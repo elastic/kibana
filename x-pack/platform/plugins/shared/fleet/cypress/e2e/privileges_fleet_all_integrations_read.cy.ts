@@ -71,7 +71,7 @@ describe('When the user has All privilege for Fleet but Read for integrations', 
       loginWithUserAndWaitForPage(INTEGRATIONS, FleetAllIntegrReadUser);
       scrollToIntegration(getIntegrationCard('apache'));
       cy.getBySel(getIntegrationCard('apache')).click();
-      cy.getBySel(ADD_INTEGRATION_POLICY_BTN).should('be.disabled');
+      cy.getBySel(ADD_INTEGRATION_POLICY_BTN).should('be.euiDisabled');
     });
   });
 });

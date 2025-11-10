@@ -42,6 +42,7 @@ export function AddIntegrationButton(props: AddIntegrationButtonProps) {
     <EuiButtonWithTooltip
       fill
       isDisabled={!userCanInstallPackages}
+      hasAriaDisabled
       iconType="plusInCircle"
       href={href}
       onClick={(e) => onClick(e)}

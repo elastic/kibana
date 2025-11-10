@@ -78,7 +78,7 @@ describe('When the user has Viewer built-in role', () => {
       loginWithUserAndWaitForPage(INTEGRATIONS, BuiltInViewerUser);
       scrollToIntegration(getIntegrationCard('apache'));
       cy.getBySel(getIntegrationCard('apache')).click();
-      cy.getBySel(ADD_INTEGRATION_POLICY_BTN).should('be.disabled');
+      cy.getBySel(ADD_INTEGRATION_POLICY_BTN).should('be.euiDisabled');
     });
   });
 });
