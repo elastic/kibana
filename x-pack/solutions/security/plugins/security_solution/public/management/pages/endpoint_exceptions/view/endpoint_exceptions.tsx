@@ -25,7 +25,7 @@ export const EndpointExceptions = memo(() => {
       apiClient={endpointExceptionsApiClient}
       ArtifactFormComponent={EndpointExceptionsForm}
       labels={ENDPOINT_EXCEPTIONS_PAGE_LABELS}
-      data-test-subj="endpointExceptionsPage"
+      data-test-subj="endpointExceptionsListPage"
       searchableFields={SEARCHABLE_FIELDS}
       flyoutSize="l"
       allowCardCreateAction={canWriteEndpointExceptions}
