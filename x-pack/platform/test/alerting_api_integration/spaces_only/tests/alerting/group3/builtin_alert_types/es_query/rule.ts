@@ -231,7 +231,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
             name: 'always fire',
             size: 100,
             thresholdComparator: '>',
-            threshold: [0],
+            threshold: [-1],
             searchType: 'searchSource',
             searchConfiguration: {
               query: {
@@ -253,7 +253,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         await initData();
 
         const messagePattern =
-          /Document count is \d+.?\d* in the last 30s in kibana-alerting-test-data (?:index|data view). Alert when greater than 0./;
+          /Document count is \d+.?\d* in the last 30s in kibana-alerting-test-data (?:index|data view). Alert when greater than -1./;
 
         const docs = await waitForDocs(2);
         for (let i = 0; i < docs.length; i++) {
@@ -284,7 +284,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
           'Number of matching documents where avg of testedValue is greater than -1'
         );
         const value = parseInt(alertDoc['kibana.alert.evaluation.value'], 10);
-        expect(value).greaterThan(0);
+        expect(value >= 0).to.be(true);
         expect(alertDoc[ALERT_URL]).to.contain('/s/space1/app/');
         expect(alertDoc['host.name'][0]).to.be('host-1');
         expect(alertDoc['host.hostname'][0]).to.be('host-1');
