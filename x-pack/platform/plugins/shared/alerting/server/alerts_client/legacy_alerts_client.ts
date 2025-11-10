@@ -289,9 +289,14 @@ export class LegacyAlertsClient<
     return;
   }
 
-  public async updatePersistedAlertsWithMaintenanceWindowIds() {
-    return null;
+  public async getAlertsToUpdateWithMaintenanceWindows() {
+    return {};
   }
+
+  public getAlertsToUpdateWithLastScheduledActions() {
+    return {};
+  }
+
   public async updatePersistedAlerts() {}
 
   public async setAlertStatusToUntracked() {

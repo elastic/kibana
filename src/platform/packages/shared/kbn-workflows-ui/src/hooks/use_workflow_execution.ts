@@ -7,22 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useQuery } from '@kbn/react-query';
-import type { WorkflowListDto } from '@kbn/workflows';
-import { useKibana } from '../../../hooks/use_kibana';
-import type { WorkflowsSearchParams } from '../../../types';
+import type { WorkflowExecutionDto } from '@kbn/workflows';
 
-export function useWorkflows(params: WorkflowsSearchParams) {
+export function useWorkflowExecution(workflowExecutionId: string | null) {
   const { http } = useKibana().services;
 
-  return useQuery<WorkflowListDto>({
+  return useQuery<WorkflowExecutionDto, Error>({
     networkMode: 'always',
-    queryKey: ['workflows', params],
-    queryFn: () => {
-      return http.post<WorkflowListDto>('/api/workflows/search', {
-        body: JSON.stringify(params),
-      });
+    queryKey: ['stepExecutions', workflowExecutionId],
+    queryFn: async () => {
+      if (!http) {
+        return Promise.reject(new Error('Http service is not available'));
+      }
+      return http.get(`/api/workflowExecutions/${workflowExecutionId}`);
     },
-    keepPreviousData: true,
+    enabled: workflowExecutionId !== null,
   });
 }
