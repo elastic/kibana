@@ -13,6 +13,7 @@ import { useConversationId } from '../context/conversation/use_conversation_id';
 import { useConversationTitle } from './use_conversation';
 
 export const useDeleteConversationModal = () => {
+  const [isLoading, setIsLoading] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const conversationId = useConversationId();
   const { title } = useConversationTitle();
@@ -23,8 +24,10 @@ export const useDeleteConversationModal = () => {
     if (!conversationId) {
       return;
     }
-    setShowDeleteModal(false);
+    setIsLoading(true);
     await conversationActions.deleteConversation(conversationId);
+    setIsLoading(false);
+    setShowDeleteModal(false);
   }, [conversationId, conversationActions]);
 
   const openDeleteModal = useCallback(() => {
@@ -62,6 +65,7 @@ export const useDeleteConversationModal = () => {
         }
         buttonColor="danger"
         defaultFocusedButton="confirm"
+        isLoading={isLoading}
       >
         <p>
           <FormattedMessage
