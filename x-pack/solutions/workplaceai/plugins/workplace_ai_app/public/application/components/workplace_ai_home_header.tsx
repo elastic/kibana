@@ -14,13 +14,13 @@ import {
   EuiText,
   EuiButton,
   EuiImage,
-  EuiCodeBlock,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { ApiKeyForm } from '@kbn/workplaceai-api-keys-components';
 import { useCurrentUser } from '../hooks/use_current_user';
 import { useElasticsearchUrl } from '../hooks/use_elasticsearch_url';
+import { ElasticsearchUrlField } from './elasticsearch_url_field';
 import headerHeroSvg from '../../assets/header_hero.svg';
 import mcpEndpointSVG from '../../assets/mcp_endpoint.svg';
 
@@ -54,9 +54,11 @@ export const WorkplaceAIHomeHeader: React.FC = () => {
         {/* Configuration Buttons Row */}
         <EuiFlexGroup gutterSize="s" wrap>
           <EuiFlexItem grow={false}>
-            <EuiCodeBlock isCopyable paddingSize="none" fontSize="m">
-              {elasticsearchUrl}
-            </EuiCodeBlock>
+            <ElasticsearchUrlField
+              value={elasticsearchUrl}
+              dataTestSubj="elasticsearchUrlField"
+              copyValueDataTestSubj="copyElasticsearchUrlButton"
+            />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <ApiKeyForm hasTitle={false} />
