@@ -48,6 +48,10 @@ export const DATA_SOURCES_I18N = {
       'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.addDataSource.menu.addCustomSamples',
       { defaultMessage: 'Add custom docs samples' }
     ),
+    addRawSamples: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.addDataSource.menu.addRawSamples',
+      { defaultMessage: 'Add raw samples' }
+    ),
   },
   dataSourceCard: {
     enabled: i18n.translate(
@@ -162,6 +166,27 @@ export const DATA_SOURCES_I18N = {
           ),
         }}
       />
+    ),
+  },
+  rawSamples: {
+    defaultName: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.rawSamples.defaultName',
+      { defaultMessage: 'Raw samples' }
+    ),
+    placeholderName: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.rawSamples.placeholderName',
+      { defaultMessage: 'Raw samples' }
+    ),
+    subtitle: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.rawSamples.subtitle',
+      { defaultMessage: 'Representative samples using Elasticsearch _sample API.' }
+    ),
+    callout: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.rawSamples.callout',
+      {
+        defaultMessage:
+          "Uses Elasticsearch's _sample API to retrieve a representative sample of raw, unprocessed documents. This enables complete pipeline simulation.",
+      }
     ),
   },
   nameField: {

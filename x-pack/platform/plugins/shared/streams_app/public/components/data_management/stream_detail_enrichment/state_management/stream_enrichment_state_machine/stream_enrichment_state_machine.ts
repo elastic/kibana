@@ -620,7 +620,11 @@ export const createStreamEnrichmentMachineImplementations = ({
     setupGrokCollection: setupGrokCollectionActor(),
     stepMachine,
     dataSourceMachine: dataSourceMachine.provide(
-      createDataSourceMachineImplementations({ data, toasts: core.notifications.toasts })
+      createDataSourceMachineImplementations({
+        data,
+        streamsRepositoryClient,
+        toasts: core.notifications.toasts,
+      })
     ),
     simulationMachine: simulationMachine.provide(
       createSimulationMachineImplementations({

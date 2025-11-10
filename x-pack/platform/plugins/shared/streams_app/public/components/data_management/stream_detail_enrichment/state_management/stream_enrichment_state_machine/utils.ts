@@ -23,6 +23,7 @@ import type {
   KqlSamplesDataSource,
   LatestSamplesDataSource,
   CustomSamplesDataSource,
+  RawSamplesDataSource,
   EnrichmentDataSource,
 } from '../../../../../../common/url_schema';
 import { dataSourceConverter } from '../../utils';
@@ -61,6 +62,12 @@ export const createDefaultCustomSamplesDataSource = (
   documents: [],
   storageKey: `streams:${streamName}__${uuidv4()}`,
 });
+
+export const defaultRawSamplesDataSource: RawSamplesDataSource = {
+  type: 'raw-samples',
+  name: DATA_SOURCES_I18N.rawSamples.defaultName,
+  enabled: true,
+};
 
 export const defaultEnrichmentUrlState: EnrichmentUrlState = {
   v: 1,

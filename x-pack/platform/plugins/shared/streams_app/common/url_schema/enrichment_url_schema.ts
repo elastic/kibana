@@ -86,12 +86,24 @@ export const customSamplesDataSourceSchema = baseDataSourceSchema.extend({
 }) satisfies z.Schema<CustomSamplesDataSource>;
 
 /**
+ * Raw samples data source that retrieves representative samples using Elasticsearch's _sample API
+ */
+export interface RawSamplesDataSource extends BaseDataSource {
+  type: 'raw-samples';
+}
+
+const rawSamplesDataSourceSchema = baseDataSourceSchema.extend({
+  type: z.literal('raw-samples'),
+}) satisfies z.Schema<RawSamplesDataSource>;
+
+/**
  * Union type of all possible data source types
  */
 export type EnrichmentDataSource =
   | LatestSamplesDataSource
   | KqlSamplesDataSource
-  | CustomSamplesDataSource;
+  | CustomSamplesDataSource
+  | RawSamplesDataSource;
 
 /**
  * Schema for validating enrichment data sources
@@ -100,6 +112,7 @@ const enrichmentDataSourceSchema = z.union([
   latestSamplesDataSourceSchema,
   kqlSamplesDataSourceSchema,
   customSamplesDataSourceSchema,
+  rawSamplesDataSourceSchema,
 ]) satisfies z.Schema<EnrichmentDataSource>;
 
 /**

@@ -188,10 +188,11 @@ export const dataSourceMachine = setup({
 
 export const createDataSourceMachineImplementations = ({
   data,
+  streamsRepositoryClient,
   toasts,
 }: DataSourceMachineDeps): MachineImplementationsFrom<typeof dataSourceMachine> => ({
   actors: {
-    collectData: createDataCollectorActor({ data }),
+    collectData: createDataCollectorActor({ data, streamsRepositoryClient }),
   },
   actions: {
     notifyDataCollectionFailure: createDataCollectionFailureNotifier({ toasts }),
@@ -203,10 +204,10 @@ const getSimulationModeByDataSourceType = (
 ): DataSourceSimulationMode => {
   switch (dataSourceType) {
     case 'latest-samples':
-      return 'partial';
     case 'kql-samples':
       return 'partial';
     case 'custom-samples':
+    case 'raw-samples':
       return 'complete';
     default:
       throw new Error(`Invalid data source type: ${dataSourceType}`);

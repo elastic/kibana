@@ -73,3 +73,8 @@ export type CustomSamplesDataSourceWithUIAttributes = Extract<
   EnrichmentDataSourceWithUIAttributes,
   { type: 'custom-samples' }
 >;
+
+export type RawSamplesDataSourceWithUIAttributes = Extract<
+  EnrichmentDataSourceWithUIAttributes,
+  { type: 'raw-samples' }
+>;
