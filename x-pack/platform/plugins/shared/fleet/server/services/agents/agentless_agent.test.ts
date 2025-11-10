@@ -73,6 +73,8 @@ const mockAgentlessDeploymentResponse: Partial<AxiosResponse<AgentlessApiDeploym
   },
 };
 
+const AxiosError = jest.requireActual('axios').AxiosError;
+
 jest.mock('@kbn/server-http-tools', () => ({
   ...jest.requireActual('@kbn/server-http-tools'),
   SslConfig: jest.fn().mockImplementation(({ certificate, key, certificateAuthorities }) => ({
@@ -278,6 +280,117 @@ describe('Agentless Agent service', () => {
     );
 
     expect(axios).toHaveBeenCalledTimes(1);
+    expect(createAgentlessAgentReturnValue).toEqual(mockAgentlessDeploymentResponse);
+    expect(axios).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          fleet_token: 'mocked-fleet-enrollment-api-key',
+          fleet_url: 'http://fleetserver:8220',
+          policy_id: 'mocked-agentless-agent-policy-id',
+          labels: {
+            owner: {
+              org: 'elastic',
+              division: 'cloud',
+              team: 'fleet',
+            },
+          },
+          secrets: {
+            fleet_app_token: 'fleet-app-token',
+            elasticsearch_app_token: 'es-app-token',
+          },
+          policy_details: {
+            output_name: 'default',
+          },
+        }),
+        headers: expect.anything(),
+        httpsAgent: expect.anything(),
+        method: 'POST',
+        url: 'http://api.agentless.com/api/v1/serverless/deployments',
+      })
+    );
+  });
+
+  it('should retry creating agentless agent on 500 error', async () => {
+    const axiosError = new AxiosError('Test Error');
+    axiosError.response = {
+      status: 500,
+    } as any;
+
+    (axios as jest.MockedFunction<typeof axios>).mockRejectedValueOnce(axiosError);
+    (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce(
+      mockAgentlessDeploymentResponse
+    );
+    const soClient = getAgentPolicyCreateMock();
+    // ignore unrelated unique name constraint
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+      agentless: {
+        enabled: true,
+        api: {
+          url: 'http://api.agentless.com',
+          tls: {
+            certificate: '/path/to/cert',
+            key: '/path/to/key',
+            ca: '/path/to/ca',
+          },
+        },
+        deploymentSecrets: {
+          fleetAppToken: 'fleet-app-token',
+          elasticsearchAppToken: 'es-app-token',
+        },
+      },
+    } as any);
+    jest
+      .spyOn(appContextService, 'getCloud')
+      .mockReturnValue({ isCloudEnabled: true, isServerlessEnabled: true } as any);
+    jest
+      .spyOn(appContextService, 'getKibanaVersion')
+      .mockReturnValue('mocked-kibana-version-infinite');
+    mockedFleetServerHostService.get.mockResolvedValue({
+      id: 'mocked-fleet-server-id',
+      host: 'http://fleetserver:8220',
+      active: true,
+      is_default: true,
+      host_urls: ['http://fleetserver:8220'],
+    } as any);
+    mockedListEnrollmentApiKeys.mockResolvedValue({
+      items: [
+        {
+          id: 'mocked-fleet-enrollment-token-id',
+          policy_id: 'mocked-fleet-enrollment-policy-id',
+          api_key: 'mocked-fleet-enrollment-api-key',
+        },
+      ],
+    } as any);
+
+    const createAgentlessAgentReturnValue = await agentlessAgentService.createAgentlessAgent(
+      esClient,
+      soClient,
+      {
+        id: 'mocked-agentless-agent-policy-id',
+        name: 'agentless agent policy',
+        namespace: 'default',
+        fleet_server_host_id: 'mock-fleet-default-fleet-server-host',
+        data_output_id: 'mock-fleet-default-output',
+        supports_agentless: true,
+        global_data_tags: [
+          {
+            name: 'organization',
+            value: 'elastic',
+          },
+          {
+            name: 'division',
+            value: 'cloud',
+          },
+          {
+            name: 'team',
+            value: 'fleet',
+          },
+        ],
+      } as AgentPolicy
+    );
+
+    expect(axios).toHaveBeenCalledTimes(2);
     expect(createAgentlessAgentReturnValue).toEqual(mockAgentlessDeploymentResponse);
     expect(axios).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -916,7 +1029,7 @@ describe('Agentless Agent service', () => {
       ],
     } as any);
     // Force axios to throw an AxiosError to simulate an error response
-    const axiosError = new axios.AxiosError('Test Error');
+    const axiosError = new AxiosError('Test Error');
     (axios as jest.MockedFunction<typeof axios>).mockRejectedValueOnce(axiosError);
 
     await expect(
@@ -1267,14 +1380,14 @@ describe('Agentless Agent service', () => {
         ],
       } as any);
       // Force axios to throw an AxiosError to simulate an error response
-      (axios as jest.MockedFunction<typeof axios>).mockRejectedValueOnce({
-        response: {
-          status: 999,
-          data: {
-            message: 'This is a fake error status that is never to be handled handled',
-          },
+      const axiosError = new AxiosError('Test Error');
+      axiosError.response = {
+        status: 999,
+        data: {
+          message: 'This is a fake error status that is never to be handled handled',
         },
-      } as AxiosError);
+      } as AxiosError['response'];
+      (axios as jest.MockedFunction<typeof axios>).mockRejectedValueOnce(axiosError);
 
       await expect(
         agentlessAgentService.createAgentlessAgent(esClient, soClient, {
@@ -1329,14 +1442,19 @@ describe('Agentless Agent service', () => {
         ],
       } as any);
       // Force axios to throw an AxiosError to simulate an error response
-      (axios as jest.MockedFunction<typeof axios>).mockRejectedValueOnce({
-        response: {
-          status: 500,
-          data: {
-            message: 'Internal Server Error',
-          },
+      const axiosError = new AxiosError('Test Error');
+      axiosError.response = {
+        status: 500,
+        data: {
+          message: 'Internal Server Error',
         },
-      } as AxiosError);
+      } as AxiosError['response'];
+
+      (axios as jest.MockedFunction<typeof axios>).mockRejectedValueOnce(axiosError);
+      (axios as jest.MockedFunction<typeof axios>).mockRejectedValueOnce(axiosError);
+      (axios as jest.MockedFunction<typeof axios>).mockRejectedValueOnce(axiosError);
+      (axios as jest.MockedFunction<typeof axios>).mockRejectedValueOnce(axiosError);
+      (axios as jest.MockedFunction<typeof axios>).mockRejectedValueOnce(axiosError);
 
       await expect(
         agentlessAgentService.createAgentlessAgent(esClient, soClient, {
@@ -1391,14 +1509,15 @@ describe('Agentless Agent service', () => {
         ],
       } as any);
       // Force axios to throw an AxiosError to simulate an error response
-      (axios as jest.MockedFunction<typeof axios>).mockRejectedValueOnce({
-        response: {
-          status: 429,
-          data: {
-            message: 'Limit exceeded',
-          },
+      const axiosError = new AxiosError('Test Error');
+      axiosError.response = {
+        status: 429,
+        data: {
+          message: 'Limit exceeded',
         },
-      } as AxiosError);
+      } as AxiosError['response'];
+
+      (axios as jest.MockedFunction<typeof axios>).mockRejectedValueOnce(axiosError);
 
       await expect(
         agentlessAgentService.createAgentlessAgent(esClient, soClient, {
@@ -1453,14 +1572,15 @@ describe('Agentless Agent service', () => {
         ],
       } as any);
       // Force axios to throw an AxiosError to simulate an error response
-      (axios as jest.MockedFunction<typeof axios>).mockRejectedValueOnce({
-        response: {
-          status: 408,
-          data: {
-            message: 'Request timed out',
-          },
+      const axiosError = new AxiosError('Test Error');
+      axiosError.response = {
+        status: 408,
+        data: {
+          message: 'Request timed out',
         },
-      } as AxiosError);
+      } as AxiosError['response'];
+
+      (axios as jest.MockedFunction<typeof axios>).mockRejectedValueOnce(axiosError);
 
       await expect(
         agentlessAgentService.createAgentlessAgent(esClient, soClient, {
@@ -1763,7 +1883,7 @@ describe('Agentless Agent service', () => {
         ],
       } as any);
 
-      const mockedError = new axios.AxiosError('Bad Request');
+      const mockedError = new AxiosError('Bad Request');
 
       mockedError.response = {
         status: 400,
@@ -1828,7 +1948,7 @@ describe('Agentless Agent service', () => {
         ],
       } as any);
 
-      const mockedError = new axios.AxiosError('reached limit: 5');
+      const mockedError = new AxiosError('reached limit: 5');
 
       mockedError.response = {
         status: 429,
