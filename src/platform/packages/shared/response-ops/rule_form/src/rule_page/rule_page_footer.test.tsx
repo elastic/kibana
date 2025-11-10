@@ -137,7 +137,7 @@ describe('rulePageFooter', () => {
 
     expect(screen.getByTestId('rulePageFooterCancelButton')).toBeDisabled();
     expect(screen.getByTestId('rulePageFooterShowRequestButton')).toBeDisabled();
-    expect(screen.getByTestId('rulePageFooterSaveButton')).toBeDisabled();
+    expect(screen.getByTestId('rulePageFooterSaveButton')).toBeEuiDisabled();
   });
 
   test('should disable save and show request buttons when there is an error', () => {
@@ -145,7 +145,7 @@ describe('rulePageFooter', () => {
     render(<RulePageFooter onSave={onSave} onCancel={onCancel} />);
 
     expect(screen.getByTestId('rulePageFooterShowRequestButton')).toBeDisabled();
-    expect(screen.getByTestId('rulePageFooterSaveButton')).toBeDisabled();
+    expect(screen.getByTestId('rulePageFooterSaveButton')).toBeEuiDisabled();
     expect(screen.getByTestId('rulePageFooterCancelButton')).not.toBeDisabled();
   });
 });
