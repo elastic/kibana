@@ -10,7 +10,6 @@
 import React from 'react';
 import { mountWithIntl, findTestSubject } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
-import { Markdown } from '@kbn/shared-ux-markdown';
 import { LanguageDocumentationPopoverContent } from './popover_content';
 
 describe('###Documentation popover content', () => {
@@ -26,15 +25,15 @@ describe('###Documentation popover content', () => {
         items: [
           {
             label: 'Section two item 1',
-            description: (
-              <Markdown readOnly markdownContent={`## Section two item 1 description `} />
-            ),
+            description: {
+              markdownContent: `## Section two item 1 description `,
+            },
           },
           {
             label: 'Section two item 2',
-            description: (
-              <Markdown readOnly markdownContent={`## Section two item 2 description `} />
-            ),
+            description: {
+              markdownContent: `## Section two item 2 description `,
+            },
           },
         ],
       },

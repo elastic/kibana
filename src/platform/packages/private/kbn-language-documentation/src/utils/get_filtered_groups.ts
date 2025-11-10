@@ -6,7 +6,11 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { DocumentationGroupItem, LanguageDocumentationSections } from '../types';
+import type {
+  DocumentationGroup,
+  DocumentationGroupItem,
+  LanguageDocumentationSections,
+} from '../types';
 import { highlightMatches } from './highlight_matches';
 
 /**
@@ -21,15 +25,17 @@ export const getFilteredGroups = (
   searchInDescription?: boolean,
   sections?: LanguageDocumentationSections,
   numOfGroupsToOmit = 0
-) => {
+): DocumentationGroup[] => {
   const normalizedSearchText = searchText.trim().toLocaleLowerCase();
 
   // If no search text, return all groups with all items
   if (!normalizedSearchText) {
-    return sections?.groups.slice(numOfGroupsToOmit).map((group) => ({
-      ...group,
-      options: group.items,
-    }));
+    return (
+      sections?.groups.slice(numOfGroupsToOmit).map((group) => ({
+        ...group,
+        options: group.items,
+      })) ?? []
+    );
   }
 
   return (
@@ -56,7 +62,7 @@ export const getFilteredGroups = (
         });
 
         // Show items with label matches first
-        const options = [...labelMatches, ...descriptionMatches].map(
+        const items = [...labelMatches, ...descriptionMatches].map(
           (item: DocumentationGroupItem) => ({
             label: highlightMatches(item.label, searchText),
             description: {
@@ -69,10 +75,10 @@ export const getFilteredGroups = (
           })
         );
 
-        return { ...group, options, hasLabelMatches: labelMatches.length > 0 };
+        return { ...group, items, hasLabelMatches: labelMatches.length > 0 };
       })
       .filter((group) => {
-        if (group.options.length > 0) {
+        if (group.items.length > 0) {
           return true;
         }
         return group.label.toLocaleLowerCase().includes(normalizedSearchText);
@@ -83,6 +89,6 @@ export const getFilteredGroups = (
       .map((group) => {
         const { hasLabelMatches, ...rest } = group;
         return rest;
-      })
+      }) ?? []
   );
 };

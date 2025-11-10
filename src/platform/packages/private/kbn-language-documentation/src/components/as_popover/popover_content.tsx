@@ -24,6 +24,7 @@ import {
   useEuiTheme,
   euiScrollBarStyles,
 } from '@elastic/eui';
+import { Markdown } from '@kbn/shared-ux-markdown';
 import { getFilteredGroups } from '../../utils/get_filtered_groups';
 import type { LanguageDocumentationSections } from '../../types';
 
@@ -178,12 +179,12 @@ function DocumentationContent({
                       </h6>
                     </EuiTitle>
 
-                    {helpGroup.options.length ? (
+                    {helpGroup.items.length ? (
                       <>
                         <EuiSpacer size="s" />
 
                         <EuiListGroup gutterSize="none">
-                          {helpGroup.options.map((helpItem) => {
+                          {helpGroup.items.map((helpItem) => {
                             return (
                               <EuiListGroupItem
                                 key={helpItem.label}
@@ -256,7 +257,14 @@ function DocumentationContent({
                           }
                         }}
                       >
-                        {helpItem.description}
+                        {helpItem.description && (
+                          <Markdown
+                            markdownContent={helpItem.description.markdownContent}
+                            openLinksInNewTab={helpItem.description.openLinksInNewTab}
+                            readOnly
+                            enableSoftLineBreaks
+                          />
+                        )}
                       </article>
                     );
                   })}

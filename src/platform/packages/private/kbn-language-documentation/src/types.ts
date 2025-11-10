@@ -21,6 +21,8 @@ export interface DocumentationGroup {
 export interface DocumentationGroupItem {
   label: string;
   description?: { markdownContent: string; openLinksInNewTab?: boolean };
+  preview?: boolean;
+  license?: MultipleLicenseInfo;
 }
 
 export interface Signature {

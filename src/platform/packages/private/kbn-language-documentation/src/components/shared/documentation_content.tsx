@@ -11,7 +11,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useEuiTheme, euiScrollBarStyles } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiBetaBadge } from '@elastic/eui';
-import type { LanguageDocumentationSections, LicenseInfo, MultipleLicenseInfo } from '../../types';
+import type { DocumentationGroup, LanguageDocumentationSections, LicenseInfo } from '../../types';
 import { getLicensesArray } from '../../utils/get_license_array';
 import { MarkdownWithHighlight } from './markdown_with_highlight';
 
@@ -46,16 +46,7 @@ function createLicenseTooltip(license: LicenseInfo): string {
 interface DocumentationContentProps {
   searchText: string;
   scrollTargets: React.MutableRefObject<{ [key: string]: HTMLElement }>;
-  filteredGroups?: Array<{
-    label: string;
-    description?: string;
-    options: Array<{
-      label: string;
-      description: { markdownContent: string; openLinksInNewTab?: boolean };
-      preview?: boolean;
-      license?: MultipleLicenseInfo | undefined;
-    }>;
-  }>;
+  filteredGroups?: DocumentationGroup[];
   sections?: LanguageDocumentationSections;
 }
 
@@ -110,7 +101,7 @@ function DocumentationContent({
 
                 <p>{helpGroup.description}</p>
 
-                {filteredGroups?.[index].options.map((helpItem) => {
+                {filteredGroups?.[index].items.map((helpItem) => {
                   return (
                     <article
                       css={css`
@@ -164,8 +155,8 @@ function DocumentationContent({
                         </EuiFlexGroup>
                       )}
                       <MarkdownWithHighlight
-                        markdownContent={helpItem.description.markdownContent}
-                        openLinksInNewTab={helpItem.description.openLinksInNewTab}
+                        markdownContent={helpItem.description?.markdownContent ?? ''}
+                        openLinksInNewTab={helpItem.description?.openLinksInNewTab}
                       />
                     </article>
                   );
