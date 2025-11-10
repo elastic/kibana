@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { lazy } from 'react';
+
 import { type Observable, debounceTime, map } from 'rxjs';
 
 import type { EuiSideNavItemType } from '@elastic/eui';
@@ -15,8 +17,15 @@ import { i18n } from '@kbn/i18n';
 
 import type { AddSolutionNavigationArg } from '@kbn/navigation-plugin/public';
 
-import playgroundIcon from './assets/images/playground.svg';
-import agentsIcon from './assets/images/robot.svg';
+const LazyIconAgents = lazy(() =>
+  import('@kbn/search-shared-ui/src/v2_icons/robot').then((m) => ({ default: m.iconRobot }))
+);
+
+const LazyIconPlayground = lazy(() =>
+  import('@kbn/search-shared-ui/src/v2_icons/playground').then((m) => ({
+    default: m.iconPlayground,
+  }))
+);
 
 export interface DynamicSideNavItems {
   collections?: Array<EuiSideNavItemType<unknown>>;
@@ -75,7 +84,7 @@ export const getNavigationTreeDefinition = ({
                 },
                 {
                   badgeTypeV2: 'techPreview',
-                  icon: agentsIcon,
+                  icon: LazyIconAgents,
                   link: 'agent_builder',
                   withBadge: true,
                 },
@@ -98,7 +107,7 @@ export const getNavigationTreeDefinition = ({
                   children: [
                     {
                       breadcrumbStatus: 'hidden',
-                      icon: playgroundIcon,
+                      icon: LazyIconPlayground,
                       link: 'searchPlayground',
                     },
                   ],
@@ -255,11 +264,23 @@ export const getNavigationTreeDefinition = ({
                         {
                           children: [
                             {
+                              // We include this link here to ensure that the settings icon does not land on Stack Monitoring by default
+                              // https://github.com/elastic/kibana/issues/241518
+                              // And that the sidenav panel opens when user lands to legacy management landing page
+                              // https://github.com/elastic/kibana/issues/240275
+                              link: 'management',
+                              title: i18n.translate(
+                                'xpack.enterpriseSearch.searchNav.management.home',
+                                { defaultMessage: 'Home' }
+                              ),
+                              breadcrumbStatus: 'hidden',
+                            },
+                            {
                               id: 'monitoring',
                               link: 'monitoring',
                             },
                           ],
-                          id: 'monitoring',
+                          id: 'stack_management_home',
                           title: '',
                         },
                         {

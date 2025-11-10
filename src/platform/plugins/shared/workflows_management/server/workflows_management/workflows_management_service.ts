@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable complexity, @typescript-eslint/no-non-null-assertion */
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 
 import type { estypes } from '@elastic/elasticsearch';
 import { v4 as generateUuid } from 'uuid';
@@ -23,6 +23,7 @@ import type {
   Logger,
   SecurityServiceStart,
 } from '@kbn/core/server';
+import { isResponseError } from '@kbn/es-errors';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
   ConnectorTypeInfo,
@@ -64,9 +65,13 @@ import {
 } from '../../common';
 import { CONNECTOR_SUB_ACTIONS_MAP } from '../../common/connector_sub_actions_map';
 
-import { InvalidYamlSchemaError, WorkflowValidationError } from '../../common/lib/errors';
+import {
+  InvalidYamlSchemaError,
+  WorkflowConflictError,
+  WorkflowValidationError,
+} from '../../common/lib/errors';
 import { validateStepNameUniqueness } from '../../common/lib/validate_step_names';
-import { parseWorkflowYamlToJSON, stringifyWorkflowDefinition } from '../../common/lib/yaml_utils';
+import { parseWorkflowYamlToJSON, stringifyWorkflowDefinition } from '../../common/lib/yaml';
 import { getWorkflowZodSchema, getWorkflowZodSchemaLoose } from '../../common/schema';
 import { getAuthenticatedUser } from '../lib/get_user';
 import { hasScheduledTriggers } from '../lib/schedule_utils';
@@ -215,7 +220,19 @@ export class WorkflowsService {
       updated_at: now.toISOString(),
     };
 
-    const id = this.generateWorkflowId();
+    const id = workflow.id || this.generateWorkflowId();
+
+    if (workflow.id) {
+      this.validateWorkflowId(workflow.id);
+
+      const existingWorkflow = await this.getWorkflow(workflow.id, spaceId);
+      if (existingWorkflow) {
+        throw new WorkflowConflictError(
+          `Workflow with id '${workflow.id}' already exists`,
+          workflow.id
+        );
+      }
+    }
 
     await this.workflowStorage.getClient().index({
       id,
@@ -225,7 +242,7 @@ export class WorkflowsService {
     // Schedule the workflow if it has triggers
     if (this.taskScheduler && workflowToCreate.definition.triggers) {
       for (const trigger of workflowToCreate.definition.triggers) {
-        if (trigger.type === 'scheduled' && trigger.enabled) {
+        if (trigger.type === 'scheduled') {
           await this.taskScheduler.scheduleWorkflowTask(id, spaceId, trigger, request);
         }
       }
@@ -396,6 +413,8 @@ export class WorkflowsService {
                   definition: updatedWorkflow.definition, // We already checked it's not null
                   tags: [], // TODO: Add tags support to WorkflowDetailDto
                   deleted_at: null,
+                  createdAt: new Date(updatedWorkflow.createdAt),
+                  lastUpdatedAt: new Date(updatedWorkflow.lastUpdatedAt),
                 };
 
                 await this.taskScheduler.updateWorkflowTasks(
@@ -427,7 +446,7 @@ export class WorkflowsService {
 
       return {
         id,
-        lastUpdatedAt: new Date(finalData.updated_at),
+        lastUpdatedAt: finalData.updated_at,
         lastUpdatedBy: finalData.lastUpdatedBy,
         enabled: finalData.enabled,
         validationErrors,
@@ -988,7 +1007,10 @@ export class WorkflowsService {
 
       return result;
     } catch (error) {
-      this.logger.error(`Failed to fetch recent executions for workflows: ${error}`);
+      // Index not found is expected when no workflows have been executed yet
+      if (!isResponseError(error) || error.body?.error?.type !== 'index_not_found_exception') {
+        this.logger.error(`Failed to fetch recent executions for workflows: ${error}`);
+      }
       return {};
     }
   }
@@ -1059,9 +1081,18 @@ export class WorkflowsService {
       createdBy: source.createdBy,
       lastUpdatedBy: source.lastUpdatedBy,
       valid: source.valid,
-      createdAt: new Date(source.created_at),
-      lastUpdatedAt: new Date(source.updated_at),
+      createdAt: source.created_at,
+      lastUpdatedAt: source.updated_at,
     };
+  }
+
+  private validateWorkflowId(id: string): void {
+    const uuidRegex = /^workflow-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(id)) {
+      throw new WorkflowValidationError(
+        `Invalid workflow ID format. Expected format: workflow-{uuid}, received: ${id}`
+      );
+    }
   }
 
   private generateWorkflowId(): string {

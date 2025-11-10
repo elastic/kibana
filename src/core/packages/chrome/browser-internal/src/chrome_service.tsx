@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactNode } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -69,11 +70,10 @@ import type { InternalChromeStart } from './types';
 import { HeaderTopBanner } from './ui/header/header_top_banner';
 import { handleSystemColorModeChange } from './handle_system_colormode_change';
 import { AppMenuBar } from './ui/project/app_menu';
-import { ProjectSideNavV1 } from './ui/project/sidenav_v1/sidenav';
-import { GridLayoutProjectSideNavV2 } from './ui/project/sidenav_v2/grid_layout_sidenav';
-import { FixedLayoutProjectSideNavV2 } from './ui/project/sidenav_v2/fixed_layout_sidenav';
-import { SideNavV2CollapseButton } from './ui/project/sidenav_v2/collapse_button';
-import type { NavigationProps as SideNavV2NavigationProps } from './ui/project/sidenav_v2/types';
+import { GridLayoutProjectSideNav } from './ui/project/sidenav/grid_layout_sidenav';
+import { FixedLayoutProjectSideNav } from './ui/project/sidenav/fixed_layout_sidenav';
+import { SideNavCollapseButton } from './ui/project/sidenav/collapse_button';
+import type { NavigationProps } from './ui/project/sidenav/types';
 
 const IS_SIDENAV_COLLAPSED_KEY = 'core.chrome.isSideNavCollapsed';
 const SNAPSHOT_REGEX = /-snapshot/i;
@@ -299,6 +299,8 @@ export class ChromeService {
     // we load the user profile to check if the user opted out of the new solution navigation.
     const chromeStyleSubject$ = new BehaviorSubject<ChromeStyle | undefined>(undefined);
 
+    const globalFooter$ = new BehaviorSubject<ReactNode>(null);
+
     const getKbnVersionClass = () => {
       // we assume that the version is valid and has the form 'X.X.X'
       // strip out `SNAPSHOT` and reformat to 'X-X-X'
@@ -345,6 +347,7 @@ export class ChromeService {
       chromeBreadcrumbs$: breadcrumbs$,
       logger: this.logger,
       featureFlags,
+      uiSettings,
     });
     const recentlyAccessed = this.recentlyAccessed.start({ http, key: 'recentlyAccessed' });
     const docTitle = this.docTitle.start();
@@ -405,9 +408,8 @@ export class ChromeService {
       projectNavigation.setProjectHome(homeHref);
     };
 
-    const setProjectName = (projectName: string) => {
-      validateChromeStyle();
-      projectNavigation.setProjectName(projectName);
+    const setKibanaName = (kibanaName: string) => {
+      projectNavigation.setKibanaName(kibanaName);
     };
 
     const setIsSideNavCollapsed = (isCollapsed: boolean) => {
@@ -483,13 +485,12 @@ export class ChromeService {
     const navLinks$ = navLinks.getNavLinks$();
     const activeNodes$ = projectNavigation.getActiveNodes$();
     const navigationTreeUi$ = projectNavigation.getNavigationTreeUi$();
-    const panelSelectedNode$ = projectNavigation.getPanelSelectedNode$();
     const loadingCount$ = http.getLoadingCount$();
     const recentlyAccessed$ = recentlyAccessed.get$();
     const activeDataTestSubj$ = projectNavigation.getActiveDataTestSubj$();
     const feedbackUrlParams$ = projectNavigation.getFeedbackUrlParams$();
 
-    const navProps: SideNavV2NavigationProps = {
+    const navProps: NavigationProps = {
       basePath: http.basePath,
       application,
       reportEvent: analytics.reportEvent,
@@ -522,9 +523,9 @@ export class ChromeService {
       includeBanner: boolean;
 
       /**
-       * Whether the header should include a side navigation and which version of it.
+       * Whether the header should include a side navigation
        */
-      includeSideNav: false | 'v1' | 'v2' | 'both';
+      includeSideNav: boolean;
 
       /**
        * Whether the header should include the application subheader
@@ -553,41 +554,16 @@ export class ChromeService {
         kibanaVersion={injectedMetadata.getKibanaVersion()}
         prependBasePath={http.basePath.prepend}
       >
-        <Router history={application.history}>
-          <>
-            {(includeSideNav === 'v1' || includeSideNav === 'both') && (
-              <ProjectSideNavV1
-                isCollapsed$={this.isSideNavCollapsed$}
-                toggle={setIsSideNavCollapsed}
-                navigationTree$={navigationTreeUi$}
-                navigateToUrl={application.navigateToUrl}
-                navLinks$={navLinks$}
-                activeNodes$={activeNodes$}
-                recentlyAccessed$={recentlyAccessed$}
-                basePath={http.basePath}
-                isFeedbackBtnVisible$={this.isFeedbackBtnVisible$}
-                panelSelectedNode$={panelSelectedNode$}
-                setPanelSelectedNode={projectNavigation.setPanelSelectedNode}
-                loadingCount$={loadingCount$}
-                reportEvent={analytics.reportEvent}
-                dataTestSubj$={activeDataTestSubj$}
-              />
-            )}
-
-            {(includeSideNav === 'v2' || includeSideNav === 'both') && (
-              <FixedLayoutProjectSideNavV2
-                isCollapsed$={this.isSideNavCollapsed$}
-                toggle={setIsSideNavCollapsed}
-                navProps={navProps}
-                side={includeSideNav === 'both' ? 'right' : 'left'}
-              />
-            )}
-          </>
-        </Router>
-
-        {/* render separate collapse button for v2 sidenav in grid layout */}
-        {!includeSideNav && (
-          <SideNavV2CollapseButton
+        {includeSideNav ? (
+          <Router history={application.history}>
+            <FixedLayoutProjectSideNav
+              isCollapsed$={this.isSideNavCollapsed$}
+              toggle={setIsSideNavCollapsed}
+              navProps={navProps}
+            />
+          </Router>
+        ) : (
+          <SideNavCollapseButton
             isCollapsed={this.isSideNavCollapsed$}
             toggle={setIsSideNavCollapsed}
           />
@@ -595,13 +571,7 @@ export class ChromeService {
       </ProjectHeader>
     );
 
-    const getLegacyHeaderComponentForFixedLayout = (
-      {
-        projectSideNavVersion,
-      }: {
-        projectSideNavVersion: 'v1' | 'v2';
-      } = { projectSideNavVersion: 'v1' }
-    ) => {
+    const getLegacyHeaderComponentForFixedLayout = () => {
       const defaultChromeStyle = chromeStyleSubject$.getValue();
 
       const HeaderComponent = () => {
@@ -625,7 +595,7 @@ export class ChromeService {
           return getProjectHeader({
             isFixed: true,
             includeBanner: true,
-            includeSideNav: projectSideNavVersion,
+            includeSideNav: true,
             includeAppMenu: true,
           });
         }
@@ -640,13 +610,10 @@ export class ChromeService {
       return getClassicHeader({ isFixed: false, includeBanner: false });
     };
 
-    const getProjectHeaderComponentForGridLayout = ({
-      includeSideNav,
-    }: {
-      includeSideNav: false | 'v1' | 'v2';
-    }) => {
+    const getProjectHeaderComponentForGridLayout = () => {
       return getProjectHeader({
-        includeSideNav,
+        // in grid layout the project side nav is rendered separately
+        includeSideNav: false,
         // in grid layout the header is not fixed, but is inside grid's layout header cell
         isFixed: false,
         // in grid layout the layout is responsible for rendering the banner
@@ -656,9 +623,9 @@ export class ChromeService {
       });
     };
 
-    const getProjectSideNavV2ComponentForGridLayout = () => {
+    const getProjectSideNavComponentForGridLayout = () => {
       return (
-        <GridLayoutProjectSideNavV2 isCollapsed$={this.isSideNavCollapsed$} navProps={navProps} />
+        <GridLayoutProjectSideNav isCollapsed$={this.isSideNavCollapsed$} navProps={navProps} />
       );
     };
 
@@ -668,7 +635,7 @@ export class ChromeService {
       getLegacyHeaderComponentForFixedLayout,
       getClassicHeaderComponentForGridLayout,
       getProjectHeaderComponentForGridLayout,
-      getProjectSideNavV2ComponentForGridLayout,
+      getProjectSideNavComponentForGridLayout,
       getHeaderBanner: () => {
         return (
           <HeaderTopBanner
@@ -703,6 +670,12 @@ export class ChromeService {
       setBadge: (badge: ChromeBadge) => {
         badge$.next(badge);
       },
+
+      setGlobalFooter: (node) => {
+        globalFooter$.next(node);
+      },
+
+      getGlobalFooter$: () => globalFooter$.pipe(takeUntil(this.stop$)),
 
       getBreadcrumbs$: () => breadcrumbs$.pipe(takeUntil(this.stop$)),
 
@@ -776,8 +749,6 @@ export class ChromeService {
       sideNav: {
         getIsCollapsed$: () => this.isSideNavCollapsed$.asObservable(),
         setIsCollapsed: setIsSideNavCollapsed,
-        getPanelSelectedNode$: projectNavigation.getPanelSelectedNode$.bind(projectNavigation),
-        setPanelSelectedNode: projectNavigation.setPanelSelectedNode.bind(projectNavigation),
         getIsFeedbackBtnVisible$: () =>
           combineLatest([this.isFeedbackBtnVisible$, this.isSideNavCollapsed$]).pipe(
             map(([isVisible, isCollapsed]) => isVisible && !isCollapsed)
@@ -789,7 +760,7 @@ export class ChromeService {
         setHome: setProjectHome,
         setCloudUrls: projectNavigation.setCloudUrls.bind(projectNavigation),
         setFeedbackUrlParams: projectNavigation.setFeedbackUrlParams.bind(projectNavigation),
-        setProjectName,
+        setKibanaName,
         initNavigation: initProjectNavigation,
         getNavigationTreeUi$: () => projectNavigation.getNavigationTreeUi$(),
         setBreadcrumbs: setProjectBreadcrumbs,

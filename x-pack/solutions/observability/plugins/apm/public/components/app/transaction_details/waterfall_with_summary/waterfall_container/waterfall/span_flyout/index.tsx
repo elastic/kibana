@@ -155,7 +155,7 @@ export function SpanFlyout({
           {span?.span.composite && (
             <EuiFlexGroup>
               <EuiFlexItem grow={false}>
-                <EuiCallOut color="warning" iconType="gear" size="s">
+                <EuiCallOut announceOnMount color="warning" iconType="gear" size="s">
                   {i18n.translate(
                     'xpack.apm.transactionDetails.spanFlyout.compositeExampleWarning',
                     {
