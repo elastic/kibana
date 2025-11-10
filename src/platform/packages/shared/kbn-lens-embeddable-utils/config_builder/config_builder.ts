@@ -25,12 +25,17 @@ import {
   fromAPItoLensState as fromLegacyMetricAPItoLensState,
   fromLensStateToAPI as fromLegacyMetricLensStateToAPI,
 } from './transforms/charts/legacy_metric';
+import {
+  fromAPItoLensState as fromTagCloudAPItoLensState,
+  fromLensStateToAPI as fromTagCloudLensStateToAPI,
+} from './transforms/charts/tagcloud';
 import type { LensApiState } from './schema';
 import { filtersAndQueryToApiFormat, filtersAndQueryToLensState } from './transforms/utils';
 
 const compatibilityMap: Record<string, string> = {
   lnsMetric: 'metric',
   lnsLegacyMetric: 'legacy_metric',
+  lnsTagcloud: 'tagcloud',
 };
 
 export class LensConfigBuilder {
@@ -53,6 +58,10 @@ export class LensConfigBuilder {
     legacy_metric: {
       fromAPItoLensState: fromLegacyMetricAPItoLensState,
       fromLensStateToAPI: fromLegacyMetricLensStateToAPI,
+    },
+    tagcloud: {
+      fromAPItoLensState: fromTagCloudAPItoLensState,
+      fromLensStateToAPI: fromTagCloudLensStateToAPI,
     },
   } as const;
   private dataViewsAPI: DataViewsCommon | undefined;
