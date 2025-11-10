@@ -203,18 +203,6 @@ const buildEsqlQuery = ({
     entity.target.id,
     target.entity.id
   )
-| EVAL detectedActorEntityType = CASE(
-    user.entity.id IS NOT NULL, "user",
-    host.entity.id IS NOT NULL, "host",
-    service.entity.id IS NOT NULL, "service",
-    ""
-  )
-| EVAL detectedTargetEntityType = CASE(
-    user.target.entity.id IS NOT NULL, "user",
-    host.target.entity.id IS NOT NULL, "host",
-    service.target.entity.id IS NOT NULL, "service",
-    ""
-  )
 ${
   isEnrichPolicyExists
     ? `
@@ -305,8 +293,6 @@ ${
     CONCAT(actorEntityType, ":", actorEntitySubType),
     actorEntityType IS NOT NULL,
     actorEntityType,
-    detectedActorEntityType IS NOT NULL,
-    detectedActorEntityType,
     actorEntityId
   )
 | EVAL targetEntityGroup = CASE(
@@ -314,8 +300,6 @@ ${
     CONCAT(targetEntityType, ":", targetEntitySubType),
     targetEntityType IS NOT NULL,
     targetEntityType,
-    detectedTargetEntityType IS NOT NULL,
-    detectedTargetEntityType,
     targetEntityId
   )
 
@@ -324,15 +308,11 @@ ${
 | EVAL actorEntityType = CASE(
     actorEntityType IS NOT NULL,
     actorEntityType,
-    detectedActorEntityType IS NOT NULL,
-    detectedActorEntityType,
     ""
   )
 | EVAL targetEntityType = CASE(
     targetEntityType IS NOT NULL,
     targetEntityType,
-    detectedTargetEntityType IS NOT NULL,
-    detectedTargetEntityType,
     ""
   )
 | STATS badge = COUNT(*),

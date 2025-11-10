@@ -288,100 +288,6 @@ describe('fetchGraph', () => {
         expect(fields[4]).toContain('target.entity.id');
       }
     });
-
-    it('should detect entity types from field presence', async () => {
-      const validIndexPatterns = ['valid_index'];
-      const params = {
-        esClient,
-        logger,
-        start: 0,
-        end: 1000,
-        originEventIds: [] as OriginEventId[],
-        showUnknownTarget: false,
-        indexPatterns: validIndexPatterns,
-        spaceId: 'default',
-        esQuery: undefined as EsQuery | undefined,
-      };
-
-      await fetchGraph(params);
-
-      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
-      const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
-      const query = esqlCallArgs[0].query;
-
-      // Verify type detection logic exists
-      expect(query).toMatch(/EVAL\s+detectedActorEntityType\s*=\s*CASE\(/);
-      expect(query).toMatch(/EVAL\s+detectedTargetEntityType\s*=\s*CASE\(/);
-
-      // Verify it assigns empty string as fallback (not null or unknown)
-      const detectedActorRegex = /detectedActorEntityType\s*=\s*CASE\(([\s\S]*?)\)/;
-      const detectedActorMatch = detectedActorRegex.exec(query);
-      expect(detectedActorMatch).toBeTruthy();
-      if (detectedActorMatch) {
-        const caseContent = detectedActorMatch[1];
-        // Should end with empty string, not "unknown" or null
-        expect(caseContent.trim()).toMatch(/""$/);
-      }
-    });
-
-    it('should prioritize ENRICH entity type over detected type', async () => {
-      // Mock the enrich.getPolicy method to return a policy that exists
-      (esClient.asInternalUser.enrich as jest.Mocked<any>).getPolicy = jest
-        .fn()
-        .mockResolvedValueOnce({
-          policies: [
-            {
-              config: {
-                match: {
-                  name: getEnrichPolicyId(),
-                },
-              },
-            },
-          ],
-        });
-
-      const validIndexPatterns = ['valid_index'];
-      const params = {
-        esClient,
-        logger,
-        start: 0,
-        end: 1000,
-        originEventIds: [] as OriginEventId[],
-        showUnknownTarget: false,
-        indexPatterns: validIndexPatterns,
-        spaceId: 'default',
-        esQuery: undefined as EsQuery | undefined,
-      };
-
-      await fetchGraph(params);
-
-      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
-      const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
-      const query = esqlCallArgs[0].query;
-
-      // Verify entity group logic prioritizes ENRICH type
-      // The actorEntityGroup CASE should check actorEntityType (from ENRICH) first,
-      // then fall back to detectedActorEntityType
-      const actorGroupRegex = /EVAL\s+actorEntityGroup\s*=\s*CASE\(([\s\S]*?)\n\s*\)/m;
-      const actorGroupMatch = actorGroupRegex.exec(query);
-      expect(actorGroupMatch).toBeTruthy();
-
-      if (actorGroupMatch) {
-        const caseContent = actorGroupMatch[1];
-        // Verify that actorEntityType (from ENRICH) is checked first
-        expect(caseContent).toContain('actorEntityType IS NOT NULL');
-        // Verify that detectedActorEntityType is used as fallback
-        expect(caseContent).toContain('detectedActorEntityType');
-        
-        // actorEntityType should appear before detectedActorEntityType in the CASE
-        const enrichTypePos = caseContent.indexOf('actorEntityType IS NOT NULL');
-        const detectedTypePos = caseContent.indexOf('detectedActorEntityType');
-        
-        expect(enrichTypePos).toBeGreaterThan(-1);
-        expect(detectedTypePos).toBeGreaterThan(-1);
-        expect(enrichTypePos).toBeLessThan(detectedTypePos);
-      }
-    });
   });
 
   describe('Target entity filtering', () => {
@@ -445,8 +351,8 @@ describe('fetchGraph', () => {
       const filterArg = esqlCallArgs[0].filter as any;
 
       // Should not have target entity exists check
-      const hasTargetCheck = filterArg.bool.filter.some(
-        (f: any) => f.bool?.should?.some((s: any) => s.exists?.field?.includes('target'))
+      const hasTargetCheck = filterArg.bool.filter.some((f: any) =>
+        f.bool?.should?.some((s: any) => s.exists?.field?.includes('target'))
       );
       expect(hasTargetCheck).toBe(false);
     });
@@ -545,8 +451,8 @@ describe('fetchGraph', () => {
       const filterArg = esqlCallArgs[0].filter as any;
 
       // Old target.entity.id field should be included in target filter
-      const targetFilter = filterArg.bool.filter.find(
-        (f: any) => f.bool?.should?.some((s: any) => s.exists?.field === 'target.entity.id')
+      const targetFilter = filterArg.bool.filter.find((f: any) =>
+        f.bool?.should?.some((s: any) => s.exists?.field === 'target.entity.id')
       );
       expect(targetFilter).toBeTruthy();
     });
