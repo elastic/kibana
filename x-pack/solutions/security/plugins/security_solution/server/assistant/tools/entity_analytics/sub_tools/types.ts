@@ -6,10 +6,13 @@
  */
 
 import type {
+  IScopedClusterClient,
   IUiSettingsClient,
   KibanaRequest,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
+import type { Logger } from '@kbn/logging';
+import type { ToolProvider } from '@kbn/onechat-server';
 import type { EntityAnalyticsRoutesDeps } from '../../../../lib/entity_analytics/types';
 import type { EntityType } from '../../../../../common/search_strategy';
 
@@ -19,6 +22,10 @@ export interface EntityAnalyticsSubPluginsDependencies {
   soClient: SavedObjectsClientContract;
   uiSettingsClient: IUiSettingsClient;
   spaceId: string;
+  esClient: IScopedClusterClient;
+  logger: Logger;
+  toolProvider: ToolProvider;
+  kibanaVersion: string;
 }
 
 export type EntityAnalyticsSubPlugin = (

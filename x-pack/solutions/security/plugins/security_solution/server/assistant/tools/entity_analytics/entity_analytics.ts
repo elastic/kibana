@@ -61,7 +61,8 @@ const MAP_DOMAIN_TO_INFO_BUILDER = {
 
 export const entityAnalyticsToolInternal = (
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices'],
-  ml: EntityAnalyticsRoutesDeps['ml']
+  ml: EntityAnalyticsRoutesDeps['ml'],
+  kibanaVersion: string
 ): BuiltinToolDefinition<typeof entityRiskScoreInternalSchema> => {
   return {
     id: ENTITY_ANALYTICS_TOOL_INTERNAL_ID,
@@ -92,6 +93,10 @@ export const entityAnalyticsToolInternal = (
           request,
           soClient,
           uiSettingsClient,
+          esClient,
+          logger,
+          toolProvider,
+          kibanaVersion,
         };
 
         const dataViewsService = await startPlugins.dataViews.dataViewsServiceFactory(
