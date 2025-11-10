@@ -11,7 +11,6 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiResizableContainer,
-  useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import type { Streams } from '@kbn/streams-schema';
@@ -99,7 +98,8 @@ export function StreamDetailRoutingImpl() {
   useUnsavedChangesPrompt({
     hasUnsavedChanges:
       routingSnapshot.can({ type: 'routingRule.save' }) ||
-      routingSnapshot.can({ type: 'routingRule.fork' }),
+      routingSnapshot.can({ type: 'routingRule.fork' }) ||
+      routingSnapshot.can({ type: 'suggestion.saveSuggestion' }),
     history: appParams.history,
     http: core.http,
     navigateToUrl: core.application.navigateToUrl,
@@ -107,7 +107,6 @@ export function StreamDetailRoutingImpl() {
   });
 
   const availableStreams = streamsListFetch.value?.streams.map((stream) => stream.name) ?? [];
-  const isVerticalLayout = useIsWithinBreakpoints(['xs', 's']);
 
   return (
     <EuiFlexItem
@@ -133,7 +132,7 @@ export function StreamDetailRoutingImpl() {
           `}
           paddingSize="none"
         >
-          <EuiResizableContainer direction={isVerticalLayout ? 'vertical' : 'horizontal'}>
+          <EuiResizableContainer>
             {(EuiResizablePanel, EuiResizableButton) => (
               <>
                 <EuiResizablePanel

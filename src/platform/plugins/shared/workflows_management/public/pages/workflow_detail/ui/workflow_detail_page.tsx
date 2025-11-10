@@ -18,18 +18,15 @@ import { WorkflowDetailEditor } from './workflow_detail_editor';
 import { WorkflowDetailHeader } from './workflow_detail_header';
 import { WorkflowEditorLayout } from './workflow_detail_layout';
 import { WorkflowDetailTestModal } from './workflow_detail_test_modal';
+import { setYamlString } from '../../../entities/workflows/store';
+import { selectWorkflowName } from '../../../entities/workflows/store/workflow_detail/selectors';
+import { loadConnectorsThunk } from '../../../entities/workflows/store/workflow_detail/thunks/load_connectors_thunk';
+import { loadWorkflowThunk } from '../../../entities/workflows/store/workflow_detail/thunks/load_workflow_thunk';
 import { WorkflowExecutionDetail } from '../../../features/workflow_execution_detail';
 import { WorkflowExecutionList } from '../../../features/workflow_execution_list/ui/workflow_execution_list_stateful';
+import { useAsyncThunk, useAsyncThunkState } from '../../../hooks/use_async_thunk';
 import { useWorkflowsBreadcrumbs } from '../../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
-import { setYamlString } from '../../../widgets/workflow_yaml_editor/lib/store';
-import {
-  useAsyncThunk,
-  useAsyncThunkState,
-} from '../../../widgets/workflow_yaml_editor/lib/store/hooks/use_async_thunk';
-import { selectWorkflowName } from '../../../widgets/workflow_yaml_editor/lib/store/selectors';
-import { loadConnectorsThunk } from '../../../widgets/workflow_yaml_editor/lib/store/thunks/load_connectors_thunk';
-import { loadWorkflowThunk } from '../../../widgets/workflow_yaml_editor/lib/store/thunks/load_workflow_thunk';
 
 export function WorkflowDetailPage({ id }: { id?: string }) {
   const dispatch = useDispatch();

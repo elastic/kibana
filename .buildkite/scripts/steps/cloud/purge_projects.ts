@@ -14,7 +14,7 @@ import { getKibanaDir } from '#pipeline-utils';
 async function getPrProjects() {
   // BOOKMARK - List of Kibana project types
   const match =
-    /^(keep.?)?kibana-pr-([0-9]+)-(elasticsearch|security|observability|workplace_ai)(?:-(ai_soc|logs_essentials))?$/;
+    /^(keep.?)?kibana-pr-([0-9]+)-(elasticsearch|security|observability|workplaceai)(?:-(ai_soc|logs_essentials))?$/;
   try {
     // BOOKMARK - List of Kibana project types
     return (
@@ -52,12 +52,12 @@ async function deleteProject({
   name,
 }: {
   // BOOKMARK - List of Kibana project types
-  type: 'elasticsearch' | 'security' | 'observability' | 'workplace_ai';
+  type: 'elasticsearch' | 'security' | 'observability' | 'workplaceai';
   id: number;
   name: string;
 }) {
   try {
-    // TODO handle the new 'workplace_ai' project type, and ideally rename 'elasticsearch' to 'search'
+    // TODO handle the new 'workplaceai' project type, and ideally rename 'elasticsearch' to 'search'
     await projectRequest.delete(`/api/v1/serverless/projects/${type}/${id}`);
 
     execSync(`.buildkite/scripts/common/deployment_credentials.sh unset ${name}`, {
@@ -103,7 +103,7 @@ async function purgeProjects() {
     } else if (
       !Boolean(
         pullRequest.labels.filter((label: any) =>
-          /^ci:project-deploy-(elasticsearch|observability|log_essentials|security|workplace_ai|ai4soc)$/.test(
+          /^ci:project-deploy-(elasticsearch|observability|log_essentials|security|workplaceai|ai4soc)$/.test(
             label.name
           )
         ).length

@@ -1,0 +1,268 @@
+{
+  "id": "@kbn/connector-schemas",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/connector-schemas",
+        "id": "def-common.CONNECTOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "CONNECTOR_ID",
+        "description": [],
+        "signature": [
+          "\".cases-webhook\""
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-schemas/cases_webhook/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-schemas",
+        "id": "def-common.CONNECTOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "CONNECTOR_ID",
+        "description": [],
+        "signature": [
+          "\".d3security\""
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-schemas/d3security/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-schemas",
+        "id": "def-common.CONNECTOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "CONNECTOR_ID",
+        "description": [],
+        "signature": [
+          "\".email\""
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-schemas/email/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-schemas",
+        "id": "def-common.CONNECTOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "CONNECTOR_ID",
+        "description": [],
+        "signature": [
+          "\".index\""
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-schemas/es_index/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-schemas",
+        "id": "def-common.CONNECTOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "CONNECTOR_ID",
+        "description": [],
+        "signature": [
+          "\".jira\""
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-schemas/jira/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-schemas",
+        "id": "def-common.CONNECTOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "CONNECTOR_ID",
+        "description": [],
+        "signature": [
+          "\".jira-service-management\""
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-schemas/jira-service-management/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-schemas",
+        "id": "def-common.CONNECTOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "CONNECTOR_ID",
+        "description": [],
+        "signature": [
+          "\".opsgenie\""
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-schemas/opsgenie/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-schemas",
+        "id": "def-common.CONNECTOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "CONNECTOR_ID",
+        "description": [],
+        "signature": [
+          "\".pagerduty\""
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-schemas/pagerduty/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-schemas",
+        "id": "def-common.CONNECTOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "CONNECTOR_ID",
+        "description": [],
+        "signature": [
+          "\".server-log\""
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-schemas/server_log/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-schemas",
+        "id": "def-common.CONNECTOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "CONNECTOR_ID",
+        "description": [],
+        "signature": [
+          "\".servicenow-itom\""
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-schemas/servicenow_itom/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-schemas",
+        "id": "def-common.CONNECTOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "CONNECTOR_ID",
+        "description": [],
+        "signature": [
+          "\".servicenow\""
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-schemas/servicenow_itsm/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-schemas",
+        "id": "def-common.CONNECTOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "CONNECTOR_ID",
+        "description": [],
+        "signature": [
+          "\".servicenow-sir\""
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-schemas/servicenow_sir/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-schemas",
+        "id": "def-common.CONNECTOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "CONNECTOR_ID",
+        "description": [],
+        "signature": [
+          "\".slack\""
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-schemas/slack/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-schemas",
+        "id": "def-common.CONNECTOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "CONNECTOR_ID",
+        "description": [],
+        "signature": [
+          "\".slack_api\""
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-schemas/slack_api/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-schemas",
+        "id": "def-common.CONNECTOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "CONNECTOR_ID",
+        "description": [],
+        "signature": [
+          "\".teams\""
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-schemas/teams/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-schemas",
+        "id": "def-common.CONNECTOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "CONNECTOR_ID",
+        "description": [],
+        "signature": [
+          "\".webhook\""
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-schemas/webhook/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}
