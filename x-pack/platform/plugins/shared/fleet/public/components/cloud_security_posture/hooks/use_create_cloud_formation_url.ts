@@ -82,7 +82,7 @@ const createCloudFormationUrl = (
   if (cloudFormationUrl.includes('ACCOUNT_TYPE')) {
     cloudFormationUrl = cloudFormationUrl.replace(
       'ACCOUNT_TYPE',
-      getAwsAccountType(awsAccountType)
+      encodeURIComponent(getAwsAccountType(awsAccountType))
     );
   }
 
