@@ -36,7 +36,11 @@ import type { LensApiBucketOperations } from '../../schema/bucket_ops';
 import type { DeepMutable, DeepPartial } from '../utils';
 import { generateLayer } from '../utils';
 import type { MetricStateESQL, MetricStateNoESQL } from '../../schema/charts/metric';
-import { getSharedChartLensStateToAPI, getSharedChartAPIToLensState } from './utils';
+import {
+  getSharedChartLensStateToAPI,
+  getSharedChartAPIToLensState,
+  getMetricAccessor,
+} from './utils';
 import {
   fromColorByValueAPIToLensState,
   fromColorByValueLensStateToAPI,
@@ -181,11 +185,6 @@ function fromCompareLensStateToAPI(
     baseline: compare.baselineValue,
     ...sharedProps,
   };
-}
-
-function getMetricAccessor(visualization: MetricVisualizationState) {
-  // @ts-expect-error Unfortunately for some obscure reasons there are SO out there with the accessor property instead of the correct one
-  return visualization.metricAccessor ?? visualization.accessor;
 }
 
 function reverseBuildVisualizationState(
