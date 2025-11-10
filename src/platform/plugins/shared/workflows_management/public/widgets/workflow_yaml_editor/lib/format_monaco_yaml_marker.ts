@@ -27,7 +27,7 @@ export function formatMonacoYamlMarker(
   editorModel: monaco.editor.ITextModel,
   workflowYamlSchemaLoose: z.ZodSchema,
   yamlDocument: YAML.Document | null
-): monaco.editor.IMarker | typeof SUPPRESS_MARKER {
+): monaco.editor.IMarkerData | typeof SUPPRESS_MARKER {
   const newMarker: monaco.editor.IMarkerData = {
     ...marker,
   };
