@@ -11,7 +11,8 @@ import React from 'react';
 import styled from '@emotion/styled';
 
 import { DirectionBadge } from '../direction';
-import { DefaultDraggable, DraggableBadge } from '../../../../common/components/draggables';
+import { CellActionsRenderer } from '../../../../common/components/cell_actions/cell_actions_renderer';
+import { DraggableBadge } from '../../../../common/components/draggables';
 
 import * as i18n from './translations';
 import {
@@ -95,18 +96,13 @@ export const Network = React.memo<{
         ? uniq(bytes).map((b) =>
             !isNaN(Number(b)) ? (
               <EuiFlexItemMarginRight grow={false} key={b}>
-                <DefaultDraggable
-                  scopeId={scopeId}
-                  field={NETWORK_BYTES_FIELD_NAME}
-                  id={`network-default-draggable-${contextId}-${eventId}-${NETWORK_BYTES_FIELD_NAME}-${b}`}
-                  value={b}
-                >
+                <CellActionsRenderer scopeId={scopeId} field={NETWORK_BYTES_FIELD_NAME} value={b}>
                   <Stats size="xs">
                     <span>
                       <PreferenceFormattedBytes value={b} />
                     </span>
                   </Stats>
-                </DefaultDraggable>
+                </CellActionsRenderer>
               </EuiFlexItemMarginRight>
             ) : null
           )
@@ -115,16 +111,11 @@ export const Network = React.memo<{
       {packets != null
         ? uniq(packets).map((p) => (
             <EuiFlexItemMarginRight grow={false} key={p}>
-              <DefaultDraggable
-                scopeId={scopeId}
-                field={NETWORK_PACKETS_FIELD_NAME}
-                id={`network-default-draggable-${contextId}-${eventId}-${NETWORK_PACKETS_FIELD_NAME}-${p}`}
-                value={p}
-              >
+              <CellActionsRenderer scopeId={scopeId} field={NETWORK_PACKETS_FIELD_NAME} value={p}>
                 <Stats size="xs">
                   <span>{`${p} ${i18n.PACKETS}`}</span>
                 </Stats>
-              </DefaultDraggable>
+              </CellActionsRenderer>
             </EuiFlexItemMarginRight>
           ))
         : null}
