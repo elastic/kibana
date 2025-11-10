@@ -28,9 +28,6 @@ export default async function (ftrConfigProviderContext: FtrConfigProviderContex
       '--serverless=security',
       // set the packagerTaskInterval to 5s in order to speed up test executions when checking fleet artifacts
       '--xpack.securitySolution.packagerTaskInterval=5s',
-      `--xpack.fleet.experimentalFeatures=${JSON.stringify({
-        enableAgentStatusAlerting: false,
-      })}`,
     ],
     services: svlServices,
     pageObjects: svlPageObjects,
