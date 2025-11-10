@@ -5,74 +5,90 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
-import { EuiTitle, EuiPageHeaderSection, useEuiTheme } from '@elastic/eui';
+import React, { useState } from 'react';
+import {
+  EuiButtonEmpty,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiPopover,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { useConversationTitle } from '../../hooks/use_conversation';
+import { useConversationTitle, useHasActiveConversation } from '../../hooks/use_conversation';
 
-export const ConversationTitle: React.FC<{}> = () => {
-  const { euiTheme } = useEuiTheme();
+const labels = {
+  ariaLabel: i18n.translate('xpack.onechat.conversationTitle.ariaLabel', {
+    defaultMessage: 'Conversation title',
+  }),
+  newConversationDisplay: i18n.translate('xpack.onechat.conversationTitle.newConversationDisplay', {
+    defaultMessage: 'New conversation',
+  }),
+  delete: i18n.translate('xpack.onechat.conversationTitle.delete', {
+    defaultMessage: 'Delete',
+  }),
+};
+
+interface ConversationTitleProps {
+  ariaLabelledBy?: string;
+}
+
+export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabelledBy }) => {
   const { title, isLoading } = useConversationTitle();
+  const hasActiveConversation = useHasActiveConversation();
+  const { euiTheme } = useEuiTheme();
 
-  const [previousTitle, setPreviousTitle] = useState<string>('');
-  const [currentText, setCurrentText] = useState<string>('');
+  const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
 
-  const labels = {
-    ariaLabel: i18n.translate('xpack.onechat.conversationTitle.ariaLabel', {
-      defaultMessage: 'Conversation title',
-    }),
-    newConversationDisplay: i18n.translate(
-      'xpack.onechat.conversationTitle.newConversationDisplay',
-      {
-        defaultMessage: 'New conversation',
-      }
-    ),
+  const getTitle = () => {
+    if (hasActiveConversation) {
+      return title;
+    }
+    return labels.newConversationDisplay;
   };
 
-  useEffect(() => {
-    if (isLoading) return;
+  const displayTitle = getTitle();
+  const shouldShowButton = hasActiveConversation && !isLoading && title;
 
-    const fullText = title || labels.newConversationDisplay;
+  const menuItems = [
+    <EuiContextMenuItem
+      key="delete"
+      icon="trash"
+      size="s"
+      css={css`
+        color: ${euiTheme.colors.textDanger};
+      `}
+      onClick={() => {
+        setIsContextMenuOpen(false);
+        // TODO: implement delete functionality
+      }}
+    >
+      {labels.delete}
+    </EuiContextMenuItem>,
+  ];
 
-    // Typewriter effect: only when transitioning from "New conversation" to actual title
-    if (previousTitle === labels.newConversationDisplay && title) {
-      if (currentText.length < fullText.length) {
-        // start typewriter effect
-        const typingSpeed = 50;
-        const timeout = setTimeout(() => {
-          setCurrentText(fullText.substring(0, currentText.length + 1));
-        }, typingSpeed);
+  if (shouldShowButton) {
+    return (
+      <EuiPopover
+        button={
+          <EuiButtonEmpty
+            onClick={() => setIsContextMenuOpen(!isContextMenuOpen)}
+            aria-label={labels.ariaLabel}
+            iconType="arrowDown"
+            iconSide="right"
+          >
+            <h1 id={ariaLabelledBy}>{displayTitle}</h1>
+          </EuiButtonEmpty>
+        }
+        isOpen={isContextMenuOpen}
+        closePopover={() => setIsContextMenuOpen(false)}
+        panelPaddingSize="s"
+        anchorPosition="downCenter"
+      >
+        <EuiContextMenuPanel size="s" items={menuItems} />
+      </EuiPopover>
+    );
+  }
 
-        return () => clearTimeout(timeout);
-      }
-    } else if (title && title !== previousTitle) {
-      // Normal title change: set immediately without typewriter effect I.e. when changing from one conversation to another
-      setCurrentText(fullText);
-    }
-    // always track the previous title
-    setPreviousTitle(fullText);
-  }, [title, currentText, labels.newConversationDisplay, isLoading, previousTitle]);
-
-  const titleDisplayText = currentText || previousTitle;
-
-  const sectionStyles = css`
-    display: flex;
-    flex-direction: row;
-    gap: ${euiTheme.size.s};
-  `;
-
-  return (
-    <EuiPageHeaderSection css={sectionStyles}>
-      {!isLoading && (
-        <EuiTitle
-          aria-label={labels.ariaLabel}
-          size="xxs"
-          data-test-subj="agentBuilderConversationTitle"
-        >
-          <h1>{titleDisplayText}</h1>
-        </EuiTitle>
-      )}
-    </EuiPageHeaderSection>
-  );
+  return null;
 };

@@ -27,10 +27,7 @@ export const OnechatConversationsView: React.FC<{}> = () => {
   const headerHeight = `calc(${euiTheme.size.xl} * 2)`;
   const headerStyles = css`
     ${backgroundStyles}
-    display: flex;
-    flex-direction: column;
     justify-content: center;
-    border: none;
     block-size: ${headerHeight};
   `;
   const contentStyles = css`

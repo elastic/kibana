@@ -7,14 +7,18 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { useHasActiveConversation } from '../../hooks/use_conversation';
 import { ConversationActions } from './conversation_actions';
 import { ConversationsHistoryButton } from './conversations_history/conversations_history_button';
 import { ConversationTitle } from './conversation_title';
 
-export const ConversationHeader: React.FC = () => {
-  const hasActiveConversation = useHasActiveConversation();
-
+interface ConversationHeaderProps {
+  onClose?: () => void;
+  ariaLabelledBy?: string;
+}
+export const ConversationHeader: React.FC<ConversationHeaderProps> = ({
+  onClose,
+  ariaLabelledBy,
+}) => {
   const containerStyles = css`
     display: flex;
     flex-direction: row;
@@ -48,16 +52,12 @@ export const ConversationHeader: React.FC = () => {
       <div css={leftSectionStyles}>
         <ConversationsHistoryButton />
       </div>
-      {hasActiveConversation && (
-        <>
-          <div css={centerSectionStyles}>
-            <ConversationTitle />
-          </div>
-          <div css={rightSectionStyles}>
-            <ConversationActions />
-          </div>
-        </>
-      )}
+      <div css={centerSectionStyles}>
+        <ConversationTitle ariaLabelledBy={ariaLabelledBy} />
+      </div>
+      <div css={rightSectionStyles}>
+        <ConversationActions onClose={onClose} />
+      </div>
     </div>
   );
 };
