@@ -46,12 +46,12 @@ export const WorkplaceAIHomeFooter: React.FC = () => {
       <EuiFlexItem>
         <EuiPanel paddingSize="l">
           <EuiTitle size="xs">
-            <h5>
+            <h3>
               <FormattedMessage
                 id="xpack.workplaceai.gettingStarted.homeFooter.browseDashboardsTitle"
                 defaultMessage="Browse dashboards"
               />
-            </h5>
+            </h3>
           </EuiTitle>
           <EuiSpacer size="s" />
           <EuiText size="s" color="subdued">
@@ -74,12 +74,12 @@ export const WorkplaceAIHomeFooter: React.FC = () => {
       <EuiFlexItem>
         <EuiPanel paddingSize="l">
           <EuiTitle size="xs">
-            <h5>
+            <h3>
               <FormattedMessage
                 id="xpack.workplaceai.gettingStarted.homeFooter.workflowTemplateTitle"
                 defaultMessage="Use a workflow template"
               />
-            </h5>
+            </h3>
           </EuiTitle>
           <EuiSpacer size="s" />
           <EuiText size="s" color="subdued">

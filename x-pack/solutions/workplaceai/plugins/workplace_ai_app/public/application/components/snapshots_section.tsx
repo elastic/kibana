@@ -15,6 +15,7 @@ import {
   EuiSpacer,
   EuiBasicTable,
   EuiIcon,
+  EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -201,7 +202,7 @@ export const SnapshotsSection: React.FC = () => {
                         <EuiIcon type={item.icon} />
                       </EuiFlexItem>
                       <EuiFlexItem>
-                        <a href="#">{name}</a>
+                        <EuiLink onClick={() => {}}>{name}</EuiLink>
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   ),

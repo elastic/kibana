@@ -83,6 +83,12 @@ export const ExploreDefaultAgent: React.FC = () => {
                   color="text"
                   iconSize="m"
                   onClick={() => {}}
+                  aria-label={i18n.translate(
+                    'xpack.workplaceai.gettingStarted.exploreDefaultAgent.shareLinkAriaLabel',
+                    {
+                      defaultMessage: 'Share link',
+                    }
+                  )}
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>

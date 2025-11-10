@@ -49,12 +49,12 @@ export const ExploreWorkplaceAI: React.FC = () => {
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiTitle size="s">
-        <h4>
+        <h2>
           <FormattedMessage
             id="xpack.workplaceai.gettingStarted.exploreSection.title"
             defaultMessage="Explore Workplace AI"
           />
-        </h4>
+        </h2>
       </EuiTitle>
       <EuiFlexGroup gutterSize="l">
         <EuiFlexItem>
