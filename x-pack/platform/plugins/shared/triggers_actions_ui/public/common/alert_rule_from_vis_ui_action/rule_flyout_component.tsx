@@ -12,7 +12,7 @@ import type { EsQueryRuleParams } from '@kbn/response-ops-rule-params/es_query';
 import { isValidRuleFormPlugins } from '@kbn/response-ops-rule-form/lib';
 import { ESQLControlVariable, apiPublishesESQLVariables } from '@kbn/esql-types';
 import { tracksOverlays } from '@kbn/presentation-containers';
-import { ES_QUERY_ID } from '@kbn/rule-data-utils';
+import { ES_QUERY_ID, AlertConsumers } from '@kbn/rule-data-utils';
 import React from 'react';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
@@ -101,6 +101,7 @@ export async function getRuleFlyoutComponent(
         }}
         onCancel={closeRuleForm}
         onSubmit={closeRuleForm}
+        multiConsumerSelection={AlertConsumers.ALERTS}
       />
     </KibanaContextProvider>
   );
