@@ -50,7 +50,10 @@ import {
   isVerificationError,
   packageToPackagePolicy,
 } from '../../../../../services';
-import type { NewPackagePolicyInput } from '../../../../../../../../common';
+import type {
+  CreatePackagePolicyResponse,
+  NewPackagePolicyInput,
+} from '../../../../../../../../common';
 import {
   FLEET_ELASTIC_AGENT_PACKAGE,
   FLEET_SYSTEM_PACKAGE,
@@ -186,7 +189,7 @@ async function savePackagePolicy(pkgPolicy: CreatePackagePolicyRequest['body']) 
       }
     );
 
-    return result;
+    return result as CreatePackagePolicyResponse;
   }
 
   const result = await sendCreatePackagePolicyForRq({
