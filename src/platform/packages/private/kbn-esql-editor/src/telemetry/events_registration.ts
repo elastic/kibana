@@ -21,6 +21,7 @@ export const ESQL_QUERY_HISTORY_CLICKED = 'esql.query_history_clicked';
 export const ESQL_STARRED_QUERY_CLICKED = 'esql.starred_query_clicked';
 export const ESQL_QUERY_SUBMITTED = 'esql.query_submitted';
 export const ESQL_RECOMMENDED_QUERY_CLICKED = 'esql.recommended_query_clicked';
+export const ESQL_CONTROL_CONFIG_OPENED = 'esql.control_config_opened';
 
 /**
  * Registers the esql editor analytics events.
@@ -138,6 +139,24 @@ export const registerESQLEditorAnalyticsEvents = once((analytics: AnalyticsServi
           description: 'The label of the recommended query that was clicked',
         },
       },
+    },
+  });
+  analytics.registerEventType({
+    eventType: ESQL_CONTROL_CONFIG_OPENED,
+    schema: {
+      control_kind: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'The type of control that is about to be created. Possible values are: multi_values|time_literal|fields|values|functions',
+        },
+      },
+      // prefilled: {
+      //   type: 'boolean',
+      //   _meta: {
+      //     description: 'Whether the control configuration was prefilled from the context.',
+      //   },
+      // },
     },
   });
 });
