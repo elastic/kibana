@@ -8,9 +8,11 @@
  */
 
 import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
-import type { ControlWidth, ControlsChainingSystem } from '@kbn/controls-schemas';
-import type { OptionsListSearchTechnique } from '@kbn/controls-plugin/common/options_list/suggestions_searching';
-import type { OptionsListSortingType } from '@kbn/controls-plugin/common/options_list/suggestions_sorting';
+import type {
+  ControlWidth,
+  OptionsListSearchTechnique,
+  OptionsListSortingType,
+} from '@kbn/controls-schemas';
 import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
 
@@ -151,24 +153,6 @@ export class DashboardPageControls extends FtrService {
     await this.openControlGroupSettingsFlyout();
     await this.testSubjects.existOrFail('control-group-layout-options');
     await this.testSubjects.click(`control-editor-layout-${layout}`);
-    await this.testSubjects.click('control-group-editor-save');
-  }
-
-  public async updateChainingSystem(chainingSystem: ControlsChainingSystem) {
-    this.log.debug(`Update control group chaining system to ${chainingSystem}`);
-    await this.openControlGroupSettingsFlyout();
-    await this.testSubjects.existOrFail('control-group-chaining');
-    // currently there are only two chaining systems, so a switch is used.
-    const switchStateToChainingSystem: { [key: string]: ControlsChainingSystem } = {
-      true: 'HIERARCHICAL',
-      false: 'NONE',
-    };
-
-    const switchState =
-      (await this.testSubjects.getAttribute('control-group-chaining', 'checked')) ?? '';
-    if (chainingSystem !== switchStateToChainingSystem[switchState]) {
-      await this.testSubjects.click('control-group-chaining');
-    }
     await this.testSubjects.click('control-group-editor-save');
   }
 

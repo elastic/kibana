@@ -19,7 +19,8 @@
       "embeddable",
       "navigation",
       "unifiedSearch",
-      "developerExamples"
+      "developerExamples",
+      "uiActions"
     ]
   }
 }

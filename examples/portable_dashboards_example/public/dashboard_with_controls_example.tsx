@@ -11,13 +11,18 @@ import React, { useEffect, useState } from 'react';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import { controlGroupStateBuilder } from '@kbn/controls-plugin/public';
 import type { DashboardApi, DashboardCreationOptions } from '@kbn/dashboard-plugin/public';
 import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
+import { controlGroupStateBuilder } from '@kbn/control-group-renderer/src/control_group_state_builder';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FILTER_DEBUGGER_EMBEDDABLE_ID } from './constants';
+import type { StartDeps } from './plugin';
 
 export const DashboardWithControlsExample = ({ dataView }: { dataView: DataView }) => {
   const [dashboard, setDashboard] = useState<DashboardApi | undefined>();
+  const {
+    services: { uiActions },
+  } = useKibana<StartDeps>();
 
   // add a filter debugger panel as soon as the dashboard becomes available
   useEffect(() => {
@@ -49,20 +54,28 @@ export const DashboardWithControlsExample = ({ dataView }: { dataView: DataView 
         <DashboardRenderer
           getCreationOptions={async (): Promise<DashboardCreationOptions> => {
             const controlGroupState = {};
-            await controlGroupStateBuilder.addDataControlFromField(controlGroupState, {
-              dataViewId: dataView.id ?? '',
-              title: 'Destintion country',
-              fieldName: 'geo.dest',
-              width: 'medium',
-              grow: false,
-            });
-            await controlGroupStateBuilder.addDataControlFromField(controlGroupState, {
-              dataViewId: dataView.id ?? '',
-              fieldName: 'bytes',
-              width: 'medium',
-              grow: true,
-              title: 'Bytes',
-            });
+            await controlGroupStateBuilder.addDataControlFromField(
+              controlGroupState,
+              {
+                dataViewId: dataView.id ?? '',
+                title: 'Destintion country',
+                fieldName: 'geo.dest',
+                width: 'medium',
+                grow: false,
+              },
+              uiActions
+            );
+            await controlGroupStateBuilder.addDataControlFromField(
+              controlGroupState,
+              {
+                dataViewId: dataView.id ?? '',
+                fieldName: 'bytes',
+                width: 'medium',
+                grow: true,
+                title: 'Bytes',
+              },
+              uiActions
+            );
 
             return {
               getInitialInput: () => ({
