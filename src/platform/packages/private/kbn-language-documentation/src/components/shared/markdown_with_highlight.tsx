@@ -8,7 +8,7 @@
  */
 
 import { getDefaultEuiMarkdownPlugins, EuiLink, EuiMarkdownFormat } from '@elastic/eui';
-import React from 'react';
+import React, { useMemo } from 'react';
 
 /**
  * Custom Markdown component that supports highlighting text wrapped in ==double equals==
@@ -21,18 +21,27 @@ export const MarkdownWithHighlight = React.memo(
     markdownContent: string;
     openLinksInNewTab?: boolean;
   }) => {
-    const { parsingPlugins, processingPlugins } = getDefaultEuiMarkdownPlugins({
-      exclude: ['tooltip', 'lineBreaks', 'linkValidator'],
-    });
+    const { modifiedParsingPlugins, modifiedProcessingPlugins } = useMemo(() => {
+      const { parsingPlugins, processingPlugins } = getDefaultEuiMarkdownPlugins({
+        exclude: ['tooltip', 'lineBreaks', 'linkValidator'],
+      });
 
-    const modifiedParsingPlugins = [...parsingPlugins, highlightParsingPlugin];
-    const modifiedProcessingPlugins = [...processingPlugins];
+      const parsingPluginList = [...parsingPlugins, highlightParsingPlugin];
+      const processingPluginList = [...processingPlugins];
 
-    // Components overwrites
-    if (openLinksInNewTab) {
-      processingPlugins[1][1].components.a = (props) => <EuiLink {...props} target="_blank" />;
-    }
-    processingPlugins[1][1].components.highlightPlugin = highlightProcessorPlugin;
+      // Components overwrites
+      if (openLinksInNewTab) {
+        (processingPluginList[1] as any)[1].components.a = (props: any) => (
+          <EuiLink {...props} target="_blank" />
+        );
+      }
+      (processingPluginList[1] as any)[1].components.highlightPlugin = highlightProcessorPlugin;
+
+      return {
+        modifiedParsingPlugins: parsingPluginList,
+        modifiedProcessingPlugins: processingPluginList,
+      };
+    }, [openLinksInNewTab]);
 
     return (
       <EuiMarkdownFormat

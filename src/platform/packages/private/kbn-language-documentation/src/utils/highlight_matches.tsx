@@ -7,16 +7,49 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { memoize } from 'lodash';
+
 interface ProtectedRange {
   start: number;
   end: number;
 }
 
 /**
+ * Highlights text matches in a string by wrapping them in a highlighted mardown ==text==.
+ * Performs case-insensitive matching while avoiding highlighting text inside
+ * markdown code blocks and links.
+ */
+export function highlightMatches(text: string, searchText: string): string {
+  const normalizedSearchText = searchText.trim();
+
+  if (!normalizedSearchText) {
+    return text;
+  }
+
+  const protectedRanges = findProtectedRanges(text);
+
+  // Create a regex to find all matches (case-insensitive)
+  const regex = new RegExp(
+    normalizedSearchText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), // escape regex special characters
+    'gi'
+  );
+
+  // Use replace to wrap matches in highlighting markers, but only if they're not in protected ranges
+  return text.replace(regex, (match, offset) => {
+    if (isPositionProtected(offset, protectedRanges)) {
+      return match;
+    }
+    return `==${match}==`;
+  });
+}
+
+/**
  * Finds protected ranges in markdown text (code blocks, inline code, and links)
  * where highlighting should not occur.
+ *
+ * This function is memoized so it won't run twice for the same given text.
  */
-function findProtectedRanges(text: string): ProtectedRange[] {
+const findProtectedRanges = memoize((text: string): ProtectedRange[] => {
   const ranges: ProtectedRange[] = [];
 
   // Find multi-line code blocks (```...```)
@@ -51,39 +84,11 @@ function findProtectedRanges(text: string): ProtectedRange[] {
   }
 
   return mergedRanges;
-}
+});
 
 /**
  * Checks if a position is within any of the protected ranges.
  */
 function isPositionProtected(position: number, protectedRanges: ProtectedRange[]): boolean {
   return protectedRanges.some((range) => position >= range.start && position < range.end);
-}
-
-/**
- * Highlights text matches in a string by wrapping them in a highlighted span.
- * Performs case-insensitive matching while avoiding highlighting text inside
- * markdown code blocks, inline code, and links.
- */
-export function highlightMatches(text: string, searchText: string): string {
-  if (!searchText.trim()) {
-    return text;
-  }
-
-  const normalizedSearchText = searchText.trim();
-  const protectedRanges = findProtectedRanges(text);
-
-  // Create a regex to find all matches (case-insensitive)
-  const regex = new RegExp(
-    normalizedSearchText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), // escape regex special characters
-    'gi'
-  );
-
-  // Use replace to wrap matches in highlighting markers, but only if they're not in protected ranges
-  return text.replace(regex, (match, offset) => {
-    if (isPositionProtected(offset, protectedRanges)) {
-      return match; // Don't highlight if in protected range
-    }
-    return `==${match}==`; // == Denotates highlighted text
-  });
 }
