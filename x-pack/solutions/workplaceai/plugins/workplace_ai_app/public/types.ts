@@ -8,6 +8,7 @@
 import type { InferencePublicStart } from '@kbn/inference-plugin/public';
 import type { DataSourcesRegistryPluginSetup } from '@kbn/data-sources-registry-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WorkplaceAIAppPluginSetup {}
@@ -22,4 +23,5 @@ export interface WorkplaceAIAppPluginSetupDependencies {
 export interface WorkplaceAIAppPluginStartDependencies {
   inference: InferencePublicStart;
   cloud?: CloudStart;
+  share?: SharePluginStart;
 }

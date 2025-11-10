@@ -14,7 +14,7 @@
     "browser": true,
     "configPath": ["xpack", "workplaceAIApp"],
     "requiredPlugins": ["inference", "actions", "features", "dataSourcesRegistry"],
-    "optionalPlugins": ["cloud"],
+    "optionalPlugins": ["cloud", "share"],
     "requiredBundles": ["kibanaReact"]
   }
 }

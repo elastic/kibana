@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { openWiredConnectionDetails } from '@kbn/cloud/connection_details';
 import { ApiKeyForm } from '@kbn/workplaceai-api-keys-components';
 import { useCurrentUser } from '../hooks/use_current_user';
 import { useElasticsearchUrl } from '../hooks/use_elasticsearch_url';
@@ -85,7 +86,13 @@ export const WorkplaceAIHomeHeader: React.FC = () => {
               size="s"
               iconType="gear"
               iconSide="left"
-              onClick={() => {}}
+              onClick={() => openWiredConnectionDetails()}
+              aria-label={i18n.translate(
+                'xpack.workplaceai.gettingStarted.homeHeader.connectionSettingsAriaLabel',
+                {
+                  defaultMessage: 'View connection settings',
+                }
+              )}
             >
               <FormattedMessage
                 id="xpack.workplaceai.gettingStarted.homeHeader.connectionSettingsButtonLabel"
