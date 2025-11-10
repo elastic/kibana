@@ -9,7 +9,7 @@ import React from 'react';
 import { css } from '@emotion/react';
 import { useHasActiveConversation } from '../../hooks/use_conversation';
 import { ConversationActions } from './conversation_actions';
-import { ConversationsHistoryButton } from './conversation_sidebar/conversations_history_button';
+import { ConversationsHistoryButton } from './conversations_history/conversations_history_button';
 import { ConversationTitle } from './conversation_title';
 
 export const ConversationHeader: React.FC = () => {

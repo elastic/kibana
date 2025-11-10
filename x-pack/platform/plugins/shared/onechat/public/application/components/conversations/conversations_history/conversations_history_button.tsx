@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { useHasActiveConversation } from '../../../hooks/use_conversation';
-import { ConversationsHistoryList } from './conversations_history_list';
+import { ConversationsHistoryPopover } from './conversations_history_popover';
 
 export const ConversationsHistoryButton: React.FC = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -23,8 +23,8 @@ export const ConversationsHistoryButton: React.FC = () => {
     close: i18n.translate('xpack.onechat.conversationSidebarToggle.close', {
       defaultMessage: 'Close conversations',
     }),
-    chatHistory: i18n.translate('xpack.onechat.conversationSidebarToggle.chatHistory', {
-      defaultMessage: 'Chat history',
+    conversations: i18n.translate('xpack.onechat.conversationSidebarToggle.conversations', {
+      defaultMessage: 'Conversations',
     }),
   };
 
@@ -55,13 +55,13 @@ export const ConversationsHistoryButton: React.FC = () => {
       onClick={togglePopover}
       data-test-subj="onechatSidebarToggleBtn"
     >
-      {labels.chatHistory}
+      {labels.conversations}
     </EuiButtonEmpty>
   );
 
   return (
     <EuiPageHeaderSection>
-      <ConversationsHistoryList
+      <ConversationsHistoryPopover
         button={button}
         isOpen={isPopoverOpen}
         closePopover={() => setIsPopoverOpen(false)}
