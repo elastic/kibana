@@ -100,6 +100,6 @@ export const useEdgeColor = (edgeColor: EdgeViewModel['color']) => {
       return euiTheme.colors.primary;
     case 'subdued':
     default:
-      return euiTheme.colors.borderBaseFormsControl;
+      return euiTheme.colors.borderBaseProminent;
   }
 };
