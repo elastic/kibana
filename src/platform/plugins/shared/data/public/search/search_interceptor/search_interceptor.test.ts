@@ -29,6 +29,7 @@ import { SearchTimeoutError, TimeoutErrorMode } from './timeout_error';
 
 import { SearchSessionIncompleteWarning } from './search_session_incomplete_warning';
 import { getMockSearchConfig } from '../../../config.mock';
+import { AbortReason } from '../..';
 
 jest.mock('./create_request_hash', () => {
   const originalModule = jest.requireActual('./create_request_hash');
@@ -1159,7 +1160,7 @@ describe('SearchInterceptor', () => {
         const abort = sessionService.trackSearch.mock.calls[0][0].abort;
         expect(abort).toBeInstanceOf(Function);
 
-        abort();
+        abort(AbortReason.SessionCanceled);
 
         await timeTravel(10);
 
