@@ -94,9 +94,9 @@ export const SettingsSchemaV5 = schema.object({
   ),
   ilm_migration_status: schema.maybe(
     schema.object({
-      logs: schema.maybe(schema.literal('success')),
-      metrics: schema.maybe(schema.literal('success')),
-      synthetics: schema.maybe(schema.literal('success')),
+      logs: schema.maybe(schema.oneOf([schema.literal('success'), schema.literal(null)])),
+      metrics: schema.maybe(schema.oneOf([schema.literal('success'), schema.literal(null)])),
+      synthetics: schema.maybe(schema.oneOf([schema.literal('success'), schema.literal(null)])),
     })
   ),
 });
