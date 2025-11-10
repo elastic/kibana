@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import type { GaugeVisualizationState, MetricVisualizationState } from '@kbn/lens-common';
 import type { LensAttributes } from '../../types';
 
 export function getSharedChartLensStateToAPI(
@@ -24,4 +25,11 @@ export function getSharedChartAPIToLensState(config: { title?: string; descripti
     title: config.title ?? '',
     ...(config.description != null ? { description: config.description } : {}),
   };
+}
+
+export function getMetricAccessor(
+  visualization: GaugeVisualizationState | MetricVisualizationState
+) {
+  // @ts-expect-error Unfortunately for some obscure reasons there are SO out there with the accessor property instead of the correct one
+  return visualization.metricAccessor ?? visualization.accessor;
 }
