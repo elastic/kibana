@@ -634,6 +634,7 @@
     "createdAt",
     "enabled",
     "name",
+    "ruleTypeConsumerPairs",
     "updatedAt"
   ],
   "graph-workspace": [
