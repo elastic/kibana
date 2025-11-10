@@ -36,7 +36,11 @@ const emptyContainerStyles = css`
   align-items: center;
 `;
 
-export const ConversationHistoryList: React.FC = () => {
+interface ConversationHistoryListProps {
+  onClose?: () => void;
+}
+
+export const ConversationHistoryList: React.FC<ConversationHistoryListProps> = ({ onClose }) => {
   const { conversations = [], isLoading } = useConversationList();
   const currentConversationId = useConversationId();
   const { navigateToOnechatUrl } = useNavigation();
@@ -89,8 +93,9 @@ export const ConversationHistoryList: React.FC = () => {
       } else {
         navigateToOnechatUrl(appPaths.chat.conversation({ conversationId: conversation.id }));
       }
+      onClose?.();
     },
-    [isEmbeddedContext, setConversationId, navigateToOnechatUrl]
+    [isEmbeddedContext, onClose, setConversationId, navigateToOnechatUrl]
   );
 
   if (isLoading) {
