@@ -9,8 +9,11 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 
-import type { DashboardSearchRequestBody, DashboardSearchResponseBody } from '../../server';
-import type { DashboardState } from '../../server/content_management';
+import type { 
+  DashboardSearchRequestBody, 
+  DashboardSearchResponseBody,
+  DashboardState
+ } from '../../server';
 
 /**
  * Types for Finding Dashboards
