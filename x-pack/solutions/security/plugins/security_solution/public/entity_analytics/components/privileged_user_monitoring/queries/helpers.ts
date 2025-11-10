@@ -67,21 +67,21 @@ export function removeInvalidForkBranchesFromESQL(
   const isInvalidColumn = (node: ESQLProperNode) =>
     isColumn(node) && !createdColumns.includes(node.name) && !fields[node.name]; // Check if the column was created or exists in the fields map
 
-  const [invalidParens, validParens] = partition(
+  const [invalidBranches, validBranches] = partition(
     (parens) => Walker.find(parens.child, isInvalidColumn),
     forkParens
   );
 
   // When all branches are valid we can return the original ESQL query
-  if (invalidParens.length === 0) {
+  if (invalidBranches.length === 0) {
     return E.right(esql);
   }
 
   // No valid FORK branches found
-  if (validParens.length === 0) {
+  if (validBranches.length === 0) {
     const invalidFields = new Set<string>();
-    invalidParens.forEach((parens) => {
-      Walker.findAll(parens.child, isInvalidColumn).forEach((node) => {
+    invalidBranches.forEach((branch) => {
+      Walker.findAll(branch.child, isInvalidColumn).forEach((node) => {
         invalidFields.add(node.name);
       });
     });
@@ -90,13 +90,13 @@ export function removeInvalidForkBranchesFromESQL(
   }
 
   // When FORK has only one valid branch we need to remove the fork command from query and add the valid branch back to the root
-  if (validParens.length === 1) {
-    return E.right(moveForkBranchToToplevel(root, forkCommand, validParens[0].child));
+  if (validBranches.length === 1) {
+    return E.right(moveForkBranchToToplevel(root, forkCommand, validBranches[0].child));
   }
 
   // Remove the invalid branches
-  invalidParens.forEach((parens) => {
-    mutate.generic.commands.args.remove(root, parens);
+  invalidBranches.forEach((branch) => {
+    mutate.generic.commands.args.remove(root, branch);
   });
   return E.right(BasicPrettyPrinter.multiline(root));
 }
