@@ -7,6 +7,8 @@
 
 import { difference, intersection, isEqual } from 'lodash';
 import { isLockAcquisitionError } from '@kbn/lock-manager';
+import { Streams } from '@kbn/streams-schema';
+import { convertToOtelConfig } from '@kbn/streamlang';
 import { FailedToApplyRequestedChangesError } from './errors/failed_to_apply_requested_changes_error';
 import { FailedToDetermineElasticsearchActionsError } from './errors/failed_to_determine_elasticsearch_actions_error';
 import { FailedToLoadCurrentStateError } from './errors/failed_to_load_current_state_error';
@@ -90,7 +92,12 @@ export class State {
         .withLock('streams/apply_changes', async () => {
           try {
             await desiredState.commitChanges(startingState);
-            return { status: 'success' as const, changes: desiredState.changes(startingState) };
+            const changes = desiredState.changes(startingState);
+
+            // After successful state change, generate and store OTEL collector config
+            await desiredState.updateOtelConfig(dependencies);
+
+            return { status: 'success' as const, changes };
           } catch (error) {
             if (error instanceof InsufficientPermissionsError) {
               throw error;
@@ -311,5 +318,65 @@ export class State {
     return Object.fromEntries(
       Array.from(this.streamsByName).map(([key, stream]) => [key, stream.toPrintable()])
     );
+  }
+
+  /**
+   * Generates OTEL collector configuration from all wired streams
+   * and stores it in .otel-pipeline-config index for the OTEL collector
+   * elasticpipeline extension to pick up
+   */
+  private async updateOtelConfig(dependencies: StateDependencies): Promise<void> {
+    try {
+      // Collect all wired stream definitions
+      const wiredStreams = this.all()
+        .map((stream) => stream.definition)
+        .filter((definition): definition is Streams.WiredStream.Definition =>
+          Streams.WiredStream.Definition.is(definition)
+        );
+
+      if (wiredStreams.length === 0) {
+        dependencies.logger.debug('No wired streams found, skipping OTEL config generation');
+        return;
+      }
+
+      // Generate OTEL collector configuration from all wired streams
+      const otelConfig = convertToOtelConfig(wiredStreams, {
+        receiverType: 'otlp',
+        includeDebugExporter: false,
+      });
+
+      // Store in .otel-pipeline-config index
+      await dependencies.scopedClusterClient.asCurrentUser.index({
+        index: '.otel-pipeline-config',
+        id: 'elastic-streams-pipeline',
+        document: {
+          pipeline_id: 'elastic-streams-pipeline',
+          agent: {
+            environment: 'production',
+            cluster: 'default',
+            labels: {
+              source: 'elastic-streams',
+            },
+          },
+          config: otelConfig,
+          metadata: {
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            created_by: 'system',
+            version: 1,
+            enabled: true,
+            priority: 100,
+          },
+        },
+        refresh: 'wait_for',
+      });
+
+      dependencies.logger.info(
+        `Successfully generated and stored OTEL collector config for ${wiredStreams.length} wired streams`
+      );
+    } catch (error) {
+      // Log error but don't fail the state change
+      dependencies.logger.error(`Failed to update OTEL collector config: ${error.message}`, error);
+    }
   }
 }
