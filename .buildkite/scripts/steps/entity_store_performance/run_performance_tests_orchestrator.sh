@@ -57,6 +57,43 @@ rm -rf "$SECURITY_DOCS_GEN_DIR"
 git clone https://github.com/elastic/security-documents-generator.git "$SECURITY_DOCS_GEN_DIR"
 cd "$SECURITY_DOCS_GEN_DIR"
 
+# Setup Node.js version for security-documents-generator
+echo "--- Setup Node.js for security-documents-generator"
+
+# Install nvm if not available
+export NVM_DIR="$HOME/.nvm"
+if [ ! -s "$NVM_DIR/nvm.sh" ]; then
+  echo "Installing nvm..."
+  mkdir -p "$NVM_DIR"
+  # Fetch the latest nvm version tag from GitHub
+  NVM_VERSION=$(curl -s https://api.github.com/repos/nvm-sh/nvm/releases/latest | jq -r '.tag_name // "v0.39.7"')
+  echo "Installing nvm version: $NVM_VERSION"
+  curl -o- "https://raw.githubusercontent.com/nvm-sh/nvm/${NVM_VERSION}/install.sh" | bash
+fi
+
+# Load nvm
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+
+# Detect and install required Node.js version
+if [ -f ".nvmrc" ]; then
+  echo "Found .nvmrc file"
+  nvm install
+  nvm use
+elif [ -f "package.json" ]; then
+  # Extract version from package.json engines.node
+  NODE_VERSION=$(jq -r '.engines.node // empty' package.json 2>/dev/null | sed -E 's/^[^0-9]*([0-9]+\.[0-9]+\.[0-9]+).*/\1/' | head -1)
+  if [ -n "$NODE_VERSION" ]; then
+    echo "Found Node.js version requirement in package.json: $NODE_VERSION"
+    nvm install "$NODE_VERSION"
+    nvm use "$NODE_VERSION"
+  else
+    echo "No Node.js version specified in package.json engines.node"
+  fi
+fi
+
+echo "Node.js version: $(node --version)"
+
 # Install dependencies
 echo "--- Install dependencies"
 yarn install
