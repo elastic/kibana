@@ -44,9 +44,15 @@ test.describe('Stream data routing - editing routing rules', { tag: ['@ess', '@s
 
     // Verify success
     const routingRule = page.getByTestId('routingRule-logs.edit-test');
-    await expect(routingRule.getByTestId('streamsAppConditionDisplayField')).toContainText('service.name');
-    await expect(routingRule.getByTestId('streamsAppConditionDisplayOperator')).toContainText('equals');
-    await expect(routingRule.getByTestId('streamsAppConditionDisplayValue')).toContainText('updated-service');
+    await expect(routingRule.getByTestId('streamsAppConditionDisplayField')).toContainText(
+      'service.name'
+    );
+    await expect(routingRule.getByTestId('streamsAppConditionDisplayOperator')).toContainText(
+      'equals'
+    );
+    await expect(routingRule.getByTestId('streamsAppConditionDisplayValue')).toContainText(
+      'updated-service'
+    );
   });
 
   test('should cancel editing routing rule', async ({ page, pageObjects }) => {
@@ -58,9 +64,15 @@ test.describe('Stream data routing - editing routing rules', { tag: ['@ess', '@s
 
     // Verify success
     const routingRule = page.getByTestId('routingRule-logs.edit-test');
-    await expect(routingRule.getByTestId('streamsAppConditionDisplayField')).toContainText('service.name');
-    await expect(routingRule.getByTestId('streamsAppConditionDisplayOperator')).toContainText('equals');
-    await expect(routingRule.getByTestId('streamsAppConditionDisplayValue')).toContainText('test-service');
+    await expect(routingRule.getByTestId('streamsAppConditionDisplayField')).toContainText(
+      'service.name'
+    );
+    await expect(routingRule.getByTestId('streamsAppConditionDisplayOperator')).toContainText(
+      'equals'
+    );
+    await expect(routingRule.getByTestId('streamsAppConditionDisplayValue')).toContainText(
+      'test-service'
+    );
   });
 
   test('should switch between editing different rules', async ({ page, pageObjects }) => {
