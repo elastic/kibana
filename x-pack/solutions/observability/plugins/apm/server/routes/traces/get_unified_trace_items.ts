@@ -7,7 +7,7 @@
 
 import type { Sort } from '@elastic/elasticsearch/lib/api/types';
 import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
-import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import type { APMConfig } from '../..';
@@ -154,28 +154,27 @@ export async function getUnifiedTraceItems({
   return {
     traceItems: unifiedTraceItems.hits.hits
       .map((hit) => {
-        const event = unflattenKnownApmEventFields(hit.fields, fields);
-        const apmDuration = event.span?.duration?.us || event.transaction?.duration?.us;
-        const id = event.span?.id || event.transaction?.id;
-        if (!id) {
+        const event = accessKnownApmEventFields(hit.fields, fields);
+        const apmDuration = event[SPAN_DURATION] ?? event[TRANSACTION_DURATION];
+        const id = event[SPAN_ID] ?? event[TRANSACTION_ID];
+        const name = event[SPAN_NAME] ?? event[TRANSACTION_NAME];
+
+        if (!id || !name) {
           return undefined;
         }
 
         const docErrorCount = errorCountByDocId[id] || 0;
+        const statusCode = event[STATUS_CODE];
         return {
-          id: event.span?.id ?? event.transaction?.id,
-          timestampUs: event.timestamp?.us ?? toMicroseconds(event[AT_TIMESTAMP]),
-          name: event.span?.name ?? event.transaction?.name,
-          traceId: event.trace.id,
-          duration: resolveDuration(apmDuration, event.duration),
-          hasError:
-            docErrorCount > 0 ||
-            (event.status?.code && Array.isArray(event.status.code)
-              ? event.status.code[0] === 'Error'
-              : false),
-          parentId: event.parent?.id,
-          serviceName: event.service.name,
-        } as TraceItem;
+          id,
+          name,
+          timestampUs: event[TIMESTAMP_US] ?? toMicroseconds(event[AT_TIMESTAMP]),
+          traceId: event[TRACE_ID],
+          duration: resolveDuration(apmDuration, event[DURATION]),
+          hasError: docErrorCount > 0 || statusCode === 'Error',
+          parentId: event[PARENT_ID],
+          serviceName: event['service.name'],
+        } satisfies TraceItem;
       })
       .filter((_) => _) as TraceItem[],
     unifiedTraceErrors,
