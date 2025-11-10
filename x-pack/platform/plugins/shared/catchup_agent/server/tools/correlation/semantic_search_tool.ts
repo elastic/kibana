@@ -10,7 +10,6 @@ import { ToolType } from '@kbn/onechat-common';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import { createErrorResult } from '@kbn/onechat-server';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { getPluginServices } from '../../services/service_locator';
 
 const semanticSearchSchema = z.object({
@@ -29,7 +28,7 @@ const semanticSearchSchema = z.object({
 
 export const semanticSearchTool = (): BuiltinToolDefinition<typeof semanticSearchSchema> => {
   return {
-    id: 'platform.catchup.correlation.semantic_search',
+    id: 'hackathon.catchup.correlation.semantic_search',
     type: ToolType.builtin,
     description: `Uses semantic search with embeddings (ELSER/E5) and hybrid search (RRF) to find related content across Security, Observability, Slack, and GitHub sources.
 
@@ -190,6 +189,3 @@ This tool combines:
     tags: ['correlation', 'semantic-search', 'hybrid-search'],
   };
 };
-
-
-

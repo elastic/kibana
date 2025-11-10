@@ -1,5 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the "Elastic License
  * 2.0"; you may not use this file except in compliance with the Elastic License
  * 2.0.
@@ -121,14 +128,16 @@ function simplifyToolResult(toolResults: any[]): any {
   }
 
   if (Array.isArray(source.channelMessages)) {
-    simplified.channelMessages = source.channelMessages.slice(0, MAX_SLACK_MESSAGES).map((m: any) => ({
-      text: m.text || m.message, // Preserve full text for correlation
-      message: m.message || m.text, // Support both field names
-      channel: m.channel,
-      permalink: m.permalink,
-      timestamp: m.timestamp,
-      user: m.user || m.username || m.user_name,
-    }));
+    simplified.channelMessages = source.channelMessages
+      .slice(0, MAX_SLACK_MESSAGES)
+      .map((m: any) => ({
+        text: m.text || m.message, // Preserve full text for correlation
+        message: m.message || m.text, // Support both field names
+        channel: m.channel,
+        permalink: m.permalink,
+        timestamp: m.timestamp,
+        user: m.user || m.username || m.user_name,
+      }));
     if (source.channelMessages.length > MAX_SLACK_MESSAGES) {
       simplified.channelMessages_truncated = true;
       simplified.total_channelMessages = source.channelMessages.length;
@@ -170,17 +179,17 @@ export const workflowSecuritySummaryTool = (): BuiltinToolDefinition<
   typeof workflowSecuritySummarySchema
 > => {
   return {
-    id: 'platform.catchup.workflow.security.summary',
+    id: 'hackathon.catchup.workflow.security.summary',
     type: ToolType.builtin,
     description: `Simplified security summary tool optimized for workflow execution.
     Wraps the original security summary tool and simplifies responses to avoid storage issues.
-    Use this tool in workflows instead of platform.catchup.security.summary.`,
+    Use this tool in workflows instead of hackathon.catchup.security.summary.`,
     schema: workflowSecuritySummarySchema,
     handler: async ({ start, end }, { runner, logger }) => {
       try {
         // Call the original tool
         const originalResult = await runner.runTool({
-          toolId: 'platform.catchup.security.summary',
+          toolId: 'hackathon.catchup.security.summary',
           toolParams: { start, end },
         });
 
@@ -295,17 +304,17 @@ const workflowSlackSchema = z.object({
 
 export const workflowSlackTool = (): BuiltinToolDefinition<typeof workflowSlackSchema> => {
   return {
-    id: 'platform.catchup.workflow.external.slack',
+    id: 'hackathon.catchup.workflow.external.slack',
     type: ToolType.builtin,
     description: `Simplified Slack tool optimized for workflow execution.
     Wraps the original Slack tool and simplifies responses to avoid storage issues.
-    Use this tool in workflows instead of platform.catchup.external.slack.`,
+    Use this tool in workflows instead of hackathon.catchup.external.slack.`,
     schema: workflowSlackSchema,
     handler: async ({ since, keywords, includeDMs }, { runner, logger }) => {
       try {
         // Call the original tool
         const originalResult = await runner.runTool({
-          toolId: 'platform.catchup.external.slack',
+          toolId: 'hackathon.catchup.external.slack',
           toolParams: { since, keywords, includeDMs },
         });
 
@@ -381,17 +390,17 @@ export const workflowCorrelationEngineTool = (): BuiltinToolDefinition<
   typeof workflowCorrelationEngineSchema
 > => {
   return {
-    id: 'platform.catchup.workflow.correlation.engine',
+    id: 'hackathon.catchup.workflow.correlation.engine',
     type: ToolType.builtin,
     description: `Simplified correlation engine tool optimized for workflow execution.
     Wraps the original correlation engine tool and stringifies responses to avoid storage issues.
-    Use this tool in workflows instead of platform.catchup.correlation.engine.`,
+    Use this tool in workflows instead of hackathon.catchup.correlation.engine.`,
     schema: workflowCorrelationEngineSchema,
     handler: async ({ results, entities }, { runner, logger }) => {
       try {
         // Call the original tool
         const originalResult = await runner.runTool({
-          toolId: 'platform.catchup.correlation.engine',
+          toolId: 'hackathon.catchup.correlation.engine',
           toolParams: { results, entities },
         });
 
@@ -539,17 +548,17 @@ const workflowRerankSchema = z.object({
 
 export const workflowRerankTool = (): BuiltinToolDefinition<typeof workflowRerankSchema> => {
   return {
-    id: 'platform.catchup.workflow.prioritization.rerank',
+    id: 'hackathon.catchup.workflow.prioritization.rerank',
     type: ToolType.builtin,
     description: `Simplified rerank tool optimized for workflow execution.
     Wraps the original rerank tool and stringifies responses to avoid storage issues.
-    Use this tool in workflows instead of platform.catchup.prioritization.rerank.`,
+    Use this tool in workflows instead of hackathon.catchup.prioritization.rerank.`,
     schema: workflowRerankSchema,
     handler: async ({ items, query, limit, inferenceId, textField }, { runner, logger }) => {
       try {
         // Call the original tool
         const originalResult = await runner.runTool({
-          toolId: 'platform.catchup.prioritization.rerank',
+          toolId: 'hackathon.catchup.prioritization.rerank',
           toolParams: { items, query, limit, inferenceId, textField },
         });
 
@@ -608,9 +617,7 @@ export const workflowRerankTool = (): BuiltinToolDefinition<typeof workflowReran
  * Wraps the original tool and stringifies the response
  */
 const workflowSummaryGeneratorSchema = z.object({
-  correlatedData: z
-    .record(z.unknown())
-    .describe('Correlated data from correlation engine'),
+  correlatedData: z.record(z.unknown()).describe('Correlated data from correlation engine'),
   format: z
     .enum(['markdown', 'json'])
     .optional()
@@ -621,25 +628,37 @@ const workflowSummaryGeneratorSchema = z.object({
 export const workflowSummaryGeneratorTool = (): BuiltinToolDefinition<
   typeof workflowSummaryGeneratorSchema
 > => {
-  const toolId = 'platform.catchup.workflow.summary.generator';
+  const toolId = 'hackathon.catchup.workflow.summary.generator';
   return {
     id: toolId,
     type: ToolType.builtin,
     description: `Simplified summary generator tool optimized for workflow execution.
     Wraps the original summary generator tool and stringifies responses to avoid storage issues.
-    Use this tool in workflows instead of platform.catchup.summary.generator.`,
+    Use this tool in workflows instead of hackathon.catchup.summary.generator.`,
     schema: workflowSummaryGeneratorSchema,
     handler: async ({ correlatedData, format = 'markdown' }, { runner, logger }) => {
-      logger.info(`==> Workflow Summary Generator [${toolId}]: Handler INVOKED with format: ${format}`);
-      logger.info(`==> Workflow Summary Generator [${toolId}]: correlatedData type: ${typeof correlatedData}, keys: ${correlatedData ? Object.keys(correlatedData).join(', ') : 'null'}`);
+      logger.info(
+        `==> Workflow Summary Generator [${toolId}]: Handler INVOKED with format: ${format}`
+      );
+      logger.info(
+        `==> Workflow Summary Generator [${toolId}]: correlatedData type: ${typeof correlatedData}, keys: ${
+          correlatedData ? Object.keys(correlatedData).join(', ') : 'null'
+        }`
+      );
       try {
         // Call the original tool
-        logger.info(`==> Workflow Summary Generator: Calling base tool platform.catchup.summary.generator`);
+        logger.info(
+          `==> Workflow Summary Generator: Calling base tool hackathon.catchup.summary.generator`
+        );
         const originalResult = await runner.runTool({
-          toolId: 'platform.catchup.summary.generator',
+          toolId: 'hackathon.catchup.summary.generator',
           toolParams: { correlatedData, format },
         });
-        logger.info(`==> Workflow Summary Generator: Base tool returned ${originalResult.results?.length || 0} results`);
+        logger.info(
+          `==> Workflow Summary Generator: Base tool returned ${
+            originalResult.results?.length || 0
+          } results`
+        );
 
         // Check for error results
         const errorResult = originalResult.results.find(
@@ -671,20 +690,41 @@ export const workflowSummaryGeneratorTool = (): BuiltinToolDefinition<
         // Log summary info for debugging
         const summaryText = originalData.summary || '';
         const summaryLength = typeof summaryText === 'string' ? summaryText.length : 0;
-        const hasCorrelations = typeof summaryText === 'string' && summaryText.includes('## Correlations');
-        const correlationsCount = typeof summaryText === 'string' ? (summaryText.match(/## Correlations/g) || []).length : 0;
-        logger.info(`==> Workflow Summary Generator: CRITICAL CHECK - Summary length: ${summaryLength}, Has Correlations section: ${hasCorrelations}, Correlations header count: ${correlationsCount}`);
+        const hasCorrelations =
+          typeof summaryText === 'string' && summaryText.includes('## Correlations');
+        const correlationsCount =
+          typeof summaryText === 'string'
+            ? (summaryText.match(/## Correlations/g) || []).length
+            : 0;
+        logger.info(
+          `==> Workflow Summary Generator: CRITICAL CHECK - Summary length: ${summaryLength}, Has Correlations section: ${hasCorrelations}, Correlations header count: ${correlationsCount}`
+        );
         if (hasCorrelations) {
           const correlationsIndex = summaryText.indexOf('## Correlations');
-          const correlationsPreview = summaryText.substring(correlationsIndex, Math.min(correlationsIndex + 500, summaryText.length));
-          logger.info(`==> Workflow Summary Generator: CRITICAL - Correlations section found at index ${correlationsIndex}`);
-          logger.info(`==> Workflow Summary Generator: CRITICAL - Correlations section preview (500 chars): ${correlationsPreview}`);
+          const correlationsPreview = summaryText.substring(
+            correlationsIndex,
+            Math.min(correlationsIndex + 500, summaryText.length)
+          );
+          logger.info(
+            `==> Workflow Summary Generator: CRITICAL - Correlations section found at index ${correlationsIndex}`
+          );
+          logger.info(
+            `==> Workflow Summary Generator: CRITICAL - Correlations section preview (500 chars): ${correlationsPreview}`
+          );
           // Log the end of the summary to verify it's complete
           const summaryEnd = summaryText.substring(Math.max(0, summaryText.length - 300));
-          logger.info(`==> Workflow Summary Generator: Summary ends with (last 300 chars): ${summaryEnd}`);
+          logger.info(
+            `==> Workflow Summary Generator: Summary ends with (last 300 chars): ${summaryEnd}`
+          );
         } else {
-          logger.error(`==> Workflow Summary Generator: ERROR - Correlations section NOT found in summary! Summary length: ${summaryLength}`);
-          logger.error(`==> Workflow Summary Generator: ERROR - Summary ends with: ${summaryText.substring(Math.max(0, summaryText.length - 200))}`);
+          logger.error(
+            `==> Workflow Summary Generator: ERROR - Correlations section NOT found in summary! Summary length: ${summaryLength}`
+          );
+          logger.error(
+            `==> Workflow Summary Generator: ERROR - Summary ends with: ${summaryText.substring(
+              Math.max(0, summaryText.length - 200)
+            )}`
+          );
         }
 
         // CRITICAL: Return the summary as a direct string in the data field
@@ -692,7 +732,9 @@ export const workflowSummaryGeneratorTool = (): BuiltinToolDefinition<
         // The workflow execution engine stores this in a text field, so we return it directly
         // as a string rather than nested in an object to avoid any truncation issues
         if (typeof summaryText === 'string' && summaryText.length > 0) {
-          logger.info(`==> Workflow Summary Generator: Returning summary as direct string, length: ${summaryText.length}`);
+          logger.info(
+            `==> Workflow Summary Generator: Returning summary as direct string, length: ${summaryText.length}`
+          );
           return {
             results: [
               {
@@ -705,7 +747,9 @@ export const workflowSummaryGeneratorTool = (): BuiltinToolDefinition<
 
         // Fallback: return as JSON string if summary is not a string
         const stringifiedData = JSON.stringify(originalData);
-        logger.info(`==> Workflow Summary Generator: Stringified data length: ${stringifiedData.length} characters`);
+        logger.info(
+          `==> Workflow Summary Generator: Stringified data length: ${stringifiedData.length} characters`
+        );
         return {
           results: [
             {

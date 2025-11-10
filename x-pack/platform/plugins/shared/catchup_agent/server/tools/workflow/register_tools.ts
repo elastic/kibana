@@ -1,5 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the "Elastic License
  * 2.0"; you may not use this file except in compliance with the Elastic License
  * 2.0.
@@ -26,26 +33,28 @@ export function registerWorkflowTools(toolsSetup: ToolsSetup, logger: Logger): v
 
     toolsSetup.register(workflowSecuritySummaryTool());
     logger.info(
-      'Registered workflow security summary tool (platform.catchup.workflow.security.summary)'
+      'Registered workflow security summary tool (hackathon.catchup.workflow.security.summary)'
     );
 
     toolsSetup.register(workflowSlackTool());
-    logger.info('Registered workflow Slack tool (platform.catchup.workflow.external.slack)');
+    logger.info('Registered workflow Slack tool (hackathon.catchup.workflow.external.slack)');
 
     toolsSetup.register(workflowCorrelationEngineTool());
     logger.info(
-      'Registered workflow correlation engine tool (platform.catchup.workflow.correlation.engine)'
+      'Registered workflow correlation engine tool (hackathon.catchup.workflow.correlation.engine)'
     );
 
     toolsSetup.register(workflowRerankTool());
     logger.info(
-      'Registered workflow rerank tool (platform.catchup.workflow.prioritization.rerank)'
+      'Registered workflow rerank tool (hackathon.catchup.workflow.prioritization.rerank)'
     );
 
     const summaryTool = workflowSummaryGeneratorTool();
     toolsSetup.register(summaryTool);
     logger.info(
-      `Registered workflow summary generator tool (${summaryTool.id}) - handler present: ${!!summaryTool.handler}`
+      `Registered workflow summary generator tool (${
+        summaryTool.id
+      }) - handler present: ${!!summaryTool.handler}`
     );
 
     logger.info('Workflow-specific simplified tools registered successfully');

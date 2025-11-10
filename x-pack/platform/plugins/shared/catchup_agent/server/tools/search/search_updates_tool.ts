@@ -18,10 +18,10 @@ const searchUpdatesSchema = z.object({
 
 export const searchUpdatesTool = (): BuiltinToolDefinition<typeof searchUpdatesSchema> => {
   return {
-    id: 'platform.catchup.search.summary',
+    id: 'hackathon.catchup.search.summary',
     type: ToolType.builtin,
     description: `Summarizes Search and indexing changes from Elasticsearch since a given timestamp.
-    
+
 The 'since' parameter should be an ISO datetime string (e.g., '2025-01-15T00:00:00Z').
 Returns analytics data including CTR changes and top queries.`,
     schema: searchUpdatesSchema,
@@ -39,7 +39,7 @@ Returns analytics data including CTR changes and top queries.`,
         // Handle case where index might not exist
         const query = `FROM .ent-search-analytics-*
 | WHERE @timestamp > TO_DATETIME("${since}")
-| STATS 
+| STATS
     avg_ctr = AVG(click_through_rate),
     total_queries = COUNT(*)
 | LIMIT 1`;

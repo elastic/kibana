@@ -30,10 +30,10 @@ const ruleChangesSchema = z.object({
 
 export const ruleChangesTool = (): BuiltinToolDefinition<typeof ruleChangesSchema> => {
   return {
-    id: 'platform.catchup.security.rule_changes',
+    id: 'hackathon.catchup.security.rule_changes',
     type: ToolType.builtin,
     description: `Tracks recently edited detection rules from Elastic Security since a given timestamp.
-    
+
 The 'start' parameter should be an ISO datetime string (e.g., '2025-01-15T00:00:00Z' or '01-15T00:00:00Z'). If no year is specified, the current year is assumed.
 The optional 'end' parameter allows filtering to a specific date range. For example, to get rules updated on November 2, use start="11-02T00:00:00Z" and end="11-03T00:00:00Z" (current year will be used).
 Returns rules with name, updated_by, enabled status, and updated_at fields.`,

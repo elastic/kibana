@@ -35,7 +35,7 @@ const slackDigestSchema = z.object({
 
 export const slackDigestTool = (): BuiltinToolDefinition<typeof slackDigestSchema> => {
   return {
-    id: 'platform.catchup.external.slack',
+    id: 'hackathon.catchup.external.slack',
     type: ToolType.builtin,
     description: `Fetches messages and threads from Slack since a given timestamp.
 

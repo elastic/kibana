@@ -39,7 +39,7 @@ const gmailDigestSchema = z.object({
 
 export const gmailDigestTool = (): BuiltinToolDefinition<typeof gmailDigestSchema> => {
   return {
-    id: 'platform.catchup.external.gmail',
+    id: 'hackathon.catchup.external.gmail',
     type: ToolType.builtin,
     description: `Fetches and summarizes email conversations from Gmail since a given timestamp.
 

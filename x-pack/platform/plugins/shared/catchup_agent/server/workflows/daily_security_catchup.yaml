@@ -39,7 +39,7 @@ steps:
       method: 'POST'
       path: '/api/agent_builder/tools/_execute'
       body:
-        tool_id: 'platform.catchup.workflow.security.summary'
+        tool_id: 'hackathon.catchup.workflow.security.summary'
         tool_params:
           start: '{{ inputs.start }}'
           end: '{{ inputs.end }}'
@@ -50,7 +50,7 @@ steps:
       method: 'POST'
       path: '/api/agent_builder/tools/_execute'
       body:
-        tool_id: 'platform.catchup.workflow.external.slack'
+        tool_id: 'hackathon.catchup.workflow.external.slack'
         tool_params:
           since: '{{ inputs.start }}'
           keywords: []
@@ -62,7 +62,7 @@ steps:
       method: 'POST'
       path: '/api/agent_builder/tools/_execute'
       body:
-        tool_id: 'platform.catchup.workflow.correlation.engine'
+        tool_id: 'hackathon.catchup.workflow.correlation.engine'
         tool_params:
           results:
             security_summary: '{{ steps.fetch_security_summary.output }}'
@@ -75,7 +75,7 @@ steps:
       method: 'POST'
       path: '/api/agent_builder/tools/_execute'
       body:
-        tool_id: 'platform.catchup.workflow.prioritization.rerank'
+        tool_id: 'hackathon.catchup.workflow.prioritization.rerank'
         tool_params:
           items: '{{ steps.correlate_events.output }}'
           query: 'security incidents critical alerts'
@@ -87,7 +87,7 @@ steps:
       method: 'POST'
       path: '/api/agent_builder/tools/_execute'
       body:
-        tool_id: 'platform.catchup.workflow.summary.generator'
+        tool_id: 'hackathon.catchup.workflow.summary.generator'
         tool_params:
           correlatedData:
             security_summary: '{{ steps.fetch_security_summary.output }}'

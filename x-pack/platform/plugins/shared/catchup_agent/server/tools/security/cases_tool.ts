@@ -76,10 +76,10 @@ const casesSchema = z.object({
 
 export const casesTool = (): BuiltinToolDefinition<typeof casesSchema> => {
   return {
-    id: 'platform.catchup.cases',
+    id: 'hackathon.catchup.cases',
     type: ToolType.builtin,
     description: `Retrieves recently updated cases from Elastic Security, Observability, or Stack Management since a given timestamp.
-    
+
 The 'start' parameter should be an ISO datetime string (e.g., '2025-01-15T00:00:00Z' or '01-15T00:00:00Z'). If no year is specified, the current year is assumed.
 The optional 'end' parameter allows filtering to a specific date range. For example, to get cases updated on November 2, use start="11-02T00:00:00Z" and end="11-03T00:00:00Z" (current year will be used).
 The optional 'owner' parameter filters cases by owner: "cases" (Stack Management/General Cases), "observability" (Observability), or "securitySolution" (Elastic Security). If not provided, returns all cases the user has access to.

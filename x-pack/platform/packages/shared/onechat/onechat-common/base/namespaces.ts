@@ -11,7 +11,7 @@
  */
 export const internalNamespaces = {
   platformCore: 'platform.core',
-  platformCatchup: 'platform.catchup',
+  platformCatchup: 'hackathon.catchup',
 } as const;
 
 /**

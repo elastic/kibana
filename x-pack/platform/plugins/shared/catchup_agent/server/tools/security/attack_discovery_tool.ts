@@ -31,10 +31,10 @@ const attackDiscoverySchema = z.object({
 
 export const attackDiscoveryTool = (): BuiltinToolDefinition<typeof attackDiscoverySchema> => {
   return {
-    id: 'platform.catchup.security.attack_discoveries',
+    id: 'hackathon.catchup.security.attack_discoveries',
     type: ToolType.builtin,
     description: `Retrieves attack discoveries from Elastic Security. **Use this tool when the user asks specifically about "attack discoveries", "attack discovery", "AI-generated security insights", or "how many attack discoveries"**. This tool is specialized for attack discovery queries and should be preferred over the general security summary tool when the user's question is specifically about attack discoveries.
-    
+
 The 'start' parameter should be an ISO datetime string (e.g., '2025-01-15T00:00:00Z' or '01-15T00:00:00Z'). If no year is specified, the current year is assumed.
 The optional 'end' parameter allows filtering to a specific date range. For example, to get discoveries created on November 2, use start="11-02T00:00:00Z" and end="11-03T00:00:00Z" (current year will be used).
 Returns attack discoveries with metadata including attack name, severity, status, alert IDs, and related cases.`,

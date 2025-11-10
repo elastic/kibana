@@ -248,10 +248,10 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
     }
 
     const result = await response.json();
-    
+
     // SPECIAL HANDLING: If this is a tool execution that returns a summary as a direct string,
     // extract it from the results structure to avoid truncation issues in the UI
-    // This handles the case where platform.catchup.workflow.summary.generator returns
+    // This handles the case where hackathon.catchup.workflow.summary.generator returns
     // {results: [{type: "other", data: "markdown string"}]}
     // We extract the data field if it's a string to preserve the full content
     if (
@@ -266,7 +266,7 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
       // Return the data directly as a string to avoid nested structure truncation
       return result.results[0].data;
     }
-    
+
     return result;
   }
 }

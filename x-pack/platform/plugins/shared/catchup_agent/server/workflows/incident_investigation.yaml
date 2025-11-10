@@ -1,6 +1,6 @@
 version: '1'
 name: 'Incident Investigation'
-description: 'Comprehensive incident investigation workflow that fetches security alert/case details, searches observability alerts, Slack messages, GitHub PRs, and correlates all sources using entity extraction.'
+description: 'Comprehensive incident investigation workflow that fetches security and observability data (alerts, cases, attack discoveries), extracts entities (host.name, user.name, service.name) from the incident, and correlates those entities across observability, security, and Slack.'
 enabled: true
 tags:
   - security
@@ -11,39 +11,85 @@ triggers:
 inputs:
   - type: string
     name: incident_id
-    description: 'Security alert ID or case ID to investigate'
+    description: 'Incident ID to investigate. Can be: security case ID, observability case ID, security alert ID, observability alert ID, or attack discovery ID. The workflow will fetch all data types and search for the specific incident across all sources.'
     required: true
-  - type: string
-    name: service_name
-    description: 'Optional service name to search for related issues'
-    required: false
   - type: string
     name: start
     description: 'ISO datetime string for the start time (defaults to 7 days ago)'
     required: false
     default: '__DYNAMIC_7D_AGO__'
+  - type: string
+    name: end
+    description: 'ISO datetime string for the end time (defaults to now)'
+    required: false
+    default: '__DYNAMIC_NOW__'
 steps:
-  - name: fetch_security_alert_case
-    type: kibana.request
+  - name: calculate_time_range
+    type: console
     with:
-      method: 'POST'
-      path: '/api/agent_builder/tools/_execute'
-      body:
-        tool_id: 'platform.catchup.security.detections'
-        tool_params:
-          start: '{{ inputs.start }}'
-          alert_id: '{{ inputs.incident_id }}'
+      message: 'Calculating time range for incident investigation'
 
-  - name: search_observability_alerts
+  - name: fetch_incident
     type: kibana.request
     with:
       method: 'POST'
       path: '/api/agent_builder/tools/_execute'
       body:
-        tool_id: 'platform.catchup.observability.summary'
+        tool_id: 'hackathon.catchup.incident.fetch'
+        tool_params:
+          incident_id: '{{ inputs.incident_id }}'
+
+  - name: fetch_security_data
+    type: kibana.request
+    with:
+      method: 'POST'
+      path: '/api/agent_builder/tools/_execute'
+      body:
+        tool_id: 'hackathon.catchup.workflow.security.summary'
         tool_params:
           start: '{{ inputs.start }}'
-          service_name: '{{ inputs.service_name }}'
+          end: '{{ inputs.end }}'
+
+  - name: fetch_observability_data
+    type: kibana.request
+    with:
+      method: 'POST'
+      path: '/api/agent_builder/tools/_execute'
+      body:
+        tool_id: 'hackathon.catchup.observability.summary'
+        tool_params:
+          start: '{{ inputs.start }}'
+          end: '{{ inputs.end }}'
+
+  - name: extract_entities_from_incident
+    type: kibana.request
+    with:
+      method: 'POST'
+      path: '/api/agent_builder/tools/_execute'
+      body:
+        tool_id: 'hackathon.catchup.correlation.entity_extraction'
+        tool_params:
+          data:
+            incident: '{{ steps.fetch_incident.output }}'
+            security_summary: '{{ steps.fetch_security_data.output }}'
+            observability: '{{ steps.fetch_observability_data.output }}'
+            incident_id: '{{ inputs.incident_id }}'
+
+  - name: search_alerts_by_entities
+    type: kibana.request
+    with:
+      method: 'POST'
+      path: '/api/agent_builder/tools/_execute'
+      body:
+        tool_id: 'hackathon.catchup.alerts.by_entities'
+        tool_params:
+          start: '{{ inputs.start }}'
+          end: '{{ inputs.end }}'
+          service_name: '{{ steps.extract_entities_from_incident.output.entities.service_names[0] }}'
+          user_name: '{{ steps.extract_entities_from_incident.output.entities.user_names[0] }}'
+          host_name: '{{ steps.extract_entities_from_incident.output.entities.host_names[0] }}'
+          alert_types: ['both']
+          limit: 100
 
   - name: search_slack_for_mentions
     type: kibana.request
@@ -51,40 +97,21 @@ steps:
       method: 'POST'
       path: '/api/agent_builder/tools/_execute'
       body:
-        tool_id: 'platform.catchup.external.slack'
+        tool_id: 'hackathon.catchup.workflow.external.slack'
         tool_params:
           since: '{{ inputs.start }}'
           keywords:
             - '{{ inputs.incident_id }}'
-            - '{{ inputs.service_name }}'
+            - '{{ steps.extract_entities_from_incident.output.entities.service_names[0] }}'
+            - '{{ steps.extract_entities_from_incident.output.entities.service_names[1] }}'
+            - '{{ steps.extract_entities_from_incident.output.entities.service_names[2] }}'
+            - '{{ steps.extract_entities_from_incident.output.entities.host_names[0] }}'
+            - '{{ steps.extract_entities_from_incident.output.entities.host_names[1] }}'
+            - '{{ steps.extract_entities_from_incident.output.entities.host_names[2] }}'
+            - '{{ steps.extract_entities_from_incident.output.entities.user_names[0] }}'
+            - '{{ steps.extract_entities_from_incident.output.entities.source_ips[0] }}'
+            - '{{ steps.extract_entities_from_incident.output.entities.destination_ips[0] }}'
           includeDMs: false
-
-  - name: search_github
-    type: kibana.request
-    with:
-      method: 'POST'
-      path: '/api/agent_builder/tools/_execute'
-      body:
-        tool_id: 'platform.catchup.external.github'
-        tool_params:
-          since: '{{ inputs.start }}'
-          keywords:
-            - '{{ inputs.incident_id }}'
-            - '{{ inputs.service_name }}'
-
-  - name: extract_entities
-    type: kibana.request
-    with:
-      method: 'POST'
-      path: '/api/agent_builder/tools/_execute'
-      body:
-        tool_id: 'platform.catchup.correlation.entity_extraction'
-        tool_params:
-          data:
-            security: '{{ steps.fetch_security_alert_case.output }}'
-            observability: '{{ steps.search_observability_alerts.output }}'
-            slack: '{{ steps.search_slack_for_mentions.output }}'
-            github: '{{ steps.search_github.output }}'
 
   - name: correlate_all_sources
     type: kibana.request
@@ -92,15 +119,26 @@ steps:
       method: 'POST'
       path: '/api/agent_builder/tools/_execute'
       body:
-        tool_id: 'platform.catchup.correlation.engine'
+        tool_id: 'hackathon.catchup.workflow.correlation.engine'
         tool_params:
           results:
-            security_summary: '{{ steps.fetch_security_alert_case.output }}'
-            observability: '{{ steps.search_observability_alerts.output }}'
+            security_summary: '{{ steps.fetch_security_data.output }}'
+            observability: '{{ steps.fetch_observability_data.output }}'
             external:
               slack: '{{ steps.search_slack_for_mentions.output }}'
-              github: '{{ steps.search_github.output }}'
-          entities: '{{ steps.extract_entities.output }}'
+          entities: '{{ steps.extract_entities_from_incident.output }}'
+
+  - name: prioritize_correlations
+    type: kibana.request
+    with:
+      method: 'POST'
+      path: '/api/agent_builder/tools/_execute'
+      body:
+        tool_id: 'hackathon.catchup.workflow.prioritization.rerank'
+        tool_params:
+          items: '{{ steps.correlate_all_sources.output }}'
+          query: 'security incident investigation critical alerts observability cases attack discoveries'
+          limit: 20
 
   - name: generate_investigation_report
     type: kibana.request
@@ -108,13 +146,14 @@ steps:
       method: 'POST'
       path: '/api/agent_builder/tools/_execute'
       body:
-        tool_id: 'platform.catchup.summary.generator'
+        tool_id: 'hackathon.catchup.workflow.summary.generator'
         tool_params:
           correlatedData:
-            security_summary: '{{ steps.fetch_security_alert_case.output }}'
-            observability: '{{ steps.search_observability_alerts.output }}'
+            security_summary: '{{ steps.fetch_security_data.output }}'
+            observability: '{{ steps.fetch_observability_data.output }}'
             external:
               slack: '{{ steps.search_slack_for_mentions.output }}'
-              github: '{{ steps.search_github.output }}'
-            correlations: '{{ steps.correlate_all_sources.output }}'
+            correlations: '{{ steps.prioritize_correlations.output }}'
+            entities: '{{ steps.extract_entities_from_incident.output }}'
+            related_alerts: '{{ steps.search_alerts_by_entities.output }}'
           format: 'markdown'

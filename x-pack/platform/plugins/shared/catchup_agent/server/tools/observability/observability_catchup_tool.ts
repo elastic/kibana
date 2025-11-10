@@ -29,10 +29,10 @@ export const observabilityCatchupTool = (): BuiltinToolDefinition<
   typeof observabilityCatchupSchema
 > => {
   return {
-    id: 'platform.catchup.observability.summary',
+    id: 'hackathon.catchup.observability.summary',
     type: ToolType.builtin,
-    description: `Orchestrates all Observability CatchUp tools to provide a comprehensive observability summary. Use this tool ONLY when the user asks for a general observability summary or catch-up. Do NOT use this tool when the user asks about specific observability topics like "alerts" or "cases" - use the specific tool instead (e.g., platform.catchup.observability.alerts).
-    
+    description: `Orchestrates all Observability CatchUp tools to provide a comprehensive observability summary. Use this tool ONLY when the user asks for a general observability summary or catch-up. Do NOT use this tool when the user asks about specific observability topics like "alerts" or "cases" - use the specific tool instead (e.g., hackathon.catchup.observability.alerts).
+
 The 'start' parameter should be an ISO datetime string (e.g., '2025-01-15T00:00:00Z' or '01-15T00:00:00Z'). If no year is specified, the current year is assumed.
 The optional 'end' parameter allows filtering to a specific date range. For example, to get updates from November 2, use start="11-02T00:00:00Z" and end="11-03T00:00:00Z" (current year will be used).
 This tool calls all observability sub-tools in parallel and aggregates their results.`,
@@ -55,11 +55,11 @@ This tool calls all observability sub-tools in parallel and aggregates their res
         // Call all observability sub-tools in parallel
         const [alerts, cases] = await Promise.all([
           runner.runTool({
-            toolId: 'platform.catchup.observability.alerts',
+            toolId: 'hackathon.catchup.observability.alerts',
             toolParams,
           }),
           runner.runTool({
-            toolId: 'platform.catchup.cases',
+            toolId: 'hackathon.catchup.cases',
             toolParams: casesToolParams,
           }),
         ]);
@@ -115,4 +115,3 @@ This tool calls all observability sub-tools in parallel and aggregates their res
     tags: ['observability', 'orchestrator'],
   };
 };
-

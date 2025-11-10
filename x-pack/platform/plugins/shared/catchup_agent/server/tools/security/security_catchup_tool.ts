@@ -25,10 +25,10 @@ const securityCatchupSchema = z.object({
 
 export const securityCatchupTool = (): BuiltinToolDefinition<typeof securityCatchupSchema> => {
   return {
-    id: 'platform.catchup.security.summary',
+    id: 'hackathon.catchup.security.summary',
     type: ToolType.builtin,
-    description: `Orchestrates all Security CatchUp tools to provide a comprehensive security summary. Use this tool ONLY when the user asks for a general security summary or catch-up. Do NOT use this tool when the user asks about specific security topics like "attack discoveries", "detections", "cases", or "rules" - use the specific tool instead (e.g., platform.catchup.security.attack_discoveries).
-    
+    description: `Orchestrates all Security CatchUp tools to provide a comprehensive security summary. Use this tool ONLY when the user asks for a general security summary or catch-up. Do NOT use this tool when the user asks about specific security topics like "attack discoveries", "detections", "cases", or "rules" - use the specific tool instead (e.g., hackathon.catchup.security.attack_discoveries).
+
 The 'start' parameter should be an ISO datetime string (e.g., '2025-01-15T00:00:00Z').
 The optional 'end' parameter allows filtering to a specific date range. For example, to get updates from November 2, 2025, use start="2025-11-02T00:00:00Z" and end="2025-11-03T00:00:00Z".
 This tool calls all security sub-tools in parallel and aggregates their results.`,
@@ -49,19 +49,19 @@ This tool calls all security sub-tools in parallel and aggregates their results.
         // Call all security sub-tools in parallel
         const [attackDiscoveries, detections, cases, ruleChanges] = await Promise.all([
           runner.runTool({
-            toolId: 'platform.catchup.security.attack_discoveries',
+            toolId: 'hackathon.catchup.security.attack_discoveries',
             toolParams,
           }),
           runner.runTool({
-            toolId: 'platform.catchup.security.detections',
+            toolId: 'hackathon.catchup.security.detections',
             toolParams,
           }),
           runner.runTool({
-            toolId: 'platform.catchup.cases',
+            toolId: 'hackathon.catchup.cases',
             toolParams: casesToolParams,
           }),
           runner.runTool({
-            toolId: 'platform.catchup.security.rule_changes',
+            toolId: 'hackathon.catchup.security.rule_changes',
             toolParams,
           }),
         ]);

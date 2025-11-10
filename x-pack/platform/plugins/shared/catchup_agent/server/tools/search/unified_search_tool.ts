@@ -10,7 +10,6 @@ import { ToolType } from '@kbn/onechat-common';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import { createErrorResult } from '@kbn/onechat-server';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { getPluginServices } from '../../services/service_locator';
 
 const unifiedSearchSchema = z.object({
@@ -30,7 +29,7 @@ const unifiedSearchSchema = z.object({
 
 export const unifiedSearchTool = (): BuiltinToolDefinition<typeof unifiedSearchSchema> => {
   return {
-    id: 'platform.catchup.search.unified_search',
+    id: 'hackathon.catchup.search.unified_search',
     type: ToolType.builtin,
     description: `Searches across Security, Observability, Search, and External sources using hybrid search (RRF).
 
@@ -158,6 +157,3 @@ This tool demonstrates Elastic's "Better Together" story by:
     tags: ['search', 'unified', 'hybrid-search', 'better-together'],
   };
 };
-
-
-

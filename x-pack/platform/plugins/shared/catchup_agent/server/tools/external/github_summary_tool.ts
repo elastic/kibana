@@ -37,10 +37,10 @@ const githubSummarySchema = z.object({
 
 export const githubSummaryTool = (): BuiltinToolDefinition<typeof githubSummarySchema> => {
   return {
-    id: 'platform.catchup.external.github',
+    id: 'hackathon.catchup.external.github',
     type: ToolType.builtin,
     description: `Summarizes pull requests, issues, and commits from GitHub since a given timestamp.
-    
+
 **Authentication:** GitHub Personal Access Token (PAT) or OAuth token with 'repo' scope is required.
 The token can be provided either:
 - Via 'token' parameter (for testing)

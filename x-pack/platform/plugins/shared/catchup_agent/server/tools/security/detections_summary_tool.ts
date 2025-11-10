@@ -32,10 +32,10 @@ const detectionsSummarySchema = z.object({
 
 export const detectionsSummaryTool = (): BuiltinToolDefinition<typeof detectionsSummarySchema> => {
   return {
-    id: 'platform.catchup.security.detections',
+    id: 'hackathon.catchup.security.detections',
     type: ToolType.builtin,
     description: `Summarizes detection alerts from Elastic Security since a given timestamp.
-    
+
 The 'start' parameter should be an ISO datetime string (e.g., '2025-01-15T00:00:00Z' or '01-15T00:00:00Z'). If no year is specified, the current year is assumed.
 The optional 'end' parameter allows filtering to a specific date range. For example, to get detections from November 2, use start="11-02T00:00:00Z" and end="11-03T00:00:00Z" (current year will be used).
 Returns aggregated statistics including total count, counts by severity, and sample alerts with entity fields (host.name, user.name, source.ip, destination.ip, etc.) prioritized by severity.`,
@@ -219,7 +219,7 @@ Returns aggregated statistics including total count, counts by severity, and sam
 | EVAL severity = COALESCE(kibana.alert.severity, "unknown")
 | SORT severity DESC, @timestamp DESC
 | LIMIT 20
-| KEEP 
+| KEEP
     @timestamp,
     severity,
     kibana.alert.rule.name,
@@ -303,31 +303,17 @@ Returns aggregated statistics including total count, counts by severity, and sam
                   // Extract entity information from sample alerts for easy access
                   entities: {
                     hosts: Array.from(
-                      new Set(
-                        sampleAlerts
-                          .map((a: any) => a['host.name'])
-                          .filter((h: any) => h)
-                      )
+                      new Set(sampleAlerts.map((a: any) => a['host.name']).filter((h: any) => h))
                     ).slice(0, 10),
                     users: Array.from(
-                      new Set(
-                        sampleAlerts
-                          .map((a: any) => a['user.name'])
-                          .filter((u: any) => u)
-                      )
+                      new Set(sampleAlerts.map((a: any) => a['user.name']).filter((u: any) => u))
                     ).slice(0, 10),
                     source_ips: Array.from(
-                      new Set(
-                        sampleAlerts
-                          .map((a: any) => a['source.ip'])
-                          .filter((ip: any) => ip)
-                      )
+                      new Set(sampleAlerts.map((a: any) => a['source.ip']).filter((ip: any) => ip))
                     ).slice(0, 10),
                     destination_ips: Array.from(
                       new Set(
-                        sampleAlerts
-                          .map((a: any) => a['destination.ip'])
-                          .filter((ip: any) => ip)
+                        sampleAlerts.map((a: any) => a['destination.ip']).filter((ip: any) => ip)
                       )
                     ).slice(0, 10),
                   },

@@ -12,6 +12,8 @@ import { detectionsSummaryTool } from './detections_summary_tool';
 import { casesTool } from './cases_tool';
 import { ruleChangesTool } from './rule_changes_tool';
 import { securityCatchupTool } from './security_catchup_tool';
+import { alertsByEntitiesTool } from './alerts_by_entities_tool';
+import { fetchIncidentTool } from './fetch_incident_tool';
 
 export function registerSecurityTools(toolsSetup: ToolsSetup, logger: Logger): void {
   logger.info('Registering Security CatchUp tools...');
@@ -23,6 +25,8 @@ export function registerSecurityTools(toolsSetup: ToolsSetup, logger: Logger): v
       casesTool(),
       ruleChangesTool(),
       securityCatchupTool(),
+      alertsByEntitiesTool(),
+      fetchIncidentTool(),
     ];
 
     for (const tool of tools) {

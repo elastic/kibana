@@ -10,7 +10,6 @@ import { ToolType } from '@kbn/onechat-common';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import { createErrorResult } from '@kbn/onechat-server';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { getPluginServices } from '../../services/service_locator';
 
 const rerankSchema = z.object({
@@ -103,7 +102,7 @@ const rerankSchema = z.object({
 
 export const rerankTool = (): BuiltinToolDefinition<typeof rerankSchema> => {
   return {
-    id: 'platform.catchup.prioritization.rerank',
+    id: 'hackathon.catchup.prioritization.rerank',
     type: ToolType.builtin,
     description: `Uses Elastic's RERANK command to prioritize items by relevance to a query.
 

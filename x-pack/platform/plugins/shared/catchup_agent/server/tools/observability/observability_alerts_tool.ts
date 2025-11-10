@@ -31,10 +31,10 @@ export const observabilityAlertsTool = (): BuiltinToolDefinition<
   typeof observabilityAlertsSchema
 > => {
   return {
-    id: 'platform.catchup.observability.alerts',
+    id: 'hackathon.catchup.observability.alerts',
     type: ToolType.builtin,
     description: `Queries observability alerts from Elastic Observability since a given timestamp. **Use this tool when the user asks specifically about observability alerts.** This tool provides aggregated statistics including open/resolved alerts and total alerts.
-    
+
 The 'start' parameter should be an ISO datetime string (e.g., '2025-01-15T00:00:00Z' or '01-15T00:00:00Z'). If no year is specified, the current year is assumed.
 The optional 'end' parameter allows filtering to a specific date range. For example, to get alerts from November 2, use start="11-02T00:00:00Z" and end="11-03T00:00:00Z" (current year will be used).
 Returns aggregated statistics including open/resolved alerts and total alerts.`,
@@ -91,14 +91,17 @@ Returns aggregated statistics including open/resolved alerts and total alerts.`,
         const query = `FROM .alerts-observability.*,.alerts-default.*,.alerts-stack.*,.alerts-ml.*,.alerts-dataset.*
 | WHERE ${dateFilter}
 | EVAL workflow_status_str = TO_STRING(kibana.alert.workflow_status)
-| STATS 
+| STATS
     open_alerts = SUM(CASE(workflow_status_str == "open", 1, 0)),
     resolved_alerts = SUM(CASE(workflow_status_str == "closed", 1, 0)),
     total_alerts = COUNT(*)
 | LIMIT 1`;
 
         // eslint-disable-next-line no-console
-        console.log('[CatchUp Agent] Observability alerts tool - Normalized start:', normalizedStart);
+        console.log(
+          '[CatchUp Agent] Observability alerts tool - Normalized start:',
+          normalizedStart
+        );
         // eslint-disable-next-line no-console
         console.log(
           '[CatchUp Agent] Observability alerts tool - Normalized end:',
@@ -119,13 +122,21 @@ Returns aggregated statistics including open/resolved alerts and total alerts.`,
             esClient: esClient.asCurrentUser,
           });
           // eslint-disable-next-line no-console
-          console.log('[CatchUp Agent] Observability alerts tool - ES|QL query executed successfully');
+          console.log(
+            '[CatchUp Agent] Observability alerts tool - ES|QL query executed successfully'
+          );
           // eslint-disable-next-line no-console
-          console.log('[CatchUp Agent] Observability alerts tool - Result columns:', result.columns);
+          console.log(
+            '[CatchUp Agent] Observability alerts tool - Result columns:',
+            result.columns
+          );
           // eslint-disable-next-line no-console
           console.log('[CatchUp Agent] Observability alerts tool - Result values:', result.values);
           // eslint-disable-next-line no-console
-          console.log('[CatchUp Agent] Observability alerts tool - Rows returned:', result.values.length);
+          console.log(
+            '[CatchUp Agent] Observability alerts tool - Rows returned:',
+            result.values.length
+          );
           logger.debug(
             `[CatchUp Agent] ES|QL query executed successfully. Rows returned: ${result.values.length}`
           );
@@ -139,7 +150,10 @@ Returns aggregated statistics including open/resolved alerts and total alerts.`,
           console.error('[CatchUp Agent] Observability alerts tool - Failed query:', query);
           if (esqlError.stack) {
             // eslint-disable-next-line no-console
-            console.error('[CatchUp Agent] Observability alerts tool - Error stack:', esqlError.stack);
+            console.error(
+              '[CatchUp Agent] Observability alerts tool - Error stack:',
+              esqlError.stack
+            );
           }
           logger.error(`[CatchUp Agent] ES|QL query failed: ${esqlError.message}`);
           logger.debug(`[CatchUp Agent] ES|QL query that failed: ${query}`);
@@ -200,4 +214,3 @@ Returns aggregated statistics including open/resolved alerts and total alerts.`,
     tags: ['observability', 'alerts'],
   };
 };
-

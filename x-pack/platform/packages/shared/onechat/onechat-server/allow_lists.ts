@@ -11,41 +11,43 @@
  */
 export const AGENT_BUILDER_BUILTIN_TOOLS: string[] = [
   // Security CatchUp tools
-  'platform.catchup.security.attack_discoveries',
-  'platform.catchup.security.detections',
-  'platform.catchup.cases',
-  'platform.catchup.security.rule_changes',
-  'platform.catchup.security.summary',
+  'hackathon.catchup.security.attack_discoveries',
+  'hackathon.catchup.security.detections',
+  'hackathon.catchup.cases',
+  'hackathon.catchup.security.rule_changes',
+  'hackathon.catchup.security.summary',
+  'hackathon.catchup.alerts.by_entities',
+  'hackathon.catchup.incident.fetch',
   // Observability CatchUp tools
-  'platform.catchup.observability.alerts',
-  'platform.catchup.observability.summary',
+  'hackathon.catchup.observability.alerts',
+  'hackathon.catchup.observability.summary',
   // Search CatchUp tools
-  'platform.catchup.search.summary',
-  'platform.catchup.search.unified_search',
+  'hackathon.catchup.search.summary',
+  'hackathon.catchup.search.unified_search',
   // External CatchUp tools
-  'platform.catchup.external.slack',
-  'platform.catchup.external.github',
-  'platform.catchup.external.gmail',
+  'hackathon.catchup.external.slack',
+  'hackathon.catchup.external.github',
+  'hackathon.catchup.external.gmail',
   // Correlation and Summary tools
-  'platform.catchup.correlation.engine',
-  'platform.catchup.correlation.entity_extraction',
-  'platform.catchup.correlation.semantic_search',
-  'platform.catchup.summary.generator',
+  'hackathon.catchup.correlation.engine',
+  'hackathon.catchup.correlation.entity_extraction',
+  'hackathon.catchup.correlation.semantic_search',
+  'hackathon.catchup.summary.generator',
   // Prioritization tools
-  'platform.catchup.prioritization.rerank',
+  'hackathon.catchup.prioritization.rerank',
   // Workflow-specific simplified tools (optimized for workflow execution)
-  'platform.catchup.workflow.security.summary',
-  'platform.catchup.workflow.external.slack',
-  'platform.catchup.workflow.correlation.engine',
-  'platform.catchup.workflow.prioritization.rerank',
-  'platform.catchup.workflow.summary.generator',
+  'hackathon.catchup.workflow.security.summary',
+  'hackathon.catchup.workflow.external.slack',
+  'hackathon.catchup.workflow.correlation.engine',
+  'hackathon.catchup.workflow.prioritization.rerank',
+  'hackathon.catchup.workflow.summary.generator',
 ];
 
 /**
  * This is a manually maintained list of all built-in agents registered in Agent Builder.
  * The intention is to force a code review from the Agent Builder team when any team adds a new agent.
  */
-export const AGENT_BUILDER_BUILTIN_AGENTS: string[] = ['platform.catchup.agent'];
+export const AGENT_BUILDER_BUILTIN_AGENTS: string[] = ['hackathon.catchup.agent'];
 
 export const isAllowedBuiltinTool = (toolName: string) => {
   return AGENT_BUILDER_BUILTIN_TOOLS.includes(toolName);

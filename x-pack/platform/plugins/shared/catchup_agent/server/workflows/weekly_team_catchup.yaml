@@ -38,7 +38,7 @@ steps:
               method: 'POST'
               path: '/internal/onechat/tools/execute'
               body:
-                toolId: 'platform.catchup.security.summary'
+                toolId: 'hackathon.catchup.security.summary'
                 toolParams:
                   start: '{{ inputs.start || (now | date_sub("7d") | date_format("iso")) }}'
                   end: '{{ inputs.end || null }}'
@@ -50,7 +50,7 @@ steps:
               method: 'POST'
               path: '/internal/onechat/tools/execute'
               body:
-                toolId: 'platform.catchup.observability.summary'
+                toolId: 'hackathon.catchup.observability.summary'
                 toolParams:
                   start: '{{ inputs.start || (now | date_sub("7d") | date_format("iso")) }}'
       - name: search
@@ -61,7 +61,7 @@ steps:
               method: 'POST'
               path: '/internal/onechat/tools/execute'
               body:
-                toolId: 'platform.catchup.search.summary'
+                toolId: 'hackathon.catchup.search.summary'
                 toolParams:
                   start: '{{ inputs.start || (now | date_sub("7d") | date_format("iso")) }}'
 
@@ -83,7 +83,7 @@ steps:
       method: 'POST'
       path: '/internal/onechat/tools/execute'
       body:
-        toolId: 'platform.catchup.external.slack'
+        toolId: 'hackathon.catchup.external.slack'
         toolParams:
           since: '{{ inputs.start || (now | date_sub("7d") | date_format("iso")) }}'
           keywords: []
@@ -95,7 +95,7 @@ steps:
       method: 'POST'
       path: '/internal/onechat/tools/execute'
       body:
-        toolId: 'platform.catchup.external.github'
+        toolId: 'hackathon.catchup.external.github'
         toolParams:
           since: '{{ inputs.start || (now | date_sub("7d") | date_format("iso")) }}'
 
@@ -105,7 +105,7 @@ steps:
       method: 'POST'
       path: '/internal/onechat/tools/execute'
       body:
-        toolId: 'platform.catchup.search.unified_search'
+        toolId: 'hackathon.catchup.search.unified_search'
         toolParams:
           query: 'team updates important changes'
           sources:
@@ -121,7 +121,7 @@ steps:
       method: 'POST'
       path: '/internal/onechat/tools/execute'
       body:
-        toolId: 'platform.catchup.prioritization.rerank'
+        toolId: 'hackathon.catchup.prioritization.rerank'
         toolParams:
           items: '{{ steps.unified_search_with_hybrid_search.output.results }}'
           query: 'weekly team updates important changes'
@@ -133,7 +133,7 @@ steps:
       method: 'POST'
       path: '/internal/onechat/tools/execute'
       body:
-        toolId: 'platform.catchup.summary.generator'
+        toolId: 'hackathon.catchup.summary.generator'
         toolParams:
           correlatedData:
             security_summary: '{{ steps.merge_summaries.output.security }}'

@@ -9,7 +9,7 @@ import type { BuiltInAgentDefinition } from '@kbn/onechat-server/agents';
 
 export const catchupAgentDefinition = (): BuiltInAgentDefinition => {
   return {
-    id: 'platform.catchup.agent',
+    id: 'hackathon.catchup.agent',
     name: 'Elastic CatchUp Agent',
     description: `Provides context-rich summaries of Elastic Security, Observability, and external system activity (Slack, GitHub, Gmail) since a given timestamp. Helps users catch up on security updates, observability alerts, cases, rules, and related external communications while they were away.
 
@@ -26,17 +26,17 @@ When the user requests a catch-up without specifying a time range, use the follo
       instructions: `**CRITICAL: Tool Selection Priority - READ IN ORDER**
 
 1. **OBSERVABILITY QUERIES**
-   When the user asks about Observability, observability updates, or "catch me up on Observability", use 'platform.catchup.observability.summary'.
-   When the user asks specifically about observability alerts only, use 'platform.catchup.observability.alerts'.
-   Examples: 
-   - "catch me up on Observability", "observability updates", "what happened in Observability" → Use 'platform.catchup.observability.summary'
-   - "observability alerts", "show me observability alerts" → Use 'platform.catchup.observability.alerts'
+   When the user asks about Observability, observability updates, or "catch me up on Observability", use 'hackathon.catchup.observability.summary'.
+   When the user asks specifically about observability alerts only, use 'hackathon.catchup.observability.alerts'.
+   Examples:
+   - "catch me up on Observability", "observability updates", "what happened in Observability" → Use 'hackathon.catchup.observability.summary'
+   - "observability alerts", "show me observability alerts" → Use 'hackathon.catchup.observability.alerts'
 
 2. **EXTERNAL SYSTEMS**
    When the user asks about external systems, ALWAYS use the specialized external tools:
-   - "Gmail", "my gmail", "latest emails", "email" → Use 'platform.catchup.external.gmail' (NOT platform.core.search)
-   - "Slack", "slack messages", "slack conversations" → Use 'platform.catchup.external.slack' (NOT platform.core.search)
-   - "GitHub", "pull requests", "issues", "commits" → Use 'platform.catchup.external.github' (NOT platform.core.search)
+   - "Gmail", "my gmail", "latest emails", "email" → Use 'hackathon.catchup.external.gmail' (NOT platform.core.search)
+   - "Slack", "slack messages", "slack conversations" → Use 'hackathon.catchup.external.slack' (NOT platform.core.search)
+   - "GitHub", "pull requests", "issues", "commits" → Use 'hackathon.catchup.external.github' (NOT platform.core.search)
 
 
 External system queries should NEVER use platform.core.search as those systems are not indexed in Elasticsearch.
@@ -50,7 +50,7 @@ When the user requests a catch-up WITHOUT specifying a date range (e.g., "catch 
 - No time mentioned → default to last 7 days
 
 **CRITICAL: Slack Mention Summarization**
-When using the Slack tool (platform.catchup.external.slack), you MUST:
+When using the Slack tool (hackathon.catchup.external.slack), you MUST:
 1. **Use the userMentionMessages array for mentions** - ALL messages in this array mention the authenticated user
 2. **Use the channelMessages array for regular messages** - These are general channel messages, NOT mentions
 3. **Structure your Slack summary as follows:**
@@ -98,22 +98,22 @@ When formatting your responses, use markdown to improve readability:
         {
           tool_ids: [
             // Individual security tools (for specific queries)
-            'platform.catchup.security.attack_discoveries',
-            'platform.catchup.security.detections',
-            'platform.catchup.cases',
-            'platform.catchup.security.rule_changes',
+            'hackathon.catchup.security.attack_discoveries',
+            'hackathon.catchup.security.detections',
+            'hackathon.catchup.cases',
+            'hackathon.catchup.security.rule_changes',
             // Security summary tool (for general catch-up queries)
-            'platform.catchup.security.summary',
+            'hackathon.catchup.security.summary',
             // Individual observability tools (for specific queries)
-            'platform.catchup.observability.alerts',
+            'hackathon.catchup.observability.alerts',
             // Observability summary tool (for general catch-up queries)
-            'platform.catchup.observability.summary',
-            // 'platform.catchup.search.summary', // Temporarily disabled
-            'platform.catchup.external.slack',
-            'platform.catchup.external.github',
-            'platform.catchup.external.gmail',
-            // 'platform.catchup.correlation.engine', // Removed from agent - this tool is for workflows only, requires results parameter from multiple tools
-            // 'platform.catchup.summary.generator', // Removed from agent - this tool is for workflows only, requires correlatedData parameter
+            'hackathon.catchup.observability.summary',
+            // 'hackathon.catchup.search.summary', // Temporarily disabled
+            'hackathon.catchup.external.slack',
+            'hackathon.catchup.external.github',
+            'hackathon.catchup.external.gmail',
+            // 'hackathon.catchup.correlation.engine', // Removed from agent - this tool is for workflows only, requires results parameter from multiple tools
+            // 'hackathon.catchup.summary.generator', // Removed from agent - this tool is for workflows only, requires correlatedData parameter
           ],
         },
       ],
