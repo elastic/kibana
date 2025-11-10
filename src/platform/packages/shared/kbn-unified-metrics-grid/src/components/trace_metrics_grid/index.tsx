@@ -52,7 +52,7 @@ function TraceMetricsGrid({
 
   const toolbar = useMemo(
     () => ({
-      leftSide: [renderToggleActions()],
+      toggleActions: renderToggleActions(),
     }),
     [renderToggleActions]
   );
