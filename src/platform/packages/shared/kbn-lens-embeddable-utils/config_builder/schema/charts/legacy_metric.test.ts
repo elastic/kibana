@@ -62,42 +62,27 @@ describe('Legacy Metric Schema', () => {
     });
 
     it('validates metric with color configuration', () => {
-      const colorByValueConfig = [
-        {
-          type: 'dynamic',
-          range: 'absolute',
-          steps: [
-            { type: 'from', from: 0, color: '#blue' },
-            { type: 'to', to: 100, color: '#red' },
-          ],
-        },
-        {
-          type: 'dynamic',
-          range: 'percentage',
-          min: 0,
-          max: 100,
-          steps: [
-            { type: 'from', from: 0, color: '#blue' },
-            { type: 'to', to: 100, color: '#red' },
-          ],
-        },
-      ];
-      for (const color of colorByValueConfig) {
-        const input = {
-          ...baseLegacyMetricConfig,
-          metric: {
-            operation: 'average',
-            field: 'temperature',
-            alignments: { labels: 'top', value: 'left' },
-            size: 'l',
-            apply_color_to: 'value',
-            color,
+      const input = {
+        ...baseLegacyMetricConfig,
+        metric: {
+          operation: 'average',
+          field: 'temperature',
+          alignments: { labels: 'top', value: 'left' },
+          size: 'l',
+          apply_color_to: 'value',
+          color: {
+            type: 'dynamic',
+            range: 'absolute',
+            steps: [
+              { type: 'from', from: 0, color: '#blue' },
+              { type: 'to', to: 100, color: '#red' },
+            ],
           },
-        };
+        },
+      };
 
-        const validated = legacyMetricStateSchema.validate(input);
-        expect(validated).toEqual({ ...defaultValues, ...input });
-      }
+      const validated = legacyMetricStateSchema.validate(input);
+      expect(validated).toEqual({ ...defaultValues, ...input });
     });
   });
 
@@ -150,9 +135,30 @@ describe('Legacy Metric Schema', () => {
           apply_color_to: 'invalid',
           color: {
             type: 'dynamic',
+            range: 'absolute',
+            steps: [
+              { type: 'from', from: 0, color: '#blue' },
+              { type: 'to', to: 100, color: '#red' },
+            ],
+          },
+        },
+      };
+
+      expect(() => legacyMetricStateSchema.validate(input)).toThrow();
+    });
+
+    it('throws when color by value is not absolute', () => {
+      const input = {
+        ...baseLegacyMetricConfig,
+        metric: {
+          operation: 'sum',
+          field: 'sales',
+          apply_color_to: 'invalid',
+          color: {
+            type: 'dynamic',
+            range: 'percentage',
             min: 0,
             max: 100,
-            range: 'absolute',
             steps: [
               { type: 'from', from: 0, color: '#blue' },
               { type: 'to', to: 100, color: '#red' },

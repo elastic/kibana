@@ -18,6 +18,7 @@ import { SearchSessionsMgmtAPI } from '../lib/api';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { SessionsClient } from '../../sessions_client';
 import { userEvent } from '@testing-library/user-event';
+import { getSearchSessionEBTManagerMock } from '../../mocks';
 
 const setup = () => {
   const mockCoreSetup = coreMock.createSetup();
@@ -58,6 +59,8 @@ const setup = () => {
         kibanaVersion={kibanaVersion}
         locators={mockShareStart.url.locators}
         usageCollector={mockSearchUsageCollector}
+        ebtManager={getSearchSessionEBTManagerMock()}
+        trackingProps={{ openedFrom: 'test' }}
       />
     </IntlProvider>
   );

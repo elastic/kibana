@@ -28,6 +28,7 @@ import type { ChatService } from '../services/chat';
 import type { AttachmentServiceStart } from '../services/attachments';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
+import { AGENT_SOCKET_TIMEOUT_MS } from './utils';
 
 export function registerChatRoutes({
   router,
@@ -104,6 +105,27 @@ export function registerChatRoutes({
         }
       )
     ),
+    browser_api_tools: schema.maybe(
+      schema.arrayOf(
+        schema.object({
+          id: schema.string({
+            meta: { description: 'Unique identifier for the browser API tool.' },
+          }),
+          description: schema.string({
+            meta: { description: 'Description of what the browser API tool does.' },
+          }),
+          schema: schema.any({
+            meta: { description: 'JSON Schema defining the tool parameters (JsonSchema7Type).' },
+          }),
+        }),
+        {
+          meta: {
+            description:
+              'Optional browser API tools to be registered as LLM tools with browser.* namespace. These tools execute on the client side.',
+          },
+        }
+      )
+    ),
   });
 
   const validateAttachments = async ({
@@ -144,6 +166,7 @@ export function registerChatRoutes({
       conversation_id: conversationId,
       input,
       capabilities,
+      browser_api_tools: browserApiTools,
     } = payload;
 
     return chatService.converse({
@@ -151,6 +174,7 @@ export function registerChatRoutes({
       connectorId,
       conversationId,
       capabilities,
+      browserApiTools,
       abortSignal,
       nextInput: {
         message: input,
@@ -171,6 +195,9 @@ export function registerChatRoutes({
       description:
         'Send a message to an agent and receive a complete response. This synchronous endpoint waits for the agent to fully process your request before returning the final result. Use this for simple chat interactions where you need the complete response.',
       options: {
+        timeout: {
+          idleSocket: AGENT_SOCKET_TIMEOUT_MS,
+        },
         tags: ['oas-tag:agent builder'],
         availability: {
           stability: 'experimental',
@@ -190,7 +217,7 @@ export function registerChatRoutes({
       },
       wrapHandler(async (ctx, request, response) => {
         const { chat: chatService, attachments: attachmentsService } = getInternalServices();
-        const payload: ChatRequestBodyPayload = request.body;
+        const payload: ChatRequestBodyPayload = request.body as ChatRequestBodyPayload;
 
         const abortController = new AbortController();
         request.events.aborted$.subscribe(() => {
@@ -242,8 +269,135 @@ export function registerChatRoutes({
       access: 'public',
       summary: 'Send chat message (streaming)',
       description:
-        "Send a message to an agent and receive real-time streaming events. This asynchronous endpoint provides live updates as the agent processes your request, allowing you to see intermediate steps and progress. Use this for interactive experiences where you want to monitor the agent's thinking process.",
+        "Send a message to an agent and receive real-time streaming events. This asynchronous endpoint provides live updates as the agent processes your request, allowing you to see intermediate steps and progress. Use this for interactive experiences where you want to monitor the agent's thinking process.\n\n" +
+        '## Event types\n\n' +
+        'The endpoint emits Server-Sent Events (SSE) with the following custom event types:\n\n' +
+        '`conversation_id_set`\n\n' +
+        'Sets the conversation ID.\n\n' +
+        'Schema:\n' +
+        '```json\n' +
+        '{\n' +
+        '  "conversation_id": "uuid"\n' +
+        '}\n' +
+        '```\n\n' +
+        '---\n\n' +
+        '`conversation_created`\n\n' +
+        'Fires when a new conversation is persisted and assigned an ID.\n\n' +
+        'Schema:\n' +
+        '```json\n' +
+        '{\n' +
+        '  "conversation_id": "uuid",\n' +
+        '  "title": "conversation title"\n' +
+        '}\n' +
+        '```\n\n' +
+        '---\n\n' +
+        '`conversation_updated`\n\n' +
+        'Fires when a conversation is updated.\n\n' +
+        'Schema:\n' +
+        '```json\n' +
+        '{\n' +
+        '  "conversation_id": "uuid",\n' +
+        '  "title": "updated conversation title"\n' +
+        '}\n' +
+        '```\n\n' +
+        '---\n\n' +
+        '`reasoning`\n\n' +
+        'Handles reasoning-related data.\n\n' +
+        'Schema:\n' +
+        '```json\n' +
+        '{\n' +
+        '  "reasoning": "plain text reasoning content",\n' +
+        '  "transient": false\n' +
+        '}\n' +
+        '```\n\n' +
+        '---\n\n' +
+        '`tool_call`\n\n' +
+        'Triggers when a tool is invoked.\n\n' +
+        'Schema:\n' +
+        '```json\n' +
+        '{\n' +
+        '  "tool_call_id": "uuid",\n' +
+        '  "tool_id": "tool_name",\n' +
+        '  "params": {}\n' +
+        '}\n' +
+        '```\n\n' +
+        '---\n\n' +
+        '`tool_progress`\n\n' +
+        'Reports progress of a running tool.\n\n' +
+        'Schema:\n' +
+        '```json\n' +
+        '{\n' +
+        '  "tool_call_id": "uuid",\n' +
+        '  "message": "progress message"\n' +
+        '}\n' +
+        '```\n\n' +
+        '---\n\n' +
+        '`tool_result`\n\n' +
+        'Returns results from a completed tool call.\n\n' +
+        'Schema:\n' +
+        '```json\n' +
+        '{\n' +
+        '  "tool_call_id": "uuid",\n' +
+        '  "tool_id": "tool_name",\n' +
+        '  "results": []\n' +
+        '}\n' +
+        '```\n\n' +
+        '**Note:** `results` is an array of `ToolResult` objects.\n\n' +
+        '---\n\n' +
+        '`message_chunk`\n\n' +
+        'Streams partial text chunks.\n\n' +
+        'Schema:\n' +
+        '```json\n' +
+        '{\n' +
+        '  "message_id": "uuid",\n' +
+        '  "text_chunk": "partial text"\n' +
+        '}\n' +
+        '```\n\n' +
+        '---\n\n' +
+        '`message_complete`\n\n' +
+        'Indicates message stream is finished.\n\n' +
+        'Schema:\n' +
+        '```json\n' +
+        '{\n' +
+        '  "message_id": "uuid",\n' +
+        '  "message_content": "full text content of the message"\n' +
+        '}\n' +
+        '```\n\n' +
+        '---\n\n' +
+        '`thinking_complete`\n\n' +
+        'Marks the end of the thinking/reasoning phase.\n\n' +
+        'Schema:\n' +
+        '```json\n' +
+        '{\n' +
+        '  "time_to_first_token": 0\n' +
+        '}\n' +
+        '```\n\n' +
+        '**Note:** `time_to_first_token` is in milliseconds.\n\n' +
+        '---\n\n' +
+        '`round_complete`\n\n' +
+        'Marks end of one conversation round.\n\n' +
+        'Schema:\n' +
+        '```json\n' +
+        '{\n' +
+        '  "round": {}\n' +
+        '}\n' +
+        '```\n\n' +
+        '**Note:** `round` contains the full round json object.\n\n' +
+        '---\n\n' +
+        '## Event flow\n\n' +
+        'A typical conversation round emits events in this sequence:\n\n' +
+        '1. `reasoning` (potentially multiple, some transient)\n' +
+        '2. `tool_call` (if tools are used)\n' +
+        '3. `tool_progress` (zero or more progress updates)\n' +
+        '4. `tool_result` (when tool completes)\n' +
+        '5. `thinking_complete`\n' +
+        '6. `message_chunk` (multiple, as text streams)\n' +
+        '7. `message_complete`\n' +
+        '8. `round_complete`',
       options: {
+        timeout: {
+          idleSocket: AGENT_SOCKET_TIMEOUT_MS,
+        },
         tags: ['oas-tag:agent builder'],
         availability: {
           stability: 'experimental',
@@ -264,7 +418,7 @@ export function registerChatRoutes({
       wrapHandler(async (ctx, request, response) => {
         const [, { cloud }] = await coreSetup.getStartServices();
         const { chat: chatService, attachments: attachmentsService } = getInternalServices();
-        const payload: ChatRequestBodyPayload = request.body;
+        const payload: ChatRequestBodyPayload = request.body as ChatRequestBodyPayload;
 
         const abortController = new AbortController();
         request.events.aborted$.subscribe(() => {
