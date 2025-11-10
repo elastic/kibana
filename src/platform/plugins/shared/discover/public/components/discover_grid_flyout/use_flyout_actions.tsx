@@ -8,21 +8,28 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { FlyoutActionItem, FlyoutCustomization } from '../../customizations';
 import type { UseNavigationProps } from '../../hooks/use_navigation_props';
 import { useNavigationProps } from '../../hooks/use_navigation_props';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
+import { useRunWorkflowAction } from './use_run_workflow_action';
 
 interface UseFlyoutActionsParams extends UseNavigationProps {
   actions?: FlyoutCustomization['actions'];
+  hit: DataTableRecord;
 }
 
 export const useFlyoutActions = ({
   actions,
+  hit,
   ...props
 }: UseFlyoutActionsParams): { flyoutActions: FlyoutActionItem[] } => {
   const { dataView } = props;
   const { singleDocHref, contextViewHref, onOpenSingleDoc, onOpenContextView } =
     useNavigationProps(props);
+  const services = useDiscoverServices();
+  const runWorkflowAction = useRunWorkflowAction(hit, services);
 
   const {
     viewSingleDocument = { disabled: false },
@@ -57,6 +64,7 @@ export const useFlyoutActions = ({
           'Inspect documents that occurred before and after this document. Only pinned filters remain active in the Surrounding documents view.',
       }),
     },
+    runWorkflowAction,
     ...customActions,
   ];
 
