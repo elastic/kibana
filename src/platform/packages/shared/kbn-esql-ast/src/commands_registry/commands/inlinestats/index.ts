@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { columnsAfter } from './columns_after';
 import { autocomplete } from './autocomplete';
-import { validate } from '../stats/validate';
+import { validate } from './validate';
 import type { ICommandContext } from '../../types';
 import type { ICommandMethods } from '../../registry';
 
@@ -38,5 +38,9 @@ export const inlineStatsCommand = {
       '… | INLINE STATS sum(b) BY b',
       '… | INLINE STATS sum(b) BY b % 2',
     ],
+    subqueryRestrictions: {
+      hideInside: false,
+      hideOutside: true,
+    },
   },
 };

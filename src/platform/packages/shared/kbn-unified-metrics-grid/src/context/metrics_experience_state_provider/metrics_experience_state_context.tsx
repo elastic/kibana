@@ -32,33 +32,41 @@ export function MetricsExperienceStateProvider({ children }: { children: React.R
 
   const onDimensionsChange = useCallback(
     (nextDimensions: string[]) => {
+      setCurrentPage(0);
       setDimensions(nextDimensions);
-      const filteredValues =
-        nextDimensions.length === 0
-          ? []
-          : valueFilters.filter((v) => nextDimensions.includes(v.split(FIELD_VALUE_SEPARATOR)[0]));
-      setValueFilters(filteredValues);
+      setValueFilters((prevValueFilters) => {
+        if (nextDimensions.length === 0) {
+          return [];
+        }
+        return prevValueFilters.filter((v) =>
+          nextDimensions.includes(v.split(FIELD_VALUE_SEPARATOR)[0])
+        );
+      });
     },
-    [valueFilters, setValueFilters, setDimensions]
+    [setValueFilters, setCurrentPage, setDimensions]
   );
 
   const onValuesChange = useCallback(
-    (values: string[]) => setValueFilters(values),
-    [setValueFilters]
+    (values: string[]) => {
+      setCurrentPage(0);
+      setValueFilters(values);
+    },
+    [setValueFilters, setCurrentPage]
   );
 
   const onPageChange = useCallback((page: number) => setCurrentPage(page), [setCurrentPage]);
 
   const onSearchTermChange = useCallback(
     (term: string) => {
+      setCurrentPage(0);
       setSearchTerm(term);
     },
-    [setSearchTerm]
+    [setSearchTerm, setCurrentPage]
   );
 
   const onToggleFullscreen = useCallback(() => {
-    setIsFullscreen(!isFullscreen);
-  }, [isFullscreen, setIsFullscreen]);
+    setIsFullscreen((prev) => !prev);
+  }, [setIsFullscreen]);
 
   return (
     <MetricsExperienceStateContext.Provider
