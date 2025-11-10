@@ -34,7 +34,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Enforces the `object_src 'none'` directive in {{product.kibana}}'s Content Security Policy and introduces a new `csp.object_src` configuration option to control its behavior [#241029]({{kib-pull}}241029).
 
 **Machine Learning**:
-* Improves layout wrapping in Overview and Notifications {{product.machine-learning}} pages [#239113]({{kib-pull}}239113).
+* Improves layout wrapping in the **Overview** and **Notifications** tabs on the {{product.machine-learning}} Overview page [#239113]({{kib-pull}}239113).
 
 
 ### Fixes [kibana-9.2.1-fixes]
