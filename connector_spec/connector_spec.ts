@@ -34,6 +34,7 @@ import { z } from '@kbn/zod';
 import type { Logger } from '@kbn/core/server';
 import type { AxiosInstance } from 'axios';
 import { i18n } from '@kbn/i18n';
+import { withUIMeta, UISchemas } from './connector_spec_ui';
 
 // Re-export UI utilities for convenience
 export { withUIMeta, UISchemas } from './connector_spec_ui';
@@ -1365,162 +1366,66 @@ export interface Transformations {
 }
 
 // ============================================================================
-// VALIDATION
+// VALIDATION - Using Zod Refinements
 // ============================================================================
 
 /**
- * Validation configuration using pure Zod schemas
+ * Validation using pure Zod schemas with .refine() and .superRefine()
  *
- * WHY: Connector configuration and secrets must be validated before they're saved
- * and used. Validation prevents runtime errors, security issues, and user confusion.
+ * WHY (CR feedback): Zod is the single source of truth for validation AND UI derivation.
+ * No need for separate validation layer - framework uses zod.parse() directly.
  *
- * DESIGN PRINCIPLE: Use Zod's built-in refinements instead of custom validators.
- * This provides:
- * - Standard validation patterns
- * - Better TypeScript inference
- * - Simpler mental model (one validation approach)
- * - Reusable validation utilities
- *
- * MIGRATION: Custom validators should be converted to Zod refinements:
+ * DESIGN PRINCIPLE:
  * - Simple validation → .refine()
  * - Cross-field validation → .superRefine()
  * - Async validation → async .refine()
+ *
+ * @example URL allowlist validation
+ * ```typescript
+ * schema: z.object({
+ *   apiUrl: z.string().url().refine(
+ *     createUrlAllowlistRefine(configurationUtilities),
+ *     { message: "URL not in allowlist" }
+ *   )
+ * })
+ * ```
+ *
+ * @example Provider-specific validation
+ * ```typescript
+ * schema: z.object({
+ *   provider: z.enum(['openai', 'azure', 'other']),
+ *   apiKey: z.string().optional(),
+ *   azureEndpoint: z.string().optional()
+ * }).superRefine((data, ctx) => {
+ *   if (data.provider === 'azure' && !data.azureEndpoint) {
+ *     ctx.addIssue({
+ *       code: z.ZodIssueCode.custom,
+ *       path: ['azureEndpoint'],
+ *       message: "Azure endpoint required"
+ *     });
+ *   }
+ * })
+ * ```
+ *
+ * @example Certificate + Key validation
+ * ```typescript
+ * schema: z.object({
+ *   certificateData: z.string().optional(),
+ *   privateKeyData: z.string().optional()
+ * }).superRefine((data, ctx) => {
+ *   const hasCert = !!data.certificateData;
+ *   const hasKey = !!data.privateKeyData;
+ *   
+ *   if (hasCert !== hasKey) {
+ *     ctx.addIssue({
+ *       code: z.ZodIssueCode.custom,
+ *       path: hasCert ? ['privateKeyData'] : ['certificateData'],
+ *       message: "Certificate and private key must both be provided"
+ *     });
+ *   }
+ * })
+ * ```
  */
-export interface ValidationConfig {
-  /**
-   * Config schema with Zod refinements for validation
-   *
-   * USED BY: ALL connectors - required by framework
-   * REFERENCE: All connectors define config schemas
-   *
-   * WHY: Provides type-safe validation of configuration values at runtime.
-   * Use Zod's refinement methods for complex validation:
-   *
-   * @example URL allowlist validation
-   * ```typescript
-   * configSchema: z.object({
-   *   apiUrl: z.string().url().refine(
-   *     createUrlAllowlistRefine(configurationUtilities),
-   *     { message: "URL not in allowlist" }
-   *   )
-   * })
-   * ```
-   *
-   * @example Provider-specific validation
-   * ```typescript
-   * configSchema: z.object({
-   *   provider: z.enum(['openai', 'azure', 'other']),
-   *   apiKey: z.string().optional(),
-   *   azureEndpoint: z.string().optional()
-   * }).superRefine((config, ctx) => {
-   *   if (config.provider === 'azure' && !config.azureEndpoint) {
-   *     ctx.addIssue({
-   *       code: z.ZodIssueCode.custom,
-   *       path: ['azureEndpoint'],
-   *       message: "Azure endpoint required"
-   *     });
-   *   }
-   * })
-   * ```
-   *
-   * @example Async connectivity test
-   * ```typescript
-   * configSchema: z.object({
-   *   apiUrl: z.string().url(),
-   *   apiKey: z.string()
-   * }).refine(
-   *   async (config) => {
-   *     try {
-   *       await testConnection(config.apiUrl, config.apiKey);
-   *       return true;
-   *     } catch {
-   *       return false;
-   *     }
-   *   },
-   *   { message: "Cannot connect to API endpoint" }
-   * )
-   * ```
-   */
-  configSchema: z.ZodSchema;
-
-  /**
-   * Secrets schema with Zod refinements for validation
-   *
-   * USED BY: ALL connectors - required by framework
-   * REFERENCE: All connectors define secrets schemas
-   *
-   * WHY: Validates sensitive data (API keys, passwords) before encryption.
-   * Use superRefine for interdependent secrets validation:
-   *
-   * @example Certificate + Key validation
-   * ```typescript
-   * secretsSchema: z.object({
-   *   certificateData: z.string().optional(),
-   *   privateKeyData: z.string().optional()
-   * }).superRefine((secrets, ctx) => {
-   *   const hasCert = !!secrets.certificateData;
-   *   const hasKey = !!secrets.privateKeyData;
-   *
-   *   // Both or neither
-   *   if (hasCert !== hasKey) {
-   *     ctx.addIssue({
-   *       code: z.ZodIssueCode.custom,
-   *       path: hasCert ? ['privateKeyData'] : ['certificateData'],
-   *       message: "Certificate and private key must both be provided"
-   *     });
-   *   }
-   * })
-   * ```
-   *
-   * @example Auth method validation
-   * ```typescript
-   * secretsSchema: z.object({
-   *   user: z.string().nullable(),
-   *   password: z.string().nullable(),
-   *   apiToken: z.string().nullable()
-   * }).superRefine((secrets, ctx) => {
-   *   const hasBasicAuth = secrets.user && secrets.password;
-   *   const hasTokenAuth = secrets.apiToken;
-   *
-   *   if (!hasBasicAuth && !hasTokenAuth) {
-   *     ctx.addIssue({
-   *       code: z.ZodIssueCode.custom,
-   *       message: "Either username/password or API token required"
-   *     });
-   *   }
-   * })
-   * ```
-   */
-  secretsSchema: z.ZodSchema;
-
-  /**
-   * URL allowlist validation (framework-enforced)
-   *
-   * USED BY: All connectors making external HTTP requests
-   * REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/webhook/index.ts:103-111
-   * REFERENCE: Most SubActionConnectorType connectors use urlAllowListValidator
-   *
-   * WHY: Security - prevents SSRF attacks by restricting which URLs connectors can call.
-   * The framework enforces this separately as a security layer.
-   *
-   * NOTE: While URL validation can also be done in Zod (see configSchema examples above),
-   * this field allows the framework to perform additional security checks and logging.
-   *
-   * @example
-   * ```typescript
-   * validateUrls: {
-   *   configFields: ["apiUrl", "webhookUrl"],
-   *   secretFields: ["oauthTokenUrl"]
-   * }
-   * ```
-   */
-  validateUrls?: {
-    /** Config field names containing URLs to validate */
-    configFields?: string[];
-    /** Secret field names containing URLs to validate */
-    secretFields?: string[];
-  };
-}
 
 // ============================================================================
 // VALIDATION UTILITIES
@@ -1749,14 +1654,92 @@ export interface ConnectorLayout {
 // ============================================================================
 
 /**
+ * Standard authentication schemas that connectors can import and use
+ * 
+ * WHY: Most connectors use standard auth patterns. Instead of each connector
+ * defining auth fields, import and spread these standard schemas.
+ * 
+ * USAGE:
+ * ```typescript
+ * schema: z.object({
+ *   url: z.string().url(),
+ *   ...BasicAuthSchema,  // Adds username, password fields
+ *   timeout: z.number()
+ * })
+ * ```
+ */
+
+/** Basic Authentication (username + password) */
+export const BasicAuthSchema = z.object({
+  username: z.string().describe('Username'),
+  password: withUIMeta(z.string(), { sensitive: true }).describe('Password'),
+});
+
+/** Bearer Token / API Key Authentication */
+export const BearerAuthSchema = z.object({
+  apiKey: withUIMeta(z.string(), { sensitive: true }).describe('API Key'),
+});
+
+/** OAuth2 Client Credentials */
+export const OAuth2AuthSchema = z.object({
+  clientId: z.string().describe('Client ID'),
+  clientSecret: withUIMeta(z.string(), { sensitive: true }).describe('Client Secret'),
+  tokenUrl: z.string().url().describe('Token URL'),
+  scope: z.string().optional().describe('Scope'),
+});
+
+/** SSL/mTLS Certificate Authentication */
+export const SSLAuthSchema = z.object({
+  certificateType: z.enum(['crt', 'pfx']).describe('Certificate Type'),
+  certificate: withUIMeta(z.string(), { sensitive: true }).optional().describe('Certificate'),
+  privateKey: withUIMeta(z.string(), { sensitive: true }).optional().describe('Private Key'),
+  pfx: withUIMeta(z.string(), { sensitive: true }).optional().describe('PFX Bundle'),
+  passphrase: withUIMeta(z.string(), { sensitive: true }).optional().describe('Passphrase'),
+  ca: z.string().optional().describe('CA Certificate'),
+});
+
+/**
+ * Helper function to get standard auth schemas
+ * 
+ * @example Get basic and bearer schemas
+ * ```typescript
+ * schema: z.object({
+ *   url: z.string(),
+ *   ...getAuthSchema(['basic', 'bearer']),
+ *   timeout: z.number()
+ * })
+ * ```
+ */
+export function getAuthSchema(types: Array<'basic' | 'bearer' | 'oauth2' | 'ssl'>) {
+  const schemas: z.ZodRawShape = {};
+  
+  if (types.includes('basic')) {
+    Object.assign(schemas, BasicAuthSchema.shape);
+  }
+  if (types.includes('bearer')) {
+    Object.assign(schemas, BearerAuthSchema.shape);
+  }
+  if (types.includes('oauth2')) {
+    Object.assign(schemas, OAuth2AuthSchema.shape);
+  }
+  if (types.includes('ssl')) {
+    Object.assign(schemas, SSLAuthSchema.shape);
+  }
+  
+  return schemas;
+}
+
+/**
  * Complete single-file connector definition
  * This is the interface that all connectors must satisfy
- *
- * PHILOSOPHY:
+ * 
+ * PHILOSOPHY (aligned with CR feedback):
+ * - Single schema containing config AND secrets (not separate)
+ * - Secrets marked with meta.sensitive (framework encrypts them)
+ * - Import standard auth schemas instead of defining from scratch
+ * - Zod is the single source of truth (validation + UI derivation)
  * - Required fields = what every connector MUST have
  * - Optional fields = what some connectors need
- * - UI is derivable from schemas + optional layout hints
- * - LLM can write a complete connector by just filling schemas
  */
 export interface SingleFileConnectorDefinition {
   // ---- Core Metadata ----
@@ -1765,33 +1748,76 @@ export interface SingleFileConnectorDefinition {
    * WHY: Every connector needs identity and basic info
    */
   metadata: ConnectorMetadata;
-
-  // ---- Authentication ----
+  
+  // ---- Single Schema (Config + Secrets) ----
   /**
-   * Auth schema (required)
-   * WHY: Defines how connector authenticates with external service
-   * UI will be derived from this discriminated union
-   * Each auth method automatically gets appropriate form fields
-   *
-   * Can be the full AuthSchema (all 8 methods) or a subset for your connector
-   *
-   * @example
-   * authSchema: z.discriminatedUnion("method", [
-   *   z.object({
-   *     method: z.literal("bearer"),
-   *     token: z.string().describe("API Token")
+   * Single Zod schema containing ALL connector fields (config AND secrets)
+   * 
+   * WHY (CR feedback from @cnasikas, @jcger, @adcoelho):
+   * - Preserves field order for UI (config, then auth, then more config)
+   * - No duplication between config/secrets schemas
+   * - Secrets marked with meta.sensitive (framework encrypts these)
+   * - Can import standard auth schemas: ...BasicAuthSchema, ...BearerAuthSchema
+   * - Single source of truth for validation AND UI
+   * 
+   * STRUCTURE:
+   * ```typescript
+   * schema: z.object({
+   *   // Config fields
+   *   url: z.string().url().meta({ 
+   *     label: 'API URL',
+   *     section: 'Connection',
+   *     order: 1
+   *   }),
+   *   
+   *   // Secret fields (marked with meta.sensitive)
+   *   apiKey: z.string().meta({ 
+   *     sensitive: true,  // ← Framework encrypts this field
+   *     label: 'API Key',
+   *     section: 'Authentication',
+   *     order: 2
+   *   }),
+   *   
+   *   // Or import standard auth
+   *   ...BasicAuthSchema,  // Adds username, password (password already marked sensitive)
+   *   
+   *   // More config
+   *   timeout: z.number().default(30000).meta({
+   *     section: 'Advanced'
    *   })
-   * ])
+   * })
+   * ```
+   * 
+   * FRAMEWORK BEHAVIOR:
+   * - Fields with `meta.sensitive = true` are encrypted before storage
+   * - Field order in schema = render order in UI (unless overridden by meta.order)
+   * - Sections group related fields (via meta.section)
+   * - Validation uses zod.parse() directly
    */
-  authSchema: z.ZodTypeAny;
-
-  // ---- Validation ----
+  schema: z.ZodSchema;
+  
+  // ---- URL Validation (Framework Enforced) ----
   /**
-   * Validation configuration (required)
-   * WHY: Every connector needs schemas for config and secrets
-   * These schemas drive both validation AND UI generation
+   * Optional URL allowlist validation (framework enforced)
+   * 
+   * WHY (Security): Prevents SSRF attacks by restricting which URLs connectors can call.
+   * The framework enforces this separately as a security layer.
+   * 
+   * Simply list field names that contain URLs to validate.
+   * 
+   * @example
+   * ```typescript
+   * validateUrls: {
+   *   fields: ["apiUrl", "webhookUrl", "tokenUrl"]
+   * }
+   * ```
+   * 
+   * Framework will call `configurationUtilities.ensureUriAllowed()` for each field.
    */
-  validation: ValidationConfig;
+  validateUrls?: {
+    /** Field names in schema that contain URLs to validate */
+    fields?: string[];
+  };
 
   // ---- Policies ----
   /**

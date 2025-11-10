@@ -2,6 +2,7 @@ import { z } from '@kbn/zod';
 import type { Logger } from '@kbn/core/server';
 import type { AxiosInstance } from 'axios';
 import { i18n } from '@kbn/i18n';
+import { withUIMeta, UISchemas } from './connector_spec_ui';
 export { withUIMeta, UISchemas } from './connector_spec_ui';
 
 export function createI18nKeys(connectorId: string) {
@@ -258,15 +259,6 @@ export interface Transformations {
     };
 }
 
-export interface ValidationConfig {
-    configSchema: z.ZodSchema;
-    secretsSchema: z.ZodSchema;
-    validateUrls?: {
-        configFields?: string[];
-        secretFields?: string[];
-    };
-}
-
 export function createUrlAllowlistRefine(configurationUtilities: {
     ensureUriAllowed: (url: string) => void;
 }) {
@@ -346,10 +338,54 @@ export interface ConnectorLayout {
     secretsOrder?: string[];
 }
 
+export const BasicAuthSchema = z.object({
+    username: z.string().describe('Username'),
+    password: withUIMeta(z.string(), { sensitive: true }).describe('Password'),
+});
+
+export const BearerAuthSchema = z.object({
+    apiKey: withUIMeta(z.string(), { sensitive: true }).describe('API Key'),
+});
+
+export const OAuth2AuthSchema = z.object({
+    clientId: z.string().describe('Client ID'),
+    clientSecret: withUIMeta(z.string(), { sensitive: true }).describe('Client Secret'),
+    tokenUrl: z.string().url().describe('Token URL'),
+    scope: z.string().optional().describe('Scope'),
+});
+
+export const SSLAuthSchema = z.object({
+    certificateType: z.enum(['crt', 'pfx']).describe('Certificate Type'),
+    certificate: withUIMeta(z.string(), { sensitive: true }).optional().describe('Certificate'),
+    privateKey: withUIMeta(z.string(), { sensitive: true }).optional().describe('Private Key'),
+    pfx: withUIMeta(z.string(), { sensitive: true }).optional().describe('PFX Bundle'),
+    passphrase: withUIMeta(z.string(), { sensitive: true }).optional().describe('Passphrase'),
+    ca: z.string().optional().describe('CA Certificate'),
+});
+
+export function getAuthSchema(types: Array<'basic' | 'bearer' | 'oauth2' | 'ssl'>) {
+    const schemas: z.ZodRawShape = {};
+    if (types.includes('basic')) {
+        Object.assign(schemas, BasicAuthSchema.shape);
+    }
+    if (types.includes('bearer')) {
+        Object.assign(schemas, BearerAuthSchema.shape);
+    }
+    if (types.includes('oauth2')) {
+        Object.assign(schemas, OAuth2AuthSchema.shape);
+    }
+    if (types.includes('ssl')) {
+        Object.assign(schemas, SSLAuthSchema.shape);
+    }
+    return schemas;
+}
+
 export interface SingleFileConnectorDefinition {
     metadata: ConnectorMetadata;
-    authSchema: z.ZodTypeAny;
-    validation: ValidationConfig;
+    schema: z.ZodSchema;
+    validateUrls?: {
+        fields?: string[];
+    };
     policies?: ConnectorPolicies;
     actions: Record<string, ActionDefinition>;
     test?: ConnectorTest;
