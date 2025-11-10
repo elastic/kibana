@@ -348,6 +348,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 ],
               },
             },
+            updated_at: new Date().toISOString(),
           },
         });
 
@@ -511,6 +512,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 routing: [],
               },
             },
+            updated_at: new Date().toISOString(),
           },
         };
         await putStream(apiClient, 'logs.rollovertest', body, 200);
@@ -532,6 +534,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   },
                 },
               },
+              updated_at: new Date().toISOString(),
             },
           },
           200
@@ -556,6 +559,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 routing: [],
               },
             },
+            updated_at: new Date().toISOString(),
           },
         };
         await putStream(apiClient, 'logs.willfail', body, 400);
@@ -667,6 +671,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               settings: {},
               wired: { fields, routing: [] },
             },
+            updated_at: new Date().toISOString(),
           },
         });
 
@@ -680,6 +685,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               settings: {},
               wired: { fields: {}, routing: [] },
             },
+            updated_at: new Date().toISOString(),
           },
         });
 
@@ -712,6 +718,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 settings: {},
                 wired: { fields: {}, routing: [] },
               },
+              updated_at: new Date().toISOString(),
             },
           },
           500
@@ -729,6 +736,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               settings: {},
               wired: { fields: {}, routing: [] },
             },
+            updated_at: new Date().toISOString(),
           },
         };
 

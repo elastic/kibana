@@ -59,6 +59,7 @@ const rootStreamDefinition: Streams.WiredStream.Definition = {
       },
     },
   },
+  updated_at: new Date().toISOString(),
 };
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
@@ -96,6 +97,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               ],
             },
           },
+          updated_at: new Date().toISOString(),
         },
       };
       const response = await putStream(apiClient, 'logs', body, 400);
@@ -122,6 +124,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               },
             },
           },
+          updated_at: new Date().toISOString(),
         },
       };
       const response = await putStream(apiClient, 'logs', body, 400);
@@ -153,6 +156,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               ],
             },
           },
+          updated_at: new Date().toISOString(),
         },
       };
       const response = await putStream(apiClient, 'logs', body);

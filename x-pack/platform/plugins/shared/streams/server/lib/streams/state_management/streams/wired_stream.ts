@@ -168,6 +168,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
               ],
             },
           },
+          updated_at: new Date().toISOString(),
         },
       });
     }
@@ -193,6 +194,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
                   routing: [],
                 },
               },
+              updated_at: new Date().toISOString(),
             },
           });
         }
@@ -228,6 +230,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
                   ],
                 },
               },
+              updated_at: new Date().toISOString(),
             },
           });
         }
@@ -272,6 +275,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
                   ),
                 },
               },
+              updated_at: new Date().toISOString(),
             },
           });
         }

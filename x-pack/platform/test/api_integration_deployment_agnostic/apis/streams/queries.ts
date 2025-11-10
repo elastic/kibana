@@ -48,6 +48,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         },
       },
     },
+    updated_at: new Date().toISOString(),
   };
 
   describe('Queries API', function () {

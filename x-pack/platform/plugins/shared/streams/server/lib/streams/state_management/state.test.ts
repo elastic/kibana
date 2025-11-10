@@ -49,6 +49,7 @@ describe('State', () => {
           routing: [],
         },
       },
+      updated_at: new Date().toISOString(),
     };
     const classicStream: Streams.ClassicStream.Definition = {
       name: 'classic_stream',

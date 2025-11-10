@@ -94,6 +94,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             wired: { routing: [], fields: {} },
             settings: {},
           },
+          updated_at: new Date().toISOString(),
         },
         ...emptyAssets,
       });
@@ -256,6 +257,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               wired: { routing: [], fields: {} },
               settings: {},
             },
+            updated_at: new Date().toISOString(),
           },
           ...emptyAssets,
         });

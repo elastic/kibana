@@ -24,6 +24,7 @@ const streamsStorageSettings = {
       description: types.text(),
       ingest: types.object({ enabled: false }),
       group: types.object({ enabled: false }),
+      updated_at: types.date(),
     },
   },
 } satisfies StorageSettings;

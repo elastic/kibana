@@ -117,6 +117,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           processing: { steps: [] },
           wired: { fields: {}, routing: [] },
         },
+        updated_at: new Date().toISOString(),
       },
       ...emptyAssets,
     };
@@ -133,6 +134,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               ...(rootDefinition as Streams.WiredStream.GetResponse).stream.ingest,
               lifecycle: { dsl: { data_retention: '999d' } },
             },
+            updated_at: new Date().toISOString(),
           },
         });
         expect(response).to.have.property('acknowledged', true);
@@ -165,6 +167,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 ...(rootDefinition as Streams.WiredStream.GetResponse).stream.ingest,
                 lifecycle: { inherit: {} },
               },
+              updated_at: new Date().toISOString(),
             },
           },
           400
@@ -181,6 +184,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               ...(rootDefinition as Streams.WiredStream.GetResponse).stream.ingest,
               lifecycle: { dsl: { data_retention: '50d' } },
             },
+            updated_at: new Date().toISOString(),
           },
         });
         await putStream(apiClient, 'logs.inheritsatcreation', wiredPutBody);
@@ -206,6 +210,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               ...(rootDefinition as Streams.WiredStream.GetResponse).stream.ingest,
               lifecycle: { dsl: { data_retention: '10m' } },
             },
+            updated_at: new Date().toISOString(),
           },
         });
         await putStream(apiClient, 'logs.overrides', {
@@ -226,6 +231,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               },
               lifecycle: { dsl: { data_retention: '1d' } },
             },
+            updated_at: new Date().toISOString(),
           },
         });
 
@@ -249,6 +255,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               ...wiredPutBody.stream.ingest,
               lifecycle: { dsl: { data_retention: '10d' } },
             },
+            updated_at: new Date().toISOString(),
           },
         });
         await putStream(apiClient, 'logs.10d.20d', {
@@ -259,6 +266,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               ...wiredPutBody.stream.ingest,
               lifecycle: { dsl: { data_retention: '20d' } },
             },
+            updated_at: new Date().toISOString(),
           },
         });
         await putStream(apiClient, 'logs.10d.20d.inherits', wiredPutBody);
@@ -281,6 +289,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 ],
               },
             },
+            updated_at: new Date().toISOString(),
           },
         });
 
@@ -299,6 +308,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               ...wiredPutBody.stream.ingest,
               lifecycle: { dsl: { data_retention: '2d' } },
             },
+            updated_at: new Date().toISOString(),
           },
         });
 
@@ -310,6 +320,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               ...wiredPutBody.stream.ingest,
               lifecycle: { dsl: {} },
             },
+            updated_at: new Date().toISOString(),
           },
         });
 
@@ -332,6 +343,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   ...wiredPutBody.stream.ingest,
                   lifecycle: { ilm: { policy: 'my-policy' } },
                 },
+                updated_at: new Date().toISOString(),
               },
             },
             400
@@ -354,6 +366,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 },
                 lifecycle: { ilm: { policy: 'my-policy' } },
               },
+              updated_at: new Date().toISOString(),
             },
           });
 
@@ -373,6 +386,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 ...wiredPutBody.stream.ingest,
                 lifecycle: { ilm: { policy: 'my-policy' } },
               },
+              updated_at: new Date().toISOString(),
             },
           });
 
@@ -391,6 +405,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 },
                 lifecycle: { dsl: { data_retention: '7d' } },
               },
+              updated_at: new Date().toISOString(),
             },
           });
 
@@ -411,6 +426,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 },
                 lifecycle: { dsl: { data_retention: '7d' } },
               },
+              updated_at: new Date().toISOString(),
             },
           });
 
@@ -429,6 +445,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 },
                 lifecycle: { ilm: { policy: 'my-policy' } },
               },
+              updated_at: new Date().toISOString(),
             },
           });
 
@@ -549,6 +566,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   ...wiredPutBody.stream.ingest,
                   lifecycle: { ilm: { policy: 'my-policy' } },
                 },
+                updated_at: new Date().toISOString(),
               },
             },
             400
@@ -692,6 +710,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               },
               lifecycle: { dsl: { data_retention: '1d' } },
             },
+            updated_at: new Date().toISOString(),
           },
         });
         await getIlmStats(apiClient, indexName, 400);
@@ -712,6 +731,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 },
                 lifecycle: { ilm: { policy: 'this-stream-policy-does-not-exist' } },
               },
+              updated_at: new Date().toISOString(),
             },
           });
           await getIlmStats(apiClient, indexName, 404);
@@ -743,6 +763,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 },
                 lifecycle: { ilm: { policy: policyName } },
               },
+              updated_at: new Date().toISOString(),
             },
           });
 

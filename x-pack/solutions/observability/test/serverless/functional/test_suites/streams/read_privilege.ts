@@ -36,6 +36,7 @@ const request: Streams.WiredStream.UpsertRequest = {
         },
       },
     },
+    updated_at: new Date().toISOString(),
   },
   ...emptyAssets,
 };

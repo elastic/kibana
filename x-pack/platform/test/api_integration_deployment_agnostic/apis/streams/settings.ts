@@ -104,6 +104,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               lifecycle: { inherit: {} },
               wired: { fields: {}, routing: [] },
             },
+            updated_at: new Date().toISOString(),
           },
         });
 
@@ -134,6 +135,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               lifecycle: { inherit: {} },
               wired: { fields: {}, routing: [] },
             },
+            updated_at: new Date().toISOString(),
           },
         });
 
@@ -168,6 +170,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 lifecycle: { inherit: {} },
                 wired: { fields: {}, routing: [] },
               },
+              updated_at: new Date().toISOString(),
             },
           });
 

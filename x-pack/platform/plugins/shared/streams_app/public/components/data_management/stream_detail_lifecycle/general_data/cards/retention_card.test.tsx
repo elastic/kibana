@@ -81,6 +81,7 @@ describe('RetentionCard', () => {
             settings: {},
             wired: { fields: {}, routing: [] },
           },
+          updated_at: new Date().toISOString(),
         },
         // Effective lifecycle for wired streams must include a `from` field
         effective_lifecycle: { ilm: { policy: 'test-policy' }, from: 'logs-test' },
@@ -119,6 +120,7 @@ describe('RetentionCard', () => {
             settings: {},
             wired: { fields: {}, routing: [] },
           },
+          updated_at: new Date().toISOString(),
         },
         effective_lifecycle: { ilm: { policy: 'test-policy' }, from: 'logs-test' },
         effective_settings: {},

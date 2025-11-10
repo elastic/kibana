@@ -259,7 +259,11 @@ export class StreamsClient {
     name: string;
     request: Streams.all.UpsertRequest;
   }): Promise<UpsertStreamResponse> {
-    const stream: Streams.all.Definition = { ...request.stream, name };
+    const stream: Streams.all.Definition = {
+      ...request.stream,
+      name,
+      updated_at: new Date().toISOString(),
+    };
 
     const result = await State.attemptChanges(
       [
@@ -341,6 +345,7 @@ export class StreamsClient {
                 }),
               },
             },
+            updated_at: new Date().toISOString(),
           },
         },
         {
@@ -348,6 +353,7 @@ export class StreamsClient {
           definition: {
             name,
             description: '',
+            updated_at: new Date().toISOString(),
             ingest: {
               lifecycle: { inherit: {} },
               processing: { steps: [] },

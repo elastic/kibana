@@ -22,6 +22,7 @@ function createMockWiredStream(
       processing: { steps: [] },
       settings: {},
     },
+    updated_at: new Date().toISOString(),
   };
 }
 

@@ -18,6 +18,7 @@ describe('isRootStreamDefinition', () => {
         settings: {},
         wired: { fields: {}, routing: [] },
       },
+      updated_at: new Date().toISOString(),
     };
     expect(isRootStreamDefinition(validWired)).toBe(true);
   });
@@ -32,6 +33,7 @@ describe('isRootStreamDefinition', () => {
         settings: {},
         wired: { fields: {}, routing: [] },
       },
+      updated_at: new Date().toISOString(),
     };
     expect(isRootStreamDefinition(nonRootWired)).toBe(false);
   });

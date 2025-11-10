@@ -23,6 +23,7 @@ const logsStreamDefinition: Streams.WiredStream.Definition = {
     processing: { steps: [] },
     settings: {},
   },
+  updated_at: new Date().toISOString(),
 };
 
 describe('verifyQueries', () => {

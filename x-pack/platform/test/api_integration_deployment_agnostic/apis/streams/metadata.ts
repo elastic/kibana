@@ -41,6 +41,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               routing: [],
             },
           },
+          updated_at: new Date().toISOString(),
         },
       };
       await putStream(apiClient, 'logs.test', body, 200);
@@ -63,6 +64,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               routing: [],
             },
           },
+          updated_at: new Date().toISOString(),
         },
       };
       await putStream(apiClient, 'logs.test', body, 200);

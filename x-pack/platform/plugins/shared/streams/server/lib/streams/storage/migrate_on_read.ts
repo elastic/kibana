@@ -131,6 +131,18 @@ export function migrateOnRead(definition: Record<string, unknown>): Streams.all.
     hasBeenMigrated = true;
   }
 
+  if (
+    isObject(migratedDefinition.ingest) &&
+    'wired' in migratedDefinition.ingest &&
+    !('updated_at' in migratedDefinition)
+  ) {
+    migratedDefinition = {
+      ...migratedDefinition,
+      updated_at: new Date(Date.UTC(1970, 0, 1)).toISOString(),
+    };
+    hasBeenMigrated = true;
+  }
+
   if (hasBeenMigrated) {
     Streams.all.Definition.asserts(migratedDefinition as unknown as BaseStream.Definition);
   }

@@ -60,6 +60,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             fields: {},
           },
         },
+        updated_at: new Date().toISOString(),
       };
 
       beforeEach(async () => {

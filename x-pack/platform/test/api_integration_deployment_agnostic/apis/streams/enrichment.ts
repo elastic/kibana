@@ -86,6 +86,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               },
             },
           },
+          updated_at: new Date().toISOString(),
         },
       };
       const response = await putStream(apiClient, 'logs.nginx', body);

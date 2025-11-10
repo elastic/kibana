@@ -39,6 +39,7 @@ describe('EditLifecycleModal', () => {
           settings: {},
           wired: { fields: {}, routing: [] },
         },
+        updated_at: new Date().toISOString(),
       },
       effective_lifecycle: effectiveLifecycle,
       effective_settings: {},

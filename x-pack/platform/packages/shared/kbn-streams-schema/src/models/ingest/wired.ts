@@ -53,6 +53,7 @@ export namespace WiredStream {
 
   export interface Definition extends IngestBaseStream.Definition {
     ingest: WiredIngest;
+    updated_at: string;
   }
 
   export type Source = IngestBaseStream.Source<WiredStream.Definition>;
@@ -73,6 +74,7 @@ export const WiredStream: ModelValidation<BaseStream.Model, WiredStream.Model> =
       IngestBaseStream.Definition.right,
       z.object({
         ingest: IngestWired,
+        updated_at: z.string(),
       })
     ),
     Source: z.intersection(IngestBaseStream.Definition.right, z.object({})),

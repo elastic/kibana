@@ -28,6 +28,7 @@ describe('generateLayer', () => {
       },
       settings: {},
     },
+    updated_at: new Date().toISOString(),
   };
 
   it('should generate mappings with proper handling of fields and aliases', () => {

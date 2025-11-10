@@ -176,6 +176,7 @@ const expectedWiredStreamsResponse: Streams.WiredStream.Definition = {
       },
     },
   },
+  updated_at: new Date().toISOString(),
 };
 
 const expectedDashboardsResponse = {

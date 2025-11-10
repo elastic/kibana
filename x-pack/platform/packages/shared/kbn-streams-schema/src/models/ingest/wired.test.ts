@@ -23,6 +23,7 @@ describe('WiredStream', () => {
             routing: [],
           },
         },
+        updated_at: new Date().toISOString(),
       },
     ] satisfies WiredStream.Definition[])('is valid %s', (val) => {
       expect(WiredStream.Definition.is(val)).toBe(true);
@@ -88,6 +89,7 @@ describe('WiredStream', () => {
               routing: [],
             },
           },
+          updated_at: new Date().toISOString(),
         },
         privileges: {
           lifecycle: true,
