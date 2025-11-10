@@ -14,7 +14,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'timeToVisualize',
     'security',
   ]);
-  const find = getService('find');
   const log = getService('log');
   const securityService = getService('security');
   const listingTable = getService('listingTable');
