@@ -27,6 +27,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { getESQLSources } from '../helpers';
 import type { ESQLEditorDeps } from '../types';
 import { DataSourcesList } from './datasources_list';
+import { generateDashPatterns } from './utils';
 
 interface SourcesDropdownProps {
   currentSource: string;
@@ -54,9 +55,17 @@ export function SourcesDropdown({ currentSource, onChangeSource }: SourcesDropdo
     async function fetchSources() {
       const sources = await getESQLSources(core, getLicense);
       if (isMounted()) {
-        setSourcesOptions(
-          sources.filter((source) => !source.hidden).map((source) => ({ label: source.name }))
-        );
+        const sourceNames = sources.filter((source) => !source.hidden).map((source) => source.name);
+
+        // Generate dash patterns from the source names
+        const dashPatterns = generateDashPatterns(sourceNames);
+
+        const allOptions = [
+          ...dashPatterns.map((pattern) => ({ label: pattern })),
+          ...sourceNames.map((name) => ({ label: name })),
+        ];
+
+        setSourcesOptions(allOptions);
       }
     }
     if (sourcesOptions.length === 0) {
