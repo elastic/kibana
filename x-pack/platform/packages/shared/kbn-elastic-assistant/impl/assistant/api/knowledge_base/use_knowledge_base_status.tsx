@@ -19,7 +19,7 @@ const KNOWLEDGE_BASE_STATUS_QUERY_KEY = ['elastic-assistant', 'knowledge-base-st
 
 export interface UseKnowledgeBaseStatusParams {
   http: HttpSetup;
-  resource: string;
+  resource?: string;
   toasts?: IToasts;
   enabled: boolean;
 }
@@ -46,7 +46,7 @@ export const useKnowledgeBaseStatus = ({
   return useQuery(
     KNOWLEDGE_BASE_STATUS_QUERY_KEY,
     async ({ signal }) => {
-      return getKnowledgeBaseStatus({ http, resource, signal });
+      return getKnowledgeBaseStatus({ http, resource: resource || '', signal });
     },
     {
       enabled,

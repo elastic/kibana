@@ -13,7 +13,7 @@ import type {
 } from '@kbn/elastic-assistant-common';
 import {
   API_VERSIONS,
-  ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL,
+  ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_RESOURCE_URL,
 } from '@kbn/elastic-assistant-common';
 import type { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
 
@@ -36,7 +36,7 @@ export const getKnowledgeBaseStatus = async ({
   ReadKnowledgeBaseResponse | IHttpFetchError
 > => {
   try {
-    const path = ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL.replace('{resource?}', resource || '');
+    const path = ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_RESOURCE_URL.replace('{resource?}', resource || '');
     const response = await http.fetch(path, {
       method: 'GET',
       signal,
@@ -67,7 +67,7 @@ export const postKnowledgeBase = async ({
   http: HttpSetup;
   signal?: AbortSignal | undefined;
 }): Promise<CreateKnowledgeBaseResponse> => {
-  const path = ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL.replace('{resource?}', resource || '');
+  const path = ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_RESOURCE_URL.replace('{resource?}', resource || '');
   const response = await http.fetch(path, {
     method: 'POST',
     signal,
