@@ -72,16 +72,7 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
   const renderButton = useMemo(() => {
     return (
       <EuiText size="xs">
-        <strong
-          css={!!helpTooltip ? styles.titleTooltip : undefined}
-          aria-label={i18n.translate('unifiedFieldList.fieldsAccordion.accordionButtonAriaLabel', {
-            defaultMessage:
-              '{label}: {fieldsCount} {fieldsCount, plural, one {item} other {items}}',
-            values: { label, fieldsCount },
-          })}
-        >
-          {label}
-        </strong>
+        <strong css={!!helpTooltip ? styles.titleTooltip : undefined}>{label}</strong>
         {!!helpTooltip && (
           <EuiIconTip
             aria-label={helpTooltip}
@@ -97,7 +88,7 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
         )}
       </EuiText>
     );
-  }, [label, helpTooltip, fieldsCount, styles.titleTooltip]);
+  }, [label, helpTooltip, styles.titleTooltip]);
 
   const accordionExtraAction = useMemo(() => {
     if (showExistenceFetchError) {
@@ -154,6 +145,10 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
       id={id}
       buttonProps={{
         id: buttonId,
+        'aria-label': i18n.translate('unifiedFieldList.fieldsAccordion.accordionButtonAriaLabel', {
+          defaultMessage: '{label}: {fieldsCount} {fieldsCount, plural, one {item} other {items}}',
+          values: { label, fieldsCount },
+        }),
       }}
       buttonContent={renderButton}
       extraAction={accordionExtraAction}
