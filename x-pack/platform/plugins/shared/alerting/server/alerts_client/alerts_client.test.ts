@@ -1999,7 +1999,7 @@ describe('Alerts Client', () => {
           ).rejects.toBe('something went wrong!');
 
           expect(logger.error).toHaveBeenCalledWith(
-            `Error updating alert last scheduled actions for test.rule-type:1 'rule-name': something went wrong!`,
+            `Error updating alerts. (last scheduled actions or maintenance windows) for test.rule-type:1 'rule-name': something went wrong!`,
             logTags
           );
         });
@@ -2751,6 +2751,43 @@ describe('Alerts Client', () => {
           const result = await alertsClient.getAlertsToUpdateWithLastScheduledActions();
 
           expect(result).toEqual({});
+        });
+
+        test('filter the alerts without last scheduled actions', async () => {
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>({
+            ...alertsClientParams,
+            isServerless: false,
+          });
+
+          await alertsClient.initializeExecution(defaultExecutionOpts);
+
+          // Report 2 new alerts
+          const alertExecutorService = alertsClient.factory();
+          alertExecutorService
+            .create('1')
+            .scheduleActions('default')
+            .updateLastScheduledActions('default');
+
+          // Does not update last scheduled actions for alert '2'
+          alertExecutorService.create('2').scheduleActions('default');
+
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
+
+          await alertsClient.persistAlerts();
+
+          const result = await alertsClient.getAlertsToUpdateWithLastScheduledActions();
+          const { rawActiveAlerts } = alertsClient.getRawAlertInstancesForState();
+          const uuid1 = rawActiveAlerts['1'].meta?.uuid as string;
+
+          expect(result).toEqual({
+            [uuid1]: {
+              date: '2023-03-28T22:27:28.159Z',
+              group: 'default',
+            },
+          });
         });
       });
 

@@ -738,7 +738,7 @@ export class AlertsClient<
       );
     } catch (err) {
       this.options.logger.error(
-        `Error updating alert last scheduled actions ${this.ruleInfoMessage}: ${err}`,
+        `Error updating alerts. (last scheduled actions or maintenance windows) ${this.ruleInfoMessage}: ${err}`,
         this.logTags
       );
       throw err;
@@ -900,16 +900,22 @@ export class AlertsClient<
   public getAlertsToUpdateWithLastScheduledActions(): AlertsToUpdateWithLastScheduledActions {
     const { rawActiveAlerts } = this.getRawAlertInstancesForState(true);
     const result: AlertsToUpdateWithLastScheduledActions = {};
-
-    for (const key in rawActiveAlerts) {
-      if (key) {
-        const { meta } = rawActiveAlerts[key];
-        const uuid = meta?.uuid;
-        const last = meta?.lastScheduledActions;
-        if (!uuid || !last) continue;
-        const { group, date, actions } = last;
-        result[uuid] = actions ? { group, date, throttling: actions } : { group, date };
+    try {
+      for (const key in rawActiveAlerts) {
+        if (key) {
+          const { meta } = rawActiveAlerts[key];
+          const uuid = meta?.uuid;
+          const last = meta?.lastScheduledActions;
+          if (!uuid || !last) continue;
+          const { group, date, actions } = last;
+          result[uuid] = actions ? { group, date, throttling: actions } : { group, date };
+        }
       }
+    } catch (err) {
+      this.options.logger.error(
+        `Error getting alerts to update with last scheduled actions: ${err.message}`,
+        this.logTags
+      );
     }
     return result;
   }
