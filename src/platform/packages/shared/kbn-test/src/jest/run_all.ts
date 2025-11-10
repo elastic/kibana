@@ -85,17 +85,12 @@ export async function runJestAll() {
     );
   }
 
-  if (!configs.length) {
-    log.error('No configs found after parsing --configs');
-    process.exit(1);
-  }
-
   log.info(
     `Launching up to ${maxParallel} parallel Jest config processes (forcing --runInBand per process).`
   );
 
   // First pass
-  const firstPass = await runConfigs(configs, maxParallel, log);
+  const firstPass = configs.length ? await runConfigs(configs, maxParallel, log) : [];
 
   let failing = firstPass.filter((r) => r.code !== 0).map((r) => r.config);
 
