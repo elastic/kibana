@@ -9,17 +9,10 @@ import React from 'react';
 import { css } from '@emotion/react';
 import { useHasActiveConversation } from '../../hooks/use_conversation';
 import { ConversationActions } from './conversation_actions';
-import { ConversationSidebarToggle } from './conversation_sidebar/conversation_sidebar_toggle';
+import { ConversationsHistoryButton } from './conversation_sidebar/conversations_history_button';
 import { ConversationTitle } from './conversation_title';
 
-interface ConversationHeaderProps {
-  sidebar: {
-    isOpen: boolean;
-    onToggle: () => void;
-  };
-}
-
-export const ConversationHeader: React.FC<ConversationHeaderProps> = ({ sidebar }) => {
+export const ConversationHeader: React.FC = () => {
   const hasActiveConversation = useHasActiveConversation();
 
   const containerStyles = css`
@@ -53,7 +46,7 @@ export const ConversationHeader: React.FC<ConversationHeaderProps> = ({ sidebar 
   return (
     <div css={containerStyles}>
       <div css={leftSectionStyles}>
-        <ConversationSidebarToggle isSidebarOpen={sidebar.isOpen} onToggle={sidebar.onToggle} />
+        <ConversationsHistoryButton />
       </div>
       {hasActiveConversation && (
         <>
