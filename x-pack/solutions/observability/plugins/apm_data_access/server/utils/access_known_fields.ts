@@ -12,6 +12,7 @@ import {
   type MapToSingleOrMultiValue,
   KNOWN_SINGLE_VALUED_FIELDS_SET,
   type KnownField,
+  ensureRequiredApmFields,
 } from './utility_types';
 
 type RequiredApmFields<
@@ -86,15 +87,7 @@ export function accessKnownApmEventFields<
 
 export function accessKnownApmEventFields(fields: Record<string, any>, required?: string[]) {
   if (required) {
-    const missingRequiredFields = required.filter((key) => {
-      const value = fields[key];
-
-      return value == null || (Array.isArray(value) && value.length === 0);
-    });
-
-    if (missingRequiredFields.length) {
-      throw new Error(`Missing required fields (${missingRequiredFields.join(', ')}) in event`);
-    }
+    ensureRequiredApmFields(fields, required);
   }
 
   return new Proxy(fields, accessHandler);

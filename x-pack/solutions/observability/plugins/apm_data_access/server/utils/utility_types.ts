@@ -90,3 +90,19 @@ export type UnflattenedKnownFields<T extends Record<string, any>> = DedotObject<
 export type FlattenedApmEvent = Record<KnownSingleValuedField | KnownMultiValuedField, unknown[]>;
 
 export type UnflattenedApmEvent = UnflattenedKnownFields<FlattenedApmEvent>;
+
+/**
+ * Validates whether the field record object contains all required fields. Throws an error
+ * if it does not.
+ */
+export function ensureRequiredApmFields(fields: Record<string, any>, required: string[]) {
+  const missingRequiredFields = required.filter((key) => {
+    const value = fields[key];
+
+    return value == null || (Array.isArray(value) && value.length === 0);
+  });
+
+  if (missingRequiredFields.length) {
+    throw new Error(`Missing required fields (${missingRequiredFields.join(', ')}) in event`);
+  }
+}
