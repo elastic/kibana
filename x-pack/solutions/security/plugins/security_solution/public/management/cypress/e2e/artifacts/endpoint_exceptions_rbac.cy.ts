@@ -23,5 +23,5 @@ describe(
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
   },
 
-  getArtifactMockedDataTests(getArtifactsListTestDataForArtifact('endpointExceptions'), ['siemV4'])
+  getArtifactMockedDataTests(getArtifactsListTestDataForArtifact('endpointExceptions'))
 );

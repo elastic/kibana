@@ -8,6 +8,7 @@
 import type { ENDPOINT_ARTIFACT_LIST_IDS } from '@kbn/securitysolution-list-constants';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { FormAction } from '../tasks/perform_user_actions';
+import type { SiemVersion } from '../common/constants';
 
 interface FormEditingDescription {
   formActions: FormAction[];
@@ -24,7 +25,12 @@ export interface ArtifactsFixtureType {
   tabId: keyof typeof ENDPOINT_ARTIFACT_LISTS;
   nextTabId: string;
   artifactName: string;
+
+  /** The siem version from which the artifact privilege is available.
+   */
+  firstSiemVersion?: SiemVersion;
   privilegePrefix: string;
+
   urlPath: string;
   emptyState: string;
 
@@ -514,6 +520,7 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
     tabId: 'trustedDevices',
     nextTabId: 'trustedApps',
     artifactName: 'Trusted device name',
+    firstSiemVersion: 'siemV3',
     privilegePrefix: 'trusted_devices_',
     create: {
       formActions: [
@@ -626,6 +633,7 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
     tabId: 'endpointExceptions',
     nextTabId: 'eventFilters', // todo: update when Policy details tabs are implemented
     artifactName: 'Endpoint exception name',
+    firstSiemVersion: 'siemV4',
     privilegePrefix: 'endpoint_exceptions_',
     create: {
       formActions: [
