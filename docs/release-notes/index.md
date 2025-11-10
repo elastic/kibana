@@ -43,7 +43,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Fixes missing accessibility announcements in Cases [#240132]({{kib-pull}}240132).
 
 **Dashboards and visualizations**:
-* Fixes an issue with links, maps and legacy visualize panel references lost when updating a dashboard [#241893]({{kib-pull}}241893).
+* Fixes an issue where references were being lost in Links, Maps, and legacy Visualize panels when updating a dashboard [#241893]({{kib-pull}}241893).
 * Fixes layout issues for markdown content in small panels [#240806]({{kib-pull}}240806).
 
 **Data ingestion and Fleet**:
