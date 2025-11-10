@@ -15,10 +15,8 @@ import {
   EuiPopover,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
-  EuiLoadingSpinner,
+  EuiBadge,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import type { NotificationsStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -45,24 +43,6 @@ interface Props {
   getIsKbnRequestSelected: () => Promise<boolean | null>;
 }
 
-const styles = {
-  // Remove the default underline on hover for the context menu items since it
-  // will also be applied to the language selector button, and apply it only to
-  // the text in the context menu item.
-  button: css`
-    &:hover {
-      text-decoration: none !important;
-
-      /* Target the language selector when the button is hovered */
-      .consoleEditorContextMenu__languageSelector {
-        text-decoration: underline;
-      }
-    }
-  `,
-};
-
-const DELAY_FOR_HIDING_SPINNER = 500;
-
 const getLanguageLabelByValue = (value: string) => {
   return AVAILABLE_LANGUAGES.find((lang) => lang.value === value)?.label || DEFAULT_LANGUAGE;
 };
@@ -81,13 +61,13 @@ export const ContextMenu = ({
   } = useServicesContext();
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [isRequestConverterLoading, setRequestConverterLoading] = useState(false);
   const [isLanguageSelectorVisible, setLanguageSelectorVisibility] = useState(false);
   const [isKbnRequestSelected, setIsKbnRequestSelected] = useState<boolean | null>(null);
   const [defaultLanguage, setDefaultLanguage] = useState(
     storage.get(StorageKeys.DEFAULT_LANGUAGE, DEFAULT_LANGUAGE)
   );
   const [currentLanguage, setCurrentLanguage] = useState(defaultLanguage);
+  const [activePanelId, setActivePanelId] = useState<string>('main');
 
   useEffect(() => {
     if (isKbnRequestSelected) {
@@ -166,21 +146,11 @@ export const ContextMenu = ({
 
     // Close language selector modal
     setLanguageSelectorVisibility(false);
-    // Show loading spinner
-    setRequestConverterLoading(true);
 
     // When copying as worked as expected, close the context menu popover
-    copyAs(withLanguage)
-      .then(() => {
-        setIsPopoverOpen(false);
-      })
-      .finally(() => {
-        // Delay hiding the spinner to avoid flickering between the spinner and
-        // the change language button
-        setTimeout(() => {
-          setRequestConverterLoading(false);
-        }, DELAY_FOR_HIDING_SPINNER);
-      });
+    copyAs(withLanguage).then(() => {
+      setIsPopoverOpen(false);
+    });
   };
 
   const changeDefaultLanguage = (language: string) => {
@@ -196,6 +166,7 @@ export const ContextMenu = ({
 
   const closePopover = () => {
     setIsPopoverOpen(false);
+    setActivePanelId('main');
   };
 
   const openDocs = async () => {
@@ -217,6 +188,11 @@ export const ContextMenu = ({
     autoIndent(event);
   };
 
+  const handleLanguageSelect = (language: string) => {
+    changeDefaultLanguage(language);
+    setActivePanelId('main');
+  };
+
   const button = (
     <EuiButtonIcon
       onClick={() => {
@@ -232,67 +208,74 @@ export const ContextMenu = ({
     />
   );
 
-  const items = [
+  // Create the language clients menu items
+  const languageClientsItems = [
+    <EuiContextMenuItem
+      key="back"
+      data-test-subj="languageClientMenuItemBack"
+      icon="arrowLeft"
+      onClick={() => setActivePanelId('main')}
+    >
+      {i18n.translate('console.consoleMenu.languageClientsBackButton', {
+        defaultMessage: 'Back',
+      })}
+    </EuiContextMenuItem>,
+    ...AVAILABLE_LANGUAGES.map((lang) => (
+      <EuiContextMenuItem
+        key={lang.value}
+        data-test-subj={`languageClientMenuItem-${lang.value}`}
+        icon={currentLanguage === lang.value ? 'check' : 'empty'}
+        onClick={() => handleLanguageSelect(lang.value)}
+      >
+        {lang.label}
+      </EuiContextMenuItem>
+    )),
+  ];
+
+  // Main menu items
+  const mainMenuItems = [
     ...(!isPackagedEnvironment
       ? [
           <EuiContextMenuItem
-            key="Copy as"
-            data-test-subj="consoleMenuCopyAsButton"
-            id="copyAs"
+            key="Copy to language"
+            data-test-subj="consoleMenuCopyToLanguage"
+            id="copyToLanguage"
             disabled={!window.navigator?.clipboard}
-            onClick={(e: React.MouseEvent) => {
-              e.preventDefault();
-              const target = e.target as HTMLButtonElement;
-
-              if (target.dataset.name === 'changeLanguage') {
-                setLanguageSelectorVisibility(true);
-                return;
-              }
-
+            onClick={() => {
               onCopyAsSubmit();
             }}
             icon="copyClipboard"
-            css={styles.button}
           >
-            <EuiFlexGroup alignItems="center">
-              <EuiFlexItem>
-                <EuiFlexGroup
-                  gutterSize="xs"
-                  alignItems="center"
-                  className="consoleEditorContextMenu__languageSelector"
-                  data-test-subj="language-selector"
-                >
-                  <EuiFlexItem grow={false}>
-                    <FormattedMessage
-                      tagName="span"
-                      id="console.monaco.requestOptions.copyAsUrlButtonLabel"
-                      defaultMessage="Copy as"
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <strong>{getLanguageLabelByValue(currentLanguage)}</strong>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <FormattedMessage
+                  id="console.monaco.requestOptions.copyToLanguageButtonLabel"
+                  defaultMessage="Copy to language"
+                />
               </EuiFlexItem>
-              {!isKbnRequestSelected && (
-                <EuiFlexItem grow={false}>
-                  {isRequestConverterLoading ? (
-                    <EuiLoadingSpinner size="s" />
-                  ) : (
-                    // The EuiContextMenuItem renders itself as a button already, so we need to
-                    // force the link to not be a button in order to prevent A11Y issues.
-                    <EuiLink
-                      href=""
-                      data-name="changeLanguage"
-                      data-test-subj="changeLanguageButton"
-                    >
-                      {i18n.translate('console.consoleMenu.changeLanguageButtonLabel', {
-                        defaultMessage: 'Change',
-                      })}
-                    </EuiLink>
-                  )}
-                </EuiFlexItem>
-              )}
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="hollow">{getLanguageLabelByValue(currentLanguage)}</EuiBadge>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiContextMenuItem>,
+          <EuiContextMenuItem
+            key="Language clients"
+            data-test-subj="consoleMenuLanguageClients"
+            id="languageClients"
+            disabled={isKbnRequestSelected || false}
+            onClick={() => setActivePanelId('languageClients')}
+            icon="editorCodeBlock"
+          >
+            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <FormattedMessage
+                  id="console.monaco.requestOptions.languageClientsButtonLabel"
+                  defaultMessage="Language clients"
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <span>›</span>
+              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiContextMenuItem>,
         ]
@@ -321,6 +304,23 @@ export const ContextMenu = ({
     </EuiContextMenuItem>,
   ];
 
+  // Define panels for nested menu
+  const panels = [
+    {
+      id: 'main',
+      items: mainMenuItems,
+    },
+    {
+      id: 'languageClients',
+      title: i18n.translate('console.consoleMenu.languageClientsPanelTitle', {
+        defaultMessage: 'Language clients',
+      }),
+      items: languageClientsItems,
+    },
+  ];
+
+  const activePanel = panels.find((panel) => panel.id === activePanelId);
+
   return (
     <>
       <EuiPopover
@@ -331,7 +331,11 @@ export const ContextMenu = ({
         panelPaddingSize="none"
         anchorPosition="downLeft"
       >
-        <EuiContextMenuPanel items={items} data-test-subj="consoleMenu" />
+        <EuiContextMenuPanel
+          items={activePanel?.items}
+          title={activePanel?.title}
+          data-test-subj="consoleMenu"
+        />
       </EuiPopover>
       {isLanguageSelectorVisible && (
         <LanguageSelectorModal
