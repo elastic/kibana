@@ -37,7 +37,7 @@ export function useRunWorkflowAction(
         : i18n.translate('discover.runWorkflow.noPermissionTooltip', {
             defaultMessage: 'You do not have permission to execute workflows',
           }),
-      iconType: 'play',
+      iconType: 'workflowsApp',
       dataTestSubj: 'discoverRunWorkflowAction',
       onClick: () => {
         // Create a QueryClient instance for the modal since it's rendered outside the main React tree
