@@ -22,6 +22,7 @@
     "@kbn/navigation-plugin",
     "@kbn/config-schema",
     "@kbn/workflows",
+    "@kbn/workflows-ui",
     "@kbn/zod",
     "@kbn/code-editor",
     "@kbn/monaco",
