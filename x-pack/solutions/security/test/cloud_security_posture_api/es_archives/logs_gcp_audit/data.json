@@ -860,3 +860,100 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-gcp.audit-default",
+    "id": "8",
+    "index": ".ds-logs-gcp.audit-default-2024.09.05-000001",
+    "source": {
+      "@timestamp": "2024-09-05T10:20:30.000Z",
+      "actor": {
+        "entity": {
+          "id": "only-new-schema-user@example.com"
+        }
+      },
+      "client": {
+        "user": {
+          "email": "only-new-schema-user@example.com"
+        }
+      },
+      "cloud": {
+        "project": {
+          "id": "only-new-schema-project-id"
+        },
+        "provider": "gcp"
+      },
+      "ecs": {
+        "version": "8.11.0"
+      },
+      "event": {
+        "action": "google.iam.admin.v1.DeleteServiceAccount",
+        "agent_id_status": "missing",
+        "category": [
+          "iam"
+        ],
+        "id": "only-new-schema-event-id",
+        "ingested": "2024-09-05T10:20:30.000Z",
+        "kind": "event",
+        "outcome": "success",
+        "provider": "activity",
+        "type": [
+          "deletion"
+        ]
+      },
+      "gcp": {
+        "audit": {
+          "authorization_info": [
+            {
+              "granted": true,
+              "permission": "iam.serviceAccounts.delete",
+              "resource": "projects/only-new-schema-project-id"
+            }
+          ],
+          "logentry_operation": {
+            "id": "only-new-schema-operation-id"
+          },
+          "request": {
+            "@type": "type.googleapis.com/google.iam.admin.v1.DeleteServiceAccountRequest",
+            "name": "projects/only-new-schema-project-id/serviceAccounts/deleted-sa"
+          },
+          "resource_name": "projects/only-new-schema-project-id/serviceAccounts/deleted-sa",
+          "type": "type.googleapis.com/google.cloud.audit.AuditLog"
+        }
+      },
+      "log": {
+        "level": "NOTICE",
+        "logger": "projects/only-new-schema-project-id/logs/cloudaudit.googleapis.com%2Factivity"
+      },
+      "related": {
+        "ip": [
+          "10.0.0.5"
+        ],
+        "user": [
+          "only-new-schema-user@example.com"
+        ]
+      },
+      "service": {
+        "name": "iam.googleapis.com"
+      },
+      "source": {
+        "ip": "10.0.0.5"
+      },
+      "tags": [],
+      "target": {
+        "entity": {
+          "id": "projects/only-new-schema-project-id/serviceAccounts/deleted-sa"
+        }
+      },
+      "user_agent": {
+        "device": {
+          "name": "Other"
+        },
+        "name": "Other",
+        "original": "google-cloud-sdk/360.0.0"
+      }
+    }
+  }
+}
