@@ -16,6 +16,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiBadge,
+  useEuiTheme,
 } from '@elastic/eui';
 import type { NotificationsStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -54,6 +55,8 @@ export const ContextMenu = ({
   notifications,
   getIsKbnRequestSelected,
 }: Props) => {
+  const { euiTheme } = useEuiTheme();
+
   // Get default language from local storage
   const {
     services: { storage, esHostService },
@@ -209,28 +212,16 @@ export const ContextMenu = ({
   );
 
   // Create the language clients menu items
-  const languageClientsItems = [
+  const languageClientsItems = AVAILABLE_LANGUAGES.map((lang) => (
     <EuiContextMenuItem
-      key="back"
-      data-test-subj="languageClientMenuItemBack"
-      icon="arrowLeft"
-      onClick={() => setActivePanelId('main')}
+      key={lang.value}
+      data-test-subj={`languageClientMenuItem-${lang.value}`}
+      icon={currentLanguage === lang.value ? 'check' : 'empty'}
+      onClick={() => handleLanguageSelect(lang.value)}
     >
-      {i18n.translate('console.consoleMenu.languageClientsBackButton', {
-        defaultMessage: 'Back',
-      })}
-    </EuiContextMenuItem>,
-    ...AVAILABLE_LANGUAGES.map((lang) => (
-      <EuiContextMenuItem
-        key={lang.value}
-        data-test-subj={`languageClientMenuItem-${lang.value}`}
-        icon={currentLanguage === lang.value ? 'check' : 'empty'}
-        onClick={() => handleLanguageSelect(lang.value)}
-      >
-        {lang.label}
-      </EuiContextMenuItem>
-    )),
-  ];
+      {lang.label}
+    </EuiContextMenuItem>
+  ));
 
   // Main menu items
   const mainMenuItems = [
@@ -274,7 +265,7 @@ export const ContextMenu = ({
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <span>›</span>
+                <span style={{ fontSize: euiTheme.size.l }}>›</span>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiContextMenuItem>,
@@ -321,6 +312,29 @@ export const ContextMenu = ({
 
   const activePanel = panels.find((panel) => panel.id === activePanelId);
 
+  // Custom title with back button for language clients panel
+  const languageClientsTitle =
+    activePanelId === 'languageClients' ? (
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            size="s"
+            iconType="arrowLeft"
+            aria-label={i18n.translate('console.consoleMenu.languageClientsBackAriaLabel', {
+              defaultMessage: 'Back to main menu',
+            })}
+            onClick={() => setActivePanelId('main')}
+            data-test-subj="languageClientsPanelBackButton"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <strong>{activePanel?.title}</strong>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ) : (
+      activePanel?.title
+    );
+
   return (
     <>
       <EuiPopover
@@ -333,7 +347,7 @@ export const ContextMenu = ({
       >
         <EuiContextMenuPanel
           items={activePanel?.items}
-          title={activePanel?.title}
+          title={languageClientsTitle}
           data-test-subj="consoleMenu"
         />
       </EuiPopover>
