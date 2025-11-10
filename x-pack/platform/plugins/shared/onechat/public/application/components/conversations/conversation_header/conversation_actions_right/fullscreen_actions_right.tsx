@@ -11,6 +11,9 @@ import {
   EuiButtonEmpty,
   EuiPopover,
   EuiContextMenuPanel,
+  EuiTitle,
+  EuiSpacer,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
@@ -28,11 +31,17 @@ const fullscreenLabels = {
   actionsAriaLabel: i18n.translate('xpack.onechat.conversationActions.actionsAriaLabel', {
     defaultMessage: 'Actions',
   }),
+  edit: i18n.translate('xpack.onechat.conversationActions.edit', {
+    defaultMessage: 'Edit',
+  }),
   editCurrentAgent: i18n.translate('xpack.onechat.conversationActions.editCurrentAgent', {
     defaultMessage: 'Edit current agent',
   }),
   cloneAgentAsNew: i18n.translate('xpack.onechat.conversationActions.cloneAgentAsNew', {
     defaultMessage: 'Clone agent as new',
+  }),
+  manage: i18n.translate('xpack.onechat.conversationActions.manage', {
+    defaultMessage: 'Manage',
   }),
   agents: i18n.translate('xpack.onechat.conversationActions.agents', {
     defaultMessage: 'Agents',
@@ -40,6 +49,19 @@ const fullscreenLabels = {
   tools: i18n.translate('xpack.onechat.conversationActions.tools', {
     defaultMessage: 'Tools',
   }),
+};
+
+const renderMenuSectionTitle = (title: string) => {
+  return (
+    <>
+      <EuiSpacer size="xs" />
+      <EuiTitle size="xxxs">
+        <h1>{title}</h1>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiHorizontalRule margin="none" />
+    </>
+  );
 };
 
 export const FullScreenActionsRight: React.FC = () => {
@@ -58,6 +80,7 @@ export const FullScreenActionsRight: React.FC = () => {
   };
 
   const menuItems = [
+    renderMenuSectionTitle(fullscreenLabels.edit),
     <EuiContextMenuItem
       key="edit-current-agent"
       icon="pencil"
@@ -81,6 +104,7 @@ export const FullScreenActionsRight: React.FC = () => {
           </EuiContextMenuItem>,
         ]
       : []),
+    renderMenuSectionTitle(fullscreenLabels.manage),
     <ExternalLinkMenuItem
       key="agents"
       icon="machineLearningApp"
