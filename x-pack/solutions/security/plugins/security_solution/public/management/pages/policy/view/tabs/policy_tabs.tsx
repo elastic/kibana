@@ -316,6 +316,7 @@ export const PolicyTabs = React.memo(() => {
                   getArtifactPath={getTrustedAppsListPath}
                   getPolicyArtifactsPath={getPolicyDetailsArtifactsListPath}
                   canWriteArtifact={canWriteTrustedApplications}
+                  CardDecorator={ProcessDescendantsIndicator}
                 />
               </>
             ),
