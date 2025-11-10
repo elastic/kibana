@@ -95,10 +95,10 @@ import {
 } from './lib/detection_engine/rule_types/create_security_rule_type_wrapper';
 
 import { RequestContextFactory } from './request_context_factory';
-import { alertsTool } from './assistant/tools/onechat/alerts_tool';
-import { securityLabsTool } from './assistant/tools/onechat/security_labs_tool';
-import { productDocumentationTool } from './assistant/tools/onechat/product_documentation_tool';
-import { createSecurityAgentDefinition } from './assistant/agents/security_agent';
+import { alertsTool } from './agent_builder/tools/alerts_tool';
+import { securityLabsTool } from './agent_builder/tools/security_labs_tool';
+import { productDocumentationTool } from './agent_builder/tools/product_documentation_tool';
+import { createSecurityAgentDefinition } from './agent_builder/agents/security_agent';
 
 import type {
   ISecuritySolutionPlugin,
