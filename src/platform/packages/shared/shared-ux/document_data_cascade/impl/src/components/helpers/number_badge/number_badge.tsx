@@ -84,7 +84,9 @@ export function NumberBadge({ value, shortenAtExpSize, textAlign = 'right' }: Nu
       <h5>
         {Math.floor(value / Math.pow(10, shortenAtExpSize)) >= 1
           ? getSiPrefixedNumber(value)
-          : value}
+          : Number.isInteger(value)
+          ? value
+          : value.toFixed(2)}
       </h5>
     </EuiText>
   );
