@@ -8,6 +8,7 @@
 import { callApmApi } from './create_call_apm_api';
 import { LatencyDistributionChartType } from '../../../common/latency_distribution_chart_types';
 import { ENVIRONMENT_ALL_VALUE } from '../../../common/environment_filter_values';
+import { DEFAULT_PERCENTILE_THRESHOLD } from '../../../common/correlations/constants';
 
 export const fetchLatencyOverallSpanDistribution = (
   {
@@ -35,7 +36,7 @@ export const fetchLatencyOverallSpanDistribution = (
         chartType: LatencyDistributionChartType.spanLatency,
         environment: ENVIRONMENT_ALL_VALUE,
         kuery: '',
-        percentileThreshold: 95,
+        percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
         isOtel,
       },
     },
