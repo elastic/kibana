@@ -29,7 +29,14 @@ export const Resource = ({ fields, limited = false, onFilter, ...props }: Resour
   return (
     <EuiFlexGroup gutterSize="s" {...props}>
       {displayedFields.map(({ name, value, ResourceBadge, Icon }) => (
-        <ResourceBadge key={name} property={name} value={value} icon={Icon} onFilter={onFilter} />
+        <ResourceBadge
+          key={name}
+          property={name}
+          value={value}
+          icon={Icon}
+          onFilter={onFilter}
+          truncateTitle={true}
+        />
       ))}
       {extraFieldsCount > 0 && (
         <div>
