@@ -34,6 +34,7 @@ import { LeafPrinter } from './leaf_printer';
 import type {
   ESQLAstBaseItem,
   ESQLAstCommand,
+  ESQLAstItem,
   ESQLAstQueryExpression,
   ESQLProperNode,
 } from '../types';
@@ -395,14 +396,29 @@ export class BasicPrettyPrinter {
           operator = this.keyword(operator);
 
           const group = binaryExpressionGroup(ctx.node);
+          // Note: right operand may be undefined for incomplete expressions.
+          // For assignments (=), left is the target name, right is the expression to assign.
           const [left, right] = ctx.arguments();
-          const groupLeft = binaryExpressionGroup(left);
-          const groupRight = binaryExpressionGroup(right);
+
+          const formatOperand = (operand: ESQLAstItem, index: number): string => {
+            const operandGroup = binaryExpressionGroup(operand);
+            let formatted = ctx.visitArgument(index);
+
+            const shouldGroup =
+              operandGroup &&
+              (operandGroup === BinaryExpressionGroup.unknown || operandGroup < group);
+
+            if (shouldGroup) {
+              formatted = `(${formatted})`;
+            }
+
+            return formatted;
+          };
 
           if (
             node.name === '*' &&
             ((isIntegerLiteral(left) && Math.abs(left.value) === 1) ||
-              (isIntegerLiteral(right) && Math.abs(right.value) === 1))
+              (right && isIntegerLiteral(right) && Math.abs(right.value) === 1))
           ) {
             const formatted = this.simplifyMultiplicationByOne(node);
 
@@ -411,22 +427,8 @@ export class BasicPrettyPrinter {
             }
           }
 
-          let leftFormatted = ctx.visitArgument(0);
-          let rightFormatted = ctx.visitArgument(1);
-
-          const shouldGroupLeftExpressions =
-            groupLeft && (groupLeft === BinaryExpressionGroup.unknown || groupLeft < group);
-
-          if (shouldGroupLeftExpressions) {
-            leftFormatted = `(${leftFormatted})`;
-          }
-
-          const shouldGroupRightExpressions =
-            groupRight && (groupRight === BinaryExpressionGroup.unknown || groupRight < group);
-
-          if (shouldGroupRightExpressions) {
-            rightFormatted = `(${rightFormatted})`;
-          }
+          const leftFormatted = formatOperand(left, 0);
+          const rightFormatted = right ? formatOperand(right, 1) : '';
 
           const formatted = `${leftFormatted} ${operator} ${rightFormatted}`;
 
