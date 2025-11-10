@@ -83,7 +83,7 @@ export function initializeSettingsManager(initialState: DashboardState) {
         stateManager.reinitializeState({
           ...stateManager.getLatestState(),
           ...settings,
-        })
+        });
       },
       setTags: stateManager.api.setTags,
       timeRestore$: stateManager.api.timeRestore$,
