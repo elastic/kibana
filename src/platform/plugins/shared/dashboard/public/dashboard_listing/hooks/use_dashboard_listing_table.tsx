@@ -24,7 +24,7 @@ import {
 } from '../../utils/telemetry_constants';
 import { getDashboardBackupService } from '../../services/dashboard_backup_service';
 import { getDashboardRecentlyAccessedService } from '../../services/dashboard_recently_accessed_service';
-import { coreServices } from '../../services/kibana_services';
+import { coreServices, savedObjectsTaggingService } from '../../services/kibana_services';
 import { logger } from '../../services/logger';
 import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
 import {
@@ -215,6 +215,7 @@ export const useDashboardListingTable = ({
               saved_object_type: DASHBOARD_CONTENT_ID,
             },
           });
+          const tagApi = savedObjectsTaggingService?.getTaggingApi();
           return {
             total,
             hits: dashboards.map(
@@ -226,7 +227,9 @@ export const useDashboardListingTable = ({
                   createdAt: meta.createdAt,
                   createdBy: meta.createdBy,
                   updatedBy: meta.updatedBy,
-                  references: (data.tags ?? []).map((tag) => ({ id: tag, name: tag, type: 'tag' })),
+                  references: tagApi && data.tags
+                    ? data.tags.map(tagApi.ui.tagIdToReference)
+                    : [],
                   managed: meta.managed,
                   attributes: {
                     title: data.title,
