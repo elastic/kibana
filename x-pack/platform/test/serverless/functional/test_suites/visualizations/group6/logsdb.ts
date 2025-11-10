@@ -295,6 +295,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               await lens.createLayer('annotations');
 
               await lens.assertLayerCount(2);
+              // switch to the annotation tab
+              await lens.ensureLayerTabIsActive(1);
               expect(
                 await (
                   await testSubjects.find('lnsXY_xAnnotationsPanel > lns-dimensionTrigger')
@@ -330,6 +332,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               await lens.createLayer('annotations');
 
               await lens.assertLayerCount(2);
+              // switch to the annotation tab
+              await lens.ensureLayerTabIsActive(1);
               expect(
                 await (
                   await testSubjects.find('lnsXY_xAnnotationsPanel > lns-dimensionTrigger')
@@ -487,6 +491,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               await lens.createLayer('annotations');
 
               await lens.assertLayerCount(2);
+              // switch to the annotation tab
+              await lens.ensureLayerTabIsActive(1);
               expect(
                 await (
                   await testSubjects.find('lnsXY_xAnnotationsPanel > lns-dimensionTrigger')
@@ -522,6 +528,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               await lens.createLayer('annotations');
 
               await lens.assertLayerCount(2);
+              // switch to the annotation tab
+              await lens.ensureLayerTabIsActive(1);
               expect(
                 await (
                   await testSubjects.find('lnsXY_xAnnotationsPanel > lns-dimensionTrigger')

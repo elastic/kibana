@@ -246,9 +246,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await lens.createLayer('annotations');
 
-      expect(
-        (await find.allByCssSelector(`[data-test-subj^="unifiedTabs_selectTabBtn_"]`)).length
-      ).to.eql(2);
+      await lens.assertLayerCount(2);
+      // switch to the annotation tab
+      await lens.ensureLayerTabIsActive(1);
       expect(
         await (
           await testSubjects.find('lnsXY_xAnnotationsPanel > lns-dimensionTrigger')
@@ -297,6 +297,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardPanelActions.clickInlineEdit();
 
       await lens.assertLayerCount(2);
+      // switch to the annotation tab
+      await lens.ensureLayerTabIsActive(1);
       expect(
         await (
           await testSubjects.find('lnsXY_xAnnotationsPanel > lns-dimensionTrigger')
@@ -320,6 +322,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug('Adds reference line');
 
       await lens.createLayer('referenceLine');
+
+      await lens.assertLayerCount(2);
+      // switch to the reference line tab
+      await lens.ensureLayerTabIsActive(1);
 
       await lens.configureDimension({
         dimension: 'lns-layerPanel-1 > lnsXY_yReferenceLineLeftPanel > lns-dimensionTrigger',
