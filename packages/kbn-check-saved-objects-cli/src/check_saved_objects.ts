@@ -10,18 +10,30 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import { startServers, stopServers } from './util/servers';
 import { assertValidUpdates, fetchSnapshot, takeSnapshot } from './snapshots';
+import type { MigrationSnapshot } from './types';
+import { getFixtures } from './migrations';
 
 interface CheckSavedObjectsParams {
-  shas: string[];
+  gitRev: string;
   log: ToolingLog;
+  fix?: boolean;
 }
 
-export async function checkSavedObjects({ shas, log }: CheckSavedObjectsParams) {
-  log.info(`Starting ES + Kibana to capture current SO type definitions`);
-  const serverHandles = await startServers();
+export async function checkSavedObjects({ gitRev, log, fix }: CheckSavedObjectsParams) {
+  const serverHandles = await startServers(log);
 
   try {
-    await assertValidUpdatesFromBaselines({ serverHandles, baselines: shas, log });
+    const [from, to] = await Promise.all([
+      fetchSnapshot({ gitRev, log }),
+      takeSnapshot({ log, serverHandles }),
+    ]);
+
+    const updatedTypes = assertValidUpdates({ from, to, log });
+
+    // ensures that each of the updated types defines fixtures that allow testing the new modelVersions
+    await getFixtures({ snapshot: to, serverHandles, types: updatedTypes, fix, log });
+
+    // TODO use the @kbn/migrator-test-kit to test migrations forwards and backwards
   } finally {
     try {
       log.info(`Stopping ES + Kibana after the verifications`);
@@ -36,22 +48,22 @@ export async function checkSavedObjects({ shas, log }: CheckSavedObjectsParams) 
 }
 
 interface AssertValidUpdatesFromBaselinesParams {
-  serverHandles: any;
+  currentVersionSnapshot: MigrationSnapshot;
   baselines: string[];
   log: ToolingLog;
 }
 
-export async function assertValidUpdatesFromBaselines({
-  serverHandles,
+export async function assertValidUpdatesFromBaseline({
+  currentVersionSnapshot,
   baselines,
   log,
-}: AssertValidUpdatesFromBaselinesParams): Promise<void> {
-  const current = await takeSnapshot({ log, serverHandles });
-
-  await Promise.all(
+}: AssertValidUpdatesFromBaselinesParams): Promise<string[]> {
+  const updatedTypesPerBaseline = await Promise.all(
     baselines.map(async (gitRev) => {
       const from = await fetchSnapshot({ gitRev, log });
-      assertValidUpdates({ from, to: current, log });
+      return assertValidUpdates({ from, to: currentVersionSnapshot, log });
     })
   );
+
+  return Array.from(new Set(updatedTypesPerBaseline.flat())).sort();
 }

@@ -37,9 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // a11y violation caught here - if this rest is unskipped remove the test below it.
-    // https://github.com/elastic/kibana/issues/134139
-    it.skip('a11y tests for Alerts modal remind later button', async function () {
+    it('a11y tests for Alerts modal remind later button', async function () {
       await testSubjects.click('alerts-modal-remind-later-button');
       await a11y.testAppSnapshot();
     });
