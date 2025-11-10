@@ -8,6 +8,6 @@
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/ui-theme",
-    "@kbn/core-chrome-layout-constants",
+    "@kbn/core-chrome-layout-utils",
   ]
 }
