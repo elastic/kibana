@@ -30,7 +30,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 jest.mock('../../../hooks/use_workflow_url_state', () => ({
   useWorkflowUrlState: () => mockUseWorkflowUrlState(),
 }));
-jest.mock('../../../entities/workflows/model/use_workflow_execution', () => ({
+jest.mock('@kbn/workflows-ui', () => ({
   useWorkflowExecution: () => mockUseWorkflowExecution(),
 }));
 jest.mock('../../../entities/workflows/model/use_workflow_actions', () => ({
