@@ -183,6 +183,20 @@ export class WebElementWrapper {
   }
 
   /**
+   * Tests whether this element is enabled, based on both the disabled attribute and aria-disabled attribute.
+   *
+   * @return {Promise<boolean>}
+   */
+  public async isEuiEnabled() {
+    return await this.retryCall(async function isEuiEnabled(wrapper) {
+      const isEnabled = await wrapper._webElement.isEnabled();
+      const isAriaDisabled = await wrapper._webElement.getAttribute('aria-disabled');
+
+      return isEnabled && isAriaDisabled !== 'true';
+    });
+  }
+
+  /**
    * Tests whether this element is selected.
    * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#isSelected
    *
