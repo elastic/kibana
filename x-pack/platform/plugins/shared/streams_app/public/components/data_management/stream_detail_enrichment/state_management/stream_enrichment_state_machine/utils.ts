@@ -162,7 +162,7 @@ export const spawnStep = <
   TAssignArgs extends AssignArgs<StreamEnrichmentContextType, any, any, any>
 >(
   step: StreamlangStepWithUIAttributes,
-  assignArgs: Pick<TAssignArgs, 'self' | 'spawn'>,
+  assignArgs: TAssignArgs,
   options?: { isNew: boolean }
 ) => {
   const { spawn, self } = assignArgs;

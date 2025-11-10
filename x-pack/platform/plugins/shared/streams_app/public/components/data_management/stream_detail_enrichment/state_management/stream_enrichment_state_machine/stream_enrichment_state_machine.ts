@@ -105,13 +105,13 @@ export const streamEnrichmentMachine = setup({
       definition: params.definition,
     })),
     /* Steps actions */
-    setupSteps: assign(({ context, spawn, self }) => {
+    setupSteps: assign((assignArgs) => {
       // Clean-up pre-existing steps
-      context.stepRefs.forEach(stopChild);
+      assignArgs.context.stepRefs.forEach(stopChild);
       // Setup processors from the stream definition
-      const uiSteps = convertStepsForUI(context.definition.stream.ingest.processing);
+      const uiSteps = convertStepsForUI(assignArgs.context.definition.stream.ingest.processing);
       const stepRefs = uiSteps.map((step) => {
-        return spawnStep(step, { self, spawn });
+        return spawnStep(step, assignArgs);
       });
 
       return {
