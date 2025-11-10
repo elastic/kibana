@@ -63,7 +63,9 @@ export async function fetchLensFeatureFlags(
 }
 
 function fetchFeatureFlagFn(service: FeatureFlagsStartPublic | FeatureFlagsStartServer) {
-  return async function fetchFeatureFlag(flag: LensFeatureFlag) {
+  return function fetchFeatureFlag(
+    flag: LensFeatureFlag
+  ): boolean | number | string | Promise<boolean | number | string> {
     switch (flag.type) {
       case 'boolean':
         return service.getBooleanValue(flag.id, flag.fallback);
