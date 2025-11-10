@@ -8,10 +8,28 @@
  */
 
 import React from 'react';
-import { Title, Subtitle, Description, Primary, Stories } from '@storybook/blocks';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import type { Decorator } from '@storybook/react';
+import { Subject } from 'rxjs';
+import { ThemeProvider } from '@emotion/react';
+import type { CoreStart } from '@kbn/core/public';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+
+const uiSettings = {
+  get: (setting: string) => {
+    switch (setting) {
+      case 'dateFormat':
+        return 'MMM D, YYYY @ HH:mm:ss.SSS';
+      case 'dateFormat:scaled':
+        return [['', 'HH:mm:ss.SSS']];
+    }
+  },
+  get$: () => new Subject(),
+};
+
+const coreMock = {
+  uiSettings,
+} as unknown as CoreStart;
+const KibanaReactContext = createKibanaReactContext(coreMock);
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -21,27 +39,16 @@ const queryClient = new QueryClient({
   },
 });
 
-export const decorators: Decorator[] = [
-  (Story) => (
-    <QueryClientProvider client={queryClient}>
-      <Story />
-      <ReactQueryDevtools initialIsOpen={false} />
-    </QueryClientProvider>
-  ),
-];
+export const StorybookProviders: FC<PropsWithChildren<unknown>> = ({ children }) => {
+  const store = createMockStore();
 
-export const parameters = {
-  docs: {
-    page: () => {
-      <>
-        <Title />
-        <Subtitle />
-        <Description />
-        <Primary />
-        <QueryClientProvider client={queryClient}>
-          <Stories />
-        </QueryClientProvider>
-      </>;
-    },
-  },
+  return (
+    <KibanaReactContext.Provider>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+          {children}
+        </ThemeProvider>
+      </QueryClientProvider>
+    </KibanaReactContext.Provider>
+  );
 };

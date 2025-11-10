@@ -7,6 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from 'zod/v3';
-export { isZod } from './util';
-export type { ZodEsque } from './types';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/response-ops/form-generator'],
+  setupFilesAfterEnv: [
+    '<rootDir>/src/platform/packages/shared/response-ops/form-generator/setup_tests.ts',
+  ],
+};
