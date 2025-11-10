@@ -11,6 +11,8 @@ import type { HttpSetup } from '@kbn/core-http-browser';
 import { httpResponseIntoObservable } from '@kbn/sse-utils-client';
 import type { ChatEvent, AgentCapabilities } from '@kbn/onechat-common';
 import { getKibanaDefaultAgentCapabilities } from '@kbn/onechat-common/agents';
+import type { AttachmentInput } from '@kbn/onechat-common/attachments';
+import type { BrowserApiToolMetadata } from '@kbn/onechat-common';
 import { publicApiPath } from '../../../common/constants';
 import type { ChatRequestBodyPayload } from '../../../common/http_api/chat';
 import { unwrapOnechatErrors } from '../utils/errors';
@@ -22,6 +24,8 @@ export interface ChatParams {
   conversationId?: string;
   capabilities?: AgentCapabilities;
   input: string;
+  attachments?: AttachmentInput[];
+  browserApiTools?: BrowserApiToolMetadata[];
 }
 
 export class ChatService {
@@ -38,7 +42,10 @@ export class ChatService {
       conversation_id: params.conversationId,
       connector_id: params.connectorId,
       capabilities: params.capabilities ?? getKibanaDefaultAgentCapabilities(),
+      attachments: params.attachments,
+      browser_api_tools: params.browserApiTools ?? [],
     };
+
     return defer(() => {
       return this.http.post(`${publicApiPath}/converse/async`, {
         signal: params.signal,
