@@ -8,7 +8,7 @@
  */
 
 import path from 'path';
-import { CiStats } from '#pipeline-utils';
+import { pickScoutTestGroupRunOrder } from '#pipeline-utils/scout/pick_scout_test_group_run_order';
 
 (async () => {
   try {
@@ -18,7 +18,7 @@ import { CiStats } from '#pipeline-utils';
       'test_configs',
       'scout_playwright_configs.json'
     );
-    await CiStats.pickScoutTestGroupRunOrder(scoutConfigsPath);
+    await pickScoutTestGroupRunOrder(scoutConfigsPath);
   } catch (ex) {
     console.error('CI Stats Error', ex.message);
     if (ex.response) {
