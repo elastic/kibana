@@ -21,13 +21,18 @@ export default function ({ getService }: FtrProviderContext) {
       const supertest = getService('supertest');
       it('updated_by is empty', async () => {
         const createResponse = await supertest
-          .post('/api/content_management/rpc/create')
+          .post('/api/dashboards/dashboard')
           .set('kbn-xsrf', 'true')
-          .send(sampleDashboard);
+          .set('elastic-api-version', '1')
+          .send({
+            data: {
+              title: 'Sample dashboard',
+            },
+          });
 
         expect(createResponse.status).to.be(200);
-        expect(createResponse.body.result.result.item).to.be.ok();
-        expect(createResponse.body.result.result.item).to.not.have.key('updatedBy');
+        expect(createResponse.body.data).to.be.ok();
+        expect(createResponse.body.meta).to.not.have.key('updatedBy');
 
         const updateResponse = await supertest
           .post('/api/content_management/rpc/update')
@@ -39,7 +44,7 @@ export default function ({ getService }: FtrProviderContext) {
               references: [],
               mergeAttributes: false,
             },
-            id: createResponse.body.result.result.item.id,
+            id: createResponse.body.id,
             data: {
               title: 'updated title',
             },
@@ -52,7 +57,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/api/content_management/rpc/get')
           .set('kbn-xsrf', 'true')
           .send({
-            id: createResponse.body.result.result.item.id,
+            id: createResponse.body.id,
             contentTypeId: sampleDashboard.contentTypeId,
             version: sampleDashboard.version,
           });
@@ -76,10 +81,15 @@ export default function ({ getService }: FtrProviderContext) {
 
       beforeEach(async () => {
         createResponse = await supertestWithoutAuth
-          .post('/api/content_management/rpc/create')
+          .post('/api/dashboards/dashboard')
           .set(interactiveUser.headers)
           .set('kbn-xsrf', 'true')
-          .send(sampleDashboard);
+          .set('elastic-api-version', '1')
+          .send({
+            data: {
+              title: 'Sample dashboard',
+            },
+          });
       });
 
       after(async () => {
@@ -88,9 +98,9 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('updated_by is with profile_id', async () => {
         expect(createResponse.status).to.be(200);
-        expect(createResponse.body.result.result.item).to.be.ok();
-        expect(createResponse.body.result.result.item).to.have.key('updatedBy');
-        expect(createResponse.body.result.result.item.updatedBy).to.be(interactiveUser.uid);
+        expect(createResponse.body.data).to.be.ok();
+        expect(createResponse.body.meta).to.have.key('updatedBy');
+        expect(createResponse.body.meta.updatedBy).to.be(interactiveUser.uid);
       });
 
       it('updated_by is empty after update with non interactive user', async () => {
@@ -104,7 +114,7 @@ export default function ({ getService }: FtrProviderContext) {
               references: [],
               mergeAttributes: false,
             },
-            id: createResponse.body.result.result.item.id,
+            id: createResponse.body.id,
             data: {
               title: 'updated title',
             },
@@ -116,7 +126,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/api/content_management/rpc/get')
           .set('kbn-xsrf', 'true')
           .send({
-            id: createResponse.body.result.result.item.id,
+            id: createResponse.body.id,
             contentTypeId: sampleDashboard.contentTypeId,
             version: sampleDashboard.version,
           });
@@ -124,13 +134,13 @@ export default function ({ getService }: FtrProviderContext) {
         expect(getResponse.status).to.be(200);
         expect(getResponse.body.result.result.item).to.be.ok();
 
-        const createdObject = createResponse.body.result.result.item;
+        const createdMeta = createResponse.body.meta;
         const updatedObject = getResponse.body.result.result.item;
 
         expect(updatedObject).to.not.have.key('updatedBy');
-        expect(updatedObject.createdBy).to.eql(createdObject.createdBy);
-        expect(updatedObject.createdAt).to.eql(createdObject.createdAt);
-        expect(updatedObject.updatedAt).to.be.greaterThan(createdObject.updatedAt);
+        expect(updatedObject.createdBy).to.eql(createdMeta.createdBy);
+        expect(updatedObject.createdAt).to.eql(createdMeta.createdAt);
+        expect(updatedObject.updatedAt).to.be.greaterThan(createdMeta.updatedAt);
       });
 
       it('updated_by is with profile_id of another user after update', async () => {
@@ -150,7 +160,7 @@ export default function ({ getService }: FtrProviderContext) {
               references: [],
               mergeAttributes: false,
             },
-            id: createResponse.body.result.result.item.id,
+            id: createResponse.body.id,
             data: {
               title: 'updated title',
             },
@@ -162,7 +172,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/api/content_management/rpc/get')
           .set('kbn-xsrf', 'true')
           .send({
-            id: createResponse.body.result.result.item.id,
+            id: createResponse.body.id,
             contentTypeId: sampleDashboard.contentTypeId,
             version: sampleDashboard.version,
           });
@@ -170,15 +180,15 @@ export default function ({ getService }: FtrProviderContext) {
         expect(getResponse.status).to.be(200);
         expect(getResponse.body.result.result.item).to.be.ok();
 
-        const createdObject = createResponse.body.result.result.item;
+        const createdMeta = createResponse.body.meta;
         const updatedObject = getResponse.body.result.result.item;
 
         expect(updatedObject).to.have.key('updatedBy');
-        expect(updatedObject.updatedBy).to.not.eql(createdObject.updatedBy);
+        expect(updatedObject.updatedBy).to.not.eql(createdMeta.updatedBy);
         expect(updatedObject.createdBy).to.eql(interactiveUser.uid);
         expect(updatedObject.updatedBy).to.eql(interactiveUser2.uid);
-        expect(updatedObject.createdAt).to.eql(createdObject.createdAt);
-        expect(updatedObject.updatedAt).to.be.greaterThan(createdObject.updatedAt);
+        expect(updatedObject.createdAt).to.eql(createdMeta.createdAt);
+        expect(updatedObject.updatedAt).to.be.greaterThan(createdMeta.updatedAt);
       });
     });
   });
