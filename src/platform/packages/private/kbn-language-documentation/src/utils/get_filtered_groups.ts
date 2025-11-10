@@ -61,7 +61,7 @@ export const getFilteredGroups = (
           }
         });
 
-        // Show items with label matches first
+        // Show items with label matches first and highlight matches
         const items = [...labelMatches, ...descriptionMatches].map(
           (item: DocumentationGroupItem) => ({
             label: highlightMatches(item.label, searchText),
@@ -70,7 +70,7 @@ export const getFilteredGroups = (
               markdownContent: highlightMatches(
                 item.description?.markdownContent || '',
                 searchText
-              ).toString(),
+              ),
             },
           })
         );
@@ -88,7 +88,11 @@ export const getFilteredGroups = (
       // Clean hasLabelMatches field
       .map((group) => {
         const { hasLabelMatches, ...rest } = group;
-        return rest;
+        return {
+          ...rest,
+          description: highlightMatches(group.description ?? '', searchText),
+          label: highlightMatches(group.label, searchText),
+        };
       }) ?? []
   );
 };

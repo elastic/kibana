@@ -97,9 +97,13 @@ function DocumentationContent({
                   }
                 }}
               >
-                <h2>{helpGroup.label}</h2>
+                <h2>{<MarkdownWithHighlight markdownContent={helpGroup.label} />}</h2>
 
-                <p>{helpGroup.description}</p>
+                {helpGroup.description !== undefined ? (
+                  <p>
+                    <MarkdownWithHighlight markdownContent={helpGroup.description} />
+                  </p>
+                ) : null}
 
                 {filteredGroups?.[index].items.map((helpItem) => {
                   return (
