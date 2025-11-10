@@ -6,7 +6,7 @@
  */
 
 import { ChatPromptTemplate } from '@langchain/core/prompts';
-export const CREATE_SEMANTIC_QUERY_PROMPT = ChatPromptTemplate.fromMessages([
+export const CREATE_SPLUNK_SEMANTIC_QUERY_PROMPT = ChatPromptTemplate.fromMessages([
   [
     'system',
     `You are a helpful assistant that helps in translating provided titles, descriptions and data sources into a single summary of keywords specifically crafted to be used as a semantic search query, which are usually short and includes keywords that are valid for the usecase.

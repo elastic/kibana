@@ -6,6 +6,7 @@
  */
 
 import type { AuthenticatedUser, KibanaRequest, Logger } from '@kbn/core/server';
+import { isResourceSupportedVendor } from '../../../../../common/siem_migrations/rules/resources/types';
 import type {
   ElasticRule,
   RuleMigration,
@@ -106,7 +107,9 @@ export class RuleMigrationTaskRunner extends SiemMigrationTaskRunner<
   protected async prepareTaskInput(
     migrationRule: StoredRuleMigrationRule
   ): Promise<RuleMigrationTaskInput> {
-    const resources = await this.retriever.resources.getResources(migrationRule.original_rule);
+    const resources = isResourceSupportedVendor(migrationRule.original_rule.vendor)
+      ? await this.retriever.resources.getResources(migrationRule.original_rule)
+      : {};
     return {
       id: migrationRule.id,
       original_rule: migrationRule.original_rule,

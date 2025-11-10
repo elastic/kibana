@@ -58,7 +58,9 @@ export const LangSmithEvaluationOptions = LangSmithOptions.merge(
  * The vendor identifier.
  */
 export type SiemMigrationVendor = z.infer<typeof SiemMigrationVendor>;
-export const SiemMigrationVendor = z.literal('splunk');
+export const SiemMigrationVendor = z.enum(['splunk', 'qradar']);
+export type SiemMigrationVendorEnum = typeof SiemMigrationVendor.enum;
+export const SiemMigrationVendorEnum = SiemMigrationVendor.enum;
 
 /**
  * A comment for the migration process

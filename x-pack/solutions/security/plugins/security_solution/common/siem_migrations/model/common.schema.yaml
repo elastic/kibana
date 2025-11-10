@@ -41,6 +41,7 @@ components:
       description: The vendor identifier.
       enum:
         - splunk
+        - qradar
 
     MigrationComment:
       type: object
