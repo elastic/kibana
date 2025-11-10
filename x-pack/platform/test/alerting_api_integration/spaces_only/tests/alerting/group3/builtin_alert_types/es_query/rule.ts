@@ -42,8 +42,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     getAllAADDocs,
   } = getRuleServices(getService);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/241403
-  describe.skip('rule', () => {
+  describe('testtest rule', () => {
     let endDate: string;
     let connectorId: string;
     const objectRemover = new ObjectRemover(supertest);
@@ -232,7 +231,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
             name: 'always fire',
             size: 100,
             thresholdComparator: '>',
-            threshold: [-1],
+            threshold: [0],
             searchType: 'searchSource',
             searchConfiguration: {
               query: {
@@ -254,7 +253,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         await initData();
 
         const messagePattern =
-          /Document count is \d+.?\d* in the last 30s in kibana-alerting-test-data (?:index|data view). Alert when greater than -1./;
+          /Document count is \d+.?\d* in the last 30s in kibana-alerting-test-data (?:index|data view). Alert when greater than 0./;
 
         const docs = await waitForDocs(2);
         for (let i = 0; i < docs.length; i++) {
