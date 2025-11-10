@@ -469,6 +469,16 @@ const providersSchemas = [
         type: 'str',
         supported_task_types: ['text_embedding', 'completion'],
       },
+      unknown_field: {
+        default_value: null,
+        description: 'Field used to test unknown field handling in the UI.',
+        label: 'Unknown Field',
+        required: true,
+        sensitive: false,
+        updatable: true,
+        type: 'unknown',
+        supported_task_types: ['text_embedding', 'completion'],
+      },
     },
   },
   {
@@ -797,6 +807,20 @@ describe('ConnectorFields renders', () => {
     expect(getAllByTestId('url-input')[0]).toHaveValue(openAiConnector.config?.providerConfig?.url);
     expect(getAllByTestId('taskTypeSelectDisabled')[0]).toBeInTheDocument();
     expect(getAllByTestId('taskTypeSelectDisabled')[0]).toHaveTextContent('completion');
+  });
+
+  test('openai provider unknown fields are not rendered', () => {
+    const { getAllByTestId, queryByTestId } = render(
+      <ConnectorFormTestProvider connector={openAiConnector}>
+        <ConnectorFields readOnly={false} isEdit={true} registerPreSubmitValidator={() => {}} />
+      </ConnectorFormTestProvider>
+    );
+    expect(getAllByTestId('provider-select')[0]).toBeInTheDocument();
+    expect(getAllByTestId('provider-select')[0]).toHaveValue('OpenAI');
+
+    expect(queryByTestId('unknown_field-input')).not.toBeInTheDocument();
+    expect(getAllByTestId('url-input')[0]).toBeInTheDocument();
+    expect(getAllByTestId('url-input')[0]).toHaveValue(openAiConnector.config?.providerConfig?.url);
   });
 
   test('googleaistudio provider fields are rendered', () => {
