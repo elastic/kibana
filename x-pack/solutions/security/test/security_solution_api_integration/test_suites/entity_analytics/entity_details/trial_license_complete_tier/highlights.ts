@@ -304,7 +304,7 @@ export default function ({ getService }: FtrProviderContext) {
         },
         anomalies: [],
       });
-      expect(body.replacements).toEqual(expect.any(Object));
+      expect(Object.values(body.replacements)).toEqual(['un-existent-host']);
       expect(body.prompt).toContain('Generate markdown text with most important information');
     });
 

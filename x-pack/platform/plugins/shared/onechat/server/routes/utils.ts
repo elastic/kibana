@@ -8,3 +8,8 @@
 export const getTechnicalPreviewWarning = (featureName: string) => {
   return `${featureName} is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.`;
 };
+
+/**
+ * Timeout for agentic features
+ */
+export const AGENT_SOCKET_TIMEOUT_MS = 5 * 60 * 1000;

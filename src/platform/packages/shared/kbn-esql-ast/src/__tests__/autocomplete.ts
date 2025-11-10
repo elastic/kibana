@@ -94,7 +94,9 @@ export const suggest = (
     throw new Error(`${commandName.toUpperCase()} command not found in the parsed query`);
   }
 
-  return autocomplete(query, command, mockCallbacks, context, cursorPosition);
+  const contextWithRoot = { ...context, rootAst: root };
+
+  return autocomplete(query, command, mockCallbacks, contextWithRoot, cursorPosition);
 };
 
 export const expectSuggestions = async (
