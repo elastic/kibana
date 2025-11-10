@@ -9,6 +9,7 @@
 
 import { fieldConstants } from '..';
 import { getLogFieldWithFallback } from './get_log_field_with_fallback';
+import type { LogDocumentOverview } from '../types';
 
 const rankingOrder = [
   fieldConstants.MESSAGE_FIELD,
@@ -20,7 +21,7 @@ const rankingOrder = [
 ] as const;
 
 export const getMessageFieldWithFallbacks = (
-  doc: Record<string, unknown>,
+  doc: Record<string, unknown> | LogDocumentOverview,
   { includeFormattedValue = false }: { includeFormattedValue?: boolean } = {}
 ) => {
   return getLogFieldWithFallback(doc, rankingOrder, includeFormattedValue);
