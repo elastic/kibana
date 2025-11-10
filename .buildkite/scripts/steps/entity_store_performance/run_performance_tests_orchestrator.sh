@@ -1,0 +1,91 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+source .buildkite/scripts/common/util.sh
+source .buildkite/scripts/common/vault_fns.sh
+
+.buildkite/scripts/bootstrap.sh
+
+# Get PR number
+if [[ "${BUILDKITE_PULL_REQUEST:-false}" == "false" ]]; then
+  PR_NUMBER="$GITHUB_PR_NUMBER"
+else
+  PR_NUMBER="$BUILDKITE_PULL_REQUEST"
+fi
+
+CLOUD_DEPLOYMENT_NAME="kibana-pr-$PR_NUMBER"
+
+echo "--- Get Cloud Deployment Information"
+CLOUD_DEPLOYMENT_ID=$(ecctl deployment list --output json | jq -r '.deployments[] | select(.name == "'$CLOUD_DEPLOYMENT_NAME'") | .id')
+
+if [ -z "${CLOUD_DEPLOYMENT_ID}" ] || [ "${CLOUD_DEPLOYMENT_ID}" == "null" ]; then
+  echo "Error: Cloud deployment not found for $CLOUD_DEPLOYMENT_NAME"
+  exit 1
+fi
+
+echo "Deployment ID: $CLOUD_DEPLOYMENT_ID"
+
+# Get deployment URLs
+CLOUD_DEPLOYMENT_KIBANA_URL=$(ecctl deployment show "$CLOUD_DEPLOYMENT_ID" | jq -r '.resources.kibana[0].info.metadata.aliased_url')
+CLOUD_DEPLOYMENT_ELASTICSEARCH_URL=$(ecctl deployment show "$CLOUD_DEPLOYMENT_ID" | jq -r '.resources.elasticsearch[0].info.metadata.aliased_url')
+
+echo "Kibana URL: $CLOUD_DEPLOYMENT_KIBANA_URL"
+echo "Elasticsearch URL: $CLOUD_DEPLOYMENT_ELASTICSEARCH_URL"
+
+# Get credentials from legacy vault
+echo "--- Get Deployment Credentials"
+VAULT_TOKEN_BAK="$VAULT_TOKEN"
+VAULT_TOKEN=$(VAULT_ADDR=$LEGACY_VAULT_ADDR vault write -field=token auth/approle/login role_id="$VAULT_ROLE_ID" secret_id="$VAULT_SECRET_ID")
+VAULT_ADDR=$LEGACY_VAULT_ADDR vault login -no-print "$VAULT_TOKEN"
+
+VAULT_USERNAME=$(vault read -address=$LEGACY_VAULT_ADDR -field=username "secret/kibana-issues/dev/cloud-deploy/$CLOUD_DEPLOYMENT_NAME")
+VAULT_PASSWORD=$(vault read -address=$LEGACY_VAULT_ADDR -field=password "secret/kibana-issues/dev/cloud-deploy/$CLOUD_DEPLOYMENT_NAME")
+
+VAULT_TOKEN="$VAULT_TOKEN_BAK"
+
+if [ -z "$VAULT_USERNAME" ] || [ -z "$VAULT_PASSWORD" ]; then
+  echo "Error: Failed to retrieve credentials from vault"
+  exit 1
+fi
+
+# Checkout security-documents-generator
+echo "--- Checkout security-documents-generator"
+SECURITY_DOCS_GEN_DIR="${KIBANA_DIR}/security-documents-generator"
+rm -rf "$SECURITY_DOCS_GEN_DIR"
+
+git clone https://github.com/elastic/security-documents-generator.git "$SECURITY_DOCS_GEN_DIR"
+cd "$SECURITY_DOCS_GEN_DIR"
+
+# Install dependencies
+echo "--- Install dependencies"
+yarn install
+
+# Export variables for test execution script
+export SECURITY_DOCS_GEN_DIR
+export CLOUD_DEPLOYMENT_ELASTICSEARCH_URL
+export CLOUD_DEPLOYMENT_KIBANA_URL
+export CLOUD_DEPLOYMENT_USERNAME="$VAULT_USERNAME"
+export CLOUD_DEPLOYMENT_PASSWORD="$VAULT_PASSWORD"
+
+# Run performance tests
+echo "--- Run Performance Tests"
+source .buildkite/scripts/steps/entity_store_performance/run_performance_tests.sh
+run_performance_tests
+
+# Export variables for reporting script
+export TEST_EXIT_CODE
+export TEST_DURATION
+export TEST_LOG_DIR
+export PERF_DATA_FILE="${PERF_DATA_FILE:-small}"
+export PERF_INTERVAL="${PERF_INTERVAL:-30}"
+export PERF_COUNT="${PERF_COUNT:-10}"
+export CLOUD_DEPLOYMENT_ID
+
+# Generate report
+echo "--- Generate Performance Report"
+source .buildkite/scripts/steps/entity_store_performance/generate_performance_report.sh
+generate_performance_report
+
+exit $TEST_EXIT_CODE
+

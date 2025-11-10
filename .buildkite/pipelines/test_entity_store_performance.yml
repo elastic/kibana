@@ -1,0 +1,110 @@
+env:
+  ELASTIC_PR_COMMENTS_ENABLED: 'true'
+  ELASTIC_GITHUB_BUILD_COMMIT_STATUS_ENABLED: 'true'
+  GITHUB_BUILD_COMMIT_STATUS_CONTEXT: kibana-entity-store-performance-from-pr
+
+steps:
+  - group: 'Entity Store Performance Tests'
+    if: "build.env('GITHUB_PR_LABELS') =~ /ci:entity-store-performance/"
+
+    steps:
+      - command: .buildkite/scripts/lifecycle/pre_build.sh
+        label: Pre-Build
+        timeout_in_minutes: 10
+        agents:
+          provider: gcp
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          machineType: n2-standard-2
+        retry:
+          automatic:
+            - exit_status: '*'
+              limit: 1
+
+      - command: |
+          ts-node .buildkite/scripts/lifecycle/comment_on_pr.ts \
+            --message "Entity store performance tests started at: $BUILDKITE_BUILD_URL" \
+            --context "entity-store-performance-job" \
+            --clear-previous
+        label: Comment with job URL
+        agents:
+          provider: gcp
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          machineType: n2-standard-2
+        timeout_in_minutes: 5
+
+      - wait: ~
+
+      - command: .buildkite/scripts/steps/build_kibana.sh
+        label: Build Kibana Distribution
+        agents:
+          provider: gcp
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          machineType: n2-standard-8
+          preemptible: true
+          diskSizeGb: 125
+        if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
+        timeout_in_minutes: 90
+        key: build
+        retry:
+          automatic:
+            - exit_status: '-1'
+              limit: 3
+
+      - command: .buildkite/scripts/steps/cloud/build_and_deploy.sh
+        label: 'Build and Deploy to Cloud'
+        agents:
+          provider: gcp
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          machineType: n2-standard-2
+          preemptible: true
+        timeout_in_minutes: 30
+        depends_on: build
+        retry:
+          automatic:
+            - exit_status: '-1'
+              limit: 3
+
+      - wait: ~
+
+      - command: .buildkite/scripts/steps/entity_store_performance/run_performance_tests_orchestrator.sh
+        label: 'Run Entity Store Performance Tests'
+        agents:
+          provider: gcp
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          machineType: n2-standard-2
+        timeout_in_minutes: 60
+        depends_on: build
+        retry:
+          automatic:
+            - exit_status: '-1'
+              limit: 1
+
+      - wait: ~
+
+      - command: |
+          ts-node .buildkite/scripts/lifecycle/comment_on_pr.ts \
+            --message "Entity store performance tests completed, see results at: $BUILDKITE_BUILD_URL" \
+            --context "entity-store-performance-job" \
+            --clear-previous
+        label: Comment with results
+        agents:
+          provider: gcp
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          machineType: n2-standard-2
+        timeout_in_minutes: 5
+
+      - wait: ~
+
+      - command: .buildkite/scripts/lifecycle/post_build.sh
+        label: Post-Build
+        agents:
+          provider: gcp
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          machineType: n2-standard-2

@@ -1,0 +1,91 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+# Function to run performance tests
+# Requires environment variables:
+#   SECURITY_DOCS_GEN_DIR - path to checked out repository
+#   CLOUD_DEPLOYMENT_ELASTICSEARCH_URL - Elasticsearch URL
+#   CLOUD_DEPLOYMENT_KIBANA_URL - Kibana URL
+#   CLOUD_DEPLOYMENT_USERNAME - deployment username
+#   CLOUD_DEPLOYMENT_PASSWORD - deployment password
+# Optional environment variables:
+#   PERF_DATA_FILE - data file to use (default: "small")
+#   PERF_INTERVAL - interval in seconds (default: 30)
+#   PERF_COUNT - number of uploads (default: 10)
+#
+# Exports:
+#   TEST_EXIT_CODE - exit code from test execution
+#   TEST_DURATION - test duration in seconds
+#   TEST_LOG_DIR - path to logs directory
+
+run_performance_tests() {
+  # Validate required environment variables
+  if [ -z "${SECURITY_DOCS_GEN_DIR:-}" ]; then
+    echo "Error: SECURITY_DOCS_GEN_DIR is required"
+    exit 1
+  fi
+
+  if [ -z "${CLOUD_DEPLOYMENT_ELASTICSEARCH_URL:-}" ] || \
+     [ -z "${CLOUD_DEPLOYMENT_KIBANA_URL:-}" ] || \
+     [ -z "${CLOUD_DEPLOYMENT_USERNAME:-}" ] || \
+     [ -z "${CLOUD_DEPLOYMENT_PASSWORD:-}" ]; then
+    echo "Error: Cloud deployment credentials are required"
+    exit 1
+  fi
+
+  # Performance test parameters (configurable via env vars)
+  PERF_DATA_FILE="${PERF_DATA_FILE:-small}"
+  PERF_INTERVAL="${PERF_INTERVAL:-30}"
+  PERF_COUNT="${PERF_COUNT:-10}"
+
+  echo "--- Run Entity Store Performance Tests"
+  echo "Data file: $PERF_DATA_FILE"
+  echo "Interval: ${PERF_INTERVAL}s"
+  echo "Count: $PERF_COUNT"
+
+  # Change to repository directory
+  cd "$SECURITY_DOCS_GEN_DIR"
+
+  # Create config.json
+  echo "--- Create config.json"
+  cat > config.json <<EOF
+{
+  "elastic": {
+    "node": "$CLOUD_DEPLOYMENT_ELASTICSEARCH_URL",
+    "username": "$CLOUD_DEPLOYMENT_USERNAME",
+    "password": "$CLOUD_DEPLOYMENT_PASSWORD"
+  },
+  "kibana": {
+    "node": "$CLOUD_DEPLOYMENT_KIBANA_URL",
+    "username": "$CLOUD_DEPLOYMENT_USERNAME",
+    "password": "$CLOUD_DEPLOYMENT_PASSWORD"
+  }
+}
+EOF
+
+  # Run the performance test
+  TEST_START_TIME=$(date +%s)
+  set +e
+  yarn start upload-perf-data-interval "$PERF_DATA_FILE" \
+    --deleteEntities \
+    --interval "$PERF_INTERVAL" \
+    --count "$PERF_COUNT"
+  TEST_EXIT_CODE=$?
+  set -e
+  TEST_END_TIME=$(date +%s)
+  TEST_DURATION=$((TEST_END_TIME - TEST_START_TIME))
+
+  # Export variables for reporting script
+  export TEST_EXIT_CODE
+  export TEST_DURATION
+  export TEST_LOG_DIR="${SECURITY_DOCS_GEN_DIR}/logs"
+
+  echo "Test completed with exit code: $TEST_EXIT_CODE"
+  echo "Test duration: ${TEST_DURATION}s"
+}
+
+# If script is executed directly (not sourced), run the function
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+  run_performance_tests
+fi
