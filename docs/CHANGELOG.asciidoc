@@ -117,7 +117,7 @@ include::upgrade-notes.asciidoc[]
 [[release-notes-8.19.7]]
 == {kib} 8.19.7
 
-The 8.19.7 release includes the following fixes.
+The 8.19.7 release includes the following enhancements and fixes.
 
 [float]
 [[enhancement-v8.19.7]]
