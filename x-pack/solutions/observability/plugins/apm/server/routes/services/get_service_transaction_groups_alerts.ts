@@ -66,7 +66,6 @@ export async function getServiceTransactionGroupsAlerts({
     query: {
       bool: {
         filter: [
-          ...termsQuery(ALERT_RULE_PRODUCER, 'apm', observabilityFeatureId),
           ...termQuery(ALERT_STATUS, ALERT_STATUS_ACTIVE),
           ...rangeQuery(start, end),
           ...kqlQuery(kuery),

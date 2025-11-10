@@ -140,7 +140,6 @@ export async function getApmServiceSummary({
       query: {
         bool: {
           filter: [
-            ...termsQuery(ALERT_RULE_PRODUCER, 'apm', observabilityFeatureId),
             ...termQuery(ALERT_STATUS, ALERT_STATUS_ACTIVE),
             ...rangeQuery(start, end),
             ...termQuery(SERVICE_NAME, serviceName),
