@@ -10,13 +10,17 @@
 import type { ProjectRouting } from '@kbn/es-query';
 import type { StateComparators } from '@kbn/presentation-publishing';
 import { diffComparators } from '@kbn/presentation-publishing';
+import type { Subscription } from 'rxjs';
 import { BehaviorSubject, combineLatestWith, debounceTime, map } from 'rxjs';
 import { coreServices } from '../services/kibana_services';
 import type { DashboardState } from '../../common';
+import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
 
 export const COMPARE_DEBOUNCE = 100;
 
 export function initializeProjectRoutingManager(initialState: DashboardState) {
+  console.log('Dashboard: initializeProjectRoutingManager with projectRouting:', initialState.projectRouting);
+
   const projectRouting$ = new BehaviorSubject<ProjectRouting | undefined>(
     initialState.projectRouting
   );
@@ -28,11 +32,18 @@ export function initializeProjectRoutingManager(initialState: DashboardState) {
     }
   }
 
-  // Subscribe to Chrome's projectRouting$ to sync global project routing changes to dashboard
-  const chromeProjectRoutingSubscription = coreServices.chrome.project
-    .getProjectRouting$()
-    .subscribe((chromeProjectRouting) => {
+  // If the dashboard has a saved projectRouting value, set it in Chrome so the picker shows the correct value
+  if (initialState.projectRouting && (coreServices.chrome as InternalChromeStart).project) {
+    console.log('Dashboard: Setting Chrome projectRouting to saved value:', initialState.projectRouting);
+    (coreServices.chrome as InternalChromeStart).project.setProjectRouting(initialState.projectRouting);
+  }
+
+  // Subscribe to Chrome's projectRouting$ to sync changes from the project picker
+  const chromeProjectRoutingSubscription: Subscription | undefined = (coreServices.chrome as InternalChromeStart).project
+    ?.getProjectRouting$()
+    .subscribe((chromeProjectRouting: ProjectRouting | undefined) => {
       console.log('Dashboard: Chrome projectRouting changed to:', chromeProjectRouting);
+      // Always update when Chrome changes (user interacted with picker)
       setProjectRouting(chromeProjectRouting);
     });
 
@@ -69,7 +80,7 @@ export function initializeProjectRoutingManager(initialState: DashboardState) {
       },
     },
     cleanup: () => {
-      chromeProjectRoutingSubscription.unsubscribe();
+      chromeProjectRoutingSubscription?.unsubscribe();
     },
   };
 }
