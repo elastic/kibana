@@ -28,7 +28,6 @@ import {
   type ESQLControlVariable,
   type PublishesESQLVariables,
 } from '@kbn/esql-types';
-import { apiHasSections } from '@kbn/presentation-containers';
 
 import { useStateFromPublishingSubject } from '../../publishing_subject';
 import { apiHasParentApi, type HasParentApi } from '../has_parent_api';
@@ -47,6 +46,14 @@ import {
   type PublishesTimeRange,
   type PublishesUnifiedSearch,
 } from './publishes_unified_search';
+
+// TODO Avoid redefining this here, fix circular dependency with presentation-containers
+interface HasSections {
+  getPanelSection$: (uuid: string) => Observable<string | undefined>;
+}
+const apiHasSections = (api: unknown): api is HasSections => {
+  return typeof (api as HasSections)?.getPanelSection$ === 'function';
+};
 
 function filterByMetaData<FilterType extends ESQLControlVariable | Filter>(
   api: unknown,

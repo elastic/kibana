@@ -22,7 +22,7 @@ import {
 import { optionsListDSLControlSchema, optionsListESQLControlSchema } from './options_list_schema';
 import { rangeSliderControlSchema } from './range_slider_schema';
 import { timeSliderControlSchema } from './time_slider_schema';
-\
+
 export const controlWidthSchema = schema.oneOf(
   [
     schema.literal(CONTROL_WIDTH_SMALL),
