@@ -1205,6 +1205,7 @@ src/platform/plugins/shared/discover/public/context_awareness/profile_providers/
 /x-pack/platform/test/functional/apps/graph @elastic/kibana-visualizations
 ^/src/platform/test/api_integration/apis/event_annotations @elastic/kibana-visualizations
 packages/kbn-monaco/src/esql @elastic/kibana-esql
+/src/platform/packages/shared/kbn-monaco/src/languages/console @elastic/kibana-management
 
 # ES|QL
 /src/platform/test/api_integration/apis/esql/*.ts @elastic/kibana-esql
