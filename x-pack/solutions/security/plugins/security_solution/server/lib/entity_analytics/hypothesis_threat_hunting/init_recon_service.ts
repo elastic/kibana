@@ -4,27 +4,28 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { Logger, SavedObjectsClientContract, CoreAuditService } from '@kbn/core/server';
 import { initThreatHuntingHypothesisDefinitions } from './initialisation_service';
 import { reconcileThreatHuntingHypothesesDefinitions } from './reconciliation_service';
+import type { EntityAnalyticsMigrationsParams } from '../migrations';
 
-export const initAndReconcileThreatHuntingHypothesisDefinitions = async (
-  savedObjectsClient: SavedObjectsClientContract,
-  logger: Logger,
-  auditService: CoreAuditService
-) => {
+export const updateThreatHuntingHypothesisDefinitions = async ({
+  logger,
+  getStartServices,
+}: EntityAnalyticsMigrationsParams) => {
+  const [core] = await getStartServices();
+
+  const soClientGlobal = core.savedObjects.createInternalRepository();
+  const auditService = core.security.audit;
   try {
     // init: upsert on startup
     const upsertRes = await initThreatHuntingHypothesisDefinitions(
-      savedObjectsClient,
+      soClientGlobal,
       logger,
       auditService
     );
     // reconcile: delete outdated saved objects
-    // TODO: specified AFTER startup - clarify when?
     const deleted = await reconcileThreatHuntingHypothesesDefinitions(
-      savedObjectsClient,
+      soClientGlobal,
       logger,
       auditService
     );

@@ -15,6 +15,7 @@ import { renameRiskScoreComponentTemplate } from '../risk_engine/migrations/rena
 import { createEventIngestedPipelineInAllNamespaces } from '../utils/event_ingested_pipeline';
 import { updatePrivilegedMonitoringSourceIndex } from '../privilege_monitoring/migrations/update_source_index';
 import { upsertPrivilegedMonitoringEntitySource } from '../privilege_monitoring/migrations/upsert_entity_source';
+import { updateThreatHuntingHypothesisDefinitions } from '../hypothesis_threat_hunting/init_recon_service';
 
 export interface EntityAnalyticsMigrationsParams {
   taskManager?: TaskManagerSetupContract;
@@ -52,4 +53,5 @@ export const scheduleEntityAnalyticsMigration = async (params: EntityAnalyticsMi
   await updateRiskScoreMappings(paramsWithScopedLogger);
   await updatePrivilegedMonitoringSourceIndex(paramsWithScopedLogger);
   await upsertPrivilegedMonitoringEntitySource(paramsWithScopedLogger);
+  await updateThreatHuntingHypothesisDefinitions(paramsWithScopedLogger);
 };

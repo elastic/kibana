@@ -146,7 +146,7 @@ import { HealthDiagnosticServiceImpl } from './lib/telemetry/diagnostic/health_d
 import type { HealthDiagnosticService } from './lib/telemetry/diagnostic/health_diagnostic_service.types';
 import { ENTITY_RISK_SCORE_TOOL_ID } from './assistant/tools/entity_risk_score/entity_risk_score';
 import type { TelemetryQueryConfiguration } from './lib/telemetry/types';
-import { initAndReconcileThreatHuntingHypothesisDefinitions } from './lib/entity_analytics/hypothesis_threat_hunting/init_recon_service';
+import { initThreatHuntingHypothesisDefinitions } from './lib/entity_analytics/hypothesis_threat_hunting/initialisation_service';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -640,11 +640,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     const fleetStartServices = plugins.fleet!;
     // Initialise entity analytics threat hunting hypothesis definitions
     if (config.experimentalFeatures.entityThreatHuntingEnabled) {
-      initAndReconcileThreatHuntingHypothesisDefinitions(
-        savedObjectsClient,
-        logger,
-        this.auditService
-      );
+      initThreatHuntingHypothesisDefinitions(savedObjectsClient, logger, this.auditService);
     }
     const { packageService } = fleetStartServices;
 
