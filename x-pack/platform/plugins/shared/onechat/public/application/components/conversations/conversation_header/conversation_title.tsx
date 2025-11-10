@@ -16,6 +16,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useConversationTitle, useHasActiveConversation } from '../../../hooks/use_conversation';
+import { useDeleteConversationModal } from '../../../hooks/use_delete_conversation_modal';
 
 const labels = {
   ariaLabel: i18n.translate('xpack.onechat.conversationTitle.ariaLabel', {
@@ -37,6 +38,7 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabell
   const { title, isLoading } = useConversationTitle();
   const hasActiveConversation = useHasActiveConversation();
   const { euiTheme } = useEuiTheme();
+  const { openDeleteModal, DeleteModal } = useDeleteConversationModal();
 
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
 
@@ -60,7 +62,7 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabell
       `}
       onClick={() => {
         setIsContextMenuOpen(false);
-        // TODO: implement delete functionality
+        openDeleteModal();
       }}
     >
       {labels.delete}
@@ -69,24 +71,28 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabell
 
   if (shouldShowButton) {
     return (
-      <EuiPopover
-        button={
-          <EuiButtonEmpty
-            onClick={() => setIsContextMenuOpen(!isContextMenuOpen)}
-            aria-label={labels.ariaLabel}
-            iconType="arrowDown"
-            iconSide="right"
-          >
-            <h1 id={ariaLabelledBy}>{displayTitle}</h1>
-          </EuiButtonEmpty>
-        }
-        isOpen={isContextMenuOpen}
-        closePopover={() => setIsContextMenuOpen(false)}
-        panelPaddingSize="s"
-        anchorPosition="downCenter"
-      >
-        <EuiContextMenuPanel size="s" items={menuItems} />
-      </EuiPopover>
+      <>
+        <EuiPopover
+          button={
+            <EuiButtonEmpty
+              onClick={() => setIsContextMenuOpen(!isContextMenuOpen)}
+              aria-label={labels.ariaLabel}
+              iconType="arrowDown"
+              iconSide="right"
+              color="text"
+            >
+              <h1 id={ariaLabelledBy}>{displayTitle}</h1>
+            </EuiButtonEmpty>
+          }
+          isOpen={isContextMenuOpen}
+          closePopover={() => setIsContextMenuOpen(false)}
+          panelPaddingSize="s"
+          anchorPosition="downCenter"
+        >
+          <EuiContextMenuPanel size="s" items={menuItems} />
+        </EuiPopover>
+        {DeleteModal}
+      </>
     );
   }
 
