@@ -50,6 +50,7 @@ export interface CommonFetchParams {
   services: DiscoverServices;
   scopedProfilesManager: ScopedProfilesManager;
   scopedEbtManager: ScopedDiscoverEBTManager;
+  getCurrentTab: () => TabState;
 }
 
 /**
@@ -62,7 +63,6 @@ export interface CommonFetchParams {
 export function fetchAll(
   params: CommonFetchParams & {
     reset: boolean;
-    getCurrentTab: () => TabState;
     onFetchRecordsComplete?: () => Promise<void>;
   }
 ): Promise<void> {
@@ -100,6 +100,7 @@ export function fetchAll(
         services,
         sort: sort as SortOrder[],
         inputTimeRange: currentTab.dataRequestParams.timeRangeAbsolute,
+        projectRouting: currentTab.globalState.projectRouting,
       });
     }
 
@@ -231,13 +232,14 @@ export function fetchAll(
 }
 
 export async function fetchMoreDocuments(params: CommonFetchParams): Promise<void> {
-  const { dataSubjects, appStateContainer, services, savedSearch } = params;
+  const { dataSubjects, appStateContainer, services, savedSearch, getCurrentTab } = params;
 
   try {
     const searchSource = savedSearch.searchSource.createChild();
     const dataView = searchSource.getField('index')!;
     const { query, sort } = appStateContainer.getState();
     const isEsqlQuery = isOfAggregateQueryType(query);
+    const currentTab = getCurrentTab();
 
     if (isEsqlQuery) {
       // not supported yet
@@ -261,6 +263,7 @@ export async function fetchMoreDocuments(params: CommonFetchParams): Promise<voi
       dataView,
       services,
       sort: sort as SortOrder[],
+      projectRouting: currentTab.globalState.projectRouting,
     });
 
     // Fetch more documents

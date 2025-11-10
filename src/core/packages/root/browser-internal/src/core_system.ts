@@ -425,7 +425,16 @@ export class CoreSystem {
         pricing,
       };
 
-      await this.plugins.start(core);
+      const pluginContracts = await this.plugins.start(core);
+
+      // Pass CPS plugin to Chrome if available
+      const cpsPlugin = pluginContracts.contracts.get('cps') as any;
+      if (cpsPlugin) {
+        console.log('CoreSystem: Setting CPS plugin on Chrome service', cpsPlugin);
+        this.chrome.setCps(cpsPlugin);
+      } else {
+        console.log('CoreSystem: CPS plugin not found in contracts');
+      }
 
       // ensure the rootDomElement is empty
       this.rootDomElement.textContent = '';

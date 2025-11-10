@@ -22,6 +22,7 @@ import type {
 } from '@kbn/core-chrome-browser';
 import type { NavigationTourManager } from '@kbn/core-chrome-navigation-tour';
 import type { Observable } from 'rxjs';
+import type { ProjectRouting } from '@kbn/es-query';
 
 /** @internal */
 export interface InternalChromeStart extends ChromeStart {
@@ -197,5 +198,16 @@ export interface InternalChromeStart extends ChromeStart {
      * Used to manage the navigation tour state and start/stop the tour.
      */
     navigationTourManager: NavigationTourManager;
+
+    /**
+     * Sets the project routing for cross-project search.
+     * @param routing The project routing configuration or undefined to clear it.
+     */
+    setProjectRouting(routing: ProjectRouting | undefined): void;
+
+    /**
+     * Get an Observable of the current project routing configuration.
+     */
+    getProjectRouting$(): Observable<ProjectRouting | undefined>;
   };
 }

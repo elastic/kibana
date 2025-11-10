@@ -133,5 +133,108 @@ describe('initializeUnifiedSearchManager', () => {
         });
       });
     });
+
+    describe('projectRouting', () => {
+      test('Should update projectRouting via setProjectRouting', () => {
+        const lastSavedState$ = new BehaviorSubject<DashboardState>(getSampleDashboardState());
+        const unifiedSearchManager = initializeUnifiedSearchManager(
+          lastSavedState$.value,
+          new BehaviorSubject<ControlGroupApi | undefined>(undefined),
+          new BehaviorSubject<boolean>(false),
+          new Subject<void>(),
+          () => lastSavedState$.value,
+          {
+            useUnifiedSearchIntegration: false,
+          }
+        );
+
+        // initializes with undefined projectRouting by default
+        expect(unifiedSearchManager.api.projectRouting$.value).toBeUndefined();
+
+        unifiedSearchManager.api.setProjectRouting('_alias:_origin');
+        expect(unifiedSearchManager.api.projectRouting$.value).toBe('_alias:_origin');
+
+        unifiedSearchManager.api.setProjectRouting(undefined);
+        expect(unifiedSearchManager.api.projectRouting$.value).toBeUndefined();
+      });
+
+      test('Should detect projectRouting change from _alias:_origin to undefined', (done) => {
+        const lastSavedState$ = new BehaviorSubject<DashboardState>({
+          ...getSampleDashboardState(),
+          projectRouting: '_alias:_origin',
+        });
+        const unifiedSearchManager = initializeUnifiedSearchManager(
+          lastSavedState$.value,
+          new BehaviorSubject<ControlGroupApi | undefined>(undefined),
+          new BehaviorSubject<boolean>(false),
+          new Subject<void>(),
+          () => lastSavedState$.value,
+          {
+            useUnifiedSearchIntegration: false,
+          }
+        );
+
+        // initializes with _alias:_origin projectRouting if set in last saved state
+        expect(unifiedSearchManager.api.projectRouting$.value).toBe('_alias:_origin');
+
+        unifiedSearchManager.internalApi.startComparing$(lastSavedState$).subscribe((changes) => {
+          expect(changes).toMatchInlineSnapshot(`
+            Object {
+              "projectRouting": undefined,
+            }
+          `);
+          done();
+        });
+
+        unifiedSearchManager.api.setProjectRouting(undefined);
+      });
+
+      test('Should not detect changes when projectRouting stays undefined', (done) => {
+        const lastSavedState$ = new BehaviorSubject<DashboardState>(getSampleDashboardState());
+        const unifiedSearchManager = initializeUnifiedSearchManager(
+          lastSavedState$.value,
+          new BehaviorSubject<ControlGroupApi | undefined>(undefined),
+          new BehaviorSubject<boolean>(false),
+          new Subject<void>(),
+          () => lastSavedState$.value,
+          {
+            useUnifiedSearchIntegration: false,
+          }
+        );
+
+        unifiedSearchManager.internalApi.startComparing$(lastSavedState$).subscribe((changes) => {
+          expect(changes).toMatchInlineSnapshot(`Object {}`);
+          done();
+        });
+
+        // Setting to undefined when it's already undefined should not trigger change
+        unifiedSearchManager.api.setProjectRouting(undefined);
+      });
+
+      test('Should restore projectRouting in reset', () => {
+        const lastSavedState$ = new BehaviorSubject<DashboardState>({
+          ...getSampleDashboardState(),
+          projectRouting: '_alias:_origin',
+        });
+        const unifiedSearchManager = initializeUnifiedSearchManager(
+          lastSavedState$.value,
+          new BehaviorSubject<ControlGroupApi | undefined>(undefined),
+          new BehaviorSubject<boolean>(false),
+          new Subject<void>(),
+          () => lastSavedState$.value,
+          {
+            useUnifiedSearchIntegration: false,
+          }
+        );
+
+        // Change projectRouting
+        unifiedSearchManager.api.setProjectRouting(undefined);
+        expect(unifiedSearchManager.api.projectRouting$.value).toBeUndefined();
+
+        // Reset to last saved state
+        unifiedSearchManager.internalApi.reset(lastSavedState$.value);
+        expect(unifiedSearchManager.api.projectRouting$.value).toBe('_alias:_origin');
+      });
+    });
   });
 });

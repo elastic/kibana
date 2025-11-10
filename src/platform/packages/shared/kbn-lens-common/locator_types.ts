@@ -9,7 +9,7 @@
 
 import type { SavedQuery } from '@kbn/data-plugin/common';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
-import type { Filter, AggregateQuery, Query } from '@kbn/es-query';
+import type { Filter, AggregateQuery, Query, ProjectRouting } from '@kbn/es-query';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { Reference } from '@kbn/content-management-utils';
@@ -67,6 +67,7 @@ export interface LensShareableState {
    * Pass adHoc dataViews specs used in the Lens state
    */
   dataViewSpecs?: DataViewSpec[];
+  projectRouting?: ProjectRouting;
 }
 
 export interface LensAppLocatorParams extends SerializableRecord {

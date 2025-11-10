@@ -134,6 +134,11 @@ export async function canSkipSourceUpdate({
 
   const updateDueToSourceMetaChange = !_.isEqual(prevMeta.sourceMeta, nextRequestMeta.sourceMeta);
 
+  const updateDueToProjectRouting = !_.isEqual(
+    prevMeta.projectRouting,
+    nextRequestMeta.projectRouting
+  );
+
   return (
     !updateDueToApplyGlobalTime &&
     !updateDueToTime &&
@@ -145,7 +150,8 @@ export async function canSkipSourceUpdate({
     !updateDueToSourceQuery &&
     !updateDueToApplyGlobalQuery &&
     !updateDueToSourceMetaChange &&
-    !updateDueToSearchSessionId
+    !updateDueToSearchSessionId &&
+    !updateDueToProjectRouting
   );
 }
 

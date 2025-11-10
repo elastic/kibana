@@ -206,6 +206,8 @@ export const getSearchSessionId = ({ map }: MapStoreState): string | undefined =
 export const getSearchSessionMapBuffer = ({ map }: MapStoreState): MapExtent | undefined =>
   map.mapState.searchSessionMapBuffer;
 
+export const getProjectRouting = ({ map }: MapStoreState) => map.mapState.projectRouting;
+
 export const isUsingSearch = (state: MapStoreState): boolean => {
   const filters = getFilters(state).filter((filter) => !filter.meta.disabled);
   const queryString = _.get(getQuery(state), 'query', '');
@@ -248,6 +250,7 @@ export const getDataFilters = createSelector(
   getEmbeddableSearchContext,
   getSearchSessionId,
   getSearchSessionMapBuffer,
+  getProjectRouting,
   getIsReadOnly,
   getExecutionContext,
   (
@@ -261,6 +264,7 @@ export const getDataFilters = createSelector(
     embeddableSearchContext,
     searchSessionId,
     searchSessionMapBuffer,
+    projectRouting,
     isReadOnly,
     executionContext
   ) => {
@@ -274,6 +278,7 @@ export const getDataFilters = createSelector(
       filters,
       embeddableSearchContext,
       searchSessionId,
+      projectRouting,
       isReadOnly,
       executionContext,
     };

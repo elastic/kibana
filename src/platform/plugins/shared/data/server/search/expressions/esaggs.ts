@@ -75,6 +75,7 @@ export function getFunctionDefinition({
             disableWarningToasts: false,
             timeFields: args.timeFields,
             timeRange: get(input, 'timeRange', undefined),
+            projectRouting: get(input, 'projectRouting', undefined),
           })
         )
       );

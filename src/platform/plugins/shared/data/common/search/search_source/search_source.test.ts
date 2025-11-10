@@ -1102,6 +1102,39 @@ describe('SearchSource', () => {
     });
   });
 
+  describe('projectRouting field', () => {
+    test('should accept projectRouting as a field', () => {
+      searchSource.setField('projectRouting', '_alias:_origin');
+      expect(searchSource.getField('projectRouting')).toBe('_alias:_origin');
+    });
+
+    test('should serialize projectRouting in getSerializedFields', () => {
+      searchSource.setField('projectRouting', '_alias:_origin');
+      const serialized = searchSource.getSerializedFields();
+      expect(serialized.projectRouting).toBe('_alias:_origin');
+    });
+
+    test('should serialize undefined projectRouting', () => {
+      searchSource.setField('projectRouting', undefined);
+      const serialized = searchSource.getSerializedFields();
+      expect(serialized.projectRouting).toBeUndefined();
+    });
+
+    test('should include projectRouting in serialize()', () => {
+      searchSource.setField('projectRouting', '_alias:_origin');
+      const { searchSourceJSON } = searchSource.serialize();
+      expect(JSON.parse(searchSourceJSON).projectRouting).toBe('_alias:_origin');
+    });
+
+    // TODO: Enable when backend support is added and we can actually add it in the request body
+    test.skip('should add projectRouting to request body', async () => {
+      searchSource.setField('index', indexPattern);
+      searchSource.setField('projectRouting', '_alias:_origin');
+      const requestBody = await searchSource.getSearchRequestBody();
+      expect(requestBody.project_routing).toBe('_alias:_origin');
+    });
+  });
+
   describe('fetch$', () => {
     describe('responses', () => {
       test('should return partial results', async () => {

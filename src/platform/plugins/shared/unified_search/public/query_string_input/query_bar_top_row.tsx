@@ -47,8 +47,8 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { SplitButton } from '@kbn/split-button';
-
 import { ProjectPicker, type ProjectPickerProps } from '@kbn/cps-utils';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { AddFilterPopover } from './add_filter_popover';
 import type { DataViewPickerProps } from '../dataview_picker';
 import { DataViewPicker } from '../dataview_picker';
@@ -624,7 +624,7 @@ export const QueryBarTopRow = React.memo(
       const component = getWrapperWithTooltip(datePicker, enableTooltip, props.query);
 
       return (
-        <EuiFlexItem className={wrapperClasses} css={inputStringStyles.datePickerWrapper}>
+        <EuiFlexItem className={wrapperClasses} css={styles.datePickerWrapper}>
           {component}
         </EuiFlexItem>
       );
@@ -918,6 +918,7 @@ export const QueryBarTopRow = React.memo(
     }
     const { euiTheme } = useEuiTheme();
     const isScreenshotMode = props.isScreenshotMode === true;
+    const styles = useMemoCss(inputStringStyles);
 
     return (
       <>

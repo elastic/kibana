@@ -9,29 +9,25 @@
 
 import React, { useState, useEffect } from 'react';
 import type { ProjectRouting } from '@kbn/es-query';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CPSPluginStart, Project } from '@kbn/cps/public';
 import { ProjectPickerComponent } from './project_picker_component';
-
-interface CPSServices {
-  cps: CPSPluginStart;
-}
 
 export interface ProjectPickerProps {
   projectRouting?: ProjectRouting;
   onProjectRoutingChange?: (projectRouting: ProjectRouting) => void;
   wrappingContainer?: (children: React.ReactNode) => React.ReactElement;
+  cps?: CPSPluginStart;
 }
 
 export const ProjectPicker: React.FC<ProjectPickerProps> = ({
   projectRouting,
   onProjectRoutingChange,
   wrappingContainer = (children) => children as React.ReactElement,
+  cps,
 }) => {
-  const { cps } = useKibana<CPSServices>().services;
   const [originProject, setOriginProject] = useState<Project | null>(null);
   const [linkedProjects, setLinkedProjects] = useState<Project[]>([]);
-
+  console.log('CPS Plugin Start:', cps);
   useEffect(() => {
     // Only fetch projects in serverless environments where cpsManager is available
     if (!cps?.cpsManager) return;

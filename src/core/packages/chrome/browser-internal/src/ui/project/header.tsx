@@ -35,8 +35,11 @@ import { i18n } from '@kbn/i18n';
 import React, { type ComponentProps, useCallback } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
-import { debounceTime } from 'rxjs';
+import { debounceTime, of } from 'rxjs';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
+import type { ProjectRouting } from '@kbn/es-query';
+import { ProjectPicker, type ProjectPickerProps } from '@kbn/cps-utils';
+import type { CPSPluginStart } from '@kbn/cps/public';
 
 import { Breadcrumbs } from './breadcrumbs';
 import { HeaderHelpMenu } from '../header/header_help_menu';
@@ -128,6 +131,9 @@ export interface Props extends Pick<ComponentProps<typeof HeaderHelpMenu>, 'isSe
   navControlsRight$: Observable<ChromeNavControl[]>;
   prependBasePath: (url: string) => string;
   isFixed?: boolean;
+  projectRouting$?: Observable<ProjectRouting | undefined>;
+  onProjectRoutingChange?: ProjectPickerProps['onProjectRoutingChange'];
+  cps$?: Observable<CPSPluginStart | undefined>;
 }
 
 const LOADING_DEBOUNCE_TIME = 80;
@@ -225,11 +231,19 @@ export const ProjectHeader = ({
   isServerless,
   breadcrumbsAppendExtensions$,
   isFixed = true,
+  projectRouting$,
+  onProjectRoutingChange,
+  cps$,
   ...observables
 }: Props) => {
   const { euiTheme } = useEuiTheme();
   const headerCss = getHeaderCss(euiTheme);
   const { logo: logoCss } = headerCss;
+
+  const projectRouting = useObservable(projectRouting$ || of(undefined), undefined);
+  const cps = useObservable(cps$ || of(undefined), undefined);
+
+  console.log('ProjectHeader received:', { projectRouting, cps, hasCps: !!cps });
 
   const topBarStyles = css`
     box-shadow: none !important;
@@ -247,7 +261,6 @@ export const ProjectHeader = ({
           >
             <EuiHeaderSection grow={false} css={headerCss.leftHeaderSection}>
               {children}
-
               <EuiHeaderSectionItem>
                 <HeaderPageAnnouncer
                   breadcrumbs$={observables.breadcrumbs$}
@@ -278,6 +291,16 @@ export const ProjectHeader = ({
                   <Breadcrumbs breadcrumbs$={observables.breadcrumbs$} />
                 </BreadcrumbsWithExtensionsWrapper>
               </EuiHeaderSectionItem>
+
+              {projectRouting$ && onProjectRoutingChange && (
+                <EuiHeaderSectionItem>
+                  <ProjectPicker
+                    projectRouting={projectRouting}
+                    onProjectRoutingChange={onProjectRoutingChange}
+                    cps={cps}
+                  />
+                </EuiHeaderSectionItem>
+              )}
             </EuiHeaderSection>
 
             <EuiHeaderSection side="right">

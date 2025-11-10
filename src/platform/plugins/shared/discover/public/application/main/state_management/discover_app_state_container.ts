@@ -261,9 +261,9 @@ export const getDiscoverAppStateContainer = ({
 
   const getGlobalState = (state: DiscoverInternalState): GlobalQueryStateFromUrl => {
     const tabState = selectTab(state, tabId);
-    const { timeRange: time, refreshInterval, filters } = tabState.globalState;
+    const { timeRange: time, refreshInterval, filters, projectRouting } = tabState.globalState;
 
-    return { time, refreshInterval, filters };
+    return { time, refreshInterval, filters, projectRouting };
   };
 
   const globalStateContainer: INullableBaseStateContainer<GlobalQueryStateFromUrl> = {
@@ -273,7 +273,7 @@ export const getDiscoverAppStateContainer = ({
         return;
       }
 
-      const { time: timeRange, refreshInterval, filters } = state;
+      const { time: timeRange, refreshInterval, filters, projectRouting } = state;
 
       internalState.dispatch(
         injectCurrentTab(internalStateActions.setGlobalState)({
@@ -281,6 +281,7 @@ export const getDiscoverAppStateContainer = ({
             timeRange,
             refreshInterval,
             filters,
+            projectRouting,
           },
         })
       );

@@ -10,6 +10,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { type DataView, DataViewType } from '@kbn/data-views-plugin/public';
 import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
+import type { ProjectRouting } from '@kbn/es-query';
 import type { DataViewPickerProps, UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
 import { ControlGroupRenderer, type ControlGroupRendererApi } from '@kbn/controls-plugin/public';
 import {
@@ -68,6 +69,8 @@ export const DiscoverTopNav = ({
 
   const query = useAppStateSelector((state) => state.query);
   const esqlVariables = useCurrentTabSelector((tab) => tab.esqlVariables);
+  const projectRouting = useCurrentTabSelector((tab) => tab.globalState.projectRouting);
+  const globalState = useCurrentTabSelector((tab) => tab.globalState);
 
   const timeRange = useCurrentTabSelector((tab) => tab.dataRequestParams.timeRangeAbsolute);
 
@@ -167,6 +170,23 @@ export const DiscoverTopNav = ({
       appState.set(newState);
     }
   };
+
+  const setGlobalState = useCurrentTabAction(internalStateActions.setGlobalState);
+  const onProjectRoutingChange = useCallback(
+    (newProjectRouting: ProjectRouting) => {
+      dispatch(
+        setGlobalState({
+          globalState: {
+            ...globalState,
+            projectRouting: newProjectRouting,
+          },
+        })
+      );
+      // Trigger data refetch with new projectRouting
+      stateContainer.dataState.fetch();
+    },
+    [dispatch, setGlobalState, globalState, stateContainer]
+  );
 
   const onESQLToDataViewTransitionModalClose = useCallback(
     (shouldDismissModal?: boolean, needsSave?: boolean) => {
@@ -282,6 +302,9 @@ export const DiscoverTopNav = ({
         allowSavingQueries
         showSearchBar={true}
         useDefaultBehaviors={true}
+        showProjectPicker
+        projectRouting={projectRouting}
+        onProjectRoutingChange={onProjectRoutingChange}
         dataViewPickerOverride={
           searchBarCustomization?.CustomDataViewPicker ? (
             <searchBarCustomization.CustomDataViewPicker />

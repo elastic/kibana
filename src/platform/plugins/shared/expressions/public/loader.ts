@@ -10,7 +10,6 @@
 import type { Observable, Subscription } from 'rxjs';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { delay, filter, map, shareReplay } from 'rxjs';
-import { defaults } from 'lodash';
 import type { SerializableRecord, UnwrapObservable } from '@kbn/utility-types';
 import type { Adapters } from '@kbn/inspector-plugin/public';
 import type { IExpressionLoaderParams } from './types';
@@ -172,11 +171,10 @@ export class ExpressionLoader {
     }
 
     if (params.searchContext) {
-      this.params.searchContext = defaults(
-        {},
-        params.searchContext,
-        this.params.searchContext || {}
-      );
+      this.params.searchContext = {
+        ...this.params.searchContext,
+        ...params.searchContext,
+      };
     }
     if (params.uiState && this.params) {
       this.params.uiState = params.uiState;
