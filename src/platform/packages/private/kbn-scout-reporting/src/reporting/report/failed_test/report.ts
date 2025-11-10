@@ -137,7 +137,7 @@ export class ScoutFailureReport extends ScoutReport {
 
         this.log.info(`Saved screenshot: ${filename} -> ${destinationPath}`);
       } catch (error) {
-        this.log.error(`Failed to save screenshot ${attachment.name}: ${error.message}`);
+        this.log.error(`Failed to save screenshot ${attachment.name}: ${error instanceof Error ? error.message : String(error)}`);
       }
     }
   }
