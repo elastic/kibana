@@ -17,7 +17,7 @@ interface ConversationsHistoryPopoverProps {
 }
 
 const popoverPanelStyles = css`
-  width: 500px;
+  width: 400px;
 `;
 
 export const ConversationsHistoryPopover: React.FC<ConversationsHistoryPopoverProps> = ({

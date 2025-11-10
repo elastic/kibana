@@ -17,10 +17,12 @@ import { useConversationContext } from '../../context/conversation/conversation_
 
 interface NewConversationButtonProps {
   iconOnly?: boolean;
+  onClose?: () => void;
 }
 
 export const NewConversationButton: React.FC<NewConversationButtonProps> = ({
   iconOnly = false,
+  onClose,
 }) => {
   const { createOnechatUrl } = useNavigation();
   const { isEmbeddedContext, setConversationId } = useConversationContext();
@@ -38,6 +40,7 @@ export const NewConversationButton: React.FC<NewConversationButtonProps> = ({
     if (isEmbeddedContext) {
       setConversationId?.(undefined);
     }
+    onClose?.();
   };
 
   const buttonProps = isDisabled

@@ -29,7 +29,7 @@ export const EmbeddedActionsRight: React.FC<{ onClose?: () => void }> = ({ onClo
   const menuItems = [
     <EuiContextMenuItem
       key="openInAgentBuilder"
-      icon="gear"
+      icon="fullScreen"
       size="s"
       href={agentId ? createOnechatUrl(appPaths.agents.edit({ agentId })) : undefined}
       onClick={closePopover}
