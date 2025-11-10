@@ -233,6 +233,7 @@
     "@kbn/chart-icons": "link:src/platform/packages/shared/kbn-chart-icons",
     "@kbn/charts-plugin": "link:src/platform/plugins/shared/charts",
     "@kbn/charts-theme": "link:src/platform/packages/shared/kbn-charts-theme",
+    "@kbn/classic-stream-flyout": "link:x-pack/platform/packages/shared/kbn-classic-stream-flyout",
     "@kbn/cleanup-before-exit": "link:src/platform/packages/shared/kbn-cleanup-before-exit",
     "@kbn/cloud": "link:src/platform/packages/shared/cloud",
     "@kbn/cloud-chat-plugin": "link:x-pack/platform/plugins/private/cloud_integrations/cloud_chat",
