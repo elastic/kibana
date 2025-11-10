@@ -1,0 +1,89 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import React from 'react';
+import { EuiSelectable, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
+
+export interface DataSourcesListProps {
+  sourcesList: string[];
+  onChangeDatasource: (newId: string) => void;
+  currentSourceId?: string;
+}
+
+export function DataSourcesList({
+  sourcesList,
+  onChangeDatasource,
+  currentSourceId,
+}: DataSourcesListProps) {
+  return (
+    <EuiSelectable<{
+      key?: string;
+      label: string;
+      value?: string;
+      checked?: 'on' | 'off' | undefined;
+    }>
+      listProps={{
+        truncationProps: {
+          truncation: 'middle',
+        },
+      }}
+      data-test-subj="indexPattern-switcher"
+      searchable
+      singleSelection="always"
+      options={sourcesList?.map((source) => ({
+        key: source,
+        label: source,
+        value: source,
+        checked: source === currentSourceId ? 'on' : undefined,
+      }))}
+      onChange={(choices) => {
+        const choice = choices.find(({ checked }) => checked) as unknown as {
+          value: string;
+        };
+        onChangeDatasource(choice.value);
+      }}
+      searchProps={{
+        id: 'visorSearchListId',
+        compressed: true,
+        placeholder: i18n.translate('esqlEditor.visor.searchSourcesPlaceholder', {
+          defaultMessage: 'Search',
+        }),
+        autoFocus: false,
+        inputRef: (ref) => {
+          ref?.focus({ preventScroll: true });
+        },
+      }}
+    >
+      {(list, search) => (
+        <>
+          <EuiPanel
+            css={css`
+              padding-bottom: 0;
+            `}
+            color="transparent"
+            paddingSize="s"
+          >
+            <EuiFlexGroup
+              gutterSize="xs"
+              direction="row"
+              justifyContent="spaceBetween"
+              alignItems="center"
+              responsive={false}
+            >
+              <EuiFlexItem>{search}</EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPanel>
+          {list}
+        </>
+      )}
+    </EuiSelectable>
+  );
+}

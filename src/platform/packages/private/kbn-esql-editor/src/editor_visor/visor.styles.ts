@@ -48,20 +48,6 @@ export const visorStyles = (
       flexGrow: 1,
       maxWidth: `${comboBoxWidth}px`,
     },
-    comboBoxStyles: css`
-      .euiComboBox__inputWrap {
-        box-shadow: none;
-        border-radius: 0;
-        border-bottom-left-radius: ${euiTheme.size.s};
-        border-top-left-radius: ${euiTheme.size.s};
-      }
-      .euiComboBox__inputWrap:focus,
-      .euiComboBox__inputWrap:focus-within,
-      .euiComboBox__inputWrap:hover {
-        box-shadow: none !important;
-        outline: none !important;
-      }
-    `,
     separator: {
       width: '1px',
       height: euiTheme.size.xl,

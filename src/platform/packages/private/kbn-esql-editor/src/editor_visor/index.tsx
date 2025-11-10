@@ -6,13 +6,10 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
-import useMountedState from 'react-use/lib/useMountedState';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButtonIcon,
-  EuiComboBox,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -22,8 +19,7 @@ import {
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { calculateWidthFromCharCount } from '@kbn/calculate-width-from-char-count';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
-import { getESQLSources } from '../helpers';
-import type { ESQLEditorDeps } from '../types';
+import { SourcesDropdown } from './sources_dropdown';
 import { visorStyles } from './visor.styles';
 
 export function QuickEditVisor({
@@ -40,23 +36,24 @@ export function QuickEditVisor({
   onUpdateAndSubmitQuery: (query: string) => void;
 }) {
   const isDarkMode = useKibanaIsDarkMode();
-  const kibana = useKibana<ESQLEditorDeps>();
-  const { core } = kibana.services;
-  const getLicense = kibana.services?.esql?.getLicense;
   const { euiTheme } = useEuiTheme();
   const [selectedSource, setSelectedSource] = useState<EuiComboBoxOptionOption[]>([]);
-  const [sourcesOptions, setSourcesOptions] = useState<EuiComboBoxOptionOption[]>([]);
   const [searchValue, setSearchValue] = useState('');
   const searchInputRef = useRef<HTMLInputElement>(null);
-
-  const isMounted = useMountedState();
+  const initializedRef = useRef(false);
+  const userSelectedSourceRef = useRef(false);
 
   const onSearchValueChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchValue(e.target.value);
   }, []);
 
-  const onSourceSelectionChange = useCallback((selectedOptions: EuiComboBoxOptionOption[]) => {
-    setSelectedSource(selectedOptions);
+  const onSearchClick = useCallback(() => {
+    // Focus after popover closes
+    setTimeout(() => {
+      if (searchInputRef.current) {
+        searchInputRef.current.focus();
+      }
+    }, 150);
   }, []);
 
   const onSearchKeyDown = useCallback(
@@ -76,30 +73,32 @@ export function QuickEditVisor({
   );
 
   useEffect(() => {
-    async function fetchSources() {
-      const sources = await getESQLSources(core, getLicense);
-      if (isMounted()) {
-        setSourcesOptions(
-          sources.filter((source) => !source.hidden).map((source) => ({ label: source.name }))
-        );
+    const sourceFromUpdatedQuery = getIndexPatternFromESQLQuery(query);
+
+    if (!initializedRef.current) {
+      if (sourceFromUpdatedQuery) {
+        setSelectedSource([{ label: sourceFromUpdatedQuery }]);
+      }
+      setSearchValue('');
+      initializedRef.current = true;
+    } else if (sourceFromUpdatedQuery && !userSelectedSourceRef.current) {
+      // Update from query prop only if user hasn't manually selected a source
+      if (selectedSource[0]?.label !== sourceFromUpdatedQuery) {
+        setSelectedSource([{ label: sourceFromUpdatedQuery }]);
       }
     }
-    if (sourcesOptions.length === 0) {
-      fetchSources();
-    }
-  }, [core, getLicense, sourcesOptions.length, isMounted]);
-
-  useEffect(() => {
-    const sourceFromUpdatedQuery = getIndexPatternFromESQLQuery(query);
-    if (sourceFromUpdatedQuery && selectedSource.length === 0) {
-      setSelectedSource([{ label: sourceFromUpdatedQuery }]);
-    }
-    setSearchValue('');
   }, [query, selectedSource]);
 
   useEffect(() => {
     if (isVisible && searchInputRef.current) {
       searchInputRef.current.focus();
+    }
+  }, [isVisible]);
+
+  useEffect(() => {
+    // Reset user selection tracking when visor becomes visible
+    if (isVisible) {
+      userSelectedSourceRef.current = false;
     }
   }, [isVisible]);
 
@@ -124,25 +123,12 @@ export function QuickEditVisor({
       css={styles.visorWrapper}
     >
       <EuiFlexItem css={styles.comboBoxWrapper}>
-        <EuiComboBox
-          placeholder={i18n.translate('esqlEditor.visor.placeholder', {
-            defaultMessage: 'Select a source to quick edit',
-          })}
-          options={sourcesOptions}
-          selectedOptions={selectedSource}
-          singleSelection={{ asPlainText: true }}
-          onChange={onSourceSelectionChange}
-          isClearable={false}
-          data-test-subj="ESQLEditor-quickEditComboBox"
-          aria-label={i18n.translate('esqlEditor.visor.ariaLabel', {
-            defaultMessage: 'Quick edit source selection',
-          })}
-          css={styles.comboBoxStyles}
-          truncationProps={{
-            truncation: 'middle',
+        <SourcesDropdown
+          currentSource={selectedSource[0]?.label || ''}
+          onChangeSource={(newSource) => {
+            setSelectedSource([{ label: newSource }]);
+            userSelectedSourceRef.current = true;
           }}
-          fullWidth
-          compressed
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false} css={styles.separator} />
@@ -154,6 +140,7 @@ export function QuickEditVisor({
           value={searchValue}
           onChange={onSearchValueChange}
           onKeyDown={onSearchKeyDown}
+          onClick={onSearchClick}
           aria-label={i18n.translate('esqlEditor.visor.searchPlaceholder', {
             defaultMessage: 'Search ...',
           })}
