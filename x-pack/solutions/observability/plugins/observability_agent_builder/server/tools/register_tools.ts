@@ -8,6 +8,12 @@
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import { platformCoreTools } from '@kbn/onechat-common';
 import type { StaticToolRegistration } from '@kbn/onechat-server';
+import {
+  OBSERVABILITY_GET_LOG_CHANGE_POINT_TOOL_ID,
+  createObservabilityGetLogChangePointTool,
+  OBSERVABILITY_GET_METRIC_CHANGE_POINT_TOOL_ID,
+  createObservabilityGetMetricChangePointTool,
+} from './get_change_point';
 import type {
   ObservabilityAgentBuilderPluginSetupDependencies,
   ObservabilityAgentBuilderPluginStart,
@@ -57,6 +63,12 @@ const OBSERVABILITY_TOOL_IDS = [
   OBSERVABILITY_GET_ALERTS_TOOL_ID,
   OBSERVABILITY_GET_LOG_CATEGORIES_TOOL_ID,
   OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID,
+  OBSERVABILITY_GET_LOG_CHANGE_POINT_TOOL_ID,
+  OBSERVABILITY_GET_METRIC_CHANGE_POINT_TOOL_ID,
+];
+
+// registered in the APM plugin
+const APM_TOOL_IDS = [
   OBSERVABILITY_GET_SERVICES_TOOL_ID,
   OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID,
   OBSERVABILITY_GET_HOSTS_TOOL_ID,
@@ -88,6 +100,8 @@ export async function registerTools({
     createDownstreamDependenciesTool({ core, dataRegistry, logger }),
     createGetCorrelatedLogsTool({ core, logger }),
     createGetHostsTool({ core, logger, dataRegistry }),
+    createObservabilityGetLogChangePointTool({ core, plugins, logger }),
+    createObservabilityGetMetricChangePointTool({ core, plugins, logger }),
   ];
 
   for (const tool of observabilityTools) {
