@@ -227,9 +227,7 @@ export const useDashboardListingTable = ({
                   createdAt: meta.createdAt,
                   createdBy: meta.createdBy,
                   updatedBy: meta.updatedBy,
-                  references: tagApi && data.tags
-                    ? data.tags.map(tagApi.ui.tagIdToReference)
-                    : [],
+                  references: tagApi && data.tags ? data.tags.map(tagApi.ui.tagIdToReference) : [],
                   managed: meta.managed,
                   attributes: {
                     title: data.title,
