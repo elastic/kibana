@@ -72,6 +72,7 @@
     "@kbn/shared-ux-error-boundary",
     "@kbn/es-query",
     "@kbn/cps-utils",
+    "@kbn/cps",
   ],
   "exclude": [
     "target/**/*",
