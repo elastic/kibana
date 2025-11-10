@@ -227,6 +227,29 @@ describe('cascaded documents helpers utils', () => {
             'FROM kibana_sample_data_logs | WHERE MATCH_PHRASE(`url.keyword`, "https://www.elastic.co/downloads/beats/metricbeat")'
           );
         });
+
+        it('should not use a match_phrase operator when the group is a runtime field created by an EVAL command', () => {
+          const editorQuery: AggregateQuery = {
+            esql: `
+              FROM remote_cluster:traces* | EVAL event = CASE(span.duration.us > 100000, "Bad", "Good") | STATS COUNT (*) by event
+            `,
+          };
+
+          const nodePath = ['event'];
+          const nodePathMap = { event: 'Bad' };
+
+          const cascadeQuery = constructCascadeQuery({
+            query: editorQuery,
+            nodeType,
+            nodePath,
+            nodePathMap,
+          });
+
+          expect(cascadeQuery).toBeDefined();
+          expect(cascadeQuery!.esql).toBe(
+            'FROM remote_cluster:traces* | EVAL event = CASE(span.duration.us > 100000, "Bad", "Good") | WHERE event == "Bad"'
+          );
+        });
       });
     });
 

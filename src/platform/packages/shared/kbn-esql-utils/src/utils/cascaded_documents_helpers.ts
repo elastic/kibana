@@ -116,6 +116,33 @@ function getESQLQueryDataSourceCommand(
 }
 
 /**
+ * Returns runtime fields that are created within the query by the STATS command in the query
+ */
+function getStatsCommandRuntimeFields(esqlQuery: EsqlQuery) {
+  return Array.from(mutate.commands.stats.summarize(esqlQuery)).map((command) => command.newFields);
+}
+
+/**
+ * Returns a set of all the runtime fields in the query, created by the EVAL command
+ */
+function getEvalCommandRuntimeFields(esqlQuery: EsqlQuery) {
+  return esqlQuery.ast.commands.reduce((acc, cur) => {
+    if (cur.name !== 'eval') {
+      return acc;
+    }
+
+    cur.args.forEach((arg) => {
+      // runtime fields are created in the EVAL as arguments that are function assignments
+      if (isFunctionExpression(arg) && isColumn(arg.args[0])) {
+        acc.push(((arg as ESQLFunction).args[0] as ESQLColumn).name);
+      }
+    });
+
+    return acc;
+  }, [] as string[]);
+}
+
+/**
  * Returns the summary of the stats command at the given command index in the esql query
  */
 function getStatsCommandAtIndexSummary(esqlQuery: EsqlQuery, commandIndex: number) {
@@ -142,9 +169,7 @@ export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta =
 
   // get all the new fields created by the stats commands in the query,
   // so we might tell if the command we are operating on is referencing a field that was defined by a preceding command
-  const queryRuntimeFields = Array.from(mutate.commands.stats.summarize(esqlQuery)).map(
-    (command) => command.newFields
-  );
+  const statsCommandRuntimeFields = getStatsCommandRuntimeFields(esqlQuery);
 
   const grouping = Object.values(summarizedStatsCommand.grouping);
 
@@ -159,7 +184,7 @@ export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta =
     const groupFieldName = removeBackticks(group.field);
     let groupFieldNode = group;
 
-    const groupDeclarationCommandIndex = queryRuntimeFields.findIndex((field) =>
+    const groupDeclarationCommandIndex = statsCommandRuntimeFields.findIndex((field) =>
       field.has(groupFieldName)
     );
 
@@ -273,20 +298,21 @@ export const constructCascadeQuery = ({
     throw new Error('Query does not have a valid stats command with grouping options');
   }
 
-  const queryRuntimeFields = Array.from(mutate.commands.stats.summarize(EditorESQLQuery)).map(
-    (command) => command.newFields
-  );
+  const statsCommandRuntimeFields = getStatsCommandRuntimeFields(EditorESQLQuery);
+  const evalCommandRuntimeFields = getEvalCommandRuntimeFields(EditorESQLQuery);
 
   if (nodeType === 'leaf') {
     const pathSegment = nodePath[nodePath.length - 1];
 
-    const groupDeclarationCommandIndex = queryRuntimeFields.findIndex((field) =>
+    const groupDeclarationCommandIndex = statsCommandRuntimeFields.findIndex((field) =>
       field.has(pathSegment)
     );
 
+    const groupIsStatsDeclaredRuntimeField = groupDeclarationCommandIndex >= 0;
+
     let groupDeclarationCommandSummary: StatsCommandSummary | null = null;
 
-    if (groupDeclarationCommandIndex >= 0) {
+    if (groupIsStatsDeclaredRuntimeField) {
       groupDeclarationCommandSummary = getStatsCommandAtIndexSummary(
         EditorESQLQuery,
         groupDeclarationCommandIndex
@@ -323,8 +349,11 @@ export const constructCascadeQuery = ({
       mutate.generic.commands.append(cascadeOperationQuery.ast, cmd);
     });
 
+    const groupIsRuntimeDeclared =
+      groupIsStatsDeclaredRuntimeField || evalCommandRuntimeFields.includes(pathSegment);
+
     if (isColumn(groupValue.definition)) {
-      return handleStatsByColumnLeafOperation(cascadeOperationQuery, {
+      return handleStatsByColumnLeafOperation(cascadeOperationQuery, groupIsRuntimeDeclared, {
         [pathSegment]: nodePathMap[pathSegment],
       });
     } else if (isFunctionExpression(groupValue.definition)) {
@@ -354,6 +383,7 @@ export const constructCascadeQuery = ({
  */
 function handleStatsByColumnLeafOperation(
   cascadeOperationQuery: EsqlQuery,
+  groupIsRuntimeDeclared: boolean,
   columnInterpolationRecord: Record<string, string>
 ): AggregateQuery {
   // build a where command with match expressions for the selected column
@@ -361,12 +391,14 @@ function handleStatsByColumnLeafOperation(
     return Builder.command({
       name: 'where',
       args: [
-        Number.isInteger(Number(value))
+        Number.isInteger(Number(value)) || groupIsRuntimeDeclared
           ? Builder.expression.func.binary('==', [
               Builder.expression.column({
                 args: [Builder.identifier({ name: key })],
               }),
-              Builder.expression.literal.integer(Number(value)),
+              Number.isInteger(Number(value))
+                ? Builder.expression.literal.integer(Number(value))
+                : Builder.expression.literal.string(value),
             ])
           : Builder.expression.func.call('match_phrase', [
               Builder.identifier({ name: key }),
