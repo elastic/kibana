@@ -15,6 +15,7 @@ import type {
   BaseSearchRuntimeMappings,
   DataStreamDefinition,
   IDataStreamClientIndexRequest,
+  IDataStreamClientBulkRequest,
   SearchRequestImproved,
   ClientHelpers,
 } from './types';
@@ -63,6 +64,13 @@ export class DataStreamClient<S extends object, SRM extends BaseSearchRuntimeMap
 
   public async index(args: IDataStreamClientIndexRequest<S>) {
     return this.client.index({
+      index: this.dataStreams.name,
+      ...args,
+    });
+  }
+
+  public async bulk(args: IDataStreamClientBulkRequest<S>) {
+    return this.client.bulk({
       index: this.dataStreams.name,
       ...args,
     });

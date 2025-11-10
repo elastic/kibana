@@ -23,7 +23,8 @@ export type {
   KeywordMapping,
   LongMapping,
   ShortMapping,
-  Strict,
+  AnyMapping,
+  ObjectMapping,
   TextMapping,
   SearchRequestImproved,
 } from './src/types';

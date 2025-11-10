@@ -10,28 +10,23 @@
 import type { TransportRequestOptionsWithOutMeta } from '@elastic/elasticsearch';
 import type api from '@elastic/elasticsearch/lib/api/types';
 
-export type StrictDynamic = false | 'strict';
+import type { Strict, StrictMappingTypeMapping, AnyMapping, StringMapping } from './mappings/types';
 
-export type ToStrictMappingProperty<P extends api.MappingProperty> = Omit<P, 'properties'> & {
-  dynamic?: StrictDynamic;
-};
-
-export type Strict<P extends api.MappingProperty> = ToStrictMappingProperty<P>;
-
-export type StrictMappingTypeMapping = Strict<api.MappingTypeMapping>;
-
-export type KeywordMapping = Strict<api.MappingKeywordProperty>;
-export type TextMapping = Strict<api.MappingTextProperty>;
-export type DateMapping = Strict<api.MappingDateProperty>;
-export type DateNanosMapping = Strict<api.MappingDateNanosProperty>;
-export type LongMapping = Strict<api.MappingLongNumberProperty>;
-export type IntegerMapping = Strict<api.MappingIntegerNumberProperty>;
-export type ShortMapping = Strict<api.MappingShortNumberProperty>;
-export type BooleanMapping = Strict<api.MappingBooleanProperty>;
-export type FlattenedMapping = Strict<api.MappingFlattenedProperty>;
-
-// Map ES data types to JavaScript types
-type StringMapping = KeywordMapping | TextMapping | DateMapping | DateNanosMapping;
+export type {
+  AnyMapping,
+  StringMapping,
+  BooleanMapping,
+  DateMapping,
+  DateNanosMapping,
+  FlattenedMapping,
+  IntegerMapping,
+  KeywordMapping,
+  LongMapping,
+  ShortMapping,
+  ObjectMapping,
+  StrictDynamic,
+  TextMapping,
+} from './mappings/types';
 
 // interface JestIntegrationTestHelpers {
 //   assertBackwardsCompatible: (
@@ -43,12 +38,6 @@ type StringMapping = KeywordMapping | TextMapping | DateMapping | DateNanosMappi
 //   toSnapshot: (...dataStream: DataStreamDefinition[]) => void;
 //   mappingsHash: (dataStream: DataStreamDefinition) => string;
 // }
-
-export interface MappingsHelpers {
-  date: () => KeywordMapping;
-  keyword: () => KeywordMapping;
-  text: () => TextMapping;
-}
 
 // export interface SearchRuntimeMappingsHelpers {
 //   remap: (args: {
@@ -153,6 +142,8 @@ export interface ClientHelpers<SRM extends BaseSearchRuntimeMappings> {
 
 export type IDataStreamClientIndexRequest<S extends object> = Omit<api.IndexRequest<S>, 'index'>;
 
+export type IDataStreamClientBulkRequest<S extends object> = Omit<api.BulkRequest<S>, 'bulk'>;
+
 /**
  * A client for interacting with data streams in Elasticsearch.
  *
@@ -172,11 +163,16 @@ export interface IDataStreamClient<S extends {}, SRM extends BaseSearchRuntimeMa
    */
   index: (req: IDataStreamClientIndexRequest<S>) => Promise<api.IndexResponse>;
 
+  /**
+   * The Elasticsearch JS client bulk interface.
+   */
+  bulk: (req: IDataStreamClientBulkRequest<S>) => Promise<api.BulkResponse>;
+
   helpers: ClientHelpers<SRM>;
 }
 
 // An attempt at getting TS to check mapping properties match the schema
-type ObjectToPropertiesDefinition<O extends Record<string, unknown>> = {} extends O
+type ObjectToPropertiesDefinition<O extends Record<string, unknown> = {}> = O extends {}
   ? never
   : {
       [K in keyof O]?: {} extends O[K]
@@ -188,7 +184,7 @@ type ObjectToPropertiesDefinition<O extends Record<string, unknown>> = {} extend
           }
         : O[K] extends string
         ? StringMapping
-        : Strict<api.MappingProperty>;
+        : AnyMapping;
     };
 
 export type AnyDataStreamDefinition = DataStreamDefinition<any, any>;

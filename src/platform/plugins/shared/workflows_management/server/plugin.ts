@@ -166,23 +166,19 @@ export class WorkflowsPlugin
     this.logger.debug('Workflows Management: Creating workflows service');
 
     // Get ES client from core
-    const esClientPromise = core
-      .getStartServices()
-      .then(([coreStart]) => coreStart.elasticsearch.client.asInternalUser);
+    const getCoreStart = () => core.getStartServices().then(([coreStart]) => coreStart);
 
+    const getPluginsStart = () => core.getStartServices().then(([, pluginsStart]) => pluginsStart);
     const getWorkflowExecutionEngine = () =>
-      core.getStartServices().then(([, pluginsStart]) => pluginsStart.workflowsExecutionEngine);
-
-    // Create function to get actions client (available after start)
-    const getActionsStart = () =>
-      core.getStartServices().then(([, pluginsStart]) => pluginsStart.actions);
+      getPluginsStart().then(({ workflowsExecutionEngine }) => workflowsExecutionEngine);
 
     this.workflowsService = new WorkflowsService(
-      esClientPromise,
       this.logger,
       this.config.logging.console,
-      getActionsStart
+      getCoreStart,
+      getPluginsStart
     );
+
     this.api = new WorkflowsManagementApi(this.workflowsService, getWorkflowExecutionEngine);
     this.spaces = plugins.spaces?.spacesService;
 

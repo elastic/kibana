@@ -22,3 +22,9 @@ export type {
   WorkflowsExecutionEnginePluginSetup,
   WorkflowsExecutionEnginePluginStart,
 } from './types';
+
+export type {
+  LogsRepository,
+  WorkflowLogEvent,
+  LogSearchResult,
+} from './repositories/logs_repository';

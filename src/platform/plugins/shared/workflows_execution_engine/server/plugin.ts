@@ -27,6 +27,7 @@ import type { WorkflowsExecutionEngineConfig } from './config';
 
 import { resumeWorkflow, runWorkflow } from './execution_functions';
 import { LogsRepository } from './repositories/logs_repository';
+import { initializeLogsRepositoryDataStream } from './repositories/logs_repository/data_stream';
 import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
 import type {
@@ -42,6 +43,7 @@ import type {
   ResumeWorkflowExecutionParams,
   StartWorkflowExecutionParams,
 } from './workflow_task_manager/types';
+
 import { createIndexes } from '../common';
 
 type SetupDependencies = Pick<ContextDependencies, 'cloudSetup'>;
@@ -74,6 +76,8 @@ export class WorkflowsExecutionEnginePlugin
     const logger = this.logger;
     const config = this.config;
 
+    initializeLogsRepositoryDataStream(core.dataStreams);
+
     const setupDependencies: SetupDependencies = { cloudSetup: plugins.cloud };
     this.setupDependencies = setupDependencies;
 
@@ -94,14 +98,15 @@ export class WorkflowsExecutionEnginePlugin
                 taskInstance.params as StartWorkflowExecutionParams;
               const [coreStart, pluginsStart] = await core.getStartServices();
               await this.initialize(coreStart);
+              const { dataStreams, elasticsearch } = coreStart;
               const { actions, taskManager } = pluginsStart;
               const dependencies: ContextDependencies = setupDependencies; // TODO: append start dependencies
 
               // Get ES client from core services (guaranteed to be available at task execution time)
-              const esClient = coreStart.elasticsearch.client.asInternalUser as Client;
+              const esClient = elasticsearch.client.asInternalUser as Client;
               const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
               const stepExecutionRepository = new StepExecutionRepository(esClient);
-              const logsRepository = new LogsRepository(esClient);
+              const logsRepository = new LogsRepository(dataStreams);
 
               await runWorkflow({
                 workflowRunId,
@@ -146,11 +151,12 @@ export class WorkflowsExecutionEnginePlugin
               await this.initialize(coreStart);
               const dependencies: ContextDependencies = setupDependencies; // TODO: append start dependencies
               const { actions, taskManager } = pluginsStart;
+              const { dataStreams, elasticsearch } = coreStart;
               // Get ES client from core services (guaranteed to be available at task execution time)
-              const esClient = coreStart.elasticsearch.client.asInternalUser as Client;
+              const esClient = elasticsearch.client.asInternalUser as Client;
               const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
               const stepExecutionRepository = new StepExecutionRepository(esClient);
-              const logsRepository = new LogsRepository(esClient);
+              const logsRepository = new LogsRepository(dataStreams);
 
               await resumeWorkflow({
                 workflowRunId,
@@ -186,6 +192,7 @@ export class WorkflowsExecutionEnginePlugin
       throw new Error('Setup not called before start');
     }
     const dependencies: ContextDependencies = this.setupDependencies; // TODO: append start dependencies
+    const logsRepository = new LogsRepository(coreStart.dataStreams);
 
     const executeWorkflow = async (
       workflow: WorkflowExecutionEngineModel,
@@ -194,12 +201,10 @@ export class WorkflowsExecutionEnginePlugin
     ) => {
       await this.initialize(coreStart);
       const workflowCreatedAt = new Date();
-
       // Get ES client and create repository for this execution
       const esClient = coreStart.elasticsearch.client.asInternalUser as Client;
       const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
       const stepExecutionRepository = new StepExecutionRepository(esClient);
-      const logsRepository = new LogsRepository(esClient);
 
       const triggeredBy = context.triggeredBy || 'manual'; // 'manual' or 'scheduled'
       const workflowExecution: Partial<EsWorkflowExecution> = {
@@ -376,6 +381,7 @@ export class WorkflowsExecutionEnginePlugin
     };
 
     return {
+      logsRepository,
       executeWorkflow,
       executeWorkflowStep,
       cancelWorkflowExecution,
