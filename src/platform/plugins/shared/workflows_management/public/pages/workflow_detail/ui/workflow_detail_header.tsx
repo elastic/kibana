@@ -48,7 +48,7 @@ import {
   useWorkflowUrlState,
   type WorkflowUrlStateTabType,
 } from '../../../hooks/use_workflow_url_state';
-import { getRunWorkflowTooltipContent } from '../../../shared/ui';
+import { getRunWorkflowTooltipContent, getSaveWorkflowTooltipContent } from '../../../shared/ui';
 import { WorkflowUnsavedChangesBadge } from '../../../widgets/workflow_yaml_editor/ui/workflow_unsaved_changes_badge';
 
 const Translations = {
@@ -139,6 +139,19 @@ export const WorkflowDetailHeader = React.memo(
       });
     }, [isSyntaxValid, canExecuteWorkflow, isExecutionsTab]);
 
+    const saveWorkflowTooltipContent = useMemo(() => {
+      const isCreate = !workflowId;
+      return getSaveWorkflowTooltipContent({
+        isExecutionsTab,
+        canSaveWorkflow: isCreate ? canCreateWorkflow : canUpdateWorkflow,
+        isCreate,
+      });
+    }, [isExecutionsTab, workflowId, canCreateWorkflow, canUpdateWorkflow]);
+
+    const canSaveWorkflow = useMemo(() => {
+      return workflowId ? canUpdateWorkflow : canCreateWorkflow;
+    }, [canUpdateWorkflow, canCreateWorkflow, workflowId]);
+
     const handleRunClickWithUnsavedCheck = useCallback(() => {
       if (hasUnsavedChanges) {
         setShowRunConfirmation(true);
@@ -155,10 +168,6 @@ export const WorkflowDetailHeader = React.memo(
     const handleCancelRun = useCallback(() => {
       setShowRunConfirmation(false);
     }, []);
-
-    const canSaveWorkflow = useMemo(() => {
-      return workflowId ? canUpdateWorkflow : canCreateWorkflow;
-    }, [canUpdateWorkflow, canCreateWorkflow, workflowId]);
 
     return (
       <>
@@ -284,15 +293,21 @@ export const WorkflowDetailHeader = React.memo(
                     data-test-subj="runWorkflowHeaderButton"
                   />
                 </EuiToolTip>
-                <EuiButton
-                  fill
-                  color="primary"
-                  size="s"
-                  onClick={handleSaveWorkflow}
-                  disabled={!canSaveWorkflow || isLoading}
-                >
-                  <FormattedMessage id="keepWorkflows.buttonText" defaultMessage="Save" ignoreTag />
-                </EuiButton>
+                <EuiToolTip content={saveWorkflowTooltipContent}>
+                  <EuiButton
+                    fill
+                    color="primary"
+                    size="s"
+                    onClick={handleSaveWorkflow}
+                    disabled={isExecutionsTab || !canSaveWorkflow || isLoading}
+                  >
+                    <FormattedMessage
+                      id="keepWorkflows.buttonText"
+                      defaultMessage="Save"
+                      ignoreTag
+                    />
+                  </EuiButton>
+                </EuiToolTip>
               </EuiFlexGroup>
             </EuiPageHeaderSection>
           </EuiPageTemplate.Header>

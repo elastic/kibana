@@ -4,7 +4,7 @@
     "outDir": "target/types",
     "types": ["jest", "node", "react", "@kbn/ambient-ui-types"]
   },
-  "include": ["**/*.ts", "**/*.tsx", "index.ts", "../../../plugins/shared/workflows_management/public/entities/workflows/model/use_workflow_execution_polling.ts", "../../../plugins/shared/workflows_management/public/entities/workflows/model/use_workflow_execution_polling.test.ts"],
+  "include": ["**/*.ts", "**/*.tsx", "index.ts"],
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/react-query",

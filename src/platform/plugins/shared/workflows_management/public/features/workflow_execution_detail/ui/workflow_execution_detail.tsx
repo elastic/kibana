@@ -16,9 +16,9 @@ import {
   ResizableLayoutMode,
   ResizableLayoutOrder,
 } from '@kbn/resizable-layout';
-import { useWorkflowExecutionPolling } from '@kbn/workflows-ui';
 import { WorkflowExecutionPanel } from './workflow_execution_panel';
 import { WorkflowStepExecutionDetails } from './workflow_step_execution_details';
+import { useWorkflowExecutionPolling } from '../../../entities/workflows/model/use_workflow_execution_polling';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 
 const WidthStorageKey = 'WORKFLOWS_EXECUTION_DETAILS_WIDTH';
