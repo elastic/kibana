@@ -200,18 +200,10 @@ export interface EvaluationTableOptions {
 }
 
 /**
- * Detects terminal width for responsive table rendering
+ * Token evaluator names that should be combined into a single column
  */
-function getTerminalWidth(): number {
-  return process.stdout.columns || 120;
-}
-
-/**
- * Determines if compact mode should be used based on terminal width
- */
-function shouldUseCompactMode(): boolean {
-  return getTerminalWidth() < 120;
-}
+const TOKEN_EVALUATORS = ['Input Tokens', 'Output Tokens', 'Cached Tokens'] as const;
+const COMBINED_TOKENS_COLUMN = 'Tokens';
 
 /**
  * Gets default evaluator-specific format configurations
@@ -221,9 +213,33 @@ function getDefaultEvaluatorFormats(): Map<string, EvaluatorFormatConfig> {
     ['Input Tokens', { hidePercentage: true, decimalPlaces: 1, showDecimalOnlyIfNeeded: true }],
     ['Output Tokens', { hidePercentage: true, decimalPlaces: 1, showDecimalOnlyIfNeeded: true }],
     ['Cached Tokens', { hidePercentage: true, decimalPlaces: 1, showDecimalOnlyIfNeeded: true }],
+    [
+      COMBINED_TOKENS_COLUMN,
+      { hidePercentage: true, decimalPlaces: 1, showDecimalOnlyIfNeeded: true },
+    ],
     ['Tool Calls', { hidePercentage: true, decimalPlaces: 1, showDecimalOnlyIfNeeded: true }],
     ['Latency', { hidePercentage: true, unitSuffix: 's' }],
   ]);
+}
+
+/**
+ * Combines token evaluator columns into a single column
+ * Returns the new column names and a map indicating which columns are combined
+ */
+function combineTokenColumns(evaluatorNames: string[]): {
+  columnNames: string[];
+  hasTokens: boolean;
+} {
+  const hasAllTokenEvaluators = TOKEN_EVALUATORS.every((name) => evaluatorNames.includes(name));
+
+  if (!hasAllTokenEvaluators) {
+    return { columnNames: evaluatorNames, hasTokens: false };
+  }
+
+  const columnNames = evaluatorNames.filter((name) => !TOKEN_EVALUATORS.includes(name as any));
+  columnNames.push(COMBINED_TOKENS_COLUMN);
+
+  return { columnNames, hasTokens: true };
 }
 
 /**
@@ -245,10 +261,10 @@ export function createEvaluationReportTable(
   const { datasetScoresWithStats, repetitions } = report;
 
   const evaluatorNames = getUniqueEvaluatorNames(datasetScoresWithStats);
+  const { columnNames, hasTokens } = combineTokenColumns(evaluatorNames);
   const overallStats = calculateOverallStats(datasetScoresWithStats);
   const totalExamples = sumBy(datasetScoresWithStats, (d) => d.numExamples);
 
-  const isCompact = shouldUseCompactMode();
   const defaultFormats = getDefaultEvaluatorFormats();
   const mergedFormats = new Map([...defaultFormats, ...(evaluatorFormats || [])]);
 
@@ -261,26 +277,46 @@ export function createEvaluationReportTable(
   const examplesHeader =
     repetitions > 1 ? `# Examples\n${chalk.gray('(repetitions x examples)')}` : '# Examples';
 
-  const tableHeaders = [firstColumnHeader, examplesHeader, ...evaluatorNames];
+  const tableHeaders = [firstColumnHeader, examplesHeader, ...columnNames];
 
   const datasetRows = datasetScoresWithStats.map((dataset) => {
     const row = [styleRowName(dataset.name), formatExampleCount(dataset.numExamples)];
 
-    evaluatorNames.forEach((evaluatorName) => {
-      const stats = dataset.evaluatorStats.get(evaluatorName);
-      if (stats && stats.count > 0) {
-        const cellContent = formatStatsCell(
-          stats,
-          evaluatorName,
+    columnNames.forEach((columnName) => {
+      if (hasTokens && columnName === COMBINED_TOKENS_COLUMN) {
+        const inputStats = dataset.evaluatorStats.get('Input Tokens');
+        const outputStats = dataset.evaluatorStats.get('Output Tokens');
+        const cachedStats = dataset.evaluatorStats.get('Cached Tokens');
+
+        const evaluatorConfig = mergedFormats.get(COMBINED_TOKENS_COLUMN) || {};
+        const tokenDecimalPlaces = evaluatorConfig.decimalPlaces ?? decimalPlaces;
+        const showDecimalOnlyIfNeeded = evaluatorConfig.showDecimalOnlyIfNeeded ?? false;
+
+        const cellContent = formatCombinedTokensCell(
+          inputStats,
+          outputStats,
+          cachedStats,
           false,
-          isCompact,
-          decimalPlaces,
-          mergedFormats,
+          tokenDecimalPlaces,
+          showDecimalOnlyIfNeeded,
           statsToInclude
         );
         row.push(cellContent);
       } else {
-        row.push(chalk.gray('-'));
+        const stats = dataset.evaluatorStats.get(columnName);
+        if (stats && stats.count > 0) {
+          const cellContent = formatStatsCell(
+            stats,
+            columnName,
+            false,
+            decimalPlaces,
+            mergedFormats,
+            statsToInclude
+          );
+          row.push(cellContent);
+        } else {
+          row.push(chalk.gray('-'));
+        }
       }
     });
 
@@ -292,27 +328,122 @@ export function createEvaluationReportTable(
     chalk.bold.green(formatExampleCount(totalExamples)),
   ];
 
-  evaluatorNames.forEach((evaluatorName) => {
-    const stats = overallStats.get(evaluatorName);
-    if (stats && stats.count > 0) {
-      const cellContent = formatStatsCell(
-        stats,
-        evaluatorName,
+  columnNames.forEach((columnName) => {
+    if (hasTokens && columnName === COMBINED_TOKENS_COLUMN) {
+      const inputStats = overallStats.get('Input Tokens');
+      const outputStats = overallStats.get('Output Tokens');
+      const cachedStats = overallStats.get('Cached Tokens');
+
+      const evaluatorConfig = mergedFormats.get(COMBINED_TOKENS_COLUMN) || {};
+      const tokenDecimalPlaces = evaluatorConfig.decimalPlaces ?? decimalPlaces;
+      const showDecimalOnlyIfNeeded = evaluatorConfig.showDecimalOnlyIfNeeded ?? false;
+
+      const cellContent = formatCombinedTokensCell(
+        inputStats,
+        outputStats,
+        cachedStats,
         true,
-        isCompact,
-        decimalPlaces,
-        mergedFormats,
+        tokenDecimalPlaces,
+        showDecimalOnlyIfNeeded,
         statsToInclude
       );
       overallRow.push(cellContent);
     } else {
-      overallRow.push(chalk.bold.green('-'));
+      const stats = overallStats.get(columnName);
+      if (stats && stats.count > 0) {
+        const cellContent = formatStatsCell(
+          stats,
+          columnName,
+          true,
+          decimalPlaces,
+          mergedFormats,
+          statsToInclude
+        );
+        overallRow.push(cellContent);
+      } else {
+        overallRow.push(chalk.bold.green('-'));
+      }
     }
   });
 
-  const tableConfig = buildTableConfig(tableHeaders.length, isCompact);
+  const tableConfig = buildTableConfig(tableHeaders.length);
 
   return table([tableHeaders, ...datasetRows, overallRow], tableConfig);
+}
+
+/**
+ * Formats a combined tokens cell showing input, output, and cached tokens as vertical sections
+ */
+function formatCombinedTokensCell(
+  inputStats: Partial<EvaluatorStats> | undefined,
+  outputStats: Partial<EvaluatorStats> | undefined,
+  cachedStats: Partial<EvaluatorStats> | undefined,
+  isBold: boolean,
+  decimalPlaces: number,
+  showDecimalOnlyIfNeeded: boolean,
+  statsToInclude?: Array<keyof EvaluatorStats>
+): string {
+  const colorFn = isBold ? chalk.bold.green : chalk.cyan;
+  const sections: string[] = [];
+  const separator = chalk.gray('────────────────');
+
+  const labels = { mean: 'mean', median: 'median', stdDev: 'std', min: 'min', max: 'max' };
+
+  const formatNumber = (value: number | undefined): string => {
+    if (value === undefined) return '-';
+    if (showDecimalOnlyIfNeeded && Number.isInteger(value)) {
+      return value.toString();
+    }
+    return value.toFixed(decimalPlaces);
+  };
+
+  const shouldInclude = (stat: keyof EvaluatorStats) => {
+    return !statsToInclude || statsToInclude.includes(stat);
+  };
+
+  const formatTokenSection = (label: string, stats: Partial<EvaluatorStats>): string => {
+    const lines: string[] = [chalk.white(label)];
+
+    if (shouldInclude('mean') && stats.mean !== undefined) {
+      lines.push(colorFn(`${labels.mean}: ${formatNumber(stats.mean)}`));
+    }
+
+    if (shouldInclude('median') && stats.median !== undefined) {
+      lines.push(colorFn(`${labels.median}: ${formatNumber(stats.median)}`));
+    }
+
+    if (shouldInclude('stdDev') && stats.stdDev !== undefined) {
+      lines.push(colorFn(`${labels.stdDev}: ${formatNumber(stats.stdDev)}`));
+    }
+
+    if (shouldInclude('min') && stats.min !== undefined) {
+      lines.push(colorFn(`${labels.min}: ${formatNumber(stats.min)}`));
+    }
+
+    if (shouldInclude('max') && stats.max !== undefined) {
+      lines.push(colorFn(`${labels.max}: ${formatNumber(stats.max)}`));
+    }
+
+    return lines.join('\n');
+  };
+
+  if (inputStats && inputStats.count !== undefined && inputStats.count > 0) {
+    sections.push(formatTokenSection('Input Tokens', inputStats));
+  }
+
+  if (outputStats && outputStats.count !== undefined && outputStats.count > 0) {
+    sections.push(formatTokenSection('Output Tokens', outputStats));
+  }
+
+  if (cachedStats && cachedStats.count !== undefined && cachedStats.count > 0) {
+    sections.push(formatTokenSection('Cached Tokens', cachedStats));
+  }
+
+  if (sections.length === 0) {
+    return chalk.gray('-');
+  }
+
+  return sections.join(`\n${separator}\n`);
 }
 
 /**
@@ -322,7 +453,6 @@ function formatStatsCell(
   stats: Partial<EvaluatorStats>,
   evaluatorName: string,
   isBold: boolean,
-  isCompact: boolean,
   defaultDecimalPlaces: number,
   evaluatorFormats: Map<string, EvaluatorFormatConfig>,
   statsToInclude?: Array<keyof EvaluatorStats>
@@ -338,9 +468,7 @@ function formatStatsCell(
   const unitSuffix = evaluatorConfig.unitSuffix || '';
   const hidePercentage = evaluatorConfig.hidePercentage ?? false;
 
-  const labels = isCompact
-    ? { mean: 'μ', median: 'p50', stdDev: 'σ', min: 'min', max: 'max' }
-    : { mean: 'mean', median: 'median', stdDev: 'std', min: 'min', max: 'max' };
+  const labels = { mean: 'mean', median: 'median', stdDev: 'std', min: 'min', max: 'max' };
 
   const formatNumber = (value: number): string => {
     if (showDecimalOnlyIfNeeded && Number.isInteger(value)) {
@@ -380,12 +508,8 @@ function formatStatsCell(
   return lines.join('\n');
 }
 
-function buildTableConfig(
-  columnCount: number,
-  isCompact: boolean
-): {
+function buildTableConfig(columnCount: number): {
   columns: Record<number, { alignment: 'right' | 'left' }>;
-  columnDefault?: { paddingLeft: number; paddingRight: number };
 } {
   const columns: Record<number, { alignment: 'right' | 'left' }> = {
     0: { alignment: 'left' },
@@ -395,14 +519,5 @@ function buildTableConfig(
     columns[i] = { alignment: 'right' };
   }
 
-  const config: {
-    columns: Record<number, { alignment: 'right' | 'left' }>;
-    columnDefault?: { paddingLeft: number; paddingRight: number };
-  } = { columns };
-
-  if (isCompact) {
-    config.columnDefault = { paddingLeft: 1, paddingRight: 1 };
-  }
-
-  return config;
+  return { columns };
 }
