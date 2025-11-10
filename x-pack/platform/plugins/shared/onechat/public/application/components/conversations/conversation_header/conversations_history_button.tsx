@@ -37,16 +37,14 @@ export const ConversationsHistoryButton: React.FC = () => {
   `;
 
   const button = hasActiveConversation ? (
-    <div css={paddingLeft}>
-      <EuiButtonIcon
-        iconType="clockCounter"
-        color="text"
-        aria-label={isPopoverOpen ? labels.close : labels.open}
-        onClick={togglePopover}
-        display="empty"
-        data-test-subj="onechatSidebarToggleBtn"
-      />
-    </div>
+    <EuiButtonIcon
+      iconType="clockCounter"
+      color="text"
+      aria-label={isPopoverOpen ? labels.close : labels.open}
+      onClick={togglePopover}
+      display="empty"
+      data-test-subj="onechatSidebarToggleBtn"
+    />
   ) : (
     <EuiButtonEmpty
       iconType="clockCounter"
@@ -60,7 +58,7 @@ export const ConversationsHistoryButton: React.FC = () => {
   );
 
   return (
-    <EuiPageHeaderSection>
+    <EuiPageHeaderSection css={hasActiveConversation ? paddingLeft : undefined}>
       <ConversationsHistoryPopover
         button={button}
         isOpen={isPopoverOpen}

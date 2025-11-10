@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { useOnechatAgentById } from '../../../../hooks/agents/use_agent_by_id';
+import { useIsAgentReadOnly } from '../../../../hooks/agents/use_is_agent_read_only';
 import { useNavigation } from '../../../../hooks/use_navigation';
 import { useHasActiveConversation, useAgentId } from '../../../../hooks/use_conversation';
 import { searchParamNames } from '../../../../search_param_names';
@@ -46,10 +46,8 @@ export const FullScreenActionsRight: React.FC = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const hasActiveConversation = useHasActiveConversation();
   const agentId = useAgentId();
-  const { agent } = useOnechatAgentById(agentId);
+  const isAgentReadOnly = useIsAgentReadOnly(agentId);
   const { createOnechatUrl } = useNavigation();
-
-  const isAgentReadOnly = !!agent?.readonly;
 
   const closePopover = () => {
     setIsPopoverOpen(false);

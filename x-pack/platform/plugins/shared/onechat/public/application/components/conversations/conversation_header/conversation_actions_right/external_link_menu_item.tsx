@@ -12,6 +12,7 @@ interface ExternalLinkMenuItemProps {
   icon: string;
   href: string;
   label: string;
+  disabled?: boolean;
   dataTestSubj?: string;
   onClose?: () => void;
 }
@@ -21,6 +22,7 @@ interface ExternalLinkMenuItemProps {
  * @param icon - The icon to display.
  * @param href - The href to the external link.
  * @param label - The label to display.
+ * @param disabled - Whether the menu item is disabled.
  * @param dataTestSubj - The data-test-subj to display.
  * @param onClose - The function to call when the menu item is clicked.
  * @returns A React component that displays a context menu item with an external link icon.
@@ -29,12 +31,14 @@ export const ExternalLinkMenuItem: React.FC<ExternalLinkMenuItemProps> = ({
   icon,
   href,
   label,
+  disabled = false,
   onClose,
   dataTestSubj,
 }) => (
   <EuiContextMenuItem
     icon={icon}
     size="s"
+    disabled={disabled}
     onClick={onClose}
     href={href}
     target="_blank"

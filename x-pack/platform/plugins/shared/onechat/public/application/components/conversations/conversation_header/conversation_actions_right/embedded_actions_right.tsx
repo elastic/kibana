@@ -8,6 +8,8 @@
 import { EuiContextMenuItem, EuiPopover, EuiButtonIcon, EuiContextMenuPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import { useIsAgentReadOnly } from '../../../../hooks/agents/use_is_agent_read_only';
+import { useConversationId } from '../../../../context/conversation/use_conversation_id';
 import { useNavigation } from '../../../../hooks/use_navigation';
 import { useAgentId } from '../../../../hooks/use_conversation';
 import { appPaths } from '../../../../utils/app_paths';
@@ -17,6 +19,8 @@ export const EmbeddedActionsRight: React.FC<{ onClose?: () => void }> = ({ onClo
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const agentId = useAgentId();
   const { createOnechatUrl } = useNavigation();
+  const conversationId = useConversationId();
+  const isAgentReadOnly = useIsAgentReadOnly(agentId);
 
   const closePopover = () => {
     setIsPopoverOpen(false);
@@ -31,7 +35,11 @@ export const EmbeddedActionsRight: React.FC<{ onClose?: () => void }> = ({ onClo
       key="openInAgentBuilder"
       icon="fullScreen"
       size="s"
-      href={agentId ? createOnechatUrl(appPaths.agents.edit({ agentId })) : undefined}
+      href={
+        conversationId
+          ? createOnechatUrl(appPaths.chat.conversation({ conversationId }))
+          : createOnechatUrl(appPaths.chat.new)
+      }
       onClick={closePopover}
     >
       {i18n.translate('xpack.onechat.embedded.conversationActions.openInAgentBuilder', {
@@ -43,6 +51,7 @@ export const EmbeddedActionsRight: React.FC<{ onClose?: () => void }> = ({ onClo
           <ExternalLinkMenuItem
             key="agentSettings"
             icon="gear"
+            disabled={isAgentReadOnly}
             href={createOnechatUrl(appPaths.agents.edit({ agentId }))}
             onClose={closePopover}
             label={i18n.translate('xpack.onechat.embedded.conversationActions.agentSettings', {
