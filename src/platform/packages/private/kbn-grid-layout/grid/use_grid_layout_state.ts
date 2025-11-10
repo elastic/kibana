@@ -23,6 +23,7 @@ import {
 import useResizeObserver, { type ObservedSize } from 'use-resize-observer/polyfilled';
 
 import { useEuiTheme } from '@elastic/eui';
+import { getScrollContainer } from '@kbn/core-chrome-layout-utils';
 
 import type { ActivePanelEvent } from './grid_panel';
 import type { ActiveSectionEvent } from './grid_section';
@@ -37,7 +38,6 @@ import type {
 import { getGridLayout, getOrderedLayout } from './utils/conversions';
 import { isLayoutEqual } from './utils/equality_checks';
 import { shouldShowMobileView } from './utils/mobile_view';
-import { getScrollContainer } from './utils/scroll_container';
 
 export const useGridLayoutState = ({
   layout,
