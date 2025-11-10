@@ -1475,12 +1475,6 @@ const componentStyles = {
       '.unifiedDataTable__cell--expanded': {
         backgroundColor: euiTheme.colors.backgroundBaseInteractiveSelect,
       },
-      '.euiDataGridRowCell__content--defaultHeight > div': {
-        maxInlineSize: '100%',
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        whiteSpace: 'nowrap',
-      },
       '.unifiedDataTable__cellValue': {
         fontFamily: euiTheme.font.familyCode,
       },
