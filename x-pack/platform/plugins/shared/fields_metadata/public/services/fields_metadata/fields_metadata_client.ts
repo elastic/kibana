@@ -22,6 +22,7 @@ import {
   FIND_FIELDS_METADATA_URL,
 } from '../../../common/fields_metadata';
 import { decodeOrThrow } from '../../../common/runtime_types';
+import { createProxiedPlainFields } from '../../../common';
 import type { IFieldsMetadataClient } from './types';
 
 export class FieldsMetadataClient implements IFieldsMetadataClient {
@@ -64,10 +65,15 @@ export class FieldsMetadataClient implements IFieldsMetadataClient {
         )
     )(response);
 
-    // Store cached results for given request parameters
-    this.cache.set(params, data);
+    // Apply proxy to support prefixed field access on the client side (reuses shared utility)
+    const proxiedData = {
+      fields: createProxiedPlainFields(data.fields),
+    };
 
-    return data;
+    // Store cached results for given request parameters
+    this.cache.set(params, proxiedData);
+
+    return proxiedData;
   }
 }
 

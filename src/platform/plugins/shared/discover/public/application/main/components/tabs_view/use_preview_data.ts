@@ -16,6 +16,7 @@ import { TabStatus } from '@kbn/unified-tabs';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
+import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 import type { RuntimeStateManager, TabState } from '../../state_management/redux';
 import {
   selectTabRuntimeState,
@@ -26,6 +27,7 @@ import { FetchStatus } from '../../../types';
 
 export const usePreviewData = (runtimeStateManager: RuntimeStateManager) => {
   const allTabs = useInternalStateSelector(selectAllTabs);
+  const savedDataViews = useInternalStateSelector((state) => state.savedDataViews);
 
   const previewDataMap$ = useMemo(
     () =>
@@ -34,11 +36,17 @@ export const usePreviewData = (runtimeStateManager: RuntimeStateManager) => {
           const tabId = tabState.id;
           return {
             ...acc,
-            [tabId]: getPreviewDataObservable(runtimeStateManager, tabId, tabState.initialAppState),
+            [tabId]: getPreviewDataObservable(
+              runtimeStateManager,
+              tabId,
+              tabState.initialAppState,
+              tabState.initialInternalState,
+              savedDataViews
+            ),
           };
         }, {})
       ),
-    [allTabs, runtimeStateManager]
+    [allTabs, runtimeStateManager, savedDataViews]
   );
   const previewDataMap = useObservable(previewDataMap$);
   const getPreviewData = useCallback(
@@ -70,7 +78,10 @@ const DEFAULT_PREVIEW_QUERY = {
   query: i18n.translate('discover.tabsView.defaultQuery', { defaultMessage: '(Empty query)' }),
 };
 
-const getPreviewQuery = (query: TabPreviewData['query'] | undefined): TabPreviewData['query'] => {
+const getPreviewQuery = (
+  query: TabPreviewData['query'] | undefined,
+  dataViewName: string | undefined
+): TabPreviewData['query'] => {
   if (!query) {
     return DEFAULT_PREVIEW_QUERY;
   }
@@ -86,23 +97,66 @@ const getPreviewQuery = (query: TabPreviewData['query'] | undefined): TabPreview
 
   return {
     ...query,
-    query: trimmedQuery || DEFAULT_PREVIEW_QUERY.query,
+    query: trimmedQuery || (dataViewName ? '' : DEFAULT_PREVIEW_QUERY.query),
   };
+};
+
+const getDataViewNameFromInitialInternalState = (
+  initialInternalState: TabState['initialInternalState'] | undefined,
+  savedDataViews: DataViewListItem[]
+): string | undefined => {
+  if (!initialInternalState?.serializedSearchSource) {
+    return undefined;
+  }
+
+  const index = initialInternalState.serializedSearchSource.index;
+
+  if (typeof index === 'string') {
+    const matchedDataView = savedDataViews.find((dv) => dv.id === index);
+    return matchedDataView?.name || matchedDataView?.title;
+  }
+
+  if (index?.name) {
+    return index.name;
+  }
+
+  return undefined;
+};
+
+const getPreviewTitle = (
+  query: TabPreviewData['query'] | undefined,
+  dataViewName: string | undefined
+) => {
+  if (isOfAggregateQueryType(query)) {
+    return undefined;
+  }
+
+  return dataViewName
+    ? i18n.translate('discover.tabsView.tabPreviewDataViewTitle', {
+        defaultMessage: 'Data view: {dataViewName}',
+        values: { dataViewName },
+      })
+    : undefined;
 };
 
 const getPreviewDataObservable = (
   runtimeStateManager: RuntimeStateManager,
   tabId: string,
-  initialAppState: TabState['initialAppState'] | undefined
-) =>
-  selectTabRuntimeState(runtimeStateManager, tabId).stateContainer$.pipe(
+  initialAppState: TabState['initialAppState'] | undefined,
+  initialInternalState: TabState['initialInternalState'] | undefined,
+  savedDataViews: DataViewListItem[]
+) => {
+  return selectTabRuntimeState(runtimeStateManager, tabId).stateContainer$.pipe(
     switchMap((tabStateContainer) => {
       if (!tabStateContainer) {
+        const derivedDataViewName = getDataViewNameFromInitialInternalState(
+          initialInternalState,
+          savedDataViews
+        );
         return of({
           status: TabStatus.DEFAULT,
-          query: initialAppState?.query
-            ? getPreviewQuery(initialAppState.query)
-            : DEFAULT_PREVIEW_QUERY,
+          query: getPreviewQuery(initialAppState?.query, derivedDataViewName),
+          title: getPreviewTitle(initialAppState?.query, derivedDataViewName),
         });
       }
 
@@ -111,13 +165,33 @@ const getPreviewDataObservable = (
       return combineLatest([
         tabStateContainer.dataState.data$.main$,
         appState.state$.pipe(startWith(appState.get())),
+        tabStateContainer.savedSearchState
+          .getCurrent$()
+          .pipe(startWith(tabStateContainer.savedSearchState.getState())),
       ]).pipe(
-        map(([{ fetchStatus }, { query }]) => ({ fetchStatus, query })),
+        map(([{ fetchStatus }, { query }, { searchSource }]) => ({
+          fetchStatus,
+          query,
+          dataViewName: searchSource?.getField('index')?.name,
+        })),
         distinctUntilChanged((prev, curr) => isEqual(prev, curr)),
-        map(({ fetchStatus, query }) => ({
-          status: getPreviewStatus(fetchStatus),
-          query: getPreviewQuery(query),
-        }))
+        map(({ fetchStatus, query, dataViewName }) => {
+          let derivedDataViewName = dataViewName;
+
+          if (!derivedDataViewName && initialInternalState?.serializedSearchSource) {
+            derivedDataViewName = getDataViewNameFromInitialInternalState(
+              initialInternalState,
+              savedDataViews
+            );
+          }
+
+          return {
+            status: getPreviewStatus(fetchStatus),
+            query: getPreviewQuery(query, derivedDataViewName),
+            title: getPreviewTitle(query, derivedDataViewName),
+          };
+        })
       );
     })
   );
+};
