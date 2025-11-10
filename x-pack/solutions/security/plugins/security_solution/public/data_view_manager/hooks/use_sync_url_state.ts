@@ -21,6 +21,7 @@ export const useSyncSourcererUrlState = (
   scopeId:
     | SourcererScopeName.default
     | SourcererScopeName.explore
+    | SourcererScopeName.attacks
     | SourcererScopeName.detections = SourcererScopeName.default
 ) => {
   const scopeDataViewId = useSelector((state: State) => {
@@ -88,6 +89,7 @@ export const useRestoreDataViewManagerStateFromURL = (
   scopeId:
     | SourcererScopeName.default
     | SourcererScopeName.explore
+    | SourcererScopeName.attacks
     | SourcererScopeName.detections = SourcererScopeName.default
 ) => {
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
