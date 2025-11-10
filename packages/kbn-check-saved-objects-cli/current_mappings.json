@@ -651,9 +651,6 @@
         },
         "type": "nested"
       },
-      "total_observables": {
-        "type": "integer"
-      },
       "owner": {
         "type": "keyword"
       },
@@ -691,6 +688,9 @@
         "type": "integer"
       },
       "total_events": {
+        "type": "integer"
+      },
+      "total_observables": {
         "type": "integer"
       },
       "updated_at": {
@@ -2093,6 +2093,9 @@
         "type": "boolean"
       },
       "name": {
+        "type": "keyword"
+      },
+      "ruleTypeConsumerPairs": {
         "type": "keyword"
       },
       "updatedAt": {
