@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { JiraServiceManagementCloseAlertExample } from '../../../server/connector_types/jira-service-management/test_schema';
+import { JiraServiceManagementCloseAlertExample } from '@kbn/connector-schemas/jira-service-management/schemas/test_schema';
 import { isPartialCloseAlertSchema } from './close_alert_schema';
 
 describe('close_alert_schema', () => {
