@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/data-quality-plugin",
-  "owner": "@elastic/obs-ux-logs-team",
+  "owner": "@elastic/obs-ux-onboarding-team",
   "group": "platform",
   "visibility": "shared",
   "plugin": {

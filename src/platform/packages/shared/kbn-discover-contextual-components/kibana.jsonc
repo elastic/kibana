@@ -2,7 +2,7 @@
   "type": "shared-browser",
   "id": "@kbn/discover-contextual-components",
   "owner": [
-    "@elastic/obs-ux-logs-team",
+    "@elastic/obs-ux-onboarding-team",
     "@elastic/kibana-data-discovery"
   ],
   "group": "platform",

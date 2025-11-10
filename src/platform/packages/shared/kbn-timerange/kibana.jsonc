@@ -1,7 +1,7 @@
 {
   "type": "shared-common",
   "id": "@kbn/timerange",
-  "owner": ["@elastic/obs-ux-logs-team"],
+  "owner": ["@elastic/obs-ux-onboarding-team"],
   "group": "platform",
   "visibility": "shared"
 }
