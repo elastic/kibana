@@ -58,6 +58,7 @@ describe('###Documentation popover content', () => {
   });
 
   test('Documentation component should list all sections that match the search input when title matches', () => {
+    jest.useFakeTimers();
     const component = mountWithIntl(
       <LanguageDocumentationPopoverContent language="test" sections={sections} />
     );
@@ -68,14 +69,22 @@ describe('###Documentation popover content', () => {
       } as React.ChangeEvent<HTMLInputElement>);
     });
 
-    component.update();
+    // Fast-forward time to let the debounce complete
+    act(() => {
+      jest.advanceTimersByTime(250);
+    });
 
+    component.update();
     const sectionsLabels = findTestSubject(component, 'language-documentation-navigation-title');
     expect(sectionsLabels.length).toBe(1);
-    expect(sectionsLabels.text()).toEqual('Section one');
+    // Check for the highlighted text pattern (EuiHighlight adds == markers around matches)
+    expect(sectionsLabels.text()).toEqual('Section ==one==');
+
+    jest.useRealTimers();
   });
 
   test('Documentation component should list all sections that match the search input when description matches', () => {
+    jest.useFakeTimers();
     const component = mountWithIntl(
       <LanguageDocumentationPopoverContent
         language="test"
@@ -90,9 +99,16 @@ describe('###Documentation popover content', () => {
       } as React.ChangeEvent<HTMLInputElement>);
     });
 
+    // Fast-forward time to let the debounce complete
+    act(() => {
+      jest.advanceTimersByTime(250);
+    });
+
     component.update();
 
     const sectionsLabels = findTestSubject(component, 'language-documentation-navigation-title');
     expect(sectionsLabels.length).toBe(1);
+
+    jest.useRealTimers();
   });
 });
