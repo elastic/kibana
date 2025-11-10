@@ -10,8 +10,8 @@ import type { IngestStreamLifecycle } from '@kbn/streams-schema';
 import type {
   StreamsAIGrokSuggestionAcceptedProps,
   StreamsAIGrokSuggestionLatencyProps,
-  StreamsAssetClickEventProps,
-  StreamsAssetCountProps,
+  StreamsAttachmentClickEventProps,
+  StreamsAttachmentCountProps,
   StreamsChildStreamCreatedProps,
   StreamsProcessingSavedProps,
   StreamsSchemaUpdatedProps,
@@ -22,8 +22,8 @@ import type {
 import {
   STREAMS_AI_GROK_SUGGESTION_ACCEPTED_EVENT_TYPE,
   STREAMS_AI_GROK_SUGGESTION_LATENCY_EVENT_TYPE,
-  STREAMS_ASSET_CLICK_EVENT_TYPE,
-  STREAMS_ASSET_COUNT_EVENT_TYPE,
+  STREAMS_ATTACHMENT_CLICK_EVENT_TYPE,
+  STREAMS_ATTACHMENT_COUNT_EVENT_TYPE,
   STREAMS_CHILD_STREAM_CREATED_EVENT_TYPE,
   STREAMS_PROCESSING_SAVED_EVENT_TYPE,
   STREAMS_RETENTION_CHANGED_EVENT_TYPE,
@@ -36,12 +36,12 @@ import {
 export class StreamsTelemetryClient {
   constructor(private readonly analytics: AnalyticsServiceSetup) {}
 
-  public trackAssetCounts(params: StreamsAssetCountProps) {
-    this.analytics.reportEvent(STREAMS_ASSET_COUNT_EVENT_TYPE, params);
+  public trackAttachmentCounts(params: StreamsAttachmentCountProps) {
+    this.analytics.reportEvent(STREAMS_ATTACHMENT_COUNT_EVENT_TYPE, params);
   }
 
-  public trackAssetClick(params: StreamsAssetClickEventProps) {
-    this.analytics.reportEvent(STREAMS_ASSET_CLICK_EVENT_TYPE, params);
+  public trackAttachmentClick(params: StreamsAttachmentClickEventProps) {
+    this.analytics.reportEvent(STREAMS_ATTACHMENT_CLICK_EVENT_TYPE, params);
   }
 
   public startTrackingAIGrokSuggestionLatency(

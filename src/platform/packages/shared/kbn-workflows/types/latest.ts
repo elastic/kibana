@@ -42,6 +42,8 @@ export type {
   // enums
   ExecutionStatusUnion,
   ExecutionTypeUnion,
+  // api types
+  WorkflowsSearchParams,
   // connector types
   ConnectorSubAction,
   ConnectorInstance,
