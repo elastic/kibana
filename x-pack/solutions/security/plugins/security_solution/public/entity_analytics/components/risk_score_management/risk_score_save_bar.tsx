@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiBottomBar } from '@elastic/eui';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import * as i18n from '../../translations';
 
 export const RiskScoreSaveBar: React.FC<{
@@ -16,8 +15,8 @@ export const RiskScoreSaveBar: React.FC<{
   isLoading: boolean;
 }> = ({ resetSelectedSettings, saveSelectedSettings, isLoading }) => {
   return (
-    <KibanaPageTemplate.BottomBar paddingSize="s">
-      <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+    <EuiBottomBar paddingSize="s" position="fixed">
+      <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             color="text"
@@ -43,6 +42,6 @@ export const RiskScoreSaveBar: React.FC<{
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </KibanaPageTemplate.BottomBar>
+    </EuiBottomBar>
   );
 };
