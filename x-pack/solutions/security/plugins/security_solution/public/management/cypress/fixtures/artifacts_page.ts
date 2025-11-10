@@ -620,4 +620,119 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
       os_types: ['windows', 'macos'],
     },
   },
+  {
+    title: 'Endpoint exceptions',
+    pagePrefix: 'endpointExceptionsListPage',
+    tabId: 'endpointExceptions',
+    nextTabId: 'eventFilters', // todo: update when Policy details tabs are implemented
+    artifactName: 'Endpoint exception name',
+    privilegePrefix: 'endpoint_exceptions_',
+    create: {
+      formActions: [
+        {
+          type: 'input',
+          selector: 'endpointExceptions-form-name-input',
+          value: 'Endpoint exception name',
+        },
+        {
+          type: 'input',
+          selector: 'endpointExceptions-form-description-input',
+          value: 'This is the endpoint exception description',
+        },
+
+        {
+          type: 'input',
+          selector: 'fieldAutocompleteComboBox',
+          value: 'agent.version',
+        },
+        {
+          type: 'click',
+          selector: 'valuesAutocompleteMatch',
+        },
+        {
+          type: 'input',
+          selector: 'valuesAutocompleteMatch',
+          value: '1234',
+        },
+        {
+          type: 'click',
+          selector: 'endpointExceptions-form-description-input',
+        },
+      ],
+      checkResults: [
+        {
+          selector: 'endpointExceptionsListPage-card-criteriaConditions-condition',
+          value: 'AND agent.versionIS 1234',
+        },
+      ],
+    },
+    update: {
+      formActions: [
+        {
+          type: 'clear',
+          selector: 'endpointExceptions-form-name-input',
+        },
+        {
+          type: 'input',
+          selector: 'endpointExceptions-form-name-input',
+          value: 'Endpoint exception name edited',
+        },
+        {
+          type: 'clear',
+          selector: 'endpointExceptions-form-description-input',
+        },
+        {
+          type: 'input',
+          selector: 'endpointExceptions-form-description-input',
+          value: 'This is the endpoint exception description edited',
+        },
+        {
+          type: 'input',
+          selector: 'fieldAutocompleteComboBox',
+          value: '{selectAll}agent.name',
+        },
+        {
+          type: 'input',
+          selector: 'valuesAutocompleteMatch',
+          value: 'test',
+        },
+        {
+          type: 'click',
+          selector: 'endpointExceptions-form-description-input',
+        },
+      ],
+      checkResults: [
+        {
+          selector: 'endpointExceptionsListPage-card-criteriaConditions-condition',
+          value: 'AND agent.nameIS test',
+        },
+        {
+          selector: 'endpointExceptionsListPage-card-header-title',
+          value: 'Endpoint exception name edited',
+        },
+        {
+          selector: 'endpointExceptionsListPage-card-description',
+          value: 'This is the endpoint exception description edited',
+        },
+      ],
+    },
+    delete: {
+      confirmSelector: 'endpointExceptionsListPage-deleteModal-submitButton',
+      card: 'endpointExceptionsListPage-card',
+    },
+    urlPath: 'endpoint_exceptions',
+    emptyState: 'endpointExceptionsListPage-emptyState',
+    createRequestBody: {
+      list_id: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
+      entries: [
+        {
+          field: 'process.name',
+          operator: 'included',
+          type: 'match',
+          value: 'notepad.exe',
+        },
+      ],
+      os_types: ['windows'],
+    },
+  },
 ];
