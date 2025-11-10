@@ -14,12 +14,5 @@ export function plugin(initContext: PluginInitializerContext) {
   return new CpsPlugin(initContext);
 }
 
-export type {
-  CPSPluginSetup,
-  CPSPluginStart,
-  CPSConfigType,
-  Project,
-  ProjectTagsResponse,
-} from './types';
-export { CPSManager } from './services/cps_manager';
-export type { ProjectsData } from './services/cps_manager';
+export type { CPSPluginSetup, CPSPluginStart, CPSConfigType } from './types';
+export type { CPSManager } from './services/cps_manager';

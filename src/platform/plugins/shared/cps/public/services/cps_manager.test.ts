@@ -9,7 +9,7 @@
 
 import { CPSManager } from './cps_manager';
 import type { HttpSetup } from '@kbn/core/public';
-import type { Project, ProjectTagsResponse } from '../types';
+import type { CPSProject, ProjectTagsResponse } from '../../common/types';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 describe('CPSManager', () => {
@@ -17,21 +17,23 @@ describe('CPSManager', () => {
   const mockLogger = loggingSystemMock.createLogger();
   let cpsManager: CPSManager;
 
-  const mockOriginProject: Project = {
+  const mockOriginProject: CPSProject = {
     _id: 'origin-id',
     _alias: 'Origin Project',
     _type: 'observability',
     _csp: 'aws',
     _region: 'us-east-1',
+    _organisation: 'org-1',
   };
 
-  const mockLinkedProjects: Project[] = [
+  const mockLinkedProjects: CPSProject[] = [
     {
       _id: 'linked-1',
       _alias: 'B Project',
       _type: 'security',
       _csp: 'azure',
       _region: 'eastus',
+      _organisation: 'org-2',
     },
     {
       _id: 'linked-2',
@@ -39,6 +41,7 @@ describe('CPSManager', () => {
       _type: 'elasticsearch',
       _csp: 'gcp',
       _region: 'us-central1',
+      _organisation: 'org-3',
     },
   ];
 
@@ -76,8 +79,8 @@ describe('CPSManager', () => {
     it('should sort linked projects by alias', async () => {
       const result = await cpsManager.fetchProjects();
 
-      expect(result.linkedProjects[0]._alias).toBe('A Project');
-      expect(result.linkedProjects[1]._alias).toBe('B Project');
+      expect(result!.linkedProjects[0]._alias).toBe('A Project');
+      expect(result!.linkedProjects[1]._alias).toBe('B Project');
     });
   });
 
@@ -122,7 +125,7 @@ describe('CPSManager', () => {
     });
 
     it('should update cached data after refresh', async () => {
-      const updatedProject: Project = {
+      const updatedProject: CPSProject = {
         ...mockOriginProject,
         _alias: 'Updated Project',
       };
@@ -136,15 +139,15 @@ describe('CPSManager', () => {
 
       // First fetch
       const result1 = await cpsManager.fetchProjects();
-      expect(result1.origin?._alias).toBe('Origin Project');
+      expect(result1!.origin?._alias).toBe('Origin Project');
 
       // Refresh with new data
       const result2 = await cpsManager.refresh();
-      expect(result2.origin?._alias).toBe('Updated Project');
+      expect(result2!.origin?._alias).toBe('Updated Project');
 
       // Subsequent fetch should return updated cached data
       const result3 = await cpsManager.fetchProjects();
-      expect(result3.origin?._alias).toBe('Updated Project');
+      expect(result3!.origin?._alias).toBe('Updated Project');
       expect(mockHttp.get).toHaveBeenCalledTimes(2); // Only 2 calls, third was from cache
     });
   });
@@ -163,7 +166,7 @@ describe('CPSManager', () => {
       const result = await promise;
 
       expect(mockHttp.get).toHaveBeenCalledTimes(3); // initial + 2 retries
-      expect(result.origin).toEqual(mockOriginProject);
+      expect(result!.origin).toEqual(mockOriginProject);
 
       jest.useRealTimers();
     });

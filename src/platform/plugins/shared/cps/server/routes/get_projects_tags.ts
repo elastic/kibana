@@ -8,10 +8,7 @@
  */
 
 import type { IRouter, PluginInitializerContext } from '@kbn/core/server';
-
-export interface ProjectTagsResponse {
-  [key: string]: Record<string, string>;
-}
+import type { ProjectTagsResponse } from '../../common/types';
 
 export const registerGetProjectTagsRoute = (
   router: IRouter,

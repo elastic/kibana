@@ -9,20 +9,20 @@
 
 import type { HttpSetup } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
-import type { Project, ProjectTagsResponse } from '../types';
-
-export interface ProjectsData {
-  origin: Project | null;
-  linkedProjects: Project[];
-}
+import type { CPSProject, ProjectTagsResponse } from '../../common/types';
 
 const MAX_RETRIES = 2;
 const RETRY_DELAY_MS = 1000;
 
+export interface ProjectsData {
+  origin: CPSProject | null;
+  linkedProjects: CPSProject[];
+}
+
 export class CPSManager {
   private readonly http: HttpSetup;
   private readonly logger: Logger;
-  private fetchPromise: Promise<ProjectsData> | null = null;
+  private fetchPromise: Promise<ProjectsData | null> | null = null;
   private cachedData: ProjectsData | null = null;
 
   constructor(deps: { http: HttpSetup; logger: Logger }) {
@@ -35,7 +35,7 @@ export class CPSManager {
    * Returns cached data if already loaded. If a fetch is already in progress, returns the existing promise.
    * @returns Promise resolving to ProjectsData
    */
-  public async fetchProjects(): Promise<ProjectsData> {
+  public async fetchProjects(): Promise<ProjectsData | null> {
     // Return cached data if available
     if (this.cachedData) {
       return this.cachedData;
@@ -48,11 +48,11 @@ export class CPSManager {
    * Forces a refresh of projects from the server, bypassing the cache.
    * @returns Promise resolving to ProjectsData
    */
-  public async refresh(): Promise<ProjectsData> {
+  public async refresh(): Promise<ProjectsData | null> {
     return this.doFetch();
   }
 
-  private async doFetch(): Promise<ProjectsData> {
+  private async doFetch(): Promise<ProjectsData | null> {
     // If a fetch is already in progress, return the existing promise
     if (this.fetchPromise) {
       return this.fetchPromise;
@@ -70,7 +70,7 @@ export class CPSManager {
     return this.fetchPromise;
   }
 
-  private async fetchProjectsWithRetry(): Promise<ProjectsData> {
+  private async fetchProjectsWithRetry(): Promise<ProjectsData | null> {
     let lastError: Error = new Error('');
 
     for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {

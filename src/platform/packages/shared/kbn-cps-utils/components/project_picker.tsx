@@ -9,46 +9,41 @@
 
 import React, { useState, useEffect } from 'react';
 import type { ProjectRouting } from '@kbn/es-query';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { CPSPluginStart, Project } from '@kbn/cps/public';
+import type { CPSProject } from '@kbn/cps/common/types';
 import { ProjectPickerComponent } from './project_picker_component';
-
-interface CPSServices {
-  cps: CPSPluginStart;
-}
 
 export interface ProjectPickerProps {
   projectRouting?: ProjectRouting;
   onProjectRoutingChange?: (projectRouting: ProjectRouting) => void;
   wrappingContainer?: (children: React.ReactNode) => React.ReactElement;
+  cpsManager?: {
+    fetchProjects: () => Promise<{ origin: CPSProject | null; linkedProjects: CPSProject[] }>;
+  };
 }
 
 export const ProjectPicker: React.FC<ProjectPickerProps> = ({
   projectRouting,
   onProjectRoutingChange,
   wrappingContainer = (children) => children as React.ReactElement,
+  cpsManager,
 }) => {
-  const { cps } = useKibana<CPSServices>().services;
-  const [originProject, setOriginProject] = useState<Project | null>(null);
-  const [linkedProjects, setLinkedProjects] = useState<Project[]>([]);
+  const [originProject, setOriginProject] = useState<CPSProject | null>(null);
+  const [linkedProjects, setLinkedProjects] = useState<CPSProject[]>([]);
 
   useEffect(() => {
     // Only fetch projects in serverless environments where cpsManager is available
-    if (!cps?.cpsManager) return;
+    if (!cpsManager) return;
 
-    cps.cpsManager.fetchProjects().then((projectsData) => {
-      setOriginProject(projectsData.origin);
-      setLinkedProjects(projectsData.linkedProjects);
+    cpsManager.fetchProjects().then((projectsData) => {
+      if (projectsData) {
+        setOriginProject(projectsData.origin);
+        setLinkedProjects(projectsData.linkedProjects);
+      }
     });
-  }, [cps]);
+  }, [cpsManager]);
 
   // do not render the component if cpsManager is not available or required props are missing or there aren't linked projects
-  if (
-    !cps?.cpsManager ||
-    !onProjectRoutingChange ||
-    !originProject ||
-    linkedProjects.length === 0
-  ) {
+  if (!cpsManager || !onProjectRoutingChange || !originProject || linkedProjects.length === 0) {
     return null;
   }
 

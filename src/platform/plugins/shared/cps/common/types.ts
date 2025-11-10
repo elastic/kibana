@@ -7,20 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export interface CPSPluginSetup {
-  cpsEnabled?: boolean;
+export interface CPSProject {
+  _id: string;
+  _alias: string;
+  _type: string;
+  _organisation: string;
+  [key: string]: string;
 }
 
-export interface CPSConfigType {
-  cpsEnabled: boolean;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface CPSServerStart {}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface CPSServerStop {}
-import type { CPSManager } from './services/cps_manager';
-
-export interface CPSPluginStart {
-  cpsManager?: CPSManager;
+export interface ProjectTagsResponse {
+  origin: Record<string, CPSProject>;
+  linked_projects: Record<string, CPSProject>;
 }
