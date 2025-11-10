@@ -8,7 +8,7 @@
  */
 
 /**
- * Validation Schemas for Simplified Filter Interface
+ * Validation Schemas for As Code Filter Interface
  *
  * These schemas are used for server validation of API requests and responses
  * in * as Code APIs.
