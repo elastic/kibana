@@ -10,11 +10,11 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { alertingEventLoggerMock } from '../../lib/alerting_event_logger/alerting_event_logger.mock';
 import { MaintenanceWindowsService } from './maintenance_windows_service';
-import { getMockMaintenanceWindow } from '@kbn/maintenance-windows-plugin/server';
-import { maintenanceWindowClientMock } from '@kbn/maintenance-windows-plugin/server';
+import { maintenanceWindowClientMock } from '@kbn/maintenance-windows-plugin/server/maintenance_window_client.mock';
 import { MaintenanceWindowStatus } from '@kbn/maintenance-windows-plugin/common';
 import type { MaintenanceWindowCategoryIds } from '../../../common/routes/maintenance_window/shared';
 import { FilterStateStore } from '@kbn/es-query';
+import { getMockMaintenanceWindow } from './maintenance_windows_service.mock';
 
 const alertingEventLogger = alertingEventLoggerMock.create();
 const logger = loggingSystemMock.createLogger();

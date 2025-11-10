@@ -7,8 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { maintenanceWindowCategoryIdTypes } from '@kbn/maintenance-windows-plugin/server';
-import { getMockMaintenanceWindow } from '@kbn/maintenance-windows-plugin/server';
-import { maintenanceWindowClientMock } from '@kbn/maintenance-windows-plugin/server';
+import { maintenanceWindowClientMock } from '@kbn/maintenance-windows-plugin/server/maintenance_window_client.mock';
 import { MaintenanceWindowStatus } from '@kbn/maintenance-windows-plugin/common';
 import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import { mockedRawRuleSO, mockedRule } from '../fixtures';
@@ -21,6 +20,7 @@ import { getFakeKibanaRequest } from '../rule_loader';
 import type { TaskRunnerContext } from '../types';
 import { FilterStateStore } from '@kbn/es-query';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import { getMockMaintenanceWindow } from './maintenance_windows_service.mock';
 
 const logger = loggingSystemMock.create().get();
 const mockBasePathService = { set: jest.fn() };

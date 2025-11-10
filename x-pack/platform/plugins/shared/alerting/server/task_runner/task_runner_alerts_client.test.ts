@@ -6,7 +6,6 @@
  */
 
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
-import { getMockMaintenanceWindow } from '@kbn/maintenance-windows-plugin/server';
 import { MaintenanceWindowStatus } from '@kbn/maintenance-windows-plugin/common';
 import type {
   RuleExecutorOptions,
@@ -107,7 +106,10 @@ import { backfillClientMock } from '../backfill_client/backfill_client.mock';
 import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
 import { createTaskRunnerLogger } from './lib';
 import type { SavedObject } from '@kbn/core/server';
-import { maintenanceWindowsServiceMock } from './maintenance_windows/maintenance_windows_service.mock';
+import {
+  getMockMaintenanceWindow,
+  maintenanceWindowsServiceMock,
+} from './maintenance_windows/maintenance_windows_service.mock';
 import { rulesSettingsServiceMock } from '../rules_settings/rules_settings_service.mock';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/mocks';
 

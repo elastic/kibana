@@ -188,6 +188,10 @@ export {
 } from './alert_schema';
 
 export { getMaxAlertLimit, ALLOWED_MAX_ALERTS } from './max_alert_limit';
+export interface DateRange {
+  gte: string;
+  lte: string;
+}
 
 export const LEGACY_BASE_ALERT_API_PATH = '/api/alerts';
 export const BASE_ALERTING_API_PATH = '/api/alerting';
