@@ -568,7 +568,6 @@ export default function createGapAutoFillSchedulerTests({ getService }: FtrProvi
             });
           expect(dup.statusCode).to.eql(409);
 
-
           // different type succeeds
           const diffType = await supertestWithoutAuth
             .post(url)
