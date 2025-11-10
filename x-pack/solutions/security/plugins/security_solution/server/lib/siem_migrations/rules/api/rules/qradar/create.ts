@@ -103,7 +103,7 @@ export const registerSiemRuleMigrationsCreateQRadarRulesRoute = (
                   resourcesToBeCreated.push(...qRadarResourcesWithMigrationId);
                 }
               }
-              ruleMigrationsClient.data.resources.create(resourcesToBeCreated);
+              await ruleMigrationsClient.data.resources.create(resourcesToBeCreated);
             }
 
             await siemMigrationAuditLogger.logAddRules({
