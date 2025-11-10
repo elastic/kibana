@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = {
-  preset: '@kbn/test/jest_integration',
-  rootDir: '../../..',
-  roots: ['<rootDir>/src/core/public'],
-};
+export { WorkflowSelector } from './workflow_selector';
+export { WorkflowSelectorWithProvider } from './workflow_selector_with_provider';
+export { WorkflowSelectorEmptyState } from './workflow_selector_empty_state';
+export * from './workflow_utils';
+export * from './tags_badge';
+export * from './translations';
