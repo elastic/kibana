@@ -14,6 +14,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { I18nProviderMock } from '@kbn/core-i18n-browser-mocks/src/i18n_context_mock';
 import type { WorkflowYAMLEditorProps } from './workflow_yaml_editor';
 import { WorkflowYAMLEditor } from './workflow_yaml_editor';
+import { setActiveTab, setExecution, setYamlString } from '../../../entities/workflows/store';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
 
 // Mock the YamlEditor component to avoid Monaco complexity in tests
@@ -162,15 +163,18 @@ jest.mock(
 
 describe('WorkflowYAMLEditor', () => {
   const defaultProps: WorkflowYAMLEditorProps = {
-    workflowYaml: '',
+    onStepRun: jest.fn(),
   };
 
-  const renderWithProviders = (component: React.ReactElement) => {
-    const store = createMockStore();
+  const renderWithProviders = (
+    component: React.ReactElement,
+    store?: ReturnType<typeof createMockStore>
+  ) => {
+    const testStore = store || createMockStore();
     return render(
       <MemoryRouter>
         <I18nProviderMock>
-          <Provider store={store}>{component}</Provider>
+          <Provider store={testStore}>{component}</Provider>
         </I18nProviderMock>
       </MemoryRouter>
     );
@@ -227,25 +231,26 @@ steps:
 `.trim();
 
     it('renders without crashing with alert trigger YAML', () => {
-      renderWithProviders(
-        <WorkflowYAMLEditor
-          {...defaultProps}
-          workflowYaml={yamlWithAlertTrigger}
-          isExecutionYaml={false}
-        />
-      );
+      const store = createMockStore();
+      store.dispatch(setYamlString(yamlWithAlertTrigger));
+      store.dispatch(setActiveTab('workflow'));
+
+      renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store);
 
       expect(document.querySelector('[data-testid="yaml-editor"]')).toBeInTheDocument();
     });
 
     it('renders in readOnly mode when isExecutionYaml is true', () => {
-      renderWithProviders(
-        <WorkflowYAMLEditor
-          {...defaultProps}
-          workflowYaml={yamlWithAlertTrigger}
-          isExecutionYaml={true}
-        />
+      const store = createMockStore();
+      store.dispatch(setActiveTab('executions'));
+      store.dispatch(
+        setExecution({
+          id: 'test-execution-id',
+          yaml: yamlWithAlertTrigger,
+        } as any)
       );
+
+      renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store);
 
       expect(document.querySelector('[data-testid="yaml-editor"]')).toBeInTheDocument();
     });
@@ -263,15 +268,13 @@ steps:
   - name: step1
 `.trim();
 
+      const store = createMockStore();
+      store.dispatch(setYamlString(invalidYaml));
+      store.dispatch(setActiveTab('workflow'));
+
       // Should not throw an error
       expect(() => {
-        renderWithProviders(
-          <WorkflowYAMLEditor
-            {...defaultProps}
-            workflowYaml={invalidYaml}
-            isExecutionYaml={false}
-          />
-        );
+        renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store);
       }).not.toThrow();
 
       expect(document.querySelector('[data-testid="yaml-editor"]')).toBeInTheDocument();
@@ -281,8 +284,11 @@ steps:
   describe('editor initialization', () => {
     it('renders correctly when editor mounts with content', () => {
       const yamlContent = 'version: "1"\nname: "test"';
+      const store = createMockStore();
+      store.dispatch(setYamlString(yamlContent));
+      store.dispatch(setActiveTab('workflow'));
 
-      renderWithProviders(<WorkflowYAMLEditor {...defaultProps} workflowYaml={yamlContent} />);
+      renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store);
 
       expect(document.querySelector('[data-testid="yaml-editor"]')).toBeInTheDocument();
       expect(document.querySelector('[data-testid="yaml-textarea"]')).toBeInTheDocument();

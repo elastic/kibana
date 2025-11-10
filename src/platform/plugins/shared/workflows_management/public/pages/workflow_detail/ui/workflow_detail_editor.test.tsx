@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { render } from '@testing-library/react';
+import { act, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { WorkflowDetailEditor } from './workflow_detail_editor';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
@@ -20,7 +20,6 @@ import { TestWrapper } from '../../../shared/test_utils';
 // Mock hooks
 const mockUseKibana = jest.fn();
 const mockUseWorkflowUrlState = jest.fn();
-const mockUseWorkflowExecution = jest.fn();
 const mockUseWorkflowActions = jest.fn();
 const mockUseSelector = jest.fn();
 
@@ -29,9 +28,6 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 }));
 jest.mock('../../../hooks/use_workflow_url_state', () => ({
   useWorkflowUrlState: () => mockUseWorkflowUrlState(),
-}));
-jest.mock('../../../entities/workflows/model/use_workflow_execution', () => ({
-  useWorkflowExecution: () => mockUseWorkflowExecution(),
 }));
 jest.mock('../../../entities/workflows/model/use_workflow_actions', () => ({
   useWorkflowActions: () => mockUseWorkflowActions(),
@@ -42,11 +38,16 @@ jest.mock('react-redux', () => ({
 }));
 
 // Mock lazy loaded components
-const WorkflowYAMLEditorMock = ({ workflowYaml, isExecutionYaml, highlightDiff }: any) => (
+const WorkflowYAMLEditorMock = ({ highlightDiff, onStepRun }: any) => (
   <div data-test-subj="workflow-yaml-editor">
-    {isExecutionYaml && <span data-test-subj="read-only-indicator">{'Read Only'}</span>}
     {highlightDiff && <span data-test-subj="highlight-diff-indicator">{'Highlight Diff'}</span>}
-    <div data-test-subj="yaml-content">{workflowYaml || 'No YAML'}</div>
+    <button
+      type="button"
+      data-test-subj="test-step-run"
+      onClick={() => onStepRun?.({ stepId: 'test-step', actionType: 'run' })}
+    >
+      {'Run Step'}
+    </button>
   </div>
 );
 
@@ -59,17 +60,17 @@ jest.mock('../../../widgets/workflow_yaml_editor', () => ({
 }));
 
 jest.mock('../../../features/workflow_visual_editor', () => ({
-  WorkflowVisualEditor: ({ workflowYaml }: any) => (
+  WorkflowVisualEditor: () => (
     <div data-test-subj="workflow-visual-editor">
-      <div data-test-subj="visual-editor-content">{workflowYaml || 'No YAML'}</div>
+      <div data-test-subj="visual-editor-content">{'Visual Editor'}</div>
     </div>
   ),
 }));
 
 jest.mock('../../../features/debug-graph/execution_graph', () => ({
-  ExecutionGraph: ({ workflowYaml }: any) => (
+  ExecutionGraph: () => (
     <div data-test-subj="execution-graph">
-      <div data-test-subj="execution-graph-content">{workflowYaml || 'No YAML'}</div>
+      <div data-test-subj="execution-graph-content">{'Execution Graph'}</div>
     </div>
   ),
 }));
@@ -92,8 +93,8 @@ jest.mock('../../../features/run_workflow/ui/test_step_modal', () => ({
   ),
 }));
 
-jest.mock('./build_step_context_mock_for_step', () => ({
-  buildContextOverrideForStep: jest.fn(() => ({
+jest.mock('./use_context_override_data', () => ({
+  useContextOverrideData: jest.fn(() => (stepId: string) => ({
     stepContext: { mockKey: 'mockValue' },
   })),
 }));
@@ -154,12 +155,6 @@ describe('WorkflowDetailEditor', () => {
       setSelectedExecution: jest.fn(),
     });
 
-    mockUseWorkflowExecution.mockReturnValue({
-      data: null,
-      isLoading: false,
-      error: null,
-    });
-
     mockUseWorkflowActions.mockReturnValue({
       runIndividualStep: {
         mutateAsync: jest.fn().mockResolvedValue({ workflowExecutionId: 'exec-123' }),
@@ -217,38 +212,22 @@ describe('WorkflowDetailEditor', () => {
     });
   });
 
-  describe('execution mode', () => {
-    it('should render editor in read-only mode when activeTab is executions', () => {
-      mockUseWorkflowUrlState.mockReturnValue({
-        activeTab: 'executions',
-        selectedExecutionId: null,
-        setSelectedExecution: jest.fn(),
+  describe('step run functionality', () => {
+    it('should handle step run action', async () => {
+      const { getByTestId, queryByTestId } = renderEditor();
+      const runButton = getByTestId('test-step-run');
+
+      await act(async () => {
+        runButton.click();
       });
 
-      const { getByTestId } = renderEditor();
-      expect(getByTestId('read-only-indicator')).toBeInTheDocument();
-    });
-
-    it('should render editor when execution data is provided', () => {
-      const mockExecution = {
-        yaml: 'execution yaml',
-        stepExecutions: [],
-      };
-
-      mockUseWorkflowUrlState.mockReturnValue({
-        activeTab: 'executions',
-        selectedExecutionId: 'exec-123',
-        setSelectedExecution: jest.fn(),
+      // Wait for the modal to appear (if context override data is returned)
+      await waitFor(() => {
+        expect(queryByTestId('test-step-modal')).toBeInTheDocument();
       });
 
-      mockUseWorkflowExecution.mockReturnValue({
-        data: mockExecution,
-        isLoading: false,
-        error: null,
-      });
-
-      const { findByTestId } = renderEditor();
-      expect(findByTestId('workflow-yaml-editor')).resolves.toBeInTheDocument();
+      // The component should handle the step run internally
+      expect(mockUseWorkflowActions).toHaveBeenCalled();
     });
   });
 });
