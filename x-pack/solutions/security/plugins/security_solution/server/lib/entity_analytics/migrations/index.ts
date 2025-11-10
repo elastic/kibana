@@ -6,7 +6,8 @@
  */
 
 import type { AuditLogger, Logger, StartServicesAccessor } from '@kbn/core/server';
-import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import { type TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import type { SecuritySolutionApiRequestHandlerContext } from '../../..';
 import type { StartPlugins } from '../../../plugin';
 import { scheduleAssetCriticalityEcsCompliancyMigration } from '../asset_criticality/migrations/schedule_ecs_compliancy_migration';
 import { updateAssetCriticalityMappings } from '../asset_criticality/migrations/update_asset_criticality_mappings';
@@ -16,13 +17,13 @@ import { createEventIngestedPipelineInAllNamespaces } from '../utils/event_inges
 import { updatePrivilegedMonitoringSourceIndex } from '../privilege_monitoring/migrations/update_source_index';
 import { upsertPrivilegedMonitoringEntitySource } from '../privilege_monitoring/migrations/upsert_entity_source';
 import { updateThreatHuntingHypothesisDefinitions } from '../hypothesis_threat_hunting/init_recon_service';
-
 export interface EntityAnalyticsMigrationsParams {
   taskManager?: TaskManagerSetupContract;
   logger: Logger;
   getStartServices: StartServicesAccessor<StartPlugins>;
   auditLogger: AuditLogger | undefined;
   kibanaVersion: string;
+  experimentalFeatures: SecuritySolutionApiRequestHandlerContext;
 }
 
 /**
@@ -46,6 +47,9 @@ export const scheduleEntityAnalyticsMigration = async (params: EntityAnalyticsMi
     ...params,
     logger: params.logger.get('entityAnalytics.migration'),
   };
+
+  const experimentalFeatures = params.experimentalFeatures.getConfig().experimentalFeatures;
+
   await createEventIngestedPipelineInAllNamespaces(paramsWithScopedLogger);
   await updateAssetCriticalityMappings(paramsWithScopedLogger);
   await scheduleAssetCriticalityEcsCompliancyMigration(paramsWithScopedLogger);
@@ -53,5 +57,7 @@ export const scheduleEntityAnalyticsMigration = async (params: EntityAnalyticsMi
   await updateRiskScoreMappings(paramsWithScopedLogger);
   await updatePrivilegedMonitoringSourceIndex(paramsWithScopedLogger);
   await upsertPrivilegedMonitoringEntitySource(paramsWithScopedLogger);
-  await updateThreatHuntingHypothesisDefinitions(paramsWithScopedLogger);
+  if (experimentalFeatures.entityThreatHuntingEnabled) {   
+    await updateThreatHuntingHypothesisDefinitions(paramsWithScopedLogger);
+  }
 };

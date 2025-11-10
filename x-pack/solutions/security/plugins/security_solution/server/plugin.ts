@@ -146,7 +146,6 @@ import { HealthDiagnosticServiceImpl } from './lib/telemetry/diagnostic/health_d
 import type { HealthDiagnosticService } from './lib/telemetry/diagnostic/health_diagnostic_service.types';
 import { ENTITY_RISK_SCORE_TOOL_ID } from './assistant/tools/entity_risk_score/entity_risk_score';
 import type { TelemetryQueryConfiguration } from './lib/telemetry/types';
-import { initThreatHuntingHypothesisDefinitions } from './lib/entity_analytics/hypothesis_threat_hunting/initialisation_service';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -270,6 +269,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       logger: this.logger,
       auditLogger: plugins.security?.audit.withoutRequest,
       kibanaVersion: pluginContext.env.packageInfo.version,
+      experimentalFeatures,
     }).catch((err) => {
       logger.error(`Error scheduling entity analytics migration: ${err}`);
     });
@@ -638,10 +638,6 @@ export class Plugin implements ISecuritySolutionPlugin {
     );
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const fleetStartServices = plugins.fleet!;
-    // Initialise entity analytics threat hunting hypothesis definitions
-    if (config.experimentalFeatures.entityThreatHuntingEnabled) {
-      initThreatHuntingHypothesisDefinitions(savedObjectsClient, logger, this.auditService);
-    }
     const { packageService } = fleetStartServices;
 
     this.licensing$ = plugins.licensing.license$;
