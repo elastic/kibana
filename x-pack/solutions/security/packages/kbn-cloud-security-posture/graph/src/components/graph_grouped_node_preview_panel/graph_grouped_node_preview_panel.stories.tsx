@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import type { Meta, StoryFn } from '@storybook/react';
+import {
+  DOCUMENT_TYPE_ENTITY,
+  DOCUMENT_TYPE_EVENT,
+  DOCUMENT_TYPE_ALERT,
+} from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import { GlobalStylesStorybookDecorator } from '../../../.storybook/decorators';
-import type { GraphGroupedNodePreviewPanelProps } from '.';
+import type { GraphGroupedNodePreviewPanelProps } from './graph_grouped_node_preview_panel';
 import type { PanelItems, EntityItem, EventItem, AlertItem } from './components/grouped_item/types';
 import { LoadingBody } from './components/loading_body';
 import { EmptyBody } from './components/empty_body';
@@ -41,49 +46,44 @@ const meta: Meta<ContentTemplateArgs> = {
 export default meta;
 
 const createEntityItem = (overrides: Partial<EntityItem> = {}): EntityItem => ({
-  itemType: 'entity',
+  itemType: DOCUMENT_TYPE_ENTITY,
   id: 'entity-1',
   type: 'host',
   label: 'host-01.acme.com',
   icon: 'storage',
   risk: 75,
   timestamp: new Date('2023-12-01T10:30:00Z'),
-  ip: '10.200.0.101',
-  countryCode: 'US',
+  ips: ['10.200.0.101'],
+  countryCodes: ['US'],
   ...overrides,
 });
 
 const createEventItem = (overrides: Partial<EventItem> = {}): EventItem => ({
-  itemType: 'event',
+  itemType: DOCUMENT_TYPE_EVENT,
   id: 'event-1',
   action: 'process_start',
   timestamp: new Date('2023-12-01T11:15:00Z'),
-  ip: '192.168.1.100',
-  countryCode: 'CA',
+  ips: ['192.168.1.100'],
+  countryCodes: ['CA'],
   actor: { id: 'user-123', label: 'admin_user', icon: 'user' },
   target: { id: 'process-456', label: 'notepad.exe', icon: 'document' },
   ...overrides,
 });
 
 const createAlertItem = (overrides: Partial<AlertItem> = {}): AlertItem => ({
-  itemType: 'alert',
+  itemType: DOCUMENT_TYPE_ALERT,
   id: 'alert-1',
   action: 'malware_detected',
   timestamp: new Date('2023-12-01T12:45:00Z'),
-  ip: '172.16.0.50',
-  countryCode: 'GB',
+  ips: ['172.16.0.50'],
+  countryCodes: ['GB'],
   actor: { id: 'system-789', label: 'antivirus_scanner', icon: 'shield' },
   target: { id: 'file-101', label: 'suspicious.exe', icon: 'warning' },
   ...overrides,
 });
 
 const ContentTemplate: StoryFn<ContentTemplateArgs> = (args) => {
-  const [pagination, setPagination] = React.useState({ pageIndex: 0, pageSize: 5 });
   const items = args.items || [];
-  const paginatedItems = items.slice(
-    pagination.pageIndex * pagination.pageSize,
-    (pagination.pageIndex + 1) * pagination.pageSize
-  );
 
   // Determine the icon and type based on the items
   const firstItem = items[0];
@@ -93,21 +93,26 @@ const ContentTemplate: StoryFn<ContentTemplateArgs> = (args) => {
   const capitalize = (str: string) =>
     !str ? '' : str[0].toUpperCase() + str.slice(1).toLowerCase();
 
-  if (firstItem && firstItem.itemType === 'entity') {
+  if (firstItem && firstItem.itemType === DOCUMENT_TYPE_ENTITY) {
     icon = firstItem.icon ?? icon;
     groupedItemsType = capitalize(`${firstItem.type}s`) || 'Entities';
   }
 
+  // Create mock pagination controls
+  const pagination = {
+    state: { pageIndex: 0, pageSize: 10 },
+    goToPage: () => {},
+    setPageSize: () => {},
+  };
+
   return (
     <div style={{ width: '460px', border: '1px solid #ccc', borderRadius: '4px' }}>
       <ContentBody
-        items={paginatedItems}
+        items={items}
         totalHits={items.length}
         icon={icon}
         groupedItemsType={groupedItemsType}
         pagination={pagination}
-        onChangePage={(pageIndex) => setPagination({ ...pagination, pageIndex })}
-        onChangeItemsPerPage={(pageSize) => setPagination({ pageIndex: 0, pageSize })}
       />
     </div>
   );
@@ -134,8 +139,8 @@ EntitiesGroup.args = {
       type: 'host',
       icon: 'storage',
       risk: 85,
-      ip: '10.0.1.10',
-      countryCode: 'US',
+      ips: ['10.0.1.10'],
+      countryCodes: ['US'],
     }),
     createEntityItem({
       id: 'host-2',
@@ -143,8 +148,8 @@ EntitiesGroup.args = {
       type: 'host',
       icon: 'storage',
       risk: 45,
-      ip: '10.0.1.11',
-      countryCode: 'US',
+      ips: ['10.0.1.11'],
+      countryCodes: ['US'],
     }),
     createEntityItem({
       id: 'host-3',
@@ -152,8 +157,8 @@ EntitiesGroup.args = {
       type: 'host',
       icon: 'storage',
       risk: 65,
-      ip: '10.0.2.15',
-      countryCode: 'CA',
+      ips: ['10.0.2.15'],
+      countryCodes: ['CA'],
     }),
   ],
 };
@@ -209,7 +214,7 @@ AlertsGroup.args = {
     createAlertItem({
       id: 'alert-2',
       action: 'malware_execution',
-      actor: { id: 'process-malware', label: 'trojan.exe', icon: 'alert' },
+      actor: { id: 'process-malware', label: 'trojan.exe', icon: DOCUMENT_TYPE_ALERT },
       target: { id: 'system-memory', label: 'system_memory', icon: 'memory' },
     }),
     createAlertItem({
@@ -267,54 +272,106 @@ EventsAndAlertsGroup.parameters = {
   },
 };
 
-export const LargeGroup: StoryFn<ContentTemplateArgs> = ContentTemplate.bind({});
-LargeGroup.args = {
-  items: Array.from({ length: 10 }, (_, index) => {
-    const itemTypes = ['entity', 'event', 'alert'] as const;
-    const itemType = itemTypes[index % 3];
+export const LargeGroup: StoryFn<ContentTemplateArgs> = () => {
+  // Generate 100 items
+  const allItems = useMemo(
+    () =>
+      Array.from({ length: 100 }, (_, index) => {
+        const itemTypes = [DOCUMENT_TYPE_ENTITY, DOCUMENT_TYPE_EVENT, DOCUMENT_TYPE_ALERT] as const;
+        const itemType = itemTypes[index % 3];
+        if (itemType === DOCUMENT_TYPE_ENTITY) {
+          return createEntityItem({
+            id: `entity-${index}`,
+            label: `host-${String(index).padStart(2, '0')}.domain.com`,
+            risk: Math.floor(Math.random() * 100),
+            ips: [`10.0.1.${100 + index}`],
+            countryCodes: [['US', 'CA', 'GB', 'DE', 'FR'][index % 5]],
+          });
+        } else if (itemType === DOCUMENT_TYPE_EVENT) {
+          const actions = [
+            'file_access',
+            'network_connection',
+            'process_execution',
+            'registry_modification',
+          ];
+          return createEventItem({
+            id: `event-${index}`,
+            action: actions[index % actions.length],
+            actor: { id: `actor-${index}`, label: `user_${index}`, icon: 'user' },
+            target: { id: `target-${index}`, label: `resource_${index}`, icon: 'document' },
+          });
+        } else {
+          const actions = [
+            'malware_detected',
+            'suspicious_login',
+            'data_exfiltration',
+            'privilege_escalation',
+          ];
+          return createAlertItem({
+            id: `alert-${index}`,
+            action: actions[index % actions.length],
+            actor: {
+              id: `threat-${index}`,
+              label: `threat_actor_${index}`,
+              icon: DOCUMENT_TYPE_ALERT,
+            },
+            target: { id: `victim-${index}`, label: `target_${index}`, icon: 'warning' },
+          });
+        }
+      }) as PanelItems,
+    []
+  );
 
-    if (itemType === 'entity') {
-      return createEntityItem({
-        id: `entity-${index}`,
-        label: `host-${String(index).padStart(2, '0')}.domain.com`,
-        risk: Math.floor(Math.random() * 100),
-        ip: `10.0.1.${100 + index}`,
-        countryCode: ['US', 'CA', 'GB', 'DE', 'FR'][index % 5],
-      });
-    } else if (itemType === 'event') {
-      const actions = [
-        'file_access',
-        'network_connection',
-        'process_execution',
-        'registry_modification',
-      ];
-      return createEventItem({
-        id: `event-${index}`,
-        action: actions[index % actions.length],
-        actor: { id: `actor-${index}`, label: `user_${index}`, icon: 'user' },
-        target: { id: `target-${index}`, label: `resource_${index}`, icon: 'document' },
-      });
-    } else {
-      const actions = [
-        'malware_detected',
-        'suspicious_login',
-        'data_exfiltration',
-        'privilege_escalation',
-      ];
-      return createAlertItem({
-        id: `alert-${index}`,
-        action: actions[index % actions.length],
-        actor: { id: `threat-${index}`, label: `threat_actor_${index}`, icon: 'alert' },
-        target: { id: `victim-${index}`, label: `target_${index}`, icon: 'warning' },
-      });
-    }
-  }) as PanelItems,
+  // Pagination state (simulate what PaginationControls does)
+  const [state, setPaginationState] = useState({ pageIndex: 0, pageSize: 10 });
+
+  const goToPage = (pageIndex: number) => {
+    setPaginationState((prev) => ({ ...prev, pageIndex }));
+  };
+
+  const setPageSize = (pageSize: number) => {
+    setPaginationState({ pageIndex: 0, pageSize });
+  };
+
+  // Determine the icon and type based on the items
+  const firstItem = allItems[0];
+  let icon = 'index';
+  let groupedItemsType = 'Events';
+  const capitalize = (str: string) =>
+    !str ? '' : str[0].toUpperCase() + str.slice(1).toLowerCase();
+  if (firstItem && firstItem.itemType === DOCUMENT_TYPE_ENTITY) {
+    icon = firstItem.icon ?? icon;
+    groupedItemsType = capitalize(`${firstItem.type}s`) || 'Entities';
+  }
+
+  // Slice items for current page
+  const start = state.pageIndex * state.pageSize;
+  const end = start + state.pageSize;
+  const pageItems = allItems.slice(start, end);
+
+  const pagination = {
+    state,
+    goToPage,
+    setPageSize,
+  };
+
+  return (
+    <div style={{ width: '460px', border: '1px solid #ccc', borderRadius: '4px' }}>
+      <ContentBody
+        items={pageItems}
+        totalHits={allItems.length}
+        icon={icon}
+        groupedItemsType={groupedItemsType}
+        pagination={pagination}
+      />
+    </div>
+  );
 };
 LargeGroup.parameters = {
   docs: {
     description: {
       story:
-        'Displays a large mixed group of 10 items to test component performance and scrolling behavior.',
+        'Displays a large mixed group of 100 items to test component performance and scrolling behavior.',
     },
   },
 };
