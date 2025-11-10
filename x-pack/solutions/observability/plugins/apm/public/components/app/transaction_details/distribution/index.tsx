@@ -129,12 +129,13 @@ export function TransactionDistribution({
     (config: SavedSearchTableConfig) => {
       const currentQuery = toQuery(history.location.search);
 
+      const isFieldIncludedInColumns = (fieldName: string) =>
+        fieldName === AT_TIMESTAMP || (config.columns && config.columns.includes(fieldName));
+
       // Clean up sort configuration to only include columns that exist
       const cleanedSort = config.sort?.filter((sortEntry) => {
         const [fieldName] = sortEntry;
-        // Keep sorts for fields that are in the current columns array
-        // Also keep @timestamp as it's not removable
-        return fieldName === AT_TIMESTAMP || (config.columns && config.columns.includes(fieldName));
+        return isFieldIncludedInColumns(fieldName);
       });
 
       // Clean up grid configuration to only include columns that exist
@@ -142,10 +143,8 @@ export function TransactionDistribution({
         ? {
             ...config.grid,
             columns: Object.fromEntries(
-              Object.entries(config.grid.columns).filter(
-                ([fieldName]) =>
-                  fieldName === AT_TIMESTAMP || // `@timestamp` is always present
-                  (config.columns && config.columns.includes(fieldName))
+              Object.entries(config.grid.columns).filter(([fieldName]) =>
+                isFieldIncludedInColumns(fieldName)
               )
             ),
           }
