@@ -20,7 +20,7 @@ import { atomicNodes, mainScopeNodes, secondaryScopeNodes } from './nodes/types'
 import { convertWorkflowGraphToReactFlow } from './workflow_graph_layout';
 
 import '@xyflow/react/dist/style.css';
-import { selectWorkflowGraph } from '../../widgets/workflow_yaml_editor/lib/store';
+import { selectWorkflowGraph } from '../../entities/workflows/store';
 
 export interface ExecutionGraphProps {
   workflowYaml: string | undefined;

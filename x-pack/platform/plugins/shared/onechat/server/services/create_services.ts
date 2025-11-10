@@ -30,7 +30,11 @@ export class ServiceManager {
   public internalSetup?: InternalSetupServices;
   public internalStart?: InternalStartServices;
 
-  setupServices({ logger, workflowsManagement }: ServiceSetupDeps): InternalSetupServices {
+  setupServices({
+    logger,
+    workflowsManagement,
+    trackingService,
+  }: ServiceSetupDeps): InternalSetupServices {
     this.services = {
       tools: new ToolsService(),
       agents: new AgentsService(),
@@ -54,6 +58,7 @@ export class ServiceManager {
     inference,
     uiSettings,
     savedObjects,
+    trackingService,
   }: ServicesStartDeps): InternalStartServices {
     if (!this.services) {
       throw new Error('#startServices called before #setupServices');
@@ -94,6 +99,7 @@ export class ServiceManager {
       toolsService: tools,
       agentsService: agents,
       attachmentsService: attachments,
+      trackingService,
     });
     runner = runnerFactory.getRunner();
 
@@ -111,6 +117,7 @@ export class ServiceManager {
       agentService: agents,
       uiSettings,
       savedObjects,
+      trackingService,
     });
 
     this.internalStart = {
