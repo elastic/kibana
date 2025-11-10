@@ -19,6 +19,7 @@ import {
   type ESQLFunction,
   type ESQLSingleAstItem,
   within,
+  isSubQuery,
 } from '@kbn/esql-ast';
 import { EDITOR_MARKER } from '@kbn/esql-ast/src/definitions/constants';
 import { pipePrecedesCurrentWord } from '@kbn/esql-ast/src/definitions/utils';
@@ -182,6 +183,7 @@ function findAstPosition(ast: ESQLAstQueryExpression, offset: number) {
     node: removeMarkerArgFromArgsList(cleanMarkerNode(node)),
   };
 }
+
 /**
  * Given a ES|QL query string, its AST and the cursor position,
  * it returns the type of context for the position ("list", "function", "option", "setting", "expression", "newCommand")
@@ -198,6 +200,29 @@ export function getAstContext(
   queryAst: ESQLAstQueryExpression,
   offset: number
 ) {
+  // Find the innermost subquery containing the cursor position
+  // Example: FROM a, (FROM b, (FROM c | WHERE |))
+  //                                         ↑ cursor
+  // Returns: ESQLAstQueryExpression for "FROM c | WHERE"
+  let innermostSubquery: ESQLAstQueryExpression | null = null;
+  let queryContainsSubqueries = false;
+
+  // Check if query contains subqueries while walking the AST
+  const allCommands = Walker.commands(queryAst);
+  const fromCommands = allCommands.filter(({ name }) => name.toLowerCase() === 'from');
+  queryContainsSubqueries = fromCommands.some((cmd) => cmd.args.some((arg) => isSubQuery(arg)));
+
+  Walker.walk(queryAst, {
+    visitParens: (node) => {
+      if (isSubQuery(node) && within(offset, node)) {
+        innermostSubquery = node.child;
+      }
+    },
+  });
+
+  const astForContext = innermostSubquery ?? queryAst;
+  const isCursorInSubquery = innermostSubquery !== null;
+
   let inComment = false;
 
   Walker.visitComments(queryAst, (node) => {
@@ -217,10 +242,13 @@ export function getAstContext(
   if (inComment) {
     return {
       type: 'comment' as const,
+      isCursorInSubquery,
+      queryContainsSubqueries,
+      astForContext,
     };
   }
 
-  const { command, option, node, containingFunction } = findAstPosition(queryAst, offset);
+  const { command, option, node, containingFunction } = findAstPosition(astForContext, offset);
   if (
     !command ||
     (queryString.length <= offset &&
@@ -228,7 +256,16 @@ export function getAstContext(
       command.location.max < queryString.length)
   ) {
     //   // ... | <here>
-    return { type: 'newCommand' as const, command: undefined, node, option, containingFunction };
+    return {
+      type: 'newCommand' as const,
+      command: undefined,
+      node,
+      option,
+      containingFunction,
+      isCursorInSubquery,
+      queryContainsSubqueries,
+      astForContext,
+    };
   }
 
   // command a ... <here> OR command a = ... <here>
@@ -238,5 +275,8 @@ export function getAstContext(
     containingFunction,
     option,
     node,
+    isCursorInSubquery,
+    queryContainsSubqueries,
+    astForContext,
   };
 }
