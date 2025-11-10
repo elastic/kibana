@@ -13,9 +13,9 @@ import { ESQL_CONTROL } from '@kbn/controls-constants';
 import { omit } from 'lodash';
 
 export const addControlsFromSavedSession = async (
-  container: CanAddNewPanel & PublishesESQLVariables,
+  container: CanAddNewPanel & Partial<PublishesESQLVariables>,
   controlGroupJson: string,
-  uuid: string | undefined
+  uuid?: string | undefined
 ): Promise<void> => {
   const controlsState = JSON.parse(controlGroupJson) as ControlPanelsState;
   const esqlVariables$ = container.esqlVariables$;
