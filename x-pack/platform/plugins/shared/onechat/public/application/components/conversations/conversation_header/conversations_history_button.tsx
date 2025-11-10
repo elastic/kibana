@@ -39,7 +39,7 @@ export const ConversationsHistoryButton: React.FC = () => {
   const button = hasActiveConversation ? (
     <div css={paddingLeft}>
       <EuiButtonIcon
-        iconType="clock"
+        iconType="clockCounter"
         color="text"
         aria-label={isPopoverOpen ? labels.close : labels.open}
         onClick={togglePopover}

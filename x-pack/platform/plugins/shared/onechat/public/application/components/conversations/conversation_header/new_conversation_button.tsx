@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiButtonIcon } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useNavigation } from '../../../hooks/use_navigation';
@@ -15,7 +15,13 @@ import { useIsSendingMessage } from '../../../hooks/use_is_sending_message';
 import { useSendMessage } from '../../../context/send_message/send_message_context';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 
-export const NewConversationButton: React.FC<{}> = () => {
+interface NewConversationButtonProps {
+  iconOnly?: boolean;
+}
+
+export const NewConversationButton: React.FC<NewConversationButtonProps> = ({
+  iconOnly = false,
+}) => {
   const { createOnechatUrl } = useNavigation();
   const { isEmbeddedContext, setConversationId } = useConversationContext();
   const conversationId = useConversationId();
@@ -52,6 +58,19 @@ export const NewConversationButton: React.FC<{}> = () => {
       defaultMessage: 'New',
     }),
   };
+
+  if (iconOnly) {
+    return (
+      <EuiButtonIcon
+        color="text"
+        iconType="plus"
+        aria-label={labels.ariaLabel}
+        onClick={handleClick}
+        data-test-subj="agentBuilderNewConversationButton"
+        {...buttonProps}
+      />
+    );
+  }
 
   return (
     <EuiButton
