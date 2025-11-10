@@ -18937,11 +18937,6 @@
                     "nullable": true,
                     "type": "array"
                   },
-                  "cloud_connector_id": {
-                    "description": "ID of the cloud connector associated with this package policy.",
-                    "nullable": true,
-                    "type": "string"
-                  },
                   "description": {
                     "description": "Policy description.",
                     "type": "string"
@@ -19142,12 +19137,6 @@
                       "version"
                     ],
                     "type": "object"
-                  },
-                  "supports_cloud_connector": {
-                    "default": false,
-                    "description": "Indicates whether the package policy supports cloud connectors.",
-                    "nullable": true,
-                    "type": "boolean"
                   },
                   "vars": {
                     "additionalProperties": {
