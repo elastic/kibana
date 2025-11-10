@@ -693,6 +693,22 @@
           },
           {
             "parentPluginId": "@kbn/code-editor",
+            "id": "def-common.CodeEditorProps.links",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "links",
+            "description": [
+              "\nEnables clickable links in the editor. URLs will be underlined and can be opened\nin a new tab using Cmd/Ctrl+Click. Disabled by default."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/code-editor",
             "id": "def-common.CodeEditorProps.onFocus",
             "type": "Function",
             "tags": [],

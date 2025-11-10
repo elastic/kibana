@@ -1600,7 +1600,19 @@
             "StreamsRouteHandlerResources",
             ", ",
             "ListDashboardsResponse",
-            ", undefined>; \"GET /internal/streams/ingest/processor_suggestions\": ",
+            ", undefined>; \"GET /internal/streams/connectors\": { endpoint: \"GET /internal/streams/connectors\"; handler: ServerRouteHandler<",
+            "StreamsRouteHandlerResources",
+            ", undefined, { connectors: ",
+            {
+              "pluginId": "actions",
+              "scope": "server",
+              "docId": "kibActionsPluginApi",
+              "section": "def-server.ConnectorWithExtraFindData",
+              "text": "ConnectorWithExtraFindData"
+            },
+            "[]; }>; security: ",
+            "RouteSecurity",
+            "; }; \"GET /internal/streams/ingest/processor_suggestions\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
               "scope": "common",
@@ -4300,7 +4312,19 @@
           "StreamsRouteHandlerResources",
           ", ",
           "ListDashboardsResponse",
-          ", undefined>; \"GET /internal/streams/ingest/processor_suggestions\": ",
+          ", undefined>; \"GET /internal/streams/connectors\": { endpoint: \"GET /internal/streams/connectors\"; handler: ServerRouteHandler<",
+          "StreamsRouteHandlerResources",
+          ", undefined, { connectors: ",
+          {
+            "pluginId": "actions",
+            "scope": "server",
+            "docId": "kibActionsPluginApi",
+            "section": "def-server.ConnectorWithExtraFindData",
+            "text": "ConnectorWithExtraFindData"
+          },
+          "[]; }>; security: ",
+          "RouteSecurity",
+          "; }; \"GET /internal/streams/ingest/processor_suggestions\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
