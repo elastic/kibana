@@ -12,14 +12,8 @@ import { render, screen, act } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { ProjectRouting } from '@kbn/es-query';
-import type { CPSManager, Project } from '@kbn/cps/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { Project, CPSManager, CPSPluginStart } from '../types';
 import { ProjectPicker } from './project_picker';
-
-// Mock the useKibana hook
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: jest.fn(),
-}));
 
 // Mock the lazy-loaded component
 jest.mock('./project_picker_component', () => ({
@@ -27,14 +21,6 @@ jest.mock('./project_picker_component', () => ({
     <div data-test-subj="project-picker-component">Project: {originProject._alias}</div>
   )),
 }));
-
-interface TestServices {
-  cps?: {
-    cpsManager?: CPSManager;
-  };
-}
-
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 
 describe('ProjectPicker', () => {
   const mockOriginProject: Project = {
@@ -62,7 +48,7 @@ describe('ProjectPicker', () => {
     }),
   };
 
-  const mockCPSService = {
+  const mockCPSService: CPSPluginStart = {
     cpsManager: mockCPSManager as unknown as CPSManager,
   };
 
@@ -71,11 +57,13 @@ describe('ProjectPicker', () => {
       projectRouting?: ProjectRouting;
       onProjectRoutingChange?: (projectRouting: ProjectRouting) => void;
       wrappingContainer?: (children: React.ReactNode) => React.ReactElement;
+      cps?: CPSPluginStart;
     } = {}
   ) => {
     const defaultProps = {
       projectRouting: undefined,
       onProjectRoutingChange: jest.fn(),
+      cps: mockCPSService,
       ...props,
     };
 
@@ -99,11 +87,6 @@ describe('ProjectPicker', () => {
       origin: mockOriginProject,
       linkedProjects: mockLinkedProjects,
     });
-    (mockUseKibana as jest.Mock).mockReturnValue({
-      services: {
-        cps: mockCPSService,
-      } as TestServices,
-    });
   });
 
   describe('rendering conditions', () => {
@@ -120,12 +103,7 @@ describe('ProjectPicker', () => {
     });
 
     it('should not render when cpsManager is not available', async () => {
-      (mockUseKibana as jest.Mock).mockReturnValue({
-        services: {
-          cps: {},
-        } as TestServices,
-      });
-      await renderProjectPicker();
+      await renderProjectPicker({ cps: {} as CPSPluginStart });
       expect(screen.queryByTestId('project-picker-component')).not.toBeInTheDocument();
     });
 

@@ -19,9 +19,7 @@
     "@kbn/i18n",
     "@kbn/i18n-react",
     "@kbn/es-query",
-    "@kbn/kibana-react-plugin",
     "@kbn/shared-ux-utility",
-    "@kbn/cps",
     "@kbn/css-utils"
   ],
   "exclude": [

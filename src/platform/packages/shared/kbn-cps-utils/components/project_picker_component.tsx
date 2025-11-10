@@ -23,7 +23,7 @@ import {
   EuiFlexGroup,
   EuiTitle,
 } from '@elastic/eui';
-import type { Project } from '@kbn/cps/public';
+import type { Project } from '../types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';

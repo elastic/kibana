@@ -10,6 +10,7 @@
 import React from 'react';
 import { withSuspense } from '@kbn/shared-ux-utility';
 export type { ProjectPickerProps } from './components/project_picker';
+export type { Project, CPSManager, CPSPluginStart } from './types';
 
 const ProjectPickerLazy = React.lazy(async () => {
   const { ProjectPicker: Component } = await import('./components/project_picker');

@@ -9,7 +9,7 @@
 
 import React, { useState, useEffect } from 'react';
 import type { ProjectRouting } from '@kbn/es-query';
-import type { CPSPluginStart, Project } from '@kbn/cps/public';
+import type { CPSPluginStart, Project } from '../types';
 import { ProjectPickerComponent } from './project_picker_component';
 
 export interface ProjectPickerProps {

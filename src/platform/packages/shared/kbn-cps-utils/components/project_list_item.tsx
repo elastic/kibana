@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import type { Project } from '@kbn/cps/public';
+import type { Project } from '../types';
 import {
   EuiFlexItem,
   EuiFlexGroup,
