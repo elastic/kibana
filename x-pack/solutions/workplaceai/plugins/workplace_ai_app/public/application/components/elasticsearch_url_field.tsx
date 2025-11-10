@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiButtonIcon, EuiCopy, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiCopy, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 interface ElasticsearchUrlFieldProps {
@@ -20,15 +20,13 @@ export const ElasticsearchUrlField: React.FC<ElasticsearchUrlFieldProps> = ({
   dataTestSubj,
   copyValueDataTestSubj,
 }) => {
-  const { euiTheme } = useEuiTheme();
-
   return (
     <EuiFlexGroup
-      style={{
+      css={({ euiTheme }) => ({
         color: euiTheme.colors.textParagraph,
         backgroundColor: euiTheme.colors.backgroundBaseSubdued,
         borderRadius: euiTheme.border.radius.small,
-      }}
+      })}
       alignItems="center"
       gutterSize="xs"
       responsive={false}
@@ -36,13 +34,13 @@ export const ElasticsearchUrlField: React.FC<ElasticsearchUrlFieldProps> = ({
       <EuiFlexItem css={{ minWidth: 0 }} grow={false}>
         <code
           data-test-subj={dataTestSubj}
-          style={{
+          css={({ euiTheme }) => ({
             textOverflow: 'ellipsis',
             overflow: 'hidden',
             whiteSpace: 'nowrap',
             fontSize: euiTheme.size.m,
             padding: `${euiTheme.size.s} ${euiTheme.size.m}`,
-          }}
+          })}
         >
           {value}
         </code>
