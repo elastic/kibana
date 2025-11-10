@@ -24,6 +24,7 @@ import {
   useEuiTheme,
   euiScrollBarStyles,
 } from '@elastic/eui';
+import useDebounce from 'react-use/lib/useDebounce';
 import { Markdown } from '@kbn/shared-ux-markdown';
 import { getFilteredGroups } from '../../utils/get_filtered_groups';
 import type { LanguageDocumentationSections } from '../../types';
@@ -55,10 +56,19 @@ function DocumentationContent({
   }, [selectedSection]);
 
   const [searchText, setSearchText] = useState('');
+  const [debouncedSearchText, setDebouncedSearchText] = useState('');
+
+  useDebounce(
+    () => {
+      setDebouncedSearchText(searchText);
+    },
+    250,
+    [searchText]
+  );
 
   const filteredGroups = useMemo(() => {
-    return getFilteredGroups(searchText, searchInDescription, sections);
-  }, [sections, searchText, searchInDescription]);
+    return getFilteredGroups(debouncedSearchText, searchInDescription, sections);
+  }, [sections, debouncedSearchText, searchInDescription]);
 
   return (
     <>
@@ -174,7 +184,9 @@ function DocumentationContent({
                             setSelectedSection(helpGroup.label);
                           }}
                         >
-                          <EuiHighlight search={searchText}>{helpGroup.label}</EuiHighlight>
+                          <EuiHighlight search={debouncedSearchText}>
+                            {helpGroup.label}
+                          </EuiHighlight>
                         </EuiLink>
                       </h6>
                     </EuiTitle>
@@ -189,7 +201,9 @@ function DocumentationContent({
                               <EuiListGroupItem
                                 key={helpItem.label}
                                 label={
-                                  <EuiHighlight search={searchText}>{helpItem.label}</EuiHighlight>
+                                  <EuiHighlight search={debouncedSearchText}>
+                                    {helpItem.label}
+                                  </EuiHighlight>
                                 }
                                 size="s"
                                 onClick={() => {
