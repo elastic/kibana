@@ -95,6 +95,8 @@ export const SlackApiConnectorExample: SingleFileConnectorDefinition = {
   actions: {
     // Action 1: Post a message
     postMessage: {
+      actionGroup: "Messages",
+      description: "Post a message to a Slack channel",
       isTool: true, // Can be used by LLMs
       
       // Input schema - UI fully derived from this
@@ -145,6 +147,8 @@ export const SlackApiConnectorExample: SingleFileConnectorDefinition = {
     
     // Action 2: Get channels list (used by postMessage for options)
     getChannels: {
+      actionGroup: "Channels",
+      description: "List all Slack channels",
       // No parameters needed - UI shows empty form
       input: z.object({
         // UI derives: Number input with validation
@@ -173,6 +177,8 @@ export const SlackApiConnectorExample: SingleFileConnectorDefinition = {
     
     // Action 3: Search channels
     searchChannels: {
+      actionGroup: "Channels",
+      description: "Search for Slack channels by name",
       input: z.object({
         // UI derives: Text input with validation
         query: z.string()
@@ -194,6 +200,13 @@ export const SlackApiConnectorExample: SingleFileConnectorDefinition = {
         };
       },
     },
+    
+    // UI will automatically group these actions:
+    // 📬 Messages
+    //   └─ postMessage
+    // 📁 Channels
+    //   ├─ getChannels
+    //   └─ searchChannels
   },
   
   // ---- Test Function (optional but recommended) ----

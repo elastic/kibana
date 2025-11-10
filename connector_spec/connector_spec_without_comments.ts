@@ -165,6 +165,7 @@ export interface ActionDefinition<TInput = unknown, TOutput = unknown, TError = 
     error?: z.ZodSchema<TError>;
     handler: (ctx: ActionContext, input: TInput) => Promise<TOutput>;
     description?: string;
+    actionGroup?: string;
     supportsStreaming?: boolean;
 }
 

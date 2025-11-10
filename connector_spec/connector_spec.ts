@@ -893,10 +893,67 @@ export interface ActionDefinition<TInput = unknown, TOutput = unknown, TError = 
 
   /** Action handler function */
   handler: (ctx: ActionContext, input: TInput) => Promise<TOutput>;
-
+  
   /** Optional description for documentation/UI */
   description?: string;
-
+  
+  /**
+   * Optional action group/category for UI organization
+   *
+   * WHY: Connectors with many actions (10+) need categorization for better UX.
+   * Instead of a flat list, group related actions together in the UI.
+   *
+   * INSPIRED BY: n8n's action grouping (e.g., Slack: "Messages", "Channels", "Users")
+   *
+   * USED BY: Connectors with multiple actions
+   * EXAMPLES:
+   * - Slack: "Send Messages", "Manage Channels", "User Management"
+   * - Gmail: "Compose", "Inbox", "Labels", "Drafts"
+   * - Jira: "Issues", "Projects", "Search", "Comments"
+   * - Crowdstrike: "Host Actions", "RTR Commands", "Agent Info"
+   *
+   * HOW IT WORKS:
+   * 1. Each action declares its group via this field
+   * 2. UI automatically groups actions with same `actionGroup` value
+   * 3. Groups appear in order of first action that declares them (or use `actionGroups` in layout for explicit ordering)
+   * 4. Actions without a group appear in a default "Actions" section
+   *
+   * @example Slack connector actions
+   * ```typescript
+   * actions: {
+   *   postMessage: {
+   *     actionGroup: "Messages",
+   *     description: "Post a message to a channel",
+   *     // ...
+   *   },
+   *   getChannels: {
+   *     actionGroup: "Channels",
+   *     description: "List all channels",
+   *     // ...
+   *   },
+   *   searchChannels: {
+   *     actionGroup: "Channels",
+   *     description: "Search for channels",
+   *     // ...
+   *   }
+   * }
+   * // UI renders:
+   * // - Messages: postMessage
+   * // - Channels: getChannels, searchChannels
+   * ```
+   *
+   * @example With i18n
+   * ```typescript
+   * actionGroup: i18n.translate(i18nKeys.actions('postMessage', 'group'), {
+   *   defaultMessage: 'Messages'
+   * })
+   * ```
+   *
+   * TIP: Use consistent group names across actions. The UI will automatically
+   * group actions with the same `actionGroup` value together.
+   */
+  actionGroup?: string;
+  
   /** Whether this action supports streaming responses */
   supportsStreaming?: boolean;
 }

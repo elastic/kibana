@@ -172,6 +172,8 @@ export const OpenAIConnectorExample: SingleFileConnectorDefinition = {
     // Action 1: Run completion (non-streaming)
     // REFERENCE: x-pack/platform/plugins/shared/stack_connectors/common/openai/schema.ts:68-76
     run: {
+      actionGroup: "AI Generation",
+      description: "Run AI completion (non-streaming)",
       isTool: false, // Internal use only
       
       input: z.object({
@@ -219,6 +221,8 @@ export const OpenAIConnectorExample: SingleFileConnectorDefinition = {
     // Action 2: Stream completion (real-time)
     // REFERENCE: x-pack/platform/plugins/shared/stack_connectors/common/openai/schema.ts:195-204
     stream: {
+      actionGroup: "AI Generation",
+      description: "Stream AI completion in real-time",
       isTool: false,
       supportsStreaming: true, // Marks this as a streaming action
       
@@ -240,6 +244,8 @@ export const OpenAIConnectorExample: SingleFileConnectorDefinition = {
     // Action 3: Invoke AI (high-level)
     // REFERENCE: x-pack/platform/plugins/shared/stack_connectors/common/openai/schema.ts:111-183
     invokeAI: {
+      actionGroup: "AI Generation",
+      description: "Invoke AI with structured parameters",
       isTool: true, // Can be used in workflows
       
       input: z.object({

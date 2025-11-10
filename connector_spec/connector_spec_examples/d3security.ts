@@ -105,6 +105,8 @@ export const D3SecurityConnectorExample: SingleFileConnectorDefinition = {
     // Action 1: Run - Send security event to D3
     // REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/d3security/d3security.ts:62-81
     run: {
+      actionGroup: "Security Events",
+      description: "Send security event to D3 SOAR platform",
       isTool: true,
       
       // Input schema

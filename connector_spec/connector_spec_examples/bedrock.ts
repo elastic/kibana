@@ -138,6 +138,8 @@ export const BedrockConnectorExample: SingleFileConnectorDefinition = {
     // Action 1: Run completion (non-streaming)
     // REFERENCE: x-pack/platform/plugins/shared/stack_connectors/common/bedrock/schema.ts:35-45
     run: {
+      actionGroup: "Advanced",
+      description: "Low-level API access for Bedrock",
       isTool: false,
       
       input: z.object({
@@ -180,6 +182,8 @@ export const BedrockConnectorExample: SingleFileConnectorDefinition = {
     // Action 2: Invoke AI (high-level with messages)
     // REFERENCE: x-pack/platform/plugins/shared/stack_connectors/common/bedrock/schema.ts:85-111
     invokeAI: {
+      actionGroup: "AI Generation",
+      description: "Invoke AI with structured parameters",
       isTool: true,
       
       input: z.object({
@@ -248,6 +252,8 @@ export const BedrockConnectorExample: SingleFileConnectorDefinition = {
     // Action 3: Converse (unified API for all models)
     // REFERENCE: x-pack/platform/plugins/shared/stack_connectors/common/bedrock/schema.ts:198-216
     converse: {
+      actionGroup: "AI Generation",
+      description: "Converse API for multi-turn conversations",
       isTool: true,
       
       input: z.object({
@@ -281,6 +287,8 @@ export const BedrockConnectorExample: SingleFileConnectorDefinition = {
     
     // Action 4: Converse Stream
     converseStream: {
+      actionGroup: "AI Generation",
+      description: "Stream Converse API responses in real-time",
       isTool: true,
       supportsStreaming: true,
       

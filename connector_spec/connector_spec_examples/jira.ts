@@ -114,6 +114,8 @@ export const JiraConnectorExample: SingleFileConnectorDefinition = {
   actions: {
     // Action 1: Get fields (for form building)
     getFields: {
+      actionGroup: "Metadata",
+      description: "Get available Jira fields for form building",
       isTool: false, // Internal use only
       
       input: z.object({}),
@@ -132,6 +134,8 @@ export const JiraConnectorExample: SingleFileConnectorDefinition = {
     
     // Action 2: Get issue types
     issueTypes: {
+      actionGroup: "Metadata",
+      description: "Get available Jira issue types",
       isTool: false,
       
       input: z.object({
@@ -150,6 +154,8 @@ export const JiraConnectorExample: SingleFileConnectorDefinition = {
     
     // Action 3: Get fields by issue type
     fieldsByIssueType: {
+      actionGroup: "Metadata",
+      description: "Get fields for a specific issue type",
       isTool: false,
       
       input: z.object({
@@ -172,6 +178,8 @@ export const JiraConnectorExample: SingleFileConnectorDefinition = {
     // Action 4: Push to service (create/update issue)
     // This is the main action used by Cases
     pushToService: {
+      actionGroup: "Issues",
+      description: "Create or update a Jira issue",
       isTool: true,
       
       input: z.object({
@@ -255,6 +263,8 @@ export const JiraConnectorExample: SingleFileConnectorDefinition = {
     
     // Action 5: Get incident (retrieve issue details)
     getIncident: {
+      actionGroup: "Issues",
+      description: "Get a Jira issue by ID",
       isTool: true,
       
       input: z.object({
@@ -279,6 +289,8 @@ export const JiraConnectorExample: SingleFileConnectorDefinition = {
     
     // Action 6: Get issues (search)
     issues: {
+      actionGroup: "Issues",
+      description: "Search for Jira issues using JQL",
       isTool: true,
       
       input: z.object({
@@ -301,8 +313,10 @@ export const JiraConnectorExample: SingleFileConnectorDefinition = {
     
     // Action 7: Get single issue
     issue: {
+      actionGroup: "Issues",
+      description: "Get a single Jira issue",
       isTool: true,
-      
+
       input: z.object({
         id: z.string().describe("Issue Key"),
       }),
