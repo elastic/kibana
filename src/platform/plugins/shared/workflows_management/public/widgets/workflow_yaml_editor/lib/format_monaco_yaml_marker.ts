@@ -20,12 +20,14 @@ import {
 } from '../../../../common/lib/yaml/get_node_value';
 import { formatZodError } from '../../../../common/lib/zod';
 
+export const SUPPRESS_MARKER = Symbol('SUPPRESS_MARKER');
+
 export function formatMonacoYamlMarker(
   marker: monaco.editor.IMarkerData,
   editorModel: monaco.editor.ITextModel,
   workflowYamlSchemaLoose: z.ZodSchema,
   yamlDocument: YAML.Document | null
-): monaco.editor.IMarker | monaco.editor.IMarkerData | null {
+): monaco.editor.IMarker | typeof SUPPRESS_MARKER {
   const newMarker: monaco.editor.IMarkerData = {
     ...marker,
   };
@@ -44,8 +46,8 @@ export function formatMonacoYamlMarker(
 
       const scalarNode = getScalarValueAtPosition(yamlDocument, markerPosition);
       if (scalarNode && isScalar(scalarNode) && isDynamicValue(scalarNode.value)) {
-        // Return null to suppress this marker - it will be filtered out in transformMonacoMarkers
-        return null;
+        // Return SUPPRESS_MARKER to suppress this marker - it will be filtered out in transformMonacoMarkers
+        return SUPPRESS_MARKER;
       }
     } catch (error) {
       // If we can't determine the value, continue with normal processing

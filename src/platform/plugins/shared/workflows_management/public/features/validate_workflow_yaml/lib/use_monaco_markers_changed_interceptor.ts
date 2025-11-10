@@ -11,7 +11,10 @@ import { useCallback, useState } from 'react';
 import type YAML from 'yaml';
 import type { monaco } from '@kbn/monaco';
 import type { z } from '@kbn/zod';
-import { formatMonacoYamlMarker } from '../../../widgets/workflow_yaml_editor/lib/format_monaco_yaml_marker';
+import {
+  formatMonacoYamlMarker,
+  SUPPRESS_MARKER,
+} from '../../../widgets/workflow_yaml_editor/lib/format_monaco_yaml_marker';
 import type { MarkerSeverity } from '../../../widgets/workflow_yaml_editor/lib/utils';
 import { getSeverityString } from '../../../widgets/workflow_yaml_editor/lib/utils';
 import { isYamlValidationMarkerOwner, type YamlValidationResult } from '../model/types';
@@ -59,9 +62,7 @@ export function useMonacoMarkersChangedInterceptor({
           }
           return marker;
         })
-        .filter(
-          (marker): marker is monaco.editor.IMarker | monaco.editor.IMarkerData => marker !== null
-        ); // Filter out null markers (dynamic values that should bypass validation)
+        .filter((marker): marker is monaco.editor.IMarkerData => marker !== SUPPRESS_MARKER); // Filter out suppressed markers (dynamic values that should bypass validation)
     },
     [workflowYamlSchema, yamlDocumentRef]
   );
