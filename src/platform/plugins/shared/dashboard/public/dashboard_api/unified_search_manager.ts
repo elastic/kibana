@@ -10,7 +10,7 @@
 import type { ControlGroupApi } from '@kbn/controls-plugin/public';
 import type { GlobalQueryStateFromUrl, RefreshInterval } from '@kbn/data-plugin/public';
 import { connectToQueryState, syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
-import type { Filter, ProjectRouting, Query, TimeRange } from '@kbn/es-query';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { COMPARE_ALL_OPTIONS, compareFilters, isFilterPinned } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
@@ -34,7 +34,7 @@ import {
   switchMap,
   tap,
 } from 'rxjs';
-import { coreServices, dataService } from '../services/kibana_services';
+import { dataService } from '../services/kibana_services';
 import { GLOBAL_STATE_STORAGE_KEY } from '../utils/urls';
 import type { DashboardCreationOptions } from './types';
 import type { DashboardState } from '../../common';
@@ -65,23 +65,6 @@ export function initializeUnifiedSearchManager(
       query$.next(query);
     }
   }
-  const projectRouting$ = new BehaviorSubject<ProjectRouting | undefined>(
-    initialState.projectRouting
-  );
-  function setProjectRouting(projectRouting: ProjectRouting | undefined) {
-    if (projectRouting !== projectRouting$.value) {
-      console.log('Dashboard: setProjectRouting called with:', projectRouting);
-      projectRouting$.next(projectRouting);
-    }
-  }
-
-  // Subscribe to Chrome's projectRouting$ to sync global project routing changes to dashboard
-  const chromeProjectRoutingSubscription = coreServices.chrome.project
-    .getProjectRouting$()
-    .subscribe((chromeProjectRouting) => {
-      console.log('Dashboard: Chrome projectRouting changed to:', chromeProjectRouting);
-      setProjectRouting(chromeProjectRouting);
-    });
 
   const refreshInterval$ = new BehaviorSubject<RefreshInterval | undefined>(
     initialState.refreshInterval
@@ -289,7 +272,6 @@ export function initializeUnifiedSearchManager(
         (b ?? []).filter((f) => !isFilterPinned(f)),
         COMPARE_ALL_OPTIONS
       ),
-    projectRouting: 'deepEquality',
     query: 'deepEquality',
     refreshInterval: (a: RefreshInterval | undefined, b: RefreshInterval | undefined) =>
       timeRestore$.value ? fastIsEqual(a, b) : true,
@@ -301,12 +283,12 @@ export function initializeUnifiedSearchManager(
       return true;
     },
   } as StateComparators<
-    Pick<DashboardState, 'filters' | 'query' | 'refreshInterval' | 'timeRange' | 'projectRouting'>
+    Pick<DashboardState, 'filters' | 'query' | 'refreshInterval' | 'timeRange'>
   >;
 
   const getState = (): Pick<
     DashboardState,
-    'filters' | 'query' | 'refreshInterval' | 'timeRange' | 'projectRouting'
+    'filters' | 'query' | 'refreshInterval' | 'timeRange'
   > => {
     // pinned filters are not serialized when saving the dashboard
     const serializableFilters = unifiedSearchFilters$.value?.filter((f) => !isFilterPinned(f));
@@ -332,7 +314,6 @@ export function initializeUnifiedSearchManager(
       ...(serializableFilters?.length && { filters: serializableFilters }),
       ...(refreshInterval && { refreshInterval }),
       ...(timeRange && { timeRange }),
-      ...(projectRouting$.value && { projectRouting: projectRouting$.value }),
     };
   };
 
@@ -344,8 +325,6 @@ export function initializeUnifiedSearchManager(
       forceRefresh: () => {
         reload$.next();
       },
-      projectRouting$,
-      setProjectRouting,
       query$,
       refreshInterval$,
       setFilters: setUnifiedSearchFilters,
@@ -359,16 +338,14 @@ export function initializeUnifiedSearchManager(
       startComparing$: (lastSavedState$: BehaviorSubject<DashboardState>) => {
         return combineLatest([
           unifiedSearchFilters$,
-          projectRouting$,
           query$,
           refreshInterval$,
           timeRange$,
           timeRestore$,
         ]).pipe(
           debounceTime(COMPARE_DEBOUNCE),
-          map(([filters, projectRouting, query, refreshInterval, timeRange]) => ({
+          map(([filters, query, refreshInterval, timeRange]) => ({
             filters,
-            projectRouting,
             query,
             refreshInterval,
             timeRange,
@@ -384,7 +361,6 @@ export function initializeUnifiedSearchManager(
           ...(unifiedSearchFilters$.value ?? []).filter(isFilterPinned),
           ...(lastSavedState.filters ?? []),
         ]);
-        setProjectRouting(lastSavedState.projectRouting as ProjectRouting | undefined);
         if (lastSavedState.query) {
           setQuery(lastSavedState.query);
         }
@@ -400,7 +376,6 @@ export function initializeUnifiedSearchManager(
     cleanup: () => {
       controlGroupSubscriptions.unsubscribe();
       unifiedSearchSubscriptions.unsubscribe();
-      chromeProjectRoutingSubscription.unsubscribe();
       stopSyncingWithUrl?.();
       stopSyncingAppFilters?.();
     },
