@@ -8,8 +8,19 @@
  */
 
 import type { Observable } from 'rxjs';
-import { from, timer, defer, fromEvent, EMPTY } from 'rxjs';
-import { expand, map, switchMap, takeUntil, takeWhile, tap } from 'rxjs';
+import {
+  defer,
+  EMPTY,
+  expand,
+  from,
+  fromEvent,
+  switchMap,
+  takeUntil,
+  takeWhile,
+  tap,
+  throwError,
+  timer,
+} from 'rxjs';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { IAsyncSearchOptions } from '..';
@@ -54,9 +65,9 @@ export const pollSearch = <Response extends IKibanaSearchResponse>(
     }
 
     const aborted$ = (abortSignal ? fromEvent(abortSignal, 'abort') : EMPTY).pipe(
-      map(() => {
-        throw new AbortError();
-      })
+      switchMap((e) =>
+        (e.target as AbortSignal).reason === 'canceled' ? EMPTY : throwError(new AbortError())
+      )
     );
 
     return from(search()).pipe(

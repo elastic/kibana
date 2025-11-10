@@ -74,8 +74,8 @@ export const useTotalHits = ({
     return () => subscription.unsubscribe();
   }, [fetch, fetch$]);
 
-  const onAbort = useCallback(() => {
-    abortController.current?.abort();
+  const onAbort = useCallback((e: Event) => {
+    abortController.current?.abort((e.target as AbortSignal).reason);
   }, []);
 
   useEffect(() => {

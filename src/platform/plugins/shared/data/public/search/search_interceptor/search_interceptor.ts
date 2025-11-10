@@ -10,18 +10,23 @@
 import { v4 as uuidv4 } from 'uuid';
 import { memoize, once } from 'lodash';
 import type { Observable, Subscription } from 'rxjs';
-import { BehaviorSubject, EMPTY, from, fromEvent, of, throwError } from 'rxjs';
 import {
+  BehaviorSubject,
   catchError,
+  EMPTY,
   filter,
   finalize,
+  from,
+  fromEvent,
   map,
+  of,
   shareReplay,
   skip,
   switchMap,
   take,
   takeUntil,
   tap,
+  throwError,
 } from 'rxjs';
 import type { estypes } from '@elastic/elasticsearch';
 import type {
@@ -51,12 +56,13 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { KibanaServerError } from '@kbn/kibana-utils-plugin/public';
 import { AbortError } from '@kbn/kibana-utils-plugin/public';
 import type {
-  SanitizedConnectionRequestParams,
   IKibanaSearchRequest,
+  IKibanaSearchResponse,
+  ISearchOptions,
   ISearchOptionsSerializable,
+  SanitizedConnectionRequestParams,
 } from '@kbn/search-types';
 import { createEsError, isEsError, renderSearchError } from '@kbn/search-errors';
-import type { IKibanaSearchResponse, ISearchOptions } from '@kbn/search-types';
 import { defaultFreeze } from '@kbn/kibana-utils-plugin/common';
 import {
   EVENT_TYPE_DATA_SEARCH_TIMEOUT,
@@ -620,10 +626,11 @@ export class SearchInterceptor {
         // Abort the replay if the abortSignal is aborted.
         // The underlaying search will not abort unless searchAbortController fires.
         const aborted$ = (abortSignal ? fromEvent(abortSignal, 'abort') : EMPTY).pipe(
-          map(() => {
-            if (abortSignal?.reason !== AbortReason.Canceled) throw new AbortError();
-            return EMPTY;
-          })
+          switchMap((e) =>
+            (e.target as AbortSignal)?.reason === AbortReason.Canceled
+              ? EMPTY
+              : throwError(new AbortError())
+          )
         );
 
         return response$.pipe(
