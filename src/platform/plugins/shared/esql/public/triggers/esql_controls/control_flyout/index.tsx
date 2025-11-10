@@ -29,6 +29,8 @@ import {
   getVariableNamePrefix,
   checkVariableExistence,
 } from './helpers';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ServiceDeps } from '@kbn/esql/public/kibana_services';
 
 interface ESQLControlsFlyoutProps {
   search: ISearchGeneric;
@@ -115,6 +117,9 @@ export function ESQLControlsFlyout({
       : true;
   }, [variableType, controlState?.availableOptions]);
 
+  const kibana = useKibana<ServiceDeps>();
+  const { telemetryService } = kibana.services;
+
   const onVariableNameChange = useCallback(
     (e: { target: { value: React.SetStateAction<string> } }) => {
       const text = validateVariableName(String(e.target.value), variableNamePrefix);
@@ -150,6 +155,10 @@ export function ESQLControlsFlyout({
     variableName,
     variableType,
   ]);
+
+  useEffect(() => {
+    telemetryService.trackEsqlControlFlyoutOpened(initialVariableType);
+  }, [initialVariableType]);
 
   const onFlyoutTypeChange = useCallback((controlType: EsqlControlType) => {
     setControlFlyoutType(controlType);
