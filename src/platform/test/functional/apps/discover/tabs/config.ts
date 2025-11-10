@@ -23,6 +23,5 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ],
     },
     testFiles: [require.resolve('.')],
-    indexRefreshInterval: '1s',
   };
 }
