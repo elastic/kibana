@@ -21,6 +21,14 @@ import {
   SUB_ACTION as OpsgenieSubActions,
 } from '@kbn/connector-schemas/opsgenie/constants';
 import {
+  CONNECTOR_ID as TINES_CONNECTOR_ID,
+  SUB_ACTION as TINES_SUB_ACTION,
+} from '@kbn/connector-schemas/tines/constants';
+import {
+  CONNECTOR_ID as XSOAR_CONNECTOR_ID,
+  SUB_ACTION as XSOAR_SUB_ACTION,
+} from '@kbn/connector-schemas/xsoar/constants';
+import {
   BEDROCK_CONNECTOR_ID,
   SUB_ACTION as BEDROCK_SUB_ACTION,
 } from '@kbn/stack-connectors-plugin/common/bedrock/constants';
@@ -52,14 +60,6 @@ import {
   THEHIVE_CONNECTOR_ID,
   SUB_ACTION as THEHIVE_SUB_ACTION,
 } from '@kbn/stack-connectors-plugin/common/thehive/constants';
-import {
-  TINES_CONNECTOR_ID,
-  SUB_ACTION as TINES_SUB_ACTION,
-} from '@kbn/stack-connectors-plugin/common/tines/constants';
-import {
-  XSOAR_CONNECTOR_ID,
-  SUB_ACTION as XSOAR_SUB_ACTION,
-} from '@kbn/stack-connectors-plugin/common/xsoar/constants';
 
 // Helper function to format sub-action names for display
 function formatSubActionName(action: string): string {
