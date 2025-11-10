@@ -389,11 +389,14 @@ export class LensPlugin {
       });
 
       core.getStartServices().then(async ([{ featureFlags }]) => {
+        // This loads the feature flags async to allow synchronous access to flags via getLensFeatureFlags
         const flags = await setLensFeatureFlags(featureFlags);
-        void setLensBuilder();
+
+        // This loads the builder async to allow synchronous access to builder via getLensBuilder
+        void setLensBuilder(flags.apiFormat);
 
         embeddable.registerLegacyURLTransform(LENS_EMBEDDABLE_TYPE, async () => {
-          const { getLensTransforms } = await import('../common/transforms');
+          const { getLensTransforms } = await import('./async_services');
           const { LensConfigBuilder } = await import('@kbn/lens-embeddable-utils');
           const builder = new LensConfigBuilder(undefined, flags.apiFormat);
 

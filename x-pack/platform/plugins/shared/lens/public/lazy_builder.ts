@@ -9,6 +9,7 @@ import type { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builde
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
 
 import { getLensFeatureFlags } from './get_feature_flags';
+import type { LensFeatureFlags } from '../common';
 
 const [getBuilder, setBuilder] = createGetterSetter<LensConfigBuilder>('LensBuilder', false);
 
@@ -27,12 +28,12 @@ export function getLensBuilder(): LensConfigBuilder | null {
   return builder;
 }
 
-export async function setLensBuilder(): Promise<LensConfigBuilder | null> {
-  const flags = getLensFeatureFlags();
-
-  if (flags.apiFormat) {
+export async function setLensBuilder(
+  useApiFormat: LensFeatureFlags['apiFormat']
+): Promise<LensConfigBuilder | null> {
+  if (useApiFormat) {
     const { LensConfigBuilder } = await import('@kbn/lens-embeddable-utils');
-    const builder = new LensConfigBuilder(undefined, flags.apiFormat);
+    const builder = new LensConfigBuilder(undefined, useApiFormat);
     setBuilder(builder);
     return builder;
   }
