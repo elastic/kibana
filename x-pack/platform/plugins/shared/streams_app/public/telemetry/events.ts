@@ -8,8 +8,8 @@
 import {
   STREAMS_AI_GROK_SUGGESTION_ACCEPTED_EVENT_TYPE,
   STREAMS_AI_GROK_SUGGESTION_LATENCY_EVENT_TYPE,
-  STREAMS_ASSET_CLICK_EVENT_TYPE,
-  STREAMS_ASSET_COUNT_EVENT_TYPE,
+  STREAMS_ATTACHMENT_CLICK_EVENT_TYPE,
+  STREAMS_ATTACHMENT_COUNT_EVENT_TYPE,
   STREAMS_CHILD_STREAM_CREATED_EVENT_TYPE,
   STREAMS_PROCESSING_SAVED_EVENT_TYPE,
   STREAMS_RETENTION_CHANGED_EVENT_TYPE,
@@ -21,8 +21,8 @@ import {
 import {
   streamsAIGrokSuggestionAcceptedSchema,
   streamsAIGrokSuggestionLatencySchema,
-  streamsAssetClickEventSchema,
-  streamsAssetCountSchema,
+  streamsAttachmentClickEventSchema,
+  streamsAttachmentCountSchema,
   streamsChildStreamCreatedSchema,
   streamsProcessingSavedSchema,
   streamsRetentionChangedSchema,
@@ -32,14 +32,14 @@ import {
   wiredStreamsStatusChangedSchema,
 } from './schemas';
 
-const streamsAssetCountEventType = {
-  eventType: STREAMS_ASSET_COUNT_EVENT_TYPE,
-  schema: streamsAssetCountSchema,
+const streamsAttachmentCountEventType = {
+  eventType: STREAMS_ATTACHMENT_COUNT_EVENT_TYPE,
+  schema: streamsAttachmentCountSchema,
 };
 
-const streamsAssetClickEventType = {
-  eventType: STREAMS_ASSET_CLICK_EVENT_TYPE,
-  schema: streamsAssetClickEventSchema,
+const streamsAttachmentClickEventType = {
+  eventType: STREAMS_ATTACHMENT_CLICK_EVENT_TYPE,
+  schema: streamsAttachmentClickEventSchema,
 };
 
 const streamsAIGrokSuggestionLatencyEventType = {
@@ -88,8 +88,8 @@ const wiredStreamsStatusChangedEventType = {
 };
 
 export {
-  streamsAssetCountEventType,
-  streamsAssetClickEventType,
+  streamsAttachmentCountEventType,
+  streamsAttachmentClickEventType,
   streamsAIGrokSuggestionLatencyEventType,
   streamsAIGrokSuggestionAcceptedEventType,
   streamsProcessingSavedEventType,
