@@ -444,6 +444,8 @@
           },
           "; documentFilters?: ",
           "QueryDslQueryContainer",
+          "[] | undefined; nonHighlightingFilters?: ",
+          "QueryDslQueryContainer",
           "[] | undefined; featureFlags?: ",
           {
             "pluginId": "@kbn/logs-overview",
