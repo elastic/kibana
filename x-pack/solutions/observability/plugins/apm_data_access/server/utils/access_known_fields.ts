@@ -15,7 +15,7 @@ import {
 
 type RequiredApmFields<
   T extends Partial<FlattenedApmEvent>,
-  R extends keyof FlattenedApmEvent
+  R extends keyof FlattenedApmEvent = never
 > = Partial<T> & Required<Pick<T, R>>;
 
 /**
@@ -25,7 +25,7 @@ type RequiredApmFields<
  */
 type ProxiedApmEvent<
   T extends Partial<FlattenedApmEvent>,
-  R extends keyof FlattenedApmEvent
+  R extends keyof FlattenedApmEvent = never
 > = Readonly<MapToSingleOrMultiValue<RequiredApmFields<T, R>>>;
 
 /**
@@ -33,7 +33,7 @@ type ProxiedApmEvent<
  */
 interface UnflattenApmDocument<
   T extends Partial<FlattenedApmEvent>,
-  R extends keyof FlattenedApmEvent
+  R extends keyof FlattenedApmEvent = never
 > {
   /**
    * Unflattens the APM Event, so fields can be accessed via `event.service?.name`.
@@ -46,6 +46,19 @@ interface UnflattenApmDocument<
    */
   unflatten(): UnflattenedKnownFields<RequiredApmFields<T, R>>;
 }
+
+/**
+ * An APM document that is strongly typed and runtime checked to be correct.
+ * Accessing fields from the document will correctly return single or multi values
+ * according to known field types.
+ *
+ * An `unflatten()` method is also exposed by this document to return an unflattened
+ * version of the document.
+ */
+type ApmDocument<
+  T extends Partial<FlattenedApmEvent>,
+  R extends keyof FlattenedApmEvent = never
+> = ProxiedApmEvent<T, R> & UnflattenApmDocument<T, R>;
 
 /**
  * Validates an APM Event document, checking if it has all the required fields if provided,
@@ -67,8 +80,8 @@ interface UnflattenApmDocument<
  */
 export function accessKnownApmEventFields<
   T extends Partial<FlattenedApmEvent>,
-  R extends keyof FlattenedApmEvent
->(fields: T, required?: R[]): UnflattenApmDocument<T, R> & ProxiedApmEvent<T, R>;
+  R extends keyof FlattenedApmEvent = never
+>(fields: T, required?: R[]): ApmDocument<T, R>;
 
 export function accessKnownApmEventFields(fields: Record<string, any>, required?: string[]) {
   if (required) {
