@@ -11,6 +11,7 @@ import type { DashboardStart } from './plugin';
 import type { DashboardState } from '../common/types';
 import { getDashboardApi } from './dashboard_api/get_dashboard_api';
 import { deserializeLayout } from './dashboard_api/layout_manager/deserialize_layout';
+import type { DashboardAPIGetOut } from '../server/content_management';
 
 export type Start = jest.Mocked<DashboardStart>;
 
@@ -76,16 +77,15 @@ export function buildMockDashboardApi({
   const results = getDashboardApi({
     initialState,
     savedObjectId,
-    savedObjectResult: {
-      dashboardFound: true,
-      newDashboardCreated: savedObjectId === undefined,
-      dashboardId: savedObjectId,
-      managed: false,
-      dashboardInput: {
-        ...initialState,
-      },
-      references: [],
-    },
+    savedObjectResult: savedObjectId
+      ? ({
+          id: savedObjectId,
+          data: initialState,
+          meta: {
+            managed: false,
+          },
+        } as unknown as DashboardAPIGetOut)
+      : undefined,
   });
   return results;
 }

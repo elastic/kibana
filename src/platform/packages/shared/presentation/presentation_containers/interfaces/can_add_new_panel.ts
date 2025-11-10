@@ -17,6 +17,7 @@ export interface CanAddNewPanel {
     panel: PanelPackage<StateType>,
     options?: {
       displaySuccessMessage?: boolean;
+      scrollToPanel?: boolean;
       beside?: string; // ID of an existing panel to place the new panel beside
     }
   ) => Promise<ApiType | undefined>;

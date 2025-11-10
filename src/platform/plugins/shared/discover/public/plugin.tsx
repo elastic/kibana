@@ -416,11 +416,28 @@ export class DiscoverPlugin
 
     plugins.embeddable.registerAddFromLibraryType<SavedSearchAttributes>({
       onAdd: async (container, savedObject) => {
-        const { addControlsFromSavedSession, SAVED_OBJECT_REF_NAME } =
-          await getEmbeddableServices();
+        const [
+          { addControlsFromSavedSession, SAVED_OBJECT_REF_NAME },
+          { apiPublishesEditablePauseFetch, apiHasUniqueId },
+          { apiPublishesESQLVariables },
+        ] = await Promise.all([
+          getEmbeddableServices(),
+          import('@kbn/presentation-publishing'),
+          import('@kbn/esql-types'),
+        ]);
 
-        addControlsFromSavedSession(container, savedObject);
-        container.addNewPanel(
+        const savedSessionAttributes = savedObject.attributes as SavedSearchAttributes;
+
+        const mightHaveVariables =
+          apiPublishesESQLVariables(container) &&
+          savedSessionAttributes.controlGroupJson &&
+          Object.keys(savedSessionAttributes.controlGroupJson).length > 0;
+
+        // pause fetching so that we don't try to build an ES|QL query without necessary variables
+        const shouldPauseFetch = mightHaveVariables && apiPublishesEditablePauseFetch(container);
+        if (shouldPauseFetch) container.setFetchPaused(true);
+
+        const api = await container.addNewPanel(
           {
             panelType: SEARCH_EMBEDDABLE_TYPE,
             serializedState: {
@@ -439,6 +456,18 @@ export class DiscoverPlugin
             displaySuccessMessage: true,
           }
         );
+
+        const uuid = apiHasUniqueId(api) ? api.uuid : undefined;
+        if (mightHaveVariables) {
+          await addControlsFromSavedSession(
+            container,
+            savedSessionAttributes.controlGroupJson!, // this is verified via mightHaveVariables
+            uuid
+          );
+        }
+
+        // unpause fetching if necessary now that ES|QL variables exist
+        if (shouldPauseFetch) container.setFetchPaused(false);
       },
       savedObjectType: SavedSearchType,
       savedObjectName: i18n.translate('discover.savedSearch.savedObjectName', {

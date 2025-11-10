@@ -13,6 +13,7 @@ import type {
   ChatAgentEvent,
   AgentCapabilities,
 } from '@kbn/onechat-common';
+import type { BrowserApiToolMetadata } from '@kbn/onechat-common';
 import type { AgentsServiceStart } from '../../agents';
 
 export const executeAgent$ = ({
@@ -24,6 +25,7 @@ export const executeAgent$ = ({
   nextInput,
   abortSignal,
   defaultConnectorId,
+  browserApiTools,
 }: {
   agentId: string;
   request: KibanaRequest;
@@ -33,6 +35,7 @@ export const executeAgent$ = ({
   nextInput: RawRoundInput;
   abortSignal?: AbortSignal;
   defaultConnectorId?: string;
+  browserApiTools?: BrowserApiToolMetadata[];
 }): Observable<ChatAgentEvent> => {
   return new Observable<ChatAgentEvent>((observer) => {
     agentService
@@ -45,6 +48,7 @@ export const executeAgent$ = ({
           nextInput,
           conversation,
           capabilities,
+          browserApiTools,
         },
         onEvent: (event) => {
           observer.next(event);
