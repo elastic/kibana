@@ -78,7 +78,6 @@ steps:
           imageProject: elastic-images-prod
           machineType: n2-standard-2
         timeout_in_minutes: 60
-        depends_on: build
         retry:
           automatic:
             - exit_status: '-1'
