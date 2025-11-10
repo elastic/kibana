@@ -7,9 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const UPDATE_QUERY_IN_FORM_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.assistant.updateQueryInFormTooltip',
+export const UPDATE_FIELD_IN_FORM_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.assistant.updateFieldInFormTooltip',
   {
-    defaultMessage: 'Update query in form',
+    defaultMessage: 'Update field in form',
   }
 );

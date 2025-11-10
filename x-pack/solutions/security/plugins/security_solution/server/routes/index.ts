@@ -46,6 +46,7 @@ import { registerTagsRoutes } from '../lib/tags/routes';
 import { setAlertTagsRoute } from '../lib/detection_engine/routes/signals/set_alert_tags_route';
 import { setAlertAssigneesRoute } from '../lib/detection_engine/routes/signals/set_alert_assignees_route';
 import { suggestUserProfilesRoute } from '../lib/detection_engine/routes/users/suggest_user_profiles_route';
+import { registerAIAssistedRoutes } from '../lib/detection_engine/routes/ai';
 import { registerTimelineRoutes } from '../lib/timeline/routes';
 import { getFleetManagedIndexTemplatesRoute } from '../lib/security_integrations/cribl/routes';
 import { registerEntityAnalyticsRoutes } from '../lib/entity_analytics/register_entity_analytics_routes';
@@ -121,7 +122,11 @@ export const initRoutes = (
   registerDashboardsRoutes(router, logger);
   registerTagsRoutes(router, logger);
 
-  const { previewTelemetryUrlEnabled } = config.experimentalFeatures;
+  const { previewTelemetryUrlEnabled, aiAssistedRuleCreationEnabled } = config.experimentalFeatures;
+
+  if (aiAssistedRuleCreationEnabled) {
+    registerAIAssistedRoutes(router, logger);
+  }
 
   if (previewTelemetryUrlEnabled) {
     // telemetry preview endpoint for e2e integration tests only at the moment.
