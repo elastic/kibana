@@ -17,15 +17,12 @@ import { validateLiquidTemplate } from './validate_liquid_template';
 import { validateStepNameUniqueness } from './validate_step_name_uniqueness';
 import { validateVariables as validateVariablesInternal } from './validate_variables';
 import { getCachedDynamicConnectorTypes } from '../../../../common/schema';
-import { useKibana } from '../../../hooks/use_kibana';
-import {
-  selectWorkflowGraph,
-  selectYamlDocument,
-} from '../../../widgets/workflow_yaml_editor/lib/store';
+import { selectWorkflowGraph, selectYamlDocument } from '../../../entities/workflows/store';
 import {
   selectWorkflowDefinition,
   selectYamlLineCounter,
-} from '../../../widgets/workflow_yaml_editor/lib/store/selectors';
+} from '../../../entities/workflows/store/workflow_detail/selectors';
+import { useKibana } from '../../../hooks/use_kibana';
 import { MarkerSeverity } from '../../../widgets/workflow_yaml_editor/lib/utils';
 import type { YamlValidationResult } from '../model/types';
 

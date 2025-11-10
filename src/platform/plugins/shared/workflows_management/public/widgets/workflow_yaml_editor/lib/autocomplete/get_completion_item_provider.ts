@@ -8,12 +8,12 @@
  */
 
 import type { monaco } from '@kbn/monaco';
-import type { MinimalWorkflowDetailState } from './context/autocomplete.types';
 import { buildAutocompleteContext } from './context/build_autocomplete_context';
 import { getSuggestions } from './suggestions/get_suggestions';
+import type { WorkflowDetailState } from '../../../../entities/workflows/store';
 
 export function getCompletionItemProvider(
-  getState: () => MinimalWorkflowDetailState | undefined
+  getState: () => WorkflowDetailState
 ): monaco.languages.CompletionItemProvider {
   return {
     // Trigger characters for completion:
@@ -25,13 +25,6 @@ export function getCompletionItemProvider(
     triggerCharacters: ['@', '.', ' ', '|', '{'],
     provideCompletionItems: (model, position, completionContext) => {
       const editorState = getState();
-      if (!editorState) {
-        // console.log('no editor state');
-        return {
-          suggestions: [],
-          incomplete: false,
-        };
-      }
       const autocompleteContext = buildAutocompleteContext({
         editorState,
         model,
