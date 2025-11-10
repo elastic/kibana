@@ -13,7 +13,6 @@ import React, { useMemo } from 'react';
 import type { Indicator } from '../../../../../../common/threat_intelligence/types/indicator';
 import { IndicatorFieldValue } from '../common/field_value';
 import { IndicatorValueActions } from './indicator_value_actions';
-import { unwrapValue } from '../../utils/unwrap_value';
 
 const euiTableSearchOptions: EuiSearchBarProps = {
   box: {
@@ -22,10 +21,6 @@ const euiTableSearchOptions: EuiSearchBarProps = {
   },
 };
 
-interface TableItem {
-  key: string;
-  value: string | string[] | null;
-}
 export interface IndicatorFieldsTableProps {
   fields: string[];
   indicator: Indicator;
@@ -77,22 +72,10 @@ export const IndicatorFieldsTable: FC<IndicatorFieldsTableProps> = ({
     [indicator, dataTestSubj]
   );
 
-  const items = useMemo(() => {
-    return fields.toSorted().reduce<TableItem[]>((acc, field) => {
-      const value = unwrapValue(indicator, field);
-      return [
-        ...acc,
-        {
-          key: field,
-          value,
-        },
-      ];
-    }, []);
-  }, [fields, indicator]);
-
   return (
     <EuiInMemoryTable
-      items={items}
+      // @ts-expect-error - EuiInMemoryTable wants an array of objects, but will accept strings if coerced
+      items={fields.sort()}
       // @ts-expect-error - EuiInMemoryTable wants an array of objects, but will accept strings if coerced
       columns={columns}
       sorting={true}
