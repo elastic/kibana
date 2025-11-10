@@ -134,11 +134,11 @@
             {
               "autoscaling_max": {
                 "resource": "memory",
-                "value": 8192
+                "value": 20000
               },
               "autoscaling_min": {
                 "resource": "memory",
-                "value": 4096
+                "value": 8192
               },
               "autoscaling_tier_override": true,
               "id": "ml",
