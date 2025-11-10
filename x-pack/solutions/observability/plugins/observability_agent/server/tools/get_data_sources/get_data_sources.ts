@@ -21,7 +21,7 @@ export const OBSERVABILITY_GET_DATA_SOURCES_TOOL_ID = 'observability.get_data_so
 
 const getDataSourcesSchema = z.object({});
 
-export async function createGetDataSourcesTool({
+export function createGetDataSourcesTool({
   core,
   plugins,
   logger,
@@ -29,7 +29,7 @@ export async function createGetDataSourcesTool({
   core: CoreSetup<ObservabilityAgentPluginStartDependencies, ObservabilityAgentPluginStart>;
   plugins: ObservabilityAgentPluginSetupDependencies;
   logger: Logger;
-}): Promise<StaticToolRegistration<typeof getDataSourcesSchema>> {
+}): StaticToolRegistration<typeof getDataSourcesSchema> {
   const toolDefinition: BuiltinToolDefinition<typeof getDataSourcesSchema> = {
     id: OBSERVABILITY_GET_DATA_SOURCES_TOOL_ID,
     type: ToolType.builtin,
