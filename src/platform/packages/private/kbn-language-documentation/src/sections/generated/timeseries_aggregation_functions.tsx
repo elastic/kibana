@@ -6,14 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { Markdown as SharedUXMarkdown } from '@kbn/shared-ux-markdown';
-
-const Markdown = (props: Parameters<typeof SharedUXMarkdown>[0]) => (
-  <SharedUXMarkdown {...props} readOnly enableSoftLineBreaks />
-);
 
 // DO NOT RENAME!
 export const functions = {

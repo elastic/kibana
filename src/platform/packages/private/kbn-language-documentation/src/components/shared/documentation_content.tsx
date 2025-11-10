@@ -11,7 +11,12 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useEuiTheme, euiScrollBarStyles } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiBetaBadge } from '@elastic/eui';
-import type { DocumentationGroup, LanguageDocumentationSections, LicenseInfo } from '../../types';
+import type {
+  DocumentationGroupItem,
+  LanguageDocumentationSections,
+  LicenseInfo,
+  MultipleLicenseInfo,
+} from '../../types';
 import { getLicensesArray } from '../../utils/get_license_array';
 import { MarkdownWithHighlight } from './markdown_with_highlight';
 
@@ -46,7 +51,13 @@ function createLicenseTooltip(license: LicenseInfo): string {
 interface DocumentationContentProps {
   searchText: string;
   scrollTargets: React.MutableRefObject<{ [key: string]: HTMLElement }>;
-  filteredGroups?: DocumentationGroup[];
+  filteredGroups?: Array<{
+    label: string;
+    description?: string;
+    items: Array<
+      DocumentationGroupItem & { preview?: boolean; license?: MultipleLicenseInfo | undefined }
+    >;
+  }>;
   sections?: LanguageDocumentationSections;
 }
 

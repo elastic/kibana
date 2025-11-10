@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import React from 'react';
-import { Markdown } from '@kbn/shared-ux-markdown';
 import { getFilteredGroups } from './get_filtered_groups';
 
 describe('getFilteredGroups', () => {
@@ -23,15 +22,15 @@ describe('getFilteredGroups', () => {
         items: [
           {
             label: 'Section two item 1 blah blah',
-            description: (
-              <Markdown readOnly markdownContent={`## Section two item 1 description `} />
-            ),
+            description: {
+              markdownContent: `## Section two item 1 description `,
+            },
           },
           {
             label: 'Section two item 2',
-            description: (
-              <Markdown readOnly markdownContent={`## Section two item 2 description `} />
-            ),
+            description: {
+              markdownContent: `## Section two item 2 description `,
+            },
           },
         ],
       },
@@ -40,15 +39,15 @@ describe('getFilteredGroups', () => {
         items: [
           {
             label: 'Section three  item 1',
-            description: (
-              <Markdown readOnly markdownContent={`## Section three  item 1 description `} />
-            ),
+            description: {
+              markdownContent: `## Section three  item 1 description `,
+            },
           },
           {
             label: 'Section three  item 2',
-            description: (
-              <Markdown readOnly markdownContent={`## Section three  item 2 description `} />
-            ),
+            description: {
+              markdownContent: `## Section three  item 2 description `,
+            },
           },
         ],
       },
@@ -72,14 +71,44 @@ describe('getFilteredGroups', () => {
   test('Should return the section two as it gets it if the search string is asking for this', () => {
     const filteredSections = getFilteredGroups('tWo', false, sections);
     expect(filteredSections).toStrictEqual([
-      { ...sections.groups[1], options: sections.groups[1].items },
+      {
+        ...sections.groups[1],
+        label: 'Section ==two==',
+        description: '',
+        items: [
+          {
+            label: 'Section ==two== item 1 blah blah',
+            description: {
+              markdownContent: '## Section ==two== item 1 description ',
+            },
+          },
+          {
+            label: 'Section ==two== item 2',
+            description: {
+              markdownContent: '## Section ==two== item 2 description ',
+            },
+          },
+        ],
+      },
     ]);
   });
 
   test('Should return the section two filtered on the search string if it is allowed to search in description', () => {
     const filteredSections = getFilteredGroups('Section two item 1 blah blah', true, sections);
     expect(filteredSections).toStrictEqual([
-      { ...sections.groups[1], options: [sections.groups[1].items[0]] },
+      {
+        ...sections.groups[1],
+        label: 'Section two',
+        description: '',
+        items: [
+          {
+            label: '==Section two item 1 blah blah==',
+            description: {
+              markdownContent: '## Section two item 1 description ',
+            },
+          },
+        ],
+      },
     ]);
   });
 
@@ -96,13 +125,15 @@ describe('getFilteredGroups', () => {
           items: [
             {
               label: 'Section two item 1 blah blah',
-              description: <Markdown readOnly markdownContent={`Values`} />,
+              description: {
+                markdownContent: 'Values',
+              },
             },
             {
               label: 'Values',
-              description: (
-                <Markdown readOnly markdownContent={`## Section two item 2 description `} />
-              ),
+              description: {
+                markdownContent: `## Section two item 2 description `,
+              },
             },
           ],
         },
@@ -113,7 +144,22 @@ describe('getFilteredGroups', () => {
     expect(filteredSections).toStrictEqual([
       {
         ...documentation.groups[1],
-        options: [documentation.groups[1].items[1], documentation.groups[1].items[0]],
+        label: 'Section two',
+        description: '',
+        items: [
+          {
+            label: '==Values==',
+            description: {
+              markdownContent: '## Section two item 2 description ',
+            },
+          },
+          {
+            label: 'Section two item 1 blah blah',
+            description: {
+              markdownContent: '==Values==',
+            },
+          },
+        ],
       },
     ]);
   });
