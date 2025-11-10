@@ -96,10 +96,13 @@ jest.mock('../../../public/application/services/api', () => ({
   }),
 }));
 
-function getTestForm(Component: React.FC<SelectInferenceIdProps>) {
+function getTestForm(
+  Component: React.FC<SelectInferenceIdProps>,
+  selectedInferenceId: string = '.preconfigured-elser'
+) {
   return (defaultProps: SelectInferenceIdProps) => {
     const { form } = useForm();
-    form.setFieldValue('inference_id', '.preconfigured-elser');
+    form.setFieldValue('inference_id', selectedInferenceId);
     return (
       <Form form={form}>
         <Component {...(defaultProps as any)} />
@@ -181,11 +184,12 @@ describe('SelectInferenceId', () => {
   describe('when ELSER endpoint is available', () => {
     const endpointsMock = [
       { inference_id: '.preconfigured-e5', task_type: 'text_embedding' },
+      { inference_id: '.elser-2-elastic', task_type: 'sparse_embedding' },
       { inference_id: '.elser-2-elasticsearch', task_type: 'sparse_embedding' },
       { inference_id: 'endpoint-1', task_type: 'text_embedding' },
     ] as InferenceAPIConfigResponse[];
 
-    beforeEach(() => {
+    beforeAll(async () => {
       const mockUseLoadInferenceEndpoints = jest.requireMock(
         '../../../public/application/services/api'
       ).useLoadInferenceEndpoints;
@@ -195,13 +199,28 @@ describe('SelectInferenceId', () => {
         error: null,
       });
 
+      const defaultProps: SelectInferenceIdProps = {
+        'data-test-subj': 'data-inference-endpoint-list',
+      };
+
+      const setup = registerTestBed(getTestForm(SelectInferenceId, ''), {
+        defaultProps,
+        memoryRouter: { wrapComponent: false },
+      });
+
+      await act(async () => {
+        const testBed = await setup();
+        exists = testBed.exists;
+        find = testBed.find;
+      });
+
       find('inferenceIdButton').simulate('click');
     });
 
     it('should prioritize ELSER endpoint as selected by default', () => {
       const elserOption = findTestSubject(
         find('data-inference-endpoint-list'),
-        'custom-inference_.elser-2-elasticsearch'
+        'custom-inference_.elser-2-elastic'
       );
       expect(elserOption.prop('aria-checked')).toEqual(true);
     });
