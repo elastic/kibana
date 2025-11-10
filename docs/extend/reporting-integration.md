@@ -12,17 +12,22 @@ These pages document internal APIs and are not guaranteed to be supported across
 
 ::::
 
+
+
 ### Reporting Export Types [_reporting_export_types]
 
 "Export Types" are pieces of code that plug into the {{kib}} Reporting framework, and are responsible for exporting data on behalf of a {{kib}} application. These pieces of code are implemented as TypeScript classes that extend an abstract base class, and implement methods for controlling the creation of report jobs, and asynchronously generating report contents. Their `createJob` methods handle requests to create report jobs, by accepting jobParams objects and returning "task payload" objects. Their `runTask` methods generate the report contents by accepting the task payload object created from the `createJob` function, which is then stored in a system index in Elasticsearch.
+
 
 ### Share menu extensions [reporting-share-service-registrations]
 
 X-Pack services, such as the {{report-features}}, register with the `share` plugin of the Kibana platform to register additional actions available to make content shareable.
 
+
 ### Generate a report job URL [_generate_a_report_job_url]
 
 To generate a new reporting job, different export types require different `jobParams` objects, which are Rison-encoded and used as a `jobParams` query string variable in the Reporting generation endpoint URL. If you use the aforementioned [Sharing plugin registrations](#reporting-share-service-registrations) then this detail will be abstracted away. If your application does not use the Share menu extensions, you will have to generate the URL and create a POST request to the URL.
+
 
 ### Basic job parameters [_basic_job_parameters]
 
@@ -42,6 +47,8 @@ interface BaseParams {
 3. The `browserTimezone` field is automatically added when using internal Reporting APIs to craft the job parameters. This is used to correctly format time-based data in the user’s desired timezone.
 4. The `version` field is automatically added when using internal Reporting APIs. This is used in cases where job parameters are reused after an upgrade of Kibana, and a migration may be needed.
 
+
+
 ### CSV [_csv]
 
 
@@ -55,6 +62,8 @@ interface JobParamsCsvFromSavedObject {
 
 1. The `locatorParams` value is controlled by the Discover application and identifies a search loaded in Discover, including the selection of DataView, columns and filters. Only a single value in the array is permitted in the `createJob` method.
 
+
+
 #### Job payload [_job_payload]
 
 After the job parameters are received by the route handler for the report generation URL, an additional field is automatically added to the fields from job parameters:
@@ -67,7 +76,10 @@ interface TaskPayloadCsvFromSavedObject {
 
 1. The `pagingStrategy` value is taken from the value of the `xpack.reporting.csv.scroll.strategy` setting in kibana.yml and used to control how the `runTask` method pages through all of the data.
 
+
+
 ### PDF and PNG [_pdf_and_png]
+
 
 #### Job parameters [_job_parameters]
 
@@ -101,6 +113,8 @@ interface BaseParamsPNGV2 {
 2. The `locatorParams` value is controlled by the application loaded in the browser for which a screenshot will be captured. The parameters to generate a PDF report allow an array of `locatorParams` to support multi-page PDF reports.
 3. The only available `layout.id` option for PNG exports is `preserve_layout`.
 4. The parameters to generate a PNG report allow a single value for `locatorParams`.
+
+
 
 #### How applications make themselves screenshot-capable [_how_applications_make_themselves_screenshot_capable]
 
