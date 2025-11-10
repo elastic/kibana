@@ -562,8 +562,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           ...input,
           streams: input.streams.map((stream) => {
             if (stream.vars?.cloud_connector_name) {
-              // eslint-disable-next-line @typescript-eslint/naming-convention
-              const { cloud_connector_name, ...restVars } = stream.vars;
+              const { cloud_connector_name: cloudConnectorName, ...restVars } = stream.vars;
               return { ...stream, vars: restVars };
             }
             return stream;
