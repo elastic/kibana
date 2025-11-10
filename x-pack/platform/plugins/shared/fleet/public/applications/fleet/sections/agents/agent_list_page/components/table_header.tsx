@@ -44,8 +44,8 @@ export const AgentTableHeader: React.FunctionComponent<{
 }) => {
   return (
     <>
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexGroup justifyContent="flexStart" alignItems="center">
+      <EuiFlexGroup justifyContent="spaceBetween" gutterSize="m">
+        <EuiFlexGroup justifyContent="flexStart" alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
             <AgentsSelectionStatus
               totalAgents={totalAgents}
@@ -63,7 +63,7 @@ export const AgentTableHeader: React.FunctionComponent<{
               <EuiLink onClick={() => clearFilters()}>
                 <FormattedMessage
                   id="xpack.fleet.agentList.header.clearFiltersLinkText"
-                  defaultMessage="Clear filters"
+                  defaultMessage="Reset filters"
                 />
               </EuiLink>
             </EuiFlexItem>

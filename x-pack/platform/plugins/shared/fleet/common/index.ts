@@ -125,6 +125,10 @@ export type {
   BulkGetPackagePoliciesResponse,
   BulkGetAgentPoliciesResponse,
   GetBulkAssetsResponse,
+  CreateAgentlessPolicyRequest,
+  CreateAgentlessPolicyResponse,
+  DeleteAgentlessPolicyRequest,
+  DeleteAgentlessPolicyResponse,
   // Models
   Agent,
   AgentStatus,
