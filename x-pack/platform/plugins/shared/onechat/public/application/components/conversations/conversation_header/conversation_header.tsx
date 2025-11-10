@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { ConversationRightActions } from './conversation_actions_right';
+import { ConversationRightActions } from './conversation_actions_right/conversation_actions_right';
 import { ConversationLeftActions } from './conversation_actions_left';
 import { ConversationTitle } from './conversation_title';
 

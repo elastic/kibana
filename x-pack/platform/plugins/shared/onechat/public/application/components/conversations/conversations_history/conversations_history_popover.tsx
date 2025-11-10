@@ -34,7 +34,7 @@ export const ConversationsHistoryPopover: React.FC<ConversationsHistoryPopoverPr
       panelPaddingSize="none"
       anchorPosition="downLeft"
     >
-      <ConversationHistoryList />
+      <ConversationHistoryList onClose={closePopover} />
     </EuiPopover>
   );
 };

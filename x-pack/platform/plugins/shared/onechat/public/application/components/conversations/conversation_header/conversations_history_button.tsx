@@ -49,7 +49,7 @@ export const ConversationsHistoryButton: React.FC = () => {
     </div>
   ) : (
     <EuiButtonEmpty
-      iconType="clock"
+      iconType="clockCounter"
       color="text"
       aria-label={isPopoverOpen ? labels.close : labels.open}
       onClick={togglePopover}
