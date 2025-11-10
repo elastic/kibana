@@ -38,7 +38,7 @@ export const migrateRuleState = Annotation.Root({
     default: () => [],
   }),
   nl_query: Annotation<string>({
-    reducer: (current, value) => current ?? value,
+    reducer: (current, value) => value ?? current,
     default: () => '',
   }),
   messages: Annotation<AIMessage[]>({
