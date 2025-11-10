@@ -69,7 +69,7 @@ export const EmbeddedActionsRight: React.FC<{ onClose?: () => void }> = ({ onClo
           <EuiButtonIcon
             color="text"
             iconType="boxesVertical"
-            aria-label={i18n.translate('xpack.onechat.conversationActions.ellipsis', {
+            aria-label={i18n.translate('xpack.onechat.embedded.conversationActions.ellipsis', {
               defaultMessage: 'Ellipsis',
             })}
             onClick={togglePopover}
@@ -86,7 +86,7 @@ export const EmbeddedActionsRight: React.FC<{ onClose?: () => void }> = ({ onClo
       <EuiButtonIcon
         color="text"
         iconType="cross"
-        aria-label={i18n.translate('xpack.onechat.conversationActions.closeConversation', {
+        aria-label={i18n.translate('xpack.onechat.embedded.conversationActions.closeConversation', {
           defaultMessage: 'Close conversation',
         })}
         onClick={onClose}
