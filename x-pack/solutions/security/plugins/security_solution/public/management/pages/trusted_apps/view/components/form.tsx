@@ -81,8 +81,9 @@ import {
   SELECT_OS_LABEL,
   USING_ADVANCED_MODE,
   USING_ADVANCED_MODE_DESCRIPTION,
-  PROCESS_DESCENDANTS_TRUSTED_APP,
+  TRUSTED_APP_PROCESS_DESCENDANTS,
   TRUSTED_APPLICATIONS,
+  TRUSTED_APP_PROCESS_DESCENDANTS_INFO,
 } from '../translations';
 import { OS_TITLES, CONFIRM_WARNING_MODAL_LABELS } from '../../../../common/translations';
 import type { LogicalConditionBuilderProps } from './logical_condition';
@@ -715,15 +716,12 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
           id: 'descendants',
           label: (
             <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-              <EuiText size="s">{PROCESS_DESCENDANTS_TRUSTED_APP}</EuiText>
+              <EuiText size="s">{TRUSTED_APP_PROCESS_DESCENDANTS}</EuiText>
               <EuiIconTip
                 content={
                   <EuiText size="s">
                     <p>
-                      <FormattedMessage
-                        id="xpack.securitySolution.trustedApps.filterProcessDescendants.tooltip"
-                        defaultMessage="When enabled, all child processes of a trusted parent process also become Trusted Applications. Supported by Elastic Agent v9.2+."
-                      />
+                      {TRUSTED_APP_PROCESS_DESCENDANTS_INFO}
                     </p>
                   </EuiText>
                 }

@@ -10,14 +10,17 @@ import { EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import { isProcessDescendantsEnabled } from '../../../../../../common/endpoint/service/artifacts/utils';
-import { ProcessDescendantsTooltip } from '../../../../pages/event_filters/view/components/process_descendant_tooltip';
+import { ProcessDescendantsIconTip } from '../../../process_descendant_icontip';
 import type { ArtifactEntryCardDecoratorProps } from '../../artifact_entry_card';
+import { TRUSTED_PROCESS_DESCENDANTS_TAG } from '../../../../../../common/endpoint/service/artifacts';
 
-export const EventFiltersProcessDescendantIndicator = memo<ArtifactEntryCardDecoratorProps>(
+export const ProcessDescendantsIndicator = memo<ArtifactEntryCardDecoratorProps>(
   ({ item, 'data-test-subj': dataTestSubj, ...commonProps }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
+    const isEventFiltersProcessDescendantsEnabled = isProcessDescendantsEnabled(item as ExceptionListItemSchema);
+    const isTrustedAppsProcessDescendantsEnabled = isProcessDescendantsEnabled(item as ExceptionListItemSchema, TRUSTED_PROCESS_DESCENDANTS_TAG);
 
-    if (isProcessDescendantsEnabled(item as ExceptionListItemSchema)) {
+    if (isEventFiltersProcessDescendantsEnabled || isTrustedAppsProcessDescendantsEnabled) {
       return (
         <>
           <EuiText {...commonProps} data-test-subj={getTestId('processDescendantIndication')}>
@@ -25,12 +28,17 @@ export const EventFiltersProcessDescendantIndicator = memo<ArtifactEntryCardDeco
               <strong>
                 <FormattedMessage
                   defaultMessage="Filtering descendants of process"
-                  id="xpack.securitySolution.eventFilters.filteringProcessDescendants"
+                  id="xpack.securitySolution.filteringProcessDescendants"
                 />{' '}
-                <ProcessDescendantsTooltip
-                  indicateExtraEntry
-                  data-test-subj={getTestId('processDescendantIndicationTooltip')}
-                />
+                {isEventFiltersProcessDescendantsEnabled ? (
+                  <ProcessDescendantsIconTip
+                    indicateExtraEntry
+                    data-test-subj={getTestId('eventFilterProcessDescendantIndicationTooltip')}
+                  />
+                ) : <ProcessDescendantsIconTip
+                  isEventFilterForm={false}
+                  data-test-subj={getTestId('trustedAppProcessDescendantIndicationTooltip')}
+                />}
               </strong>
             </code>
           </EuiText>
@@ -42,4 +50,4 @@ export const EventFiltersProcessDescendantIndicator = memo<ArtifactEntryCardDeco
     return <></>;
   }
 );
-EventFiltersProcessDescendantIndicator.displayName = 'EventFiltersProcessDescendantIndicator';
+ProcessDescendantsIndicator.displayName = 'ProcessDescendantsIndicator';

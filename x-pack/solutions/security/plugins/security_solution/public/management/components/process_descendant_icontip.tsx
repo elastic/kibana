@@ -12,18 +12,18 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useTestIdGenerator } from '../hooks/use_test_id_generator';
 import { PROCESS_DESCENDANT_EXTRA_ENTRY_TEXT } from '../../../common/endpoint/service/artifacts/constants';
 
-interface ProcessDescendantsTooltipProps extends CommonProps {
+interface ProcessDescendantsIconTipProps extends CommonProps {
   indicateExtraEntry?: boolean;
   isEventFilterForm?: boolean;
 }
 
-export const ProcessDescendantIconTip = memo<ProcessDescendantsTooltipProps>(
+export const ProcessDescendantsIconTip = memo<ProcessDescendantsIconTipProps>(
   ({
     indicateExtraEntry = false,
     'data-test-subj': dataTestSubj,
     isEventFilterForm = true,
     ...commonProps
-  }: ProcessDescendantsTooltipProps) => {
+  }: ProcessDescendantsIconTipProps) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
 
     return (
@@ -76,4 +76,4 @@ export const ProcessDescendantIconTip = memo<ProcessDescendantsTooltipProps>(
   }
 );
 
-ProcessDescendantIconTip.displayName = 'ProcessDescendantsTooltip';
+ProcessDescendantsIconTip.displayName = 'ProcessDescendantsIconTip';

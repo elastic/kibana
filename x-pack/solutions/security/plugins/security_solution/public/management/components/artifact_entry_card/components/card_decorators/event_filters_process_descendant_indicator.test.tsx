@@ -7,7 +7,7 @@
 
 import React from 'react';
 import userEvent from '@testing-library/user-event';
-import { EventFiltersProcessDescendantIndicator } from './event_filters_process_descendant_indicator';
+import { ProcessDescendantsIndicator } from './process_descendants_indicator';
 import type { AnyArtifact } from '../../types';
 import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
@@ -38,7 +38,7 @@ describe('EventFiltersProcessDescendantIndicator', () => {
     appTestContext = createAppRootMockRenderer();
     render = (props) => {
       renderResult = appTestContext.render(
-        <EventFiltersProcessDescendantIndicator data-test-subj="test" {...props} />
+        <ProcessDescendantsIndicator data-test-subj="test" {...props} />
       );
       return renderResult;
     };
