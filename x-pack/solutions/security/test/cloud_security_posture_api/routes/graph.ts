@@ -855,6 +855,110 @@ export default function (providerContext: FtrProviderContext) {
               expect(edge.type).equal('solid');
             });
           });
+
+          it('should return a graph with nodes and edges by origin event - only new ECS schema fields (no legacy fields)', async () => {
+            const response = await postGraph(supertest, {
+              query: {
+                indexPatterns: ['.alerts-security.alerts-*', 'logs-*'],
+                originEventIds: [{ id: 'only-new-schema-event-id', isAlert: false }],
+                start: '2024-09-05T00:00:00Z',
+                end: '2024-09-06T00:00:00Z',
+              },
+            }).expect(result(200));
+
+            expect(response.body).to.have.property('nodes').length(3);
+            expect(response.body).to.have.property('edges').length(2);
+            expect(response.body).not.to.have.property('messages');
+
+            const actorNode = response.body.nodes.find(
+              (node: NodeDataModel) => node.id === 'only-new-schema-user@example.com'
+            ) as EntityNodeDataModel;
+            expect(actorNode).not.to.be(undefined);
+            expect(actorNode.shape).to.equal('rectangle');
+
+            const targetNode = response.body.nodes.find(
+              (node: NodeDataModel) =>
+                node.id === 'projects/only-new-schema-project-id/serviceAccounts/deleted-sa'
+            ) as EntityNodeDataModel;
+            expect(targetNode).not.to.be(undefined);
+            expect(targetNode.shape).to.equal('rectangle');
+
+            response.body.nodes.forEach((node: EntityNodeDataModel | LabelNodeDataModel) => {
+              expect(node).to.have.property('color');
+              expect(node.color).equal(
+                'primary',
+                `node color mismatched [node: ${node.id}] [actual: ${node.color}]`
+              );
+              if (isLabelNode(node)) {
+                expect(node.documentsData).to.have.length(2);
+                const hasAlert = node.documentsData!.some((doc) => doc.type === 'alert');
+                const hasEvent = node.documentsData!.some((doc) => doc.type === 'event');
+                expect(hasAlert).to.be(true);
+                expect(hasEvent).to.be(true);
+              }
+            });
+
+            response.body.edges.forEach((edge: EdgeDataModel) => {
+              expect(edge).to.have.property('color');
+              expect(edge.color).equal(
+                'subdued',
+                `edge color mismatched [edge: ${edge.id}] [actual: ${edge.color}]`
+              );
+              expect(edge.type).equal('solid');
+            });
+          });
+
+          it('should return a graph with both alert and event for only new ECS schema fields', async () => {
+            const response = await postGraph(supertest, {
+              query: {
+                indexPatterns: ['.alerts-security.alerts-*', 'logs-*'],
+                originEventIds: [{ id: 'only-new-schema-event-id', isAlert: true }],
+                start: '2024-09-05T00:00:00Z',
+                end: '2024-09-06T00:00:00Z',
+              },
+            }).expect(result(200));
+
+            expect(response.body).to.have.property('nodes').length(3);
+            expect(response.body).to.have.property('edges').length(2);
+            expect(response.body).not.to.have.property('messages');
+
+            const actorNode = response.body.nodes.find(
+              (node: NodeDataModel) => node.id === 'only-new-schema-user@example.com'
+            ) as EntityNodeDataModel;
+            expect(actorNode).not.to.be(undefined);
+            expect(actorNode.shape).to.equal('rectangle');
+
+            const targetNode = response.body.nodes.find(
+              (node: NodeDataModel) =>
+                node.id === 'projects/only-new-schema-project-id/serviceAccounts/deleted-sa'
+            ) as EntityNodeDataModel;
+            expect(targetNode).not.to.be(undefined);
+            expect(targetNode.shape).to.equal('rectangle');
+
+            response.body.nodes.forEach((node: EntityNodeDataModel | LabelNodeDataModel) => {
+              expect(node).to.have.property('color');
+              expect(node.color).equal(
+                'primary',
+                `node color mismatched [node: ${node.id}] [actual: ${node.color}]`
+              );
+              if (isLabelNode(node)) {
+                expect(node.documentsData).to.have.length(2);
+                const hasAlert = node.documentsData!.some((doc) => doc.type === 'alert');
+                const hasEvent = node.documentsData!.some((doc) => doc.type === 'event');
+                expect(hasAlert).to.be(true);
+                expect(hasEvent).to.be(true);
+              }
+            });
+
+            response.body.edges.forEach((edge: EdgeDataModel) => {
+              expect(edge).to.have.property('color');
+              expect(edge.color).equal(
+                'subdued',
+                `edge color mismatched [edge: ${edge.id}] [actual: ${edge.color}]`
+              );
+              expect(edge.type).equal('solid');
+            });
+          });
         });
       });
 
