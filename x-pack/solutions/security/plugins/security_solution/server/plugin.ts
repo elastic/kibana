@@ -95,6 +95,10 @@ import {
 } from './lib/detection_engine/rule_types/create_security_rule_type_wrapper';
 
 import { RequestContextFactory } from './request_context_factory';
+import { alertsTool } from './assistant/tools/onechat/alerts_tool';
+import { securityLabsTool } from './assistant/tools/onechat/security_labs_tool';
+import { productDocumentationTool } from './assistant/tools/onechat/product_documentation_tool';
+import { createSecurityAgentDefinition } from './assistant/agents/security_agent';
 
 import type {
   ISecuritySolutionPlugin,
@@ -601,6 +605,23 @@ export class Plugin implements ISecuritySolutionPlugin {
       });
     } else {
       this.logger.warn('Task Manager not available, health diagnostic task not registered.');
+    }
+
+    // Agent Builder Tool and Agent Registration
+    if (config.experimentalFeatures.agentBuilderEnabled && plugins.onechat) {
+      // Register tools
+      plugins.onechat.tools.register(alertsTool());
+      plugins.onechat.tools.register(securityLabsTool());
+      plugins.onechat.tools.register(productDocumentationTool());
+
+      // Register agent
+      plugins.onechat.agents.register(createSecurityAgentDefinition());
+
+      this.logger.info('Security Agent Builder tools and agent registered');
+    } else if (config.experimentalFeatures.agentBuilderEnabled && !plugins.onechat) {
+      this.logger.warn(
+        'Agent Builder feature flag is enabled but onechat plugin is not available. Security Agent Builder tools and agent will not be registered.'
+      );
     }
 
     return {

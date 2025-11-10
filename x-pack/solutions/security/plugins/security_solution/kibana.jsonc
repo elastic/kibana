@@ -76,7 +76,8 @@
       "osquery",
       "savedObjectsTaggingOss",
       "automaticImport",
-      "serverless"
+      "serverless",
+      "onechat"
     ],
     "requiredBundles": [
       "esUiShared",
