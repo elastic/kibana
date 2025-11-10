@@ -14,10 +14,14 @@ import React, { useMemo, useState } from 'react';
 import { useDashboardsApi } from '../../hooks/use_dashboards_api';
 import { useDashboardsFetch } from '../../hooks/use_dashboards_fetch';
 import { useKibana } from '../../hooks/use_kibana';
-import { AddAssetFlyout } from './add_asset_flyout';
-import { AssetsTable } from './asset_table';
+import { AddAttachmentFlyout } from './add_attachment_flyout';
+import { AttachmentsTable } from './attachment_table';
 
-export function StreamDetailAssets({ definition }: { definition: Streams.ingest.all.GetResponse }) {
+export function StreamDetailAttachments({
+  definition,
+}: {
+  definition: Streams.ingest.all.GetResponse;
+}) {
   const [query, setQuery] = useState('');
 
   const [isAddDashboardFlyoutOpen, setIsAddDashboardFlyoutOpen] = useState(false);
@@ -42,7 +46,7 @@ export function StreamDetailAssets({ definition }: { definition: Streams.ingest.
     core: {
       application: {
         capabilities: {
-          streams: { [STREAMS_UI_PRIVILEGES.manage]: canLinkAssets },
+          streams: { [STREAMS_UI_PRIVILEGES.manage]: canLinkAttachments },
         },
       },
     },
@@ -71,9 +75,12 @@ export function StreamDetailAssets({ definition }: { definition: Streams.ingest.
               }}
               color="danger"
             >
-              {i18n.translate('xpack.streams.streamDetailAssetView.removeSelectedButtonLabel', {
-                defaultMessage: 'Unlink selected',
-              })}
+              {i18n.translate(
+                'xpack.streams.streamDetailAttachmentView.removeSelectedButtonLabel',
+                {
+                  defaultMessage: 'Unlink selected',
+                }
+              )}
             </EuiButton>
           )}
           <EuiSearchBar
@@ -88,31 +95,31 @@ export function StreamDetailAssets({ definition }: { definition: Streams.ingest.
           <EuiButton
             data-test-subj="streamsAppStreamDetailAddDashboardButton"
             iconType="plusInCircle"
-            disabled={!canLinkAssets}
+            disabled={!canLinkAttachments}
             onClick={() => {
               setIsAddDashboardFlyoutOpen(true);
             }}
           >
-            {i18n.translate('xpack.streams.streamDetailAssetView.addAnAssetButtonLabel', {
-              defaultMessage: 'Add an asset',
+            {i18n.translate('xpack.streams.streamDetailAttachmentView.addAnAttachmentButtonLabel', {
+              defaultMessage: 'Add an attachment',
             })}
           </EuiButton>
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
-        <AssetsTable
+        <AttachmentsTable
           entityId={definition?.stream.name}
-          assets={filteredDashboards}
+          attachments={filteredDashboards}
           loading={dashboardsFetch.loading}
-          selectedAssets={selectedDashboards}
-          setSelectedAssets={canLinkAssets ? setSelectedDashboards : undefined}
+          selectedAttachments={selectedDashboards}
+          setSelectedAttachments={canLinkAttachments ? setSelectedDashboards : undefined}
           dataTestSubj="streamsAppStreamDetailDashboardsTable"
         />
         {definition && isAddDashboardFlyoutOpen ? (
-          <AddAssetFlyout
-            linkedAssets={linkedDashboards}
+          <AddAttachmentFlyout
+            linkedAttachments={linkedDashboards}
             entityId={definition.stream.name}
-            onAddAssets={async (dashboards) => {
+            onAddAttachments={async (dashboards) => {
               await addDashboards(dashboards);
               dashboardsFetch.refresh();
               setIsAddDashboardFlyoutOpen(false);

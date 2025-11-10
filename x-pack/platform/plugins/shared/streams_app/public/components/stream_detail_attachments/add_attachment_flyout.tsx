@@ -28,17 +28,17 @@ import React, { useMemo, useState, useEffect } from 'react';
 import type { SanitizedDashboardAsset } from '@kbn/streams-plugin/server/routes/dashboards/route';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
-import { AssetsTable } from './asset_table';
+import { AttachmentsTable } from './attachment_table';
 
-export function AddAssetFlyout({
+export function AddAttachmentFlyout({
   entityId,
-  onAddAssets,
-  linkedAssets,
+  onAddAttachments,
+  linkedAttachments,
   onClose,
 }: {
   entityId: string;
-  onAddAssets: (assets: SanitizedDashboardAsset[]) => Promise<void>;
-  linkedAssets: SanitizedDashboardAsset[];
+  onAddAttachments: (attachments: SanitizedDashboardAsset[]) => Promise<void>;
+  linkedAttachments: SanitizedDashboardAsset[];
   onClose: () => void;
 }) {
   const {
@@ -53,7 +53,7 @@ export function AddAssetFlyout({
   const [query, setQuery] = useState('');
 
   const [submittedQuery, setSubmittedQuery] = useState(query);
-  const [selectedAssets, setSelectedAssets] = useState<SanitizedDashboardAsset[]>([]);
+  const [selectedAttachments, setSelectedAttachments] = useState<SanitizedDashboardAsset[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -82,12 +82,14 @@ export function AddAssetFlyout({
         .then(({ suggestions }) => {
           return {
             dashboards: suggestions.filter((dashboard) => {
-              return !linkedAssets.find((linkedAsset) => linkedAsset.id === dashboard.id);
+              return !linkedAttachments.find(
+                (linkedAttachment) => linkedAttachment.id === dashboard.id
+              );
             }),
           };
         });
     },
-    [streamsRepositoryClient, entityId, submittedQuery, selectedTags, linkedAssets]
+    [streamsRepositoryClient, entityId, submittedQuery, selectedTags, linkedAttachments]
   );
 
   const tagList = savedObjectsTaggingUi.getTagList();
@@ -102,7 +104,7 @@ export function AddAssetFlyout({
       hasActiveFilters={selectedTags.length > 0}
       numActiveFilters={selectedTags.length}
     >
-      {i18n.translate('xpack.streams.addAssetFlyout.filterButtonLabel', {
+      {i18n.translate('xpack.streams.addAttachmentFlyout.filterButtonLabel', {
         defaultMessage: 'Tags',
       })}
     </EuiFilterButton>
@@ -113,14 +115,14 @@ export function AddAssetFlyout({
   });
 
   const flyoutTitleId = useGeneratedHtmlId({
-    prefix: 'addAssetFlyoutTitle',
+    prefix: 'addAttachmentFlyoutTitle',
   });
 
   useEffect(() => {
-    setSelectedAssets([]);
-  }, [linkedAssets]);
+    setSelectedAttachments([]);
+  }, [linkedAttachments]);
 
-  const allAssets = useMemo(() => {
+  const allAttachments = useMemo(() => {
     return dashboardSuggestionsFetch.value?.dashboards || [];
   }, [dashboardSuggestionsFetch.value]);
 
@@ -129,8 +131,8 @@ export function AddAssetFlyout({
       <EuiFlyoutHeader hasBorder>
         <EuiTitle>
           <h2 id={flyoutTitleId}>
-            {i18n.translate('xpack.streams.addAssetFlyout.flyoutHeaderLabel', {
-              defaultMessage: 'Add assets',
+            {i18n.translate('xpack.streams.addAttachmentFlyout.flyoutHeaderLabel', {
+              defaultMessage: 'Add attachments',
             })}
           </h2>
         </EuiTitle>
@@ -138,9 +140,9 @@ export function AddAssetFlyout({
       <EuiFlyoutBody>
         <EuiFlexGroup direction="column" gutterSize="m">
           <EuiText size="s">
-            {i18n.translate('xpack.streams.addAssetFlyout.helpLabel', {
+            {i18n.translate('xpack.streams.addAttachmentFlyout.helpLabel', {
               defaultMessage:
-                'Select assets which you want to add and assign to the {stream} stream',
+                'Select attachments which you want to add and assign to the {stream} stream',
               values: {
                 stream: entityId,
               },
@@ -172,9 +174,12 @@ export function AddAssetFlyout({
                     allowExclusions
                     searchable
                     searchProps={{
-                      placeholder: i18n.translate('xpack.streams.addAssetFlyout.searchTagsLabel', {
-                        defaultMessage: 'Search tags',
-                      }),
+                      placeholder: i18n.translate(
+                        'xpack.streams.addAttachmentFlyout.searchTagsLabel',
+                        {
+                          defaultMessage: 'Search tags',
+                        }
+                      ),
                       compressed: true,
                     }}
                     options={(tagList || []).map((tag) => ({
@@ -201,32 +206,32 @@ export function AddAssetFlyout({
               </EuiFilterGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
-          <AssetsTable
+          <AttachmentsTable
             entityId={entityId}
-            assets={allAssets}
+            attachments={allAttachments}
             loading={dashboardSuggestionsFetch.loading}
-            selectedAssets={selectedAssets}
-            setSelectedAssets={setSelectedAssets}
-            dataTestSubj="streamsAppAddAssetFlyoutAssetsTable"
+            selectedAttachments={selectedAttachments}
+            setSelectedAttachments={setSelectedAttachments}
+            dataTestSubj="streamsAppAddAttachmentFlyoutAttachmentsTable"
           />
         </EuiFlexGroup>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiButton
           isLoading={isLoading}
-          disabled={selectedAssets.length === 0}
-          data-test-subj="streamsAppAddAssetFlyoutAddAssetsButton"
+          disabled={selectedAttachments.length === 0}
+          data-test-subj="streamsAppAddAttachmentFlyoutAddAttachmentsButton"
           onClick={async () => {
             setIsLoading(true);
             try {
-              await onAddAssets(selectedAssets);
+              await onAddAttachments(selectedAttachments);
             } finally {
               setIsLoading(false);
             }
           }}
         >
-          {i18n.translate('xpack.streams.addAssetFlyout.addAssetsButtonLabel', {
-            defaultMessage: 'Add assets',
+          {i18n.translate('xpack.streams.addAttachmentFlyout.addAttachmentsButtonLabel', {
+            defaultMessage: 'Add attachments',
           })}
         </EuiButton>
       </EuiFlyoutFooter>

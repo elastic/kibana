@@ -20,7 +20,7 @@ import { WiredAdvancedView } from './wired_advanced_view';
 import { StreamDetailDataQuality } from '../../stream_data_quality';
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
 import { WiredStreamBadge } from '../../stream_badges';
-import { StreamDetailAssets } from '../../stream_detail_assets';
+import { StreamDetailAttachments } from '../../stream_detail_attachments';
 
 const wiredStreamManagementSubTabs = [
   'partitioning',
@@ -30,7 +30,7 @@ const wiredStreamManagementSubTabs = [
   'advanced',
   'significantEvents',
   'dataQuality',
-  'assets',
+  'attachments',
   'references',
 ] as const;
 
@@ -58,7 +58,7 @@ export function WiredStreamDetailManagement({
   } = useStreamsAppParams('/{key}/management/{tab}');
 
   const {
-    features: { assets },
+    features: { attachments },
   } = useStreamsPrivileges();
 
   const { processing, isLoading, ...otherTabs } = useStreamsDetailManagementTabs({
@@ -155,12 +155,12 @@ export function WiredStreamDetailManagement({
         </EuiToolTip>
       ),
     },
-    ...(assets?.enabled
+    ...(attachments?.enabled
       ? {
-          assets: {
-            content: <StreamDetailAssets definition={definition} />,
-            label: i18n.translate('xpack.streams.streamDetailView.assetsTab', {
-              defaultMessage: 'Assets',
+          attachments: {
+            content: <StreamDetailAttachments definition={definition} />,
+            label: i18n.translate('xpack.streams.streamDetailView.attachmentsTab', {
+              defaultMessage: 'Attachments',
             }),
           },
         }

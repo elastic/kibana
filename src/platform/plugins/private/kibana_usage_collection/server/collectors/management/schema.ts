@@ -694,10 +694,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Enable Group streams in Streams',
     },
   },
-  'observability:streamsEnableAssets': {
+  'observability:streamsEnableAttachments': {
     type: 'boolean',
     _meta: {
-      description: 'Enable Streams assets tab.',
+      description: 'Enable Streams attachments tab.',
     },
   },
   'observability:streamsEnableContentPacks': {

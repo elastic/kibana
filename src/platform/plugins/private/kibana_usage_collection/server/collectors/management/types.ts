@@ -182,6 +182,6 @@ export interface UsageStats {
   'genAiSettings:defaultAIConnector': string;
   'genAiSettings:defaultAIConnectorOnly': boolean;
   'observability:streamsEnableGroupStreams': boolean;
-  'observability:streamsEnableAssets': boolean;
+  'observability:streamsEnableAttachments': boolean;
   'observability:streamsEnableContentPacks': boolean;
 }

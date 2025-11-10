@@ -21,7 +21,7 @@ import { ClassicStreamBadge, LifecycleBadge } from '../../stream_badges';
 import { useStreamsDetailManagementTabs } from './use_streams_detail_management_tabs';
 import { StreamDetailDataQuality } from '../../stream_data_quality';
 import { StreamDetailSchemaEditor } from '../stream_detail_schema_editor';
-import { StreamDetailAssets } from '../../stream_detail_assets';
+import { StreamDetailAttachments } from '../../stream_detail_attachments';
 
 const classicStreamManagementSubTabs = [
   'processing',
@@ -31,7 +31,7 @@ const classicStreamManagementSubTabs = [
   'significantEvents',
   'schemaEditor',
   'schema',
-  'assets',
+  'attachments',
   'references',
 ] as const;
 
@@ -59,7 +59,7 @@ export function ClassicStreamDetailManagement({
   } = useStreamsAppParams('/{key}/management/{tab}');
 
   const {
-    features: { assets },
+    features: { attachments },
   } = useStreamsPrivileges();
 
   const { processing, isLoading, ...otherTabs } = useStreamsDetailManagementTabs({
@@ -157,11 +157,11 @@ export function ClassicStreamDetailManagement({
     ),
   };
 
-  if (assets?.enabled) {
-    tabs.assets = {
-      content: <StreamDetailAssets definition={definition} />,
-      label: i18n.translate('xpack.streams.streamDetailView.assetsTab', {
-        defaultMessage: 'Assets',
+  if (attachments?.enabled) {
+    tabs.attachments = {
+      content: <StreamDetailAttachments definition={definition} />,
+      label: i18n.translate('xpack.streams.streamDetailView.attachmentsTab', {
+        defaultMessage: 'Attachments',
       }),
     };
   }
