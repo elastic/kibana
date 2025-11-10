@@ -155,6 +155,7 @@ export const AzureCredentialsFormAgentless = ({
           hasInvalidRequiredVars={hasInvalidRequiredVars}
           cloudProvider="azure"
           templateName={templateName}
+          isEditPage={isEditPage}
         />
       ) : (
         <AzureInputVarFields
