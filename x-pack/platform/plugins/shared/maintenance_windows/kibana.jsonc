@@ -7,8 +7,8 @@
     "id": "maintenanceWindows",
     "server": true,
     "browser": true,
-    "requiredPlugins": [
-      "navigation"
-    ]
+    "configPath": ["xpack", "maintenanceWindows"],
+    "requiredPlugins": ["features", "licensing", "taskManager", "navigation"],
+    "extraPublicDirs": ["common"]
   }
 }
