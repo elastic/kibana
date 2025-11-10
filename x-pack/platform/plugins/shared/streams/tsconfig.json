@@ -70,5 +70,6 @@
     "@kbn/usage-collection-plugin",
     "@kbn/utility-types",
     "@kbn/console-plugin",
+    "@kbn/actions-plugin",
   ]
 }
