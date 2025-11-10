@@ -81,9 +81,11 @@ export async function updateAgentPolicySpaces({
     );
   }
   const spacesToAdd = newSpaceIds.filter(
+    // @ts-expect-error upgrade typescript v5.9.3
     (spaceId) => !existingPolicy?.space_ids?.includes(spaceId) ?? true
   );
   const spacesToRemove =
+    // @ts-expect-error upgrade typescript v5.9.3
     existingPolicy?.space_ids?.filter((spaceId) => !newSpaceIds.includes(spaceId) ?? true) ?? [];
 
   // Privileges check

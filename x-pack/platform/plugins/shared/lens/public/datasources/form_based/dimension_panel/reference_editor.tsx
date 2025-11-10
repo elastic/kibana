@@ -279,7 +279,7 @@ export const ReferenceEditor = (props: ReferenceEditorProps) => {
                   column && 'sourceField' in column && possibleFieldNames?.has(column.sourceField)
                     ? currentIndexPattern.getFieldByName(column.sourceField)
                     : possibleFieldNames?.size === 1
-                    ? currentIndexPattern.getFieldByName(possibleFieldNames.values().next().value)
+                    ? currentIndexPattern.getFieldByName(possibleFieldNames.values().next().value!) // valid due to prev check
                     : undefined;
 
                 onChooseFunction(operationType, field);

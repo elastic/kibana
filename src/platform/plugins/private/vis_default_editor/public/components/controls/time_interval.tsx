@@ -142,7 +142,7 @@ function TimeIntervalParamEditor({
   const helpText = (
     <>
       {scaledHelpText}
-      {get(editorConfig, 'interval.help') || selectOptionHelpText}
+      {editorConfig.interval?.help ?? selectOptionHelpText}
     </>
   );
 

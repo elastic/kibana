@@ -335,7 +335,8 @@ describe('Executor', () => {
     it('caches the result of function', async () => {
       await executor.run('theme size default=12', null, { allowCache: true }).toPromise();
       expect(functionCache.size).toEqual(1);
-      const entry = functionCache.keys().next().value;
+      // non-null assertion true by construction
+      const entry = functionCache.keys().next().value!;
       functionCache.set(entry, fakeCacheEntry);
       const result = await executor
         .run('theme size default=12', null, { allowCache: true })
@@ -347,7 +348,8 @@ describe('Executor', () => {
     it('doesnt cache if allowCache flag is false', async () => {
       await executor.run('theme size default=12', null, { allowCache: true }).toPromise();
       expect(functionCache.size).toEqual(1);
-      const entry = functionCache.keys().next().value;
+      // non-null assertion true by construction
+      const entry = functionCache.keys().next().value!;
       functionCache.set(entry, fakeCacheEntry);
       const result = await executor
         .run('theme size default=12', null, { allowCache: false })

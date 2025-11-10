@@ -17,6 +17,7 @@ export const JobInfoFlyoutsManager = () => {
     useContext(JobInfoFlyoutsContext);
   const [globalState] = useUrlState('_g');
   const end = useMemo(
+    // @ts-expect-error upgrade typescript v5.9.3
     () => moment(globalState?.time?.to).unix() * 1000 ?? 0,
     [globalState?.time?.to]
   );

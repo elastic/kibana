@@ -40,8 +40,8 @@ describe('useExpressionRenderer', () => {
     } as unknown as typeof expressionLoader;
 
     expressionLoaderSpy.mockImplementation(() => expressionLoader);
-    hook = renderHook(
-      (params: ExpressionRendererParams) => useExpressionRenderer(nodeRef, params),
+    hook = renderHook<ReturnType<typeof useExpressionRenderer>, ExpressionRendererParams>(
+      (params) => useExpressionRenderer(nodeRef, params),
       { initialProps: { expression: 'something' } }
     );
   });

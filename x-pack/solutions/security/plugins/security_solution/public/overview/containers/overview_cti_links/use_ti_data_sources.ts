@@ -152,7 +152,9 @@ export const useTiDataSources = ({
 
       if (Array.isArray(allTiDataSources)) {
         allTiDataSources.forEach((integration) => {
+          // @ts-expect-error upgrade typescript v5.9.3
           if (!integrationMap[integration.dataset]) {
+            // @ts-expect-error upgrade typescript v5.9.3
             integrationMap[integration.dataset] = {
               ...integration,
               count: 0,

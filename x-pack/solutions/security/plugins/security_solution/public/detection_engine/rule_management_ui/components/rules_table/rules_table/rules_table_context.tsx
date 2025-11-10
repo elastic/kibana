@@ -207,8 +207,10 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     filter: savedFilter?.searchTerm ?? DEFAULT_FILTER_OPTIONS.filter,
     tags: savedFilter?.tags ?? DEFAULT_FILTER_OPTIONS.tags,
     showCustomRules:
+      // @ts-expect-error upgrade typescript v5.9.3
       savedFilter?.source === RuleSource.Custom ?? DEFAULT_FILTER_OPTIONS.showCustomRules,
     showElasticRules:
+      // @ts-expect-error upgrade typescript v5.9.3
       savedFilter?.source === RuleSource.Prebuilt ?? DEFAULT_FILTER_OPTIONS.showElasticRules,
     enabled: savedFilter?.enabled,
     ruleExecutionStatus:

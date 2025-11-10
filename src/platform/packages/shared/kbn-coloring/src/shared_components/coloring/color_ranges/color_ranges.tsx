@@ -55,7 +55,7 @@ export function ColorRanges({
       gutterSize="s"
     >
       {colorRanges.map((colorRange, index) => (
-        <EuiFlexItem grow={false} key={`${colorRange.end ?? 0 + colorRange.start ?? 0}${index}`}>
+        <EuiFlexItem grow={false} key={`${colorRange.end} - ${colorRange.start}${index}`}>
           <ColorRangeItem
             colorRange={colorRange}
             dispatch={dispatch}

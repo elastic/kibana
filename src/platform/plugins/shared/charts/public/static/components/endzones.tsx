@@ -194,5 +194,5 @@ export const renderEndzoneTooltip =
       );
     }
 
-    return renderValue ? formattedValue : null;
+    return renderValue ? formattedValue : <></>;
   };

@@ -261,7 +261,7 @@ export const AnnotationRow = ({
                   />
                 }
               >
-                <IconSelect value={model.icon} onChange={handleChange('icon')} />
+                <IconSelect value={model.icon ?? 'fa-tag'} onChange={handleChange('icon')} />
               </EuiFormRow>
             </EuiFlexItem>
             <EuiFlexItem>
