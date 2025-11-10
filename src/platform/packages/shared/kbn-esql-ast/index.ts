@@ -30,6 +30,7 @@ export type {
   ESQLAstBaseItem,
   ESQLAstChangePointCommand,
   ESQLAstForkCommand,
+  ESQLForkParens,
 } from './src/types';
 
 export * from './src/ast/is';
