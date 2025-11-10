@@ -15,6 +15,11 @@ import type { ApmFields } from '@kbn/apm-synthtrace-client';
 
 export const ANOMALY_DETECTION_INDEX = 'observability-ml-test-index';
 
+export const APM_ML_JOB_ID = 'apm-service-anomaly-detector';
+export const APM_SERVICE_NAME = 'web-api-service';
+
+export const CLOSED_ML_JOB_ID = 'response-time-threshold-detector';
+
 export async function cleanupMachineLearningJobs({
   esClient,
   log,
@@ -55,20 +60,18 @@ async function createAndStartMLJobWithDatafeed(
   });
 }
 
-export async function createApmJobWithNormalData(
+export async function createAnomalyDetectionJobWithApmData(
   esClient: Client,
   apmSynthtraceEsClient: Pick<SynthtraceEsClient<ApmFields>, 'index' | 'clean'>,
-  serviceName: string,
-  jobId: string,
   log: ScoutLogger
 ) {
   log.debug('Generating APM data');
-  const datafeedId = `datafeed-${jobId}`;
+  const datafeedId = `datafeed-${APM_ML_JOB_ID}`;
 
   const range = timerange(moment().subtract(1, 'days'), moment());
 
   const myServiceInstance = apm
-    .service({ name: serviceName, environment: 'production', agentName: 'nodejs' })
+    .service({ name: APM_SERVICE_NAME, environment: 'production', agentName: 'nodejs' })
     .instance('my-instance');
 
   // Normal transactions: same duration 5 ms
@@ -83,7 +86,7 @@ export async function createApmJobWithNormalData(
     );
   await apmSynthtraceEsClient.index(normalDocs);
   const ML_JOB_CONFIG: MlPutJobRequest = {
-    job_id: jobId,
+    job_id: APM_ML_JOB_ID,
     description: 'Detect anomalies in APM transaction duration',
     analysis_config: {
       bucket_span: '5m',
@@ -93,19 +96,21 @@ export async function createApmJobWithNormalData(
     datafeed_config: {
       datafeed_id: datafeedId,
       indices: ['traces-apm*'],
-      query: { match: { 'service.name': serviceName } },
+      query: { match: { 'service.name': APM_SERVICE_NAME } },
     },
   };
 
-  await createAndStartMLJobWithDatafeed(esClient, ML_JOB_CONFIG, jobId, datafeedId, 'now-1h');
+  await createAndStartMLJobWithDatafeed(
+    esClient,
+    ML_JOB_CONFIG,
+    APM_ML_JOB_ID,
+    datafeedId,
+    'now-1h'
+  );
 }
 
-export async function createAnomalyDetectionJobWithNoData(
-  esClient: Client,
-  jobId: string,
-  log: ScoutLogger
-) {
-  const datafeedId = `datafeed-${jobId}`;
+export async function createAnomalyDetectionJobWithNoData(esClient: Client, log: ScoutLogger) {
+  const datafeedId = `datafeed-${CLOSED_ML_JOB_ID}`;
   await esClient.indices.create({
     index: ANOMALY_DETECTION_INDEX,
     mappings: {
@@ -118,7 +123,7 @@ export async function createAnomalyDetectionJobWithNoData(
   });
 
   const ML_JOB_CONFIG_2 = {
-    job_id: jobId,
+    job_id: CLOSED_ML_JOB_ID,
     description: 'Detect anomalies in average response_time',
     analysis_config: {
       bucket_span: '5m',
@@ -139,5 +144,11 @@ export async function createAnomalyDetectionJobWithNoData(
     },
   };
 
-  await createAndStartMLJobWithDatafeed(esClient, ML_JOB_CONFIG_2, jobId, datafeedId, 'now-1h');
+  await createAndStartMLJobWithDatafeed(
+    esClient,
+    ML_JOB_CONFIG_2,
+    CLOSED_ML_JOB_ID,
+    datafeedId,
+    'now-1h'
+  );
 }

@@ -55,20 +55,11 @@ export async function createMLJobsWithSampleData({
       timeFieldName: 'timestamp',
       query: {
         bool: {
-          must: [
-            {
-              match_all: {},
+          must_not: {
+            term: {
+              _tier: 'data_frozen',
             },
-          ],
-          must_not: [
-            {
-              term: {
-                _tier: {
-                  value: 'data_frozen',
-                },
-              },
-            },
-          ],
+          },
         },
       },
       runtimeMappings: {

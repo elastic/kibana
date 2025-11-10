@@ -8,16 +8,16 @@
 import type { MlGetJobsResponse } from '@elastic/elasticsearch/lib/api/types';
 import {
   cleanupMachineLearningJobs,
-  createApmJobWithNormalData,
+  createAnomalyDetectionJobWithApmData,
   createAnomalyDetectionJobWithNoData,
+  APM_ML_JOB_ID,
+  APM_SERVICE_NAME,
+  CLOSED_ML_JOB_ID,
 } from '../../src/data_generators/machine_learning_jobs';
 import { createMLJobsWithSampleData } from '../../src/data_generators/load_sample_data';
 import { evaluate } from '../../src/evaluate';
 
 evaluate.describe('Machine learning', { tag: '@svlOblt' }, () => {
-  const APM_ML_JOB_ID = 'apm-service-anomaly-detector';
-  const APM_SERVICE_NAME = 'web-api-service';
-  const CLOSED_ML_JOB_ID = 'response-time-threshold-detector';
   let jobs: MlGetJobsResponse = { count: 0, jobs: [] };
   let jobIds: string[] = [];
 
@@ -30,15 +30,9 @@ evaluate.describe('Machine learning', { tag: '@svlOblt' }, () => {
       sampleDataId: 'logs',
     });
 
-    await createApmJobWithNormalData(
-      esClient,
-      apmSynthtraceEsClient,
-      APM_SERVICE_NAME,
-      APM_ML_JOB_ID,
-      log
-    );
+    await createAnomalyDetectionJobWithApmData(esClient, apmSynthtraceEsClient, log);
 
-    await createAnomalyDetectionJobWithNoData(esClient, CLOSED_ML_JOB_ID, log);
+    await createAnomalyDetectionJobWithNoData(esClient, log);
 
     await esClient.ml.closeJob({ job_id: CLOSED_ML_JOB_ID, force: true });
 
@@ -52,7 +46,6 @@ evaluate.describe('Machine learning', { tag: '@svlOblt' }, () => {
   });
 
   evaluate.describe('Machine learning (ML) jobs', () => {
-    const closedJobIds = jobIds.filter((jobId) => jobId !== APM_ML_JOB_ID);
     evaluate('returns the ML jobs configuration', async ({ evaluateDataset }) => {
       await evaluateDataset({
         dataset: {
@@ -108,7 +101,7 @@ evaluate.describe('Machine learning', { tag: '@svlOblt' }, () => {
                 criteria: [
                   'Calls the Elasticsearch function with GET method and path that contains: ml/anomaly_detectors',
                   'Returns the closed ML jobs based on the response from the Elasticsearch function, its not empty',
-                  `Includes ${closedJobIds.join(', ')} in the list of closed machine learning jobs`,
+                  `Includes ${CLOSED_ML_JOB_ID} in the list of closed machine learning jobs`,
                   `Does not include ${APM_ML_JOB_ID} in the list of closed ML jobs`,
                 ],
               },
@@ -158,7 +151,7 @@ evaluate.describe('Machine learning', { tag: '@svlOblt' }, () => {
               },
               output: {
                 criteria: [
-                  'Checks ml/anomaly_detectors/${APM_ML_JOB_ID}/_stats and ml/anomaly_detectors/${CLOSED_ML_JOB_ID}/_stats for state=open/closed',
+                  `Checks ml/anomaly_detectors/${APM_ML_JOB_ID}/_stats and ml/anomaly_detectors/${CLOSED_ML_JOB_ID}/_stats for state=open/closed`,
                   'Returns the last time the job ran by reading data_counts.latest_record_timestamp or timing stats for last run time',
                 ],
               },
