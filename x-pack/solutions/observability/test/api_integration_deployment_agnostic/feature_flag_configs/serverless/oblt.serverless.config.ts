@@ -14,6 +14,7 @@ export default createServerlessFeatureFlagTestConfig<typeof services>({
   kbnServerArgs: [
     '--xpack.actions.preconfigured',
     '--xpack.alerting.rules.minimumScheduleInterval.value="1s"',
+    '--feature_flags.overrides.observabilityAgent.enabled=true',
   ],
   testFiles: [require.resolve('./oblt.index.ts')],
   junit: {
