@@ -21,7 +21,7 @@ import { confirmDiscardUnsavedChanges } from '../../dashboard_listing/confirm_ov
 import { openSettingsFlyout } from '../../dashboard_renderer/settings/open_settings_flyout';
 import { getDashboardBackupService } from '../../services/dashboard_backup_service';
 import type { SaveDashboardReturn } from '../../dashboard_api/save_modal/types';
-import { coreServices, shareService, dataService } from '../../services/kibana_services';
+import { coreServices, shareService, dataService, onechatService } from '../../services/kibana_services';
 import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
 import { topNavStrings } from '../_dashboard_app_strings';
 import { showAddMenu } from './add_menu/show_add_menu';
@@ -266,6 +266,22 @@ export const useDashboardMenuItems = ({
         run: (anchorElement: HTMLElement) =>
           showAddMenu({ dashboardApi, anchorElement, coreServices }),
       },
+
+      ...(onechatService
+        ? {
+            onechat: {
+              ...topNavStrings.onechat,
+              id: 'onechat',
+              iconType: 'sparkles',
+              iconOnly: true,
+              testId: 'dashboardOnechatButton',
+              disableButton: disableTopNav,
+              run: () => {
+                onechatService.openConversationFlyout();
+              },
+            } as TopNavMenuData,
+          }
+        : {}),
     };
   }, [
     disableTopNav,
@@ -283,6 +299,7 @@ export const useDashboardMenuItems = ({
     resetChanges,
     isResetting,
     appId,
+    onechatService,
   ]);
 
   const resetChangesMenuItem = useMemo(() => {

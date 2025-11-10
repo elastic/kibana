@@ -33,6 +33,7 @@ import { DASHBOARD_STATE_STORAGE_KEY, createDashboardEditUrl } from '../utils/ur
 import { useDashboardMountContext } from './hooks/dashboard_mount_context';
 import { useDashboardOutcomeValidation } from './hooks/use_dashboard_outcome_validation';
 import { useObservabilityAIAssistantContext } from './hooks/use_observability_ai_assistant_context';
+import { useDashboardOnechat } from '../onechat/hooks/use_dashboard_onechat';
 import {
   DashboardAppNoDataPage,
   isDashboardAppInNoDataState,
@@ -105,6 +106,9 @@ export function DashboardApp({
   useObservabilityAIAssistantContext({
     dashboardApi,
   });
+
+  // Set up onechat integration with dashboard context
+  useDashboardOnechat(dashboardApi);
 
   useExecutionContext(coreServices.executionContext, {
     type: 'application',

@@ -104,6 +104,7 @@ export interface DashboardStartDependencies {
   share?: SharePluginStart;
   spaces?: SpacesPluginStart;
   uiActions: UiActionsStart;
+  onechat?: import('@kbn/onechat-plugin/public').OnechatPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   urlForwarding: UrlForwardingStart;
   usageCollection?: UsageCollectionStart;

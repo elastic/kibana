@@ -270,6 +270,14 @@ export const topNavStrings = {
       defaultMessage: 'Additional save options',
     }),
   },
+  onechat: {
+    label: i18n.translate('dashboard.topNave.onechatButtonAriaLabel', {
+      defaultMessage: 'AI Assistant',
+    }),
+    description: i18n.translate('dashboard.topNave.onechatConfigDescription', {
+      defaultMessage: 'Open AI Assistant',
+    }),
+  },
 };
 
 export const getControlButtonTitle = () =>

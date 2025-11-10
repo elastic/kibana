@@ -41,6 +41,7 @@ export let navigationService: NavigationPublicPluginStart;
 export let noDataPageService: NoDataPagePluginStart | undefined;
 export let observabilityAssistantService: ObservabilityAIAssistantPublicStart | undefined;
 export let lensService: LensPublicStart | undefined;
+export let onechatService: import('@kbn/onechat-plugin/public').OnechatPluginStart | undefined;
 export let presentationUtilService: PresentationUtilPluginStart;
 export let savedObjectsTaggingService: SavedObjectTaggingOssPluginStart | undefined;
 export let screenshotModeService: ScreenshotModePluginStart;
@@ -64,6 +65,7 @@ export const setKibanaServices = (kibanaCore: CoreStart, deps: DashboardStartDep
   noDataPageService = deps.noDataPage;
   observabilityAssistantService = deps.observabilityAIAssistant;
   lensService = deps.lens;
+  onechatService = deps.onechat;
   presentationUtilService = deps.presentationUtil;
   savedObjectsTaggingService = deps.savedObjectsTaggingOss;
   serverlessService = deps.serverless;
