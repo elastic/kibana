@@ -9,6 +9,8 @@ import { z } from '@kbn/zod';
 import { ToolType } from '@kbn/onechat-common';
 import { runSearchTool } from '@kbn/onechat-genai-utils/tools';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
+import { DEFAULT_ALERTS_INDEX } from '../../../common/constants';
+import { getSpaceIdFromRequest } from './helpers';
 
 const alertsSchema = z.object({
   query: z
@@ -41,16 +43,21 @@ Examples of queries:
 
 Note:
 - The 'index' parameter can be used to specify a specific alerts index to search against.
-- If not provided, the tool will search against the .alerts-security.alerts-* index pattern.
+- If not provided, the tool will automatically determine the index based on the current space.
 - This tool is specifically designed for security alerts and understands security-specific fields and terminology.
     `,
     schema: alertsSchema,
-    handler: async ({ query: nlQuery, index }, { esClient, modelProvider, logger, events }) => {
-      const alertsIndexPattern = index || '.alerts-security.alerts-*';
-      logger.debug(`alerts tool called with query: ${nlQuery}, index: ${alertsIndexPattern}`);
+    handler: async (
+      { query: nlQuery, index },
+      { request, esClient, modelProvider, logger, events }
+    ) => {
+      // Determine the index to use: either explicitly provided or based on the current space
+      const searchIndex = index ?? `${DEFAULT_ALERTS_INDEX}-${getSpaceIdFromRequest(request)}`;
+
+      logger.debug(`alerts tool called with query: ${nlQuery}, index: ${searchIndex}`);
       const results = await runSearchTool({
         nlQuery,
-        index: alertsIndexPattern,
+        index: searchIndex,
         esClient: esClient.asCurrentUser,
         model: await modelProvider.getDefaultModel(),
         events,
