@@ -13,7 +13,8 @@ import {
 import { type PostAttackDiscoveryGenerationsDismissResponse } from '@kbn/elastic-assistant-common';
 import { replaceParams } from '@kbn/openapi-common/shared';
 import { renderHook, act, waitFor } from '@testing-library/react';
-import * as ReactQuery from '@tanstack/react-query';
+import '@kbn/react-query/mock';
+import { useMutation } from '@kbn/react-query';
 
 import { useDismissAttackDiscoveryGeneration } from '.';
 import { TestProviders } from '../../../common/mock/test_providers';
@@ -130,7 +131,7 @@ describe('useDismissAttackDiscoveryGeneration', () => {
   });
 
   describe('when attackDiscoveryPublicApiEnabled is false', () => {
-    const spy = jest.spyOn(ReactQuery, 'useMutation');
+    const spy = useMutation as unknown as jest.MockedFn<typeof useMutation>;
 
     beforeEach(() => {
       mockUseKibanaFeatureFlags.mockReturnValue({ attackDiscoveryPublicApiEnabled: false });
@@ -181,7 +182,7 @@ describe('useDismissAttackDiscoveryGeneration', () => {
   });
 
   describe('when attackDiscoveryPublicApiEnabled is true', () => {
-    const spy = jest.spyOn(ReactQuery, 'useMutation');
+    const spy = useMutation as unknown as jest.MockedFn<typeof useMutation>;
 
     beforeEach(() => {
       mockUseKibanaFeatureFlags.mockReturnValue({ attackDiscoveryPublicApiEnabled: true });

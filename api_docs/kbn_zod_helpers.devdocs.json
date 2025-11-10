@@ -29,7 +29,11 @@
           "\nThis is a helper schema to convert comma separated strings to arrays. Useful\nfor processing query params.\n"
         ],
         "signature": [
-          "(schema: T) => Zod.ZodEffects<Zod.ZodArray<T, \"many\">, T[\"_output\"][], unknown>"
+          "(schema: T) => ",
+          "ZodEffects",
+          "<",
+          "ZodArray",
+          "<T, \"many\">, T[\"_output\"][], unknown>"
         ],
         "path": "src/platform/packages/shared/kbn-zod-helpers/src/array_from_string.ts",
         "deprecated": false,
@@ -103,7 +107,11 @@
         "label": "createIsNarrowSchema",
         "description": [],
         "signature": [
-          "(_base: TBaseSchema, narrow: TNarrowSchema) => <TValue extends Zod.input<TBaseSchema>>(value: TValue) => value is Extract<TValue, Zod.input<TNarrowSchema>>"
+          "(_base: TBaseSchema, narrow: TNarrowSchema) => <TValue extends ",
+          "input",
+          "<TBaseSchema>>(value: TValue) => value is Extract<TValue, ",
+          "input",
+          "<TNarrowSchema>>"
         ],
         "path": "src/platform/packages/shared/kbn-zod-helpers/src/schema.ts",
         "deprecated": false,
@@ -184,7 +192,9 @@
         "label": "expectParseError",
         "description": [],
         "signature": [
-          "(result: Zod.SafeParseReturnType<Input, Output>) => void"
+          "(result: ",
+          "SafeParseReturnType",
+          "<Input, Output>) => void"
         ],
         "path": "src/platform/packages/shared/kbn-zod-helpers/src/expect_parse_error.ts",
         "deprecated": false,
@@ -198,7 +208,8 @@
             "label": "result",
             "description": [],
             "signature": [
-              "Zod.SafeParseReturnType<Input, Output>"
+              "SafeParseReturnType",
+              "<Input, Output>"
             ],
             "path": "src/platform/packages/shared/kbn-zod-helpers/src/expect_parse_error.ts",
             "deprecated": false,
@@ -217,7 +228,9 @@
         "label": "expectParseSuccess",
         "description": [],
         "signature": [
-          "(result: Zod.SafeParseReturnType<Input, Output>) => void"
+          "(result: ",
+          "SafeParseReturnType",
+          "<Input, Output>) => void"
         ],
         "path": "src/platform/packages/shared/kbn-zod-helpers/src/expect_parse_success.ts",
         "deprecated": false,
@@ -231,7 +244,8 @@
             "label": "result",
             "description": [],
             "signature": [
-              "Zod.SafeParseReturnType<Input, Output>"
+              "SafeParseReturnType",
+              "<Input, Output>"
             ],
             "path": "src/platform/packages/shared/kbn-zod-helpers/src/expect_parse_success.ts",
             "deprecated": false,
@@ -283,7 +297,9 @@
         "label": "isNonEmptyString",
         "description": [],
         "signature": [
-          "(input: string, ctx: Zod.RefinementCtx) => void"
+          "(input: string, ctx: ",
+          "RefinementCtx",
+          ") => void"
         ],
         "path": "src/platform/packages/shared/kbn-zod-helpers/src/non_empty_string.ts",
         "deprecated": false,
@@ -312,7 +328,7 @@
             "label": "ctx",
             "description": [],
             "signature": [
-              "Zod.RefinementCtx"
+              "RefinementCtx"
             ],
             "path": "src/platform/packages/shared/kbn-zod-helpers/src/non_empty_string.ts",
             "deprecated": false,
@@ -331,7 +347,9 @@
         "label": "isoToEpoch",
         "description": [],
         "signature": [
-          "(input: string, ctx: Zod.RefinementCtx) => number"
+          "(input: string, ctx: ",
+          "RefinementCtx",
+          ") => number"
         ],
         "path": "src/platform/packages/shared/kbn-zod-helpers/src/iso_to_epoch.ts",
         "deprecated": false,
@@ -360,7 +378,7 @@
             "label": "ctx",
             "description": [],
             "signature": [
-              "Zod.RefinementCtx"
+              "RefinementCtx"
             ],
             "path": "src/platform/packages/shared/kbn-zod-helpers/src/iso_to_epoch.ts",
             "deprecated": false,
@@ -460,7 +478,9 @@
         "label": "isValidDateMath",
         "description": [],
         "signature": [
-          "(input: string, ctx: Zod.RefinementCtx) => void"
+          "(input: string, ctx: ",
+          "RefinementCtx",
+          ") => void"
         ],
         "path": "src/platform/packages/shared/kbn-zod-helpers/src/is_valid_date_math.ts",
         "deprecated": false,
@@ -489,7 +509,7 @@
             "label": "ctx",
             "description": [],
             "signature": [
-              "Zod.RefinementCtx"
+              "RefinementCtx"
             ],
             "path": "src/platform/packages/shared/kbn-zod-helpers/src/is_valid_date_math.ts",
             "deprecated": false,
@@ -611,7 +631,9 @@
         "label": "stringifyZodError",
         "description": [],
         "signature": [
-          "(err: Zod.ZodError<any>) => string"
+          "(err: ",
+          "ZodError",
+          "<any>) => string"
         ],
         "path": "src/platform/packages/shared/kbn-zod-helpers/src/stringify_zod_error.ts",
         "deprecated": false,
@@ -625,7 +647,8 @@
             "label": "err",
             "description": [],
             "signature": [
-              "Zod.ZodError<any>"
+              "ZodError",
+              "<any>"
             ],
             "path": "src/platform/packages/shared/kbn-zod-helpers/src/stringify_zod_error.ts",
             "deprecated": false,
@@ -684,7 +707,10 @@
         "label": "NonEmptyString",
         "description": [],
         "signature": [
-          "Zod.ZodEffects<Zod.ZodString, string, string>"
+          "ZodEffects",
+          "<",
+          "ZodString",
+          ", string, string>"
         ],
         "path": "src/platform/packages/shared/kbn-zod-helpers/src/non_empty_string.ts",
         "deprecated": false,

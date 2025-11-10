@@ -5,61 +5,42 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
-import { TinesStoryObjectSchema } from '../../../common/tines/schema';
+import { z } from '@kbn/zod';
+import { TinesStoryObjectSchema } from '@kbn/connector-schemas/tines';
 
 // Tines response base schema
-export const TinesBaseApiResponseSchema = schema.object(
-  {
-    meta: schema.object(
-      {
-        pages: schema.number(),
-      },
-      { unknowns: 'ignore' }
-    ),
-  },
-  { unknowns: 'ignore' }
-);
+export const TinesBaseApiResponseSchema = z.object({
+  meta: z.object({
+    pages: z.coerce.number(),
+  }),
+});
 
 // Stories action schema
-export const TinesStoriesApiResponseSchema = TinesBaseApiResponseSchema.extends(
-  {
-    stories: schema.arrayOf(TinesStoryObjectSchema.extends({}, { unknowns: 'ignore' })),
-  },
-  { unknowns: 'ignore' }
-);
+export const TinesStoriesApiResponseSchema = TinesBaseApiResponseSchema.extend({
+  stories: z.array(TinesStoryObjectSchema.extend({}).strip()),
+});
 
 // Single Webhook action schema
-export const TinesWebhookApiResponseSchema = schema.object(
-  {
-    id: schema.number(),
-    name: schema.string(),
-    type: schema.string(),
-    story_id: schema.number(),
-    options: schema.object(
-      {
-        path: schema.maybe(schema.string()),
-        secret: schema.maybe(schema.string()),
-      },
-      { unknowns: 'ignore' }
-    ),
-  },
-  { unknowns: 'ignore' }
-);
+export const TinesWebhookApiResponseSchema = z.object({
+  id: z.coerce.number(),
+  name: z.string(),
+  type: z.string(),
+  story_id: z.coerce.number(),
+  options: z.object({
+    path: z.string().optional(),
+    secret: z.string().optional(),
+  }),
+});
 
 // Webhooks action schema
-export const TinesWebhooksApiResponseSchema = TinesBaseApiResponseSchema.extends(
-  {
-    agents: schema.arrayOf(TinesWebhookApiResponseSchema),
-  },
-  { unknowns: 'ignore' }
-);
+export const TinesWebhooksApiResponseSchema = TinesBaseApiResponseSchema.extend({
+  agents: z.array(TinesWebhookApiResponseSchema),
+});
 
-export const TinesRunApiResponseSchema = schema.object({}, { unknowns: 'ignore' });
+export const TinesRunApiResponseSchema = z.object({});
 
-export type TinesBaseApiResponse = TypeOf<typeof TinesBaseApiResponseSchema>;
-export type TinesStoriesApiResponse = TypeOf<typeof TinesStoriesApiResponseSchema>;
-export type TinesWebhookApiResponse = TypeOf<typeof TinesWebhookApiResponseSchema>;
-export type TinesWebhooksApiResponse = TypeOf<typeof TinesWebhooksApiResponseSchema>;
-export type TinesRunApiResponse = TypeOf<typeof TinesRunApiResponseSchema>;
+export type TinesBaseApiResponse = z.infer<typeof TinesBaseApiResponseSchema>;
+export type TinesStoriesApiResponse = z.infer<typeof TinesStoriesApiResponseSchema>;
+export type TinesWebhookApiResponse = z.infer<typeof TinesWebhookApiResponseSchema>;
+export type TinesWebhooksApiResponse = z.infer<typeof TinesWebhooksApiResponseSchema>;
+export type TinesRunApiResponse = z.infer<typeof TinesRunApiResponseSchema>;

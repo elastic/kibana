@@ -16,12 +16,12 @@ import {
 
 import type { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
 import { css } from '@emotion/react';
+import type { AddLayerFunction, DragDropOperation, Visualization } from '@kbn/lens-common';
 import {
   changeIndexPattern,
   onDropToDimension,
   removeDimension,
 } from '../../../state_management/lens_slice';
-import type { AddLayerFunction, DragDropOperation, Visualization } from '../../../types';
 import { LayerPanel } from './layer_panel';
 import { generateId } from '../../../id_generator';
 import type { ConfigPanelWrapperProps, LayerPanelProps } from './types';

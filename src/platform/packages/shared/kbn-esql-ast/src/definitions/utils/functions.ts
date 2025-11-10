@@ -263,11 +263,18 @@ export function getFunctionSuggestion(fn: FunctionDefinition): ISuggestionItem {
     detail = `[${labels.join('] [')}] ${detail}`;
   }
   const fullSignatures = getFunctionSignatures(fn, { capitalize: true, withTypes: true });
+  const hasNoArguments = fn.signatures.every((sig) => sig.params.length === 0);
 
   let text = `${fn.name.toUpperCase()}($0)`;
+
+  if (hasNoArguments) {
+    text = `${fn.name.toUpperCase()}()`;
+  }
+
   if (fn.customParametersSnippet) {
     text = `${fn.name.toUpperCase()}(${fn.customParametersSnippet})`;
   }
+
   let functionsPriority = fn.type === FunctionDefinitionTypes.AGG ? 'A' : 'C';
   if (fn.type === FunctionDefinitionTypes.TIME_SERIES_AGG) {
     functionsPriority = '1A';
@@ -386,6 +393,7 @@ export const buildColumnSuggestions = (
     addComma?: boolean;
     variableType?: ESQLVariableType;
     supportsControls?: boolean;
+    supportsMultiValue?: boolean;
   },
   variables?: ESQLControlVariable[]
 ): ISuggestionItem[] => {

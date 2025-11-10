@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-export interface ConversationFlyoutProps {
-  onClose: () => void;
-}
+import type { EmbeddableConversationProps } from '../embeddable/types';
 
-export interface OpenConversationFlyoutOptions {
+export interface OpenConversationFlyoutOptions extends EmbeddableConversationProps {
   onClose?: () => void;
 }
