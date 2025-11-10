@@ -7,38 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { unescape } from 'lodash';
 import { fieldConstants } from '..';
-import { getFirstAvailableFieldValue } from './get_field_value_with_fallback';
+import { getLogFieldWithFallback } from './get_log_field_with_fallback';
+
+const rankingOrder = [
+  fieldConstants.MESSAGE_FIELD,
+  fieldConstants.ERROR_MESSAGE_FIELD,
+  fieldConstants.EVENT_ORIGINAL_FIELD,
+  fieldConstants.EXCEPTION_MESSAGE_FIELD,
+  fieldConstants.ERROR_EXCEPTION_MESSAGE,
+  fieldConstants.OTEL_ATTRIBUTES_EXCEPTION_MESSAGE,
+] as const;
 
 export const getMessageFieldWithFallbacks = (
   doc: Record<string, unknown>,
   { includeFormattedValue = false }: { includeFormattedValue?: boolean } = {}
 ) => {
-  const rankingOrder = [
-    fieldConstants.MESSAGE_FIELD,
-    fieldConstants.ERROR_MESSAGE_FIELD,
-    fieldConstants.EVENT_ORIGINAL_FIELD,
-  ] as const;
-
-  const { field, value } = getFirstAvailableFieldValue(doc, rankingOrder);
-
-  const valueAsString = value !== undefined && value !== null ? String(value) : undefined;
-
-  if (field && valueAsString !== undefined && valueAsString !== null) {
-    let formattedValue: string | undefined;
-
-    if (includeFormattedValue) {
-      try {
-        formattedValue = JSON.stringify(JSON.parse(unescape(valueAsString)), null, 2);
-      } catch {
-        // If the value is not a valid JSON, leave it unformatted
-      }
-    }
-
-    return { field, value: valueAsString, formattedValue };
-  }
-
-  // If none of the ranks (fallbacks) are present
-  return { field: undefined };
+  return getLogFieldWithFallback(doc, rankingOrder, includeFormattedValue);
 };

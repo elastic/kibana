@@ -118,17 +118,14 @@ const SamplePreviewPanel = ({ enableActions }: { enableActions: boolean }) => {
   const isUpdating =
     samplesSnapshot.matches('debouncingCondition') ||
     samplesSnapshot.matches({ fetching: { documents: 'loading' } });
-  const streamName = useStreamSamplesSelector(
-    (snapshot) => snapshot.context.definition.stream.name
-  );
+  const streamName = samplesSnapshot.context.definition.stream.name;
+  const hasPrivileges = samplesSnapshot.context.definition.privileges.manage;
 
   const [viewMode, setViewMode] = useState<PreviewTableMode>('summary');
   const { fieldTypes, dataView: streamDataView } = useStreamDataViewFieldTypes(streamName);
 
   const { documentsError, approximateMatchingPercentage } = samplesSnapshot.context;
-  const documents = useStreamSamplesSelector((snapshot) =>
-    selectPreviewDocuments(snapshot.context)
-  );
+  const documents = selectPreviewDocuments(samplesSnapshot.context);
 
   const condition = processCondition(samplesSnapshot.context.condition);
   const isProcessedCondition = condition ? isCondition(condition) : true;
@@ -243,11 +240,15 @@ const SamplePreviewPanel = ({ enableActions }: { enableActions: boolean }) => {
     <>
       {isUpdating && <EuiProgress size="xs" color="accent" position="absolute" />}
       <EuiFlexGroup gutterSize="m" direction="column">
-        <DocumentMatchFilterControls
-          onFilterChange={setDocumentMatchFilter}
-          matchedDocumentPercentage={approximateMatchingPercentage}
-          isDisabled={!!documentsError || !condition || (condition && !isProcessedCondition)}
-        />
+        {hasPrivileges ? (
+          <DocumentMatchFilterControls
+            onFilterChange={setDocumentMatchFilter}
+            matchedDocumentPercentage={approximateMatchingPercentage}
+            isDisabled={!!documentsError || !condition || (condition && !isProcessedCondition)}
+          />
+        ) : (
+          <EuiFlexItem grow={false} />
+        )}
         {content}
       </EuiFlexGroup>
     </>
