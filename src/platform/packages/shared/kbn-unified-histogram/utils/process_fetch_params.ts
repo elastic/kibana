@@ -22,6 +22,7 @@ import type {
 
 const EMPTY_FILTERS: Filter[] = [];
 const EMPTY_ESQL_VARIABLES: ESQLControlVariable[] = [];
+const DEFAULT_TIME_INTERVAL = 'auto';
 
 export const processFetchParams = ({
   params,
@@ -64,7 +65,7 @@ export const processFetchParams = ({
       isESQLQuery,
       breakdownField,
     }),
-    timeInterval: params.timeInterval ?? 'auto',
+    timeInterval: params.timeInterval ?? DEFAULT_TIME_INTERVAL,
   };
 };
 
