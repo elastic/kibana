@@ -9,7 +9,7 @@ import * as APM_EVENT_FIELDS_MAP from '@kbn/apm-types/es_fields';
 import type { DedotObject } from '@kbn/utility-types';
 import type { ValuesType } from 'utility-types';
 import type { AgentName } from '@kbn/elastic-agent-utils';
-import type { EventOutcome, StatusCode } from '@kbn/apm-types/src/es_schemas/raw/fields';
+import type { EventOutcome } from '@kbn/apm-types/src/es_schemas/raw/fields';
 import type { ProcessorEvent } from '@kbn/observability-plugin/common';
 
 const {
