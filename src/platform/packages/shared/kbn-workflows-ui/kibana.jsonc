@@ -1,0 +1,8 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/workflows-ui",
+  "owner": ["@elastic/workflows-eng"],
+  "group": "platform",
+  "visibility": "shared"
+}
+

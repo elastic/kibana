@@ -7,15 +7,15 @@
 
 import { XSOARConnector } from './xsoar';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
-import { XSOAR_CONNECTOR_ID } from '../../../common/xsoar/constants';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import {
-  XSOARRunActionResponseSchema,
-  XSOARPlaybooksActionResponseSchema,
-} from '../../../common/xsoar/schema';
-import type { XSOARRunActionParams } from '../../../common/xsoar/types';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import type { XSOARRunActionParams } from '@kbn/connector-schemas/xsoar';
+import {
+  CONNECTOR_ID,
+  XSOARPlaybooksActionResponseSchema,
+  XSOARRunActionResponseSchema,
+} from '@kbn/connector-schemas/xsoar';
 
 const mockTime = new Date('2025-02-20T10:10:30.000');
 
@@ -24,7 +24,7 @@ describe('XSOARConnector', () => {
 
   const connector = new XSOARConnector({
     configurationUtilities: actionsConfigMock.create(),
-    connector: { id: '1', type: XSOAR_CONNECTOR_ID },
+    connector: { id: '1', type: CONNECTOR_ID },
     config: { url: 'https://example.com' },
     secrets: { apiKey: 'test123', apiKeyID: null },
     logger,
@@ -33,7 +33,7 @@ describe('XSOARConnector', () => {
 
   const cloudConnector = new XSOARConnector({
     configurationUtilities: actionsConfigMock.create(),
-    connector: { id: '2', type: XSOAR_CONNECTOR_ID },
+    connector: { id: '2', type: CONNECTOR_ID },
     config: { url: 'https://test.com' },
     secrets: { apiKey: 'test123', apiKeyID: '123' },
     logger,
