@@ -8,8 +8,8 @@
  */
 
 import { euiThemeVars } from '@kbn/ui-theme';
+import { getScrollDimensions, isAtBottomOfPage } from '@kbn/core-chrome-layout-utils';
 
-import { getScrollDimensions, isAtBottomOfPage } from '../../utils/scroll_container';
 import type { ActivePanelEvent, GridPanelData } from '../../grid_panel';
 import type { GridLayoutStateManager, RuntimeGridSettings } from '../../types';
 import { updateClientY } from '../keyboard_utils';
