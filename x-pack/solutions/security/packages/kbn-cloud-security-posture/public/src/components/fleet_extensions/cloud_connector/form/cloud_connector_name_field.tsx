@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiFieldText, EuiIcon } from '@elastic/eui';
+import { EuiFormRow, EuiFieldText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 interface CloudConnectorNameFieldProps {
   value: string;
@@ -21,12 +22,20 @@ export const CloudConnectorNameField: React.FC<CloudConnectorNameFieldProps> = (
 }) => {
   // Format validation only
   const validateFormat = (name: string): string | undefined => {
-    if (!name) return 'Cloud Connector Name is required';
-    if (name.length < 3) return 'Name must be at least 3 characters';
-    if (name.length > 64) return 'Name must be 64 characters or less';
-    if (!/^[a-zA-Z0-9-_ ]+$/.test(name)) {
-      return 'Only letters, numbers, dashes, spaces, and underscores are allowed';
-    }
+    if (!name)
+      return i18n.translate(
+        'xpack.cloudSecurityPosture.cloudConnectorSetup.cloudConnectorNameField.requiredError',
+        {
+          defaultMessage: 'Cloud Connector Name is required',
+        }
+      );
+    if (name.length > 255)
+      return i18n.translate(
+        'xpack.cloudSecurityPosture.cloudConnectorSetup.cloudConnectorNameField.tooLongError',
+        {
+          defaultMessage: 'Cloud Connector Name must be 255 characters or less',
+        }
+      );
     return undefined;
   };
 
@@ -38,14 +47,27 @@ export const CloudConnectorNameField: React.FC<CloudConnectorNameFieldProps> = (
   };
 
   const error = validateFormat(value);
-  const isValid = !error && value.length >= 3;
 
   return (
     <EuiFormRow
-      label="Cloud Connector Name"
+      label={i18n.translate(
+        'xpack.cloudSecurityPosture.cloudConnectorSetup.cloudConnectorNameField.label',
+        {
+          defaultMessage: 'Cloud Connector Name',
+        }
+      )}
       isInvalid={!!error}
       error={error}
-      helpText={!error ? 'Choose a unique, descriptive name (3-64 characters)' : undefined}
+      helpText={
+        !error
+          ? i18n.translate(
+              'xpack.cloudSecurityPosture.cloudConnectorSetup.cloudConnectorNameField.helpText',
+              {
+                defaultMessage: 'Choose a unique, descriptive name (3-64 characters)',
+              }
+            )
+          : undefined
+      }
       fullWidth
     >
       <EuiFieldText
@@ -53,8 +75,6 @@ export const CloudConnectorNameField: React.FC<CloudConnectorNameFieldProps> = (
         onChange={handleChange}
         isInvalid={!!error}
         disabled={disabled}
-        placeholder="e.g., cloud-connector-prod-aws"
-        append={isValid ? <EuiIcon type="check" color="success" /> : undefined}
         fullWidth
       />
     </EuiFormRow>
