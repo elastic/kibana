@@ -39,7 +39,6 @@ import { TimelineStatusEnum, TimelineTypeEnum } from '../../../common/api/timeli
 import { mockManagementState } from '../../management/store/reducer';
 import type { ManagementState } from '../../management/types';
 import { initialSourcererState, SourcererScopeName } from '../../sourcerer/store/model';
-import { allowedExperimentalValues } from '../../../common/experimental_features';
 import { getScopePatternListSelection } from '../../sourcerer/store/helpers';
 import { mockBrowserFields, mockIndexFields } from '../containers/source/mock';
 import { usersModel } from '../../explore/users/store';
@@ -87,7 +86,6 @@ export const mockGlobalState: State = {
       { id: 'error-id-1', title: 'title-1', message: ['error-message-1'] },
       { id: 'error-id-2', title: 'title-2', message: ['error-message-2'] },
     ],
-    enableExperimental: allowedExperimentalValues,
   },
   hosts: {
     page: {
