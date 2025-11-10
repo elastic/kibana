@@ -14,7 +14,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { selectFocusedStepInfo } from '../../lib/store';
+import { selectFocusedStepInfo } from '../../../../entities/workflows/store';
 
 export interface CopyWorkflowStepOption {
   onClick: () => void;
