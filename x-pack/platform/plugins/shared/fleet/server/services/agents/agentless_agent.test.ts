@@ -9,7 +9,7 @@ import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { Logger } from '@kbn/core/server';
 
-import type { AxiosError, AxiosResponse } from 'axios';
+import type { AxiosResponse } from 'axios';
 import axios from 'axios';
 
 import { AgentlessAgentCreateFleetUnreachableError } from '../../../common/errors';
@@ -90,7 +90,7 @@ describe('Agentless Agent service', () => {
     mockedLogger = loggerMock.create();
     mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
     mockedAppContextService.getExperimentalFeatures.mockReturnValue({ agentless: false } as any);
-    (axios as jest.MockedFunction<typeof axios>).mockReset();
+    jest.mocked(axios).mockReset();
     jest.spyOn(agentPolicyService, 'getFullAgentPolicy').mockResolvedValue({
       outputs: { default: {} as any },
     } as any);
@@ -102,9 +102,7 @@ describe('Agentless Agent service', () => {
   });
 
   it('should create agentless agent for ESS', async () => {
-    (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce(
-      mockAgentlessDeploymentResponse
-    );
+    jest.mocked(axios).mockResolvedValueOnce(mockAgentlessDeploymentResponse);
     const soClient = getAgentPolicyCreateMock();
     // ignore unrelated unique name constraint
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -206,9 +204,7 @@ describe('Agentless Agent service', () => {
   });
 
   it('should create agentless agent for serverless', async () => {
-    (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce(
-      mockAgentlessDeploymentResponse
-    );
+    jest.mocked(axios).mockResolvedValueOnce(mockAgentlessDeploymentResponse);
     const soClient = getAgentPolicyCreateMock();
     // ignore unrelated unique name constraint
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -316,10 +312,8 @@ describe('Agentless Agent service', () => {
       status: 500,
     } as any;
 
-    (axios as jest.MockedFunction<typeof axios>).mockRejectedValueOnce(axiosError);
-    (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce(
-      mockAgentlessDeploymentResponse
-    );
+    jest.mocked(axios).mockRejectedValueOnce(axiosError);
+    jest.mocked(axios).mockResolvedValueOnce(mockAgentlessDeploymentResponse);
     const soClient = getAgentPolicyCreateMock();
     // ignore unrelated unique name constraint
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -422,9 +416,7 @@ describe('Agentless Agent service', () => {
   });
 
   it('should create agentless agent with resources', async () => {
-    (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce(
-      mockAgentlessDeploymentResponse
-    );
+    jest.mocked(axios).mockResolvedValueOnce(mockAgentlessDeploymentResponse);
     const soClient = getAgentPolicyCreateMock();
     // ignore unrelated unique name constraint
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -541,9 +533,7 @@ describe('Agentless Agent service', () => {
   });
 
   it('should create agentless agent with cloud_connectors', async () => {
-    (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce(
-      mockAgentlessDeploymentResponse
-    );
+    jest.mocked(axios).mockResolvedValueOnce(mockAgentlessDeploymentResponse);
     const soClient = getAgentPolicyCreateMock();
     // ignore unrelated unique name constraint
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -668,9 +658,7 @@ describe('Agentless Agent service', () => {
   });
 
   it('should create agentless agent when no labels are given', async () => {
-    (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce(
-      mockAgentlessDeploymentResponse
-    );
+    jest.mocked(axios).mockResolvedValueOnce(mockAgentlessDeploymentResponse);
     const soClient = getAgentPolicyCreateMock();
     // ignore unrelated unique name constraint
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -748,7 +736,7 @@ describe('Agentless Agent service', () => {
       id: 'mocked',
     };
 
-    (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce(returnValue);
+    jest.mocked(axios).mockResolvedValueOnce(returnValue);
     jest.spyOn(appContextService, 'getConfig').mockReturnValue({
       agentless: {
         enabled: true,
@@ -785,9 +773,7 @@ describe('Agentless Agent service', () => {
   });
 
   it('should upgraded agentless agent for ESS', async () => {
-    (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce(
-      mockAgentlessDeploymentResponse
-    );
+    jest.mocked(axios).mockResolvedValueOnce(mockAgentlessDeploymentResponse);
     jest.spyOn(appContextService, 'getConfig').mockReturnValue({
       agentless: {
         enabled: true,
@@ -830,7 +816,7 @@ describe('Agentless Agent service', () => {
       id: 'mocked',
     };
 
-    (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce(returnValue);
+    jest.mocked(axios).mockResolvedValueOnce(returnValue);
     jest.spyOn(appContextService, 'getConfig').mockReturnValue({
       agentless: {
         enabled: true,
@@ -869,9 +855,7 @@ describe('Agentless Agent service', () => {
   });
 
   it('should redact sensitive information from debug logs', async () => {
-    (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce(
-      mockAgentlessDeploymentResponse
-    );
+    jest.mocked(axios).mockResolvedValueOnce(mockAgentlessDeploymentResponse);
     const soClient = getAgentPolicyCreateMock();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
@@ -934,9 +918,7 @@ describe('Agentless Agent service', () => {
   });
 
   it('should log "undefined" on debug logs when tls configuration is missing', async () => {
-    (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce(
-      mockAgentlessDeploymentResponse
-    );
+    jest.mocked(axios).mockResolvedValueOnce(mockAgentlessDeploymentResponse);
     const soClient = getAgentPolicyCreateMock();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
@@ -1030,7 +1012,7 @@ describe('Agentless Agent service', () => {
     } as any);
     // Force axios to throw an AxiosError to simulate an error response
     const axiosError = new AxiosError('Test Error');
-    (axios as jest.MockedFunction<typeof axios>).mockRejectedValueOnce(axiosError);
+    jest.mocked(axios).mockRejectedValueOnce(axiosError);
 
     await expect(
       agentlessAgentService.createAgentlessAgent(esClient, soClient, {
@@ -1051,9 +1033,7 @@ describe('Agentless Agent service', () => {
   });
 
   it(`should have x-elastic-internal-origin in the headers when the request is internal`, async () => {
-    (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce(
-      mockAgentlessDeploymentResponse
-    );
+    jest.mocked(axios).mockResolvedValueOnce(mockAgentlessDeploymentResponse);
     const soClient = getAgentPolicyCreateMock();
     // ignore unrelated unique name constraint
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -1386,8 +1366,8 @@ describe('Agentless Agent service', () => {
         data: {
           message: 'This is a fake error status that is never to be handled handled',
         },
-      } as AxiosError['response'];
-      (axios as jest.MockedFunction<typeof axios>).mockRejectedValueOnce(axiosError);
+      } as AxiosResponse;
+      jest.mocked(axios).mockRejectedValueOnce(axiosError);
 
       await expect(
         agentlessAgentService.createAgentlessAgent(esClient, soClient, {
@@ -1448,13 +1428,13 @@ describe('Agentless Agent service', () => {
         data: {
           message: 'Internal Server Error',
         },
-      } as AxiosError['response'];
+      } as AxiosResponse;
 
-      (axios as jest.MockedFunction<typeof axios>).mockRejectedValueOnce(axiosError);
-      (axios as jest.MockedFunction<typeof axios>).mockRejectedValueOnce(axiosError);
-      (axios as jest.MockedFunction<typeof axios>).mockRejectedValueOnce(axiosError);
-      (axios as jest.MockedFunction<typeof axios>).mockRejectedValueOnce(axiosError);
-      (axios as jest.MockedFunction<typeof axios>).mockRejectedValueOnce(axiosError);
+      jest.mocked(axios).mockRejectedValueOnce(axiosError);
+      jest.mocked(axios).mockRejectedValueOnce(axiosError);
+      jest.mocked(axios).mockRejectedValueOnce(axiosError);
+      jest.mocked(axios).mockRejectedValueOnce(axiosError);
+      jest.mocked(axios).mockRejectedValueOnce(axiosError);
 
       await expect(
         agentlessAgentService.createAgentlessAgent(esClient, soClient, {
@@ -1515,9 +1495,9 @@ describe('Agentless Agent service', () => {
         data: {
           message: 'Limit exceeded',
         },
-      } as AxiosError['response'];
+      } as AxiosResponse;
 
-      (axios as jest.MockedFunction<typeof axios>).mockRejectedValueOnce(axiosError);
+      jest.mocked(axios).mockRejectedValueOnce(axiosError);
 
       await expect(
         agentlessAgentService.createAgentlessAgent(esClient, soClient, {
@@ -1578,9 +1558,9 @@ describe('Agentless Agent service', () => {
         data: {
           message: 'Request timed out',
         },
-      } as AxiosError['response'];
+      } as AxiosResponse;
 
-      (axios as jest.MockedFunction<typeof axios>).mockRejectedValueOnce(axiosError);
+      jest.mocked(axios).mockRejectedValueOnce(axiosError);
 
       await expect(
         agentlessAgentService.createAgentlessAgent(esClient, soClient, {
@@ -1635,14 +1615,14 @@ describe('Agentless Agent service', () => {
         ],
       } as any);
       // Force axios to throw an AxiosError to simulate an error response
-      (axios as jest.MockedFunction<typeof axios>).mockRejectedValueOnce({
-        response: {
-          status: 404,
-          data: {
-            message: 'Not Found',
-          },
+      const axiosError = new AxiosError('Test Error');
+      axiosError.response = {
+        status: 404,
+        data: {
+          message: 'Not Found',
         },
-      } as AxiosError);
+      } as AxiosResponse;
+      jest.mocked(axios).mockRejectedValueOnce(axiosError);
 
       await expect(
         agentlessAgentService.createAgentlessAgent(esClient, soClient, {
@@ -1697,14 +1677,15 @@ describe('Agentless Agent service', () => {
         ],
       } as any);
       // Force axios to throw an AxiosError to simulate an error response
-      (axios as jest.MockedFunction<typeof axios>).mockRejectedValueOnce({
-        response: {
-          status: 403,
-          data: {
-            message: 'Forbidden',
-          },
+      const axiosError = new AxiosError('Test Error');
+      axiosError.response = {
+        status: 403,
+        data: {
+          message: 'Forbidden',
         },
-      } as AxiosError);
+      } as AxiosResponse;
+
+      jest.mocked(axios).mockRejectedValueOnce(axiosError);
 
       await expect(
         agentlessAgentService.createAgentlessAgent(esClient, soClient, {
@@ -1759,14 +1740,15 @@ describe('Agentless Agent service', () => {
         ],
       } as any);
       // Force axios to throw an AxiosError to simulate an error response
-      (axios as jest.MockedFunction<typeof axios>).mockRejectedValueOnce({
-        response: {
-          status: 401,
-          data: {
-            message: 'Unauthorized',
-          },
+      const axiosError = new AxiosError('Test Error');
+      axiosError.response = {
+        status: 401,
+        data: {
+          message: 'Unauthorized',
         },
-      } as AxiosError);
+      } as AxiosResponse;
+
+      jest.mocked(axios).mockRejectedValueOnce(axiosError);
 
       await expect(
         agentlessAgentService.createAgentlessAgent(esClient, soClient, {
@@ -1821,14 +1803,15 @@ describe('Agentless Agent service', () => {
         ],
       } as any);
       // Force axios to throw an AxiosError to simulate an error response
-      (axios as jest.MockedFunction<typeof axios>).mockRejectedValueOnce({
-        response: {
-          status: 400,
-          data: {
-            message: 'Bad Request',
-          },
+      const axiosError = new AxiosError('Bad Request');
+      axiosError.response = {
+        status: 400,
+        data: {
+          message: 'Bad Request',
         },
-      } as AxiosError);
+      } as AxiosResponse;
+
+      jest.mocked(axios).mockRejectedValueOnce(axiosError);
 
       await expect(
         agentlessAgentService.createAgentlessAgent(esClient, soClient, {
@@ -1893,7 +1876,7 @@ describe('Agentless Agent service', () => {
         },
       } as AxiosResponse;
       // Force axios to throw an AxiosError to simulate an error response
-      (axios as jest.MockedFunction<typeof axios>).mockRejectedValueOnce(mockedError);
+      jest.mocked(axios).mockRejectedValueOnce(mockedError);
 
       await expect(
         agentlessAgentService.createAgentlessAgent(esClient, soClient, {
@@ -1958,7 +1941,7 @@ describe('Agentless Agent service', () => {
         },
       } as AxiosResponse;
       // Force axios to throw an AxiosError to simulate an error response
-      (axios as jest.MockedFunction<typeof axios>).mockRejectedValueOnce(mockedError);
+      jest.mocked(axios).mockRejectedValueOnce(mockedError);
 
       await expect(
         agentlessAgentService.createAgentlessAgent(esClient, soClient, {
