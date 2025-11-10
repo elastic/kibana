@@ -5,9 +5,14 @@
  * 2.0.
  */
 
+import type { EventObject } from 'xstate5';
 import { fromCallback } from 'xstate5';
 import { withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
-import type { EnrichmentDataSource, EnrichmentUrlState } from '../../../../../../common/url_schema';
+import type {
+  CustomSamplesDataSource,
+  EnrichmentDataSource,
+  EnrichmentUrlState,
+} from '../../../../../../common/url_schema';
 import { ENRICHMENT_URL_STATE_KEY, enrichmentUrlSchema } from '../../../../../../common/url_schema';
 import type { StreamEnrichmentContextType, StreamEnrichmentServiceDependencies } from './types';
 import { defaultEnrichmentUrlState, defaultLatestSamplesDataSource } from './utils';
@@ -16,30 +21,49 @@ export function createUrlInitializerActor({
   core,
   urlStateStorageContainer,
 }: Pick<StreamEnrichmentServiceDependencies, 'core' | 'urlStateStorageContainer'>) {
-  return fromCallback(({ sendBack }) => {
+  return fromCallback<EventObject, { streamName: string }>(({ input, sendBack }) => {
     const urlStateValues =
       urlStateStorageContainer.get<EnrichmentUrlState>(ENRICHMENT_URL_STATE_KEY) ?? undefined;
+
+    const persistedCustomSamplesSources = retrievePersistedCustomSamplesSources(input.streamName);
 
     if (!urlStateValues) {
       return sendBack({
         type: 'url.initialized',
-        urlState: defaultEnrichmentUrlState,
+        urlState: {
+          ...defaultEnrichmentUrlState,
+          dataSources: getDataSourcesWithDefault(
+            Object.values(persistedCustomSamplesSources) // Add new custom samples data sources not existing in the url state
+          ),
+        },
       });
     }
 
     const urlState = enrichmentUrlSchema.safeParse(urlStateValues);
 
     if (urlState.success) {
+      // Restore persisted custom samples documents for existing custom samples data sources
+      urlState.data.dataSources.forEach((source) => {
+        if (
+          source.type === 'custom-samples' &&
+          source.storageKey &&
+          source.storageKey in persistedCustomSamplesSources
+        ) {
+          source.documents = persistedCustomSamplesSources[source.storageKey].documents;
+          delete persistedCustomSamplesSources[source.storageKey];
+        }
+      });
+
+      // Add new custom samples data sources not existing in the url state
+      Object.keys(persistedCustomSamplesSources).forEach((key) => {
+        urlState.data.dataSources.push(persistedCustomSamplesSources[key]);
+      });
+
       // Always add default latest samples data source
       if (!hasDefaultLatestSamplesDataSource(urlState.data.dataSources)) {
-        const isLatestSamplesDataSourceEnabled = urlState.data.dataSources.every(
-          (dataSource) => !dataSource.enabled
-        );
+        const dataSourcesWithDefault = getDataSourcesWithDefault(urlState.data.dataSources);
 
-        urlState.data.dataSources.push({
-          ...defaultLatestSamplesDataSource,
-          enabled: isLatestSamplesDataSourceEnabled,
-        });
+        urlState.data.dataSources = dataSourcesWithDefault;
       }
 
       sendBack({
@@ -60,6 +84,34 @@ export function createUrlInitializerActor({
 
 const hasDefaultLatestSamplesDataSource = (dataSources: EnrichmentDataSource[]) => {
   return dataSources.some((dataSource) => dataSource.type === 'latest-samples');
+};
+
+const getDataSourcesWithDefault = (dataSources: EnrichmentDataSource[]) => {
+  const isLatestSamplesDataSourceEnabled = dataSources.every((dataSource) => !dataSource.enabled);
+
+  dataSources.unshift({
+    ...defaultLatestSamplesDataSource,
+    enabled: isLatestSamplesDataSourceEnabled,
+  });
+
+  return dataSources;
+};
+
+const retrievePersistedCustomSamplesSources = (streamName: string) => {
+  const storedSourcesKeys = Object.keys(localStorage).filter((key) =>
+    key.startsWith(`streams:${streamName}__custom-samples__`)
+  );
+
+  const sources: Record<string, CustomSamplesDataSource> = {};
+
+  storedSourcesKeys.forEach((key) => {
+    const dataSource = localStorage.getItem(key);
+    if (dataSource) {
+      sources[key] = { ...JSON.parse(dataSource), documents: [] };
+    }
+  });
+
+  return sources;
 };
 
 export function createUrlSyncAction({

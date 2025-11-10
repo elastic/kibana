@@ -84,8 +84,8 @@ const parseAndPersistCustomSamplesDataSource = (
   dataSource: CustomSamplesDataSource,
   streamName: string
 ) => {
-  const key = dataSource.storageKey ?? `streams:${streamName}__${uuidv4()}`;
-  localStorage.setItem(key, JSON.stringify(dataSource.documents));
+  const key = dataSource.storageKey ?? `streams:${streamName}__custom-samples__${uuidv4()}`;
+  localStorage.setItem(key, JSON.stringify(dataSource));
   return {
     name: dataSource.name,
     enabled: dataSource.enabled,

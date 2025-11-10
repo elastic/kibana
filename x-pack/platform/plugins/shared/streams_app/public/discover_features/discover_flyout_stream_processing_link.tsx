@@ -66,7 +66,7 @@ export function DiscoverFlyoutStreamProcessingLink({
             defaultMessage: 'Discover document',
           }),
           documents: [formattedDoc],
-          storageKey: `streams:${value}__discover-document`,
+          storageKey: `streams:${value}__custom-samples__discover-document`,
         },
       ],
     },

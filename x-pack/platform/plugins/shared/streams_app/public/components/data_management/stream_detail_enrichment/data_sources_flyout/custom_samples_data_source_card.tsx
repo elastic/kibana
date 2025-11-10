@@ -18,6 +18,7 @@ import { deserializeJson, serializeXJson } from '../helpers';
 import { DataSourceCard } from './data_source_card';
 import { NameField } from './name_field';
 import { DATA_SOURCES_I18N } from './translations';
+import { dataSourceConverter } from '../utils';
 
 const debounceOptions = { wait: 500 };
 interface CustomSamplesDataSourceCardProps {
@@ -37,22 +38,21 @@ export const CustomSamplesDataSourceCard = ({
     (snapshot) => !snapshot.can({ type: 'dataSource.change', dataSource })
   );
 
-  const handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    dataSourceRef.send({
-      type: 'dataSource.change',
-      dataSource: { ...dataSource, name: event.target.value },
-    });
-  };
-
-  const { run: handleDocumentsChange } = useDebounceFn(
-    (documents: CustomSamplesDataSourceWithUIAttributes['documents']) => {
-      dataSourceRef.send({ type: 'dataSource.change', dataSource: { ...dataSource, documents } });
-      if (dataSource.storageKey) {
-        localStorage.setItem(dataSource.storageKey, JSON.stringify(documents));
+  const { run: handleStorageUpdate } = useDebounceFn(
+    (newDataSource: CustomSamplesDataSourceWithUIAttributes) => {
+      if (newDataSource.storageKey) {
+        const urlSchemaDataSource = dataSourceConverter.toUrlSchema(newDataSource);
+        localStorage.setItem(newDataSource.storageKey, JSON.stringify(urlSchemaDataSource));
       }
     },
     debounceOptions
   );
+
+  const handleChange = (updates: Partial<CustomSamplesDataSourceWithUIAttributes>) => {
+    const newDataSource = { ...dataSource, ...updates };
+    dataSourceRef.send({ type: 'dataSource.change', dataSource: newDataSource });
+    handleStorageUpdate(newDataSource);
+  };
 
   /**
    * To have the editor properly handle the set xjson language
@@ -67,7 +67,7 @@ export const CustomSamplesDataSourceCard = ({
     setEditorValue(value);
     const documents = deserializeJson(value);
     if (isSchema(customSamplesDataSourceDocumentsSchema, documents)) {
-      handleDocumentsChange(documents);
+      handleChange({ documents });
     }
   };
 
@@ -79,7 +79,7 @@ export const CustomSamplesDataSourceCard = ({
       isForCompleteSimulation
     >
       <NameField
-        onChange={handleNameChange}
+        onChange={(event) => handleChange({ name: event.target.value })}
         value={dataSource.name}
         disabled={isDisabled}
         data-test-subj="streamsAppCustomSamplesDataSourceNameField"

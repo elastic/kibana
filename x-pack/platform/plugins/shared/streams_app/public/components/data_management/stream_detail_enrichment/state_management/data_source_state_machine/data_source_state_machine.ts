@@ -42,10 +42,22 @@ export const dataSourceMachine = setup({
     notifyDataCollectionFailure: getPlaceholderFor(createDataCollectionFailureNotifier),
     restorePersistedCustomSamplesDocuments: assign(({ context }) => {
       if (context.dataSource.type === 'custom-samples' && context.dataSource.storageKey) {
-        const documents = localStorage.getItem(context.dataSource.storageKey);
-        if (documents) {
-          return { dataSource: { ...context.dataSource, documents: JSON.parse(documents) } };
+        const dataSource = localStorage.getItem(context.dataSource.storageKey);
+        if (dataSource) {
+          return { dataSource: JSON.parse(dataSource) };
         }
+      }
+      return {};
+    }),
+    updatePersistedCustomSamplesDocuments: assign(({ context }) => {
+      if (context.dataSource.type === 'custom-samples' && context.dataSource.storageKey) {
+        localStorage.setItem(context.dataSource.storageKey, JSON.stringify(context.dataSource));
+      }
+      return {};
+    }),
+    removePersistedCustomSamplesDocuments: assign(({ context }) => {
+      if (context.dataSource.type === 'custom-samples' && context.dataSource.storageKey) {
+        localStorage.removeItem(context.dataSource.storageKey);
       }
       return {};
     }),
@@ -102,6 +114,7 @@ export const dataSourceMachine = setup({
           target: 'disabled',
           actions: [
             { type: 'toggleDataSourceActivity' },
+            { type: 'updatePersistedCustomSamplesDocuments' },
             { type: 'notifyParent', params: { eventType: 'dataSource.change' } },
           ],
         },
@@ -166,6 +179,7 @@ export const dataSourceMachine = setup({
           target: 'enabled',
           actions: [
             { type: 'toggleDataSourceActivity' },
+            { type: 'updatePersistedCustomSamplesDocuments' },
             { type: 'notifyParent', params: { eventType: 'dataSource.change' } },
           ],
         },
@@ -181,7 +195,10 @@ export const dataSourceMachine = setup({
     deleted: {
       id: 'deleted',
       type: 'final',
-      entry: [{ type: 'notifyParent', params: { eventType: 'dataSource.delete' } }],
+      entry: [
+        { type: 'notifyParent', params: { eventType: 'dataSource.delete' } },
+        { type: 'removePersistedCustomSamplesDocuments' },
+      ],
     },
   },
 });

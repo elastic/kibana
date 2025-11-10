@@ -72,7 +72,7 @@ export interface CustomSamplesDataSource extends BaseDataSource {
   type: 'custom-samples';
   documents: SampleDocument[];
   /* Optional key used to store and retrieve the documents from the browser session storage.
-   * The key is a combination of the `streams:${streamName}__${dataSourceIdentifie}`
+   * The key is a combination of the `streams:${streamName}__custom-samples__${dataSourceIdentifie}`
    */
   storageKey?: string;
 }

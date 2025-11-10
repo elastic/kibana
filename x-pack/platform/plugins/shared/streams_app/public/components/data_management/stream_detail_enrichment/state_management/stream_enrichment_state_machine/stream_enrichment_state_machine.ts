@@ -324,6 +324,7 @@ export const streamEnrichmentMachine = setup({
     initializingFromUrl: {
       invoke: {
         src: 'initializeUrl',
+        input: ({ context }) => ({ streamName: context.definition.stream.name }),
       },
       on: {
         'url.initialized': {

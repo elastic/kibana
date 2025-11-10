@@ -59,7 +59,7 @@ export const createDefaultCustomSamplesDataSource = (
   name: DATA_SOURCES_I18N.customSamples.defaultName,
   enabled: true,
   documents: [],
-  storageKey: `streams:${streamName}__${uuidv4()}`,
+  storageKey: `streams:${streamName}__custom-samples__${uuidv4()}`,
 });
 
 export const defaultEnrichmentUrlState: EnrichmentUrlState = {
