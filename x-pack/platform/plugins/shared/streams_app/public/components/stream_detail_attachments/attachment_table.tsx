@@ -15,21 +15,21 @@ import { useKibana } from '../../hooks/use_kibana';
 import { tagListToReferenceList } from './to_reference_list';
 import { useTimefilter } from '../../hooks/use_timefilter';
 
-export function DashboardsTable({
-  dashboards,
+export function AttachmentsTable({
+  attachments,
   compact = false,
-  selectedDashboards,
-  setSelectedDashboards,
+  selectedAttachments,
+  setSelectedAttachments,
   loading,
   entityId,
   dataTestSubj,
 }: {
   entityId?: string;
   loading: boolean;
-  dashboards: SanitizedDashboardAsset[] | undefined;
+  attachments: SanitizedDashboardAsset[] | undefined;
   compact?: boolean;
-  selectedDashboards?: SanitizedDashboardAsset[];
-  setSelectedDashboards?: (dashboards: SanitizedDashboardAsset[]) => void;
+  selectedAttachments?: SanitizedDashboardAsset[];
+  setSelectedAttachments?: (attachments: SanitizedDashboardAsset[]) => void;
   dataTestSubj?: string;
 }) {
   const {
@@ -50,17 +50,17 @@ export function DashboardsTable({
     return [
       {
         field: 'label',
-        name: i18n.translate('xpack.streams.dashboardTable.dashboardNameColumnTitle', {
-          defaultMessage: 'Dashboard name',
+        name: i18n.translate('xpack.streams.attachmentTable.attachmentNameColumnTitle', {
+          defaultMessage: 'Attachment name',
         }),
         render: (_, { title, id }) => (
           <EuiLink
-            data-test-subj="streamsAppDashboardColumnsLink"
+            data-test-subj="streamsAppAttachmentColumnsLink"
             onClick={() => {
               if (entityId) {
-                telemetryClient.trackAssetClick({
-                  asset_id: id,
-                  asset_type: 'dashboard',
+                telemetryClient.trackAttachmentClick({
+                  attachment_id: id,
+                  attachment_type: 'dashboard',
                   name: entityId,
                 });
               }
@@ -76,11 +76,22 @@ export function DashboardsTable({
           </EuiLink>
         ),
       },
+      {
+        field: 'type',
+        name: i18n.translate('xpack.streams.attachmentTable.attachmentTypeColumnTitle', {
+          defaultMessage: 'Attachment type',
+        }),
+        render: () => {
+          return i18n.translate('xpack.streams.attachmentTable.attachmentType', {
+            defaultMessage: 'Dashboard',
+          });
+        },
+      },
       ...(!compact
         ? ([
             {
               field: 'tags',
-              name: i18n.translate('xpack.streams.dashboardTable.tagsColumnTitle', {
+              name: i18n.translate('xpack.streams.attachmentTable.tagsColumnTitle', {
                 defaultMessage: 'Tags',
               }),
               render: (_, { tags }) => {
@@ -107,8 +118,8 @@ export function DashboardsTable({
   ]);
 
   const items = useMemo(() => {
-    return dashboards ?? [];
-  }, [dashboards]);
+    return attachments ?? [];
+  }, [attachments]);
 
   return (
     <EuiFlexGroup direction="column">
@@ -120,8 +131,8 @@ export function DashboardsTable({
         items={items}
         loading={loading}
         selection={
-          setSelectedDashboards
-            ? { onSelectionChange: setSelectedDashboards, selected: selectedDashboards }
+          setSelectedAttachments
+            ? { onSelectionChange: setSelectedAttachments, selected: selectedAttachments }
             : undefined
         }
       />
