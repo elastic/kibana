@@ -11,10 +11,10 @@ import { act, renderHook } from '@testing-library/react';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowExecutionDto, WorkflowYaml } from '@kbn/workflows';
 import { PollingIntervalMs, useWorkflowExecutionPolling } from './use_workflow_execution_polling';
-import { useAsyncThunkState } from '../../../../hooks/use_async_thunk';
+import { useAsyncThunkState } from '../../../hooks/use_async_thunk';
 
 // Mock the useAsyncThunkState hook
-jest.mock('../../../../hooks/use_async_thunk');
+jest.mock('../../../hooks/use_async_thunk');
 const mockUseAsyncThunkState = useAsyncThunkState as jest.MockedFunction<typeof useAsyncThunkState>;
 
 describe('useWorkflowExecutionPolling', () => {

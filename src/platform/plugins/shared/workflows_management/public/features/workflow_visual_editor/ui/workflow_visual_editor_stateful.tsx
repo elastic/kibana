@@ -18,11 +18,11 @@ import { getWorkflowZodSchemaLoose } from '../../../../common/schema';
 import { useAvailableConnectors } from '../../../entities/connectors/model/use_available_connectors';
 import {
   selectEditorYaml,
-  selectExecution,
+  selectStepExecutions,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
 
 export const WorkflowVisualEditorStateful = () => {
-  const workflowExecution = useSelector(selectExecution);
+  const stepExecutions = useSelector(selectStepExecutions);
   const workflowYaml = useSelector(selectEditorYaml) ?? '';
   const connectorsData = useAvailableConnectors();
 
@@ -80,7 +80,7 @@ export const WorkflowVisualEditorStateful = () => {
   return (
     <WorkflowVisualEditor
       workflow={workflowYamlObject as WorkflowYaml}
-      stepExecutions={workflowExecution?.stepExecutions}
+      stepExecutions={stepExecutions}
     />
   );
 };

@@ -9,10 +9,10 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { Subject, switchMap, takeUntil, timer } from 'rxjs';
+import { isTerminalStatus } from '@kbn/workflows';
 import type { WorkflowExecutionDto } from '@kbn/workflows/types/latest';
-import { loadExecutionThunk } from '../../../../entities/workflows/store/workflow_detail/thunks/load_execution_thunk';
-import { useAsyncThunkState } from '../../../../hooks/use_async_thunk';
-import { isTerminalStatus } from '../../lib/execution_status';
+import { useAsyncThunkState } from '../../../hooks/use_async_thunk';
+import { loadExecutionThunk } from '../store/workflow_detail/thunks/load_execution_thunk';
 
 export const PollingIntervalMs = 1000 as const;
 
