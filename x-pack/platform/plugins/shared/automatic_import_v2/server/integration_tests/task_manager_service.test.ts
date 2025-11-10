@@ -269,7 +269,7 @@ describe('TaskManagerService Integration Tests', () => {
       await expect(savedObjectService.getDataStream(dataStreamSavedObject.id)).rejects.toThrow();
     });
 
-    it('should schedule and track 5 concurrent AI workflow tasks', async () => {
+    it('should schedule and track 5 concurrent unique AI workflow tasks', async () => {
       const mockUser = {
         username: 'test-user-concurrent',
         roles: ['admin'],
@@ -351,6 +351,25 @@ describe('TaskManagerService Integration Tests', () => {
         const taskIds = createdObjects.map((obj) => obj.taskId);
         const uniqueTaskIds = new Set(taskIds);
         expect(uniqueTaskIds.size).toBe(numConcurrentTasks);
+
+        // Try to schedule a task with the same integrationId and dataStreamId as the first one
+        const firstObject = createdObjects[0];
+        const duplicateTaskParams = {
+          integrationId: firstObject.integration.id,
+          dataStreamId: firstObject.dataStream.attributes.data_stream_id,
+        };
+
+        const duplicateTaskResponse = await taskManagerService.scheduleAIWorkflowTask(
+          duplicateTaskParams
+        );
+
+        // Should return the same task ID as the existing one
+        expect(duplicateTaskResponse.taskId).toBe(firstObject.taskId);
+
+        // Verify that no new task was created - the task count should remain the same
+        const allTaskIds = createdObjects.map((obj) => obj.taskId);
+        const uniqueTaskIdsBeforeTrigger = new Set(allTaskIds);
+        expect(uniqueTaskIdsBeforeTrigger.size).toBe(numConcurrentTasks);
 
         // Trigger all tasks to run concurrently using Promise.all
         // Note: We don't check initial "pending" status because TaskManager may auto-claim tasks
