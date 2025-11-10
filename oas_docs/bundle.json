@@ -47066,18 +47066,21 @@
                               "enum": [
                                 "success"
                               ],
+                              "nullable": true,
                               "type": "string"
                             },
                             "metrics": {
                               "enum": [
                                 "success"
                               ],
+                              "nullable": true,
                               "type": "string"
                             },
                             "synthetics": {
                               "enum": [
                                 "success"
                               ],
+                              "nullable": true,
                               "type": "string"
                             }
                           },
@@ -47293,18 +47296,21 @@
                               "enum": [
                                 "success"
                               ],
+                              "nullable": true,
                               "type": "string"
                             },
                             "metrics": {
                               "enum": [
                                 "success"
                               ],
+                              "nullable": true,
                               "type": "string"
                             },
                             "synthetics": {
                               "enum": [
                                 "success"
                               ],
+                              "nullable": true,
                               "type": "string"
                             }
                           },
