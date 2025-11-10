@@ -9,6 +9,7 @@ For Elastic {{observability}} known issues, refer to [Elastic Observability know
 For Elastic Security known issues, refer to [Elastic Security known issues](docs-content://release-notes/elastic-security/known-issues.md).
 
 ::::{dropdown} The connection between agentless integrations and {{fleet-server}} is broken
+:applies_to: ess: ga
 
 Applies to: {{stack}} <9.1.6
 
