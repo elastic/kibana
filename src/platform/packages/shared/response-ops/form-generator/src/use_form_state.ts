@@ -22,8 +22,6 @@ export const useFormState = (fields: FieldDefinition[]) => {
     return acc;
   }, {} as Record<string, unknown>);
 
-  console.log('Initial Values:', initialValues);
-
   const [formState, setFormState] = useState<FormState>({
     values: initialValues,
     errors: {},
@@ -56,7 +54,7 @@ export const useFormState = (fields: FieldDefinition[]) => {
     }
   };
 
-  const handleSubmit = (onSuccess: (data: Record<string, unknown>) => void) => {
+  const handleSubmit = (onSuccess: ({ data }: { data: Record<string, unknown> }) => void) => {
     return (e: React.FormEvent) => {
       e.preventDefault();
 
@@ -84,7 +82,7 @@ export const useFormState = (fields: FieldDefinition[]) => {
           errors,
         }));
       } else {
-        onSuccess(formState.values);
+        onSuccess({ data: formState.values });
       }
     };
   };

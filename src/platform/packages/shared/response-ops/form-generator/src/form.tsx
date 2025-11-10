@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { z } from '@kbn/zod/v4';
 import type {
   EuiDatePickerProps,
@@ -19,7 +19,7 @@ import type {
   EuiSwitchProps,
   EuiTextAreaProps,
 } from '@elastic/eui';
-import { EuiFieldText, EuiForm, EuiFormRow, EuiSelect } from '@elastic/eui';
+import { EuiButton, EuiFieldText, EuiForm, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { useFormState } from './use_form_state';
 import type { UIMetadata } from './connector_spec_ui';
 import { getUIMeta } from './connector_spec_ui';
@@ -50,7 +50,7 @@ export interface FieldDefinition {
     fullWidth?: boolean;
     placeholder?: string;
     label?: string;
-    defaltValue?: unknown;
+    default?: unknown;
   };
   initialValue?: unknown;
   value?: unknown;
@@ -105,7 +105,7 @@ const getStaticProps = ({ schema }: { schema: z.ZodTypeAny }) => {
     fullWidth: true,
     label,
     placeholder,
-    defaultValue: schema.default,
+    default: widgetOptions?.default,
   };
 
   const mergedOptions = {
@@ -134,8 +134,7 @@ const getFieldsFromSchema = (schema: z.ZodObject<any>) => {
       id: key,
       render: renderFn,
       staticProps,
-      initialValue: staticProps.defaultValue,
-      value: staticProps.defaultValue,
+      initialValue: staticProps.default,
       validate: (value: unknown) => {
         try {
           schemaAny.parse(value);
@@ -155,19 +154,19 @@ const getFieldsFromSchema = (schema: z.ZodObject<any>) => {
 
 interface FormProps {
   connectorSchema: z.ZodObject<any>;
+  onSubmit?: ({ data }: { data: Record<string, unknown> }) => void;
 }
-export const Form = ({ connectorSchema }: FormProps) => {
-  const fields = getFieldsFromSchema(connectorSchema);
+export const Form = ({ connectorSchema, onSubmit }: FormProps) => {
+  const fields = useMemo(() => getFieldsFromSchema(connectorSchema), [connectorSchema]);
   const form = useFormState(fields);
 
-  const onSubmit = (data: Record<string, unknown>) => {
-    // eslint-disable-next-line no-console
-    console.log('Form submitted with data:', data);
+  const _onSubmit = ({ data }: { data: Record<string, unknown> }) => {
+    onSubmit?.({ data });
     form.reset();
   };
 
   return (
-    <EuiForm component="form" onSubmit={form.handleSubmit(onSubmit)}>
+    <EuiForm component="form" onSubmit={form.handleSubmit(_onSubmit)}>
       {fields.map((field) => {
         const { render: RenderComponent, id, staticProps } = field;
         return (
@@ -189,6 +188,9 @@ export const Form = ({ connectorSchema }: FormProps) => {
           </EuiFormRow>
         );
       })}
+      <EuiButton type="submit" fill>
+        Submit
+      </EuiButton>
     </EuiForm>
   );
 };

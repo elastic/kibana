@@ -16,13 +16,13 @@ import { withUIMeta } from './connector_spec_ui';
 const webhookConnectorFormSchema = z.object({
   name: withUIMeta(z.string().min(1, { message: 'Name cannot be empty' }), {
     widget: 'text',
-    widgetOptions: { label: 'Connector Name', defaultValue: 'My Webhook' },
+    widgetOptions: { label: 'Connector Name' },
   }),
-  method: withUIMeta(z.enum(['post', 'put', 'get', 'delete']).default('post'), {
+  method: withUIMeta(z.enum(['post', 'put', 'get', 'delete']), {
     widget: 'select',
-    widgetOptions: { label: 'Method' },
+    widgetOptions: { label: 'Method', default: 'post' },
   }),
-  // url: withUIMeta(z.url(), { widget: 'text', widgetOptions: { label: 'URL' } }),
+  url: withUIMeta(z.url(), { widget: 'text', widgetOptions: { label: 'URL' } }),
   // authType: withUIMeta(
   //   z.discriminatedUnion('type', [
   //     z.object({
@@ -68,17 +68,16 @@ const meta = {
 
 export default meta;
 
-const DefaultStory = ({ connectorSchema }: { connectorSchema?: z.ZodObject }) => {
-  if (!connectorSchema) {
-    return <div>No schema provided</div>;
-  }
-  return <Form connectorSchema={connectorSchema} />;
+const DefaultStory = () => {
+  return (
+    <Form
+      connectorSchema={webhookConnectorFormSchema}
+      onSubmit={({ data }) => window.alert(JSON.stringify(data))}
+    />
+  );
 };
 
 export const WebhookConnector: StoryObj<typeof DefaultStory> = {
-  args: {
-    connectorSchema: webhookConnectorFormSchema,
-  },
   argTypes: {
     connectorSchema: {
       control: false,
