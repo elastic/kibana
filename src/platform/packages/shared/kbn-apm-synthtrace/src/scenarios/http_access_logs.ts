@@ -76,58 +76,19 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
     return `${seconds.toFixed(0)} seconds`;
   };
 
-  // Display estimation warning
-  logger.info('');
-  logger.info('='.repeat(80));
-  logger.info('⚠️  HTTP ACCESS LOGS GENERATION ESTIMATE');
-  logger.info('='.repeat(80));
+  // Display generation summary
   logger.info(
-    `Time Range:       ${formatDuration(timeRangeMs)} (${new Date(
-      runOptions.from
-    ).toISOString()} to ${new Date(runOptions.to).toISOString()})`
+    `Generating HTTP Access Logs (ECS): ${formatDuration(timeRangeMs)} | mode=${
+      finalOpts.mode
+    } | scale=${scale}x`
   );
-  logger.info(`Mode:             ${finalOpts.mode}`);
-  logger.info(`Scale:            ${scale}x`);
-  logger.info(`Expected Docs:    ${estimate.estimatedDocs.toLocaleString()}`);
   logger.info(
-    `Expected Size:    ${
+    `Expected output: ${estimate.estimatedDocs.toLocaleString()} docs (~${
       estimate.estimatedSizeMB >= 1024
         ? `${(estimate.estimatedSizeMB / 1024).toFixed(2)} GB`
         : `${estimate.estimatedSizeMB} MB`
-    }`
+    }) | ${cpuCores} CPU cores available`
   );
-  logger.info(`System CPU Cores: ${cpuCores}`);
-  logger.info('');
-  logger.info('ℹ️  Synthtrace will automatically parallelize generation across multiple workers');
-  logger.info('   based on the time range. Each worker handles a portion of the timeline.');
-  logger.info('='.repeat(80));
-
-  // Provide recommendations for different scale levels
-  if (estimate.estimatedDocs > 100_000_000) {
-    logger.info('');
-    logger.info('🚨 VERY LARGE DATASET DETECTED (100M+ documents)');
-    logger.info('   This may impact system performance!');
-    logger.info('   Consider: --scenarioOpts.scale=10 or shorter time range');
-    logger.info('');
-  } else if (estimate.estimatedDocs > 10_000_000) {
-    logger.info('');
-    logger.info('⚠️  LARGE DATASET (10M+ documents)');
-    logger.info('   For quick testing, use --scenarioOpts.scale=1');
-    logger.info('');
-  } else if (estimate.estimatedDocs < 100_000) {
-    logger.info('');
-    logger.info('✅ Small dataset - Good for quick testing!');
-    logger.info('   For more realistic demos, consider: --scenarioOpts.scale=10');
-    logger.info('');
-  }
-
-  logger.info('💡 Recommended scales for different use cases:');
-  logger.info('   • Quick test/development: --scenarioOpts.scale=1');
-  logger.info('   • Demo/presentation:      --scenarioOpts.scale=10');
-  logger.info('   • Benchmarking:           --scenarioOpts.scale=100');
-  logger.info('   • Large dataset (1TB+):   --scenarioOpts.scale=5000 --from=now-30d');
-  logger.info('='.repeat(80));
-  logger.info('');
 
   return {
     bootstrap: async ({ logsEsClient }) => {

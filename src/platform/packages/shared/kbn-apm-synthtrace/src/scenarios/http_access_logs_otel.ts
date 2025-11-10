@@ -39,6 +39,7 @@ import { withClient } from '../lib/utils/with_client';
 import { parseHttpAccessLogsOpts } from './helpers/http_access_logs_opts_parser';
 import { getGeneratorForPattern, TrafficPattern } from './helpers/http_access_logs_data_generator';
 import { estimateDataGeneration } from './helpers/http_generation_estimator';
+import { convertEcsToOtel } from './helpers/ecs_to_otel';
 
 const scenario: Scenario<OtelLogDocument> = async (runOptions) => {
   const parsedOpts = parseHttpAccessLogsOpts(runOptions.scenarioOpts);
@@ -75,58 +76,19 @@ const scenario: Scenario<OtelLogDocument> = async (runOptions) => {
     return `${seconds.toFixed(0)} seconds`;
   };
 
-  // Display estimation warning
-  logger.info('');
-  logger.info('='.repeat(80));
-  logger.info('⚠️  HTTP ACCESS LOGS GENERATION ESTIMATE (OTEL Format)');
-  logger.info('='.repeat(80));
+  // Display generation summary
   logger.info(
-    `Time Range:       ${formatDuration(timeRangeMs)} (${new Date(
-      runOptions.from
-    ).toISOString()} to ${new Date(runOptions.to).toISOString()})`
+    `Generating HTTP Access Logs (OTEL): ${formatDuration(timeRangeMs)} | mode=${
+      finalOpts.mode
+    } | scale=${scale}x`
   );
-  logger.info(`Mode:             ${finalOpts.mode}`);
-  logger.info(`Scale:            ${scale}x`);
-  logger.info(`Expected Docs:    ${estimate.estimatedDocs.toLocaleString()}`);
   logger.info(
-    `Expected Size:    ${
+    `Expected output: ${estimate.estimatedDocs.toLocaleString()} docs (~${
       estimate.estimatedSizeMB >= 1024
         ? `${(estimate.estimatedSizeMB / 1024).toFixed(2)} GB`
         : `${estimate.estimatedSizeMB} MB`
-    }`
+    }) | ${cpuCores} CPU cores available`
   );
-  logger.info(`System CPU Cores: ${cpuCores}`);
-  logger.info('');
-  logger.info('ℹ️  Synthtrace will automatically parallelize generation across multiple workers');
-  logger.info('   based on the time range. Each worker handles a portion of the timeline.');
-  logger.info('='.repeat(80));
-
-  // Provide recommendations for different scale levels
-  if (estimate.estimatedDocs > 100_000_000) {
-    logger.info('');
-    logger.info('🚨 VERY LARGE DATASET DETECTED (100M+ documents)');
-    logger.info('   This may impact system performance!');
-    logger.info('   Consider: --scenarioOpts.scale=10 or shorter time range');
-    logger.info('');
-  } else if (estimate.estimatedDocs > 10_000_000) {
-    logger.info('');
-    logger.info('⚠️  LARGE DATASET (10M+ documents)');
-    logger.info('   For quick testing, use --scenarioOpts.scale=1');
-    logger.info('');
-  } else if (estimate.estimatedDocs < 100_000) {
-    logger.info('');
-    logger.info('✅ Small dataset - Good for quick testing!');
-    logger.info('   For more realistic demos, consider: --scenarioOpts.scale=10');
-    logger.info('');
-  }
-
-  logger.info('💡 Recommended scales for different use cases:');
-  logger.info('   • Quick test/development: --scenarioOpts.scale=1');
-  logger.info('   • Demo/presentation:      --scenarioOpts.scale=10');
-  logger.info('   • Benchmarking:           --scenarioOpts.scale=100');
-  logger.info('   • Large dataset (1TB+):   --scenarioOpts.scale=5000 --from=now-30d');
-  logger.info('='.repeat(80));
-  logger.info('');
 
   return {
     generate: ({ range, clients: { logsEsClient } }) => {
@@ -295,165 +257,24 @@ const scenario: Scenario<OtelLogDocument> = async (runOptions) => {
 };
 
 /**
- * Map ECS fields to OTEL format.
- * Resource attributes: service, deployment, cloud, kubernetes, container, host
- * Log attributes: http, network, error, correlation, custom fields
+ * Create OTEL log from ECS data using the conversion helper.
+ * This is a thin wrapper that delegates to the reusable ECS->OTEL converter.
  */
 function createOTELLog(
   logData: Partial<LogDocument>,
   timestamp: number
 ): ReturnType<typeof otelLog.createForIndex> {
-  // Separate resource attributes (infrastructure/service metadata)
-  const resourceAttributes: Record<string, unknown> = {};
+  // Convert ECS to OTEL format using the reusable helper
+  const { resourceAttributes, logAttributes, severity, message } = convertEcsToOtel(logData);
 
-  // Service fields
-  if (logData['service.name']) resourceAttributes['service.name'] = logData['service.name'];
-  if (logData['service.version'])
-    resourceAttributes['service.version'] = logData['service.version'];
-  if (logData['service.environment'])
-    resourceAttributes['service.environment'] = logData['service.environment'];
-  if (logData['deployment.name'])
-    resourceAttributes['deployment.name'] = logData['deployment.name'];
-
-  // Cloud fields
-  if (logData['cloud.provider']) resourceAttributes['cloud.provider'] = logData['cloud.provider'];
-  if (logData['cloud.region']) resourceAttributes['cloud.region'] = logData['cloud.region'];
-  if (logData['cloud.availability_zone'])
-    resourceAttributes['cloud.availability_zone'] = logData['cloud.availability_zone'];
-  if (logData['cloud.instance.id'])
-    resourceAttributes['cloud.instance.id'] = logData['cloud.instance.id'];
-  if (logData['cloud.instance.name'])
-    resourceAttributes['cloud.instance.name'] = logData['cloud.instance.name'];
-  if (logData['cloud.project.id'])
-    resourceAttributes['cloud.project.id'] = logData['cloud.project.id'];
-
-  // Kubernetes fields
-  if (logData['kubernetes.namespace'])
-    resourceAttributes['k8s.namespace.name'] = logData['kubernetes.namespace'];
-  if (logData['kubernetes.pod.name'])
-    resourceAttributes['k8s.pod.name'] = logData['kubernetes.pod.name'];
-  if (logData['kubernetes.pod.uid'])
-    resourceAttributes['k8s.pod.uid'] = logData['kubernetes.pod.uid'];
-  if (logData['kubernetes.container.name'])
-    resourceAttributes['k8s.container.name'] = logData['kubernetes.container.name'];
-  if (logData['kubernetes.deployment.name'])
-    resourceAttributes['k8s.deployment.name'] = logData['kubernetes.deployment.name'];
-  if (logData['kubernetes.node.name'])
-    resourceAttributes['k8s.node.name'] = logData['kubernetes.node.name'];
-
-  // Container fields
-  if (logData['container.id']) resourceAttributes['container.id'] = logData['container.id'];
-  if (logData['container.name']) resourceAttributes['container.name'] = logData['container.name'];
-  if (logData['container.image.name'])
-    resourceAttributes['container.image.name'] = logData['container.image.name'];
-  if (logData['container.runtime'])
-    resourceAttributes['container.runtime'] = logData['container.runtime'];
-
-  // Host fields
-  if (logData.hostname) resourceAttributes['host.name'] = logData.hostname;
-  if (logData['host.ip']) resourceAttributes['host.ip'] = logData['host.ip'];
-
-  // Separate log attributes (request/response specific data)
-  const attributes: Record<string, unknown> = {};
-
-  // HTTP fields
-  if (logData['http.request.method']) attributes['http.method'] = logData['http.request.method'];
-  if (logData['url.path']) attributes['http.target'] = logData['url.path'];
-  if (logData['http.response.status_code'])
-    attributes['http.status_code'] = logData['http.response.status_code'];
-  if (logData['http.version']) attributes['http.flavor'] = logData['http.version'];
-  if (logData['http.response.bytes'])
-    attributes['http.response_content_length'] = logData['http.response.bytes'];
-  if (logData['user_agent.name']) attributes['http.user_agent'] = logData['user_agent.name'];
-  if (logData['http.request.referrer'])
-    attributes['http.referer'] = logData['http.request.referrer'];
-
-  // Client/Network fields
-  if (logData['client.ip']) attributes['net.peer.ip'] = logData['client.ip'];
-  if (logData['network.protocol']) attributes['net.protocol.name'] = logData['network.protocol'];
-  if (logData['network.transport']) attributes['net.transport'] = logData['network.transport'];
-  if (logData['network.type']) attributes['net.type'] = logData['network.type'];
-
-  // TLS fields
-  if (logData['tls.version']) attributes['tls.version'] = logData['tls.version'];
-  if (logData['tls.cipher']) attributes['tls.cipher'] = logData['tls.cipher'];
-
-  // Correlation IDs
-  if (logData['trace.id']) attributes.trace_id = logData['trace.id'];
-  if (logData['span.id']) attributes.span_id = logData['span.id'];
-  if (logData['transaction.id']) attributes['transaction.id'] = logData['transaction.id'];
-  if (logData['session.id']) attributes['session.id'] = logData['session.id'];
-
-  // Error fields
-  if (logData['error.type']) attributes['error.type'] = logData['error.type'];
-  if (logData['error.message']) attributes['error.message'] = logData['error.message'];
-  if (logData['error.code']) attributes['error.code'] = logData['error.code'];
-
-  // Event fields
-  if (logData['event.category']) attributes['event.category'] = logData['event.category'];
-  if (logData['event.type']) attributes['event.type'] = logData['event.type'];
-  if (logData['event.outcome']) attributes['event.outcome'] = logData['event.outcome'];
-
-  // Tags and labels
-  if (logData.tags) attributes.tags = logData.tags;
-  if (logData.labels) {
-    Object.entries(logData.labels).forEach(([key, value]) => {
-      attributes[`label.${key}`] = value;
-    });
-  }
-
-  // Geo location (map ECS to OTEL semantic conventions)
-  if (logData['host.geo.location']) {
-    const [lon, lat] = logData['host.geo.location'];
-    attributes['geo.location.lon'] = lon;
-    attributes['geo.location.lat'] = lat;
-  }
-  if (logData['host.geo.city_name']) {
-    attributes['geo.locality.name'] = logData['host.geo.city_name'];
-  }
-  if (logData['host.geo.country_name']) {
-    attributes['geo.country.name'] = logData['host.geo.country_name'];
-  }
-  if (logData['host.geo.country_iso_code']) {
-    attributes['geo.country.iso_code'] = logData['host.geo.country_iso_code'];
-  }
-  if (logData['host.geo.continent_name']) {
-    attributes['geo.continent.name'] = logData['host.geo.continent_name'];
-  }
-  if (logData['host.geo.region_name']) {
-    attributes['geo.region.name'] = logData['host.geo.region_name'];
-  }
-  if (logData['host.geo.timezone']) {
-    attributes['geo.timezone'] = logData['host.geo.timezone'];
-  }
-
-  // Map log level to OTEL severity
-  const severityMap: Record<string, { text: string; number: number }> = {
-    trace: { text: 'TRACE', number: 1 },
-    debug: { text: 'DEBUG', number: 5 },
-    info: { text: 'INFO', number: 9 },
-    warn: { text: 'WARN', number: 13 },
-    warning: { text: 'WARN', number: 13 },
-    error: { text: 'ERROR', number: 17 },
-    fatal: { text: 'FATAL', number: 21 },
-  };
-
-  const logLevel = (logData['log.level'] || 'info').toLowerCase();
-  const severity = severityMap[logLevel] || severityMap.info;
-
-  // Create OTEL log
-  const otelLogEntry = otelLog
+  // Create OTEL log with converted attributes
+  return otelLog
     .createForIndex('logs-generic.otel-default')
-    .message(
-      logData.message ||
-        `${logData['http.request.method']} ${logData['url.path']} ${logData['http.response.status_code']}`
-    )
+    .message(message)
     .logLevel(severity.text)
     .addResourceAttributes(resourceAttributes)
-    .addAttributes(attributes)
+    .addAttributes(logAttributes)
     .timestamp(timestamp);
-
-  return otelLogEntry;
 }
 
 export default scenario;
