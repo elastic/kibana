@@ -19,6 +19,9 @@ import { useConversationScrollActions } from '../../hooks/use_conversation_scrol
 import { useConversationStatus } from '../../hooks/use_conversation';
 import { useSendPredefinedInitialMessage } from '../../hooks/use_initial_message';
 import { maxConversationWidthStyles } from './conversation.styles';
+import { useAppLeave } from '../../context/app_leave_context';
+import { useConversationContext } from '../../context/conversation/conversation_context';
+import { useNavigationAbort } from '../../hooks/use_navigation_abort';
 
 const fullHeightStyles = css`
   height: 100%;
@@ -32,11 +35,20 @@ export const Conversation: React.FC<{}> = () => {
   const conversationId = useConversationId();
   const hasActiveConversation = useHasActiveConversation();
   const { euiTheme } = useEuiTheme();
-  const { isResponseLoading } = useSendMessage();
+  const { isResponseLoading, cancel } = useSendMessage();
   const { isFetched } = useConversationStatus();
   const shouldStickToBottom = useShouldStickToBottom();
+  const onAppLeave = useAppLeave();
+  const { conversationActions } = useConversationContext();
 
   useSendPredefinedInitialMessage();
+
+  useNavigationAbort({
+    onAppLeave,
+    isResponseLoading,
+    cancel,
+    markRoundAsAborted: conversationActions.markRoundAsAborted,
+  });
 
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const {

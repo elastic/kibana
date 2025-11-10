@@ -122,6 +122,7 @@ describe('chat_message_text', () => {
         onConversationCreated: jest.fn(),
         deleteConversation: jest.fn(),
         setTimeToFirstToken: jest.fn(),
+        markRoundAsAborted: jest.fn(),
       },
     });
   });
