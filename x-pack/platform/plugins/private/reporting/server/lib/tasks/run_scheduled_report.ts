@@ -11,6 +11,10 @@ import type { ConcreteTaskInstance, TaskInstance } from '@kbn/task-manager-plugi
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
 import { ScheduleType } from '@kbn/reporting-server';
+import {
+  renderMustacheString,
+  renderMustacheStringNoEscape,
+} from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import type { ScheduledReportTaskParams, ScheduledReportTaskParamsWithoutSpaceId } from '.';
 import { SCHEDULED_REPORTING_EXECUTE_TYPE } from '.';
 import type { SavedReport } from '../store';
@@ -139,12 +143,35 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
         const email = notification.email;
         const title = scheduledReport.attributes.title;
         const extension = this.getJobContentExtension(report.jobtype);
+        const filename = `${title}-${runAt.toISOString()}.${extension}`;
+        const templateVariables = {
+          title,
+          filename,
+          objectType: scheduledReport.attributes.meta.objectType,
+          date: scheduledReport.attributes.schedule?.rrule?.dtstart,
+          payload: JSON.parse(scheduledReport.attributes.payload),
+          output: {
+            contentType: output.content_type,
+            csvContainsFormulas: output.csv_contains_formulas,
+            errorCode: output.error_code,
+            maxSizeReached: output.max_size_reached,
+            hasUserError: output.user_error,
+            warnings: output.warnings,
+            metrics: output.metrics,
+          },
+        };
+        const subject = email.subject
+          ? renderMustacheStringNoEscape(email.subject, templateVariables)
+          : `${title}-${runAt.toISOString()} scheduled report`;
+        const message = email.message
+          ? renderMustacheString(this.logger, email.message, templateVariables, 'markdown')
+          : 'Your scheduled report is attached for you to download or share.';
 
         await this.emailNotificationService.notify({
           reporting: this.opts.reporting,
           index: report._index,
           id: report._id,
-          filename: `${title}-${runAt.toISOString()}.${extension}`,
+          filename,
           contentType: output.content_type,
           relatedObject: {
             id: scheduledReport.id,
@@ -155,7 +182,8 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
             to: email.to,
             cc: email.cc,
             bcc: email.bcc,
-            subject: `${title}-${runAt.toISOString()} scheduled report`,
+            subject,
+            message,
             spaceId,
           },
         });
