@@ -12,6 +12,8 @@ import { EuiGlobalToastList } from '@elastic/eui';
 import React, { useEffect, useState, type FunctionComponent, useCallback } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import type { Observable } from 'rxjs';
+import { debounceTime } from 'rxjs/operators';
+
 import { i18n } from '@kbn/i18n';
 
 import type { Toast } from '@kbn/core-notifications-browser';
@@ -70,7 +72,7 @@ export const GlobalToastList: FunctionComponent<Props> = ({
   );
 
   useEffect(() => {
-    const subscription = toasts$.subscribe((redundantToastList) => {
+    const subscription = toasts$.pipe(debounceTime(200)).subscribe((redundantToastList) => {
       const { toasts: reducedToasts, idToToasts: reducedIdToasts } =
         deduplicateToasts(redundantToastList);
 
