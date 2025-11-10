@@ -177,7 +177,7 @@ export class RelatedDashboardsClient {
       result: { hits },
     } = dashboards;
     for (const dashboard of hits) {
-      for (const panel of dashboard.attributes.panels) {
+      for (const panel of dashboard.attributes.panels ?? []) {
         if (
           isDashboardPanel(panel) &&
           isSuggestedDashboardsValidPanelType(panel.type) &&
@@ -211,7 +211,7 @@ export class RelatedDashboardsClient {
   } {
     const relevantDashboards: SuggestedDashboard[] = [];
     this.dashboardsById.forEach((d) => {
-      const panels = d.attributes.panels.filter(isDashboardPanel);
+      const panels = (d.attributes.panels ?? []).filter(isDashboardPanel);
       const matchingPanels = this.getPanelsByIndex(index, panels);
       if (matchingPanels.length > 0) {
         this.logger.debug(
@@ -235,7 +235,7 @@ export class RelatedDashboardsClient {
   } {
     const relevantDashboards: SuggestedDashboard[] = [];
     this.dashboardsById.forEach((d) => {
-      const panels = d.attributes.panels.filter(isDashboardPanel);
+      const panels = (d.attributes.panels ?? []).filter(isDashboardPanel);
       const matchingPanels = this.getPanelsByField(fields, panels);
       const allMatchingFields = new Set(
         matchingPanels.map((p) => Array.from(p.matchingFields)).flat()
