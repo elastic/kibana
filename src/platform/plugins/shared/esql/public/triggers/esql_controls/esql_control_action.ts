@@ -19,6 +19,7 @@ import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { dismissAllFlyoutsExceptFor, DiscoverFlyouts } from '@kbn/discover-utils';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import { ACTION_CREATE_ESQL_CONTROL } from '../constants';
+import { ESQLEditorTelemetryService } from '@kbn/esql-editor/src/telemetry/telemetry_service';
 
 function isESQLVariableType(value: string): value is ESQLVariableType {
   return Object.values(ESQLVariableType).includes(value as ESQLVariableType);
@@ -44,11 +45,15 @@ export class CreateESQLControlAction implements Action<Context> {
   public id = ACTION_CREATE_ESQL_CONTROL;
   public order = 50;
 
+  private telemetryService: ESQLEditorTelemetryService;
+
   constructor(
     protected readonly core: CoreStart,
     protected readonly search: ISearchGeneric,
     protected readonly timefilter: TimefilterContract
-  ) {}
+  ) {
+    this.telemetryService = new ESQLEditorTelemetryService(this.core.analytics);
+  }
 
   public getDisplayName(): string {
     return i18n.translate('esql.createESQLControlLabel', {
@@ -91,7 +96,7 @@ export class CreateESQLControlAction implements Action<Context> {
       core: this.core,
       parentApi,
       loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
-        // esql_control_config_opened
+        this.telemetryService.trackEsqlControlFlyoutOpened(variableType);
         const { loadESQLControlFlyout } = await import('./esql_control_helpers');
         return await loadESQLControlFlyout({
           queryString,
