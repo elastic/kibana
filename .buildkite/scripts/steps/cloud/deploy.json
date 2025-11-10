@@ -138,7 +138,7 @@
               },
               "autoscaling_min": {
                 "resource": "memory",
-                "value": 0
+                "value": 4096
               },
               "autoscaling_tier_override": true,
               "id": "ml",
