@@ -41,7 +41,8 @@ export const createIndexWithMappings = async ({
     await esClient.indices.create({
       index: indexName,
       mappings: {
-        "date_detection": false,
+        ...mappings,
+        date_detection: false,
       },
     });
 
