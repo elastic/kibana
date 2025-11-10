@@ -167,6 +167,8 @@ export function setupSavedObjects(
       properties: {
         name: { type: 'keyword' },
         enabled: { type: 'boolean' },
+        // For searching by exact (type, consumer) pair
+        ruleTypeConsumerPairs: { type: 'keyword' },
         createdAt: { type: 'date' },
         updatedAt: { type: 'date' },
       },

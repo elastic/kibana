@@ -61,6 +61,28 @@ Payload summary: ${JSON.stringify(otherParams, (key, value) =>
     const soClient = context.unsecuredSavedObjectsClient;
     const taskManager = context.taskManager;
 
+    // Throw error if a gap auto fill scheduler already exists for the same (rule type, consumer) pair
+    const pairs = Array.from(new Set(params.ruleTypes.map((rt) => `${rt.type}:${rt.consumer}`)));
+    if (pairs.length > 0) {
+      const filter = `(${pairs
+        .map(
+          (p) =>
+            `${GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE}.attributes.ruleTypeConsumerPairs: "${p}"`
+        )
+        .join(' or ')})`;
+      const { saved_objects: candidates } = await soClient.find<GapAutoFillSchedulerSO>({
+        type: GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
+        perPage: 1,
+        filter,
+      });
+      if (candidates.length > 0) {
+        // Pairs are exact; any match is a duplicate
+        throw Boom.conflict(
+          `A gap auto fill scheduler already exists for at least one of the specified (rule type, consumer) pairs`
+        );
+      }
+    }
+
     const createdBy = await context.getUserName?.();
 
     const now = new Date().toISOString();

@@ -25,10 +25,6 @@ export default function createGapAutoFillSchedulerTests({ getService }: FtrProvi
     const gapStart = moment().subtract(14, 'days').startOf('day').toISOString();
     const gapEnd = moment().subtract(13, 'days').startOf('day').toISOString();
 
-    afterEach(async () => {
-      await objectRemover.removeAll();
-    });
-
     function getRule(overwrites: Record<string, unknown> = {}) {
       return getTestRuleData({
         rule_type_id: 'test.patternFiringAutoRecoverFalse',
@@ -50,6 +46,15 @@ export default function createGapAutoFillSchedulerTests({ getService }: FtrProvi
           username: user.username,
           password: user.password,
         };
+
+        afterEach(async () => {
+          await objectRemover.removeAll();
+          // Remove all gap auto fill schedulers in this space to avoid duplicate 409s
+          await supertest
+            .post(`${getUrlPrefix(apiOptions.spaceId)}/_test/gap_auto_fill_scheduler/_delete_all`)
+            .set('kbn-xsrf', 'foo')
+            .send({});
+        });
 
         it('creates scheduler and (for authorized) eventually creates a system backfill', async () => {
           // Create a rule
@@ -511,6 +516,73 @@ export default function createGapAutoFillSchedulerTests({ getService }: FtrProvi
             .auth(apiOptions.username, apiOptions.password)
             .send(body);
           expect(second.statusCode).to.eql(409);
+        });
+
+        it('returns 409 when creating duplicate (ruleType, consumer) pair for authorized user', async () => {
+          if (
+            ![
+              'superuser at space1',
+              'space_1_all at space1',
+              'space_1_all_alerts_none_actions at space1',
+              'space_1_all_with_restricted_fixture at space1',
+            ].includes(scenario.id)
+          ) {
+            return;
+          }
+
+          const url = `${getUrlPrefix(
+            apiOptions.spaceId
+          )}/internal/alerting/rules/gaps/gap_auto_fill_scheduler`;
+
+          // first create
+          const first = await supertestWithoutAuth
+            .post(url)
+            .set('kbn-xsrf', 'foo')
+            .auth(apiOptions.username, apiOptions.password)
+            .send({
+              name: `it-scheduler-pair-1-${Date.now()}`,
+              schedule: { interval: '1m' },
+              gap_fill_range: 'now-30d',
+              max_backfills: 10,
+              amount_of_retries: 1,
+              rule_types: [
+                { type: 'test.patternFiringAutoRecoverFalse', consumer: 'alertsFixture' },
+              ],
+            });
+          expect(first.statusCode).to.eql(200);
+
+          // duplicate pair
+          const dup = await supertestWithoutAuth
+            .post(url)
+            .set('kbn-xsrf', 'foo')
+            .auth(apiOptions.username, apiOptions.password)
+            .send({
+              name: `it-scheduler-pair-dup-${Date.now()}`,
+              schedule: { interval: '2m' },
+              gap_fill_range: 'now-30d',
+              max_backfills: 10,
+              amount_of_retries: 1,
+              rule_types: [
+                { type: 'test.patternFiringAutoRecoverFalse', consumer: 'alertsFixture' },
+              ],
+            });
+          expect(dup.statusCode).to.eql(409);
+
+
+          // different type succeeds
+          const diffType = await supertestWithoutAuth
+            .post(url)
+            .set('kbn-xsrf', 'foo')
+            .auth(apiOptions.username, apiOptions.password)
+            .send({
+              name: `it-scheduler-pair-type-${Date.now()}`,
+              schedule: { interval: '2m' },
+              gap_fill_range: 'now-30d',
+              max_backfills: 10,
+              amount_of_retries: 1,
+              rule_types: [{ type: 'test.always-firing', consumer: 'alertsFixture' }],
+            });
+          expect(diffType.statusCode).to.eql(200);
         });
       });
     }

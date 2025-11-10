@@ -14,6 +14,7 @@ export interface GapAutoFillSchedulerSO extends Record<string, unknown> {
   maxBackfills: number;
   amountOfRetries: number;
   ruleTypes: Array<{ type: string; consumer: string }>;
+  ruleTypeConsumerPairs: string[];
   createdBy?: string;
   updatedBy?: string;
   createdAt: string;

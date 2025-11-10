@@ -24,6 +24,7 @@ export const rawGapAutoFillSchedulerSchemaV1 = schema.object(
         consumer: schema.string(),
       })
     ),
+    ruleTypeConsumerPairs: schema.arrayOf(schema.string()),
     createdBy: schema.maybe(schema.string()),
     updatedBy: schema.maybe(schema.string()),
     createdAt: schema.string(),
