@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable complexity */
+
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import {
   MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID,
@@ -50,6 +52,7 @@ import type {
   ResponseActionRunScriptOutputContent,
   ResponseActionRunScriptParameters,
   UploadedFileInfo,
+  ActionResponseOutput,
 } from '../../../../../../../../common/endpoint/types';
 import type {
   ResponseActionAgentType,
@@ -94,6 +97,8 @@ const MDE_ACTION_FETCH_RETRY_CONFIG = {
   maxTimeout: 1500,
   factor: 1.5,
 };
+
+const RUNSCRIPT_OUTPUT_FILE_MAX_SIZE_BYTES = 65 * 1024; // 65 KB
 
 export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClientImpl {
   protected readonly agentType: ResponseActionAgentType = 'microsoft_defender_endpoint';
@@ -480,7 +485,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
     try {
       // Retry fetching action details to handle MDE API indexing lag.
       // When MDE accepts a new action, there's a delay before it appears in their GET actions API.
-      // We retry with exponential backoff (300ms → 450ms → 675ms → 1012ms → 1518ms) up to 5 times
+      // We retry request with linear increase in time delay (300ms → 450ms → 675ms → 1012ms → 1518ms) up to 5 times
       // to give MDE's internal indexing sufficient time to make the action available.
       const actionDetails = await pRetry(
         async () => {
@@ -508,9 +513,9 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
         },
         {
           ...MDE_ACTION_FETCH_RETRY_CONFIG,
-          onFailedAttempt: (error) => {
+          onFailedAttempt: ({ attemptNumber, retriesLeft, message }) => {
             this.log.debug(
-              `Attempt ${error.attemptNumber} to fetch MDE action [${machineActionId}] failed. ${error.retriesLeft} retries left. [ERROR: ${error.message}]`
+              `Attempt ${attemptNumber} to fetch MDE action [${machineActionId}] failed. ${retriesLeft} retries left. [ERROR: ${message}]`
             );
           },
         }
@@ -764,9 +769,9 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
     const { scriptName, args } = reqIndexOptions.parameters;
 
     if (!reqIndexOptions.error) {
-      let error = (await this.validateRequest(reqIndexOptions)).error;
+      let reqValidationError = (await this.validateRequest(reqIndexOptions)).error;
 
-      if (!error) {
+      if (!reqValidationError) {
         try {
           const msActionResponse = await this.sendAction<
             MicrosoftDefenderEndpointMachineAction,
@@ -813,14 +818,14 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
 
           reqIndexOptions.meta = { machineActionId };
         } catch (err) {
-          error = err;
+          reqValidationError = err;
         }
       }
 
-      reqIndexOptions.error = error?.message;
+      reqIndexOptions.error = reqValidationError?.message;
 
-      if (!this.options.isAutomated && error) {
-        throw error;
+      if (!this.options.isAutomated && reqValidationError) {
+        throw reqValidationError;
       }
     }
 
@@ -941,18 +946,6 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
           case 'isolate':
           case 'unisolate':
           case 'cancel':
-            addResponsesToQueueIfAny(
-              await this.checkPendingActions(
-                typePendingActions as Array<
-                  ResponseActionsClientPendingAction<
-                    undefined,
-                    {},
-                    MicrosoftDefenderEndpointActionRequestCommonMeta
-                  >
-                >
-              )
-            );
-            break;
           case 'runscript':
             addResponsesToQueueIfAny(
               await this.checkPendingActions(
@@ -962,8 +955,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
                     {},
                     MicrosoftDefenderEndpointActionRequestCommonMeta
                   >
-                >,
-                { downloadResult: true }
+                >
               )
             );
             break;
@@ -979,8 +971,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
         {},
         MicrosoftDefenderEndpointActionRequestCommonMeta
       >
-    >,
-    options: { downloadResult?: boolean } = { downloadResult: false }
+    >
   ): Promise<LogsEndpointActionResponse[]> {
     const completedResponses: LogsEndpointActionResponse[] = [];
     const warnings: string[] = [];
@@ -1031,49 +1022,63 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
 
     if (machineActions?.value) {
       for (const machineAction of machineActions.value) {
-        const { isPending, isError, message } = this.calculateMachineActionState(machineAction);
+        const machineActionId = machineAction.id;
+        const mdeCommand = machineAction.type;
 
-        const commandErrors: string = machineAction.commands?.[0]?.errors?.join('\n') ?? '';
+        const {
+          isPending,
+          isError,
+          message: machineStateMessage,
+        } = this.calculateMachineActionState(machineAction);
+        const message: string =
+          machineAction.commands?.[0]?.errors?.join('\n') || machineStateMessage;
 
+        // completed actions -> failed | succeeded - build response docs for all associated action requests
         if (!isPending) {
-          const pendingActionRequests = actionsByMachineId[machineAction.id] ?? [];
-          for (const actionRequest of pendingActionRequests) {
-            let additionalData = {};
-            // In order to not copy paste most of the logic, I decided to add this additional check here to support `runscript` action and it's result that comes back as a link to download the file
-            if (options.downloadResult) {
-              additionalData = {
-                meta: {
-                  machineActionId: machineAction.id,
-                  filename: `runscript-output-${machineAction.id}.json`,
-                  createdAt: new Date().toISOString(),
-                },
-              };
-            }
+          const completeActionRequests = actionsByMachineId[machineActionId] ?? [];
 
+          for (const actionRequest of completeActionRequests) {
+            const actionId = actionRequest.EndpointActions.action_id;
+            const command = actionRequest.EndpointActions.data.command;
+            const isCancelledAction = machineAction.status === 'Cancelled' && command === 'cancel';
             // Special handling for cancelled actions:
             // Cancel actions that successfully cancel something should show as success
             // Actions that were cancelled by another action should show as failed
-            let finalIsError = isError;
-            if (
-              machineAction.status === 'Cancelled' &&
-              actionRequest.EndpointActions.data.command === 'cancel'
-            ) {
-              finalIsError = false; // Cancel action succeeded
+            const shouldUpdateErrorMessage = !isCancelledAction && isError;
+
+            const isRunscriptAction = mdeCommand === 'LiveResponse' && command === 'runscript';
+            let output: ActionResponseOutput<EndpointActionResponseDataOutput> | undefined;
+            let meta = {};
+
+            if (isRunscriptAction) {
+              const outputFile = await this.fetchMachineLiveResponseFile(machineActionId);
+              output = {
+                type: 'json' as const,
+                content: {
+                  stdout: outputFile?.stdout || '',
+                  stderr: outputFile?.stderr || '',
+                  code: outputFile?.code || '0',
+                },
+              };
+              meta = {
+                machineActionId,
+                filename: `runscript_output_${machineActionId}_0.json`,
+                createdAt: new Date().toISOString(),
+              };
             }
 
             completedResponses.push(
               this.buildActionResponseEsDoc({
-                actionId: actionRequest.EndpointActions.action_id,
+                actionId,
                 agentId: Array.isArray(actionRequest.agent.id)
                   ? actionRequest.agent.id[0]
                   : actionRequest.agent.id,
-                data: { command: actionRequest.EndpointActions.data.command },
-                error: finalIsError
-                  ? {
-                      message: commandErrors || message,
-                    }
-                  : undefined,
-                ...additionalData,
+                data: {
+                  command: actionRequest.EndpointActions.data.command,
+                  output,
+                },
+                error: shouldUpdateErrorMessage ? { message } : undefined,
+                meta,
               })
             );
           }
@@ -1308,5 +1313,71 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
     }
 
     return agentResponse;
+  }
+
+  private async fetchMachineLiveResponseFile(
+    machineActionId: string
+  ): Promise<ResponseActionRunScriptOutputContent | null> {
+    try {
+      // Download the file content
+      const { data: downloadStream } = await this.sendAction<Readable>(
+        MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTION_RESULTS,
+        { id: machineActionId }
+      );
+
+      if (!downloadStream) {
+        this.log.debug(`No download stream available for machine action ${machineActionId}`);
+        return null;
+      }
+
+      if (downloadStream.readableLength > RUNSCRIPT_OUTPUT_FILE_MAX_SIZE_BYTES) {
+        throw new ResponseActionsClientError(
+          'The output file is too large to download and display.',
+          413
+        );
+      }
+
+      return this.getFormattedOutput(downloadStream);
+    } catch ({ message, statusCode }) {
+      this.log.error(
+        `Failed to fetch runscript output for machine action ${machineActionId}: ${message}`
+      );
+
+      // Return error information as output
+      return {
+        stdout: '',
+        stderr: message,
+        code: statusCode,
+      };
+    }
+  }
+
+  private async getFormattedOutput(
+    stream: Readable
+  ): Promise<ResponseActionRunScriptOutputContent> {
+    try {
+      const buffer: Buffer[] = [];
+      const stderr = '';
+
+      for await (const chunk of stream) {
+        buffer.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+      }
+      const output = JSON.parse(Buffer.concat(buffer).toString('utf8'));
+
+      return {
+        stdout: output.script_output ?? '',
+        stderr: (output.script_errors ?? '') + (stderr ? `\n${stderr}` : ''),
+        code: output.exit_code ?? 0,
+      };
+    } catch ({ message }) {
+      const error = `Failed to process runscript output file: ${message}`;
+      this.log.error(error);
+
+      return {
+        stdout: '',
+        stderr: error,
+        code: '-1',
+      };
+    }
   }
 }
