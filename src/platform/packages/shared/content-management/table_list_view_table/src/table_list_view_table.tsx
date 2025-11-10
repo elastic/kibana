@@ -58,6 +58,7 @@ import type { RowActions, SearchQueryError, TableItemsRowActions } from './types
 import type { CustomSortingOptions } from './components/table_sort_select';
 import { sortByRecentlyAccessed } from './components/table_sort_select';
 import { ContentEditorActivityRow } from './components/content_editor_activity_row';
+import type { ContentType } from './components/tabbed_filter';
 
 const disabledEditAction = {
   enabled: false,
@@ -169,7 +170,7 @@ export interface State<T extends UserContentCommonSchema = UserContentCommonSche
   tableFilter: {
     createdBy: string[];
     favorites: boolean;
-    contentTypeTab?: string;
+    contentTypeTab?: ContentType;
   };
 }
 
@@ -181,7 +182,7 @@ export interface URLState {
   };
   filter?: {
     createdBy?: string[];
-    contentTypeTab?: string;
+    contentTypeTab?: ContentType;
   };
 
   [key: string]: unknown;
@@ -275,7 +276,7 @@ const urlStateSerializer = (updated: {
   sort?: { field: 'title' | 'updatedAt'; direction: Direction };
   filter?: {
     createdBy?: string[];
-    contentTypeTab?: 'dashboards' | 'visualizations' | 'annotation-groups';
+    contentTypeTab?: ContentType;
   };
 }) => {
   const updatedQueryParams: Partial<URLQueryParams> = {};

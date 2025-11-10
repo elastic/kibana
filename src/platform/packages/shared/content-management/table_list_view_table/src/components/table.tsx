@@ -53,8 +53,7 @@ import {
 } from './user_filter_panel';
 import { FavoritesFilterButton } from './favorites_filter_panel';
 
-// Temporarily hiding tabs filter because we now have favorite filter as a button, and will rework tabs filter later
-// import { TabbedTableFilter } from './tabbed_filter';
+import { TabbedTableFilter } from './tabbed_filter';
 
 type State<T extends UserContentCommonSchema> = Pick<
   TableListViewState<T>,
@@ -355,15 +354,15 @@ export function Table<T extends UserContentCommonSchema>({
       ? true // by passing "true" we disable the EuiInMemoryTable sorting and handle it ourselves, but sorting is still enabled
       : { sort: tableSort };
 
-  // const favoritesFilter =
-  //   favoritesEnabled && !favoritesError ? (
-  //     <TabbedTableFilter
-  //       selectedTabId={tableFilter.favorites ? 'favorite' : 'all'}
-  //       onSelectedTabChanged={(newTab) => {
-  //         onFilterChange({ favorites: newTab === 'favorite' });
-  //       }}
-  //     />
-  //   ) : undefined;
+  const favoritesFilter =
+    favoritesEnabled && !favoritesError ? (
+      <TabbedTableFilter
+        selectedTabId={tableFilter.contentTypeTab ?? 'dashboards'}
+        onSelectedTabChanged={(newTab) => {
+          onFilterChange({ contentTypeTab: newTab });
+        }}
+      />
+    ) : undefined;
 
   return (
     <UserFilterContextProvider
@@ -402,7 +401,7 @@ export function Table<T extends UserContentCommonSchema>({
           rowHeader="attributes.title"
           tableCaption={tableCaption}
           css={cssFavoriteHoverWithinEuiTableRow(euiTheme.euiTheme)}
-          // childrenBetween={favoritesFilter}
+          childrenBetween={favoritesFilter}
         />
       </TagFilterContextProvider>
     </UserFilterContextProvider>
