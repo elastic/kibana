@@ -11,11 +11,9 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useEuiTheme, euiScrollBarStyles } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiBetaBadge } from '@elastic/eui';
-import { Markdown } from '@kbn/shared-ux-markdown';
 import type { LanguageDocumentationSections, LicenseInfo, MultipleLicenseInfo } from '../../types';
 import { getLicensesArray } from '../../utils/get_license_array';
-
-const MemoizedMarkdown = React.memo(Markdown);
+import { MarkdownWithHighlight } from './markdown_with_highlight';
 
 function toTitleCase(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
@@ -165,11 +163,9 @@ function DocumentationContent({
                           ))}
                         </EuiFlexGroup>
                       )}
-                      <MemoizedMarkdown
+                      <MarkdownWithHighlight
                         markdownContent={helpItem.description.markdownContent}
                         openLinksInNewTab={helpItem.description.openLinksInNewTab}
-                        readOnly
-                        enableSoftLineBreaks
                       />
                     </article>
                   );

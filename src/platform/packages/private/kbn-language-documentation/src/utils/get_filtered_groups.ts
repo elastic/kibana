@@ -6,7 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { LanguageDocumentationSections } from '../types';
+import type { DocumentationGroupItem, LanguageDocumentationSections } from '../types';
+import { highlightMatches } from './highlight_matches';
 
 /**
  * Filters the documentation groups based on the search criteria.
@@ -55,7 +56,19 @@ export const getFilteredGroups = (
         });
 
         // Show items with label matches first
-        const options = [...labelMatches, ...descriptionMatches];
+        const options = [...labelMatches, ...descriptionMatches].map(
+          (item: DocumentationGroupItem) => ({
+            label: highlightMatches(item.label, searchText),
+            description: {
+              ...item.description,
+              markdownContent: highlightMatches(
+                item.description?.markdownContent || '',
+                searchText
+              ).toString(),
+            },
+          })
+        );
+
         return { ...group, options, hasLabelMatches: labelMatches.length > 0 };
       })
       .filter((group) => {
