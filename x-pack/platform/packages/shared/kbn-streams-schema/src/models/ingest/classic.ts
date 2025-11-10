@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { z } from '@kbn/zod';
-import { IngestBase, IngestBaseStream } from './base';
+import { ingestBaseObjectSchema, IngestBase, IngestBaseStream } from './base';
 import type { ClassicIngestStreamEffectiveLifecycle } from './lifecycle';
 import { classicIngestStreamEffectiveLifecycleSchema } from './lifecycle';
 import type { ElasticsearchAssets } from './common';
@@ -23,12 +23,14 @@ import { fieldDefinitionSchema } from '../../fields';
 /* eslint-disable @typescript-eslint/no-namespace */
 
 export interface IngestClassic {
+  type: 'classic';
   classic: {
     field_overrides?: FieldDefinition;
   };
 }
 
 export const IngestClassic: z.Schema<IngestClassic> = z.object({
+  type: z.literal('classic'),
   classic: z.object({
     field_overrides: z.optional(fieldDefinitionSchema),
   }),
@@ -36,9 +38,16 @@ export const IngestClassic: z.Schema<IngestClassic> = z.object({
 
 export type ClassicIngest = IngestBase & IngestClassic;
 
+export const classicIngestObjectSchema = ingestBaseObjectSchema.extend({
+  type: z.literal('classic'),
+  classic: z.object({
+    field_overrides: z.optional(fieldDefinitionSchema),
+  }),
+});
+
 export const ClassicIngest: Validation<IngestBase, ClassicIngest> = validation(
   IngestBase.right,
-  z.intersection(IngestBase.right, IngestClassic)
+  classicIngestObjectSchema
 );
 
 export namespace ClassicStream {

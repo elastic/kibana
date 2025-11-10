@@ -30,6 +30,7 @@ import { isObservable } from 'rxjs';
 import { makeZodValidationObject } from './make_zod_validation_object';
 import { validateAndDecodeParams } from './validate_and_decode_params';
 import { noParamsValidationObject, passThroughValidationObject } from './validation_objects';
+import { z } from '@kbn/zod';
 
 const CLIENT_CLOSED_REQUEST = {
   statusCode: 499,
@@ -167,7 +168,16 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
 
     let validationObject;
     if (params === undefined) {
-      validationObject = noParamsValidationObject;
+      // For GET/DELETE without explicit params, do not emit a request body at all
+      // so downstream OAS does not include a requestBody.
+      if (method === 'get' || method === 'delete') {
+        validationObject = {
+          ...noParamsValidationObject,
+          body: z.undefined(),
+        };
+      } else {
+        validationObject = noParamsValidationObject;
+      }
     } else if (isZod(params)) {
       validationObject = makeZodValidationObject(params as ZodParamsObject);
     } else {

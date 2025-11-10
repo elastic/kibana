@@ -107,6 +107,17 @@ export function migrateOnRead(definition: Record<string, unknown>): Streams.all.
     hasBeenMigrated = true;
   }
 
+  // Add ingest.type discriminator if missing
+  if (isObject(migratedDefinition.ingest) && !('type' in migratedDefinition.ingest)) {
+    if ('wired' in migratedDefinition.ingest) {
+      set(migratedDefinition, 'ingest.type', 'wired');
+      hasBeenMigrated = true;
+    } else if ('classic' in migratedDefinition.ingest) {
+      set(migratedDefinition, 'ingest.type', 'classic');
+      hasBeenMigrated = true;
+    }
+  }
+
   // Add metadata to Group stream if missing
   if (isObject(migratedDefinition.group) && !('metadata' in migratedDefinition.group)) {
     migratedDefinition = {

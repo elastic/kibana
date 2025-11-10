@@ -11,8 +11,8 @@ import type { ModelValidation } from '../validation/model_validation';
 import { joinValidation } from '../validation/model_validation';
 import type { Validation } from '../validation/validation';
 import { validation } from '../validation/validation';
-import { ClassicIngest, ClassicStream } from './classic';
-import { WiredIngest, WiredStream } from './wired';
+import { ClassicIngest, classicIngestObjectSchema, ClassicStream } from './classic';
+import { WiredIngest, wiredIngestObjectSchema, WiredStream } from './wired';
 
 /* eslint-disable @typescript-eslint/no-namespace */
 export namespace IngestStream {
@@ -41,7 +41,7 @@ export namespace IngestStream {
 }
 
 export type Ingest = WiredIngest | ClassicIngest;
-export const Ingest: Validation<IngestBase, Ingest> = validation(
+export const Ingest: Validation<IngestBase, Ingest> = validation<IngestBase, Ingest>(
   IngestBase.right,
-  z.union([WiredIngest.right, ClassicIngest.right])
+  z.discriminatedUnion('type', [wiredIngestObjectSchema, classicIngestObjectSchema])
 );

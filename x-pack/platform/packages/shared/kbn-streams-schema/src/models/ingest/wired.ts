@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { z } from '@kbn/zod';
-import { IngestBase, IngestBaseStream } from './base';
+import { ingestBaseObjectSchema, IngestBase, IngestBaseStream } from './base';
 import type { RoutingDefinition } from './routing';
 import { routingDefinitionListSchema } from './routing';
 import type { WiredIngestStreamEffectiveLifecycle } from './lifecycle';
@@ -23,6 +23,7 @@ import { wiredIngestStreamEffectiveSettingsSchema } from './settings';
 /* eslint-disable @typescript-eslint/no-namespace */
 
 interface IngestWired {
+  type: 'wired';
   wired: {
     fields: FieldDefinition;
     routing: RoutingDefinition[];
@@ -30,6 +31,7 @@ interface IngestWired {
 }
 
 const IngestWired: z.Schema<IngestWired> = z.object({
+  type: z.literal('wired'),
   wired: z.object({
     fields: fieldDefinitionSchema,
     routing: routingDefinitionListSchema,
@@ -38,9 +40,17 @@ const IngestWired: z.Schema<IngestWired> = z.object({
 
 export type WiredIngest = IngestBase & IngestWired;
 
+export const wiredIngestObjectSchema = ingestBaseObjectSchema.extend({
+  type: z.literal('wired'),
+  wired: z.object({
+    fields: fieldDefinitionSchema,
+    routing: routingDefinitionListSchema,
+  }),
+});
+
 export const WiredIngest: Validation<IngestBase, WiredIngest> = validation(
   IngestBase.right,
-  z.intersection(IngestBase.right, IngestWired)
+  wiredIngestObjectSchema
 );
 
 export namespace WiredStream {

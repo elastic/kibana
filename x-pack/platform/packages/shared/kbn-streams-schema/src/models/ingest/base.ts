@@ -53,13 +53,15 @@ export interface IngestBase {
   settings: IngestStreamSettings;
 }
 
+export const ingestBaseObjectSchema = z.object({
+  lifecycle: ingestStreamLifecycleSchema,
+  processing: streamlangDSLSchema,
+  settings: ingestStreamSettingsSchema,
+});
+
 export const IngestBase: Validation<unknown, IngestBase> = validation(
   z.unknown(),
-  z.object({
-    lifecycle: ingestStreamLifecycleSchema,
-    processing: streamlangDSLSchema,
-    settings: ingestStreamSettingsSchema,
-  })
+  ingestBaseObjectSchema
 );
 
 /* eslint-disable @typescript-eslint/no-namespace */
