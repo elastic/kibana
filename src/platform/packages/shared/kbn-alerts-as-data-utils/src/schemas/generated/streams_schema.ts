@@ -87,6 +87,7 @@ const StreamsAlertOptional = rt.partial({
   'event.kind': schemaString,
   'event.original': schemaString,
   'kibana.alert.action_group': schemaString,
+  'kibana.alert.attack_ids': schemaStringArray,
   'kibana.alert.case_ids': schemaStringArray,
   'kibana.alert.consecutive_matches': schemaStringOrNumber,
   'kibana.alert.duration.us': schemaStringOrNumber,
