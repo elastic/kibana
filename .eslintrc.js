@@ -2252,6 +2252,7 @@ module.exports = {
         'src/platform/plugins/shared/workflows_management/**/*.{js,mjs,ts,tsx}',
         'src/platform/plugins/shared/workflows_execution_engine/**/*.{js,mjs,ts,tsx}',
         'src/platform/packages/shared/kbn-workflows/**/*.{js,mjs,ts,tsx}',
+        'src/platform/packages/shared/kbn-workflows-ui/**/*.{js,mjs,ts,tsx}',
       ],
       plugins: ['eslint-plugin-node', 'react'],
       env: {
@@ -2400,6 +2401,7 @@ module.exports = {
         'src/platform/plugins/shared/workflows_management/public/**/*.{js,mjs,ts,tsx}',
         'src/platform/plugins/shared/workflows_management/common/**/*.{js,mjs,ts,tsx}',
         'src/platform/packages/shared/kbn-workflows/**/*.{js,mjs,ts,tsx}',
+        'src/platform/packages/shared/kbn-workflows-ui/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         'import/no-nodejs-modules': 'error',
@@ -2415,6 +2417,7 @@ module.exports = {
         'src/platform/plugins/shared/workflows_management/**/*.{test,mock,test_helper}.{ts,tsx}',
         'src/platform/plugins/shared/workflows_execution_engine/**/*.{test,mock,test_helper}.{ts,tsx}',
         'src/platform/packages/shared/kbn-workflows/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'src/platform/packages/shared/kbn-workflows-ui/**/*.{test,mock,test_helper}.{ts,tsx}',
       ],
       rules: {
         '@typescript-eslint/no-non-null-assertion': 'off',
