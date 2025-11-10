@@ -12,6 +12,7 @@ import { startServers, stopServers } from './util/servers';
 import { assertValidUpdates, fetchSnapshot, takeSnapshot } from './snapshots';
 import type { MigrationSnapshot } from './types';
 import { getFixtures } from './migrations';
+import { handleRemovedTypes } from './removed_types';
 
 interface CheckSavedObjectsParams {
   gitRev: string;
@@ -29,6 +30,9 @@ export async function checkSavedObjects({ gitRev, log, fix }: CheckSavedObjectsP
     ]);
 
     const updatedTypes = assertValidUpdates({ from, to, log });
+
+    // Handles removed types between base branch and current branch
+    await handleRemovedTypes({ log, from, to, fix });
 
     // ensures that each of the updated types defines fixtures that allow testing the new modelVersions
     await getFixtures({ snapshot: to, serverHandles, types: updatedTypes, fix, log });

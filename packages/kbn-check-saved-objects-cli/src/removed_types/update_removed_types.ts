@@ -18,18 +18,11 @@ const REMOVED_TYPES_JSON_PATH = path.resolve(__dirname, '../../removed_types.jso
  */
 export async function updateRemovedTypes(
   removedTypes: string[],
+  currentRemovedTypes: string[],
   log: ToolingLog
 ) {
   log.info(`Updating removed_types.json`);
-  const currentRemovedTypes = await readRemovedTypesJson();
-  const typesToAdd = removedTypes.filter(type => !currentRemovedTypes.includes(type));
-  
-  if (typesToAdd.length === 0) {
-    log.info('removed_types.json already contains all specified types');
-    return;
-  }
-
-  const allTypes = [...currentRemovedTypes, ...typesToAdd].sort();
+  const allTypes = [...currentRemovedTypes, ...removedTypes].sort();
 
   await writeRemovedTypesJson(allTypes);
 }
@@ -37,7 +30,7 @@ export async function updateRemovedTypes(
 /**
  * Reads the removed types from the JSON file
  */
-async function readRemovedTypesJson(): Promise<string[]> {
+export async function readRemovedTypesJson(): Promise<string[]> {
   const fileContent = await fs.readFile(REMOVED_TYPES_JSON_PATH, 'utf-8');
   return JSON.parse(fileContent);
 }
@@ -45,7 +38,7 @@ async function readRemovedTypesJson(): Promise<string[]> {
 /**
  * Writes the removed types to the JSON file
  */
-async function writeRemovedTypesJson(removedTypes: string[]): Promise<void> {
+export async function writeRemovedTypesJson(removedTypes: string[]): Promise<void> {
   const jsonContent = JSON.stringify(removedTypes, null, 2) + '\n';
   await fs.writeFile(REMOVED_TYPES_JSON_PATH, jsonContent, 'utf-8');
 }

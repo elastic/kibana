@@ -9,55 +9,87 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { MigrationSnapshot } from '../types';
-import { updateRemovedTypes } from './update_removed_types';
+import { updateRemovedTypes, readRemovedTypesJson } from './update_removed_types';
 
 /**
- * Detects types that were removed between baseline and current snapshot,
+ * Detects types that were removed between base branch and current branch,
  * then automatically updates the removed_types.json file to track the removal.
- * TODO: pass in the fix flag eventually and check if fix flag is set to true
- * TODO: checks for new types that have the same name as an existing removed type
+ * Also checks for new types that have the same name as an existing removed type.
  */
 export async function handleRemovedTypes({
   log,
   from,
-  current,
+  to,
+  fix
 }: {
   log: ToolingLog;
   from: MigrationSnapshot;
-  current: MigrationSnapshot;
+  to: MigrationSnapshot;
+  fix?: boolean;
 }) {
-  const removedTypes = detectRemovedTypes(from, current);
-  
+  log.info(`Checking for removed types between base branch and current branch`);
+
+  const currentRemovedTypes = await readRemovedTypesJson();
+
+  const conflictingTypes = await detectConflictsWithRemovedTypes(to, currentRemovedTypes);
+  if (conflictingTypes.length > 0) {
+    throw new Error(
+      `❌ Cannot re-register previously removed type(s): ${conflictingTypes.join(', ')}. Please use a different name.`
+    );
+  }
+
+  const removedTypes = detectRemovedTypes(from, to, currentRemovedTypes);
   if (removedTypes.length === 0) {
     log.info('No removed types detected');
     return;
   }
 
   log.info(`Detected ${removedTypes.length} removed type(s): ${removedTypes.join(', ')}`);
-  
-  try {
-    await updateRemovedTypes(removedTypes, log);
-    log.info(`✅ Successfully handled ${removedTypes.length} removed type(s)`);
-  } catch (error) {
-    log.error(`❌ Failed to handle removed types: ${error.message}`);
-    throw error;
-  };
+
+  if (!fix) {
+    throw new Error(
+      `❌ Removed types detected, but fix flag was not provided. Please run with --fix to update removed_types.json.`
+    );
+  }
+
+  await updateRemovedTypes(removedTypes, currentRemovedTypes, log);
+  log.info(`✅ Successfully handled ${removedTypes.length} removed type(s)`);
 }
 
 /**
- * Compares two snapshots and identifies types that exist in 'from' but not in 'current'
+ * Detects new types in 'to' that conflict with previously removed types
  */
-function detectRemovedTypes(from: MigrationSnapshot, current: MigrationSnapshot): string[] {
-  const fromTypes = Object.keys(from.typeDefinitions);
-  const currentTypes = Object.keys(current.typeDefinitions);
-  
-  const removedTypes: string[] = [];
-  
-  for (const typeName of fromTypes) {
-    if (!currentTypes.includes(typeName)) {
-      removedTypes.push(typeName);
+async function detectConflictsWithRemovedTypes(
+  to: MigrationSnapshot,
+  currentRemovedTypes: string[]
+): Promise<string[]> {
+  const toTypes = Object.keys(to.typeDefinitions);
+
+  const conflictingTypes: string[] = [];
+
+  for (const type of toTypes) {
+    if (currentRemovedTypes.includes(type)) {
+      conflictingTypes.push(type);
     }
   }
-  
+
+  return conflictingTypes.sort();
+}
+
+/**
+ * Compares two snapshots and identifies types that exist in 'from' but not in 'to' and not already in removed_types.json
+ */
+function detectRemovedTypes(from: MigrationSnapshot, to: MigrationSnapshot, currentRemovedTypes: string[]): string[] {
+  const fromTypes = Object.keys(from.typeDefinitions);
+  const toTypes = Object.keys(to.typeDefinitions);
+
+  const removedTypes: string[] = [];
+
+  for (const type of fromTypes) {
+    if (!toTypes.includes(type) && !currentRemovedTypes.includes(type)) {
+      removedTypes.push(type);
+    }
+  }
+
   return removedTypes.sort();
 }
