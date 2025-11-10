@@ -8,6 +8,12 @@
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import { platformCoreTools } from '@kbn/onechat-common';
 import type { StaticToolRegistration } from '@kbn/onechat-server';
+import {
+  OBSERVABILITY_GET_LOG_CHANGE_POINT_TOOL_ID,
+  createObservabilityGetLogChangePointTool,
+  OBSERVABILITY_GET_METRIC_CHANGE_POINT_TOOL_ID,
+  createObservabilityGetMetricChangePointTool,
+} from './get_change_point';
 import type {
   ObservabilityAgentPluginSetupDependencies,
   ObservabilityAgentPluginStart,
@@ -48,6 +54,8 @@ const OBSERVABILITY_TOOL_IDS = [
   OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
   OBSERVABILITY_GET_ALERTS_TOOL_ID,
   OBSERVABILITY_GET_LOG_CATEGORIES_TOOL_ID,
+  OBSERVABILITY_GET_LOG_CHANGE_POINT_TOOL_ID,
+  OBSERVABILITY_GET_METRIC_CHANGE_POINT_TOOL_ID,
 ];
 
 // registered in the APM plugin
@@ -77,6 +85,8 @@ export async function registerTools({
     createGetAnomalyDetectionJobsTool({ core, plugins, logger }),
     createGetAlertsTool({ core, logger }),
     createGetLogCategoriesTool({ core, logger }),
+    createObservabilityGetLogChangePointTool({ core, plugins, logger }),
+    createObservabilityGetMetricChangePointTool({ core, plugins, logger }),
   ];
 
   for (const tool of observabilityTools) {
