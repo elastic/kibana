@@ -60,6 +60,6 @@ Examples:
         ],
       };
     },
-    tags: ['security-labs', 'knowledge-base'],
+    tags: ['security', 'security-labs'],
   };
 };
