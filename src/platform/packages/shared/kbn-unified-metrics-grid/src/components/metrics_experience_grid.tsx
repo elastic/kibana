@@ -47,7 +47,7 @@ export const MetricsExperienceGrid = ({
     timeRange,
   });
 
-  const { leftSideActions, rightSideActions } = useToolbarActions({
+  const { toggleActions, leftSideActions, rightSideActions } = useToolbarActions({
     fields,
     renderToggleActions,
     requestParams,

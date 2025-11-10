@@ -13,7 +13,7 @@ import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import type { estypes } from '@elastic/elasticsearch';
 import type { InferSearchResponseOf } from '@kbn/es-types';
 import { semconvFlat } from '@kbn/otel-semantic-conventions';
-import { dateRangeQuery } from '@kbn/es-query';
+import { dateRangeQuery, kqlQuery } from '@kbn/es-query';
 import type { IndexFieldCapsMap, EpochTimeRange } from '../../types';
 import type { Dimension, MetricField } from '../../../common/types';
 import { extractDimensions } from '../dimensions/extract_dimensions';

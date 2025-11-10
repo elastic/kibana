@@ -51,7 +51,7 @@ export async function retrieveFieldCaps({
     });
 
     if (Object.keys(fieldCaps.fields).length > 0) {
-      dataStreamFieldCapsMap.set(dataStream.name, fieldCaps.fields);
+      indexFieldCapsMap.set(index.name, fieldCaps.fields);
     }
   });
 

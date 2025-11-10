@@ -118,8 +118,8 @@ describe('enrichMetricFields', () => {
         ],
       });
 
-      dataStreamFieldCapsMap.set(TEST_INDEX_METRICS, createFieldCaps());
-      dataStreamFieldCapsMap.set(TEST_INDEX_METRICBEAT, createFieldCaps());
+      indexFieldCapsMap.set(TEST_INDEX_METRICS, createFieldCaps());
+      indexFieldCapsMap.set(TEST_INDEX_METRICBEAT, createFieldCaps());
 
       const result = await enrichMetricFields({
         esClient: esClientMock,
@@ -171,12 +171,12 @@ describe('enrichMetricFields', () => {
         ],
       });
 
-      dataStreamFieldCapsMap.set(TEST_INDEX_METRICS, createFieldCaps());
+      indexFieldCapsMap.set(TEST_INDEX_METRICS, createFieldCaps());
 
       const result = await enrichMetricFields({
         esClient: esClientMock,
         metricFields,
-        dataStreamFieldCapsMap,
+        indexFieldCapsMap,
         logger,
         timerange: timeRangeFixture,
       });
@@ -192,12 +192,12 @@ describe('enrichMetricFields', () => {
         createMsearchResponse(TEST_INDEX_METRICS, {}, 1) // No dimension fields
       );
 
-      dataStreamFieldCapsMap.set(TEST_INDEX_METRICS, createFieldCaps());
+      indexFieldCapsMap.set(TEST_INDEX_METRICS, createFieldCaps());
 
       const result = await enrichMetricFields({
         esClient: esClientMock,
         metricFields,
-        dataStreamFieldCapsMap,
+        indexFieldCapsMap,
         logger,
         timerange: timeRangeFixture,
       });
@@ -220,12 +220,12 @@ describe('enrichMetricFields', () => {
         createMsearchResponse(TEST_INDEX_METRICS, { [TEST_HOST_FIELD]: [TEST_HOST_VALUE] })
       );
 
-      dataStreamFieldCapsMap.set(TEST_INDEX_METRICS, createFieldCaps());
+      indexFieldCapsMap.set(TEST_INDEX_METRICS, createFieldCaps());
 
       await enrichMetricFields({
         esClient: esClientMock,
         metricFields,
-        dataStreamFieldCapsMap,
+        indexFieldCapsMap,
         logger,
         timerange: timeRangeFixture,
         kuery,
@@ -256,7 +256,7 @@ describe('enrichMetricFields', () => {
           unit: ['1'],
         })
       );
-      dataStreamFieldCapsMap.set(TEST_INDEX_METRICS, createFieldCaps());
+      indexFieldCapsMap.set(TEST_INDEX_METRICS, createFieldCaps());
 
       const result = await enrichMetricFields({
         esClient: esClientMock,
@@ -288,7 +288,7 @@ describe('enrichMetricFields', () => {
       msearchMock.mockResolvedValue(
         createMsearchResponse(TEST_INDEX_METRICS, { [TEST_HOST_FIELD]: [TEST_HOST_VALUE] })
       );
-      dataStreamFieldCapsMap.set(TEST_INDEX_METRICS, createFieldCaps());
+      indexFieldCapsMap.set(TEST_INDEX_METRICS, createFieldCaps());
 
       const result = await enrichMetricFields({
         esClient: esClientMock,

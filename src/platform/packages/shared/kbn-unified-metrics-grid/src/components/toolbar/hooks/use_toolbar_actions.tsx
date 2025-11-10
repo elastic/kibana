@@ -29,7 +29,6 @@ export const useToolbarActions = ({
   fields,
   requestParams,
   renderToggleActions,
-  indexPattern,
   hideDimensionsSelector = false,
   hideRightSideActions = false,
 }: UseToolbarActionsProps) => {
