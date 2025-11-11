@@ -69,7 +69,7 @@ test.describe('Stream data routing - creating routing rules', { tag: ['@ess', '@
   }) => {
     await pageObjects.streams.clickCreateRoutingRule();
 
-    await expect(page.getByTestId('streamsAppStreamDetailRoutingAddRuleButton')).toBeDisabled();
+    await expect(page.getByTestId('streamsAppStreamDetailRoutingAddRuleButton')).toBeEuiDisabled();
 
     // Cancel the operation
     await pageObjects.streams.cancelRoutingRule();
@@ -120,6 +120,6 @@ test.describe('Stream data routing - creating routing rules', { tag: ['@ess', '@
     await pageObjects.streams.fillRoutingRuleName('nginx.access_logs');
 
     const createButton = page.getByTestId('streamsAppStreamDetailRoutingAddRuleButton');
-    await expect(createButton).toBeDisabled();
+    await expect(createButton).toBeEuiDisabled();
   });
 });

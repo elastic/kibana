@@ -136,6 +136,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
                 data-test-subj="streamsAppStreamDetailRoutingAddRuleButton"
                 onClick={createNewRule}
                 disabled={!canCreateRoutingRules || maxNestingLevel}
+                hasAriaDisabled
               >
                 {i18n.translate('xpack.streams.streamDetailRouting.addRule', {
                   defaultMessage: 'Create partition manually',
