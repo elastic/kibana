@@ -261,6 +261,7 @@
     "@kbn/object-utils",
     "@kbn/core-ui-settings-common",
     "@kbn/react-query",
+    "@kbn/core-lifecycle-browser-mocks",
     "@kbn/onechat-common",
     "@kbn/spaces-utils",
     "@kbn/onechat-plugin"

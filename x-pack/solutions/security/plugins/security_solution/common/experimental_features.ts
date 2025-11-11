@@ -176,11 +176,6 @@ export const allowedExperimentalValues = Object.freeze({
    */
   microsoftDefenderEndpointCancelEnabled: true,
   /**
-   * Protects all the work related to the attacks and alerts alignment effort
-   */
-  attacksAlertsAlignment: false,
-
-  /**
    * Enables Security Agent Builder integration. When enabled, registers Security Agent Builder
    * tools (alerts, security labs, product documentation) and the Security Agent.
    * Enable via: xpack.securitySolution.enableExperimental: ['agentBuilderEnabled']
