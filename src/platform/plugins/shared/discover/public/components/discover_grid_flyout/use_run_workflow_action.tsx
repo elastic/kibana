@@ -7,23 +7,114 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { toMountPoint } from '@kbn/react-kibana-mount';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { EuiButtonIcon, EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { FlyoutActionItem } from '../../customizations';
 import type { DiscoverServices } from '../../build_services';
 import { RunWorkflowModal } from './run_workflow_modal';
 
+interface RunWorkflowButtonProps {
+  showIconOnly?: boolean;
+  hit: DataTableRecord;
+  services: DiscoverServices;
+  hasPermission: boolean;
+}
+
+const RunWorkflowButton: React.FC<RunWorkflowButtonProps> = ({
+  showIconOnly,
+  hit,
+  services,
+  hasPermission,
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const queryClient = useMemo(() => new QueryClient(), []);
+
+  const button = showIconOnly ? (
+    <EuiToolTip
+      content={i18n.translate('discover.runWorkflow.actionLabel', {
+        defaultMessage: 'Run workflow',
+      })}
+      disableScreenReaderOutput
+    >
+      <EuiButtonIcon
+        size="s"
+        iconType="play"
+        data-test-subj="discoverRunWorkflowAction"
+        aria-label={i18n.translate('discover.runWorkflow.actionLabel', {
+          defaultMessage: 'Run workflow',
+        })}
+        onClick={(e: React.MouseEvent) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setIsOpen(true);
+        }}
+      />
+    </EuiToolTip>
+  ) : (
+    <EuiToolTip
+      content={
+        !hasPermission
+          ? i18n.translate('discover.runWorkflow.noPermissionTooltip', {
+              defaultMessage: 'You do not have permission to execute workflows',
+            })
+          : undefined
+      }
+      delay="long"
+    >
+      <EuiButtonEmpty
+        size="s"
+        iconSize="s"
+        flush="both"
+        iconType="play"
+        data-test-subj="discoverRunWorkflowAction"
+        onClick={(e: React.MouseEvent) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setIsOpen(true);
+        }}
+      >
+        {i18n.translate('discover.runWorkflow.actionLabel', {
+          defaultMessage: 'Run workflow',
+        })}
+      </EuiButtonEmpty>
+    </EuiToolTip>
+  );
+
+  return (
+    <KibanaContextProvider services={services.core}>
+      <QueryClientProvider client={queryClient}>
+        <RunWorkflowModal
+          document={hit}
+          core={services.core}
+          isOpen={isOpen}
+          onClose={() => setIsOpen(false)}
+          button={button}
+        />
+      </QueryClientProvider>
+    </KibanaContextProvider>
+  );
+};
+
 export function useRunWorkflowAction(
   hit: DataTableRecord,
   services: DiscoverServices
-): FlyoutActionItem {
+): FlyoutActionItem & { Component?: React.ComponentType<{ showIconOnly?: boolean }> } {
   const executeWorkflowCapability =
     services.core.application.capabilities.workflowsManagement?.executeWorkflow;
   const hasPermission = Boolean(executeWorkflowCapability);
+
+  const Component = useMemo(
+    () => (props: { showIconOnly?: boolean }) => {
+      return (
+        <RunWorkflowButton {...props} hit={hit} services={services} hasPermission={hasPermission} />
+      );
+    },
+    [hit, services, hasPermission]
+  );
 
   return useMemo(
     () => ({
@@ -39,25 +130,9 @@ export function useRunWorkflowAction(
           }),
       iconType: 'workflowsApp',
       dataTestSubj: 'discoverRunWorkflowAction',
-      onClick: () => {
-        // Create a QueryClient instance for the modal since it's rendered outside the main React tree
-        const queryClient = new QueryClient();
-        const overlayRef = services.core.overlays.openModal(
-          toMountPoint(
-            <KibanaContextProvider services={services.core}>
-              <QueryClientProvider client={queryClient}>
-                <RunWorkflowModal
-                  document={hit}
-                  core={services.core}
-                  onClose={() => overlayRef.close()}
-                />
-              </QueryClientProvider>
-            </KibanaContextProvider>,
-            services.core
-          )
-        );
-      },
+      onClick: () => {}, // Not used when Component is provided
+      Component,
     }),
-    [hit, hasPermission, services.core]
+    [hasPermission, Component]
   );
 }

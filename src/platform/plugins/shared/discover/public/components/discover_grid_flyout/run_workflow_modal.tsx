@@ -10,19 +10,16 @@
 import React, { useState, useCallback } from 'react';
 import ReactDOM from 'react-dom';
 import {
-  EuiModal,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiModalBody,
-  EuiModalFooter,
+  EuiPopover,
+  EuiPanel,
   EuiButton,
   EuiButtonEmpty,
   EuiSpacer,
-  useGeneratedHtmlId,
   EuiLink,
   EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -41,7 +38,9 @@ import { WorkflowExecutionPoller } from './workflow_execution_poller';
 interface RunWorkflowModalProps {
   document: DataTableRecord;
   core: CoreStart;
+  isOpen: boolean;
   onClose: () => void;
+  button: React.ReactElement;
 }
 
 /**
@@ -133,9 +132,14 @@ function validateWorkflowInputs(
   return null;
 }
 
-export const RunWorkflowModal: React.FC<RunWorkflowModalProps> = ({ document, core, onClose }) => {
+export const RunWorkflowModal: React.FC<RunWorkflowModalProps> = ({
+  document,
+  core,
+  isOpen,
+  onClose,
+  button,
+}) => {
   const [selectedWorkflowId, setSelectedWorkflowId] = useState<string>('');
-  const modalTitleId = useGeneratedHtmlId();
   const { http, notifications, application } = core;
 
   // Fetch workflows to get the workflow name
@@ -244,17 +248,24 @@ export const RunWorkflowModal: React.FC<RunWorkflowModalProps> = ({ document, co
   ]);
 
   return (
-    <EuiModal onClose={onClose} aria-labelledby={modalTitleId} maxWidth={600}>
-      <EuiModalHeader>
-        <EuiModalHeaderTitle id={modalTitleId}>
-          <FormattedMessage
-            id="discover.runWorkflow.modalTitle"
-            defaultMessage="Run workflow on document"
-          />
-        </EuiModalHeaderTitle>
-      </EuiModalHeader>
-
-      <EuiModalBody>
+    <EuiPopover
+      button={button}
+      isOpen={isOpen}
+      closePopover={onClose}
+      anchorPosition="downLeft"
+      panelPaddingSize="m"
+      panelStyle={{ minWidth: 500, maxWidth: 600 }}
+    >
+      <EuiPanel paddingSize="m">
+        <EuiText>
+          <h3>
+            <FormattedMessage
+              id="discover.runWorkflow.modalTitle"
+              defaultMessage="Run workflow on document"
+            />
+          </h3>
+        </EuiText>
+        <EuiSpacer size="m" />
         <WorkflowSelector
           selectedWorkflowId={selectedWorkflowId}
           onWorkflowChange={setSelectedWorkflowId}
@@ -263,21 +274,24 @@ export const RunWorkflowModal: React.FC<RunWorkflowModalProps> = ({ document, co
           }}
         />
         <EuiSpacer size="m" />
-      </EuiModalBody>
-
-      <EuiModalFooter>
-        <EuiButtonEmpty onClick={onClose}>
-          <FormattedMessage id="discover.runWorkflow.cancel" defaultMessage="Cancel" />
-        </EuiButtonEmpty>
-        <EuiButton
-          onClick={handleRun}
-          fill
-          isLoading={runWorkflowMutation.isLoading}
-          isDisabled={!selectedWorkflowId || runWorkflowMutation.isLoading}
-        >
-          <FormattedMessage id="discover.runWorkflow.run" defaultMessage="Run workflow" />
-        </EuiButton>
-      </EuiModalFooter>
-    </EuiModal>
+        <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty onClick={onClose}>
+              <FormattedMessage id="discover.runWorkflow.cancel" defaultMessage="Cancel" />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              onClick={handleRun}
+              fill
+              isLoading={runWorkflowMutation.isLoading}
+              isDisabled={!selectedWorkflowId || runWorkflowMutation.isLoading}
+            >
+              <FormattedMessage id="discover.runWorkflow.run" defaultMessage="Run workflow" />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
+    </EuiPopover>
   );
 };
