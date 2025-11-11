@@ -1271,7 +1271,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         type: LIST,
         ui_restrictions: [],
         validations: [],
-        value: [],
+        value: '',
       },
     },
     name: translate('searchConnectors.nativeConnectors.gitlab.name', {
