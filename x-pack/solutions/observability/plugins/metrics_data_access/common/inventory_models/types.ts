@@ -203,6 +203,7 @@ export const TSVBMetricModelRT = rt.intersection([
     map_field_to: rt.string,
     id_type: rt.keyof({ cloud: null, node: null }),
     drop_last_bucket: rt.boolean,
+    gap_policy: rt.string,
   }),
 ]);
 
