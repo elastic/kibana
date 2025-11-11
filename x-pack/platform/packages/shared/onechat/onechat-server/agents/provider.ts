@@ -22,6 +22,7 @@ import type {
   WritableToolResultStore,
   AttachmentsService,
 } from '../runner';
+import { CheckpointerService } from '@kbn/langgraph-checkpoint-saver';
 
 export type AgentHandlerFn = (
   params: AgentHandlerParams,
@@ -35,6 +36,10 @@ export interface AgentHandlerParams {
   runId: string;
   /** optional signal to abort the execution of the agent */
   abortSignal?: AbortSignal;
+  /**
+   * Checkpointer service to use for checkpointing.
+   */
+  checkpointerService: CheckpointerService;
 }
 
 export interface AgentHandlerReturn {

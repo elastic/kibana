@@ -8,6 +8,7 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ChatAgentEvent } from '@kbn/onechat-common';
 import type { AgentParams, AgentResponse } from './provider';
+import { CheckpointerService } from '@kbn/langgraph-checkpoint-saver';
 
 export interface RunAgentReturn {
   /** return from the agent */
@@ -43,6 +44,10 @@ export interface RunAgentParams {
    * If unspecified, will use internal logic to use the default connector
    */
   defaultConnectorId?: string;
+  /**
+   * Checkpointer service to use for checkpointing.
+   */
+  checkpointerService: CheckpointerService;
 }
 
 export type RunAgentOnEventFn = (event: ChatAgentEvent) => void;

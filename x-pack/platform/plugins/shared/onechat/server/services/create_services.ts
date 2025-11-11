@@ -18,6 +18,7 @@ import { RunnerFactoryImpl } from './runner';
 import { ConversationServiceImpl } from './conversation';
 import { createChatService } from './chat';
 import { type AttachmentService, createAttachmentService } from './attachments';
+import { CheckpointerServiceImpl } from './checkpointer';
 
 interface ServiceInstances {
   tools: ToolsService;
@@ -86,6 +87,18 @@ export class ServiceManager {
       toolsService: tools,
     });
 
+    const conversations = new ConversationServiceImpl({
+      logger: logger.get('conversations'),
+      security,
+      elasticsearch,
+      spaces,
+    });
+
+    const checkpointer = new CheckpointerServiceImpl({
+      logger: logger.get('checkpointer'),
+      elasticsearch,
+    });
+
     const runnerFactory = new RunnerFactoryImpl({
       logger: logger.get('runnerFactory'),
       security,
@@ -94,15 +107,9 @@ export class ServiceManager {
       toolsService: tools,
       agentsService: agents,
       attachmentsService: attachments,
+      checkpointerService: checkpointer,
     });
     runner = runnerFactory.getRunner();
-
-    const conversations = new ConversationServiceImpl({
-      logger: logger.get('conversations'),
-      security,
-      elasticsearch,
-      spaces,
-    });
 
     const chat = createChatService({
       logger: logger.get('chat'),
@@ -111,6 +118,7 @@ export class ServiceManager {
       agentService: agents,
       uiSettings,
       savedObjects,
+      checkpointerService: checkpointer,
     });
 
     this.internalStart = {
@@ -118,6 +126,7 @@ export class ServiceManager {
       agents,
       attachments,
       conversations,
+      checkpointer,
       runnerFactory,
       chat,
     };

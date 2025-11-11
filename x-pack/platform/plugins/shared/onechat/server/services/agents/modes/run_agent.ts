@@ -14,6 +14,7 @@ import type {
 } from '@kbn/onechat-common';
 import type { AgentHandlerContext } from '@kbn/onechat-server';
 import { runDefaultAgentMode } from './default';
+import { CheckpointerService } from '@kbn/langgraph-checkpoint-saver';
 
 export interface RunAgentParams {
   /**
@@ -44,6 +45,10 @@ export interface RunAgentParams {
    * optional signal to abort the execution of the agent
    */
   abortSignal?: AbortSignal;
+  /**
+   * Checkpointer service to use for checkpointing.
+   */
+  checkpointerService: CheckpointerService;
 }
 
 export interface RunAgentResponse {

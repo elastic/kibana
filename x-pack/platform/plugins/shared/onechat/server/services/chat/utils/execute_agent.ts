@@ -14,6 +14,7 @@ import type {
   AgentCapabilities,
 } from '@kbn/onechat-common';
 import type { AgentsServiceStart } from '../../agents';
+import type { CheckpointerService } from '../../checkpointer';
 
 export const executeAgent$ = ({
   agentId,
@@ -24,6 +25,7 @@ export const executeAgent$ = ({
   nextInput,
   abortSignal,
   defaultConnectorId,
+  checkpointerService,
 }: {
   agentId: string;
   request: KibanaRequest;
@@ -33,6 +35,7 @@ export const executeAgent$ = ({
   nextInput: RawRoundInput;
   abortSignal?: AbortSignal;
   defaultConnectorId?: string;
+  checkpointerService: CheckpointerService;
 }): Observable<ChatAgentEvent> => {
   return new Observable<ChatAgentEvent>((observer) => {
     agentService
@@ -41,6 +44,7 @@ export const executeAgent$ = ({
         agentId,
         abortSignal,
         defaultConnectorId,
+        checkpointerService,
         agentParams: {
           nextInput,
           conversation: conversation,

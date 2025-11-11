@@ -43,6 +43,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     runId = uuidv4(),
     agentId,
     abortSignal,
+    checkpointerService,
   },
   { logger, request, modelProvider, toolProvider, attachments, events }
 ) => {
@@ -86,6 +87,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     conversation: processedConversation,
   }); */
 
+  const checkpointer = await checkpointerService.getCheckpointer({ request });
+
   const agentGraph = createAgentGraph({
     logger,
     events: { emit: eventEmitter },
@@ -93,6 +96,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     tools: langchainTools,
     configuration: resolvedConfiguration,
     capabilities: resolvedCapabilities,
+    checkpointer,
   });
 
   const revertToCheckpoint = await advanceState(agentGraph, {

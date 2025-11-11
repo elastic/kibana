@@ -23,6 +23,7 @@ import type {
 import type { ToolsServiceStart } from '../tools';
 import type { AgentsServiceStart } from '../agents';
 import type { AttachmentServiceStart } from '../attachments';
+import type { CheckpointerService } from '../checkpointer';
 import type { ModelProviderFactoryFn } from './model_provider';
 import { createEmptyRunContext } from './utils/run_context';
 import { createResultStore } from './tool_result_store';
@@ -38,6 +39,7 @@ export interface CreateScopedRunnerDeps {
   toolsService: ToolsServiceStart;
   agentsService: AgentsServiceStart;
   attachmentsService: AttachmentServiceStart;
+  checkpointerService: CheckpointerService;
   // other deps
   logger: Logger;
   request: KibanaRequest;

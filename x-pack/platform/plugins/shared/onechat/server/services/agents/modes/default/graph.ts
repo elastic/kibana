@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { StateGraph, START as _START_, END as _END_, MemorySaver } from '@langchain/langgraph';
+import { StateGraph, START as _START_, END as _END_, type BaseCheckpointSaver } from '@langchain/langgraph';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
 import type { StructuredTool } from '@langchain/core/tools';
 import type { Logger } from '@kbn/core/server';
@@ -20,8 +20,6 @@ import { steps, tags } from './constants';
 import type { StateType } from './state';
 import { StateAnnotation } from './state';
 
-const checkpointer = new MemorySaver();
-
 export const createAgentGraph = ({
   chatModel,
   tools,
@@ -29,6 +27,7 @@ export const createAgentGraph = ({
   capabilities,
   logger,
   events,
+  checkpointer,
 }: {
   chatModel: InferenceChatModel;
   tools: StructuredTool[];
@@ -36,6 +35,7 @@ export const createAgentGraph = ({
   configuration: ResolvedConfiguration;
   logger: Logger;
   events: AgentEventEmitter;
+  checkpointer: BaseCheckpointSaver;
 }) => {
   const toolNode = new ToolNode<typeof StateAnnotation.State.addedMessages>(tools);
 
@@ -127,7 +127,6 @@ export const createAgentGraph = ({
     .addEdge(steps.prepareToAnswer, steps.answerAgent)
     .addEdge(steps.answerAgent, _END_)
     .compile({
-      interruptBefore: [steps.researchAgent],
       checkpointer,
     });
 

@@ -17,6 +17,7 @@ import { withConverseSpan } from '../../tracing';
 import type { ConversationService } from '../conversation';
 import type { ConversationClient } from '../conversation';
 import type { AgentsServiceStart } from '../agents';
+import type { CheckpointerService } from '../checkpointer';
 import {
   generateTitle,
   handleCancellation,
@@ -38,6 +39,7 @@ interface ChatServiceDeps {
   agentService: AgentsServiceStart;
   uiSettings: UiSettingsServiceStart;
   savedObjects: SavedObjectsServiceStart;
+  checkpointerService: CheckpointerService;
 }
 
 export const createChatService = (options: ChatServiceDeps): ChatService => {
@@ -115,6 +117,7 @@ class ChatServiceImpl implements ChatService {
             conversation: context.conversation,
             defaultConnectorId: context.selectedConnectorId,
             agentService: this.dependencies.agentService,
+            checkpointerService: this.dependencies.checkpointerService,
           });
 
           // Generate title (for CREATE) or use existing title (for UPDATE)

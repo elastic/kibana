@@ -19,6 +19,7 @@ import type { AgentsServiceSetup, AgentsServiceStart } from './agents';
 import type { ConversationService } from './conversation';
 import type { ChatService } from './chat';
 import type { AttachmentServiceSetup, AttachmentServiceStart } from './attachments';
+import type { CheckpointerService } from './checkpointer';
 
 export interface InternalSetupServices {
   tools: ToolsServiceSetup;
@@ -31,6 +32,7 @@ export interface InternalStartServices {
   agents: AgentsServiceStart;
   attachments: AttachmentServiceStart;
   conversations: ConversationService;
+  checkpointer: CheckpointerService;
   chat: ChatService;
   runnerFactory: RunnerFactory;
 }
