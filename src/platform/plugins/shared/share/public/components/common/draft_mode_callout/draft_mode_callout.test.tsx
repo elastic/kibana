@@ -31,19 +31,6 @@ describe('DraftModeCallout', () => {
     });
   });
 
-  describe('Node override case', () => {
-    it('renders a component override when a node prop is provided', () => {
-      render(
-        <DraftModeCallout
-          node={<p data-test-subj="overriddenDraftModeCallOut">Component override</p>}
-        />
-      );
-      const callout = screen.getByTestId('overriddenDraftModeCallOut');
-      expect(screen.getByText('Component override')).toBeInTheDocument();
-      expect(callout).toMatchSnapshot();
-    });
-  });
-
   describe('Save button case', () => {
     it('renders a save button when onSave is present', () => {
       render(<DraftModeCallout saveButtonProps={{ onSave: jest.fn() }} />);

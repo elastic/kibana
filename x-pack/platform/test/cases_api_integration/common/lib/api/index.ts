@@ -72,6 +72,7 @@ export * from './omit';
 export * from './configuration';
 export * from './files';
 export * from './telemetry';
+export * from './observables';
 
 export { getSpaceUrlPrefix } from './helpers';
 

@@ -78,7 +78,7 @@ export class RuleEditorPanel extends Component<Props, State> {
     if (validationResult && validationResult.error) {
       validationWarning = (
         <Fragment>
-          <EuiCallOut color="danger" title={validationResult.error} size="s" />
+          <EuiCallOut announceOnMount color="danger" title={validationResult.error} size="s" />
         </Fragment>
       );
     }
@@ -160,6 +160,7 @@ export class RuleEditorPanel extends Component<Props, State> {
     if (this.state.mode === 'json' && this.state.maxDepth > VISUAL_MAX_RULE_DEPTH) {
       return (
         <EuiCallOut
+          announceOnMount
           size="s"
           title={i18n.translate(
             'xpack.security.management.editRoleMapping.visualEditorUnavailableTitle',

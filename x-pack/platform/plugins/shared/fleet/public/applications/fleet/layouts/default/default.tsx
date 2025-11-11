@@ -119,6 +119,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
     <TourManagerProvider>
       {!authz.fleet.all || granularPrivilegesCallout.isHidden ? null : (
         <EuiCallOut
+          announceOnMount
           size="s"
           iconType="cheer"
           onDismiss={granularPrivilegesCallout.dismiss}

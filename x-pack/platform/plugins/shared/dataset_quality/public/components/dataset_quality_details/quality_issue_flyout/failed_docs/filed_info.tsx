@@ -71,6 +71,7 @@ export const FailedFieldInfo = () => {
           <EuiHorizontalRule margin="xs" />
           <EuiBasicTable
             tableLayout="fixed"
+            responsiveBreakpoint={true}
             columns={failedDocsErrorsColumns}
             items={renderedFailedDocsErrorsItems ?? []}
             loading={isFailedDocsErrorsLoading}

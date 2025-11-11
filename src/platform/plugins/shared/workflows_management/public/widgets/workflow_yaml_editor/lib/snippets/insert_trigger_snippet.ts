@@ -11,7 +11,7 @@ import { type Document } from 'yaml';
 import { monaco } from '@kbn/monaco';
 import type { TriggerType } from '@kbn/workflows';
 import { generateTriggerSnippet } from './generate_trigger_snippet';
-import { getTriggerNodes } from '../../../../../common/lib/yaml_utils';
+import { getTriggerNodes } from '../../../../../common/lib/yaml';
 import { getIndentLevelFromLineNumber } from '../get_indent_level';
 import { prependIndentToLines } from '../prepend_indent_to_lines';
 import { getMonacoRangeFromYamlNode } from '../utils';

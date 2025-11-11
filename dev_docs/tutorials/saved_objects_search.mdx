@@ -1,0 +1,100 @@
+---
+id: kibDevTutorialSavedObjectsSearch
+slug: /kibana-dev-docs/tutorials/saved-objects-search
+title: Saved Object `search` method
+description: Learn how to use the `search` method to search for Saved Objects.
+date: 2025-10-28
+tags: ['kibana', 'dev', 'tutorials', 'saved-objects', 'search']
+---
+
+`SavedObjectsClientContract.search` is a powerful way to search for Saved Objects. It allows you to search Saved Objects using the [Elasticsearch query DSL](https://www.elastic.co/docs/explore-analyze/query-filter/languages/querydsl), [runtime fields](https://www.elastic.co/docs/manage-data/data-store/mapping/define-runtime-fields-in-search-request) and more.
+
+It is an alternative to the safer but more limited `SavedObjectsClientContract.find` method.
+
+<DocCallOut title="With great power comes great responsibility">
+  While the `search` method is powerful, it can increase code complexity, introduce performance issues and introduce security risks (like injection attacks). Take care to ensure it is implemented correctly for your use case and appropriately stress tested. Carefully consider how you would like to use this method in your plugin to unlock value for users.
+</DocCallOut>
+
+## See it in code
+
+This example demonstrates a request to search across multiple types of Saved Objects and sort by fields that are the same type, but named differently:
+
+```ts
+import { isResponseError } from '@kbn/es-errors';
+import { TYPE_A, TYPE_B } from './saved_objects';
+  /** ...some lines down we have a route handler like this: */
+  async (ctx, req, res) => {
+    log.info('Searching for saved objects');
+    const core = await ctx.core;
+    const savedObjectsClient = core.savedObjects.client;
+    try {
+      const result /* returns raw hits from Elasticsearch */ = await savedObjectsClient.search({
+        type: [TYPE_A, TYPE_B],
+        namespaces: ['default'],
+        query: {
+          bool: {
+            must: [
+              {
+                match_all: {},
+              },
+            ],
+          },
+        },
+        // The below runtime mappings would not be possible with the `find` method
+        runtime_mappings: {
+          merged_date: {
+            type: 'date',
+            script: {
+              // Note 1: the query is in Painless, but written against the "raw" Saved object document,
+              //         you are responsible for ensuring that the fields are scoped to the correct type
+              // Note 2: Painless is powerful, but is executed at runtime, so be mindful of performance and handling
+              //         edge cases in your data like when null values may be present.
+              source: `
+                if (doc.containsKey(params.typeA + '.myDateField') && !doc[params.typeA + '.myDateField'].empty) {
+                  emit(doc[params.typeA + '.myDateField'].value.toInstant().toEpochMilli());
+                } else if (doc.containsKey(params.typeB + '.myOtherDateField') && !doc[params.typeB + '.myOtherDateField'].empty) {
+                  emit(doc[params.typeB + '.myOtherDateField'].value.toInstant().toEpochMilli());
+                }
+              `,
+              // Note 3: Using `params` is best practice to avoid injection attacks.
+              params: {
+                typeA: TYPE_A,
+                typeB: TYPE_B,
+              },
+            },
+          },
+        },
+        sort: [
+          {
+            merged_date: {
+              order: 'desc',
+              unmapped_type: 'date', // In case one type doesn't have the date field
+            },
+          },
+        ],
+      });
+      return res.ok({
+        body: {
+          result,
+        },
+      });
+    } catch (e) {
+      if (isResponseError(e)) {
+        log.error(JSON.stringify(e.meta.body, null, 2)); // good error logging is essential for debugging...
+      }
+      throw e;
+    }
+  }
+```
+
+See the full example in the Kibana repository at `examples/saved_objects`.
+
+
+### When to use the `search` method
+
+- You are trying to search across multiple types of Saved Objects
+- You are trying to aggregate over multiple types of Saved Objects
+
+### When not to use the `search` method
+
+- You just want a simple way to filter your Saved Object type, use `SavedObjectsClientContract.find` instead

@@ -102,8 +102,8 @@ export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<El
       return esClient.transport.request({ method, path, body });
     } else if (stepType === 'elasticsearch.request') {
       // Special case: elasticsearch.request type uses raw API format at top level
-      const { method = 'GET', path, body } = params;
-      return esClient.transport.request({ method, path, body });
+      const { method = 'GET', path, body, headers } = params;
+      return esClient.transport.request({ method, path, body }, headers ? { headers } : {});
     } else {
       // Use generated connector definitions to determine method and path (covers all 568+ ES APIs)
       const {

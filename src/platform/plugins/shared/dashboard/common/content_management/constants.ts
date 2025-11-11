@@ -8,6 +8,7 @@
  */
 
 export const LATEST_VERSION = 1;
+export const DASHBOARD_API_VERSION = String(LATEST_VERSION);
 
 export const CONTENT_ID = 'dashboard';
 

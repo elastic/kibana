@@ -185,6 +185,7 @@ export const DeprecationDetailsFlyout = ({
         {deprecationResolutionState?.resolveDeprecationStatus === 'fail' && (
           <>
             <EuiCallOut
+              announceOnMount
               title={i18nTexts.quickResolveErrorTitle}
               color="danger"
               iconType="warning"
@@ -236,6 +237,7 @@ export const DeprecationDetailsFlyout = ({
             {correctiveActions.api && (
               <>
                 <EuiCallOut
+                  announceOnMount={false}
                   title={i18nTexts.quickResolveCalloutTitle}
                   color="primary"
                   iconType="info"

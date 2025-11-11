@@ -49,7 +49,6 @@ export type {
   GroupDefinition,
   ItemDefinition,
   PresetDefinition,
-  PanelSelectedNode,
   RecentlyAccessedDefinition,
   NavigationGroupPreset,
   RootNavigationItemDefinition,

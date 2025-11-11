@@ -86,6 +86,7 @@ function StaleAlert({
     <>
       {isAlertStale?.isStale && (
         <EuiCallOut
+          announceOnMount
           data-test-subj="o11yAlertDetailsAlertStaleCallout"
           title={i18n.translate('xpack.observability.alertDetails.staleAlertCallout.title', {
             defaultMessage: 'This alert may be stale',

@@ -81,13 +81,21 @@ export function WelcomeMessage({
         gutterSize="none"
         className={fullHeightClassName}
       >
-        {showKnowledgeBaseReIndexingCallout ? <KnowledgeBaseReindexingCallout /> : null}
-        {showElasticLlmCalloutInChat ? <ElasticLlmConversationCallout /> : null}
+        {showKnowledgeBaseReIndexingCallout ? (
+          <EuiFlexItem grow={false}>
+            <KnowledgeBaseReindexingCallout />
+          </EuiFlexItem>
+        ) : null}
+        {showElasticLlmCalloutInChat ? (
+          <EuiFlexItem grow={false}>
+            <ElasticLlmConversationCallout />
+          </EuiFlexItem>
+        ) : null}
         <EuiFlexItem grow={false}>
           <AssistantBeacon backgroundColor="emptyShade" size="xl" />
         </EuiFlexItem>
         <EuiFlexItem grow className={centerMaxWidthClassName}>
-          <EuiSpacer size={['xl', 'l'].includes(breakpoint!) ? 'l' : 's'} />
+          <EuiSpacer size={['xl', 'l'].includes(breakpoint!) ? 'm' : 's'} />
           <WelcomeMessageConnectors
             connectors={connectors}
             onSetupConnectorClick={handleConnectorClick}
@@ -100,6 +108,7 @@ export function WelcomeMessage({
           <StarterPrompts onSelectPrompt={onSelectPrompt} />
           <EuiSpacer size="l" />
           <Disclaimer />
+          <EuiSpacer size="s" />
         </EuiFlexItem>
       </EuiFlexGroup>
 

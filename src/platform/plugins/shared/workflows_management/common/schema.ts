@@ -14,7 +14,10 @@ import type {
   EnhancedInternalConnectorContract,
   InternalConnectorContract,
 } from '@kbn/workflows';
-import { generateYamlSchemaFromConnectors } from '@kbn/workflows';
+import {
+  enhanceKibanaConnectorsWithFetcher,
+  generateYamlSchemaFromConnectors,
+} from '@kbn/workflows';
 import { z } from '@kbn/zod';
 
 // Import connector schemas from the organized structure
@@ -646,6 +649,7 @@ const staticConnectors: ConnectorContractUnion[] = [
       path: z.string(),
       body: z.any().optional(),
       params: z.any().optional(),
+      headers: z.any().optional(),
     }),
     outputSchema: z.any(),
     description: i18n.translate('workflows.connectors.elasticsearch.request.description', {
@@ -711,14 +715,13 @@ function generateElasticsearchConnectors(): EnhancedInternalConnectorContract[] 
 
 function generateKibanaConnectors(): InternalConnectorContract[] {
   // Lazy load the generated Kibana connectors
-
   const {
     GENERATED_KIBANA_CONNECTORS,
     // eslint-disable-next-line @typescript-eslint/no-var-requires
   } = require('@kbn/workflows/common/generated/kibana_connectors');
 
-  // Return the pre-generated Kibana connectors (build-time generated, browser-safe)
-  return GENERATED_KIBANA_CONNECTORS;
+  // Enhance connectors with fetcher parameter support
+  return enhanceKibanaConnectorsWithFetcher(GENERATED_KIBANA_CONNECTORS);
 }
 
 /**

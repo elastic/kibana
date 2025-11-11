@@ -71,7 +71,7 @@ export const SearchGettingStartedHeader: React.FC = () => {
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   aria-label={skipAndGoHomeLabel}
-                  data-test-subj="elasticLLMCostsTourCloseBtn"
+                  data-test-subj="skipAndGoHomeBtn"
                   onClick={() => {
                     application.navigateToApp(SEARCH_HOMEPAGE);
                   }}
