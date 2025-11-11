@@ -821,7 +821,7 @@ describe('parseRecords', () => {
   });
 
   describe('additional edge cases', () => {
-    it('handles empty documentsData when no entity documents exist', () => {
+    it('handles empty documentsData when no entity documents exist and no hints', () => {
       const records: GraphEdge[] = [
         {
           action: 'login',

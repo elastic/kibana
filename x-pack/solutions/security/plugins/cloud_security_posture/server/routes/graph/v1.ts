@@ -10,6 +10,7 @@ import type { GraphResponse } from '@kbn/cloud-security-posture-common/types/gra
 import { fetchGraph } from './fetch_graph';
 import type { EsQuery, OriginEventId } from './types';
 import { parseRecords } from './parse_records';
+import { inspect } from 'util';
 
 interface GraphContextServices {
   logger: Logger;
@@ -55,7 +56,12 @@ export const getGraph = async ({
     spaceId,
     esQuery,
   });
+  
+  console.log('results1 ', inspect(results, false, null, true));
+
 
   // Convert results into set of nodes and edges
-  return parseRecords(logger, results.records, nodesLimit);
+  const result = parseRecords(logger, results.records, nodesLimit);
+  // console.log('result12', inspect(result, false, null, true));
+  return result;
 };
