@@ -46,6 +46,7 @@ function createCompleteWiredStreamDefinition(overrides: any = {}) {
         ...overrides,
       },
     },
+    updated_at: new Date().toISOString(),
   };
 }
 

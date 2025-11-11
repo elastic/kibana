@@ -37,7 +37,7 @@ export const testContentPackEntry = ({
         wired: { routing, fields },
         settings: {},
       },
-      updated_at: new Date().toISOString(),
+      updated_at: '2025-11-11T17:52:23.108Z',
     },
   },
 });

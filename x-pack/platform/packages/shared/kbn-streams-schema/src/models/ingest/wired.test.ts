@@ -165,6 +165,7 @@ describe('WiredStream', () => {
               routing: [],
             },
           },
+          updated_at: new Date().toISOString(),
         },
         ...emptyAssets,
       },
