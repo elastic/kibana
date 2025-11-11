@@ -72,7 +72,7 @@ describe('getDimensions', () => {
     expect(mockEsClient.esql).toHaveBeenCalledWith(
       'get_dimensions',
       {
-        query: expect.stringContaining('TIMESERIES metrics-*'),
+        query: expect.stringContaining('FROM metrics-*'),
         filter: {
           bool: {
             filter: [
@@ -118,7 +118,7 @@ describe('getDimensions', () => {
     });
 
     const calledQuery = (mockEsClient.esql as jest.Mock).mock.calls[0][1].query;
-    expect(calledQuery).toContain('TIMESERIES metrics-a-*, metrics-b-*');
+    expect(calledQuery).toContain('FROM metrics-a-*, metrics-b-*');
   });
 
   it('should return formatted dimension values', async () => {
