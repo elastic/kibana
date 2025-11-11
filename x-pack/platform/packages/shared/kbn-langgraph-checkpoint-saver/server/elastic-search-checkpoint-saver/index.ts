@@ -6,7 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import type { RunnableConfig } from '@langchain/core/runnables';
 import type { CheckpointPendingWrite } from '@langchain/langgraph-checkpoint';
 import {
@@ -18,8 +18,10 @@ import {
   type PendingWrite,
   type CheckpointMetadata,
 } from '@langchain/langgraph-checkpoint';
+import type { InternalIStorageClient } from '@kbn/storage-adapter';
 
 interface CheckpointDocument {
+  _id?: string;
   '@timestamp': string;
   thread_id: string;
   checkpoint_ns: string;
@@ -30,7 +32,8 @@ interface CheckpointDocument {
   metadata: string;
 }
 
-interface WritesDocument {
+interface CheckpointWriteDocument {
+  _id?: string;
   '@timestamp': string;
   thread_id: string;
   checkpoint_ns: string;
@@ -38,16 +41,24 @@ interface WritesDocument {
   task_id: string;
   idx: number;
   channel: string;
-  value: string;
   type: string;
+  value: string;
 }
-
 export interface ElasticSearchSaverParams {
-  client: ElasticsearchClient;
   logger: Logger;
   checkpointIndex?: string;
   checkpointWritesIndex?: string;
   refreshPolicy?: estypes.Refresh;
+  /**
+   * Storage adapter for checkpoints index.
+   * Ensures index templates and indices are created automatically.
+   */
+  checkpointsStorage: InternalIStorageClient<CheckpointDocument>;
+  /**
+   * Storage adapter for checkpoint writes index.
+   * Ensures index templates and indices are created automatically.
+   */
+  checkpointWritesStorage: InternalIStorageClient<CheckpointWriteDocument>;
 }
 
 /**
@@ -58,44 +69,6 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
 
   static defaultCheckpointWritesIndex = 'checkpoint_writes';
 
-  /**
-   * When modifying the field maps, ensure you perform upgrade testing for all graphs depending on this saver.
-   */
-  static readonly checkpointsFieldMap = {
-    '@timestamp': {
-      type: 'date',
-      required: true,
-      array: false,
-    },
-    thread_id: { type: 'keyword', required: true, array: false },
-    checkpoint_ns: { type: 'keyword', required: true, array: false },
-    checkpoint_id: { type: 'keyword', required: false, array: false },
-    parent_checkpoint_id: { type: 'keyword', required: true, array: false },
-    type: { type: 'keyword', required: true, array: false },
-    checkpoint: { type: 'binary', required: true, array: false },
-    metadata: { type: 'binary', required: true, array: false },
-  } as const;
-
-  /**
-   * When modifying the field maps, ensure you perform upgrade testing for all graphs depending on this saver.
-   */
-  static readonly checkpointWritesFieldMap = {
-    '@timestamp': {
-      type: 'date',
-      required: true,
-      array: false,
-    },
-    thread_id: { type: 'keyword', required: true, array: false },
-    checkpoint_ns: { type: 'keyword', required: true, array: false },
-    checkpoint_id: { type: 'keyword', required: true, array: false },
-    task_id: { type: 'keyword', required: true, array: false },
-    idx: { type: 'unsigned_long', required: true, array: false },
-    channel: { type: 'keyword', required: true, array: false },
-    type: { type: 'keyword', required: true, array: false },
-    value: { type: 'binary', required: true, array: false },
-  } as const;
-
-  protected client: ElasticsearchClient;
   protected logger: Logger;
 
   checkpointIndex: string;
@@ -104,23 +77,28 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
 
   refreshPolicy: estypes.Refresh = 'wait_for';
 
+  private checkpointsStorage: InternalIStorageClient<CheckpointDocument>;
+  private checkpointWritesStorage: InternalIStorageClient<CheckpointWriteDocument>;
+
   constructor(
     {
-      client,
       checkpointIndex,
       checkpointWritesIndex,
       refreshPolicy = 'wait_for',
       logger,
+      checkpointsStorage,
+      checkpointWritesStorage,
     }: ElasticSearchSaverParams,
     serde?: SerializerProtocol
   ) {
     super(serde);
-    this.client = client;
     this.checkpointIndex = checkpointIndex ?? ElasticSearchSaver.defaultCheckpointIndex;
     this.checkpointWritesIndex =
       checkpointWritesIndex ?? ElasticSearchSaver.defaultCheckpointWritesIndex;
     this.refreshPolicy = refreshPolicy;
     this.logger = logger;
+    this.checkpointsStorage = checkpointsStorage;
+    this.checkpointWritesStorage = checkpointWritesStorage;
   }
 
   /**
@@ -136,8 +114,8 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
       checkpoint_id: checkpointId,
     } = config.configurable ?? {};
 
-    const result = await this.client.search<CheckpointDocument>({
-      index: this.checkpointIndex,
+    const result = await this.checkpointsStorage.search({
+      track_total_hits: true,
       size: 1,
       sort: [{ checkpoint_id: { order: 'desc' } }],
       query: {
@@ -151,14 +129,16 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
       },
     });
 
-    if (result.hits.hits.length === 0 || result.hits.hits[0]?._source === undefined) {
+    if (result.hits.hits.length === 0 || !result.hits.hits[0]) {
       return undefined;
     }
 
+    // Storage adapter always returns _source
     const doc = result.hits.hits[0]._source;
 
-    const serializedWrites = await this.client.search<WritesDocument>({
-      index: this.checkpointWritesIndex,
+    const serializedWrites = await this.checkpointWritesStorage.search({
+      track_total_hits: true,
+      size: 10000,
       sort: [{ idx: { order: 'asc' } }],
       query: {
         bool: {
@@ -203,7 +183,8 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
 
     const pendingWrites: CheckpointPendingWrite[] = await Promise.all(
       serializedWrites.hits.hits.map(async (serializedWrite) => {
-        const source = serializedWrite._source!;
+        // Storage adapter always returns _source
+        const source = serializedWrite._source;
         return [
           source.task_id,
           source.channel,
@@ -273,9 +254,9 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
       });
     }
 
-    const result = await this.client.search<CheckpointDocument>({
-      index: this.checkpointIndex,
-      ...(limit ? { size: limit } : {}),
+    const result = await this.checkpointsStorage.search({
+      track_total_hits: true,
+      ...(limit ? { size: limit } : { size: 10000 }),
       sort: [{ checkpoint_id: { order: 'desc' } }, { '@timestamp': { order: 'desc' } }],
       query: {
         bool: {
@@ -285,8 +266,9 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
     });
 
     for await (const hit of result.hits.hits) {
+      // Storage adapter always returns _source
       const source = hit._source;
-      if (source === undefined) {
+      if (!source) {
         continue;
       }
       const checkpoint = (await this.serde.loadsTyped(
@@ -363,11 +345,10 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
 
     const compositeId = `thread_id:${threadId}|checkpoint_ns:${checkpointNs}|checkpoint_id:${checkpointId}`;
 
-    await this.client.update({
-      index: this.checkpointIndex,
+    // Use storage adapter which handles index creation automatically
+    await this.checkpointsStorage.index({
       id: compositeId,
-      doc,
-      doc_as_upsert: true,
+      document: doc,
       refresh: this.refreshPolicy,
     });
 
@@ -396,50 +377,44 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
       );
     }
 
-    const operations = (
-      await Promise.all(
-        writes.map(async (write, idx) => {
-          const [channel, value] = write;
+    // Use storage adapter which handles index creation automatically
+    const operations = await Promise.all(
+      writes.map(async (write, idx) => {
+        const [channel, value] = write;
 
-          const compositeId = `thread_id:${threadId}|checkpoint_ns:${checkpointNs}|checkpoint_id:${checkpointId}|task_id:${taskId}|idx:${idx}`;
-          const [type, serializedValue] = await this.serde.dumpsTyped(value);
+        const compositeId = `thread_id:${threadId}|checkpoint_ns:${checkpointNs}|checkpoint_id:${checkpointId}|task_id:${taskId}|idx:${idx}`;
+        const [type, serializedValue] = await this.serde.dumpsTyped(value);
 
-          const doc: WritesDocument = {
-            '@timestamp': new Date().toISOString(),
-            thread_id: threadId,
-            checkpoint_ns: checkpointNs,
-            checkpoint_id: checkpointId,
-            task_id: taskId,
-            idx,
-            channel,
-            value: Buffer.from(serializedValue).toString('base64'),
-            type,
-          };
+        const doc = {
+          '@timestamp': new Date().toISOString(),
+          thread_id: threadId,
+          checkpoint_ns: checkpointNs,
+          checkpoint_id: checkpointId,
+          task_id: taskId,
+          idx,
+          channel,
+          value: Buffer.from(serializedValue).toString('base64'),
+          type,
+        };
 
-          this.logger.debug(`Indexing write operation for checkpoint ${checkpointId}`);
+        this.logger.debug(`Indexing write operation for checkpoint ${checkpointId}`);
 
-          return [
-            {
-              update: {
-                _index: this.checkpointWritesIndex,
-                _id: compositeId,
-              },
-            },
-            { doc, doc_as_upsert: true },
-          ];
-        })
-      )
-    ).flat();
+        return {
+          index: {
+            _id: compositeId,
+            document: doc,
+          },
+        };
+      })
+    );
 
-    const result = await this.client.bulk({
+    const result = await this.checkpointWritesStorage.bulk({
       operations,
       refresh: this.refreshPolicy,
-      error_trace: true,
     });
 
     if (result.errors) {
       this.logger.error(`Failed to index writes for checkpoint ${checkpointId}`);
-
       throw new Error(`Failed to index writes for checkpoint ${checkpointId}`);
     }
   }

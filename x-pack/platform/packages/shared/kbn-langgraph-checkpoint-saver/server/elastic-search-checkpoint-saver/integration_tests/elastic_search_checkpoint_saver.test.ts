@@ -11,8 +11,11 @@ import { Client as ESClient } from '@elastic/elasticsearch';
 import { ElasticSearchSaver } from '..';
 import type { Checkpoint, CheckpointTuple } from '@langchain/langgraph-checkpoint';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { uuid6 } from '@langchain/langgraph-checkpoint';
+import {
+  createCheckpointsStorage,
+  createCheckpointWritesStorage,
+} from '../../storage-adapter-checkpoint-saver/storage';
 
 const mockLoggerFactory = loggingSystemMock.create();
 const mockLogger = mockLoggerFactory.get('mock logger');
@@ -76,47 +79,6 @@ describe('ElasticSearchSaver', () => {
     });
   });
 
-  async function setupIndices(esClient: ESClient): Promise<void> {
-    // Set up checkpoints index
-    const checkpointIndexName = `checkpoints-${DEFAULT_NAMESPACE_STRING}`;
-    await esClient.indices.create({
-      index: checkpointIndexName,
-      mappings: {
-        properties: {
-          // TODO(@KDKHD) Replace this field map with the one from ElasticSearchSaver.
-          '@timestamp': { type: 'date' },
-          thread_id: { type: 'keyword' },
-          checkpoint_ns: { type: 'keyword' },
-          checkpoint_id: { type: 'keyword' },
-          parent_checkpoint_id: { type: 'keyword' },
-          type: { type: 'keyword' },
-          checkpoint: { type: 'binary' },
-          metadata: { type: 'binary' },
-        },
-      },
-    });
-
-    // Set up checkpoint-writes index
-    const checkpointWritesIndexName = `checkpoint-writes-${DEFAULT_NAMESPACE_STRING}`;
-    await esClient.indices.create({
-      index: checkpointWritesIndexName,
-      mappings: {
-        properties: {
-          // TODO(@KDKHD) Replace this field map with the one from ElasticSearchSaver.
-          '@timestamp': { type: 'date' },
-          thread_id: { type: 'keyword' },
-          checkpoint_ns: { type: 'keyword' },
-          checkpoint_id: { type: 'keyword' },
-          task_id: { type: 'keyword' },
-          idx: { type: 'unsigned_long' },
-          channel: { type: 'keyword' },
-          type: { type: 'keyword' },
-          value: { type: 'binary' },
-        },
-      },
-    });
-  }
-
   async function deleteIndices(indexPattern: string) {
     // Use indices.get to find indices matching the pattern
     const response = await client.indices
@@ -142,19 +104,32 @@ describe('ElasticSearchSaver', () => {
 
   beforeEach(async () => {
     // Clean up indices before each test
-    await deleteIndices('checkpoints*');
-    await deleteIndices('checkpoint-writes*');
+    await deleteIndices('.chat-checkpoints*');
+    await deleteIndices('.chat-checkpoint-writes*');
 
-    // Re-setup indices for each test
-    await setupIndices(client);
+    const checkpointIndexPrefix = '.chat-';
+
+    // Create storage adapters - they will create indices automatically on first write
+    const checkpointsStorage = createCheckpointsStorage({
+      indexPrefix: checkpointIndexPrefix,
+      logger: mockLogger,
+      esClient: client,
+    });
+
+    const checkpointWritesStorage = createCheckpointWritesStorage({
+      indexPrefix: checkpointIndexPrefix,
+      logger: mockLogger,
+      esClient: client,
+    });
 
     // Create a fresh saver for each test
     saver = new ElasticSearchSaver({
-      client,
       refreshPolicy: 'wait_for',
       logger: mockLogger,
-      checkpointIndex: `${ElasticSearchSaver.defaultCheckpointIndex}-${DEFAULT_NAMESPACE_STRING}`,
-      checkpointWritesIndex: `${ElasticSearchSaver.defaultCheckpointWritesIndex}-${DEFAULT_NAMESPACE_STRING}`,
+      checkpointIndex: `${checkpointIndexPrefix}${ElasticSearchSaver.defaultCheckpointIndex}`,
+      checkpointWritesIndex: `${checkpointIndexPrefix}${ElasticSearchSaver.defaultCheckpointWritesIndex}`,
+      checkpointsStorage: checkpointsStorage.getClient(),
+      checkpointWritesStorage: checkpointWritesStorage.getClient(),
     });
   });
 

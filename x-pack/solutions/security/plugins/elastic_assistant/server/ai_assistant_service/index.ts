@@ -29,8 +29,7 @@ import type { InstallationStatus } from '@kbn/product-doc-base-plugin/common/ins
 import type { TrainedModelsProvider } from '@kbn/ml-plugin/server/shared_services/providers';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
-import { IndexPatternAdapter } from '@kbn/index-adapter';
-import { ElasticSearchSaver } from '@kbn/langgraph-checkpoint-saver/server/elastic-search-checkpoint-saver';
+import { CheckpointerServiceImpl } from '@kbn/langgraph-checkpoint-saver';
 import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common';
 import type { ESSearchRequest } from '@kbn/es-types';
 import { alertSummaryFieldsFieldMap } from '../ai_assistant_data_clients/alert_summary/field_maps_configuration';
@@ -105,12 +104,12 @@ export interface CreateAIAssistantClientParams {
 
 export type CreateDataStream = (params: {
   resource:
-    | 'anonymizationFields'
-    | 'conversations'
-    | 'knowledgeBase'
-    | 'prompts'
-    | 'defendInsights'
-    | 'alertSummary';
+  | 'anonymizationFields'
+  | 'conversations'
+  | 'knowledgeBase'
+  | 'prompts'
+  | 'defendInsights'
+  | 'alertSummary';
   fieldMap: FieldMap;
   kibanaVersion: string;
   spaceId?: string;
@@ -118,14 +117,6 @@ export type CreateDataStream = (params: {
   writeIndexOnly?: boolean;
 }) => DataStreamSpacesAdapter;
 
-export type CreateIndexPattern = (params: {
-  resource: 'checkpoints' | 'checkpointWrites';
-  fieldMap: FieldMap;
-  kibanaVersion: string;
-  spaceId?: string;
-  settings?: IndicesIndexSettings;
-  writeIndexOnly?: boolean;
-}) => IndexPatternAdapter;
 
 export class AIAssistantService {
   private initialized: boolean;
@@ -138,8 +129,7 @@ export class AIAssistantService {
   private alertSummaryDataStream: DataStreamSpacesAdapter;
   private anonymizationFieldsDataStream: DataStreamSpacesAdapter;
   private defendInsightsDataStream: DataStreamSpacesAdapter;
-  private checkpointsDataStream: IndexPatternAdapter;
-  private checkpointWritesDataStream: IndexPatternAdapter;
+  private checkpointerService: Promise<CheckpointerServiceImpl>;
   private resourceInitializationHelper: ResourceInstallationHelper;
   private initPromise: Promise<InitializationPromise>;
   private isKBSetupInProgress: Map<string, boolean> = new Map();
@@ -187,16 +177,20 @@ export class AIAssistantService {
       fieldMap: alertSummaryFieldsFieldMap,
     });
 
-    this.checkpointsDataStream = this.createIndexPattern({
-      resource: 'checkpoints',
-      kibanaVersion: options.kibanaVersion,
-      fieldMap: ElasticSearchSaver.checkpointsFieldMap,
-    });
-    this.checkpointWritesDataStream = this.createIndexPattern({
-      resource: 'checkpointWrites',
-      kibanaVersion: options.kibanaVersion,
-      fieldMap: ElasticSearchSaver.checkpointWritesFieldMap,
-    });
+    this.checkpointerService = new Promise((resolve) => {
+      return options.elasticsearchClientPromise.then((esClient) => {
+        const checkpointerService = new CheckpointerServiceImpl({
+          indexPrefix: '.kibana-elastic-ai-assistant-',
+          logger: options.logger,
+          elasticsearch: {
+            client: {
+              asScoped: () => ({ asInternalUser: esClient }),
+            },
+          } as any,
+        })
+        resolve(checkpointerService);
+      });
+    })
 
     this.initPromise = this.initializeResources();
 
@@ -222,6 +216,10 @@ export class AIAssistantService {
     this.isCheckpointSaverEnabled = isEnabled;
   }
 
+  public getCheckpointerService() {
+    return this.checkpointerService;
+  }
+
   public isInitialized() {
     return this.initialized;
   }
@@ -242,41 +240,6 @@ export class AIAssistantService {
     this.isProductDocumentationInProgress = isInProgress;
   }
 
-  private createIndexPattern: CreateIndexPattern = ({
-    resource,
-    kibanaVersion,
-    fieldMap,
-    settings,
-    writeIndexOnly,
-  }) => {
-    const newIndexPattern = new IndexPatternAdapter(this.resourceNames.aliases[resource], {
-      kibanaVersion,
-      totalFieldsLimit: TOTAL_FIELDS_LIMIT,
-      writeIndexOnly,
-    });
-
-    newIndexPattern.setComponentTemplate({
-      name: this.resourceNames.componentTemplate[resource],
-      fieldMap,
-      settings,
-    });
-
-    newIndexPattern.setIndexTemplate({
-      name: this.resourceNames.indexTemplate[resource],
-      componentTemplateRefs: [this.resourceNames.componentTemplate[resource]],
-      // Apply `default_pipeline` if pipeline exists for resource
-      ...(resource in this.resourceNames.pipelines && {
-        template: {
-          settings: {
-            'index.default_pipeline':
-              this.resourceNames.pipelines[resource as keyof typeof this.resourceNames.pipelines],
-          },
-        },
-      }),
-    });
-
-    return newIndexPattern;
-  };
 
   private createDataStream: CreateDataStream = ({
     resource,
@@ -302,18 +265,18 @@ export class AIAssistantService {
       componentTemplateRefs: [this.resourceNames.componentTemplate[resource]],
       // Apply `default_pipeline` if pipeline exists for resource
       ...(resource in this.resourceNames.pipelines &&
-      // Remove this param and initialization when the `assistantKnowledgeBaseByDefault` feature flag is removed
-      !(resource === 'knowledgeBase')
+        // Remove this param and initialization when the `assistantKnowledgeBaseByDefault` feature flag is removed
+        !(resource === 'knowledgeBase')
         ? {
-            template: {
-              settings: {
-                'index.default_pipeline':
-                  this.resourceNames.pipelines[
-                    resource as keyof typeof this.resourceNames.pipelines
-                  ],
-              },
+          template: {
+            settings: {
+              'index.default_pipeline':
+                this.resourceNames.pipelines[
+                resource as keyof typeof this.resourceNames.pipelines
+                ],
             },
-          }
+          },
+        }
         : {}),
     });
 
@@ -514,17 +477,8 @@ export class AIAssistantService {
         pluginStop$: this.options.pluginStop$,
       });
 
-      await this.checkpointsDataStream.install({
-        esClient,
-        logger: this.options.logger,
-        pluginStop$: this.options.pluginStop$,
-      });
-
-      await this.checkpointWritesDataStream.install({
-        esClient,
-        logger: this.options.logger,
-        pluginStop$: this.options.pluginStop$,
-      });
+      // Checkpoint indices are now managed by CheckpointerServiceImpl
+      // and will be created automatically on first write
     } catch (error) {
       this.options.logger.warn(`Error initializing AI assistant resources: ${error.message}`);
       this.initialized = false;
@@ -673,22 +627,12 @@ export class AIAssistantService {
     });
   }
 
-  public async createCheckpointSaver(opts: CreateAIAssistantClientParams) {
-    const esClient = await this.options.elasticsearchClientPromise;
-    const checkpointIndex = getIndexTemplateAndPattern(
-      this.resourceNames.aliases.checkpoints,
-      opts.spaceId
-    ).alias;
-    const checkpointWritesIndex = getIndexTemplateAndPattern(
-      this.resourceNames.aliases.checkpointWrites,
-      opts.spaceId
-    ).alias;
-
-    const elasticSearchSaver = new ElasticSearchSaver({
-      client: esClient,
-      checkpointIndex,
-      checkpointWritesIndex,
-      logger: this.options.logger,
+  public async createCheckpointSaver(request: KibanaRequest) {
+    // Use the checkpointer service to get a properly configured saver
+    // Indices will be created automatically on first checkpoint save
+    const checkpointerService = await this.checkpointerService;
+    const elasticSearchSaver = await checkpointerService.getCheckpointer({
+      request,
     });
     return elasticSearchSaver;
   }
@@ -895,17 +839,9 @@ export class AIAssistantService {
       if (!alertSummaryIndexName) {
         await this.alertSummaryDataStream.installSpace(spaceId);
       }
-      const checkpointsIndexName = await this.checkpointsDataStream.getInstalledIndexName(spaceId);
-      if (!checkpointsIndexName) {
-        await this.checkpointsDataStream.createIndex(spaceId);
-      }
 
-      const checkpointWritesIndexName = await this.checkpointWritesDataStream.getInstalledIndexName(
-        spaceId
-      );
-      if (!checkpointWritesIndexName) {
-        await this.checkpointWritesDataStream.createIndex(spaceId);
-      }
+      // Checkpoint indices are now managed by CheckpointerServiceImpl
+      // and will be created automatically on first checkpoint save
     } catch (error) {
       this.options.logger.warn(
         `Error initializing AI assistant namespace level resources: ${error.message}`
