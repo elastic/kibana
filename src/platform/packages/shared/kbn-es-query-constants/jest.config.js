@@ -7,20 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FilterStateStore } from '@kbn/es-query-constants';
-import type { ExistsFilter } from '..';
-
-export const existsFilter: ExistsFilter = {
-  meta: {
-    index: 'logstash-*',
-    negate: false,
-    disabled: false,
-    type: 'exists',
-    key: 'machine.os',
-    alias: null,
-  },
-  $state: {
-    store: FilterStateStore.APP_STATE,
-  },
-  query: {},
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/kbn-es-query-constants'],
 };
