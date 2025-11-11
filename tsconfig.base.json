@@ -2502,7 +2502,9 @@
       "@emotion/react/types/css-prop",
       "@kbn/ambient-ui-types",
       "@kbn/ambient-common-types",
-      "@kbn/ambient-storybook-types"
+      "@kbn/ambient-storybook-types",
+      "@elastic/eui/lib/test/rtl/matchers",
+      "@elastic/eui/lib/test/enzyme/enzyme_matchers"
     ]
   }
 }

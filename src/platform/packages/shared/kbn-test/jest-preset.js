@@ -84,6 +84,7 @@ module.exports = {
     process.env.CI
       ? '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/setup/disable_console_logs.js'
       : [],
+    '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/setup/eui_matchers.js',
   ].flat(),
 
   snapshotFormat: {

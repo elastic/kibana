@@ -5,7 +5,9 @@
     "stripInternal": true,
     "types": [
       "jest",
-      "node"
+      "node",
+      "@elastic/eui/lib/test/rtl/matchers",
+      "@elastic/eui/lib/test/enzyme/enzyme_matchers"
     ]
   },
   "include": [
