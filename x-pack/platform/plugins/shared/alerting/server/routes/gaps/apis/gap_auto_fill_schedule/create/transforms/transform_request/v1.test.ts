@@ -12,7 +12,7 @@ describe('transformRequest v1 - create', () => {
   it('should transform create request correctly', () => {
     const mockRequest = httpServerMock.createKibanaRequest({
       method: 'post',
-      path: '/internal/alerting/rules/gaps/gap_auto_fill_scheduler',
+      path: '/internal/alerting/rules/gaps/auto_fill_scheduler',
       body: {
         id: 'test-scheduler-id',
         name: 'Test Scheduler',

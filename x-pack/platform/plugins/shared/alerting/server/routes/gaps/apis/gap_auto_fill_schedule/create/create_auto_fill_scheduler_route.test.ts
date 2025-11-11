@@ -60,7 +60,7 @@ describe('createAutoFillSchedulerRoute', () => {
     const [config, handler] = router.post.mock.calls[0];
     const [context, req, res] = mockHandlerArguments({ rulesClient }, { body: mockCreateRequest });
 
-    expect(config.path).toEqual('/internal/alerting/rules/gaps/gap_auto_fill_scheduler');
+    expect(config.path).toEqual('/internal/alerting/rules/gaps/auto_fill_scheduler');
 
     await handler(context, req, res);
 

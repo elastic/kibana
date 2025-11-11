@@ -105,9 +105,7 @@ export default function createGapAutoFillSchedulerTests({ getService }: FtrProvi
 
           const schedulerResp = await supertestWithoutAuth
             .post(
-              `${getUrlPrefix(
-                apiOptions.spaceId
-              )}/internal/alerting/rules/gaps/gap_auto_fill_scheduler`
+              `${getUrlPrefix(apiOptions.spaceId)}/internal/alerting/rules/gaps/auto_fill_scheduler`
             )
             .set('kbn-xsrf', 'foo')
             .auth(apiOptions.username, apiOptions.password)
@@ -196,7 +194,7 @@ export default function createGapAutoFillSchedulerTests({ getService }: FtrProvi
           // Create the scheduler, which runs cleanup before scheduling
           const url = `${getUrlPrefix(
             apiOptions.spaceId
-          )}/internal/alerting/rules/gaps/gap_auto_fill_scheduler`;
+          )}/internal/alerting/rules/gaps/auto_fill_scheduler`;
           const createResp = await supertestWithoutAuth
             .post(url)
             .set('kbn-xsrf', 'foo')
@@ -294,7 +292,7 @@ export default function createGapAutoFillSchedulerTests({ getService }: FtrProvi
 
           const url = `${getUrlPrefix(
             apiOptions.spaceId
-          )}/internal/alerting/rules/gaps/gap_auto_fill_scheduler`;
+          )}/internal/alerting/rules/gaps/auto_fill_scheduler`;
           // Create the scheduler
           const schedulerResp = await supertestWithoutAuth
             .post(url)
@@ -381,9 +379,7 @@ export default function createGapAutoFillSchedulerTests({ getService }: FtrProvi
 
           const resp = await supertestWithoutAuth
             .post(
-              `${getUrlPrefix(
-                apiOptions.spaceId
-              )}/internal/alerting/rules/gaps/gap_auto_fill_scheduler`
+              `${getUrlPrefix(apiOptions.spaceId)}/internal/alerting/rules/gaps/auto_fill_scheduler`
             )
             .set('kbn-xsrf', 'foo')
             .auth(apiOptions.username, apiOptions.password)
@@ -415,9 +411,7 @@ export default function createGapAutoFillSchedulerTests({ getService }: FtrProvi
 
           const resp = await supertestWithoutAuth
             .post(
-              `${getUrlPrefix(
-                apiOptions.spaceId
-              )}/internal/alerting/rules/gaps/gap_auto_fill_scheduler`
+              `${getUrlPrefix(apiOptions.spaceId)}/internal/alerting/rules/gaps/auto_fill_scheduler`
             )
             .set('kbn-xsrf', 'foo')
             .send(schedulerBody);
@@ -453,9 +447,7 @@ export default function createGapAutoFillSchedulerTests({ getService }: FtrProvi
 
           const resp = await supertestWithoutAuth
             .post(
-              `${getUrlPrefix(
-                apiOptions.spaceId
-              )}/internal/alerting/rules/gaps/gap_auto_fill_scheduler`
+              `${getUrlPrefix(apiOptions.spaceId)}/internal/alerting/rules/gaps/auto_fill_scheduler`
             )
             .set('kbn-xsrf', 'foo')
             .auth(apiOptions.username, apiOptions.password)
@@ -496,9 +488,7 @@ export default function createGapAutoFillSchedulerTests({ getService }: FtrProvi
           // First create should succeed
           const first = await supertestWithoutAuth
             .post(
-              `${getUrlPrefix(
-                apiOptions.spaceId
-              )}/internal/alerting/rules/gaps/gap_auto_fill_scheduler`
+              `${getUrlPrefix(apiOptions.spaceId)}/internal/alerting/rules/gaps/auto_fill_scheduler`
             )
             .set('kbn-xsrf', 'foo')
             .auth(apiOptions.username, apiOptions.password)
@@ -508,9 +498,7 @@ export default function createGapAutoFillSchedulerTests({ getService }: FtrProvi
           // Second create with same id should conflict
           const second = await supertestWithoutAuth
             .post(
-              `${getUrlPrefix(
-                apiOptions.spaceId
-              )}/internal/alerting/rules/gaps/gap_auto_fill_scheduler`
+              `${getUrlPrefix(apiOptions.spaceId)}/internal/alerting/rules/gaps/auto_fill_scheduler`
             )
             .set('kbn-xsrf', 'foo')
             .auth(apiOptions.username, apiOptions.password)
@@ -532,7 +520,7 @@ export default function createGapAutoFillSchedulerTests({ getService }: FtrProvi
 
           const url = `${getUrlPrefix(
             apiOptions.spaceId
-          )}/internal/alerting/rules/gaps/gap_auto_fill_scheduler`;
+          )}/internal/alerting/rules/gaps/auto_fill_scheduler`;
 
           // first create
           const first = await supertestWithoutAuth
