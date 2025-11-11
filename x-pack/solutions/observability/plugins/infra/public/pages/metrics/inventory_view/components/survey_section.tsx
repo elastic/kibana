@@ -29,6 +29,7 @@ export const SurveySection = () => {
           kibanaVersion={kibanaVersion}
           isCloudEnv={isCloudEnv}
           isServerlessEnv={isServerlessEnv}
+          sanitizedPath={document.location.pathname}
         />
       )}
     </>

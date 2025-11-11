@@ -120,8 +120,10 @@
     "@kbn/core-security-server",
     "@kbn/core-http-server-utils",
     "@kbn/handlebars",
+    "@kbn/lock-manager",
     "@kbn/saved-search-component",
     "@kbn/logs-data-access-plugin",
     "@kbn/embeddable-plugin",
+    "@kbn/react-query",
   ]
 }

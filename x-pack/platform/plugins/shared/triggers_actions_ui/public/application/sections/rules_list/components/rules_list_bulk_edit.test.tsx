@@ -18,7 +18,7 @@ import {
 } from './test_helpers';
 import { IToasts } from '@kbn/core/public';
 import { render, screen, waitForElementToBeRemoved, fireEvent } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 jest.mock('../../../../common/lib/kibana');

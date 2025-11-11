@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMutation } from '@tanstack/react-query';
+import { useMutation } from '@kbn/react-query';
 
 import { POST_CREATE_INDEX_ROUTE } from '../../../common/routes';
 import { CreateIndexRequest, CreateIndexResponse } from '../../../common/types';

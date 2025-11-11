@@ -7,7 +7,7 @@
 import React from 'react';
 import Chance from 'chance';
 import { render, screen } from '@testing-library/react';
-import type { UseQueryResult } from '@tanstack/react-query';
+import type { UseQueryResult } from '@kbn/react-query';
 import { createCloudDefendIntegrationFixture } from '../../test/fixtures/cloud_defend_integration';
 import { createReactQueryResponse } from '../../test/fixtures/react_query';
 import { TestProvider } from '../../test/test_provider';

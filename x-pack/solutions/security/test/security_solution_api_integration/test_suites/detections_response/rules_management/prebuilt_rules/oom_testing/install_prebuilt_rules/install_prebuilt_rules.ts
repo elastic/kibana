@@ -26,6 +26,8 @@ import {
 } from '../../../../utils/rules/prebuilt_rules/delete_fleet_packages';
 import { deleteAllRules, waitFor } from '../../../../../../config/services/detections_response';
 
+const KIBANA_STATUS_URL = '/api/status';
+
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const supertest = getService('supertest');
@@ -35,6 +37,31 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('@ess @serverless @skipInServerlessMKI Install from mocked prebuilt rule assets', () => {
     beforeEach(async () => {
+      await waitFor(
+        async () => {
+          const { body: kibanaStatusResponse } = await supertest
+            .get(KIBANA_STATUS_URL)
+            .send()
+            .expect(200);
+
+          if (kibanaStatusResponse.status.plugins.fleet.summary === 'Fleet setup failed') {
+            throw new Error(
+              `Fleet setup failed: ${JSON.stringify(
+                kibanaStatusResponse.status.plugins.fleet,
+                null,
+                2
+              )}`
+            );
+          }
+
+          return kibanaStatusResponse.status.plugins.fleet.summary === 'Fleet is available';
+        },
+        'waitForFleetSetup',
+        log,
+        undefined, // maxTimeout - use default
+        3000 // timeoutWait - wait longer between tries as fleet setup can take some time
+      );
+
       await deleteAllRules(supertest, log);
 
       await deletePrebuiltRulesFleetPackage({ supertest, es, log, retryService });

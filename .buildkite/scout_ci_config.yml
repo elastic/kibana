@@ -1,6 +1,7 @@
 # Define which plugins and packages should be run or skipped in Kibana CI pipeline
 plugins:
   enabled:
+    - console
     - discover_enhanced
     - maps
     - observability_onboarding
@@ -12,3 +13,4 @@ plugins:
 packages:
   enabled:
   disabled:
+    - kbn-scout # Internal scout tests are run in advance to validate Scout integrity (see .buildkite/scripts/steps/test/scout_test_run_builder.sh)

@@ -9,7 +9,7 @@ import React from 'react';
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { encode } from '@kbn/rison';
 import type { CreateSLOInput, CreateSLOResponse, FindSLOResponse } from '@kbn/slo-schema';
-import { QueryKey, useMutation, useQueryClient } from '@tanstack/react-query';
+import { QueryKey, useMutation, useQueryClient } from '@kbn/react-query';
 import { EuiLink } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { FormattedMessage } from '@kbn/i18n-react';

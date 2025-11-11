@@ -2,7 +2,7 @@
   "type": "shared-common",
   "id": "@kbn/elastic-agent-utils",
   "owner": [
-    "@elastic/obs-ux-logs-team"
+    "@elastic/obs-ux-onboarding-team"
   ],
   "group": "platform",
   "visibility": "shared"

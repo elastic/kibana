@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  IndicesGetIndexTemplateIndexTemplateItem,
+  IngestPipeline,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
 import { castArray, groupBy, omit, uniq } from 'lodash';
@@ -359,7 +362,12 @@ async function getIndexTemplate(name: string, scopedClusterClient: IScopedCluste
   const indexTemplates = await scopedClusterClient.asCurrentUser.indices.getIndexTemplate({
     name,
   });
-  return indexTemplates.index_templates[0];
+  const template = omit(indexTemplates.index_templates[0], [
+    'created_date_millis',
+    'modified_date_millis',
+  ]);
+
+  return template as IndicesGetIndexTemplateIndexTemplateItem;
 }
 
 function assertOnlyAppendActions(
