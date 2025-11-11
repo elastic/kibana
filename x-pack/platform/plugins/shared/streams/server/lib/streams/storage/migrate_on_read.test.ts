@@ -34,8 +34,8 @@ const mockStreamsAsserts = Streams.all.Definition.asserts as jest.MockedFunction
 
 function createCompleteWiredStreamDefinition(overrides: any = {}) {
   return {
-    name: 'test-stream',
-    description: 'Test stream',
+    name: 'test-wired-stream',
+    description: 'Test wired stream',
     ingest: {
       lifecycle: { dsl: {} },
       processing: { steps: [] },
@@ -47,6 +47,35 @@ function createCompleteWiredStreamDefinition(overrides: any = {}) {
       },
     },
     updated_at: new Date().toISOString(),
+  };
+}
+
+function createCompleteClassicStreamDefinition(overrides: any = {}) {
+  return {
+    name: 'test-classic-stream',
+    description: 'Test classic stream',
+    ingest: {
+      lifecycle: { dsl: {} },
+      processing: { steps: [] },
+      settings: {},
+      classic: {
+        fieldOverrides: [],
+        ...overrides,
+      },
+    },
+  };
+}
+
+function createCompleteGroupStreamDefinition(overrides: any = {}) {
+  return {
+    name: 'test-group-stream',
+    description: 'Test group stream',
+    group: {
+      members: [],
+      tags: [],
+      metadata: {},
+      ...overrides,
+    },
   };
 }
 
@@ -279,6 +308,42 @@ describe('migrateOnRead', () => {
 
       expect((result as any).group.tags).toEqual([]);
       expect(mockStreamsAsserts).toHaveBeenCalled();
+    });
+  });
+
+  describe('updated_at migration', () => {
+    it('should add updated_at to wired streams if missing', () => {
+      const definition = createCompleteWiredStreamDefinition();
+      delete (definition as any).updated_at;
+
+      const result = migrateOnRead(definition);
+      expect((result as any).updated_at).toBeDefined();
+      expect(mockStreamsAsserts).toHaveBeenCalled();
+    });
+
+    it('should not modify updated_at if it already exists', () => {
+      const definition = createCompleteWiredStreamDefinition();
+      const existingTimestamp = definition.updated_at;
+
+      const result = migrateOnRead(definition);
+      expect((result as any).updated_at).toBe(existingTimestamp);
+      expect(mockStreamsAsserts).not.toHaveBeenCalled();
+    });
+
+    it('should not add updated_at to classic streams', () => {
+      const definition = createCompleteClassicStreamDefinition();
+
+      const result = migrateOnRead(definition);
+      expect((result as any).updated_at).toBeUndefined();
+      expect(mockStreamsAsserts).not.toHaveBeenCalled();
+    });
+
+    it('should not add updated_at to group streams', () => {
+      const definition = createCompleteGroupStreamDefinition();
+
+      const result = migrateOnRead(definition);
+      expect((result as any).updated_at).toBeUndefined();
+      expect(mockStreamsAsserts).not.toHaveBeenCalled();
     });
   });
 });
