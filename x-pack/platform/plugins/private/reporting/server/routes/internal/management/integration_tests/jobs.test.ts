@@ -121,7 +121,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
     eventTracker = new EventTracker(coreSetupMock.analytics, 'jobId', 'exportTypeId', 'appId');
     jest.spyOn(reportingCore, 'getEventTracker').mockReturnValue(eventTracker);
 
-    exportTypesRegistry = new ExportTypesRegistry();
+    exportTypesRegistry = new ExportTypesRegistry(licensingMock.createSetup());
     exportTypesRegistry.register({
       id: 'unencoded',
       jobType: mockJobTypeUnencoded,
