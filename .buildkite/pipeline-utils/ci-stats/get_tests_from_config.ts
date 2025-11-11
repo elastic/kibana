@@ -39,7 +39,3 @@ export async function getTestsFromJestConfig(configPath: string): Promise<string
     return [];
   }
 }
-
-(async () => {
-  console.log(await getTestsFromJestConfig(process.argv[2]));
-})();
