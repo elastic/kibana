@@ -5,12 +5,17 @@
  * 2.0.
  */
 import type { Meta, StoryObj } from '@storybook/react';
+import { fn } from '@storybook/test';
 
 import { FailureStoreModal } from './failure_store_modal';
 
 const meta: Meta<typeof FailureStoreModal> = {
   component: FailureStoreModal,
   title: 'Failure Store Modal',
+  args: {
+    onCloseModal: fn(),
+    onSaveModal: fn(),
+  },
 };
 
 export default meta;
@@ -18,19 +23,16 @@ type Story = StoryObj<typeof FailureStoreModal>;
 
 export const BasicModal: Story = {
   args: {
-    onCloseModal: () => {},
-    onSaveModal: () => {},
     failureStoreProps: {
       failureStoreEnabled: false,
       defaultRetentionPeriod: '40d',
     },
-    isServerless: false,
+    showIlmDescription: false,
   },
 };
+
 export const BasicModalWithoutRetention: Story = {
   args: {
-    onCloseModal: () => {},
-    onSaveModal: () => {},
     failureStoreProps: {
       failureStoreEnabled: true,
     },
@@ -39,8 +41,6 @@ export const BasicModalWithoutRetention: Story = {
 
 export const InheritanceModal: Story = {
   args: {
-    onCloseModal: () => {},
-    onSaveModal: () => {},
     failureStoreProps: {
       failureStoreEnabled: true,
       defaultRetentionPeriod: '30d',
@@ -51,7 +51,6 @@ export const InheritanceModal: Story = {
       isWired: true,
       isCurrentlyInherited: false,
     },
-    isServerless: false,
-    isLoading: false,
+    showIlmDescription: false,
   },
 };

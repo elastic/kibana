@@ -153,7 +153,6 @@ The modal supports the following time units for retention periods:
 - **Storybook Integration**: Includes Storybook stories for component development and testing
 - **Inheritance Support**: Optional inheritance from parent streams or index templates
   - When inheritance is enabled, all configuration fields are disabled
-  - Fields automatically reset to their initial values when inheritance is toggled on
   - Supports both wired (parent stream) and classic (index template) inheritance modes
 
 ## Development

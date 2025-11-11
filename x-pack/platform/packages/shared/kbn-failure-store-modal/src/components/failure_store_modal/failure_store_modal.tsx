@@ -6,7 +6,7 @@
  */
 
 import type { FunctionComponent } from 'react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -35,17 +35,21 @@ import { splitSizeAndUnits } from '../utils';
 import { RetentionPeriodField } from '../retention_period_field/retention_period_field';
 import { editFailureStoreFormSchema } from './schema';
 
+const PERIOD_TYPE = {
+  CUSTOM: 'custom',
+  DEFAULT: 'default',
+} as const;
+
 export interface FailureStoreFormProps {
   failureStoreEnabled: boolean;
   defaultRetentionPeriod?: string;
   customRetentionPeriod?: string;
 }
 
-interface FailureStoreFormData {
-  failureStoreEnabled: boolean;
-  customRetentionPeriod?: string;
-  inherit?: object;
-}
+type FailureStoreFormData = { failureStoreEnabled: boolean } & (
+  | { inherit: boolean }
+  | { customRetentionPeriod?: string }
+);
 
 interface Props {
   onCloseModal: () => void;
@@ -56,46 +60,49 @@ interface Props {
     isWired: boolean;
     isCurrentlyInherited: boolean;
   };
-  isServerless?: boolean;
-  isLoading?: boolean;
+  showIlmDescription?: boolean;
 }
 
 export const FailureStoreModal: FunctionComponent<Props> = ({
   onCloseModal,
   onSaveModal,
   failureStoreProps,
-  isServerless = false,
-  isLoading = false,
+  showIlmDescription = false,
   inheritOptions,
 }) => {
   const [isSaveInProgress, setIsSaveInProgress] = useState(false);
+
   const onSubmitForm = async () => {
     setIsSaveInProgress(true);
-    const { isValid, data } = await form.submit();
+    try {
+      const { isValid, data } = await form.submit();
 
-    if (!isValid) {
-      setIsSaveInProgress(false);
-      return;
-    }
-    // If the inherit toggle is on, we need to save the inherit field.
-    if (data.inherit) {
-      await onSaveModal({
-        inherit: {},
+      if (!isValid) {
+        return;
+      }
+
+      // If the inherit toggle is on, we need to save the inherit field.
+      if (data.inherit) {
+        await onSaveModal({
+          inherit: data.inherit,
+          failureStoreEnabled: data.failureStore,
+        });
+        return;
+      }
+
+      // The new failure store configuration has to include the enabled state and, if the custom retention type is enabled, the retention period.
+      const newFailureStoreConfig: FailureStoreFormData = {
         failureStoreEnabled: data.failureStore,
-      });
-      setIsSaveInProgress(false);
-      return;
-    }
+      };
 
-    // The new failure store configuration has to include the enabled state and, if the custom retention type is enabled, the retention period.
-    const newFailureStoreConfig: FailureStoreFormData = { failureStoreEnabled: data.failureStore };
-    if (data.failureStore) {
-      if (data.periodType === 'custom') {
+      if (data.failureStore && data.periodType === PERIOD_TYPE.CUSTOM) {
         newFailureStoreConfig.customRetentionPeriod = `${data.retentionPeriodValue}${data.retentionPeriodUnit}`;
       }
+
+      await onSaveModal(newFailureStoreConfig);
+    } finally {
+      setIsSaveInProgress(false);
     }
-    await onSaveModal(newFailureStoreConfig);
-    setIsSaveInProgress(false);
   };
 
   const modalTitleId = useGeneratedHtmlId();
@@ -106,6 +113,7 @@ export const FailureStoreModal: FunctionComponent<Props> = ({
   const customRetentionPeriod = failureStoreProps.customRetentionPeriod
     ? splitSizeAndUnits(failureStoreProps.customRetentionPeriod)
     : null;
+
   const retentionPeriodUnit = customRetentionPeriod
     ? customRetentionPeriod.unit
     : defaultRetentionPeriod
@@ -118,20 +126,21 @@ export const FailureStoreModal: FunctionComponent<Props> = ({
     ? defaultRetentionPeriod.size
     : '30';
 
-  // Store initial values to reset when inherit is enabled
-  const initialFormValues = {
-    inherit: inheritOptions?.isCurrentlyInherited ?? false,
-    failureStore: failureStoreProps.failureStoreEnabled ?? false,
-    periodType: failureStoreProps.customRetentionPeriod ? 'custom' : 'default',
-    retentionPeriodValue,
-    retentionPeriodUnit,
-  };
-
   const { form } = useForm({
-    defaultValue: initialFormValues,
+    defaultValue: {
+      failureStore: failureStoreProps.failureStoreEnabled ?? false,
+      periodType: failureStoreProps.customRetentionPeriod
+        ? PERIOD_TYPE.CUSTOM
+        : PERIOD_TYPE.DEFAULT,
+      retentionPeriodValue,
+      retentionPeriodUnit,
+      inherit: (inheritOptions?.isCurrentlyInherited && inheritOptions.canShowInherit) ?? false,
+    },
     schema: editFailureStoreFormSchema,
     id: 'editFailureStoreForm',
   });
+
+  const { setFieldValue, getFields } = form;
 
   const [{ failureStore, periodType, inherit }] = useFormData({
     form,
@@ -140,48 +149,40 @@ export const FailureStoreModal: FunctionComponent<Props> = ({
 
   const isDirty = useFormIsModified({ form });
 
-  const isCustomPeriod = periodType === 'custom';
+  const isCustomPeriod = periodType === PERIOD_TYPE.CUSTOM;
+  const prevPeriodTypeRef = useRef(periodType);
 
   // Synchronize form values when period type changes
   useEffect(() => {
-    form.setFieldValue(
-      'retentionPeriodValue',
-      isCustomPeriod && customRetentionPeriod
-        ? customRetentionPeriod.size
-        : defaultRetentionPeriod
-        ? defaultRetentionPeriod.size
-        : '30'
-    );
-    form.setFieldValue(
-      'retentionPeriodUnit',
-      isCustomPeriod && customRetentionPeriod
-        ? customRetentionPeriod.unit
-        : defaultRetentionPeriod
-        ? defaultRetentionPeriod.unit
-        : 'd'
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [periodType]);
+    if (prevPeriodTypeRef.current !== periodType) {
+      prevPeriodTypeRef.current = periodType;
+      setFieldValue(
+        'retentionPeriodValue',
+        isCustomPeriod && customRetentionPeriod
+          ? customRetentionPeriod.size
+          : defaultRetentionPeriod
+          ? defaultRetentionPeriod.size
+          : '30'
+      );
+      setFieldValue(
+        'retentionPeriodUnit',
+        isCustomPeriod && customRetentionPeriod
+          ? customRetentionPeriod.unit
+          : defaultRetentionPeriod
+          ? defaultRetentionPeriod.unit
+          : 'd'
+      );
+    }
+  }, [periodType, isCustomPeriod, customRetentionPeriod, defaultRetentionPeriod, setFieldValue]);
 
   // Clear validation errors when failureStore or periodType changes
   useEffect(() => {
-    const retentionField = form.getFields().retentionPeriodValue;
+    const retentionField = getFields().retentionPeriodValue;
     if (retentionField) {
       // Trigger validation to clear/set errors based on current state
       retentionField.validate();
     }
-  }, [failureStore, periodType, form]);
-
-  // Reset fields to initial values when inherit is toggled on
-  useEffect(() => {
-    if (inherit) {
-      form.setFieldValue('failureStore', initialFormValues.failureStore);
-      form.setFieldValue('periodType', initialFormValues.periodType);
-      form.setFieldValue('retentionPeriodValue', initialFormValues.retentionPeriodValue);
-      form.setFieldValue('retentionPeriodUnit', initialFormValues.retentionPeriodUnit);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [inherit]);
+  }, [failureStore, periodType, getFields]);
 
   const formHasErrors = form.getErrors().length > 0;
   const disableSubmit = formHasErrors || !isDirty || form.isValid === false;
@@ -283,7 +284,7 @@ export const FailureStoreModal: FunctionComponent<Props> = ({
                   </EuiCallOut>
                 )}
               </EuiFormRow>
-              {!isServerless && (
+              {!showIlmDescription && (
                 <EuiFormRow fullWidth>
                   <EuiText size="s" color="subdued">
                     <FormattedMessage
@@ -302,7 +303,7 @@ export const FailureStoreModal: FunctionComponent<Props> = ({
         <EuiButtonEmpty
           data-test-subj="failureStoreModalCancelButton"
           onClick={() => onCloseModal()}
-          disabled={isSaveInProgress || isLoading}
+          disabled={isSaveInProgress}
           aria-label={i18n.translate('xpack.failureStoreModal.cancelButtonLabel', {
             defaultMessage: 'Cancel',
           })}
@@ -316,7 +317,7 @@ export const FailureStoreModal: FunctionComponent<Props> = ({
         <EuiButton
           fill
           type="submit"
-          isLoading={isSaveInProgress || isLoading}
+          isLoading={isSaveInProgress}
           data-test-subj="failureStoreModalSaveButton"
           onClick={onSubmitForm}
           disabled={disableSubmit}

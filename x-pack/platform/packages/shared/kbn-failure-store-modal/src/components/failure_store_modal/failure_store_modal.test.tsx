@@ -282,7 +282,7 @@ describe('FailureStoreModal', () => {
       });
     });
 
-    it('resets fields to initial values when inherit is enabled', async () => {
+    it('do not reset fields to initial values when inherit is enabled', async () => {
       const { getByTestId } = renderModal(
         {
           failureStoreEnabled: true,
@@ -312,8 +312,8 @@ describe('FailureStoreModal', () => {
       fireEvent.click(inheritToggle);
 
       await waitFor(() => {
-        // Fields should be reset to initial values
-        expect(failureStoreToggle).toBeChecked(); // Reset to initial true
+        // Fields should maintain the modified values
+        expect(failureStoreToggle).not.toBeChecked();
       });
     });
 
@@ -345,7 +345,7 @@ describe('FailureStoreModal', () => {
 
       await waitFor(() => {
         expect(defaultProps.onSaveModal).toHaveBeenCalledWith({
-          inherit: {},
+          inherit: true,
           failureStoreEnabled: false,
         });
       });
