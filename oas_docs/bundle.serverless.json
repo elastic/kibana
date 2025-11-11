@@ -56440,10 +56440,15 @@
                                               "wired"
                                             ],
                                             "type": "object"
+                                          },
+                                          "updated_at": {
+                                            "format": "date-time",
+                                            "type": "string"
                                           }
                                         },
                                         "required": [
-                                          "ingest"
+                                          "ingest",
+                                          "updated_at"
                                         ],
                                         "type": "object"
                                       }
