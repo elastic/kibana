@@ -7,20 +7,28 @@
 
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import {
-  ASSET_INVENTORY_EXPAND_FLYOUT_SUCCESS,
   ASSET_INVENTORY_EXPAND_FLYOUT_ERROR,
+  ASSET_INVENTORY_EXPAND_FLYOUT_SUCCESS,
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
+import { useFlyoutApi } from '@kbn/flyout';
+import {
+  GenericEntityPanelKeyV2,
+  HostPanelKeyV2,
+  ServicePanelKeyV2,
+  UserPanelKeyV2,
+} from '../../flyoutV2/entity_details/shared/constants';
 import { useKibana } from '../../common/lib/kibana';
 import {
+  GenericEntityPanelKey,
   HostPanelKey,
   ServicePanelKey,
-  GenericEntityPanelKey,
   UserPanelKey,
 } from '../../flyout/entity_details/shared/constants';
 import { useOnExpandableFlyoutClose } from '../../flyout/shared/hooks/use_on_expandable_flyout_close';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 interface InventoryFlyoutProps {
   entityDocId?: string;
@@ -32,6 +40,8 @@ interface InventoryFlyoutProps {
 
 export const useDynamicEntityFlyout = ({ onFlyoutClose }: { onFlyoutClose: () => void }) => {
   const { openFlyout, closeFlyout } = useExpandableFlyoutApi();
+  const { openFlyout: openFlyoutV2, closeFlyout: closeFlyoutV2 } = useFlyoutApi();
+  const newFlyoutEnabled = useIsExperimentalFeatureEnabled('newFlyout');
   const { notifications } = useKibana().services;
   useOnExpandableFlyoutClose({ callback: onFlyoutClose });
 
@@ -62,33 +72,68 @@ export const useDynamicEntityFlyout = ({ onFlyoutClose }: { onFlyoutClose: () =>
 
     switch (entityType) {
       case 'user':
-        openFlyout({
-          right: { id: UserPanelKey, params: { userName: entityName, scopeId, contextId } },
-        });
+        if (newFlyoutEnabled) {
+          openFlyoutV2({
+            main: { id: UserPanelKeyV2, params: { userName: entityName, scopeId, contextId } },
+          });
+        } else {
+          openFlyout({
+            right: { id: UserPanelKey, params: { userName: entityName, scopeId, contextId } },
+          });
+        }
         break;
       case 'host':
-        openFlyout({
-          right: { id: HostPanelKey, params: { hostName: entityName, scopeId, contextId } },
-        });
+        if (newFlyoutEnabled) {
+          openFlyoutV2({
+            main: { id: HostPanelKeyV2, params: { hostName: entityName, scopeId, contextId } },
+          });
+        } else {
+          openFlyout({
+            right: { id: HostPanelKey, params: { hostName: entityName, scopeId, contextId } },
+          });
+        }
         break;
       case 'service':
-        openFlyout({
-          right: { id: ServicePanelKey, params: { serviceName: entityName, scopeId, contextId } },
-        });
+        if (newFlyoutEnabled) {
+          openFlyoutV2({
+            main: {
+              id: ServicePanelKeyV2,
+              params: { serviceName: entityName, scopeId, contextId },
+            },
+          });
+        } else {
+          openFlyout({
+            right: { id: ServicePanelKey, params: { serviceName: entityName, scopeId, contextId } },
+          });
+        }
         break;
 
       default:
-        openFlyout({
-          right: {
-            id: GenericEntityPanelKey,
-            params: {
-              entityDocId,
-              scopeId,
-              contextId,
-              isEngineMetadataExist: Boolean(entityType), // Pass whether entityType exists to avoid error state in generic flyout
+        if (newFlyoutEnabled) {
+          openFlyoutV2({
+            main: {
+              id: GenericEntityPanelKeyV2,
+              params: {
+                entityDocId,
+                scopeId,
+                contextId,
+                isEngineMetadataExist: Boolean(entityType), // Pass whether entityType exists to avoid error state in generic flyout
+              },
             },
-          },
-        });
+          });
+        } else {
+          openFlyout({
+            right: {
+              id: GenericEntityPanelKey,
+              params: {
+                entityDocId,
+                scopeId,
+                contextId,
+                isEngineMetadataExist: Boolean(entityType), // Pass whether entityType exists to avoid error state in generic flyout
+              },
+            },
+          });
+        }
         break;
     }
 
@@ -96,7 +141,11 @@ export const useDynamicEntityFlyout = ({ onFlyoutClose }: { onFlyoutClose: () =>
   };
 
   const closeDynamicFlyout = () => {
-    closeFlyout();
+    if (newFlyoutEnabled) {
+      closeFlyoutV2();
+    } else {
+      closeFlyout();
+    }
   };
 
   return {

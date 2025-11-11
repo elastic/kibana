@@ -8,8 +8,7 @@
  */
 
 import * as React from 'react';
-import ReactDOM from 'react-dom';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import * as conn from '..';
 
@@ -27,24 +26,23 @@ export interface OpenConnectionDetailsParams {
 }
 
 export const openConnectionDetails = async ({ props, start }: OpenConnectionDetailsParams) => {
-  const mount = (element: HTMLElement) => {
-    const reactElement = (
-      <KibanaRenderContextProvider {...start.core}>
-        <conn.KibanaConnectionDetailsProvider
-          {...props}
-          onNavigation={() => {
-            flyoutRef?.close();
-          }}
-        >
-          <conn.ConnectionDetailsFlyoutContent />
-        </conn.KibanaConnectionDetailsProvider>
-      </KibanaRenderContextProvider>
-    );
-    ReactDOM.render(reactElement, element);
-
-    return () => ReactDOM.unmountComponentAtNode(element);
-  };
-  const flyoutRef = start.core.overlays.openFlyout(mount, { size: 's' });
+  const flyoutRef = start.core.overlays.openSystemFlyout(
+    <conn.KibanaConnectionDetailsProvider
+      {...props}
+      onNavigation={() => {
+        flyoutRef?.close();
+      }}
+    >
+      <conn.ConnectionDetailsFlyoutContent />
+    </conn.KibanaConnectionDetailsProvider>,
+    {
+      // title is needed for flyout system
+      title: i18n.translate('cloud.connectionDetails.flyout.title', {
+        defaultMessage: 'Connection details',
+      }),
+      size: 's',
+    }
+  );
 
   return flyoutRef;
 };

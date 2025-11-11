@@ -12,6 +12,8 @@ import type { SyntheticEvent } from 'react';
 import React, { useCallback, useContext, useMemo } from 'react';
 import styled from 'styled-components';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useFlyoutApi } from '@kbn/flyout';
+import { RulePanelKeyV2 } from '../../../../../flyoutV2/rule_details/right';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { getRuleDetailsUrl } from '../../../../../common/components/link_to/redirect_to_detection_engine';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
@@ -26,6 +28,7 @@ import { LinkAnchor } from '../../../../../common/components/links';
 import { GenericLinkButton } from '../../../../../common/components/links/helpers';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import { RulePanelKey } from '../../../../../flyout/rule_details/right';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 
 const EventModuleFlexItem = styled(EuiFlexItem)`
   width: 100%;
@@ -57,6 +60,8 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
   value,
 }) => {
   const { openFlyout } = useExpandableFlyoutApi();
+  const { openFlyout: openFlyoutV2 } = useFlyoutApi();
+  const newFlyoutEnabled = useIsExperimentalFeatureEnabled('newFlyout');
   const eventContext = useContext(StatefulEventContext);
 
   const ruleName = `${value}`;
@@ -80,16 +85,37 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
         return;
       }
 
-      openFlyout({
-        right: {
-          id: RulePanelKey,
-          params: {
-            ruleId,
+      if (newFlyoutEnabled) {
+        openFlyoutV2({
+          main: {
+            id: RulePanelKeyV2,
+            params: {
+              ruleId,
+            },
           },
-        },
-      });
+        });
+      } else {
+        openFlyout({
+          right: {
+            id: RulePanelKey,
+            params: {
+              ruleId,
+            },
+          },
+        });
+      }
     },
-    [navigateToApp, ruleId, search, openInNewTab, openFlyout, eventContext, isInTimelineContext]
+    [
+      eventContext,
+      isInTimelineContext,
+      newFlyoutEnabled,
+      navigateToApp,
+      ruleId,
+      search,
+      openInNewTab,
+      openFlyoutV2,
+      openFlyout,
+    ]
   );
 
   const href = useMemo(

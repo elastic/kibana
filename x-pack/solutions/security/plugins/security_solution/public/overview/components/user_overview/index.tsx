@@ -11,6 +11,7 @@ import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from '@emotion/styled';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { buildUserNamesFilter } from '../../../../common/search_strategy';
 import { RiskScoreHeaderTitle } from '../../../entity_analytics/components/risk_score_header_title';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
@@ -33,6 +34,7 @@ import { AnomalyScores } from '../../../common/components/ml/score/anomaly_score
 import type { Anomalies, NarrowDateRange } from '../../../common/components/ml/types';
 import { DescriptionListStyled, OverviewWrapper } from '../../../common/components/page';
 import { FlyoutLink } from '../../../flyout/shared/components/flyout_link';
+import { FlyoutLink as FlyoutLinkV2 } from '../../../flyoutV2/shared/components/flyout_link';
 
 import * as i18n from './translations';
 
@@ -86,6 +88,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
     jobNameById,
     isFlyoutOpen = false,
   }) => {
+    const newFlyoutEnabled = useIsExperimentalFeatureEnabled('newFlyout');
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
     const darkMode = useKibanaIsDarkMode();
@@ -269,12 +272,16 @@ export const UserOverview = React.memo<UserSummaryProps>(
                 scopeId={scopeId}
                 render={(ip) =>
                   ip != null ? (
-                    <FlyoutLink
-                      field={'host.ip'}
-                      value={ip}
-                      scopeId={scopeId}
-                      isFlyoutOpen={isFlyoutOpen}
-                    />
+                    newFlyoutEnabled ? (
+                      <FlyoutLinkV2 field={'host.ip'} value={ip} scopeId={scopeId} />
+                    ) : (
+                      <FlyoutLink
+                        field={'host.ip'}
+                        value={ip}
+                        scopeId={scopeId}
+                        isFlyoutOpen={isFlyoutOpen}
+                      />
+                    )
                   ) : (
                     getEmptyTagValue()
                   )

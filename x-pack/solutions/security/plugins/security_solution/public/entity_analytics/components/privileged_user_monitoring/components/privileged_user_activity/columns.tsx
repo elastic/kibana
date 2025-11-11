@@ -8,9 +8,10 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { capitalize, isArray } from 'lodash/fp';
-import { EuiBadge, EuiButtonIcon, type EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBadge, type EuiBasicTableColumn, EuiButtonIcon } from '@elastic/eui';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { i18n } from '@kbn/i18n';
+import { DocumentDetailsRightPanelKeyV2 } from '../../../../../flyoutV2/document_details/shared/constants/panel_keys';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { PreferenceFormattedDate } from '../../../../../common/components/formatted_date';
 import { UserName } from '../../../user_name';
@@ -91,7 +92,11 @@ const getIpColumn = (fieldName = 'source.ip') => ({
     }),
 });
 
-const getActionsColumn = (openRightPanel: (props: FlyoutPanelProps) => void) => ({
+const getActionsColumn = (
+  openRightPanel: (props: FlyoutPanelProps) => void,
+  openMainPanel: (props: FlyoutPanelProps) => void,
+  newFlyoutEnabled: boolean
+) => ({
   name: (
     <FormattedMessage
       id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userActivity.columns.actions"
@@ -100,14 +105,25 @@ const getActionsColumn = (openRightPanel: (props: FlyoutPanelProps) => void) => 
   ),
   render: (record: { _id: string; _index: string }) => {
     const onClick = () => {
-      openRightPanel({
-        id: DocumentDetailsRightPanelKey,
-        params: {
-          id: record._id,
-          indexName: record._index,
-          scopeId: SCOPE_ID,
-        },
-      });
+      if (newFlyoutEnabled) {
+        openMainPanel({
+          id: DocumentDetailsRightPanelKeyV2,
+          params: {
+            id: record._id,
+            indexName: record._index,
+            scopeId: SCOPE_ID,
+          },
+        });
+      } else {
+        openRightPanel({
+          id: DocumentDetailsRightPanelKey,
+          params: {
+            id: record._id,
+            indexName: record._index,
+            scopeId: SCOPE_ID,
+          },
+        });
+      }
     };
 
     return (
@@ -128,10 +144,13 @@ const getActionsColumn = (openRightPanel: (props: FlyoutPanelProps) => void) => 
 });
 
 type OpenRightPanelType = (props: FlyoutPanelProps) => void;
+type OpenMainPanelType = (props: FlyoutPanelProps) => void;
 export const buildGrantedRightsColumns = (
-  openRightPanel: OpenRightPanelType
+  openRightPanel: OpenRightPanelType,
+  openMainPanel: OpenMainPanelType,
+  newFlyoutEnabled: boolean
 ): Array<EuiBasicTableColumn<TableItemType>> => [
-  getActionsColumn(openRightPanel),
+  getActionsColumn(openRightPanel, openMainPanel, newFlyoutEnabled),
   timestampColumn,
   getPrivilegedUserColumn(),
   getTargetUserColumn(),
@@ -148,9 +167,11 @@ export const buildGrantedRightsColumns = (
 ];
 
 export const buildAccountSwitchesColumns = (
-  openRightPanel: OpenRightPanelType
+  openRightPanel: OpenRightPanelType,
+  openMainPanel: OpenMainPanelType,
+  newFlyoutEnabled: boolean
 ): Array<EuiBasicTableColumn<TableItemType>> => [
-  getActionsColumn(openRightPanel),
+  getActionsColumn(openRightPanel, openMainPanel, newFlyoutEnabled),
   timestampColumn,
   getPrivilegedUserColumn(),
   {
@@ -184,9 +205,11 @@ export const buildAccountSwitchesColumns = (
 ];
 
 export const buildAuthenticationsColumns = (
-  openRightPanel: OpenRightPanelType
+  openRightPanel: OpenRightPanelType,
+  openMainPanel: OpenMainPanelType,
+  newFlyoutEnabled: boolean
 ): Array<EuiBasicTableColumn<TableItemType>> => [
-  getActionsColumn(openRightPanel),
+  getActionsColumn(openRightPanel, openMainPanel, newFlyoutEnabled),
   timestampColumn,
   getPrivilegedUserColumn(),
   {

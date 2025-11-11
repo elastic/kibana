@@ -11,6 +11,8 @@ import { EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { TableId } from '@kbn/securitysolution-data-table';
+import { useFlyoutApi } from '@kbn/flyout';
+import { DocumentDetailsRightPanelKeyV2 } from '../../flyoutV2/document_details/shared/constants/panel_keys';
 import { OPEN_FLYOUT_BUTTON_TEST_ID } from './test_ids';
 import { useSourcererDataView } from '../../sourcerer/containers';
 import { SourcererScopeName } from '../../sourcerer/store/model';
@@ -61,23 +63,46 @@ export const OpenFlyoutButtonIcon = memo(
 
     const { telemetry } = useKibana().services;
     const { openFlyout } = useExpandableFlyoutApi();
+    const { openFlyout: openFlyoutV2 } = useFlyoutApi();
+    const newFlyoutEnabled = useIsExperimentalFeatureEnabled('newFlyout');
 
     const handleClick = useCallback(() => {
-      openFlyout({
-        right: {
-          id: DocumentDetailsRightPanelKey,
-          params: {
-            id: eventId,
-            indexName: selectedPatterns.join(','),
-            scopeId: TableId.alertsOnAlertsPage, // TODO we should update the flyout's code to separate scopeId and preview
+      if (newFlyoutEnabled) {
+        openFlyoutV2({
+          main: {
+            id: DocumentDetailsRightPanelKeyV2,
+            params: {
+              id: eventId,
+              indexName: selectedPatterns.join(','),
+              scopeId: TableId.alertsOnAlertsPage, // TODO we should update the flyout's code to separate scopeId and preview
+            },
           },
-        },
-      });
+        });
+      } else {
+        openFlyout({
+          right: {
+            id: DocumentDetailsRightPanelKey,
+            params: {
+              id: eventId,
+              indexName: selectedPatterns.join(','),
+              scopeId: TableId.alertsOnAlertsPage, // TODO we should update the flyout's code to separate scopeId and preview
+            },
+          },
+        });
+      }
       telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
         location: timelineId,
         panel: 'right',
       });
-    }, [eventId, openFlyout, selectedPatterns, telemetry, timelineId]);
+    }, [
+      eventId,
+      newFlyoutEnabled,
+      openFlyout,
+      openFlyoutV2,
+      selectedPatterns,
+      telemetry,
+      timelineId,
+    ]);
 
     return (
       <EuiButtonIcon

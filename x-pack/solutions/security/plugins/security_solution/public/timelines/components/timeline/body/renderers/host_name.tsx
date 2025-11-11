@@ -9,12 +9,15 @@ import React, { useCallback, useContext, useMemo } from 'react';
 import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { isString } from 'lodash/fp';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useFlyoutApi } from '@kbn/flyout';
+import { HostPanelKeyV2 } from '../../../../../flyoutV2/entity_details/shared/constants';
 import { HostPanelKey } from '../../../../../flyout/entity_details/shared/constants';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import { HostDetailsLink } from '../../../../../common/components/links';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
 import { useIsInSecurityApp } from '../../../../../common/hooks/is_in_security_app';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 
 interface Props {
   contextId: string;
@@ -34,6 +37,8 @@ const HostNameComponent: React.FC<Props> = ({
   value,
 }) => {
   const { openFlyout } = useExpandableFlyoutApi();
+  const { openFlyout: openFlyoutV2 } = useFlyoutApi();
+  const newFlyoutEnabled = useIsExperimentalFeatureEnabled('newFlyout');
 
   const isInSecurityApp = useIsInSecurityApp();
 
@@ -59,18 +64,40 @@ const HostNameComponent: React.FC<Props> = ({
       }
 
       const { timelineID } = eventContext;
-      openFlyout({
-        right: {
-          id: HostPanelKey,
-          params: {
-            hostName,
-            contextID: contextId,
-            scopeId: timelineID,
+      if (newFlyoutEnabled) {
+        openFlyoutV2({
+          main: {
+            id: HostPanelKeyV2,
+            params: {
+              hostName,
+              contextID: contextId,
+              scopeId: timelineID,
+            },
           },
-        },
-      });
+        });
+      } else {
+        openFlyout({
+          right: {
+            id: HostPanelKey,
+            params: {
+              hostName,
+              contextID: contextId,
+              scopeId: timelineID,
+            },
+          },
+        });
+      }
     },
-    [contextId, eventContext, hostName, isInTimelineContext, onClick, openFlyout]
+    [
+      contextId,
+      eventContext,
+      hostName,
+      isInTimelineContext,
+      newFlyoutEnabled,
+      onClick,
+      openFlyout,
+      openFlyoutV2,
+    ]
   );
 
   // The below is explicitly defined this way as the onClick takes precedence when it and the href are both defined

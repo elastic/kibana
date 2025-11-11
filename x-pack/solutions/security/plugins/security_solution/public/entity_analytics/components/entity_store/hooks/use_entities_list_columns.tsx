@@ -11,6 +11,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { get } from 'lodash/fp';
+import { useFlyoutApi } from '@kbn/flyout';
 import {
   EntityTypeToLevelField,
   EntityTypeToScoreField,
@@ -29,6 +30,7 @@ import { ENTITIES_LIST_TABLE_ID } from '../constants';
 import { EntityIconByType, getEntityType, sourceFieldToText } from '../helpers';
 import { CRITICALITY_LEVEL_TITLE } from '../../asset_criticality/translations';
 import { formatRiskScore } from '../../../common';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 export type EntitiesListColumns = [
   Columns<Entity>,
@@ -42,6 +44,8 @@ export type EntitiesListColumns = [
 
 export const useEntitiesListColumns = (): EntitiesListColumns => {
   const { openRightPanel } = useExpandableFlyoutApi();
+  const { openMainPanel } = useFlyoutApi();
+  const newFlyoutEnabled = useIsExperimentalFeatureEnabled('newFlyout');
   const { euiTheme } = useEuiTheme();
 
   return [
@@ -61,14 +65,25 @@ export const useEntitiesListColumns = (): EntitiesListColumns => {
           const id = EntityPanelKeyByType[entityType];
 
           if (id) {
-            openRightPanel({
-              id,
-              params: {
-                [EntityPanelParamByType[entityType] ?? '']: value,
-                contextID: ENTITIES_LIST_TABLE_ID,
-                scopeId: ENTITIES_LIST_TABLE_ID,
-              },
-            });
+            if (newFlyoutEnabled) {
+              openMainPanel({
+                id,
+                params: {
+                  [EntityPanelParamByType[entityType] ?? '']: value,
+                  contextID: ENTITIES_LIST_TABLE_ID,
+                  scopeId: ENTITIES_LIST_TABLE_ID,
+                },
+              });
+            } else {
+              openRightPanel({
+                id,
+                params: {
+                  [EntityPanelParamByType[entityType] ?? '']: value,
+                  contextID: ENTITIES_LIST_TABLE_ID,
+                  scopeId: ENTITIES_LIST_TABLE_ID,
+                },
+              });
+            }
           }
         };
 

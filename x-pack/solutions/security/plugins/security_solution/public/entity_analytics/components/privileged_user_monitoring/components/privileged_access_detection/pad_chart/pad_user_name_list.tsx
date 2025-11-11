@@ -9,25 +9,43 @@ import React from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { useFlyoutApi } from '@kbn/flyout';
+import { UserPanelKeyV2 } from '../../../../../../flyoutV2/entity_details/shared/constants';
 import { padChartStyling } from './pad_chart_styling';
 import { UserPanelKey } from '../../../../../../flyout/entity_details/shared/constants';
+import { useIsExperimentalFeatureEnabled } from '../../../../../../common/hooks/use_experimental_features';
 
 const PRIVILEGED_ACCESS_DETECTION_TABLE_ID = 'PadAnomalies-table';
 
 export const UserNameList: React.FC<{ userNames: string[] }> = ({ userNames }) => {
   const { openFlyout } = useExpandableFlyoutApi();
+  const { openFlyout: openFlyoutV2 } = useFlyoutApi();
+  const newFlyoutEnabled = useIsExperimentalFeatureEnabled('newFlyout');
 
   const openUserFlyout = (userName: string) => {
-    openFlyout({
-      right: {
-        id: UserPanelKey,
-        params: {
-          contextID: PRIVILEGED_ACCESS_DETECTION_TABLE_ID,
-          userName,
-          scopeId: PRIVILEGED_ACCESS_DETECTION_TABLE_ID,
+    if (newFlyoutEnabled) {
+      openFlyoutV2({
+        main: {
+          id: UserPanelKeyV2,
+          params: {
+            contextID: PRIVILEGED_ACCESS_DETECTION_TABLE_ID,
+            userName,
+            scopeId: PRIVILEGED_ACCESS_DETECTION_TABLE_ID,
+          },
         },
-      },
-    });
+      });
+    } else {
+      openFlyout({
+        right: {
+          id: UserPanelKey,
+          params: {
+            contextID: PRIVILEGED_ACCESS_DETECTION_TABLE_ID,
+            userName,
+            scopeId: PRIVILEGED_ACCESS_DETECTION_TABLE_ID,
+          },
+        },
+      });
+    }
   };
 
   return (

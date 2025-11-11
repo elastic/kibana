@@ -8,9 +8,12 @@
 import React, { useCallback } from 'react';
 
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useFlyoutApi } from '@kbn/flyout';
+import { UserPanelKeyV2 } from '../../flyoutV2/entity_details/shared/constants';
 import { UserDetailsLink } from '../../common/components/links';
 import { getEmptyTagValue } from '../../common/components/empty_value';
 import { UserPanelKey } from '../../flyout/entity_details/shared/constants';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 interface Props {
   userName: string | undefined | null;
@@ -20,23 +23,38 @@ interface Props {
 
 const UserNameComponent: React.FC<Props> = ({ userName, scopeId, contextId }) => {
   const { openFlyout } = useExpandableFlyoutApi();
+  const { openFlyout: openFlyoutV2 } = useFlyoutApi();
+  const newFlyoutEnabled = useIsExperimentalFeatureEnabled('newFlyout');
 
   const openUserDetailsSidePanel = useCallback(
     (e: React.SyntheticEvent) => {
       e.preventDefault();
 
-      openFlyout({
-        right: {
-          id: UserPanelKey,
-          params: {
-            userName,
-            contextID: contextId,
-            scopeId,
+      if (newFlyoutEnabled) {
+        openFlyoutV2({
+          main: {
+            id: UserPanelKeyV2,
+            params: {
+              userName,
+              contextID: contextId,
+              scopeId,
+            },
           },
-        },
-      });
+        });
+      } else {
+        openFlyout({
+          right: {
+            id: UserPanelKey,
+            params: {
+              userName,
+              contextID: contextId,
+              scopeId,
+            },
+          },
+        });
+      }
     },
-    [contextId, openFlyout, scopeId, userName]
+    [contextId, newFlyoutEnabled, openFlyout, openFlyoutV2, scopeId, userName]
   );
 
   if (!userName) {

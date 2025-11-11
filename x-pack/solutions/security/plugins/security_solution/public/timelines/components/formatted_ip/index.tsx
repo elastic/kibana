@@ -10,12 +10,16 @@ import React, { useCallback, useContext, useMemo } from 'react';
 import deepEqual from 'fast-deep-equal';
 import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useFlyoutApi } from '@kbn/flyout';
+import { NetworkPanelKeyV2 } from '../../../flyoutV2/network_details';
 import { StatefulEventContext } from '../../../common/components/events_viewer/stateful_event_context';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 import { getOrEmptyTagFromValue } from '../../../common/components/empty_value';
 import { NetworkDetailsLink } from '../../../common/components/links';
 import { NetworkPanelKey } from '../../../flyout/network_details';
 import { FlyoutLink } from '../../../flyout/shared/components/flyout_link';
+import { FlyoutLink as FlyoutLinkV2 } from '../../../flyoutV2/shared/components/flyout_link';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 const tryStringify = (value: string | object | null | undefined): string => {
   try {
@@ -54,6 +58,8 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
   title,
 }) => {
   const { openFlyout } = useExpandableFlyoutApi();
+  const { openFlyout: openFlyoutV2 } = useFlyoutApi();
+  const newFlyoutEnabled = useIsExperimentalFeatureEnabled('newFlyout');
 
   const eventContext = useContext(StatefulEventContext);
 
@@ -64,21 +70,36 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
       }
 
       if (eventContext) {
-        openFlyout({
-          right: {
-            id: NetworkPanelKey,
-            params: {
-              ip,
-              scopeId: eventContext.timelineID,
-              flowTarget: fieldName.includes(FlowTargetSourceDest.destination)
-                ? FlowTargetSourceDest.destination
-                : FlowTargetSourceDest.source,
+        if (newFlyoutEnabled) {
+          openFlyoutV2({
+            main: {
+              id: NetworkPanelKeyV2,
+              params: {
+                ip,
+                scopeId: eventContext.timelineID,
+                flowTarget: fieldName.includes(FlowTargetSourceDest.destination)
+                  ? FlowTargetSourceDest.destination
+                  : FlowTargetSourceDest.source,
+              },
             },
-          },
-        });
+          });
+        } else {
+          openFlyout({
+            right: {
+              id: NetworkPanelKey,
+              params: {
+                ip,
+                scopeId: eventContext.timelineID,
+                flowTarget: fieldName.includes(FlowTargetSourceDest.destination)
+                  ? FlowTargetSourceDest.destination
+                  : FlowTargetSourceDest.source,
+              },
+            },
+          });
+        }
       }
     },
-    [onClick, eventContext, fieldName, openFlyout]
+    [onClick, eventContext, newFlyoutEnabled, openFlyoutV2, fieldName, openFlyout]
   );
 
   // The below is explicitly defined this way as the onClick takes precedence when it and the href are both defined
@@ -92,6 +113,13 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
           isButton={isButton}
           onClick={openNetworkDetailsSidePanel}
           title={title}
+        />
+      ) : newFlyoutEnabled ? (
+        <FlyoutLinkV2
+          field={fieldName}
+          value={address}
+          scopeId={eventContext?.timelineID ?? ''}
+          data-test-subj="network-details"
         />
       ) : (
         <FlyoutLink

@@ -11,6 +11,7 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import { encode } from '@kbn/rison';
 import * as E from 'fp-ts/Either';
+import { useFlyoutApi } from '@kbn/flyout';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { useSpaceId } from '../../../../../common/hooks/use_space_id';
 import {
@@ -19,20 +20,21 @@ import {
 } from '../../../privileged_user_monitoring_onboarding/components/sample_dashboard/esql_data_generation';
 import { VisualizationToggleOptions } from './types';
 import {
-  buildGrantedRightsColumns,
   buildAccountSwitchesColumns,
   buildAuthenticationsColumns,
+  buildGrantedRightsColumns,
 } from './columns';
 import { getLensAttributes } from './get_lens_attributes';
 import {
   ACCOUNT_SWITCH_STACK_BY,
   AUTHENTICATIONS_STACK_BY,
-  GRANTED_RIGHTS_STACK_BY,
   ERROR_ENCODING_ESQL_QUERY,
+  GRANTED_RIGHTS_STACK_BY,
 } from './constants';
 import { getAuthenticationsEsqlSource } from '../../queries/authentications_esql_query';
 import { getAccountSwitchesEsqlSource } from '../../queries/account_switches_esql_query';
 import { getGrantedRightsEsqlSource } from '../../queries/granted_rights_esql_query';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 
 export const useDiscoverPath = (query: string) => {
   const { addWarning } = useAppToasts();
@@ -102,10 +104,17 @@ export const usePrivilegedUserActivityParams = (
   );
 
   const { openRightPanel } = useExpandableFlyoutApi();
+  const { openMainPanel } = useFlyoutApi();
+  const newFlyoutEnabled = useIsExperimentalFeatureEnabled('newFlyout');
 
   const columns = useMemo(
-    () => toggleOptionsConfig[selectedToggleOption].buildColumns(openRightPanel),
-    [selectedToggleOption, openRightPanel]
+    () =>
+      toggleOptionsConfig[selectedToggleOption].buildColumns(
+        openRightPanel,
+        openMainPanel,
+        newFlyoutEnabled
+      ),
+    [selectedToggleOption, openRightPanel, openMainPanel, newFlyoutEnabled]
   );
 
   return {
