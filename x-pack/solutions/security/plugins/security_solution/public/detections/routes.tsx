@@ -21,7 +21,7 @@ import { PluginTemplateWrapper } from '../common/components/plugin_template_wrap
 import { Alerts } from './pages/alerts';
 import { Attacks } from './pages/attacks';
 import { withSecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
-import { AlertDetectionsLandingPage } from './landing';
+import { AlertDetectionsLandingPage } from './pages/landing';
 
 const AlertsRoutes = () => (
   <PluginTemplateWrapper>
