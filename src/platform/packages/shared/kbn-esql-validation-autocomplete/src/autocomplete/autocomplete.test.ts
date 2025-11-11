@@ -573,6 +573,7 @@ describe('autocomplete', () => {
       testSuggestions(
         'FROM /',
         [
+          withAutoSuggest({ text: '(FROM $0)' } as ISuggestionItem),
           withAutoSuggest({ text: 'index1' } as ISuggestionItem),
           withAutoSuggest({ text: 'index2' } as ISuggestionItem),
         ],
@@ -642,6 +643,7 @@ describe('autocomplete', () => {
       testSuggestions(
         'FROM index1, index2/',
         [
+          withAutoSuggest({ text: '(FROM $0)' } as ISuggestionItem),
           withAutoSuggest({
             text: 'index2 | ',
             filterText: 'index2',

@@ -10,12 +10,12 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { WorkflowDetailEditor } from './workflow_detail_editor';
-import { TestWrapper } from '../../../shared/test_utils';
-import { createMockStore } from '../../../widgets/workflow_yaml_editor/lib/store/__mocks__/store.mock';
+import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
 import {
   _setComputedDataInternal,
   setYamlString,
-} from '../../../widgets/workflow_yaml_editor/lib/store/slice';
+} from '../../../entities/workflows/store/workflow_detail/slice';
+import { TestWrapper } from '../../../shared/test_utils';
 
 // Mock hooks
 const mockUseKibana = jest.fn();
@@ -30,7 +30,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 jest.mock('../../../hooks/use_workflow_url_state', () => ({
   useWorkflowUrlState: () => mockUseWorkflowUrlState(),
 }));
-jest.mock('../../../entities/workflows/model/use_workflow_execution', () => ({
+jest.mock('@kbn/workflows-ui', () => ({
   useWorkflowExecution: () => mockUseWorkflowExecution(),
 }));
 jest.mock('../../../entities/workflows/model/use_workflow_actions', () => ({

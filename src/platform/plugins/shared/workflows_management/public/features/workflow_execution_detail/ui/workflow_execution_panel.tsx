@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -17,14 +18,15 @@ import {
   EuiPanel,
   EuiTitle,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React from 'react';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowExecutionDto, WorkflowYaml } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
+import { ExecutionStatus, isCancelableStatus } from '@kbn/workflows';
 import { CancelExecutionButton } from './cancel_execution_button';
 import { WorkflowStepExecutionTree } from './workflow_step_execution_tree';
 import { WorkflowExecutionListItem } from '../../workflow_execution_list/ui/workflow_execution_list_item';
-import { isCancelableStatus } from '../lib/execution_status';
 
 const i18nTexts = {
   backToExecutions: i18n.translate('workflows.workflowStepExecutionList.backToExecution', {
@@ -55,78 +57,90 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
     onStepExecutionClick,
     selectedId: selectedStepExecutionId,
     onClose,
-  }) => (
-    <EuiFlexGroup
-      direction="column"
-      justifyContent="flexStart"
-      gutterSize="none"
-      css={{ height: '100%' }}
-    >
-      {showBackButton && (
-        <EuiFlexItem grow={false}>
-          <EuiLink onClick={onClose} color="text" aria-label={i18nTexts.backToExecutions}>
-            <EuiPanel paddingSize="m" hasShadow={false}>
-              <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <EuiIcon type="sortLeft" />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiTitle size="xxs">
-                    <span>{i18nTexts.backToExecutions}</span>
-                  </EuiTitle>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPanel>
-          </EuiLink>
-          <EuiHorizontalRule margin="none" />
-        </EuiFlexItem>
-      )}
+  }) => {
+    const styles = useMemoCss(componentStyles);
+    return (
+      <EuiFlexGroup
+        direction="column"
+        justifyContent="flexStart"
+        gutterSize="none"
+        css={{ height: '100%' }}
+      >
+        {showBackButton && (
+          <EuiFlexItem grow={false}>
+            <EuiLink onClick={onClose} color="text" aria-label={i18nTexts.backToExecutions}>
+              <EuiPanel paddingSize="m" hasShadow={false} css={styles.linkCss}>
+                <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon type="sortLeft" />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiTitle size="xxs">
+                      <span>{i18nTexts.backToExecutions}</span>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiPanel>
+            </EuiLink>
+            <EuiHorizontalRule margin="none" />
+          </EuiFlexItem>
+        )}
 
-      <EuiFlexItem css={{ overflow: 'hidden' }}>
-        <EuiPanel paddingSize="m" hasShadow={false} css={{ overflow: 'hidden' }}>
-          <EuiFlexGroup direction="column" gutterSize="m" css={{ height: '100%' }}>
-            <EuiFlexItem grow={false}>
-              <WorkflowExecutionListItem
-                status={execution?.status ?? ExecutionStatus.PENDING}
-                startedAt={execution?.startedAt ? new Date(execution.startedAt) : null}
-                duration={execution?.duration ?? null}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem css={{ overflowY: 'auto' }}>
-              <WorkflowStepExecutionTree
-                definition={definition}
-                execution={execution ?? null}
-                isLoading={isLoading}
-                error={error}
-                onStepExecutionClick={onStepExecutionClick}
-                selectedId={selectedStepExecutionId ?? null}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
-      </EuiFlexItem>
-
-      {!showBackButton && (
-        <EuiFlexItem grow={false}>
-          <EuiHorizontalRule margin="none" />
-          <EuiPanel paddingSize="m" hasShadow={false}>
-            {execution && isCancelableStatus(execution.status) ? (
-              <CancelExecutionButton executionId={execution.id} />
-            ) : (
-              <EuiButton
-                onClick={onClose}
-                iconType="check"
-                size="s"
-                fullWidth
-                aria-label={i18nTexts.done}
-              >
-                {i18nTexts.done}
-              </EuiButton>
-            )}
+        <EuiFlexItem css={{ overflow: 'hidden' }}>
+          <EuiPanel paddingSize="m" hasShadow={false} css={{ overflow: 'hidden' }}>
+            <EuiFlexGroup direction="column" gutterSize="m" css={{ height: '100%' }}>
+              <EuiFlexItem grow={false}>
+                <WorkflowExecutionListItem
+                  status={execution?.status ?? ExecutionStatus.PENDING}
+                  startedAt={execution?.startedAt ? new Date(execution.startedAt) : null}
+                  duration={execution?.duration ?? null}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem css={{ overflowY: 'auto' }}>
+                <WorkflowStepExecutionTree
+                  definition={definition}
+                  execution={execution ?? null}
+                  isLoading={isLoading}
+                  error={error}
+                  onStepExecutionClick={onStepExecutionClick}
+                  selectedId={selectedStepExecutionId ?? null}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiPanel>
         </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
-  )
+
+        {!showBackButton && (
+          <EuiFlexItem grow={false}>
+            <EuiHorizontalRule margin="none" />
+            <EuiPanel paddingSize="m" hasShadow={false}>
+              {execution && isCancelableStatus(execution.status) ? (
+                <CancelExecutionButton executionId={execution.id} />
+              ) : (
+                <EuiButton
+                  onClick={onClose}
+                  iconType="check"
+                  size="s"
+                  fullWidth
+                  aria-label={i18nTexts.done}
+                >
+                  {i18nTexts.done}
+                </EuiButton>
+              )}
+            </EuiPanel>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    );
+  }
 );
 WorkflowExecutionPanel.displayName = 'WorkflowExecutionPanel';
+
+const componentStyles = {
+  linkCss: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      '&:hover': {
+        background: euiTheme.colors.backgroundBaseInteractiveHover,
+      },
+    }),
+};

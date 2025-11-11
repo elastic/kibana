@@ -232,6 +232,10 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
      */
     controlsWrapper: React.ReactNode;
   };
+  /**
+   * Optional ES|QL prop - Callback function invoked to open the given ES|QL query in a new Discover tab
+   */
+  onOpenQueryInNewTab?: ESQLEditorProps['onOpenQueryInNewTab'];
   useBackgroundSearchButton?: boolean;
   showProjectPicker?: boolean;
 }
@@ -919,6 +923,7 @@ export const QueryBarTopRow = React.memo(
                 : undefined
             }
             esqlVariables={props.esqlVariablesConfig?.esqlVariables ?? []}
+            onOpenQueryInNewTab={props.onOpenQueryInNewTab}
           />
         )
       );

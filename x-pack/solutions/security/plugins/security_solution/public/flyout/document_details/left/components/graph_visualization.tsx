@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useEffect } from 'react';
 import { css } from '@emotion/react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
@@ -18,9 +18,15 @@ import {
   getNodeDocumentMode,
   getSingleDocumentData,
   type NodeViewModel,
+  groupedItemClick$,
+  type EntityOrEventItem,
+  NETWORK_PREVIEW_BANNER,
 } from '@kbn/cloud-security-posture-graph';
 import { type NodeDocumentDataModel } from '@kbn/cloud-security-posture-common/types/graph/v1';
-import { DOCUMENT_TYPE_ENTITY } from '@kbn/cloud-security-posture-common/schema/graph/v1';
+import {
+  DOCUMENT_TYPE_ENTITY,
+  DOCUMENT_TYPE_ALERT,
+} from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { useGetScopedSourcererDataView } from '../../../../sourcerer/components/use_get_sourcerer_data_view';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
@@ -38,6 +44,7 @@ import {
 } from '../../preview/constants';
 import { useToasts } from '../../../../common/lib/kibana';
 import { GenericEntityPanelKey } from '../../../entity_details/shared/constants';
+import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
 
 const GraphInvestigationLazy = React.lazy(() =>
   import('@kbn/cloud-security-posture-graph').then((module) => ({
@@ -77,35 +84,71 @@ export const GraphVisualization: React.FC = memo(() => {
   });
 
   const { openPreviewPanel } = useExpandableFlyoutApi();
+
+  const onOpenNetworkPreview = useCallback(
+    (ip: string, previewScopeId: string) => {
+      openPreviewPanel({
+        id: 'network-preview',
+        params: {
+          ip,
+          scopeId: previewScopeId,
+          flowTarget: FlowTargetSourceDest.source,
+          banner: NETWORK_PREVIEW_BANNER,
+          isPreviewMode: true,
+        },
+      });
+    },
+    [openPreviewPanel]
+  );
+
   const onOpenEventPreview = useCallback(
     (node: NodeViewModel) => {
       const singleDocumentData = getSingleDocumentData(node);
       const docMode = getNodeDocumentMode(node);
+      const documentsData = (node.documentsData ?? []) as NodeDocumentDataModel[];
 
-      if ((docMode === 'single-event' || docMode === 'single-alert') && singleDocumentData) {
-        openPreviewPanel({
-          id: DocumentDetailsPreviewPanelKey,
-          params: {
-            id: singleDocumentData.id,
-            indexName: singleDocumentData.index,
-            scopeId,
-            banner: docMode === 'single-alert' ? ALERT_PREVIEW_BANNER : EVENT_PREVIEW_BANNER,
-            isPreviewMode: true,
-          },
-        });
-      } else if (docMode === 'single-entity' && singleDocumentData) {
+      const showEntityPreview = (item: { id: string; entity?: unknown }) => {
         openPreviewPanel({
           id: GenericEntityPanelKey,
           params: {
-            entityId: singleDocumentData.id,
+            entityId: item.id,
             scopeId,
             isPreviewMode: true,
             banner: GENERIC_ENTITY_PREVIEW_BANNER,
-            // TODO: Remove hardcoded value once https://github.com/elastic/kibana/issues/232226 is implemented
-            isEngineMetadataExist: true,
+            isEngineMetadataExist: !!item.entity,
           },
         });
-      } else if (docMode === 'grouped-entities' && node.documentsData) {
+      };
+
+      const showEventOrAlertPreview = (
+        item: { id: string },
+        banner: {
+          title: string;
+          backgroundColor: string;
+          textColor: string;
+        },
+        index?: string
+      ) => {
+        openPreviewPanel({
+          id: DocumentDetailsPreviewPanelKey,
+          params: {
+            id: item.id,
+            indexName: index,
+            scopeId,
+            banner,
+            isPreviewMode: true,
+          },
+        });
+      };
+      if ((docMode === 'single-event' || docMode === 'single-alert') && singleDocumentData) {
+        showEventOrAlertPreview(
+          singleDocumentData,
+          docMode === 'single-alert' ? ALERT_PREVIEW_BANNER : EVENT_PREVIEW_BANNER,
+          singleDocumentData.index
+        );
+      } else if (docMode === 'single-entity' && singleDocumentData) {
+        showEntityPreview(singleDocumentData);
+      } else if (docMode === 'grouped-entities' && documentsData.length > 0) {
         openPreviewPanel({
           id: GraphGroupedNodePreviewPanelKey,
           params: {
@@ -125,7 +168,7 @@ export const GraphVisualization: React.FC = memo(() => {
               })),
           },
         });
-      } else if (docMode === 'grouped-events' && node.documentsData) {
+      } else if (docMode === 'grouped-events' && documentsData.length > 0) {
         openPreviewPanel({
           id: GraphGroupedNodePreviewPanelKey,
           params: {
@@ -153,6 +196,37 @@ export const GraphVisualization: React.FC = memo(() => {
     },
     [toasts, openPreviewPanel, scopeId, dataViewIndexPattern]
   );
+
+  // Subscribe to grouped item click events emitted by graph package
+  useEffect(() => {
+    const sub = groupedItemClick$.subscribe((item: EntityOrEventItem) => {
+      if (item.itemType === DOCUMENT_TYPE_ENTITY) {
+        openPreviewPanel({
+          id: GenericEntityPanelKey,
+          params: {
+            entityId: item.id,
+            scopeId,
+            isPreviewMode: true,
+            banner: GENERIC_ENTITY_PREVIEW_BANNER,
+          },
+        });
+      } else {
+        // event or alert
+        openPreviewPanel({
+          id: DocumentDetailsPreviewPanelKey,
+          params: {
+            id: item.docId,
+            indexName: item.index,
+            scopeId,
+            banner:
+              item.itemType === DOCUMENT_TYPE_ALERT ? ALERT_PREVIEW_BANNER : EVENT_PREVIEW_BANNER,
+            isPreviewMode: true,
+          },
+        });
+      }
+    });
+    return () => sub.unsubscribe();
+  }, [openPreviewPanel, scopeId]);
 
   const originEventIds = eventIds.map((id) => ({ id, isAlert }));
   const { investigateInTimeline } = useInvestigateInTimeline();
@@ -223,6 +297,7 @@ export const GraphVisualization: React.FC = memo(() => {
             showToggleSearch={true}
             onInvestigateInTimeline={openTimelineCallback}
             onOpenEventPreview={onOpenEventPreview}
+            onOpenNetworkPreview={onOpenNetworkPreview}
           />
         </React.Suspense>
       )}
