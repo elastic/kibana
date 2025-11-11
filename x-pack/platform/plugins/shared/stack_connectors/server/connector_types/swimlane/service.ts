@@ -15,21 +15,23 @@ import {
 } from '@kbn/actions-plugin/server/lib/axios_utils';
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import { CONNECTOR_NAME } from '@kbn/connector-schemas/swimlane';
+import type {
+  SwimlanePublicConfigurationType,
+  SwimlaneSecretConfigurationType,
+  MappingConfigType,
+  CreateRecordParams,
+  UpdateRecordParams,
+} from '@kbn/connector-schemas/swimlane';
 import { getBodyForEventAction } from './helpers';
 import type {
   CreateCommentParams,
-  CreateRecordParams,
   ExternalService,
   ExternalServiceCredentials,
   ExternalServiceIncidentResponse,
-  MappingConfigType,
   ResponseError,
-  SwimlanePublicConfigurationType,
   SwimlaneRecordPayload,
-  SwimlaneSecretConfigurationType,
-  UpdateRecordParams,
 } from './types';
-import * as i18n from './translations';
 
 const createErrorMessage = (errorResponse: ResponseError | null | undefined): string => {
   if (errorResponse == null) {
@@ -52,7 +54,7 @@ export const createExternalService = (
   const axiosInstance = axios.create();
 
   if (!url || !appId || !apiToken || !mappings) {
-    throw Error(`[Action]${i18n.NAME}: Wrong configuration.`);
+    throw Error(`[Action]${CONNECTOR_NAME}: Wrong configuration.`);
   }
 
   const headers: Record<string, string> = {
@@ -110,7 +112,7 @@ export const createExternalService = (
       };
     } catch (error) {
       error.message = getErrorMessage(
-        i18n.NAME,
+        CONNECTOR_NAME,
         `Unable to create record in application with id ${appId}. Status: ${
           error.response?.status ?? 500
         }. Error: ${error.message}. Reason: ${createErrorMessage(error.response?.data)}`
@@ -150,7 +152,7 @@ export const createExternalService = (
       };
     } catch (error) {
       error.message = getErrorMessage(
-        i18n.NAME,
+        CONNECTOR_NAME,
         `Unable to update record in application with id ${appId}. Status: ${
           error.response?.status ?? 500
         }. Error: ${error.message}. Reason: ${createErrorMessage(error.response?.data)}`
@@ -165,7 +167,7 @@ export const createExternalService = (
       const fieldId = getCommentFieldId(mappingConfig);
 
       if (fieldId == null) {
-        throw new Error(`No comment field mapped in ${i18n.NAME} connector`);
+        throw new Error(`No comment field mapped in ${CONNECTOR_NAME} connector`);
       }
 
       const data = {
@@ -196,7 +198,7 @@ export const createExternalService = (
       };
     } catch (error) {
       error.message = getErrorMessage(
-        i18n.NAME,
+        CONNECTOR_NAME,
         `Unable to create comment in application with id ${appId}. Status: ${
           error.response?.status ?? 500
         }. Error: ${error.message}. Reason: ${createErrorMessage(error.response?.data)}`
