@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { WorkflowsSearchParams } from '../../types';
+import type { WorkflowsSearchParams } from '@kbn/workflows';
 
 export interface WorkflowsData {
   _pagination: {

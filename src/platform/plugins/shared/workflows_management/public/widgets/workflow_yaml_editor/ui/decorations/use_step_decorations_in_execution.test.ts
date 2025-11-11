@@ -14,15 +14,15 @@ import type { monaco } from '@kbn/monaco';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { useStepDecorationsInExecution } from './use_step_decorations_in_execution';
-import { createMockStore } from '../../lib/store/__mocks__/store.mock';
+import { createMockStore } from '../../../../entities/workflows/store/__mocks__/store.mock';
+import type { ComputedData } from '../../../../entities/workflows/store/types';
+import type { StepInfo } from '../../../../entities/workflows/store/utils/build_workflow_lookup';
 import {
   _setComputedDataInternal,
   setHighlightedStepId,
   setStepExecutions,
   setYamlString,
-} from '../../lib/store/slice';
-import type { ComputedData } from '../../lib/store/types';
-import type { StepInfo } from '../../lib/store/utils/build_workflow_lookup';
+} from '../../../../entities/workflows/store/workflow_detail/slice';
 
 // Mock Monaco Range
 jest.mock('@kbn/monaco', () => {
