@@ -16,6 +16,7 @@ import {
   EuiButton,
   EuiFieldText,
   EuiBadge,
+  EuiCallOut,
 } from '@elastic/eui';
 import { useCloudConnectedAppContext } from '../../../application/app_context';
 import {
@@ -37,12 +38,38 @@ interface ConnectionWizardProps {
 }
 
 export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect }) => {
-  const { docLinks } = useCloudConnectedAppContext();
+  const { docLinks, http } = useCloudConnectedAppContext();
   const [apiKey, setApiKey] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
 
-  const handleConnect = () => {
-    if (apiKey.trim()) {
+  const handleConnect = async () => {
+    if (!apiKey.trim()) {
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+    setSuccess(false);
+
+    try {
+      const response = await http.post('/internal/cloud_connect/authenticate', {
+        body: JSON.stringify({ apiKey: apiKey.trim() }),
+      });
+
+      setSuccess(true);
       onConnect(apiKey);
+      // eslint-disable-next-line no-console
+      console.log('Authentication successful:', response);
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : 'Failed to authenticate with Cloud Connect';
+      setError(errorMessage);
+      // eslint-disable-next-line no-console
+      console.error('Authentication failed:', err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -118,14 +145,35 @@ export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect })
                 value={apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
                 fullWidth
+                disabled={isLoading}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton onClick={handleConnect} disabled={!apiKey.trim()}>
+              <EuiButton
+                onClick={handleConnect}
+                disabled={!apiKey.trim() || isLoading}
+                isLoading={isLoading}
+              >
                 {CONNECT_BUTTON}
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
+          {error && (
+            <>
+              <EuiSpacer size="m" />
+              <EuiCallOut title="Authentication failed" color="danger" iconType="error">
+                <p>{error}</p>
+              </EuiCallOut>
+            </>
+          )}
+          {success && (
+            <>
+              <EuiSpacer size="m" />
+              <EuiCallOut title="Successfully connected!" color="success" iconType="check">
+                <p>Your cluster has been authenticated and onboarded to Cloud Connect.</p>
+              </EuiCallOut>
+            </>
+          )}
         </>
       ),
     },

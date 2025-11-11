@@ -14,6 +14,7 @@ import type {
 } from '@kbn/core/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { cloudConnectedFeature } from './features';
+import { registerRoutes } from './routes';
 
 export interface CloudConnectedPluginSetup {}
 
@@ -40,6 +41,13 @@ export class CloudConnectedPlugin
 
     // Register the feature with privileges
     plugins.features.registerKibanaFeature(cloudConnectedFeature);
+
+    // Register HTTP routes
+    const router = core.http.createRouter();
+    registerRoutes({
+      router,
+      logger: this.logger,
+    });
 
     return {};
   }
