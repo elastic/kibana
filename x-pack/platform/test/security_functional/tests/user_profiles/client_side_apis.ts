@@ -98,7 +98,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             `testEndpointsUserProfilesAppUserProfile_user_${userPrefix}`
           );
           expect(userProfileText).to.equal(
-            `user_${userPrefix}:{"avatar":{"color":null,"initials":"some-initials-${userPrefix},"imageUrl":null}}`
+            `user_${userPrefix}:{"avatar":{"color":null,"initials":"some-initials-${userPrefix}","imageUrl":null}}`
           );
         }
       });
