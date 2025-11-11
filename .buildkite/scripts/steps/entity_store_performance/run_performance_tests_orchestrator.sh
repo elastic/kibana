@@ -107,7 +107,7 @@ export CLOUD_DEPLOYMENT_PASSWORD="$VAULT_PASSWORD"
 
 # Run performance tests
 echo "--- Run Performance Tests"
-source .buildkite/scripts/steps/entity_store_performance/run_performance_tests.sh
+source "$KIBANA_DIR/.buildkite/scripts/steps/entity_store_performance/run_performance_tests.sh"
 run_performance_tests
 
 # Export variables for reporting script
@@ -121,7 +121,7 @@ export CLOUD_DEPLOYMENT_ID
 
 # Generate report
 echo "--- Generate Performance Report"
-source .buildkite/scripts/steps/entity_store_performance/generate_performance_report.sh
+source "$KIBANA_DIR/.buildkite/scripts/steps/entity_store_performance/generate_performance_report.sh"
 generate_performance_report
 
 exit $TEST_EXIT_CODE
