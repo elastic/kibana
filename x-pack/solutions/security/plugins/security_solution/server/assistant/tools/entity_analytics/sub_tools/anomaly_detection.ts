@@ -34,14 +34,8 @@ export const getAnomalyDetectionSubPlugin: EntityAnalyticsSubPlugin = async (
   const allJobsWithStatus = await jobServiceProvider?.jobsSummary();
 
   // get all installed security jobs (with any statuses)
-  const securityJobsFormatted = securityJobs
-    // TODO: Filter out jobs by entity type
-    // .filter(
-    //   ({ config: { analysis_config: analysisConfig } }: ModuleJob) =>
-    //     analysisConfig.influencers === undefined ||
-    //     analysisConfig.influencers.includes(EntityTypeToIdentifierField[entityType])
-    // )
-    .map(({ config: { description, analysis_config: analysisConfig }, id }: ModuleJob) => {
+  const securityJobsFormatted = securityJobs.map(
+    ({ config: { description, analysis_config: analysisConfig }, id }: ModuleJob) => {
       const jobStatus = allJobsWithStatus?.find((job) => job.id === id);
 
       return {
@@ -49,11 +43,9 @@ export const getAnomalyDetectionSubPlugin: EntityAnalyticsSubPlugin = async (
         description,
         influencers: analysisConfig.influencers,
         isJobStarted: jobStatus ? isJobStarted(jobStatus.jobState, jobStatus.datafeedState) : false,
-
-        // custom_settings: job.custom_settings, // do we need to filter by managed or created_by?
-        // I noticed that pad jobs don't have the managed: true flag
       };
-    });
+    }
+  );
 
   const model = await modelProvider.getDefaultModel();
   const recommendedJobsResp = await model.inferenceClient.output({

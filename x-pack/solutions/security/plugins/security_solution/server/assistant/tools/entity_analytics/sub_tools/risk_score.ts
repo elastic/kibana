@@ -20,7 +20,7 @@ import type { EntityAnalyticsSubPlugin } from './types';
 
 export const getRiskScoreSubPlugin: EntityAnalyticsSubPlugin = async (
   entityType: EntityType,
-  { spaceId, soClient, request, logger, esClient, kibanaVersion }
+  { spaceId, soClient, logger, esClient, kibanaVersion }
 ) => {
   const riskScoreIndexPattern = getRiskScoreLatestIndex(spaceId);
   const riskScoreTimeSeriesIndexPattern = getRiskScoreTimeSeriesIndex(spaceId);

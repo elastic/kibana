@@ -17,7 +17,7 @@ import type { EntityAnalyticsSubPlugin } from './types';
 
 export const getPrivilegedUserMonitoringSubPlugin: EntityAnalyticsSubPlugin = async (
   entityType: EntityType,
-  { spaceId, soClient, logger }
+  { spaceId, soClient }
 ) => {
   const descriptorClient = new PrivilegeMonitoringEngineDescriptorClient({
     soClient,

@@ -10,7 +10,6 @@ import { EngineDescriptorClient } from '../../../../lib/entity_analytics/entity_
 import type { EntityType } from '../../../../../common/search_strategy';
 import type { EntityAnalyticsSubPlugin } from './types';
 
-// Helper function moved from the original file
 const getEntityStoreIndexPattern = (entityType: EntityType, spaceId: string) =>
   `.entities.v1.latest.security_${entityType}_${spaceId}`;
 

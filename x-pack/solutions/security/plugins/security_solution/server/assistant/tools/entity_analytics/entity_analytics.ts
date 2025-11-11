@@ -33,6 +33,12 @@ const entityRiskScoreInternalSchema = z.object({
     .optional(),
 
   prompt: z.string().describe('The prompt or question that calling this tool will help to answer.'),
+  queryExtraContext: z
+    .string()
+    .describe('Information from previous chat messages like an ESQL filter that should be used.'),
+  informationOnly: z
+    .boolean()
+    .describe('If true, only provide information without generating ESQL queries.'),
 });
 
 export const ENTITY_ANALYTICS_TOOL_INTERNAL_ID = 'entity-analytics-tool';
@@ -70,7 +76,7 @@ export const entityAnalyticsToolInternal = (
     schema: entityRiskScoreInternalSchema,
     type: ToolType.builtin,
     handler: async (
-      { entityType, domain, prompt },
+      { entityType, domain, prompt, queryExtraContext, informationOnly },
       { esClient, logger, request, toolProvider, modelProvider }
     ) => {
       try {
@@ -79,6 +85,8 @@ export const entityAnalyticsToolInternal = (
             entityType,
             domain,
             prompt,
+            queryExtraContext,
+            informationOnly,
           })}`
         );
 
@@ -123,7 +131,7 @@ export const entityAnalyticsToolInternal = (
         const generalSecuritySolutionMessage = `Always try querying the most appropriate domain index when available. When it isn't enough, you can query security solution events and logs. For that you must generate an ES|QL and you **MUST ALWAYS** use the following from clause (ONLY FOR LOGS AND NOT FOR OTHER INDICES): "FROM ${dataView.getIndexPattern()}"`;
 
         const results: ToolHandlerResult[] = [];
-        if (hasGenerateESQLQuery && specificEntityAnalyticsResponse.index) {
+        if (hasGenerateESQLQuery && specificEntityAnalyticsResponse.index && !informationOnly) {
           const generateESQLTool = await toolProvider.get({
             toolId: 'platform.core.generate_esql',
             request,
@@ -133,7 +141,9 @@ export const entityAnalyticsToolInternal = (
             toolParams: {
               index: specificEntityAnalyticsResponse.index,
               query: prompt,
-              context: `${specificEntityAnalyticsResponse.message}\n${generalSecuritySolutionMessage}`,
+              context: `${
+                specificEntityAnalyticsResponse.message
+              }\n${generalSecuritySolutionMessage}\n${queryExtraContext ?? ''}`,
             },
           });
           results.push(...generateESQLResult);
@@ -144,9 +154,6 @@ export const entityAnalyticsToolInternal = (
             },
           });
         } else {
-          logger.warn(
-            `The 'platform.core.generate_esql' tool is not available. Cannot generate ES|QL query for the prompt: ${prompt}`
-          );
           results.push({
             type: ToolResultType.other,
             data: {
