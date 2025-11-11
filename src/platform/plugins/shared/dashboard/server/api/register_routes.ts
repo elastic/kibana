@@ -65,7 +65,7 @@ export function registerAPIRoutes({
 
   registerCreateRoute(versionedRouter);
   registerSearchRoute(versionedRouter);
-  
+
   // Update API route
 
   const updateRoute = versionedRouter.put({

@@ -16,11 +16,7 @@ import { DASHBOARD_SAVED_OBJECT_TYPE } from '../dashboard_saved_object';
 import { cmServicesDefinition } from './cm_services';
 import type { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
 import { savedObjectToItem, transformDashboardIn } from './latest';
-import type {
-  DashboardState,
-  DashboardUpdateOptions,
-  DashboardGetOut,
-} from './latest';
+import type { DashboardState, DashboardUpdateOptions, DashboardGetOut } from './latest';
 
 import type { DashboardUpdateOut } from './v1/types';
 
