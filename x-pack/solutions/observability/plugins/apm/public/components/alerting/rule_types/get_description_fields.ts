@@ -6,14 +6,21 @@
  */
 
 import type { GetDescriptionFieldsFn } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { SearchConfigurationType } from '@kbn/response-ops-rule-params/common/search_configuration_schema';
 
 export const getDescriptionFields: GetDescriptionFieldsFn = ({ rule, prebuildFields }) => {
   if (!rule || !prebuildFields) {
     return [];
   }
 
-  if (rule.params.filterQueryText && typeof rule.params.filterQueryText === 'string') {
-    return [prebuildFields.customQuery(rule.params.filterQueryText)];
+  const searchConfig = rule.params.searchConfiguration as SearchConfigurationType;
+
+  if (!searchConfig) {
+    return [];
+  }
+
+  if (searchConfig.query.query && typeof searchConfig.query.query === 'string') {
+    return [prebuildFields.customQuery(searchConfig.query.query)];
   }
 
   return [];
