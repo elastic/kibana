@@ -30,7 +30,11 @@ export interface SpanFlyoutProps {
 export function LogsFlyout({ onCloseFlyout, id, dataView }: SpanFlyoutProps) {
   const { loading, log, index } = useLog({ id });
   const { indexes } = useDataSourcesContext();
-  const { dataView: logDataView, error, loading: loadingDataView } = useAdhocDataView({ index });
+  const {
+    dataView: logDataView,
+    error,
+    loading: loadingDataView,
+  } = useAdhocDataView({ index: index ?? null });
 
   const documentAsHit = useMemo<DataTableRecord | null>(() => {
     if (!log || !id || !index) return null;

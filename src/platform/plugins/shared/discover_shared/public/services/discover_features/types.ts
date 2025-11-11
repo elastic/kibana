@@ -61,10 +61,13 @@ export interface ObservabilityLogsFetchDocumentByIdFeature {
       id: string;
     },
     signal: AbortSignal
-  ) => Promise<{
-    _index: string | null;
-    fields: Record<PropertyKey, any> | null;
-  }>;
+  ) => Promise<
+    | {
+        _index: string;
+        fields: Record<PropertyKey, any> | undefined;
+      }
+    | undefined
+  >;
 }
 
 export interface ObservabilityLogEventsFeature {

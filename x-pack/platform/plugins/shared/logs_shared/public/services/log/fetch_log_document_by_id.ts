@@ -20,10 +20,13 @@ export const fetchLogDocumentById = async (
     logSourcesService: LogSourcesService;
   },
   signal: AbortSignal
-): Promise<{
-  _index: string | null;
-  fields: Record<PropertyKey, any> | null;
-}> => {
+): Promise<
+  | {
+      _index: string;
+      fields: Record<PropertyKey, any> | undefined;
+    }
+  | undefined
+> => {
   const logSources = await logSourcesService.getLogSources();
   const indexPattern = logSources
     .map((source: { indexPattern: string }) => source.indexPattern)
@@ -57,8 +60,12 @@ export const fetchLogDocumentById = async (
 
   const hit = result.rawResponse.hits.hits[0];
 
+  if (!hit) {
+    return undefined;
+  }
+
   return {
-    _index: hit?._index ?? null,
-    fields: hit?.fields ?? null,
+    _index: hit._index,
+    fields: hit.fields,
   };
 };

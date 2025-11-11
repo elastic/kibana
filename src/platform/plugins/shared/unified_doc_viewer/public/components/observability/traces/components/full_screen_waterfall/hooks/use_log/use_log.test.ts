@@ -18,8 +18,8 @@ jest.mock('../../../../../../../plugin', () => ({
 const mockFetchLogDocumentById = jest.fn<
   Promise<
     | {
-        _index: string | null;
-        fields: Record<PropertyKey, any> | null;
+        _index: string;
+        fields: Record<PropertyKey, any> | undefined;
       }
     | undefined
   >,
@@ -32,8 +32,8 @@ const mockGetById: jest.Mock<
       fetchLogDocumentById: jest.Mock<
         Promise<
           | {
-              _index: string | null;
-              fields: Record<PropertyKey, any> | null;
+              _index: string;
+              fields: Record<PropertyKey, any> | undefined;
             }
           | undefined
         >
@@ -151,23 +151,6 @@ describe('useLog', () => {
     expect(result.current.log).toBeNull();
     expect(result.current.index).toBeNull();
     expect(mockFetchLogDocumentById).toHaveBeenCalledTimes(1);
-  });
-
-  it('should handle null fields and index', async () => {
-    const mockLogData = {
-      _index: null,
-      fields: null,
-    };
-
-    mockFetchLogDocumentById.mockResolvedValue(mockLogData);
-
-    const { result } = renderHook(() => useLog({ id }));
-
-    await waitFor(() => !result.current.loading);
-
-    expect(result.current.loading).toBe(false);
-    expect(result.current.log).toBeNull();
-    expect(result.current.index).toBeNull();
   });
 
   it('should handle errors and return null values', async () => {

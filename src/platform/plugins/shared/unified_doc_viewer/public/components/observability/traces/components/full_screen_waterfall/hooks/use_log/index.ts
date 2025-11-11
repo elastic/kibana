@@ -54,7 +54,7 @@ export function useLog({ id }: Props) {
 
   return {
     loading,
-    log: value?.fields ? unflattenObject(value?.fields) : null,
-    index: value?._index ?? null,
+    log: value?.fields ? unflattenObject(value.fields) : undefined,
+    index: value?._index,
   };
 }
