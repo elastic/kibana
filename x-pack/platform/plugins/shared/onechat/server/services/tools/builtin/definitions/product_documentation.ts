@@ -23,7 +23,7 @@ const productDocumentationSchema = z.object({
     .number()
     .optional()
     .default(3)
-    .describe('Maximum number of documents to return. Defaults to 3.'),
+    .describe('(optional) Maximum number of documents to return. Defaults to 3.'),
 });
 
 export const productDocumentationTool = (): BuiltinToolDefinition<typeof productDocumentationSchema> => {
