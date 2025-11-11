@@ -126,6 +126,8 @@ const createGroupedActorAndTargetNodes = (
     targetHostIps,
   } = record;
 
+  const actorIdsArray = actorIds ? castArray(actorIds) : [];
+  const targetIdsArray = targetIds ? castArray(targetIds) : [];
   const actorHostIpsArray = actorHostIps ? castArray(actorHostIps) : [];
   const targetHostIpsArray = targetHostIps ? castArray(targetHostIps) : [];
 
@@ -143,8 +145,13 @@ const createGroupedActorAndTargetNodes = (
         .map((targetData) => JSON.parse(targetData))
     : [];
 
-  const actorIdsArray = castArray(actorIds);
-  const targetIdsArray = castArray(targetIds);
+  const actorNodeId = actorIdsCount === 1 && actorIdsArray[0] ? actorIdsArray[0] : uuidv4();
+  const targetNodeId =
+    targetIdsCount === 0
+      ? `unknown-${uuidv4()}` // Unknown target
+      : targetIdsCount === 1 && targetIdsArray[0]
+      ? targetIdsArray[0] // Single target
+      : uuidv4(); // Group target
 
   const actorGroup: {
     id: string;
@@ -154,7 +161,7 @@ const createGroupedActorAndTargetNodes = (
     hostIps: string[];
     label?: string;
   } = {
-    id: actorIdsArray[0],
+    id: actorNodeId,
     type: actorEntityType,
     count: actorIdsCount,
     docData: actorsDocDataArray,
@@ -172,7 +179,7 @@ const createGroupedActorAndTargetNodes = (
   } =
     targetIdsCount > 0
       ? {
-          id: targetIdsArray[0]!,
+          id: targetNodeId,
           type: targetEntityType,
           count: targetIdsCount,
           docData: targetsDocDataArray,
@@ -181,7 +188,7 @@ const createGroupedActorAndTargetNodes = (
         }
       : {
           // Unknown target
-          id: `unknown ${uuidv4()}`,
+          id: targetNodeId,
           type: '',
           label: 'Unknown',
           count: 0,

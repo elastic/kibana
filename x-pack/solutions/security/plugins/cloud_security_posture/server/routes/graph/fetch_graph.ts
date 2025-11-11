@@ -334,7 +334,7 @@ ${
     ""
   )
 | LIMIT 1000
-| SORT action DESC, actorEntityGroup, targetEntityGroup, isOrigin`;
+| SORT action DESC, isOrigin`;
 
   return query;
 };
