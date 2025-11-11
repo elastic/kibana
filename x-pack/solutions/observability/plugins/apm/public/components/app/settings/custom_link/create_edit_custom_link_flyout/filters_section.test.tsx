@@ -50,7 +50,7 @@ describe('FiltersSections', () => {
       ),
     }));
 
-    const initialFilters: Filter[] = [{ key: 'service.name', value: 'foo' }];
+    const initialFilters: Filter[] = [{ key: 'service.name', value: 'foo', id: '123' }];
     const setFilters = jest.fn();
 
     const { getByLabelText, getByTestId, rerender } = render(
@@ -66,12 +66,12 @@ describe('FiltersSections', () => {
       fireEvent.change(select, { target: { value: 'transaction.type' } });
     });
 
-    expect(setFilters).toHaveBeenCalledWith([{ key: 'transaction.type', value: '' }]);
+    expect(setFilters).toHaveBeenCalledWith([{ key: 'transaction.type', value: '', id: '123' }]);
 
     await act(async () => {
       rerender(
         <FiltersSection
-          filters={[{ key: 'transaction.type', value: '' }]}
+          filters={[{ key: 'transaction.type', value: '', id: '123' }]}
           setFilters={setFilters}
         />
       );
@@ -118,12 +118,13 @@ describe('FiltersSections', () => {
 
   it('when many filters, it deletes the proper filter', async () => {
     const initialFilters: Filter[] = [
-      { key: 'service.name', value: 'foo' },
-      { key: 'transaction.type', value: 'bar' },
+      { key: 'service.name', value: 'foo', id: '123' },
+      { key: 'transaction.type', value: 'bar', id: '456' },
     ];
     const setFilters = jest.fn();
     const { getAllByTestId, rerender } = render(
-      <FiltersSection filters={initialFilters} setFilters={setFilters} />
+      <FiltersSection filters={initialFilters} setFilters={setFilters} />,
+      { wrapper: Wrapper }
     );
 
     const removeButtons = getAllByTestId('apmCustomLinkFiltersSectionButton');
@@ -133,12 +134,12 @@ describe('FiltersSections', () => {
       fireEvent.click(removeButtons[0]);
     });
 
-    expect(setFilters).toHaveBeenCalledWith([{ key: 'transaction.type', value: 'bar' }]);
+    expect(setFilters).toHaveBeenCalledWith([{ key: 'transaction.type', value: 'bar', id: '456' }]);
 
     await act(async () => {
       rerender(
         <FiltersSection
-          filters={[{ key: 'transaction.type', value: 'bar' }]}
+          filters={[{ key: 'transaction.type', value: 'bar', id: '456' }]}
           setFilters={setFilters}
         />
       );

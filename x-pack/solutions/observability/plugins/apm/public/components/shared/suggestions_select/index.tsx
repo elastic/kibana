@@ -87,6 +87,14 @@ export function SuggestionsSelect({
     prevShouldResetRef.current = shouldReset;
   }, [shouldReset, onChange, selectedOptions.length]);
 
+  useEffect(() => {
+    if (defaultValue) {
+      setSelectedOptions([{ label: defaultValue, value: defaultValue }]);
+    } else {
+      setSelectedOptions([]);
+    }
+  }, [defaultValue]);
+
   const handleChange = useCallback(
     (changedOptions: Array<EuiComboBoxOptionOption<string>>) => {
       setSelectedOptions(changedOptions);
