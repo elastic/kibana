@@ -9,7 +9,10 @@ import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
 import * as i18n from './translations';
 
-export { SecurityPageName } from '@kbn/security-solution-navigation';
+export {
+  SecurityPageName,
+  ATTACKS_ALERTS_ALIGNMENT_ENABLED,
+} from '@kbn/security-solution-navigation';
 /**
  * as const
  *
@@ -190,9 +193,6 @@ export const ENABLE_NEWS_FEED_SETTING = 'securitySolution:enableNewsFeed' as con
 
 /** This Kibana Advanced Setting sets a default AI connector for serverless AI features (EASE) */
 export const DEFAULT_AI_CONNECTOR = 'securitySolution:defaultAIConnector' as const;
-
-/** Feature flag for the alerts and attacks alignment feature */
-export const ATTACKS_ALERTS_ALIGNMENT_ENABLED = 'securitySolution.attacksAlertsAlignment' as const;
 
 /** Feature flag for the default AI connector setting */
 export const AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED =
