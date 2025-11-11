@@ -48,15 +48,13 @@ export const getTransformIn = ({
     const chartType = builder.getType(config.attributes);
 
     if (!builder.isSupported(chartType)) {
-      const { state: lensState, references: lensReferences } = extractLensReferences(
-        config as LensSerializedState
-      );
+      const { state, references } = extractLensReferences(config as LensSerializedState);
       // TODO: remove this once all formats are supported
       // when not supported, no transform is needed
       return {
-        state: lensState,
+        state,
         ...enhancementsState,
-        references: [...lensReferences, ...enhancementsReferences],
+        references: [...references, ...enhancementsReferences],
       } satisfies LensByValueTransformInResult;
     }
 
@@ -65,18 +63,18 @@ export const getTransformIn = ({
       throw new Error('attributes are missing');
     }
 
-    const serializedState = isLensAPIFormat(config.attributes)
+    const attributes = isLensAPIFormat(config.attributes)
       ? builder.fromAPIFormat(config.attributes)
       : config.attributes;
-    const { state: lensState, references: lensReferences } = extractLensReferences(serializedState);
+    const { state, references } = extractLensReferences({
+      ...config,
+      attributes,
+    });
 
     return {
-      state: {
-        ...lensState,
-        attributes: serializedState,
-      },
+      state,
       ...enhancementsState,
-      references: [...lensReferences, ...enhancementsReferences],
+      references: [...references, ...enhancementsReferences],
     } satisfies LensByValueTransformInResult;
   };
 };

@@ -138,6 +138,7 @@ import { setLensFeatureFlags } from './get_feature_flags';
 import type { Visualization, LensSerializedState, TypedLensByValueInput, Suggestion } from '.';
 import type { LensEmbeddableStartServices } from './react_embeddable/types';
 import type { EditorFrameServiceValue } from './editor_frame_service/editor_frame_service_context';
+import { setLensBuilder } from './lazy_builder';
 
 export type { SaveProps } from './app_plugin';
 
@@ -388,10 +389,14 @@ export class LensPlugin {
       });
 
       core.getStartServices().then(async ([{ featureFlags }]) => {
+        // This loads the feature flags async to allow synchronous access to flags via getLensFeatureFlags
         const flags = await setLensFeatureFlags(featureFlags);
 
+        // This loads the builder async to allow synchronous access to builder via getLensBuilder
+        void setLensBuilder(flags.apiFormat);
+
         embeddable.registerLegacyURLTransform(LENS_EMBEDDABLE_TYPE, async () => {
-          const { getLensTransforms } = await import('../common/transforms');
+          const { getLensTransforms } = await import('./async_services');
           const { LensConfigBuilder } = await import('@kbn/lens-embeddable-utils');
           const builder = new LensConfigBuilder(undefined, flags.apiFormat);
 

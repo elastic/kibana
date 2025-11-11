@@ -88,7 +88,7 @@ export const FeedbackPanel = ({
   const closePanelIcon = (
     <EuiFlexItem grow={false}>
       <EuiButtonIcon
-        data-test-subj="feedbackSnippetPanelDismiss"
+        data-test-subj={`${feedbackSnippetId}PanelDismiss`}
         iconType="cross"
         color="text"
         onClick={handleDismissPanel}
@@ -107,6 +107,7 @@ export const FeedbackPanel = ({
     <>
       <EuiFlexItem grow={false}>
         <EuiButton
+          data-test-subj={`${feedbackSnippetId}PanelThumbDown`}
           onClick={handleNegativeFeedback}
           id={`${feedbackSnippetId}PanelThumbDown`}
           color="danger"
@@ -117,6 +118,7 @@ export const FeedbackPanel = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButton
+          data-test-subj={`${feedbackSnippetId}PanelThumbUp`}
           onClick={handlePositiveFeedback}
           id={`${feedbackSnippetId}PanelThumbUp`}
           color="success"
@@ -142,6 +144,7 @@ export const FeedbackPanel = ({
 
   const negativeFooter = (
     <EuiButton
+      data-test-subj={`${feedbackSnippetId}PanelSurveyLink`}
       onClick={handleOpenSurveyAndDismissPanel}
       fill
       fullWidth

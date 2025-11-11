@@ -36,7 +36,11 @@ import type { LensApiBucketOperations } from '../../schema/bucket_ops';
 import type { DeepMutable, DeepPartial } from '../utils';
 import { generateLayer } from '../utils';
 import type { MetricStateESQL, MetricStateNoESQL } from '../../schema/charts/metric';
-import { getSharedChartLensStateToAPI, getSharedChartAPIToLensState } from './utils';
+import {
+  getSharedChartLensStateToAPI,
+  getSharedChartAPIToLensState,
+  getMetricAccessor,
+} from './utils';
 import {
   fromColorByValueAPIToLensState,
   fromColorByValueLensStateToAPI,
@@ -56,7 +60,7 @@ export const LENS_METRIC_COMPARE_TO_PALETTE_DEFAULT = 'compare_to';
 const LENS_METRIC_COMPARE_TO_REVERSED = false;
 const LENS_DEFAULT_LAYER_ID = 'layer_0';
 
-function getAccessorName(type: 'max' | 'breakdown' | 'secondary') {
+function getAccessorName(type: 'metric' | 'max' | 'breakdown' | 'secondary') {
   return `${ACCESSOR}_${type}`;
 }
 
@@ -86,7 +90,7 @@ function buildVisualizationState(config: MetricState): MetricVisualizationState 
   return {
     layerId: DEFAULT_LAYER_ID,
     layerType: 'data',
-    metricAccessor: ACCESSOR,
+    metricAccessor: getAccessorName('metric'),
     ...(layer.metric.color?.type === 'static'
       ? fromStaticColorAPIToLensState(layer.metric.color)
       : {}),
@@ -113,9 +117,7 @@ function buildVisualizationState(config: MetricState): MetricVisualizationState 
       ? {
           secondaryMetricAccessor: getAccessorName('secondary'),
           secondaryPrefix: layer.secondary_metric.prefix,
-          secondaryAlign: layer.metric.alignments.value,
-          // secondaryLabelPosition: layer.metric.alignments.labels,
-          // secondaryLabel: '',
+          secondaryAlign: layer.metric.alignments?.value,
           ...(layer.secondary_metric.compare
             ? fromCompareAPIToLensState(layer.secondary_metric.compare)
             : {}),
@@ -193,7 +195,8 @@ function reverseBuildVisualizationState(
   references: SavedObjectReference[],
   adhocReferences?: SavedObjectReference[]
 ): MetricState {
-  if (visualization.metricAccessor === undefined) {
+  const metricAccessor = getMetricAccessor(visualization);
+  if (metricAccessor == null) {
     throw new Error('Metric accessor is missing in the visualization state');
   }
 
@@ -209,7 +212,7 @@ function reverseBuildVisualizationState(
     const esqlLayer = layer as TextBasedLayer;
     props = {
       ...props,
-      metric: getValueApiColumn(visualization.metricAccessor, esqlLayer),
+      metric: getValueApiColumn(metricAccessor, esqlLayer),
       ...(visualization.secondaryMetricAccessor
         ? {
             secondary_metric: {
@@ -237,10 +240,7 @@ function reverseBuildVisualizationState(
     } as MetricState;
   } else if (dataset.type === 'dataView' || dataset.type === 'index') {
     const formLayer = layer as FormBasedLayer;
-    const metric = operationFromColumn(
-      visualization.metricAccessor,
-      formLayer
-    ) as LensApiAllMetricOperations;
+    const metric = operationFromColumn(metricAccessor, formLayer) as LensApiAllMetricOperations;
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const secondary_metric = visualization.secondaryMetricAccessor
       ? (operationFromColumn(
@@ -371,7 +371,7 @@ function buildFormBasedLayer(layer: MetricStateNoESQL): FormBasedPersistedState[
     trendLineLayer.linkToLayers = [DEFAULT_LAYER_ID];
   }
 
-  addLayerColumn(defaultLayer, ACCESSOR, columns);
+  addLayerColumn(defaultLayer, getAccessorName('metric'), columns);
   if (trendLineLayer) {
     addLayerColumn(trendLineLayer, `${ACCESSOR}_trendline`, columns);
     addLayerColumn(trendLineLayer, HISTOGRAM_COLUMN_NAME, columns);
@@ -381,7 +381,7 @@ function buildFormBasedLayer(layer: MetricStateNoESQL): FormBasedPersistedState[
     const columnName = getAccessorName('breakdown');
     const breakdownColumn = fromBucketLensApiToLensState(
       layer.breakdown_by as LensApiBucketOperations,
-      []
+      columns.map((col) => ({ column: col, id: getAccessorName('metric') }))
     );
     addLayerColumn(defaultLayer, columnName, breakdownColumn, true);
 
@@ -420,7 +420,7 @@ function getValueColumns(layer: MetricStateESQL) {
     ...(layer.breakdown_by
       ? [getValueColumn(getAccessorName('breakdown'), layer.breakdown_by.column)]
       : []),
-    getValueColumn(ACCESSOR, layer.metric.column, 'number'),
+    getValueColumn(getAccessorName('metric'), layer.metric.column, 'number'),
     ...(layer.metric?.background_chart?.type === 'bar'
       ? [
           getValueColumn(
@@ -471,9 +471,16 @@ export function fromLensStateToAPI(config: LensAttributes): MetricState {
   const { state } = config;
   const visualization = state.visualization as MetricVisualizationState;
   const layers =
-    state.datasourceStates.formBased?.layers ?? state.datasourceStates.textBased?.layers ?? [];
+    state.datasourceStates.formBased?.layers ??
+    state.datasourceStates.textBased?.layers ??
+    // @ts-expect-error unfortunately due to a migration bug, some existing SO might still have the old indexpattern DS state
+    (state.datasourceStates.indexpattern?.layers as PersistedIndexPatternLayer[]) ??
+    [];
 
-  const [layerId, layer] = Object.entries(layers)[0];
+  // Layers can be in any order, so make sure to get the main one
+  const [layerId, layer] = Object.entries(layers).find(
+    ([, l]) => !('linkToLayers' in l) || l.linkToLayers == null
+  )!;
 
   const visualizationState = {
     ...getSharedChartLensStateToAPI(config),

@@ -15,7 +15,7 @@ import {
   LENS_SAMPLING_DEFAULT_VALUE,
   LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE,
 } from './constants';
-import { filterSchema } from './filter';
+import { filterSchema, unifiedSearchFilterSchema } from './filter';
 
 export const sharedPanelInfoSchema = {
   /**
@@ -47,7 +47,7 @@ export const sharedPanelInfoSchema = {
       },
     })
   ),
-  filters: schema.maybe(schema.arrayOf(filterSchema)),
+  filters: schema.maybe(schema.arrayOf(unifiedSearchFilterSchema)),
 };
 
 export const dslOnlyPanelInfoSchema = {

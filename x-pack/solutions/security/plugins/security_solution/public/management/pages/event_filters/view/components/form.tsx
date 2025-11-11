@@ -315,10 +315,11 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
             fullWidth
             valueOfSelected={selectedOs}
             onChange={handleOnOsChange}
+            data-test-subj={getTestId('os-select')}
           />
         </EuiFormRow>
       ),
-      [handleOnOsChange, selectedOs]
+      [getTestId, handleOnOsChange, selectedOs]
     );
 
     // comments and handler

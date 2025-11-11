@@ -138,26 +138,30 @@ export const cleanupCredentials = (packagePolicy: NewPackagePolicy | UpdatePacka
       return {
         ...packagePolicy,
         inputs: packagePolicy.inputs.map((input) => {
-          if (input.enabled) {
-            return {
-              ...input,
-              streams: input.streams.map((stream) => {
-                const vars = stream.vars;
-                for (const field in vars) {
-                  if (!credsToKeep.includes(field) && credFields.includes(field)) {
+          return {
+            ...input,
+            streams: input.streams.map((stream) => {
+              const vars = stream.vars;
+              for (const field in vars) {
+                if (input.enabled) {
+                  // for enabled inputs, clean up unused credentials based on the selected credential type
+                  if (credFields.includes(field) && !credsToKeep.includes(field)) {
+                    vars[field].value = undefined;
+                  }
+                } else {
+                  // for disabled inputs, remove all credential fields to prevent storing unnecessary secrets
+                  if (credFields.includes(field)) {
                     vars[field].value = undefined;
                   }
                 }
+              }
 
-                return {
-                  ...stream,
-                  vars,
-                };
-              }),
-            };
-          }
-
-          return input;
+              return {
+                ...stream,
+                vars,
+              };
+            }),
+          };
         }),
       };
     }

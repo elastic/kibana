@@ -247,6 +247,7 @@ export type {
   LensByValueSerializedAPIConfig,
   LensByRefSerializedAPIConfig,
   LensSerializedAPIConfig,
+  LensSerializedSharedState,
   LensByReferenceInput,
   LensSavedObjectAttributes,
   VisualizationContextHelper,
@@ -278,10 +279,8 @@ export type {
   StructuredDatasourceStates,
   LensByValueInput,
   TypedLensSerializedState,
-  LensEmbeddableOutput,
   ESQLVariablesCompatibleDashboardApi,
   LensByValueBase,
-  LensSerializedSharedState,
 } from './embeddable/types';
 export type {
   LensAppLocatorParams,

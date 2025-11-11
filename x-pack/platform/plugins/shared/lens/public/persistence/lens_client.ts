@@ -7,7 +7,7 @@
 
 import type { HttpStart } from '@kbn/core/public';
 import type { Reference } from '@kbn/content-management-utils';
-import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
+import type { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
 import type { LensApiState } from '@kbn/lens-embeddable-utils/config_builder/schema';
 
 import type { LensSavedObjectAttributes } from '@kbn/lens-common';
@@ -27,11 +27,7 @@ import type {
   LensItemMeta,
   LensUpdateRequestQuery,
 } from '../../server/api/routes/visualizations/types';
-
-export interface LensItemResponse<M extends Record<string, string | boolean> = {}> {
-  item: LensItem;
-  meta: LensItemMeta & M;
-}
+import { getLensBuilder } from '../lazy_builder';
 
 export interface LensItemResponse<M extends Record<string, string | boolean> = {}> {
   item: LensItem;
@@ -47,9 +43,11 @@ export type LooseLensAttributes = Omit<LensAttributes, 'visualizationType'> &
   Pick<LensSavedObjectAttributes, 'visualizationType'>;
 
 export class LensClient {
-  private builder = new LensConfigBuilder();
+  private builder: LensConfigBuilder | null;
 
-  constructor(private http: HttpStart) {}
+  constructor(private http: HttpStart) {
+    this.builder = getLensBuilder();
+  }
 
   async get(id: string): Promise<LensItemResponse<LensGetResponseBody['meta']>> {
     const {
@@ -60,9 +58,9 @@ export class LensClient {
       version: LENS_API_VERSION,
     });
 
-    const chartType = this.builder.getType(data);
+    const chartType = this.builder?.getType(data);
 
-    if (this.builder.isSupported(chartType)) {
+    if (this.builder?.isSupported(chartType)) {
       const config = data as LensApiState;
       return {
         item: {
@@ -97,24 +95,25 @@ export class LensClient {
       throw new Error('Missing visualization type');
     }
 
-    const useApiFormat = this.builder.isSupported(visualizationType);
-    const body: LensCreateRequestBody = useApiFormat
-      ? this.builder.toAPIFormat({
-          description,
-          visualizationType,
-          state,
-          title,
-          version,
-          references,
-        })
-      : {
-          description,
-          visualizationType,
-          state,
-          title,
-          version,
-          references,
-        };
+    const useApiFormat = this.builder?.isSupported(visualizationType);
+    const body: LensCreateRequestBody =
+      useApiFormat && this.builder
+        ? this.builder.toAPIFormat({
+            description,
+            visualizationType,
+            state,
+            title,
+            version,
+            references,
+          })
+        : {
+            description,
+            visualizationType,
+            state,
+            title,
+            version,
+            references,
+          };
 
     const { data, meta, ...rest } = await this.http.post<LensCreateResponseBody>(
       LENS_VIS_API_PATH,
@@ -125,7 +124,7 @@ export class LensClient {
       }
     );
 
-    if (useApiFormat) {
+    if (useApiFormat && this.builder) {
       const config = data as LensApiState;
       return {
         item: {
@@ -161,24 +160,25 @@ export class LensClient {
       throw new Error('Missing visualization type');
     }
 
-    const useApiFormat = this.builder.isSupported(visualizationType);
-    const body: LensUpdateRequestBody = useApiFormat
-      ? this.builder.toAPIFormat({
-          description,
-          visualizationType,
-          state,
-          title,
-          version,
-          references,
-        })
-      : {
-          description,
-          visualizationType,
-          state,
-          title,
-          version,
-          references,
-        };
+    const useApiFormat = this.builder?.isSupported(visualizationType);
+    const body: LensUpdateRequestBody =
+      useApiFormat && this.builder
+        ? this.builder.toAPIFormat({
+            description,
+            visualizationType,
+            state,
+            title,
+            version,
+            references,
+          })
+        : {
+            description,
+            visualizationType,
+            state,
+            title,
+            version,
+            references,
+          };
 
     const { data, meta, ...rest } = await this.http.put<LensUpdateResponseBody>(
       `${LENS_VIS_API_PATH}/${id}`,
@@ -189,7 +189,7 @@ export class LensClient {
       }
     );
 
-    if (useApiFormat) {
+    if (useApiFormat && this.builder) {
       const config = data as LensApiState;
       return {
         item: {
@@ -244,9 +244,9 @@ export class LensClient {
     });
 
     return result.data.map(({ id, data }) => {
-      const chartType = this.builder.getType(data);
+      const chartType = this.builder?.getType(data);
 
-      if (this.builder.isSupported(chartType)) {
+      if (this.builder?.isSupported(chartType)) {
         const config = data as LensApiState;
         return {
           id,

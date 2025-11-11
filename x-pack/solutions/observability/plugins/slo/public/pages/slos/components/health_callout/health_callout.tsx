@@ -37,7 +37,7 @@ export function HealthCallout() {
   }
 
   const unhealthyAndMissingSloList = results.filter(
-    (result) => result.health.overall === 'unhealthy' || result.health.overall === 'missing'
+    (result) => result.health.overall !== 'healthy'
   );
   if (unhealthyAndMissingSloList.length === 0) {
     return null;

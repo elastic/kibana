@@ -66,9 +66,9 @@
             "\nOpens a conversation flyout.\n"
           ],
           "signature": [
-            "(options: ",
+            "(options?: ",
             "OpenConversationFlyoutOptions",
-            ") => ",
+            " | undefined) => ",
             "OpenConversationFlyoutReturn"
           ],
           "path": "x-pack/platform/plugins/shared/onechat/public/types.ts",
@@ -85,7 +85,44 @@
                 "- Configuration options for the flyout"
               ],
               "signature": [
-                "OpenConversationFlyoutOptions"
+                "OpenConversationFlyoutOptions",
+                " | undefined"
+              ],
+              "path": "x-pack/platform/plugins/shared/onechat/public/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": false
+            }
+          ],
+          "returnComment": [
+            "An object containing the flyout reference"
+          ]
+        },
+        {
+          "parentPluginId": "onechat",
+          "id": "def-public.OnechatPluginStart.setConversationFlyoutActiveConfig",
+          "type": "Function",
+          "tags": [],
+          "label": "setConversationFlyoutActiveConfig",
+          "description": [],
+          "signature": [
+            "(config: ",
+            "EmbeddableConversationProps",
+            ") => void"
+          ],
+          "path": "x-pack/platform/plugins/shared/onechat/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "onechat",
+              "id": "def-public.OnechatPluginStart.setConversationFlyoutActiveConfig.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "config",
+              "description": [],
+              "signature": [
+                "EmbeddableConversationProps"
               ],
               "path": "x-pack/platform/plugins/shared/onechat/public/types.ts",
               "deprecated": false,
@@ -93,9 +130,23 @@
               "isRequired": true
             }
           ],
-          "returnComment": [
-            "An object containing the flyout reference"
-          ]
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "onechat",
+          "id": "def-public.OnechatPluginStart.clearConversationFlyoutActiveConfig",
+          "type": "Function",
+          "tags": [],
+          "label": "clearConversationFlyoutActiveConfig",
+          "description": [],
+          "signature": [
+            "() => void"
+          ],
+          "path": "x-pack/platform/plugins/shared/onechat/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
         }
       ],
       "lifecycle": "start",
@@ -347,7 +398,7 @@
           "tags": [],
           "label": "agents",
           "description": [
-            "\nAgents setup contract, can be used to register built-in agents."
+            "\nAgents setup contract, which can be used to register built-in agents."
           ],
           "signature": [
             "AgentsSetup"
@@ -363,7 +414,7 @@
           "tags": [],
           "label": "tools",
           "description": [
-            "\nTools setup contract, can be used to register built-in tools."
+            "\nTools setup contract, which can be used to register built-in tools."
           ],
           "signature": [
             {
@@ -373,6 +424,22 @@
               "section": "def-server.ToolsSetup",
               "text": "ToolsSetup"
             }
+          ],
+          "path": "x-pack/platform/plugins/shared/onechat/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "onechat",
+          "id": "def-server.OnechatPluginSetup.attachments",
+          "type": "Object",
+          "tags": [],
+          "label": "attachments",
+          "description": [
+            "\nAttachments setup contract, which can be used to register attachment types."
+          ],
+          "signature": [
+            "AttachmentsSetup"
           ],
           "path": "x-pack/platform/plugins/shared/onechat/server/types.ts",
           "deprecated": false,

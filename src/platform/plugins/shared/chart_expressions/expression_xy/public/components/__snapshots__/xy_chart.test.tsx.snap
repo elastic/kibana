@@ -41,7 +41,7 @@ exports[`XYChart component annotations should render basic line annotation 1`] =
       "line": Object {
         "dash": undefined,
         "opacity": 1,
-        "stroke": "#f04e98",
+        "stroke": "#BC1E70",
         "strokeWidth": 1,
       },
     }
@@ -58,9 +58,9 @@ Array [
     id="__endzones__"
     style={
       Object {
-        "fill": "#69707d",
+        "fill": "#5A6D8C",
         "opacity": 0.2,
-        "stroke": "#69707d",
+        "stroke": "#5A6D8C",
         "strokeWidth": 0,
       }
     }
@@ -166,7 +166,7 @@ exports[`XYChart component annotations should render grouped line annotations wi
     <Marker
       config={
         Object {
-          "color": "#f04e98",
+          "color": "#BC1E70",
           "customTooltip": [Function],
           "icon": "2",
           "id": "event1",
@@ -192,7 +192,7 @@ exports[`XYChart component annotations should render grouped line annotations wi
       "line": Object {
         "dash": undefined,
         "opacity": 1,
-        "stroke": "#f04e98",
+        "stroke": "#BC1E70",
         "strokeWidth": 1,
       },
     }
@@ -221,7 +221,7 @@ exports[`XYChart component annotations should render simplified annotations when
       "line": Object {
         "dash": undefined,
         "opacity": 1,
-        "stroke": "#f04e98",
+        "stroke": "#BC1E70",
         "strokeWidth": 1,
       },
     }
@@ -238,9 +238,9 @@ Array [
     id="__endzones__"
     style={
       Object {
-        "fill": "#69707d",
+        "fill": "#5A6D8C",
         "opacity": 0.2,
-        "stroke": "#69707d",
+        "stroke": "#5A6D8C",
         "strokeWidth": 0,
       }
     }

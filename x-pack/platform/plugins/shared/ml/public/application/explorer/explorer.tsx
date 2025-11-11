@@ -493,6 +493,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
     <div>
       {stoppedPartitions && (
         <EuiCallOut
+          announceOnMount
           size={'s'}
           title={
             <FormattedMessage
@@ -525,6 +526,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
           </EuiTitle>
           <EuiPanel>
             <EuiCallOut
+              announceOnMount
               title={i18n.translate('xpack.ml.explorer.annotationsErrorCallOutTitle', {
                 defaultMessage: 'An error occurred loading annotations:',
               })}
@@ -644,6 +646,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
 
         {tableError ? (
           <EuiCallOut
+            announceOnMount
             color="danger"
             iconType="warning"
             title={i18n.translate('xpack.ml.explorer.anomaliesTableErrorTitle', {

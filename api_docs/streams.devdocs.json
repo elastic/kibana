@@ -1600,7 +1600,19 @@
             "StreamsRouteHandlerResources",
             ", ",
             "ListDashboardsResponse",
-            ", undefined>; \"GET /internal/streams/ingest/processor_suggestions\": ",
+            ", undefined>; \"GET /internal/streams/connectors\": { endpoint: \"GET /internal/streams/connectors\"; handler: ServerRouteHandler<",
+            "StreamsRouteHandlerResources",
+            ", undefined, { connectors: ",
+            {
+              "pluginId": "actions",
+              "scope": "server",
+              "docId": "kibActionsPluginApi",
+              "section": "def-server.ConnectorWithExtraFindData",
+              "text": "ConnectorWithExtraFindData"
+            },
+            "[]; }>; security: ",
+            "RouteSecurity",
+            "; }; \"GET /internal/streams/ingest/processor_suggestions\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
               "scope": "common",
@@ -1692,7 +1704,9 @@
             "ZodTypeAny",
             ", { path: { name: string; }; query: { connectorId: string; from: Date; to: Date; }; }, { path: { name: string; }; query: { connectorId: string; from: string; to: string; }; }>, ",
             "StreamsRouteHandlerResources",
-            ", { features: ",
+            ", ",
+            "Observable",
+            "<{ features: ",
             {
               "pluginId": "@kbn/streams-schema",
               "scope": "common",
@@ -1700,7 +1714,7 @@
               "section": "def-common.Feature",
               "text": "Feature"
             },
-            "[]; } & { type: \"identified_features\"; }, undefined>; \"POST /internal/streams/{name}/features/_bulk\": ",
+            "[]; } & { type: \"identified_features\"; }>, undefined>; \"POST /internal/streams/{name}/features/_bulk\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
               "scope": "common",
@@ -2557,20 +2571,21 @@
         },
         {
           "parentPluginId": "streams",
-          "id": "def-public.StreamsPluginStart.wiredStatus$",
-          "type": "Object",
+          "id": "def-public.StreamsPluginStart.getWiredStatus",
+          "type": "Function",
           "tags": [],
-          "label": "wiredStatus$",
+          "label": "getWiredStatus",
           "description": [],
           "signature": [
-            "Observable",
-            "<",
+            "() => Promise<",
             "WiredStreamsStatus",
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/streams/public/types.ts",
           "deprecated": false,
-          "trackAdoption": false
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
         },
         {
           "parentPluginId": "streams",
@@ -4297,7 +4312,19 @@
           "StreamsRouteHandlerResources",
           ", ",
           "ListDashboardsResponse",
-          ", undefined>; \"GET /internal/streams/ingest/processor_suggestions\": ",
+          ", undefined>; \"GET /internal/streams/connectors\": { endpoint: \"GET /internal/streams/connectors\"; handler: ServerRouteHandler<",
+          "StreamsRouteHandlerResources",
+          ", undefined, { connectors: ",
+          {
+            "pluginId": "actions",
+            "scope": "server",
+            "docId": "kibActionsPluginApi",
+            "section": "def-server.ConnectorWithExtraFindData",
+            "text": "ConnectorWithExtraFindData"
+          },
+          "[]; }>; security: ",
+          "RouteSecurity",
+          "; }; \"GET /internal/streams/ingest/processor_suggestions\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -4389,7 +4416,9 @@
           "ZodTypeAny",
           ", { path: { name: string; }; query: { connectorId: string; from: Date; to: Date; }; }, { path: { name: string; }; query: { connectorId: string; from: string; to: string; }; }>, ",
           "StreamsRouteHandlerResources",
-          ", { features: ",
+          ", ",
+          "Observable",
+          "<{ features: ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
@@ -4397,7 +4426,7 @@
             "section": "def-common.Feature",
             "text": "Feature"
           },
-          "[]; } & { type: \"identified_features\"; }, undefined>; \"POST /internal/streams/{name}/features/_bulk\": ",
+          "[]; } & { type: \"identified_features\"; }>, undefined>; \"POST /internal/streams/{name}/features/_bulk\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",

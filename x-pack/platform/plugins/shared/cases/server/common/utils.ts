@@ -91,6 +91,7 @@ export const transformNewCase = ({
   category: newCase.category ?? null,
   customFields: newCase.customFields ?? [],
   observables: [],
+  total_observables: 0,
   incremental_id: undefined,
 });
 

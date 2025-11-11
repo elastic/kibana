@@ -32,6 +32,21 @@ jest.mock('../../utils', () => ({
   buildStepExecutionId: jest.fn().mockImplementation((executionId, stepId, path) => {
     return `${stepId}_generated`;
   }),
+  getKibanaUrl: jest.fn().mockReturnValue('http://localhost:5601'),
+  buildWorkflowExecutionUrl: jest
+    .fn()
+    .mockImplementation((kibanaUrl, spaceId, workflowId, executionId, stepExecutionId) => {
+      const spacePrefix = spaceId === 'default' ? '' : `/s/${spaceId}`;
+      const baseUrl = `${kibanaUrl}${spacePrefix}/app/workflows/${workflowId}`;
+      const params = new URLSearchParams({
+        executionId,
+        tab: 'executions',
+      });
+      if (stepExecutionId) {
+        params.set('stepExecutionId', stepExecutionId);
+      }
+      return `${baseUrl}?${params.toString()}`;
+    }),
 }));
 
 describe('WorkflowContextManager', () => {
@@ -817,6 +832,7 @@ describe('WorkflowContextManager', () => {
             id: 'exec-123',
             isTestRun: false,
             startedAt: new Date('2023-01-01T00:00:00.000Z'),
+            url: 'http://localhost:5601/s/space-789/app/workflows/workflow-456?executionId=exec-123&tab=executions',
           },
           workflow: {
             id: 'workflow-456',
@@ -824,6 +840,7 @@ describe('WorkflowContextManager', () => {
             enabled: true,
             spaceId: 'space-789',
           },
+          kibanaUrl: 'http://localhost:5601',
           consts: {
             API_URL: 'https://api.example.com',
             TIMEOUT: 5000,

@@ -63,9 +63,11 @@ export const optionalFields = asMutableArray([
   EXCEPTION_TYPE,
   EXCEPTION_MESSAGE,
   TIMESTAMP_US,
+  OTEL_EVENT_NAME,
 ] as const);
 
 interface OtelError {
+  event_name: string;
   span: {
     id: string;
   };
@@ -120,6 +122,7 @@ async function getUnprocessedOtelErrors({
         id: hit._id,
         spanId: event.span?.id,
         timestamp: event?.timestamp,
+        eventName: event?.event_name,
         error: {
           exception: {
             type: event.exception?.type,
@@ -135,6 +138,7 @@ async function getUnprocessedOtelErrors({
         id: string;
         spanId: string;
         timestamp: TimestampUs | undefined;
+        eventName: string;
         error: { exception: { type: string | undefined; message: string | undefined } };
       } => !!doc
     );

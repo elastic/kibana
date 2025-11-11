@@ -16,11 +16,15 @@ import type {
   GetStateType,
   LensRuntimeState,
   IntegrationCallbacks,
+  LensSerializedState,
+} from '@kbn/lens-common';
+import type {
+  LegacyLensStateApi,
+  LensSerializedAPIConfig,
   LensByRefSerializedAPIConfig,
   LensByValueSerializedAPIConfig,
-  LensSerializedAPIConfig,
-} from '@kbn/lens-common';
-import { isTextBasedLanguage, transformOutputState } from '../helper';
+} from '@kbn/lens-common-2';
+import { isTextBasedLanguage, transformToApiConfig } from '../helper';
 
 function cleanupSerializedState(state: LensRuntimeState) {
   const cleanedState = omit(state, 'searchSessionId');
@@ -39,7 +43,8 @@ export function initializeIntegrations(getLatestState: GetStateType): {
     | 'updateDataLoading'
     | 'getTriggerCompatibleActions'
   > &
-    HasSerializableState<LensSerializedAPIConfig>;
+    HasSerializableState<LensSerializedAPIConfig> &
+    LegacyLensStateApi;
 } {
   return {
     api: {
@@ -60,11 +65,27 @@ export function initializeIntegrations(getLatestState: GetStateType): {
           } satisfies SerializedPanelState<LensByRefSerializedAPIConfig>;
         }
 
-        const transformedState = transformOutputState(currentState);
+        const transformedState = transformToApiConfig(currentState);
 
         return {
           rawState: transformedState,
         } satisfies SerializedPanelState<LensByValueSerializedAPIConfig>;
+      },
+      getLegacySerializedState: (): LensSerializedState => {
+        const currentState = cleanupSerializedState(getLatestState());
+        const { savedObjectId, attributes, ...state } = currentState;
+
+        if (savedObjectId) {
+          return {
+            ...state,
+            savedObjectId,
+          };
+        }
+
+        return {
+          ...state,
+          attributes,
+        };
       },
       // TODO: workout why we have this duplicated
       getFullAttributes: () => getLatestState().attributes,

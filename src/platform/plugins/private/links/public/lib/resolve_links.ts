@@ -71,9 +71,7 @@ export async function resolveLinkInfo(
   if (link.type === DASHBOARD_LINK_TYPE) {
     if (!link.destination) return { title: '' };
     try {
-      const {
-        attributes: { title, description },
-      } = await fetchDashboard(link.destination);
+      const { title, description } = await fetchDashboard(link.destination);
       return { label: link.label, title, description };
     } catch (error) {
       return {

@@ -15,6 +15,7 @@ import {
   useIsWithinMaxBreakpoint,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { useSignalIndexWithDefault } from '../../hooks/use_signal_index_with_default';
 import * as i18n from './translations';
 import type {
   EmbeddableData,
@@ -50,10 +51,16 @@ const CostSavingsTrendComponent: React.FC<Props> = ({
   to,
 }) => {
   const timerange = useMemo(() => ({ from, to }), [from, to]);
+  const signalIndexName = useSignalIndexWithDefault();
   const getLensAttributes = useCallback<GetLensAttributes>(
     (args) =>
-      getCostSavingsTrendAreaLensAttributes({ ...args, minutesPerAlert, analystHourlyRate }),
-    [analystHourlyRate, minutesPerAlert]
+      getCostSavingsTrendAreaLensAttributes({
+        ...args,
+        minutesPerAlert,
+        analystHourlyRate,
+        signalIndexName,
+      }),
+    [analystHourlyRate, minutesPerAlert, signalIndexName]
   );
   const isSmall = useIsWithinMaxBreakpoint('s');
   const {
