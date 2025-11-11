@@ -6,9 +6,9 @@
  */
 
 import {
-  CROWDSTRIKE_CONNECTOR_ID,
+  CONNECTOR_ID as CROWDSTRIKE_CONNECTOR_ID,
   SUB_ACTION,
-} from '@kbn/stack-connectors-plugin/common/crowdstrike/constants';
+} from '@kbn/connector-schemas/crowdstrike/constants';
 import type { FeaturesPrivileges, Role } from '@kbn/security-plugin/common';
 import type SuperTest from 'supertest';
 import expect from '@kbn/expect';

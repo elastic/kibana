@@ -10,7 +10,7 @@ import { createToolingLogger } from '../../../../common/endpoint/data_loaders/ut
 import { createCrowdStrikeConnectorIfNeeded } from './create_crowdstrike_connector';
 import * as connectorsServices from '../../common/connectors_services';
 import * as spaces from '../../common/spaces';
-import { CROWDSTRIKE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/crowdstrike/constants';
+import { CONNECTOR_ID as CROWDSTRIKE_CONNECTOR_ID } from '@kbn/connector-schemas/crowdstrike/constants';
 import { createMockConnector } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 jest.mock('../../common/connectors_services');

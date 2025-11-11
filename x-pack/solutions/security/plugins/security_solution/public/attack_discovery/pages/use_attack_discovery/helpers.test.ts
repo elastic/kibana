@@ -6,7 +6,7 @@
  */
 
 import { DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS } from '@kbn/elastic-assistant';
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
+import { OpenAiProviderType } from '@kbn/connector-schemas/openai/constants';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import { omit } from 'lodash/fp';
 

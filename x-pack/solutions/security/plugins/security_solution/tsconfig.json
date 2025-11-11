@@ -175,7 +175,6 @@
     "@kbn/zod-helpers",
     "@kbn/core-http-common",
     "@kbn/search-errors",
-    "@kbn/stack-connectors-plugin",
     "@kbn/elastic-assistant-common",
     "@kbn/core-elasticsearch-server-mocks",
     "@kbn/lens-embeddable-utils",
@@ -260,6 +259,7 @@
     "@kbn/core-analytics-server-mocks",
     "@kbn/object-utils",
     "@kbn/core-ui-settings-common",
+    "@kbn/connector-schemas",
     "@kbn/react-query"
   ]
 }
