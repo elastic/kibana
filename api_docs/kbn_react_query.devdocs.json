@@ -12887,6 +12887,10 @@
               },
               {
                 "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/public/action_results/action_results_summary.tsx"
+              },
+              {
+                "plugin": "osquery",
                 "path": "x-pack/platform/plugins/shared/osquery/public/saved_queries/use_saved_queries.ts"
               },
               {

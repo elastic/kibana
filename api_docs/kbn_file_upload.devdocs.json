@@ -454,6 +454,38 @@
           },
           {
             "parentPluginId": "@kbn/file-upload",
+            "id": "def-common.FileUploadManager.abortAnalysis",
+            "type": "Function",
+            "tags": [],
+            "label": "abortAnalysis",
+            "description": [],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-common.FileUploadManager.abortImport",
+            "type": "Function",
+            "tags": [],
+            "label": "abortImport",
+            "description": [],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
             "id": "def-common.FileUploadManager.removeClashingFiles",
             "type": "Function",
             "tags": [],
@@ -1021,7 +1053,7 @@
             "section": "def-common.Index",
             "text": "Index"
           },
-          "[]; existingIndexName: string | null; setExistingIndexName: (idxName: string | null) => void; }"
+          "[]; existingIndexName: string | null; setExistingIndexName: (idxName: string | null) => void; abortAllAnalysis: () => void; abortImport: () => void; }"
         ],
         "path": "x-pack/platform/packages/shared/file-upload/src/use_file_upload.ts",
         "deprecated": false,
@@ -1237,7 +1269,7 @@
             "section": "def-common.Index",
             "text": "Index"
           },
-          "[]; existingIndexName: string | null; setExistingIndexName: (idxName: string | null) => void; }"
+          "[]; existingIndexName: string | null; setExistingIndexName: (idxName: string | null) => void; abortAllAnalysis: () => void; abortImport: () => void; }"
         ],
         "path": "x-pack/platform/packages/shared/file-upload/src/use_file_upload.ts",
         "deprecated": false,
@@ -1738,7 +1770,7 @@
             "section": "def-common.Index",
             "text": "Index"
           },
-          "[]; existingIndexName: string | null; setExistingIndexName: (idxName: string | null) => void; } | undefined>"
+          "[]; existingIndexName: string | null; setExistingIndexName: (idxName: string | null) => void; abortAllAnalysis: () => void; abortImport: () => void; } | undefined>"
         ],
         "path": "x-pack/platform/packages/shared/file-upload/src/use_file_upload.ts",
         "deprecated": false,

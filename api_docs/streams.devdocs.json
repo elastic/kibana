@@ -2559,20 +2559,21 @@
         },
         {
           "parentPluginId": "streams",
-          "id": "def-public.StreamsPluginStart.wiredStatus$",
-          "type": "Object",
+          "id": "def-public.StreamsPluginStart.getWiredStatus",
+          "type": "Function",
           "tags": [],
-          "label": "wiredStatus$",
+          "label": "getWiredStatus",
           "description": [],
           "signature": [
-            "Observable",
-            "<",
+            "() => Promise<",
             "WiredStreamsStatus",
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/streams/public/types.ts",
           "deprecated": false,
-          "trackAdoption": false
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
         },
         {
           "parentPluginId": "streams",

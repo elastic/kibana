@@ -38,6 +38,7 @@ export const Resource = ({ fields, limited = false, onFilter, ...props }: Resour
           value={value}
           icon={Icon}
           onFilter={onFilter}
+          truncateTitle={true}
         />
       ))}
       {extraFieldsCount > 0 && (

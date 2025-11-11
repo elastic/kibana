@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ServiceNowActionParams } from '@kbn/stack-connectors-plugin/server/connector_types';
+import type { ServiceNowActionParams } from '@kbn/connector-schemas/servicenow';
 import type { ActionParamsType as EmailActionParams } from '@kbn/connector-schemas/email';
 import type { ActionParamsType as IndexActionParams } from '@kbn/connector-schemas/es_index';
 import type { ActionParamsType as JiraActionParams } from '@kbn/connector-schemas/jira';
