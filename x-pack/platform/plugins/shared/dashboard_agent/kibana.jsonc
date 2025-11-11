@@ -1,0 +1,20 @@
+{
+  "type": "plugin",
+  "id": "@kbn/dashboard-agent-plugin",
+  "owner": "@elastic/kibana-presentation",
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "dashboardAgent",
+    "server": true,
+    "browser": false,
+    "configPath": [
+      "xpack",
+      "dashboardAgent"
+    ],
+    "requiredPlugins": [
+      "onechat",
+      "dashboard"
+    ]
+  }
+}
