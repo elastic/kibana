@@ -21,7 +21,7 @@ import {
   transactionErrorRateRecoveryMessage,
 } from '../../../../common/rules/default_action_message';
 import type { AlertParams } from './anomaly_rule_type';
-import { getDescriptionFields } from './transaction_error_rate_rule_type/get_description_fields';
+import { getDescriptionFields } from './get_description_fields';
 
 // copied from elasticsearch_fieldnames.ts to limit page load bundle size
 const SERVICE_ENVIRONMENT = 'service.environment';
@@ -56,6 +56,7 @@ export function registerApmRuleTypes(observabilityRuleTypeRegistry: Observabilit
     defaultActionMessage: errorCountMessage,
     defaultRecoveryMessage: errorCountRecoveryMessage,
     priority: 80,
+    getDescriptionFields,
   });
 
   observabilityRuleTypeRegistry.register({

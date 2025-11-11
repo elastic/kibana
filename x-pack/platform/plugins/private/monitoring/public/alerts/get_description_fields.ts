@@ -12,6 +12,10 @@ export const getDescriptionFields: GetDescriptionFieldsFn = ({ rule, prebuildFie
     return [];
   }
 
+  if (rule.params.indexPattern && typeof rule.params.indexPattern === 'string') {
+    return [prebuildFields.indexPattern([rule.params.indexPattern])];
+  }
+
   if (rule.params.filterQueryText && typeof rule.params.filterQueryText === 'string') {
     return [prebuildFields.customQuery(rule.params.filterQueryText)];
   }
