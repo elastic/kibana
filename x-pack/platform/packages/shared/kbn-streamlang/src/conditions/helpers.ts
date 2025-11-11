@@ -98,7 +98,7 @@ export function getDefaultFormValueForOperator(
     case 'exists':
       return true;
     case 'range':
-      return { gte: 0, lt: 0 };
+      return {};
     default:
       return '';
   }
