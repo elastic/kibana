@@ -271,7 +271,6 @@ export type {
   LensRuntimeState,
   LensHasEditPanel,
   LensInspectorAdapters,
-  LensApi,
   LensParentApi,
   LensInternalApi,
   ExpressionWrapperProps,
