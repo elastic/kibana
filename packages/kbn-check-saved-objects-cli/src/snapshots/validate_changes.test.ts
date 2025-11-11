@@ -21,11 +21,25 @@ function loadSnapshot(filename: string): MigrationSnapshot {
 describe('validateChanges', () => {
   beforeEach(() => jest.clearAllMocks());
 
+  const validateChangesWrapper = ({
+    from,
+    to,
+    name,
+  }: {
+    from: MigrationSnapshot;
+    to: MigrationSnapshot;
+    name: string;
+  }) => {
+    const typeFrom = from.typeDefinitions[name];
+    const typeTo = to.typeDefinitions[name];
+    return validateChanges({ from: typeFrom, to: typeTo });
+  };
+
   it('should throw if migrations are deleted', () => {
     const from = loadSnapshot('baseline.json');
     const to = loadSnapshot('migrations_deleted.json');
 
-    expect(() => validateChanges({ from, to, name: 'config' })).toThrowError(
+    expect(() => validateChangesWrapper({ from, to, name: 'config' })).toThrowError(
       `❌ Modifications have been detected in the 'config.migrations'. This property is deprected and no modifications are allowed.`
     );
   });
@@ -34,7 +48,7 @@ describe('validateChanges', () => {
     const from = loadSnapshot('baseline.json');
     const to = loadSnapshot('migrations_added.json');
 
-    expect(() => validateChanges({ from, to, name: 'config' })).toThrowError(
+    expect(() => validateChangesWrapper({ from, to, name: 'config' })).toThrowError(
       `❌ Modifications have been detected in the 'config.migrations'. This property is deprected and no modifications are allowed.`
     );
   });
@@ -43,7 +57,7 @@ describe('validateChanges', () => {
     const from = loadSnapshot('baseline.json');
     const to = loadSnapshot('model_versions_deleted.json');
 
-    expect(() => validateChanges({ from, to, name: 'task' })).toThrowError(
+    expect(() => validateChangesWrapper({ from, to, name: 'task' })).toThrowError(
       `❌ Some model versions have been deleted for SO type 'task'.`
     );
   });
@@ -51,7 +65,7 @@ describe('validateChanges', () => {
   it('should throw if more than one new model version is defined', () => {
     const from = loadSnapshot('baseline.json');
     const to = loadSnapshot('two_new_model_versions.json');
-    expect(() => validateChanges({ from, to, name: 'task' })).toThrowError(
+    expect(() => validateChangesWrapper({ from, to, name: 'task' })).toThrowError(
       `❌ The SO type 'task' is defining two (or more) new model versions. Please refer to our troubleshooting guide: https://docs.elastic.dev/kibana-dev-docs/tutorials/saved-objects#troubleshooting`
     );
   });
@@ -60,7 +74,7 @@ describe('validateChanges', () => {
     const from = loadSnapshot('baseline.json');
     const to = loadSnapshot('mutated_model_versions.json');
 
-    expect(() => validateChanges({ from, to, name: 'task' })).toThrowError(
+    expect(() => validateChangesWrapper({ from, to, name: 'task' })).toThrowError(
       `❌ Some modelVersions have been updated for SO type 'task' after they were defined: 10.6.0.`
     );
   });
@@ -69,7 +83,7 @@ describe('validateChanges', () => {
     const from = loadSnapshot('baseline.json');
     const to = loadSnapshot('non_consecutive_model_versions.json');
 
-    expect(() => validateChanges({ from, to, name: 'task' })).toThrowError(
+    expect(() => validateChangesWrapper({ from, to, name: 'task' })).toThrowError(
       `❌ The 'task' SO type is missing model version '7'. Model versions defined: 1,2,3,4,5,6,8`
     );
   });
@@ -78,7 +92,7 @@ describe('validateChanges', () => {
     const from = loadSnapshot('baseline.json');
     const to = loadSnapshot('mappings_updated_no_bump.json');
 
-    expect(() => validateChanges({ from, to, name: 'task' })).toThrowError(
+    expect(() => validateChangesWrapper({ from, to, name: 'task' })).toThrowError(
       `❌ The 'task' SO type has changes in the mappings, but is missing a modelVersion that defines these changes.`
     );
   });
