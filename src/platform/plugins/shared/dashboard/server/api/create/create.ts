@@ -26,7 +26,11 @@ export async function create(
 ): Promise<DashboardCreateResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
 
-  const { references: incomingReferences, ...incomingDashboardState } = searchBody.data;
+  const {
+    references: incomingReferences,
+    accessControl,
+    ...incomingDashboardState
+  } = searchBody.data;
   const {
     attributes: soAttributes,
     references: soReferences,
@@ -46,6 +50,9 @@ export async function create(
       references: soReferences,
       ...(searchBody.id && { id: searchBody.id }),
       ...(searchBody.spaces && { initialNamespaces: searchBody.spaces }),
+      ...(accessControl?.accessMode && {
+        accessControl: { accessMode: accessControl.accessMode },
+      }),
     }
   );
 
@@ -66,6 +73,7 @@ export async function create(
     data: {
       ...dashboardState,
       references,
+      ...(savedObject.accessControl && { accessControl: savedObject.accessControl }),
     },
     meta: {
       createdAt: savedObject.created_at,
