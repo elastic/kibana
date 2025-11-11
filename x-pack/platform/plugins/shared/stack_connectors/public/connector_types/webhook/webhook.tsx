@@ -35,7 +35,7 @@ export function getConnectorType(): ConnectorTypeModel<
       connectorConfig?: WebhookConfig
     ): Promise<GenericValidationResult<WebhookActionParams>> => {
       const webhookMethod: WebhookMethods = connectorConfig?.method
-        ? (connectorConfig.method as WebhookMethods)
+        ? connectorConfig.method
         : WebhookMethods.POST;
       const translations = await import('./translations');
       const errors = {
