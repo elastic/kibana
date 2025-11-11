@@ -22,7 +22,9 @@ export const VISUALIZE_QUERY_FUNCTION_NAME = 'visualize_query';
 export const GET_DATASET_INFO_FUNCTION_NAME = 'get_dataset_info';
 export const SELECT_RELEVANT_FIELDS_NAME = 'select_relevant_fields';
 
+// Elasticsearch tools
 export const ELASTICSEARCH_FUNCTION_NAME = 'elasticsearch';
+export const RETRIEVE_ES_API_DOC_FUNCTION_NAME = 'retrieve_es_api_doc';
 
 export const EXECUTE_CONNECTOR_FUNCTION_NAME = 'execute_connector';
 

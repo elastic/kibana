@@ -7527,6 +7527,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/observability-agent-plugin@link:x-pack/solutions/observability/plugins/observability_agent":
+  version "0.0.0"
+  uid ""
+
 "@kbn/observability-ai-common@link:x-pack/solutions/observability/packages/observability-ai/observability-ai-common":
   version "0.0.0"
   uid ""

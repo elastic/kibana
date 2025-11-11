@@ -13,7 +13,7 @@ import { registerKibanaFunction } from './kibana';
 import { registerContextFunction } from './context/context';
 import { registerSummarizationFunction } from './summarize';
 import type { RegistrationCallback } from '../service/types';
-import { registerElasticsearchFunction } from './elasticsearch';
+import { registerElasticsearchFunction, registerRetrieveEsApiDocFunction } from './elasticsearch';
 import { registerGetDatasetInfoFunction } from './get_dataset_info';
 import { registerExecuteConnectorFunction } from './execute_connector';
 
@@ -73,6 +73,7 @@ export const registerFunctions: RegistrationCallback = async ({
 
   registerContextFunction({ ...registrationParameters, isKnowledgeBaseReady });
 
+  registerRetrieveEsApiDocFunction(registrationParameters);
   registerElasticsearchFunction(registrationParameters);
 
   const request = registrationParameters.resources.request;
