@@ -48,6 +48,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('Embeddable alerts panel', function () {
     this.tags('skipFIPS');
+
     before(async () => {
       await sampleData.testResources.installAllKibanaSampleData();
 
