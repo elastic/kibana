@@ -156,10 +156,6 @@ export function ESQLControlsFlyout({
     variableType,
   ]);
 
-  useEffect(() => {
-    telemetryService.trackEsqlControlFlyoutOpened(initialVariableType);
-  }, [initialVariableType]);
-
   const onFlyoutTypeChange = useCallback((controlType: EsqlControlType) => {
     setControlFlyoutType(controlType);
   }, []);
@@ -178,7 +174,6 @@ export function ESQLControlsFlyout({
         // esql_control_config_saved
       }
     }
-    // esql–control_applied
     closeFlyout();
   }, [
     controlState,
