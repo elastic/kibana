@@ -65,7 +65,6 @@ export function isDynamicValue(value: unknown): boolean {
   if (typeof value !== 'string') {
     return false;
   }
-  // Match pattern: starts with ${{ and ends with }}, and any non-empty string in between
   return DYNAMIC_VALUE_REGEX.test(value);
 }
 
