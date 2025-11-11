@@ -25,14 +25,28 @@ const additionalProps = {
 export const CommandInputUsage = memo<Pick<CommandUsageProps, 'commandDef'>>(({ commandDef }) => {
   const inputCommand = useInputCommand();
   const usageHelp = useMemo(() => {
-    return getArgumentsForCommand(commandDef).map((usage, index) => {
-      return (
-        <React.Fragment key={`helpUsage-${index}`}>
-          {index > 0 && <EuiSpacer size="xs" />}
-          <ConsoleCodeBlock>{`${commandDef.name} ${usage}`}</ConsoleCodeBlock>
-        </React.Fragment>
-      );
-    });
+    if (commandDef.helpUsage) {
+      return <ConsoleCodeBlock>{commandDef.helpUsage}</ConsoleCodeBlock>;
+    }
+
+    const commandArgs = getArgumentsForCommand(commandDef);
+
+    if (commandArgs.length === 0) {
+      return <ConsoleCodeBlock>{commandDef.name}</ConsoleCodeBlock>;
+    }
+
+    return (
+      <>
+        {commandArgs.map((usage, index) => {
+          return (
+            <React.Fragment key={`helpUsage-${index}`}>
+              {index > 0 && <EuiSpacer size="xs" />}
+              <ConsoleCodeBlock>{`${commandDef.name} ${usage}`}</ConsoleCodeBlock>
+            </React.Fragment>
+          );
+        })}
+      </>
+    );
   }, [commandDef]);
 
   const helpExample = useMemo(() => {
@@ -60,7 +74,7 @@ export const CommandInputUsage = memo<Pick<CommandUsageProps, 'commandDef'>>(({ 
                 })}
               </ConsoleCodeBlock>
             ),
-            description: usageHelp && usageHelp.length > 0 ? usageHelp : commandDef.name,
+            description: usageHelp,
           },
         ]}
         descriptionProps={additionalProps}
