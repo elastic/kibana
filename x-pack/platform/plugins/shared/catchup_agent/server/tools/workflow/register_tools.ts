@@ -26,9 +26,7 @@ export function registerWorkflowTools(toolsSetup: ToolsSetup, logger: Logger): v
     logger.info('Registering workflow-specific simplified tools...');
 
     toolsSetup.register(workflowToolSummarizerTool());
-    logger.info(
-      'Registered workflow tool summarizer (hackathon.catchup.workflow_tool_summarizer)'
-    );
+    logger.info('Registered workflow tool summarizer (hackathon.catchup.workflow_tool_summarizer)');
 
     logger.info('Workflow-specific simplified tools registered successfully');
   } catch (error) {

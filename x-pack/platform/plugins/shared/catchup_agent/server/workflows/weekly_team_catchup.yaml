@@ -85,7 +85,7 @@ steps:
       body:
         toolId: 'hackathon.catchup.external.slack'
         toolParams:
-          since: '{{ inputs.start || (now | date_sub("7d") | date_format("iso")) }}'
+          start: '{{ inputs.start || (now | date_sub("7d") | date_format("iso")) }}'
           keywords: []
           includeDMs: false
 
@@ -97,7 +97,7 @@ steps:
       body:
         toolId: 'hackathon.catchup.external.github'
         toolParams:
-          since: '{{ inputs.start || (now | date_sub("7d") | date_format("iso")) }}'
+          start: '{{ inputs.start || (now | date_sub("7d") | date_format("iso")) }}'
 
   - name: Unified search with hybrid search
     type: kibana.request

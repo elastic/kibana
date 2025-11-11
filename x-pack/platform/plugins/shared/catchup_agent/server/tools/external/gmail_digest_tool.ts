@@ -14,7 +14,7 @@ import { normalizeDateToCurrentYear } from '../utils/date_normalization';
 import { getPluginServices } from '../../services/service_locator';
 
 const gmailDigestSchema = z.object({
-  since: z
+  start: z
     .string()
     .describe(
       'ISO datetime string for the start time to fetch Gmail messages. If no year is specified (e.g., "10-31T00:00:00Z"), the current year is assumed.'
@@ -57,13 +57,13 @@ The token can be provided either:
 
 If not configured, you'll be prompted to add it to kibana.dev.yml.
 
-The 'since' parameter should be an ISO datetime string (e.g., '2025-01-15T00:00:00Z' or '01-15T00:00:00Z'). If no year is specified, the current year is assumed.
+The 'start' parameter should be an ISO datetime string (e.g., '2025-01-15T00:00:00Z' or '01-15T00:00:00Z'). If no year is specified, the current year is assumed.
 Optionally filters by keywords like "incident", "alert", or "case".`,
     schema: gmailDigestSchema,
-    handler: async ({ since, token, connectorId, keywords }, { request, logger }) => {
+    handler: async ({ start, token, connectorId, keywords }, { request, logger }) => {
       try {
         logger.info(
-          `[CatchUp Agent] Gmail digest tool called with since: ${since}, connectorId: ${
+          `[CatchUp Agent] Gmail digest tool called with start: ${start}, connectorId: ${
             connectorId || 'none'
           }`
         );
@@ -95,14 +95,14 @@ Or provide it via the 'token' parameter. The token should have 'gmail.readonly' 
         }
 
         // Normalize date to current year if year is missing
-        const normalizedSince = normalizeDateToCurrentYear(since);
-        const sinceDate = new Date(normalizedSince);
-        if (isNaN(sinceDate.getTime())) {
-          throw new Error(`Invalid datetime format: ${since}. Expected ISO 8601 format.`);
+        const normalizedStart = normalizeDateToCurrentYear(start);
+        const startDate = new Date(normalizedStart);
+        if (isNaN(startDate.getTime())) {
+          throw new Error(`Invalid datetime format: ${start}. Expected ISO 8601 format.`);
         }
 
         // Convert to Unix timestamp (seconds) for Gmail API
-        const sinceTimestamp = Math.floor(sinceDate.getTime() / 1000);
+        const startTimestamp = Math.floor(startDate.getTime() / 1000);
 
         // TODO: Full implementation would:
         // 1. Use OAuth token from config or parameter
@@ -118,7 +118,7 @@ Or provide it via the 'token' parameter. The token should have 'gmail.readonly' 
               data: {
                 message:
                   'Gmail digest tool implementation pending. Will use Gmail API with OAuth token from config.',
-                since: normalizedSince,
+                start: normalizedStart,
                 keywords: keywords || ['incident', 'alert', 'case'],
                 emails: [],
               },

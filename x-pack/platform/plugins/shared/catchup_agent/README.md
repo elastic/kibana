@@ -129,7 +129,7 @@ The CatchUp Agent can be used via Agent Builder UI or programmatically:
 // Example: Call the security summary tool
 const result = await onechat.tools.execute({
   toolId: 'platform.catchup.security.summary',
-  toolParams: { since: '2025-01-15T00:00:00Z' },
+  toolParams: { start: '2025-01-15T00:00:00Z' },
   request,
 });
 ```

@@ -13,7 +13,7 @@ import { createErrorResult } from '@kbn/onechat-server';
 import { executeEsql } from '@kbn/onechat-genai-utils/tools/utils/esql';
 
 const searchUpdatesSchema = z.object({
-  since: z.string().describe('ISO datetime string for the start time to fetch search updates'),
+  start: z.string().describe('ISO datetime string for the start time to fetch search updates'),
 });
 
 export const searchUpdatesTool = (): BuiltinToolDefinition<typeof searchUpdatesSchema> => {
@@ -22,23 +22,23 @@ export const searchUpdatesTool = (): BuiltinToolDefinition<typeof searchUpdatesS
     type: ToolType.builtin,
     description: `Summarizes Search and indexing changes from Elasticsearch since a given timestamp.
 
-The 'since' parameter should be an ISO datetime string (e.g., '2025-01-15T00:00:00Z').
+The 'start' parameter should be an ISO datetime string (e.g., '2025-01-15T00:00:00Z').
 Returns analytics data including CTR changes and top queries.`,
     schema: searchUpdatesSchema,
-    handler: async ({ since }, { esClient, logger }) => {
+    handler: async ({ start }, { esClient, logger }) => {
       try {
-        logger.info(`[CatchUp Agent] Search updates tool called with since: ${since}`);
+        logger.info(`[CatchUp Agent] Search updates tool called with start: ${start}`);
 
-        const sinceDate = new Date(since);
-        if (isNaN(sinceDate.getTime())) {
-          throw new Error(`Invalid datetime format: ${since}. Expected ISO 8601 format.`);
+        const startDate = new Date(start);
+        if (isNaN(startDate.getTime())) {
+          throw new Error(`Invalid datetime format: ${start}. Expected ISO 8601 format.`);
         }
 
         // Query search analytics using ES|QL
         // Use TO_DATETIME to convert ISO string to datetime for comparison
         // Handle case where index might not exist
         const query = `FROM .ent-search-analytics-*
-| WHERE @timestamp > TO_DATETIME("${since}")
+| WHERE @timestamp > TO_DATETIME("${start}")
 | STATS
     avg_ctr = AVG(click_through_rate),
     total_queries = COUNT(*)
@@ -83,7 +83,7 @@ Returns analytics data including CTR changes and top queries.`,
             {
               type: ToolResultType.other,
               data: {
-                since,
+                start,
               },
             },
           ],

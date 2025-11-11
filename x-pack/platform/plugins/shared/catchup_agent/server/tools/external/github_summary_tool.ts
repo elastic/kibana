@@ -14,7 +14,7 @@ import { normalizeDateToCurrentYear } from '../utils/date_normalization';
 import { getPluginServices } from '../../services/service_locator';
 
 const githubSummarySchema = z.object({
-  since: z
+  start: z
     .string()
     .describe(
       'ISO datetime string for the start time to fetch GitHub updates. If no year is specified (e.g., "10-31T00:00:00Z"), the current year is assumed.'
@@ -48,12 +48,12 @@ The token can be provided either:
 
 If not configured, you'll be prompted to add it to kibana.dev.yml.
 
-The 'since' parameter should be an ISO datetime string (e.g., '2025-01-15T00:00:00Z' or '01-15T00:00:00Z'). If no year is specified, the current year is assumed.
+The 'start' parameter should be an ISO datetime string (e.g., '2025-01-15T00:00:00Z' or '01-15T00:00:00Z'). If no year is specified, the current year is assumed.
 Optionally specify 'repo' and 'owner' to scope to a specific repository (e.g., owner='elastic', repo='kibana').`,
     schema: githubSummarySchema,
-    handler: async ({ since, connectorId, token, repo, owner }, { request, logger }) => {
+    handler: async ({ start, connectorId, token, repo, owner }, { request, logger }) => {
       try {
-        logger.info(`[CatchUp Agent] GitHub summary tool called with since: ${since}`);
+        logger.info(`[CatchUp Agent] GitHub summary tool called with start: ${start}`);
 
         if (connectorId) {
           throw new Error(
@@ -82,10 +82,10 @@ Or provide it via the 'token' parameter. The token should have 'repo' scope for 
         }
 
         // Normalize date to current year if year is missing
-        const normalizedSince = normalizeDateToCurrentYear(since);
-        const sinceTimestamp = new Date(normalizedSince).getTime();
-        if (isNaN(sinceTimestamp)) {
-          throw new Error(`Invalid datetime format: ${since}. Expected ISO 8601 format.`);
+        const normalizedStart = normalizeDateToCurrentYear(start);
+        const startTimestamp = new Date(normalizedStart).getTime();
+        if (isNaN(startTimestamp)) {
+          throw new Error(`Invalid datetime format: ${start}. Expected ISO 8601 format.`);
         }
 
         // TODO: Full implementation would:
@@ -102,7 +102,7 @@ Or provide it via the 'token' parameter. The token should have 'repo' scope for 
               data: {
                 message:
                   'GitHub summary tool implementation pending. Will use GitHub API with token from config.',
-                since: normalizedSince,
+                start: normalizedStart,
                 repo: repo || null,
                 owner: owner || null,
                 pull_requests: [],

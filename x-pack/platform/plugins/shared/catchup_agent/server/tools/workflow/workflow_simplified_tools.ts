@@ -47,7 +47,7 @@ function simplifyToolResult(toolResults: any[]): any {
   if (source.total !== undefined) simplified.total = source.total;
   if (source.start !== undefined) simplified.start = source.start;
   if (source.end !== undefined) simplified.end = source.end;
-  if (source.since !== undefined) simplified.since = source.since;
+  if (source.since !== undefined) simplified.start = source.since;
 
   // Limit array sizes and extract only essential fields
   // Remove nested arrays (like comments_summary) to keep structure flat

@@ -103,7 +103,7 @@ steps:
         tool_params:
           tool_id: 'hackathon.catchup.external.slack'
           tool_params:
-            since: '{{ inputs.start }}'
+            start: '{{ inputs.start }}'
             keywords:
               - '{{ inputs.incident_id }}'
               - '{{ steps.extract_entities_from_incident.output.entities.service_names[0] }}'

@@ -15,7 +15,7 @@ import { normalizeDateToCurrentYear } from '../utils/date_normalization';
 import { getPluginServices } from '../../services/service_locator';
 
 const slackDigestSchema = z.object({
-  since: z
+  start: z
     .string()
     .describe(
       'ISO datetime string for the start time to fetch Slack messages. If no year is specified (e.g., "10-31T00:00:00Z"), the current year is assumed.'
@@ -101,20 +101,20 @@ The tool returns messages in THREE separate arrays:
     - Follow with "### Mentions" (if any userMentionMessages that aren't already in Key Topics)
     - End with "### Other Updates" (brief summaries of routine chatter, grouped by channel)
 
-The 'since' parameter should be an ISO datetime string (e.g., '2025-01-15T00:00:00Z' or '01-15T00:00:00Z'). If no year is specified, the current year is assumed.
+The 'start' parameter should be an ISO datetime string (e.g., '2025-01-15T00:00:00Z' or '01-15T00:00:00Z'). If no year is specified, the current year is assumed.
 Optionally filters by keywords for user mentions or project names.`,
     schema: slackDigestSchema,
-    handler: async ({ since, keywords, includeDMs = false }, { request, logger }) => {
+    handler: async ({ start, keywords, includeDMs = false }, { request, logger }) => {
       try {
         // Normalize date to current year if year is missing
-        const normalizedSince = normalizeDateToCurrentYear(since);
-        const sinceDate = new Date(normalizedSince);
-        if (isNaN(sinceDate.getTime())) {
-          throw new Error(`Invalid datetime format: ${since}. Expected ISO 8601 format.`);
+        const normalizedStart = normalizeDateToCurrentYear(start);
+        const startDate = new Date(normalizedStart);
+        if (isNaN(startDate.getTime())) {
+          throw new Error(`Invalid datetime format: ${start}. Expected ISO 8601 format.`);
         }
 
         // Convert to Unix timestamp (seconds) for Slack API
-        const sinceTimestamp = Math.floor(sinceDate.getTime() / 1000);
+        const startTimestamp = Math.floor(startDate.getTime() / 1000);
 
         // Get Actions plugin to access connectors
         const { plugin } = getPluginServices();
@@ -171,7 +171,7 @@ Optionally filters by keywords for user mentions or project names.`,
         const userParams = {
           subAction: 'getChannelDigest',
           subActionParams: {
-            since: sinceTimestamp,
+            since: startTimestamp,
             types: channelTypes,
             keywords,
           },
@@ -180,7 +180,7 @@ Optionally filters by keywords for user mentions or project names.`,
         logger.info(
           `[CatchUp Agent] Executing user connector for channel types: ${channelTypes.join(
             ', '
-          )}, includeDMs: ${includeDMs}, since: ${new Date(sinceTimestamp * 1000).toISOString()}`
+          )}, includeDMs: ${includeDMs}, start: ${new Date(startTimestamp * 1000).toISOString()}`
         );
 
         let userDigestResult;
@@ -218,7 +218,7 @@ Optionally filters by keywords for user mentions or project names.`,
 
         const userDigest = userDigestResult.data as {
           total: number;
-          since: string;
+          start: string;
           keywords?: string[];
           channels_searched: number;
           userMentionMessages: Array<{
@@ -329,7 +329,7 @@ Optionally filters by keywords for user mentions or project names.`,
               type: ToolResultType.other,
               data: {
                 total: totalMessages,
-                since: normalizedSince,
+                start: normalizedStart,
                 keywords: keywords || [],
                 channels_searched: totalChannels,
                 userMentionMessages: userDigest.userMentionMessages,
