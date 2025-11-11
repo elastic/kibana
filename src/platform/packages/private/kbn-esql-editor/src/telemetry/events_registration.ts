@@ -190,6 +190,13 @@ export const registerESQLEditorAnalyticsEvents = once((analytics: AnalyticsServi
             'The type of control that was being created. Possible values are: multi_values|time_literal|fields|values|functions',
         },
       },
+      reason: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'The reason why the control configuration was cancelled. Possible values are: cancel_button|close_button|escape_key',
+        },
+      },
     },
   });
 });

@@ -155,9 +155,10 @@ export class ESQLEditorTelemetryService {
     });
   }
 
-  public trackEsqlControlConfigCancelled(controlType: string) {
+  public trackEsqlControlConfigCancelled(controlType: string, reason: string) {
     this._reportEvent(ESQL_CONTROL_CONFIG_CANCELLED, {
       control_kind: controlType,
+      reason,
     });
   }
 }
