@@ -3033,6 +3033,12 @@ paths:
           required: false
           schema:
             type: string
+        - description: Aggregated gap status
+          in: query
+          name: gap_status
+          required: false
+          schema:
+            $ref: '#/components/schemas/AggregatedGapStatus'
       responses:
         '200':
           content:
@@ -4331,6 +4337,12 @@ paths:
         - Tags API
 components:
   schemas:
+    AggregatedGapStatus:
+      enum:
+        - unfilled
+        - in_progress
+        - filled
+      type: string
     AlertAssignees:
       type: object
       properties:
@@ -4803,6 +4815,15 @@ components:
           enum:
             - delete
           type: string
+        gap_status:
+          description: >-
+            Gap status to filter rules with gaps by status (used together with
+            gaps_range_*).
+          enum:
+            - unfilled
+            - in_progress
+            - filled
+          type: string
         gaps_range_end:
           description: Gaps range end, valid only when query is provided
           type: string
@@ -4830,6 +4851,15 @@ components:
         action:
           enum:
             - disable
+          type: string
+        gap_status:
+          description: >-
+            Gap status to filter rules with gaps by status (used together with
+            gaps_range_*).
+          enum:
+            - unfilled
+            - in_progress
+            - filled
           type: string
         gaps_range_end:
           description: Gaps range end, valid only when query is provided
@@ -4872,6 +4902,15 @@ components:
           required:
             - include_exceptions
             - include_expired_exceptions
+        gap_status:
+          description: >-
+            Gap status to filter rules with gaps by status (used together with
+            gaps_range_*).
+          enum:
+            - unfilled
+            - in_progress
+            - filled
+          type: string
         gaps_range_end:
           description: Gaps range end, valid only when query is provided
           type: string
@@ -4980,6 +5019,15 @@ components:
             $ref: '#/components/schemas/BulkActionEditPayload'
           minItems: 1
           type: array
+        gap_status:
+          description: >-
+            Gap status to filter rules with gaps by status (used together with
+            gaps_range_*).
+          enum:
+            - unfilled
+            - in_progress
+            - filled
+          type: string
         gaps_range_end:
           description: Gaps range end, valid only when query is provided
           type: string
@@ -5013,6 +5061,15 @@ components:
           enum:
             - enable
           type: string
+        gap_status:
+          description: >-
+            Gap status to filter rules with gaps by status (used together with
+            gaps_range_*).
+          enum:
+            - unfilled
+            - in_progress
+            - filled
+          type: string
         gaps_range_end:
           description: Gaps range end, valid only when query is provided
           type: string
@@ -5042,6 +5099,15 @@ components:
         action:
           enum:
             - export
+          type: string
+        gap_status:
+          description: >-
+            Gap status to filter rules with gaps by status (used together with
+            gaps_range_*).
+          enum:
+            - unfilled
+            - in_progress
+            - filled
           type: string
         gaps_range_end:
           description: Gaps range end, valid only when query is provided
@@ -5090,6 +5156,15 @@ components:
           required:
             - start_date
             - end_date
+        gap_status:
+          description: >-
+            Gap status to filter rules with gaps by status (used together with
+            gaps_range_*).
+          enum:
+            - unfilled
+            - in_progress
+            - filled
+          type: string
         gaps_range_end:
           description: Gaps range end, valid only when query is provided
           type: string
@@ -5118,6 +5193,15 @@ components:
         action:
           enum:
             - run
+          type: string
+        gap_status:
+          description: >-
+            Gap status to filter rules with gaps by status (used together with
+            gaps_range_*).
+          enum:
+            - unfilled
+            - in_progress
+            - filled
           type: string
         gaps_range_end:
           description: Gaps range end, valid only when query is provided
