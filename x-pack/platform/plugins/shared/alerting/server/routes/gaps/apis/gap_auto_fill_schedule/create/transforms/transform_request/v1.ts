@@ -18,7 +18,7 @@ export const transformRequest = (
     name: body.name,
     enabled: body.enabled,
     maxBackfills: body.max_backfills,
-    amountOfRetries: body.amount_of_retries,
+    numRetries: body.num_retries,
     gapFillRange: body.gap_fill_range,
     schedule: body.schedule,
     scope: body.scope,

@@ -199,7 +199,7 @@ export async function initRun({
   const soAttrs = schedulerSo.attributes as SchedulerSoAttributes;
   const config: GapAutoFillSchedulerLogConfig = {
     name: soAttrs.name,
-    amountOfRetries: soAttrs.amountOfRetries,
+    numRetries: soAttrs.numRetries,
     gapFillRange: soAttrs.gapFillRange,
     schedule: soAttrs.schedule,
     maxBackfills: soAttrs.maxBackfills,

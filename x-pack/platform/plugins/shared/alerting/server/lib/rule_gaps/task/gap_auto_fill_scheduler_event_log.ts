@@ -71,7 +71,7 @@ export function createGapAutoFillSchedulerEventLogger({
             rule_ids: Array.from(ruleIds),
             task_params: {
               name: config.name,
-              amount_of_retries: config.amountOfRetries,
+              num_retries: config.numRetries,
               gap_fill_range: config.gapFillRange,
               interval: config.schedule.interval,
               max_backfills: config.maxBackfills,

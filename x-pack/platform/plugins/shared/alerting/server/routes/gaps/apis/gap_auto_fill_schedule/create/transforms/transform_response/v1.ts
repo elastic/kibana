@@ -17,7 +17,7 @@ export const transformResponse = (
   schedule: result.schedule,
   gap_fill_range: result.gapFillRange,
   max_backfills: result.maxBackfills,
-  amount_of_retries: result.amountOfRetries,
+  num_retries: result.numRetries,
   created_by: result.createdBy,
   updated_by: result.updatedBy,
   created_at: result.createdAt,

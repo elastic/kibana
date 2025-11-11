@@ -35,7 +35,7 @@ describe('gap_auto_fill_scheduler_event_log', () => {
     config: {
       name: 'gap-fill-auto-fill-name',
       enabled: true,
-      amountOfRetries: 3,
+      numRetries: 3,
       gapFillRange: 'now-7d',
       maxBackfills: 10,
       ruleTypes: [],

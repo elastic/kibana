@@ -392,7 +392,7 @@ exports.EcsCustomPropertyMappings = {
                   name: {
                     type: 'keyword',
                   },
-                  amount_of_retries: {
+                  num_retries: {
                     type: 'long',
                   },
                   gap_fill_range: {

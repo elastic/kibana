@@ -17,7 +17,7 @@ export interface GapAutoFillSchedulerResponse {
   schedule: { interval: string };
   gapFillRange: string;
   maxBackfills: number;
-  amountOfRetries: number;
+  numRetries: number;
   createdBy?: string;
   updatedBy?: string;
   createdAt: string;

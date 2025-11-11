@@ -26,5 +26,5 @@ export type GapAutoFillStatus = (typeof GAP_AUTO_FILL_STATUS)[keyof typeof GAP_A
 
 export type GapAutoFillSchedulerLogConfig = Pick<
   SchedulerSoAttributes,
-  'name' | 'amountOfRetries' | 'gapFillRange' | 'schedule' | 'maxBackfills' | 'ruleTypes'
+  'name' | 'numRetries' | 'gapFillRange' | 'schedule' | 'maxBackfills' | 'ruleTypes'
 >;

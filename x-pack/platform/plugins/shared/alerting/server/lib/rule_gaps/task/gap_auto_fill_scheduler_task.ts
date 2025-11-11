@@ -119,7 +119,7 @@ export function registerGapAutoFillSchedulerTask({
             let rulesClientContext: RulesClientContext;
             let config: {
               name: string;
-              amountOfRetries: number;
+              numRetries: number;
               gapFillRange: string;
               schedule: { interval: string };
               maxBackfills: number;

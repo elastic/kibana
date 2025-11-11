@@ -28,7 +28,7 @@ export const transformGapAutoFillSchedulerCreateParamToSavedObject = (
     schedule: params.schedule,
     gapFillRange: params.gapFillRange,
     maxBackfills: params.maxBackfills,
-    amountOfRetries: params.amountOfRetries,
+    numRetries: params.numRetries,
     ruleTypes: params.ruleTypes,
     ruleTypeConsumerPairs: Array.from(
       new Set(params.ruleTypes.map((rt) => `${rt.type}:${rt.consumer}`))

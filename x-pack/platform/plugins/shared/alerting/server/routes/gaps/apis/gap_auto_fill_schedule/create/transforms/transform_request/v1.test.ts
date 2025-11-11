@@ -19,7 +19,7 @@ describe('transformRequest v1 - create', () => {
         enabled: true,
         schedule: { interval: '1h' },
         gap_fill_range: '24h',
-        amount_of_retries: 3,
+        num_retries: 3,
         max_backfills: 100,
         scope: 'internal',
         rule_types: [
@@ -38,7 +38,7 @@ describe('transformRequest v1 - create', () => {
       schedule: { interval: '1h' },
       gapFillRange: '24h',
       maxBackfills: 100,
-      amountOfRetries: 3,
+      numRetries: 3,
       scope: 'internal',
       ruleTypes: [
         { type: 'test-rule-type', consumer: 'test-consumer' },

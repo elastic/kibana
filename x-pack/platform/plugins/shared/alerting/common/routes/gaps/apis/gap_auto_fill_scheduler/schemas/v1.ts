@@ -11,7 +11,7 @@ export const gapAutoFillSchedulerBodySchema = schema.object({
   name: schema.string({ defaultValue: '' }),
   enabled: schema.boolean({ defaultValue: true }),
   max_backfills: schema.number({ defaultValue: 1000, min: 1, max: 5000 }),
-  amount_of_retries: schema.number({ defaultValue: 3, min: 1 }),
+  num_retries: schema.number({ defaultValue: 3, min: 1 }),
   gap_fill_range: schema.string({ defaultValue: 'now-90d' }),
   schedule: schema.object({
     interval: schema.string(),
@@ -34,7 +34,7 @@ export const gapAutoFillSchedulerResponseSchema = schema.object({
   }),
   gap_fill_range: schema.string(),
   max_backfills: schema.number(),
-  amount_of_retries: schema.number(),
+  num_retries: schema.number(),
   created_by: schema.maybe(schema.string()),
   updated_by: schema.maybe(schema.string()),
   created_at: schema.string(),

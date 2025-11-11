@@ -279,7 +279,7 @@ export const EventSchema = schema.maybe(
                 task_params: schema.maybe(
                   schema.object({
                     name: ecsString(),
-                    amount_of_retries: ecsStringOrNumber(),
+                    num_retries: ecsStringOrNumber(),
                     gap_fill_range: ecsString(),
                     interval: ecsString(),
                     max_backfills: ecsStringOrNumber(),

@@ -34,7 +34,7 @@ export const transformSavedObjectToGapAutoFillSchedulerResult = ({
     schedule: attributes.schedule,
     gapFillRange: attributes.gapFillRange,
     maxBackfills: attributes.maxBackfills,
-    amountOfRetries: attributes.amountOfRetries,
+    numRetries: attributes.numRetries,
     createdBy: attributes.createdBy,
     updatedBy: attributes.updatedBy,
     createdAt: attributes.createdAt,

@@ -75,7 +75,7 @@ function getParams(
     name: 'auto-fill',
     enabled: true,
     maxBackfills: 100,
-    amountOfRetries: 3,
+    numRetries: 3,
 
     gapFillRange: 'now-1d',
     schedule: { interval: '1h' },
@@ -106,7 +106,7 @@ describe('createGapFillAutoScheduler()', () => {
         schedule: { interval: '1h' },
         gapFillRange: 'now-1d',
         maxBackfills: 100,
-        amountOfRetries: 3,
+        numRetries: 3,
         ruleTypes: [
           { type: 'test-rule-type1', consumer: 'test-consumer' },
           { type: 'test-rule-type2', consumer: 'test-consumer' },
@@ -140,7 +140,7 @@ describe('createGapFillAutoScheduler()', () => {
         schedule: { interval: '1h' },
         gapFillRange: 'now-1d',
         maxBackfills: 100,
-        amountOfRetries: 3,
+        numRetries: 3,
         ruleTypes: [
           { type: 'test-rule-type1', consumer: 'test-consumer' },
           { type: 'test-rule-type2', consumer: 'test-consumer' },
@@ -166,7 +166,7 @@ describe('createGapFillAutoScheduler()', () => {
         schedule: { interval: '1h' },
         gapFillRange: 'now-1d',
         maxBackfills: 100,
-        amountOfRetries: 3,
+        numRetries: 3,
         ruleTypes: [
           { type: 'test-rule-type1', consumer: 'test-consumer' },
           { type: 'test-rule-type2', consumer: 'test-consumer' },
