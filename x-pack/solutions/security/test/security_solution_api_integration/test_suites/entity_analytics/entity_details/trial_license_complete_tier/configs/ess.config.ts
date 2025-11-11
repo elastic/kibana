@@ -23,6 +23,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.securitySolution.enableExperimental=${JSON.stringify([
           'entityDetailsHighlightsEnabled',
         ])}`,
+        `--xpack.fleet.internal.disableILMPolicies=true`,
       ],
     },
 
