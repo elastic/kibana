@@ -14,14 +14,7 @@
 
 import type { ToolsSetup } from '@kbn/onechat-server';
 import type { Logger } from '@kbn/logging';
-import {
-  workflowToolSummarizerTool,
-  workflowSecuritySummaryTool,
-  workflowSlackTool,
-  workflowCorrelationEngineTool,
-  workflowRerankTool,
-  workflowSummaryGeneratorTool,
-} from './workflow_simplified_tools';
+import { workflowToolSummarizerTool } from './workflow_simplified_tools';
 
 /**
  * Registers workflow-specific simplified tools.
@@ -35,32 +28,6 @@ export function registerWorkflowTools(toolsSetup: ToolsSetup, logger: Logger): v
     toolsSetup.register(workflowToolSummarizerTool());
     logger.info(
       'Registered workflow tool summarizer (hackathon.catchup.workflow_tool_summarizer)'
-    );
-
-    toolsSetup.register(workflowSecuritySummaryTool());
-    logger.info(
-      'Registered workflow security summary tool (hackathon.catchup.workflow.security.summary)'
-    );
-
-    toolsSetup.register(workflowSlackTool());
-    logger.info('Registered workflow Slack tool (hackathon.catchup.workflow.external.slack)');
-
-    toolsSetup.register(workflowCorrelationEngineTool());
-    logger.info(
-      'Registered workflow correlation engine tool (hackathon.catchup.workflow.correlation.engine)'
-    );
-
-    toolsSetup.register(workflowRerankTool());
-    logger.info(
-      'Registered workflow rerank tool (hackathon.catchup.workflow.prioritization.rerank)'
-    );
-
-    const summaryTool = workflowSummaryGeneratorTool();
-    toolsSetup.register(summaryTool);
-    logger.info(
-      `Registered workflow summary generator tool (${
-        summaryTool.id
-      }) - handler present: ${!!summaryTool.handler}`
     );
 
     logger.info('Workflow-specific simplified tools registered successfully');

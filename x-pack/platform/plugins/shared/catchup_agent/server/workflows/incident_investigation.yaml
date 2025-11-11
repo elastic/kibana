@@ -45,10 +45,12 @@ steps:
       method: 'POST'
       path: '/api/agent_builder/tools/_execute'
       body:
-        tool_id: 'hackathon.catchup.workflow.security.summary'
+        tool_id: 'hackathon.catchup.workflow_tool_summarizer'
         tool_params:
-          start: '{{ inputs.start }}'
-          end: '{{ inputs.end }}'
+          tool_id: 'hackathon.catchup.security.summary'
+          tool_params:
+            start: '{{ inputs.start }}'
+            end: '{{ inputs.end }}'
 
   - name: fetch_observability_data
     type: kibana.request
@@ -97,21 +99,23 @@ steps:
       method: 'POST'
       path: '/api/agent_builder/tools/_execute'
       body:
-        tool_id: 'hackathon.catchup.workflow.external.slack'
+        tool_id: 'hackathon.catchup.workflow_tool_summarizer'
         tool_params:
-          since: '{{ inputs.start }}'
-          keywords:
-            - '{{ inputs.incident_id }}'
-            - '{{ steps.extract_entities_from_incident.output.entities.service_names[0] }}'
-            - '{{ steps.extract_entities_from_incident.output.entities.service_names[1] }}'
-            - '{{ steps.extract_entities_from_incident.output.entities.service_names[2] }}'
-            - '{{ steps.extract_entities_from_incident.output.entities.host_names[0] }}'
-            - '{{ steps.extract_entities_from_incident.output.entities.host_names[1] }}'
-            - '{{ steps.extract_entities_from_incident.output.entities.host_names[2] }}'
-            - '{{ steps.extract_entities_from_incident.output.entities.user_names[0] }}'
-            - '{{ steps.extract_entities_from_incident.output.entities.source_ips[0] }}'
-            - '{{ steps.extract_entities_from_incident.output.entities.destination_ips[0] }}'
-          includeDMs: false
+          tool_id: 'hackathon.catchup.external.slack'
+          tool_params:
+            since: '{{ inputs.start }}'
+            keywords:
+              - '{{ inputs.incident_id }}'
+              - '{{ steps.extract_entities_from_incident.output.entities.service_names[0] }}'
+              - '{{ steps.extract_entities_from_incident.output.entities.service_names[1] }}'
+              - '{{ steps.extract_entities_from_incident.output.entities.service_names[2] }}'
+              - '{{ steps.extract_entities_from_incident.output.entities.host_names[0] }}'
+              - '{{ steps.extract_entities_from_incident.output.entities.host_names[1] }}'
+              - '{{ steps.extract_entities_from_incident.output.entities.host_names[2] }}'
+              - '{{ steps.extract_entities_from_incident.output.entities.user_names[0] }}'
+              - '{{ steps.extract_entities_from_incident.output.entities.source_ips[0] }}'
+              - '{{ steps.extract_entities_from_incident.output.entities.destination_ips[0] }}'
+            includeDMs: false
 
   - name: correlate_all_sources
     type: kibana.request
@@ -119,14 +123,16 @@ steps:
       method: 'POST'
       path: '/api/agent_builder/tools/_execute'
       body:
-        tool_id: 'hackathon.catchup.workflow.correlation.engine'
+        tool_id: 'hackathon.catchup.workflow_tool_summarizer'
         tool_params:
-          results:
-            security_summary: '{{ steps.fetch_security_data.output }}'
-            observability: '{{ steps.fetch_observability_data.output }}'
-            external:
-              slack: '{{ steps.search_slack_for_mentions.output }}'
-          entities: '{{ steps.extract_entities_from_incident.output }}'
+          tool_id: 'hackathon.catchup.correlation.engine'
+          tool_params:
+            results:
+              security_summary: '{{ steps.fetch_security_data.output }}'
+              observability: '{{ steps.fetch_observability_data.output }}'
+              external:
+                slack: '{{ steps.search_slack_for_mentions.output }}'
+            entities: '{{ steps.extract_entities_from_incident.output }}'
 
   - name: prioritize_correlations
     type: kibana.request
@@ -134,11 +140,13 @@ steps:
       method: 'POST'
       path: '/api/agent_builder/tools/_execute'
       body:
-        tool_id: 'hackathon.catchup.workflow.prioritization.rerank'
+        tool_id: 'hackathon.catchup.workflow_tool_summarizer'
         tool_params:
-          items: '{{ steps.correlate_all_sources.output }}'
-          query: 'security incident investigation critical alerts observability cases attack discoveries'
-          limit: 20
+          tool_id: 'hackathon.catchup.prioritization.rerank'
+          tool_params:
+            items: '{{ steps.correlate_all_sources.output }}'
+            query: 'security incident investigation critical alerts observability cases attack discoveries'
+            limit: 20
 
   - name: generate_investigation_report
     type: kibana.request
@@ -146,14 +154,16 @@ steps:
       method: 'POST'
       path: '/api/agent_builder/tools/_execute'
       body:
-        tool_id: 'hackathon.catchup.workflow.summary.generator'
+        tool_id: 'hackathon.catchup.workflow_tool_summarizer'
         tool_params:
-          correlatedData:
-            security_summary: '{{ steps.fetch_security_data.output }}'
-            observability: '{{ steps.fetch_observability_data.output }}'
-            external:
-              slack: '{{ steps.search_slack_for_mentions.output }}'
-            correlations: '{{ steps.prioritize_correlations.output }}'
-            entities: '{{ steps.extract_entities_from_incident.output }}'
-            related_alerts: '{{ steps.search_alerts_by_entities.output }}'
-          format: 'markdown'
+          tool_id: 'hackathon.catchup.summary.generator'
+          tool_params:
+            correlatedData:
+              security_summary: '{{ steps.fetch_security_data.output }}'
+              observability: '{{ steps.fetch_observability_data.output }}'
+              external:
+                slack: '{{ steps.search_slack_for_mentions.output }}'
+              correlations: '{{ steps.prioritize_correlations.output }}'
+              entities: '{{ steps.extract_entities_from_incident.output }}'
+              related_alerts: '{{ steps.search_alerts_by_entities.output }}'
+            format: 'markdown'

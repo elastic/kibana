@@ -52,11 +52,13 @@ steps:
       method: 'POST'
       path: '/api/agent_builder/tools/_execute'
       body:
-        tool_id: 'hackathon.catchup.workflow.external.slack'
+        tool_id: 'hackathon.catchup.workflow_tool_summarizer'
         tool_params:
-          since: '{{ inputs.start }}'
-          keywords: []
-          includeDMs: false
+          tool_id: 'hackathon.catchup.external.slack'
+          tool_params:
+            since: '{{ inputs.start }}'
+            keywords: []
+            includeDMs: false
 
   - name: correlate_events
     type: kibana.request
@@ -64,12 +66,14 @@ steps:
       method: 'POST'
       path: '/api/agent_builder/tools/_execute'
       body:
-        tool_id: 'hackathon.catchup.workflow.correlation.engine'
+        tool_id: 'hackathon.catchup.workflow_tool_summarizer'
         tool_params:
-          results:
-            security_summary: '{{ steps.fetch_security_summary.output }}'
-            external:
-              slack: '{{ steps.fetch_slack_messages.output }}'
+          tool_id: 'hackathon.catchup.correlation.engine'
+          tool_params:
+            results:
+              security_summary: '{{ steps.fetch_security_summary.output }}'
+              external:
+                slack: '{{ steps.fetch_slack_messages.output }}'
 
   - name: prioritize_with_reranker
     type: kibana.request
@@ -77,11 +81,13 @@ steps:
       method: 'POST'
       path: '/api/agent_builder/tools/_execute'
       body:
-        tool_id: 'hackathon.catchup.workflow.prioritization.rerank'
+        tool_id: 'hackathon.catchup.workflow_tool_summarizer'
         tool_params:
-          items: '{{ steps.correlate_events.output }}'
-          query: 'security incidents critical alerts'
-          limit: 10
+          tool_id: 'hackathon.catchup.prioritization.rerank'
+          tool_params:
+            items: '{{ steps.correlate_events.output }}'
+            query: 'security incidents critical alerts'
+            limit: 10
 
   - name: generate_summary
     type: kibana.request
@@ -89,11 +95,13 @@ steps:
       method: 'POST'
       path: '/api/agent_builder/tools/_execute'
       body:
-        tool_id: 'hackathon.catchup.workflow.summary.generator'
+        tool_id: 'hackathon.catchup.workflow_tool_summarizer'
         tool_params:
-          correlatedData:
-            security_summary: '{{ steps.fetch_security_summary.output }}'
-            external:
-              slack: '{{ steps.fetch_slack_messages.output }}'
-            correlations: '{{ steps.correlate_events.output }}'
-          format: 'markdown'
+          tool_id: 'hackathon.catchup.summary.generator'
+          tool_params:
+            correlatedData:
+              security_summary: '{{ steps.fetch_security_summary.output }}'
+              external:
+                slack: '{{ steps.fetch_slack_messages.output }}'
+              correlations: '{{ steps.correlate_events.output }}'
+            format: 'markdown'
