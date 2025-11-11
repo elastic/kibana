@@ -106,7 +106,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       // Wait for navigation to complete and assert we're back to the initial state with a populated conversation list
       await retry.try(async () => {
         // The conversation list should still contain our previous conversation
-        await onechat.openConversationsHistory();
         const isConversationInHistory = await onechat.isConversationInHistory(conversationId);
         expect(isConversationInHistory).to.be(true);
 

@@ -60,6 +60,7 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabell
       css={css`
         color: ${euiTheme.colors.textDanger};
       `}
+      data-test-subj="agentBuilderConversationDeleteButton"
       onClick={() => {
         setIsContextMenuOpen(false);
         openDeleteModal();
