@@ -270,9 +270,9 @@ export interface SettingsSOAttributes {
     is_preconfigured: boolean;
   };
   ilm_migration_status?: {
-    logs?: 'success';
-    metrics?: 'success';
-    synthetics?: 'success';
+    logs?: 'success' | null;
+    metrics?: 'success' | null;
+    synthetics?: 'success' | null;
   };
 }
 
