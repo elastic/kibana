@@ -63,8 +63,7 @@ export const SidePanel = ({ children, footer, openerNode }: SidePanelProps): JSX
     [scrollStyles]
   );
 
-  const panelClassName = `${NAVIGATION_SELECTOR_PREFIX}-sidePanel`;
-  const panelTestSubj = `${NAVIGATION_SELECTOR_PREFIX}-panel`;
+  const sidePanelClassName = `${NAVIGATION_SELECTOR_PREFIX}-sidePanel`;
 
   return (
     <EuiSplitPanel.Outer
@@ -75,9 +74,9 @@ export const SidePanel = ({ children, footer, openerNode }: SidePanelProps): JSX
         },
       })}
       borderRadius="none"
-      className={panelClassName} // Used in Storybook to limit the height of the panel
+      className={sidePanelClassName} // Used in Storybook to limit the height of the panel
       css={wrapperStyles}
-      data-test-subj={`${panelTestSubj} ${panelTestSubj}-${openerNode.id}`}
+      data-test-subj={`${sidePanelClassName} ${sidePanelClassName}_${openerNode.id}`}
       hasShadow={false}
       role="region"
     >
