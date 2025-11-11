@@ -74,7 +74,7 @@ export const WiredStream: ModelValidation<BaseStream.Model, WiredStream.Model> =
       IngestBaseStream.Definition.right,
       z.object({
         ingest: IngestWired,
-        updated_at: z.string(),
+        updated_at: z.string().datetime(),
       })
     ),
     Source: z.intersection(IngestBaseStream.Definition.right, z.object({})),
