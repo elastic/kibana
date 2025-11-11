@@ -74,11 +74,13 @@ export class SampleDataManager {
     esClient,
     soClient,
     soImporter,
+    abortController,
   }: {
     sampleType: DatasetSampleType;
     esClient: ElasticsearchClient;
     soClient: SavedObjectsClientContract;
     soImporter: ISavedObjectsImporter;
+    abortController?: AbortController;
   }): Promise<{ indexName: string; dashboardId?: string }> {
     this.log.info(`Installing sample data for [${sampleType}]`);
 
@@ -99,7 +101,7 @@ export class SampleDataManager {
         archive: artifactsArchive,
         manifest,
         mappings,
-      } = await this.artifactManager.prepareArtifact(sampleType);
+      } = await this.artifactManager.prepareArtifact(sampleType, abortController);
       archive = artifactsArchive;
 
       await this.indexManager.createAndPopulateIndex({
@@ -108,6 +110,7 @@ export class SampleDataManager {
         manifest,
         archive,
         esClient,
+        abortController,
       });
 
       this.log.info(`Sample data installation successful for [${sampleType}]`);
