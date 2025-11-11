@@ -45,6 +45,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       ({ apmSynthtraceEsClient } = await createSyntheticApmData({ getService }));
 
+
       createdRuleId = await createRule({
         getService,
         roleAuthc,
