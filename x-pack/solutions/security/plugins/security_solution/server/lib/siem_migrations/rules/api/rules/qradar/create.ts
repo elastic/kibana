@@ -31,6 +31,7 @@ export const registerSiemRuleMigrationsCreateQRadarRulesRoute = (
       path: SIEM_RULE_MIGRATION_QRADAR_RULES_PATH,
       access: 'internal',
       security: { authz },
+      options: { body: { maxBytes: 25 * 1024 * 1024 } }, // rise payload limit to 25MB
     })
     .addVersion(
       {
