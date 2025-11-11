@@ -204,7 +204,6 @@ export const Navigation = ({
                           <NestedSecondaryMenu.PrimaryMenuItem
                             key={item.id}
                             isHighlighted={item.id === visuallyActivePageId}
-                            isCollapsed={isCollapsed}
                             hasSubmenu={hasSubmenu}
                             onClick={() => {
                               onItemClick?.(item);
