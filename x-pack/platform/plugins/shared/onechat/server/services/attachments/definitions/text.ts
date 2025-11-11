@@ -26,10 +26,10 @@ export const createTextAttachmentType = (): AttachmentTypeDefinition<
         return { valid: false, error: parseResult.error.message };
       }
     },
-    format: (input) => {
+    format: (attachment) => {
       return {
         getRepresentation: () => {
-          return { type: 'text', value: input.content };
+          return { type: 'text', value: attachment.data.content };
         },
       };
     },

@@ -14,6 +14,8 @@ export interface AttachmentServiceSetup {
 }
 
 export interface AttachmentServiceStart {
-  validate(attachment: AttachmentInput): Promise<ValidateAttachmentResult>;
+  validate<Type extends string, Data>(
+    attachment: AttachmentInput<Type, Data>
+  ): Promise<ValidateAttachmentResult<Type, Data>>;
   getTypeDefinition(type: string): AttachmentTypeDefinition | undefined;
 }

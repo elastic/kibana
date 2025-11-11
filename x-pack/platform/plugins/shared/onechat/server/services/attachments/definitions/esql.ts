@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { validateQuery } from '@kbn/esql-validation-autocomplete';
 import type { EsqlAttachmentData } from '@kbn/onechat-common/attachments';
 import { AttachmentType, esqlAttachmentDataSchema } from '@kbn/onechat-common/attachments';
 import { platformCoreTools } from '@kbn/onechat-common/tools';
@@ -19,13 +20,21 @@ export const createEsqlAttachmentType = (): AttachmentTypeDefinition<
 > => {
   return {
     id: AttachmentType.esql,
-    validate: (input) => {
+    validate: async (input) => {
       const parseResult = esqlAttachmentDataSchema.safeParse(input);
-      if (parseResult.success) {
-        return { valid: true, data: parseResult.data };
-      } else {
+      if (!parseResult.success) {
         return { valid: false, error: parseResult.error.message };
       }
+
+      const validationResult = await validateQuery(parseResult.data.query);
+      if (validationResult.errors.length > 0) {
+        const message = `Query validation returned errors: \n${validationResult.errors
+          .map((error) => ('text' in error ? error.text : 'message' in error ? error.message : ''))
+          .join('\n')}`;
+        return { valid: false, error: message };
+      }
+
+      return { valid: true, data: parseResult.data };
     },
     format: (attachment) => {
       return {

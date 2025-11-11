@@ -26,18 +26,22 @@ export const validateAttachment = async <Type extends string, Data>({
   }
   const typeDefinition = registry.get(attachment.type)! as AttachmentTypeDefinition<any>;
 
-  const typeValidation = await typeDefinition.validate(attachment.data);
-  if (typeValidation.valid) {
-    return {
-      valid: true,
-      attachment: {
-        id: attachment.id ?? getToolResultId(),
-        type: attachment.type,
-        data: typeValidation.data as Data,
-        hidden: attachment.hidden,
-      },
-    };
-  } else {
-    return { valid: false, error: typeValidation.error };
+  try {
+    const typeValidation = await typeDefinition.validate(attachment.data);
+    if (typeValidation.valid) {
+      return {
+        valid: true,
+        attachment: {
+          id: attachment.id ?? getToolResultId(),
+          type: attachment.type,
+          data: typeValidation.data as Data,
+          hidden: attachment.hidden,
+        },
+      };
+    } else {
+      return { valid: false, error: typeValidation.error };
+    }
+  } catch (e) {
+    return { valid: false, error: `Error during attachment validation: ${e.message}` };
   }
 };
