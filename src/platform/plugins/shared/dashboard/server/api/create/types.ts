@@ -7,19 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const LATEST_VERSION = 1;
-export const DASHBOARD_API_VERSION = String(LATEST_VERSION);
+import type { TypeOf } from '@kbn/config-schema';
+import type { getCreateRequestBody, getCreateResponseBody } from './schemas';
 
-export const CONTENT_ID = 'dashboard';
-
-export const DASHBOARD_GRID_COLUMN_COUNT = 48;
-export const DEFAULT_PANEL_WIDTH = DASHBOARD_GRID_COLUMN_COUNT / 2;
-export const DEFAULT_PANEL_HEIGHT = 15;
-
-export const DEFAULT_DASHBOARD_OPTIONS = {
-  hidePanelTitles: false,
-  useMargins: true,
-  syncColors: false,
-  syncCursor: true,
-  syncTooltips: false,
-} as const;
+export type DashboardCreateRequestBody = TypeOf<ReturnType<typeof getCreateRequestBody>>;
+export type DashboardCreateResponseBody = TypeOf<ReturnType<typeof getCreateResponseBody>>;
