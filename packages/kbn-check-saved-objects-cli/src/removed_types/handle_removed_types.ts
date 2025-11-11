@@ -23,7 +23,7 @@ export async function handleRemovedTypes({
   log,
   from,
   to,
-  fix
+  fix,
 }: {
   log: ToolingLog;
   from: MigrationSnapshot;
@@ -32,12 +32,14 @@ export async function handleRemovedTypes({
 }) {
   log.info(`Checking for removed types between base branch and current branch`);
 
-  const currentRemovedTypes = await fileToJson(REMOVED_TYPES_JSON_PATH) as string[];
+  const currentRemovedTypes = (await fileToJson(REMOVED_TYPES_JSON_PATH)) as string[];
 
   const conflictingTypes = await detectConflictsWithRemovedTypes(to, currentRemovedTypes);
   if (conflictingTypes.length > 0) {
     throw new Error(
-      `❌ Cannot re-register previously removed type(s): ${conflictingTypes.join(', ')}. Please use a different name.`
+      `❌ Cannot re-register previously removed type(s): ${conflictingTypes.join(
+        ', '
+      )}. Please use a different name.`
     );
   }
 
@@ -105,10 +107,7 @@ function detectRemovedTypes(
 /**
  * Updates the removed_types.json file by adding new removed types
  */
-async function updateRemovedTypes(
-  removedTypes: string[],
-  currentRemovedTypes: string[],
-) {
+async function updateRemovedTypes(removedTypes: string[], currentRemovedTypes: string[]) {
   const allTypes = [...currentRemovedTypes, ...removedTypes].sort();
   await jsonToFile(REMOVED_TYPES_JSON_PATH, allTypes);
 }
