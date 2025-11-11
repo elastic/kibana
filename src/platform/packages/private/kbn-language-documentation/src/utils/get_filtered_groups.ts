@@ -6,11 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type {
-  DocumentationGroup,
-  DocumentationGroupItem,
-  LanguageDocumentationSections,
-} from '../types';
+import type { DocumentationGroup, LanguageDocumentationSections } from '../types';
 import { highlightMatches } from './highlight_matches';
 
 /**
@@ -19,12 +15,19 @@ import { highlightMatches } from './highlight_matches';
  * 1- Groups with items that match the search text in their label
  * 2- Groups with items that match the search text in their description
  * 3- Groups that match the search text in their label
+ *
+ * @param searchText - The text to search for
+ * @param searchInDescription - Whether to search in item descriptions
+ * @param sections - The documentation sections to filter
+ * @param numOfGroupsToOmit - Number of groups to skip from the beginning
+ * @param highlightMatchingText - Whether to highlight matching text in results
  */
 export const getFilteredGroups = (
   searchText: string,
   searchInDescription?: boolean,
   sections?: LanguageDocumentationSections,
-  numOfGroupsToOmit = 0
+  numOfGroupsToOmit = 0,
+  highlightMatchingText = true
 ): DocumentationGroup[] => {
   const normalizedSearchText = searchText.trim().toLocaleLowerCase();
 
@@ -38,7 +41,7 @@ export const getFilteredGroups = (
     );
   }
 
-  return (
+  const filteredGroups =
     sections?.groups
       .slice(numOfGroupsToOmit)
       .map((group) => {
@@ -61,19 +64,8 @@ export const getFilteredGroups = (
           }
         });
 
-        // Show items with label matches first and highlight matches
-        const items = [...labelMatches, ...descriptionMatches].map(
-          (item: DocumentationGroupItem) => ({
-            label: highlightMatches(item.label, searchText),
-            description: {
-              ...item.description,
-              markdownContent: highlightMatches(
-                item.description?.markdownContent || '',
-                searchText
-              ),
-            },
-          })
-        );
+        // Show items with label matches first
+        const items = [...labelMatches, ...descriptionMatches];
 
         return { ...group, items, hasLabelMatches: labelMatches.length > 0 };
       })
@@ -88,11 +80,24 @@ export const getFilteredGroups = (
       // Clean hasLabelMatches field
       .map((group) => {
         const { hasLabelMatches, ...rest } = group;
-        return {
-          ...rest,
-          description: highlightMatches(group.description ?? '', searchText),
-          label: highlightMatches(group.label, searchText),
-        };
-      }) ?? []
-  );
+        return rest;
+      }) ?? [];
+
+  if (!highlightMatchingText) {
+    return filteredGroups;
+  }
+
+  return filteredGroups.map((group) => ({
+    ...group,
+    label: highlightMatches(group.label, searchText),
+    description: highlightMatches(group.description ?? '', searchText),
+    items: group.items.map((item) => ({
+      ...item,
+      label: highlightMatches(item.label, searchText),
+      description: {
+        ...item.description,
+        markdownContent: highlightMatches(item.description?.markdownContent || '', searchText),
+      },
+    })),
+  }));
 };

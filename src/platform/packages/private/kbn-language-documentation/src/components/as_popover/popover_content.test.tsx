@@ -77,8 +77,7 @@ describe('###Documentation popover content', () => {
     component.update();
     const sectionsLabels = findTestSubject(component, 'language-documentation-navigation-title');
     expect(sectionsLabels.length).toBe(1);
-    // Check for the highlighted text pattern (EuiHighlight adds == markers around matches)
-    expect(sectionsLabels.text()).toEqual('Section ==one==');
+    expect(sectionsLabels.text()).toEqual('Section one');
 
     jest.useRealTimers();
   });

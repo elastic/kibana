@@ -43,6 +43,10 @@ export function highlightMatches(text: string, searchText: string): string {
   });
 }
 
+export function removeHighlighting(text: string): string {
+  return text.replaceAll('==', '');
+}
+
 /**
  * Finds protected ranges in markdown text (code blocks, inline code, and links)
  * where highlighting should not occur.

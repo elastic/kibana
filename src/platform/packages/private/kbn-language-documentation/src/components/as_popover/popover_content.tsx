@@ -18,11 +18,11 @@ import {
   EuiListGroup,
   EuiTitle,
   EuiFieldSearch,
-  EuiHighlight,
   EuiSpacer,
   EuiLink,
   useEuiTheme,
   euiScrollBarStyles,
+  EuiHighlight,
 } from '@elastic/eui';
 import useDebounce from 'react-use/lib/useDebounce';
 import { Markdown } from '@kbn/shared-ux-markdown';
@@ -68,7 +68,7 @@ function DocumentationContent({
   );
 
   const filteredGroups = useMemo(() => {
-    return getFilteredGroups(debouncedSearchText, searchInDescription, sections);
+    return getFilteredGroups(debouncedSearchText, searchInDescription, sections, 0, false);
   }, [sections, debouncedSearchText, searchInDescription]);
 
   return (

@@ -15,12 +15,12 @@ export interface LanguageDocumentationSections {
 export interface DocumentationGroup {
   label: string;
   description?: string;
-  items: Array<DocumentationGroupItem>;
+  items: DocumentationGroupItem[];
 }
 
 export interface DocumentationGroupItem {
   label: string;
-  description?: { markdownContent: string; openLinksInNewTab?: boolean };
+  description: { markdownContent: string; openLinksInNewTab?: boolean };
 }
 
 export interface Signature {
