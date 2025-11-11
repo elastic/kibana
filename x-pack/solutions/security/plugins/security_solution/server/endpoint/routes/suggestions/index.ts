@@ -175,19 +175,11 @@ export const getEndpointSuggestionsRequestHandler = (
         });
       }
 
-      // Avoid adding endpoint alerts log access to kibana_system role by using current user,
-      // as the index may contain user data.
-      // https://docs.elastic.dev/kibana-dev-docs/key-concepts/security-kibana-system-user
-      const elasticsearchClient =
-        suggestionType === 'endpointExceptions'
-          ? elasticsearch.client.asCurrentUser
-          : elasticsearch.client.asInternalUser;
-
       const abortSignal = getRequestAbortedSignal(request.events.aborted$);
       const body = await suggestionMethod(
         config,
         savedObjects.client,
-        elasticsearchClient,
+        elasticsearch.client.asInternalUser,
         index,
         fieldName,
         query,

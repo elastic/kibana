@@ -109,10 +109,6 @@ describe('when calling the Suggestions route handler', () => {
   describe('having right privileges', () => {
     describe('when space awareness feature is enabled', () => {
       beforeEach(() => {
-        // todo
-        mockEndpointContext.experimentalFeatures = {
-          ...mockEndpointContext.experimentalFeatures,
-        };
         suggestionsRouteHandler = getEndpointSuggestionsRequestHandler(
           config$,
           mockEndpointContext
@@ -722,9 +718,6 @@ describe('when calling the Suggestions route handler', () => {
         const mockIntegrationNamespaces = { endpoint: ['custom-namespace'] };
         const mockIndexPattern = 'logs-endpoint.alerts.*-custom-namespace';
 
-        // Endpoint exceptions use the current user ES client
-        applyActionsEsSearchMock(mockScopedEsClient.asInternalUser);
-
         const mockContext = requestContextMock.convertContext(
           createRouteHandlerContext(mockScopedEsClient, mockSavedObjectClient)
         );
@@ -785,8 +778,6 @@ describe('when calling the Suggestions route handler', () => {
         const spaceId = 'custom-space';
         const mockIntegrationNamespaces = { endpoint: [] };
 
-        applyActionsEsSearchMock(mockScopedEsClient.asInternalUser);
-
         const mockContext = requestContextMock.convertContext(
           createRouteHandlerContext(mockScopedEsClient, mockSavedObjectClient)
         );
@@ -831,8 +822,6 @@ describe('when calling the Suggestions route handler', () => {
         const spaceId = 'custom-space';
         const mockIntegrationNamespaces = { endpoint: ['custom-namespace'] };
         const mockIndexPattern = 'logs-endpoint.alerts.*-custom-namespace';
-
-        applyActionsEsSearchMock(mockScopedEsClient.asInternalUser);
 
         const mockContext = requestContextMock.convertContext(
           createRouteHandlerContext(mockScopedEsClient, mockSavedObjectClient)
