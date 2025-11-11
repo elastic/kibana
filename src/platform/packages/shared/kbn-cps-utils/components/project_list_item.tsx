@@ -8,7 +8,6 @@
  */
 
 import React from 'react';
-import type { CPSProject } from '@kbn/cps/common/types';
 import {
   EuiFlexItem,
   EuiFlexGroup,
@@ -21,6 +20,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { CPSProject } from '../types';
 import { strings } from './strings';
 
 interface ProjectListItemProps {

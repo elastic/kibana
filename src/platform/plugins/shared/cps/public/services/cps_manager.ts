@@ -9,25 +9,44 @@
 
 import type { HttpSetup } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
-import type { CPSProject, ProjectTagsResponse } from '../../common/types';
+import type { ProjectRouting } from '@kbn/es-query';
+import { BehaviorSubject } from 'rxjs';
+import type { ProjectTagsResponse, ICPSManager, ProjectsData } from '@kbn/cps-utils';
 
 const MAX_RETRIES = 2;
 const RETRY_DELAY_MS = 1000;
 
-export interface ProjectsData {
-  origin: CPSProject | null;
-  linkedProjects: CPSProject[];
-}
-
-export class CPSManager {
+export class CPSManager implements ICPSManager {
   private readonly http: HttpSetup;
   private readonly logger: Logger;
   private fetchPromise: Promise<ProjectsData | null> | null = null;
   private cachedData: ProjectsData | null = null;
+  private readonly projectRouting$ = new BehaviorSubject<ProjectRouting | undefined>(undefined);
 
   constructor(deps: { http: HttpSetup; logger: Logger }) {
     this.http = deps.http;
     this.logger = deps.logger.get('cps_manager');
+  }
+
+  /**
+   * Get the current project routing as an observable
+   */
+  public getProjectRouting$() {
+    return this.projectRouting$.asObservable();
+  }
+
+  /**
+   * Set the current project routing
+   */
+  public setProjectRouting(projectRouting: ProjectRouting | undefined) {
+    this.projectRouting$.next(projectRouting);
+  }
+
+  /**
+   * Get the current project routing value
+   */
+  public getProjectRouting() {
+    return this.projectRouting$.value;
   }
 
   /**

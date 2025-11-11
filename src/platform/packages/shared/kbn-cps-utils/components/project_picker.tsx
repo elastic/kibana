@@ -9,48 +9,59 @@
 
 import React, { useState, useEffect } from 'react';
 import type { ProjectRouting } from '@kbn/es-query';
-import type { CPSProject } from '@kbn/cps/common/types';
+import type { CPSProject, ICPSManager } from '../types';
 import { ProjectPickerComponent } from './project_picker_component';
 
 export interface ProjectPickerProps {
-  projectRouting?: ProjectRouting;
-  onProjectRoutingChange?: (projectRouting: ProjectRouting) => void;
-  wrappingContainer?: (children: React.ReactNode) => React.ReactElement;
-  cpsManager?: {
-    fetchProjects: () => Promise<{ origin: CPSProject | null; linkedProjects: CPSProject[] }>;
-  };
+  cpsManager: ICPSManager;
 }
 
-export const ProjectPicker: React.FC<ProjectPickerProps> = ({
-  projectRouting,
-  onProjectRoutingChange,
-  wrappingContainer = (children) => children as React.ReactElement,
-  cpsManager,
-}) => {
+export const ProjectPicker: React.FC<ProjectPickerProps> = ({ cpsManager }) => {
   const [originProject, setOriginProject] = useState<CPSProject | null>(null);
   const [linkedProjects, setLinkedProjects] = useState<CPSProject[]>([]);
+  const [projectRouting, setProjectRouting] = useState<ProjectRouting | undefined>(
+    cpsManager.getProjectRouting()
+  );
 
   useEffect(() => {
-    // Only fetch projects in serverless environments where cpsManager is available
-    if (!cpsManager) return;
+    let isMounted = true;
 
-    cpsManager.fetchProjects().then((projectsData) => {
-      if (projectsData) {
-        setOriginProject(projectsData.origin);
-        setLinkedProjects(projectsData.linkedProjects);
+    cpsManager
+      .fetchProjects()
+      .then((projectsData) => {
+        if (isMounted && projectsData) {
+          setOriginProject(projectsData.origin);
+          setLinkedProjects(projectsData.linkedProjects);
+        }
+      })
+      .catch((error) => {
+        // eslint-disable-next-line no-console
+        console.error('Failed to fetch projects:', error);
+      });
+
+    const subscription = cpsManager.getProjectRouting$().subscribe((newRouting) => {
+      if (isMounted) {
+        setProjectRouting(newRouting);
       }
     });
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, [cpsManager]);
 
-  // do not render the component if cpsManager is not available or required props are missing or there aren't linked projects
-  if (!cpsManager || !onProjectRoutingChange || !originProject || linkedProjects.length === 0) {
+  // do not render the component if required props are missing or there aren't linked projects
+  if (!originProject || linkedProjects.length === 0) {
     return null;
   }
 
-  return wrappingContainer(
+  return (
     <ProjectPickerComponent
       projectRouting={projectRouting}
-      onProjectRoutingChange={onProjectRoutingChange}
+      onProjectRoutingChange={(newRouting: ProjectRouting) => {
+        cpsManager.setProjectRouting(newRouting);
+      }}
       originProject={originProject}
       linkedProjects={linkedProjects}
     />

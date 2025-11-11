@@ -51,6 +51,7 @@
     "@kbn/split-button",
     "@kbn/cps",
     "@kbn/cps-utils",
+    "@kbn/css-utils",
   ],
   "exclude": ["target/**/*"]
 }

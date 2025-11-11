@@ -23,11 +23,11 @@ import {
   EuiFlexGroup,
   EuiTitle,
 } from '@elastic/eui';
-import type { CPSProject } from '@kbn/cps/common/types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import type { ProjectRouting } from '@kbn/es-query';
+import type { CPSProject } from '../types';
 import { ProjectListItem } from './project_list_item';
 import { strings } from './strings';
 

@@ -8,7 +8,7 @@
  */
 
 import type { IRouter, PluginInitializerContext } from '@kbn/core/server';
-import type { ProjectTagsResponse } from '../../common/types';
+import type { ProjectTagsResponse } from '@kbn/cps-utils';
 
 export const registerGetProjectTagsRoute = (
   router: IRouter,

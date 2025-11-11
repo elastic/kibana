@@ -24,7 +24,6 @@ import {
   type Filter,
   type TimeRange,
   type AggregateQuery,
-  type ProjectRouting,
   isOfQueryType,
   isOfAggregateQueryType,
 } from '@kbn/es-query';
@@ -81,7 +80,6 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   showQueryInput?: boolean;
   showFilterBar?: boolean;
   showDatePicker?: boolean;
-  showProjectPicker?: boolean;
   showAutoRefreshOnly?: boolean;
   filters?: Filter[];
   additionalQueryBarMenuItems?: AdditionalQueryBarMenuItems;
@@ -170,8 +168,6 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   onEsqlEditorInitialStateChange?: QueryBarTopRowProps['onEsqlEditorInitialStateChange'];
 
   useBackgroundSearchButton?: boolean;
-  projectRouting?: ProjectRouting;
-  onProjectRoutingChange?: QueryBarTopRowProps['onProjectRoutingChange'];
 }
 
 export type SearchBarProps<QT extends Query | AggregateQuery = Query> = SearchBarOwnProps<QT> &
@@ -795,9 +791,6 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           esqlVariablesConfig={this.props.esqlVariablesConfig}
           onOpenQueryInNewTab={this.props.onOpenQueryInNewTab}
           useBackgroundSearchButton={this.props.useBackgroundSearchButton}
-          showProjectPicker={this.props.showProjectPicker}
-          projectRouting={this.props.projectRouting}
-          onProjectRoutingChange={this.props.onProjectRoutingChange}
         />
       </div>
     );

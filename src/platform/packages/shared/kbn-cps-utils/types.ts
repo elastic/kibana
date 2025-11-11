@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ProjectRouting } from '@kbn/es-query';
+import type { Observable } from 'rxjs';
+
 export interface CPSProject {
   _id: string;
   _alias: string;
@@ -18,4 +21,17 @@ export interface CPSProject {
 export interface ProjectTagsResponse {
   origin: Record<string, CPSProject>;
   linked_projects: Record<string, CPSProject>;
+}
+
+export interface ProjectsData {
+  origin: CPSProject | null;
+  linkedProjects: CPSProject[];
+}
+
+export interface ICPSManager {
+  fetchProjects(): Promise<ProjectsData | null>;
+  refresh(): Promise<ProjectsData | null>;
+  getProjectRouting$(): Observable<ProjectRouting>;
+  setProjectRouting(projectRouting: ProjectRouting): void;
+  getProjectRouting(): ProjectRouting;
 }

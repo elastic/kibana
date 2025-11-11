@@ -18,7 +18,7 @@ import { throttle } from 'lodash';
 
 import dateMath from '@kbn/datemath';
 import { css } from '@emotion/react';
-import type { Filter, TimeRange, Query, AggregateQuery, ProjectRouting } from '@kbn/es-query';
+import type { Filter, TimeRange, Query, AggregateQuery } from '@kbn/es-query';
 import {
   getAggregateQueryMode,
   isOfQueryType,
@@ -47,8 +47,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { SplitButton } from '@kbn/split-button';
-
-import { ProjectPicker, type ProjectPickerProps } from '@kbn/cps-utils';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { AddFilterPopover } from './add_filter_popover';
 import type { DataViewPickerProps } from '../dataview_picker';
 import { DataViewPicker } from '../dataview_picker';
@@ -235,9 +234,6 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
    */
   onOpenQueryInNewTab?: ESQLEditorProps['onOpenQueryInNewTab'];
   useBackgroundSearchButton?: boolean;
-  showProjectPicker?: boolean;
-  projectRouting?: ProjectRouting;
-  onProjectRoutingChange?: ProjectPickerProps['onProjectRoutingChange'];
 }
 
 export const SharingMetaFields = React.memo(function SharingMetaFields({
@@ -624,7 +620,7 @@ export const QueryBarTopRow = React.memo(
       const component = getWrapperWithTooltip(datePicker, enableTooltip, props.query);
 
       return (
-        <EuiFlexItem className={wrapperClasses} css={inputStringStyles.datePickerWrapper}>
+        <EuiFlexItem className={wrapperClasses} css={styles.datePickerWrapper}>
           {component}
         </EuiFlexItem>
       );
@@ -918,6 +914,7 @@ export const QueryBarTopRow = React.memo(
     }
     const { euiTheme } = useEuiTheme();
     const isScreenshotMode = props.isScreenshotMode === true;
+    const styles = useMemoCss(inputStringStyles);
 
     return (
       <>
@@ -942,15 +939,6 @@ export const QueryBarTopRow = React.memo(
               justifyContent={shouldShowDatePickerAsBadge() ? 'flexStart' : 'flexEnd'}
               wrap
             >
-              {props.showProjectPicker && (
-                <ProjectPicker
-                  projectRouting={props.projectRouting}
-                  onProjectRoutingChange={props.onProjectRoutingChange}
-                  wrappingContainer={(children: React.ReactNode) => (
-                    <EuiFlexItem grow={false}>{children}</EuiFlexItem>
-                  )}
-                />
-              )}
               {props.dataViewPickerOverride || renderDataViewsPicker()}
               {Boolean(isQueryLangSelected) && (
                 <ESQLMenuPopover

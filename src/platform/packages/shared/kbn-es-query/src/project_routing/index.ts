@@ -18,4 +18,4 @@
  *
  * @public
  */
-export type ProjectRouting = '_alias:_origin' | undefined;
+export type ProjectRouting = string | undefined;

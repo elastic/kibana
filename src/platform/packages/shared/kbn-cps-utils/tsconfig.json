@@ -21,7 +21,6 @@
     "@kbn/es-query",
     "@kbn/shared-ux-utility",
     "@kbn/css-utils",
-    "@kbn/cps",
   ],
   "exclude": [
     "target/**/*"

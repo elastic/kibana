@@ -6,13 +6,13 @@
   "include": [
     "../../../../typings/**/*",
     "public/**/*",
-    "server/**/*",
-    "common/*"
+    "server/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
     "@kbn/config-schema",
     "@kbn/logging",
+    "@kbn/cps-utils"
   ],
   "exclude": [
     "target/**/*",

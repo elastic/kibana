@@ -7,13 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { withSuspense } from '@kbn/shared-ux-utility';
 export type { ProjectPickerProps } from './components/project_picker';
-
-const ProjectPickerLazy = React.lazy(async () => {
-  const { ProjectPicker: Component } = await import('./components/project_picker');
-  return { default: Component };
-});
-
-export const ProjectPicker = withSuspense(ProjectPickerLazy, null);
+export type { CPSProject, ProjectTagsResponse, ICPSManager, ProjectsData } from './types';
+export { ProjectPicker } from './components/project_picker';

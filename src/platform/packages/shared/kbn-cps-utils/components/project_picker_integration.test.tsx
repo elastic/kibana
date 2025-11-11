@@ -11,8 +11,9 @@ import React from 'react';
 import { render, screen, act } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
+import { BehaviorSubject } from 'rxjs';
 import type { ProjectRouting } from '@kbn/es-query';
-import type { CPSProject } from '@kbn/cps/common/types';
+import type { CPSProject, ICPSManager } from '../types';
 import { ProjectPicker } from './project_picker';
 
 // Mock the lazy-loaded component
@@ -39,39 +40,23 @@ describe('ProjectPicker', () => {
     },
   ];
 
+  let mockProjectRouting$: BehaviorSubject<ProjectRouting | undefined>;
+  let mockCPSManager: ICPSManager;
+
   const mockFetchProjects = jest.fn().mockResolvedValue({
     origin: mockOriginProject,
     linkedProjects: mockLinkedProjects,
   });
 
-  const mockCPSManager = {
-    fetchProjects: mockFetchProjects,
-  };
-
   const renderProjectPicker = async (
-    props: {
-      projectRouting?: ProjectRouting;
-      onProjectRoutingChange?: (projectRouting: ProjectRouting) => void;
-      wrappingContainer?: (children: React.ReactNode) => React.ReactElement;
-      cpsManager?: {
-        fetchProjects: () => Promise<{ origin: CPSProject | null; linkedProjects: CPSProject[] }>;
-      };
-    } = {}
+    props: { cpsManager: ICPSManager } = { cpsManager: mockCPSManager }
   ) => {
-    const defaultProps = {
-      projectRouting: undefined,
-      onProjectRoutingChange: jest.fn(),
-      cpsManager: mockCPSManager,
-      ...props,
-    };
-
     let result;
     await act(async () => {
+      const component = <ProjectPicker cpsManager={props.cpsManager} />;
       result = render(
         <I18nProvider>
-          <EuiThemeProvider>
-            <ProjectPicker {...defaultProps} />
-          </EuiThemeProvider>
+          <EuiThemeProvider>{component}</EuiThemeProvider>
         </I18nProvider>
       );
     });
@@ -85,6 +70,14 @@ describe('ProjectPicker', () => {
       origin: mockOriginProject,
       linkedProjects: mockLinkedProjects,
     });
+
+    mockProjectRouting$ = new BehaviorSubject<ProjectRouting | undefined>(undefined);
+    mockCPSManager = {
+      fetchProjects: mockFetchProjects,
+      getProjectRouting: jest.fn(() => undefined),
+      getProjectRouting$: jest.fn(() => mockProjectRouting$),
+      setProjectRouting: jest.fn(),
+    } as unknown as ICPSManager;
   });
 
   describe('rendering conditions', () => {
@@ -98,16 +91,6 @@ describe('ProjectPicker', () => {
       await renderProjectPicker();
 
       expect(mockFetchProjects).toHaveBeenCalledTimes(1);
-    });
-
-    it('should not render when cpsManager is not available', async () => {
-      await renderProjectPicker({ cpsManager: undefined });
-      expect(screen.queryByTestId('project-picker-component')).not.toBeInTheDocument();
-    });
-
-    it('should not render when onProjectRoutingChange is not provided', async () => {
-      await renderProjectPicker({ onProjectRoutingChange: undefined });
-      expect(screen.queryByTestId('project-picker-component')).not.toBeInTheDocument();
     });
 
     it('should not render when there is no origin project', async () => {
@@ -127,23 +110,6 @@ describe('ProjectPicker', () => {
 
       await renderProjectPicker();
       expect(screen.queryByTestId('project-picker-component')).not.toBeInTheDocument();
-    });
-  });
-
-  describe('wrappingContainer', () => {
-    it('should use default wrapper when not provided', async () => {
-      await renderProjectPicker();
-      expect(screen.getByTestId('project-picker-component')).toBeInTheDocument();
-    });
-
-    it('should use custom wrapper when provided', async () => {
-      const customWrapper = (children: React.ReactNode) => (
-        <div data-test-subj="custom-wrapper">{children}</div>
-      );
-
-      await renderProjectPicker({ wrappingContainer: customWrapper });
-      expect(screen.getByTestId('custom-wrapper')).toBeInTheDocument();
-      expect(screen.getByTestId('project-picker-component')).toBeInTheDocument();
     });
   });
 });

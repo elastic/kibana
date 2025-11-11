@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ICPSManager } from '@kbn/cps-utils';
+
 export interface CPSPluginSetup {
   cpsEnabled?: boolean;
 }
@@ -19,8 +21,7 @@ export interface CPSConfigType {
 export interface CPSServerStart {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CPSServerStop {}
-import type { CPSManager } from './services/cps_manager';
 
 export interface CPSPluginStart {
-  cpsManager?: CPSManager;
+  cpsManager?: ICPSManager;
 }

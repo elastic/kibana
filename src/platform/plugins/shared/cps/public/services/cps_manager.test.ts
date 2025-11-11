@@ -9,7 +9,7 @@
 
 import { CPSManager } from './cps_manager';
 import type { HttpSetup } from '@kbn/core/public';
-import type { CPSProject, ProjectTagsResponse } from '../../common/types';
+import type { CPSProject, ProjectTagsResponse } from '@kbn/cps-utils';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 describe('CPSManager', () => {
