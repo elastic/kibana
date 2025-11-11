@@ -319,7 +319,7 @@ export const APIKeysGridPage: FunctionComponent = () => {
             {canManageOwnApiKeys && !canManageApiKeys ? (
               <>
                 <EuiCallOut
-                  announceOnMount
+                  announceOnMount={false}
                   title={
                     <FormattedMessage
                       id="xpack.security.management.apiKeys.table.manageOwnKeysWarning"
