@@ -38,7 +38,6 @@ jest.mock('@kbn/esql-utils', () => {
     }),
     getIndexPatternFromESQLQuery: jest.fn().mockReturnValue('index1'),
     getLimitFromESQLQuery: jest.fn().mockReturnValue(1000),
-    isQueryWrappedByPipes: jest.fn().mockReturnValue(false),
     getValuesFromQueryField: jest.fn().mockReturnValue('field'),
     getESQLQueryColumnsRaw: jest.fn().mockResolvedValue([{ name: 'column1' }, { name: 'column2' }]),
   };
