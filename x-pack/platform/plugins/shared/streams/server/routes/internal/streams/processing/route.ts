@@ -26,6 +26,7 @@ import {
   handleProcessingGrokSuggestions,
   processingGrokSuggestionsSchema,
 } from './grok_suggestions_handler';
+import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
 
 const paramsSchema = z.object({
   path: z.object({ name: z.string() }),
@@ -110,6 +111,7 @@ export const processingGrokSuggestionRoute = createServerRoute({
         streamsClient,
         scopedClusterClient,
         fieldsMetadataClient,
+        signal: getRequestAbortSignal(request),
       })
     ).pipe(
       map((grokProcessor) => ({

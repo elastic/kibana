@@ -13,6 +13,7 @@ import type { Runner } from '@kbn/onechat-server';
 import type { ToolsServiceStart } from '../tools';
 import type { AgentsServiceStart } from '../agents';
 import type { AttachmentServiceStart } from '../attachments';
+import type { TrackingService } from '../../telemetry';
 
 export interface RunnerFactoryDeps {
   // core services
@@ -25,6 +26,7 @@ export interface RunnerFactoryDeps {
   toolsService: ToolsServiceStart;
   agentsService: AgentsServiceStart;
   attachmentsService: AttachmentServiceStart;
+  trackingService?: TrackingService;
 }
 
 export interface RunnerFactory {

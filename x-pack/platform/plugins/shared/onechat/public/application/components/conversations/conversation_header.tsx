@@ -6,19 +6,14 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
 import { useHasActiveConversation } from '../../hooks/use_conversation';
 import { ConversationActions } from './conversation_actions';
-import {
-  ConversationCenter,
-  ConversationGrid,
-  ConversationLeft,
-  ConversationRight,
-} from './conversation_grid';
 import { ConversationSidebarToggle } from './conversation_sidebar/conversation_sidebar_toggle';
 import { ConversationTitle } from './conversation_title';
 
 interface ConversationHeaderProps {
-  sidebar?: {
+  sidebar: {
     isOpen: boolean;
     onToggle: () => void;
   };
@@ -27,23 +22,49 @@ interface ConversationHeaderProps {
 export const ConversationHeader: React.FC<ConversationHeaderProps> = ({ sidebar }) => {
   const hasActiveConversation = useHasActiveConversation();
 
+  const containerStyles = css`
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+  `;
+
+  const sectionStyles = css`
+    flex: 1;
+    display: flex;
+    align-items: center;
+  `;
+
+  const leftSectionStyles = css`
+    ${sectionStyles}
+    justify-content: flex-start;
+  `;
+
+  const centerSectionStyles = css`
+    ${sectionStyles}
+    justify-content: center;
+  `;
+
+  const rightSectionStyles = css`
+    ${sectionStyles}
+    justify-content: flex-end;
+  `;
+
   return (
-    <ConversationGrid>
-      {sidebar && (
-        <ConversationLeft>
-          <ConversationSidebarToggle isSidebarOpen={sidebar.isOpen} onToggle={sidebar.onToggle} />
-        </ConversationLeft>
-      )}
+    <div css={containerStyles}>
+      <div css={leftSectionStyles}>
+        <ConversationSidebarToggle isSidebarOpen={sidebar.isOpen} onToggle={sidebar.onToggle} />
+      </div>
       {hasActiveConversation && (
         <>
-          <ConversationCenter>
+          <div css={centerSectionStyles}>
             <ConversationTitle />
-          </ConversationCenter>
-          <ConversationRight>
+          </div>
+          <div css={rightSectionStyles}>
             <ConversationActions />
-          </ConversationRight>
+          </div>
         </>
       )}
-    </ConversationGrid>
+    </div>
   );
 };
