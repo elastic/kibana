@@ -52,8 +52,10 @@ POST /kibana_sample_data_esql/_bulk?refresh=wait_for
 # Step 3: Run a basic full-text search. 🔎
 # -----------------------------------------------
 # Note: when ES|QL queries are run from within the Kibana Console, they must be wrapped in triple quotes syntax.
+# The 'format=txt' parameter allows you to see the output in a tabular format.
+# To view the raw response instead, omit the 'format=txt' parameter.
 
-POST /_query
+POST /_query?format=txt
 {
   "query": """
     FROM kibana_sample_data_esql
@@ -70,7 +72,7 @@ POST /_query
 # -----------------------------------------------
 # You can specify the exact fields to include in your results using the KEEP command.
 
-POST /_query
+POST /_query?format=txt
 {
   "query": """
     FROM kibana_sample_data_esql
@@ -88,7 +90,7 @@ POST /_query
 # 'METADATA _score' tells ES|QL to include relevance scores in the results.
 # Without explicit sorting, results aren't ordered by relevance even when scores are calculated.
 
-POST /_query
+POST /_query?format=txt
 {
   "query": """
     FROM kibana_sample_data_esql METADATA _score
@@ -106,7 +108,7 @@ POST /_query
 # -----------------------------------------------
 # This is fundamentally different from full-text search - it's a binary yes/no filter that doesn't affect relevance scoring.
 
-POST /_query
+POST /_query?format=txt
 {
   "query": """
     FROM kibana_sample_data_esql
@@ -124,7 +126,7 @@ POST /_query
 # -----------------------------------------------
 # The MATCH function with AND logic doesn't require terms to be adjacent or in order.
 
-POST /_query
+POST /_query?format=txt
 {
   "query": """
     FROM kibana_sample_data_esql
@@ -139,7 +141,7 @@ POST /_query
 # Step 8: Minimum number of terms to match 🧮
 # -----------------------------------------------
 
-POST /_query
+POST /_query?format=txt
 {
   "query": """
     FROM kibana_sample_data_esql
@@ -154,7 +156,7 @@ POST /_query
 # Step 9: Search for exact phrases 🔤
 # -----------------------------------------------
 
-POST /_query
+POST /_query?format=txt
 {
   "query": """
     FROM kibana_sample_data_esql
@@ -170,7 +172,7 @@ POST /_query
 # Step 10: Date range filtering 📅
 # -----------------------------------------------
 
-POST /_query
+POST /_query?format=txt
 {
   "query": """
     FROM kibana_sample_data_esql
@@ -186,7 +188,7 @@ POST /_query
 # Step 11: Numerical range filtering 🔢
 # -----------------------------------------------
 
-POST /_query
+POST /_query?format=txt
 {
   "query": """
     FROM kibana_sample_data_esql
@@ -203,7 +205,7 @@ POST /_query
 # Step 12: Search across multiple fields 🔦
 # -----------------------------------------------
 
-POST /_query
+POST /_query?format=txt
 {
   "query": """
     FROM kibana_sample_data_esql
@@ -218,7 +220,7 @@ POST /_query
 # Step 13: Weight different fields ⚖️
 # -----------------------------------------------
 
-POST /_query
+POST /_query?format=txt
 {
   "query": """
     FROM kibana_sample_data_esql METADATA _score
@@ -237,7 +239,7 @@ POST /_query
 # The QSTR function enables powerful search patterns using a compact query language.
 # It's ideal for when you need wildcards, fuzzy matching, and boolean logic in a single expression
 
-POST /_query
+POST /_query?format=txt 
 {
   "query": """
     FROM kibana_sample_data_esql
@@ -253,7 +255,7 @@ POST /_query
 # Step 15: Advanced relevance scoring (custom score) 🏆
 # -----------------------------------------------
 
-POST /_query
+POST /_query?format=txt
 {
   "query": """
     FROM kibana_sample_data_esql METADATA _score

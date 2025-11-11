@@ -733,7 +733,7 @@
                 "section": "def-common.ESQLControlVariable",
                 "text": "ESQLControlVariable"
               },
-              "[]; onSaveControl: (controlState: Record<string, unknown>, updatedQuery: string) => Promise<void>; onCancelControl?: (() => void) | undefined; controlsWrapper: React.ReactNode; } | undefined; esqlEditorInitialState?: Partial<",
+              "[]; onSaveControl: (controlState: Record<string, unknown>, updatedQuery: string) => Promise<void>; onCancelControl?: (() => void) | undefined; controlsWrapper: React.ReactNode; } | undefined; onOpenQueryInNewTab?: ((tabName: string, esqlQuery: string) => Promise<void>) | undefined; esqlEditorInitialState?: Partial<",
               {
                 "pluginId": "@kbn/esql-editor",
                 "scope": "public",

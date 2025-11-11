@@ -51,7 +51,7 @@ export function getForeachItemSchema(
   // If we have a valid variable path syntax (e.g., {{some.path}})
   if (parsedPath && !parsedPath.errors && iterateOverPath) {
     let itemSchema: z.ZodType = z.unknown(); // we need this constant to have references in json schema
-    const iterableSchema = getSchemaAtPath(stepContextSchema, iterateOverPath);
+    const { schema: iterableSchema } = getSchemaAtPath(stepContextSchema, iterateOverPath);
     if (!iterableSchema) {
       // if we cannot resolve the path in the schema, we return an unknown schema
       return itemSchema;
