@@ -26,17 +26,33 @@ import {
   fromLensStateToAPI as fromLegacyMetricLensStateToAPI,
 } from './transforms/charts/legacy_metric';
 import {
+  fromAPItoLensState as fromGaugeAPItoLensState,
+  fromLensStateToAPI as fromGaugeLensStateToAPI,
+} from './transforms/charts/gauge';
+import {
   fromAPItoLensState as fromTagCloudAPItoLensState,
   fromLensStateToAPI as fromTagCloudLensStateToAPI,
 } from './transforms/charts/tagcloud';
 import type { LensApiState } from './schema';
 import { filtersAndQueryToApiFormat, filtersAndQueryToLensState } from './transforms/utils';
+import { isLensLegacyFormat } from './utils';
 
 const compatibilityMap: Record<string, string> = {
   lnsMetric: 'metric',
   lnsLegacyMetric: 'legacy_metric',
+  lnsGauge: 'gauge',
   lnsTagcloud: 'tagcloud',
 };
+
+/**
+ * A minimal type to extend for type lookup
+ */
+type ChartTypeLike =
+  | Pick<LensAttributes, 'visualizationType'>
+  | Pick<LensConfig, 'chartType'>
+  | Pick<LensApiState, 'type'>
+  | { visualizationType: null | undefined }
+  | undefined;
 
 export class LensConfigBuilder {
   private charts = {
@@ -59,15 +75,45 @@ export class LensConfigBuilder {
       fromAPItoLensState: fromLegacyMetricAPItoLensState,
       fromLensStateToAPI: fromLegacyMetricLensStateToAPI,
     },
+    gauge: {
+      fromAPItoLensState: fromGaugeAPItoLensState,
+      fromLensStateToAPI: fromGaugeLensStateToAPI,
+    },
     tagcloud: {
       fromAPItoLensState: fromTagCloudAPItoLensState,
       fromLensStateToAPI: fromTagCloudLensStateToAPI,
     },
   } as const;
   private dataViewsAPI: DataViewsCommon | undefined;
+  private enableAPITransforms: boolean;
 
-  constructor(dataViewsAPI?: DataViewsCommon) {
+  constructor(dataViewsAPI?: DataViewsCommon, enableAPITransforms = false) {
     this.dataViewsAPI = dataViewsAPI;
+    this.enableAPITransforms = enableAPITransforms;
+  }
+
+  public setEnabled(enabled: boolean) {
+    this.enableAPITransforms = enabled;
+  }
+
+  isSupported(chartType?: string | null): boolean {
+    if (!this.enableAPITransforms) return false;
+    if (!chartType) return false;
+    const type = compatibilityMap[chartType] ?? chartType;
+    return type in this.apiConvertersByChart;
+  }
+
+  getType<C extends ChartTypeLike>(config: C): string | undefined | null {
+    if (config == null) {
+      return null;
+    }
+    return 'visualizationType' in config
+      ? config.visualizationType
+      : isLensLegacyFormat(config)
+      ? config.chartType
+      : 'type' in config
+      ? config.type
+      : null;
   }
 
   /**

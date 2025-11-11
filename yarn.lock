@@ -4867,6 +4867,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/classic-stream-flyout@link:x-pack/platform/packages/shared/kbn-classic-stream-flyout":
+  version "0.0.0"
+  uid ""
+
 "@kbn/cleanup-before-exit@link:src/platform/packages/shared/kbn-cleanup-before-exit":
   version "0.0.0"
   uid ""
@@ -5164,6 +5168,10 @@
   uid ""
 
 "@kbn/core-chrome-layout-feature-flags@link:src/core/packages/chrome/layout/core-chrome-layout-feature-flags":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-chrome-layout-utils@link:src/core/packages/chrome/layout/core-chrome-layout-utils":
   version "0.0.0"
   uid ""
 
@@ -7100,6 +7108,10 @@
   uid ""
 
 "@kbn/lazy-object@link:src/platform/packages/shared/kbn-lazy-object":
+  version "0.0.0"
+  uid ""
+
+"@kbn/lens-common-2@link:src/platform/packages/shared/kbn-lens-common-2":
   version "0.0.0"
   uid ""
 
@@ -9272,6 +9284,10 @@
   uid ""
 
 "@kbn/workflows-management-plugin@link:src/platform/plugins/shared/workflows_management":
+  version "0.0.0"
+  uid ""
+
+"@kbn/workflows-ui@link:src/platform/packages/shared/kbn-workflows-ui":
   version "0.0.0"
   uid ""
 
