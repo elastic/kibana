@@ -8,7 +8,10 @@
 import { z } from '@kbn/zod';
 import { badData } from '@hapi/boom';
 import { Streams } from '@kbn/streams-schema';
-import { OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS } from '@kbn/management-settings-ids';
+import {
+  OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS,
+  OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS,
+} from '@kbn/management-settings-ids';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import type { UpsertStreamResponse } from '../../../lib/streams/client';
 import { createServerRoute } from '../../create_server_route';
@@ -116,9 +119,16 @@ export const editStreamRoute = createServerRoute({
     const groupStreamsEnabled = await core.uiSettings.client.get(
       OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS
     );
+    const queryStreamsEnabled = await core.uiSettings.client.get(
+      OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS
+    );
 
     if (Streams.GroupStream.UpsertRequest.is(params.body) && !groupStreamsEnabled) {
       throw badData('Streams are not enabled for Group streams.');
+    }
+
+    if (Streams.QueryStream.UpsertRequest.is(params.body) && !queryStreamsEnabled) {
+      throw badData('Streams are not enabled for Query streams.');
     }
 
     return await streamsClient.upsertStream({
