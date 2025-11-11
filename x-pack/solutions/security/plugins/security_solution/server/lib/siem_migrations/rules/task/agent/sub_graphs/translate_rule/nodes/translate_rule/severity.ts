@@ -84,9 +84,6 @@ export const getElasticRiskScoreFromElasticSeverity = (elasticSeverity: Severity
 };
 
 export const getElasticRiskScoreFromOriginalRule = async (originalRule: OriginalRule) => {
-  if (originalRule.vendor === 'splunk') {
-    const elasticSeverity = await getElasticSeverityFromOriginalRule(originalRule);
-    return getElasticRiskScoreFromElasticSeverity(elasticSeverity);
-  }
-  return ELASTIC_SEVERITY_TO_RISK_SCORE_MAP[DEFAULT_TRANSLATION_SEVERITY];
+  const elasticSeverity = await getElasticSeverityFromOriginalRule(originalRule);
+  return getElasticRiskScoreFromElasticSeverity(elasticSeverity);
 };
