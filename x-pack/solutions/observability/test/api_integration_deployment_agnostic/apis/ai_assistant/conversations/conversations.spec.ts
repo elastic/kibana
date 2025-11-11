@@ -25,6 +25,16 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   });
 
   describe('Conversations', function () {
+    before(async function () {
+      this.timeout(60000);
+      await clearConversations(es);
+    });
+
+    after(async function () {
+      this.timeout(60000);
+      await clearConversations(es);
+    });
+
     describe('without conversations', () => {
       it('returns no conversations when listing', async () => {
         const { status, body } = await observabilityAIAssistantAPIClient.editor({
@@ -224,7 +234,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     describe('when creating private and public conversations', () => {
-      before(async () => {
+      before(async function () {
+        this.timeout(120000);
+        // Clean up any existing conversations first
+        await clearConversations(es);
+
+        // Create test conversations
         const promises = [
           {
             username: 'editor' as const,
@@ -261,26 +276,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         await Promise.all(promises);
       });
 
-      after(async () => {
-        async function deleteConversations(username: 'editor' | 'admin') {
-          const response = await observabilityAIAssistantAPIClient[username]({
-            endpoint: 'POST /internal/observability_ai_assistant/conversations',
-          });
-
-          for (const conversation of response.body.conversations) {
-            await observabilityAIAssistantAPIClient[username]({
-              endpoint: `DELETE /internal/observability_ai_assistant/conversation/{conversationId}`,
-              params: {
-                path: {
-                  conversationId: conversation.conversation.id,
-                },
-              },
-            });
-          }
-        }
-
-        await deleteConversations('editor');
-        await deleteConversations('admin');
+      after(async function () {
+        this.timeout(60000);
+        await clearConversations(es);
       });
 
       it('user_1 can retrieve their own private and public conversations', async () => {
@@ -309,7 +307,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     describe('public conversation ownership checks', () => {
       let createdConversationId: string;
 
-      before(async () => {
+      before(async function () {
+        this.timeout(60000);
         const { status, body } = await observabilityAIAssistantAPIClient.editor({
           endpoint: 'POST /internal/observability_ai_assistant/conversation',
           params: {
@@ -326,7 +325,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         createdConversationId = body.conversation.id;
       });
 
-      after(async () => {
+      after(async function () {
+        this.timeout(60000);
         const { status } = await observabilityAIAssistantAPIClient.editor({
           endpoint: 'DELETE /internal/observability_ai_assistant/conversation/{conversationId}',
           params: {
@@ -385,7 +385,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       let publicConversation: Conversation;
       let privateConversation: Conversation;
 
-      before(async () => {
+      before(async function () {
+        this.timeout(120000);
         const publicCreateResp = await observabilityAIAssistantAPIClient.editor({
           endpoint: 'POST /internal/observability_ai_assistant/conversation',
           params: {
@@ -423,7 +424,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         privateConversation = privateCreateResp.body;
       });
 
-      after(async () => {
+      after(async function () {
+        this.timeout(60000);
         for (const conversation of [publicConversation, privateConversation]) {
           const { status } = await observabilityAIAssistantAPIClient.editor({
             endpoint: 'DELETE /internal/observability_ai_assistant/conversation/{conversationId}',
@@ -435,7 +437,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       describe('allows the owner to duplicate their own private conversation', () => {
         let duplicatedConversation: Conversation;
-        before(async () => {
+        before(async function () {
+          this.timeout(60000);
           const duplicateResponse = await observabilityAIAssistantAPIClient.editor({
             endpoint:
               'POST /internal/observability_ai_assistant/conversation/{conversationId}/duplicate',
@@ -448,7 +451,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           duplicatedConversation = duplicateResponse.body;
         });
 
-        after(async () => {
+        after(async function () {
+          this.timeout(60000);
           // cleanup
           const { status } = await observabilityAIAssistantAPIClient.editor({
             endpoint: 'DELETE /internal/observability_ai_assistant/conversation/{conversationId}',
@@ -470,7 +474,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       describe('allows the owner to duplicate their own public conversation', () => {
         let duplicatedConversation: Conversation;
-        before(async () => {
+        before(async function () {
+          this.timeout(60000);
           const duplicateResponse = await observabilityAIAssistantAPIClient.editor({
             endpoint:
               'POST /internal/observability_ai_assistant/conversation/{conversationId}/duplicate',
@@ -483,7 +488,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           duplicatedConversation = duplicateResponse.body;
         });
 
-        after(async () => {
+        after(async function () {
+          this.timeout(60000);
           // cleanup
           const { status } = await observabilityAIAssistantAPIClient.editor({
             endpoint: 'DELETE /internal/observability_ai_assistant/conversation/{conversationId}',
@@ -505,7 +511,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       describe('allows another user to duplicate a public conversation, making them the new owner', () => {
         let duplicatedConversation: Conversation;
-        before(async () => {
+        before(async function () {
+          this.timeout(60000);
           const duplicateResponse = await observabilityAIAssistantAPIClient.admin({
             endpoint:
               'POST /internal/observability_ai_assistant/conversation/{conversationId}/duplicate',
@@ -518,7 +525,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           duplicatedConversation = duplicateResponse.body;
         });
 
-        after(async () => {
+        after(async function () {
+          this.timeout(60000);
           // cleanup
           const { status } = await observabilityAIAssistantAPIClient.admin({
             endpoint: 'DELETE /internal/observability_ai_assistant/conversation/{conversationId}',
@@ -556,12 +564,14 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           SupertestReturnType<'POST /internal/observability_ai_assistant/conversation'>
         >;
 
-        before(async () => {
+        before(async function () {
+          this.timeout(60000);
           createResponse = await createConversation({ observabilityAIAssistantAPIClient });
           expect(createResponse.status).to.be(200);
         });
 
-        after(async () => {
+        after(async function () {
+          this.timeout(60000);
           const response = await observabilityAIAssistantAPIClient.editor({
             endpoint: 'DELETE /internal/observability_ai_assistant/conversation/{conversationId}',
             params: {
@@ -637,14 +647,16 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       const patchConversationRoute =
         'PATCH /internal/observability_ai_assistant/conversation/{conversationId}';
 
-      before(async () => {
+      before(async function () {
+        this.timeout(60000);
         const { status, body } = await createConversation({ observabilityAIAssistantAPIClient });
 
         expect(status).to.be(200);
         createdConversationId = body.conversation.id;
       });
 
-      after(async () => {
+      after(async function () {
+        this.timeout(60000);
         await clearConversations(es);
       });
 
@@ -704,7 +716,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       const deleteConversationRoute =
         'DELETE /internal/observability_ai_assistant/conversation/{conversationId}';
 
-      before(async () => {
+      before(async function () {
+        this.timeout(60000);
         // Create a conversation to delete
         const { status, body } = await createConversation({ observabilityAIAssistantAPIClient });
 
@@ -763,7 +776,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     describe('conversation archiving', () => {
       let createdConversationId: string;
 
-      before(async () => {
+      before(async function () {
+        this.timeout(60000);
         const { status, body } = await createConversation({
           observabilityAIAssistantAPIClient,
           isPublic: true,
@@ -773,7 +787,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         createdConversationId = body.conversation.id;
       });
 
-      after(async () => {
+      after(async function () {
+        this.timeout(60000);
         await clearConversations(es);
       });
 

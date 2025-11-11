@@ -8,6 +8,9 @@
 // Security-specific test framework
 export { test, spaceTest } from './src/playwright';
 
+// Security-specific constants
+export { TIMEOUTS } from './src/playwright/constants/timeouts';
+
 // re-exported test framework from @kbn/scout
 export { expect, lighthouseTest, apiTest, globalSetupHook, tags } from '@kbn/scout';
 
@@ -41,7 +44,6 @@ export type {
   SecurityTestFixtures,
   SecurityWorkerFixtures,
   SecurityParallelTestFixtures,
-  SecurityParallelApiServicesFixture,
   SecurityParallelWorkerFixtures,
 } from './src/playwright';
 

@@ -13,7 +13,7 @@ export { getEsArchiver } from './es_archiver';
 export { createKbnUrl } from './kibana_url';
 export { createSamlSessionManager } from './saml_auth';
 
-export type { KibanaUrl } from './kibana_url';
+export type { KibanaUrl, PathOptions } from './kibana_url';
 export type { SamlSessionManager } from '@kbn/test';
 export { ScoutLogger } from './logger';
 export type { KbnClient } from '@kbn/test';
