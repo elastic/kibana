@@ -42,7 +42,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     getAllAADDocs,
   } = getRuleServices(getService);
 
-  describe('testtest rule', () => {
+  describe('rule', () => {
     let endDate: string;
     let connectorId: string;
     const objectRemover = new ObjectRemover(supertest);
