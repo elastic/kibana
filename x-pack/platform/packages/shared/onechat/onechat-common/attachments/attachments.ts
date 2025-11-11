@@ -28,6 +28,7 @@ export interface Attachment<
 
 export type TextAttachment = Attachment<AttachmentType.text>;
 export type ScreenContextAttachment = Attachment<AttachmentType.screenContext>;
+export type EsqlAttachment = Attachment<AttachmentType.esql>;
 
 /**
  * Input version of an attachment, where the id is optional
