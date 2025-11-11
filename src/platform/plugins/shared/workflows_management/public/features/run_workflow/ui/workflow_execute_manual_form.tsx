@@ -13,6 +13,41 @@ import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowInputChoiceSchema, WorkflowInputSchema, WorkflowYaml } from '@kbn/workflows';
 import { z } from '@kbn/zod';
+import { convertInlineSchemaToZod } from '../../../../common/lib/zod';
+
+/**
+ * Creates a sample object from a schema definition for use as a placeholder.
+ */
+function createSampleObjectFromSchema(schema: Record<string, unknown>): Record<string, unknown> {
+  if (!schema || typeof schema !== 'object') {
+    return {};
+  }
+  const sample: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(schema)) {
+    if (typeof value === 'string') {
+      // Simple type definition - use defaultWorkflowInputsMappings directly
+      const mapping = defaultWorkflowInputsMappings[value];
+      if (typeof mapping === 'function') {
+        // For functions (array, object), use default values
+        if (value === 'array') {
+          sample[key] = [];
+        } else if (value === 'object') {
+          sample[key] = {};
+        } else {
+          sample[key] = null;
+        }
+      } else {
+        sample[key] = mapping;
+      }
+    } else if (Array.isArray(value) && value.length > 0 && typeof value[0] === 'string') {
+      sample[key] = [];
+    } else if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+      // Recursively create sample for nested objects
+      sample[key] = createSampleObjectFromSchema(value as Record<string, unknown>);
+    }
+  }
+  return sample;
+}
 
 const makeWorkflowInputsValidator = (inputs: Array<z.infer<typeof WorkflowInputSchema>>) => {
   return z.object(
@@ -53,6 +88,20 @@ const makeWorkflowInputsValidator = (inputs: Array<z.infer<typeof WorkflowInputS
           acc[input.name] = input.required ? arr : arr.optional();
           break;
         }
+        case 'object': {
+          // Handle object type inputs
+          const objectInput = input as Extract<typeof input, { type: 'object' }>;
+          let objectSchema: z.ZodType;
+          if (objectInput.schema && typeof objectInput.schema === 'object') {
+            // Inline schema provided - convert to Zod schema
+            objectSchema = convertInlineSchemaToZod(objectInput.schema as Record<string, unknown>);
+          } else {
+            // No schema provided - accept any JSON object
+            objectSchema = z.record(z.string(), z.any());
+          }
+          acc[input.name] = input.required ? objectSchema : objectSchema.optional();
+          break;
+        }
       }
       return acc;
     }, {} as Record<string, z.ZodType>)
@@ -74,7 +123,8 @@ type WorkflowInputPlaceholder =
   | string[]
   | number[]
   | boolean[]
-  | ((input: z.infer<typeof WorkflowInputSchema>) => string);
+  | Record<string, unknown>
+  | ((input: z.infer<typeof WorkflowInputSchema>) => string | Record<string, unknown>);
 
 const defaultWorkflowInputsMappings: Record<string, WorkflowInputPlaceholder> = {
   string: 'Enter a string',
@@ -84,6 +134,10 @@ const defaultWorkflowInputsMappings: Record<string, WorkflowInputPlaceholder> = 
     `Select an option: ${(input as z.infer<typeof WorkflowInputChoiceSchema>).options.join(', ')}`,
   array: (input: z.infer<typeof WorkflowInputSchema>) =>
     'Enter array of strings, numbers or booleans',
+  object: (input: z.infer<typeof WorkflowInputSchema>) => {
+    const objectInput = input as Extract<typeof input, { type: 'object' }>;
+    return createSampleObjectFromSchema(objectInput.schema as Record<string, unknown>);
+  },
 };
 
 const getDefaultWorkflowInput = (definition: WorkflowYaml): string => {

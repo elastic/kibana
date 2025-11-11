@@ -232,3 +232,67 @@ export function getZodTypeName(schema: z.ZodType) {
       return 'unknown';
   }
 }
+
+/**
+ * Converts an inline schema definition to a Zod schema.
+ * The inline schema is a record where keys are property names and values are type definitions.
+ * Type definitions can be:
+ * - String literals: "string", "number", "boolean", "array", "object"
+ * - Nested objects: for nested object structures
+ * - Arrays: ["string"] for array types
+ */
+export function convertInlineSchemaToZod(schema: Record<string, unknown>): z.ZodType {
+  const shape: Record<string, z.ZodType> = {};
+
+  for (const [key, value] of Object.entries(schema)) {
+    if (typeof value === 'string') {
+      // Simple type definition
+      switch (value) {
+        case 'string':
+          shape[key] = z.string();
+          break;
+        case 'number':
+          shape[key] = z.number();
+          break;
+        case 'boolean':
+          shape[key] = z.boolean();
+          break;
+        case 'array':
+          shape[key] = z.array(z.any());
+          break;
+        case 'object':
+          shape[key] = z.record(z.string(), z.any());
+          break;
+        default:
+          shape[key] = z.any();
+      }
+    } else if (Array.isArray(value) && value.length > 0 && typeof value[0] === 'string') {
+      // Array type definition like ["string"]
+      const itemType = value[0];
+      switch (itemType) {
+        case 'string':
+          shape[key] = z.array(z.string());
+          break;
+        case 'number':
+          shape[key] = z.array(z.number());
+          break;
+        case 'boolean':
+          shape[key] = z.array(z.boolean());
+          break;
+        case 'object':
+          shape[key] = z.array(z.record(z.string(), z.any()));
+          break;
+        default:
+          shape[key] = z.array(z.any());
+      }
+    } else if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+      // Nested object - recursively convert
+      shape[key] = convertInlineSchemaToZod(value as Record<string, unknown>);
+    } else {
+      // Unknown type - use any
+      shape[key] = z.any();
+    }
+  }
+
+  return z.object(shape).passthrough();
+}

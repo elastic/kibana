@@ -371,7 +371,14 @@ export const getMergeStepSchema = (stepSchema: z.ZodType, loose: boolean = false
 };
 
 /* --- Inputs --- */
-export const WorkflowInputTypeEnum = z.enum(['string', 'number', 'boolean', 'choice', 'array']);
+export const WorkflowInputTypeEnum = z.enum([
+  'string',
+  'number',
+  'boolean',
+  'choice',
+  'array',
+  'object',
+]);
 
 const WorkflowInputBaseSchema = z.object({
   name: z.string(),
@@ -408,12 +415,19 @@ export const WorkflowInputArraySchema = WorkflowInputBaseSchema.extend({
   default: z.union([z.array(z.string()), z.array(z.number()), z.array(z.boolean())]).optional(),
 });
 
+export const WorkflowInputObjectSchema = WorkflowInputBaseSchema.extend({
+  type: z.literal('object'),
+  schema: z.record(z.string(), z.any()).optional(), // Inline schema definition
+  default: z.record(z.string(), z.any()).optional(),
+});
+
 export const WorkflowInputSchema = z.union([
   WorkflowInputStringSchema,
   WorkflowInputNumberSchema,
   WorkflowInputBooleanSchema,
   WorkflowInputChoiceSchema,
   WorkflowInputArraySchema,
+  WorkflowInputObjectSchema,
 ]);
 
 /* --- Consts --- */
