@@ -3,7 +3,10 @@
 set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
-source .buildkite/scripts/common/vault_fns.sh
+
+if [[ "$(type -t vault_get)" != "function" ]]; then
+  source .buildkite/scripts/common/vault_fns.sh
+fi
 
 .buildkite/scripts/bootstrap.sh
 
@@ -35,19 +38,33 @@ echo "Elasticsearch URL: $CLOUD_DEPLOYMENT_ELASTICSEARCH_URL"
 
 # Get credentials from legacy vault
 echo "--- Get Deployment Credentials"
-VAULT_TOKEN_BAK="$VAULT_TOKEN"
-VAULT_TOKEN=$(VAULT_ADDR=$LEGACY_VAULT_ADDR vault write -field=token auth/approle/login role_id="$VAULT_ROLE_ID" secret_id="$VAULT_SECRET_ID")
-VAULT_ADDR=$LEGACY_VAULT_ADDR vault login -no-print "$VAULT_TOKEN"
 
-VAULT_USERNAME=$(vault read -address=$LEGACY_VAULT_ADDR -field=username "secret/kibana-issues/dev/cloud-deploy/$CLOUD_DEPLOYMENT_NAME")
-VAULT_PASSWORD=$(vault read -address=$LEGACY_VAULT_ADDR -field=password "secret/kibana-issues/dev/cloud-deploy/$CLOUD_DEPLOYMENT_NAME")
+# Ensure we're using legacy vault
+export VAULT_ADDR="$LEGACY_VAULT_ADDR"
+VAULT_TOKEN_BAK="$VAULT_TOKEN"
+VAULT_TOKEN=$(vault write -field=token auth/approle/login role_id="$VAULT_ROLE_ID" secret_id="$VAULT_SECRET_ID")
+vault login -no-print "$VAULT_TOKEN"
+
+# Use vault_get function (it will use VAULT_PATH_PREFIX which is already set to secret/kibana-issues/dev)
+VAULT_USERNAME=$(vault_get "cloud-deploy/$CLOUD_DEPLOYMENT_NAME" username)
+VAULT_PASSWORD=$(vault_get "cloud-deploy/$CLOUD_DEPLOYMENT_NAME" password)
+
 
 VAULT_TOKEN="$VAULT_TOKEN_BAK"
+
+# Remove surrounding quotes and trim whitespace
+VAULT_USERNAME=$(echo "$VAULT_USERNAME" | sed -e 's/^"//' -e 's/"$//' | xargs)
+VAULT_PASSWORD=$(echo "$VAULT_PASSWORD" | sed -e 's/^"//' -e 's/"$//' | xargs)
+
 
 if [ -z "$VAULT_USERNAME" ] || [ -z "$VAULT_PASSWORD" ]; then
   echo "Error: Failed to retrieve credentials from vault"
   exit 1
 fi
+
+#TODO: Remove this after debugging
+echo "Username length: ${#VAULT_USERNAME} characters"
+echo "Password length: ${#VAULT_PASSWORD} characters"
 
 # Checkout security-documents-generator
 echo "--- Checkout security-documents-generator"
