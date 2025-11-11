@@ -8,7 +8,15 @@
  */
 
 import { tagcloudStateSchema } from '../../schema/charts/tagcloud';
-import { validateConverter } from '../validate';
+import { validateAPIConverter, validateConverter } from '../validate';
+import {
+  basicTagcloudWithAdHocDataView,
+  basicTagcloudWithDataView,
+  basicEsqlTagcloud,
+  comprehensiveTagcloudWithAdHocDataView,
+  comprehensiveTagcloudWithDataView,
+  comprehensiveEsqlTagcloud,
+} from './lens_api_config.mock';
 import {
   tagcloudAttributes,
   tagcloudAttributesWithFullConfig,
@@ -25,6 +33,31 @@ describe('Tagcloud', () => {
     });
     it('should convert an esql tagcloud', () => {
       validateConverter(tagcloudESQLAttributes, tagcloudStateSchema);
+    });
+  });
+  describe('validateAPIConverter', () => {
+    it('should convert a basic tagcloud chart with ad hoc dataView', () => {
+      validateAPIConverter(basicTagcloudWithAdHocDataView, tagcloudStateSchema);
+    });
+
+    it('should convert a basic tagcloud chart with dataView', () => {
+      validateAPIConverter(basicTagcloudWithDataView, tagcloudStateSchema);
+    });
+
+    it('should convert a ESQL-based tagcloud chart', () => {
+      validateAPIConverter(basicEsqlTagcloud, tagcloudStateSchema);
+    });
+
+    it('should convert a comprehensive tagcloud chart with ad hoc data view', () => {
+      validateAPIConverter(comprehensiveTagcloudWithAdHocDataView, tagcloudStateSchema);
+    });
+
+    it('should convert a comprehensive tagcloud chart with data view', () => {
+      validateAPIConverter(comprehensiveTagcloudWithDataView, tagcloudStateSchema);
+    });
+
+    it('should convert a comprehensive ESQL-based tagcloud chart', () => {
+      validateAPIConverter(comprehensiveEsqlTagcloud, tagcloudStateSchema);
     });
   });
 });
