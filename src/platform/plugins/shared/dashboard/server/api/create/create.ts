@@ -22,7 +22,8 @@ import type { DashboardState } from '../../content_management';
 
 export async function create(
   requestCtx: RequestHandlerContext,
-  searchBody: DashboardCreateRequestBody
+  searchBody: DashboardCreateRequestBody,
+  isAccessControlEnabled: boolean
 ): Promise<DashboardCreateResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
 
@@ -50,9 +51,10 @@ export async function create(
       references: soReferences,
       ...(searchBody.id && { id: searchBody.id }),
       ...(searchBody.spaces && { initialNamespaces: searchBody.spaces }),
-      ...(accessControl?.accessMode && {
-        accessControl: { accessMode: accessControl.accessMode },
-      }),
+      ...(accessControl?.accessMode &&
+        isAccessControlEnabled && {
+          accessControl: { accessMode: accessControl.accessMode },
+        }),
     }
   );
 
