@@ -11,7 +11,9 @@ import { renderHook, act } from '@testing-library/react';
 import {
   EUI_DATA_GRID_FULL_SCREEN_CLASS,
   UNIFIED_DATA_TABLE_FULL_SCREEN_CLASS,
+  EUI_DATA_GRID_RESTRICT_BODY_CLASS,
   useFullScreenWatcher,
+  useIsDataGridFullScreen,
 } from './use_full_screen_watcher';
 
 describe('useFullScreenWatcher', () => {
@@ -33,6 +35,36 @@ describe('useFullScreenWatcher', () => {
     dataGrid.classList.remove(EUI_DATA_GRID_FULL_SCREEN_CLASS);
     await nextTick();
     expect(document.body).not.toHaveClass(UNIFIED_DATA_TABLE_FULL_SCREEN_CLASS);
+  });
+});
+
+describe('useIsDataGridFullScreen', () => {
+  afterEach(() => {
+    document.body.classList.remove(EUI_DATA_GRID_RESTRICT_BODY_CLASS);
+  });
+
+  it('should return false when no data grid is in fullscreen', () => {
+    const { result } = renderHook(() => useIsDataGridFullScreen());
+    expect(result.current).toBe(false);
+  });
+
+  it('should return true when data grid is in fullscreen', () => {
+    document.body.classList.add(EUI_DATA_GRID_RESTRICT_BODY_CLASS);
+    const { result } = renderHook(() => useIsDataGridFullScreen());
+    expect(result.current).toBe(true);
+  });
+
+  it('should reactively update when body class changes', async () => {
+    const { result } = renderHook(() => useIsDataGridFullScreen());
+    expect(result.current).toBe(false);
+
+    document.body.classList.add(EUI_DATA_GRID_RESTRICT_BODY_CLASS);
+    await nextTick();
+    expect(result.current).toBe(true);
+
+    document.body.classList.remove(EUI_DATA_GRID_RESTRICT_BODY_CLASS);
+    await nextTick();
+    expect(result.current).toBe(false);
   });
 });
 
