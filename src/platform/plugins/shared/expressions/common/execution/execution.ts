@@ -14,21 +14,30 @@ import type { ObservableLike, UnwrapObservable } from '@kbn/utility-types';
 import { keys, last as lastOf, mapValues, reduce, zipObject } from 'lodash';
 import type { Subscription } from 'rxjs';
 import {
+  catchError,
   combineLatest,
   defer,
+  EMPTY,
+  finalize,
   from,
+  fromEvent,
   identity,
   isObservable,
   last,
+  map,
+  Observable,
   of,
+  pluck,
+  ReplaySubject,
+  shareReplay,
+  switchMap,
+  takeUntil,
   takeWhile,
+  tap,
   throwError,
   timer,
-  Observable,
-  ReplaySubject,
 } from 'rxjs';
-import { catchError, finalize, map, pluck, shareReplay, switchMap, tap } from 'rxjs';
-import { now, AbortError, calculateObjectHash } from '@kbn/kibana-utils-plugin/common';
+import { now, AbortError, calculateObjectHash, AbortReason } from '@kbn/kibana-utils-plugin/common';
 import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { Executor } from '../executor';
 import type { ExecutionContainer } from './container';
@@ -168,23 +177,6 @@ function throttle<T>(timeout: number) {
     });
 }
 
-function takeUntilAborted<T>(signal: AbortSignal) {
-  return (source: Observable<T>) =>
-    new Observable<T>((subscriber) => {
-      const throwAbortError = () => {
-        subscriber.error(new AbortError());
-      };
-
-      subscriber.add(source.subscribe(subscriber));
-      subscriber.add(() => signal.removeEventListener('abort', throwAbortError));
-
-      signal.addEventListener('abort', throwAbortError);
-      if (signal.aborted) {
-        throwAbortError();
-      }
-    });
-}
-
 export interface ExecutionParams {
   executor: Executor;
   ast?: ExpressionAstExpression;
@@ -285,6 +277,15 @@ export class Execution<
     const inspectorAdapters =
       (execution.params.inspectorAdapters as InspectorAdapters) || createDefaultInspectorAdapters();
 
+    const abortSignal = this.abortController.signal;
+    const aborted$ = fromEvent(abortSignal, 'abort').pipe(
+      switchMap((e) =>
+        (e.target as AbortSignal).reason === AbortReason.CANCELED
+          ? EMPTY
+          : throwError(new AbortError())
+      )
+    );
+
     this.context = {
       getSearchContext: () => this.execution.params.searchContext || {},
       getSearchSessionId: () => execution.params.searchSessionId,
@@ -309,7 +310,7 @@ export class Execution<
     this.result = this.input$.pipe(
       switchMap((input) =>
         this.invokeChain<Output>(this.state.get().ast.chain, input).pipe(
-          takeUntilAborted(this.abortController.signal),
+          takeUntil(aborted$),
           markPartial(),
           this.execution.params.partial && this.execution.params.throttle
             ? throttle(this.execution.params.throttle)
@@ -318,7 +319,9 @@ export class Execution<
       ),
       catchError((error) => {
         if (this.abortController.signal.aborted) {
-          this.childExecutions.forEach((childExecution) => childExecution.cancel());
+          this.childExecutions.forEach((childExecution) =>
+            childExecution.cancel(this.abortController.signal.reason)
+          );
 
           return of({ result: createAbortErrorValue(), partial: false });
         }
@@ -339,8 +342,8 @@ export class Execution<
   /**
    * Stop execution of expression.
    */
-  cancel() {
-    this.abortController.abort();
+  cancel(reason?: AbortReason) {
+    this.abortController.abort(reason);
   }
 
   /**

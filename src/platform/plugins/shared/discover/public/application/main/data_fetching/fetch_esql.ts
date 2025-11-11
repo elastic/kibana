@@ -76,7 +76,9 @@ export function fetchEsql({
           },
           searchSessionId,
         });
-        abortSignal?.addEventListener('abort', contract.cancel);
+        abortSignal?.addEventListener('abort', (e) => {
+          contract.cancel((e.target as AbortSignal).reason);
+        });
         const execution = contract.getData();
         let finalData: DataTableRecord[] = [];
         let esqlQueryColumns: Datatable['columns'] | undefined;

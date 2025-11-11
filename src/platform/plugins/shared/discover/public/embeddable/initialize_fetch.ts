@@ -36,8 +36,7 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
 import { getTextBasedColumnsMeta } from '@kbn/unified-data-table';
-
-import { AbortReason } from '@kbn/data-plugin/public';
+import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import { fetchEsql } from '../application/main/data_fetching/fetch_esql';
 import type { DiscoverServices } from '../build_services';
 import { getAllowedSampleSize } from '../utils/get_allowed_sample_size';
@@ -174,7 +173,7 @@ export function initializeFetch({
       tap(() => {
         // abort any in-progress requests
         if (abortController) {
-          abortController.abort(AbortReason.Replaced);
+          abortController.abort(AbortReason.REPLACED);
           abortController = undefined;
         }
       }),

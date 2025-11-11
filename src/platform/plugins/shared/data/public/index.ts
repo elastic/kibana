@@ -226,8 +226,6 @@ export type {
   TimefilterHook,
 } from './query';
 
-export { AbortReason } from './utils';
-
 export type { AggsStart } from './search/aggs';
 
 export { getTime } from '../common';

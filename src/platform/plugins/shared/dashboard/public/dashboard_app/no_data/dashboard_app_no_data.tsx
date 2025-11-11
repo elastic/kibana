@@ -19,7 +19,7 @@ import {
 import { withSuspense } from '@kbn/shared-ux-utility';
 import type { LensSerializedState } from '@kbn/lens-plugin/public';
 import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
-import { AbortReason } from '@kbn/data-plugin/public';
+import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import {
   coreServices,
   dataService,
@@ -60,12 +60,12 @@ export const DashboardAppNoDataPage = ({
 
   useEffect(() => {
     return () => {
-      abortController?.abort(AbortReason.Cleanup);
+      abortController?.abort(AbortReason.CLEANUP);
     };
   }, [abortController]);
 
   const onTryESQL = useCallback(async () => {
-    abortController?.abort(AbortReason.Replaced);
+    abortController?.abort(AbortReason.REPLACED);
     if (lensHelpersAsync.value) {
       const abc = new AbortController();
       const { dataViews } = dataService;

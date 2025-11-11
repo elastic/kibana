@@ -9,7 +9,7 @@
 
 import type { Subscription } from 'rxjs';
 import { timer } from 'rxjs';
-import { AbortReason } from '../../utils';
+import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 
 export class SearchAbortController {
   private inputAbortSignals: AbortSignal[] = new Array();
@@ -20,7 +20,7 @@ export class SearchAbortController {
   constructor(timeout?: number) {
     if (timeout) {
       this.timeoutSub = timer(timeout).subscribe(() => {
-        this.abortController.abort(AbortReason.Timeout);
+        this.abortController.abort(AbortReason.TIMEOUT);
         this.timeoutSub!.unsubscribe();
       });
     }
@@ -68,10 +68,10 @@ export class SearchAbortController {
   }
 
   public isTimeout() {
-    return this.abortController.signal.reason === AbortReason.Timeout;
+    return this.abortController.signal.reason === AbortReason.TIMEOUT;
   }
 
   public isCanceled() {
-    return this.abortController.signal.reason === AbortReason.Canceled;
+    return this.abortController.signal.reason === AbortReason.CANCELED;
   }
 }

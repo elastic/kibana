@@ -63,7 +63,7 @@ import type {
   SanitizedConnectionRequestParams,
 } from '@kbn/search-types';
 import { createEsError, isEsError, renderSearchError } from '@kbn/search-errors';
-import { defaultFreeze } from '@kbn/kibana-utils-plugin/common';
+import { AbortReason, defaultFreeze } from '@kbn/kibana-utils-plugin/common';
 import {
   EVENT_TYPE_DATA_SEARCH_TIMEOUT,
   EVENT_PROPERTY_SEARCH_TIMEOUT_MS,
@@ -90,7 +90,6 @@ import { SearchAbortController } from './search_abort_controller';
 import type { SearchConfigSchema } from '../../../server/config';
 import type { SearchServiceStartDependencies } from '../search_service';
 import { createRequestHash } from './create_request_hash';
-import { AbortReason } from '../..';
 
 export interface SearchInterceptorDeps {
   http: HttpSetup;
@@ -627,7 +626,7 @@ export class SearchInterceptor {
         // The underlaying search will not abort unless searchAbortController fires.
         const aborted$ = (abortSignal ? fromEvent(abortSignal, 'abort') : EMPTY).pipe(
           switchMap((e) =>
-            (e.target as AbortSignal)?.reason === AbortReason.Canceled
+            (e.target as AbortSignal)?.reason === AbortReason.CANCELED
               ? EMPTY
               : throwError(new AbortError())
           )

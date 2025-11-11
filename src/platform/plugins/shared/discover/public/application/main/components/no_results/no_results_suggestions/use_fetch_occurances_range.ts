@@ -10,13 +10,13 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { lastValueFrom } from 'rxjs';
 import type { DataView } from '@kbn/data-plugin/common';
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { AbortReason } from '@kbn/data-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { AggregationsSingleMetricAggregateBase } from '@elastic/elasticsearch/lib/api/types';
-import { buildEsQuery } from '@kbn/es-query';
-import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 
 export interface Params {
   dataView?: DataView;
@@ -62,7 +62,7 @@ export const useFetchOccurrencesRange = (params: Params): Result => {
       let occurrencesRangeResult = { status: TimeRangeExtendingStatus.failed };
 
       if (dataView?.isTimeBased() && query && mountedRef.current) {
-        abortControllerRef.current?.abort(AbortReason.Replaced);
+        abortControllerRef.current?.abort(AbortReason.REPLACED);
         abortControllerRef.current = new AbortController();
 
         try {
@@ -94,7 +94,7 @@ export const useFetchOccurrencesRange = (params: Params): Result => {
   useEffect(() => {
     return () => {
       mountedRef.current = false;
-      abortControllerRef.current?.abort(AbortReason.Cleanup);
+      abortControllerRef.current?.abort(AbortReason.CLEANUP);
     };
   }, [abortControllerRef, mountedRef]);
 
