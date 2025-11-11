@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { deleteIntegrations } from '../tasks/integrations';
+import { deleteIntegrations, calculateAssetCount } from '../tasks/integrations';
 import { SETTINGS } from '../screens/integrations';
 import { LOADING_SPINNER, CONFIRM_MODAL } from '../screens/navigation';
 import { ASSETS_PAGE } from '../screens/fleet';
@@ -109,23 +109,9 @@ describe('Assets - Real API for integration with ML and transforms', () => {
     cy.intercept('GET', `**/api/fleet/epm/packages/${integrationWithML}**`).as('getPackageInfo');
     cy.visit(`/app/integrations/detail/${integrationWithML}/settings`);
 
-    // Wait for package info and extract the asset count
     cy.wait('@getPackageInfo').then((interception) => {
       const packageInfo = interception.response?.body.item;
-      const packageAssets = packageInfo?.assets || {};
-
-      // Calculate total asset count from all services and types
-      const assetCount = Object.values(packageAssets).reduce(
-        (total: number, serviceAssets: any) => {
-          return (
-            total +
-            Object.values(serviceAssets || {}).reduce((serviceTotal: number, typeAssets: any) => {
-              return serviceTotal + (Array.isArray(typeAssets) ? typeAssets.length : 0);
-            }, 0)
-          );
-        },
-        0
-      );
+      const assetCount = calculateAssetCount(packageInfo);
 
       cy.getBySel(SETTINGS.INSTALL_ASSETS_BTN).click();
       // Assert against the actual asset count from the package

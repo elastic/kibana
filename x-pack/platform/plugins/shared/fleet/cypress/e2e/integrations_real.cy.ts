@@ -13,6 +13,7 @@ import {
   installPackageWithVersion,
   deleteIntegrations,
   clickIfVisible,
+  calculateAssetCount,
 } from '../tasks/integrations';
 import {
   AGENT_POLICY_NAME_LINK,
@@ -102,24 +103,12 @@ describe('Add Integration - Real API', () => {
 
   it('should install integration without policy', () => {
     // Intercept the package info API to get the asset count
-    // Note: The version part of the URL is optional, so we match with or without it
     cy.intercept('GET', '**/api/fleet/epm/packages/tomcat**').as('getPackageInfo');
     cy.visit('/app/integrations/detail/tomcat/settings');
 
-    // Wait for package info and extract the asset count
     cy.wait('@getPackageInfo').then((interception) => {
       const packageInfo = interception.response?.body.item;
-      const assets = packageInfo?.assets || {};
-
-      // Calculate total asset count from all services and types
-      const assetCount = Object.values(assets).reduce((total: number, serviceAssets: any) => {
-        return (
-          total +
-          Object.values(serviceAssets || {}).reduce((serviceTotal: number, typeAssets: any) => {
-            return serviceTotal + (Array.isArray(typeAssets) ? typeAssets.length : 0);
-          }, 0)
-        );
-      }, 0);
+      const assetCount = calculateAssetCount(packageInfo);
 
       cy.getBySel(SETTINGS.INSTALL_ASSETS_BTN).click();
       // Assert against the actual asset count from the package
