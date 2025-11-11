@@ -12,6 +12,7 @@ import { useIsAgentReadOnly } from '../../../../hooks/agents/use_is_agent_read_o
 import { useConversationId } from '../../../../context/conversation/use_conversation_id';
 import { useNavigation } from '../../../../hooks/use_navigation';
 import { useAgentId } from '../../../../hooks/use_conversation';
+import { useKibana } from '../../../../hooks/use_kibana';
 import { appPaths } from '../../../../utils/app_paths';
 import { ExternalLinkMenuItem } from './external_link_menu_item';
 
@@ -19,6 +20,9 @@ export const EmbeddedActionsRight: React.FC<{ onClose?: () => void }> = ({ onClo
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const agentId = useAgentId();
   const { createOnechatUrl } = useNavigation();
+  const {
+    services: { application },
+  } = useKibana();
   const conversationId = useConversationId();
   const isAgentReadOnly = useIsAgentReadOnly(agentId);
 
@@ -28,6 +32,11 @@ export const EmbeddedActionsRight: React.FC<{ onClose?: () => void }> = ({ onClo
 
   const togglePopover = () => {
     setIsPopoverOpen(!isPopoverOpen);
+  };
+
+  const handleOpenInAgentBuilder = () => {
+    closePopover();
+    onClose?.();
   };
 
   const menuItems = [
@@ -40,7 +49,7 @@ export const EmbeddedActionsRight: React.FC<{ onClose?: () => void }> = ({ onClo
           ? createOnechatUrl(appPaths.chat.conversation({ conversationId }))
           : createOnechatUrl(appPaths.chat.new)
       }
-      onClick={closePopover}
+      onClick={handleOpenInAgentBuilder}
     >
       {i18n.translate('xpack.onechat.embedded.conversationActions.openInAgentBuilder', {
         defaultMessage: 'Open in Agent Builder',
@@ -49,14 +58,17 @@ export const EmbeddedActionsRight: React.FC<{ onClose?: () => void }> = ({ onClo
     ...(agentId
       ? [
           <ExternalLinkMenuItem
-            key="agentSettings"
+            key="agentBuilderSettings"
             icon="gear"
             disabled={isAgentReadOnly}
-            href={createOnechatUrl(appPaths.agents.edit({ agentId }))}
+            href={application.getUrlForApp('management', { path: '/ai/agentBuilder' })}
             onClose={closePopover}
-            label={i18n.translate('xpack.onechat.embedded.conversationActions.agentSettings', {
-              defaultMessage: 'Agent Settings',
-            })}
+            label={i18n.translate(
+              'xpack.onechat.embedded.conversationActions.agentBuilderSettings',
+              {
+                defaultMessage: 'Settings',
+              }
+            )}
           />,
         ]
       : []),
