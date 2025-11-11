@@ -1,0 +1,34 @@
+on:
+  issue_comment:
+    types:
+      - created
+
+jobs:
+  trigger_flaky:
+    name: Trigger flaky test runner on /flaky comment
+    if: |
+      github.event.issue.pull_request
+      && contains(fromJSON('["MEMBER","OWNER"]'), github.event.comment.author_association)
+      && startsWith(github.event.comment.body, '/flaky ')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout kibana-operations
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          repository: 'elastic/kibana-operations'
+          ref: main
+          path: ./kibana-operations
+          token: ${{secrets.KIBANAMACHINE_TOKEN}}
+          persist-credentials: false
+
+      - name: Trigger flaky test runner
+        working-directory: ./kibana-operations/triage
+        env:
+          GITHUB_TOKEN: ${{secrets.KIBANAMACHINE_TOKEN}}
+          BUILDKITE_TOKEN: ${{secrets.OPS_BUILDKITE_TOKEN}}
+        run: |
+          body="${{github.event.comment.body}}"
+          configs="${body#* }"
+
+          npm ci --omit=dev
+          node trigger-flaky-test-runner ${{github.event.issue.number}} $configs
