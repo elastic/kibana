@@ -10,22 +10,11 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { getStackConnectorLogo } from '@kbn/stack-connectors-plugin/public/common/logos';
-import { ElasticsearchLogo } from './icons/elasticsearch.svg';
-import { HARDCODED_ICONS } from './icons/hardcoded_icons';
-import { KibanaLogo } from './icons/kibana.svg';
-
-/**
- * Default fallback SVG for unknown connectors
- */
-const DEFAULT_CONNECTOR_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
-    <circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="2"/>
-    <circle cx="8" cy="8" r="2" fill="currentColor"/>
-  </svg>`;
 
 /**
  * Get base64 encoded SVG icon for a connector type
  */
-export async function getStepIconBase64(connectorType: string): Promise<string> {
+export async function getStepIconBase64(connectorType: string): Promise<string | null> {
   try {
     const dotConnectorType = `.${connectorType}`;
     // First, try to get the logo directly from stack connectors
@@ -34,35 +23,15 @@ export async function getStepIconBase64(connectorType: string): Promise<string> 
       return getBase64FromReactComponent(LogoComponent);
     }
 
-    if (connectorType === 'elasticsearch') {
-      return getBase64FromReactComponent(ElasticsearchLogo);
-    }
-
-    if (connectorType === 'kibana') {
-      return getBase64FromReactComponent(KibanaLogo);
-    }
-
-    // Handle connectors that use EUI built-in icons instead of custom logo components
-    if (connectorType === 'slack' || connectorType === 'slack_api') {
-      // hardcoded slack logo
-      return HARDCODED_ICONS.slack;
-    }
-
-    if (connectorType in HARDCODED_ICONS) {
-      return HARDCODED_ICONS[connectorType as keyof typeof HARDCODED_ICONS];
-    }
-
-    // Fallback to default icon for other connector types
-    return btoa(DEFAULT_CONNECTOR_SVG);
+    return null;
   } catch (error) {
-    // Fallback to default static icon
-    return btoa(DEFAULT_CONNECTOR_SVG);
+    return null;
   }
 }
 
 function getBase64FromReactComponent(
   component: React.ComponentType<{ width: number; height: number }>
-): string {
+): string | null {
   try {
     const logoElement = React.createElement(component, { width: 16, height: 16 });
     let htmlString = renderToStaticMarkup(logoElement);
@@ -104,10 +73,8 @@ function getBase64FromReactComponent(
       }
     }
 
-    const base64 = btoa(htmlString);
-    return base64;
+    return btoa(htmlString);
   } catch (error) {
-    // Fallback to default SVG on any error
-    return btoa(DEFAULT_CONNECTOR_SVG);
+    return null;
   }
 }
