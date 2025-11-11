@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export interface GapAutoFillSchedulerSO extends Record<string, unknown> {
+export interface GapAutoFillSchedulerSO {
   id: string;
   name: string;
   enabled: boolean;
@@ -19,7 +19,6 @@ export interface GapAutoFillSchedulerSO extends Record<string, unknown> {
   updatedBy?: string;
   createdAt: string;
   updatedAt: string;
-  scheduledTaskId: string;
 }
 
 export interface GapAutoFillScheduler {

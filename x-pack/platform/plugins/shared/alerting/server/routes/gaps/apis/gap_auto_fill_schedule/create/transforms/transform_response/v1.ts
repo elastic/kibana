@@ -22,5 +22,4 @@ export const transformResponse = (
   updated_by: result.updatedBy,
   created_at: result.createdAt,
   updated_at: result.updatedAt,
-  scheduled_task_id: result.scheduledTaskId,
 });

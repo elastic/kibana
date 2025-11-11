@@ -106,37 +106,27 @@ Payload summary: ${JSON.stringify(otherParams, (key, value) =>
       savedObjectOptions
     );
 
-    const task = await taskManager.ensureScheduled(
-      {
-        id: so.id,
-        taskType: GAP_AUTO_FILL_SCHEDULER_TASK_TYPE,
-        schedule: params.schedule,
-        scope: params.scope ?? [],
-        params: {
-          configId: so.id,
-          spaceId: context.spaceId,
+    try {
+      await taskManager.ensureScheduled(
+        {
+          id: so.id,
+          taskType: GAP_AUTO_FILL_SCHEDULER_TASK_TYPE,
+          schedule: params.schedule,
+          scope: params.scope ?? [],
+          params: {
+            configId: so.id,
+            spaceId: context.spaceId,
+          },
+          state: {},
         },
-        state: {},
-      },
-      {
-        request: params.request,
-      }
-    );
-
-    // Update the saved object with the scheduled task ID
-    await soClient.update<GapAutoFillSchedulerSO>(
-      GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
-      so.id,
-      {
-        scheduledTaskId: task.id,
-        updatedAt: new Date().toISOString(),
-      }
-    );
-
-    const updatedSo = await soClient.get<GapAutoFillSchedulerSO>(
-      GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
-      so.id
-    );
+        {
+          request: params.request,
+        }
+      );
+    } catch (e) {
+      await soClient.delete(GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE, so.id);
+      throw e;
+    }
 
     // Log successful creation
     context.auditLogger?.log(
@@ -144,15 +134,15 @@ Payload summary: ${JSON.stringify(otherParams, (key, value) =>
         action: GapAutoFillSchedulerAuditAction.CREATE,
         savedObject: {
           type: GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
-          id: updatedSo.id,
-          name: updatedSo.attributes.name,
+          id: so.id,
+          name: so.attributes.name,
         },
       })
     );
 
     // Transform the saved object to the result format
     return transformSavedObjectToGapAutoFillSchedulerResult({
-      savedObject: updatedSo,
+      savedObject: so,
     });
   } catch (error) {
     throw Boom.boomify(error, { message: 'Failed to create gap auto fill scheduler' });

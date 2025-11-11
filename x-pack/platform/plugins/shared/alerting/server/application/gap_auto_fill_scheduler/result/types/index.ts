@@ -22,5 +22,4 @@ export interface GapAutoFillSchedulerResponse {
   updatedBy?: string;
   createdAt: string;
   updatedAt: string;
-  scheduledTaskId: string;
 }

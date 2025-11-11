@@ -21,5 +21,4 @@ export const gapAutoFillSchedulerSchema = schema.object({
   updatedBy: schema.maybe(schema.string()),
   createdAt: schema.string(),
   updatedAt: schema.string(),
-  scheduledTaskId: schema.string(),
 });

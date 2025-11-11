@@ -22,7 +22,6 @@ describe('transformResponse v1 - create', () => {
       updatedBy: 'test-user',
       createdAt: '2024-01-01T00:00:00.000Z',
       updatedAt: '2024-01-01T00:00:00.000Z',
-      scheduledTaskId: 'task-id-123',
     };
 
     const result = transformResponse(mockResponse);
@@ -39,7 +38,6 @@ describe('transformResponse v1 - create', () => {
       updated_by: 'test-user',
       created_at: '2024-01-01T00:00:00.000Z',
       updated_at: '2024-01-01T00:00:00.000Z',
-      scheduled_task_id: 'task-id-123',
     });
   });
 });

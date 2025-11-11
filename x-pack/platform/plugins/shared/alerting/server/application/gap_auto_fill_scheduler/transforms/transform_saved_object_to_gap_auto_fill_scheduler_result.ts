@@ -10,8 +10,9 @@ import type { SavedObject } from '@kbn/core/server';
 import type { GapAutoFillSchedulerResponse } from '../result/types';
 import type { GapAutoFillSchedulerSO } from '../../../data/gap_auto_fill_scheduler/types/gap_auto_fill_scheduler';
 
+type BaseGapAutoFillSchedulerSO = Omit<GapAutoFillSchedulerSO, 'id'>;
 export interface TransformSavedObjectToGapAutoFillSchedulerResultOpts {
-  savedObject: SavedObject<GapAutoFillSchedulerSO>;
+  savedObject: SavedObject<BaseGapAutoFillSchedulerSO>;
 }
 
 export const transformSavedObjectToGapAutoFillSchedulerResult = ({
@@ -39,6 +40,5 @@ export const transformSavedObjectToGapAutoFillSchedulerResult = ({
     updatedBy: attributes.updatedBy,
     createdAt: attributes.createdAt,
     updatedAt: attributes.updatedAt,
-    scheduledTaskId: attributes.scheduledTaskId || '',
   };
 };

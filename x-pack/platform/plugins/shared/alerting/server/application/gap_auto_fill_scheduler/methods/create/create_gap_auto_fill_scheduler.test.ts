@@ -119,7 +119,6 @@ describe('createGapFillAutoScheduler()', () => {
           { type: 'test-rule-type2', consumer: 'test-consumer' },
         ],
         ruleTypeConsumerPairs: ['test-rule-type1:test-consumer', 'test-rule-type2:test-consumer'],
-        scheduledTaskId: '',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         createdBy: 'elastic',
@@ -153,7 +152,6 @@ describe('createGapFillAutoScheduler()', () => {
           { type: 'test-rule-type2', consumer: 'test-consumer' },
         ],
         ruleTypeConsumerPairs: ['test-rule-type1:test-consumer', 'test-rule-type2:test-consumer'],
-        scheduledTaskId: 'task-1',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         createdBy: 'elastic',
@@ -179,7 +177,6 @@ describe('createGapFillAutoScheduler()', () => {
           { type: 'test-rule-type2', consumer: 'test-consumer' },
         ],
         ruleTypeConsumerPairs: ['test-rule-type1:test-consumer', 'test-rule-type2:test-consumer'],
-        scheduledTaskId: 'task-1',
         createdAt: new Date().toISOString(),
         createdBy: 'elastic',
         updatedAt: new Date().toISOString(),
@@ -190,7 +187,7 @@ describe('createGapFillAutoScheduler()', () => {
     unsecuredSavedObjectsClient.get.mockResolvedValue(soFetched);
   });
 
-  test('succeeds creating, scheduling task and updating SO with task id', async () => {
+  test('succeeds creating and scheduling task without updating SO with task id', async () => {
     const params = getParams();
     const result = await rulesClient.createGapAutoFillScheduler(params);
 
@@ -213,24 +210,27 @@ describe('createGapFillAutoScheduler()', () => {
       expect.objectContaining({ request: params.request })
     );
 
-    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
-      GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
-      'gap-1',
-      expect.objectContaining({ scheduledTaskId: 'task-1' })
-    );
-
-    expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledWith(
-      GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
-      'gap-1'
-    );
-
     expect(auditLogger.log).toHaveBeenCalledTimes(1);
 
     expect(result).toEqual(
       transformSavedObjectToGapAutoFillSchedulerResult({
-        savedObject: await unsecuredSavedObjectsClient.get.mock.results[0].value,
+        savedObject: await unsecuredSavedObjectsClient.create.mock.results[0].value,
       })
     );
+  });
+
+  test('deletes saved object and throws if scheduling task fails', async () => {
+    taskManager.ensureScheduled.mockRejectedValueOnce(new Error('schedule failed'));
+
+    await expect(rulesClient.createGapAutoFillScheduler(getParams())).rejects.toThrow(
+      'schedule failed'
+    );
+
+    expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith(
+      GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
+      'gap-1'
+    );
+    expect(auditLogger.log).not.toHaveBeenCalled();
   });
 
   test('validates params and throws on invalid', async () => {
