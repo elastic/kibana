@@ -14,17 +14,11 @@ import { createErrorResult } from '@kbn/onechat-server';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 
 const productDocumentationSchema = z.object({
-  query: z
-    .string()
-    .describe(
-      'The search query to retrieve documentation. Always write the query in English, as the documentation is available only in English. Examples: "How to enable TLS for Elasticsearch?", "What is Kibana Lens?"'
-    ),
+  query: z.string().describe('Search query to retrieve documentation about Elastic products'),
   product: z
     .string()
     .optional()
-    .describe(
-      'Optional product filter to restrict the search to a specific product. Possible options: "kibana", "elasticsearch", "observability", "security". If not specified, will search against all products.'
-    ),
+    .describe('(optional) Product to filter by: "kibana", "elasticsearch", "observability", or "security"'),
   max: z
     .number()
     .optional()
@@ -36,20 +30,8 @@ export const productDocumentationTool = (): BuiltinToolDefinition<typeof product
   return {
     id: platformCoreTools.productDocumentation,
     type: ToolType.builtin,
-    description: `A tool for retrieving documentation about Elastic products.
-Use this tool to search and retrieve documentation about the Elastic stack, such as Kibana and Elasticsearch,
-or for Elastic solutions, such as Elastic Security, Elastic Observability or Elastic Enterprise Search.
-
-The tool performs semantic search against the Elastic product documentation index, returning relevant
-documentation articles that match your query.
-
-Examples of when to use this tool:
-- "How to create a space in Kibana?"
-- "What is Elasticsearch index lifecycle management?"
-- "How to configure alerting rules in Elastic Observability?"
-- "What are the security features in Elastic Security?"
-
-Note: The query should always be written in English, as the documentation is available only in English.`,
+    description: `Retrieve documentation about Elastic products, such as Kibana, Elasticsearch, Elastic Security, and Elastic Observability.
+Use this tool to search the Elastic product documentation index for relevant articles.`,
     schema: productDocumentationSchema,
     handler: async (
       { query, product, max = 3 },
@@ -149,7 +131,7 @@ Note: The query should always be written in English, as the documentation is ava
         };
       }
     },
-    tags: ['documentation', 'search'],
+    tags: [],
   };
 };
 
