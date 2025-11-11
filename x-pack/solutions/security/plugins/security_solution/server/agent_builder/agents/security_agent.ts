@@ -30,7 +30,8 @@ Use the available tools to gather information, then synthesize and explain findi
           tool_ids: [
             'core.security.alerts',
             'core.security.security_labs',
-            'core.security.product_documentation',
+            // TODO add once product doc tool is merged https://github.com/elastic/kibana/pull/242598
+            // 'platform.core.product_documentation',
           ],
         },
       ],

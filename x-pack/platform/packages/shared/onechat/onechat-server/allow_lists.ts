@@ -12,7 +12,6 @@
 export const AGENT_BUILDER_BUILTIN_TOOLS: string[] = [
   'core.security.alerts',
   'core.security.security_labs',
-  'core.security.product_documentation',
 ];
 
 /**
