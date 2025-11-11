@@ -5517,6 +5517,10 @@ groups:
               annotations:
                 code_generation:
                   exclude: true
+            - id: gcp.agent_engine
+              value: gcp.agent_engine
+              brief: Google Vertex AI Agent Engine
+              stability: development
             - id: gcp_bare_metal_solution
               value: gcp_bare_metal_solution
               brief: Google Bare Metal Solution (BMS)
@@ -8730,6 +8734,18 @@ groups:
       An operating system process.
     stability: development
     attributes:
+      - name: process.args_count
+        type: int
+        brief: |
+          Length of the process.command_args array
+        examples:
+          - 4
+        requirement_level:
+          conditionally_required: See [Selecting process attributes](/docs/resource/process.md#selecting-process-attributes) for details.
+        note: |
+          This field can be useful for querying or performing bucket analysis on how many arguments were provided to start a process. More arguments may be an indication of suspicious activity.
+        stability: development
+        role: descriptive
       - name: process.command
         type: string
         brief: |
@@ -8739,6 +8755,7 @@ groups:
         requirement_level:
           conditionally_required: See [Selecting process attributes](/docs/resource/process.md#selecting-process-attributes) for details.
         stability: development
+        role: descriptive
       - name: process.command_args
         type: string[]
         brief: |
@@ -8749,6 +8766,7 @@ groups:
         requirement_level:
           conditionally_required: See [Selecting process attributes](/docs/resource/process.md#selecting-process-attributes) for details.
         stability: development
+        role: descriptive
       - name: process.command_line
         type: string
         brief: |
@@ -8758,6 +8776,16 @@ groups:
         requirement_level:
           conditionally_required: See [Selecting process attributes](/docs/resource/process.md#selecting-process-attributes) for details.
         stability: development
+        role: descriptive
+      - name: process.creation.time
+        type: string
+        brief: |
+          The date and time the process was created, in ISO 8601 format.
+        examples:
+          - 2023-11-21T09:25:34.853Z
+        requirement_level: recommended
+        stability: development
+        role: identifying
       - name: process.executable.name
         type: string
         brief: |
@@ -8767,6 +8795,7 @@ groups:
         requirement_level:
           conditionally_required: See [Selecting process attributes](/docs/resource/process.md#selecting-process-attributes) for details.
         stability: development
+        role: descriptive
       - name: process.executable.path
         type: string
         brief: |
@@ -8776,6 +8805,14 @@ groups:
         requirement_level:
           conditionally_required: See [Selecting process attributes](/docs/resource/process.md#selecting-process-attributes) for details.
         stability: development
+        role: descriptive
+      - name: process.interactive
+        type: boolean
+        brief: |
+          Whether the process is connected to an interactive shell.
+        requirement_level: recommended
+        stability: development
+        role: descriptive
       - name: process.linux.cgroup
         type: string
         brief: The control group associated with the process.
@@ -8786,6 +8823,7 @@ groups:
         note: |
           Control groups (cgroups) are a kernel feature used to organize and manage process resources. This attribute provides the path(s) to the cgroup(s) associated with the process, which should match the contents of the [/proc/\[PID\]/cgroup](https://man7.org/linux/man-pages/man7/cgroups.7.html) file.
         stability: development
+        role: descriptive
       - name: process.owner
         type: string
         brief: |
@@ -8794,6 +8832,7 @@ groups:
           - root
         requirement_level: recommended
         stability: development
+        role: descriptive
       - name: process.parent_pid
         type: int
         brief: |
@@ -8802,6 +8841,7 @@ groups:
           - 111
         requirement_level: recommended
         stability: development
+        role: descriptive
       - name: process.pid
         type: int
         brief: |
@@ -8810,12 +8850,45 @@ groups:
           - 1234
         requirement_level: recommended
         stability: development
+        role: identifying
+      - name: process.title
+        type: string
+        brief: |
+          Process title (proctitle)
+        examples:
+          - cat /etc/hostname
+          - xfce4-session
+          - bash
+        requirement_level: recommended
+        note: |
+          In many Unix-like systems, process title (proctitle), is the string that represents the name or command line of a running process, displayed by system monitoring tools like ps, top, and htop.
+        stability: development
+        role: descriptive
+      - name: process.working_directory
+        type: string
+        brief: |
+          The working directory of the process.
+        examples:
+          - /root
+        requirement_level: recommended
+        stability: development
+        role: descriptive
     name: process
     lineage:
       provenance:
         registry_id: main
         path: /home/weaver/source/process/entities.yaml
       attributes:
+        process.args_count:
+          source_group: registry.process
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+            - role
         process.command:
           source_group: registry.process
           inherited_fields:
@@ -8825,6 +8898,7 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - role
         process.command_args:
           source_group: registry.process
           inherited_fields:
@@ -8834,6 +8908,7 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - role
         process.command_line:
           source_group: registry.process
           inherited_fields:
@@ -8843,6 +8918,17 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - role
+        process.creation.time:
+          source_group: registry.process
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
+          locally_overridden_fields:
+            - role
         process.executable.name:
           source_group: registry.process
           inherited_fields:
@@ -8852,6 +8938,7 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - role
         process.executable.path:
           source_group: registry.process
           inherited_fields:
@@ -8861,6 +8948,16 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - role
+        process.interactive:
+          source_group: registry.process
+          inherited_fields:
+            - brief
+            - note
+            - requirement_level
+            - stability
+          locally_overridden_fields:
+            - role
         process.linux.cgroup:
           source_group: registry.process.linux
           inherited_fields:
@@ -8869,6 +8966,8 @@ groups:
             - note
             - requirement_level
             - stability
+          locally_overridden_fields:
+            - role
         process.owner:
           source_group: registry.process
           inherited_fields:
@@ -8877,6 +8976,8 @@ groups:
             - note
             - requirement_level
             - stability
+          locally_overridden_fields:
+            - role
         process.parent_pid:
           source_group: registry.process
           inherited_fields:
@@ -8885,6 +8986,8 @@ groups:
             - note
             - requirement_level
             - stability
+          locally_overridden_fields:
+            - role
         process.pid:
           source_group: registry.process
           inherited_fields:
@@ -8893,6 +8996,28 @@ groups:
             - note
             - requirement_level
             - stability
+          locally_overridden_fields:
+            - role
+        process.title:
+          source_group: registry.process
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
+          locally_overridden_fields:
+            - role
+        process.working_directory:
+          source_group: registry.process
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
+          locally_overridden_fields:
+            - role
   - id: entity.process.runtime
     type: entity
     brief: |
@@ -8906,6 +9031,7 @@ groups:
         examples: Eclipse OpenJ9 Eclipse OpenJ9 VM openj9-0.21.0
         requirement_level: recommended
         stability: development
+        role: descriptive
       - name: process.runtime.name
         type: string
         brief: |
@@ -8914,6 +9040,7 @@ groups:
           - OpenJDK Runtime Environment
         requirement_level: recommended
         stability: development
+        role: identifying
       - name: process.runtime.version
         type: string
         brief: |
@@ -8921,6 +9048,7 @@ groups:
         examples: 14.0.2
         requirement_level: recommended
         stability: development
+        role: identifying
     name: process.runtime
     lineage:
       provenance:
@@ -8935,6 +9063,8 @@ groups:
             - note
             - requirement_level
             - stability
+          locally_overridden_fields:
+            - role
         process.runtime.name:
           source_group: registry.process
           inherited_fields:
@@ -8943,6 +9073,8 @@ groups:
             - note
             - requirement_level
             - stability
+          locally_overridden_fields:
+            - role
         process.runtime.version:
           source_group: registry.process
           inherited_fields:
@@ -8951,6 +9083,8 @@ groups:
             - note
             - requirement_level
             - stability
+          locally_overridden_fields:
+            - role
   - id: entity.service
     type: entity
     brief: |
@@ -38408,15 +38542,19 @@ groups:
         metric_value_type: int
   - id: metric.k8s.node.allocatable.cpu
     type: metric
-    brief: Amount of cpu allocatable on the node.
+    brief: Deprecated, use `k8s.node.cpu.allocatable` instead.
     stability: development
+    deprecated:
+      reason: renamed
+      renamed_to: k8s.node.cpu.allocatable
+      note: Replaced by `k8s.node.cpu.allocatable`.
     metric_name: k8s.node.allocatable.cpu
     instrument: updowncounter
     unit: '{cpu}'
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/k8s/metrics.yaml
+        path: /home/weaver/source/k8s/deprecated/metrics-deprecated.yaml
     entity_associations:
       - k8s.node
     annotations:
@@ -38424,15 +38562,19 @@ groups:
         metric_value_type: double
   - id: metric.k8s.node.allocatable.ephemeral_storage
     type: metric
-    brief: Amount of ephemeral-storage allocatable on the node.
+    brief: Deprecated, use `k8s.node.ephemeral_storage.allocatable` instead.
     stability: development
+    deprecated:
+      reason: renamed
+      renamed_to: k8s.node.ephemeral_storage.allocatable
+      note: Replaced by `k8s.node.ephemeral_storage.allocatable`.
     metric_name: k8s.node.allocatable.ephemeral_storage
     instrument: updowncounter
     unit: By
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/k8s/metrics.yaml
+        path: /home/weaver/source/k8s/deprecated/metrics-deprecated.yaml
     entity_associations:
       - k8s.node
     annotations:
@@ -38440,15 +38582,19 @@ groups:
         metric_value_type: int
   - id: metric.k8s.node.allocatable.memory
     type: metric
-    brief: Amount of memory allocatable on the node.
+    brief: Deprecated, use `k8s.node.memory.allocatable` instead.
     stability: development
+    deprecated:
+      reason: renamed
+      renamed_to: k8s.node.memory.allocatable
+      note: Replaced by `k8s.node.memory.allocatable`.
     metric_name: k8s.node.allocatable.memory
     instrument: updowncounter
     unit: By
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/k8s/metrics.yaml
+        path: /home/weaver/source/k8s/deprecated/metrics-deprecated.yaml
     entity_associations:
       - k8s.node
     annotations:
@@ -38575,6 +38721,22 @@ groups:
     annotations:
       code_generation:
         metric_value_type: int
+  - id: metric.k8s.node.cpu.allocatable
+    type: metric
+    brief: Amount of cpu allocatable on the node.
+    stability: development
+    metric_name: k8s.node.cpu.allocatable
+    instrument: updowncounter
+    unit: '{cpu}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/metrics.yaml
+    entity_associations:
+      - k8s.node
+    annotations:
+      code_generation:
+        metric_value_type: double
   - id: metric.k8s.node.cpu.time
     type: metric
     brief: Total CPU time consumed.
@@ -38611,6 +38773,22 @@ groups:
     annotations:
       code_generation:
         metric_value_type: double
+  - id: metric.k8s.node.ephemeral_storage.allocatable
+    type: metric
+    brief: Amount of ephemeral-storage allocatable on the node.
+    stability: development
+    metric_name: k8s.node.ephemeral_storage.allocatable
+    instrument: updowncounter
+    unit: By
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/metrics.yaml
+    entity_associations:
+      - k8s.node
+    annotations:
+      code_generation:
+        metric_value_type: int
   - id: metric.k8s.node.filesystem.available
     type: metric
     brief: Node filesystem available bytes.
@@ -38665,6 +38843,22 @@ groups:
       of the Kubelet's stats API.
     stability: development
     metric_name: k8s.node.filesystem.usage
+    instrument: updowncounter
+    unit: By
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/metrics.yaml
+    entity_associations:
+      - k8s.node
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.k8s.node.memory.allocatable
+    type: metric
+    brief: Amount of memory allocatable on the node.
+    stability: development
+    metric_name: k8s.node.memory.allocatable
     instrument: updowncounter
     unit: By
     lineage:
@@ -54031,7 +54225,7 @@ groups:
     brief: Total number of processes in each state.
     stability: development
     attributes:
-      - name: system.process.status
+      - name: process.state
         type:
           members:
             - id: running
@@ -54060,8 +54254,8 @@ groups:
         registry_id: main
         path: /home/weaver/source/system/metrics.yaml
       attributes:
-        system.process.status:
-          source_group: registry.system.process
+        process.state:
+          source_group: registry.process
           inherited_fields:
             - brief
             - examples
@@ -59454,6 +59648,10 @@ groups:
               annotations:
                 code_generation:
                   exclude: true
+            - id: gcp.agent_engine
+              value: gcp.agent_engine
+              brief: Google Vertex AI Agent Engine
+              stability: development
             - id: gcp_bare_metal_solution
               value: gcp_bare_metal_solution
               brief: Google Bare Metal Solution (BMS)
@@ -60903,7 +61101,7 @@ groups:
         stability: development
         deprecated:
           reason: uncategorized
-          note: Uncategorized.
+          note: Use `db.response.status_code` instead.
       - name: db.cosmosdb.sub_status_code
         type: int
         brief: Deprecated, use `azure.cosmosdb.response.sub_status_code` instead.
@@ -61718,7 +61916,7 @@ groups:
         stability: development
         deprecated:
           reason: uncategorized
-          note: Uncategorized.
+          note: Use `user.roles` instead.
       - name: enduser.scope
         type: string
         brief: Deprecated, no replacement at this time.
@@ -61811,7 +62009,7 @@ groups:
         deprecated:
           reason: uncategorized
           note: |
-            Replaced by EventName top-level field on the LogRecord.
+            The value of this attribute MUST now be set as the value of the EventName field on the LogRecord to indicate that the LogRecord represents an Event.
     lineage:
       provenance:
         registry_id: main
@@ -68186,6 +68384,27 @@ groups:
           - 14
         requirement_level: recommended
         stability: development
+      - name: process.state
+        type:
+          members:
+            - id: running
+              value: running
+              stability: development
+            - id: sleeping
+              value: sleeping
+              stability: development
+            - id: stopped
+              value: stopped
+              stability: development
+            - id: defunct
+              value: defunct
+              stability: development
+        brief: |
+          The process state, e.g., [Linux Process State Codes](https://man7.org/linux/man-pages/man1/ps.1.html#PROCESS_STATE_CODES)
+        examples:
+          - running
+        requirement_level: recommended
+        stability: development
       - name: process.title
         type: string
         brief: |
@@ -69183,6 +69402,30 @@ groups:
           reason: renamed
           renamed_to: system.paging.fault.type
           note: Replaced by `system.paging.fault.type`.
+      - name: system.process.status
+        type:
+          members:
+            - id: running
+              value: running
+              stability: development
+            - id: sleeping
+              value: sleeping
+              stability: development
+            - id: stopped
+              value: stopped
+              stability: development
+            - id: defunct
+              value: defunct
+              stability: development
+        brief: Deprecated, use `process.state` instead.
+        examples:
+          - running
+        requirement_level: recommended
+        stability: development
+        deprecated:
+          reason: renamed
+          renamed_to: process.state
+          note: Replaced by `process.state`.
       - name: system.processes.status
         type:
           members:
@@ -69198,15 +69441,15 @@ groups:
             - id: defunct
               value: defunct
               stability: development
-        brief: Deprecated, use `system.process.status` instead.
+        brief: Deprecated, use `process.state` instead.
         examples:
           - running
         requirement_level: recommended
         stability: development
         deprecated:
           reason: renamed
-          renamed_to: system.process.status
-          note: Replaced by `system.process.status`.
+          renamed_to: process.state
+          note: Replaced by `process.state`.
     lineage:
       provenance:
         registry_id: main
@@ -69368,36 +69611,6 @@ groups:
         registry_id: main
         path: /home/weaver/source/system/registry.yaml
     display_name: System Paging Attributes
-  - id: registry.system.process
-    type: attribute_group
-    brief: Describes System Process attributes
-    attributes:
-      - name: system.process.status
-        type:
-          members:
-            - id: running
-              value: running
-              stability: development
-            - id: sleeping
-              value: sleeping
-              stability: development
-            - id: stopped
-              value: stopped
-              stability: development
-            - id: defunct
-              value: defunct
-              stability: development
-        brief: |
-          The process state, e.g., [Linux Process State Codes](https://man7.org/linux/man-pages/man1/ps.1.html#PROCESS_STATE_CODES)
-        examples:
-          - running
-        requirement_level: recommended
-        stability: development
-    lineage:
-      provenance:
-        registry_id: main
-        path: /home/weaver/source/system/registry.yaml
-    display_name: System Process Attributes
   - id: registry.telemetry
     type: attribute_group
     brief: |
@@ -70813,24 +71026,6 @@ groups:
           a port number is ambiguous without knowing the transport. For example
           different processes could be listening on TCP port 12345 and UDP port 12345.
         stability: stable
-      - name: network.type
-        type:
-          members:
-            - id: ipv4
-              value: ipv4
-              brief: IPv4
-              stability: stable
-            - id: ipv6
-              value: ipv6
-              brief: IPv6
-              stability: stable
-        brief: '[OSI network layer](https://wikipedia.org/wiki/Network_layer) or non-OSI equivalent.'
-        examples:
-          - ipv4
-          - ipv6
-        requirement_level: recommended
-        note: The value SHOULD be normalized to lowercase.
-        stability: stable
       - name: rpc.method
         type: string
         brief: This is the logical name of the method from the RPC interface perspective.
@@ -70913,15 +71108,6 @@ groups:
             - requirement_level
             - stability
         network.transport:
-          source_group: registry.network
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - stability
-          locally_overridden_fields:
-            - requirement_level
-        network.type:
           source_group: registry.network
           inherited_fields:
             - brief
@@ -71069,24 +71255,6 @@ groups:
           a port number is ambiguous without knowing the transport. For example
           different processes could be listening on TCP port 12345 and UDP port 12345.
         stability: stable
-      - name: network.type
-        type:
-          members:
-            - id: ipv4
-              value: ipv4
-              brief: IPv4
-              stability: stable
-            - id: ipv6
-              value: ipv6
-              brief: IPv6
-              stability: stable
-        brief: '[OSI network layer](https://wikipedia.org/wiki/Network_layer) or non-OSI equivalent.'
-        examples:
-          - ipv4
-          - ipv6
-        requirement_level: recommended
-        note: The value SHOULD be normalized to lowercase.
-        stability: stable
       - name: rpc.method
         type: string
         brief: This is the logical name of the method from the RPC interface perspective.
@@ -71177,15 +71345,6 @@ groups:
             - requirement_level
             - stability
         network.transport:
-          source_group: registry.network
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - stability
-          locally_overridden_fields:
-            - requirement_level
-        network.type:
           source_group: registry.network
           inherited_fields:
             - brief
@@ -71362,24 +71521,6 @@ groups:
           a port number is ambiguous without knowing the transport. For example
           different processes could be listening on TCP port 12345 and UDP port 12345.
         stability: stable
-      - name: network.type
-        type:
-          members:
-            - id: ipv4
-              value: ipv4
-              brief: IPv4
-              stability: stable
-            - id: ipv6
-              value: ipv6
-              brief: IPv6
-              stability: stable
-        brief: '[OSI network layer](https://wikipedia.org/wiki/Network_layer) or non-OSI equivalent.'
-        examples:
-          - ipv4
-          - ipv6
-        requirement_level: recommended
-        note: The value SHOULD be normalized to lowercase.
-        stability: stable
       - name: rpc.method
         type: string
         brief: This is the logical name of the method from the RPC interface perspective.
@@ -71488,15 +71629,6 @@ groups:
             - requirement_level
             - stability
         network.transport:
-          source_group: registry.network
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - stability
-          locally_overridden_fields:
-            - requirement_level
-        network.type:
           source_group: registry.network
           inherited_fields:
             - brief
@@ -71673,24 +71805,6 @@ groups:
           a port number is ambiguous without knowing the transport. For example
           different processes could be listening on TCP port 12345 and UDP port 12345.
         stability: stable
-      - name: network.type
-        type:
-          members:
-            - id: ipv4
-              value: ipv4
-              brief: IPv4
-              stability: stable
-            - id: ipv6
-              value: ipv6
-              brief: IPv6
-              stability: stable
-        brief: '[OSI network layer](https://wikipedia.org/wiki/Network_layer) or non-OSI equivalent.'
-        examples:
-          - ipv4
-          - ipv6
-        requirement_level: recommended
-        note: The value SHOULD be normalized to lowercase.
-        stability: stable
       - name: rpc.method
         type: string
         brief: This is the logical name of the method from the RPC interface perspective.
@@ -71791,15 +71905,6 @@ groups:
             - requirement_level
             - stability
         network.transport:
-          source_group: registry.network
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - stability
-          locally_overridden_fields:
-            - requirement_level
-        network.type:
           source_group: registry.network
           inherited_fields:
             - brief
@@ -73015,7 +73120,7 @@ groups:
       **Span name** MUST be set to the function name from the Lambda `Context`
       unless stated otherwise.
 
-      **Span kind** MUST be set to `SERVER` unless stated otherwise.
+      **Span kind** MUST be `SERVER` unless stated otherwise.
     stability: development
     attributes:
       - name: aws.lambda.invoked_arn
@@ -74963,8 +75068,8 @@ groups:
       Instrumentations that have additional context about executed commands MAY use
       a different low-cardinality span name format and SHOULD document it.
 
-      **Span status** SHOULD be set to Error if {process.exit.code} is not 0. Refer to
-      the [Recording Errors](/docs/general/recording-errors.md) document for details on how to record span status.
+      **Span status** SHOULD follow the [Recording Errors](/docs/general/recording-errors.md) document.
+      An Error is defined as when the `{process.exit.code}` attribute is not 0.
     stability: development
     attributes:
       - name: error.type
@@ -75115,8 +75220,8 @@ groups:
       Instrumentations that have additional context about executed commands MAY use
       a different low-cardinality span name format and SHOULD document it.
 
-      **Span status** SHOULD be set to Error if {process.exit.code} is not 0. Refer to
-      the [Recording Errors](/docs/general/recording-errors.md) document for details on how to record span status.
+      **Span status** SHOULD follow the [Recording Errors](/docs/general/recording-errors.md) document.
+      An Error is defined as when the `{process.exit.code}` attribute is not 0.
     stability: development
     attributes:
       - name: error.type
@@ -75785,9 +75890,8 @@ groups:
       runs in a different process than its client or when database calls happen over
       instrumented protocol such as HTTP.
 
-      **Span status** Refer to the [Recording Errors](/docs/general/recording-errors.md)
-      document for details on how to record span status. Semantic conventions for
-      individual systems SHOULD specify which values of `db.response.status_code`
+      **Span status** SHOULD follow the [Recording Errors](/docs/general/recording-errors.md) document.
+      Semantic conventions for individual systems SHOULD specify which values of `db.response.status_code`
       classify as errors.
     stability: stable
     attributes:
@@ -84168,7 +84272,7 @@ groups:
       Semantic conventions for individual GenAI systems and frameworks MAY specify different span name format
       and MUST follow the overall [guidelines for span names](https://github.com/open-telemetry/opentelemetry-specification/blob/v1.37.0/specification/trace/api.md#span).
 
-      **Span kind** SHOULD be `CLIENT`and MAY be set to `INTERNAL` on spans representing
+      **Span kind** SHOULD be `CLIENT` and MAY be set to `INTERNAL` on spans representing
       call to models running in the same process. It's RECOMMENDED to use `CLIENT` kind
       when the GenAI system being instrumented usually runs in a different process than its
       client or when the GenAI call happens over instrumented protocol such as HTTP.
@@ -84937,7 +85041,8 @@ groups:
       Describes GenAI agent invocation.
     note: |
       The `gen_ai.operation.name` SHOULD be `invoke_agent`.
-      The **span name** SHOULD be `invoke_agent {gen_ai.agent.name}` if `gen_ai.agent.name` is readily available.
+
+      **Span name** SHOULD be `invoke_agent {gen_ai.agent.name}` if `gen_ai.agent.name` is readily available.
       When `gen_ai.agent.name` is not available, it SHOULD be `invoke_agent`.
       Semantic conventions for individual GenAI systems and frameworks MAY specify different span name format.
 
@@ -88030,24 +88135,6 @@ groups:
           a port number is ambiguous without knowing the transport. For example
           different processes could be listening on TCP port 12345 and UDP port 12345.
         stability: stable
-      - name: network.type
-        type:
-          members:
-            - id: ipv4
-              value: ipv4
-              brief: IPv4
-              stability: stable
-            - id: ipv6
-              value: ipv6
-              brief: IPv6
-              stability: stable
-        brief: '[OSI network layer](https://wikipedia.org/wiki/Network_layer) or non-OSI equivalent.'
-        examples:
-          - ipv4
-          - ipv6
-        requirement_level: recommended
-        note: The value SHOULD be normalized to lowercase.
-        stability: stable
       - name: rpc.method
         type: string
         brief: This is the logical name of the method from the RPC interface perspective.
@@ -88175,15 +88262,6 @@ groups:
             - requirement_level
             - stability
         network.transport:
-          source_group: registry.network
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - stability
-          locally_overridden_fields:
-            - requirement_level
-        network.type:
           source_group: registry.network
           inherited_fields:
             - brief
@@ -88354,24 +88432,6 @@ groups:
           Consider always setting the transport when setting a port number, since
           a port number is ambiguous without knowing the transport. For example
           different processes could be listening on TCP port 12345 and UDP port 12345.
-        stability: stable
-      - name: network.type
-        type:
-          members:
-            - id: ipv4
-              value: ipv4
-              brief: IPv4
-              stability: stable
-            - id: ipv6
-              value: ipv6
-              brief: IPv6
-              stability: stable
-        brief: '[OSI network layer](https://wikipedia.org/wiki/Network_layer) or non-OSI equivalent.'
-        examples:
-          - ipv4
-          - ipv6
-        requirement_level: recommended
-        note: The value SHOULD be normalized to lowercase.
         stability: stable
       - name: rpc.connect_rpc.error_code
         type:
@@ -88548,15 +88608,6 @@ groups:
             - requirement_level
             - stability
         network.transport:
-          source_group: registry.network
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - stability
-          locally_overridden_fields:
-            - requirement_level
-        network.type:
           source_group: registry.network
           inherited_fields:
             - brief
@@ -88766,24 +88817,6 @@ groups:
           a port number is ambiguous without knowing the transport. For example
           different processes could be listening on TCP port 12345 and UDP port 12345.
         stability: stable
-      - name: network.type
-        type:
-          members:
-            - id: ipv4
-              value: ipv4
-              brief: IPv4
-              stability: stable
-            - id: ipv6
-              value: ipv6
-              brief: IPv6
-              stability: stable
-        brief: '[OSI network layer](https://wikipedia.org/wiki/Network_layer) or non-OSI equivalent.'
-        examples:
-          - ipv4
-          - ipv6
-        requirement_level: recommended
-        note: The value SHOULD be normalized to lowercase.
-        stability: stable
       - name: rpc.connect_rpc.error_code
         type:
           members:
@@ -88985,15 +89018,6 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
-        network.type:
-          source_group: registry.network
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - stability
-          locally_overridden_fields:
-            - requirement_level
         rpc.connect_rpc.error_code:
           source_group: registry.rpc
           inherited_fields:
@@ -89176,24 +89200,6 @@ groups:
           Consider always setting the transport when setting a port number, since
           a port number is ambiguous without knowing the transport. For example
           different processes could be listening on TCP port 12345 and UDP port 12345.
-        stability: stable
-      - name: network.type
-        type:
-          members:
-            - id: ipv4
-              value: ipv4
-              brief: IPv4
-              stability: stable
-            - id: ipv6
-              value: ipv6
-              brief: IPv6
-              stability: stable
-        brief: '[OSI network layer](https://wikipedia.org/wiki/Network_layer) or non-OSI equivalent.'
-        examples:
-          - ipv4
-          - ipv6
-        requirement_level: recommended
-        note: The value SHOULD be normalized to lowercase.
         stability: stable
       - name: rpc.grpc.request.metadata
         type: template[string[]]
@@ -89389,15 +89395,6 @@ groups:
             - requirement_level
             - stability
         network.transport:
-          source_group: registry.network
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - stability
-          locally_overridden_fields:
-            - requirement_level
-        network.type:
           source_group: registry.network
           inherited_fields:
             - brief
@@ -89609,24 +89606,6 @@ groups:
           a port number is ambiguous without knowing the transport. For example
           different processes could be listening on TCP port 12345 and UDP port 12345.
         stability: stable
-      - name: network.type
-        type:
-          members:
-            - id: ipv4
-              value: ipv4
-              brief: IPv4
-              stability: stable
-            - id: ipv6
-              value: ipv6
-              brief: IPv6
-              stability: stable
-        brief: '[OSI network layer](https://wikipedia.org/wiki/Network_layer) or non-OSI equivalent.'
-        examples:
-          - ipv4
-          - ipv6
-        requirement_level: recommended
-        note: The value SHOULD be normalized to lowercase.
-        stability: stable
       - name: rpc.grpc.request.metadata
         type: template[string[]]
         brief: |
@@ -89847,15 +89826,6 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
-        network.type:
-          source_group: registry.network
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - stability
-          locally_overridden_fields:
-            - requirement_level
         rpc.grpc.request.metadata:
           source_group: registry.rpc
           inherited_fields:
@@ -90037,24 +90007,6 @@ groups:
           a port number is ambiguous without knowing the transport. For example
           different processes could be listening on TCP port 12345 and UDP port 12345.
         stability: stable
-      - name: network.type
-        type:
-          members:
-            - id: ipv4
-              value: ipv4
-              brief: IPv4
-              stability: stable
-            - id: ipv6
-              value: ipv6
-              brief: IPv6
-              stability: stable
-        brief: '[OSI network layer](https://wikipedia.org/wiki/Network_layer) or non-OSI equivalent.'
-        examples:
-          - ipv4
-          - ipv6
-        requirement_level: recommended
-        note: The value SHOULD be normalized to lowercase.
-        stability: stable
       - name: rpc.jsonrpc.error_code
         type: int
         brief: '`error.code` property of response if it is an error response.'
@@ -90174,15 +90126,6 @@ groups:
             - requirement_level
             - stability
         network.transport:
-          source_group: registry.network
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - stability
-          locally_overridden_fields:
-            - requirement_level
-        network.type:
           source_group: registry.network
           inherited_fields:
             - brief
@@ -90393,24 +90336,6 @@ groups:
           a port number is ambiguous without knowing the transport. For example
           different processes could be listening on TCP port 12345 and UDP port 12345.
         stability: stable
-      - name: network.type
-        type:
-          members:
-            - id: ipv4
-              value: ipv4
-              brief: IPv4
-              stability: stable
-            - id: ipv6
-              value: ipv6
-              brief: IPv6
-              stability: stable
-        brief: '[OSI network layer](https://wikipedia.org/wiki/Network_layer) or non-OSI equivalent.'
-        examples:
-          - ipv4
-          - ipv6
-        requirement_level: recommended
-        note: The value SHOULD be normalized to lowercase.
-        stability: stable
       - name: rpc.jsonrpc.error_code
         type: int
         brief: '`error.code` property of response if it is an error response.'
@@ -90548,15 +90473,6 @@ groups:
             - requirement_level
             - stability
         network.transport:
-          source_group: registry.network
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - stability
-          locally_overridden_fields:
-            - requirement_level
-        network.type:
           source_group: registry.network
           inherited_fields:
             - brief
@@ -90765,24 +90681,6 @@ groups:
           a port number is ambiguous without knowing the transport. For example
           different processes could be listening on TCP port 12345 and UDP port 12345.
         stability: stable
-      - name: network.type
-        type:
-          members:
-            - id: ipv4
-              value: ipv4
-              brief: IPv4
-              stability: stable
-            - id: ipv6
-              value: ipv6
-              brief: IPv6
-              stability: stable
-        brief: '[OSI network layer](https://wikipedia.org/wiki/Network_layer) or non-OSI equivalent.'
-        examples:
-          - ipv4
-          - ipv6
-        requirement_level: recommended
-        note: The value SHOULD be normalized to lowercase.
-        stability: stable
       - name: rpc.method
         type: string
         brief: This is the logical name of the method from the RPC interface perspective.
@@ -90928,15 +90826,6 @@ groups:
             - requirement_level
             - stability
         network.transport:
-          source_group: registry.network
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - stability
-          locally_overridden_fields:
-            - requirement_level
-        network.type:
           source_group: registry.network
           inherited_fields:
             - brief

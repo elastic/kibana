@@ -16,7 +16,7 @@ import {
   selectHighlightedStepId,
   selectStepExecutions,
   selectWorkflowLookup,
-} from '../../lib/store';
+} from '../../../../entities/workflows/store';
 
 export const useStepDecorationsInExecution = (
   editor: monaco.editor.IStandaloneCodeEditor | null
