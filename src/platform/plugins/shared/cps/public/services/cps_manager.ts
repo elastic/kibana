@@ -16,6 +16,12 @@ import type { ProjectTagsResponse, ICPSManager, ProjectsData } from '@kbn/cps-ut
 const MAX_RETRIES = 2;
 const RETRY_DELAY_MS = 1000;
 
+/**
+ * Central service for managing project routing and project data.
+ *
+ * - Fetches project data from ES via `/internal/cps/projects_tags` endpoint (with caching and retry logic)
+ * - Manages current project routing state using observables
+ */
 export class CPSManager implements ICPSManager {
   private readonly http: HttpSetup;
   private readonly logger: Logger;
