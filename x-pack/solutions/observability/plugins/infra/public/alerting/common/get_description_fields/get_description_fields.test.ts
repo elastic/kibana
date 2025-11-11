@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import type { Rule, PrebuildFieldsMap } from '@kbn/triggers-actions-ui-plugin/public/types';
-import type { HttpSetup } from '@kbn/core/public';
-import { getDescriptionFields } from '.';
-import type { ValidateOptions as RuleParams } from '.';
+import type { PrebuildFieldsMap } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { getDescriptionFields } from './get_description_fields';
 
-describe('shard size getDescriptionFields', () => {
+describe('getDescriptionFields', () => {
   const mockPrebuildField = jest.fn();
   const mockPrebuildFields = {
-    indexPattern: mockPrebuildField,
+    customQuery: mockPrebuildField,
   } as unknown as PrebuildFieldsMap;
 
   beforeEach(() => {
@@ -22,9 +20,9 @@ describe('shard size getDescriptionFields', () => {
 
   it('should return empty array when rule is not provided', () => {
     const result = getDescriptionFields({
-      rule: undefined as unknown as Rule<RuleParams>,
+      // @ts-expect-error Testing undefined rule
+      rule: undefined,
       prebuildFields: mockPrebuildFields,
-      http: {} as HttpSetup,
     });
 
     expect(result).toEqual([]);
@@ -33,20 +31,13 @@ describe('shard size getDescriptionFields', () => {
   it('should return empty array when prebuildFields is not provided', () => {
     const mockRule = {
       params: {
-        searchConfiguration: {
-          index: 'logs-*',
-        },
-        threshold: [10],
-        timeWindowSize: 5,
-        timeWindowUnit: 'm',
-        comparator: '>',
+        filterQueryText: '_id: *',
       },
-    } as unknown as Rule<RuleParams>;
+    } as unknown as Parameters<typeof getDescriptionFields>[0]['rule'];
 
     const result = getDescriptionFields({
       rule: mockRule,
       prebuildFields: undefined,
-      http: {} as HttpSetup,
     });
 
     expect(result).toEqual([]);
@@ -54,31 +45,30 @@ describe('shard size getDescriptionFields', () => {
 
   it('should return empty array when both rule and prebuildFields are not provided', () => {
     const result = getDescriptionFields({
-      rule: undefined as unknown as Rule<RuleParams>,
+      // @ts-expect-error Testing undefined rule
+      rule: undefined,
       prebuildFields: undefined,
-      http: {} as HttpSetup,
     });
 
     expect(result).toEqual([]);
   });
 
-  it('should call prebuildField with index wrapped in array', () => {
+  it('should return the custom query', () => {
     const mockRule = {
       params: {
-        indexPattern: 'logs-*',
+        filterQueryText: '_id: *',
       },
-    } as unknown as Rule<RuleParams>;
+    } as unknown as Parameters<typeof getDescriptionFields>[0]['rule'];
 
-    const mockReturnValue = { type: 'index_pattern', value: 'logs-*' };
+    const mockReturnValue = { type: 'customQuery', value: '_id: *' };
     mockPrebuildField.mockReturnValue(mockReturnValue);
 
     const result = getDescriptionFields({
       rule: mockRule,
       prebuildFields: mockPrebuildFields,
-      http: {} as HttpSetup,
     });
 
-    expect(mockPrebuildField).toHaveBeenCalledWith(['logs-*']);
+    expect(mockPrebuildField).toHaveBeenCalledWith('_id: *');
     expect(result).toEqual([mockReturnValue]);
   });
 });
