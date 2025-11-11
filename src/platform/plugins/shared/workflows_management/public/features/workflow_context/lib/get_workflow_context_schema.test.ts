@@ -145,9 +145,26 @@ describe('getWorkflowContextSchema', () => {
 
     // Test object with schema
     const fieldsSchema = schema.shape.inputs.shape.fields;
-    expect(fieldsSchema.parse({ email: 'test@example.com', name: 'Test' })).toEqual({
+    expect(
+      fieldsSchema.parse({
+        email: 'test@example.com',
+        name: 'Test',
+        metadata: {
+          source: 'test',
+          routing: {
+            shard: 1,
+          },
+        },
+      })
+    ).toEqual({
       email: 'test@example.com',
       name: 'Test',
+      metadata: {
+        source: 'test',
+        routing: {
+          shard: 1,
+        },
+      },
     });
 
     // Test nested path access

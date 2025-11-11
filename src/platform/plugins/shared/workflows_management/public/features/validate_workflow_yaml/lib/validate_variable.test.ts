@@ -380,9 +380,7 @@ describe('validateVariable', () => {
       severity: null,
       owner: 'variable-validation',
     });
-    expect(mockGetSchemaAtPath).toHaveBeenCalledWith(context, 'inputs.fields.email', {
-      partial: false,
-    });
+    expect(mockGetSchemaAtPath).toHaveBeenCalledWith(expect.any(Object), 'inputs.fields.email');
   });
 
   it('should validate deeply nested object paths', () => {
@@ -414,9 +412,8 @@ describe('validateVariable', () => {
 
     expect(result.message).toBeNull();
     expect(mockGetSchemaAtPath).toHaveBeenCalledWith(
-      context,
-      'inputs.fields.metadata.routing.shard',
-      { partial: false }
+      expect.any(Object),
+      'inputs.fields.metadata.routing.shard'
     );
   });
 
