@@ -129,7 +129,7 @@ export function convertToOtelConfig(
     // Initialize stream.name to root stream unconditionally
     allStatements.push({
       context: 'log',
-      statements: [`set(attributes["stream.name"], "${rootStream.name}")`],
+      statements: [`set(attributes["target_stream"], "${rootStream.name}")`],
     });
   }
 
@@ -161,9 +161,13 @@ export function convertToOtelConfig(
     if (processingStatements.length > 0) {
       for (const stmt of processingStatements) {
         // Add condition to only process when stream.name matches
+        const conditions = [
+          ...(stmt.conditions || []),
+          `attributes["target_stream"] == "${streamName}"`,
+        ];
         allStatements.push({
           context: stmt.context,
-          conditions: [...(stmt.conditions || []), `attributes["stream.name"] == "${streamName}"`],
+          conditions: conditions.length > 0 ? [conditions.join(' and ')] : undefined,
           statements: stmt.statements,
         });
       }
@@ -172,7 +176,7 @@ export function convertToOtelConfig(
     // 2. Add stream metadata (when stream.name == streamName)
     allStatements.push({
       context: 'log',
-      conditions: [`attributes["stream.name"] == "${streamName}"`],
+      conditions: [`attributes["target_stream"] == "${streamName}"`],
       statements: [
         `set(attributes["target_stream"], "${streamName}")`,
         `set(attributes["otel_processed"], true)`,
@@ -187,13 +191,14 @@ export function convertToOtelConfig(
 
     for (const routing of activeRoutings) {
       const ottlCondition = convertConditionToOTTL(routing.where);
+      const conditions = [
+        `attributes["target_stream"] == "${streamName}"`,
+        ottlCondition !== 'true' ? ottlCondition : undefined,
+      ].filter(Boolean);
       allStatements.push({
         context: 'log',
-        conditions: [
-          `attributes["stream.name"] == "${streamName}"`,
-          ottlCondition !== 'true' ? ottlCondition : undefined,
-        ].filter(Boolean),
-        statements: [`set(attributes["stream.name"], "${routing.destination}")`],
+        conditions: conditions.length > 0 ? [conditions.join(' and ')] : undefined,
+        statements: [`set(attributes["target_stream"], "${routing.destination}")`],
       });
     }
   }

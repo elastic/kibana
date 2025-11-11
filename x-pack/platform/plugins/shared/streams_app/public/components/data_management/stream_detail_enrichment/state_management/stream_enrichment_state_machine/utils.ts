@@ -63,6 +63,14 @@ export const createDefaultCustomSamplesDataSource = (
   storageKey: `streams:${streamName}__${uuidv4()}`,
 });
 
+export const createDefaultRawSamplesDataSource = (streamName: string): RawSamplesDataSource => ({
+  type: 'raw-samples',
+  name: DATA_SOURCES_I18N.rawSamples.defaultName,
+  enabled: true,
+  condition: `attributes["target_stream"] == "${streamName}"`,
+});
+
+// Legacy export for backwards compatibility - use createDefaultRawSamplesDataSource instead
 export const defaultRawSamplesDataSource: RawSamplesDataSource = {
   type: 'raw-samples',
   name: DATA_SOURCES_I18N.rawSamples.defaultName,

@@ -18,15 +18,6 @@ export function generateReroutePipeline({ definition }: GenerateReroutePipelineP
   return {
     id: getReroutePipelineName(definition.name),
     processors: [
-      // client side routing
-      ...definition.ingest.wired.routing.map((child) => {
-        return {
-          reroute: {
-            destination: child.destination,
-            if: `$("attributes.elastic.stream", "") == "${child.destination}" || $("attributes.elastic.stream", "").startsWith("${child.destination}" + ".")`,
-          },
-        };
-      }),
       // server side routing
       ...definition.ingest.wired.routing
         .filter((child) => child.status !== 'disabled')

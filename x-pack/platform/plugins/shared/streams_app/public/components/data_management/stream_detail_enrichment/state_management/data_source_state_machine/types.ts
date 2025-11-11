@@ -46,4 +46,5 @@ export type DataSourceEvent =
   | { type: 'dataSource.delete' }
   | { type: 'dataSource.refresh' }
   | { type: 'dataSource.enable' }
-  | { type: 'dataSource.disable' };
+  | { type: 'dataSource.disable' }
+  | { type: 'sampling.stop' };

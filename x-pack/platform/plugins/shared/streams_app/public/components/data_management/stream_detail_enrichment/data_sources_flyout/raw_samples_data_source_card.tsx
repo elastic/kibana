@@ -6,8 +6,17 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiSpacer, EuiFormRow, EuiTextArea, EuiText, EuiCode } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiSpacer,
+  EuiText,
+  EuiCode,
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataSourceActorRef } from '../state_management/data_source_state_machine';
 import { useDataSourceSelector } from '../state_management/data_source_state_machine';
 import type { RawSamplesDataSourceWithUIAttributes } from '../types';
@@ -24,13 +33,13 @@ export const RawSamplesDataSourceCard = ({ dataSourceRef }: RawSamplesDataSource
     (state) => state.context.dataSource
   ) as RawSamplesDataSourceWithUIAttributes;
 
-  const handleConditionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const isSampling = useDataSourceSelector(dataSourceRef, (state) =>
+    state.matches({ enabled: 'enablingSampling' })
+  );
+
+  const handleStopSampling = () => {
     dataSourceRef.send({
-      type: 'dataSource.change',
-      dataSource: {
-        ...dataSource,
-        condition: e.target.value || undefined,
-      },
+      type: 'sampling.stop',
     });
   };
 
@@ -44,36 +53,36 @@ export const RawSamplesDataSourceCard = ({ dataSourceRef }: RawSamplesDataSource
       <EuiCallOut iconType="beaker" size="s" title={DATA_SOURCES_I18N.rawSamples.callout} />
       <EuiSpacer size="m" />
 
-      <EuiFormRow
-        label={i18n.translate(
-          'xpack.streams.streamDetailView.managementTab.enrichment.rawSamples.conditionLabel',
-          { defaultMessage: 'OTTL Condition (Optional)' }
-        )}
-        helpText={
-          <EuiText size="xs" color="subdued">
+      <EuiText size="s">
+        <p>
+          <FormattedMessage
+            id="xpack.streams.streamDetailView.managementTab.enrichment.rawSamples.conditionInfo"
+            defaultMessage="Sampling is automatically configured to filter documents for this stream using the condition: {condition}"
+            values={{
+              condition: <EuiCode>{dataSource.condition || 'None'}</EuiCode>,
+            }}
+          />
+        </p>
+      </EuiText>
+
+      <EuiSpacer size="m" />
+
+      <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            size="s"
+            color="danger"
+            onClick={handleStopSampling}
+            isLoading={isSampling}
+            data-test-subj="streamsAppStopSamplingButton"
+          >
             {i18n.translate(
-              'xpack.streams.streamDetailView.managementTab.enrichment.rawSamples.conditionHelp',
-              {
-                defaultMessage:
-                  'Filter sampled documents using OpenTelemetry Transformation Language. Example: ',
-              }
+              'xpack.streams.streamDetailView.managementTab.enrichment.rawSamples.stopSampling',
+              { defaultMessage: 'Stop sampling' }
             )}
-            <EuiCode>{'attributes["service.name"] == "my-service"'}</EuiCode>
-          </EuiText>
-        }
-        fullWidth
-      >
-        <EuiTextArea
-          placeholder={i18n.translate(
-            'xpack.streams.streamDetailView.managementTab.enrichment.rawSamples.conditionPlaceholder',
-            { defaultMessage: 'attributes["log.level"] == "ERROR"' }
-          )}
-          value={dataSource.condition || ''}
-          onChange={handleConditionChange}
-          rows={3}
-          fullWidth
-        />
-      </EuiFormRow>
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </DataSourceCard>
   );
 };

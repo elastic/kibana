@@ -48,6 +48,7 @@ export const dataSourceMachine = setup({
   actions: {
     notifyDataCollectionFailure: getPlaceholderFor(createDataCollectionFailureNotifier),
     notifySamplingConfigFailure: getPlaceholderFor(createSamplingConfigFailureNotifier),
+    disableSamplingOnExit: () => {},
     restorePersistedCustomSamplesDocuments: assign(({ context }) => {
       if (context.dataSource.type === 'custom-samples' && context.dataSource.storageKey) {
         const documents = localStorage.getItem(context.dataSource.storageKey);
@@ -133,6 +134,10 @@ export const dataSourceMachine = setup({
             ],
           },
         ],
+        'sampling.stop': {
+          guard: 'isRawSamplesType',
+          target: '.stoppingSampling',
+        },
       },
       states: {
         configuringSampling: {
@@ -161,6 +166,19 @@ export const dataSourceMachine = setup({
             },
             onError: {
               target: 'loadingData',
+              actions: [{ type: 'notifySamplingConfigFailure' }],
+            },
+          },
+        },
+        stoppingSampling: {
+          invoke: {
+            id: 'samplingDisableActor',
+            src: 'disableSampling',
+            onDone: {
+              target: 'idle',
+            },
+            onError: {
+              target: 'idle',
               actions: [{ type: 'notifySamplingConfigFailure' }],
             },
           },

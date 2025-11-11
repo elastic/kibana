@@ -11,8 +11,8 @@ import { useBoolean } from '@kbn/react-hooks';
 import { DATA_SOURCES_I18N } from './translations';
 import {
   createDefaultCustomSamplesDataSource,
+  createDefaultRawSamplesDataSource,
   defaultKqlSamplesDataSource,
-  defaultRawSamplesDataSource,
 } from '../state_management/stream_enrichment_state_machine/utils';
 import {
   useStreamEnrichmentEvents,
@@ -67,7 +67,7 @@ export const AddDataSourcesContextMenu = () => {
                 icon: 'beaker',
                 'data-test-subj': 'streamsAppProcessingAddRawSamplesDataSource',
                 onClick: () => {
-                  addDataSource(defaultRawSamplesDataSource);
+                  addDataSource(createDefaultRawSamplesDataSource(streamName));
                   closeMenu();
                 },
               },

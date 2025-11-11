@@ -20,6 +20,29 @@ export function generateIngestPipeline(
   return {
     id: getProcessingPipelineName(name),
     processors: [
+      // client side routing
+      ...(Streams.WiredStream.Definition.is(definition)
+        ? definition.ingest.wired.routing.map((child) => {
+            return {
+              reroute: {
+                destination: child.destination,
+                if: `$("attributes.target_stream", "") == "${child.destination}" || $("attributes.target_stream", "").startsWith("${child.destination}" + ".")`,
+              },
+            };
+          })
+        : []),
+      {
+        set: {
+          field: 'stream.name',
+          value: definition.name,
+          if: `$("attributes.target_stream", "") == "${definition.name}"`,
+        },
+      },
+      {
+        terminate: {
+          if: `$("attributes.target_stream", "") == "${definition.name}"`,
+        },
+      },
       ...(isRoot(definition.name) ? getLogsDefaultPipelineProcessors() : []),
       ...(!isRoot(definition.name) && isWiredStream
         ? [

@@ -25,36 +25,44 @@ export class GrokProcessorConverter extends OTTLProcessorConverter<GrokProcessor
 
     // Unified approach: cascade with short-circuit logic for all cases
     // Try each pattern in order, skip subsequent ones if one succeeds
+    // Note: cache doesn't persist between conditional blocks, so we use attributes["_cache"] for persistence
     const statementBlocks: Array<{ statements: string[]; conditions?: string[] }> = [];
 
     processor.patterns.forEach((pattern, idx) => {
       const statements: string[] = [
         `set(cache["grok_${idx}"], ExtractGrokPatterns(${fromField}, "${pattern}", ${!processor.ignore_missing}))`,
+        // Persist cache to attributes so it's available in subsequent conditional blocks
+        `set(attributes["_cache"]["grok_${idx}"], cache["grok_${idx}"])`,
       ];
-
-      // Set matched flag if this pattern extracted any fields
-      statements.push(`set(cache["matched"], Len(cache["grok_${idx}"]) > 0)`);
 
       if (idx === 0) {
         // First pattern: no condition, always try
         statementBlocks.push({ statements });
       } else {
-        // Subsequent patterns: only try if previous patterns failed
+        // Subsequent patterns: only try if all previous patterns failed
+        // Check that all previous grok results are empty (using persisted cache in attributes)
+        const previousFailedConditions = Array.from(
+          { length: idx },
+          (_, i) =>
+            `attributes["_cache"]["grok_${i}"] == nil or Len(attributes["_cache"]["grok_${i}"]) == 0`
+        );
         statementBlocks.push({
           statements,
-          conditions: ['cache["matched"] == false'],
+          conditions: [previousFailedConditions.join(' and ')],
         });
       }
     });
 
-    // Final block: route fields from whichever pattern succeeded (only if matched)
+    // Final block: route fields from whichever pattern succeeded (only if any matched)
     const finalStatements: string[] = [];
 
-    // Coalesce to get first successful extraction
+    // Coalesce to get first successful extraction (using persisted cache from attributes)
     if (processor.patterns.length === 1) {
-      finalStatements.push(`set(cache["grok_result"], cache["grok_0"])`);
+      finalStatements.push(`set(cache["grok_result"], attributes["_cache"]["grok_0"])`);
     } else {
-      const cacheRefs = processor.patterns.map((_, idx) => `cache["grok_${idx}"]`).join(', ');
+      const cacheRefs = processor.patterns
+        .map((_, idx) => `attributes["_cache"]["grok_${idx}"]`)
+        .join(', ');
       finalStatements.push(`set(cache["grok_result"], Coalesce(${cacheRefs}, {}))`);
     }
 
@@ -64,10 +72,21 @@ export class GrokProcessorConverter extends OTTLProcessorConverter<GrokProcessor
       finalStatements.push(`set(${setter}, cache["grok_result"]["${field.name}"])`);
     }
 
+    // Clean up temporary cache storage
+    finalStatements.push(`delete_key(attributes, "_cache")`);
+
+    // Build condition: at least one pattern matched (using persisted cache from attributes)
+    const anyMatchedCondition = processor.patterns
+      .map(
+        (_, idx) =>
+          `attributes["_cache"]["grok_${idx}"] != nil and Len(attributes["_cache"]["grok_${idx}"]) > 0`
+      )
+      .join(' or ');
+
     // Only execute field routing if a pattern matched
     statementBlocks.push({
       statements: finalStatements,
-      conditions: ['cache["matched"] == true'],
+      conditions: [anyMatchedCondition],
     });
 
     // Create multiple statement blocks with conditions

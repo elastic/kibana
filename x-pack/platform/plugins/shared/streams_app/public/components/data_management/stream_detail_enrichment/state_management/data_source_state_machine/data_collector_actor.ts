@@ -16,7 +16,6 @@ import { Observable, filter, map, of, from } from 'rxjs';
 import { isRunningResponse } from '@kbn/data-plugin/common';
 import type { IEsSearchResponse } from '@kbn/search-types';
 import { pick } from 'lodash';
-import { getRoot } from '@kbn/streams-schema/src/shared/hierarchy';
 import { getFormattedError } from '../../../../../util/errors';
 import type { DataSourceMachineDeps } from './types';
 import type { EnrichmentDataSourceWithUIAttributes } from '../../types';
@@ -113,7 +112,7 @@ function collectRawSamplesData({
     streamsRepositoryClient.fetch('GET /internal/streams/{name}/samples/_raw', {
       signal: null,
       params: {
-        path: { name: getRoot(index) },
+        path: { name: index },
       },
     })
   );
