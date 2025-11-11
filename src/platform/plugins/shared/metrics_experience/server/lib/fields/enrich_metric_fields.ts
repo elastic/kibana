@@ -183,26 +183,25 @@ export async function enrichMetricFields({
 
   const uniqueDimensionSets = new Map<string, Array<Dimension>>();
 
-  return metricFields
-    .map((field) => {
-      const { dimensions, unitFromSample, totalHits } =
-        metricMetadataMap.get(generateMapKey(field.index, field.name)) || {};
-      const fieldCaps = indexFieldCapsMap.get(field.index);
+  return metricFields.map((field) => {
+    const { dimensions, unitFromSample, totalHits } =
+      metricMetadataMap.get(generateMapKey(field.index, field.name)) || {};
+    const fieldCaps = indexFieldCapsMap.get(field.index);
 
-      if ((!dimensions || dimensions.length === 0) && totalHits === 0) {
-        return;
-      }
+    if ((!dimensions || dimensions.length === 0) && totalHits === 0) {
+      return { ...field, dimensions: [], noData: true };
+    }
 
-      const cacheKey = dimensions ? [...(dimensions || [])].sort().join(',') : undefined;
-      if (cacheKey && !uniqueDimensionSets.has(cacheKey) && fieldCaps) {
-        uniqueDimensionSets.set(cacheKey, extractDimensions(fieldCaps, dimensions));
-      }
+    const cacheKey = dimensions ? [...(dimensions || [])].sort().join(',') : undefined;
+    if (cacheKey && !uniqueDimensionSets.has(cacheKey) && fieldCaps) {
+      uniqueDimensionSets.set(cacheKey, extractDimensions(fieldCaps, dimensions));
+    }
 
-      return {
-        ...field,
-        dimensions: cacheKey ? uniqueDimensionSets.get(cacheKey) ?? [] : [],
-        unit: normalizeUnit({ fieldName: field.name, unit: field.unit ?? unitFromSample }),
-      };
-    })
-    .filter((field): field is NonNullable<typeof field> => field !== undefined);
+    return {
+      ...field,
+      dimensions: cacheKey ? uniqueDimensionSets.get(cacheKey) ?? [] : [],
+      noData: false,
+      unit: normalizeUnit({ fieldName: field.name, unit: field.unit ?? unitFromSample }),
+    };
+  });
 }

@@ -20,6 +20,7 @@ export interface MetricField {
   unit?: MetricUnit;
   display?: string;
   scope?: string;
+  noData?: boolean;
 }
 
 export interface MetricFieldsResponse {

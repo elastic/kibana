@@ -103,6 +103,54 @@ describe('enrichMetricFields', () => {
   });
 
   describe('data availability', () => {
+    const testCases = [
+      {
+        description: 'marks noData true when no sample docs exist',
+        mockResponse: createMsearchResponse(TEST_INDEX_METRICS, {}, 0),
+        expectedResult: {
+          dimensions: [],
+          index: TEST_INDEX_METRICS,
+          name: TEST_METRIC_NAME,
+          noData: true,
+          type: 'long',
+        },
+      },
+      {
+        description: 'marks noData false when sample docs exist',
+        mockResponse: createMsearchResponse(TEST_INDEX_METRICS, {
+          [TEST_HOST_FIELD]: [TEST_HOST_VALUE],
+        }),
+        setupFieldCaps: true,
+        expectedResult: {
+          index: TEST_INDEX_METRICS,
+          name: TEST_METRIC_NAME,
+          noData: false,
+          dimensions: [{ name: TEST_HOST_FIELD, type: 'keyword' }],
+        },
+      },
+    ];
+
+    testCases.forEach(({ description, mockResponse, setupFieldCaps, expectedResult }) => {
+      it(description, async () => {
+        const metricFields = [createMetricField()];
+        msearchMock.mockResolvedValue(mockResponse);
+
+        if (setupFieldCaps) {
+          indexFieldCapsMap.set(TEST_INDEX_METRICS, createFieldCaps());
+        }
+
+        const result = await enrichMetricFields({
+          esClient: esClientMock,
+          metricFields,
+          indexFieldCapsMap,
+          logger,
+          timerange: timeRangeFixture,
+        });
+
+        expect(result[0]).toMatchObject(expectedResult);
+      });
+    });
+
     it('should return duplicate fields from different indices', async () => {
       const metricFields = [
         createMetricField(),
@@ -113,8 +161,7 @@ describe('enrichMetricFields', () => {
         responses: [
           ...createMsearchResponse(TEST_INDEX_METRICS, { [TEST_HOST_FIELD]: [TEST_HOST_VALUE] })
             .responses,
-          ...createMsearchResponse(TEST_INDEX_METRICBEAT, { [TEST_HOST_FIELD]: [TEST_HOST_VALUE] })
-            .responses,
+          ...createMsearchResponse(TEST_INDEX_METRICBEAT, {}).responses,
         ],
       });
 
@@ -140,73 +187,15 @@ describe('enrichMetricFields', () => {
           index: TEST_INDEX_METRICS,
           name: 'system.cpu.utilization',
           type: 'long',
+          noData: false,
         },
         {
-          dimensions: [
-            {
-              name: TEST_HOST_FIELD,
-              type: 'keyword',
-            },
-          ],
+          dimensions: [],
           index: TEST_INDEX_METRICBEAT,
           name: 'system.cpu.utilization',
           type: 'long',
+          noData: false,
         },
-      ]);
-    });
-  });
-
-  describe('filtering', () => {
-    it('filters out fields with no data (totalHits === 0)', async () => {
-      const metricFields = [
-        createMetricField('metric.with.data'),
-        createMetricField('metric.without.data'),
-      ];
-
-      msearchMock.mockResolvedValue({
-        responses: [
-          ...createMsearchResponse(TEST_INDEX_METRICS, { [TEST_HOST_FIELD]: [TEST_HOST_VALUE] }, 1)
-            .responses,
-          ...createMsearchResponse(TEST_INDEX_METRICS, {}, 0).responses,
-        ],
-      });
-
-      indexFieldCapsMap.set(TEST_INDEX_METRICS, createFieldCaps());
-
-      const result = await enrichMetricFields({
-        esClient: esClientMock,
-        metricFields,
-        indexFieldCapsMap,
-        logger,
-        timerange: timeRangeFixture,
-      });
-
-      expect(result).toHaveLength(1);
-      expect(result[0].name).toBe('metric.with.data');
-    });
-
-    it('handles fields with no dimensions in sample', async () => {
-      const metricFields = [createMetricField()];
-
-      msearchMock.mockResolvedValue(
-        createMsearchResponse(TEST_INDEX_METRICS, {}, 1) // No dimension fields
-      );
-
-      indexFieldCapsMap.set(TEST_INDEX_METRICS, createFieldCaps());
-
-      const result = await enrichMetricFields({
-        esClient: esClientMock,
-        metricFields,
-        indexFieldCapsMap,
-        logger,
-        timerange: timeRangeFixture,
-      });
-
-      expect(result).toEqual([
-        expect.objectContaining({
-          name: TEST_METRIC_NAME,
-          dimensions: [],
-        }),
       ]);
     });
   });

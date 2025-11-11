@@ -8,10 +8,9 @@
  */
 
 import type { QueryFunctionContext } from '@kbn/react-query';
-import { useInfiniteQuery } from '@kbn/react-query';
-import { useEffect, useMemo } from 'react';
 import type { TimeRange } from '@kbn/es-query';
-import { useMetricsExperienceClient } from '../context/metrics_experience_client_provider/use_metrics_experience_client';
+import { useMetricsExperienceClient } from '../context/metrics_experience_client_provider';
+import { usePaginatedMetricFieldsQuery } from './use_paginated_metric_fields_query';
 
 export const useMetricFieldsQuery = (params?: {
   index: string;
@@ -19,59 +18,40 @@ export const useMetricFieldsQuery = (params?: {
 }) => {
   const { client } = useMetricsExperienceClient();
 
-  const { hasNextPage, data, status, fetchNextPage, isFetchingNextPage, isFetching } =
-    useInfiniteQuery({
-      queryKey: ['metricFields', params?.index, params?.timeRange?.from, params?.timeRange?.to],
-      queryFn: async ({
-        queryKey,
-        pageParam = 1,
-        signal,
-      }: QueryFunctionContext<[string, string?, string?, string?], number>) => {
-        try {
-          const [, index, from, to] = queryKey;
+  return usePaginatedMetricFieldsQuery({
+    queryKey: [
+      'metricFields',
+      params?.index,
+      params?.timeRange?.from,
+      params?.timeRange?.to,
+    ] as const,
+    queryFn: async ({
+      queryKey,
+      pageParam = 1,
+      signal,
+    }: QueryFunctionContext<readonly [string, string?, string?, string?], number>) => {
+      try {
+        const [, index, from, to] = queryKey;
 
-          const response = await client.getFields(
-            {
-              index,
-              from,
-              to,
-              page: pageParam,
-              size: 200,
-            },
-            signal
-          );
+        const response = await client.getFields(
+          {
+            index,
+            from,
+            to,
+            page: pageParam,
+            size: 200,
+          },
+          signal
+        );
 
-          if (!response) {
-            throw new Error(`Failed to fetch fields for ${index}`);
-          }
-
-          return response;
-        } catch (error) {
-          throw error;
+        if (!response) {
+          throw new Error(`Failed to fetch fields for ${index}`);
         }
-      },
-      keepPreviousData: true,
-      getNextPageParam: (lastPage) => {
-        if (!lastPage) return;
-        if (lastPage?.fields.length === 0) return;
-        return lastPage?.page + 1;
-      },
-      staleTime: 10 * 60 * 1000, // 10 minutes - fields don't change often
-    });
 
-  useEffect(() => {
-    if (hasNextPage && !isFetchingNextPage) {
-      fetchNextPage();
-    }
-  }, [hasNextPage, fetchNextPage, isFetchingNextPage]);
-
-  const metricFieldsData = useMemo(() => {
-    return data?.pages?.filter(Boolean).flatMap((page) => page.fields) ?? [];
-  }, [data]);
-
-  return {
-    data: metricFieldsData,
-    status,
-    isFetching,
-  };
+        return response;
+      } catch (error) {
+        throw error;
+      }
+    },
+  });
 };

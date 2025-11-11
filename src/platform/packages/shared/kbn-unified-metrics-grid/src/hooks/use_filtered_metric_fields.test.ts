@@ -14,7 +14,6 @@ import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { useMetricFieldsSearchQuery } from './use_metric_fields_search_query';
 import { FIELD_VALUE_SEPARATOR } from '../common/constants';
 
-// Mock the search query hook
 jest.mock('./use_metric_fields_search_query', () => ({
   useMetricFieldsSearchQuery: jest.fn(() => ({
     data: [],
