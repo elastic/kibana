@@ -1495,7 +1495,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.process_ancestry_length',
       {
         defaultMessage:
-          'Maximum number of process ancestry entries to include in process events. For 8.14 and earlier, default: 20. For 8.15 and later, default: 5.'.
+          'Maximum number of process ancestry entries to include in process events. For 8.14 and earlier, default: 20. For 8.15 and later, default: 5.',
       }
     ),
   },
@@ -1506,7 +1506,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.process_ancestry_length',
       {
         defaultMessage:
-          'Maximum number of process ancestry entries to include in process events. For 8.14 and earlier, default: 20. For 8.15 and later, default: 5.'.
+          'Maximum number of process ancestry entries to include in process events. For 8.14 and earlier, default: 20. For 8.15 and later, default: 5.',
       }
     ),
   },
@@ -1517,7 +1517,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.process_ancestry_length',
       {
         defaultMessage:
-          'Maximum number of process ancestry entries to include in process events. For 8.14 and earlier, default: 20. For 8.15 and later, default: 5.'.
+          'Maximum number of process ancestry entries to include in process events. For 8.14 and earlier, default: 20. For 8.15 and later, default: 5.',
       }
     ),
   },
@@ -1812,7 +1812,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.image_load.origin_info_collection',
       {
         defaultMessage:
-          "Include 'dll.origin_url', 'dll.origin_referrer_url', and 'dll.Ext.windows.zone_identifier' in image load events. These fields normally show where the loaded DLL was downloaded from, using information taken from the file's Mark of the Web. For 9.1 and earlier, default: false. For 9.2 and later, default: true.".
+          "Include 'dll.origin_url', 'dll.origin_referrer_url', and 'dll.Ext.windows.zone_identifier' in image load events. These fields normally show where the loaded DLL was downloaded from, using information taken from the file's Mark of the Web. For 9.1 and earlier, default: false. For 9.2 and later, default: true.",
       }
     ),
   },
@@ -1985,7 +1985,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.process.origin_info_collection',
       {
         defaultMessage:
-          "Include 'process.origin_url', 'process.origin_referrer_url', and 'process.Ext.windows.zone_identifier' in process events. These fields normally show where the process's executable file was downloaded from, using information taken from the file's Mark of the Web. For 9.1 and earlier, default: false. For 9.2 and later, default: true.".
+          "Include 'process.origin_url', 'process.origin_referrer_url', and 'process.Ext.windows.zone_identifier' in process events. These fields normally show where the process's executable file was downloaded from, using information taken from the file's Mark of the Web. For 9.1 and earlier, default: false. For 9.2 and later, default: true.",
       }
     ),
   },
@@ -2106,7 +2106,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.deduplicate_network_events',
       {
         defaultMessage:
-          'Deduplicate network events based on repeated Src-IP/Dst-IP/Dst-Port/PID tuple grouping. For 8.14 and earlier, default: false. For 8.15 and later, default: true.'.
+          'Deduplicate network events based on repeated Src-IP/Dst-IP/Dst-Port/PID tuple grouping. For 8.14 and earlier, default: false. For 8.15 and later, default: true.',
       }
     ),
   },
@@ -2117,7 +2117,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.deduplicate_network_events',
       {
         defaultMessage:
-          'Deduplicate network events based on repeated Src-IP/Dst-IP/Dst-Port/PID tuple grouping. For 8.14 and earlier, default: false. For 8.15 and later, default: true.'.
+          'Deduplicate network events based on repeated Src-IP/Dst-IP/Dst-Port/PID tuple grouping. For 8.14 and earlier, default: false. For 8.15 and later, default: true.',
       }
     ),
   },
@@ -2128,7 +2128,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.deduplicate_network_events',
       {
         defaultMessage:
-          'Deduplicate network events based on repeated Src-IP/Dst-IP/Dst-Port/PID tuple grouping. For 8.14 and earlier, default: false. For 8.15 and later, default: true.'.
+          'Deduplicate network events based on repeated Src-IP/Dst-IP/Dst-Port/PID tuple grouping. For 8.14 and earlier, default: false. For 8.15 and later, default: true.',
       }
     ),
   },
@@ -2227,7 +2227,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.aggregate_process',
       {
         defaultMessage:
-          'Reduce event volume by merging related process events into fewer aggregate events. For 8.17 and earlier, default: false. For 8.18 and later, default: true.'.
+          'Reduce event volume by merging related process events into fewer aggregate events. For 8.17 and earlier, default: false. For 8.18 and later, default: true.',
       }
     ),
   },
@@ -2238,7 +2238,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.aggregate_process',
       {
         defaultMessage:
-          'Reduce event volume by merging related process events into fewer aggregate events. For 8.17 and earlier, default: false. For 8.18 and later, default: true.'.
+          'Reduce event volume by merging related process events into fewer aggregate events. For 8.17 and earlier, default: false. For 8.18 and later, default: true.',
       }
     ),
   },
@@ -2249,7 +2249,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.aggregate_process',
       {
         defaultMessage:
-          'Reduce event volume by merging related process events into fewer aggregate events. For 8.17 and earlier, default: false. For 8.18 and later, default: true.'.
+          'Reduce event volume by merging related process events into fewer aggregate events. For 8.17 and earlier, default: false. For 8.18 and later, default: true.',
       }
     ),
   },
@@ -2260,7 +2260,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.aggregate_network',
       {
         defaultMessage:
-          'Reduce event volume by merging related network events into fewer aggregate events. For 8.17 and earlier, default: false. For 8.18 and later, default: true.'.
+          'Reduce event volume by merging related network events into fewer aggregate events. For 8.17 and earlier, default: false. For 8.18 and later, default: true.',
       }
     ),
   },
@@ -2271,7 +2271,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.aggregate_network',
       {
         defaultMessage:
-          'Reduce event volume by merging related network events into fewer aggregate events. For 8.17 and earlier, default: false. For 8.18 and later, default: true.'.
+          'Reduce event volume by merging related network events into fewer aggregate events. For 8.17 and earlier, default: false. For 8.18 and later, default: true.',
       }
     ),
   },
@@ -2282,7 +2282,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.aggregate_network',
       {
         defaultMessage:
-          'Reduce event volume by merging related network events into fewer aggregate events. For 8.17 and earlier, default: false. For 8.18 and later, default: true.'.
+          'Reduce event volume by merging related network events into fewer aggregate events. For 8.17 and earlier, default: false. For 8.18 and later, default: true.',
       }
     ),
   },
@@ -2293,7 +2293,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.alerts.hash.md5',
       {
         defaultMessage:
-          'Include MD5 hashes in alerts. Even if set to false, MD5 hashes will still be included if alert exceptions, trusted apps, or blocklisting require them. For 8.17 and earlier, default: true. For 8.18 and later, default: false.'.
+          'Include MD5 hashes in alerts. Even if set to false, MD5 hashes will still be included if alert exceptions, trusted apps, or blocklisting require them. For 8.17 and earlier, default: true. For 8.18 and later, default: false.',
       }
     ),
   },
@@ -2304,7 +2304,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.alerts.hash.sha1',
       {
         defaultMessage:
-          "Include SHA-1 hashes in alerts. Even if set to 'false', SHA-1 hashes will still be included if alert exceptions, trusted apps, or blocklisting require them. For 8.17 and earlier, default: true. For 8.18 and later, default: false.".
+          "Include SHA-1 hashes in alerts. Even if set to 'false', SHA-1 hashes will still be included if alert exceptions, trusted apps, or blocklisting require them. For 8.17 and earlier, default: true. For 8.18 and later, default: false.",
       }
     ),
   },
@@ -2315,7 +2315,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.hash.md5',
       {
         defaultMessage:
-          "Include MD5 hashes in processes and libraries in events. Even if set to 'false', MD5 hashes will still be included if alert exceptions, trusted apps, or blocklisting require them. For 8.17 and earlier, default: true. For 8.18 and later, default: false.".
+          "Include MD5 hashes in processes and libraries in events. Even if set to 'false', MD5 hashes will still be included if alert exceptions, trusted apps, or blocklisting require them. For 8.17 and earlier, default: true. For 8.18 and later, default: false.",
       }
     ),
   },
@@ -2326,7 +2326,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.hash.sha1',
       {
         defaultMessage:
-          "Include SHA-1 hashes in processes and libraries in events. Even if set to 'false', SHA-1 hashes will still be included if alert exceptions, trusted apps, or blocklisting require them. For 8.17 and earlier, default: true. For 8.18 and later, default: false.".
+          "Include SHA-1 hashes in processes and libraries in events. Even if set to 'false', SHA-1 hashes will still be included if alert exceptions, trusted apps, or blocklisting require them. For 8.17 and earlier, default: true. For 8.18 and later, default: false.",
       }
     ),
   },
@@ -2337,7 +2337,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.hash.sha256',
       {
         defaultMessage:
-          "Include SHA-256 hashes in processes and libraries in events. Even if set to 'false', SHA-256 hashes will still be included if alert exceptions, trusted apps, or blocklisting require them. For 8.17 and earlier, default: true. For 8.18 and later, default: false.".
+          "Include SHA-256 hashes in processes and libraries in events. Even if set to 'false', SHA-256 hashes will still be included if alert exceptions, trusted apps, or blocklisting require them. For 8.17 and earlier, default: true. For 8.18 and later, default: false.",
       }
     ),
   },
@@ -2381,7 +2381,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.alerts.hash.md5',
       {
         defaultMessage:
-          'Include MD5 hashes in alerts. Even if set to false, MD5 hashes will still be included if alert exceptions, trusted apps, or blocklisting require them. For 8.17 and earlier, default: true. For 8.18 and later, default: false.'.
+          'Include MD5 hashes in alerts. Even if set to false, MD5 hashes will still be included if alert exceptions, trusted apps, or blocklisting require them. For 8.17 and earlier, default: true. For 8.18 and later, default: false.',
       }
     ),
   },
@@ -2392,7 +2392,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.alerts.hash.sha1',
       {
         defaultMessage:
-          "Include SHA-1 hashes in alerts. Even if set to 'false', SHA-1 hashes will still be included if alert exceptions, trusted apps, or blocklisting require them. For 8.17 and earlier, default: true. For 8.18 and later, default: false.".
+          "Include SHA-1 hashes in alerts. Even if set to 'false', SHA-1 hashes will still be included if alert exceptions, trusted apps, or blocklisting require them. For 8.17 and earlier, default: true. For 8.18 and later, default: false.",
       }
     ),
   },
@@ -2403,7 +2403,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.hash.md5',
       {
         defaultMessage:
-          "Include MD5 hashes in processes and libraries in events. Even if set to 'false', MD5 hashes will still be included if alert exceptions, trusted apps, or blocklisting require them. For 8.17 and earlier, default: true. For 8.18 and later, default: false.".
+          "Include MD5 hashes in processes and libraries in events. Even if set to 'false', MD5 hashes will still be included if alert exceptions, trusted apps, or blocklisting require them. For 8.17 and earlier, default: true. For 8.18 and later, default: false.",
       }
     ),
   },
@@ -2414,7 +2414,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.hash.sha1',
       {
         defaultMessage:
-          "Include SHA-1 hashes in processes and libraries in events. Even if set to 'false', SHA-1 hashes will still be included if alert exceptions, trusted apps, or blocklisting require them. For 8.17 and earlier, default: true. For 8.18 and later, default: false.".
+          "Include SHA-1 hashes in processes and libraries in events. Even if set to 'false', SHA-1 hashes will still be included if alert exceptions, trusted apps, or blocklisting require them. For 8.17 and earlier, default: true. For 8.18 and later, default: false.",
       }
     ),
   },
@@ -2425,7 +2425,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.hash.sha256',
       {
         defaultMessage:
-          "Include SHA-256 hashes in processes and libraries in events. Even if set to 'false', SHA-256 hashes will still be included if alert exceptions, trusted apps, or blocklisting require them. For 8.17 and earlier, default: true. For 8.18 and later, default: false.".
+          "Include SHA-256 hashes in processes and libraries in events. Even if set to 'false', SHA-256 hashes will still be included if alert exceptions, trusted apps, or blocklisting require them. For 8.17 and earlier, default: true. For 8.18 and later, default: false.",
       }
     ),
   },
@@ -2436,7 +2436,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.alerts.hash.md5',
       {
         defaultMessage:
-          'Include MD5 hashes in alerts. Even if set to false, MD5 hashes will still be included if alert exceptions, trusted apps, or blocklisting require them. For 8.17 and earlier, default: true. For 8.18 and later, default: false.'.
+          'Include MD5 hashes in alerts. Even if set to false, MD5 hashes will still be included if alert exceptions, trusted apps, or blocklisting require them. For 8.17 and earlier, default: true. For 8.18 and later, default: false.',
       }
     ),
   },
@@ -2447,7 +2447,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.alerts.hash.sha1',
       {
         defaultMessage:
-          "Include SHA-1 hashes in alerts. Even if set to 'false', SHA-1 hashes will still be included if alert exceptions, trusted apps, or blocklisting require them. For 8.17 and earlier, default: true. For 8.18 and later, default: false.".
+          "Include SHA-1 hashes in alerts. Even if set to 'false', SHA-1 hashes will still be included if alert exceptions, trusted apps, or blocklisting require them. For 8.17 and earlier, default: true. For 8.18 and later, default: false.",
       }
     ),
   },
@@ -2458,7 +2458,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.hash.md5',
       {
         defaultMessage:
-          "Include MD5 hashes in processes and libraries in events. Even if set to 'false', MD5 hashes will still be included if alert exceptions, trusted apps, or blocklisting require them. For 8.17 and earlier, default: true. For 8.18 and later, default: false.".
+          "Include MD5 hashes in processes and libraries in events. Even if set to 'false', MD5 hashes will still be included if alert exceptions, trusted apps, or blocklisting require them. For 8.17 and earlier, default: true. For 8.18 and later, default: false.",
       }
     ),
   },
@@ -2469,7 +2469,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.hash.sha1',
       {
         defaultMessage:
-          "Include SHA-1 hashes in processes and libraries in events. Even if set to 'false', SHA-1 hashes will still be included if alert exceptions, trusted apps, or blocklisting require them. For 8.17 and earlier, default: true. For 8.18 and later, default: false.".
+          "Include SHA-1 hashes in processes and libraries in events. Even if set to 'false', SHA-1 hashes will still be included if alert exceptions, trusted apps, or blocklisting require them. For 8.17 and earlier, default: true. For 8.18 and later, default: false.",
       }
     ),
   },
@@ -2480,7 +2480,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.hash.sha256',
       {
         defaultMessage:
-          "Include SHA-256 hashes in processes and libraries in events. Even if set to 'false', SHA-256 hashes will still be included if alert exceptions, trusted apps, or blocklisting require them. For 8.17 and earlier, default: true. For 8.18 and later, default: false.".
+          "Include SHA-256 hashes in processes and libraries in events. Even if set to 'false', SHA-256 hashes will still be included if alert exceptions, trusted apps, or blocklisting require them. For 8.17 and earlier, default: true. For 8.18 and later, default: false.",
       }
     ),
   },
@@ -2491,7 +2491,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.set_extended_host_information',
       {
         defaultMessage:
-          "Include full 'host.*' fieldset information in events. When 'false', only 'id', 'name', and 'os' are included. Warning: 'true' will increase event size. For 8.17 and earlier, default: true. For 8.18 and later, default: false.".
+          "Include full 'host.*' fieldset information in events. When 'false', only 'id', 'name', and 'os' are included. Warning: 'true' will increase event size. For 8.17 and earlier, default: true. For 8.18 and later, default: false.",
       }
     ),
   },
@@ -2502,7 +2502,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.set_extended_host_information',
       {
         defaultMessage:
-          "Include full 'host.*' fieldset information in events. When 'false', only 'id', 'name', and 'os' are included. Warning: 'true' will increase event size. For 8.17 and earlier, default: true. For 8.18 and later, default: false.".
+          "Include full 'host.*' fieldset information in events. When 'false', only 'id', 'name', and 'os' are included. Warning: 'true' will increase event size. For 8.17 and earlier, default: true. For 8.18 and later, default: false.",
       }
     ),
   },
@@ -2513,7 +2513,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.set_extended_host_information',
       {
         defaultMessage:
-          "Include full 'host.*' fieldset information in events. When 'false', only 'id', 'name', and 'os' are included. Warning: 'true' will increase event size. For 8.17 and earlier, default: true. For 8.18 and later, default: false.".
+          "Include full 'host.*' fieldset information in events. When 'false', only 'id', 'name', and 'os' are included. Warning: 'true' will increase event size. For 8.17 and earlier, default: true. For 8.18 and later, default: false.",
       }
     ),
   },
