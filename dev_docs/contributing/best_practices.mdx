@@ -37,7 +37,42 @@ all of our apps are accessible.
 - If you don't use EUI, follow the same EUI accessibility standards
 
 <DocCallOut title="Internal only">
-  Elasticians, check out the #accessibility channel to ask questions and receive guidance.
+  ## Accessibility automation in Kibana
+
+  Layered checks prevent regressions and enforce WCAG compliance.
+
+  ### 1. Code‑level checks
+  - **Tool:** `@elastic/eslint-plugin-eui`
+  - **Enforces:** ARIA correctness, required labels, forbidden patterns, safer EUI usage
+  - **Action:** Fix every warning before commit (treat warnings as blockers)
+  - **Rule:** Do **not** suppress or ignore lint output
+
+  ### 2. Render‑level checks
+  - **CI tooling:** axe‑core via FTR and Cypress (Scout pending...)
+  - **Scope:** Semantics, landmarks, contrast, focus order, interaction patterns. All automation tests are based on the configuration defined in `src/platform/packages/shared/kbn-axe-config/index.ts`.
+  - **Usage:**
+    - **FTR a11y tests** (`test/accessibility`):
+      ```ts
+      it('has no detectable a11y violations on load', async () => {
+        await common.navigateToApp('dashboard');
+        await a11y.testAppSnapshot();
+      });
+      ```
+    - **Cypress (only if your product supports that):**
+      ```ts
+      it('has no detectable a11y violations on load', () => {
+        cy.checkA11y();
+      });
+      ```
+  - **Add coverage:** create or extend tests when developing new feature
+
+  ### 3. Ready check (execute before commit)
+  - Prefer EUI components and follow EUI accessibility guidance
+  - Zero a11y ESLint warnings
+  - No new axe violations on affected components
+  - Basic VoiceOver pass: new or changed interactive regions announce purpose
+
+  For help: join `#accessibility` slack channel.
 </DocCallOut>
 
 ## Localization
