@@ -9,7 +9,6 @@
 
 import Url from 'url';
 import { inspect } from 'util';
-import { setTimeout as setTimer } from 'timers/promises';
 import * as Rx from 'rxjs';
 import apmNode from 'elastic-apm-node';
 import type { ApmBase } from '@elastic/apm-rum';
@@ -273,35 +272,9 @@ export class JourneyFtrHarness {
     }
   }
 
-  private async teardownApm() {
-    if (!this.apm) {
-      return;
-    }
-
-    const apmStarted = this.apm.isStarted();
-    // @ts-expect-error
-    const apmActive = apmStarted && this.apm._conf.active;
-
-    if (!apmActive) {
-      this.log.warning('APM is not active');
-      return;
-    }
-
-    this.log.info('Flushing APM');
-    await new Promise<void>((resolve) => this.apm?.flush(() => resolve()));
-    // wait for the HTTP request that apm.flush() starts, which we
-    // can't track but hope it is started within 3 seconds, node will stay
-    // alive for active requests
-    // https://github.com/elastic/apm-agent-nodejs/issues/2088
-    await setTimer(3000);
-  }
-
   private async onTeardown() {
     await this.tearDownBrowserAndPage();
-    // It is important that we complete the APM transaction after we close the browser and before we start
-    // unloading the test data so that the scalability data extractor can focus on just the APM data produced
-    // by Kibana running under test.
-    await this.teardownApm();
+
     await Promise.all([
       asyncForEach(this.journeyConfig.getEsArchives(), async (esArchive) => {
         /**
