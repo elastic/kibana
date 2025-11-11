@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-jest.mock('../../data_view_manager/hooks/use_data_view');
+jest.mock('../../data_view_manager');

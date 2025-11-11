@@ -11,7 +11,7 @@ import { SecurityCellActionsTrigger } from '../../../app/actions/constants';
 import { CellActionsMode, SecurityCellActions } from '.';
 import { CellActions } from '@kbn/cell-actions';
 
-jest.mock('../../../data_view_manager/hooks/use_data_view', () => ({
+jest.mock('../../../data_view_manager', () => ({
   useDataView: jest.fn(() => ({
     dataView: { id: 'security-default-dataview-id', fields: { getByName: jest.fn() } },
   })),

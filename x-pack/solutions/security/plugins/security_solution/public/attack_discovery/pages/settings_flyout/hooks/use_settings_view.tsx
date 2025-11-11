@@ -22,7 +22,7 @@ import { DEFAULT_STACK_BY_FIELD } from '..';
 import { AlertSelection } from '../alert_selection';
 import { useKibana } from '../../../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../../../common/lib/kuery';
-import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
+import { useDataView } from '../../../../data_view_manager';
 import { parseFilterQuery } from '../parse_filter_query';
 import type { SettingsOverrideOptions } from '../../results/history/types';
 import { useSourcererDataView } from '../../../../sourcerer/containers';

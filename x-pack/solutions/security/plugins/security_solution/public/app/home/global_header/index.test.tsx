@@ -18,7 +18,7 @@ import { createMockStore, mockGlobalState, TestProviders } from '../../../common
 import { TimelineId } from '../../../../common/types/timeline';
 import { sourcererPaths } from '../../../sourcerer/containers/sourcerer_paths';
 
-import { DATA_VIEW_PICKER_TEST_ID } from '../../../data_view_manager/components/data_view_picker/constants';
+import { DATA_VIEW_PICKER_TEST_ID } from '../../../data_view_manager';
 import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__';
 import { useKibana } from '../../../common/lib/kibana';
 

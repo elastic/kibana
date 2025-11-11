@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { OnTimeChangeProps, EuiSuperUpdateButtonProps } from '@elastic/eui';
+import type { EuiSuperUpdateButtonProps, OnTimeChangeProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { FilterManager } from '@kbn/data-plugin/public';
@@ -21,7 +21,7 @@ import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import { useCreateDataView } from '../../../../../common/hooks/use_create_data_view';
 import type { AlertsSelectionSettings } from '../../types';
-import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
+import { useDataView } from '../../../../../data_view_manager';
 
 export const MAX_ALERTS = 500;
 export const MIN_ALERTS = 50;

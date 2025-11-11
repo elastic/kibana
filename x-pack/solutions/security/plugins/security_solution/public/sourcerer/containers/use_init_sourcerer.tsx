@@ -21,7 +21,7 @@ import { useDataView } from '../../common/containers/source/use_data_view';
 import type { State } from '../../common/store/types';
 import { useKibana } from '../../common/lib/kibana';
 import { useSourcererDataView } from '.';
-import { useSyncSourcererUrlState } from '../../data_view_manager/hooks/use_sync_url_state';
+import { useSyncSourcererUrlState } from '../../data_view_manager';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 const defaultInitResult = { browserFields: {} };

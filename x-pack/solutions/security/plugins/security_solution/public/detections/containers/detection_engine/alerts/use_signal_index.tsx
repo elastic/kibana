@@ -9,15 +9,14 @@ import { useEffect, useState } from 'react';
 import { isSecurityAppError } from '@kbn/securitysolution-t-grid';
 import { useSelector } from 'react-redux';
 
-import { signalIndexOutdatedSelector } from '../../../../data_view_manager/redux/selectors';
-import { useSignalIndexName } from '../../../../data_view_manager/hooks/use_signal_index_name';
+import { signalIndexOutdatedSelector, useSignalIndexName } from '../../../../data_view_manager';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { createSignalIndex, getSignalIndex } from './api';
 import * as i18n from './translations';
 import { useAlertsPrivileges } from './use_alerts_privileges';
-import { sourcererSelectors } from '../../../../common/store';
 import type { State } from '../../../../common/store';
+import { sourcererSelectors } from '../../../../common/store';
 
 type Func = () => Promise<void>;
 

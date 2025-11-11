@@ -19,7 +19,11 @@ import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { LastEventIndexKey } from '@kbn/timelines-plugin/common';
-import { DataViewManagerScopeName } from '../../../../data_view_manager/constants';
+import {
+  DataViewManagerScopeName,
+  useDataView,
+  useSelectedPatterns,
+} from '../../../../data_view_manager';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { dataViewSpecToViewBase } from '../../../../common/lib/kuery';
@@ -74,8 +78,6 @@ import { hasMlUserPermissions } from '../../../../../common/machine_learning/has
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { EmptyPrompt } from '../../../../common/components/empty_prompt';
 import { useRefetchOverviewPageRiskScore } from '../../../../entity_analytics/api/hooks/use_refetch_overview_page_risk_score';
-import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
-import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 import { PageLoader } from '../../../../common/components/page_loader';
 
 const QUERY_ID = 'UsersDetailsQueryId';

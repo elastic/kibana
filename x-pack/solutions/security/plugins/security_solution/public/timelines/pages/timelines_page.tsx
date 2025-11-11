@@ -18,10 +18,9 @@ import * as i18n from './translations';
 import { SecurityPageName } from '../../app/types';
 import { EmptyPrompt } from '../../common/components/empty_prompt';
 import { SecurityRoutePageWrapper } from '../../common/components/security_route_page_wrapper';
-import { DataViewManagerScopeName } from '../../data_view_manager/constants';
+import { DataViewManagerScopeName, useDataView } from '../../data_view_manager';
 import { useSourcererDataView } from '../../sourcerer/containers';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
-import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { PageLoader } from '../../common/components/page_loader';
 
 export const DEFAULT_SEARCH_RESULTS_PER_PAGE = 10;

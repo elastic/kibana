@@ -16,12 +16,12 @@ import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal'
 import { i18n } from '@kbn/i18n';
 
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { DataViewManagerScopeName } from '../../../data_view_manager/constants';
+import { DataViewManagerScopeName, DataViewPicker } from '../../../data_view_manager';
 import { SECURITY_FEATURE_ID } from '../../../../common';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { MlPopover } from '../../../common/components/ml_popover/ml_popover';
 import { useKibana } from '../../../common/lib/kibana';
-import { isDetectionsPath, isDashboardViewPath } from '../../../helpers';
+import { isDashboardViewPath, isDetectionsPath } from '../../../helpers';
 import { Sourcerer } from '../../../sourcerer/components';
 import { TimelineId } from '../../../../common/types/timeline';
 import { timelineDefaults } from '../../../timelines/store/defaults';
@@ -32,7 +32,6 @@ import {
   showSourcererByPath,
 } from '../../../sourcerer/containers/sourcerer_paths';
 import { useAddIntegrationsUrl } from '../../../common/hooks/use_add_integrations_url';
-import { DataViewPicker } from '../../../data_view_manager/components/data_view_picker';
 
 const BUTTON_ADD_DATA = i18n.translate('xpack.securitySolution.globalHeader.buttonAddData', {
   defaultMessage: 'Add integrations',

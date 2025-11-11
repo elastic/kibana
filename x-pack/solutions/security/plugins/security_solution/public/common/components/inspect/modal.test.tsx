@@ -10,11 +10,10 @@ import { TestProviders } from '../../mock';
 
 import { NO_ALERT_INDEX } from '../../../../common/constants';
 import type { ModalInspectProps } from './modal';
-import { ModalInspectQuery, formatIndexPatternRequested } from './modal';
+import { formatIndexPatternRequested, ModalInspectQuery } from './modal';
 import { InputsModelId } from '../../store/inputs/constants';
 import { fireEvent, render, screen } from '@testing-library/react';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
-import { withIndices } from '../../../data_view_manager/hooks/__mocks__/use_data_view';
+import { useDataView, withIndices } from '../../../data_view_manager';
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');

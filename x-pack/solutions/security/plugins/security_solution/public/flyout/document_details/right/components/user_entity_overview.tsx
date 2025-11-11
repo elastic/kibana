@@ -61,7 +61,7 @@ import { PreviewLink } from '../../../shared/components/preview_link';
 import { MisconfigurationsInsight } from '../../shared/components/misconfiguration_insight';
 import { AlertCountInsight } from '../../shared/components/alert_count_insight';
 import { useNavigateToUserDetails } from '../../../entity_details/user_right/hooks/use_navigate_to_user_details';
-import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
+import { useSelectedPatterns } from '../../../../data_view_manager';
 
 const USER_ICON = 'user';
 const USER_ENTITY_OVERVIEW_ID = 'user-entity-overview';

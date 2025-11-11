@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { useDataView, useSelectedPatterns } from '../../../data_view_manager';
 import { SecurityPageName } from '../../../../common/constants';
 import { NetworkRouteType } from '../../../explore/network/pages/navigation/types';
 import { useSourcererDataView } from '../../../sourcerer/containers';
@@ -17,15 +17,14 @@ import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { useRouteSpy } from '../../utils/route/use_route_spy';
 import type { LensAttributes, UseLensAttributesProps } from './types';
 import {
+  fieldNameExistsFilter,
   getDetailsPageFilter,
-  sourceOrDestinationIpExistsFilter,
+  getESQLGlobalFilters,
   getIndexFilters,
   getNetworkDetailsPageFilter,
-  fieldNameExistsFilter,
-  getESQLGlobalFilters,
+  sourceOrDestinationIpExistsFilter,
 } from './utils';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
-import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
 import { useGlobalFilterQuery } from '../../hooks/use_global_filter_query';
 
 export const useLensAttributes = ({

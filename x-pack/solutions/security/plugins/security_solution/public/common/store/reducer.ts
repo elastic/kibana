@@ -14,7 +14,7 @@ import { enableMapSet } from 'immer';
 import { appReducer, initialAppState } from './app';
 import { dragAndDropReducer, initialDragAndDropState } from './drag_and_drop';
 import { createInitialInputsState, inputsReducer } from './inputs';
-import { sourcererReducer, sourcererModel } from '../../sourcerer/store';
+import { sourcererModel, sourcererReducer } from '../../sourcerer/store';
 
 import type { HostsPluginReducer } from '../../explore/hosts/store';
 import type { NetworkPluginReducer } from '../../explore/network/store';
@@ -37,10 +37,7 @@ import { securitySolutionDiscoverReducer } from './discover/reducer';
 import type { AnalyzerState } from '../../resolver/types';
 import type { NotesState } from '../../notes/store/notes.slice';
 import { notesReducer } from '../../notes/store/notes.slice';
-import {
-  dataViewManagerReducer,
-  initialDataViewManagerState,
-} from '../../data_view_manager/redux/reducer';
+import { dataViewManagerReducer, initialDataViewManagerState } from '../../data_view_manager';
 
 enableMapSet();
 

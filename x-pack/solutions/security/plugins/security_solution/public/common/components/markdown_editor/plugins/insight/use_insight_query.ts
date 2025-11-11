@@ -18,9 +18,11 @@ import { useTimelineEvents } from '../../../../../timelines/containers';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import type { TimeRange } from '../../../../store/inputs/model';
-import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
-import { useSelectedPatterns } from '../../../../../data_view_manager/hooks/use_selected_patterns';
-import { useBrowserFields } from '../../../../../data_view_manager/hooks/use_browser_fields';
+import {
+  useBrowserFields,
+  useDataView,
+  useSelectedPatterns,
+} from '../../../../../data_view_manager';
 
 const fields = ['*'];
 const runtimeMappings = {};

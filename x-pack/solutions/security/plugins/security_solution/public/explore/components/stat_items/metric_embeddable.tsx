@@ -6,7 +6,7 @@
  */
 import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import React from 'react';
-import { DataViewManagerScopeName } from '../../../data_view_manager/constants';
+import { DataViewManagerScopeName } from '../../../data_view_manager';
 import { FlexItem, StatValue } from './utils';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
 import type { FieldConfigs } from './types';

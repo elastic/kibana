@@ -13,7 +13,7 @@ import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 import { EuiFlexGroup, EuiFlexItem, EuiSuperSelect, EuiToolTip } from '@elastic/eui';
 
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { useBrowserFields } from '../../../../data_view_manager/hooks/use_browser_fields';
+import { useBrowserFields } from '../../../../data_view_manager';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { DroppableWrapper } from '../../../../common/components/drag_and_drop/droppable_wrapper';
 import { droppableTimelineProvidersPrefix } from '../../../../common/components/drag_and_drop/helpers';

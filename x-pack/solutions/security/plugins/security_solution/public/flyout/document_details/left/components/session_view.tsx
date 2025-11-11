@@ -28,7 +28,7 @@ import { useLicense } from '../../../../common/hooks/use_license';
 import { useSessionViewConfig } from '../../shared/hooks/use_session_view_config';
 import { SessionViewNoDataMessage } from '../../shared/components/session_view_no_data_message';
 import { DocumentEventTypes } from '../../../../common/lib/telemetry';
-import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
+import { useSelectedPatterns } from '../../../../data_view_manager';
 
 export const SESSION_VIEW_ID = 'session-view';
 

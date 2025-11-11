@@ -22,7 +22,7 @@ import { useShowRelatedAlertsBySession } from '../../shared/hooks/use_show_relat
 import { RelatedAlertsByAncestry } from './related_alerts_by_ancestry';
 import { SuppressedAlerts } from './suppressed_alerts';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
+import { useSecurityDefaultPatterns } from '../../../../data_view_manager';
 import { sourcererSelectors } from '../../../../sourcerer/store';
 
 export const CORRELATIONS_TAB_ID = 'correlations';
