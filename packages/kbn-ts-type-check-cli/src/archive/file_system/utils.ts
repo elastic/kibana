@@ -61,7 +61,5 @@ export const resolveTarEnvironment = (): NodeJS.ProcessEnv => {
     COPY_EXTENDED_ATTRIBUTES_DISABLE: '1',
   };
 
-  env.GZIP = `-1`;
-
   return env;
 };

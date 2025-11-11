@@ -153,7 +153,7 @@ run(
           relative,
           '--pretty',
           ...(flagsReader.boolean('verbose') ? ['--verbose'] : []),
-          ...(flagsReader.boolean('extendedDiagnostics') ? ['--extendedDiagnostics'] : []),
+          ...(flagsReader.boolean('extended-diagnostics') ? ['--extendedDiagnostics'] : []),
         ],
         env: {
           NODE_OPTIONS: '--max-old-space-size=10240',
@@ -204,7 +204,7 @@ run(
     `,
     flags: {
       string: ['project'],
-      boolean: ['clean-cache', 'cleanup', 'extendedDiagnostics', 'with-archive'],
+      boolean: ['clean-cache', 'cleanup', 'extended-diagnostics', 'with-archive'],
       help: `
         --project [path]        Path to a tsconfig.json file determines the project to check
         --help                  Show this message
@@ -213,7 +213,7 @@ run(
                                   files in place makes subsequent executions faster because ts can
                                   identify that none of the imports have changed (it uses creation/update
                                   times) but cleaning them prevents leaving garbage around the repo.
-        --extendedDiagnostics   Turn on extended diagnostics in the TypeScript compiler
+        --extended-diagnostics  Turn on extended diagnostics in the TypeScript compiler
         --with-archive          Restore cached artifacts before running and archive results afterwards
       `,
     },
