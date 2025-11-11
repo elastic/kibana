@@ -247,6 +247,169 @@ describe('toStoredFilter', () => {
       expect(result.query).toEqual(dsl.query);
       expect(result.meta.type).toBe('custom');
     });
+
+    it('should detect match_all filter type', () => {
+      const dsl = {
+        query: { match_all: {} },
+      };
+
+      const result = convertFromDSLFilter(dsl, createBaseStored());
+
+      expect(result.query).toEqual(dsl.query);
+      expect(result.meta.type).toBe('match_all');
+      expect(result.meta.params).toEqual({});
+    });
+
+    it('should detect query_string filter type', () => {
+      const dsl = {
+        query: {
+          query_string: {
+            query: 'status:active AND type:user',
+          },
+        },
+      };
+
+      const result = convertFromDSLFilter(dsl, createBaseStored());
+
+      expect(result.query).toEqual(dsl.query);
+      expect(result.meta.type).toBe('query_string');
+      expect(result.meta.params).toEqual({
+        query: 'status:active AND type:user',
+      });
+    });
+
+    it('should detect spatial_filter type from geo_shape query', () => {
+      const dsl = {
+        query: {
+          bool: {
+            should: [
+              {
+                geo_shape: {
+                  location: {
+                    shape: {
+                      type: 'envelope',
+                      coordinates: [
+                        [-74.1, 40.73],
+                        [-73.9, 40.71],
+                      ],
+                    },
+                    relation: 'intersects',
+                  },
+                },
+              },
+            ],
+          },
+        },
+      };
+
+      const result = convertFromDSLFilter(dsl, createBaseStored());
+
+      expect(result.query).toEqual(dsl.query);
+      expect(result.meta.type).toBe('spatial_filter');
+    });
+
+    it('should detect spatial_filter type from geo_bounding_box query', () => {
+      const dsl = {
+        query: {
+          bool: {
+            filter: [
+              {
+                geo_bounding_box: {
+                  location: {
+                    top_left: { lat: 40.73, lon: -74.1 },
+                    bottom_right: { lat: 40.71, lon: -73.9 },
+                  },
+                },
+              },
+            ],
+          },
+        },
+      };
+
+      const result = convertFromDSLFilter(dsl, createBaseStored());
+
+      expect(result.query).toEqual(dsl.query);
+      expect(result.meta.type).toBe('spatial_filter');
+    });
+
+    it('should detect spatial_filter type from geo_distance query', () => {
+      const dsl = {
+        query: {
+          bool: {
+            must: [
+              {
+                geo_distance: {
+                  distance: '200km',
+                  location: { lat: 40.73, lon: -74.0 },
+                },
+              },
+            ],
+          },
+        },
+      };
+
+      const result = convertFromDSLFilter(dsl, createBaseStored());
+
+      expect(result.query).toEqual(dsl.query);
+      expect(result.meta.type).toBe('spatial_filter');
+    });
+
+    it('should detect range_from_value type for single-bound ranges', () => {
+      const dsl = {
+        query: {
+          range: {
+            age: {
+              gte: 18,
+            },
+          },
+        },
+      };
+
+      const result = convertFromDSLFilter(dsl, createBaseStored());
+
+      expect(result.query).toEqual(dsl.query);
+      expect(result.meta.type).toBe('range_from_value');
+      expect(result.meta.params).toEqual({ gte: 18 });
+    });
+
+    it('should detect regular range type for multi-bound ranges', () => {
+      const dsl = {
+        query: {
+          range: {
+            age: {
+              gte: 18,
+              lte: 65,
+            },
+          },
+        },
+      };
+
+      const result = convertFromDSLFilter(dsl, createBaseStored());
+
+      expect(result.query).toEqual(dsl.query);
+      expect(result.meta.type).toBe('range');
+      expect(result.meta.params).toEqual({ gte: 18, lte: 65 });
+    });
+
+    it('should use preserved filterType over detection', () => {
+      const dsl = {
+        query: { match_all: {} },
+      };
+
+      // Base stored already has a type from preservation
+      const baseWithType: StoredFilter = {
+        ...createBaseStored(),
+        meta: {
+          ...createBaseStored().meta,
+          type: 'spatial_filter',
+        },
+      };
+
+      const result = convertFromDSLFilter(dsl, baseWithType);
+
+      // Should preserve the original type, not detect match_all
+      expect(result.meta.type).toBe('spatial_filter');
+    });
   });
 
   describe('round-trip conversion', () => {

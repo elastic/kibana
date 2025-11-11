@@ -330,9 +330,48 @@ export function convertFromDSLFilter(
     } else if (dsl.query.range) {
       type = 'range';
       const field = Object.keys(dsl.query.range)[0];
-      params = dsl.query.range[field];
+      const rangeParams = dsl.query.range[field];
+      params = rangeParams;
+
+      // Detect RANGE_FROM_VALUE (single-bound range) vs regular RANGE (multi-bound)
+      if (rangeParams && typeof rangeParams === 'object') {
+        const boundCount = ['gte', 'lte', 'gt', 'lt'].filter((k) => k in rangeParams).length;
+        if (boundCount === 1) {
+          type = 'range_from_value';
+        }
+      }
     } else if (dsl.query.exists) {
       type = 'exists';
+    } else if (dsl.query.match_all) {
+      // Detect MATCH_ALL filter
+      type = 'match_all';
+      params = dsl.query.match_all;
+    } else if (dsl.query.query_string) {
+      // Detect QUERY_STRING filter
+      type = 'query_string';
+      params = dsl.query.query_string;
+    } else if (dsl.query.bool) {
+      // Detect SPATIAL_FILTER (geo_shape queries wrapped in bool.should)
+      // Spatial filters typically have a bool.should with geo_shape or geo_bounding_box queries
+      const { should, must, filter: boolFilter } = dsl.query.bool;
+      const allClauses = [
+        ...(Array.isArray(should) ? should : []),
+        ...(Array.isArray(must) ? must : []),
+        ...(Array.isArray(boolFilter) ? boolFilter : []),
+      ];
+
+      // Check if any clause contains geo queries
+      const hasGeoQuery = allClauses.some(
+        (clause) =>
+          clause &&
+          typeof clause === 'object' &&
+          ('geo_shape' in clause || 'geo_bounding_box' in clause || 'geo_distance' in clause)
+      );
+
+      if (hasGeoQuery) {
+        type = 'spatial_filter';
+        // Don't set params - preserve the original bool query structure
+      }
     }
   }
 
