@@ -244,7 +244,25 @@ export function loadEmbeddableData(
         getExecutionContext,
         logError: getLogError(getExecutionContext),
         addUserMessages,
-        onRender,
+        onRender: (count) => {
+          performance.mark('render_complete');
+          performance.measure('time_to_request', 'navigate', 'search_start');
+          performance.measure('time_to_data', 'search_start', 'search_end');
+          performance.measure('time_to_render', 'search_end', 'render_complete');
+
+          // Print performance measures to console
+          const timeToRequest = performance.getEntriesByName('time_to_request')[0];
+          const timeToData = performance.getEntriesByName('time_to_data')[0];
+          const timeToRender = performance.getEntriesByName('time_to_render')[0];
+
+          console.log('Performance Measures:', {
+            time_to_request: timeToRequest ? `${timeToRequest.duration.toFixed(2)}ms` : 'N/A',
+            time_to_data: timeToData ? `${timeToData.duration.toFixed(2)}ms` : 'N/A',
+            time_to_render: timeToRender ? `${timeToRender.duration.toFixed(2)}ms` : 'N/A',
+          });
+
+          onRender?.(count);
+        },
         onData,
         handleEvent,
         disableTriggers,

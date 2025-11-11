@@ -89,7 +89,9 @@ export function ItemDetails<T extends UserContentCommonSchema>({
         {/* eslint-disable-next-line  @elastic/eui/href-or-on-click */}
         <EuiLink
           href={getDetailViewLink?.(item)}
-          onClick={onClickTitleHandler}
+          onClick={() => {
+            performance.mark('navigate');
+          }}
           data-test-subj={`${id}ListingTitleLink-${item.attributes.title.split(' ').join('-')}`}
         >
           <EuiHighlight highlightAll search={escapeRegExp(searchTerm)}>
