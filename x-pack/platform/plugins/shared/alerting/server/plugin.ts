@@ -779,6 +779,7 @@ export class AlertingPlugin {
           return maintenanceWindowClientFactory.createWithAuthorization(request);
         },
         listTypes: ruleTypeRegistry!.list.bind(ruleTypeRegistry!),
+        getType: ruleTypeRegistry!.get.bind(ruleTypeRegistry!),
         getFrameworkHealth: async () =>
           await getHealth(savedObjects.createInternalRepository([RULE_SAVED_OBJECT_TYPE])),
         areApiKeysEnabled: async () => {
