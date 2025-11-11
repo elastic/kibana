@@ -38,16 +38,23 @@ export class AttachmentClient {
     dashboard: async (ids) =>
       getSoByIds({ soClient: this.clients.soClient, attachmentType: 'dashboard', ids }),
     rule: async (ids) => {
-      const { rules } = await this.clients.rulesClient.bulkGetRules({
-        ids,
-      });
+      try {
+        const { rules } = await this.clients.rulesClient.bulkGetRules({
+          ids,
+        });
 
-      return rules.map((rule) => ({
-        id: rule.id,
-        title: rule.name,
-        tags: rule.tags,
-        type: 'rule',
-      }));
+        return rules.map((rule) => ({
+          id: rule.id,
+          title: rule.name,
+          tags: rule.tags,
+          type: 'rule',
+        }));
+      } catch (error) {
+        if (error.message === 'No rules found for bulk get') {
+          return [];
+        }
+        throw error;
+      }
     },
   };
 
