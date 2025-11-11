@@ -13,7 +13,7 @@ import type { EuiSelectableOption } from '@elastic/eui';
 import { EuiFilterButton, EuiPopover, EuiPopoverTitle, EuiSelectable } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 
-const WORKFLOW_POPOVER_WIDTH = 500;
+const WORKFLOW_POPOVER_WIDTH = 215;
 
 interface WorkflowFilterPopoverProps {
   filter: string;

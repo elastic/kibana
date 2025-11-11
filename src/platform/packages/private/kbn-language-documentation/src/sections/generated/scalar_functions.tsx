@@ -2576,7 +2576,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.to_aggregate_metric_double', {
         defaultMessage: 'TO_AGGREGATE_METRIC_DOUBLE',
       }),
-      preview: false,
+      preview: true,
       license: undefined,
       description: {
         markdownContent: i18n.translate(
