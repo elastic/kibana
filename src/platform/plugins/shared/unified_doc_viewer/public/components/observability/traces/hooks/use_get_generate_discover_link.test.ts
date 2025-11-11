@@ -96,14 +96,7 @@ describe('useGetGenerateDiscoverLink', () => {
     });
 
     expect(mockGetRedirectUrl).toHaveBeenCalled();
-    const callArgs = mockGetRedirectUrl.mock.calls[0] as unknown as [
-      {
-        timeRange: { from: string; to: string };
-        filters: unknown[];
-        query: { language: string; esql: string };
-      }
-    ];
-    const esql = callArgs[0].query.esql;
+    const esql = (mockGetRedirectUrl.mock.calls[0] as any)?.[0]?.query?.esql;
 
     expect(esql).toBe(`FROM traces-*
   | WHERE trace.id == "abc123" AND exception.message == "Test error"`);
