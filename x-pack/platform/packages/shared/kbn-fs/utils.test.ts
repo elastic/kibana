@@ -12,7 +12,7 @@ import {
   getSafePath,
   ensureDirectory,
   ensureDirectorySync,
-  validateVolume,
+  sanitizeVolume,
 } from './utils';
 
 const DATA_PATH = join(REPO_ROOT, 'data');
@@ -49,69 +49,69 @@ describe('kbn-fs utils', () => {
     });
   });
 
-  describe('validateVolume', () => {
+  describe('sanitizeVolume', () => {
     it('should allow valid volume names', () => {
-      expect(() => validateVolume('reports')).not.toThrow();
-      expect(() => validateVolume('exports')).not.toThrow();
-      expect(() => validateVolume('reports_2024')).not.toThrow();
-      expect(() => validateVolume('reports/2024')).not.toThrow();
-      expect(() => validateVolume('reports/2024/january')).not.toThrow();
-      expect(() => validateVolume('data_export_2024')).not.toThrow();
-      expect(() => validateVolume('a')).not.toThrow();
-      expect(() => validateVolume('123')).not.toThrow();
-      expect(() => validateVolume('_private')).not.toThrow();
+      expect(() => sanitizeVolume('reports')).not.toThrow();
+      expect(() => sanitizeVolume('exports')).not.toThrow();
+      expect(() => sanitizeVolume('reports_2024')).not.toThrow();
+      expect(() => sanitizeVolume('reports/2024')).not.toThrow();
+      expect(() => sanitizeVolume('reports/2024/january')).not.toThrow();
+      expect(() => sanitizeVolume('data_export_2024')).not.toThrow();
+      expect(() => sanitizeVolume('a')).not.toThrow();
+      expect(() => sanitizeVolume('123')).not.toThrow();
+      expect(() => sanitizeVolume('_private')).not.toThrow();
     });
 
     it('should reject invalid volume names', () => {
-      expect(() => validateVolume('reports../2024')).toThrow(
+      expect(() => sanitizeVolume('reports../2024')).toThrow(
         'Invalid volume name: reports../2024. Volume must only contain alphanumeric characters, underscores, and forward slashes for path separators.'
       );
-      expect(() => validateVolume('reports*2024')).toThrow(
+      expect(() => sanitizeVolume('reports*2024')).toThrow(
         'Invalid volume name: reports*2024. Volume must only contain alphanumeric characters, underscores, and forward slashes for path separators.'
       );
-      expect(() => validateVolume('reports?2024')).toThrow(
+      expect(() => sanitizeVolume('reports?2024')).toThrow(
         'Invalid volume name: reports?2024. Volume must only contain alphanumeric characters, underscores, and forward slashes for path separators.'
       );
-      expect(() => validateVolume('reports<2024')).toThrow(
+      expect(() => sanitizeVolume('reports<2024')).toThrow(
         'Invalid volume name: reports<2024. Volume must only contain alphanumeric characters, underscores, and forward slashes for path separators.'
       );
-      expect(() => validateVolume('reports>2024')).toThrow(
+      expect(() => sanitizeVolume('reports>2024')).toThrow(
         'Invalid volume name: reports>2024. Volume must only contain alphanumeric characters, underscores, and forward slashes for path separators.'
       );
-      expect(() => validateVolume('reports|2024')).toThrow(
+      expect(() => sanitizeVolume('reports|2024')).toThrow(
         'Invalid volume name: reports|2024. Volume must only contain alphanumeric characters, underscores, and forward slashes for path separators.'
       );
-      expect(() => validateVolume('reports"2024')).toThrow(
+      expect(() => sanitizeVolume('reports"2024')).toThrow(
         'Invalid volume name: reports"2024. Volume must only contain alphanumeric characters, underscores, and forward slashes for path separators.'
       );
-      expect(() => validateVolume("reports'2024")).toThrow(
+      expect(() => sanitizeVolume("reports'2024")).toThrow(
         "Invalid volume name: reports'2024. Volume must only contain alphanumeric characters, underscores, and forward slashes for path separators."
       );
-      expect(() => validateVolume('reports\\2024')).toThrow(
+      expect(() => sanitizeVolume('reports\\2024')).toThrow(
         'Invalid volume name: reports\\2024. Volume must only contain alphanumeric characters, underscores, and forward slashes for path separators.'
       );
-      expect(() => validateVolume('reports 2024')).toThrow(
+      expect(() => sanitizeVolume('reports 2024')).toThrow(
         'Invalid volume name: reports 2024. Volume must only contain alphanumeric characters, underscores, and forward slashes for path separators.'
       );
-      expect(() => validateVolume('reports\t2024')).toThrow(
+      expect(() => sanitizeVolume('reports\t2024')).toThrow(
         'Invalid volume name: reports\t2024. Volume must only contain alphanumeric characters, underscores, and forward slashes for path separators.'
       );
-      expect(() => validateVolume('reports\n2024')).toThrow(
+      expect(() => sanitizeVolume('reports\n2024')).toThrow(
         'Invalid volume name: reports\n2024. Volume must only contain alphanumeric characters, underscores, and forward slashes for path separators.'
       );
     });
 
     it('should reject empty volume names', () => {
-      expect(() => validateVolume('')).toThrow(
+      expect(() => sanitizeVolume('')).toThrow(
         'Invalid volume name: . Volume must only contain alphanumeric characters, underscores, and forward slashes for path separators.'
       );
     });
 
     it('should allow complex valid volume names', () => {
-      expect(() => validateVolume('reports_2024/january/data')).not.toThrow();
-      expect(() => validateVolume('exports/user_data/backup_2024')).not.toThrow();
-      expect(() => validateVolume('temp_files/processing/stage_1')).not.toThrow();
-      expect(() => validateVolume('A1B2C3_Test/SubDir')).not.toThrow();
+      expect(() => sanitizeVolume('reports_2024/january/data')).not.toThrow();
+      expect(() => sanitizeVolume('exports/user_data/backup_2024')).not.toThrow();
+      expect(() => sanitizeVolume('temp_files/processing/stage_1')).not.toThrow();
+      expect(() => sanitizeVolume('A1B2C3_Test/SubDir')).not.toThrow();
     });
   });
 

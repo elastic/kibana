@@ -19,10 +19,8 @@ import {
 import type { Readable, Writable, StreamOptions } from 'stream';
 import type { WriteFileOptions, FileMetadata, WriteFileContent } from './types';
 import { getSafePath, ensureDirectory, ensureDirectorySync } from './utils';
+import { validateAndSanitizeFileData } from './validations';
 
-/**
- * Writes data to a file, replacing the file if `override` is true.
- */
 export async function writeFile(
   name: string,
   content: WriteFileContent,
@@ -36,13 +34,16 @@ export async function writeFile(
   }
 
   await ensureDirectory(fullPath);
-  await fs.writeFile(fullPath, content);
+  const validatedContent = validateAndSanitizeFileData(content, fullPath);
+  await fs.writeFile(fullPath, validatedContent);
 
   return { alias, path: fullPath };
 }
 
 /**
  * Appends data to a file, creating the file if it does not yet exist.
+ * Note: Validation (file size and mime type) is skipped for streaming content
+ * (AsyncIterable or Stream) to prevent data corruption from stream consumption.
  */
 export async function appendFile(
   name: string,
@@ -52,7 +53,8 @@ export async function appendFile(
   const { fullPath, alias } = getSafePath(name, options?.volume);
 
   await ensureDirectory(fullPath);
-  await fs.appendFile(fullPath, content);
+  const validatedContent = validateAndSanitizeFileData(content, fullPath);
+  await fs.appendFile(fullPath, validatedContent);
 
   return { alias, path: fullPath };
 }
@@ -123,7 +125,8 @@ export function writeFileSync(
   }
 
   ensureDirectorySync(fullPath);
-  fsWriteFileSync(fullPath, content);
+  const validatedContent = validateAndSanitizeFileData(content, fullPath);
+  fsWriteFileSync(fullPath, validatedContent);
 
   return { alias, path: fullPath };
 }
@@ -140,7 +143,8 @@ export function appendFileSync(
   const { fullPath, alias } = getSafePath(name, volume);
 
   ensureDirectorySync(fullPath);
-  fsAppendFileSync(fullPath, content);
+  const validatedContent = validateAndSanitizeFileData(content, fullPath);
+  fsAppendFileSync(fullPath, validatedContent);
 
   return { alias, path: fullPath };
 }
