@@ -111,5 +111,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
       await testSubjects.existOrFail('dscSelectedColumnsCallout');
     });
+
+    it('should hide view mode toggle in fullscreen mode', async () => {
+      await discover.selectIndexPattern('logstash-*');
+      await header.waitUntilLoadingHasFinished();
+
+      await testSubjects.existOrFail('dscViewModeToggle');
+
+      await testSubjects.click('dataGridFullScreenButton');
+      await testSubjects.missingOrFail('dscViewModeToggle');
+
+      await testSubjects.click('dataGridFullScreenButton');
+      await testSubjects.existOrFail('dscViewModeToggle');
+    });
   });
 }
