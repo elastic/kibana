@@ -36,8 +36,8 @@ export const CommandInputUsage = memo<Pick<CommandUsageProps, 'commandDef'>>(({ 
   }, [commandDef]);
 
   const helpExample = useMemo(() => {
-    if (commandDef.helpUsage) {
-      return commandDef.helpUsage;
+    if (commandDef.helpExample) {
+      return commandDef.helpExample;
     }
 
     return typeof commandDef.exampleUsage === 'function'

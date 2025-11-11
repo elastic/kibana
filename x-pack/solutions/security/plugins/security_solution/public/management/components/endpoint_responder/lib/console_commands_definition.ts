@@ -941,7 +941,7 @@ const adjustCommandsForCrowdstrike = ({
         return {
           ...command,
           exampleUsage: `runscript --Raw=\`\`\`Get-ChildItem .\`\`\` --CommandLine=""`,
-          helpUsage: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.helpUsage,
+          helpExample: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.helpExample,
           mustHaveArgs: true,
           args: {
             Raw: {
