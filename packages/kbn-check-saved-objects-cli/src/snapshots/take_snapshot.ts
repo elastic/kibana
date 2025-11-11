@@ -10,7 +10,6 @@
 import * as cp from 'child_process';
 
 import { extractMigrationInfo, getMigrationHash } from '@kbn/core-test-helpers-so-type-serializer';
-import type { ToolingLog } from '@kbn/tooling-log';
 import type {
   MigrationInfoRecord,
   MigrationSnapshot,
@@ -20,48 +19,30 @@ import type {
 
 /**
  * Extracts plugin migration information using provided server handles.
- * @param log Tooling log handed over from CLI runner
  * @param serverHandles Handles for running ES & Kibana servers
  */
-export async function takeSnapshot({
-  log,
-  serverHandles,
-}: {
-  log: ToolingLog;
-  serverHandles: ServerHandles;
-}): Promise<MigrationSnapshot> {
-  try {
-    log.info(`Taking snapshot of current SO type definitions`);
-    const { coreStart } = serverHandles;
-    const typeRegistry = coreStart.savedObjects.getTypeRegistry();
-    const allTypes = typeRegistry.getAllTypes();
+export async function takeSnapshot(serverHandles: ServerHandles): Promise<MigrationSnapshot> {
+  const { coreStart } = serverHandles;
+  const typeRegistry = coreStart.savedObjects.getTypeRegistry();
+  const allTypes = typeRegistry.getAllTypes();
 
-    const migrationInfoMap = allTypes.reduce<Record<string, MigrationInfoRecord>>((map, type) => {
-      const migrationInfo = extractMigrationInfo(type);
-      map[type.name] = {
-        name: migrationInfo.name,
-        migrationVersions: migrationInfo.migrationVersions,
-        hash: getMigrationHash(type),
-        modelVersions: migrationInfo.modelVersions,
-        schemaVersions: migrationInfo.schemaVersions,
-        mappings: migrationInfo.mappings,
-      };
-      return map;
-    }, {});
-
-    return {
-      meta: collectSnapshotMeta(),
-      typeDefinitions: migrationInfoMap,
+  const migrationInfoMap = allTypes.reduce<Record<string, MigrationInfoRecord>>((map, type) => {
+    const migrationInfo = extractMigrationInfo(type);
+    map[type.name] = {
+      name: migrationInfo.name,
+      migrationVersions: migrationInfo.migrationVersions,
+      hash: getMigrationHash(type),
+      modelVersions: migrationInfo.modelVersions,
+      schemaVersions: migrationInfo.schemaVersions,
+      mappings: migrationInfo.mappings,
     };
-  } catch (err) {
-    log.error(
-      '⚠️ Failed to obtain snapshot for current working tree. Skipping Saved Objects checks.'
-    );
-    if (err instanceof Error || typeof err === 'string') {
-      log.error(err);
-    }
-    throw err;
-  }
+    return map;
+  }, {});
+
+  return {
+    meta: collectSnapshotMeta(),
+    typeDefinitions: migrationInfoMap,
+  };
 }
 
 function collectSnapshotMeta(): MigrationSnapshotMeta {

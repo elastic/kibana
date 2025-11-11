@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { takeSnapshot } from './take';
-export { fetchSnapshot } from './fetch';
-export { assertValidUpdates } from './compare';
+export { takeSnapshot } from './take_snapshot';
+export { fetchSnapshot } from './fetch_snapshot';
+export { getUpdatedTypes } from './get_updated_types';
+export { validateChanges } from './validate_changes';
