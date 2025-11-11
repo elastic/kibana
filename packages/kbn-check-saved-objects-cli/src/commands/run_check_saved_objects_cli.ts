@@ -145,9 +145,8 @@ export function runCheckSavedObjectsCli() {
       try {
         await list.run(context);
         exitCode = list.errors.length > 0 ? 1 : 0;
-      } catch (error) {
-        log.error('Unhandled exception!');
-        log.error(error);
+      } catch (err) {
+        log.error(err);
         exitCode = 1;
       } finally {
         await new Listr<TaskContext, 'default', 'simple'>(
@@ -157,7 +156,7 @@ export function runCheckSavedObjectsCli() {
               task: async (ctx) => {
                 await stopServers(ctx.serverHandles!);
               },
-              enabled: (ctx) => Boolean(ctx.serverHandles),
+              skip: (ctx) => !ctx.serverHandles,
               exitOnError: false,
             },
           ],
