@@ -29,13 +29,12 @@ import {
 } from '../utils';
 import { fromBucketLensApiToLensState } from '../columns/buckets';
 import { getValueApiColumn, getValueColumn } from '../columns/esql_column';
-import type { LensApiState, MetricState } from '../../schema';
+import type { LensApiState, MetricState, MetricStateESQL, MetricStateNoESQL } from '../../schema';
 import { fromMetricAPItoLensState } from '../columns/metric';
 import type { LensApiAllMetricOperations } from '../../schema/metric_ops';
 import type { LensApiBucketOperations } from '../../schema/bucket_ops';
 import type { DeepMutable, DeepPartial } from '../utils';
 import { generateLayer } from '../utils';
-import type { MetricStateESQL, MetricStateNoESQL } from '../../schema/charts/metric';
 import {
   getSharedChartLensStateToAPI,
   getSharedChartAPIToLensState,

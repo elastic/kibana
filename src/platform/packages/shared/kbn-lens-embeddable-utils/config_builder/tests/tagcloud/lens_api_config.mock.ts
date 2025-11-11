@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TagcloudState } from '../../schema/charts/tagcloud';
+import type { TagcloudState } from '../../schema';
 
 /**
  * Basic tagcloud chart with ad hoc dataView

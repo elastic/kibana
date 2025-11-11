@@ -25,10 +25,14 @@ export const lensApiStateSchema = schema.oneOf([
 
 export type LensApiState = TypeOf<typeof lensApiStateSchema>;
 
-export type { MetricState, metricStateSchemaNoESQL } from './charts/metric';
-export type { LegacyMetricState, legacyMetricStateSchemaNoESQL } from './charts/legacy_metric';
-export type { GaugeState, gaugeStateSchemaNoESQL } from './charts/gauge';
-export type { TagcloudState } from './charts/tagcloud';
+export type { MetricState, MetricStateNoESQL, MetricStateESQL } from './charts/metric';
+export type {
+  LegacyMetricState,
+  LegacyMetricStateNoESQL,
+  LegacyMetricStateESQL,
+} from './charts/legacy_metric';
+export type { GaugeState, GaugeStateNoESQL, GaugeStateESQL } from './charts/gauge';
+export type { TagcloudState, TagcloudStateNoESQL, TagcloudStateESQL } from './charts/tagcloud';
 
 export type NarrowByType<T, U> = T extends { type: U } ? T : never;
 
