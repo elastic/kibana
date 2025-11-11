@@ -20,7 +20,7 @@ export const internalNamespaces = {
 export const protectedNamespaces: string[] = [
   internalNamespaces.platformCore,
   internalNamespaces.coreSecurity,
-  'observability'
+  'observability',
 ];
 
 /**
