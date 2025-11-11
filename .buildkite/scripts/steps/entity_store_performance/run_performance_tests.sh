@@ -49,20 +49,25 @@ run_performance_tests() {
 
   # Create config.json
   echo "--- Create config.json"
-  cat > config.json <<EOF
-{
-  "elastic": {
-    "node": "$CLOUD_DEPLOYMENT_ELASTICSEARCH_URL",
-    "username": "$CLOUD_DEPLOYMENT_USERNAME",
-    "password": "$CLOUD_DEPLOYMENT_PASSWORD"
-  },
-  "kibana": {
-    "node": "$CLOUD_DEPLOYMENT_KIBANA_URL",
-    "username": "$CLOUD_DEPLOYMENT_USERNAME",
-    "password": "$CLOUD_DEPLOYMENT_PASSWORD"
-  }
-}
-EOF
+  jq -n \
+    --arg es_url "$CLOUD_DEPLOYMENT_ELASTICSEARCH_URL" \
+    --arg es_username "$CLOUD_DEPLOYMENT_USERNAME" \
+    --arg es_password "$CLOUD_DEPLOYMENT_PASSWORD" \
+    --arg kibana_url "$CLOUD_DEPLOYMENT_KIBANA_URL" \
+    --arg kibana_username "$CLOUD_DEPLOYMENT_USERNAME" \
+    --arg kibana_password "$CLOUD_DEPLOYMENT_PASSWORD" \
+    '{
+      elastic: {
+        node: $es_url,
+        username: $es_username,
+        password: $es_password
+      },
+      kibana: {
+        node: $kibana_url,
+        username: $kibana_username,
+        password: $kibana_password
+      }
+    }' > config.json
 
   # Run the performance test
   TEST_START_TIME=$(date +%s)
