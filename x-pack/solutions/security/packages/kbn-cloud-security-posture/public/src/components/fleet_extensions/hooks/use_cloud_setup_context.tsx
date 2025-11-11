@@ -89,18 +89,6 @@ const isCloudConnectorEnabledForProvider = ({
   const providerConfig = config.providers[provider];
   const cloudConnectorEnabledVersion = providerConfig.cloudConnectorEnabledVersion;
 
-  const hostProvider = getCloudProviderFromCloudHost(cloud?.cloudHost);
-
-  // Cloud connector availability rules:
-  // - AWS: Only available on AWS host
-  // - GCP: Not enabled yet (always disabled)
-  // - Azure: Available on any cloud host
-  if (!hostProvider) return false;
-
-  if (provider === AWS_PROVIDER && hostProvider !== AWS_PROVIDER) return false;
-  if (provider === GCP_PROVIDER) return false; // GCP cloud connectors not enabled yet
-  // Azure is allowed on any host
-
   return !!(
     cloudConnectorsFeatureEnabled &&
     cloudConnectorEnabledVersion &&
