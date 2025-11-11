@@ -7115,6 +7115,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/lens-common-2@link:src/platform/packages/shared/kbn-lens-common-2":
+  version "0.0.0"
+  uid ""
+
 "@kbn/lens-common@link:src/platform/packages/shared/kbn-lens-common":
   version "0.0.0"
   uid ""

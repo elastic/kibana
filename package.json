@@ -688,6 +688,7 @@
     "@kbn/langgraph-checkpoint-saver": "link:x-pack/platform/packages/shared/kbn-langgraph-checkpoint-saver",
     "@kbn/language-documentation": "link:src/platform/packages/private/kbn-language-documentation",
     "@kbn/lens-common": "link:src/platform/packages/shared/kbn-lens-common",
+    "@kbn/lens-common-2": "link:src/platform/packages/shared/kbn-lens-common-2",
     "@kbn/lens-config-builder-example-plugin": "link:x-pack/examples/lens_config_builder_example",
     "@kbn/lens-embeddable-utils": "link:src/platform/packages/shared/kbn-lens-embeddable-utils",
     "@kbn/lens-formula-docs": "link:src/platform/packages/private/kbn-lens-formula-docs",
