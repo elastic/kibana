@@ -80,8 +80,8 @@ describe('useLog', () => {
     await waitFor(() => !result.current.loading);
 
     expect(result.current.loading).toBe(false);
-    expect(result.current.log).toBeNull();
-    expect(result.current.index).toBeNull();
+    expect(result.current.log).toBeUndefined();
+    expect(result.current.index).toBeUndefined();
     expect(mockFetchLogDocumentById).not.toHaveBeenCalled();
   });
 
@@ -91,12 +91,12 @@ describe('useLog', () => {
     await waitFor(() => !result.current.loading);
 
     expect(result.current.loading).toBe(false);
-    expect(result.current.log).toBeNull();
-    expect(result.current.index).toBeNull();
+    expect(result.current.log).toBeUndefined();
+    expect(result.current.index).toBeUndefined();
     expect(mockFetchLogDocumentById).not.toHaveBeenCalled();
   });
 
-  it('should start with loading true and log/index as null', async () => {
+  it('should start with loading true and log/index as undefined', async () => {
     mockFetchLogDocumentById.mockImplementation(
       () => new Promise(() => {}) // Never resolves to keep loading
     );
@@ -104,8 +104,8 @@ describe('useLog', () => {
     const { result } = renderHook(() => useLog({ id }));
 
     expect(result.current.loading).toBe(true);
-    expect(result.current.log).toBeNull();
-    expect(result.current.index).toBeNull();
+    expect(result.current.log).toBeUndefined();
+    expect(result.current.index).toBeUndefined();
     expect(mockFetchLogDocumentById).toHaveBeenCalledWith(
       {
         id,
@@ -148,12 +148,30 @@ describe('useLog', () => {
     await waitFor(() => !result.current.loading);
 
     expect(result.current.loading).toBe(false);
-    expect(result.current.log).toBeNull();
-    expect(result.current.index).toBeNull();
+    expect(result.current.log).toBeUndefined();
+    expect(result.current.index).toBeUndefined();
     expect(mockFetchLogDocumentById).toHaveBeenCalledTimes(1);
   });
 
-  it('should handle errors and return null values', async () => {
+  it('should handle when log document has undefined fields', async () => {
+    const mockLogData = {
+      _index: 'logs-*',
+      fields: undefined,
+    };
+
+    mockFetchLogDocumentById.mockResolvedValue(mockLogData);
+
+    const { result } = renderHook(() => useLog({ id }));
+
+    await waitFor(() => !result.current.loading);
+
+    expect(result.current.loading).toBe(false);
+    expect(result.current.log).toBeUndefined();
+    expect(result.current.index).toBe('logs-*');
+    expect(mockFetchLogDocumentById).toHaveBeenCalledTimes(1);
+  });
+
+  it('should handle errors and return undefined values', async () => {
     const errorMessage = 'Fetch error';
     mockFetchLogDocumentById.mockRejectedValue(new Error(errorMessage));
 
@@ -162,8 +180,8 @@ describe('useLog', () => {
     await waitFor(() => !result.current.loading);
 
     expect(result.current.loading).toBe(false);
-    expect(result.current.log).toBeNull();
-    expect(result.current.index).toBeNull();
+    expect(result.current.log).toBeUndefined();
+    expect(result.current.index).toBeUndefined();
     expect(mockFetchLogDocumentById).toHaveBeenCalledTimes(1);
   });
 
