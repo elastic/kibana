@@ -27,6 +27,7 @@ import { licenseService } from '../../../../license';
 import { appContextService } from '../../../../app_context';
 export const KNOWLEDGE_BASE_PATH = 'docs/knowledge_base/';
 export const DOCS_PATH_PATTERN = '/docs/';
+export const KNOWLEDGE_BASE_FOLDER = 'knowledge_base/';
 
 /**
  * Extract knowledge base files directly from the package archive
@@ -53,8 +54,8 @@ async function extractKnowledgeBaseFromArchive(
           const pathAfterDocs = entry.path.substring(docsIndex + DOCS_PATH_PATTERN.length);
 
           // If it's in knowledge_base subfolder, remove that prefix too for backward compatibility
-          if (pathAfterDocs.startsWith('knowledge_base/')) {
-            fileName = pathAfterDocs.substring('knowledge_base/'.length);
+          if (pathAfterDocs.startsWith(KNOWLEDGE_BASE_FOLDER)) {
+            fileName = pathAfterDocs.substring(KNOWLEDGE_BASE_FOLDER.length);
           } else {
             fileName = pathAfterDocs;
           }
