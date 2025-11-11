@@ -143,7 +143,8 @@ function buildFormBasedLayer(layer: TagcloudStateNoESQL): FormBasedPersistedStat
   const layers: Record<string, PersistedIndexPatternLayer> = generateLayer(DEFAULT_LAYER_ID, layer);
   const defaultLayer = layers[DEFAULT_LAYER_ID];
 
-  addLayerColumn(defaultLayer, ACCESSOR, columns);
+  addLayerColumn(defaultLayer, getAccessorName('metric'), columns);
+
   if (layer.tag_by) {
     const columnName = getAccessorName('tag');
     const breakdownColumn = fromBucketLensApiToLensState(
