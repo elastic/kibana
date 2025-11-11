@@ -170,6 +170,8 @@ const createGroupedActorAndTargetNodes = (
     targetHostIps,
   } = record;
 
+  const actorIdsArray = actorIds ? castArray(actorIds) : [];
+  const targetIdsArray = targetIds ? castArray(targetIds) : [];
   const actorHostIpsArray = actorHostIps ? castArray(actorHostIps) : [];
   const targetHostIpsArray = targetHostIps ? castArray(targetHostIps) : [];
 
