@@ -32,6 +32,17 @@ import type {
   LensYBoundsConfig,
   LensESQLDataset,
 } from '@kbn/lens-embeddable-utils/config_builder/types';
+
+// Cache for built lens attributes to avoid rebuilding on remount
+// Using Map preserves insertion order for LRU-style eviction
+const attributesCache = new Map<string, Promise<LensAttributes>>();
+const MAX_CACHE_SIZE = 100; // Reasonable limit for metrics grids
+
+// Utility to clear cache (useful for testing or when data changes significantly)
+export const clearLensAttributesCache = () => {
+  attributesCache.clear();
+};
+
 export type LensProps = Pick<
   EmbeddableComponentProps,
   | 'id'
@@ -72,15 +83,40 @@ export const useLensProps = ({
 
   // creates a stable function that builds the Lens attributes
   const buildAttributesFn = useLatest(async () => {
-    const lensParams = buildLensParams({ query, title, chartLayers, yBounds });
-    const builder = new LensConfigBuilder(services.dataViews);
+    // Use title as cache key (title is unique per metric)
+    const cacheKey = title;
 
-    const result = (await builder.build(lensParams, {
-      query: {
-        esql: (lensParams.dataset as LensESQLDataset).esql,
-      },
-    })) as LensAttributes;
-    return result;
+    // Return cached attributes if they exist
+    if (attributesCache.has(cacheKey)) {
+      // Move to end (most recently used) for LRU behavior
+      const cached = attributesCache.get(cacheKey)!;
+      attributesCache.delete(cacheKey);
+      attributesCache.set(cacheKey, cached);
+      return cached;
+    }
+
+    // Build and cache the attributes
+    const buildPromise = (async () => {
+      const lensParams = buildLensParams({ query, title, chartLayers, yBounds });
+      const builder = new LensConfigBuilder(services.dataViews);
+
+      const result = (await builder.build(lensParams, {
+        query: {
+          esql: (lensParams.dataset as LensESQLDataset).esql,
+        },
+      })) as LensAttributes;
+      return result;
+    })();
+
+    attributesCache.set(cacheKey, buildPromise);
+
+    // Evict oldest entry if cache is too large (LRU eviction)
+    if (attributesCache.size > MAX_CACHE_SIZE) {
+      const firstKey = attributesCache.keys().next().value;
+      attributesCache.delete(firstKey);
+    }
+
+    return buildPromise;
   });
 
   const buildLensProps = useCallback(
@@ -107,7 +143,7 @@ export const useLensProps = ({
     const intersecting$ = new Observable<boolean>((subscriber) => {
       const observer = new IntersectionObserver(
         ([entry]) => subscriber.next(entry.isIntersecting),
-        { threshold: 0.1, rootMargin: euiTheme.size.base }
+        { rootMargin: euiTheme.size.base }
       );
 
       if (chartRefCurrent) {

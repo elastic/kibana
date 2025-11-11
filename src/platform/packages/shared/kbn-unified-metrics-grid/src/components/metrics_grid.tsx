@@ -58,7 +58,6 @@ export const MetricsGrid = ({
 }: MetricsGridProps) => {
   const gridRef = useRef<HTMLDivElement>(null);
   const virtualGridRef = useRef<Grid>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
   const chartRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
   const chartSize = useMemo(() => (columns === 2 || columns === 4 ? 's' : 'm'), [columns]);
@@ -143,6 +142,7 @@ export const MetricsGrid = ({
       onBrushEnd,
       onFilter,
       abortController,
+      searchTerm,
       requestParams,
       discoverFetch$,
       setChartRef,
@@ -161,6 +161,7 @@ export const MetricsGrid = ({
       onBrushEnd,
       onFilter,
       abortController,
+      searchTerm,
       requestParams,
       discoverFetch$,
       setChartRef,
@@ -175,20 +176,21 @@ export const MetricsGrid = ({
 
   return (
     <FieldsMetadataProvider fields={fields} services={services}>
-      <EuiAutoSizer>
-        {({ width, height }) => {
-          const columnWidth = width / gridColumns;
-          return (
-            <A11yGridWrapper
-              ref={gridRef}
-              aria-label={i18n.translate('metricsExperience.gridAriaLabel', {
-                defaultMessage: 'Metric charts grid. Use arrow keys to navigate.',
-              })}
-              gridRows={gridRows}
-              gridColumns={gridColumns}
-              onKeyDown={handleKeyDown}
-              data-test-subj="unifiedMetricsExperienceGrid"
-            >
+      <A11yGridWrapper
+        ref={gridRef}
+        aria-label={i18n.translate('metricsExperience.gridAriaLabel', {
+          defaultMessage: 'Metric charts grid. Use arrow keys to navigate.',
+        })}
+        gridRows={gridRows}
+        gridColumns={gridColumns}
+        onKeyDown={handleKeyDown}
+        data-test-subj="unifiedMetricsExperienceGrid"
+      >
+        <EuiAutoSizer>
+          {({ width, height }) => {
+            const columnWidth = width / gridColumns;
+
+            return (
               <Grid
                 ref={virtualGridRef}
                 columnCount={gridColumns}
@@ -198,21 +200,15 @@ export const MetricsGrid = ({
                 rowHeight={ChartSizes[chartSize]}
                 width={width}
                 overscanRowCount={2}
-                overscanColumnCount={0}
-                itemKey={({ rowIndex, columnIndex }) =>
-                  getItemKey(
-                    fields[rowIndex * gridColumns + columnIndex],
-                    rowIndex * gridColumns + columnIndex
-                  )
-                }
+                overscanColumnCount={1}
                 itemData={itemData}
               >
                 {VirtualGridCell}
               </Grid>
-            </A11yGridWrapper>
-          );
-        }}
-      </EuiAutoSizer>
+            );
+          }}
+        </EuiAutoSizer>
+      </A11yGridWrapper>
       {expandedMetric && (
         <MetricInsightsFlyout
           chartRef={getChartRefForFocus()}
@@ -230,6 +226,7 @@ interface BaseChartProps
     ChartSectionProps,
     'searchSessionId' | 'services' | 'onBrushEnd' | 'onFilter' | 'abortController' | 'requestParams'
   > {
+  searchTerm?: string;
   dimensions: string[];
   filters: Array<{ field: string; value: string }>;
   discoverFetch$: Observable<UnifiedHistogramInputMessage>;
@@ -255,6 +252,7 @@ const VirtualGridCell = React.memo(
       dimensions,
       filters,
       searchSessionId,
+      searchTerm,
       services,
       onBrushEnd,
       onFilter,
@@ -266,24 +264,36 @@ const VirtualGridCell = React.memo(
       setChartRef,
     } = data;
 
-    const index = rowIndex * gridColumns + columnIndex;
+    const index = useMemo(
+      () => rowIndex * gridColumns + columnIndex,
+      [rowIndex, gridColumns, columnIndex]
+    );
+
+    const isFocused = useMemo(
+      () => focusedCell.rowIndex === rowIndex && focusedCell.colIndex === columnIndex,
+      [focusedCell, rowIndex, columnIndex]
+    );
+
+    const cellStyle = useMemo(
+      () => ({
+        ...style,
+        padding: `${GUTTER_SIZE / 2}px ${GUTTER_SIZE / 2}px ${GUTTER_SIZE / 2}px ${
+          GUTTER_SIZE / 2
+        }px`,
+      }),
+      [style]
+    );
+
+    const metric = useMemo(() => fields[index], [fields, index]);
+    const id = useMemo(() => getItemKey(metric, index), [metric, index]);
 
     // Don't render if index is out of bounds
     if (index >= fields.length) {
       return null;
     }
 
-    const metric = fields[index];
-    const id = getItemKey(metric, index);
-    const isFocused = focusedCell.rowIndex === rowIndex && focusedCell.colIndex === columnIndex;
-
     return (
-      <div
-        style={{
-          ...style,
-          padding: `${GUTTER_SIZE}px ${GUTTER_SIZE / 2}px ${GUTTER_SIZE}px ${GUTTER_SIZE / 2}px`,
-        }}
-      >
+      <div style={cellStyle}>
         <ChartItem
           id={id}
           index={index}
@@ -304,6 +314,7 @@ const VirtualGridCell = React.memo(
           isFocused={isFocused}
           onFocusCell={onFocusCell}
           onViewDetails={onViewDetails}
+          searchTerm={searchTerm}
         />
       </div>
     );
