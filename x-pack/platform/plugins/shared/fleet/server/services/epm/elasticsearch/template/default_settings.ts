@@ -61,7 +61,7 @@ export async function getILMPolicies(
 }
 
 export async function saveILMMigrationChanges(
-  updatedILMMigrationStatusMap: Map<string, 'success' | undefined>
+  updatedILMMigrationStatusMap: Map<string, 'success' | undefined | null>
 ) {
   const isILMPolicyDisabled = appContextService.getConfig()?.internal?.disableILMPolicies ?? false;
   if (isILMPolicyDisabled) {
@@ -98,7 +98,7 @@ export async function saveILMMigrationChanges(
   }
 }
 
-export async function getILMMigrationStatus(): Promise<Map<string, 'success' | undefined>> {
+export async function getILMMigrationStatus(): Promise<Map<string, 'success' | undefined | null>> {
   const isILMPolicyDisabled = appContextService.getConfig()?.internal?.disableILMPolicies ?? false;
   if (isILMPolicyDisabled) {
     return new Map();
@@ -108,7 +108,7 @@ export async function getILMMigrationStatus(): Promise<Map<string, 'success' | u
   const settings = await getSettingsOrUndefined(soClient);
   const ilmMigrationStatus = settings?.ilm_migration_status ?? {};
 
-  const ilmMigrationStatusMap = new Map<string, 'success' | undefined>([
+  const ilmMigrationStatusMap = new Map<string, 'success' | undefined | null>([
     ['logs', ilmMigrationStatus?.logs],
     ['metrics', ilmMigrationStatus?.metrics],
     ['synthetics', ilmMigrationStatus?.synthetics],
@@ -119,7 +119,7 @@ export async function getILMMigrationStatus(): Promise<Map<string, 'success' | u
 
 function getILMPolicy(
   type: string,
-  ilmMigrationStatusMap: Map<string, 'success' | undefined>,
+  ilmMigrationStatusMap: Map<string, 'success' | undefined | null>,
   ilmPolicies: Map<
     string,
     { deprecatedILMPolicy?: IlmGetLifecycleLifecycle; newILMPolicy?: IlmGetLifecycleLifecycle }
@@ -163,7 +163,7 @@ export function buildDefaultSettings({
   type: string;
   ilmPolicy?: string | undefined;
   isOtelInputType?: boolean;
-  ilmMigrationStatusMap: Map<string, 'success' | undefined>;
+  ilmMigrationStatusMap: Map<string, 'success' | undefined | null>;
   ilmPolicies: Map<
     string,
     { deprecatedILMPolicy?: IlmGetLifecycleLifecycle; newILMPolicy?: IlmGetLifecycleLifecycle }

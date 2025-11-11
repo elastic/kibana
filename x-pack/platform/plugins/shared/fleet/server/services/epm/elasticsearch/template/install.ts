@@ -675,7 +675,7 @@ export function prepareTemplate({
   fieldAssetsMap: AssetsMap;
   dataStream: RegistryDataStream;
   experimentalDataStreamFeature?: ExperimentalDataStreamFeature;
-  ilmMigrationStatusMap: Map<string, 'success' | undefined>;
+  ilmMigrationStatusMap: Map<string, 'success' | undefined | null>;
   ilmPolicies: Map<
     string,
     { deprecatedILMPolicy?: IlmGetLifecycleLifecycle; newILMPolicy?: IlmGetLifecycleLifecycle }
@@ -683,7 +683,7 @@ export function prepareTemplate({
 }): {
   componentTemplates: TemplateMap;
   indexTemplate: IndexTemplateEntry;
-  ilmMigrationStatus: 'success' | undefined;
+  ilmMigrationStatus: 'success' | undefined | null;
 } {
   const { name: packageName, version: packageVersion } = packageInstallContext.packageInfo;
   const fields = loadDatastreamsFieldsFromYaml(
