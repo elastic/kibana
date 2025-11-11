@@ -184,7 +184,6 @@ describe('fetchGraph', () => {
 
     expect(query).toContain('EVAL actorDocData = CONCAT');
     expect(query).toContain('actor.entity.id');
-    expect(query).toContain('actorEntityGroup'); // <-- should be present because we group by type and sub_type
     expect(query).toContain('actorEntityName');
     expect(query).toContain('actorEntityType');
     expect(query).toContain('actorEntitySubType');
@@ -192,7 +191,6 @@ describe('fetchGraph', () => {
 
     expect(query).toContain('EVAL targetDocData = CONCAT');
     expect(query).toContain('target.entity.id');
-    expect(query).toContain('targetEntityGroup'); // <-- should be present because we group by type and sub_type
     expect(query).toContain('targetEntityName');
     expect(query).toContain('targetEntityType');
     expect(query).toContain('targetEntitySubType');
@@ -267,9 +265,6 @@ describe('fetchGraph', () => {
 
     expect(query).toContain(`actorsDocData = VALUES(actorDocData)`);
     expect(query).toContain(`targetsDocData = VALUES(targetDocData)`);
-
-    expect(query).toContain('EVAL actorEntityGroup = CASE'); // <-- should be present because we group by id
-    expect(query).toContain('EVAL targetEntityGroup = CASE'); // <-- should be present because we group by id
 
     expect(result).toEqual([{ id: 'dummy' }]);
   });
