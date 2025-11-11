@@ -23,7 +23,6 @@ export enum LinkCategoryType {
  * since they are mixed together in the navigationTree.
  */
 export enum SecurityGroupName {
-  alertDetections = 'securityGroup:alertDetections',
   rules = 'securityGroup:rules',
   explore = 'securityGroup:explore',
   investigations = 'securityGroup:investigations',
@@ -31,6 +30,10 @@ export enum SecurityGroupName {
   entityAnalytics = 'securityGroup:entityAnalytics',
   machineLearning = 'securityGroup:machineLearning',
   launchpad = 'securityGroup:launchpad',
+
+  // TODO: https://github.com/elastic/kibana/issues/242434
+  // Investigate possibility of using `detections` instead
+  alertDetections = 'securityGroup:alertDetections',
 }
 
 /** Feature flag for the alerts and attacks alignment feature */
