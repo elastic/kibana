@@ -615,14 +615,17 @@ export class AlertsClient<
       );
 
       try {
-        const response = await esClient.bulk({
-          // On serverless we can force a refresh to we don't wait for the longer refresh interval
-          // When too many refresh calls are done in a short period of time, they are throttled by stateless Elasticsearch
-          refresh: this.isServerless ? true : 'wait_for',
-          index: this.indexTemplateAndPattern.alias,
-          require_alias: !this.isUsingDataStreams(),
-          body: bulkBody,
-        });
+        const requests = [
+          esClient.bulk({
+            refresh: this.isServerless ? true : 'wait_for',
+            index: this.indexTemplateAndPattern.alias,
+            require_alias: !this.isUsingDataStreams(),
+            body: bulkBody,
+          }),
+        ];
+
+        const [response, forkedResponse] = await Promise.all(requests);
+        // console.log('forkedResponse:', JSON.stringify(forkedResponse));
 
         // If there were individual indexing errors, they will be returned in the success response
         if (response && response.errors) {
@@ -760,6 +763,7 @@ export class AlertsClient<
       );
 
       try {
+        console.log('bulkBody:', JSON.stringify(bulkBody, null, 2));
         const response = await esClient.bulk({
           // On serverless we can force a refresh to we don't wait for the longer refresh interval
           // When too many refresh calls are done in a short period of time, they are throttled by stateless Elasticsearch
@@ -781,6 +785,36 @@ export class AlertsClient<
               operations: bulkBody,
             },
             bulkResponse: response,
+            ruleId: this.options.rule.id,
+            ruleName: this.options.rule.name,
+            ruleType: this.ruleType.id,
+          });
+        }
+        const forkedBulkBody = flatMap(
+          alertsToIndex.map((alert: Alert & AlertData) => {
+            const alertUuid = get(alert, ALERT_UUID);
+            return [{ create: { _id: alertUuid } }, alert];
+          })
+        );
+        const forkedResponse = await esClient.bulk({
+          // On serverless we can force a refresh to we don't wait for the longer refresh interval
+          // When too many refresh calls are done in a short period of time, they are throttled by stateless Elasticsearch
+          refresh: this.isServerless ? true : 'wait_for',
+          index: 'alerts',
+          body: forkedBulkBody,
+        });
+        if (forkedResponse && forkedResponse.errors) {
+          this.throwIfHasClusterBlockException(forkedResponse);
+          await resolveAlertConflicts({
+            logger: this.options.logger,
+            esClient,
+            bulkRequest: {
+              refresh: 'wait_for',
+              index: 'alerts',
+              require_alias: false,
+              body: bulkBody,
+            },
+            bulkResponse: forkedResponse,
             ruleId: this.options.rule.id,
             ruleName: this.options.rule.name,
             ruleType: this.ruleType.id,

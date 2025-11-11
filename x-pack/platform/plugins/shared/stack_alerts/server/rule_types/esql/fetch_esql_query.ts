@@ -81,12 +81,14 @@ export async function fetchEsqlQuery({
   const link = generateLink(params, discoverLocator, dateStart, dateEnd, spacePrefix);
   const sourceFieldsPerResult = getSourceFields(results, sourceFieldsParams);
   const groupingObjectsPerResult = getGroupingObjects(results, alertIdFields);
+  const flappingFieldsPerResult = getFlappingFields(results);
 
   return {
     link,
     results,
     sourceFieldsPerResult,
     groupingObjectsPerResult,
+    flappingFieldsPerResult,
   };
 }
 
@@ -200,4 +202,16 @@ function getGroupingObjects(results: Record<string, EsqlHit[]>, alertIdFields: s
     }
   }
   return groupingObjectsPerResult;
+}
+
+function getFlappingFields(results: Record<string, EsqlHit[]>) {
+  const flappingFieldsPerResult: Record<string, boolean | undefined> = {};
+  for (const alertId of Object.keys(results)) {
+    const hit = results[alertId].at(0);
+    if (hit) {
+      const flappingField = get(hit._source, 'alert.flapping');
+      flappingFieldsPerResult[alertId] = Boolean(flappingField) || undefined;
+    }
+  }
+  return flappingFieldsPerResult;
 }

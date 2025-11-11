@@ -38,4 +38,5 @@ export const DEFAULTS = {
   ALIGN_EVENTS_TO_INTERVAL: true,
   CARDINALITY: 1,
   SLASH_LOGS: false,
+  LOOP_SCHEDULE: false,
 };
