@@ -63,9 +63,13 @@ const getPipeline = (filename: string, removeSteps = true) => {
       return;
     }
 
-    await runPreBuild();
+    if (GITHUB_PR_LABELS.includes('ci:beta-faster-pr-build')) {
+      await runPreBuild();
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base_merged_phases.yml', false));
+    } else {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base.yml', false));
+    }
 
-    pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base.yml', false));
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/scout_tests.yml'));
 
     if (await doAnyChangesMatch([/^src\/platform\/packages\/private\/kbn-handlebars/])) {

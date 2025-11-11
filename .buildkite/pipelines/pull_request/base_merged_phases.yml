@@ -1,14 +1,4 @@
 steps:
-  - command: .buildkite/scripts/lifecycle/pre_build.sh
-    label: Pre-Build
-    timeout_in_minutes: 10
-    id: pre_build
-    agents:
-      machineType: n2-standard-2
-      diskSizeGb: 100
-
-  - wait
-
   - command: .buildkite/scripts/steps/store_cache.sh
     label: Store Cache for build
     timeout_in_minutes: 10
@@ -23,9 +13,7 @@ steps:
   - command: .buildkite/scripts/steps/build_kibana.sh
     label: Build Kibana Distribution
     agents:
-      machineType: n2-standard-8
-      preemptible: true
-      diskSizeGb: 150
+      machineType: c3d-standard-16-lssd
     key: build
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
     timeout_in_minutes: 90
@@ -113,7 +101,22 @@ steps:
         - exit_status: '-1'
           limit: 3
 
-  - wait
+  - command: .buildkite/scripts/steps/test/pick_test_group_run_order.sh
+    label: 'Pick Test Group Run Order'
+    agents:
+      machineType: n2-standard-2
+      diskSizeGb: 100
+    timeout_in_minutes: 10
+    env:
+      JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
+      JEST_INTEGRATION_SCRIPT: '.buildkite/scripts/steps/test/jest_integration.sh'
+      JEST_CONFIGS_DEPS: 'check_types'
+      FTR_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/ftr_configs.sh'
+      FTR_CONFIGS_DEPS: 'build,check_types'
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
 
   - command: .buildkite/scripts/steps/ci_stats_ready.sh
     label: Mark CI Stats as ready
@@ -136,6 +139,13 @@ steps:
       preemptible: true
       diskSizeGb: 100
     key: build_api_docs
+    depends_on:
+      - build
+      - check_types
+      - linting
+      - linting_with_types
+      - quick_checks
+      - check_oas_snapshot
     timeout_in_minutes: 90
     retry:
       automatic:
