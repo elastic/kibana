@@ -1400,7 +1400,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.enable_caps',
       {
         defaultMessage:
-          'Include Linux process capabilities in process events written to Elasticsearch. Capabilities must be enabled for some SIEM detection rules. Warning: enabling this will increase data volume. For 8.13 and earlier, default: true. For 8.14 and later, default: false.'.
+          'Include Linux process capabilities in process events written to Elasticsearch. Capabilities must be enabled for some SIEM detection rules. Warning: enabling this will increase data volume. For 8.13 and earlier, default: true. For 8.14 and later, default: false.',
       }
     ),
   },
