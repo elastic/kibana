@@ -107,7 +107,7 @@ export function CreateEditCustomLinkFlyout({
 
           <EuiSpacer size="l" />
 
-          <FiltersSection filters={filters} onChangeFilters={setFilters} />
+          <FiltersSection filters={filters} setFilters={setFilters} />
 
           <EuiSpacer size="l" />
 

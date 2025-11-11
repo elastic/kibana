@@ -23,18 +23,18 @@ import { SuggestionsSelect } from '../../../../shared/suggestions_select';
 
 export function FiltersSection({
   filters,
-  onChangeFilters,
+  setFilters,
 }: {
   filters: Filter[];
-  onChangeFilters: (filters: Filter[]) => void;
+  setFilters: (filters: Filter[]) => void;
 }) {
   const onChangeFilter = useCallback(
     (key: Filter['key'], value: Filter['value'], idx: number) => {
       const newFilters = [...filters];
       newFilters[idx] = { key, value };
-      onChangeFilters(newFilters);
+      setFilters(newFilters);
     },
-    [filters, onChangeFilters]
+    [filters, setFilters]
   );
 
   const start = useMemo(() => moment().subtract(24, 'h').toISOString(), []);
@@ -48,14 +48,14 @@ export function FiltersSection({
     // if there is only one item left it should not be removed
     // but reset to empty
     if (isEmpty(newFilters)) {
-      onChangeFilters([{ key: '', value: '' }]);
+      setFilters([{ key: '', value: '' }]);
     } else {
-      onChangeFilters(newFilters);
+      setFilters(newFilters);
     }
   };
 
   const handleAddFilter = () => {
-    onChangeFilters([...filters, { key: '', value: '' }]);
+    setFilters([...filters, { key: '', value: '' }]);
   };
 
   return (

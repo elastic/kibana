@@ -29,7 +29,7 @@ describe('FiltersSections', () => {
   });
 
   it('renders the component', () => {
-    const { getByText } = render(<FiltersSection filters={[]} onChangeFilters={() => {}} />, {
+    const { getByText } = render(<FiltersSection filters={[]} setFilters={() => {}} />, {
       wrapper: Wrapper,
     });
 
@@ -51,10 +51,10 @@ describe('FiltersSections', () => {
     }));
 
     const initialFilters: Filter[] = [{ key: 'service.name', value: 'foo' }];
-    const onChangeFilters = jest.fn();
+    const setFilters = jest.fn();
 
     const { getByLabelText, getByTestId, rerender } = render(
-      <FiltersSection filters={initialFilters} onChangeFilters={onChangeFilters} />,
+      <FiltersSection filters={initialFilters} setFilters={setFilters} />,
       { wrapper: Wrapper }
     );
 
@@ -66,13 +66,13 @@ describe('FiltersSections', () => {
       fireEvent.change(select, { target: { value: 'transaction.type' } });
     });
 
-    expect(onChangeFilters).toHaveBeenCalledWith([{ key: 'transaction.type', value: '' }]);
+    expect(setFilters).toHaveBeenCalledWith([{ key: 'transaction.type', value: '' }]);
 
     await act(async () => {
       rerender(
         <FiltersSection
           filters={[{ key: 'transaction.type', value: '' }]}
-          onChangeFilters={onChangeFilters}
+          setFilters={setFilters}
         />
       );
     });
@@ -83,9 +83,9 @@ describe('FiltersSections', () => {
 
   it('empties the key and the value AND keeps the selects visible, when I have only 1 filter and I delete the filter.', async () => {
     const initialFilters: Filter[] = [{ key: 'service.name', value: 'foo' }];
-    const onChangeFilters = jest.fn();
+    const setFilters = jest.fn();
     const { getAllByTestId } = render(
-      <FiltersSection filters={initialFilters} onChangeFilters={onChangeFilters} />,
+      <FiltersSection filters={initialFilters} setFilters={setFilters} />,
       { wrapper: Wrapper }
     );
 
@@ -105,9 +105,9 @@ describe('FiltersSections', () => {
 
   it('has the Delete disabled, when I have 1 filter and the selects have no values', async () => {
     const initialFilters: Filter[] = [{ key: '', value: '' }];
-    const onChangeFilters = jest.fn();
+    const setFilters = jest.fn();
     const { getAllByTestId } = render(
-      <FiltersSection filters={initialFilters} onChangeFilters={onChangeFilters} />,
+      <FiltersSection filters={initialFilters} setFilters={setFilters} />,
       { wrapper: Wrapper }
     );
 
@@ -121,9 +121,9 @@ describe('FiltersSections', () => {
       { key: 'service.name', value: 'foo' },
       { key: 'transaction.type', value: 'bar' },
     ];
-    const onChangeFilters = jest.fn();
+    const setFilters = jest.fn();
     const { getAllByTestId, rerender } = render(
-      <FiltersSection filters={initialFilters} onChangeFilters={onChangeFilters} />
+      <FiltersSection filters={initialFilters} setFilters={setFilters} />
     );
 
     const removeButtons = getAllByTestId('apmCustomLinkFiltersSectionButton');
@@ -133,13 +133,13 @@ describe('FiltersSections', () => {
       fireEvent.click(removeButtons[0]);
     });
 
-    expect(onChangeFilters).toHaveBeenCalledWith([{ key: 'transaction.type', value: 'bar' }]);
+    expect(setFilters).toHaveBeenCalledWith([{ key: 'transaction.type', value: 'bar' }]);
 
     await act(async () => {
       rerender(
         <FiltersSection
           filters={[{ key: 'transaction.type', value: 'bar' }]}
-          onChangeFilters={onChangeFilters}
+          setFilters={setFilters}
         />
       );
     });
