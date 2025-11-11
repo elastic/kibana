@@ -12,10 +12,10 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import { monaco } from '@kbn/monaco';
 import { useYamlValidation } from './use_yaml_validation';
+import { selectDetailState } from '../../../entities/workflows/store';
+import { createWorkflowsStore } from '../../../entities/workflows/store/store';
+import { setYamlString } from '../../../entities/workflows/store/workflow_detail/slice';
 import { createStartServicesMock } from '../../../mocks';
-import { selectDetailState } from '../../../widgets/workflow_yaml_editor/lib/store';
-import { setYamlString } from '../../../widgets/workflow_yaml_editor/lib/store/slice';
-import { createWorkflowDetailStore } from '../../../widgets/workflow_yaml_editor/lib/store/store';
 
 // Mock Monaco editor
 const createMockEditor = (value: string) => {
@@ -74,7 +74,7 @@ const renderHookWithProviders = (
   editor: monaco.editor.IStandaloneCodeEditor | null,
   yamlContent: string
 ) => {
-  const store = createWorkflowDetailStore(createStartServicesMock());
+  const store = createWorkflowsStore(createStartServicesMock());
 
   // Set the YAML content which will trigger computation via middleware
   store.dispatch(setYamlString(yamlContent));
