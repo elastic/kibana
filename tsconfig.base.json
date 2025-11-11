@@ -1308,6 +1308,8 @@
       "@kbn/lazy-object/*": ["src/platform/packages/shared/kbn-lazy-object/*"],
       "@kbn/lens-common": ["src/platform/packages/shared/kbn-lens-common"],
       "@kbn/lens-common/*": ["src/platform/packages/shared/kbn-lens-common/*"],
+      "@kbn/lens-common-2": ["src/platform/packages/shared/kbn-lens-common-2"],
+      "@kbn/lens-common-2/*": ["src/platform/packages/shared/kbn-lens-common-2/*"],
       "@kbn/lens-config-builder-example-plugin": ["x-pack/examples/lens_config_builder_example"],
       "@kbn/lens-config-builder-example-plugin/*": ["x-pack/examples/lens_config_builder_example/*"],
       "@kbn/lens-embeddable-utils": ["src/platform/packages/shared/kbn-lens-embeddable-utils"],
