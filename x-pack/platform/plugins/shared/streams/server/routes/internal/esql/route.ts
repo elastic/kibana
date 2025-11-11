@@ -12,6 +12,7 @@ import { isNumber } from 'lodash';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
 import { excludeFrozenQuery, kqlQuery, rangeQuery } from './query_helpers';
+import { getRequestAbortSignal } from '../../utils/get_request_abort_signal';
 
 export const executeEsqlRoute = createServerRoute({
   endpoint: 'POST /internal/streams/esql',
@@ -36,10 +37,10 @@ export const executeEsqlRoute = createServerRoute({
   handler: async ({ params, request, logger, getScopedClients }): Promise<UnparsedEsqlResponse> => {
     const { scopedClusterClient } = await getScopedClients({ request });
     const tracedEsClient = createTracedEsClient({
-      request,
       client: scopedClusterClient.asCurrentUser,
       logger,
       plugin: 'streams',
+      abortSignal: getRequestAbortSignal(request),
     });
 
     const {

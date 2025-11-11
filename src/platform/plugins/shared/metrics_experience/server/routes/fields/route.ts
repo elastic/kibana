@@ -11,6 +11,7 @@ import { z } from '@kbn/zod';
 import { createTracedEsClient } from '@kbn/traced-es-client';
 import { isoToEpoch } from '@kbn/zod-helpers';
 import { parse as dateMathParse } from '@kbn/datemath';
+import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { getMetricFields } from './get_metric_fields';
 import { createRoute } from '../create_route';
 import { throwNotFoundIfMetricsExperienceDisabled } from '../../lib/utils';
@@ -42,10 +43,10 @@ export const getFieldsRoute = createRoute({
 
     const { fields, total } = await getMetricFields({
       esClient: createTracedEsClient({
-        request,
         logger,
         client: esClient,
         plugin: 'metrics_experience',
+        abortSignal: getRequestAbortedSignal(request.events.aborted$),
       }),
       indexPattern: params.query.index,
       timerange: { from: params.query.from, to: params.query.to },

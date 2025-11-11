@@ -20,7 +20,6 @@ import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
 import type { Required, ValuesType } from 'utility-types';
 import type { DedotObject } from '@kbn/utility-types';
 import { unflattenObject } from '@kbn/task-manager-plugin/server/metrics/lib';
-import type { KibanaRequest } from '@kbn/core/server';
 import { esqlResultToPlainObjects } from './esql_result_to_plain_objects';
 
 type SearchRequest = ESSearchRequest & {
@@ -112,22 +111,6 @@ export interface TracedElasticsearchClient {
   client: ElasticsearchClient;
 }
 
-const cancelEsRequestOnAbort = <T extends Promise<any>>(
-  promise: T,
-  controller: AbortController,
-  request?: KibanaRequest
-): T => {
-  if (!request) {
-    return promise as T;
-  }
-
-  const subscription = request.events.aborted$.subscribe(() => {
-    controller.abort();
-  });
-
-  return promise.finally(() => subscription.unsubscribe()) as T;
-};
-
 const unwrapEsResponse = <T extends Promise<{ body?: any }>>(
   responsePromise: T
 ): Promise<Awaited<T> extends { body: infer TBody } ? TBody : Awaited<T>> => {
@@ -136,14 +119,14 @@ const unwrapEsResponse = <T extends Promise<{ body?: any }>>(
 
 export function createTracedEsClient({
   client,
-  request,
+  abortSignal,
   logger,
   plugin,
   labels,
 }: {
   client: ElasticsearchClient;
   logger: Logger;
-  request?: KibanaRequest;
+  abortSignal?: AbortSignal;
   plugin?: string;
   labels?: Record<string, string>;
 }): TracedElasticsearchClient {
@@ -152,10 +135,10 @@ export function createTracedEsClient({
   const callWithLogger = <T extends { body?: any }>(
     operationName: string,
     params: Record<string, any>,
-    callback: (requestOpts: { signal: AbortSignal; meta: true }) => Promise<T>
+    callback: (requestOpts: { signal?: AbortSignal; meta: true }) => Promise<T>
   ): Promise<T extends { body: infer TBody } ? TBody : T> => {
     logger.debug(() => `Request (${operationName}):\n${JSON.stringify(params)}`);
-    const controller = new AbortController();
+
     return withSpan(
       {
         name: operationName,
@@ -165,11 +148,7 @@ export function createTracedEsClient({
         },
       },
       () => {
-        const promise = cancelEsRequestOnAbort(
-          callback({ signal: controller.signal, meta: true }),
-          controller,
-          request
-        );
+        const promise = callback({ signal: abortSignal, meta: true });
 
         return unwrapEsResponse(promise);
       },
