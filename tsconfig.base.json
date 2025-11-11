@@ -1508,6 +1508,8 @@
       "@kbn/object-versioning/*": ["src/platform/packages/shared/kbn-object-versioning/*"],
       "@kbn/object-versioning-utils": ["src/platform/packages/shared/kbn-object-versioning-utils"],
       "@kbn/object-versioning-utils/*": ["src/platform/packages/shared/kbn-object-versioning-utils/*"],
+      "@kbn/observability-agent-plugin": ["x-pack/solutions/observability/plugins/observability_agent"],
+      "@kbn/observability-agent-plugin/*": ["x-pack/solutions/observability/plugins/observability_agent/*"],
       "@kbn/observability-ai-assistant-app-plugin": ["x-pack/solutions/observability/plugins/observability_ai_assistant_app"],
       "@kbn/observability-ai-assistant-app-plugin/*": ["x-pack/solutions/observability/plugins/observability_ai_assistant_app/*"],
       "@kbn/observability-ai-assistant-management-plugin": ["x-pack/platform/plugins/private/observability_ai_assistant_management"],
