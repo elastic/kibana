@@ -49,6 +49,7 @@ const getMockConfig = (opts: Partial<CsvConfigType> = {}): CsvConfigType => ({
   useByteOrderMarkEncoding: false,
   scroll: { size: 500, duration: '30s', strategy: 'pit' },
   maxConcurrentShardRequests: 5,
+  maxRows: 500,
   ...opts,
 });
 
@@ -1528,6 +1529,90 @@ describe('CsvGenerator', () => {
         ],
       }
     `);
+  });
+
+  it('will return partial data and a warning if search results exceed the max rows', async () => {
+    const mockJobUsingPitPaging = createMockJob({
+      columns: ['date', 'ip', 'message'],
+      pagingStrategy: 'pit',
+    });
+    mockDataClient.search = jest
+      .fn()
+      .mockImplementationOnce(() =>
+        Rx.of({
+          rawResponse: getMockRawResponse(
+            range(0, HITS_TOTAL / 20).map(
+              () =>
+                ({
+                  fields: {
+                    date: ['2020-12-31T00:14:28.000Z'],
+                    ip: ['110.135.176.89'],
+                    message: ['hit from the initial search'],
+                  },
+                } as unknown as estypes.SearchHit)
+            ),
+            HITS_TOTAL
+          ),
+        })
+      )
+      .mockImplementation(() =>
+        Rx.of({
+          rawResponse: getMockRawResponse(
+            range(0, HITS_TOTAL / 20).map(
+              () =>
+                ({
+                  fields: {
+                    date: ['2020-12-31T00:14:28.000Z'],
+                    ip: ['110.135.176.89'],
+                    message: ['hit from a subsequent scroll'],
+                  },
+                } as unknown as estypes.SearchHit)
+            )
+          ),
+        })
+      );
+
+    const generateCsv = new CsvGenerator(
+      mockJobUsingPitPaging,
+      getMockConfig({
+        maxRows: 5,
+      }),
+      mockTaskInstanceFields,
+      {
+        es: mockEsClient,
+        data: mockDataClient,
+        uiSettings: uiSettingsClient,
+      },
+      {
+        searchSourceStart: mockSearchSourceService,
+        fieldFormatsRegistry: mockFieldFormatsRegistry,
+      },
+      new CancellationToken(),
+      mockLogger,
+      stream
+    );
+    const warnLogSpy = jest.spyOn(mockLogger, 'warn');
+    const csvResult = await generateCsv.generateData();
+    expect(csvResult).toMatchInlineSnapshot(`
+      Object {
+        "content_type": "text/csv",
+        "csv_contains_formulas": false,
+        "error_code": undefined,
+        "max_size_reached": false,
+        "metrics": Object {
+          "csv": Object {
+            "rows": 5,
+          },
+        },
+        "user_error": true,
+        "warnings": Array [
+          "Encountered an error with the number of CSV rows generated from the search: expected 100, received 5.",
+        ],
+      }
+    `);
+    expect(warnLogSpy).toHaveBeenCalledWith(
+      'This search has exceeded the recommended row limit (5). This limit can be configured in kibana.yml, but increasing it may impact performance.'
+    );
   });
 
   it('will return partial data if the scroll or search fails', async () => {

@@ -296,7 +296,7 @@ export class CsvGenerator {
       }
     }
 
-    const { maxSizeBytes, bom, escapeFormulaValues, timezone } = settings;
+    const { maxSizeBytes, maxRows, bom, escapeFormulaValues, timezone } = settings;
     const indexPatternTitle = index.getIndexPattern();
     const builder = new MaxSizeStringBuilder(this.stream, byteSizeValueToNumber(maxSizeBytes), bom);
     const warnings: string[] = [];
@@ -359,7 +359,9 @@ export class CsvGenerator {
           break;
         }
 
-        searchSource.setField('size', settings.scroll.size);
+        // override the scroll size if the maxRows limit is smaller
+        const size = Math.min(settings.scroll.size, maxRows);
+        searchSource.setField('size', size);
 
         let results: estypes.SearchResponse<unknown> | undefined;
         try {
@@ -426,6 +428,15 @@ export class CsvGenerator {
 
         // update iterator
         currentRecord += table.rows.length;
+
+        // stop generating the report if the
+        // current number of rows is >= the max row limit
+        if (currentRecord >= maxRows - 1) {
+          this.logger.warn(
+            `This search has exceeded the recommended row limit (${maxRows}). This limit can be configured in kibana.yml, but increasing it may impact performance.`
+          );
+          break;
+        }
       } while (totalRecords != null && currentRecord < totalRecords - 1);
 
       // Add warnings to be logged
