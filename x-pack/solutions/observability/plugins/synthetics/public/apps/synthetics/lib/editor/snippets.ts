@@ -16,6 +16,7 @@ export const syntheticsSuggestionProvider: monaco.languages.CompletionItemProvid
     const lineContent = model.getLineContent(lineNumber);
 
     const word = model.getWordAtPosition(position);
+
     const range: monaco.IRange = word
       ? {
           startLineNumber: lineNumber,
@@ -23,7 +24,12 @@ export const syntheticsSuggestionProvider: monaco.languages.CompletionItemProvid
           startColumn: word.startColumn,
           endColumn: word.endColumn,
         }
-      : new monaco.Range(lineNumber, position.column, lineNumber, position.column);
+      : {
+          startLineNumber: lineNumber,
+          endLineNumber: lineNumber,
+          startColumn: position.column,
+          endColumn: position.column,
+        };
 
     const suggestions: monaco.languages.CompletionItem[] = [
       {
@@ -31,7 +37,8 @@ export const syntheticsSuggestionProvider: monaco.languages.CompletionItemProvid
         kind: monaco.languages.CompletionItemKind.Snippet,
         detail: 'Navigate to a URL and wait',
         documentation: 'Navigate to the provided URL and wait for the page to load.',
-        insertText: "await page.goto('https://example.com');\nawait page.waitForLoadState('load');",
+        insertText:
+          "await page.goto('${1:https://example.com}');\nawait page.waitForLoadState('load');\n$0",
         insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
         range,
         sortText: '0',
@@ -55,6 +62,37 @@ export const syntheticsSuggestionProvider: monaco.languages.CompletionItemProvid
         insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
         range,
         sortText: '2',
+      },
+      {
+        label: 'step',
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        detail: 'Define a step with name and action',
+        documentation: 'Defines a step with a given name and action to perform.',
+        insertText: "step('${1:step name}', async () => {\n  ${0:// your code here}\n});",
+        insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+        range,
+        sortText: '3',
+      },
+      {
+        label: 'clickText',
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        detail: 'Click an element containing text',
+        documentation: 'Click an element that contains the specified text.',
+        insertText: "await page.getByText('${1:Text}').click();$0",
+        insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+        range,
+        sortText: '4',
+      },
+      {
+        label: 'expectText',
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        detail: 'Expect an element containing text to be visible',
+        documentation:
+          'Expect an element that contains the specified text to be visible on the page.',
+        insertText: "expect(await page.getByText('${1:locator}')).toBeVisible();",
+        insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+        range,
+        sortText: '5',
       },
     ];
 
