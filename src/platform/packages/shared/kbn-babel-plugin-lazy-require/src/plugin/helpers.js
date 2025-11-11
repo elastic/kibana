@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const babelTypes = require('@babel/types');
-const tsNodes = Object.keys(babelTypes.VISITOR_KEYS).filter((k) => k.startsWith('TS'));
+/**
+ * Helper utilities for the lazy-require Babel plugin
+ */
 
 /**
  * Check if an expression is a direct require() call with a string literal
@@ -127,14 +128,34 @@ function hasImportThenExportPattern(importPath, t) {
  * @param {import('@babel/types')} t - Babel types helper
  * @returns {boolean} True if in type-only context
  */
-function isInTypeContext(path) {
+function isInTypeContext(path, t) {
   let currentPath = path;
   while (currentPath) {
     const parentNode = currentPath.parent;
     if (!parentNode) break;
 
     // Check if we're inside a pure type context
-    if (parentNode.type && tsNodes.includes(parentNode.type)) {
+    if (
+      parentNode.type &&
+      (t.isTSTypeAnnotation(parentNode) ||
+        t.isTSTypeReference(parentNode) ||
+        t.isTSTypeParameterDeclaration(parentNode) ||
+        t.isTSTypeParameter(parentNode) ||
+        t.isTSInterfaceDeclaration(parentNode) ||
+        t.isTSTypeAliasDeclaration(parentNode) ||
+        t.isTSTypeQuery(parentNode) ||
+        t.isTSTypeLiteral(parentNode) ||
+        t.isTSIndexedAccessType(parentNode) ||
+        t.isTSMappedType(parentNode) ||
+        t.isTSConditionalType(parentNode) ||
+        t.isTSExpressionWithTypeArguments(parentNode) ||
+        t.isTSDeclareMethod(parentNode) ||
+        t.isTSMethodSignature(parentNode) ||
+        t.isTSDeclareFunction(parentNode) ||
+        t.isTSFunctionType(parentNode) ||
+        t.isTSConstructSignatureDeclaration(parentNode) ||
+        t.isTSCallSignatureDeclaration(parentNode))
+    ) {
       return true;
     }
 

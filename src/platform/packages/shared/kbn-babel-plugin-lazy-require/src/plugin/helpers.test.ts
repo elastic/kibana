@@ -211,7 +211,7 @@ describe('helpers', () => {
         },
       });
 
-      const result = isInTypeContext(identifierPath!);
+      const result = isInTypeContext(identifierPath!, t);
 
       expect(result).toBe(true);
     });
@@ -230,7 +230,7 @@ describe('helpers', () => {
         },
       });
 
-      const result = isInTypeContext(identifierPath!);
+      const result = isInTypeContext(identifierPath!, t);
 
       expect(result).toBe(false);
     });
@@ -249,7 +249,7 @@ describe('helpers', () => {
         },
       });
 
-      const result = isInTypeContext(identifierPath!);
+      const result = isInTypeContext(identifierPath!, t);
 
       expect(result).toBe(true);
     });
