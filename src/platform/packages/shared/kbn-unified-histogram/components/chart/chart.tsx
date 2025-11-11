@@ -25,14 +25,12 @@ import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { estypes } from '@elastic/elasticsearch';
 import { Histogram } from './histogram';
 import type {
-  UnifiedHistogramBreakdownContext,
   UnifiedHistogramBucketInterval,
   UnifiedHistogramChartContext,
   UnifiedHistogramChartLoadEvent,
   UnifiedHistogramFetch$,
   UnifiedHistogramFetchParams,
   UnifiedHistogramHitsContext,
-  UnifiedHistogramRequestContext,
   UnifiedHistogramServices,
   UnifiedHistogramSuggestionContext,
   LensVisServiceState,
@@ -58,10 +56,8 @@ export interface UnifiedHistogramChartProps {
   services: UnifiedHistogramServices;
   lensVisService: LensVisService;
   lensVisServiceState: LensVisServiceState;
-  request: UnifiedHistogramRequestContext | undefined;
   hits: UnifiedHistogramHitsContext | undefined;
   chart: UnifiedHistogramChartContext | undefined;
-  breakdown: UnifiedHistogramBreakdownContext | undefined;
   renderCustomChartToggleActions?: () => ReactElement | undefined;
   disableTriggers?: LensEmbeddableInput['disableTriggers'];
   disabledActions?: LensEmbeddableInput['disabledActions'];
@@ -86,10 +82,8 @@ const HistogramMemoized = memo(Histogram);
 export function UnifiedHistogramChart({
   isChartAvailable,
   services,
-  request,
   hits,
   chart,
-  breakdown,
   lensVisService,
   lensVisServiceState,
   renderCustomChartToggleActions,
@@ -128,6 +122,7 @@ export function UnifiedHistogramChart({
     columns,
     controlsState,
     isESQLQuery: isPlainRecord,
+    breakdown,
   } = fetchParams;
   const hasLensSuggestions = Boolean(
     isPlainRecord &&
@@ -136,7 +131,6 @@ export function UnifiedHistogramChart({
 
   useTotalHits({
     services,
-    request,
     hits,
     chartVisible,
     fetch$,

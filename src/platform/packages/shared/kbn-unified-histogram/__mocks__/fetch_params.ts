@@ -16,6 +16,7 @@ import type {
 import { processFetchParams } from '../utils/process_fetch_params';
 import { unifiedHistogramServicesMock } from './services';
 import { ReplaySubject } from 'rxjs';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
 
 export const getFetchParamsMock = (
   partialParams?: Partial<UnifiedHistogramFetchParamsExternal>
@@ -33,6 +34,7 @@ export const getFetchParamsMock = (
         relativeTimeRange: { from: 'now-30d/d', to: 'now' },
         dataView: dataViewWithTimefieldMock,
         lastReloadRequestTime: new Date('2025-10-07T22:00:00.000Z').getTime(),
+        requestAdapter: new RequestAdapter(),
         ...partialParams,
       },
       services: unifiedHistogramServicesMock,

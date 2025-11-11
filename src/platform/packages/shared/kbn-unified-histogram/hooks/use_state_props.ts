@@ -50,8 +50,7 @@ export const useStateProps = ({
   const lensAdapters = useStateSelector(stateService?.state$, lensAdaptersSelector);
   const lensDataLoading$ = useStateSelector(stateService?.state$, lensDataLoadingSelector$);
 
-  const { searchSessionId, requestAdapter, breakdown, isTimeBased, isESQLQuery, timeInterval } =
-    fetchParams || {};
+  const { breakdown, isTimeBased, isESQLQuery, timeInterval } = fetchParams || {};
 
   const hits = useMemo(() => {
     if (totalHitsResult instanceof Error) {
@@ -74,14 +73,6 @@ export const useStateProps = ({
       timeInterval,
     };
   }, [chartHidden, isESQLQuery, isTimeBased, timeInterval]);
-
-  // TODO: consider dropping in favor of fetchParams
-  const request = useMemo(() => {
-    return {
-      searchSessionId,
-      adapter: requestAdapter,
-    };
-  }, [requestAdapter, searchSessionId]);
 
   /**
    * Callbacks
@@ -158,8 +149,6 @@ export const useStateProps = ({
     topPanelHeight,
     hits,
     chart,
-    breakdown,
-    request,
     lensAdapters,
     dataLoading$: lensDataLoading$,
     onTopPanelHeightChange,

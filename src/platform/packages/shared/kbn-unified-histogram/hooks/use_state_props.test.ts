@@ -48,6 +48,10 @@ describe('useStateProps', () => {
     return stateService;
   };
 
+  beforeEach(() => {
+    (unifiedHistogramServicesMock.storage.set as jest.Mock).mockClear();
+  });
+
   it('should return the correct props', () => {
     const stateService = getStateService({ initialState });
     const fetchParams = getFetchParamsMock({
@@ -69,9 +73,6 @@ describe('useStateProps', () => {
     );
     expect(result.current).toMatchInlineSnapshot(`
       Object {
-        "breakdown": Object {
-          "field": undefined,
-        },
         "chart": Object {
           "hidden": false,
           "timeInterval": "auto",
@@ -122,18 +123,6 @@ describe('useStateProps', () => {
         "onTimeIntervalChange": [Function],
         "onTopPanelHeightChange": [Function],
         "onTotalHitsChange": [Function],
-        "request": Object {
-          "adapter": RequestAdapter {
-            "_events": Object {},
-            "_eventsCount": 0,
-            "_maxListeners": undefined,
-            "requests": Map {},
-            "responses": WeakMap {},
-            Symbol(shapeMode): false,
-            Symbol(kCapture): false,
-          },
-          "searchSessionId": "123",
-        },
         "topPanelHeight": 100,
       }
     `);
@@ -151,7 +140,7 @@ describe('useStateProps', () => {
     const { result } = renderHook(() =>
       useStateProps({
         services: unifiedHistogramServicesMock,
-        localStorageKeyPrefix: undefined,
+        localStorageKeyPrefix: 'test-prefix',
         stateService,
         fetchParams,
         onBreakdownFieldChange: undefined,
@@ -160,9 +149,6 @@ describe('useStateProps', () => {
     );
     expect(result.current).toMatchInlineSnapshot(`
       Object {
-        "breakdown": Object {
-          "field": undefined,
-        },
         "chart": Object {
           "hidden": false,
           "timeInterval": "auto",
@@ -213,24 +199,16 @@ describe('useStateProps', () => {
         "onTimeIntervalChange": [Function],
         "onTopPanelHeightChange": [Function],
         "onTotalHitsChange": [Function],
-        "request": Object {
-          "adapter": RequestAdapter {
-            "_events": Object {},
-            "_eventsCount": 0,
-            "_maxListeners": undefined,
-            "requests": Map {},
-            "responses": WeakMap {},
-            Symbol(shapeMode): false,
-            Symbol(kCapture): false,
-          },
-          "searchSessionId": "123",
-        },
         "topPanelHeight": 100,
       }
     `);
 
     expect(result.current.chart).toStrictEqual({ hidden: false, timeInterval: 'auto' });
-    expect(result.current.breakdown).toStrictEqual({ field: undefined });
+    expect(fetchParams.breakdown).toStrictEqual({ field: undefined });
+    expect(unifiedHistogramServicesMock.storage.set).toHaveBeenCalledWith(
+      'test-prefix:histogramBreakdownField',
+      ''
+    );
   });
 
   it('should return the correct props when an ES|QL query is used with transformational commands', () => {
@@ -249,7 +227,7 @@ describe('useStateProps', () => {
     const { result } = renderHook(() =>
       useStateProps({
         services: unifiedHistogramServicesMock,
-        localStorageKeyPrefix: undefined,
+        localStorageKeyPrefix: 'test-prefix',
         stateService,
         fetchParams,
         onBreakdownFieldChange: undefined,
@@ -257,7 +235,11 @@ describe('useStateProps', () => {
       })
     );
     expect(result.current.chart).toStrictEqual({ hidden: false, timeInterval: 'auto' });
-    expect(result.current.breakdown).toBe(undefined);
+    expect(fetchParams.breakdown).toBe(undefined);
+    expect(unifiedHistogramServicesMock.storage.set).toHaveBeenCalledWith(
+      'test-prefix:histogramBreakdownField',
+      ''
+    );
   });
 
   it('should return the correct props when an ES|QL query is used with breakdown field', () => {
@@ -287,10 +269,10 @@ describe('useStateProps', () => {
       columns: esqlColumns,
       breakdownField,
     });
-    const { result } = renderHook(() =>
+    renderHook(() =>
       useStateProps({
         services: unifiedHistogramServicesMock,
-        localStorageKeyPrefix: undefined,
+        localStorageKeyPrefix: 'test',
         stateService,
         fetchParams,
         onBreakdownFieldChange: undefined,
@@ -302,7 +284,11 @@ describe('useStateProps', () => {
     const selectedField = new DataViewField(
       convertDatatableColumnToDataViewFieldSpec(breakdownColumn)
     );
-    expect(result.current.breakdown).toStrictEqual({ field: selectedField });
+    expect(fetchParams.breakdown).toStrictEqual({ field: selectedField });
+    expect(unifiedHistogramServicesMock.storage.set).toHaveBeenCalledWith(
+      'test:histogramBreakdownField',
+      'extension'
+    );
   });
 
   it('should call the setBreakdown cb when an ES|QL query is used', () => {
@@ -371,7 +357,6 @@ describe('useStateProps', () => {
     );
     expect(result.current).toMatchInlineSnapshot(`
       Object {
-        "breakdown": undefined,
         "chart": undefined,
         "dataLoading$": undefined,
         "hits": Object {
@@ -419,18 +404,6 @@ describe('useStateProps', () => {
         "onTimeIntervalChange": [Function],
         "onTopPanelHeightChange": [Function],
         "onTotalHitsChange": [Function],
-        "request": Object {
-          "adapter": RequestAdapter {
-            "_events": Object {},
-            "_eventsCount": 0,
-            "_maxListeners": undefined,
-            "requests": Map {},
-            "responses": WeakMap {},
-            Symbol(shapeMode): false,
-            Symbol(kCapture): false,
-          },
-          "searchSessionId": "123",
-        },
         "topPanelHeight": 100,
       }
     `);
@@ -457,7 +430,6 @@ describe('useStateProps', () => {
     );
     expect(result.current).toMatchInlineSnapshot(`
       Object {
-        "breakdown": undefined,
         "chart": undefined,
         "dataLoading$": undefined,
         "hits": Object {
@@ -505,18 +477,6 @@ describe('useStateProps', () => {
         "onTimeIntervalChange": [Function],
         "onTopPanelHeightChange": [Function],
         "onTotalHitsChange": [Function],
-        "request": Object {
-          "adapter": RequestAdapter {
-            "_events": Object {},
-            "_eventsCount": 0,
-            "_maxListeners": undefined,
-            "requests": Map {},
-            "responses": WeakMap {},
-            Symbol(shapeMode): false,
-            Symbol(kCapture): false,
-          },
-          "searchSessionId": "123",
-        },
         "topPanelHeight": 100,
       }
     `);

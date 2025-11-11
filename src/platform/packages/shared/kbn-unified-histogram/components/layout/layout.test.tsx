@@ -26,6 +26,7 @@ import { ResizableLayout, ResizableLayoutMode } from '@kbn/resizable-layout';
 import type { UseUnifiedHistogramProps } from '../../hooks/use_unified_histogram';
 import { useUnifiedHistogram } from '../../hooks/use_unified_histogram';
 import { act } from 'react-dom/test-utils';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
 
 let mockBreakpoint = 'l';
 
@@ -70,6 +71,7 @@ describe('Layout', () => {
         from: '2020-05-14T11:05:13.590',
         to: '2020-05-14T11:20:13.590',
       },
+      requestAdapter: new RequestAdapter(),
     };
     const Wrapper = () => {
       const unifiedHistogram = useUnifiedHistogram({

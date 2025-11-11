@@ -14,6 +14,7 @@ import { getBreakdownField } from '../utils/local_storage_utils';
 import { createStateService } from '../services/state_service';
 import { useStateProps } from './use_state_props';
 import type { UnifiedHistogramFetchParamsExternal } from '../types';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
 
 jest.mock('../services/state_service');
 jest.mock('./use_state_props');
@@ -71,6 +72,7 @@ describe('useServicesBootstrap', () => {
       dataView: dataViewWithTimefieldMock,
       query,
       relativeTimeRange: { from: 'now-15m', to: 'now' },
+      requestAdapter: new RequestAdapter(),
     };
 
     act(() => {

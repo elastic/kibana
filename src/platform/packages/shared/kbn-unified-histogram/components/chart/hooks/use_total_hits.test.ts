@@ -46,7 +46,6 @@ describe('useTotalHits', () => {
         ),
       },
     } as any,
-    request: undefined,
     hits: {
       status: UnifiedHistogramFetchStatus.uninitialized,
       total: undefined,
@@ -81,23 +80,21 @@ describe('useTotalHits', () => {
       });
     const setFieldSpy = jest.spyOn(searchSourceInstanceMock, 'setField').mockClear();
     const data = dataPluginMock.createStartContract();
+    const adapter = new RequestAdapter();
     const fetchParams = getFetchParamsMock({
       query: { query: 'test query', language: 'kuery' },
       filters: [{ meta: { index: 'test' }, query: { match_all: {} } }],
+      searchSessionId: '123',
+      requestAdapter: adapter,
     });
     jest
       .spyOn(data.query.timefilter.timefilter, 'createFilter')
       .mockClear()
       .mockReturnValue(fetchParams.timeRange as any);
-    const adapter = new RequestAdapter();
     const { rerender } = renderHook(() =>
       useTotalHits({
         ...getDeps(),
         services: { data } as any,
-        request: {
-          searchSessionId: '123',
-          adapter,
-        },
         onTotalHitsChange,
       })
     );

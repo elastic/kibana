@@ -94,20 +94,6 @@ export interface UnifiedHistogramChartLoadEvent {
 }
 
 /**
- * Context object for requests made by Unified Histogram components
- */
-export interface UnifiedHistogramRequestContext {
-  /**
-   * Current search session ID
-   */
-  searchSessionId?: string;
-  /**
-   * The adapter to use for requests (does not apply to Lens requests)
-   */
-  adapter?: RequestAdapter;
-}
-
-/**
  * Context object for the hits count
  */
 export interface UnifiedHistogramHitsContext {
@@ -197,11 +183,11 @@ export interface UnifiedHistogramFetchParamsExternal {
   /**
    * The request adapter to use for the inspector
    */
-  requestAdapter?: UnifiedHistogramRequestContext['adapter'];
+  requestAdapter: RequestAdapter | undefined;
   /**
    * The current search session ID
    */
-  searchSessionId: UnifiedHistogramRequestContext['searchSessionId'];
+  searchSessionId: string | undefined;
   /**
    * The abort controller to use for requests
    */

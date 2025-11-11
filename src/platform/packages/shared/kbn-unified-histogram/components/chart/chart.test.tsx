@@ -99,6 +99,7 @@ async function mountComponent({
     esqlVariables: [],
     relativeTimeRange: { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' },
   });
+  fetchParams.breakdown = noBreakdown ? undefined : { field: undefined };
 
   const lensVisService = (
     await getLensVisMock({
@@ -107,7 +108,7 @@ async function mountComponent({
       isPlainRecord: Boolean(isPlainRecord),
       timeInterval: 'auto',
       dataView,
-      breakdownField: undefined,
+      breakdownField: fetchParams.breakdown?.field,
       columns: [],
       allSuggestions,
       isTransformationalESQL,
@@ -125,7 +126,6 @@ async function mountComponent({
           total: 2,
         },
     chart,
-    breakdown: noBreakdown ? undefined : { field: undefined },
     isChartLoading: Boolean(isChartLoading),
     onChartHiddenChange: jest.fn(),
     onTimeIntervalChange: jest.fn(),
@@ -134,7 +134,6 @@ async function mountComponent({
     renderCustomChartToggleActions: customToggle ? () => customToggle : undefined,
     fetch$: getFetch$Mock(),
     fetchParams,
-    request: undefined,
     dataLoading$: undefined,
     lensAdapters: undefined,
   };
