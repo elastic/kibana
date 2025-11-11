@@ -21,6 +21,16 @@ export const performComputation = (
   yamlString: string,
   loadedDefinition?: WorkflowYaml
 ): ComputedData => {
+  if (!yamlString) {
+    return {
+      yamlLineCounter: undefined,
+      yamlDocument: undefined,
+      workflowLookup: undefined,
+      workflowGraph: undefined,
+      workflowDefinition: undefined,
+    };
+  }
+
   // Compute derived data
   // Parse YAML document from original yaml string
   // todo: use parseDocument once, not here plus inside parseWorkflowYamlToJSON

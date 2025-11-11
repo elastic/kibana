@@ -14,7 +14,10 @@ import { monaco } from '@kbn/monaco';
 import { useYamlValidation } from './use_yaml_validation';
 import { selectDetail } from '../../../entities/workflows/store';
 import { createWorkflowsStore } from '../../../entities/workflows/store/store';
-import { setYamlString } from '../../../entities/workflows/store/workflow_detail/slice';
+import {
+  setActiveTab,
+  setYamlString,
+} from '../../../entities/workflows/store/workflow_detail/slice';
 import { createStartServicesMock } from '../../../mocks';
 
 // Mock Monaco editor
@@ -78,6 +81,7 @@ const renderHookWithProviders = (
 
   // Set the YAML content which will trigger computation via middleware
   store.dispatch(setYamlString(yamlContent));
+  store.dispatch(setActiveTab('workflow'));
 
   const wrapper = ({ children }: { children: React.ReactNode }) => {
     return React.createElement(Provider, { store }, children);

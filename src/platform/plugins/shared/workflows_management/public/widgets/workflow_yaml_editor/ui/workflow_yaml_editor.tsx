@@ -33,7 +33,6 @@ import { useCompletionProvider } from './hooks/use_completion_provider';
 import { StepActions } from './step_actions';
 import { WorkflowYAMLEditorShortcuts } from './workflow_yaml_editor_shortcuts';
 import { WorkflowYAMLValidationErrors } from './workflow_yaml_validation_errors';
-import { addDynamicConnectorsToCache } from '../../../../common/schema';
 import { useAvailableConnectors } from '../../../entities/connectors/model/use_available_connectors';
 import { useSaveYaml } from '../../../entities/workflows/model/use_save_yaml';
 import type { StepInfo } from '../../../entities/workflows/store';
@@ -176,12 +175,6 @@ export const WorkflowYAMLEditor = ({
 
   // Data
   const connectorsData = useAvailableConnectors();
-
-  useEffect(() => {
-    if (connectorsData?.connectorTypes) {
-      addDynamicConnectorsToCache(connectorsData.connectorTypes);
-    }
-  }, [connectorsData?.connectorTypes]);
 
   // Styles
   const styles = useWorkflowEditorStyles();

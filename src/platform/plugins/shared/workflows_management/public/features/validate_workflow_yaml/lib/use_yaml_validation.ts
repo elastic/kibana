@@ -16,9 +16,9 @@ import { validateConnectorIds } from './validate_connector_ids';
 import { validateLiquidTemplate } from './validate_liquid_template';
 import { validateStepNameUniqueness } from './validate_step_name_uniqueness';
 import { validateVariables as validateVariablesInternal } from './validate_variables';
-import { getCachedDynamicConnectorTypes } from '../../../../common/schema';
 import { selectWorkflowGraph, selectYamlDocument } from '../../../entities/workflows/store';
 import {
+  selectConnectors,
   selectIsWorkflowTab,
   selectWorkflowDefinition,
   selectYamlLineCounter,
@@ -49,6 +49,7 @@ export function useYamlValidation(
   const workflowDefinition = useSelector(selectWorkflowDefinition);
   const lineCounter = useSelector(selectYamlLineCounter);
   const isWorkflowTab = useSelector(selectIsWorkflowTab);
+  const connectors = useSelector(selectConnectors);
   const { application } = useKibana().services;
 
   useEffect(() => {
@@ -96,7 +97,7 @@ export function useYamlValidation(
 
     const variableItems = collectAllVariables(model, yamlDocument, workflowGraph);
     const connectorIdItems = collectAllConnectorIds(yamlDocument, lineCounter);
-    const dynamicConnectorTypes = getCachedDynamicConnectorTypes();
+    const dynamicConnectorTypes = connectors?.connectorTypes ?? null;
 
     // Generate the connectors management URL
     const connectorsManagementUrl = application?.getUrlForApp('management', {
@@ -262,6 +263,7 @@ export function useYamlValidation(
     yamlDocument,
     application,
     isWorkflowTab,
+    connectors?.connectorTypes,
   ]);
 
   return {
