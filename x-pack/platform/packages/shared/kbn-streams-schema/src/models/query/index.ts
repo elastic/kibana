@@ -54,13 +54,10 @@ export const QueryStream: ModelValidation<BaseStream.Model, QueryStream.Model> =
     Definition: z.object({
       query: Query.right,
     }),
-    GetResponse: z.intersection(
-      BaseStream.GetResponse.right,
-      z.object({
-        inherited_fields: inheritedFieldDefinitionSchema,
-        sub_query_streams: z.array(z.string()),
-      })
-    ),
+    GetResponse: z.object({
+      inherited_fields: inheritedFieldDefinitionSchema,
+      sub_query_streams: z.array(z.string()),
+    }),
     UpsertRequest: z.object({}),
   }
 );
