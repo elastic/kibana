@@ -332,6 +332,67 @@ const CODES = Object.freeze({
     'xpack.securitySolution.endpointActionResponseCodes.scan.success',
     { defaultMessage: 'Scan complete' }
   ),
+
+  // -----------------------------------------------------------------
+  // MEMORY-DUMP CODES
+  // -----------------------------------------------------------------
+  'ra_memory-dump_error_failure': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.memoryDump.failure',
+    { defaultMessage: 'Unknown failure while capturing memory dump' }
+  ),
+  'ra_memory-dump_success_done': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.memoryDump.done',
+    { defaultMessage: 'Memory dump complete' }
+  ),
+  'ra_memory-dump_error_invalid-input': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.memoryDump.invalidInput',
+    { defaultMessage: 'The request provided for memory dump is invalid' }
+  ),
+
+  // DEV: process with pid or entity_id not foud
+  'ra_memory-dump_error_not-found': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.memoryDump.notFound',
+    { defaultMessage: 'The identifier (pid or entity_id) was not found' }
+  ),
+
+  // DEV: not permitted to dump protected process memory. Endpoint honors the OS system protection model
+  // thus protected processes are not allowed to dump memory.
+  'ra_memory-dump_error_not-permitted': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.memoryDump.notPermitted',
+    { defaultMessage: 'Memory dump not permitted on protected processes' }
+  ),
+
+  // DEV: too many queued memory dump requests
+  'ra_memory-dump_error_queue-full': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.memoryDump.queueFull',
+    { defaultMessage: 'Too many memory-dump requests in queue' }
+  ),
+
+  'ra_memory-dump_error_io': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.memoryDump.ioError',
+    { defaultMessage: 'A disk input/output error has occurred' }
+  ),
+
+  // DEV: A catch-all placeholder to indicate that action failed during processing memory dump with
+  // a rare not generally expected code.
+  'ra_memory-dump_error_processing': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.memoryDump.processingError',
+    { defaultMessage: 'Memory dump failed during processing' }
+  ),
+
+  // DEV: processing interrupted by stop/shutdown/reboot. Action has been interrupted or could have
+  // been just in the queue before shutdown. Nonetheless, since in this case all processes are gone,
+  // action will fail
+  'ra_memory-dump_error_processing-interrupted': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.memoryDump.processingInterruptedError',
+    { defaultMessage: 'Action was interrupted during processing (possible host shutdown/reboot)' }
+  ),
+
+  // DEV: Fail early when disk space falls below free space threshold set via advanced Endpoint policy
+  'ra_memory-dump_error_not-enough-free-space': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.memoryDump.insufficientDiskSpaceError',
+    { defaultMessage: 'Host does not have sufficient disk space to capture a memory dump' }
+  ),
 });
 
 /**
