@@ -15,13 +15,14 @@ import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { LoggerFactory } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
 
+import { AGENTS_INDEX, AGENT_POLICY_INDEX } from '../../common';
 import { appContextService } from '../services';
 
 export const TYPE = 'fleet:policy-revisions-cleanup-task';
 export const VERSION = '1.0.0';
 const TITLE = 'Fleet Policy Revisions Cleanup Task';
 const SCOPE = ['fleet'];
-const TIMEOUT = '5m';
+const TASK_TIMEOUT = '5m';
 
 interface FleetPolicyRevisionsCleanupTaskConfig {
   max_revisions?: number;
@@ -40,12 +41,22 @@ interface FleetPolicyRevisionsCleanupTaskStartContract {
   taskManager: TaskManagerStartContract;
 }
 
+type PoliciesRevisionSummaries = Record<
+  string,
+  {
+    maxRevision: number;
+    minUsedRevision?: number;
+    count: number;
+  }
+>;
+
 export class FleetPolicyRevisionsCleanupTask {
   private logger: Logger;
   private wasStarted: boolean = false;
   private taskInterval: string;
   private maxRevisions: number;
   private maxPoliciesPerRun: number;
+  private pitId: string | null;
 
   constructor(setupContract: FleetPolicyRevisionsCleanupTaskSetupContract) {
     const { core, taskManager, logFactory, config } = setupContract;
@@ -55,11 +66,12 @@ export class FleetPolicyRevisionsCleanupTask {
     this.taskInterval = config.frequency ?? '1h';
     this.maxRevisions = config.max_revisions ?? 10;
     this.maxPoliciesPerRun = config.max_policies_per_run ?? 100;
+    this.pitId = null;
 
     taskManager.registerTaskDefinitions({
       [TYPE]: {
         title: TITLE,
-        timeout: TIMEOUT,
+        timeout: TASK_TIMEOUT,
         createTaskRunner: ({
           taskInstance,
           abortController,
@@ -149,9 +161,16 @@ export class FleetPolicyRevisionsCleanupTask {
 
     try {
       await this.cleanupPolicyRevisions(esClient, abortController);
+      if (this.pitId) {
+        await esClient.closePointInTime({ id: this.pitId });
+      }
 
       this.endRun('success');
     } catch (err) {
+      if (this.pitId) {
+        await esClient.closePointInTime({ id: this.pitId });
+      }
+
       if (err instanceof errors.RequestAbortedError) {
         this.logger.warn(
           `[FleetPolicyRevisionsCleanupTask] request aborted due to timeout: ${err}`
@@ -172,9 +191,162 @@ export class FleetPolicyRevisionsCleanupTask {
       `[FleetPolicyRevisionsCleanupTask] Starting cleanup with max_revisions: ${this.maxRevisions}, max_policies_per_run: ${this.maxPoliciesPerRun}`
     );
 
+    const pitRes = await esClient.openPointInTime({
+      index: AGENT_POLICY_INDEX,
+      keep_alive: TASK_TIMEOUT,
+    });
+
+    this.pitId = pitRes.id;
+
+    const policiesToClean = await this.getPoliciesToClean(esClient);
+
+    if (Object.keys(policiesToClean).length === 0) {
+      this.logger.info(
+        `[FleetPolicyRevisionsCleanupTask] No policies found with more than ${this.maxRevisions} revisions. Exiting cleanup task.`
+      );
+
+      return;
+    }
+
+    this.logger.info(
+      `[FleetPolicyRevisionsCleanupTask] Found ${
+        Object.keys(policiesToClean).length
+      } policies with more than ${this.maxRevisions} revisions.`
+    );
+
+    this.throwIfAborted(abortController);
+
+    const policiesRevisionSummaries = await this.populateMinimumRevisionsUsedByAgents(
+      esClient,
+      policiesToClean
+    );
+
     this.throwIfAborted(abortController);
 
     this.logger.debug('[FleetPolicyRevisionsCleanupTask] Cleanup completed');
+  };
+
+  private getPoliciesToClean = async (esClient: ElasticsearchClient) => {
+    const results = await this.queryMaxRevisionsAndCounts(esClient);
+
+    return (
+      results.aggregations?.latest_revisions_by_policy_id.buckets.reduce<PoliciesRevisionSummaries>(
+        (acc, bucket) => {
+          if (bucket.doc_count > this.maxRevisions) {
+            acc[bucket.key] = {
+              maxRevision: bucket.latest_revision.value,
+              count: bucket.doc_count,
+            };
+          }
+          return acc;
+        },
+        {}
+      ) ?? {}
+    );
+  };
+
+  private queryMaxRevisionsAndCounts = async (esClient: ElasticsearchClient) => {
+    interface Aggregations {
+      latest_revisions_by_policy_id: {
+        buckets: Array<{
+          key: string;
+          doc_count: number;
+          latest_revision: {
+            value: number;
+          };
+        }>;
+      };
+    }
+
+    return await esClient.search<{}, Aggregations>({
+      index: AGENT_POLICY_INDEX,
+      pit: {
+        id: this.pitId!,
+        keep_alive: TASK_TIMEOUT,
+      },
+      size: 0,
+      aggs: {
+        latest_revisions_by_policy_id: {
+          terms: {
+            field: 'policy_id',
+            order: { _count: 'desc' },
+            size: this.maxPoliciesPerRun,
+          },
+          aggs: {
+            latest_revision: {
+              max: {
+                field: 'revision_idx',
+              },
+            },
+          },
+        },
+      },
+    });
+  };
+
+  private populateMinimumRevisionsUsedByAgents = async (
+    esClient: ElasticsearchClient,
+    policiesRevisionSummaries: PoliciesRevisionSummaries
+  ) => {
+    const result = await this.queryMinimumRevisionsUsedByAgents(
+      esClient,
+      Object.keys(policiesRevisionSummaries)
+    );
+
+    result.aggregations?.min_used_revisions_by_policy_id.buckets.forEach((bucket) => {
+      const policySummary = policiesRevisionSummaries[bucket.key];
+      if (policySummary) {
+        policySummary.minUsedRevision = bucket.min_used_revision.value;
+      }
+    });
+
+    return policiesRevisionSummaries;
+  };
+
+  private queryMinimumRevisionsUsedByAgents = async (
+    esClient: ElasticsearchClient,
+    policyIds: string[]
+  ) => {
+    interface Aggregations {
+      min_used_revisions_by_policy_id: {
+        buckets: Array<{
+          key: string;
+          doc_count: number;
+          min_used_revision: {
+            value: number;
+          };
+        }>;
+      };
+    }
+
+    return await esClient.search<{}, Aggregations>({
+      index: AGENTS_INDEX,
+      pit: {
+        id: this.pitId!,
+        keep_alive: TASK_TIMEOUT,
+      },
+      size: 0,
+      query: {
+        terms: {
+          policy_id: policyIds,
+        },
+      },
+      aggs: {
+        min_used_revisions_by_policy_id: {
+          terms: {
+            field: 'policy_id',
+            size: this.maxPoliciesPerRun,
+          },
+          aggs: {
+            min_used_revision: {
+              min: {
+                field: 'policy_revision_idx',
+              },
+            },
+          },
+        },
+      },
+    });
   };
 
   private throwIfAborted(abortController: AbortController) {
