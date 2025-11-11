@@ -14,6 +14,43 @@ import { i18n } from '@kbn/i18n';
 import type { WorkflowInputChoiceSchema, WorkflowInputSchema, WorkflowYaml } from '@kbn/workflows';
 import { z } from '@kbn/zod';
 
+/**
+ * Merges saved input with schema structure, preserving schema structure
+ * and only updating values where paths exist in both.
+ */
+function mergeSavedInputWithSchema(
+  schema: Record<string, unknown>,
+  savedInput: Record<string, unknown>
+): Record<string, unknown> {
+  const result: Record<string, unknown> = { ...schema };
+
+  for (const key in schema) {
+    if (Object.prototype.hasOwnProperty.call(schema, key)) {
+      const schemaValue = schema[key];
+      const savedValue = savedInput[key];
+
+      if (savedValue !== undefined) {
+        if (
+          schemaValue !== null &&
+          typeof schemaValue === 'object' &&
+          !Array.isArray(schemaValue)
+        ) {
+          if (savedValue !== null && typeof savedValue === 'object' && !Array.isArray(savedValue)) {
+            result[key] = mergeSavedInputWithSchema(
+              schemaValue as Record<string, unknown>,
+              savedValue as Record<string, unknown>
+            );
+          }
+        } else {
+          result[key] = savedValue;
+        }
+      }
+    }
+  }
+
+  return result;
+}
+
 const makeWorkflowInputsValidator = (inputs: Array<z.infer<typeof WorkflowInputSchema>>) => {
   return z.object(
     inputs.reduce((acc, input) => {
@@ -145,10 +182,22 @@ export const WorkflowExecuteManualForm = ({
   );
 
   useEffect(() => {
-    if (!value && definition) {
-      handleChange(getDefaultWorkflowInput(definition));
+    if (!definition) {
+      return;
     }
-  }, [definition, value, handleChange]);
+
+    const defaultInput = getDefaultWorkflowInput(definition);
+    const defaultInputObj = JSON.parse(defaultInput);
+    const savedInputObj = value ? JSON.parse(value) : {};
+    const merged = mergeSavedInputWithSchema(defaultInputObj, savedInputObj);
+    try {
+      handleChange(JSON.stringify(merged, null, 2));
+    } catch (e: Error | unknown) {
+      handleChange(defaultInput);
+    }
+    // Only run when definition changes (modal opens)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [definition]);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
