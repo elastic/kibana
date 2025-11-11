@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexItem, EuiSpacer, type EuiTextProps } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
 import type {
   ActionDetails,
@@ -26,7 +26,7 @@ export interface ExecuteActionHostResponseProps {
   agentId?: string;
   canAccessFileDownloadLink: boolean;
   'data-test-subj'?: string;
-  textSize?: 'xs' | 's';
+  textSize?: Exclude<EuiTextProps['size'], 'm' | 'relative'>;
   hideFile?: boolean;
   hideContext?: boolean;
   showPasscode?: boolean;
@@ -64,16 +64,18 @@ export const ExecuteActionHostResponse = memo<ExecuteActionHostResponseProps>(
               textSize={textSize}
               showPasscode={showPasscode}
             />
-            <EuiSpacer size="xxl" />
           </EuiFlexItem>
         )}
         {outputContent && (
-          <ExecuteActionHostResponseOutput
-            outputContent={outputContent}
-            data-test-subj={`${dataTestSubj}-executeResponseOutput`}
-            textSize={textSize}
-            hideContext={hideContext}
-          />
+          <>
+            <EuiSpacer size="l" />
+            <ExecuteActionHostResponseOutput
+              outputContent={outputContent}
+              data-test-subj={`${dataTestSubj}-executeResponseOutput`}
+              textSize={textSize}
+              hideContext={hideContext}
+            />
+          </>
         )}
       </>
     );
