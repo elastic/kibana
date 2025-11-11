@@ -74,3 +74,19 @@ export const getConvertToLensModule = async () => {
   return await import('./convert_to_lens');
 };
 export { getDataViewByIndexPatternId } from './convert_to_lens/datasource';
+
+/** @public listing utilities */
+export { findListItems } from './utils/saved_visualize_utils';
+export {
+  deleteListItems,
+  updateBasicSoAttributes,
+} from './utils/saved_objects_utils/update_basic_attributes';
+export {
+  getCustomColumn,
+  getCustomSortingOptions,
+  getNoItemsMessage,
+} from './visualize_app/utils/get_table_columns';
+export { getVisualizeListItemLinkFn } from './visualize_app/utils/get_visualize_list_item_link';
+export { toTableListViewSavedObject } from './visualize_app/components/visualize_listing';
+
+export type { VisualizeUserContent } from './visualize_app/components/visualize_listing';

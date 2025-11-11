@@ -354,15 +354,14 @@ export function Table<T extends UserContentCommonSchema>({
       ? true // by passing "true" we disable the EuiInMemoryTable sorting and handle it ourselves, but sorting is still enabled
       : { sort: tableSort };
 
-  const favoritesFilter =
-    favoritesEnabled && !favoritesError ? (
-      <TabbedTableFilter
-        selectedTabId={tableFilter.contentTypeTab ?? 'dashboards'}
-        onSelectedTabChanged={(newTab) => {
-          onFilterChange({ contentTypeTab: newTab });
-        }}
-      />
-    ) : undefined;
+  const tabbedFilter = contentTypeTabsEnabled ? (
+    <TabbedTableFilter
+      selectedTabId={tableFilter.contentTypeTab ?? 'dashboards'}
+      onSelectedTabChanged={(newTab) => {
+        onFilterChange({ contentTypeTab: newTab });
+      }}
+    />
+  ) : undefined;
 
   return (
     <UserFilterContextProvider
@@ -401,7 +400,7 @@ export function Table<T extends UserContentCommonSchema>({
           rowHeader="attributes.title"
           tableCaption={tableCaption}
           css={cssFavoriteHoverWithinEuiTableRow(euiTheme.euiTheme)}
-          childrenBetween={favoritesFilter}
+          childrenBetween={tabbedFilter}
         />
       </TagFilterContextProvider>
     </UserFilterContextProvider>

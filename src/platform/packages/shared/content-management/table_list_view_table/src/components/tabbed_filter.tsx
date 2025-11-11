@@ -54,7 +54,7 @@ export const TabbedTableFilter = (props: TabbedTableFilterProps) => {
         >
           <FormattedMessage
             id="contentManagement.tableList.tabsFilter.annotationGroupsTabLabel"
-            defaultMessage="Annotation Groups"
+            defaultMessage="Annotation groups"
           />
         </EuiTab>
       </EuiTabs>

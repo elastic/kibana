@@ -104,6 +104,7 @@ export interface TableListViewTableProps<
     refs?: {
       references?: SavedObjectsFindOptionsReference[];
       referencesToExclude?: SavedObjectsFindOptionsReference[];
+      contentType?: ContentType;
     }
   ): Promise<{ total: number; hits: T[] }>;
   /** Handler to set the item title "href" value. If it returns undefined there won't be a link for this item. */
@@ -479,7 +480,11 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         ? await searchQueryParser(searchQuery.text)
         : { searchQuery: searchQuery.text, references: undefined, referencesToExclude: undefined };
 
-      const response = await findItems(searchQueryParsed, { references, referencesToExclude });
+      const response = await findItems(searchQueryParsed, {
+        references,
+        referencesToExclude,
+        contentType: tableFilter.contentTypeTab,
+      });
 
       if (!isMounted.current) {
         return;
@@ -507,7 +512,14 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         data: err,
       });
     }
-  }, [searchQueryParser, searchQuery.text, findItems, onFetchSuccess, recentlyAccessed]);
+  }, [
+    searchQueryParser,
+    searchQuery.text,
+    findItems,
+    onFetchSuccess,
+    recentlyAccessed,
+    tableFilter.contentTypeTab,
+  ]);
 
   const updateQuery = useCallback(
     (query: Query | null, error: SearchQueryError | null) => {
