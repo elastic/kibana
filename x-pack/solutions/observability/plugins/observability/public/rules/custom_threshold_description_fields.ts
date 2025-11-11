@@ -23,7 +23,9 @@ export const getDescriptionFields: GetDescriptionFieldsFn<CustomThresholdParams>
     fields.push(prebuildFields.dataViewIndexPattern(searchConfig.index));
   }
 
-  fields.push(prebuildFields.customQuery(searchConfig.query.query));
+  if (searchConfig.query.query) {
+    fields.push(prebuildFields.customQuery(searchConfig.query.query));
+  }
 
   if (searchConfig.filter && typeof searchConfig.index === 'string') {
     fields.push(
