@@ -11,7 +11,7 @@ import { getDefaultEuiMarkdownPlugins, EuiLink, EuiMarkdownFormat } from '@elast
 import React, { useMemo } from 'react';
 
 /**
- * Custom Markdown component that supports highlighting text wrapped in ==double equals==
+ * Markdown component, with a plugin that supports highlighting text wrapped in ==double equals==
  */
 export const MarkdownWithHighlight = React.memo(
   ({
