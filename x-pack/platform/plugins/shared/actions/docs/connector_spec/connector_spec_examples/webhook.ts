@@ -29,10 +29,10 @@ export const WebhookConnectorExample: SingleFileConnectorDefinition = {
     supportedFeatureIds: ["alerting", "uptime", "security", "cases"],
   },
   
-  // ---- Auth Schema (required) ----
+  // ---- Single Schema (required) ----
   // WHY: Demonstrates discriminated union with multiple auth options
   // User can choose from: None, Basic Auth, SSL/mTLS, or Custom Headers
-  authSchema: z.discriminatedUnion("method", [
+  schema: z.discriminatedUnion("method", [
     // 1. No Authentication
     z.object({
       method: z.literal("none"),
@@ -243,25 +243,6 @@ export const WebhookConnectorExample: SingleFileConnectorDefinition = {
       };
     },
     description: "Verifies webhook URL is reachable with configured authentication",
-  },
-  
-  // ---- Layout (optional) ----
-  layout: {
-    configSections: [
-      {
-        title: "Connection",
-        fields: ["url", "method"],
-        order: 1,
-        description: "Configure the webhook endpoint",
-      },
-      {
-        title: "Advanced",
-        fields: ["defaultHeaders", "timeout"],
-        order: 2,
-        collapsed: true,
-        description: "Optional advanced configuration",
-      },
-    ],
   },
 };
 

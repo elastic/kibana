@@ -33,7 +33,7 @@ export const D3SecurityConnectorExample: SingleFileConnectorDefinition = {
   // D3 Security uses a custom "d3key" header for authentication
   // REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/d3security/d3security.ts:76
   //   Code: `headers: { d3key: this.token || '' }`
-  authSchema: z.discriminatedUnion("method", [
+  schema: z.discriminatedUnion("method", [
     z.object({
       method: z.literal("headers"),
       headers: z.object({
@@ -279,33 +279,6 @@ export const D3SecurityConnectorExample: SingleFileConnectorDefinition = {
       // REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/d3security/render.ts
       //   Code: Mustache rendering for body parameter with JSON escaping
     },
-  },
-
-  // ---- Layout (optional UI hints) ----
-  layout: {
-    configSections: [
-      {
-        title: "Connection",
-        fields: ["url"],
-        order: 1,
-        description: "D3 Security API endpoint configuration",
-      },
-    ],
-    
-    actionGroups: [
-      {
-        title: "Security Events",
-        actions: ["run"],
-        order: 1,
-        description: "Send security events to D3 SOAR",
-      },
-      {
-        title: "Utilities",
-        actions: ["test"],
-        order: 2,
-        description: "Test connection and validate configuration",
-      },
-    ],
   },
 };
 

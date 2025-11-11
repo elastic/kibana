@@ -58,7 +58,7 @@ export const OpenAIConnectorExample: SingleFileConnectorDefinition = {
   
   // ---- Auth Schema (required) ----
   // WHY: Different providers require different auth and configuration
-  authSchema: z.discriminatedUnion("method", [
+  schema: z.discriminatedUnion("method", [
     // 1. OpenAI (official)
     z.object({
       method: z.literal("openai"),
@@ -336,23 +336,6 @@ export const OpenAIConnectorExample: SingleFileConnectorDefinition = {
       };
     },
     description: "Verifies API credentials and connectivity",
-  },
-  
-  // ---- Layout (optional) ----
-  layout: {
-    actionGroups: [
-      {
-        title: "AI Completion",
-        actions: ["invokeAI", "stream", "run"],
-        order: 1,
-        description: "Generate AI responses",
-      },
-      {
-        title: "Utilities",
-        actions: ["test"],
-        order: 2,
-      },
-    ],
   },
 };
 

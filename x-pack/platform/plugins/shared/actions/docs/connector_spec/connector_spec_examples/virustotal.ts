@@ -32,7 +32,7 @@ export const VirusTotalConnector: SingleFileConnectorDefinition = {
     supportedFeatureIds: ['alerting', 'security'],
   },
 
-  authSchema: z.discriminatedUnion('method', [
+  schema: z.discriminatedUnion('method', [
     z.object({
       method: z.literal('headers'),
       headers: z.object({

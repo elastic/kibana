@@ -29,10 +29,10 @@ export const SlackApiConnectorExample: SingleFileConnectorDefinition = {
     supportedFeatureIds: ["alerting", "uptime", "security"],
   },
   
-  // ---- Auth Schema (required) ----
+  // ---- Single Schema (required) ----
   // WHY: Discriminated union lets UI render different forms per auth method
   // "headers" method shows token field, "webhook" method shows URL field
-  authSchema: z.discriminatedUnion("method", [
+  schema: z.discriminatedUnion("method", [
     z.object({
       method: z.literal("headers"),
       fields: z.object({
@@ -60,16 +60,6 @@ export const SlackApiConnectorExample: SingleFileConnectorDefinition = {
       }),
     }),
   ]),
-  
-  // ---- Validation (required) ----
-  validation: {
-    // Config schema (no config needed for Slack API - it's stateless)
-    configSchema: z.object({}).strict(),
-    
-    // Secrets schema (already defined in authSchema discriminated union)
-    // WHY: Secrets come from the selected auth method's fields
-    secretsSchema: z.object({}),
-  },
   
   // ---- Policies (optional) ----
   // WHY: Slack has specific rate limiting and pagination patterns
@@ -232,24 +222,6 @@ export const SlackApiConnectorExample: SingleFileConnectorDefinition = {
       return { ok: false, message: "Unknown auth method" };
     },
     description: "Verifies Slack API credentials",
-  },
-  
-  // ---- Layout (optional) ----
-  // WHY: Slack is simple enough that default layout works
-  // If we had many actions, we could group them:
-  layout: {
-    actionGroups: [
-      {
-        title: "Send Messages",
-        actions: ["postMessage"],
-        order: 1,
-      },
-      {
-        title: "Manage Channels",
-        actions: ["getChannels", "searchChannels"],
-        order: 2,
-      },
-    ],
   },
 };
 

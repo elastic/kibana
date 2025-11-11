@@ -58,7 +58,7 @@ export const BedrockConnectorExample: SingleFileConnectorDefinition = {
   // ---- Auth Schema (required) ----
   // WHY: AWS services require SigV4 signing with access key and secret
   // REFERENCE: x-pack/platform/plugins/shared/stack_connectors/common/bedrock/schema.ts:28-33
-  authSchema: z.discriminatedUnion("method", [
+  schema: z.discriminatedUnion("method", [
     z.object({
       method: z.literal("aws_sig_v4"),
       credentials: z.object({
@@ -319,24 +319,6 @@ export const BedrockConnectorExample: SingleFileConnectorDefinition = {
       };
     },
     description: "Verifies AWS credentials and Bedrock access",
-  },
-  
-  // ---- Layout (optional) ----
-  layout: {
-    actionGroups: [
-      {
-        title: "AI Invocation",
-        actions: ["invokeAI", "converse", "converseStream"],
-        order: 1,
-        description: "Generate AI responses using Bedrock models",
-      },
-      {
-        title: "Advanced",
-        actions: ["run"],
-        order: 2,
-        description: "Low-level API access",
-      },
-    ],
   },
 };
 

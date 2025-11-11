@@ -35,7 +35,7 @@ export const JiraConnectorExample: SingleFileConnectorDefinition = {
   // ---- Auth Schema (required) ----
   // WHY: Jira uses HTTP Basic Auth (email + API token)
   // REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/jira/service.ts:66
-  authSchema: z.discriminatedUnion("method", [
+  schema: z.discriminatedUnion("method", [
     z.object({
       method: z.literal("basic"),
       credentials: z.object({
@@ -352,24 +352,6 @@ export const JiraConnectorExample: SingleFileConnectorDefinition = {
       };
     },
     description: "Verifies Jira credentials and connectivity",
-  },
-  
-  // ---- Layout (optional) ----
-  layout: {
-    actionGroups: [
-      {
-        title: "Issue Management",
-        actions: ["pushToService", "getIncident", "issues", "issue"],
-        order: 1,
-        description: "Create and manage Jira issues",
-      },
-      {
-        title: "Metadata",
-        actions: ["getFields", "issueTypes", "fieldsByIssueType"],
-        order: 2,
-        description: "Retrieve Jira metadata for form building",
-      },
-    ],
   },
 };
 
