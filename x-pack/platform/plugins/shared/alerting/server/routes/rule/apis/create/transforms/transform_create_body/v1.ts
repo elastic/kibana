@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
 import type {
   CreateRuleActionV1,
   CreateRuleRequestBodyV1,
@@ -57,11 +58,21 @@ const transformCreateBodySystemActions = (actions: CreateRuleActionV1[]): System
     return [];
   }
 
-  return actions.map(({ id, params, uuid }) => {
+  return actions.map(({ id, params, uuid, frequency }) => {
     return {
       id,
       params,
       ...(uuid ? { uuid } : {}),
+      ...(frequency
+        ? {
+            frequency: {
+              ...omit(frequency, 'notify_when'),
+              summary: frequency.summary,
+              throttle: frequency.throttle,
+              notifyWhen: frequency.notify_when,
+            },
+          }
+        : {}),
     };
   });
 };

@@ -61,11 +61,21 @@ export const transformUpdateBodySystemActions = (
     return [];
   }
 
-  return actions.map(({ id, params, uuid }) => {
+  return actions.map(({ id, params, uuid, frequency }) => {
     return {
       id,
       params,
       ...(uuid ? { uuid } : {}),
+      ...(frequency
+        ? {
+            frequency: {
+              ...omit(frequency, 'notify_when'),
+              summary: frequency.summary,
+              throttle: frequency.throttle,
+              notifyWhen: frequency.notify_when,
+            },
+          }
+        : {}),
     };
   });
 };

@@ -4013,37 +4013,46 @@ describe('update()', () => {
       );
     });
 
-    test('should throw an error if the system action contains the frequency', async () => {
-      await expect(() =>
-        rulesClient.update({
-          id: '1',
-          data: {
-            schedule: { interval: '1m' },
-            name: 'abc',
-            tags: ['foo'],
-            params: {
-              bar: true,
-            },
-            throttle: null,
-            notifyWhen: 'onActiveAlert',
-            actions: [],
-            systemActions: [
-              {
-                id: 'system_action-id',
-                params: {},
-                // @ts-expect-error: testing validation
-                frequency: {
-                  summary: false,
-                  notifyWhen: 'onActionGroupChange',
-                  throttle: null,
-                },
-              },
-            ],
+    test('should accept frequency in system actions', async () => {
+      const result = await rulesClient.update({
+        id: '1',
+        data: {
+          schedule: { interval: '1m' },
+          name: 'abc',
+          tags: ['foo'],
+          params: {
+            bar: true,
           },
-        })
-      ).rejects.toMatchInlineSnapshot(
-        `[Error: Error validating update data - [systemActions.0.frequency]: definition for this key is missing]`
-      );
+          throttle: null,
+          notifyWhen: 'onActiveAlert',
+          actions: [],
+          systemActions: [
+            {
+              id: 'system_action-id',
+              params: {},
+              frequency: {
+                summary: false,
+                notifyWhen: 'onActionGroupChange',
+                throttle: null,
+              },
+            },
+          ],
+        },
+      });
+
+      expect(result.systemActions).toEqual([
+        {
+          id: 'system_action-id',
+          actionTypeId: '.test',
+          params: {},
+          uuid: expect.any(String),
+          frequency: {
+            summary: false,
+            notifyWhen: 'onActionGroupChange',
+            throttle: null,
+          },
+        },
+      ]);
     });
 
     test('should throw an error if the system action contains the alertsFilter', async () => {

@@ -60,6 +60,7 @@ export const systemActionSchema = schema.object({
   actionTypeId: schema.string(),
   params: actionParamsSchema,
   uuid: schema.maybe(schema.string()),
+  frequency: schema.maybe(actionFrequencySchema),
 });
 
 /**
@@ -82,4 +83,5 @@ export const systemActionRequestSchema = schema.object({
   actionTypeId: schema.maybe(schema.string()),
   id: schema.string(),
   params: actionParamsSchema,
+  frequency: schema.maybe(actionFrequencySchema),
 });

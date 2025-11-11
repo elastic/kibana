@@ -25,6 +25,7 @@ import {
 import type { CombinedSummarizedAlerts } from '../../../types';
 import { schema } from '@kbn/config-schema';
 import { TaskPriority } from '@kbn/task-manager-plugin/server';
+import type { RuleSystemAction } from '@kbn/alerting-types';
 
 const alertingEventLogger = alertingEventLoggerMock.create();
 const actionsClient = actionsClientMock.create();
@@ -516,6 +517,403 @@ describe('System Action Scheduler', () => {
       );
 
       expect(results).toHaveLength(0);
+    });
+
+    describe('frequency and throttling', () => {
+      const summarySystemActionWithThrottle: RuleSystemAction = {
+        id: 'system-action-throttle',
+        actionTypeId: '.test-system-action',
+        params: { myParams: 'test' },
+        uuid: 'throttle-uuid',
+        frequency: {
+          summary: true,
+          notifyWhen: 'onThrottleInterval',
+          throttle: '1h',
+        },
+      };
+
+      test('should create actions to schedule for summary system action with throttle interval', async () => {
+        clock.setSystemTime(new Date('2020-01-01T12:00:00.000Z'));
+        alertsClient.getProcessedAlerts.mockReturnValue(alerts);
+
+        const summarizedAlerts = {
+          new: { count: 2, data: [mockAAD, mockAAD] },
+          ongoing: { count: 0, data: [] },
+          recovered: { count: 0, data: [] },
+        };
+        alertsClient.getSummarizedAlerts.mockResolvedValue(summarizedAlerts);
+
+        const scheduler = new SystemActionScheduler({
+          ...getSchedulerContext(),
+          rule: { ...rule, systemActions: [summarySystemActionWithThrottle] },
+        });
+
+        const throttledSummaryActions = {};
+        const results = await scheduler.getActionsToSchedule({
+          throttledSummaryActions,
+        });
+
+        expect(throttledSummaryActions).toEqual({
+          'throttle-uuid': { date: '2020-01-01T12:00:00.000Z' },
+        });
+        expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledTimes(1);
+        expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledWith({
+          excludedAlertInstanceIds: [],
+          ruleId: 'rule-id-1',
+          spaceId: 'test1',
+          start: new Date('2020-01-01T11:00:00.000Z'),
+          end: new Date('2020-01-01T12:00:00.000Z'),
+        });
+
+        expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toEqual(1);
+        expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toEqual(1);
+
+        expect(results).toHaveLength(1);
+        const finalSummary = { ...summarizedAlerts, all: { count: 2, data: [mockAAD, mockAAD] } };
+        expect(results).toEqual([
+          getResult('system-action-throttle', 'throttle-uuid', finalSummary),
+        ]);
+      });
+
+      test('should skip creating actions to schedule for summary system action when throttled', async () => {
+        clock.setSystemTime(new Date('2020-01-01T12:00:00.000Z'));
+
+        const scheduler = new SystemActionScheduler({
+          ...getSchedulerContext(),
+          rule: { ...rule, systemActions: [summarySystemActionWithThrottle] },
+        });
+
+        const throttledSummaryActions = {
+          'throttle-uuid': { date: '2020-01-01T11:30:00.000Z' },
+        };
+        const results = await scheduler.getActionsToSchedule({
+          throttledSummaryActions,
+        });
+
+        expect(throttledSummaryActions).toEqual({
+          'throttle-uuid': { date: '2020-01-01T11:30:00.000Z' },
+        });
+        expect(alertsClient.getSummarizedAlerts).not.toHaveBeenCalled();
+        expect(logger.debug).toHaveBeenCalledWith(
+          `skipping scheduling the action '.test-system-action:system-action-throttle', summary action is still being throttled`
+        );
+
+        expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toEqual(0);
+        expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toEqual(0);
+
+        expect(results).toHaveLength(0);
+      });
+
+      test('should update throttled state after executing summary system action with throttle', async () => {
+        clock.setSystemTime(new Date('2020-01-01T12:00:00.000Z'));
+        alertsClient.getProcessedAlerts.mockReturnValue(alerts);
+
+        const summarizedAlerts = {
+          new: { count: 1, data: [mockAAD] },
+          ongoing: { count: 0, data: [] },
+          recovered: { count: 0, data: [] },
+        };
+        alertsClient.getSummarizedAlerts.mockResolvedValue(summarizedAlerts);
+
+        const scheduler = new SystemActionScheduler({
+          ...getSchedulerContext(),
+          rule: { ...rule, systemActions: [summarySystemActionWithThrottle] },
+        });
+
+        const throttledSummaryActions = {};
+        await scheduler.getActionsToSchedule({
+          throttledSummaryActions,
+        });
+
+        expect(throttledSummaryActions).toEqual({
+          'throttle-uuid': { date: '2020-01-01T12:00:00.000Z' },
+        });
+      });
+    });
+
+    describe('per-alert execution mode', () => {
+      const perAlertSystemAction: RuleSystemAction = {
+        id: 'system-action-per-alert',
+        actionTypeId: '.test-system-action',
+        params: { myParams: 'test' },
+        uuid: 'per-alert-uuid',
+        frequency: {
+          summary: false,
+          notifyWhen: 'onActiveAlert',
+          throttle: null,
+        },
+      };
+
+      test('should create separate actions for each alert when summary is false', async () => {
+        alertsClient.getProcessedAlerts.mockReturnValue(alerts);
+
+        const alert1Uuid = newAlert1[1].getUuid();
+        const alert2Uuid = newAlert2[2].getUuid();
+        const alert1AAD = { ...mockAAD, [ALERT_UUID]: alert1Uuid };
+        const alert2AAD = { ...mockAAD, [ALERT_UUID]: alert2Uuid };
+
+        const summarizedAlerts = {
+          new: { count: 2, data: [alert1AAD, alert2AAD] },
+          ongoing: { count: 0, data: [] },
+          recovered: { count: 0, data: [] },
+        };
+        alertsClient.getSummarizedAlerts.mockResolvedValue(summarizedAlerts);
+
+        const scheduler = new SystemActionScheduler({
+          ...getSchedulerContext(),
+          rule: { ...rule, systemActions: [perAlertSystemAction] },
+        });
+
+        const results = await scheduler.getActionsToSchedule({});
+
+        expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledTimes(1);
+        expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledWith({
+          excludedAlertInstanceIds: [],
+          executionUuid: defaultSchedulerContext.executionId,
+          ruleId: 'rule-id-1',
+          spaceId: 'test1',
+        });
+
+        expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toEqual(2);
+        expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toEqual(2);
+
+        expect(results).toHaveLength(2);
+
+        const alert1Summary: CombinedSummarizedAlerts = {
+          new: { count: 1, data: [alert1AAD] },
+          ongoing: { count: 0, data: [] },
+          recovered: { count: 0, data: [] },
+          all: { count: 1, data: [alert1AAD] },
+        };
+
+        const alert2Summary: CombinedSummarizedAlerts = {
+          new: { count: 1, data: [alert2AAD] },
+          ongoing: { count: 0, data: [] },
+          recovered: { count: 0, data: [] },
+          all: { count: 1, data: [alert2AAD] },
+        };
+
+        expect(results).toEqual([
+          getResult('system-action-per-alert', 'per-alert-uuid', alert1Summary),
+          getResult('system-action-per-alert', 'per-alert-uuid', alert2Summary),
+        ]);
+      });
+
+      test('should create single action for single alert when summary is false', async () => {
+        alertsClient.getProcessedAlerts.mockReturnValue(newAlert1);
+
+        const alert1Uuid = newAlert1[1].getUuid();
+        const alert1AAD = { ...mockAAD, [ALERT_UUID]: alert1Uuid };
+
+        const summarizedAlerts = {
+          new: { count: 1, data: [alert1AAD] },
+          ongoing: { count: 0, data: [] },
+          recovered: { count: 0, data: [] },
+        };
+        alertsClient.getSummarizedAlerts.mockResolvedValue(summarizedAlerts);
+
+        const scheduler = new SystemActionScheduler({
+          ...getSchedulerContext(),
+          rule: { ...rule, systemActions: [perAlertSystemAction] },
+        });
+
+        const results = await scheduler.getActionsToSchedule({});
+
+        expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toEqual(1);
+        expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toEqual(1);
+
+        expect(results).toHaveLength(1);
+
+        const alert1Summary: CombinedSummarizedAlerts = {
+          new: { count: 1, data: [alert1AAD] },
+          ongoing: { count: 0, data: [] },
+          recovered: { count: 0, data: [] },
+          all: { count: 1, data: [alert1AAD] },
+        };
+
+        expect(results).toEqual([
+          getResult('system-action-per-alert', 'per-alert-uuid', alert1Summary),
+        ]);
+      });
+
+      test('should correctly categorize alerts in per-alert mode (new/ongoing/recovered)', async () => {
+        alertsClient.getProcessedAlerts.mockReturnValue(alerts);
+
+        const alert1Uuid = newAlert1[1].getUuid();
+        const alert2Uuid = newAlert2[2].getUuid();
+        const alert1AAD = { ...mockAAD, [ALERT_UUID]: alert1Uuid };
+        const alert2AAD = { ...mockAAD, [ALERT_UUID]: alert2Uuid };
+
+        const summarizedAlerts = {
+          new: { count: 1, data: [alert1AAD] },
+          ongoing: { count: 1, data: [alert2AAD] },
+          recovered: { count: 0, data: [] },
+        };
+        alertsClient.getSummarizedAlerts.mockResolvedValue(summarizedAlerts);
+
+        const scheduler = new SystemActionScheduler({
+          ...getSchedulerContext(),
+          rule: { ...rule, systemActions: [perAlertSystemAction] },
+        });
+
+        const results = await scheduler.getActionsToSchedule({});
+
+        expect(results).toHaveLength(2);
+
+        const alert1Summary: CombinedSummarizedAlerts = {
+          new: { count: 1, data: [alert1AAD] },
+          ongoing: { count: 0, data: [] },
+          recovered: { count: 0, data: [] },
+          all: { count: 1, data: [alert1AAD] },
+        };
+
+        const alert2Summary: CombinedSummarizedAlerts = {
+          new: { count: 0, data: [] },
+          ongoing: { count: 1, data: [alert2AAD] },
+          recovered: { count: 0, data: [] },
+          all: { count: 1, data: [alert2AAD] },
+        };
+
+        expect(results).toEqual([
+          getResult('system-action-per-alert', 'per-alert-uuid', alert1Summary),
+          getResult('system-action-per-alert', 'per-alert-uuid', alert2Summary),
+        ]);
+      });
+
+      test('should not throttle per-alert system actions', async () => {
+        clock.setSystemTime(new Date('2020-01-01T12:00:00.000Z'));
+        alertsClient.getProcessedAlerts.mockReturnValue(alerts);
+
+        const perAlertActionWithThrottle: RuleSystemAction = {
+          ...perAlertSystemAction,
+          frequency: {
+            summary: false,
+            notifyWhen: 'onThrottleInterval',
+            throttle: '1h',
+          },
+        };
+
+        const alert1Uuid = newAlert1[1].getUuid();
+        const alert2Uuid = newAlert2[2].getUuid();
+        const alert1AAD = { ...mockAAD, [ALERT_UUID]: alert1Uuid };
+        const alert2AAD = { ...mockAAD, [ALERT_UUID]: alert2Uuid };
+
+        const summarizedAlerts = {
+          new: { count: 2, data: [alert1AAD, alert2AAD] },
+          ongoing: { count: 0, data: [] },
+          recovered: { count: 0, data: [] },
+        };
+        alertsClient.getSummarizedAlerts.mockResolvedValue(summarizedAlerts);
+
+        const scheduler = new SystemActionScheduler({
+          ...getSchedulerContext(),
+          rule: { ...rule, systemActions: [perAlertActionWithThrottle] },
+        });
+
+        const throttledSummaryActions = {
+          'per-alert-uuid': { date: '2020-01-01T11:30:00.000Z' },
+        };
+        const results = await scheduler.getActionsToSchedule({
+          throttledSummaryActions,
+        });
+
+        // Per-alert actions should not be throttled, so they should execute
+        expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledTimes(1);
+        expect(logger.debug).not.toHaveBeenCalledWith(
+          expect.stringContaining('summary action is still being throttled')
+        );
+
+        expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toEqual(2);
+        expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toEqual(2);
+
+        expect(results).toHaveLength(2);
+      });
+
+      test('should handle mixed system actions (summary and per-alert)', async () => {
+        alertsClient.getProcessedAlerts.mockReturnValue(alerts);
+
+        const summarySystemAction: RuleSystemAction = {
+          id: 'system-action-summary',
+          actionTypeId: '.test-system-action',
+          params: { myParams: 'summary' },
+          uuid: 'summary-uuid',
+          frequency: {
+            summary: true,
+            notifyWhen: 'onActiveAlert',
+            throttle: null,
+          },
+        };
+
+        const alert1Uuid = newAlert1[1].getUuid();
+        const alert2Uuid = newAlert2[2].getUuid();
+        const alert1AAD = { ...mockAAD, [ALERT_UUID]: alert1Uuid };
+        const alert2AAD = { ...mockAAD, [ALERT_UUID]: alert2Uuid };
+
+        const summarizedAlerts = {
+          new: { count: 2, data: [alert1AAD, alert2AAD] },
+          ongoing: { count: 0, data: [] },
+          recovered: { count: 0, data: [] },
+        };
+        alertsClient.getSummarizedAlerts.mockResolvedValue(summarizedAlerts);
+
+        const scheduler = new SystemActionScheduler({
+          ...getSchedulerContext(),
+          rule: { ...rule, systemActions: [summarySystemAction, perAlertSystemAction] },
+        });
+
+        const results = await scheduler.getActionsToSchedule({});
+
+        // Summary action: 1 execution with all alerts
+        // Per-alert action: 2 executions (one per alert)
+        expect(results).toHaveLength(3);
+
+        const allAlertsSummary: CombinedSummarizedAlerts = {
+          ...summarizedAlerts,
+          all: { count: 2, data: [alert1AAD, alert2AAD] },
+        };
+
+        const alert1Summary: CombinedSummarizedAlerts = {
+          new: { count: 1, data: [alert1AAD] },
+          ongoing: { count: 0, data: [] },
+          recovered: { count: 0, data: [] },
+          all: { count: 1, data: [alert1AAD] },
+        };
+
+        const alert2Summary: CombinedSummarizedAlerts = {
+          new: { count: 1, data: [alert2AAD] },
+          ongoing: { count: 0, data: [] },
+          recovered: { count: 0, data: [] },
+          all: { count: 1, data: [alert2AAD] },
+        };
+
+        expect(results).toEqual([
+          getResult('system-action-summary', 'summary-uuid', allAlertsSummary),
+          getResult('system-action-per-alert', 'per-alert-uuid', alert1Summary),
+          getResult('system-action-per-alert', 'per-alert-uuid', alert2Summary),
+        ]);
+      });
+
+      test('should skip per-alert actions when no alerts found', async () => {
+        alertsClient.getProcessedAlerts.mockReturnValue({});
+
+        const summarizedAlerts = {
+          new: { count: 0, data: [] },
+          ongoing: { count: 0, data: [] },
+          recovered: { count: 0, data: [] },
+        };
+        alertsClient.getSummarizedAlerts.mockResolvedValue(summarizedAlerts);
+
+        const scheduler = new SystemActionScheduler({
+          ...getSchedulerContext(),
+          rule: { ...rule, systemActions: [perAlertSystemAction] },
+        });
+
+        const results = await scheduler.getActionsToSchedule({});
+
+        expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toEqual(0);
+        expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toEqual(0);
+        expect(results).toHaveLength(0);
+      });
     });
   });
 });

@@ -27,7 +27,17 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { isEmpty, partition, some } from 'lodash';
-import type { ActionVariable, RuleActionParam } from '@kbn/alerting-plugin/common';
+import type {
+  ActionVariable,
+  RuleActionParam,
+  RuleActionFrequency,
+} from '@kbn/alerting-plugin/common';
+import {
+  getDurationNumberInItsUnit,
+  getDurationUnitValue,
+  parseDuration,
+} from '@kbn/alerting-plugin/common/parse_duration';
+import { RuleActionsNotifyWhen } from '@kbn/response-ops-rule-form';
 import type { ActionGroupWithMessageVariables } from '@kbn/triggers-actions-ui-types';
 import { checkActionFormActionTypeEnabled, transformActionVariables } from '@kbn/alerts-ui-shared';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
@@ -38,6 +48,7 @@ import type {
   ActionConnector,
   ActionVariables,
   ActionTypeRegistryContract,
+  NotifyWhenSelectOptions,
 } from '../../../types';
 import { ActionConnectorMode } from '../../../types';
 import type { ActionAccordionFormProps } from './action_form';
@@ -51,6 +62,7 @@ export type SystemActionTypeFormProps = {
   index: number;
   onDeleteAction: () => void;
   setActionParamsProperty: (key: string, value: RuleActionParam, index: number) => void;
+  setActionFrequencyProperty: (key: string, value: RuleActionParam, index: number) => void;
   actionTypesIndex: ActionTypeIndex;
   connectors: ActionConnector[];
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -58,6 +70,11 @@ export type SystemActionTypeFormProps = {
   producerId: string;
   ruleTypeId?: string;
   disableErrorMessages?: boolean;
+  hasAlertsMappings?: boolean;
+  minimumThrottleInterval?: [number | undefined, string];
+  notifyWhenSelectOptions?: NotifyWhenSelectOptions[];
+  hideNotifyWhen?: boolean;
+  defaultRuleFrequency?: RuleActionFrequency;
 } & Pick<
   ActionAccordionFormProps,
   | 'setActionParamsProperty'
@@ -73,6 +90,7 @@ export const SystemActionTypeForm = ({
   index,
   onDeleteAction,
   setActionParamsProperty,
+  setActionFrequencyProperty,
   actionTypesIndex,
   connectors,
   defaultActionMessage,
@@ -84,6 +102,11 @@ export const SystemActionTypeForm = ({
   featureId,
   ruleTypeId,
   disableErrorMessages,
+  hasAlertsMappings,
+  minimumThrottleInterval,
+  notifyWhenSelectOptions,
+  hideNotifyWhen = false,
+  defaultRuleFrequency,
 }: SystemActionTypeFormProps) => {
   const { http } = useKibana().services;
   const [isOpen, setIsOpen] = useState(true);
@@ -92,6 +115,39 @@ export const SystemActionTypeForm = ({
   });
 
   const { euiTheme } = useEuiTheme();
+
+  // State management for throttle values
+  const [actionThrottle, setActionThrottle] = useState<number | null>(
+    actionItem.frequency?.throttle
+      ? getDurationNumberInItsUnit(actionItem.frequency.throttle)
+      : null
+  );
+  const [actionThrottleUnit, setActionThrottleUnit] = useState<string>(
+    actionItem.frequency?.throttle ? getDurationUnitValue(actionItem.frequency?.throttle) : 'h'
+  );
+  const [minimumActionThrottle = -1, minimumActionThrottleUnit = 's'] = minimumThrottleInterval ?? [
+    -1,
+    's',
+  ];
+
+  const [showMinimumThrottleWarning, showMinimumThrottleUnitWarning] = useMemo(() => {
+    try {
+      if (!actionThrottle) return [false, false];
+      const throttleUnitDuration = parseDuration(`1${actionThrottleUnit}`);
+      const minThrottleUnitDuration = parseDuration(`1${minimumActionThrottleUnit}`);
+      const boundedThrottle =
+        throttleUnitDuration > minThrottleUnitDuration
+          ? actionThrottle
+          : Math.max(actionThrottle, minimumActionThrottle);
+      const boundedThrottleUnit =
+        parseDuration(`${actionThrottle}${actionThrottleUnit}`) >= minThrottleUnitDuration
+          ? actionThrottleUnit
+          : minimumActionThrottleUnit;
+      return [boundedThrottle !== actionThrottle, boundedThrottleUnit !== actionThrottleUnit];
+    } catch (e) {
+      return [false, false];
+    }
+  }, [actionThrottle, actionThrottleUnit, minimumActionThrottle, minimumActionThrottleUnit]);
 
   const actAccordionActionFormCss = css`
     .actAccordionActionForm {
@@ -185,6 +241,59 @@ export const SystemActionTypeForm = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionItem, disableErrorMessages]);
 
+  // Sync throttle state when actionItem.frequency changes
+  useEffect(() => {
+    if (actionItem.frequency?.throttle) {
+      setActionThrottle(getDurationNumberInItsUnit(actionItem.frequency.throttle));
+      setActionThrottleUnit(getDurationUnitValue(actionItem.frequency.throttle));
+    } else {
+      setActionThrottle(null);
+      setActionThrottleUnit('h');
+    }
+  }, [actionItem.frequency]);
+
+  // Frequency change handler
+  const onActionFrequencyChange = useCallback(
+    (frequency: RuleActionFrequency | undefined) => {
+      if (!frequency) return;
+
+      const { notifyWhen, throttle, summary } = frequency;
+
+      if (notifyWhen !== undefined) {
+        setActionFrequencyProperty('notifyWhen', notifyWhen, index);
+      }
+
+      if (throttle) {
+        setActionThrottle(getDurationNumberInItsUnit(throttle));
+        setActionThrottleUnit(getDurationUnitValue(throttle));
+      }
+
+      setActionFrequencyProperty('throttle', throttle ? throttle : null, index);
+
+      if (summary !== undefined) {
+        setActionFrequencyProperty('summary', summary, index);
+      }
+    },
+    [setActionFrequencyProperty, index]
+  );
+
+  // Note: System actions don't support action groups, so we don't implement group selection
+
+  // Frequency UI component
+  const actionNotifyWhen = (
+    <RuleActionsNotifyWhen
+      frequency={actionItem.frequency ?? defaultRuleFrequency}
+      throttle={actionThrottle}
+      throttleUnit={actionThrottleUnit}
+      hasAlertsMappings={hasAlertsMappings}
+      onChange={onActionFrequencyChange}
+      showMinimumThrottleWarning={showMinimumThrottleWarning}
+      showMinimumThrottleUnitWarning={showMinimumThrottleUnitWarning}
+      notifyWhenSelectOptions={notifyWhenSelectOptions}
+      onUseDefaultMessage={() => {}}
+    />
+  );
+
   const actionTypeRegistered = actionTypeRegistry.get(actionConnector.actionTypeId);
   if (!actionTypeRegistered) return null;
 
@@ -200,6 +309,12 @@ export const SystemActionTypeForm = ({
 
   const accordionContent = checkEnabledResult.isEnabled ? (
     <>
+      <EuiSplitPanel.Inner
+        color="subdued"
+        style={{ borderBottom: `1px solid ${euiTheme.colors.lightShade}` }}
+      >
+        {!hideNotifyWhen && actionNotifyWhen}
+      </EuiSplitPanel.Inner>
       <EuiSplitPanel.Inner color="plain">
         {ParamsFieldsComponent ? (
           <EuiErrorBoundary>

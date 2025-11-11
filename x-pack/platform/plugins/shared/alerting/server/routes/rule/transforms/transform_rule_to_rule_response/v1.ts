@@ -77,12 +77,21 @@ export const transformRuleActions = (
       };
     }),
     ...systemActions.map((sActions) => {
-      const { id, actionTypeId, params, uuid } = sActions;
+      const { id, actionTypeId, params, uuid, frequency } = sActions;
       return {
         id,
         params,
         uuid,
         connector_type_id: actionTypeId,
+        ...(frequency
+          ? {
+              frequency: {
+                summary: frequency.summary,
+                notify_when: frequency.notifyWhen,
+                throttle: frequency.throttle,
+              },
+            }
+          : {}),
       };
     }),
   ];

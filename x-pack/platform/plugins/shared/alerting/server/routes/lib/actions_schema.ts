@@ -87,6 +87,17 @@ export const systemActionsSchema = schema.maybe(
       id: schema.string(),
       params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
       uuid: schema.maybe(schema.string()),
+      frequency: schema.maybe(
+        schema.object({
+          summary: schema.boolean(),
+          notify_when: schema.oneOf([
+            schema.literal('onActionGroupChange'),
+            schema.literal('onActiveAlert'),
+            schema.literal('onThrottleInterval'),
+          ]),
+          throttle: schema.nullable(schema.string({ validate: validateDurationSchema })),
+        })
+      ),
     }),
     { defaultValue: [] }
   )
