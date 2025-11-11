@@ -9,8 +9,6 @@ import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
 import type { CoreSetup, UiSettingsParams } from '@kbn/core/server';
-import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
-import type { ReadonlyModeType } from '@kbn/core-ui-settings-common';
 import {
   SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_MINUTES,
   SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_RATE,
@@ -18,7 +16,6 @@ import {
 } from '@kbn/management-settings-ids';
 import {
   APP_ID,
-  DEFAULT_AI_CONNECTOR,
   DEFAULT_ALERT_TAGS_KEY,
   DEFAULT_ALERT_TAGS_VALUE,
   DEFAULT_ANOMALY_SCORE,

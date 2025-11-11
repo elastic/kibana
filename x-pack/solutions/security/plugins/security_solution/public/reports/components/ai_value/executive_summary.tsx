@@ -53,7 +53,9 @@ export const ExecutiveSummary: React.FC<Props> = ({
   valueMetricsCompare,
 }) => {
   const { uiSettings } = useKibana().services;
-  const [title, setTitle] = useState<string>(uiSettings.get(SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_TITLE));
+  const [title, setTitle] = useState<string>(
+    uiSettings.get(SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_TITLE)
+  );
   const updateTitle = useCallback(
     (newTitle: string) => {
       uiSettings.set(SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_TITLE, newTitle);
