@@ -366,10 +366,6 @@ export class DataViewsService {
   private dataViewLazyCache: Map<string, Promise<DataViewLazy>>;
 
   /**
-   * Can the user save advanced settings?
-   */
-  private getCanSaveAdvancedSettings: () => Promise<boolean>;
-  /**
    * Can the user save data views?
    */
   public getCanSave: () => Promise<boolean>;
@@ -388,7 +384,6 @@ export class DataViewsService {
       onNotification,
       onError,
       getCanSave = () => Promise.resolve(false),
-      getCanSaveAdvancedSettings,
       scriptedFieldsEnabled,
     } = deps;
     this.apiClient = apiClient;
@@ -398,7 +393,6 @@ export class DataViewsService {
     this.onNotification = onNotification;
     this.onError = onError;
     this.getCanSave = getCanSave;
-    this.getCanSaveAdvancedSettings = getCanSaveAdvancedSettings;
 
     this.dataViewCache = new Map();
     this.dataViewLazyCache = new Map();
@@ -557,6 +551,7 @@ export class DataViewsService {
   };
 
   /**
+   * This appears to be just be used in tsvb
    * Get default index pattern
    * @param displayErrors - If set false, API consumer is responsible for displaying and handling errors.
    */
@@ -565,16 +560,19 @@ export class DataViewsService {
     if (defaultIndexPatternId) {
       return await this.get(defaultIndexPatternId, displayErrors);
     }
-
-    return null;
   };
 
   /**
    * Get default index pattern id
    */
   getDefaultId = async (): Promise<string | null> => {
-    const defaultIndexPatternId = await this.config.get<string | null>(DEFAULT_DATA_VIEW_ID);
-    return defaultIndexPatternId ?? null;
+    const allDataViews = await this.getIdsWithTitle();
+    if (allDataViews.length === 0) {
+      return null;
+    }
+    const defaultId = await this.config.get<string | null>(DEFAULT_DATA_VIEW_ID);
+    const exists = defaultId ? allDataViews.some((pattern) => pattern.id === defaultId) : false;
+    return exists && defaultId ? defaultId : allDataViews[0].id;
   };
 
   /**
@@ -1404,33 +1402,15 @@ export class DataViewsService {
   }
 
   private async getDefaultDataViewId() {
-    const patterns = await this.getIdsWithTitle();
-    let defaultId: string | null = await this.getDefaultId();
-    const exists = defaultId ? patterns.some((pattern) => pattern.id === defaultId) : false;
-
-    if (defaultId && !exists) {
-      if (await this.getCanSaveAdvancedSettings()) {
-        await this.config.remove(DEFAULT_DATA_VIEW_ID);
-      }
-
-      defaultId = null;
-    }
-
-    if (!defaultId && patterns.length >= 1 && (await this.hasUserDataView().catch(() => true))) {
-      defaultId = patterns[0].id;
-      if (await this.getCanSaveAdvancedSettings()) {
-        await this.config.set(DEFAULT_DATA_VIEW_ID, defaultId);
-      }
-    }
-
-    return defaultId;
+    return this.getDefaultId();
   }
 
   /**
    * Returns whether a default data view exists.
    */
   async defaultDataViewExists() {
-    return !!(await this.getDefaultDataViewId());
+    const defaultId = await this.getDefaultDataViewId();
+    return Boolean(defaultId);
   }
 
   /**
