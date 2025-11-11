@@ -635,5 +635,16 @@ export default function (providerContext: FtrProviderContext) {
         previous_version: '0.1.0',
       });
     });
+
+    it('should have updated the ilm migration status', async function () {
+      const settingsSO = await kibanaServer.savedObjects.get({
+        type: 'ingest_manager_settings',
+        id: 'fleet-default-settings',
+      });
+      expect(settingsSO.attributes.ilm_migration_status).eql({
+        logs: 'success',
+        metrics: 'success',
+      });
+    });
   });
 }
