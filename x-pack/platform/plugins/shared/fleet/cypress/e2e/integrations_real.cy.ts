@@ -101,33 +101,40 @@ describe('Add Integration - Real API', () => {
   afterEach(() => {});
 
   it('should install integration without policy', () => {
+    // Intercept the package info API to get the asset count
+    // Note: The version part of the URL is optional, so we match with or without it
+    cy.intercept('GET', '**/api/fleet/epm/packages/tomcat**').as('getPackageInfo');
     cy.visit('/app/integrations/detail/tomcat/settings');
 
-    cy.getBySel(SETTINGS.INSTALL_ASSETS_BTN).click();
-    cy.get('.euiCallOut').contains('This action will install 1 assets');
-    cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();
+    // Wait for package info and extract the asset count
+    cy.wait('@getPackageInfo').then((interception) => {
+      const packageInfo = interception.response?.body.item;
+      const assets = packageInfo?.assets || {};
 
-    cy.getBySel(LOADING_SPINNER).should('not.exist');
+      // Calculate total asset count from all services and types
+      const assetCount = Object.values(assets).reduce((total: number, serviceAssets: any) => {
+        return (
+          total +
+          Object.values(serviceAssets || {}).reduce((serviceTotal: number, typeAssets: any) => {
+            return serviceTotal + (Array.isArray(typeAssets) ? typeAssets.length : 0);
+          }, 0)
+        );
+      }, 0);
 
-    cy.getBySel(SETTINGS.UNINSTALL_ASSETS_BTN).click();
-    cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();
-    cy.getBySel(LOADING_SPINNER).should('not.exist');
-    cy.getBySel(SETTINGS.INSTALL_ASSETS_BTN).should('exist');
-  });
+      cy.getBySel(SETTINGS.INSTALL_ASSETS_BTN).click();
+      // Assert against the actual asset count from the package
+      cy.get('.euiCallOut').contains(
+        `This action will install ${assetCount} asset${assetCount === 1 ? '' : 's'}`
+      );
+      cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();
 
-  it('should install integration without policy', () => {
-    cy.visit('/app/integrations/detail/tomcat/settings');
+      cy.getBySel(LOADING_SPINNER).should('not.exist');
 
-    cy.getBySel(SETTINGS.INSTALL_ASSETS_BTN).click();
-    cy.get('.euiCallOut').contains('This action will install 1 assets');
-    cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();
-
-    cy.getBySel(LOADING_SPINNER).should('not.exist');
-
-    cy.getBySel(SETTINGS.UNINSTALL_ASSETS_BTN).click();
-    cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();
-    cy.getBySel(LOADING_SPINNER).should('not.exist');
-    cy.getBySel(SETTINGS.INSTALL_ASSETS_BTN).should('exist');
+      cy.getBySel(SETTINGS.UNINSTALL_ASSETS_BTN).click();
+      cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();
+      cy.getBySel(LOADING_SPINNER).should('not.exist');
+      cy.getBySel(SETTINGS.INSTALL_ASSETS_BTN).should('exist');
+    });
   });
 
   it('should display Apache integration in the Policies list once installed ', () => {
