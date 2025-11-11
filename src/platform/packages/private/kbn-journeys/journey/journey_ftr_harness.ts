@@ -71,8 +71,6 @@ export class JourneyFtrHarness {
   private page: Page | undefined;
   private client: CDPSession | undefined;
   private context: BrowserContext | undefined;
-  private currentSpanStack: Array<apmNode.Span | null> = [];
-  private currentTransaction: apmNode.Transaction | undefined | null = undefined;
 
   private pageTeardown$ = new Rx.Subject<Page>();
   private telemetryTrackerSubs = new Map<Page, Rx.Subscription>();
@@ -119,15 +117,6 @@ export class JourneyFtrHarness {
     await this.updateTelemetryAndAPMLabels(journeyLabels);
 
     this.apm = apmNode;
-
-    if (this.currentTransaction) {
-      throw new Error(`Transaction exist, end prev transaction ${this.currentTransaction?.name}`);
-    }
-
-    this.currentTransaction = this.apm?.startTransaction(
-      `Journey: ${this.journeyConfig.getName()}`,
-      'performance'
-    );
   }
 
   private async setupBrowserAndPage() {
@@ -289,11 +278,6 @@ export class JourneyFtrHarness {
       return;
     }
 
-    if (this.currentTransaction) {
-      this.currentTransaction.end('Success');
-      this.currentTransaction = undefined;
-    }
-
     const apmStarted = this.apm.isStarted();
     // @ts-expect-error
     const apmActive = apmStarted && this.apm._conf.active;
@@ -367,11 +351,6 @@ export class JourneyFtrHarness {
   }
 
   private async onStepError(step: AnyStep, err: Error) {
-    if (this.currentTransaction) {
-      this.currentTransaction.end(`Failure ${err.message}`);
-      this.currentTransaction = undefined;
-    }
-
     if (this.page) {
       const { screenshot, fs } = await this.takeScreenshots(this.page);
       if (screenshot && fs) {
@@ -380,20 +359,31 @@ export class JourneyFtrHarness {
     }
   }
 
-  private async withSpan<T>(name: string, type: string | undefined, block: () => Promise<T>) {
-    if (!this.currentTransaction) {
-      return await block();
-    }
+  private async withSpan<T>(
+    name: string,
+    type: string | undefined,
+    block: (ids: { traceId?: string; parentId?: string }) => Promise<T>
+  ) {
+    const traceId = apmNode.currentTraceIds['trace.id'];
+    const parentId =
+      apmNode.currentTraceIds['span.id'] ?? apmNode.currentTraceIds['transaction.id'];
 
-    const span = this.currentTransaction.startSpan(name, type ?? null);
+    const span = apmNode.currentTransaction?.startSpan(
+      name,
+      type ?? null,
+      parentId
+        ? {
+            childOf: parentId,
+          }
+        : undefined
+    );
 
     if (!span) {
-      return await block();
+      return await block({ traceId, parentId });
     }
 
     try {
-      this.currentSpanStack.unshift(span);
-      const result = await block();
+      const result = await block({ traceId, parentId });
       span.setOutcome('success');
       span.end();
       return result;
@@ -401,20 +391,7 @@ export class JourneyFtrHarness {
       span.setOutcome('failure');
       span.end();
       throw error;
-    } finally {
-      if (span !== this.currentSpanStack.shift()) {
-        // eslint-disable-next-line no-unsafe-finally
-        throw new Error('span stack mismatch');
-      }
     }
-  }
-
-  private getCurrentSpanOrTransaction() {
-    return this.currentSpanStack.length ? this.currentSpanStack[0] : this.currentTransaction;
-  }
-
-  private getCurrentTraceparent() {
-    return this.getCurrentSpanOrTransaction()?.traceparent;
   }
 
   private async getBrowserInstance() {
@@ -487,7 +464,7 @@ export class JourneyFtrHarness {
   private async interceptBrowserRequests(page: Page) {
     await page.route('**', async (route, request) => {
       const headers = await request.allHeaders();
-      const traceparent = this.getCurrentTraceparent();
+      const traceparent = apmNode.currentTraceparent;
       if (traceparent && request.isNavigationRequest()) {
         await route.continue({ headers: { traceparent, ...headers } });
       } else {
@@ -543,29 +520,30 @@ export class JourneyFtrHarness {
 
       for (const step of steps) {
         it(step.name, async () => {
-          await this.withSpan(`step: ${step.name}`, 'step', async () => {
-            await this.page?.evaluate(
-              ([traceId, parentId]) => {
-                const win = window as WindowWithApmContext;
-                win.journeyTraceId = traceId;
-                win.journeyParentId = parentId;
-              },
-              [
-                this.apm?.currentTraceIds['trace.id'],
-                this.apm?.currentTraceIds['span.id'] || this.apm?.currentTraceIds['transaction.id'],
-              ]
-            );
+          const ids = {
+            traceId: this.apm?.currentTraceIds['trace.id'],
+            parentId:
+              this.apm?.currentTraceIds['span.id'] ?? this.apm?.currentTraceIds['transaction.id'],
+          };
 
-            try {
-              await step.fn(this.getCtx());
-              await this.onStepSuccess(step);
-            } catch (e) {
-              const error = new Error(`Step [${step.name}] failed: ${e.message}`);
-              error.stack = e.stack;
-              await this.onStepError(step, error);
-              throw error; // Rethrow error if step fails otherwise it is silently passing
-            }
-          });
+          await this.page?.evaluate(
+            ([traceId, parentId]) => {
+              const win = window as WindowWithApmContext;
+              win.journeyTraceId = traceId;
+              win.journeyParentId = parentId;
+            },
+            [ids.traceId, ids.parentId]
+          );
+
+          try {
+            await step.fn(this.getCtx());
+            await this.onStepSuccess(step);
+          } catch (e) {
+            const error = new Error(`Step [${step.name}] failed: ${e.message}`);
+            error.stack = e.stack;
+            await this.onStepError(step, error);
+            throw error; // Rethrow error if step fails otherwise it is silently passing
+          }
         });
       }
     });
