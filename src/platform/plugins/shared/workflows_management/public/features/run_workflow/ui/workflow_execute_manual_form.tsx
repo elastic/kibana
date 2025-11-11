@@ -91,14 +91,9 @@ const makeWorkflowInputsValidator = (inputs: Array<z.infer<typeof WorkflowInputS
         case 'object': {
           // Handle object type inputs
           const objectInput = input as Extract<typeof input, { type: 'object' }>;
-          let objectSchema: z.ZodType;
-          if (objectInput.schema && typeof objectInput.schema === 'object') {
-            // Inline schema provided - convert to Zod schema
-            objectSchema = convertInlineSchemaToZod(objectInput.schema as Record<string, unknown>);
-          } else {
-            // No schema provided - accept any JSON object
-            objectSchema = z.record(z.string(), z.any());
-          }
+          const objectSchema: z.ZodType = convertInlineSchemaToZod(
+            objectInput.schema as Record<string, unknown>
+          );
           acc[input.name] = input.required ? objectSchema : objectSchema.optional();
           break;
         }

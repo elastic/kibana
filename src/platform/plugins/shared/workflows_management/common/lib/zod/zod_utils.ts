@@ -242,6 +242,9 @@ export function getZodTypeName(schema: z.ZodType) {
  * - Arrays: ["string"] for array types
  */
 export function convertInlineSchemaToZod(schema: Record<string, unknown>): z.ZodType {
+  if (!schema || typeof schema !== 'object') {
+    return z.record(z.string(), z.any());
+  }
   const shape: Record<string, z.ZodType> = {};
 
   for (const [key, value] of Object.entries(schema)) {
