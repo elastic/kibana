@@ -8,4 +8,3 @@
  */
 
 export { handleRemovedTypes } from './handle_removed_types';
-export { updateRemovedTypes } from './update_removed_types';

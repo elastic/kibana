@@ -7,9 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import * as path from 'path';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { MigrationSnapshot } from '../types';
-import { updateRemovedTypes, readRemovedTypesJson } from './update_removed_types';
+import { fileToJson, jsonToFile } from '../util/json';
+
+const REMOVED_TYPES_JSON_PATH = path.resolve(__dirname, '../../removed_types.json');
 
 /**
  * Detects types that were removed between base branch and current branch,
@@ -29,7 +32,7 @@ export async function handleRemovedTypes({
 }) {
   log.info(`Checking for removed types between base branch and current branch`);
 
-  const currentRemovedTypes = await readRemovedTypesJson();
+  const currentRemovedTypes = await fileToJson(REMOVED_TYPES_JSON_PATH) as string[];
 
   const conflictingTypes = await detectConflictsWithRemovedTypes(to, currentRemovedTypes);
   if (conflictingTypes.length > 0) {
@@ -52,7 +55,8 @@ export async function handleRemovedTypes({
     );
   }
 
-  await updateRemovedTypes(removedTypes, currentRemovedTypes, log);
+  log.info(`Updating removed_types.json`);
+  await updateRemovedTypes(removedTypes, currentRemovedTypes);
   log.info(`✅ Successfully handled ${removedTypes.length} removed type(s)`);
 }
 
@@ -79,7 +83,11 @@ async function detectConflictsWithRemovedTypes(
 /**
  * Compares two snapshots and identifies types that exist in 'from' but not in 'to' and not already in removed_types.json
  */
-function detectRemovedTypes(from: MigrationSnapshot, to: MigrationSnapshot, currentRemovedTypes: string[]): string[] {
+function detectRemovedTypes(
+  from: MigrationSnapshot,
+  to: MigrationSnapshot,
+  currentRemovedTypes: string[]
+): string[] {
   const fromTypes = Object.keys(from.typeDefinitions);
   const toTypes = Object.keys(to.typeDefinitions);
 
@@ -92,4 +100,15 @@ function detectRemovedTypes(from: MigrationSnapshot, to: MigrationSnapshot, curr
   }
 
   return removedTypes.sort();
+}
+
+/**
+ * Updates the removed_types.json file by adding new removed types
+ */
+async function updateRemovedTypes(
+  removedTypes: string[],
+  currentRemovedTypes: string[],
+) {
+  const allTypes = [...currentRemovedTypes, ...removedTypes].sort();
+  await jsonToFile(REMOVED_TYPES_JSON_PATH, allTypes);
 }
