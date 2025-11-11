@@ -32,7 +32,7 @@ import { ESQLDataGrid } from '@kbn/esql-datagrid/public';
   This will return a response with columns and values
 **/
 
-const adHocDataView = getESQLAdHocDataview({query, dataViewsService: dataViews,});
+const adHocDataView = getESQLAdHocDataview({query, dataViewsService: dataViews, http});
 const formattedColumns = formatESQLColumns(columns);
 
 <ESQLDataGrid

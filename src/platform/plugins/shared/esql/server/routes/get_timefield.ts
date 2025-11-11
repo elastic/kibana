@@ -11,17 +11,19 @@ import type { IRouter, PluginInitializerContext } from '@kbn/core/server';
 import type { FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
 import { getIndexPatternFromESQLQuery, getTimeFieldFromESQLQuery } from '@kbn/esql-utils';
 import { Parser, isSubQuery } from '@kbn/esql-ast';
-// import { Parser } from '@kbn/esql-ast';
-
-// import { type ResolveIndexResponse, REGISTRY_EXTENSIONS_ROUTE } from '@kbn/esql-types';
+import { TIMEFIELD_ROUTE } from '@kbn/esql-types';
 
 /**
- * Registers the ESQL extensions route.
- * This route handles requests for ESQL extensions based on the provided solutionId and query.
+ * Registers the ESQL get timefield route.
+ * This route returns the timefield to use for the ES|QL ad-hoc dataview.
  *
+ * The timefield is extracted from the ES|QL query if specified.
+ * If not specified, it checks if the index pattern contains the default time field '@timestamp'.
+ * In case of subqueries, it verifies that all involved indices contain the '@timestamp' field.
  * @param router The IRouter instance to register the route with.
- * @param extensionsRegistry The ESQLExtensionsRegistry instance to use for fetching recommended queries.
  * @param logger The logger instance from the PluginInitializerContext.
+ *
+ * @returns timeField or undefined
  */
 export const registerGetTimeFieldRoute = (
   router: IRouter,
@@ -29,7 +31,7 @@ export const registerGetTimeFieldRoute = (
 ) => {
   router.get(
     {
-      path: `/internal/esql/get_timefield/{query}`,
+      path: `${TIMEFIELD_ROUTE}{query}`,
       security: {
         authz: {
           enabled: false,
@@ -43,8 +45,6 @@ export const registerGetTimeFieldRoute = (
       },
     },
     async (requestHandlerContext, request, response) => {
-      const core = await requestHandlerContext.core;
-      const client = core.elasticsearch.client.asCurrentUser;
       const { query } = request.params;
       // Query is of the form "from index | where timefield >= ?_tstart".
       // At this point we just want to extract the timefield if present in the query
@@ -54,9 +54,10 @@ export const registerGetTimeFieldRoute = (
           body: timeField,
         });
       }
+      const core = await requestHandlerContext.core;
+      const client = core.elasticsearch.client.asCurrentUser;
 
       // Trying to identify if there is @timestamp
-
       const { root } = Parser.parse(query);
       const sourceCommand = root.commands.find(({ name }) => ['from', 'ts'].includes(name));
       if (!sourceCommand) {

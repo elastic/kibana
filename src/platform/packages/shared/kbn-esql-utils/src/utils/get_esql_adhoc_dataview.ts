@@ -9,7 +9,9 @@
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { HttpStart } from '@kbn/core/public';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
+import { TIMEFIELD_ROUTE } from '@kbn/esql-types';
 import { getIndexPatternFromESQLQuery } from './get_index_pattern_from_query';
+
 // uses browser sha256 method with fallback if unavailable
 async function sha256(str: string) {
   if (crypto.subtle) {
@@ -66,9 +68,9 @@ export async function getESQLAdHocDataview({
   // optional http service to use to fetch the time field, if needed
   http?: HttpStart;
 }) {
-  const response = (await http?.get(`/internal/esql/get_timefield/${query}`).catch((error) => {
+  const response = (await http?.get(`${TIMEFIELD_ROUTE}${query}`).catch((error) => {
     // eslint-disable-next-line no-console
-    console.error('Failed to fetch the sources', error);
+    console.error('Failed to fetch the timefield', error);
     return '';
   })) as string | undefined;
   const timeField = response;

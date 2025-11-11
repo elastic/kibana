@@ -19,6 +19,7 @@ import {
 } from './utils';
 import type { TextBasedLayerColumn } from '@kbn/lens-common';
 import { type AggregateQuery } from '@kbn/es-query';
+import { coreMock } from '@kbn/core/public/mocks';
 
 jest.mock('./fetch_data_from_aggregate_query', () => ({
   fetchDataFromAggregateQuery: jest.fn(() => {
@@ -256,6 +257,7 @@ describe('Text based languages utils', () => {
       };
       const dataViewsMock = dataViewPluginMocks.createStartContract();
       const dataMock = dataPluginMock.createStartContract();
+      const coreStart = coreMock.createStart();
       const expressionsMock = expressionsPluginMock.createStartContract();
       const updatedState = await getStateFromAggregateQuery(
         state,
@@ -287,7 +289,8 @@ describe('Text based languages utils', () => {
           ),
         },
         dataMock,
-        expressionsMock
+        expressionsMock,
+        coreStart.http
       );
 
       expect(updatedState).toStrictEqual({
@@ -361,6 +364,7 @@ describe('Text based languages utils', () => {
       const dataViewsMock = dataViewPluginMocks.createStartContract();
       const dataMock = dataPluginMock.createStartContract();
       const expressionsMock = expressionsPluginMock.createStartContract();
+      const coreStart = coreMock.createStart();
       const updatedState = await getStateFromAggregateQuery(
         state,
         { esql: 'FROM my-fake-index-pattern | WHERE time <= ?_tend' },
@@ -391,7 +395,8 @@ describe('Text based languages utils', () => {
           ),
         },
         dataMock,
-        expressionsMock
+        expressionsMock,
+        coreStart.http
       );
 
       expect(updatedState).toStrictEqual({
@@ -465,6 +470,7 @@ describe('Text based languages utils', () => {
       const dataViewsMock = dataViewPluginMocks.createStartContract();
       const dataMock = dataPluginMock.createStartContract();
       const expressionsMock = expressionsPluginMock.createStartContract();
+      const coreStart = coreMock.createStart();
       const updatedState = await getStateFromAggregateQuery(
         state,
         { esql: 'FROM my-fake-index-*' },
@@ -500,7 +506,8 @@ describe('Text based languages utils', () => {
           ),
         },
         dataMock,
-        expressionsMock
+        expressionsMock,
+        coreStart.http
       );
 
       expect(updatedState).toStrictEqual({

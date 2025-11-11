@@ -7,6 +7,7 @@
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { HttpStart } from '@kbn/core/public';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
@@ -81,6 +82,7 @@ export async function getStateFromAggregateQuery(
   dataViews: DataViewsPublicPluginStart,
   data: DataPublicPluginStart,
   expressions: ExpressionsStart,
+  http: HttpStart,
   frameDataViews?: DataViewsState
 ) {
   let indexPatternRefs: IndexPatternRef[] = frameDataViews?.indexPatternRefs.length
@@ -101,6 +103,7 @@ export async function getStateFromAggregateQuery(
       dataViewsService: dataViews,
       query: query.esql,
       options: { skipFetchFields: true },
+      http,
     });
 
     if (dataView && dataView.id) {
