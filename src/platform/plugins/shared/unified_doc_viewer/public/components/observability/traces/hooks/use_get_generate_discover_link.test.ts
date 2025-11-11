@@ -82,4 +82,24 @@ describe('useGetGenerateDiscoverLink', () => {
     expect(url).toBe(DISCOVER_URL);
     expect(mockDiscoverLocator.getRedirectUrl).toHaveBeenCalled();
   });
+
+  it('filters out undefined values from whereClause to avoid invalid ESQL parameters', () => {
+    const { result } = renderHook(() => useGetGenerateDiscoverLink({ indexPattern: 'traces-*' }));
+    const mockGetRedirectUrl = jest.fn(() => DISCOVER_URL);
+    mockDiscoverLocator.getRedirectUrl = mockGetRedirectUrl;
+
+    result.current.generateDiscoverLink({
+      'trace.id': 'abc123',
+      'span.id': undefined,
+      'event.name': undefined,
+      'exception.message': 'Test error',
+    });
+
+    expect(mockGetRedirectUrl).toHaveBeenCalled();
+    const callArgs = mockGetRedirectUrl.mock.calls[0][0];
+    const esql = callArgs.query.esql;
+
+    expect(esql).toBe(`FROM traces-*
+  | WHERE trace.id == "abc123" AND exception.message == "Test error"`);
+  });
 });
