@@ -639,6 +639,41 @@ function detectClassExtendsUsage(programPath, properties, t) {
   return importsUsedInExtends;
 }
 
+/**
+ * Check if a file or module path should be excluded from lazy loading due to being mock-related
+ *
+ * This function checks for:
+ * 1. Mock file patterns (.mock., .mocks., .test.mock, .test.mocks)
+ * 2. @kbn packages with "mock" in the name
+ * 3. "mock" or "__mocks__" as a path segment
+ *
+ * @param {string} path - File path or module path to check
+ * @returns {boolean} True if the path is mock-related and should be excluded
+ */
+function isMockRelated(path) {
+  if (!path) {
+    return false;
+  }
+
+  // Check for mock file patterns
+  if (/\.mocks?\./.test(path)) {
+    return true;
+  }
+
+  // Check for @kbn packages with mock in the name
+  if (path.startsWith('@kbn/') && path.includes('mock')) {
+    return true;
+  }
+
+  // Check for /mock/, /mocks/, /__mock__/, /__mocks__/ as a path segment
+  const mockSegmentPattern = /((__mocks?__)|mocks?)(\/|$)/i;
+  if (mockSegmentPattern.test(path)) {
+    return true;
+  }
+
+  return false;
+}
+
 module.exports = {
   isSimpleRequireCall,
   collectReferencedProperties,
@@ -654,4 +689,5 @@ module.exports = {
   detectConstructorUsage,
   detectConstructorInitNewUsage,
   detectClassExtendsUsage,
+  isMockRelated,
 };

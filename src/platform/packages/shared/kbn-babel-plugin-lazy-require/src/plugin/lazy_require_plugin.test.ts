@@ -159,6 +159,62 @@ describe('@kbn/babel-plugin-lazy-require', () => {
       expect(result?.code).not.toContain('_imports');
     });
 
+    it('does not transform files in mock directories', () => {
+      const code = 'import { something } from "./module"; export const value = something;';
+
+      // Transform with mock directory
+      const result = transform(code, {
+        plugins: [lazyRequirePlugin],
+        filename: 'src/mock/index.ts',
+      });
+
+      // Should not be transformed
+      expect(result?.code).toContain('import');
+      expect(result?.code).not.toContain('_imports');
+    });
+
+    it('does not transform files in __mocks__ directories', () => {
+      const code = 'import { something } from "./module"; export const value = something;';
+
+      // Transform with __mocks__ directory
+      const result = transform(code, {
+        plugins: [lazyRequirePlugin],
+        filename: 'src/__mocks__/index.ts',
+      });
+
+      // Should not be transformed
+      expect(result?.code).toContain('import');
+      expect(result?.code).not.toContain('_imports');
+    });
+
+    it('does not transform imports from @kbn packages with mock in the name', () => {
+      const code = `
+        import { MockProvider } from '@kbn/test-mock';
+        import { mockHelper } from '@kbn/mock-utils';
+        import { regularModule } from '@kbn/regular-package';
+        import { other } from './other';
+
+        test('example', () => {
+          expect(MockProvider).toBeDefined();
+          expect(mockHelper).toBeDefined();
+          expect(regularModule).toBeDefined();
+          expect(other).toBeDefined();
+        });
+      `;
+
+      const result = transformCode(code);
+
+      // Imports from @kbn packages with "mock" should NOT be lazy
+      expect(result).toContain('MockProvider');
+      expect(result).toContain('mockHelper');
+      expect(result).not.toContain('get MockProvider');
+      expect(result).not.toContain('get mockHelper');
+
+      // But other @kbn imports without "mock" and regular imports should be lazy
+      expect(result).toContain('get regularModule');
+      expect(result).toContain('get other');
+    });
+
     it('does not transform imports from .test.mocks files (jest.doMock setup needs immediate access)', () => {
       const code = `
         import { MockService, mockHelper } from './service.test.mocks';

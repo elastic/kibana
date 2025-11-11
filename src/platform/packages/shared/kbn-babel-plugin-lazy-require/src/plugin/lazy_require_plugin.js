@@ -25,6 +25,7 @@ const {
   detectConstructorUsage,
   detectConstructorInitNewUsage,
   detectClassExtendsUsage,
+  isMockRelated,
 } = require('./helpers');
 
 /**
@@ -63,10 +64,6 @@ const EXCLUDED_MODULES = [
   '@elastic/eui/test-env/test/*',
 ];
 
-// File patterns for files that should skip transformation
-const MOCK_FILE_PATTERNS = ['.mock.', '.mocks.'];
-const TEST_MOCK_IMPORT_PATTERNS = ['.test.mocks', '.test.mock'];
-
 // Test file detection patterns
 const TEST_DIR_PATTERN = /(^|\/)(__tests__|__test__)(\/|$)/;
 const TEST_FILE_PATTERN = /\.(test|spec)\.[tj]sx?$/;
@@ -94,10 +91,10 @@ module.exports = function lazyRequirePlugin({ types: t }) {
     name: 'kbn-lazy-require',
     visitor: {
       Program(programPath, state) {
-        // Skip transformation for mock files - they need immediate access to all imports
-        // for jest.mock() and jest.doMock() factory functions to work correctly
         const filename = state.filename || state.file.opts.filename || '';
-        if (MOCK_FILE_PATTERNS.some((pattern) => filename.includes(pattern))) {
+
+        // Skip transformation for mock files - they need immediate access to all imports
+        if (isMockRelated(filename)) {
           return;
         }
 
@@ -225,8 +222,7 @@ module.exports = function lazyRequirePlugin({ types: t }) {
               return;
             }
 
-            // Skip imports from mock setup files (jest.doMock() must run immediately)
-            if (TEST_MOCK_IMPORT_PATTERNS.some((pattern) => importPath.includes(pattern))) {
+            if (isMockRelated(importPath)) {
               return;
             }
 
@@ -270,9 +266,11 @@ module.exports = function lazyRequirePlugin({ types: t }) {
         // Exclude JSX usage (JSX transforms happen at compile time, so components need direct access)
         excludeImports(detectJsxUsage(programPath, properties, t), properties);
 
-        // Never transform explicitly excluded modules
         for (const [localName, propInfo] of properties) {
-          if (isExcludedModule(propInfo.moduleRequirePath)) {
+          if (
+            isExcludedModule(propInfo.moduleRequirePath) ||
+            isMockRelated(propInfo.moduleRequirePath)
+          ) {
             properties.delete(localName);
           }
         }
