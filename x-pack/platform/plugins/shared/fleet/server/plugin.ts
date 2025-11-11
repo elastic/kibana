@@ -719,9 +719,9 @@ export class FleetPlugin
       taskManager: deps.taskManager,
       logFactory: this.initializerContext.logger,
       config: {
-        max_revisions: (config as any).fleetPolicyRevisionsCleanup?.max_revisions,
-        frequency: (config as any).fleetPolicyRevisionsCleanup?.frequency,
-        max_policies_per_run: (config as any).fleetPolicyRevisionsCleanup?.max_policies_per_run,
+        max_revisions: config.fleetPolicyRevisionsCleanup?.max_revisions,
+        frequency: config.fleetPolicyRevisionsCleanup?.frequency,
+        max_policies_per_run: config.fleetPolicyRevisionsCleanup?.max_policies_per_run,
       },
     });
     this.lockManagerService = new LockManagerService(core, this.initializerContext.logger.get());

@@ -113,6 +113,11 @@ export interface FleetConfigType {
   hideDashboards?: boolean;
   integrationRollbackTTL?: string;
   installIntegrationsKnowledge?: boolean;
+  fleetPolicyRevisionsCleanup?: {
+    max_revisions: number;
+    frequency: string;
+    max_policies_per_run: number;
+  };
 }
 
 // Calling Object.entries(PackagesGroupedByStatus) gave `status: string`
