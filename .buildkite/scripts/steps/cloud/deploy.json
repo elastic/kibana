@@ -132,15 +132,10 @@
               }
             },
             {
-              "autoscaling_max": {
-                "resource": "memory",
-                "value": 20000
+              "size": {
+                "value": 8192,
+                "resource": "memory"
               },
-              "autoscaling_min": {
-                "resource": "memory",
-                "value": 8192
-              },
-              "autoscaling_tier_override": true,
               "id": "ml",
               "instance_configuration_id": "gcp.es.ml.n2.68x32x45",
               "node_roles": [
