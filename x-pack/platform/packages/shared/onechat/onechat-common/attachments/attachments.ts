@@ -33,4 +33,7 @@ export type EsqlAttachment = Attachment<AttachmentType.esql>;
 /**
  * Input version of an attachment, where the id is optional
  */
-export type AttachmentInput = Omit<Attachment, 'id'> & Partial<Pick<Attachment, 'id'>>;
+export type AttachmentInput<
+  Type extends string = string,
+  DataType = Type extends AttachmentType ? AttachmentDataOf<Type> : Record<string, unknown>
+> = Omit<Attachment<Type, DataType>, 'id'> & Partial<Pick<Attachment<Type, DataType>, 'id'>>;

@@ -10,17 +10,17 @@ import type { AttachmentTypeDefinition } from '@kbn/onechat-server/attachments';
 import { getToolResultId } from '@kbn/onechat-server/tools';
 import type { AttachmentTypeRegistry } from './attachment_type_registry';
 
-export type ValidateAttachmentResult =
-  | { valid: true; attachment: Attachment }
+export type ValidateAttachmentResult<Type extends string, Data> =
+  | { valid: true; attachment: Attachment<Type, Data> }
   | { valid: false; error: string };
 
-export const validateAttachment = async ({
+export const validateAttachment = async <Type extends string, Data>({
   attachment,
   registry,
 }: {
-  attachment: AttachmentInput;
+  attachment: AttachmentInput<Type, Data>;
   registry: AttachmentTypeRegistry;
-}): Promise<ValidateAttachmentResult> => {
+}): Promise<ValidateAttachmentResult<Type, Data>> => {
   if (!registry.has(attachment.type)) {
     return { valid: false, error: `Unknown attachment type: ${attachment.type}` };
   }
@@ -31,9 +31,9 @@ export const validateAttachment = async ({
     return {
       valid: true,
       attachment: {
-        type: attachment.type,
         id: attachment.id ?? getToolResultId(),
-        data: typeValidation.data,
+        type: attachment.type,
+        data: typeValidation.data as Data,
         hidden: attachment.hidden,
       },
     };
