@@ -69,6 +69,7 @@ export const ConversationHistoryList: React.FC<ConversationHistoryListProps> = (
           key: conversation.id,
           label: conversation.title,
           checked: currentConversationId === conversation.id ? 'on' : undefined,
+          'data-test-subj': `conversationItem-${conversation.id}`,
           data: {
             conversation,
           },

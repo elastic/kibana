@@ -43,7 +43,7 @@ export const ConversationsHistoryButton: React.FC = () => {
       aria-label={isPopoverOpen ? labels.close : labels.open}
       onClick={togglePopover}
       display="empty"
-      data-test-subj="onechatSidebarToggleBtn"
+      data-test-subj="onechatConversationsHistoryToggleBtn"
     />
   ) : (
     <EuiButtonEmpty
@@ -51,7 +51,7 @@ export const ConversationsHistoryButton: React.FC = () => {
       color="text"
       aria-label={isPopoverOpen ? labels.close : labels.open}
       onClick={togglePopover}
-      data-test-subj="onechatSidebarToggleBtn"
+      data-test-subj="onechatConversationsHistoryToggleBtn"
     >
       {labels.conversations}
     </EuiButtonEmpty>

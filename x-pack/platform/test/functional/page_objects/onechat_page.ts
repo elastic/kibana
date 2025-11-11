@@ -112,6 +112,35 @@ export class OneChatPageObject extends FtrService {
     return await this.getCurrentConversationIdFromUrl();
   }
 
+  async openConversationsHistory() {
+    const conversationsHistoryToggleBtn = await this.testSubjects.find(
+      'onechatConversationsHistoryToggleBtn'
+    );
+    await conversationsHistoryToggleBtn.click();
+
+    // Wait for the conversations history popover to be visible and populated
+    await this.retry.try(async () => {
+      const conversationList = await this.testSubjects.find('agentBuilderConversationList');
+      // Verify the list is actually visible and has content
+      const isDisplayed = await conversationList.isDisplayed();
+      if (!isDisplayed) {
+        throw new Error('Conversation list is not displayed');
+      }
+    });
+  }
+
+  /**
+   * Check if the conversations history popover is currently open
+   */
+  async isConversationsHistoryOpen(): Promise<boolean> {
+    try {
+      const conversationList = await this.testSubjects.find('agentBuilderConversationList');
+      return await conversationList.isDisplayed();
+    } catch {
+      return false;
+    }
+  }
+
   /**
    * Navigate to an existing conversation by clicking on it in the history sidebar
    */

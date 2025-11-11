@@ -80,6 +80,7 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabell
               iconType="arrowDown"
               iconSide="right"
               color="text"
+              data-test-subj="agentBuilderConversationTitle"
             >
               <h1 id={ariaLabelledBy}>{displayTitle}</h1>
             </EuiButtonEmpty>

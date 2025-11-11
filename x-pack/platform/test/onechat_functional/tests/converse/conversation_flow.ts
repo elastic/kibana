@@ -43,13 +43,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it('navigates to new conversation page and shows initial state', async () => {
       await onechat.navigateToApp('conversations/new');
 
-      // Assert the conversation list is empty and shows the no conversations message
-      const dataTestSubj = 'agentBuilderNoConversationsMessage';
-      await testSubjects.existOrFail(dataTestSubj);
-      const noConversationsElement = await testSubjects.find(dataTestSubj);
-      const noConversationsText = await noConversationsElement.getVisibleText();
-      expect(noConversationsText).to.contain("You haven't started any conversations yet.");
-
       // Assert the welcome page is displayed
       await testSubjects.existOrFail('agentBuilderWelcomePage');
 
@@ -87,9 +80,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const titleText = await titleElement.getVisibleText();
         expect(titleText).to.contain(MOCKED_TITLE);
 
-        const conversationList = await testSubjects.find('agentBuilderConversationList');
-        const conversationText = await conversationList.getVisibleText();
-        expect(conversationText).to.contain(MOCKED_TITLE);
+        await onechat.openConversationsHistory();
+        // Wait for the conversation to appear in the list
+        await retry.try(async () => {
+          const conversationList = await testSubjects.find('agentBuilderConversationList');
+          const conversationText = await conversationList.getVisibleText();
+          expect(conversationText).to.contain(MOCKED_TITLE);
+        });
       });
 
       await onechat.clickThinkingToggle();
@@ -109,6 +106,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       // Wait for navigation to complete and assert we're back to the initial state with a populated conversation list
       await retry.try(async () => {
         // The conversation list should still contain our previous conversation
+        await onechat.openConversationsHistory();
         const isConversationInHistory = await onechat.isConversationInHistory(conversationId);
         expect(isConversationInHistory).to.be(true);
 
