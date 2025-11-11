@@ -60,7 +60,11 @@ function convertTreeToEuiTreeViewItems(
       id: item.stepExecutionId ?? `${item.stepId}-${item.executionIndex}-no-step-execution`,
       css: getStatusCss({ status, selected }, euiTheme),
       icon: (
-        <StepIcon stepType={item.stepType} executionStatus={status} onClick={selectStepExecution} />
+        <StepIcon
+          stepType={item.stepType}
+          executionStatus={status ?? null}
+          onClick={selectStepExecution}
+        />
       ),
       label: (
         <StepExecutionTreeItemLabel
