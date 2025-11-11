@@ -20,7 +20,9 @@ export function assertValidUpdates({
   log: ToolingLog;
   from: MigrationSnapshot;
   to: MigrationSnapshot;
-}) {
+}): string[] {
+  const udpatedTypes = [];
+
   log.info(`Checking SO type updates between base branch and current branch`);
   for (const name in to.typeDefinitions) {
     if (!Object.prototype.hasOwnProperty.call(to.typeDefinitions, name)) {
@@ -72,14 +74,17 @@ export function assertValidUpdates({
               `❌ The new model version '${newModelVersion.version}' for SO type '${name}' is missing the 'schemas' definition.`
             );
           }
-          if (newModelVersion.schemas.forwardCompatibility === false)
+          if (newModelVersion.schemas.forwardCompatibility === false) {
             throw new Error(
               `❌ The new model version '${newModelVersion.version}' for SO type '${name}' is missing the 'forwardCompatibility' schema definition.`
             );
-          if (newModelVersion.schemas.create === false)
+          }
+          if (newModelVersion.schemas.create === false) {
             throw new Error(
               `❌ The new model version '${newModelVersion.version}' for SO type '${name}' is missing the 'create' schema definition.`
             );
+          }
+          udpatedTypes.push(name);
         }
 
         // check that existing model versions have not been mutated
@@ -125,6 +130,7 @@ export function assertValidUpdates({
     }
   }
   log.info('✅ Current SO type definitions are compatible with the baseline');
+  return udpatedTypes;
 }
 
 function getMutatedModelVersions(
