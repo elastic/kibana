@@ -186,7 +186,7 @@ export function ESQLControlsFlyout({
   ]);
 
   const onCloseFlyout = useCallback(() => {
-    telemetryService.trackEsqlControlConfigCancelled(initialVariableType);
+    telemetryService.trackEsqlControlConfigCancelled(initialVariableType, 'cancel_button');
     closeFlyout();
   }, [closeFlyout]);
 
