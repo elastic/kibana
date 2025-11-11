@@ -42,7 +42,7 @@ const RunWorkflowButton: React.FC<RunWorkflowButtonProps> = ({
     >
       <EuiButtonIcon
         size="s"
-        iconType="play"
+        iconType="workflowsApp"
         data-test-subj="discoverRunWorkflowAction"
         aria-label={i18n.translate('discover.runWorkflow.actionLabel', {
           defaultMessage: 'Run workflow',
@@ -50,7 +50,7 @@ const RunWorkflowButton: React.FC<RunWorkflowButtonProps> = ({
         onClick={(e: React.MouseEvent) => {
           e.preventDefault();
           e.stopPropagation();
-          setIsOpen(true);
+          setIsOpen((prev) => !prev);
         }}
       />
     </EuiToolTip>
@@ -69,12 +69,12 @@ const RunWorkflowButton: React.FC<RunWorkflowButtonProps> = ({
         size="s"
         iconSize="s"
         flush="both"
-        iconType="play"
+        iconType="workflowsApp"
         data-test-subj="discoverRunWorkflowAction"
         onClick={(e: React.MouseEvent) => {
           e.preventDefault();
           e.stopPropagation();
-          setIsOpen(true);
+          setIsOpen((prev) => !prev);
         }}
       >
         {i18n.translate('discover.runWorkflow.actionLabel', {

@@ -7,20 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import ReactDOM from 'react-dom';
-import {
-  EuiPopover,
-  EuiPanel,
-  EuiButton,
-  EuiButtonEmpty,
-  EuiSpacer,
-  EuiLink,
-  EuiIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-} from '@elastic/eui';
+import { EuiPopover, EuiLink, EuiIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css, keyframes } from '@emotion/react';
@@ -139,7 +128,6 @@ export const RunWorkflowModal: React.FC<RunWorkflowModalProps> = ({
   onClose,
   button,
 }) => {
-  const [selectedWorkflowId, setSelectedWorkflowId] = useState<string>('');
   const { http, notifications, application } = core;
 
   // Fetch workflows to get the workflow name
@@ -148,9 +136,6 @@ export const RunWorkflowModal: React.FC<RunWorkflowModalProps> = ({
     page: 1,
     query: '',
   });
-
-  const selectedWorkflow = workflowsData?.results?.find((w) => w.id === selectedWorkflowId);
-  const workflowName = selectedWorkflow?.name || '';
 
   const runWorkflowMutation = useMutation<
     RunWorkflowResponseDto,
@@ -165,87 +150,128 @@ export const RunWorkflowModal: React.FC<RunWorkflowModalProps> = ({
     },
   });
 
-  const handleRun = useCallback(async () => {
-    if (!selectedWorkflowId) return;
+  const handleRun = useCallback(
+    async (workflowIdToRun: string) => {
+      if (!workflowIdToRun) return;
 
-    const inputs = document.raw as Record<string, unknown>;
+      const selectedWorkflowToRun = workflowsData?.results?.find((w) => w.id === workflowIdToRun);
+      const workflowNameToRun = selectedWorkflowToRun?.name || workflowIdToRun;
 
-    try {
-      const response = await runWorkflowMutation.mutateAsync({
-        workflowId: selectedWorkflowId,
-        inputs,
+      const inputs = document.raw as Record<string, unknown>;
+
+      try {
+        const response = await runWorkflowMutation.mutateAsync({
+          workflowId: workflowIdToRun,
+          inputs,
+        });
+
+        const executionUrl = application.getUrlForApp('workflows', {
+          path: `/${workflowIdToRun}?tab=executions&executionId=${response.workflowExecutionId}`,
+        });
+
+        // Show initial toast with link (in progress)
+        const toast = notifications.toasts.add({
+          color: 'primary',
+          title: toMountPoint(
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="refresh" css={spinningIconCss} />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                {i18n.translate('discover.runWorkflow.executionInProgressTitle', {
+                  defaultMessage: 'Workflow execution in progress',
+                })}
+              </EuiFlexItem>
+            </EuiFlexGroup>,
+            core
+          ),
+          text: toMountPoint(
+            <FormattedMessage
+              id="discover.runWorkflow.executionInProgressMessage"
+              defaultMessage='The workflow "{workflowLink}" is currently executing.'
+              values={{
+                workflowLink: (
+                  <EuiLink
+                    onClick={(e: React.MouseEvent) => {
+                      e.preventDefault();
+                      window.open(executionUrl, '_blank');
+                    }}
+                  >
+                    {workflowNameToRun}
+                  </EuiLink>
+                ),
+              }}
+            />,
+            core
+          ),
+          toastLifeTimeMs: 10000,
+        });
+
+        // Start polling workflow execution (rendered outside modal lifecycle)
+        startWorkflowExecutionPolling(
+          response.workflowExecutionId,
+          workflowIdToRun,
+          workflowNameToRun,
+          core,
+          toast.id
+        );
+      } catch (error) {
+        notifications.toasts.addError(error as Error, {
+          title: i18n.translate('discover.runWorkflow.errorTitle', {
+            defaultMessage: 'Failed to run workflow',
+          }),
+          toastLifeTimeMs: 5000,
+        });
+      }
+    },
+    [workflowsData?.results, document, runWorkflowMutation, notifications, application, core]
+  );
+
+  // Auto-run workflow when selected
+  const handleWorkflowChange = useCallback(
+    (workflowId: string) => {
+      if (workflowId) {
+        // Close modal immediately
+        onClose();
+        // Run workflow
+        handleRun(workflowId);
+      }
+    },
+    [handleRun, onClose]
+  );
+
+  // Sort workflows: valid enabled workflows at the top, disabled at the bottom
+  const sortWorkflows = useMemo(
+    () => (workflows: WorkflowListDto['results']) => {
+      return [...workflows].sort((a, b) => {
+        // Check if workflows are valid (no validation errors)
+        const aValidation = validateWorkflowInputs(a, document);
+        const bValidation = validateWorkflowInputs(b, document);
+        const aIsValid = aValidation === null;
+        const bIsValid = bValidation === null;
+
+        // Valid enabled workflows go to the top
+        const aIsValidEnabled = a.enabled && aIsValid;
+        const bIsValidEnabled = b.enabled && bIsValid;
+
+        // Disabled workflows go to the bottom
+        const aIsDisabled = !a.enabled;
+        const bIsDisabled = !b.enabled;
+
+        // Sort order: valid enabled > other enabled > disabled
+        if (aIsValidEnabled && !bIsValidEnabled) return -1;
+        if (!aIsValidEnabled && bIsValidEnabled) return 1;
+        if (!aIsDisabled && bIsDisabled) return -1;
+        if (aIsDisabled && !bIsDisabled) return 1;
+
+        // Within the same group, sort alphabetically by name
+        return a.name.localeCompare(b.name);
       });
+    },
+    [document]
+  );
 
-      const executionUrl = application.getUrlForApp('workflows', {
-        path: `/${selectedWorkflowId}?tab=executions&executionId=${response.workflowExecutionId}`,
-      });
-
-      // Show initial toast with link (in progress)
-      const toast = notifications.toasts.add({
-        color: 'primary',
-        title: toMountPoint(
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="refresh" css={spinningIconCss} />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              {i18n.translate('discover.runWorkflow.executionInProgressTitle', {
-                defaultMessage: 'Workflow execution in progress',
-              })}
-            </EuiFlexItem>
-          </EuiFlexGroup>,
-          core
-        ),
-        text: toMountPoint(
-          <FormattedMessage
-            id="discover.runWorkflow.executionInProgressMessage"
-            defaultMessage='The workflow "{workflowLink}" is currently executing.'
-            values={{
-              workflowLink: (
-                <EuiLink
-                  onClick={(e: React.MouseEvent) => {
-                    e.preventDefault();
-                    window.open(executionUrl, '_blank');
-                  }}
-                >
-                  {workflowName || selectedWorkflowId}
-                </EuiLink>
-              ),
-            }}
-          />,
-          core
-        ),
-        toastLifeTimeMs: 10000,
-      });
-
-      // Start polling workflow execution (rendered outside modal lifecycle)
-      startWorkflowExecutionPolling(
-        response.workflowExecutionId,
-        selectedWorkflowId,
-        workflowName,
-        core,
-        toast.id
-      );
-
-      onClose();
-    } catch (error) {
-      notifications.toasts.addError(error as Error, {
-        title: i18n.translate('discover.runWorkflow.errorTitle', {
-          defaultMessage: 'Failed to run workflow',
-        }),
-        toastLifeTimeMs: 5000,
-      });
-    }
-  }, [
-    selectedWorkflowId,
-    workflowName,
-    document,
-    runWorkflowMutation,
-    notifications,
-    application,
-    onClose,
-    core,
-  ]);
+  const popoverPanelStyle = { minWidth: 600, maxWidth: 800 };
 
   return (
     <EuiPopover
@@ -253,45 +279,23 @@ export const RunWorkflowModal: React.FC<RunWorkflowModalProps> = ({
       isOpen={isOpen}
       closePopover={onClose}
       anchorPosition="downLeft"
-      panelPaddingSize="m"
-      panelStyle={{ minWidth: 500, maxWidth: 600 }}
+      panelPaddingSize="none"
+      offset={4}
+      panelStyle={popoverPanelStyle}
     >
-      <EuiPanel paddingSize="m">
-        <EuiText>
-          <h3>
-            <FormattedMessage
-              id="discover.runWorkflow.modalTitle"
-              defaultMessage="Run workflow on document"
-            />
-          </h3>
-        </EuiText>
-        <EuiSpacer size="m" />
+      <div style={{ padding: '4px 8px 8px 8px' }}>
         <WorkflowSelector
-          selectedWorkflowId={selectedWorkflowId}
-          onWorkflowChange={setSelectedWorkflowId}
+          onWorkflowChange={handleWorkflowChange}
           config={{
+            label: '', // Hide label in popover
+            createWorkflowLinkText: '', // Hide "create new" link
             validationFunction: (workflow) => validateWorkflowInputs(workflow, document),
+            sortFunction: sortWorkflows,
+            panelStyle: popoverPanelStyle, // Match outer popover width
           }}
+          initialIsOpen={isOpen}
         />
-        <EuiSpacer size="m" />
-        <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onClose}>
-              <FormattedMessage id="discover.runWorkflow.cancel" defaultMessage="Cancel" />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              onClick={handleRun}
-              fill
-              isLoading={runWorkflowMutation.isLoading}
-              isDisabled={!selectedWorkflowId || runWorkflowMutation.isLoading}
-            >
-              <FormattedMessage id="discover.runWorkflow.run" defaultMessage="Run workflow" />
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
+      </div>
     </EuiPopover>
   );
 };

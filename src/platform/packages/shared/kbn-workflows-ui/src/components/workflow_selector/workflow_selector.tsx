@@ -22,6 +22,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 
+import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -37,6 +38,7 @@ interface WorkflowSelectorProps {
   onWorkflowChange: (workflowId: string) => void;
   config?: WorkflowSelectorConfig;
   error?: string;
+  initialIsOpen?: boolean;
 }
 
 // Default configuration
@@ -55,8 +57,9 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
   onWorkflowChange,
   config = {},
   error,
+  initialIsOpen = false,
 }) => {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(initialIsOpen);
   const [inputValue, setInputValue] = useState('');
   const [isSearching, setIsSearching] = useState(true);
   const { application } = useKibana().services;
@@ -217,6 +220,11 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
     }
   }, [selectedWorkflowId, workflowOptions]);
 
+  // Sync selector popover state with initialIsOpen prop
+  useEffect(() => {
+    setIsPopoverOpen(initialIsOpen);
+  }, [initialIsOpen]);
+
   // Prioritize selected workflow disabled error over validation errors
   const displayError = selectedWorkflowDisabledError || error;
   const helpText = fetchError
@@ -229,9 +237,11 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
     <EuiFormRow
       label={finalConfig.label}
       labelAppend={
-        <EuiLink {...workflowManagementLinkProps} external={false}>
-          {finalConfig.createWorkflowLinkText} <EuiIcon type="plusInCircle" size="s" />
-        </EuiLink>
+        finalConfig.createWorkflowLinkText ? (
+          <EuiLink {...workflowManagementLinkProps} external={false}>
+            {finalConfig.createWorkflowLinkText} <EuiIcon type="plusInCircle" size="s" />
+          </EuiLink>
+        ) : undefined
       }
       helpText={helpText}
       error={displayError}
@@ -289,6 +299,7 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
               input={search!} // eslint-disable-line @typescript-eslint/no-non-null-assertion
               panelPaddingSize="none"
               fullWidth
+              panelStyle={finalConfig.panelStyle}
             >
               {list}
               {workflowOptions.length > 0 && (
@@ -297,12 +308,24 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
                   css={{ backgroundColor: euiTheme.colors.backgroundBaseSubdued }}
                 >
                   <EuiText size="s" textAlign="right">
-                    <EuiLink {...workflowManagementLinkProps} external={false}>
+                    <EuiLink
+                      {...workflowManagementLinkProps}
+                      external={false}
+                      css={css`
+                        font-size: 13px;
+                      `}
+                    >
                       <FormattedMessage
                         id="workflows.params.viewAllWorkflowsLinkText"
                         defaultMessage="View all workflows"
                       />
-                      <EuiIcon type="popout" size="s" />
+                      <EuiIcon
+                        type="popout"
+                        size="s"
+                        css={css`
+                          margin-left: 4px;
+                        `}
+                      />
                     </EuiLink>
                   </EuiText>
                 </EuiPopoverFooter>
