@@ -20,5 +20,6 @@
     "@kbn/zod",
     "@kbn/tooling-log",
     "@kbn/sample-log-parser",
+    "@kbn/streamlang",
   ]
 }

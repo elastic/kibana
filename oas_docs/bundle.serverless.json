@@ -52660,6 +52660,12 @@
                                                                 "ignore_missing": {
                                                                   "type": "boolean"
                                                                 },
+                                                                "pattern_definitions": {
+                                                                  "additionalProperties": {
+                                                                    "type": "string"
+                                                                  },
+                                                                  "type": "object"
+                                                                },
                                                                 "patterns": {
                                                                   "items": {
                                                                     "minLength": 1,
@@ -56960,6 +56966,12 @@
                                                             "ignore_missing": {
                                                               "type": "boolean"
                                                             },
+                                                            "pattern_definitions": {
+                                                              "additionalProperties": {
+                                                                "type": "string"
+                                                              },
+                                                              "type": "object"
+                                                            },
                                                             "patterns": {
                                                               "items": {
                                                                 "minLength": 1,
@@ -60852,6 +60864,12 @@
                                                                 },
                                                                 "ignore_missing": {
                                                                   "type": "boolean"
+                                                                },
+                                                                "pattern_definitions": {
+                                                                  "additionalProperties": {
+                                                                    "type": "string"
+                                                                  },
+                                                                  "type": "object"
                                                                 },
                                                                 "patterns": {
                                                                   "items": {
@@ -64848,6 +64866,12 @@
                                                             },
                                                             "ignore_missing": {
                                                               "type": "boolean"
+                                                            },
+                                                            "pattern_definitions": {
+                                                              "additionalProperties": {
+                                                                "type": "string"
+                                                              },
+                                                              "type": "object"
                                                             },
                                                             "patterns": {
                                                               "items": {
@@ -69326,6 +69350,12 @@
                                                 "ignore_missing": {
                                                   "type": "boolean"
                                                 },
+                                                "pattern_definitions": {
+                                                  "additionalProperties": {
+                                                    "type": "string"
+                                                  },
+                                                  "type": "object"
+                                                },
                                                 "patterns": {
                                                   "items": {
                                                     "minLength": 1,
@@ -73190,6 +73220,12 @@
                                                 },
                                                 "ignore_missing": {
                                                   "type": "boolean"
+                                                },
+                                                "pattern_definitions": {
+                                                  "additionalProperties": {
+                                                    "type": "string"
+                                                  },
+                                                  "type": "object"
                                                 },
                                                 "patterns": {
                                                   "items": {
