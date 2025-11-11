@@ -136,25 +136,20 @@ export const RunScriptActionResult = memo<
         { defaultMessage: 'RunScript was successful.' }
       )}
     >
-      {command.commandDefinition?.meta?.agentType === 'sentinel_one' ? (
-        <RunscriptActionResult
-          action={completedActionDetails}
-          agentId={command.commandDefinition?.meta?.endpointId}
-          data-test-subj="sentinelOneRunscriptResult"
-        />
-      ) : (
-        <ExecuteActionHostResponse
-          action={completedActionDetails}
-          canAccessFileDownloadLink={true}
-          agentId={command.commandDefinition?.meta?.endpointId}
-          textSize="s"
-          data-test-subj="console"
-          // Currently file is not supported for CrowdStrike
-          hideFile={command.commandDefinition?.meta?.agentType === 'crowdstrike'}
-          showPasscode={false}
-          hideContext={true}
-        />
-      )}
+      <RunscriptActionResult
+        action={completedActionDetails}
+        agentId={command.commandDefinition?.meta?.endpointId}
+        canAccessFileDownloadLink={command.commandDefinition?.meta?.agentType !== 'crowdstrike'}
+        data-test-subj={
+          command.commandDefinition?.meta?.agentType === 'sentinel_one'
+            ? 'sentinelOneRunscriptResult'
+            : 'console'
+        }
+        hideFile={command.commandDefinition?.meta?.agentType === 'crowdstrike'}
+        showOutput={command.commandDefinition?.meta?.agentType === 'microsoft_defender_endpoint'}
+        showPasscode={command.commandDefinition?.meta?.agentType !== 'microsoft_defender_endpoint'}
+        textSize="s"
+      />
     </ResultComponent>
   );
 });
