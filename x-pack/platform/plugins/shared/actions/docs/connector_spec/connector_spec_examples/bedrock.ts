@@ -1,8 +1,12 @@
 /**
  * Example: Amazon Bedrock Connector
  * 
+ * ⚠️ PHASE 2 ONLY - NOT SUPPORTED IN PHASE 1
+ * This connector uses AWS SigV4 authentication which is not part of Phase 1.
+ * Phase 1 only supports: Header, Basic, Bearer auth.
+ * 
  * This demonstrates an AWS service connector with:
- * - AWS Signature v4 authentication
+ * - AWS Signature v4 authentication (PHASE 2)
  * - Streaming support for AI responses
  * - Tool calling (Claude-specific format)
  * - Multiple model support (Claude, Titan, etc.)
@@ -56,11 +60,12 @@ export const BedrockConnectorExample: SingleFileConnectorDefinition = {
   },
   
   // ---- Auth Schema (required) ----
+  // ⚠️ PHASE 2: AWS SigV4 auth not supported in Phase 1
   // WHY: AWS services require SigV4 signing with access key and secret
   // REFERENCE: x-pack/platform/plugins/shared/stack_connectors/common/bedrock/schema.ts:28-33
   schema: z.discriminatedUnion("method", [
     z.object({
-      method: z.literal("aws_sig_v4"),
+      method: z.literal("aws_sig_v4"), // PHASE 2 ONLY
       credentials: z.object({
         accessKey: withUIMeta(
           z.string(),

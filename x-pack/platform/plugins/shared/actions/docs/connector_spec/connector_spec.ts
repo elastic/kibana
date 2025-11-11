@@ -69,52 +69,48 @@ export interface ConnectorMetadata {
 }
 
 // ============================================================================
-// STANDARD AUTH SCHEMAS
+// STANDARD AUTH SCHEMAS - PHASE 1
 // ============================================================================
+// Phase 1 supports only: Header, Basic, Bearer
+// OAuth2, SSL/mTLS, AWS SigV4 → Phase 2 (see connector_rfc.ts)
 
+/**
+ * Header-based authentication (generic)
+ * Use for: API keys, custom headers (X-API-Key, etc.)
+ */
+export const HeaderAuthSchema = z.object({
+  method: z.literal('headers'),
+  headers: z.record(z.string(), z.string()).describe('Custom Headers'),
+});
+
+/**
+ * HTTP Basic Authentication
+ * Use for: Username + Password auth (Jira, etc.)
+ */
 export const BasicAuthSchema = z.object({
-  username: z.string().describe('Username'),
-  password: withUIMeta(z.string(), { sensitive: true }).describe('Password'),
+  method: z.literal('basic'),
+  credentials: z.object({
+    username: z.string().describe('Username'),
+    password: withUIMeta(z.string(), { sensitive: true }).describe('Password'),
+  }),
 });
 
+/**
+ * Bearer Token Authentication
+ * Use for: OAuth tokens, API tokens sent as "Authorization: Bearer <token>"
+ */
 export const BearerAuthSchema = z.object({
-  apiKey: withUIMeta(z.string(), { sensitive: true }).describe('API Key'),
+  method: z.literal('bearer'),
+  token: withUIMeta(z.string(), { sensitive: true }).describe('Bearer Token'),
 });
 
-export const OAuth2AuthSchema = z.object({
-  clientId: z.string().describe('Client ID'),
-  clientSecret: withUIMeta(z.string(), { sensitive: true }).describe('Client Secret'),
-  tokenUrl: z.string().url().describe('Token URL'),
-  scope: z.string().optional().describe('Scope'),
-});
-
-export const SSLAuthSchema = z.object({
-  certificateType: z.enum(['crt', 'pfx']).describe('Certificate Type'),
-  certificate: withUIMeta(z.string(), { sensitive: true }).optional().describe('Certificate'),
-  privateKey: withUIMeta(z.string(), { sensitive: true }).optional().describe('Private Key'),
-  pfx: withUIMeta(z.string(), { sensitive: true }).optional().describe('PFX Bundle'),
-  passphrase: withUIMeta(z.string(), { sensitive: true }).optional().describe('Passphrase'),
-  ca: z.string().optional().describe('CA Certificate'),
-});
-
-export function getAuthSchema(types: Array<'basic' | 'bearer' | 'oauth2' | 'ssl'>) {
-  const schemas: z.ZodRawShape = {};
-  
-  if (types.includes('basic')) {
-    Object.assign(schemas, BasicAuthSchema.shape);
-  }
-  if (types.includes('bearer')) {
-    Object.assign(schemas, BearerAuthSchema.shape);
-  }
-  if (types.includes('oauth2')) {
-    Object.assign(schemas, OAuth2AuthSchema.shape);
-  }
-  if (types.includes('ssl')) {
-    Object.assign(schemas, SSLAuthSchema.shape);
-  }
-  
-  return schemas;
-}
+// ============================================================================
+// PHASE 2 AUTH TYPES (Not supported yet - see connector_rfc.ts)
+// ============================================================================
+// - OAuth2 (clientId, clientSecret, token refresh)
+// - SSL/mTLS (certificate-based authentication)
+// - AWS SigV4 (AWS service authentication)
+// - Custom (connector-specific auth flows)
 
 // ============================================================================
 // POLICIES

@@ -4,10 +4,13 @@
  * This demonstrates a generic webhook connector with multiple authentication
  * options and HTTP methods. Shows how to:
  * 
- * 1. Support multiple auth methods (Basic, SSL/mTLS, Custom Headers)
+ * 1. Support multiple auth methods (Basic, Header, SSL/mTLS)
  * 2. Handle different HTTP methods (POST, PUT, GET, etc.)
  * 3. Use conditional fields based on auth selection
- * 4. Implement SSL certificate authentication
+ * 4. Implement SSL certificate authentication (⚠️ PHASE 2)
+ * 
+ * ⚠️ NOTE: SSL/mTLS auth is PHASE 2 ONLY
+ * Phase 1 only supports: Header, Basic, Bearer
  * 
  * REFERENCE: Based on actual Webhook connector
  * FILE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/webhook/
@@ -48,8 +51,9 @@ export const WebhookConnectorExample: SingleFileConnectorDefinition = {
     }),
     
     // 3. SSL/mTLS Certificate Authentication
+    // ⚠️ PHASE 2 ONLY - SSL auth not supported in Phase 1
     z.object({
-      method: z.literal("ssl"),
+      method: z.literal("ssl"), // PHASE 2 ONLY
       certificate: z.discriminatedUnion("type", [
         // CRT + Key option
         z.object({

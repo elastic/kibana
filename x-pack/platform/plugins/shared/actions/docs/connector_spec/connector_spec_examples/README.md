@@ -141,16 +141,18 @@ This directory contains **real-world connector implementations** based on actual
 
 ### Authentication Methods
 
-| Auth Type | Example Connector | Line Reference |
-|-----------|-------------------|----------------|
-| **No Auth** | _(not in examples - see server_log connector)_ | - |
-| **Basic Auth** | Jira, Webhook | `jira.ts:27`, `webhook.ts:34` |
-| **Bearer Token** | Slack, OpenAI | `slack_api.ts:40`, `openai.ts:68` |
-| **Custom Headers** | Slack, Webhook | `slack_api.ts:40`, `webhook.ts:140` |
-| **OAuth2** | _(not in examples - see crowdstrike connector)_ | - |
-| **SSL/mTLS** | Webhook, OpenAI | `webhook.ts:43`, `openai.ts:113` |
-| **AWS SigV4** | Bedrock | `bedrock.ts:48` |
-| **Webhook URL** | Slack | `slack_api.ts:63` |
+**Phase 1 Support** (✅ = Supported, ⚠️ = Phase 2 Only)
+
+| Auth Type | Phase | Example Connector | Line Reference |
+|-----------|-------|-------------------|----------------|
+| **Header (Generic)** | ✅ Phase 1 | Slack, D3Security, Security APIs | `slack_api.ts:40`, `d3security.ts:35` |
+| **Basic Auth** | ✅ Phase 1 | Jira, Webhook | `jira.ts:38`, `webhook.ts:42` |
+| **Bearer Token** | ✅ Phase 1 | _(can be implemented via Header auth)_ | - |
+| **OAuth2** | ⚠️ Phase 2 | _(not in examples)_ | See connector_rfc.ts |
+| **SSL/mTLS** | ⚠️ Phase 2 | Webhook (marked) | `webhook.ts:55` |
+| **AWS SigV4** | ⚠️ Phase 2 | Bedrock (marked) | `bedrock.ts:68` |
+
+**Note**: Phase 1 focuses on **Header, Basic, and Bearer** authentication. OAuth2, SSL/mTLS, and AWS SigV4 are marked in examples but not supported until Phase 2.
 
 ### Special Capabilities
 
@@ -299,19 +301,20 @@ Example:
 
 - **Total Examples**: 5 real connectors
 - **Total Lines**: ~1,500 lines
-- **Auth Methods Covered**: 6 of 8
-- **Special Capabilities**: Streaming, Function Calling, Dynamic Options, SSL/mTLS
-- **Status**: ✅ Production-Ready
+- **Phase 1 Auth Methods**: 3 (Header, Basic, Bearer) ✅
+- **Phase 2 Auth Methods**: 3 (OAuth2, SSL/mTLS, AWS SigV4) - marked in examples
+- **Special Capabilities**: Streaming, Function Calling, Dynamic Options
+- **Status**: ✅ Phase 1 Ready
 
-**Coverage**:
+**Phase 1 Coverage** (Supported Now):
+- ✅ Header Auth (Slack, D3Security, All Security APIs)
 - ✅ Basic Auth (Jira, Webhook)
-- ✅ Bearer Token (Slack, OpenAI)
-- ✅ Custom Headers (Slack, Webhook)
-- ✅ SSL/mTLS (Webhook, OpenAI)
-- ✅ AWS SigV4 (Bedrock)
-- ✅ Webhook URL (Slack)
-- ❌ OAuth2 (see Crowdstrike for reference)
-- ❌ No Auth (see Server Log for reference)
+- ✅ Bearer Token (can use Header auth)
+
+**Phase 2 Coverage** (Marked in Examples):
+- ⚠️ SSL/mTLS (Webhook - marked)
+- ⚠️ AWS SigV4 (Bedrock - marked)
+- ⚠️ OAuth2 (not in examples - see connector_rfc.ts)
 
 ---
 
