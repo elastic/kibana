@@ -560,6 +560,7 @@ export class DataViewsService {
     if (defaultIndexPatternId) {
       return await this.get(defaultIndexPatternId, displayErrors);
     }
+    return null;
   };
 
   /**
@@ -570,9 +571,10 @@ export class DataViewsService {
     if (allDataViews.length === 0) {
       return null;
     }
+    const firstId = allDataViews[0].id;
     const defaultId = await this.config.get<string | null>(DEFAULT_DATA_VIEW_ID);
     const exists = defaultId ? allDataViews.some((pattern) => pattern.id === defaultId) : false;
-    return exists && defaultId ? defaultId : allDataViews[0].id;
+    return exists && defaultId ? defaultId : firstId;
   };
 
   /**
