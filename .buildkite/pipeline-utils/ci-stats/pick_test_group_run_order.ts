@@ -8,7 +8,7 @@
  */
 
 import * as Fs from 'fs';
-import { dirname, resolve } from 'path';
+import { dirname, resolve, relative } from 'path';
 
 import * as globby from 'globby';
 import minimatch from 'minimatch';
@@ -27,6 +27,7 @@ import {
   expandAgentQueue,
   getRequiredEnv,
   runBatchedPromises,
+  getKibanaDir,
 } from '#pipeline-utils';
 
 const ALL_FTR_MANIFEST_REL_PATHS = serverless.concat(stateful);
@@ -168,11 +169,13 @@ export async function pickTestGroupRunOrder() {
     await runBatchedPromises(
       jestUnitConfigsWithEmpties.map((config) => {
         return () => {
+          const configAbsolutePath = resolve(getKibanaDir(), config);
+          const relativePathToConfig = relative(__dirname, configAbsolutePath);
           // eslint-disable-next-line @typescript-eslint/no-var-requires
-          const jestConfig = require('./' + config);
+          const jestConfig = require(relativePathToConfig);
           return globby.default([
             ...jestConfig.roots.map((l: string) =>
-              resolve(l.replace('<rootDir>', dirname(config)), '**/*.test.{js,ts,tsx}')
+              resolve(l.replace('<rootDir>', dirname(configAbsolutePath)), '**/*.test.{js,ts,tsx}')
             ),
             '!**/__fixtures__/**',
           ]);
