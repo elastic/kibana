@@ -6,7 +6,7 @@
  */
 
 import type { EuiIconProps } from '@elastic/eui';
-import { WebhookMethods } from '@kbn/connector-schemas/common/auth';
+import type { WebhookMethods } from '@kbn/connector-schemas/common/auth';
 import type { UserConfiguredActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 
 export interface EmailActionParams {
