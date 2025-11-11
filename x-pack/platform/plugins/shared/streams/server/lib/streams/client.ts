@@ -34,6 +34,7 @@ import { State } from './state_management/state';
 import { checkAccess, checkAccessBulk } from './stream_crud';
 import { StreamsStatusConflictError } from './errors/streams_status_conflict_error';
 import type { FeatureClient } from './feature/feature_client';
+import type { AttachmentClient } from './attachments/attachment_client';
 
 interface AcknowledgeResponse<TResult extends Result> {
   acknowledged: true;
@@ -68,6 +69,7 @@ export class StreamsClient {
       lockManager: LockManagerService;
       scopedClusterClient: IScopedClusterClient;
       assetClient: AssetClient;
+      attachmentClient: AttachmentClient;
       queryClient: QueryClient;
       storageClient: StreamsStorageClient;
       featureClient: FeatureClient;
@@ -214,8 +216,8 @@ export class StreamsClient {
         }
       );
 
-      const { assetClient, storageClient } = this.dependencies;
-      await Promise.all([assetClient.clean(), storageClient.clean()]);
+      const { assetClient, attachmentClient, storageClient } = this.dependencies;
+      await Promise.all([assetClient.clean(), attachmentClient.clean(), storageClient.clean()]);
     }
 
     if (elasticsearchStreamsEnabled) {
