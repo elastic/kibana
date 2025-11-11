@@ -13,12 +13,9 @@ import { apiPublishesSearchSession } from '@kbn/presentation-publishing/interfac
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, merge, map, distinctUntilChanged } from 'rxjs';
 import { isEqual } from 'lodash';
-import type {
-  LensInternalApi,
-  LensRuntimeState,
-  LensSerializedState,
-  LensUnifiedSearchContext,
-} from '@kbn/lens-common';
+import type { LensInternalApi, LensRuntimeState, LensUnifiedSearchContext } from '@kbn/lens-common';
+import type { LensSerializedAPIConfig } from '@kbn/lens-common-2';
+
 import type { LensEmbeddableStartServices } from '../types';
 
 export const searchContextComparators: StateComparators<LensUnifiedSearchContext> = {
@@ -35,7 +32,7 @@ export interface SearchContextConfig {
   anyStateChange$: Observable<void>;
   cleanup: () => void;
   getLatestState: () => LensUnifiedSearchContext;
-  reinitializeState: (lastSaved?: LensSerializedState) => void;
+  reinitializeState: (lastSaved?: LensSerializedAPIConfig) => void;
 }
 
 export function initializeSearchContext(
@@ -99,7 +96,7 @@ export function initializeSearchContext(
       lastReloadRequestTime: lastReloadRequestTime$.getValue(),
       ...timeRangeManager.getLatestState(),
     }),
-    reinitializeState: (lastSaved?: LensSerializedState) => {
+    reinitializeState: (lastSaved?: LensSerializedAPIConfig) => {
       timeRangeManager.reinitializeState(lastSaved);
     },
   };

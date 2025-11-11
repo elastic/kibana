@@ -65,10 +65,11 @@ export {
 
 export { kqlQuery, dateRangeQuery, termQuery } from './src/es_query/helpers';
 
+export { FilterStateStore } from '@kbn/es-query-constants';
+
 export {
   COMPARE_ALL_OPTIONS,
   FILTERS,
-  FilterStateStore,
   buildCustomFilter,
   buildEmptyFilter,
   buildExistsFilter,

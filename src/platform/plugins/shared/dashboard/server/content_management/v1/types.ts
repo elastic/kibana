@@ -17,12 +17,12 @@ import type {
   UpdateIn,
 } from '@kbn/content-management-plugin/common';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
-import type { filterSchema, querySchema } from '@kbn/es-query-server';
+import type { storedFilterSchema, querySchema } from '@kbn/es-query-server';
 import type { Writable } from '@kbn/utility-types';
 import type * as schema from './schema';
 import type { CONTENT_ID } from '../../../common/content_management';
 
-export type DashboardFilter = TypeOf<typeof filterSchema>;
+export type DashboardFilter = TypeOf<typeof storedFilterSchema>;
 export type DashboardQuery = TypeOf<typeof querySchema>;
 export type DashboardOptions = TypeOf<typeof schema.optionsSchema>;
 
