@@ -80,7 +80,7 @@ if is_pr; then
     export ELASTIC_APM_TRANSACTION_SAMPLE_RATE=1.0
     export ELASTIC_APM_CONTEXT_PROPAGATION_ONLY=false
     # set higher timeouts as # of requests can temporarily overwhelm APM Server
-    export ELASTIC_APM_API_REQUEST_TIME=30s
+    export ELASTIC_APM_API_REQUEST_TIME=10s
     export ELASTIC_APM_SERVER_TIMEOUT=60s
     export ELASTIC_APM_KIBANA_FRONTEND_ACTIVE=true
   else
