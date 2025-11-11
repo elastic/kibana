@@ -13,7 +13,7 @@ import type {
 } from '../types';
 import { OBSERVABILITY_AGENT_TOOL_IDS } from '../tools/register_tools';
 
-export const OBSERVABILITY_AGENT_ID = 'platform.core.observability';
+export const OBSERVABILITY_AGENT_ID = 'observability.agent';
 
 export async function registerObservabilityAgent({
   core,

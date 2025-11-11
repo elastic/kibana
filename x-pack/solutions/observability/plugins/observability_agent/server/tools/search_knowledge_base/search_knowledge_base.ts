@@ -65,13 +65,13 @@ const searchKnowledgeBaseSchema = z.object({
     ),
 });
 
-export async function createSearchKnowledgeBaseTool({
+export function createSearchKnowledgeBaseTool({
   core,
   logger,
 }: {
   core: CoreSetup<ObservabilityAgentPluginStartDependencies, ObservabilityAgentPluginStart>;
   logger: Logger;
-}): Promise<StaticToolRegistration<typeof searchKnowledgeBaseSchema>> {
+}): StaticToolRegistration<typeof searchKnowledgeBaseSchema> {
   const toolDefinition: BuiltinToolDefinition<typeof searchKnowledgeBaseSchema> = {
     id: OBSERVABILITY_SEARCH_KNOWLEDGE_BASE_TOOL_ID,
     type: ToolType.builtin,

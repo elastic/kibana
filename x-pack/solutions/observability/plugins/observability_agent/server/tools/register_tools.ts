@@ -45,10 +45,10 @@ export async function registerTools({
   plugins: ObservabilityAgentPluginSetupDependencies;
   logger: Logger;
 }) {
-  const observabilityTools: StaticToolRegistration<any>[] = await Promise.all([
+  const observabilityTools: StaticToolRegistration<any>[] = [
     createGetDataSourcesTool({ core, plugins, logger }),
     createSearchKnowledgeBaseTool({ core, logger }),
-  ]);
+  ];
 
   for (const tool of observabilityTools) {
     plugins.onechat.tools.register(tool);
