@@ -34,7 +34,6 @@ export const AttacksContainerComponent: React.FC = () => {
   return (
     <Routes>
       <Route path={ATTACKS_PATH} exact component={AttacksRoute} />
-      {/* Redirect to the attacks page filtered for the given attack id */}
       <Route component={NotFoundPage} />
     </Routes>
   );
