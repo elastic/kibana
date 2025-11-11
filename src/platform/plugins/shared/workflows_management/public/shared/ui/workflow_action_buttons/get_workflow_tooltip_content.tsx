@@ -9,16 +9,44 @@
 
 import { i18n } from '@kbn/i18n';
 
-interface GetRunWorkflowTooltipContentProps {
-  isExecutionsTab: boolean;
+interface GetRunTooltipContentProps {
   isValid: boolean;
   canRunWorkflow: boolean;
+  isEnabled: boolean;
 }
-export function getRunWorkflowTooltipContent({
-  isExecutionsTab,
+export function getRunTooltipContent({
   isValid,
   canRunWorkflow,
-}: GetRunWorkflowTooltipContentProps) {
+  isEnabled,
+}: GetRunTooltipContentProps) {
+  if (!isValid) {
+    return i18n.translate('workflows.actionButtons.runWorkflow.invalid', {
+      defaultMessage: 'Fix errors to run workflow',
+    });
+  }
+  if (!canRunWorkflow) {
+    return i18n.translate('workflows.actionButtons.runWorkflow.notAllowed', {
+      defaultMessage: 'You are not allowed to run workflows',
+    });
+  }
+  if (!isEnabled) {
+    return i18n.translate('workflows.actionButtons.runWorkflow.disabled', {
+      defaultMessage: 'Enable the workflow to run it',
+    });
+  }
+  return null;
+}
+
+interface GetTestRunTooltipContentProps {
+  isValid: boolean;
+  canRunWorkflow: boolean;
+  isExecutionsTab: boolean;
+}
+export function getTestRunTooltipContent({
+  isValid,
+  canRunWorkflow,
+  isExecutionsTab,
+}: GetTestRunTooltipContentProps) {
   if (isExecutionsTab) {
     return i18n.translate('workflows.actionButtons.runWorkflow.executionsTab', {
       defaultMessage: 'Can not run workflow from executions tab',
@@ -42,7 +70,6 @@ interface GetSaveWorkflowTooltipContentProps {
   canSaveWorkflow: boolean;
   isCreate: boolean;
 }
-
 export function getSaveWorkflowTooltipContent({
   isExecutionsTab,
   canSaveWorkflow,

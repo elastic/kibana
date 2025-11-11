@@ -48,7 +48,7 @@ import {
   useWorkflowUrlState,
   type WorkflowUrlStateTabType,
 } from '../../../hooks/use_workflow_url_state';
-import { getRunWorkflowTooltipContent, getSaveWorkflowTooltipContent } from '../../../shared/ui';
+import { getSaveWorkflowTooltipContent, getTestRunTooltipContent } from '../../../shared/ui';
 import { WorkflowUnsavedChangesBadge } from '../../../widgets/workflow_yaml_editor/ui/workflow_unsaved_changes_badge';
 
 const Translations = {
@@ -132,7 +132,7 @@ export const WorkflowDetailHeader = React.memo(
     const [showRunConfirmation, setShowRunConfirmation] = useState(false);
 
     const runWorkflowTooltipContent = useMemo(() => {
-      return getRunWorkflowTooltipContent({
+      return getTestRunTooltipContent({
         isExecutionsTab,
         isValid: isSyntaxValid,
         canRunWorkflow: canExecuteWorkflow,

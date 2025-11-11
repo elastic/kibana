@@ -14,7 +14,8 @@ export { JSONDataTable, type JSONDataTableProps } from './json_data_view/json_da
 export { UnsavedChangesPrompt } from './unsaved_changes_prompt';
 export { WorkflowStatus } from './workflow_status';
 export {
-  getRunWorkflowTooltipContent,
+  getRunTooltipContent,
+  getTestRunTooltipContent,
   getSaveWorkflowTooltipContent,
 } from './workflow_action_buttons/get_workflow_tooltip_content';
 export { FormattedRelativeEnhanced } from './formatted_relative_enhanced/formatted_relative_enhanced';
