@@ -58,7 +58,7 @@ export const ReplaceProcessorForm = () => {
         helpText={
           <FormattedMessage
             id="xpack.streams.streamDetailView.managementTab.enrichment.processor.replacePatternHelpText"
-            defaultMessage="Text or regex pattern to replace with the replacement string. For example {regexExample} to replace a space."
+            defaultMessage="Text or regex pattern that identifies what to replace with the replacement string. For example, use {regexExample} to replace a space."
             values={{
               regexExample: <EuiCode>\s</EuiCode>,
             }}
@@ -78,7 +78,14 @@ export const ReplaceProcessorForm = () => {
         helpText={
           <FormattedMessage
             id="xpack.streams.streamDetailView.managementTab.enrichment.processor.replaceReplacementHelpText"
-            defaultMessage="Accepts text, empty value and capture group references like $1, $2, etc."
+            defaultMessage="Value that replaces any matches of the pattern. It can be text, an empty value, or a capture group reference (for example, {captureGroupExample})."
+            values={{
+              captureGroupExample: (
+                <>
+                  <EuiCode>$1</EuiCode>, <EuiCode>$2</EuiCode>
+                </>
+              ),
+            }}
           />
         }
         isInvalid={replacementFieldState.invalid}

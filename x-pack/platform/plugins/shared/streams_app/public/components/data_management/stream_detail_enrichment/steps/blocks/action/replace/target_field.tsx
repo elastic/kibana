@@ -27,7 +27,7 @@ export const ReplaceTargetFieldSelector = () => {
       )}
       helpText={i18n.translate(
         'xpack.streams.streamDetailView.managementTab.enrichment.processor.replaceTargetFieldHelpText',
-        { defaultMessage: 'Output field. If empty, the input field is updated in place.' }
+        { defaultMessage: 'Output field. Leave empty to update the source field.' }
       )}
       isInvalid={Boolean(errors.to)}
       error={errors.to?.message}
