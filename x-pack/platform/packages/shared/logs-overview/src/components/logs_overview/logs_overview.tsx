@@ -27,7 +27,8 @@ import { LogsOverviewStateContext, logsOverviewStateMachine } from './logs_overv
 
 export type LogsOverviewProps = Pick<LogsOverviewContentProps, 'height' | 'timeRange'> & {
   dependencies: LogsOverviewDependencies;
-  documentFilters?: QueryDslQueryContainer[] | undefined;
+  documentFilters?: QueryDslQueryContainer[];
+  nonHighlightingFilters?: QueryDslQueryContainer[];
   featureFlags?: LogsOverviewFeatureFlags | undefined;
   logsSource?: LogsSourceConfiguration | undefined;
 };
@@ -42,6 +43,7 @@ export const LogsOverview: React.FC<LogsOverviewProps> = React.memo(
   ({
     dependencies,
     documentFilters = defaultDocumentFilters,
+    nonHighlightingFilters = defaultNonHighlightingFilters,
     featureFlags = defaultFeatureFlags,
     height,
     logsSource = defaultLogsSource,
@@ -71,6 +73,7 @@ export const LogsOverview: React.FC<LogsOverviewProps> = React.memo(
         <LogsOverviewContent
           dependencies={dependencies}
           documentFilters={documentFilters}
+          nonHighlightingFilters={nonHighlightingFilters}
           height={height}
           timeRange={timeRange}
         />
@@ -81,16 +84,16 @@ export const LogsOverview: React.FC<LogsOverviewProps> = React.memo(
 
 export type LogsOverviewContentProps = Pick<
   LogCategoriesProps,
-  'height' | 'timeRange' | 'documentFilters'
+  'height' | 'timeRange' | 'documentFilters' | 'nonHighlightingFilters'
 > &
-  Pick<LogEventsProps, 'height' | 'timeRange' | 'documentFilters'> & {
+  Pick<LogEventsProps, 'height' | 'timeRange' | 'documentFilters' | 'nonHighlightingFilters'> & {
     dependencies: LogsOverviewDependencies;
   };
 
 export type LogsOverviewContentDependencies = LogCategoriesDependencies & LogEventsDependencies;
 
 export const LogsOverviewContent = React.memo<LogsOverviewContentProps>(
-  ({ dependencies, documentFilters, height, timeRange }) => {
+  ({ dependencies, documentFilters, nonHighlightingFilters, height, timeRange }) => {
     const logsOverviewStateActorRef = LogsOverviewStateContext.useActorRef();
 
     const logsOverviewState = LogsOverviewStateContext.useSelector(identity);
@@ -123,6 +126,11 @@ export const LogsOverviewContent = React.memo<LogsOverviewContentProps>(
       [logsOverviewStateActorRef]
     );
 
+    const allFiltersForCategories = React.useMemo(
+      () => [...(documentFilters || []), ...(nonHighlightingFilters || [])],
+      [documentFilters, nonHighlightingFilters]
+    );
+
     if (logsOverviewState.matches('initializing')) {
       return <LogsOverviewLoadingContent />;
     } else if (logsOverviewState.matches('failedToInitialize')) {
@@ -136,7 +144,7 @@ export const LogsOverviewContent = React.memo<LogsOverviewContentProps>(
         return (
           <LogCategories
             dependencies={dependencies}
-            documentFilters={documentFilters}
+            documentFilters={allFiltersForCategories}
             logsSource={logsOverviewState.context.logsSource.value}
             timeRange={timeRange}
             grouping={grouping}
@@ -150,6 +158,7 @@ export const LogsOverviewContent = React.memo<LogsOverviewContentProps>(
           <LogEvents
             dependencies={dependencies}
             documentFilters={documentFilters}
+            nonHighlightingFilters={nonHighlightingFilters}
             logsSource={logsOverviewState.context.logsSource.value}
             timeRange={timeRange}
             grouping={grouping}
@@ -164,6 +173,8 @@ export const LogsOverviewContent = React.memo<LogsOverviewContentProps>(
 );
 
 const defaultDocumentFilters: QueryDslQueryContainer[] = [];
+
+const defaultNonHighlightingFilters: QueryDslQueryContainer[] = [];
 
 const defaultFeatureFlags: LogsOverviewFeatureFlags = {
   isPatternsEnabled: true,

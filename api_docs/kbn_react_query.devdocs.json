@@ -12544,6 +12544,10 @@
                 "path": "x-pack/platform/plugins/shared/cases/public/components/connectors/servicenow/use_get_choices.tsx"
               },
               {
+                "plugin": "onechat",
+                "path": "x-pack/platform/plugins/shared/onechat/public/application/hooks/use_conversation.ts"
+              },
+              {
                 "plugin": "osquery",
                 "path": "x-pack/platform/plugins/shared/osquery/public/actions/use_live_query_details.ts"
               },
@@ -12884,6 +12888,10 @@
               {
                 "plugin": "osquery",
                 "path": "x-pack/platform/plugins/shared/osquery/public/agents/use_agent_details.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/public/action_results/action_results_summary.tsx"
               },
               {
                 "plugin": "osquery",

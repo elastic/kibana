@@ -121,6 +121,8 @@ export interface DateProcessor extends ProcessorBaseWithWhere {
   to?: string;
   formats: string[];
   output_format?: string;
+  timezone?: string;
+  locale?: string;
 }
 
 export const dateProcessorSchema = processorBaseWithWhereSchema.extend({
@@ -129,6 +131,8 @@ export const dateProcessorSchema = processorBaseWithWhereSchema.extend({
   to: z.optional(StreamlangTargetField),
   formats: z.array(NonEmptyString),
   output_format: z.optional(NonEmptyString),
+  timezone: z.optional(NonEmptyString),
+  locale: z.optional(NonEmptyString),
 }) satisfies z.Schema<DateProcessor>;
 
 /**
@@ -232,6 +236,36 @@ export const convertProcessorSchema = processorBaseWithWhereSchema
     path: ['to', 'where'],
   }) satisfies z.Schema<ConvertProcessor>;
 
+/**
+ * RemoveByPrefix processor
+ */
+
+export interface RemoveByPrefixProcessor extends ProcessorBase {
+  action: 'remove_by_prefix';
+  from: string;
+}
+
+export const removeByPrefixProcessorSchema = processorBaseSchema.extend({
+  action: z.literal('remove_by_prefix'),
+  from: StreamlangSourceField,
+}) satisfies z.Schema<RemoveByPrefixProcessor>;
+
+/**
+ * Remove processor
+ */
+
+export interface RemoveProcessor extends ProcessorBaseWithWhere {
+  action: 'remove';
+  from: string;
+  ignore_missing?: boolean;
+}
+
+export const removeProcessorSchema = processorBaseWithWhereSchema.extend({
+  action: z.literal('remove'),
+  from: StreamlangSourceField,
+  ignore_missing: z.optional(z.boolean()),
+}) satisfies z.Schema<RemoveProcessor>;
+
 export type StreamlangProcessorDefinition =
   | DateProcessor
   | DissectProcessor
@@ -240,6 +274,8 @@ export type StreamlangProcessorDefinition =
   | SetProcessor
   | AppendProcessor
   | ConvertProcessor
+  | RemoveByPrefixProcessor
+  | RemoveProcessor
   | ManualIngestPipelineProcessor;
 
 export const streamlangProcessorSchema = z.union([
@@ -249,6 +285,8 @@ export const streamlangProcessorSchema = z.union([
   renameProcessorSchema,
   setProcessorSchema,
   appendProcessorSchema,
+  removeByPrefixProcessorSchema,
+  removeProcessorSchema,
   convertProcessorSchema,
   manualIngestPipelineProcessorSchema,
 ]);

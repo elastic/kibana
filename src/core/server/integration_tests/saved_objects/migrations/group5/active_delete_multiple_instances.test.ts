@@ -17,11 +17,11 @@ import {
   getEsClient,
   nextMinor,
   startElasticsearch,
-} from '../kibana_migrator_test_kit';
+} from '@kbn/migrator-test-kit';
 import {
   getUpToDateBaselineTypes,
   getUpToDateMigratorTestKit,
-} from '../kibana_migrator_test_kit.fixtures';
+} from '@kbn/migrator-test-kit/fixtures';
 import {
   BASELINE_TEST_ARCHIVE_LARGE,
   BASELINE_DOCUMENTS_PER_TYPE_LARGE,

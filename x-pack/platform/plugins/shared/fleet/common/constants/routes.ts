@@ -191,6 +191,11 @@ export const AGENT_API_ROUTES = {
   BULK_PRIVILEGE_LEVEL_CHANGE_PATTERN: `${API_ROOT}/agents/bulk_privilege_level_change`,
 };
 
+export const AGENTLESS_POLICIES_ROUTES = {
+  CREATE_PATTERN: `${API_ROOT}/agentless_policies`,
+  DELETE_PATTERN: `${API_ROOT}/agentless_policies/{policyId}`,
+};
+
 export const ENROLLMENT_API_KEY_ROUTES = {
   CREATE_PATTERN: `${API_ROOT}/enrollment_api_keys`,
   LIST_PATTERN: `${API_ROOT}/enrollment_api_keys`,
