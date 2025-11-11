@@ -160,7 +160,7 @@ export async function suggest(
     controlSuggestions = getControlSuggestionIfSupported(
       Boolean(supportsControls),
       ESQLVariableType.VALUES,
-      '?',
+      'question_mark',
       getVariables?.(),
       false
     );

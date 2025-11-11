@@ -141,9 +141,17 @@ export class ESQLEditorTelemetryService {
     });
   }
 
-  public trackEsqlControlFlyoutOpened(controlType: string) {
+  public trackEsqlControlFlyoutOpened(controlType: string, source: string, query: string) {
+    // parsing and prettifying the raw query
+    // to remove comments for accurately measuring its length
+    const { root } = Parser.parse(query);
+    const prettyQuery = BasicPrettyPrinter.print(root);
+
     this._reportEvent(ESQL_CONTROL_CONFIG_OPENED, {
       control_kind: controlType,
+      trigger_source: source,
+      query_length: prettyQuery.length.toString(),
+      query_lines: query.split('\n').length.toString(),
     });
   }
 

@@ -309,7 +309,7 @@ export const columnExists = (col: string, context?: ICommandContext) =>
 
 export function getControlSuggestion(
   type: ESQLVariableType,
-  source: string = 'other',
+  source: ControlTriggerSource = 'smart_suggestion',
   variables?: string[]
 ): ISuggestionItem[] {
   return [
@@ -328,7 +328,7 @@ export function getControlSuggestion(
         title: i18n.translate('kbn-esql-ast.esql.autocomplete.createControlDetailLabel', {
           defaultMessage: 'Click to create',
         }),
-        source,
+        arguments: [{ source }],
       },
     } as ISuggestionItem,
     ...(variables?.length
@@ -348,12 +348,11 @@ export const getVariablePrefix = (variableType: ESQLVariableType) =>
     ? '??'
     : '?';
 
+type ControlTriggerSource = 'question_mark' | 'smart_suggestion';
 export function getControlSuggestionIfSupported(
   supportsControls: boolean,
   type: ESQLVariableType,
-  // 'other' is a placeholder for other sources
-  // when we will want to specify them in the future
-  source: string = 'other',
+  source: ControlTriggerSource = 'smart_suggestion',
   variables?: ESQLControlVariable[],
   shouldBePrefixed = true
 ) {

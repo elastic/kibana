@@ -145,6 +145,12 @@ export const registerESQLEditorAnalyticsEvents = once((analytics: AnalyticsServi
   analytics.registerEventType({
     eventType: ESQL_CONTROL_CONFIG_OPENED,
     schema: {
+      // prefilled: {
+      //   type: 'boolean',
+      //   _meta: {
+      //     description: 'Whether the control configuration was prefilled from the context.',
+      //   },
+      // },
       control_kind: {
         type: 'keyword',
         _meta: {
@@ -152,12 +158,26 @@ export const registerESQLEditorAnalyticsEvents = once((analytics: AnalyticsServi
             'The type of control that is about to be created. Possible values are: multi_values|time_literal|fields|values|functions',
         },
       },
-      // prefilled: {
-      //   type: 'boolean',
-      //   _meta: {
-      //     description: 'Whether the control configuration was prefilled from the context.',
-      //   },
-      // },
+      trigger_source: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'The way how the control flyout was opened. Possible values are: question_mark|smart_suggestion',
+        },
+      },
+      query_length: {
+        type: 'keyword',
+        _meta: {
+          description: 'The length of the query when the control configuration was opened.',
+        },
+      },
+      query_lines: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'The number of lines in the query when the control configuration was opened.',
+        },
+      },
     },
   });
   analytics.registerEventType({
