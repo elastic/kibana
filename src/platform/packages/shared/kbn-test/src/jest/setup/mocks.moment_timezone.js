@@ -28,8 +28,11 @@ let mockIsInitializingMoment = false;
 
 const setMomentTimezone = () => {
   const momentTz = jest.requireActual('moment-timezone');
-  momentTz.tz.guess = () => 'America/New_York';
-  momentTz.tz.setDefault('America/New_York');
+  // Check if tz is defined (may not be during circular loading)
+  if (momentTz.tz && typeof momentTz.tz.setDefault === 'function') {
+    momentTz.tz.guess = () => 'America/New_York';
+    momentTz.tz.setDefault('America/New_York');
+  }
   return momentTz;
 };
 
