@@ -35,17 +35,18 @@ export const resolveResource = async ({
   resourceName: string;
   esClient: ElasticsearchClient;
 }): Promise<ResolveResourceResponse> => {
-  if (resourceName.includes(',') || resourceName.includes('*')) {
-    throw new Error(
-      `Tried to resolve resource for multiple resources using pattern ${resourceName}`
-    );
-  }
+  // if (resourceName.includes(',') || resourceName.includes('*')) {
+  //   throw new Error(
+  //     `Tried to resolve resource for multiple resources using pattern ${resourceName}`
+  //   );
+  // }
 
   let resolveRes: IndicesResolveIndexResponse;
   try {
     resolveRes = await esClient.indices.resolveIndex({
       name: [resourceName],
-      allow_no_indices: false,
+      allow_no_indices: true,
+      expand_wildcards: 'all',
     });
   } catch (e) {
     if (isNotFoundError(e)) {
@@ -57,16 +58,39 @@ export const resolveResource = async ({
   const resourceCount =
     resolveRes.indices.length + resolveRes.aliases.length + resolveRes.data_streams.length;
 
-  if (resourceCount !== 1) {
-    throw new Error(`Found multiple targets when trying to resolve resource for ${resourceName}`);
-  }
+  // if (resourceCount !== 1) {
+  //   throw new Error(`Found multiple targets when trying to resolve resource for ${resourceName}`);
+  // }
 
   // target is an index
   if (resolveRes.indices.length > 0) {
-    const indexName = resolveRes.indices[0].name;
-    const mappingRes = await getIndexMappings({ indices: [indexName], esClient, cleanup: true });
-    const mappings = mappingRes[indexName].mappings;
-    const fields = flattenMapping(mappings);
+    if (resourceName.includes(',') || resourceName.includes('*')) {
+      const fieldCapRes = await esClient.fieldCaps({
+        index: resourceName,
+        fields: ['*'],
+      });
+
+      const { fields } = processFieldCapsResponse(fieldCapRes);
+
+      return {
+        name: resourceName,
+        type: EsResourceType.index,
+        fields,
+      };
+    } else {
+      const indexName = resolveRes.indices[0].name;
+      const mappingRes = await getIndexMappings({ indices: [indexName], esClient, cleanup: true });
+      const mappings = mappingRes[indexName].mappings;
+      const fields = flattenMapping(mappings);
+
+      return {
+        name: resourceName,
+        type: EsResourceType.index,
+        fields,
+        description: mappings._meta?.description,
+      };
+    }
+
     return {
       name: resourceName,
       type: EsResourceType.index,

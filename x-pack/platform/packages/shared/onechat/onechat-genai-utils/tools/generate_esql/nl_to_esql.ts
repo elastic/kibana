@@ -86,6 +86,10 @@ export const generateEsql = async ({
   logger,
   events,
 }: GenerateEsqlParams): Promise<GenerateEsqlResponse> => {
+  logger.info(
+    `------------------ generateEsql for nlQuery: ${nlQuery} and index: ${index} with additionalInstructions: ${additionalInstructions} and additionalContext: ${additionalContext}`
+  );
+
   const docBase = await EsqlDocumentBase.load();
   const graph = createNlToEsqlGraph({ model, esClient, logger, docBase, events });
 
