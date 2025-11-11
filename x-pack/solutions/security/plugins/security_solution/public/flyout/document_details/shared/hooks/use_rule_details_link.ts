@@ -32,8 +32,9 @@ export const useRuleDetailsLink = ({ ruleId }: UseRuleDetailsLinkParams): string
 
   const path = getRuleDetailsUrl(ruleId);
   let href = getSecuritySolutionUrl({ deepLinkId: SecurityPageName.rules, path });
+  const sanitisedSeachParams = href?.split('?')?.[1] ?? '';
 
-  const timelineState = new URLSearchParams(href.split('?')[1]).get(URL_PARAM_KEY.timeline);
+  const timelineState = new URLSearchParams(sanitisedSeachParams).get(URL_PARAM_KEY.timeline);
   if (timelineState) {
     const parsedState = safeDecode(timelineState) as TimelineUrl | null;
 
