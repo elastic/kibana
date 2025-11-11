@@ -41,11 +41,6 @@ export const AlienVaultOTXConnector: SingleFileConnectorDefinition = {
     }),
   ]),
 
-  validation: {
-    configSchema: z.object({}).strict(),
-    secretsSchema: z.object({}),
-  },
-
   actions: {
     getIndicator: {
       isTool: true,

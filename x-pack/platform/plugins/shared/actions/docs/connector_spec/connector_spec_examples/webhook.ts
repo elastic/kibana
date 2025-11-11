@@ -126,38 +126,6 @@ export const WebhookConnectorExample: SingleFileConnectorDefinition = {
     }),
   ]),
   
-  // ---- Validation (required) ----
-  validation: {
-    configSchema: z.object({
-      // URL is always required
-      url: UISchemas.url().describe("Webhook URL"),
-      
-      // HTTP method selection
-      method: z.enum(["POST", "PUT", "PATCH", "GET", "DELETE"])
-        .default("POST")
-        .describe("HTTP Method"),
-      
-      // Optional default headers (can be overridden per request)
-      defaultHeaders: withUIMeta(
-        z.record(z.string(), z.string()),
-        {
-          widget: "keyValue",
-          helpText: "Default headers applied to all requests",
-        }
-      ).optional().describe("Default Headers"),
-      
-      // Timeout configuration
-      timeout: withUIMeta(
-        z.number().int().positive().max(300000),
-        {
-          helpText: "Request timeout in milliseconds (max: 5 minutes)",
-        }
-      ).default(60000).describe("Timeout (ms)"),
-    }).strict(),
-    
-    secretsSchema: z.object({}),
-  },
-  
   // ---- Policies (optional) ----
   policies: {
     retry: {

@@ -41,11 +41,6 @@ export const VirusTotalConnector: SingleFileConnectorDefinition = {
     }),
   ]),
 
-  validation: {
-    configSchema: z.object({}).strict(),
-    secretsSchema: z.object({}),
-  },
-
   actions: {
     scanFileHash: {
       isTool: true,

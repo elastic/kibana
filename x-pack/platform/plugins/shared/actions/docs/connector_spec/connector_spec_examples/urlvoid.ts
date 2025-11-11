@@ -41,11 +41,6 @@ export const URLVoidConnector: SingleFileConnectorDefinition = {
     }),
   ]),
 
-  validation: {
-    configSchema: z.object({}).strict(),
-    secretsSchema: z.object({}),
-  },
-
   actions: {
     scanDomain: {
       isTool: true,

@@ -41,11 +41,6 @@ export const GreyNoiseConnector: SingleFileConnectorDefinition = {
     }),
   ]),
 
-  validation: {
-    configSchema: z.object({}).strict(),
-    secretsSchema: z.object({}),
-  },
-
   actions: {
     getIpContext: {
       isTool: true,

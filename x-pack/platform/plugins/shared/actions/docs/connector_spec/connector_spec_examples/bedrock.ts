@@ -82,55 +82,10 @@ export const BedrockConnectorExample: SingleFileConnectorDefinition = {
     }),
   ]),
   
-  // ---- Validation (required) ----
-  validation: {
-    // REFERENCE: x-pack/platform/plugins/shared/stack_connectors/common/bedrock/schema.ts:19-26
-    configSchema: z.object({
-      apiUrl: withUIMeta(
-        UISchemas.url(),
-        {
-          helpText: "Bedrock runtime endpoint (e.g., https://bedrock-runtime.us-east-1.amazonaws.com)",
-          placeholder: "https://bedrock-runtime.us-east-1.amazonaws.com",
-        }
-      )
-        .describe("API URL")
-        .refine(
-          (url) => url.includes("bedrock-runtime"),
-          {
-            message: "API URL must be a valid Bedrock endpoint (must contain 'bedrock-runtime')",
-          }
-        ),
-      
-      defaultModel: withUIMeta(
-        z.string(),
-        {
-          widget: "select",
-          helpText: "Default foundation model to use",
-        }
-      )
-        .default("anthropic.claude-3-5-sonnet-20241022-v2:0")
-        .describe("Default Model"),
-      
-      contextWindowLength: z.number()
-        .int()
-        .positive()
-        .optional()
-        .describe("Context Window Length"),
-      
-      temperature: z.number()
-        .min(0)
-        .max(1)
-        .optional()
-        .describe("Temperature"),
-    }).strict(),
-    
-    secretsSchema: z.object({}),
-    
-    // URL allowlist validation (framework-enforced)
-    // REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/bedrock/index.ts:43-59
-    validateUrls: {
-      configFields: ["apiUrl"],
-    },
+  // URL allowlist validation (framework-enforced)
+  // REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/bedrock/index.ts:43-59
+  validateUrls: {
+    fields: ["apiUrl"],
   },
   
   // ---- Actions (required) ----

@@ -59,36 +59,9 @@ export const JiraConnectorExample: SingleFileConnectorDefinition = {
     }),
   ]),
   
-  // ---- Validation (required) ----
-  validation: {
-    configSchema: z.object({
-      apiUrl: withUIMeta(
-        UISchemas.url(),
-        {
-          placeholder: "https://your-domain.atlassian.net",
-          helpText: "Your Jira instance URL",
-        }
-      )
-        .describe("Jira URL")
-        .refine(
-          (url) => url.includes("atlassian.net") || url.includes("jira"),
-          {
-            message: "Jira URL must be a valid Jira instance (e.g., *.atlassian.net or contain 'jira')",
-          }
-        ),
-      
-      // Optional project key for default project
-      projectKey: z.string()
-        .optional()
-        .describe("Default Project Key"),
-    }).strict(),
-    
-    secretsSchema: z.object({}),
-    
-    // URL allowlist validation (framework-enforced)
-    validateUrls: {
-      configFields: ["apiUrl"],
-    },
+  // URL allowlist validation (framework-enforced)
+  validateUrls: {
+    fields: ["apiUrl"],
   },
   
   // ---- Policies (optional) ----

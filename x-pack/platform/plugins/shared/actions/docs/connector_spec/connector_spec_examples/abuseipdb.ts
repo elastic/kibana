@@ -41,11 +41,6 @@ export const AbuseIPDBConnector: SingleFileConnectorDefinition = {
     }),
   ]),
 
-  validation: {
-    configSchema: z.object({}).strict(),
-    secretsSchema: z.object({}),
-  },
-
   actions: {
     checkIp: {
       isTool: true,

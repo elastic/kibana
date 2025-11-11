@@ -32,18 +32,6 @@ export const OpenAIConnectorExample: SingleFileConnectorDefinition = {
     ],
   },
   
-  // ---- Special Capabilities ----
-  capabilities: {
-    // Function calling / tool use
-    // REFERENCE: x-pack/platform/plugins/shared/stack_connectors/common/openai/schema.ts:115-132
-    // WHY: Allows LLM to call external tools/functions
-    functionCalling: {
-      supported: true,
-      format: "openai", // OpenAI's tool call format
-      toolUseEnabled: true,
-    },
-  },
-  
   // ---- Policies (optional) ----
   policies: {
     // Streaming support for real-time token generation
@@ -131,40 +119,11 @@ export const OpenAIConnectorExample: SingleFileConnectorDefinition = {
     }),
   ]),
   
-  // ---- Validation (required) ----
-  validation: {
-    configSchema: z.object({
-      // Headers for all requests
-      headers: withUIMeta(
-        z.record(z.string(), z.string()),
-        {
-          widget: "keyValue",
-          helpText: "Custom headers sent with all requests",
-        }
-      ).optional().describe("Custom Headers"),
-      
-      // Model parameters
-      contextWindowLength: z.number()
-        .int()
-        .positive()
-        .optional()
-        .describe("Context Window Length"),
-      
-      temperature: z.number()
-        .min(0)
-        .max(2)
-        .optional()
-        .describe("Temperature"),
-    }).strict(),
-    
-    secretsSchema: z.object({}),
-    
-    // URL allowlist validation (framework-enforced)
-    // REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/openai/index.ts:62-92
-    // Note: The auth schema's apiUrl field is validated by the framework's allowlist
-    validateUrls: {
-      configFields: [], // No config URLs, auth URLs validated separately
-    },
+  // URL allowlist validation (framework-enforced)
+  // REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/openai/index.ts:62-92
+  // Note: The auth schema's apiUrl field is validated by the framework's allowlist
+  validateUrls: {
+    fields: [], // No config URLs, auth URLs validated separately
   },
   
   // ---- Actions (required) ----

@@ -51,31 +51,11 @@ export const D3SecurityConnectorExample: SingleFileConnectorDefinition = {
     }),
   ]),
 
-  // ---- Validation & Config ----
-  validation: {
-    // Configuration schema
-    // REFERENCE: x-pack/platform/plugins/shared/stack_connectors/common/d3security/schema.ts:12-16
-    configSchema: z.object({
-      url: withUIMeta(
-        z.string().url(),
-        {
-          widget: "text",
-          placeholder: "https://your-instance.d3security.com/api/v1/event",
-          helpText: "D3 Security API endpoint URL",
-          section: "Connection",
-          order: 1,
-        }
-      ).describe("API URL"),
-    }).strict(),
-    
-    secretsSchema: z.object({}),
-    
-    // URL allowlist validation
-    // REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/d3security/index.ts:30
-    //   Code: `validators: [{ type: ValidatorType.CONFIG, validator: urlAllowListValidator('url') }]`
-    validateUrls: {
-      configFields: ["url"],
-    },
+  // URL allowlist validation
+  // REFERENCE: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/d3security/index.ts:30
+  //   Code: `validators: [{ type: ValidatorType.CONFIG, validator: urlAllowListValidator('url') }]`
+  validateUrls: {
+    fields: ["url"],
   },
 
   // ---- Policies ----

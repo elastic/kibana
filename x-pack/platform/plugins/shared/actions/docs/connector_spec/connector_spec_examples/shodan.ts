@@ -41,11 +41,6 @@ export const ShodanConnector: SingleFileConnectorDefinition = {
     }),
   ]),
 
-  validation: {
-    configSchema: z.object({}).strict(),
-    secretsSchema: z.object({}),
-  },
-
   actions: {
     searchHosts: {
       isTool: true,
