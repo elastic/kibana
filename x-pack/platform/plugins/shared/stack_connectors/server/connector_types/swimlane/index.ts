@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import type {
   ActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
@@ -16,21 +15,23 @@ import {
   CasesConnectorFeatureId,
   SecurityConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
+import {
+  CONNECTOR_ID,
+  CONNECTOR_NAME,
+  ExecutorParamsSchema,
+  SwimlaneSecretsConfigurationSchema,
+  SwimlaneServiceConfigurationSchema,
+} from '@kbn/connector-schemas/swimlane';
 import type {
-  SwimlaneExecutorResultData,
   SwimlanePublicConfigurationType,
   SwimlaneSecretConfigurationType,
   ExecutorParams,
   ExecutorSubActionPushParams,
-} from './types';
+} from '@kbn/connector-schemas/swimlane';
 import { validate } from './validators';
-import {
-  ExecutorParamsSchema,
-  SwimlaneSecretsConfigurationSchema,
-  SwimlaneServiceConfigurationSchema,
-} from './schema';
 import { createExternalService } from './service';
 import { api } from './api';
+import type { SwimlaneExecutorResultData } from './types';
 
 const supportedSubActions: string[] = ['pushToService'];
 
@@ -42,11 +43,9 @@ export function getConnectorType(): ConnectorType<
   SwimlaneExecutorResultData | {}
 > {
   return {
-    id: '.swimlane',
+    id: CONNECTOR_ID,
     minimumLicenseRequired: 'gold',
-    name: i18n.translate('xpack.stackConnectors.swimlane.title', {
-      defaultMessage: 'Swimlane',
-    }),
+    name: CONNECTOR_NAME,
     supportedFeatureIds: [
       AlertingConnectorFeatureId,
       CasesConnectorFeatureId,
