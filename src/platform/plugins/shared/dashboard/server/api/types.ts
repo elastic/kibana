@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { registerAPIRoutes } from './register_routes';
+import type { TypeOf } from '@kbn/config-schema';
+import type { getDashboardResponseBodySchema } from './schemas';
 
-export type { DashboardResponseBody } from './types';
-export type { DashboardCreateRequestBody } from './create';
+// Response body type for CREATE, GET, and UPDATE endpoints
+export type DashboardResponseBody = TypeOf<ReturnType<typeof getDashboardResponseBodySchema>>;

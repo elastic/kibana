@@ -11,14 +11,15 @@ import Boom from '@hapi/boom';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../dashboard_saved_object';
-import type { DashboardCreateRequestBody } from './types';
+import type { DashboardUpdateRequestBody } from './types';
 import { transformDashboardIn } from '../../content_management/v1/transforms';
 import { getDashboardResponseBody } from '../saved_object_utils';
 import type { DashboardResponseBody } from '../types';
 
-export async function create(
+export async function update(
   requestCtx: RequestHandlerContext,
-  searchBody: DashboardCreateRequestBody
+  id: string,
+  searchBody: DashboardUpdateRequestBody
 ): Promise<DashboardResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
 
@@ -35,13 +36,14 @@ export async function create(
     throw Boom.badRequest(`Invalid data. ${transformInError.message}`);
   }
 
-  const savedObject = await core.savedObjects.client.create<DashboardSavedObjectAttributes>(
+  const savedObject = await core.savedObjects.client.update<DashboardSavedObjectAttributes>(
     DASHBOARD_SAVED_OBJECT_TYPE,
+    id,
     soAttributes,
     {
       references: soReferences,
-      ...(searchBody.id && { id: searchBody.id }),
-      ...(searchBody.spaces && { initialNamespaces: searchBody.spaces }),
+      /** perform a "full" update instead, where the provided attributes will fully replace the existing ones */
+      mergeAttributes: false,
     }
   );
 

@@ -9,24 +9,30 @@
 
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
-import { commonRouteConfig, INTERNAL_API_VERSION, PUBLIC_API_PATH } from '../constants';
-import { getCreateRequestBodySchema } from './schemas';
-import { create } from './create';
+import { schema } from '@kbn/config-schema';
+import { INTERNAL_API_VERSION, PUBLIC_API_PATH, commonRouteConfig } from '../constants';
 import { getDashboardResponseBodySchema } from '../schemas';
+import { getUpdateRequestBodySchema } from './schemas';
+import { update } from './update';
 
-export function registerCreateRoute(router: VersionedRouter<RequestHandlerContext>) {
-  const createRoute = router.post({
-    path: PUBLIC_API_PATH,
-    summary: 'Create a dashboard',
+export function registerUpdateRoute(router: VersionedRouter<RequestHandlerContext>) {
+  const updateRoute = router.put({
+    path: `${PUBLIC_API_PATH}/{id}`,
+    summary: `Update an existing dashboard`,
     ...commonRouteConfig,
   });
 
-  createRoute.addVersion(
+  updateRoute.addVersion(
     {
       version: INTERNAL_API_VERSION,
       validate: () => ({
         request: {
-          body: getCreateRequestBodySchema(),
+          params: schema.object({
+            id: schema.string({
+              meta: { description: 'A unique identifier for the dashboard.' },
+            }),
+          }),
+          body: getUpdateRequestBodySchema(),
         },
         response: {
           200: {
@@ -37,22 +43,20 @@ export function registerCreateRoute(router: VersionedRouter<RequestHandlerContex
     },
     async (ctx, req, res) => {
       try {
-        const result = await create(ctx, req.body);
+        const result = await update(ctx, req.params.id, req.body);
         return res.ok({ body: result });
       } catch (e) {
-        if (e.isBoom && e.output.statusCode === 409) {
-          return res.conflict({
+        if (e.isBoom && e.output.statusCode === 404) {
+          return res.notFound({
             body: {
-              message: `A dashboard with ID ${req.body.id} already exists.`,
+              message: `A dashboard with ID ${req.params.id} was not found.`,
             },
           });
         }
-
         if (e.isBoom && e.output.statusCode === 403) {
           return res.forbidden();
         }
-
-        return res.badRequest({ body: e });
+        return res.badRequest({ body: e.output.payload });
       }
     }
   );

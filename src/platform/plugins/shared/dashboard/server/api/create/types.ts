@@ -8,7 +8,6 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { getCreateRequestBody, getCreateResponseBody } from './schemas';
+import type { getCreateRequestBodySchema } from './schemas';
 
-export type DashboardCreateRequestBody = TypeOf<ReturnType<typeof getCreateRequestBody>>;
-export type DashboardCreateResponseBody = TypeOf<ReturnType<typeof getCreateResponseBody>>;
+export type DashboardCreateRequestBody = TypeOf<ReturnType<typeof getCreateRequestBodySchema>>;

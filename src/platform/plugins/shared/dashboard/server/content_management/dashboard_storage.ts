@@ -15,14 +15,9 @@ import type { StorageContext } from '@kbn/content-management-plugin/server';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../dashboard_saved_object';
 import { cmServicesDefinition } from './cm_services';
 import type { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
-import { savedObjectToItem, transformDashboardIn } from './latest';
-import type {
-  DashboardState,
-  DashboardUpdateOptions,
-  DashboardSearchOptions,
-  DashboardGetOut,
-} from './latest';
-import type { DashboardSearchOut, DashboardUpdateOut } from './v1/types';
+import { savedObjectToItem } from './latest';
+import type { DashboardSearchOptions, DashboardGetOut } from './latest';
+import type { DashboardSearchOut } from './v1/types';
 import { getSavedObjectFindOptions } from './get_saved_object_find_options';
 
 const savedObjectClientFromRequest = async (ctx: StorageContext) => {
@@ -103,82 +98,8 @@ export class DashboardStorage {
     throw Boom.badRequest(`Use REST API create endpoint`);
   }
 
-  async update(
-    ctx: StorageContext,
-    id: string,
-    data: DashboardState,
-    options: DashboardUpdateOptions
-  ): Promise<DashboardUpdateOut> {
-    const transforms = ctx.utils.getTransforms(cmServicesDefinition);
-    const soClient = await savedObjectClientFromRequest(ctx);
-
-    // Validate input (data & options) & UP transform them to the latest version
-    const { value: dataToLatest, error: dataError } = transforms.update.in.data.up<
-      DashboardState,
-      DashboardState
-    >(data);
-    if (dataError) {
-      throw Boom.badRequest(`Invalid data. ${dataError.message}`);
-    }
-
-    const { value: optionsToLatest, error: optionsError } = transforms.update.in.options.up<
-      DashboardUpdateOptions,
-      DashboardUpdateOptions
-    >(options);
-    if (optionsError) {
-      throw Boom.badRequest(`Invalid options. ${optionsError.message}`);
-    }
-
-    const {
-      attributes: soAttributes,
-      references: soReferences,
-      error: transformDashboardError,
-    } = transformDashboardIn({
-      dashboardState: dataToLatest,
-      incomingReferences: options.references,
-    });
-    if (transformDashboardError) {
-      throw Boom.badRequest(`Invalid data. ${transformDashboardError.message}`);
-    }
-
-    // Save data in DB
-    const partialSavedObject = await soClient.update<DashboardSavedObjectAttributes>(
-      DASHBOARD_SAVED_OBJECT_TYPE,
-      id,
-      soAttributes,
-      { ...optionsToLatest, references: soReferences }
-    );
-
-    const { item, error: itemError } = savedObjectToItem(partialSavedObject, true);
-    if (itemError) {
-      throw Boom.badRequest(`Invalid response. ${itemError.message}`);
-    }
-
-    const validationError = transforms.update.out.result.validate({ item });
-    if (validationError) {
-      if (this.throwOnResultValidationError) {
-        throw Boom.badRequest(`Invalid response. ${validationError.message}`);
-      } else {
-        this.logger.warn(`Invalid response. ${validationError.message}`);
-      }
-    }
-
-    // Validate DB response and DOWN transform to the request version
-    const { value, error: resultError } = transforms.update.out.result.down<
-      DashboardUpdateOut,
-      DashboardUpdateOut
-    >(
-      // @ts-expect-error - fix type error
-      { item },
-      undefined, // do not override version
-      { validate: false } // validation is done above
-    );
-
-    if (resultError) {
-      throw Boom.badRequest(`Invalid response. ${resultError.message}`);
-    }
-
-    return value;
+  async update(): Promise<any> {
+    throw Boom.badRequest(`Use REST API update endpoint`);
   }
 
   async delete(

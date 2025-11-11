@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { registerAPIRoutes } from './register_routes';
+import { schema } from '@kbn/config-schema';
+import { getDashboardDataSchema } from '../../content_management/v1/schema';
 
-export type { DashboardResponseBody } from './types';
-export type { DashboardCreateRequestBody } from './create';
+export function getUpdateRequestBodySchema() {
+  return schema.object({
+    data: getDashboardDataSchema(),
+  });
+}

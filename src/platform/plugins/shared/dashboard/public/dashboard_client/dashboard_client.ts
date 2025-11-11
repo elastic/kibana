@@ -17,12 +17,9 @@ import type {
   DashboardSearchAPIResult,
   DashboardSearchIn,
   DashboardState,
-  DashboardUpdateIn,
-  DashboardUpdateOut,
 } from '../../server/content_management';
 import { contentManagementService, coreServices } from '../services/kibana_services';
 import type { SearchDashboardsArgs } from './types';
-import { DASHBOARD_CONTENT_ID } from '../utils/telemetry_constants';
 
 const CACHE_SIZE = 20; // only store a max of 20 dashboards
 const CACHE_TTL = 1000 * 60 * 5; // time to live = 5 minutes
@@ -100,20 +97,18 @@ export const dashboardClient = {
     };
   },
   update: async (id: string, dashboardState: DashboardState, references: Reference[]) => {
-    // TODO replace with call to dashboard REST update endpoint
-    const updateResponse = await contentManagementService.client.update<
-      DashboardUpdateIn,
-      DashboardUpdateOut
-    >({
-      contentTypeId: DASHBOARD_CONTENT_ID,
-      id,
-      data: dashboardState,
-      options: {
-        /** perform a "full" update instead, where the provided attributes will fully replace the existing ones */
-        mergeAttributes: false,
-        references,
-      },
-    });
+    const updateResponse = await coreServices.http.put<DashboardAPIGetOut>(
+      `/api/dashboards/dashboard/${id}`,
+      {
+        version: DASHBOARD_API_VERSION,
+        body: JSON.stringify({
+          data: {
+            ...dashboardState,
+            references,
+          },
+        }),
+      }
+    );
     cache.delete(id);
     return updateResponse;
   },
