@@ -33,7 +33,6 @@ import {
   DimensionEditorAdditionalSection,
   DimensionEditorDataExtraComponent,
 } from './dimension_editor';
-import { Toolbar } from './toolbar';
 import { generateId } from '../../id_generator';
 import { toExpression } from './to_expression';
 import { nonNullable } from '../../utils';
@@ -47,7 +46,7 @@ import {
 } from './helpers';
 import { getAccessorType } from '../../shared_components';
 import { convertToRunTimeState } from './runtime_state';
-import { MetricAppearanceSettings } from './toolbar/appearance_settings';
+import { MetricAppearanceSettings } from './toolbar';
 import { FlyoutToolbar } from '../../shared_components/flyout_toolbar';
 
 export const DEFAULT_MAX_COLUMNS = 3;
@@ -663,10 +662,6 @@ export const getMetricVisualization = ({
     }
 
     return updated;
-  },
-
-  ToolbarComponent(props) {
-    return <Toolbar {...props} />;
   },
 
   FlyoutToolbarComponent(props) {

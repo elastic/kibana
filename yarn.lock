@@ -6447,6 +6447,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/es-query-constants@link:src/platform/packages/shared/kbn-es-query-constants":
+  version "0.0.0"
+  uid ""
+
 "@kbn/es-query-server@link:src/platform/packages/shared/kbn-es-query-server":
   version "0.0.0"
   uid ""
