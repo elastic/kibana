@@ -36,7 +36,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS: string[] = [
   // Prioritization tools
   'hackathon.catchup.prioritization.rerank',
   // Workflow-specific simplified tools (optimized for workflow execution)
-  'hackathon.catchup.workflow.tool.summarizer',
+  'hackathon.catchup.workflow_tool_summarizer',
   'hackathon.catchup.workflow.security.summary',
   'hackathon.catchup.workflow.external.slack',
   'hackathon.catchup.workflow.correlation.engine',

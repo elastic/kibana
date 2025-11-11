@@ -12,7 +12,7 @@ import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import { createErrorResult } from '@kbn/onechat-server';
 import { executeEsql } from '@kbn/onechat-genai-utils/tools/utils/esql';
 import { getSpaceId, getPluginServices } from '../../services/service_locator';
-import { normalizeDateToCurrentYear } from '../utils/date_normalization';
+import { normalizeTimeRange } from '../utils/date_normalization';
 import { getAttackDiscoveryUrl } from '../utils/kibana_urls';
 
 const attackDiscoverySchema = z.object({
@@ -45,22 +45,8 @@ Returns attack discoveries with metadata including attack name, severity, status
           `[CatchUp Agent] Attack discovery tool called with start: ${start}, end: ${end || 'now'}`
         );
 
-        // Normalize dates to current year if year is missing
-        const normalizedStart = normalizeDateToCurrentYear(start);
-        const startDate = new Date(normalizedStart);
-        if (isNaN(startDate.getTime())) {
-          throw new Error(`Invalid datetime format: ${start}. Expected ISO 8601 format.`);
-        }
-
-        let endDate: Date | null = null;
-        let normalizedEnd: string | null = null;
-        if (end) {
-          normalizedEnd = normalizeDateToCurrentYear(end);
-          endDate = new Date(normalizedEnd);
-          if (isNaN(endDate.getTime())) {
-            throw new Error(`Invalid datetime format: ${end}. Expected ISO 8601 format.`);
-          }
-        }
+        // Normalize and adjust time range using helper function
+        const timeRange = normalizeTimeRange(start, end, { logger });
 
         // Get space ID from request
         const spaceId = getSpaceId(request);
@@ -68,14 +54,16 @@ Returns attack discoveries with metadata including attack name, severity, status
         // Build date range filter using normalized dates
         // If end is provided, use a range query; otherwise use a simple greater-than query
         let dateFilter: string;
-        if (endDate && normalizedEnd) {
-          dateFilter = `@timestamp >= TO_DATETIME("${normalizedStart}") AND @timestamp < TO_DATETIME("${normalizedEnd}")`;
+        if (timeRange.endDate && timeRange.end) {
+          dateFilter = `@timestamp >= TO_DATETIME("${timeRange.start}") AND @timestamp < TO_DATETIME("${timeRange.end}")`;
         } else {
-          dateFilter = `@timestamp > TO_DATETIME("${normalizedStart}")`;
+          dateFilter = `@timestamp > TO_DATETIME("${timeRange.start}")`;
         }
 
         // Use space-aware index pattern for attack discoveries
         // Include _id for generating URLs using METADATA directive
+        // For catchup purposes, show all attack discoveries created in the time range
+        // The workflow_status is included in the results so users can see which are open
         const query = `FROM .alerts-security.attack.discovery.alerts-${spaceId}*,.adhoc.alerts-security.attack.discovery.alerts-${spaceId}* METADATA _id
 | WHERE ${dateFilter}
 | KEEP _id, kibana.alert.attack_discovery.title, kibana.alert.severity, kibana.alert.workflow_status, kibana.alert.attack_discovery.alert_ids, kibana.alert.case_ids, @timestamp
@@ -147,8 +135,8 @@ Returns attack discoveries with metadata including attack name, severity, status
               type: ToolResultType.other,
               data: {
                 total: result.values.length,
-                start: normalizedStart,
-                end: normalizedEnd || null,
+                start: timeRange.start,
+                end: timeRange.end,
                 attack_discoveries: attackDiscoveries,
               },
             },

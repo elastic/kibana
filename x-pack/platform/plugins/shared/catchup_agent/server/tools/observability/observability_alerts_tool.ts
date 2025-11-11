@@ -11,7 +11,7 @@ import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import { createErrorResult } from '@kbn/onechat-server';
 import { executeEsql } from '@kbn/onechat-genai-utils/tools/utils/esql';
-import { normalizeDateToCurrentYear } from '../utils/date_normalization';
+import { normalizeTimeRange } from '../utils/date_normalization';
 
 const observabilityAlertsSchema = z.object({
   start: z
@@ -47,34 +47,20 @@ Returns aggregated statistics including open/resolved alerts and total alerts.`,
           }`
         );
 
-        // Normalize dates to current year if year is missing
-        const normalizedStart = normalizeDateToCurrentYear(start);
-        const startDate = new Date(normalizedStart);
-        if (isNaN(startDate.getTime())) {
-          throw new Error(`Invalid datetime format: ${start}. Expected ISO 8601 format.`);
-        }
-
-        let endDate: Date | null = null;
-        let normalizedEnd: string | null = null;
-        if (end) {
-          normalizedEnd = normalizeDateToCurrentYear(end);
-          endDate = new Date(normalizedEnd);
-          if (isNaN(endDate.getTime())) {
-            throw new Error(`Invalid datetime format: ${end}. Expected ISO 8601 format.`);
-          }
-        }
+        // Normalize and adjust time range using helper function
+        const timeRange = normalizeTimeRange(start, end, { logger });
 
         // Build date range filter using normalized dates
         // If end is provided, use a range query; otherwise use a simple greater-than query
         let dateFilter: string;
-        if (endDate && normalizedEnd) {
-          dateFilter = `@timestamp >= TO_DATETIME("${normalizedStart}") AND @timestamp < TO_DATETIME("${normalizedEnd}")`;
+        if (timeRange.endDate && timeRange.end) {
+          dateFilter = `@timestamp >= TO_DATETIME("${timeRange.start}") AND @timestamp < TO_DATETIME("${timeRange.end}")`;
         } else {
-          dateFilter = `@timestamp > TO_DATETIME("${normalizedStart}")`;
+          dateFilter = `@timestamp > TO_DATETIME("${timeRange.start}")`;
         }
 
         logger.debug(
-          `[CatchUp Agent] Normalized start: ${normalizedStart}, end: ${normalizedEnd || 'none'}`
+          `[CatchUp Agent] Normalized start: ${timeRange.start}, end: ${timeRange.end || 'none'}`
         );
         logger.debug(`[CatchUp Agent] Date filter: ${dateFilter}`);
 
@@ -100,12 +86,12 @@ Returns aggregated statistics including open/resolved alerts and total alerts.`,
         // eslint-disable-next-line no-console
         console.log(
           '[CatchUp Agent] Observability alerts tool - Normalized start:',
-          normalizedStart
+          timeRange.start
         );
         // eslint-disable-next-line no-console
         console.log(
           '[CatchUp Agent] Observability alerts tool - Normalized end:',
-          normalizedEnd || 'none'
+          timeRange.end || 'none'
         );
         // eslint-disable-next-line no-console
         console.log('[CatchUp Agent] Observability alerts tool - Date filter:', dateFilter);
@@ -193,8 +179,8 @@ Returns aggregated statistics including open/resolved alerts and total alerts.`,
             {
               type: ToolResultType.other,
               data: {
-                start: normalizedStart,
-                end: normalizedEnd || null,
+                start: timeRange.start,
+                end: timeRange.end,
               },
             },
           ],

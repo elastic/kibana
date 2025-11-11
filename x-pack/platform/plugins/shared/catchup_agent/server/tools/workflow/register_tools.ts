@@ -34,7 +34,7 @@ export function registerWorkflowTools(toolsSetup: ToolsSetup, logger: Logger): v
 
     toolsSetup.register(workflowToolSummarizerTool());
     logger.info(
-      'Registered workflow tool summarizer (hackathon.catchup.workflow.tool.summarizer)'
+      'Registered workflow tool summarizer (hackathon.catchup.workflow_tool_summarizer)'
     );
 
     toolsSetup.register(workflowSecuritySummaryTool());

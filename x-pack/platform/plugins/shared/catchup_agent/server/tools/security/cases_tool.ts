@@ -12,18 +12,7 @@ import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import { createErrorResult } from '@kbn/onechat-server';
 import { getCaseUrl } from '../utils/kibana_urls';
 import { getPluginServices } from '../../services/service_locator';
-import { normalizeDateToCurrentYear } from '../utils/date_normalization';
-
-// Helper functions
-const parseAndValidateDate = (normalizedDateString: string, fieldName: string): Date => {
-  const date = new Date(normalizedDateString);
-  if (isNaN(date.getTime())) {
-    throw new Error(
-      `Invalid datetime format for ${fieldName}: ${normalizedDateString}. Expected ISO 8601 format.`
-    );
-  }
-  return date;
-};
+import { normalizeTimeRange } from '../utils/date_normalization';
 
 const getUsername = (user: any): string | null => {
   return user?.username || null;
@@ -89,23 +78,15 @@ Returns cases with detailed information including id, title, description, status
     schema: casesSchema,
     handler: async ({ start, end, owner }, { request, logger }) => {
       try {
-        // Normalize and validate dates
-        const normalizedStart = normalizeDateToCurrentYear(start);
-        const startDate = parseAndValidateDate(normalizedStart, 'start');
-
-        let endDate: Date | null = null;
-        let normalizedEnd: string | null = null;
-        if (end) {
-          normalizedEnd = normalizeDateToCurrentYear(end);
-          endDate = parseAndValidateDate(normalizedEnd, 'end');
-        }
+        // Normalize and adjust time range using helper function
+        const timeRange = normalizeTimeRange(start, end, { logger });
 
         const { plugin } = getPluginServices();
 
         // Use Cases API to fetch cases updated since the given date
         if (!plugin.getCasesClient) {
           logger.warn('[CatchUp Agent] Cases plugin not available, returning empty results');
-          return createEmptyResults(normalizedStart, normalizedEnd, 'Cases plugin not available');
+          return createEmptyResults(timeRange.start, timeRange.end, 'Cases plugin not available');
         }
 
         const casesClient = await plugin.getCasesClient(request);
@@ -129,8 +110,8 @@ Returns cases with detailed information including id, title, description, status
         let currentPage = 1;
         const maxPages = 10; // Limit to prevent infinite loops
         let hasMorePages = true;
-        const startTimestamp = startDate.getTime();
-        const endTimestamp = endDate ? endDate.getTime() : null;
+        const startTimestamp = timeRange.startDate.getTime();
+        const endTimestamp = timeRange.endDate ? timeRange.endDate.getTime() : null;
 
         while (hasMorePages && currentPage <= maxPages) {
           searchParams.page = currentPage;
@@ -264,8 +245,8 @@ Returns cases with detailed information including id, title, description, status
               data: {
                 total: casesData.length,
                 cases: casesData,
-                start: normalizedStart,
-                end: normalizedEnd || null,
+                start: timeRange.start,
+                end: timeRange.end,
               },
             },
           ],

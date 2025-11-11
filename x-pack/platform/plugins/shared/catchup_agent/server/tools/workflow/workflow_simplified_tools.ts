@@ -179,7 +179,7 @@ export const workflowToolSummarizerTool = (): BuiltinToolDefinition<
   typeof workflowToolSummarizerSchema
 > => {
   return {
-    id: 'hackathon.catchup.workflow.tool.summarizer',
+    id: 'hackathon.catchup.workflow_tool_summarizer',
     type: ToolType.builtin,
     description: `Generic tool summarizer optimized for workflow execution.
     Wraps any tool and simplifies its response to avoid Elasticsearch mapping issues.

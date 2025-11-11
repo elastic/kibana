@@ -39,7 +39,7 @@ steps:
       method: 'POST'
       path: '/api/agent_builder/tools/_execute'
       body:
-        tool_id: 'hackathon.catchup.workflow.tool.summarizer'
+        tool_id: 'hackathon.catchup.workflow_tool_summarizer'
         tool_params:
           tool_id: 'hackathon.catchup.security.summary'
           tool_params:

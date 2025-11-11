@@ -13,7 +13,7 @@ import { createErrorResult } from '@kbn/onechat-server';
 import { executeEsql } from '@kbn/onechat-genai-utils/tools/utils/esql';
 import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
 import { getSpaceId, getPluginServices } from '../../services/service_locator';
-import { normalizeDateToCurrentYear } from '../utils/date_normalization';
+import { normalizeTimeRange } from '../utils/date_normalization';
 import { getAlertsPageUrl } from '../utils/kibana_urls';
 
 const detectionsSummarySchema = z.object({
@@ -48,22 +48,8 @@ Returns aggregated statistics including total count, counts by severity, and sam
           }`
         );
 
-        // Normalize dates to current year if year is missing
-        const normalizedStart = normalizeDateToCurrentYear(start);
-        const startDate = new Date(normalizedStart);
-        if (isNaN(startDate.getTime())) {
-          throw new Error(`Invalid datetime format: ${start}. Expected ISO 8601 format.`);
-        }
-
-        let endDate: Date | null = null;
-        let normalizedEnd: string | null = null;
-        if (end) {
-          normalizedEnd = normalizeDateToCurrentYear(end);
-          endDate = new Date(normalizedEnd);
-          if (isNaN(endDate.getTime())) {
-            throw new Error(`Invalid datetime format: ${end}. Expected ISO 8601 format.`);
-          }
-        }
+        // Normalize and adjust time range using helper function
+        const timeRange = normalizeTimeRange(start, end, { logger });
 
         // Get space ID from request
         const spaceId = getSpaceId(request);
@@ -129,10 +115,10 @@ Returns aggregated statistics including total count, counts by severity, and sam
         // Build date range filter using normalized dates
         // "since" means inclusive, so use >= for start date
         let dateFilter: string;
-        if (endDate && normalizedEnd) {
-          dateFilter = `@timestamp >= TO_DATETIME("${normalizedStart}") AND @timestamp <= TO_DATETIME("${normalizedEnd}")`;
+        if (timeRange.endDate && timeRange.end) {
+          dateFilter = `@timestamp >= TO_DATETIME("${timeRange.start}") AND @timestamp <= TO_DATETIME("${timeRange.end}")`;
         } else {
-          dateFilter = `@timestamp >= TO_DATETIME("${normalizedStart}")`;
+          dateFilter = `@timestamp >= TO_DATETIME("${timeRange.start}")`;
         }
 
         // Build query matching the DSL structure:
@@ -278,7 +264,7 @@ Returns aggregated statistics including total count, counts by severity, and sam
 
           // Generate URL to alerts page with time range
           const { core } = getPluginServices();
-          const alertsPageUrl = getAlertsPageUrl(request, core, normalizedStart, normalizedEnd);
+          const alertsPageUrl = getAlertsPageUrl(request, core, timeRange.start, timeRange.end);
 
           // Return both the grouped results and a summary with sample alerts
           return {
@@ -296,8 +282,8 @@ Returns aggregated statistics including total count, counts by severity, and sam
                 data: {
                   total,
                   by_severity: severityCounts,
-                  start: normalizedStart,
-                  end: normalizedEnd || null,
+                  start: timeRange.start,
+                  end: timeRange.end,
                   alerts_page_url: alertsPageUrl,
                   sample_alerts: sampleAlerts,
                   // Extract entity information from sample alerts for easy access
