@@ -167,6 +167,173 @@ function simplifyToolResult(toolResults: any[]): any {
 }
 
 /**
+ * Generic tool summarizer for workflows
+ * Wraps any tool and simplifies its output for safe storage in Elasticsearch
+ */
+const workflowToolSummarizerSchema = z.object({
+  tool_id: z.string().describe('The ID of the tool to execute and summarize'),
+  tool_params: z.record(z.unknown()).describe('Parameters to pass to the tool'),
+});
+
+export const workflowToolSummarizerTool = (): BuiltinToolDefinition<
+  typeof workflowToolSummarizerSchema
+> => {
+  return {
+    id: 'hackathon.catchup.workflow.tool.summarizer',
+    type: ToolType.builtin,
+    description: `Generic tool summarizer optimized for workflow execution.
+    Wraps any tool and simplifies its response to avoid Elasticsearch mapping issues.
+    Use this tool in workflows instead of calling tools directly when you need simplified output.`,
+    schema: workflowToolSummarizerSchema,
+    handler: async ({ tool_id, tool_params }, { runner, logger }) => {
+      try {
+        // Call the specified tool
+        const originalResult = await runner.runTool({
+          toolId: tool_id,
+          toolParams: tool_params,
+        });
+
+        // Check for error results
+        const errorResult = originalResult.results.find(
+          (r: any) => r.type === ToolResultType.error
+        );
+        if (errorResult) {
+          return {
+            results: [errorResult],
+          };
+        }
+
+        // Extract the original data
+        const originalData = originalResult.results[0]?.data;
+
+        // Special handling for security_summary tool which returns nested structure
+        let simplifiedData: any = null;
+        if (tool_id === 'hackathon.catchup.security.summary' && originalData?.security_summary) {
+          const summary = originalData.security_summary;
+          simplifiedData = {};
+
+          // Simplify each sub-tool result
+          if (summary.attackDiscoveries) {
+            const simplified = simplifyToolResult([
+              { type: ToolResultType.other, data: summary.attackDiscoveries },
+            ]);
+            if (simplified) {
+              simplifiedData.attack_discoveries = simplified;
+            } else {
+              simplifiedData.attack_discoveries = {
+                total: summary.attackDiscoveries.total,
+                start: summary.attackDiscoveries.start,
+                end: summary.attackDiscoveries.end,
+              };
+            }
+          }
+
+          if (summary.detections) {
+            const simplified = simplifyToolResult([
+              { type: ToolResultType.other, data: summary.detections },
+            ]);
+            if (simplified) {
+              simplifiedData.detections = simplified;
+            } else {
+              simplifiedData.detections = {
+                total: summary.detections.total,
+                by_severity: summary.detections.by_severity,
+                alerts_page_url: summary.detections.alerts_page_url,
+              };
+            }
+          }
+
+          if (summary.cases) {
+            const simplified = simplifyToolResult([
+              { type: ToolResultType.other, data: summary.cases },
+            ]);
+            if (simplified) {
+              simplifiedData.cases = simplified;
+            } else {
+              simplifiedData.cases = {
+                total: summary.cases.total,
+                start: summary.cases.start,
+                end: summary.cases.end,
+              };
+            }
+          }
+
+          if (summary.ruleChanges) {
+            const simplified = simplifyToolResult([
+              { type: ToolResultType.other, data: summary.ruleChanges },
+            ]);
+            if (simplified) {
+              simplifiedData.rule_changes = simplified;
+            } else {
+              simplifiedData.rule_changes = {
+                total: summary.ruleChanges.total,
+                start: summary.ruleChanges.start,
+                end: summary.ruleChanges.end,
+              };
+            }
+          }
+
+          // Add time range if available
+          if (tool_params.start) simplifiedData.start = tool_params.start;
+          if (tool_params.end) simplifiedData.end = tool_params.end;
+        } else {
+          // For other tools, use the generic simplifyToolResult function
+          const simplified = simplifyToolResult(originalResult.results);
+          simplifiedData = simplified;
+
+          // If simplification returned null or empty, try to extract basic data from the original result
+          if (!simplifiedData && originalData) {
+            if (typeof originalData === 'object' && originalData !== null) {
+              simplifiedData = originalData;
+            } else {
+              simplifiedData = { data: originalData };
+            }
+          }
+        }
+
+        // If we still don't have data, return an empty result
+        if (!simplifiedData) {
+          return {
+            results: [
+              {
+                type: ToolResultType.other,
+                data: JSON.stringify({
+                  tool_id,
+                  message: 'No data returned from tool',
+                }),
+              },
+            ],
+          };
+        }
+
+        // Return data as JSON string to avoid Elasticsearch mapping issues
+        // The workflow execution engine stores the entire response in a text field
+        // We stringify the data so it can be stored, but downstream tools will parse it
+        return {
+          results: [
+            {
+              type: ToolResultType.other,
+              data: JSON.stringify(simplifiedData),
+            },
+          ],
+        };
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        logger.error(`Error in workflow tool summarizer: ${errorMessage}`);
+        return {
+          results: [
+            createErrorResult(
+              `Error executing and summarizing tool ${tool_id}: ${errorMessage}`
+            ),
+          ],
+        };
+      }
+    },
+    tags: ['workflow', 'simplified', 'generic'],
+  };
+};
+
+/**
  * Simplified security summary tool for workflows
  * Wraps the original tool and simplifies the response
  */

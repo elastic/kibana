@@ -39,10 +39,12 @@ steps:
       method: 'POST'
       path: '/api/agent_builder/tools/_execute'
       body:
-        tool_id: 'hackathon.catchup.workflow.security.summary'
+        tool_id: 'hackathon.catchup.workflow.tool.summarizer'
         tool_params:
-          start: '{{ inputs.start }}'
-          end: '{{ inputs.end }}'
+          tool_id: 'hackathon.catchup.security.summary'
+          tool_params:
+            start: '{{ inputs.start }}'
+            end: '{{ inputs.end }}'
 
   - name: fetch_slack_messages
     type: kibana.request

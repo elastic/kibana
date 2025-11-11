@@ -15,6 +15,7 @@
 import type { ToolsSetup } from '@kbn/onechat-server';
 import type { Logger } from '@kbn/logging';
 import {
+  workflowToolSummarizerTool,
   workflowSecuritySummaryTool,
   workflowSlackTool,
   workflowCorrelationEngineTool,
@@ -30,6 +31,11 @@ import {
 export function registerWorkflowTools(toolsSetup: ToolsSetup, logger: Logger): void {
   try {
     logger.info('Registering workflow-specific simplified tools...');
+
+    toolsSetup.register(workflowToolSummarizerTool());
+    logger.info(
+      'Registered workflow tool summarizer (hackathon.catchup.workflow.tool.summarizer)'
+    );
 
     toolsSetup.register(workflowSecuritySummaryTool());
     logger.info(
