@@ -18,9 +18,9 @@ import {
   WORKFLOWS_UI_EXECUTION_GRAPH_SETTING_ID,
   WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID,
 } from '@kbn/workflows';
+import { useWorkflowExecution } from '@kbn/workflows-ui';
 import { buildContextOverrideForStep } from './build_step_context_mock_for_step';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
-import { useWorkflowExecution } from '../../../entities/workflows/model/use_workflow_execution';
 import {
   selectWorkflowDefinition,
   selectWorkflowGraph,
