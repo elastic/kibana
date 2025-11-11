@@ -66,7 +66,7 @@ export const DATA_SOURCES_I18N = {
       'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.dataSourceCard.deleteDataSourceDisabledLabel',
       {
         defaultMessage:
-          'Cannot delete data source while is selected. Switch to another data source first.',
+          'Cannot delete data source while it is selected. Switch to another data source first.',
       }
     ),
     dataPreviewAccordionLabel: i18n.translate(
