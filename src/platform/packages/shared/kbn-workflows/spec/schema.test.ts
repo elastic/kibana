@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { WorkflowSchemaForAutocomplete } from './schema';
+import { WorkflowInputObjectSchema, WorkflowSchemaForAutocomplete } from './schema';
 
 describe('WorkflowSchemaForAutocomplete', () => {
   it('should allow empty "with" block', () => {
@@ -119,5 +119,80 @@ describe('WorkflowSchemaForAutocomplete', () => {
       steps: [],
       triggers: [],
     });
+  });
+});
+
+describe('WorkflowInputObjectSchema', () => {
+  it('should accept valid type literals in schema', () => {
+    const result = WorkflowInputObjectSchema.safeParse({
+      name: 'test',
+      type: 'object',
+      schema: {
+        str: 'string',
+        num: 'number',
+        bool: 'boolean',
+        arr: 'array',
+        obj: 'object',
+      },
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('should accept valid array type definitions', () => {
+    const result = WorkflowInputObjectSchema.safeParse({
+      name: 'test',
+      type: 'object',
+      schema: {
+        tags: ['string'],
+        scores: ['number'],
+      },
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('should accept nested objects in schema', () => {
+    const result = WorkflowInputObjectSchema.safeParse({
+      name: 'test',
+      type: 'object',
+      schema: {
+        profile: {
+          firstName: 'string',
+          metadata: {
+            source: 'string',
+          },
+        },
+      },
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('should reject invalid string value in schema', () => {
+    const result = WorkflowInputObjectSchema.safeParse({
+      name: 'test',
+      type: 'object',
+      schema: {
+        firstName: 'bla', // Invalid - not a valid type
+      },
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('should reject invalid array item type', () => {
+    const result = WorkflowInputObjectSchema.safeParse({
+      name: 'test',
+      type: 'object',
+      schema: {
+        tags: ['invalid'], // Invalid - not a valid type
+      },
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('should accept object without schema', () => {
+    const result = WorkflowInputObjectSchema.safeParse({
+      name: 'test',
+      type: 'object',
+    });
+    expect(result.success).toBe(true);
   });
 });

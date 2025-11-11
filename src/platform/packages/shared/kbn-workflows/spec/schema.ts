@@ -415,9 +415,26 @@ export const WorkflowInputArraySchema = WorkflowInputBaseSchema.extend({
   default: z.union([z.array(z.string()), z.array(z.number()), z.array(z.boolean())]).optional(),
 });
 
+// Add this before WorkflowInputObjectSchema definition
+const InlineSchemaValueSchema: z.ZodType<unknown> = z.lazy(() =>
+  z.union([
+    z.literal('string'),
+    z.literal('number'),
+    z.literal('boolean'),
+    z.literal('array'),
+    z.literal('object'),
+    z.array(
+      z.union([z.literal('string'), z.literal('number'), z.literal('boolean'), z.literal('object')])
+    ),
+    z.record(z.string(), InlineSchemaValueSchema),
+  ])
+);
+
+const InlineSchemaDefinitionSchema = z.record(z.string(), InlineSchemaValueSchema);
+
 export const WorkflowInputObjectSchema = WorkflowInputBaseSchema.extend({
   type: z.literal('object'),
-  schema: z.record(z.string(), z.any()).optional(), // Inline schema definition
+  schema: InlineSchemaDefinitionSchema.optional(), // Inline schema definition with validation
   default: z.record(z.string(), z.any()).optional(),
 });
 
