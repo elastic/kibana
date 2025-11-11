@@ -144,6 +144,7 @@ export class DashboardPlugin
       http: core.http,
       contentManagement: plugins.contentManagement,
       logger: this.logger,
+      isAccessControlEnabled: core.savedObjects.isAccessControlEnabled(),
     });
 
     void registerAccessControl({
