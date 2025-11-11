@@ -5,10 +5,4 @@
  * 2.0.
  */
 
-import { useEuiTheme } from '@elastic/eui';
-
-export const useBarColor = () => {
-  const { euiTheme } = useEuiTheme();
-
-  return euiTheme.flags.hasVisColorAdjustment ? 'success' : 'vis0';
-};
+export const useBarColor = () => 'vis0';

@@ -10,10 +10,8 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { SEARCH_EMBEDDABLE_TYPE, getDefaultSort } from '@kbn/discover-utils';
-import type {
-  SearchEmbeddableSerializedState,
-  SearchEmbeddableApi,
-} from '@kbn/discover-plugin/public';
+import type { SearchEmbeddableApi } from '@kbn/discover-plugin/public';
+import type { SearchEmbeddableState } from '@kbn/discover-plugin/common';
 import type { SerializedPanelState } from '@kbn/presentation-publishing';
 import { css } from '@emotion/react';
 import { type SavedSearch, toSavedSearchAttributes } from '@kbn/saved-search-plugin/common';
@@ -27,7 +25,7 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
   // Creates our *initial* search source and set of attributes.
   // Future changes to these properties will be facilitated by the Parent API from the embeddable.
   const [initialSerializedState, setInitialSerializedState] =
-    useState<SerializedPanelState<SearchEmbeddableSerializedState>>();
+    useState<SerializedPanelState<SearchEmbeddableState>>();
 
   const [error, setError] = useState<Error | undefined>();
 
@@ -36,6 +34,7 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
     timeRange,
     query,
     filters,
+    nonHighlightingFilters,
     index,
     timestampField,
     columns,
@@ -66,6 +65,7 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
           searchSource.setField('index', dataView);
           searchSource.setField('query', query);
           searchSource.setField('filter', filters);
+          searchSource.setField('nonHighlightingFilters', nonHighlightingFilters);
           const { searchSourceJSON, references } = searchSource.serialize();
           // By-value saved object structure
           const savedSearch: SavedSearch = {
@@ -89,7 +89,7 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
                 enableDocumentViewer: documentViewerEnabled,
                 enableFilters: filtersEnabled,
               },
-            } as SearchEmbeddableSerializedState,
+            } as SearchEmbeddableState,
             references,
           });
         }
@@ -108,6 +108,7 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
     dataViews,
     documentViewerEnabled,
     filters,
+    nonHighlightingFilters,
     filtersEnabled,
     index,
     query,
@@ -137,7 +138,7 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
 
 const SavedSearchComponentTable: React.FC<
   SavedSearchComponentProps & {
-    initialSerializedState: SerializedPanelState<SearchEmbeddableSerializedState>;
+    initialSerializedState: SerializedPanelState<SearchEmbeddableState>;
   }
 > = (props) => {
   const {
@@ -219,7 +220,7 @@ const SavedSearchComponentTable: React.FC<
   );
 
   return (
-    <EmbeddableRenderer<SearchEmbeddableSerializedState, SearchEmbeddableApi>
+    <EmbeddableRenderer<SearchEmbeddableState, SearchEmbeddableApi>
       maybeId={undefined}
       type={SEARCH_EMBEDDABLE_TYPE}
       getParentApi={() => parentApi}

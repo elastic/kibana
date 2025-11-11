@@ -20,5 +20,6 @@
     "@kbn/developer-examples-plugin",
     "@kbn/discover-utils",
     "@kbn/unified-doc-viewer-plugin",
+    "@kbn/i18n-react",
   ]
 }

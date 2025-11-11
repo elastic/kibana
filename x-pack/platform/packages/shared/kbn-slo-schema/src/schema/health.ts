@@ -7,11 +7,21 @@
 
 import * as t from 'io-ts';
 
-const healthStatusSchema = t.union([
+const transformHealthSchema = t.union([
   t.literal('healthy'),
   t.literal('unhealthy'),
   t.literal('missing'),
 ]);
+
+const healthStatusSchema = t.intersection([
+  t.partial({
+    transformState: t.union([t.literal('stopped'), t.literal('started')]),
+  }),
+  t.type({
+    status: transformHealthSchema,
+  }),
+]);
+
 const stateSchema = t.union([
   t.literal('no_data'),
   t.literal('indexing'),
@@ -19,4 +29,4 @@ const stateSchema = t.union([
   t.literal('stale'),
 ]);
 
-export { healthStatusSchema, stateSchema };
+export { transformHealthSchema, healthStatusSchema, stateSchema };

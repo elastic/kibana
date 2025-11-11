@@ -13,19 +13,12 @@ import type { Phases } from '../../../../../../common/types';
 
 const useStyles = ({ enabled, phase }: { enabled: boolean; phase: string }) => {
   const { euiTheme } = useEuiTheme();
-  const isBorealis = euiTheme.themeName === 'EUI_THEME_BOREALIS';
 
   const phaseIconColors = {
-    hot: isBorealis ? euiTheme.colors.vis.euiColorVis6 : euiTheme.colors.vis.euiColorVisBehindText9,
-    warm: isBorealis
-      ? euiTheme.colors.vis.euiColorVis9
-      : euiTheme.colors.vis.euiColorVisBehindText5,
-    cold: isBorealis
-      ? euiTheme.colors.vis.euiColorVis2
-      : euiTheme.colors.vis.euiColorVisBehindText1,
-    frozen: isBorealis
-      ? euiTheme.colors.vis.euiColorVis4
-      : euiTheme.colors.vis.euiColorVisBehindText4,
+    hot: euiTheme.colors.vis.euiColorVis6,
+    warm: euiTheme.colors.vis.euiColorVis9,
+    cold: euiTheme.colors.vis.euiColorVis2,
+    frozen: euiTheme.colors.vis.euiColorVis4,
     delete: euiTheme.colors.darkShade,
   };
 

@@ -27,7 +27,15 @@
         "label": "SplitButton",
         "description": [],
         "signature": [
-          "({ isDisabled, disabled, isLoading, color, size, isSecondaryButtonLoading, isSecondaryButtonDisabled, secondaryButtonIcon, secondaryButtonAriaLabel, secondaryButtonTitle, onSecondaryButtonClick, isMainButtonLoading, isMainButtonDisabled, iconOnly, iconType, ...mainButtonProps }: SplitButtonProps) => React.JSX.Element"
+          "({ isDisabled, disabled, isLoading, color, size, isSecondaryButtonLoading, isSecondaryButtonDisabled, secondaryButtonIcon, secondaryButtonAriaLabel, secondaryButtonTitle, secondaryButtonFill, onSecondaryButtonClick, isMainButtonLoading, isMainButtonDisabled, iconOnly, iconType, ...mainButtonProps }: ",
+          {
+            "pluginId": "@kbn/split-button",
+            "scope": "common",
+            "docId": "kibKbnSplitButtonPluginApi",
+            "section": "def-common.SplitButtonProps",
+            "text": "SplitButtonProps"
+          },
+          ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/private/kbn-split-button/src/split_button.tsx",
         "deprecated": false,
@@ -38,10 +46,16 @@
             "id": "def-common.SplitButton.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  // Common props\n  isDisabled = false,\n  disabled = false,\n  isLoading = false,\n  color = 'primary',\n  size = 'm',\n\n  // Secondary button props\n  isSecondaryButtonLoading = false,\n  isSecondaryButtonDisabled = false,\n  secondaryButtonIcon,\n  secondaryButtonAriaLabel,\n  secondaryButtonTitle,\n  onSecondaryButtonClick,\n\n  // Primary button props\n  isMainButtonLoading = false,\n  isMainButtonDisabled = false,\n  iconOnly = false,\n  iconType,\n  ...mainButtonProps\n}",
+            "label": "{\n  // Common props\n  isDisabled = false,\n  disabled = false,\n  isLoading = false,\n  color = 'primary',\n  size = 'm',\n\n  // Secondary button props\n  isSecondaryButtonLoading = false,\n  isSecondaryButtonDisabled = false,\n  secondaryButtonIcon,\n  secondaryButtonAriaLabel,\n  secondaryButtonTitle,\n  secondaryButtonFill,\n  onSecondaryButtonClick,\n\n  // Primary button props\n  isMainButtonLoading = false,\n  isMainButtonDisabled = false,\n  iconOnly = false,\n  iconType,\n  ...mainButtonProps\n}",
             "description": [],
             "signature": [
-              "SplitButtonProps"
+              {
+                "pluginId": "@kbn/split-button",
+                "scope": "common",
+                "docId": "kibKbnSplitButtonPluginApi",
+                "section": "def-common.SplitButtonProps",
+                "text": "SplitButtonProps"
+              }
             ],
             "path": "src/platform/packages/private/kbn-split-button/src/split_button.tsx",
             "deprecated": false,
@@ -55,7 +69,43 @@
     ],
     "interfaces": [],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/split-button",
+        "id": "def-common.SplitButtonProps",
+        "type": "Type",
+        "tags": [],
+        "label": "SplitButtonProps",
+        "description": [],
+        "signature": [
+          "((",
+          "DisambiguateSet",
+          "<",
+          "EuiButtonPropsForAnchor",
+          ", ",
+          "EuiButtonPropsForButton",
+          "> & ",
+          "EuiButtonDisplayCommonProps",
+          " & ",
+          "EuiButtonProps",
+          " & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; } & React.ButtonHTMLAttributes<HTMLButtonElement> & { buttonRef?: React.Ref<HTMLButtonElement> | undefined; }) | (",
+          "DisambiguateSet",
+          "<",
+          "EuiButtonPropsForButton",
+          ", ",
+          "EuiButtonPropsForAnchor",
+          "> & ",
+          "EuiButtonProps",
+          " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement> & { buttonRef?: React.Ref<HTMLAnchorElement> | undefined; })) & { isMainButtonLoading?: boolean | undefined; isMainButtonDisabled?: boolean | undefined; iconOnly?: boolean | undefined; isSecondaryButtonLoading?: boolean | undefined; isSecondaryButtonDisabled?: boolean | undefined; secondaryButtonIcon: ",
+          "IconType",
+          "; secondaryButtonAriaLabel?: string | undefined; secondaryButtonTitle?: string | undefined; secondaryButtonFill?: boolean | undefined; onSecondaryButtonClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; }"
+        ],
+        "path": "src/platform/packages/private/kbn-split-button/src/split_button.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   }
 }

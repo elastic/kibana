@@ -63,7 +63,6 @@ export function transformDashboardOut(
     }),
     ...(tags && tags.length && { tags }),
     ...(timeRange && { timeRange }),
-    timeRestore: timeRestore ?? false,
     title,
     ...(version && { version }),
   };

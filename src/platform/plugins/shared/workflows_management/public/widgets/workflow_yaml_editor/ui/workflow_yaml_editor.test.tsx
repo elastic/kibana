@@ -14,7 +14,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { I18nProviderMock } from '@kbn/core-i18n-browser-mocks/src/i18n_context_mock';
 import type { WorkflowYAMLEditorProps } from './workflow_yaml_editor';
 import { WorkflowYAMLEditor } from './workflow_yaml_editor';
-import { createMockStore } from '../lib/store/__mocks__/store.mock';
+import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
 
 // Mock the YamlEditor component to avoid Monaco complexity in tests
 jest.mock('../../../shared/ui/yaml_editor', () => ({
@@ -231,16 +231,20 @@ steps:
         <WorkflowYAMLEditor
           {...defaultProps}
           workflowYaml={yamlWithAlertTrigger}
-          readOnly={false}
+          isExecutionYaml={false}
         />
       );
 
       expect(document.querySelector('[data-testid="yaml-editor"]')).toBeInTheDocument();
     });
 
-    it('renders in readOnly mode', () => {
+    it('renders in readOnly mode when isExecutionYaml is true', () => {
       renderWithProviders(
-        <WorkflowYAMLEditor {...defaultProps} workflowYaml={yamlWithAlertTrigger} readOnly={true} />
+        <WorkflowYAMLEditor
+          {...defaultProps}
+          workflowYaml={yamlWithAlertTrigger}
+          isExecutionYaml={true}
+        />
       );
 
       expect(document.querySelector('[data-testid="yaml-editor"]')).toBeInTheDocument();
@@ -262,7 +266,11 @@ steps:
       // Should not throw an error
       expect(() => {
         renderWithProviders(
-          <WorkflowYAMLEditor {...defaultProps} workflowYaml={invalidYaml} readOnly={false} />
+          <WorkflowYAMLEditor
+            {...defaultProps}
+            workflowYaml={invalidYaml}
+            isExecutionYaml={false}
+          />
         );
       }).not.toThrow();
 
