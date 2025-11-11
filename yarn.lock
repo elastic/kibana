@@ -7111,6 +7111,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/lens-common-2@link:src/platform/packages/shared/kbn-lens-common-2":
+  version "0.0.0"
+  uid ""
+
 "@kbn/lens-common@link:src/platform/packages/shared/kbn-lens-common":
   version "0.0.0"
   uid ""
@@ -9280,6 +9284,10 @@
   uid ""
 
 "@kbn/workflows-management-plugin@link:src/platform/plugins/shared/workflows_management":
+  version "0.0.0"
+  uid ""
+
+"@kbn/workflows-ui@link:src/platform/packages/shared/kbn-workflows-ui":
   version "0.0.0"
   uid ""
 
