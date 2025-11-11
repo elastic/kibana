@@ -8,6 +8,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    "../../../../../typings/emotion.d.ts"
   ],
   "kbn_references": [
     "@kbn/config-schema",
@@ -60,7 +61,8 @@
     "@kbn/search-queries",
     "@kbn/monaco",
     "@kbn/search-shared-ui",
-    "@kbn/license-management-plugin"
+    "@kbn/license-management-plugin",
+    "@kbn/react-query"
   ],
   "exclude": [
     "target/**/*",

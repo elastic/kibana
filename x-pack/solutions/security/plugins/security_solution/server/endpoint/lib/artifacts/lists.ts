@@ -20,7 +20,10 @@ import {
 } from '@kbn/securitysolution-list-constants';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
-import { PROCESS_DESCENDANT_EXTRA_ENTRY } from '../../../../common/endpoint/service/artifacts/constants';
+import {
+  PROCESS_DESCENDANT_EXTRA_ENTRY,
+  TRUSTED_PROCESS_DESCENDANTS_TAG,
+} from '../../../../common/endpoint/service/artifacts/constants';
 import type { ExperimentalFeatures } from '../../../../common';
 import { isProcessDescendantsEnabled } from '../../../../common/endpoint/service/artifacts/utils';
 import type {
@@ -33,7 +36,8 @@ import type {
   TranslatedEntryNestedEntry,
   TranslatedExceptionListItem,
   WrappedTranslatedExceptionList,
-  TranslatedEntriesOfDescendantOf,
+  TranslatedEntriesOfProcessDescendants,
+  TranslatedEntryTrustDescendants,
 } from '../../schemas';
 import {
   translatedPerformantEntries as translatedPerformantEntriesType,
@@ -187,11 +191,17 @@ export function translateToEndpointExceptions(
           storeUniqueItem(translatedItem);
         });
       } else if (
-        experimentalFeatures.filterProcessDescendantsForEventFiltersEnabled &&
         entry.list_id === ENDPOINT_ARTIFACT_LISTS.eventFilters.id &&
         isProcessDescendantsEnabled(entry)
       ) {
         const translatedItem = translateProcessDescendantEventFilter(schemaVersion, entry);
+        storeUniqueItem(translatedItem);
+      } else if (
+        experimentalFeatures.filterProcessDescendantsForTrustedAppsEnabled &&
+        entry.list_id === ENDPOINT_ARTIFACT_LISTS.trustedApps.id &&
+        isProcessDescendantsEnabled(entry, TRUSTED_PROCESS_DESCENDANTS_TAG)
+      ) {
+        const translatedItem = translateProcessDescendantTrustedApp(schemaVersion, entry);
         storeUniqueItem(translatedItem);
       } else {
         const translatedItem = translateItem(schemaVersion, entry);
@@ -209,10 +219,10 @@ function translateProcessDescendantEventFilter(
   schemaVersion: string,
   entry: ExceptionListItemSchema
 ): TranslatedExceptionListItem {
-  const translatedEntries: TranslatedEntriesOfDescendantOf = translateItem(schemaVersion, {
+  const translatedEntries: TranslatedEntriesOfProcessDescendants = translateItem(schemaVersion, {
     ...entry,
     entries: [...entry.entries, PROCESS_DESCENDANT_EXTRA_ENTRY],
-  }) as TranslatedEntriesOfDescendantOf;
+  }) as TranslatedEntriesOfProcessDescendants;
 
   return {
     type: entry.type,
@@ -225,6 +235,22 @@ function translateProcessDescendantEventFilter(
         },
       },
     ],
+  };
+}
+
+function translateProcessDescendantTrustedApp(
+  schemaVersion: string,
+  entry: ExceptionListItemSchema
+): TranslatedEntryTrustDescendants {
+  const translatedEntries: TranslatedEntriesOfProcessDescendants = translateItem(schemaVersion, {
+    ...entry,
+    entries: [...entry.entries, PROCESS_DESCENDANT_EXTRA_ENTRY],
+  }) as TranslatedEntriesOfProcessDescendants;
+
+  return {
+    type: entry.type,
+    trust_descendants: true,
+    entries: translatedEntries.entries,
   };
 }
 

@@ -40,7 +40,7 @@ export const RulesDeleteModalConfirmation = ({
     >
       <p>{confirmModalText}</p>
       {showWarningText && (
-        <EuiCallOut title={<>{warningText}</>} color="warning" iconType="warning" />
+        <EuiCallOut announceOnMount title={<>{warningText}</>} color="warning" iconType="warning" />
       )}
     </EuiConfirmModal>
   );

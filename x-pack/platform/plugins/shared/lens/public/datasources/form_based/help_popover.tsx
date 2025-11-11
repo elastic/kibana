@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { css } from '@emotion/react';
-import type { StartServices } from '../../types';
+import type { LensStartServices as StartServices } from '@kbn/lens-common';
 
 export const HelpPopoverButton = ({
   children,

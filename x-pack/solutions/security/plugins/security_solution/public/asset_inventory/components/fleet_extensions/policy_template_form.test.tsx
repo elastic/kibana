@@ -355,7 +355,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       );
       expect(getByTestId('externalLink')).toHaveAttribute(
         'href',
-        'https://ela.st/cloud-asset-discovery-get-started-aws.html'
+        'https://www.elastic.co/docs/solutions/security/cloud/asset-disc-aws'
       );
     });
     it(`documentation Hyperlink should have correct URL to redirect users to AWS page if user chose Cloudformation`, () => {
@@ -576,7 +576,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       );
       expect(getByText('documentation')).toHaveAttribute(
         'href',
-        'https://ela.st/cloud-asset-discovery-get-started-gcp.html'
+        'https://www.elastic.co/docs/solutions/security/cloud/asset-disc-gcp'
       );
     });
 
@@ -1068,7 +1068,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       });
     });
 
-    it.skip('should render setup technology selector for AWS and allow to select cloud connector in ess  aws environnement', async () => {
+    it('should render setup technology selector for AWS and allow to select cloud connector in ess aws environment', async () => {
       const newPackagePolicy = getMockPolicyAWS();
       (useKibana as jest.Mock).mockReturnValue({
         services: {
@@ -1125,7 +1125,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       });
     });
 
-    it('should render setup technology selector for AWS and allow to select cloud connector in cloud GCP environment', async () => {
+    it('should render setup technology selector for AWS and hide cloud connectors in cloud GCP environment', async () => {
       const newPackagePolicy = getMockPolicyAWS();
       (useKibana as jest.Mock).mockReturnValue({
         services: {
@@ -1179,6 +1179,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
         expect(optionValues).toEqual(
           expect.arrayContaining(['direct_access_keys', 'temporary_keys'])
         );
+        expect(optionValues).not.toContain('cloud_connectors');
       });
     });
     it('should render setup technology selector for AWS and allow to select cloud connectors in serverless aws environment', async () => {
@@ -1300,6 +1301,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
         expect(optionValues).toEqual(
           expect.arrayContaining(['direct_access_keys', 'temporary_keys'])
         );
+        expect(optionValues).not.toContain('cloud_connectors');
       });
     });
 
@@ -1361,6 +1363,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
         expect(optionValues).toEqual(
           expect.arrayContaining(['direct_access_keys', 'temporary_keys'])
         );
+        expect(optionValues).not.toContain('cloud_connectors');
       });
     });
   });

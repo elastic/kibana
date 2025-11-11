@@ -6,7 +6,6 @@
  */
 
 import { curry } from 'lodash';
-import type { TypeOf } from '@kbn/config-schema';
 
 import type {
   ActionType as ConnectorType,
@@ -18,40 +17,39 @@ import {
   CasesConnectorFeatureId,
   SecurityConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
-import { validate } from '../lib/servicenow/validators';
 import {
-  ExecutorParamsSchemaSIR,
-  ExternalIncidentServiceConfigurationSchema,
   ExternalIncidentServiceSecretConfigurationSchema,
-} from '../lib/servicenow/schema';
-import * as i18n from '../lib/servicenow/translations';
+  ExternalIncidentServiceConfigurationSchema,
+} from '@kbn/connector-schemas/servicenow';
+import type {
+  ServiceNowPublicConfigurationBaseType,
+  ServiceNowSecretConfigurationType,
+  ExecutorSubActionGetChoicesParams,
+  ExecutorSubActionCommonFieldsParams,
+  ServiceNowPublicConfigurationType,
+} from '@kbn/connector-schemas/servicenow';
+import {
+  CONNECTOR_ID,
+  CONNECTOR_NAME,
+  ExecutorParamsSchemaSIR,
+} from '@kbn/connector-schemas/servicenow_sir';
+import { validate } from '../lib/servicenow/validators';
 import type {
   ExecutorParams,
   ExecutorSubActionPushParams,
   ServiceFactory,
   ExternalServiceAPI,
-  ServiceNowPublicConfigurationBaseType,
   ExternalService,
-  ExecutorSubActionCommonFieldsParams,
-  ExecutorSubActionGetChoicesParams,
   PushToServiceResponse,
   ServiceNowExecutorResultData,
-  ServiceNowPublicConfigurationType,
-  ServiceNowSecretConfigurationType,
 } from '../lib/servicenow/types';
-import {
-  ServiceNowSIRConnectorTypeId,
-  serviceNowSIRTable,
-  snExternalServiceConfig,
-} from '../lib/servicenow/config';
+import { serviceNowSIRTable, snExternalServiceConfig } from '../lib/servicenow/config';
 import { createExternalService } from './service';
 import { api as apiSIR } from './api';
 import { throwIfSubActionIsNotSupported } from '../lib/servicenow/utils';
 import { createServiceWrapper } from '../lib/servicenow/create_service_wrapper';
 
-export { ServiceNowSIRConnectorTypeId, serviceNowSIRTable };
-
-export type ActionParamsType = TypeOf<typeof ExecutorParamsSchemaSIR>;
+export { serviceNowSIRTable };
 
 export type ServiceNowConnectorType<
   C extends Record<string, unknown> = ServiceNowPublicConfigurationBaseType,
@@ -69,9 +67,9 @@ export function getServiceNowSIRConnectorType(): ServiceNowConnectorType<
   ExecutorParams
 > {
   return {
-    id: ServiceNowSIRConnectorTypeId,
+    id: CONNECTOR_ID,
     minimumLicenseRequired: 'platinum',
-    name: i18n.SERVICENOW_SIR,
+    name: CONNECTOR_NAME,
     supportedFeatureIds: [
       AlertingConnectorFeatureId,
       CasesConnectorFeatureId,
@@ -92,7 +90,7 @@ export function getServiceNowSIRConnectorType(): ServiceNowConnectorType<
       },
     },
     executor: curry(executor)({
-      actionTypeId: ServiceNowSIRConnectorTypeId,
+      actionTypeId: CONNECTOR_ID,
       createService: createExternalService,
       api: apiSIR,
     }),

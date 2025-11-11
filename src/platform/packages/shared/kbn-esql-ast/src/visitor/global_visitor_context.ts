@@ -25,6 +25,7 @@ import type {
   ESQLMap,
   ESQLMapEntry,
   ESQLOrderExpression,
+  ESQLParens,
   ESQLSource,
 } from '../types';
 import type * as types from './types';
@@ -543,6 +544,14 @@ export class GlobalVisitorContext<
         if (!this.methods.visitQuery || expressionNode.type !== 'query') break;
         return this.visitQuery(parent, expressionNode, input as any);
       }
+      case 'parens': {
+        if (this.methods.visitParensExpression) {
+          const result = this.visitParensExpression(parent, expressionNode, input as any);
+          if (result) return result;
+        }
+        // Parens wraps subqueries: can return null to let comments attach to nodes inside the subquery
+        break;
+      }
     }
     return this.visitExpressionGeneric(parent, expressionNode, input as any);
   }
@@ -644,6 +653,15 @@ export class GlobalVisitorContext<
   ): types.VisitorOutput<Methods, 'visitMapEntryExpression'> {
     const context = new contexts.MapEntryExpressionVisitorContext(this, node, parent);
     return this.visitWithSpecificContext('visitMapEntryExpression', context, input);
+  }
+
+  public visitParensExpression(
+    parent: contexts.VisitorContext | null,
+    node: ESQLParens,
+    input: types.VisitorInput<Methods, 'visitParensExpression'>
+  ): types.VisitorOutput<Methods, 'visitParensExpression'> {
+    const context = new contexts.ParensExpressionVisitorContext(this, node, parent);
+    return this.visitWithSpecificContext('visitParensExpression', context, input);
   }
 }
 

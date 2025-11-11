@@ -20,7 +20,7 @@ const generatePackageInputSchema = z.object({
     .describe(
       'The owning Github team of the package. Use list_teams before this to find the appropriate owner'
     ),
-  group: z.enum(['chat', 'search', 'observability', 'security', 'platform']),
+  group: z.enum(['workplaceai', 'search', 'observability', 'security', 'platform']),
 });
 
 async function generatePackage(input: z.infer<typeof generatePackageInputSchema>): Promise<string> {

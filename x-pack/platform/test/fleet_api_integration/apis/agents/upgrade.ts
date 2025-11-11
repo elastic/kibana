@@ -637,8 +637,7 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/215025
-    describe.skip('multiple agents', () => {
+    describe('multiple agents', () => {
       const fleetServerVersion = '7.16.0';
 
       beforeEach(async () => {
@@ -999,7 +998,7 @@ export default function (providerContext: FtrProviderContext) {
               await verifyActionResult();
               resolve({});
             }
-          }, 1000);
+          }, 3000);
         }).catch((e) => {
           throw e;
         });

@@ -43,7 +43,6 @@ import type { OnChangeProps } from '@kbn/lists-plugin/public';
 import type { ValueSuggestionsGetFn } from '@kbn/unified-search-plugin/public/autocomplete/providers/value_suggestion_provider';
 import { useCanAssignArtifactPerPolicy } from '../../../../hooks/artifacts/use_can_assign_artifact_per_policy';
 import { FormattedError } from '../../../../components/formatted_error';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useGetUpdatedTags } from '../../../../hooks/artifacts';
 import {
   FILTER_PROCESS_DESCENDANTS_TAG,
@@ -150,10 +149,6 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
     );
     const { getTagsUpdatedBy } = useGetUpdatedTags(exception);
     const euiTheme = useEuiTheme();
-
-    const isFilterProcessDescendantsFeatureEnabled = useIsExperimentalFeatureEnabled(
-      'filterProcessDescendantsForEventFiltersEnabled'
-    );
 
     const isFilterProcessDescendantsSelected = useMemo(
       () => isProcessDescendantsEnabled(exception),
@@ -320,10 +315,11 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
             fullWidth
             valueOfSelected={selectedOs}
             onChange={handleOnOsChange}
+            data-test-subj={getTestId('os-select')}
           />
         </EuiFormRow>
       ),
-      [handleOnOsChange, selectedOs]
+      [getTestId, handleOnOsChange, selectedOs]
     );
 
     // comments and handler
@@ -449,8 +445,6 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
     }, [getTestId, isFilterProcessDescendantsSelected]);
 
     const filterTypeSubsection = useMemo(() => {
-      if (!isFilterProcessDescendantsFeatureEnabled) return null;
-
       return (
         <>
           <EuiButtonGroup
@@ -487,7 +481,6 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         </>
       );
     }, [
-      isFilterProcessDescendantsFeatureEnabled,
       handleFilterTypeOnChange,
       euiTheme.euiTheme.size.l,
       filterTypeOptions,
@@ -505,7 +498,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         if (isCalledWithoutChanges) {
           const addedFields = arg.exceptionItems[0]?.entries.map((e) => e.field) || [''];
 
-          if (isFilterProcessDescendantsFeatureEnabled && isFilterProcessDescendantsSelected) {
+          if (isFilterProcessDescendantsSelected) {
             addedFields.push(PROCESS_DESCENDANT_EXTRA_ENTRY.field);
           }
 
@@ -543,13 +536,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         processChanged(updatedItem);
         if (!hasFormChanged) setHasFormChanged(true);
       },
-      [
-        exception,
-        hasFormChanged,
-        isFilterProcessDescendantsFeatureEnabled,
-        isFilterProcessDescendantsSelected,
-        processChanged,
-      ]
+      [exception, hasFormChanged, isFilterProcessDescendantsSelected, processChanged]
     );
     const exceptionBuilderComponentMemo = useMemo(
       () =>

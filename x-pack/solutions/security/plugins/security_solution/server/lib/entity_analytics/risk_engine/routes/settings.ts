@@ -59,6 +59,10 @@ export const riskEngineSettingsRoute = (router: EntityAnalyticsRoutesDeps['route
                 Array.isArray(result?.excludeAlertStatuses) &&
                 !result.excludeAlertStatuses.includes('closed'),
               enableResetToZero: result.enableResetToZero,
+              filters: (result.filters || []).map((f) => ({
+                entity_types: f.entity_types as Array<'host' | 'user' | 'service'>,
+                filter: f.filter,
+              })),
             },
           });
         } catch (e) {

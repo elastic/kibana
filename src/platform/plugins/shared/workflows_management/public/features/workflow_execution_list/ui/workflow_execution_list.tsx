@@ -7,24 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { UseEuiTheme } from '@elastic/eui';
+import type { EuiEmptyPromptProps, UseEuiTheme } from '@elastic/eui';
 import {
   EuiEmptyPrompt,
-  type EuiEmptyPromptProps,
   EuiFlexGroup,
+  EuiFlexItem,
   EuiIcon,
   EuiLoadingSpinner,
   EuiText,
   EuiTitle,
-  EuiFlexItem,
 } from '@elastic/eui';
-import { type WorkflowExecutionListDto } from '@kbn/workflows';
-import React, { useEffect, useRef } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
+import React, { useEffect, useRef } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { WorkflowExecutionListItem } from './workflow_execution_list_item';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { type WorkflowExecutionListDto } from '@kbn/workflows';
 import { ExecutionListFilters } from './workflow_execution_list_filters';
+import { WorkflowExecutionListItem } from './workflow_execution_list_item';
 import type { ExecutionListFiltersQueryParams } from './workflow_execution_list_stateful';
 
 export interface WorkflowExecutionListProps {
@@ -199,7 +198,7 @@ export const WorkflowExecutionList = ({
 const componentStyles = {
   container: ({ euiTheme }: UseEuiTheme) =>
     css({
-      padding: euiTheme.size.s,
+      padding: euiTheme.size.m,
       height: '100%',
       overflow: 'hidden',
     }),

@@ -70,6 +70,7 @@ describe('getObservablesFromEcsDataArray', () => {
           { field: 'host.name', value: ['host1'] },
           { field: 'file.hash.sha256', value: ['sha256hash', 'sha256hash2'] },
           { field: 'dns.question.name', value: ['example.com', 'example.org'] },
+          { field: 'agent.id', value: ['agent1', 'agent2'] },
         ],
       ])
     ).toEqual([
@@ -106,6 +107,16 @@ describe('getObservablesFromEcsDataArray', () => {
       {
         typeKey: 'observable-type-domain',
         value: 'example.org',
+        description: 'Auto extracted observable',
+      },
+      {
+        typeKey: 'observable-type-agent-id',
+        value: 'agent1',
+        description: 'Auto extracted observable',
+      },
+      {
+        typeKey: 'observable-type-agent-id',
+        value: 'agent2',
         description: 'Auto extracted observable',
       },
     ]);

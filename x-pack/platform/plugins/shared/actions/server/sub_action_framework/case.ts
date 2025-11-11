@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { Type } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import type { ExternalServiceIncidentResponse, PushToServiceResponse } from './types';
 import { SubActionConnector } from './sub_action_connector';
 import type { ServiceParams } from './types';
@@ -50,25 +49,29 @@ export abstract class CaseConnector<Config, Secrets, Incident, GetIncidentRespon
 {
   constructor(
     params: ServiceParams<Config, Secrets>,
-    pushToServiceIncidentParamsSchema: Record<string, Type<unknown>>
+    pushToServiceIncidentParamsSchema: Record<string, z.ZodType<unknown>>
   ) {
     super(params);
 
     this.registerSubAction({
       name: 'pushToService',
       method: 'pushToService',
-      schema: schema.object({
-        incident: schema
+      schema: z.object({
+        incident: z
           .object(pushToServiceIncidentParamsSchema)
-          .extends({ externalId: schema.nullable(schema.string()) }),
-        comments: schema.nullable(
-          schema.arrayOf(
-            schema.object({
-              comment: schema.string(),
-              commentId: schema.string(),
-            })
+          .extend({ externalId: z.string().nullable().default(null) })
+          .strict(),
+        comments: z
+          .array(
+            z
+              .object({
+                comment: z.string(),
+                commentId: z.string(),
+              })
+              .strict()
           )
-        ),
+          .nullable()
+          .default(null),
       }),
     });
   }

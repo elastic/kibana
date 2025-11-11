@@ -369,7 +369,7 @@ describe('bulkEditRulesRoute', () => {
   });
 
   describe('internally managed rule types', () => {
-    it('throws 400 if the rule type is internally managed', async () => {
+    it('should throw 400 error when trying to bulk update an internally managed rule type using the ids param', async () => {
       const licenseState = licenseStateMock.create();
       const router = httpServiceMock.createRouter();
 
@@ -394,17 +394,17 @@ describe('bulkEditRulesRoute', () => {
           ]),
         },
         {
-          body: bulkEditRequest,
+          body: { ...bulkEditRequest, ids: ['1'] },
         },
         ['ok']
       );
 
       await expect(handler(context, req, res)).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Cannot update rule of type \\"test.internal-rule-type\\" because it is internally managed."`
+        `"Cannot update rules of type \\"test.internal-rule-type\\" because they are internally managed."`
       );
     });
 
-    it('does not throw 400 if the rule type is internally managed and the operation is apiKey', async () => {
+    it('should ignore internal rule types when trying to bulk update using the filter param', async () => {
       const licenseState = licenseStateMock.create();
       const router = httpServiceMock.createRouter();
 
@@ -429,82 +429,12 @@ describe('bulkEditRulesRoute', () => {
           ]),
         },
         {
-          body: { ...bulkEditRequest, operations: [{ field: 'apiKey', operation: 'set' }] },
+          body: { ...bulkEditRequest, filter: 'alert.attributes.tags: "test.internal-rule-type"' },
         },
         ['ok']
       );
 
       await expect(handler(context, req, res)).resolves.not.toThrow();
-    });
-
-    it('throws 400 if the rule type is internally managed and multiple non supported operations', async () => {
-      const licenseState = licenseStateMock.create();
-      const router = httpServiceMock.createRouter();
-
-      rulesClient.getRuleTypesByQuery.mockResolvedValueOnce({
-        ruleTypes: ['test.internal-rule-type'],
-      });
-
-      bulkEditInternalRulesRoute(router, licenseState);
-
-      const [config, handler] = router.post.mock.calls[0];
-
-      expect(config.path).toBe('/internal/alerting/rules/_bulk_edit');
-
-      rulesClient.bulkEdit.mockResolvedValueOnce(bulkEditResult);
-
-      const [context, req, res] = mockHandlerArguments(
-        {
-          rulesClient,
-          // @ts-expect-error: not all args are required for this test
-          listTypes: new Map([
-            ['test.internal-rule-type', { id: 'test.internal-rule-type', internallyManaged: true }],
-          ]),
-        },
-        {
-          body: {
-            ...bulkEditRequest,
-            operations: [...bulkEditRequest.operations, { field: 'apiKey', operation: 'set' }],
-          },
-        },
-        ['ok']
-      );
-
-      await expect(handler(context, req, res)).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Cannot update rule of type \\"test.internal-rule-type\\" because it is internally managed."`
-      );
-    });
-
-    it('throws 400 if the rule type is not registered', async () => {
-      const licenseState = licenseStateMock.create();
-      const router = httpServiceMock.createRouter();
-
-      rulesClient.getRuleTypesByQuery.mockResolvedValue({
-        ruleTypes: ['test.internal-rule-type'],
-      });
-
-      bulkEditInternalRulesRoute(router, licenseState);
-
-      const [config, handler] = router.post.mock.calls[0];
-
-      expect(config.path).toBe('/internal/alerting/rules/_bulk_edit');
-
-      rulesClient.bulkEdit.mockResolvedValueOnce(bulkEditResult);
-
-      const [context, req, res] = mockHandlerArguments(
-        {
-          rulesClient,
-          listTypes: new Map([]),
-        },
-        {
-          body: bulkEditRequest,
-        },
-        ['ok']
-      );
-
-      await expect(handler(context, req, res)).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Cannot update rule of type \\"unknown\\" because it is internally managed."`
-      );
     });
   });
 });

@@ -119,36 +119,46 @@ export const dashboardMetaSchema = schema.object({
 });
 
 export const optionsSchema = schema.object({
-  hidePanelTitles: schema.boolean({
-    defaultValue: DEFAULT_DASHBOARD_OPTIONS.hidePanelTitles,
-    meta: { description: 'Hide the panel titles in the dashboard.' },
-  }),
-  useMargins: schema.boolean({
-    defaultValue: DEFAULT_DASHBOARD_OPTIONS.useMargins,
-    meta: { description: 'Show margins between panels in the dashboard layout.' },
-  }),
-  syncColors: schema.boolean({
-    defaultValue: DEFAULT_DASHBOARD_OPTIONS.syncColors,
-    meta: { description: 'Synchronize colors between related panels in the dashboard.' },
-  }),
-  syncTooltips: schema.boolean({
-    defaultValue: DEFAULT_DASHBOARD_OPTIONS.syncTooltips,
-    meta: { description: 'Synchronize tooltips between related panels in the dashboard.' },
-  }),
-  syncCursor: schema.boolean({
-    defaultValue: DEFAULT_DASHBOARD_OPTIONS.syncCursor,
-    meta: {
-      description: 'Synchronize cursor position between related panels in the dashboard.',
-    },
-  }),
+  hidePanelTitles: schema.maybe(
+    schema.boolean({
+      defaultValue: DEFAULT_DASHBOARD_OPTIONS.hidePanelTitles,
+      meta: { description: 'Hide the panel titles in the dashboard.' },
+    })
+  ),
+  useMargins: schema.maybe(
+    schema.boolean({
+      defaultValue: DEFAULT_DASHBOARD_OPTIONS.useMargins,
+      meta: { description: 'Show margins between panels in the dashboard layout.' },
+    })
+  ),
+  syncColors: schema.maybe(
+    schema.boolean({
+      defaultValue: DEFAULT_DASHBOARD_OPTIONS.syncColors,
+      meta: { description: 'Synchronize colors between related panels in the dashboard.' },
+    })
+  ),
+  syncTooltips: schema.maybe(
+    schema.boolean({
+      defaultValue: DEFAULT_DASHBOARD_OPTIONS.syncTooltips,
+      meta: { description: 'Synchronize tooltips between related panels in the dashboard.' },
+    })
+  ),
+  syncCursor: schema.maybe(
+    schema.boolean({
+      defaultValue: DEFAULT_DASHBOARD_OPTIONS.syncCursor,
+      meta: {
+        description: 'Synchronize cursor position between related panels in the dashboard.',
+      },
+    })
+  ),
 });
 
 export function getDashboardStateSchema() {
   return {
     controlGroupInput: schema.maybe(controlsGroupSchema),
-    description: schema.string({ defaultValue: '', meta: { description: 'A short description.' } }),
+    description: schema.maybe(schema.string({ meta: { description: 'A short description.' } })),
     filters: schema.maybe(schema.arrayOf(filterSchema)),
-    options: optionsSchema,
+    options: schema.maybe(optionsSchema),
     panels: schema.arrayOf(schema.oneOf([getPanelSchema(), getSectionSchema()]), {
       defaultValue: [],
     }),
@@ -160,10 +170,6 @@ export function getDashboardStateSchema() {
       )
     ),
     timeRange: schema.maybe(timeRangeSchema),
-    timeRestore: schema.boolean({
-      defaultValue: false,
-      meta: { description: 'Whether to restore time upon viewing this dashboard' },
-    }),
     title: schema.string({ meta: { description: 'A human-readable title for the dashboard' } }),
     version: schema.maybe(schema.number({ meta: { deprecated: true } })),
   };

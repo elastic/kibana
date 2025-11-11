@@ -6,15 +6,22 @@
  */
 
 import type { SomeDevLog } from '@kbn/some-dev-log';
-import type { Model } from '@kbn/inference-common';
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import { hostname } from 'os';
 import type { DatasetScoreWithStats } from './evaluation_stats';
+import type { EvaluationReport } from './report_model_score';
 
-interface ModelScoreDocument {
+export interface EvaluationScoreDocument {
   '@timestamp': string;
   run_id: string;
+  experiment_id: string;
+  repetitions: number;
   model: {
+    id: string;
+    family: string;
+    provider: string;
+  };
+  evaluator_model: {
     id: string;
     family: string;
     provider: string;
@@ -37,13 +44,45 @@ interface ModelScoreDocument {
     };
     scores: number[];
   };
-  experiments: Array<{
-    id?: string;
-  }>;
   environment: {
     hostname: string;
   };
-  tags: string[];
+}
+
+/**
+ * Parses Elasticsearch EvaluationScoreDocuments to DatasetScoreWithStats array
+ * This is the core transformation logic shared across different reporters
+ */
+export function parseScoreDocuments(documents: EvaluationScoreDocument[]): DatasetScoreWithStats[] {
+  const datasetMap = new Map<string, DatasetScoreWithStats>();
+
+  for (const doc of documents) {
+    if (!datasetMap.has(doc.dataset.id)) {
+      datasetMap.set(doc.dataset.id, {
+        id: doc.dataset.id,
+        name: doc.dataset.name,
+        numExamples: doc.dataset.examples_count,
+        evaluatorScores: new Map(),
+        evaluatorStats: new Map(),
+        experimentId: doc.experiment_id,
+      });
+    }
+
+    const dataset = datasetMap.get(doc.dataset.id)!;
+
+    dataset.evaluatorScores.set(doc.evaluator.name, doc.evaluator.scores);
+    dataset.evaluatorStats.set(doc.evaluator.name, {
+      mean: doc.evaluator.stats.mean,
+      median: doc.evaluator.stats.median,
+      stdDev: doc.evaluator.stats.std_dev,
+      min: doc.evaluator.stats.min,
+      max: doc.evaluator.stats.max,
+      count: doc.evaluator.stats.count,
+      percentage: doc.evaluator.stats.percentage,
+    });
+  }
+
+  return Array.from(datasetMap.values());
 }
 
 const EVALUATIONS_DATA_STREAM_ALIAS = '.kibana-evaluations';
@@ -63,14 +102,24 @@ export class EvaluationScoreRepository {
         settings: {
           number_of_shards: 1,
           number_of_replicas: 0,
-          refresh_interval: '30s',
+          refresh_interval: '5s',
           'index.hidden': true,
         },
         mappings: {
           properties: {
             '@timestamp': { type: 'date' },
             run_id: { type: 'keyword' },
+            experiment_id: { type: 'keyword' },
+            repetitions: { type: 'integer' },
             model: {
+              type: 'object',
+              properties: {
+                id: { type: 'keyword' },
+                family: { type: 'keyword' },
+                provider: { type: 'keyword' },
+              },
+            },
+            evaluator_model: {
               type: 'object',
               properties: {
                 id: { type: 'keyword' },
@@ -108,19 +157,12 @@ export class EvaluationScoreRepository {
                 },
               },
             },
-            experiments: {
-              type: 'nested',
-              properties: {
-                id: { type: 'keyword' },
-              },
-            },
             environment: {
               type: 'object',
               properties: {
                 hostname: { type: 'keyword' },
               },
             },
-            tags: { type: 'keyword' },
           },
         },
       },
@@ -170,17 +212,11 @@ export class EvaluationScoreRepository {
 
   async exportScores({
     datasetScoresWithStats,
-    evaluatorNames,
     model,
+    evaluatorModel,
     runId,
-    tags = [],
-  }: {
-    datasetScoresWithStats: DatasetScoreWithStats[];
-    evaluatorNames: string[];
-    model: Model;
-    runId: string;
-    tags?: string[];
-  }): Promise<void> {
+    repetitions,
+  }: EvaluationReport): Promise<void> {
     try {
       await this.ensureIndexTemplate();
       await this.ensureDatastream();
@@ -190,24 +226,30 @@ export class EvaluationScoreRepository {
         return;
       }
 
-      const documents: ModelScoreDocument[] = [];
+      const documents: EvaluationScoreDocument[] = [];
       const timestamp = new Date().toISOString();
 
       for (const dataset of datasetScoresWithStats) {
-        for (const evaluatorName of evaluatorNames) {
-          const stats = dataset.evaluatorStats.get(evaluatorName);
+        for (const [evaluatorName, stats] of dataset.evaluatorStats.entries()) {
           const scores = dataset.evaluatorScores.get(evaluatorName) || [];
-          if (!stats || stats.count === 0) {
+          if (stats.count === 0) {
             continue;
           }
 
-          const document: ModelScoreDocument = {
+          const document: EvaluationScoreDocument = {
             '@timestamp': timestamp,
             run_id: runId,
+            experiment_id: dataset.experimentId,
+            repetitions,
             model: {
               id: model.id || 'unknown',
               family: model.family,
               provider: model.provider,
+            },
+            evaluator_model: {
+              id: evaluatorModel.id || 'unknown',
+              family: evaluatorModel.family,
+              provider: evaluatorModel.provider,
             },
             dataset: {
               id: dataset.id,
@@ -227,11 +269,9 @@ export class EvaluationScoreRepository {
               },
               scores,
             },
-            experiments: dataset.experiments || [],
             environment: {
               hostname: hostname(),
             },
-            tags,
           };
 
           documents.push(document);
@@ -249,6 +289,7 @@ export class EvaluationScoreRepository {
               },
             };
           },
+          refresh: 'wait_for',
         });
 
         // Check for bulk operation errors
@@ -261,20 +302,9 @@ export class EvaluationScoreRepository {
           );
         }
 
-        this.log.success(
+        this.log.debug(
           `Successfully indexed evaluation results to a datastream: ${EVALUATIONS_DATA_STREAM_ALIAS}`
         );
-
-        // Log summary information for easy querying
-        this.log.info(`Export details:`);
-        this.log.info(
-          `  - Query filter: environment.hostname:"${hostname()}" AND model.id:"${
-            model.id
-          }" AND run_id:"${runId}"`
-        );
-        this.log.info(`  - Timestamp: ${timestamp}`);
-        this.log.info(`  - Datasets: ${datasetScoresWithStats.map((d) => d.name).join(', ')}`);
-        this.log.info(`  - Evaluators: ${evaluatorNames.join(', ')}`);
       }
     } catch (error) {
       this.log.error('Failed to export scores to Elasticsearch:', error);
@@ -282,7 +312,7 @@ export class EvaluationScoreRepository {
     }
   }
 
-  async getScoresByRunId(runId: string): Promise<ModelScoreDocument[]> {
+  async getScoresByRunId(runId: string): Promise<EvaluationScoreDocument[]> {
     try {
       const query = {
         bool: {

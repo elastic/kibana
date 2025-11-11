@@ -7,13 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './spec/lib/generate_yaml_schema';
+export * from './spec/lib/generate_yaml_schema_from_connectors';
+export * from './spec/lib/get_json_schema_from_yaml_schema';
 export * from './spec/schema';
 export * from './types/latest';
 export * from './types/utils';
 export * from './common/constants';
+export * from './common/privileges';
 export * from './common/elasticsearch_request_builder';
 export * from './common/kibana_request_builder';
+export * from './common/connector_utils';
 
 // Export specific types that are commonly used
 export type { BuiltInStepType, TriggerType } from './spec/schema';

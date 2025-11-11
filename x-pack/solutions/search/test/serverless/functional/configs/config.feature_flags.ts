@@ -23,9 +23,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...baseConfig.get('kbnTestServer'),
       serverArgs: [
         ...baseConfig.get('kbnTestServer.serverArgs'),
-        '--feature_flags.overrides.core.chrome.projectSideNav=v2',
         `--uiSettings.overrides.agentBuilder:enabled=true`,
         `--uiSettings.overrides.searchPlayground:searchModeEnabled=true`,
+        '--uiSettings.overrides.hideAnnouncements=true',
+        '--feature_flags.overrides.searchSolution.gettingStartedEnabled=true',
       ],
     },
     // load tests in the index file

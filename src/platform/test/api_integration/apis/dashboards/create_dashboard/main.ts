@@ -15,8 +15,8 @@ import type { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   describe('main', () => {
-    it('sets top level default values', async () => {
-      const title = `foo-${Date.now()}-${Math.random()}`;
+    it('should create a dashboard', async () => {
+      const title = 'Hello world dashboard';
 
       const response = await supertest
         .post(PUBLIC_API_PATH)
@@ -28,14 +28,11 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
       expect(response.status).to.be(200);
-      expect(response.body.data.panels).to.eql([]);
-      expect(response.body.data.timeRestore).to.be(false);
-      expect(response.body.data.options).to.eql({
-        hidePanelTitles: false,
-        useMargins: true,
-        syncColors: true,
-        syncTooltips: true,
-        syncCursor: true,
+      expect(response.body.data).to.eql({
+        namespaces: ['default'],
+        panels: [],
+        references: [],
+        title,
       });
     });
 

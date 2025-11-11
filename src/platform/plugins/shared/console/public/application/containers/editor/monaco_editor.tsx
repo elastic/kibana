@@ -11,9 +11,11 @@ import type { CSSProperties } from 'react';
 import React, { useCallback, useMemo, useRef, useState, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { CodeEditor } from '@kbn/code-editor';
+
+import { CodeEditor } from '@kbn/code-editor/code_editor';
 import type { ESQLCallbacks, monaco } from '@kbn/monaco';
 import { CONSOLE_LANG_ID, CONSOLE_THEME_ID, ConsoleLang } from '@kbn/monaco';
+
 import { i18n } from '@kbn/i18n';
 import { getESQLSources } from '@kbn/esql-editor/src/helpers';
 import { getESQLQueryColumns } from '@kbn/esql-utils';
@@ -56,9 +58,15 @@ export interface EditorProps {
   localStorageValue: string | undefined;
   value: string;
   setValue: (value: string) => void;
+  customParsedRequestsProvider?: (model: any) => any;
 }
 
-export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps) => {
+export const MonacoEditor = ({
+  localStorageValue,
+  value,
+  setValue,
+  customParsedRequestsProvider,
+}: EditorProps) => {
   const context = useServicesContext();
   const {
     services: {
@@ -66,7 +74,6 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
       notifications,
       settings: settingsService,
       autocompleteInfo,
-      dataViews,
       data,
       licensing,
       application,
@@ -118,17 +125,29 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
 
   const editorDidMountCallback = useCallback(
     (editor: monaco.editor.IStandaloneCodeEditor) => {
+      // Create custom provider if factory function is provided
+      const customProvider = customParsedRequestsProvider
+        ? customParsedRequestsProvider(editor.getModel())
+        : undefined;
+
       const provider = new MonacoEditorActionsProvider(
         editor,
         setEditorActionsCss,
-        highlightedLinesClassName
+        highlightedLinesClassName,
+        customProvider
       );
       setInputEditor(provider);
       actionsProvider.current = provider;
       setupResizeChecker(divRef.current!, editor);
       setEditorInstace(editor);
     },
-    [highlightedLinesClassName, setInputEditor, setupResizeChecker]
+    [
+      setupResizeChecker,
+      setInputEditor,
+      setEditorInstace,
+      customParsedRequestsProvider,
+      highlightedLinesClassName,
+    ]
   );
 
   useEffect(() => {
@@ -164,14 +183,14 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
     const callbacks: ESQLCallbacks = {
       getSources: async () => {
         const getLicense = licensing?.getLicense;
-        return await getESQLSources(dataViews, { application, http }, getLicense);
+        return await getESQLSources({ application, http }, getLicense);
       },
       getColumnsFor: async ({ query: queryToExecute }: { query?: string } | undefined = {}) => {
         if (queryToExecute) {
           try {
             const columns = await getESQLQueryColumns({
               esqlQuery: queryToExecute,
-              search: data.search.search,
+              search: data?.search?.search,
             });
             return (
               columns?.map((c) => {
@@ -192,7 +211,7 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
       },
     };
     return callbacks;
-  }, [licensing, dataViews, application, http, data.search.search]);
+  }, [licensing, application, http, data?.search?.search]);
 
   const suggestionProvider = useMemo(
     () => ConsoleLang.getSuggestionProvider?.(esqlCallbacks, actionsProvider),
@@ -281,6 +300,7 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
         accessibilityOverlayEnabled={settings.isAccessibilityOverlayEnabled}
         editorDidMount={editorDidMountCallback}
         editorWillUnmount={editorWillUnmountCallback}
+        links={true}
         options={{
           fontSize: settings.fontSize,
           wordWrap: settings.wrapMode === true ? 'on' : 'off',

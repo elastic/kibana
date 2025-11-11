@@ -26,6 +26,7 @@
     "@kbn/i18n-react",
     "@kbn/analytics",
     "@kbn/test-jest-helpers",
+    "@kbn/test-eui-helpers",
     "@kbn/config-schema",
     "@kbn/shared-ux-router",
     "@kbn/react-kibana-context-render",

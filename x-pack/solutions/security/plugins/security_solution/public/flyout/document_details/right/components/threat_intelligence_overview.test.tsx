@@ -78,10 +78,7 @@ describe('<ThreatIntelligenceOverview />', () => {
     (useFetchThreatIntelligence as jest.Mock).mockReturnValue({
       loading: false,
     });
-    (useNavigateToLeftPanel as jest.Mock).mockReturnValue({
-      navigateToLeftPanel: mockNavigateToLeftPanel,
-      isEnabled: true,
-    });
+    (useNavigateToLeftPanel as jest.Mock).mockReturnValue(mockNavigateToLeftPanel);
   });
 
   it('should render wrapper component', () => {
@@ -98,25 +95,10 @@ describe('<ThreatIntelligenceOverview />', () => {
       dataFormattedForFieldBrowser,
       isPreviewMode: true,
     });
-    (useNavigateToLeftPanel as jest.Mock).mockReturnValue({
-      navigateToLeftPanel: mockNavigateToLeftPanel,
-      isEnabled: true,
-    });
+
     const { getByTestId, queryByTestId } = renderThreatIntelligenceOverview();
     expect(queryByTestId(TITLE_ICON_TEST_ID)).not.toBeInTheDocument();
     expect(getByTestId(TITLE_LINK_TEST_ID)).toBeInTheDocument();
-  });
-
-  it('should not render link if navigation is not enabled', () => {
-    (useNavigateToLeftPanel as jest.Mock).mockReturnValue({
-      navigateToLeftPanel: mockNavigateToLeftPanel,
-      isEnabled: false,
-    });
-
-    const { getByTestId, queryByTestId } = renderThreatIntelligenceOverview();
-
-    expect(queryByTestId(TITLE_LINK_TEST_ID)).not.toBeInTheDocument();
-    expect(getByTestId(TITLE_TEXT_TEST_ID)).toBeInTheDocument();
   });
 
   it('should render 1 match detected and 1 field enriched', () => {

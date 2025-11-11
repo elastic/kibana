@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { useKibana } from '@kbn/reporting-public';
 import { getScheduledReportsList } from '../apis/get_scheduled_reports_list';
 import { queryKeys } from '../query_keys';

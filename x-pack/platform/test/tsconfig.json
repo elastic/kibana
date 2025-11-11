@@ -152,7 +152,6 @@
     "@kbn/controls-constants",
     "@kbn/palettes",
     "@kbn/field-formats-plugin",
-    "@kbn/visualizations-plugin",
     "@kbn/datemath",
     "@kbn/global-search-plugin",
     "@kbn/global-search-test-plugin",
@@ -172,5 +171,9 @@
     "@kbn/onechat-plugin",
     "@kbn/field-formats-common",
     "@kbn/reporting-test-routes",
+    "@kbn/alerting-types",
+    "@kbn/visualizations-common",
+    "@kbn/es-types",
+    "@kbn/connector-schemas",
   ]
 }

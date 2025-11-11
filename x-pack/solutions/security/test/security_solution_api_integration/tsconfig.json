@@ -2,23 +2,20 @@
   "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": [
-      "node",
-      "jest",
-      "@kbn/ambient-ftr-types"
-    ],
+    "types": ["node", "jest", "@kbn/ambient-ftr-types"]
   },
   "include": [
     "**/*",
     "../../../../../typings/**/*",
     "../../../../../src/platform/packages/shared/kbn-test/types/ftr_globals/**/*"
   ],
-  "exclude": [
-    "target/**/*"
-  ],
+  "exclude": ["target/**/*", "config/services/detections_response/**/*"],
   "kbn_references": [
     {
       "path": "../security_solution_endpoint/tsconfig.json"
+    },
+    {
+      "path": "config/services/detections_response/tsconfig.json"
     },
     "@kbn/dev-utils",
     "@kbn/test",
@@ -42,7 +39,6 @@
     "@kbn/securitysolution-es-utils",
     "@kbn/datemath",
     "@kbn/safer-lodash-set",
-    "@kbn/stack-connectors-plugin",
     "@kbn/ftr-common-functional-services",
     "@kbn/actions-plugin",
     "@kbn/task-manager-plugin",
@@ -64,6 +60,8 @@
     "@kbn/securitysolution-exceptions-common",
     "@kbn/std",
     "@kbn/securitysolution-utils",
-    "@kbn/security-solution-test-api-clients"
+    "@kbn/security-solution-test-api-clients",
+    "@kbn/cloud-security-posture-common",
+    "@kbn/connector-schemas"
   ]
 }

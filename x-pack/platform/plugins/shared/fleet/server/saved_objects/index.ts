@@ -1418,16 +1418,14 @@ export const OUTPUT_INCLUDE_AAD_FIELDS = new Set([
   'channel_buffer_size',
 ]);
 
-// dangerouslyExposeValue added to allow the user with access to the SO to see and edit these values through the UI
+// Encrypted fields need to be retrieved using an EncryptedSavedObjectsClient.
 export const OUTPUT_ENCRYPTED_FIELDS = new Set([
-  { key: 'ssl', dangerouslyExposeValue: true },
-  { key: 'password', dangerouslyExposeValue: true },
-  { key: 'kibana_api_key', dangerouslyExposeValue: true },
+  { key: 'ssl' },
+  { key: 'password' },
+  { key: 'kibana_api_key' },
 ]);
 
-export const FLEET_SERVER_HOST_ENCRYPTED_FIELDS = new Set([
-  { key: 'ssl', dangerouslyExposeValue: true },
-]);
+export const FLEET_SERVER_HOST_ENCRYPTED_FIELDS = new Set([{ key: 'ssl' }]);
 
 export function registerEncryptedSavedObjects(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
@@ -1456,7 +1454,7 @@ export function registerEncryptedSavedObjects(
   });
   encryptedSavedObjects.registerType({
     type: DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
-    attributesToEncrypt: new Set([{ key: 'ssl', dangerouslyExposeValue: true }]),
+    attributesToEncrypt: new Set([{ key: 'ssl' }]),
     // enforceRandomId allows to create an SO with an arbitrary id
     enforceRandomId: false,
   });

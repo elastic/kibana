@@ -22,8 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Dashboard control group settings', () => {
     before(async () => {
-      await dashboard.loadSavedDashboard('control group settings test dashboard');
-      await dashboard.switchToEditMode();
+      await dashboard.loadDashboardInEditMode('control group settings test dashboard');
     });
 
     describe('filtering settings', () => {

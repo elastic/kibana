@@ -56,7 +56,7 @@ export function useLensInput({
 
   const lensHelpersAsync = useAsync(() => lens.stateHelperApi(), [lens]);
   const dataViewAsync = useAsync(
-    () => getESQLAdHocDataview(esqlQuery, dataViews),
+    () => getESQLAdHocDataview(esqlQuery, dataViews, { skipFetchFields: true }),
     [esqlQuery, dataViews]
   );
 

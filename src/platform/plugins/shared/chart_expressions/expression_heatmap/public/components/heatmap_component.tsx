@@ -27,18 +27,15 @@ import { Chart, Heatmap, ScaleType, Settings, TooltipType, Tooltip } from '@elas
 import type { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { search } from '@kbn/data-plugin/public';
 import { LegendToggle, EmptyPlaceholder, useActiveCursor } from '@kbn/charts-plugin/public';
-import {
-  getAccessorByDimension,
-  getFormatByAccessor,
-} from '@kbn/visualizations-plugin/common/utils';
-import {
-  DEFAULT_LEGEND_SIZE,
-  LegendSizeToPixels,
-} from '@kbn/visualizations-plugin/common/constants';
+import { getAccessorByDimension, getFormatByAccessor } from '@kbn/chart-expressions-common';
 import { i18n } from '@kbn/i18n';
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
 import { IconChartHeatmap } from '@kbn/chart-icons';
-import { getOverridesFor } from '@kbn/chart-expressions-common';
+import {
+  getOverridesFor,
+  DEFAULT_LEGEND_SIZE,
+  LegendSizeToPixels,
+} from '@kbn/chart-expressions-common';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import type { HeatmapRenderProps, FilterEvent, BrushEvent } from '../../common';
 import {

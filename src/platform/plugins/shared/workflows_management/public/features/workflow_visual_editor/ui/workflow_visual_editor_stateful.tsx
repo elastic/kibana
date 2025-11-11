@@ -7,17 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { EuiEmptyPrompt } from '@elastic/eui';
-import type { WorkflowYaml } from '@kbn/workflows';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { WorkflowYaml } from '@kbn/workflows';
+import { useWorkflowExecution } from '@kbn/workflows-ui';
 import { WorkflowVisualEditor } from './workflow_visual_editor';
-import {
-  getCachedDynamicConnectorTypes,
-  getWorkflowZodSchemaLoose,
-} from '../../../../common/schema';
-import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
-import { useWorkflowExecution } from '../../../entities/workflows/model/use_workflow_execution';
+import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml';
+import { getWorkflowZodSchemaLoose } from '../../../../common/schema';
+import { useAvailableConnectors } from '../../../entities/connectors/model/use_available_connectors';
 
 interface WorkflowVisualEditorStatefulProps {
   workflowYaml: string;
@@ -29,23 +27,39 @@ export function WorkflowVisualEditorStateful({
   workflowExecutionId,
 }: WorkflowVisualEditorStatefulProps) {
   const { data: workflowExecution } = useWorkflowExecution(workflowExecutionId ?? null);
+  const connectorsData = useAvailableConnectors();
 
   const workflowYamlObject = useMemo(() => {
-    if (!workflowYaml) {
-      return null;
+    if (!workflowYaml || !connectorsData) {
+      return undefined;
     }
-    const dynamicConnectorTypes = getCachedDynamicConnectorTypes() || {};
     const result = parseWorkflowYamlToJSON(
       workflowYaml,
-      getWorkflowZodSchemaLoose(dynamicConnectorTypes)
+      getWorkflowZodSchemaLoose(connectorsData.connectorTypes)
     );
     if (result.error) {
       return null;
     }
     return result.data;
-  }, [workflowYaml]);
+  }, [workflowYaml, connectorsData]);
 
-  if (!workflowYamlObject) {
+  if (workflowYamlObject === undefined) {
+    return (
+      <EuiEmptyPrompt
+        icon={<EuiLoadingSpinner size="l" />}
+        title={
+          <h2>
+            <FormattedMessage
+              id="workflows.visualEditor.loadingWorkflowGraph"
+              defaultMessage="Loading workflow graph..."
+            />
+          </h2>
+        }
+      />
+    );
+  }
+
+  if (workflowYamlObject === null) {
     return (
       <EuiEmptyPrompt
         title={

@@ -19,6 +19,7 @@ export const ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN = `${ENDPOINT_ACTION_RESPON
 
 export const eventsIndexPattern = 'logs-endpoint.events.*';
 export const FILE_EVENTS_INDEX_PATTERN = 'logs-endpoint.events.file-*';
+export const DEVICE_EVENTS_INDEX_PATTERN = 'logs-endpoint.events.device-*';
 export const alertsIndexPattern = 'logs-endpoint.alerts-*';
 
 // metadata datastream
@@ -98,6 +99,7 @@ export const EXECUTE_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/execute`;
 export const UPLOAD_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/upload`;
 export const SCAN_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/scan`;
 export const RUN_SCRIPT_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/run_script`;
+export const MEMORY_DUMP_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/memory_dump`;
 export const CANCEL_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/cancel`;
 export const CUSTOM_SCRIPTS_ROUTE = `${BASE_INTERNAL_ENDPOINT_ACTION_ROUTE}/custom_scripts`;
 

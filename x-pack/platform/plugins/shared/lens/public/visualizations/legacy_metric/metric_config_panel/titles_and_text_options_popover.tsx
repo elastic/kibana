@@ -8,11 +8,9 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { TooltipWrapper } from '@kbn/visualization-utils';
+import type { FramePublicAPI, LegacyMetricState } from '@kbn/lens-common';
 import { ToolbarPopover } from '../../../shared_components';
-import { TitlePositionOptions } from './title_position_option';
-import type { FramePublicAPI } from '../../../types';
-import type { LegacyMetricState } from '../../../../common/types';
-import { TextFormattingOptions } from './text_formatting_options';
+import { LegacyMetricTitlesAndTextSettings } from './appearance_settings';
 
 export interface TitlesAndTextPopoverProps {
   state: LegacyMetricState;
@@ -39,8 +37,7 @@ export const TitlesAndTextOptionsPopover: React.FC<TitlesAndTextPopoverProps> = 
         groupPosition="none"
         buttonDataTestSubj="lnsTextOptionsButton"
       >
-        <TextFormattingOptions state={state} setState={setState} />
-        <TitlePositionOptions state={state} setState={setState} />
+        <LegacyMetricTitlesAndTextSettings state={state} setState={setState} />
       </ToolbarPopover>
     </TooltipWrapper>
   );

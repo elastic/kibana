@@ -10,48 +10,102 @@
 import { transformReferencesOut } from './transform_references_out';
 
 describe('transformReferencesOut', () => {
-  test('should not transform non-legacy saved object references', () => {
-    const references = [
-      {
-        name: 'someRef',
-        type: 'someType',
-        id: '1',
-      },
-    ];
-    expect(transformReferencesOut(references)).toEqual(references);
+  describe('legacy saved object references', () => {
+    test('should not transform non-legacy saved object references', () => {
+      const references = [
+        {
+          name: 'someRef',
+          type: 'someType',
+          id: '1',
+        },
+      ];
+      expect(transformReferencesOut(references)).toEqual(references);
+    });
+
+    test('should transform legacy saved object references', () => {
+      const references = [
+        {
+          name: 'panel_4',
+          type: 'someType',
+          id: '1',
+        },
+      ];
+      expect(transformReferencesOut(references)).toEqual([
+        {
+          name: '4:savedObjectRef',
+          type: 'someType',
+          id: '1',
+        },
+      ]);
+    });
+
+    test('should transform legacy saved object references prefixed by panel id', () => {
+      const references = [
+        {
+          name: '4:panel_4',
+          type: 'someType',
+          id: '1',
+        },
+      ];
+      expect(transformReferencesOut(references)).toEqual([
+        {
+          name: '4:savedObjectRef',
+          type: 'someType',
+          id: '1',
+        },
+      ]);
+    });
   });
 
-  test('should transform legacy saved object references', () => {
-    const references = [
-      {
-        name: 'panel_4',
-        type: 'someType',
-        id: '1',
-      },
-    ];
-    expect(transformReferencesOut(references)).toEqual([
-      {
-        name: '4:savedObjectRef',
-        type: 'someType',
-        id: '1',
-      },
-    ]);
-  });
+  describe('panel references', () => {
+    test('should drop references for panels that handle references on server', () => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      require('../../../../kibana_services').embeddableService = {
+        getTransforms: () => ({ transformOutInjectsReferences: true }),
+      };
 
-  test('should transform legacy saved object references prefixed by panel id', () => {
-    const references = [
-      {
-        name: '4:panel_4',
-        type: 'someType',
-        id: '1',
-      },
-    ];
-    expect(transformReferencesOut(references)).toEqual([
-      {
-        name: '4:savedObjectRef',
-        type: 'someType',
-        id: '1',
-      },
-    ]);
+      const references = [
+        {
+          name: 'panel1:someRef',
+          type: 'someType',
+          id: '1',
+        },
+      ];
+      expect(
+        transformReferencesOut(references, [
+          {
+            config: {},
+            grid: { x: 0, y: 0, w: 24, h: 15 },
+            uid: 'panel1',
+            type: 'someType',
+          },
+        ])
+      ).toEqual([]);
+    });
+
+    test('should keep references for panels that do not handle references on server', () => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      require('../../../../kibana_services').embeddableService = {
+        getTransforms: () => ({ transformOutInjectsReferences: false }),
+      };
+
+      const references = [
+        {
+          name: 'panel1:someRef',
+          type: 'someType',
+          id: '1',
+        },
+      ];
+      expect(
+        transformReferencesOut(references, [
+          {
+            config: {},
+            grid: { x: 0, y: 0, w: 24, h: 15 },
+            uid: 'panel1',
+            type: 'someType',
+          },
+        ])
+      ).toEqual(references);
+    });
   });
 });

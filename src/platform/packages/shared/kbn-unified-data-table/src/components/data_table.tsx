@@ -53,6 +53,7 @@ import {
   getShouldShowFieldHandler,
   canPrependTimeFieldColumn,
   getVisibleColumns,
+  prepareDataViewForEditing,
 } from '@kbn/discover-utils';
 import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -308,7 +309,7 @@ interface InternalUnifiedDataTableProps {
   /**
    * Callback to execute on edit runtime field
    */
-  onFieldEdited?: () => void;
+  onFieldEdited?: (options: { editedDataView: DataView }) => void;
   /**
    * Service dependencies
    */
@@ -465,6 +466,11 @@ interface InternalUnifiedDataTableProps {
    * Custom bulk action
    */
   customBulkActions?: CustomBulkActions;
+
+  /**
+   * When editing fields, it will create a new ad-hoc data view instead of modifying the existing one.
+   */
+  shouldKeepAdHocDataViewImmutable?: boolean;
 }
 
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
@@ -548,6 +554,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       disableCellActions = false,
       disableCellPopover = false,
       customBulkActions,
+      shouldKeepAdHocDataViewImmutable,
     },
     ref
   ) => {
@@ -848,20 +855,31 @@ const InternalUnifiedDataTable = React.forwardRef<
       () =>
         onFieldEdited
           ? async (fieldName: string) => {
+              const editedDataView = shouldKeepAdHocDataViewImmutable
+                ? await prepareDataViewForEditing(dataView, data.dataViews)
+                : dataView;
               closeFieldEditor.current =
                 onFieldEdited &&
                 (await services?.dataViewFieldEditor?.openEditor({
                   ctx: {
-                    dataView,
+                    dataView: editedDataView,
                   },
                   fieldName,
                   onSave: async () => {
-                    await onFieldEdited();
+                    await onFieldEdited({
+                      editedDataView,
+                    });
                   },
                 }));
             }
           : undefined,
-      [dataView, onFieldEdited, services?.dataViewFieldEditor]
+      [
+        data.dataViews,
+        dataView,
+        onFieldEdited,
+        services?.dataViewFieldEditor,
+        shouldKeepAdHocDataViewImmutable,
+      ]
     );
 
     const getCellValue = useCallback<UseDataGridColumnsCellActionsProps['getCellValue']>(
@@ -964,6 +982,7 @@ const InternalUnifiedDataTable = React.forwardRef<
           onResize,
           sortedColumns,
           disableCellActions,
+          dataGridRef,
         }),
       [
         cellActionsHandling,

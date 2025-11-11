@@ -91,7 +91,8 @@
     "@kbn/controls-schemas",
     "@kbn/controls-constants",
     "@kbn/presentation-util",
-    "@kbn/background-search"
+    "@kbn/react-query",
+    "@kbn/core-chrome-layout-utils"
   ],
   "exclude": ["target/**/*"]
 }

@@ -1285,6 +1285,7 @@ describe('AlertingEventLogger', () => {
           [TaskRunnerTimerSpan.PersistAlerts]: 60,
           [TaskRunnerTimerSpan.TriggerActions]: 70,
           [TaskRunnerTimerSpan.ProcessRuleRun]: 80,
+          [TaskRunnerTimerSpan.UpdateAlerts]: 90,
         },
       });
 
@@ -1308,6 +1309,7 @@ describe('AlertingEventLogger', () => {
                   persist_alerts_duration_ms: 60,
                   trigger_actions_duration_ms: 70,
                   process_rule_duration_ms: 80,
+                  update_alerts_duration_ms: 90,
                 },
               },
             },
@@ -1345,6 +1347,7 @@ describe('AlertingEventLogger', () => {
           [TaskRunnerTimerSpan.PersistAlerts]: 60,
           [TaskRunnerTimerSpan.TriggerActions]: 70,
           [TaskRunnerTimerSpan.ProcessRuleRun]: 80,
+          [TaskRunnerTimerSpan.UpdateAlerts]: 90,
         },
       });
 
@@ -1379,6 +1382,7 @@ describe('AlertingEventLogger', () => {
                   persist_alerts_duration_ms: 60,
                   trigger_actions_duration_ms: 70,
                   process_rule_duration_ms: 80,
+                  update_alerts_duration_ms: 90,
                 },
               },
             },

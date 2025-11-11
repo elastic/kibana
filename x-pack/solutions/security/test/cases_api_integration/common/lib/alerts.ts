@@ -18,7 +18,7 @@ import {
   waitForAlertsToBePresent,
   getAlertsByIds,
   getQueryAlertIds,
-} from '../../../common/utils/detections_response';
+} from '../../../security_solution_api_integration/config/services/detections_response';
 
 export const createSecuritySolutionAlerts = async (
   supertest: SuperTest.Agent,

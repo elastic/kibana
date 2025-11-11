@@ -21,7 +21,7 @@
           "\nGenerate significant event definitions, based on:\n- the description of the feature (or stream if feature is undefined)\n- dataset analysis\n- for the given significant event types"
         ],
         "signature": [
-          "({\n  stream,\n  feature,\n  start,\n  end,\n  esClient,\n  inferenceClient,\n  logger,\n}: { stream: ",
+          "({\n  stream,\n  feature,\n  start,\n  end,\n  esClient,\n  inferenceClient,\n  signal,\n}: { stream: ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
@@ -47,7 +47,7 @@
             "section": "def-common.BoundInferenceClient",
             "text": "BoundInferenceClient"
           },
-          "; logger: ",
+          "; signal: AbortSignal; logger: ",
           {
             "pluginId": "@kbn/logging",
             "scope": "common",
@@ -55,9 +55,7 @@
             "section": "def-common.Logger",
             "text": "Logger"
           },
-          "; }) => Promise<{ queries: { title: string; kql: string; category: ",
-          "SignificantEventType",
-          "; }[]; }>"
+          "; }) => Promise<{ queries: Query[]; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events/generate_significant_events.ts",
         "deprecated": false,
@@ -68,7 +66,7 @@
             "id": "def-server.generateSignificantEvents.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  stream,\n  feature,\n  start,\n  end,\n  esClient,\n  inferenceClient,\n  logger,\n}",
+            "label": "{\n  stream,\n  feature,\n  start,\n  end,\n  esClient,\n  inferenceClient,\n  signal,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events/generate_significant_events.ts",
             "deprecated": false,
@@ -1156,6 +1154,20 @@
               },
               {
                 "parentPluginId": "@kbn/streams-ai",
+                "id": "def-server.generateSignificantEvents.$1.signal",
+                "type": "Object",
+                "tags": [],
+                "label": "signal",
+                "description": [],
+                "signature": [
+                  "AbortSignal"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events/generate_significant_events.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/streams-ai",
                 "id": "def-server.generateSignificantEvents.$1.logger",
                 "type": "Object",
                 "tags": [],
@@ -1190,7 +1202,7 @@
           "\nGenerate a natural-language description"
         ],
         "signature": [
-          "({\n  stream,\n  feature,\n  start,\n  end,\n  esClient,\n  inferenceClient,\n}: { stream: ",
+          "({\n  stream,\n  feature,\n  start,\n  end,\n  esClient,\n  inferenceClient,\n  signal,\n}: { stream: ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
@@ -1216,7 +1228,7 @@
             "section": "def-common.BoundInferenceClient",
             "text": "BoundInferenceClient"
           },
-          "; }) => Promise<string>"
+          "; signal: AbortSignal; }) => Promise<string>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/description/generate_description.ts",
         "deprecated": false,
@@ -1227,7 +1239,7 @@
             "id": "def-server.generateStreamDescription.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  stream,\n  feature,\n  start,\n  end,\n  esClient,\n  inferenceClient,\n}",
+            "label": "{\n  stream,\n  feature,\n  start,\n  end,\n  esClient,\n  inferenceClient,\n  signal,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/description/generate_description.ts",
             "deprecated": false,
@@ -2312,6 +2324,20 @@
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/description/generate_description.ts",
                 "deprecated": false,
                 "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/streams-ai",
+                "id": "def-server.generateStreamDescription.$1.signal",
+                "type": "Object",
+                "tags": [],
+                "label": "signal",
+                "description": [],
+                "signature": [
+                  "AbortSignal"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/description/generate_description.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -2329,7 +2355,7 @@
           "\nIdentifies features in a stream, by:\n- describing the dataset (via sampled documents)\n- clustering docs together on similarity\n- asking the LLM to identify features by creating\nqueries and validating the resulting clusters"
         ],
         "signature": [
-          "({\n  stream,\n  features,\n  start,\n  end,\n  esClient,\n  kql,\n  inferenceClient,\n  logger,\n  dropUnmapped = false,\n}: { stream: ",
+          "({\n  stream,\n  features,\n  start,\n  end,\n  esClient,\n  kql,\n  inferenceClient,\n  logger,\n  signal,\n  dropUnmapped = false,\n  maxSteps: initialMaxSteps,\n}: { stream: ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
@@ -2363,7 +2389,7 @@
             "section": "def-common.Logger",
             "text": "Logger"
           },
-          "; dropUnmapped?: boolean | undefined; }) => Promise<{ features: ",
+          "; signal: AbortSignal; dropUnmapped?: boolean | undefined; maxSteps?: number | undefined; }) => Promise<{ features: Omit<",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
@@ -2371,7 +2397,7 @@
             "section": "def-common.Feature",
             "text": "Feature"
           },
-          "[]; }>"
+          ", \"description\">[]; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/features/identify_features.ts",
         "deprecated": false,
@@ -2382,7 +2408,7 @@
             "id": "def-server.identifyFeatures.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  stream,\n  features,\n  start,\n  end,\n  esClient,\n  kql,\n  inferenceClient,\n  logger,\n  dropUnmapped = false,\n}",
+            "label": "{\n  stream,\n  features,\n  start,\n  end,\n  esClient,\n  kql,\n  inferenceClient,\n  logger,\n  signal,\n  dropUnmapped = false,\n  maxSteps: initialMaxSteps,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/features/identify_features.ts",
             "deprecated": false,
@@ -3504,6 +3530,20 @@
               },
               {
                 "parentPluginId": "@kbn/streams-ai",
+                "id": "def-server.identifyFeatures.$1.signal",
+                "type": "Object",
+                "tags": [],
+                "label": "signal",
+                "description": [],
+                "signature": [
+                  "AbortSignal"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/features/identify_features.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/streams-ai",
                 "id": "def-server.identifyFeatures.$1.dropUnmapped",
                 "type": "CompoundType",
                 "tags": [],
@@ -3511,6 +3551,20 @@
                 "description": [],
                 "signature": [
                   "boolean | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/features/identify_features.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/streams-ai",
+                "id": "def-server.identifyFeatures.$1.maxSteps",
+                "type": "number",
+                "tags": [],
+                "label": "maxSteps",
+                "description": [],
+                "signature": [
+                  "number | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/features/identify_features.ts",
                 "deprecated": false,

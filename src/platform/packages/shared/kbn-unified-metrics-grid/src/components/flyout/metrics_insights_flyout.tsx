@@ -22,11 +22,12 @@ import {
   EuiTitle,
   EuiPortal,
 } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { css } from '@emotion/react';
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
+import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import { MetricFlyoutBody } from './metrics_flyout_body';
 import { useFlyoutA11y } from './hooks/use_flyout_a11y';
 import { useFieldsMetadataContext } from '../../context/fields_metadata';
@@ -54,6 +55,10 @@ export const MetricInsightsFlyout = ({
   const { a11yProps, screenReaderDescription } = useFlyoutA11y({ isXlScreen });
   const { fieldsMetadata = {} } = useFieldsMetadataContext();
 
+  useEffect(() => {
+    dismissAllFlyoutsExceptFor(DiscoverFlyouts.metricInsights);
+  }, []);
+
   const onKeyDown = useCallback(
     (ev: React.KeyboardEvent) => {
       if (isDOMNode(ev.target) && ev.currentTarget.contains(ev.target) && ev.key === keys.ESCAPE) {
@@ -72,7 +77,8 @@ export const MetricInsightsFlyout = ({
     <EuiPortal>
       <EuiFlyoutResizable
         onClose={onClose}
-        type="overlay"
+        type="push"
+        pushMinBreakpoint="xl"
         size={flyoutWidth}
         onKeyDown={onKeyDown}
         data-test-subj="metricsExperienceFlyout"

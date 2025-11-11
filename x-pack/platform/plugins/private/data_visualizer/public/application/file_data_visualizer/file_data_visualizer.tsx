@@ -17,6 +17,7 @@ import type { GetAdditionalLinks } from '../common/components/results_links';
 import { FileUploadView } from './new/file_upload_view';
 
 export interface Props {
+  location: string;
   resultLinks?: ResultLinks;
   getAdditionalLinks?: GetAdditionalLinks;
   setUploadResults?: (results: FileUploadResults) => void;
@@ -26,6 +27,7 @@ export interface Props {
 export type FileDataVisualizerSpec = typeof FileDataVisualizer;
 
 export const FileDataVisualizer: FC<Props> = ({
+  location,
   getAdditionalLinks,
   resultLinks,
   setUploadResults,
@@ -51,25 +53,17 @@ export const FileDataVisualizer: FC<Props> = ({
     (existingIndex?: string) => {
       return new FileUploadManager(
         fileUpload,
-        coreStart.http,
+        coreStart,
         data,
-        services.notifications,
         autoAddInference ?? null,
         autoCreateDataView,
         true,
         existingIndex ?? null,
-        indexSettings
+        indexSettings,
+        location
       );
     },
-    [
-      autoAddInference,
-      autoCreateDataView,
-      coreStart.http,
-      data,
-      fileUpload,
-      indexSettings,
-      services.notifications,
-    ]
+    [autoAddInference, autoCreateDataView, coreStart, data, fileUpload, indexSettings, location]
   );
 
   const [fileUploadManager, setFileUploadManager] = useState<FileUploadManager>(() =>

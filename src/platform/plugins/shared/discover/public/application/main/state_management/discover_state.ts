@@ -46,6 +46,7 @@ import {
   internalStateActions,
   selectTab,
   selectTabRuntimeState,
+  selectIsDataViewUsedInMultipleRuntimeTabStates,
 } from './redux';
 import type { DiscoverSavedSearchContainer } from './discover_saved_search_container';
 import { getSavedSearchContainer } from './discover_saved_search_container';
@@ -204,10 +205,10 @@ export interface DiscoverStateContainer {
      */
     undoSavedSearchChanges: () => Promise<SavedSearch>;
     /**
-     * When saving a saved search with an ad hoc data view, a new id needs to be generated for the data view
+     * When editing an ad hoc data view, a new id needs to be generated for the data view
      * This is to prevent duplicate ids messing with our system
      */
-    updateAdHocDataViewId: () => Promise<DataView | undefined>;
+    updateAdHocDataViewId: (editedDataView: DataView) => Promise<DataView | undefined>;
     /**
      * Updates the ES|QL query string
      */
@@ -287,20 +288,27 @@ export function getDiscoverStateContainer({
   });
 
   /**
-   * When saving a saved search with an ad hoc data view, a new id needs to be generated for the data view
+   * When editing an ad hoc data view, a new id needs to be generated for the data view
    * This is to prevent duplicate ids messing with our system
    */
-  const updateAdHocDataViewId = async () => {
+  const updateAdHocDataViewId = async (editedDataView: DataView) => {
     const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, tabId);
     const prevDataView = currentDataView$.getValue();
     if (!prevDataView || prevDataView.isPersisted()) return;
 
+    const isUsedInMultipleTabs = selectIsDataViewUsedInMultipleRuntimeTabStates(
+      runtimeStateManager,
+      prevDataView.id!
+    );
+
     const nextDataView = await services.dataViews.create({
-      ...prevDataView.toSpec(),
+      ...editedDataView.toSpec(),
       id: uuidv4(),
     });
 
-    services.dataViews.clearInstanceCache(prevDataView.id);
+    if (!isUsedInMultipleTabs) {
+      services.dataViews.clearInstanceCache(prevDataView.id);
+    }
 
     await updateFiltersReferences({
       prevDataView,
@@ -308,9 +316,13 @@ export function getDiscoverStateContainer({
       services,
     });
 
-    internalState.dispatch(
-      internalStateActions.replaceAdHocDataViewWithId(prevDataView.id!, nextDataView)
-    );
+    if (isUsedInMultipleTabs) {
+      internalState.dispatch(internalStateActions.appendAdHocDataViews(nextDataView));
+    } else {
+      internalState.dispatch(
+        internalStateActions.replaceAdHocDataViewWithId(prevDataView.id!, nextDataView)
+      );
+    }
 
     if (isDataSourceType(appStateContainer.get().dataSource, DataSourceType.DataView)) {
       await appStateContainer.replaceUrlState({
@@ -412,7 +424,7 @@ export function getDiscoverStateContainer({
       services.dataViews.clearInstanceCache(editedDataView.id);
       setDataView(await services.dataViews.create(editedDataView.toSpec(), true));
     } else {
-      await updateAdHocDataViewId();
+      await updateAdHocDataViewId(editedDataView);
     }
     void internalState.dispatch(internalStateActions.loadDataViewList());
     addLog('[getDiscoverStateContainer] onDataViewEdited triggers data fetching');

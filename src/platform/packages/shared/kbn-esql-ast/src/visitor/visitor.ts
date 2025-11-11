@@ -94,6 +94,21 @@ export class Visitor<
         }
         return null;
       })
+      .on('visitParensExpression', (ctx): ESQLProperNode | null => {
+        const parens = ctx.node;
+        const parensLocation = parens.location;
+
+        if (!parensLocation) {
+          return null;
+        }
+
+        // Handle position before opening "("
+        if (parensLocation.min > pos) {
+          return parens;
+        }
+
+        return null;
+      })
       .on('visitCommand', visitCommand)
       .on('visitHeaderCommand', visitCommand)
       .on('visitQuery', (ctx): ESQLProperNode | null => {
@@ -182,6 +197,31 @@ export class Visitor<
           }
         }
 
+        return null;
+      })
+      .on('visitParensExpression', (ctx): ESQLProperNode | null => {
+        const parens = ctx.node;
+        const parensLocation = parens.location;
+
+        if (!parensLocation) {
+          return null;
+        }
+
+        const childQuery = ctx.child();
+
+        // Handle comments between end of subquery content and closing ")"
+        if (childQuery?.type === 'query' && childQuery.location) {
+          if (childQuery.location.max < pos && pos <= parensLocation.max) {
+            return parens;
+          }
+        }
+
+        // Handle comments immediately after closing ")"
+        if (pos > parensLocation.max) {
+          return parens;
+        }
+
+        // For comments inside parens but before/during content, continue visiting children
         return null;
       })
       .on('visitCommand', visitCommand)

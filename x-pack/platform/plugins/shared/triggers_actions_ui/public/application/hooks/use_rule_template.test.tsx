@@ -9,7 +9,7 @@ import React from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useRuleTemplate } from './use_rule_template';
 import { loadRuleTemplate } from '../lib/rule_template_api/get_rule_template';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
 // Mocks
 jest.mock('../../common/lib/kibana', () => ({

@@ -9,6 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
+import { useSignalIndexWithDefault } from '../../hooks/use_signal_index_with_default';
 import {
   type GetLensAttributes,
   VisualizationContextMenuActions,
@@ -34,9 +35,11 @@ const TimeSavedMetricComponent: React.FC<Props> = ({ from, to, minutesPerAlert }
     euiTheme: { colors },
   } = useEuiTheme();
   const timerange = useMemo(() => ({ from, to }), [from, to]);
+  const signalIndexName = useSignalIndexWithDefault();
+
   const getLensAttributes = useCallback<GetLensAttributes>(
-    (args) => getTimeSavedMetricLensAttributes({ ...args, minutesPerAlert }),
-    [minutesPerAlert]
+    (args) => getTimeSavedMetricLensAttributes({ ...args, minutesPerAlert, signalIndexName }),
+    [minutesPerAlert, signalIndexName]
   );
   return (
     <div

@@ -5,134 +5,60 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/logging';
 import type { Observable } from 'rxjs';
-import {
-  filter,
-  of,
-  defer,
-  shareReplay,
-  forkJoin,
-  switchMap,
-  merge,
-  catchError,
-  throwError,
-  map,
-  take,
-  EMPTY,
-} from 'rxjs';
-import type { KibanaRequest } from '@kbn/core-http-server';
+import { tap } from 'rxjs';
+import { filter, of, defer, shareReplay, switchMap, merge, EMPTY } from 'rxjs';
+import type { Logger } from '@kbn/logging';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import type { AgentCapabilities } from '@kbn/onechat-common';
-import {
-  type RoundInput,
-  type ChatEvent,
-  oneChatDefaultAgentId,
-  isRoundCompleteEvent,
-  isOnechatError,
-  createInternalError,
-} from '@kbn/onechat-common';
-import { withConverseSpan, getCurrentTraceId } from '../../tracing';
+import type { InferenceChatModel } from '@kbn/inference-langchain';
+import { type ChatEvent, oneChatDefaultAgentId, isRoundCompleteEvent } from '@kbn/onechat-common';
+import { withConverseSpan } from '../../tracing';
 import type { ConversationService } from '../conversation';
+import type { ConversationClient } from '../conversation';
 import type { AgentsServiceStart } from '../agents';
 import {
-  generateTitle$,
+  generateTitle,
   handleCancellation,
-  getChatModel$,
   executeAgent$,
-  getConversation$,
-  conversationExists$,
+  getConversation,
   updateConversation$,
   createConversation$,
+  resolveServices,
+  convertErrors,
+  type ConversationWithOperation,
 } from './utils';
 import { createConversationIdSetEvent } from './utils/events';
-import { resolveSelectedConnectorId } from './utils/resolve_selected_connector_id';
+import type { ChatService, ChatConverseParams } from './types';
+import type { TrackingService } from '../../telemetry';
 
-interface ChatServiceOptions {
+interface ChatServiceDeps {
   logger: Logger;
   inference: InferenceServerStart;
   conversationService: ConversationService;
   agentService: AgentsServiceStart;
   uiSettings: UiSettingsServiceStart;
   savedObjects: SavedObjectsServiceStart;
+  trackingService?: TrackingService;
 }
 
-export interface ChatService {
-  converse(params: ChatConverseParams): Observable<ChatEvent>;
-}
-
-/**
- * Parameters for {@link ChatService.converse}
- */
-export interface ChatConverseParams {
-  /**
-   * Id of the conversational agent to converse with.
-   * If empty, will use the default agent id.
-   */
-  agentId?: string;
-  /**
-   * Id of the genAI connector to use.
-   * If empty, will use the default connector.
-   */
-  connectorId?: string;
-  /**
-   * Id of the conversation to continue.
-   * If empty, will create a new conversation instead.
-   */
-  conversationId?: string;
-  /**
-   * Set of capabilities to use for this round.
-   * Defaults to all capabilities being disabled.
-   */
-  capabilities?: AgentCapabilities;
-  /**
-   * Create conversation with specified ID if not found.
-   * Defaults to false. Has no effect when conversationId is not provided.
-   */
-  autoCreateConversationWithId?: boolean;
-  /**
-   * Optional abort signal to handle cancellation.
-   * Canceled rounds will not be persisted.
-   */
-  abortSignal?: AbortSignal;
-  /**
-   * Next user input to start the round.
-   */
-  nextInput: RoundInput;
-  /**
-   * Request bound to this call.
-   */
-  request: KibanaRequest;
-}
-
-export const createChatService = (options: ChatServiceOptions): ChatService => {
+export const createChatService = (options: ChatServiceDeps): ChatService => {
   return new ChatServiceImpl(options);
 };
 
-class ChatServiceImpl implements ChatService {
-  private readonly inference: InferenceServerStart;
-  private readonly logger: Logger;
-  private readonly conversationService: ConversationService;
-  private readonly agentService: AgentsServiceStart;
-  private readonly uiSettings: UiSettingsServiceStart;
-  private readonly savedObjects: SavedObjectsServiceStart;
+interface ConversationContext {
+  conversation: ConversationWithOperation;
+  conversationClient: ConversationClient;
+  chatModel: InferenceChatModel;
+  selectedConnectorId: string;
+}
 
-  constructor({
-    inference,
-    logger,
-    conversationService,
-    agentService,
-    uiSettings,
-    savedObjects,
-  }: ChatServiceOptions) {
-    this.inference = inference;
-    this.logger = logger;
-    this.conversationService = conversationService;
-    this.agentService = agentService;
-    this.uiSettings = uiSettings;
-    this.savedObjects = savedObjects;
+class ChatServiceImpl implements ChatService {
+  private readonly dependencies: ChatServiceDeps;
+
+  constructor(deps: ChatServiceDeps) {
+    this.dependencies = deps;
   }
 
   converse({
@@ -144,137 +70,98 @@ class ChatServiceImpl implements ChatService {
     abortSignal,
     nextInput,
     autoCreateConversationWithId = false,
+    browserApiTools,
   }: ChatConverseParams): Observable<ChatEvent> {
-    const { inference } = this;
-    const isNewConversation = !conversationId;
+    const { trackingService } = this.dependencies;
+    const requestId = trackingService?.trackQueryStart();
 
     return withConverseSpan({ agentId, conversationId }, (span) => {
-      return defer(() =>
-        resolveSelectedConnectorId({
-          uiSettings: this.uiSettings,
-          savedObjects: this.savedObjects,
-          request,
+      // Resolve scoped services
+      return defer(async () => {
+        const services = await resolveServices({
+          agentId,
           connectorId,
-          inference: this.inference,
-        })
-      ).pipe(
-        switchMap((selectedConnectorId) => {
-          if (!selectedConnectorId) {
-            return throwError(() => new Error('No connector available for chat execution'));
-          }
+          request,
+          ...this.dependencies,
+        });
 
-          return forkJoin({
-            conversationClient: defer(async () =>
-              this.conversationService.getScopedClient({ request })
-            ),
-            agent: defer(async () => {
-              const agentRegistry = await this.agentService.getRegistry({ request });
-              return agentRegistry.get(agentId);
-            }),
-            chatModel: getChatModel$({
-              connectorId: selectedConnectorId,
-              request,
-              inference,
-              span,
-            }),
-            selectedConnectorId: of(selectedConnectorId),
-          });
-        }),
-        switchMap(({ conversationClient, chatModel, agent, selectedConnectorId }) => {
-          const shouldCreateNewConversation$ = isNewConversation
-            ? of(true)
-            : autoCreateConversationWithId
-            ? conversationExists$({ conversationId, conversationClient }).pipe(
-                switchMap((exists) => of(!exists))
-              )
-            : of(false);
+        span?.setAttribute('elastic.connector.id', services.selectedConnectorId);
 
-          const conversation$ = getConversation$({
-            agentId,
-            conversationId,
-            autoCreateConversationWithId,
-            conversationClient,
-          });
+        // Get conversation and determine operation (CREATE or UPDATE)
+        const conversation = await getConversation({
+          agentId,
+          conversationId,
+          autoCreateConversationWithId,
+          conversationClient: services.conversationClient,
+        });
 
-          // Extract the ID from the conversation and emit the event ONLY for new conversations
-          const conversationIdSetEvent$ = shouldCreateNewConversation$.pipe(
-            switchMap((shouldCreate) =>
-              shouldCreate
-                ? conversation$.pipe(
-                    map((conversation) => createConversationIdSetEvent(conversation.id)),
-                    take(1)
-                  )
-                : EMPTY
-            )
-          );
+        // Build conversation context
+        const context: ConversationContext = {
+          conversation,
+          conversationClient: services.conversationClient,
+          chatModel: services.chatModel,
+          selectedConnectorId: services.selectedConnectorId,
+        };
 
+        return context;
+      }).pipe(
+        switchMap((context) => {
+          // Emit conversation ID for new conversations
+          const conversationIdEvent$ =
+            context.conversation.operation === 'CREATE'
+              ? of(createConversationIdSetEvent(context.conversation.id))
+              : EMPTY;
+
+          // Execute agent
           const agentEvents$ = executeAgent$({
             agentId,
             request,
-            conversation$,
             nextInput,
             capabilities,
             abortSignal,
-            agentService: this.agentService,
-            defaultConnectorId: selectedConnectorId,
+            conversation: context.conversation,
+            defaultConnectorId: context.selectedConnectorId,
+            agentService: this.dependencies.agentService,
+            browserApiTools,
           });
 
-          const title$ = shouldCreateNewConversation$.pipe(
-            switchMap((shouldCreate) =>
-              shouldCreate
-                ? generateTitle$({ chatModel, conversation$, nextInput })
-                : conversation$.pipe(
-                    switchMap((conversation) => {
-                      return of(conversation.title);
-                    })
-                  )
-            )
-          );
+          // Generate title (for CREATE) or use existing title (for UPDATE)
+          const title$ =
+            context.conversation.operation === 'CREATE'
+              ? generateTitle({
+                  chatModel: context.chatModel,
+                  conversation: context.conversation,
+                  nextInput,
+                })
+              : of(context.conversation.title);
 
-          const roundCompletedEvents$ = agentEvents$.pipe(filter(isRoundCompleteEvent));
+          // Persist conversation
+          const persistenceEvents$ = persistConversation({
+            agentId,
+            conversation: context.conversation,
+            conversationClient: context.conversationClient,
+            conversationId,
+            title$,
+            agentEvents$,
+          });
 
-          const saveOrUpdateAndEmit$ = shouldCreateNewConversation$.pipe(
-            switchMap((shouldCreate) =>
-              shouldCreate
-                ? conversation$.pipe(
-                    switchMap((conversation) =>
-                      createConversation$({
-                        agentId,
-                        conversationClient,
-                        conversationId: conversationId || conversation.id,
-                        title$,
-                        roundCompletedEvents$,
-                      })
-                    )
-                  )
-                : updateConversation$({
-                    conversationClient,
-                    conversation$,
-                    title$,
-                    roundCompletedEvents$,
-                  })
-            )
-          );
-
-          return merge(conversationIdSetEvent$, agentEvents$, saveOrUpdateAndEmit$).pipe(
+          // Merge all event streams
+          return merge(conversationIdEvent$, agentEvents$, persistenceEvents$).pipe(
             handleCancellation(abortSignal),
-            catchError((err) => {
-              this.logger.error(`Error executing agent: ${err.stack}`);
-              return throwError(() => {
-                const traceId = getCurrentTraceId();
-                if (isOnechatError(err)) {
-                  err.meta = {
-                    ...err.meta,
-                    traceId,
-                  };
-                  return err;
-                } else {
-                  return createInternalError(`Error executing agent: ${err.message}`, {
-                    statusCode: 500,
-                    traceId,
-                  });
+            convertErrors({ logger: this.dependencies.logger }),
+            tap((event) => {
+              // Track round completion and query-to-result time
+              try {
+                if (isRoundCompleteEvent(event) && trackingService) {
+                  if (requestId) trackingService.trackQueryEnd(requestId);
+                  const currentRoundCount = (context.conversation.rounds?.length ?? 0) + 1;
+                  if (conversationId) {
+                    trackingService.trackConversationRound(conversationId, currentRoundCount);
+                  }
                 }
-              });
+              } catch (error) {
+                this.dependencies.logger.error(error);
+              }
             }),
             shareReplay()
           );
@@ -283,3 +170,41 @@ class ChatServiceImpl implements ChatService {
     });
   }
 }
+
+/**
+ * Creates events for conversation persistence (create/update)
+ */
+const persistConversation = ({
+  agentId,
+  conversation,
+  conversationClient,
+  conversationId,
+  title$,
+  agentEvents$,
+}: {
+  agentId: string;
+  conversation: ConversationWithOperation;
+  conversationClient: ConversationClient;
+  conversationId?: string;
+  title$: Observable<string>;
+  agentEvents$: Observable<ChatEvent>;
+}): Observable<ChatEvent> => {
+  const roundCompletedEvents$ = agentEvents$.pipe(filter(isRoundCompleteEvent));
+
+  if (conversation.operation === 'CREATE') {
+    return createConversation$({
+      agentId,
+      conversationClient,
+      conversationId: conversationId || conversation.id,
+      title$,
+      roundCompletedEvents$,
+    });
+  }
+
+  return updateConversation$({
+    conversationClient,
+    conversation,
+    title$,
+    roundCompletedEvents$,
+  });
+};

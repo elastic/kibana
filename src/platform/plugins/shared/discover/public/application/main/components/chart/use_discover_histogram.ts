@@ -212,6 +212,7 @@ export const useDiscoverHistogram = (
     timeRangeRelative: relativeTimeRange,
     timeRangeAbsolute: timeRange,
     searchSessionId,
+    lastReloadRequestTime,
   } = requestParams;
   // When in ES|QL mode, update the data view, query, and
   // columns only when documents are done fetching so the Lens suggestions
@@ -406,6 +407,7 @@ export const useDiscoverHistogram = (
     filters: isEsqlMode ? EMPTY_FILTERS : filtersMemoized,
     timeRange: timeRangeMemoized,
     relativeTimeRange,
+    lastReloadRequestTime,
     columns: isEsqlMode ? esqlColumns : undefined,
     table: isEsqlMode ? table : undefined,
     onFilter: histogramCustomization?.onFilter,

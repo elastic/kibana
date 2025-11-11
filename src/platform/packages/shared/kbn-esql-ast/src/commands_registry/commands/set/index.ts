@@ -9,10 +9,12 @@
 import { i18n } from '@kbn/i18n';
 import type { ICommandMethods } from '../../registry';
 import { autocomplete } from './autocomplete';
+import { validate } from './validate';
 import type { ICommandContext } from '../../types';
 
 const setCommandMethods: ICommandMethods<ICommandContext> = {
   autocomplete,
+  validate,
 };
 
 export const setCommand = {
@@ -23,11 +25,7 @@ export const setCommand = {
       defaultMessage: 'Sets a query setting',
     }),
     declaration: `SET <setting> = <value>`,
-    examples: [
-      'SET project_routing = "_alias:_origin";',
-      'SET project_routing = "_alias: *";',
-      'SET project_routing = "_alias:* AND NOT _alias:_origin";',
-    ],
+    examples: ['SET project_routing = "_alias:_origin";', 'SET project_routing = "_alias: *";'],
     hidden: process.env.NODE_ENV === 'test' ? false : true, // Temporary until making it GA
     preview: true,
     name: 'set',

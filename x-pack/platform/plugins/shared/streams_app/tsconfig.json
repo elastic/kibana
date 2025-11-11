@@ -91,5 +91,6 @@
     "@kbn/deeplinks-security",
     "@kbn/spaces-plugin",
     "@kbn/unified-data-table",
+    "@kbn/console-plugin",
   ]
 }

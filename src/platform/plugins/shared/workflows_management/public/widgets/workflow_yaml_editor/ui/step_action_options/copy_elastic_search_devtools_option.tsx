@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
-import type { ElasticsearchGraphNode } from '@kbn/workflows/graph/types';
+import React, { useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { ElasticsearchGraphNode } from '@kbn/workflows/graph/types';
+import { selectFocusedStepInfo, selectWorkflowGraph } from '../../../../entities/workflows/store';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { selectFocusedStepInfo, selectWorkflowGraph } from '../../lib/store';
 import { getElasticsearchRequestInfo } from '../../lib/elasticsearch_step_utils';
 
 export interface CopyElasticSearchDevToolsOptionProps {
@@ -32,7 +32,7 @@ export const CopyElasticSearchDevToolsOption: React.FC<CopyElasticSearchDevTools
 
   function generateConsoleFormat(
     requestInfo: { method: string; url: string; data?: string[] },
-    withParams: Record<string, any>
+    withParams: Record<string, any> // eslint-disable-line @typescript-eslint/no-explicit-any
   ): string {
     const lines = [`${requestInfo.method} ${requestInfo.url}`];
 

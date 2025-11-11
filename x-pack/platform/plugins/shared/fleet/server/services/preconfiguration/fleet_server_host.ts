@@ -100,7 +100,6 @@ export async function createOrUpdatePreconfiguredFleetServerHosts(
   preconfiguredFleetServerHosts: FleetServerHost[]
 ) {
   const existingFleetServerHosts = await fleetServerHostService.bulkGet(
-    soClient,
     preconfiguredFleetServerHosts.map(({ id }) => id),
     { ignoreNotFound: true }
   );
@@ -165,7 +164,7 @@ export async function createCloudFleetServerHostIfNeeded(
     return;
   }
 
-  const defaultFleetServerHost = await fleetServerHostService.getDefaultFleetServerHost(soClient);
+  const defaultFleetServerHost = await fleetServerHostService.getDefaultFleetServerHost();
   if (!defaultFleetServerHost) {
     await fleetServerHostService.create(
       soClient,
@@ -186,7 +185,7 @@ export async function cleanPreconfiguredFleetServerHosts(
   esClient: ElasticsearchClient,
   preconfiguredFleetServerHosts: FleetServerHost[]
 ) {
-  const existingFleetServerHosts = await fleetServerHostService.list(soClient);
+  const existingFleetServerHosts = await fleetServerHostService.list();
   const existingPreconfiguredHosts = existingFleetServerHosts.items.filter(
     (o) => o.is_preconfigured === true
   );
@@ -210,7 +209,7 @@ export async function cleanPreconfiguredFleetServerHosts(
         }
       );
     } else {
-      await fleetServerHostService.delete(soClient, esClient, existingFleetServerHost.id, {
+      await fleetServerHostService.delete(esClient, existingFleetServerHost.id, {
         fromPreconfiguration: true,
       });
     }

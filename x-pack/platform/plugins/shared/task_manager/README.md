@@ -547,7 +547,7 @@ Use `bulkUpdatesSchedules` to instruct TaskManger to update the schedule interva
 When the interval is updated, new `runAt` will be computed and task will be updated with that value, using the formula
 
 ```
-newRunAt = oldRunAt - oldInterval + newInterval
+newRunAt = scheduledAt + newInterval
 ```
 
 Example:
@@ -819,15 +819,18 @@ Tasks can be scheduled with a user-scope, which allows the task to run with the 
 To schedule a task with a user scope, pass a KibanaRequest object as part of the schedule options:
 
 ```js
-const task = await taskManager.schedule({
-  taskType,
-  runAt,
-  schedule,
-  params,
-  scope: ['my-fanci-app'],
-}, {
-  request
-});
+const task = await taskManager.schedule(
+  {
+    taskType,
+    runAt,
+    schedule,
+    params,
+    scope: ['my-fanci-app'],
+  },
+  {
+    request,
+  }
+);
 ```
 
 Task Manager creates an API key using this request and stores this as an encrypted field on the task document. When the task runs, Task Manager decryptes the API key from the task document and generates a fake KibanaRequest using the decrypted API key in the authorization header. This fake request is then passed into the task runner defined in the task type

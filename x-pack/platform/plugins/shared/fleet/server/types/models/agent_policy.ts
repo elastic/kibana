@@ -13,6 +13,8 @@ import { agentPolicyStatuses, dataTypes } from '../../../common/constants';
 import { isValidNamespace } from '../../../common/services';
 import { getSettingsAPISchema } from '../../services/form_settings';
 
+import { ProxyHeadersSchema } from '../rest_spec/fleet_proxies';
+
 import { PackagePolicySchema, PackagePolicyResponseSchema } from './package_policy';
 
 export const AgentPolicyNamespaceSchema = schema.string({
@@ -337,6 +339,7 @@ export const GetAutoUpgradeAgentsStatusResponseSchema = schema.object({
       version: schema.string(),
       agents: schema.number(),
       failedUpgradeAgents: schema.number(),
+      failedUpgradeActionIds: schema.maybe(schema.arrayOf(schema.string())),
     })
   ),
   totalAgents: schema.number(),
@@ -383,7 +386,7 @@ export const FullAgentPolicyResponseSchema = schema.object({
         hosts: schema.maybe(schema.arrayOf(schema.string())),
         ca_sha256: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
         proxy_url: schema.maybe(schema.string()),
-        proxy_headers: schema.maybe(schema.any()),
+        proxy_headers: schema.maybe(ProxyHeadersSchema),
       })
     )
     .extendsDeep({
@@ -397,7 +400,7 @@ export const FullAgentPolicyResponseSchema = schema.object({
       schema.object({
         hosts: schema.arrayOf(schema.string()),
         proxy_url: schema.maybe(schema.string()),
-        proxy_headers: schema.maybe(schema.any()),
+        proxy_headers: schema.maybe(ProxyHeadersSchema),
         ssl: schema.maybe(BaseSSLSchema),
         secrets: schema.maybe(BaseSecretsSchema),
       }),
@@ -488,6 +491,8 @@ export const FullAgentPolicyResponseSchema = schema.object({
         secrets: schema.maybe(BaseSecretsSchema),
         timeout: schema.maybe(schema.string()),
         target_directory: schema.maybe(schema.string()),
+        proxy_url: schema.maybe(schema.string()),
+        proxy_headers: schema.maybe(ProxyHeadersSchema),
       }),
       features: schema.recordOf(
         schema.string(),

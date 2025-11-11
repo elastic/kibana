@@ -8,12 +8,12 @@
  */
 import { errors } from '../../../definitions/utils';
 import { isColumn } from '../../../ast/is';
-import type { ESQLAst, ESQLColumn, ESQLCommand, ESQLMessage } from '../../../types';
+import type { ESQLAst, ESQLColumn, ESQLAstAllCommands, ESQLMessage } from '../../../types';
 import { validateCommandArguments } from '../../../definitions/utils/validation';
 import type { ICommandContext, ICommandCallbacks } from '../../types';
 
 export const validate = (
-  command: ESQLCommand,
+  command: ESQLAstAllCommands,
   ast: ESQLAst,
   context?: ICommandContext,
   callbacks?: ICommandCallbacks

@@ -21,6 +21,109 @@
     "functions": [
       {
         "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.appendFilteringWhereClauseForCascadeLayout",
+        "type": "Function",
+        "tags": [],
+        "label": "appendFilteringWhereClauseForCascadeLayout",
+        "description": [
+          "\nHandles the computation and appending of a filtering where clause,\nfor ES|QL query containing a stats command in the cascade layout experience"
+        ],
+        "signature": [
+          "<T extends string = string>(query: string, fieldName: string, value: T extends ",
+          "SupportedFieldTypes",
+          " ? unknown : unknown, operation: \"+\" | \"-\" | \"is_not_null\" | \"is_null\", fieldType?: (T extends ",
+          "SupportedFieldTypes",
+          " ? T : string) | undefined) => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/cascaded_documents_helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.appendFilteringWhereClauseForCascadeLayout.$1",
+            "type": "string",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/cascaded_documents_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.appendFilteringWhereClauseForCascadeLayout.$2",
+            "type": "string",
+            "tags": [],
+            "label": "fieldName",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/cascaded_documents_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.appendFilteringWhereClauseForCascadeLayout.$3",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "T extends ",
+              "SupportedFieldTypes",
+              " ? unknown : unknown"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/cascaded_documents_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.appendFilteringWhereClauseForCascadeLayout.$4",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "operation",
+            "description": [],
+            "signature": [
+              "\"+\" | \"-\" | \"is_not_null\" | \"is_null\""
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/cascaded_documents_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.appendFilteringWhereClauseForCascadeLayout.$5",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "fieldType",
+            "description": [],
+            "signature": [
+              "(T extends ",
+              "SupportedFieldTypes",
+              " ? T : string) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/cascaded_documents_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
         "id": "def-common.appendStatsByToQuery",
         "type": "Function",
         "tags": [],
@@ -203,6 +306,51 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.constructCascadeQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "constructCascadeQuery",
+        "description": [
+          "\nConstructs a cascade query from the provided query, based on the node type, node path and node path map."
+        ],
+        "signature": [
+          "({ query, nodeType, nodePath, nodePathMap, }: ",
+          "CascadeQueryArgs",
+          ") => ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          " | undefined"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/cascaded_documents_helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.constructCascadeQuery.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  query,\n  nodeType,\n  nodePath,\n  nodePathMap,\n}",
+            "description": [],
+            "signature": [
+              "CascadeQueryArgs"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/cascaded_documents_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -561,7 +709,7 @@
             "section": "def-public.DataViewsServicePublic",
             "text": "DataViewsServicePublic"
           },
-          ", options: { allowNoIndex?: boolean | undefined; createNewInstanceEvenIfCachedOneAvailable?: boolean | undefined; } | undefined) => Promise<",
+          ", options: { allowNoIndex?: boolean | undefined; createNewInstanceEvenIfCachedOneAvailable?: boolean | undefined; skipFetchFields?: boolean | undefined; } | undefined) => Promise<",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -642,6 +790,20 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "createNewInstanceEvenIfCachedOneAvailable",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_adhoc_dataview.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/esql-utils",
+                "id": "def-common.getESQLAdHocDataview.$3.skipFetchFields",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "skipFetchFields",
                 "description": [],
                 "signature": [
                   "boolean | undefined"
@@ -1479,6 +1641,40 @@
       },
       {
         "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.getESQLStatsQueryMeta",
+        "type": "Function",
+        "tags": [],
+        "label": "getESQLStatsQueryMeta",
+        "description": [],
+        "signature": [
+          "(queryString: string) => ",
+          "ESQLStatsQueryMeta"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/cascaded_documents_helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.getESQLStatsQueryMeta.$1",
+            "type": "string",
+            "tags": [],
+            "label": "queryString",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/cascaded_documents_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
         "id": "def-common.getESQLWithSafeLimit",
         "type": "Function",
         "tags": [],
@@ -1846,7 +2042,7 @@
             "section": "def-common.ESQLControlVariable",
             "text": "ESQLControlVariable"
           },
-          "[] | undefined) => Record<string, string | number | Record<string, string | number> | undefined>[]"
+          "[] | undefined) => Record<string, string | number | (string | number)[] | Record<string, string | number> | undefined>[]"
         ],
         "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/run_query.ts",
         "deprecated": false,
@@ -2173,7 +2369,9 @@
         "type": "Function",
         "tags": [],
         "label": "hasTransformationalCommand",
-        "description": [],
+        "description": [
+          "\nDetermines if an ES|QL query contains transformational commands.\n\nFor ES|QL, we consider the following as transformational commands:\n- `stats`: Performs aggregations and transformations\n- `keep`: Filters and selects specific fields\n- `fork` commands where ALL branches contain only transformational commands\n"
+        ],
         "signature": [
           "(esql: string | undefined) => boolean"
         ],
@@ -2187,7 +2385,9 @@
             "type": "string",
             "tags": [],
             "label": "esql",
-            "description": [],
+            "description": [
+              "- The ES|QL query string to analyze"
+            ],
             "signature": [
               "string | undefined"
             ],
@@ -2197,7 +2397,9 @@
             "isRequired": false
           }
         ],
-        "returnComment": [],
+        "returnComment": [
+          "true if the query contains transformational commands or fork commands with all transformational branches"
+        ],
         "initialIsOpen": false
       },
       {
@@ -2355,39 +2557,6 @@
       },
       {
         "parentPluginId": "@kbn/esql-utils",
-        "id": "def-common.isQueryWrappedByPipes",
-        "type": "Function",
-        "tags": [],
-        "label": "isQueryWrappedByPipes",
-        "description": [],
-        "signature": [
-          "(query: string) => boolean"
-        ],
-        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/esql-utils",
-            "id": "def-common.isQueryWrappedByPipes.$1",
-            "type": "string",
-            "tags": [],
-            "label": "query",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/esql-utils",
         "id": "def-common.mapVariableToColumn",
         "type": "Function",
         "tags": [],
@@ -2495,6 +2664,77 @@
         "returnComment": [
           "DatatableColumn[]"
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.mutateQueryStatsGrouping",
+        "type": "Function",
+        "tags": [],
+        "label": "mutateQueryStatsGrouping",
+        "description": [
+          "\nModifies the provided ESQL query to only include the specified columns in the stats by option."
+        ],
+        "signature": [
+          "(query: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          ", pick: string[]) => ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/cascaded_documents_helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.mutateQueryStatsGrouping.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.AggregateQuery",
+                "text": "AggregateQuery"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/cascaded_documents_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.mutateQueryStatsGrouping.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "pick",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/cascaded_documents_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
         "initialIsOpen": false
       },
       {

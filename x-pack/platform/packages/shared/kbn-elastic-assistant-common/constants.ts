@@ -8,6 +8,9 @@
 export const ELASTIC_AI_ASSISTANT_URL = '/api/security_ai_assistant';
 export const ELASTIC_AI_ASSISTANT_INTERNAL_URL = '/internal/elastic_assistant';
 
+export const UPDATE_ANONYMIZATION_FIELDS_URL =
+  `${ELASTIC_AI_ASSISTANT_INTERNAL_URL}/update_anonymization_fields` as const;
+
 export const POST_ACTIONS_CONNECTOR_EXECUTE =
   `${ELASTIC_AI_ASSISTANT_INTERNAL_URL}/actions/connector/{connectorId}/_execute` as const;
 
@@ -164,3 +167,6 @@ export const INFERENCE_CHAT_MODEL_DISABLED_FEATURE_FLAG =
 
 export const ELASTIC_AI_ASSISTANT_CHECKPOINT_SAVER_ENABLED_FEATURE_FLAG =
   'elasticAssistant.checkpointSaverEnabled' as const;
+
+export const ASSISTANT_INTERRUPTS_ENABLED_FEATURE_FLAG =
+  'securitySolution.assistantInterruptsEnabled' as const;

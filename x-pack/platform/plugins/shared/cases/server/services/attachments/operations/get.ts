@@ -370,10 +370,8 @@ export class AttachmentGetter {
                     },
                   },
                   events: {
-                    filter: {
-                      term: {
-                        [`${CASE_COMMENT_SAVED_OBJECT}.attributes.type`]: AttachmentType.event,
-                      },
+                    cardinality: {
+                      field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.eventId`,
                     },
                   },
                 },

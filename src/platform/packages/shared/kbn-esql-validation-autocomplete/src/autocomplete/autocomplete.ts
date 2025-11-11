@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLAstQueryExpression, ESQLColumn } from '@kbn/esql-ast';
+import type { ESQLColumn } from '@kbn/esql-ast';
 import {
   ESQL_VARIABLES_PREFIX,
   EsqlQuery,
@@ -25,23 +25,20 @@ import type {
   GetColumnsByTypeFn,
   ISuggestionItem,
 } from '@kbn/esql-ast/src/commands_registry/types';
-import {
-  buildFieldsDefinitionsWithMetadata,
-  getControlSuggestionIfSupported,
-} from '@kbn/esql-ast/src/definitions/utils';
+import { getControlSuggestionIfSupported } from '@kbn/esql-ast/src/definitions/utils';
 import { correctQuerySyntax } from '@kbn/esql-ast/src/definitions/utils/ast';
 import { ESQLVariableType } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { ESQLAstAllCommands } from '@kbn/esql-ast/src/types';
 import { getAstContext } from '../shared/context';
 import { isHeaderCommandSuggestion, isSourceCommandSuggestion } from '../shared/helpers';
-import { QueryColumns, getSourcesHelper } from '../shared/resources_helpers';
+import { getSourcesHelper } from '../shared/resources_helpers';
 import type { ESQLCallbacks } from '../shared/types';
 import { getCommandContext } from './get_command_context';
 import { mapRecommendedQueriesFromExtensions } from './utils/recommended_queries_helpers';
 import { getQueryForFields } from './get_query_for_fields';
-
-type GetColumnMapFn = () => Promise<Map<string, ESQLColumnData>>;
+import type { GetColumnMapFn } from '../shared/columns';
+import { getColumnsByTypeRetriever } from '../shared/columns';
 
 export async function suggest(
   fullText: string,
@@ -59,8 +56,12 @@ export async function suggest(
     return [];
   }
 
+  // Use the appropriate AST context for field retrieval
+  // When in a subquery, use the subquery's AST to get only its fields
+  const astForFields = astContext.isCursorInSubquery ? astContext.astForContext : root;
+
   const { getColumnsByType, getColumnMap } = getColumnsByTypeRetriever(
-    getQueryForFields(correctedQuery, root),
+    getQueryForFields(correctedQuery, astForFields),
     innerText,
     resourceRetriever
   );
@@ -77,8 +78,16 @@ export async function suggest(
     // propose main commands here
     // resolve particular commands suggestions after
     // filter source commands if already defined
+
+    const isStartingSubquery =
+      astContext.isCursorInSubquery && !astContext.astForContext.commands.length;
+
     const commands = esqlCommandRegistry
-      .getAllCommands()
+      .getAllCommands({
+        isCursorInSubquery: astContext.isCursorInSubquery,
+        isStartingSubquery,
+        queryContainsSubqueries: astContext.queryContainsSubqueries,
+      })
       .filter((command) => {
         const license = command.metadata?.license;
         const observabilityTier = command.metadata?.observabilityTier;
@@ -99,8 +108,13 @@ export async function suggest(
       .map((command) => command.name);
 
     const suggestions = getCommandAutocompleteDefinitions(commands);
-    if (!root.commands.length) {
-      // Display the recommended queries if there are no commands (empty state)
+
+    if (!astContext.astForContext.commands.length) {
+      if (isStartingSubquery) {
+        return suggestions;
+      }
+
+      // Root level empty state: show source commands + recommended queries
       const recommendedQueriesSuggestions: ISuggestionItem[] = [];
       if (getSources) {
         let fromCommand = '';
@@ -179,45 +193,6 @@ export async function suggest(
   return [];
 }
 
-export function getColumnsByTypeRetriever(
-  query: ESQLAstQueryExpression,
-  queryText: string,
-  resourceRetriever?: ESQLCallbacks
-): { getColumnsByType: GetColumnsByTypeFn; getColumnMap: GetColumnMapFn } {
-  const helpers = new QueryColumns(query, queryText, resourceRetriever);
-  const getVariables = resourceRetriever?.getVariables;
-  const canSuggestVariables = resourceRetriever?.canSuggestVariables?.() ?? false;
-
-  const queryString = queryText;
-  const lastCharacterTyped = queryString[queryString.length - 1];
-  const lastCharIsQuestionMark = lastCharacterTyped === ESQL_VARIABLES_PREFIX;
-  return {
-    getColumnsByType: async (
-      expectedType: Readonly<string> | Readonly<string[]> = 'any',
-      ignored: string[] = [],
-      options
-    ) => {
-      const updatedOptions = {
-        ...options,
-        supportsControls: canSuggestVariables && !lastCharIsQuestionMark,
-      };
-      const editorExtensions = (await resourceRetriever?.getEditorExtensions?.(queryText)) ?? {
-        recommendedQueries: [],
-        recommendedFields: [],
-      };
-      const recommendedFieldsFromExtensions = editorExtensions.recommendedFields;
-      const columns = await helpers.byType(expectedType, ignored);
-      return buildFieldsDefinitionsWithMetadata(
-        columns,
-        recommendedFieldsFromExtensions,
-        updatedOptions,
-        await getVariables?.()
-      );
-    },
-    getColumnMap: helpers.asMap.bind(helpers),
-  };
-}
-
 function findNewUserDefinedColumn(userDefinedColumns: Set<string>) {
   let autoGeneratedColumnCounter = 0;
   let name = `col${autoGeneratedColumnCounter++}`;
@@ -235,6 +210,7 @@ async function getSuggestionsWithinCommandExpression(
     node?: ESQLAstItem;
     option?: ESQLCommandOption;
     containingFunction?: ESQLFunction;
+    isCursorInSubquery: boolean;
   },
   getColumnsByType: GetColumnsByTypeFn,
   getColumnMap: GetColumnMapFn,
@@ -271,10 +247,11 @@ async function getSuggestionsWithinCommandExpression(
     ...references,
     ...additionalCommandContext,
     activeProduct: callbacks?.getActiveProduct?.(),
+    isCursorInSubquery: astContext.isCursorInSubquery,
   };
 
   // does it make sense to have a different context per command?
-  return commandDefinition.methods.autocomplete(
+  const suggestions = await commandDefinition.methods.autocomplete(
     fullText,
     astContext.command,
     {
@@ -287,8 +264,11 @@ async function getSuggestionsWithinCommandExpression(
         : undefined,
       hasMinimumLicenseRequired,
       canCreateLookupIndex: callbacks?.canCreateLookupIndex,
+      isServerless: callbacks?.isServerless,
     },
     context,
     offset
   );
+
+  return suggestions;
 }

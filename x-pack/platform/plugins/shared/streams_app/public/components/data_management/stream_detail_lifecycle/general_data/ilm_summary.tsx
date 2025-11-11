@@ -81,14 +81,16 @@ export function IlmSummary({
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiText>
-              <h5>
+              <h5 data-test-subj="ilmSummary-title">
                 {i18n.translate('xpack.streams.streamDetailLifecycle.ilmDataTiers', {
                   defaultMessage: 'ILM policy data tiers',
                 })}
               </h5>
             </EuiText>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>{loading && <EuiLoadingSpinner size="s" />}</EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            {loading && <EuiLoadingSpinner size="s" data-test-subj="ilmSummary-loading" />}
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
 
@@ -155,6 +157,7 @@ function IlmPhase({
         >
           {phase.name === 'delete' ? (
             <EuiText
+              data-test-subj={`ilmPhase-${phase.name}-icon`}
               css={{
                 height: '100%',
                 textAlign: 'center',
@@ -168,11 +171,21 @@ function IlmPhase({
             </EuiText>
           ) : (
             <>
-              <EuiText size="xs" color={euiTheme.colors.plainDark} textAlign="right">
+              <EuiText
+                size="xs"
+                color={euiTheme.colors.plainDark}
+                textAlign="right"
+                data-test-subj={`ilmPhase-${phase.name}-name`}
+              >
                 <b>{capitalize(phase.name)}</b>
               </EuiText>
               {'size_in_bytes' in phase && (
-                <EuiText size="xs" color={euiTheme.colors.plainDark} textAlign="right">
+                <EuiText
+                  size="xs"
+                  color={euiTheme.colors.plainDark}
+                  textAlign="right"
+                  data-test-subj={`ilmPhase-${phase.name}-size`}
+                >
                   {formatBytes(phase.size_in_bytes)}
                 </EuiText>
               )}

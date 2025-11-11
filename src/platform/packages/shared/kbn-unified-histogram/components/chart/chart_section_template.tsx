@@ -7,23 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import type { SerializedStyles } from '@emotion/serialize';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { IconButtonGroup, type IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
-import React from 'react';
+import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 
 export interface ChartSectionTemplateProps {
   id: string;
   toolbarCss?: SerializedStyles;
   toolbar?: {
+    toggleActions?: React.ReactElement;
     leftSide?: React.ReactNode;
     rightSide?: IconButtonGroupProps['buttons'];
     additionalControls?: {
       prependRight?: React.ReactNode;
     };
   };
-  children: React.ReactNode;
+  toolbarWrapAt?: 'xs' | 's' | 'm' | 'l' | 'xl' | 'xxl';
 }
 
 export const ChartSectionTemplate = ({
@@ -31,8 +34,55 @@ export const ChartSectionTemplate = ({
   toolbarCss,
   toolbar,
   children,
-}: ChartSectionTemplateProps) => {
-  const { leftSide = [], rightSide = [] } = toolbar ?? {};
+  toolbarWrapAt,
+}: React.PropsWithChildren<ChartSectionTemplateProps>) => {
+  const { toggleActions, leftSide, rightSide = [] } = toolbar ?? {};
+  const { euiTheme } = useEuiTheme();
+
+  const toolbarContainerCss = useMemo(
+    () =>
+      toolbarWrapAt
+        ? css`
+            ${toolbarCss};
+            @media (max-width: ${euiTheme.breakpoint[toolbarWrapAt]}px) {
+              min-height: auto;
+            }
+          `
+        : toolbarCss,
+    [toolbarWrapAt, euiTheme, toolbarCss]
+  );
+
+  const toolbarWrapperCss = useMemo(
+    () =>
+      toolbarWrapAt
+        ? css`
+            @media (max-width: ${euiTheme.breakpoint[toolbarWrapAt]}px) {
+              flex-wrap: wrap;
+              [data-toolbar-section='toggle'] {
+                order: 1;
+              }
+              [data-toolbar-section='left'] {
+                flex-basis: 100%;
+                order: 3;
+
+                .euiFlexGroup {
+                  flex-wrap: wrap;
+                }
+
+                .euiFlexItem {
+                  flex-grow: 1;
+                  flex-basis: 100%;
+                }
+              }
+              [data-toolbar-section='right'] {
+                order: 2;
+                margin-left: auto;
+              }
+            }
+          `
+        : undefined,
+    [toolbarWrapAt, euiTheme]
+  );
 
   return (
     <EuiFlexGroup
@@ -42,45 +92,65 @@ export const ChartSectionTemplate = ({
       alignItems="stretch"
       gutterSize="none"
       responsive={false}
+      onClick={handleClick}
     >
-      <EuiFlexItem grow={false} css={toolbarCss}>
+      <EuiFlexItem grow={false} css={toolbarContainerCss}>
         <EuiFlexGroup
           direction="row"
           gutterSize="s"
           responsive={false}
           alignItems="center"
-          justifyContent="spaceBetween"
+          css={toolbarWrapperCss}
         >
-          <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
-            <EuiFlexGroup direction="row" gutterSize="s" responsive={false} alignItems="center">
-              {React.Children.toArray(leftSide).map((child, i) => (
-                <EuiFlexItem grow={false} key={i}>
-                  {child}
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup direction="row" gutterSize="none" responsive={false}>
-              {toolbar?.additionalControls?.prependRight ? (
-                <EuiFlexItem grow={false}>{toolbar.additionalControls.prependRight}</EuiFlexItem>
-              ) : null}
-              {rightSide.length > 0 && (
-                <EuiFlexItem grow={false}>
-                  <IconButtonGroup
-                    legend={i18n.translate('unifiedHistogram.chartActionsGroupLegend', {
-                      defaultMessage: 'Chart actions',
-                    })}
-                    buttonSize="s"
-                    buttons={rightSide}
-                  />
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-          </EuiFlexItem>
+          {toggleActions && (
+            <EuiFlexItem grow={false} data-toolbar-section="toggle">
+              {toggleActions}
+            </EuiFlexItem>
+          )}
+
+          {leftSide && (
+            <EuiFlexItem grow data-toolbar-section="left">
+              <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
+                {React.Children.toArray(leftSide).map((child, i) => (
+                  <EuiFlexItem grow={false} key={i}>
+                    {child}
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          )}
+
+          {(rightSide.length > 0 || toolbar?.additionalControls?.prependRight) && (
+            <EuiFlexItem grow={false} data-toolbar-section="right">
+              <EuiFlexGroup direction="row" gutterSize="none" responsive={false}>
+                {toolbar?.additionalControls?.prependRight && (
+                  <EuiFlexItem grow={false}>{toolbar.additionalControls.prependRight}</EuiFlexItem>
+                )}
+                {rightSide.length > 0 && (
+                  <EuiFlexItem grow={false}>
+                    <IconButtonGroup
+                      legend={i18n.translate('unifiedHistogram.chartActionsGroupLegend', {
+                        defaultMessage: 'Chart actions',
+                      })}
+                      buttonSize="s"
+                      buttons={rightSide}
+                    />
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiFlexItem>
       {children}
     </EuiFlexGroup>
   );
+};
+
+const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
+  const target = event.target as HTMLElement;
+
+  if (target.closest('[data-test-subj="embeddablePanelAction-openInspector"]')) {
+    dismissAllFlyoutsExceptFor(DiscoverFlyouts.inspectorPanel);
+  }
 };

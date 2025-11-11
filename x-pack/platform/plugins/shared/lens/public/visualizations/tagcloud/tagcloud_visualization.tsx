@@ -30,6 +30,8 @@ import { TagsDimensionEditor } from './tags_dimension_editor';
 import { DEFAULT_STATE, TAGCLOUD_LABEL } from './constants';
 import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
 import { convertToRuntimeState } from './runtime_state';
+import { FlyoutToolbar } from '../../shared_components/flyout_toolbar';
+import { TagcloudAppearanceSettings } from './tagcloud_toolbar/appearance_settings';
 
 const TAG_GROUP_ID = 'tags';
 const METRIC_GROUP_ID = 'metric';
@@ -327,6 +329,11 @@ export const getTagcloudVisualization = ({
   ToolbarComponent(props) {
     return <TagcloudToolbar {...props} />;
   },
+
+  FlyoutToolbarComponent(props) {
+    return <FlyoutToolbar {...props} contentMap={{ style: TagcloudAppearanceSettings }} />;
+  },
+
   getTelemetryEventsOnSave(state, prevState) {
     return getColorMappingTelemetryEvents(state?.colorMapping, prevState?.colorMapping);
   },

@@ -254,7 +254,7 @@ export async function pickTestGroupRunOrder() {
         .filter(Boolean)
     : undefined;
   if (LIMIT_SOLUTIONS) {
-    const validSolutions = ['observability', 'search', 'security', 'workplace_ai'];
+    const validSolutions = ['observability', 'search', 'security', 'workplaceai'];
     const invalidSolutions = LIMIT_SOLUTIONS.filter((s) => !validSolutions.includes(s));
     if (invalidSolutions.length) throw new Error('Unsupported LIMIT_SOLUTIONS value');
   }
@@ -424,7 +424,7 @@ export async function pickTestGroupRunOrder() {
         queue,
         maxMin: FUNCTIONAL_MAX_MINUTES,
         minimumIsolationMin: FUNCTIONAL_MINIMUM_ISOLATION_MIN,
-        overheadMin: 1.5,
+        overheadMin: 0,
         names,
       })),
     ],
