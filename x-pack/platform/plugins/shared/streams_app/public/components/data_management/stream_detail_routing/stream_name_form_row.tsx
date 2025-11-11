@@ -26,8 +26,26 @@ interface StreamNameFormRowProps {
   autoFocus?: boolean;
 }
 
+const MIN_NAME_LENGTH = 6; // 'logs.' is already included which is 5 characters, so user must enter at least one more
 const MAX_NAME_LENGTH = 200;
 const PREFIX_MAX_VISIBLE_CHARACTERS = 25;
+
+const getHelpText = (value: string, readOnly: boolean): string | undefined => {
+  if (value.length < MIN_NAME_LENGTH && !readOnly) {
+    return i18n.translate('xpack.streams.streamDetailRouting.emptyNameErrorHelpText', {
+      defaultMessage: 'Stream name must not be empty.',
+    });
+  } else if (value.length >= MAX_NAME_LENGTH && !readOnly) {
+    return i18n.translate('xpack.streams.streamDetailRouting.nameTooLongErrorHelpText', {
+      defaultMessage: `Stream name cannot be longer than {maxLength} characters.`,
+      values: {
+        maxLength: MAX_NAME_LENGTH,
+      },
+    });
+  } else {
+    return undefined;
+  }
+};
 
 export function StreamNameFormRow({
   value,
@@ -43,15 +61,7 @@ export function StreamNameFormRow({
   const prefix = parentStreamName + '.';
   const partitionName = value.replace(prefix, '');
 
-  const helpText =
-    value.length >= MAX_NAME_LENGTH && !readOnly
-      ? i18n.translate('xpack.streams.streamDetailRouting.nameHelpText', {
-          defaultMessage: `Stream name cannot be longer than {maxLength} characters.`,
-          values: {
-            maxLength: MAX_NAME_LENGTH,
-          },
-        })
-      : undefined;
+  const helpText = getHelpText(value, readOnly);
   const isInvalid = !readOnly && partitionName.includes('.');
   const errorMessage = isInvalid
     ? i18n.translate('xpack.streams.streamDetailRouting.nameContainsDotErrorMessage', {

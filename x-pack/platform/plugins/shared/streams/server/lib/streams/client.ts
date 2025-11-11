@@ -324,6 +324,21 @@ export class StreamsClient {
       throw new StatusError(`Child stream ${name} already exists`, 409);
     }
 
+    // TODO - These constants need to be shared between both plugins so I don't have to duplicate them
+    const MIN_NAME_LENGTH = 6; // 'logs.' is already included which is 5 characters, so user must enter at least one more
+    const MAX_NAME_LENGTH = 200;
+
+    if (name.length < MIN_NAME_LENGTH) {
+      throw new StatusError('Stream name must not be empty.', 400);
+    }
+
+    if (name.length >= MAX_NAME_LENGTH) {
+      throw new StatusError(
+        `Stream name cannot be longer than ${MAX_NAME_LENGTH} characters.`,
+        400
+      );
+    }
+
     await State.attemptChanges(
       [
         {
