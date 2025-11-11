@@ -54,6 +54,20 @@ const webhookConnectorFormSchema = z.object({
         }),
         { widgetOptions: { label: 'Bearer Token' } }
       ),
+      withUIMeta(
+        z.object({
+          type: z.literal('headers'),
+          headers: withUIMeta(z.record(z.string(), z.string()), {
+            widget: 'keyValue',
+            widgetOptions: {
+              label: 'Headers',
+            },
+          }),
+        }),
+        {
+          widgetOptions: { label: 'Headers' },
+        }
+      ),
     ]),
     {
       widget: 'formFieldset',

@@ -34,4 +34,12 @@ export interface DiscriminatedUnionWidgetProps extends BaseWidgetProps<Record<st
   schema: z.ZodDiscriminatedUnion<any>;
 }
 
-export type WidgetProps = TextWidgetProps | SelectWidgetProps | DiscriminatedUnionWidgetProps;
+export interface KeyValueWidgetProps extends BaseWidgetProps<Record<string, string>> {
+  schema?: z.ZodRecord<z.ZodString, z.ZodString>;
+}
+
+export type WidgetProps =
+  | TextWidgetProps
+  | SelectWidgetProps
+  | DiscriminatedUnionWidgetProps
+  | KeyValueWidgetProps;

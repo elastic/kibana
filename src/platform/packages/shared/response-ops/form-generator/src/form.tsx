@@ -68,6 +68,8 @@ const getFieldsFromSchema = (schema: z.ZodObject<any>) => {
 
     if (uiMeta.widget === 'formFieldset' && schemaAny instanceof z.ZodDiscriminatedUnion) {
       initialValue = getDiscriminatedUnionInitialValue(schemaAny);
+    } else if (uiMeta.widget === 'keyValue' && !initialValue) {
+      initialValue = {};
     }
 
     fields.push({

@@ -96,7 +96,7 @@ export const DiscriminatedUnionField: React.FC<DiscriminatedUnionWidgetProps> = 
   );
 
   const validateNestedField = useCallback(
-    (fieldKey: string, fieldValue: any, subSchema: z.ZodTypeAny): string[] | undefined => {
+    (fieldValue: any, subSchema: z.ZodTypeAny): string[] | undefined => {
       try {
         subSchema.parse(fieldValue);
         return undefined;
@@ -196,7 +196,7 @@ export const DiscriminatedUnionField: React.FC<DiscriminatedUnionWidgetProps> = 
 
                   onChange(fieldId, updatedValue);
 
-                  const errors = validateNestedField(fieldKey, newValue, subSchema);
+                  const errors = validateNestedField(newValue, subSchema);
                   setNestedFieldErrors((prev) => ({
                     ...prev,
                     [fieldKey]: errors,
@@ -205,7 +205,7 @@ export const DiscriminatedUnionField: React.FC<DiscriminatedUnionWidgetProps> = 
 
                 const handleNestedBlur = () => {
                   const fieldValue = valueObj[fieldKey];
-                  const errors = validateNestedField(fieldKey, fieldValue, subSchema);
+                  const errors = validateNestedField(fieldValue, subSchema);
                   setNestedFieldErrors((prev) => ({
                     ...prev,
                     [fieldKey]: errors,

@@ -12,6 +12,7 @@ import { TextField } from './text_field';
 import { SelectField } from './select_field';
 import { PasswordField } from './password_field';
 import { DiscriminatedUnionField } from './discriminated_union_field';
+import { KeyValueField } from './key_value_field';
 import type { UIMetadata } from '../connector_spec_ui';
 
 export type WidgetType = NonNullable<UIMetadata['widget']>;
@@ -21,11 +22,11 @@ export const WIDGET_REGISTRY: Partial<Record<WidgetType, React.ComponentType<any
   password: PasswordField,
   select: SelectField,
   formFieldset: DiscriminatedUnionField,
+  keyValue: KeyValueField,
   // TODO: Add more widgets as they are implemented:
   // textarea: TextAreaField,
   // json: JsonField,
   // code: CodeField,
-  // keyValue: KeyValueField,
   // number: NumberField,
   // multiSelect: MultiSelectField,
   // toggle: ToggleField,
@@ -41,6 +42,7 @@ export function getWidget(widgetType: WidgetType): React.ComponentType<any> | un
 export { TextField } from './text_field';
 export { SelectField } from './select_field';
 export { PasswordField } from './password_field';
+export { KeyValueField } from './key_value_field';
 export {
   DiscriminatedUnionField,
   getDiscriminatedUnionInitialValue,
@@ -50,4 +52,5 @@ export type {
   TextWidgetProps,
   SelectWidgetProps,
   DiscriminatedUnionWidgetProps,
+  KeyValueWidgetProps,
 } from './widget_props';
