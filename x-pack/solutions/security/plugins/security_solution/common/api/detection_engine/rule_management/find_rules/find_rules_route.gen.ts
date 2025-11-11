@@ -18,6 +18,7 @@ import { z } from '@kbn/zod';
 import { ArrayFromString } from '@kbn/zod-helpers';
 
 import { SortOrder } from '../../model/sorting.gen';
+import { AggregatedGapStatus } from '../../model/rule_schema/common_attributes.gen';
 import { RuleResponse } from '../../model/rule_schema/rule_schemas.gen';
 
 export type FindRulesSortField = z.infer<typeof FindRulesSortField>;
@@ -82,6 +83,10 @@ Filters the returned results according to the value of the specified field, usin
    * Gaps range end
    */
   gaps_range_end: z.string().optional(),
+  /**
+   * Aggregated gap status
+   */
+  gap_status: AggregatedGapStatus.optional(),
 });
 export type FindRulesRequestQueryInput = z.input<typeof FindRulesRequestQuery>;
 

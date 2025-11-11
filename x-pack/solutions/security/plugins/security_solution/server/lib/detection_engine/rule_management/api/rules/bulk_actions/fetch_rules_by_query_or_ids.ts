@@ -7,7 +7,7 @@
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
-import { gapStatus } from '@kbn/alerting-plugin/common';
+import type { aggregatedGapStatus } from '@kbn/alerting-plugin/common/constants/gap_status';
 import type { PromisePoolOutcome } from '../../../../../../utils/promise_pool';
 import type { RuleAlertType } from '../../../../rule_schema';
 import { findRules } from '../../../logic/search/find_rules';
@@ -18,12 +18,14 @@ export const fetchRulesByQueryOrIds = async ({
   rulesClient,
   maxRules,
   gapRange,
+  gapStatuses,
 }: {
   query: string | undefined;
   ids: string[] | undefined;
   rulesClient: RulesClient;
   maxRules: number;
   gapRange?: { start: string; end: string };
+  gapStatuses?: Array<(typeof aggregatedGapStatus)[keyof typeof aggregatedGapStatus]>;
 }): Promise<PromisePoolOutcome<string, RuleAlertType>> => {
   if (ids) {
     const fallbackErrorMessage = 'Error resolving the rule';
@@ -67,12 +69,11 @@ export const fetchRulesByQueryOrIds = async ({
 
   let ruleIdsWithGaps: string[] | undefined;
   // If there is a gap range, we need to find the rules that have gaps in that range
-  if (gapRange) {
+  if (gapRange && gapStatuses && gapStatuses.length > 0) {
     const ruleIdsWithGapsResponse = await rulesClient.getRuleIdsWithGaps({
       start: gapRange.start,
       end: gapRange.end,
-      statuses: [gapStatus.UNFILLED, gapStatus.PARTIALLY_FILLED],
-      hasUnfilledIntervals: true,
+      statuses: gapStatuses,
     });
     ruleIdsWithGaps = ruleIdsWithGapsResponse.ruleIds;
     if (ruleIdsWithGaps.length === 0) {

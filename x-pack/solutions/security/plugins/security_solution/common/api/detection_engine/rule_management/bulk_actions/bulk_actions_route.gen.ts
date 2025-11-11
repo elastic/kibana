@@ -131,6 +131,10 @@ Only valid when query property is undefined.
    * Gaps range end, valid only when query is provided
    */
   gaps_range_end: z.string().optional(),
+  /**
+   * Gap status to filter rules with gaps by status (used together with gaps_range_*).
+   */
+  gap_status: z.enum(['unfilled', 'in_progress', 'filled']).optional(),
 });
 
 export type BulkDeleteRules = z.infer<typeof BulkDeleteRules>;

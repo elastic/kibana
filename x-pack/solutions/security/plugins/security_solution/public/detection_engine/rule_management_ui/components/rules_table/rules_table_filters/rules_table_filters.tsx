@@ -18,6 +18,8 @@ import { TagsFilterPopover } from './tags_filter_popover';
 import { RuleExecutionStatusSelector } from './rule_execution_status_selector';
 import { RuleSearchField } from './rule_search_field';
 import type { RuleExecutionStatus } from '../../../../../../common/api/detection_engine';
+import { AllRulesTabs } from '../rules_table_toolbar';
+import { GapStatusSelector } from './gap_status_selector';
 
 const FilterWrapper = styled(EuiFlexGroup)`
   margin-bottom: ${({ theme }) => theme.eui.euiSizeXS};
@@ -27,7 +29,14 @@ const FilterWrapper = styled(EuiFlexGroup)`
  * Collection of filters for filtering data within the RulesTable. Contains search bar, Elastic/Custom
  * Rules filter button toggle, and tag selection
  */
-const RulesTableFiltersComponent = () => {
+interface RulesTableFiltersProps {
+  selectedTab?: AllRulesTabs;
+}
+
+// Local UI type for aggregated gap status values
+type AggregatedGapStatus = 'unfilled' | 'in_progress' | 'filled';
+
+const RulesTableFiltersComponent = ({ selectedTab }: RulesTableFiltersProps) => {
   const { startTransaction } = useStartTransaction();
   const {
     state: { filterOptions },
@@ -44,6 +53,7 @@ const RulesTableFiltersComponent = () => {
     tags: selectedTags,
     enabled,
     ruleExecutionStatus: selectedRuleExecutionStatus,
+    gapStatus,
   } = filterOptions;
 
   const handleOnSearch = useCallback(
@@ -94,6 +104,16 @@ const RulesTableFiltersComponent = () => {
     [selectedRuleExecutionStatus, setFilterOptions, startTransaction]
   );
 
+  const handleSelectedGapStatus = useCallback(
+    (newStatus?: AggregatedGapStatus) => {
+      if (newStatus !== gapStatus) {
+        startTransaction({ name: RULES_TABLE_ACTIONS.FILTER });
+        setFilterOptions({ gapStatus: newStatus });
+      }
+    },
+    [gapStatus, setFilterOptions, startTransaction]
+  );
+
   return (
     <FilterWrapper gutterSize="m" justifyContent="flexEnd" wrap>
       <RuleSearchField initialValue={filterOptions.filter} onSearch={handleOnSearch} />
@@ -107,6 +127,17 @@ const RulesTableFiltersComponent = () => {
           />
         </EuiFilterGroup>
       </EuiFlexItem>
+
+      {selectedTab === AllRulesTabs.monitoring && (
+        <EuiFlexItem grow={false}>
+          <EuiFilterGroup>
+            <GapStatusSelector
+              selectedStatus={gapStatus}
+              onSelectedStatusChanged={handleSelectedGapStatus}
+            />
+          </EuiFilterGroup>
+        </EuiFlexItem>
+      )}
 
       <EuiFlexItem grow={false}>
         <EuiFilterGroup>

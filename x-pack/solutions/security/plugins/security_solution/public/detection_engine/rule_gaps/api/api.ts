@@ -13,7 +13,7 @@ import {
   INTERNAL_ALERTING_GAPS_GET_SUMMARY_BY_RULE_IDS_API_PATH,
   INTERNAL_ALERTING_GAPS_FILL_BY_ID_API_PATH,
   INTERNAL_ALERTING_GAPS_FIND_API_PATH,
-  gapStatus,
+  aggregatedGapStatus,
 } from '@kbn/alerting-plugin/common';
 import type { FindBackfillResponseBody } from '@kbn/alerting-plugin/common/routes/backfill/apis/find';
 import type { ScheduleBackfillResponseBody } from '@kbn/alerting-plugin/common/routes/backfill/apis/schedule';
@@ -118,7 +118,7 @@ export const getRuleIdsWithGaps = async ({
   signal,
   start,
   end,
-  statuses = [gapStatus.UNFILLED, gapStatus.PARTIALLY_FILLED],
+  statuses = [aggregatedGapStatus.UNFILLED],
   hasUnfilledIntervals,
   hasInProgressIntervals,
   hasFilledIntervals,

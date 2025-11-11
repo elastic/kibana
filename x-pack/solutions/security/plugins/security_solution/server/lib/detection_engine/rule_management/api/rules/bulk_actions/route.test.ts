@@ -688,7 +688,7 @@ describe('Perform bulk action route', () => {
 
       expect(response.status).toEqual(400);
       expect(response.body.message).toEqual(
-        'Cannot use both ids and gaps_range_start/gaps_range_end in request payload.'
+        'gaps_range_start, gaps_range_end and gap_status must be provided together.'
       );
     });
 
@@ -707,7 +707,7 @@ describe('Perform bulk action route', () => {
 
       expect(response.status).toEqual(400);
       expect(response.body.message).toEqual(
-        'Both gaps_range_start and gaps_range_end must be provided together.'
+        'gaps_range_start, gaps_range_end and gap_status must be provided together.'
       );
     });
 
@@ -726,13 +726,48 @@ describe('Perform bulk action route', () => {
 
       expect(response.status).toEqual(400);
       expect(response.body.message).toEqual(
-        'Both gaps_range_start and gaps_range_end must be provided together.'
+        'gaps_range_start, gaps_range_end and gap_status must be provided together.'
+      );
+    });
+
+    it('rejects payload if gaps range is provided without gap_status', async () => {
+      const request = requestMock.create({
+        method: 'patch',
+        path: DETECTION_ENGINE_RULES_BULK_ACTION,
+        body: {
+          ...getBulkDisableRuleActionSchemaMock(),
+          query: '',
+          gaps_range_start: '2025-01-01T00:00:00.000Z',
+          gaps_range_end: '2025-01-02T00:00:00.000Z',
+        },
+      });
+      const response = await server.inject(request, requestContextMock.convertContext(context));
+      expect(response.status).toEqual(400);
+      expect(response.body.message).toEqual(
+        'gaps_range_start, gaps_range_end and gap_status must be provided together.'
+      );
+    });
+
+    it('rejects payload if gap_status is provided without gaps range', async () => {
+      const request = requestMock.create({
+        method: 'patch',
+        path: DETECTION_ENGINE_RULES_BULK_ACTION,
+        body: {
+          ...getBulkDisableRuleActionSchemaMock(),
+          query: '',
+          gap_status: 'unfilled',
+        },
+      });
+      const response = await server.inject(request, requestContextMock.convertContext(context));
+      expect(response.status).toEqual(400);
+      expect(response.body.message).toEqual(
+        'gaps_range_start, gaps_range_end and gap_status must be provided together.'
       );
     });
   });
 
   describe('gap range functionality', () => {
-    it('passes gap range to rules find when provided with query', async () => {
+    it('passes gap range and status to rules find when provided with query', async () => {
       const gapStartDate = '2025-01-01T00:00:00.000Z';
       const gapEndDate = '2025-01-02T00:00:00.000Z';
 
@@ -744,6 +779,7 @@ describe('Perform bulk action route', () => {
           query: '',
           gaps_range_start: gapStartDate,
           gaps_range_end: gapEndDate,
+          gap_status: 'unfilled',
         },
       });
 
@@ -753,7 +789,7 @@ describe('Perform bulk action route', () => {
         expect.objectContaining({
           start: gapStartDate,
           end: gapEndDate,
-          statuses: ['unfilled', 'partially_filled'],
+          statuses: ['unfilled'],
         })
       );
     });

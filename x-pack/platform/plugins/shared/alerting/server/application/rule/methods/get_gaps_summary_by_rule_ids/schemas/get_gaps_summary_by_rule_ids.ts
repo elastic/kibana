@@ -8,8 +8,8 @@
 import { schema } from '@kbn/config-schema';
 
 export const getGapsSummaryByRuleIdsParamsSchema = schema.object({
-  start: schema.string(),
-  end: schema.string(),
+  start: schema.maybe(schema.string()),
+  end: schema.maybe(schema.string()),
   ruleIds: schema.arrayOf(schema.string()),
 });
 
@@ -20,6 +20,8 @@ export const getGapsSummaryByRuleIdsResponseSchema = schema.object({
       totalUnfilledDurationMs: schema.number(),
       totalInProgressDurationMs: schema.number(),
       totalFilledDurationMs: schema.number(),
+      status: schema.maybe(schema.string()),
+      lastGapTimestamp: schema.maybe(schema.number()),
     })
   ),
 });

@@ -12,3 +12,11 @@ export const gapStatus = {
 } as const;
 
 export type GapStatus = (typeof gapStatus)[keyof typeof gapStatus];
+
+export const aggregatedGapStatus = {
+  UNFILLED: 'unfilled',
+  IN_PROGRESS: 'in_progress',
+  FILLED: 'filled',
+} as const;
+
+export type AggregatedGapStatus = (typeof aggregatedGapStatus)[keyof typeof aggregatedGapStatus];

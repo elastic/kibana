@@ -19,7 +19,15 @@ import {
   alertingAuthorizationFilterOpts,
   RULE_TYPE_CHECKS_CONCURRENCY,
 } from '../../../../rules_client/common/constants';
-import { buildGapsFilter } from '../../../../lib/rule_gaps/build_gaps_filter';
+//
+import {
+  buildBaseGapsFilter,
+  resolveTimeRange,
+  extractGapDurationSums,
+  calculateAggregatedGapStatus,
+  COMMON_GAP_AGGREGATIONS,
+  type GapDurationBucket,
+} from '../get_rule_ids_with_gaps/utils';
 
 export async function getGapsSummaryByRuleIds(
   context: RulesClientContext,
@@ -99,10 +107,8 @@ export async function getGapsSummaryByRuleIds(
       { concurrency: RULE_TYPE_CHECKS_CONCURRENCY }
     );
 
-    const filter = buildGapsFilter({
-      start,
-      end,
-    });
+    const { from, to } = resolveTimeRange({ from: start, to: end });
+    const filter = buildBaseGapsFilter(from, to);
 
     const aggs = await eventLogClient.aggregateEventsBySavedObjectIds(
       RULE_SAVED_OBJECT_TYPE,
@@ -116,21 +122,8 @@ export async function getGapsSummaryByRuleIds(
               size: 10000,
             },
             aggs: {
-              totalUnfilledDurationMs: {
-                sum: {
-                  field: 'kibana.alert.rule.gap.unfilled_duration_ms',
-                },
-              },
-              totalInProgressDurationMs: {
-                sum: {
-                  field: 'kibana.alert.rule.gap.in_progress_duration_ms',
-                },
-              },
-              totalFilledDurationMs: {
-                sum: {
-                  field: 'kibana.alert.rule.gap.filled_duration_ms',
-                },
-              },
+              ...COMMON_GAP_AGGREGATIONS,
+              last_gap_ts: { max: { field: '@timestamp' } },
             },
           },
         },
@@ -138,24 +131,32 @@ export async function getGapsSummaryByRuleIds(
     );
 
     interface UniqueRuleIdsAgg {
-      buckets: Array<{
-        key: string;
-        totalUnfilledDurationMs: { value: number };
-        totalInProgressDurationMs: { value: number };
-        totalFilledDurationMs: { value: number };
-      }>;
+      buckets: Array<
+        GapDurationBucket & {
+          key: string;
+          last_gap_ts?: { value: number | null };
+        }
+      >;
     }
 
     const uniqueRuleIdsAgg = aggs.aggregations?.unique_rule_ids as UniqueRuleIdsAgg;
     const resultBuckets = uniqueRuleIdsAgg?.buckets ?? [];
 
     const result: GetGapsSummaryByRuleIdsResponse = {
-      data: resultBuckets.map((bucket) => ({
-        ruleId: bucket.key,
-        totalUnfilledDurationMs: bucket.totalUnfilledDurationMs.value,
-        totalInProgressDurationMs: bucket.totalInProgressDurationMs.value,
-        totalFilledDurationMs: bucket.totalFilledDurationMs.value,
-      })),
+      data: resultBuckets.map((bucket) => {
+        const sums = extractGapDurationSums(bucket);
+        const status = calculateAggregatedGapStatus(sums) ?? undefined;
+        return {
+          ruleId: bucket.key,
+          totalUnfilledDurationMs: sums.sumUnfilledMs,
+          totalInProgressDurationMs: sums.sumInProgressMs,
+          totalFilledDurationMs: sums.sumFilledMs,
+          ...(bucket.last_gap_ts?.value != null
+            ? { lastGapTimestamp: bucket.last_gap_ts.value }
+            : {}),
+          ...(status ? { status } : {}),
+        };
+      }),
     };
 
     return result;

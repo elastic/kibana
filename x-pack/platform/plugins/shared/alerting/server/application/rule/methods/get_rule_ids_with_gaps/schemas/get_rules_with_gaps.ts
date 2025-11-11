@@ -8,9 +8,17 @@
 import { schema } from '@kbn/config-schema';
 
 export const getRuleIdsWithGapsParamsSchema = schema.object({
-  start: schema.string(),
-  end: schema.string(),
-  statuses: schema.maybe(schema.arrayOf(schema.string())),
+  start: schema.maybe(schema.string()),
+  end: schema.maybe(schema.string()),
+  statuses: schema.maybe(
+    schema.arrayOf(
+      schema.oneOf([
+        schema.literal('unfilled'),
+        schema.literal('in_progress'),
+        schema.literal('filled'),
+      ])
+    )
+  ),
   hasUnfilledIntervals: schema.maybe(schema.boolean()),
   hasInProgressIntervals: schema.maybe(schema.boolean()),
   hasFilledIntervals: schema.maybe(schema.boolean()),

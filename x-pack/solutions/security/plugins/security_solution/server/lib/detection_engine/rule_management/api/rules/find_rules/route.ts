@@ -8,7 +8,6 @@
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { gapStatus } from '@kbn/alerting-plugin/common';
 import { DETECTION_ENGINE_RULES_URL_FIND } from '../../../../../../../common/constants';
 import type { FindRulesResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
@@ -54,15 +53,12 @@ export const findRulesRoute = (router: SecuritySolutionPluginRouter, logger: Log
           const rulesClient = await ctx.alerting.getRulesClient();
 
           let ruleIds: string[] | undefined;
-          if (query.gaps_range_start && query.gaps_range_end) {
+          if (query.gap_status) {
             const ruleIdsWithGaps = await rulesClient.getRuleIdsWithGaps({
-              start: query.gaps_range_start,
-              end: query.gaps_range_end,
-              statuses: [gapStatus.UNFILLED, gapStatus.PARTIALLY_FILLED],
-              hasUnfilledIntervals: true,
+              statuses: [query.gap_status],
             });
             ruleIds = ruleIdsWithGaps.ruleIds;
-            if (ruleIds.length === 0) {
+            if ((ruleIds?.length ?? 0) === 0) {
               const emptyRules = transformFindAlerts({
                 data: [],
                 page: query.page,
