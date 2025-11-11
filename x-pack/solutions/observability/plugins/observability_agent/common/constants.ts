@@ -6,4 +6,4 @@
  */
 
 export const OBSERVABILITY_AGENT_FEATURE_FLAG = 'observabilityAgent.enabled';
-export const OBSERVABILITY_AGENT_FEATURE_FLAG_DEFAULT = false as const;
+export const OBSERVABILITY_AGENT_FEATURE_FLAG_DEFAULT = false;

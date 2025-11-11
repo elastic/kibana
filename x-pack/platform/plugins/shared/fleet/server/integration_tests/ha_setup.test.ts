@@ -145,6 +145,7 @@ describe('Fleet setup preconfiguration with multiple instances Kibana', () => {
   });
 
   // FLAKY: https://github.com/elastic/kibana/issues/223652
+  // FLAKY: https://github.com/elastic/kibana/issues/223654
   describe.skip('preconfiguration setup', () => {
     it('sets up Fleet correctly with single Kibana instance', async () => {
       await addRoots(1);

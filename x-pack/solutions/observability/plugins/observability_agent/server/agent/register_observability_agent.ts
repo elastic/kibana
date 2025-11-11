@@ -14,7 +14,7 @@ import type {
 import { OBSERVABILITY_AGENT_TOOL_IDS } from '../tools/register_tools';
 import { OBSERVABILITY_ALERTS_TOOL_ID } from '../tools/alerts/alerts';
 
-export const OBSERVABILITY_AGENT_ID = 'platform.core.observability';
+export const OBSERVABILITY_AGENT_ID = 'observability.agent';
 
 export async function registerObservabilityAgent({
   core,

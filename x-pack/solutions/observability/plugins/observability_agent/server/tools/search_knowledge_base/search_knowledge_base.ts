@@ -8,11 +8,7 @@
 import { z } from '@kbn/zod';
 import { ToolType } from '@kbn/onechat-common';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
-import type {
-  BuiltinToolDefinition,
-  ModelProvider,
-  StaticToolRegistration,
-} from '@kbn/onechat-server';
+import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/onechat-server';
 import type {
   AuthenticatedUser,
   CoreSetup,
@@ -22,7 +18,6 @@ import type {
 } from '@kbn/core/server';
 import { encode } from 'gpt-tokenizer';
 import { orderBy } from 'lodash';
-import { MessageRole } from '@kbn/inference-common';
 import { getSpaceIdFromPath } from '@kbn/spaces-plugin/common';
 import type {
   ObservabilityAgentPluginStart,
@@ -62,39 +57,41 @@ interface KnowledgeBaseResult {
 }
 
 const searchKnowledgeBaseSchema = z.object({
-  query: z.string().min(1).describe('The search query to find relevant knowledge base entries.'),
+  query: z
+    .string()
+    .min(1)
+    .describe(
+      'One focused semantic search question that restates the latest user request together with essential conversation context, preserving exact identifiers and key entities.'
+    ),
 });
 
-export async function createSearchKnowledgeBaseTool({
+export function createSearchKnowledgeBaseTool({
   core,
   logger,
 }: {
   core: CoreSetup<ObservabilityAgentPluginStartDependencies, ObservabilityAgentPluginStart>;
   logger: Logger;
-}): Promise<StaticToolRegistration<typeof searchKnowledgeBaseSchema>> {
+}): StaticToolRegistration<typeof searchKnowledgeBaseSchema> {
   const toolDefinition: BuiltinToolDefinition<typeof searchKnowledgeBaseSchema> = {
     id: OBSERVABILITY_SEARCH_KNOWLEDGE_BASE_TOOL_ID,
     type: ToolType.builtin,
-    description: `Search the observability knowledge base for documentation, guides, custom organizational knowledge, and user-specific information. This contains specialized content not accessible through other search tools, including personal user details, preferences, and context from previous interactions. Use when built-in tools don't have the needed information or when queries involve custom organizational policies, procedures, domain-specific knowledge, or personal user information not available in standard indices.`,
+    description: `Search the observability knowledge base for custom organizational knowledge, and user-specific information. This contains specialized content not accessible through other search tools, including personal user details, preferences, and context from previous interactions. Use when built-in tools don't have the needed information or when queries involve custom organizational policies, procedures, domain-specific knowledge, or personal user information not available in standard indices.`,
     schema: searchKnowledgeBaseSchema,
     tags: ['observability', 'knowledge', 'documentation', 'context'],
-    handler: async ({ query }, { esClient, modelProvider, request }) => {
+    handler: async ({ query }, { esClient, request }) => {
       const [, plugins] = await core.getStartServices();
       const user = plugins.security.authc.getCurrentUser(request);
 
       try {
-        const rewrittenQuery = await rewriteQuery({ query, modelProvider, logger });
-
-        logger.debug(
-          `Searching from knowledge base: original="${query}", rewritten="${rewrittenQuery}"`
-        );
+        const normalizedQuery = query.trim();
+        logger.debug(`Searching knowledge base with query: "${normalizedQuery}"`);
 
         const namespace = await getNamespaceForRequest(request, core);
         logger.debug(`Using namespace: ${namespace}`);
         const entries = await searchKnowledgeBase({
           user,
           esClient,
-          query: rewrittenQuery,
+          query: normalizedQuery,
           namespace,
           logger,
         });
@@ -123,7 +120,7 @@ export async function createSearchKnowledgeBaseTool({
             {
               type: ToolResultType.other,
               data: {
-                query: rewrittenQuery,
+                query: normalizedQuery,
                 entries: filteredEntries,
                 total: entries.length,
                 noOfDroppedEntries: entries.length - filteredEntries.length,
@@ -150,56 +147,6 @@ export async function createSearchKnowledgeBaseTool({
   };
 
   return toolDefinition;
-}
-
-/**
- * Rewrite the user query using LLM to improve semantic search
- */
-async function rewriteQuery({
-  query,
-  modelProvider,
-  logger,
-}: {
-  query: string;
-  modelProvider: ModelProvider;
-  logger: Logger;
-}): Promise<string> {
-  try {
-    const systemMessage = `You are a retrieval query-rewriting assistant. Your ONLY task is to transform the user's query into a single question that will be embedded and searched against "semantic_text" fields in Elasticsearch.
-
-OUTPUT
-Return exactly one English question (≤ 50 tokens) and nothing else—no preamble, no code-blocks, no JSON.
-
-RULES & STRATEGY
- - Always produce one question; never ask the user anything in return.
- - Preserve literal identifiers: if the query references an entity - e.g. service name, hostname, trace ID—repeat that exact string, unchanged; no paraphrasing, truncation, or symbol removal.
- - Expand vague references using context clues, but never invent facts, names, or numbers.
- - If context is too thin for a precise query, output a single broad question centered on any topic words mentioned (e.g. "latency", "errors", "logs").
- - Use neutral third-person phrasing; avoid "I", "we", or "you".
- - Keep it one declarative sentence not exceeding 50 tokens with normal punctuation—no lists, meta-commentary, or extra formatting.
-
-EXAMPLES
-• "How to debug high latency in APM?" ➜ "What are best practices for debugging high latency issues in APM traces?"
-• "SLO configuration" ➜ "How do you configure Service Level Objectives in observability?"
-• "Error rate spike investigation" ➜ "What steps should be taken to investigate sudden error rate spikes?"
-• "logs not showing up" ➜ "Why might logs not appear in the observability solution?"`;
-
-    const { inferenceClient } = await modelProvider.getDefaultModel();
-
-    const response = await inferenceClient.chatComplete({
-      system: systemMessage,
-      messages: [{ role: MessageRole.User, content: query }],
-    });
-
-    const rewrittenQuery = response.content;
-    logger.debug(`Query rewritten from "${query}" to "${rewrittenQuery}"`);
-
-    return rewrittenQuery || query;
-  } catch (error) {
-    logger.error(`Failed to rewrite query: ${error.message}`);
-    logger.debug(error);
-    return query; // Fall back to original query
-  }
 }
 
 /**
