@@ -1477,7 +1477,7 @@
     "@cypress/webpack-preprocessor": "^6.0.2",
     "@elastic/eslint-plugin-eui": "2.5.0",
     "@elastic/makelogs": "^6.1.1",
-    "@elastic/synthetics": "^1.19.0",
+    "@elastic/synthetics": "^1.20.0",
     "@emotion/babel-preset-css-prop": "^11.11.0",
     "@emotion/jest": "^11.11.0",
     "@fast-check/jest": "^2.1.1",

@@ -2883,10 +2883,10 @@
     history "^4.9.0"
     qs "^6.9.7"
 
-"@elastic/synthetics@^1.19.0":
-  version "1.19.0"
-  resolved "https://registry.yarnpkg.com/@elastic/synthetics/-/synthetics-1.19.0.tgz#b05a8a56f5a705672601a20a37fcb42aef8936d4"
-  integrity sha512-DUE+dFHBhAYHrFxYOdVzmzMSoVqAe/wnLhNgXJ294WdfcohKJdCy0zWhDfwt4Ynivlfc7w4euekN9wlrUuRIJA==
+"@elastic/synthetics@^1.20.0":
+  version "1.20.0"
+  resolved "https://registry.yarnpkg.com/@elastic/synthetics/-/synthetics-1.20.0.tgz#bf9d1045950acbba80188fdaa04afcb831279876"
+  integrity sha512-sOXRZryaN7auAvbopeK0Qne0mdENek6EaL2xV1y/4rgXnxyjCX0h5JGibLvzyhSQSVlLbUwF4TdlIcT2PtcGVw==
   dependencies:
     "@babel/code-frame" "^7.22.13"
     archiver "^7.0.1"
@@ -2908,7 +2908,7 @@
     sonic-boom "^3.3.0"
     source-map-support "^0.5.21"
     stack-utils "^2.0.6"
-    undici "^5.29.0"
+    undici "^7.11.0"
     unzip-stream "^0.3.4"
     yaml "^2.2.2"
 
@@ -3307,11 +3307,6 @@
   integrity sha512-t9m3u3tikj/+Ph+gRLGb7fFS/aqnIafsAc6qhXIFJytkqOFRSF70Y5yUUyTtR0idcb6Ald7AnC0AChLCLxv2Tg==
   dependencies:
     fast-check "^3.0.0 || ^4.0.0"
-
-"@fastify/busboy@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@fastify/busboy/-/busboy-2.0.0.tgz#f22824caff3ae506b18207bad4126dbc6ccdb6b8"
-  integrity sha512-JUFJad5lv7jxj926GPgymrWQxxjPYuJNiNjNMzqT+HiuP6Vl3dk5xzG+8sTX96np0ZAluvaMzPsjhHZ5rNuNQQ==
 
 "@floating-ui/core@^1.7.1":
   version "1.7.1"
@@ -33123,17 +33118,15 @@ undici@6.21.2:
   resolved "https://registry.yarnpkg.com/undici/-/undici-6.21.2.tgz#49c5884e8f9039c65a89ee9018ef3c8e2f1f4928"
   integrity sha512-uROZWze0R0itiAKVPsYhFov9LxrPMHLMEQFszeI2gCN6bnIIZ8twzBCJcN2LJrBBLfrP0t1FW0g+JmKVl8Vk1g==
 
-undici@^5.29.0:
-  version "5.29.0"
-  resolved "https://registry.yarnpkg.com/undici/-/undici-5.29.0.tgz#419595449ae3f2cdcba3580a2e8903399bd1f5a3"
-  integrity sha512-raqeBD6NQK4SkWhQzeYKd1KmIG6dllBOTt55Rmkt4HtI9mwdWtJljnrXjAFUBLTSN67HWrOIZ3EPF4kjUw80Bg==
-  dependencies:
-    "@fastify/busboy" "^2.0.0"
-
 undici@^6.21.1, undici@^6.21.2:
   version "6.21.3"
   resolved "https://registry.yarnpkg.com/undici/-/undici-6.21.3.tgz#185752ad92c3d0efe7a7d1f6854a50f83b552d7a"
   integrity sha512-gBLkYIlEnSp8pFbT64yFgGE6UIB9tAkhukC23PmMDCe5Nd+cRqKxSjw5y54MK2AZMgZfJWMaNE4nYUHgi1XEOw==
+
+undici@^7.11.0:
+  version "7.16.0"
+  resolved "https://registry.yarnpkg.com/undici/-/undici-7.16.0.tgz#cb2a1e957726d458b536e3f076bf51f066901c1a"
+  integrity sha512-QEg3HPMll0o3t2ourKwOeUAZ159Kn9mx5pnzHRQO8+Wixmh88YdZRiIwat0iNzNNXn0yoEtXJqFpyW7eM8BV7g==
 
 undici@^7.2.3:
   version "7.5.0"
