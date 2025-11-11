@@ -24,32 +24,37 @@ import {
  * in a GCS bucket for cached type checks.
  */
 export async function archiveTSBuildArtifacts(log: SomeDevLog) {
-  const matches = await globby(CACHE_MATCH_GLOBS, {
-    cwd: REPO_ROOT,
-    dot: true,
-    followSymbolicLinks: false,
-    ignore: CACHE_IGNORE_GLOBS,
-  });
+  try {
+    const matches = await globby(CACHE_MATCH_GLOBS, {
+      cwd: REPO_ROOT,
+      dot: true,
+      followSymbolicLinks: false,
+      ignore: CACHE_IGNORE_GLOBS,
+    });
 
-  if (matches.length === 0) {
-    log.info('No TypeScript build artifacts found to archive.');
-    return;
-  }
+    if (matches.length === 0) {
+      log.info('No TypeScript build artifacts found to archive.');
+      return;
+    }
 
-  const commitSha = await resolveCurrentCommitSha();
+    const commitSha = await resolveCurrentCommitSha();
 
-  if (!commitSha) {
-    log.warning('Unable to determine commit SHA for TypeScript cache archive.');
-    return;
-  }
+    if (!commitSha) {
+      log.warning('Unable to determine commit SHA for TypeScript cache archive.');
+      return;
+    }
 
-  const prNumber = getPullRequestNumber();
+    const prNumber = getPullRequestNumber();
 
-  const options = { files: matches, sha: commitSha, prNumber };
+    const options = { files: matches, sha: commitSha, prNumber };
 
-  if (isCiEnvironment()) {
-    await withGcsAuth(log, () => new GcsFileSystem(log).updateArchive(options));
-  } else {
-    await new LocalFileSystem(log).updateArchive(options);
+    if (isCiEnvironment()) {
+      await withGcsAuth(log, () => new GcsFileSystem(log).updateArchive(options));
+    } else {
+      await new LocalFileSystem(log).updateArchive(options);
+    }
+  } catch (error) {
+    const archiveErrorDetails = error instanceof Error ? error.message : String(error);
+    log.warning(`Failed to archive TypeScript build artifacts: ${archiveErrorDetails}`);
   }
 }
