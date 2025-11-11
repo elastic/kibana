@@ -19,6 +19,7 @@ import {
   hasImportThenExportPattern,
   isInTypeContext,
   shouldSkipIdentifier,
+  isMockRelated,
 } from './helpers';
 
 interface PropertyInfo {
@@ -382,6 +383,32 @@ describe('helpers', () => {
       const result = collectReferencedProperties(programPath!, properties);
 
       expect(result).toEqual(new Set());
+    });
+  });
+
+  describe('isMockRelated', () => {
+    it('returns true for mock file patterns', () => {
+      expect(isMockRelated('./file.mock.js')).toBe(true);
+      expect(isMockRelated('path/to/file.mocks.js')).toBe(true);
+    });
+
+    it('returns true for @kbn packages with mock in the name', () => {
+      expect(isMockRelated('@kbn/core-http-server-mocks')).toBe(true);
+      expect(isMockRelated('@kbn/test-mock')).toBe(true);
+    });
+
+    it('returns true for mock directory segments', () => {
+      expect(isMockRelated('src/mock/index.ts')).toBe(true);
+      expect(isMockRelated('src/mocks/index.ts')).toBe(true);
+      expect(isMockRelated('../../mocks')).toBe(true);
+      expect(isMockRelated('src/__mocks__/index.ts')).toBe(true);
+      expect(isMockRelated('./__mocks__/module.ts')).toBe(true);
+    });
+
+    it('returns false for regular files and modules', () => {
+      expect(isMockRelated('@kbn/regular-package')).toBe(false);
+      expect(isMockRelated('path/to/file.ts')).toBe(false);
+      expect(isMockRelated('./module')).toBe(false);
     });
   });
 });
