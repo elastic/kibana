@@ -13,7 +13,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowYAMLEditor } from './workflow_yaml_editor';
 import { kibanaReactDecorator } from '../../../../.storybook/decorators';
-import { WorkflowDetailStoreProvider } from '../lib/store';
+import { WorkflowDetailStoreProvider } from '../../../entities/workflows/store';
 
 const StoryProviders: Decorator = (story: Function) => {
   return (

@@ -36,6 +36,20 @@ import { WorkflowYAMLValidationErrors } from './workflow_yaml_validation_errors'
 import { addDynamicConnectorsToCache } from '../../../../common/schema';
 import { useAvailableConnectors } from '../../../entities/connectors/model/use_available_connectors';
 import { useSaveYaml } from '../../../entities/workflows/model/use_save_yaml';
+import type { StepInfo } from '../../../entities/workflows/store';
+import {
+  selectFocusedStepInfo,
+  selectSchema,
+  selectYamlDocument,
+  setCursorPosition,
+  setStepExecutions,
+  setYamlString,
+} from '../../../entities/workflows/store';
+import {
+  selectHasChanges,
+  selectWorkflow,
+} from '../../../entities/workflows/store/workflow_detail/selectors';
+import { setIsTestModalOpen } from '../../../entities/workflows/store/workflow_detail/slice';
 import { ActionsMenuPopover } from '../../../features/actions_menu_popover';
 import type { ActionOptionData } from '../../../features/actions_menu_popover/types';
 import { useMonacoMarkersChangedInterceptor } from '../../../features/validate_workflow_yaml/lib/use_monaco_markers_changed_interceptor';
@@ -55,16 +69,6 @@ import {
 } from '../lib/monaco_providers';
 import { insertStepSnippet } from '../lib/snippets/insert_step_snippet';
 import { insertTriggerSnippet } from '../lib/snippets/insert_trigger_snippet';
-import type { StepInfo } from '../lib/store';
-import {
-  selectFocusedStepInfo,
-  selectYamlDocument,
-  setCursorPosition,
-  setStepExecutions,
-  setYamlString,
-} from '../lib/store';
-import { selectHasChanges, selectSchema, selectWorkflow } from '../lib/store/selectors';
-import { setIsTestModalOpen } from '../lib/store/slice';
 import { useRegisterKeyboardCommands } from '../lib/use_register_keyboard_commands';
 import { navigateToErrorPosition } from '../lib/utils';
 import { GlobalWorkflowEditorStyles } from '../styles/global_workflow_editor_styles';

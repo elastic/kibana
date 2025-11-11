@@ -127,7 +127,7 @@ export const entityDetailsHighlightsRoute = (
                 vulnerabilitiesTotal, // Prevents the UI from displaying the wrong number of vulnerabilities
                 anomalies: anomaliesAnonymized,
               },
-              replacements: getLocalReplacements(),
+              replacements: getLocalReplacements(entityField, entityIdentifier),
               prompt,
             },
           });

@@ -15,6 +15,7 @@ import type {
 } from '@kbn/onechat-common';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { BrowserApiToolMetadata } from '@kbn/onechat-common';
 import type {
   ModelProvider,
   ScopedRunner,
@@ -108,6 +109,7 @@ export interface AgentParams {
    * Agent capabilities to enable.
    */
   capabilities?: AgentCapabilities;
+  browserApiTools?: BrowserApiToolMetadata[];
 }
 
 export interface AgentResponse {

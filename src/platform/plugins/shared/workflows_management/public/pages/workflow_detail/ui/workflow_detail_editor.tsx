@@ -18,19 +18,19 @@ import {
   WORKFLOWS_UI_EXECUTION_GRAPH_SETTING_ID,
   WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID,
 } from '@kbn/workflows';
+import { useWorkflowExecution } from '@kbn/workflows-ui';
 import { buildContextOverrideForStep } from './build_step_context_mock_for_step';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
-import { useWorkflowExecution } from '../../../entities/workflows/model/use_workflow_execution';
+import {
+  selectWorkflowDefinition,
+  selectWorkflowGraph,
+  selectYamlString,
+} from '../../../entities/workflows/store/workflow_detail/selectors';
 import { ExecutionGraph } from '../../../features/debug-graph/execution_graph';
 import { TestStepModal } from '../../../features/run_workflow/ui/test_step_modal';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import type { ContextOverrideData } from '../../../shared/utils/build_step_context_override/build_step_context_override';
-import {
-  selectWorkflowDefinition,
-  selectWorkflowGraph,
-  selectYamlString,
-} from '../../../widgets/workflow_yaml_editor/lib/store/selectors';
 
 const WorkflowYAMLEditor = React.lazy(() =>
   import('../../../widgets/workflow_yaml_editor').then((module) => ({

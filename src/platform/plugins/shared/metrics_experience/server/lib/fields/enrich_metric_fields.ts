@@ -14,7 +14,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { InferSearchResponseOf } from '@kbn/es-types';
 import { semconvFlat } from '@kbn/otel-semantic-conventions';
 import { dateRangeQuery } from '@kbn/es-query';
-import type { DataStreamFieldCapsMap, EpochTimeRange } from '../../types';
+import type { IndexFieldCapsMap, EpochTimeRange } from '../../types';
 import type { Dimension, MetricField } from '../../../common/types';
 import { extractDimensions } from '../dimensions/extract_dimensions';
 import { normalizeUnit } from './normalize_unit';
@@ -149,13 +149,13 @@ export async function sampleMetricMetadata({
 export async function enrichMetricFields({
   esClient,
   metricFields,
-  dataStreamFieldCapsMap,
+  indexFieldCapsMap,
   logger,
   timerange,
 }: {
   esClient: TracedElasticsearchClient;
   metricFields: MetricField[];
-  dataStreamFieldCapsMap: DataStreamFieldCapsMap;
+  indexFieldCapsMap: IndexFieldCapsMap;
   logger: Logger;
   timerange: EpochTimeRange;
 }) {
@@ -175,7 +175,7 @@ export async function enrichMetricFields({
   return metricFields.map((field) => {
     const { dimensions, unitFromSample } =
       metricMetadataMap.get(generateMapKey(field.index, field.name)) || {};
-    const fieldCaps = dataStreamFieldCapsMap.get(field.index);
+    const fieldCaps = indexFieldCapsMap.get(field.index);
 
     if (!dimensions || dimensions.length === 0) {
       return { ...field, dimensions: [], noData: true };

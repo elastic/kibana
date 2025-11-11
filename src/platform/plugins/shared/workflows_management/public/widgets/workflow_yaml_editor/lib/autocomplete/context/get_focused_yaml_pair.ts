@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { StepPropInfo, WorkflowLookup } from '../../store/utils/build_workflow_lookup';
+import type {
+  StepPropInfo,
+  WorkflowLookup,
+} from '../../../../../entities/workflows/store/utils/build_workflow_lookup';
 
 export function getFocusedYamlPair(
   workflowLookup: WorkflowLookup | undefined,

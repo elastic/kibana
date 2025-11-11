@@ -14,7 +14,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { I18nProviderMock } from '@kbn/core-i18n-browser-mocks/src/i18n_context_mock';
 import type { WorkflowYAMLEditorProps } from './workflow_yaml_editor';
 import { WorkflowYAMLEditor } from './workflow_yaml_editor';
-import { createMockStore } from '../lib/store/__mocks__/store.mock';
+import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
 
 // Mock the YamlEditor component to avoid Monaco complexity in tests
 jest.mock('../../../shared/ui/yaml_editor', () => ({
