@@ -9,7 +9,7 @@
 
 import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import { z } from '@kbn/zod/v4';
-import { EuiCheckableCard, EuiFormFieldset, EuiSpacer } from '@elastic/eui';
+import { EuiCheckableCard, EuiFormFieldset, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { getUIMeta } from '../connector_spec_ui';
 import { getWidget } from '.';
 import type { DiscriminatedUnionWidgetProps } from './widget_props';
@@ -81,6 +81,7 @@ export const DiscriminatedUnionField: React.FC<DiscriminatedUnionWidgetProps> = 
   onChange,
   onBlur,
   schema,
+  fullWidth,
 }) => {
   if (!(schema instanceof z.ZodDiscriminatedUnion)) {
     throw new Error('Schema provided to DiscriminatedUnionField is not a ZodDiscriminatedUnion');
@@ -250,15 +251,19 @@ export const DiscriminatedUnionField: React.FC<DiscriminatedUnionWidgetProps> = 
       );
     });
   }, [
-    fieldId,
-    onBlur,
-    onChange,
     schemaOptions,
-    totalOptions,
     value,
+    fieldId,
+    totalOptions,
+    onChange,
     nestedFieldErrors,
     validateNestedField,
+    onBlur,
   ]);
 
-  return <EuiFormFieldset legend={{ children: label }}>{options}</EuiFormFieldset>;
+  return (
+    <EuiFormRow fullWidth={fullWidth}>
+      <EuiFormFieldset legend={{ children: label }}>{options}</EuiFormFieldset>
+    </EuiFormRow>
+  );
 };

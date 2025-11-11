@@ -18,9 +18,9 @@ const webhookConnectorFormSchema = z.object({
     widget: 'text',
     widgetOptions: { label: 'Connector Name' },
   }),
-  method: withUIMeta(z.enum(['post', 'put', 'get', 'delete']), {
+  method: withUIMeta(z.enum(['POST', 'PUT', 'GET', 'DELETE']), {
     widget: 'select',
-    widgetOptions: { label: 'Method', default: 'post' },
+    widgetOptions: { label: 'Method', default: 'POST' },
   }),
   url: withUIMeta(z.url(), { widget: 'text', widgetOptions: { label: 'URL' } }),
   authType: withUIMeta(
@@ -41,6 +41,16 @@ const webhookConnectorFormSchema = z.object({
           }),
         }),
         { widgetOptions: { label: 'Basic Authentication' } }
+      ),
+      withUIMeta(
+        z.object({
+          type: z.literal('bearer'),
+          token: withUIMeta(z.string().min(1, { message: 'Token cannot be empty' }), {
+            widget: 'password',
+            widgetOptions: { label: 'Token' },
+          }),
+        }),
+        { widgetOptions: { label: 'Bearer Token' } }
       ),
     ]),
     {

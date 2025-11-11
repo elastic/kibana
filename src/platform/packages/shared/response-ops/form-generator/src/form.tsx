@@ -9,7 +9,7 @@
 
 import React, { useMemo } from 'react';
 import { z } from '@kbn/zod/v4';
-import { EuiButton, EuiForm } from '@elastic/eui';
+import { EuiButton, EuiForm, EuiSpacer } from '@elastic/eui';
 import { useFormState } from './use_form_state';
 import type { UIMetadata } from './connector_spec_ui';
 import { getUIMeta } from './connector_spec_ui';
@@ -67,7 +67,7 @@ const getFieldsFromSchema = (schema: z.ZodObject<any>) => {
     let initialValue = staticProps.default;
 
     if (uiMeta.widget === 'formFieldset' && schemaAny instanceof z.ZodDiscriminatedUnion) {
-      initialValue = getDiscriminatedUnionInitialValue(schemaAny, staticProps.default);
+      initialValue = getDiscriminatedUnionInitialValue(schemaAny);
     }
 
     fields.push({
@@ -138,6 +138,7 @@ export const Form = ({ connectorSchema, onSubmit }: FormProps) => {
           />
         );
       })}
+      <EuiSpacer size="m" />
       <EuiButton type="submit" fill>
         Submit
       </EuiButton>
