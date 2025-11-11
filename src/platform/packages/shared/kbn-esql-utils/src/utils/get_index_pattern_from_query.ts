@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { Parser, isSubQuery } from '@kbn/esql-ast';
-
 import type { ESQLSource, ESQLCommand } from '@kbn/esql-ast';
 
 function getSourcesFromAst(commands: ESQLCommand[]): string[] {

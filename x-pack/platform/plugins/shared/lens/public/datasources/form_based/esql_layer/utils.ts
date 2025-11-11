@@ -97,7 +97,11 @@ export async function getStateFromAggregateQuery(
   let columnsFromQuery: DatatableColumn[] = [];
   let timeFieldName;
   try {
-    const dataView = await getESQLAdHocDataview(query.esql, dataViews, { skipFetchFields: true });
+    const dataView = await getESQLAdHocDataview({
+      dataViewsService: dataViews,
+      query: query.esql,
+      options: { skipFetchFields: true },
+    });
 
     if (dataView && dataView.id) {
       dataViewId = dataView?.id;
