@@ -15,6 +15,7 @@ export const useFullScreenWatcher = () => {
   const dataGridId = useGeneratedHtmlId({ prefix: 'unifiedDataTable' });
   const [dataGridWrapper, setDataGridWrapper] = useState<HTMLElement | null>(null);
   const [dataGrid, setDataGrid] = useState<HTMLElement | null>(null);
+  const [isFullScreen, setIsFullScreen] = useState(false);
 
   const checkForDataGrid = useCallback<MutationCallback>(
     (_, observer) => {
@@ -31,6 +32,7 @@ export const useFullScreenWatcher = () => {
   const watchForFullScreen = useCallback<MutationCallback>(() => {
     if (dataGrid) {
       toggleFullScreen(dataGrid);
+      setIsFullScreen(dataGrid.classList.contains(EUI_DATA_GRID_FULL_SCREEN_CLASS));
     }
   }, [dataGrid]);
 
@@ -41,7 +43,7 @@ export const useFullScreenWatcher = () => {
     attributeFilter: ['class'],
   });
 
-  return { dataGridId, dataGridWrapper, setDataGridWrapper };
+  return { dataGridId, dataGridWrapper, setDataGridWrapper, isFullScreen };
 };
 
 export const EUI_DATA_GRID_FULL_SCREEN_CLASS = 'euiDataGrid--fullScreen';
