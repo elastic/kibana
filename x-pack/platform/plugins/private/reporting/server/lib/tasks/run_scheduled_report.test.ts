@@ -734,6 +734,7 @@ describe('Run Scheduled Report Task', () => {
         emailParams: {
           bcc: ['test2@test.com'],
           cc: undefined,
+          message: 'Your scheduled report is attached for you to download or share.',
           spaceId: 'default',
           subject: 'Test Report-2025-06-04T00:00:00.000Z scheduled report',
           to: ['test1@test.com'],
@@ -986,6 +987,7 @@ describe('Run Scheduled Report Task', () => {
         emailParams: {
           bcc: ['test2@test.com'],
           cc: undefined,
+          message: 'Your scheduled report is attached for you to download or share.',
           spaceId: 'default',
           subject: 'Test Report-2025-06-04T00:00:00.000Z scheduled report',
           to: ['test1@test.com'],
@@ -1142,6 +1144,7 @@ describe('Run Scheduled Report Task', () => {
         emailParams: {
           bcc: ['test2@test.com'],
           cc: undefined,
+          message: 'Your scheduled report is attached for you to download or share.',
           spaceId: 'default',
           subject: 'Test Report-2025-06-04T00:00:00.000Z scheduled report',
           to: ['test1@test.com'],
