@@ -32,6 +32,7 @@ import {
   ALERT_SEVERITY_IMPROVING,
   ALERT_STATUS_ACTIVE,
   ALERT_STATE_NAMESPACE,
+  ALERT_ATTACK_IDS,
 } from '@kbn/rule-data-utils';
 import type { DeepPartial } from '@kbn/utility-types';
 import type { Alert as LegacyAlert } from '../../alert/alert';
@@ -122,6 +123,7 @@ export const buildNewAlert = <
           new Set([...((cleanedPayload?.tags as string[]) ?? []), ...(rule[ALERT_RULE_TAGS] ?? [])])
         ),
         ...(hasAlertState ? { [ALERT_STATE_NAMESPACE]: filteredAlertState } : {}),
+        [ALERT_ATTACK_IDS]: [],
       },
     ],
     { arrayMerge: (_, sourceArray) => sourceArray }

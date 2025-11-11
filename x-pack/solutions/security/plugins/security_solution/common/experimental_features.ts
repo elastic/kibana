@@ -178,7 +178,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Protects all the work related to the attacks and alerts alignment effort
    */
-  attacksAlertsAlignment: false,
+  attacksAlertsAlignment: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

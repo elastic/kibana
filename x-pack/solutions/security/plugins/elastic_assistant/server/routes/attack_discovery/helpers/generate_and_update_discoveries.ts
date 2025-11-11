@@ -24,6 +24,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { Document } from '@langchain/core/documents';
 
+import { ALERT_ATTACK_IDS } from '@kbn/rule-data-utils';
 import { deduplicateAttackDiscoveries } from '../../../lib/attack_discovery/persistence/deduplication';
 import { reportAttackDiscoverySuccessTelemetry } from './report_attack_discovery_success_telemetry';
 import { handleGraphError } from '../public/post/helpers/handle_graph_error';
@@ -138,6 +139,51 @@ export const generateAndUpdateAttackDiscoveries = async ({
       authenticatedUser,
       createAttackDiscoveryAlertsParams,
     });
+
+    for (const attack of storedAttackDiscoveries) {
+      await esClient.updateByQuery({
+        index: '.alerts-security.alerts-default',
+        query: {
+          ids: {
+            values: attack.alert_ids,
+          },
+        },
+        script: {
+          source: `
+            if (ctx._source['${ALERT_ATTACK_IDS}'] == null) {
+              ctx._source['${ALERT_ATTACK_IDS}'] = [params.attack_id];
+            } else if (!ctx._source['${ALERT_ATTACK_IDS}'].contains(params.attack_id)) {
+              ctx._source['${ALERT_ATTACK_IDS}'].add(params.attack_id);
+            }
+          `,
+          lang: 'painless',
+          params: {
+            attack_id: attack.id,
+          },
+        },
+      });
+      await esClient.updateByQuery({
+        index: '.alerts-security.attack.discovery.alerts-default',
+        query: {
+          ids: {
+            values: attack.id,
+          },
+        },
+        script: {
+          source: `
+            if (ctx._source['${ALERT_ATTACK_IDS}'] == null) {
+              ctx._source['${ALERT_ATTACK_IDS}'] = [params.attack_id];
+            } else if (!ctx._source['${ALERT_ATTACK_IDS}'].contains(params.attack_id)) {
+              ctx._source['${ALERT_ATTACK_IDS}'].add(params.attack_id);
+            }
+          `,
+          lang: 'painless',
+          params: {
+            attack_id: attack.id,
+          },
+        },
+      });
+    }
 
     return {
       anonymizedAlerts,
