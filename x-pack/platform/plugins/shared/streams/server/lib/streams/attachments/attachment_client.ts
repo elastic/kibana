@@ -418,7 +418,7 @@ export class AttachmentClient {
       },
     });
 
-    const existingAssetLinks: AttachmentLink[] = attachmentsResponse.hits.hits.map(
+    const existingAttachmentLinks: AttachmentLink[] = attachmentsResponse.hits.hits.map(
       ({ _source }) => {
         return {
           id: _source[ATTACHMENT_ID],
@@ -428,10 +428,10 @@ export class AttachmentClient {
     );
 
     const nextIds = new Set(links.map((link) => link.id));
-    const assetLinksDeleted = existingAssetLinks.filter((link) => !nextIds.has(link.id));
+    const attachmentLinksDeleted = existingAttachmentLinks.filter((link) => !nextIds.has(link.id));
 
     const operations: AttachmentBulkOperation[] = [
-      ...assetLinksDeleted.map((attachment) => ({ delete: { attachment } })),
+      ...attachmentLinksDeleted.map((attachment) => ({ delete: { attachment } })),
       ...links.map((attachment) => ({ index: { attachment } })),
     ];
 
@@ -440,7 +440,7 @@ export class AttachmentClient {
     }
 
     return {
-      deleted: assetLinksDeleted,
+      deleted: attachmentLinksDeleted,
       indexed: links,
     };
   }
