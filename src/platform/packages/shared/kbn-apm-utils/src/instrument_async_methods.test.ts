@@ -48,6 +48,30 @@ describe('instrumentAsyncMethods', () => {
     expect(wrappedMethod).not.toBe(originalMethod);
   });
 
+  it('wraps async instance field methods', async () => {
+    class Example {
+      value = 0;
+
+      doWork = async (by: number) => {
+        this.value += by;
+        return this.value;
+      };
+    }
+
+    const instance = new Example();
+    const originalMethod = instance.doWork;
+
+    instrumentAsyncMethods('Example', instance);
+
+    const result = await instance.doWork(1);
+
+    expect(result).toBe(1);
+    expect(instance.value).toBe(1);
+    expect(withSpanMock).toHaveBeenCalledTimes(1);
+    expect(withSpanMock.mock.calls[0][0]).toEqual({ name: 'Example.doWork' });
+    expect(instance.doWork).not.toBe(originalMethod);
+  });
+
   it('wraps async functions defined on plain objects', async () => {
     const service = {
       value: 0,

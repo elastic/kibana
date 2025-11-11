@@ -18,6 +18,18 @@ const isAsyncFunction = (fn: unknown): fn is (...args: any[]) => Promise<any> =>
   return typeof fn === 'function' && fn.constructor?.name === 'AsyncFunction';
 };
 
+const TRANSPILED_ASYNC_MARKERS = ['__awaiter', '_asyncToGenerator', 'regeneratorRuntime'];
+
+// Detect async functions transpiled to helpers such as __awaiter or _asyncToGenerator
+const isTranspiledAsyncFunction = (fn: unknown): fn is (...args: any[]) => Promise<any> => {
+  if (typeof fn !== 'function') {
+    return false;
+  }
+
+  const source = Function.prototype.toString.call(fn);
+  return TRANSPILED_ASYNC_MARKERS.some((marker) => source.includes(marker));
+};
+
 const IGNORE_LIST = ['kibanaServer.request'];
 
 /**
@@ -69,7 +81,7 @@ export function instrumentAsyncMethods(
         continue;
       }
 
-      if (!isAsyncFunction(fn)) {
+      if (!isAsyncFunction(fn) && !isTranspiledAsyncFunction(fn)) {
         continue;
       }
 
