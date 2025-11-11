@@ -160,6 +160,7 @@ const createGroupedActorAndTargetNodes = (
     actorEntitySubType,
     actorEntityName,
     actorHostIps,
+    actorEntityFieldHint,
     // target attributes
     targetNodeId,
     targetIdsCount,
@@ -168,8 +169,8 @@ const createGroupedActorAndTargetNodes = (
     targetEntitySubType,
     targetEntityName,
     targetHostIps,
+    targetEntityFieldHint,
   } = record;
-
   const actorHostIpsArray = actorHostIps ? castArray(actorHostIps) : [];
   const targetHostIpsArray = targetHostIps ? castArray(targetHostIps) : [];
 
@@ -192,19 +193,36 @@ const createGroupedActorAndTargetNodes = (
     targetEntityName,
     targetEntitySubType
   );
+  // Convert namespace hints to arrays - each document has its own entity root namespace
+  const actorNamespaceArray = actorEntityFieldHint ? castArray(actorEntityFieldHint) : [];
+  const targetNamespaceArray = targetEntityFieldHint ? castArray(targetEntityFieldHint) : [];
 
   const actorsDocDataArray: NodeDocumentDataModel[] = actorsDocData
     ? castArray(actorsDocData)
-        .filter((actorData): actorData is string => actorData !== null && actorData !== undefined)
-        .map((actorData) => JSON.parse(actorData))
+        .map((actorData, index) => {
+          if (actorData === null || actorData === undefined) {
+            return null;
+          }
+          return {
+            ...JSON.parse(actorData),
+            sourceNamespaceField: actorNamespaceArray[index],
+          };
+        })
+        .filter((doc): doc is NodeDocumentDataModel => doc !== null)
     : [];
 
   const targetsDocDataArray: NodeDocumentDataModel[] = targetsDocData
     ? castArray(targetsDocData)
-        .filter(
-          (targetData): targetData is string => targetData !== null && targetData !== undefined
-        )
-        .map((targetData) => JSON.parse(targetData))
+        .map((targetData, index) => {
+          if (targetData === null || targetData === undefined) {
+            return null;
+          }
+          return {
+            ...JSON.parse(targetData),
+            sourceNamespaceField: targetNamespaceArray[index],
+          };
+        })
+        .filter((doc): doc is NodeDocumentDataModel => doc !== null)
     : [];
 
   const actorGroup: {

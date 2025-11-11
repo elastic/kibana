@@ -38,6 +38,7 @@ export interface GraphEdge {
   actorEntitySubType?: string | null;
   actorEntityName?: string | string[] | null;
   actorHostIps?: string[] | string;
+  actorEntityFieldHint?: string[] | string;
   // target attributes
   targetNodeId: string | null;
   targetIdsCount: number;
@@ -46,4 +47,5 @@ export interface GraphEdge {
   targetEntitySubType?: string | null;
   targetEntityName?: string | string[] | null;
   targetHostIps?: string[] | string;
+  targetEntityFieldHint?: string[] | string;
 }

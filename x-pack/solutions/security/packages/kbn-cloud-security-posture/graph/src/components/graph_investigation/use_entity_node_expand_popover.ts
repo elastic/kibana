@@ -23,10 +23,24 @@ import type {
   ItemExpandPopoverListItemProps,
   SeparatorExpandPopoverListItemProps,
 } from './list_group_graph_popover';
-import { ACTOR_ENTITY_ID, RELATED_ENTITY, TARGET_ENTITY_ID } from '../../common/constants';
+import { RELATED_ENTITY } from '../../common/constants';
 import { addFilter, containsFilter, removeFilter } from './search_filters';
 
 type NodeToggleAction = 'show' | 'hide';
+
+/**
+ * Helper function to extract sourceNamespaceField from the first document in a node's documentsData.
+ * This determines which ECS namespace field (user/host/service/entity) to use for filtering.
+ */
+const getSourceNamespaceFromNode = (node: NodeProps): string | undefined => {
+  if ('documentsData' in node.data) {
+    const documentsData = node.data.documentsData;
+    if (Array.isArray(documentsData) && documentsData.length > 0) {
+      return documentsData[0].sourceNamespaceField;
+    }
+  }
+  return undefined;
+};
 
 /**
  * Hook to handle the entity node expand popover.
@@ -57,10 +71,13 @@ export const useEntityNodeExpandPopover = (
 
   const onToggleActionsByEntityClick = useCallback(
     (node: NodeProps, action: NodeToggleAction) => {
+      const sourceNamespace = getSourceNamespaceFromNode(node);
+      const actorField = sourceNamespace ? `${sourceNamespace}.entity.id` : 'entity.id';
+
       if (action === 'show') {
-        setSearchFilters((prev) => addFilter(dataViewId, prev, ACTOR_ENTITY_ID, node.id));
+        setSearchFilters((prev) => addFilter(dataViewId, prev, actorField, node.id));
       } else if (action === 'hide') {
-        setSearchFilters((prev) => removeFilter(prev, ACTOR_ENTITY_ID, node.id));
+        setSearchFilters((prev) => removeFilter(prev, actorField, node.id));
       }
     },
     [dataViewId, setSearchFilters]
@@ -68,10 +85,15 @@ export const useEntityNodeExpandPopover = (
 
   const onToggleActionsOnEntityClick = useCallback(
     (node: NodeProps, action: NodeToggleAction) => {
+      const sourceNamespace = getSourceNamespaceFromNode(node);
+      const targetField = sourceNamespace
+        ? `${sourceNamespace}.target.entity.id`
+        : 'entity.target.id';
+
       if (action === 'show') {
-        setSearchFilters((prev) => addFilter(dataViewId, prev, TARGET_ENTITY_ID, node.id));
+        setSearchFilters((prev) => addFilter(dataViewId, prev, targetField, node.id));
       } else if (action === 'hide') {
-        setSearchFilters((prev) => removeFilter(prev, TARGET_ENTITY_ID, node.id));
+        setSearchFilters((prev) => removeFilter(prev, targetField, node.id));
       }
     },
     [dataViewId, setSearchFilters]
@@ -81,10 +103,16 @@ export const useEntityNodeExpandPopover = (
     (
       node: NodeProps
     ): Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps> => {
-      const actionsByEntityAction = containsFilter(searchFilters, ACTOR_ENTITY_ID, node.id)
+      const sourceNamespace = getSourceNamespaceFromNode(node);
+      const actorField = sourceNamespace ? `${sourceNamespace}.entity.id` : 'entity.id';
+      const targetField = sourceNamespace
+        ? `${sourceNamespace}.target.entity.id`
+        : 'entity.target.id';
+
+      const actionsByEntityAction = containsFilter(searchFilters, actorField, node.id)
         ? 'hide'
         : 'show';
-      const actionsOnEntityAction = containsFilter(searchFilters, TARGET_ENTITY_ID, node.id)
+      const actionsOnEntityAction = containsFilter(searchFilters, targetField, node.id)
         ? 'hide'
         : 'show';
       const relatedEntitiesAction = containsFilter(searchFilters, RELATED_ENTITY, node.id)

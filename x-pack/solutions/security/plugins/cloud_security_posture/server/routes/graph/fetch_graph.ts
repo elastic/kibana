@@ -195,6 +195,20 @@ const buildEsqlQuery = ({
 | EVAL targetEntityId = COALESCE(
     ${targetFieldsCoalesce}
   )
+| EVAL actorEntityFieldHint = CASE(
+    user.entity.id IS NOT NULL, "user",
+    host.entity.id IS NOT NULL, "host",
+    service.entity.id IS NOT NULL, "service",
+    entity.id IS NOT NULL, "entity",
+    null
+  )
+| EVAL targetEntityFieldHint = CASE(
+    user.target.entity.id IS NOT NULL, "user",
+    host.target.entity.id IS NOT NULL, "host",
+    service.target.entity.id IS NOT NULL, "service",
+    entity.target.id IS NOT NULL, "entity",
+    null
+  )
 ${
   isEnrichPolicyExists
     ? `
@@ -298,6 +312,7 @@ ${
   actorEntityName = VALUES(actorEntityName),
   actorHostIp = VALUES(actorHostIp),
   actorsDocData = VALUES(actorDocData),
+  actorEntityFieldHint = VALUES(actorEntityFieldHint),
   // target attributes
   targetNodeId = CASE(
     // deterministic group IDs - use raw entity ID for single values, MD5 hash for multiple
@@ -311,6 +326,7 @@ ${
   targetEntityName = VALUES(targetEntityName),
   targetHostIp = VALUES(targetHostIp),
   targetsDocData = VALUES(targetDocData)
+  targetEntityFieldHint = VALUES(targetEntityFieldHint)
     BY action = event.action,
       actorEntityType,
       actorEntitySubType,
