@@ -5,16 +5,11 @@
  * 2.0.
  */
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
-import {
-  elasticsearchServiceMock,
-  loggingSystemMock,
-  httpServerMock,
-} from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import type { Streams } from '@kbn/streams-schema';
 import { createTracedEsClient } from '@kbn/traced-es-client';
 import { verifyQueries } from './verify_queries';
-import type { KibanaRequest } from '@kbn/core/server';
 
 const logsStreamDefinition: Streams.WiredStream.Definition = {
   name: 'logs',
@@ -33,12 +28,12 @@ const logsStreamDefinition: Streams.WiredStream.Definition = {
 describe('verifyQueries', () => {
   let esClientMock: ElasticsearchClientMock;
   let loggerMock: jest.Mocked<MockedLogger>;
-  let requestMock: jest.Mocked<KibanaRequest>;
+  let abortCtrl: AbortController;
 
   beforeEach(() => {
     loggerMock = loggingSystemMock.createLogger();
     esClientMock = elasticsearchServiceMock.createElasticsearchClient();
-    requestMock = httpServerMock.createKibanaRequest();
+    abortCtrl = new AbortController();
   });
 
   it('filters out the invalid queries', async () => {
@@ -51,7 +46,7 @@ describe('verifyQueries', () => {
     const esClient = createTracedEsClient({
       client: esClientMock,
       logger: loggerMock,
-      request: requestMock,
+      abortSignal: abortCtrl.signal,
     });
 
     const result = await verifyQueries(
@@ -78,7 +73,7 @@ describe('verifyQueries', () => {
     const esClient = createTracedEsClient({
       client: esClientMock,
       logger: loggerMock,
-      request: requestMock,
+      abortSignal: abortCtrl.signal,
     });
 
     const result = await verifyQueries(
