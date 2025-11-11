@@ -33,7 +33,7 @@ import {
 } from '../utils';
 import { isEsqlTableTypeDataset } from '../../utils';
 import { getValueApiColumn, getValueColumn } from '../columns/esql_column';
-import type { LensApiAllMetricOperations } from '../../schema/metric_ops';
+import type { LensApiFieldOrFormulaMetricOperation } from '../../schema/metric_ops';
 import type { LensApiBucketOperations } from '../../schema/bucket_ops';
 import { fromColorMappingAPIToLensState, fromColorMappingLensStateToAPI } from '../coloring';
 import type { TagcloudStateESQL, TagcloudStateNoESQL } from '../../schema/charts/tagcloud';
@@ -106,7 +106,7 @@ function reverseBuildVisualizationState(
       : (operationFromColumn(
           visualization.valueAccessor,
           layer as FormBasedLayer
-        ) as LensApiAllMetricOperations),
+        ) as LensApiFieldOrFormulaMetricOperation),
     tag_by: isEsqlTableTypeDataset(dataset)
       ? getValueApiColumn(visualization.tagAccessor, layer as TextBasedLayer)
       : (operationFromColumn(
@@ -134,7 +134,7 @@ function reverseBuildVisualizationState(
 }
 
 function buildFormBasedLayer(layer: TagcloudStateNoESQL): FormBasedPersistedState['layers'] {
-  const columns = fromMetricAPItoLensState(layer.metric as LensApiAllMetricOperations);
+  const columns = fromMetricAPItoLensState(layer.metric as LensApiFieldOrFormulaMetricOperation);
 
   const layers: Record<string, PersistedIndexPatternLayer> = generateLayer(DEFAULT_LAYER_ID, layer);
   const defaultLayer = layers[DEFAULT_LAYER_ID];

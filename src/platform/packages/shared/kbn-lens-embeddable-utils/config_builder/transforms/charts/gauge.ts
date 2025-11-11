@@ -37,7 +37,10 @@ import {
 } from './utils';
 import type { GaugeStateESQL, GaugeStateNoESQL } from '../../schema/charts/gauge';
 import { fromMetricAPItoLensState } from '../columns/metric';
-import type { LensApiAllMetricOperations } from '../../schema/metric_ops';
+import type {
+  LensApiAllMetricOperations,
+  LensApiFieldOrFormulaMetricOperation,
+} from '../../schema/metric_ops';
 import { getValueApiColumn, getValueColumn } from '../columns/esql_column';
 import { isEsqlTableTypeDataset } from '../../utils';
 
@@ -122,7 +125,7 @@ function reverseBuildVisualizationState(
           ...(operationFromColumn(
             metricAccessor,
             layer as FormBasedLayer
-          ) as LensApiAllMetricOperations),
+          ) as LensApiFieldOrFormulaMetricOperation),
           ...(visualization.minAccessor
             ? {
                 min: operationFromColumn(
@@ -178,7 +181,7 @@ function reverseBuildVisualizationState(
 }
 
 function buildFormBasedLayer(layer: GaugeStateNoESQL): FormBasedPersistedState['layers'] {
-  const columns = fromMetricAPItoLensState(layer.metric as LensApiAllMetricOperations);
+  const columns = fromMetricAPItoLensState(layer.metric as LensApiFieldOrFormulaMetricOperation);
 
   const layers: Record<string, PersistedIndexPatternLayer> = generateLayer(DEFAULT_LAYER_ID, layer);
 
