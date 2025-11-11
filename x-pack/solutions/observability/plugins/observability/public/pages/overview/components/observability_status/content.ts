@@ -47,7 +47,7 @@ export const getContent = (
       goToAppTitle: i18n.translate('xpack.observability.statusVisualization.logs.goToAppTitle', {
         defaultMessage: 'Show Logs Explorer',
       }),
-      goToAppLink: logsLocator.getRedirectUrl({}),
+      goToAppLink: logsLocator?.getRedirectUrl({}) ?? '',
       weight: 1,
     },
     {

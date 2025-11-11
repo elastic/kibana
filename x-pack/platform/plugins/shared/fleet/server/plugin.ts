@@ -55,6 +55,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
 
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+import { LockManagerService } from '@kbn/lock-manager';
 
 import type { FleetConfigType } from '../common/types';
 import type { FleetAuthz } from '../common';
@@ -203,6 +204,7 @@ export interface FleetAppContext {
   updateAgentlessDeploymentsTask: UpgradeAgentlessDeploymentsTask;
   automaticAgentUpgradeTask: AutomaticAgentUpgradeTask;
   taskManagerStart?: TaskManagerStartContract;
+  lockManagerService?: LockManagerService;
 }
 
 export type FleetSetupContract = void;
@@ -309,6 +311,7 @@ export class FleetPlugin
   private packageService?: PackageService;
   private packagePolicyService?: PackagePolicyService;
   private policyWatcher?: PolicyWatcher;
+  private lockManagerService?: LockManagerService;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config$ = this.initializerContext.config.create<FleetConfigType>();
@@ -663,6 +666,8 @@ export class FleetPlugin
       logFactory: this.initializerContext.logger,
     });
 
+    this.lockManagerService = new LockManagerService(core, this.initializerContext.logger.get());
+
     // Register fields metadata extractors
     registerFieldsMetadataExtractors({ core, fieldsMetadata: deps.fieldsMetadata });
   }
@@ -712,6 +717,7 @@ export class FleetPlugin
       updateAgentlessDeploymentsTask: this.updateAgentlessDeploymentsTask!,
       automaticAgentUpgradeTask: this.automaticAgentUpgradeTask!,
       taskManagerStart: plugins.taskManager,
+      lockManagerService: this.lockManagerService,
     });
     licenseService.start(plugins.licensing.license$);
     this.telemetryEventsSender.start(plugins.telemetry, core).catch(() => {});

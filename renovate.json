@@ -2729,7 +2729,6 @@
         "puppeteer"
       ],
       "reviewers": [
-        "team:kibana-presentation",
         "team:response-ops"
       ],
       "matchBaseBranches": [
@@ -4176,13 +4175,13 @@
         "@xstate/react"
       ],
       "reviewers": [
-        "team:obs-ux-logs-team"
+        "team:obs-ux-onboarding-team"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
-        "Team:obs-ux-logs",
+        "Team:obs-ux-onboarding",
         "release_note:skip",
         "backport:all-open"
       ],
@@ -4197,13 +4196,13 @@
         "@xstate5/react"
       ],
       "reviewers": [
-        "team:obs-ux-logs-team"
+        "team:obs-ux-onboarding-team"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
-        "Team:obs-ux-logs",
+        "Team:obs-ux-onboarding",
         "release_note:skip",
         "backport:all-open"
       ],
@@ -4217,13 +4216,13 @@
         "constate"
       ],
       "reviewers": [
-        "team:obs-ux-logs-team"
+        "team:obs-ux-onboarding-team"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
-        "Team:obs-ux-logs",
+        "Team:obs-ux-onboarding",
         "release_note:skip",
         "backport:all-open"
       ],
@@ -4236,13 +4235,13 @@
         "oniguruma-to-es"
       ],
       "reviewers": [
-        "team:obs-ux-logs-team"
+        "team:obs-ux-onboarding-team"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
-        "Team:obs-ux-logs",
+        "Team:obs-ux-onboarding",
         "release_note:skip",
         "backport:all-open"
       ],
