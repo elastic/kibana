@@ -75,6 +75,9 @@ export const BANNERS_TEXT_COLOR_ID = 'banners:textColor';
 export const BANNERS_LINK_COLOR_ID = 'banners:linkColor';
 export const BANNERS_BACKGROUND_COLOR_ID = 'banners:backgroundColor';
 
+// Data connectors settings
+export const DATA_CONNECTORS_ENABLED_SETTING_ID = 'dataConnectors:enabled';
+
 // Discover settings
 export const CONTEXT_DEFAULT_SIZE_ID = 'context:defaultSize';
 export const CONTEXT_STEP_ID = 'context:step';
@@ -138,6 +141,7 @@ export const OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS =
   'observability:streamsEnableSignificantEvents';
 export const OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS = 'observability:streamsEnableGroupStreams';
 export const OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS = 'observability:streamsEnableContentPacks';
+export const OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS = 'observability:streamsEnableAttachments';
 export const OBSERVABILITY_ENABLE_DIAGNOSTIC_MODE = 'observability:enableDiagnosticMode';
 
 // Reporting settings
