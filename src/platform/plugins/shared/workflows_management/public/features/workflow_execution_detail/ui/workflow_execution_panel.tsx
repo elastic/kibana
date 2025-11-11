@@ -23,11 +23,10 @@ import React from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowExecutionDto, WorkflowYaml } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
+import { ExecutionStatus, isCancelableStatus } from '@kbn/workflows';
 import { CancelExecutionButton } from './cancel_execution_button';
 import { WorkflowStepExecutionTree } from './workflow_step_execution_tree';
 import { WorkflowExecutionListItem } from '../../workflow_execution_list/ui/workflow_execution_list_item';
-import { isCancelableStatus } from '../lib/execution_status';
 
 const i18nTexts = {
   backToExecutions: i18n.translate('workflows.workflowStepExecutionList.backToExecution', {
