@@ -154,11 +154,12 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
       </>
     );
 
+    // Priority: disabled tooltip > validation tooltip > description tooltip
     const tooltipContent = option.disabled
       ? i18n.DISABLED_WORKFLOW_TOOLTIP
       : option.validationResult
       ? option.validationResult.message
-      : undefined;
+      : option.description || (option.data?.secondaryContent as string) || undefined;
 
     if (tooltipContent) {
       return <EuiToolTip content={tooltipContent}>{content}</EuiToolTip>;
