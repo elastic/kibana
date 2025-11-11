@@ -11,7 +11,7 @@ import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { WebhookMethods } from '@kbn/connector-schemas/common/auth';
+import { WebhookMethods } from '@kbn/connector-schemas/common/auth/constants';
 import { CONNECTOR_ID } from '@kbn/connector-schemas/webhook/constants';
 import type { WebhookActionParams, WebhookConfig, WebhookSecrets } from '../types';
 import { formDeserializer, formSerializer } from '../lib/webhook/form_serialization';

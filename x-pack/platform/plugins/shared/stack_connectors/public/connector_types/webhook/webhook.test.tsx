@@ -10,7 +10,7 @@ import { registerConnectorTypes } from '..';
 import type { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { experimentalFeaturesMock, registrationServicesMock } from '../../mocks';
 import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
-import { WebhookMethods } from '@kbn/connector-schemas/common/auth';
+import { WebhookMethods } from '@kbn/connector-schemas/common/auth/constants';
 
 const CONNECTOR_TYPE_ID = '.webhook';
 let connectorTypeModel: ConnectorTypeModel;

@@ -16,7 +16,7 @@ import {
   type ActionConnectorFieldsProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
 
-import { WebhookMethods } from '@kbn/connector-schemas/common/auth';
+import { WebhookMethods } from '@kbn/connector-schemas/common/auth/constants';
 import * as i18n from './translations';
 
 const HTTP_VERBS = [
