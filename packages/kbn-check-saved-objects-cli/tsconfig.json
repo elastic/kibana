@@ -32,6 +32,5 @@
     "@kbn/core-root-server-internal",
     "@kbn/core-lifecycle-server-internal",
     "@kbn/core-test-helpers-so-type-serializer",
-    "@kbn/std",
   ]
 }
