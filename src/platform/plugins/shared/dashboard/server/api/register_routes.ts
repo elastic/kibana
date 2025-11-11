@@ -19,9 +19,9 @@ import type { DashboardItem } from '../content_management/v1';
 import { getDashboardAPIGetResultSchema } from '../content_management/v1';
 import {
   getDashboardDataSchema,
-  getDashboardAPICreateResultSchema,
   getDashboardUpdateResultSchema,
 } from '../content_management/v1/schema';
+import { registerCreateRoute } from './create';
 import { registerSearchRoute } from './search';
 
 interface RegisterAPIRoutesArgs {
@@ -63,72 +63,9 @@ export function registerAPIRoutes({
 }: RegisterAPIRoutesArgs) {
   const { versioned: versionedRouter } = http.createRouter();
 
+  registerCreateRoute(versionedRouter);
   registerSearchRoute(versionedRouter);
-
-  // Create API route
-  const createRoute = versionedRouter.post({
-    path: `${PUBLIC_API_PATH}/{id?}`,
-    summary: 'Create a dashboard',
-    ...commonRouteConfig,
-  });
-
-  createRoute.addVersion(
-    {
-      version: INTERNAL_API_VERSION,
-      validate: () => ({
-        request: {
-          params: schema.object({
-            id: schema.maybe(
-              schema.string({
-                meta: { description: 'A unique identifier for the dashboard.' },
-              })
-            ),
-          }),
-          body: getDashboardDataSchema(),
-        },
-        response: {
-          200: {
-            body: getDashboardAPICreateResultSchema,
-          },
-        },
-      }),
-    },
-    async (ctx, req, res) => {
-      const { id } = req.params;
-      const { references, spaces: initialNamespaces, ...attributes } = req.body;
-      const client = contentManagement.contentClient
-        .getForRequest({ request: req, requestHandlerContext: ctx })
-        .for<DashboardItem>(CONTENT_ID, LATEST_VERSION);
-      let result;
-      try {
-        ({ result } = await client.create(attributes, {
-          id,
-          references,
-          initialNamespaces,
-        }));
-      } catch (e) {
-        if (e.isBoom && e.output.statusCode === 409) {
-          return res.conflict({
-            body: {
-              message: `A dashboard with saved object ID ${id} already exists.`,
-            },
-          });
-        }
-
-        if (e.isBoom && e.output.statusCode === 403) {
-          return res.forbidden();
-        }
-
-        return res.badRequest({ body: e });
-      }
-      const formattedResult = formatResult(result.item);
-      const response = { ...formattedResult, meta: { ...formattedResult.meta, ...result.meta } };
-      return res.ok({
-        body: response,
-      });
-    }
-  );
-
+  
   // Update API route
 
   const updateRoute = versionedRouter.put({

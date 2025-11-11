@@ -15,8 +15,6 @@ import type { DashboardSearchRequestBody, DashboardSearchResponseBody } from '..
 import { CONTENT_ID, DASHBOARD_API_VERSION } from '../../common/content_management/constants';
 import type {
   DashboardAPIGetOut,
-  DashboardCreateIn,
-  DashboardCreateOut,
   DashboardState,
   DashboardUpdateIn,
   DashboardUpdateOut,
@@ -34,13 +32,14 @@ const cache = new LRUCache<string, DashboardAPIGetOut>({
 
 export const dashboardClient = {
   create: async (dashboardState: DashboardState, references: Reference[]) => {
-    // TODO replace with call to dashboard REST create endpoint
-    return contentManagementService.client.create<DashboardCreateIn, DashboardCreateOut>({
-      contentTypeId: DASHBOARD_CONTENT_ID,
-      data: dashboardState,
-      options: {
-        references,
-      },
+    return coreServices.http.post<DashboardAPIGetOut>(`/api/dashboards/dashboard`, {
+      version: DASHBOARD_API_VERSION,
+      body: JSON.stringify({
+        data: {
+          ...dashboardState,
+          references,
+        },
+      }),
     });
   },
   delete: async (id: string): Promise<DeleteResult> => {
