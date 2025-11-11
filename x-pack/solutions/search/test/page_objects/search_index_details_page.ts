@@ -353,7 +353,9 @@ export function SearchIndexDetailPageProvider({ getService }: FtrProviderContext
 
     async expectAddFieldToBeDisabled() {
       await testSubjects.existOrFail('indexDetailsMappingsAddField');
-      const isMappingsFieldEnabled = await testSubjects.isEnabled('indexDetailsMappingsAddField');
+      const isMappingsFieldEnabled = await testSubjects.isEuiEnabled(
+        'indexDetailsMappingsAddField'
+      );
       expect(isMappingsFieldEnabled).to.be(false);
       await testSubjects.moveMouseTo('indexDetailsMappingsAddField');
       await testSubjects.existOrFail('indexDetailsMappingsAddFieldTooltip');

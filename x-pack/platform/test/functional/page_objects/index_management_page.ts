@@ -200,7 +200,9 @@ export function IndexManagementPageProvider({ getService, getPageObjects }: FtrP
       },
       async expectIndexDetailsMappingsAddFieldToBeEnabled() {
         await testSubjects.existOrFail('indexDetailsMappingsAddField');
-        const isMappingsFieldEnabled = await testSubjects.isEnabled('indexDetailsMappingsAddField');
+        const isMappingsFieldEnabled = await testSubjects.isEuiEnabled(
+          'indexDetailsMappingsAddField'
+        );
         expect(isMappingsFieldEnabled).to.be(true);
       },
       async expectTabsExists() {

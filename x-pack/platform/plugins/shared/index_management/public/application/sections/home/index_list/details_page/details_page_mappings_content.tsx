@@ -458,6 +458,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
           size="m"
           data-test-subj="indexDetailsMappingsAddField"
           isDisabled={isDisabled}
+          hasAriaDisabled
         >
           <FormattedMessage
             id="xpack.idxMgmt.indexDetails.mappings.addNewField"

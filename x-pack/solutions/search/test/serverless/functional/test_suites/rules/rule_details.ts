@@ -7,6 +7,7 @@
 
 import { expect } from 'expect';
 import { v4 as uuidv4 } from 'uuid';
+import { euiDisabledSelector } from '@elastic/eui';
 import type { RoleCredentials } from '../../services';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -307,7 +308,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           clearWithKeyboard: true,
         });
 
-        await find.clickByCssSelector('[data-test-subj="rulePageFooterSaveButton"]:not(disabled)');
+        await find.clickByCssSelector(
+          `[data-test-subj="rulePageFooterSaveButton"]:not(${euiDisabledSelector})`
+        );
 
         await retry.try(async () => {
           const resultToast = await toasts.getElementByIndex(1);
@@ -540,7 +543,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           clearWithKeyboard: true,
         });
 
-        await find.clickByCssSelector('[data-test-subj="rulePageFooterSaveButton"]:not(disabled)');
+        await find.clickByCssSelector(
+          `[data-test-subj="rulePageFooterSaveButton"]:not(${euiDisabledSelector})`
+        );
 
         await retry.try(async () => {
           const resultToast = await toasts.getElementByIndex(1);
