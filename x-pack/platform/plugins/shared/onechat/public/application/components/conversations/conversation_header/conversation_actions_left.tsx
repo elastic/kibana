@@ -10,7 +10,7 @@ import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ConversationsHistoryButton } from './conversations_history_button';
 import { useHasActiveConversation } from '../../../hooks/use_conversation';
-import { NewConversationButton } from '../new_conversation_button';
+import { NewConversationButton } from './new_conversation_button';
 
 export const ConversationLeftActions: React.FC<{}> = () => {
   const hasActiveConversation = useHasActiveConversation();
@@ -26,7 +26,7 @@ export const ConversationLeftActions: React.FC<{}> = () => {
   return (
     <div css={actionsContainerStyles}>
       <ConversationsHistoryButton />
-      {hasActiveConversation && <NewConversationButton iconOnly />}
+      {hasActiveConversation && <NewConversationButton />}
     </div>
   );
 };

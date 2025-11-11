@@ -26,7 +26,6 @@ import { useConversationContext } from '../../../context/conversation/conversati
 import { groupConversationsByTime } from '../../../utils/group_conversations';
 import { NoConversationsPrompt } from './no_conversations_prompt';
 import { useConversationList } from '../../../hooks/use_conversation_list';
-import { NewConversationButton } from '../new_conversation_button';
 
 const EMPTY_CONTAINER_HEIGHT = 300;
 
@@ -141,7 +140,7 @@ export const ConversationHistoryList: React.FC<ConversationHistoryListProps> = (
     >
       {(list, search) => (
         <div>
-          <PopoverHeader onClose={onClose} />
+          <PopoverHeader />
           <EuiPopoverTitle paddingSize="s">{search}</EuiPopoverTitle>
           {list}
         </div>
@@ -150,7 +149,7 @@ export const ConversationHistoryList: React.FC<ConversationHistoryListProps> = (
   );
 };
 
-const PopoverHeader = ({ onClose }: { onClose?: () => void }) => {
+const PopoverHeader = () => {
   const { euiTheme } = useEuiTheme();
 
   const headerStyles = css`
@@ -169,9 +168,6 @@ const PopoverHeader = ({ onClose }: { onClose?: () => void }) => {
               })}
             </h5>
           </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <NewConversationButton onClose={onClose} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>
