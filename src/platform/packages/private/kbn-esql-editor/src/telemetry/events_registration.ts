@@ -58,27 +58,16 @@ export const registerESQLEditorAnalyticsEvents = once((analytics: AnalyticsServi
   analytics.registerEventType({
     eventType: ESQL_SUGGESTIONS_WITH_CUSTOM_COMMAND_SHOWN,
     schema: {
-      commands: {
+      command_ids: {
         type: 'array',
         items: {
-          properties: {
-            id: {
-              type: 'keyword',
-              _meta: {
-                description: 'The command id attached to the suggestion item',
-              },
-            },
-            source: {
-              type: 'keyword',
-              _meta: {
-                description: 'The source of the command from the ui.',
-              },
-            },
+          type: 'keyword',
+          _meta: {
+            description: 'The command id attached to the suggestion item',
           },
         },
         _meta: {
-          description:
-            'Collection of commands shown in the suggestions with custom command and the trigger source.',
+          description: 'List of commands ids suggested',
         },
       },
     },
