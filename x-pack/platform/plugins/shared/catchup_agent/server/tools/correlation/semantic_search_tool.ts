@@ -168,10 +168,6 @@ This tool combines:
             _semantic_score: semanticScore,
           }));
 
-        logger.info(
-          `Semantic search found ${results.length} results for query "${query}" from ${items.length} items`
-        );
-
         return {
           results: [
             {

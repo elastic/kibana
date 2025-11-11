@@ -255,9 +255,6 @@ Returns cases with detailed information including id, title, description, status
         const errorMessage = error instanceof Error ? error.message : String(error);
         const errorStack = error instanceof Error ? error.stack : undefined;
         logger.error(`[CatchUp Agent] Error in cases tool: ${errorMessage}`);
-        if (errorStack) {
-          logger.debug(`[CatchUp Agent] Cases tool error stack: ${errorStack}`);
-        }
         return {
           results: [createErrorResult(`Error fetching cases: ${errorMessage}`)],
         };

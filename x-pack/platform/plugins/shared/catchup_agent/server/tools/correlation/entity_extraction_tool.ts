@@ -42,13 +42,6 @@ The extracted entities are used by the correlation engine to find relationships 
     schema: entityExtractionSchema,
     handler: async ({ data }, { logger }) => {
       try {
-        logger.info('[Entity Extraction] Entity extraction tool called');
-        logger.info(`[Entity Extraction] Input data keys: ${Object.keys(data || {}).join(', ')}`);
-        logger.info(
-          `[Entity Extraction] data.incident type: ${typeof data?.incident}, value preview: ${JSON.stringify(
-            data?.incident
-          ).substring(0, 200)}`
-        );
 
         const entities: {
           service_names: string[];
@@ -69,12 +62,6 @@ The extracted entities are used by the correlation engine to find relationships 
         let incidentData: any = {};
         const incidentRaw = data.incident || {};
 
-        logger.info(
-          `[Entity Extraction] Processing incident data - type: ${typeof incidentRaw}, has results: ${
-            incidentRaw && typeof incidentRaw === 'object' && 'results' in incidentRaw
-          }`
-        );
-
         // If it's a workflow response structure, extract the data
         if (
           incidentRaw &&
@@ -84,40 +71,22 @@ The extracted entities are used by the correlation engine to find relationships 
           (incidentRaw as any).results.length > 0
         ) {
           const incidentResultData = (incidentRaw as any).results[0]?.data;
-          logger.info(
-            `[Entity Extraction] Found workflow response structure, extracting data - type: ${typeof incidentResultData}`
-          );
 
           // If data is a JSON string, parse it
           if (typeof incidentResultData === 'string') {
             try {
               incidentData = JSON.parse(incidentResultData);
-              logger.info(
-                `[Entity Extraction] Parsed JSON string, keys: ${Object.keys(incidentData).join(
-                  ', '
-                )}`
-              );
             } catch (e) {
               logger.warn(`Entity extraction: Failed to parse incident data as JSON: ${e}`);
               incidentData = {};
             }
           } else {
             incidentData = incidentResultData || {};
-            logger.info(
-              `[Entity Extraction] Using direct data object, keys: ${Object.keys(incidentData).join(
-                ', '
-              )}`
-            );
           }
         } else if (typeof incidentRaw === 'string') {
           // If it's already a JSON string, parse it
           try {
             incidentData = JSON.parse(incidentRaw);
-            logger.info(
-              `[Entity Extraction] Parsed incidentRaw as JSON string, keys: ${Object.keys(
-                incidentData
-              ).join(', ')}`
-            );
           } catch (e) {
             logger.warn(`Entity extraction: Failed to parse incident data as JSON: ${e}`);
             incidentData = {};
@@ -125,34 +94,8 @@ The extracted entities are used by the correlation engine to find relationships 
         } else {
           // Otherwise, assume it's already the data object
           incidentData = incidentRaw;
-          logger.info(
-            `[Entity Extraction] Using incidentRaw directly as data object, keys: ${Object.keys(
-              incidentData
-            ).join(', ')}`
-          );
         }
-
-        logger.info(
-          `[Entity Extraction] incidentData keys: ${Object.keys(incidentData).join(
-            ', '
-          )}, has entities: ${!!incidentData.entities}`
-        );
         if (incidentData.entities) {
-          logger.info(
-            `[Entity Extraction] Found entities object with keys: ${Object.keys(
-              incidentData.entities
-            ).join(', ')}`
-          );
-          logger.info(
-            `[Entity Extraction] Entity counts in incidentData - hosts: ${
-              incidentData.entities.host_names?.length || 0
-            }, services: ${incidentData.entities.service_names?.length || 0}, users: ${
-              incidentData.entities.user_names?.length || 0
-            }, source_ips: ${incidentData.entities.source_ips?.length || 0}, dest_ips: ${
-              incidentData.entities.destination_ips?.length || 0
-            }`
-          );
-
           // Use entities already extracted by fetch_incident tool
           // NOTE: Only extract actual entities (host names, service names, user names, IPs), NOT IDs
           if (
@@ -160,50 +103,24 @@ The extracted entities are used by the correlation engine to find relationships 
             Array.isArray(incidentData.entities.service_names)
           ) {
             entities.service_names.push(...incidentData.entities.service_names);
-            logger.info(
-              `[Entity Extraction] Added ${
-                incidentData.entities.service_names.length
-              } service names: ${incidentData.entities.service_names.slice(0, 3).join(', ')}`
-            );
           }
           if (incidentData.entities.user_names && Array.isArray(incidentData.entities.user_names)) {
             entities.user_names.push(...incidentData.entities.user_names);
-            logger.info(
-              `[Entity Extraction] Added ${incidentData.entities.user_names.length} user names`
-            );
           }
           if (incidentData.entities.host_names && Array.isArray(incidentData.entities.host_names)) {
             entities.host_names.push(...incidentData.entities.host_names);
-            logger.info(
-              `[Entity Extraction] Added ${
-                incidentData.entities.host_names.length
-              } host names: ${incidentData.entities.host_names.join(', ')}`
-            );
           }
           if (incidentData.entities.source_ips && Array.isArray(incidentData.entities.source_ips)) {
             entities.source_ips.push(...incidentData.entities.source_ips);
-            logger.info(
-              `[Entity Extraction] Added ${incidentData.entities.source_ips.length} source IPs`
-            );
           }
           if (
             incidentData.entities.destination_ips &&
             Array.isArray(incidentData.entities.destination_ips)
           ) {
             entities.destination_ips.push(...incidentData.entities.destination_ips);
-            logger.info(
-              `[Entity Extraction] Added ${incidentData.entities.destination_ips.length} destination IPs`
-            );
           }
-          logger.info(
-            `[Entity Extraction] After extracting from fetched incident - hosts=${entities.host_names.length}, services=${entities.service_names.length}, users=${entities.user_names.length}, source_ips=${entities.source_ips.length}, dest_ips=${entities.destination_ips.length}`
-          );
         } else if (incidentData.found === false) {
-          logger.debug(
-            `Entity extraction: Incident ${
-              data.incident_id || 'unknown'
-            } was not found by fetch_incident tool`
-          );
+          // Incident not found
         } else {
           logger.warn(
             `[Entity Extraction] incidentData does not have entities property. Available keys: ${Object.keys(
@@ -330,15 +247,6 @@ The extracted entities are used by the correlation engine to find relationships 
           finalEntities.source_ips.length +
           finalEntities.destination_ips.length;
 
-        logger.info(
-          `[Entity Extraction] Final entity extraction result - hosts: ${
-            finalEntities.host_names.length
-          } (${finalEntities.host_names.join(', ')}), services: ${
-            finalEntities.service_names.length
-          }, users: ${finalEntities.user_names.length}, source_ips: ${
-            finalEntities.source_ips.length
-          }, dest_ips: ${finalEntities.destination_ips.length}, total: ${totalEntities}`
-        );
 
         return {
           results: [

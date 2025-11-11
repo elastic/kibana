@@ -53,7 +53,6 @@ Optionally specify 'repo' and 'owner' to scope to a specific repository (e.g., o
     schema: githubSummarySchema,
     handler: async ({ start, connectorId, token, repo, owner }, { request, logger }) => {
       try {
-        logger.info(`[CatchUp Agent] GitHub summary tool called with start: ${start}`);
 
         if (connectorId) {
           throw new Error(

@@ -29,7 +29,6 @@ export const fetchIncidentTool = (): BuiltinToolDefinition<typeof fetchIncidentS
     schema: fetchIncidentSchema,
     handler: async ({ incident_id }, { request, esClient, logger }) => {
       try {
-        logger.info(`[CatchUp Agent] Fetch incident tool called with incident_id: ${incident_id}`);
 
         const { core, plugin } = getPluginServices();
         const spaceId = getSpaceId(request);
@@ -50,13 +49,9 @@ export const fetchIncidentTool = (): BuiltinToolDefinition<typeof fetchIncidentS
               incident = theCase;
               incidentType = 'case';
               owner = theCase.owner || null;
-              logger.info(`[CatchUp Agent] Found incident as case (owner: ${owner})`);
             }
           } catch (caseError: any) {
             // Case not found, continue to try other types
-            logger.debug(
-              `[CatchUp Agent] Incident ${incident_id} is not a case: ${caseError.message}`
-            );
           }
         }
 
@@ -77,13 +72,10 @@ export const fetchIncidentTool = (): BuiltinToolDefinition<typeof fetchIncidentS
                 incident = alert;
                 incidentType = 'alert';
                 owner = 'securitySolution';
-                logger.info(`[CatchUp Agent] Found incident as security alert in index: ${index}`);
                 break;
               }
             } catch (alertError: any) {
-              logger.debug(
-                `[CatchUp Agent] Incident ${incident_id} not found in ${index}: ${alertError.message}`
-              );
+              // Alert not found in this index, continue
             }
           }
 
@@ -106,15 +98,10 @@ export const fetchIncidentTool = (): BuiltinToolDefinition<typeof fetchIncidentS
                   incident = alert;
                   incidentType = 'alert';
                   owner = 'observability';
-                  logger.info(
-                    `[CatchUp Agent] Found incident as observability alert in index: ${index}`
-                  );
                   break;
                 }
               } catch (alertError: any) {
-                logger.debug(
-                  `[CatchUp Agent] Incident ${incident_id} not found in ${index}: ${alertError.message}`
-                );
+                // Alert not found in this index, continue
               }
             }
           }
@@ -154,8 +141,7 @@ export const fetchIncidentTool = (): BuiltinToolDefinition<typeof fetchIncidentS
                   incident._id = incident_id;
                   incidentType = 'attack_discovery';
                   owner = 'securitySolution';
-                  logger.info(`[CatchUp Agent] Found incident as attack discovery`);
-                  break;
+                break;
                 }
               } catch (indexError: any) {
                 // If it's an index not found error, try next pattern
@@ -163,21 +149,13 @@ export const fetchIncidentTool = (): BuiltinToolDefinition<typeof fetchIncidentS
                   indexError.message?.includes('Unknown index') ||
                   indexError.message?.includes('no such index')
                 ) {
-                  logger.debug(
-                    `[CatchUp Agent] Index pattern ${indexPattern} not found, trying next`
-                  );
                   continue;
                 }
-                // For other errors, log and try next
-                logger.debug(
-                  `[CatchUp Agent] Incident ${incident_id} not found in ${indexPattern}: ${indexError.message}`
-                );
+                // For other errors, try next index
               }
             }
           } catch (attackError: any) {
-            logger.debug(
-              `[CatchUp Agent] Incident ${incident_id} is not an attack discovery: ${attackError.message}`
-            );
+            // Not an attack discovery, continue
           }
         }
 
@@ -219,17 +197,11 @@ export const fetchIncidentTool = (): BuiltinToolDefinition<typeof fetchIncidentS
           if (plugin.getCasesClient && plugin.ruleRegistry) {
             try {
               const casesClient = await plugin.getCasesClient(request);
-              logger.info(
-                `[CatchUp Agent] Fetching alerts attached to case ${incident_id} using Cases API`
-              );
 
               const alertsResponse = await casesClient.attachments.getAllAlertsAttachToCase({
                 caseId: incident_id,
               });
 
-              logger.info(
-                `[CatchUp Agent] Cases API returned ${alertsResponse.length} alert(s) for case ${incident_id}`
-              );
 
               if (alertsResponse.length > 0) {
                 const racClient = await plugin.ruleRegistry.getRacClientWithRequest(request);
@@ -250,18 +222,9 @@ export const fetchIncidentTool = (): BuiltinToolDefinition<typeof fetchIncidentS
                   }
 
                   try {
-                    logger.debug(
-                      `[CatchUp Agent] Fetching alert ${alertId} from index ${alertIndex}`
-                    );
                     const alert = await racClient.get({ id: alertId, index: alertIndex });
 
                     if (alert) {
-                      logger.info(
-                        `[CatchUp Agent] Successfully fetched alert ${alertId} from ${alertIndex}, extracting entities`
-                      );
-                      logger.debug(
-                        `[CatchUp Agent] Alert keys: ${Object.keys(alert).slice(0, 30).join(', ')}`
-                      );
 
                       // Extract entities from alert - try multiple possible field paths
                       const serviceName =
@@ -276,7 +239,6 @@ export const fetchIncidentTool = (): BuiltinToolDefinition<typeof fetchIncidentS
                           !entities.service_names.includes(value)
                         ) {
                           entities.service_names.push(value);
-                          logger.debug(`[CatchUp Agent] Extracted service.name: ${value}`);
                         }
                       }
 
@@ -292,7 +254,6 @@ export const fetchIncidentTool = (): BuiltinToolDefinition<typeof fetchIncidentS
                           !entities.host_names.includes(value)
                         ) {
                           entities.host_names.push(value);
-                          logger.info(`[CatchUp Agent] Extracted host.name: ${value}`);
                         }
                       }
 
@@ -308,7 +269,6 @@ export const fetchIncidentTool = (): BuiltinToolDefinition<typeof fetchIncidentS
                           !entities.user_names.includes(value)
                         ) {
                           entities.user_names.push(value);
-                          logger.debug(`[CatchUp Agent] Extracted user.name: ${value}`);
                         }
                       }
 
@@ -324,7 +284,6 @@ export const fetchIncidentTool = (): BuiltinToolDefinition<typeof fetchIncidentS
                           !entities.source_ips.includes(value)
                         ) {
                           entities.source_ips.push(value);
-                          logger.debug(`[CatchUp Agent] Extracted source.ip: ${value}`);
                         }
                       }
 
@@ -341,15 +300,9 @@ export const fetchIncidentTool = (): BuiltinToolDefinition<typeof fetchIncidentS
                           !entities.destination_ips.includes(value)
                         ) {
                           entities.destination_ips.push(value);
-                          logger.debug(
-                            `[CatchUp Agent] Extracted destination.ip/address: ${value}`
-                          );
                         }
                       }
 
-                      logger.info(
-                        `[CatchUp Agent] After alert ${alertId}, entity counts - hosts: ${entities.host_names.length}, services: ${entities.service_names.length}, users: ${entities.user_names.length}, source_ips: ${entities.source_ips.length}, dest_ips: ${entities.destination_ips.length}`
-                      );
                     } else {
                       logger.warn(
                         `[CatchUp Agent] Alert ${alertId} from ${alertIndex} returned null/undefined`
@@ -363,11 +316,6 @@ export const fetchIncidentTool = (): BuiltinToolDefinition<typeof fetchIncidentS
                   }
                 }
 
-                logger.info(
-                  `[CatchUp Agent] Final entity extraction from case alerts - hosts: ${entities.host_names.length}, services: ${entities.service_names.length}, users: ${entities.user_names.length}, source_ips: ${entities.source_ips.length}, dest_ips: ${entities.destination_ips.length}`
-                );
-              } else {
-                logger.info(`[CatchUp Agent] No alerts found attached to case ${incident_id}`);
               }
             } catch (fetchError: any) {
               logger.warn(

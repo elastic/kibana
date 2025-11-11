@@ -10,9 +10,5 @@ import type { ToolsSetup } from '@kbn/onechat-plugin/server';
 import { summaryGeneratorTool } from './summary_generator_tool';
 
 export function registerSummaryTool(toolsSetup: ToolsSetup, logger: Logger): void {
-  logger.debug('Registering Summary Generator tool');
-
   toolsSetup.register(summaryGeneratorTool());
-
-  logger.info('Registered Summary Generator tool');
 }

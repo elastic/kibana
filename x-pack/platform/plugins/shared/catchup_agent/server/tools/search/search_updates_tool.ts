@@ -27,7 +27,6 @@ Returns analytics data including CTR changes and top queries.`,
     schema: searchUpdatesSchema,
     handler: async ({ start }, { esClient, logger }) => {
       try {
-        logger.info(`[CatchUp Agent] Search updates tool called with start: ${start}`);
 
         const startDate = new Date(start);
         if (isNaN(startDate.getTime())) {
@@ -56,7 +55,6 @@ Returns analytics data including CTR changes and top queries.`,
             esqlError.message?.includes('Unknown index') ||
             esqlError.message?.includes('no such index')
           ) {
-            logger.debug(`Search analytics index not found, returning empty results`);
             result = {
               columns: [
                 { name: 'avg_ctr', type: 'double' },
@@ -92,9 +90,6 @@ Returns analytics data including CTR changes and top queries.`,
         const errorMessage = error instanceof Error ? error.message : String(error);
         const errorStack = error instanceof Error ? error.stack : undefined;
         logger.error(`Error in search updates tool: ${errorMessage}`);
-        if (errorStack) {
-          logger.debug(`Search updates tool error stack: ${errorStack}`);
-        }
         return {
           results: [createErrorResult(`Error fetching search updates: ${errorMessage}`)],
         };

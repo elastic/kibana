@@ -265,9 +265,6 @@ The tool accepts an array of items with text content and uses a reranking model 
             };
           });
 
-        logger.info(
-          `Reranked ${items.length} items with query "${query}", returning top ${prioritized.length}`
-        );
 
         return {
           results: [

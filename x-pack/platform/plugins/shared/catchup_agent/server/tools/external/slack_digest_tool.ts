@@ -157,10 +157,6 @@ Optionally filters by keywords for user mentions or project names.`,
           );
         }
 
-        logger.info(
-          `[CatchUp Agent] Using user token connector: ${userConnector.name} (${userConnector.id})`
-        );
-
         // Determine channel types based on whether DMs are requested
         // By default, exclude DMs ('im' and 'mpim') unless explicitly requested
         const channelTypes = ['public_channel', 'private_channel'];
@@ -176,12 +172,6 @@ Optionally filters by keywords for user mentions or project names.`,
             keywords,
           },
         };
-
-        logger.info(
-          `[CatchUp Agent] Executing user connector for channel types: ${channelTypes.join(
-            ', '
-          )}, includeDMs: ${includeDMs}, start: ${new Date(startTimestamp * 1000).toISOString()}`
-        );
 
         let userDigestResult;
         try {
@@ -316,11 +306,6 @@ Optionally filters by keywords for user mentions or project names.`,
           userDigest.channelMessages.length +
           userDigest.dmMessages.length;
 
-        logger.info(
-          `[CatchUp Agent] User connector returned ${totalMessages} messages from ${userDigest.channels_searched} channels/DMs: ` +
-            `${userDigest.userMentionMessages.length} mentions, ${userDigest.channelMessages.length} channel messages, ${userDigest.dmMessages.length} DMs ` +
-            `(includes mentions from all channels via search.messages API)`
-        );
 
         // Format results - return messages in the same structure as the service
         return {
@@ -343,9 +328,6 @@ Optionally filters by keywords for user mentions or project names.`,
         const errorMessage = error instanceof Error ? error.message : String(error);
         const errorStack = error instanceof Error ? error.stack : undefined;
         logger.error(`[CatchUp Agent] Error in Slack digest tool: ${errorMessage}`);
-        if (errorStack) {
-          logger.debug(`[CatchUp Agent] Slack digest tool error stack: ${errorStack}`);
-        }
         return {
           results: [createErrorResult(`Error fetching Slack digest: ${errorMessage}`)],
         };

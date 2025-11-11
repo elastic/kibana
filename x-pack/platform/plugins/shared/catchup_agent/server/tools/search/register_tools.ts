@@ -11,10 +11,6 @@ import { searchUpdatesTool } from './search_updates_tool';
 import { unifiedSearchTool } from './unified_search_tool';
 
 export function registerSearchTool(toolsSetup: ToolsSetup, logger: Logger): void {
-  logger.debug('Registering Search CatchUp tools');
-
   toolsSetup.register(searchUpdatesTool());
   toolsSetup.register(unifiedSearchTool());
-
-  logger.info('Registered Search CatchUp tools (search updates, unified search)');
 }

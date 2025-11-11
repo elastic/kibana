@@ -10,11 +10,8 @@ import type { ToolsSetup } from '@kbn/onechat-plugin/server';
 import { rerankTool } from './rerank_tool';
 
 export function registerPrioritizationTools(tools: ToolsSetup, logger: Logger): void {
-  logger.debug('Registering Prioritization tools...');
-
   try {
     tools.register(rerankTool());
-    logger.info('Rerank tool registered successfully');
   } catch (error) {
     logger.error(`Error registering Prioritization tools: ${error}`);
     throw error;

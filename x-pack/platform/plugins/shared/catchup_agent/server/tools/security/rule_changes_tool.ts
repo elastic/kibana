@@ -40,9 +40,6 @@ Returns rules with name, updated_by, enabled status, and updated_at fields.`,
     schema: ruleChangesSchema,
     handler: async ({ start, end }, { request, logger }) => {
       try {
-        logger.info(
-          `[CatchUp Agent] Rule changes tool called with start: ${start}, end: ${end || 'now'}`
-        );
 
         // Normalize dates to current year if year is missing
         const normalizedStart = normalizeDateToCurrentYear(start);
@@ -147,9 +144,6 @@ Returns rules with name, updated_by, enabled status, and updated_at fields.`,
         const errorMessage = error instanceof Error ? error.message : String(error);
         const errorStack = error instanceof Error ? error.stack : undefined;
         logger.error(`[CatchUp Agent] Error in rule changes tool: ${errorMessage}`);
-        if (errorStack) {
-          logger.debug(`[CatchUp Agent] Rule changes tool error stack: ${errorStack}`);
-        }
         return {
           results: [createErrorResult(`Error fetching rule changes: ${errorMessage}`)],
         };

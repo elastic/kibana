@@ -39,11 +39,6 @@ This tool calls all observability sub-tools in parallel and aggregates their res
     schema: observabilityCatchupSchema,
     handler: async ({ start, end }, { runner, logger }) => {
       try {
-        logger.info(
-          `[CatchUp Agent] Observability catchup tool called with start: ${start}, end: ${
-            end || 'now'
-          }`
-        );
 
         // Build tool params with optional end parameter
         const toolParams = end ? { start, end } : { start };
@@ -104,9 +99,6 @@ This tool calls all observability sub-tools in parallel and aggregates their res
         const errorMessage = error instanceof Error ? error.message : String(error);
         const errorStack = error instanceof Error ? error.stack : undefined;
         logger.error(`Error in observability catchup tool: ${errorMessage}`);
-        if (errorStack) {
-          logger.debug(`Observability catchup tool error stack: ${errorStack}`);
-        }
         return {
           results: [createErrorResult(`Error generating observability summary: ${errorMessage}`)],
         };

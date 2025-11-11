@@ -41,10 +41,6 @@ Returns attack discoveries with metadata including attack name, severity, status
     schema: attackDiscoverySchema,
     handler: async ({ start, end }, { request, esClient, logger }) => {
       try {
-        logger.info(
-          `[CatchUp Agent] Attack discovery tool called with start: ${start}, end: ${end || 'now'}`
-        );
-
         // Normalize and adjust time range using helper function
         const timeRange = normalizeTimeRange(start, end, { logger });
 
@@ -82,7 +78,6 @@ Returns attack discoveries with metadata including attack name, severity, status
             esqlError.message?.includes('Unknown index') ||
             esqlError.message?.includes('no such index')
           ) {
-            logger.debug(`Attack discovery indices not found, returning empty results`);
             result = {
               columns: [
                 { name: '_id', type: 'keyword' },
@@ -146,9 +141,6 @@ Returns attack discoveries with metadata including attack name, severity, status
         const errorMessage = error instanceof Error ? error.message : String(error);
         const errorStack = error instanceof Error ? error.stack : undefined;
         logger.error(`Error in attack discovery tool: ${errorMessage}`);
-        if (errorStack) {
-          logger.debug(`Attack discovery tool error stack: ${errorStack}`);
-        }
         return {
           results: [createErrorResult(`Error fetching attack discoveries: ${errorMessage}`)],
         };

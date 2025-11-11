@@ -35,9 +35,6 @@ This tool calls all security sub-tools in parallel and aggregates their results.
     schema: securityCatchupSchema,
     handler: async ({ start, end }, { runner, logger }) => {
       try {
-        logger.info(
-          `[CatchUp Agent] Security catchup tool called with start: ${start}, end: ${end || 'now'}`
-        );
 
         // Build tool params with optional end parameter
         const toolParams = end ? { start, end } : { start };
@@ -108,9 +105,6 @@ This tool calls all security sub-tools in parallel and aggregates their results.
         const errorMessage = error instanceof Error ? error.message : String(error);
         const errorStack = error instanceof Error ? error.stack : undefined;
         logger.error(`Error in security catchup tool: ${errorMessage}`);
-        if (errorStack) {
-          logger.debug(`Security catchup tool error stack: ${errorStack}`);
-        }
         return {
           results: [createErrorResult(`Error generating security summary: ${errorMessage}`)],
         };

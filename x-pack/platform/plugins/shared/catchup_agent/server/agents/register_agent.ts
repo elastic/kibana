@@ -13,8 +13,6 @@ export function registerCatchupAgent(
   agentsSetup: OnechatPluginSetup['agents'],
   logger: Logger
 ): void {
-  logger.info('=== Starting CatchUp Agent Registration ===');
-
   try {
     if (!agentsSetup) {
       logger.error('agentsSetup is undefined or null!');
@@ -26,24 +24,12 @@ export function registerCatchupAgent(
       return;
     }
 
-    logger.debug('agentsSetup is valid, creating agent definition...');
     const agentDefinition = catchupAgentDefinition();
-
-    logger.info(`Agent definition created: id=${agentDefinition.id}, name=${agentDefinition.name}`);
-    logger.debug(`Agent configuration: ${JSON.stringify(agentDefinition.configuration, null, 2)}`);
-
-    logger.info('Calling agentsSetup.register()...');
     agentsSetup.register(agentDefinition);
-
-    logger.info('=== CatchUp Agent Registration SUCCESS ===');
-    logger.info(`Agent "${agentDefinition.name}" (${agentDefinition.id}) registered successfully`);
   } catch (error) {
     logger.error('=== CatchUp Agent Registration FAILED ===');
     const errorMessage = error instanceof Error ? error.message : String(error);
     logger.error(`Error registering agent: ${errorMessage}`);
-    if (error instanceof Error && error.stack) {
-      logger.debug(`Agent registration error stack: ${error.stack}`);
-    }
     throw error;
   }
 }

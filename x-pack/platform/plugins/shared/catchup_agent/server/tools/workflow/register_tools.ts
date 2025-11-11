@@ -16,12 +16,7 @@ import { workflowToolSummarizerTool } from './workflow_simplified_tools';
  */
 export function registerWorkflowTools(toolsSetup: ToolsSetup, logger: Logger): void {
   try {
-    logger.info('Registering workflow-specific simplified tools...');
-
     toolsSetup.register(workflowToolSummarizerTool());
-    logger.info('Registered workflow tool summarizer (hackathon.catchup.workflow_tool_summarizer)');
-
-    logger.info('Workflow-specific simplified tools registered successfully');
   } catch (error) {
     logger.error(
       `Failed to register workflow tools: ${error instanceof Error ? error.message : String(error)}`

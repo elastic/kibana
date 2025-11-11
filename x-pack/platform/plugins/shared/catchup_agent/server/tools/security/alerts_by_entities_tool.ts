@@ -74,9 +74,6 @@ Returns alert details including alert IDs, timestamps, severity, rule names, ent
       { request, esClient, logger }
     ) => {
       try {
-        logger.info(
-          `[CatchUp Agent] Alerts by entities tool called with filters: host_name=${host_name}, user_name=${user_name}, service_name=${service_name}, source_ip=${source_ip}, destination_ip=${destination_ip}`
-        );
 
         // Validate that at least one entity filter is provided
         if (!host_name && !user_name && !service_name && !source_ip && !destination_ip) {
@@ -352,7 +349,6 @@ Returns alert details including alert IDs, timestamps, severity, rule names, ent
     event.type,
     message`;
 
-            logger.debug(`[CatchUp Agent] Observability alerts query: ${observabilityQuery}`);
             const observabilityResult = await executeEsql({
               query: observabilityQuery,
               esClient: esClient.asCurrentUser,
@@ -504,9 +500,6 @@ Returns alert details including alert IDs, timestamps, severity, rule names, ent
         const errorMessage = error instanceof Error ? error.message : String(error);
         const errorStack = error instanceof Error ? error.stack : undefined;
         logger.error(`Error in alerts by entities tool: ${errorMessage}`);
-        if (errorStack) {
-          logger.debug(`Alerts by entities tool error stack: ${errorStack}`);
-        }
         return {
           results: [createErrorResult(`Error searching alerts by entities: ${errorMessage}`)],
         };

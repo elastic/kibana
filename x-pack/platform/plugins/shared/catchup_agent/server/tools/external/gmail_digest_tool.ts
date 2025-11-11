@@ -62,11 +62,6 @@ Optionally filters by keywords like "incident", "alert", or "case".`,
     schema: gmailDigestSchema,
     handler: async ({ start, token, connectorId, keywords }, { request, logger }) => {
       try {
-        logger.info(
-          `[CatchUp Agent] Gmail digest tool called with start: ${start}, connectorId: ${
-            connectorId || 'none'
-          }`
-        );
 
         if (connectorId) {
           throw new Error(

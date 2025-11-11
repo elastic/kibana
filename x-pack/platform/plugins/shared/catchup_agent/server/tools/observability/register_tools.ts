@@ -11,10 +11,6 @@ import { observabilityAlertsTool } from './observability_alerts_tool';
 import { observabilityCatchupTool } from './observability_catchup_tool';
 
 export function registerObservabilityTool(toolsSetup: ToolsSetup, logger: Logger): void {
-  logger.debug('Registering Observability tools');
-
   toolsSetup.register(observabilityAlertsTool());
   toolsSetup.register(observabilityCatchupTool());
-
-  logger.info('Registered Observability tools');
 }

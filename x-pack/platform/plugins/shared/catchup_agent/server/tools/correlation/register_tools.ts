@@ -12,13 +12,7 @@ import { entityExtractionTool } from './entity_extraction_tool';
 import { semanticSearchTool } from './semantic_search_tool';
 
 export function registerCorrelationTool(toolsSetup: ToolsSetup, logger: Logger): void {
-  logger.debug('Registering Correlation tools');
-
   toolsSetup.register(correlationEngineTool());
   toolsSetup.register(entityExtractionTool());
   toolsSetup.register(semanticSearchTool());
-
-  logger.info(
-    'Registered Correlation tools (correlation engine, entity extraction, semantic search)'
-  );
 }

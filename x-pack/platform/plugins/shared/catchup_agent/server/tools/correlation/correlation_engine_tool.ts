@@ -51,7 +51,6 @@ Returns structured correlation data with confidence scores linking related event
     schema: correlationEngineSchema,
     handler: async ({ results, entities }, { logger }) => {
       try {
-        logger.debug('correlation engine tool called');
 
         const correlations: Array<{
           alert?: string;
@@ -150,9 +149,6 @@ Returns structured correlation data with confidence scores linking related event
         const entitySourceIPs = extractedEntities.source_ips || [];
         const entityDestinationIPs = extractedEntities.destination_ips || [];
 
-        logger.info(
-          `==> Correlation Engine: Using entities - hosts: ${entityHostNames.length}, services: ${entityServiceNames.length}, users: ${entityUserNames.length}, source_ips: ${entitySourceIPs.length}, dest_ips: ${entityDestinationIPs.length}`
-        );
 
         // Simple correlation logic - match by service names, alert IDs, case IDs
         const alerts = observabilityData.top_services || [];
@@ -171,9 +167,6 @@ Returns structured correlation data with confidence scores linking related event
           ? obsCases
           : obsCases.cases || obsCases.values || [];
 
-        logger.info(
-          `==> Correlation Engine: Found ${cases.length} security cases, ${observabilityCases.length} observability cases, ${attackDiscoveries.length} attack discoveries`
-        );
         const githubPRs = externalData.github?.pull_requests || [];
         const slackMessages = [
           ...(externalData.slack?.userMentionMessages || []),
@@ -181,62 +174,7 @@ Returns structured correlation data with confidence scores linking related event
           ...(externalData.slack?.dmMessages || []),
         ];
 
-        // Debug logging
-        logger.info(`==> Correlation Engine: Processing ${slackMessages.length} Slack messages`);
-        logger.info(`==> Correlation Engine: Found ${cases.length} cases`);
-        logger.info(`==> Correlation Engine: Found ${attackDiscoveries.length} attack discoveries`);
-        logger.info(
-          `==> Correlation Engine: Slack data structure: ${JSON.stringify({
-            has_slack: !!externalData.slack,
-            userMentionMessages: externalData.slack?.userMentionMessages?.length || 0,
-            channelMessages: externalData.slack?.channelMessages?.length || 0,
-            dmMessages: externalData.slack?.dmMessages?.length || 0,
-          })}`
-        );
-
-        // Log all Slack messages with their channels and full text
-        logger.info(`==> Correlation Engine: All Slack messages breakdown:`);
-        slackMessages.forEach((msg: any, index: number) => {
-          const channel = msg.channel || 'unknown';
-          const text = msg.text || msg.message || '';
-          const hasCaseUrl = text.includes('/cases/');
-          const hasAlertUrl = text.includes('/alerts/');
-          const hasAttackUrl = text.includes('/attack_discovery');
-          logger.info(
-            `==> Correlation Engine: Message ${index + 1}/${
-              slackMessages.length
-            } - Channel: ${channel}, Text length: ${
-              text.length
-            }, Has case URL: ${hasCaseUrl}, Has alert URL: ${hasAlertUrl}, Has attack URL: ${hasAttackUrl}`
-          );
-          if (text.length > 0) {
-            logger.info(
-              `==> Correlation Engine: Message ${index + 1} full text: ${text.substring(0, 500)}${
-                text.length > 500 ? '...' : ''
-              }`
-            );
-          }
-        });
-
-        if (slackMessages.length > 0) {
-          logger.info(
-            `==> Correlation Engine: First Slack message sample: ${JSON.stringify({
-              text: slackMessages[0].text || slackMessages[0].message || 'no text',
-              channel: slackMessages[0].channel || 'no channel',
-              permalink: slackMessages[0].permalink || 'no permalink',
-              has_text: !!(slackMessages[0].text || slackMessages[0].message),
-            })}`
-          );
-        }
-        if (cases.length > 0) {
-          logger.info(
-            `==> Correlation Engine: Sample case IDs: ${cases
-              .slice(0, 3)
-              .map((c: any) => c.id || c.case_id)
-              .join(', ')}`
-          );
-        }
-
+        // Correlate Slack messages with cases by extracting case IDs from URLs
         // Correlate alerts with services mentioned in GitHub PRs
         for (const alert of alerts) {
           const serviceName = alert.service?.name || alert.service;
@@ -298,45 +236,18 @@ Returns structured correlation data with confidence scores linking related event
         }
 
         // Correlate Slack messages with cases by extracting case IDs from URLs
-        logger.info(
-          `==> Correlation Engine: Starting Slack message correlation, checking ${slackMessages.length} messages`
-        );
         for (const message of slackMessages) {
           const messageText = message.text || message.message || '';
-          const channel = message.channel || 'unknown';
-          logger.info(
-            `==> Correlation Engine: Processing Slack message from channel '${channel}' - text length: ${
-              messageText.length
-            }, preview: ${messageText.substring(0, 200)}`
-          );
 
           // Extract case IDs from URLs like: http://localhost:5601/kbn/app/security/cases/a9734cfb-08e7-4cfe-aa69-ed5259d4f048
           // Also handle URLs like: http://localhost:5601/kbn/app/security/cases/005b13f6-416f-4534-a799-4ef53f78e800?t[...]
           const caseUrlRegex = /\/cases\/([a-f0-9-]+)/gi;
           const caseUrlMatches = messageText.match(caseUrlRegex);
-          logger.info(
-            `==> Correlation Engine: Channel '${channel}' - Case URL matches found: ${
-              caseUrlMatches ? caseUrlMatches.length : 0
-            }`
-          );
           if (caseUrlMatches) {
-            logger.info(
-              `==> Correlation Engine: Channel '${channel}' - Case URL matches: ${JSON.stringify(
-                caseUrlMatches
-              )}`
-            );
             for (const match of caseUrlMatches) {
               const caseId = match.replace(/\/cases\//i, '').trim();
-              logger.info(
-                `==> Correlation Engine: Channel '${channel}' - Extracted case ID: ${caseId}`
-              );
               // Find the matching case
               const matchedCase = cases.find((c: any) => (c.id || c.case_id) === caseId);
-              logger.info(
-                `==> Correlation Engine: Channel '${channel}' - Matched case: ${
-                  matchedCase ? 'YES' : 'NO'
-                } (looking for case ID: ${caseId})`
-              );
               if (matchedCase) {
                 // Build text field combining case and Slack message
                 const caseTitle = matchedCase.title || '';
@@ -364,11 +275,6 @@ Returns structured correlation data with confidence scores linking related event
           // Extract alert IDs from URLs like: http://localhost:5601/kbn/app/security/alerts/...
           const alertUrlRegex = /\/alerts\/([a-f0-9-]+)/gi;
           const alertUrlMatches = messageText.match(alertUrlRegex);
-          logger.info(
-            `==> Correlation Engine: Alert URL matches found: ${
-              alertUrlMatches ? alertUrlMatches.length : 0
-            }`
-          );
           if (alertUrlMatches) {
             for (const match of alertUrlMatches) {
               const alertId = match.replace(/\/alerts\//i, '').trim();
@@ -408,11 +314,6 @@ Returns structured correlation data with confidence scores linking related event
           // Extract attack discovery IDs from URLs like: http://localhost:5601/kbn/app/security/attack_discovery?id=...
           const attackDiscoveryUrlRegex = /\/attack_discovery\?id=([a-f0-9]+)/gi;
           const attackDiscoveryMatches = messageText.match(attackDiscoveryUrlRegex);
-          logger.info(
-            `==> Correlation Engine: Attack discovery URL matches found: ${
-              attackDiscoveryMatches ? attackDiscoveryMatches.length : 0
-            }`
-          );
           if (attackDiscoveryMatches) {
             for (const match of attackDiscoveryMatches) {
               const attackId = match.replace(/\/attack_discovery\?id=/i, '').trim();
@@ -519,9 +420,6 @@ Returns structured correlation data with confidence scores linking related event
 
         // Correlate by host names - find observability cases and attack discoveries
         if (entityHostNames.length > 0) {
-          logger.info(
-            `==> Correlation Engine: Correlating by host names: ${entityHostNames.join(', ')}`
-          );
           for (const hostName of entityHostNames) {
             const hostLower = hostName.toLowerCase();
             const relatedItems: any[] = [];
@@ -533,9 +431,6 @@ Returns structured correlation data with confidence scores linking related event
               return title.includes(hostLower) || description.includes(hostLower);
             });
             if (relatedObsCases.length > 0) {
-              logger.info(
-                `==> Correlation Engine: Found ${relatedObsCases.length} observability case(s) for host ${hostName}`
-              );
               for (const obsCase of relatedObsCases) {
                 const caseTitle = obsCase.title || '';
                 const caseDescription = obsCase.description || '';
@@ -563,9 +458,6 @@ Returns structured correlation data with confidence scores linking related event
               return title.includes(hostLower);
             });
             if (relatedAttacks.length > 0) {
-              logger.info(
-                `==> Correlation Engine: Found ${relatedAttacks.length} attack discovery/discoveries for host ${hostName}`
-              );
               for (const attack of relatedAttacks) {
                 const attackTitle = attack.title || '';
                 const combinedText = `Host: ${hostName} Attack Discovery: ${attackTitle}`.trim();
@@ -589,9 +481,6 @@ Returns structured correlation data with confidence scores linking related event
               return title.includes(hostLower) || description.includes(hostLower);
             });
             if (relatedSecurityCases.length > 0) {
-              logger.info(
-                `==> Correlation Engine: Found ${relatedSecurityCases.length} security case(s) for host ${hostName}`
-              );
               for (const secCase of relatedSecurityCases) {
                 const caseTitle = secCase.title || '';
                 const caseDescription = secCase.description || '';
@@ -616,9 +505,6 @@ Returns structured correlation data with confidence scores linking related event
 
         // Correlate by service names - find observability cases and attack discoveries
         if (entityServiceNames.length > 0) {
-          logger.info(
-            `==> Correlation Engine: Correlating by service names: ${entityServiceNames.join(', ')}`
-          );
           for (const serviceName of entityServiceNames) {
             const serviceLower = serviceName.toLowerCase();
 
@@ -629,9 +515,6 @@ Returns structured correlation data with confidence scores linking related event
               return title.includes(serviceLower) || description.includes(serviceLower);
             });
             if (relatedObsCases.length > 0) {
-              logger.info(
-                `==> Correlation Engine: Found ${relatedObsCases.length} observability case(s) for service ${serviceName}`
-              );
               for (const obsCase of relatedObsCases) {
                 const caseTitle = obsCase.title || '';
                 const caseDescription = obsCase.description || '';
@@ -659,9 +542,6 @@ Returns structured correlation data with confidence scores linking related event
               return title.includes(serviceLower);
             });
             if (relatedAttacks.length > 0) {
-              logger.info(
-                `==> Correlation Engine: Found ${relatedAttacks.length} attack discovery/discoveries for service ${serviceName}`
-              );
               for (const attack of relatedAttacks) {
                 const attackTitle = attack.title || '';
                 const combinedText =
@@ -694,20 +574,6 @@ Returns structured correlation data with confidence scores linking related event
             })
           );
         });
-
-        logger.info(
-          `==> Correlation Engine: Total correlations found: ${correlations.length}, after deduplication: ${uniqueCorrelations.length}`
-        );
-        logger.info(
-          `==> Correlation Engine: Correlation types: ${uniqueCorrelations
-            .map((c: any) => c.match_type)
-            .join(', ')}`
-        );
-        logger.info(
-          `==> Correlation Engine: Correlations with Slack: ${
-            uniqueCorrelations.filter((c: any) => c.slack).length
-          }`
-        );
 
         return {
           results: [

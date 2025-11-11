@@ -16,7 +16,6 @@ import { alertsByEntitiesTool } from './alerts_by_entities_tool';
 import { fetchIncidentTool } from './fetch_incident_tool';
 
 export function registerSecurityTools(toolsSetup: ToolsSetup, logger: Logger): void {
-  logger.info('Registering Security CatchUp tools...');
 
   try {
     const tools = [
@@ -30,12 +29,8 @@ export function registerSecurityTools(toolsSetup: ToolsSetup, logger: Logger): v
     ];
 
     for (const tool of tools) {
-      logger.debug(`Registering tool: ${tool.id}`);
       toolsSetup.register(tool);
-      logger.debug(`Tool ${tool.id} registered successfully`);
     }
-
-    logger.info(`Registered ${tools.length} Security CatchUp tools`);
   } catch (error) {
     logger.error(`Error registering Security tools: ${error}`);
     throw error;

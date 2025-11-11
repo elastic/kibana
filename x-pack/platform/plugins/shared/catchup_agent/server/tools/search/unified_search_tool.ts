@@ -60,11 +60,6 @@ This tool demonstrates Elastic's "Better Together" story by:
       { logger }
     ) => {
       try {
-        logger.info(
-          `Unified search called with query: "${query}", sources: ${sources.join(
-            ', '
-          )}, limit: ${limit}`
-        );
 
         // TODO: Use esClient for Elasticsearch hybrid search (RRF) in production
         // const { core } = getPluginServices();
@@ -129,9 +124,6 @@ This tool demonstrates Elastic's "Better Together" story by:
         // Sort by score (descending) - simulating RRF ranking
         const rankedResults = results.sort((a, b) => b.score - a.score).slice(0, limit);
 
-        logger.info(
-          `Unified search found ${rankedResults.length} results across ${sources.length} sources`
-        );
 
         return {
           results: [
