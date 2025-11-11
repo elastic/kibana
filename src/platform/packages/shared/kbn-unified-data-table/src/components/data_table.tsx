@@ -802,8 +802,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       ]
     );
 
-    const { dataGridId, dataGridWrapper, setDataGridWrapper, isFullScreen } =
-      useFullScreenWatcher();
+    const { dataGridId, dataGridWrapper, setDataGridWrapper } = useFullScreenWatcher();
 
     const inTableSearchLatestStateRef = useRestorableRef('inTableSearch', undefined);
     const onInTableSearchInitialStateChange = useCallback(
