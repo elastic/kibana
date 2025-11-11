@@ -123,7 +123,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
             statusCode: 400,
             error: 'Bad Request',
             message:
-              'error validating action type config: [\n  {\n    "code": "invalid_type",\n    "expected": "string",\n    "received": "undefined",\n    "path": [\n      "allowedChannels",\n      0,\n      "name"\n    ],\n    "message": "Required"\n  }\n]',
+              'error validating connector type config: Field "allowedChannels.0.name": Required',
           });
         });
     });
