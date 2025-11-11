@@ -7,7 +7,6 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { DataViewBase } from '@kbn/es-query';
-import { useLoadConnectors } from '@kbn/response-ops-rule-form/src/common/hooks';
 import type { ActionConnector } from '@kbn/alerts-ui-shared';
 import { useFormWithWarnings } from '../../../common/hooks/use_form_with_warnings';
 import type {
@@ -25,6 +24,7 @@ import { schema as aboutRuleSchema } from '../components/step_about_rule/schema'
 import { schema as scheduleRuleSchema } from '../components/step_schedule_rule/schema';
 import { getSchema as getActionsRuleSchema } from '../../rule_creation/components/step_rule_actions/get_schema';
 import { useFetchIndex } from '../../../common/containers/source';
+import { useConnectors } from '../../../common/hooks/use_connectors';
 import { VALIDATION_WARNING_CODES } from '../../rule_creation/constants/validation_warning_codes';
 
 export interface UseRuleFormsProps {
@@ -44,9 +44,7 @@ export const useRuleForms = ({
     triggersActionsUi: { actionTypeRegistry },
     http,
   } = useKibana().services;
-  const [currentConnector, setCurrentConnector] = useState<ActionConnector | null>(null);
-
-  const { data: allConnectors, isLoading: isLoadingAllConnectors } = useLoadConnectors({ http });
+  const { connectors, setCurrentConnector } = useConnectors({ http });
 
   // DEFINE STEP FORM
   const { form: defineStepForm } = useFormWithWarnings<DefineStepRule>({
@@ -88,19 +86,6 @@ export const useRuleForms = ({
     'interval' in scheduleStepFormData ? scheduleStepFormData : scheduleStepDefault;
 
   // ACTIONS STEP FORM
-  const connectors = useMemo(() => {
-    if (!isLoadingAllConnectors && allConnectors) {
-      if (
-        currentConnector &&
-        !allConnectors.some((connector) => connector.id === currentConnector.id)
-      ) {
-        return [...allConnectors, currentConnector];
-      }
-      return allConnectors;
-    }
-    return currentConnector ? [currentConnector] : [];
-  }, [currentConnector, isLoadingAllConnectors, allConnectors]);
-
   const handleNewConnectorCreated = useCallback(
     (connector: ActionConnector) => {
       setCurrentConnector(connector);

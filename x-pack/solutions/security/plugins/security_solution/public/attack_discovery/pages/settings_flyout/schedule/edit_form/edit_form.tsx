@@ -10,7 +10,6 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
-import { useLoadConnectors } from '@kbn/response-ops-rule-form/src/common/hooks';
 import type { ActionConnector } from '@kbn/alerts-ui-shared';
 import { getSchema } from './schema';
 import type { AttackDiscoveryScheduleSchema } from './types';
@@ -21,6 +20,7 @@ import { useSettingsView } from '../../hooks/use_settings_view';
 import type { AlertsSelectionSettings } from '../../types';
 import { RuleActionsField } from '../../../../../common/components/rule_actions_field';
 import { useKibana } from '../../../../../common/lib/kibana';
+import { useConnectors } from '../../../../../common/hooks/use_connectors';
 import type { FormHook } from '../../../../../shared_imports';
 import {
   Field,
@@ -52,22 +52,7 @@ export const EditForm: React.FC<FormProps> = React.memo((props) => {
     triggersActionsUi: { actionTypeRegistry },
     http,
   } = useKibana().services;
-  const [currentConnector, setCurrentConnector] = useState<ActionConnector | null>(null);
-
-  const { data: allConnectors, isLoading: isLoadingAllConnectors } = useLoadConnectors({ http });
-
-  const connectors = useMemo(() => {
-    if (!isLoadingAllConnectors && allConnectors) {
-      if (
-        currentConnector &&
-        !allConnectors.some((connector) => connector.id === currentConnector.id)
-      ) {
-        return [...allConnectors, currentConnector];
-      }
-      return allConnectors;
-    }
-    return currentConnector ? [currentConnector] : [];
-  }, [currentConnector, isLoadingAllConnectors, allConnectors]);
+  const { connectors, setCurrentConnector } = useConnectors({ http });
 
   const schema = useMemo(
     () => getSchema({ actionTypeRegistry, connectors }),
