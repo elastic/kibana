@@ -36,8 +36,18 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
       [stepExecution?.status]
     );
 
-    const tabs = useMemo(
-      () => [
+    const isPseudoStep = stepExecution?.stepType?.startsWith('__');
+
+    const tabs = useMemo(() => {
+      if (isPseudoStep) {
+        return [
+          {
+            id: 'input',
+            name: 'Input',
+          },
+        ];
+      }
+      return [
         {
           id: 'output',
           name: stepExecution?.error ? 'Error' : 'Output',
@@ -50,9 +60,8 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
           id: 'timeline',
           name: 'Timeline',
         },
-      ],
-      [stepExecution]
-    );
+      ];
+    }, [stepExecution, isPseudoStep]);
 
     const [selectedTabId, setSelectedTabId] = useState<string>(tabs[0].id);
 

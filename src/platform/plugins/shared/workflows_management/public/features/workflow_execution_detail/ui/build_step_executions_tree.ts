@@ -23,6 +23,7 @@ export interface StepListTreeItem {
 export interface StepExecutionTreeItem extends StepListTreeItem {
   status: ExecutionStatus | null;
   stepExecutionId: string | null;
+  isPseudoStep?: boolean;
   children: StepExecutionTreeItem[];
 }
 
@@ -82,8 +83,33 @@ export function flattenStackFrames(stackFrames: StackFrame[]): string[] {
   });
 }
 
+function createPseudoStepExecution(
+  type: 'trigger' | 'inputs',
+  data: any,
+  executionId: string
+): WorkflowStepExecutionDto {
+  const stepId = type === 'trigger' ? 'Event' : 'Inputs';
+  const stepType = type === 'trigger' ? '__trigger' : '__inputs';
+
+  return {
+    id: `__pseudo_${type}__`,
+    stepId,
+    stepType,
+    status: ExecutionStatus.COMPLETED,
+    input: data,
+    scopeStack: [],
+    workflowRunId: executionId,
+    workflowId: '',
+    startedAt: '',
+    globalExecutionIndex: -1,
+    stepExecutionIndex: 0,
+    topologicalIndex: -1,
+  };
+}
+
 export function buildStepExecutionsTree(
-  stepExecutions: WorkflowStepExecutionDto[]
+  stepExecutions: WorkflowStepExecutionDto[],
+  executionContext?: Record<string, any>
 ): StepExecutionTreeItem[] {
   const root = {};
   const stepExecutionsMap: Map<string, WorkflowStepExecutionDto> = new Map();
@@ -152,5 +178,46 @@ export function buildStepExecutionsTree(
     }));
   }
 
-  return toArray(root);
+  const regularSteps = toArray(root);
+  const pseudoSteps: StepExecutionTreeItem[] = [];
+
+  if (executionContext) {
+    const executionId = stepExecutions[0]?.workflowRunId || '';
+
+    if (executionContext.event) {
+      const triggerExecution = createPseudoStepExecution(
+        'trigger',
+        executionContext.event,
+        executionId
+      );
+      pseudoSteps.push({
+        stepId: triggerExecution.stepId,
+        stepType: triggerExecution.stepType!,
+        executionIndex: 0,
+        stepExecutionId: triggerExecution.id,
+        status: triggerExecution.status,
+        isPseudoStep: true,
+        children: [],
+      });
+    }
+
+    if (executionContext.inputs && Object.keys(executionContext.inputs).length > 0) {
+      const inputsExecution = createPseudoStepExecution(
+        'inputs',
+        executionContext.inputs,
+        executionId
+      );
+      pseudoSteps.push({
+        stepId: inputsExecution.stepId,
+        stepType: inputsExecution.stepType!,
+        executionIndex: 0,
+        stepExecutionId: inputsExecution.id,
+        status: inputsExecution.status,
+        isPseudoStep: true,
+        children: [],
+      });
+    }
+  }
+
+  return [...pseudoSteps, ...regularSteps];
 }
