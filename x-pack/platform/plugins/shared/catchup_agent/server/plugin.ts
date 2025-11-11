@@ -12,6 +12,9 @@ import type {
   CoreStart,
   Logger,
 } from '@kbn/core/server';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+import type { FakeRawRequest } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type {
   CatchupAgentPluginSetup,
   CatchupAgentPluginStart,
@@ -30,6 +33,7 @@ import { registerPrioritizationTools } from './tools/prioritization/register_too
 import { registerWorkflowTools } from './tools/workflow/register_tools';
 import { registerCatchupAgent } from './agents/register_agent';
 import { setPluginServices } from './services/service_locator';
+import { registerCatchupWorkflows } from './workflows/register_workflows';
 
 export class CatchupAgentPlugin
   implements
@@ -42,6 +46,7 @@ export class CatchupAgentPlugin
 {
   private readonly logger: Logger;
   private readonly config: CatchupAgentConfigType;
+  private workflowsManagement?: CatchupAgentSetupDependencies['workflowsManagement'];
 
   constructor(initializerContext: PluginInitializerContext) {
     // eslint-disable-next-line no-console
@@ -58,6 +63,9 @@ export class CatchupAgentPlugin
     plugins: CatchupAgentSetupDependencies
   ): CatchupAgentPluginSetup {
     this.logger.info('Setting up CatchupAgent plugin');
+
+    // Store workflowsManagement for later use in start
+    this.workflowsManagement = plugins.workflowsManagement;
 
     try {
       // Check if OneChat plugin is available
@@ -129,6 +137,34 @@ export class CatchupAgentPlugin
     };
     // Store services for tools to access
     setPluginServices(core, pluginStart, this.config);
+
+    // Register workflows if workflowsManagement is available (fire-and-forget)
+    if (this.workflowsManagement) {
+      // Create a fake request for workflow registration
+      const fakeRawRequest: FakeRawRequest = {
+        headers: {},
+        path: '/',
+      };
+      const fakeRequest = kibanaRequestFactory(fakeRawRequest);
+
+      // Register workflows in the default space (async, fire-and-forget)
+      registerCatchupWorkflows(
+        this.workflowsManagement,
+        this.logger,
+        fakeRequest,
+        DEFAULT_SPACE_ID
+      ).catch((error) => {
+        this.logger.error(`Error registering workflows: ${error}`);
+        if (error instanceof Error && error.stack) {
+          this.logger.error(error.stack);
+        }
+      });
+    } else {
+      this.logger.warn(
+        'Workflows Management plugin not available. Workflows will not be registered automatically.'
+      );
+    }
+
     return pluginStart;
   }
 

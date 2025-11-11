@@ -9,13 +9,72 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { WorkflowsServerPluginSetup } from '@kbn/workflows-plugin/server';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 
 const WORKFLOW_FILES = [
   'daily_security_catchup.yaml',
   'incident_investigation.yaml',
   'weekly_team_catchup.yaml',
 ];
+
+const MAX_RETRIES = 10;
+const INITIAL_RETRY_DELAY_MS = 500;
+const MAX_RETRY_DELAY_MS = 5000;
+
+/**
+ * Wait for the WorkflowsService to be initialized by checking if it can retrieve workflows.
+ * Retries with exponential backoff until the service is ready or max retries is reached.
+ */
+async function waitForWorkflowsService(
+  workflowsManagement: WorkflowsServerPluginSetup,
+  logger: Logger,
+  spaceId: string
+): Promise<boolean> {
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      // Try to get workflows - if this succeeds, the service is initialized
+      await workflowsManagement.management.getWorkflows(
+        {
+          page: 1,
+          limit: 1,
+          query: '',
+        },
+        spaceId
+      );
+      // Service is ready
+      return true;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      if (errorMessage.includes('not initialized')) {
+        // Service not ready yet, wait and retry
+        const delay = Math.min(
+          INITIAL_RETRY_DELAY_MS * Math.pow(2, attempt - 1),
+          MAX_RETRY_DELAY_MS
+        );
+        if (attempt < MAX_RETRIES) {
+          logger.debug(
+            `WorkflowsService not ready yet (attempt ${attempt}/${MAX_RETRIES}), retrying in ${delay}ms...`
+          );
+          await new Promise((resolve) => setTimeout(resolve, delay));
+          continue;
+        } else {
+          logger.error(
+            `WorkflowsService failed to initialize after ${MAX_RETRIES} attempts. Cannot register workflows.`
+          );
+          return false;
+        }
+      } else {
+        // Different error - service might be ready but there's another issue
+        // Return true to proceed (the actual registration will handle the error)
+        logger.debug(
+          `WorkflowsService check returned error (not initialization issue): ${errorMessage}. Proceeding.`
+        );
+        return true;
+      }
+    }
+  }
+  return false;
+}
 
 export async function registerCatchupWorkflows(
   workflowsManagement: WorkflowsServerPluginSetup | undefined,
@@ -38,6 +97,17 @@ export async function registerCatchupWorkflows(
   }
 
   logger.info('Registering CatchUp Agent workflows...');
+
+  // Wait for WorkflowsService to be initialized before proceeding
+  logger.info('Waiting for WorkflowsService to be initialized...');
+  const serviceReady = await waitForWorkflowsService(workflowsManagement, logger, spaceId);
+  if (!serviceReady) {
+    logger.error(
+      'WorkflowsService failed to initialize. Skipping workflow registration to avoid creating duplicates.'
+    );
+    return;
+  }
+  logger.info('WorkflowsService is ready. Proceeding with workflow registration.');
 
   const workflowsDir = join(__dirname, '.');
 
@@ -71,28 +141,92 @@ export async function registerCatchupWorkflows(
       const nameMatch = workflowYaml.match(/^name:\s*['"](.+?)['"]/m);
       const workflowName = nameMatch ? nameMatch[1] : workflowFile.replace('.yaml', '');
 
+      logger.info(`Checking if workflow "${workflowName}" already exists...`);
+
       // Check if workflow already exists
+      // Search all workflows and filter by exact name match to avoid duplicates
       // Note: getWorkflows returns { _pagination: {...}, results: [...] }
       let existingWorkflow;
       try {
+        // Search without query to get all workflows, then filter by exact name
+        // This is more reliable than using a search query which might miss the workflow
         const existingWorkflows = await workflowsManagement.management.getWorkflows(
           {
             page: 1,
-            limit: 100,
-            query: workflowName,
+            limit: 1000, // Get a large number to ensure we find existing workflows
+            query: '', // Empty query to get all workflows
           },
           spaceId
         );
 
-        existingWorkflow = existingWorkflows.results?.find((w) => w.name === workflowName);
-      } catch (error) {
-        // If getWorkflows fails, log and continue (might be a transient issue)
-        logger.warn(
-          `Could not check for existing workflow "${workflowName}": ${
-            error instanceof Error ? error.message : String(error)
-          }. Will attempt to create.`
+        logger.debug(
+          `Found ${existingWorkflows.results?.length || 0} total workflows in space "${spaceId}"`
         );
-        existingWorkflow = undefined;
+
+        // Find all workflows with exact name match (case-sensitive to avoid false matches)
+        const matchingWorkflows =
+          existingWorkflows.results?.filter((w) => w.name === workflowName) || [];
+
+        logger.debug(
+          `Found ${matchingWorkflows.length} workflow(s) with exact name "${workflowName}"`
+        );
+
+        if (matchingWorkflows.length > 1) {
+          logger.warn(
+            `Found ${matchingWorkflows.length} workflows with name "${workflowName}". ` +
+              `This indicates duplicates. Will update the first one and delete the others.`
+          );
+
+          // Sort by createdAt descending to get the most recent one
+          matchingWorkflows.sort((a, b) => {
+            const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+            const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+            return bTime - aTime;
+          });
+
+          // Keep the most recent one (by creation date), delete the rest
+          existingWorkflow = matchingWorkflows[0];
+          const duplicatesToDelete = matchingWorkflows.slice(1);
+
+          for (const duplicate of duplicatesToDelete) {
+            try {
+              await workflowsManagement.management.deleteWorkflows(
+                [duplicate.id],
+                spaceId,
+                request
+              );
+              logger.info(`Deleted duplicate workflow "${workflowName}" with ID: ${duplicate.id}`);
+            } catch (deleteError) {
+              logger.error(
+                `Failed to delete duplicate workflow "${workflowName}" with ID: ${duplicate.id}: ${
+                  deleteError instanceof Error ? deleteError.message : String(deleteError)
+                }`
+              );
+            }
+          }
+        } else if (matchingWorkflows.length === 1) {
+          existingWorkflow = matchingWorkflows[0];
+          logger.info(
+            `Found existing workflow "${workflowName}" with ID: ${existingWorkflow.id}. Will update it.`
+          );
+        } else {
+          logger.info(
+            `No existing workflow found with name "${workflowName}". Will create new one.`
+          );
+          existingWorkflow = undefined;
+        }
+      } catch (error) {
+        // If getWorkflows fails, log error but don't create - this prevents duplicates
+        logger.error(
+          `Failed to check for existing workflow "${workflowName}": ${
+            error instanceof Error ? error.message : String(error)
+          }. Skipping registration to avoid creating duplicates.`
+        );
+        if (error instanceof Error && error.stack) {
+          logger.error(error.stack);
+        }
+        // Don't set existingWorkflow to undefined - skip this workflow entirely
+        continue;
       }
 
       if (existingWorkflow) {
@@ -132,11 +266,12 @@ export async function registerCatchupWorkflows(
             throw error;
           }
         }
+        // Skip creation - workflow already exists and was updated
         continue;
       }
 
-      // Create workflow
-      // Catch authentication errors during scheduling - workflow will still be created
+      // Only create if workflow doesn't exist
+      logger.info(`Creating new workflow "${workflowName}"...`);
       try {
         const createdWorkflow = await workflowsManagement.management.createWorkflow(
           {
@@ -147,7 +282,7 @@ export async function registerCatchupWorkflows(
         );
 
         logger.info(
-          `Successfully registered workflow "${workflowName}" with ID: ${createdWorkflow.id}`
+          `Successfully created new workflow "${workflowName}" with ID: ${createdWorkflow.id}`
         );
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
