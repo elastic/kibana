@@ -6,7 +6,9 @@
  */
 
 import type { GrokProcessor } from '../../../../types/processors';
-import { fieldToOTTLGetter } from '../field_mapping';
+import { parseMultiGrokPatterns } from '../../../../types/utils/grok_patterns';
+import { convertConditionToOTTL } from '../condition_to_ottl';
+import { fieldToOTTLGetter, fieldToOTTLSetter } from '../field_mapping';
 import {
   OTTLProcessorConverter,
   type ProcessorConverterContext,
@@ -17,28 +19,75 @@ export class GrokProcessorConverter extends OTTLProcessorConverter<GrokProcessor
   convert(processor: GrokProcessor, context: ProcessorConverterContext): ProcessorConversionResult {
     const fromField = fieldToOTTLGetter(processor.from);
 
-    // OTTL ExtractGrokPatterns tries patterns in order and returns first match
-    // We need to try each pattern and merge results
-    const statements: string[] = [];
+    // Parse all patterns to extract field information
+    const parseResult = parseMultiGrokPatterns(processor.patterns);
+    const allFields = parseResult.allFields;
+
+    // Unified approach: cascade with short-circuit logic for all cases
+    // Try each pattern in order, skip subsequent ones if one succeeds
+    const statementBlocks: Array<{ statements: string[]; conditions?: string[] }> = [];
 
     processor.patterns.forEach((pattern, idx) => {
-      statements.push(
-        `set(cache["grok_${idx}"], ExtractGrokPatterns(${fromField}, "${pattern}", ${!processor.ignore_missing}))`
-      );
+      const statements: string[] = [
+        `set(cache["grok_${idx}"], ExtractGrokPatterns(${fromField}, "${pattern}", ${!processor.ignore_missing}))`,
+      ];
+
+      // Set matched flag if this pattern extracted any fields
+      statements.push(`set(cache["matched"], Len(cache["grok_${idx}"]) > 0)`);
+
+      if (idx === 0) {
+        // First pattern: no condition, always try
+        statementBlocks.push({ statements });
+      } else {
+        // Subsequent patterns: only try if previous patterns failed
+        statementBlocks.push({
+          statements,
+          conditions: ['cache["matched"] == false'],
+        });
+      }
     });
 
-    // Merge all successful extractions (coalesce to first non-nil)
+    // Final block: route fields from whichever pattern succeeded (only if matched)
+    const finalStatements: string[] = [];
+
+    // Coalesce to get first successful extraction
     if (processor.patterns.length === 1) {
-      statements.push(`merge_maps(attributes, cache["grok_0"], "upsert")`);
+      finalStatements.push(`set(cache["grok_result"], cache["grok_0"])`);
     } else {
-      // Try patterns in order, use first that succeeds
       const cacheRefs = processor.patterns.map((_, idx) => `cache["grok_${idx}"]`).join(', ');
-      statements.push(`set(cache["grok_result"], Coalesce(${cacheRefs}, {}))`);
-      statements.push(`merge_maps(attributes, cache["grok_result"], "upsert")`);
+      finalStatements.push(`set(cache["grok_result"], Coalesce(${cacheRefs}, {}))`);
+    }
+
+    // Route each extracted field to its proper destination
+    for (const field of allFields) {
+      const setter = fieldToOTTLSetter(field.name);
+      finalStatements.push(`set(${setter}, cache["grok_result"]["${field.name}"])`);
+    }
+
+    // Only execute field routing if a pattern matched
+    statementBlocks.push({
+      statements: finalStatements,
+      conditions: ['cache["matched"] == true'],
+    });
+
+    // Create multiple statement blocks with conditions
+    const ottlStatements = this.createStatements(statementBlocks);
+
+    // Wrap all blocks with the processor's where condition if present
+    if (processor.where) {
+      // If there's a where condition, we need to wrap all blocks
+      return {
+        statements: ottlStatements.map((stmt) => ({
+          ...stmt,
+          conditions: processor.where
+            ? [...(stmt.conditions || []), convertConditionToOTTL(processor.where)]
+            : stmt.conditions,
+        })),
+      };
     }
 
     return {
-      statements: [this.wrapWithCondition(statements, processor.where)],
+      statements: ottlStatements,
     };
   }
 }
