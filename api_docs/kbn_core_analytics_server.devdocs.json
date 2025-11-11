@@ -625,6 +625,18 @@
               },
               {
                 "plugin": "data",
+                "path": "src/platform/plugins/shared/data/public/search/session/ebt_manager/search_session_ebt_manager.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/platform/plugins/shared/data/public/search/session/ebt_manager/search_session_ebt_manager.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/platform/plugins/shared/data/public/search/session/ebt_manager/search_session_ebt_manager.ts"
+              },
+              {
+                "plugin": "data",
                 "path": "src/platform/plugins/shared/data/public/search/search_interceptor/search_interceptor.ts"
               },
               {
