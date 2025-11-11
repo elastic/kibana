@@ -8,7 +8,8 @@
  */
 
 import * as Fs from 'fs';
-import { dirname, resolve, relative } from 'path';
+import { resolve } from 'path';
+import os from 'os';
 
 import * as globby from 'globby';
 import minimatch from 'minimatch';
@@ -22,6 +23,7 @@ import { CiStatsClient } from './client';
 
 import DISABLED_JEST_CONFIGS from '../../disabled_jest_configs.json';
 import { serverless, stateful } from '../../ftr_configs_manifests.json';
+import { getTestsFromJestConfig } from './get_tests_from_config';
 import {
   collectEnvFromLabels,
   expandAgentQueue,
@@ -165,25 +167,15 @@ export async function pickTestGroupRunOrder() {
         ignore: DISABLED_JEST_CONFIGS,
       })
     : [];
-  const jestUnitConfigs = (
-    await runBatchedPromises(
-      jestUnitConfigsWithEmpties.map((config) => {
-        return () => {
-          const configAbsolutePath = resolve(getKibanaDir(), config);
-          const relativePathToConfig = relative(__dirname, configAbsolutePath);
-          // eslint-disable-next-line @typescript-eslint/no-var-requires
-          const jestConfig = require(relativePathToConfig);
-          return globby.default([
-            ...jestConfig.roots.map((l: string) =>
-              resolve(l.replace('<rootDir>', dirname(configAbsolutePath)), '**/*.test.{js,ts,tsx}')
-            ),
-            '!**/__fixtures__/**',
-          ]);
-        };
-      }),
-      10
-    )
-  ).flat();
+  const jestUnitConfigs = await runBatchedPromises(
+    jestUnitConfigsWithEmpties.map(
+      (configPath) => () =>
+        getTestsFromJestConfig(resolve(getKibanaDir(), configPath)).then((tests) =>
+          tests?.length > 0 ? [configPath] : []
+        )
+    ),
+    os.availableParallelism()
+  ).then((results) => results.flat());
 
   const jestIntegrationConfigs = LIMIT_CONFIG_TYPE.includes('integration')
     ? globby.sync(getJestConfigGlobs(['**/jest.integration.config.*js', '!**/__fixtures__/**']), {
