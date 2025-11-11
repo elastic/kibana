@@ -16,6 +16,7 @@ import {
   SO_SEARCH_LIMIT,
   UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
 } from '../../../common/constants';
+import type { AgentPolicy } from '../../../common/types';
 import { appContextService } from '../app_context';
 import { agentPolicyService } from '../agent_policy';
 import { ENROLLMENT_API_KEYS_INDEX } from '../../constants';
@@ -31,18 +32,18 @@ import { isSpaceAwarenessEnabled } from './helpers';
 const UPDATE_AGENT_BATCH_SIZE = 1000;
 
 export async function updateAgentPolicySpaces({
-  agentPolicyId,
+  agentPolicy,
   currentSpaceId,
-  newSpaceIds,
   authorizedSpaces,
   options,
 }: {
-  agentPolicyId: string;
+  agentPolicy: Pick<AgentPolicy, 'id' | 'name' | 'space_ids' | 'supports_agentless'>;
   currentSpaceId: string;
-  newSpaceIds: string[];
   authorizedSpaces: string[];
-  options?: { force?: boolean; validateUniqueName?: boolean };
+  options?: { force?: boolean };
 }) {
+  const { id: agentPolicyId, space_ids: newSpaceIds } = agentPolicy;
+
   const useSpaceAwareness = await isSpaceAwarenessEnabled();
   if (!useSpaceAwareness || !newSpaceIds || newSpaceIds.length === 0) {
     return;
@@ -73,9 +74,6 @@ export async function updateAgentPolicySpaces({
   if (deepEqual(existingPolicy?.space_ids?.sort() ?? [DEFAULT_SPACE_ID], newSpaceIds.sort())) {
     return;
   }
-  if (options?.validateUniqueName) {
-    await validatePackagePoliciesUniqueNameAcrossSpaces(existingPackagePolicies, newSpaceIds);
-  }
 
   if (existingPackagePolicies.some((packagePolicy) => packagePolicy.policy_ids.length > 1)) {
     throw new FleetError(
@@ -100,6 +98,9 @@ export async function updateAgentPolicySpaces({
       throw new FleetError(`Not enough permissions to remove policies from space ${spaceId}`);
     }
   }
+
+  await agentPolicyService.requireUniqueName(soClient, agentPolicy);
+  await validatePackagePoliciesUniqueNameAcrossSpaces(existingPackagePolicies, newSpaceIds);
 
   const res = await soClient.updateObjectsSpaces(
     [

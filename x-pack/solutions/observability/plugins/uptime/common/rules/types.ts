@@ -6,17 +6,15 @@
  */
 
 import type {
-  ServiceNowITSMConnectorTypeId as ServiceNowConnectorTypeId,
-  TeamsConnectorTypeId,
-} from '@kbn/stack-connectors-plugin/server/connector_types';
-import type {
   EmailConnectorTypeId,
   EsIndexConnectorTypeId,
   JiraConnectorTypeId,
   PagerDutyConnectorTypeId,
   ServerLogConnectorTypeId,
+  ServiceNowITSMConnectorTypeId as ServiceNowConnectorTypeId,
   SlackApiConnectorTypeId,
   SlackWebhookConnectorTypeId,
+  TeamsConnectorTypeId,
   WebhookConnectorTypeId,
 } from '@kbn/connector-schemas';
 

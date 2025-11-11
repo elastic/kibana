@@ -114,6 +114,7 @@ export const ConsoleTutorialsGroup = () => {
                 onClick={() => {
                   tutorial.buttonRef.current?.click();
                 }}
+                data-test-subj={tutorial.dataTestSubj}
                 footer={
                   <TryInConsoleButton
                     type="button"
@@ -124,7 +125,7 @@ export const ConsoleTutorialsGroup = () => {
                     sharePlugin={share}
                     consolePlugin={consolePlugin}
                     telemetryId={tutorial.dataTestSubj}
-                    data-test-subj={tutorial.dataTestSubj}
+                    data-test-subj={`${tutorial.dataTestSubj}-btn`}
                     buttonProps={{ buttonRef: tutorial.buttonRef }}
                     content={
                       <FormattedMessage

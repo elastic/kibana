@@ -9,7 +9,7 @@
 
 import { enrichMetricFields } from './enrich_metric_fields';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
-import type { DataStreamFieldCapsMap, EpochTimeRange } from '../../types';
+import type { IndexFieldCapsMap, EpochTimeRange } from '../../types';
 import type { MetricField } from '../../../common/types';
 import { extractDimensions } from '../dimensions/extract_dimensions';
 import type { Logger } from '@kbn/core/server';
@@ -28,7 +28,7 @@ const timeRangeFixture: EpochTimeRange = { from: Date.now() - 300_000, to: Date.
 
 describe('enrichMetricFields', () => {
   let logger: Logger;
-  let dataStreamFieldCapsMap: DataStreamFieldCapsMap;
+  let indexFieldCapsMap: IndexFieldCapsMap;
 
   const TEST_METRIC_NAME = 'system.cpu.utilization';
   const TEST_INDEX = 'metrics-*';
@@ -79,7 +79,7 @@ describe('enrichMetricFields', () => {
       debug: jest.fn(),
     } as unknown as Logger;
 
-    dataStreamFieldCapsMap = new Map();
+    indexFieldCapsMap = new Map();
     extractDimensionsMock.mockImplementation(
       (_caps, names) => names?.map((name) => ({ name, type: ES_FIELD_TYPES.KEYWORD })) ?? []
     );
@@ -90,7 +90,7 @@ describe('enrichMetricFields', () => {
       const result = await enrichMetricFields({
         esClient: esClientMock,
         metricFields: [],
-        dataStreamFieldCapsMap,
+        indexFieldCapsMap,
         logger,
         timerange: timeRangeFixture,
       });
@@ -130,13 +130,13 @@ describe('enrichMetricFields', () => {
         msearchMock.mockResolvedValue(mockResponse);
 
         if (setupFieldCaps) {
-          dataStreamFieldCapsMap.set(TEST_INDEX, createFieldCaps());
+          indexFieldCapsMap.set(TEST_INDEX, createFieldCaps());
         }
 
         const result = await enrichMetricFields({
           esClient: esClientMock,
           metricFields,
-          dataStreamFieldCapsMap,
+          indexFieldCapsMap,
           logger,
           timerange: timeRangeFixture,
         });
@@ -155,13 +155,13 @@ describe('enrichMetricFields', () => {
         createMsearchResponse({ [TEST_HOST_FIELD]: [TEST_HOST_VALUE] })
       );
 
-      dataStreamFieldCapsMap.set(TEST_INDEX, createFieldCaps());
-      dataStreamFieldCapsMap.set(NO_DATA_INDEX, createFieldCaps());
+      indexFieldCapsMap.set(TEST_INDEX, createFieldCaps());
+      indexFieldCapsMap.set(NO_DATA_INDEX, createFieldCaps());
 
       const result = await enrichMetricFields({
         esClient: esClientMock,
         metricFields,
-        dataStreamFieldCapsMap,
+        indexFieldCapsMap,
         logger,
         timerange: timeRangeFixture,
       });
@@ -198,12 +198,12 @@ describe('enrichMetricFields', () => {
       msearchMock.mockResolvedValue(
         createMsearchResponse({ [TEST_HOST_FIELD]: [TEST_HOST_VALUE], unit: ['1'] })
       );
-      dataStreamFieldCapsMap.set(TEST_INDEX, createFieldCaps());
+      indexFieldCapsMap.set(TEST_INDEX, createFieldCaps());
 
       const result = await enrichMetricFields({
         esClient: esClientMock,
         metricFields,
-        dataStreamFieldCapsMap,
+        indexFieldCapsMap,
         logger,
         timerange: timeRangeFixture,
       });
@@ -228,12 +228,12 @@ describe('enrichMetricFields', () => {
       msearchMock.mockResolvedValue(
         createMsearchResponse({ [TEST_HOST_FIELD]: [TEST_HOST_VALUE] })
       );
-      dataStreamFieldCapsMap.set(TEST_INDEX, createFieldCaps());
+      indexFieldCapsMap.set(TEST_INDEX, createFieldCaps());
 
       const result = await enrichMetricFields({
         esClient: esClientMock,
         metricFields,
-        dataStreamFieldCapsMap,
+        indexFieldCapsMap,
         logger,
         timerange: timeRangeFixture,
       });
