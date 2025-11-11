@@ -63,9 +63,7 @@ function buildVisualizationState(config: TagcloudState): LensTagCloudState {
     minFontSize: layer.font_size?.min ?? LENS_TAGCLOUD_DEFAULT_STATE.minFontSize,
     showLabel: layer.metric?.show_metric_label ?? LENS_TAGCLOUD_DEFAULT_STATE.showLabel,
     tagAccessor: getAccessorName('tag'),
-    ...(layer.tag_by.color
-      ? { colorMapping: fromColorMappingAPIToLensState(layer.tag_by?.color) }
-      : {}),
+    colorMapping: fromColorMappingAPIToLensState(layer.tag_by.color),
   };
 }
 
@@ -122,11 +120,9 @@ function reverseBuildVisualizationState(
   }
 
   if (props.tag_by) {
-    if (visualization.colorMapping) {
-      const colorMapping = fromColorMappingLensStateToAPI(visualization.colorMapping);
-      if (colorMapping) {
-        props.tag_by.color = colorMapping;
-      }
+    const colorMapping = fromColorMappingLensStateToAPI(visualization.colorMapping);
+    if (colorMapping) {
+      props.tag_by.color = colorMapping;
     }
   }
 
@@ -144,22 +140,19 @@ function buildFormBasedLayer(layer: TagcloudStateNoESQL): FormBasedPersistedStat
   const defaultLayer = layers[DEFAULT_LAYER_ID];
 
   addLayerColumn(defaultLayer, getAccessorName('metric'), columns);
+  const breakdownColumn = fromBucketLensApiToLensState(
+    layer.tag_by as LensApiBucketOperations,
+    columns.map((col) => ({ column: col, id: getAccessorName('metric') }))
+  );
+  addLayerColumn(defaultLayer, getAccessorName('tag'), breakdownColumn, true);
 
-  if (layer.tag_by) {
-    const columnName = getAccessorName('tag');
-    const breakdownColumn = fromBucketLensApiToLensState(
-      layer.tag_by as LensApiBucketOperations,
-      columns.map((col) => ({ column: col, id: getAccessorName('metric') }))
-    );
-    addLayerColumn(defaultLayer, columnName, breakdownColumn, true);
-  }
   return layers;
 }
 
 function getValueColumns(layer: TagcloudStateESQL) {
   return [
     getValueColumn(getAccessorName('metric'), layer.metric.column, 'number'),
-    ...(layer.tag_by ? [getValueColumn(getAccessorName('tag'), layer.tag_by.column)] : []),
+    getValueColumn(getAccessorName('tag'), layer.tag_by.column),
   ];
 }
 
