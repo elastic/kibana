@@ -171,8 +171,8 @@ function simplifyToolResult(toolResults: any[]): any {
  * Wraps any tool and simplifies its output for safe storage in Elasticsearch
  */
 const workflowToolSummarizerSchema = z.object({
-  tool_id: z.string().describe('The ID of the tool to execute and summarize'),
-  tool_params: z.record(z.unknown()).describe('Parameters to pass to the tool'),
+  toolId: z.string().describe('The ID of the tool to execute and summarize'),
+  toolParams: z.record(z.unknown()).describe('Parameters to pass to the tool'),
 });
 
 export const workflowToolSummarizerTool = (): BuiltinToolDefinition<
@@ -185,12 +185,12 @@ export const workflowToolSummarizerTool = (): BuiltinToolDefinition<
     Wraps any tool and simplifies its response to avoid Elasticsearch mapping issues.
     Use this tool in workflows instead of calling tools directly when you need simplified output.`,
     schema: workflowToolSummarizerSchema,
-    handler: async ({ tool_id, tool_params }, { runner, logger }) => {
+    handler: async ({ toolId, toolParams }, { runner, logger }) => {
       try {
         // Call the specified tool
         const originalResult = await runner.runTool({
-          toolId: tool_id,
-          toolParams: tool_params,
+          toolId,
+          toolParams,
         });
 
         // Check for error results
@@ -209,8 +209,8 @@ export const workflowToolSummarizerTool = (): BuiltinToolDefinition<
         // Special handling for tools that don't need simplification - just stringify directly
         // Correlation engine and rerank tools return complex structures that simplifyToolResult doesn't handle
         if (
-          tool_id === 'hackathon.catchup.correlation.engine' ||
-          tool_id === 'hackathon.catchup.prioritization.rerank'
+          toolId === 'hackathon.catchup.correlation.engine' ||
+          toolId === 'hackathon.catchup.prioritization.rerank'
         ) {
           // These tools return data structures that don't need simplification
           // Just stringify the original data like the old workflow tools did
@@ -219,11 +219,15 @@ export const workflowToolSummarizerTool = (): BuiltinToolDefinition<
               results: [
                 {
                   type: ToolResultType.other,
-                  data: JSON.stringify({
-                    correlations: tool_id === 'hackathon.catchup.correlation.engine' ? [] : undefined,
-                    prioritized_items: tool_id === 'hackathon.catchup.prioritization.rerank' ? [] : undefined,
-                    total: 0,
-                  }),
+                  data: {
+                    content: JSON.stringify({
+                      correlations:
+                        toolId === 'hackathon.catchup.correlation.engine' ? [] : undefined,
+                      prioritized_items:
+                        toolId === 'hackathon.catchup.prioritization.rerank' ? [] : undefined,
+                      total: 0,
+                    }),
+                  },
                 },
               ],
             };
@@ -232,7 +236,9 @@ export const workflowToolSummarizerTool = (): BuiltinToolDefinition<
             results: [
               {
                 type: ToolResultType.other,
-                data: JSON.stringify(originalData),
+                data: {
+                  content: JSON.stringify(originalData),
+                },
               },
             ],
           };
@@ -240,8 +246,13 @@ export const workflowToolSummarizerTool = (): BuiltinToolDefinition<
 
         // Special handling for security_summary tool which returns nested structure
         let simplifiedData: any = null;
-        if (tool_id === 'hackathon.catchup.security.summary' && originalData?.security_summary) {
-          const summary = originalData.security_summary;
+        if (
+          toolId === 'hackathon.catchup.security.summary' &&
+          originalData &&
+          typeof originalData === 'object' &&
+          'security_summary' in originalData
+        ) {
+          const summary = (originalData as any).security_summary;
           simplifiedData = {};
 
           // Simplify each sub-tool result
@@ -306,8 +317,8 @@ export const workflowToolSummarizerTool = (): BuiltinToolDefinition<
           }
 
           // Add time range if available
-          if (tool_params.start) simplifiedData.start = tool_params.start;
-          if (tool_params.end) simplifiedData.end = tool_params.end;
+          if (toolParams.start) simplifiedData.start = toolParams.start;
+          if (toolParams.end) simplifiedData.end = toolParams.end;
         } else {
           // For other tools, use the generic simplifyToolResult function
           const simplified = simplifyToolResult(originalResult.results);
@@ -337,10 +348,12 @@ export const workflowToolSummarizerTool = (): BuiltinToolDefinition<
             results: [
               {
                 type: ToolResultType.other,
-                data: JSON.stringify({
-                  tool_id,
-                  message: 'No data returned from tool',
-                }),
+                data: {
+                  content: JSON.stringify({
+                    toolId,
+                    message: 'No data returned from tool',
+                  }),
+                },
               },
             ],
           };
@@ -350,17 +363,25 @@ export const workflowToolSummarizerTool = (): BuiltinToolDefinition<
         // This ensures the full summary is preserved and not truncated
         // The workflow execution engine stores this in a text field, so we return it directly
         // as a string rather than nested in an object to avoid any truncation issues
-        if (tool_id === 'hackathon.catchup.summary.generator') {
+        if (toolId === 'hackathon.catchup.summary.generator') {
           // The summary generator returns { summary: markdown, format: 'markdown' }
           // Extract the summary text from either originalData or simplifiedData
-          const summaryText = originalData?.summary || simplifiedData?.summary || 
+          const summaryText =
+            (originalData && typeof originalData === 'object' && 'summary' in originalData
+              ? (originalData as any).summary
+              : null) ||
+            (simplifiedData && typeof simplifiedData === 'object' && 'summary' in simplifiedData
+              ? (simplifiedData as any).summary
+              : null) ||
             (typeof simplifiedData === 'string' ? simplifiedData : null);
           if (typeof summaryText === 'string' && summaryText.length > 0) {
             return {
               results: [
                 {
                   type: ToolResultType.other,
-                  data: summaryText, // Return the markdown directly as a string
+                  data: {
+                    content: summaryText, // Return the markdown directly
+                  },
                 },
               ],
             };
@@ -374,7 +395,9 @@ export const workflowToolSummarizerTool = (): BuiltinToolDefinition<
           results: [
             {
               type: ToolResultType.other,
-              data: JSON.stringify(simplifiedData),
+              data: {
+                content: JSON.stringify(simplifiedData),
+              },
             },
           ],
         };
@@ -383,9 +406,7 @@ export const workflowToolSummarizerTool = (): BuiltinToolDefinition<
         logger.error(`Error in workflow tool summarizer: ${errorMessage}`);
         return {
           results: [
-            createErrorResult(
-              `Error executing and summarizing tool ${tool_id}: ${errorMessage}`
-            ),
+            createErrorResult(`Error executing and summarizing tool ${toolId}: ${errorMessage}`),
           ],
         };
       }

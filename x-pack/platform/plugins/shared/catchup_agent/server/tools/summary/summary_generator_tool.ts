@@ -43,7 +43,6 @@ Output can be in markdown (human-readable) or JSON (structured) format.`,
     schema: summaryGeneratorSchema,
     handler: async ({ correlatedData, format = 'markdown' }, { logger }) => {
       try {
-
         // Recursively search for a key in an object tree
         const findNestedKey = (
           obj: any,
@@ -486,21 +485,30 @@ Output can be in markdown (human-readable) or JSON (structured) format.`,
 
             // Sort entities by score and show top ones
             const sortedHosts = (extractedEntities.host_names || [])
-              .map((host) => ({ name: host, score: entityScores.get(`host:${host}`) || 0 }))
-              .sort((a, b) => b.score - a.score)
+              .map((host: string) => ({ name: host, score: entityScores.get(`host:${host}`) || 0 }))
+              .sort(
+                (a: { name: string; score: number }, b: { name: string; score: number }) =>
+                  b.score - a.score
+              )
               .slice(0, 5); // Top 5 hosts
 
             const sortedServices = (extractedEntities.service_names || [])
-              .map((service) => ({
+              .map((service: string) => ({
                 name: service,
                 score: entityScores.get(`service:${service}`) || 0,
               }))
-              .sort((a, b) => b.score - a.score)
+              .sort(
+                (a: { name: string; score: number }, b: { name: string; score: number }) =>
+                  b.score - a.score
+              )
               .slice(0, 3); // Top 3 services
 
             const sortedUsers = (extractedEntities.user_names || [])
-              .map((user) => ({ name: user, score: entityScores.get(`user:${user}`) || 0 }))
-              .sort((a, b) => b.score - a.score)
+              .map((user: string) => ({ name: user, score: entityScores.get(`user:${user}`) || 0 }))
+              .sort(
+                (a: { name: string; score: number }, b: { name: string; score: number }) =>
+                  b.score - a.score
+              )
               .slice(0, 3); // Top 3 users
 
             // Show prioritized entities
@@ -550,7 +558,6 @@ Output can be in markdown (human-readable) or JSON (structured) format.`,
               }
               entitySummarySection += '\n';
             }
-
           }
 
           extractedEntitiesSection = `\n## Extracted Entities and Relationships\n`;
@@ -729,7 +736,7 @@ Output can be in markdown (human-readable) or JSON (structured) format.`,
           // NOTE: IDs are NOT entities - we don't show them in the entities section
         }
 
-        const markdown = `# Elastic CatchUp Summary
+        let markdown = `# Elastic CatchUp Summary
 
 ## Security
 ${securityItems.join('\n')}${criticalAlertsSection}${entitiesSection}
@@ -1090,13 +1097,6 @@ ${
           correlationText += `### Cases with Linked Alerts\n`;
           correlationText += `*These cases have alerts directly linked to them, indicating active security incidents.*\n\n`;
 
-          // Check if any of these cases have Slack discussions
-          const caseIdsWithSlack = new Set(
-            [...slackCaseCorrelations, ...slackAlertCorrelations]
-              .filter((c: any) => c.case)
-              .map((c: any) => c.case)
-          );
-
           for (const corr of caseAlertCorrelations) {
             const caseId = corr.case;
             const caseData =
@@ -1255,7 +1255,6 @@ ${
         }
 
         // Extract and show entity names mentioned in correlations
-        const mentionedEntities = new Set<string>();
         const mentionedServices = new Set<string>();
         const mentionedCases = new Set<string>();
         const mentionedAlerts = new Set<string>();
@@ -1290,7 +1289,7 @@ ${
 
           if (correlationTypes.size > 0) {
             const typeList = Array.from(correlationTypes)
-              .map((type) => {
+              .map((type: string) => {
                 const description = typeDescriptions[type] || type;
                 return `${type} (${description})`;
               })
@@ -1301,7 +1300,7 @@ ${
           // Show what was found
           if (mentionedCases.size > 0) {
             const caseTitles = Array.from(mentionedCases)
-              .map((caseId) => {
+              .map((caseId: string) => {
                 const caseData =
                   cases.cases?.find((c: any) => c.id === caseId) ||
                   cases.values?.find((c: any) => c.id === caseId);
@@ -1370,7 +1369,7 @@ ${
             c.match_type === 'entity_host_attack_discovery' ||
             c.match_type === 'entity_service_attack_discovery'
         );
-        const criticalCases = correlations.filter(
+        const criticalCorrelations = correlations.filter(
           (c: any) => c.severity === 'critical' || c.severity === 'high'
         );
 
@@ -1399,9 +1398,9 @@ ${
           );
         }
 
-        if (criticalCases.length > 0) {
+        if (criticalCorrelations.length > 0) {
           recommendations.push(
-            `🚨 **Priority: ${criticalCases.length} critical/high severity case(s) require immediate attention**. Review these cases first.`
+            `🚨 **Priority: ${criticalCorrelations.length} critical/high severity case(s) require immediate attention**. Review these cases first.`
           );
         }
 
@@ -1449,7 +1448,10 @@ ${
           return '*No specific recommendations at this time. Continue monitoring the incident.*\n';
         }
 
-        return recommendations.map((rec, idx) => `${idx + 1}. ${rec}`).join('\n\n') + '\n';
+        return (
+          recommendations.map((rec: string, idx: number) => `${idx + 1}. ${rec}`).join('\n\n') +
+          '\n'
+        );
       })()
     : '*No correlations found. Continue standard investigation procedures.*\n'
 }

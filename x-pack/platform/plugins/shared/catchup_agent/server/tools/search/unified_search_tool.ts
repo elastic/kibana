@@ -10,7 +10,8 @@ import { ToolType } from '@kbn/onechat-common';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import { createErrorResult } from '@kbn/onechat-server';
-import { getPluginServices } from '../../services/service_locator';
+// TODO: Uncomment when implementing Elasticsearch hybrid search (RRF)
+// import { getPluginServices } from '../../services/service_locator';
 
 const unifiedSearchSchema = z.object({
   query: z.string().describe('Search query text'),
@@ -65,8 +66,9 @@ This tool demonstrates Elastic's "Better Together" story by:
           )}, limit: ${limit}`
         );
 
-        const { core } = getPluginServices();
-        const esClient = core.elasticsearch.client.asInternalUser;
+        // TODO: Use esClient for Elasticsearch hybrid search (RRF) in production
+        // const { core } = getPluginServices();
+        // const esClient = core.elasticsearch.client.asInternalUser;
 
         // In a real implementation, this would:
         // 1. Call individual catchup tools for each source

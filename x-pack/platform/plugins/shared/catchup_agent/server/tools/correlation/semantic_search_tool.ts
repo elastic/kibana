@@ -10,7 +10,8 @@ import { ToolType } from '@kbn/onechat-common';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import { createErrorResult } from '@kbn/onechat-server';
-import { getPluginServices } from '../../services/service_locator';
+// TODO: Uncomment when implementing ELSER/E5 embeddings
+// import { getPluginServices } from '../../services/service_locator';
 
 const semanticSearchSchema = z.object({
   query: z.string().describe('Search query text'),
@@ -63,8 +64,9 @@ This tool combines:
           };
         }
 
-        const { core } = getPluginServices();
-        const esClient = core.elasticsearch.client.asInternalUser;
+        // TODO: Use esClient for ELSER/E5 embeddings and RRF in production
+        // const { core } = getPluginServices();
+        // const esClient = core.elasticsearch.client.asInternalUser;
 
         // Determine text field from items
         const detectTextField = (item: Record<string, unknown>): string | null => {
@@ -82,7 +84,12 @@ This tool combines:
 
         // For now, use a simplified semantic similarity approach
         // In production, this would use ELSER/E5 embeddings and RRF
-        const itemsWithText = items
+        interface ItemWithText {
+          item: Record<string, unknown>;
+          text: string;
+          index: number;
+        }
+        const itemsWithText: ItemWithText[] = items
           .map((item, index) => {
             const textFieldName = detectTextField(item);
             if (!textFieldName) {
@@ -94,7 +101,7 @@ This tool combines:
               index,
             };
           })
-          .filter((item) => item !== null);
+          .filter((item): item is ItemWithText => item !== null);
 
         if (itemsWithText.length === 0) {
           return {
@@ -114,7 +121,7 @@ This tool combines:
 
         // Simple semantic scoring (in production, would use embeddings)
         const queryLower = query.toLowerCase();
-        const queryWords = queryLower.split(/\s+/).filter((w) => w.length > 2);
+        const queryWords = queryLower.split(/\s+/).filter((w: string) => w.length > 2);
 
         const scoredItems = itemsWithText.map(({ item, text, index }) => {
           const textLower = text.toLowerCase();
@@ -129,7 +136,7 @@ This tool combines:
           }
 
           // Semantic similarity (word overlap, phrase matching)
-          const textWords = textLower.split(/\s+/).filter((w) => w.length > 2);
+          const textWords = textLower.split(/\s+/).filter((w: string) => w.length > 2);
           const commonWords = queryWords.filter((qw) => textWords.includes(qw));
           semanticScore = commonWords.length / Math.max(queryWords.length, 1);
 
@@ -154,11 +161,11 @@ This tool combines:
         const results = scoredItems
           .sort((a, b) => b.score - a.score)
           .slice(0, limit)
-          .map(({ item, score, keyword_score, semantic_score }) => ({
+          .map(({ item, score, keyword_score: keywordScore, semantic_score: semanticScore }) => ({
             ...item,
             _score: score,
-            _keyword_score: keyword_score,
-            _semantic_score: semantic_score,
+            _keyword_score: keywordScore,
+            _semantic_score: semanticScore,
           }));
 
         logger.info(
