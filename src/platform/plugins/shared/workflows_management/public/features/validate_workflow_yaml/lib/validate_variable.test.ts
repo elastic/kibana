@@ -345,4 +345,105 @@ describe('validateVariable', () => {
       hoverMessage: expect.stringContaining('(property) inputs.items:'),
     });
   });
+
+  it('should validate nested object property access', () => {
+    const context = z.object({
+      inputs: z.object({
+        fields: z.object({
+          email: z.string(),
+          name: z.string(),
+          metadata: z.object({
+            source: z.string(),
+            routing: z.object({
+              shard: z.number(),
+            }),
+          }),
+        }),
+      }),
+    }) as any;
+
+    const variableItem = createVariableItem({ key: 'inputs.fields.email' });
+    mockParseVariablePath.mockReturnValue({
+      propertyPath: 'inputs.fields.email',
+      errors: null,
+    } as any);
+    mockGetSchemaAtPath.mockReturnValue({
+      schema: z.string(),
+      scopedToPath: 'inputs.fields.email',
+    });
+    mockGetZodTypeName.mockReturnValue('string');
+
+    const result = validateVariable(variableItem, context);
+
+    expect(result).toMatchObject({
+      message: null,
+      severity: null,
+      owner: 'variable-validation',
+    });
+    expect(mockGetSchemaAtPath).toHaveBeenCalledWith(context, 'inputs.fields.email', {
+      partial: false,
+    });
+  });
+
+  it('should validate deeply nested object paths', () => {
+    const context = z.object({
+      inputs: z.object({
+        fields: z.object({
+          metadata: z.object({
+            routing: z.object({
+              shard: z.number(),
+              primary: z.boolean(),
+            }),
+          }),
+        }),
+      }),
+    }) as any;
+
+    const variableItem = createVariableItem({ key: 'inputs.fields.metadata.routing.shard' });
+    mockParseVariablePath.mockReturnValue({
+      propertyPath: 'inputs.fields.metadata.routing.shard',
+      errors: null,
+    } as any);
+    mockGetSchemaAtPath.mockReturnValue({
+      schema: z.number(),
+      scopedToPath: 'inputs.fields.metadata.routing.shard',
+    });
+    mockGetZodTypeName.mockReturnValue('number');
+
+    const result = validateVariable(variableItem, context);
+
+    expect(result.message).toBeNull();
+    expect(mockGetSchemaAtPath).toHaveBeenCalledWith(
+      context,
+      'inputs.fields.metadata.routing.shard',
+      { partial: false }
+    );
+  });
+
+  it('should return error for invalid nested path', () => {
+    const context = z.object({
+      inputs: z.object({
+        fields: z.object({
+          email: z.string(),
+        }),
+      }),
+    }) as any;
+
+    const variableItem = createVariableItem({ key: 'inputs.fields.nonexistent' });
+    mockParseVariablePath.mockReturnValue({
+      propertyPath: 'inputs.fields.nonexistent',
+      errors: null,
+    } as any);
+    mockGetSchemaAtPath.mockReturnValue({
+      schema: null,
+      scopedToPath: null,
+    });
+
+    const result = validateVariable(variableItem, context);
+
+    expect(result).toMatchObject({
+      message: 'Variable inputs.fields.nonexistent is invalid',
+      severity: 'error',
+    });
+  });
 });

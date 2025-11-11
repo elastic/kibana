@@ -10,7 +10,11 @@
 import { WorkflowContextSchema } from '@kbn/workflows';
 import { z } from '@kbn/zod';
 import { getWorkflowContextSchema } from './get_workflow_context_schema';
-import { expectZodSchemaEqual } from '../../../../common/lib/zod/zod_utils';
+import {
+  expectZodSchemaEqual,
+  getSchemaAtPath,
+  getZodTypeName,
+} from '../../../../common/lib/zod/zod_utils';
 
 describe('getWorkflowContextSchema', () => {
   it('should return the workflow context schema with empty inputs and consts', () => {
@@ -106,5 +110,53 @@ describe('getWorkflowContextSchema', () => {
         }),
       })
     );
+  });
+
+  it('should properly handle object type inputs with inline schema', () => {
+    const schema = getWorkflowContextSchema({
+      version: '1' as const,
+      name: 'test-workflow',
+      enabled: true,
+      triggers: [],
+      steps: [],
+      inputs: [
+        {
+          name: 'fields',
+          type: 'object',
+          schema: {
+            email: 'string',
+            name: 'string',
+            metadata: {
+              source: 'string',
+              routing: {
+                shard: 'number',
+              },
+            },
+          },
+        },
+        {
+          name: 'rawDocument',
+          type: 'object',
+          // No schema - should accept any object
+        },
+      ],
+      consts: {},
+    });
+
+    // Test object with schema
+    const fieldsSchema = schema.shape.inputs.shape.fields;
+    expect(fieldsSchema.parse({ email: 'test@example.com', name: 'Test' })).toEqual({
+      email: 'test@example.com',
+      name: 'Test',
+    });
+
+    // Test nested path access
+    const nestedResult = getSchemaAtPath(schema.shape.inputs, 'fields.metadata.routing.shard');
+    expect(nestedResult.schema).not.toBeNull();
+    expect(getZodTypeName(nestedResult.schema!)).toBe('number');
+
+    // Test object without schema (should be record)
+    const rawSchema = schema.shape.inputs.shape.rawDocument;
+    expect(rawSchema.parse({ any: 'property' })).toEqual({ any: 'property' });
   });
 });

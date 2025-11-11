@@ -9,6 +9,7 @@
 
 import { z } from '@kbn/zod';
 import {
+  convertInlineSchemaToZod,
   expectZodSchemaEqual,
   getSchemaAtPath,
   getZodTypeName,
@@ -201,5 +202,95 @@ describe('inferZodType', () => {
         f: z.object({ g: z.string() }),
       })
     );
+  });
+});
+
+describe('convertInlineSchemaToZod', () => {
+  it('should convert simple schema types to Zod schemas', () => {
+    const schema = {
+      name: 'string',
+      age: 'number',
+      active: 'boolean',
+    };
+    const result = convertInlineSchemaToZod(schema);
+    expect(result.parse({ name: 'John', age: 30, active: true })).toEqual({
+      name: 'John',
+      age: 30,
+      active: true,
+    });
+    expect(() => result.parse({ name: 123 })).toThrow();
+  });
+
+  it('should convert nested object schemas recursively', () => {
+    const schema = {
+      user: {
+        profile: {
+          firstName: 'string',
+          lastName: 'string',
+        },
+        preferences: {
+          theme: 'string',
+          notifications: 'boolean',
+        },
+      },
+    };
+    const result = convertInlineSchemaToZod(schema);
+    const valid = {
+      user: {
+        profile: { firstName: 'John', lastName: 'Doe' },
+        preferences: { theme: 'dark', notifications: true },
+      },
+    };
+    expect(result.parse(valid)).toEqual(valid);
+  });
+
+  it('should handle array type definitions', () => {
+    const schema = {
+      tags: ['string'],
+      scores: ['number'],
+    };
+    const result = convertInlineSchemaToZod(schema);
+    expect(result.parse({ tags: ['tag1', 'tag2'], scores: [1, 2, 3] })).toEqual({
+      tags: ['tag1', 'tag2'],
+      scores: [1, 2, 3],
+    });
+  });
+
+  it('should use passthrough to allow additional properties', () => {
+    const schema = { name: 'string' };
+    const result = convertInlineSchemaToZod(schema);
+    // Passthrough allows extra properties
+    expect(result.parse({ name: 'John', extra: 'property' })).toEqual({
+      name: 'John',
+      extra: 'property',
+    });
+  });
+
+  it('should handle deeply nested structures', () => {
+    const schema = {
+      fields: {
+        metadata: {
+          routing: {
+            shard: 'number',
+            primary: 'boolean',
+          },
+        },
+      },
+    };
+    const result = convertInlineSchemaToZod(schema);
+    const valid = {
+      fields: {
+        metadata: {
+          routing: { shard: 0, primary: true },
+        },
+      },
+    };
+    expect(result.parse(valid)).toEqual(valid);
+  });
+
+  it('should return empty object for empty schema', () => {
+    const result = convertInlineSchemaToZod({});
+    expect(result.parse({})).toEqual({});
+    expect(result.parse({ extra: 'property' })).toEqual({ extra: 'property' });
   });
 });
