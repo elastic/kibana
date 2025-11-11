@@ -461,11 +461,12 @@ export const AddExceptionFlyoutWrapper: React.FC<AddExceptionFlyoutWrapperProps>
   const isLoading =
     (isLoadingAlertData && isSignalIndexLoading) ||
     enrichedAlert == null ||
-    isWaitingForIndexOrDataView;
+    isWaitingForIndexOrDataView ||
+    isRuleLoading;
 
   const isEndpointItem = exceptionListType === ExceptionListTypeEnum.ENDPOINT;
 
-  if (isLoading || isRuleLoading) return null;
+  if (isLoading) return null;
 
   return isEndpointItem && isEndpointExceptionsMovedUnderManagement ? (
     <EndpointExceptionsFlyout
@@ -473,7 +474,7 @@ export const AddExceptionFlyoutWrapper: React.FC<AddExceptionFlyoutWrapperProps>
       onConfirm={onConfirm}
       alertData={enrichedAlert}
       alertStatus={alertStatus}
-      isAlertDataLoading={isLoading || isRuleLoading}
+      isAlertDataLoading={isLoading}
       rules={memoRule}
     />
   ) : (
@@ -481,7 +482,7 @@ export const AddExceptionFlyoutWrapper: React.FC<AddExceptionFlyoutWrapperProps>
       rules={memoRule}
       isEndpointItem={isEndpointItem}
       alertData={enrichedAlert}
-      isAlertDataLoading={isLoading || isRuleLoading}
+      isAlertDataLoading={isLoading}
       alertStatus={alertStatus}
       isBulkAction={false}
       showAlertCloseOptions
