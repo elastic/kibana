@@ -42,7 +42,8 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     getAllAADDocs,
   } = getRuleServices(getService);
 
-  describe('rule', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/241403
+  describe.skip('rule', () => {
     let endDate: string;
     let connectorId: string;
     const objectRemover = new ObjectRemover(supertest);

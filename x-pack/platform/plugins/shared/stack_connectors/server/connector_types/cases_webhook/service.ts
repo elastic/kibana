@@ -17,7 +17,12 @@ import {
   mergeConfigHeadersWithSecretHeaders,
 } from '@kbn/actions-plugin/server/lib';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import { CONNECTOR_NAME } from '@kbn/connector-schemas/cases_webhook';
 import { WebhookMethods } from '@kbn/connector-schemas/common/auth';
+import type {
+  CasesWebhookPublicConfigurationType,
+  ExternalServiceIncidentResponse,
+} from '@kbn/connector-schemas/cases_webhook';
 import { buildConnectorAuth, validateConnectorAuthConfiguration } from '../../../common/auth/utils';
 import { validateAndNormalizeUrl, validateJson } from './validators';
 
@@ -32,14 +37,10 @@ import type {
   CreateIncidentParams,
   ExternalServiceCredentials,
   ExternalService,
-  CasesWebhookPublicConfigurationType,
-  ExternalServiceIncidentResponse,
   GetIncidentResponse,
   UpdateIncidentParams,
   CreateCommentParams,
 } from './types';
-
-import * as i18n from './translations';
 
 export const createExternalService = (
   actionId: string,
@@ -84,11 +85,11 @@ export const createExternalService = (
     authType,
     basicAuth,
     sslOverrides,
-    connectorName: i18n.NAME,
+    connectorName: CONNECTOR_NAME,
   });
 
   if (!getIncidentUrl || !createIncidentUrlConfig || !viewIncidentUrl || !updateIncidentUrl) {
-    throw Error(`[Action]${i18n.NAME}: Wrong configuration.`);
+    throw Error(`[Action]${CONNECTOR_NAME}: Wrong configuration.`);
   }
 
   const mergedHeaders = mergeConfigHeadersWithSecretHeaders(headers, secrets.secretHeaders);

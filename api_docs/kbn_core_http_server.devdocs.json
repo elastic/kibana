@@ -4169,6 +4169,10 @@
                 "path": "src/platform/plugins/shared/esql/server/routes/lookup_index.ts"
               },
               {
+                "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/server/routes/get_all_sources.ts"
+              },
+              {
                 "plugin": "observability",
                 "path": "x-pack/solutions/observability/plugins/observability/server/lib/annotations/register_annotation_apis.ts"
               },
