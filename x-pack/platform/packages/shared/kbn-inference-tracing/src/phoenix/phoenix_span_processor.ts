@@ -19,6 +19,19 @@ import { getChatSpan } from './get_chat_span';
 import { getExecuteToolSpan } from './get_execute_tool_span';
 import { PhoenixProtoExporter } from './phoenix_otlp_exporter';
 
+/**
+ * Build the Phoenix URL by preserving any path prefix on the base URL and
+ * appending the provided path (which may start with '/').
+ */
+function getPhoenixUrl(base: string | URL, path: string): URL {
+  const baseUrl = new URL(base);
+  const baseWithTrailingSlash = baseUrl.pathname.endsWith('/')
+    ? baseUrl.toString()
+    : `${baseUrl.toString()}/`;
+  const pathWithoutLeadingSlash = path.startsWith('/') ? path.slice(1) : path;
+  return new URL(pathWithoutLeadingSlash, baseWithTrailingSlash);
+}
+
 export class PhoenixSpanProcessor extends BaseInferenceSpanProcessor {
   private getProjectId: () => Promise<string | undefined>;
   constructor(private readonly config: InferenceTracingPhoenixExportConfig) {
@@ -38,9 +51,9 @@ export class PhoenixSpanProcessor extends BaseInferenceSpanProcessor {
         return undefined;
       }
 
-      const base = new URL(config.public_url);
-
-      const { data } = await fetch(new URL('/v1/projects', base), { headers }).then(
+      const { data } = await fetch(getPhoenixUrl(config.public_url, '/v1/projects'), {
+        headers,
+      }).then(
         (response) =>
           response.json() as Promise<{
             data: Array<{ id: string; name: string; description: string }>;
@@ -80,9 +93,9 @@ export class PhoenixSpanProcessor extends BaseInferenceSpanProcessor {
           return;
         }
 
-        const url = new URL(
-          `/projects/${projectId}/traces/${traceId}?selected`,
-          new URL(this.config.public_url)
+        const url = getPhoenixUrl(
+          this.config.public_url,
+          `/projects/${projectId}/traces/${traceId}?selected`
         );
         diag.info(`View trace at ${url.toString()}`);
       });

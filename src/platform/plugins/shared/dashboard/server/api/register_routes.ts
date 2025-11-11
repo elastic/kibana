@@ -69,6 +69,8 @@ const formatResult = (item: DashboardItem) => {
     error,
     managed,
     version,
+    // TODO rest contains spaces and namespaces
+    // These should not be spread into data and instead be moved to meta
     ...rest
   } = item;
   return {
