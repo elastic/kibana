@@ -188,7 +188,7 @@ export const RunWorkflowModal: React.FC<RunWorkflowModalProps> = ({
           text: toMountPoint(
             <FormattedMessage
               id="discover.runWorkflow.executionInProgressMessage"
-              defaultMessage='The workflow "{workflowLink}" is currently executing.'
+              defaultMessage="The workflow {workflowLink} is currently executing."
               values={{
                 workflowLink: (
                   <EuiLink

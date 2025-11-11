@@ -70,7 +70,7 @@ export const WorkflowExecutionPoller: React.FC<WorkflowExecutionPollerProps> = (
         text: toMountPoint(
           <FormattedMessage
             id="discover.runWorkflow.executionCompletedMessage"
-            defaultMessage='The workflow "{workflowLink}" executed successfully.'
+            defaultMessage="The workflow {workflowLink} executed successfully."
             values={{
               workflowLink: (
                 <EuiLink
@@ -98,7 +98,7 @@ export const WorkflowExecutionPoller: React.FC<WorkflowExecutionPollerProps> = (
         text: toMountPoint(
           <FormattedMessage
             id="discover.runWorkflow.executionFailedMessage"
-            defaultMessage='The workflow "{workflowLink}" execution failed.'
+            defaultMessage="The workflow {workflowLink} execution failed."
             values={{
               workflowLink: (
                 <EuiLink
