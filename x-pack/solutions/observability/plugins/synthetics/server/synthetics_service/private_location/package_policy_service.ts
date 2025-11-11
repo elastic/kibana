@@ -184,9 +184,13 @@ export class PackagePolicyService {
     const defaultSpaceSoClient = this.getSpaceSoClient(DEFAULT_SPACE_ID);
     const spaceSoClient = this.getSpaceSoClient(spaceId);
     const clients = [spaceSoClient];
-    if (spaceId !== DEFAULT_SPACE_ID) {
+
+    if (spaceId === DEFAULT_SPACE_ID) {
+      return [{ client: defaultSpaceSoClient, policies }];
+    } else {
       clients.push(defaultSpaceSoClient);
     }
+
     const agentPolicies = (
       await Promise.all(
         clients.map((soClient) =>
