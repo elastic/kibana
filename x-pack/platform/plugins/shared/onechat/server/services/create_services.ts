@@ -58,6 +58,7 @@ export class ServiceManager {
     inference,
     uiSettings,
     savedObjects,
+    llmTasks,
     trackingService,
   }: ServicesStartDeps): InternalStartServices {
     if (!this.services) {

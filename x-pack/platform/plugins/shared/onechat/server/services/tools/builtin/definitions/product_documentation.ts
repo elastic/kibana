@@ -18,30 +18,30 @@ const productDocumentationSchema = z.object({
   product: z
     .string()
     .optional()
-    .describe('(optional) Product to filter by: "kibana", "elasticsearch", "observability", or "security"'),
+    .describe('Product to filter by: "kibana", "elasticsearch", "observability", or "security"'),
   max: z
     .number()
     .optional()
     .default(3)
-    .describe('(optional) Maximum number of documents to return. Defaults to 3.'),
+    .describe('Maximum number of documents to return. Defaults to 3.'),
 });
 
-export const productDocumentationTool = (): BuiltinToolDefinition<typeof productDocumentationSchema> => {
+export const productDocumentationTool = (): BuiltinToolDefinition<
+  typeof productDocumentationSchema
+> => {
   return {
     id: platformCoreTools.productDocumentation,
     type: ToolType.builtin,
     description: `Retrieve documentation about Elastic products, such as Kibana, Elasticsearch, Elastic Security, and Elastic Observability.
 Use this tool to search the Elastic product documentation index for relevant articles.`,
     schema: productDocumentationSchema,
-    handler: async (
-      { query, product, max = 3 },
-      { modelProvider, llmTasks, logger, request }
-    ) => {
+    handler: async ({ query, product, max = 3 }, { modelProvider, llmTasks, logger, request }) => {
       if (!llmTasks) {
         return {
           results: [
             createErrorResult({
-              message: 'Product documentation tool is not available. LlmTasks plugin is not available.',
+              message:
+                'Product documentation tool is not available. LlmTasks plugin is not available.',
             }),
           ],
         };
@@ -134,4 +134,3 @@ Use this tool to search the Elastic product documentation index for relevant art
     tags: [],
   };
 };
-
