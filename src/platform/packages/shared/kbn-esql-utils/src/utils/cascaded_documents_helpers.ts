@@ -391,19 +391,19 @@ function handleStatsByColumnLeafOperation(
     return Builder.command({
       name: 'where',
       args: [
-        Number.isInteger(Number(value)) || groupIsRuntimeDeclared
-          ? Builder.expression.func.binary('==', [
-              Builder.expression.column({
-                args: [Builder.identifier({ name: key })],
-              }),
-              Number.isInteger(Number(value))
-                ? Builder.expression.literal.integer(Number(value))
-                : Builder.expression.literal.string(value),
-            ])
-          : Builder.expression.func.call('match_phrase', [
-              Builder.identifier({ name: key }),
-              Builder.expression.literal.string(value),
-            ]),
+        /* Number.isInteger(Number(value)) || groupIsRuntimeDeclared
+          ? */ Builder.expression.func.binary('==', [
+          Builder.expression.column({
+            args: [Builder.identifier({ name: key })],
+          }),
+          Number.isInteger(Number(value))
+            ? Builder.expression.literal.integer(Number(value))
+            : Builder.expression.literal.string(value),
+        ]),
+        // : Builder.expression.func.call('match_phrase', [
+        //     Builder.identifier({ name: key }),
+        //     Builder.expression.literal.string(value),
+        //   ]),
       ],
     });
   });
