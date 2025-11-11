@@ -9,7 +9,7 @@
 
 export interface ESQLTelemetryCallbacks {
   onDecorationHoverShown?: (hoverMessage: string) => void;
-  onSuggestionsWithCustomCommandShown?: (commandNames: { id: string; source: string }[]) => void;
+  onSuggestionsWithCustomCommandShown?: (commandNames: string[]) => void;
 }
 
 export enum QuerySource {
