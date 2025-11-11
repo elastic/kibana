@@ -65,7 +65,7 @@ export function getDocumentationSections({
   const helpGroups: Array<{
     label: string;
     description?: string;
-    items: Array<{ label: string; description?: { markdownContent: string } }>;
+    items: Array<{ label: string; description: { markdownContent: string } }>;
   }> = [];
 
   helpGroups.push({
