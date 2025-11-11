@@ -7,7 +7,6 @@
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { IStorageClient } from '@kbn/storage-adapter';
-import { partition } from 'lodash';
 import objectHash from 'object-hash';
 import type {
   Asset,
@@ -15,7 +14,6 @@ import type {
   AssetLinkRequest,
   AssetUnlinkRequest,
   AssetType,
-  QueryAsset,
   QueryLink,
 } from '../../../../common/assets';
 import { QUERY_KQL_BODY, QUERY_FEATURE_FILTER, QUERY_FEATURE_NAME, QUERY_TITLE } from './fields';
@@ -291,13 +289,9 @@ export class AssetClient {
       return [];
     }
 
-    const [queryAssetLinks] = partition(
-      assetLinks,
-      (link): link is QueryLink => link[ASSET_TYPE] === 'query'
-    );
-
-    return [
-      ...queryAssetLinks.map((link): QueryAsset => {
+    return assetLinks
+      .filter((link): link is QueryLink => link[ASSET_TYPE] === 'query')
+      .map((link) => {
         return {
           [ASSET_ID]: link[ASSET_ID],
           [ASSET_UUID]: link[ASSET_UUID],
@@ -305,7 +299,6 @@ export class AssetClient {
           query: link.query,
           title: link.query.title,
         };
-      }),
-    ];
+      });
   }
 }
