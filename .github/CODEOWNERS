@@ -497,6 +497,7 @@ src/platform/packages/shared/kbn-es @elastic/kibana-operations
 src/platform/packages/shared/kbn-es-archiver @elastic/appex-qa
 src/platform/packages/shared/kbn-es-errors @elastic/kibana-core
 src/platform/packages/shared/kbn-es-query @elastic/kibana-data-discovery
+src/platform/packages/shared/kbn-es-query-constants @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-es-query-server @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-es-types @elastic/kibana-core @elastic/obs-knowledge-team
 src/platform/packages/shared/kbn-esql-ast @elastic/kibana-esql
