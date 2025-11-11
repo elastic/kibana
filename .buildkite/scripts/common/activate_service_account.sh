@@ -42,7 +42,6 @@ if [[ "$CURRENT_GCLOUD_USER" != "$GCLOUD_SA_PROXY_EMAIL" ]]; then
       else
         echo "Activated service account $GCLOUD_SA_PROXY_EMAIL"
       fi
-      echo "OK"
     else
       echo "gcloud is not installed, cannot activate service account $GCLOUD_SA_PROXY_EMAIL."
       exit 1
