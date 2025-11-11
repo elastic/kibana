@@ -13,6 +13,8 @@ import { z } from '@kbn/zod/v4';
 import { Form } from './form';
 import { withUIMeta } from './connector_spec_ui';
 
+// this is not the object that would be created as SingleConnectorFile, this is the internal
+// representation after parsing a SingleConnectorFile
 const webhookConnectorFormSchema = z.object({
   name: withUIMeta(z.string().min(1, { message: 'Name cannot be empty' }), {
     widget: 'text',
