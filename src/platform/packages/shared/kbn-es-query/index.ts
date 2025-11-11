@@ -142,3 +142,22 @@ export {
 } from './src/utils';
 
 export type { ExecutionContextSearch } from './src/expressions/types';
+
+// SimplifiedFilter API for Dashboards as Code
+export type { ValidationResult, ValidationError } from './src/simplified_filters';
+export {
+  FilterConversionError,
+  SimpleFilterBuilder,
+  FilterGroupBuilder,
+  FilterBuilder,
+  createFilter,
+  field,
+  and,
+  or,
+  dsl,
+  FilterPatterns,
+  // Conversion utilities
+  fromStoredFilter,
+  toStoredFilter,
+  validate,
+} from './src/simplified_filters';

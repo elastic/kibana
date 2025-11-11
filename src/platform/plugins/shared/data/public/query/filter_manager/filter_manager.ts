@@ -20,7 +20,10 @@ import {
   uniqFilters,
   compareFilters,
   COMPARE_ALL_OPTIONS,
+  fromStoredFilter,
+  toStoredFilter,
 } from '@kbn/es-query';
+import type { SimplifiedFilter } from '@kbn/es-query-server';
 import type { PersistableStateService } from '@kbn/kibana-utils-plugin/common/persistable_state';
 import { sortFilters } from './lib/sort_filters';
 import { mapAndFlattenFilters } from './lib/map_and_flatten_filters';
@@ -232,6 +235,94 @@ export class FilterManager implements PersistableStateService<Filter[]> {
         filter.$state = { store };
       }
     });
+  }
+
+  /**
+   * Get filters in SimplifiedFilter format
+   * Converts Filter[] to SimplifiedFilter[] using the conversion utilities from @kbn/es-query
+   *
+   * @returns Array of SimplifiedFilter objects
+   *
+   * @example
+   * ```typescript
+   * const simplifiedFilters = filterManager.getSimplifiedFilters();
+   * // Returns array of SimplifiedFilter with condition/group/dsl properties
+   * ```
+   */
+  public getSimplifiedFilters(): SimplifiedFilter[] {
+    const filters = this.getFilters();
+    return filters.map((filter) => fromStoredFilter(filter));
+  }
+
+  /**
+   * Set filters from SimplifiedFilter format
+   * Converts SimplifiedFilter[] to Filter[] and updates FilterManager state
+   *
+   * @param simplifiedFilters - Array of SimplifiedFilter objects
+   * @param pinFilterStatus - Whether to pin filters (defaults to UI setting)
+   *
+   * @example
+   * ```typescript
+   * const simplifiedFilters: SimplifiedFilter[] = [{
+   *   condition: { field: 'status', operator: 'is', value: 'active' }
+   * }];
+   * filterManager.setSimplifiedFilters(simplifiedFilters);
+   * ```
+   */
+  public setSimplifiedFilters(
+    simplifiedFilters: SimplifiedFilter[],
+    pinFilterStatus?: boolean
+  ): void {
+    const filters = simplifiedFilters.map((simplified) => toStoredFilter(simplified) as Filter);
+    this.setFilters(filters, pinFilterStatus);
+  }
+
+  /**
+   * Add filters from SimplifiedFilter format
+   * Converts SimplifiedFilter(s) to Filter(s) and adds to FilterManager state
+   *
+   * @param simplifiedFilters - Single SimplifiedFilter or array
+   * @param pinFilterStatus - Whether to pin filters (defaults to UI setting)
+   */
+  public addSimplifiedFilters(
+    simplifiedFilters: SimplifiedFilter | SimplifiedFilter[],
+    pinFilterStatus?: boolean
+  ): void {
+    const filtersArray = Array.isArray(simplifiedFilters) ? simplifiedFilters : [simplifiedFilters];
+    const filters = filtersArray.map((simplified) => toStoredFilter(simplified) as Filter);
+    this.addFilters(filters, pinFilterStatus);
+  }
+
+  /**
+   * Get app filters in SimplifiedFilter format
+   */
+  public getSimplifiedAppFilters(): SimplifiedFilter[] {
+    const appFilters = this.getAppFilters();
+    return appFilters.map((filter) => fromStoredFilter(filter));
+  }
+
+  /**
+   * Get global filters in SimplifiedFilter format
+   */
+  public getSimplifiedGlobalFilters(): SimplifiedFilter[] {
+    const globalFilters = this.getGlobalFilters();
+    return globalFilters.map((filter) => fromStoredFilter(filter));
+  }
+
+  /**
+   * Set app filters from SimplifiedFilter format
+   */
+  public setSimplifiedAppFilters(simplifiedFilters: SimplifiedFilter[]): void {
+    const filters = simplifiedFilters.map((simplified) => toStoredFilter(simplified) as Filter);
+    this.setAppFilters(filters);
+  }
+
+  /**
+   * Set global filters from SimplifiedFilter format
+   */
+  public setSimplifiedGlobalFilters(simplifiedFilters: SimplifiedFilter[]): void {
+    const filters = simplifiedFilters.map((simplified) => toStoredFilter(simplified) as Filter);
+    this.setGlobalFilters(filters);
   }
 
   public extract = extract;

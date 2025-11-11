@@ -8,17 +8,16 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { FilterStateStore } from '@kbn/es-query';
 
-const filterStateStoreSchema = schema.oneOf(
-  [schema.literal(FilterStateStore.APP_STATE), schema.literal(FilterStateStore.GLOBAL_STATE)],
-  {
-    meta: {
-      description:
-        "Denote whether a filter is specific to an application's context (e.g. 'appState') or whether it should be applied globally (e.g. 'globalState').",
-    },
-  }
-);
+export const appStateSchema = schema.literal('appState');
+export const globalStateSchema = schema.literal('globalState');
+
+const filterStateStoreSchema = schema.oneOf([appStateSchema, globalStateSchema], {
+  meta: {
+    description:
+      "Denote whether a filter is specific to an application's context (e.g. 'appState') or whether it should be applied globally (e.g. 'globalState').",
+  },
+});
 
 export const filterMetaSchema = schema.object(
   {
@@ -31,6 +30,7 @@ export const filterMetaSchema = schema.object(
     group: schema.maybe(
       schema.string({ meta: { description: 'The group to which this filter belongs.' } })
     ),
+    relation: schema.maybe(schema.string()),
     // field is missing from the Filter type, but is stored in SerializedSearchSourceFields
     // see the todo in src/platform/packages/shared/kbn-es-query/src/filters/helpers/update_filter.ts
     field: schema.maybe(schema.string()),
