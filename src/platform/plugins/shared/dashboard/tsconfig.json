@@ -104,6 +104,7 @@
     "@kbn/background-search",
     "@kbn/react-query",
     "@kbn/core-chrome-layout-utils",
+    "@kbn/core-http-server"
   ],
   "exclude": ["target/**/*"]
 }

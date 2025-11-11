@@ -15,8 +15,6 @@ import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import { CONTENT_ID, DASHBOARD_API_VERSION } from '../../common/content_management/constants';
 import type {
   DashboardAPIGetOut,
-  DashboardCreateIn,
-  DashboardCreateOut,
   DashboardSearchAPIResult,
   DashboardSearchIn,
   DashboardState,
@@ -41,16 +39,17 @@ export const dashboardClient = {
     references: Reference[],
     accessMode?: SavedObjectAccessControl['accessMode']
   ) => {
-    // TODO replace with call to dashboard REST create endpoint
-    return contentManagementService.client.create<DashboardCreateIn, DashboardCreateOut>({
-      contentTypeId: DASHBOARD_CONTENT_ID,
-      data: dashboardState,
-      options: {
-        references,
-        accessControl: {
-          accessMode,
+    return coreServices.http.post<DashboardAPIGetOut>(`/api/dashboards/dashboard`, {
+      version: DASHBOARD_API_VERSION,
+      body: JSON.stringify({
+        data: {
+          ...dashboardState,
+          references,
+          accessControl: {
+            accessMode,
+          },
         },
-      },
+      }),
     });
   },
   delete: async (id: string): Promise<DeleteResult> => {
