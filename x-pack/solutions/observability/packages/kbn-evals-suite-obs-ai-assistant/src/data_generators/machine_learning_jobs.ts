@@ -20,7 +20,7 @@ export const APM_SERVICE_NAME = 'web-api-service';
 
 export const CLOSED_ML_JOB_ID = 'response-time-threshold-detector';
 
-export async function cleanupMachineLearningJobs({
+export async function cleanupAnomalyDetectionJobs({
   esClient,
   log,
 }: {

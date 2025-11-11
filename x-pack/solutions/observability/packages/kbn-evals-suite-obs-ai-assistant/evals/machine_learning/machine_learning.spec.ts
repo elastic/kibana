@@ -7,7 +7,7 @@
 
 import type { MlGetJobsResponse } from '@elastic/elasticsearch/lib/api/types';
 import {
-  cleanupMachineLearningJobs,
+  cleanupAnomalyDetectionJobs,
   createAnomalyDetectionJobWithApmData,
   createAnomalyDetectionJobWithNoData,
   APM_ML_JOB_ID,
@@ -22,7 +22,7 @@ evaluate.describe('Machine learning', { tag: '@svlOblt' }, () => {
   let jobIds: string[] = [];
 
   evaluate.beforeAll(async ({ apmSynthtraceEsClient, kbnClient, esClient, log }) => {
-    await cleanupMachineLearningJobs({ esClient, log });
+    await cleanupAnomalyDetectionJobs({ esClient, log });
     await apmSynthtraceEsClient.clean();
     await createMLJobsWithSampleData({
       log,
@@ -41,7 +41,7 @@ evaluate.describe('Machine learning', { tag: '@svlOblt' }, () => {
   });
 
   evaluate.afterAll(async ({ apmSynthtraceEsClient, kbnClient, esClient, log }) => {
-    await cleanupMachineLearningJobs({ esClient, log });
+    await cleanupAnomalyDetectionJobs({ esClient, log });
     await apmSynthtraceEsClient.clean();
   });
 
