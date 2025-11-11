@@ -1322,7 +1322,7 @@ const InternalUnifiedDataTable = React.forwardRef<
           data-description={searchDescription}
           data-document-number={0}
         >
-          <EuiText size="xs" color="subdued">
+          <EuiText size="xs" color="subdued" textAlign="center">
             <EuiIcon type="discoverApp" size="m" color="subdued" />
             <EuiSpacer size="s" />
             <FormattedMessage

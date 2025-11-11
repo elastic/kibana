@@ -71,6 +71,10 @@ const customCascadeGridBodyStyle = {
     left: 0,
     width: '100%',
     overflowAnchor: 'none',
+
+    '& > .euiDataGridRow:last-child .euiDataGridRowCell:not(.euiDataGridFooterCell)': {
+      borderBlockEnd: 'none',
+    },
   }),
   displayFlex: css({ display: 'flex' }),
 };
@@ -90,7 +94,6 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
   visibleRowData,
   headerRow,
   footerRow,
-  setCustomGridBodyProps,
 }: CustomCascadeGridBodyProps) {
   const visibleRows = useMemo(
     () => data.slice(visibleRowData.startRow, visibleRowData.endRow),
