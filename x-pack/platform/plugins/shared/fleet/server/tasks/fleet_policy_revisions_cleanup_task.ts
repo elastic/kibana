@@ -50,6 +50,11 @@ type PoliciesRevisionSummaries = Record<
   }
 >;
 
+interface RevisionsToDeleteParams {
+  policyId: string;
+  revisionIdxCutoff: number;
+}
+
 export class FleetPolicyRevisionsCleanupTask {
   private logger: Logger;
   private wasStarted: boolean = false;
@@ -223,6 +228,8 @@ export class FleetPolicyRevisionsCleanupTask {
 
     this.throwIfAborted(abortController);
 
+    await this.deletePolicyRevisions(esClient, policiesRevisionSummaries);
+
     this.logger.debug('[FleetPolicyRevisionsCleanupTask] Cleanup completed');
   };
 
@@ -349,6 +356,52 @@ export class FleetPolicyRevisionsCleanupTask {
     });
   };
 
+  private deletePolicyRevisions = async (
+    esClient: ElasticsearchClient,
+    policiesRevisionSummaries: PoliciesRevisionSummaries
+  ) => {
+    const policiesToDelete = Object.entries(policiesRevisionSummaries).reduce<
+      RevisionsToDeleteParams[]
+    >((acc, [policyId, summary]) => {
+      const minUsedRevisionIdxCutoff = summary.minUsedRevision
+        ? Math.max(summary.minUsedRevision - this.maxRevisions, 1)
+        : undefined;
+
+      // If we have a minimum used revision, but the max policy offset is less than or equal to 1, nothing to delete
+      if (minUsedRevisionIdxCutoff === 1) {
+        return acc;
+      }
+
+      // Favor a cutoff offset based on the min revision used by agents, otherwise use the max idx
+      const revisionIdxCutoff = minUsedRevisionIdxCutoff ?? summary.maxRevision - this.maxRevisions;
+      return [...acc, { policyId, revisionIdxCutoff }];
+    }, []);
+
+    return await this.queryDeletePolicyRevisions(esClient, policiesToDelete);
+  };
+
+  private queryDeletePolicyRevisions = async (
+    esClient: ElasticsearchClient,
+    policiesToDelete: Array<RevisionsToDeleteParams>
+  ) => {
+    const policyCutoffClauses = policiesToDelete.map(({ policyId, revisionIdxCutoff }) => ({
+      bool: {
+        must: [
+          { term: { policy_id: policyId } },
+          { range: { revision_idx: { lt: revisionIdxCutoff } } },
+        ],
+      },
+    }));
+
+    return await esClient.deleteByQuery({
+      index: AGENT_POLICY_INDEX,
+      query: {
+        bool: {
+          should: policyCutoffClauses,
+        },
+      },
+    });
+  };
   private throwIfAborted(abortController: AbortController) {
     if (abortController.signal.aborted) {
       throw new Error('Task was aborted');
