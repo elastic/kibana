@@ -59,6 +59,10 @@ export const EndpointExceptionsFlyout: React.FC<EndpointExceptionsFlyoutProps> =
     prefix: 'endpointExceptionsCreateFlyoutTitle',
   });
   const { euiTheme } = useEuiTheme();
+  const maskProps = useMemo(
+    () => ({ style: `z-index: ${(euiTheme.levels.flyout as number) + 4}` }), // we need this flyout to be above the timeline flyout (which has a z-index of 1003)
+    [euiTheme.levels.flyout]
+  );
   const toasts = useToasts();
   const http = useHttp();
   const { isLoading: isSubmittingData, mutateAsync: submitData } = useCreateArtifact(
@@ -154,6 +158,7 @@ export const EndpointExceptionsFlyout: React.FC<EndpointExceptionsFlyoutProps> =
       onClose={handleCloseFlyout}
       aria-labelledby={endpointExceptionsFlyoutTitleId}
       data-test-subj="addEndpointExceptionFlyout"
+      maskProps={maskProps}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle>
