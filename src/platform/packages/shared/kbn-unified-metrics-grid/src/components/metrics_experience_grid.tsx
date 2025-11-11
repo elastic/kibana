@@ -93,10 +93,10 @@ export const MetricsExperienceGrid = ({
     timeRange,
   });
 
-  const { leftSideActions, rightSideActions } = useToolbarActions({
+  const { toggleActions, leftSideActions, rightSideActions } = useToolbarActions({
     fields,
-    indexPattern,
     renderToggleActions,
+    indexPattern,
     requestParams,
   });
 
@@ -138,6 +138,7 @@ export const MetricsExperienceGrid = ({
       id="metricsExperienceGrid"
       toolbarCss={chartToolbarCss}
       toolbar={{
+        toggleActions,
         leftSide: leftSideActions,
         rightSide: rightSideActions,
         additionalControls: {
@@ -152,6 +153,7 @@ export const MetricsExperienceGrid = ({
           ),
         },
       }}
+      toolbarWrapAt={isFullscreen ? 'l' : 'xl'}
       isComponentVisible={isComponentVisible}
       isFullscreen={isFullscreen}
       onKeyDown={onKeyDown}
@@ -179,18 +181,28 @@ export const MetricsExperienceGrid = ({
             direction="row"
           >
             <EuiFlexItem grow={false}>
-              {isFieldsLoading ? (
-                <EuiLoadingSpinner size="s" />
-              ) : (
-                <EuiText size="s">
-                  <strong>
-                    {i18n.translate('metricsExperience.grid.metricsCount.label', {
-                      defaultMessage: '{count} {count, plural, one {metric} other {metrics}}',
-                      values: { count: filteredFieldsCount },
-                    })}
-                  </strong>
-                </EuiText>
-              )}
+              <EuiFlexGroup
+                justifyContent="spaceBetween"
+                alignItems="center"
+                responsive={false}
+                gutterSize="s"
+              >
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s">
+                    <strong>
+                      {i18n.translate('metricsExperience.grid.metricsCount.label', {
+                        defaultMessage: '{count} {count, plural, one {metric} other {metrics}}',
+                        values: { count: filteredFieldsCount },
+                      })}
+                    </strong>
+                  </EuiText>
+                </EuiFlexItem>
+                {isFieldsLoading && (
+                  <EuiFlexItem grow={false}>
+                    <EuiLoadingSpinner size="s" />
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiBetaBadge
