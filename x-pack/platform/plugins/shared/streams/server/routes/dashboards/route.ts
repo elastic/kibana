@@ -68,7 +68,9 @@ const listDashboardsRoute = createServerRoute({
     }
 
     return {
-      dashboards: (await attachmentClient.getAttachments(streamName)).filter(isDashboard),
+      dashboards: (await attachmentClient.getAttachments(streamName, 'dashboard')).filter(
+        isDashboard
+      ),
     };
   },
 });

@@ -13,7 +13,7 @@ import type {
   STREAM_NAMES,
 } from './storage_settings';
 
-export const ATTACHMENT_TYPES = ['dashboard'] as const;
+export const ATTACHMENT_TYPES = ['dashboard', 'rule'] as const;
 
 export type AttachmentType = ValuesType<typeof ATTACHMENT_TYPES>;
 

@@ -20,7 +20,6 @@ import { Streams, getAncestors, getParentId } from '@kbn/streams-schema';
 import type { LockManagerService } from '@kbn/lock-manager';
 import type { Condition } from '@kbn/streamlang';
 import type { AssetClient } from './assets/asset_client';
-import { ASSET_ID, ASSET_TYPE } from './assets/fields';
 import type { QueryClient } from './assets/query/query_client';
 import {
   DefinitionNotFoundError,
@@ -792,19 +791,19 @@ export class StreamsClient {
     const { dashboards, queries, rules } = request;
 
     await Promise.all([
-      this.dependencies.assetClient.syncAssetList(
+      this.dependencies.attachmentClient.syncAttachmentList(
         name,
         dashboards.map((dashboard) => ({
-          [ASSET_ID]: dashboard,
-          [ASSET_TYPE]: 'dashboard' as const,
+          id: dashboard,
+          type: 'dashboard' as const,
         })),
         'dashboard'
       ),
-      this.dependencies.assetClient.syncAssetList(
+      this.dependencies.attachmentClient.syncAttachmentList(
         name,
         rules.map((rule) => ({
-          [ASSET_ID]: rule,
-          [ASSET_TYPE]: 'rule' as const,
+          id: rule,
+          type: 'rule' as const,
         })),
         'rule'
       ),

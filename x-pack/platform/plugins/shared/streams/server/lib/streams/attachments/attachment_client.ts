@@ -7,6 +7,8 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
 import type { IStorageClient } from '@kbn/storage-adapter';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
 import { AttachmentNotFoundError } from '../errors/attachment_not_found_error';
 import type { AttachmentStorageSettings } from './storage_settings';
 import { ATTACHMENT_ID, ATTACHMENT_TYPE, ATTACHMENT_UUID, STREAM_NAMES } from './storage_settings';
@@ -18,13 +20,14 @@ import {
   type AttachmentLink,
   type AttachmentType,
 } from './types';
-import { getAttachmentDocument, getAttachmentLinkUuid, soToAttachment } from './utils';
+import { getAttachmentDocument, getAttachmentLinkUuid, getSoByIds, getSuggestedSo } from './utils';
 
 export class AttachmentClient {
   constructor(
     private readonly clients: {
       storageClient: IStorageClient<AttachmentStorageSettings, AttachmentDocument>;
       soClient: SavedObjectsClientContract;
+      rulesClient: RulesClient;
     }
   ) {}
 
@@ -32,13 +35,19 @@ export class AttachmentClient {
     AttachmentType,
     (ids: string[]) => Promise<Attachment[]>
   > = {
-    dashboard: async (ids) => {
-      const result = await this.clients.soClient.bulkGet<{ title: string }>(
-        ids.map((id) => ({ id, type: 'dashboard' }))
-      );
-      return result.saved_objects
-        .filter((savedObject) => !savedObject.error)
-        .map((savedObject) => soToAttachment(savedObject, 'dashboard'));
+    dashboard: async (ids) =>
+      getSoByIds({ soClient: this.clients.soClient, attachmentType: 'dashboard', ids }),
+    rule: async (ids) => {
+      const { rules } = await this.clients.rulesClient.bulkGetRules({
+        ids,
+      });
+
+      return rules.map((rule) => ({
+        id: rule.id,
+        title: rule.name,
+        tags: rule.tags,
+        type: 'rule',
+      }));
     },
   };
 
@@ -46,21 +55,33 @@ export class AttachmentClient {
     AttachmentType,
     (options: { query: string; tags?: string[]; perPage: number }) => Promise<Attachment[]>
   > = {
-    dashboard: async ({ query, tags, perPage }) => {
-      const result = await this.clients.soClient.find<{ title: string }>({
-        type: 'dashboard',
-        search: query,
+    dashboard: async ({ query, tags, perPage }) =>
+      getSuggestedSo({
+        soClient: this.clients.soClient,
+        attachmentType: 'dashboard',
+        query,
+        tags,
         perPage,
-        ...(tags
-          ? {
-              hasReferenceOperator: 'OR',
-              hasReference: tags.map((tag) => ({ type: 'tag', id: tag })),
-            }
-          : {}),
+      }),
+    rule: async ({ query, tags, perPage }) => {
+      const { data } = await this.clients.rulesClient.find({
+        options: {
+          search: query,
+          perPage,
+          ...(tags && tags.length > 0
+            ? {
+                filter: tags.map((tag) => `alert.attributes.tags:"${tag}"`).join(' or '),
+              }
+            : {}),
+        },
       });
-      return result.saved_objects
-        .filter((savedObject) => !savedObject.error)
-        .map((savedObject) => soToAttachment(savedObject, 'dashboard'));
+
+      return data.map((rule) => ({
+        id: rule.id,
+        title: rule.name,
+        tags: rule.tags,
+        type: 'rule',
+      }));
     },
   };
 
@@ -291,13 +312,17 @@ export class AttachmentClient {
     return { errors: bulkResponse.errors, items: bulkResponse.items };
   }
 
-  async getAttachments(streamName: string): Promise<Attachment[]> {
+  async getAttachments(streamName: string, attachmentType?: AttachmentType): Promise<Attachment[]> {
+    const filter: QueryDslQueryContainer[] = [{ terms: { [STREAM_NAMES]: [streamName] } }];
+    if (attachmentType) {
+      filter.push({ terms: { [ATTACHMENT_TYPE]: [attachmentType] } });
+    }
     const attachmentsResponse = await this.clients.storageClient.search({
       size: 10_000,
       track_total_hits: false,
       query: {
         bool: {
-          filter: [{ terms: { [STREAM_NAMES]: [streamName] } }],
+          filter,
         },
       },
     });
@@ -308,6 +333,7 @@ export class AttachmentClient {
 
     const attachmentIdsByType: Record<AttachmentType, string[]> = {
       dashboard: [],
+      rule: [],
     };
 
     for (const attachment of attachmentDocuments) {
@@ -344,6 +370,7 @@ export class AttachmentClient {
     const searchAll = !attachmentTypes;
 
     const searchDashboards = searchAll || attachmentTypes.includes('dashboard');
+    const searchRules = searchAll || attachmentTypes.includes('rule');
     const suggestionsPromises: Promise<Attachment[]>[] = [];
     if (searchDashboards) {
       suggestionsPromises.push(
@@ -355,11 +382,66 @@ export class AttachmentClient {
       );
     }
 
+    if (searchRules) {
+      suggestionsPromises.push(
+        this.getSuggestedEntitiesMap.rule({
+          query,
+          tags,
+          perPage,
+        })
+      );
+    }
     const suggestions = (await Promise.all(suggestionsPromises)).flat();
 
     return {
       attachments: suggestions,
       hasMore: suggestions.length > perPage - 1,
+    };
+  }
+
+  async syncAttachmentList(
+    streamName: string,
+    links: AttachmentLink[],
+    attachmentType?: AttachmentType
+  ): Promise<{ deleted: AttachmentLink[]; indexed: AttachmentLink[] }> {
+    const filter: QueryDslQueryContainer[] = [{ terms: { [STREAM_NAMES]: [streamName] } }];
+    if (attachmentType) {
+      filter.push({ terms: { [ATTACHMENT_TYPE]: [attachmentType] } });
+    }
+    const attachmentsResponse = await this.clients.storageClient.search({
+      size: 10_000,
+      track_total_hits: false,
+      query: {
+        bool: {
+          filter,
+        },
+      },
+    });
+
+    const existingAssetLinks: AttachmentLink[] = attachmentsResponse.hits.hits.map(
+      ({ _source }) => {
+        return {
+          id: _source[ATTACHMENT_ID],
+          type: _source[ATTACHMENT_TYPE],
+        };
+      }
+    );
+
+    const nextIds = new Set(links.map((link) => link.id));
+    const assetLinksDeleted = existingAssetLinks.filter((link) => !nextIds.has(link.id));
+
+    const operations: AttachmentBulkOperation[] = [
+      ...assetLinksDeleted.map((attachment) => ({ delete: { attachment } })),
+      ...links.map((attachment) => ({ index: { attachment } })),
+    ];
+
+    if (operations.length) {
+      await this.bulk(streamName, operations);
+    }
+
+    return {
+      deleted: assetLinksDeleted,
+      indexed: links,
     };
   }
 }

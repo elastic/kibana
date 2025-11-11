@@ -20,7 +20,7 @@ export class AttachmentService {
   ) {}
 
   async getClientWithRequest({ request }: { request: KibanaRequest }): Promise<AttachmentClient> {
-    const [coreStart] = await this.coreSetup.getStartServices();
+    const [coreStart, pluginsStart] = await this.coreSetup.getStartServices();
 
     const adapter = new StorageIndexAdapter<AttachmentStorageSettings, AttachmentDocument>(
       coreStart.elasticsearch.client.asInternalUser,
@@ -31,6 +31,7 @@ export class AttachmentService {
     return new AttachmentClient({
       storageClient: adapter.getClient(),
       soClient: coreStart.savedObjects.getScopedClient(request),
+      rulesClient: await pluginsStart.alerting.getRulesClientWithRequest(request),
     });
   }
 }
