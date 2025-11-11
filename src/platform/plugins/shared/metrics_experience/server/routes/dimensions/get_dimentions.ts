@@ -42,7 +42,7 @@ export const getDimensions = async ({
         dim: dimensions[0],
       }),
       sort('??dim', { dim: dimensions[0] }),
-      limit(1000)
+      limit(20)
     )
     .toString();
 
