@@ -307,13 +307,14 @@ export const CONSOLE_COMMANDS = {
       }
     ),
     pidArgAbout: i18n.translate('xpack.securitySolution.translations.memoryDump.pidArgAbout', {
-      defaultMessage: 'Process ID to generate a memory dump for. Valid only "--process" is used',
+      defaultMessage:
+        'Process ID to generate a memory dump for. Valid only when "--process" is used',
     }),
     entityIdArgAbout: i18n.translate(
       'xpack.securitySolution.translations.memoryDump.entityIdArgAbout',
       {
         defaultMessage:
-          'Process Entity ID to generate a memory dump for.  Valid only "--process" is used',
+          'Process Entity ID to generate a memory dump for.  Valid only when "--process" is used',
       }
     ),
     agentResultMissing: i18n.translate(
