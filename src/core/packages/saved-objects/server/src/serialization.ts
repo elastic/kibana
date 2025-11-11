@@ -9,7 +9,7 @@
 
 import type { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-common';
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-api-server';
-import type { SavedObjectReference } from '..';
+import type { SavedObjectReference, SavedObjectsRawDocSource } from '..';
 
 /**
  * A serializer that can be used to manually convert {@link SavedObjectsRawDoc | raw} or
