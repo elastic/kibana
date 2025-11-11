@@ -41,7 +41,7 @@ function encodeValue(value: StringOrNumberOrBoolean | null | undefined) {
 function generateRangeComparisonClauses(
   field: string,
   operator: 'gt' | 'gte' | 'lt' | 'lte',
-  value: number
+  value: StringOrNumberOrBoolean
 ): { numberClause: string; stringClause: string } {
   const opMap: Record<typeof operator, string> = {
     gt: '>',
@@ -50,10 +50,26 @@ function generateRangeComparisonClauses(
     lte: '<=',
   };
   const opSymbol = opMap[operator];
-  return {
-    numberClause: `${field} ${opSymbol} ${encodeValue(value)}`,
-    stringClause: `Float.parseFloat(${field}) ${opSymbol} ${encodeValue(value)}`,
-  };
+
+  // Check if the value is numeric
+  const numericValue = typeof value === 'number' ? value : Number(value);
+  const isNumeric = !isNaN(numericValue);
+
+  if (isNumeric) {
+    // Handle numeric comparisons (integers, floats)
+    return {
+      numberClause: `${field} ${opSymbol} ${encodeValue(numericValue)}`,
+      stringClause: `Float.parseFloat(${field}) ${opSymbol} ${encodeValue(numericValue)}`,
+    };
+  } else {
+    // Handle string comparisons (dates, etc.) - use compareTo for strings
+    return {
+      numberClause: `String.valueOf(${field}).compareTo(${encodeValue(
+        String(value)
+      )}) ${opSymbol} 0`,
+      stringClause: `${field}.compareTo(${encodeValue(String(value))}) ${opSymbol} 0`,
+    };
+  }
 }
 
 // Convert a shorthand binary filter condition to painless
@@ -106,7 +122,7 @@ function shorthandBinaryToPainless(condition: ShorthandBinaryFilterCondition) {
         const { numberClause, stringClause } = generateRangeComparisonClauses(
           safeFieldAccessor,
           'gte',
-          Number(range.gte)
+          range.gte
         );
         numberClauses.push(numberClause);
         stringClauses.push(stringClause);
@@ -115,7 +131,7 @@ function shorthandBinaryToPainless(condition: ShorthandBinaryFilterCondition) {
         const { numberClause, stringClause } = generateRangeComparisonClauses(
           safeFieldAccessor,
           'lte',
-          Number(range.lte)
+          range.lte
         );
         numberClauses.push(numberClause);
         stringClauses.push(stringClause);
@@ -124,7 +140,7 @@ function shorthandBinaryToPainless(condition: ShorthandBinaryFilterCondition) {
         const { numberClause, stringClause } = generateRangeComparisonClauses(
           safeFieldAccessor,
           'gt',
-          Number(range.gt)
+          range.gt
         );
         numberClauses.push(numberClause);
         stringClauses.push(stringClause);
@@ -133,7 +149,7 @@ function shorthandBinaryToPainless(condition: ShorthandBinaryFilterCondition) {
         const { numberClause, stringClause } = generateRangeComparisonClauses(
           safeFieldAccessor,
           'lt',
-          Number(range.lt)
+          range.lt
         );
         numberClauses.push(numberClause);
         stringClauses.push(stringClause);

@@ -51,7 +51,7 @@ export function undefinedToAlways(condition: Condition | undefined) {
   return condition;
 }
 
-const UI_SUPPORTED_OPERATORS_AND_VALUE_TYPES: Record<Exclude<OperatorKeys, 'range'>, string[]> = {
+const UI_SUPPORTED_OPERATORS_AND_VALUE_TYPES: Record<OperatorKeys, string[]> = {
   // Allow both string and boolean for eq/neq so that boolean shorthand (e.g. "equals true") can rendered in UI
   eq: ['string', 'boolean'],
   neq: ['string', 'boolean'],
@@ -64,6 +64,8 @@ const UI_SUPPORTED_OPERATORS_AND_VALUE_TYPES: Record<Exclude<OperatorKeys, 'rang
   startsWith: ['string'],
   endsWith: ['string'],
   exists: ['boolean'],
+
+  range: ['object'],
 };
 
 function isOperatorUiSupported(

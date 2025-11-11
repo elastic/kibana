@@ -15,7 +15,7 @@ import {
   EuiBadge,
   EuiToolTip,
 } from '@elastic/eui';
-import type { Condition, FilterCondition } from '@kbn/streamlang';
+import type { Condition, FilterCondition, RangeCondition } from '@kbn/streamlang';
 import {
   getFilterOperator,
   getFilterValue,
@@ -103,11 +103,32 @@ const FilterBadges = ({ condition }: { condition: FilterCondition }) => {
   const operatorText =
     operatorToHumanReadableNameMap[operator as keyof typeof operatorToHumanReadableNameMap];
 
+  let displayText = value?.toString() ?? '';
+
+  if (operator === 'range' && typeof value === 'object' && value !== null) {
+    const rangeValue = value as RangeCondition;
+    const parts: string[] = [];
+
+    if (rangeValue.gte !== undefined) {
+      parts.push(`${rangeValue.gte}`);
+    } else if (rangeValue.gt !== undefined) {
+      parts.push(`> ${rangeValue.gt}`);
+    }
+
+    if (rangeValue.lt !== undefined) {
+      parts.push(`${rangeValue.lt}`);
+    } else if (rangeValue.lte !== undefined) {
+      parts.push(`≤ ${rangeValue.lte}`);
+    }
+
+    displayText = parts.length === 2 ? `${parts[0]} to ${parts[1]}` : parts.join(' ');
+  }
+
   return (
     <>
       <BadgeItem text={field} testSubj="streamsAppConditionDisplayField" />
       <OperatorText operator={operatorText} subdued testSubj="streamsAppConditionDisplayOperator" />
-      <BadgeItem text={value?.toString() ?? ''} testSubj="streamsAppConditionDisplayValue" />
+      <BadgeItem text={displayText} testSubj="streamsAppConditionDisplayValue" />
     </>
   );
 };

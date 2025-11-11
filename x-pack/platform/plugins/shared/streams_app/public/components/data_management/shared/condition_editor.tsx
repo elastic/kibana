@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
-import type { Condition } from '@kbn/streamlang';
+import type { Condition, RangeCondition } from '@kbn/streamlang';
 import {
   type FilterCondition,
   getFilterOperator,
@@ -35,6 +35,7 @@ import {
 import type { Suggestion } from './autocomplete_selector';
 import { AutocompleteSelector } from './autocomplete_selector';
 import { OperatorSelector } from './operator_selector';
+import { RangeInput } from './range_input';
 
 export interface ConditionEditorProps {
   condition: Condition;
@@ -144,7 +145,7 @@ function FilterConditionForm(props: {
     } as FilterCondition);
   };
 
-  const handleValueChange = (nextValue: string | boolean) => {
+  const handleValueChange = (nextValue: string | boolean | RangeCondition) => {
     onConditionChange({
       field: condition.field,
       [operator as OperatorKeys]: nextValue,
@@ -225,6 +226,17 @@ function FilterConditionForm(props: {
                   handleValueChange(nextValue);
                 }}
                 disabled={disabled}
+              />
+            ) : typeof value === 'object' && value !== null ? (
+              <RangeInput
+                value={value as RangeCondition}
+                onChange={(newValue) => {
+                  handleValueChange(newValue);
+                }}
+                valueSuggestions={valueSuggestions}
+                compressed
+                disabled={disabled}
+                dataTestSubj="streamsAppConditionEditorValueRange"
               />
             ) : null}
           </>
