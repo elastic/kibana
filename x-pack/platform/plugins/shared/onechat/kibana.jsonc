@@ -37,7 +37,8 @@
       "cloud",
       "licenseManagement",
       "workflowsManagement",
-      "usageCollection"
+      "usageCollection",
+      "llmTasks"
     ],
     "extraPublicDirs": []
   }

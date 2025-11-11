@@ -96,6 +96,7 @@ export class ServiceManager {
       security,
       elasticsearch,
       inference,
+      llmTasks,
       toolsService: tools,
       agentsService: agents,
       attachmentsService: attachments,
