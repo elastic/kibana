@@ -37,15 +37,19 @@ export const getRiskScoreSubPlugin: EntityAnalyticsSubPlugin = async (
   const engineStatus = await riskEngineClient.getStatus({ namespace: spaceId });
 
   if (engineStatus.riskEngineStatus === 'ENABLED') {
-    return `This is a set of rules that you must follow strictly:
+    return {
+      message: `This is a set of rules that you must follow strictly:
   * Use the latest risk score index pattern: ${riskScoreIndexPattern} when answering questions about the current risk score of entities.
   * Use the risk score time series patterns: ${riskScoreTimeSeriesIndexPattern} when answering questions about how the risk score changes over time.
   * When querying the risk score for a entity you must **ALWAYS** use the normalized field '${EntityTypeToScoreField[entityType]}'.
   * The field '${EntityTypeToLevelField[entityType]}' contains a textual description of the risk level.
   * The inputs field inside the risk score document contains the 10 highest-risk documents (sorted by 'kibana.alert.risk_score') that contributed to the risk score of an entity.
-  * When searching the risk score of an entity of type '${entityType}' you must **ALWAYS** filter by: 'where ${EntityTypeToIdentifierField[entityType]} IS NOT NULL'
-  `;
+  * When searching the risk score of an entity of type '${entityType}' you must **ALWAYS** filter by: 'where ${EntityTypeToIdentifierField[entityType]} IS NOT NULL'`,
+      index: riskScoreIndexPattern,
+    };
   } else {
-    return `The risk engine is not enabled in this environment. The current status is: ${engineStatus.riskEngineStatus}. The user needs to enable the risk engine se this assistant can answer risk related questions.`;
+    return {
+      message: `The risk engine is not enabled in this environment. The current status is: ${engineStatus.riskEngineStatus}. The user needs to enable the risk engine se this assistant can answer risk related questions.`,
+    };
   }
 };

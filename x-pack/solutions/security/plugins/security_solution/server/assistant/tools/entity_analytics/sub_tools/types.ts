@@ -12,7 +12,7 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import type { ToolProvider } from '@kbn/onechat-server';
+import type { ModelProvider, ToolProvider } from '@kbn/onechat-server';
 import type { EntityAnalyticsRoutesDeps } from '../../../../lib/entity_analytics/types';
 import type { EntityType } from '../../../../../common/search_strategy';
 
@@ -26,9 +26,11 @@ export interface EntityAnalyticsSubPluginsDependencies {
   logger: Logger;
   toolProvider: ToolProvider;
   kibanaVersion: string;
+  modelProvider: ModelProvider;
+  prompt: string;
 }
 
 export type EntityAnalyticsSubPlugin = (
   entityType: EntityType,
   dependencies: EntityAnalyticsSubPluginsDependencies
-) => Promise<string>;
+) => Promise<{ message: string; index?: string }>;

@@ -26,13 +26,17 @@ export const getEntityStoreSubPlugin: EntityAnalyticsSubPlugin = async (
   const engine = await engineClient.maybeGet(entityType);
 
   if (engine?.status === ENGINE_STATUS.STARTED) {
-    return `This is a set of rules that you must follow strictly:
-  * Use the entity store index pattern: ${getEntityStoreIndexPattern(entityType, spaceId)}.
+    return {
+      message: `This is a set of rules that you must follow strictly:
   * When searching the entity store for '${entityType}' you **MUST ALWAYS** filter by: 'where entity.EngineMetadata.Type == "${entityType}" OR entity.type == "${entityType}"'.
-  `;
+  `,
+      index: getEntityStoreIndexPattern(entityType, spaceId),
+    };
   } else {
-    return `The entity store for entity type '${entityType}' is not enabled in this environment. The current status is: ${
-      engine?.status ?? 'NOT CONFIGURED'
-    }. The user needs to enable the entity store for this entity type so this assistant can answer related questions.`;
+    return {
+      message: `The entity store for entity type '${entityType}' is not enabled in this environment. The current status is: ${
+        engine?.status ?? 'NOT CONFIGURED'
+      }. The user needs to enable the entity store for this entity type so this assistant can answer related questions.`,
+    };
   }
 };

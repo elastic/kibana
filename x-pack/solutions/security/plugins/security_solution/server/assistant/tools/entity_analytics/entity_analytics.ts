@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
-import type { BuiltinToolDefinition } from '@kbn/onechat-server';
+import type { BuiltinToolDefinition, ToolHandlerResult } from '@kbn/onechat-server';
 import { ToolType } from '@kbn/onechat-common';
 import type { EntityAnalyticsRoutesDeps } from '../../../lib/entity_analytics/types';
 import type { EntityType } from '../../../../common/search_strategy';
@@ -37,7 +37,7 @@ const entityRiskScoreInternalSchema = z.object({
 
 export const ENTITY_ANALYTICS_TOOL_INTERNAL_ID = 'entity-analytics-tool';
 
-export const ENTITY_RISK_SCORE_TOOL_INTERNAL_DESCRIPTION = `Call this for knowledge Security solution and entity analytics indices and data. If no 'domain' is provided, only general security solution knowledge will be returned.
+export const ENTITY_RISK_SCORE_TOOL_INTERNAL_DESCRIPTION = `Call this for knowledge Security solution and entity analytics indices and to generate ESQL for queries the domain. If no 'domain' is provided, only general security solution knowledge will be returned.
 Available domains:
 * Risk score: Entity risk scoring is an advanced Elastic Security analytics feature that helps security analysts detect changes in an entity’s risk posture, hunt for new threats, and prioritize incident response.
 * Asset criticality: Allows you to classify your organization’s entities based on various operational factors that are important to your organization.
@@ -46,10 +46,10 @@ Available domains:
 * Entity store: The entity store allows you to query, reconcile, maintain, and persist entity metadata. The entity store can hold any entity type observed by Elastic Security. It allows you to view and query select entities represented in your indices without needing to perform real-time searches of observable data. 
 
 If you need information about several type of entities or entity analytics domain, you must call this tool multiple times.
-This tool provider crucial information about the entity analytics domain and kibana security solution but it does not query data. You must call other tools after this tool to query data from the environment.
+This tool is the preferred way to generate ESQL queries for entity analytics domain and kibana security solution. You must call other tools to execute the query.
 `;
 
-// TODO Add checks if user has the privileges and if the module is installed: risk score, entity store, anomaly detection, privileged user monitoring, asset criticality
+// TODO Add checks if user has the privileges
 
 const MAP_DOMAIN_TO_INFO_BUILDER = {
   risk_score: getRiskScoreSubPlugin,
@@ -71,11 +71,11 @@ export const entityAnalyticsToolInternal = (
     type: ToolType.builtin,
     handler: async (
       { entityType, domain, prompt },
-      { esClient, logger, request, toolProvider }
+      { esClient, logger, request, toolProvider, modelProvider }
     ) => {
       try {
         logger.info(
-          `---------------- ${ENTITY_ANALYTICS_TOOL_INTERNAL_ID} called with: ${JSON.stringify({
+          `${ENTITY_ANALYTICS_TOOL_INTERNAL_ID} called with: ${JSON.stringify({
             entityType,
             domain,
             prompt,
@@ -97,6 +97,8 @@ export const entityAnalyticsToolInternal = (
           logger,
           toolProvider,
           kibanaVersion,
+          modelProvider,
+          prompt,
         };
 
         const dataViewsService = await startPlugins.dataViews.dataViewsServiceFactory(
@@ -109,21 +111,57 @@ export const entityAnalyticsToolInternal = (
         // TODO: Don't return the alert index
         const dataView = await dataViewsService.get(exploreDataViewId);
 
-        const generalSecuritySolutionMessage = `
-        Always try querying the most appropriate domain index when available. When it isn't enough, you can query security solution events and logs. For that you must generate an ES|QL and you **MUST ALWAYS** use the following from clause (ONLY FOR LOGS AND NOT FOR OTHER INDICES):
-        "FROM ${dataView.getIndexPattern()}"
-        `;
-
-        const specificEntityAnalyticsMessage = domain
+        const specificEntityAnalyticsResponse = domain
           ? await MAP_DOMAIN_TO_INFO_BUILDER[domain](entityType as EntityType, dependencies)
-          : '';
+          : { message: '' };
+
+        const hasGenerateESQLQuery = await toolProvider.has({
+          toolId: 'platform.core.generate_esql',
+          request,
+        });
+
+        const generalSecuritySolutionMessage = `Always try querying the most appropriate domain index when available. When it isn't enough, you can query security solution events and logs. For that you must generate an ES|QL and you **MUST ALWAYS** use the following from clause (ONLY FOR LOGS AND NOT FOR OTHER INDICES): "FROM ${dataView.getIndexPattern()}"`;
+
+        const results: ToolHandlerResult[] = [];
+        if (hasGenerateESQLQuery && specificEntityAnalyticsResponse.index) {
+          const generateESQLTool = await toolProvider.get({
+            toolId: 'platform.core.generate_esql',
+            request,
+          });
+
+          const { results: generateESQLResult } = await generateESQLTool.execute({
+            toolParams: {
+              index: specificEntityAnalyticsResponse.index,
+              query: prompt,
+              context: `${specificEntityAnalyticsResponse.message}\n${generalSecuritySolutionMessage}`,
+            },
+          });
+          results.push(...generateESQLResult);
+          results.push({
+            type: ToolResultType.other,
+            data: {
+              message: specificEntityAnalyticsResponse.message,
+            },
+          });
+        } else {
+          logger.warn(
+            `The 'platform.core.generate_esql' tool is not available. Cannot generate ES|QL query for the prompt: ${prompt}`
+          );
+          results.push({
+            type: ToolResultType.other,
+            data: {
+              message: specificEntityAnalyticsResponse.message,
+            },
+          });
+        }
 
         return {
           results: [
+            ...results,
             {
               type: ToolResultType.other,
               data: {
-                message: `General Security Solution knowledge: \n${generalSecuritySolutionMessage} \n\nSpecific Entity Analytics knowledge: \n${specificEntityAnalyticsMessage}`,
+                message: generalSecuritySolutionMessage,
               },
             },
           ],

@@ -15,9 +15,11 @@ export const getAssetCriticalitySubPlugin: EntityAnalyticsSubPlugin = async (
   { spaceId }
 ) => {
   const assetCriticalityIndexPattern = getAssetCriticalityIndex(spaceId);
-  return `This is a set of rules that you must follow strictly:
-  * Use the asset criticality index pattern: ${assetCriticalityIndexPattern}.
+  return {
+    message: `This is a set of rules that you must follow strictly:
   * When searching asset criticality for '${entityType}' you **MUST ALWAYS** filter by: 'where id_field == "${EntityTypeToIdentifierField[entityType]}"'.
   * The criticality value is stored in the field 'criticality_level'.
-  `;
+  `,
+    index: assetCriticalityIndexPattern,
+  };
 };
