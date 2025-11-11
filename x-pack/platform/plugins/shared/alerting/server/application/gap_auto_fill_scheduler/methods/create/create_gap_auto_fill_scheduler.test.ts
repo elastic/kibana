@@ -96,6 +96,13 @@ describe('createGapFillAutoScheduler()', () => {
     jest.resetAllMocks();
     rulesClient = new RulesClient(rulesClientParams);
 
+    unsecuredSavedObjectsClient.find.mockResolvedValue({
+      saved_objects: [],
+      total: 0,
+      per_page: 1,
+      page: 1,
+    });
+
     const soCreated: SavedObject<GapAutoFillSchedulerSO> = {
       id: 'gap-1',
       type: GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
@@ -230,11 +237,20 @@ describe('createGapFillAutoScheduler()', () => {
     const invalid = {
       ...getParams(),
       schedule: { interval: 1 as unknown as string },
+      // Ensure request contents are not leaked into logs/errors
+      request: { secret: 'SHOULD_NOT_APPEAR' } as unknown as KibanaRequest,
     } as unknown as CreateGapAutoFillSchedulerParams;
 
-    await expect(rulesClient.createGapAutoFillScheduler(invalid)).rejects.toThrowError(
-      /Error validating gap auto fill scheduler parameters/
-    );
+    expect.assertions(4);
+    try {
+      await rulesClient.createGapAutoFillScheduler(invalid);
+    } catch (err) {
+      const message = String((err as Error).message ?? err);
+      expect(message).toMatch(/Error validating gap auto fill scheduler parameters/);
+      expect(message).not.toContain('SHOULD_NOT_APPEAR');
+      expect(message).not.toContain('"request"');
+      expect(auditLogger.log).not.toHaveBeenCalled();
+    }
   });
 
   test('logs and rethrows when authorization fails', async () => {
