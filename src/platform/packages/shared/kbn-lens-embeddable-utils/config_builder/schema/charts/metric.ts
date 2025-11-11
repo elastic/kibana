@@ -18,7 +18,7 @@ import { colorByValueAbsolute, staticColorSchema, applyColorToSchema } from '../
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import {
   collapseBySchema,
-  layerSettingsSchema,
+  layerSettingsSchemaRaw,
   sharedPanelInfoSchema,
   dslOnlyPanelInfoSchema,
 } from '../shared';
@@ -185,7 +185,7 @@ export const metricStateSchemaNoESQL = schema.object({
   type: schema.literal('metric'),
   ...sharedPanelInfoSchema,
   ...dslOnlyPanelInfoSchema,
-  ...layerSettingsSchema,
+  ...layerSettingsSchemaRaw,
   ...datasetSchema,
   /**
    * Primary value configuration, must define operation.
@@ -210,7 +210,7 @@ export const metricStateSchemaNoESQL = schema.object({
 export const esqlMetricState = schema.object({
   type: schema.literal('metric'),
   ...sharedPanelInfoSchema,
-  ...layerSettingsSchema,
+  ...layerSettingsSchemaRaw,
   ...datasetEsqlTableSchema,
   /**
    * Primary value configuration, must define operation.

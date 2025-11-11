@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import {
   LENS_SAMPLING_MIN_VALUE,
@@ -54,7 +55,7 @@ export const dslOnlyPanelInfoSchema = {
   query: schema.maybe(filterSchema),
 };
 
-export const layerSettingsSchema = {
+export const layerSettingsSchemaRaw = {
   /**
    * The sampling factor for the dataset.
    *
@@ -113,3 +114,7 @@ export const collapseBySchema = schema.oneOf(
   ],
   { meta: { description: 'Collapse by function description' } }
 );
+
+const layerSettingsSchema = schema.object(layerSettingsSchemaRaw);
+
+export type LayerSettingsSchemaType = TypeOf<typeof layerSettingsSchema>;

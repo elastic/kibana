@@ -11,7 +11,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { esqlColumnSchema, genericOperationOptionsSchema } from '../metric_ops';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
-import { layerSettingsSchema, sharedPanelInfoSchema, dslOnlyPanelInfoSchema } from '../shared';
+import { layerSettingsSchemaRaw, sharedPanelInfoSchema, dslOnlyPanelInfoSchema } from '../shared';
 import { applyColorToSchema, colorByValueSchema } from '../color';
 import { horizontalAlignmentSchema, verticalAlignmentSchema } from '../alignments';
 import { mergeAllMetricsWithChartDimensionSchema } from './shared';
@@ -80,7 +80,7 @@ export const legacyMetricStateSchemaNoESQL = schema.object({
   type: schema.literal('legacy_metric'),
   ...sharedPanelInfoSchema,
   ...dslOnlyPanelInfoSchema,
-  ...layerSettingsSchema,
+  ...layerSettingsSchemaRaw,
   ...datasetSchema,
   /**
    * Metric configuration, must define operation.
@@ -91,7 +91,7 @@ export const legacyMetricStateSchemaNoESQL = schema.object({
 const esqlLegacyMetricState = schema.object({
   type: schema.literal('legacy_metric'),
   ...sharedPanelInfoSchema,
-  ...layerSettingsSchema,
+  ...layerSettingsSchemaRaw,
   ...datasetEsqlTableSchema,
   /**
    * Metric configuration, must define operation.

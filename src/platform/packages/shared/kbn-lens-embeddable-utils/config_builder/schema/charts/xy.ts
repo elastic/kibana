@@ -9,7 +9,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { collapseBySchema, layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
+import { collapseBySchema, layerSettingsSchemaRaw, sharedPanelInfoSchema } from '../shared';
 import { datasetEsqlTableSchema, datasetSchema } from '../dataset';
 import {
   mergeAllBucketsWithChartDimensionSchema,
@@ -36,13 +36,57 @@ const statisticsSchema = schema.oneOf([
     schema.literal('difference'),
     schema.literal('difference_percentage'),
     schema.literal('count'),
-    schema.literal('sum'),
+    schema.literal('total'),
     schema.literal('standard_deviation'),
     schema.literal('variance'),
     schema.literal('distinct_count'),
-    schema.literal('current_or_last_value'),
+    schema.literal('current_and_last_value'),
   ]),
 ]);
+
+const yExtendSchema = schema.oneOf([
+  schema.object({
+    type: schema.literal('full'),
+    integer_rounding: schema.maybe(schema.boolean()),
+  }),
+  // on the UI as "data" - line chart only
+  schema.object({
+    type: schema.literal('focus'),
+  }),
+  schema.object({
+    type: schema.literal('custom'),
+    start: schema.number(),
+    end: schema.number(),
+    integer_rounding: schema.maybe(schema.boolean()),
+  }),
+]);
+const yScaleSchema = schema.oneOf([
+  schema.literal('time'),
+  schema.literal('linear'),
+  schema.literal('log'),
+  schema.literal('sqrt'),
+]);
+
+const sharedAxisSchema = {
+  title: schema.maybe(
+    schema.object({ value: schema.string(), visible: schema.maybe(schema.boolean()) })
+  ),
+  ticks: schema.maybe(schema.boolean()),
+  grid: schema.maybe(schema.boolean()),
+  label_orientation: schema.maybe(
+    schema.oneOf([
+      schema.literal('horizontal'),
+      schema.literal('vertical'),
+      schema.literal('angled'),
+    ])
+  ),
+};
+
+const yAxisSchema = schema.object({
+  ...sharedAxisSchema,
+  scale: schema.maybe(yScaleSchema),
+  extent: schema.maybe(yExtendSchema),
+});
 
 const xyDataLayerSharedSchema = {
   type: schema.oneOf([
@@ -57,29 +101,128 @@ const xyDataLayerSharedSchema = {
     schema.literal('bar_stacked'),
     schema.literal('line'),
   ]),
+};
+
+const sharedLegendSchema = {
+  visible: schema.maybe(schema.boolean()),
+  statistics: schema.maybe(schema.arrayOf(statisticsSchema)),
+  truncate_after_lines: schema.maybe(schema.number({ min: 1, max: 5 })),
+};
+
+const xySharedSettings = {
   legend: schema.maybe(
+    schema.oneOf([
+      schema.object({
+        ...sharedLegendSchema,
+        inside: schema.maybe(schema.literal(false)),
+        position: schema.maybe(
+          schema.oneOf([
+            schema.literal('top'),
+            schema.literal('bottom'),
+            schema.literal('left'),
+            schema.literal('right'),
+          ])
+        ),
+        size: schema.maybe(
+          schema.oneOf([
+            schema.literal('small'),
+            schema.literal('medium'),
+            schema.literal('large'),
+            schema.literal('xlarge'),
+          ])
+        ),
+      }),
+      schema.object({
+        ...sharedLegendSchema,
+        inside: schema.literal(true),
+        columns: schema.maybe(schema.number({ min: 1, max: 5 })),
+        alignment: schema.maybe(
+          schema.oneOf([
+            schema.literal('top_right'),
+            schema.literal('bottom_right'),
+            schema.literal('top_left'),
+            schema.literal('bottom_left'),
+          ])
+        ),
+      }),
+    ])
+  ),
+
+  // While these will pass thru for any data layer
+  // at runtime only valid ones will be applied
+  // @TODO: document this behaviour
+  fitting: schema.maybe(
     schema.object({
-      visible: schema.maybe(schema.boolean()),
-      inside: schema.maybe(schema.boolean()),
-      position: schema.maybe(
+      type: schema.oneOf([
+        schema.literal('None'),
+        schema.literal('Zero'),
+        schema.literal('Linear'),
+        schema.literal('Carry'),
+        schema.literal('Lookahead'),
+        schema.literal('Average'),
+        schema.literal('Nearest'),
+      ]),
+      dotted: schema.maybe(schema.boolean()),
+      endValue: schema.maybe(
+        schema.oneOf([schema.literal('None'), schema.literal('Zero'), schema.literal('Nearest')])
+      ),
+    })
+  ),
+  axis: schema.maybe(
+    schema.object({
+      x: schema.maybe(
+        schema.object({
+          ...sharedAxisSchema,
+          extent: schema.maybe(
+            schema.oneOf([
+              schema.object({
+                // on the UI as "data"
+                type: schema.literal('full'),
+                integer_rounding: schema.maybe(schema.boolean()),
+              }),
+              schema.object({
+                type: schema.literal('custom'),
+                start: schema.number(),
+                end: schema.number(),
+                integer_rounding: schema.maybe(schema.boolean()),
+              }),
+            ])
+          ),
+        })
+      ),
+      left: schema.maybe(yAxisSchema),
+      right: schema.maybe(yAxisSchema),
+    })
+  ),
+  decorations: schema.maybe(
+    schema.object({
+      end_zones: schema.maybe(schema.boolean()),
+      current_time_marker: schema.maybe(schema.boolean()),
+      point_visibility: schema.maybe(schema.boolean()),
+      line_interpolation: schema.maybe(
         schema.oneOf([
-          schema.literal('top'),
-          schema.literal('bottom'),
-          schema.literal('left'),
-          schema.literal('right'),
+          schema.literal('linear'),
+          schema.literal('smooth'),
+          schema.literal('stepped'),
         ])
       ),
-      statistics: schema.maybe(schema.arrayOf(statisticsSchema)),
-      truncate_after_lines: schema.maybe(schema.number({ min: 1, max: 5 })),
+      minimum_bar_height: schema.maybe(
+        schema.number({ min: 0, meta: { description: 'The minimum height of bars in pixels' } })
+      ),
+      show_value_labels: schema.maybe(schema.boolean()),
+      fill_opacity: schema.maybe(
+        schema.number({ min: 0, max: 1, meta: { description: 'The fill opacity for area charts' } })
+      ),
+      value_labels: schema.maybe(schema.boolean()),
     })
   ),
 };
 
 const xyDataLayerSchemaNoESQL = schema.object({
-  ...layerSettingsSchema,
+  ...layerSettingsSchemaRaw,
   ...datasetSchema,
   ...xyDataLayerSharedSchema,
-  breakdownBy: schema.maybe(
+  breakdown_by: schema.maybe(
     mergeAllBucketsWithChartDimensionSchema(
       schema.object({
         /**
@@ -111,10 +254,10 @@ const xyDataLayerSchemaNoESQL = schema.object({
 });
 
 const xyDataLayerSchemaESQL = schema.object({
-  ...layerSettingsSchema,
+  ...layerSettingsSchemaRaw,
   ...datasetEsqlTableSchema,
   ...xyDataLayerSharedSchema,
-  breakdownBy: schema.maybe(esqlColumnSchema),
+  breakdown_by: schema.maybe(esqlColumnSchema),
   y: schema.arrayOf(
     esqlColumnSchema.extends({
       axis: schema.maybe(schema.oneOf([schema.literal('left'), schema.literal('right')])),
@@ -146,7 +289,7 @@ const referenceLineLayerShared = {
 };
 
 const referenceLineLayerSchemaNoESQL = schema.object({
-  ...layerSettingsSchema,
+  ...layerSettingsSchemaRaw,
   ...datasetSchema,
   type: schema.literal('referenceLines'),
   thresholds: schema.arrayOf(
@@ -154,7 +297,7 @@ const referenceLineLayerSchemaNoESQL = schema.object({
   ),
 });
 const referenceLineLayerSchemaESQL = schema.object({
-  ...layerSettingsSchema,
+  ...layerSettingsSchemaRaw,
   ...datasetEsqlTableSchema,
   type: schema.literal('referenceLines'),
   thresholds: schema.arrayOf(
@@ -224,7 +367,7 @@ const annotationManualRange = schema.object({
 });
 
 const annotationLayerSchema = schema.object({
-  ...layerSettingsSchema,
+  ...layerSettingsSchemaRaw,
   ...datasetSchema,
   type: schema.literal('annotations'),
   events: schema.arrayOf(
@@ -243,7 +386,20 @@ const xyLayerSchema = schema.oneOf([
 export const xyStateSchema = schema.object({
   type: schema.literal('xy'),
   ...sharedPanelInfoSchema,
+  ...xySharedSettings,
   layers: schema.arrayOf(xyLayerSchema),
 });
 
 export type XYState = TypeOf<typeof xyStateSchema>;
+export type DataLayerTypeESQL = TypeOf<typeof xyDataLayerSchemaESQL>;
+export type DataLayerTypeNoESQL = TypeOf<typeof xyDataLayerSchemaNoESQL>;
+export type DataLayerType = DataLayerTypeNoESQL | DataLayerTypeESQL;
+export type ReferenceLineLayerTypeESQL = TypeOf<typeof referenceLineLayerSchemaESQL>;
+export type ReferenceLineLayerTypeNoESQL = TypeOf<typeof referenceLineLayerSchemaNoESQL>;
+export type ReferenceLineLayerType = ReferenceLineLayerTypeNoESQL | ReferenceLineLayerTypeESQL;
+export type AnnotationLayerType = TypeOf<typeof annotationLayerSchema>;
+export type LayerTypeESQL = DataLayerTypeESQL | ReferenceLineLayerTypeESQL;
+export type LayerTypeNoESQL =
+  | DataLayerTypeNoESQL
+  | ReferenceLineLayerTypeNoESQL
+  | AnnotationLayerType;
