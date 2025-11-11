@@ -43,7 +43,6 @@ Output can be in markdown (human-readable) or JSON (structured) format.`,
     schema: summaryGeneratorSchema,
     handler: async ({ correlatedData, format = 'markdown' }, { logger }) => {
       try {
-        logger.debug(`summary generator tool called with format: ${format}`);
 
         // Recursively search for a key in an object tree
         const findNestedKey = (
@@ -168,26 +167,6 @@ Output can be in markdown (human-readable) or JSON (structured) format.`,
         const entitiesRaw = correlatedData.entities || {};
         const relatedAlertsRaw = correlatedData.related_alerts || {};
 
-        // Comprehensive logging to capture the exact structure received from workflow template engine
-        logger.info(
-          `==> Summary Generator: correlationsRaw received - type: ${typeof correlationsRaw}, isArray: ${Array.isArray(
-            correlationsRaw
-          )}`
-        );
-        if (typeof correlationsRaw === 'string') {
-          logger.info(
-            `==> Summary Generator: correlationsRaw is string, length: ${
-              correlationsRaw.length
-            }, preview: ${correlationsRaw.substring(0, 500)}`
-          );
-        } else if (correlationsRaw && typeof correlationsRaw === 'object') {
-          logger.info(
-            `==> Summary Generator: correlationsRaw is object, keys: ${Object.keys(
-              correlationsRaw
-            ).join(', ')}, JSON preview: ${JSON.stringify(correlationsRaw).substring(0, 500)}`
-          );
-        }
-
         const security = extractDataFromResponse(securityRaw);
         const observability = extractDataFromResponse(observabilityRaw);
         const search = extractDataFromResponse(searchRaw);
@@ -195,110 +174,6 @@ Output can be in markdown (human-readable) or JSON (structured) format.`,
         // Extract entities and related alerts
         const entitiesData = extractDataFromResponse(entitiesRaw);
         const relatedAlertsData = extractDataFromResponse(relatedAlertsRaw);
-
-        // Log entities data structure for debugging
-        logger.info(
-          `==> Summary Generator: entitiesRaw type: ${typeof entitiesRaw}, keys: ${
-            entitiesRaw && typeof entitiesRaw === 'object'
-              ? Object.keys(entitiesRaw).join(', ')
-              : 'N/A'
-          }`
-        );
-        logger.info(
-          `==> Summary Generator: entitiesData type: ${typeof entitiesData}, keys: ${
-            entitiesData && typeof entitiesData === 'object'
-              ? Object.keys(entitiesData).join(', ')
-              : 'N/A'
-          }`
-        );
-        if (entitiesData && typeof entitiesData === 'object' && entitiesData.entities) {
-          const entities = entitiesData.entities;
-          logger.info(
-            `==> Summary Generator: Found entities object with keys: ${Object.keys(entities).join(
-              ', '
-            )}`
-          );
-          logger.info(
-            `==> Summary Generator: Entity counts - hosts: ${
-              entities.host_names?.length || 0
-            }, services: ${entities.service_names?.length || 0}, users: ${
-              entities.user_names?.length || 0
-            }, source_ips: ${entities.source_ips?.length || 0}, dest_ips: ${
-              entities.destination_ips?.length || 0
-            }`
-          );
-        } else if (entitiesData && typeof entitiesData === 'object') {
-          logger.info(
-            `==> Summary Generator: entitiesData is object but no 'entities' key, direct keys: ${Object.keys(
-              entitiesData
-            ).join(', ')}`
-          );
-          logger.info(
-            `==> Summary Generator: Direct entity counts - hosts: ${
-              entitiesData.host_names?.length || 0
-            }, services: ${entitiesData.service_names?.length || 0}, users: ${
-              entitiesData.user_names?.length || 0
-            }, source_ips: ${entitiesData.source_ips?.length || 0}, dest_ips: ${
-              entitiesData.destination_ips?.length || 0
-            }`
-          );
-        }
-
-        // Log observability data structure for debugging
-        logger.info(
-          `==> Summary Generator: Observability data structure - keys: ${Object.keys(
-            observability || {}
-          ).join(', ')}`
-        );
-        logger.info(`==> Summary Generator: Observability data type: ${typeof observability}`);
-        if (observability && typeof observability === 'object') {
-          logger.info(
-            `==> Summary Generator: Observability has observability_summary: ${!!observability.observability_summary}`
-          );
-          logger.info(`==> Summary Generator: Observability has cases: ${!!observability.cases}`);
-          if (observability.observability_summary) {
-            logger.info(
-              `==> Summary Generator: observability_summary keys: ${Object.keys(
-                observability.observability_summary || {}
-              ).join(', ')}`
-            );
-            logger.info(
-              `==> Summary Generator: observability_summary.cases exists: ${!!observability
-                .observability_summary.cases}`
-            );
-            if (observability.observability_summary.cases) {
-              const casesData = observability.observability_summary.cases;
-              logger.info(
-                `==> Summary Generator: observability_summary.cases type: ${typeof casesData}`
-              );
-              if (Array.isArray(casesData)) {
-                logger.info(
-                  `==> Summary Generator: observability_summary.cases is array with ${casesData.length} items`
-                );
-              } else if (casesData && typeof casesData === 'object') {
-                logger.info(
-                  `==> Summary Generator: observability_summary.cases is object with keys: ${Object.keys(
-                    casesData
-                  ).join(', ')}`
-                );
-                if (casesData.cases) {
-                  logger.info(
-                    `==> Summary Generator: observability_summary.cases.cases is array with ${
-                      Array.isArray(casesData.cases) ? casesData.cases.length : 'N/A'
-                    } items`
-                  );
-                }
-                if (casesData.values) {
-                  logger.info(
-                    `==> Summary Generator: observability_summary.cases.values is array with ${
-                      Array.isArray(casesData.values) ? casesData.values.length : 'N/A'
-                    } items`
-                  );
-                }
-              }
-            }
-          }
-        }
 
         // Handle external object which may contain nested workflow responses
         const external: any = {};
@@ -314,80 +189,35 @@ Output can be in markdown (human-readable) or JSON (structured) format.`,
         let correlations: any[] = [];
         if (Array.isArray(correlationsRaw)) {
           correlations = correlationsRaw;
-          logger.info(
-            `==> Summary Generator: correlationsRaw is already an array with ${correlations.length} items`
-          );
         } else {
           const extracted = extractDataFromResponse(correlationsRaw);
-          logger.info(
-            `==> Summary Generator: After extractDataFromResponse - type: ${typeof extracted}, isArray: ${Array.isArray(
-              extracted
-            )}`
-          );
 
           if (Array.isArray(extracted)) {
             correlations = extracted;
-            logger.info(`==> Summary Generator: Extracted array with ${correlations.length} items`);
           } else if (extracted && typeof extracted === 'object') {
             // First try direct access to common locations
             if (extracted.correlations && Array.isArray(extracted.correlations)) {
               correlations = extracted.correlations;
-              logger.info(
-                `==> Summary Generator: Found correlations array with ${correlations.length} items at extracted.correlations`
-              );
             } else if (extracted.prioritized_items && Array.isArray(extracted.prioritized_items)) {
               correlations = extracted.prioritized_items;
-              logger.info(
-                `==> Summary Generator: Found prioritized_items array with ${correlations.length} items`
-              );
             } else {
               // Recursively search for correlations array anywhere in the object tree
-              logger.info(
-                `==> Summary Generator: No direct correlations found, searching recursively...`
-              );
               const foundCorrelations = findNestedKey(extracted, 'correlations');
               if (foundCorrelations && Array.isArray(foundCorrelations)) {
                 correlations = foundCorrelations;
-                logger.info(
-                  `==> Summary Generator: Found correlations array recursively with ${correlations.length} items`
-                );
               } else {
                 // Try searching for prioritized_items as well
                 const foundPrioritized = findNestedKey(extracted, 'prioritized_items');
                 if (foundPrioritized && Array.isArray(foundPrioritized)) {
                   correlations = foundPrioritized;
-                  logger.info(
-                    `==> Summary Generator: Found prioritized_items array recursively with ${correlations.length} items`
-                  );
-                } else {
-                  // Log what we found for debugging
-                  logger.warn(
-                    `==> Summary Generator: No correlations array found anywhere. Top-level keys: ${Object.keys(
-                      extracted
-                    ).join(', ')}`
-                  );
-                  logger.warn(
-                    `==> Summary Generator: Extracted object structure (first 1000 chars): ${JSON.stringify(
-                      extracted
-                    ).substring(0, 1000)}`
-                  );
                 }
               }
             }
-          } else {
-            logger.warn(
-              `==> Summary Generator: Extracted value is not an array or object: ${typeof extracted}, value: ${String(
-                extracted
-              ).substring(0, 200)}`
-            );
           }
         }
 
         // Fallback: if no correlations found, check if they're in reranker output
         if (correlations.length === 0) {
-          logger.info(
-            `==> Summary Generator: No correlations found in expected location, checking for reranker output...`
-          );
           const rerankerOutput =
             correlatedData.prioritize_with_reranker || correlatedData.reranker_output;
           if (rerankerOutput) {
@@ -397,9 +227,6 @@ Output can be in markdown (human-readable) or JSON (structured) format.`,
               Array.isArray(rerankerExtracted.prioritized_items)
             ) {
               correlations = rerankerExtracted.prioritized_items;
-              logger.info(
-                `==> Summary Generator: Found correlations in reranker output: ${correlations.length} items`
-              );
             } else {
               // Try recursive search in reranker output
               const found =
@@ -407,9 +234,6 @@ Output can be in markdown (human-readable) or JSON (structured) format.`,
                 findNestedKey(rerankerExtracted, 'prioritized_items');
               if (found && Array.isArray(found)) {
                 correlations = found;
-                logger.info(
-                  `==> Summary Generator: Found correlations in reranker output recursively: ${correlations.length} items`
-                );
               }
             }
           }
@@ -422,37 +246,6 @@ Output can be in markdown (human-readable) or JSON (structured) format.`,
           }
           return count;
         }, 0);
-
-        // Final debug logging
-        logger.info(`==> Summary Generator: Total correlations extracted: ${correlations.length}`);
-        logger.info(
-          `==> Summary Generator: Correlations with Slack messages: ${
-            correlations.filter((c: any) => c.slack).length
-          }`
-        );
-        logger.info(
-          `==> Summary Generator: Total correlated Slack message count: ${correlatedSlackCount}`
-        );
-        if (correlations.length > 0) {
-          logger.info(
-            `==> Summary Generator: Correlation types: ${correlations
-              .map((c: any) => c.match_type)
-              .join(', ')}`
-          );
-          logger.info(
-            `==> Summary Generator: Sample correlation: ${JSON.stringify({
-              match_type: correlations[0].match_type,
-              has_slack: !!correlations[0].slack,
-              slack_count: correlations[0].slack?.length || 0,
-              case: correlations[0].case || 'none',
-              alert: correlations[0].alert || 'none',
-            })}`
-          );
-        } else {
-          logger.warn(
-            `==> Summary Generator: WARNING - No correlations found, but correlatedSlackCount is ${correlatedSlackCount}`
-          );
-        }
 
         if (format === 'json') {
           return {
@@ -613,21 +406,6 @@ Output can be in markdown (human-readable) or JSON (structured) format.`,
         const extractedEntities = entitiesData?.entities || entitiesData || {};
         const relatedAlerts = relatedAlertsData?.alerts || relatedAlertsData?.data?.alerts || [];
 
-        logger.info(
-          `==> Summary Generator: extractedEntities keys: ${Object.keys(extractedEntities).join(
-            ', '
-          )}`
-        );
-        logger.info(
-          `==> Summary Generator: extractedEntities values - hosts: ${
-            extractedEntities.host_names?.length || 0
-          }, services: ${extractedEntities.service_names?.length || 0}, users: ${
-            extractedEntities.user_names?.length || 0
-          }, source_ips: ${extractedEntities.source_ips?.length || 0}, dest_ips: ${
-            extractedEntities.destination_ips?.length || 0
-          }`
-        );
-
         if (
           extractedEntities &&
           (extractedEntities.host_names?.length > 0 ||
@@ -636,7 +414,6 @@ Output can be in markdown (human-readable) or JSON (structured) format.`,
             extractedEntities.source_ips?.length > 0 ||
             extractedEntities.destination_ips?.length > 0)
         ) {
-          logger.info(`==> Summary Generator: Entities found, building entity sections`);
           // Build entity summary section
           const totalEntities =
             (extractedEntities.host_names?.length || 0) +
@@ -774,9 +551,6 @@ Output can be in markdown (human-readable) or JSON (structured) format.`,
               entitySummarySection += '\n';
             }
 
-            logger.info(
-              `==> Summary Generator: Built prioritized entity summary with ${sortedHosts.length} hosts, ${sortedServices.length} services, ${sortedUsers.length} users`
-            );
           }
 
           extractedEntitiesSection = `\n## Extracted Entities and Relationships\n`;
@@ -807,9 +581,6 @@ Output can be in markdown (human-readable) or JSON (structured) format.`,
             }
           }
 
-          logger.info(
-            `==> Summary Generator: Found ${allCases.length} security cases and ${observabilityCases.length} observability cases`
-          );
           const allObservabilityCases = [...allCases, ...observabilityCases];
 
           // Host names (prioritize these as they're most meaningful)
@@ -956,28 +727,6 @@ Output can be in markdown (human-readable) or JSON (structured) format.`,
           }
 
           // NOTE: IDs are NOT entities - we don't show them in the entities section
-        } else {
-          logger.info(`==> Summary Generator: No entities found - extractedEntities check failed`);
-        }
-
-        logger.info(
-          `==> Summary Generator: entitySummarySection length: ${entitySummarySection.length}, extractedEntitiesSection length: ${extractedEntitiesSection.length}`
-        );
-        if (entitySummarySection.length > 0) {
-          logger.info(
-            `==> Summary Generator: entitySummarySection preview: ${entitySummarySection.substring(
-              0,
-              200
-            )}`
-          );
-        }
-        if (extractedEntitiesSection.length > 0) {
-          logger.info(
-            `==> Summary Generator: extractedEntitiesSection preview: ${extractedEntitiesSection.substring(
-              0,
-              200
-            )}`
-          );
         }
 
         const markdown = `# Elastic CatchUp Summary
@@ -999,22 +748,6 @@ ${(() => {
     obsAlerts.resolved_alerts ||
     obsAlerts.top_services;
   const hasCases = obsCasesList.length > 0;
-
-  logger.info(
-    `==> Summary Generator: Observability section - hasAlerts: ${hasAlerts}, hasCases: ${hasCases}, casesCount: ${obsCasesList.length}`
-  );
-  logger.info(`==> Summary Generator: obsAlerts keys: ${Object.keys(obsAlerts).join(', ')}`);
-  logger.info(
-    `==> Summary Generator: obsCases type: ${typeof obsCases}, isArray: ${Array.isArray(obsCases)}`
-  );
-  if (obsCasesList.length > 0) {
-    logger.info(
-      `==> Summary Generator: First case sample: ${JSON.stringify(obsCasesList[0]).substring(
-        0,
-        200
-      )}`
-    );
-  }
 
   if (hasAlerts || hasCases) {
     let obsSection = `## Observability\n`;
@@ -1046,15 +779,8 @@ ${(() => {
     }
 
     obsSection += '\n';
-    logger.info(`==> Summary Generator: Built observability section, length: ${obsSection.length}`);
-    logger.info(
-      `==> Summary Generator: Observability section preview: ${obsSection.substring(0, 300)}`
-    );
     return obsSection;
   }
-  logger.info(
-    `==> Summary Generator: Skipping observability section - hasAlerts: ${hasAlerts}, hasCases: ${hasCases}`
-  );
   return '';
 })()}${entitySummarySection}${extractedEntitiesSection}
 ${
@@ -1082,15 +808,9 @@ ${
         const correlatedSlackMessages: any[] = [];
         correlations.forEach((corr: any) => {
           if (corr.slack && Array.isArray(corr.slack)) {
-            logger.info(
-              `==> Summary Generator: Found correlation with ${corr.slack.length} Slack messages, match_type: ${corr.match_type}`
-            );
             correlatedSlackMessages.push(...corr.slack);
           }
         });
-        logger.info(
-          `==> Summary Generator: Total correlated Slack messages collected: ${correlatedSlackMessages.length}`
-        );
 
         if (hasSlack || hasGithub || hasGmail) {
           let slackSection = '';
@@ -1155,12 +875,6 @@ ${hasGmail ? `- **Gmail**: ${external.gmail.emails.length} emails` : ''}
 ${
   correlations.length > 0
     ? (() => {
-        logger.info(
-          `==> Summary Generator: Building correlations section with ${correlations.length} correlations`
-        );
-        logger.info(
-          `==> Summary Generator: CRITICAL - About to build correlations section. Correlations array length: ${correlations.length}`
-        );
         let correlationText = `- **${correlations.length} correlated events found**\n\n`;
 
         // Group correlations by type first
@@ -1627,15 +1341,6 @@ ${
           }
         }
 
-        logger.info(
-          `==> Summary Generator: CRITICAL - Built correlations section text, length: ${correlationText.length} characters`
-        );
-        logger.info(
-          `==> Summary Generator: CRITICAL - Correlations section preview (first 500 chars): ${correlationText.substring(
-            0,
-            500
-          )}`
-        );
         return correlationText;
       })()
     : (() => {
@@ -1751,38 +1456,10 @@ ${
 
 `;
 
-        // CRITICAL: Log the final markdown to verify Correlations section is included
+        // Verify Correlations section is included
         const hasCorrelationsSection = markdown.includes('## Correlations');
-        const correlationsCount = (markdown.match(/## Correlations/g) || []).length;
-        logger.info(
-          `==> Summary Generator: CRITICAL CHECK - Final markdown length: ${markdown.length} characters`
-        );
-        logger.info(
-          `==> Summary Generator: CRITICAL CHECK - Final markdown includes "## Correlations": ${hasCorrelationsSection}`
-        );
-        logger.info(
-          `==> Summary Generator: CRITICAL CHECK - Number of "## Correlations" headers found: ${correlationsCount}`
-        );
-        logger.info(
-          `==> Summary Generator: CRITICAL CHECK - Correlations array length when building markdown: ${correlations.length}`
-        );
 
-        if (hasCorrelationsSection) {
-          const correlationsSectionIndex = markdown.indexOf('## Correlations');
-          const correlationsSectionPreview = markdown.substring(
-            correlationsSectionIndex,
-            Math.min(correlationsSectionIndex + 800, markdown.length)
-          );
-          logger.info(
-            `==> Summary Generator: CRITICAL - Correlations section found at index ${correlationsSectionIndex}`
-          );
-          logger.info(
-            `==> Summary Generator: CRITICAL - Correlations section preview (800 chars): ${correlationsSectionPreview}`
-          );
-          // Log the end of the markdown to verify it's complete
-          const markdownEnd = markdown.substring(Math.max(0, markdown.length - 300));
-          logger.info(`==> Summary Generator: Markdown ends with (last 300 chars): ${markdownEnd}`);
-        } else {
+        if (!hasCorrelationsSection) {
           logger.error(
             `==> Summary Generator: ERROR - Correlations section NOT found in final markdown! Markdown length: ${markdown.length}`
           );

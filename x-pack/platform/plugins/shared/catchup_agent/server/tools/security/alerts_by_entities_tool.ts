@@ -205,7 +205,6 @@ Returns alert details including alert IDs, timestamps, severity, rule names, ent
     event.type,
     message`;
 
-            logger.debug(`[CatchUp Agent] Security alerts query: ${securityQuery}`);
             const securityResult = await executeEsql({
               query: securityQuery,
               esClient: esClient.asCurrentUser,

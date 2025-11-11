@@ -12,11 +12,7 @@ import { githubSummaryTool } from './github_summary_tool';
 import { gmailDigestTool } from './gmail_digest_tool';
 
 export function registerExternalTools(toolsSetup: ToolsSetup, logger: Logger): void {
-  logger.debug('Registering External CatchUp tools');
-
   toolsSetup.register(slackDigestTool());
   toolsSetup.register(githubSummaryTool());
   toolsSetup.register(gmailDigestTool());
-
-  logger.info('Registered 3 External CatchUp tools');
 }

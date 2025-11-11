@@ -41,12 +41,6 @@ Returns aggregated statistics including open/resolved alerts and total alerts.`,
     schema: observabilityAlertsSchema,
     handler: async ({ start, end }, { esClient, logger }) => {
       try {
-        logger.info(
-          `[CatchUp Agent] Observability alerts tool called with start: ${start}, end: ${
-            end || 'now'
-          }`
-        );
-
         // Normalize and adjust time range using helper function
         const timeRange = normalizeTimeRange(start, end, { logger });
 
@@ -58,11 +52,6 @@ Returns aggregated statistics including open/resolved alerts and total alerts.`,
         } else {
           dateFilter = `@timestamp > TO_DATETIME("${timeRange.start}")`;
         }
-
-        logger.debug(
-          `[CatchUp Agent] Normalized start: ${timeRange.start}, end: ${timeRange.end || 'none'}`
-        );
-        logger.debug(`[CatchUp Agent] Date filter: ${dateFilter}`);
 
         // Query observability alerts using ES|QL
         // Match all observability alerts indices:
@@ -83,75 +72,20 @@ Returns aggregated statistics including open/resolved alerts and total alerts.`,
     total_alerts = COUNT(*)
 | LIMIT 1`;
 
-        // eslint-disable-next-line no-console
-        console.log(
-          '[CatchUp Agent] Observability alerts tool - Normalized start:',
-          timeRange.start
-        );
-        // eslint-disable-next-line no-console
-        console.log(
-          '[CatchUp Agent] Observability alerts tool - Normalized end:',
-          timeRange.end || 'none'
-        );
-        // eslint-disable-next-line no-console
-        console.log('[CatchUp Agent] Observability alerts tool - Date filter:', dateFilter);
-        // eslint-disable-next-line no-console
-        console.log('[CatchUp Agent] Observability alerts tool - Full ES|QL query:', query);
-        logger.debug(`[CatchUp Agent] Executing ES|QL query: ${query}`);
 
         let result;
         try {
-          // eslint-disable-next-line no-console
-          console.log('[CatchUp Agent] Observability alerts tool - About to execute ES|QL query');
           result = await executeEsql({
             query,
             esClient: esClient.asCurrentUser,
           });
-          // eslint-disable-next-line no-console
-          console.log(
-            '[CatchUp Agent] Observability alerts tool - ES|QL query executed successfully'
-          );
-          // eslint-disable-next-line no-console
-          console.log(
-            '[CatchUp Agent] Observability alerts tool - Result columns:',
-            result.columns
-          );
-          // eslint-disable-next-line no-console
-          console.log('[CatchUp Agent] Observability alerts tool - Result values:', result.values);
-          // eslint-disable-next-line no-console
-          console.log(
-            '[CatchUp Agent] Observability alerts tool - Rows returned:',
-            result.values.length
-          );
-          logger.debug(
-            `[CatchUp Agent] ES|QL query executed successfully. Rows returned: ${result.values.length}`
-          );
         } catch (esqlError: any) {
-          // eslint-disable-next-line no-console
-          console.error(
-            '[CatchUp Agent] Observability alerts tool - ES|QL query failed:',
-            esqlError.message
-          );
-          // eslint-disable-next-line no-console
-          console.error('[CatchUp Agent] Observability alerts tool - Failed query:', query);
-          if (esqlError.stack) {
-            // eslint-disable-next-line no-console
-            console.error(
-              '[CatchUp Agent] Observability alerts tool - Error stack:',
-              esqlError.stack
-            );
-          }
           logger.error(`[CatchUp Agent] ES|QL query failed: ${esqlError.message}`);
-          logger.debug(`[CatchUp Agent] ES|QL query that failed: ${query}`);
-          if (esqlError.stack) {
-            logger.debug(`[CatchUp Agent] ES|QL error stack: ${esqlError.stack}`);
-          }
           // If indices don't exist, return empty results instead of failing
           if (
             esqlError.message?.includes('Unknown index') ||
             esqlError.message?.includes('no such index')
           ) {
-            logger.debug(`Observability alerts indices not found, returning empty results`);
             result = {
               columns: [
                 { name: 'open_alerts', type: 'long' },
@@ -187,11 +121,7 @@ Returns aggregated statistics including open/resolved alerts and total alerts.`,
         };
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        const errorStack = error instanceof Error ? error.stack : undefined;
         logger.error(`Error in observability alerts tool: ${errorMessage}`);
-        if (errorStack) {
-          logger.debug(`Observability alerts tool error stack: ${errorStack}`);
-        }
         return {
           results: [createErrorResult(`Error fetching observability alerts: ${errorMessage}`)],
         };

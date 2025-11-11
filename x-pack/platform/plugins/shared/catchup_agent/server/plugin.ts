@@ -49,21 +49,14 @@ export class CatchupAgentPlugin
   private workflowsManagement?: CatchupAgentSetupDependencies['workflowsManagement'];
 
   constructor(initializerContext: PluginInitializerContext) {
-    // eslint-disable-next-line no-console
-    console.log('[CATCHUP-AGENT] CatchupAgentPlugin constructor called');
     this.logger = initializerContext.logger.get();
     this.config = initializerContext.config.get<CatchupAgentConfigType>();
-    this.logger.info('CatchupAgentPlugin constructor called - plugin is being instantiated');
-    // eslint-disable-next-line no-console
-    console.log('[CATCHUP-AGENT] Logger obtained, plugin instance ready');
   }
 
   public setup(
     core: CoreSetup<CatchupAgentStartDependencies, CatchupAgentPluginStart>,
     plugins: CatchupAgentSetupDependencies
   ): CatchupAgentPluginSetup {
-    this.logger.info('Setting up CatchupAgent plugin');
-
     // Store workflowsManagement for later use in start
     this.workflowsManagement = plugins.workflowsManagement;
 
@@ -74,48 +67,17 @@ export class CatchupAgentPlugin
         return {};
       }
 
-      this.logger.info('OneChat plugin is available, proceeding with tool and agent registration');
-
       // Register all tools
-      this.logger.info('Registering Security tools...');
       registerSecurityTools(plugins.onechat.tools, this.logger);
-      this.logger.info('Security tools registered');
-
-      this.logger.info('Registering Observability tool...');
       registerObservabilityTool(plugins.onechat.tools, this.logger);
-      this.logger.info('Observability tool registered');
-
-      // Search tool temporarily disabled - focusing on Security, Observability and External tools first
-      // this.logger.info('Registering Search tool...');
-      // registerSearchTool(plugins.onechat.tools, this.logger);
-      // this.logger.info('Search tool registered');
-
-      this.logger.info('Registering External tools...');
       registerExternalTools(plugins.onechat.tools, this.logger);
-      this.logger.info('External tools registered');
-
-      this.logger.info('Registering Correlation tool...');
       registerCorrelationTool(plugins.onechat.tools, this.logger);
-      this.logger.info('Correlation tool registered');
-
-      this.logger.info('Registering Summary tool...');
       registerSummaryTool(plugins.onechat.tools, this.logger);
-      this.logger.info('Summary tool registered');
-
-      this.logger.info('Registering Prioritization tools...');
       registerPrioritizationTools(plugins.onechat.tools, this.logger);
-      this.logger.info('Prioritization tools registered');
-
-      this.logger.info('Registering Workflow tools...');
       registerWorkflowTools(plugins.onechat.tools, this.logger);
-      this.logger.info('Workflow tools registered');
 
       // Register the main agent
-      this.logger.info('Registering CatchUp Agent...');
       registerCatchupAgent(plugins.onechat.agents, this.logger);
-      this.logger.info('CatchUp Agent registration completed');
-
-      this.logger.info('CatchupAgent plugin setup completed successfully');
     } catch (error) {
       this.logger.error(`Error during CatchupAgent plugin setup: ${error}`);
       if (error instanceof Error && error.stack) {
@@ -127,7 +89,6 @@ export class CatchupAgentPlugin
   }
 
   public start(core: CoreStart, plugins: CatchupAgentStartDependencies): CatchupAgentPluginStart {
-    this.logger.info('Starting CatchupAgent plugin');
     const pluginStart = {
       getCasesClient: plugins.cases?.getCasesClientWithRequest,
       getRulesClient: plugins.alerting?.getRulesClientWithRequest,
@@ -169,6 +130,6 @@ export class CatchupAgentPlugin
   }
 
   public stop() {
-    this.logger.info('Stopping CatchupAgent plugin');
+    // Plugin stopped
   }
 }

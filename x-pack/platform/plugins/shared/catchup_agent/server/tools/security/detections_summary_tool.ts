@@ -42,18 +42,11 @@ Returns aggregated statistics including total count, counts by severity, and sam
     schema: detectionsSummarySchema,
     handler: async ({ start, end }, { request, esClient, logger }) => {
       try {
-        logger.info(
-          `[CatchUp Agent] Detections summary tool called with start: ${start}, end: ${
-            end || 'now'
-          }`
-        );
-
         // Normalize and adjust time range using helper function
         const timeRange = normalizeTimeRange(start, end, { logger });
 
         // Get space ID from request
         const spaceId = getSpaceId(request);
-        logger.info(`[CatchUp Agent] Detections tool using spaceId: ${spaceId}`);
 
         // Get authorized alerts indices from Rule Registry
         const { plugin } = getPluginServices();
@@ -68,10 +61,6 @@ Returns aggregated statistics including total count, counts by severity, and sam
 
             if (authorizedIndices && authorizedIndices.length > 0) {
               // Filter out preview indices and internal indices
-              // Also log all indices to help debug
-              logger.debug(
-                `[CatchUp Agent] All authorized indices: ${JSON.stringify(authorizedIndices)}`
-              );
               const filteredIndices = authorizedIndices.filter(
                 (idx: string) =>
                   !idx.includes('.preview.') &&
@@ -80,18 +69,6 @@ Returns aggregated statistics including total count, counts by severity, and sam
               );
               if (filteredIndices.length > 0) {
                 indexPattern = filteredIndices.join(',');
-                logger.info(
-                  `[CatchUp Agent] Using authorized indices from Rule Registry (${filteredIndices.length}/${authorizedIndices.length} after filtering): ${indexPattern}`
-                );
-                if (filteredIndices.length !== authorizedIndices.length) {
-                  const excluded = authorizedIndices.filter(
-                    (idx: string) =>
-                      idx.includes('.preview.') ||
-                      idx.includes('.internal.') ||
-                      idx.startsWith('.internal.')
-                  );
-                  logger.debug(`[CatchUp Agent] Excluded indices: ${JSON.stringify(excluded)}`);
-                }
               }
             }
           } catch (error) {
@@ -134,22 +111,11 @@ Returns aggregated statistics including total count, counts by severity, and sam
 | STATS count = COUNT(*) BY severity
 | SORT severity DESC`;
 
-        logger.info(
-          `[CatchUp Agent] Executing detections query with index pattern: ${indexPattern}`
-        );
-        logger.debug(`[CatchUp Agent] Query: ${query}`);
         try {
           result = await executeEsql({
             query,
             esClient: esClient.asCurrentUser,
           });
-
-          // Log the raw result structure for debugging
-          logger.debug(
-            `[CatchUp Agent] Raw ES|QL result: columns=${JSON.stringify(
-              result.columns
-            )}, values=${JSON.stringify(result.values)}`
-          );
 
           // Calculate totals from grouped results
           // ES|QL STATS BY returns: aggregated columns first, then grouping columns
@@ -163,10 +129,6 @@ Returns aggregated statistics including total count, counts by severity, and sam
             );
             throw new Error('Unexpected query result structure');
           }
-
-          logger.debug(
-            `[CatchUp Agent] Column indices: countIndex=${countIndex}, severityIndex=${severityIndex}`
-          );
 
           // Calculate total and severity breakdown
           const severityCounts: Record<string, number> = {};
@@ -188,12 +150,6 @@ Returns aggregated statistics including total count, counts by severity, and sam
             total += count;
             severityCounts[severity] = count;
           });
-
-          logger.info(
-            `[CatchUp Agent] Detections query succeeded, total: ${total}, severity breakdown: ${JSON.stringify(
-              severityCounts
-            )}`
-          );
 
           // Fetch sample alerts with entity fields, prioritizing critical/high severity
           // Limit to top 20 alerts to avoid overwhelming the response
@@ -228,7 +184,6 @@ Returns aggregated statistics including total count, counts by severity, and sam
 
           let sampleAlerts: any[] = [];
           try {
-            logger.info(`[CatchUp Agent] Fetching sample alerts with entity fields...`);
             const alertsResult = await executeEsql({
               query: alertsQuery,
               esClient: esClient.asCurrentUser,
@@ -250,15 +205,8 @@ Returns aggregated statistics including total count, counts by severity, and sam
                 });
                 return alert;
               });
-
-              logger.info(
-                `[CatchUp Agent] Fetched ${sampleAlerts.length} sample alerts with entity fields`
-              );
             }
           } catch (error: any) {
-            logger.warn(
-              `[CatchUp Agent] Failed to fetch sample alerts: ${error.message}. Continuing with summary only.`
-            );
             // Continue without sample alerts - summary is still useful
           }
 
@@ -315,11 +263,7 @@ Returns aggregated statistics including total count, counts by severity, and sam
         }
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        const errorStack = error instanceof Error ? error.stack : undefined;
         logger.error(`Error in detections summary tool: ${errorMessage}`);
-        if (errorStack) {
-          logger.debug(`Detections summary tool error stack: ${errorStack}`);
-        }
         return {
           results: [createErrorResult(`Error summarizing detections: ${errorMessage}`)],
         };

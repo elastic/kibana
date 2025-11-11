@@ -52,9 +52,6 @@ async function waitForWorkflowsService(
           MAX_RETRY_DELAY_MS
         );
         if (attempt < MAX_RETRIES) {
-          logger.debug(
-            `WorkflowsService not ready yet (attempt ${attempt}/${MAX_RETRIES}), retrying in ${delay}ms...`
-          );
           await new Promise((resolve) => setTimeout(resolve, delay));
           continue;
         } else {
@@ -66,9 +63,6 @@ async function waitForWorkflowsService(
       } else {
         // Different error - service might be ready but there's another issue
         // Return true to proceed (the actual registration will handle the error)
-        logger.debug(
-          `WorkflowsService check returned error (not initialization issue): ${errorMessage}. Proceeding.`
-        );
         return true;
       }
     }
@@ -96,10 +90,7 @@ export async function registerCatchupWorkflows(
     return;
   }
 
-  logger.info('Registering CatchUp Agent workflows...');
-
   // Wait for WorkflowsService to be initialized before proceeding
-  logger.info('Waiting for WorkflowsService to be initialized...');
   const serviceReady = await waitForWorkflowsService(workflowsManagement, logger, spaceId);
   if (!serviceReady) {
     logger.error(
@@ -107,7 +98,6 @@ export async function registerCatchupWorkflows(
     );
     return;
   }
-  logger.info('WorkflowsService is ready. Proceeding with workflow registration.');
 
   const workflowsDir = join(__dirname, '.');
 
@@ -141,8 +131,6 @@ export async function registerCatchupWorkflows(
       const nameMatch = workflowYaml.match(/^name:\s*['"](.+?)['"]/m);
       const workflowName = nameMatch ? nameMatch[1] : workflowFile.replace('.yaml', '');
 
-      logger.info(`Checking if workflow "${workflowName}" already exists...`);
-
       // Check if workflow already exists
       // Search all workflows and filter by exact name match to avoid duplicates
       // Note: getWorkflows returns { _pagination: {...}, results: [...] }
@@ -159,17 +147,9 @@ export async function registerCatchupWorkflows(
           spaceId
         );
 
-        logger.debug(
-          `Found ${existingWorkflows.results?.length || 0} total workflows in space "${spaceId}"`
-        );
-
         // Find all workflows with exact name match (case-sensitive to avoid false matches)
         const matchingWorkflows =
           existingWorkflows.results?.filter((w) => w.name === workflowName) || [];
-
-        logger.debug(
-          `Found ${matchingWorkflows.length} workflow(s) with exact name "${workflowName}"`
-        );
 
         if (matchingWorkflows.length > 1) {
           logger.warn(
@@ -195,7 +175,6 @@ export async function registerCatchupWorkflows(
                 spaceId,
                 request
               );
-              logger.info(`Deleted duplicate workflow "${workflowName}" with ID: ${duplicate.id}`);
             } catch (deleteError) {
               logger.error(
                 `Failed to delete duplicate workflow "${workflowName}" with ID: ${duplicate.id}: ${
@@ -206,13 +185,7 @@ export async function registerCatchupWorkflows(
           }
         } else if (matchingWorkflows.length === 1) {
           existingWorkflow = matchingWorkflows[0];
-          logger.info(
-            `Found existing workflow "${workflowName}" with ID: ${existingWorkflow.id}. Will update it.`
-          );
         } else {
-          logger.info(
-            `No existing workflow found with name "${workflowName}". Will create new one.`
-          );
           existingWorkflow = undefined;
         }
       } catch (error) {
@@ -230,10 +203,6 @@ export async function registerCatchupWorkflows(
       }
 
       if (existingWorkflow) {
-        logger.info(
-          `Workflow "${workflowName}" already exists (ID: ${existingWorkflow.id}). Updating with latest YAML.`
-        );
-
         // Update existing workflow with latest YAML
         // Catch authentication errors during scheduling - workflow will still be updated
         try {
@@ -244,10 +213,6 @@ export async function registerCatchupWorkflows(
             },
             spaceId,
             request
-          );
-
-          logger.info(
-            `Successfully updated workflow "${workflowName}" with ID: ${existingWorkflow.id}`
           );
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : String(error);
@@ -271,18 +236,13 @@ export async function registerCatchupWorkflows(
       }
 
       // Only create if workflow doesn't exist
-      logger.info(`Creating new workflow "${workflowName}"...`);
       try {
-        const createdWorkflow = await workflowsManagement.management.createWorkflow(
+        await workflowsManagement.management.createWorkflow(
           {
             yaml: workflowYaml,
           },
           spaceId,
           request
-        );
-
-        logger.info(
-          `Successfully created new workflow "${workflowName}" with ID: ${createdWorkflow.id}`
         );
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
@@ -307,6 +267,4 @@ export async function registerCatchupWorkflows(
       // Continue with other workflows even if one fails
     }
   }
-
-  logger.info('CatchUp Agent workflow registration completed');
 }
