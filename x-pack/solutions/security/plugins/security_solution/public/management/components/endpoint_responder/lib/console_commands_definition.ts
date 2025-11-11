@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { getMemoryDumpHelpUsage } from './get_memory_dump_help_usage';
 import { MemoryDumpActionResult } from '../command_render_components/memory_dump_action';
 import { CancelActionResult } from '../command_render_components/cancel_action';
 import { isActionSupportedByAgentType } from '../../../../../common/endpoint/service/response_actions/is_response_action_supported';
@@ -706,6 +707,7 @@ export const getEndpointConsoleCommands = ({
       helpCommandPosition: 6,
       helpDisabled: !doesEndpointSupportCommand('memory-dump'),
       helpHidden: !getRbacControl({ commandName: 'execute', privileges: endpointPrivileges }),
+      helpUsage: getMemoryDumpHelpUsage(),
     });
   }
 
