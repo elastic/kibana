@@ -8,7 +8,6 @@
 import { EuiContextMenuItem, EuiPopover, EuiButtonIcon, EuiContextMenuPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { useIsAgentReadOnly } from '../../../../hooks/agents/use_is_agent_read_only';
 import { useConversationId } from '../../../../context/conversation/use_conversation_id';
 import { useNavigation } from '../../../../hooks/use_navigation';
 import { useAgentId } from '../../../../hooks/use_conversation';
@@ -24,7 +23,6 @@ export const EmbeddedActionsRight: React.FC<{ onClose?: () => void }> = ({ onClo
     services: { application },
   } = useKibana();
   const conversationId = useConversationId();
-  const isAgentReadOnly = useIsAgentReadOnly(agentId);
 
   const closePopover = () => {
     setIsPopoverOpen(false);
@@ -60,7 +58,6 @@ export const EmbeddedActionsRight: React.FC<{ onClose?: () => void }> = ({ onClo
           <ExternalLinkMenuItem
             key="agentBuilderSettings"
             icon="gear"
-            disabled={isAgentReadOnly}
             href={application.getUrlForApp('management', { path: '/ai/agentBuilder' })}
             onClose={closePopover}
             label={i18n.translate(
