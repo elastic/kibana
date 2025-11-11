@@ -1226,7 +1226,7 @@ export class DataViewsService {
   async createAndSaveDataViewLazy(spec: DataViewSpec, overwrite = false) {
     const dataViewLazy = await this.createFromSpecLazy(spec);
     await this.createSavedObject(dataViewLazy, overwrite);
-    await this.setDefault(dataViewLazy.id!);
+    // await this.setDefault(dataViewLazy.id!);
     return dataViewLazy;
   }
 
@@ -1246,7 +1246,7 @@ export class DataViewsService {
   ) {
     const dataView = await this.createFromSpec(spec, skipFetchFields, displayErrors);
     await this.createSavedObject(dataView, overwrite);
-    await this.setDefault(dataView.id!);
+    // await this.setDefault(dataView.id!);
     return dataView;
   }
 
