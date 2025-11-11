@@ -73,7 +73,7 @@ run_performance_tests() {
   TEST_START_TIME=$(date +%s)
   set +e
   yarn start upload-perf-data-interval "$PERF_DATA_FILE" \
-    --deleteEntities \
+    --deleteData \
     --interval "$PERF_INTERVAL" \
     --count "$PERF_COUNT"
   TEST_EXIT_CODE=$?
