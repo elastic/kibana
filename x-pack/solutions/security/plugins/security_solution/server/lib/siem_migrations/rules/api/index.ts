@@ -49,7 +49,9 @@ export const registerSiemRuleMigrationsRoutes = (
   registerSiemRuleMigrationsGetRulesRoute(router, logger);
   registerSiemRuleMigrationsUpdateRulesRoute(router, logger);
   /** Qradar */
-  registerSiemRuleMigrationsCreateQRadarRulesRoute(router, logger);
+  if (config.experimentalFeatures.qradarRulesMigration) {
+    registerSiemRuleMigrationsCreateQRadarRulesRoute(router, logger);
+  }
   /** *******/
   /** *******/
 
