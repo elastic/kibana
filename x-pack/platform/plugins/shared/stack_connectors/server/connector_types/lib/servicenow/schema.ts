@@ -6,9 +6,8 @@
  */
 
 import { z } from '@kbn/zod';
-import { Coerced } from '../../../../common/lib';
+import { Coerced, validateRecordMaxKeys } from '@kbn/connector-schemas/common/utils';
 import { MAX_ADDITIONAL_FIELDS_LENGTH } from '../../../../common/servicenow/constants';
-import { validateRecordMaxKeys } from '../validators';
 import { DEFAULT_ALERTS_GROUPING_KEY } from './config';
 import { validateOtherFieldsKeys } from './validators';
 

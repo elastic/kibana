@@ -9,14 +9,14 @@
 
 import Path from 'path';
 import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
-import { clearLog, defaultKibanaIndex, startElasticsearch } from '../kibana_migrator_test_kit';
+import { clearLog, defaultKibanaIndex, startElasticsearch } from '@kbn/migrator-test-kit';
 
 import {
   createBaseline,
   getCompatibleMigratorTestKit,
   getUpToDateMigratorTestKit,
   getReindexingMigratorTestKit,
-} from '../kibana_migrator_test_kit.fixtures';
+} from '@kbn/migrator-test-kit/fixtures';
 import '../jest_matchers';
 import { delay, parseLogFile } from '../test_utils';
 

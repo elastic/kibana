@@ -206,9 +206,7 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
 
     const step = currentProcessorRef.getSnapshot().context.step;
 
-    if (!isActionBlock(step)) return undefined;
-
-    return getSourceField(step);
+    if (isActionBlock(step)) return getSourceField(step);
   });
 
   const docViewsRegistry = useDocViewerSetup(true);

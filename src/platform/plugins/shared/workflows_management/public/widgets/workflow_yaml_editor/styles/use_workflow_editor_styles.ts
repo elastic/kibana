@@ -160,6 +160,7 @@ export const useWorkflowEditorStyles = () => {
     stepActionsContainer: css({
       position: 'absolute',
       zIndex: 1002, // Above the highlighting and pseudo-element
+      transform: 'translateY(4px) translateX(-28px)', // 24px to match width + 4px padding inside decoration
     }),
 
     downloadSchemaButton: ({ euiTheme }: UseEuiTheme) =>

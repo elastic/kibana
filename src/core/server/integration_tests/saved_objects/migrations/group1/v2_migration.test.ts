@@ -23,7 +23,7 @@ import {
   clearLog,
   currentVersion,
   nextMinor,
-} from '../kibana_migrator_test_kit';
+} from '@kbn/migrator-test-kit';
 import {
   BASELINE_COMPLEX_DOCUMENTS_LARGE_AFTER,
   BASELINE_DOCUMENTS_PER_TYPE_LARGE,
@@ -33,9 +33,9 @@ import {
   getReindexingBaselineTypes,
   getReindexingMigratorTestKit,
   getUpToDateMigratorTestKit,
-} from '../kibana_migrator_test_kit.fixtures';
+} from '@kbn/migrator-test-kit/fixtures';
 import { delay } from '../test_utils';
-import { expectDocumentsMigratedToHighestVersion } from '../kibana_migrator_test_kit.expect';
+import { expectDocumentsMigratedToHighestVersion } from '@kbn/migrator-test-kit/expect';
 
 const logFilePath = join(__dirname, 'v2_migration.log');
 

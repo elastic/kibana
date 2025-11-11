@@ -83,6 +83,7 @@ const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
   lineNumbersMinChars: 2,
   insertSpaces: true,
   fontSize: 14,
+  lineHeight: 23, // default ~21px + 2px
   renderWhitespace: 'none',
   wordWrap: 'on',
   wordWrapColumn: 80,
@@ -609,7 +610,7 @@ export const WorkflowYAMLEditor = ({
           error={errorValidating}
           validationErrors={validationErrors}
           onErrorClick={handleErrorClick}
-          rightSide={<WorkflowYAMLEditorShortcuts />}
+          rightSide={<WorkflowYAMLEditorShortcuts onOpenActionsMenu={setActionsPopoverOpen} />}
         />
       </div>
     </div>

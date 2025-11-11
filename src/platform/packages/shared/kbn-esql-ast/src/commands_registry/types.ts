@@ -71,6 +71,7 @@ export interface ISuggestionItem {
   command?: {
     title: string;
     id: string;
+    arguments?: { [key: string]: string }[];
   };
   /**
    * The range that should be replaced when the suggestion is applied

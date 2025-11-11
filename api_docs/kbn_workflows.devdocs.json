@@ -5352,7 +5352,7 @@
         "label": "CreateWorkflowCommand",
         "description": [],
         "signature": [
-          "{ yaml: string; }"
+          "{ yaml: string; id?: string | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
         "deprecated": false,
@@ -6230,9 +6230,13 @@
           "ZodObject",
           "<{ yaml: ",
           "ZodString",
-          "; }, \"strip\", ",
+          "; id: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; }, \"strip\", ",
           "ZodTypeAny",
-          ", { yaml: string; }, { yaml: string; }>"
+          ", { yaml: string; id?: string | undefined; }, { yaml: string; id?: string | undefined; }>"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
         "deprecated": false,

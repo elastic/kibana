@@ -16,8 +16,8 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { getBasicAuthHeader } from '@kbn/actions-plugin/server/lib';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
-import { AuthType, WebhookMethods, SSLCertType } from '../../../common/auth/constants';
-import { CRT_FILE, KEY_FILE } from '../../../common/auth/mocks';
+import { AuthType, WebhookMethods, SSLCertType } from '@kbn/connector-schemas/common/auth';
+import { CRT_FILE, KEY_FILE } from '@kbn/connector-schemas/common/auth/mocks';
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 

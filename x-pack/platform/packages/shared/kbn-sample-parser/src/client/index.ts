@@ -9,11 +9,25 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { getLoghubGenerators } from '../loghub/get_loghub_generators';
 import { getServerlessGenerators } from '../serverless/get_serverless_generators';
 import type { StreamLogGenerator } from '../types';
+import { listLoghubSystemDirs } from '../loghub/list_loghub_system_dirs';
+import { listServerlessSystemFiles } from '../serverless/list_serverless_system_files';
 
 export class SampleParserClient {
   private readonly logger: ToolingLog;
   constructor(options: { logger: ToolingLog }) {
     this.logger = options.logger;
+  }
+
+  async listLoghubSystems(): Promise<string[]> {
+    const dirs = await listLoghubSystemDirs({ log: this.logger });
+
+    return dirs;
+  }
+
+  async listServerlessSystems(): Promise<string[]> {
+    const files = await listServerlessSystemFiles({ log: this.logger });
+
+    return files.map((file) => file.replace('.json', ''));
   }
 
   async getLogGenerators({

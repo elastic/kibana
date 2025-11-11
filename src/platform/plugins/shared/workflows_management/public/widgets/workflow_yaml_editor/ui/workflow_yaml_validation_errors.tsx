@@ -230,7 +230,7 @@ const componentStyles = {
     }),
   buttonContent: ({ euiTheme }: UseEuiTheme) => css`
     width: 100%;
-    padding: ${euiTheme.size.m} 0;
+    padding: ${euiTheme.size.s} 0;
     color: ${euiTheme.colors.textParagraph};
     flex-wrap: nowrap !important;
   `,

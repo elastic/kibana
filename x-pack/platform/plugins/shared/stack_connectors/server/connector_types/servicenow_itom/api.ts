@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { convertTimestamp } from '../lib/convert_timestamp';
+import { convertTimestamp } from '@kbn/connector-schemas/common/utils';
 import { api as commonApi } from '../lib/servicenow/api';
 import type {
   ExecutorSubActionAddEventParams,

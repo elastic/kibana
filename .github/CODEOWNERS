@@ -32,6 +32,7 @@ examples/preboot_example @elastic/kibana-security @elastic/kibana-core
 examples/resizable_layout_examples @elastic/kibana-data-discovery
 examples/response_stream @elastic/ml-ui
 examples/routing_example @elastic/kibana-core
+examples/saved_objects @elastic/kibana-core
 examples/screenshot_mode_example @elastic/response-ops
 examples/search_examples @elastic/kibana-data-discovery
 examples/share_examples @elastic/appex-sharedux
@@ -39,7 +40,7 @@ examples/sse_example @elastic/kibana-core
 examples/state_containers_examples @elastic/appex-sharedux
 examples/ui_action_examples @elastic/appex-sharedux
 examples/ui_actions_explorer @elastic/appex-sharedux
-examples/unified_doc_viewer @elastic/kibana-core
+examples/unified_doc_viewer @elastic/kibana-data-discovery
 examples/unified_field_list_examples @elastic/kibana-data-discovery
 examples/unified_tabs_examples @elastic/kibana-data-discovery
 examples/user_profile_examples @elastic/kibana-security
@@ -359,6 +360,7 @@ src/platform/packages/private/kbn-language-documentation @elastic/kibana-esql
 src/platform/packages/private/kbn-lens-formula-docs @elastic/kibana-visualizations
 src/platform/packages/private/kbn-managed-content-badge @elastic/kibana-visualizations
 src/platform/packages/private/kbn-mapbox-gl @elastic/kibana-presentation
+src/platform/packages/private/kbn-migrator-test-kit @elastic/kibana-core
 src/platform/packages/private/kbn-mock-idp-utils @elastic/kibana-security
 src/platform/packages/private/kbn-node-libs-browser-webpack-plugin @elastic/kibana-operations
 src/platform/packages/private/kbn-optimizer-webpack-helpers @elastic/kibana-operations
@@ -460,6 +462,7 @@ src/platform/packages/shared/kbn-cleanup-before-exit @elastic/observability-ui
 src/platform/packages/shared/kbn-coloring @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-config @elastic/kibana-core
 src/platform/packages/shared/kbn-config-schema @elastic/kibana-core
+src/platform/packages/shared/kbn-connector-schemas @elastic/response-ops
 src/platform/packages/shared/kbn-content-management-utils @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-core-server-benchmarks @elastic/kibana-core
 src/platform/packages/shared/kbn-crypto @elastic/kibana-security
@@ -657,7 +660,6 @@ src/platform/packages/shared/shared-ux/button/exit_full_screen @elastic/appex-sh
 src/platform/packages/shared/shared-ux/card/no_data/impl @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/card/no_data/mocks @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/card/no_data/types @elastic/appex-sharedux
-src/platform/packages/shared/shared-ux/chrome/navigation @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/code_editor/impl @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/code_editor/mocks @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/error_boundary @elastic/appex-sharedux
@@ -851,7 +853,6 @@ x-pack/packages/kbn-synthetics-private-location @elastic/obs-ux-management-team
 x-pack/performance @elastic/appex-qa
 x-pack/platform/packages/private/kbn-alerting-state-types @elastic/response-ops
 x-pack/platform/packages/private/kbn-data-quality @elastic/obs-ux-logs-team
-x-pack/platform/packages/private/kbn-evals-suite-streams @elastic/streams-program-team
 x-pack/platform/packages/private/kbn-infra-forge @elastic/obs-ux-management-team
 x-pack/platform/packages/private/kbn-random-sampling @elastic/kibana-visualizations
 x-pack/platform/packages/private/maps/vector_tile_utils @elastic/kibana-presentation
@@ -917,6 +918,7 @@ x-pack/platform/packages/shared/kbn-elastic-assistant-common @elastic/security-g
 x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state @elastic/security-generative-ai
 x-pack/platform/packages/shared/kbn-entities-schema @elastic/obs-entities
 x-pack/platform/packages/shared/kbn-evals @elastic/appex-ai-infra
+x-pack/platform/packages/shared/kbn-evals-suite-streams @elastic/streams-program-team
 x-pack/platform/packages/shared/kbn-event-stacktrace @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 x-pack/platform/packages/shared/kbn-failure-store-modal @elastic/kibana-management
 x-pack/platform/packages/shared/kbn-grok-heuristics @elastic/obs-ux-logs-team

@@ -15,15 +15,12 @@ import {
   startElasticsearch,
   defaultKibanaIndex,
   defaultKibanaTaskIndex,
-} from '../kibana_migrator_test_kit';
+} from '@kbn/migrator-test-kit';
 import { delay } from '../test_utils';
 import '../jest_matchers';
-import { getElasticsearchClientWrapperFactory } from '../elasticsearch_client_wrapper';
+import { getElasticsearchClientWrapperFactory } from '@kbn/migrator-test-kit';
 import { BASELINE_TEST_ARCHIVE_SMALL } from '../kibana_migrator_archive_utils';
-import {
-  getRelocatingMigratorTestKit,
-  kibanaSplitIndex,
-} from '../kibana_migrator_test_kit.fixtures';
+import { getRelocatingMigratorTestKit, kibanaSplitIndex } from '@kbn/migrator-test-kit/fixtures';
 
 export const logFilePathFirstRun = join(__dirname, 'single_migrator_failures_1st_run.test.log');
 export const logFilePathSecondRun = join(__dirname, 'single_migrator_failures_2nd_run.test.log');
