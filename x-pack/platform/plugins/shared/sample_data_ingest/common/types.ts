@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-export type InstallationStatus = 'installed' | 'uninstalled' | 'installing' | 'error';
+export enum InstallationStatus {
+  Installed = 'installed',
+  Uninstalled = 'uninstalled',
+  Installing = 'installing',
+  Error = 'error',
+}
 
 export interface StatusResponse {
   status: InstallationStatus;
@@ -21,13 +26,13 @@ export interface SampleDataResponse {
 }
 
 export interface InstalledResponse extends SampleDataResponse {
-  status: 'installed';
+  status: InstallationStatus.Installed;
   indexName: string;
   dashboardId: string;
 }
 
 export interface InstallingResponse extends SampleDataResponse {
-  status: 'installing';
+  status: InstallationStatus.Installing;
   taskId: string;
 }
 

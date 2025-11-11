@@ -15,6 +15,7 @@ export const indexNamePrefix = 'kibana_sample_data_';
 export const MINIMUM_LICENSE_TYPE = 'enterprise';
 
 export {
+  InstallationStatus,
   type StatusResponse,
   type InstallingResponse,
   type InstalledResponse,

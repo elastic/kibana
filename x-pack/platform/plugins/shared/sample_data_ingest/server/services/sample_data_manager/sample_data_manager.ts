@@ -14,7 +14,7 @@ import type {
 import { type TaskManagerStartContract, TaskStatus } from '@kbn/task-manager-plugin/server';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import type { DatasetSampleType } from '../../../common';
-import { getSampleDataIndexName, type StatusResponse } from '../../../common';
+import { getSampleDataIndexName, type StatusResponse, InstallationStatus } from '../../../common';
 import { ArtifactManager } from '../artifact_manager';
 import { IndexManager } from '../index_manager';
 import { SavedObjectsManager } from '../saved_objects_manager';
@@ -187,7 +187,7 @@ export class SampleDataManager {
               (task as { error?: { message?: string } }).error?.message;
 
             return {
-              status: 'error',
+              status: InstallationStatus.Error,
               taskId,
               error: taskErrorMessage,
             };
@@ -205,7 +205,7 @@ export class SampleDataManager {
             taskState.status !== 'completed'
           ) {
             return {
-              status: 'installing',
+              status: InstallationStatus.Installing,
               taskId,
             };
           }
@@ -233,16 +233,16 @@ export class SampleDataManager {
         const dashboardId = await this.savedObjectsManager.getDashboardId(soClient, sampleType);
 
         return {
-          status: 'installed',
+          status: InstallationStatus.Installed,
           indexName,
           dashboardId,
         };
       }
 
-      return { status: 'uninstalled' };
+      return { status: InstallationStatus.Uninstalled };
     } catch (error) {
       this.log.warn(`Failed to check sample data status for [${sampleType}]: ${error.message}`);
-      return { status: 'uninstalled' };
+      return { status: InstallationStatus.Uninstalled };
     }
   }
 

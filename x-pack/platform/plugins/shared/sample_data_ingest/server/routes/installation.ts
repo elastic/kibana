@@ -14,6 +14,7 @@ import {
   type StatusResponse,
   type InstallingResponse,
   type InstalledResponse,
+  InstallationStatus,
 } from '../../common';
 import type { InternalServices } from '../types';
 import { scheduleInstallSampleDataTask } from '../tasks';
@@ -54,7 +55,7 @@ export const registerInstallationRoutes = ({
           soClient,
         });
 
-        if (currentStatus.status === 'installing') {
+        if (currentStatus.status === InstallationStatus.Installing) {
           return res.ok<InstallingResponse>({
             body: {
               status: currentStatus.status,
@@ -64,7 +65,7 @@ export const registerInstallationRoutes = ({
         }
 
         if (
-          currentStatus.status === 'installed' &&
+          currentStatus.status === InstallationStatus.Installed &&
           currentStatus.indexName &&
           currentStatus.dashboardId
         ) {
@@ -85,7 +86,7 @@ export const registerInstallationRoutes = ({
 
         return res.ok<InstallingResponse>({
           body: {
-            status: 'installing',
+            status: InstallationStatus.Installing,
             taskId,
           },
         });
