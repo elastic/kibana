@@ -26,6 +26,7 @@ import capitalize from 'lodash/capitalize';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowYaml } from '@kbn/workflows';
+import { useExecutionInput } from './use_execution_input/use_execution_input';
 import { WorkflowExecuteEventForm } from './workflow_execute_event_form';
 import { WorkflowExecuteIndexForm } from './workflow_execute_index_form';
 import { WorkflowExecuteManualForm } from './workflow_execute_manual_form';
@@ -59,7 +60,10 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
     const defaultTrigger = useMemo(() => getDefaultTrigger(definition), [definition]);
     const [selectedTrigger, setSelectedTrigger] = useState<TriggerType>(defaultTrigger);
 
-    const [executionInput, setExecutionInput] = useState<string>('');
+    const { executionInput, setExecutionInput } = useExecutionInput({
+      workflowName: definition?.name || '',
+      selectedTrigger,
+    });
     const [executionInputErrors, setExecutionInputErrors] = useState<string | null>(null);
 
     const { euiTheme } = useEuiTheme();

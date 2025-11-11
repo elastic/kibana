@@ -11,11 +11,11 @@ import { EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowYaml } from '@kbn/workflows';
+import { useWorkflowExecution } from '@kbn/workflows-ui';
 import { WorkflowVisualEditor } from './workflow_visual_editor';
 import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml';
 import { getWorkflowZodSchemaLoose } from '../../../../common/schema';
 import { useAvailableConnectors } from '../../../entities/connectors/model/use_available_connectors';
-import { useWorkflowExecution } from '../../../entities/workflows/model/use_workflow_execution';
 
 interface WorkflowVisualEditorStatefulProps {
   workflowYaml: string;
