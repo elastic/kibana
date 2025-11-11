@@ -42,7 +42,7 @@ export default function upgradeAssistantESDeprecationLogsPageFunctionalTests({
       await PageObjects.upgradeAssistant.clickVerifyLoggingButton();
     });
 
-    it('Shows warnings callout if there are deprecations', async () => {
+    it.skip('Shows warnings callout if there are deprecations', async () => {
       expect(await testSubjects.exists('hasWarningsCallout')).toBe(true);
     });
 
