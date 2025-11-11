@@ -24,13 +24,40 @@
  * The mocks that are enabled that way live inside the `__mocks__` folders beside their implementation files.
  */
 
+let mockIsInitializingMoment = false;
+
+const setMomentTimezone = () => {
+  const momentTz = jest.requireActual('moment-timezone');
+  momentTz.tz.guess = () => 'America/New_York';
+  momentTz.tz.setDefault('America/New_York');
+  return momentTz;
+};
+
 jest.mock('moment-timezone', () => {
   // We always want to mock the timezone moment-timezone guesses, since otherwise
   // test results might be depending on which time zone you are running them.
   // Using that mock we always make sure moment.tz.guess is always returning the same
   // timezone in all tests.
-  const moment = jest.requireActual('moment-timezone');
-  moment.tz.guess = () => 'America/New_York';
-  moment.tz.setDefault('America/New_York');
-  return moment;
+  return setMomentTimezone();
+});
+
+// Also mock 'moment' to ensure timezone is set even when code imports 'moment' directly
+// This is needed because the lazy-require plugin may load 'moment' before 'moment-timezone'
+jest.mock('moment', () => {
+  const moment = jest.requireActual('moment');
+
+  if (mockIsInitializingMoment) {
+    // We're in a circular dependency - moment-timezone is requiring moment
+    // Return the actual moment to break the cycle
+    return moment;
+  }
+
+  mockIsInitializingMoment = true;
+  try {
+    setMomentTimezone();
+
+    return moment;
+  } finally {
+    mockIsInitializingMoment = false;
+  }
 });
