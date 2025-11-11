@@ -752,7 +752,7 @@ src/platform/plugins/shared/charts @elastic/kibana-visualizations
 src/platform/plugins/shared/console @elastic/kibana-management
 src/platform/plugins/shared/content_management @elastic/appex-sharedux
 src/platform/plugins/shared/controls @elastic/kibana-presentation
-src/platform/plugins/shared/cps @elastic/kibana-core
+src/platform/plugins/shared/cps @elastic/kibana-core @elastic/kibana-presentation
 src/platform/plugins/shared/custom_integrations @elastic/fleet
 src/platform/plugins/shared/dashboard @elastic/kibana-presentation
 src/platform/plugins/shared/dashboard_markdown @elastic/kibana-presentation
