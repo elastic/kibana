@@ -37,6 +37,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     const request = {
       ...emptyAssets,
       stream: {
+        ...definition.stream,
+        name: undefined,
         description: '',
         ingest: {
           ...definition.stream.ingest,

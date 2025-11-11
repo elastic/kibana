@@ -15,6 +15,7 @@ import { loadDashboards } from './helpers/dashboards';
 
 const TEST_STREAM_NAME = 'logs-test-default';
 const WIRED_STREAM_NAME = 'logs.wiredChild';
+const WIRED_STREAM_UPDATED_AT = new Date().toISOString();
 const TEST_DASHBOARD_ID = '9230e631-1f1a-476d-b613-4b074c6cfdd0';
 
 const oldProcessing = [
@@ -126,6 +127,7 @@ const wiredStreamDefinition = {
       },
     },
   },
+  updated_at: WIRED_STREAM_UPDATED_AT,
 };
 
 const expectedStreamsResponse: Streams.ClassicStream.Definition = {
@@ -176,7 +178,7 @@ const expectedWiredStreamsResponse: Streams.WiredStream.Definition = {
       },
     },
   },
-  updated_at: new Date().toISOString(),
+  updated_at: WIRED_STREAM_UPDATED_AT,
 };
 
 const expectedDashboardsResponse = {

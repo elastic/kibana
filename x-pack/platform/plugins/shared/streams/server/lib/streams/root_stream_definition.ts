@@ -25,7 +25,7 @@ export const rootStreamDefinition: Streams.WiredStream.Definition = {
       },
     },
   },
-  updated_at: new Date().toISOString(),
+  updated_at: '',
 };
 
 export function hasSupportedStreamsRoot(streamName: string) {

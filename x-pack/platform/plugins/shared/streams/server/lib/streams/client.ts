@@ -143,7 +143,7 @@ export class StreamsClient {
         [
           {
             type: 'upsert',
-            definition: rootStreamDefinition,
+            definition: { ...rootStreamDefinition, updated_at: new Date().toISOString() },
           },
         ],
         {
@@ -262,8 +262,11 @@ export class StreamsClient {
     const stream: Streams.all.Definition = {
       ...request.stream,
       name,
-      updated_at: new Date().toISOString(),
     };
+
+    if (Streams.WiredStream.Definition.is(stream)) {
+      stream.updated_at = new Date().toISOString();
+    }
 
     const result = await State.attemptChanges(
       [
@@ -288,10 +291,21 @@ export class StreamsClient {
 
   async bulkUpsert(streams: Array<{ name: string; request: Streams.all.UpsertRequest }>) {
     const result = await State.attemptChanges(
-      streams.map(({ name, request }) => ({
-        type: 'upsert',
-        definition: { ...request.stream, name } as Streams.all.Definition,
-      })),
+      streams.map(({ name, request }) => {
+        const definition: Streams.all.Definition = {
+          ...request.stream,
+          name,
+        };
+
+        if (Streams.WiredStream.Definition.is(definition)) {
+          definition.updated_at = new Date().toISOString();
+        }
+
+        return {
+          type: 'upsert',
+          definition,
+        };
+      }),
       {
         ...this.dependencies,
         streamsClient: this,
