@@ -10,7 +10,7 @@
 import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
-import { getDimensions } from './get_dimentions';
+import { getDimensions } from './get_dimensions';
 
 describe('getDimensions', () => {
   let logger: Logger;
