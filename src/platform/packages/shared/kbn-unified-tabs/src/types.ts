@@ -26,7 +26,6 @@ export interface TabsSizeConfig {
   // TODO: extend with possibly different sizes for pinned tabs
 }
 
-// TODO status value for now matches EuiHealth colors for mocking simplicity, adjust when real data is available
 export enum TabStatus {
   DEFAULT = 'default',
   RUNNING = 'running',
@@ -34,8 +33,8 @@ export enum TabStatus {
   ERROR = 'danger',
 }
 
-// TODO adjust interface when real data is available, this currently types TAB_CONTENT_MOCK
 export interface TabPreviewData {
+  title?: string;
   query: AggregateQuery | Query;
   status: TabStatus;
 }

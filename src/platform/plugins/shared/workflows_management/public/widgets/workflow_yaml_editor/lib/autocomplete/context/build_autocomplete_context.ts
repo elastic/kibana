@@ -11,7 +11,7 @@ import { isScalar } from 'yaml';
 import type { monaco } from '@kbn/monaco';
 import { DynamicStepContextSchema } from '@kbn/workflows';
 import type { z } from '@kbn/zod';
-import type { AutocompleteContext, MinimalWorkflowDetailState } from './autocomplete.types';
+import type { AutocompleteContext } from './autocomplete.types';
 import { getFocusedYamlPair } from './get_focused_yaml_pair';
 import { isInsideLiquidBlock } from './liquid_utils';
 import { parseLineForCompletion } from './parse_line_for_completion';
@@ -22,11 +22,11 @@ import {
 } from './triggers_utils';
 import { getPathAtOffset } from '../../../../../../common/lib/yaml';
 import { getSchemaAtPath } from '../../../../../../common/lib/zod';
+import type { StepInfo, WorkflowDetailState } from '../../../../../entities/workflows/store';
 import { getContextSchemaForPath } from '../../../../../features/workflow_context/lib/get_context_for_path';
-import type { StepInfo } from '../../store';
 
 export interface BuildAutocompleteContextParams {
-  editorState: MinimalWorkflowDetailState | undefined;
+  editorState: WorkflowDetailState;
   model: monaco.editor.ITextModel;
   position: monaco.Position;
   completionContext: monaco.languages.CompletionContext;
