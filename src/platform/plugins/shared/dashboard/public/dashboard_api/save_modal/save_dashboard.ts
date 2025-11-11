@@ -26,11 +26,9 @@ export const saveDashboard = async ({
   const idToSaveTo = saveOptions.saveAsCopy ? undefined : lastSavedId;
 
   try {
-    const result = idToSaveTo
-      ? await dashboardClient.update(idToSaveTo, dashboardState, references)
-      : await dashboardClient.create(dashboardState, references, accessMode);
-
-    const newId = result.item.id;
+    const newId = idToSaveTo
+      ? (await dashboardClient.update(idToSaveTo, dashboardState, references)).item.id
+      : (await dashboardClient.create(dashboardState, references, accessMode)).id;
 
     if (newId) {
       coreServices.notifications.toasts.addSuccess({
