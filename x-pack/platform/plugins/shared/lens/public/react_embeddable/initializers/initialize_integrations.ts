@@ -11,16 +11,20 @@ import {
   isOfAggregateQueryType,
 } from '@kbn/es-query';
 import { omit } from 'lodash';
-import { type HasSerializableState, type SerializedPanelState } from '@kbn/presentation-publishing';
+import type { HasSerializableState, SerializedPanelState } from '@kbn/presentation-publishing';
 import type {
   GetStateType,
-  LensByRefSerializedState,
-  LensByValueSerializedState,
   LensRuntimeState,
-  LensSerializedState,
   IntegrationCallbacks,
+  LensSerializedState,
 } from '@kbn/lens-common';
-import { isTextBasedLanguage, transformOutputState } from '../helper';
+import type {
+  LegacyLensStateApi,
+  LensSerializedAPIConfig,
+  LensByRefSerializedAPIConfig,
+  LensByValueSerializedAPIConfig,
+} from '@kbn/lens-common-2';
+import { isTextBasedLanguage, transformToApiConfig } from '../helper';
 
 function cleanupSerializedState(state: LensRuntimeState) {
   const cleanedState = omit(state, 'searchSessionId');
@@ -39,7 +43,8 @@ export function initializeIntegrations(getLatestState: GetStateType): {
     | 'updateDataLoading'
     | 'getTriggerCompatibleActions'
   > &
-    HasSerializableState<LensSerializedState>;
+    HasSerializableState<LensSerializedAPIConfig> &
+    LegacyLensStateApi;
 } {
   return {
     api: {
@@ -47,25 +52,40 @@ export function initializeIntegrations(getLatestState: GetStateType): {
        * This API is used by the parent to serialize the panel state to save it into its saved object.
        * Make sure to remove the attributes when the panel is by reference.
        */
-      serializeState: (): SerializedPanelState<LensSerializedState> => {
+      serializeState: (): SerializedPanelState<LensSerializedAPIConfig> => {
         const currentState = cleanupSerializedState(getLatestState());
 
         const { savedObjectId, attributes, ...state } = currentState;
-
         if (savedObjectId) {
           return {
             rawState: {
               ...state,
               savedObjectId,
             },
-          } satisfies SerializedPanelState<LensByRefSerializedState>;
+          } satisfies SerializedPanelState<LensByRefSerializedAPIConfig>;
         }
 
-        const transformedState = transformOutputState(currentState);
+        const transformedState = transformToApiConfig(currentState);
 
         return {
           rawState: transformedState,
-        } satisfies SerializedPanelState<LensByValueSerializedState>;
+        } satisfies SerializedPanelState<LensByValueSerializedAPIConfig>;
+      },
+      getLegacySerializedState: (): LensSerializedState => {
+        const currentState = cleanupSerializedState(getLatestState());
+        const { savedObjectId, attributes, ...state } = currentState;
+
+        if (savedObjectId) {
+          return {
+            ...state,
+            savedObjectId,
+          };
+        }
+
+        return {
+          ...state,
+          attributes,
+        };
       },
       // TODO: workout why we have this duplicated
       getFullAttributes: () => getLatestState().attributes,

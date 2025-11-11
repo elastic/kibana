@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { GrokProcessorResult } from './get_grok_processor';
+import type { GrokProcessor } from '../processors';
 
 /**
  * Unwraps pattern definitions by recursively inlining them
@@ -18,7 +18,7 @@ import type { GrokProcessorResult } from './get_grok_processor';
  * @returns An array of fully expanded patterns.
  */
 export function unwrapPatternDefinitions(
-  grokProcessor: Pick<GrokProcessorResult, 'patterns' | 'pattern_definitions'>
+  grokProcessor: Pick<GrokProcessor, 'patterns' | 'pattern_definitions'>
 ): string[] {
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const { patterns, pattern_definitions } = grokProcessor;

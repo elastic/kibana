@@ -522,6 +522,7 @@ src/platform/packages/shared/kbn-io-ts-utils @elastic/obs-knowledge-team
 src/platform/packages/shared/kbn-jest-benchmarks @elastic/obs-ui-devex-team
 src/platform/packages/shared/kbn-lazy-object @elastic/kibana-operations
 src/platform/packages/shared/kbn-lens-common @elastic/kibana-visualizations
+src/platform/packages/shared/kbn-lens-common-2 @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-lens-embeddable-utils @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-licensing-types @elastic/kibana-core
 src/platform/packages/shared/kbn-lock-manager @elastic/obs-ai-assistant
