@@ -10,13 +10,14 @@
 import { createRequestHash } from './create_request_hash';
 
 describe('createRequestHash', () => {
-  it('ignores `preference`', () => {
+  it('ignores `preference` and sessionId', () => {
     const request = {
       foo: 'bar',
     };
     const withPreference = {
       ...request,
       preference: 1234,
+      sessionId: 'abcd',
     };
 
     expect(createRequestHash(request)).toEqual(createRequestHash(withPreference));

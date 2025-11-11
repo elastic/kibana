@@ -18,7 +18,8 @@ import stringify from 'json-stable-stringify';
  * https://www.elastic.co/guide/en/elasticsearch/reference/current/search-shard-routing.html#shard-and-node-preference)
  */
 export function createRequestHash(keys: Record<string, any>) {
-  const { preference, ...params } = keys;
+  // sessionId is excluded to match previous behavior before https://github.com/elastic/kibana/commit/5717459c42ba84871234b3d1330f9713853efc11
+  const { preference, sessionId, ...params } = keys;
   const hash = new Sha256().update(stringify(params), 'utf8').digest('hex');
   return hash;
 }
