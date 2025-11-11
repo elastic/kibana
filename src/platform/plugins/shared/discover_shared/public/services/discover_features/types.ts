@@ -46,6 +46,64 @@ export interface ObservabilityLogsAIAssistantFeature {
   render: (deps: ObservabilityLogsAIAssistantFeatureRenderDeps) => JSX.Element;
 }
 
+export interface ObservabilityCreateSLOFeature {
+  id: 'observability-create-slo';
+  createSLOFlyout: (props: {
+    onClose: () => void;
+    initialValues: Record<string, unknown>;
+  }) => React.ReactNode;
+}
+
+export interface ObservabilityLogsFetchDocumentByIdFeature {
+  id: 'observability-logs-fetch-document-by-id';
+  fetchLogDocumentById: (
+    params: {
+      id: string;
+    },
+    signal: AbortSignal
+  ) => Promise<{
+    _index: string | null;
+    fields: Record<PropertyKey, any> | null;
+  }>;
+}
+
+export interface ObservabilityLogEventsFeature {
+  id: 'observability-log-events';
+  render: (props: {
+    query?: Query;
+    nonHighlightingQuery?: Query;
+    timeRange: TimeRange;
+    index: string;
+    displayOptions?: {
+      solutionNavIdOverride: 'oblt';
+      enableDocumentViewer: false;
+      enableFilters: false;
+    };
+  }) => JSX.Element;
+}
+
+/** **************** Security Solution ****************/
+
+export interface SecuritySolutionCellRendererFeature {
+  id: 'security-solution-cell-renderer';
+  getRenderer: () => Promise<
+    (fieldName: string) => FunctionComponent<DataGridCellValueElementProps> | undefined
+  >;
+}
+
+export interface SecuritySolutionAppWrapperFeature {
+  id: 'security-solution-app-wrapper';
+  getWrapper: () => Promise<() => FunctionComponent<PropsWithChildren<{}>>>;
+}
+
+export type SecuritySolutionFeature =
+  | SecuritySolutionCellRendererFeature
+  | SecuritySolutionAppWrapperFeature;
+
+/** ****************************************************************************************/
+
+/** **************** Observability Traces ****************/
+
 export interface ObservabilityTracesSpanLinksFeature {
   id: 'observability-traces-fetch-span-links';
   fetchSpanLinks: (
@@ -136,59 +194,13 @@ export interface ObservabilityTracesFetchLatencyOverallSpanDistributionFeature {
   >;
 }
 
-export interface ObservabilityCreateSLOFeature {
-  id: 'observability-create-slo';
-  createSLOFlyout: (props: {
-    onClose: () => void;
-    initialValues: Record<string, unknown>;
-  }) => React.ReactNode;
-}
-
-export interface ObservabilityLogsFetchDocumentByIdFeature {
-  id: 'observability-logs-fetch-document-by-id';
-  fetchLogDocumentById: (
-    params: {
-      id: string;
-    },
-    signal: AbortSignal
-  ) => Promise<{
-    _index: string | null;
-    fields: Record<PropertyKey, any> | null;
-  }>;
-}
-
-export interface ObservabilityLogEventsFeature {
-  id: 'observability-log-events';
-  render: (props: {
-    query?: Query;
-    nonHighlightingQuery?: Query;
-    timeRange: TimeRange;
-    index: string;
-    displayOptions?: {
-      solutionNavIdOverride: 'oblt';
-      enableDocumentViewer: false;
-      enableFilters: false;
-    };
-  }) => JSX.Element;
-}
-
-/** **************** Security Solution ****************/
-
-export interface SecuritySolutionCellRendererFeature {
-  id: 'security-solution-cell-renderer';
-  getRenderer: () => Promise<
-    (fieldName: string) => FunctionComponent<DataGridCellValueElementProps> | undefined
-  >;
-}
-
-export interface SecuritySolutionAppWrapperFeature {
-  id: 'security-solution-app-wrapper';
-  getWrapper: () => Promise<() => FunctionComponent<PropsWithChildren<{}>>>;
-}
-
-export type SecuritySolutionFeature =
-  | SecuritySolutionCellRendererFeature
-  | SecuritySolutionAppWrapperFeature;
+export type ObservabilityTracesFeature =
+  | ObservabilityTracesSpanLinksFeature
+  | ObservabilityTracesFetchErrorsFeature
+  | ObservabilityTracesFetchRootSpanByTraceIdFeature
+  | ObservabilityTracesFetchSpanFeature
+  | ObservabilityTracesFetchLatencyOverallTransactionDistributionFeature
+  | ObservabilityTracesFetchLatencyOverallSpanDistributionFeature;
 
 /** ****************************************************************************************/
 
@@ -198,12 +210,7 @@ export type DiscoverFeature =
   | ObservabilityLogsAIAssistantFeature
   | ObservabilityCreateSLOFeature
   | ObservabilityLogEventsFeature
-  | ObservabilityTracesSpanLinksFeature
-  | ObservabilityTracesFetchErrorsFeature
-  | ObservabilityTracesFetchRootSpanByTraceIdFeature
-  | ObservabilityTracesFetchSpanFeature
-  | ObservabilityTracesFetchLatencyOverallTransactionDistributionFeature
-  | ObservabilityTracesFetchLatencyOverallSpanDistributionFeature
+  | ObservabilityTracesFeature
   | ObservabilityLogsFetchDocumentByIdFeature
   | SecuritySolutionFeature;
 
