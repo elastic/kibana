@@ -38,7 +38,7 @@ export const useSetupKnowledgeBase = ({ http, toasts }: UseSetupKnowledgeBasePar
     SETUP_KNOWLEDGE_BASE_MUTATION_KEY,
     (resource?: string | void) => {
       // Optional params workaround: see: https://github.com/TanStack/query/issues/1077#issuecomment-1431247266
-      return postKnowledgeBase({ http, resource: resource ?? undefined });
+      return postKnowledgeBase({ http, resource: resource || '' });
     },
     {
       onError: (error: IHttpFetchError<ResponseErrorBody>) => {
