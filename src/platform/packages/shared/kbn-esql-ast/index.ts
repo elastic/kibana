@@ -29,7 +29,6 @@ export type {
   ESQLInlineCast,
   ESQLAstBaseItem,
   ESQLAstChangePointCommand,
-  ESQLParens,
 } from './src/types';
 
 export * from './src/ast/is';
