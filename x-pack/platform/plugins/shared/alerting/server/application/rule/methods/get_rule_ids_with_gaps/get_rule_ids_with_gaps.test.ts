@@ -26,6 +26,7 @@ import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connect
 import type { ConstructorOptions } from '../../../../rules_client';
 import { RulesClient } from '../../../../rules_client';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
+import { aggregatedGapStatus } from '../../../../../common';
 
 describe('getRuleIdsWithGaps', () => {
   let rulesClient: RulesClient;
@@ -48,7 +49,7 @@ describe('getRuleIdsWithGaps', () => {
   const params = {
     start: '2024-01-01T00:00:00.000Z',
     end: '2024-01-02T00:00:00.000Z',
-    statuses: ['unfilled', 'partially_filled'],
+    statuses: [aggregatedGapStatus.UNFILLED, aggregatedGapStatus.IN_PROGRESS],
   };
 
   const filter = { type: 'mock_filter' };
@@ -147,8 +148,23 @@ describe('getRuleIdsWithGaps', () => {
   describe('event log aggregation', () => {
     it('should aggregate events with correct parameters', async () => {
       const mockAggregations = {
-        unique_rule_ids: {
-          buckets: [{ key: 'rule-1' }, { key: 'rule-2' }],
+        by_rule: {
+          buckets: [
+            {
+              key: 'rule-1',
+              sum_unfilled_ms: { value: 100 },
+              sum_in_progress_ms: { value: 0 },
+              sum_filled_ms: { value: 0 },
+              sum_total_ms: { value: 100 },
+            },
+            {
+              key: 'rule-2',
+              sum_unfilled_ms: { value: 0 },
+              sum_in_progress_ms: { value: 50 },
+              sum_filled_ms: { value: 0 },
+              sum_total_ms: { value: 50 },
+            },
+          ],
         },
         latest_gap_timestamp: {
           value: 1704067200000,
@@ -165,11 +181,21 @@ describe('getRuleIdsWithGaps', () => {
         RULE_SAVED_OBJECT_TYPE,
         filter,
         expect.objectContaining({
-          filter: `event.action: gap AND event.provider: alerting AND not kibana.alert.rule.gap.deleted:true AND kibana.alert.rule.gap.range <= "2024-01-02T00:00:00.000Z" AND kibana.alert.rule.gap.range >= "2024-01-01T00:00:00.000Z" AND (kibana.alert.rule.gap.status : unfilled OR kibana.alert.rule.gap.status : partially_filled)`,
-          aggs: {
+          filter: `event.action: gap AND event.provider: alerting AND not kibana.alert.rule.gap.deleted:true AND kibana.alert.rule.gap.range <= "2024-01-02T00:00:00.000Z" AND kibana.alert.rule.gap.range >= "2024-01-01T00:00:00.000Z" AND kibana.alert.rule.gap.status: *`,
+          aggs: expect.objectContaining({
             latest_gap_timestamp: { max: { field: '@timestamp' } },
-            unique_rule_ids: { terms: { field: 'rule.id', size: 10000 } },
-          },
+            by_rule: expect.objectContaining({
+              terms: { field: 'rule.id', size: 10000, order: { _key: 'asc' } },
+              aggs: {
+                sum_unfilled_ms: { sum: { field: 'kibana.alert.rule.gap.unfilled_duration_ms' } },
+                sum_in_progress_ms: {
+                  sum: { field: 'kibana.alert.rule.gap.in_progress_duration_ms' },
+                },
+                sum_filled_ms: { sum: { field: 'kibana.alert.rule.gap.filled_duration_ms' } },
+                sum_total_ms: { sum: { field: 'kibana.alert.rule.gap.total_gap_duration_ms' } },
+              },
+            }),
+          }),
         })
       );
 
@@ -183,9 +209,7 @@ describe('getRuleIdsWithGaps', () => {
     it('should handle empty aggregation results', async () => {
       eventLogClient.aggregateEventsWithAuthFilter.mockResolvedValue({
         aggregations: {
-          unique_rule_ids: {
-            buckets: [],
-          },
+          by_rule: { buckets: [] },
           latest_gap_timestamp: {
             value: null,
           },
@@ -201,10 +225,12 @@ describe('getRuleIdsWithGaps', () => {
           filter: expect.stringContaining(
             'event.action: gap AND event.provider: alerting AND not kibana.alert.rule.gap.deleted:true'
           ),
-          aggs: {
+          aggs: expect.objectContaining({
             latest_gap_timestamp: { max: { field: '@timestamp' } },
-            unique_rule_ids: { terms: { field: 'rule.id', size: 10000 } },
-          },
+            by_rule: expect.objectContaining({
+              terms: { field: 'rule.id', size: 10000, order: { _key: 'asc' } },
+            }),
+          }),
         })
       );
 
@@ -227,11 +253,13 @@ describe('getRuleIdsWithGaps', () => {
         RULE_SAVED_OBJECT_TYPE,
         filter,
         expect.objectContaining({
-          filter: `event.action: gap AND event.provider: alerting AND not kibana.alert.rule.gap.deleted:true AND kibana.alert.rule.gap.range <= "2024-01-02T00:00:00.000Z" AND kibana.alert.rule.gap.range >= "2024-01-01T00:00:00.000Z"`,
-          aggs: {
+          filter: `event.action: gap AND event.provider: alerting AND not kibana.alert.rule.gap.deleted:true AND kibana.alert.rule.gap.range <= "2024-01-02T00:00:00.000Z" AND kibana.alert.rule.gap.range >= "2024-01-01T00:00:00.000Z" AND kibana.alert.rule.gap.status: *`,
+          aggs: expect.objectContaining({
             latest_gap_timestamp: { max: { field: '@timestamp' } },
-            unique_rule_ids: { terms: { field: 'rule.id', size: 10000 } },
-          },
+            by_rule: expect.objectContaining({
+              terms: { field: 'rule.id', size: 10000, order: { _key: 'asc' } },
+            }),
+          }),
         })
       );
     });
