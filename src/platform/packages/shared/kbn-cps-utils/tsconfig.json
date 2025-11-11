@@ -19,7 +19,6 @@
     "@kbn/i18n",
     "@kbn/i18n-react",
     "@kbn/es-query",
-    "@kbn/shared-ux-utility",
     "@kbn/css-utils",
   ],
   "exclude": [
