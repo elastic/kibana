@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import type { Streams } from '@kbn/streams-schema';
+import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { disableStreams, enableStreams, indexDocument } from './helpers/requests';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
@@ -78,11 +79,14 @@ const assetLinks = [
     'query.title': 'Test',
     'query.kql.query': 'atest',
   },
+];
+
+const attachmentLinks = [
   {
-    'asset.type': 'dashboard',
-    'asset.id': TEST_DASHBOARD_ID,
-    'asset.uuid': 'a9e60eb2bc5fa77d1f66a612db29d2764ff8cf4a',
-    'stream.name': TEST_STREAM_NAME,
+    'attachment.type': 'dashboard',
+    'attachment.id': TEST_DASHBOARD_ID,
+    'attachment.uuid': 'a9e60eb2bc5fa77d1f66a612db29d2764ff8cf4a',
+    'stream.names': [TEST_STREAM_NAME],
   },
 ];
 
@@ -183,6 +187,7 @@ const expectedDashboardsResponse = {
     {
       id: TEST_DASHBOARD_ID,
       title: 'dashboard-4-panels',
+      type: 'dashboard',
       tags: [],
     },
   ],
@@ -224,7 +229,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await loadDashboards(kibanaServer, ARCHIVES, SPACE_ID);
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       await enableStreams(apiClient);
-      // link and unlink dashboard to make sure assets index is created
+      await kibanaServer.uiSettings.update({
+        [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: true,
+      });
+      // link and unlink dashboard to make sure attachments index is created
       await apiClient.fetch('PUT /api/streams/{name}/dashboards/{dashboardId} 2023-10-31', {
         params: {
           path: {
@@ -241,6 +249,28 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         },
       });
+      // link and unlink query asset to make sure assets index is created
+      await apiClient.fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
+        params: {
+          path: {
+            name: 'logs',
+            queryId: 'test-query-init',
+          },
+          body: {
+            title: 'Init Query',
+            kql: { query: 'test' },
+          },
+        },
+      });
+      await apiClient.fetch('DELETE /api/streams/{name}/queries/{queryId} 2023-10-31', {
+        params: {
+          path: {
+            name: 'logs',
+            queryId: 'test-query-init',
+          },
+        },
+      });
+
       await esClient.index({
         index: '.kibana_streams-000001',
         id: TEST_STREAM_NAME,
@@ -263,13 +293,27 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         )
       );
 
+      await Promise.all(
+        attachmentLinks.map((link) =>
+          esClient.index({
+            index: '.kibana_streams_attachments-000001',
+            id: link['attachment.uuid'],
+            document: link,
+          })
+        )
+      );
+
       // Refresh the index to make the document searchable
       await esClient.indices.refresh({ index: '.kibana_streams-000001' });
       await esClient.indices.refresh({ index: '.kibana_streams_assets-000001' });
+      await esClient.indices.refresh({ index: '.kibana_streams_attachments-000001' });
     });
 
     after(async () => {
       await disableStreams(apiClient);
+      await kibanaServer.uiSettings.update({
+        [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: false,
+      });
     });
 
     it('should read and return existing orphaned classic stream', async () => {
