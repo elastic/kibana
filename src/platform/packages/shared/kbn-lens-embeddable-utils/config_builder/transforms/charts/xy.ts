@@ -7,11 +7,47 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { TypedLensSerializedState } from '@kbn/lens-common';
 import type { XYState } from '../../schema';
+import { getSharedChartLensStateToAPI, getSharedChartAPIToLensState } from './utils';
 import type { LensAttributes } from '../../types';
+import { buildDatasourceStates, buildReferences, getAdhocDataviews } from '../utils';
+import { buildVisualizationState } from './xy/chart';
+import { buildXYLayer, getValueColumns } from './xy/layers';
 
-export function fromAPItoLensState(config: XYState): LensAttributes {
-  return { title: config.title ?? '', ...config } as unknown as LensAttributes;
+type XYLens = Extract<TypedLensSerializedState['attributes'], { visualizationType: 'lnsXY' }>;
+
+export function fromAPItoLensState(config: XYState): XYLens {
+  // convert layers and produce references from them
+  const { layers, usedDataviews } = buildDatasourceStates(config, buildXYLayer, getValueColumns);
+
+  const visualizationState = buildVisualizationState(config);
+
+  const { adHocDataViews, internalReferences } = getAdhocDataviews(usedDataviews);
+  const regularDataViews = Object.fromEntries(
+    Object.entries(usedDataviews)
+      .filter((v): v is [string, { id: string; type: 'dataView' }] => v[1].type === 'dataView')
+      .map(([key, { id }]) => [key, id])
+  );
+  // @TODO: support annotation references
+  const references = regularDataViews.length ? buildReferences(regularDataViews) : [];
+
+  return {
+    visualizationType: 'lnsXY',
+    ...getSharedChartAPIToLensState(config),
+    state: {
+      query: {
+        query: '',
+        language: 'kuery',
+      },
+      filters: [],
+      datasourceStates: layers,
+      internalReferences,
+      visualization: visualizationState,
+      adHocDataViews,
+    },
+    references,
+  };
 }
 
 export function fromLensStateToAPI(config: LensAttributes): XYState {

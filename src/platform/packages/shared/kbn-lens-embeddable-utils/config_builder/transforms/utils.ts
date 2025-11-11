@@ -32,6 +32,8 @@ import {
   LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE,
 } from '../schema/constants';
 import type { LensApiFilterType } from '../schema/filter';
+import type { DatasetType } from '../schema/dataset';
+import type { LayerSettingsSchemaType } from '../schema/shared';
 
 type DataSourceStateLayer =
   | FormBasedPersistedState['layers'] // metric chart can return 2 layers (one for the metric and one for the trendline)
@@ -159,7 +161,7 @@ export const buildDatasetState = (
   references: SavedObjectReference[],
   adhocReferences: SavedObjectReference[] = [],
   layerId: string
-): LensApiState['dataset'] => {
+): DatasetType => {
   if (isTextBasedLayer(layer)) {
     return {
       type: 'esql',
@@ -216,7 +218,7 @@ export function isSingleLayer(
  * @param dataViewsAPI
  * @returns
  */
-export function getDatasetIndex(dataset: LensApiState['dataset']) {
+export function getDatasetIndex(dataset: DatasetType) {
   const timeFieldName: string = LENS_DEFAULT_TIME_FIELD;
   switch (dataset.type) {
     case 'index':
@@ -243,20 +245,20 @@ export function getDatasetIndex(dataset: LensApiState['dataset']) {
 
 // internal function used to build datasource states layer
 function buildDatasourceStatesLayer(
-  layer: LensApiState,
+  layer: unknown,
   i: number,
-  dataset: LensApiState['dataset'],
-  index: { index: string; timeFieldName: string },
-  buildDataLayers: (
+  dataset: DatasetType,
+  datasetIndex: { index: string; timeFieldName: string },
+  buildDataLayer: (
     config: unknown,
     i: number,
     index: { index: string; timeFieldName: string }
   ) => FormBasedPersistedState['layers'] | PersistedIndexPatternLayer | undefined,
-  getValueColumns: (config: unknown, i: number) => TextBasedLayerColumn[] // ValueBasedLayerColumn[]
+  getValueColumns: (layer: unknown, i: number) => TextBasedLayerColumn[] // ValueBasedLayerColumn[]
 ): ['textBased' | 'formBased', DataSourceStateLayer | undefined] {
   function buildValueLayer(
-    config: LensApiState,
-    ds: NarrowByType<LensApiState['dataset'], 'table'>
+    config: unknown,
+    ds: NarrowByType<DatasetType, 'table'>
   ): TextBasedPersistedState['layers'][0] {
     const table = ds.table as LensDatatableDataset;
     const newLayer = {
@@ -277,13 +279,13 @@ function buildDatasourceStatesLayer(
   }
 
   function buildESQLLayer(
-    config: LensApiState,
-    ds: NarrowByType<LensApiState['dataset'], 'esql'>
+    config: unknown,
+    ds: NarrowByType<DatasetType, 'esql'>
   ): TextBasedPersistedState['layers'][0] {
     const columns = getValueColumns(config, i);
 
     return {
-      index: index.index,
+      index: datasetIndex.index,
       query: { esql: ds.query },
       timeField: LENS_DEFAULT_TIME_FIELD,
       columns,
@@ -296,7 +298,7 @@ function buildDatasourceStatesLayer(
   if (dataset.type === 'table') {
     return ['textBased', buildValueLayer(layer, dataset)];
   }
-  return ['formBased', buildDataLayers(layer, i, index)];
+  return ['formBased', buildDataLayer(layer, i, datasetIndex)];
 }
 
 /**
@@ -312,7 +314,7 @@ function buildDatasourceStatesLayer(
  */
 export const buildDatasourceStates = (
   config: LensApiState,
-  buildFormulaLayers: (
+  buildDataLayers: (
     config: unknown,
     i: number,
     index: { index: string; timeFieldName: string }
@@ -321,18 +323,19 @@ export const buildDatasourceStates = (
 ) => {
   let layers: Partial<LensAttributes['state']['datasourceStates']> = {};
 
-  const mainDataset = config.dataset;
+  // XY charts have dataset encoded per layer not at the root level
+  const mainDataset = 'dataset' in config && config.dataset;
   const usedDataviews: Record<
     string,
     | { type: 'dataView'; id: string }
     | { type: 'adHocDataView'; index: string; timeFieldName: string }
   > = {};
   // a few charts types support multiple layers
-  const configLayers = 'layers' in config ? (config.layers as LensApiState[]) : [config];
+  const configLayers = 'layers' in config ? config.layers : [config];
   for (let i = 0; i < configLayers.length; i++) {
     const layer = configLayers[i];
     const layerId = `layer_${i}`;
-    const dataset = layer.dataset || mainDataset;
+    const dataset = layer.dataset ?? mainDataset;
 
     if (!dataset) {
       throw Error('dataset must be defined');
@@ -345,7 +348,7 @@ export const buildDatasourceStates = (
       i,
       dataset,
       index!,
-      buildFormulaLayers,
+      buildDataLayers,
       getValueColumns
     );
     if (layerConfig) {
@@ -415,7 +418,7 @@ export const addLayerColumn = (
  */
 export const generateLayer = (
   id: string,
-  options: LensApiState
+  options: LayerSettingsSchemaType
 ): Record<string, PersistedIndexPatternLayer> => {
   return {
     [id]: {
