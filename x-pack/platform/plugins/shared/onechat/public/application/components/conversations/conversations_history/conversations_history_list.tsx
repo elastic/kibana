@@ -126,7 +126,7 @@ export const ConversationHistoryList: React.FC<ConversationHistoryListProps> = (
       css={selectableStyles}
       searchable
       searchProps={{
-        placeholder: i18n.translate('xpack.onechat.conversationSidebar.searchPlaceholder', {
+        placeholder: i18n.translate('xpack.onechat.conversationsHistory.searchPlaceholder', {
           defaultMessage: 'Search conversations',
         }),
         compressed: true,
@@ -134,7 +134,7 @@ export const ConversationHistoryList: React.FC<ConversationHistoryListProps> = (
       options={selectableOptions}
       onChange={handleChange}
       singleSelection={true}
-      aria-label={i18n.translate('xpack.onechat.conversationSidebar.conversations', {
+      aria-label={i18n.translate('xpack.onechat.conversationsHistory.conversations', {
         defaultMessage: 'Conversations',
       })}
       data-test-subj="agentBuilderConversationList"
@@ -164,7 +164,7 @@ const PopoverHeader = () => {
         <EuiFlexItem grow={false}>
           <EuiTitle size="xxs">
             <h5>
-              {i18n.translate('xpack.onechat.conversationSidebar.title', {
+              {i18n.translate('xpack.onechat.conversationsHistory.title', {
                 defaultMessage: 'Conversations',
               })}
             </h5>

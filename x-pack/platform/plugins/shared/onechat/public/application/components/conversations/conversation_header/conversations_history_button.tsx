@@ -17,13 +17,13 @@ export const ConversationsHistoryButton: React.FC = () => {
   const { euiTheme } = useEuiTheme();
 
   const labels = {
-    open: i18n.translate('xpack.onechat.conversationSidebarToggle.open', {
+    open: i18n.translate('xpack.onechat.conversationsHistory.open', {
       defaultMessage: 'Open conversations',
     }),
-    close: i18n.translate('xpack.onechat.conversationSidebarToggle.close', {
+    close: i18n.translate('xpack.onechat.conversationsHistory.close', {
       defaultMessage: 'Close conversations',
     }),
-    conversations: i18n.translate('xpack.onechat.conversationSidebarToggle.conversations', {
+    conversations: i18n.translate('xpack.onechat.conversationsHistory.conversations', {
       defaultMessage: 'Conversations',
     }),
   };
