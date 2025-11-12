@@ -36,11 +36,7 @@ export type AttackDetailsProviderProps = {
 export const AttackDetailsProvider = memo(({ id, children }: AttackDetailsProviderProps) => {
   const { assistantAvailability, http } = useAssistantContext();
 
-  const {
-    data,
-    error,
-    isLoading: loading,
-  } = useFindAttackDetailsById({
+  const { data, isLoading: loading } = useFindAttackDetailsById({
     id: id || '',
     http,
     isAssistantEnabled: assistantAvailability.isAssistantEnabled,

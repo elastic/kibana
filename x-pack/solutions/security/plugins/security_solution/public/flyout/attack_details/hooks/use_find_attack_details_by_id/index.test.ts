@@ -122,10 +122,10 @@ describe('useFindAttackDetailsById', () => {
 
       // Resolve the fetch with API-shaped response
       (mockHttpFetch as unknown as jest.Mock).mockResolvedValue(
-        mockTransformedResponse as AttackDiscoveryFindResponse
+        mockTransformedResponse as unknown as AttackDiscoveryFindResponse
       );
 
-      mockTransform.mockReturnValue(mockTransformed as unknown);
+      mockTransform.mockReturnValue(mockTransformed);
 
       let capturedQueryFn: (() => Promise<unknown>) | undefined;
       // Keep only what we need from options (no any)
