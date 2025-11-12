@@ -5,19 +5,16 @@
  * 2.0.
  */
 
-import { castArray } from 'lodash';
 import type { Error } from '@kbn/apm-types';
-import type { UnifiedTraceErrors } from './get_unified_trace_errors';
+import type { UnifiedError } from './get_unified_trace_errors';
 
-type UnifiedErrors = UnifiedTraceErrors['apmErrors'] | UnifiedTraceErrors['unprocessedOtelErrors'];
-
-export const normalizeErrors = (errors: UnifiedErrors): Error[] =>
+export const normalizeErrors = (errors: UnifiedError[]): Error[] =>
   errors.map(
     ({ error, timestamp, eventName }): Error => ({
       eventName,
       error: {
         ...error,
-        exception: castArray(error?.exception)[0],
+        exception: Array.isArray(error?.exception) ? error.exception[0] : error?.exception,
       },
       timestamp,
     })

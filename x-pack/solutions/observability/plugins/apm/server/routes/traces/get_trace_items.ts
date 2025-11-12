@@ -8,8 +8,8 @@
 import type { Logger } from '@kbn/logging';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
-import { castArray, last } from 'lodash';
-import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import { last } from 'lodash';
+import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import type { APMConfig } from '../..';
 import {
@@ -172,30 +172,36 @@ export async function getApmTraceError({
     _source: [ERROR_LOG_MESSAGE, ERROR_EXC_MESSAGE, ERROR_EXC_HANDLED, ERROR_EXC_TYPE],
   });
 
-  return response.hits.hits.map((hit) => {
-    const errorSource = 'error' in hit._source ? hit._source : undefined;
+  return response.hits.hits
+    .map((hit) => {
+      const errorSource = 'error' in hit._source ? hit._source : undefined;
+      const event = hit.fields ? accessKnownApmEventFields(hit.fields, requiredFields) : undefined;
 
-    const { _id: id, ...event } = unflattenKnownApmEventFields(hit.fields, requiredFields);
+      if (!event) {
+        return undefined;
+      }
 
-    const waterfallErrorEvent: WaterfallError = {
-      ...event,
-      id: castArray(id)[0] as string,
-      parent: {
-        ...event?.parent,
-        id: event?.parent?.id ?? event?.span?.id,
-      },
-      error: {
-        ...(event.error ?? {}),
-        exception:
-          (errorSource?.error.exception?.length ?? 0) > 0
-            ? errorSource?.error.exception
-            : event?.error.exception && [event.error.exception],
-        log: errorSource?.error.log,
-      },
-    };
+      const { _id: id, parent, error, ...unflattened } = event.unflatten();
 
-    return waterfallErrorEvent;
-  });
+      const waterfallErrorEvent: WaterfallError = {
+        ...unflattened,
+        id,
+        parent: {
+          id: parent?.id ?? unflattened.span?.id,
+        },
+        error: {
+          ...error,
+          exception:
+            (errorSource?.error.exception?.length ?? 0) > 0
+              ? errorSource?.error.exception
+              : error.exception && [error.exception],
+          log: errorSource?.error.log,
+        },
+      };
+
+      return waterfallErrorEvent;
+    })
+    .filter((doc): doc is WaterfallError => !!doc);
 }
 
 async function getTraceDocsPaginated({
