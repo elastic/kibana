@@ -135,6 +135,8 @@ export function SchemaChangesReviewModal({
         name: i18n.translate('xpack.streams.schemaEditor.confirmChangesModal.tableColumnField', {
           defaultMessage: 'Field',
         }),
+        width: '272px',
+        truncateText: true,
         render: (name: string) => <>{name}</>,
       },
       {
@@ -142,6 +144,8 @@ export function SchemaChangesReviewModal({
         name: i18n.translate('xpack.streams.schemaEditor.confirmChangesModal.tableColumnType', {
           defaultMessage: 'type',
         }),
+        width: '160px',
+        truncateText: true,
         render: (type: FieldDefinitionConfig['type'] | undefined, field: SchemaEditorField) => {
           // Prioritize showing esType if available and different from our supported type
           if (field.esType && (!type || type === 'system')) {
@@ -185,7 +189,7 @@ export function SchemaChangesReviewModal({
         name: i18n.translate('xpack.streams.schemaEditor.confirmChangesModal.tableColumnStatus', {
           defaultMessage: 'Status',
         }),
-        width: '200px',
+        width: '128px',
         render: (status: string, field: SchemaEditorField) => {
           return (
             <FieldStatusBadge
@@ -205,7 +209,7 @@ export function SchemaChangesReviewModal({
         name: i18n.translate('xpack.streams.schemaEditor.confirmChangesModal.tableColumnResult', {
           defaultMessage: 'Result',
         }),
-        width: '150px',
+        width: '128px',
         render: (result: SchemaEditorField['result'], field: SchemaEditorField) => {
           if (!result) return null;
           return <FieldResultBadge result={result} />;
@@ -220,6 +224,8 @@ export function SchemaChangesReviewModal({
         name: i18n.translate('xpack.streams.schemaEditor.confirmChangesModal.tableColumnSource', {
           defaultMessage: 'Source',
         }),
+        width: '128px',
+        truncateText: true,
         render: (source: string | undefined, field: SchemaEditorField) => {
           // Don't show source for existing fields (those that have esType)
           if (field.esType) {

@@ -22,32 +22,22 @@ export const FieldStatusBadge = ({
   // Determine the display status - for classic streams, show "dynamic" instead of "unmapped"
   const displayStatus = status === 'unmapped' && streamType === 'classic' ? 'dynamic' : status;
 
-  // Show pending badge if uncommitted, otherwise show regular status badge
-  if (uncommitted) {
-    return (
-      <EuiFlexGroup gutterSize="xs" responsive={false} wrap>
-        <EuiFlexItem grow={false}>
-          <EuiToolTip content={FIELD_STATUS_MAP[displayStatus].tooltip}>
-            <EuiBadge tabIndex={0} color={FIELD_STATUS_MAP[displayStatus].color}>
-              {FIELD_STATUS_MAP[displayStatus].label}
-            </EuiBadge>
-          </EuiToolTip>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiToolTip content={FIELD_STATUS_MAP.pending.tooltip}>
-            <EuiBadge tabIndex={0} color={FIELD_STATUS_MAP.pending.color}>
-              <EuiIcon type="clockCounter" size="s" />
-            </EuiBadge>
-          </EuiToolTip>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
+  // Combine tooltip messages when uncommitted
+  const tooltipContent = uncommitted
+    ? `${FIELD_STATUS_MAP[displayStatus].tooltip} ${FIELD_STATUS_MAP.pending.tooltip}`
+    : FIELD_STATUS_MAP[displayStatus].tooltip;
 
   return (
-    <EuiToolTip content={FIELD_STATUS_MAP[displayStatus].tooltip}>
+    <EuiToolTip content={tooltipContent}>
       <EuiBadge tabIndex={0} color={FIELD_STATUS_MAP[displayStatus].color}>
-        {FIELD_STATUS_MAP[displayStatus].label}
+        <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center" wrap={false}>
+          {uncommitted && (
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="clockCounter" size="s" />
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem grow={false}>{FIELD_STATUS_MAP[displayStatus].label}</EuiFlexItem>
+        </EuiFlexGroup>
       </EuiBadge>
     </EuiToolTip>
   );
