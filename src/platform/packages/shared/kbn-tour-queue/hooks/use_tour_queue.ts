@@ -14,7 +14,6 @@ import type { TourId } from '..';
 export interface TourQueueResult {
   shouldShow: boolean;
   onComplete: () => void;
-  onSkip: () => void;
 }
 
 /**
@@ -43,13 +42,8 @@ export const useTourQueue = (tourId: TourId): TourQueueResult => {
     tourQueueStateManager.completeTour(tourId);
   }, [tourId, tourQueueStateManager]);
 
-  const onSkip = useCallback(async () => {
-    await tourQueueStateManager.skipAllTours();
-  }, [tourQueueStateManager]);
-
   return {
     shouldShow,
     onComplete,
-    onSkip,
   };
 };

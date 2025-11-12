@@ -31,7 +31,6 @@ export class SolutionNavigationTourManager {
   ) {}
 
   async startTour(): Promise<void> {
-    await this.tourQueueStateManager.initializeTourQueueSkipState(this.deps.userProfile);
     // Register and get cleanup function
     const removeTour = this.tourQueueStateManager.registerTour(TOURS.NAVIGATION);
     const shouldShow = this.tourQueueStateManager.shouldShowTour(TOURS.NAVIGATION);
@@ -58,13 +57,12 @@ export class SolutionNavigationTourManager {
       this.deps.navigationTourManager.startTour();
       const navigationTourResult = await this.deps.navigationTourManager.waitForTourEnd();
 
-      // Skip remaining tours in queue if navigation tour was skipped
+      // If skipped, notify queue to skip all remaining tours for the current page load only
       if (navigationTourResult === 'skipped') {
-        await this.tourQueueStateManager.skipAllTours();
-      } else {
-        await preserveTourCompletion(this.deps.userProfile);
-        this.tourQueueStateManager.completeTour(TOURS.NAVIGATION);
+        this.tourQueueStateManager.skipAllTours();
       }
+      await preserveTourCompletion(this.deps.userProfile);
+      this.tourQueueStateManager.completeTour(TOURS.NAVIGATION);
     } finally {
       removeTour();
     }
