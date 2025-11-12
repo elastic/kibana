@@ -11,7 +11,7 @@ import type YAML from 'yaml';
 import { isScalar } from 'yaml';
 import type { monaco } from '@kbn/monaco';
 import { isDynamicValue, isVariableValue } from '../../../../common/lib/regex';
-import { getScalarValueAtOffset } from '../../../../common/lib/yaml/get_node_value';
+import { getScalarValueAtOffset } from '../../../../common/lib/yaml/get_scalar_value_at_offset';
 
 export function filterMonacoYamlMarkers(
   markers: monaco.editor.IMarkerData[],
@@ -19,10 +19,8 @@ export function filterMonacoYamlMarkers(
   yamlDocument: YAML.Document | null
 ): monaco.editor.IMarkerData[] {
   return markers.filter((marker) => {
-    // Check if this marker is for a dynamic value - if so, suppress the validation error
-    if (yamlDocument) {
+    if (marker.source && marker.source.startsWith('yaml-schema:') && yamlDocument) {
       try {
-        // TODO: remove this getOffsetAt call once we ensure yamlDocument always has a lineCounter
         const markerOffset = editorModel.getOffsetAt({
           lineNumber: marker.startLineNumber,
           column: marker.startColumn,
@@ -34,14 +32,16 @@ export function filterMonacoYamlMarkers(
           isScalar(scalarNode) &&
           (isDynamicValue(scalarNode.value) || isVariableValue(scalarNode.value))
         ) {
-          // Return false to suppress this marker - it will be filtered out in transformMonacoMarkers
+          // Filter out markers with dynamic or variable values (e.g. ${{ }} or {{ }})
+          // as we cannot reliably validate them statically
           return false;
         }
       } catch (error) {
-        // If we can't determine the value, continue with normal processing
-        // Fall through to existing logic
+        // If we can't determine the value at marker position, keep the marker
+        return true;
       }
     }
+    // Keep other markers (e.g. schema validation errors)
     return true;
   });
 }
