@@ -8,7 +8,6 @@
  */
 
 export type { ESQLCallbacks } from './src/shared/types';
-export type { ValidationOptions } from './src/validation/types';
 
 /**
  * High level functions

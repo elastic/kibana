@@ -45,8 +45,7 @@ export class QueryColumns {
   constructor(
     private readonly query: ESQLAstQueryExpression,
     private readonly originalQueryText: string,
-    private readonly resourceRetriever?: ESQLCallbacks,
-    private readonly options?: { forceRefresh?: boolean }
+    private readonly resourceRetriever?: ESQLCallbacks
   ) {
     this.fullQueryCacheKey = BasicPrettyPrinter.print(this.query, { skipHeader: true });
   }
@@ -91,15 +90,26 @@ export class QueryColumns {
     if (!this.fullQueryCacheKey) return;
 
     const getFields = async (queryToES: string) => {
-      if (!this.options?.forceRefresh) {
-        const cached = QueryColumns.fromCache(queryToES);
+      const freshColumns = await this.resourceRetriever?.getColumnsFor?.({
+        query: queryToES,
+      });
 
-        if (cached) {
+      const cached = QueryColumns.fromCache(queryToES);
+
+      if (!freshColumns) {
+        return (cached as ESQLFieldWithMetadata[]) || [];
+      }
+
+      if (cached && cached.length === freshColumns.length) {
+        const cachedNames = new Set(cached.map(({ name }) => name));
+        const freshNames = new Set(freshColumns.map(({ name }) => name));
+
+        if ([...cachedNames].every((name) => freshNames.has(name))) {
           return cached as ESQLFieldWithMetadata[];
         }
       }
 
-      const fields = await getFieldsFromES(queryToES, this.resourceRetriever);
+      const fields = await getFieldsFromES(freshColumns, this.resourceRetriever);
       QueryColumns.cache.set(queryToES, fields);
       return fields;
     };
@@ -139,14 +149,6 @@ export class QueryColumns {
       // anyways, so just move on — ANTLR errors will
       // be reported.
       return;
-    }
-
-    if (!this.options?.forceRefresh) {
-      const existsInCache = Boolean(QueryColumns.fromCache(cacheKey));
-      if (existsInCache) {
-        // this is already in the cache
-        return;
-      }
     }
 
     const queryBeforeCurrentCommand = BasicPrettyPrinter.print({

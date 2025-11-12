@@ -25,13 +25,3 @@ export interface ValidationResult {
   errors: Array<ESQLMessage | EditorError>;
   warnings: ESQLMessage[];
 }
-
-export interface ValidationOptions {
-  /**
-   * Forces cache invalidation for column metadata.
-   * Only effective when 'getColumnsFor' callback is provided in ESQLCallbacks.
-   * Use when schema changes have occurred (e.g., new fields added to lookup indices).
-   * @default false
-   */
-  forceRefresh?: boolean;
-}

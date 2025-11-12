@@ -602,7 +602,7 @@ describe('validation logic', () => {
         await validateQuery(`from a_index | eval b  = a | enrich policy`, callbackMocks);
         expect(callbackMocks.getSources).toHaveBeenCalled();
         expect(callbackMocks.getPolicies).toHaveBeenCalled();
-        expect(callbackMocks.getColumnsFor).toHaveBeenCalledTimes(0);
+        expect(callbackMocks.getColumnsFor).toHaveBeenCalledTimes(3);
       });
 
       it(`should not crash if no callbacks are available`, async () => {
