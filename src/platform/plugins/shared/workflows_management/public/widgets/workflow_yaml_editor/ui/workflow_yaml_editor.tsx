@@ -17,7 +17,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import type YAML from 'yaml';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { monaco } from '@kbn/monaco';
+import { monaco, YAML_LANG_ID } from '@kbn/monaco';
 import { isTriggerType } from '@kbn/workflows';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows/types/v1';
 import type { z } from '@kbn/zod';
@@ -29,7 +29,7 @@ import {
   useStepDecorationsInExecution,
   useTriggerTypeDecorations,
 } from './decorations';
-import { useCompletionProvider } from './hooks/use_completion_provider';
+import { useWorkflowYamlCompletionProvider } from './hooks/use_workflow_yaml_completion_provider';
 import { StepActions } from './step_actions';
 import { WorkflowYAMLEditorShortcuts } from './workflow_yaml_editor_shortcuts';
 import { WorkflowYAMLValidationErrors } from './workflow_yaml_validation_errors';
@@ -252,6 +252,9 @@ export const WorkflowYAMLEditor = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
+
+  const completionProvider = useWorkflowYamlCompletionProvider();
+
   const handleEditorDidMount = useCallback(
     (editor: monaco.editor.IStandaloneCodeEditor) => {
       editorRef.current = editor;
@@ -261,6 +264,14 @@ export const WorkflowYAMLEditor = ({
         openActionsPopover,
         ...keyboardHandlers,
       });
+
+      if (completionProvider) {
+        const disposable = monaco.languages.registerCompletionItemProvider(
+          YAML_LANG_ID,
+          completionProvider
+        );
+        disposablesRef.current.push(disposable);
+      }
 
       // Listen to content changes to detect typing
       const model = editor.getModel();
@@ -419,8 +430,6 @@ export const WorkflowYAMLEditor = ({
     [closeActionsPopover]
   );
 
-  const completionProvider = useCompletionProvider();
-
   const options = useMemo(() => {
     return { ...editorOptions, readOnly: isExecutionYaml };
   }, [isExecutionYaml]);
@@ -526,7 +535,6 @@ export const WorkflowYAMLEditor = ({
           onChange={onChange}
           options={options}
           schemas={schemas}
-          suggestionProvider={completionProvider}
           value={workflowYaml}
         />
       </div>

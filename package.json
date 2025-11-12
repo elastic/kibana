@@ -1439,6 +1439,7 @@
     "vega-tooltip": "^0.34.0",
     "vinyl": "^3.0.0",
     "wellknown": "^0.5.0",
+    "xml-formatter": "^3.6.7",
     "xml2js": "^0.6.2",
     "xstate": "^4.38.3",
     "xstate5": "npm:xstate@^5.19.2",
