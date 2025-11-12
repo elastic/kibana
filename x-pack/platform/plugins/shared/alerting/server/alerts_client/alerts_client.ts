@@ -52,7 +52,8 @@ import type {
   LogAlertsOpts,
   SearchResult,
   DetermineDelayedAlertsOpts,
-  UpdatePersistedAlertsQueryParams,
+  AlertsToUpdateWithMaintenanceWindows,
+  AlertsToUpdateWithLastScheduledActions,
 } from './types';
 import type {
   IAlertsClient,
@@ -92,11 +93,6 @@ export interface AlertsClientParams extends CreateAlertsClientParams {
   kibanaVersion: string;
   dataStreamAdapter: DataStreamAdapter;
   isServerless: boolean;
-}
-
-interface AlertsAffectedByMaintenanceWindows {
-  alertIds: string[];
-  maintenanceWindowIds: string[];
 }
 
 export class AlertsClient<
@@ -689,62 +685,60 @@ export class AlertsClient<
     }
   }
 
-  public async updatePersistedAlerts() {
-    const { rawActiveAlerts } = this.getRawAlertInstancesForState(true);
+  public async updatePersistedAlerts({
+    alertsToUpdateWithMaintenanceWindows,
+    alertsToUpdateWithLastScheduledActions,
+  }: {
+    alertsToUpdateWithMaintenanceWindows: AlertsToUpdateWithMaintenanceWindows;
+    alertsToUpdateWithLastScheduledActions: AlertsToUpdateWithLastScheduledActions;
+  }) {
+    const idsToUpdate = new Set([
+      ...Object.keys(alertsToUpdateWithMaintenanceWindows),
+      ...Object.keys(alertsToUpdateWithLastScheduledActions),
+    ]);
 
-    const updateByQueryParams = Object.values(rawActiveAlerts).reduce(
-      (acc: UpdatePersistedAlertsQueryParams, rawAlert) => {
-        const { meta } = rawAlert;
-        if (!!meta?.uuid && meta.lastScheduledActions) {
-          const { group, date, actions } = meta.lastScheduledActions;
-          acc[meta.uuid] = {
-            group,
-            date,
-            ...(actions ? { actions } : {}),
-          };
-        }
-
-        return acc;
-      },
-      {}
-    );
-
-    const idsToUpdate = Object.keys(updateByQueryParams);
-
-    if (idsToUpdate.length === 0) {
+    if (idsToUpdate.size === 0) {
       return;
     }
+
     try {
       const esClient = await this.options.elasticsearchClientPromise;
       await retryTransientEsErrors(
-        () =>
-          esClient.updateByQuery({
+        () => {
+          return esClient.updateByQuery({
             query: {
               terms: {
-                _id: idsToUpdate,
+                _id: [...idsToUpdate],
               },
             },
             conflicts: 'proceed',
             index: this.indexTemplateAndPattern.alias,
             script: {
               source: `
-            if (params.containsKey(ctx._source['${ALERT_UUID}'])) {
-              ctx._source['${ALERT_SCHEDULED_ACTION_GROUP}'] = params[ctx._source['${ALERT_UUID}']].group;
-              ctx._source['${ALERT_SCHEDULED_ACTION_DATE}'] = params[ctx._source['${ALERT_UUID}']].date;
-              if (params[ctx._source['${ALERT_UUID}']].containsKey('actions')) {
-                ctx._source['${ALERT_SCHEDULED_ACTION_THROTTLING}'] = params[ctx._source['${ALERT_UUID}']].actions;
-              }
-            }
-          `,
+                if (params.toScheduledAction.containsKey(ctx._source['${ALERT_UUID}'])) {
+                  ctx._source['${ALERT_SCHEDULED_ACTION_GROUP}'] = params.toScheduledAction[ctx._source['${ALERT_UUID}']].group;
+                  ctx._source['${ALERT_SCHEDULED_ACTION_DATE}'] = params.toScheduledAction[ctx._source['${ALERT_UUID}']].date;
+                  if (params.toScheduledAction[ctx._source['${ALERT_UUID}']].containsKey('throttling')) {
+                    ctx._source['${ALERT_SCHEDULED_ACTION_THROTTLING}'] = params.toScheduledAction[ctx._source['${ALERT_UUID}']].throttling;
+                  }
+                }
+                if (params.toMaintenanceWindows.containsKey(ctx._source['${ALERT_UUID}'])) {
+                  ctx._source['${ALERT_MAINTENANCE_WINDOW_IDS}'] = params.toMaintenanceWindows[ctx._source['${ALERT_UUID}']];
+                }
+              `,
               lang: 'painless',
-              params: updateByQueryParams,
+              params: {
+                toScheduledAction: alertsToUpdateWithLastScheduledActions,
+                toMaintenanceWindows: alertsToUpdateWithMaintenanceWindows,
+              },
             },
-          }),
+          });
+        },
         { logger: this.options.logger }
       );
     } catch (err) {
       this.options.logger.error(
-        `Error updating alert last scheduled actions ${this.ruleInfoMessage}: ${err}`,
+        `Error updating alerts. (last scheduled actions or maintenance windows) ${this.ruleInfoMessage}: ${err}`,
         this.logTags
       );
       throw err;
@@ -801,50 +795,7 @@ export class AlertsClient<
     return alertsByMaintenanceWindowIds;
   }
 
-  private async updateAlertMaintenanceWindowIds(idsToUpdate: string[]) {
-    const esClient = await this.options.elasticsearchClientPromise;
-    const newAlerts = Object.values(this.legacyAlertsClient.getProcessedAlerts('new'));
-
-    const params: Record<string, string[]> = {};
-
-    idsToUpdate.forEach((id) => {
-      const newAlert = newAlerts.find((alert) => alert.matchesUuid(id));
-      if (newAlert) {
-        params[id] = newAlert.getMaintenanceWindowIds();
-      }
-    });
-
-    try {
-      const response = await esClient.updateByQuery({
-        query: {
-          terms: {
-            _id: idsToUpdate,
-          },
-        },
-        refresh: true,
-        conflicts: 'proceed',
-        index: this.indexTemplateAndPattern.alias,
-        script: {
-          source: `
-            if (params.containsKey(ctx._source['${ALERT_UUID}'])) {
-              ctx._source['${ALERT_MAINTENANCE_WINDOW_IDS}'] = params[ctx._source['${ALERT_UUID}']];
-            }
-          `,
-          lang: 'painless',
-          params,
-        },
-      });
-      return response;
-    } catch (err) {
-      this.options.logger.warn(
-        `Error updating alert maintenance window IDs ${this.ruleInfoMessage}: ${err}`,
-        this.logTags
-      );
-      throw err;
-    }
-  }
-
-  public async updatePersistedAlertsWithMaintenanceWindowIds(): Promise<AlertsAffectedByMaintenanceWindows> {
+  public async getAlertsToUpdateWithMaintenanceWindows(): Promise<AlertsToUpdateWithMaintenanceWindows> {
     try {
       // check if there are any alerts
       const newAlerts = Object.values(this.legacyAlertsClient.getProcessedAlerts('new'));
@@ -858,10 +809,7 @@ export class AlertsClient<
         (!newAlerts.length && !activeAlerts.length && !recoveredAlerts.length) ||
         !this.options.maintenanceWindowsService
       ) {
-        return {
-          alertIds: [],
-          maintenanceWindowIds: [],
-        };
+        return {};
       }
 
       const { maintenanceWindows } =
@@ -881,10 +829,7 @@ export class AlertsClient<
         withScopedQuery: false,
       });
       if (maintenanceWindowsWithScopedQuery.length === 0) {
-        return {
-          alertIds: [],
-          maintenanceWindowIds: maintenanceWindowsWithoutScopedQueryIds,
-        };
+        return {};
       }
 
       // Run aggs to get all scoped query alert IDs, returns a record<maintenanceWindowId, alertIds>,
@@ -929,21 +874,50 @@ export class AlertsClient<
       const uniqueAlertsId = [...new Set(alertsAffectedByScopedQuery)];
       const uniqueMaintenanceWindowIds = [...new Set(appliedMaintenanceWindowIds)];
 
-      if (uniqueAlertsId.length) {
-        await this.updateAlertMaintenanceWindowIds(uniqueAlertsId);
+      if (uniqueMaintenanceWindowIds && uniqueMaintenanceWindowIds.length > 0) {
+        this.options.alertingEventLogger.setMaintenanceWindowIds(uniqueMaintenanceWindowIds);
       }
 
-      return {
-        alertIds: uniqueAlertsId,
-        maintenanceWindowIds: uniqueMaintenanceWindowIds,
-      };
+      const alertsAffectedByMaintenanceWindows: Record<string, string[]> = {};
+
+      uniqueAlertsId.forEach((id) => {
+        const newAlert = newAlerts.find((alert) => alert.matchesUuid(id));
+        if (newAlert) {
+          alertsAffectedByMaintenanceWindows[id] = newAlert.getMaintenanceWindowIds();
+        }
+      });
+
+      return alertsAffectedByMaintenanceWindows;
     } catch (err) {
       this.options.logger.error(
-        `Error updating maintenance window IDs: ${err.message}`,
+        `Error getting alerts affected by maintenance windows: ${err.message}`,
         this.logTags
       );
-      return { alertIds: [], maintenanceWindowIds: [] };
+      return {};
     }
+  }
+
+  public getAlertsToUpdateWithLastScheduledActions(): AlertsToUpdateWithLastScheduledActions {
+    const { rawActiveAlerts } = this.getRawAlertInstancesForState(true);
+    const result: AlertsToUpdateWithLastScheduledActions = {};
+    try {
+      for (const key in rawActiveAlerts) {
+        if (key) {
+          const { meta } = rawActiveAlerts[key];
+          const uuid = meta?.uuid;
+          const last = meta?.lastScheduledActions;
+          if (!uuid || !last) continue;
+          const { group, date, actions } = last;
+          result[uuid] = actions ? { group, date, throttling: actions } : { group, date };
+        }
+      }
+    } catch (err) {
+      this.options.logger.error(
+        `Error getting alerts to update with last scheduled actions: ${err.message}`,
+        this.logTags
+      );
+    }
+    return result;
   }
 
   public client() {
