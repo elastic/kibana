@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import {
   selectIsTestModalOpen,
   selectWorkflowDefinition,
+  selectWorkflowId,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
 import { setIsTestModalOpen } from '../../../entities/workflows/store/workflow_detail/slice';
 import { testWorkflowThunk } from '../../../entities/workflows/store/workflow_detail/thunks/test_workflow_thunk';
@@ -31,6 +32,7 @@ export const WorkflowDetailTestModal = () => {
 
   const isTestModalOpen = useSelector(selectIsTestModalOpen);
   const definition = useSelector(selectWorkflowDefinition);
+  const workflowId = useSelector(selectWorkflowId);
 
   const testWorkflow = useAsyncThunk(testWorkflowThunk);
   const handleRunWorkflow = useCallback(
@@ -76,6 +78,7 @@ export const WorkflowDetailTestModal = () => {
   return (
     <WorkflowExecuteModal
       definition={definition}
+      workflowId={workflowId}
       onClose={closeModal}
       onSubmit={handleRunWorkflow}
     />

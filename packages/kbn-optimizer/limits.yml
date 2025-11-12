@@ -21,8 +21,8 @@ pageLoadAssetSize:
   contentConnectors: 33014
   contentManagement: 8350
   controls: 12234
-  core: 569528
-  cps: 1580
+  core: 572422
+  cps: 6000
   crossClusterReplication: 12662
   customIntegrations: 11715
   dashboard: 19000
@@ -167,7 +167,7 @@ pageLoadAssetSize:
   spaces: 30665
   stackAlerts: 31499
   stackConnectors: 85053
-  streams: 9000
+  streams: 10000
   streamsApp: 17000
   synthetics: 31571
   telemetry: 25755

@@ -92,6 +92,7 @@ packages/kbn-sort-package-json @elastic/kibana-operations
 packages/kbn-styled-components-mapping-cli @elastic/kibana-operations @elastic/eui-team
 packages/kbn-ts-projects @elastic/kibana-operations
 packages/kbn-ts-type-check-cli @elastic/kibana-operations
+packages/kbn-tsconfig/base @elastic/kibana-operations
 packages/kbn-validate-next-docs-cli @elastic/kibana-operations
 packages/kbn-web-worker-stub @elastic/kibana-operations
 packages/kbn-whereis-pkg-cli @elastic/kibana-operations
@@ -468,6 +469,7 @@ src/platform/packages/shared/kbn-config-schema @elastic/kibana-core
 src/platform/packages/shared/kbn-connector-schemas @elastic/response-ops
 src/platform/packages/shared/kbn-content-management-utils @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-core-server-benchmarks @elastic/kibana-core
+src/platform/packages/shared/kbn-cps-utils @elastic/kibana-presentation
 src/platform/packages/shared/kbn-crypto @elastic/kibana-security
 src/platform/packages/shared/kbn-crypto-browser @elastic/kibana-core
 src/platform/packages/shared/kbn-css-utils @elastic/appex-sharedux
@@ -491,6 +493,7 @@ src/platform/packages/shared/kbn-discover-utils @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-doc-links @elastic/docs
 src/platform/packages/shared/kbn-dom-drag-drop @elastic/kibana-visualizations @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-ebt-tools @elastic/kibana-core
+src/platform/packages/shared/kbn-edot-collector @elastic/obs-ai-assistant
 src/platform/packages/shared/kbn-elastic-agent-utils @elastic/obs-onboarding-team
 src/platform/packages/shared/kbn-encrypted-saved-objects-shared @elastic/kibana-security
 src/platform/packages/shared/kbn-es @elastic/kibana-operations
@@ -750,7 +753,7 @@ src/platform/plugins/shared/charts @elastic/kibana-visualizations
 src/platform/plugins/shared/console @elastic/kibana-management
 src/platform/plugins/shared/content_management @elastic/appex-sharedux
 src/platform/plugins/shared/controls @elastic/kibana-presentation
-src/platform/plugins/shared/cps @elastic/kibana-core
+src/platform/plugins/shared/cps @elastic/kibana-core @elastic/kibana-presentation
 src/platform/plugins/shared/custom_integrations @elastic/fleet
 src/platform/plugins/shared/dashboard @elastic/kibana-presentation
 src/platform/plugins/shared/dashboard_markdown @elastic/kibana-presentation
@@ -1470,6 +1473,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/solutions/observability/test/observability_ai_assistant_functional @elastic/obs-ai-assistant
 /x-pack/solutions/observability/test/fixtures/es_archives/observability/ai_assistant @elastic/obs-ai-assistant
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant @elastic/obs-ai-assistant
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/observability_agent @elastic/obs-ai-assistant
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.ai_assistant.index.ts @elastic/obs-ai-assistant
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.ai_assistant.serverless.config.ts @elastic/obs-ai-assistant
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.ai_assistant.index.ts @elastic/obs-ai-assistant
