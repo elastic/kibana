@@ -1047,13 +1047,13 @@ describe('getSortedObjectsForExport()', () => {
     // Unskip after: https://github.com/elastic/kibana/issues/242671
     describe.skip('access control', () => {
       test('applies the access control transform if defined', async () => {
-        const accessControlExportTransform: SavedObjectsExportTransform = (ctx, objects) => {
-          objects.forEach((obj: SavedObject<any>) => {
-            if (typeRegistry.supportsAccessControl(obj.type))
-              obj.attributes.foo = 'modified by access control transform';
-          });
-          return objects;
-        };
+        // const accessControlExportTransform: SavedObjectsExportTransform = (ctx, objects) => {
+        //   objects.forEach((obj: SavedObject<any>) => {
+        //     if (typeRegistry.supportsAccessControl(obj.type))
+        //       obj.attributes.foo = 'modified by access control transform';
+        //   });
+        //   return objects;
+        // };
 
         typeRegistry.registerType({
           name: 'foo',
