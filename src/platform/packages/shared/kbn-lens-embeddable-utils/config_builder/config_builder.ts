@@ -30,8 +30,8 @@ import {
   fromLensStateToAPI as fromGaugeLensStateToAPI,
 } from './transforms/charts/gauge';
 import {
-  fromAPItoLensState as fromTagCloudAPItoLensState,
-  fromLensStateToAPI as fromTagCloudLensStateToAPI,
+  fromAPItoLensState as fromTagcloudAPItoLensState,
+  fromLensStateToAPI as fromTagcloudLensStateToAPI,
 } from './transforms/charts/tagcloud';
 import type { LensApiState } from './schema';
 import { filtersAndQueryToApiFormat, filtersAndQueryToLensState } from './transforms/utils';
@@ -80,8 +80,8 @@ export class LensConfigBuilder {
       fromLensStateToAPI: fromGaugeLensStateToAPI,
     },
     tagcloud: {
-      fromAPItoLensState: fromTagCloudAPItoLensState,
-      fromLensStateToAPI: fromTagCloudLensStateToAPI,
+      fromAPItoLensState: fromTagcloudAPItoLensState,
+      fromLensStateToAPI: fromTagcloudLensStateToAPI,
     },
   } as const;
   private dataViewsAPI: DataViewsCommon | undefined;
