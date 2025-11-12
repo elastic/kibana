@@ -122,6 +122,11 @@ export const createKbnFieldTypes = (): KbnFieldType[] => [
     esTypes: [ES_FIELD_TYPES.HISTOGRAM],
   }),
   new KbnFieldType({
+    name: KBN_FIELD_TYPES.EXPONENTIAL_HISTOGRAM,
+    filterable: true,
+    esTypes: [ES_FIELD_TYPES.EXPONENTIAL_HISTOGRAM],
+  }),
+  new KbnFieldType({
     name: KBN_FIELD_TYPES.CONFLICT,
   }),
   kbnFieldTypeUnknown,
