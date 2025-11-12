@@ -7,8 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createPlaywrightConfig } from '@kbn/scout';
+import { useEffect, useState } from 'react';
+import { useKibana } from './use_kibana';
 
-export default createPlaywrightConfig({
-  testDir: './discovery_tests',
-});
+export const useSpaceId = () => {
+  const { spaces } = useKibana().services;
+
+  const [spaceId, setSpaceId] = useState<string>();
+
+  useEffect(() => {
+    if (spaces) {
+      spaces.getActiveSpace().then((space) => setSpaceId(space.id));
+    }
+  }, [spaces]);
+  return spaceId;
+};
