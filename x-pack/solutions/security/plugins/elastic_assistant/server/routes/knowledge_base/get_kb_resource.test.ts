@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import type { CreateKnowledgeBaseRequestParams } from '@kbn/elastic-assistant-common';
 import { getKbResource } from './get_kb_resource';
 
 describe('getKbResource', () => {
@@ -17,7 +18,7 @@ describe('getKbResource', () => {
 
   it('returns undefined when params is undefined', () => {
     const request = { params: undefined } as unknown as KibanaRequest<
-      { resource?: string | undefined },
+      CreateKnowledgeBaseRequestParams,
       unknown,
       unknown,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -31,7 +32,7 @@ describe('getKbResource', () => {
 
   it('returns undefined when resource is undefined', () => {
     const request = { params: { resource: undefined } } as unknown as KibanaRequest<
-      { resource?: string | undefined },
+      CreateKnowledgeBaseRequestParams,
       unknown,
       unknown,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -45,7 +46,7 @@ describe('getKbResource', () => {
 
   it('returns the decoded resource', () => {
     const request = { params: { resource: 'esql%20query' } } as unknown as KibanaRequest<
-      { resource?: string | undefined },
+      CreateKnowledgeBaseRequestParams,
       unknown,
       unknown,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
