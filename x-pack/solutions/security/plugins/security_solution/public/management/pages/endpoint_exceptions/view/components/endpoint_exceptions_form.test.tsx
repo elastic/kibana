@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { cleanup, fireEvent, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React, { useCallback, useState } from 'react';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
@@ -13,8 +13,8 @@ import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { stubIndexPattern } from '@kbn/data-plugin/common/stubs';
 import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
+import type { EndpointExceptionsFormProps } from './endpoint_exceptions_form';
 import { EndpointExceptionsForm } from './endpoint_exceptions_form';
-import type { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
 import { useFetchIndex } from '../../../../../common/containers/source';
 import { ENDPOINT_EXCEPTIONS_LIST_DEFINITION } from '../../constants';
 import { licenseService } from '../../../../../common/hooks/use_license';
@@ -51,11 +51,11 @@ jest.mock('../../../../components/policy_selector/hooks/use_fetch_policy_data');
  *
  */
 const TestComponentWrapper: typeof EndpointExceptionsForm = (
-  formProps: ArtifactFormComponentProps
+  formProps: EndpointExceptionsFormProps
 ) => {
   const [item, setItem] = useState(formProps.item);
 
-  const handleOnChange: ArtifactFormComponentProps['onChange'] = useCallback(
+  const handleOnChange: EndpointExceptionsFormProps['onChange'] = useCallback(
     (formStatus) => {
       setItem(formStatus.item);
       formProps.onChange(formStatus);
@@ -69,10 +69,10 @@ const TestComponentWrapper: typeof EndpointExceptionsForm = (
 describe('Endpoint exceptions form', () => {
   const formPrefix = 'endpointExceptions-form';
 
-  let formProps: jest.Mocked<ArtifactFormComponentProps>;
+  let formProps: jest.Mocked<EndpointExceptionsFormProps>;
   let mockedContext: AppContextTestRender;
   let renderResult: ReturnType<AppContextTestRender['render']>;
-  let latestUpdatedItem: ArtifactFormComponentProps['item'];
+  let latestUpdatedItem: EndpointExceptionsFormProps['item'];
   let isLatestUpdatedItemValid: boolean;
 
   const getUI = () => <TestComponentWrapper {...formProps} />;
@@ -102,9 +102,9 @@ describe('Endpoint exceptions form', () => {
   }
 
   function createItem(
-    overrides: Partial<ArtifactFormComponentProps['item']> = {}
-  ): ArtifactFormComponentProps['item'] {
-    const defaults: ArtifactFormComponentProps['item'] = {
+    overrides: Partial<EndpointExceptionsFormProps['item']> = {}
+  ): EndpointExceptionsFormProps['item'] {
+    const defaults: EndpointExceptionsFormProps['item'] = {
       id: 'some_item_id',
       list_id: ENDPOINT_EXCEPTIONS_LIST_DEFINITION.list_id ?? 'endpoint_exceptions',
       name: '',
@@ -170,7 +170,7 @@ describe('Endpoint exceptions form', () => {
 
   describe('Details and Conditions', () => {
     it('should display sections', async () => {
-      render();
+      await act(() => render());
       expect(renderResult.queryByText('Details')).toBeInTheDocument();
       expect(renderResult.queryByText('Conditions')).toBeInTheDocument();
       expect(renderResult.queryByText('Comments')).toBeInTheDocument();
@@ -405,7 +405,7 @@ describe('Endpoint exceptions form', () => {
       });
 
       it('should display warning when wildcard is used with IS operator', async () => {
-        render();
+        await act(() => render());
 
         expect(renderResult.getByTestId('wildcardWithWrongOperatorCallout')).toBeInTheDocument();
       });
@@ -435,7 +435,7 @@ describe('Endpoint exceptions form', () => {
           },
         ];
 
-        render();
+        await act(() => render());
 
         expect(renderResult.getByTestId('partialCodeSignatureCallout')).toBeInTheDocument();
       });
@@ -447,7 +447,7 @@ describe('Endpoint exceptions form', () => {
       setValidItemForEditing();
     });
 
-    it('should display form submission errors', () => {
+    it('should display form submission errors', async () => {
       const message = 'Submission failed';
       formProps.error = {
         message,
@@ -455,7 +455,7 @@ describe('Endpoint exceptions form', () => {
         name: 'Error',
         request: {} as Request,
       };
-      render();
+      await act(() => render());
 
       expect(renderResult.getByTestId(`${formPrefix}-submitError`).textContent).toMatch(message);
     });
@@ -469,7 +469,7 @@ describe('Endpoint exceptions form', () => {
           value: '',
         },
       ];
-      render();
+      await act(() => render());
 
       expect(isLatestUpdatedItemValid).toBe(false);
     });
@@ -487,18 +487,15 @@ describe('Endpoint exceptions form', () => {
   });
 
   describe('allowSelectOs prop', () => {
-    it('should show OS selector when allowSelectOs is true', () => {
-      render();
+    it('should show OS selector when allowSelectOs is true', async () => {
+      await act(() => render());
       const osSelect = renderResult.getByTestId(`${formPrefix}-osSelectField`);
       expect(osSelect).toBeInTheDocument();
     });
 
-    it('should hide OS selector when allowSelectOs is false', () => {
-      const propsWithoutOsSelect: ArtifactFormComponentProps & { allowSelectOs: boolean } = {
-        ...formProps,
-        allowSelectOs: false,
-      };
-      renderResult = mockedContext.render(<EndpointExceptionsForm {...propsWithoutOsSelect} />);
+    it('should hide OS selector when allowSelectOs is false', async () => {
+      formProps.allowSelectOs = false;
+      await act(() => render());
       expect(renderResult.queryByTestId(`${formPrefix}-osSelectField`)).not.toBeInTheDocument();
     });
   });
@@ -510,15 +507,15 @@ describe('Endpoint exceptions form', () => {
       mockLicenseService.isPlatinumPlus.mockReturnValue(true);
     });
 
-    it('should not display policy assignment when license is below platinum', () => {
+    it('should not display policy assignment when license is below platinum', async () => {
       mockLicenseService.isPlatinumPlus.mockReturnValue(false);
-      render();
+      await act(() => render());
 
       expect(renderResult.queryByTestId(`${formPrefix}-effectedPolicies`)).not.toBeInTheDocument();
     });
 
-    it('should display policy assignment when license is at least platinum', () => {
-      render();
+    it('should display policy assignment when license is at least platinum', async () => {
+      await act(() => render());
       expect(renderResult.queryByTestId(`${formPrefix}-effectedPolicies`)).toBeInTheDocument();
     });
 
@@ -526,7 +523,7 @@ describe('Endpoint exceptions form', () => {
       formProps.item.tags = ['policy:1234'];
       render();
 
-      renderResult.getByTestId(`${formPrefix}-effectedPolicies-global`).click();
+      await userEvent.click(renderResult.getByTestId(`${formPrefix}-effectedPolicies-global`));
       rerenderWithLatestProps();
 
       expect(formProps.item.tags).toEqual([GLOBAL_ARTIFACT_TAG]);
