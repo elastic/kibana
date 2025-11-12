@@ -10,78 +10,19 @@
 import React, { useMemo, useCallback } from 'react';
 import { z } from '@kbn/zod/v4';
 import { EuiCheckableCard, EuiFormFieldset, EuiFormRow, EuiSpacer } from '@elastic/eui';
-import { getUIMeta } from '../connector_spec_ui';
-import { getWidget } from '.';
-import type { DiscriminatedUnionWidgetProps } from './widget_props';
+import { getUIMeta } from '../../connector_spec_ui';
+import type { DiscriminatedUnionWidgetProps } from '../widget_props';
+import { getDefaultValuesForOption } from './get_default_values';
+import { getWidget } from '..';
 
-const getDiscriminatorFieldValue = (optionSchema: z.ZodObject<any>) => {
-  return optionSchema.shape.type.value;
+const getDiscriminatorFieldValue = (optionSchema: z.ZodObject<z.ZodRawShape>) => {
+  return (optionSchema.shape.type as z.ZodLiteral<string>).value;
 };
 
-const getDefaultValuesForOption = (optionSchema: z.ZodObject<any>) => {
-  const defaultValues: Record<string, any> = {};
-  const discriminatorValue = getDiscriminatorFieldValue(optionSchema);
-
-  defaultValues.type = discriminatorValue;
-
-  Object.entries(optionSchema.shape).forEach(([fieldKey, fieldSchema]: [string, any]) => {
-    if (fieldKey === 'type') return; // Skip discriminator
-
-    try {
-      const parsed = fieldSchema.parse(undefined);
-      defaultValues[fieldKey] = parsed;
-    } catch {
-      if (fieldSchema instanceof z.ZodString) {
-        defaultValues[fieldKey] = '';
-      } else if (fieldSchema instanceof z.ZodNumber) {
-        defaultValues[fieldKey] = 0;
-      } else if (fieldSchema instanceof z.ZodBoolean) {
-        defaultValues[fieldKey] = false;
-      } else if (fieldSchema instanceof z.ZodArray) {
-        defaultValues[fieldKey] = [];
-      } else if (fieldSchema instanceof z.ZodObject) {
-        defaultValues[fieldKey] = {};
-      } else {
-        defaultValues[fieldKey] = '';
-      }
-    }
-  });
-
-  return defaultValues;
-};
-
-export const getDiscriminatedUnionInitialValue = (
-  schema: z.ZodDiscriminatedUnion<any>,
-  defaultValue?: any
-) => {
-  if (!(schema instanceof z.ZodDiscriminatedUnion)) {
-    throw new Error('Schema provided is not a ZodDiscriminatedUnion');
-  }
-
-  const uiMeta = getUIMeta(schema);
-  const metadataDefault = uiMeta?.widgetOptions?.default;
-  const valueToUse = metadataDefault ?? defaultValue;
-
-  if (valueToUse) {
-    const matchingOption = schema.options.find((option: z.ZodObject<any>) => {
-      const discriminatorValue = getDiscriminatorFieldValue(option);
-      return discriminatorValue === valueToUse;
-    });
-
-    if (matchingOption) {
-      return getDefaultValuesForOption(matchingOption);
-    }
-  }
-
-  return getDefaultValuesForOption(schema.options[0]);
-};
-
-export const DiscriminatedUnionField: React.FC<DiscriminatedUnionWidgetProps> = ({
+export const MultiOptionUnionField: React.FC<DiscriminatedUnionWidgetProps> = ({
   fieldId,
   value,
   label,
-  error,
-  isInvalid,
   onChange,
   onBlur,
   schema,
@@ -92,21 +33,20 @@ export const DiscriminatedUnionField: React.FC<DiscriminatedUnionWidgetProps> = 
   touched = {},
 }) => {
   if (!(schema instanceof z.ZodDiscriminatedUnion)) {
-    throw new Error('Schema provided to DiscriminatedUnionField is not a ZodDiscriminatedUnion');
+    throw new Error('Schema provided to MultiOptionUnionField is not a ZodDiscriminatedUnion');
   }
 
-  const discriminatedSchema = schema as any;
+  const discriminatedSchema = schema as z.ZodDiscriminatedUnion<z.ZodObject<z.ZodRawShape>[]>;
   const schemaOptions = discriminatedSchema.options;
   const totalOptions = schemaOptions.length;
 
   const [internalTouchedFields, setInternalTouchedFields] = React.useState<Set<string>>(new Set());
-
   const [internalFieldErrors, setInternalFieldErrors] = React.useState<
     Record<string, string[] | undefined>
   >({});
 
   const validateNestedField = useCallback(
-    (fieldValue: any, subSchema: z.ZodTypeAny): string[] | undefined => {
+    (fieldValue: unknown, subSchema: z.ZodTypeAny): string[] | undefined => {
       try {
         subSchema.parse(fieldValue);
         return undefined;
@@ -121,14 +61,15 @@ export const DiscriminatedUnionField: React.FC<DiscriminatedUnionWidgetProps> = 
   );
 
   const options = useMemo(() => {
-    return schemaOptions.map((optionSchema: z.ZodObject<any>, index: number) => {
+    return schemaOptions.map((optionSchema: z.ZodObject<z.ZodRawShape>, index: number) => {
       const discriminatorValue = getDiscriminatorFieldValue(optionSchema);
       const currentType = typeof value === 'object' && value !== null ? value.type : value;
       const isChecked = currentType === discriminatorValue;
       const checkableCardId = `${fieldId}-option-${discriminatorValue}`;
 
       const optionUiMeta = getUIMeta(optionSchema);
-      const cardLabel = optionUiMeta?.widgetOptions?.label || discriminatorValue;
+      const cardLabel: string =
+        (optionUiMeta?.widgetOptions?.label as string | undefined) || discriminatorValue;
 
       const handleCardChange = () => {
         const newValue = getDefaultValuesForOption(optionSchema);
@@ -143,10 +84,11 @@ export const DiscriminatedUnionField: React.FC<DiscriminatedUnionWidgetProps> = 
         return (
           <>
             {Object.entries(optionSchema.shape).map(
-              ([fieldKey, subSchema]: [string, any], nestedFieldsIndex: number) => {
+              ([fieldKey, subSchema], nestedFieldsIndex: number) => {
                 if (nestedFieldsIndex === 0) return null;
 
-                const nestedUiMeta = getUIMeta(subSchema);
+                const fieldSchema = subSchema as z.ZodTypeAny;
+                const nestedUiMeta = getUIMeta(fieldSchema);
                 const nestedWidget = nestedUiMeta?.widget || 'text';
                 const valueObj =
                   typeof value === 'object' && value !== null ? value : { type: value };
@@ -158,15 +100,12 @@ export const DiscriminatedUnionField: React.FC<DiscriminatedUnionWidgetProps> = 
                 }
 
                 const nestedFieldId = `${fieldId}.${fieldKey}`;
-
                 const nestedFieldTouched =
                   touched[nestedFieldId] || internalTouchedFields.has(fieldKey);
-
                 const nestedFieldError = errors[nestedFieldId] || internalFieldErrors[fieldKey];
-
                 const nestedFieldIsInvalid = !!(nestedFieldTouched && nestedFieldError);
 
-                const handleNestedChange = (nestedFieldIdArg: string, newValue: any) => {
+                const handleNestedChange = (_nestedFieldIdArg: string, newValue: unknown) => {
                   const currentValueObj =
                     typeof value === 'object' && value !== null
                       ? value
@@ -179,8 +118,7 @@ export const DiscriminatedUnionField: React.FC<DiscriminatedUnionWidgetProps> = 
 
                   onChange(fieldId, updatedValue);
 
-                  const fieldErrors = validateNestedField(newValue, subSchema);
-
+                  const fieldErrors = validateNestedField(newValue, fieldSchema);
                   setInternalFieldErrors((prev) => ({
                     ...prev,
                     [fieldKey]: fieldErrors,
@@ -199,7 +137,7 @@ export const DiscriminatedUnionField: React.FC<DiscriminatedUnionWidgetProps> = 
                   }
 
                   const fieldValue = valueObj[fieldKey];
-                  const fieldErrors = validateNestedField(fieldValue, subSchema);
+                  const fieldErrors = validateNestedField(fieldValue, fieldSchema);
 
                   setInternalFieldErrors((prev) => ({
                     ...prev,
@@ -223,7 +161,7 @@ export const DiscriminatedUnionField: React.FC<DiscriminatedUnionWidgetProps> = 
                       isInvalid={nestedFieldIsInvalid}
                       onChange={handleNestedChange}
                       onBlur={handleNestedBlur}
-                      schema={subSchema}
+                      schema={fieldSchema}
                       fullWidth
                     />
                   </React.Fragment>

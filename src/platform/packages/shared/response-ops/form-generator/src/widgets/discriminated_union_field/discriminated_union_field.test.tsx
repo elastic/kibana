@@ -15,7 +15,7 @@ import {
   DiscriminatedUnionField,
   getDiscriminatedUnionInitialValue,
 } from './discriminated_union_field';
-import { withUIMeta } from '../connector_spec_ui';
+import { withUIMeta } from '../../connector_spec_ui';
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <IntlProvider locale="en">{children}</IntlProvider>
@@ -194,10 +194,8 @@ describe('DiscriminatedUnionField', () => {
     fireEvent.change(usernameInput, { target: { value: 'testuser' } });
 
     await waitFor(() => {
-      expect(mockOnChange).toHaveBeenCalledWith('auth', {
-        type: 'basic',
-        username: 'testuser',
-      });
+      // Widget passes full object to onChange, transformation happens at form submit
+      expect(mockOnChange).toHaveBeenCalledWith('auth', { type: 'basic', username: 'testuser' });
     });
   });
 
@@ -345,7 +343,7 @@ describe('DiscriminatedUnionField', () => {
     });
   });
 
-  it('uses discriminator value as label when widgetOptions.label is not provided', () => {
+  it('renders single option union without checkable card', () => {
     const option1 = z.object({
       type: z.literal('basic'),
       username: withUIMeta(z.string(), { widget: 'text', label: 'Username' }),
@@ -365,7 +363,70 @@ describe('DiscriminatedUnionField', () => {
       { wrapper }
     );
 
-    expect(screen.getByText('basic')).toBeDefined();
+    // Single option union should NOT render checkable card
+    expect(screen.queryByLabelText('basic')).toBeNull();
+
+    // But should render the field directly
+    expect(screen.getByText('Username')).toBeDefined();
+  });
+
+  it('handles single option union with field interactions and validation', async () => {
+    const option1 = withUIMeta(
+      z.object({
+        type: z.literal('headers'),
+        key: withUIMeta(z.string().min(1, { message: 'API Key cannot be empty' }), {
+          widget: 'password',
+          widgetOptions: {
+            label: 'API Key',
+          },
+        }),
+      }),
+      {
+        widgetOptions: { label: 'Headers' },
+      }
+    );
+
+    const schema = z.discriminatedUnion('type', [option1]);
+
+    render(
+      <DiscriminatedUnionField
+        fieldId="apiKey"
+        value={{ type: 'headers', key: '' }}
+        label="Authentication"
+        schema={schema}
+        onChange={mockOnChange}
+        onBlur={mockOnBlur}
+      />,
+      { wrapper }
+    );
+
+    // Should render fieldset with label
+    expect(screen.getByText('Authentication')).toBeInTheDocument();
+
+    // Should NOT render checkable card since there's only one option
+    expect(screen.queryByLabelText('Headers')).not.toBeInTheDocument();
+
+    // Should render the password field directly
+    const apiKeyInput = screen.getByTestId('apiKey.key');
+    expect(apiKeyInput).toBeInTheDocument();
+
+    // Fill in the API key
+    fireEvent.change(apiKeyInput, { target: { value: 'my-secret-api-key' } });
+
+    await waitFor(() => {
+      // Widget passes full object to onChange, transformation happens at form submit
+      expect(mockOnChange).toHaveBeenCalledWith('apiKey', {
+        type: 'headers',
+        key: 'my-secret-api-key',
+      });
+    });
+
+    // Blur the field
+    fireEvent.blur(apiKeyInput);
+
+    await waitFor(() => {
+      expect(mockOnBlur).toHaveBeenCalled();
+    });
   });
 
   it('selects the first option by default when no default is specified', () => {
