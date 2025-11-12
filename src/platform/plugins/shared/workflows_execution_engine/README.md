@@ -381,7 +381,6 @@ interface WorkflowDefinition {
   name: string;
   description?: string;
   inputs?: Record<string, InputDefinition>;
-  outputs?: Record<string, OutputDefinition>;
   steps: StepDefinition[];
   timeout?: string; // e.g., "5m", "1h"
 }
