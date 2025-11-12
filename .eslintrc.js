@@ -2662,6 +2662,40 @@ module.exports = {
         '@kbn/eslint/deployment_agnostic_test_context': 'error',
       },
     },
+
+    {
+      // Restrict fs imports in production code (exclude test files, scripts, etc.)
+      files: [
+        'src/platform/plugins/shared/**/*.ts',
+        'x-pack/solutions/**/*.ts',
+        'x-pack/plugins/**/*.ts',
+      ],
+      excludedFiles: [
+        '**/*.{test,spec}.ts',
+        '**/*.test.ts',
+        '**/test/**',
+        '**/tests/**',
+        '**/__tests__/**',
+        '**/scripts/**',
+        '**/e2e/**',
+        '**/cypress/**',
+        '**/ftr_e2e/**',
+        '**/.storybook/**',
+        '**/json_schemas/**',
+        // Can use fs for telemetry collection
+        'src/platform/plugins/shared/telemetry/**',
+      ],
+      rules: {
+        '@kbn/eslint/require_kbn_fs': [
+          'warn',
+          {
+            restrictedMethods: ['writeFile', 'writeFileSync', 'createWriteStream'],
+            disallowedMessage:
+              'Use `@kbn/fs` for file write operations instead of direct `fs` in production code',
+          },
+        ],
+      },
+    },
   ],
 };
 
