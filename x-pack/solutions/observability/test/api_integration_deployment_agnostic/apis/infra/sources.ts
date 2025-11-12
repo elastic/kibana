@@ -22,7 +22,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   const kibanaServer = getService('kibanaServer');
 
-  describe('API /api/metrics/source', () => {
+  describe('API /api/metrics/source', function () {
     // Fails on MKI: https://github.com/elastic/kibana/issues/242627
     this.tags(['failsOnMKI']);
     let supertestWithAdminScope: SupertestWithRoleScopeType;
