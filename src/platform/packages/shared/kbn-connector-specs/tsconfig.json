@@ -15,7 +15,8 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/i18n",
     "@kbn/zod",
+    "@kbn/logging",
+    "@kbn/licensing-types",
   ]
 }
