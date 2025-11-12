@@ -40,6 +40,7 @@ const NODE_SHAPE_ON_HOVER_STACKED_Y_POS_DELTA = 4;
 
 export const HexagonNode = memo<NodeProps>((props: NodeProps) => {
   const {
+    id,
     color,
     icon,
     label,
@@ -138,7 +139,7 @@ export const HexagonNode = memo<NodeProps>((props: NodeProps) => {
       <NodeDetails
         count={count}
         tag={tag}
-        label={label}
+        label={label ? label : id}
         ips={ips}
         countryCodes={countryCodes}
         onIpClick={ipClickHandler}
