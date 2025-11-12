@@ -15,6 +15,7 @@ import { DATE_RANGE, generateLogsData } from '../../../fixtures/generators';
 test.describe('Stream data routing - previewing data', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeAll(async ({ logsSynthtraceEsClient }) => {
     // Generate logs data only
+    await logsSynthtraceEsClient.clean();
     await generateLogsData(logsSynthtraceEsClient)({ index: 'logs' });
   });
 
