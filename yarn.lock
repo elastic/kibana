@@ -6031,6 +6031,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/cps-utils@link:src/platform/packages/shared/kbn-cps-utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/cps@link:src/platform/plugins/shared/cps":
   version "0.0.0"
   uid ""
@@ -6356,6 +6360,10 @@
   uid ""
 
 "@kbn/ecs-data-quality-dashboard@link:x-pack/solutions/security/packages/ecs-data-quality-dashboard":
+  version "0.0.0"
+  uid ""
+
+"@kbn/edot-collector@link:src/platform/packages/shared/kbn-edot-collector":
   version "0.0.0"
   uid ""
 
@@ -9024,6 +9032,10 @@
   uid ""
 
 "@kbn/ts-type-check-cli@link:packages/kbn-ts-type-check-cli":
+  version "0.0.0"
+  uid ""
+
+"@kbn/tsconfig-base@link:packages/kbn-tsconfig/base":
   version "0.0.0"
   uid ""
 
