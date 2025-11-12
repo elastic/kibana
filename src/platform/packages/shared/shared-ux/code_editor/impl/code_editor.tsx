@@ -909,14 +909,16 @@ const UseBug223981FixRepositionSuggestWidget: FC<
 
   return (
     <React.Fragment>
-      <Global
-        // @ts-expect-error -- it's necessary that we apply the important modifier
-        styles={{
-          [`.${suggestWidgetModifierClassName}`]: {
-            visibility: 'hidden !important',
-          },
-        }}
-      />
+      {enableSuggestWidgetRepositioning && (
+        <Global
+          // @ts-expect-error -- it's necessary that we apply the important modifier
+          styles={{
+            [`.${suggestWidgetModifierClassName}`]: {
+              visibility: 'hidden !important',
+            },
+          }}
+        />
+      )}
       <React.Fragment>{children}</React.Fragment>
     </React.Fragment>
   );
