@@ -91,6 +91,7 @@ const triggerControl = async (
   variableType: ESQLVariableType,
   position: monaco.Position | null | undefined,
   uiActions: ESQLEditorDeps['uiActions'],
+  source: string,
   esqlVariables?: ESQLControlVariable[],
   onSaveControl?: ControlsContext['onSaveControl'],
   onCancelControl?: ControlsContext['onCancelControl']
@@ -99,6 +100,7 @@ const triggerControl = async (
     queryString,
     variableType,
     cursorPosition: position,
+    source,
     esqlVariables,
     onSaveControl,
     onCancelControl,
@@ -366,6 +368,7 @@ const ESQLEditorInternal = function ESQLEditor({
         variableType,
         position,
         uiActions,
+        source,
         esqlVariables,
         controlsContext?.onSaveControl,
         controlsContext?.onCancelControl

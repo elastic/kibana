@@ -45,6 +45,7 @@ interface ESQLControlsFlyoutProps {
   closeFlyout: () => void;
   ariaLabelledBy: string;
   currentApp?: string;
+  telemetryTriggerSource: string;
 }
 
 export function ESQLControlsFlyout({
@@ -60,6 +61,7 @@ export function ESQLControlsFlyout({
   closeFlyout,
   ariaLabelledBy,
   currentApp,
+  telemetryTriggerSource,
 }: ESQLControlsFlyoutProps) {
   // ?? or ?
   const [variableNamePrefix, setVariableNamePrefix] = useState(
@@ -171,8 +173,8 @@ export function ESQLControlsFlyout({
         }
       } else {
         await onSaveControl?.(controlState, '');
-        // esql_control_config_saved
       }
+      telemetryService.trackEsqlControlConfigSaved(variableType, telemetryTriggerSource);
     }
     closeFlyout();
   }, [

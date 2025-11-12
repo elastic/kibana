@@ -37,6 +37,7 @@ interface Context {
   cursorPosition?: monaco.Position;
   initialState?: ESQLControlState;
   parentApi?: unknown;
+  source: string;
 }
 
 export class CreateESQLControlAction implements Action<Context> {
@@ -73,6 +74,7 @@ export class CreateESQLControlAction implements Action<Context> {
     cursorPosition,
     initialState,
     parentApi,
+    source,
   }: Context) {
     if (!isActionCompatible(this.core, variableType)) {
       throw new IncompatibleActionError();
@@ -106,6 +108,7 @@ export class CreateESQLControlAction implements Action<Context> {
           initialState,
           closeFlyout,
           currentApp,
+          source,
         });
       },
       flyoutProps: {

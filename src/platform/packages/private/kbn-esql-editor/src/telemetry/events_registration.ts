@@ -23,6 +23,7 @@ export const ESQL_QUERY_SUBMITTED = 'esql.query_submitted';
 export const ESQL_RECOMMENDED_QUERY_CLICKED = 'esql.recommended_query_clicked';
 export const ESQL_CONTROL_CONFIG_OPENED = 'esql.control_config_opened';
 export const ESQL_CONTROL_CONFIG_CANCELLED = 'esql.control_config_cancelled';
+export const ESQL_CONTROL_CONFIG_SAVED = 'esql.control_config_saved';
 
 /**
  * Registers the esql editor analytics events.
@@ -184,6 +185,25 @@ export const registerESQLEditorAnalyticsEvents = once((analytics: AnalyticsServi
         _meta: {
           description:
             'The reason why the control configuration was cancelled. Possible values are: cancel_button|close_button|escape_key',
+        },
+      },
+    },
+  });
+  analytics.registerEventType({
+    eventType: ESQL_CONTROL_CONFIG_SAVED,
+    schema: {
+      control_kind: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'The type of control that was created. Possible values are: multi_values|time_literal|fields|values|functions',
+        },
+      },
+      trigger_source: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'The way how the control flyout was opened. Possible values are: question_mark|smart_suggestion',
         },
       },
     },
