@@ -65,6 +65,10 @@ export const ContextMenu = ({
     config: { isPackagedEnvironment },
   } = useServicesContext();
 
+  // Detect OS for keyboard shortcut display
+  const isMac = navigator.platform.toLowerCase().includes('mac');
+  const modifierKey = isMac ? '⌘' : 'Ctrl';
+
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isRequestConverterLoading, setRequestConverterLoading] = useState(false);
   const [isLanguageSelectorVisible, setLanguageSelectorVisibility] = useState(false);
@@ -241,13 +245,13 @@ export const ContextMenu = ({
             key="Copy to language"
             data-test-subj="consoleMenuCopyToLanguage"
             id="copyToLanguage"
-            disabled={!window.navigator?.clipboard || isRequestConverterLoading}
+            disabled={!window.navigator?.clipboard}
             onClick={() => {
               onCopyAsSubmit();
             }}
             icon={isRequestConverterLoading ? <EuiLoadingSpinner size="m" /> : 'copyClipboard'}
           >
-            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
               <EuiFlexItem grow={false}>
                 <FormattedMessage
                   id="console.monaco.requestOptions.copyToLanguageButtonLabel"
@@ -289,10 +293,19 @@ export const ContextMenu = ({
       onClick={handleAutoIndent}
       icon="kqlFunction"
     >
-      <FormattedMessage
-        id="console.monaco.requestOptions.autoIndentButtonLabel"
-        defaultMessage="Auto indent"
-      />
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <FormattedMessage
+            id="console.monaco.requestOptions.autoIndentButtonLabel"
+            defaultMessage="Auto indent"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiBadge color="hollow" data-test-subj="consoleMenuAutoIndentShortcut">
+            {modifierKey} + I
+          </EuiBadge>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiContextMenuItem>,
     <EuiContextMenuItem
       key="Open documentation"
@@ -300,10 +313,19 @@ export const ContextMenu = ({
       onClick={openDocs}
       icon="documentation"
     >
-      <FormattedMessage
-        id="console.monaco.requestOptions.openDocumentationButtonLabel"
-        defaultMessage="Open API reference"
-      />
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <FormattedMessage
+            id="console.monaco.requestOptions.openDocumentationButtonLabel"
+            defaultMessage="Open API reference"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiBadge color="hollow" data-test-subj="consoleMenuOpenDocsShortcut">
+            {modifierKey} + /
+          </EuiBadge>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiContextMenuItem>,
   ];
 

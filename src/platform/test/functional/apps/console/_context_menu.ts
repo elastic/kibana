@@ -206,5 +206,31 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(request).to.be.eql('GET _search\n{\n  "query": {\n    "match_all": {}\n  }\n}');
       });
     });
+
+    it('should display keyboard shortcut badges for Auto indent and API reference', async () => {
+      await PageObjects.console.clickContextMenu();
+
+      // Check Auto indent shortcut badge exists
+      const autoIndentShortcutExists = await testSubjects.exists('consoleMenuAutoIndentShortcut');
+      expect(autoIndentShortcutExists).to.be(true);
+
+      // Get Auto indent shortcut badge text
+      const autoIndentShortcut = await testSubjects.find('consoleMenuAutoIndentShortcut');
+      const autoIndentShortcutText = await autoIndentShortcut.getVisibleText();
+
+      // Check it shows either Cmd+I (Mac) or Ctrl+I (Windows/Linux)
+      expect(autoIndentShortcutText).to.match(/^(⌘|Ctrl) \+ I$/);
+
+      // Check API reference shortcut badge exists
+      const openDocsShortcutExists = await testSubjects.exists('consoleMenuOpenDocsShortcut');
+      expect(openDocsShortcutExists).to.be(true);
+
+      // Get API reference shortcut badge text
+      const openDocsShortcut = await testSubjects.find('consoleMenuOpenDocsShortcut');
+      const openDocsShortcutText = await openDocsShortcut.getVisibleText();
+
+      // Check it shows either Cmd+/ (Mac) or Ctrl+/ (Windows/Linux)
+      expect(openDocsShortcutText).to.match(/^(⌘|Ctrl) \+ \/$/);
+    });
   });
 }
