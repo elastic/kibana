@@ -1195,11 +1195,19 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
         ruleId ? this.deleteRuleById({ roleAuthc, ruleId }) : this.deleteRules({ roleAuthc }),
         // Delete all documents in the alert index if specified
         alertIndexName
-          ? es.deleteByQuery({
-              index: alertIndexName,
-              conflicts: 'proceed',
-              query: { match_all: {} },
-            })
+          ? es
+              .deleteByQuery({
+                index: alertIndexName,
+                conflicts: 'proceed',
+                refresh: true,
+                query: { match_all: {} },
+              })
+              .then(async () => {
+                // Explicitly refresh the index to ensure deletions are visible
+                await es.indices.refresh({ index: alertIndexName }).catch(() => {
+                  // Ignore errors if index doesn't exist
+                });
+              })
           : Promise.resolve(),
         // Delete event logs for the specified consumer if provided
         consumer

@@ -18,3 +18,5 @@ export const tags = {
   researchAgent: 'research-agent',
   answerAgent: 'answer-agent',
 };
+
+export const BROWSER_TOOL_PREFIX = 'browser_';

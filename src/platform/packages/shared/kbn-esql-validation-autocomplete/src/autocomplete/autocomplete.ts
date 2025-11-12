@@ -56,8 +56,12 @@ export async function suggest(
     return [];
   }
 
+  // Use the appropriate AST context for field retrieval
+  // When in a subquery, use the subquery's AST to get only its fields
+  const astForFields = astContext.isCursorInSubquery ? astContext.astForContext : root;
+
   const { getColumnsByType, getColumnMap } = getColumnsByTypeRetriever(
-    getQueryForFields(correctedQuery, root),
+    getQueryForFields(correctedQuery, astForFields),
     innerText,
     resourceRetriever
   );
@@ -74,8 +78,16 @@ export async function suggest(
     // propose main commands here
     // resolve particular commands suggestions after
     // filter source commands if already defined
+
+    const isStartingSubquery =
+      astContext.isCursorInSubquery && !astContext.astForContext.commands.length;
+
     const commands = esqlCommandRegistry
-      .getAllCommands()
+      .getAllCommands({
+        isCursorInSubquery: astContext.isCursorInSubquery,
+        isStartingSubquery,
+        queryContainsSubqueries: astContext.queryContainsSubqueries,
+      })
       .filter((command) => {
         const license = command.metadata?.license;
         const observabilityTier = command.metadata?.observabilityTier;
@@ -96,8 +108,13 @@ export async function suggest(
       .map((command) => command.name);
 
     const suggestions = getCommandAutocompleteDefinitions(commands);
-    if (!root.commands.length) {
-      // Display the recommended queries if there are no commands (empty state)
+
+    if (!astContext.astForContext.commands.length) {
+      if (isStartingSubquery) {
+        return suggestions;
+      }
+
+      // Root level empty state: show source commands + recommended queries
       const recommendedQueriesSuggestions: ISuggestionItem[] = [];
       if (getSources) {
         let fromCommand = '';
@@ -193,6 +210,7 @@ async function getSuggestionsWithinCommandExpression(
     node?: ESQLAstItem;
     option?: ESQLCommandOption;
     containingFunction?: ESQLFunction;
+    isCursorInSubquery: boolean;
   },
   getColumnsByType: GetColumnsByTypeFn,
   getColumnMap: GetColumnMapFn,
@@ -229,10 +247,11 @@ async function getSuggestionsWithinCommandExpression(
     ...references,
     ...additionalCommandContext,
     activeProduct: callbacks?.getActiveProduct?.(),
+    isCursorInSubquery: astContext.isCursorInSubquery,
   };
 
   // does it make sense to have a different context per command?
-  return commandDefinition.methods.autocomplete(
+  const suggestions = await commandDefinition.methods.autocomplete(
     fullText,
     astContext.command,
     {
@@ -250,4 +269,6 @@ async function getSuggestionsWithinCommandExpression(
     context,
     offset
   );
+
+  return suggestions;
 }

@@ -23,3 +23,9 @@ export type {
 
 export { FieldMetadata } from './fields_metadata/models/field_metadata';
 export { FieldsMetadataDictionary } from './fields_metadata/models/fields_metadata_dictionary';
+export {
+  createProxiedFieldsMap,
+  createProxiedPlainFields,
+  extractPrefixParts,
+  SUPPORTED_PREFIXES,
+} from './fields_metadata/utils/create_proxied_fields_map';
