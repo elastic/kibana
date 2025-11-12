@@ -6,7 +6,7 @@
  */
 
 import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
-import { bulkUpdateTagsRoute } from './tags';
+import { bulkUpdateTagsRoute } from './bulk_update_tags';
 import { requestContextMock } from './__mocks__/request_context';
 import { requestMock, serverMock } from './__mocks__/server';
 

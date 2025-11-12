@@ -103,7 +103,7 @@ export default ({ getService }: FtrProviderContext) => {
       authorizedUsers.forEach(({ username, password }) => {
         it(`${username} should bulk update alert tags with given id ${alertId} in ${space}/${index}`, async () => {
           const { body: updated } = await supertestWithoutAuth
-            .patch(`${getSpaceUrlPrefix(space)}${TEST_URL}/tags`)
+            .post(`${getSpaceUrlPrefix(space)}${TEST_URL}/tags`)
             .auth(username, password)
             .set('kbn-xsrf', 'true')
             .send({
@@ -120,7 +120,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         it(`${username} should bulk update alert tags which match KQL query string in ${space}/${index}`, async () => {
           const { body: updated } = await supertestWithoutAuth
-            .patch(`${getSpaceUrlPrefix(space)}${TEST_URL}/tags`)
+            .post(`${getSpaceUrlPrefix(space)}${TEST_URL}/tags`)
             .auth(username, password)
             .set('kbn-xsrf', 'true')
             .send({
@@ -134,7 +134,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         it(`${username} should bulk update alert tags which match query in DSL in ${space}/${index}`, async () => {
           const { body: updated } = await supertestWithoutAuth
-            .patch(`${getSpaceUrlPrefix(space)}${TEST_URL}/tags`)
+            .post(`${getSpaceUrlPrefix(space)}${TEST_URL}/tags`)
             .auth(username, password)
             .set('kbn-xsrf', 'true')
             .send({
@@ -150,7 +150,7 @@ export default ({ getService }: FtrProviderContext) => {
       unauthorizedUsers.forEach(({ username, password }) => {
         it(`${username} should NOT be able to bulk update alert tags with given id ${alertId} in ${space}/${index}`, async () => {
           const res = await supertestWithoutAuth
-            .patch(`${getSpaceUrlPrefix(space)}${TEST_URL}/tags`)
+            .post(`${getSpaceUrlPrefix(space)}${TEST_URL}/tags`)
             .auth(username, password)
             .set('kbn-xsrf', 'true')
             .send({

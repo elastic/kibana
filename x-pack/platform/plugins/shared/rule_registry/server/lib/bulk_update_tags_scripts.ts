@@ -28,3 +28,27 @@ export const REMOVE_TAGS_UPDATE_SCRIPT = `
     }
   }
 `;
+
+export const getBulkUpdateTagsPainlessScript = (
+  add?: string[] | null,
+  remove?: string[] | null
+) => {
+  const scriptOps: string[] = [];
+  const params: Record<string, string[]> = {};
+
+  if (add != null && add.length > 0) {
+    params.add = add;
+    scriptOps.push(ADD_TAGS_UPDATE_SCRIPT);
+  }
+
+  if (remove != null && remove.length > 0) {
+    params.remove = remove;
+    scriptOps.push(REMOVE_TAGS_UPDATE_SCRIPT);
+  }
+
+  return {
+    source: scriptOps.join('\n'),
+    lang: 'painless',
+    params: Object.keys(params).length > 0 ? params : undefined,
+  };
+};

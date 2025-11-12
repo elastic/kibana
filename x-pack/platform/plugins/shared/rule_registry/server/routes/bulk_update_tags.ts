@@ -14,7 +14,7 @@ import type { RacRequestHandlerContext } from '../types';
 import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
 
 export const bulkUpdateTagsRoute = (router: IRouter<RacRequestHandlerContext>) => {
-  router.patch(
+  router.post(
     {
       path: `${BASE_RAC_ALERTS_API_PATH}/tags`,
       validate: {
