@@ -9,8 +9,17 @@
 
 import type { IconType } from '@elastic/eui';
 
+/**
+ * Badge types that can be displayed next to navigation items.
+ * - 'beta': Blue badge for features in beta testing
+ * - 'techPreview': Purple badge for technical preview features
+ */
 export type BadgeType = 'beta' | 'techPreview';
 
+/**
+ * A navigation item within a secondary/nested menu.
+ * Secondary items appear when a primary menu item with sections is clicked or hovered.
+ */
 export interface SecondaryMenuItem {
   /**
    * The URL for the menu item link.
@@ -38,6 +47,10 @@ export interface SecondaryMenuItem {
   isExternal?: boolean;
 }
 
+/**
+ * A section grouping within a secondary menu.
+ * Sections help organize related secondary menu items with optional headers.
+ */
 export interface SecondaryMenuSection {
   /**
    * The unique identifier of the secondary menu section.
@@ -53,6 +66,10 @@ export interface SecondaryMenuSection {
   label?: string;
 }
 
+/**
+ * A primary navigation menu item that appears in the main navigation sidebar.
+ * Can optionally contain nested secondary menu sections.
+ */
 export interface MenuItem {
   /**
    * The URL for the menu item link.
@@ -84,6 +101,10 @@ export interface MenuItem {
   sections?: SecondaryMenuSection[];
 }
 
+/**
+ * The complete navigation structure containing primary and footer menu items.
+ * This is the main data structure passed to the Navigation component.
+ */
 export interface NavigationStructure {
   /**
    * The items to be displayed in the navigation footer.
