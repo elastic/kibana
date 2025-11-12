@@ -8,7 +8,7 @@
  */
 
 import Path from 'path';
-import { setTimeout } from 'timers/promises';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -107,25 +107,53 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
 
         let shutdownEs;
         try {
-          if (process.env.TEST_ES_DISABLE_STARTUP !== 'true') {
-            shutdownEs = await runElasticsearch({ ...options, log, config, onEarlyExit });
-            if (abortCtrl.signal.aborted) {
-              return;
-            }
+          log.info('🚀 Starting Elasticsearch and Kibana in parallel...');
+
+          // Start both ES and Kibana in parallel
+          // Kibana has built-in retry logic for ES connections, so it will wait for ES to be ready
+          // Use Promise.allSettled to ensure both complete (or fail) before proceeding
+          const results = await Promise.allSettled([
+            // Start Elasticsearch - this completes when ES cluster health is yellow/green
+            process.env.TEST_ES_DISABLE_STARTUP !== 'true'
+              ? runElasticsearch({ ...options, log, config, onEarlyExit }).then((shutdown) => {
+                  log.info('✅ Elasticsearch is ready');
+                  return shutdown;
+                })
+              : Promise.resolve(undefined),
+
+            // Start Kibana - will retry ES connections until successful
+            runKibanaServer({
+              procs,
+              config,
+              logsDir: options.logsDir,
+              installDir: options.installDir,
+              onEarlyExit,
+              extraKbnOpts: [
+                config.get('serverless')
+                  ? '--server.versioned.versionResolution=newest'
+                  : '--server.versioned.versionResolution=oldest',
+              ],
+            }).then(() => {
+              log.info('✅ Kibana is ready');
+            }),
+          ]);
+
+          // Check if either service failed to start
+          const [esResult, kibanaResult] = results;
+
+          if (esResult.status === 'rejected') {
+            throw esResult.reason;
           }
 
-          await runKibanaServer({
-            procs,
-            config,
-            logsDir: options.logsDir,
-            installDir: options.installDir,
-            onEarlyExit,
-            extraKbnOpts: [
-              config.get('serverless')
-                ? '--server.versioned.versionResolution=newest'
-                : '--server.versioned.versionResolution=oldest',
-            ],
-          });
+          if (kibanaResult.status === 'rejected') {
+            throw kibanaResult.reason;
+          }
+
+          shutdownEs = esResult.value;
+
+          if (abortCtrl.signal.aborted) {
+            return;
+          }
 
           const startRemoteKibana = config.get('kbnTestServer.startRemoteKibana');
 
@@ -175,7 +203,7 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
             const delay = config.get('kbnTestServer.delayShutdown');
             if (typeof delay === 'number') {
               log.info('Delaying shutdown of Kibana for', delay, 'ms');
-              await setTimeout(delay);
+              await setTimeoutAsync(delay);
             }
 
             await procs.stop('kibana');
