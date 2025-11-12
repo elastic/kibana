@@ -43,8 +43,8 @@ export function isReloadTimeFetchContextEqual(
 }
 
 export const isProjectRoutingEqualForFetch = (
-  currentProjectRouting: string | undefined,
-  lastProjectRouting: string | undefined
+  currentProjectRouting: ProjectRouting,
+  lastProjectRouting: ProjectRouting
 ) => {
   return currentProjectRouting === lastProjectRouting;
 };

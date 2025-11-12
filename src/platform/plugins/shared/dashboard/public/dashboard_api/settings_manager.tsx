@@ -18,6 +18,7 @@ export type DashboardSettings = Required<DashboardOptions> & {
   description?: DashboardState['description'];
   tags: DashboardState['tags'];
   timeRestore: boolean;
+  projectRoutingRestore: boolean;
   title: DashboardState['title'];
 };
 
@@ -26,6 +27,7 @@ const DEFAULT_SETTINGS: WithAllKeys<DashboardSettings> = {
   description: undefined,
   tags: [],
   timeRestore: false,
+  projectRoutingRestore: false,
   title: '',
 };
 
@@ -37,6 +39,7 @@ const comparators: StateComparators<DashboardSettings> = {
   syncCursor: 'referenceEquality',
   syncTooltips: 'referenceEquality',
   timeRestore: 'referenceEquality',
+  projectRoutingRestore: 'referenceEquality',
   useMargins: 'referenceEquality',
   tags: 'deepEquality',
 };
@@ -47,6 +50,8 @@ function deserializeState(state: DashboardState) {
     description: state.description,
     tags: state.tags,
     timeRestore: Boolean(state.timeRange),
+    // projectRoutingRestore should be true if projectRouting exists (even if null)
+    projectRoutingRestore: state.projectRouting !== undefined,
     title: state.title,
   };
 }
@@ -59,7 +64,8 @@ export function initializeSettingsManager(initialState: DashboardState) {
   );
 
   function serializeSettings() {
-    const { description, tags, timeRestore, title, ...options } = stateManager.getLatestState();
+    const { description, tags, timeRestore, projectRoutingRestore, title, ...options } =
+      stateManager.getLatestState();
     return {
       ...(description && { description }),
       tags,
@@ -87,6 +93,7 @@ export function initializeSettingsManager(initialState: DashboardState) {
       },
       setTags: stateManager.api.setTags,
       timeRestore$: stateManager.api.timeRestore$,
+      projectRoutingRestore$: stateManager.api.projectRoutingRestore$,
       title$: stateManager.api.title$,
     },
     internalApi: {
@@ -97,12 +104,13 @@ export function initializeSettingsManager(initialState: DashboardState) {
           map(() => stateManager.getLatestState()),
           combineLatestWith(lastSavedState$),
           map(([latestState, lastSavedState]) => {
-            const { description, tags, timeRestore, title, ...optionDiffs } = diffComparators(
-              comparators,
-              deserializeState(lastSavedState),
-              latestState,
-              DEFAULT_SETTINGS
-            );
+            const { description, tags, timeRestore, projectRoutingRestore, title, ...optionDiffs } =
+              diffComparators(
+                comparators,
+                deserializeState(lastSavedState),
+                latestState,
+                DEFAULT_SETTINGS
+              );
             // options needs to contain all values and not just diffs since is spread into saved state
             const options = Object.keys(optionDiffs).length
               ? { ...serializeSettings().options, ...optionDiffs }
@@ -112,6 +120,7 @@ export function initializeSettingsManager(initialState: DashboardState) {
               ...(tags && { tags }),
               ...(title && { title }),
               ...(typeof timeRestore === 'boolean' && { timeRestore }),
+              ...(typeof projectRoutingRestore === 'boolean' && { projectRoutingRestore }),
               ...(options && { options }),
             };
           })

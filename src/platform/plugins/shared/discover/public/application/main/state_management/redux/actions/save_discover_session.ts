@@ -33,6 +33,7 @@ type AdHocDataViewAction = 'copy' | 'replace';
 export interface SaveDiscoverSessionThunkParams {
   newTitle: string;
   newTimeRestore: boolean;
+  newProjectRoutingRestore: boolean;
   newCopyOnSave: boolean;
   newDescription: string;
   newTags: string[];
@@ -47,6 +48,7 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
       newTitle,
       newCopyOnSave,
       newTimeRestore,
+      newProjectRoutingRestore,
       newDescription,
       newTags,
       isTitleDuplicateConfirmed,
@@ -86,6 +88,8 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
             timeRestore: newTimeRestore,
             timeRange: newTimeRestore ? tab.globalState.timeRange : undefined,
             refreshInterval: newTimeRestore ? tab.globalState.refreshInterval : undefined,
+            projectRoutingRestore: newProjectRoutingRestore,
+            projectRouting: newProjectRoutingRestore ? tab.globalState.projectRouting : undefined,
           });
         } else {
           updatedTab = cloneDeep(
@@ -99,6 +103,15 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
             // assign the current time range of the selected tab if time restore is enabled and no time range was set yet for this tab
             updatedTab.timeRange = selectedTab.globalState.timeRange;
             updatedTab.refreshInterval = selectedTab.globalState.refreshInterval;
+          }
+          updatedTab.projectRoutingRestore = newProjectRoutingRestore;
+          if (
+            newProjectRoutingRestore &&
+            !updatedTab.projectRouting &&
+            selectedTab?.globalState.projectRouting
+          ) {
+            // assign the current project routing of the selected tab if project routing restore is enabled and no project routing was set yet for this tab
+            updatedTab.projectRouting = selectedTab.globalState.projectRouting;
           }
         }
 

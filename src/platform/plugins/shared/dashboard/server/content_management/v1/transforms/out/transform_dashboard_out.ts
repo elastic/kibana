@@ -64,8 +64,8 @@ export function transformDashboardOut(
     }),
     ...(tags && tags.length && { tags }),
     ...(timeRange && { timeRange }),
-    ...(projectRouting && { projectRouting }),
     title: title ?? '',
+    ...(projectRouting !== undefined && { projectRouting }),
     ...(version && { version }),
   };
 }

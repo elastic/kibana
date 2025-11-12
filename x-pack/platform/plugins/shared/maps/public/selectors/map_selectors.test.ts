@@ -92,6 +92,7 @@ describe('getDataFilters', () => {
       embeddableSearchContext,
       searchSessionId,
       searchSessionMapBuffer,
+      undefined,
       isReadOnly,
       executionContext
     );
@@ -109,6 +110,7 @@ describe('getDataFilters', () => {
       filters,
       embeddableSearchContext,
       searchSessionId,
+      undefined,
       undefined,
       isReadOnly,
       executionContext

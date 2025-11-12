@@ -33,7 +33,7 @@ export const sectionSchema = schema.object({
 export const dashboardAttributesSchema = dashboardAttributesSchemaV2.extends(
   {
     sections: schema.maybe(schema.arrayOf(sectionSchema)),
-    projectRouting: schema.maybe(schema.string()),
+    projectRouting: schema.maybe(schema.nullable(schema.string())),
   },
   { unknowns: 'ignore' }
 );

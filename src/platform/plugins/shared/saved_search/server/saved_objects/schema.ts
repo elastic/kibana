@@ -185,10 +185,34 @@ export const SCHEMA_SEARCH_MODEL_VERSION_8 = SCHEMA_SEARCH_MODEL_VERSION_7.exten
   tabs: schema.arrayOf(SCHEMA_DISCOVER_SESSION_TAB_VERSION_8, { minSize: 1 }),
 });
 
+export const PROJECT_ROUTING_SCHEMA = {
+  projectRoutingRestore: schema.maybe(schema.boolean()),
+  projectRouting: schema.maybe(
+    schema.nullable(
+      schema.object({
+        id: schema.string(),
+        name: schema.maybe(schema.string()),
+      })
+    )
+  ),
+};
+
+const DISCOVER_SESSION_TAB_ATTRIBUTES_VERSION_9 =
+  DISCOVER_SESSION_TAB_ATTRIBUTES_VERSION_8.extends(PROJECT_ROUTING_SCHEMA);
+
+const SCHEMA_DISCOVER_SESSION_TAB_VERSION_9 = SCHEMA_DISCOVER_SESSION_TAB.extends({
+  attributes: DISCOVER_SESSION_TAB_ATTRIBUTES_VERSION_9,
+});
+
+export const SCHEMA_SEARCH_MODEL_VERSION_9 = SCHEMA_SEARCH_MODEL_VERSION_8.extends({
+  ...PROJECT_ROUTING_SCHEMA,
+  tabs: schema.arrayOf(SCHEMA_DISCOVER_SESSION_TAB_VERSION_9, { minSize: 1 }),
+});
+
 // We need to flatten the schema type here to avoid this error:
 // "Type instantiation is excessively deep and possibly infinite",
 // since each `extends()` call wraps the previous type until we hit the depth limit.
-const { tabs: tabsV8, ...restV8Props } = SCHEMA_SEARCH_MODEL_VERSION_8.getPropSchemas();
+const { tabs: tabsV9, ...restV9Props } = SCHEMA_SEARCH_MODEL_VERSION_9.getPropSchemas();
 
 // This schema temporarily makes `tabs` optional again, to work around an issue
 // where saved objects created via the deprecated saved objects API without a
@@ -197,10 +221,10 @@ const { tabs: tabsV8, ...restV8Props } = SCHEMA_SEARCH_MODEL_VERSION_8.getPropSc
 // It should not be relied on in application code or used for the content
 // management validation schema, and `tabs` should be required again once Core
 // provides a way to fix the underlying issue at the saved objects API level.
-export const SCHEMA_SEARCH_MODEL_VERSION_9_SO_API_WORKAROUND = schema.object({
-  ...restV8Props,
-  tabs: schema.maybe(tabsV8),
+export const SCHEMA_SEARCH_MODEL_VERSION_10_SO_API_WORKAROUND = schema.object({
+  ...restV9Props,
+  tabs: schema.maybe(tabsV9),
 });
 
-export type DiscoverSessionTabAttributes = TypeOf<typeof DISCOVER_SESSION_TAB_ATTRIBUTES_VERSION_8>;
-export type DiscoverSessionTab = TypeOf<typeof SCHEMA_DISCOVER_SESSION_TAB_VERSION_8>;
+export type DiscoverSessionTabAttributes = TypeOf<typeof DISCOVER_SESSION_TAB_ATTRIBUTES_VERSION_9>;
+export type DiscoverSessionTab = TypeOf<typeof SCHEMA_DISCOVER_SESSION_TAB_VERSION_9>;

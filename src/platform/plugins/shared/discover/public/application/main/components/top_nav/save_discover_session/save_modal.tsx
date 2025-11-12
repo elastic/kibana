@@ -16,17 +16,23 @@ import { SavedObjectSaveModal } from '@kbn/saved-objects-plugin/public';
 import type { DiscoverServices } from '../../../../../build_services';
 
 export type DiscoverSessionSaveModalOnSaveCallback = (
-  props: OnSaveProps & { newTimeRestore: boolean; newTags: string[] }
+  props: OnSaveProps & {
+    newTimeRestore: boolean;
+    newProjectRoutingRestore: boolean;
+    newTags: string[];
+  }
 ) => Promise<SaveResult>;
 
 export interface DiscoverSessionSaveModalProps {
   isTimeBased: boolean;
+  hasProjectRouting: boolean;
   services: DiscoverServices;
   title: string;
   showCopyOnSave: boolean;
   initialCopyOnSave?: boolean;
   description?: string;
   timeRestore?: boolean;
+  projectRoutingRestore?: boolean;
   tags: string[];
   onSave: DiscoverSessionSaveModalOnSaveCallback;
   onClose: () => void;
@@ -35,6 +41,7 @@ export interface DiscoverSessionSaveModalProps {
 
 export const DiscoverSessionSaveModal: React.FC<DiscoverSessionSaveModalProps> = ({
   isTimeBased,
+  hasProjectRouting,
   services: { savedObjectsTagging, discoverFeatureFlags },
   title,
   description,
@@ -42,11 +49,15 @@ export const DiscoverSessionSaveModal: React.FC<DiscoverSessionSaveModalProps> =
   showCopyOnSave,
   initialCopyOnSave,
   timeRestore: savedTimeRestore,
+  projectRoutingRestore: savedProjectRoutingRestore,
   onSave,
   onClose,
   managed,
 }) => {
   const [timeRestore, setTimeRestore] = useState(Boolean(isTimeBased && savedTimeRestore));
+  const [projectRoutingRestore, setProjectRoutingRestore] = useState(
+    Boolean(hasProjectRouting && savedProjectRoutingRestore)
+  );
   const [currentTags, setCurrentTags] = useState(tags);
   const tabsEnabled = discoverFeatureFlags.getTabsEnabled();
 
@@ -54,6 +65,7 @@ export const DiscoverSessionSaveModal: React.FC<DiscoverSessionSaveModalProps> =
     await onSave({
       ...params,
       newTimeRestore: timeRestore,
+      newProjectRoutingRestore: projectRoutingRestore,
       newTags: currentTags,
     });
   };
@@ -90,10 +102,34 @@ export const DiscoverSessionSaveModal: React.FC<DiscoverSessionSaveModalProps> =
     </EuiFormRow>
   ) : null;
 
+  const projectRoutingSwitch = hasProjectRouting ? (
+    <EuiFormRow
+      helpText={
+        <FormattedMessage
+          id="discover.topNav.saveModal.storeProjectRoutingWithSearchToggleDescription"
+          defaultMessage="Update the project routing to the current selection when using this session."
+        />
+      }
+    >
+      <EuiSwitch
+        data-test-subj="storeProjectRoutingWithSearch"
+        checked={projectRoutingRestore}
+        onChange={(event) => setProjectRoutingRestore(event.target.checked)}
+        label={
+          <FormattedMessage
+            id="discover.topNav.saveModal.storeProjectRoutingWithSearchToggleLabel"
+            defaultMessage="Store project routing with Discover session"
+          />
+        }
+      />
+    </EuiFormRow>
+  ) : null;
+
   const options = (
     <>
       {tagSelector}
       {timeSwitch}
+      {projectRoutingSwitch}
     </>
   );
 

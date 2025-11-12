@@ -14,6 +14,7 @@ import type {
   SerializedSearchSourceFields,
   TimeRange,
 } from '@kbn/data-plugin/common';
+import type { ProjectRouting } from '@kbn/es-query';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsResolveResponse } from '@kbn/core/server';
 import type { SerializableRecord } from '@kbn/utility-types';
@@ -121,6 +122,8 @@ export interface DiscoverSessionTab {
   timeRestore?: boolean;
   timeRange?: Pick<TimeRange, 'from' | 'to'>;
   refreshInterval?: RefreshInterval;
+  projectRoutingRestore?: boolean;
+  projectRouting?: ProjectRouting | null;
   rowsPerPage?: number;
   sampleSize?: number;
   breakdownField?: string;

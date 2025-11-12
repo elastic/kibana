@@ -161,7 +161,7 @@ export function getDashboardStateSchema() {
     panels: schema.arrayOf(schema.oneOf([getPanelSchema(), getSectionSchema()]), {
       defaultValue: [],
     }),
-    projectRouting: schema.maybe(schema.string()),
+    projectRouting: schema.maybe(schema.nullable(schema.string())),
     query: schema.maybe(querySchema),
     refreshInterval: schema.maybe(refreshIntervalSchema),
     tags: schema.maybe(

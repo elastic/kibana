@@ -13,9 +13,10 @@
  * Used in serverless environments to control whether searches are scoped to a single project or span multiple projects.
  *
  * Examples:
- * - undefined - Search across all projects (default)
+ * - undefined - take the default behavior as per parent/space configuration
+ * - null - Search across all projects 
  * - '_alias:_origin' - Search only in the current project
  *
  * @public
  */
-export type ProjectRouting = string | undefined;
+export type ProjectRouting = string | null | undefined;

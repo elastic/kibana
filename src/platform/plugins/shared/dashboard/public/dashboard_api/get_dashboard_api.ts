@@ -108,7 +108,10 @@ export function getDashboardApi({
     () => unsavedChangesManager.internalApi.getLastSavedState(),
     creationOptions
   );
-  const projectRoutingManager = initializeProjectRoutingManager(initialState);
+  const projectRoutingManager = initializeProjectRoutingManager(
+    initialState,
+    settingsManager.api.projectRoutingRestore$
+  );
 
   const unsavedChangesManager = initializeUnsavedChangesManager({
     viewMode$: viewModeManager.api.viewMode$,
@@ -183,7 +186,8 @@ export function getDashboardApi({
     runInteractiveSave: async () => {
       trackOverlayApi.clearOverlays();
 
-      const { description, tags, timeRestore, title } = settingsManager.api.getSettings();
+      const { description, tags, timeRestore, projectRoutingRestore, title } =
+        settingsManager.api.getSettings();
       const saveResult = await openSaveModal({
         description,
         isManaged,
@@ -191,8 +195,11 @@ export function getDashboardApi({
         serializeState: getState,
         setTimeRestore: (newTimeRestore: boolean) =>
           settingsManager.api.setSettings({ timeRestore: newTimeRestore }),
+        setProjectRoutingRestore: (newProjectRoutingRestore: boolean) =>
+          settingsManager.api.setSettings({ projectRoutingRestore: newProjectRoutingRestore }),
         tags,
         timeRestore,
+        projectRoutingRestore,
         title,
         viewMode: viewModeManager.api.viewMode$.value,
       });
