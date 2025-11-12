@@ -6447,6 +6447,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/es-query-constants@link:src/platform/packages/shared/kbn-es-query-constants":
+  version "0.0.0"
+  uid ""
+
 "@kbn/es-query-server@link:src/platform/packages/shared/kbn-es-query-server":
   version "0.0.0"
   uid ""
@@ -7111,6 +7115,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/lens-common-2@link:src/platform/packages/shared/kbn-lens-common-2":
+  version "0.0.0"
+  uid ""
+
 "@kbn/lens-common@link:src/platform/packages/shared/kbn-lens-common":
   version "0.0.0"
   uid ""
@@ -7504,6 +7512,10 @@
   uid ""
 
 "@kbn/object-versioning@link:src/platform/packages/shared/kbn-object-versioning":
+  version "0.0.0"
+  uid ""
+
+"@kbn/observability-agent-plugin@link:x-pack/solutions/observability/plugins/observability_agent":
   version "0.0.0"
   uid ""
 
@@ -9280,6 +9292,10 @@
   uid ""
 
 "@kbn/workflows-management-plugin@link:src/platform/plugins/shared/workflows_management":
+  version "0.0.0"
+  uid ""
+
+"@kbn/workflows-ui@link:src/platform/packages/shared/kbn-workflows-ui":
   version "0.0.0"
   uid ""
 
@@ -16992,10 +17008,10 @@ caniuse-lite@^1.0.0, caniuse-lite@^1.0.30001335, caniuse-lite@^1.0.30001741:
   resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001743.tgz#50ff91a991220a1ee2df5af00650dd5c308ea7cd"
   integrity sha512-e6Ojr7RV14Un7dz6ASD0aZDmQPT/A+eZU+nuTNfjqmRrmkmQlnTNWH0SKmqagx9PeW87UVqapSurtAXifmtdmw==
 
-canvas-confetti@^1.9.3:
-  version "1.9.3"
-  resolved "https://registry.yarnpkg.com/canvas-confetti/-/canvas-confetti-1.9.3.tgz#ef4c857420ad8045ab4abe8547261c8cdf229845"
-  integrity sha512-rFfTURMvmVEX1gyXFgn5QMn81bYk70qa0HLzcIOSVEyl57n6o9ItHeBtUSWdvKAPY0xlvBHno4/v3QPrT83q9g==
+canvas-confetti@^1.9.4:
+  version "1.9.4"
+  resolved "https://registry.yarnpkg.com/canvas-confetti/-/canvas-confetti-1.9.4.tgz#4412a5daa96afd0b4d70ecd66b65ce8db3022b2b"
+  integrity sha512-yxQbJkAVrFXWNbTUjPqjF7G+g6pDotOUHGbkZq2NELZUMDpiJ85rIEazVb8GTaAptNW2miJAXbs1BtioA251Pw==
 
 canvg@^3.0.9:
   version "3.0.11"
