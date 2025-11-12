@@ -72,6 +72,7 @@ const TagContainer = styled.div`
 `;
 
 TagContainer.displayName = 'TagContainer';
+const GhostFormField = () => <></>;
 
 const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   ruleType,
@@ -329,7 +330,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
               />
             </EuiToolTip>
             <EuiSpacer size="l" />
-            {!endpointExceptionsMovedUnderManagement && (
+            {!endpointExceptionsMovedUnderManagement ? (
               <EuiFormRow label={I18n.GLOBAL_ENDPOINT_EXCEPTION_LIST} fullWidth>
                 <CommonUseField
                   path="isAssociatedToEndpointList"
@@ -342,6 +343,8 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                   }}
                 />
               </EuiFormRow>
+            ) : (
+              <UseField path="isAssociatedToEndpointList" component={GhostFormField} />
             )}
             <EuiFormRow label={I18n.BUILDING_BLOCK} fullWidth>
               <CommonUseField
