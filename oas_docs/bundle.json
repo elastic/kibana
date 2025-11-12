@@ -10436,6 +10436,9 @@
                             "nullable": true,
                             "type": "boolean"
                           },
+                          "min_agent_version": {
+                            "type": "string"
+                          },
                           "monitoring_diagnostics": {
                             "additionalProperties": false,
                             "properties": {
@@ -10903,6 +10906,9 @@
                                     },
                                     "is_managed": {
                                       "type": "boolean"
+                                    },
+                                    "min_agent_version": {
+                                      "type": "string"
                                     },
                                     "name": {
                                       "description": "Unique name for the package policy.",
@@ -11476,6 +11482,9 @@
                     "nullable": true,
                     "type": "boolean"
                   },
+                  "min_agent_version": {
+                    "type": "string"
+                  },
                   "monitoring_diagnostics": {
                     "additionalProperties": false,
                     "properties": {
@@ -11802,6 +11811,9 @@
                           "description": "When set to true, monitoring will be enabled but logs/metrics collection will be disabled",
                           "nullable": true,
                           "type": "boolean"
+                        },
+                        "min_agent_version": {
+                          "type": "string"
                         },
                         "monitoring_diagnostics": {
                           "additionalProperties": false,
@@ -12270,6 +12282,9 @@
                                   },
                                   "is_managed": {
                                     "type": "boolean"
+                                  },
+                                  "min_agent_version": {
+                                    "type": "string"
                                   },
                                   "name": {
                                     "description": "Unique name for the package policy.",
@@ -12876,6 +12891,9 @@
                             "nullable": true,
                             "type": "boolean"
                           },
+                          "min_agent_version": {
+                            "type": "string"
+                          },
                           "monitoring_diagnostics": {
                             "additionalProperties": false,
                             "properties": {
@@ -13343,6 +13361,9 @@
                                     },
                                     "is_managed": {
                                       "type": "boolean"
+                                    },
+                                    "min_agent_version": {
+                                      "type": "string"
                                     },
                                     "name": {
                                       "description": "Unique name for the package policy.",
@@ -14199,6 +14220,9 @@
                           "nullable": true,
                           "type": "boolean"
                         },
+                        "min_agent_version": {
+                          "type": "string"
+                        },
                         "monitoring_diagnostics": {
                           "additionalProperties": false,
                           "properties": {
@@ -14666,6 +14690,9 @@
                                   },
                                   "is_managed": {
                                     "type": "boolean"
+                                  },
+                                  "min_agent_version": {
+                                    "type": "string"
                                   },
                                   "name": {
                                     "description": "Unique name for the package policy.",
@@ -15240,6 +15267,9 @@
                     "nullable": true,
                     "type": "boolean"
                   },
+                  "min_agent_version": {
+                    "type": "string"
+                  },
                   "monitoring_diagnostics": {
                     "additionalProperties": false,
                     "properties": {
@@ -15566,6 +15596,9 @@
                           "description": "When set to true, monitoring will be enabled but logs/metrics collection will be disabled",
                           "nullable": true,
                           "type": "boolean"
+                        },
+                        "min_agent_version": {
+                          "type": "string"
                         },
                         "monitoring_diagnostics": {
                           "additionalProperties": false,
@@ -16034,6 +16067,9 @@
                                   },
                                   "is_managed": {
                                     "type": "boolean"
+                                  },
+                                  "min_agent_version": {
+                                    "type": "string"
                                   },
                                   "name": {
                                     "description": "Unique name for the package policy.",
@@ -16742,6 +16778,9 @@
                           "nullable": true,
                           "type": "boolean"
                         },
+                        "min_agent_version": {
+                          "type": "string"
+                        },
                         "monitoring_diagnostics": {
                           "additionalProperties": false,
                           "properties": {
@@ -17209,6 +17248,9 @@
                                   },
                                   "is_managed": {
                                     "type": "boolean"
+                                  },
+                                  "min_agent_version": {
+                                    "type": "string"
                                   },
                                   "name": {
                                     "description": "Unique name for the package policy.",
@@ -19629,6 +19671,9 @@
                         "is_managed": {
                           "type": "boolean"
                         },
+                        "min_agent_version": {
+                          "type": "string"
+                        },
                         "name": {
                           "description": "Unique name for the package policy.",
                           "type": "string"
@@ -21459,6 +21504,9 @@
                   },
                   "batchSize": {
                     "type": "number"
+                  },
+                  "force": {
+                    "type": "boolean"
                   },
                   "includeInactive": {
                     "default": false,
@@ -23906,6 +23954,9 @@
               "schema": {
                 "additionalProperties": false,
                 "properties": {
+                  "force": {
+                    "type": "boolean"
+                  },
                   "policy_id": {
                     "type": "string"
                   }
@@ -41023,6 +41074,9 @@
                           "is_managed": {
                             "type": "boolean"
                           },
+                          "min_agent_version": {
+                            "type": "string"
+                          },
                           "name": {
                             "description": "Unique name for the package policy.",
                             "type": "string"
@@ -42370,6 +42424,9 @@
                         "is_managed": {
                           "type": "boolean"
                         },
+                        "min_agent_version": {
+                          "type": "string"
+                        },
                         "name": {
                           "description": "Unique name for the package policy.",
                           "type": "string"
@@ -43106,6 +43163,9 @@
                           "is_managed": {
                             "type": "boolean"
                           },
+                          "min_agent_version": {
+                            "type": "string"
+                          },
                           "name": {
                             "description": "Unique name for the package policy.",
                             "type": "string"
@@ -43630,6 +43690,9 @@
               "schema": {
                 "additionalProperties": false,
                 "properties": {
+                  "force": {
+                    "type": "boolean"
+                  },
                   "packagePolicyIds": {
                     "items": {
                       "type": "string"
@@ -44299,6 +44362,9 @@
                                 },
                                 "is_managed": {
                                   "type": "boolean"
+                                },
+                                "min_agent_version": {
+                                  "type": "string"
                                 },
                                 "name": {
                                   "description": "Unique name for the package policy.",
@@ -45508,6 +45574,9 @@
                         },
                         "is_managed": {
                           "type": "boolean"
+                        },
+                        "min_agent_version": {
+                          "type": "string"
                         },
                         "name": {
                           "description": "Unique name for the package policy.",
@@ -46861,6 +46930,9 @@
                         },
                         "is_managed": {
                           "type": "boolean"
+                        },
+                        "min_agent_version": {
+                          "type": "string"
                         },
                         "name": {
                           "description": "Unique name for the package policy.",
