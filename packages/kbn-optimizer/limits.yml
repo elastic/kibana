@@ -21,8 +21,8 @@ pageLoadAssetSize:
   contentConnectors: 33014
   contentManagement: 8350
   controls: 12234
-  core: 572422
-  cps: 6000
+  core: 569774
+  cps: 5918
   crossClusterReplication: 12662
   customIntegrations: 11715
   dashboard: 19000
