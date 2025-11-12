@@ -50,7 +50,7 @@ export const getDimensions = async ({
     const response = await esClient.esql(
       'get_dimensions',
       {
-        query: query.toString(),
+        query,
         filter: {
           bool: {
             filter: [...dateRangeQuery(from, to)],
