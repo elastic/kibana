@@ -6,5 +6,5 @@
   },
   "include": ["**/*.ts", "**/*.tsx"],
   "exclude": ["target/**/*"],
-  "kbn_references": ["@kbn/i18n", "@kbn/zod"]
+  "kbn_references": ["@kbn/zod"]
 }
