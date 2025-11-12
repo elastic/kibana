@@ -8111,7 +8111,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/scout-release-testing@link:src/platform/packages/shared/kbn-scout-release-testing":
+"@kbn/scout-release-testing@link:x-pack/platform/packages/private/kbn-scout-release-testing":
   version "0.0.0"
   uid ""
 
