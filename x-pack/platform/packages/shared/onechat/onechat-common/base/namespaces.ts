@@ -19,6 +19,7 @@ export const internalNamespaces = {
  */
 export const protectedNamespaces: string[] = [
   internalNamespaces.platformCore,
+  'observability',
   internalNamespaces.platformCatchup,
 ];
 

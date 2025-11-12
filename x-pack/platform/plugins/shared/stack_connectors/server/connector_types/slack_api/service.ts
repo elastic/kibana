@@ -123,7 +123,8 @@ export const createExternalService = (
     config,
     secrets,
   }: {
-    config?: { allowedChannels?: Array<{ id: string; name: string }> };
+    config?: { allowedChannels?: Array<{ id?: string; name: string }> };
+
     secrets: { token: string };
   },
   logger: Logger,
@@ -132,7 +133,10 @@ export const createExternalService = (
 ): SlackApiService => {
   const { token } = secrets;
   const { allowedChannels } = config || { allowedChannels: [] };
-  const allowedChannelIds = allowedChannels?.map((ac) => ac.id);
+  const allowedChannelIds = allowedChannels
+    ?.map((ac) => ac.id)
+    .filter((id): id is string => id !== undefined);
+  const allowedChannelNames = allowedChannels?.map((ac) => ac.name);
 
   if (!token) {
     throw Error(`[Action][${CONNECTOR_NAME}]: Wrong configuration.`);
@@ -176,46 +180,86 @@ export const createExternalService = (
     }
   };
 
-  const getChannelToUse = ({
+  const validateChannels = ({
     channels,
+    allowedList,
+  }: {
+    channels?: string[];
+    allowedList?: string[];
+  }) => {
+    if (!channels || !channels.length || !allowedList || !allowedList.length) return;
+
+    const normalizeChannel = (name: string) => name.replace(/^#/, '');
+
+    const hasDisallowedChannel = channels?.some(
+      (name) => !allowedList.some((allowed) => normalizeChannel(allowed) === normalizeChannel(name))
+    );
+
+    if (hasDisallowedChannel) {
+      throw new Error(
+        `One or more provided channel names are not included in the allowed channels list`
+      );
+    }
+  };
+
+  /**
+   * Selects the Slack channel to use for message delivery. At the moment, only posting to a single channel is supported.
+   *
+   * Priority order:
+   *   1. If channelNames is provided and non-empty, validates against allowedChannelNames (if configured) and returns the first entry.
+   *   2. If channelIds is provided and non-empty, validates against allowedChannelIds (if configured) and returns the first entry.
+   *   3. If channels (legacy) is provided and non-empty, returns the first entry.
+   *   4. Throws if none are provided or all are empty.
+   *
+   * If allowedChannels is empty or undefined, no validation is performed against allowedChannelNames or allowedChannelIds.
+   */
+  const getChannelToUse = ({
+    channels = [],
     channelIds = [],
+    channelNames = [],
   }: {
     channels?: string[];
     channelIds?: string[];
+    channelNames?: string[];
   }): string => {
-    if (
-      channelIds.length > 0 &&
-      allowedChannelIds &&
-      allowedChannelIds.length > 0 &&
-      !channelIds.every((cId) => allowedChannelIds.includes(cId))
-    ) {
+    const hasChannels = channelNames.length > 0 || channelIds.length > 0 || channels.length > 0;
+
+    if (!hasChannels) {
       throw new Error(
-        `One of channel ids "${channelIds.join()}" is not included in the allowed channels list "${allowedChannelIds.join()}"`
+        `One of channels, channelIds, or channelNames is required and cannot be empty`
       );
     }
 
-    // For now, we only allow one channel but we wanted
-    // to have a array in case we need to allow multiple channels
-    // in one actions
-    let channelToUse = channelIds.length > 0 ? channelIds[0] : '';
-    if (channelToUse.length === 0 && channels && channels.length > 0 && channels[0].length > 0) {
-      channelToUse = channels[0];
+    // priority: channelNames > channelIds > channels
+    if (channelNames.length > 0) {
+      validateChannels({
+        channels: channelNames,
+        allowedList: allowedChannelNames,
+      });
+
+      return channelNames[0];
     }
 
-    if (channelToUse.length === 0) {
-      throw new Error(`The channel is empty"`);
+    if (channelIds.length > 0) {
+      validateChannels({ channels: channelIds, allowedList: allowedChannelIds });
+      return channelIds[0];
     }
 
-    return channelToUse;
+    if (channels && channels.length > 0) {
+      return channels[0];
+    }
+
+    throw new Error(`No valid channel found to use`);
   };
 
   const postMessage = async ({
-    channels,
+    channels = [],
     channelIds = [],
+    channelNames = [],
     text,
   }: PostMessageSubActionParams): Promise<ConnectorTypeExecutorResult<unknown>> => {
     try {
-      const channelToUse = getChannelToUse({ channels, channelIds });
+      const channelToUse = getChannelToUse({ channels, channelIds, channelNames });
 
       const result: AxiosResponse<PostMessageResponse> = await request({
         axios: axiosInstance,
@@ -235,12 +279,13 @@ export const createExternalService = (
   };
 
   const postBlockkit = async ({
-    channels,
+    channels = [],
     channelIds = [],
+    channelNames = [],
     text,
   }: PostBlockkitSubActionParams): Promise<ConnectorTypeExecutorResult<unknown>> => {
     try {
-      const channelToUse = getChannelToUse({ channels, channelIds });
+      const channelToUse = getChannelToUse({ channels, channelIds, channelNames });
       const blockJson = JSON.parse(text);
 
       const result: AxiosResponse<PostMessageResponse> = await request({
