@@ -7,38 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { unescape } from 'lodash';
 import { fieldConstants } from '..';
 import type { LogDocumentOverview } from '../types';
+import { getLogFieldWithFallback } from './get_log_field_with_fallback';
+
+const rankingOrder = [
+  fieldConstants.MESSAGE_FIELD,
+  fieldConstants.ERROR_MESSAGE_FIELD,
+  fieldConstants.EVENT_ORIGINAL_FIELD,
+  fieldConstants.EXCEPTION_MESSAGE_FIELD,
+  fieldConstants.ERROR_EXCEPTION_MESSAGE,
+  fieldConstants.OTEL_ATTRIBUTES_EXCEPTION_MESSAGE,
+] as const;
 
 export const getMessageFieldWithFallbacks = (
   doc: LogDocumentOverview,
   { includeFormattedValue = false }: { includeFormattedValue?: boolean } = {}
 ) => {
-  const rankingOrder = [
-    fieldConstants.MESSAGE_FIELD,
-    fieldConstants.ERROR_MESSAGE_FIELD,
-    fieldConstants.EVENT_ORIGINAL_FIELD,
-  ] as const;
-
-  for (const rank of rankingOrder) {
-    const value = doc[rank];
-
-    if (value !== undefined && value !== null) {
-      let formattedValue: string | undefined;
-
-      if (includeFormattedValue) {
-        try {
-          formattedValue = JSON.stringify(JSON.parse(unescape(value)), null, 2);
-        } catch {
-          // If the value is not a valid JSON, leave it unformatted
-        }
-      }
-
-      return { field: rank, value, formattedValue };
-    }
-  }
-
-  // If none of the ranks (fallbacks) are present
-  return { field: undefined };
+  return getLogFieldWithFallback(doc, rankingOrder, includeFormattedValue);
 };
