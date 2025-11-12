@@ -13,8 +13,8 @@ import type {
   IndexPatternRef,
   SharingSavedObjectProps,
   UserMessage,
-  LensApi,
 } from '@kbn/lens-common';
+import type { LensApi } from '@kbn/lens-common-2';
 import { DOC_TYPE } from '../../../common/constants';
 import type { MergedSearchContext } from '../expressions/merged_search_context';
 import { MISSING_TIME_RANGE_ON_EMBEDDABLE, URL_CONFLICT } from '../../user_messages_ids';
