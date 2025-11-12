@@ -274,11 +274,12 @@ For each step in workflow definition:
   1. Load step definition
   2. Create step execution context
   3. Resolve step inputs using templating engine
-  4. Execute step via step factory
-  5. Store step outputs in context
-  6. Save step execution record
-  7. Emit step events
-  8. Continue to next step
+  4. Store resolved inputs for persistency
+  5. Execute step via step factory
+  6. Store step outputs in context
+  7. Save step execution record
+  8. Emit step events
+  9. Continue to next step, if any```
 ```
 
 ### 3. Workflow Completion
