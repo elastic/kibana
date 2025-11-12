@@ -7,19 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { jsonToFile } from "../../util/json";
-import { REMOVED_TYPES_JSON_PATH } from "./constants";
+import { jsonToFile } from '../../util/json';
+import { REMOVED_TYPES_JSON_PATH } from './constants';
 
 /**
  * Updates the removed_types.json file by adding new removed types
  */
-export async function updateRemovedTypes(removedTypes: string[], currentRemovedTypes: string[], fix: boolean) {
-    if (!fix) {
-        throw new Error(
-            `❌ Removed types detected, but fix flag was not provided. Please run with --fix to update removed_types.json.`
-        );
-    }
+export async function updateRemovedTypes(
+  removedTypes: string[],
+  currentRemovedTypes: string[],
+  fix: boolean
+) {
+  if (!fix) {
+    throw new Error(
+      `❌ Removed types detected, but fix flag was not provided. Please run with --fix to update removed_types.json.`
+    );
+  }
 
-    const allTypes = [...currentRemovedTypes, ...removedTypes].sort();
-    await jsonToFile(REMOVED_TYPES_JSON_PATH, allTypes);
+  const allTypes = [...currentRemovedTypes, ...removedTypes].sort();
+  await jsonToFile(REMOVED_TYPES_JSON_PATH, allTypes);
 }

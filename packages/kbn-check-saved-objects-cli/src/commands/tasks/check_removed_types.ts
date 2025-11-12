@@ -11,31 +11,35 @@ import type { ListrTask } from 'listr2';
 import type { Task, TaskContext } from '../types';
 import { fileToJson } from '../../util/json';
 import { REMOVED_TYPES_JSON_PATH } from '../../migrations/removed_types/constants';
-import { detectConflictsWithRemovedTypes, detectRemovedTypes, updateRemovedTypes } from '../../migrations/removed_types';
+import {
+  detectConflictsWithRemovedTypes,
+  detectRemovedTypes,
+  updateRemovedTypes,
+} from '../../migrations/removed_types';
 
 export const checkRemovedTypes: Task = async (ctx, task) => {
-    const subtasks: ListrTask<TaskContext>[] = [
-        {
-            title: 'Detecting conflicts with removed types',
-            task: async () => {
-                ctx.currentRemovedTypes = await fileToJson(REMOVED_TYPES_JSON_PATH) as string[];
-                await detectConflictsWithRemovedTypes(ctx.to!, ctx.currentRemovedTypes);
-            },
-        },
-        {
-            title: `Detecting new removed types`,
-            task: () => {
-                ctx.newRemovedTypes = detectRemovedTypes(ctx.from!, ctx.to!, ctx.currentRemovedTypes);
-            },
-        },
-        {
-            title: `Updating removed types`,
-            task: async () => {
-                await updateRemovedTypes(ctx.newRemovedTypes!, ctx.currentRemovedTypes, ctx.fix);
-            },
-            skip: () => ctx.newRemovedTypes.length === 0,
-        },
-    ];
+  const subtasks: ListrTask<TaskContext>[] = [
+    {
+      title: 'Detecting conflicts with removed types',
+      task: async () => {
+        ctx.currentRemovedTypes = (await fileToJson(REMOVED_TYPES_JSON_PATH)) as string[];
+        await detectConflictsWithRemovedTypes(ctx.to!, ctx.currentRemovedTypes);
+      },
+    },
+    {
+      title: `Detecting new removed types`,
+      task: () => {
+        ctx.newRemovedTypes = detectRemovedTypes(ctx.from!, ctx.to!, ctx.currentRemovedTypes);
+      },
+    },
+    {
+      title: `Updating removed types`,
+      task: async () => {
+        await updateRemovedTypes(ctx.newRemovedTypes!, ctx.currentRemovedTypes, ctx.fix);
+      },
+      skip: () => ctx.newRemovedTypes.length === 0,
+    },
+  ];
 
-    return task.newListr<TaskContext>(subtasks);
+  return task.newListr<TaskContext>(subtasks);
 };

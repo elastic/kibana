@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MigrationSnapshot } from "../../types";
+import type { MigrationSnapshot } from '../../types';
 
 /**
  * Detects for new removed types by comparing two snapshots and identifying

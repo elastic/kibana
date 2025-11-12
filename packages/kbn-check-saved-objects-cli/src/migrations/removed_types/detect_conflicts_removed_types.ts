@@ -7,30 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MigrationSnapshot } from "../../types";
+import type { MigrationSnapshot } from '../../types';
 
 /**
  * Detects new types in 'to' that conflict with previously removed types
  */
 export async function detectConflictsWithRemovedTypes(
-    to: MigrationSnapshot,
-    currentRemovedTypes: string[]
+  to: MigrationSnapshot,
+  currentRemovedTypes: string[]
 ) {
-    const toTypes = Object.keys(to.typeDefinitions);
+  const toTypes = Object.keys(to.typeDefinitions);
 
-    const conflictingTypes: string[] = [];
+  const conflictingTypes: string[] = [];
 
-    for (const type of toTypes) {
-        if (currentRemovedTypes.includes(type)) {
-            conflictingTypes.push(type);
-        }
+  for (const type of toTypes) {
+    if (currentRemovedTypes.includes(type)) {
+      conflictingTypes.push(type);
     }
+  }
 
-    if (conflictingTypes.length > 0) {
-        throw new Error(
-            `❌ Cannot re-register previously removed type(s): ${conflictingTypes.join(
-                ', '
-            )}. Please use a different name.`
-        );
-    }
+  if (conflictingTypes.length > 0) {
+    throw new Error(
+      `❌ Cannot re-register previously removed type(s): ${conflictingTypes.join(
+        ', '
+      )}. Please use a different name.`
+    );
+  }
 }
