@@ -9,6 +9,7 @@ import { z } from '@kbn/zod';
 import { ToolType } from '@kbn/onechat-common';
 import { runSearchTool } from '@kbn/onechat-genai-utils/tools';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
+import { internalNamespaces } from '@kbn/onechat-common/base/namespaces';
 import { DEFAULT_ALERTS_INDEX } from '../../../common/constants';
 import { getSpaceIdFromRequest } from './helpers';
 
@@ -24,9 +25,10 @@ const alertsSchema = z.object({
     ),
 });
 
+export const SECURITY_ALERTS_TOOL_ID = `${internalNamespaces}.alerts`;
 export const alertsTool = (): BuiltinToolDefinition<typeof alertsSchema> => {
   return {
-    id: 'core.security.alerts',
+    id: SECURITY_ALERTS_TOOL_ID,
     type: ToolType.builtin,
     description: `A tool for searching and analyzing security alerts within your Elasticsearch cluster.
 It supports both full-text relevance searches and structured analytical queries against security alerts.

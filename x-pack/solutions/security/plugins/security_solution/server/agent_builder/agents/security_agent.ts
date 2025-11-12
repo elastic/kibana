@@ -6,10 +6,12 @@
  */
 
 import type { BuiltInAgentDefinition } from '@kbn/onechat-server/agents';
+import { SECURITY_AGENT_TOOL_IDS } from '../tools/register_tools';
 
-export const createSecurityAgentDefinition = (): BuiltInAgentDefinition => {
+export const SECURITY_AGENT_ID = 'core.security.agent';
+export const createSecurityAgent = (): BuiltInAgentDefinition => {
   return {
-    id: 'core.security.agent',
+    id: SECURITY_AGENT_ID,
     avatar_icon: 'logoSecurity',
     name: 'Security Agent',
     description:
@@ -19,12 +21,7 @@ export const createSecurityAgentDefinition = (): BuiltInAgentDefinition => {
       instructions: `You are a Security Agent specialized in security analysis and threat intelligence.`,
       tools: [
         {
-          tool_ids: [
-            'core.security.alerts',
-            'core.security.security_labs',
-            // TODO add once product doc tool is merged https://github.com/elastic/kibana/pull/242598
-            // 'platform.core.product_documentation',
-          ],
+          tool_ids: SECURITY_AGENT_TOOL_IDS,
         },
       ],
     },

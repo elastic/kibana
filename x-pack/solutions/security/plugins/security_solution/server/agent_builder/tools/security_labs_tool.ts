@@ -9,6 +9,7 @@ import { z } from '@kbn/zod';
 import { ToolType } from '@kbn/onechat-common';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { createErrorResult } from '@kbn/onechat-server';
+import { internalNamespaces } from '@kbn/onechat-common/base/namespaces';
 
 // TODO: Update to follow same pattern as Product Documentation Tool (use llmTasks.retrieveDocumentation)
 // TODO: Investigate how to install Security Labs documents using the same installation/retrieval pattern as product documentation
@@ -21,10 +22,11 @@ const securityLabsSchema = z.object({
       `Key terms to retrieve Elastic Security Labs content for, like specific malware names or attack techniques.`
     ),
 });
+export const SECURITY_LABS_TOOL_ID = `${internalNamespaces}.security_labs`;
 
 export const securityLabsTool = (): BuiltinToolDefinition<typeof securityLabsSchema> => {
   return {
-    id: 'core.security.security_labs',
+    id: SECURITY_LABS_TOOL_ID,
     type: ToolType.builtin,
     description: `Call this for knowledge from Elastic Security Labs content, which contains information on malware, attack techniques, and more.
 

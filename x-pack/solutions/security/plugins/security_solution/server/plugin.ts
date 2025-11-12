@@ -97,7 +97,7 @@ import {
 import { RequestContextFactory } from './request_context_factory';
 import { alertsTool } from './agent_builder/tools/alerts_tool';
 import { securityLabsTool } from './agent_builder/tools/security_labs_tool';
-import { createSecurityAgentDefinition } from './agent_builder/agents/security_agent';
+import { createSecurityAgent } from './agent_builder/agents/security_agent';
 
 import type {
   ISecuritySolutionPlugin,
@@ -613,7 +613,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       plugins.onechat.tools.register(securityLabsTool());
 
       // Register agent
-      plugins.onechat.agents.register(createSecurityAgentDefinition());
+      plugins.onechat.agents.register(createSecurityAgent());
 
       this.logger.info('Security Agent Builder tools and agent registered');
     } else if (config.experimentalFeatures.agentBuilderEnabled && !plugins.onechat) {

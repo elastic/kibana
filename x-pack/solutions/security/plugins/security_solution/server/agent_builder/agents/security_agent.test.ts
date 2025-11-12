@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { createSecurityAgentDefinition } from './security_agent';
+import { createSecurityAgent } from './security_agent';
 
-describe('createSecurityAgentDefinition', () => {
+describe('createSecurityAgent', () => {
   it('returns an agent definition with all correct properties', () => {
-    const definition = createSecurityAgentDefinition();
+    const definition = createSecurityAgent();
 
     expect(definition.id).toBe('core.security.agent');
     expect(definition.name).toBe('Security Agent');
