@@ -7,25 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  connectToQueryState,
-  syncGlobalQueryStateWithUrl,
-  type GlobalQueryStateFromUrl,
-  type RefreshInterval,
-} from '@kbn/data-plugin/public';
-import {
-  COMPARE_ALL_OPTIONS,
-  compareFilters,
-  isFilterPinned,
-  type Filter,
-  type Query,
-  type TimeRange,
-} from '@kbn/es-query';
-import {
-  diffComparators,
-  type PublishingSubject,
-  type StateComparators,
-} from '@kbn/presentation-publishing';
+import type { GlobalQueryStateFromUrl, RefreshInterval } from '@kbn/data-plugin/public';
+import { connectToQueryState, syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import { COMPARE_ALL_OPTIONS, compareFilters, isFilterPinned } from '@kbn/es-query';
+import type { ESQLControlVariable } from '@kbn/esql-types';
+import type { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
+import { diffComparators } from '@kbn/presentation-publishing';
 import fastIsEqual from 'fast-deep-equal';
 import { cloneDeep } from 'lodash';
 import type { Moment } from 'moment';
@@ -44,10 +32,11 @@ import {
   switchMap,
   tap,
 } from 'rxjs';
-import { type DashboardState, cleanFiltersForSerialize } from '../../common';
 import { dataService } from '../services/kibana_services';
 import { GLOBAL_STATE_STORAGE_KEY } from '../utils/urls';
 import type { DashboardCreationOptions } from './types';
+import type { DashboardState } from '../../common';
+import { cleanFiltersForSerialize } from '../../common';
 
 export const COMPARE_DEBOUNCE = 100;
 
@@ -64,6 +53,7 @@ export function initializeUnifiedSearchManager(
     timefilter: { timefilter: timefilterService },
   } = dataService.query;
 
+  const filters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
   const reload$ = new Subject<void>();
   const query$ = new BehaviorSubject<Query | undefined>(initialState.query);
   // setAndSyncQuery method not needed since query synced with 2-way data binding
@@ -110,13 +100,16 @@ export function initializeUnifiedSearchManager(
     }
   }
 
+  // forward ESQL variables from the control group. TODO, this is overcomplicated by the fact that
+  // the control group API is a publishing subject. Instead, the control group API should be a constant
+  const esqlVariables$ = new BehaviorSubject<ESQLControlVariable[]>([]);
+
   // --------------------------------------------------------------------------------------
   // Set up unified search integration.
   // --------------------------------------------------------------------------------------
   const unifiedSearchSubscriptions: Subscription = new Subscription();
   let stopSyncingWithUrl: (() => void) | undefined;
   let stopSyncingAppFilters: (() => void) | undefined;
-
   if (
     creationOptions?.useUnifiedSearchIntegration &&
     creationOptions?.unifiedSearchSettings?.kbnUrlStateStorage
@@ -291,19 +284,21 @@ export function initializeUnifiedSearchManager(
   return {
     api: {
       reload$,
+      filters$,
+      esqlVariables$,
       forceRefresh: () => {
         reload$.next();
       },
       query$,
-      setQuery,
-      setFilters: setUnifiedSearchFilters,
-      timeRange$,
-      setTimeRange: setAndSyncTimeRange,
       refreshInterval$,
+      setFilters: setUnifiedSearchFilters,
+      setQuery,
+      setTimeRange: setAndSyncTimeRange,
+      timeRange$,
       timeslice$,
+      unifiedSearchFilters$,
     },
     internalApi: {
-      unifiedSearchFilters$,
       startComparing$: (lastSavedState$: BehaviorSubject<DashboardState>) => {
         return combineLatest([
           unifiedSearchFilters$,

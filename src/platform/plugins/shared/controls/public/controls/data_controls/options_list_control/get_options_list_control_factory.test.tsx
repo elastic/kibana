@@ -24,7 +24,7 @@ const render = (ui: React.ReactElement) => {
 describe('Options List Control Api', () => {
   const uuid = 'myControl1';
   const factory = getOptionsListControlFactory();
-  const finalizeApi = getMockedFinalizeApi(uuid, factory, {});
+  const finalizeApi = getMockedFinalizeApi(uuid, factory);
 
   const getDataView = async (id: string): Promise<DataView> => {
     if (id !== 'myDataViewId') {

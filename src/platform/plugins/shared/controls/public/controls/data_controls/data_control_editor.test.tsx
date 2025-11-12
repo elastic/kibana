@@ -17,6 +17,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import type { RenderResult } from '@testing-library/react';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import { DEFAULT_CONTROL_GROW } from '@kbn/controls-constants';
+import type { DataControlState } from '@kbn/controls-schemas';
 
 import { dataViewsService } from '../../services/kibana_services';
 import { DataControlEditor } from './data_control_editor';
@@ -51,7 +52,7 @@ describe('Data control editor', () => {
     controlType,
     initialDefaultPanelTitle,
   }: {
-    initialState?: object;
+    initialState?: Partial<DataControlState>;
     controlId?: string;
     controlType?: string;
     initialDefaultPanelTitle?: string;

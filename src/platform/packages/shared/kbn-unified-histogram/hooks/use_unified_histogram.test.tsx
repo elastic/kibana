@@ -30,7 +30,7 @@ describe('useUnifiedHistogram', () => {
         controlType: EsqlControlType.VALUES_FROM_QUERY,
         esqlQuery: 'FROM logstash* | STATS BY field',
         title: 'field',
-      } as unknown as ControlPanelState,
+      } as ControlPanelState,
     };
     const hook = renderHook(() =>
       useUnifiedHistogram({

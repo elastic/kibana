@@ -31,7 +31,6 @@ import type { RequestStatus } from '@kbn/inspector-plugin/public';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { estypes } from '@elastic/elasticsearch';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
-import type { StickyControlState } from '@kbn/controls-schemas';
 import { Histogram } from './histogram';
 import type {
   UnifiedHistogramBreakdownContext,
@@ -93,7 +92,7 @@ export interface UnifiedHistogramChartProps {
   onBrushEnd?: LensEmbeddableInput['onBrushEnd'];
   withDefaultActions?: EmbeddableComponentProps['withDefaultActions'];
   columns?: DatatableColumn[];
-  controlsState?: ControlPanelsState<StickyControlState>;
+  controlsState?: ControlPanelsState;
 }
 
 const RequestStatusError: typeof RequestStatus.ERROR = 2;

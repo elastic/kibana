@@ -23,7 +23,6 @@ import { cloneDeep } from 'lodash';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import useObservable from 'react-use/lib/useObservable';
 import useLatest from 'react-use/lib/useLatest';
-import type { StickyControlState } from '@kbn/controls-schemas';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { UnifiedHistogramChartProps } from '../components/chart/chart';
 import type {
@@ -83,7 +82,7 @@ export type UseUnifiedHistogramProps = Omit<UnifiedHistogramStateOptions, 'servi
   /**
    * The controls state to use for the chart
    */
-  controlsState?: ControlPanelsState<StickyControlState>;
+  controlsState?: ControlPanelsState;
   /**
    * The external custom Lens vis
    */
