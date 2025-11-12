@@ -6359,6 +6359,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/edot-collector@link:src/platform/packages/shared/kbn-edot-collector":
+  version "0.0.0"
+  uid ""
+
 "@kbn/elastic-agent-utils@link:src/platform/packages/shared/kbn-elastic-agent-utils":
   version "0.0.0"
   uid ""

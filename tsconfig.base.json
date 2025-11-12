@@ -930,6 +930,8 @@
       "@kbn/ecs-data-quality-dashboard/*": ["x-pack/solutions/security/packages/ecs-data-quality-dashboard/*"],
       "@kbn/ecs-data-quality-dashboard-plugin": ["x-pack/solutions/security/plugins/ecs_data_quality_dashboard"],
       "@kbn/ecs-data-quality-dashboard-plugin/*": ["x-pack/solutions/security/plugins/ecs_data_quality_dashboard/*"],
+      "@kbn/edot-collector": ["src/platform/packages/shared/kbn-edot-collector"],
+      "@kbn/edot-collector/*": ["src/platform/packages/shared/kbn-edot-collector/*"],
       "@kbn/elastic-agent-utils": ["src/platform/packages/shared/kbn-elastic-agent-utils"],
       "@kbn/elastic-agent-utils/*": ["src/platform/packages/shared/kbn-elastic-agent-utils/*"],
       "@kbn/elastic-assistant": ["x-pack/platform/packages/shared/kbn-elastic-assistant"],

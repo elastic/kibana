@@ -1587,6 +1587,7 @@
     "@kbn/docs-utils": "link:packages/kbn-docs-utils",
     "@kbn/dot-text": "link:src/platform/packages/private/kbn-dot-text",
     "@kbn/dot-text-loader": "link:src/platform/packages/private/kbn-dot-text-loader",
+    "@kbn/edot-collector": "link:src/platform/packages/shared/kbn-edot-collector",
     "@kbn/es": "link:src/platform/packages/shared/kbn-es",
     "@kbn/es-archiver": "link:src/platform/packages/shared/kbn-es-archiver",
     "@kbn/eslint-config": "link:packages/kbn-eslint-config",
