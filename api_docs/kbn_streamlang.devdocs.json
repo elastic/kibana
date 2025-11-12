@@ -2294,6 +2294,20 @@
           },
           {
             "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.GrokProcessor.pattern_definitions",
+            "type": "Object",
+            "tags": [],
+            "label": "pattern_definitions",
+            "description": [],
+            "signature": [
+              "Record<string, string> | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
             "id": "def-common.GrokProcessor.ignore_missing",
             "type": "CompoundType",
             "tags": [],

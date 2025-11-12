@@ -14,6 +14,7 @@ import type {
   NewPackagePolicyInput,
   PackageInfo,
 } from '@kbn/fleet-plugin/common';
+import type { CloudProvider } from '@kbn/fleet-plugin/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 
 import { NewCloudConnectorForm } from './form/new_cloud_connector_form';
@@ -24,7 +25,6 @@ import { CloudConnectorTabs, type CloudConnectorTab } from './cloud_connector_ta
 import type { UpdatePolicy } from '../types';
 import { TABS, CLOUD_FORMATION_EXTERNAL_DOC_URL } from './constants';
 import { hasValidNewConnectionCredentials, isCloudConnectorReusableEnabled } from './utils';
-import { AZURE_PROVIDER } from '../constants';
 export interface CloudConnectorSetupProps {
   input: NewPackagePolicyInput;
   newPolicy: NewPackagePolicy;
@@ -33,7 +33,7 @@ export interface CloudConnectorSetupProps {
   isEditPage?: boolean;
   hasInvalidRequiredVars: boolean;
   cloud?: CloudSetup;
-  cloudProvider?: string;
+  cloudProvider?: CloudProvider;
   templateName: string;
 }
 
@@ -48,9 +48,13 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
   cloudProvider,
   templateName,
 }) => {
-  const reusableFeatureEnabled = isCloudConnectorReusableEnabled(packageInfo.version, templateName);
+  const reusableFeatureEnabled = isCloudConnectorReusableEnabled(
+    cloudProvider || '',
+    packageInfo.version,
+    templateName
+  );
 
-  const { data: cloudConnectors } = useGetCloudConnectors();
+  const { data: cloudConnectors } = useGetCloudConnectors(cloudProvider);
   const cloudConnectorsCount = cloudConnectors?.length;
   const [selectedTabId, setSelectedTabId] = useState<string>(TABS.NEW_CONNECTION);
 
@@ -70,6 +74,16 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
     updatePolicyWithExistingCredentials,
   } = useCloudConnectorSetup(input, newPolicy, updatePolicy);
 
+  // Ensure root-level supports_cloud_connector is true when this component is rendered
+  if (!newPolicy.supports_cloud_connector) {
+    updatePolicy({
+      updatedPolicy: {
+        ...newPolicy,
+        supports_cloud_connector: true,
+      },
+    });
+  }
+
   const tabs: CloudConnectorTab[] = [
     {
       id: TABS.NEW_CONNECTION,
@@ -86,7 +100,7 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
             <EuiText size="s" color="subdued">
               <FormattedMessage
                 id="securitySolutionPackages.cloudSecurityPosture.cloudConnectorSetup.cloudFormation.guide.description.cloudConnectors"
-                defaultMessage="Create a reusable IAM role in your AWS account, then give Elastic its Role ARN and the External ID shown below. You’ll need rights to launch a CloudFormation stack and create/update IAM roles in the target AWS account {learnMore}."
+                defaultMessage="Create a reusable IAM role in your AWS account, then give Elastic its Role ARN and the External ID shown below. You'll need rights to launch a CloudFormation stack and create/update IAM roles in the target AWS account {learnMore}."
                 values={{
                   learnMore: (
                     <EuiLink
@@ -169,7 +183,6 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
 
   return (
     <>
-      {/* This shows the Phase 2 Reusable Cloud connector Form */}
       {!reusableFeatureEnabled && (
         <NewCloudConnectorForm
           input={input}
@@ -185,22 +198,7 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
           setCredentials={updatePolicyWithNewCredentials}
         />
       )}
-      {reusableFeatureEnabled && cloudProvider === AZURE_PROVIDER && (
-        <NewCloudConnectorForm
-          input={input}
-          templateName={templateName}
-          newPolicy={newPolicy}
-          packageInfo={packageInfo}
-          updatePolicy={updatePolicy}
-          isEditPage={isEditPage}
-          hasInvalidRequiredVars={hasInvalidRequiredVars}
-          cloud={cloud}
-          cloudProvider={cloudProvider}
-          credentials={newConnectionCredentials}
-          setCredentials={updatePolicyWithNewCredentials}
-        />
-      )}
-      {reusableFeatureEnabled && cloudProvider !== AZURE_PROVIDER && (
+      {reusableFeatureEnabled && (
         <CloudConnectorTabs
           tabs={tabs}
           selectedTabId={selectedTabId}
