@@ -54,6 +54,7 @@ interface SetupDeps {
   usageCollection?: UsageCollectionSetup;
   taskManager: TaskManagerSetupContract;
   contentManagement: ContentManagementServerSetup;
+  onechat?: { tools: { register: (tool: any) => void } };
 }
 
 export interface StartDeps {
@@ -141,6 +142,17 @@ export class DashboardPlugin
       contentManagement: plugins.contentManagement,
       logger: this.logger,
     });
+
+    // Register onechat tool if onechat plugin is available
+    if (plugins.onechat?.tools) {
+      // Defer tool creation until start when savedObjects is available
+      core.getStartServices().then(([coreStart]) => {
+        const { getDashboardTool } = require('./onechat/tools/get_dashboard');
+        plugins.onechat!.tools.register(getDashboardTool(coreStart.savedObjects));
+      }).catch((error) => {
+        this.logger.warn(`Failed to register onechat tool: ${error.message}`);
+      });
+    }
 
     return {};
   }
