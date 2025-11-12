@@ -26,7 +26,7 @@ apiTest.describe('Profiling is not setup and no data is loaded', { tag: ['@ess']
     });
   });
 
-  apiTest('Admin users', async ({ profilingClient, apiClient, apiServices }) => {
+  apiTest('Admin users', async ({ profilingClient }) => {
     const adminRes = await profilingClient.adminUser({
       endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
     });
@@ -50,7 +50,7 @@ apiTest.describe('Profiling is not setup and no data is loaded', { tag: ['@ess']
 });
 
 apiTest.describe('APM integration not installed but setup completed', { tag: ['@ess'] }, () => {
-  apiTest.beforeEach(async ({ esClient, apiServices, config, log }) => {
+  apiTest.beforeEach(async ({ apiServices, config, log }) => {
     await setupProfiling(config, apiServices, log);
   });
   apiTest('Admin user', async ({ profilingClient }) => {
@@ -136,7 +136,7 @@ apiTest.describe('Profiling is setup', { tag: ['@ess'] }, () => {
 });
 
 apiTest.describe('Collector integration is not installed', { tag: ['@ess'] }, () => {
-  apiTest.beforeEach(async ({ esClient, apiServices, config, log }) => {
+  apiTest.beforeEach(async ({ apiServices, config, log }) => {
     await setupProfiling(config, apiServices, log);
   });
 
@@ -175,7 +175,7 @@ apiTest.describe('Collector integration is not installed', { tag: ['@ess'] }, ()
 
   apiTest(
     'Admin user symbolizer integration is not installed',
-    async ({ profilingClient, config, apiServices, log }) => {
+    async ({ profilingClient, config }) => {
       const ids = await getProfilingPackagePolicyIds(config);
 
       const symbolizerId = ids.symbolizerId;
@@ -196,7 +196,7 @@ apiTest.describe('Collector integration is not installed', { tag: ['@ess'] }, ()
 
   apiTest(
     'Viewer user symbolizer integration is not installed',
-    async ({ profilingClient, config, apiServices }) => {
+    async ({ profilingClient, config }) => {
       const ids = await getProfilingPackagePolicyIds(config);
       const symbolizerId = ids.symbolizerId;
       await deletePackagePolicy(config, symbolizerId!);
