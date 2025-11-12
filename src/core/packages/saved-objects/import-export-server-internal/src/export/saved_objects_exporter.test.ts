@@ -1040,6 +1040,7 @@ describe('getSortedObjectsForExport()', () => {
       );
     });
 
+    // GH Issue: https://github.com/elastic/kibana/issues/242671
     // describe('access control', () => {
     //   test('applies the access control transform if defined', async () => {
     //     const accessControlExportTransform: SavedObjectsExportTransform = (ctx, objects) => {

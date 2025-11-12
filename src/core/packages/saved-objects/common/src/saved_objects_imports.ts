@@ -63,6 +63,7 @@ export interface SavedObjectsImportUnsupportedTypeError {
 
 // Note: the following two interfaces are not needed until we support importing
 // access control metadata for admins (phase 2 of write-restricted dashboards).
+// To be used once access control is enabled for imports: https://github.com/elastic/kibana/issues/242671
 /**
  * Represents a failure to import due to missing access control mode metadata.
  * This metadata is required only for objects that support access control when
