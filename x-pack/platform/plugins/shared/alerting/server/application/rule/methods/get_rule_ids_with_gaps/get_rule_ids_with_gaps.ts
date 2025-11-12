@@ -45,10 +45,10 @@ export async function getRuleIdsWithGaps(
       throw error;
     }
 
-    const { start, end, statuses, sortOrder } = params;
+    const { start, end, statuses, sortOrder, ruleTypes } = params;
     const eventLogClient = await context.getEventLogClient();
 
-    const filter = buildGapsFilter({
+    let filter = buildGapsFilter({
       start,
       end,
       statuses,
@@ -56,6 +56,16 @@ export async function getRuleIdsWithGaps(
       hasInProgressIntervals: params.hasInProgressIntervals,
       hasFilledIntervals: params.hasFilledIntervals,
     });
+
+    if (ruleTypes?.length) {
+      const ruleTypesFilter = ruleTypes
+        .map(
+          (rt) =>
+            `(kibana.alert.rule.rule_type_id: "${rt.type}" AND kibana.alert.rule.consumer: "${rt.consumer}")`
+        )
+        .join(' OR ');
+      filter = `${filter} AND (${ruleTypesFilter})`;
+    }
 
     const perBucketAgg: Record<string, AggregationsAggregationContainer> =
       sortOrder === 'desc'

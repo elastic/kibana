@@ -193,6 +193,7 @@ export function registerGapAutoFillSchedulerTask({
                 end: now.toISOString(),
                 sortOrder,
                 hasUnfilledIntervals: true,
+                ruleTypes: config.ruleTypes,
               });
 
               if (!ruleIds.length) {
@@ -253,8 +254,6 @@ export function registerGapAutoFillSchedulerTask({
                     filter: `alert.attributes.enabled:true AND (${currentRuleIds
                       .map((id) => `alert.id: ("alert:${id}")`)
                       .join(' OR ')})`,
-                    ruleTypeIds: config.ruleTypes.map((rt) => rt.type),
-                    consumers: Array.from(new Set(config.ruleTypes.map((rt) => rt.consumer))),
                   },
                 });
 

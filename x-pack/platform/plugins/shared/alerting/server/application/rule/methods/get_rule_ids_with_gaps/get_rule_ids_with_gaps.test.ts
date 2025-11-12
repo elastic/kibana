@@ -258,6 +258,59 @@ describe('getRuleIdsWithGaps', () => {
     });
   });
 
+  describe('ruleTypes filter', () => {
+    it('should include ruleTypes filter for a single rule type/consumer pair', async () => {
+      eventLogClient.aggregateEventsWithAuthFilter.mockResolvedValue({
+        aggregations: {
+          unique_rule_ids: { buckets: [] },
+          latest_gap_timestamp: { value: null },
+        },
+      });
+
+      await rulesClient.getRuleIdsWithGaps({
+        ...params,
+        ruleTypes: [{ type: 'my.rule.type', consumer: 'my-consumer' }],
+      });
+
+      expect(eventLogClient.aggregateEventsWithAuthFilter).toHaveBeenCalledWith(
+        RULE_SAVED_OBJECT_TYPE,
+        filter,
+        expect.objectContaining({
+          filter: expect.stringContaining(
+            'AND ((kibana.alert.rule.rule_type_id: "my.rule.type" AND kibana.alert.rule.consumer: "my-consumer"))'
+          ),
+        })
+      );
+    });
+
+    it('should include ruleTypes filter joined with OR for multiple pairs', async () => {
+      eventLogClient.aggregateEventsWithAuthFilter.mockResolvedValue({
+        aggregations: {
+          unique_rule_ids: { buckets: [] },
+          latest_gap_timestamp: { value: null },
+        },
+      });
+
+      await rulesClient.getRuleIdsWithGaps({
+        ...params,
+        ruleTypes: [
+          { type: 'type.a', consumer: 'cons-a' },
+          { type: 'type.b', consumer: 'cons-b' },
+        ],
+      });
+
+      expect(eventLogClient.aggregateEventsWithAuthFilter).toHaveBeenCalledWith(
+        RULE_SAVED_OBJECT_TYPE,
+        filter,
+        expect.objectContaining({
+          filter: expect.stringContaining(
+            'AND ((kibana.alert.rule.rule_type_id: "type.a" AND kibana.alert.rule.consumer: "cons-a") OR (kibana.alert.rule.rule_type_id: "type.b" AND kibana.alert.rule.consumer: "cons-b"))'
+          ),
+        })
+      );
+    });
+  });
+
   describe('error handling', () => {
     it('should handle and wrap errors from event log client', async () => {
       const error = new Error('Event log client error');
