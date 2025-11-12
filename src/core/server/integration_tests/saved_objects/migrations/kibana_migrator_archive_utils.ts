@@ -25,7 +25,7 @@ import {
 import { baselineTypes, getBaselineDocuments } from '@kbn/migrator-test-kit/fixtures';
 import { delay } from './test_utils';
 
-export const BASELINE_ELASTICSEARCH_VERSION = '9.2.1';
+export const BASELINE_ELASTICSEARCH_VERSION = '9.2.2';
 export const BASELINE_DOCUMENTS_PER_TYPE_SMALL = 200;
 export const BASELINE_DOCUMENTS_PER_TYPE_LARGE = 100_000;
 // we discard the second half with exclude on upgrade (firstHalf !== true)
