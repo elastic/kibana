@@ -9,13 +9,14 @@ import { SOURCE_TYPES } from '../constants';
 import { transformLayersOut } from './transform_layers_out';
 
 describe('transformLayersOut', () => {
-  test('should remove columns from ESQLSourceDescriptor', () => {
+  test('should remove columns and dataViewId from ESQLSourceDescriptor', () => {
     expect(
       transformLayersOut([
         {
           sourceDescriptor: {
             type: SOURCE_TYPES.ESQL,
             columns: [],
+            dataViewId: '1234',
             esql: 'from kibana_sample_data_logs | keep geo.coordinates',
           } as any,
         },
