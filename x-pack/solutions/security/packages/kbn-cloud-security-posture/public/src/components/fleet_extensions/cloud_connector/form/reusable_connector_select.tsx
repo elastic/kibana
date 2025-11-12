@@ -6,8 +6,14 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
-import { css } from '@emotion/react';
-import { EuiSuperSelect, EuiFormRow, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import {
+  EuiSuperSelect,
+  EuiFormRow,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiTextTruncate,
+} from '@elastic/eui';
 import type { EuiSuperSelectOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -46,11 +52,6 @@ export const ReusableConnectorSelect = <
       defaultMessage="Cloud Connector Name"
     />
   );
-  const truncateStyle = css`
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  `;
 
   // Create super select options with custom display
   const selectOptions: Array<EuiSuperSelectOption<string>> = useMemo(() => {
@@ -69,12 +70,14 @@ export const ReusableConnectorSelect = <
         dropdownDisplay: (
           <EuiFlexGroup direction="column" gutterSize="none">
             <EuiFlexItem>
-              <strong>{connector.name}</strong>
+              <strong>
+                <EuiTextTruncate text={connector.name} />
+              </strong>
             </EuiFlexItem>
             {identifier && (
               <EuiFlexItem>
                 <EuiText size="s" color="subdued">
-                  <div css={truncateStyle}>{identifier}</div>
+                  <EuiTextTruncate text={identifier} />
                 </EuiText>
               </EuiFlexItem>
             )}
@@ -82,7 +85,7 @@ export const ReusableConnectorSelect = <
         ),
       };
     });
-  }, [cloudConnectors, provider, truncateStyle]);
+  }, [cloudConnectors, provider]);
 
   // Find currently selected value
   const selectedValue = useMemo(() => {
