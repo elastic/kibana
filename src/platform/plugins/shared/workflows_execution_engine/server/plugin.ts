@@ -416,7 +416,8 @@ export class WorkflowsExecutionEnginePlugin
     const executeWorkflowStep = async (
       workflow: WorkflowExecutionEngineModel,
       stepId: string,
-      contextOverride: Record<string, any>
+      contextOverride: Record<string, any>,
+      request?: any
     ): Promise<ExecuteWorkflowStepResponse> => {
       await this.initialize(coreStart);
       const workflowCreatedAt = new Date();
@@ -460,7 +461,18 @@ export class WorkflowsExecutionEnginePlugin
         enabled: true,
       };
 
-      await plugins.taskManager.schedule(taskInstance);
+      // Use Task Manager's first-class API key support by passing the request
+      // This ensures the step runs with the user's permissions, not kibana_system
+      if (request) {
+        this.logger.debug(
+          `Scheduling workflow step task with user context for workflow ${workflow.id}, step ${stepId}`
+        );
+        await plugins.taskManager.schedule(taskInstance, { request });
+      } else {
+        this.logger.debug(`Scheduling workflow step task without user context`);
+        await plugins.taskManager.schedule(taskInstance);
+      }
+
       return {
         workflowExecutionId: workflowExecution.id!,
       };
