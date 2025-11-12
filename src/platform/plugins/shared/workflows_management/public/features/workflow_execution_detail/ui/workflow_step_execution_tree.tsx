@@ -170,8 +170,9 @@ export const WorkflowStepExecutionTree = ({
       />
     );
   } else if (definition) {
-    const skeletonStepExecutions: WorkflowStepExecutionDto[] = definition.steps.map(
-      (step, index) => ({
+    const skeletonStepExecutions: WorkflowStepExecutionDto[] = definition.steps
+      .filter((step) => !execution.stepId || step.name === execution.stepId) // we create skeletons only for the executed step and its children
+      .map((step, index) => ({
         stepId: step.name,
         stepType: step.type,
         status: ExecutionStatus.PENDING,
@@ -185,8 +186,7 @@ export const WorkflowStepExecutionTree = ({
         globalExecutionIndex: 0,
         stepExecutionIndex: 0,
         topologicalIndex: 0,
-      })
-    );
+      }));
     const stepExecutionMap = new Map<string, WorkflowStepExecutionDto>();
     const stepExecutionNameMap = new Map<string, WorkflowStepExecutionDto>();
     for (const stepExecution of execution.stepExecutions) {
