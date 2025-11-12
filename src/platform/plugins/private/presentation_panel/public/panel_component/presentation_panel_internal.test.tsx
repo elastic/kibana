@@ -53,6 +53,7 @@ describe('Presentation panel', () => {
   it('renders a blocking error when one is present', async () => {
     const api: DefaultPresentationPanelApi = {
       uuid: 'test',
+
       blockingError$: new BehaviorSubject<Error | undefined>(new Error('UH OH')),
     };
     render(<PresentationPanel Component={getMockPresentationPanelCompatibleComponent(api)} />);
@@ -244,6 +245,7 @@ describe('Presentation panel', () => {
 
       const api: DefaultPresentationPanelApi & PublishesDataViews & PublishesViewMode = {
         uuid: 'test',
+        isCustomizable: true,
         title$: new BehaviorSubject<string | undefined>('TITLE'),
         viewMode$: new BehaviorSubject<ViewMode>('edit'),
         dataViews$: new BehaviorSubject<DataView[] | undefined>([]),
@@ -260,11 +262,34 @@ describe('Presentation panel', () => {
       expect(editPanelSpy).toHaveBeenCalled();
     });
 
+    it('does not open customize panel flyout on title click when panel is not customizable', async () => {
+      editPanelSpy.mockClear();
+
+      const api: DefaultPresentationPanelApi & PublishesDataViews & PublishesViewMode = {
+        uuid: 'test',
+        isCustomizable: false,
+        title$: new BehaviorSubject<string | undefined>('TITLE'),
+        viewMode$: new BehaviorSubject<ViewMode>('edit'),
+        dataViews$: new BehaviorSubject<DataView[] | undefined>([]),
+      };
+      await renderPresentationPanel({ api });
+      await waitFor(() => {
+        expect(screen.getByTestId('embeddablePanelTitle')).toBeInTheDocument();
+      });
+      const titleElement = screen.getByTestId('embeddablePanelTitle');
+      expect(titleElement).toHaveTextContent('TITLE');
+      expect(titleElement.nodeName).toBe('SPAN');
+
+      await userEvent.click(titleElement);
+      expect(editPanelSpy).not.toHaveBeenCalled();
+    });
+
     it('does not show title customize link in view mode', async () => {
       editPanelSpy.mockClear();
 
       const api: DefaultPresentationPanelApi & PublishesDataViews & PublishesViewMode = {
         uuid: 'test',
+        isCustomizable: true,
         title$: new BehaviorSubject<string | undefined>('SUPER TITLE'),
         viewMode$: new BehaviorSubject<ViewMode>('view'),
         dataViews$: new BehaviorSubject<DataView[] | undefined>([]),
