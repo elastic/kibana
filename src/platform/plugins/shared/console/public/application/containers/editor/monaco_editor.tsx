@@ -39,7 +39,6 @@ import {
 import { ContextMenu } from './components';
 import { useSetInputEditor } from '../../hooks';
 import { useActionStyles, useHighlightedLinesClassName } from './styles';
-import { PlayButtonIcon } from './components/icons/play_button_icon';
 
 const useStyles = () => {
   const { euiTheme } = useEuiTheme();
@@ -102,6 +101,7 @@ export const MonacoEditor = ({
   const setInputEditor = useSetInputEditor();
   const styles = useStyles();
   const highlightedLinesClassName = useHighlightedLinesClassName();
+  const [isPlayButtonHovered, setIsPlayButtonHovered] = useState(false);
 
   const getRequestsCallback = useCallback(async (): Promise<EditorRequest[]> => {
     const requests = await actionsProvider.current?.getRequests();
@@ -272,13 +272,17 @@ export const MonacoEditor = ({
             })}
           >
             <EuiButtonIcon
+              display={isPlayButtonHovered ? 'fill' : 'base'}
+              size="s"
+              color="primary"
+              iconType="play"
               onClick={sendRequestsCallback}
+              onMouseEnter={() => setIsPlayButtonHovered(true)}
+              onMouseLeave={() => setIsPlayButtonHovered(false)}
               data-test-subj="sendRequestButton"
               aria-label={i18n.translate('console.monaco.sendRequestButtonTooltipAriaLabel', {
                 defaultMessage: 'Click to send request',
               })}
-              iconSize={'m'}
-              iconType={() => <PlayButtonIcon size="m" />}
             />
           </EuiToolTip>
         </EuiFlexItem>
