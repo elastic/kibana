@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -13,24 +12,28 @@ import {
   EuiResizableContainer,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
-import type { Streams } from '@kbn/streams-schema';
-import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
+import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import type { CoreStart } from '@kbn/core/public';
-import { useTimefilter } from '../../../hooks/use_timefilter';
+import type { Streams } from '@kbn/streams-schema';
+import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
+import React from 'react';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
+import type { StatefulStreamsAppRouter } from '../../../hooks/use_streams_app_router';
+import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
+import { useTimefilter } from '../../../hooks/use_timefilter';
+import { ManagementBottomBar } from '../management_bottom_bar';
+import { RequestPreviewFlyout } from '../request_preview_flyout';
+import { buildRequestPreviewCodeContent } from '../shared/utils';
 import { ChildStreamList } from './child_stream_list';
+import { PreviewPanel } from './preview_panel';
 import {
   StreamRoutingContextProvider,
   useStreamRoutingEvents,
   useStreamsRoutingSelector,
 } from './state_management/stream_routing_state_machine';
-import { ManagementBottomBar } from '../management_bottom_bar';
-import { PreviewPanel } from './preview_panel';
-import type { StatefulStreamsAppRouter } from '../../../hooks/use_streams_app_router';
-import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
+import { buildRoutingSaveRequestPayload, routingConverter } from './utils';
 
 interface StreamDetailRoutingProps {
   definition: Streams.WiredStream.GetResponse;
@@ -107,6 +110,27 @@ export function StreamDetailRoutingImpl() {
   });
 
   const availableStreams = streamsListFetch.value?.streams.map((stream) => stream.name) ?? [];
+  const [isRequestPreviewFlyoutOpen, setIsRequestPreviewFlyoutOpen] = React.useState(false);
+  const [requestPreviewCodeContent, setRequestPreviewCodeContent] = React.useState<string>('');
+
+  const onBottomBarViewCodeClick = () => {
+    const routing = routingSnapshot.context.routing.map(routingConverter.toAPIDefinition);
+    const body = buildRoutingSaveRequestPayload(routingSnapshot.context.definition, routing);
+
+    setRequestPreviewCodeContent(
+      buildRequestPreviewCodeContent({
+        method: 'PUT',
+        url: `/api/streams/${routingSnapshot.context.definition.stream.name}/_ingest`,
+        body,
+      })
+    );
+    setIsRequestPreviewFlyoutOpen(true);
+  };
+
+  const closeRequestPreviewFlyout = React.useCallback(() => {
+    setIsRequestPreviewFlyoutOpen(false);
+    setRequestPreviewCodeContent('');
+  }, []);
 
   return (
     <EuiFlexItem
@@ -180,10 +204,17 @@ export function StreamDetailRoutingImpl() {
               })}
               disabled={!routingSnapshot.can({ type: 'routingRule.save' })}
               insufficientPrivileges={!routingSnapshot.can({ type: 'routingRule.save' })}
+              onViewCodeClick={onBottomBarViewCodeClick}
             />
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
+      {isRequestPreviewFlyoutOpen && (
+        <RequestPreviewFlyout
+          codeContent={requestPreviewCodeContent}
+          onClose={closeRequestPreviewFlyout}
+        />
+      )}
     </EuiFlexItem>
   );
 }
