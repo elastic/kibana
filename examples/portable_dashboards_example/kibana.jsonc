@@ -21,7 +21,6 @@
       "unifiedSearch",
       "developerExamples",
       "uiActions"
-    ],
-    "requiredBundles": ["kibanaReact"]
+    ]
   }
 }

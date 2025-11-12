@@ -14,15 +14,17 @@ import { EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import type { DashboardApi, DashboardCreationOptions } from '@kbn/dashboard-plugin/public';
 import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
 import { controlGroupStateBuilder } from '@kbn/control-group-renderer';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FILTER_DEBUGGER_EMBEDDABLE_ID } from './constants';
 import type { StartDeps } from './plugin';
 
-export const DashboardWithControlsExample = ({ dataView }: { dataView: DataView }) => {
+export const DashboardWithControlsExample = ({
+  dataView,
+  uiActions,
+}: {
+  dataView: DataView;
+  uiActions: StartDeps['uiActions'];
+}) => {
   const [dashboard, setDashboard] = useState<DashboardApi | undefined>();
-  const {
-    services: { uiActions },
-  } = useKibana<StartDeps>();
 
   // add a filter debugger panel as soon as the dashboard becomes available
   useEffect(() => {
