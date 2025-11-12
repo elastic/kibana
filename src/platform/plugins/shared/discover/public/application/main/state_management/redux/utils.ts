@@ -12,9 +12,9 @@ import { i18n } from '@kbn/i18n';
 import { getNextTabNumber, type TabItem } from '@kbn/unified-tabs';
 import { createAsyncThunk, miniSerializeError } from '@reduxjs/toolkit';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
-import type { ControlPanelsState } from '@kbn/controls-plugin/public';
-import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
+import type { ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
+import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { DiscoverInternalState, TabState } from './types';
 import type {
   InternalStateDispatch,
@@ -79,9 +79,7 @@ export const createTabItem = (allTabs: TabState[]): TabItem => {
  * @returns A ControlPanelsState object or an empty object if parsing fails.
  */
 
-export const parseControlGroupJson = (
-  jsonString?: string | null
-): ControlPanelsState<ESQLControlState> => {
+export const parseControlGroupJson = (jsonString?: string | null): ControlPanelsState => {
   try {
     return jsonString ? JSON.parse(jsonString) : {};
   } catch (e) {
@@ -97,9 +95,7 @@ export const parseControlGroupJson = (
  * If `panels` is null or empty, it returns an empty array.
  * @returns An array of ESQLControlVariable objects.
  */
-export const extractEsqlVariables = (
-  panels: ControlPanelsState<ESQLControlState> | null
-): ESQLControlVariable[] => {
+export const extractEsqlVariables = (panels: ControlPanelsState | null): ESQLControlVariable[] => {
   if (!panels || Object.keys(panels).length === 0) {
     return [];
   }
@@ -121,7 +117,7 @@ export const extractEsqlVariables = (
 
       acc.push({
         key: panel.variableName,
-        type: panel.variableType,
+        type: panel.variableType as ESQLVariableType,
         value,
       });
     }

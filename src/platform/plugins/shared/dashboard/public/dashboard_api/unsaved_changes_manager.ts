@@ -9,7 +9,6 @@
 
 import { BehaviorSubject, combineLatest, debounceTime, first, map, skip, tap } from 'rxjs';
 
-import type { Reference } from '@kbn/content-management-utils';
 import type { HasLastSavedChildState } from '@kbn/presentation-containers';
 import { childrenUnsavedChanges$ } from '@kbn/presentation-containers';
 import type {
@@ -39,12 +38,10 @@ export function initializeUnsavedChangesManager({
   settingsManager,
   viewMode$,
   storeUnsavedChanges,
-  getReferences,
   unifiedSearchManager,
 }: {
   lastSavedState: DashboardState;
   storeUnsavedChanges?: boolean;
-  getReferences: (id: string) => Reference[];
   savedObjectId$: PublishesSavedObjectId['savedObjectId$'];
   layoutManager: ReturnType<typeof initializeLayoutManager>;
   filtersManager: ReturnType<typeof initializeFiltersManager>;

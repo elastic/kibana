@@ -4,7 +4,7 @@
     "outDir": "target/types",
     "types": ["jest", "node"]
   },
-  "include": ["**/*.ts"],
+  "include": ["**/*.ts", "**/*.tsx"],
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/controls-constants",
@@ -14,6 +14,12 @@
     "@kbn/controls-renderer",
     "@kbn/data-views-plugin",
     "@kbn/esql-types",
-    "@kbn/presentation-publishing"
+    "@kbn/presentation-publishing",
+    "@kbn/es-query",
+    "@kbn/kibana-react-plugin",
+    "@kbn/std",
+    "@kbn/embeddable-plugin",
+    "@kbn/shared-ux-utility",
+    "@kbn/presentation-containers"
   ]
 }

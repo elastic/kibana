@@ -92,7 +92,6 @@
     "@kbn/controls-renderer",
     "@kbn/presentation-util",
     "@kbn/react-query",
-    "@kbn/controls-plugin",
     "@kbn/core-chrome-layout-utils"
   ],
   "exclude": ["target/**/*"]

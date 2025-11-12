@@ -12,4 +12,5 @@ import { schema } from '@kbn/config-schema';
 export const timeSliderControlSchema = schema.object({
   timesliceStartAsPercentageOfTimeRange: schema.maybe(schema.number()),
   timesliceEndAsPercentageOfTimeRange: schema.maybe(schema.number()),
+  isAnchored: schema.maybe(schema.boolean()),
 });

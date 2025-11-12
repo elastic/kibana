@@ -25,6 +25,7 @@ import type {
   optionsListSortSchema,
 } from './options_list_schema';
 import type { rangeSliderControlSchema, rangeValueSchema } from './range_slider_schema';
+import type { timeSliderControlSchema } from './time_slider_schema';
 
 export type ControlsGroupState = TypeOf<typeof controlsGroupSchema>;
 export type StickyControlState = ControlsGroupState['controls'][number];
@@ -51,6 +52,7 @@ export type RangeSliderControlState = TypeOf<typeof rangeSliderControlSchema>;
 export type RangeSliderValue = TypeOf<typeof rangeValueSchema>;
 
 export type TimeSlice = [number, number];
+export type TimeSliderControlState = TypeOf<typeof timeSliderControlSchema>;
 
 export interface HasCustomPrepend {
   CustomPrependComponent: React.FC<{}>;

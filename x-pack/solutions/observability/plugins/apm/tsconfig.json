@@ -84,7 +84,6 @@
     "@kbn/observability-alert-details",
     "@kbn/custom-integrations-plugin",
     "@kbn/dashboard-plugin",
-    "@kbn/controls-plugin",
     "@kbn/core-http-server",
     "@kbn/profiling-plugin",
     "@kbn/logs-shared-plugin",
@@ -147,7 +146,8 @@
     "@kbn/discover-shared-plugin",
     "@kbn/core-chrome-browser",
     "@kbn/react-query",
-    "@kbn/core-chrome-layout-constants"
+    "@kbn/core-chrome-layout-constants",
+    "@kbn/control-group-renderer"
   ],
   "exclude": ["target/**/*"]
 }

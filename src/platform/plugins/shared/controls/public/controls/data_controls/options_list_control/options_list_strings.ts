@@ -14,7 +14,7 @@ import { MAX_OPTIONS_LIST_BULK_SELECT_SIZE } from './constants';
 export const OptionsListStrings = {
   control: {
     getDisplayName: () =>
-      i18n.translate('controls.optionsList.displayName', {
+      i18n.translate('controls.optionsList.control.displayName', {
         defaultMessage: 'options list',
       }),
     getSeparator: (type?: string) => {

@@ -30,6 +30,8 @@ export type DashboardPanel = TypeOf<ReturnType<typeof schema.getPanelSchema>>;
 export type DashboardSection = TypeOf<ReturnType<typeof schema.getSectionSchema>>;
 export type DashboardState = Writable<TypeOf<ReturnType<typeof schema.getDashboardDataSchema>>>;
 
+export type DashboardControlsState = NonNullable<DashboardState['controlGroupInput']>['controls'];
+
 export type DashboardItem = TypeOf<ReturnType<typeof schema.getDashboardItemSchema>>;
 export type PartialDashboardItem = Omit<DashboardItem, 'attributes' | 'references'> & {
   attributes: Partial<DashboardState>;

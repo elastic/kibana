@@ -12,6 +12,7 @@ export type {
   DashboardPanel,
   DashboardSection,
   DashboardState,
+  DashboardControlsState,
   DashboardItem,
   DashboardGetIn,
   DashboardAPIGetOut,

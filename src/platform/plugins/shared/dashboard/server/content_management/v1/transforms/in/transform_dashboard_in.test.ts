@@ -22,6 +22,7 @@ describe('transformDashboardIn', () => {
             grow: false,
             id: 'foo',
             order: 0,
+            // @ts-expect-error Test type
             type: 'type1',
             width: 'small',
           },

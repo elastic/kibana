@@ -33,6 +33,7 @@ describe('serializeLayout', () => {
           type: 'testPanelType',
         },
       },
+      controls: {},
       sections: {
         section1: {
           collapsed: true,

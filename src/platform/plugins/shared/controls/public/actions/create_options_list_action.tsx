@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
-import type { OptionsListControlState } from '@kbn/controls-schemas';
+import type { DataControlState, OptionsListControlState } from '@kbn/controls-schemas';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 
@@ -25,29 +25,30 @@ const isFieldCompatible = (field: DataViewField) => {
   );
 };
 
-export const createOptionsListControlAction =
-  (): CreateControlTypeAction<OptionsListControlState> => {
-    return {
-      id: OPTIONS_LIST_ACTION,
-      type: OPTIONS_LIST_CONTROL,
-      order: 1,
-      getIconType: () => 'editorChecklist',
-      getDisplayName: () =>
-        i18n.translate('controls.optionsList.displayName', {
-          defaultMessage: 'Options list',
-        }),
-      isCompatible: async ({ state: { dataViewId, fieldName } }) => {
-        if (!dataViewId || !fieldName) return false;
-        const dataView = await dataViewsService.get(dataViewId);
-        const field = dataView.getFieldByName(fieldName);
-        return Boolean(field && isFieldCompatible(field));
-      },
-      execute: async ({ embeddable, state, controlId, isPinned }) => {
-        createDataControlOfType(OPTIONS_LIST_CONTROL, { embeddable, state, controlId, isPinned });
-      },
-      extension: {
-        CustomOptionsComponent: OptionsListEditorOptions,
-        isFieldCompatible,
-      },
-    };
+export const createOptionsListControlAction = (): CreateControlTypeAction<
+  OptionsListControlState & DataControlState
+> => {
+  return {
+    id: OPTIONS_LIST_ACTION,
+    type: OPTIONS_LIST_CONTROL,
+    order: 1,
+    getIconType: () => 'editorChecklist',
+    getDisplayName: () =>
+      i18n.translate('controls.optionsList.action.displayName', {
+        defaultMessage: 'Options list',
+      }),
+    isCompatible: async ({ state: { dataViewId, fieldName } }) => {
+      if (!dataViewId || !fieldName) return false;
+      const dataView = await dataViewsService.get(dataViewId);
+      const field = dataView.getFieldByName(fieldName);
+      return Boolean(field && isFieldCompatible(field));
+    },
+    execute: async ({ embeddable, state, controlId, isPinned }) => {
+      createDataControlOfType(OPTIONS_LIST_CONTROL, { embeddable, state, controlId, isPinned });
+    },
+    extension: {
+      CustomOptionsComponent: OptionsListEditorOptions,
+      isFieldCompatible,
+    },
   };
+};

@@ -47,7 +47,7 @@ import type {
 import type { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
 import type { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import { type TracksOverlays } from '@kbn/presentation-util';
-import type { ControlsGroupState, TimeSlice } from '@kbn/controls-schemas';
+import type { TimeSlice } from '@kbn/controls-schemas';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { BehaviorSubject, Observable, Subject } from 'rxjs';
 import type { DashboardLocatorParams } from '../../common';
@@ -179,8 +179,4 @@ export interface DashboardInternalApi {
   isSectionCollapsed: (sectionId?: string) => boolean;
   dashboardContainerRef$: BehaviorSubject<HTMLElement | null>;
   setDashboardContainerRef: (ref: HTMLElement | null) => void;
-  serializeControls: () => {
-    controlGroupInput: ControlsGroupState | undefined;
-    controlGroupReferences: Reference[];
-  };
 }

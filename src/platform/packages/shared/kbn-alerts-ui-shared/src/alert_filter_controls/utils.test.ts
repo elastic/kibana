@@ -71,10 +71,9 @@ describe('utils', () => {
       const filterItemObjList = getFilterItemObjListFromControlState(initialInputData);
 
       filterItemObjList.forEach((item, idx) => {
-        const panelObj =
-          initialInputData.initialChildControlState[
-            String(idx) as keyof typeof initialInputData.initialChildControlState
-          ];
+        const panelObj = initialInputData.initialChildControlState[
+          String(idx) as keyof typeof initialInputData.initialChildControlState
+        ] as FilterControlConfig;
         expect(item).toMatchObject({
           fieldName: panelObj.fieldName,
           selectedOptions: panelObj.selectedOptions,
@@ -95,7 +94,7 @@ describe('utils', () => {
       };
       const filterItemObjList = getFilterItemObjListFromControlState(newInputData);
 
-      let panelObj = newInputData.initialChildControlState['1'];
+      let panelObj = newInputData.initialChildControlState['1'] as FilterControlConfig;
       expect(filterItemObjList[0]).toMatchObject({
         fieldName: panelObj.fieldName,
         selectedOptions: panelObj.selectedOptions,
@@ -104,7 +103,7 @@ describe('utils', () => {
         exclude: panelObj.exclude,
       });
 
-      panelObj = newInputData.initialChildControlState['0'];
+      panelObj = newInputData.initialChildControlState['0'] as FilterControlConfig;
       expect(filterItemObjList[1]).toMatchObject({
         fieldName: panelObj.fieldName,
         selectedOptions: panelObj.selectedOptions,

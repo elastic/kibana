@@ -240,10 +240,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('Hierarchical chaining off', () => {
-      before(async () => {
-        await dashboardControls.updateChainingSystem('NONE');
-      });
-
       it('Selecting an option in the first Options List will not filter the second or third controls', async () => {
         await dashboardControls.optionsListOpenPopover(controlIds[0]);
         await dashboardControls.optionsListPopoverSelectOption('cat');

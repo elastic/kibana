@@ -9,11 +9,10 @@
 
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { BehaviorSubject } from 'rxjs';
-import type { ControlPanelsState } from '@kbn/controls-plugin/public';
-import type { ESQLControlState } from '@kbn/esql-types';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram';
+import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import { updateSavedSearch } from './utils/update_saved_search';
 import { addLog } from '../../../utils/add_log';
 import type { DiscoverAppState } from './discover_app_state_container';
@@ -97,7 +96,7 @@ export interface DiscoverSavedSearchContainer {
    * Updates the current value of controlState in saved search
    * @param params
    */
-  updateControlState: (params: { nextControlState: ControlPanelsState<ESQLControlState> }) => void;
+  updateControlState: (params: { nextControlState: ControlPanelsState }) => void;
 }
 
 export function getSavedSearchContainer({
@@ -214,7 +213,7 @@ export function getSavedSearchContainer({
   const updateControlState = ({
     nextControlState,
   }: {
-    nextControlState: ControlPanelsState<ESQLControlState> | undefined;
+    nextControlState: ControlPanelsState | undefined;
   }) => {
     const previousSavedSearch = getState();
     const nextSavedSearch: SavedSearch = {

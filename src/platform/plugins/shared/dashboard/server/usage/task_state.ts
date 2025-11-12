@@ -29,13 +29,6 @@ export const stateSchemaByVersion = {
           by_value: state.telemetry?.panels?.by_value || 0,
           by_type: state.telemetry?.panels?.by_type || {},
         },
-        controls: {
-          total: state.telemetry?.controls?.total || 0,
-          chaining_system: state.telemetry?.controls?.chaining_system || {},
-          label_position: state.telemetry?.controls?.label_position || {},
-          ignore_settings: state.telemetry?.controls?.ignore_settings || {},
-          by_type: state.telemetry?.controls?.by_type || {},
-        },
       },
     }),
     schema: schema.object({
@@ -51,19 +44,6 @@ export const stateSchemaByVersion = {
               total: schema.number(),
               by_reference: schema.number(),
               by_value: schema.number(),
-              details: schema.recordOf(schema.string(), schema.number()),
-            })
-          ),
-        }),
-        controls: schema.object({
-          total: schema.number(),
-          chaining_system: schema.recordOf(schema.string(), schema.number()),
-          label_position: schema.recordOf(schema.string(), schema.number()),
-          ignore_settings: schema.recordOf(schema.string(), schema.number()),
-          by_type: schema.recordOf(
-            schema.string(),
-            schema.object({
-              total: schema.number(),
               details: schema.recordOf(schema.string(), schema.number()),
             })
           ),
@@ -84,13 +64,6 @@ export const emptyState: LatestTaskStateSchema = {
       total: 0,
       by_reference: 0,
       by_value: 0,
-      by_type: {},
-    },
-    controls: {
-      total: 0,
-      chaining_system: {},
-      ignore_settings: {},
-      label_position: {},
       by_type: {},
     },
     sections: {

@@ -14,6 +14,7 @@ import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield
 import { unifiedHistogramServicesMock } from '../__mocks__/services';
 import { useUnifiedHistogram } from './use_unified_histogram';
 import { renderHook, waitFor } from '@testing-library/react';
+import type { ControlPanelState } from '@kbn/control-group-renderer';
 
 describe('useUnifiedHistogram', () => {
   it('should initialize', async () => {
@@ -29,7 +30,7 @@ describe('useUnifiedHistogram', () => {
         controlType: EsqlControlType.VALUES_FROM_QUERY,
         esqlQuery: 'FROM logstash* | STATS BY field',
         title: 'field',
-      },
+      } as ControlPanelState,
     };
     const hook = renderHook(() =>
       useUnifiedHistogram({

@@ -25,6 +25,7 @@ export type {
   RangeSliderValue,
   StickyControlState,
   TimeSlice,
+  TimeSliderControlState,
   HasCustomPrepend,
   LegacyIgnoreParentSettings,
   StickyControlLayoutState,

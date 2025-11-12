@@ -14,13 +14,13 @@ import type {
   StoredControlGroupInput,
 } from '../../../../dashboard_saved_object';
 import { transformControlsState } from './transform_controls_state';
-import type { DashboardAttributes } from '../../types';
+import type { DashboardControlsState, DashboardState } from '../../types';
 
 export function transformControlGroupOut(
   controlGroupInput: NonNullable<DashboardSavedObjectAttributes['controlGroupInput']>,
   references: Reference[],
   ignoreParentSettingsJSON?: string
-): DashboardAttributes['controlGroupInput'] {
+): DashboardState['controlGroupInput'] {
   let controls = controlGroupInput.panelsJSON
     ? transformControlsState(controlGroupInput.panelsJSON, references)
     : [];
@@ -45,7 +45,7 @@ export function transformControlGroupOut(
           ignoreValidations: legacyControlGroupOptions.ignoreValidations,
         },
       ];
-    }, [] as DashboardAttributes['controlGroupInput']['controls']);
+    }, [] as DashboardControlsState);
   }
   return { controls };
 }

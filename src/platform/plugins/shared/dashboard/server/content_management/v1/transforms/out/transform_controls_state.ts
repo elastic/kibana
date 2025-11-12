@@ -17,7 +17,7 @@ import type {
   StoredControlState,
 } from '../../../../dashboard_saved_object';
 import { embeddableService, logger } from '../../../../kibana_services';
-import type { DashboardAttributes } from '../../types';
+import type { DashboardControlsState } from '../../types';
 
 /**
  * Transform functions for serialized controls state.
@@ -25,10 +25,7 @@ import type { DashboardAttributes } from '../../types';
 export const transformControlsState: (
   serializedControlState: string,
   references: Reference[]
-) => DashboardAttributes['controlGroupInput']['controls'] = (
-  serializedControlState,
-  references
-) => {
+) => DashboardControlsState = (serializedControlState, references) => {
   const state = flow(
     JSON.parse,
     transformControlObjectToArray,
@@ -39,7 +36,7 @@ export const transformControlsState: (
 
 export function transformControlObjectToArray(
   controls: StoredControlGroupInput['panels']
-): Array<SerializableRecord> {
+): Array<StoredControlState> {
   return Object.entries(controls).map(([id, control]) => ({ id, ...control }));
 }
 
@@ -60,22 +57,18 @@ export function transformControlProperties(controls: Array<StoredControlState>) 
 function injectControlReferences(
   controls: Array<StoredControlState>,
   references: Reference[]
-): DashboardAttributes['controlGroupInput']['controls'] {
-  const transformedControls: DashboardAttributes['controlGroupInput']['controls'] = [];
+): DashboardControlsState {
+  const transformedControls: DashboardControlsState = [];
 
   controls.forEach((control) => {
     const transforms = embeddableService.getTransforms(control.type);
     try {
       if (transforms?.transformOut) {
         transformedControls.push(
-          transforms.transformOut(
-            control,
-            references,
-            control.id
-          ) as DashboardAttributes['controlGroupInput']['controls'][number]
+          transforms.transformOut(control, references, control.id) as DashboardControlsState[number]
         );
       } else {
-        transformedControls.push(control);
+        transformedControls.push(control as DashboardControlsState[number]);
       }
     } catch (transformOutError) {
       // do not prevent read on transformOutError
