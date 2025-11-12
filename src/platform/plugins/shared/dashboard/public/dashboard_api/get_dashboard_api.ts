@@ -90,7 +90,10 @@ export function getDashboardApi({
   const dataViewsManager = initializeDataViewsManager(layoutManager.api.children$);
   const settingsManager = initializeSettingsManager(initialState);
 
-  const esqlVariablesManager = initializeESQLVariablesManager(layoutManager.api.children$);
+  const esqlVariablesManager = initializeESQLVariablesManager(
+    layoutManager.api.children$,
+    settingsManager
+  );
   const timesliceManager = initializeTimesliceManager(layoutManager.api.children$, settingsManager);
 
   const unifiedSearchManager = initializeUnifiedSearchManager(
@@ -131,7 +134,7 @@ export function getDashboardApi({
       controlGroupInput,
     };
 
-    // ...(controlGroupReferences ?? []),
+    console.log({ getState: dashboardState });
     return {
       dashboardState,
       references: [...(panelReferences ?? [])],
@@ -145,6 +148,7 @@ export function getDashboardApi({
   const dashboardApi = {
     isFetchPaused$,
     setFetchPaused: (paused) => isFetchPaused$.next(paused),
+    esqlVariables$: esqlVariablesManager.api.publishedEsqlVariables$,
     ...viewModeManager.api,
     ...dataLoadingManager.api,
     ...dataViewsManager.api,

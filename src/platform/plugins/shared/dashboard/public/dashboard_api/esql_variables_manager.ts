@@ -7,30 +7,57 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject } from 'rxjs';
+import deepEqual from 'fast-deep-equal';
+
+import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { PublishesESQLVariable } from '@kbn/esql-types';
 import { apiPublishesESQLVariable, type ESQLControlVariable } from '@kbn/esql-types';
 import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
-import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
+import { BehaviorSubject, combineLatestWith, filter, first, skip } from 'rxjs';
+import type { initializeSettingsManager } from './settings_manager';
 
 export const initializeESQLVariablesManager = (
-  children$: PublishingSubject<{ [key: string]: DefaultEmbeddableApi }>
+  children$: PublishingSubject<{ [key: string]: DefaultEmbeddableApi }>,
+  settingsManager: ReturnType<typeof initializeSettingsManager>
 ) => {
-  const esqlVariables$ = new BehaviorSubject<ESQLControlVariable[]>([]);
+  const publishedEsqlVariables$ = new BehaviorSubject<ESQLControlVariable[]>([]);
+  const unpublishedEsqlVariables$ = new BehaviorSubject<ESQLControlVariable[]>([]);
+
   const childrenESQLVariablesSubscription = combineCompatibleChildrenApis<
     PublishesESQLVariable,
     ESQLControlVariable[]
   >({ children$ }, 'esqlVariable$', apiPublishesESQLVariable, []).subscribe((newESQLVariables) => {
-    esqlVariables$.next(newESQLVariables);
+    unpublishedEsqlVariables$.next(newESQLVariables);
   });
+
+  const publishVariables = () => {
+    const published = publishedEsqlVariables$.getValue();
+    const unpublished = unpublishedEsqlVariables$.getValue();
+    if (!deepEqual(published, unpublished)) {
+      publishedEsqlVariables$.next(unpublished);
+    }
+  };
+
+  /** when auto publish is `true`, push filters from `unpublishedFilters$` directly to published */
+  const autoPublishFiltersSubscription = unpublishedEsqlVariables$
+    .pipe(
+      combineLatestWith(settingsManager.api.settings.autoApplyFilters$),
+      filter(([_, autoApplyFilters]) => autoApplyFilters)
+    )
+    .subscribe(([filters, autoApplyFilters]) => {
+      publishVariables();
+    });
 
   return {
     api: {
-      esqlVariables$,
+      publishedEsqlVariables$,
+      unpublishedEsqlVariables$,
+      publishVariables,
     },
     cleanup: () => {
       childrenESQLVariablesSubscription.unsubscribe();
+      autoPublishFiltersSubscription.unsubscribe();
     },
   };
 };

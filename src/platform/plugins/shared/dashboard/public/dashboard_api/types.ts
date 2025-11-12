@@ -164,6 +164,10 @@ export type DashboardApi = CanExpandPanels &
     unpublishedTimeslice$: PublishingSubject<TimeSlice | undefined>;
     publishTimeslice: () => void;
 
+    publishedEsqlVariables$: PublishingSubject<TimeSlice | undefined>;
+    unpublishedEsqlVariables$: PublishingSubject<TimeSlice | undefined>;
+    publishVariables: () => void;
+
     layout$: BehaviorSubject<DashboardLayout>;
 
     registerChildApi: (api: DefaultEmbeddableApi) => void;
