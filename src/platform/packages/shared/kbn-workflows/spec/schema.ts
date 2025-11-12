@@ -415,7 +415,6 @@ export const WorkflowInputArraySchema = WorkflowInputBaseSchema.extend({
   default: z.union([z.array(z.string()), z.array(z.number()), z.array(z.boolean())]).optional(),
 });
 
-// Add this before WorkflowInputObjectSchema definition
 const InlineSchemaValueSchema: z.ZodType<unknown> = z.lazy(() =>
   z.union([
     z.literal('string'),
