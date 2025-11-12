@@ -172,6 +172,7 @@ export interface AlertingServerSetup {
 }
 
 export interface AlertingServerStart {
+  logger: Logger;
   listTypes: RuleTypeRegistry['list'];
   getAllTypes: RuleTypeRegistry['getAllTypes'];
   getType: RuleTypeRegistry['get'];
@@ -739,6 +740,7 @@ export class AlertingPlugin {
     scheduleMaintenanceWindowEventsGenerator(this.logger, plugins.taskManager).catch(() => {});
 
     return {
+      logger: this.logger,
       listTypes: ruleTypeRegistry!.list.bind(this.ruleTypeRegistry!),
       getType: ruleTypeRegistry!.get.bind(this.ruleTypeRegistry),
       getAllTypes: ruleTypeRegistry!.getAllTypes.bind(this.ruleTypeRegistry!),
