@@ -371,8 +371,6 @@ export interface ConnectorTypeInfo {
   subActions: ConnectorSubAction[];
 }
 
-export type ConnectorTypeInfoMinimal = Pick<ConnectorTypeInfo, 'actionTypeId' | 'displayName'>;
-
 export interface ConnectorContract {
   type: string;
   paramsSchema: z.ZodType;
