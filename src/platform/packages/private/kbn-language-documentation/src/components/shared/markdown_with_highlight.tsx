@@ -63,24 +63,24 @@ const highlightParsingPlugin: MarkdownPlugin = function (this) {
   const tokenizers = Parser.prototype.inlineTokenizers;
   const methods = Parser.prototype.inlineMethods;
 
-  const tokenizeHighlight: RemarkTokenizer = function (eat, value, silent) {
-    const pattern = new RegExp(`^${HIGHLIGHT_TOKEN}(.*?)${HIGHLIGHT_TOKEN}`);
-    const match = value.match(pattern);
-    if (!match) return false;
-
-    if (silent) return true;
-
-    const [fullMatch, content] = match;
-    return eat(fullMatch)({
-      type: 'highlightPlugin',
-      content,
-    });
-  };
-
   tokenizeHighlight.locator = (value: string, fromIndex: number) => {
     return value.indexOf(HIGHLIGHT_TOKEN, fromIndex);
   };
 
   tokenizers.highlight = tokenizeHighlight;
   methods.splice(methods.indexOf('text'), 0, 'highlight');
+};
+
+const tokenizeHighlight: RemarkTokenizer = function (eat, value, silent) {
+  const pattern = new RegExp(`^${HIGHLIGHT_TOKEN}(.*?)${HIGHLIGHT_TOKEN}`);
+  const match = value.match(pattern);
+  if (!match) return false;
+
+  if (silent) return true;
+
+  const [fullMatch, content] = match;
+  return eat(fullMatch)({
+    type: 'highlightPlugin',
+    content,
+  });
 };
