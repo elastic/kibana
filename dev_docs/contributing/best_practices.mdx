@@ -39,16 +39,15 @@ all of our apps are accessible.
 <DocCallOut title="Internal only">
   ## Accessibility automation in Kibana
 
-  Layered checks prevent regressions and enforce WCAG compliance.
+  Kibana maintains accessibility quality using a layered, automated approach:
 
   ### 1. Code‑level checks
-  - **Tool:** `@elastic/eslint-plugin-eui`
-  - **Enforces:** ARIA correctness, required labels, forbidden patterns, safer EUI usage
-  - **Action:** Fix every warning before commit (treat warnings as blockers)
-  - **Rule:** Do **not** suppress or ignore lint output
+  - **Tool:** `@elastic/eslint-plugin-eui` – custom rules for the ESLint library
+  - **Enforces:** Correct ARIA usage, required labels, prohibited patterns, and safer EUI practices
+  - **Action:** Resolve all warnings before committing (treat warnings as blockers)
 
   ### 2. Render‑level checks
-  - **CI tooling:** axe‑core via FTR and Cypress (Scout pending...)
+  - **CI tooling:** running `axe-core` check in `FTR` and `Cypress` tests (`Scout` integration pending...)
   - **Scope:** Semantics, landmarks, contrast, focus order, interaction patterns. All automation tests are based on the configuration defined in `src/platform/packages/shared/kbn-axe-config/index.ts`.
   - **Usage:**
     - **FTR a11y tests** (`test/accessibility`):
@@ -64,13 +63,13 @@ all of our apps are accessible.
         cy.checkA11y();
       });
       ```
-  - **Add coverage:** create or extend tests when developing new feature
+  - *Action:** Improve coverage — add or extend tests while developing features.
 
   ### 3. Ready check (execute before commit)
-  - Prefer EUI components and follow EUI accessibility guidance
-  - Zero a11y ESLint warnings
-  - No new axe violations on affected components
-  - Basic VoiceOver pass: new or changed interactive regions announce purpose
+  - Favor EUI components and honor their accessibility playbook
+  - Zero tolerance for a11y ESLint warnings
+  - No new axe violations in updated components — keep it clean
+  - VoiceOver sanity check: new or modified interactive areas should clearly announce their purpose
 
   For help: join `#accessibility` slack channel.
 </DocCallOut>
