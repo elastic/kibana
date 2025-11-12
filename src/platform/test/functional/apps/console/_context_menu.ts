@@ -33,10 +33,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(PageObjects.console.isContextMenuOpen()).to.be.eql(true);
     });
 
-    it('should have options to copy as, open documentation, and auto indent', async () => {
+    it('should have options to copy to language, language clients, open documentation, and auto indent', async () => {
       await PageObjects.console.clickContextMenu();
       expect(PageObjects.console.isContextMenuOpen()).to.be.eql(true);
-      expect(PageObjects.console.isCopyAsButtonVisible()).to.be.eql(true);
+      expect(PageObjects.console.isCopyToLanguageButtonVisible()).to.be.eql(true);
+      expect(PageObjects.console.isLanguageClientsButtonVisible()).to.be.eql(true);
       expect(PageObjects.console.isOpenDocumentationButtonVisible()).to.be.eql(true);
       expect(PageObjects.console.isAutoIndentButtonVisible()).to.be.eql(true);
     });
@@ -49,9 +50,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.console.enterText('GET _search');
       });
 
-      it('by default it should copy as curl and show toast when copy as button is clicked', async () => {
+      it('by default it should copy as curl and show toast when copy to language button is clicked', async () => {
         await PageObjects.console.clickContextMenu();
-        await PageObjects.console.clickCopyAsButton();
+        await PageObjects.console.clickCopyToLanguageButton();
 
         const resultToast = await toasts.getElementByIndex(1);
         const toastText = await resultToast.getVisibleText();
@@ -83,7 +84,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.console.selectAllRequests();
 
         await PageObjects.console.clickContextMenu();
-        await PageObjects.console.clickCopyAsButton();
+        await PageObjects.console.clickCopyToLanguageButton();
 
         const resultToast = await toasts.getElementByIndex(1);
         const toastText = await resultToast.getVisibleText();
@@ -102,32 +103,51 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Focus editor once again
         await PageObjects.console.focusInputEditor();
 
-        // Verify that the Change language button is not displayed for kbn request
+        // Verify that the Language clients button is disabled for kbn request
         await PageObjects.console.clickContextMenu();
-        expect(await testSubjects.exists('changeLanguageButton')).to.be(false);
+        const languageClientsButton = await testSubjects.find('consoleMenuLanguageClients');
+        expect(await languageClientsButton.getAttribute('disabled')).to.be('true');
       });
 
       it('allows to change default language', async () => {
         await PageObjects.console.clickContextMenu();
 
-        // By default should be copy as cURL
-        let copyAsButton = await testSubjects.find('consoleMenuCopyAsButton');
-        let buttonLabel = await copyAsButton.getVisibleText();
-        expect(buttonLabel).to.contain('curl');
+        // Wait for menu to be fully open
+        await retry.waitFor('context menu to open', async () => {
+          return await testSubjects.exists('consoleMenuCopyToLanguage');
+        });
 
-        // Select python as default language
-        await PageObjects.console.changeDefaultLanguage('python');
-        // Wait until async operation is done
-        await PageObjects.common.sleep(2000);
-        // Select requests to display context menu button
-        await PageObjects.console.selectAllRequests();
-        // Open the context menu once again
-        await PageObjects.console.clickContextMenu();
+        // Check default language badge shows "curl"
+        let languageBadge = await testSubjects.find('consoleMenuLanguageBadge');
+        let badgeText = await languageBadge.getVisibleText();
+        expect(badgeText.toLowerCase()).to.equal('curl');
 
-        // By default should be copy as cURL
-        copyAsButton = await testSubjects.find('consoleMenuCopyAsButton');
-        buttonLabel = await copyAsButton.getVisibleText();
-        expect(buttonLabel).to.contain('Python');
+        // Click "Language clients" to open nested panel
+        await testSubjects.click('consoleMenuLanguageClients');
+
+        // Wait for the language clients panel to open
+        await retry.waitFor('language clients panel to open', async () => {
+          return await testSubjects.exists('languageClientMenuItem-python');
+        });
+
+        // Wait for panel animation to complete
+        await PageObjects.common.sleep(300);
+
+        // Click "Python" from the language list
+        await testSubjects.click('languageClientMenuItem-python');
+
+        // Wait for panel to return to main menu
+        await retry.waitFor('panel to return to main menu', async () => {
+          return await testSubjects.exists('consoleMenuCopyToLanguage');
+        });
+
+        // Wait for panel animation to complete
+        await PageObjects.common.sleep(300);
+
+        // Check that the language badge now shows "Python"
+        languageBadge = await testSubjects.find('consoleMenuLanguageBadge');
+        badgeText = await languageBadge.getVisibleText();
+        expect(badgeText).to.equal('Python');
       });
 
       it('allows to select a different language to copy as and should copy it right away to clipboard', async () => {

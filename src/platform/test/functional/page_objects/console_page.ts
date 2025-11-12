@@ -481,8 +481,12 @@ export class ConsolePageObject extends FtrService {
     return await this.testSubjects.exists('consoleMenuAutoIndent');
   }
 
-  public async isCopyAsButtonVisible() {
-    return await this.testSubjects.exists('consoleMenuCopyAsButton');
+  public async isCopyToLanguageButtonVisible() {
+    return await this.testSubjects.exists('consoleMenuCopyToLanguage');
+  }
+
+  public async isLanguageClientsButtonVisible() {
+    return await this.testSubjects.exists('consoleMenuLanguageClients');
   }
 
   public async clickCopyAsCurlButton() {
@@ -491,31 +495,34 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async changeLanguageAndCopy(language: string) {
-    const openModalButton = await this.testSubjects.find('changeLanguageButton');
-    await openModalButton.click();
+    // Open language clients nested panel
+    await this.testSubjects.click('consoleMenuLanguageClients');
 
-    const changeLangButton = await this.testSubjects.find(`languageOption-${language}`);
-    await changeLangButton.click();
+    // Wait for the language clients panel to be visible
+    await this.retry.waitFor('language clients panel to open', async () => {
+      return await this.testSubjects.exists(`languageClientMenuItem-${language}`);
+    });
 
-    const submitButton = await this.testSubjects.find('copyAsLanguageSubmit');
-    await submitButton.click();
+    // Small delay to ensure panel animation completes
+    await this.common.sleep(300);
+
+    // Select the language from the nested panel
+    await this.testSubjects.click(`languageClientMenuItem-${language}`);
+
+    // Wait for panel to return to main menu
+    await this.retry.waitFor('language clients panel to close', async () => {
+      return await this.testSubjects.exists('consoleMenuCopyToLanguage');
+    });
+
+    // Small delay to ensure panel animation completes
+    await this.common.sleep(300);
+
+    // Click copy to language button to copy
+    await this.testSubjects.click('consoleMenuCopyToLanguage');
   }
 
-  public async changeDefaultLanguage(language: string) {
-    const openModalButton = await this.testSubjects.find('changeLanguageButton');
-    await openModalButton.click();
-
-    const changeDefaultLangButton = await this.testSubjects.find(
-      `changeDefaultLanguageTo-${language}`
-    );
-    await changeDefaultLangButton.click();
-
-    const submitButton = await this.testSubjects.find('copyAsLanguageSubmit');
-    await submitButton.click();
-  }
-
-  public async clickCopyAsButton() {
-    const button = await this.testSubjects.find('consoleMenuCopyAsButton');
+  public async clickCopyToLanguageButton() {
+    const button = await this.testSubjects.find('consoleMenuCopyToLanguage');
     await button.click();
   }
 

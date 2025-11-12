@@ -245,7 +245,9 @@ export const ContextMenu = ({
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiBadge color="hollow">{getLanguageLabelByValue(currentLanguage)}</EuiBadge>
+                <EuiBadge color="hollow" data-test-subj="consoleMenuLanguageBadge">
+                  {getLanguageLabelByValue(currentLanguage)}
+                </EuiBadge>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiContextMenuItem>,
