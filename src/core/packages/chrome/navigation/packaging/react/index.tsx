@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// Import type validation to ensure packaged types match source types
+// This will cause build failure if types diverge
+import './type_validation';
+
 import React from 'react';
 import { Navigation, type NavigationProps } from '../../src/components/navigation';
 import type {
@@ -17,6 +21,9 @@ import type {
   SecondaryMenuSection,
   SideNavLogo,
 } from '../../types';
+
+// React import is needed for JSX transform
+void React;
 
 // Re-export types
 export type {

@@ -18,10 +18,10 @@
     "**/*.tsx"
   ],
   "exclude": [
-    "target/**/*"
+    "target/**/*",
+    "packaging/**/*"
   ],
   "kbn_references": [
-    "@kbn/core-chrome-layout-components",
     "@kbn/i18n",
     "@kbn/i18n-react"
   ]
