@@ -56,6 +56,12 @@ export default function (providerContext: FtrProviderContext) {
         await kibanaServer.savedObjects.cleanStandardList();
         await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
 
+        await supertestWithoutAuth
+          .post(`/api/fleet/setup`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+
         const { body: agentPolicyResponse } = await supertestWithoutAuth
           .post(`/api/fleet/agent_policies`)
           .set(internalRequestHeader)
