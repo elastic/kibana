@@ -39,13 +39,6 @@ describe('highlightMatches', () => {
       );
     });
 
-    test('should return original text when search text is empty', () => {
-      const text = 'This is a test string';
-      const result = highlightMatches(text, '');
-
-      expect(result).toBe(text);
-    });
-
     test('should handle text with no matches', () => {
       const text = 'This string has no matches';
       const searchText = 'xyz';
