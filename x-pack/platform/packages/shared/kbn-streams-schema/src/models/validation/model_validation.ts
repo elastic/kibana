@@ -105,16 +105,17 @@ export function modelValidation(...args: [ModelValidation, ModelSchema] | [Model
       left.UpsertRequest,
       z.intersection(
         z.object({
-          // upsert doesn't allow name to be set
+          // upsert doesn't allow name or updated_at to be set
           stream: z
-            .object({ name: z.undefined().optional() })
+            .object({ name: z.undefined().optional(), updated_at: z.undefined().optional() })
             .passthrough()
-            // but the definition requires it, so we set a default
-            .transform((prev) => ({ ...prev, name: '.' }))
+            // but the definition requires them, so we set a default
+            .transform((prev) => ({ ...prev, name: '.', updated_at: new Date().toISOString() }))
             .pipe(rightPartial.Definition)
             // that should be removed after
             .transform((prev) => {
               delete prev.name;
+              delete prev.updated_at;
               return prev;
             }),
         }),
