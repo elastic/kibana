@@ -146,7 +146,9 @@ export const RunScriptActionResult = memo<
             : 'console'
         }
         hideFile={command.commandDefinition?.meta?.agentType === 'crowdstrike'}
-        showOutput={command.commandDefinition?.meta?.agentType === 'microsoft_defender_endpoint'}
+        shouldShowOutput={
+          command.commandDefinition?.meta?.agentType === 'microsoft_defender_endpoint'
+        }
         showPasscode={command.commandDefinition?.meta?.agentType !== 'microsoft_defender_endpoint'}
         textSize="s"
       />

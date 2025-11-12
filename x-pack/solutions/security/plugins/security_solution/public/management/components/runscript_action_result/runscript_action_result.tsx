@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { EuiText, EuiFlexItem, EuiSpacer, type EuiTextProps } from '@elastic/eui';
+import { EuiFlexItem, EuiSpacer, type EuiTextProps } from '@elastic/eui';
 import { ResponseActionFileDownloadLink } from '../response_action_file_download_link';
 import type {
   ActionDetails,
@@ -15,6 +15,7 @@ import type {
   ResponseActionRunScriptOutputContent,
 } from '../../../../common/endpoint/types';
 import { RunscriptOutput } from './runscript_action_output';
+import { RunscriptActionNoOutput } from './runscript_action_no_output';
 
 export interface RunscriptActionResultProps {
   action: MaybeImmutable<ActionDetails<ResponseActionRunScriptOutputContent>>;
@@ -27,7 +28,7 @@ export interface RunscriptActionResultProps {
   'data-test-subj'?: string;
   hideFile: boolean;
   // should be true for microsoft_defender_endpoint
-  showOutput: boolean;
+  shouldShowOutput?: boolean;
   // should be false for microsoft_defender_endpoint
   showPasscode: boolean;
   textSize?: Exclude<EuiTextProps['size'], 'm' | 'relative'>;
@@ -53,7 +54,7 @@ export const RunscriptActionResult = memo<RunscriptActionResultProps>(
     canAccessFileDownloadLink,
     'data-test-subj': dataTestSubj,
     hideFile,
-    showOutput,
+    shouldShowOutput = false,
     showPasscode,
     textSize = 's',
   }) => {
@@ -79,7 +80,15 @@ export const RunscriptActionResult = memo<RunscriptActionResultProps>(
             />
           </EuiFlexItem>
         )}
-        {showOutput && outputContent && (
+        {shouldShowOutput && !outputContent && (
+          <>
+            <EuiSpacer size="l" />
+            <EuiFlexItem>
+              <RunscriptActionNoOutput textSize={textSize} data-test-subj={dataTestSubj} />
+            </EuiFlexItem>
+          </>
+        )}
+        {shouldShowOutput && outputContent && (
           <>
             <EuiSpacer size="l" />
             <RunscriptOutput
