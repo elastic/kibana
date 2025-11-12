@@ -29,6 +29,7 @@ const printUsage = () =>
     [--batches]: run the script in batches, defaults to 1 e.g if count is 50 and batches is 10, 500 agents will be created and 10 agent policies
     [--concurrentBatches]: how many batches to run concurrently, defaults to 10
     [--outdated]: agents will show as outdated (their revision is below the policies), defaults to false
+    [--revisions]: includes the number of revisions to create per policy, defaults to 0
 `);
 
 const DEFAULT_KIBANA_URL = 'http://localhost:5601';
@@ -57,6 +58,7 @@ const {
   batches: batchesArg = 1,
   outdated: outdatedArg = false,
   concurrentBatches: concurrentBatchesArg = 10,
+  revisions: revisionsArg = 0,
   // ignore yargs positional args, we only care about named args
   _,
   $0,
@@ -67,9 +69,10 @@ const statusesArg = (statusArg as string).split(',') as AgentStatus[];
 const inactivityTimeout = inactivityTimeoutArg
   ? Number(inactivityTimeoutArg).valueOf()
   : DEFAULT_UNENROLL_TIMEOUT;
-const batches = inactivityTimeoutArg ? Number(batchesArg).valueOf() : 1;
+const batches = batchesArg ? Number(batchesArg).valueOf() : 1;
 const concurrentBatches = concurrentBatchesArg ? Number(concurrentBatchesArg).valueOf() : 10;
 const count = countArg ? Number(countArg).valueOf() : DEFAULT_AGENT_COUNT;
+const revisionsCount = revisionsArg ? Number(revisionsArg).valueOf() : 0;
 const kbnAuth = 'Basic ' + Buffer.from(kbnUsername + ':' + kbnPassword).toString('base64');
 
 const logger = new ToolingLog({
@@ -138,11 +141,13 @@ function createAgentWithStatus({
   status,
   version,
   hostname,
+  revisionIdx = 1,
 }: {
   policyId: string;
   status: AgentStatus;
   version: string;
   hostname: string;
+  revisionIdx?: number;
 }) {
   const baseAgent = {
     agent: {
@@ -153,8 +158,8 @@ function createAgentWithStatus({
     active: true,
     policy_id: policyId,
     type: 'PERMANENT',
-    policy_revision_idx: 1,
-    policy_revision: 1,
+    policy_revision_idx: revisionIdx,
+    policy_revision: revisionIdx,
     local_metadata: {
       elastic: {
         agent: {
@@ -178,7 +183,8 @@ function createAgentsWithStatuses(
   statusMap: Partial<{ [status in AgentStatus]: number }>,
   policyId: string,
   version: string,
-  namePrefix?: string
+  namePrefix?: string,
+  latestRevision?: number
 ) {
   // loop over statuses and create agents with that status
   const agents = [];
@@ -189,7 +195,13 @@ function createAgentsWithStatuses(
     for (let i = 0; i < statusCount; i++) {
       const hostname = `${namePrefix ? namePrefix + '-' : ''}${currentAgentStatus}-${i}`;
       agents.push(
-        createAgentWithStatus({ policyId, status: currentAgentStatus, version, hostname })
+        createAgentWithStatus({
+          policyId,
+          status: currentAgentStatus,
+          version,
+          hostname,
+          revisionIdx: latestRevision,
+        })
       );
     }
   }
@@ -348,6 +360,9 @@ async function bumpAgentPolicyRevision(id: string, policy: any) {
         'schema_version',
         'package_policies',
         'agents',
+        'version',
+        'unprivileged_agents',
+        'fips_agents',
       ]),
       monitoring_enabled: ['logs'], // change monitoring to add  a revision
     }),
@@ -428,13 +443,26 @@ export async function run() {
           agentPolicyId = agentPolicy.item.id;
           logger.info(`Created agent policy ${agentPolicy.item.id}`);
 
+          let latestRevision: number = agentPolicy.item.revision ?? 1;
+          if (revisionsCount > 0) {
+            logger.info(`Creating ${revisionsCount} revisions for agent policy ${agentPolicyId}`);
+
+            for (let rev = 0; rev < revisionsCount; rev++) {
+              const updatedPolicy = await bumpAgentPolicyRevision(agentPolicyId, agentPolicy.item);
+              logger.info(
+                `  Created revision ${updatedPolicy.item.revision} for agent policy ${agentPolicyId}`
+              );
+              latestRevision = updatedPolicy.item.revision;
+            }
+          }
           const statusMap = statusesArg.reduce((acc, status) => ({ ...acc, [status]: count }), {});
           logStatusMap(statusMap);
           const agents = createAgentsWithStatuses(
             statusMap,
             agentPolicyId,
             agentVersion,
-            i > 0 ? `batch-${i}` : undefined
+            i > 0 ? `batch-${i}` : undefined,
+            latestRevision
           );
           const createRes = await createAgentDocsBulk(agents);
           if (outdatedArg) {

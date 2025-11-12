@@ -720,7 +720,7 @@ export class FleetPlugin
       logFactory: this.initializerContext.logger,
       config: {
         max_revisions: config.fleetPolicyRevisionsCleanup?.max_revisions,
-        frequency: config.fleetPolicyRevisionsCleanup?.frequency,
+        interval: config.fleetPolicyRevisionsCleanup?.interval,
         max_policies_per_run: config.fleetPolicyRevisionsCleanup?.max_policies_per_run,
       },
     });

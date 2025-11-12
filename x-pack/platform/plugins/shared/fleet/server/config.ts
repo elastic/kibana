@@ -386,10 +386,10 @@ export const config: PluginConfigDescriptor = {
           taskInterval: schema.maybe(schema.string()),
         })
       ),
-      fleetPolicyRevisionCleanup: schema.maybe(
+      fleetPolicyRevisionsCleanup: schema.maybe(
         schema.object({
           max_revisions: schema.number({ defaultValue: 10 }),
-          frequency: schema.string({ defaultValue: '1h' }),
+          interval: schema.string({ defaultValue: '1h' }),
           max_policies_per_run: schema.number({ defaultValue: 100 }),
         })
       ),

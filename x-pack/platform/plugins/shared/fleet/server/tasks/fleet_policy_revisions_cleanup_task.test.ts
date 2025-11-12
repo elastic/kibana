@@ -197,42 +197,13 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
 
     it('should log errors if one is thrown', async () => {
       const error = new Error('Test error');
-      mockEsClient.openPointInTime.mockRejectedValue(error);
+      mockEsClient.search.mockRejectedValue(error);
 
       await mockTask.runTask(taskInstance, mockCore, abortController);
 
       expect(logger.error).toHaveBeenCalledWith(
         '[FleetPolicyRevisionsCleanupTask] error: Error: Test error'
       );
-    });
-
-    it('should close point in time on successful completion', async () => {
-      const pitId = 'test-pit-id';
-      mockEsClient.openPointInTime.mockResolvedValue(mockOpenPointInTimeResponse(pitId));
-      mockEsClient.search.mockResolvedValue({
-        aggregations: {
-          latest_revisions_by_policy_id: {
-            buckets: [],
-          },
-        },
-      } as any);
-
-      await mockTask.runTask(taskInstance, mockCore, abortController);
-
-      expect(mockEsClient.closePointInTime).toHaveBeenCalledWith({ id: pitId });
-      expect(logger.debug).toHaveBeenCalledWith(
-        '[FleetPolicyRevisionsCleanupTask] runTask ended: success'
-      );
-    });
-
-    it('should close point in time on error', async () => {
-      const pitId = 'test-pit-id';
-      mockEsClient.openPointInTime.mockResolvedValue(mockOpenPointInTimeResponse(pitId));
-      mockEsClient.search.mockRejectedValue(new Error('Search failed'));
-
-      await mockTask.runTask(taskInstance, mockCore, abortController);
-
-      expect(mockEsClient.closePointInTime).toHaveBeenCalledWith({ id: pitId });
     });
   });
 
@@ -242,8 +213,6 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
     });
 
     it('should exit early when no policies need cleanup', async () => {
-      const pitId = 'test-pit-id';
-      mockEsClient.openPointInTime.mockResolvedValue(mockOpenPointInTimeResponse(pitId));
       mockEsClient.search.mockResolvedValue({
         aggregations: {
           latest_revisions_by_policy_id: {
@@ -261,9 +230,6 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
     });
 
     it('should process policies that exceed max revisions', async () => {
-      const pitId = 'test-pit-id';
-      mockEsClient.openPointInTime.mockResolvedValue(mockOpenPointInTimeResponse(pitId));
-
       mockEsClient.search
         .mockResolvedValueOnce({
           aggregations: {
@@ -333,9 +299,6 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
     });
 
     it('should favor cutting off deletions from the minimum used revision', async () => {
-      const pitId = 'test-pit-id';
-      mockEsClient.openPointInTime.mockResolvedValue(mockOpenPointInTimeResponse(pitId));
-
       mockEsClient.search
         .mockResolvedValueOnce({
           aggregations: {
@@ -405,9 +368,6 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
     });
 
     it('should skip deletions of a policy revision if the calculated cutoff idx from minimum used revision is equal or below 1', async () => {
-      const pitId = 'test-pit-id';
-      mockEsClient.openPointInTime.mockResolvedValue(mockOpenPointInTimeResponse(pitId));
-
       mockEsClient.search
         .mockResolvedValueOnce({
           aggregations: {
@@ -482,9 +442,6 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
     });
 
     it('should calculate the deletion cutoff for a policy from the latest revision if not use by agents', async () => {
-      const pitId = 'test-pit-id';
-      mockEsClient.openPointInTime.mockResolvedValue(mockOpenPointInTimeResponse(pitId));
-
       mockEsClient.search
         .mockResolvedValueOnce({
           aggregations: {
@@ -546,8 +503,6 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
   describe('query methods', () => {
     beforeEach(async () => {
       await mockTask.start({ taskManager: mockTaskManagerStart });
-      const pitId = 'test-pit-id';
-      mockEsClient.openPointInTime.mockResolvedValue(mockOpenPointInTimeResponse(pitId));
     });
 
     it('should query max revisions and counts correctly', async () => {
@@ -564,10 +519,6 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
       expect(mockEsClient.search).toHaveBeenCalledWith(
         {
           index: '.fleet-policies',
-          pit: {
-            id: 'test-pit-id',
-            keep_alive: '5m',
-          },
           size: 0,
           aggs: {
             latest_revisions_by_policy_id: {

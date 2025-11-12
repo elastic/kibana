@@ -115,7 +115,7 @@ export interface FleetConfigType {
   installIntegrationsKnowledge?: boolean;
   fleetPolicyRevisionsCleanup?: {
     max_revisions: number;
-    frequency: string;
+    interval: string;
     max_policies_per_run: number;
   };
 }
