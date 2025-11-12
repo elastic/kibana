@@ -76,15 +76,15 @@ export const configSchema = schema.object({
   compression: schema.boolean({ defaultValue: false }),
   username: schema.maybe(
     schema.string({
-      validate: (rawConfig) => {
-        if (rawConfig === 'elastic') {
-          return (
-            'value of "elastic" is forbidden. This is a superuser account that cannot write to system indices that Kibana needs to ' +
-            'function. Use a service account token instead. Learn more: ' +
-            'https://www.elastic.co/guide/en/elasticsearch/reference/8.0/service-accounts.html' // we don't have a way to pass a branch into the config schema; hardcoding this one link to the 8.0 docs is OK
-          );
-        }
-      },
+      // validate: (rawConfig) => {
+      //   if (rawConfig === 'elastic') {
+      //     return (
+      //       'value of "elastic" is forbidden. This is a superuser account that cannot write to system indices that Kibana needs to ' +
+      //       'function. Use a service account token instead. Learn more: ' +
+      //       'https://www.elastic.co/guide/en/elasticsearch/reference/8.0/service-accounts.html' // we don't have a way to pass a branch into the config schema; hardcoding this one link to the 8.0 docs is OK
+      //     );
+      //   }
+      // },
     })
   ),
   password: schema.maybe(schema.string({ coerceFromNumber: true })),

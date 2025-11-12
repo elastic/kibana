@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DataTableRecord } from '@kbn/discover-utils';
+import { type DataTableRecord } from '@kbn/discover-utils';
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import {
   EuiLoadingSpinner,
@@ -18,24 +18,28 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { CoreStart } from '@kbn/core/public';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { css } from '@emotion/react';
-import type { StreamsAppLocator } from '../../common/locators';
+import { getFormattedFields } from '@kbn/discover-utils/src/utils/get_formatted_fields';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { isMetadataField } from '@kbn/fields-metadata-plugin/common';
+import type { StreamsAppLocator, StreamsAppLocatorParams } from '../../common/locators';
 import { useResolvedDefinitionName } from './use_resolved_definition_name';
 
 export interface DiscoverFlyoutStreamProcessingLinkProps {
+  dataView: DataView;
   doc: DataTableRecord;
-  streamsRepositoryClient: StreamsRepositoryClient;
-  coreApplication: CoreStart['application'];
+  fieldFormats: FieldFormatsStart;
   locator: StreamsAppLocator;
+  streamsRepositoryClient: StreamsRepositoryClient;
 }
 
 export function DiscoverFlyoutStreamProcessingLink({
-  streamsRepositoryClient,
+  dataView,
   doc,
+  fieldFormats,
   locator,
-  coreApplication,
+  streamsRepositoryClient,
 }: DiscoverFlyoutStreamProcessingLinkProps) {
   const { euiTheme } = useEuiTheme();
   const { value, loading, error } = useResolvedDefinitionName({
@@ -47,62 +51,58 @@ export function DiscoverFlyoutStreamProcessingLink({
 
   if (!value || error) return null;
 
-  const hasDocumentId = !!doc.raw._id;
+  const formattedDoc = formatDoc(doc, dataView, fieldFormats);
 
   const href = locator.getRedirectUrl({
     name: value,
     managementTab: 'processing',
-    pageState: hasDocumentId
-      ? {
-          v: 1,
-          dataSources: [
-            {
-              type: 'kql-samples',
-              enabled: true,
-              name: i18n.translate('xpack.streams.discoverFlyoutStreamProcessingLink', {
-                defaultMessage: 'Discover document',
-              }),
-              query: {
-                language: 'kuery',
-                query: `_id: ${doc.raw._id}`,
-              },
-            },
-          ],
-        }
-      : undefined,
+    pageState: {
+      v: 1,
+      dataSources: [
+        {
+          type: 'custom-samples',
+          enabled: true,
+          name: i18n.translate('xpack.streams.discoverFlyoutStreamProcessingLink', {
+            defaultMessage: 'Discover document',
+          }),
+          documents: [formattedDoc],
+          storageKey: `streams:${value}__discover-document`,
+        },
+      ],
+    },
+  } as StreamsAppLocatorParams);
+
+  const message = i18n.translate('xpack.streams.discoverFlyoutStreamProcessingLink', {
+    defaultMessage: 'Parse content in Streams',
   });
 
-  const message = hasDocumentId
-    ? i18n.translate('xpack.streams.discoverFlyoutStreamProcessingLink', {
-        defaultMessage: 'Parse content in Streams',
-      })
-    : i18n.translate('xpack.streams.discoverFlyoutStreamProcessingLinkEdit', {
-        defaultMessage: 'Edit processing in Streams',
-      });
-
   return (
-    <RedirectAppLinks
-      coreStart={{ application: coreApplication }}
-      css={css`
-        min-width: 0;
-      `}
-    >
-      <EuiLink href={href}>
-        <EuiToolTip content={message} display="block">
-          <EuiFlexGroup alignItems="center" gutterSize="s">
-            <EuiIcon
-              type="sparkles"
-              size="s"
-              css={css`
-                margin-left: ${euiTheme.size.s};
-              `}
-            />
-            <EuiText size="xs" className="eui-textTruncate">
-              {message}
-            </EuiText>
-          </EuiFlexGroup>
-        </EuiToolTip>
-      </EuiLink>
-    </RedirectAppLinks>
+    <EuiLink href={href}>
+      <EuiToolTip content={message} display="block">
+        <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiIcon
+            type="sparkles"
+            size="s"
+            css={css`
+              margin-left: ${euiTheme.size.s};
+            `}
+          />
+          <EuiText size="xs" className="eui-textTruncate">
+            {message}
+          </EuiText>
+        </EuiFlexGroup>
+      </EuiToolTip>
+    </EuiLink>
   );
+}
+
+function formatDoc(doc: DataTableRecord, dataView: DataView, fieldFormats: FieldFormatsStart) {
+  const fieldsToFormat = Object.keys(doc.flattened).filter(
+    (fieldName) => !isMetadataField(fieldName) && fieldName !== '_score'
+  );
+
+  return getFormattedFields(doc, fieldsToFormat, {
+    dataView,
+    fieldFormats,
+  });
 }

@@ -11,6 +11,7 @@
     "@kbn/unified-data-table",
     "@kbn/es-query",
     "@kbn/apm-types",
-    "@kbn/apm-types-shared"
+    "@kbn/apm-types-shared",
+    "@kbn/data-views-plugin"
   ]
 }

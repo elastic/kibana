@@ -12,7 +12,7 @@ import { fromObservable } from 'xstate5';
 import type { errors as esErrors } from '@elastic/elasticsearch';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
-import { Observable, filter, map, of } from 'rxjs';
+import { Observable, filter, map, of, from } from 'rxjs';
 import { isRunningResponse } from '@kbn/data-plugin/common';
 import type { IEsSearchResponse } from '@kbn/search-types';
 import { pick } from 'lodash';
@@ -37,15 +37,24 @@ interface CollectKqlDataParams extends SearchParamsOptions {
   data: DataSourceMachineDeps['data'];
 }
 
-type CollectorParams = Pick<CollectKqlDataParams, 'data' | 'index'>;
+type CollectorParams = Pick<CollectKqlDataParams, 'data' | 'index'> & {
+  streamsRepositoryClient: DataSourceMachineDeps['streamsRepositoryClient'];
+};
 
 /**
  * Creates a data collector actor that fetches sample documents based on the data source type
  */
-export function createDataCollectorActor({ data }: Pick<DataSourceMachineDeps, 'data'>) {
+export function createDataCollectorActor({
+  data,
+  streamsRepositoryClient,
+}: Pick<DataSourceMachineDeps, 'data' | 'streamsRepositoryClient'>) {
   return fromObservable<SampleDocument[], SamplesFetchInput>(({ input }) => {
     const { dataSource, streamName } = input;
-    return getDataCollectorForDataSource(dataSource)({ data, index: streamName });
+    return getDataCollectorForDataSource(dataSource)({
+      data,
+      streamsRepositoryClient,
+      index: streamName,
+    });
   });
 }
 
@@ -53,7 +62,7 @@ export function createDataCollectorActor({ data }: Pick<DataSourceMachineDeps, '
  * Returns the appropriate data collector function based on the data source type
  */
 function getDataCollectorForDataSource(dataSource: EnrichmentDataSourceWithUIAttributes) {
-  if (dataSource.type === 'random-samples') {
+  if (dataSource.type === 'latest-samples') {
     return (args: CollectorParams) => collectKqlData(args);
   }
   if (dataSource.type === 'kql-samples') {
@@ -62,6 +71,9 @@ function getDataCollectorForDataSource(dataSource: EnrichmentDataSourceWithUIAtt
   }
   if (dataSource.type === 'custom-samples') {
     return () => of(dataSource.documents);
+  }
+  if (dataSource.type === 'raw-samples') {
+    return (args: CollectorParams) => collectRawSamplesData(args);
   }
   return () => of<SampleDocument[]>([]);
 }
@@ -87,6 +99,23 @@ function collectKqlData({
       subscription.unsubscribe();
     };
   });
+}
+
+/**
+ * Function to collect raw samples using Elasticsearch's _sample API
+ */
+function collectRawSamplesData({
+  streamsRepositoryClient,
+  index,
+}: Pick<CollectorParams, 'streamsRepositoryClient' | 'index'>): Observable<SampleDocument[]> {
+  return from(
+    streamsRepositoryClient.fetch('GET /internal/streams/{name}/samples/_raw', {
+      signal: null,
+      params: {
+        path: { name: index },
+      },
+    })
+  );
 }
 
 /**
@@ -136,7 +165,10 @@ function buildSamplesSearchParams({
 /**
  * Adds time range to the query definition if provided
  */
-function addTimeRangeToQuery(queryDefinition: any, timeRange?: TimeRange): void {
+function addTimeRangeToQuery(
+  queryDefinition: ReturnType<typeof buildEsQuery>,
+  timeRange?: TimeRange
+): void {
   if (timeRange) {
     queryDefinition.bool.must.unshift({
       range: {
@@ -152,7 +184,7 @@ function addTimeRangeToQuery(queryDefinition: any, timeRange?: TimeRange): void 
 /**
  * Creates a notifier for data collection failures
  */
-export function createDataCollectionFailureNofitier({
+export function createDataCollectionFailureNotifier({
   toasts,
 }: {
   toasts: DataSourceMachineDeps['toasts'];

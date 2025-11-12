@@ -22,8 +22,8 @@ import {
   FIND_FIELDS_METADATA_URL,
 } from '../../../common/fields_metadata';
 import { decodeOrThrow } from '../../../common/runtime_types';
-import { createProxiedPlainFields } from '../../../common';
 import type { IFieldsMetadataClient } from './types';
+import { createProxiedPlainFields } from '../../../common/fields_metadata/utils/create_proxied_fields_map';
 
 export class FieldsMetadataClient implements IFieldsMetadataClient {
   private cache: HashedCache<FindFieldsMetadataRequestQuery, FindFieldsMetadataResponsePayload>;

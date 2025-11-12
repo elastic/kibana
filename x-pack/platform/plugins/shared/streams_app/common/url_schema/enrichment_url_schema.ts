@@ -29,13 +29,13 @@ const baseDataSourceSchema = z.object({
 /**
  * Random samples data source that retrieves data from the stream index
  */
-export interface RandomSamplesDataSource extends BaseDataSource {
-  type: 'random-samples';
+export interface LatestSamplesDataSource extends BaseDataSource {
+  type: 'latest-samples';
 }
 
-const randomSamplesDataSourceSchema = baseDataSourceSchema.extend({
-  type: z.literal('random-samples'),
-}) satisfies z.Schema<RandomSamplesDataSource>;
+const latestSamplesDataSourceSchema = baseDataSourceSchema.extend({
+  type: z.literal('latest-samples'),
+}) satisfies z.Schema<LatestSamplesDataSource>;
 
 /**
  * KQL samples data source that retrieves data based on KQL query
@@ -71,6 +71,10 @@ const kqlSamplesDataSourceSchema = baseDataSourceSchema.extend({
 export interface CustomSamplesDataSource extends BaseDataSource {
   type: 'custom-samples';
   documents: SampleDocument[];
+  /* Optional key used to store and retrieve the documents from the browser session storage.
+   * The key is a combination of the `streams:${streamName}__${dataSourceIdentifie}`
+   */
+  storageKey?: string;
 }
 
 export const customSamplesDataSourceDocumentsSchema = z.array(sampleDocument);
@@ -78,23 +82,43 @@ export const customSamplesDataSourceDocumentsSchema = z.array(sampleDocument);
 export const customSamplesDataSourceSchema = baseDataSourceSchema.extend({
   type: z.literal('custom-samples'),
   documents: customSamplesDataSourceDocumentsSchema,
+  storageKey: z.string().optional(),
 }) satisfies z.Schema<CustomSamplesDataSource>;
+
+/**
+ * Raw samples data source that retrieves representative samples using Elasticsearch's _sample API
+ */
+export interface RawSamplesDataSource extends BaseDataSource {
+  type: 'raw-samples';
+  /**
+   * Optional OTTL (OpenTelemetry Transformation Language) condition to filter sampled documents
+   * Example: attributes["service.name"] == "my-service"
+   */
+  condition?: string;
+}
+
+const rawSamplesDataSourceSchema = baseDataSourceSchema.extend({
+  type: z.literal('raw-samples'),
+  condition: z.string().optional(),
+}) satisfies z.Schema<RawSamplesDataSource>;
 
 /**
  * Union type of all possible data source types
  */
 export type EnrichmentDataSource =
-  | RandomSamplesDataSource
+  | LatestSamplesDataSource
   | KqlSamplesDataSource
-  | CustomSamplesDataSource;
+  | CustomSamplesDataSource
+  | RawSamplesDataSource;
 
 /**
  * Schema for validating enrichment data sources
  */
 const enrichmentDataSourceSchema = z.union([
-  randomSamplesDataSourceSchema,
+  latestSamplesDataSourceSchema,
   kqlSamplesDataSourceSchema,
   customSamplesDataSourceSchema,
+  rawSamplesDataSourceSchema,
 ]) satisfies z.Schema<EnrichmentDataSource>;
 
 /**

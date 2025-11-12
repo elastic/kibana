@@ -95,8 +95,21 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
         Streams.WiredStream.Definition.is(definition) &&
         isDescendantOf(definition.name, this._definition.name);
 
+      // if a direct child stream gets upserted, we need to regenerate the processing pipeline
+      // mark processing as changed to trigger pipeline regeneration
+      const directChildHasChanged =
+        Streams.WiredStream.Definition.is(definition) &&
+        isChildOf(this._definition.name, definition.name);
+
+      if (directChildHasChanged && !this.isDeleted()) {
+        this._changes.processing = true;
+      }
+
       return {
-        changeStatus: ancestorHasChanged && !this.isDeleted() ? 'upserted' : this.changeStatus,
+        changeStatus:
+          (ancestorHasChanged || directChildHasChanged) && !this.isDeleted()
+            ? 'upserted'
+            : this.changeStatus,
         cascadingChanges: [],
       };
     }

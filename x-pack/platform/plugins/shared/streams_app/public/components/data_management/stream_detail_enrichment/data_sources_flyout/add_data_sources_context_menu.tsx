@@ -10,14 +10,18 @@ import { EuiButton, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { useBoolean } from '@kbn/react-hooks';
 import { DATA_SOURCES_I18N } from './translations';
 import {
-  defaultCustomSamplesDataSource,
+  createDefaultCustomSamplesDataSource,
+  createDefaultRawSamplesDataSource,
   defaultKqlSamplesDataSource,
 } from '../state_management/stream_enrichment_state_machine/utils';
-import { useStreamEnrichmentEvents } from '../state_management/stream_enrichment_state_machine';
+import {
+  useStreamEnrichmentEvents,
+  useStreamEnrichmentSelector,
+} from '../state_management/stream_enrichment_state_machine';
 
 export const AddDataSourcesContextMenu = () => {
   const { addDataSource } = useStreamEnrichmentEvents();
-
+  const streamName = useStreamEnrichmentSelector((state) => state.context.definition.stream.name);
   const [isOpen, { toggle: toggleMenu, off: closeMenu }] = useBoolean();
 
   return (
@@ -54,7 +58,16 @@ export const AddDataSourcesContextMenu = () => {
                 icon: 'visText',
                 'data-test-subj': 'streamsAppProcessingAddCustomDataSource',
                 onClick: () => {
-                  addDataSource(defaultCustomSamplesDataSource);
+                  addDataSource(createDefaultCustomSamplesDataSource(streamName));
+                  closeMenu();
+                },
+              },
+              {
+                name: DATA_SOURCES_I18N.contextMenu.addRawSamples,
+                icon: 'beaker',
+                'data-test-subj': 'streamsAppProcessingAddRawSamplesDataSource',
+                onClick: () => {
+                  addDataSource(createDefaultRawSamplesDataSource(streamName));
                   closeMenu();
                 },
               },

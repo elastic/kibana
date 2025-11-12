@@ -61,7 +61,7 @@ export type EnrichmentDataSourceWithUIAttributes = EnrichmentDataSource & {
 
 export type RandomSamplesDataSourceWithUIAttributes = Extract<
   EnrichmentDataSourceWithUIAttributes,
-  { type: 'random-samples' }
+  { type: 'latest-samples' }
 >;
 
 export type KqlSamplesDataSourceWithUIAttributes = Extract<
@@ -72,4 +72,9 @@ export type KqlSamplesDataSourceWithUIAttributes = Extract<
 export type CustomSamplesDataSourceWithUIAttributes = Extract<
   EnrichmentDataSourceWithUIAttributes,
   { type: 'custom-samples' }
+>;
+
+export type RawSamplesDataSourceWithUIAttributes = Extract<
+  EnrichmentDataSourceWithUIAttributes,
+  { type: 'raw-samples' }
 >;

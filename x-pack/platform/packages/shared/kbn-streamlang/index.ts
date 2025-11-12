@@ -9,6 +9,18 @@ export type { StreamlangDSL } from './types/streamlang';
 export { streamlangDSLSchema, isActionBlock, isWhereBlock } from './types/streamlang';
 export { transpile as transpileIngestPipeline } from './src/transpilers/ingest_pipeline';
 export { transpile as transpileEsql, conditionToESQL } from './src/transpilers/esql';
+export {
+  transpile as transpileOttl,
+  convertConditionToOTTL,
+  convertToOtelConfig,
+} from './src/transpilers/ottl';
+export type {
+  OTTLTranspilationOptions,
+  OTELConfigGeneratorOptions,
+  OTELConfig,
+  OTTLTransformProcessor,
+  OTTLStatement,
+} from './src/transpilers/ottl/types';
 export * from './types/processors';
 export * from './types/conditions';
 export type * from './types/ui';
