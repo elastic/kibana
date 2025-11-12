@@ -19,7 +19,7 @@ export interface ConnectorTypeInfoMinimal {
   icon?: IconType;
 }
 
-const predefinedStepTypes = [
+export const predefinedStepTypes = [
   {
     actionTypeId: 'console',
     displayName: 'Console',
