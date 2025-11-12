@@ -16,6 +16,7 @@ import {
   type KnowledgeBaseEntry,
   OBSERVABILITY_SEARCH_KNOWLEDGE_BASE_TOOL_ID,
 } from '@kbn/observability-agent-plugin/server/tools';
+import type { AgentBuilderApiClient } from '../utils/agent_builder_client';
 import { createAgentBuilderApiClient } from '../utils/agent_builder_client';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import {
@@ -66,7 +67,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     this.tags(['skipCloud']);
     let llmProxy: LlmProxy;
     let connectorId: string;
-    let agentBuilderApiClient: ReturnType<typeof createAgentBuilderApiClient>;
+    let agentBuilderApiClient: AgentBuilderApiClient;
     let toolResponseContent: { results: ToolResult[] };
     let otherResult!: OtherResult;
 
