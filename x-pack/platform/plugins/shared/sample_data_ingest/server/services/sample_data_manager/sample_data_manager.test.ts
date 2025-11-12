@@ -191,7 +191,7 @@ describe('SampleDataManager', () => {
       });
 
       expect(mockSavedObjectsManager.getDashboardId).not.toHaveBeenCalled();
-      expect(mockArtifactManager.prepareArtifact).toHaveBeenCalledWith(sampleType);
+      expect(mockArtifactManager.prepareArtifact).toHaveBeenCalledWith(sampleType, undefined);
       expect(mockIndexManager.createAndPopulateIndex).toHaveBeenCalledWith({
         indexName: expectedIndexName,
         mappings: mockMappings,
@@ -271,7 +271,10 @@ describe('SampleDataManager', () => {
         soImporter,
       });
 
-      expect(mockArtifactManager.prepareArtifact).toHaveBeenCalledWith(elasticsearchSampleType);
+      expect(mockArtifactManager.prepareArtifact).toHaveBeenCalledWith(
+        elasticsearchSampleType,
+        undefined
+      );
       expect(mockIndexManager.createAndPopulateIndex).toHaveBeenCalledWith({
         indexName: expectedElasticsearchIndexName,
         mappings: mockMappings,
