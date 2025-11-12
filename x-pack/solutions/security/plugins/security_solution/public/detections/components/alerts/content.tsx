@@ -22,7 +22,7 @@ import { HeaderPage } from '../../../common/components/header_page';
 import { KPIsSection } from './kpis/kpis_section';
 import { FiltersSection } from './filters/filters_section';
 import { HeaderSection } from './header/header_section';
-import { SearchBarSection } from './search_bar/search_bar_section';
+import { SearchBarSection } from '../common/search_bar/search_bar_section';
 import { TableSection } from './table/table_section';
 import type { AssigneesIdsSelection } from '../../../common/components/assignees/types';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';

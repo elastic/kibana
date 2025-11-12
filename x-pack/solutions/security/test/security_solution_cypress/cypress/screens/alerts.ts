@@ -276,4 +276,4 @@ export const TAKE_ACTION_GROUPED_ALERTS_BTN = '[data-test-subj="take-action-butt
 
 export const ALERT_STATUS_BADGE_BUTTON = '[data-test-subj="rule-status-badge"]';
 
-export const ALERTS_PAGE_KQL_BAR = '[data-test-subj="alerts-page-search-bar"]';
+export const ALERTS_PAGE_KQL_BAR = '[data-test-subj="detections-search-bar"]';

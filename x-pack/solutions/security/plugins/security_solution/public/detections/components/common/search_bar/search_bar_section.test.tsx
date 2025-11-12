@@ -17,7 +17,7 @@ jest.mock('../../../../common/components/filters_global', () => ({
 }));
 jest.mock('../../../../common/components/search_bar', () => ({
   // The module factory of `jest.mock()` is not allowed to reference any out-of-scope variables so we can't use SEARCH_BAR_TEST_ID
-  SiemSearchBar: () => <div data-test-subj={'alerts-page-search-bar'} />,
+  SiemSearchBar: () => <div data-test-subj={'detections-search-bar'} />,
 }));
 
 const dataView: DataView = createStubDataView({ spec: {} });

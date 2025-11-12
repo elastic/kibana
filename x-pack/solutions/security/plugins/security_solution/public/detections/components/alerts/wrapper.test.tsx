@@ -7,18 +7,18 @@
 
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
-import {
-  DATA_VIEW_ERROR_TEST_ID,
-  DATA_VIEW_LOADING_PROMPT_TEST_ID,
-  SKELETON_TEST_ID,
-  Wrapper,
-} from './wrapper';
+import { Wrapper } from './wrapper';
 import { TestProviders } from '../../../common/mock';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
+import {
+  DATA_VIEW_ERROR_TEST_ID,
+  DATA_VIEW_LOADING_PROMPT_TEST_ID,
+  SKELETON_TEST_ID,
+} from '../common/detections_wrapper';
 
 jest.mock('../../../sourcerer/containers');
 jest.mock('../../../common/hooks/use_experimental_features');

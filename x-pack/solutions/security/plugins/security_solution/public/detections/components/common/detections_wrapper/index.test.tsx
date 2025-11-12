@@ -7,30 +7,39 @@
 
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
-import { Wrapper } from './wrapper';
-import { TestProviders } from '../../../common/mock';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { useSourcererDataView } from '../../../sourcerer/containers';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
+
+import { TestProviders } from '../../../../common/mock';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
+import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import {
   DATA_VIEW_ERROR_TEST_ID,
   DATA_VIEW_LOADING_PROMPT_TEST_ID,
+  DetectionsWrapper,
   SKELETON_TEST_ID,
-} from '../common/detections_wrapper';
+} from '.';
+import { SourcererScopeName } from '../../../../sourcerer/store/model';
 
-jest.mock('../../../sourcerer/containers');
-jest.mock('../../../common/hooks/use_experimental_features');
-jest.mock('../../../data_view_manager/hooks/use_data_view');
-jest.mock('./content', () => ({
-  AttacksPageContent: () => <div data-test-subj={'attacks-page-content'} />,
-}));
+jest.mock('../../../../sourcerer/containers');
+jest.mock('../../../../common/hooks/use_experimental_features');
+jest.mock('../../../../data_view_manager/hooks/use_data_view');
 
 const dataView: DataView = createStubDataView({ spec: {} });
 const dataViewSpec: DataViewSpec = createStubDataView({ spec: {} }).toSpec();
 
-describe('<Wrapper />', () => {
+const renderWrapper = () => {
+  render(
+    <TestProviders>
+      <DetectionsWrapper scope={SourcererScopeName.detections} title="Test Wrapper">
+        {() => <div data-test-subj={'detections-page-content'} />}
+      </DetectionsWrapper>
+    </TestProviders>
+  );
+};
+
+describe('<DetectionsWrapper />', () => {
   describe('newDataViewPickerEnabled false', () => {
     beforeEach(() => {
       jest.clearAllMocks();
@@ -44,11 +53,7 @@ describe('<Wrapper />', () => {
         sourcererDataView: dataViewSpec,
       });
 
-      render(
-        <TestProviders>
-          <Wrapper />
-        </TestProviders>
-      );
+      renderWrapper();
 
       await waitFor(() => {
         expect(screen.getByTestId(DATA_VIEW_LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
@@ -62,11 +67,7 @@ describe('<Wrapper />', () => {
         sourcererDataView: undefined,
       });
 
-      render(
-        <TestProviders>
-          <Wrapper />
-        </TestProviders>
-      );
+      renderWrapper();
 
       expect(await screen.findByTestId(DATA_VIEW_LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
       expect(await screen.findByTestId(DATA_VIEW_ERROR_TEST_ID)).toHaveTextContent(
@@ -80,11 +81,7 @@ describe('<Wrapper />', () => {
         sourcererDataView: { ...dataViewSpec, id: undefined, title: 'title' },
       });
 
-      render(
-        <TestProviders>
-          <Wrapper />
-        </TestProviders>
-      );
+      renderWrapper();
 
       expect(await screen.findByTestId(DATA_VIEW_LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
       expect(await screen.findByTestId(DATA_VIEW_ERROR_TEST_ID)).toHaveTextContent(
@@ -98,11 +95,7 @@ describe('<Wrapper />', () => {
         sourcererDataView: { ...dataViewSpec, id: 'id', title: '' },
       });
 
-      render(
-        <TestProviders>
-          <Wrapper />
-        </TestProviders>
-      );
+      renderWrapper();
 
       expect(await screen.findByTestId(DATA_VIEW_LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
       expect(await screen.findByTestId(DATA_VIEW_ERROR_TEST_ID)).toHaveTextContent(
@@ -116,14 +109,10 @@ describe('<Wrapper />', () => {
         sourcererDataView: { ...dataViewSpec, id: 'id', title: 'title' },
       });
 
-      render(
-        <TestProviders>
-          <Wrapper />
-        </TestProviders>
-      );
+      renderWrapper();
 
       expect(await screen.findByTestId(DATA_VIEW_LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
-      expect(await screen.findByTestId('attacks-page-content')).toBeInTheDocument();
+      expect(await screen.findByTestId('detections-page-content')).toBeInTheDocument();
     });
   });
 
@@ -137,11 +126,7 @@ describe('<Wrapper />', () => {
     it('should render a loading skeleton if the dataView status is pristine', async () => {
       (useDataView as jest.Mock).mockReturnValue({ dataView, status: 'pristine' });
 
-      render(
-        <TestProviders>
-          <Wrapper />
-        </TestProviders>
-      );
+      renderWrapper();
 
       await waitFor(() => {
         expect(screen.getByTestId(DATA_VIEW_LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
@@ -152,11 +137,7 @@ describe('<Wrapper />', () => {
     it('should render a loading skeleton if the dataView status is loading', async () => {
       (useDataView as jest.Mock).mockReturnValue({ dataView, status: 'loading' });
 
-      render(
-        <TestProviders>
-          <Wrapper />
-        </TestProviders>
-      );
+      renderWrapper();
 
       await waitFor(() => {
         expect(screen.getByTestId(DATA_VIEW_LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
@@ -170,11 +151,7 @@ describe('<Wrapper />', () => {
         status: 'error',
       });
 
-      render(
-        <TestProviders>
-          <Wrapper />
-        </TestProviders>
-      );
+      renderWrapper();
 
       expect(await screen.findByTestId(DATA_VIEW_LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
       expect(await screen.findByTestId(DATA_VIEW_ERROR_TEST_ID)).toHaveTextContent(
@@ -192,11 +169,7 @@ describe('<Wrapper />', () => {
         status: 'ready',
       });
 
-      render(
-        <TestProviders>
-          <Wrapper />
-        </TestProviders>
-      );
+      renderWrapper();
 
       expect(await screen.findByTestId(DATA_VIEW_LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
       expect(await screen.findByTestId(DATA_VIEW_ERROR_TEST_ID)).toHaveTextContent(
@@ -216,14 +189,10 @@ describe('<Wrapper />', () => {
         status: 'ready',
       });
 
-      render(
-        <TestProviders>
-          <Wrapper />
-        </TestProviders>
-      );
+      renderWrapper();
 
       expect(await screen.findByTestId(DATA_VIEW_LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
-      expect(await screen.findByTestId('attacks-page-content')).toBeInTheDocument();
+      expect(await screen.findByTestId('detections-page-content')).toBeInTheDocument();
     });
   });
 });

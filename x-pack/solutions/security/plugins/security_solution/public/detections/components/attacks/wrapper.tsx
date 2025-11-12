@@ -6,34 +6,28 @@
  */
 
 import React, { memo } from 'react';
-import { EuiEmptyPrompt } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+
+import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { AttacksPageContent } from './content';
+import { PAGE_TITLE } from '../../pages/attacks/translations';
+import { DetectionsWrapper } from '../common/detections_wrapper';
 
-export const DATA_VIEW_ERROR_TEST_ID = 'attacks-page-data-view-error';
-
-const DATAVIEW_ERROR = i18n.translate('xpack.securitySolution.attacksPage.dataViewError', {
-  defaultMessage: 'Unable to retrieve the data view',
-});
-
+/**
+ * Retrieves the dataView for the attacks page then renders the attacks page when the dataView is valid.
+ * Shows a loading skeleton while retrieving.
+ * Shows an error message if the dataView is invalid.
+ */
 export const Wrapper = memo(() => {
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-
   return (
-    <>
-      {!newDataViewPickerEnabled ? (
-        <EuiEmptyPrompt
-          color="danger"
-          data-test-subj={DATA_VIEW_ERROR_TEST_ID}
-          iconType="error"
-          title={<h2>{DATAVIEW_ERROR}</h2>}
+    // TODO: Switch to `SourcererScopeName.attacks` data view scope once available
+    <DetectionsWrapper scope={SourcererScopeName.detections} title={PAGE_TITLE}>
+      {({ dataView, oldSourcererDataViewSpec }) => (
+        <AttacksPageContent
+          dataView={dataView}
+          oldSourcererDataViewSpec={oldSourcererDataViewSpec}
         />
-      ) : (
-        <AttacksPageContent />
       )}
-    </>
+    </DetectionsWrapper>
   );
 });
-
 Wrapper.displayName = 'Wrapper';

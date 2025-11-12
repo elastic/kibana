@@ -12,7 +12,7 @@ import { FiltersGlobal } from '../../../../common/components/filters_global';
 import { SiemSearchBar } from '../../../../common/components/search_bar';
 import { useSignalHelpers } from '../../../../sourcerer/containers/use_signal_helpers';
 
-export const SEARCH_BAR_TEST_ID = 'alerts-page-search-bar';
+export const SEARCH_BAR_TEST_ID = 'detections-search-bar';
 
 export interface SearchBarSectionProps {
   /**
@@ -26,7 +26,7 @@ export interface SearchBarSectionProps {
 }
 
 /**
- * UI section of the alerts page that renders the global search bar.
+ * UI section of the detections page (alerts and attacks) that renders the global search bar.
  */
 export const SearchBarSection = memo(
   ({ dataView, sourcererDataViewSpec }: SearchBarSectionProps) => {
