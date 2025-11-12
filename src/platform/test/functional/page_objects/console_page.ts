@@ -251,6 +251,14 @@ export class ConsolePageObject extends FtrService {
     return await this.testSubjects.exists('sendRequestButton');
   }
 
+  public async clickCopyToLanguageActionButton() {
+    await this.testSubjects.click('copyToLanguageActionButton');
+  }
+
+  public async isCopyToLanguageActionButtonVisible() {
+    return await this.testSubjects.exists('copyToLanguageActionButton');
+  }
+
   public async clickCopyOutput() {
     await this.testSubjects.click('copyOutputButton');
   }

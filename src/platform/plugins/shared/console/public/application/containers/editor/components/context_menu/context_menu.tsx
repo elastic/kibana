@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   EuiButtonIcon,
   EuiContextMenuPanel,
@@ -26,7 +26,6 @@ import { convertRequestToLanguage } from '../../../../../services';
 import type { EditorRequest } from '../../types';
 
 import { useServicesContext } from '../../../../contexts';
-import { StorageKeys } from '../../../../../services';
 import {
   DEFAULT_LANGUAGE,
   AVAILABLE_LANGUAGES,
@@ -42,6 +41,8 @@ interface Props {
    * (starting with the kbn: prefix). This is needed here as we display only the curl language
    * for internal Kibana requests since the other languages are not supported yet. */
   getIsKbnRequestSelected: () => Promise<boolean | null>;
+  currentLanguage: string;
+  onLanguageChange: (language: string) => void;
 }
 
 const DELAY_FOR_HIDING_SPINNER = 500;
@@ -56,12 +57,13 @@ export const ContextMenu = ({
   autoIndent,
   notifications,
   getIsKbnRequestSelected,
+  currentLanguage,
+  onLanguageChange,
 }: Props) => {
   const { euiTheme } = useEuiTheme();
 
-  // Get default language from local storage
   const {
-    services: { storage, esHostService },
+    services: { esHostService },
     config: { isPackagedEnvironment },
   } = useServicesContext();
 
@@ -73,18 +75,6 @@ export const ContextMenu = ({
   const [isRequestConverterLoading, setRequestConverterLoading] = useState(false);
   const [isLanguageSelectorVisible, setLanguageSelectorVisibility] = useState(false);
   const [isKbnRequestSelected, setIsKbnRequestSelected] = useState<boolean | null>(null);
-  const [defaultLanguage, setDefaultLanguage] = useState(
-    storage.get(StorageKeys.DEFAULT_LANGUAGE, DEFAULT_LANGUAGE)
-  );
-  const [currentLanguage, setCurrentLanguage] = useState(defaultLanguage);
-
-  useEffect(() => {
-    if (isKbnRequestSelected) {
-      setCurrentLanguage(DEFAULT_LANGUAGE);
-    } else {
-      setCurrentLanguage(defaultLanguage);
-    }
-  }, [defaultLanguage, isKbnRequestSelected]);
 
   const copyText = async (text: string) => {
     if (window.navigator?.clipboard) {
@@ -170,17 +160,6 @@ export const ContextMenu = ({
       });
   };
 
-  const changeDefaultLanguage = (language: string) => {
-    if (currentLanguage !== language) {
-      storage.set(StorageKeys.DEFAULT_LANGUAGE, language);
-    }
-
-    setDefaultLanguage(language);
-    if (!isKbnRequestSelected) {
-      setCurrentLanguage(language);
-    }
-  };
-
   const closePopover = () => {
     setIsPopoverOpen(false);
     setLanguageSelectorVisibility(false);
@@ -206,7 +185,7 @@ export const ContextMenu = ({
   };
 
   const handleLanguageSelect = (language: string) => {
-    changeDefaultLanguage(language);
+    onLanguageChange(language);
     setLanguageSelectorVisibility(false);
   };
 
