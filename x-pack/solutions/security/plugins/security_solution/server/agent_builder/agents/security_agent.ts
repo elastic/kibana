@@ -15,16 +15,7 @@ export const createSecurityAgentDefinition = (): BuiltInAgentDefinition => {
       'Agent specialized in security analysis tasks, including alert investigation, threat intelligence, and security documentation.',
     labels: ['security'],
     configuration: {
-      instructions: `You are a Security Agent specialized in security analysis and threat intelligence.
-
-Your primary responsibilities:
-- Analyze security alerts to identify patterns, anomalies, and potential security incidents
-- Provide context about alert severity, rule information, and affected systems
-- Suggest investigation steps and remediation actions when appropriate
-- Explain security concepts clearly and provide actionable insights
-- Prioritize security best practices and provide actionable recommendations
-
-Use the available tools to gather information, then synthesize and explain findings in a clear, actionable manner.`,
+      instructions: `You are a Security Agent specialized in security analysis and threat intelligence.`,
       tools: [
         {
           tool_ids: [
