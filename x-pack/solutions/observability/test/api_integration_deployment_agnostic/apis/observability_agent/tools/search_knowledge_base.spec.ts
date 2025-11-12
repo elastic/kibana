@@ -10,11 +10,14 @@ import { maxBy, get } from 'lodash';
 import { AGENT_BUILDER_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import type { ToolResult, OtherResult } from '@kbn/onechat-common';
 import { isOtherResult } from '@kbn/onechat-common/tools';
-import { createOneChatApiClient } from '@kbn/test-suites-xpack-platform/onechat_api_integration/utils/one_chat_client';
 import type { LlmProxy } from '@kbn/test-suites-xpack-platform/onechat_api_integration/utils/llm_proxy';
 import { createLlmProxy } from '@kbn/test-suites-xpack-platform/onechat_api_integration/utils/llm_proxy';
 import { OBSERVABILITY_AGENT_ID } from '@kbn/observability-agent-plugin/server/agent/register_observability_agent';
-import { OBSERVABILITY_SEARCH_KNOWLEDGE_BASE_TOOL_ID } from '@kbn/observability-agent-plugin/server/tools';
+import {
+  type KnowledgeBaseEntry,
+  OBSERVABILITY_SEARCH_KNOWLEDGE_BASE_TOOL_ID,
+} from '@kbn/observability-agent-plugin/server/tools';
+import { createOneChatApiClient } from '../utils/one_chat_client';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import {
   createLlmProxyActionConnector,
@@ -59,7 +62,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const log = getService('log');
   const kibanaServer = getService('kibanaServer');
   const roleScopedSupertest = getService('roleScopedSupertest');
-  const es = getService('es');
 
   describe(`tool: ${OBSERVABILITY_SEARCH_KNOWLEDGE_BASE_TOOL_ID}`, function () {
     // LLM Proxy is not yet supported in cloud environments
@@ -142,7 +144,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('returns KB entries for the query', () => {
         const total = get(otherResult, ['data', 'total']);
-        const entries = get(otherResult, ['data', 'entries']);
+        const entries = get(otherResult, ['data', 'entries']) as KnowledgeBaseEntry[];
 
         expect(total).to.be(3);
         expect(Array.isArray(entries)).to.be(true);
@@ -150,7 +152,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('ranks the most relevant entry highest by score', () => {
-        const entries = get(otherResult, ['data', 'entries']);
+        const entries = get(otherResult, ['data', 'entries']) as KnowledgeBaseEntry[];
         const topEntry = maxBy(entries, 'esScore');
 
         expect(topEntry?.text).to.be(sampleDocsForInternalKb[1].text);
