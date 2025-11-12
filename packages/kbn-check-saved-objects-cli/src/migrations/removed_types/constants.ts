@@ -7,4 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { handleRemovedTypes } from './handle_removed_types';
+import { resolve } from 'path';
+
+export const REMOVED_TYPES_JSON_PATH = resolve(__dirname, '../../../removed_types.json');
