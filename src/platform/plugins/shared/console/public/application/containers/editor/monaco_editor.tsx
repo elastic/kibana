@@ -39,6 +39,7 @@ import {
 import { ContextMenu } from './components';
 import { useSetInputEditor } from '../../hooks';
 import { useActionStyles, useHighlightedLinesClassName } from './styles';
+import { PlayButtonIcon } from './components/icons/play_button_icon';
 
 const useStyles = () => {
   const { euiTheme } = useEuiTheme();
@@ -271,13 +272,13 @@ export const MonacoEditor = ({
             })}
           >
             <EuiButtonIcon
-              iconType="playFilled"
               onClick={sendRequestsCallback}
               data-test-subj="sendRequestButton"
               aria-label={i18n.translate('console.monaco.sendRequestButtonTooltipAriaLabel', {
                 defaultMessage: 'Click to send request',
               })}
-              iconSize={'s'}
+              iconSize={'m'}
+              iconType={() => <PlayButtonIcon size="m" />}
             />
           </EuiToolTip>
         </EuiFlexItem>
