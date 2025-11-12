@@ -4,9 +4,6 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
-if [[ "$(type -t vault_get)" != "function" ]]; then
-  source .buildkite/scripts/common/vault_fns.sh
-fi
 
 .buildkite/scripts/bootstrap.sh
 
@@ -41,6 +38,10 @@ echo "--- Get Deployment Credentials"
 
 # Ensure we're using legacy vault
 export VAULT_ADDR="$LEGACY_VAULT_ADDR"
+
+# Re-source vault_fns.sh to recalculate path prefixes based on VAULT_ADDR
+source .buildkite/scripts/common/vault_fns.sh
+
 VAULT_TOKEN_BAK="$VAULT_TOKEN"
 VAULT_TOKEN=$(vault write -field=token auth/approle/login role_id="$VAULT_ROLE_ID" secret_id="$VAULT_SECRET_ID")
 vault login -no-print "$VAULT_TOKEN"
