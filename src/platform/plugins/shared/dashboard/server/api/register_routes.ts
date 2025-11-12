@@ -14,16 +14,16 @@ import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { Logger } from '@kbn/logging';
 
 import { CONTENT_ID, LATEST_VERSION } from '../../common/content_management';
-import { INTERNAL_API_VERSION, PUBLIC_API_PATH, commonRouteConfig } from './constants';
+import { commonRouteConfig, INTERNAL_API_VERSION, PUBLIC_API_PATH } from './constants';
 import type { DashboardItem } from '../content_management/v1';
 import { getDashboardAPIGetResultSchema } from '../content_management/v1';
 import {
   getDashboardDataSchema,
-  getDashboardListResultAPISchema,
   getDashboardUpdateResultSchema,
 } from '../content_management/v1/schema';
 import { registerCreateRoute } from './create';
 import { registerDeleteRoute } from './delete';
+import { registerSearchRoute } from './search';
 
 interface RegisterAPIRoutesArgs {
   http: HttpServiceSetup;
@@ -66,6 +66,7 @@ export function registerAPIRoutes({
 
   registerCreateRoute(versionedRouter);
   registerDeleteRoute(versionedRouter);
+  registerSearchRoute(versionedRouter);
 
   // Update API route
 
@@ -120,76 +121,6 @@ export function registerAPIRoutes({
       return res.ok({
         body: { ...formattedResult, meta: { ...formattedResult.meta, ...result.meta } },
       });
-    }
-  );
-
-  // List API route
-  const listRoute = versionedRouter.get({
-    path: `${PUBLIC_API_PATH}`,
-    summary: `Get a list of dashboards`,
-    ...commonRouteConfig,
-  });
-
-  listRoute.addVersion(
-    {
-      version: INTERNAL_API_VERSION,
-      validate: {
-        request: {
-          query: schema.object({
-            page: schema.number({
-              meta: { description: 'The page number to return. Default is "1".' },
-              min: 1,
-              defaultValue: 1,
-            }),
-            perPage: schema.number({
-              meta: {
-                description:
-                  'The number of dashboards to display on each page (max 1000). Default is "20".',
-              },
-              defaultValue: 20,
-              min: 1,
-              max: 1000,
-            }),
-          }),
-        },
-        response: {
-          200: {
-            body: getDashboardListResultAPISchema,
-          },
-        },
-      },
-    },
-    async (ctx, req, res) => {
-      const { page, perPage: limit } = req.query;
-      const client = contentManagement.contentClient
-        .getForRequest({ request: req, requestHandlerContext: ctx })
-        .for<DashboardItem>(CONTENT_ID, LATEST_VERSION);
-      let result;
-      try {
-        // TODO add filtering
-        ({ result } = await client.search(
-          {
-            cursor: page.toString(),
-            limit,
-          },
-          {
-            fields: ['title', 'description', 'timeRange'],
-          }
-        ));
-      } catch (e) {
-        if (e.isBoom && e.output.statusCode === 403) {
-          return res.forbidden();
-        }
-
-        return res.badRequest();
-      }
-
-      const body = {
-        items: result.hits.map(formatResult),
-        total: result.pagination.total,
-      };
-
-      return res.ok({ body });
     }
   );
 
