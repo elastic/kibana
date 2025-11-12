@@ -160,6 +160,10 @@ export interface CreateChatModelOptions {
    */
   connectorId: string;
   /**
+   * Callback manager to be used by the client to report lifecycle events.
+   */
+  callbackManager?: InferenceCallbackManager;
+  /**
    * Additional parameters to be passed down to the model constructor.
    */
   chatModelOptions: Omit<InferenceChatModelParams, 'connector' | 'chatComplete' | 'logger'>;
