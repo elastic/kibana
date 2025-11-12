@@ -7,21 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type {
-  GridData,
-  DashboardPanel,
-  DashboardSection,
-  DashboardState,
-  DashboardItem,
-  DashboardGetIn,
-  DashboardAPIGetOut,
-  DashboardGetOut,
-  DashboardUpdateIn,
-  DashboardUpdateOut,
-  DashboardUpdateOptions,
-  DashboardOptions,
-  DashboardFilter,
-  DashboardQuery,
-} from './latest';
-
-export { DashboardStorage } from './dashboard_storage';
+export type { DashboardSearchRequestBody, DashboardSearchResponseBody } from './types';
+export { registerSearchRoute } from './register_search_route';

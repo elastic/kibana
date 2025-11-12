@@ -17,10 +17,9 @@ import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { ViewMode } from '@kbn/presentation-publishing';
 
 import { asyncMap } from '@kbn/std';
-import { contentEditorFlyoutStrings } from '../../dashboard_app/_dashboard_app_strings';
 import { CONTENT_ID } from '../../../common/content_management';
 import { getAccessControlClient } from '../../services/access_control_service';
-import type { DashboardSearchAPIResult } from '../../../server/content_management';
+import { contentEditorFlyoutStrings } from '../../dashboard_app/_dashboard_app_strings';
 import {
   DASHBOARD_CONTENT_ID,
   SAVED_OBJECT_DELETE_TIME,
@@ -28,7 +27,7 @@ import {
 } from '../../utils/telemetry_constants';
 import { getDashboardBackupService } from '../../services/dashboard_backup_service';
 import { getDashboardRecentlyAccessedService } from '../../services/dashboard_recently_accessed_service';
-import { coreServices } from '../../services/kibana_services';
+import { coreServices, savedObjectsTaggingService } from '../../services/kibana_services';
 import { logger } from '../../services/logger';
 import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
 import {
@@ -49,30 +48,6 @@ type GetDetailViewLink =
 
 const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
 const SAVED_OBJECTS_PER_PAGE_SETTING = 'savedObjects:perPage';
-
-const toTableListViewSavedObject = (
-  hit: DashboardSearchAPIResult['hits'][number],
-  canManageAccessControl: boolean
-): DashboardSavedObjectUserContent => {
-  const { title, description, timeRange } = hit.attributes;
-  return {
-    type: 'dashboard',
-    id: hit.id,
-    updatedAt: hit.updatedAt!,
-    createdAt: hit.createdAt,
-    createdBy: hit.createdBy,
-    updatedBy: hit.updatedBy,
-    references: hit.references ?? [],
-    managed: hit.managed,
-    attributes: {
-      title,
-      description,
-      timeRestore: Boolean(timeRange),
-    },
-    canManageAccessControl,
-    accessMode: hit?.accessControl?.accessMode,
-  };
-};
 
 type DashboardListingViewTableProps = Omit<
   TableListViewTableProps<DashboardSavedObjectUserContent>,
@@ -214,7 +189,7 @@ export const useDashboardListingTable = ({
   );
 
   const findItems = useCallback(
-    (
+    async (
       searchTerm: string,
       {
         references,
@@ -226,19 +201,27 @@ export const useDashboardListingTable = ({
     ) => {
       const searchStartTime = window.performance.now();
 
+      const [userResponse, globalPrivilegeResponse] = await Promise.allSettled([
+        coreServices.userProfile.getCurrent(),
+        accessControlClient.checkGlobalPrivilege(CONTENT_ID),
+      ]);
+
+      const userId = userResponse.status === 'fulfilled' ? userResponse.value.uid : undefined;
+      const isGloballyAuthorized =
+        globalPrivilegeResponse.status === 'fulfilled'
+          ? globalPrivilegeResponse.value.isGloballyAuthorized
+          : false;
+
       return findService
         .search({
           search: searchTerm,
-          size: listingLimit,
-          hasReference: references,
-          hasNoReference: referencesToExclude,
-          options: {
-            // include only tags references in the response to save bandwidth
-            includeReferences: ['tag'],
-            fields: ['title', 'description', 'timeRange'],
+          per_page: listingLimit,
+          tags: {
+            included: (references ?? []).map(({ id }) => id),
+            excluded: (referencesToExclude ?? []).map(({ id }) => id),
           },
         })
-        .then(async ({ total, hits }) => {
+        .then(({ total, dashboards }) => {
           const searchEndTime = window.performance.now();
           const searchDuration = searchEndTime - searchStartTime;
           reportPerformanceMetricEvent(coreServices.analytics, {
@@ -248,29 +231,36 @@ export const useDashboardListingTable = ({
               saved_object_type: DASHBOARD_CONTENT_ID,
             },
           });
-
-          const [userResponse, globalPrivilegeResponse] = await Promise.allSettled([
-            coreServices.userProfile.getCurrent(),
-            accessControlClient.checkGlobalPrivilege(CONTENT_ID),
-          ]);
-
-          const userId = userResponse.status === 'fulfilled' ? userResponse.value.uid : undefined;
-          const isGloballyAuthorized =
-            globalPrivilegeResponse.status === 'fulfilled'
-              ? globalPrivilegeResponse.value.isGloballyAuthorized
-              : false;
+          const tagApi = savedObjectsTaggingService?.getTaggingApi();
 
           return {
             total,
-            hits: hits.map((hit) => {
+            hits: dashboards.map(({ id, data, meta }) => {
               const canManageAccessControl =
                 isGloballyAuthorized ||
                 accessControlClient.checkUserAccessControl({
-                  accessControl: hit?.accessControl,
-                  createdBy: hit.createdBy,
+                  accessControl: data?.accessControl,
+                  createdBy: meta.createdBy,
                   userId,
                 });
-              return toTableListViewSavedObject(hit, canManageAccessControl);
+
+              return {
+                type: 'dashboard',
+                id,
+                updatedAt: meta.updatedAt!,
+                createdAt: meta.createdAt,
+                createdBy: meta.createdBy,
+                updatedBy: meta.updatedBy,
+                references: tagApi && data.tags ? data.tags.map(tagApi.ui.tagIdToReference) : [],
+                managed: meta.managed,
+                attributes: {
+                  title: data.title,
+                  description: data.description,
+                  timeRestore: Boolean(data.timeRange),
+                },
+                canManageAccessControl,
+                accessMode: data?.accessControl?.accessMode,
+              } as DashboardSavedObjectUserContent;
             }),
           };
         });
