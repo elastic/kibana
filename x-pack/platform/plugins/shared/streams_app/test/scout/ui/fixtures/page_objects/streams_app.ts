@@ -748,6 +748,18 @@ export class StreamsApp {
     await expect(this.page.getByTestId('droppable')).not.toHaveAttribute('class', /isDragging/);
   }
 
+  async clickFilterForButton() {
+    const filterForButton = this.page.getByTestId('streamsAppCellActionFilterFor');
+    await expect(filterForButton).toBeVisible();
+    await filterForButton.click();
+  }
+
+  async clickFilterOutButton() {
+    const filterOutButton = this.page.getByTestId('streamsAppCellActionFilterOut');
+    await expect(filterOutButton).toBeVisible();
+    await filterOutButton.click();
+  }
+
   /**
    * Share utility methods
    */
