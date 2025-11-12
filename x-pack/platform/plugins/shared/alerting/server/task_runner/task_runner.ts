@@ -419,8 +419,8 @@ export class TaskRunner<
           this.countUsageOfActionExecutionAfterRuleCancellation();
         } else {
           actionSchedulerResult = await actionScheduler.run({
-            activeAlerts: alertsClient.getProcessedAlerts('active'),
-            recoveredAlerts: alertsClient.getProcessedAlerts('recovered'),
+            activeAlerts: alertsClient.getProcessedAlerts('activeOnlyForActions'),
+            recoveredAlerts: alertsClient.getProcessedAlerts('recoveredOnlyForActions'),
           });
         }
       })

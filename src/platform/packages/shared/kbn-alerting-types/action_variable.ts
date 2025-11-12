@@ -28,34 +28,19 @@ type FlattenKeys<T extends Record<string, unknown>, Key = keyof T> = Key extends
  * All valid action context variables
  */
 export interface ActionContextVariables {
-  alertId: string;
-  alertName: string;
-  alertInstanceId: string;
-  alertActionGroup: string;
-  alertActionGroupName: string;
   tags?: string[];
   spaceId: string;
-  params: Record<string, unknown>;
-  context: Record<string, unknown>;
   date: string;
-  state: Record<string, unknown>;
-  kibanaBaseUrl?: string;
-  rule: {
+  rule?: {
     id: string;
-    name: string;
-    spaceId: string;
-    type: string;
-    params: Record<string, unknown>;
-    tags?: string[];
-    url?: string;
+    query: string;
   };
-  alert: {
+  alert?: {
     id: string;
-    uuid: string;
-    actionGroup: string;
-    actionGroupName: string;
-    flapping: boolean;
-    consecutiveMatches?: number;
+    status: string;
+  };
+  entity?: {
+    key: string;
   };
 }
 
@@ -68,15 +53,7 @@ export type SummaryActionContextVariables = ActionContextVariables & {
       count: number;
       data: unknown[];
     };
-    ongoing: {
-      count: number;
-      data: unknown[];
-    };
     recovered: {
-      count: number;
-      data: unknown[];
-    };
-    all: {
       count: number;
       data: unknown[];
     };

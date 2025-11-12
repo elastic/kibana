@@ -25,7 +25,7 @@ import type {
   MsearchResponseItem,
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { Alert } from '@kbn/alerts-as-data-utils';
+import type { Alert as AlertType } from '@kbn/alerts-as-data-utils';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import type { DeepPartial } from '@kbn/utility-types';
 import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
@@ -77,6 +77,7 @@ import {
 import { ErrorWithType } from '../lib/error_with_type';
 import { DEFAULT_MAX_ALERTS } from '../config';
 import { RUNTIME_MAINTENANCE_WINDOW_ID_FIELD } from './lib/get_summarized_alerts_query';
+import { Alert } from '../alert/alert';
 
 export interface AlertsClientParams extends CreateAlertsClientParams {
   elasticsearchClientPromise: Promise<ElasticsearchClient>;
@@ -111,12 +112,12 @@ export class AlertsClient<
   // recovered alerts
   private trackedAlerts: {
     indices: Record<string, string>;
-    active: Record<string, Alert & AlertData>;
-    recovered: Record<string, Alert & AlertData>;
+    active: Record<string, AlertType & AlertData>;
+    recovered: Record<string, AlertType & AlertData>;
     seqNo: Record<string, number | undefined>;
     primaryTerm: Record<string, number | undefined>;
-    get: (uuid: string) => Alert & AlertData;
-    getById: (id: string) => (Alert & AlertData) | undefined;
+    get: (uuid: string) => AlertType & AlertData;
+    getById: (id: string) => (AlertType & AlertData) | undefined;
   };
 
   private startedAtString: string | null = null;
@@ -233,7 +234,7 @@ export class AlertsClient<
         const results = await getTrackedAlerts();
 
         for (const hit of results) {
-          const alertHit = hit._source as Alert & AlertData;
+          const alertHit = hit._source as AlertType & AlertData;
           const alertUuid = get(alertHit, ALERT_UUID);
 
           if (get(alertHit, ALERT_STATUS) === ALERT_STATUS_ACTIVE) {
@@ -266,7 +267,7 @@ export class AlertsClient<
     const {
       hits: { hits, total },
       aggregations,
-    } = await esClient.search<Alert & AlertData, Aggregation>({
+    } = await esClient.search<AlertType & AlertData, Aggregation>({
       index,
       ...queryBody,
       ignore_unavailable: true,
@@ -277,12 +278,12 @@ export class AlertsClient<
 
   public async msearch<Aggregation = unknown>(
     searches: MsearchRequestItem[]
-  ): Promise<Array<MsearchResponseItem<Alert & AlertData>>> {
+  ): Promise<Array<MsearchResponseItem<AlertType & AlertData>>> {
     const esClient = await this.options.elasticsearchClientPromise;
     const index = this.isUsingDataStreams()
       ? this.indexTemplateAndPattern.alias
       : this.indexTemplateAndPattern.pattern;
-    const { responses } = await esClient.msearch<Alert & AlertData>({
+    const { responses } = await esClient.msearch<AlertType & AlertData>({
       index,
       searches,
       ignore_unavailable: true,
@@ -385,7 +386,14 @@ export class AlertsClient<
   }
 
   public getProcessedAlerts(
-    type: 'new' | 'active' | 'trackedActiveAlerts' | 'recovered' | 'trackedRecoveredAlerts'
+    type:
+      | 'new'
+      | 'active'
+      | 'trackedActiveAlerts'
+      | 'recovered'
+      | 'trackedRecoveredAlerts'
+      | 'activeOnlyForActions'
+      | 'recoveredOnlyForActions'
   ) {
     return this.legacyAlertsClient.getProcessedAlerts(type);
   }
@@ -481,7 +489,7 @@ export class AlertsClient<
     // Example: workflow status - default to 'open' if not set
     // event action: new alert = 'new', active alert: 'active', otherwise 'close'
 
-    const activeAlertsToIndex: Array<Alert & AlertData> = [];
+    const activeAlertsToIndex: Array<AlertType & AlertData> = [];
     for (const id of keys(rawActiveAlerts)) {
       // See if there's an existing active alert document
       if (activeAlerts[id]) {
@@ -545,7 +553,7 @@ export class AlertsClient<
       }
     }
 
-    const recoveredAlertsToIndex: Array<Alert & AlertData> = [];
+    const recoveredAlertsToIndex: Array<AlertType & AlertData> = [];
     for (const id of keys(rawRecoveredAlerts)) {
       const trackedAlert = this.trackedAlerts.getById(id);
       // See if there's an existing alert document
@@ -582,7 +590,7 @@ export class AlertsClient<
     }
 
     const alertsToIndex = [...activeAlertsToIndex, ...recoveredAlertsToIndex].filter(
-      (alert: Alert & AlertData) => {
+      (alert: AlertType & AlertData) => {
         const alertUuid = get(alert, ALERT_UUID);
         const alertIndex = this.trackedAlerts.indices[alertUuid];
         if (!alertIndex) {
@@ -599,7 +607,7 @@ export class AlertsClient<
     );
     if (alertsToIndex.length > 0) {
       const bulkBody = flatMap(
-        alertsToIndex.map((alert: Alert & AlertData) => {
+        alertsToIndex.map((alert: AlertType & AlertData) => {
           const alertUuid = get(alert, ALERT_UUID);
           return [
             getBulkMeta(
@@ -696,37 +704,57 @@ export class AlertsClient<
         LegacyContext,
         WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
       >
-    >
+    >,
+    newAlerts: Set<string>
   ) {
     const currentTime = this.startedAtString ?? new Date().toISOString();
     const esClient = await this.options.elasticsearchClientPromise;
 
-    const activeAlertsToIndex: Array<Alert & AlertData> = [];
+    const activeAlertsToIndex: Array<AlertType & AlertData> = [];
     for (const alert of activeAlerts) {
-      activeAlertsToIndex.push(
-        buildAlert<AlertData, LegacyState, LegacyContext, ActionGroupIds, RecoveryActionGroupId>({
-          alert,
-          rule: this.rule,
-          timestamp: currentTime,
-          status: ALERT_STATUS_ACTIVE,
-        })
-      );
+      const alertData = buildAlert<
+        AlertData,
+        LegacyState,
+        LegacyContext,
+        ActionGroupIds,
+        RecoveryActionGroupId
+      >({
+        alert,
+        rule: this.rule,
+        timestamp: currentTime,
+        status: ALERT_STATUS_ACTIVE,
+      });
+      activeAlertsToIndex.push(alertData);
+
+      if (newAlerts.has(alert.id)) {
+        const a = new Alert<LegacyState, LegacyContext>(alert.id);
+        a.setAlertAsData(alertData);
+        this.legacyAlertsClient.setProcessedAlert('activeOnlyForActions', alert.id, a);
+      }
     }
 
-    const recoveredAlertsToIndex: Array<Alert & AlertData> = [];
+    const recoveredAlertsToIndex: Array<AlertType & AlertData> = [];
     for (const alert of recoveredAlerts) {
-      activeAlertsToIndex.push(
-        buildAlert<AlertData, LegacyState, LegacyContext, ActionGroupIds, RecoveryActionGroupId>({
-          alert,
-          rule: this.rule,
-          timestamp: currentTime,
-          status: ALERT_STATUS_RECOVERED,
-        })
-      );
+      const alertData = buildAlert<
+        AlertData,
+        LegacyState,
+        LegacyContext,
+        ActionGroupIds,
+        RecoveryActionGroupId
+      >({
+        alert,
+        rule: this.rule,
+        timestamp: currentTime,
+        status: ALERT_STATUS_RECOVERED,
+      });
+      activeAlertsToIndex.push(alertData);
+      const a = new Alert<LegacyState, LegacyContext>(alert.id);
+      a.setAlertAsData(alertData);
+      this.legacyAlertsClient.setProcessedAlert('recoveredOnlyForActions', alert.id, a);
     }
 
     const alertsToIndex = [...activeAlertsToIndex, ...recoveredAlertsToIndex].filter(
-      (alert: Alert & AlertData) => {
+      (alert: AlertType & AlertData) => {
         const alertUuid = get(alert, ALERT_UUID);
         const alertIndex = this.trackedAlerts.indices[alertUuid];
         if (!alertIndex) {
@@ -744,7 +772,7 @@ export class AlertsClient<
 
     if (alertsToIndex.length > 0) {
       const bulkBody = flatMap(
-        alertsToIndex.map((alert: Alert & AlertData) => {
+        alertsToIndex.map((alert: AlertType & AlertData) => {
           const alertUuid = get(alert, ALERT_UUID);
           return [
             getBulkMeta(
@@ -1059,8 +1087,9 @@ export class AlertsClient<
             LegacyContext,
             WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
           >
-        >
-      ) => this.writeAlerts(activeAlerts, recoveredAlerts),
+        >,
+        newAlerts: Set<string>
+      ) => this.writeAlerts(activeAlerts, recoveredAlerts, newAlerts),
     };
   }
 

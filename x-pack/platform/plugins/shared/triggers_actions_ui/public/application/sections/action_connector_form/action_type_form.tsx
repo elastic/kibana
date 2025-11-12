@@ -9,7 +9,6 @@ import React, { Suspense, useEffect, useState, useCallback, useMemo } from 'reac
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -51,7 +50,6 @@ import {
 } from '@kbn/response-ops-rule-form';
 import { checkActionFormActionTypeEnabled, transformActionVariables } from '@kbn/alerts-ui-shared';
 import type { ActionGroupWithMessageVariables } from '@kbn/triggers-actions-ui-types';
-import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared/src/common/hooks';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import { getIsExperimentalFeatureEnabled } from '../../../common/get_experimental_features';
 import type {
@@ -195,12 +193,6 @@ export const ActionTypeForm = ({
     useState<Record<string, SavedObjectAttribute>>({});
 
   const { fields: alertFields } = useRuleTypeAlertFields(http, ruleTypeId, useAlertTemplateFields);
-
-  const { ruleTypesState } = useGetRuleTypesPermissions({
-    http,
-    toasts: notifications.toasts,
-    filteredRuleTypes: [],
-  });
 
   const templateFields = useMemo(
     () => (useAlertTemplateFields ? alertFields : availableActionVariables),
@@ -437,15 +429,9 @@ export const ActionTypeForm = ({
     connectors.filter((connector) => connector.isPreconfigured)
   );
 
-  const showSelectActionGroup =
-    actionGroups &&
-    selectedActionGroup &&
-    setActionGroupIdByIndex &&
-    !actionItem.frequency?.summary;
+  const showSelectActionGroup = false;
 
-  const ruleType = ruleTypeId ? ruleTypesState.data.get(ruleTypeId) : null;
-
-  const showActionAlertsFilter = ruleType?.hasAlertsMappings || producerId === AlertConsumers.SIEM;
+  const showActionAlertsFilter = false;
 
   const accordionContent = checkEnabledResult.isEnabled ? (
     <>

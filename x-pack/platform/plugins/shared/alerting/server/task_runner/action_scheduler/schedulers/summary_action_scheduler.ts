@@ -8,19 +8,14 @@
 import type { AlertInstanceState, AlertInstanceContext } from '@kbn/alerting-state-types';
 import type { RuleAction, RuleTypeParams } from '@kbn/alerting-types';
 import { compact } from 'lodash';
-import type { CombinedSummarizedAlerts } from '../../../types';
+import type { CombinedSummarizedAlerts, AlertHit } from '../../../types';
 import type { RuleTypeState, RuleAlertData } from '../../../../common';
-import { parseDuration } from '../../../../common';
-import type { GetSummarizedAlertsParams } from '../../../alerts_client/types';
 import {
   buildRuleUrl,
   formatActionToEnqueue,
-  getSummarizedAlerts,
   getSummaryActionTimeBounds,
   isActionOnInterval,
   isSummaryAction,
-  isSummaryActionThrottled,
-  logNumberOfFilteredAlerts,
   shouldScheduleAction,
 } from '../lib';
 import type {
@@ -88,7 +83,6 @@ export class SummaryActionScheduler<
   }: GetActionsToScheduleOpts<State, Context, ActionGroupIds, RecoveryActionGroupId>): Promise<
     ActionsToSchedule[]
   > {
-    const alerts = { ...activeAlerts, ...recoveredAlerts };
     const executables: Array<{
       action: RuleAction;
       summarizedAlerts: CombinedSummarizedAlerts;
@@ -96,44 +90,40 @@ export class SummaryActionScheduler<
     const results: ActionsToSchedule[] = [];
 
     for (const action of this.actions) {
-      if (
-        // if summary action is throttled, we won't send any notifications
-        !isSummaryActionThrottled({ action, throttledSummaryActions, logger: this.context.logger })
-      ) {
-        const actionHasThrottleInterval = isActionOnInterval(action);
-        const optionsBase = {
-          spaceId: this.context.taskInstance.params.spaceId,
-          ruleId: this.context.rule.id,
-          excludedAlertInstanceIds: this.context.rule.mutedInstanceIds,
-          alertsFilter: action.alertsFilter,
-        };
-
-        let options: GetSummarizedAlertsParams;
-        if (actionHasThrottleInterval) {
-          const throttleMills = parseDuration(action.frequency!.throttle!);
-          const start = new Date(Date.now() - throttleMills);
-          options = { ...optionsBase, start, end: new Date() };
-        } else {
-          options = { ...optionsBase, executionUuid: this.context.executionId };
+      const activeAlertsArray = Object.values(activeAlerts || {});
+      const recoveredAlertsArray = Object.values(recoveredAlerts || {});
+      const active: AlertHit[] = [];
+      for (const alert of activeAlertsArray) {
+        const hit = alert.getAlertAsData();
+        if (hit) {
+          active.push(hit as AlertHit);
         }
+      }
 
-        const summarizedAlerts = await getSummarizedAlerts({
-          queryOptions: options,
-          alertsClient: this.context.alertsClient,
-        });
-
-        if (!actionHasThrottleInterval) {
-          logNumberOfFilteredAlerts({
-            logger: this.context.logger,
-            numberOfAlerts: Object.entries(alerts).length,
-            numberOfSummarizedAlerts: summarizedAlerts.all.count,
-            action,
-          });
+      const recovered: AlertHit[] = [];
+      for (const alert of recoveredAlertsArray) {
+        const hit = alert.getAlertAsData();
+        if (hit) {
+          recovered.push(hit as AlertHit);
         }
+      }
+      const summarizedAlerts = {
+        new: {
+          count: active.length,
+          data: active,
+        },
+        recovered: {
+          count: recovered.length,
+          data: recovered,
+        },
+        all: {
+          count: active.length + recovered.length,
+          data: active.concat(recovered),
+        },
+      };
 
-        if (summarizedAlerts.all.count !== 0) {
-          executables.push({ action, summarizedAlerts });
-        }
+      if (summarizedAlerts.all.count !== 0) {
+        executables.push({ action, summarizedAlerts });
       }
     }
 
@@ -191,14 +181,11 @@ export class SummaryActionScheduler<
           actionParams: transformSummaryActionParams({
             alerts: summarizedAlerts,
             rule: this.context.rule,
-            ruleTypeId: this.context.ruleType.id,
             actionId: action.id,
             actionParams: action.params,
             spaceId: this.context.taskInstance.params.spaceId,
             actionsPlugin: this.context.taskRunnerContext.actionsPlugin,
             actionTypeId: action.actionTypeId,
-            kibanaBaseUrl: this.context.taskRunnerContext.kibanaBaseUrl,
-            ruleUrl: ruleUrl?.absoluteUrl,
           }),
         }),
       };
@@ -221,7 +208,7 @@ export class SummaryActionScheduler<
           typeId: action.actionTypeId,
           alertSummary: {
             new: summarizedAlerts.new.count,
-            ongoing: summarizedAlerts.ongoing.count,
+            ongoing: 0,
             recovered: summarizedAlerts.recovered.count,
           },
         },

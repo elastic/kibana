@@ -55,7 +55,25 @@ export async function executor(
   });
 
   const trackedAlerts = alertsClient.getTrackedAlerts() ?? [];
+  const recoveredAlerts: any = [];
+  const trackedAlertByAlertId: Record<string, any> = {};
+  for (const alertUuid of Object.keys(trackedAlerts)) {
+    const alert = trackedAlerts[alertUuid];
+    const alertId = alert[ALERT_INSTANCE_ID];
+    trackedAlertByAlertId[alertId] = alert;
+    if (!results[alertId]) {
+      recoveredAlerts.push({
+        id: alertId,
+        state: { latestTimestamp, dateStart, dateEnd },
+        payload: {
+          [ALERT_GROUPING]: alert[ALERT_GROUPING],
+        },
+      });
+    }
+  }
+
   const activeAlerts: any = [];
+  const newAlerts: Set<string> = new Set<string>();
   for (const alertId of Object.keys(results)) {
     const sourceFields = sourceFieldsPerResult[alertId];
     const groupingObject = groupingObjectsPerResult[alertId]
@@ -70,24 +88,12 @@ export async function executor(
         ...sourceFields,
       },
     });
-  }
-
-  const recoveredAlerts: any = [];
-  for (const alertUuid of Object.keys(trackedAlerts)) {
-    const alert = trackedAlerts[alertUuid];
-    const alertId = alert[ALERT_INSTANCE_ID];
-    if (!results[alertId]) {
-      recoveredAlerts.push({
-        id: alertId,
-        state: { latestTimestamp, dateStart, dateEnd },
-        payload: {
-          [ALERT_GROUPING]: alert[ALERT_GROUPING],
-        },
-      });
+    if (!trackedAlertByAlertId[alertId]) {
+      newAlerts.add(alertId);
     }
   }
 
-  alertsClient.writeAlerts(activeAlerts, recoveredAlerts);
+  alertsClient.writeAlerts(activeAlerts, recoveredAlerts, newAlerts);
 
   alertsClient.setAlertLimitReached(false);
   return { state: { latestTimestamp } };

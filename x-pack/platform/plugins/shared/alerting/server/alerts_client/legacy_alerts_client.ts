@@ -71,6 +71,8 @@ export class LegacyAlertsClient<
     trackedActiveAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
     recovered: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
     trackedRecoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
+    activeOnlyForActions: Record<string, Alert<State, Context, ActionGroupIds>>;
+    recoveredOnlyForActions: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
   };
 
   private alertFactory?: AlertFactory<
@@ -86,6 +88,8 @@ export class LegacyAlertsClient<
       trackedActiveAlerts: {},
       recovered: {},
       trackedRecoveredAlerts: {},
+      activeOnlyForActions: {},
+      recoveredOnlyForActions: {},
     };
   }
 
@@ -208,13 +212,30 @@ export class LegacyAlertsClient<
   }
 
   public getProcessedAlerts(
-    type: 'new' | 'active' | 'trackedActiveAlerts' | 'recovered' | 'trackedRecoveredAlerts'
+    type:
+      | 'new'
+      | 'active'
+      | 'trackedActiveAlerts'
+      | 'recovered'
+      | 'trackedRecoveredAlerts'
+      | 'activeOnlyForActions'
+      | 'recoveredOnlyForActions'
   ) {
     if (Object.hasOwn(this.processedAlerts, type)) {
       return this.processedAlerts[type];
     }
 
     return {};
+  }
+
+  public setProcessedAlert(
+    type: 'activeOnlyForActions' | 'recoveredOnlyForActions',
+    id: string,
+    alert: Alert<State, Context, RecoveryActionGroupId> | Alert<State, Context, ActionGroupIds>
+  ) {
+    if (Object.hasOwn(this.processedAlerts, type)) {
+      this.processedAlerts[type][id] = alert;
+    }
   }
 
   public getRawAlertInstancesForState(shouldOptimizeTaskState?: boolean) {

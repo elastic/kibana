@@ -8,10 +8,8 @@
 import React, { useState } from 'react';
 import { EuiTextArea, EuiFormRow } from '@elastic/eui';
 import type { ActionVariable } from '@kbn/alerting-plugin/common';
-import { AddMessageVariablesOptional } from './add_message_variables_optional';
 import { getIsExperimentalFeatureEnabled } from '../../common/get_experimental_features';
 import { TextAreaWithAutocomplete } from './text_area_with_autocomplete';
-import { templateActionVariable } from '../lib';
 
 interface Props {
   messageVariables?: ActionVariable[];
@@ -38,18 +36,7 @@ const TextAreaWithMessageVariablesLegacy: React.FunctionComponent<Props> = ({
   helpText,
   isOptionalField = false,
 }) => {
-  const [currentTextElement, setCurrentTextElement] = useState<HTMLTextAreaElement | null>(null);
-
-  const onSelectMessageVariable = (variable: ActionVariable) => {
-    const templatedVar = templateActionVariable(variable);
-    const startPosition = currentTextElement?.selectionStart ?? 0;
-    const endPosition = currentTextElement?.selectionEnd ?? 0;
-    const newValue =
-      (inputTargetValue ?? '').substring(0, startPosition) +
-      templatedVar +
-      (inputTargetValue ?? '').substring(endPosition, (inputTargetValue ?? '').length);
-    editAction(paramsProperty, newValue, index);
-  };
+  const [_, setCurrentTextElement] = useState<HTMLTextAreaElement | null>(null);
 
   const onChangeWithMessageVariable = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     editAction(paramsProperty, e.target.value, index);
@@ -62,14 +49,6 @@ const TextAreaWithMessageVariablesLegacy: React.FunctionComponent<Props> = ({
       isDisabled={isDisabled}
       isInvalid={errors && errors.length > 0 && inputTargetValue !== undefined}
       label={label}
-      labelAppend={
-        <AddMessageVariablesOptional
-          isOptionalField={isOptionalField}
-          messageVariables={messageVariables}
-          onSelectEventHandler={onSelectMessageVariable}
-          paramsProperty={paramsProperty}
-        />
-      }
       helpText={helpText}
     >
       <EuiTextArea
