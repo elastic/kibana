@@ -8,7 +8,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { getDashboardResponseBodySchema } from './schemas';
+import type { getDashboardCRUResponseBodySchema } from './schemas';
 
-// Response body type for CREATE, GET, and UPDATE endpoints
-export type DashboardResponseBody = TypeOf<ReturnType<typeof getDashboardResponseBodySchema>>;
+// Response body type for Create, Read, and Update endpoints
+export type DashboardCRUResponseBody = TypeOf<ReturnType<typeof getDashboardCRUResponseBodySchema>>;

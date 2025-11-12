@@ -10,7 +10,8 @@
 import { schema } from '@kbn/config-schema';
 import { dashboardMetaSchema, getDashboardDataSchema } from '../content_management/v1/schema';
 
-export function getDashboardResponseBodySchema() {
+// CRU is create, read, update
+export function getDashboardCRUResponseBodySchema() {
   return schema.object({
     id: schema.string(),
     data: getDashboardDataSchema(),

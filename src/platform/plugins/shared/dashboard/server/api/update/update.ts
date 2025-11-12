@@ -13,14 +13,14 @@ import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_objec
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../dashboard_saved_object';
 import type { DashboardUpdateRequestBody } from './types';
 import { transformDashboardIn } from '../../content_management/v1/transforms';
-import { getDashboardResponseBody } from '../saved_object_utils';
-import type { DashboardResponseBody } from '../types';
+import { getDashboardCRUResponseBody } from '../saved_object_utils';
+import type { DashboardCRUResponseBody } from '../types';
 
 export async function update(
   requestCtx: RequestHandlerContext,
   id: string,
   searchBody: DashboardUpdateRequestBody
-): Promise<DashboardResponseBody> {
+): Promise<DashboardCRUResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
 
   const { references: incomingReferences, ...incomingDashboardState } = searchBody.data;
@@ -47,5 +47,5 @@ export async function update(
     }
   );
 
-  return getDashboardResponseBody(savedObject);
+  return getDashboardCRUResponseBody(savedObject);
 }

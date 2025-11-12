@@ -13,13 +13,29 @@ import type { Reference } from '@kbn/content-management-utils';
 import type { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
 import type { DashboardState } from '../content_management';
 import { transformDashboardOut, transformReferencesOut } from '../content_management/v1/transforms';
-import type { DashboardResponseBody } from './types';
+import type { DashboardCRUResponseBody } from './types';
 
-export function getDashboardResponseBody(
+export function getDashboardMeta(
   savedObject:
     | SavedObject<DashboardSavedObjectAttributes>
     | SavedObjectsUpdateResponse<DashboardSavedObjectAttributes>
-): DashboardResponseBody {
+): DashboardCRUResponseBody['meta'] {
+  return {
+    createdAt: savedObject.created_at,
+    createdBy: savedObject.created_by,
+    error: savedObject.error,
+    managed: savedObject.managed,
+    updatedAt: savedObject.updated_at,
+    updatedBy: savedObject.updated_by,
+    version: savedObject.version ?? '',
+  };
+}
+
+export function getDashboardCRUResponseBody(
+  savedObject:
+    | SavedObject<DashboardSavedObjectAttributes>
+    | SavedObjectsUpdateResponse<DashboardSavedObjectAttributes>
+): DashboardCRUResponseBody {
   let dashboardState: DashboardState;
   let references: Reference[];
   try {
@@ -38,15 +54,7 @@ export function getDashboardResponseBody(
       ...dashboardState,
       references,
     },
-    meta: {
-      createdAt: savedObject.created_at,
-      createdBy: savedObject.created_by,
-      error: savedObject.error,
-      managed: savedObject.managed,
-      updatedAt: savedObject.updated_at,
-      updatedBy: savedObject.updated_by,
-      version: savedObject.version ?? '',
-    },
+    meta: getDashboardMeta(savedObject),
     spaces: savedObject.namespaces,
   };
 }

@@ -42,7 +42,7 @@ export async function plugin(initializerContext: PluginInitializerContext) {
 export type { DashboardPluginSetup, DashboardPluginStart } from './types';
 export type {
   DashboardCreateRequestBody,
-  DashboardResponseBody,
+  DashboardCRUResponseBody,
   DashboardSearchRequestBody,
   DashboardSearchResponseBody,
 } from './api';

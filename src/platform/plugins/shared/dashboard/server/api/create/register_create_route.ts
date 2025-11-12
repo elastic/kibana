@@ -12,7 +12,7 @@ import type { RequestHandlerContext } from '@kbn/core/server';
 import { commonRouteConfig, INTERNAL_API_VERSION, PUBLIC_API_PATH } from '../constants';
 import { getCreateRequestBodySchema } from './schemas';
 import { create } from './create';
-import { getDashboardResponseBodySchema } from '../schemas';
+import { getDashboardCRUResponseBodySchema } from '../schemas';
 
 export function registerCreateRoute(router: VersionedRouter<RequestHandlerContext>) {
   const createRoute = router.post({
@@ -30,7 +30,7 @@ export function registerCreateRoute(router: VersionedRouter<RequestHandlerContex
         },
         response: {
           200: {
-            body: getDashboardResponseBodySchema,
+            body: getDashboardCRUResponseBodySchema,
           },
         },
       }),
