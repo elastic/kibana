@@ -373,7 +373,7 @@ export class StreamsClient {
     name: string;
     query: Streams.QueryStream.UpsertRequest['stream']['query'];
   }): Promise<UpsertStreamResponse> {
-    const result = await State.attemptChanges(
+    await State.attemptChanges(
       [
         {
           type: 'upsert',
@@ -387,10 +387,7 @@ export class StreamsClient {
       { ...this.dependencies, streamsClient: this }
     );
 
-    return {
-      acknowledged: true,
-      result: result.changes.created.includes(name) ? 'created' : 'updated',
-    };
+    return { acknowledged: true, result: 'created' };
   }
 
   /**

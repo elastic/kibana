@@ -44,16 +44,7 @@ export class QueryStream extends StreamActiveRecord<Streams.QueryStream.Definiti
 
     this._definition = definition;
 
-    const cascadingChanges: StreamChange[] = [
-      {
-        type: 'upsert',
-        definition: {
-          name: this._definition.name,
-          description: '',
-          query: this._definition.query,
-        },
-      },
-    ];
+    const cascadingChanges: StreamChange[] = [];
 
     return { cascadingChanges, changeStatus: 'upserted' };
   }
