@@ -9,17 +9,9 @@ import { expect } from '@kbn/scout';
 import { test } from '../../../fixtures';
 
 test.describe('Stream data routing - creating routing rules', { tag: ['@ess', '@svlOblt'] }, () => {
-  test.beforeAll(async ({ apiServices }) => {
-    await apiServices.streams.enable();
-  });
-
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
     await pageObjects.streams.gotoPartitioningTab('logs');
-  });
-
-  test.afterAll(async ({ apiServices }) => {
-    await apiServices.streams.disable();
   });
 
   test('should create a new routing rule successfully', async ({ page, pageObjects }) => {

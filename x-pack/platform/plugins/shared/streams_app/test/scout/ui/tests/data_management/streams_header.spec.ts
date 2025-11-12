@@ -12,9 +12,8 @@ const INGESTION_DURATION_MINUTES = 5;
 const TEST_STREAM_NAME = 'logs-test-stream';
 
 test.describe('Stream detail header', { tag: ['@ess', '@svlOblt'] }, () => {
-  test.beforeAll(async ({ apiServices, logsSynthtraceEsClient }) => {
+  test.beforeAll(async ({ logsSynthtraceEsClient }) => {
     const currentTime = Date.now();
-    await apiServices.streams.enable();
     // Generate 50 logs over the last 5 minutes
     await generateLogsData(logsSynthtraceEsClient)({
       index: TEST_STREAM_NAME,
@@ -31,7 +30,6 @@ test.describe('Stream detail header', { tag: ['@ess', '@svlOblt'] }, () => {
 
   test.afterAll(async ({ apiServices }) => {
     await apiServices.streams.deleteStream(TEST_STREAM_NAME);
-    await apiServices.streams.disable();
   });
 
   test('shows correct Discover badge', async ({ pageObjects }) => {

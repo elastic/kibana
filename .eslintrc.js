@@ -794,6 +794,7 @@ module.exports = {
         'x-pack/solutions/security/test/security_solution_api_integration/*/test_suites/**/*',
         'x-pack/solutions/security/test/security_solution_api_integration/**/config*.ts',
         '**/playwright.config.ts',
+        '**/parallel.playwright.config.ts',
       ],
       rules: {
         'import/no-default-export': 'off',
@@ -1638,6 +1639,13 @@ module.exports = {
         'playwright/valid-title': 'error',
         // Scout has a its own runtime validator for test tags
         'playwright/valid-test-tags': 'off',
+        // Check unused destructured params
+        '@typescript-eslint/no-unused-vars': [
+          'error',
+          {
+            args: 'all',
+          },
+        ],
       },
     },
     {

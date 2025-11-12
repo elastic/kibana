@@ -10,8 +10,7 @@ import { test } from '../../../fixtures';
 import { generateLogsData } from '../../../fixtures/generators';
 
 test.describe('Stream data processing - creating steps', { tag: ['@ess', '@svlOblt'] }, () => {
-  test.beforeAll(async ({ apiServices, logsSynthtraceEsClient }) => {
-    await apiServices.streams.enable();
+  test.beforeAll(async ({ logsSynthtraceEsClient }) => {
     await generateLogsData(logsSynthtraceEsClient)({ index: 'logs-generic-default' });
   });
 
@@ -23,9 +22,8 @@ test.describe('Stream data processing - creating steps', { tag: ['@ess', '@svlOb
     await pageObjects.streams.gotoProcessingTab('logs-generic-default');
   });
 
-  test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
+  test.afterAll(async ({ logsSynthtraceEsClient }) => {
     await logsSynthtraceEsClient.clean();
-    await apiServices.streams.disable();
   });
 
   test('should create a new processor successfully', async ({ pageObjects }) => {
@@ -38,7 +36,7 @@ test.describe('Stream data processing - creating steps', { tag: ['@ess', '@svlOb
     expect(await pageObjects.streams.getProcessorsListItems()).toHaveLength(1);
   });
 
-  test('should create a new condition successfully', async ({ page, pageObjects }) => {
+  test('should create a new condition successfully', async ({ pageObjects }) => {
     await pageObjects.streams.clickAddCondition();
     await pageObjects.streams.fillCondition('test_field', 'contains', 'logs');
     await pageObjects.streams.clickSaveCondition();
@@ -46,7 +44,7 @@ test.describe('Stream data processing - creating steps', { tag: ['@ess', '@svlOb
     expect(await pageObjects.streams.getConditionsListItems()).toHaveLength(1);
   });
 
-  test('should be able to nest steps under conditions', async ({ page, pageObjects }) => {
+  test('should be able to nest steps under conditions', async ({ pageObjects }) => {
     // Create a condition first
     await pageObjects.streams.clickAddCondition();
     await pageObjects.streams.fillCondition('test_field', 'contains', 'logs');

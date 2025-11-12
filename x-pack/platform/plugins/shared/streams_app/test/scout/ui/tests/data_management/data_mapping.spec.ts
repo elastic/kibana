@@ -13,7 +13,6 @@ import { generateLogsData } from '../../fixtures/generators';
 
 test.describe('Stream data mapping - schema editor', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeAll(async ({ apiServices, logsSynthtraceEsClient }) => {
-    await apiServices.streams.enable();
     // Clear existing rules
     await apiServices.streams.clearStreamChildren('logs');
     // Create a test stream with routing rules first
@@ -33,9 +32,8 @@ test.describe('Stream data mapping - schema editor', { tag: ['@ess', '@svlOblt']
     await pageObjects.streams.gotoSchemaEditorTab('logs.info');
   });
 
-  test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
+  test.afterAll(async ({ logsSynthtraceEsClient }) => {
     await logsSynthtraceEsClient.clean();
-    await apiServices.streams.disable();
   });
 
   test('should display a list of stream mappings', async ({ page, pageObjects }) => {
@@ -91,7 +89,7 @@ test.describe('Stream data mapping - schema editor', { tag: ['@ess', '@svlOblt']
     });
   });
 
-  test('should allow filtering by field type and status', async ({ page, pageObjects }) => {
+  test('should allow filtering by field type and status', async ({ pageObjects }) => {
     // Wait for the schema editor table to load
     await pageObjects.streams.expectSchemaEditorTableVisible();
 
@@ -126,7 +124,7 @@ test.describe('Stream data mapping - schema editor', { tag: ['@ess', '@svlOblt']
     }
   });
 
-  test('should allow mapping a field', async ({ page, pageObjects }) => {
+  test('should allow mapping a field', async ({ pageObjects }) => {
     // Wait for the schema editor table to load
     await pageObjects.streams.expectSchemaEditorTableVisible();
     // Search specific unmapped field
@@ -168,7 +166,7 @@ test.describe('Stream data mapping - schema editor', { tag: ['@ess', '@svlOblt']
     });
   });
 
-  test('should allow unmapping a field', async ({ page, pageObjects }) => {
+  test('should allow unmapping a field', async ({ pageObjects }) => {
     // Wait for the schema editor table to load
     await pageObjects.streams.expectSchemaEditorTableVisible();
     // Search specific unmapped field

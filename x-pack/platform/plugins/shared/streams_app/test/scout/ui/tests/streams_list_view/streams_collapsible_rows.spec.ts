@@ -11,10 +11,6 @@ test.describe(
   'Stream list view - expand and collapse streams in the table',
   { tag: ['@ess', '@svlOblt'] },
   () => {
-    test.beforeAll(async ({ apiServices }) => {
-      await apiServices.streams.enable();
-    });
-
     test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
       await browserAuth.loginAsAdmin();
       // Clear existing rules
@@ -44,10 +40,6 @@ test.describe(
       });
 
       await pageObjects.streams.gotoStreamMainPage();
-    });
-
-    test.afterAll(async ({ apiServices }) => {
-      await apiServices.streams.disable();
     });
 
     test('should expand and collapse a stream node in the table', async ({ pageObjects }) => {

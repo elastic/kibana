@@ -13,8 +13,7 @@ test.describe(
   'Stream data retention - updating failure store',
   { tag: ['@ess', '@svlOblt'] },
   () => {
-    test.beforeAll(async ({ apiServices, logsSynthtraceEsClient, esClient }) => {
-      await apiServices.streams.enable();
+    test.beforeAll(async ({ logsSynthtraceEsClient, esClient }) => {
       await generateLogsData(logsSynthtraceEsClient)({ index: 'logs-generic-default' });
       await esClient.indices.putDataStreamOptions(
         {
@@ -40,9 +39,8 @@ test.describe(
       });
     });
 
-    test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
+    test.afterAll(async ({ logsSynthtraceEsClient }) => {
       await logsSynthtraceEsClient.clean();
-      await apiServices.streams.disable();
     });
 
     test('should edit failure store successfully for classic streams', async ({
