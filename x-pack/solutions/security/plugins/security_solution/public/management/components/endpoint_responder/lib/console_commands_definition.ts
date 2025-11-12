@@ -659,20 +659,6 @@ export const getEndpointConsoleCommands = ({
       },
       mustHaveArgs: true,
       args: {
-        kernel: {
-          about: CONSOLE_COMMANDS.memoryDump.kernelArgAbout,
-          required: false,
-          allowMultiples: false,
-          mustHaveValue: false,
-          exclusiveOr: true,
-          validate: () => {
-            if (!endpointSupportsKernelDump) {
-              return getMemoryDumpTypeNotSupportedMessage('kernel');
-            }
-
-            return true;
-          },
-        },
         process: {
           about: CONSOLE_COMMANDS.memoryDump.processArgAbout,
           required: false,
@@ -682,6 +668,20 @@ export const getEndpointConsoleCommands = ({
           validate: () => {
             if (!endpointSupportsProcessDump) {
               return getMemoryDumpTypeNotSupportedMessage('process');
+            }
+
+            return true;
+          },
+        },
+        kernel: {
+          about: CONSOLE_COMMANDS.memoryDump.kernelArgAbout,
+          required: false,
+          allowMultiples: false,
+          mustHaveValue: false,
+          exclusiveOr: true,
+          validate: () => {
+            if (!endpointSupportsKernelDump) {
+              return getMemoryDumpTypeNotSupportedMessage('kernel');
             }
 
             return true;
