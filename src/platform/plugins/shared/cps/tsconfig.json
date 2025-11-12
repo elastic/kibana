@@ -6,11 +6,15 @@
   "include": [
     "../../../../typings/**/*",
     "public/**/*",
-    "server/**/*",
+    "server/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
     "@kbn/config-schema",
+    "@kbn/logging",
+    "@kbn/cps-utils",
+    "@kbn/es-query",
+    "@kbn/i18n-react"
   ],
   "exclude": [
     "target/**/*",
