@@ -36,7 +36,8 @@
     "@kbn/code-editor",
     "@kbn/code-editor-mock",
     "@kbn/core-security-common",
-    "@kbn/react-query"
+    "@kbn/react-query",
+    "@kbn/licensing-types"
   ],
   "exclude": ["target/**/*"]
 }
