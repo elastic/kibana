@@ -28,15 +28,15 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import type { ProjectRouting } from '@kbn/es-query';
-import type { CPSProject } from '../types';
+import type { ProjectsData } from '../types';
 import { ProjectListItem } from './project_list_item';
 import { strings } from './strings';
+import { useFetchProjects } from './project_picker';
 
 export interface ProjectPickerComponentProps {
   projectRouting?: ProjectRouting;
   onProjectRoutingChange: (projectRouting: ProjectRouting) => void;
-  originProject: CPSProject;
-  linkedProjects: CPSProject[];
+  fetchProjects: () => Promise<ProjectsData | null>
 }
 
 const projectPickerOptions = [
@@ -55,11 +55,18 @@ const projectPickerOptions = [
 export const ProjectPickerComponent = ({
   projectRouting,
   onProjectRoutingChange,
-  originProject,
-  linkedProjects,
+  fetchProjects,
 }: ProjectPickerComponentProps) => {
   const [showPopover, setShowPopover] = useState(false);
   const styles = useMemoCss(projectPickerStyles);
+
+  const { originProject, linkedProjects } = useFetchProjects(fetchProjects);
+  
+  // do not render the component if there aren't linked projects
+  if (!originProject || linkedProjects.length === 0) {
+    return null;
+  }
+
   const projectsList =
     projectRouting === '_alias:_origin' ? [originProject] : [originProject, ...linkedProjects];
 

@@ -47,7 +47,7 @@ export class CpsPlugin implements Plugin<CPSPluginSetup, CPSPluginStart> {
           mount: (element) => {
             ReactDOM.render(
               <I18nProvider>
-                <ProjectPicker cpsManager={manager} />
+                <ProjectPicker cpsManager={manager} fetchProjects={manager.fetchProjects.bind(manager)} />
               </I18nProvider>,
               element,
               () => {}

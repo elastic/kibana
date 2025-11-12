@@ -9,21 +9,20 @@
 
 import React, { useState, useEffect } from 'react';
 import type { ProjectRouting } from '@kbn/es-query';
-import type { CPSProject, ICPSManager } from '../types';
+import type { CPSProject, ICPSManager, ProjectsData } from '../types';
 import { ProjectPickerComponent } from './project_picker_component';
 
 /**
  * Hook for fetching projects data from CPSManager
  */
-export const useFetchProjects = (cpsManager: ICPSManager) => {
+export const useFetchProjects = (fetchProjects: () => Promise<ProjectsData | null>) => {
   const [originProject, setOriginProject] = useState<CPSProject | null>(null);
   const [linkedProjects, setLinkedProjects] = useState<CPSProject[]>([]);
 
   useEffect(() => {
     let isMounted = true;
 
-    cpsManager
-      .fetchProjects()
+    fetchProjects()
       .then((projectsData) => {
         if (isMounted && projectsData) {
           setOriginProject(projectsData.origin);
@@ -38,7 +37,7 @@ export const useFetchProjects = (cpsManager: ICPSManager) => {
     return () => {
       isMounted = false;
     };
-  }, [cpsManager]);
+  }, [fetchProjects]);
 
   return { originProject, linkedProjects };
 };
@@ -71,23 +70,17 @@ export const useProjectRouting = (cpsManager: ICPSManager) => {
 
 export interface ProjectPickerProps {
   cpsManager: ICPSManager;
+  fetchProjects: () => Promise<ProjectsData | null>
 }
 
-export const ProjectPicker: React.FC<ProjectPickerProps> = ({ cpsManager }) => {
-  const { originProject, linkedProjects } = useFetchProjects(cpsManager);
+export const ProjectPicker: React.FC<ProjectPickerProps> = ({ cpsManager, fetchProjects }) => {
   const { projectRouting, updateProjectRouting } = useProjectRouting(cpsManager);
-
-  // do not render the component if required props are missing or there aren't linked projects
-  if (!originProject || linkedProjects.length === 0) {
-    return null;
-  }
 
   return (
     <ProjectPickerComponent
       projectRouting={projectRouting}
       onProjectRoutingChange={updateProjectRouting}
-      originProject={originProject}
-      linkedProjects={linkedProjects}
+      fetchProjects={fetchProjects}
     />
   );
 };
