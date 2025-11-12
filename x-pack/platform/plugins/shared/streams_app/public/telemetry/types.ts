@@ -7,17 +7,17 @@
 
 type StreamType = 'wired' | 'classic' | 'unknown';
 
-interface StreamsAssetCountProps {
+interface StreamsAttachmentCountProps {
   name: string;
   dashboards: number;
   slos?: number;
   rules?: number;
 }
 
-interface StreamsAssetClickEventProps {
+interface StreamsAttachmentClickEventProps {
   name: string;
-  asset_type: 'dashboard' | 'slo' | 'rule';
-  asset_id: string;
+  attachment_type: 'dashboard' | 'slo' | 'rule';
+  attachment_id: string;
 }
 
 interface StreamsAIGrokSuggestionLatencyProps {
@@ -71,8 +71,8 @@ interface StreamsSignificantEventsCreatedProps {
 }
 
 export {
-  type StreamsAssetCountProps,
-  type StreamsAssetClickEventProps,
+  type StreamsAttachmentCountProps,
+  type StreamsAttachmentClickEventProps,
   type StreamsAIGrokSuggestionLatencyProps,
   type StreamsAIGrokSuggestionAcceptedProps,
   type StreamsRetentionChangedProps,
