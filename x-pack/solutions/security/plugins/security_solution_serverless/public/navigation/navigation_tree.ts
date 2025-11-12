@@ -7,7 +7,11 @@
 
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
-import { SecurityGroupName, SecurityPageName } from '@kbn/security-solution-navigation';
+import {
+  ATTACKS_ALERTS_ALIGNMENT_ENABLED,
+  SecurityGroupName,
+  SecurityPageName,
+} from '@kbn/security-solution-navigation';
 import {
   SecurityLinkGroup,
   i18nStrings,
@@ -54,11 +58,13 @@ export const createNavigationTree = async (
             breadcrumbStatus: 'hidden',
             children: [
               defaultNavigationTree.rules({ sideNavVersion: 'v1' }),
-              {
-                id: SecurityPageName.alerts,
-                link: securityLink(SecurityPageName.alerts),
-                sideNavVersion: 'v1',
-              },
+              services.featureFlags.getBooleanValue(ATTACKS_ALERTS_ALIGNMENT_ENABLED, false)
+                ? defaultNavigationTree.alertDetections({ sideNavVersion: 'v1' })
+                : {
+                    id: SecurityPageName.alerts,
+                    link: securityLink(SecurityPageName.alerts),
+                    sideNavVersion: 'v1',
+                  },
               {
                 link: 'workflows',
                 withBadge: true,

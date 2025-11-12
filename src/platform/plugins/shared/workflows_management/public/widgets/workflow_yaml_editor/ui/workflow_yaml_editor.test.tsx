@@ -12,15 +12,28 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
 import { I18nProviderMock } from '@kbn/core-i18n-browser-mocks/src/i18n_context_mock';
+import { monaco, YAML_LANG_ID } from '@kbn/monaco';
 import type { WorkflowYAMLEditorProps } from './workflow_yaml_editor';
 import { WorkflowYAMLEditor } from './workflow_yaml_editor';
+import { setActiveTab, setExecution, setYamlString } from '../../../entities/workflows/store';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
+import type { YamlEditorProps } from '../../../shared/ui';
+import { getCompletionItemProvider } from '../lib/autocomplete/get_completion_item_provider';
 
 // Mock the YamlEditor component to avoid Monaco complexity in tests
 jest.mock('../../../shared/ui/yaml_editor', () => ({
-  YamlEditor: ({ value, onChange, ...props }: any) => (
+  YamlEditor: ({ value, onChange, editorDidMount, ...props }: YamlEditorProps) => (
     <div data-testid="yaml-editor">
       <textarea
+        ref={(el) => {
+          const editorMock = {
+            getModel: jest.fn(),
+            dispose: jest.fn(),
+          } as unknown as monaco.editor.IStandaloneCodeEditor;
+          if (el) {
+            editorDidMount?.(editorMock);
+          }
+        }}
         value={value || ''}
         onChange={(e: any) => onChange?.(e.target.value)}
         data-testid="yaml-textarea"
@@ -37,11 +50,6 @@ jest.mock('../../../features/validate_workflow_yaml/lib/use_yaml_validation', ()
     validateVariables: jest.fn(),
     handleMarkersChanged: jest.fn(),
   }),
-}));
-
-// Mock the completion provider
-jest.mock('./hooks/use_completion_provider', () => ({
-  useCompletionProvider: jest.fn().mockReturnValue({}),
 }));
 
 // Mock the UnsavedChangesPrompt
@@ -160,17 +168,43 @@ jest.mock(
   })
 );
 
+const mockCompletionProvider = {
+  triggerCharacters: ['@', '.', ' ', '|', '{'],
+  provideCompletionItems: jest.fn(),
+};
+
+jest.mock('../lib/autocomplete/get_completion_item_provider', () => ({
+  getCompletionItemProvider: jest.fn(() => mockCompletionProvider),
+}));
+
+jest.mock('@kbn/monaco', () => ({
+  monaco: {
+    editor: {
+      setModelMarkers: jest.fn(),
+    },
+    languages: {
+      registerCompletionItemProvider: jest.fn().mockReturnValue({
+        dispose: jest.fn(),
+      }),
+    },
+  },
+  YAML_LANG_ID: 'yaml',
+}));
+
 describe('WorkflowYAMLEditor', () => {
   const defaultProps: WorkflowYAMLEditorProps = {
-    workflowYaml: '',
+    onStepRun: jest.fn(),
   };
 
-  const renderWithProviders = (component: React.ReactElement) => {
-    const store = createMockStore();
+  const renderWithProviders = (
+    component: React.ReactElement,
+    store?: ReturnType<typeof createMockStore>
+  ) => {
+    const testStore = store || createMockStore();
     return render(
       <MemoryRouter>
         <I18nProviderMock>
-          <Provider store={store}>{component}</Provider>
+          <Provider store={testStore}>{component}</Provider>
         </I18nProviderMock>
       </MemoryRouter>
     );
@@ -227,25 +261,26 @@ steps:
 `.trim();
 
     it('renders without crashing with alert trigger YAML', () => {
-      renderWithProviders(
-        <WorkflowYAMLEditor
-          {...defaultProps}
-          workflowYaml={yamlWithAlertTrigger}
-          isExecutionYaml={false}
-        />
-      );
+      const store = createMockStore();
+      store.dispatch(setYamlString(yamlWithAlertTrigger));
+      store.dispatch(setActiveTab('workflow'));
+
+      renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store);
 
       expect(document.querySelector('[data-testid="yaml-editor"]')).toBeInTheDocument();
     });
 
     it('renders in readOnly mode when isExecutionYaml is true', () => {
-      renderWithProviders(
-        <WorkflowYAMLEditor
-          {...defaultProps}
-          workflowYaml={yamlWithAlertTrigger}
-          isExecutionYaml={true}
-        />
+      const store = createMockStore();
+      store.dispatch(setActiveTab('executions'));
+      store.dispatch(
+        setExecution({
+          id: 'test-execution-id',
+          yaml: yamlWithAlertTrigger,
+        } as any)
       );
+
+      renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store);
 
       expect(document.querySelector('[data-testid="yaml-editor"]')).toBeInTheDocument();
     });
@@ -263,15 +298,13 @@ steps:
   - name: step1
 `.trim();
 
+      const store = createMockStore();
+      store.dispatch(setYamlString(invalidYaml));
+      store.dispatch(setActiveTab('workflow'));
+
       // Should not throw an error
       expect(() => {
-        renderWithProviders(
-          <WorkflowYAMLEditor
-            {...defaultProps}
-            workflowYaml={invalidYaml}
-            isExecutionYaml={false}
-          />
-        );
+        renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store);
       }).not.toThrow();
 
       expect(document.querySelector('[data-testid="yaml-editor"]')).toBeInTheDocument();
@@ -281,8 +314,11 @@ steps:
   describe('editor initialization', () => {
     it('renders correctly when editor mounts with content', () => {
       const yamlContent = 'version: "1"\nname: "test"';
+      const store = createMockStore();
+      store.dispatch(setYamlString(yamlContent));
+      store.dispatch(setActiveTab('workflow'));
 
-      renderWithProviders(<WorkflowYAMLEditor {...defaultProps} workflowYaml={yamlContent} />);
+      renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store);
 
       expect(document.querySelector('[data-testid="yaml-editor"]')).toBeInTheDocument();
       expect(document.querySelector('[data-testid="yaml-textarea"]')).toBeInTheDocument();
@@ -291,6 +327,52 @@ steps:
         '[data-testid="yaml-textarea"]'
       ) as HTMLTextAreaElement;
       expect(textarea?.value).toBe(yamlContent);
+    });
+  });
+
+  describe('completion provider', () => {
+    it('registers the completion provider when the editor mounts', () => {
+      const yamlContent = 'version: "1"\nname: "test"';
+      const store = createMockStore();
+      store.dispatch(setYamlString(yamlContent));
+      store.dispatch(setActiveTab('workflow'));
+
+      renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store);
+
+      // Verify that registerCompletionItemProvider was called with the correct parameters
+      expect(monaco.languages.registerCompletionItemProvider).toHaveBeenCalledWith(
+        YAML_LANG_ID,
+        mockCompletionProvider
+      );
+
+      // Verify that getCompletionItemProvider was called
+      expect(getCompletionItemProvider).toHaveBeenCalled();
+
+      // Get the second argument passed to registerCompletionItemProvider
+      const registeredProvider = (monaco.languages.registerCompletionItemProvider as jest.Mock).mock
+        .calls[0][1];
+
+      // Verify it's the same object returned by our mock
+      expect(registeredProvider).toBe(mockCompletionProvider);
+      expect(registeredProvider).toHaveProperty('triggerCharacters', ['@', '.', ' ', '|', '{']);
+      expect(registeredProvider).toHaveProperty('provideCompletionItems');
+    });
+
+    it('should dispose the completion provider when the editor unmounts', () => {
+      const yamlContent = 'version: "1"\nname: "test"';
+      const store = createMockStore();
+      store.dispatch(setYamlString(yamlContent));
+      store.dispatch(setActiveTab('workflow'));
+
+      const { unmount } = renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store);
+
+      const registeredProvider = (monaco.languages.registerCompletionItemProvider as jest.Mock).mock
+        .results[0].value;
+
+      unmount();
+
+      // Verify that dispose was called on the completion provider
+      expect(registeredProvider.dispose).toHaveBeenCalled();
     });
   });
 });
