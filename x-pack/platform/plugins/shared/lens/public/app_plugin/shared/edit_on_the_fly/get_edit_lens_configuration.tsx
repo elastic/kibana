@@ -31,6 +31,7 @@ import {
   loadInitial,
   initExisting,
   initEmpty,
+  setSelectedLayerId,
 } from '../../../state_management';
 import { generateId } from '../../../id_generator';
 import { LensEditConfigurationFlyout } from './lens_configuration_flyout';
@@ -82,7 +83,12 @@ export const updatingMiddleware =
       !isEqual(prevVisualization, visualization)
     ) {
       // ignore the actions that initialize the store with the state from the attributes
-      if (initExisting.match(action) || initEmpty.match(action)) {
+      // selectedLayerId is UI runtime state only and shouldn't trigger the updater
+      if (
+        initExisting.match(action) ||
+        initEmpty.match(action) ||
+        setSelectedLayerId.match(action)
+      ) {
         return;
       }
       // The user is updating the Visualization parameters,
