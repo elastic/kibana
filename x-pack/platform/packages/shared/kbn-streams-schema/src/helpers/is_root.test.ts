@@ -12,6 +12,7 @@ describe('isRootStreamDefinition', () => {
     const validWired = {
       name: 'logs',
       description: '',
+      updated_at: new Date().toISOString(),
       ingest: {
         lifecycle: { inherit: {} },
         processing: { steps: [] },
@@ -26,6 +27,7 @@ describe('isRootStreamDefinition', () => {
     const nonRootWired = {
       name: 'logs.bar',
       description: '',
+      updated_at: new Date().toISOString(),
       ingest: {
         lifecycle: { inherit: {} },
         processing: { steps: [] },
@@ -40,6 +42,7 @@ describe('isRootStreamDefinition', () => {
     const classic = {
       name: 'logs-test-default',
       description: '',
+      updated_at: new Date().toISOString(),
       ingest: {
         lifecycle: { inherit: {} },
         processing: { steps: [] },

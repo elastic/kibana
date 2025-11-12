@@ -14,6 +14,7 @@ describe('ClassicStream', () => {
       {
         name: 'classic-stream',
         description: '',
+        updated_at: new Date().toISOString(),
         ingest: {
           lifecycle: { inherit: {} },
           processing: { steps: [] },
@@ -24,6 +25,7 @@ describe('ClassicStream', () => {
       {
         name: 'classic-stream-with-fields',
         description: '',
+        updated_at: new Date().toISOString(),
         ingest: {
           lifecycle: { inherit: {} },
           processing: { steps: [] },
@@ -46,6 +48,7 @@ describe('ClassicStream', () => {
       {
         name: 'classic-stream',
         description: null,
+        updated_at: new Date().toISOString(),
         ingest: {
           lifecycle: { inherit: {} },
           processing: { steps: [] },
@@ -57,12 +60,24 @@ describe('ClassicStream', () => {
         name: 'classic-stream',
         description: '',
         ingest: {
+          lifecycle: { inherit: {} },
+          processing: { steps: [] },
+          settings: {},
           classic: {},
         },
       },
       {
         name: 'classic-stream',
         description: '',
+        updated_at: new Date().toISOString(),
+        ingest: {
+          classic: {},
+        },
+      },
+      {
+        name: 'classic-stream',
+        description: '',
+        updated_at: new Date().toISOString(),
         ingest: {
           lifecycle: { inherit: {} },
           processing: { steps: [] },
@@ -82,6 +97,7 @@ describe('ClassicStream', () => {
         stream: {
           name: 'classic-stream',
           description: '',
+          updated_at: new Date().toISOString(),
           ingest: {
             lifecycle: { inherit: {} },
             processing: { steps: [] },
@@ -115,6 +131,7 @@ describe('ClassicStream', () => {
       {
         stream: {
           description: '',
+          updated_at: new Date().toISOString(),
           ingest: {
             lifecycle: { inherit: {} },
             processing: { steps: [] },
@@ -177,6 +194,19 @@ describe('ClassicStream', () => {
             classic: {},
           },
         },
+      },
+      {
+        stream: {
+          description: 'updated_at should not be present',
+          updated_at: new Date().toISOString(),
+          ingest: {
+            lifecycle: { inherit: {} },
+            processing: { steps: [] },
+            settings: {},
+            classic: {},
+          },
+        },
+        ...emptyAssets,
       },
     ])('is not valid', (val) => {
       expect(ClassicStream.UpsertRequest.is(val as any)).toBe(false);
