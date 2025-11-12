@@ -16,10 +16,10 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
   uiSettings.register({
     [WORKFLOWS_UI_SETTING_ID]: {
       description: i18n.translate('workflowsManagement.uiSettings.ui.description', {
-        defaultMessage: 'Enables the workflows management UI for creating and managing workflows.',
+        defaultMessage: 'Enables Elastic Workflows and related experiences.',
       }),
       name: i18n.translate('workflowsManagement.uiSettings.ui.name', {
-        defaultMessage: 'Workflows Management UI',
+        defaultMessage: 'Elastic Workflows',
       }),
       schema: schema.boolean(),
       value: false,
