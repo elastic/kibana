@@ -6,7 +6,7 @@
  */
 
 import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
-import { bulkPatchAlertTagsRoute } from './tags';
+import { bulkUpdateTagsRoute } from './tags';
 import { requestContextMock } from './__mocks__/request_context';
 import { requestMock, serverMock } from './__mocks__/server';
 
@@ -17,7 +17,7 @@ const getPatchTagsByAlertIdsRequest = () =>
     body: {
       alertIds: ['alert-1'],
       index: '.alerts-security.alerts',
-      addTags: ['new-tag'],
+      add: ['new-tag'],
     },
   });
 
@@ -28,12 +28,12 @@ const getPatchTagsByQueryRequest = () =>
     body: {
       query: { term: { 'some.field': 'some-value' } },
       index: '.alerts-security.alerts',
-      addTags: ['tag-to-add'],
-      removeTags: ['tag-to-remove'],
+      add: ['tag-to-add'],
+      remove: ['tag-to-remove'],
     },
   });
 
-describe('bulkPatchAlertTagsRoute', () => {
+describe('bulkUpdateTagsRoute', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
 
@@ -41,17 +41,17 @@ describe('bulkPatchAlertTagsRoute', () => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 
-    clients.rac.patchTags.mockResolvedValue({
+    clients.rac.bulkUpdateTags.mockResolvedValue({
       failures: [],
       updated: 1,
     });
 
-    bulkPatchAlertTagsRoute(server.router);
+    bulkUpdateTagsRoute(server.router);
   });
 
   describe('success scenarios', () => {
     test('returns 200 when updating tags by query', async () => {
-      clients.rac.patchTags.mockResolvedValue({
+      clients.rac.bulkUpdateTags.mockResolvedValue({
         failures: [],
         updated: 5,
       });
@@ -62,11 +62,11 @@ describe('bulkPatchAlertTagsRoute', () => {
         failures: [],
         updated: 5,
       });
-      expect(clients.rac.patchTags).toHaveBeenCalledWith({
+      expect(clients.rac.bulkUpdateTags).toHaveBeenCalledWith({
         query: { term: { 'some.field': 'some-value' } },
         index: '.alerts-security.alerts',
-        addTags: ['tag-to-add'],
-        removeTags: ['tag-to-remove'],
+        add: ['tag-to-add'],
+        remove: ['tag-to-remove'],
         alertIds: undefined,
       });
     });
@@ -81,7 +81,7 @@ describe('bulkPatchAlertTagsRoute', () => {
         body: {
           alertIds: largeAlertIds,
           index: '.alerts-security.alerts',
-          addTags: ['some-tag'],
+          add: ['some-tag'],
         },
       });
       const response = await server.inject(request, context);
@@ -91,8 +91,8 @@ describe('bulkPatchAlertTagsRoute', () => {
       });
     });
 
-    test('returns 500 if rac client "patchTags" fails', async () => {
-      clients.rac.patchTags.mockRejectedValue(new Error('Unable to patch tags'));
+    test('returns 500 if rac client "bulkUpdateTags" fails', async () => {
+      clients.rac.bulkUpdateTags.mockRejectedValue(new Error('Unable to patch tags'));
       const response = await server.inject(getPatchTagsByAlertIdsRequest(), context);
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({
@@ -102,7 +102,7 @@ describe('bulkPatchAlertTagsRoute', () => {
     });
 
     test('returns 404 for alert not found at index', async () => {
-      clients.rac.patchTags.mockResolvedValue(null!);
+      clients.rac.bulkUpdateTags.mockResolvedValue(null!);
       const response = await server.inject(
         requestMock.create({
           method: 'patch',
@@ -110,7 +110,7 @@ describe('bulkPatchAlertTagsRoute', () => {
           body: {
             alertIds: ['alert-1'],
             index: '.alerts-security.alerts',
-            addTags: ['new-tag'],
+            add: ['new-tag'],
           },
         }),
         context
@@ -130,7 +130,7 @@ describe('bulkPatchAlertTagsRoute', () => {
         ...getPatchTagsByAlertIdsRequest(),
         body: {
           alertIds: ['alert-1'],
-          addTags: ['new-tag'],
+          add: ['new-tag'],
         },
       };
       await expect(server.inject(request, context)).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -145,7 +145,7 @@ describe('bulkPatchAlertTagsRoute', () => {
           alertIds: ['alert-1'],
           query: { term: { 'some.field': 'some-value' } },
           index: '.alerts-security.alerts',
-          addTags: ['new-tag'],
+          add: ['new-tag'],
         },
       };
       await expect(server.inject(request, context)).rejects.toThrowError();
@@ -156,7 +156,7 @@ describe('bulkPatchAlertTagsRoute', () => {
         ...getPatchTagsByAlertIdsRequest(),
         body: {
           index: '.alerts-security.alerts',
-          addTags: ['new-tag'],
+          add: ['new-tag'],
         },
       };
       await expect(server.inject(request, context)).rejects.toThrowError();

@@ -115,10 +115,10 @@ export interface UpdateOptions<Params extends RuleTypeParams> {
   index: string;
 }
 
-export interface PatchTagOptions<Params extends RuleTypeParams> {
+export interface BulkUpdateTagArgs {
   alertIds?: string[] | null;
-  addTags?: string[] | null;
-  removeTags?: string[] | null;
+  add?: string[] | null;
+  remove?: string[] | null;
   index: string;
   query?: object | string | null;
 }
@@ -872,29 +872,23 @@ export class AlertsClient {
     }
   }
 
-  public async patchTags<Params extends RuleTypeParams = never>({
-    alertIds,
-    query,
-    index,
-    addTags,
-    removeTags,
-  }: PatchTagOptions<Params> & { addTags?: string[]; removeTags?: string[] }) {
+  public async bulkUpdateTags({ alertIds, query, index, add, remove }: BulkUpdateTagArgs) {
     // rejects at the route level if more than 1000 id's are passed in
     const scriptOps: string[] = [];
     const params: Record<string, string[] | STATUS_VALUES> = {};
 
-    if (addTags != null && addTags.length > 0) {
-      params.addTags = addTags;
+    if (add != null && add.length > 0) {
+      params.add = add;
       scriptOps.push(ADD_TAGS_UPDATE_SCRIPT);
     }
 
-    if (removeTags != null && removeTags.length > 0) {
-      params.removeTags = removeTags;
+    if (remove != null && remove.length > 0) {
+      params.remove = remove;
       scriptOps.push(REMOVE_TAGS_UPDATE_SCRIPT);
     }
 
     if (scriptOps.length === 0) {
-      this.logger.debug(`patchTags: No tags to update in index=${index}`);
+      this.logger.debug(`bulkUpdateTags: No tags to update in index=${index}`);
       return { updated: 0, errors: [], message: 'No tags to update.' };
     }
 

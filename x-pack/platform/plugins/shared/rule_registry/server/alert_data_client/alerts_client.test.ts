@@ -507,7 +507,7 @@ describe('AlertsClient', () => {
     });
   });
 
-  describe('patchTags', () => {
+  describe('bulkUpdateTags', () => {
     beforeEach(() => {
       esClientMock.mget.mockResolvedValue({
         docs: [
@@ -564,11 +564,11 @@ describe('AlertsClient', () => {
       });
     });
 
-    it('should bulk update alerts with addTags only', async () => {
-      await alertsClient.patchTags({
+    it('should bulk update alerts with add only', async () => {
+      await alertsClient.bulkUpdateTags({
         alertIds: ['alert-1', 'alert-2'],
         index: '.alerts-security.alerts-default',
-        addTags: ['urgent', 'production'],
+        add: ['urgent', 'production'],
       });
 
       expect(esClientMock.mget).toHaveBeenCalledWith({
@@ -592,7 +592,7 @@ describe('AlertsClient', () => {
               source: ADD_TAGS_UPDATE_SCRIPT,
               lang: 'painless',
               params: {
-                addTags: ['urgent', 'production'],
+                add: ['urgent', 'production'],
               },
             },
           },
@@ -607,7 +607,7 @@ describe('AlertsClient', () => {
               source: ADD_TAGS_UPDATE_SCRIPT,
               lang: 'painless',
               params: {
-                addTags: ['urgent', 'production'],
+                add: ['urgent', 'production'],
               },
             },
           },
@@ -615,11 +615,11 @@ describe('AlertsClient', () => {
       });
     });
 
-    it('should bulk update alerts with removeTags only', async () => {
-      await alertsClient.patchTags({
+    it('should bulk update alerts with remove only', async () => {
+      await alertsClient.bulkUpdateTags({
         alertIds: ['alert-1', 'alert-2'],
         index: '.alerts-security.alerts-default',
-        removeTags: ['outdated', 'test'],
+        remove: ['outdated', 'test'],
       });
 
       expect(esClientMock.mget).toHaveBeenCalledWith({
@@ -643,7 +643,7 @@ describe('AlertsClient', () => {
               source: REMOVE_TAGS_UPDATE_SCRIPT,
               lang: 'painless',
               params: {
-                removeTags: ['outdated', 'test'],
+                remove: ['outdated', 'test'],
               },
             },
           },
@@ -658,7 +658,7 @@ describe('AlertsClient', () => {
               source: REMOVE_TAGS_UPDATE_SCRIPT,
               lang: 'painless',
               params: {
-                removeTags: ['outdated', 'test'],
+                remove: ['outdated', 'test'],
               },
             },
           },
@@ -666,12 +666,12 @@ describe('AlertsClient', () => {
       });
     });
 
-    it('should bulk update alerts with both addTags and removeTags', async () => {
-      await alertsClient.patchTags({
+    it('should bulk update alerts with both add and remove', async () => {
+      await alertsClient.bulkUpdateTags({
         alertIds: ['alert-1', 'alert-2'],
         index: '.alerts-security.alerts-default',
-        addTags: ['urgent'],
-        removeTags: ['outdated'],
+        add: ['urgent'],
+        remove: ['outdated'],
       });
 
       expect(esClientMock.mget).toHaveBeenCalledWith({
@@ -695,8 +695,8 @@ describe('AlertsClient', () => {
               source: [ADD_TAGS_UPDATE_SCRIPT, REMOVE_TAGS_UPDATE_SCRIPT].join('\n'),
               lang: 'painless',
               params: {
-                addTags: ['urgent'],
-                removeTags: ['outdated'],
+                add: ['urgent'],
+                remove: ['outdated'],
               },
             },
           },
@@ -711,8 +711,8 @@ describe('AlertsClient', () => {
               source: [ADD_TAGS_UPDATE_SCRIPT, REMOVE_TAGS_UPDATE_SCRIPT].join('\n'),
               lang: 'painless',
               params: {
-                addTags: ['urgent'],
-                removeTags: ['outdated'],
+                add: ['urgent'],
+                remove: ['outdated'],
               },
             },
           },
@@ -721,7 +721,7 @@ describe('AlertsClient', () => {
     });
 
     it('should return early when no operations are provided', async () => {
-      const result = await alertsClient.patchTags({
+      const result = await alertsClient.bulkUpdateTags({
         alertIds: ['alert-1', 'alert-2'],
         index: '.alerts-security.alerts-default',
       });
@@ -739,11 +739,11 @@ describe('AlertsClient', () => {
 
     it('should throw error when alert ids and query are empty', async () => {
       await expect(
-        alertsClient.patchTags({
+        alertsClient.bulkUpdateTags({
           alertIds: [],
           query: '',
           index: '.alerts-security.alerts-default',
-          addTags: ['urgent', 'production'],
+          add: ['urgent', 'production'],
         })
       ).rejects.toMatchInlineSnapshot(`[Error: no alert ids or query were provided for updating]`);
 
@@ -752,7 +752,7 @@ describe('AlertsClient', () => {
     });
   });
 
-  describe('patchTags edge cases', () => {
+  describe('bulkUpdateTags edge cases', () => {
     beforeEach(() => {
       esClientMock.mget.mockResolvedValue({
         docs: [
@@ -788,11 +788,11 @@ describe('AlertsClient', () => {
       });
     });
 
-    it('should handle empty addTags array', async () => {
-      await alertsClient.patchTags({
+    it('should handle empty add array', async () => {
+      await alertsClient.bulkUpdateTags({
         alertIds: ['alert-1'],
         index: '.alerts-security.alerts-default',
-        addTags: [],
+        add: [],
       });
 
       expect(esClientMock.mget).not.toHaveBeenCalled();
@@ -800,11 +800,11 @@ describe('AlertsClient', () => {
       expect(esClientMock.bulk).not.toHaveBeenCalled();
     });
 
-    it('should handle empty removeTags array', async () => {
-      await alertsClient.patchTags({
+    it('should handle empty remove array', async () => {
+      await alertsClient.bulkUpdateTags({
         alertIds: ['alert-1'],
         index: '.alerts-security.alerts-default',
-        removeTags: [],
+        remove: [],
       });
 
       expect(esClientMock.mget).not.toHaveBeenCalled();

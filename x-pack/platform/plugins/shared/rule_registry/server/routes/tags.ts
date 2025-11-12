@@ -13,7 +13,7 @@ import { buildRouteValidation } from './utils/route_validation';
 import type { RacRequestHandlerContext } from '../types';
 import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
 
-export const bulkPatchAlertTagsRoute = (router: IRouter<RacRequestHandlerContext>) => {
+export const bulkUpdateTagsRoute = (router: IRouter<RacRequestHandlerContext>) => {
   router.patch(
     {
       path: `${BASE_RAC_ALERTS_API_PATH}/tags`,
@@ -34,8 +34,8 @@ export const bulkPatchAlertTagsRoute = (router: IRouter<RacRequestHandlerContext
               }),
             ]),
             t.partial({
-              addTags: t.array(t.string),
-              removeTags: t.array(t.string),
+              add: t.array(t.string),
+              remove: t.array(t.string),
             }),
           ])
         ),
@@ -53,7 +53,7 @@ export const bulkPatchAlertTagsRoute = (router: IRouter<RacRequestHandlerContext
       try {
         const racContext = await context.rac;
         const alertsClient = await racContext.getAlertsClient();
-        const { query, alertIds, index, addTags, removeTags } = req.body;
+        const { query, alertIds, index, add, remove } = req.body;
 
         if (alertIds != null && alertIds.length > 1000) {
           return response.badRequest({
@@ -63,10 +63,10 @@ export const bulkPatchAlertTagsRoute = (router: IRouter<RacRequestHandlerContext
           });
         }
 
-        const updatedAlert = await alertsClient.patchTags({
+        const updatedAlert = await alertsClient.bulkUpdateTags({
           alertIds,
-          addTags,
-          removeTags,
+          add,
+          remove,
           query,
           index,
         });

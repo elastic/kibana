@@ -108,8 +108,8 @@ export default ({ getService }: FtrProviderContext) => {
             .set('kbn-xsrf', 'true')
             .send({
               alertIds: [alertId],
-              addTags: ['new-tag', 'another-tag'],
-              removeTags: ['old-tag'],
+              add: ['new-tag', 'another-tag'],
+              remove: ['old-tag'],
               index,
             });
           expect(updated.statusCode).to.eql(200);
@@ -125,7 +125,7 @@ export default ({ getService }: FtrProviderContext) => {
             .set('kbn-xsrf', 'true')
             .send({
               query: `${ALERT_WORKFLOW_STATUS}: open`,
-              addTags: ['new-tag'],
+              add: ['new-tag'],
               index,
             });
           expect(updated.statusCode).to.eql(200);
@@ -139,7 +139,7 @@ export default ({ getService }: FtrProviderContext) => {
             .set('kbn-xsrf', 'true')
             .send({
               query: { match: { [ALERT_WORKFLOW_STATUS]: 'open' } },
-              addTags: ['new-tag'],
+              add: ['new-tag'],
               index,
             });
           expect(updated.statusCode).to.eql(200);
@@ -155,7 +155,7 @@ export default ({ getService }: FtrProviderContext) => {
             .set('kbn-xsrf', 'true')
             .send({
               alertIds: [alertId],
-              addTags: ['new-tag'],
+              add: ['new-tag'],
               index,
             });
           expect([403, 404]).to.contain(res.statusCode);
