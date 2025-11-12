@@ -1,3 +1,0 @@
-// TypeScript configuration for type checking
-// To be completed in Phase 1.9
-

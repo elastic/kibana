@@ -166,11 +166,154 @@ This document tracks the implementation progress of creating the `@kbn/one-navig
 - No code splitting for simplicity (single bundle)
 - Dynamic minification based on NODE_ENV (development vs production)
 
-### Phase 1.7: Create Build Scripts ⏳ PENDING
+### Phase 1.7: Create Build Scripts ✅ COMPLETED
 
-### Phase 1.8: Create Package Manifest ⏳ PENDING
+**Completed Changes:**
 
-### Phase 1.9: TypeScript Configuration ⏳ PENDING
+✅ **Created `packaging/scripts/build.sh` - Main build orchestration script**
+   - Error handling with `set -e` (exit on any error)
+   - **NVM integration** - Loads nvm and switches to correct Node.js version from `.nvmrc`
+   - Configurable output directory (defaults to `../target`)
+   - Converts relative paths to absolute paths for robustness
+   - Three build steps:
+     1. **Webpack build** - Bundles JavaScript with production optimizations (minified)
+     2. **TypeScript definitions** - Generates `index.d.ts` from standalone `react/types.ts`
+     3. **Package manifest** - Copies `package.json` to output directory
+   - Verbose output showing build progress and final file listing
+   - Uses environment variables: `NODE_ENV=production`, `BUILD_OUTPUT_DIR`
+   - Navigates to Kibana root for webpack (to access yarn and webpack config)
+   - **TypeScript command** - Simple, following one-console pattern:
+     - `npx tsc react/types.ts --declaration --emitDeclarationOnly --outFile "$OUTPUT_DIR/index.d.ts" --skipLibCheck`
+     - Generates types from standalone `types.ts` file (no complex flags needed)
+
+✅ **Created `scripts/build_one_navigation.sh` - Kibana root convenience script**
+   - Provides easy access to build from Kibana root: `./scripts/build_one_navigation.sh`
+   - **NVM integration** - Loads nvm and switches to correct Node.js version
+   - Validates build script exists before running
+   - Forwards all arguments to main build script (`"$@"`)
+   - Clean output with success indicator
+   - Follows same pattern as existing `build_one_console.sh`
+
+✅ **Made both scripts executable**
+   - `chmod +x` applied to both scripts
+   - Verified with `ls -lh`: both show `-rwxr-xr-x` permissions
+
+**Build Script Features:**
+- **Flexible output**: Can specify custom output directory as first argument
+- **Standalone**: Can be run from within packaging directory or via convenience script
+- **Production-ready**: Sets `NODE_ENV=production` for optimized builds
+- **Type-safe**: Generates TypeScript declarations for external consumers
+- **Complete package**: Outputs everything needed for npm publishing (`index.js`, `index.d.ts`, `package.json`, source maps)
+
+**Build Output:**
+- `index.js` - Minified production bundle (25.6 KiB)
+- `index.js.map` - Source map for debugging (143 KiB)
+- `index.d.ts` - TypeScript type definitions (25 KiB)
+- `package.json` - Package manifest
+
+**Usage Examples:**
+```bash
+# From Kibana root (recommended)
+./scripts/build_one_navigation.sh
+
+# From packaging scripts directory
+cd src/core/packages/chrome/navigation/packaging/scripts
+./build.sh
+
+# Custom output directory
+./build.sh /path/to/output
+```
+
+**Verified:**
+- ✅ Build completes successfully with correct Node.js version (22.17.1)
+- ✅ All output files generated correctly
+- ✅ TypeScript definitions include proper types for Navigation, MenuItem, etc.
+- ✅ Convenience script works from Kibana root
+- ✅ Webpack bundle is minified (25.6 KiB vs 92 KiB unminified)
+
+### Phase 1.8: Create Package Manifest ✅ COMPLETED
+
+**Completed Changes:**
+
+✅ **Created `packaging/package.json` - Complete package manifest**
+   - Package name: `@kbn/one-navigation`
+   - Version: `1.0.0` (initial release)
+   - Description: "Standalone Elastic Navigation component for external React applications"
+   - License: "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0"
+   - Entry points:
+     - `main`: `../target/index.js` (CommonJS bundle)
+     - `types`: `../target/index.d.ts` (TypeScript definitions)
+   - Peer dependencies (externalized in webpack):
+     - `@elastic/eui`: `102.2.0` (exact version for compatibility)
+     - `@emotion/css`: `^11.11.0` (caret for flexibility)
+     - `@emotion/react`: `^11.0.0` (caret for flexibility)
+     - `react`: `^18.0.0` (caret for flexibility)
+     - `react-dom`: `^18.0.0` (caret for flexibility)
+   - Keywords for npm discoverability: elastic, navigation, sidebar, menu, react
+
+**Version Strategy:**
+- `@elastic/eui`: Exact version ensures compatibility with Navigation component's EUI usage patterns
+- Emotion and React: Caret allows minor/patch updates for consumer flexibility
+- Semantic versioning: Major.Minor.Patch (currently 1.0.0)
+
+**Verified:**
+- ✅ Successfully copied to target directory by build script
+- ✅ All paths relative to target directory are correct
+- ✅ Peer dependencies match webpack externals configuration
+
+### Phase 1.9: TypeScript Configuration ✅ COMPLETED
+
+**Completed Changes:**
+
+✅ **Created `packaging/react/types.ts` - Standalone type definitions**
+   - Follows one-console pattern: defines types inline without importing source files
+   - Avoids compiling dependencies by not importing from `.tsx` files
+   - Defines all public API types:
+     - `BadgeType` - 'beta' | 'techPreview'
+     - `SecondaryMenuItem` - Menu item in secondary/nested menus
+     - `SecondaryMenuSection` - Section grouping secondary menu items
+     - `MenuItem` - Primary navigation menu item
+     - `NavigationStructure` - Overall navigation structure (primary + footer items)
+     - `SideNavLogo` - Logo configuration
+     - `NavigationProps` - All props for Navigation component including:
+       - `activeItemId` - Current active item
+       - `isCollapsed` - Collapsed state
+       - `items` - Navigation structure
+       - `logo` - Logo configuration
+       - `onItemClick` - Click callback
+       - `setWidth` - Width setter for grid layout
+       - `mainContentSelectors` - Focus management selectors (new in Phase 1.1)
+       - `mainScrollContainerId` - Scroll container ID (new in Phase 1.1)
+       - `sidePanelFooter` - Footer content
+       - `data-test-subj` - Test selector
+     - `OneNavigationProps` - Alias for NavigationProps
+   - Only imports `ReactNode` from 'react' (minimal external dependency)
+   - All other types defined inline to keep compilation simple
+
+✅ **Created `packaging/tsconfig.json` - For webpack/babel compilation**
+   - Extends Kibana's base tsconfig
+   - Includes packaging and source files
+   - References `@kbn/i18n` and `@kbn/i18n-react` (aliased to no-op)
+   - Excludes tests, stories, and target directory
+
+✅ **Created `packaging/tsconfig.type_check.json` - For type generation**
+   - Extends Kibana's base type check tsconfig
+   - Configured for declaration-only emission
+   - **Note**: Not used by build script (follows one-console pattern)
+   - Build script uses simple inline tsc command instead
+
+**Key Design Decision:**
+Following the **one-console pattern**, type definitions are generated from a standalone `types.ts` file using a simple `tsc` command, rather than using complex tsconfig files or inline flags. This approach:
+- Avoids compiling dependencies
+- Keeps build simple and fast
+- Generates clean, minimal `.d.ts` output (3.2 KB)
+- Matches established Kibana external package pattern
+
+**Verified:**
+- ✅ Build completes successfully with simple tsc command
+- ✅ Generated `index.d.ts` is clean and minimal (3.2 KB)
+- ✅ All public API types are properly exported
+- ✅ No dependency types are compiled (only react/ReactNode imported)
 
 ### Phase 1.10: Documentation ⏳ PENDING
 
