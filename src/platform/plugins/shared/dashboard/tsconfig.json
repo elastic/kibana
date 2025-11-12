@@ -102,8 +102,8 @@
     "@kbn/content-management-access-control-public",
     "@kbn/content-management-access-control-server",
     "@kbn/react-query",
-    "@kbn/core-chrome-layout-utils",
-    "@kbn/core-http-server"
+    "@kbn/core-http-server",
+    "@kbn/core-chrome-layout-utils"
   ],
   "exclude": ["target/**/*"]
 }

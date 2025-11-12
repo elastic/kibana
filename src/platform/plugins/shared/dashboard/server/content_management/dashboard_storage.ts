@@ -10,20 +10,15 @@
 import Boom from '@hapi/boom';
 import type { Logger } from '@kbn/logging';
 
-import type { DeleteResult, SearchQuery } from '@kbn/content-management-plugin/common';
+import type { DeleteResult } from '@kbn/content-management-plugin/common';
 import type { StorageContext } from '@kbn/content-management-plugin/server';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../dashboard_saved_object';
 import { cmServicesDefinition } from './cm_services';
 import type { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
 import { savedObjectToItem, transformDashboardIn } from './latest';
-import type {
-  DashboardState,
-  DashboardUpdateOptions,
-  DashboardSearchOptions,
-  DashboardGetOut,
-} from './latest';
-import type { DashboardSearchOut, DashboardUpdateOut } from './v1/types';
-import { getSavedObjectFindOptions } from './get_saved_object_find_options';
+import type { DashboardState, DashboardUpdateOptions, DashboardGetOut } from './latest';
+
+import type { DashboardUpdateOut } from './v1/types';
 
 const savedObjectClientFromRequest = async (ctx: StorageContext) => {
   if (!ctx.requestHandlerContext) {
@@ -64,9 +59,11 @@ export class DashboardStorage {
       outcome,
     } = await soClient.resolve<DashboardSavedObjectAttributes>(DASHBOARD_SAVED_OBJECT_TYPE, id);
 
-    const { item, error: itemError } = savedObjectToItem(savedObject, false, {
-      isAccessControlEnabled: this.isAccessControlEnabled,
-    });
+    const { item, error: itemError } = savedObjectToItem(
+      savedObject,
+      false,
+      this.isAccessControlEnabled
+    );
     if (itemError) {
       throw Boom.badRequest(`Invalid response. ${itemError.message}`);
     }
@@ -198,70 +195,7 @@ export class DashboardStorage {
     return { success: true };
   }
 
-  async search(
-    ctx: StorageContext,
-    query: SearchQuery,
-    options: DashboardSearchOptions
-  ): Promise<DashboardSearchOut> {
-    const transforms = ctx.utils.getTransforms(cmServicesDefinition);
-    const soClient = await savedObjectClientFromRequest(ctx);
-
-    // Validate and UP transform the options
-    const { value: optionsToLatest, error: optionsError } = transforms.search.in.options.up<
-      DashboardSearchOptions,
-      DashboardSearchOptions
-    >(options);
-    if (optionsError) {
-      throw Boom.badRequest(`Invalid payload. ${optionsError.message}`);
-    }
-
-    // Execute the query in the DB
-    const soResponse = await soClient.find<DashboardSavedObjectAttributes>(
-      getSavedObjectFindOptions(query, optionsToLatest)
-    );
-    const hits = soResponse.saved_objects
-      .map((so) => {
-        const { item } = savedObjectToItem(so, false, {
-          // TODO remove allowedAttributes, fields are already filtered at saved object level
-          allowedAttributes: optionsToLatest?.fields,
-          allowedReferences: optionsToLatest?.includeReferences,
-          isAccessControlEnabled: this.isAccessControlEnabled,
-        });
-        return item;
-      })
-      // Ignore any saved objects that failed to convert to items.
-      .filter((item) => item !== null);
-    const response = {
-      hits,
-      pagination: {
-        total: soResponse.total,
-      },
-    };
-
-    const validationError = transforms.search.out.result.validate(response);
-    if (validationError) {
-      if (this.throwOnResultValidationError) {
-        throw Boom.badRequest(`Invalid response. ${validationError.message}`);
-      } else {
-        this.logger.warn(`Invalid response. ${validationError.message}`);
-      }
-    }
-
-    // Validate the response and DOWN transform to the request version
-    const { value, error: resultError } = transforms.search.out.result.down<
-      DashboardSearchOut,
-      DashboardSearchOut
-    >(
-      // @ts-expect-error - fix type error
-      response,
-      undefined, // do not override version
-      { validate: false } // validation is done above
-    );
-
-    if (resultError) {
-      throw Boom.badRequest(`Invalid response. ${resultError.message}`);
-    }
-
-    return value;
+  async search(): Promise<any> {
+    throw Boom.badRequest(`Use REST API search endpoint`);
   }
 }
