@@ -68,9 +68,10 @@ export const ChartSectionTemplate = ({
                 .unifiedHistogram__leftSideToolbar {
                   flex-wrap: wrap;
 
-                .unifiedHistogram__leftSideToolbarItem {
-                  flex-grow: 1;
-                  flex-basis: 100%;
+                  .unifiedHistogram__leftSideToolbarItem {
+                    flex-grow: 1;
+                    flex-basis: 100%;
+                  }
                 }
               }
               [data-toolbar-section='right'] {
