@@ -129,7 +129,7 @@ const PreviewDocumentsGroupBy = () => {
 
   return (
     <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" wrap>
-      <EuiFilterGroup 
+      <EuiFilterGroup
         compressed={true}
         aria-label={i18n.translate(
           'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomeControlsAriaLabel',
