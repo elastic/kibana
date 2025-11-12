@@ -17,6 +17,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useConversationTitle, useHasActiveConversation } from '../../../hooks/use_conversation';
 import { useDeleteConversationModal } from '../../../hooks/use_delete_conversation_modal';
+import { useRenameConversationModal } from '../../../hooks/use_rename_conversation_modal';
 
 const labels = {
   ariaLabel: i18n.translate('xpack.onechat.conversationTitle.ariaLabel', {
@@ -24,6 +25,9 @@ const labels = {
   }),
   newConversationDisplay: i18n.translate('xpack.onechat.conversationTitle.newConversationDisplay', {
     defaultMessage: 'New conversation',
+  }),
+  rename: i18n.translate('xpack.onechat.conversationTitle.rename', {
+    defaultMessage: 'Rename',
   }),
   delete: i18n.translate('xpack.onechat.conversationTitle.delete', {
     defaultMessage: 'Delete',
@@ -39,6 +43,7 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabell
   const hasActiveConversation = useHasActiveConversation();
   const { euiTheme } = useEuiTheme();
   const { openDeleteModal, DeleteModal } = useDeleteConversationModal();
+  const { openRenameModal, RenameModal } = useRenameConversationModal();
 
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
 
@@ -53,6 +58,18 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabell
   const shouldShowButton = hasActiveConversation && !isLoading && title;
 
   const menuItems = [
+    <EuiContextMenuItem
+      key="rename"
+      icon="pencil"
+      size="s"
+      data-test-subj="agentBuilderConversationRenameButton"
+      onClick={() => {
+        setIsContextMenuOpen(false);
+        openRenameModal();
+      }}
+    >
+      {labels.rename}
+    </EuiContextMenuItem>,
     <EuiContextMenuItem
       key="delete"
       icon="trash"
@@ -94,6 +111,7 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabell
           <EuiContextMenuPanel size="s" items={menuItems} />
         </EuiPopover>
         {DeleteModal}
+        {RenameModal}
       </>
     );
   }
