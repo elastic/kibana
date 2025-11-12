@@ -110,7 +110,7 @@ export const DocumentViewModeToggle = ({
 
   const isFullScreen = useIsDataGridFullScreen();
 
-  if (isFullScreen) {
+  if (isFullScreen && !isEsqlMode) {
     return null;
   }
 
