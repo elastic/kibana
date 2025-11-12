@@ -97,5 +97,6 @@
     "@kbn/data-quality",
     "@kbn/onechat-common",
     "@kbn/observability-agent-plugin",
+    "@kbn/onechat-plugin",
   ]
 }
