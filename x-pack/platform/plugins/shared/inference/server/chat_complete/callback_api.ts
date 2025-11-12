@@ -15,6 +15,7 @@ import {
   type ChatCompleteCompositeResponse,
   MessageRole,
 } from '@kbn/inference-common';
+import type { InferenceCallbackManager } from '@kbn/inference-common/src/chat_complete/api';
 import type { Logger } from '@kbn/logging';
 import { defer, forkJoin, from, identity, share, switchMap, throwError } from 'rxjs';
 import { withChatCompleteSpan } from '@kbn/inference-tracing';
@@ -26,6 +27,7 @@ import {
   chunksIntoMessage,
   getInferenceExecutor,
   handleCancellation,
+  handleLifecycleCallbacks,
   streamToResponse,
 } from './utils';
 import { retryWithExponentialBackoff } from '../../common/utils/retry_with_exponential_backoff';
@@ -42,6 +44,7 @@ interface CreateChatCompleteApiOptions {
   anonymizationRulesPromise: Promise<AnonymizationRule[]>;
   regexWorker: RegexWorkerService;
   esClient: ElasticsearchClient;
+  callbackManager?: InferenceCallbackManager;
 }
 
 type CreateChatCompleteApiOptionsKey =
@@ -76,6 +79,7 @@ export function createChatCompleteCallbackApi({
   anonymizationRulesPromise,
   regexWorker,
   esClient,
+  callbackManager,
 }: CreateChatCompleteApiOptions) {
   return (
     {
@@ -190,6 +194,7 @@ export function createChatCompleteCallbackApi({
           initialDelay: retryConfiguration.initialDelay,
           errorFilter: getRetryFilter(retryConfiguration.retryOn),
         }),
+        callbackManager ? handleLifecycleCallbacks({ callbackManager }) : identity,
         abortSignal ? handleCancellation(abortSignal) : identity
       );
 

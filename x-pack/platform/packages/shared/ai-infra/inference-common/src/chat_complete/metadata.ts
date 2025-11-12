@@ -15,6 +15,10 @@ import type { Attributes } from '@opentelemetry/api';
 export interface ChatCompleteMetadata {
   connectorTelemetry?: ConnectorTelemetryMetadata;
   attributes?: Attributes;
+  /** arbitrary call id which will be returned in completion callbacks */
+  callId?: string;
+  /** arbitrary call group id which will be returned in completion callbacks */
+  callGroupId?: string;
 }
 
 /**
