@@ -21,6 +21,7 @@ import type {
   ObservabilityAgentPluginStart,
   ObservabilityAgentPluginStartDependencies,
 } from '../types';
+import { OBSERVABILITY_GET_ALERTS_TOOL_ID, createGetAlertsTool } from './alerts/get_alerts';
 
 const PLATFORM_TOOL_IDS = [
   platformCoreTools.search,
@@ -32,6 +33,7 @@ const PLATFORM_TOOL_IDS = [
 const OBSERVABILITY_TOOL_IDS = [
   OBSERVABILITY_GET_DATA_SOURCES_TOOL_ID,
   OBSERVABILITY_SEARCH_KNOWLEDGE_BASE_TOOL_ID,
+  OBSERVABILITY_GET_ALERTS_TOOL_ID,
 ];
 
 export const OBSERVABILITY_AGENT_TOOL_IDS = [...PLATFORM_TOOL_IDS, ...OBSERVABILITY_TOOL_IDS];
@@ -48,6 +50,7 @@ export async function registerTools({
   const observabilityTools: StaticToolRegistration<any>[] = [
     createGetDataSourcesTool({ core, plugins, logger }),
     createSearchKnowledgeBaseTool({ core, logger }),
+    createGetAlertsTool({ core, logger }),
   ];
 
   for (const tool of observabilityTools) {
