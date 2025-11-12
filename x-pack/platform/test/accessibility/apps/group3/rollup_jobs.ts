@@ -17,7 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     let deActivateRollupFeature: () => Promise<void>;
 
     before(async () => {
-      deActivateRollupFeature = await PageObjects.rollup.activateFeature(rollupJobName);
+      deActivateRollupFeature = await PageObjects.rollup.activateFeature();
 
       await PageObjects.settings.navigateTo();
       await PageObjects.rollup.clickRollupJobsTab();
