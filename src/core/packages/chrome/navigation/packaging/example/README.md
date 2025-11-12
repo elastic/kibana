@@ -38,16 +38,16 @@ This will start a webpack dev server at http://localhost:3000
 
 ## What This Tests
 
-- ✅ OneNavigation component renders correctly
-- ✅ All navigation features work (primary items, nested items, footer items)
-- ✅ Collapsed/expanded states
-- ✅ Active item highlighting
-- ✅ Custom layout constants (`mainContentSelectors`, `mainScrollContainerId`)
-- ✅ Width management via `setWidth` callback
-- ✅ Click handling via `onItemClick` callback
-- ✅ No-op i18n (default English messages)
-- ✅ Emotion styling works correctly
-- ✅ No Kibana dependencies required
+- OneNavigation component renders correctly
+- All navigation features work (primary items, nested items, footer items)
+- Collapsed/expanded states
+- Active item highlighting
+- Custom layout constants (`mainContentSelectors`, `mainScrollContainerId`)
+- Width management via `setWidth` callback
+- Click handling via `onItemClick` callback
+- No-op i18n (default English messages)
+- Emotion styling works correctly
+- No Kibana dependencies required
 
 ## Verification Checklist
 
@@ -79,7 +79,7 @@ This will start a webpack dev server at http://localhost:3000
 
 ## Bundle Info
 
-- **Size**: ~26 KB (minified)
+- **Size**: 25.8 KB (minified)
 - **Dependencies**: Externalized (React, EUI, Emotion as peer deps)
 - **i18n**: No-op implementation (no translation overhead)
 

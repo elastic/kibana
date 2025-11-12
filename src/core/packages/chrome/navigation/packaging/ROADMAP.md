@@ -776,26 +776,26 @@ After running the build scripts, the package artifacts will be in:
    ```
 
 5. **Comprehensive verification checklist**
-   - ✅ Component renders without errors
-   - ✅ Navigation structure displays correctly (primary items, footer items)
-   - ✅ Logo is clickable and triggers callback
-   - ✅ Primary items are clickable and update active state
-   - ✅ Nested items expand/collapse properly (Analytics, Data sections)
-   - ✅ Secondary menu items work correctly
-   - ✅ Footer items are functional (Settings)
-   - ✅ Toggle between collapsed/expanded states works smoothly
-   - ✅ Collapsed state shows popovers on hover
-   - ✅ Active item highlighting works (visual feedback)
-   - ✅ `setWidth` callback receives correct navigation width
-   - ✅ Main content area adjusts to navigation width
-   - ✅ Custom layout constants work (`mainContentSelectors`, `mainScrollContainerId`)
-   - ✅ i18n shows default English messages (e.g., "More" menu if overflow)
-   - ✅ No console errors about missing dependencies
-   - ✅ No console warnings from React
-   - ✅ Styles render correctly (Emotion CSS-in-JS)
-   - ✅ Responsive behavior works (try mobile viewport)
-   - ✅ Bundle size is reasonable (<200KB uncompressed JavaScript)
-   - ✅ TypeScript types are available and correct
+   - - Component renders without errors
+   - - Navigation structure displays correctly (primary items, footer items)
+   - - Logo is clickable and triggers callback
+   - - Primary items are clickable and update active state
+   - - Nested items expand/collapse properly (Analytics, Data sections)
+   - - Secondary menu items work correctly
+   - - Footer items are functional (Settings)
+   - - Toggle between collapsed/expanded states works smoothly
+   - - Collapsed state shows popovers on hover
+   - - Active item highlighting works (visual feedback)
+   - - `setWidth` callback receives correct navigation width
+   - - Main content area adjusts to navigation width
+   - - Custom layout constants work (`mainContentSelectors`, `mainScrollContainerId`)
+   - - i18n shows default English messages (e.g., "More" menu if overflow)
+   - - No console errors about missing dependencies
+   - - No console warnings from React
+   - - Styles render correctly (Emotion CSS-in-JS)
+   - - Responsive behavior works (try mobile viewport)
+   - - Bundle size is reasonable (<200KB uncompressed JavaScript)
+   - - TypeScript types are available and correct
 
 6. **Test edge cases**
    - Resize window to trigger responsive menu
@@ -845,15 +845,15 @@ After running the build scripts, the package artifacts will be in:
 
 ### Phase 1 Success Criteria
 
-1. ✅ Standalone Navigation component can be imported in external React app
-2. ✅ No Kibana runtime dependencies required
-3. ✅ All existing Navigation functionality works in standalone mode
-4. ✅ Backward compatible with Kibana usage
-5. ✅ i18n calls return default messages (no-op behavior)
-6. ✅ Layout constants can be customized
-7. ✅ Build process is automated and documented
-8. ✅ TypeScript definitions are generated correctly
-9. ✅ Consumers can provide their own navigation item labels
+1. - Standalone Navigation component can be imported in external React app
+2. - No Kibana runtime dependencies required
+3. - All existing Navigation functionality works in standalone mode
+4. - Backward compatible with Kibana usage
+5. - i18n calls return default messages (no-op behavior)
+6. - Layout constants can be customized
+7. - Build process is automated and documented
+8. - TypeScript definitions are generated correctly
+9. - Consumers can provide their own navigation item labels
 
 ---
 
@@ -1106,14 +1106,14 @@ packages/kbn-one-layout/
 
 ### Phase 2 Success Criteria
 
-1. ✅ `@kbn/external-package-builder` package created and tested
-2. ✅ `one-navigation` migrated to use shared tooling
-3. ✅ `one-console` migrated to use shared tooling (or plan documented)
-4. ✅ Shared no-op i18n package created
-5. ✅ Scaffolding CLI functional
-6. ✅ Documentation complete
-7. ✅ Creating new external packages takes < 1 hour
-8. ✅ Build configuration complexity reduced by >50%
+1. - `@kbn/external-package-builder` package created and tested
+2. - `one-navigation` migrated to use shared tooling
+3. - `one-console` migrated to use shared tooling (or plan documented)
+4. - Shared no-op i18n package created
+5. - Scaffolding CLI functional
+6. - Documentation complete
+7. - Creating new external packages takes < 1 hour
+8. - Build configuration complexity reduced by >50%
 
 ### Future External Packages
 
@@ -1273,12 +1273,12 @@ Add sections on:
 
 ### Phase 3 Success Criteria
 
-1. ✅ Translations can be provided via props or loaded from files
-2. ✅ Multiple languages supported (en, fr-FR, ja-JP, zh-CN, de-DE)
-3. ✅ Phase 1 behavior maintained (no-op if no translations)
-4. ✅ Translation extraction automated
-5. ✅ Documentation updated with translation examples
-6. ✅ Backward compatible with Phase 1 API
+1. - Translations can be provided via props or loaded from files
+2. - Multiple languages supported (en, fr-FR, ja-JP, zh-CN, de-DE)
+3. - Phase 1 behavior maintained (no-op if no translations)
+4. - Translation extraction automated
+5. - Documentation updated with translation examples
+6. - Backward compatible with Phase 1 API
 
 ---
 
@@ -1327,20 +1327,23 @@ Add sections on:
 ### Phase 1 (In Progress)
 
 **Completed:**
-- ✅ **Phase 1.1** - Refactored Navigation component to accept layout constants as props
-- ✅ **Phase 1.2** - Updated all component usage for layout constants
-- ✅ **Phase 1.3** - Created packaging directory structure
-- ✅ **Phase 1.4** - Created no-op i18n service
-- ✅ **Phase 1.5** - Created OneNavigation component wrapper
-- ✅ **Phase 1.6** - Created Webpack configuration
-- ✅ **Phase 1.7** - Created build scripts (following one-console pattern)
-- ✅ **Phase 1.8** - Package manifest already complete
-- ✅ **Phase 1.9** - TypeScript configuration (standalone types.ts following one-console pattern)
-- ✅ **Phase 1.11** - Created example application for testing (`packaging/example/` - uses Kibana's dependencies via webpack resolution)
+- - **Phase 1.1** - Refactored Navigation component to accept layout constants as props
+- - **Phase 1.2** - Updated all component usage for layout constants
+- - **Phase 1.3** - Created packaging directory structure
+- - **Phase 1.4** - Created no-op i18n service
+- - **Phase 1.5** - Created OneNavigation component wrapper
+- - **Phase 1.6** - Created Webpack configuration
+- - **Phase 1.7** - Created build scripts (following one-console pattern)
+- - **Phase 1.8** - Package manifest already complete
+- - **Phase 1.9** - TypeScript configuration (standalone types.ts following one-console pattern)
+- - **Phase 1.10** - Documentation complete (comprehensive README.md)
+- - **Phase 1.11** - Created example application for testing (`packaging/example/` - uses Kibana's dependencies via webpack resolution)
+
+**Phase 1 Complete! !**
 
 **Next Steps:**
-1. **Phase 1.10** - Documentation
-2. Validate with real-world usage
+1. Validate with real-world usage
+2. Consider Phase 2 (shared build infrastructure) after validation
 
 ### Phase 2 (After Phase 1 Complete)
 

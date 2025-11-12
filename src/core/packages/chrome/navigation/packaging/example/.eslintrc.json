@@ -1,9 +1,0 @@
-{
-  "rules": {
-    "import/no-unresolved": "off",
-    "@typescript-eslint/no-var-requires": "off",
-    "import/no-extraneous-dependencies": "off",
-    "@kbn/imports/uniform_imports": "off"
-  }
-}
-

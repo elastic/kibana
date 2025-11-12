@@ -36,8 +36,7 @@
  */
 
 // Re-define all types inline to avoid importing from source files
-// ReactNode equivalent (string | number | React.ReactElement | null | undefined)
-type ReactNode = any;
+type ReactNode = string | number | boolean | null | undefined | React.ReactElement;
 
 export type BadgeType = 'beta' | 'techPreview';
 
