@@ -8,7 +8,7 @@
 import { evaluate as base, createDefaultTerminalReporter } from '@kbn/evals';
 import { KnowledgeBaseClient } from './clients/knowledge_base_client';
 import { ConversationsClient } from './clients/conversations_client';
-import { createChatClient, type ChatClient } from './clients/chat/chat_client';
+import { createChatClient, type ChatClient } from './clients/chat';
 import type { EvaluateObservabilityAIAssistantDataset } from './evaluate_dataset';
 import { createEvaluateObservabilityAIAssistantDataset } from './evaluate_dataset';
 import { createScenarioSummaryReporter } from './scenario_summary_reporter';
