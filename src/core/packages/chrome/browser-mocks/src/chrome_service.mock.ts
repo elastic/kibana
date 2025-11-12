@@ -22,7 +22,7 @@ const createStartContractMock = () => {
     getHeaderBanner: jest.fn(),
     getProjectAppMenuComponent: jest.fn(),
     getProjectHeaderComponentForGridLayout: jest.fn(),
-    getProjectSideNavV2ComponentForGridLayout: jest.fn(),
+    getProjectSideNavComponentForGridLayout: jest.fn(),
     navLinks: lazyObject({
       getNavLinks$: jest.fn(),
       has: jest.fn(),
@@ -61,8 +61,6 @@ const createStartContractMock = () => {
     sideNav: lazyObject({
       getIsCollapsed$: jest.fn().mockReturnValue(new BehaviorSubject(false)),
       setIsCollapsed: jest.fn(),
-      getPanelSelectedNode$: jest.fn(),
-      setPanelSelectedNode: jest.fn(),
       getIsFeedbackBtnVisible$: jest.fn(),
       setIsFeedbackBtnVisible: jest.fn(),
     }),
@@ -97,6 +95,8 @@ const createStartContractMock = () => {
       updateSolutionNavigations: jest.fn(),
       navigationTourManager: {} as any,
     }),
+    setGlobalFooter: jest.fn(),
+    getGlobalFooter$: jest.fn(),
   });
 
   return startContract;

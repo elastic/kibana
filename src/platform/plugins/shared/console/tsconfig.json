@@ -33,7 +33,6 @@
     "@kbn/core-doc-links-browser",
     "@kbn/shared-ux-router",
     "@kbn/esql-editor",
-    "@kbn/data-views-plugin",
     "@kbn/licensing-plugin",
     "@kbn/esql-utils",
     "@kbn/field-types",

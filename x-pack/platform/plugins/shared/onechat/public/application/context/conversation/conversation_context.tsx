@@ -6,6 +6,7 @@
  */
 
 import { createContext, useContext } from 'react';
+import type { BrowserApiToolDefinition } from '@kbn/onechat-browser/tools/browser_api_tool';
 import type { ConversationActions } from './use_conversation_actions';
 
 interface ConversationContextValue {
@@ -15,6 +16,7 @@ interface ConversationContextValue {
   sessionTag?: string;
   agentId?: string;
   initialMessage?: string;
+  browserApiTools?: Array<BrowserApiToolDefinition<any>>;
   setConversationId?: (conversationId?: string) => void;
   conversationActions: ConversationActions;
 }

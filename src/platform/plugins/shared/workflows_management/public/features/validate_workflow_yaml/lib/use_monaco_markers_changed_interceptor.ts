@@ -20,7 +20,7 @@ export interface UseMonacoMarkersChangedInterceptorResult {
   transformMonacoMarkers: (
     editorModel: monaco.editor.ITextModel,
     owner: string,
-    markers: monaco.editor.IMarker[] | monaco.editor.IMarkerData[]
+    markers: monaco.editor.IMarkerData[]
   ) => monaco.editor.IMarker[] | monaco.editor.IMarkerData[];
   handleMarkersChanged: (
     editorModel: monaco.editor.ITextModel,
@@ -45,7 +45,7 @@ export function useMonacoMarkersChangedInterceptor({
     (
       editorModel: monaco.editor.ITextModel,
       owner: string,
-      markers: monaco.editor.IMarker[] | monaco.editor.IMarkerData[]
+      markers: monaco.editor.IMarkerData[]
     ) => {
       return markers.map((marker) => {
         if (owner === 'yaml') {

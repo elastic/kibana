@@ -205,14 +205,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(response).to.contain('# 3: DELETE test-index [200 OK]');
         });
       });
-
-      // not implemented for monaco yet https://github.com/elastic/kibana/issues/184010
-      it.skip('should display status badges', async () => {
-        await sendMultipleRequests(['\n GET _search/test', '\n GET _search']);
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        expect(await PageObjects.console.hasWarningBadge()).to.be(true);
-        expect(await PageObjects.console.hasSuccessBadge()).to.be(true);
-      });
     });
 
     it('should show actions menu when the first line of the request is not in the viewport', async () => {

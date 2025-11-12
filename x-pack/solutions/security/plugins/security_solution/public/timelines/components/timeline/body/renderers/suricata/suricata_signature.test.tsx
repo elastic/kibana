@@ -13,7 +13,7 @@ import { useMountAppended } from '../../../../../../common/utils/use_mount_appen
 import {
   SuricataSignature,
   Tokens,
-  DraggableSignatureId,
+  SignatureId,
   SURICATA_SIGNATURE_ID_FIELD_NAME,
 } from './suricata_signature';
 
@@ -34,7 +34,7 @@ describe('SuricataSignature', () => {
     test('it renders the default SuricataSignature', () => {
       const wrapper = shallow(
         <SuricataSignature
-          contextId="test"
+          scopeId="test"
           id="doc-id-123"
           signatureId={123}
           signature="ET SCAN ATTACK Hello"
@@ -69,11 +69,11 @@ describe('SuricataSignature', () => {
     });
   });
 
-  describe('DraggableSignatureId', () => {
+  describe('SignatureId', () => {
     test('it renders the default SuricataSignature', () => {
       const wrapper = mount(
         <TestProviders>
-          <DraggableSignatureId id="id-123" signatureId={123} />
+          <SignatureId signatureId={123} scopeId="test" />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual('123');
@@ -82,12 +82,13 @@ describe('SuricataSignature', () => {
     test('it renders a tooltip for the signature field', () => {
       const wrapper = mount(
         <TestProviders>
-          <DraggableSignatureId id="id-123" signatureId={123} />
+          <SignatureId signatureId={123} scopeId="test" />
         </TestProviders>
       );
 
       expect(
-        wrapper.find('[data-test-subj="signature-id-tooltip"]').first().props().content
+        wrapper.find('[data-test-subj="suricata.eve.alert.signature_id-tooltip"]').first().props()
+          .content
       ).toEqual(SURICATA_SIGNATURE_ID_FIELD_NAME);
     });
   });

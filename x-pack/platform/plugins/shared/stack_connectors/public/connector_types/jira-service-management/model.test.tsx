@@ -9,10 +9,7 @@ import { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application
 import { registerConnectorTypes } from '..';
 import type { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { experimentalFeaturesMock, registrationServicesMock } from '../../mocks';
-import {
-  JIRA_SERVICE_MANAGEMENT_CONNECTOR_TYPE_ID,
-  JiraServiceManagementSubActions,
-} from '../../../common/jira-service-management/constants';
+import { CONNECTOR_ID, SUB_ACTION } from '@kbn/connector-schemas/jira-service-management/constants';
 import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
 
 let connectorTypeModel: ConnectorTypeModel;
@@ -21,7 +18,7 @@ beforeAll(() => {
   const connectorTypeRegistry = new TypeRegistry<ConnectorTypeModel>();
   ExperimentalFeaturesService.init({ experimentalFeatures: experimentalFeaturesMock });
   registerConnectorTypes({ connectorTypeRegistry, services: registrationServicesMock });
-  const getResult = connectorTypeRegistry.get(JIRA_SERVICE_MANAGEMENT_CONNECTOR_TYPE_ID);
+  const getResult = connectorTypeRegistry.get(CONNECTOR_ID);
   if (getResult !== null) {
     connectorTypeModel = getResult;
   }
@@ -29,14 +26,14 @@ beforeAll(() => {
 
 describe('connectorTypeRegistry.get() works', () => {
   it('sets the id field in the connector type static data to the correct value', () => {
-    expect(connectorTypeModel.id).toEqual(JIRA_SERVICE_MANAGEMENT_CONNECTOR_TYPE_ID);
+    expect(connectorTypeModel.id).toEqual(CONNECTOR_ID);
   });
 });
 
 describe('jira service management action params validation', () => {
   it('results in no errors when the action params are valid for creating an alert', async () => {
     const actionParams = {
-      subAction: JiraServiceManagementSubActions.CreateAlert,
+      subAction: SUB_ACTION.CreateAlert,
       subActionParams: {
         message: 'hello',
       },
@@ -53,7 +50,7 @@ describe('jira service management action params validation', () => {
 
   it('results in no errors when the action params are valid for closing an alert', async () => {
     const actionParams = {
-      subAction: JiraServiceManagementSubActions.CloseAlert,
+      subAction: SUB_ACTION.CloseAlert,
       subActionParams: {
         alias: '123',
       },
@@ -70,7 +67,7 @@ describe('jira service management action params validation', () => {
 
   it('sets the message error when the message is missing for creating an alert', async () => {
     const actionParams = {
-      subAction: JiraServiceManagementSubActions.CreateAlert,
+      subAction: SUB_ACTION.CreateAlert,
       subActionParams: {},
     };
 
@@ -85,7 +82,7 @@ describe('jira service management action params validation', () => {
 
   it('sets the alias error when the alias is missing for closing an alert', async () => {
     const actionParams = {
-      subAction: JiraServiceManagementSubActions.CloseAlert,
+      subAction: SUB_ACTION.CloseAlert,
       subActionParams: {},
     };
 

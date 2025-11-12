@@ -6,7 +6,9 @@
  */
 
 import { useMutation } from '@kbn/react-query';
-import { useRef, useState } from 'react';
+import { useRef, useState, useMemo } from 'react';
+import { toToolMetadata } from '@kbn/onechat-browser/tools/browser_api_tool';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useAgentId } from '../../hooks/use_conversation';
 import { useConversationContext } from '../conversation/conversation_context';
 import { useConversationId } from '../conversation/use_conversation_id';
@@ -15,6 +17,7 @@ import { useReportConverseError } from '../../hooks/use_report_error';
 import { mutationKeys } from '../../mutation_keys';
 import { usePendingMessageState } from './use_pending_message_state';
 import { useSubscribeToChatEvents } from './use_subscribe_to_chat_events';
+import { BrowserToolExecutor } from '../../services/browser_tool_executor';
 
 interface UseSendMessageMutationProps {
   connectorId?: string;
@@ -22,14 +25,25 @@ interface UseSendMessageMutationProps {
 
 export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationProps = {}) => {
   const { chatService } = useOnechatServices();
+  const { services } = useKibana();
   const { reportConverseError } = useReportConverseError();
-  const { conversationActions } = useConversationContext();
+  const { conversationActions, browserApiTools } = useConversationContext();
   const [isResponseLoading, setIsResponseLoading] = useState(false);
   const [agentReasoning, setAgentReasoning] = useState<string | null>(null);
   const conversationId = useConversationId();
   const isMutatingNewConversationRef = useRef(false);
   const agentId = useAgentId();
   const messageControllerRef = useRef<AbortController | null>(null);
+
+  const browserApiToolsMetadata = useMemo(() => {
+    if (!browserApiTools) return undefined;
+    return browserApiTools.map(toToolMetadata);
+  }, [browserApiTools]);
+
+  const browserToolExecutor = useMemo(() => {
+    return new BrowserToolExecutor(services.notifications?.toasts);
+  }, [services.notifications?.toasts]);
+
   const {
     pendingMessageState: { error, pendingMessage },
     setPendingMessage,
@@ -41,6 +55,7 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
     setAgentReasoning,
     setIsResponseLoading,
     isAborted: () => Boolean(messageControllerRef?.current?.signal?.aborted),
+    browserToolExecutor,
   });
 
   const sendMessage = ({ message }: { message: string }) => {
@@ -54,6 +69,7 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
       conversationId,
       agentId,
       connectorId,
+      browserApiTools: browserApiToolsMetadata,
     });
 
     return subscribeToChatEvents(events$);

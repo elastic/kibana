@@ -67,9 +67,7 @@ export default function (providerContext: FtrProviderContext) {
     return req.send(body);
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/236975
-  // Failing: See https://github.com/elastic/kibana/issues/236975
-  describe.skip('POST /internal/cloud_security_posture/graph', () => {
+  describe('POST /internal/cloud_security_posture/graph', () => {
     describe('Authorization', () => {
       it('should return 403 for user without read access', async () => {
         await postGraph(
@@ -615,8 +613,10 @@ export default function (providerContext: FtrProviderContext) {
               if (node.documentsData && node.documentsData.length === 1) {
                 expect(node.documentsData?.[0]).to.have.property('type', 'event');
               } else if (node.documentsData && node.documentsData.length === 2) {
-                expect(node.documentsData?.[0]).to.have.property('type', 'alert');
-                expect(node.documentsData?.[1]).to.have.property('type', 'event');
+                const hasAlert = node.documentsData.some((doc) => doc.type === 'alert');
+                const hasEvent = node.documentsData.some((doc) => doc.type === 'event');
+                expect(hasAlert).to.be(true);
+                expect(hasEvent).to.be(true);
               }
             }
           }

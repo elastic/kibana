@@ -6,11 +6,11 @@
  */
 
 import type {
-  PostMessageSubActionParams,
   PostBlockkitSubActionParams,
-  SlackApiService,
+  PostMessageSubActionParams,
   ValidChannelIdSubActionParams,
-} from '../../../common/slack_api/types';
+} from '@kbn/connector-schemas/slack_api';
+import type { SlackApiService } from '../../../common/slack_api/types';
 
 const validChannelIdHandler = async ({
   externalService,

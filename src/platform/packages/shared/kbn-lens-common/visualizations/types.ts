@@ -375,8 +375,8 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
    * in a flyout panel. Provides configuration options for style, legend and filters.
    */
   FlyoutToolbarComponent?: (
-    props: VisualizationToolbarProps<T>
-  ) => null | ReactElement<VisualizationToolbarProps<T>>;
+    props: VisualizationToolbarProps<T> & { isInlineEditing: boolean }
+  ) => null | ReactElement<VisualizationToolbarProps<T> & { isInlineEditing: boolean }>;
 
   /**
    * The frame is telling the visualization to update or set a dimension based on user interaction

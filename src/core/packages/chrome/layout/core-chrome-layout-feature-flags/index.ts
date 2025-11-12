@@ -12,24 +12,6 @@ import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
 export type LayoutFeatureFlag = 'legacy-fixed' | 'grid';
 export const LAYOUT_FEATURE_FLAG_KEY = 'core.chrome.layoutType';
 export const LAYOUT_DEBUG_FEATURE_FLAG_KEY = 'core.chrome.layoutDebug';
-export type LayoutProjectSideNavVersion = 'v1' | 'v2';
-export const LAYOUT_PROJECT_SIDENAV_FEATURE_FLAG_KEY = 'core.chrome.projectSideNav';
-
-export const getSideNavVersion = (featureFlags: FeatureFlagsStart): LayoutProjectSideNavVersion => {
-  const featureFlag = featureFlags.getStringValue<LayoutProjectSideNavVersion>(
-    LAYOUT_PROJECT_SIDENAV_FEATURE_FLAG_KEY,
-    'v2'
-  );
-
-  // both is temporarily supported hidden option to allow for a smooth transition
-  if (featureFlag !== 'v1' && featureFlag !== 'v2' && featureFlag !== 'both') {
-    throw new Error(
-      `Invalid project side nav feature flag value: ${featureFlag}. Expected 'v1' or 'v2'.`
-    );
-  }
-
-  return featureFlag;
-};
 
 export const getLayoutVersion = (featureFlags: FeatureFlagsStart): LayoutFeatureFlag => {
   const featureFlag = featureFlags.getStringValue<LayoutFeatureFlag>(

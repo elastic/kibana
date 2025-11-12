@@ -33,6 +33,7 @@ export interface TraceWaterfallContextProps {
   colorBy: WaterfallLegendType;
   showLegend: boolean;
   serviceName?: string;
+  message?: string;
 }
 
 export const TraceWaterfallContext = createContext<TraceWaterfallContextProps>({

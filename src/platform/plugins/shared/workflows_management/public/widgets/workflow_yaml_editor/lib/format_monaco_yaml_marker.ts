@@ -10,16 +10,24 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, complexity */
 
 import type YAML from 'yaml';
-import type { monaco } from '@kbn/monaco';
+import { monaco } from '@kbn/monaco';
 import type { z } from '@kbn/zod';
-import { formatValidationError, getCurrentPath } from '../../../../common/lib/yaml_utils';
+import { getPathAtOffset } from '../../../../common/lib/yaml';
+import { formatZodError } from '../../../../common/lib/zod';
 
 export function formatMonacoYamlMarker(
-  marker: monaco.editor.IMarker | monaco.editor.IMarkerData,
+  marker: monaco.editor.IMarkerData,
   editorModel: monaco.editor.ITextModel,
   workflowYamlSchemaLoose: z.ZodSchema,
   yamlDocument: YAML.Document | null
 ) {
+  const newMarker: monaco.editor.IMarkerData = {
+    ...marker,
+  };
+  if (marker.source && marker.source.startsWith('yaml-schema:')) {
+    // update the severity to error to make it more visible and match vs code behavior
+    newMarker.severity = monaco.MarkerSeverity.Error;
+  }
   // Check if this is a validation error that could benefit from dynamic formatting
   const hasNumericEnumPattern =
     // Patterns with quotes: Expected "0 | 1 | 2"
@@ -53,7 +61,7 @@ export function formatMonacoYamlMarker(
           lineNumber: marker.startLineNumber,
           column: marker.startColumn,
         });
-        yamlPath = getCurrentPath(yamlDocument, markerPosition);
+        yamlPath = getPathAtOffset(yamlDocument, markerPosition);
       }
 
       // Create a mock Zod error with the path information
@@ -69,7 +77,7 @@ export function formatMonacoYamlMarker(
       };
 
       // Use the dynamic formatValidationError with schema and YAML document
-      const { message: formattedMessage } = formatValidationError(
+      const { message: formattedMessage } = formatZodError(
         mockZodError as any,
         workflowYamlSchemaLoose,
         yamlDocument ?? undefined
@@ -78,13 +86,13 @@ export function formatMonacoYamlMarker(
       // Return the marker with the improved message
 
       return {
-        ...marker,
+        ...newMarker,
         message: formattedMessage,
       };
     } catch (error) {
       // Fallback to original message if dynamic formatting fails
-      return marker;
+      return newMarker;
     }
   }
-  return marker;
+  return newMarker;
 }
