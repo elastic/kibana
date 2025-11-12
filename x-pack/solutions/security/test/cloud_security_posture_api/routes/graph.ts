@@ -404,6 +404,64 @@ export default function (providerContext: FtrProviderContext) {
         });
       });
 
+      it('should filter by user.entity.id in esQuery and return sourceNamespaceField for non-enriched entity nodes', async () => {
+        const response = await postGraph(supertest, {
+          query: {
+            indexPatterns: ['.alerts-security.alerts-*', 'logs-*'],
+            originEventIds: [],
+            start: '2024-09-01T00:00:00Z',
+            end: '2024-09-02T00:00:00Z',
+            esQuery: {
+              bool: {
+                filter: [
+                  {
+                    match_phrase: {
+                      'user.entity.id': 'new-schema-user@example.com',
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        }).expect(result(200));
+
+        expect(response.body).to.have.property('nodes').length(3);
+        expect(response.body).to.have.property('edges').length(2);
+        expect(response.body).not.to.have.property('messages');
+
+        const entityNodes = response.body.nodes.filter(
+          (node: NodeDataModel) => !isLabelNode(node)
+        ) as EntityNodeDataModel[];
+
+        const actorNode = entityNodes.find((node) => node.id === 'new-schema-user@example.com');
+        expect(actorNode).to.not.be(undefined);
+        expect(actorNode!.documentsData).to.not.be(undefined);
+        expect(actorNode!.documentsData!.length).to.equal(1);
+
+        expectExpect(actorNode!.documentsData).toContainEqual(
+          expectExpect.objectContaining({
+            id: 'new-schema-user@example.com',
+            type: 'entity',
+            sourceNamespaceField: 'user',
+          })
+        );
+
+        const targetNode = entityNodes.find(
+          (node) => node.id === 'projects/new-schema-project-id/serviceAccounts/test-sa'
+        );
+        expect(targetNode).to.not.be(undefined);
+        expect(targetNode!.documentsData).to.not.be(undefined);
+        expect(targetNode!.documentsData!.length).to.equal(1);
+
+        expectExpect(targetNode!.documentsData).toContainEqual(
+          expectExpect.objectContaining({
+            id: 'projects/new-schema-project-id/serviceAccounts/test-sa',
+            type: 'entity',
+            sourceNamespaceField: 'entity',
+          })
+        );
+      });
+
       it('should return a graph with nodes and edges by alert', async () => {
         const response = await postGraph(supertest, {
           query: {
@@ -1364,139 +1422,74 @@ export default function (providerContext: FtrProviderContext) {
             expect(edge.type).equal('solid');
           });
         });
-      });
 
-      describe('Source namespace field', () => {
-        it('should include sourceNamespaceField "user" in documentsData when user.entity.id field exists', async () => {
-          const response = await postGraph(supertest, {
-            query: {
-              indexPatterns: ['.alerts-security.alerts-*', 'logs-*'],
-              originEventIds: [{ id: 'new-schema-event-id', isAlert: false }],
-              start: '2024-09-01T00:00:00Z',
-              end: '2024-09-02T00:00:00Z',
-            },
-          }).expect(result(200));
-
-          expect(response.body).to.have.property('nodes').length(3);
-          expect(response.body).to.have.property('edges').length(2);
-          expect(response.body).not.to.have.property('messages');
-
-          const entityNodes = response.body.nodes.filter(
-            (node: NodeDataModel) => !isLabelNode(node)
-          ) as EntityNodeDataModel[];
-
-          const actorNode = entityNodes.find((node) => node.id === 'new-schema-user@example.com');
-          expect(actorNode).to.not.be(undefined);
-          expect(actorNode!.documentsData!.length).to.equal(1);
-
-          expectExpect(actorNode!.documentsData).toContainEqual(
-            expectExpect.objectContaining({
-              id: 'new-schema-user@example.com',
-              type: 'entity',
-              sourceNamespaceField: 'user',
-            })
-          );
-        });
-
-        it('should include sourceNamespaceField for service.target.entity.id', async () => {
-          const response = await postGraph(supertest, {
-            query: {
-              indexPatterns: ['.alerts-security.alerts-*', 'logs-*'],
-              originEventIds: [{ id: 'entity-enrichment-event-id', isAlert: false }],
-              start: '2024-09-10T14:00:00Z',
-              end: '2024-09-10T15:00:00Z',
-            },
-          }).expect(result(200));
-
-          expect(response.body).to.have.property('nodes').length(3);
-          expect(response.body).to.have.property('edges').length(2);
-          expect(response.body).not.to.have.property('messages');
-
-          const entityNodes = response.body.nodes.filter(
-            (node: NodeDataModel) => !isLabelNode(node)
-          ) as EntityNodeDataModel[];
-
-          const actorNode = entityNodes.find((node) => node.id === 'entity-user@example.com');
-          expect(actorNode).to.not.be(undefined);
-          expect(actorNode!.documentsData!.length).to.equal(1);
-
-          expectExpect(actorNode!.documentsData).toContainEqual(
-            expectExpect.objectContaining({
-              id: 'entity-user@example.com',
-              type: 'entity',
-              sourceNamespaceField: 'user',
-            })
-          );
-
-          const targetNode = entityNodes.find((node) => node.id === 'entity-service-target-1');
-          expect(targetNode).to.not.be(undefined);
-          expect(targetNode!.documentsData!.length).to.equal(1);
-
-          expectExpect(targetNode!.documentsData).toContainEqual(
-            expectExpect.objectContaining({
-              id: 'entity-service-target-1',
-              type: 'entity',
-              sourceNamespaceField: 'service',
-            })
-          );
-        });
-
-        it('should filter by user.entity.id in esQuery and return sourceNamespaceField', async () => {
-          const response = await postGraph(supertest, {
-            query: {
-              indexPatterns: ['.alerts-security.alerts-*', 'logs-*'],
-              originEventIds: [],
-              start: '2024-09-01T00:00:00Z',
-              end: '2024-09-02T00:00:00Z',
-              esQuery: {
-                bool: {
-                  filter: [
-                    {
-                      match_phrase: {
-                        'user.entity.id': 'new-schema-user@example.com',
-                      },
-                    },
-                  ],
+        it('should include sourceNamespaceField in enriched entity documentsData', async () => {
+          await supertest
+            .post(`/api/fleet/epm/packages/_bulk`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              packages: [
+                {
+                  name: 'cloud_asset_inventory',
+                  version: CLOUD_ASSET_DISCOVERY_PACKAGE_VERSION,
                 },
+              ],
+            })
+            .expect(200);
+
+          await retry.tryForTime(enrichPolicyCreationTimeout, async () => {
+            const response = await postGraph(supertest, {
+              query: {
+                indexPatterns: ['.alerts-security.alerts-*', 'logs-*'],
+                originEventIds: [{ id: 'entity-enrichment-event-id', isAlert: true }],
+                start: '2024-09-10T14:00:00Z',
+                end: '2024-09-10T15:00:00Z',
               },
-            },
-          }).expect(result(200));
+            }).expect(result(200));
 
-          expect(response.body).to.have.property('nodes').length(3);
-          expect(response.body).to.have.property('edges').length(2);
-          expect(response.body).not.to.have.property('messages');
+            expect(response.body).to.have.property('nodes').length(3);
+            expect(response.body).to.have.property('edges').length(2);
 
-          const entityNodes = response.body.nodes.filter(
-            (node: NodeDataModel) => !isLabelNode(node)
-          ) as EntityNodeDataModel[];
+            const entityNodes = response.body.nodes.filter(
+              (node: NodeDataModel) => !isLabelNode(node)
+            ) as EntityNodeDataModel[];
 
-          const actorNode = entityNodes.find((node) => node.id === 'new-schema-user@example.com');
-          expect(actorNode).to.not.be(undefined);
-          expect(actorNode!.documentsData).to.not.be(undefined);
-          expect(actorNode!.documentsData!.length).to.equal(1);
+            // Verify actor node has sourceNamespaceField in documentsData
+            const actorNode = entityNodes.find((node) => node.id === 'entity-user@example.com');
+            expect(actorNode).not.to.be(undefined);
+            expect(actorNode!.documentsData!.length).to.equal(1);
+            expectExpect(actorNode!.documentsData).toContainEqual(
+              expectExpect.objectContaining({
+                id: 'entity-user@example.com',
+                type: 'entity',
+                entity: {
+                  name: 'EntityTestUser',
+                  type: 'Identity',
+                  sub_type: 'GCP IAM User',
+                },
+                sourceNamespaceField: 'user',
+              })
+            );
 
-          expectExpect(actorNode!.documentsData).toContainEqual(
-            expectExpect.objectContaining({
-              id: 'new-schema-user@example.com',
-              type: 'entity',
-              sourceNamespaceField: 'user',
-            })
-          );
+            // Verify target node has sourceNamespaceField in documentsData
+            const targetNode = entityNodes.find((node) => node.id === 'entity-service-target-1');
+            expect(targetNode).not.to.be(undefined);
+            expect(targetNode!.documentsData).to.not.be(undefined);
+            expect(targetNode!.documentsData!.length).to.be.greaterThan(0);
 
-          const targetNode = entityNodes.find(
-            (node) => node.id === 'projects/new-schema-project-id/serviceAccounts/test-sa'
-          );
-          expect(targetNode).to.not.be(undefined);
-          expect(targetNode!.documentsData).to.not.be(undefined);
-          expect(targetNode!.documentsData!.length).to.equal(1);
-
-          expectExpect(targetNode!.documentsData).toContainEqual(
-            expectExpect.objectContaining({
-              id: 'projects/new-schema-project-id/serviceAccounts/test-sa',
-              type: 'entity',
-              sourceNamespaceField: 'entity',
-            })
-          );
+            expectExpect(targetNode!.documentsData).toContainEqual(
+              expectExpect.objectContaining({
+                id: 'entity-service-target-1',
+                type: 'entity',
+                entity: {
+                  name: 'ComputeServiceTarget',
+                  type: 'Compute',
+                  sub_type: 'GCP Compute Instance',
+                },
+                sourceNamespaceField: 'service',
+              })
+            );
+          });
         });
       });
     });
