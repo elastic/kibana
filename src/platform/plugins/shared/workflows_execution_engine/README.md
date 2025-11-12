@@ -168,7 +168,6 @@ Factory pattern for creating and executing different types of workflow steps.
 - Action steps (connector execution)
 - Conditional steps
 - Loop, wait, timeout, and failure handling steps
-- Parallel execution steps
 - Custom step types
 
 ---
