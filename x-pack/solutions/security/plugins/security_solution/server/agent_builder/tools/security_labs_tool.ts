@@ -9,7 +9,7 @@ import { z } from '@kbn/zod';
 import { ToolType } from '@kbn/onechat-common';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { createErrorResult } from '@kbn/onechat-server';
-import { internalNamespaces } from '@kbn/onechat-common/base/namespaces';
+import { securityTool } from '../constants';
 
 // TODO: Update to follow same pattern as Product Documentation Tool (use llmTasks.retrieveDocumentation)
 // TODO: Investigate how to install Security Labs documents using the same installation/retrieval pattern as product documentation
@@ -22,7 +22,7 @@ const securityLabsSchema = z.object({
       `Key terms to retrieve Elastic Security Labs content for, like specific malware names or attack techniques.`
     ),
 });
-export const SECURITY_LABS_TOOL_ID = `${internalNamespaces}.security_labs`;
+export const SECURITY_LABS_TOOL_ID = securityTool('security_labs');
 
 export const securityLabsTool = (): BuiltinToolDefinition<typeof securityLabsSchema> => {
   return {
@@ -43,8 +43,6 @@ Examples:
     `,
     schema: securityLabsSchema,
     handler: async ({ question }, { request, logger }) => {
-      logger.debug(`security labs tool called with question: ${question}`);
-
       // TODO: Follow the same pattern as Product Documentation Tool
       // Need to determine how to install Security Labs documents using the same installation/retrieval pattern
       // as product documentation, then use llmTasks.retrieveDocumentation to retrieve them
