@@ -8,5 +8,4 @@
  */
 
 export * from './get';
-export * from './search';
 export * from './common';

@@ -8,7 +8,7 @@
  */
 
 import type { ContentManagementServicesDefinition as ServicesDefinition } from '@kbn/object-versioning';
-import { getDashboardGetResultSchema, dashboardSearchOptionsSchema } from './schema';
+import { getDashboardGetResultSchema } from './schema';
 
 export function getServiceDefinition(): ServicesDefinition {
   return {
@@ -16,13 +16,6 @@ export function getServiceDefinition(): ServicesDefinition {
       out: {
         result: {
           schema: getDashboardGetResultSchema(),
-        },
-      },
-    },
-    search: {
-      in: {
-        options: {
-          schema: dashboardSearchOptionsSchema,
         },
       },
     },
