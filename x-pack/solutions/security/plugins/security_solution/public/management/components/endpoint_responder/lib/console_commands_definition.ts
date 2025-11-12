@@ -564,7 +564,6 @@ export const getEndpointConsoleCommands = ({
                   }
                 ),
                 mustHaveValue: 'truthy',
-                selectorShowTextValue: true,
                 SelectorComponent: PendingActionsSelector,
               },
             }
@@ -840,7 +839,6 @@ const adjustCommandsForSentinelOne = ({
             ),
             mustHaveValue: 'non-empty-string',
             SelectorComponent: CustomScriptSelector,
-            selectorShowTextValue: true,
           },
           inputParams: {
             required: false,
@@ -851,7 +849,6 @@ const adjustCommandsForSentinelOne = ({
             ),
             mustHaveValue: 'non-empty-string',
             SelectorComponent: SentinelOneScriptInputParams,
-            selectorShowTextValue: true,
           },
           ...commandCommentArgument(),
         };
@@ -959,7 +956,6 @@ const adjustCommandsForCrowdstrike = ({
               about: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.args.cloudFile.about,
               mustHaveValue: 'truthy',
               exclusiveOr: true,
-              selectorShowTextValue: true,
               SelectorComponent: CustomScriptSelector,
             },
             CommandLine: {
@@ -967,7 +963,6 @@ const adjustCommandsForCrowdstrike = ({
               allowMultiples: false,
               about: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.args.commandLine.about,
               mustHaveValue: 'non-empty-string',
-              selectorShowTextValue: true,
               SelectorComponent: CrowdstrikeScriptInputParams,
             },
             HostPath: {
@@ -1033,7 +1028,6 @@ const adjustCommandsForMicrosoftDefenderEndpoint = ({
               allowMultiples: false,
               about: MS_DEFENDER_ENDPOINT_CONSOLE_COMMANDS.runscript.args.scriptName.about,
               mustHaveValue: 'truthy',
-              selectorShowTextValue: true,
               SelectorComponent: CustomScriptSelector,
             },
             Args: {
@@ -1041,7 +1035,6 @@ const adjustCommandsForMicrosoftDefenderEndpoint = ({
               allowMultiples: false,
               about: MS_DEFENDER_ENDPOINT_CONSOLE_COMMANDS.runscript.args.args.about,
               mustHaveValue: 'non-empty-string',
-              selectorShowTextValue: true,
               SelectorComponent: MicrosoftScriptInputParams,
             },
             ...commandCommentArgument(),

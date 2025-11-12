@@ -69,11 +69,6 @@ export interface CommandArgDefinition {
    * the argument's value.
    */
   SelectorComponent?: CommandArgumentValueSelectorComponent;
-
-  /**
-   * If defined, the selector will use `true` as the default value which results in empty array as args value
-   */
-  selectorShowTextValue?: boolean;
 }
 
 /** List of arguments for a Command */
@@ -304,7 +299,11 @@ export interface CommandArgumentValueSelectorProps<
 > {
   /**
    * The current value that was selected. This will not be displayed in the UI, but will
-   * be passed on to the command execution as part of the argument's value
+   * be passed on to the command execution as part of the argument's value.
+   *
+   * NOTE:  that this value might be defined during the initial component render as a result of the
+   *        user selecting the command from the input history or pasting the command into the
+   *        console's input area. Components should be coded to handle this possibility
    */
   value: TSelection | undefined;
 
@@ -312,6 +311,10 @@ export interface CommandArgumentValueSelectorProps<
    * A string value for display purposes only that describes the selected value. This
    * will be used when the command is entered and displayed in the console as well as in
    * the command input history popover
+   *
+   * NOTE:  that this value might be defined during the initial component render as a result of the
+   *        user selecting the command from the input history or pasting the command into the
+   *        console's input area. Components should be coded to handle this possibility
    */
   valueText: string;
 
@@ -354,7 +357,11 @@ export interface CommandArgumentValueSelectorProps<
 }
 
 /**
- * Component for rendering an argument's value selector
+ * Component for rendering an argument's value selector.
+ *
+ * Note that the component could be initialized with a `value` and `valueText` in cases where the
+ * user might have either selected the command entry from the input history or from pasting the
+ * command into the input.
  */
 export type CommandArgumentValueSelectorComponent =
   ComponentType<CommandArgumentValueSelectorProps>;
