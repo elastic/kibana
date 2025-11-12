@@ -320,17 +320,13 @@ ${
     "${NON_ENRICHED_ENTITY_TYPE_PLURAL}"
   )
 | EVAL actorLabel = CASE(
-    actorEntitySubType IS NOT NULL,
+    actorIdsCount > 1 AND actorEntitySubType IS NOT NULL,
     actorEntitySubType,
-    actorIdsCount == 1,
-    MV_FIRST(actorIds),
     ""
   )
 | EVAL targetLabel = CASE(
-    targetEntitySubType IS NOT NULL,
+    targetIdsCount > 1 AND targetEntitySubType IS NOT NULL,
     targetEntitySubType,
-    targetIdsCount == 1,
-    MV_FIRST(targetIds),
     ""
   )
 | LIMIT 1000
