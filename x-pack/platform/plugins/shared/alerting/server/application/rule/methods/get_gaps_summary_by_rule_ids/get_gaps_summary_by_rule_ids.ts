@@ -21,13 +21,12 @@ import {
 } from '../../../../rules_client/common/constants';
 //
 import {
-  buildBaseGapsFilter,
-  resolveTimeRange,
   extractGapDurationSums,
   calculateAggregatedGapStatus,
   COMMON_GAP_AGGREGATIONS,
   type GapDurationBucket,
 } from '../get_rule_ids_with_gaps/utils';
+import { buildGapsFilter } from '../../../../lib/rule_gaps/build_gaps_filter';
 
 export async function getGapsSummaryByRuleIds(
   context: RulesClientContext,
@@ -50,7 +49,7 @@ export async function getGapsSummaryByRuleIds(
       throw error;
     }
 
-    const { start, end, ruleIds } = params;
+    const { ruleIds, start, end } = params;
     const { filter: authorizationFilter } = authorizationTuple;
     const kueryNodeFilter = convertRuleIdsToKueryNode(ruleIds);
     const kueryNodeFilterWithAuth =
@@ -107,8 +106,7 @@ export async function getGapsSummaryByRuleIds(
       { concurrency: RULE_TYPE_CHECKS_CONCURRENCY }
     );
 
-    const { from, to } = resolveTimeRange({ from: start, to: end });
-    const filter = buildBaseGapsFilter(from, to);
+    const filter = buildGapsFilter({ start, end });
 
     const aggs = await eventLogClient.aggregateEventsBySavedObjectIds(
       RULE_SAVED_OBJECT_TYPE,

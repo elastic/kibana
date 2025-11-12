@@ -73,7 +73,7 @@ export const fetchRulesByQueryOrIds = async ({
     const ruleIdsWithGapsResponse = await rulesClient.getRuleIdsWithGaps({
       start: gapRange.start,
       end: gapRange.end,
-      statuses: gapStatuses,
+      aggregatedStatuses: gapStatuses,
     });
     ruleIdsWithGaps = ruleIdsWithGapsResponse.ruleIds;
     if (ruleIdsWithGaps.length === 0) {

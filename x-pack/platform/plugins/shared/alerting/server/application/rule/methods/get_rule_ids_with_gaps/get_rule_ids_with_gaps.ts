@@ -15,15 +15,29 @@ import type { RulesClientContext } from '../../../../rules_client';
 import type { GetRuleIdsWithGapsParams, GetRuleIdsWithGapsResponse } from './types';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import {
-  buildBaseGapsFilter,
-  resolveTimeRange,
   extractGapDurationSums,
   calculateAggregatedGapStatus,
   COMMON_GAP_AGGREGATIONS,
   type GapDurationBucket,
 } from './utils';
 export const RULE_SAVED_OBJECT_TYPE = 'alert';
+import { buildGapsFilter } from '../../../../lib/rule_gaps/build_gaps_filter';
 
+/**
+ * Returns rule ids that have gaps within the requested time range.
+ *
+ * Parameters:
+ * - statuses: Direct per-gap status filter applied to event log gap documents
+ *   before aggregation. This corresponds to gap-level statuses
+ *   (e.g. 'unfilled' | 'partially_filled' | 'filled') and controls which
+ *   gaps are considered in the aggregations and latest timestamp query.
+ *
+ * - aggregatedStatuses: Computed, per-rule status filter applied after
+ *   aggregation. For each rule we compute an aggregated status from the
+ *   summed gap durations with precedence: unfilled > in_progress > filled.
+ *   Only rules whose computed aggregated status matches one of the provided
+ *   values ('unfilled' | 'in_progress' | 'filled') are returned.
+ */
 export async function getRuleIdsWithGaps(
   context: RulesClientContext,
   params: GetRuleIdsWithGapsParams
@@ -51,11 +65,10 @@ export async function getRuleIdsWithGaps(
       throw error;
     }
 
-    const { start, end } = params;
+    const { start, end, statuses, aggregatedStatuses } = params;
     const eventLogClient = await context.getEventLogClient();
 
-    const { from, to } = resolveTimeRange({ from: start, to: end });
-    const filter = `${buildBaseGapsFilter(from, to)} AND kibana.alert.rule.gap.status: *`;
+    const filter = buildGapsFilter({ start, end, statuses });
 
     const aggs = await eventLogClient.aggregateEventsWithAuthFilter(
       RULE_SAVED_OBJECT_TYPE,
@@ -80,13 +93,14 @@ export async function getRuleIdsWithGaps(
       | { buckets: ByRuleBucket[] }
       | undefined;
     const buckets = byRuleAgg?.buckets ?? [];
-    const statuses = new Set(params.statuses);
 
     const ruleIds: string[] = [];
-    for (const b of buckets) {
-      const sums = extractGapDurationSums(b);
-      const status = calculateAggregatedGapStatus(sums);
-      if (status && statuses.has(status)) ruleIds.push(b.key);
+    if (aggregatedStatuses?.length ?? 0 > 0) {
+      for (const b of buckets) {
+        const sums = extractGapDurationSums(b);
+        const aggregatedStatus = calculateAggregatedGapStatus(sums);
+        if (aggregatedStatus && aggregatedStatuses?.includes(aggregatedStatus)) ruleIds.push(b.key);
+      }
     }
 
     const latestGapTimestampAgg = aggs.aggregations?.latest_gap_timestamp as { value: number };

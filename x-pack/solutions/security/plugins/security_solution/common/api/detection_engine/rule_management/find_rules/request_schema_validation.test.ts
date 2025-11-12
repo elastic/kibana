@@ -10,6 +10,87 @@ import { validateFindRulesRequestQuery } from './request_schema_validation';
 
 describe('Find rules request schema, additional validation', () => {
   describe('validateFindRulesRequestQuery', () => {
+    describe('gap filters coupling', () => {
+      test('Valid when gap_status with both gaps_range_start and gaps_range_end', () => {
+        const schema: FindRulesRequestQueryInput = {
+          gap_status: 'unfilled',
+          gaps_range_start: '2024-01-01T00:00:00.000Z',
+          gaps_range_end: '2024-01-02T00:00:00.000Z',
+        };
+        const errors = validateFindRulesRequestQuery(schema);
+        expect(errors).toEqual([]);
+      });
+
+      test('Error when gap_status present without gaps_range_start and gaps_range_end', () => {
+        const schema: FindRulesRequestQueryInput = {
+          gap_status: 'in_progress',
+        };
+        const errors = validateFindRulesRequestQuery(schema);
+        expect(errors).toEqual([
+          'when "gap_status" is present, "gaps_range_start" and "gaps_range_end" must also be present',
+        ]);
+      });
+
+      test('Error when gap_status present with only gaps_range_start', () => {
+        const schema: FindRulesRequestQueryInput = {
+          gap_status: 'filled',
+          gaps_range_start: '2024-01-01T00:00:00.000Z',
+        };
+        const errors = validateFindRulesRequestQuery(schema);
+        expect(errors).toEqual([
+          'when "gap_status" is present, "gaps_range_start" and "gaps_range_end" must also be present',
+        ]);
+      });
+
+      test('Error when gap_status present with only gaps_range_end', () => {
+        const schema: FindRulesRequestQueryInput = {
+          gap_status: 'filled',
+          gaps_range_end: '2024-01-02T00:00:00.000Z',
+        };
+        const errors = validateFindRulesRequestQuery(schema);
+        expect(errors).toEqual([
+          'when "gap_status" is present, "gaps_range_start" and "gaps_range_end" must also be present',
+        ]);
+      });
+
+      test('Error when gaps_range_start and gaps_range_end present without gap_status', () => {
+        const schema: FindRulesRequestQueryInput = {
+          gaps_range_start: '2024-01-01T00:00:00.000Z',
+          gaps_range_end: '2024-01-02T00:00:00.000Z',
+        };
+        const errors = validateFindRulesRequestQuery(schema);
+        expect(errors).toEqual([
+          'when "gap_status" is not present, "gaps_range_start" and "gaps_range_end" must not be present',
+        ]);
+      });
+
+      test('Error when only gaps_range_start present without gap_status', () => {
+        const schema: FindRulesRequestQueryInput = {
+          gaps_range_start: '2024-01-01T00:00:00.000Z',
+        };
+        const errors = validateFindRulesRequestQuery(schema);
+        expect(errors).toEqual([
+          'when "gap_status" is not present, "gaps_range_start" and "gaps_range_end" must not be present',
+        ]);
+      });
+
+      test('Error when only gaps_range_end present without gap_status', () => {
+        const schema: FindRulesRequestQueryInput = {
+          gaps_range_end: '2024-01-02T00:00:00.000Z',
+        };
+        const errors = validateFindRulesRequestQuery(schema);
+        expect(errors).toEqual([
+          'when "gap_status" is not present, "gaps_range_start" and "gaps_range_end" must not be present',
+        ]);
+      });
+
+      test('No error when none of gap filters are provided', () => {
+        const schema: FindRulesRequestQueryInput = {};
+        const errors = validateFindRulesRequestQuery(schema);
+        expect(errors).toEqual([]);
+      });
+    });
+
     test('You can have an empty sort_field and empty sort_order', () => {
       const schema: FindRulesRequestQueryInput = {};
       const errors = validateFindRulesRequestQuery(schema);

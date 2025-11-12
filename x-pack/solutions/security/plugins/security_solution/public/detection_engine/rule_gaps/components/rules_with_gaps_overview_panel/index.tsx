@@ -21,14 +21,14 @@ export const RulesWithGapsOverviewPanel = () => {
   // Total rules with gaps: unfilled or in progress
   const { data: totalRulesWithGaps, refetch: refetchGetRuleIdsWithGaps } = useGetRuleIdsWithGaps({
     gapRange: defaultRangeValue,
-    statuses: [aggregatedGapStatus.UNFILLED, aggregatedGapStatus.IN_PROGRESS],
+    aggregatedStatuses: [aggregatedGapStatus.UNFILLED, aggregatedGapStatus.IN_PROGRESS],
   });
 
   // Rules with in-progress gaps
   const { data: inProgressRulesWithGaps, refetch: refetchGetRuleIdsWithGapsInProgressIntervals } =
     useGetRuleIdsWithGaps({
       gapRange: defaultRangeValue,
-      statuses: [aggregatedGapStatus.IN_PROGRESS],
+      aggregatedStatuses: [aggregatedGapStatus.IN_PROGRESS],
     });
 
   useEffect(() => {

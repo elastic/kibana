@@ -8,8 +8,8 @@
 import { schema } from '@kbn/config-schema';
 
 export const getGapsSummaryByRuleIdsParamsSchema = schema.object({
-  start: schema.maybe(schema.string()),
-  end: schema.maybe(schema.string()),
+  start: schema.string(),
+  end: schema.string(),
   ruleIds: schema.arrayOf(schema.string()),
 });
 

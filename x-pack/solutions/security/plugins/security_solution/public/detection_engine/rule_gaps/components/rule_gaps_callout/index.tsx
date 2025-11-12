@@ -47,7 +47,7 @@ export const RuleGapsCallout = () => {
 
   const { data } = useGetRuleIdsWithGaps({
     gapRange: GapRangeValue.LAST_24_H,
-    statuses: [aggregatedGapStatus.UNFILLED, aggregatedGapStatus.IN_PROGRESS],
+    aggregatedStatuses: [aggregatedGapStatus.UNFILLED],
   });
 
   useEffect(() => {

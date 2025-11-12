@@ -5,18 +5,7 @@
  * 2.0.
  */
 
-import { buildGapsFilter } from '../../../../lib/rule_gaps/build_gaps_filter';
 import type { AggregatedGapStatus } from '../../../../../common/constants/gap_status';
-
-export interface TimeRangeInput {
-  from?: string;
-  to?: string;
-}
-
-export interface ResolvedTimeRange {
-  from: string;
-  to: string;
-}
 
 export interface GapDurationSums {
   sumUnfilledMs: number;
@@ -30,20 +19,6 @@ export interface GapDurationBucket {
   sum_in_progress_ms?: { value: number | null };
   sum_filled_ms?: { value: number | null };
   sum_total_ms?: { value: number | null };
-}
-
-export function resolveTimeRange(timeRange?: TimeRangeInput): ResolvedTimeRange {
-  const now = new Date();
-  const ninetyDaysAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
-  const fromDefault = ninetyDaysAgo.toISOString();
-  const toDefault = now.toISOString();
-  const from = timeRange?.from ?? fromDefault;
-  const to = timeRange?.to ?? toDefault;
-  return { from, to };
-}
-
-export function buildBaseGapsFilter(from: string, to: string): string {
-  return buildGapsFilter({ start: from, end: to });
 }
 
 /**
@@ -87,18 +62,3 @@ export const COMMON_GAP_AGGREGATIONS = {
     sum: { field: 'kibana.alert.rule.gap.total_gap_duration_ms' },
   },
 } as const;
-
-/**
- * Legacy function for backward compatibility
- * @deprecated Use calculateAggregatedGapStatus instead
- */
-export function computeAggregatedStatusFromIntervals(
-  hasUnfilled: boolean,
-  hasInProgress: boolean,
-  hasFilled: boolean
-): AggregatedGapStatus | null {
-  if (hasUnfilled) return 'unfilled';
-  if (hasInProgress) return 'in_progress';
-  if (hasFilled) return 'filled';
-  return null;
-}

@@ -16,5 +16,17 @@ export const validateFindRulesRequestQuery = (query: FindRulesRequestQueryInput)
       return ['when "sort_order" and "sort_field" must exist together or not at all'];
     }
   }
+  if (query.gap_status != null) {
+    if (query.gaps_range_start == null || query.gaps_range_end == null) {
+      return [
+        'when "gap_status" is present, "gaps_range_start" and "gaps_range_end" must also be present',
+      ];
+    }
+  }
+  if (!query.gap_status && (query.gaps_range_start || query.gaps_range_end)) {
+    return [
+      'when "gap_status" is not present, "gaps_range_start" and "gaps_range_end" must not be present',
+    ];
+  }
   return [];
 };
