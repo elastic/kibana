@@ -196,6 +196,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('a11y test for field statistics data grid view', async () => {
+      await retry.try(async () => {
+        await testSubjects.existOrFail('dscViewModeFieldStatsButton');
+      });
       await discover.clickViewModeFieldStatsButton();
       await a11y.testAppSnapshot();
     });
