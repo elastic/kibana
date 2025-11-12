@@ -469,6 +469,13 @@ export default function (providerContext: FtrProviderContext) {
             'primary',
             `node color mismatched [node: ${node.id}] [actual: ${node.color}]`
           );
+
+          // make sure entity nodes have no documents data
+          // for non-enriched entity nodes - documentData is added only when event data containts root level namespace entity fields
+          if (node.shape !== 'label') {
+            expect(node.documentsData?.length ?? 0).to.equal(0);
+          }
+
           if (node.shape === 'label') {
             expect(node.documentsData).to.have.length(2);
             // Check document types based on actual content
@@ -609,6 +616,13 @@ export default function (providerContext: FtrProviderContext) {
               'primary',
               `node color mismatched [node: ${node.id}] [actual: ${node.color}]`
             );
+
+            // make sure entity nodes have no documents data
+            // for non-enriched entity nodes - documentData is added only when event data containts root level namespace entity fields
+            if (node.shape !== 'label') {
+              expect(node.documentsData?.length ?? 0).to.equal(0);
+            }
+
             if (node.shape === 'label') {
               // Handle flexible document patterns
               if (node.documentsData && node.documentsData.length === 1) {
@@ -1349,6 +1363,140 @@ export default function (providerContext: FtrProviderContext) {
             );
             expect(edge.type).equal('solid');
           });
+        });
+      });
+
+      describe('Source namespace field', () => {
+        it('should include sourceNamespaceField "user" in documentsData when user.entity.id field exists', async () => {
+          const response = await postGraph(supertest, {
+            query: {
+              indexPatterns: ['.alerts-security.alerts-*', 'logs-*'],
+              originEventIds: [{ id: 'new-schema-event-id', isAlert: false }],
+              start: '2024-09-01T00:00:00Z',
+              end: '2024-09-02T00:00:00Z',
+            },
+          }).expect(result(200));
+
+          expect(response.body).to.have.property('nodes').length(3);
+          expect(response.body).to.have.property('edges').length(2);
+          expect(response.body).not.to.have.property('messages');
+
+          const entityNodes = response.body.nodes.filter(
+            (node: NodeDataModel) => !isLabelNode(node)
+          ) as EntityNodeDataModel[];
+
+          const actorNode = entityNodes.find((node) => node.id === 'new-schema-user@example.com');
+          expect(actorNode).to.not.be(undefined);
+          expect(actorNode!.documentsData!.length).to.equal(1);
+
+          expectExpect(actorNode!.documentsData).toContainEqual(
+            expectExpect.objectContaining({
+              id: 'new-schema-user@example.com',
+              type: 'entity',
+              sourceNamespaceField: 'user',
+            })
+          );
+        });
+
+        it('should include sourceNamespaceField for service.target.entity.id', async () => {
+          const response = await postGraph(supertest, {
+            query: {
+              indexPatterns: ['.alerts-security.alerts-*', 'logs-*'],
+              originEventIds: [{ id: 'entity-enrichment-event-id', isAlert: false }],
+              start: '2024-09-10T14:00:00Z',
+              end: '2024-09-10T15:00:00Z',
+            },
+          }).expect(result(200));
+
+          expect(response.body).to.have.property('nodes').length(3);
+          expect(response.body).to.have.property('edges').length(2);
+          expect(response.body).not.to.have.property('messages');
+
+          const entityNodes = response.body.nodes.filter(
+            (node: NodeDataModel) => !isLabelNode(node)
+          ) as EntityNodeDataModel[];
+
+          const actorNode = entityNodes.find((node) => node.id === 'entity-user@example.com');
+          expect(actorNode).to.not.be(undefined);
+          expect(actorNode!.documentsData!.length).to.equal(1);
+
+          expectExpect(actorNode!.documentsData).toContainEqual(
+            expectExpect.objectContaining({
+              id: 'entity-user@example.com',
+              type: 'entity',
+              sourceNamespaceField: 'user',
+            })
+          );
+
+          const targetNode = entityNodes.find((node) => node.id === 'entity-service-target-1');
+          expect(targetNode).to.not.be(undefined);
+          expect(targetNode!.documentsData!.length).to.equal(1);
+
+          expectExpect(targetNode!.documentsData).toContainEqual(
+            expectExpect.objectContaining({
+              id: 'entity-service-target-1',
+              type: 'entity',
+              sourceNamespaceField: 'service',
+            })
+          );
+        });
+
+        it('should filter by user.entity.id in esQuery and return sourceNamespaceField', async () => {
+          const response = await postGraph(supertest, {
+            query: {
+              indexPatterns: ['.alerts-security.alerts-*', 'logs-*'],
+              originEventIds: [],
+              start: '2024-09-01T00:00:00Z',
+              end: '2024-09-02T00:00:00Z',
+              esQuery: {
+                bool: {
+                  filter: [
+                    {
+                      match_phrase: {
+                        'user.entity.id': 'new-schema-user@example.com',
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          }).expect(result(200));
+
+          expect(response.body).to.have.property('nodes').length(3);
+          expect(response.body).to.have.property('edges').length(2);
+          expect(response.body).not.to.have.property('messages');
+
+          const entityNodes = response.body.nodes.filter(
+            (node: NodeDataModel) => !isLabelNode(node)
+          ) as EntityNodeDataModel[];
+
+          const actorNode = entityNodes.find((node) => node.id === 'new-schema-user@example.com');
+          expect(actorNode).to.not.be(undefined);
+          expect(actorNode!.documentsData).to.not.be(undefined);
+          expect(actorNode!.documentsData!.length).to.equal(1);
+
+          expectExpect(actorNode!.documentsData).toContainEqual(
+            expectExpect.objectContaining({
+              id: 'new-schema-user@example.com',
+              type: 'entity',
+              sourceNamespaceField: 'user',
+            })
+          );
+
+          const targetNode = entityNodes.find(
+            (node) => node.id === 'projects/new-schema-project-id/serviceAccounts/test-sa'
+          );
+          expect(targetNode).to.not.be(undefined);
+          expect(targetNode!.documentsData).to.not.be(undefined);
+          expect(targetNode!.documentsData!.length).to.equal(1);
+
+          expectExpect(targetNode!.documentsData).toContainEqual(
+            expectExpect.objectContaining({
+              id: 'projects/new-schema-project-id/serviceAccounts/test-sa',
+              type: 'entity',
+              sourceNamespaceField: 'entity',
+            })
+          );
         });
       });
     });
