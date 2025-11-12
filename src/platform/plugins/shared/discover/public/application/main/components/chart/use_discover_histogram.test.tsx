@@ -21,7 +21,9 @@ import { RequestAdapter } from '@kbn/inspector-plugin/public';
 import type {
   UnifiedHistogramFetchParamsExternal,
   UnifiedHistogramState,
+  UnifiedHistogramVisContext,
 } from '@kbn/unified-histogram';
+import { UnifiedHistogramSuggestionType } from '@kbn/unified-histogram/types';
 import { UnifiedHistogramFetchStatus } from '@kbn/unified-histogram';
 import { createMockUnifiedHistogramApi } from '@kbn/unified-histogram/mocks';
 import { checkHitCount, sendErrorTo } from '../../hooks/use_saved_search_messages';
@@ -55,20 +57,6 @@ jest.mock('../../../../hooks/use_discover_services', () => {
   return {
     ...originalModule,
     useDiscoverServices: () => ({ data: mockData }),
-  };
-});
-
-jest.mock('@kbn/unified-field-list/src/hooks/use_query_subscriber', () => {
-  const originalModule = jest.requireActual(
-    '@kbn/unified-field-list/src/hooks/use_query_subscriber'
-  );
-  return {
-    ...originalModule,
-    useQuerySubscriber: jest.fn(() => ({
-      ...mockQueryState,
-      fromDate: 'now-15m',
-      toDate: 'now',
-    })),
   };
 });
 
@@ -437,7 +425,7 @@ describe('useDiscoverHistogram', () => {
   });
 
   describe('fetching', () => {
-    it('should call fetch when savedSearchFetch$ is triggered', async () => {
+    it('should call fetch when fetchChart$ is triggered', async () => {
       const fetch$ = new Subject<DiscoverLatestFetchDetails>();
       const stateContainer = getStateContainer();
       stateContainer.dataState.fetchChart$ = fetch$;
@@ -456,6 +444,39 @@ describe('useDiscoverHistogram', () => {
         expect.objectContaining({
           abortController,
         })
+      );
+    });
+
+    it('should call fetch when only visContext changes', async () => {
+      const fetch$ = new Subject<DiscoverLatestFetchDetails>();
+      const stateContainer = getStateContainer();
+      stateContainer.appState.update({ query: { esql: 'from logs*' } });
+      stateContainer.dataState.fetchChart$ = fetch$;
+      const { hook } = await renderUseDiscoverHistogram({ stateContainer });
+      const api = createMockUnifiedHistogramApi();
+      act(() => {
+        hook.result.current.setUnifiedHistogramApi(api);
+      });
+      expect(api.fetch).not.toHaveBeenCalled();
+      const abortController = new AbortController();
+      act(() => {
+        fetch$.next({ abortController });
+      });
+      expect(api.fetch).toHaveBeenCalledTimes(1);
+      const visContext = {
+        attributes: {},
+        requestData: {},
+        suggestionType: UnifiedHistogramSuggestionType.histogramForESQL,
+      } as UnifiedHistogramVisContext;
+      act(() => {
+        stateContainer.savedSearchState.set({
+          ...stateContainer.savedSearchState.getState(),
+          visContext,
+        });
+      });
+      expect(api.fetch).toHaveBeenCalledTimes(2);
+      expect(api.fetch).toHaveBeenLastCalledWith(
+        expect.objectContaining({ externalVisContext: visContext })
       );
     });
   });

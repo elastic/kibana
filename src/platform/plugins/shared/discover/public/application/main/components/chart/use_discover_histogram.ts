@@ -286,7 +286,7 @@ export const useDiscoverHistogram = (
     lastReloadRequestTime,
   ]);
 
-  const usedFetchParamsRef = useRef<UnifiedHistogramFetchParamsExternal | null>(null);
+  const previousFetchParamsRef = useRef<UnifiedHistogramFetchParamsExternal | null>(null);
 
   const triggerUnifiedHistogramFetch = useLatest(
     (latestFetchDetails: DiscoverLatestFetchDetails | undefined) => {
@@ -303,8 +303,7 @@ export const useDiscoverHistogram = (
         table: isEsqlMode ? table : undefined,
         externalVisContext: isEsqlMode && canImportVisContext(visContext) ? visContext : undefined,
       };
-      // console.debug('Use Unified Histogram - triggering fetch', nextFetchParams);
-      usedFetchParamsRef.current = nextFetchParams;
+      previousFetchParamsRef.current = nextFetchParams;
       unifiedHistogramApi?.fetch(nextFetchParams);
     }
   );
@@ -318,7 +317,6 @@ export const useDiscoverHistogram = (
     }
 
     const subscription = stateContainer.dataState.fetchChart$.subscribe((latestFetchDetails) => {
-      // console.debug('Use Unified Histogram - Fetch triggered');
       triggerUnifiedHistogramFetch.current(latestFetchDetails);
     });
 
@@ -328,20 +326,18 @@ export const useDiscoverHistogram = (
   }, [stateContainer.dataState.fetchChart$, triggerUnifiedHistogramFetch, unifiedHistogramApi]);
 
   useEffect(() => {
-    const usedFetchParams = usedFetchParamsRef.current;
-    if (!collectedFetchParams || !usedFetchParams) {
+    const previousFetchParams = previousFetchParamsRef.current;
+    if (!collectedFetchParams || !previousFetchParams) {
       return;
     }
-    // console.log('Use Unified Histogram - comparing fetch params');
     const changedParams = Object.keys(collectedFetchParams).filter((key) => {
       return (
         collectedFetchParams[key as keyof UnifiedHistogramFetchParamsExternal] !==
-        usedFetchParams[key as keyof UnifiedHistogramFetchParamsExternal]
+        previousFetchParams[key as keyof UnifiedHistogramFetchParamsExternal]
       );
     });
 
     if (changedParams.length === 1 && changedParams[0] === 'externalVisContext') {
-      // console.log('Use Unified Histogram - externalVisContext changed, triggering fetch');
       triggerUnifiedHistogramFetch.current({
         visContext: collectedFetchParams.externalVisContext,
       });
