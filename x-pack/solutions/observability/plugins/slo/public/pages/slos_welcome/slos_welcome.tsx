@@ -17,7 +17,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
-import { paths } from '../../../common/locators/paths';
+import { useHistory } from 'react-router-dom';
+import { paths, SLOS_PATH } from '../../../common/locators/paths';
 import { HeaderMenu } from '../../components/header_menu/header_menu';
 import { SloOutdatedCallout } from '../../components/slo/slo_outdated_callout';
 import { SloPermissionsCallout } from '../../components/slo/slo_permissions_callout';
@@ -36,11 +37,12 @@ export function SlosWelcomePage() {
   } = useKibana().services;
 
   const { ObservabilityPageTemplate } = usePluginContext();
-  const { data: permissions } = usePermissions();
+  const { data: permissions, ...permissionsContext } = usePermissions();
   const { hasAtLeast } = useLicense();
   const hasRightLicense = hasAtLeast('platinum');
+  const history = useHistory();
 
-  const { data: sloList } = useFetchSloList();
+  const { data: sloList, ...sloListContext } = useFetchSloList();
   const { total } = sloList ?? { total: 0 };
 
   const hasSlosAndPermissions =
@@ -52,9 +54,15 @@ export function SlosWelcomePage() {
 
   useEffect(() => {
     if (hasSlosAndPermissions) {
-      navigateToUrl(basePath.prepend(paths.slos));
+      // Use history.replace for in-app navigation to avoid adding to the browser history stack
+      history.replace(SLOS_PATH);
     }
-  }, [basePath, navigateToUrl, hasSlosAndPermissions]);
+  }, [hasSlosAndPermissions, history]);
+
+  // Prevent flash of content while loading or during redirect
+  if (sloListContext.isLoading || permissionsContext.isLoading || hasSlosAndPermissions) {
+    return null;
+  }
 
   return (
     <ObservabilityPageTemplate data-test-subj="slosPageWelcomePrompt">
