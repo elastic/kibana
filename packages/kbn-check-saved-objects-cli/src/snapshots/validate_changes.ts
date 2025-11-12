@@ -67,11 +67,11 @@ function validateChangesExistingType({ from, to }: ValidateChangesExistingTypePa
 
   // check that the last modelVersion has schemas and that schemas have both create and forwardCompatibility defined
   if (to.modelVersions.length > from.modelVersions.length) {
-    validateLastModelVersion(to.modelVersions);
+    validateLastModelVersion(name, to.modelVersions);
   }
 
   // check that defined modelVersions are consecutive integer numbers, starting at 1
-  validateModelVersionNumbers(to.modelVersions);
+  validateModelVersionNumbers(name, to.modelVersions);
 
   // ensure that updates in mappings go together with a modelVersion bump
   if (mappingsUpdated(from, to) && to.modelVersions.length === from.modelVersions.length) {
@@ -93,13 +93,13 @@ function validateChangesNewType({ to }: ValidateChangesNewTypeParams): void {
   }
 
   // check that the last modelVersion has schemas and that schemas have both create and forwardCompatibility defined
-  validateModelVersionNumbers(to.modelVersions);
+  validateModelVersionNumbers(name, to.modelVersions);
 
   // check that defined modelVersions are consecutive integer numbers, starting at 1
-  validateLastModelVersion(to.modelVersions);
+  validateLastModelVersion(name, to.modelVersions);
 }
 
-function validateModelVersionNumbers(mvs: ModelVersionSummary[]) {
+function validateModelVersionNumbers(name: string, mvs: ModelVersionSummary[]) {
   mvs
     .map<number>(({ version }) => {
       const parsed = parseInt(version, 10);
@@ -122,7 +122,7 @@ function validateModelVersionNumbers(mvs: ModelVersionSummary[]) {
     });
 }
 
-function validateLastModelVersion(mvs: ModelVersionSummary[]) {
+function validateLastModelVersion(name: string, mvs: ModelVersionSummary[]) {
   const mv = mvs[mvs.length - 1];
   if (!mv.schemas) {
     throw new Error(

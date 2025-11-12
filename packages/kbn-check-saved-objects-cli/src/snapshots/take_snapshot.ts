@@ -22,8 +22,7 @@ import type {
  * @param serverHandles Handles for running ES & Kibana servers
  */
 export async function takeSnapshot(serverHandles: ServerHandles): Promise<MigrationSnapshot> {
-  const { coreStart } = serverHandles;
-  const typeRegistry = coreStart.savedObjects.getTypeRegistry();
+  const { typeRegistry } = serverHandles;
   const allTypes = typeRegistry.getAllTypes();
 
   const migrationInfoMap = allTypes.reduce<Record<string, MigrationInfoRecord>>((map, type) => {

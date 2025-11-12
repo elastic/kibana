@@ -21,7 +21,8 @@ import type { ServerHandles } from '../types';
 export async function startServers(): Promise<ServerHandles> {
   const [esServer, kibanaRoot] = await Promise.all([startElasticsearch(), startKibana()]);
   const coreStart = await kibanaRoot.start();
-  return { esServer, kibanaRoot, coreStart };
+  const typeRegistry = coreStart.savedObjects.getTypeRegistry();
+  return { esServer, kibanaRoot, typeRegistry };
 }
 
 async function startElasticsearch(): Promise<TestElasticsearchUtils> {
