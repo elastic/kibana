@@ -644,6 +644,7 @@ src/platform/packages/shared/response-ops/alerts-delete @elastic/response-ops
 src/platform/packages/shared/response-ops/alerts-fields-browser @elastic/response-ops
 src/platform/packages/shared/response-ops/alerts-filters-form @elastic/response-ops
 src/platform/packages/shared/response-ops/alerts-table @elastic/response-ops
+src/platform/packages/shared/response-ops/form-generator @elastic/response-ops
 src/platform/packages/shared/response-ops/recurring-schedule-form @elastic/response-ops
 src/platform/packages/shared/response-ops/rule_form @elastic/response-ops
 src/platform/packages/shared/response-ops/rule_params @elastic/response-ops
