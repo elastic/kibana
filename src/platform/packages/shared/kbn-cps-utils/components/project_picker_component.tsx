@@ -15,13 +15,14 @@ import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiPopover,
   EuiPopoverTitle,
-  EuiButtonIcon,
   EuiButtonGroup,
   EuiHorizontalRule,
   EuiToolTip,
   EuiFlexItem,
   EuiFlexGroup,
   EuiTitle,
+  EuiHeaderSectionItemButton,
+  EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -59,26 +60,25 @@ export const ProjectPickerComponent = ({
 }: ProjectPickerComponentProps) => {
   const [showPopover, setShowPopover] = useState(false);
   const styles = useMemoCss(projectPickerStyles);
-
-  const projects =
+  const projectsList =
     projectRouting === '_alias:_origin' ? [originProject] : [originProject, ...linkedProjects];
 
   const button = (
     <EuiToolTip
       delay="long"
-      content={strings.getProjectPickerButtonLabel(projects.length, linkedProjects.length + 1)}
+      content={strings.getProjectPickerButtonLabel(projectsList.length, linkedProjects.length + 1)}
       disableScreenReaderOutput
     >
-      <EuiButtonIcon
-        type="link"
-        display="base"
-        iconType="cluster" // TODO: replace with cross project icon when available in EUI
+      <EuiHeaderSectionItemButton
         aria-label={strings.getProjectPickerButtonAriaLabel()}
         data-test-subj="project-picker-button"
         onClick={() => setShowPopover(!showPopover)}
         size="s"
-        css={styles.button}
-      />
+        notification={projectRouting && projectsList.length}
+        notificationColor="success"
+      >
+        <EuiIcon type="cluster" />
+      </EuiHeaderSectionItemButton>
     </EuiToolTip>
   );
 
@@ -154,7 +154,7 @@ export const ProjectPickerComponent = ({
         </EuiFlexItem>
         <EuiFlexItem css={styles.listContainer} className="eui-yScroll">
           <EuiFlexGroup direction="column" gutterSize="none" justifyContent="center">
-            {projects.map((project, index) => (
+            {projectsList.map((project, index) => (
               <ProjectListItem
                 key={project._id}
                 project={project}
