@@ -12,7 +12,7 @@ import type { TagcloudState } from '../../schema';
 /**
  * Basic tagcloud chart with ad hoc dataView
  */
-export const basicTagcloudWithAdHocDataView: TagcloudState = {
+export const basicTagcloudWithAdHocDataView = {
   title: 'Test Tagcloud',
   type: 'tagcloud',
   dataset: {
@@ -39,12 +39,12 @@ export const basicTagcloudWithAdHocDataView: TagcloudState = {
   },
   sampling: 1,
   ignore_global_filters: false,
-};
+} satisfies TagcloudState;
 
 /**
  * Basic tagcloud chart with existing dataView
  */
-export const basicTagcloudWithDataView: TagcloudState = {
+export const basicTagcloudWithDataView = {
   title: 'Test Tagcloud',
   type: 'tagcloud',
   dataset: {
@@ -70,12 +70,12 @@ export const basicTagcloudWithDataView: TagcloudState = {
   },
   sampling: 1,
   ignore_global_filters: false,
-};
+} satisfies TagcloudState;
 
 /**
  * ESQL-based tagcloud chart
  */
-export const basicEsqlTagcloud: TagcloudState = {
+export const basicEsqlTagcloud = {
   title: 'Test Tagcloud',
   type: 'tagcloud',
   dataset: {
@@ -97,11 +97,12 @@ export const basicEsqlTagcloud: TagcloudState = {
   },
   sampling: 1,
   ignore_global_filters: false,
-};
+} satisfies TagcloudState;
+
 /**
  * Comprehensive tagcloud chart with ad hoc dataView
  */
-export const comprehensiveTagcloudWithAdHocDataView: TagcloudState = {
+export const comprehensiveTagcloudWithAdHocDataView = {
   title: 'Comprehensive Test Tagcloud',
   type: 'tagcloud',
   dataset: {
@@ -159,12 +160,12 @@ export const comprehensiveTagcloudWithAdHocDataView: TagcloudState = {
   },
   sampling: 1,
   ignore_global_filters: false,
-};
+} satisfies TagcloudState;
 
 /**
  * Comprehensive tagcloud chart with existing dataView
  */
-export const comprehensiveTagcloudWithDataView: TagcloudState = {
+export const comprehensiveTagcloudWithDataView = {
   title: 'Comprehensive Test Tagcloud',
   type: 'tagcloud',
   dataset: {
@@ -222,12 +223,12 @@ export const comprehensiveTagcloudWithDataView: TagcloudState = {
   },
   sampling: 1,
   ignore_global_filters: false,
-};
+} satisfies TagcloudState;
 
 /**
  * Comprehensive ESQL-based tagcloud chart
  */
-export const comprehensiveEsqlTagcloud: TagcloudState = {
+export const comprehensiveEsqlTagcloud = {
   title: 'Comprehensive Test Tagcloud',
   type: 'tagcloud',
   dataset: {
@@ -255,4 +256,4 @@ export const comprehensiveEsqlTagcloud: TagcloudState = {
   },
   sampling: 1,
   ignore_global_filters: false,
-};
+} satisfies TagcloudState;

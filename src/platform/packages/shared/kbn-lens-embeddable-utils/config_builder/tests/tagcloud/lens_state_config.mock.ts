@@ -12,7 +12,7 @@ import type { LensAttributes } from '../../types';
 /**
  * Simple tag cloud generated from kibana
  */
-export const tagcloudAttributes: LensAttributes = {
+export const tagcloudAttributes = {
   title: 'Tagcloud',
   description: 'Days with the most average bytes',
   visualizationType: 'lnsTagcloud',
@@ -92,7 +92,6 @@ export const tagcloudAttributes: LensAttributes = {
           },
         },
       },
-      // @ts-expect-error
       indexpattern: {
         layers: {},
       },
@@ -116,7 +115,7 @@ export const tagcloudAttributes: LensAttributes = {
 /**
  * Tagcloud generated from kibana with full config
  */
-export const tagcloudAttributesWithFullConfig: LensAttributes = {
+export const tagcloudAttributesWithFullConfig = {
   title: 'Tagcloud with full config',
   visualizationType: 'lnsTagcloud',
   state: {
@@ -232,7 +231,6 @@ export const tagcloudAttributesWithFullConfig: LensAttributes = {
           },
         },
       },
-      // @ts-expect-error
       indexpattern: {
         layers: {},
       },
@@ -256,7 +254,7 @@ export const tagcloudAttributesWithFullConfig: LensAttributes = {
 /**
  * ESQL tagcloud generated from kibana
  */
-export const tagcloudESQLAttributes: LensAttributes = {
+export const tagcloudESQLAttributes = {
   title: 'ESQL Tagcloud',
   visualizationType: 'lnsTagcloud',
   state: {
