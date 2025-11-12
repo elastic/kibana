@@ -40,7 +40,7 @@ export async function getMetricFields({
 }): Promise<MetricFieldsResponse> {
   if (!indexPattern) return { fields: [], total: 0 };
 
-  const dataStreamFieldCapsMap = await retrieveFieldCaps({
+  const indexFieldCapsMap = await retrieveFieldCaps({
     esClient: esClient.client,
     indexPattern,
     fields,
@@ -48,8 +48,8 @@ export async function getMetricFields({
   });
 
   const allMetricFields: MetricField[] = [];
-  for (const [dataStreamName, fieldCaps] of dataStreamFieldCapsMap.entries()) {
-    if (isNumber(dataStreamName) || fieldCaps == null) continue;
+  for (const [indexName, fieldCaps] of indexFieldCapsMap.entries()) {
+    if (isNumber(indexName) || fieldCaps == null) continue;
     if (Object.keys(fieldCaps).length === 0) continue;
 
     const metricFields = extractMetricFields(fieldCaps);
@@ -59,7 +59,7 @@ export async function getMetricFields({
     const initialFields = metricFields.map(({ fieldName, type, typeInfo }) =>
       buildMetricField({
         name: fieldName,
-        index: dataStreamName,
+        index: indexName,
         dimensions: allDimensions,
         type,
         typeInfo,
@@ -77,7 +77,7 @@ export async function getMetricFields({
   const enrichedMetricFields = await enrichMetricFields({
     esClient,
     metricFields: applyPagination({ metricFields: allMetricFields, page, size }),
-    dataStreamFieldCapsMap,
+    indexFieldCapsMap,
     logger,
     timerange,
   });

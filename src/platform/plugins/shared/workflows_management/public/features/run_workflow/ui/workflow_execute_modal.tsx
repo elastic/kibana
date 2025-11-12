@@ -50,11 +50,12 @@ function getDefaultTrigger(definition: WorkflowYaml | null): TriggerType {
 
 interface WorkflowExecuteModalProps {
   definition: WorkflowYaml | null;
+  workflowId?: string;
   onClose: () => void;
   onSubmit: (data: Record<string, unknown>) => void;
 }
 export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
-  ({ definition, onClose, onSubmit }) => {
+  ({ definition, workflowId, onClose, onSubmit }) => {
     const modalTitleId = useGeneratedHtmlId();
     const enabledTriggers = ['alert', 'index', 'manual'];
     const defaultTrigger = useMemo(() => getDefaultTrigger(definition), [definition]);
@@ -62,6 +63,7 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
 
     const { executionInput, setExecutionInput } = useExecutionInput({
       workflowName: definition?.name || '',
+      workflowId,
       selectedTrigger,
     });
     const [executionInputErrors, setExecutionInputErrors] = useState<string | null>(null);

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { LENS_UNKNOWN_VIS } from '@kbn/lens-common';
+
 import type { LensAttributes } from '../../../../server/content_management';
 import type { LensSOAttributesV0 } from '../../../../server/content_management/v0';
-
-export const LENS_UNKNOWN_VIS = 'UNKNOWN';
 
 /**
  * Cleanup null and loose SO attribute types

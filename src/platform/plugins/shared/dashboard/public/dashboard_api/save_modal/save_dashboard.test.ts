@@ -24,21 +24,6 @@ jest.mock('../../dashboard_client', () => ({
   },
 }));
 
-/* contentManagementService.client.create = jest.fn().mockImplementation(({ options }) => {
-  if (options.id === undefined) {
-    return { item: { id: 'newlyGeneratedId' } };
-  }
-
-  throw new Error('Update should be used when id is provided');
-});
-
-contentManagementService.client.update = jest.fn().mockImplementation(({ id }) => {
-  if (id === undefined) {
-    throw new Error('Update needs an id');
-  }
-  return { item: { id } };
-});*/
-
 describe('Save dashboard state', () => {
   beforeEach(() => {
     jest.resetAllMocks();
@@ -68,7 +53,7 @@ describe('Save dashboard state', () => {
   });
 
   it('should save the dashboard using a new id, and return redirect required', async () => {
-    mockCreate.mockResolvedValue({ item: { id: 'newlyGeneratedId' } });
+    mockCreate.mockResolvedValue({ id: 'newlyGeneratedId' });
     const result = await saveDashboard({
       dashboardState: {
         ...getSampleDashboardState(),

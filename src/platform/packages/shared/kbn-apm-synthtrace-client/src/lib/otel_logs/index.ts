@@ -19,6 +19,7 @@ export type OtelLogDocument = Fields &
     span_id?: string;
     attributes?: Record<string, unknown>;
     severity_text?: string;
+    severity_number?: number;
     resource?: {
       attributes?: Record<string, unknown>;
     };
@@ -26,6 +27,8 @@ export type OtelLogDocument = Fields &
       text?: string;
       structured?: Record<string, unknown>;
     };
+    flags?: number;
+    observed_timestamp?: number;
   }>;
 
 class OtelLog extends Serializable<OtelLogDocument> {

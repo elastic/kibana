@@ -13,6 +13,7 @@ import type { LazyExpressionProps } from '../components/param_details_form/lazy_
 import { LazyExpression } from '../components/param_details_form/lazy_expression';
 import type { MonitoringAlertTypeParams } from '../components/param_details_form/validation';
 import { validate } from '../components/param_details_form/validation';
+import { getDescriptionFields } from '../get_description_fields';
 
 export function createCpuUsageAlertType(
   config: MonitoringConfig
@@ -34,5 +35,6 @@ export function createCpuUsageAlertType(
     validate,
     defaultActionMessage: '{{context.internalFullMessage}}',
     requiresAppContext: RULE_REQUIRES_APP_CONTEXT,
+    getDescriptionFields,
   };
 }

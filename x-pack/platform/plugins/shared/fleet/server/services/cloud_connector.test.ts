@@ -5,14 +5,20 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { SavedObject, SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { loggerMock } from '@kbn/logging-mocks';
 
 import { CLOUD_CONNECTOR_SAVED_OBJECT_TYPE } from '../../common/constants';
 
 import { createSavedObjectClientMock } from '../mocks';
-import type { CreateCloudConnectorRequest } from '../../common/types/rest_spec/cloud_connector';
-import type { AwsCloudConnectorVars } from '../../common/types/models/cloud_connector';
+import type {
+  CreateCloudConnectorRequest,
+  UpdateCloudConnectorRequest,
+} from '../../common/types/rest_spec/cloud_connector';
+import type {
+  AwsCloudConnectorVars,
+  CloudConnector,
+} from '../../common/types/models/cloud_connector';
 
 import { CloudConnectorService } from './cloud_connector';
 import { appContextService } from './app_context';
@@ -148,7 +154,10 @@ describe('CloudConnectorService', () => {
       const emptyVarsRequest: CreateCloudConnectorRequest = {
         name: 'test-connector',
         cloudProvider: 'aws',
-        vars: {},
+        vars: {
+          role_arn: { value: '', type: 'text' },
+          external_id: { value: { id: '', isSecretRef: true }, type: 'password' },
+        },
       };
 
       await expect(service.create(mockSoClient, emptyVarsRequest)).rejects.toThrow(
@@ -182,7 +191,7 @@ describe('CloudConnectorService', () => {
             },
             type: 'password',
           },
-        },
+        } as any, // Intentionally invalid for testing validation
       };
 
       await expect(service.create(mockSoClient, invalidRequest)).rejects.toThrow(
@@ -199,7 +208,7 @@ describe('CloudConnectorService', () => {
             value: 'arn:aws:iam::123456789012:role/TestRole',
             type: 'text',
           },
-        },
+        } as any, // Intentionally invalid for testing validation
       };
 
       await expect(service.create(mockSoClient, invalidRequest)).rejects.toThrow(
@@ -606,7 +615,7 @@ describe('CloudConnectorService', () => {
           type: 'text' as const,
         },
         // Missing external_id
-      };
+      } as any; // Intentionally invalid for testing validation
 
       await expect(
         service.update(mockSoClient, 'cloud-connector-123', {
@@ -864,7 +873,7 @@ describe('CloudConnectorService', () => {
               },
               type: 'password',
             },
-          },
+          } as any, // Intentionally invalid for testing validation
         };
 
         expect(() => (service as any).validateCloudConnectorDetails(invalidRequest)).toThrow(
@@ -905,7 +914,7 @@ describe('CloudConnectorService', () => {
               value: 'arn:aws:iam::123456789012:role/TestRole',
               type: 'text',
             },
-          },
+          } as any, // Intentionally invalid for testing validation
         };
 
         expect(() => (service as any).validateCloudConnectorDetails(invalidRequest)).toThrow(
@@ -1139,7 +1148,7 @@ describe('CloudConnectorService', () => {
         };
 
         expect(() => (service as any).validateCloudConnectorDetails(invalidRequest)).toThrow(
-          'Unsupported cloud provider: azure'
+          'tenant_id must be a valid secret reference'
         );
       });
 
@@ -1164,6 +1173,320 @@ describe('CloudConnectorService', () => {
 
         expect(() => (service as any).validateCloudConnectorDetails(invalidRequest)).toThrow(
           'Unsupported cloud provider: gcp'
+        );
+      });
+    });
+  });
+
+  describe('CloudConnectorService - Azure support', () => {
+    describe('create', () => {
+      it('should create Azure cloud connector with valid vars', async () => {
+        const azureRequest: CreateCloudConnectorRequest = {
+          name: 'azure-test-connector',
+          cloudProvider: 'azure',
+          vars: {
+            tenant_id: { value: { id: 'secret-tenant-id', isSecretRef: true }, type: 'password' },
+            client_id: { value: { id: 'secret-client-id', isSecretRef: true }, type: 'password' },
+            azure_credentials_cloud_connector_id: {
+              value: 'secret-cc-id',
+              type: 'text',
+            },
+          },
+        };
+
+        const mockSavedObject = {
+          id: 'cloud-connector-123',
+          attributes: {
+            name: 'secret-cc-id',
+            namespace: '*',
+            cloudProvider: 'azure',
+            vars: azureRequest.vars,
+            packagePolicyCount: 1,
+            created_at: '2023-01-01T00:00:00.000Z',
+            updated_at: '2023-01-01T00:00:00.000Z',
+          },
+        } as SavedObject<CloudConnector>;
+
+        mockSoClient.create.mockResolvedValue(mockSavedObject);
+
+        const result = await service.create(mockSoClient, azureRequest);
+
+        expect(mockSoClient.create).toHaveBeenCalledTimes(1);
+        const [[type, createCall]] = mockSoClient.create.mock.calls;
+        expect(type).toBe(CLOUD_CONNECTOR_SAVED_OBJECT_TYPE);
+        expect(createCall).toMatchObject({
+          name: 'secret-cc-id',
+          cloudProvider: 'azure',
+          namespace: '*',
+          vars: azureRequest.vars,
+          packagePolicyCount: 1,
+        });
+        expect((createCall as any).created_at).toBeDefined();
+        expect((createCall as any).updated_at).toBeDefined();
+
+        expect(result).toEqual({
+          id: 'cloud-connector-123',
+          name: 'secret-cc-id',
+          namespace: '*',
+          cloudProvider: 'azure',
+          vars: azureRequest.vars,
+          packagePolicyCount: 1,
+          created_at: '2023-01-01T00:00:00.000Z',
+          updated_at: '2023-01-01T00:00:00.000Z',
+        });
+      });
+
+      it('should use azure_credentials_cloud_connector_id as name for Azure connectors', async () => {
+        const azureRequest: CreateCloudConnectorRequest = {
+          name: 'ignored-name',
+          cloudProvider: 'azure',
+          vars: {
+            tenant_id: { value: { id: 'secret-tenant-id', isSecretRef: true }, type: 'password' },
+            client_id: { value: { id: 'secret-client-id', isSecretRef: true }, type: 'password' },
+            azure_credentials_cloud_connector_id: {
+              value: 'actual-connector-name',
+              type: 'text',
+            },
+          },
+        };
+
+        const mockSavedObject = {
+          id: 'cloud-connector-123',
+          attributes: {
+            name: 'actual-connector-name',
+            namespace: '*',
+            cloudProvider: 'azure',
+            vars: azureRequest.vars,
+            packagePolicyCount: 1,
+            created_at: '2023-01-01T00:00:00.000Z',
+            updated_at: '2023-01-01T00:00:00.000Z',
+          },
+        } as SavedObject<CloudConnector>;
+
+        mockSoClient.create.mockResolvedValue(mockSavedObject);
+
+        await service.create(mockSoClient, azureRequest);
+
+        expect(mockSoClient.create).toHaveBeenCalledTimes(1);
+        const [[type, createCall]] = mockSoClient.create.mock.calls;
+        expect(type).toBe(CLOUD_CONNECTOR_SAVED_OBJECT_TYPE);
+        expect(createCall).toMatchObject({
+          name: 'actual-connector-name', // Should use azure_credentials_cloud_connector_id.value
+          cloudProvider: 'azure',
+          namespace: '*',
+          vars: azureRequest.vars,
+          packagePolicyCount: 1,
+        });
+        expect((createCall as any).created_at).toBeDefined();
+        expect((createCall as any).updated_at).toBeDefined();
+      });
+
+      it('should throw error for Azure connector with missing tenant_id', async () => {
+        const invalidRequest: CreateCloudConnectorRequest = {
+          name: 'azure-test-connector',
+          cloudProvider: 'azure',
+          vars: {
+            client_id: { value: { id: 'secret-client-id', isSecretRef: true }, type: 'password' },
+            azure_credentials_cloud_connector_id: {
+              value: 'secret-cc-id',
+              type: 'text',
+            },
+          } as any,
+        };
+
+        await expect(service.create(mockSoClient, invalidRequest)).rejects.toThrow(
+          'tenant_id must be a valid secret reference'
+        );
+      });
+
+      it('should throw error for Azure connector with invalid secret reference', async () => {
+        const invalidRequest: CreateCloudConnectorRequest = {
+          name: 'azure-test-connector',
+          cloudProvider: 'azure',
+          vars: {
+            tenant_id: { value: 'plain-string-not-secret', type: 'text' },
+            client_id: { value: { id: 'secret-client-id', isSecretRef: true }, type: 'password' },
+            azure_credentials_cloud_connector_id: {
+              value: 'secret-cc-id',
+              type: 'text',
+            },
+          } as any,
+        };
+
+        await expect(service.create(mockSoClient, invalidRequest)).rejects.toThrow(
+          'tenant_id must be a valid secret reference'
+        );
+      });
+    });
+
+    describe('update', () => {
+      it('should update Azure cloud connector vars', async () => {
+        const existingConnector = {
+          id: 'cloud-connector-123',
+          attributes: {
+            name: 'existing-azure-connector',
+            namespace: '*',
+            cloudProvider: 'azure',
+            vars: {
+              tenant_id: { value: { id: 'old-tenant-id', isSecretRef: true }, type: 'password' },
+              client_id: { value: { id: 'old-client-id', isSecretRef: true }, type: 'password' },
+              azure_credentials_cloud_connector_id: {
+                value: 'old-cc-id',
+                type: 'text',
+              },
+            },
+            packagePolicyCount: 1,
+            created_at: '2023-01-01T00:00:00.000Z',
+            updated_at: '2023-01-01T00:00:00.000Z',
+          },
+        } as SavedObject<CloudConnector>;
+
+        const updateRequest = {
+          vars: {
+            tenant_id: { value: { id: 'new-tenant-id', isSecretRef: true }, type: 'password' },
+            client_id: { value: { id: 'new-client-id', isSecretRef: true }, type: 'password' },
+            azure_credentials_cloud_connector_id: {
+              value: 'new-cc-id',
+              type: 'text',
+            },
+          },
+        } as Partial<UpdateCloudConnectorRequest>;
+
+        const updatedConnector = {
+          ...existingConnector,
+          attributes: {
+            ...existingConnector.attributes,
+            vars: updateRequest.vars,
+            updated_at: '2023-01-02T00:00:00.000Z',
+          },
+        };
+
+        mockSoClient.get.mockResolvedValue(existingConnector);
+        mockSoClient.update.mockResolvedValue(updatedConnector);
+
+        const result = await service.update(mockSoClient, 'cloud-connector-123', updateRequest);
+
+        expect(mockSoClient.update).toHaveBeenCalledWith(
+          CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+          'cloud-connector-123',
+          expect.objectContaining({
+            vars: updateRequest.vars,
+            updated_at: expect.any(String),
+          })
+        );
+
+        expect(result.vars).toEqual(updateRequest.vars);
+      });
+
+      it('should validate Azure vars on update', async () => {
+        const existingConnector = {
+          id: 'cloud-connector-123',
+          attributes: {
+            name: 'existing-azure-connector',
+            namespace: '*',
+            cloudProvider: 'azure',
+            vars: {
+              tenant_id: { value: { id: 'old-tenant-id', isSecretRef: true }, type: 'password' },
+              client_id: { value: { id: 'old-client-id', isSecretRef: true }, type: 'password' },
+              azure_credentials_cloud_connector_id: {
+                value: 'old-cc-id',
+                type: 'text',
+              },
+            },
+            packagePolicyCount: 1,
+            created_at: '2023-01-01T00:00:00.000Z',
+            updated_at: '2023-01-01T00:00:00.000Z',
+          },
+        } as SavedObject<CloudConnector>;
+
+        const invalidUpdateRequest = {
+          vars: {
+            tenant_id: { value: 'plain-string-not-secret', type: 'text' },
+            client_id: { value: { id: 'secret-client-id', isSecretRef: true }, type: 'password' },
+            azure_credentials_cloud_connector_id: {
+              value: 'secret-cc-id',
+              type: 'text',
+            },
+          } as any,
+        };
+
+        mockSoClient.get.mockResolvedValue(existingConnector);
+
+        await expect(
+          service.update(mockSoClient, 'cloud-connector-123', invalidUpdateRequest)
+        ).rejects.toThrow('tenant_id must be a valid secret reference');
+      });
+    });
+
+    describe('validateCloudConnectorDetails', () => {
+      it('should validate Azure connector requires all three fields', () => {
+        const validAzureRequest: CreateCloudConnectorRequest = {
+          name: 'azure-test-connector',
+          cloudProvider: 'azure',
+          vars: {
+            tenant_id: { value: { id: 'secret-tenant-id', isSecretRef: true }, type: 'password' },
+            client_id: { value: { id: 'secret-client-id', isSecretRef: true }, type: 'password' },
+            azure_credentials_cloud_connector_id: {
+              value: 'secret-cc-id',
+              type: 'text',
+            },
+          },
+        };
+
+        expect(() =>
+          (service as any).validateCloudConnectorDetails(validAzureRequest)
+        ).not.toThrow();
+      });
+
+      it('should validate Azure fields are secret references', () => {
+        const invalidAzureRequest: CreateCloudConnectorRequest = {
+          name: 'azure-test-connector',
+          cloudProvider: 'azure',
+          vars: {
+            tenant_id: { value: 'plain-string', type: 'text' },
+            client_id: { value: { id: 'secret-client-id', isSecretRef: true }, type: 'password' },
+            azure_credentials_cloud_connector_id: {
+              value: 'secret-cc-id',
+              type: 'text',
+            },
+          } as any,
+        };
+
+        expect(() => (service as any).validateCloudConnectorDetails(invalidAzureRequest)).toThrow(
+          'tenant_id must be a valid secret reference'
+        );
+      });
+
+      it('should validate Azure connector with missing client_id', () => {
+        const invalidAzureRequest: CreateCloudConnectorRequest = {
+          name: 'azure-test-connector',
+          cloudProvider: 'azure',
+          vars: {
+            tenant_id: { value: { id: 'secret-tenant-id', isSecretRef: true }, type: 'password' },
+            azure_credentials_cloud_connector_id: {
+              value: 'secret-cc-id',
+              type: 'text',
+            },
+          } as any,
+        };
+
+        expect(() => (service as any).validateCloudConnectorDetails(invalidAzureRequest)).toThrow(
+          'client_id must be a valid secret reference'
+        );
+      });
+
+      it('should validate Azure connector with missing azure_credentials_cloud_connector_id', () => {
+        const invalidAzureRequest: CreateCloudConnectorRequest = {
+          name: 'azure-test-connector',
+          cloudProvider: 'azure',
+          vars: {
+            tenant_id: { value: { id: 'secret-tenant-id', isSecretRef: true }, type: 'password' },
+            client_id: { value: { id: 'secret-client-id', isSecretRef: true }, type: 'password' },
+          } as any,
+        };
+
+        expect(() => (service as any).validateCloudConnectorDetails(invalidAzureRequest)).toThrow(
+          'azure_credentials_cloud_connector_id must be a valid string'
         );
       });
     });

@@ -13,5 +13,6 @@ export {
   SecurityGroupName,
   LinkCategoryType,
   SECURITY_UI_APP_ID,
+  ATTACKS_ALERTS_ALIGNMENT_ENABLED,
 } from './src/constants';
 export * from './src/types';

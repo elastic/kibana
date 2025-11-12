@@ -16,7 +16,8 @@
     "@kbn/utility-types",
     "@kbn/i18n",
     "@kbn/safer-lodash-set",
-    "@kbn/esql-types"
+    "@kbn/esql-types",
+    "@kbn/es-query-constants"
   ],
   "exclude": [
     "target/**/*",

@@ -14,7 +14,7 @@ import type { Streams } from '@kbn/streams-schema';
 import { useDashboardsFetch } from '../../hooks/use_dashboards_fetch';
 import { AssetImage } from '../asset_image';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
-import { DashboardsTable } from '../stream_detail_dashboards_view/dashboard_table';
+import { AttachmentsTable } from '../stream_detail_attachments/attachment_table';
 
 const EMPTY_DASHBOARD_LIST: SanitizedDashboardAsset[] = [];
 
@@ -61,8 +61,8 @@ export function QuickLinks({ definition }: { definition: Streams.ingest.all.GetR
   }
 
   return (
-    <DashboardsTable
-      dashboards={dashboardsFetch.value?.dashboards ?? EMPTY_DASHBOARD_LIST}
+    <AttachmentsTable
+      attachments={dashboardsFetch.value?.dashboards ?? EMPTY_DASHBOARD_LIST}
       loading={dashboardsFetch.loading}
     />
   );

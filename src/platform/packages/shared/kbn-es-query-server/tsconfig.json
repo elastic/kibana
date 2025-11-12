@@ -9,6 +9,6 @@
   "kbn_references": [
     "@kbn/config-schema",
     "@kbn/utility-types",
-    "@kbn/es-query",
+    "@kbn/es-query-constants",
   ],
 }

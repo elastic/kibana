@@ -380,7 +380,6 @@ export function InternalDashboardTopNav({
           dataService.search.isBackgroundSearchEnabled &&
           getDashboardCapabilities().storeSearchSession
         }
-        showProjectPicker
       />
       {viewMode !== 'print' && isLabsEnabled && isLabsShown ? (
         <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />
