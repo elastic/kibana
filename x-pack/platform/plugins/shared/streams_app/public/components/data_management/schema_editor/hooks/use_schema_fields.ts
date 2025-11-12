@@ -17,9 +17,8 @@ import { getStreamTypeFromDefinition } from '../../../../util/get_stream_type_fr
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../../../hooks/use_kibana';
 import type { MappedSchemaField, SchemaField, SchemaEditorField } from '../types';
-import { convertToFieldDefinitionConfig } from '../utils';
+import { convertToFieldDefinitionConfig, isFieldUncommitted } from '../utils';
 import { getFormattedError } from '../../../../util/errors';
-import { isFieldUncommitted } from '../schema_changes_review_modal';
 
 export const useSchemaFields = ({
   definition,
@@ -231,10 +230,7 @@ export const useSchemaFields = ({
     () =>
       fields.map((field) => ({
         ...field,
-        uncommitted: isFieldUncommitted(
-          field as SchemaEditorField,
-          storedFields as SchemaEditorField[]
-        ),
+        uncommitted: isFieldUncommitted(field, storedFields),
       })),
     [fields, storedFields]
   );

@@ -29,15 +29,6 @@ const FIELD_RESULT_MAP = {
       defaultMessage: 'The simulated processing steps modify the values of this field.',
     }),
   },
-  unchanged: {
-    color: 'default' as const,
-    label: i18n.translate('xpack.streams.streamDetailSchemaEditorUnchangedResultLabel', {
-      defaultMessage: 'Unchanged',
-    }),
-    tooltip: i18n.translate('xpack.streams.streamDetailSchemaEditorUnchangedResultTooltip', {
-      defaultMessage: 'The simulated processing steps do not modify the values of this field.',
-    }),
-  },
 };
 
 export const FieldResultBadge = ({ result }: { result: SchemaEditorField['result'] }) => {

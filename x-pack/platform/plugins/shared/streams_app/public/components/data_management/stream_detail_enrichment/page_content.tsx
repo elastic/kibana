@@ -35,14 +35,11 @@ import { NoStepsEmptyPrompt } from './empty_prompts';
 import { RootSteps } from './steps/root_steps';
 import { StreamsAppContextProvider } from '../../streams_app_context_provider';
 import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_definition';
-import {
-  SchemaChangesReviewModal,
-  getChanges,
-  isFieldUncommitted,
-} from '../schema_editor/schema_changes_review_modal';
+import { SchemaChangesReviewModal, getChanges } from '../schema_editor/schema_changes_review_modal';
 import { getDefinitionFields } from '../schema_editor/hooks/use_schema_fields';
 import { selectFieldsInSamples } from './state_management/simulation_state_machine/selectors';
 import type { SchemaEditorField } from '../schema_editor/types';
+import { isFieldUncommitted } from '../schema_editor/utils';
 
 const MemoSimulationPlayground = React.memo(SimulationPlayground);
 
