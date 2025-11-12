@@ -32,8 +32,11 @@ const MIN_NAME_LENGTH = 1;
 const MAX_NAME_LENGTH = 200;
 const PREFIX_MAX_VISIBLE_CHARACTERS = 25;
 
-// TODO: write a unit test for this function
-const getHelpText = (prefix: string, value: string, readOnly: boolean): string | undefined => {
+export const getHelpText = (
+  prefix: string,
+  value: string,
+  readOnly: boolean
+): string | undefined => {
   if (value.length <= prefix.length && !readOnly) {
     return i18n.translate('xpack.streams.streamDetailRouting.emptyNameErrorHelpText', {
       defaultMessage: 'Stream name must not be empty.',
