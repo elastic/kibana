@@ -68,6 +68,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base_merged_phases.yml', false));
     } else {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base.yml', false));
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/pick_test_groups.yml'));
     }
 
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/scout_tests.yml'));
