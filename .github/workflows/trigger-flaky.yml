@@ -26,9 +26,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{secrets.KIBANAMACHINE_TOKEN}}
           BUILDKITE_TOKEN: ${{secrets.OPS_BUILDKITE_TOKEN}}
+          COMMENT_BODY: ${{github.event.comment.body}}
         run: |
-          body="${{github.event.comment.body}}"
-          configs="${body#* }"
+          configs="${COMMENT_BODY#* }"
 
           npm ci --omit=dev
-          node trigger-flaky-test-runner ${{github.event.issue.number}} $configs
+          node trigger-flaky-test-runner ${{github.event.issue.number}} "$configs"
