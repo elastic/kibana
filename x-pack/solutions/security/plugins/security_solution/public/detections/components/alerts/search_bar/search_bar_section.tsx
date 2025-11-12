@@ -10,7 +10,7 @@ import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { FiltersGlobal } from '../../../../common/components/filters_global';
 import { SiemSearchBar } from '../../../../common/components/search_bar';
-import { useSignalHelpers } from '../../../../sourcerer/containers/use_signal_helpers';
+import { useSignalHelpers } from '../../../../sourcerer';
 
 export const SEARCH_BAR_TEST_ID = 'alerts-page-search-bar';
 

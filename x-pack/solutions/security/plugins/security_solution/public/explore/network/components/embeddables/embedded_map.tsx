@@ -29,8 +29,8 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { getLayerList } from './map_config';
 import { sourcererSelectors } from '../../../../sourcerer/store';
 import type { State } from '../../../../common/store';
-import type { SourcererDataView } from '../../../../sourcerer/store/model';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import type { SourcererDataView } from '../../../../sourcerer';
+import { SourcererScopeName } from '../../../../sourcerer';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 

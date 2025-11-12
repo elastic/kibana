@@ -37,7 +37,7 @@ import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { DescriptionListStyled } from '../../../../common/components/page';
 import { OverviewDescriptionList } from '../../../../common/components/overview_description_list';
 import { RiskScoreLevel } from '../../../../entity_analytics/components/severity/common';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
+import { useSourcererDataView } from '../../../../sourcerer';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import {

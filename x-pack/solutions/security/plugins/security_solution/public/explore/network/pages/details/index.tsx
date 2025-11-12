@@ -45,7 +45,7 @@ import { setNetworkDetailsTablesActivePageToZero } from '../../store/actions';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { networkModel } from '../../store';
 import { SecurityPageName } from '../../../../app/types';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
+import { SourcererScopeName, useSourcererDataView } from '../../../../sourcerer';
 import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
 import { EmptyPrompt } from '../../../../common/components/empty_prompt';
 import { TabNavigation } from '../../../../common/components/navigation/tab_navigation';
@@ -62,7 +62,6 @@ import {
   SecurityCellActions,
   SecurityCellActionsTrigger,
 } from '../../../../common/components/cell_actions';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 

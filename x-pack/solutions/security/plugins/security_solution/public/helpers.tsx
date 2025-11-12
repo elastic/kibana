@@ -37,7 +37,7 @@ import type { InspectResponse, StartedSubPlugins, StartServices } from './types'
 import { CASES_SUB_PLUGIN_KEY } from './types';
 import { timelineActions } from './timelines/store';
 import { TimelineId } from '../common/types';
-import { SourcererScopeName } from './sourcerer/store/model';
+import { SourcererScopeName } from './sourcerer';
 import { hasAccessToSecuritySolution } from './helpers_access';
 
 export const parseRoute = (location: Pick<Location, 'hash' | 'pathname' | 'search'>) => {

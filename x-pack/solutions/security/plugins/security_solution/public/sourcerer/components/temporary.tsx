@@ -7,18 +7,18 @@
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
+  EuiButton,
   EuiCallOut,
-  EuiText,
-  EuiTextColor,
-  EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButton,
+  EuiSpacer,
+  EuiText,
+  EuiTextColor,
   EuiToolTip,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import * as i18n from './translations';
-import { Blockquote, ResetButton } from './helpers';
+import * as i18n from '../translations';
+import { Blockquote, ResetButton } from '../utils/helpers';
 import { UpdateDefaultDataViewModal } from './update_default_data_view_modal';
 import { TimelineId } from '../../../common/types';
 import { TimelineTypeEnum } from '../../../common/api/timeline';
@@ -30,7 +30,7 @@ import {
   CurrentPatternsMessage,
   DeprecatedMessage,
   MissingPatternsMessage,
-} from './utils';
+} from '../utils/utils';
 
 interface Props {
   activePatterns?: string[];
@@ -60,7 +60,7 @@ const translations = {
   },
 };
 
-export const TemporarySourcererComp = React.memo<Props>(
+const TemporarySourcererComp = React.memo<Props>(
   ({
     activePatterns,
     indicesExist,

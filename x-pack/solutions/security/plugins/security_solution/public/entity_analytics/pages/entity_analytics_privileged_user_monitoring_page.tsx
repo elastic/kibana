@@ -34,7 +34,7 @@ import { SiemSearchBar } from '../../common/components/search_bar';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { useDataViewSpec } from '../../data_view_manager/hooks/use_data_view_spec';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
-import { useSourcererDataView } from '../../sourcerer/containers';
+import { useSourcererDataView } from '../../sourcerer';
 import { HeaderPage } from '../../common/components/header_page';
 import { useEntityAnalyticsRoutes } from '../api/api';
 import { usePrivilegedMonitoringEngineStatus } from '../hooks/use_privileged_monitoring_health';

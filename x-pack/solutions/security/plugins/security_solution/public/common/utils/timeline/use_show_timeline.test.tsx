@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { waitFor, renderHook } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 import { useUserPrivileges } from '../../components/user_privileges';
 import { useShowTimeline } from './use_show_timeline';
 
@@ -42,7 +42,7 @@ const mockUseSourcererDataView = jest.fn(
     dataViewId: null,
   })
 );
-jest.mock('../../../sourcerer/containers', () => ({
+jest.mock('../../../sourcerer', () => ({
   useSourcererDataView: () => mockUseSourcererDataView(),
 }));
 

@@ -7,7 +7,7 @@
 
 import React, { useEffect, useMemo } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import styled from 'styled-components';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
@@ -23,7 +23,7 @@ import { Panel } from '../../../../common/components/panel';
 import { HeaderSection } from '../../../../common/components/header_section';
 
 import { getAlertsPreviewDefaultModel } from '../../../../detections/components/alerts_table/default_config';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { SourcererScopeName } from '../../../../sourcerer';
 import { DEFAULT_PREVIEW_INDEX } from '../../../../../common/constants';
 import { PreviewRenderCellValue } from './preview_table_cell_renderer';
 import { getPreviewTableControlColumn } from './preview_table_control_columns';

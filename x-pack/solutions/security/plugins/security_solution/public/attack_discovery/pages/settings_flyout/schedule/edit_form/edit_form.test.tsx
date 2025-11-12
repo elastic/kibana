@@ -14,7 +14,7 @@ import { EditForm } from './edit_form';
 
 import { useKibana } from '../../../../../common/lib/kibana';
 import { TestProviders } from '../../../../../common/mock';
-import { useSourcererDataView } from '../../../../../sourcerer/containers';
+import { useSourcererDataView } from '../../../../../sourcerer';
 import { getDefaultQuery } from '../../../helpers';
 import { DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS } from '@kbn/elastic-assistant';
 import { DEFAULT_END, DEFAULT_START } from '@kbn/elastic-assistant-common';
@@ -36,7 +36,7 @@ jest.mock('react-router', () => ({
   withRouter: jest.fn(),
 }));
 jest.mock('../../../../../common/lib/kibana');
-jest.mock('../../../../../sourcerer/containers');
+jest.mock('../../../../../sourcerer');
 jest.mock('@kbn/elastic-assistant/impl/connectorland/use_load_connectors', () => ({
   useLoadConnectors: jest.fn(() => ({
     isFetched: true,

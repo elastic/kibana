@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import type { DocLinks } from '@kbn/doc-links';
 import { pick } from 'lodash/fp';
@@ -18,7 +18,7 @@ import { AIValueMetrics } from '../components/ai_value';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
-import { useSourcererDataView } from '../../sourcerer/containers';
+import { useSourcererDataView } from '../../sourcerer';
 import { HeaderPage } from '../../common/components/header_page';
 import * as i18n from './translations';
 import { NoPrivileges } from '../../common/components/no_privileges';

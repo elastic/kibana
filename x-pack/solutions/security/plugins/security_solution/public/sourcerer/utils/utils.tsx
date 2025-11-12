@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import { type TimelineType, TimelineTypeEnum } from '../../../common/api/timeline';
 import { Blockquote } from './helpers';
-import * as i18n from './translations';
+import * as i18n from '../translations';
 
 export const CurrentPatternsMessage = ({
   activePatterns,

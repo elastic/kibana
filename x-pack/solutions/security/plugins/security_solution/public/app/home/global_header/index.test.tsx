@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { useLocation } from 'react-router-dom';
@@ -16,7 +17,7 @@ import {
 } from '../../../../common/constants';
 import { createMockStore, mockGlobalState, TestProviders } from '../../../common/mock';
 import { TimelineId } from '../../../../common/types/timeline';
-import { sourcererPaths } from '../../../sourcerer/containers/sourcerer_paths';
+import { sourcererPaths } from '../../../sourcerer';
 
 import { DATA_VIEW_PICKER_TEST_ID } from '../../../data_view_manager/components/data_view_picker/constants';
 import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__';

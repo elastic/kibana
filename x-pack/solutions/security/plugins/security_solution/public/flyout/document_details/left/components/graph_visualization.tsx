@@ -28,8 +28,7 @@ import {
   DOCUMENT_TYPE_ALERT,
 } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
-import { useGetScopedSourcererDataView } from '../../../../sourcerer/components/use_get_sourcerer_data_view';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { SourcererScopeName, useGetScopedSourcererDataView } from '../../../../sourcerer';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { GRAPH_VISUALIZATION_TEST_ID } from './test_ids';
 import { useGraphPreview } from '../../shared/hooks/use_graph_preview';

@@ -11,7 +11,7 @@ import type { Filter, Query } from '@kbn/es-query';
 import { useSelectDataView } from '../../../data_view_manager/hooks/use_select_data_view';
 import { useCreateTimeline } from '../../../timelines/hooks/use_create_timeline';
 import { applyKqlFilterQuery, setFilters, updateProviders } from '../../../timelines/store/actions';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { SourcererScopeName } from '../../../sourcerer';
 import type { DataProvider } from '../../../../common/types';
 import { sourcererSelectors } from '../../store';
 import { inputsActions } from '../../store/inputs';

@@ -16,7 +16,7 @@ import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_exper
 import { timelineActions, timelineSelectors } from '../../store';
 import { timelineDefaults } from '../../store/defaults';
 import type { CellValueElementProps } from './cell_rendering';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { SourcererScopeName } from '../../../sourcerer';
 import { TimelineModalHeader } from '../modal/header';
 import type { RowRenderer, TimelineId } from '../../../../common/types/timeline';
 import { TimelineTypeEnum } from '../../../../common/api/timeline';

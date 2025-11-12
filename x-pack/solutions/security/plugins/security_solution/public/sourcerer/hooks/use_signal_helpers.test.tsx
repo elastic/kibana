@@ -7,10 +7,10 @@
 
 import React from 'react';
 import { createMockStore, mockGlobalState, TestProviders } from '../../common/mock';
-import { waitFor, renderHook } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 import { useSignalHelpers } from './use_signal_helpers';
 import type { State } from '../../common/store';
-import { createSourcererDataView } from './create_sourcerer_data_view';
+import { createSourcererDataView } from '../containers/create_sourcerer_data_view';
 
 const mockCreateSourcererDataView = jest.fn(() => {
   const errToReturn = new Error('fake error');
@@ -18,7 +18,7 @@ const mockCreateSourcererDataView = jest.fn(() => {
   throw errToReturn;
 });
 
-jest.mock('./create_sourcerer_data_view');
+jest.mock('../containers/create_sourcerer_data_view');
 
 const mockAddError = jest.fn();
 

@@ -15,7 +15,7 @@ import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import type { EqlOptions } from '../../../../../../common/search_strategy';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
-import { SourcererScopeName } from '../../../../../sourcerer/store/model';
+import { SourcererScopeName, useSourcererDataView } from '../../../../../sourcerer';
 import { EqlQueryEdit } from '../../../../../detection_engine/rule_creation/components/eql_query_edit';
 import type { FieldValueQueryBar } from '../../../../../detection_engine/rule_creation_ui/components/query_bar_field';
 
@@ -24,7 +24,6 @@ import { Form, UseField, useForm } from '../../../../../shared_imports';
 import { timelineActions } from '../../../../store';
 import { getEqlOptions } from './selectors';
 import { useSelectedPatterns } from '../../../../../data_view_manager/hooks/use_selected_patterns';
-import { useSourcererDataView } from '../../../../../sourcerer/containers';
 
 interface TimelineEqlQueryBar {
   index: string[];

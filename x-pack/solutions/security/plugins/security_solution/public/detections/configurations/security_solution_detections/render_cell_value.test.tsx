@@ -18,11 +18,11 @@ import { defaultRowRenderers } from '../../../timelines/components/timeline/body
 import type { TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
 import type { RenderCellValueProps } from './render_cell_value';
 import { CellValue } from './render_cell_value';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { SourcererScopeName } from '../../../sourcerer';
 import { AlertTableCellContextProvider } from './cell_value_context';
 
 jest.mock('../../../common/lib/kibana');
-jest.mock('../../../sourcerer/containers', () => ({
+jest.mock('../../../sourcerer', () => ({
   useSourcererDataView: jest.fn().mockReturnValue({
     browserFields: {},
     defaultIndex: 'defaultIndex',

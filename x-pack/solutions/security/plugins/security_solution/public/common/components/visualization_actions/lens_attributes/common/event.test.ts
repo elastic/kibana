@@ -24,7 +24,7 @@ jest.mock('uuid', () => ({
     .mockReturnValue('e09e0380-0740-4105-becc-0a4ca12e3944'),
 }));
 
-jest.mock('../../../../../sourcerer/containers', () => ({
+jest.mock('../../../../../sourcerer', () => ({
   useSourcererDataView: jest.fn().mockReturnValue({
     selectedPatterns: ['auditbeat-mytest-*'],
     dataViewId: 'security-solution-my-test',
