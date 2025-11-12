@@ -557,8 +557,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           enrichedPackagePolicy.cloud_connector_id = cloudConnector.id;
         }
 
-        // Remove cloud_connector_name from package policy vars as it's not part of the package schema
-        // It was only used to pass the name to cloud connector creation
         // TODO: Remove after https://github.com/elastic/security-team/issues/14608
         enrichedPackagePolicy = removeCloudConnectorTransientVars(enrichedPackagePolicy, [
           'cloud_connector_name',
