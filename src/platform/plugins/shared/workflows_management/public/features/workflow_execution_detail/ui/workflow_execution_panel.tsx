@@ -95,6 +95,7 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
                   status={execution?.status ?? ExecutionStatus.PENDING}
                   startedAt={execution?.startedAt ? new Date(execution.startedAt) : null}
                   duration={execution?.duration ?? null}
+                  isTestRun={execution?.isTestRun ?? false}
                 />
               </EuiFlexItem>
               <EuiFlexItem css={{ overflowY: 'auto' }}>
