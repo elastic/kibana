@@ -161,7 +161,10 @@ export class OnechatPlugin
           // Non-critical errors (like product documentation availability) are already
           // handled within the service initialization and won't reach here.
           this.startServicesError = error instanceof Error ? error : new Error(String(error));
-          this.logger.error('Failed to initialize onechat services. Plugin will be unavailable until initialization succeeds.', error);
+          this.logger.error(
+            'Failed to initialize onechat services. Plugin will be unavailable until initialization succeeds.',
+            error
+          );
           return Promise.reject(this.startServicesError);
         }
       );
