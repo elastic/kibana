@@ -66,6 +66,7 @@ export async function bootstrap({
   }
 
   return {
+    kibanaClient,
     clients,
     logger,
     kibanaUrl,

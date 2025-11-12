@@ -32,7 +32,7 @@ export async function startLiveDataUpload({
 
   const clientsPerIndices = new Map<string, SynthtraceClientTypes>();
 
-  const { logger, clients } = await bootstrap(runOptions);
+  const { logger, clients, kibanaClient } = await bootstrap(runOptions);
 
   Object.entries(clients).forEach(([key, client]) => {
     clientsPerIndices.set(client.getAllIndices().join(','), key as SynthtraceClientTypes);
@@ -56,7 +56,7 @@ export async function startLiveDataUpload({
     await Promise.all(
       scenarios.map((scenario) => {
         if (scenario.teardown) {
-          return scenario.teardown(clients);
+          return scenario.teardown(clients, kibanaClient);
         }
       })
     );
@@ -69,7 +69,7 @@ export async function startLiveDataUpload({
   await Promise.all(
     scenarios.map((scenario) => {
       if (scenario.bootstrap) {
-        return scenario.bootstrap(clients);
+        return scenario.bootstrap(clients, kibanaClient);
       }
     })
   );
