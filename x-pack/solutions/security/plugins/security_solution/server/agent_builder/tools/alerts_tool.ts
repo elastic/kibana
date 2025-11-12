@@ -30,12 +30,7 @@ export const alertsTool = (): BuiltinToolDefinition<typeof alertsSchema> => {
   return {
     id: SECURITY_ALERTS_TOOL_ID,
     type: ToolType.builtin,
-    description: `Search and analyze security alerts using full-text or structured queries. Use for finding, counting, aggregating, or summarizing alerts.
-
-Examples: "find alerts related to malware", "show me high severity alerts from the last 24 hours", "what are the top 10 alert types?"
-
-The 'index' parameter is optional - if not provided, the tool automatically determines the index based on the current space.
-    `,
+    description: `Search and analyze security alerts using full-text or structured queries for finding, counting, aggregating, or summarizing alerts.`,
     schema: alertsSchema,
     handler: async (
       { query: nlQuery, index },

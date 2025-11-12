@@ -28,19 +28,7 @@ export const securityLabsTool = (): BuiltinToolDefinition<typeof securityLabsSch
   return {
     id: SECURITY_LABS_TOOL_ID,
     type: ToolType.builtin,
-    description: `Call this for knowledge from Elastic Security Labs content, which contains information on malware, attack techniques, and more.
-
-Use this tool to retrieve detailed information about:
-- Malware families and their behaviors
-- Attack techniques and tactics
-- Security research and analysis
-- Threat intelligence
-
-Examples:
-- "Tell me about Emotet malware"
-- "What are the latest attack techniques?"
-- "Information about ransomware attacks"
-    `,
+    description: `Retrieve knowledge from Elastic Security Labs content about malware, attack techniques, threat intelligence, and security research.`,
     schema: securityLabsSchema,
     handler: async ({ question }, { request, logger }) => {
       // TODO: Follow the same pattern as Product Documentation Tool
