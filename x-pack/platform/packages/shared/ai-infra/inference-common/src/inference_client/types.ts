@@ -8,8 +8,7 @@
 import type {
   BoundChatCompleteAPI,
   ChatCompleteAPI,
-  InferenceCompleteCallbackHandler,
-  InferenceErrorCallbackHandler,
+  InferenceEventEmitter,
 } from '../chat_complete';
 import type { InferenceConnector } from '../connectors';
 import type { BoundOutputAPI, OutputAPI } from '../output';
@@ -78,9 +77,4 @@ export interface BoundInferenceClient extends InferenceEventEmitter {
    * Create a {@link BoundInferenceClient}.
    */
   bindTo: (options: BoundOptions) => BoundInferenceClient;
-}
-
-export interface InferenceEventEmitter {
-  on(type: 'complete', handler: InferenceCompleteCallbackHandler): void;
-  on(type: 'error', handler: InferenceErrorCallbackHandler): void;
 }

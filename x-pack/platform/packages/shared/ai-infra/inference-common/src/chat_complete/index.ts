@@ -97,7 +97,8 @@ export type {
 export type {
   InferenceCallbacks,
   InferenceCallbackErrorEvent,
-  InferenceCallbackSuccessEvent,
+  InferenceCallbackCompleteEvent,
   InferenceCompleteCallbackHandler,
   InferenceErrorCallbackHandler,
+  InferenceEventEmitter,
 } from './callbacks';

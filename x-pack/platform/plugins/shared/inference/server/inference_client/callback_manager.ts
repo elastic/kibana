@@ -16,10 +16,6 @@ import type { InferenceEventEmitter } from '@kbn/inference-common';
 export interface InferenceCallbackManager {
   onComplete: InferenceCompleteCallbackHandler;
   onError: InferenceErrorCallbackHandler;
-}
-
-export interface InternalCallbackManager extends InferenceCallbackManager {
-  // TODO
   asEventEmitter: () => InferenceEventEmitter;
 }
 
@@ -28,7 +24,7 @@ interface InternalCallbacks {
   error: InferenceErrorCallbackHandler[];
 }
 
-export const createCallbackManager = (cbs?: InferenceCallbacks): InternalCallbackManager => {
+export const createCallbackManager = (cbs?: InferenceCallbacks): InferenceCallbackManager => {
   const callbacks: InternalCallbacks = {
     complete: [],
     error: [],
