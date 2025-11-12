@@ -77,4 +77,66 @@ describe('various dynamic query construction scenarios', () => {
       'FROM index1, index2 METADATA _id, _source | WHERE KQL("foo: bar") AND foo < 42'
     );
   });
+
+  test('Carlos example: IN list', () => {
+    // Dynamic inputs
+    const key = ['foo'];
+    const value = ['a', 'b', 'c'];
+
+    // Query construction
+    const query = esql`FROM index`;
+    const list = value.map((v) => esql.str(v));
+    query.pipe`WHERE ${key} IN (${list})`;
+
+    expect(query.print('basic')).toBe('FROM index | WHERE foo IN ("a", "b", "c")');
+  });
+
+  test('Carlos example: column expression 1', () => {
+    // Query construction
+    const query = esql`FROM index`;
+    query.pipe`STATS AVG(system.cpu.load_average.\`5m\`) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)`;
+
+    expect(query.print('basic')).toBe(
+      'FROM index | STATS AVG(system.cpu.load_average.`5m`) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)'
+    );
+  });
+
+  test('Carlos example: column expression 2', () => {
+    // Query construction
+    const query = esql`FROM index`;
+    const field = ['system', 'cpu', 'load_average', '5m'];
+    query.pipe`STATS AVG(${field}) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)`;
+
+    expect(query.print('basic')).toBe(
+      'FROM index | STATS AVG(system.cpu.load_average.`5m`) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)'
+    );
+  });
+
+  test('Carlos example: column expression 3', () => {
+    // Query construction
+    const query = esql`FROM index`;
+    const field = 'system.cpu.load_average.5m'.split('.');
+    query.pipe`STATS AVG(${field}) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)`;
+
+    expect(query.print('basic')).toBe(
+      'FROM index | STATS AVG(system.cpu.load_average.`5m`) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)'
+    );
+  });
+
+  test('Carlos example: column expression 4', () => {
+    // Query construction
+    const query = esql`FROM index`;
+    const field = 'system.cpu.load_average.`5m`';
+    query.pipe({ field })`STATS AVG(??field) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)`;
+
+    expect(query.print('basic')).toBe(
+      'FROM index | STATS AVG(??field) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)'
+    );
+
+    query.inlineParams();
+
+    expect(query.print('basic')).toBe(
+      'FROM index | STATS AVG(system.cpu.load_average.`5m`) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)'
+    );
+  });
 });
