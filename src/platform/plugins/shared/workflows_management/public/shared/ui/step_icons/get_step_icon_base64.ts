@@ -15,9 +15,8 @@ import { ElasticsearchLogo } from './icons/elasticsearch.svg';
 import { HARDCODED_ICONS } from './icons/hardcoded_icons';
 import { KibanaLogo } from './icons/kibana.svg';
 
-export interface ConnectorTypeInfoMinimal {
+export interface GetStepIconBase64Params {
   actionTypeId: string;
-  displayName: string;
   icon?: IconType;
 }
 
@@ -33,7 +32,7 @@ const DEFAULT_CONNECTOR_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="16
  * Get data URL for a connector icon (supports SVG, PNG, and other image formats)
  * Returns a full data URL (e.g., "data:image/svg+xml;base64,..." or "data:image/png;base64,...")
  */
-export async function getStepIconBase64(connector: ConnectorTypeInfoMinimal): Promise<string> {
+export async function getStepIconBase64(connector: GetStepIconBase64Params): Promise<string> {
   try {
     // Only use connector.icon if it's already a data URL
     if (

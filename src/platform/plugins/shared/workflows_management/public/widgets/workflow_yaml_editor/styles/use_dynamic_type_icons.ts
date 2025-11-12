@@ -7,13 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { IconType } from '@elastic/eui';
 import { useEffect } from 'react';
 import type { ConnectorsResponse } from '../../../entities/connectors/model/types';
 import { useKibana } from '../../../hooks/use_kibana';
-import {
-  type ConnectorTypeInfoMinimal,
-  getStepIconBase64,
-} from '../../../shared/ui/step_icons/get_step_icon_base64';
+import { getStepIconBase64 } from '../../../shared/ui/step_icons/get_step_icon_base64';
+
+export interface ConnectorTypeInfoMinimal {
+  actionTypeId: string;
+  displayName: string;
+  icon?: IconType;
+}
 
 const predefinedStepTypes = [
   {
