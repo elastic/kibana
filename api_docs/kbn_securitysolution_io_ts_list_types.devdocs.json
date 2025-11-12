@@ -1250,9 +1250,9 @@
             "signature": [
               "{ $state?: { store: ",
               {
-                "pluginId": "@kbn/es-query",
+                "pluginId": "@kbn/es-query-constants",
                 "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
+                "docId": "kibKbnEsQueryConstantsPluginApi",
                 "section": "def-common.FilterStateStore",
                 "text": "FilterStateStore"
               },
