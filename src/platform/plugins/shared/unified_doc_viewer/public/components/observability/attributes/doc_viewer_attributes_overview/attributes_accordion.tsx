@@ -57,7 +57,7 @@ export const AttributesAccordion = ({
   const { euiTheme } = useEuiTheme();
 
   // TODO: Re-add EuiAccordion once the buggy interaction between it and EuiDataGrid is
-  // resolved.
+  // resolved. https://github.com/elastic/kibana/issues/242652
   return (
     <EuiFlexGroup id={id} direction="column">
       <EuiFlexItem grow={0}>
