@@ -449,9 +449,6 @@ export async function run() {
 
             for (let rev = 0; rev < revisionsCount; rev++) {
               const updatedPolicy = await bumpAgentPolicyRevision(agentPolicyId, agentPolicy.item);
-              logger.info(
-                `  Created revision ${updatedPolicy.item.revision} for agent policy ${agentPolicyId}`
-              );
               latestRevision = updatedPolicy.item.revision;
             }
           }
