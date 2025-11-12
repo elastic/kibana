@@ -146,3 +146,45 @@ export function canDeployCustomPackageAsAgentlessOrThrow(
 
   return true;
 }
+
+/**
+ * Removes transient cloud connector variables from package policy inputs/streams.
+ * These are temporary fields used during cloud connector creation that should not be persisted.
+ *
+ * @temporary This is a workaround until issue #14608 is resolved
+ * @see https://github.com/elastic/security-team/issues/14608
+ *
+ * @param packagePolicy - The package policy to clean
+ * @param varsToRemove - Array of variable names to remove from streams
+ * @returns A new package policy with transient vars removed
+ */
+export function removeCloudConnectorTransientVars(
+  packagePolicy: NewPackagePolicy,
+  varsToRemove: string[]
+): NewPackagePolicy {
+  if (!varsToRemove.length) {
+    return packagePolicy;
+  }
+
+  return {
+    ...packagePolicy,
+    inputs: packagePolicy.inputs.map((input) => ({
+      ...input,
+      streams: input.streams.map((stream) => {
+        if (!stream.vars) {
+          return stream;
+        }
+
+        const hasVarsToRemove = varsToRemove.some((varName) => varName in stream.vars!);
+        if (!hasVarsToRemove) {
+          return stream;
+        }
+
+        const cleanedVars = { ...stream.vars };
+        varsToRemove.forEach((varName) => delete cleanedVars[varName]);
+
+        return { ...stream, vars: cleanedVars };
+      }),
+    })),
+  };
+}

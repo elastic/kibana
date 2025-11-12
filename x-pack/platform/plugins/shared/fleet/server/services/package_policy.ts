@@ -165,6 +165,7 @@ import {
   handleExperimentalDatastreamFeatureOptIn,
   mapPackagePolicySavedObjectToPackagePolicy,
   preflightCheckPackagePolicy,
+  removeCloudConnectorTransientVars,
 } from './package_policies';
 import type {
   PackagePolicyClient,
@@ -558,16 +559,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
         // Remove cloud_connector_name from package policy vars as it's not part of the package schema
         // It was only used to pass the name to cloud connector creation
-        enrichedPackagePolicy.inputs = enrichedPackagePolicy.inputs.map((input) => ({
-          ...input,
-          streams: input.streams.map((stream) => {
-            if (stream.vars?.cloud_connector_name) {
-              const { cloud_connector_name: cloudConnectorName, ...restVars } = stream.vars;
-              return { ...stream, vars: restVars };
-            }
-            return stream;
-          }),
-        }));
+        // TODO: Remove after https://github.com/elastic/security-team/issues/14608
+        enrichedPackagePolicy = removeCloudConnectorTransientVars(enrichedPackagePolicy, [
+          'cloud_connector_name',
+        ]);
       }
 
       inputs = enrichedPackagePolicy.inputs as PackagePolicyInput[];
