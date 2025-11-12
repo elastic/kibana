@@ -33,8 +33,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       shouldUseHashForSubUrl: false,
     });
 
-  // eslint-disable-next-line ban/ban
-  describe.only('Stack alerts page', function () {
+  describe('Stack alerts page', function () {
     describe('Loads the page with limited privileges', () => {
       beforeEach(async () => {
         await security.testUser.restoreDefaults();
