@@ -108,7 +108,7 @@ export const comprehensiveTagcloudWithAdHocDataView: TagcloudState = {
     type: 'dataView',
     id: 'my-custom-data-view-id',
   },
-  orientation: 'right_angled',
+  orientation: 'angled',
   font_size: {
     min: 35,
     max: 58,
@@ -171,7 +171,7 @@ export const comprehensiveTagcloudWithDataView: TagcloudState = {
     type: 'dataView',
     id: 'my-custom-data-view-id',
   },
-  orientation: 'right_angled',
+  orientation: 'angled',
   font_size: {
     min: 35,
     max: 58,
@@ -234,7 +234,7 @@ export const comprehensiveEsqlTagcloud: TagcloudState = {
     type: 'esql',
     query: 'FROM test-index | STATS bytes=AVG(bytes) BY geo.dest',
   },
-  orientation: 'right_angled',
+  orientation: 'angled',
   font_size: {
     min: 35,
     max: 58,

@@ -168,7 +168,7 @@ describe('Tagcloud Schema', () => {
         });
       });
 
-      it('validates right angled orientation', () => {
+      it('validates angled orientation', () => {
         const input = {
           ...baseTagcloudConfig,
           metric: {
@@ -185,7 +185,7 @@ describe('Tagcloud Schema', () => {
               palette: 'kibana_palette',
             },
           },
-          orientation: 'right_angled',
+          orientation: 'angled',
         };
 
         const validated = tagcloudStateSchema.validate(input);

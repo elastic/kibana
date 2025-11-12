@@ -47,7 +47,7 @@ const tagcloudStateSharedOptionsSchema = {
    **/
   orientation: schema.maybe(
     schema.oneOf(
-      [schema.literal('horizontal'), schema.literal('vertical'), schema.literal('right_angled')],
+      [schema.literal('horizontal'), schema.literal('vertical'), schema.literal('angled')],
       { meta: { description: 'Orientation of the tagcloud' }, defaultValue: 'horizontal' }
     )
   ),
