@@ -52,8 +52,8 @@ export const FailureStoreInfo = ({
           />
         </h4>
       </EuiTitle>
-      <EuiFlexGroup>
-        <EuiFlexItem grow={1}>
+      <EuiFlexGroup gutterSize="m">
+        <EuiFlexItem>
           <RetentionCard
             openModal={openModal}
             canManageFailureStore={definition.privileges?.manage_failure_store}
@@ -62,14 +62,14 @@ export const FailureStoreInfo = ({
             definition={definition}
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={1}>
+        <EuiFlexItem>
           <StorageSizeCard
             stats={stats}
             hasPrivileges={definition.privileges?.manage_failure_store}
             statsError={statsError}
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={2}>
+        <EuiFlexItem>
           <IngestionCard
             stats={stats}
             hasPrivileges={definition.privileges?.manage_failure_store}
