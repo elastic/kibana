@@ -32,20 +32,29 @@ test.describe('Stream detail header', { tag: ['@ess', '@svlOblt'] }, () => {
     await apiServices.streams.deleteStream(TEST_STREAM_NAME);
   });
 
-  test('shows correct Discover badge', async ({ pageObjects }) => {
+  test('shows correct badges', async ({ pageObjects, config }) => {
     await pageObjects.streams.gotoDataRetentionTab(TEST_STREAM_NAME);
-    await pageObjects.streams.verifyDiscoverButtonLink(TEST_STREAM_NAME);
+    await test.step('verify Discover badge link', async () => {
+      await pageObjects.streams.verifyDiscoverButtonLink(TEST_STREAM_NAME);
+    });
+
+    await test.step('verify Lifecycle badge link', async () => {
+      const isServerless = config.serverless ?? false;
+
+      await pageObjects.streams.verifyLifecycleBadge(
+        TEST_STREAM_NAME,
+        isServerless ? 'Indefinite' : 'ILM Policy: logs'
+      );
+    });
+
+    await test.step('verify Classic badge on classic stream', async () => {
+      await pageObjects.streams.verifyClassicBadge();
+    });
   });
 
-  test('shows correct Lifecycle badge', async ({ pageObjects, config }) => {
-    await pageObjects.streams.gotoDataRetentionTab(TEST_STREAM_NAME);
-
-    const isServerless = config.serverless ?? false;
-
-    await pageObjects.streams.verifyLifecycleBadge(
-      TEST_STREAM_NAME,
-      isServerless ? 'Indefinite' : 'ILM Policy: logs'
-    );
+  test('shows Wired badge on wired stream', async ({ pageObjects }) => {
+    await pageObjects.streams.gotoDataRetentionTab('logs');
+    await pageObjects.streams.verifyWiredBadge();
   });
 
   test('transitions data quality from Good -> Degraded -> Poor for stream', async ({
@@ -86,15 +95,5 @@ test.describe('Stream detail header', { tag: ['@ess', '@svlOblt'] }, () => {
 
     // We should have 55 documents in total now, 5 degraded -> ~9.09% degraded docs -> > 3% so Poor quality
     await pageObjects.streams.verifyDataQuality(TEST_STREAM_NAME, 'Poor');
-  });
-
-  test('shows Classic badge on classic stream', async ({ pageObjects }) => {
-    await pageObjects.streams.gotoDataRetentionTab(TEST_STREAM_NAME);
-    await pageObjects.streams.verifyClassicBadge();
-  });
-
-  test('shows Wired badge on wired stream', async ({ pageObjects }) => {
-    await pageObjects.streams.gotoDataRetentionTab('logs');
-    await pageObjects.streams.verifyWiredBadge();
   });
 });
