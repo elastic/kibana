@@ -29,16 +29,17 @@ export const createMarkdownAction = (): ActionDefinition<EmbeddableApiContext> =
     const newMarkdownEmbeddable = await embeddable.addNewPanel<
       MarkdownEmbeddableState,
       MarkdownEditorApi
-    >({
-      panelType: MARKDOWN_EMBEDDABLE_TYPE,
-      serializedState: {
-        rawState: {
-          content: '',
+    >(
+      {
+        panelType: MARKDOWN_EMBEDDABLE_TYPE,
+        serializedState: {
+          rawState: {
+            content: '',
+          },
         },
       },
-      },
       { displaySuccessMessage: true }
-    )
+    );
     return newMarkdownEmbeddable?.onEdit({ isNewPanel: true });
   },
   getDisplayName: () =>

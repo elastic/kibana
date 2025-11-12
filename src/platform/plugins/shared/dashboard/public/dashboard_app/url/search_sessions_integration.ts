@@ -84,8 +84,12 @@ function getLocatorParams({
     'panels' | 'references'
   >;
 
+  // TODO Update serializing controls https://github.com/elastic/kibana/issues/242768
+  // const { controlGroupInput, controlGroupReferences } = dashboardInternalApi.serializeControls();
+
   const combinedReferences = [
     ...(panels?.references ?? []),
+    // ...(controlGroupReferences ?? []),
   ] as unknown as DashboardState['references'] & SerializableRecord;
 
   return {
@@ -107,6 +111,7 @@ function getLocatorParams({
           value: 0,
         }
       : undefined,
+    // controlGroupInput,
     panels: panels?.panels,
     references: combinedReferences,
   };
