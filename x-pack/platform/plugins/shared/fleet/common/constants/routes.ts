@@ -194,6 +194,7 @@ export const AGENT_API_ROUTES = {
 export const AGENTLESS_POLICIES_ROUTES = {
   CREATE_PATTERN: `${API_ROOT}/agentless_policies`,
   DELETE_PATTERN: `${API_ROOT}/agentless_policies/{policyId}`,
+  SYNC_PATTERN: `${INTERNAL_ROOT}/agentless_policies/_sync`,
 };
 
 export const ENROLLMENT_API_KEY_ROUTES = {

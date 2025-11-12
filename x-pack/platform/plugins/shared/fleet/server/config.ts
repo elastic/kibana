@@ -218,6 +218,13 @@ export const config: PluginConfigDescriptor = {
               enabled: schema.maybe(schema.boolean({ defaultValue: false })),
             })
           ),
+          backgroundSync: schema.maybe(
+            schema.object({
+              enabled: schema.boolean({ defaultValue: false }),
+              dryRun: schema.boolean({ defaultValue: false }),
+              interval: schema.maybe(schema.string({ defaultValue: '5m' })),
+            })
+          ),
         })
       ),
       packages: PreconfiguredPackagesSchema,

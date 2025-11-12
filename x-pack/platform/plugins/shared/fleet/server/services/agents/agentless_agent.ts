@@ -63,7 +63,23 @@ interface AgentlessAgentErrorHandlingMessages {
   };
 }
 
-class AgentlessAgentService {
+export interface AgentlessAgentService {
+  listAgentlessDeployments(opts?: { perPage?: number; nextPageToken?: string }): Promise<{
+    deployments: Array<{
+      policy_id: string;
+      revision_idx?: number;
+    }>;
+    nextPageToken?: string;
+  }>;
+  createAgentlessAgent(
+    esClient: ElasticsearchClient,
+    soClient: SavedObjectsClientContract,
+    agentlessAgentPolicy: AgentPolicy
+  ): Promise<AxiosResponse<AgentlessApiDeploymentResponse> | void>;
+  deleteAgentlessAgent(agentlessPolicyId: string): Promise<AxiosResponse | void>;
+}
+
+class AgentlessAgentServiceImpl implements AgentlessAgentService {
   public getDefaultSettings() {
     const cloudSetup = appContextService.getCloud();
     const isCloud = cloudSetup?.isCloudEnabled;
@@ -334,6 +350,21 @@ class AgentlessAgentService {
     });
 
     return response;
+  }
+
+  public async listAgentlessDeployments(opts?: { perPage?: number; nextPageToken?: string }) {
+    const logger = appContextService.getLogger();
+
+    logger.debug('[Agentless API] Retrieve agentless deployments');
+    // TODO implement
+    return {
+      deployments: [
+        {
+          policy_id: 'policy-id-1',
+          revision_idx: 1,
+        },
+      ],
+    };
   }
 
   private getAgentlessSecrets() {
@@ -841,4 +872,4 @@ class AgentlessAgentService {
   };
 }
 
-export const agentlessAgentService = new AgentlessAgentService();
+export const agentlessAgentService = new AgentlessAgentServiceImpl();
