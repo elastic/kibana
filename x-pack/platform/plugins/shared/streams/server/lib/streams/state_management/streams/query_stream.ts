@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { cloneDeep } from 'lodash';
+import { cloneDeep, isEqual } from 'lodash';
 import { Streams } from '@kbn/streams-schema';
 import { StatusError } from '../../errors/status_error';
 import type { ElasticsearchAction } from '../execution_plan/types';
@@ -89,13 +89,21 @@ export class QueryStream extends StreamActiveRecord<Streams.QueryStream.Definiti
     ];
   }
 
-  protected async doDetermineUpdateActions(): Promise<ElasticsearchAction[]> {
-    return [
-      {
-        type: 'upsert_dot_streams_document',
-        request: this._definition,
-      },
-    ];
+  protected async doDetermineUpdateActions(
+    desiredState: State,
+    startingState: State,
+    startingStateStream: QueryStream
+  ): Promise<ElasticsearchAction[]> {
+    const definitionChanged = !isEqual(startingStateStream.definition, this._definition);
+    if (definitionChanged) {
+      return [
+        {
+          type: 'upsert_dot_streams_document',
+          request: this._definition,
+        },
+      ];
+    }
+    return [];
   }
 
   protected async doDetermineDeleteActions(): Promise<ElasticsearchAction[]> {

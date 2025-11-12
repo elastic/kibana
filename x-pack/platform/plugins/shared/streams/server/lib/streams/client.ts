@@ -719,13 +719,17 @@ export class StreamsClient {
 
     const privileges = await checkAccessBulk({
       names: streams
-        .filter((stream) => !Streams.GroupStream.Definition.is(stream))
+        .filter(
+          (stream) =>
+            !Streams.GroupStream.Definition.is(stream) && !Streams.QueryStream.Definition.is(stream)
+        )
         .map((stream) => stream.name),
       scopedClusterClient,
     });
 
     return streams.filter((stream) => {
       if (Streams.GroupStream.Definition.is(stream)) return true;
+      if (Streams.QueryStream.Definition.is(stream)) return true;
       return privileges[stream.name]?.read === true;
     });
   }
