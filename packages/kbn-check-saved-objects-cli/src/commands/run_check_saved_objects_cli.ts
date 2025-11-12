@@ -21,7 +21,6 @@ interface TaskContext {
   from?: MigrationSnapshot;
   to?: MigrationSnapshot;
   updatedTypes: string[];
-  invalidUpdates: Record<string, Error>;
   fixtures: Record<
     string,
     {
@@ -32,7 +31,7 @@ interface TaskContext {
 }
 
 export function runCheckSavedObjectsCli() {
-  const scriptName = process.argv[1].replace(/^.*scripts\//, 'scripts/');
+  let globalTask: Listr<TaskContext, 'default', 'simple'>;
 
   run(
     async ({ log, flagsReader }) => {
@@ -41,7 +40,6 @@ export function runCheckSavedObjectsCli() {
       const fix = flagsReader.boolean('fix');
       const context: TaskContext = {
         updatedTypes: [],
-        invalidUpdates: {},
         fixtures: {},
       };
 
@@ -51,7 +49,7 @@ export function runCheckSavedObjectsCli() {
         );
       }
 
-      const list = new Listr<TaskContext, 'default', 'simple'>(
+      globalTask = new Listr(
         [
           {
             title: 'Starting ES + Kibana',
@@ -61,28 +59,28 @@ export function runCheckSavedObjectsCli() {
           },
           {
             title: 'Obtaining SO type registry snapshots',
-            task: async (ctx, task) =>
-              task.newListr<TaskContext>(
-                [
-                  {
-                    title: `Obtanining snapshot for baseline '${gitRev}'`,
-                    task: async () => {
-                      ctx.from = await fetchSnapshot(gitRev);
-                    },
-                    retry: {
-                      delay: 2000,
-                      tries: 5,
-                    },
+            task: async (ctx, task) => {
+              const subtasks: ListrTask<TaskContext>[] = [
+                {
+                  title: `Obtanining snapshot for baseline '${gitRev}'`,
+                  task: async () => {
+                    ctx.from = await fetchSnapshot(gitRev);
                   },
-                  {
-                    title: `Taking snapshot of current SO type definitions`,
-                    task: async () => {
-                      ctx.to = await takeSnapshot(ctx.serverHandles!);
-                    },
+                  retry: {
+                    delay: 2000,
+                    tries: 5,
                   },
-                ],
-                { concurrent: true }
-              ),
+                },
+                {
+                  title: `Taking snapshot of current SO type definitions`,
+                  task: async () => {
+                    ctx.to = await takeSnapshot(ctx.serverHandles!);
+                  },
+                },
+              ];
+
+              return task.newListr<TaskContext>(subtasks, { concurrent: true });
+            },
           },
           {
             title: 'Detecting updated types',
@@ -95,17 +93,11 @@ export function runCheckSavedObjectsCli() {
             task: (ctx, task) => {
               const subtasks: ListrTask<TaskContext>[] = ctx.updatedTypes.map((name) => ({
                 title: `Checking updates on type '${name}'`,
-                task: () => {
-                  try {
-                    validateChanges({
-                      from: ctx.from?.typeDefinitions[name],
-                      to: ctx.to?.typeDefinitions[name]!,
-                    });
-                  } catch (err) {
-                    ctx.invalidUpdates[name] = err;
-                    throw err;
-                  }
-                },
+                task: () =>
+                  validateChanges({
+                    from: ctx.from?.typeDefinitions[name],
+                    to: ctx.to?.typeDefinitions[name]!,
+                  }),
               }));
 
               return task.newListr<TaskContext>(subtasks, { exitOnError: false });
@@ -116,7 +108,7 @@ export function runCheckSavedObjectsCli() {
             title: 'Checking for SO fixtures',
             task: (ctx, task) => {
               const registry = ctx.serverHandles?.coreStart.savedObjects.getTypeRegistry();
-              const subtasks = ctx.updatedTypes.map((type) => {
+              const subtasks: ListrTask<TaskContext>[] = ctx.updatedTypes.map((type) => {
                 return {
                   title: `Loading fixtures for type '${type}'`,
                   task: async () => {
@@ -136,15 +128,20 @@ export function runCheckSavedObjectsCli() {
           {
             title: 'Automated rollback tests',
             task: () => {},
-            skip: (ctx) => Object.keys(ctx.invalidUpdates).length > 0,
+            skip: () => globalTask.errors.length > 0,
           },
         ],
-        { fallbackRenderer: 'simple', collectErrors: 'minimal' }
+        {
+          fallbackRenderer: 'simple',
+          collectErrors: 'minimal',
+          exitOnError: true,
+          concurrent: false,
+        }
       );
 
       try {
-        await list.run(context);
-        exitCode = list.errors.length > 0 ? 1 : 0;
+        await globalTask.run(context);
+        exitCode = globalTask.errors.length > 0 ? 1 : 0;
       } catch (err) {
         log.error(err);
         exitCode = 1;
@@ -169,7 +166,7 @@ export function runCheckSavedObjectsCli() {
       description: `
       Determine if the changes performed to the Saved Objects mappings are following our standards.
 
-      Usage: node ${scriptName} --baseline <gitRev>
+      Usage: node scripts/check_saved_objects --baseline <gitRev> --fix
     `,
       flags: {
         alias: {
@@ -183,6 +180,7 @@ export function runCheckSavedObjectsCli() {
         },
         help: `
         --baseline <SHA>   Provide a commit SHA, to use as a baseline for comparing SO changes against
+        --fix              Generate templates for missing fixture files, and update outdated JSON files
       `,
       },
     }
