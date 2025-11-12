@@ -17,6 +17,7 @@ import {
 import {
   ESQL_CONTROL_CONFIG_CANCELLED,
   ESQL_CONTROL_CONFIG_OPENED,
+  ESQL_CONTROL_CONFIG_SAVED,
   ESQL_LOOKUP_JOIN_ACTION_SHOWN,
   ESQL_QUERY_HISTORY_CLICKED,
   ESQL_QUERY_HISTORY_OPENED,
@@ -158,6 +159,13 @@ export class ESQLEditorTelemetryService {
       trigger_source: source,
       query_length: prettyQuery.length.toString(),
       query_lines: query.split('\n').length.toString(),
+    });
+  }
+
+  public trackEsqlControlConfigSaved(controlType: string, source: string) {
+    this._reportEvent(ESQL_CONTROL_CONFIG_SAVED, {
+      control_kind: controlType,
+      trigger_source: source,
     });
   }
 
