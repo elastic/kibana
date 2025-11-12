@@ -46,7 +46,7 @@ const getAnomalyDetectionJobsSchema = z.object({
     .min(2)
     .max(200)
     .describe(
-      'Start of the time range for anomaly records, expressed with Elastic date math (e.g. now-1h). Defaults to `now-24h`.'
+      `Start of the time range for anomaly records, expressed with Elastic date math (e.g. now-1h). Defaults to ${DEFAULT_TIME_RANGE.start}.`
     )
     .optional(),
   end: z
@@ -54,7 +54,7 @@ const getAnomalyDetectionJobsSchema = z.object({
     .min(2)
     .max(200)
     .describe(
-      'End of the time range for anomaly records, expressed with Elastic date math. Defaults to `now`.'
+      `End of the time range for anomaly records, expressed with Elastic date math. Defaults to ${DEFAULT_TIME_RANGE.end}.`
     )
     .optional(),
 });
@@ -73,11 +73,16 @@ export function createGetAnomalyDetectionJobsTool({
       'Return anomaly detection jobs and associated anomaly records. Useful for identifying unusual patterns in observability data.',
     schema: getAnomalyDetectionJobsSchema,
     tags: ['observability', 'machine_learning', 'anomaly_detection'],
-    handler: async ({ jobIds, limit, start, end }, { esClient }) => {
+    handler: async (
+      {
+        jobIds,
+        limit: jobsLimit = DEFAULT_JOBS_LIMIT,
+        start: rangeStart = DEFAULT_TIME_RANGE.start,
+        end: rangeEnd = DEFAULT_TIME_RANGE.end,
+      },
+      { esClient }
+    ) => {
       const mlClient = esClient.asCurrentUser.ml;
-      const jobsLimit = limit ?? DEFAULT_JOBS_LIMIT;
-      const rangeStart = start ?? DEFAULT_TIME_RANGE.start;
-      const rangeEnd = end ?? DEFAULT_TIME_RANGE.end;
 
       try {
         const mlJobs = await getMlJobs({ mlClient, jobIds, jobsLimit, rangeStart, rangeEnd });
