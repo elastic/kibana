@@ -59,7 +59,6 @@ const sampleDocsForInternalKb = [
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const log = getService('log');
-  const kibanaServer = getService('kibanaServer');
   const roleScopedSupertest = getService('roleScopedSupertest');
 
   describe(`tool: ${OBSERVABILITY_SEARCH_KNOWLEDGE_BASE_TOOL_ID}`, function () {
