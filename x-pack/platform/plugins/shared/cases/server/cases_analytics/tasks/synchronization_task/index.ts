@@ -19,7 +19,7 @@ import type { Owner } from '../../../../common/constants/types';
 import type { CasesServerStartDependencies } from '../../../types';
 import { AnalyticsIndexSynchronizationTaskFactory } from './synchronization_task_factory';
 
-const SCHEDULE: IntervalSchedule = { interval: '5m' };
+const SCHEDULE: IntervalSchedule = { interval: '1m' };
 
 export function registerCAISynchronizationTask({
   taskManager,

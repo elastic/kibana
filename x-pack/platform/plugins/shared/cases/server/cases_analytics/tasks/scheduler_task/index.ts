@@ -79,9 +79,9 @@ export async function scheduleCAISchedulerTask({
       id: CAI_SCHEDULER_TASK_ID,
       taskType: ANALYTICS_SCHEDULER_TASK_TYPE,
       params: {},
-      runAt: new Date(Date.now() + 60 * 1000),
+      runAt: new Date(Date.now() + 60 * 1),
       schedule: {
-        interval: '1h',
+        interval: '1m',
       },
       state: {},
     });
