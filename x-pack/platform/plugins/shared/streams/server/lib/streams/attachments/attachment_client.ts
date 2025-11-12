@@ -22,6 +22,11 @@ import {
 } from './types';
 import { getAttachmentDocument, getAttachmentLinkUuid, getSoByIds, getSuggestedSo } from './utils';
 
+/**
+ * Client for managing attachments linked to streams.
+ *
+ * Handles the lifecycle of attachments associated with streams, including linking, unlinking, bulk operations, and querying attachments.
+ */
 export class AttachmentClient {
   constructor(
     private readonly clients: {
@@ -92,6 +97,24 @@ export class AttachmentClient {
     },
   };
 
+  /**
+   * Links an attachment to a stream.
+   *
+   * If the attachment already exists, adds the stream name to its list of associated streams.
+   * If the attachment doesn't exist, creates it with the stream name.
+   *
+   * @param streamName - The name of the stream to link the attachment to
+   * @param link - The attachment link containing the attachment id and type
+   * @returns A promise that resolves when the linking operation is complete
+   *
+   * @example
+   * ```typescript
+   * await attachmentClient.linkAttachment('my-stream', {
+   *   id: 'dashboard-123',
+   *   type: 'dashboard'
+   * });
+   * ```
+   */
   async linkAttachment(streamName: string, link: AttachmentLink): Promise<void> {
     const uuid = getAttachmentLinkUuid(link);
 
@@ -132,6 +155,25 @@ export class AttachmentClient {
     });
   }
 
+  /**
+   * Unlinks an attachment from a stream.
+   *
+   * Removes the stream name from the attachment's list of associated streams.
+   * If this is the last stream associated with the attachment, deletes the attachment entirely.
+   *
+   * @param streamName - The name of the stream to unlink the attachment from
+   * @param attachment - The attachment link containing the attachment id and type
+   * @returns A promise that resolves when the unlinking operation is complete
+   * @throws {AttachmentNotFoundError} If the attachment doesn't exist
+   *
+   * @example
+   * ```typescript
+   * await attachmentClient.unlinkAttachment('my-stream', {
+   *   id: 'dashboard-123',
+   *   type: 'dashboard'
+   * });
+   * ```
+   */
   async unlinkAttachment(streamName: string, attachment: AttachmentLink): Promise<void> {
     const uuid = getAttachmentLinkUuid(attachment);
 
@@ -183,10 +225,36 @@ export class AttachmentClient {
     }
   }
 
+  /**
+   * Cleans up the attachment storage by removing all attachment documents.
+   *
+   * @returns A promise that resolves when the cleanup operation is complete
+   */
   async clean() {
     await this.clients.storageClient.clean();
   }
 
+  /**
+   * Performs bulk link and unlink operations for attachments on a stream.
+   *
+   * This method efficiently processes multiple attachment operations in a single bulk request.
+   * It handles both linking (index) and unlinking (delete) operations, managing stream name
+   * associations and automatic cleanup when attachments have no remaining stream associations.
+   *
+   * @param streamName - The name of the stream for the bulk operations
+   * @param operations - Array of bulk operations to perform (index or delete)
+   * @returns A promise that resolves with the bulk operation result
+   * @returns result.errors - Whether any errors occurred during the bulk operation
+   * @returns result.items - Optional array of operation results (if errors occurred)
+   *
+   * @example
+   * ```typescript
+   * const result = await attachmentClient.bulk('my-stream', [
+   *   { index: { attachment: { id: 'dashboard-1', type: 'dashboard' } } },
+   *   { delete: { attachment: { id: 'rule-1', type: 'rule' } } }
+   * ]);
+   * ```
+   */
   async bulk(streamName: string, operations: AttachmentBulkOperation[]) {
     if (operations.length === 0) {
       return { errors: false };
@@ -319,6 +387,25 @@ export class AttachmentClient {
     return { errors: bulkResponse.errors, items: bulkResponse.items };
   }
 
+  /**
+   * Retrieves all attachments associated with a stream.
+   *
+   * Fetches attachment documents from storage and enriches them with full entity details
+   * by querying the appropriate services.
+   *
+   * @param streamName - The name of the stream to get attachments for
+   * @param attachmentType - Optional filter to only return attachments of a specific type
+   * @returns A promise that resolves with an array of attachments with full entity details
+   *
+   * @example
+   * ```typescript
+   * // Get all attachments
+   * const allAttachments = await attachmentClient.getAttachments('my-stream');
+   *
+   * // Get only attachments of a specific type
+   * const dashboards = await attachmentClient.getAttachments('my-stream', 'dashboard');
+   * ```
+   */
   async getAttachments(streamName: string, attachmentType?: AttachmentType): Promise<Attachment[]> {
     const filter: QueryDslQueryContainer[] = [{ terms: { [STREAM_NAMES]: [streamName] } }];
     if (attachmentType) {
@@ -363,6 +450,29 @@ export class AttachmentClient {
     return attachments;
   }
 
+  /**
+   * Searches for attachments that match the given query and filters.
+   *
+   * Provides suggestions for attachments that can be linked to streams,
+   * searching across attachment types based on the specified filters.
+   *
+   * @param options - The search options
+   * @param options.query - Search query string to match against attachment titles/names
+   * @param options.attachmentTypes - Optional array of attachment types to search (searches all if not provided)
+   * @param options.tags - Optional array of tags to filter attachments by
+   * @returns A promise that resolves with search results
+   * @returns result.attachments - Array of matching attachments (up to 100)
+   * @returns result.hasMore - Whether there are more results available beyond the returned set
+   *
+   * @example
+   * ```typescript
+   * const results = await attachmentClient.getSuggestions({
+   *   query: 'security',
+   *   attachmentTypes: ['dashboard', 'rule'],
+   *   tags: ['security', 'monitoring']
+   * });
+   * ```
+   */
   async getSuggestions({
     query,
     attachmentTypes,
@@ -406,6 +516,29 @@ export class AttachmentClient {
     };
   }
 
+  /**
+   * Synchronizes a stream's attachments to match a provided list.
+   *
+   * Compares the current attachments associated with a stream against a desired list,
+   * then performs the necessary operations to add new attachments and remove old ones.
+   * This is useful for bulk updates where you want to replace all attachments of a certain type.
+   *
+   * @param streamName - The name of the stream to synchronize attachments for
+   * @param links - Array of attachment links that should be associated with the stream
+   * @param attachmentType - Optional filter to only sync attachments of a specific type
+   * @returns A promise that resolves with the sync operation results
+   * @returns result.deleted - Array of attachment links that were removed
+   * @returns result.indexed - Array of attachment links that were added (same as input links)
+   *
+   * @example
+   * ```typescript
+   * const result = await attachmentClient.syncAttachmentList('my-stream', [
+   *   { id: 'dashboard-1', type: 'dashboard' },
+   *   { id: 'dashboard-2', type: 'dashboard' }
+   * ], 'dashboard');
+   * // Removes any attachments not in the list, adds the specified attachments
+   * ```
+   */
   async syncAttachmentList(
     streamName: string,
     links: AttachmentLink[],
