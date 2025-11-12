@@ -77,6 +77,14 @@ export interface SearchSessionRequestInfo {
    * Search strategy used to submit the search request
    */
   strategy: string;
+  /**
+   * Search request params used to submit the search request
+   */
+  params?: SerializableRecord;
+  /**
+   * Timestamp when a search request was added to the search session / background search
+   */
+  added?: string;
 }
 
 export interface SearchSessionRequestStatus {

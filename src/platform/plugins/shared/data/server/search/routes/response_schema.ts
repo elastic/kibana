@@ -9,12 +9,14 @@
 
 import { schema } from '@kbn/config-schema';
 
+const serializeableSchema = schema.mapOf(schema.string(), schema.any());
+
 const searchSessionRequestInfoSchema = schema.object({
   id: schema.string(),
   strategy: schema.string(),
+  params: schema.maybe(serializeableSchema),
+  added: schema.maybe(schema.string()),
 });
-
-const serializeableSchema = schema.mapOf(schema.string(), schema.any());
 
 const searchSessionAttrSchema = () =>
   schema.object({
