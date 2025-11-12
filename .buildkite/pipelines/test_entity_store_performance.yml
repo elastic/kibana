@@ -54,6 +54,8 @@ steps:
               limit: 3
 
       - command: .buildkite/scripts/steps/cloud/build_and_deploy.sh
+        env:
+          ES_ZONE_COUNT: 2
         label: 'Build and Deploy to Cloud'
         agents:
           provider: gcp

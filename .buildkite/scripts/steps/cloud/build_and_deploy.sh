@@ -22,6 +22,17 @@ case "$KIBANA_MEMORY_SIZE" in
     ;;
 esac
 
+ES_ZONE_COUNT=${ES_ZONE_COUNT:-1}
+case "$ES_ZONE_COUNT" in
+  1|2|3)
+    echo "--- Elasticsearch zone count: ${ES_ZONE_COUNT}"
+    ;;
+  *)
+    echo "Error: ES_ZONE_COUNT must be 1, 2, or 3. Got: $ES_ZONE_COUNT"
+    exit 1
+    ;;
+esac
+
 echo "--- Download Kibana Distribution"
 
 mkdir -p ./target
@@ -87,7 +98,8 @@ if [ -z "${CLOUD_DEPLOYMENT_ID}" ] || [ "${CLOUD_DEPLOYMENT_ID}" = 'null' ]; the
     .resources.kibana[0].plan.kibana.version = "'$VERSION'" |
     .resources.elasticsearch[0].plan.elasticsearch.version = "'$VERSION'" |
     .resources.integrations_server[0].plan.integrations_server.version = "'$VERSION'" |
-    .resources.kibana[0].plan.cluster_topology[0].size.value = '$KIBANA_MEMORY_SIZE'
+    .resources.kibana[0].plan.cluster_topology[0].size.value = '$KIBANA_MEMORY_SIZE' |
+    (.resources.elasticsearch[0].plan.cluster_topology[] | select(.zone_count != null) | .zone_count) = '$ES_ZONE_COUNT'
     ' .buildkite/scripts/steps/cloud/deploy.json > /tmp/deploy.json
 
   echo "Creating deployment..."
@@ -127,7 +139,8 @@ if [ -z "${CLOUD_DEPLOYMENT_ID}" ] || [ "${CLOUD_DEPLOYMENT_ID}" = 'null' ]; the
 else
   ecctl deployment show "$CLOUD_DEPLOYMENT_ID" --generate-update-payload | jq '
     .resources.kibana[0].plan.kibana.docker_image = "'$KIBANA_CLOUD_IMAGE'" |
-    (.. | select(.version? != null).version) = "'$VERSION'"
+    (.. | select(.version? != null).version) = "'$VERSION'" |
+    (.resources.elasticsearch[0].plan.cluster_topology[]? | select(.zone_count != null) | .zone_count) = '$ES_ZONE_COUNT'
     ' > /tmp/deploy.json
 
   echo "Updating deployment..."
