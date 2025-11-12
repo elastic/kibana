@@ -7,7 +7,7 @@
 
 import { lazy } from 'react';
 import type { ActionTypeModel } from '@kbn/alerts-ui-shared';
-import { connectorsSpecs, type ConnectorSpec } from '@kbn/connector-specs';
+import { type ConnectorSpec } from '@kbn/connector-specs';
 import type { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
 
 export function registerConnectorTypesFromSpecs({
@@ -15,9 +15,11 @@ export function registerConnectorTypesFromSpecs({
 }: {
   connectorTypeRegistry: TriggersAndActionsUIPublicPluginSetup['actionTypeRegistry'];
 }) {
-  for (const spec of Object.values(connectorsSpecs)) {
-    connectorTypeRegistry.register(createConnectorTypeFromSpec(spec));
-  }
+  import('@kbn/connector-specs').then(({ connectorsSpecs }) => {
+    for (const spec of Object.values(connectorsSpecs)) {
+      connectorTypeRegistry.register(createConnectorTypeFromSpec(spec));
+    }
+  });
 }
 
 function createConnectorTypeFromSpec(spec: ConnectorSpec): ActionTypeModel {
