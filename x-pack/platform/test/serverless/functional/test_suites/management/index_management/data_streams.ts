@@ -129,7 +129,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         this.tags(['skipSvlOblt', 'skipSvlSearch']);
 
         it('shows project data retention in the datastreams list', async () => {
-          expect(await testSubjects.exists('projectLevelRetentionCallout')).to.be(true);
+          expect(await testSubjects.exists('projectLevelRetentionLink')).to.be(true);
           expect(await testSubjects.exists('cloudLinkButton')).to.be(true);
         });
       });
