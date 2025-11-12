@@ -19,12 +19,12 @@ import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type {
   LensDocument,
   GetStateType,
-  LensApi,
   LensInternalApi,
   LensOverrides,
   LensPublicCallbacks,
   LensRuntimeState,
 } from '@kbn/lens-common';
+import type { LensApi } from '@kbn/lens-common-2';
 import type {
   HasParentApi,
   PublishesTimeRange,
