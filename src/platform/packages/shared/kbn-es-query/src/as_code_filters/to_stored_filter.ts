@@ -17,7 +17,7 @@ import type {
   AsCodeGroupFilter,
   AsCodeDSLFilter,
 } from '@kbn/es-query-server';
-import { SIMPLE_FILTER_OPERATOR } from '@kbn/es-query-constants';
+import { ASCODE_FILTER_OPERATOR } from '@kbn/es-query-constants';
 import { FilterStateStore } from '../..';
 import { FilterConversionError } from './errors';
 import { getFilterTypeForOperator } from './utils';
@@ -106,16 +106,16 @@ export function convertFromSimpleCondition(
   };
 
   switch (condition.operator) {
-    case SIMPLE_FILTER_OPERATOR.EXISTS:
+    case ASCODE_FILTER_OPERATOR.EXISTS:
       query = { exists: { field: condition.field } };
       break;
 
-    case SIMPLE_FILTER_OPERATOR.NOT_EXISTS:
+    case ASCODE_FILTER_OPERATOR.NOT_EXISTS:
       query = { exists: { field: condition.field } };
       meta = { ...meta, negate: true };
       break;
 
-    case SIMPLE_FILTER_OPERATOR.IS:
+    case ASCODE_FILTER_OPERATOR.IS:
       // Use match_phrase for better compatibility with original filters
       query = {
         match_phrase: {
@@ -125,7 +125,7 @@ export function convertFromSimpleCondition(
       meta = { ...meta, params: { query: condition.value } };
       break;
 
-    case SIMPLE_FILTER_OPERATOR.IS_NOT:
+    case ASCODE_FILTER_OPERATOR.IS_NOT:
       // Use match_phrase for better compatibility with original filters
       query = {
         match_phrase: {
@@ -135,17 +135,17 @@ export function convertFromSimpleCondition(
       meta = { ...meta, negate: true, params: { query: condition.value } };
       break;
 
-    case SIMPLE_FILTER_OPERATOR.IS_ONE_OF:
+    case ASCODE_FILTER_OPERATOR.IS_ONE_OF:
       query = { terms: { [condition.field]: condition.value } };
       meta = { ...meta, params: { terms: condition.value } };
       break;
 
-    case SIMPLE_FILTER_OPERATOR.IS_NOT_ONE_OF:
+    case ASCODE_FILTER_OPERATOR.IS_NOT_ONE_OF:
       query = { terms: { [condition.field]: condition.value } };
       meta = { ...meta, negate: true, params: { terms: condition.value } };
       break;
 
-    case SIMPLE_FILTER_OPERATOR.RANGE:
+    case ASCODE_FILTER_OPERATOR.RANGE:
       const rangeValue = condition.value as {
         gte?: number | string;
         lte?: number | string;
@@ -202,7 +202,7 @@ export function convertFromFilterGroup(
         'operator' in typedCondition &&
         typedCondition.field ===
           (group.conditions[0] as AsCodeConditionFilter['condition']).field &&
-        typedCondition.operator === SIMPLE_FILTER_OPERATOR.IS
+        typedCondition.operator === ASCODE_FILTER_OPERATOR.IS
       );
     });
 

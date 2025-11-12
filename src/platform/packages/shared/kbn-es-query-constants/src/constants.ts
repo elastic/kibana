@@ -8,10 +8,10 @@
  */
 
 /**
- * SimpleFilter operator constants
+ * As Code Filter operator constants
  * These operators are used in SimpleFilterCondition to specify how to match field values
  */
-export const SIMPLE_FILTER_OPERATOR = {
+export const ASCODE_FILTER_OPERATOR = {
   IS: 'is',
   IS_NOT: 'is_not',
   IS_ONE_OF: 'is_one_of',
@@ -20,24 +20,6 @@ export const SIMPLE_FILTER_OPERATOR = {
   NOT_EXISTS: 'not_exists',
   RANGE: 'range',
 } as const;
-
-/**
- * Array of all valid filter operators
- */
-export const FILTER_OPERATORS = [
-  SIMPLE_FILTER_OPERATOR.IS,
-  SIMPLE_FILTER_OPERATOR.IS_NOT,
-  SIMPLE_FILTER_OPERATOR.IS_ONE_OF,
-  SIMPLE_FILTER_OPERATOR.IS_NOT_ONE_OF,
-  SIMPLE_FILTER_OPERATOR.EXISTS,
-  SIMPLE_FILTER_OPERATOR.NOT_EXISTS,
-  SIMPLE_FILTER_OPERATOR.RANGE,
-] as const;
-
-/**
- * Union type of all valid filter operators
- */
-export type FilterOperator = (typeof FILTER_OPERATORS)[number];
 
 /**
  * An enum to denote whether a filter is specific to an application's context or whether it should be applied globally.

@@ -15,7 +15,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { SIMPLE_FILTER_OPERATOR } from '@kbn/es-query-constants';
+import { ASCODE_FILTER_OPERATOR } from '@kbn/es-query-constants';
 
 // ====================================================================
 // CORE FILTER OPERATOR AND VALUE SCHEMAS
@@ -132,7 +132,7 @@ const conditionFieldSchema = schema.object({
  */
 const singleConditionSchema = conditionFieldSchema.extends({
   operator: schema.oneOf(
-    [schema.literal(SIMPLE_FILTER_OPERATOR.IS), schema.literal(SIMPLE_FILTER_OPERATOR.IS_NOT)],
+    [schema.literal(ASCODE_FILTER_OPERATOR.IS), schema.literal(ASCODE_FILTER_OPERATOR.IS_NOT)],
     {
       meta: { description: 'Single value comparison operators' },
     }
@@ -148,8 +148,8 @@ const singleConditionSchema = conditionFieldSchema.extends({
 const oneOfConditionSchema = conditionFieldSchema.extends({
   operator: schema.oneOf(
     [
-      schema.literal(SIMPLE_FILTER_OPERATOR.IS_ONE_OF),
-      schema.literal(SIMPLE_FILTER_OPERATOR.IS_NOT_ONE_OF),
+      schema.literal(ASCODE_FILTER_OPERATOR.IS_ONE_OF),
+      schema.literal(ASCODE_FILTER_OPERATOR.IS_NOT_ONE_OF),
     ],
     {
       meta: { description: 'Array value comparison operators' },
@@ -169,7 +169,7 @@ const oneOfConditionSchema = conditionFieldSchema.extends({
  * Schema for 'range' operator with range value
  */
 const rangeConditionSchema = conditionFieldSchema.extends({
-  operator: schema.literal(SIMPLE_FILTER_OPERATOR.RANGE),
+  operator: schema.literal(ASCODE_FILTER_OPERATOR.RANGE),
   value: rangeSchema,
 });
 
@@ -179,8 +179,8 @@ const rangeConditionSchema = conditionFieldSchema.extends({
 const existsConditionSchema = conditionFieldSchema.extends({
   operator: schema.oneOf(
     [
-      schema.literal(SIMPLE_FILTER_OPERATOR.EXISTS),
-      schema.literal(SIMPLE_FILTER_OPERATOR.NOT_EXISTS),
+      schema.literal(ASCODE_FILTER_OPERATOR.EXISTS),
+      schema.literal(ASCODE_FILTER_OPERATOR.NOT_EXISTS),
     ],
     {
       meta: { description: 'Field existence check operators' },

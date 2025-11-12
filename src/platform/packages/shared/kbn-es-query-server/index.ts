@@ -12,13 +12,6 @@ export { querySchema } from './src/query';
 export { asCodeFilterSchema } from './src/filter';
 export { storedFilterSchema } from './src/stored_filter';
 
-// Re-export filter operator constants for server-side use
-export {
-  SIMPLE_FILTER_OPERATOR,
-  FILTER_OPERATORS,
-  type FilterOperator,
-} from '@kbn/es-query-constants';
-
 export type {
   TimeRange,
   AbsoluteTimeRange,
@@ -26,4 +19,7 @@ export type {
   AggregateQuery,
   Query,
   AsCodeFilter,
+  AsCodeConditionFilter,
+  AsCodeGroupFilter,
+  AsCodeDSLFilter,
 } from './src/types';

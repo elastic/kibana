@@ -12,7 +12,7 @@
  */
 
 import type { AsCodeFilter } from '@kbn/es-query-server';
-import { SIMPLE_FILTER_OPERATOR } from '@kbn/es-query-constants';
+import { ASCODE_FILTER_OPERATOR } from '@kbn/es-query-constants';
 import type { StoredFilter } from './types';
 
 /**
@@ -44,13 +44,13 @@ export function extractBaseProperties(storedFilter: StoredFilter): Partial<AsCod
  */
 export function getFilterTypeForOperator(operator: string): string {
   switch (operator) {
-    case SIMPLE_FILTER_OPERATOR.EXISTS:
-    case SIMPLE_FILTER_OPERATOR.NOT_EXISTS:
+    case ASCODE_FILTER_OPERATOR.EXISTS:
+    case ASCODE_FILTER_OPERATOR.NOT_EXISTS:
       return 'exists';
-    case SIMPLE_FILTER_OPERATOR.RANGE:
+    case ASCODE_FILTER_OPERATOR.RANGE:
       return 'range';
-    case SIMPLE_FILTER_OPERATOR.IS_ONE_OF:
-    case SIMPLE_FILTER_OPERATOR.IS_NOT_ONE_OF:
+    case ASCODE_FILTER_OPERATOR.IS_ONE_OF:
+    case ASCODE_FILTER_OPERATOR.IS_NOT_ONE_OF:
       return 'terms';
     default:
       return 'phrase';

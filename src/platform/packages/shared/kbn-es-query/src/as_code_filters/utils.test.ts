@@ -8,7 +8,7 @@
  */
 
 import type { StoredFilter } from './types';
-import { SIMPLE_FILTER_OPERATOR } from '@kbn/es-query-constants';
+import { ASCODE_FILTER_OPERATOR } from '@kbn/es-query-constants';
 import { extractBaseProperties, getFilterTypeForOperator } from './utils';
 import { FilterStateStore } from '../..';
 
@@ -102,22 +102,22 @@ describe('Utils', () => {
 
   describe('getFilterTypeForOperator', () => {
     it('should return "exists" for existence operators', () => {
-      expect(getFilterTypeForOperator(SIMPLE_FILTER_OPERATOR.EXISTS)).toBe('exists');
-      expect(getFilterTypeForOperator(SIMPLE_FILTER_OPERATOR.NOT_EXISTS)).toBe('exists');
+      expect(getFilterTypeForOperator(ASCODE_FILTER_OPERATOR.EXISTS)).toBe('exists');
+      expect(getFilterTypeForOperator(ASCODE_FILTER_OPERATOR.NOT_EXISTS)).toBe('exists');
     });
 
     it('should return "range" for range operator', () => {
-      expect(getFilterTypeForOperator(SIMPLE_FILTER_OPERATOR.RANGE)).toBe('range');
+      expect(getFilterTypeForOperator(ASCODE_FILTER_OPERATOR.RANGE)).toBe('range');
     });
 
     it('should return "terms" for array operators', () => {
-      expect(getFilterTypeForOperator(SIMPLE_FILTER_OPERATOR.IS_ONE_OF)).toBe('terms');
-      expect(getFilterTypeForOperator(SIMPLE_FILTER_OPERATOR.IS_NOT_ONE_OF)).toBe('terms');
+      expect(getFilterTypeForOperator(ASCODE_FILTER_OPERATOR.IS_ONE_OF)).toBe('terms');
+      expect(getFilterTypeForOperator(ASCODE_FILTER_OPERATOR.IS_NOT_ONE_OF)).toBe('terms');
     });
 
     it('should return "phrase" for simple value operators', () => {
-      expect(getFilterTypeForOperator(SIMPLE_FILTER_OPERATOR.IS)).toBe('phrase');
-      expect(getFilterTypeForOperator(SIMPLE_FILTER_OPERATOR.IS_NOT)).toBe('phrase');
+      expect(getFilterTypeForOperator(ASCODE_FILTER_OPERATOR.IS)).toBe('phrase');
+      expect(getFilterTypeForOperator(ASCODE_FILTER_OPERATOR.IS_NOT)).toBe('phrase');
     });
 
     it('should return "phrase" for unknown operators', () => {
