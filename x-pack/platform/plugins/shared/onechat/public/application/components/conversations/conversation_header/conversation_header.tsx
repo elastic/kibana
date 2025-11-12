@@ -7,9 +7,14 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ConversationRightActions } from './conversation_actions_right/conversation_actions_right';
 import { ConversationLeftActions } from './conversation_actions_left';
 import { ConversationTitle } from './conversation_title';
+
+const centerSectionStyles = css`
+  align-items: center;
+`;
 
 interface ConversationHeaderProps {
   onClose?: () => void;
@@ -19,45 +24,17 @@ export const ConversationHeader: React.FC<ConversationHeaderProps> = ({
   onClose,
   ariaLabelledBy,
 }) => {
-  const containerStyles = css`
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    width: 100%;
-  `;
-
-  const sectionStyles = css`
-    flex: 1;
-    display: flex;
-    align-items: center;
-  `;
-
-  const leftSectionStyles = css`
-    ${sectionStyles}
-    justify-content: flex-start;
-  `;
-
-  const centerSectionStyles = css`
-    ${sectionStyles}
-    justify-content: center;
-  `;
-
-  const rightSectionStyles = css`
-    ${sectionStyles}
-    justify-content: flex-end;
-  `;
-
   return (
-    <div css={containerStyles}>
-      <div css={leftSectionStyles}>
+    <EuiFlexGroup alignItems="center">
+      <EuiFlexItem grow={false}>
         <ConversationLeftActions />
-      </div>
-      <div css={centerSectionStyles}>
+      </EuiFlexItem>
+      <EuiFlexItem grow={true} css={centerSectionStyles}>
         <ConversationTitle ariaLabelledBy={ariaLabelledBy} />
-      </div>
-      <div css={rightSectionStyles}>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <ConversationRightActions onClose={onClose} />
-      </div>
-    </div>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

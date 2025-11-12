@@ -159,18 +159,21 @@ const PopoverHeader = () => {
   `;
 
   return (
-    <div css={headerStyles}>
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="none">
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xxs">
-            <h5>
-              {i18n.translate('xpack.onechat.conversationsHistory.title', {
-                defaultMessage: 'Conversations',
-              })}
-            </h5>
-          </EuiTitle>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </div>
+    <EuiFlexGroup
+      css={headerStyles}
+      justifyContent="spaceBetween"
+      alignItems="center"
+      gutterSize="none"
+    >
+      <EuiFlexItem grow={false}>
+        <EuiTitle size="xxs">
+          <h5>
+            {i18n.translate('xpack.onechat.conversationsHistory.title', {
+              defaultMessage: 'Conversations',
+            })}
+          </h5>
+        </EuiTitle>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

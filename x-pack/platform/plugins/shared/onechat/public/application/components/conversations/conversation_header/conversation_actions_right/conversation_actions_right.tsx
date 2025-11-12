@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useConversationContext } from '../../../../context/conversation/conversation_context';
 import { EmbeddedActionsRight } from './embedded_actions_right';
@@ -18,16 +17,7 @@ export interface ConversationRightActionsProps {
 }
 
 export const ConversationRightActions: React.FC<ConversationRightActionsProps> = ({ onClose }) => {
-  const { euiTheme } = useEuiTheme();
   const { isEmbeddedContext } = useConversationContext();
-
-  const actionsContainerStyles = css`
-    display: flex;
-    flex-direction: row;
-    gap: ${euiTheme.size.s};
-    align-items: center;
-    justify-self: end;
-  `;
 
   const labels = {
     container: i18n.translate('xpack.onechat.conversationActions.container', {
@@ -36,8 +26,13 @@ export const ConversationRightActions: React.FC<ConversationRightActionsProps> =
   };
 
   return (
-    <div css={actionsContainerStyles} aria-label={labels.container}>
+    <EuiFlexGroup
+      gutterSize="s"
+      justifyContent="flexEnd"
+      alignItems="center"
+      aria-label={labels.container}
+    >
       {isEmbeddedContext ? <EmbeddedActionsRight onClose={onClose} /> : <FullScreenActionsRight />}
-    </div>
+    </EuiFlexGroup>
   );
 };
