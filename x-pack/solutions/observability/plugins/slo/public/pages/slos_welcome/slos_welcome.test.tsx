@@ -6,7 +6,7 @@
  */
 
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
-import { screen, waitFor } from '@testing-library/react';
+import { screen, waitFor, act } from '@testing-library/react';
 import React from 'react';
 import Router from 'react-router-dom';
 import { paths } from '../../../common/locators/paths';
@@ -19,9 +19,13 @@ import { render } from '../../utils/test_helper';
 import { SlosWelcomePage } from './slos_welcome';
 import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 
+const mockHistoryReplace = jest.fn();
+const mockUseHistory = jest.fn();
+
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useParams: jest.fn(),
+  useHistory: () => mockUseHistory(),
 }));
 
 jest.mock('@kbn/observability-shared-plugin/public');
@@ -68,6 +72,15 @@ const mockKibana = () => {
 describe('SLOs Welcome Page', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockHistoryReplace.mockClear();
+    mockUseHistory.mockReturnValue({
+      replace: mockHistoryReplace,
+      createHref: (location: any) => {
+        if (typeof location === 'string') return location;
+        return location.pathname || '/';
+      },
+      location: { pathname: '/slos/welcome', search: '', hash: '', state: undefined },
+    });
     mockKibana();
     jest
       .spyOn(Router, 'useLocation')
@@ -86,7 +99,9 @@ describe('SLOs Welcome Page', () => {
         },
       });
 
-      render(<SlosWelcomePage />);
+      await act(async () => {
+        render(<SlosWelcomePage />);
+      });
 
       expect(screen.queryByTestId('slosPageWelcomePrompt')).toBeTruthy();
       expect(screen.queryByTestId('slosPageWelcomePromptSignupForCloudButton')).toBeTruthy();
@@ -120,7 +135,9 @@ describe('SLOs Welcome Page', () => {
           },
         });
 
-        render(<SlosWelcomePage />);
+        await act(async () => {
+          render(<SlosWelcomePage />);
+        });
 
         expect(screen.queryByTestId('slosPageWelcomePrompt')).toBeTruthy();
 
@@ -138,7 +155,9 @@ describe('SLOs Welcome Page', () => {
           },
         });
 
-        render(<SlosWelcomePage />);
+        await act(async () => {
+          render(<SlosWelcomePage />);
+        });
         expect(screen.queryByTestId('slosPageWelcomePrompt')).toBeTruthy();
 
         const createNewSloButton = screen.queryByTestId('o11ySloListWelcomePromptCreateSloButton');
@@ -154,12 +173,17 @@ describe('SLOs Welcome Page', () => {
           },
         });
 
-        render(<SlosWelcomePage />);
+        await act(async () => {
+          render(<SlosWelcomePage />);
+        });
         expect(screen.queryByTestId('slosPageWelcomePrompt')).toBeTruthy();
 
         const createNewSloButton = screen.queryByTestId('o11ySloListWelcomePromptCreateSloButton');
         expect(createNewSloButton).toBeTruthy();
-        createNewSloButton?.click();
+
+        await act(async () => {
+          createNewSloButton?.click();
+        });
 
         await waitFor(() => {
           expect(mockNavigate).toBeCalledWith(paths.sloCreate);
@@ -179,12 +203,86 @@ describe('SLOs Welcome Page', () => {
         });
       });
 
-      it('should navigate to the SLO List page', async () => {
-        render(<SlosWelcomePage />);
-        await waitFor(() => {
-          expect(mockNavigate).toBeCalledWith(paths.slos);
+      it('should redirect to the SLO List page using history.replace', async () => {
+        let container: HTMLElement;
+
+        await act(async () => {
+          const result = render(<SlosWelcomePage />);
+          container = result.container;
         });
+
+        await waitFor(() => {
+          expect(mockHistoryReplace).toHaveBeenCalledWith('/');
+        });
+
+        // Should not render page content when redirecting
+        expect(container!.firstChild).toBeNull();
       });
+    });
+
+    it('returns null while loading SLO data', async () => {
+      useFetchSloListMock.mockReturnValue({ isLoading: true, data: undefined });
+      usePermissionsMock.mockReturnValue({
+        isLoading: false,
+        data: {
+          hasAllWriteRequested: true,
+          hasAllReadRequested: true,
+        },
+      });
+
+      let container: HTMLElement;
+      await act(async () => {
+        const result = render(<SlosWelcomePage />);
+        container = result.container;
+      });
+
+      // Should not render page content while loading
+      expect(container!.firstChild).toBeNull();
+      // Should not redirect while loading
+      expect(mockHistoryReplace).not.toHaveBeenCalled();
+    });
+
+    it('returns null while loading permissions', async () => {
+      useFetchSloListMock.mockReturnValue({ isLoading: false, data: emptySloList });
+      usePermissionsMock.mockReturnValue({
+        isLoading: true,
+        data: undefined,
+      });
+
+      let container: HTMLElement;
+      await act(async () => {
+        const result = render(<SlosWelcomePage />);
+        container = result.container;
+      });
+
+      // Should not render page content while loading permissions
+      expect(container!.firstChild).toBeNull();
+      // Should not redirect while loading
+      expect(mockHistoryReplace).not.toHaveBeenCalled();
+    });
+
+    it('returns null when redirect conditions are met', async () => {
+      useFetchSloListMock.mockReturnValue({ isLoading: false, data: sloList });
+      usePermissionsMock.mockReturnValue({
+        isLoading: false,
+        data: {
+          hasAllWriteRequested: true,
+          hasAllReadRequested: true,
+        },
+      });
+
+      let container: HTMLElement;
+      await act(async () => {
+        const result = render(<SlosWelcomePage />);
+        container = result.container;
+      });
+
+      await waitFor(() => {
+        expect(mockHistoryReplace).toHaveBeenCalledWith('/');
+      });
+
+      // Should not render page content when redirecting
+      expect(container!.firstChild).toBeNull();
     });
   });
 });
