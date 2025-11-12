@@ -11,7 +11,6 @@ import type { FleetAuthzRouter } from '../../services/security';
 import { API_VERSIONS } from '../../../common/constants';
 import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
 import { AGENT_POLICY_API_ROUTES } from '../../constants';
-import { type FleetConfigType } from '../../config';
 import {
   GetAgentPoliciesRequestSchema,
   GetOneAgentPolicyRequestSchema,
@@ -39,7 +38,7 @@ import {
 } from '../../types';
 
 import { K8S_API_ROUTES } from '../../../common/constants';
-import { parseExperimentalConfigValue } from '../../../common/experimental_features';
+import { type ExperimentalFeatures } from '../../../common/experimental_features';
 
 import { genericErrorResponse } from '../schema/errors';
 import { ListResponseSchema } from '../schema/utils';
@@ -62,7 +61,10 @@ import {
   createAgentAndPackagePoliciesHandler,
 } from './handlers';
 
-export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType) => {
+export const registerRoutes = (
+  router: FleetAuthzRouter,
+  experimentalFeatures: ExperimentalFeatures
+) => {
   // List - Fleet Server needs access to run setup
   router.versioned
     .get({
@@ -190,10 +192,6 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       getOneAgentPolicyHandler
     );
 
-  const experimentalFeatures = parseExperimentalConfigValue(
-    config.enableExperimental || [],
-    config.experimentalFeatures || {}
-  );
   if (experimentalFeatures.enableAutomaticAgentUpgrades) {
     router.versioned
       .get({

@@ -234,6 +234,15 @@ export const sendDeleteAgentPolicy = (body: DeleteAgentPolicyRequest['body']) =>
   });
 };
 
+export const sendDeleteAgentPolicyForRq = (body: DeleteAgentPolicyRequest['body']) => {
+  return sendRequestForRq<DeleteAgentPolicyResponse>({
+    path: agentPolicyRouteService.getDeletePath(),
+    method: 'post',
+    body: JSON.stringify(body),
+    version: API_VERSIONS.public.v1,
+  });
+};
+
 export function useDeleteAgentPolicyMutation() {
   const queryClient = useQueryClient();
 
