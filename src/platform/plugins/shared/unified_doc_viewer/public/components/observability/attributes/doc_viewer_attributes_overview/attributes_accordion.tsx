@@ -67,7 +67,7 @@ export const AttributesAccordion = ({
               <strong css={{ marginRight: euiTheme.size.xs }}>{title}</strong>
               <EuiIconTip
                 aria-label={tooltipMessage}
-                type="question"
+                type="questionInCircle"
                 color="subdued"
                 size="s"
                 content={tooltipMessage}
