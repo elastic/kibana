@@ -29,7 +29,7 @@ import type { InstallationStatus } from '@kbn/product-doc-base-plugin/common/ins
 import type { TrainedModelsProvider } from '@kbn/ml-plugin/server/shared_services/providers';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
-import { CheckpointerServiceImpl } from '@kbn/langgraph-checkpoint-saver';
+import { CheckpointerService, CheckpointerServiceImpl } from '@kbn/langgraph-checkpoint-saver';
 import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common';
 import type { ESSearchRequest } from '@kbn/es-types';
 import { alertSummaryFieldsFieldMap } from '../ai_assistant_data_clients/alert_summary/field_maps_configuration';
@@ -76,6 +76,7 @@ import {
   ANONYMIZATION_FIELDS_RESOURCE,
 } from './constants';
 import { getIndexTemplateAndPattern } from '../lib/data_stream/helpers';
+import { SecurityCheckpointerServiceImpl } from './checkpointer_service';
 
 const TOTAL_FIELDS_LIMIT = 2500;
 
@@ -88,6 +89,7 @@ export interface AIAssistantServiceOpts {
   kibanaVersion: string;
   elserInferenceId?: string;
   elasticsearchClientPromise: Promise<ElasticsearchClient>;
+  checkpointerServicePromise: Promise<CheckpointerService>;
   soClientPromise: Promise<SavedObjectsClientContract>;
   ml: MlPluginSetup;
   taskManager: TaskManagerSetupContract;
@@ -129,7 +131,6 @@ export class AIAssistantService {
   private alertSummaryDataStream: DataStreamSpacesAdapter;
   private anonymizationFieldsDataStream: DataStreamSpacesAdapter;
   private defendInsightsDataStream: DataStreamSpacesAdapter;
-  private checkpointerService: Promise<CheckpointerServiceImpl>;
   private resourceInitializationHelper: ResourceInstallationHelper;
   private initPromise: Promise<InitializationPromise>;
   private isKBSetupInProgress: Map<string, boolean> = new Map();
@@ -177,21 +178,6 @@ export class AIAssistantService {
       fieldMap: alertSummaryFieldsFieldMap,
     });
 
-    this.checkpointerService = new Promise((resolve) => {
-      return options.elasticsearchClientPromise.then((esClient) => {
-        const checkpointerService = new CheckpointerServiceImpl({
-          indexPrefix: '.kibana-elastic-ai-assistant-',
-          logger: options.logger,
-          elasticsearch: {
-            client: {
-              asScoped: () => ({ asInternalUser: esClient }),
-            },
-          } as any,
-        })
-        resolve(checkpointerService);
-      });
-    })
-
     this.initPromise = this.initializeResources();
 
     this.resourceInitializationHelper = createResourceInstallationHelper(
@@ -214,10 +200,6 @@ export class AIAssistantService {
 
   public setIsCheckpointSaverEnabled(isEnabled: boolean) {
     this.isCheckpointSaverEnabled = isEnabled;
-  }
-
-  public getCheckpointerService() {
-    return this.checkpointerService;
   }
 
   public isInitialized() {
@@ -630,7 +612,7 @@ export class AIAssistantService {
   public async createCheckpointSaver(request: KibanaRequest) {
     // Use the checkpointer service to get a properly configured saver
     // Indices will be created automatically on first checkpoint save
-    const checkpointerService = await this.checkpointerService;
+    const checkpointerService = await this.options.checkpointerServicePromise;
     const elasticSearchSaver = await checkpointerService.getCheckpointer({
       request,
     });

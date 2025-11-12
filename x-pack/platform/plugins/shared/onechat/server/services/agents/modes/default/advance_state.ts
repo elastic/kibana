@@ -13,7 +13,7 @@
 import { RemoveMessage } from '@langchain/core/messages';
 import { REMOVE_ALL_MESSAGES } from '@langchain/langgraph';
 import isEmpty from 'lodash/isEmpty';
-import { type StateType } from './state';
+import { DEFAULT_CYCLE_LIMIT, type StateType } from './state';
 import type { createAgentGraph } from './graph';
 
 interface AdvanceStateOptions {
@@ -41,10 +41,10 @@ export const advanceState = async (
   if (isEmpty(oldState.values)) {
     // no state to advance
     return async () => {
-        // resets the state to the initial state
+      // Return a callback that resets the checkpointer to a clean state.
       const revertState = {
         initialMessages: [new RemoveMessage({ id: REMOVE_ALL_MESSAGES })],
-        cycleLimit: 10,
+        cycleLimit: DEFAULT_CYCLE_LIMIT,
         currentCycle: 0,
         nextMessage: undefined,
         maxCycleReached: false,
@@ -91,7 +91,7 @@ export const advanceState = async (
   );
 
   return async () => {
-    // resets the state to the previous state
+    // Return a callback that resets the checkpointer to the previous state.
     const revertState = {
       ...oldValues,
       addedMessages: [new RemoveMessage({ id: REMOVE_ALL_MESSAGES }), ...oldValues.addedMessages],

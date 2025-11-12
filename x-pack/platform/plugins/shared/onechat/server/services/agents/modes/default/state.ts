@@ -9,6 +9,8 @@ import { Annotation } from '@langchain/langgraph';
 import type { BaseMessage, BaseMessageLike, AIMessage } from '@langchain/core/messages';
 import { messagesStateReducer } from '@langchain/langgraph';
 
+export const DEFAULT_CYCLE_LIMIT = 10;
+
 export const StateAnnotation = Annotation.Root({
   // inputs
   initialMessages: Annotation<BaseMessageLike[]>({
@@ -17,7 +19,7 @@ export const StateAnnotation = Annotation.Root({
   }),
   cycleLimit: Annotation<number>({
     reducer: (a, b) => b,
-    default: () => 10,
+    default: () => DEFAULT_CYCLE_LIMIT,
   }),
   // internals
   currentCycle: Annotation<number>({

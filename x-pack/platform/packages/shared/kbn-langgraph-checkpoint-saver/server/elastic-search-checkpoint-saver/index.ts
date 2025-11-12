@@ -129,12 +129,13 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
       },
     });
 
-    if (result.hits.hits.length === 0 || !result.hits.hits[0]) {
+    const hit = result.hits.hits.at(0);
+    
+    if (!hit) {
       return undefined;
     }
 
-    // Storage adapter always returns _source
-    const doc = result.hits.hits[0]._source;
+    const doc = hit._source;
 
     const serializedWrites = await this.checkpointWritesStorage.search({
       track_total_hits: true,
@@ -183,7 +184,6 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
 
     const pendingWrites: CheckpointPendingWrite[] = await Promise.all(
       serializedWrites.hits.hits.map(async (serializedWrite) => {
-        // Storage adapter always returns _source
         const source = serializedWrite._source;
         return [
           source.task_id,
@@ -266,7 +266,6 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
     });
 
     for await (const hit of result.hits.hits) {
-      // Storage adapter always returns _source
       const source = hit._source;
       if (!source) {
         continue;

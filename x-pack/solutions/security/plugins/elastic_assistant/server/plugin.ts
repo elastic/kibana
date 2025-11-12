@@ -47,6 +47,7 @@ import { getAttackDiscoveryScheduleType } from './lib/attack_discovery/schedules
 import type { ConfigSchema } from './config_schema';
 import { attackDiscoveryAlertFieldMap } from './lib/attack_discovery/schedules/fields';
 import { ATTACK_DISCOVERY_ALERTS_CONTEXT } from './lib/attack_discovery/schedules/constants';
+import { SecurityCheckpointerServiceImpl } from './ai_assistant_service/checkpointer_service';
 
 interface FeatureFlagDefinition {
   featureFlagName: string;
@@ -61,13 +62,12 @@ interface FeatureFlagDefinition {
 
 export class ElasticAssistantPlugin
   implements
-    Plugin<
-      ElasticAssistantPluginSetup,
-      ElasticAssistantPluginStart,
-      ElasticAssistantPluginSetupDependencies,
-      ElasticAssistantPluginStartDependencies
-    >
-{
+  Plugin<
+    ElasticAssistantPluginSetup,
+    ElasticAssistantPluginStart,
+    ElasticAssistantPluginSetupDependencies,
+    ElasticAssistantPluginStartDependencies
+  > {
   private readonly logger: Logger;
   private assistantService: AIAssistantService | undefined;
   private pluginStop$: Subject<void>;
@@ -105,6 +105,12 @@ export class ElasticAssistantPlugin
       productDocManager: core
         .getStartServices()
         .then(([_, { productDocBase }]) => productDocBase.management),
+      checkpointerServicePromise: core
+        .getStartServices()
+        .then(([{ elasticsearch }]) => new SecurityCheckpointerServiceImpl({
+          logger: this.logger,
+          elasticsearch: elasticsearch,
+        })),
       pluginStop$: this.pluginStop$,
     });
 
@@ -182,7 +188,7 @@ export class ElasticAssistantPlugin
         if (res?.total)
           this.logger.info(`Removed ${res.total} legacy quick prompts from AI Assistant`);
       })
-      .catch(() => {});
+      .catch(() => { });
 
     return {
       actions: plugins.actions,

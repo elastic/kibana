@@ -145,6 +145,9 @@ describe('AI Assistant Service', () => {
         updateAll: jest.fn(),
         uninstall: jest.fn(),
       }),
+      checkpointerServicePromise: Promise.resolve({
+        getCheckpointer: jest.fn(),
+      }),
     };
   });
 

@@ -21,6 +21,7 @@ import { createAgentGraph } from './graph';
 import { convertGraphEvents } from './convert_graph_events';
 import type { RunAgentParams, RunAgentResponse } from '../run_agent';
 import { advanceState } from './advance_state';
+import { DEFAULT_CYCLE_LIMIT } from './state';
 
 const chatAgentGraphName = 'default-onechat-agent';
 
@@ -71,21 +72,18 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     sendEvent: eventEmitter,
   });
 
-  const cycleLimit = 10;
+  const cycleLimit = DEFAULT_CYCLE_LIMIT;
   // langchain's recursionLimit is basically the number of nodes we can traverse before hitting a recursion limit error
   // we have two steps per cycle (agent node + tool call node), and then a few other steps (prepare + answering), and some extra buffer
   const graphRecursionLimit = cycleLimit * 2 + 8;
 
+  // since the checkpoint is used, we only need to add the new message as initialMessage. The state will already be primed with the chatHistory.
   const initialMessages = [createUserMessage(nextInput.message)];
   const processedConversation = await prepareConversation({
     nextInput,
     previousRounds: conversation?.rounds ?? [],
     attachmentsService: attachments,
   });
-
-  /* const initialMessages = conversationToLangchainMessages({
-    conversation: processedConversation,
-  }); */
 
   const checkpointer = await checkpointerService.getCheckpointer({ request });
 
