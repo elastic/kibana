@@ -11,7 +11,7 @@ import Fs from 'fs';
 import { BuildkiteClient, type BuildkiteStep } from '../buildkite';
 import { collectEnvFromLabels } from '../pr_labels';
 import { expandAgentQueue } from '../agent_images';
-import { getRequiredEnv } from '#pipeline-utils/utils';
+import { getRequiredEnv } from '#pipeline-utils';
 
 interface ScoutTestDiscoveryConfig {
   group: string;
