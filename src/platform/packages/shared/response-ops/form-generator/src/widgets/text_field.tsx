@@ -25,6 +25,7 @@ export const TextField: React.FC<TextWidgetProps> = ({
   return (
     <EuiFormRow label={label} error={error} isInvalid={isInvalid} fullWidth={fullWidth}>
       <EuiFieldText
+        data-test-subj={fieldId}
         value={value}
         placeholder={placeholder}
         onChange={(e) => onChange(fieldId, e.target.value)}

@@ -54,6 +54,15 @@ export const KeyValueField: React.FC<KeyValueWidgetProps> = ({
     {}
   );
 
+  const lastNotifiedValueRef = React.useRef<string>('');
+
+  React.useEffect(() => {
+    if (value && typeof value === 'object') {
+      lastNotifiedValueRef.current = JSON.stringify(value);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const notifyParent = useCallback(
     (updatedPairs: KeyValuePair[]) => {
       const nonEmptyPairs = updatedPairs.filter((pair) => pair.key.trim() || pair.value.trim());
@@ -64,6 +73,8 @@ export const KeyValueField: React.FC<KeyValueWidgetProps> = ({
         }
         return acc;
       }, {} as Record<string, string>);
+
+      lastNotifiedValueRef.current = JSON.stringify(recordValue);
 
       onChange(fieldId, recordValue);
     },
@@ -93,21 +104,24 @@ export const KeyValueField: React.FC<KeyValueWidgetProps> = ({
   }, []);
 
   useEffect(() => {
-    if (value && typeof value === 'object') {
+    const currentValueStr = JSON.stringify(value || {});
+    if (currentValueStr === lastNotifiedValueRef.current) {
+      return;
+    }
+
+    if (value && typeof value === 'object' && Object.keys(value).length > 0) {
       const newPairs = Object.entries(value).map(([key, val]) => ({
         id: generateId(),
         key,
         value: String(val),
       }));
-
-      const currentKeys = pairs.map((p) => p.key).sort();
-      const newKeys = newPairs.map((p) => p.key).sort();
-
-      if (JSON.stringify(currentKeys) !== JSON.stringify(newKeys)) {
-        setPairs(newPairs.length > 0 ? newPairs : [{ id: generateId(), key: '', value: '' }]);
-      }
+      setPairs(newPairs);
+      lastNotifiedValueRef.current = currentValueStr;
+    } else if (!value || (typeof value === 'object' && Object.keys(value).length === 0)) {
+      setPairs([{ id: generateId(), key: '', value: '' }]);
+      lastNotifiedValueRef.current = currentValueStr;
     }
-  }, [value]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [value]);
 
   const handlePairChange = useCallback(
     (id: string, field: 'key' | 'value', newValue: string) => {

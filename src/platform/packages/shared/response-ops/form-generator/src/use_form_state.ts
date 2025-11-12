@@ -68,8 +68,14 @@ export const useFormState = (fields: FieldDefinition[]) => {
       const errors: Record<string, string | string[]> = {};
       let hasErrors = false;
 
+      const cleanedValues: Record<string, unknown> = {};
+
       fields.forEach((field) => {
-        const validationResult = field.validate(formState.values[field.id]);
+        const value = formState.values[field.id];
+        const cleanedValue = typeof field.cleanup === 'function' ? field.cleanup(value) : value;
+        cleanedValues[field.id] = cleanedValue;
+
+        const validationResult = field.validate(cleanedValue);
         if (validationResult) {
           errors[field.id] = validationResult;
           hasErrors = true;
@@ -82,7 +88,7 @@ export const useFormState = (fields: FieldDefinition[]) => {
           errors,
         }));
       } else {
-        onSuccess({ data: formState.values });
+        onSuccess({ data: cleanedValues });
       }
     };
   };

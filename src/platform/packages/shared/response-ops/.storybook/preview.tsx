@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { Subject } from 'rxjs';
-import { ThemeProvider } from '@emotion/react';
+import { EuiProvider } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 
@@ -40,14 +41,10 @@ const queryClient = new QueryClient({
 });
 
 export const StorybookProviders: FC<PropsWithChildren<unknown>> = ({ children }) => {
-  const store = createMockStore();
-
   return (
     <KibanaReactContext.Provider>
       <QueryClientProvider client={queryClient}>
-        <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-          {children}
-        </ThemeProvider>
+        <EuiProvider colorMode="light">{children}</EuiProvider>
       </QueryClientProvider>
     </KibanaReactContext.Provider>
   );

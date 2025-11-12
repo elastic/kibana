@@ -28,6 +28,7 @@ export interface FieldDefinition {
   initialValue?: unknown;
   value?: unknown;
   validate: (value: unknown) => string[] | string | undefined;
+  cleanup?: (value: unknown) => unknown;
   schema?: z.ZodTypeAny;
   widget?: WidgetType;
 }
@@ -72,7 +73,7 @@ const getFieldsFromSchema = (schema: z.ZodObject<any>) => {
       initialValue = {};
     }
 
-    fields.push({
+    const field: FieldDefinition = {
       id: key,
       staticProps,
       initialValue,
@@ -89,7 +90,18 @@ const getFieldsFromSchema = (schema: z.ZodObject<any>) => {
           return 'Invalid value';
         }
       },
-    });
+    };
+
+    if (uiMeta.widget === 'keyValue') {
+      field.cleanup = (value: unknown) => {
+        if (typeof value === 'object' && value !== null) {
+          return Object.fromEntries(Object.entries(value).filter(([k]) => k !== ''));
+        }
+        return value;
+      };
+    }
+
+    fields.push(field);
   });
 
   return fields;

@@ -14,4 +14,5 @@ module.exports = {
   setupFilesAfterEnv: [
     '<rootDir>/src/platform/packages/shared/response-ops/form-generator/setup_tests.ts',
   ],
+  transformIgnorePatterns: ['[/\\\\]node_modules(?![\\/\\\\](zod))[/\\\\].+\\.js$'],
 };

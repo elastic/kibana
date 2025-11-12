@@ -58,10 +58,14 @@ export const getDiscriminatedUnionInitialValue = (
     throw new Error('Schema provided is not a ZodDiscriminatedUnion');
   }
 
-  if (defaultValue) {
+  const uiMeta = getUIMeta(schema);
+  const metadataDefault = uiMeta?.widgetOptions?.default;
+  const valueToUse = metadataDefault ?? defaultValue;
+
+  if (valueToUse) {
     const matchingOption = schema.options.find((option: z.ZodObject<any>) => {
       const discriminatorValue = getDiscriminatorFieldValue(option);
-      return discriminatorValue === defaultValue;
+      return discriminatorValue === valueToUse;
     });
 
     if (matchingOption) {
@@ -94,6 +98,7 @@ export const DiscriminatedUnionField: React.FC<DiscriminatedUnionWidgetProps> = 
   const [nestedFieldErrors, setNestedFieldErrors] = useState<Record<string, string[] | undefined>>(
     {}
   );
+  const [touchedFields, setTouchedFields] = useState<Set<string>>(new Set());
 
   const validateNestedField = useCallback(
     (fieldValue: any, subSchema: z.ZodTypeAny): string[] | undefined => {
@@ -128,10 +133,13 @@ export const DiscriminatedUnionField: React.FC<DiscriminatedUnionWidgetProps> = 
             validationError.issues.forEach((issue) => {
               const fieldPath = issue.path.join('.');
               if (fieldPath && fieldPath !== 'type') {
-                if (!parsedErrors[fieldPath]) {
-                  parsedErrors[fieldPath] = [];
+                // Only set error if the field has been touched
+                if (touchedFields.has(fieldPath)) {
+                  if (!parsedErrors[fieldPath]) {
+                    parsedErrors[fieldPath] = [];
+                  }
+                  parsedErrors[fieldPath]!.push(issue.message);
                 }
-                parsedErrors[fieldPath]!.push(issue.message);
               }
             });
             setNestedFieldErrors(parsedErrors);
@@ -141,7 +149,7 @@ export const DiscriminatedUnionField: React.FC<DiscriminatedUnionWidgetProps> = 
     } else if (!error) {
       setNestedFieldErrors({});
     }
-  }, [error, value, schemaOptions]);
+  }, [error, value, schemaOptions, touchedFields]);
 
   const options = useMemo(() => {
     return schemaOptions.map((optionSchema: z.ZodObject<any>, index: number) => {
@@ -155,6 +163,7 @@ export const DiscriminatedUnionField: React.FC<DiscriminatedUnionWidgetProps> = 
 
       const handleCardChange = () => {
         const newValue = getDefaultValuesForOption(optionSchema);
+        setTouchedFields(new Set());
         onChange(fieldId, newValue);
       };
 
@@ -204,6 +213,8 @@ export const DiscriminatedUnionField: React.FC<DiscriminatedUnionWidgetProps> = 
                 };
 
                 const handleNestedBlur = () => {
+                  setTouchedFields((prev) => new Set(prev).add(fieldKey));
+
                   const fieldValue = valueObj[fieldKey];
                   const errors = validateNestedField(fieldValue, subSchema);
                   setNestedFieldErrors((prev) => ({
