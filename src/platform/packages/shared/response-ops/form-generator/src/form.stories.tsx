@@ -86,7 +86,10 @@ const DefaultStory = () => {
   return (
     <Form
       connectorSchema={webhookConnectorFormSchema}
-      onSubmit={({ data }) => window.alert(JSON.stringify(data))}
+      onSubmit={({ data }) => {
+        console.log(data);
+        window.alert(JSON.stringify(data));
+      }}
     />
   );
 };

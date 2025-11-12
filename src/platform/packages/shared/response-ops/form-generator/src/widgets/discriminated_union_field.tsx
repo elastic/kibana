@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useState, useCallback, useEffect } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { z } from '@kbn/zod/v4';
 import { EuiCheckableCard, EuiFormFieldset, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { getUIMeta } from '../connector_spec_ui';
@@ -86,6 +86,10 @@ export const DiscriminatedUnionField: React.FC<DiscriminatedUnionWidgetProps> = 
   onBlur,
   schema,
   fullWidth,
+  setFieldError,
+  setFieldTouched,
+  errors = {},
+  touched = {},
 }) => {
   if (!(schema instanceof z.ZodDiscriminatedUnion)) {
     throw new Error('Schema provided to DiscriminatedUnionField is not a ZodDiscriminatedUnion');
@@ -95,10 +99,11 @@ export const DiscriminatedUnionField: React.FC<DiscriminatedUnionWidgetProps> = 
   const schemaOptions = discriminatedSchema.options;
   const totalOptions = schemaOptions.length;
 
-  const [nestedFieldErrors, setNestedFieldErrors] = useState<Record<string, string[] | undefined>>(
-    {}
-  );
-  const [touchedFields, setTouchedFields] = useState<Set<string>>(new Set());
+  const [internalTouchedFields, setInternalTouchedFields] = React.useState<Set<string>>(new Set());
+
+  const [internalFieldErrors, setInternalFieldErrors] = React.useState<
+    Record<string, string[] | undefined>
+  >({});
 
   const validateNestedField = useCallback(
     (fieldValue: any, subSchema: z.ZodTypeAny): string[] | undefined => {
@@ -115,42 +120,6 @@ export const DiscriminatedUnionField: React.FC<DiscriminatedUnionWidgetProps> = 
     []
   );
 
-  useEffect(() => {
-    if (error && Array.isArray(error) && error.length > 0) {
-      const currentType = typeof value === 'object' && value !== null ? value.type : value;
-      const currentOption = schemaOptions.find((option: z.ZodObject<any>) => {
-        return getDiscriminatorFieldValue(option) === currentType;
-      });
-
-      if (currentOption && typeof value === 'object' && value !== null) {
-        const parsedErrors: Record<string, string[] | undefined> = {};
-
-        try {
-          currentOption.parse(value);
-          setNestedFieldErrors({});
-        } catch (validationError) {
-          if (validationError instanceof z.ZodError) {
-            validationError.issues.forEach((issue) => {
-              const fieldPath = issue.path.join('.');
-              if (fieldPath && fieldPath !== 'type') {
-                // Only set error if the field has been touched
-                if (touchedFields.has(fieldPath)) {
-                  if (!parsedErrors[fieldPath]) {
-                    parsedErrors[fieldPath] = [];
-                  }
-                  parsedErrors[fieldPath]!.push(issue.message);
-                }
-              }
-            });
-            setNestedFieldErrors(parsedErrors);
-          }
-        }
-      }
-    } else if (!error) {
-      setNestedFieldErrors({});
-    }
-  }, [error, value, schemaOptions, touchedFields]);
-
   const options = useMemo(() => {
     return schemaOptions.map((optionSchema: z.ZodObject<any>, index: number) => {
       const discriminatorValue = getDiscriminatorFieldValue(optionSchema);
@@ -163,7 +132,8 @@ export const DiscriminatedUnionField: React.FC<DiscriminatedUnionWidgetProps> = 
 
       const handleCardChange = () => {
         const newValue = getDefaultValuesForOption(optionSchema);
-        setTouchedFields(new Set());
+        setInternalTouchedFields(new Set());
+        setInternalFieldErrors({});
         onChange(fieldId, newValue);
       };
 
@@ -189,8 +159,12 @@ export const DiscriminatedUnionField: React.FC<DiscriminatedUnionWidgetProps> = 
 
                 const nestedFieldId = `${fieldId}.${fieldKey}`;
 
-                const nestedFieldError = nestedFieldErrors[fieldKey];
-                const nestedFieldIsInvalid = !!nestedFieldError;
+                const nestedFieldTouched =
+                  touched[nestedFieldId] || internalTouchedFields.has(fieldKey);
+
+                const nestedFieldError = errors[nestedFieldId] || internalFieldErrors[fieldKey];
+
+                const nestedFieldIsInvalid = !!(nestedFieldTouched && nestedFieldError);
 
                 const handleNestedChange = (nestedFieldIdArg: string, newValue: any) => {
                   const currentValueObj =
@@ -205,22 +179,36 @@ export const DiscriminatedUnionField: React.FC<DiscriminatedUnionWidgetProps> = 
 
                   onChange(fieldId, updatedValue);
 
-                  const errors = validateNestedField(newValue, subSchema);
-                  setNestedFieldErrors((prev) => ({
+                  const fieldErrors = validateNestedField(newValue, subSchema);
+
+                  setInternalFieldErrors((prev) => ({
                     ...prev,
-                    [fieldKey]: errors,
+                    [fieldKey]: fieldErrors,
                   }));
+
+                  if (setFieldError) {
+                    setFieldError(nestedFieldId, fieldErrors);
+                  }
                 };
 
                 const handleNestedBlur = () => {
-                  setTouchedFields((prev) => new Set(prev).add(fieldKey));
+                  setInternalTouchedFields((prev) => new Set(prev).add(fieldKey));
+
+                  if (setFieldTouched) {
+                    setFieldTouched(nestedFieldId, true);
+                  }
 
                   const fieldValue = valueObj[fieldKey];
-                  const errors = validateNestedField(fieldValue, subSchema);
-                  setNestedFieldErrors((prev) => ({
+                  const fieldErrors = validateNestedField(fieldValue, subSchema);
+
+                  setInternalFieldErrors((prev) => ({
                     ...prev,
-                    [fieldKey]: errors,
+                    [fieldKey]: fieldErrors,
                   }));
+
+                  if (setFieldError) {
+                    setFieldError(nestedFieldId, fieldErrors);
+                  }
                   onBlur(fieldId);
                 };
 
@@ -267,9 +255,14 @@ export const DiscriminatedUnionField: React.FC<DiscriminatedUnionWidgetProps> = 
     fieldId,
     totalOptions,
     onChange,
-    nestedFieldErrors,
     validateNestedField,
     onBlur,
+    errors,
+    setFieldError,
+    setFieldTouched,
+    touched,
+    internalTouchedFields,
+    internalFieldErrors,
   ]);
 
   return (

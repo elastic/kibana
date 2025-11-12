@@ -8,6 +8,7 @@
  */
 
 import type { z } from '@kbn/zod/v4';
+import type { FieldDefinition } from '../form';
 
 // could we use EUI's common types instead?
 export interface BaseWidgetProps<T = unknown> {
@@ -22,6 +23,16 @@ export interface BaseWidgetProps<T = unknown> {
   onBlur: (fieldId: string) => void;
   schema?: z.ZodTypeAny;
   widgetOptions?: Record<string, unknown>;
+  setFieldError?: (fieldId: string, error: string | string[] | undefined) => void;
+  setFieldTouched?: (fieldId: string, touched?: boolean) => void;
+  getFieldValue?: (fieldId: string) => unknown;
+  validateField?: (
+    fieldId: string,
+    value: unknown,
+    fieldDefinitions: FieldDefinition[]
+  ) => string | string[] | undefined;
+  errors?: Record<string, string | string[]>;
+  touched?: Record<string, boolean>;
 }
 
 export type TextWidgetProps = BaseWidgetProps<string>;

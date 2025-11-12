@@ -38,6 +38,8 @@ export const KeyValueField: React.FC<KeyValueWidgetProps> = ({
   onBlur,
   widgetOptions,
   fullWidth = true,
+  setFieldError,
+  errors = {},
 }) => {
   const [pairs, setPairs] = useState<KeyValuePair[]>(() => {
     if (value && typeof value === 'object' && Object.keys(value).length > 0) {
@@ -63,6 +65,41 @@ export const KeyValueField: React.FC<KeyValueWidgetProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const validateAndSetErrors = useCallback(
+    (updatedPairs: KeyValuePair[]) => {
+      const keysSeen = new Set<string>();
+      const errorMessages: string[] = [];
+      const pairErrorsMap: Record<string, { key?: string; value?: string }> = {};
+
+      updatedPairs.forEach((pair) => {
+        const trimmedKey = pair.key.trim();
+
+        if (!trimmedKey && pair.value.trim()) {
+          errorMessages.push('Key cannot be empty');
+          pairErrorsMap[pair.id] = { key: 'Key cannot be empty' };
+        } else if (trimmedKey) {
+          if (keysSeen.has(trimmedKey)) {
+            errorMessages.push(`Duplicate key: ${trimmedKey}`);
+            pairErrorsMap[pair.id] = { key: 'Duplicate key' };
+          } else {
+            keysSeen.add(trimmedKey);
+          }
+        }
+      });
+
+      setPairErrors(pairErrorsMap);
+
+      if (setFieldError) {
+        if (errorMessages.length > 0) {
+          setFieldError(fieldId, errorMessages);
+        } else {
+          setFieldError(fieldId, undefined);
+        }
+      }
+    },
+    [fieldId, setFieldError]
+  );
+
   const notifyParent = useCallback(
     (updatedPairs: KeyValuePair[]) => {
       const nonEmptyPairs = updatedPairs.filter((pair) => pair.key.trim() || pair.value.trim());
@@ -77,31 +114,11 @@ export const KeyValueField: React.FC<KeyValueWidgetProps> = ({
       lastNotifiedValueRef.current = JSON.stringify(recordValue);
 
       onChange(fieldId, recordValue);
+
+      validateAndSetErrors(updatedPairs);
     },
-    [fieldId, onChange]
+    [fieldId, onChange, validateAndSetErrors]
   );
-
-  const validatePairs = useCallback((updatedPairs: KeyValuePair[]) => {
-    const errors: Record<string, { key?: string; value?: string }> = {};
-    const keysSeen = new Set<string>();
-
-    updatedPairs.forEach((pair) => {
-      const trimmedKey = pair.key.trim();
-
-      if (!trimmedKey && pair.value.trim()) {
-        errors[pair.id] = { key: 'Key cannot be empty' };
-      } else if (trimmedKey) {
-        if (keysSeen.has(trimmedKey)) {
-          errors[pair.id] = { key: 'Duplicate key' };
-        } else {
-          keysSeen.add(trimmedKey);
-        }
-      }
-    });
-
-    setPairErrors(errors);
-    return errors;
-  }, []);
 
   useEffect(() => {
     const currentValueStr = JSON.stringify(value || {});
@@ -130,18 +147,16 @@ export const KeyValueField: React.FC<KeyValueWidgetProps> = ({
       );
 
       setPairs(updatedPairs);
-      validatePairs(updatedPairs);
       notifyParent(updatedPairs);
     },
-    [pairs, validatePairs, notifyParent]
+    [pairs, notifyParent]
   );
 
   const handleAddPair = useCallback(() => {
     const newPair: KeyValuePair = { id: generateId(), key: '', value: '' };
     const updatedPairs = [...pairs, newPair];
     setPairs(updatedPairs);
-    validatePairs(updatedPairs);
-  }, [pairs, validatePairs]);
+  }, [pairs]);
 
   const handleRemovePair = useCallback(
     (id: string) => {
@@ -153,11 +168,10 @@ export const KeyValueField: React.FC<KeyValueWidgetProps> = ({
       } else {
         const updatedPairs = pairs.filter((pair) => pair.id !== id);
         setPairs(updatedPairs);
-        validatePairs(updatedPairs);
         notifyParent(updatedPairs);
       }
     },
-    [pairs, validatePairs, notifyParent]
+    [pairs, notifyParent]
   );
 
   const handleBlur = useCallback(() => {

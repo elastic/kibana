@@ -149,6 +149,14 @@ export const Form = ({ connectorSchema, onSubmit }: FormProps) => {
             onBlur={form.handleBlur}
             schema={fieldSchema}
             widgetOptions={staticProps}
+            setFieldError={form.setFieldError}
+            setFieldTouched={form.setFieldTouched}
+            getFieldValue={form.getFieldValue}
+            validateField={(fieldId: string, value: unknown) =>
+              form.validateField(fieldId, value, fields)
+            }
+            errors={form.errors}
+            touched={form.touched}
           />
         );
       })}
