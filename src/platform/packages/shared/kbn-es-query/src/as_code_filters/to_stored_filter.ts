@@ -71,7 +71,7 @@ export function toStoredFilter(simplified: AsCodeFilter): StoredFilter {
     }
 
     if (isDSLFilter(simplified)) {
-      return convertFromDSLFilter(simplified.dsl, storedFilter);
+      return convertFromDSLFilter(simplified, storedFilter);
     }
 
     throw new FilterConversionError(
@@ -293,9 +293,11 @@ export function convertFromFilterGroup(
  * Convert DSL filter to stored filter with smart type detection
  */
 export function convertFromDSLFilter(
-  dsl: AsCodeDSLFilter['dsl'],
+  asCodeFilter: AsCodeDSLFilter,
   baseStored: StoredFilter
 ): StoredFilter {
+  const dsl = asCodeFilter.dsl;
+
   // Use preserved filterType if available, otherwise detect from query structure
   let type = baseStored.meta.type || 'custom';
   let params: Record<string, unknown> | undefined;
@@ -379,6 +381,10 @@ export function convertFromDSLFilter(
     ...baseStored.meta,
     type,
     ...(params ? { params } : {}),
+    // Restore meta.field and meta.params from AsCodeDSLFilter if available
+    // This is critical for scripted filters where field cannot be extracted from query
+    ...(asCodeFilter.field ? { field: asCodeFilter.field } : {}),
+    ...(asCodeFilter.params && !params ? { params: asCodeFilter.params } : {}),
   };
 
   return {

@@ -241,11 +241,28 @@ export const asCodeGroupFilterSchema = basePropertiesSchema.extends(
 
 /**
  * Schema for DSL filters
+ * Includes field and params properties specific to DSL filters for preserving metadata
  */
 export const asCodeDSLFilterSchema = basePropertiesSchema.extends({
   dsl: schema.recordOf(schema.string(), schema.any(), {
     meta: { description: 'Elasticsearch Query DSL object' },
   }),
+  field: schema.maybe(
+    schema.string({
+      meta: {
+        description:
+          'Field name from filter metadata (meta.field). Critical for scripted filters where field cannot be extracted from query.',
+      },
+    })
+  ),
+  params: schema.maybe(
+    schema.any({
+      meta: {
+        description:
+          'Filter parameters from metadata (meta.params). Preserves display values, formats, and script parameters.',
+      },
+    })
+  ),
 });
 
 /**

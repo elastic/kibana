@@ -10,12 +10,12 @@
 /**
  * Functions for converting stored filters to AsCodeFilter format
  *
- * CONVERSION STRATEGIES:
- * 1. Direct Compatibility: Uses simple condition format (primary path for simple operators)
- * 2. Full Compatibility: Direct conversion to AsCodeConditionFilter (simple operators)
- * 3. Enhanced Compatibility: Parse complex query structures into AsCodeConditionFilter
- * 4. Group Handling: Convert combined/bool filters into AsCodeGroupFilter
- * 5. Preserve Original: When conversion would lose data or semantics, preserve as DSL (AsCodeDSLFilter)
+ * CONVERSION STRATEGIES (in order of evaluation):
+ * 1. Simple Conditions: Filters with metadata-only representation (no query parsing needed)
+ * 2. Query Parsing: Filters with Elasticsearch query DSL that can be parsed into conditions
+ * 3. Complex DSL: Filters requiring high-fidelity preservation (scripts, nested queries, etc.)
+ * 4. Filter Groups: Combined/bool filters converted to group format
+ * 5. Fallback DSL: Any remaining filters preserved as-is to prevent data loss
  *
  * See: fromStoredFilter() for the main entry point
  */
@@ -44,6 +44,7 @@ import {
  * Type definitions for Elasticsearch query structures
  * These represent the dynamic query objects stored in Filter.query
  */
+
 interface RangeQuery {
   [field: string]: {
     gte?: string | number;
@@ -135,12 +136,16 @@ export function fromStoredFilter(storedFilter: unknown): AsCodeFilter {
     // This avoids unnecessary processing for modern filters, which would lose properties
     // via migrateFilter's pick() call. Legacy filters have top-level query properties
     // (range, exists, match_all, match) that need to be moved under .query
-    const normalizedFilter = isLegacyFilter(filter) ? migrateFilter(filter) : filter;
+    // Note: migrateFilter returns Filter type, but since we're migrating from StoredFilter,
+    // the result maintains the StoredFilter schema shape (includes meta.field, meta.params, etc.)
+    const normalizedFilter = (
+      isLegacyFilter(filter) ? migrateFilter(filter) : filter
+    ) as StoredFilter;
 
     // Extract base properties from stored filter
     const baseProperties = extractBaseProperties(normalizedFilter);
 
-    // STRATEGY 1: Full Compatibility - Direct AsCodeFilter conversion
+    // STRATEGY 1: Simple Conditions - Filters with metadata-only representation
     if (isFullyCompatible(normalizedFilter)) {
       try {
         const condition = convertToSimpleCondition(normalizedFilter);
@@ -149,11 +154,11 @@ export function fromStoredFilter(storedFilter: unknown): AsCodeFilter {
           condition,
         };
       } catch (conversionError) {
-        // If conversion fails, fall through to enhanced handling
+        // If conversion fails, fall through to query parsing
       }
     }
 
-    // STRATEGY 2: Enhanced Compatibility - Parse and simplify when possible
+    // STRATEGY 2: Query Parsing - Parse Elasticsearch DSL into conditions
     // This includes phrase filters with match_phrase queries
     if (isEnhancedCompatible(normalizedFilter) || isPhraseFilterWithQuery(normalizedFilter)) {
       try {
@@ -163,19 +168,23 @@ export function fromStoredFilter(storedFilter: unknown): AsCodeFilter {
           condition,
         };
       } catch (conversionError) {
-        // If conversion fails, fall through to DSL handling
+        // If conversion fails, fall through to DSL preservation
       }
     }
 
-    // STRATEGY 3: High-Fidelity Check - Preserve as DSL only for truly complex cases
+    // STRATEGY 3: Complex DSL - Preserve filters requiring high fidelity
     if (requiresHighFidelity(normalizedFilter)) {
+      const meta = normalizedFilter.meta;
       return {
         ...baseProperties,
-        dsl: convertToRawDSLWithReason(normalizedFilter),
+        dsl: convertToRawDSL(normalizedFilter),
+        // Add field and params ONLY for DSL filters (not available in condition.field)
+        ...(meta?.field ? { field: meta.field } : {}),
+        ...(meta?.params ? { params: meta.params } : {}),
       };
     }
 
-    // STRATEGY 4: Handle grouped filters
+    // STRATEGY 4: Filter Groups - Convert combined/bool filters to group format
     if (isStoredGroupFilter(normalizedFilter)) {
       try {
         const group = convertToFilterGroup(normalizedFilter);
@@ -184,14 +193,18 @@ export function fromStoredFilter(storedFilter: unknown): AsCodeFilter {
           group,
         };
       } catch (conversionError) {
-        // If conversion fails, fall through to DSL handling
+        // If conversion fails, fall through to DSL preservation
       }
     }
 
-    // STRATEGY 5: Preserve Original - No data loss, keep as RawDSL
+    // STRATEGY 5: Fallback DSL - Preserve any remaining filters to prevent data loss
+    const meta = normalizedFilter.meta;
     return {
       ...baseProperties,
-      dsl: convertToRawDSLWithReason(normalizedFilter),
+      dsl: convertToRawDSL(normalizedFilter),
+      // Add field and params ONLY for DSL filters (not available in condition.field)
+      ...(meta?.field ? { field: meta.field } : {}),
+      ...(meta?.params ? { params: meta.params } : {}),
     };
   } catch (error) {
     if (error instanceof FilterConversionError) {
@@ -205,7 +218,8 @@ export function fromStoredFilter(storedFilter: unknown): AsCodeFilter {
 }
 
 /**
- * Convert stored filter to simple condition (Strategy 1 & 2)
+ * Convert stored filter to simple condition (Strategies 1 & 2)
+ * Extracts field, operator, and value from filter metadata or basic query structures
  */
 export function convertToSimpleCondition(
   storedFilter: StoredFilter
@@ -310,7 +324,8 @@ export function convertToSimpleCondition(
 }
 
 /**
- * Convert stored filter to filter group
+ * Convert stored filter to filter group (Strategy 4)
+ * Handles combined filters (legacy) and bool queries (modern)
  */
 export function convertToFilterGroup(storedFilter: StoredFilter): AsCodeGroupFilter['group'] {
   // Handle combined filter format (legacy): meta.type === 'combined' with params array
@@ -374,7 +389,8 @@ export function convertToFilterGroup(storedFilter: StoredFilter): AsCodeGroupFil
 }
 
 /**
- * STRATEGY 2: Convert with enhancement - parse complex structures when possible
+ * Strategy 2: Query Parsing - Parse complex Elasticsearch DSL into conditions
+ * Handles query-based filters by extracting field/operator/value from query structure
  */
 export function convertWithEnhancement(
   storedFilter: StoredFilter
@@ -477,10 +493,10 @@ export function parseQueryFilter(storedFilter: StoredFilter): AsCodeConditionFil
 }
 
 /**
- * STRATEGY 3: Convert to RawDSL with preservation reason
+ * Convert stored filter to DSL format
+ * Used when filter cannot be simplified to condition or group format
  */
-export function convertToRawDSLWithReason(storedFilter: StoredFilter): AsCodeDSLFilter['dsl'] {
-  // Preserved as RawDSL for maximum compatibility
+export function convertToRawDSL(storedFilter: StoredFilter): AsCodeDSLFilter['dsl'] {
   return {
     query: storedFilter.query || storedFilter,
   };
