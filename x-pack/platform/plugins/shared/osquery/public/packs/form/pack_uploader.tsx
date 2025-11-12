@@ -132,6 +132,9 @@ const OsqueryPackUploaderComponent: React.FC<OsqueryPackUploaderProps> = ({ onCh
           initialPromptText={i18n.translate('xpack.osquery.packUploader.initialPromptTextLabel', {
             defaultMessage: 'Select or drag and drop osquery pack config file',
           })}
+          aria-label={i18n.translate('xpack.osquery.packUploader.initialPromptTextLabel', {
+            defaultMessage: 'Select or drag and drop osquery pack config file',
+          })}
           onChange={handleInputChange}
           display="large"
           fullWidth
