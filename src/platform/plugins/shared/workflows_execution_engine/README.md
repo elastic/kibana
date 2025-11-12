@@ -401,7 +401,6 @@ const executionId = await workflowsExecutionEngine.executeWorkflow(
     name: 'My Workflow',
     enabled: true,
     definition: {
-      name: 'My Workflow',
       steps: [
         {
           id: 'step1',
