@@ -117,7 +117,7 @@ export async function getILMMigrationStatus(): Promise<Map<string, 'success' | u
   return ilmMigrationStatusMap;
 }
 
-function getILMPolicy(
+export function getILMPolicy(
   type: string,
   ilmMigrationStatusMap: Map<string, 'success' | undefined | null>,
   ilmPolicies: Map<
@@ -158,16 +158,11 @@ export function buildDefaultSettings({
   type,
   isOtelInputType,
   ilmMigrationStatusMap,
-  ilmPolicies,
 }: {
   type: string;
   ilmPolicy?: string | undefined;
   isOtelInputType?: boolean;
   ilmMigrationStatusMap: Map<string, 'success' | undefined | null>;
-  ilmPolicies: Map<
-    string,
-    { deprecatedILMPolicy?: IlmGetLifecycleLifecycle; newILMPolicy?: IlmGetLifecycleLifecycle }
-  >;
 }) {
   const isILMPolicyDisabled = appContextService.getConfig()?.internal?.disableILMPolicies ?? false;
   if (isILMPolicyDisabled) {
@@ -175,15 +170,22 @@ export function buildDefaultSettings({
       index: {},
     };
   }
-  const defaultIlmPolicy = isOtelInputType
-    ? `${type}@lifecycle`
-    : getILMPolicy(type, ilmMigrationStatusMap, ilmPolicies);
+  if (ilmPolicy) {
+    return {
+      index: {
+        lifecycle: {
+          name: ilmPolicy,
+        },
+      },
+    };
+  }
 
+  const defaultIlmPolicy =
+    isOtelInputType || ilmMigrationStatusMap.get(type) === 'success' ? `${type}@lifecycle` : type;
   return {
     index: {
-      // ILM Policy must be added here, for now point to the default global ILM policy name
       lifecycle: {
-        name: ilmPolicy ? ilmPolicy : defaultIlmPolicy,
+        name: defaultIlmPolicy,
       },
     },
   };
