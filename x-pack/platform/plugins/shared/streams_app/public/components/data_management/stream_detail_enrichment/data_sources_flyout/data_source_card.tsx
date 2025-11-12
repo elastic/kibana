@@ -139,22 +139,54 @@ export const DataSourceCard = ({
   );
 };
 
-export const PartialSimulationBadge = () => {
-  return (
-    <EuiBadge color="warning">
-      {i18n.translate('xpack.streams.dataSourceCard.partialSimulationBadgeLabel', {
+export const PartialSimulationBadge = ({ short = false }: { short?: boolean }) => {
+  const label = short
+    ? i18n.translate('xpack.streams.dataSourceCard.partialSimulationBadgeShortLabel', {
+        defaultMessage: 'Partial',
+      })
+    : i18n.translate('xpack.streams.dataSourceCard.partialSimulationBadgeLabel', {
         defaultMessage: 'Partial simulation',
-      })}
-    </EuiBadge>
+      });
+  return (
+    <EuiToolTip
+      content={
+        short
+          ? i18n.translate('xpack.streams.dataSourceCard.partialSimulationBadgeLabel', {
+              defaultMessage:
+                'This data source can only simulate the part of the pipeline that includes the newly added processors, because the original, unprocessed data content is not guaranteed.',
+            })
+          : undefined
+      }
+    >
+      <EuiBadge tabIndex={0} color="warning">
+        {label}
+      </EuiBadge>
+    </EuiToolTip>
   );
 };
 
-export const CompleteSimulationBadge = () => {
-  return (
-    <EuiBadge color="primary">
-      {i18n.translate('xpack.streams.dataSourceCard.completeSimulationBadgeLabel', {
+export const CompleteSimulationBadge = ({ short = false }: { short?: boolean }) => {
+  const label = short
+    ? i18n.translate('xpack.streams.dataSourceCard.completeSimulationBadgeShortLabel', {
+        defaultMessage: 'Complete',
+      })
+    : i18n.translate('xpack.streams.dataSourceCard.completeSimulationBadgeLabel', {
         defaultMessage: 'Complete simulation',
-      })}
-    </EuiBadge>
+      });
+  return (
+    <EuiToolTip
+      content={
+        short
+          ? i18n.translate('xpack.streams.dataSourceCard.completeSimulationBadgeLabel', {
+              defaultMessage:
+                'This data source can simulate the whole pipeline, since the original data content is guaranteed.',
+            })
+          : undefined
+      }
+    >
+      <EuiBadge tabIndex={0} color="primary">
+        {label}
+      </EuiBadge>
+    </EuiToolTip>
   );
 };

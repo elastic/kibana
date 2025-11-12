@@ -24,6 +24,10 @@ import {
 import { getActiveDataSourceRef } from './state_management/stream_enrichment_state_machine/utils';
 import type { EnrichmentDataSourceWithUIAttributes } from './types';
 import { DATA_SOURCES_I18N } from './data_sources_flyout/translations';
+import {
+  CompleteSimulationBadge,
+  PartialSimulationBadge,
+} from './data_sources_flyout/data_source_card';
 
 const DataSourcesFlyout = dynamic(() =>
   import('./data_sources_flyout').then((mod) => ({ default: mod.DataSourcesFlyout }))
@@ -78,10 +82,26 @@ const DataSourceSelector = () => {
     const name = snapshot.context.dataSource.name || snapshot.context.dataSource.type;
     return {
       value: dataSourceRef.id,
-      inputDisplay: name,
+      inputDisplay: (
+        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="xs">
+          <span className="eui-textTruncate">{name}</span>
+          {snapshot.context.simulationMode === 'partial' ? (
+            <PartialSimulationBadge short />
+          ) : (
+            <CompleteSimulationBadge short />
+          )}
+        </EuiFlexGroup>
+      ),
       dropdownDisplay: (
         <EuiFlexGroup direction="column" gutterSize="xs">
-          <strong>{name}</strong>
+          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="xs">
+            <strong className="eui-textTruncate">{name}</strong>
+            {snapshot.context.simulationMode === 'partial' ? (
+              <PartialSimulationBadge short />
+            ) : (
+              <CompleteSimulationBadge short />
+            )}
+          </EuiFlexGroup>
           <EuiText component="p" size="xs" color="subdued">
             {getOptionSubtitle(snapshot.context.dataSource.type)}
           </EuiText>
