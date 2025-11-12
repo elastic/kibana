@@ -17,7 +17,14 @@ import type {
 import { LENS_TAGCLOUD_DEFAULT_STATE, TAGCLOUD_ORIENTATION } from '@kbn/lens-common';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/types';
-import type { LensApiState, TagcloudState } from '../../schema';
+import type {
+  LensApiState,
+  TagcloudState,
+  LensApiFieldOrFormulaMetricOperation,
+  LensApiBucketOperations,
+  TagcloudStateESQL,
+  TagcloudStateNoESQL,
+} from '../../schema';
 import type { LensAttributes } from '../../types';
 import { DEFAULT_LAYER_ID } from '../../types';
 import type { DeepMutable, DeepPartial } from '../utils';
@@ -33,10 +40,7 @@ import {
 } from '../utils';
 import { isEsqlTableTypeDataset } from '../../utils';
 import { getValueApiColumn, getValueColumn } from '../columns/esql_column';
-import type { LensApiFieldOrFormulaMetricOperation } from '../../schema/metric_ops';
-import type { LensApiBucketOperations } from '../../schema/bucket_ops';
 import { fromColorMappingAPIToLensState, fromColorMappingLensStateToAPI } from '../coloring';
-import type { TagcloudStateESQL, TagcloudStateNoESQL } from '../../schema/charts/tagcloud';
 import { fromMetricAPItoLensState } from '../columns/metric';
 import { fromBucketLensApiToLensState } from '../columns/buckets';
 import { getSharedChartAPIToLensState, getSharedChartLensStateToAPI } from './utils';
