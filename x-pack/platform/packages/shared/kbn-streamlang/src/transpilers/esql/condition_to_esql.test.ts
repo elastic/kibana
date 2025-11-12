@@ -128,7 +128,7 @@ describe('conditionToESQLAst', () => {
 
       it('should handle contains with special characters', () => {
         const condition: Condition = { field: 'path', contains: '/api/v1/' };
-        expect(prettyPrint(condition)).toBe('path LIKE "*/api/v1/*"');
+        expect(prettyPrint(condition)).toBe('TO_LOWER(path) LIKE "*/api/v1/*"');
       });
 
       it('should handle startsWith with numbers', () => {
@@ -186,7 +186,7 @@ describe('conditionToESQLAst', () => {
           ],
         };
         expect(prettyPrint(condition)).toBe(
-          'status == "active" AND count > 10 AND name LIKE "*test*"'
+          'status == "active" AND count > 10 AND TO_LOWER(name) LIKE "*test*"'
         );
       });
     });
@@ -228,7 +228,7 @@ describe('conditionToESQLAst', () => {
         const condition: Condition = {
           not: { field: 'message', contains: 'debug' },
         };
-        expect(prettyPrint(condition)).toBe('NOT message LIKE "*debug*"');
+        expect(prettyPrint(condition)).toBe('NOT TO_LOWER(message) LIKE "*debug*"');
       });
     });
 
@@ -299,7 +299,7 @@ describe('conditionToESQLAst', () => {
           ],
         };
         expect(prettyPrint(condition)).toBe(
-          'active == TRUE AND (role == "admin" AND department LIKE "*engineering*" OR NOT suspended == TRUE)'
+          'active == TRUE AND (role == "admin" AND TO_LOWER(department) LIKE "*engineering*" OR NOT suspended == TRUE)'
         );
       });
     });
@@ -315,7 +315,7 @@ describe('conditionToESQLAst', () => {
   describe('edge cases', () => {
     it('should handle empty string in contains', () => {
       const condition: Condition = { field: 'message', contains: '' };
-      expect(prettyPrint(condition)).toBe('message LIKE "**"');
+      expect(prettyPrint(condition)).toBe('TO_LOWER(message) LIKE "**"');
     });
 
     it('should handle nested field names with dots', () => {
