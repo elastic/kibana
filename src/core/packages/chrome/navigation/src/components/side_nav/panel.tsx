@@ -45,7 +45,7 @@ export const SideNavPanel = ({ children, footer, openerNode }: SideNavPanelProps
   `;
 
   const navigationPanelStyles = css`
-    ${scrollStyles}
+    ${scrollStyles};
   `;
 
   return (
@@ -56,6 +56,7 @@ export const SideNavPanel = ({ children, footer, openerNode }: SideNavPanelProps
           label: openerNode.label,
         },
       })}
+      color={'transparent'}
       borderRadius="none"
       // Used in Storybook to limit the height of the panel
       className="side-nav-panel"
@@ -65,7 +66,7 @@ export const SideNavPanel = ({ children, footer, openerNode }: SideNavPanelProps
       role="region"
     >
       <EuiSplitPanel.Inner
-        color="subdued"
+        color="transparent"
         css={navigationPanelStyles}
         data-test-subj="side-navigation-panel-content"
         onKeyDown={handleRovingIndex}
@@ -80,7 +81,7 @@ export const SideNavPanel = ({ children, footer, openerNode }: SideNavPanelProps
         {children}
       </EuiSplitPanel.Inner>
       <EuiSplitPanel.Inner
-        color="subdued"
+        color="transparent"
         data-test-subj="side-navigation-panel-footer"
         paddingSize="none"
         grow={false}

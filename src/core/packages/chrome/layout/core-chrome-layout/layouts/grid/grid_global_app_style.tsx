@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { css, Global } from '@emotion/react';
-import { logicalCSS, useEuiTheme, type UseEuiTheme } from '@elastic/eui';
+import { euiShadow, logicalCSS, useEuiTheme, type UseEuiTheme } from '@elastic/eui';
 import {
   APP_FIXED_VIEWPORT_ID,
   APP_MAIN_SCROLL_CONTAINER_ID,
@@ -17,7 +17,7 @@ import {
 } from '@kbn/core-chrome-layout-constants';
 import { CommonGlobalAppStyles } from '../common/global_app_styles';
 
-const globalLayoutStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
+const globalLayoutStyles = (euiThemeContext: UseEuiTheme) => css`
   :root {
     // TODO: these variables are legacy and we keep them for backward compatibility
     // https://github.com/elastic/kibana/issues/225264
@@ -84,6 +84,12 @@ const globalLayoutStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
     right: ${layoutVar('application.right', '0px')} !important; /* override EUI inline style */
     bottom: ${layoutVar('application.bottom', '0px')} !important; /* override EUI inline style */
   }
+
+  .kbnChromeLayoutApplication {
+    background-color: ${euiThemeContext.euiTheme.colors.backgroundBasePlain};
+    border-radius: ${euiThemeContext.euiTheme.border.radius.medium};
+    ${euiShadow(euiThemeContext, 'm')};
+  }
 `;
 
 // temporary hacks that need to be removed after better flyout and global sidenav customization support in EUI
@@ -126,10 +132,10 @@ const globalTempHackStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
 `;
 
 export const GridLayoutGlobalStyles = () => {
-  const { euiTheme } = useEuiTheme();
+  const euiTheme = useEuiTheme();
   return (
     <>
-      <Global styles={[globalLayoutStyles(euiTheme), globalTempHackStyles(euiTheme)]} />
+      <Global styles={[globalLayoutStyles(euiTheme), globalTempHackStyles(euiTheme.euiTheme)]} />
       <CommonGlobalAppStyles />
     </>
   );

@@ -80,7 +80,7 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
         border-radius: ${euiTheme.border.radius.medium};
         background-color: ${isHighlighted
           ? euiTheme.components.buttons.backgroundPrimary
-          : euiTheme.components.buttons.backgroundText};
+          : euiTheme.colors.backgroundTransparent};
         z-index: 1;
       }
 
