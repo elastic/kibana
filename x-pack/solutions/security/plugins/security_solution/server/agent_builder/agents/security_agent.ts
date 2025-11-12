@@ -10,6 +10,7 @@ import type { BuiltInAgentDefinition } from '@kbn/onechat-server/agents';
 export const createSecurityAgentDefinition = (): BuiltInAgentDefinition => {
   return {
     id: 'core.security.agent',
+    avatar_icon: 'logoSecurity',
     name: 'Security Agent',
     description:
       'Agent specialized in security analysis tasks, including alert investigation, threat intelligence, and security documentation.',
