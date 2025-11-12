@@ -356,14 +356,17 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
       },
       async expectPanelExists(sectionId: NavigationId) {
         log.debug('SolutionNavigation.sidenav.expectPanelExists', sectionId);
-        await testSubjects.existOrFail(`~sidePanel_${sectionId}`, {
+        await testSubjects.existOrFail(`~kbnChromeNav-sidePanel_${sectionId}`, {
           timeout: TIMEOUT_CHECK,
         });
       },
       async isPanelOpen(sectionId: NavigationId) {
         if (await this.isV2()) {
           try {
-            const panel = await testSubjects.find(`~sidePanel_${sectionId}`, TIMEOUT_CHECK);
+            const panel = await testSubjects.find(
+              `~kbnChromeNav-sidePanel_${sectionId}`,
+              TIMEOUT_CHECK
+            );
             return !!panel;
           } catch (e) {
             return false;
