@@ -88,5 +88,6 @@ export {
 } from './visualize_app/utils/get_table_columns';
 export { getVisualizeListItemLinkFn } from './visualize_app/utils/get_visualize_list_item_link';
 export { toTableListViewSavedObject } from './visualize_app/components/visualize_listing';
+export { showNewVisModal } from './wizard';
 
 export type { VisualizeUserContent } from './visualize_app/components/visualize_listing';

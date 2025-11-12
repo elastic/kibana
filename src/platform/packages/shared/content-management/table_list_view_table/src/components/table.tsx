@@ -25,14 +25,13 @@ import {
   useEuiTheme,
   EuiCode,
   EuiText,
-  EuiLoadingSpinner,
+  EuiEmptyPrompt,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import {
   cssFavoriteHoverWithinEuiTableRow,
   useFavorites,
-  FavoritesEmptyState,
 } from '@kbn/content-management-favorites-public';
 
 import { useServices } from '../services';
@@ -125,7 +124,8 @@ export function Table<T extends UserContentCommonSchema>({
   emptyPrompt,
 }: Props<T>) {
   const euiTheme = useEuiTheme();
-  const { getTagList, isTaggingEnabled, isKibanaVersioningEnabled } = useServices();
+  const { getTagList, isTaggingEnabled, isKibanaVersioningEnabled, navigateToUrl, getUrlForApp } =
+    useServices();
 
   // Compute dynamic entity name plural based on active tab
   const dynamicEntityNamePlural = useMemo(() => {
@@ -167,6 +167,61 @@ export function Table<T extends UserContentCommonSchema>({
       </EuiButton>
     );
   }, [deleteItems, dispatch, entityName, dynamicEntityNamePlural, selectedIds.length]);
+
+  // Dynamic create button for toolbar (changes based on active tab)
+  const renderDynamicCreateButton = useCallback(() => {
+    if (contentTypeTabsEnabled && tableFilter.contentTypeTab) {
+      switch (tableFilter.contentTypeTab) {
+        case 'visualizations':
+          // For visualizations, open the visualization creation modal
+          return (
+            <EuiButton
+              fill
+              iconType="plusInCircle"
+              onClick={async () => {
+                const { showNewVisModal } = await import('@kbn/visualizations-plugin/public');
+                showNewVisModal();
+              }}
+              data-test-subj="newItemButton"
+            >
+              <FormattedMessage
+                id="contentManagement.tableList.listing.visualizations.createButtonToolbar"
+                defaultMessage="Create visualization"
+              />
+            </EuiButton>
+          );
+        case 'annotation-groups':
+          // For annotation groups, button navigates to Lens
+          return (
+            <EuiButton
+              fill
+              iconType="plusInCircle"
+              onClick={() => {
+                const lensUrl = getUrlForApp('lens', { path: '#/' });
+                navigateToUrl(lensUrl);
+              }}
+              data-test-subj="createAnnotationInLensButton"
+            >
+              <FormattedMessage
+                id="contentManagement.tableList.listing.annotationGroups.createButtonToolbar"
+                defaultMessage="Create annotation in Lens"
+              />
+            </EuiButton>
+          );
+        default:
+          // Dashboards - use the create button from parent
+          return renderCreateButton();
+      }
+    }
+
+    return renderCreateButton();
+  }, [
+    contentTypeTabsEnabled,
+    tableFilter.contentTypeTab,
+    renderCreateButton,
+    navigateToUrl,
+    getUrlForApp,
+  ]);
 
   const selection = useMemo<EuiTableSelectionType<T> | undefined>(() => {
     if (deleteItems) {
@@ -280,7 +335,7 @@ export function Table<T extends UserContentCommonSchema>({
     return {
       onChange: onTableSearchChange,
       toolsLeft: renderToolsLeft(),
-      toolsRight: renderCreateButton(),
+      toolsRight: renderDynamicCreateButton(),
       query: searchQuery.query ?? undefined,
       box: {
         incremental: true,
@@ -306,32 +361,124 @@ export function Table<T extends UserContentCommonSchema>({
     };
   }, [
     onTableSearchChange,
-    renderCreateButton,
+    renderDynamicCreateButton,
     renderToolsLeft,
     searchFilters,
     searchQuery.query,
     searchQuery.error,
   ]);
 
-  const hasQueryOrFilters = Boolean(searchQuery.text || tableFilter.createdBy.length > 0);
-
-  const noItemsMessage = useMemo(
-    () =>
-      tableFilter.favorites ? (
-        <FavoritesEmptyState
-          emptyStateType={hasQueryOrFilters ? 'noMatchingItems' : 'noItems'}
-          entityName={entityName}
-          entityNamePlural={dynamicEntityNamePlural}
-        />
-      ) : (
-        <FormattedMessage
-          id="contentManagement.tableList.listing.noMatchedItemsMessage"
-          defaultMessage="No {entityNamePlural} matched your search."
-          values={{ entityNamePlural: dynamicEntityNamePlural }}
-        />
-      ),
-    [tableFilter.favorites, hasQueryOrFilters, entityName, dynamicEntityNamePlural]
+  // Simple message shown while loading
+  const loadingMessage = useMemo(
+    () => (
+      <FormattedMessage
+        id="contentManagement.tableList.listing.loadingMessage"
+        defaultMessage="No {entityNamePlural} matched your search."
+        values={{ entityNamePlural: dynamicEntityNamePlural }}
+      />
+    ),
+    [dynamicEntityNamePlural]
   );
+
+  const emptyPromptTitle = useMemo(
+    () => (
+      <FormattedMessage
+        id="contentManagement.tableList.listing.noItemsTitle"
+        defaultMessage="No {entityNamePlural} to display"
+        values={{ entityNamePlural: dynamicEntityNamePlural }}
+      />
+    ),
+    [dynamicEntityNamePlural]
+  );
+
+  const emptyPromptBody = useMemo(() => {
+    if (contentTypeTabsEnabled && tableFilter.contentTypeTab) {
+      switch (tableFilter.contentTypeTab) {
+        case 'visualizations':
+          return (
+            <FormattedMessage
+              id="contentManagement.tableList.listing.visualizations.noItemsBody"
+              defaultMessage="Create a visualization to get started."
+            />
+          );
+        case 'annotation-groups':
+          return (
+            <FormattedMessage
+              id="contentManagement.tableList.listing.annotationGroups.noItemsBody"
+              defaultMessage="Create and save annotations for use across multiple visualizations in the Lens editor."
+            />
+          );
+        default:
+          // Dashboards
+          return (
+            <FormattedMessage
+              id="contentManagement.tableList.listing.dashboards.noItemsBody"
+              defaultMessage="Create a dashboard to get started."
+            />
+          );
+      }
+    }
+
+    return (
+      <FormattedMessage
+        id="contentManagement.tableList.listing.noItemsBody"
+        defaultMessage="Create a new item to get started."
+      />
+    );
+  }, [contentTypeTabsEnabled, tableFilter.contentTypeTab]);
+
+  const emptyPromptActions = useMemo(() => {
+    if (contentTypeTabsEnabled && tableFilter.contentTypeTab) {
+      switch (tableFilter.contentTypeTab) {
+        case 'visualizations':
+          // For visualizations, open the visualization creation modal
+          return (
+            <EuiButton
+              fill
+              onClick={async () => {
+                // Dynamically import showNewVisModal from visualizations plugin
+                const { showNewVisModal } = await import('@kbn/visualizations-plugin/public');
+                showNewVisModal();
+              }}
+              data-test-subj="newItemButton"
+            >
+              <FormattedMessage
+                id="contentManagement.tableList.listing.visualizations.createButton"
+                defaultMessage="Create visualization"
+              />
+            </EuiButton>
+          );
+        case 'annotation-groups':
+          // For annotation groups, button navigates to Lens
+          return (
+            <EuiButton
+              fill
+              onClick={() => {
+                const lensUrl = getUrlForApp('lens', { path: '#/' });
+                navigateToUrl(lensUrl);
+              }}
+              data-test-subj="createAnnotationInLensButton"
+            >
+              <FormattedMessage
+                id="contentManagement.tableList.listing.annotationGroups.createButton"
+                defaultMessage="Create annotation in Lens"
+              />
+            </EuiButton>
+          );
+        default:
+          // Dashboards - use the create button from parent
+          return renderCreateButton();
+      }
+    }
+
+    return renderCreateButton();
+  }, [
+    contentTypeTabsEnabled,
+    tableFilter.contentTypeTab,
+    renderCreateButton,
+    navigateToUrl,
+    getUrlForApp,
+  ]);
 
   const { data: favorites, isError: favoritesError } = useFavorites({ enabled: favoritesEnabled });
 
@@ -435,7 +582,20 @@ export function Table<T extends UserContentCommonSchema>({
             columns={tableColumns}
             pagination={pagination}
             loading={isFetchingItems}
-            noItemsMessage={noItemsMessage}
+            noItemsMessage={
+              isFetchingItems ? (
+                // Show simple message while loading
+                loadingMessage
+              ) : (
+                // Show full empty prompt when confirmed no items
+                <EuiEmptyPrompt
+                  title={<h3>{emptyPromptTitle}</h3>}
+                  titleSize="xs"
+                  body={emptyPromptBody}
+                  actions={emptyPromptActions}
+                />
+              )
+            }
             selection={selection}
             search={showSearch ? search : false}
             executeQueryOptions={{ enabled: false }}
