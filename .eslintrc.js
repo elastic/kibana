@@ -1639,7 +1639,7 @@ module.exports = {
         'playwright/valid-title': 'error',
         // Scout has a its own runtime validator for test tags
         'playwright/valid-test-tags': 'off',
-        // Check all function arguments (not just after-used) to catch unused destructured params
+        // Check all function arguments to catch unused destructured params
         // Allow _ prefix for intentionally unused parameters and variables (e.g., Proxy handlers, callbacks, destructured values)
         '@typescript-eslint/no-unused-vars': [
           'error',
