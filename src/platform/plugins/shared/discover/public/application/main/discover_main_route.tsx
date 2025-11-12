@@ -16,6 +16,7 @@ import useUnmount from 'react-use/lib/useUnmount';
 import type { AppMountParameters } from '@kbn/core/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import useLatest from 'react-use/lib/useLatest';
+import { i18n } from '@kbn/i18n';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import type { CustomizationCallback, DiscoverCustomizationContext } from '../../customizations';
 import {
@@ -44,7 +45,6 @@ import { useAlertResultsToast } from './hooks/use_alert_results_toast';
 import { setBreadcrumbs } from '../../utils/breadcrumbs';
 import { useUnsavedChanges } from './state_management/hooks/use_unsaved_changes';
 import { DiscoverTopNavMenuProvider } from './components/top_nav/discover_topnav_menu';
-import { i18n } from '@kbn/i18n';
 
 export interface MainRouteProps {
   customizationContext: DiscoverCustomizationContext;
