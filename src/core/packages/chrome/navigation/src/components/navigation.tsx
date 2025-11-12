@@ -32,6 +32,10 @@ const navigationWrapperStyles = css`
   display: flex;
 `;
 
+// Default values matching Kibana's constants for backward compatibility
+const DEFAULT_MAIN_CONTENT_SELECTORS = ['main', '[role="main"]', '#app-content'];
+const DEFAULT_MAIN_SCROLL_CONTAINER_ID = 'app-content';
+
 export interface NavigationProps {
   /**
    * The active path for the navigation, used for highlighting the current item.
@@ -63,6 +67,19 @@ export interface NavigationProps {
   sidePanelFooter?: ReactNode;
   /**
    * (optional) data-test-subj attribute for testing purposes.
+   * CSS selectors for the main content area (used for focus management).
+   * Defaults to ['main', '[role="main"]', '#app-content'] if not provided.
+   * These defaults match Kibana's MAIN_CONTENT_SELECTORS for backward compatibility.
+   */
+  mainContentSelectors?: string[];
+  /**
+   * ID of the main scroll container (used for skip links).
+   * Defaults to 'app-content' if not provided.
+   * This default matches Kibana's APP_MAIN_SCROLL_CONTAINER_ID for backward compatibility.
+   */
+  mainScrollContainerId?: string;
+  /**
+   * Optional data-test-subj attribute for testing purposes.
    */
   'data-test-subj'?: string;
 }
@@ -75,6 +92,8 @@ export const Navigation = ({
   onItemClick,
   setWidth,
   sidePanelFooter,
+  mainContentSelectors = DEFAULT_MAIN_CONTENT_SELECTORS,
+  mainScrollContainerId = DEFAULT_MAIN_SCROLL_CONTAINER_ID,
   ...rest
 }: NavigationProps) => {
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
@@ -219,7 +238,7 @@ export const Navigation = ({
                               onItemClick?.(item);
                               if (!hasSubmenu) {
                                 closePopover();
-                                focusMainContent();
+                                focusMainContent(mainContentSelectors);
                               }
                             }}
                             {...itemProps}
@@ -243,7 +262,7 @@ export const Navigation = ({
                               onClick={() => {
                                 onItemClick?.(subItem);
                                 closePopover();
-                                focusMainContent();
+                                focusMainContent(mainContentSelectors);
                               }}
                               {...subItem}
                             >
