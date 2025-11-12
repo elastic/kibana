@@ -17,8 +17,13 @@ import { TRUSTED_PROCESS_DESCENDANTS_TAG } from '../../../../../../common/endpoi
 export const ProcessDescendantsIndicator = memo<ArtifactEntryCardDecoratorProps>(
   ({ item, 'data-test-subj': dataTestSubj, ...commonProps }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
-    const isEventFiltersProcessDescendantsEnabled = isProcessDescendantsEnabled(item as ExceptionListItemSchema);
-    const isTrustedAppsProcessDescendantsEnabled = isProcessDescendantsEnabled(item as ExceptionListItemSchema, TRUSTED_PROCESS_DESCENDANTS_TAG);
+    const isEventFiltersProcessDescendantsEnabled = isProcessDescendantsEnabled(
+      item as ExceptionListItemSchema
+    );
+    const isTrustedAppsProcessDescendantsEnabled = isProcessDescendantsEnabled(
+      item as ExceptionListItemSchema,
+      TRUSTED_PROCESS_DESCENDANTS_TAG
+    );
 
     if (isEventFiltersProcessDescendantsEnabled || isTrustedAppsProcessDescendantsEnabled) {
       return (
@@ -36,18 +41,19 @@ export const ProcessDescendantsIndicator = memo<ArtifactEntryCardDecoratorProps>
                     defaultMessage="Trusting descendants of process"
                     id="xpack.securitySolution.trustedAppProcessDescendants"
                   />
-                )}
-                {' '}
+                )}{' '}
                 {isEventFiltersProcessDescendantsEnabled ? (
                   <ProcessDescendantsIconTip
                     indicateExtraEntry
                     data-test-subj={getTestId('processDescendantsIndicationTooltip')}
                   />
-                ) : <ProcessDescendantsIconTip
-                  isEventFilterForm={false}
-                  indicateExtraEntry
-                  data-test-subj={getTestId('processDescendantsIndicationTooltip')}
-                />}
+                ) : (
+                  <ProcessDescendantsIconTip
+                    isEventFilterForm={false}
+                    indicateExtraEntry
+                    data-test-subj={getTestId('processDescendantsIndicationTooltip')}
+                  />
+                )}
               </strong>
             </code>
           </EuiText>

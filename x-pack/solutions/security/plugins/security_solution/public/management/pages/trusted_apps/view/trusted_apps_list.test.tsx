@@ -18,7 +18,7 @@ import { parseQueryFilterToKQL } from '../../../common/utils';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import type { EndpointPrivileges } from '../../../../../common/endpoint/types';
 import { ExceptionsListItemGenerator } from '../../../../../common/endpoint/data_generators/exceptions_list_item_generator';
-import { TRUSTED_PROCESS_DESCENDANTS_TAG } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts';
+import { TRUSTED_PROCESS_DESCENDANTS_TAG } from '../../../../../common/endpoint/service/artifacts';
 
 jest.mock('../../../../common/components/user_privileges');
 const mockUserPrivileges = useUserPrivileges as jest.Mock;
@@ -88,7 +88,7 @@ describe('When on the trusted applications page', () => {
       })
     );
   });
-  
+
   describe('process descendants', () => {
     let renderWithData: () => Promise<ReturnType<AppContextTestRender['render']>>;
 
