@@ -6447,6 +6447,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/es-query-constants@link:src/platform/packages/shared/kbn-es-query-constants":
+  version "0.0.0"
+  uid ""
+
 "@kbn/es-query-server@link:src/platform/packages/shared/kbn-es-query-server":
   version "0.0.0"
   uid ""
@@ -7511,6 +7515,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/observability-agent-plugin@link:x-pack/solutions/observability/plugins/observability_agent":
+  version "0.0.0"
+  uid ""
+
 "@kbn/observability-ai-assistant-app-plugin@link:x-pack/solutions/observability/plugins/observability_ai_assistant_app":
   version "0.0.0"
   uid ""
@@ -8103,7 +8111,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/scout-release-testing@link:src/platform/packages/shared/kbn-scout-release-testing":
+"@kbn/scout-release-testing@link:x-pack/platform/packages/private/kbn-scout-release-testing":
   version "0.0.0"
   uid ""
 
@@ -27460,7 +27468,7 @@ p-limit@^2.0.0, p-limit@^2.2.0:
   dependencies:
     p-try "^2.0.0"
 
-p-limit@^3.0.1, p-limit@^3.0.2, p-limit@^3.1.0:
+p-limit@^3.0.2, p-limit@^3.1.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/p-limit/-/p-limit-3.1.0.tgz#e1daccbe78d0d1388ca18c64fea38e3e57e3706b"
   integrity sha512-TYOanM3wGwNGsZN2cVTYPArw454xnXj5qmWF1bEoAc4+cU/ol7GVh7odevjp1FNHduHc3KZMcFduxU5Xc6uJRQ==
