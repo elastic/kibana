@@ -116,6 +116,33 @@ function getESQLQueryDataSourceCommand(
 }
 
 /**
+ * Returns runtime fields that are created within the query by the STATS command in the query
+ */
+function getStatsCommandRuntimeFields(esqlQuery: EsqlQuery) {
+  return Array.from(mutate.commands.stats.summarize(esqlQuery)).map((command) => command.newFields);
+}
+
+/**
+ * Returns a set of all the runtime fields in the query, created by the EVAL command
+ */
+function getEvalCommandRuntimeFields(esqlQuery: EsqlQuery) {
+  return esqlQuery.ast.commands.reduce((acc, cur) => {
+    if (cur.name !== 'eval') {
+      return acc;
+    }
+
+    cur.args.forEach((arg) => {
+      // runtime fields are created in the EVAL as arguments that are function assignments
+      if (isFunctionExpression(arg) && isColumn(arg.args[0])) {
+        acc.push(((arg as ESQLFunction).args[0] as ESQLColumn).name);
+      }
+    });
+
+    return acc;
+  }, [] as string[]);
+}
+
+/**
  * Returns the summary of the stats command at the given command index in the esql query
  */
 function getStatsCommandAtIndexSummary(esqlQuery: EsqlQuery, commandIndex: number) {
@@ -142,9 +169,7 @@ export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta =
 
   // get all the new fields created by the stats commands in the query,
   // so we might tell if the command we are operating on is referencing a field that was defined by a preceding command
-  const queryRuntimeFields = Array.from(mutate.commands.stats.summarize(esqlQuery)).map(
-    (command) => command.newFields
-  );
+  const statsCommandRuntimeFields = getStatsCommandRuntimeFields(esqlQuery);
 
   const grouping = Object.values(summarizedStatsCommand.grouping);
 
@@ -159,7 +184,7 @@ export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta =
     const groupFieldName = removeBackticks(group.field);
     let groupFieldNode = group;
 
-    const groupDeclarationCommandIndex = queryRuntimeFields.findIndex((field) =>
+    const groupDeclarationCommandIndex = statsCommandRuntimeFields.findIndex((field) =>
       field.has(groupFieldName)
     );
 
@@ -267,32 +292,27 @@ export const constructCascadeQuery = ({
     throw new Error('Query is malformed');
   }
 
-  const dataSourceCommand = getESQLQueryDataSourceCommand(EditorESQLQuery);
-
-  if (!dataSourceCommand) {
-    throw new Error('Query does not have a data source');
-  }
-
   const summarizedStatsCommand = getStatsCommandToOperateOn(EditorESQLQuery);
 
   if (!summarizedStatsCommand) {
     throw new Error('Query does not have a valid stats command with grouping options');
   }
 
-  const queryRuntimeFields = Array.from(mutate.commands.stats.summarize(EditorESQLQuery)).map(
-    (command) => command.newFields
-  );
+  const statsCommandRuntimeFields = getStatsCommandRuntimeFields(EditorESQLQuery);
+  const evalCommandRuntimeFields = getEvalCommandRuntimeFields(EditorESQLQuery);
 
   if (nodeType === 'leaf') {
     const pathSegment = nodePath[nodePath.length - 1];
 
-    const groupDeclarationCommandIndex = queryRuntimeFields.findIndex((field) =>
+    const groupDeclarationCommandIndex = statsCommandRuntimeFields.findIndex((field) =>
       field.has(pathSegment)
     );
 
+    const groupIsStatsDeclaredRuntimeField = groupDeclarationCommandIndex >= 0;
+
     let groupDeclarationCommandSummary: StatsCommandSummary | null = null;
 
-    if (groupDeclarationCommandIndex !== -1) {
+    if (groupIsStatsDeclaredRuntimeField) {
       groupDeclarationCommandSummary = getStatsCommandAtIndexSummary(
         EditorESQLQuery,
         groupDeclarationCommandIndex
@@ -304,16 +324,46 @@ export const constructCascadeQuery = ({
       // when a column name is not assigned, one is created automatically that includes backticks
       (groupDeclarationCommandSummary ?? summarizedStatsCommand).grouping[`\`${pathSegment}\``];
 
-    const isOperable = groupValue && nodePathMap[pathSegment];
+    // check if we have a value for the path segment in the node path map to match on
+    if (!(groupValue && nodePathMap[pathSegment] !== undefined)) {
+      throw new Error(`The "${pathSegment}" field is not operable`);
+    }
 
-    if (isOperable && isColumn(groupValue.definition)) {
-      return handleStatsByColumnLeafOperation(dataSourceCommand, {
+    const operatingStatsCommandIndex = EditorESQLQuery.ast.commands.findIndex(
+      (cmd) => cmd.text === summarizedStatsCommand.command.text
+    );
+
+    // create a new query to populate with the cascade operation query
+    const cascadeOperationQuery = EsqlQuery.fromSrc('');
+
+    // include all the existing commands up to the operating stats command in the cascade operation query
+    EditorESQLQuery.ast.commands.slice(0, operatingStatsCommandIndex).forEach((cmd, idx, arr) => {
+      if (idx === arr.length - 1 && cmd.name === 'stats') {
+        // however, when the last command is a stats command, we don't want to include it in the cascade operation query
+        // since where commands that use either the MATCH or MATCH_PHRASE function cannot be immediately followed by a stats command
+        // and moreover this STATS command doesn't provide any useful context even if it defines new runtime fields
+        // we would not be leveraging them for the cascade operation
+        return;
+      }
+
+      mutate.generic.commands.append(cascadeOperationQuery.ast, cmd);
+    });
+
+    const groupIsRuntimeDeclared =
+      groupIsStatsDeclaredRuntimeField || evalCommandRuntimeFields.includes(pathSegment);
+
+    if (isColumn(groupValue.definition)) {
+      return handleStatsByColumnLeafOperation(cascadeOperationQuery, groupIsRuntimeDeclared, {
         [pathSegment]: nodePathMap[pathSegment],
       });
-    } else if (isOperable && isFunctionExpression(groupValue.definition)) {
+    } else if (isFunctionExpression(groupValue.definition)) {
       switch (groupValue.definition.name) {
         case 'categorize': {
-          return handleStatsByCategorizeLeafOperation(dataSourceCommand, groupValue, nodePathMap);
+          return handleStatsByCategorizeLeafOperation(
+            cascadeOperationQuery,
+            groupValue,
+            nodePathMap
+          );
         }
         default: {
           throw new Error(
@@ -332,25 +382,28 @@ export const constructCascadeQuery = ({
  * helps us with fetching leaf node data for stats operation in the data cascade experience.
  */
 function handleStatsByColumnLeafOperation(
-  dataSourceCommand: ESQLCommand<'from' | 'ts'>,
+  cascadeOperationQuery: EsqlQuery,
+  groupIsRuntimeDeclared: boolean,
   columnInterpolationRecord: Record<string, string>
 ): AggregateQuery {
-  // create new query which we will modify to contain the valid query for the cascade experience
-  const cascadeOperationQuery = EsqlQuery.fromSrc('');
-
-  // set data source for the new query
-  mutate.generic.commands.append(cascadeOperationQuery.ast, dataSourceCommand);
-
+  // build a where command with match expressions for the selected column
   const newCommands = Object.entries(columnInterpolationRecord).map(([key, value]) => {
     return Builder.command({
       name: 'where',
       args: [
-        Builder.expression.func.binary('==', [
+        /* Number.isInteger(Number(value)) || groupIsRuntimeDeclared
+          ? */ Builder.expression.func.binary('==', [
           Builder.expression.column({
             args: [Builder.identifier({ name: key })],
           }),
-          Builder.expression.literal.string(value),
+          Number.isInteger(Number(value))
+            ? Builder.expression.literal.integer(Number(value))
+            : Builder.expression.literal.string(value),
         ]),
+        // : Builder.expression.func.call('match_phrase', [
+        //     Builder.identifier({ name: key }),
+        //     Builder.expression.literal.string(value),
+        //   ]),
       ],
     });
   });
@@ -368,16 +421,10 @@ function handleStatsByColumnLeafOperation(
  * Handles the stats command for a leaf operation that contains a categorize function by modifying the query and adding necessary commands.
  */
 function handleStatsByCategorizeLeafOperation(
-  dataSourceCommand: ESQLCommand<'from' | 'ts'>,
+  cascadeOperationQuery: EsqlQuery,
   categorizeCommand: StatsFieldSummary,
   nodePathMap: Record<string, string>
 ): AggregateQuery {
-  // create new query which we will modify to contain the valid query for the cascade experience
-  const cascadeOperationQuery = EsqlQuery.fromSrc('');
-
-  // set data source for the new query
-  mutate.generic.commands.append(cascadeOperationQuery.ast, dataSourceCommand);
-
   // build a where command with match expressions for the selected categorize function
   const categorizeWhereCommand = Builder.command({
     name: 'where',
@@ -391,8 +438,16 @@ function handleStatsByCategorizeLeafOperation(
           return null;
         }
 
+        let matchField = (arg as ESQLColumn).text;
+
+        if (isFunctionExpression(arg)) {
+          // this assumes that the function invoked is accepts a column as its first argument
+          matchField = ((arg as ESQLFunction).args[0] as ESQLColumn).text;
+        }
+
         return Builder.expression.func.call('match', [
-          Builder.identifier({ name: (arg as ESQLColumn).text }),
+          // this search doesn't work well on the keyword field when used with the match function, so we remove the keyword suffix to get the actual field name
+          Builder.identifier({ name: matchField.replace(/\.keyword\b/i, '') }),
           Builder.expression.literal.string(extractCategorizeTokens(matchValue).join(' ')),
           Builder.expression.map({
             entries: [
@@ -434,22 +489,8 @@ export function mutateQueryStatsGrouping(query: AggregateQuery, pick: string[]):
     throw new Error(`Query does not include a "stats" command`);
   }
 
-  let statsCommandToOperateOn: StatsCommand | null = null;
-  let statsCommandToOperateOnGrouping: StatsCommandSummary['grouping'] | null = null;
-
-  // accounting for the possibility of multiple stats commands in the query,
-  // we always want to operate on the last stats command that has valid grouping options
-  for (let i = statsCommands.length - 1; i >= 0; i--) {
-    ({ grouping: statsCommandToOperateOnGrouping } = mutate.commands.stats.summarizeCommand(
-      EditorESQLQuery,
-      statsCommands[i]
-    ));
-
-    if (statsCommandToOperateOnGrouping && Object.keys(statsCommandToOperateOnGrouping).length) {
-      statsCommandToOperateOn = statsCommands[i] as StatsCommand;
-      break;
-    }
-  }
+  const { grouping: statsCommandToOperateOnGrouping, command: statsCommandToOperateOn } =
+    getStatsCommandToOperateOn(EditorESQLQuery) ?? {};
 
   if (!statsCommandToOperateOn) {
     throw new Error(`No valid "stats" command was found in the query`);
@@ -510,7 +551,7 @@ export function mutateQueryStatsGrouping(query: AggregateQuery, pick: string[]):
 
   // Get the position of the original stats command
   const statsCommandIndex = EditorESQLQuery.ast.commands.findIndex(
-    (cmd) => cmd === statsCommandToOperateOn
+    (cmd) => cmd.text === statsCommandToOperateOn.text
   );
 
   // remove stats command
@@ -551,7 +592,7 @@ export const appendFilteringWhereClauseForCascadeLayout = <
 
   const fieldIsRuntimeDeclared = fieldDeclarationCommandIndex >= 0;
 
-  let fieldDeclarationCommand: ESQLCommand<'stats'> | null = null;
+  let fieldDeclarationCommand: StatsCommand | null = null;
 
   // if the field that's being filtered on is a new field created by some stats command in the query,
   // then we want to find the command that created it
@@ -559,7 +600,7 @@ export const appendFilteringWhereClauseForCascadeLayout = <
     fieldDeclarationCommand = mutate.commands.stats.byIndex(
       ast,
       fieldDeclarationCommandIndex
-    ) as ESQLCommand<'stats'>;
+    ) as StatsCommand;
   }
 
   const datasourceCommand = getESQLQueryDataSourceCommand(ESQLQuery);

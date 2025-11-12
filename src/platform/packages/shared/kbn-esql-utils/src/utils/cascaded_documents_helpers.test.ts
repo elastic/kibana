@@ -176,8 +176,8 @@ describe('cascaded documents helpers utils', () => {
           });
 
           expect(cascadeQuery).toBeDefined();
-          expect(cascadeQuery!.esql).toMatchInlineSnapshot(
-            `"FROM kibana_sample_data_logs | WHERE clientip == \\"192.168.1.1\\""`
+          expect(cascadeQuery!.esql).toBe(
+            'FROM kibana_sample_data_logs | WHERE MATCH_PHRASE(clientip, "192.168.1.1")'
           );
         });
 
@@ -223,8 +223,31 @@ describe('cascaded documents helpers utils', () => {
           });
 
           expect(cascadeQuery).toBeDefined();
-          expect(cascadeQuery!.esql).toMatchInlineSnapshot(
-            `"FROM kibana_sample_data_logs | WHERE \`url.keyword\` == \\"https://www.elastic.co/downloads/beats/metricbeat\\""`
+          expect(cascadeQuery!.esql).toBe(
+            'FROM kibana_sample_data_logs | WHERE MATCH_PHRASE(`url.keyword`, "https://www.elastic.co/downloads/beats/metricbeat")'
+          );
+        });
+
+        it('should not use a match_phrase operator when the group is a runtime field created by an EVAL command', () => {
+          const editorQuery: AggregateQuery = {
+            esql: `
+              FROM remote_cluster:traces* | EVAL event = CASE(span.duration.us > 100000, "Bad", "Good") | STATS COUNT (*) by event
+            `,
+          };
+
+          const nodePath = ['event'];
+          const nodePathMap = { event: 'Bad' };
+
+          const cascadeQuery = constructCascadeQuery({
+            query: editorQuery,
+            nodeType,
+            nodePath,
+            nodePathMap,
+          });
+
+          expect(cascadeQuery).toBeDefined();
+          expect(cascadeQuery!.esql).toBe(
+            'FROM remote_cluster:traces* | EVAL event = CASE(span.duration.us > 100000, "Bad", "Good") | WHERE event == "Bad"'
           );
         });
       });
@@ -251,8 +274,8 @@ describe('cascaded documents helpers utils', () => {
           });
 
           expect(cascadeQuery).toBeDefined();
-          expect(cascadeQuery!.esql).toMatchInlineSnapshot(
-            `"FROM kibana_sample_data_logs | WHERE MATCH(message, \\"some random pattern\\", {\\"auto_generate_synonyms_phrase_query\\": FALSE, \\"fuzziness\\": 0, \\"operator\\": \\"AND\\"})"`
+          expect(cascadeQuery!.esql).toBe(
+            'FROM kibana_sample_data_logs | WHERE MATCH(message, "some random pattern", {"auto_generate_synonyms_phrase_query": FALSE, "fuzziness": 0, "operator": "AND"})'
           );
         });
 
@@ -279,8 +302,80 @@ describe('cascaded documents helpers utils', () => {
           });
 
           expect(cascadeQuery).toBeDefined();
-          expect(cascadeQuery!.esql).toMatchInlineSnapshot(
-            `"FROM kibana_sample_data_logs | WHERE MATCH(message, \\"some random pattern\\", {\\"auto_generate_synonyms_phrase_query\\": FALSE, \\"fuzziness\\": 0, \\"operator\\": \\"AND\\"})"`
+          expect(cascadeQuery!.esql).toBe(
+            'FROM kibana_sample_data_logs | WHERE @timestamp <= ?_tend AND @timestamp > ?_tstart | SAMPLE 0.001 | WHERE MATCH(message, "some random pattern", {"auto_generate_synonyms_phrase_query": FALSE, "fuzziness": 0, "operator": "AND"})'
+          );
+        });
+
+        it('should construct a valid cascade query for an un-named categorize operation with a function as the argument', () => {
+          const editorQuery: AggregateQuery = {
+            esql: `
+              FROM kibana_sample_data_logs | STATS var0 = AVG(bytes) BY CATEGORIZE(TO_UPPER(message))
+            `,
+          };
+
+          const nodeType = 'leaf';
+          const nodePath = ['CATEGORIZE(TO_UPPER(message))'];
+          const nodePathMap = { 'CATEGORIZE(TO_UPPER(message))': 'some random pattern' };
+
+          const cascadeQuery = constructCascadeQuery({
+            query: editorQuery,
+            nodeType,
+            nodePath,
+            nodePathMap,
+          });
+
+          expect(cascadeQuery).toBeDefined();
+          expect(cascadeQuery!.esql).toBe(
+            'FROM kibana_sample_data_logs | WHERE MATCH(message, "some random pattern", {"auto_generate_synonyms_phrase_query": FALSE, "fuzziness": 0, "operator": "AND"})'
+          );
+        });
+
+        it('should construct a valid cascade query for a named categorize operation with a function as the argument', () => {
+          const editorQuery: AggregateQuery = {
+            esql: `
+              FROM kibana_sample_data_logs | STATS var0 = AVG(bytes) BY Pattern = CATEGORIZE(TO_UPPER(message))
+            `,
+          };
+
+          const nodeType = 'leaf';
+          const nodePath = ['Pattern'];
+          const nodePathMap = { Pattern: 'some random pattern' };
+
+          const cascadeQuery = constructCascadeQuery({
+            query: editorQuery,
+            nodeType,
+            nodePath,
+            nodePathMap,
+          });
+
+          expect(cascadeQuery).toBeDefined();
+          expect(cascadeQuery!.esql).toBe(
+            'FROM kibana_sample_data_logs | WHERE MATCH(message, "some random pattern", {"auto_generate_synonyms_phrase_query": FALSE, "fuzziness": 0, "operator": "AND"})'
+          );
+        });
+
+        it('should construct a valid cascade query for a named categorize operation with a keyword field as the argument', () => {
+          const editorQuery: AggregateQuery = {
+            esql: `
+              FROM kibana_sample_data_logs | STATS var0 = AVG(bytes) BY Pattern = CATEGORIZE(message.keyword)
+            `,
+          };
+
+          const nodeType = 'leaf';
+          const nodePath = ['Pattern'];
+          const nodePathMap = { Pattern: 'some random pattern' };
+
+          const cascadeQuery = constructCascadeQuery({
+            query: editorQuery,
+            nodeType,
+            nodePath,
+            nodePathMap,
+          });
+
+          expect(cascadeQuery).toBeDefined();
+          expect(cascadeQuery!.esql).toBe(
+            'FROM kibana_sample_data_logs | WHERE MATCH(message, "some random pattern", {"auto_generate_synonyms_phrase_query": FALSE, "fuzziness": 0, "operator": "AND"})'
           );
         });
       });
@@ -299,8 +394,8 @@ describe('cascaded documents helpers utils', () => {
 
       const result = mutateQueryStatsGrouping(editorQuery, ['agent.keyword']);
 
-      expect(result.esql).toMatchInlineSnapshot(
-        `"FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY \`agent.keyword\`"`
+      expect(result.esql).toBe(
+        'FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY `agent.keyword`'
       );
     });
 
@@ -314,8 +409,8 @@ describe('cascaded documents helpers utils', () => {
 
       const result = mutateQueryStatsGrouping(editorQuery, ['Pattern']);
 
-      expect(result.esql).toMatchInlineSnapshot(
-        `"FROM kibana_sample_data_logs | STATS Count = COUNT(*) BY Pattern = CATEGORIZE(message)"`
+      expect(result.esql).toBe(
+        'FROM kibana_sample_data_logs | STATS Count = COUNT(*) BY Pattern = CATEGORIZE(message)'
       );
     });
 
@@ -330,8 +425,8 @@ describe('cascaded documents helpers utils', () => {
 
       const result = mutateQueryStatsGrouping(editorQuery, ['clientip']);
 
-      expect(result.esql).toMatchInlineSnapshot(
-        `"FROM kibana_sample_data_logs | STATS COUNT() BY clientip | LIMIT 100"`
+      expect(result.esql).toBe(
+        'FROM kibana_sample_data_logs | STATS COUNT() BY clientip | LIMIT 100'
       );
     });
 
@@ -346,8 +441,8 @@ describe('cascaded documents helpers utils', () => {
 
       const result = mutateQueryStatsGrouping(editorQuery, ['non_existent_column']);
 
-      expect(result.esql).toMatchInlineSnapshot(
-        `"FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY CATEGORIZE(message), agent.keyword, url.keyword"`
+      expect(result.esql).toBe(
+        'FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY CATEGORIZE(message), agent.keyword, url.keyword'
       );
     });
   });

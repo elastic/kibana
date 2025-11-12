@@ -13,6 +13,7 @@ import type { BehaviorSubject } from 'rxjs';
 import { combineLatest, distinctUntilChanged, filter, firstValueFrom, race, switchMap } from 'rxjs';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getTimeDifferenceInSeconds } from '@kbn/timerange';
+import { mutateQueryStatsGrouping } from '@kbn/esql-utils';
 import type { DiscoverAppStateContainer } from '../state_management/discover_app_state_container';
 import { updateVolatileSearchSource } from './update_search_source';
 import {
@@ -79,6 +80,7 @@ export function fetchAll(
     abortController,
     getCurrentTab,
     onFetchRecordsComplete,
+    internalState,
   } = params;
   const { data, expressions } = services;
 
@@ -88,6 +90,20 @@ export function fetchAll(
     const { query, sort } = appStateContainer.getState();
     const isEsqlQuery = isOfAggregateQueryType(query);
     const currentTab = getCurrentTab();
+
+    let fetchQuery = query!;
+
+    const internalStateStore = internalState.getState();
+    const currentTabState = internalStateStore.tabs.byId[internalStateStore.tabs.unsafeCurrentId];
+
+    // if the query is an ESQL query and there are cascade groupings selected,
+    // we mutate the query to only include the selected groupings
+    if (isEsqlQuery && currentTabState.uiState.cascadedDocuments?.selectedCascadeGroups?.length) {
+      fetchQuery = mutateQueryStatsGrouping(
+        query,
+        currentTabState.uiState.cascadedDocuments.selectedCascadeGroups
+      );
+    }
 
     if (reset) {
       sendResetMsg(dataSubjects, initialFetchStatus);
@@ -113,7 +129,7 @@ export function fetchAll(
     // Start fetching all required requests
     const response = isEsqlQuery
       ? fetchEsql({
-          query,
+          query: fetchQuery,
           dataView,
           abortSignal: abortController.signal,
           inspectorAdapters,

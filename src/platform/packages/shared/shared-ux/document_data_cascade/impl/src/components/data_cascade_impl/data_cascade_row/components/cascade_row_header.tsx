@@ -180,14 +180,19 @@ export function CascadeRowHeaderPrimitive<G extends GroupNode, L extends LeafNod
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem css={flexHelper}>
-          <EuiFlexGroup justifyContent="spaceBetween" direction="row" responsive={false}>
+          <EuiFlexGroup
+            gutterSize="m"
+            justifyContent="spaceBetween"
+            direction="row"
+            responsive={false}
+          >
             <EuiFlexItem grow={4} css={styles.rowHeaderTitleWrapper}>
               <RowTitleSlot rowData={rowInstance.original} nodePath={nodePath} />
             </EuiFlexItem>
             <EuiFlexItem grow={6} css={styles.rowHeaderSlotContainer}>
               <EuiFlexGroup
                 direction="row"
-                gutterSize={size}
+                gutterSize="s"
                 alignItems="center"
                 justifyContent="flexEnd"
                 css={styles.rowHeaderSlotContainerInner}
@@ -195,9 +200,13 @@ export function CascadeRowHeaderPrimitive<G extends GroupNode, L extends LeafNod
                 <React.Fragment>
                   {Boolean(headerMetaSlots?.length) && (
                     <EuiFlexItem>
-                      <EuiFlexGroup gutterSize={size}>
+                      <EuiFlexGroup gutterSize={size} justifyContent="flexEnd">
                         {headerMetaSlots?.map((metaSlot, index) => (
-                          <EuiFlexItem css={styles.rowHeaderSlotItemWrapper} key={index}>
+                          <EuiFlexItem
+                            css={styles.rowHeaderSlotItemWrapper}
+                            key={index}
+                            grow={false}
+                          >
                             {metaSlot}
                           </EuiFlexItem>
                         ))}
