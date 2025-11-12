@@ -21,10 +21,8 @@ import { coreMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { INTERNAL_ROUTES } from '@kbn/reporting-common';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
-import type { ExportType } from '@kbn/reporting-server';
 import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
 import type { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
-
 import type { ReportingCore } from '../../../..';
 import type { ReportingInternalSetup, ReportingInternalStart } from '../../../../core';
 import type { ContentStream } from '../../../../lib';
@@ -39,6 +37,7 @@ import type { ReportingRequestHandlerContext } from '../../../../types';
 import { EventTracker } from '../../../../usage';
 import { STATUS_CODES } from '../../../common/jobs/constants';
 import { registerJobInfoRoutesInternal as registerJobInfoRoutes } from '../jobs';
+import { getExportType } from '../../../test_utils';
 
 describe(`Reporting Job Management Routes: Internal`, () => {
   const reportingSymbol = Symbol('reporting');
@@ -122,19 +121,23 @@ describe(`Reporting Job Management Routes: Internal`, () => {
     jest.spyOn(reportingCore, 'getEventTracker').mockReturnValue(eventTracker);
 
     exportTypesRegistry = new ExportTypesRegistry(licensingMock.createSetup());
-    exportTypesRegistry.register({
-      id: 'unencoded',
-      jobType: mockJobTypeUnencoded,
-      jobContentExtension: 'csv',
-      validLicenses: ['basic', 'gold'],
-    } as ExportType);
-    exportTypesRegistry.register({
-      id: 'base64Encoded',
-      jobType: mockJobTypeBase64Encoded,
-      jobContentEncoding: 'base64',
-      jobContentExtension: 'pdf',
-      validLicenses: ['basic', 'gold'],
-    } as ExportType);
+    exportTypesRegistry.register(
+      getExportType({
+        id: 'unencoded',
+        jobType: mockJobTypeUnencoded,
+        jobContentExtension: 'csv',
+        validLicenses: ['basic', 'gold'],
+      })
+    );
+    exportTypesRegistry.register(
+      getExportType({
+        id: 'base64Encoded',
+        jobType: mockJobTypeBase64Encoded,
+        jobContentEncoding: 'base64',
+        jobContentExtension: 'pdf',
+        validLicenses: ['basic', 'gold'],
+      })
+    );
     reportingCore.getExportTypesRegistry = () => exportTypesRegistry;
 
     mockEsClient = (await reportingCore.getEsClient()).asInternalUser as typeof mockEsClient;
