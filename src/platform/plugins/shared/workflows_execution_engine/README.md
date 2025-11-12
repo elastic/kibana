@@ -28,15 +28,16 @@ The workflows execution engine plugin provides:
 - **Workflow Execution Runtime**: Core engine for executing workflow definitions
 - **Step Execution Management**: Individual step execution with state tracking
 - **Context Management**: Runtime context and variable management across steps
-- **Event Logging**: Comprehensive execution logging and monitoring to Elasticsearch
+- **Event Logging**: Comprehensive execution logging and monitoring
 - **Repository Layer**: Persistence for executions, step data, and logs
 - **Task Manager Integration**: Handles both immediate and scheduled workflow execution
 
 ### Key Capabilities
 
-✅ Execute workflows defined in YAML or JSON format
+✅ Execute workflow based on topological order (DAG) 
 ✅ Support for various step types (actions, conditions, loops, etc.)
 ✅ Manage execution state throughout the workflow lifecycle
+✅ Execute individual step
 ✅ Track step-by-step execution progress
 ✅ Log all execution events for debugging and monitoring
 ✅ Handle workflow cancellation and error recovery
@@ -166,7 +167,7 @@ Factory pattern for creating and executing different types of workflow steps.
 **Supported Step Types**:
 - Action steps (connector execution)
 - Conditional steps
-- Loop/iteration steps
+- Loop, wait, timeout, and failure handling steps
 - Parallel execution steps
 - Custom step types
 
@@ -227,7 +228,7 @@ Data persistence layer for workflow executions and logs.
 Provides dynamic value substitution in workflow definitions.
 
 **Capabilities**:
-- Variable interpolation using `${{ variable }}` syntax
+- Variable interpolation using `{{ variable }}` syntax
 - Access to workflow context and step outputs
 - Expression evaluation
 - Safe templating with error handling
@@ -237,7 +238,7 @@ Provides dynamic value substitution in workflow definitions.
 - name: send_message
   action: slack.postMessage
   params:
-    message: "Hello ${{ workflow.inputs.userName }}"
+    message: "Hello {{ workflow.inputs.userName }}"
 ```
 
 ---
@@ -297,7 +298,7 @@ For each step in workflow definition:
 ```
 If step fails:
   1. Log error details
-  2. Check retry configuration
+  2. Check step-level retry configuration
   3. Retry step or fail workflow
   4. Update execution status
   5. Emit error events
@@ -668,8 +669,7 @@ GET .kibana-workflows-logs-*/_search
 const workflowDefinition = {
   name: 'Daily Report',
   description: 'Generate and send daily report',
-  inputs: {
-    date: { type: 'string', required: true }
+  inputs: [{ name: 'date', type: 'string', required: true }]
   },
   steps: [
     {
