@@ -11,22 +11,22 @@ import { css } from '@emotion/react';
 import { useHasActiveConversation } from '../../../hooks/use_conversation';
 import { ConversationsHistoryPopover } from '../conversations_history/conversations_history_popover';
 
+const labels = {
+  open: i18n.translate('xpack.onechat.conversationsHistory.open', {
+    defaultMessage: 'Open conversations',
+  }),
+  close: i18n.translate('xpack.onechat.conversationsHistory.close', {
+    defaultMessage: 'Close conversations',
+  }),
+  conversations: i18n.translate('xpack.onechat.conversationsHistory.conversations', {
+    defaultMessage: 'Conversations',
+  }),
+};
+
 export const ConversationsHistoryButton: React.FC = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const hasActiveConversation = useHasActiveConversation();
   const { euiTheme } = useEuiTheme();
-
-  const labels = {
-    open: i18n.translate('xpack.onechat.conversationsHistory.open', {
-      defaultMessage: 'Open conversations',
-    }),
-    close: i18n.translate('xpack.onechat.conversationsHistory.close', {
-      defaultMessage: 'Close conversations',
-    }),
-    conversations: i18n.translate('xpack.onechat.conversationsHistory.conversations', {
-      defaultMessage: 'Conversations',
-    }),
-  };
 
   const togglePopover = () => {
     setIsPopoverOpen(!isPopoverOpen);

@@ -51,7 +51,7 @@ const fullscreenLabels = {
   }),
 };
 
-const renderMenuSectionTitle = (title: string) => {
+const MenuSectionTitle = ({ title }: { title: string }) => {
   return (
     <>
       <EuiSpacer size="xs" />
@@ -80,7 +80,7 @@ export const FullScreenActionsRight: React.FC = () => {
   };
 
   const menuItems = [
-    renderMenuSectionTitle(fullscreenLabels.edit),
+    <MenuSectionTitle title={fullscreenLabels.edit} />,
     <EuiContextMenuItem
       key="edit-current-agent"
       icon="pencil"
@@ -104,7 +104,7 @@ export const FullScreenActionsRight: React.FC = () => {
           </EuiContextMenuItem>,
         ]
       : []),
-    renderMenuSectionTitle(fullscreenLabels.manage),
+    <MenuSectionTitle title={fullscreenLabels.manage} />,
     <ExternalLinkMenuItem
       key="agents"
       icon="machineLearningApp"
