@@ -200,23 +200,26 @@ export async function fetchLogRateAnalysisForAlert({
 
         const fieldType = type === 'keyword' ? 'metadata' : 'log message pattern';
 
-        const data = {
+        const logRateChange = getLogRateChange(
+          logRateAnalysisType,
+          baselineBucketRate,
+          deviationBucketRate
+        );
+
+        const score = bgCount > 0 ? docCount / bgCount : docCount;
+
+        return {
+          score,
           fieldType,
           fieldName,
           fieldValue: String(fieldValue).substring(0, 140),
-          logRateChange: getLogRateChange(
-            logRateAnalysisType,
-            baselineBucketRate,
-            deviationBucketRate
-          ).message,
-        };
-
-        return {
-          logRateChangeSort: bgCount > 0 ? docCount / bgCount : docCount,
-          data,
+          message: logRateChange.message,
+          change: {
+            baseline: baselineBucketRate,
+            deviation: deviationBucketRate,
+          },
         };
       })
-      .sort((a, b) => b.logRateChangeSort - a.logRateChangeSort)
-      .map((d) => d.data),
+      .sort((a, b) => b.score - a.score),
   };
 }

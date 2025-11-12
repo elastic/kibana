@@ -13,6 +13,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS: string[] = [
   // Observability
   'observability.search_knowledge_base',
   'observability.get_data_sources',
+  'observability.run_log_rate_analysis',
 ];
 
 /**
