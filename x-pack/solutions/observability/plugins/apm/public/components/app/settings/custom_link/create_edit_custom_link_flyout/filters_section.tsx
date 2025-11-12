@@ -90,7 +90,7 @@ export function FiltersSection({
 
       {filters.map((filter, idx) => {
         const { key, value } = filter;
-        const filterId = filter.id || '';
+        const filterId = filter.id || uuidv4();
         const selectOptions = getSelectOptions(filters, key);
         return (
           <React.Fragment key={filterId}>
