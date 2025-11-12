@@ -138,7 +138,9 @@ export function migrateOnRead(definition: Record<string, unknown>): Streams.all.
   ) {
     migratedDefinition = {
       ...migratedDefinition,
-      updated_at: new Date(Date.UTC(1970, 0, 1)).toISOString(),
+      // Given that we can't know the actual update time of existing streams, we initially set it to epoch to ensure no warnings will be shown yet.
+      // Later on, when the stream is updated, the correct timestamp will be set.
+      updated_at: new Date(0).toISOString(),
     };
     hasBeenMigrated = true;
   }
