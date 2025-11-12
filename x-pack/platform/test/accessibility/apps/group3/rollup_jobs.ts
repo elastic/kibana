@@ -14,7 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Stack management- rollup a11y tests', () => {
     const rollupJobName = `rollup${Date.now().toString()}`;
-    let deActivateRollupFeature: void;
+    let deActivateRollupFeature: () => Promise<void>;
 
     before(async () => {
       deActivateRollupFeature = await PageObjects.rollup.activateFeature(rollupJobName);
