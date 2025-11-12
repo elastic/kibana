@@ -25,8 +25,6 @@ export interface SetupTourProps {
 export const SiemMigrationSetupTour: React.FC<SetupTourProps> = React.memo(({ children }) => {
   const { siemMigrations, storage } = useKibana().services;
 
-  const { shouldShow, onComplete } = useTourQueue(TOURS.SECURITY_SIEM_MIGRATION);
-
   const [tourState, setTourState] = useState(() => {
     const restoredTourState = storage.get(NEW_FEATURES_TOUR_STORAGE_KEYS.SIEM_MAIN_LANDING_PAGE);
     if (restoredTourState != null) {
@@ -34,6 +32,8 @@ export const SiemMigrationSetupTour: React.FC<SetupTourProps> = React.memo(({ ch
     }
     return tourConfig;
   });
+
+  const { shouldShow, onComplete } = useTourQueue(TOURS.SECURITY_SIEM_MIGRATION);
 
   const onTourFinished = useCallback(() => {
     setTourState({

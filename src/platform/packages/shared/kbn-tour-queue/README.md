@@ -11,4 +11,4 @@ A global queue mechanism for managing sequential tour display across Kibana plug
 | 1 | `solutionNavigationTour` | Solution navigation tour (Navigation plugin) |
 | 2 | `siemMigrationSetupTour` | Security SIEM migration setup (Security plugin) |
 
-**Note:** Lower priority = shown first. If a tour calls `onSkip()`, all remaining tours are skipped. Currently, only the navigation tour implements skip functionality.
+**Note:** Lower priority = shown first. If a tour is skipped, all remaining tours are skipped for the current page load only. Currently, only the navigation tour implements skip functionality.
