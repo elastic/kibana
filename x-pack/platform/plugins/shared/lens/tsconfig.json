@@ -123,8 +123,6 @@
     "@kbn/core-http-server",
     "@kbn/presentation-util",
     "@kbn/content-management-table-list-view-common",
-    "@kbn/controls-schemas",
-    "@kbn/controls-constants",
     "@kbn/visualizations-common",
     "@kbn/css-utils",
     "@kbn/lens-common",
