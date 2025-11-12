@@ -30,15 +30,18 @@ export const useDeleteSynonymsSet = (onSuccess?: () => void, onError?: (error: s
     {
       onSuccess: (_, { synonymsSetId }) => {
         queryClient.invalidateQueries([SYNONYMS_SETS_QUERY_KEY]);
-        notifications?.toasts?.addSuccess({
-          title: i18n.translate('xpack.searchSynonyms.deleteSynonymsSetSuccess', {
-            defaultMessage: 'Synonyms set {synonymsSetId} deleted',
-            values: { synonymsSetId },
-          }),
-        });
+
         if (onSuccess) {
           onSuccess();
         }
+        setTimeout(() => {
+          notifications?.toasts?.addSuccess({
+            title: i18n.translate('xpack.searchSynonyms.deleteSynonymsSetSuccess', {
+              defaultMessage: 'Synonyms set {synonymsSetId} deleted',
+              values: { synonymsSetId },
+            }),
+          });
+        }, 200);
       },
       onError: (error: { body: KibanaServerError }) => {
         if (onError) {

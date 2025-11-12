@@ -40,17 +40,19 @@ export const usePutSynonymsSet = (
       onSuccess: (_, { synonymsSetId }) => {
         queryClient.invalidateQueries([SYNONYMS_RULE_FETCH_QUERY_KEY]);
         queryClient.invalidateQueries([SYNONYMS_SETS_QUERY_KEY]);
-        notifications?.toasts?.addSuccess({
-          title: i18n.translate('xpack.searchSynonyms.putSynonymsSetSuccess', {
-            defaultMessage: 'Synonyms set added',
-          }),
-        });
         if (onSuccess) {
           onSuccess();
         }
         application.navigateToUrl(
           http.basePath.prepend(`${PLUGIN_ROUTE_ROOT}/sets/${synonymsSetId}`)
         );
+        setTimeout(() => {
+          notifications?.toasts?.addSuccess({
+            title: i18n.translate('xpack.searchSynonyms.putSynonymsSetSuccess', {
+              defaultMessage: 'Synonyms set added',
+            }),
+          });
+        }, 200);
       },
       onError: (error: { body: KibanaServerError }) => {
         if (onConflictError && error.body.statusCode === 409) {
