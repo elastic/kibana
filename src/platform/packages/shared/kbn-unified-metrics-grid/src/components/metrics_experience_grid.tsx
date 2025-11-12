@@ -93,10 +93,10 @@ export const MetricsExperienceGrid = ({
     timeRange,
   });
 
-  const { leftSideActions, rightSideActions } = useToolbarActions({
+  const { toggleActions, leftSideActions, rightSideActions } = useToolbarActions({
     fields,
-    indexPattern,
     renderToggleActions,
+    indexPattern,
     requestParams,
   });
 
@@ -138,6 +138,7 @@ export const MetricsExperienceGrid = ({
       id="metricsExperienceGrid"
       toolbarCss={chartToolbarCss}
       toolbar={{
+        toggleActions,
         leftSide: leftSideActions,
         rightSide: rightSideActions,
         additionalControls: {
@@ -152,6 +153,7 @@ export const MetricsExperienceGrid = ({
           ),
         },
       }}
+      toolbarWrapAt={isFullscreen ? 'l' : 'xl'}
       isComponentVisible={isComponentVisible}
       isFullscreen={isFullscreen}
       onKeyDown={onKeyDown}
