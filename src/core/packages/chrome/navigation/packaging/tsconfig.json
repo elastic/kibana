@@ -2,9 +2,9 @@
   "extends": "../../../../../../tsconfig.base.json",
   "compilerOptions": {
     "noEmit": true,
-    "skipLibCheck": true,
     "jsx": "react",
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "outDir": "target/types"
   },
   "include": [
     "react/**/*",
@@ -14,8 +14,10 @@
   ],
   "exclude": [
     "target",
-    "node_modules",
-    "**/__stories__/**",
-    "../src/__stories__/**"
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/i18n",
+    "@kbn/i18n-react",
   ]
 }
