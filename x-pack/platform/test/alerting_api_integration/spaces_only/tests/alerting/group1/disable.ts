@@ -22,7 +22,7 @@ import {
   getEventLog,
   TaskManagerUtils,
 } from '../../../../common/lib';
-import { validateEvent } from './event_log';
+import { validateEvent } from '../validate_event';
 
 const alertAsDataIndex = '.internal.alerts-observability.test.alerts.alerts-default-000001';
 

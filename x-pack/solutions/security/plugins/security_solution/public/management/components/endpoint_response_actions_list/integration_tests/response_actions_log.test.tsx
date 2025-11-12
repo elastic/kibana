@@ -1526,6 +1526,7 @@ describe('Response actions history', () => {
       featureFlags = {
         crowdstrikeRunScriptEnabled: true,
         microsoftDefenderEndpointCancelEnabled: true,
+        responseActionsEndpointMemoryDump: true,
       };
 
       mockedContext.setExperimentalFlag(featureFlags);

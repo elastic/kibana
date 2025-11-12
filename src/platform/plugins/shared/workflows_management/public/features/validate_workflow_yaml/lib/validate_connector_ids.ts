@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getCachedDynamicConnectorTypes } from '../../../../common/schema';
-import { getConnectorInstancesForType } from '../../../widgets/workflow_yaml_editor/lib/snippets/generate_connector_snippet';
+import type { ConnectorTypeInfo } from '@kbn/workflows';
+import { getConnectorInstancesForType } from '../../../widgets/workflow_yaml_editor/lib/autocomplete/suggestions/connector_id/get_connector_id_suggestions_items';
 import type { ConnectorIdItem, YamlValidationResult } from '../model/types';
 
 export function validateConnectorIds(
   connectorIdItems: ConnectorIdItem[],
-  dynamicConnectorTypes: Record<string, any> | null, // eslint-disable-line @typescript-eslint/no-explicit-any
+  dynamicConnectorTypes: Record<string, ConnectorTypeInfo> | null,
   connectorsManagementUrl?: string
 ): YamlValidationResult[] {
   const results: YamlValidationResult[] = [];
@@ -36,7 +36,7 @@ export function validateConnectorIds(
   }
 
   for (const connectorIdItem of connectorIdItems) {
-    const connectorType = (getCachedDynamicConnectorTypes() ?? {})[connectorIdItem.connectorType];
+    const connectorType = dynamicConnectorTypes[connectorIdItem.connectorType];
     const displayName = connectorType?.displayName ?? connectorIdItem.connectorType;
     const instances = getConnectorInstancesForType(
       connectorIdItem.connectorType,

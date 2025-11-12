@@ -16,6 +16,7 @@ import type { QueryStart, SavedQuery, DataPublicPluginStart } from '@kbn/data-pl
 import type { Query, AggregateQuery } from '@kbn/es-query';
 import type { Filter, TimeRange } from '@kbn/es-query';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 import { SearchBar } from '.';
 import type { SearchBarOwnProps } from '.';
 import { useFilterManager } from './lib/use_filter_manager';
@@ -32,6 +33,7 @@ export interface StatefulSearchBarDeps {
   usageCollection?: UsageCollectionSetup;
   isScreenshotMode?: boolean;
   unifiedSearch: Omit<UnifiedSearchPublicPluginStart, 'ui'>;
+  cps: CPSPluginStart;
 }
 
 export type StatefulSearchBarProps<QT extends Query | AggregateQuery = Query> = Omit<
@@ -156,6 +158,7 @@ export function createSearchBar({
   usageCollection,
   isScreenshotMode = false,
   unifiedSearch,
+  cps,
 }: StatefulSearchBarDeps) {
   // App name should come from the core application service.
   // Until it's available, we'll ask the user to provide it for the pre-wired component.
@@ -218,6 +221,7 @@ export function createSearchBar({
           storage,
           usageCollection,
           unifiedSearch,
+          cps,
           ...core,
         }}
       >
@@ -279,6 +283,7 @@ export function createSearchBar({
             esqlEditorInitialState={props.esqlEditorInitialState}
             onEsqlEditorInitialStateChange={props.onEsqlEditorInitialStateChange}
             esqlVariablesConfig={props.esqlVariablesConfig}
+            onOpenQueryInNewTab={props.onOpenQueryInNewTab}
             useBackgroundSearchButton={props.useBackgroundSearchButton}
           />
         </core.i18n.Context>
