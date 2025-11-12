@@ -19,6 +19,7 @@ const ALLOWED_KEYS_UPDATE_CLOUD = [
   'userSettings.darkMode',
   'userSettings.contrastMode',
   'solutionNavigationTour:completed', // TODO: remove with https://github.com/elastic/kibana/issues/239313
+  'tourQueue:skipped',
 ];
 
 export function defineUpdateUserProfileDataRoute({
