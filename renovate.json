@@ -174,6 +174,7 @@
         "@smithy/types",
         "@types/aws4",
         "ajv",
+        "ajv-formats",
         "aws4",
         "eventsource-parser",
         "fast-glob",
@@ -1199,7 +1200,7 @@
         "@elastic/ecs"
       ],
       "reviewers": [
-        "team:obs-ux-logs-team"
+        "team:obs-onboarding-team"
       ],
       "matchBaseBranches": [
         "main"
@@ -1207,7 +1208,7 @@
       "labels": [
         "release_note:skip",
         "backport:all-open",
-        "Team:obs-ux-logs"
+        "Team:obs-onboarding"
       ],
       "enabled": true,
       "minimumReleaseAge": "14 days"
@@ -4295,13 +4296,13 @@
         "@xstate/react"
       ],
       "reviewers": [
-        "team:obs-ux-logs-team"
+        "team:obs-onboarding-team"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
-        "Team:obs-ux-logs",
+        "Team:obs-onboarding",
         "release_note:skip",
         "backport:all-open"
       ],
@@ -4317,13 +4318,13 @@
         "@xstate5/react"
       ],
       "reviewers": [
-        "team:obs-ux-logs-team"
+        "team:obs-onboarding-team"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
-        "Team:obs-ux-logs",
+        "Team:obs-onboarding",
         "release_note:skip",
         "backport:all-open"
       ],
@@ -4337,13 +4338,13 @@
         "constate"
       ],
       "reviewers": [
-        "team:obs-ux-logs-team"
+        "team:obs-onboarding-team"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
-        "Team:obs-ux-logs",
+        "Team:obs-onboarding",
         "release_note:skip",
         "backport:all-open"
       ],
@@ -4356,13 +4357,13 @@
         "oniguruma-to-es"
       ],
       "reviewers": [
-        "team:obs-ux-logs-team"
+        "team:obs-onboarding-team"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
-        "Team:obs-ux-logs",
+        "Team:obs-onboarding",
         "release_note:skip",
         "backport:all-open"
       ],
