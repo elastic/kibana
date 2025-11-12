@@ -202,7 +202,7 @@ The refactoring adds optional props with defaults, so Kibana's existing usage co
    │   ├── index.tsx          # Main standalone component wrapper
    │   ├── types.ts            # TypeScript type definitions
    │   └── services/           # Standalone service implementations
-   │       ├── i18n.ts         # No-op i18n implementation
+   │       ├── i18n.tsx        # No-op i18n implementation
    │       └── index.ts
    └── scripts/
        └── build.sh            # Build script
@@ -210,7 +210,7 @@ The refactoring adds optional props with defaults, so Kibana's existing usage co
 
 ### Phase 1.4: Create No-Op i18n Service
 
-**File: `src/core/packages/chrome/navigation/packaging/react/services/i18n.ts`** (new file)
+**File: `src/core/packages/chrome/navigation/packaging/react/services/i18n.tsx`** (new file)
 
 Create a minimal i18n implementation that returns default messages:
 
@@ -387,9 +387,9 @@ module.exports = {
     // CRITICAL: Alias @kbn/i18n imports to our no-op implementation
     alias: {
       // Redirect all @kbn/i18n imports to our no-op i18n service
-      '@kbn/i18n$': path.resolve(__dirname, 'react/services/i18n.ts'),
-      '@kbn/i18n/react': path.resolve(__dirname, 'react/services/i18n.ts'),
-      '@kbn/i18n-react': path.resolve(__dirname, 'react/services/i18n.ts'),
+      '@kbn/i18n$': path.resolve(__dirname, 'react/services/i18n.tsx'),
+      '@kbn/i18n/react': path.resolve(__dirname, 'react/services/i18n.tsx'),
+      '@kbn/i18n-react': path.resolve(__dirname, 'react/services/i18n.tsx'),
     },
   },
   
@@ -1153,7 +1153,7 @@ Phase 3 adds full translation support to the standalone Navigation component, al
 
 ### Phase 3.1: Enhanced i18n Service
 
-**File: `src/core/packages/chrome/navigation/packaging/react/services/i18n.ts`** (modified - enhanced)
+**File: `src/core/packages/chrome/navigation/packaging/react/services/i18n.tsx`** (modified - enhanced)
 
 Replace no-op implementation with full i18n support:
 
@@ -1330,18 +1330,18 @@ Add sections on:
 - ✅ **Phase 1.1** - Refactored Navigation component to accept layout constants as props
 - ✅ **Phase 1.2** - Updated all component usage for layout constants
 - ✅ **Phase 1.3** - Created packaging directory structure
+- ✅ **Phase 1.4** - Created no-op i18n service
 
 **Next Steps:**
-1. **Phase 1.4** - Create no-op i18n service
-2. **Phase 1.5** - Create OneNavigation component wrapper
-3. **Phase 1.6** - Create Webpack configuration
-4. **Phase 1.7** - Create build scripts
-5. **Phase 1.8** - Create package manifest
-6. **Phase 1.9** - TypeScript configuration
-7. **Phase 1.10** - Documentation
-8. **Phase 1.11** - Test external build
-9. Test Phase 1 thoroughly with external test application
-10. Validate with real-world usage
+1. **Phase 1.5** - Create OneNavigation component wrapper (stashed, ready to apply after commit)
+2. **Phase 1.6** - Create Webpack configuration
+3. **Phase 1.7** - Create build scripts
+4. **Phase 1.8** - Create package manifest (already created, needs verification)
+5. **Phase 1.9** - TypeScript configuration
+6. **Phase 1.10** - Documentation
+7. **Phase 1.11** - Test external build
+8. Test Phase 1 thoroughly with external test application
+9. Validate with real-world usage
 
 ### Phase 2 (After Phase 1 Complete)
 
