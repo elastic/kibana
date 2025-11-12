@@ -7,4 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getPreviousVersionTypes } from './previous_version_types';
+import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
+
+interface GetPreviousVersionTypesParams {
+  gitRev: string;
+  types: SavedObjectsType<any>[];
+}
+
+export async function getPreviousVersionTypes({
+  gitRev,
+  types,
+}: GetPreviousVersionTypesParams): Promise<Array<SavedObjectsType<any>>> {
+  // TODO must obtain the previous version mappings from the baseline commit
+  return types;
+}

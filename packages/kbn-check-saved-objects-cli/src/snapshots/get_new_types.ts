@@ -7,4 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getPreviousVersionTypes } from './previous_version_types';
+import type { MigrationSnapshot } from '../types';
+
+export function getNewTypes({
+  from,
+  to,
+}: {
+  from: MigrationSnapshot;
+  to: MigrationSnapshot;
+}): string[] {
+  return Object.keys(to.typeDefinitions).filter((type) => {
+    if (!Object.prototype.hasOwnProperty.call(to.typeDefinitions, type)) {
+      return false;
+    }
+    return !from.typeDefinitions[type];
+  });
+}

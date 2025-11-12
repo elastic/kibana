@@ -7,4 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getPreviousVersionTypes } from './previous_version_types';
+export { getSnapshots } from './get_snapshots';
+export { validateNewTypes } from './validate_new_types';
+export { validateUpdatedTypes } from './validate_updated_types';
+export { automatedRollbackTests } from './automated_rollback_tests';

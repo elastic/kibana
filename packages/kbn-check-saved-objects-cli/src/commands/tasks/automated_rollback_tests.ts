@@ -7,4 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getPreviousVersionTypes } from './previous_version_types';
+import type { Task } from '../types';
+
+export const automatedRollbackTests: Task = async (ctx, task) => {};
