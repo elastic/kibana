@@ -7,34 +7,44 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPagination } from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 interface PaginationProps {
   totalPages: number;
   currentPage: number;
+
+  loaded: number;
+  total: number;
+
   onPageChange: (pageIndex: number) => void;
 }
 
-export const Pagination = ({ totalPages, currentPage, onPageChange }: PaginationProps) => {
+export const Pagination = ({
+  totalPages,
+  currentPage,
+  loaded,
+  total,
+  onPageChange,
+}: PaginationProps) => {
   if (totalPages <= 1) {
     return null;
   }
 
+  if (currentPage >= totalPages - 1) {
+    return null;
+  }
+
   return (
-    <EuiFlexGroup justifyContent="center">
-      <EuiFlexItem grow={false}>
-        <EuiPagination
-          aria-label={i18n.translate(
-            'metricsExperience.pagination.euiPagination.metricsPaginationLabel',
-            { defaultMessage: 'Metrics pagination' }
-          )}
-          pageCount={totalPages}
-          activePage={currentPage}
-          onPageClick={onPageChange}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiButton fullWidth onClick={() => onPageChange(currentPage + 1)}>
+      {i18n.translate('metricsExperience.pagination.euiPagination.metricsPaginationLabel', {
+        defaultMessage: 'Load more ({loaded}/{total})',
+        values: {
+          loaded,
+          total,
+        },
+      })}
+    </EuiButton>
   );
 };

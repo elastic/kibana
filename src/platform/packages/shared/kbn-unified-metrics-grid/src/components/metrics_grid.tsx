@@ -7,16 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useState, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import type { EuiFlexGridProps } from '@elastic/eui';
-import { EuiFlexGrid, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { useEuiTheme, EuiAutoSizer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
 import type { Observable } from 'rxjs';
 import { css } from '@emotion/react';
+import { FixedSizeGrid as Grid, type GridChildComponentProps } from 'react-window';
 import type { ChartSize } from './chart';
-import { Chart } from './chart';
+import { Chart, ChartSizes } from './chart';
 import { MetricInsightsFlyout } from './flyout/metrics_insights_flyout';
 import { EmptyState } from './empty_state/empty_state';
 import { useGridNavigation } from '../hooks/use_grid_navigation';
@@ -36,6 +37,8 @@ export type MetricsGridProps = Pick<
   fields: MetricField[];
 };
 
+const GUTTER_SIZE = 8; // EUI's 's' gutter size
+
 const getItemKey = (metric: MetricField, index: number) => {
   return `${metric.name}-${index}`;
 };
@@ -54,8 +57,8 @@ export const MetricsGrid = ({
   filters = [],
 }: MetricsGridProps) => {
   const gridRef = useRef<HTMLDivElement>(null);
+  const virtualGridRef = useRef<Grid>(null);
   const chartRefs = useRef<Map<string, HTMLDivElement>>(new Map());
-  const { euiTheme } = useEuiTheme();
 
   const chartSize = useMemo(() => (columns === 2 || columns === 4 ? 's' : 'm'), [columns]);
 
@@ -115,6 +118,58 @@ export const MetricsGrid = ({
     return { current: null };
   }, [expandedMetric]);
 
+  // Scroll to focused cell when keyboard navigation happens
+  useEffect(() => {
+    if (virtualGridRef.current && focusedCell.rowIndex >= 0 && focusedCell.colIndex >= 0) {
+      virtualGridRef.current.scrollToItem({
+        rowIndex: focusedCell.rowIndex,
+        columnIndex: focusedCell.colIndex,
+        align: 'auto',
+      });
+    }
+  }, [focusedCell]);
+
+  const itemData: VirtualGridCellProps = useMemo(
+    () => ({
+      gridColumns,
+      fields,
+      focusedCell,
+      chartSize,
+      dimensions,
+      filters,
+      searchSessionId,
+      services,
+      onBrushEnd,
+      onFilter,
+      abortController,
+      searchTerm,
+      requestParams,
+      discoverFetch$,
+      setChartRef,
+      onViewDetails: handleViewDetails,
+      onFocusCell: handleFocusCell,
+    }),
+    [
+      gridColumns,
+      fields,
+      focusedCell,
+      chartSize,
+      dimensions,
+      filters,
+      searchSessionId,
+      services,
+      onBrushEnd,
+      onFilter,
+      abortController,
+      searchTerm,
+      requestParams,
+      discoverFetch$,
+      setChartRef,
+      handleViewDetails,
+      handleFocusCell,
+    ]
+  );
+
   if (fields.length === 0) {
     return <EmptyState />;
   }
@@ -131,55 +186,28 @@ export const MetricsGrid = ({
         onKeyDown={handleKeyDown}
         data-test-subj="unifiedMetricsExperienceGrid"
       >
-        <EuiFlexGrid
-          gutterSize="s"
-          css={css`
-            grid-template-columns: repeat(${Math.min(columns, 4)}, 1fr);
-            @container (max-width: ${euiTheme.breakpoint.xl}px) {
-              grid-template-columns: repeat(${Math.min(columns, 3)}, 1fr);
-            }
-            @container (max-width: ${euiTheme.breakpoint.l}px) {
-              grid-template-columns: repeat(${Math.min(columns, 2)}, 1fr);
-            }
-            @container (max-width: ${euiTheme.breakpoint.s}px) {
-              grid-template-columns: repeat(${Math.min(columns, 1)}, 1fr);
-            }
-          `}
-        >
-          {fields.map((metric, index) => {
-            const id = getItemKey(metric, index);
-            const { rowIndex, colIndex } = getRowColFromIndex(index);
-            const isFocused =
-              focusedCell.rowIndex === rowIndex && focusedCell.colIndex === colIndex;
+        <EuiAutoSizer>
+          {({ width, height }) => {
+            const columnWidth = width / gridColumns;
 
             return (
-              <EuiFlexItem key={index}>
-                <ChartItem
-                  id={id}
-                  index={index}
-                  ref={(element) => setChartRef(id, element)}
-                  metric={metric}
-                  size={chartSize}
-                  dimensions={dimensions}
-                  filters={filters}
-                  searchSessionId={searchSessionId}
-                  services={services}
-                  onBrushEnd={onBrushEnd}
-                  onFilter={onFilter}
-                  abortController={abortController}
-                  requestParams={requestParams}
-                  discoverFetch$={discoverFetch$}
-                  rowIndex={rowIndex}
-                  colIndex={colIndex}
-                  isFocused={isFocused}
-                  onFocusCell={handleFocusCell}
-                  onViewDetails={handleViewDetails}
-                  searchTerm={searchTerm}
-                />
-              </EuiFlexItem>
+              <Grid
+                ref={virtualGridRef}
+                columnCount={gridColumns}
+                columnWidth={columnWidth}
+                height={height}
+                rowCount={gridRows}
+                rowHeight={ChartSizes[chartSize]}
+                width={width}
+                overscanRowCount={2}
+                overscanColumnCount={1}
+                itemData={itemData}
+              >
+                {VirtualGridCell}
+              </Grid>
             );
-          })}
-        </EuiFlexGrid>
+          }}
+        </EuiAutoSizer>
       </A11yGridWrapper>
       {expandedMetric && (
         <MetricInsightsFlyout
@@ -193,18 +221,113 @@ export const MetricsGrid = ({
   );
 };
 
-interface ChartItemProps
+interface BaseChartProps
   extends Pick<
     ChartSectionProps,
     'searchSessionId' | 'services' | 'onBrushEnd' | 'onFilter' | 'abortController' | 'requestParams'
   > {
+  searchTerm?: string;
+  dimensions: string[];
+  filters: Array<{ field: string; value: string }>;
+  discoverFetch$: Observable<UnifiedHistogramInputMessage>;
+  onFocusCell: (rowIndex: number, colIndex: number) => void;
+  onViewDetails: (index: number, esqlQuery: string, metric: MetricField) => void;
+}
+
+interface VirtualGridCellProps extends BaseChartProps {
+  gridColumns: NonNullable<EuiFlexGridProps['columns']>;
+  fields: MetricField[];
+  focusedCell: { rowIndex: number; colIndex: number };
+  chartSize: ChartSize;
+  setChartRef: (id: string, element: HTMLDivElement | null) => void;
+}
+
+const VirtualGridCell = React.memo(
+  ({ columnIndex, rowIndex, style, data }: GridChildComponentProps<VirtualGridCellProps>) => {
+    const {
+      gridColumns,
+      fields,
+      focusedCell,
+      chartSize,
+      dimensions,
+      filters,
+      searchSessionId,
+      searchTerm,
+      services,
+      onBrushEnd,
+      onFilter,
+      abortController,
+      requestParams,
+      discoverFetch$,
+      onFocusCell,
+      onViewDetails,
+      setChartRef,
+    } = data;
+
+    const index = useMemo(
+      () => rowIndex * gridColumns + columnIndex,
+      [rowIndex, gridColumns, columnIndex]
+    );
+
+    const isFocused = useMemo(
+      () => focusedCell.rowIndex === rowIndex && focusedCell.colIndex === columnIndex,
+      [focusedCell, rowIndex, columnIndex]
+    );
+
+    const cellStyle = useMemo(
+      () => ({
+        ...style,
+        padding: `${GUTTER_SIZE / 2}px ${GUTTER_SIZE / 2}px ${GUTTER_SIZE / 2}px ${
+          GUTTER_SIZE / 2
+        }px`,
+      }),
+      [style]
+    );
+
+    const metric = useMemo(() => fields[index], [fields, index]);
+    const id = useMemo(() => getItemKey(metric, index), [metric, index]);
+
+    // Don't render if index is out of bounds
+    if (index >= fields.length) {
+      return null;
+    }
+
+    return (
+      <div style={cellStyle}>
+        <ChartItem
+          id={id}
+          index={index}
+          ref={(element) => setChartRef(id, element)}
+          metric={metric}
+          size={chartSize}
+          dimensions={dimensions}
+          filters={filters}
+          searchSessionId={searchSessionId}
+          services={services}
+          onBrushEnd={onBrushEnd}
+          onFilter={onFilter}
+          abortController={abortController}
+          requestParams={requestParams}
+          discoverFetch$={discoverFetch$}
+          rowIndex={rowIndex}
+          colIndex={columnIndex}
+          isFocused={isFocused}
+          onFocusCell={onFocusCell}
+          onViewDetails={onViewDetails}
+          searchTerm={searchTerm}
+        />
+      </div>
+    );
+  }
+);
+
+VirtualGridCell.displayName = 'VirtualGridCell';
+
+interface ChartItemProps extends BaseChartProps {
   id: string;
   metric: MetricField;
   index: number;
   size: ChartSize;
-  dimensions: string[];
-  filters: Array<{ field: string; value: string }>;
-  discoverFetch$: Observable<UnifiedHistogramInputMessage>;
   rowIndex: number;
   colIndex: number;
   isFocused: boolean;
@@ -325,6 +448,8 @@ const A11yGridWrapper = React.forwardRef(
         css={css`
           outline: none;
           container-type: inline-size;
+          height: 100%;
+          min-height: 600px;
         `}
       >
         {children}
