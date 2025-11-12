@@ -8,7 +8,7 @@
  */
 
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
-import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
+import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import type { ParsedQuery } from 'query-string';
@@ -61,7 +61,6 @@ export async function mountApp({
     createKbnUrlStateStorage({
       history,
       useHash: coreServices.uiSettings.get('state:storeInSessionStorage'),
-      ...withNotifyOnErrors(coreServices.notifications.toasts),
     });
 
   const redirect = (redirectTo: RedirectToProps) => {

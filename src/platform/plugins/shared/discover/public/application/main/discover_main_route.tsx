@@ -9,7 +9,7 @@
 
 import { useHistory, useParams } from 'react-router-dom';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
+import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { useEffect, useState } from 'react';
 import React from 'react';
 import useUnmount from 'react-use/lib/useUnmount';
@@ -73,7 +73,6 @@ export const DiscoverMainRoute = ({
         useHash: services.uiSettings.get('state:storeInSessionStorage'),
         history,
         useHashQuery: customizationContext.displayMode !== 'embedded',
-        ...withNotifyOnErrors(services.core.notifications.toasts),
       })
   );
   const { internalState, runtimeStateManager, searchSessionManager } = useStateManagers({

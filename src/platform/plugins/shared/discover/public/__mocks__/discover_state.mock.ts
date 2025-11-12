@@ -23,7 +23,7 @@ import {
 } from '../application/main/state_management/redux';
 import type { DiscoverServices, HistoryLocationState } from '../build_services';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
+import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { History } from 'history';
 import {
   getConnectedCustomizationService,
@@ -58,7 +58,7 @@ function createInternalStateStoreMock({
     useHash: storeInSessionStorage,
     history: services.history,
     useHashQuery: customizationContext.displayMode !== 'embedded',
-    ...(toasts && withNotifyOnErrors(toasts)),
+    ...toasts,
   });
   runtimeStateManager ??= createRuntimeStateManager();
   const tabsStorageManager = createTabsStorageManager({
