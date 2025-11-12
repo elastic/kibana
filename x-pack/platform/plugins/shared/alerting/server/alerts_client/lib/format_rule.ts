@@ -38,5 +38,6 @@ export const formatRule = ({ rule, ruleType }: FormatRuleOpts): AlertRule => {
     [ALERT_RULE_TAGS]: rule.tags,
     [ALERT_RULE_UUID]: rule.id,
     [SPACE_IDS]: [rule.spaceId],
+    ...(rule.entities ? { 'kibana.alert.rule.entities': rule.entities } : {}),
   };
 };

@@ -141,6 +141,9 @@ export const buildRecoveredAlert = <
         ...(rule[ALERT_RULE_TAGS] ?? []),
       ])
     ),
+    ...(rule['kibana.alert.rule.entities']
+      ? { 'kibana.alert.rule.entities': rule['kibana.alert.rule.entities'] }
+      : {}),
     ...(hasAlertState ? { [ALERT_STATE_NAMESPACE]: filteredAlertState } : {}),
   };
 

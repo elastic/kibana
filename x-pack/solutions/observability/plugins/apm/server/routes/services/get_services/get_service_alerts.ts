@@ -50,16 +50,24 @@ export async function getServicesAlerts({
           ...rangeQuery(start, end),
           ...kqlQuery(kuery),
           ...serviceGroupWithOverflowQuery(serviceGroup),
-          ...termQuery(SERVICE_NAME, serviceName),
-          ...wildcardQuery(SERVICE_NAME, searchQuery),
+          // ...wildcardQuery(SERVICE_NAME, searchQuery),
           ...environmentQuery(environment),
         ],
+        ...(serviceName
+          ? {
+              should: [
+                ...termQuery(SERVICE_NAME, serviceName),
+                ...termQuery('kibana.alert.rule.entities', serviceName),
+              ],
+              minimum_should_match: 1,
+            }
+          : {}),
       },
     },
     aggs: {
       services: {
         terms: {
-          field: SERVICE_NAME,
+          field: 'kibana.alert.rule.entities',
           size: maxNumServices,
         },
         aggs: {
@@ -74,6 +82,8 @@ export async function getServicesAlerts({
   };
 
   const result = await apmAlertsClient.search(params);
+
+  console.log('params', JSON.stringify(params, null, 2));
 
   const filterAggBuckets = result.aggregations?.services.buckets ?? [];
 

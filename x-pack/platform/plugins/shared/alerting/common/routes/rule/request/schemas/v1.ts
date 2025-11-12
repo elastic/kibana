@@ -22,9 +22,12 @@ export const investigationGuideSchema = schema.object({
   }),
 });
 
+export const entitiesSchema = schema.arrayOf(schema.string());
+
 export const artifactsSchema = schema.object({
   dashboards: schema.maybe(dashboardsSchema),
   investigation_guide: schema.maybe(investigationGuideSchema),
+  entities: schema.maybe(entitiesSchema),
 });
 
 export const ruleSnoozeScheduleSchema = schema.object(

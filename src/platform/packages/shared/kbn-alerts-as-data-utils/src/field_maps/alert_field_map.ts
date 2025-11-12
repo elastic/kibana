@@ -190,6 +190,11 @@ export const alertFieldMap = {
     array: true,
     required: false,
   },
+  'kibana.alert.rule.entities': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
   [ALERT_RULE_TYPE_ID]: {
     type: 'keyword',
     array: false,

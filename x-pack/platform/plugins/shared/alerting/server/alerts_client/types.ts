@@ -48,6 +48,7 @@ export interface AlertRuleData {
   spaceId: string;
   tags: string[];
   alertDelay: number;
+  entities?: string[];
 }
 
 export interface AlertRule {
@@ -62,6 +63,7 @@ export interface AlertRule {
   [ALERT_RULE_TAGS]: string[];
   [ALERT_RULE_UUID]: string;
   [SPACE_IDS]: string[];
+  'kibana.alert.rule.entities'?: string[];
 }
 
 export interface IAlertsClient<
