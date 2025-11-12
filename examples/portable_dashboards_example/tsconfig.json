@@ -25,7 +25,6 @@
     "@kbn/presentation-publishing",
     "@kbn/react-kibana-context-render",
     "@kbn/control-group-renderer",
-    "@kbn/kibana-react-plugin",
     "@kbn/ui-actions-plugin"
   ]
 }
