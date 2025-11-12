@@ -111,6 +111,14 @@ describe('Entity Nodes', () => {
       expect(screen.getByTestId(GRAPH_TAG_TEXT_ID).textContent).toBe('N/A');
     });
 
+    it('should use id as label when label is not provided', () => {
+      renderNodeInFlow({
+        id: 'id-used-as-label',
+      });
+
+      expect(screen.getByText('id-used-as-label')).toBeInTheDocument();
+    });
+
     it('should render node with all details (count > 1)', () => {
       const label = 'server-01';
       const tag = 'Host';
