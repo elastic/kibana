@@ -358,7 +358,8 @@ const ESQLEditorInternal = function ESQLEditor({
   controlCommands.forEach(({ command, variableType }) => {
     monaco.editor.registerCommand(command, async (...args) => {
       const [, { source }] = args;
-      telemetryService.trackEsqlControlFlyoutOpened(variableType, source, fixedQuery);
+      const prefilled = source !== 'question_mark';
+      telemetryService.trackEsqlControlFlyoutOpened(prefilled, variableType, source, fixedQuery);
       const position = editor1.current?.getPosition();
       await triggerControl(
         fixedQuery,
