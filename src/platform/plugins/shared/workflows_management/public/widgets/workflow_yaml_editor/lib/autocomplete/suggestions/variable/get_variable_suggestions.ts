@@ -20,15 +20,24 @@ export function getVariableSuggestions(autocompleteContext: AutocompleteContext)
     range,
     contextSchema,
     contextScopedToPath,
+    focusedYamlPair,
     scalarType,
-    shouldBeQuoted,
-    shouldUseCurlyBraces,
     lineParseResult,
   } = autocompleteContext;
 
   if (!lineParseResult || !isVariableLineParseResult(lineParseResult)) {
     return [];
   }
+
+  // variables
+  let shouldUseCurlyBraces = true;
+  if (triggerCharacter === '@' && focusedYamlPair) {
+    shouldUseCurlyBraces = focusedYamlPair.keyNode.value !== 'foreach';
+  }
+
+  // We only add quotes if there's nothing other than the full key in the value node
+  const shouldBeQuoted =
+    (scalarType === null || scalarType === 'PLAIN') && focusedYamlPair?.valueNode.value === '@';
 
   const suggestions: monaco.languages.CompletionItem[] = [];
   const currentSchema: z.ZodType | null = contextSchema;
