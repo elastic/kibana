@@ -38,35 +38,74 @@
 // Re-define all types inline to avoid importing from source files
 type ReactNode = string | number | boolean | null | undefined | React.ReactElement;
 
+/**
+ * Badge types that can be displayed next to navigation items.
+ * - 'beta': Blue badge for features in beta testing
+ * - 'techPreview': Purple badge for technical preview features
+ */
 export type BadgeType = 'beta' | 'techPreview';
 
+/**
+ * A navigation item within a secondary/nested menu.
+ * Secondary items appear when a primary menu item with sections is clicked or hovered.
+ */
 export interface SecondaryMenuItem {
+  /** Optional test selector for automated testing */
   'data-test-subj'?: string;
+  /** Optional badge to display next to the label */
   badgeType?: BadgeType;
+  /** URL or hash for navigation */
   href: string;
+  /** Unique identifier for this item */
   id: string;
+  /** If true, opens link in new tab with external icon */
   isExternal?: boolean;
+  /** Display text for the menu item */
   label: string;
 }
 
+/**
+ * A section grouping within a secondary menu.
+ * Sections help organize related secondary menu items with optional headers.
+ */
 export interface SecondaryMenuSection {
+  /** Unique identifier for this section */
   id: string;
+  /** Array of menu items in this section */
   items: SecondaryMenuItem[];
+  /** Optional section header label (omit for unlabeled sections) */
   label?: string;
 }
 
+/**
+ * A primary navigation menu item that appears in the main navigation sidebar.
+ * Can optionally contain nested secondary menu sections.
+ */
 export interface MenuItem {
+  /** Optional test selector for automated testing */
   'data-test-subj'?: string;
+  /** Optional badge to display next to the label */
   badgeType?: BadgeType;
+  /** URL or hash for navigation */
   href: string;
+  /** EUI icon name (e.g., 'dashboardApp', 'graphApp', 'gear') - see https://eui.elastic.co/#/display/icons */
   iconType: string; // IconType from @elastic/eui
+  /** Unique identifier for this item */
   id: string;
+  /** Display text for the menu item */
   label: string;
+  /** Optional array of secondary menu sections for nested navigation */
   sections?: SecondaryMenuSection[];
 }
 
+/**
+ * The complete navigation structure containing primary and footer menu items.
+ * This is the main data structure passed to the OneNavigation component.
+ */
 export interface NavigationStructure {
+  /** Array of items displayed in the footer area of the navigation */
   footerItems: MenuItem[];
+  /** Array of items displayed in the primary/main area of the navigation */
   primaryItems: MenuItem[];
 }
 
@@ -144,5 +183,4 @@ export interface NavigationProps {
 export type OneNavigationProps = NavigationProps;
 
 // Component declarations (will be compiled to function declarations in .d.ts)
-export declare function OneNavigation(props: OneNavigationProps): any;
-export declare function Navigation(props: NavigationProps): any;
+export declare function OneNavigation(props: OneNavigationProps): React.ReactNode;
