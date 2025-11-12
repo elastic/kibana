@@ -61,7 +61,6 @@ export function initializeSettingsManager(initialState: DashboardState) {
 
   function serializeSettings() {
     const { description, tags, timeRestore, title, ...options } = stateManager.getLatestState();
-    console.log({ options });
     return {
       ...(description && { description }),
       tags,

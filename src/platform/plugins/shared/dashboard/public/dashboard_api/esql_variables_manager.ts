@@ -49,6 +49,13 @@ export const initializeESQLVariablesManager = (
       publishVariables();
     });
 
+  /** when auto-apply is `false`, publish the first set of variables once the children are available */
+  if (!settingsManager.api.settings.autoApplyFilters$.getValue()) {
+    unpublishedEsqlVariables$.pipe(skip(1), first()).subscribe(() => {
+      publishVariables();
+    });
+  }
+
   return {
     api: {
       publishedEsqlVariables$,

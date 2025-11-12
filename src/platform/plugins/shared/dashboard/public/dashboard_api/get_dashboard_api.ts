@@ -134,7 +134,6 @@ export function getDashboardApi({
       controlGroupInput,
     };
 
-    console.log({ getState: dashboardState });
     return {
       dashboardState,
       references: [...(panelReferences ?? [])],
