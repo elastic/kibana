@@ -331,7 +331,7 @@ describe('getVariableSuggestions', () => {
   });
 
   describe('suggestion formatting', () => {
-    it('should use correct formatting options from context', () => {
+    it('should quote insertText if scalarType is PLAIN and value starts with @', () => {
       const context = createMockAutocompleteContext({
         triggerCharacter: '@',
         triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter,
@@ -347,7 +347,7 @@ describe('getVariableSuggestions', () => {
             value: 'message',
           },
           valueNode: {
-            value: '@',
+            value: '@co',
           },
         } as StepPropInfo,
         contextSchema: z.object({
@@ -364,6 +364,41 @@ describe('getVariableSuggestions', () => {
       expect(suggestions.map((s) => s.insertText)).toEqual(['"{{ consts$0 }}"']);
       // The actual formatting is handled by wrapAsMonacoSuggestion
       // We just verify that suggestions are generated
+    });
+
+    it('should not quote insertText by default', () => {
+      const context = createMockAutocompleteContext({
+        triggerCharacter: '.',
+        triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter,
+        range: createMockRange(),
+        line: 'message: {{ consts.',
+        lineUpToCursor: 'message: {{ consts.',
+        lineParseResult: createMockVariableLineParseResult(),
+        contextSchema: z.object({
+          apiUrl: z.string().describe('The API URL'),
+          apiKey: z.string().describe('The API key'),
+          timeout: z.number().describe('Request timeout in seconds'),
+        }),
+        contextScopedToPath: 'consts',
+        focusedStepInfo: null,
+        yamlDocument: new Document(),
+        focusedYamlPair: {
+          path: ['steps', 0, 'with', 'message'],
+          keyNode: {
+            value: 'message',
+          },
+          valueNode: {
+            value: '{{ consts.',
+          },
+        } as StepPropInfo,
+        scalarType: Scalar.PLAIN,
+        path: ['steps', 0, 'with', 'message'],
+        absoluteOffset: 50,
+      });
+
+      const suggestions = getVariableSuggestions(context);
+      expect(suggestions).toHaveLength(3);
+      expect(suggestions.map((s) => s.label)).toEqual(['apiUrl', 'apiKey', 'timeout']);
     });
 
     it('should handle different scalar types', () => {

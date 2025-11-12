@@ -28,16 +28,19 @@ export function getVariableSuggestions(autocompleteContext: AutocompleteContext)
   if (!lineParseResult || !isVariableLineParseResult(lineParseResult)) {
     return [];
   }
-
-  // variables
-  let shouldUseCurlyBraces = true;
-  if (triggerCharacter === '@' && focusedYamlPair) {
-    shouldUseCurlyBraces = focusedYamlPair.keyNode.value !== 'foreach';
-  }
-
   // We only add quotes if there's nothing other than the full key in the value node
+  const wholePairValue =
+    typeof focusedYamlPair?.valueNode.value === 'string' ? focusedYamlPair?.valueNode.value : '';
   const shouldBeQuoted =
-    (scalarType === null || scalarType === 'PLAIN') && focusedYamlPair?.valueNode.value === '@';
+    (scalarType === null || scalarType === 'PLAIN') &&
+    (wholePairValue.startsWith('@') || wholePairValue.startsWith('{{') || wholePairValue === '');
+
+  // Do not wrap in curly braces if
+  // 1) we're in a foreach block
+  // 2) we're completing an existing variable
+  // 3) we're completing an @ trigger
+  const shouldUseCurlyBraces =
+    focusedYamlPair?.keyNode.value !== 'foreach' && lineParseResult.matchType === 'at';
 
   const suggestions: monaco.languages.CompletionItem[] = [];
   const currentSchema: z.ZodType | null = contextSchema;
