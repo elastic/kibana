@@ -325,7 +325,9 @@ export class StreamsClient {
     }
 
     // TODO - These constants need to be shared between both plugins so I don't have to duplicate them
-    const MIN_NAME_LENGTH = 6; // 'logs.' is already included which is 5 characters, so user must enter at least one more
+    // TODO: need to know prefix to do min check properly
+    logger.info(`parent: ${parent}, \n name: ${name}`);
+    const MIN_NAME_LENGTH = 6; // 'logs.' is already included which is 5 characters, so user must enter at least one more.
     const MAX_NAME_LENGTH = 200;
 
     if (name.length < MIN_NAME_LENGTH) {
