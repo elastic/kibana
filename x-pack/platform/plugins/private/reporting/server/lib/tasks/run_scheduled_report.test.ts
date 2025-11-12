@@ -812,16 +812,9 @@ describe('Run Scheduled Report Task', () => {
                 - filename: {{filename}}
                 - objectType: {{objectType}}
                 - date: {{date}}
-                - payload.title: {{payload.title}}
-                - payload.objectType: {{payload.objectType}}
-                - payload.version: {{payload.version}}
                 - output.contentType: {{output.contentType}}
                 - output.csvContainsFormulas: {{output.csvContainsFormulas}}
                 - output.maxSizeReached: {{output.maxSizeReached}}
-                - output.metrics.pdf.cpu: {{output.metrics.pdf.cpu}}
-                - output.metrics.pdf.cpuInPercentage: {{output.metrics.pdf.cpuInPercentage}}
-                - output.metrics.pdf.memory: {{output.metrics.pdf.memory}}
-                - output.metrics.pdf.memoryInMegabytes: {{output.metrics.pdf.memoryInMegabytes}}
                 `,
               },
             },
@@ -845,16 +838,9 @@ describe('Run Scheduled Report Task', () => {
                 - filename: Test Report\\-2025\\-06\\-04T00:00:00\\.000Z\\.pdf
                 - objectType: test
                 - date: 2025\\-06\\-04T00:00:00\\.000Z
-                - payload.title: Test Report
-                - payload.objectType: test
-                - payload.version: 8\\.0\\.0
                 - output.contentType: application/pdf
                 - output.csvContainsFormulas: false
                 - output.maxSizeReached: false
-                - output.metrics.pdf.cpu: 0.11005001073746828
-                - output.metrics.pdf.cpuInPercentage: 11.01
-                - output.metrics.pdf.memory: 347602944
-                - output.metrics.pdf.memoryInMegabytes: 331.5
                 `,
         },
         filename: 'Test Report-2025-06-04T00:00:00.000Z.pdf',
