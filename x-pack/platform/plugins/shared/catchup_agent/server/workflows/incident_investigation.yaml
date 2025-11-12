@@ -47,8 +47,8 @@ steps:
       body:
         tool_id: 'hackathon.catchup.workflow_tool_summarizer'
         tool_params:
-          tool_id: 'hackathon.catchup.security.summary'
-          tool_params:
+          toolId: 'hackathon.catchup.security.summary'
+          toolParams:
             start: '{{ inputs.start }}'
             end: '{{ inputs.end }}'
 
@@ -101,8 +101,8 @@ steps:
       body:
         tool_id: 'hackathon.catchup.workflow_tool_summarizer'
         tool_params:
-          tool_id: 'hackathon.catchup.external.slack'
-          tool_params:
+          toolId: 'hackathon.catchup.external.slack'
+          toolParams:
             start: '{{ inputs.start }}'
             keywords:
               - '{{ inputs.incident_id }}'
@@ -125,8 +125,8 @@ steps:
       body:
         tool_id: 'hackathon.catchup.workflow_tool_summarizer'
         tool_params:
-          tool_id: 'hackathon.catchup.correlation.engine'
-          tool_params:
+          toolId: 'hackathon.catchup.correlation.engine'
+          toolParams:
             results:
               security_summary: '{{ steps.fetch_security_data.output }}'
               observability: '{{ steps.fetch_observability_data.output }}'
@@ -142,8 +142,8 @@ steps:
       body:
         tool_id: 'hackathon.catchup.workflow_tool_summarizer'
         tool_params:
-          tool_id: 'hackathon.catchup.prioritization.rerank'
-          tool_params:
+          toolId: 'hackathon.catchup.prioritization.rerank'
+          toolParams:
             items: '{{ steps.correlate_all_sources.output }}'
             query: 'security incident investigation critical alerts observability cases attack discoveries'
             limit: 20
@@ -156,8 +156,8 @@ steps:
       body:
         tool_id: 'hackathon.catchup.workflow_tool_summarizer'
         tool_params:
-          tool_id: 'hackathon.catchup.summary.generator'
-          tool_params:
+          toolId: 'hackathon.catchup.summary.generator'
+          toolParams:
             correlatedData:
               security_summary: '{{ steps.fetch_security_data.output }}'
               observability: '{{ steps.fetch_observability_data.output }}'

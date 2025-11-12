@@ -41,8 +41,8 @@ steps:
       body:
         tool_id: 'hackathon.catchup.workflow_tool_summarizer'
         tool_params:
-          tool_id: 'hackathon.catchup.security.summary'
-          tool_params:
+          toolId: 'hackathon.catchup.security.summary'
+          toolParams:
             start: '{{ inputs.start }}'
             end: '{{ inputs.end }}'
 
@@ -54,8 +54,8 @@ steps:
       body:
         tool_id: 'hackathon.catchup.workflow_tool_summarizer'
         tool_params:
-          tool_id: 'hackathon.catchup.external.slack'
-          tool_params:
+          toolId: 'hackathon.catchup.external.slack'
+          toolParams:
             start: '{{ inputs.start }}'
             keywords: []
             includeDMs: false
@@ -68,8 +68,8 @@ steps:
       body:
         tool_id: 'hackathon.catchup.workflow_tool_summarizer'
         tool_params:
-          tool_id: 'hackathon.catchup.correlation.engine'
-          tool_params:
+          toolId: 'hackathon.catchup.correlation.engine'
+          toolParams:
             results:
               security_summary: '{{ steps.fetch_security_summary.output }}'
               external:
@@ -83,8 +83,8 @@ steps:
       body:
         tool_id: 'hackathon.catchup.workflow_tool_summarizer'
         tool_params:
-          tool_id: 'hackathon.catchup.prioritization.rerank'
-          tool_params:
+          toolId: 'hackathon.catchup.prioritization.rerank'
+          toolParams:
             items: '{{ steps.correlate_events.output }}'
             query: 'security incidents critical alerts'
             limit: 10
@@ -97,8 +97,8 @@ steps:
       body:
         tool_id: 'hackathon.catchup.workflow_tool_summarizer'
         tool_params:
-          tool_id: 'hackathon.catchup.summary.generator'
-          tool_params:
+          toolId: 'hackathon.catchup.summary.generator'
+          toolParams:
             correlatedData:
               security_summary: '{{ steps.fetch_security_summary.output }}'
               external:

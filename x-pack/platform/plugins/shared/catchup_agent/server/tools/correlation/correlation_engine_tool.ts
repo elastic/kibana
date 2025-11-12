@@ -51,7 +51,6 @@ Returns structured correlation data with confidence scores linking related event
     schema: correlationEngineSchema,
     handler: async ({ results, entities }, { logger }) => {
       try {
-
         const correlations: Array<{
           alert?: string;
           case?: string;
@@ -72,12 +71,26 @@ Returns structured correlation data with confidence scores linking related event
         }> = [];
 
         // Helper function to extract and parse data from workflow tool response structure
-        // Workflow tools return {results: [{data: "<json string>"}]}, we need to extract and parse
+        // Workflow tools return {results: [{data: {content: "<json string>"}}]}, we need to extract and parse
         const extractDataFromResponse = (value: any): any => {
           if (!value) return {};
           // If it's a workflow tool response structure, extract the data
           if (value.results && Array.isArray(value.results) && value.results.length > 0) {
             const data = value.results[0]?.data;
+            // Check if data has a content property (workflow tool format: {data: {content: "..."}})
+            if (data && typeof data === 'object' && 'content' in data) {
+              const content = data.content;
+              if (typeof content === 'string') {
+                try {
+                  return JSON.parse(content);
+                } catch (e) {
+                  logger.warn(`Failed to parse data.content as JSON: ${e}`);
+                  return {};
+                }
+              }
+              // If content is not a string, return it as-is
+              return content || {};
+            }
             // If data is a JSON string, parse it
             if (typeof data === 'string') {
               try {
@@ -112,6 +125,18 @@ Returns structured correlation data with confidence scores linking related event
           if (value.results && Array.isArray(value.results) && value.results.length > 0) {
             // This is a workflow response structure, extract the data
             const data = value.results[0]?.data;
+            // Check if data has a content property (workflow tool format)
+            if (data && typeof data === 'object' && 'content' in data) {
+              const content = data.content;
+              if (typeof content === 'string') {
+                try {
+                  return JSON.parse(content);
+                } catch (e) {
+                  return content || {};
+                }
+              }
+              return content || {};
+            }
             if (typeof data === 'string') {
               try {
                 return JSON.parse(data);
@@ -148,7 +173,6 @@ Returns structured correlation data with confidence scores linking related event
         const entityUserNames = extractedEntities.user_names || [];
         const entitySourceIPs = extractedEntities.source_ips || [];
         const entityDestinationIPs = extractedEntities.destination_ips || [];
-
 
         // Simple correlation logic - match by service names, alert IDs, case IDs
         const alerts = observabilityData.top_services || [];
