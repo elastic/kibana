@@ -341,15 +341,11 @@ export class JourneyFtrHarness {
     const parentId =
       apmNode.currentTraceIds['span.id'] ?? apmNode.currentTraceIds['transaction.id'];
 
-    const span = apmNode.currentTransaction?.startSpan(
-      name,
-      type ?? null,
-      parentId
-        ? {
-            childOf: parentId,
-          }
-        : undefined
-    );
+    const span = parentId
+      ? apmNode.currentTransaction?.startSpan(name, type ?? null, {
+          childOf: parentId,
+        })
+      : undefined;
 
     if (!span) {
       return await block({ traceId, parentId });
