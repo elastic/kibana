@@ -11,7 +11,7 @@ import { expect } from '@kbn/scout';
 import { test } from '../../../fixtures';
 import { DATE_RANGE, generateLogsData } from '../../../fixtures/generators';
 
-test.describe.only(
+test.describe(
   'Stream data processing - data sources management',
   { tag: ['@ess', '@svlOblt'] },
   () => {
