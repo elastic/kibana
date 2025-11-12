@@ -23,6 +23,7 @@
   ],
   "kbn_references": [
     "@kbn/i18n",
-    "@kbn/i18n-react"
+    "@kbn/i18n-react",
+    "@kbn/core-chrome-layout-components"
   ]
 }
