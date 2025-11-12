@@ -33,6 +33,12 @@ module.exports = (
       [require('./common_preset'), options],
     ],
     plugins: [
+      // Enable class static block syntax support (ES2022)
+      // While @babel/preset-env includes this, it may skip transformation for modern browsers
+      // that support the syntax natively. However, we still need the plugin to PARSE the syntax.
+      // This is needed for monaco-editor 0.54.0+ which uses class static blocks.
+      require.resolve('@babel/plugin-transform-class-static-block'),
+
       // Conditionally include babel-plugin-transform-require-default
       //
       // We need to include this plugin in the main worker webpack config that handles our
