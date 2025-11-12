@@ -261,6 +261,7 @@
     "@kbn/object-utils",
     "@kbn/core-ui-settings-common",
     "@kbn/react-query",
+    "@kbn/core-chrome-layout-constants",
     "@kbn/core-lifecycle-browser-mocks"
   ]
 }

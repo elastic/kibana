@@ -15,18 +15,19 @@ import { isPair, visit } from 'yaml';
  * Returns the node if found, null otherwise
  * This finds the scalar VALUE node (not the key) at the given position
  */
-export function getScalarValueAtPosition(
-  document: Document,
-  absolutePosition: number
-): Scalar | null {
+export function getScalarValueAtOffset(document: Document, offset: number): Scalar | null {
   let scalarNode: Scalar | null = null;
 
-  if (!document.contents) return null;
+  if (!document.contents) {
+    return null;
+  }
 
   visit(document, {
     Scalar(key, node, ancestors) {
-      if (!node.range) return;
-      if (absolutePosition >= node.range[0] && absolutePosition <= node.range[2]) {
+      if (!node.range) {
+        return;
+      }
+      if (offset >= node.range[0] && offset <= node.range[2]) {
         // Check if this is a value (not a key)
         // The value will be the value of a Pair
         const lastAncestor = ancestors?.[ancestors.length - 1];
@@ -46,17 +47,4 @@ export function getScalarValueAtPosition(
   });
 
   return scalarNode;
-}
-
-/**
- * Checks if a value matches the dynamic/templated value pattern ($<something>)
- * Examples: $env.USER, $ref:myVar, $someVariable
- * Pattern: starts with $ followed by alphanumeric characters, dots, colons, or underscores
- */
-export function isDynamicValue(value: unknown): boolean {
-  if (typeof value !== 'string') {
-    return false;
-  }
-  // Match pattern: starts with ${{ and ends with }}, and any non-empty string in between
-  return /^\$\{\{\s*\S[\s\S]*\}\}$/.test(value);
 }
