@@ -106,14 +106,10 @@ export const ActionTypeMenu = ({
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
   const registeredActionTypes = Object.entries(actionTypesIndex ?? [])
     .filter(([id, details]) => {
       const actionTypeModel = actionTypeRegistry.has(id) ? actionTypeRegistry.get(id) : undefined;
-      if (!actionTypeModel) {
-        return false;
-      }
-      const shouldHideInUi = actionTypeModel.getHideInUi?.(
+      const shouldHideInUi = actionTypeModel?.getHideInUi?.(
         actionTypesIndex ? Object.values(actionTypesIndex) : []
       );
 
