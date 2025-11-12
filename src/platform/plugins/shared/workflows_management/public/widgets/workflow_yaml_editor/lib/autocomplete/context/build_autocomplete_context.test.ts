@@ -14,9 +14,9 @@ import type { BuildAutocompleteContextParams } from './build_autocomplete_contex
 import { buildAutocompleteContext } from './build_autocomplete_context';
 import { expectZodSchemaEqual } from '../../../../../../common/lib/zod';
 import { createFakeMonacoModel } from '../../../../../../common/mocks/monaco_model';
-import type { WorkflowDetailState } from '../../../../../entities/workflows/store';
-import { performComputation } from '../../../../../entities/workflows/store/utils/computation';
-import { findStepByLine } from '../../../../../entities/workflows/store/utils/step_finder';
+import type { WorkflowDetailState } from '../../../../../entities/workflows/store/workflow_detail/types';
+import { performComputation } from '../../../../../entities/workflows/store/workflow_detail/utils/computation';
+import { findStepByLine } from '../../../../../entities/workflows/store/workflow_detail/utils/step_finder';
 
 export function getFakeAutocompleteContextParams(
   yamlContent: string,
