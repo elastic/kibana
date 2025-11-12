@@ -8,15 +8,11 @@
  */
 
 import type { ContentManagementServicesDefinition as ServicesDefinition } from '@kbn/object-versioning';
-import { schema } from '@kbn/config-schema';
 import {
   getDashboardGetResultSchema,
-  dashboardCreateOptionsSchema,
   dashboardUpdateOptionsSchema,
   getDashboardUpdateRequestAttributesSchema,
   dashboardSearchOptionsSchema,
-  getDashboardItemSchema,
-  getDashboardStateSchema,
 } from './schema';
 
 export function getServiceDefinition(): ServicesDefinition {
@@ -25,21 +21,6 @@ export function getServiceDefinition(): ServicesDefinition {
       out: {
         result: {
           schema: getDashboardGetResultSchema(),
-        },
-      },
-    },
-    create: {
-      in: {
-        options: {
-          schema: dashboardCreateOptionsSchema,
-        },
-        data: {
-          schema: schema.object(getDashboardStateSchema()),
-        },
-      },
-      out: {
-        result: {
-          schema: getDashboardItemSchema(),
         },
       },
     },

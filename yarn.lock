@@ -6447,6 +6447,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/es-query-constants@link:src/platform/packages/shared/kbn-es-query-constants":
+  version "0.0.0"
+  uid ""
+
 "@kbn/es-query-server@link:src/platform/packages/shared/kbn-es-query-server":
   version "0.0.0"
   uid ""
@@ -7508,6 +7512,10 @@
   uid ""
 
 "@kbn/object-versioning@link:src/platform/packages/shared/kbn-object-versioning":
+  version "0.0.0"
+  uid ""
+
+"@kbn/observability-agent-plugin@link:x-pack/solutions/observability/plugins/observability_agent":
   version "0.0.0"
   uid ""
 
