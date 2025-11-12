@@ -16,7 +16,9 @@
     ],
     "requiredPlugins": [
       "management",
-      "features"
-    ]
+      "features",
+      "encryptedSavedObjects"
+    ],
+    "requiredBundles": []
   }
 }

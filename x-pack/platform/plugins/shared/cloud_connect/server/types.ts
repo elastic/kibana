@@ -71,3 +71,10 @@ export interface ApiKeyValidationResult {
   errorMessage?: string;
   clusterId?: string;
 }
+
+export interface CloudConnectApiKey {
+  apiKey: string;
+  clusterId: string;
+  createdAt: string;
+  updatedAt: string;
+}

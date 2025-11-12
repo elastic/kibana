@@ -49,9 +49,6 @@ export class CloudConnectClient {
         }
       );
 
-      console.log('VALIDATION OF API KEY SCOPE RESPONSE:');
-      console.log(JSON.stringify(response.data, null, 2));
-
       const roleAssignments = response.data.user.role_assignments.cloud_connected_resource;
 
       if (!roleAssignments || roleAssignments.length === 0) {

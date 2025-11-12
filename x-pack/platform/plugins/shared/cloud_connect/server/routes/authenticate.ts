@@ -10,17 +10,32 @@ import type { IRouter, Logger } from '@kbn/core/server';
 import axios from 'axios';
 import { CloudConnectClient } from '../services/cloud_connect_client';
 import type { OnboardClusterResponse } from '../types';
+import { getCurrentClusterData } from '../lib/cluster_info';
+import { StorageService } from '../services/storage';
+import { CLOUD_CONNECT_API_KEY_TYPE } from '../../common/constants';
 
 const bodySchema = schema.object({
   apiKey: schema.string({ minLength: 1 }),
 });
 
+import type { StartServicesAccessor } from '@kbn/core/server';
+import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
+
+interface CloudConnectedStartDeps {
+  encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
+}
+
 export interface AuthenticateRouteOptions {
   router: IRouter;
   logger: Logger;
+  getStartServices: StartServicesAccessor<CloudConnectedStartDeps, unknown>;
 }
 
-export const registerAuthenticateRoute = ({ router, logger }: AuthenticateRouteOptions) => {
+export const registerAuthenticateRoute = ({
+  router,
+  logger,
+  getStartServices,
+}: AuthenticateRouteOptions) => {
   router.post(
     {
       path: '/internal/cloud_connect/authenticate',
@@ -44,6 +59,21 @@ export const registerAuthenticateRoute = ({ router, logger }: AuthenticateRouteO
       try {
         const cloudConnectClient = new CloudConnectClient(logger);
 
+        // Initialize storage service for saving the API key
+        const coreContext = await context.core;
+        const [, { encryptedSavedObjects }] = await getStartServices();
+        const encryptedSavedObjectsClient = encryptedSavedObjects.getClient({
+          includedHiddenTypes: [CLOUD_CONNECT_API_KEY_TYPE],
+        });
+        const savedObjectsClient = coreContext.savedObjects.getClient({
+          includedHiddenTypes: [CLOUD_CONNECT_API_KEY_TYPE],
+        });
+        const storageService = new StorageService({
+          encryptedSavedObjectsClient,
+          savedObjectsClient,
+          logger,
+        });
+
         // Step 1: Validate the API key scope
         const validationResult = await cloudConnectClient.validateApiKeyScope(apiKey);
 
@@ -60,18 +90,12 @@ export const registerAuthenticateRoute = ({ router, logger }: AuthenticateRouteO
         // Step 2: Onboard the cluster based on the key type
         let onboardingResponse: OnboardClusterResponse;
 
+        // Happy path: the API key is already scoped to a cluster
         if (validationResult.isHappyPath) {
-          // Happy path: Fetch existing cluster details and use them to onboard
-          console.log('======= Happy Path: Fetching Cluster Details =======');
-          console.log('Cluster ID:', validationResult.clusterId);
-
           const clusterDetails = await cloudConnectClient.getClusterDetails(
             apiKey,
             validationResult.clusterId!
           );
-
-          console.log('======= Cluster Details Retrieved =======');
-          console.log('Cluster Data:', JSON.stringify(clusterDetails, null, 2));
 
           // Use the fetched cluster details to onboard
           const clusterData = {
@@ -79,35 +103,23 @@ export const registerAuthenticateRoute = ({ router, logger }: AuthenticateRouteO
             license: clusterDetails.license,
           };
 
-          console.log('======= Onboarding with Retrieved Data =======');
           onboardingResponse = await cloudConnectClient.onboardCluster(apiKey, clusterData);
 
-          // eslint-disable-next-line no-console
-          console.log('Final API Key (Happy Path):', apiKey);
+          // Store the API key after successful onboarding
+          await storageService.saveApiKey(apiKey, onboardingResponse.id);
         } else {
-          // Admin key: Generate a new cluster-scoped API key
-          const clusterData = {
-            self_managed_cluster: {
-              id: 'kibana-cluster-id-2',
-              name: 'Self-Managed Cluster',
-              version: '8.0.0',
-            },
-            license: {
-              type: 'trial',
-              uid: 'temporary-license-uid-6',
-            },
-          };
+          // Generate a new cluster-scoped API key
+          const esClient = coreContext.elasticsearch.client.asCurrentUser;
+          const clusterData = await getCurrentClusterData(esClient);
 
-          console.log('======= Admin Path: Onboarding with Key Generation =======');
-          console.log('Cluster Data:', JSON.stringify(clusterData, null, 2));
-
+          // Use cluster details to onboard
           onboardingResponse = await cloudConnectClient.onboardClusterWithKeyGeneration(
             apiKey,
             clusterData
           );
 
-          // eslint-disable-next-line no-console
-          console.log('Final API Key (Generated):', onboardingResponse.key);
+          // Store the generated API key after successful onboarding
+          await storageService.saveApiKey(onboardingResponse.key!, onboardingResponse.id);
         }
 
         logger.info(
@@ -124,10 +136,6 @@ export const registerAuthenticateRoute = ({ router, logger }: AuthenticateRouteO
         });
       } catch (error) {
         logger.error('Failed to authenticate with Cloud Connect', { error });
-
-        console.log('%%%%%%%%%%%%%%%%%%%%%%%%');
-        console.log('ERROR');
-        console.log(JSON.stringify(error.response?.data));
 
         if (axios.isAxiosError(error)) {
           const status = error.response?.status;

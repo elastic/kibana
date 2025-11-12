@@ -5,12 +5,18 @@
  * 2.0.
  */
 
-import type { IRouter, Logger } from '@kbn/core/server';
+import type { IRouter, Logger, StartServicesAccessor } from '@kbn/core/server';
+import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import { registerAuthenticateRoute } from './authenticate';
+
+interface CloudConnectedStartDeps {
+  encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
+}
 
 export interface RouteOptions {
   router: IRouter;
   logger: Logger;
+  getStartServices: StartServicesAccessor<CloudConnectedStartDeps, unknown>;
 }
 
 export function registerRoutes(options: RouteOptions) {
