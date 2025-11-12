@@ -258,6 +258,7 @@
     "@kbn/object-utils",
     "@kbn/core-ui-settings-common",
     "@kbn/setup-node-env",
-    "@kbn/react-query"
+    "@kbn/react-query",
+    "@kbn/core-lifecycle-browser-mocks"
   ]
 }
