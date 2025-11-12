@@ -11,7 +11,6 @@ import type { GlobalQueryStateFromUrl, RefreshInterval } from '@kbn/data-plugin/
 import { connectToQueryState, syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { COMPARE_ALL_OPTIONS, compareFilters, isFilterPinned } from '@kbn/es-query';
-import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
 import { diffComparators } from '@kbn/presentation-publishing';
 import fastIsEqual from 'fast-deep-equal';
@@ -99,10 +98,6 @@ export function initializeUnifiedSearchManager(
       unifiedSearchFilters$.next(unifiedSearchFilters);
     }
   }
-
-  // forward ESQL variables from the control group. TODO, this is overcomplicated by the fact that
-  // the control group API is a publishing subject. Instead, the control group API should be a constant
-  const esqlVariables$ = new BehaviorSubject<ESQLControlVariable[]>([]);
 
   // --------------------------------------------------------------------------------------
   // Set up unified search integration.
@@ -285,7 +280,6 @@ export function initializeUnifiedSearchManager(
     api: {
       reload$,
       filters$,
-      esqlVariables$,
       forceRefresh: () => {
         reload$.next();
       },
