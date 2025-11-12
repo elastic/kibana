@@ -19,10 +19,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { css } from '@emotion/react';
-import { getFormattedFields } from '@kbn/discover-utils/src/utils/get_formatted_fields';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { isMetadataField } from '@kbn/fields-metadata-plugin/common';
 import { CUSTOM_SAMPLES_DATA_SOURCE_STORAGE_KEY_PREFIX } from '../../common/url_schema/common';
 import type { StreamsAppLocator, StreamsAppLocatorParams } from '../../common/locators';
 import { useResolvedDefinitionName } from './use_resolved_definition_name';
@@ -36,9 +34,7 @@ export interface DiscoverFlyoutStreamProcessingLinkProps {
 }
 
 export function DiscoverFlyoutStreamProcessingLink({
-  dataView,
   doc,
-  fieldFormats,
   locator,
   streamsRepositoryClient,
 }: DiscoverFlyoutStreamProcessingLinkProps) {
@@ -52,30 +48,12 @@ export function DiscoverFlyoutStreamProcessingLink({
 
   if (!value || error) return null;
 
-  const formattedDoc = formatDoc(doc, dataView, fieldFormats);
-
   const href = locator.getRedirectUrl({
     name: value,
     managementTab: 'processing',
     pageState: {
       v: 1,
-      dataSources: [
-        {
-          type: 'custom-samples',
-          enabled: true,
-          name: i18n.translate(
-            'xpack.streams.discoverFlyoutStreamProcessingLink.customSamplesName',
-            {
-              defaultMessage: 'Discover document from {streamName}',
-              values: {
-                streamName: value,
-              },
-            }
-          ),
-          documents: [formattedDoc],
-          storageKey: `${CUSTOM_SAMPLES_DATA_SOURCE_STORAGE_KEY_PREFIX}${value}__discover-document`,
-        },
-      ],
+      dataSources: [getTargetDataSource(doc, value)],
     },
   } as StreamsAppLocatorParams);
 
@@ -103,13 +81,30 @@ export function DiscoverFlyoutStreamProcessingLink({
   );
 }
 
-function formatDoc(doc: DataTableRecord, dataView: DataView, fieldFormats: FieldFormatsStart) {
-  const fieldsToFormat = Object.keys(doc.flattened).filter(
-    (fieldName) => !isMetadataField(fieldName) && fieldName !== '_score'
-  );
+const getTargetDataSource = (doc: DataTableRecord, streamName: string) => {
+  const baseDataSource = {
+    enabled: true,
+    name: i18n.translate('xpack.streams.discoverFlyoutStreamProcessingLink.customSamplesName', {
+      defaultMessage: 'Discover document from {streamName}',
+      values: { streamName },
+    }),
+  };
 
-  return getFormattedFields(doc, fieldsToFormat, {
-    dataView,
-    fieldFormats,
-  });
-}
+  if (doc.raw._id) {
+    return {
+      ...baseDataSource,
+      type: 'kql-samples',
+      query: {
+        language: 'kuery',
+        query: `_id: ${doc.raw._id}`,
+      },
+    };
+  }
+
+  return {
+    ...baseDataSource,
+    type: 'custom-samples',
+    documents: [doc.flattened],
+    storageKey: `${CUSTOM_SAMPLES_DATA_SOURCE_STORAGE_KEY_PREFIX}${streamName}__discover-document`,
+  };
+};
