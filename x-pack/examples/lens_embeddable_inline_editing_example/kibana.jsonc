@@ -18,6 +18,9 @@
       "embeddable",
       "developerExamples",
       "kibanaReact"
+    ],
+    "requiredBundles": [
+      "data"
     ]
   }
 }
