@@ -132,8 +132,8 @@ describe('useFilteredMetricFields', () => {
       renderFilteredFields({ allFields: metricFields, timeRange: DEFAULT_TIME_RANGE });
 
       expect(mockUseMetricFieldsSearchQuery).toHaveBeenCalledWith({
-        fields: ['field1', 'field2'],
-        index: 'metrics-*',
+        fields: [],
+        index: '',
         timeRange: DEFAULT_TIME_RANGE,
         kuery: undefined,
         enabled: false,
