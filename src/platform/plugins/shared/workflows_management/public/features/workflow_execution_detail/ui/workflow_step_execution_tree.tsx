@@ -106,7 +106,6 @@ function convertTreeToEuiTreeViewItems(
 export interface WorkflowStepExecutionTreeProps {
   execution: WorkflowExecutionDto | null;
   definition: WorkflowYaml | null;
-  isLoading: boolean;
   error: Error | null;
   onStepExecutionClick: (stepExecutionId: string) => void;
   selectedId: string | null;
@@ -115,7 +114,6 @@ export interface WorkflowStepExecutionTreeProps {
 const emptyPromptCommonProps: EuiEmptyPromptProps = { titleSize: 'xs', paddingSize: 's' };
 
 export const WorkflowStepExecutionTree = ({
-  isLoading,
   error,
   execution,
   definition,
@@ -125,7 +123,7 @@ export const WorkflowStepExecutionTree = ({
   const styles = useMemoCss(componentStyles);
   const { euiTheme } = useEuiTheme();
 
-  if (isLoading || !execution) {
+  if (!execution) {
     return (
       <EuiEmptyPrompt
         {...emptyPromptCommonProps}
