@@ -21,6 +21,7 @@ import { monaco } from '@kbn/monaco';
 import { isTriggerType } from '@kbn/workflows';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows/types/v1';
 import type { z } from '@kbn/zod';
+import { ActionsMenuButton } from './actions_menu_button';
 import {
   useAlertTriggerDecorations,
   useConnectorTypeDecorations,
@@ -31,8 +32,7 @@ import {
 } from './decorations';
 import { useCompletionProvider } from './hooks/use_completion_provider';
 import { StepActions } from './step_actions';
-import { WorkflowYAMLEditorShortcuts } from './workflow_yaml_editor_shortcuts';
-import { WorkflowYAMLValidationErrors } from './workflow_yaml_validation_errors';
+import { WorkflowYamlValidationAccordion } from './workflow_yaml_validation_accordion';
 import { useAvailableConnectors } from '../../../entities/connectors/model/use_available_connectors';
 import { useSaveYaml } from '../../../entities/workflows/model/use_save_yaml';
 import type { StepInfo } from '../../../entities/workflows/store';
@@ -531,13 +531,16 @@ export const WorkflowYAMLEditor = ({
         />
       </div>
       <div css={styles.validationErrorsContainer}>
-        <WorkflowYAMLValidationErrors
+        <WorkflowYamlValidationAccordion
           isMounted={isEditorMounted}
           isLoading={isLoadingValidation}
           error={errorValidating}
           validationErrors={validationErrors}
           onErrorClick={handleErrorClick}
-          rightSide={<WorkflowYAMLEditorShortcuts onOpenActionsMenu={setActionsPopoverOpen} />}
+          extraAction={
+            // Only show the shortcuts in edit mode
+            !isExecutionYaml ? <ActionsMenuButton onClick={openActionsPopover} /> : null
+          }
         />
       </div>
     </div>
