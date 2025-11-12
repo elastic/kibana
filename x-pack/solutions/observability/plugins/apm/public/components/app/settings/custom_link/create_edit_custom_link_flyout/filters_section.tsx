@@ -88,9 +88,12 @@ export function FiltersSection({
 
       <EuiSpacer size="s" />
 
-      {filters.map((filter, idx) => {
+      {filters.map((filter) => {
         const { key, value } = filter;
-        const filterId = filter.id || uuidv4();
+        if (!filter.id) {
+          filter.id = uuidv4();
+        }
+        const filterId = filter.id;
         const selectOptions = getSelectOptions(filters, key);
         return (
           <React.Fragment key={filterId}>
