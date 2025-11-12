@@ -21020,69 +21020,12 @@
           },
           {
             "parentPluginId": "@kbn/lens-common",
-            "id": "def-common.Visualization.ToolbarComponent",
-            "type": "Function",
-            "tags": [],
-            "label": "ToolbarComponent",
-            "description": [
-              "\nToolbar rendered above the visualization. This is meant to be used to provide chart-level\nsettings for the visualization."
-            ],
-            "signature": [
-              "((props: ",
-              {
-                "pluginId": "@kbn/lens-common",
-                "scope": "common",
-                "docId": "kibKbnLensCommonPluginApi",
-                "section": "def-common.VisualizationToolbarProps",
-                "text": "VisualizationToolbarProps"
-              },
-              "<T>) => React.ReactElement<",
-              {
-                "pluginId": "@kbn/lens-common",
-                "scope": "common",
-                "docId": "kibKbnLensCommonPluginApi",
-                "section": "def-common.VisualizationToolbarProps",
-                "text": "VisualizationToolbarProps"
-              },
-              "<T>, string | React.JSXElementConstructor<any>> | null) | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-lens-common/visualizations/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/lens-common",
-                "id": "def-common.Visualization.ToolbarComponent.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "props",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/lens-common",
-                    "scope": "common",
-                    "docId": "kibKbnLensCommonPluginApi",
-                    "section": "def-common.VisualizationToolbarProps",
-                    "text": "VisualizationToolbarProps"
-                  },
-                  "<T>"
-                ],
-                "path": "src/platform/packages/shared/kbn-lens-common/visualizations/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/lens-common",
             "id": "def-common.Visualization.FlyoutToolbarComponent",
             "type": "Function",
             "tags": [],
             "label": "FlyoutToolbarComponent",
             "description": [
-              "\nOptional flyout toolbar component that renders visualization-specific controls\nin a flyout panel. Provides configuration options for style, legend and filters."
+              "\nFlyout toolbar component that renders visualization-specific controls\nin a flyout panel. Provides configuration options for style, legend and filters."
             ],
             "signature": [
               "((props: ",
@@ -24368,23 +24311,23 @@
               },
               {
                 "plugin": "lens",
+                "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/to_expression.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/to_expression.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/to_expression.ts"
+              },
+              {
+                "plugin": "lens",
                 "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/xy_config_panel/dimension_editor.tsx"
               },
               {
                 "plugin": "lens",
                 "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/xy_config_panel/dimension_editor.tsx"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/to_expression.ts"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/to_expression.ts"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/to_expression.ts"
               },
               {
                 "plugin": "lens",
