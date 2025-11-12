@@ -232,13 +232,14 @@ export const useDashboardListingTable = ({
             },
           });
           const tagApi = savedObjectsTaggingService?.getTaggingApi();
+
           return {
             total,
             hits: dashboards.map(({ id, data, meta }) => {
               const canManageAccessControl =
                 isGloballyAuthorized ||
                 accessControlClient.checkUserAccessControl({
-                  accessControl: meta?.accessControl,
+                  accessControl: data?.accessControl,
                   createdBy: meta.createdBy,
                   userId,
                 });
@@ -258,7 +259,7 @@ export const useDashboardListingTable = ({
                   timeRestore: Boolean(data.timeRange),
                 },
                 canManageAccessControl,
-                accessMode: meta?.accessControl?.accessMode,
+                accessMode: data?.accessControl?.accessMode,
               } as DashboardSavedObjectUserContent;
             }),
           };
