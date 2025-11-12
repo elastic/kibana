@@ -20,5 +20,6 @@
     "@kbn/otel-semantic-conventions",
     "@kbn/i18n",
     "@kbn/core-chrome-browser",
+    "@kbn/data-plugin"
   ]
 }

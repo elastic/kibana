@@ -140,7 +140,7 @@ describe('addFetcherToKibanaConnectors', () => {
   it('should add fetcher parameter to Kibana connector steps in JSON schema', () => {
     // Import the actual connector generation to test with real connectors
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { generateYamlSchemaFromConnectors } = require('./generate_yaml_schema');
+    const { generateYamlSchemaFromConnectors } = require('./generate_yaml_schema_from_connectors');
 
     const mockConnectors = [
       {
@@ -203,7 +203,7 @@ describe('addFetcherToKibanaConnectors', () => {
 
   it('should not add fetcher to non-Kibana connector steps', () => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { generateYamlSchemaFromConnectors } = require('./generate_yaml_schema');
+    const { generateYamlSchemaFromConnectors } = require('./generate_yaml_schema_from_connectors');
 
     const mockConnectors = [
       {
@@ -247,7 +247,7 @@ describe('addFetcherToKibanaConnectors', () => {
 
   it('should handle Kibana connectors with complex schemas', () => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { generateYamlSchemaFromConnectors } = require('./generate_yaml_schema');
+    const { generateYamlSchemaFromConnectors } = require('./generate_yaml_schema_from_connectors');
 
     const mockConnectors = [
       {
@@ -317,7 +317,7 @@ describe('addFetcherToKibanaConnectors', () => {
   it('should handle workflow schema without steps', () => {
     // This shouldn't throw an error - generate schema with empty connectors
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { generateYamlSchemaFromConnectors } = require('./generate_yaml_schema');
+    const { generateYamlSchemaFromConnectors } = require('./generate_yaml_schema_from_connectors');
 
     const workflowSchema = generateYamlSchemaFromConnectors([]);
     const jsonSchema = getJsonSchemaFromYamlSchema(workflowSchema);
@@ -328,7 +328,7 @@ describe('addFetcherToKibanaConnectors', () => {
 
   it('should add fetcher with correct schema structure', () => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { generateYamlSchemaFromConnectors } = require('./generate_yaml_schema');
+    const { generateYamlSchemaFromConnectors } = require('./generate_yaml_schema_from_connectors');
 
     const mockConnectors = [
       {

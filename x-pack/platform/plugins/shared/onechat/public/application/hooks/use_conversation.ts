@@ -19,12 +19,15 @@ import { storageKeys } from '../storage_keys';
 import { useSendMessage } from '../context/send_message/send_message_context';
 import { useValidateAgentId } from './agents/use_validate_agent_id';
 import { useConversationContext } from '../context/conversation/conversation_context';
+import { rebuildAttachmentMapFromConversation } from '../context/conversation/rebuild_attachment_map_from_conversation';
 
 export const useConversation = () => {
   const conversationId = useConversationId();
   const { conversationsService } = useOnechatServices();
   const queryKey = queryKeys.conversations.byId(conversationId ?? newConversationId);
   const isSendingMessage = useIsSendingMessage();
+  const { setAttachmentMap } = useConversationContext();
+
   const {
     data: conversation,
     isLoading,
@@ -40,6 +43,11 @@ export const useConversation = () => {
         return Promise.reject(new Error('Invalid conversation id'));
       }
       return conversationsService.get({ conversationId });
+    },
+    onSuccess: (data) => {
+      if (setAttachmentMap) {
+        setAttachmentMap(rebuildAttachmentMapFromConversation(data));
+      }
     },
   });
 
