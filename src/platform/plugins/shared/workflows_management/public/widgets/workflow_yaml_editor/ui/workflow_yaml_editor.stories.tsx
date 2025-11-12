@@ -13,7 +13,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowYAMLEditor } from './workflow_yaml_editor';
 import { kibanaReactDecorator } from '../../../../.storybook/decorators';
-import { WorkflowDetailStoreProvider } from '../lib/store';
+import { WorkflowDetailStoreProvider } from '../../../entities/workflows/store';
 
 const StoryProviders: Decorator = (story: Function) => {
   return (
@@ -86,21 +86,21 @@ type Story = StoryObj<typeof WorkflowYAMLEditor>;
 export const Default: Story = {
   args: {
     workflowYaml,
-    readOnly: false,
+    isExecutionYaml: false,
   },
 };
 
 export const ReadOnly: Story = {
   args: {
     workflowYaml,
-    readOnly: true,
+    isExecutionYaml: true,
   },
 };
 
 export const WithStepExecutions: Story = {
   args: {
     workflowYaml,
-    readOnly: false,
+    isExecutionYaml: false,
     stepExecutions: [
       {
         stepId: 'analysis',

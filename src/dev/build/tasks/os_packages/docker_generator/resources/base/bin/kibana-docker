@@ -33,6 +33,7 @@ kibana_vars=(
     csp.font_src
     csp.frame_src
     csp.img_src
+    csp.object_src
     csp.frame_ancestors
     csp.report_uri
     csp.report_to
@@ -219,6 +220,7 @@ kibana_vars=(
     xpack.actions.customHostSettings
     xpack.actions.email.domain_allowlist
     xpack.actions.email.recipient_allowlist
+    xpack.actions.email.maximum_body_length
     xpack.actions.email.services.ses.host
     xpack.actions.email.services.ses.port
     xpack.actions.email.services.enabled

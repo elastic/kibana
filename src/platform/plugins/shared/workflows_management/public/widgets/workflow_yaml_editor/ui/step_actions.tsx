@@ -21,7 +21,7 @@ import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { RunStepButton } from './run_step_button';
 import { CopyElasticSearchDevToolsOption, CopyWorkflowStepOption } from './step_action_options';
-import { selectFocusedStepInfo } from '../lib/store';
+import { selectFocusedStepInfo } from '../../../entities/workflows/store';
 
 export interface StepActionsProps {
   onStepActionClicked?: (params: { stepId: string; actionType: string }) => void;

@@ -1692,7 +1692,9 @@
             "ZodTypeAny",
             ", { path: { name: string; }; query: { connectorId: string; from: Date; to: Date; }; }, { path: { name: string; }; query: { connectorId: string; from: string; to: string; }; }>, ",
             "StreamsRouteHandlerResources",
-            ", { features: ",
+            ", ",
+            "Observable",
+            "<{ features: ",
             {
               "pluginId": "@kbn/streams-schema",
               "scope": "common",
@@ -1700,7 +1702,7 @@
               "section": "def-common.Feature",
               "text": "Feature"
             },
-            "[]; } & { type: \"identified_features\"; }, undefined>; \"POST /internal/streams/{name}/features/_bulk\": ",
+            "[]; } & { type: \"identified_features\"; }>, undefined>; \"POST /internal/streams/{name}/features/_bulk\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
               "scope": "common",
@@ -2557,20 +2559,21 @@
         },
         {
           "parentPluginId": "streams",
-          "id": "def-public.StreamsPluginStart.wiredStatus$",
-          "type": "Object",
+          "id": "def-public.StreamsPluginStart.getWiredStatus",
+          "type": "Function",
           "tags": [],
-          "label": "wiredStatus$",
+          "label": "getWiredStatus",
           "description": [],
           "signature": [
-            "Observable",
-            "<",
+            "() => Promise<",
             "WiredStreamsStatus",
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/streams/public/types.ts",
           "deprecated": false,
-          "trackAdoption": false
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
         },
         {
           "parentPluginId": "streams",
@@ -4389,7 +4392,9 @@
           "ZodTypeAny",
           ", { path: { name: string; }; query: { connectorId: string; from: Date; to: Date; }; }, { path: { name: string; }; query: { connectorId: string; from: string; to: string; }; }>, ",
           "StreamsRouteHandlerResources",
-          ", { features: ",
+          ", ",
+          "Observable",
+          "<{ features: ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
@@ -4397,7 +4402,7 @@
             "section": "def-common.Feature",
             "text": "Feature"
           },
-          "[]; } & { type: \"identified_features\"; }, undefined>; \"POST /internal/streams/{name}/features/_bulk\": ",
+          "[]; } & { type: \"identified_features\"; }>, undefined>; \"POST /internal/streams/{name}/features/_bulk\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",

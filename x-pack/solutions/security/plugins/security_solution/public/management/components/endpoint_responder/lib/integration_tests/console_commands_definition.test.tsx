@@ -71,9 +71,18 @@ describe('When displaying Endpoint Response Actions', () => {
         HELP_GROUPS.responseActions.label
       );
 
-      const endpointCommands = CONSOLE_RESPONSE_ACTION_COMMANDS.filter(
-        (command) => command !== 'runscript' && command !== 'cancel'
-      );
+      const endpointCommands = CONSOLE_RESPONSE_ACTION_COMMANDS.filter((command) => {
+        if (
+          command === 'runscript' ||
+          command === 'cancel' ||
+          (command === 'memory-dump' &&
+            !ExperimentalFeaturesService.get().responseActionsEndpointMemoryDump)
+        ) {
+          return false;
+        }
+
+        return true;
+      });
       const expectedCommands: string[] = [...endpointCommands];
       // add status to the list of expected commands in that order
       expectedCommands.splice(2, 0, 'status');

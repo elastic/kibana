@@ -12,18 +12,12 @@ import { ScaleType } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { AxisExtentConfig, YScaleType } from '@kbn/expression-xy-plugin/common';
 import { TooltipWrapper } from '@kbn/visualization-utils';
-import type {
-  AxesSettingsConfig,
-  VisualizationToolbarProps,
-  FramePublicAPI,
-  XYState,
-} from '@kbn/lens-common';
+import type { AxesSettingsConfig, VisualizationToolbarProps, XYState } from '@kbn/lens-common';
 import { LegendSize } from '@kbn/chart-expressions-common';
 import type { LegendSettingsProps } from '../../../shared_components/legend/legend_settings';
 import { hasBarSeries, isHorizontalChart } from '../state_helpers';
 import { hasNumericHistogramDimension, LegendSettingsPopover } from '../../../shared_components';
-import { AxisSettingsPopover } from './axis_settings_popover';
-import type { AxisGroupConfiguration } from '../axes_configuration';
+import { AxisSettingsPopover } from './axis_settings';
 import { getAxesConfiguration, getXDomain } from '../axes_configuration';
 import { VisualOptionsPopover } from './visual_options_popover';
 import { TextPopover } from './titles_and_text_popover';
@@ -32,6 +26,7 @@ import { getDefaultVisualValuesForLayer } from '../../../shared_components/datas
 import { getDataLayers } from '../visualization_helpers';
 import type { AxesSettingsConfigKeys } from '../../../shared_components';
 import { defaultLegendTitle, legendOptions, xyLegendValues } from './legend_settings';
+import { axisKeyToTitleMapping, getDataBounds, hasPercentageAxis } from './style_settings';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 
@@ -46,64 +41,10 @@ export function updateLayer(
   };
 }
 
-export const getDataBounds = function (
-  activeData: FramePublicAPI['activeData'],
-  axes: AxisGroupConfiguration[]
-) {
-  const groups: Partial<Record<string, { min: number; max: number }>> = {};
-  axes.forEach((axis) => {
-    let min = Number.MAX_SAFE_INTEGER;
-    let max = -Number.MAX_SAFE_INTEGER;
-    axis.series.forEach((series) => {
-      activeData?.[series.layer]?.rows.forEach((row) => {
-        const value = row[series.accessor];
-        // TODO: add tests for null value
-        if (value !== null && Number.isFinite(value)) {
-          if (value < min) {
-            min = value;
-          }
-          if (value > max) {
-            max = value;
-          }
-        }
-      });
-    });
-    if (min !== Number.MAX_SAFE_INTEGER && max !== -Number.MAX_SAFE_INTEGER) {
-      groups[axis.groupId] = {
-        min: Math.round((min + Number.EPSILON) * 100) / 100,
-        max: Math.round((max + Number.EPSILON) * 100) / 100,
-      };
-    }
-  });
-
-  return groups;
-};
-
-export function hasPercentageAxis(
-  axisGroups: AxisGroupConfiguration[],
-  groupId: string,
-  state: XYState
-) {
-  return Boolean(
-    axisGroups
-      .find((group) => group.groupId === groupId)
-      ?.series.some(({ layer: layerId }) =>
-        getDataLayers(state?.layers).find(
-          (layer) => layer.layerId === layerId && layer.seriesType.includes('percentage')
-        )
-      )
-  );
-}
-
-export const axisKeyToTitleMapping: Record<
-  keyof AxesSettingsConfig,
-  'xTitle' | 'yTitle' | 'yRightTitle'
-> = {
-  x: 'xTitle',
-  yLeft: 'yTitle',
-  yRight: 'yRightTitle',
-};
-
+/**
+ *  TODO: Delete this component after migration to flyout toolbar
+ * See: https://github.com/elastic/kibana/issues/240088
+ */
 export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProps<XYState>) {
   const { state, setState, frame } = props;
   const dataLayers = getDataLayers(state?.layers);

@@ -32,8 +32,8 @@ import {
 
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { isEqual } from 'lodash';
+import { AuthType, SSLCertType, MAX_HEADERS } from '@kbn/connector-schemas/common/auth/constants';
 import { useSecretHeaders } from './use_secret_headers';
-import { AuthType, SSLCertType, MAX_HEADERS } from '../../../common/auth/constants';
 import { SSLCertFields } from './ssl_cert_fields';
 import { BasicAuthFields } from './basic_auth_fields';
 import { HeaderFields } from './header_fields';
@@ -298,7 +298,7 @@ export const AuthConfig: FunctionComponent<Props> = ({
             <>
               <EuiSpacer size="s" />
               <EuiCallOut
-                announceOnMount
+                announceOnMount={false}
                 size="s"
                 iconType="document"
                 title={i18n.EDIT_CA_CALLOUT}

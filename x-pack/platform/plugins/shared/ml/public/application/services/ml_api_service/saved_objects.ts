@@ -42,7 +42,7 @@ export const savedObjectsApiProvider = (httpService: HttpService) => ({
   ) {
     const body = JSON.stringify({ jobType, jobIds, spacesToAdd, spacesToRemove });
     return httpService.http<SavedObjectResult>({
-      path: `${ML_INTERNAL_BASE_PATH}/saved_objects/update_jobs_spaces`,
+      path: `${ML_EXTERNAL_BASE_PATH}/saved_objects/update_jobs_spaces`,
       method: 'POST',
       body,
       version: '1',
@@ -110,7 +110,7 @@ export const savedObjectsApiProvider = (httpService: HttpService) => ({
   updateModelsSpaces(modelIds: string[], spacesToAdd: string[], spacesToRemove: string[]) {
     const body = JSON.stringify({ modelIds, spacesToAdd, spacesToRemove });
     return httpService.http<SavedObjectResult>({
-      path: `${ML_INTERNAL_BASE_PATH}/saved_objects/update_trained_models_spaces`,
+      path: `${ML_EXTERNAL_BASE_PATH}/saved_objects/update_trained_models_spaces`,
       method: 'POST',
       body,
       version: '1',

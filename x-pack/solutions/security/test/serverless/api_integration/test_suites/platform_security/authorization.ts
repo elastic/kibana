@@ -3008,6 +3008,12 @@ export default function ({ getService }: FtrProviderContext) {
                 "ui:siem/writeScanOperations",
                 "ui:siemV4/writeScanOperations",
               ],
+              "soc_management_all": Array [
+                "login:",
+                "api:securitySolution-socManagement",
+                "ui:siem/socManagement",
+                "ui:siemV4/socManagement",
+              ],
               "trusted_applications_all": Array [
                 "login:",
                 "api:lists-all",
@@ -5644,6 +5650,12 @@ export default function ({ getService }: FtrProviderContext) {
                 "api:securitySolution-writeScanOperations",
                 "ui:siemV2/writeScanOperations",
                 "ui:siemV4/writeScanOperations",
+              ],
+              "soc_management_all": Array [
+                "login:",
+                "api:securitySolution-socManagement",
+                "ui:siemV2/socManagement",
+                "ui:siemV4/socManagement",
               ],
               "trusted_applications_all": Array [
                 "login:",
@@ -8286,6 +8298,12 @@ export default function ({ getService }: FtrProviderContext) {
                 "ui:siemV3/writeScanOperations",
                 "ui:siemV4/writeScanOperations",
               ],
+              "soc_management_all": Array [
+                "login:",
+                "api:securitySolution-socManagement",
+                "ui:siemV3/socManagement",
+                "ui:siemV4/socManagement",
+              ],
               "trusted_applications_all": Array [
                 "login:",
                 "api:lists-all",
@@ -10889,6 +10907,11 @@ export default function ({ getService }: FtrProviderContext) {
                 "login:",
                 "api:securitySolution-writeScanOperations",
                 "ui:siemV4/writeScanOperations",
+              ],
+              "soc_management_all": Array [
+                "login:",
+                "api:securitySolution-socManagement",
+                "ui:siemV4/socManagement",
               ],
               "trusted_applications_all": Array [
                 "login:",

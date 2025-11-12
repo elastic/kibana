@@ -11,6 +11,7 @@ import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import type { Root } from '@kbn/core-root-server-internal';
 import type { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
 import type { SavedObjectTypeMigrationInfo } from '@kbn/core-test-helpers-so-type-serializer';
+export type { ModelVersionSummary } from '@kbn/core-test-helpers-so-type-serializer';
 
 export interface ServerHandles {
   esServer: TestElasticsearchUtils;

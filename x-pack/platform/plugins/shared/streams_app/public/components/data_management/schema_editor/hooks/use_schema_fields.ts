@@ -266,5 +266,5 @@ export const getDefinitionFields = (definition: Streams.ingest.all.GetResponse):
     status: 'mapped',
   }));
 
-  return [...inheritedFields, ...mappedFields];
+  return [...mappedFields, ...inheritedFields];
 };

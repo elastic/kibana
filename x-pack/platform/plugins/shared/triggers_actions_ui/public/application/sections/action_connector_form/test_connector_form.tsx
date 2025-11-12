@@ -117,7 +117,7 @@ export const TestConnectorForm = ({
         <>
           {executeEnabled ? null : (
             <>
-              <EuiCallOut iconType="warning" color="warning">
+              <EuiCallOut announceOnMount iconType="warning" color="warning">
                 <p>
                   <FormattedMessage
                     defaultMessage="Save your changes before testing the connector."

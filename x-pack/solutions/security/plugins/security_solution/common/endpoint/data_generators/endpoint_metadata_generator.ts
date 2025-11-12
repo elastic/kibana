@@ -146,6 +146,11 @@ export class EndpointMetadataGenerator extends BaseDataGenerator {
       capabilities.push('scan');
     }
 
+    // v9.3.0 introduced memory dump capability
+    if (gte(agentVersion, '9.3.0')) {
+      capabilities.push('memdump_process', 'memdump_kernel');
+    }
+
     const hostMetadataDoc: HostMetadataInterface = {
       '@timestamp': ts,
       event: {

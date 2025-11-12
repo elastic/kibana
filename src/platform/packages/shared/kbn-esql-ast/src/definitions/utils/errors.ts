@@ -342,6 +342,21 @@ Expected one of:
         }),
         type: 'error',
       };
+    case 'forkNotAllowedWithSubqueries':
+      return {
+        message: i18n.translate('kbn-esql-ast.esql.validation.forkNotAllowedWithSubqueries', {
+          defaultMessage: '[FORK] Command is not allowed inside a subquery.',
+        }),
+        type: 'error',
+      };
+    case 'inlineStatsNotAllowedAfterLimit':
+      return {
+        message: i18n.translate('kbn-esql-ast.esql.validation.inlineStatsNotAllowedAfterLimit', {
+          defaultMessage:
+            '[INLINE STATS] Command is not allowed at the root level when the query contains subqueries.',
+        }),
+        type: 'error',
+      };
   }
   return { message: '' };
 }
@@ -569,6 +584,12 @@ export const errors = {
 
   forkTooFewBranches: (command: ESQLAstAllCommands): ESQLMessage =>
     errors.byId('forkTooFewBranches', command.location, {}),
+
+  forkNotAllowedWithSubqueries: (command: ESQLAstAllCommands): ESQLMessage =>
+    errors.byId('forkNotAllowedWithSubqueries', command.location, {}),
+
+  inlineStatsNotAllowedAfterLimit: (command: ESQLAstAllCommands): ESQLMessage =>
+    errors.byId('inlineStatsNotAllowedAfterLimit', command.location, {}),
 };
 
 export const buildSignatureTypes = (sig: Signature) =>

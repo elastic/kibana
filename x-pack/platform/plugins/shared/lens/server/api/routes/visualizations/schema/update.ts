@@ -5,16 +5,13 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
+
 import { schema } from '@kbn/config-schema';
 
-import { omit } from 'lodash';
-import {
-  lensResponseItemSchema,
-  lensAPIAttributesSchema,
-  lensAPIConfigSchema,
-  lensCMUpdateOptionsSchema,
-} from '../../../../content_management';
-import { pickFromObjectSchema } from '../../../../utils';
+import { lensCMUpdateOptionsSchema, lensItemDataSchema } from '../../../../content_management';
+import { lensItemDataSchemaV0 } from '../../../../content_management/v0';
+import { lensResponseItemSchema } from './common';
 
 export const lensUpdateRequestParamsSchema = schema.object(
   {
@@ -27,27 +24,28 @@ export const lensUpdateRequestParamsSchema = schema.object(
   { unknowns: 'forbid' }
 );
 
-export const lensUpdateRequestBodySchema = schema.object(
+export const lensUpdateRequestQuerySchema = schema.object(
   {
-    data: schema.object(
+    ...omit(lensCMUpdateOptionsSchema.getPropSchemas(), ['references']),
+  },
+  { unknowns: 'forbid' }
+);
+
+export const lensUpdateRequestBodySchema = schema.oneOf([
+  lensItemDataSchema,
+  lensItemDataSchemaV0, // Temporarily permit passing old v0 SO attributes on create
+]);
+
+export const lensUpdateResponseBodySchema = schema.object(
+  {
+    id: lensResponseItemSchema.getPropSchemas().id,
+    data: lensResponseItemSchema.getPropSchemas().data,
+    meta: schema.object(
       {
-        ...lensAPIAttributesSchema.getPropSchemas(),
-        // omit id on create options
-        ...pickFromObjectSchema(lensAPIConfigSchema.getPropSchemas(), ['references']),
-      },
-      { unknowns: 'forbid' }
-    ),
-    // TODO should these options be here?
-    options: schema.object(
-      {
-        ...omit(lensCMUpdateOptionsSchema.getPropSchemas(), ['references']),
+        ...lensResponseItemSchema.getPropSchemas().meta.getPropSchemas(),
       },
       { unknowns: 'forbid' }
     ),
   },
-  {
-    unknowns: 'forbid',
-  }
+  { unknowns: 'forbid' }
 );
-
-export const lensUpdateResponseBodySchema = lensResponseItemSchema;

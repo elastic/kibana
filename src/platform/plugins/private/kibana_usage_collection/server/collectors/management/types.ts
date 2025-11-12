@@ -51,6 +51,8 @@ export interface UsageStats {
   'ai:anonymizationSettings': string;
   'agentBuilder:enabled': boolean;
   'agentBuilder:dashboardTools': boolean;
+  'agentBuilder:navEnabled': boolean;
+  'dataConnectors:enabled': boolean;
   'workflows:ui:enabled': boolean;
   'visualization:heatmap:maxBuckets': number;
   'visualization:regionmap:showWarnings': boolean;

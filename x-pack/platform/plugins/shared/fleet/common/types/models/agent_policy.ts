@@ -193,6 +193,8 @@ export interface FullAgentPolicyDownload {
   sourceURI: string;
   ssl?: BaseSSLConfig;
   secrets?: BaseSSLSecrets;
+  proxy_url?: string;
+  proxy_headers?: any;
 }
 
 export interface FullAgentPolicy {
