@@ -6,9 +6,6 @@
  */
 
 import { expect, apiTest } from '@kbn/scout-oblt';
-import type { ScoutTestConfig } from '@kbn/scout-oblt';
-import { format as formatUrl } from 'url';
-import supertest from 'supertest';
 import { getRoutePaths } from '../../../../common';
 import {
   cleanUpProfilingData,
@@ -19,15 +16,7 @@ import {
 
 const profilingRoutePaths = getRoutePaths();
 
-function getSupertest(config: ScoutTestConfig) {
-  const kbnUrl = new URL(config.hosts.kibana);
-  kbnUrl.username = config.auth.username;
-  kbnUrl.password = config.auth.password;
-
-  return supertest(formatUrl(kbnUrl));
-}
-
-apiTest.describe('Profiling is not setup and no data is loaded', { tag: ['@svlOblt'] }, () => {
+apiTest.describe('Profiling is not setup and no data is loaded', { tag: ['@ess'] }, () => {
   apiTest.beforeAll(async ({ esClient, apiServices, log, config }) => {
     await cleanUpProfilingData({
       es: esClient,
@@ -36,7 +25,7 @@ apiTest.describe('Profiling is not setup and no data is loaded', { tag: ['@svlOb
     });
   });
 
-  apiTest('Admin users', async ({ profilingClient, apiServices }) => {
+  apiTest('Admin users', async ({ profilingClient, apiClient, apiServices }) => {
     const adminRes = await profilingClient.adminUser({
       endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
     });
@@ -59,10 +48,9 @@ apiTest.describe('Profiling is not setup and no data is loaded', { tag: ['@svlOb
   });
 });
 
-apiTest.describe('APM integration not installed but setup completed', { tag: ['@svlOblt'] }, () => {
+apiTest.describe('APM integration not installed but setup completed', { tag: ['@ess'] }, () => {
   apiTest.beforeEach(async ({ esClient, apiServices, config, log }) => {
-    const st = getSupertest(config);
-    await setupProfiling(st, apiServices, log);
+    await setupProfiling(config.hosts.kibana, apiServices, log);
   });
   apiTest('Admin user', async ({ profilingClient }) => {
     const adminRes = await profilingClient.adminUser({
@@ -90,13 +78,12 @@ apiTest.describe('APM integration not installed but setup completed', { tag: ['@
 
 apiTest.describe('Profiling is setup', { tag: ['@svlOblt'] }, () => {
   apiTest.beforeAll(async ({ esClient, apiServices, config, log }) => {
-    const st = getSupertest(config);
     await cleanUpProfilingData({
       es: esClient,
       apiServices,
       logger: log,
     });
-    await setupProfiling(st, apiServices, log);
+    await setupProfiling(config.hosts.kibana, apiServices, log);
   });
   apiTest.afterAll(async ({ esClient, apiServices, log }) => {
     await cleanUpProfilingData({
@@ -147,10 +134,9 @@ apiTest.describe('Profiling is setup', { tag: ['@svlOblt'] }, () => {
   });
 });
 
-apiTest.describe('Collector integration is not installed', { tag: ['@svlOblt'] }, () => {
+apiTest.describe('Collector integration is not installed', { tag: ['@ess'] }, () => {
   apiTest.beforeAll(async ({ esClient, apiServices, config, log }) => {
-    const st = getSupertest(config);
-    await setupProfiling(st, apiServices, log);
+    await setupProfiling(config.hosts.kibana, apiServices, log);
   });
 
   apiTest('Admin user collector integration missing', async ({ profilingClient, apiServices }) => {

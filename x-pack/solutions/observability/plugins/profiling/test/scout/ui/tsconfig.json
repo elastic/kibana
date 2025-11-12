@@ -5,7 +5,7 @@
   },
   "include": [
     "**/*"
-  ],
+, "../common/fixtures/constants.ts"  ],
   "kbn_references": [
     "@kbn/scout-oblt",
     "@kbn/observability-plugin",

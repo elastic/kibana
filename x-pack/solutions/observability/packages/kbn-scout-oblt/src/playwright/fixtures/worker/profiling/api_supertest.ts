@@ -7,10 +7,11 @@
 
 import { formatRequest } from '@kbn/server-route-repository';
 import type request from 'superagent';
-import type supertest from 'supertest';
+import supertest from 'supertest';
+import type { URL } from 'url';
 import { format } from 'url';
 
-export function createProfilingApiClient(st: supertest.Agent) {
+export function createProfilingApiClient(kbnUrl: URL) {
   return async (options: {
     endpoint: string;
     params?: {
@@ -22,8 +23,20 @@ export function createProfilingApiClient(st: supertest.Agent) {
 
     const params = 'params' in options ? (options.params as Record<string, any>) : {};
 
+    const { protocol, username, password, host, pathname: kbnPath } = kbnUrl;
+
+    let baseUrl;
+    if (kbnPath === '/') {
+      baseUrl = `${protocol}//${username}:${password}@${host}`;
+    } else {
+      baseUrl = `${protocol}//${username}:${password}@${host}${kbnPath}`;
+    }
+
     const { method, pathname, version } = formatRequest(endpoint, params.path);
+
     const url = format({ pathname, query: params?.query });
+
+    const st = supertest(baseUrl);
 
     const headers: Record<string, string> = { 'kbn-xsrf': 'foo' };
 

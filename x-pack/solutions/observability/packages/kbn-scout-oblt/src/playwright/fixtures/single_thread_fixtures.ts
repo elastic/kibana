@@ -58,4 +58,4 @@ const apiFixture = apiBase.extend<ObltApiServicesFixture>({
  * Should be used for the test spec files executed sequentially.
  */
 export const test = mergeTests(baseFixture, sloDataFixture, profilingSetupFixture);
-export const apiTest = mergeTests(apiFixture, profilingClientFixture);
+export const apiTest = mergeTests(apiFixture, profilingClientFixture, profilingSetupFixture);

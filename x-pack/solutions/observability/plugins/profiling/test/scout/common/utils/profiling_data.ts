@@ -8,13 +8,13 @@ import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import fs from 'fs';
 import Path from 'path';
-import type TestAgent from 'supertest/lib/agent';
 import type { ApiServicesFixture } from '@kbn/scout-oblt';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
   COLLECTOR_PACKAGE_POLICY_NAME,
   SYMBOLIZER_PACKAGE_POLICY_NAME,
 } from '@kbn/profiling-data-access-plugin/common';
+import supertest from 'supertest';
 import { getRoutePaths } from '../../../../common';
 
 const esArchiversPath = Path.posix.join(
@@ -48,17 +48,23 @@ export async function loadProfilingData(es: Client, logger: ToolingLog) {
 }
 
 export async function setupProfiling(
-  st: TestAgent,
+  kbnUrl: string,
   apiServices: ApiServicesFixture,
   logger: ToolingLog
 ) {
   const log = logWithTimer(logger);
+  const { username, password, protocol, host, pathname } = new URL(kbnUrl);
+
+  let baseUrl;
+  if (pathname === '/') {
+    baseUrl = `${protocol}//${username}:${password}@${host}`;
+  } else {
+    baseUrl = `${protocol}//${username}:${password}@${host}${pathname}`;
+  }
+
+  const st = supertest(baseUrl);
 
   await apiServices.fleet.agent.setup();
-  // await st
-  //   .post('/api/fleet/setup')
-  //   .set({ 'kbn-xsrf': 'foo' })
-  //   .set('x-elastic-internal-origin', 'Kibana');
   const res = await st
     .get(profilingRoutePaths.HasSetupESResources)
     .set({ 'kbn-xsrf': 'foo' })
