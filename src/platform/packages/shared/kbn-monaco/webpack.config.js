@@ -77,8 +77,9 @@ const workerConfig = (languages) => ({
         /**
          * further process the modules exported by monaco-editor and monaco-yaml
          * because their exports leverage some none-standard language APIs at this time.
+         * Also includes /vs/editor/ to transpile worker files that may use modern syntax like class static blocks.
          */
-        test: /(monaco-editor\/esm\/vs\/language|monaco-yaml|vscode-uri)\/.*m?(t|j)sx?$/,
+        test: /(monaco-editor\/esm\/vs\/(language|editor)|monaco-yaml|vscode-uri)\/.*m?(t|j)sx?$/,
         use: {
           loader: 'babel-loader',
           options: {
