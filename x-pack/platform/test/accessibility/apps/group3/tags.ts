@@ -13,24 +13,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'settings', 'header', 'home', 'tagManagement']);
   const a11y = getService('a11y');
   const testSubjects = getService('testSubjects');
+  const browser = getService('browser');
 
   describe('Kibana Tags Page Accessibility', () => {
     before(async () => {
-      await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
-        useActualUrl: true,
-      });
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.home.addSampleDataSet('flights');
       await PageObjects.settings.navigateTo();
       await testSubjects.click('tags');
-    });
-
-    after(async () => {
-      await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
-        useActualUrl: true,
-      });
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.home.removeSampleDataSet('flights');
     });
 
     it('tags main page meets a11y validations', async () => {
@@ -56,27 +44,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it('edit tag panel meets a11y validations', async () => {
-      const tagName = 'a11yTag';
-      await PageObjects.tagManagement.tagModal.openEdit(tagName);
-      await a11y.testAppSnapshot();
-    });
-
     it('tag actions panel meets a11y requirements', async () => {
-      await testSubjects.click('createModalCancelButton');
-
-      await testSubjects.click('euiCollapsedItemActionsButton');
+      await PageObjects.tagManagement.openCollapsedMenu();
       await a11y.testAppSnapshot();
+      await browser.pressKeys(browser.keys.ESCAPE);
     });
 
     it('tag assignment panel & tag management page with populated connections meets a11y requirements', async () => {
-      await testSubjects.click('euiCollapsedItemActionsButton');
-      const actionOnTag = 'assign';
-      await PageObjects.tagManagement.clickActionItem(actionOnTag);
+      await PageObjects.tagManagement.clickActionItem('assign');
       await a11y.testAppSnapshot();
       await testSubjects.click('euiFlyoutCloseButton');
       await testSubjects.waitForDeleted('euiFlyoutCloseButton');
       await a11y.testAppSnapshot();
+    });
+
+    it('edit tag panel meets a11y validations', async () => {
+      const tagName = 'a11yTag';
+      await PageObjects.tagManagement.tagModal.openEdit(tagName);
+      await a11y.testAppSnapshot();
+      await testSubjects.click('createModalCancelButton');
     });
 
     it('bulk actions panel meets a11y requirements', async () => {
