@@ -9,12 +9,12 @@
 
 import { useMemo, useRef } from 'react';
 import { useSelector } from 'react-redux';
-import type { WorkflowDetailState } from '../../../../entities/workflows/store/types';
-import { selectDetailState } from '../../../../entities/workflows/store/workflow_detail/selectors';
+import type { WorkflowDetailState } from '../../../../entities/workflows/store';
+import { selectDetail } from '../../../../entities/workflows/store/workflow_detail/selectors';
 import { getCompletionItemProvider } from '../../lib/autocomplete/get_completion_item_provider';
 
 export const useCompletionProvider = () => {
-  const editorState = useSelector(selectDetailState);
+  const editorState = useSelector(selectDetail);
   const editorStateRef = useRef<WorkflowDetailState>(editorState);
   editorStateRef.current = editorState;
 

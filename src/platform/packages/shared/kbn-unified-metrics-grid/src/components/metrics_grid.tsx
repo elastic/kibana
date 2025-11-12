@@ -54,8 +54,6 @@ export const MetricsGrid = ({
   const chartRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const { euiTheme } = useEuiTheme();
 
-  const chartSize = useMemo(() => (columns === 2 || columns === 4 ? 's' : 'm'), [columns]);
-
   const [expandedMetric, setExpandedMetric] = useState<
     | {
         index: number;
@@ -156,7 +154,7 @@ export const MetricsGrid = ({
                   index={index}
                   ref={(element) => setChartRef(id, element)}
                   metric={metric}
-                  size={chartSize}
+                  size="s"
                   dimensions={dimensions}
                   filters={filters}
                   services={services}
