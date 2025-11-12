@@ -53,6 +53,17 @@ export function extractControlGroupState(state: {
 
   const controlGroupInput = state.controlGroupInput as { [key: string]: unknown };
 
+  // TODO: Update bwc for autoApplySelections
+
+  // let autoApplySelections: ControlsGroupState['autoApplySelections'] =
+  //   DEFAULT_AUTO_APPLY_SELECTIONS;
+  // if (typeof controlGroupInput.autoApplySelections === 'boolean') {
+  //   autoApplySelections = controlGroupInput.autoApplySelections;
+  // } else if (typeof controlGroupInput.showApplySelections === 'boolean') {
+  //   // <8.16 autoApplySelections exported as !showApplySelections
+  //   autoApplySelections = !controlGroupInput.showApplySelections;
+  // }
+
   let controls: DashboardControlsState = [];
   if (Array.isArray(controlGroupInput.controls)) {
     controls = controlGroupInput.controls;
@@ -72,7 +83,19 @@ export function extractControlGroupState(state: {
     }) as DashboardControlsState;
   }
 
+  // TODO: Update bwc for labelPosition
+
+  // let labelPosition: ControlsGroupState['labelPosition'] = DEFAULT_CONTROLS_LABEL_POSITION;
+  // if (typeof controlGroupInput.labelPosition === 'string') {
+  //   labelPosition = controlGroupInput.labelPosition as ControlsGroupState['labelPosition'];
+  // } else if (typeof controlGroupInput.controlStyle === 'string') {
+  //   // <8.16 labelPosition exported as controlStyle
+  //   labelPosition = controlGroupInput.controlStyle as ControlsGroupState['labelPosition'];
+  // }
+
   return {
+    // autoApplySelections,
     controls,
+    // labelPosition,
   };
 }
