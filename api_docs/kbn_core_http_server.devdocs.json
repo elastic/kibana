@@ -16221,7 +16221,7 @@
               },
               {
                 "plugin": "dashboard",
-                "path": "src/platform/plugins/shared/dashboard/server/api/register_routes.ts"
+                "path": "src/platform/plugins/shared/dashboard/server/api/create/register_create_route.ts"
               },
               {
                 "plugin": "@kbn/core",
