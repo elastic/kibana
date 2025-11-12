@@ -7550,6 +7550,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/scout-release-testing@link:x-pack/platform/packages/private/kbn-scout-release-testing":
+  version "0.0.0"
+  uid ""
+
 "@kbn/scout-reporting@link:src/platform/packages/private/kbn-scout-reporting":
   version "0.0.0"
   uid ""
