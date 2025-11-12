@@ -15,6 +15,7 @@ import { getValuesFromQueryField } from '@kbn/esql-utils';
 import { EsqlControlType, VariableNamePrefix } from '@kbn/esql-types';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { monaco } from '@kbn/monaco';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ValueControlForm } from './value_control_form';
 import { Header, ControlType, VariableName, Footer } from './shared_form_components';
 import { IdentifierControlForm } from './identifier_control_form';
@@ -29,8 +30,7 @@ import {
   getVariableNamePrefix,
   checkVariableExistence,
 } from './helpers';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ServiceDeps } from '@kbn/esql/public/kibana_services';
+import type { ServiceDeps } from '../../../kibana_services';
 
 interface ESQLControlsFlyoutProps {
   search: ISearchGeneric;

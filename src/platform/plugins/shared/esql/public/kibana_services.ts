@@ -14,8 +14,8 @@ import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/publ
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { ESQLEditorTelemetryService } from '@kbn/esql-editor/src/telemetry/telemetry_service';
 import type { EsqlPluginStart } from './plugin';
-import { ESQLEditorTelemetryService } from '@kbn/esql-editor/src/telemetry/telemetry_service';
 
 export let core: CoreStart;
 

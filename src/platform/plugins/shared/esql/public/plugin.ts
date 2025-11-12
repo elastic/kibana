@@ -25,6 +25,7 @@ import { registerIndexEditorActions, registerIndexEditorAnalyticsEvents } from '
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
+import { ESQLEditorTelemetryService } from '@kbn/esql-editor/src/telemetry/telemetry_service';
 import {
   ESQL_CONTROL_TRIGGER,
   esqlControlTrigger,
@@ -37,7 +38,6 @@ import { ACTION_CREATE_ESQL_CONTROL, ACTION_UPDATE_ESQL_QUERY } from './triggers
 import { setKibanaServices } from './kibana_services';
 import { cacheNonParametrizedAsyncFunction, cacheParametrizedAsyncFunction } from './util/cache';
 import { EsqlVariablesService } from './variables_service';
-import { ESQLEditorTelemetryService } from '@kbn/esql-editor/src/telemetry/telemetry_service';
 
 interface EsqlPluginSetupDependencies {
   uiActions: UiActionsSetup;
