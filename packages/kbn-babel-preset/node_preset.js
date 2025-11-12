@@ -40,5 +40,10 @@ module.exports = (_, options = {}) => {
       ],
       [require('./common_preset'), options],
     ],
+    plugins: [
+      // Enable class static block syntax support (ES2022)
+      // Needed to parse modern dependencies that use this syntax
+      require.resolve('@babel/plugin-transform-class-static-block'),
+    ],
   };
 };
