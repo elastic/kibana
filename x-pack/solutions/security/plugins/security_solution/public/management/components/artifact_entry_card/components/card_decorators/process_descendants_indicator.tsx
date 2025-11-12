@@ -23,7 +23,7 @@ export const ProcessDescendantsIndicator = memo<ArtifactEntryCardDecoratorProps>
     if (isEventFiltersProcessDescendantsEnabled || isTrustedAppsProcessDescendantsEnabled) {
       return (
         <>
-          <EuiText {...commonProps} data-test-subj={getTestId('processDescendantIndication')}>
+          <EuiText {...commonProps} data-test-subj={getTestId('processDescendantsIndication')}>
             <code>
               <strong>
                 <FormattedMessage
@@ -33,11 +33,12 @@ export const ProcessDescendantsIndicator = memo<ArtifactEntryCardDecoratorProps>
                 {isEventFiltersProcessDescendantsEnabled ? (
                   <ProcessDescendantsIconTip
                     indicateExtraEntry
-                    data-test-subj={getTestId('eventFilterProcessDescendantIndicationTooltip')}
+                    data-test-subj={getTestId('processDescendantsIndicationTooltip')}
                   />
                 ) : <ProcessDescendantsIconTip
                   isEventFilterForm={false}
-                  data-test-subj={getTestId('trustedAppProcessDescendantIndicationTooltip')}
+                  indicateExtraEntry
+                  data-test-subj={getTestId('processDescendantsIndicationTooltip')}
                 />}
               </strong>
             </code>

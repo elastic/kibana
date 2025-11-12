@@ -14,10 +14,11 @@ import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
 import {
   FILTER_PROCESS_DESCENDANTS_TAG,
   GLOBAL_ARTIFACT_TAG,
+  TRUSTED_PROCESS_DESCENDANTS_TAG,
 } from '../../../../../../common/endpoint/service/artifacts/constants';
 import type { ArtifactEntryCardDecoratorProps } from '../../artifact_entry_card';
 
-describe('EventFiltersProcessDescendantIndicator', () => {
+describe('ProcessDescendantIndicator', () => {
   let appTestContext: AppContextTestRender;
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let render: (
@@ -34,6 +35,11 @@ describe('EventFiltersProcessDescendantIndicator', () => {
       tags: [GLOBAL_ARTIFACT_TAG, FILTER_PROCESS_DESCENDANTS_TAG],
     } as Partial<AnyArtifact> as AnyArtifact);
 
+  const getProcessDescendantTrustedApp: () => AnyArtifact = () =>
+    ({
+      tags: [GLOBAL_ARTIFACT_TAG, TRUSTED_PROCESS_DESCENDANTS_TAG],
+    } as Partial<AnyArtifact> as AnyArtifact);
+
   beforeEach(() => {
     appTestContext = createAppRootMockRenderer();
     render = (props) => {
@@ -44,20 +50,26 @@ describe('EventFiltersProcessDescendantIndicator', () => {
     };
   });
 
-  it('should not display anything if Event Filter is not for process descendants', () => {
+  it('should not display anything if Event Filter or Trusted App is not for process descendants', () => {
     render({ item: getStandardEventFilter() });
 
-    expect(renderResult.queryByTestId('test-processDescendantIndication')).not.toBeInTheDocument();
+    expect(renderResult.queryByTestId('test-processDescendantsIndication')).not.toBeInTheDocument();
   });
-
+  
   it('should display indication if Event Filter is for process descendants', () => {
     render({ item: getProcessDescendantEventFilter() });
 
-    expect(renderResult.getByTestId('test-processDescendantIndication')).toBeInTheDocument();
+    expect(renderResult.getByTestId('test-processDescendantsIndication')).toBeInTheDocument();
   });
 
-  it('should mention additional `event.category is process` entry in tooltip', async () => {
-    const prefix = 'test-processDescendantIndicationTooltip';
+  it('should display indication if Trusted App is for process descendants', () => {
+    render({ item: getProcessDescendantTrustedApp() });
+
+    expect(renderResult.getByTestId('test-processDescendantsIndication')).toBeInTheDocument();
+  });
+
+  it('should mention additional `event.category is process` entry in tooltip for event filters', async () => {
+    const prefix = 'test-processDescendantsIndicationTooltip';
     render({ item: getProcessDescendantEventFilter() });
 
     expect(renderResult.queryByTestId(`${prefix}-tooltipText`)).not.toBeInTheDocument();
