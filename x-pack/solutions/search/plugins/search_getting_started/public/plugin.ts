@@ -19,6 +19,7 @@ import type {
   SearchGettingStartedAppPluginStartDependencies,
   SearchGettingStartedServicesContextDeps,
 } from './types';
+import { docLinks } from './common/doc_links';
 
 export class SearchGettingStartedPlugin
   implements
@@ -49,6 +50,7 @@ export class SearchGettingStartedPlugin
       async mount({ element, history }: AppMountParameters) {
         const { renderApp } = await import('./application');
         const [coreStart, depsStart] = await core.getStartServices();
+        docLinks.setDocLinks(coreStart.docLinks.links);
         const services: SearchGettingStartedServicesContextDeps = {
           ...depsStart,
           history,

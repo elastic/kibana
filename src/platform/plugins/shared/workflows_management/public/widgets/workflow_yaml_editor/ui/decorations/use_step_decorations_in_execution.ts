@@ -13,16 +13,16 @@ import { useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { monaco } from '@kbn/monaco';
 import {
+  selectEditorWorkflowLookup,
   selectHighlightedStepId,
   selectStepExecutions,
-  selectWorkflowLookup,
-} from '../../lib/store';
+} from '../../../../entities/workflows/store';
 
 export const useStepDecorationsInExecution = (
   editor: monaco.editor.IStandaloneCodeEditor | null
 ) => {
   const stepExecutions = useSelector(selectStepExecutions);
-  const workflowLookup = useSelector(selectWorkflowLookup);
+  const workflowLookup = useSelector(selectEditorWorkflowLookup);
   const highlightedStepId = useSelector(selectHighlightedStepId);
   const decorationsCollection = useMemo(() => {
     if (!editor) {

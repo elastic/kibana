@@ -1632,6 +1632,14 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
+              "[] | undefined; nonHighlightingFilters?: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
               "[] | undefined; sort?: ",
               {
                 "pluginId": "data",
