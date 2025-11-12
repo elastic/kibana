@@ -125,6 +125,11 @@ describe('parseWorkflowYamlToJSON', () => {
             type: z.string(),
             with: z.object({
               count: z.number(),
+              cases: z.array(
+                z.object({
+                  severity: z.enum(['low', 'medium', 'high', 'critical']),
+                })
+              ),
             }),
           })
         ),
@@ -135,6 +140,8 @@ describe('parseWorkflowYamlToJSON', () => {
           type: noop
           with:
             count: $\{\{ inputs.count \}\}
+            cases:
+              - severity: $\{\{ inputs.severity \}\}
       `;
       const result = parseWorkflowYamlToJSON(yaml, schema);
       expect(result.success).toBe(true);
@@ -190,7 +197,37 @@ describe('parseWorkflowYamlToJSON', () => {
       expect(result.error?.message).toContain('number');
     });
 
-    it('should not suppress errors for regular {{ }} template syntax', () => {
+    it('should also suppress errors for regular {{ }} template syntax', () => {
+      const schema = z.object({
+        steps: z.array(
+          z.object({
+            name: z.string(),
+            type: z.string(),
+            with: z.object({
+              count: z.number(),
+              cases: z.array(
+                z.object({
+                  severity: z.enum(['low', 'medium', 'high', 'critical']),
+                })
+              ),
+            }),
+          })
+        ),
+      });
+
+      const yaml = `steps:
+        - name: step1
+          type: noop
+          with:
+            count: "{{ inputs.count }}"
+            cases:
+              - severity: "{{ inputs.severity }}"
+      `;
+      const result = parseWorkflowYamlToJSON(yaml, schema);
+      expect(result.success).toBe(true);
+    });
+
+    it('should not suppress errors if the variable is inside a string and field should be a number', () => {
       const schema = z.object({
         steps: z.array(
           z.object({
@@ -202,12 +239,11 @@ describe('parseWorkflowYamlToJSON', () => {
           })
         ),
       });
-
       const yaml = `steps:
         - name: step1
           type: noop
           with:
-            count: {{ inputs.count }}
+            count: "some string with a variable {{ inputs.count }}"
       `;
       const result = parseWorkflowYamlToJSON(yaml, schema);
       expect(result.success).toBe(false);
