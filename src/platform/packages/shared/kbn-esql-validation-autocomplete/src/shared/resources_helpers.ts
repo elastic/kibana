@@ -46,7 +46,7 @@ export class QueryColumns {
     private readonly query: ESQLAstQueryExpression,
     private readonly originalQueryText: string,
     private readonly resourceRetriever?: ESQLCallbacks,
-    private readonly options?: { forceRefresh?: boolean }
+    private readonly options?: { invalidateColumnsCache?: boolean }
   ) {
     this.fullQueryCacheKey = BasicPrettyPrinter.print(this.query, { skipHeader: true });
   }
@@ -91,7 +91,7 @@ export class QueryColumns {
     if (!this.fullQueryCacheKey) return;
 
     const getFields = async (queryToES: string) => {
-      if (!this.options?.forceRefresh) {
+      if (!this.options?.invalidateColumnsCache) {
         const cached = QueryColumns.fromCache(queryToES);
 
         if (cached) {
@@ -141,7 +141,7 @@ export class QueryColumns {
       return;
     }
 
-    if (!this.options?.forceRefresh) {
+    if (!this.options?.invalidateColumnsCache) {
       const existsInCache = Boolean(QueryColumns.fromCache(cacheKey));
       if (existsInCache) {
         // this is already in the cache

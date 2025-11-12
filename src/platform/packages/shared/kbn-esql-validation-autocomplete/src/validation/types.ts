@@ -33,5 +33,5 @@ export interface ValidationOptions {
    * Use when schema changes have occurred (e.g., new fields added to lookup indices).
    * @default false
    */
-  forceRefresh?: boolean;
+  invalidateColumnsCache?: boolean;
 }

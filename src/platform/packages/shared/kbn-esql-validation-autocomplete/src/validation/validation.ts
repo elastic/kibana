@@ -25,13 +25,15 @@ import { getSubqueriesToValidate } from './helpers';
 
 /**
  * ES|QL validation public API
+ * It takes a query string and returns a list of messages (errors and warnings) after validate
+ * The astProvider is optional, but if not provided the default one from '@kbn/esql-validation-autocomplete' will be used.
+ * This is useful for async loading the ES|QL parser and reduce the bundle size, or to swap grammar version.
+ * As for the callbacks, while optional, the validation function will selectively ignore some errors types based on each callback missing.
  *
- * @param queryString - The ES|QL query string to validate
- * @param callbacks - Optional callbacks for resource retrieval. Missing callbacks will skip related validations.
- * @param options - Validation options
- * @param options.forceRefresh - Forces cache invalidation for column metadata. Has no effect if 'getColumnsFor' callback is not provided.
+ * @param queryString - The query string to validate
+ * @param callbacks - Optional callbacks for resource retrieval.
+ * @param options.invalidateColumnsCache - Invalidates the columns metadata cache before validation. Has no effect if 'getColumnsFor' callback is not provided.
  *
- * @returns Promise resolving to validation result with errors and warnings
  */
 export async function validateQuery(
   queryString: string,

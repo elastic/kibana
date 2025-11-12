@@ -647,7 +647,7 @@ const ESQLEditorInternal = function ESQLEditor({
   }, [allowQueryCancellation, code, codeWhenSubmitted, isLoading]);
 
   const parseMessages = useCallback(
-    async (options?: { forceRefresh?: boolean }) => {
+    async (options?: { invalidateColumnsCache?: boolean }) => {
       if (editorModel.current) {
         return await ESQLLang.validate(editorModel.current, code, esqlCallbacks, options);
       }
@@ -689,11 +689,17 @@ const ESQLEditorInternal = function ESQLEditor({
   }, [isLoading, isQueryLoading, parseMessages, code]);
 
   const queryValidation = useCallback(
-    async ({ active, forceRefresh }: { active: boolean; forceRefresh?: boolean }) => {
+    async ({
+      active,
+      invalidateColumnsCache,
+    }: {
+      active: boolean;
+      invalidateColumnsCache?: boolean;
+    }) => {
       if (!editorModel.current || editorModel.current.isDisposed()) return;
       monaco.editor.setModelMarkers(editorModel.current, 'Unified search', []);
       const { warnings: parserWarnings, errors: parserErrors } = await parseMessages({
-        forceRefresh,
+        invalidateColumnsCache,
       });
 
       let allErrors = parserErrors;
@@ -759,7 +765,7 @@ const ESQLEditorInternal = function ESQLEditor({
   const onNewFieldsAddedToLookupIndex = useCallback(async () => {
     esqlFieldsCache.clear?.();
 
-    await queryValidation({ active: true, forceRefresh: true });
+    await queryValidation({ active: true, invalidateColumnsCache: true });
   }, [esqlFieldsCache, queryValidation]);
 
   const { lookupIndexBadgeStyle, addLookupIndicesDecorator } = useLookupIndexCommand(
