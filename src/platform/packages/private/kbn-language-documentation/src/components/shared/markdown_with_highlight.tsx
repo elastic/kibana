@@ -11,9 +11,10 @@ import { getDefaultEuiMarkdownPlugins, EuiLink, EuiMarkdownFormat } from '@elast
 import type { Plugin as MarkdownPlugin } from 'unified';
 import type { RemarkTokenizer } from '@elastic/eui';
 import React, { useMemo } from 'react';
+import { HIGHLIGHT_TOKEN } from '../../utils/highlight_matches';
 
 /**
- * Markdown component, with a plugin that supports highlighting text wrapped in ==double equals==
+ * Markdown component, with a plugin that supports highlighting text wrapped in double equals tokens
  */
 export const MarkdownWithHighlight = React.memo(
   ({
@@ -63,7 +64,8 @@ const highlightParsingPlugin: MarkdownPlugin = function (this) {
   const methods = Parser.prototype.inlineMethods;
 
   const tokenizeHighlight: RemarkTokenizer = function (eat, value, silent) {
-    const match = value.match(/^==(.*?)==/);
+    const pattern = new RegExp(`^${HIGHLIGHT_TOKEN}(.*?)${HIGHLIGHT_TOKEN}`);
+    const match = value.match(pattern);
     if (!match) return false;
 
     if (silent) return true;
@@ -76,7 +78,7 @@ const highlightParsingPlugin: MarkdownPlugin = function (this) {
   };
 
   tokenizeHighlight.locator = (value: string, fromIndex: number) => {
-    return value.indexOf('==', fromIndex);
+    return value.indexOf(HIGHLIGHT_TOKEN, fromIndex);
   };
 
   tokenizers.highlight = tokenizeHighlight;

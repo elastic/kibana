@@ -8,6 +8,7 @@
  */
 import React from 'react';
 import { getFilteredGroups } from './get_filtered_groups';
+import { HIGHLIGHT_TOKEN } from './highlight_matches';
 
 describe('getFilteredGroups', () => {
   const sections = {
@@ -73,19 +74,19 @@ describe('getFilteredGroups', () => {
     expect(filteredSections).toStrictEqual([
       {
         ...sections.groups[1],
-        label: 'Section ==two==',
+        label: `Section ${HIGHLIGHT_TOKEN}two${HIGHLIGHT_TOKEN}`,
         description: '',
         items: [
           {
-            label: 'Section ==two== item 1 blah blah',
+            label: `Section ${HIGHLIGHT_TOKEN}two${HIGHLIGHT_TOKEN} item 1 blah blah`,
             description: {
-              markdownContent: '## Section ==two== item 1 description ',
+              markdownContent: `## Section ${HIGHLIGHT_TOKEN}two${HIGHLIGHT_TOKEN} item 1 description `,
             },
           },
           {
-            label: 'Section ==two== item 2',
+            label: `Section ${HIGHLIGHT_TOKEN}two${HIGHLIGHT_TOKEN} item 2`,
             description: {
-              markdownContent: '## Section ==two== item 2 description ',
+              markdownContent: `## Section ${HIGHLIGHT_TOKEN}two${HIGHLIGHT_TOKEN} item 2 description `,
             },
           },
         ],
@@ -102,7 +103,7 @@ describe('getFilteredGroups', () => {
         description: '',
         items: [
           {
-            label: '==Section two item 1 blah blah==',
+            label: `${HIGHLIGHT_TOKEN}Section two item 1 blah blah${HIGHLIGHT_TOKEN}`,
             description: {
               markdownContent: '## Section two item 1 description ',
             },
@@ -148,7 +149,7 @@ describe('getFilteredGroups', () => {
         description: '',
         items: [
           {
-            label: '==Values==',
+            label: `${HIGHLIGHT_TOKEN}Values${HIGHLIGHT_TOKEN}`,
             description: {
               markdownContent: '## Section two item 2 description ',
             },
@@ -156,7 +157,7 @@ describe('getFilteredGroups', () => {
           {
             label: 'Section two item 1 blah blah',
             description: {
-              markdownContent: '==Values==',
+              markdownContent: `${HIGHLIGHT_TOKEN}Values${HIGHLIGHT_TOKEN}`,
             },
           },
         ],

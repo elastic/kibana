@@ -14,8 +14,10 @@ interface ProtectedRange {
   end: number;
 }
 
+export const HIGHLIGHT_TOKEN = '=hl=';
+
 /**
- * Highlights text matches in a string by wrapping them in a highlighted mardown ==text==.
+ * Highlights text matches in a string by wrapping them in a highlighted mardown =hl=text=hl=.
  * Performs case-insensitive matching while avoiding highlighting text inside
  * markdown code blocks and links.
  */
@@ -39,12 +41,12 @@ export function highlightMatches(text: string, searchText: string): string {
     if (isPositionProtected(offset, protectedRanges)) {
       return match;
     }
-    return `==${match}==`;
+    return `${HIGHLIGHT_TOKEN}${match}${HIGHLIGHT_TOKEN}`;
   });
 }
 
 export function removeHighlighting(text: string): string {
-  return text.replaceAll('==', '');
+  return text.replaceAll(HIGHLIGHT_TOKEN, '');
 }
 
 /**

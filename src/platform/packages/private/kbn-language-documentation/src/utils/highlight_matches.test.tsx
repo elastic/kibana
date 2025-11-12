@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { highlightMatches } from './highlight_matches';
+import { HIGHLIGHT_TOKEN, highlightMatches } from './highlight_matches';
 
 describe('highlightMatches', () => {
   describe('basic functionality', () => {
@@ -16,7 +16,7 @@ describe('highlightMatches', () => {
       const searchText = 'test';
       const result = highlightMatches(text, searchText);
 
-      expect(result).toBe('This is a ==test== string');
+      expect(result).toBe(`This is a ${HIGHLIGHT_TOKEN}test${HIGHLIGHT_TOKEN} string`);
     });
 
     test('should handle multiple matches', () => {
@@ -24,7 +24,9 @@ describe('highlightMatches', () => {
       const searchText = 'test';
       const result = highlightMatches(text, searchText);
 
-      expect(result).toBe('==test== this ==test== that ==test==');
+      expect(result).toBe(
+        `${HIGHLIGHT_TOKEN}test${HIGHLIGHT_TOKEN} this ${HIGHLIGHT_TOKEN}test${HIGHLIGHT_TOKEN} that ${HIGHLIGHT_TOKEN}test${HIGHLIGHT_TOKEN}`
+      );
     });
 
     test('should be case-insensitive', () => {
@@ -32,7 +34,9 @@ describe('highlightMatches', () => {
       const searchText = 'test';
       const result = highlightMatches(text, searchText);
 
-      expect(result).toBe('==Test== this ==TEST== that ==tEsT==');
+      expect(result).toBe(
+        `${HIGHLIGHT_TOKEN}Test${HIGHLIGHT_TOKEN} this ${HIGHLIGHT_TOKEN}TEST${HIGHLIGHT_TOKEN} that ${HIGHLIGHT_TOKEN}tEsT${HIGHLIGHT_TOKEN}`
+      );
     });
 
     test('should return original text when search text is empty', () => {
@@ -56,7 +60,9 @@ describe('highlightMatches', () => {
     const searchText = '[a-z]+';
     const result = highlightMatches(text, searchText);
 
-    expect(result).toBe('Use regex like ==[a-z]+== or .*? patterns');
+    expect(result).toBe(
+      `Use regex like ${HIGHLIGHT_TOKEN}[a-z]+${HIGHLIGHT_TOKEN} or .*? patterns`
+    );
   });
 
   describe('markdown protected blocks', () => {
@@ -71,8 +77,8 @@ And more test outside.
       const searchText = 'test';
       const result = highlightMatches(text, searchText);
 
-      expect(result).toContain('Here is some text with ==test==.');
-      expect(result).toContain('And more ==test== outside.');
+      expect(result).toContain(`Here is some text with ${HIGHLIGHT_TOKEN}test${HIGHLIGHT_TOKEN}.`);
+      expect(result).toContain(`And more ${HIGHLIGHT_TOKEN}test${HIGHLIGHT_TOKEN} outside.`);
       expect(result).toContain('```\nThis is a test in a code block\n```');
     });
 
@@ -81,7 +87,9 @@ And more test outside.
       const searchText = 'test';
       const result = highlightMatches(text, searchText);
 
-      expect(result).toBe('Use the `test` function to ==test== your code');
+      expect(result).toBe(
+        `Use the \`test\` function to ${HIGHLIGHT_TOKEN}test${HIGHLIGHT_TOKEN} your code`
+      );
     });
 
     test('should not highlight text inside markdown links', () => {
@@ -90,7 +98,7 @@ And more test outside.
       const result = highlightMatches(text, searchText);
 
       expect(result).toBe(
-        'Check out [test documentation](http://example.com/test) for more ==test== info'
+        `Check out [test documentation](http://example.com/test) for more ${HIGHLIGHT_TOKEN}test${HIGHLIGHT_TOKEN} info`
       );
     });
   });
