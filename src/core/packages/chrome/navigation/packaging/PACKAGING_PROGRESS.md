@@ -117,7 +117,54 @@ This document tracks the implementation progress of creating the `@kbn/one-navig
 - No initialization required
 - Clean, simple API for external consumers
 
-### Phase 1.6: Create Webpack Configuration ⏳ PENDING
+### Phase 1.6: Create Webpack Configuration ✅ COMPLETED
+
+**Completed Changes:**
+
+✅ **Created `webpack.config.js` with full configuration**
+   - Entry point: `react/index.tsx`
+   - Output: CommonJS bundle to `../target/index.js`
+   - Mode: Production (or from `NODE_ENV`)
+   - Source maps enabled for debugging
+
+✅ **Configured externals (peer dependencies)**
+   - `@elastic/eui` - Elastic UI components
+   - `@emotion/css` - CSS-in-JS styling
+   - `@emotion/react` - Emotion React
+   - `react` - React framework
+   - `react-dom` - React DOM
+
+✅ **Set up module loaders**
+   - Babel loader for `.js`, `.ts`, `.tsx` files
+   - Uses `@kbn/babel-preset/webpack_preset`
+   - No CSS loader needed (component uses Emotion exclusively for styling)
+
+✅ **Configured webpack aliases for i18n**
+   - `@kbn/i18n` → `react/services/i18n.tsx` (no-op implementation)
+   - `@kbn/i18n/react` → `react/services/i18n.tsx`
+   - `@kbn/i18n-react` → `react/services/i18n.tsx`
+   - Redirects all i18n imports transparently to no-op service
+
+✅ **Optimization settings**
+   - Minification enabled for production builds
+   - No minification in development mode (for readability and debugging)
+   - No emit on errors (fails fast on build errors)
+
+✅ **Plugins**
+   - CleanWebpackPlugin - Cleans output directory before each build
+
+✅ **Bundle size verification**
+   - Development (unminified): 92 KB (94,186 bytes)
+   - Production (minified): 26 KB (26,232 bytes)
+   - **72% size reduction** in production mode
+   - Source maps included for debugging
+
+**Key Design Decisions:**
+- Uses webpack aliases for i18n (cleanest approach, no runtime overhead)
+- Externalizes large peer dependencies to reduce bundle size
+- No SCSS loaders needed (Navigation uses CSS-in-JS via Emotion)
+- No code splitting for simplicity (single bundle)
+- Dynamic minification based on NODE_ENV (development vs production)
 
 ### Phase 1.7: Create Build Scripts ⏳ PENDING
 

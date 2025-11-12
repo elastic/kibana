@@ -394,7 +394,7 @@ module.exports = {
   },
   
   optimization: {
-    minimize: false,
+    minimize: mode === 'production',
     noEmitOnErrors: true,
   },
   
@@ -1332,16 +1332,16 @@ Add sections on:
 - ✅ **Phase 1.3** - Created packaging directory structure
 - ✅ **Phase 1.4** - Created no-op i18n service
 - ✅ **Phase 1.5** - Created OneNavigation component wrapper
+- ✅ **Phase 1.6** - Created Webpack configuration
 
 **Next Steps:**
-1. **Phase 1.6** - Create Webpack configuration
-2. **Phase 1.7** - Create build scripts
-3. **Phase 1.8** - Create package manifest (already created, needs verification)
-4. **Phase 1.9** - TypeScript configuration
-5. **Phase 1.10** - Documentation
-6. **Phase 1.11** - Test external build
-7. Test Phase 1 thoroughly with external test application
-8. Validate with real-world usage
+1. **Phase 1.7** - Create build scripts
+2. **Phase 1.8** - Create package manifest (already created, needs verification)
+3. **Phase 1.9** - TypeScript configuration
+4. **Phase 1.10** - Documentation
+5. **Phase 1.11** - Test external build
+6. Test Phase 1 thoroughly with external test application
+7. Validate with real-world usage
 
 ### Phase 2 (After Phase 1 Complete)
 

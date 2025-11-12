@@ -7,5 +7,75 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Webpack configuration for OneNavigation package
-// To be completed in Phase 1.6
+const path = require('path');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+
+const entry = require.resolve('./react/index.tsx');
+const outputPath = process.env.BUILD_OUTPUT_DIR || path.resolve(__dirname, '../target');
+const mode = process.env.NODE_ENV || 'production';
+
+module.exports = {
+  mode,
+  entry,
+  context: path.dirname(entry),
+  devtool: 'source-map',
+
+  output: {
+    libraryTarget: 'commonjs',
+    path: outputPath,
+    filename: 'index.js',
+    publicPath: 'auto',
+  },
+
+  target: 'web',
+
+  // Externalize peer dependencies
+  externals: {
+    '@elastic/eui': 'commonjs @elastic/eui',
+    '@emotion/css': 'commonjs @emotion/css',
+    '@emotion/react': 'commonjs @emotion/react',
+    react: 'commonjs react',
+    'react-dom': 'commonjs react-dom',
+  },
+
+  module: {
+    rules: [
+      {
+        test: /\.(js|tsx?)$/,
+        exclude: /node_modules/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            babelrc: false,
+            envName: mode,
+            presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
+          },
+        },
+      },
+    ],
+  },
+
+  resolve: {
+    extensions: ['.js', '.ts', '.tsx'],
+
+    // CRITICAL: Alias @kbn/i18n imports to our no-op implementation
+    alias: {
+      // Redirect all @kbn/i18n imports to our no-op i18n service
+      '@kbn/i18n$': path.resolve(__dirname, 'react/services/i18n.tsx'),
+      '@kbn/i18n/react': path.resolve(__dirname, 'react/services/i18n.tsx'),
+      '@kbn/i18n-react': path.resolve(__dirname, 'react/services/i18n.tsx'),
+    },
+  },
+
+  optimization: {
+    minimize: mode === 'production',
+    noEmitOnErrors: true,
+  },
+
+  plugins: [
+    new CleanWebpackPlugin({
+      cleanOnceBeforeBuildPatterns: ['**/*'],
+      dangerouslyAllowCleanPatternsOutsideProject: true,
+    }),
+  ],
+};
