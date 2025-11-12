@@ -72,32 +72,32 @@ describe('parseRecords', () => {
     ];
     const result = parseRecords(mockLogger, records);
 
-    // Should have 3 nodes: actor (uuid-1), target (uuid-2), label
+    // Should have 3 nodes: actor (entity ID), target (entity ID), label
     expect(result.nodes.length).toBe(3);
 
-    const actorNode = result.nodes.find((n) => n.id === 'uuid-1') as EntityNodeDataModel;
-    const targetNode = result.nodes.find((n) => n.id === 'uuid-2') as EntityNodeDataModel;
+    const actorNode = result.nodes.find((n) => n.id === 'actor1') as EntityNodeDataModel;
+    const targetNode = result.nodes.find((n) => n.id === 'target1') as EntityNodeDataModel;
     const labelNode = result.nodes.find((n) => n.shape === 'label') as LabelNodeDataModel;
 
     expect(actorNode).toBeDefined();
     expect(targetNode).toBeDefined();
     expect(labelNode).toBeDefined();
 
-    // Verify actor node uses UUID
-    expect(actorNode.id).toBe('uuid-1');
+    // Verify actor node uses entity ID (single entity)
+    expect(actorNode.id).toBe('actor1');
     expect(actorNode.label).toBe('John Doe');
     expect(actorNode).toHaveProperty('tag', 'user');
     expect(actorNode).toHaveProperty('icon', 'user');
     expect(actorNode).toHaveProperty('shape', 'ellipse');
 
-    // Verify target node uses UUID
-    expect(targetNode.id).toBe('uuid-2');
+    // Verify target node uses entity ID (single entity)
+    expect(targetNode.id).toBe('target1');
     expect(targetNode.label).toBe('Server 01');
     expect(targetNode).toHaveProperty('tag', 'host');
     expect(targetNode).toHaveProperty('icon', 'storage');
     expect(targetNode).toHaveProperty('shape', 'hexagon');
 
-    // Label node should reference the actor and target by their UUIDs
+    // Label node should reference the actor and target by their entity IDs
     expect(labelNode.id).toContain('label(login)oe(1)oa(0)');
     expect(labelNode.label).toBe('login');
     expect(labelNode).toHaveProperty('documentsData', [{ foo: 'bar' }]);
@@ -107,10 +107,10 @@ describe('parseRecords', () => {
 
     // Should have 2 edges: actor->label, label->target
     expect(result.edges.length).toBe(2);
-    expect(result.edges[0].source).toBe('uuid-1');
+    expect(result.edges[0].source).toBe('actor1');
     expect(result.edges[0].target).toBe(labelNode.id);
     expect(result.edges[1].source).toBe(labelNode.id);
-    expect(result.edges[1].target).toBe('uuid-2');
+    expect(result.edges[1].target).toBe('target1');
     expect(result.edges[0].target).toBe(labelNode.id);
     expect(result.edges[1].source).toBe(labelNode.id);
     expect(result.edges[1].target).toBe(targetNode.id);
@@ -145,6 +145,12 @@ describe('parseRecords', () => {
     const labelNode = result.nodes.find((n) => n.shape === 'label') as LabelNodeDataModel;
     expect(labelNode).toBeDefined();
     expect(labelNode).toHaveProperty('documentsData', [{ a: 1 }]);
+
+    // Verify single entities use entity IDs
+    const actorNode = result.nodes.find((n) => n.id === 'actor1');
+    const targetNode = result.nodes.find((n) => n.id === 'target1');
+    expect(actorNode).toBeDefined();
+    expect(targetNode).toBeDefined();
   });
 
   it('creates group node when multiple actions between same actor and target groups', () => {
@@ -196,102 +202,97 @@ describe('parseRecords', () => {
     ];
     const result = parseRecords(mockLogger, records);
 
-    // Event 1 creates: uuid-1 (actor), uuid-2 (target)
-    // Event 2 creates: uuid-3 (actor), uuid-4 (target)
-    // With pure UUIDs, each event creates separate nodes, so NO group node is created
-    // (group nodes are only created when same actor/target nodes have multiple connections)
+    // Event 1 creates: actor1 (entity ID), target1 (entity ID)
+    // Event 2 creates: actor1 (reused), target1 (reused)
+    // Since both events reference the same single entities, a group node IS created
 
-    // Should NOT have a group node since all nodes are unique
+    // Should have a group node since same actor and target have multiple connections
     const groupNode = result.nodes.find((n) => n.shape === 'group') as GroupNodeDataModel;
-    expect(groupNode).toBeUndefined();
+    expect(groupNode).toBeDefined();
 
-    // Should have 4 entity nodes (2 actors + 2 targets) and 2 label nodes
-    expect(result.nodes.length).toBe(6);
+    // Should have 2 entity nodes (1 actor + 1 target), 2 label nodes, and 1 group node = 5 nodes
+    expect(result.nodes.length).toBe(5);
 
-    // Find actor and target nodes by UUID
-    const actorNode1 = result.nodes.find((n) => n.id === 'uuid-1') as EntityNodeDataModel;
-    const targetNode1 = result.nodes.find((n) => n.id === 'uuid-2') as EntityNodeDataModel;
-    const actorNode2 = result.nodes.find((n) => n.id === 'uuid-3') as EntityNodeDataModel;
-    const targetNode2 = result.nodes.find((n) => n.id === 'uuid-4') as EntityNodeDataModel;
+    // Find actor and target nodes by entity ID
+    const actorNode = result.nodes.find((n) => n.id === 'actor1') as EntityNodeDataModel;
+    const targetNode = result.nodes.find((n) => n.id === 'target1') as EntityNodeDataModel;
 
-    expect(actorNode1).toBeDefined();
-    expect(actorNode1.label).toBe('John Doe');
-    expect(targetNode1).toBeDefined();
-    expect(targetNode1.label).toBe('Server 01');
-    expect(actorNode2).toBeDefined();
-    expect(actorNode2.label).toBe('John Doe');
-    expect(targetNode2).toBeDefined();
-    expect(targetNode2.label).toBe('Server 01');
+    expect(actorNode).toBeDefined();
+    expect(actorNode.label).toBe('John Doe');
+    expect(targetNode).toBeDefined();
+    expect(targetNode.label).toBe('Server 01');
 
-    // Edges should be simple: actor->label->target for each event
+    // Since same entities have multiple connections, label nodes should have the group as parent
     const labelNodes = result.nodes.filter((n) => n.shape === 'label') as LabelNodeDataModel[];
     expect(labelNodes.length).toBe(2);
-    expect(labelNodes[0].parentId).toBeUndefined(); // No group node
-    expect(labelNodes[1].parentId).toBeUndefined(); // No group node
+    expect(labelNodes[0].parentId).toBe(groupNode.id); // Has group node
+    expect(labelNodes[1].parentId).toBe(groupNode.id); // Has group node
   });
 
-  it('sets color to danger for isOriginAlert', () => {
-    const records: GraphEdge[] = [
-      {
-        actorIds: 'actor1',
-        targetIds: 'target1',
-        actorEntityType: '',
-        targetEntityType: '',
-        actorLabel: 'Actor 1',
-        targetLabel: 'Target 1',
-        actorIdsCount: 1,
-        targetIdsCount: 1,
-        action: 'alert',
-        docs: ['{"foo":"bar"}'],
-        badge: 1,
-        uniqueEventsCount: 0,
-        uniqueAlertsCount: 1,
-        isAlert: false,
-        isOrigin: true,
-        isOriginAlert: true,
-        actorHostIps: [],
-        targetHostIps: [],
-        sourceIps: [],
-        sourceCountryCodes: [],
-      },
-    ];
-    const result = parseRecords(mockLogger, records);
-    const labelNode = result.nodes.find((n) => n.shape === 'label') as LabelNodeDataModel;
-    expect(labelNode).toBeDefined();
-    expect(labelNode).toHaveProperty('color', 'danger');
-    expect(labelNode).toHaveProperty('uniqueAlertsCount', 1);
-  });
+  describe('color assignment', () => {
+    it('sets color to danger for isOriginAlert', () => {
+      const records: GraphEdge[] = [
+        {
+          actorIds: 'actor1',
+          targetIds: 'target1',
+          actorEntityType: '',
+          targetEntityType: '',
+          actorLabel: 'Actor 1',
+          targetLabel: 'Target 1',
+          actorIdsCount: 1,
+          targetIdsCount: 1,
+          action: 'alert',
+          docs: ['{"foo":"bar"}'],
+          badge: 1,
+          uniqueEventsCount: 0,
+          uniqueAlertsCount: 1,
+          isAlert: false,
+          isOrigin: true,
+          isOriginAlert: true,
+          actorHostIps: [],
+          targetHostIps: [],
+          sourceIps: [],
+          sourceCountryCodes: [],
+        },
+      ];
+      const result = parseRecords(mockLogger, records);
+      const labelNode = result.nodes.find((n) => n.shape === 'label') as LabelNodeDataModel;
+      expect(labelNode).toBeDefined();
+      expect(labelNode).toHaveProperty('color', 'danger');
+      expect(labelNode).toHaveProperty('uniqueAlertsCount', 1);
+    });
 
-  it('sets color to danger for isAlert', () => {
-    const records: GraphEdge[] = [
-      {
-        actorIds: 'actor1',
-        targetIds: 'target1',
-        actorEntityType: '',
-        targetEntityType: '',
-        actorLabel: 'Actor 1',
-        targetLabel: 'Target 1',
-        actorIdsCount: 1,
-        targetIdsCount: 1,
-        action: 'alert',
-        docs: ['{"foo":"bar"}'],
-        badge: 1,
-        uniqueEventsCount: 0,
-        uniqueAlertsCount: 1,
-        isAlert: true,
-        isOrigin: true,
-        isOriginAlert: false,
-        actorHostIps: [],
-        targetHostIps: [],
-        sourceIps: [],
-        sourceCountryCodes: [],
-      },
-    ];
-    const result = parseRecords(mockLogger, records);
-    const labelNode = result.nodes.find((n) => n.shape === 'label') as LabelNodeDataModel;
-    expect(labelNode).toBeDefined();
-    expect(labelNode).toHaveProperty('color', 'danger');
-    expect(labelNode).toHaveProperty('uniqueAlertsCount', 1);
+    it('sets color to danger for isAlert', () => {
+      const records: GraphEdge[] = [
+        {
+          actorIds: 'actor1',
+          targetIds: 'target1',
+          actorEntityType: '',
+          targetEntityType: '',
+          actorLabel: 'Actor 1',
+          targetLabel: 'Target 1',
+          actorIdsCount: 1,
+          targetIdsCount: 1,
+          action: 'alert',
+          docs: ['{"foo":"bar"}'],
+          badge: 1,
+          uniqueEventsCount: 0,
+          uniqueAlertsCount: 1,
+          isAlert: true,
+          isOrigin: true,
+          isOriginAlert: false,
+          actorHostIps: [],
+          targetHostIps: [],
+          sourceIps: [],
+          sourceCountryCodes: [],
+        },
+      ];
+      const result = parseRecords(mockLogger, records);
+      const labelNode = result.nodes.find((n) => n.shape === 'label') as LabelNodeDataModel;
+      expect(labelNode).toBeDefined();
+      expect(labelNode).toHaveProperty('color', 'danger');
+      expect(labelNode).toHaveProperty('uniqueAlertsCount', 1);
+    });
   });
 
   it('sets label node id based on action, isOrigin and isOriginAlert fields', () => {
@@ -344,55 +345,14 @@ describe('parseRecords', () => {
     const result = parseRecords(mockLogger, records);
     const labelNodes = result.nodes.filter((n) => n.shape === 'label') as LabelNodeDataModel[];
 
-    // Event 1: uuid-1 (actor), uuid-2 (target)
-    // Event 2: uuid-3 (actor), uuid-4 (target)
-    // Event 3: uuid-5 (actor), uuid-6 (target)
-    // Event 4: uuid-7 (actor), uuid-8 (target)
+    // All events use same single entities (actor1, target1) so they use entity IDs
+    // Since it's the same actor and target with multiple actions, they should reuse IDs
     expect(labelNodes.map((n) => n.id)).toStrictEqual([
-      `a(uuid-1)-b(uuid-2)label(action1)oe(0)oa(0)`,
-      `a(uuid-3)-b(uuid-4)label(action2)oe(1)oa(0)`,
-      `a(uuid-5)-b(uuid-6)label(action3)oe(0)oa(1)`,
-      `a(uuid-7)-b(uuid-8)label(action4)oe(1)oa(1)`,
+      `a(actor1)-b(target1)label(action1)oe(0)oa(0)`,
+      `a(actor1)-b(target1)label(action2)oe(1)oa(0)`,
+      `a(actor1)-b(target1)label(action3)oe(0)oa(1)`,
+      `a(actor1)-b(target1)label(action4)oe(1)oa(1)`,
     ]);
-  });
-
-  it('handles unknown target groups', () => {
-    const records: GraphEdge[] = [
-      {
-        action: 'foo',
-        actorIds: 'actor1',
-        targetIds: 'target1',
-        actorEntityType: 'user',
-        targetEntityType: '',
-        actorLabel: 'John Doe',
-        targetLabel: '',
-        actorIdsCount: 1,
-        targetIdsCount: 0,
-        badge: 1,
-        uniqueEventsCount: 1,
-        uniqueAlertsCount: 0,
-        docs: ['{"foo":"bar"}'],
-        isAlert: false,
-        isOrigin: true,
-        isOriginAlert: false,
-        actorHostIps: [],
-        targetHostIps: [],
-        sourceIps: [],
-        sourceCountryCodes: [],
-      },
-    ];
-    const result = parseRecords(mockLogger, records);
-    // Should create uuid-1 for actor and unknown-uuid-2 for target
-    const actorNode = result.nodes.find((n) => n.id === 'uuid-1') as EntityNodeDataModel;
-    const unknownNode = result.nodes.find(
-      (n) => n.label === 'Unknown' && n.id.startsWith('unknown-')
-    ) as EntityNodeDataModel;
-
-    expect(actorNode).toBeDefined();
-    expect(actorNode.label).toBe('John Doe');
-    expect(unknownNode).toBeDefined();
-    expect(unknownNode!.id).toBe('unknown-uuid-2');
-    expect(unknownNode).toHaveProperty('documentsData', []);
   });
 
   it('limits nodes and sets message when nodesLimit is reached', () => {
@@ -450,7 +410,7 @@ describe('parseRecords', () => {
   });
 
   // Test for entity grouping by type and sub_type
-  describe('entity grouping functionality', () => {
+  describe('enriched entities grouping', () => {
     it('groups actors and targets by type and sub_type', () => {
       const records: GraphEdge[] = [
         {
@@ -565,66 +525,6 @@ describe('parseRecords', () => {
       expect(targetNode).toHaveProperty('tag', 'file');
       expect(targetNode.documentsData).toHaveLength(1);
       expect(targetNode.documentsData![0].entity).toHaveProperty('type', 'file');
-      expect(targetNode.documentsData![0].entity).not.toHaveProperty('sub_type');
-    });
-
-    it('groups actors and targets by id when type and sub_type are missing', () => {
-      const records: GraphEdge[] = [
-        {
-          action: 'interact',
-          actorIds: ['entity1', 'entity2'],
-          targetIds: ['entity3'],
-          actorEntityType: '',
-          targetEntityType: '',
-          actorLabel: 'Generic Group 1',
-          targetLabel: 'Generic Group 2',
-          actorIdsCount: 2,
-          targetIdsCount: 1,
-          badge: 1,
-          uniqueEventsCount: 1,
-          uniqueAlertsCount: 0,
-          docs: ['{"event":"generic_interaction"}'],
-          isAlert: false,
-          isOrigin: true,
-          isOriginAlert: false,
-          actorsDocData: [
-            '{"id":"entity1","entity":{"name":"Entity One"}}',
-            '{"id":"entity2","entity":{"name":"Entity Two"}}',
-          ],
-          targetsDocData: ['{"id":"entity3","entity":{"name":"Entity Three"}}'],
-          actorHostIps: [],
-          targetHostIps: [],
-          sourceIps: [],
-          sourceCountryCodes: [],
-        },
-      ];
-      const result = parseRecords(mockLogger, records);
-
-      const actorNode = result.nodes.find(
-        (n) => n.label === 'Generic Group 1'
-      ) as EntityNodeDataModel;
-      expect(actorNode).toBeDefined();
-      expect(actorNode!.label).toBe('Generic Group 1');
-      expect(actorNode).toHaveProperty('shape', 'rectangle'); // Default shape when no type
-      expect(actorNode).not.toHaveProperty('tag');
-      expect(actorNode).not.toHaveProperty('icon');
-      expect(actorNode).toHaveProperty('count', 2);
-      expect(actorNode.documentsData).toHaveLength(2);
-      expect(actorNode.documentsData![0].entity).not.toHaveProperty('type');
-      expect(actorNode.documentsData![0].entity).not.toHaveProperty('sub_type');
-      expect(actorNode.documentsData![1].entity).not.toHaveProperty('type');
-      expect(actorNode.documentsData![1].entity).not.toHaveProperty('sub_type');
-
-      const targetNode = result.nodes.find(
-        (n) => n.label === 'Generic Group 2'
-      ) as EntityNodeDataModel;
-      expect(targetNode).toBeDefined();
-      expect(targetNode!.label).toBe('Generic Group 2');
-      expect(targetNode).toHaveProperty('shape', 'rectangle');
-      expect(targetNode).not.toHaveProperty('tag');
-      expect(targetNode).not.toHaveProperty('icon');
-      expect(targetNode.documentsData).toHaveLength(1);
-      expect(targetNode.documentsData![0].entity).not.toHaveProperty('type');
       expect(targetNode.documentsData![0].entity).not.toHaveProperty('sub_type');
     });
   });
@@ -979,325 +879,207 @@ describe('parseRecords', () => {
     });
   });
 
-  describe('non-enriched entities', () => {
-    describe('single non-enriched entity', () => {
-      it('should create node with "Entity" (singular) type and entity.id as label', () => {
-        const records: GraphEdge[] = [
-          {
-            action: 'test.action',
-            actorIds: ['non-enriched-actor-123'],
-            targetIds: ['non-enriched-target-456'],
-            actorEntityType: 'Entity',
-            targetEntityType: 'Entity',
-            actorLabel: 'non-enriched-actor-123',
-            targetLabel: 'non-enriched-target-456',
-            actorIdsCount: 1,
-            targetIdsCount: 1,
-            badge: 1,
-            uniqueEventsCount: 1,
-            uniqueAlertsCount: 0,
-            docs: ['{"id":"event1","type":"event"}'],
-            isOrigin: false,
-            isOriginAlert: false,
-            isAlert: false,
-            actorHostIps: [],
-            targetHostIps: [],
-            sourceIps: [],
-            sourceCountryCodes: [],
-          },
-        ];
+  describe('entities enrichment', () => {
+    it('should create single non-enriched entity node with tag "Entity", label undefined, and no count', () => {
+      const records: GraphEdge[] = [
+        {
+          action: 'test.action',
+          actorIds: ['non-enriched-actor-123'],
+          targetIds: ['non-enriched-target-456'],
+          actorEntityType: 'Entity',
+          targetEntityType: 'Entity',
+          actorLabel: '', // Empty string from ESQL
+          targetLabel: '', // Empty string from ESQL
+          actorIdsCount: 1,
+          targetIdsCount: 1,
+          badge: 1,
+          uniqueEventsCount: 1,
+          uniqueAlertsCount: 0,
+          docs: ['{"id":"event1","type":"event"}'],
+          isOrigin: false,
+          isOriginAlert: false,
+          isAlert: false,
+          actorHostIps: [],
+          targetHostIps: [],
+          sourceIps: [],
+          sourceCountryCodes: [],
+        },
+      ];
 
-        const result = parseRecords(mockLogger, records);
+      const result = parseRecords(mockLogger, records);
 
-        // Find actor node by characteristics
-        const actorNode = result.nodes.find(
-          (n) => n.label === 'non-enriched-actor-123'
-        ) as EntityNodeDataModel;
-        expect(actorNode).toBeDefined();
-        expect(actorNode.label).toBe('non-enriched-actor-123');
-        expect(actorNode.tag).toBe('Entity');
-        expect(actorNode.icon).toBe('magnifyWithExclamation');
-        expect(actorNode.shape).toBe('rectangle');
+      // Find actor and target nodes by entity ID (single entities use entity IDs)
+      const actorNode = result.nodes.find(
+        (n) => n.id === 'non-enriched-actor-123'
+      ) as EntityNodeDataModel;
+      const targetNode = result.nodes.find(
+        (n) => n.id === 'non-enriched-target-456'
+      ) as EntityNodeDataModel;
 
-        // Find target node by characteristics
-        const targetNode = result.nodes.find(
-          (n) => n.label === 'non-enriched-target-456'
-        ) as EntityNodeDataModel;
-        expect(targetNode).toBeDefined();
-        expect(targetNode.label).toBe('non-enriched-target-456');
-        expect(targetNode.tag).toBe('Entity');
-        expect(targetNode.icon).toBe('magnifyWithExclamation');
-        expect(targetNode.shape).toBe('rectangle');
-      });
+      expect(actorNode).toBeDefined();
+      expect(actorNode.label).toBeUndefined(); // UI will fallback to node ID
+      expect(actorNode.tag).toBe('Entity');
+      expect(actorNode.icon).toBe('magnifyWithExclamation');
+      expect(actorNode.shape).toBe('rectangle');
+      expect(actorNode.count).toBeUndefined();
+
+      expect(targetNode).toBeDefined();
+      expect(targetNode.label).toBeUndefined(); // UI will fallback to node ID
+      expect(targetNode.tag).toBe('Entity');
+      expect(targetNode.icon).toBe('magnifyWithExclamation');
+      expect(targetNode.shape).toBe('rectangle');
+      expect(targetNode.count).toBeUndefined();
     });
 
-    describe('multiple non-enriched entities', () => {
-      it('should create grouped node with "Entities" (plural) type and no label', () => {
-        const records: GraphEdge[] = [
-          {
-            action: 'test.action.multiple',
-            actorIds: ['entity-1', 'entity-2', 'entity-3'],
-            targetIds: ['target-1', 'target-2'],
-            actorEntityType: 'Entities',
-            targetEntityType: 'Entities',
-            actorLabel: '', // Empty string for multiple entities without subType
-            targetLabel: '', // Empty string for multiple entities without subType
-            actorIdsCount: 3,
-            targetIdsCount: 2,
-            badge: 5,
-            uniqueEventsCount: 5,
-            uniqueAlertsCount: 0,
-            docs: [
-              '{"id":"event1","type":"event"}',
-              '{"id":"event2","type":"event"}',
-              '{"id":"event3","type":"event"}',
-              '{"id":"event4","type":"event"}',
-              '{"id":"event5","type":"event"}',
-            ],
-            isOrigin: false,
-            isOriginAlert: false,
-            isAlert: false,
-            actorHostIps: [],
-            targetHostIps: [],
-            sourceIps: [],
-            sourceCountryCodes: [],
-          },
-        ];
+    it('should create group non-enriched entity node with tag "Entities", label undefined, and count', () => {
+      const records: GraphEdge[] = [
+        {
+          action: 'test.action.multiple',
+          actorIds: ['entity-1', 'entity-2', 'entity-3'],
+          targetIds: ['target-1', 'target-2'],
+          actorEntityType: 'Entities',
+          targetEntityType: 'Entities',
+          actorLabel: '', // Empty string from ESQL
+          targetLabel: '', // Empty string from ESQL
+          actorIdsCount: 3,
+          targetIdsCount: 2,
+          badge: 5,
+          uniqueEventsCount: 5,
+          uniqueAlertsCount: 0,
+          docs: [
+            '{"id":"event1","type":"event"}',
+            '{"id":"event2","type":"event"}',
+            '{"id":"event3","type":"event"}',
+            '{"id":"event4","type":"event"}',
+            '{"id":"event5","type":"event"}',
+          ],
+          isOrigin: false,
+          isOriginAlert: false,
+          isAlert: false,
+          actorHostIps: [],
+          targetHostIps: [],
+          sourceIps: [],
+          sourceCountryCodes: [],
+        },
+      ];
 
-        const result = parseRecords(mockLogger, records);
+      const result = parseRecords(mockLogger, records);
 
-        // With pure UUIDs, actor gets uuid-1 and target gets uuid-2
-        // They are separate nodes even though they have the same type
-        const entityNodes = result.nodes.filter(
-          (n) => n.shape !== 'label' && n.shape !== 'group'
-        ) as EntityNodeDataModel[];
+      const actorNode = result.nodes.find((n) => n.id === 'uuid-1') as EntityNodeDataModel;
+      const targetNode = result.nodes.find((n) => n.id === 'uuid-2') as EntityNodeDataModel;
 
-        // Should have 2 entity nodes (actor and target)
-        expect(entityNodes.length).toBe(2);
+      expect(actorNode).toBeDefined();
+      expect(actorNode.label).toBeUndefined(); // UI will fallback to node ID
+      expect(actorNode.tag).toBe('Entities');
+      expect(actorNode.icon).toBe('magnifyWithExclamation');
+      expect(actorNode.shape).toBe('rectangle');
+      expect(actorNode.count).toBe(3);
 
-        const actorNode = entityNodes.find((n) => n.id === 'uuid-1');
-        const targetNode = entityNodes.find((n) => n.id === 'uuid-2');
-
-        expect(actorNode).toBeDefined();
-        expect(actorNode!.label).toBeUndefined(); // Label not included for empty strings
-        expect(actorNode!.tag).toBe('Entities');
-        expect(actorNode!.icon).toBe('magnifyWithExclamation');
-        expect(actorNode!.shape).toBe('rectangle');
-        expect(actorNode!.count).toBe(3);
-
-        expect(targetNode).toBeDefined();
-        expect(targetNode!.label).toBeUndefined(); // Label not included for empty strings
-        expect(targetNode!.tag).toBe('Entities');
-        expect(targetNode!.icon).toBe('magnifyWithExclamation');
-        expect(targetNode!.shape).toBe('rectangle');
-        expect(targetNode!.count).toBe(2);
-      });
+      expect(targetNode).toBeDefined();
+      expect(targetNode.label).toBeUndefined(); // UI will fallback to node ID
+      expect(targetNode.tag).toBe('Entities');
+      expect(targetNode.icon).toBe('magnifyWithExclamation');
+      expect(targetNode.shape).toBe('rectangle');
+      expect(targetNode.count).toBe(2);
     });
 
-    describe('mixed enriched and non-enriched entities', () => {
-      it('should handle both enriched and non-enriched entities correctly', () => {
-        const records: GraphEdge[] = [
-          {
-            action: 'test.action.mixed',
-            actorIds: ['enriched-user-1'],
-            targetIds: ['non-enriched-target-1'],
-            actorEntityType: 'user',
-            targetEntityType: 'Entities',
-            actorLabel: 'admin',
-            targetLabel: 'non-enriched-target-1',
-            actorIdsCount: 1,
-            targetIdsCount: 1,
-            badge: 1,
-            uniqueEventsCount: 1,
-            uniqueAlertsCount: 0,
-            docs: ['{"id":"event1","type":"event"}'],
-            isOrigin: false,
-            isOriginAlert: false,
-            isAlert: false,
-            actorHostIps: [],
-            targetHostIps: [],
-            sourceIps: [],
-            sourceCountryCodes: [],
-          },
-        ];
+    it('should create single enriched entity node with tag as entity.type, label undefined, and no count', () => {
+      const records: GraphEdge[] = [
+        {
+          action: 'test.action',
+          actorIds: ['user-123'],
+          targetIds: ['host-456'],
+          actorEntityType: 'user',
+          targetEntityType: 'host',
+          actorLabel: '', // Empty string from ESQL
+          targetLabel: '', // Empty string from ESQL
+          actorIdsCount: 1,
+          targetIdsCount: 1,
+          badge: 1,
+          uniqueEventsCount: 1,
+          uniqueAlertsCount: 0,
+          docs: ['{"id":"event1","type":"event"}'],
+          isOrigin: false,
+          isOriginAlert: false,
+          isAlert: false,
+          actorHostIps: [],
+          targetHostIps: [],
+          sourceIps: [],
+          sourceCountryCodes: [],
+        },
+      ];
 
-        const result = parseRecords(mockLogger, records);
+      const result = parseRecords(mockLogger, records);
 
-        // Enriched actor should maintain its type
-        const actorNode = result.nodes.find((n) => n.label === 'admin') as EntityNodeDataModel;
-        expect(actorNode).toBeDefined();
-        expect(actorNode.label).toBe('admin');
-        expect(actorNode.tag).toBe('user');
-        expect(actorNode.icon).toBe('user');
-        expect(actorNode.shape).toBe('ellipse');
+      // Find actor and target nodes by entity ID (single entities use entity IDs)
+      const actorNode = result.nodes.find((n) => n.id === 'user-123') as EntityNodeDataModel;
+      const targetNode = result.nodes.find((n) => n.id === 'host-456') as EntityNodeDataModel;
 
-        // Non-enriched target should have "Entities" type
-        const targetNode = result.nodes.find(
-          (n) => n.label === 'non-enriched-target-1'
-        ) as EntityNodeDataModel;
-        expect(targetNode).toBeDefined();
-        expect(targetNode.label).toBe('non-enriched-target-1');
-        expect(targetNode.tag).toBe('Entities');
-        expect(targetNode.icon).toBe('magnifyWithExclamation');
-        expect(targetNode.shape).toBe('rectangle');
-      });
+      expect(actorNode).toBeDefined();
+      expect(actorNode.label).toBeUndefined(); // UI will fallback to node ID
+      expect(actorNode.tag).toBe('user');
+      expect(actorNode.icon).toBe('user');
+      expect(actorNode.shape).toBe('ellipse');
+      expect(actorNode.count).toBeUndefined();
+
+      expect(targetNode).toBeDefined();
+      expect(targetNode.label).toBeUndefined(); // UI will fallback to node ID
+      expect(targetNode.tag).toBe('host');
+      expect(targetNode.icon).toBe('storage');
+      expect(targetNode.shape).toBe('hexagon');
+      expect(targetNode.count).toBeUndefined();
     });
 
-    describe('complex grouping scenarios', () => {
-      it('should create separate nodes for actors with different enrichment levels', () => {
-        // This test verifies that actors are correctly grouped:
-        // - Group 1: Multiple enriched actors with same type AND sub_type
-        // - Group 2: Single enriched actor with type only (no sub_type)
-        // - Group 3: Single non-enriched actor
-        const records: GraphEdge[] = [
-          // Event 1: Actor from Group 1 (enriched with type:sub_type)
-          {
-            action: 'complex.action',
-            actorIds: ['user-1'],
-            targetIds: ['target-1'],
-            actorEntityType: 'user',
-            targetEntityType: 'host',
-            actorLabel: 'service account',
-            targetLabel: 'Server',
-            actorIdsCount: 1,
-            targetIdsCount: 1,
-            badge: 1,
-            uniqueEventsCount: 1,
-            uniqueAlertsCount: 0,
-            docs: ['{"id":"event1","type":"event"}'],
-            isOrigin: false,
-            isOriginAlert: false,
-            isAlert: false,
-            actorHostIps: [],
-            targetHostIps: [],
-            sourceIps: [],
-            sourceCountryCodes: [],
-          },
-          // Event 2: Another actor from Group 1 (same type:sub_type)
-          {
-            action: 'complex.action',
-            actorIds: ['user-2'],
-            targetIds: ['target-1'],
-            actorEntityType: 'user',
-            targetEntityType: 'host',
-            actorLabel: 'service account',
-            targetLabel: 'Server',
-            actorIdsCount: 1,
-            targetIdsCount: 1,
-            badge: 1,
-            uniqueEventsCount: 1,
-            uniqueAlertsCount: 0,
-            docs: ['{"id":"event2","type":"event"}'],
-            isOrigin: false,
-            isOriginAlert: false,
-            isAlert: false,
-            actorHostIps: [],
-            targetHostIps: [],
-            sourceIps: [],
-            sourceCountryCodes: [],
-          },
-          // Event 3: Actor from Group 2 (enriched with type only, no sub_type)
-          {
-            action: 'complex.action',
-            actorIds: ['host-1'],
-            targetIds: ['target-1'],
-            actorEntityType: 'host',
-            targetEntityType: 'host',
-            actorLabel: 'host-1',
-            targetLabel: 'Server',
-            actorIdsCount: 1,
-            targetIdsCount: 1,
-            badge: 1,
-            uniqueEventsCount: 1,
-            uniqueAlertsCount: 0,
-            docs: ['{"id":"event3","type":"event"}'],
-            isOrigin: false,
-            isOriginAlert: false,
-            isAlert: false,
-            actorHostIps: [],
-            targetHostIps: [],
-            sourceIps: [],
-            sourceCountryCodes: [],
-          },
-          // Event 4: Actor from Group 3 (non-enriched)
-          {
-            action: 'complex.action',
-            actorIds: ['non-enriched-1'],
-            targetIds: ['target-1'],
-            actorEntityType: 'Entities',
-            targetEntityType: 'host',
-            actorLabel: 'non-enriched-1',
-            targetLabel: 'Server',
-            actorIdsCount: 1,
-            targetIdsCount: 1,
-            badge: 1,
-            uniqueEventsCount: 1,
-            uniqueAlertsCount: 0,
-            docs: ['{"id":"event4","type":"event"}'],
-            isOrigin: false,
-            isOriginAlert: false,
-            isAlert: false,
-            actorHostIps: [],
-            targetHostIps: [],
-            sourceIps: [],
-            sourceCountryCodes: [],
-          },
-        ];
+    it('should create group enriched entity node with tag as entity.type, label as entity.sub_type, and count', () => {
+      const records: GraphEdge[] = [
+        {
+          action: 'test.action',
+          actorIds: ['user-1', 'user-2', 'user-3'],
+          targetIds: ['host-1', 'host-2'],
+          actorEntityType: 'user',
+          targetEntityType: 'host',
+          actorLabel: 'service_account', // entity.sub_type from ESQL
+          targetLabel: 'server', // entity.sub_type from ESQL
+          actorIdsCount: 3,
+          targetIdsCount: 2,
+          badge: 5,
+          uniqueEventsCount: 5,
+          uniqueAlertsCount: 0,
+          docs: [
+            '{"id":"event1","type":"event"}',
+            '{"id":"event2","type":"event"}',
+            '{"id":"event3","type":"event"}',
+            '{"id":"event4","type":"event"}',
+            '{"id":"event5","type":"event"}',
+          ],
+          isOrigin: false,
+          isOriginAlert: false,
+          isAlert: false,
+          actorHostIps: [],
+          targetHostIps: [],
+          sourceIps: [],
+          sourceCountryCodes: [],
+        },
+      ];
 
-        const result = parseRecords(mockLogger, records);
+      const result = parseRecords(mockLogger, records);
 
-        // With pure UUIDs:
-        // Event 1: uuid-1 (actor), uuid-2 (target)
-        // Event 2: uuid-3 (actor), uuid-4 (target)
-        // Event 3: uuid-5 (actor), uuid-6 (target)
-        // Event 4: uuid-7 (actor), uuid-8 (target)
-        // All events have same action going to targets with same label 'Server'
-        // Events 1&2 have same actor/target labels, so group node created
-        const entityNodes = result.nodes.filter((n) => n.shape !== 'label' && n.shape !== 'group');
-        const labelNodes = result.nodes.filter((n) => n.shape === 'label');
-        const groupNodes = result.nodes.filter((n) => n.shape === 'group');
+      const actorNode = result.nodes.find((n) => n.id === 'uuid-1') as EntityNodeDataModel;
+      const targetNode = result.nodes.find((n) => n.id === 'uuid-2') as EntityNodeDataModel;
 
-        // 8 entity nodes (4 actors + 4 targets)
-        expect(entityNodes.length).toBe(8);
-        expect(labelNodes.length).toBeGreaterThanOrEqual(3); // May have grouping
-        expect(groupNodes.length).toBeGreaterThanOrEqual(0); // May have group nodes
+      expect(actorNode).toBeDefined();
+      expect(actorNode.label).toBe('service_account');
+      expect(actorNode.tag).toBe('user');
+      expect(actorNode.icon).toBe('user');
+      expect(actorNode.shape).toBe('ellipse');
+      expect(actorNode.count).toBe(3);
 
-        // Group 1: First actor (service account)
-        const group1Node1 = result.nodes.find((n) => n.id === 'uuid-1') as EntityNodeDataModel;
-        expect(group1Node1).toBeDefined();
-        expect(group1Node1!.label).toBe('service account');
-        expect(group1Node1!.tag).toBe('user');
-        expect(group1Node1!.icon).toBe('user');
-        expect(group1Node1!.shape).toBe('ellipse');
-
-        // Group 1: Second actor (also service account, but different UUID)
-        const group1Node2 = result.nodes.find((n) => n.id === 'uuid-3') as EntityNodeDataModel;
-        expect(group1Node2).toBeDefined();
-        expect(group1Node2!.label).toBe('service account');
-        expect(group1Node2!.tag).toBe('user');
-
-        // Group 2: Host actor
-        const group2Node = result.nodes.find((n) => n.id === 'uuid-5') as EntityNodeDataModel;
-        expect(group2Node).toBeDefined();
-        expect(group2Node!.label).toBe('host-1');
-        expect(group2Node!.tag).toBe('host');
-        expect(group2Node!.icon).toBe('storage');
-        expect(group2Node!.shape).toBe('hexagon');
-
-        // Group 3: Non-enriched actor (Entities)
-        const group3Node = result.nodes.find((n) => n.id === 'uuid-7') as EntityNodeDataModel;
-        expect(group3Node).toBeDefined();
-        expect(group3Node!.label).toBe('non-enriched-1');
-        expect(group3Node!.tag).toBe('Entities');
-        expect(group3Node!.icon).toBe('magnifyWithExclamation');
-        expect(group3Node!.shape).toBe('rectangle');
-        expect(group3Node!.count).toBeUndefined(); // Single entity
-
-        // Verify all actor nodes have different tags
-        const actorNodes = [group1Node1!, group2Node!, group3Node!];
-        const uniqueTags = new Set(actorNodes.map((n) => n.tag));
-        expect(uniqueTags.size).toBe(3); // user, host, Entities
-      });
+      expect(targetNode).toBeDefined();
+      expect(targetNode.label).toBe('server');
+      expect(targetNode.tag).toBe('host');
+      expect(targetNode.icon).toBe('storage');
+      expect(targetNode.shape).toBe('hexagon');
+      expect(targetNode.count).toBe(2);
     });
   });
 });

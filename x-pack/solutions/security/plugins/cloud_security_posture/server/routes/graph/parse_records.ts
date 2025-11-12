@@ -156,23 +156,23 @@ const createGroupedActorAndTargetNodes = (
   const actorGroup: {
     id: string;
     type: string;
-    count: number;
+    count?: number;
     docData: NodeDocumentDataModel[];
     hostIps: string[];
     label?: string;
   } = {
     id: actorNodeId,
     type: actorEntityType,
-    count: actorIdsCount,
     docData: actorsDocDataArray,
     hostIps: actorHostIpsArray,
+    ...(actorIdsCount > 1 ? { count: actorIdsCount } : {}),
     ...(actorLabel && actorLabel !== '' ? { label: actorLabel } : {}),
   };
 
   const targetGroup: {
     id: string;
     type: string;
-    count: number;
+    count?: number;
     docData: NodeDocumentDataModel[];
     hostIps: string[];
     label?: string;
@@ -181,9 +181,9 @@ const createGroupedActorAndTargetNodes = (
       ? {
           id: targetNodeId,
           type: targetEntityType,
-          count: targetIdsCount,
           docData: targetsDocDataArray,
           hostIps: targetHostIpsArray,
+          ...(targetIdsCount > 1 ? { count: targetIdsCount } : {}),
           ...(targetLabel && targetLabel !== '' ? { label: targetLabel } : {}),
         }
       : {
@@ -191,7 +191,6 @@ const createGroupedActorAndTargetNodes = (
           id: targetNodeId,
           type: '',
           label: 'Unknown',
-          count: 0,
           docData: [],
           hostIps: [],
         };
@@ -201,10 +200,10 @@ const createGroupedActorAndTargetNodes = (
       nodesMap[id] = {
         id,
         color: 'primary' as const,
-        label,
+        ...(label ? { label } : {}),
         documentsData: docData,
         ...deriveEntityAttributesFromType(type),
-        ...(count > 1 ? { count } : {}),
+        ...(count && count > 1 ? { count } : {}),
         ...(hostIps.length > 0 ? { ips: hostIps } : {}),
       };
     }
