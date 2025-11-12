@@ -1639,13 +1639,6 @@ module.exports = {
         'playwright/valid-title': 'error',
         // Scout has a its own runtime validator for test tags
         'playwright/valid-test-tags': 'off',
-        // Check unused destructured params
-        '@typescript-eslint/no-unused-vars': [
-          'error',
-          {
-            args: 'all',
-          },
-        ],
       },
     },
     {
