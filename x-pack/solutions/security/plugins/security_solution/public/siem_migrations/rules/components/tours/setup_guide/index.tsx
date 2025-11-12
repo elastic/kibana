@@ -7,6 +7,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiButtonEmpty, EuiTourStep } from '@elastic/eui';
+import { TOURS, useTourQueue } from '@kbn/tour-queue';
 import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../../../../../../common/constants';
 import { useKibana } from '../../../../../common/lib/kibana';
 import * as i18n from './translations';
@@ -24,6 +25,8 @@ export interface SetupTourProps {
 export const SiemMigrationSetupTour: React.FC<SetupTourProps> = React.memo(({ children }) => {
   const { siemMigrations, storage } = useKibana().services;
 
+  const { shouldShow, onComplete } = useTourQueue(TOURS.SECURITY_SIEM_MIGRATION);
+
   const [tourState, setTourState] = useState(() => {
     const restoredTourState = storage.get(NEW_FEATURES_TOUR_STORAGE_KEYS.SIEM_MAIN_LANDING_PAGE);
     if (restoredTourState != null) {
@@ -37,7 +40,8 @@ export const SiemMigrationSetupTour: React.FC<SetupTourProps> = React.memo(({ ch
       ...tourState,
       isTourActive: false,
     });
-  }, [tourState]);
+    onComplete();
+  }, [tourState, onComplete]);
 
   useEffect(() => {
     storage.set(NEW_FEATURES_TOUR_STORAGE_KEYS.SIEM_MAIN_LANDING_PAGE, tourState);
@@ -52,8 +56,10 @@ export const SiemMigrationSetupTour: React.FC<SetupTourProps> = React.memo(({ ch
   }, []);
 
   const showTour = useMemo(() => {
-    return siemMigrations.rules.isAvailable() && tourState.isTourActive && tourDelayElapsed;
-  }, [siemMigrations.rules, tourDelayElapsed, tourState.isTourActive]);
+    return (
+      siemMigrations.rules.isAvailable() && tourState.isTourActive && tourDelayElapsed && shouldShow
+    );
+  }, [siemMigrations.rules, tourDelayElapsed, tourState.isTourActive, shouldShow]);
 
   return (
     <EuiTourStep

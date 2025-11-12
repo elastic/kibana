@@ -12,12 +12,14 @@ import type { NavigationTourManager } from '@kbn/core-chrome-navigation-tour';
 import type { UserProfileServiceStart } from '@kbn/core-user-profile-browser';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
+import { getTourQueueStateManager, TOURS } from '@kbn/tour-queue';
 
 /**
  * This tour combines the spaces solution view tour and new navigation tour into a single
  * multi-step tour.
  */
 export class SolutionNavigationTourManager {
+  private tourQueueStateManager = getTourQueueStateManager();
   constructor(
     private deps: {
       navigationTourManager: NavigationTourManager;
@@ -29,22 +31,43 @@ export class SolutionNavigationTourManager {
   ) {}
 
   async startTour(): Promise<void> {
-    // first start the spaces tour (if applicable)
-    if (this.deps.spacesSolutionViewTourManager) {
-      const spacesTour = await this.deps.spacesSolutionViewTourManager.startTour();
-      if (spacesTour.result === 'started') {
-        await this.deps.spacesSolutionViewTourManager.waitForTourEnd();
-      }
+    await this.tourQueueStateManager.initializeTourQueueSkipState(this.deps.userProfile);
+    // Register and get cleanup function
+    const removeTour = this.tourQueueStateManager.registerTour(TOURS.NAVIGATION);
+    const shouldShow = this.tourQueueStateManager.shouldShowTour(TOURS.NAVIGATION);
+    if (!shouldShow) {
+      removeTour();
+      return;
     }
 
-    // when completes, maybe start the navigation tour (if applicable)
-    const hasCompletedTour = await checkTourCompletion(this.deps.userProfile);
-    if (hasCompletedTour) return;
+    try {
+      // first start the spaces tour (if applicable)
+      if (this.deps.spacesSolutionViewTourManager) {
+        const spacesTour = await this.deps.spacesSolutionViewTourManager.startTour();
+        if (spacesTour.result === 'started') {
+          await this.deps.spacesSolutionViewTourManager.waitForTourEnd();
+        }
+      }
 
-    this.deps.navigationTourManager.startTour();
-    await this.deps.navigationTourManager.waitForTourEnd();
+      // when completes, maybe start the navigation tour (if applicable)
+      const hasCompletedTour = await checkTourCompletion(this.deps.userProfile);
+      if (hasCompletedTour) {
+        this.tourQueueStateManager.completeTour(TOURS.NAVIGATION);
+        return;
+      }
+      this.deps.navigationTourManager.startTour();
+      const navigationTourResult = await this.deps.navigationTourManager.waitForTourEnd();
 
-    await preserveTourCompletion(this.deps.userProfile);
+      // Skip remaining tours in queue if navigation tour was skipped
+      if (navigationTourResult === 'skipped') {
+        await this.tourQueueStateManager.skipAllTours();
+      } else {
+        await preserveTourCompletion(this.deps.userProfile);
+        this.tourQueueStateManager.completeTour(TOURS.NAVIGATION);
+      }
+    } finally {
+      removeTour();
+    }
   }
 }
 
