@@ -7,7 +7,7 @@
 
 import type { FieldMap } from '@kbn/alerts-as-data-utils';
 import { alertFieldMap } from '@kbn/alerts-as-data-utils';
-import { ALERT_WORKFLOW_STATUS_UPDATED_AT } from '@kbn/rule-data-utils';
+import { ALERT_WORKFLOW_STATUS_UPDATED_AT, ALERT_ATTACK_IDS } from '@kbn/rule-data-utils';
 import {
   ALERT_ATTACK_DISCOVERY_ALERTS_CONTEXT_COUNT,
   ALERT_ATTACK_DISCOVERY_ALERT_IDS,
@@ -55,6 +55,11 @@ export const attackDiscoveryAlertFieldMap: FieldMap = {
   [ALERT_WORKFLOW_STATUS_UPDATED_AT]: {
     type: 'date',
     array: false,
+    required: false,
+  },
+  [ALERT_ATTACK_IDS]: {
+    type: 'keyword',
+    array: true,
     required: false,
   },
 
