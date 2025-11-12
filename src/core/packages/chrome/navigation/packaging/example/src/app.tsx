@@ -182,7 +182,7 @@ function App() {
                 <strong>Package</strong>: <EuiCode>@kbn/one-navigation</EuiCode>
               </li>
               <li>
-                <strong>Bundle Size</strong>: ~26 KB (minified)
+                <strong>Bundle Size</strong>: 25.8 KB (minified)
               </li>
               <li>
                 <strong>Dependencies</strong>: React, EUI, Emotion (peer deps)

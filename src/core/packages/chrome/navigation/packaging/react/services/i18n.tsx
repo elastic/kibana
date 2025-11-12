@@ -27,7 +27,18 @@ export const FormattedMessage: React.FC<{
   id: string;
   defaultMessage?: string;
   values?: Record<string, any>;
-}> = ({ id, defaultMessage }) => {
+}> = ({ id, defaultMessage, values }) => {
+  // Simple string interpolation for values like {count}
+  if (values && defaultMessage) {
+    return (
+      <>
+        {Object.entries(values).reduce(
+          (msg, [key, val]) => msg.replace(new RegExp(`\\{${key}\\}`, 'g'), String(val)),
+          defaultMessage
+        )}
+      </>
+    );
+  }
   return <>{defaultMessage || id}</>;
 };
 

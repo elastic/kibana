@@ -1,0 +1,21 @@
+{
+  "extends": "../../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "skipLibCheck": true,
+    "jsx": "react",
+    "esModuleInterop": true
+  },
+  "include": [
+    "react/**/*",
+    "../src/components/navigation.tsx",
+    "../src/utils/**/*",
+    "../types.ts"
+  ],
+  "exclude": [
+    "target",
+    "node_modules",
+    "**/__stories__/**",
+    "../src/__stories__/**"
+  ]
+}
