@@ -231,6 +231,5 @@ const componentStyles = {
   visualizationToolbar: ({ euiTheme }: UseEuiTheme) =>
     css({
       margin: `${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.s} ${euiTheme.size.base}`,
-      backgroundColor: euiTheme.colors.emptyShade,
     }),
 };
