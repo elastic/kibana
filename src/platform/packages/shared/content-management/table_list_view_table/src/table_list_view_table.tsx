@@ -1172,7 +1172,9 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     return null;
   }
 
-  if (!showFetchError && hasNoItems) {
+  // When tabs are enabled, always show the table structure (including tabs)
+  // even when there are no items, so users can switch between tabs
+  if (!showFetchError && hasNoItems && !contentTypeTabsEnabled) {
     return (
       <PageTemplate isEmptyState={true}>
         <KibanaPageTemplate.Section
@@ -1227,6 +1229,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           createdByEnabled={createdByEnabled}
           favoritesEnabled={favoritesEnabled}
           contentTypeTabsEnabled={contentTypeTabsEnabled}
+          emptyPrompt={emptyPrompt}
         />
 
         {/* Delete modal */}

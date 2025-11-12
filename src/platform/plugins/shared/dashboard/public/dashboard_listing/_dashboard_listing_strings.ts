@@ -42,6 +42,14 @@ export const dashboardListingTableStrings = {
     i18n.translate('dashboard.listing.tableListTitle', {
       defaultMessage: 'Dashboards',
     }),
+  getManagementItemDisabledEditMessage: () =>
+    i18n.translate('dashboard.listing.table.managedItemDisabledEditMessage', {
+      defaultMessage: 'Elastic manages this item. Editing it is not possible.',
+    }),
+  getReadOnlyVisualizationMessage: () =>
+    i18n.translate('dashboard.listing.table.readOnlyVisualizationMessage', {
+      defaultMessage: "These details can't be edited because this visualization is no longer supported.",
+    }),
 };
 
 export const noItemsStrings = {

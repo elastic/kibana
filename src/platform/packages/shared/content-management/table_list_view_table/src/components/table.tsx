@@ -88,6 +88,7 @@ interface Props<T extends UserContentCommonSchema> extends State<T>, TagManageme
   createdByEnabled: boolean;
   favoritesEnabled: boolean;
   contentTypeTabsEnabled?: boolean;
+  emptyPrompt?: JSX.Element;
 }
 
 export function Table<T extends UserContentCommonSchema>({
@@ -120,6 +121,7 @@ export function Table<T extends UserContentCommonSchema>({
   createdByEnabled,
   favoritesEnabled,
   contentTypeTabsEnabled,
+  emptyPrompt,
 }: Props<T>) {
   const euiTheme = useEuiTheme();
   const { getTagList, isTaggingEnabled, isKibanaVersioningEnabled } = useServices();
@@ -362,6 +364,24 @@ export function Table<T extends UserContentCommonSchema>({
       }}
     />
   ) : undefined;
+
+  // Special case: for annotation-groups tab with no items and no search/filters,
+  // show tabs + empty prompt without table
+  const isAnnotationGroupsTabEmpty =
+    contentTypeTabsEnabled &&
+    tableFilter.contentTypeTab === 'annotation-groups' &&
+    visibleItems.length === 0 &&
+    !isFetchingItems &&
+    !hasQueryOrFilters;
+
+  if (isAnnotationGroupsTabEmpty) {
+    return (
+      <>
+        {tabbedFilter}
+        {emptyPrompt || noItemsMessage}
+      </>
+    );
+  }
 
   return (
     <UserFilterContextProvider
