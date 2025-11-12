@@ -18,12 +18,12 @@ import { convertUIStepsToDSL, isActionBlock } from '@kbn/streamlang';
 import { getStreamTypeFromDefinition } from '../../../../../util/get_stream_type_from_definition';
 import { getFormattedError } from '../../../../../util/errors';
 import type { StreamEnrichmentServiceDependencies } from './types';
+import type { HttpRequestPreview } from '../../../request_preview_flyout';
 
 export type UpsertStreamResponse = APIReturnType<'PUT /api/streams/{name}/_ingest 2023-10-31'>;
 
-export interface StreamSaveRequest {
+export interface StreamSaveRequest extends HttpRequestPreview {
   method: 'PUT';
-  url: string;
   body: {
     ingest: Streams.ingest.all.GetResponse['stream']['ingest'];
   };

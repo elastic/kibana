@@ -8,16 +8,11 @@
 import {
   EuiAccordion,
   EuiCode,
-  EuiCodeBlock,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
   EuiPanel,
   EuiResizableContainer,
   EuiSpacer,
   EuiSplitPanel,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -31,6 +26,7 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_definition';
 import { useKbnUrlStateStorageFromRouterContext } from '../../../util/kbn_url_state_context';
 import { StreamsAppContextProvider } from '../../streams_app_context_provider';
+import { RequestPreviewFlyout, type HttpRequestPreview } from '../request_preview_flyout';
 import { ManagementBottomBar } from '../management_bottom_bar';
 import { getDefinitionFields } from '../schema_editor/hooks/use_schema_fields';
 import { SchemaChangesReviewModal, getChanges } from '../schema_editor/schema_changes_review_modal';
@@ -43,7 +39,6 @@ import {
   useStreamEnrichmentSelector,
   useStreamSaveRequestPreview,
 } from './state_management/stream_enrichment_state_machine';
-import type { StreamSaveRequest } from './state_management/stream_enrichment_state_machine/upsert_stream_actor';
 import { RootSteps } from './steps/root_steps';
 
 const MemoSimulationPlayground = React.memo(SimulationPlayground);
@@ -107,7 +102,7 @@ export function StreamDetailEnrichmentContentImpl() {
 
   const hasChanges = canUpdate && !isSimulating;
   const [isRequestFlyoutOpen, setIsRequestFlyoutOpen] = React.useState(false);
-  const [requestPreview, setRequestPreview] = React.useState<StreamSaveRequest | null>(null);
+  const [requestPreview, setRequestPreview] = React.useState<HttpRequestPreview | null>(null);
 
   const openRequestPreviewFlyout = React.useCallback(() => {
     const preview = getRequestPreview();
@@ -205,7 +200,7 @@ export function StreamDetailEnrichmentContentImpl() {
         />
       )}
       {isRequestFlyoutOpen && requestPreview && (
-        <RequestPayloadFlyout
+        <RequestPreviewFlyout
           request={requestPreview}
           onClose={closeRequestPreviewFlyout}
           prependBasePath={core.http.basePath.prepend}
@@ -214,52 +209,6 @@ export function StreamDetailEnrichmentContentImpl() {
     </EuiSplitPanel.Outer>
   );
 }
-
-interface RequestPayloadFlyoutProps {
-  request: StreamSaveRequest;
-  onClose: () => void;
-  prependBasePath: (path: string) => string;
-}
-
-const RequestPayloadFlyout = ({ request, onClose, prependBasePath }: RequestPayloadFlyoutProps) => {
-  const fullUrl = prependBasePath(request.url);
-  const requestBody = JSON.stringify(request.body, null, 2);
-
-  return (
-    <EuiFlyout
-      onClose={onClose}
-      size="m"
-      maxWidth={600}
-      aria-labelledby="streamsRequestPayloadFlyoutTitle"
-    >
-      <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
-          <h2 id="streamsRequestPayloadFlyoutTitle">{requestPreviewFlyoutTitle}</h2>
-        </EuiTitle>
-        <EuiText color="subdued" size="s">
-          {requestPreviewFlyoutDescription}
-        </EuiText>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <EuiText size="s">
-          <strong>{requestPreviewUrlLabel}</strong>
-        </EuiText>
-        <EuiSpacer size="s" />
-        <EuiCodeBlock language="http" isCopyable aria-label={requestPreviewUrlLabel}>
-          {`${request.method} ${fullUrl}`}
-        </EuiCodeBlock>
-        <EuiSpacer size="m" />
-        <EuiText size="s">
-          <strong>{requestPreviewBodyLabel}</strong>
-        </EuiText>
-        <EuiSpacer size="s" />
-        <EuiCodeBlock language="json" isCopyable aria-label={requestPreviewBodyLabel}>
-          {requestBody}
-        </EuiCodeBlock>
-      </EuiFlyoutBody>
-    </EuiFlyout>
-  );
-};
 
 const StepsEditor = React.memo(() => {
   const stepRefs = useStreamEnrichmentSelector((state) => state.context.stepRefs);
@@ -417,26 +366,3 @@ const clampTwoLines = css`
   overflow: hidden;
   text-overflow: ellipsis;
 `;
-
-const requestPreviewFlyoutTitle = i18n.translate(
-  'xpack.streams.streamDetailView.managementTab.enrichment.requestPreview.flyoutTitle',
-  { defaultMessage: 'Save request payload' }
-);
-
-const requestPreviewFlyoutDescription = i18n.translate(
-  'xpack.streams.streamDetailView.managementTab.enrichment.requestPreview.flyoutDescription',
-  {
-    defaultMessage:
-      'Use this API request in scripts or automation to persist the configured processing steps.',
-  }
-);
-
-const requestPreviewUrlLabel = i18n.translate(
-  'xpack.streams.streamDetailView.managementTab.enrichment.requestPreview.urlLabel',
-  { defaultMessage: 'Request URL' }
-);
-
-const requestPreviewBodyLabel = i18n.translate(
-  'xpack.streams.streamDetailView.managementTab.enrichment.requestPreview.bodyLabel',
-  { defaultMessage: 'Request body' }
-);

@@ -24,6 +24,7 @@ import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { ChildStreamList } from './child_stream_list';
 import {
   StreamRoutingContextProvider,
+  useRoutingRequestPreview,
   useStreamRoutingEvents,
   useStreamsRoutingSelector,
 } from './state_management/stream_routing_state_machine';
@@ -31,6 +32,7 @@ import { ManagementBottomBar } from '../management_bottom_bar';
 import { PreviewPanel } from './preview_panel';
 import type { StatefulStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
+import { RequestPreviewFlyout, type HttpRequestPreview } from '../request_preview_flyout';
 
 interface StreamDetailRoutingProps {
   definition: Streams.WiredStream.GetResponse;
@@ -72,6 +74,7 @@ export function StreamDetailRoutingImpl() {
 
   const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
   const { cancelChanges, saveChanges } = useStreamRoutingEvents();
+  const getRequestPreview = useRoutingRequestPreview();
 
   const definition = routingSnapshot.context.definition;
 
@@ -107,6 +110,18 @@ export function StreamDetailRoutingImpl() {
   });
 
   const availableStreams = streamsListFetch.value?.streams.map((stream) => stream.name) ?? [];
+  const [isRequestFlyoutOpen, setIsRequestFlyoutOpen] = React.useState(false);
+  const [requestPreview, setRequestPreview] = React.useState<HttpRequestPreview | null>(null);
+
+  const openRequestPreviewFlyout = React.useCallback(() => {
+    setRequestPreview(getRequestPreview());
+    setIsRequestFlyoutOpen(true);
+  }, [getRequestPreview]);
+
+  const closeRequestPreviewFlyout = React.useCallback(() => {
+    setIsRequestFlyoutOpen(false);
+    setRequestPreview(null);
+  }, []);
 
   return (
     <EuiFlexItem
@@ -180,10 +195,18 @@ export function StreamDetailRoutingImpl() {
               })}
               disabled={!routingSnapshot.can({ type: 'routingRule.save' })}
               insufficientPrivileges={!routingSnapshot.can({ type: 'routingRule.save' })}
+              onViewRequest={openRequestPreviewFlyout}
             />
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
+      {isRequestFlyoutOpen && requestPreview && (
+        <RequestPreviewFlyout
+          request={requestPreview}
+          onClose={closeRequestPreviewFlyout}
+          prependBasePath={core.http.basePath.prepend}
+        />
+      )}
     </EuiFlexItem>
   );
 }

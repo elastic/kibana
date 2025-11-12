@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { createActorContext, useSelector } from '@xstate5/react';
 import { createConsoleInspector } from '@kbn/xstate-utils';
 import { waitFor } from 'xstate5';
@@ -23,6 +23,8 @@ import type {
   RoutingSamplesActorSnapshot,
 } from './routing_samples_state_machine';
 import type { PartitionSuggestion } from '../../review_suggestions_form/use_review_suggestions_form';
+import { routingConverter } from '../../utils';
+import { buildRoutingSaveRequest } from './stream_actors';
 
 const consoleInspector = createConsoleInspector();
 
@@ -150,4 +152,15 @@ export const useStreamSamplesSelector = <T,>(
   }
 
   return useSelector(routingSamplesRef, selector);
+};
+
+export const useRoutingRequestPreview = () => {
+  const service = StreamRoutingContext.useActorRef();
+
+  return useCallback(() => {
+    const snapshot = service.getSnapshot();
+    const routing = snapshot.context.routing.map(routingConverter.toAPIDefinition);
+
+    return buildRoutingSaveRequest(snapshot.context.definition, routing);
+  }, [service]);
 };

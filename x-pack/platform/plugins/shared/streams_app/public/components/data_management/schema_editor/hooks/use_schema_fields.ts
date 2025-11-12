@@ -19,6 +19,7 @@ import { useKibana } from '../../../../hooks/use_kibana';
 import type { MappedSchemaField, SchemaField } from '../types';
 import { convertToFieldDefinitionConfig } from '../utils';
 import { getFormattedError } from '../../../../util/errors';
+import type { HttpRequestPreview } from '../../request_preview_flyout';
 
 export const useSchemaFields = ({
   definition,
@@ -161,12 +162,7 @@ export const useSchemaFields = ({
 
   const submitChanges = useCallback(async () => {
     try {
-      const mappedFields = fields
-        .filter((field) => field.status === 'mapped')
-        .reduce((acc, field) => {
-          acc[field.name] = convertToFieldDefinitionConfig(field as MappedSchemaField);
-          return acc;
-        }, {} as Record<string, FieldDefinitionConfig>);
+      const request = buildSchemaSaveRequest(definition, fields);
 
       await streamsRepositoryClient.fetch(`PUT /api/streams/{name}/_ingest 2023-10-31`, {
         signal: abortController.signal,
@@ -174,24 +170,7 @@ export const useSchemaFields = ({
           path: {
             name: definition.stream.name,
           },
-          body: {
-            ingest: {
-              ...definition.stream.ingest,
-              ...(Streams.WiredStream.GetResponse.is(definition)
-                ? {
-                    wired: {
-                      ...definition.stream.ingest.wired,
-                      fields: mappedFields,
-                    },
-                  }
-                : {
-                    classic: {
-                      ...definition.stream.ingest.classic,
-                      field_overrides: mappedFields,
-                    },
-                  }),
-            },
-          },
+          body: request.body,
         },
       });
 
@@ -235,6 +214,43 @@ export const useSchemaFields = ({
     pendingChangesCount,
     discardChanges,
     submitChanges,
+  };
+};
+
+export const buildSchemaSaveRequest = (
+  definition: Streams.ingest.all.GetResponse,
+  fields: SchemaField[]
+): HttpRequestPreview => {
+  const mappedFields = fields
+    .filter((field) => field.status === 'mapped')
+    .reduce((acc, field) => {
+      acc[field.name] = convertToFieldDefinitionConfig(field as MappedSchemaField);
+      return acc;
+    }, {} as Record<string, FieldDefinitionConfig>);
+
+  const streamName = encodeURIComponent(definition.stream.name);
+
+  return {
+    method: 'PUT',
+    url: `/api/streams/${streamName}/_ingest`,
+    body: {
+      ingest: {
+        ...definition.stream.ingest,
+        ...(Streams.WiredStream.GetResponse.is(definition)
+          ? {
+              wired: {
+                ...definition.stream.ingest.wired,
+                fields: mappedFields,
+              },
+            }
+          : {
+              classic: {
+                ...definition.stream.ingest.classic,
+                field_overrides: mappedFields,
+              },
+            }),
+      },
+    },
   };
 };
 
