@@ -39,7 +39,6 @@ export const useLensProps = ({
   const buildLensProps = useCallback(
     ({ fetchParams, lensVisServiceState }: UnifiedHistogramFetch$Arguments) => {
       const visContext = lensVisServiceState?.visContext;
-      // console.log('useLensProps - buildLensProps called', visContext);
       if (!visContext) {
         return;
       }

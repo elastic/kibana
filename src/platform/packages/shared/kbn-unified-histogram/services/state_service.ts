@@ -84,6 +84,10 @@ export interface UnifiedHistogramStateService {
    */
   state$: BehaviorSubject<UnifiedHistogramState>;
   /**
+   * Gets the current chart hidden state
+   */
+  getChartHidden: () => boolean;
+  /**
    * Sets the current chart hidden state
    */
   setChartHidden: (chartHidden: boolean) => void;
@@ -111,19 +115,7 @@ export interface UnifiedHistogramStateService {
 
 export const createStateService = (
   options: UnifiedHistogramStateOptions
-): {
-  state$: BehaviorSubject<UnifiedHistogramState>;
-  getChartHidden: () => boolean;
-  setChartHidden: (chartHidden: boolean) => void;
-  setTopPanelHeight: (topPanelHeight: UnifiedHistogramTopPanelHeightContext) => void;
-  setLensRequestAdapter: (lensRequestAdapter: RequestAdapter | undefined) => void;
-  setLensAdapters: (lensAdapters: UnifiedHistogramChartLoadEvent['adapters'] | undefined) => void;
-  setLensDataLoading$: (dataLoading$: PublishingSubject<boolean | undefined> | undefined) => void;
-  setTotalHits: (totalHits: {
-    totalHitsStatus: UnifiedHistogramFetchStatus;
-    totalHitsResult: number | Error | undefined;
-  }) => void;
-} => {
+): UnifiedHistogramStateService => {
   const { services, localStorageKeyPrefix, initialState } = options;
 
   let initialChartHidden = false;
