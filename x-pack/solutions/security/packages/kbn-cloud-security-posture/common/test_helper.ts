@@ -7,7 +7,7 @@
 import type { Agent as SuperTestAgent } from 'supertest';
 
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
+import type { RoleCredentials, SecurityService } from '@kbn/ftr-common-functional-services';
 import { CLOUD_SECURITY_PLUGIN_VERSION } from './constants';
 
 export async function createPackagePolicy(
