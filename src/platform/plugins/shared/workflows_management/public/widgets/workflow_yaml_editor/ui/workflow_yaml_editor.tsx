@@ -15,9 +15,9 @@ import classnames from 'classnames';
 import type { SchemasSettings } from 'monaco-yaml';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import YAML from 'yaml';
+import type YAML from 'yaml';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { monaco } from '@kbn/monaco';
+import { monaco, YAML_LANG_ID } from '@kbn/monaco';
 import { isTriggerType } from '@kbn/workflows';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows/types/v1';
 import type { z } from '@kbn/zod';
@@ -29,13 +29,28 @@ import {
   useStepDecorationsInExecution,
   useTriggerTypeDecorations,
 } from './decorations';
-import { useCompletionProvider } from './hooks/use_completion_provider';
+import { useWorkflowYamlCompletionProvider } from './hooks/use_workflow_yaml_completion_provider';
 import { StepActions } from './step_actions';
 import { WorkflowYAMLEditorShortcuts } from './workflow_yaml_editor_shortcuts';
 import { WorkflowYAMLValidationErrors } from './workflow_yaml_validation_errors';
-import { addDynamicConnectorsToCache } from '../../../../common/schema';
 import { useAvailableConnectors } from '../../../entities/connectors/model/use_available_connectors';
 import { useSaveYaml } from '../../../entities/workflows/model/use_save_yaml';
+import type { StepInfo } from '../../../entities/workflows/store';
+import {
+  selectEditorFocusedStepInfo,
+  selectEditorYamlDocument,
+  selectSchema,
+  setCursorPosition,
+  setYamlString,
+} from '../../../entities/workflows/store';
+import {
+  selectEditorYaml,
+  selectHasChanges,
+  selectIsExecutionsTab,
+  selectStepExecutions,
+  selectWorkflow,
+} from '../../../entities/workflows/store/workflow_detail/selectors';
+import { setIsTestModalOpen } from '../../../entities/workflows/store/workflow_detail/slice';
 import { ActionsMenuPopover } from '../../../features/actions_menu_popover';
 import type { ActionOptionData } from '../../../features/actions_menu_popover/types';
 import { useMonacoMarkersChangedInterceptor } from '../../../features/validate_workflow_yaml/lib/use_monaco_markers_changed_interceptor';
@@ -43,8 +58,7 @@ import { useYamlValidation } from '../../../features/validate_workflow_yaml/lib/
 import type { YamlValidationResult } from '../../../features/validate_workflow_yaml/model/types';
 import { useWorkflowJsonSchema } from '../../../features/validate_workflow_yaml/model/use_workflow_json_schema';
 import { useKibana } from '../../../hooks/use_kibana';
-import { UnsavedChangesPrompt } from '../../../shared/ui/unsaved_changes_prompt';
-import { YamlEditor } from '../../../shared/ui/yaml_editor';
+import { UnsavedChangesPrompt, YamlEditor } from '../../../shared/ui';
 import {
   ElasticsearchMonacoConnectorHandler,
   GenericMonacoConnectorHandler,
@@ -56,17 +70,6 @@ import {
 } from '../lib/monaco_providers';
 import { insertStepSnippet } from '../lib/snippets/insert_step_snippet';
 import { insertTriggerSnippet } from '../lib/snippets/insert_trigger_snippet';
-import type { StepInfo } from '../lib/store';
-import {
-  selectFocusedStepInfo,
-  selectSchemaLoose,
-  selectYamlDocument,
-  setCursorPosition,
-  setStepExecutions,
-  setYamlString,
-} from '../lib/store';
-import { selectHasChanges, selectWorkflow } from '../lib/store/selectors';
-import { setIsTestModalOpen } from '../lib/store/slice';
 import { useRegisterKeyboardCommands } from '../lib/use_register_keyboard_commands';
 import { navigateToErrorPosition } from '../lib/utils';
 import { GlobalWorkflowEditorStyles } from '../styles/global_workflow_editor_styles';
@@ -123,45 +126,19 @@ const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
 };
 
 export interface WorkflowYAMLEditorProps {
-  workflowYaml: string;
-  isExecutionYaml?: boolean;
-  stepExecutions?: WorkflowStepExecutionDto[];
-  'data-testid'?: string;
   highlightDiff?: boolean;
-  onMount?: (editor: monaco.editor.IStandaloneCodeEditor, monacoInstance: typeof monaco) => void;
-  onValidationErrors?: React.Dispatch<React.SetStateAction<YamlValidationResult[]>>;
-  esHost?: string;
-  kibanaHost?: string;
-  selectedExecutionId?: string;
-  onStepActionClicked?: (params: { stepId: string; actionType: string }) => void;
+  onStepRun: (params: { stepId: string; actionType: string }) => void;
 }
 
 export const WorkflowYAMLEditor = ({
-  workflowYaml,
-  isExecutionYaml = false,
-  stepExecutions,
   highlightDiff = false,
-  onMount,
-  onValidationErrors,
-  esHost = 'http://localhost:9200',
-  kibanaHost,
-  selectedExecutionId,
-  onStepActionClicked,
-  ...props
+  onStepRun,
 }: WorkflowYAMLEditorProps) => {
   const { euiTheme } = useEuiTheme();
   const { http, notifications } = useKibana().services;
 
-  const dispatch = useDispatch();
-
-  const hasChanges = useSelector(selectHasChanges);
-  const workflow = useSelector(selectWorkflow);
-
-  const originalValue = workflow?.yaml ?? '';
-  const workflowId = workflow?.id ?? '';
-
   const saveYaml = useSaveYaml();
-
+  const dispatch = useDispatch();
   const onChange = useCallback(
     (yaml: string) => {
       dispatch(setYamlString(yaml));
@@ -169,45 +146,35 @@ export const WorkflowYAMLEditor = ({
     [dispatch]
   );
 
+  const workflowYaml = useSelector(selectEditorYaml) ?? '';
+  const isExecutionYaml = useSelector(selectIsExecutionsTab);
+  const hasChanges = useSelector(selectHasChanges);
+  const workflow = useSelector(selectWorkflow);
+
+  const originalValue = workflow?.yaml ?? '';
+
   // Refs
   const containerRef = useRef<HTMLDivElement | null>(null);
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
-  const stepExecutionsRef = useRef<WorkflowStepExecutionDto[] | undefined>(stepExecutions);
 
-  // Refs / Keep stepExecutionsRef in sync
-  useEffect(() => {
-    stepExecutionsRef.current = stepExecutions;
-  }, [stepExecutions]);
+  const stepExecutions = useSelector(selectStepExecutions);
+  const stepExecutionsRef = useRef<WorkflowStepExecutionDto[] | undefined>(stepExecutions);
+  stepExecutionsRef.current = stepExecutions;
 
   // Refs / Disposables for Monaco providers
   const disposablesRef = useRef<monaco.IDisposable[]>([]);
-  const focusedStepInfo = useSelector(selectFocusedStepInfo);
-  const workflowYamlSchemaLoose = useSelector(selectSchemaLoose);
+  const workflowYamlSchema = useSelector(selectSchema);
   // The current yaml document in the editor (could be unsaved)
-  const currentYamlDocument = useSelector(selectYamlDocument);
-
-  const yamlDocument = useMemo(() => {
-    // if the yaml comes from an execution, we need to parse it to get the correct yaml document
-    if (isExecutionYaml) {
-      return YAML.parseDocument(workflowYaml, { keepSourceTokens: true });
-    }
-    return currentYamlDocument;
-  }, [isExecutionYaml, workflowYaml, currentYamlDocument]);
-
+  const yamlDocument = useSelector(selectEditorYamlDocument);
   const yamlDocumentRef = useRef<YAML.Document | null>(yamlDocument ?? null);
   yamlDocumentRef.current = yamlDocument || null;
 
+  const focusedStepInfo = useSelector(selectEditorFocusedStepInfo);
   const focusedStepInfoRef = useRef<StepInfo | undefined>(focusedStepInfo);
   focusedStepInfoRef.current = focusedStepInfo;
 
   // Data
   const connectorsData = useAvailableConnectors();
-
-  useEffect(() => {
-    if (connectorsData?.connectorTypes) {
-      addDynamicConnectorsToCache(connectorsData.connectorTypes);
-    }
-  }, [connectorsData?.connectorTypes]);
 
   // Styles
   const styles = useWorkflowEditorStyles();
@@ -245,7 +212,7 @@ export const WorkflowYAMLEditor = ({
   const { validationErrors, transformMonacoMarkers, handleMarkersChanged } =
     useMonacoMarkersChangedInterceptor({
       yamlDocumentRef,
-      workflowYamlSchema: workflowYamlSchemaLoose as z.ZodSchema,
+      workflowYamlSchema: workflowYamlSchema as z.ZodSchema,
     });
 
   const handleErrorClick = useCallback((error: YamlValidationResult) => {
@@ -285,6 +252,9 @@ export const WorkflowYAMLEditor = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
+
+  const completionProvider = useWorkflowYamlCompletionProvider();
+
   const handleEditorDidMount = useCallback(
     (editor: monaco.editor.IStandaloneCodeEditor) => {
       editorRef.current = editor;
@@ -295,26 +265,23 @@ export const WorkflowYAMLEditor = ({
         ...keyboardHandlers,
       });
 
+      if (completionProvider) {
+        const disposable = monaco.languages.registerCompletionItemProvider(
+          YAML_LANG_ID,
+          completionProvider
+        );
+        disposablesRef.current.push(disposable);
+      }
+
       // Listen to content changes to detect typing
       const model = editor.getModel();
       if (!model) {
         return;
       }
-      // Initial YAML parsing from main
-      const value = model.getValue();
-      if (value && value.trim() !== '') {
-        // Use setTimeout to defer state updates until after the current render cycle
-        // This prevents the flushSync warning while maintaining the correct order
-        setTimeout(() => {
-          dispatch(setYamlString(value));
-          setIsEditorMounted(true);
-        }, 0);
-      } else {
-        // If no model, just set the mounted state
-        setTimeout(() => {
-          setIsEditorMounted(true);
-        }, 0);
-      }
+      // If no model, just set the mounted state
+      setTimeout(() => {
+        setIsEditorMounted(true);
+      }, 0);
 
       // Setup Elasticsearch step providers if we have the required services
       if (http && notifications) {
@@ -329,7 +296,7 @@ export const WorkflowYAMLEditor = ({
         const kibanaHandler = new KibanaMonacoConnectorHandler({
           http,
           notifications,
-          kibanaHost: kibanaHost || window.location.origin,
+          kibanaHost: window.location.origin,
         });
         registerMonacoConnectorHandler(kibanaHandler);
 
@@ -345,8 +312,8 @@ export const WorkflowYAMLEditor = ({
           options: {
             http,
             notifications,
-            esHost,
-            kibanaHost: kibanaHost || window.location.origin,
+            esHost: 'http://localhost:9200',
+            kibanaHost: window.location.origin,
           },
         };
 
@@ -354,8 +321,6 @@ export const WorkflowYAMLEditor = ({
         const hoverDisposable = registerUnifiedHoverProvider(providerConfig);
         disposablesRef.current.push(hoverDisposable);
       }
-
-      onMount?.(editor, monaco);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
@@ -364,38 +329,6 @@ export const WorkflowYAMLEditor = ({
   const handleEditorWillUnmount = useCallback(() => {
     unregisterKeyboardCommands();
   }, [unregisterKeyboardCommands]);
-
-  const changeSideEffects = useCallback(() => {
-    if (editorRef.current) {
-      const model = editorRef.current.getModel();
-
-      if (!model) {
-        return;
-      }
-      dispatch(setYamlString(model.getValue()));
-    }
-  }, [dispatch]);
-
-  const handleChange = useCallback(
-    (value: string) => {
-      if (onChange) {
-        onChange(value);
-      }
-
-      changeSideEffects();
-    },
-    [onChange, changeSideEffects]
-  );
-
-  useEffect(() => {
-    // After editor is mounted or workflowId changes, validate the initial content
-    if (isEditorMounted && editorRef.current) {
-      const model = editorRef.current.getModel();
-      if (model && model.getValue() !== '') {
-        changeSideEffects();
-      }
-    }
-  }, [changeSideEffects, isEditorMounted, workflowId]);
 
   // Clean up the monaco model and editor on unmount
   useEffect(() => {
@@ -459,10 +392,6 @@ export const WorkflowYAMLEditor = ({
   }, [isEditorMounted, focusedStepInfo, setPositionStyles]);
 
   useEffect(() => {
-    dispatch(setStepExecutions({ stepExecutions }));
-  }, [stepExecutions, dispatch]);
-
-  useEffect(() => {
     if (!isEditorMounted) {
       return;
     }
@@ -500,8 +429,6 @@ export const WorkflowYAMLEditor = ({
     },
     [closeActionsPopover]
   );
-
-  const completionProvider = useCompletionProvider();
 
   const options = useMemo(() => {
     return { ...editorOptions, readOnly: isExecutionYaml };
@@ -567,7 +494,7 @@ export const WorkflowYAMLEditor = ({
       <UnsavedChangesPrompt hasUnsavedChanges={hasChanges} shouldPromptOnNavigation={true} />
       {/* Floating Elasticsearch step actions */}
       <div css={styles.stepActionsContainer} style={positionStyles ? positionStyles : {}}>
-        <StepActions onStepActionClicked={onStepActionClicked} />
+        <StepActions onStepActionClicked={onStepRun} />
       </div>
       {isDevelopment && (
         <div
@@ -605,12 +532,10 @@ export const WorkflowYAMLEditor = ({
         <YamlEditor
           editorDidMount={handleEditorDidMount}
           editorWillUnmount={handleEditorWillUnmount}
-          onChange={handleChange}
+          onChange={onChange}
           options={options}
           schemas={schemas}
-          suggestionProvider={completionProvider}
           value={workflowYaml}
-          {...props}
         />
       </div>
       <div css={styles.validationErrorsContainer}>
