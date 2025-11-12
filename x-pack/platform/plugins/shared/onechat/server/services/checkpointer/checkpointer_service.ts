@@ -30,4 +30,3 @@ export class CheckpointerServiceImpl extends BaseCheckpointerServiceImpl {
     });
   }
 }
-

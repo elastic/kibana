@@ -29,7 +29,8 @@ import type { InstallationStatus } from '@kbn/product-doc-base-plugin/common/ins
 import type { TrainedModelsProvider } from '@kbn/ml-plugin/server/shared_services/providers';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
-import { CheckpointerService, CheckpointerServiceImpl } from '@kbn/langgraph-checkpoint-saver';
+import type { CheckpointerService } from '@kbn/langgraph-checkpoint-saver';
+import {} from '@kbn/langgraph-checkpoint-saver';
 import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common';
 import type { ESSearchRequest } from '@kbn/es-types';
 import { alertSummaryFieldsFieldMap } from '../ai_assistant_data_clients/alert_summary/field_maps_configuration';
@@ -75,8 +76,6 @@ import {
   ANONYMIZATION_FIELDS_INDEX_TEMPLATE,
   ANONYMIZATION_FIELDS_RESOURCE,
 } from './constants';
-import { getIndexTemplateAndPattern } from '../lib/data_stream/helpers';
-import { SecurityCheckpointerServiceImpl } from './checkpointer_service';
 
 const TOTAL_FIELDS_LIMIT = 2500;
 
@@ -106,19 +105,18 @@ export interface CreateAIAssistantClientParams {
 
 export type CreateDataStream = (params: {
   resource:
-  | 'anonymizationFields'
-  | 'conversations'
-  | 'knowledgeBase'
-  | 'prompts'
-  | 'defendInsights'
-  | 'alertSummary';
+    | 'anonymizationFields'
+    | 'conversations'
+    | 'knowledgeBase'
+    | 'prompts'
+    | 'defendInsights'
+    | 'alertSummary';
   fieldMap: FieldMap;
   kibanaVersion: string;
   spaceId?: string;
   settings?: IndicesIndexSettings;
   writeIndexOnly?: boolean;
 }) => DataStreamSpacesAdapter;
-
 
 export class AIAssistantService {
   private initialized: boolean;
@@ -222,7 +220,6 @@ export class AIAssistantService {
     this.isProductDocumentationInProgress = isInProgress;
   }
 
-
   private createDataStream: CreateDataStream = ({
     resource,
     kibanaVersion,
@@ -247,18 +244,18 @@ export class AIAssistantService {
       componentTemplateRefs: [this.resourceNames.componentTemplate[resource]],
       // Apply `default_pipeline` if pipeline exists for resource
       ...(resource in this.resourceNames.pipelines &&
-        // Remove this param and initialization when the `assistantKnowledgeBaseByDefault` feature flag is removed
-        !(resource === 'knowledgeBase')
+      // Remove this param and initialization when the `assistantKnowledgeBaseByDefault` feature flag is removed
+      !(resource === 'knowledgeBase')
         ? {
-          template: {
-            settings: {
-              'index.default_pipeline':
-                this.resourceNames.pipelines[
-                resource as keyof typeof this.resourceNames.pipelines
-                ],
+            template: {
+              settings: {
+                'index.default_pipeline':
+                  this.resourceNames.pipelines[
+                    resource as keyof typeof this.resourceNames.pipelines
+                  ],
+              },
             },
-          },
-        }
+          }
         : {}),
     });
 

@@ -7,4 +7,3 @@
 
 export { CheckpointerServiceImpl } from './checkpointer_service';
 export type { CheckpointerService } from './checkpointer_service';
-

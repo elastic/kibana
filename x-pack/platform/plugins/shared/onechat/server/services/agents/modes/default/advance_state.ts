@@ -63,7 +63,6 @@ export const advanceState = async (
     };
   }
 
-  
   const oldValues = oldState.values;
 
   // append the added messages to the initial messages to form the initial messages for the next graph invocation.

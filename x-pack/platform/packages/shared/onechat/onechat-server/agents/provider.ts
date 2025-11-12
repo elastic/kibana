@@ -15,6 +15,7 @@ import type {
 } from '@kbn/onechat-common';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { CheckpointerService } from '@kbn/langgraph-checkpoint-saver';
 import type {
   ModelProvider,
   ScopedRunner,
@@ -22,7 +23,6 @@ import type {
   WritableToolResultStore,
   AttachmentsService,
 } from '../runner';
-import { CheckpointerService } from '@kbn/langgraph-checkpoint-saver';
 
 export type AgentHandlerFn = (
   params: AgentHandlerParams,

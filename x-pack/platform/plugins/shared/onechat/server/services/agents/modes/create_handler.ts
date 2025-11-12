@@ -18,7 +18,12 @@ export const createAgentHandler = ({
   agent: InternalAgentDefinition;
 }): AgentHandlerFn => {
   return async (
-    { agentParams: { nextInput, conversation, capabilities }, runId, abortSignal, checkpointerService },
+    {
+      agentParams: { nextInput, conversation, capabilities },
+      runId,
+      abortSignal,
+      checkpointerService,
+    },
     context
   ) => {
     const { round } = await runAgent(

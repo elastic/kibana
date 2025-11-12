@@ -75,7 +75,7 @@ export const runAgent = async ({
         runId: manager.context.runId,
         agentParams,
         abortSignal,
-        checkpointerService
+        checkpointerService,
       },
       agentHandlerContext
     );

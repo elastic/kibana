@@ -130,7 +130,7 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
     });
 
     const hit = result.hits.hits.at(0);
-    
+
     if (!hit) {
       return undefined;
     }

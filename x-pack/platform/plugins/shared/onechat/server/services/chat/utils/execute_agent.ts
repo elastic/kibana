@@ -47,7 +47,7 @@ export const executeAgent$ = ({
         checkpointerService,
         agentParams: {
           nextInput,
-          conversation: conversation,
+          conversation,
           capabilities,
         },
         onEvent: (event) => {

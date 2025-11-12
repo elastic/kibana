@@ -68,4 +68,3 @@ export const createCheckpointerClient = ({
     checkpointWritesStorage: checkpointWritesStorage.getClient(),
   });
 };
-
