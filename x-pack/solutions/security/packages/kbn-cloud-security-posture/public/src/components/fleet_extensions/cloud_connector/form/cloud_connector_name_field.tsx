@@ -58,16 +58,6 @@ export const CloudConnectorNameField: React.FC<CloudConnectorNameFieldProps> = (
       )}
       isInvalid={!!error}
       error={error}
-      helpText={
-        !error
-          ? i18n.translate(
-              'xpack.cloudSecurityPosture.cloudConnectorSetup.cloudConnectorNameField.helpText',
-              {
-                defaultMessage: 'Choose a unique, descriptive name (3-64 characters)',
-              }
-            )
-          : undefined
-      }
       fullWidth
     >
       <EuiFieldText
