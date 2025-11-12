@@ -263,6 +263,5 @@
     "@kbn/react-query",
     "@kbn/core-chrome-layout-constants",
     "@kbn/core-lifecycle-browser-mocks",
-    "@kbn/security-solution-plugin"
   ]
 }
