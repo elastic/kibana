@@ -8,7 +8,6 @@
  */
 
 import React from 'react';
-
 import {
   EuiFlexItem,
   EuiFlexGroup,
@@ -21,13 +20,13 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Project } from './project_picker';
-import { strings } from './project_picker';
+import type { CPSProject } from '../types';
+import { strings } from './strings';
 
 interface ProjectListItemProps {
-  project: Project;
+  project: CPSProject;
   index: number;
-  originProjectId: string;
+  isOriginProject?: boolean;
 }
 
 const SOLUTION_ICONS: Record<string, string> = {
@@ -51,7 +50,7 @@ const getCSPLabel = (csp: string): string => {
   return CSP_LABELS[csp] || csp.toUpperCase();
 };
 
-export const ProjectListItem = ({ project, index, originProjectId }: ProjectListItemProps) => {
+export const ProjectListItem = ({ project, index, isOriginProject }: ProjectListItemProps) => {
   const { euiTheme } = useEuiTheme();
 
   const tags = Object.entries(project)
@@ -80,7 +79,7 @@ export const ProjectListItem = ({ project, index, originProjectId }: ProjectList
                 {project._alias || project._id}
               </EuiText>
             </EuiFlexItem>
-            {project._id === originProjectId ? (
+            {isOriginProject ? (
               <EuiFlexItem grow={false}>
                 <EuiIconTip size="m" type="flag" content={strings.getOriginProjectLabel()} />
               </EuiFlexItem>
@@ -91,13 +90,13 @@ export const ProjectListItem = ({ project, index, originProjectId }: ProjectList
           <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiText size="s" color="subdued">
-                {`${getCSPLabel(project._csp)}, ${project._region}`}
+                {getCSPLabel(project._csp || project._id)} {project._region}
               </EuiText>
             </EuiFlexItem>
             {tags.length ? (
               <EuiFlexItem grow={false}>
                 <EuiToolTip
-                  title={i18n.translate('unifiedSearch.projectPicker.tagTooltipTitle', {
+                  title={i18n.translate('cpsUtils.projectPicker.tagTooltipTitle', {
                     defaultMessage: 'Custom tags',
                   })}
                   content={tags.map((tag) => (
@@ -106,7 +105,9 @@ export const ProjectListItem = ({ project, index, originProjectId }: ProjectList
                     </EuiThemeProvider>
                   ))}
                 >
-                  <EuiBadge iconType="tag">{tags.length}</EuiBadge>
+                  <EuiBadge iconType="tag" tabIndex={0}>
+                    {tags.length}
+                  </EuiBadge>
                 </EuiToolTip>
               </EuiFlexItem>
             ) : null}
