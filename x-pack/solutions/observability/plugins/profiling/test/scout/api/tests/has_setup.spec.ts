@@ -12,6 +12,7 @@ import {
   loadProfilingData,
   setupProfiling,
   getProfilingPackagePolicyIds,
+  deletePackagePolicy,
 } from '../../common/utils/profiling_data';
 
 const profilingRoutePaths = getRoutePaths();
@@ -20,7 +21,7 @@ apiTest.describe('Profiling is not setup and no data is loaded', { tag: ['@ess']
   apiTest.beforeAll(async ({ esClient, apiServices, log, config }) => {
     await cleanUpProfilingData({
       es: esClient,
-      apiServices,
+      config,
       logger: log,
     });
   });
@@ -50,7 +51,7 @@ apiTest.describe('Profiling is not setup and no data is loaded', { tag: ['@ess']
 
 apiTest.describe('APM integration not installed but setup completed', { tag: ['@ess'] }, () => {
   apiTest.beforeEach(async ({ esClient, apiServices, config, log }) => {
-    await setupProfiling(config.hosts.kibana, apiServices, log);
+    await setupProfiling(config, apiServices, log);
   });
   apiTest('Admin user', async ({ profilingClient }) => {
     const adminRes = await profilingClient.adminUser({
@@ -76,19 +77,19 @@ apiTest.describe('APM integration not installed but setup completed', { tag: ['@
   });
 });
 
-apiTest.describe('Profiling is setup', { tag: ['@svlOblt'] }, () => {
+apiTest.describe('Profiling is setup', { tag: ['@ess'] }, () => {
   apiTest.beforeAll(async ({ esClient, apiServices, config, log }) => {
     await cleanUpProfilingData({
       es: esClient,
-      apiServices,
+      config,
       logger: log,
     });
-    await setupProfiling(config.hosts.kibana, apiServices, log);
+    await setupProfiling(config, apiServices, log);
   });
-  apiTest.afterAll(async ({ esClient, apiServices, log }) => {
+  apiTest.afterAll(async ({ esClient, config, apiServices, log }) => {
     await cleanUpProfilingData({
       es: esClient,
-      apiServices,
+      config,
       logger: log,
     });
   });
@@ -135,14 +136,14 @@ apiTest.describe('Profiling is setup', { tag: ['@svlOblt'] }, () => {
 });
 
 apiTest.describe('Collector integration is not installed', { tag: ['@ess'] }, () => {
-  apiTest.beforeAll(async ({ esClient, apiServices, config, log }) => {
-    await setupProfiling(config.hosts.kibana, apiServices, log);
+  apiTest.beforeEach(async ({ esClient, apiServices, config, log }) => {
+    await setupProfiling(config, apiServices, log);
   });
 
-  apiTest('Admin user collector integration missing', async ({ profilingClient, apiServices }) => {
-    const ids = await getProfilingPackagePolicyIds(apiServices);
+  apiTest('Admin user collector integration missing', async ({ profilingClient, config }) => {
+    const ids = await getProfilingPackagePolicyIds(config);
     const collectorId = ids.collectorId;
-    await apiServices.fleet.agent_policies.delete(collectorId!);
+    await deletePackagePolicy(config, collectorId!);
 
     expect(collectorId).toBeDefined();
 
@@ -155,10 +156,10 @@ apiTest.describe('Collector integration is not installed', { tag: ['@ess'] }, ()
     expect(adminStatus.pre_8_9_1_data).toBe(false);
   });
 
-  apiTest('Viewer user collector integration missing', async ({ profilingClient, apiServices }) => {
-    const ids = await getProfilingPackagePolicyIds(apiServices);
+  apiTest('Viewer user collector integration missing', async ({ profilingClient, config }) => {
+    const ids = await getProfilingPackagePolicyIds(config);
     const collectorId = ids.collectorId;
-    await apiServices.fleet.agent_policies.delete(collectorId!);
+    await deletePackagePolicy(config, collectorId!);
 
     expect(collectorId).toBeDefined();
 
@@ -174,12 +175,12 @@ apiTest.describe('Collector integration is not installed', { tag: ['@ess'] }, ()
 
   apiTest(
     'Admin user symbolizer integration is not installed',
-    async ({ profilingClient, apiServices }) => {
-      const ids = await getProfilingPackagePolicyIds(apiServices);
+    async ({ profilingClient, config, apiServices, log }) => {
+      const ids = await getProfilingPackagePolicyIds(config);
 
       const symbolizerId = ids.symbolizerId;
 
-      await apiServices.fleet.agent_policies.delete(symbolizerId!);
+      await deletePackagePolicy(config, symbolizerId!);
 
       expect(symbolizerId).toBeDefined();
 
@@ -195,10 +196,10 @@ apiTest.describe('Collector integration is not installed', { tag: ['@ess'] }, ()
 
   apiTest(
     'Viewer user symbolizer integration is not installed',
-    async ({ profilingClient, apiServices }) => {
-      const ids = await getProfilingPackagePolicyIds(apiServices);
+    async ({ profilingClient, config, apiServices }) => {
+      const ids = await getProfilingPackagePolicyIds(config);
       const symbolizerId = ids.symbolizerId;
-      await apiServices.fleet.agent_policies.delete(symbolizerId!);
+      await deletePackagePolicy(config, symbolizerId!);
 
       expect(symbolizerId).toBeDefined();
 

@@ -8,7 +8,7 @@ import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import fs from 'fs';
 import Path from 'path';
-import type { ApiServicesFixture } from '@kbn/scout-oblt';
+import type { ApiServicesFixture, ScoutTestConfig } from '@kbn/scout-oblt';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
   COLLECTOR_PACKAGE_POLICY_NAME,
@@ -47,13 +47,9 @@ export async function loadProfilingData(es: Client, logger: ToolingLog) {
   log('Loaded profiling data');
 }
 
-export async function setupProfiling(
-  kbnUrl: string,
-  apiServices: ApiServicesFixture,
-  logger: ToolingLog
-) {
-  const log = logWithTimer(logger);
-  const { username, password, protocol, host, pathname } = new URL(kbnUrl);
+export function buildKibanaUrl(config: ScoutTestConfig) {
+  const { username, password } = config.auth;
+  const { protocol, host, pathname } = new URL(config.hosts.kibana);
 
   let baseUrl;
   if (pathname === '/') {
@@ -61,10 +57,25 @@ export async function setupProfiling(
   } else {
     baseUrl = `${protocol}//${username}:${password}@${host}${pathname}`;
   }
+  return baseUrl;
+}
 
-  const st = supertest(baseUrl);
+export async function setupProfiling(
+  config: ScoutTestConfig,
+  apiServices: ApiServicesFixture,
+  logger: ToolingLog
+) {
+  const log = logWithTimer(logger);
+
+  const st = supertest(buildKibanaUrl(config));
 
   await apiServices.fleet.agent.setup();
+
+  // await st
+  //   .post('/api/fleet/setup')
+  //   .set({ 'kbn-xsrf': 'foo' })
+  //   .set('x-elastic-internal-origin', 'Kibana');
+
   const res = await st
     .get(profilingRoutePaths.HasSetupESResources)
     .set({ 'kbn-xsrf': 'foo' })
@@ -82,26 +93,30 @@ export async function setupProfiling(
   log(`Universal Profiling set up`);
 }
 
-export async function getProfilingPackagePolicyIds(apiServices: ApiServicesFixture) {
-  return apiServices.fleet.agent_policies.get().then((response) => {
-    const policies: PackagePolicy[] = response.data.items;
+export async function getProfilingPackagePolicyIds(config: ScoutTestConfig) {
+  const st = supertest(buildKibanaUrl(config));
+  const res = await st
+    .get('/api/fleet/package_policies')
+    .set({ 'kbn-xsrf': 'foo' })
+    .set('x-elastic-internal-origin', 'Kibana');
+  const policies: PackagePolicy[] = res.body.items;
 
-    const collector = policies.find((item) => item.name === COLLECTOR_PACKAGE_POLICY_NAME);
-    const symbolizer = policies.find((item) => item.name === SYMBOLIZER_PACKAGE_POLICY_NAME);
-    return {
-      collectorId: collector?.id,
-      symbolizerId: symbolizer?.id,
-    };
-  });
+  const collector = policies.find((item) => item.name === COLLECTOR_PACKAGE_POLICY_NAME);
+  const symbolizer = policies.find((item) => item.name === SYMBOLIZER_PACKAGE_POLICY_NAME);
+
+  return {
+    collectorId: collector?.id,
+    symbolizerId: symbolizer?.id,
+  };
 }
 
 export async function cleanUpProfilingData({
   es,
-  apiServices,
+  config,
   logger,
 }: {
   es: Client;
-  apiServices: ApiServicesFixture;
+  config: ScoutTestConfig;
   logger: ToolingLog;
 }) {
   const log = logWithTimer(logger);
@@ -109,7 +124,7 @@ export async function cleanUpProfilingData({
 
   const [indices, { collectorId, symbolizerId }] = await Promise.all([
     es.cat.indices({ format: 'json' }),
-    getProfilingPackagePolicyIds(apiServices),
+    getProfilingPackagePolicyIds(config),
   ]);
 
   const profilingIndices = indices
@@ -124,8 +139,19 @@ export async function cleanUpProfilingData({
     es.indices.deleteDataStream({
       name: 'profiling-events*',
     }),
-    collectorId ? apiServices.fleet.agent_policies.delete(collectorId) : Promise.resolve(),
-    symbolizerId ? apiServices.fleet.agent_policies.delete(symbolizerId) : Promise.resolve(),
+    collectorId ? deletePackagePolicy(config, collectorId) : Promise.resolve(),
+    symbolizerId ? deletePackagePolicy(config, symbolizerId) : Promise.resolve(),
   ]);
   log('Unloaded Profiling data');
+}
+
+export async function deletePackagePolicy(config: ScoutTestConfig, policy: string) {
+  const st = supertest(buildKibanaUrl(config));
+  return st
+    .post('/api/fleet/package_policies/delete')
+    .set({ 'kbn-xsrf': 'foo' })
+    .set('x-elastic-internal-origin', 'Kibana')
+    .send({
+      packagePolicyIds: [policy],
+    });
 }
