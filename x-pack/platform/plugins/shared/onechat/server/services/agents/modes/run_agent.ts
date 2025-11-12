@@ -13,8 +13,8 @@ import type {
   AgentConfiguration,
 } from '@kbn/onechat-common';
 import type { AgentHandlerContext } from '@kbn/onechat-server';
+import type { CheckpointerService } from '@kbn/langgraph-checkpoint-saver';
 import { runDefaultAgentMode } from './default';
-import { CheckpointerService } from '@kbn/langgraph-checkpoint-saver';
 
 export interface RunAgentParams {
   /**

@@ -24,4 +24,3 @@ export type {
   CheckpointsStorage,
   CheckpointWritesStorage,
 } from './storage';
-

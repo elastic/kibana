@@ -68,4 +68,3 @@ export class CheckpointerServiceImpl implements CheckpointerService {
     });
   }
 }
-

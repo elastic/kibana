@@ -116,4 +116,3 @@ export const createCheckpointWritesStorage = ({
   const storageSettings = createCheckpointWritesStorageSettings(indexName);
   return new StorageIndexAdapter(esClient, logger, storageSettings);
 };
-

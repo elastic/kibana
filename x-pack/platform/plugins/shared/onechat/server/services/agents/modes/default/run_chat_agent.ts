@@ -14,7 +14,12 @@ import {
 } from '@kbn/onechat-genai-utils/langchain';
 import type { ChatAgentEvent, RoundInput } from '@kbn/onechat-common';
 import type { AgentHandlerContext, AgentEventEmitterFn } from '@kbn/onechat-server';
-import { addRoundCompleteEvent, extractRound, prepareConversation, selectProviderTools } from '../utils';
+import {
+  addRoundCompleteEvent,
+  extractRound,
+  prepareConversation,
+  selectProviderTools,
+} from '../utils';
 import { resolveCapabilities } from '../utils/capabilities';
 import { resolveConfiguration } from '../utils/configuration';
 import { createAgentGraph } from './graph';
@@ -150,7 +155,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       });
     },
     error: async () => {
-    await revertToCheckpoint() // if there are errors we need to revert to the checkpoint to maintain correct message state
+      await revertToCheckpoint(); // if there are errors we need to revert to the checkpoint to maintain correct message state
     },
   });
 

@@ -7,8 +7,8 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ChatAgentEvent } from '@kbn/onechat-common';
+import type { CheckpointerService } from '@kbn/langgraph-checkpoint-saver';
 import type { AgentParams, AgentResponse } from './provider';
-import { CheckpointerService } from '@kbn/langgraph-checkpoint-saver';
 
 export interface RunAgentReturn {
   /** return from the agent */
