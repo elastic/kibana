@@ -95,9 +95,12 @@ export function conditionToESQLAst(condition: Condition): ESQLSingleAstItem {
       return parts.reduce((acc, part) => Builder.expression.func.binary('and', [acc, part]));
     }
     if ('contains' in condition) {
+      // Make contains case-insensitive by lowercasing both field and value
+      const lowerField = Builder.expression.func.call('TO_LOWER', [field]);
+      const lowerValue = String(condition.contains).toLowerCase();
       return Builder.expression.func.binary('like', [
-        field,
-        Builder.expression.literal.string(`*${condition.contains}*`),
+        lowerField,
+        Builder.expression.literal.string(`*${lowerValue}*`),
       ]);
     }
     if ('startsWith' in condition) {

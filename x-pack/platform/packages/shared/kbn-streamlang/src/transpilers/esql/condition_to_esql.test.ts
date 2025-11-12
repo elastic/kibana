@@ -100,10 +100,12 @@ describe('conditionToESQLAst', () => {
       it('should handle contains with wildcards (*)', () => {
         const condition: Condition = {
           field: 'resource.attributes.service.name',
-          contains: 'synth-service-2',
+          contains: 'synth-SERVICE-2',
         };
         const result = prettyPrint(condition);
-        expect(result).toBe('`resource.attributes.service.name` LIKE "*synth-service-2*"');
+        expect(result).toBe(
+          'TO_LOWER(`resource.attributes.service.name`) LIKE "*synth-service-2*"'
+        ); // LIKE should be applied with both sides lowercased
         expect(result).not.toContain('LIKE(');
         expect(result).not.toContain('%');
       });
