@@ -26,6 +26,7 @@ import {
   createMockedAgent,
   createMockedAgentRegistry,
   createToolRegistryMock,
+  createCheckpointerServiceMock,
 } from '../../test_utils';
 import { createScopedRunner, createRunner } from './runner';
 import { createAgentHandler } from '../agents/modes/create_handler';
@@ -161,6 +162,7 @@ describe('Onechat runner', () => {
       const params: ScopedRunnerRunAgentParams = {
         agentId: 'test-tool',
         agentParams: { nextInput: { message: 'dolly' } },
+        checkpointerService: createCheckpointerServiceMock(),
       };
 
       const runner = createScopedRunner(runnerDeps);
@@ -171,6 +173,7 @@ describe('Onechat runner', () => {
         {
           runId: expect.any(String),
           agentParams: params.agentParams,
+          checkpointerService: params.checkpointerService,
         },
         expect.any(Object)
       );
@@ -189,6 +192,7 @@ describe('Onechat runner', () => {
         agentId: 'test-tool',
         agentParams: { nextInput: { message: 'dolly' } },
         request,
+        checkpointerService: createCheckpointerServiceMock(),
       };
 
       const runner = createRunner(otherRunnerDeps);
@@ -199,6 +203,7 @@ describe('Onechat runner', () => {
         {
           runId: expect.any(String),
           agentParams: params.agentParams,
+          checkpointerService: params.checkpointerService,
         },
         expect.any(Object)
       );

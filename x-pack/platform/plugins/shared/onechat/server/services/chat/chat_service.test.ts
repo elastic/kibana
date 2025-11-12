@@ -30,6 +30,7 @@ import {
   createConversationServiceMock,
   createConversationClientMock,
   createEmptyConversation,
+  createCheckpointerServiceMock,
 } from '../../test_utils';
 import type { ChatService } from './types';
 import { createChatService } from './chat_service';
@@ -46,6 +47,7 @@ describe('ChatService', () => {
   let request: ReturnType<typeof httpServerMock.createKibanaRequest>;
   let agentService: ReturnType<typeof createAgentsServiceStartMock>;
   let conversationService: ReturnType<typeof createConversationServiceMock>;
+  let checkpointerService: ReturnType<typeof createCheckpointerServiceMock>;
   let uiSettings: ReturnType<typeof uiSettingsServiceMock.createStartContract>;
   let savedObjects: ReturnType<typeof savedObjectsServiceMock.createStartContract>;
 
@@ -57,6 +59,7 @@ describe('ChatService', () => {
     inference = inferenceMock.createStartContract();
     agentService = createAgentsServiceStartMock();
     conversationService = createConversationServiceMock();
+    checkpointerService = createCheckpointerServiceMock();
     uiSettings = uiSettingsServiceMock.createStartContract();
     savedObjects = savedObjectsServiceMock.createStartContract();
 
@@ -67,6 +70,7 @@ describe('ChatService', () => {
       conversationService,
       uiSettings,
       savedObjects,
+      checkpointerService,
     });
 
     const conversation = createEmptyConversation();

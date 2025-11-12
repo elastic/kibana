@@ -14,6 +14,7 @@ import {
   createScopedRunnerDepsMock,
   createMockedAgent,
   createMockedAgentRegistry,
+  createCheckpointerServiceMock,
 } from '../../test_utils';
 import { createAgentHandler } from '../agents/modes/create_handler';
 
@@ -56,6 +57,7 @@ describe('runAgent', () => {
     const params: ScopedRunnerRunAgentParams = {
       agentId: 'test-agent',
       agentParams: { nextInput: { message: 'bar' } },
+      checkpointerService: createCheckpointerServiceMock(),
     };
 
     await runAgent({
@@ -71,6 +73,7 @@ describe('runAgent', () => {
     const params: ScopedRunnerRunAgentParams = {
       agentId: 'test-agent',
       agentParams: { nextInput: { message: 'dolly' } },
+      checkpointerService: createCheckpointerServiceMock(),
     };
 
     await runAgent({
@@ -83,6 +86,7 @@ describe('runAgent', () => {
       {
         runId: runnerManager.context.runId,
         agentParams: params.agentParams,
+        checkpointerService: params.checkpointerService,
       },
       expect.any(Object)
     );
@@ -95,6 +99,7 @@ describe('runAgent', () => {
       agentId: 'test-agent',
       agentParams: { nextInput: { message: 'dolly' } },
       abortSignal: abortCtrl.signal,
+      checkpointerService: createCheckpointerServiceMock(),
     };
 
     await runAgent({
@@ -115,6 +120,7 @@ describe('runAgent', () => {
     const params: ScopedRunnerRunAgentParams = {
       agentId: 'test-agent',
       agentParams: { nextInput: { message: 'dolly' } },
+      checkpointerService: createCheckpointerServiceMock(),
     };
 
     agentHandler.mockResolvedValue({
