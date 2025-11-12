@@ -17,24 +17,19 @@ import { EndpointExceptionsForm } from './endpoint_exceptions_form';
 import type { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
 import { useFetchIndex } from '../../../../../common/containers/source';
 import { ENDPOINT_EXCEPTIONS_LIST_DEFINITION } from '../../constants';
+import { licenseService } from '../../../../../common/hooks/use_license';
+import { GLOBAL_ARTIFACT_TAG } from '../../../../../../common/endpoint/service/artifacts';
+import { useFetchPolicyData } from '../../../../components/policy_selector/hooks/use_fetch_policy_data';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
+import { buildPerPolicyTag } from '../../../../../../common/endpoint/service/artifacts/utils';
 
 jest.setTimeout(15_000);
 
 jest.mock('../../../../../common/components/user_privileges');
 jest.mock('../../../../../common/lib/kibana');
 jest.mock('../../../../../common/containers/source');
-jest.mock('../../../../../common/hooks/use_license', () => {
-  const licenseServiceInstance = {
-    isPlatinumPlus: jest.fn(),
-    isGoldPlus: jest.fn(),
-  };
-  return {
-    licenseService: licenseServiceInstance,
-    useLicense: () => {
-      return licenseServiceInstance;
-    },
-  };
-});
+jest.mock('../../../../../common/hooks/use_license');
+jest.mock('../../../../components/policy_selector/hooks/use_fetch_policy_data');
 
 /** When some props and states change, `EndpointExceptionsForm` will recreate its internal `processChanged` function,
  * and therefore will call it from a `useEffect` hook.
@@ -142,6 +137,20 @@ describe('Endpoint exceptions form', () => {
         indexPatterns: stubIndexPattern,
       },
     ]);
+    (useFetchPolicyData as jest.MockedFunction<typeof useFetchPolicyData>).mockReturnValue({
+      isLoading: false,
+      isFetching: false,
+      error: null,
+      data: {
+        total: 2,
+        perPage: 2,
+        page: 1,
+        items: [
+          { id: 'policy-1', name: 'Policy 1' },
+          { id: 'policy-2', name: 'Policy 2' },
+        ] as PackagePolicy[],
+      },
+    });
 
     formProps = {
       item: latestUpdatedItem,
@@ -491,6 +500,63 @@ describe('Endpoint exceptions form', () => {
       };
       renderResult = mockedContext.render(<EndpointExceptionsForm {...propsWithoutOsSelect} />);
       expect(renderResult.queryByTestId(`${formPrefix}-osSelectField`)).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Policy assignment', () => {
+    const mockLicenseService = licenseService as jest.Mocked<typeof licenseService>;
+
+    beforeEach(() => {
+      mockLicenseService.isPlatinumPlus.mockReturnValue(true);
+    });
+
+    it('should not display policy assignment when license is below platinum', () => {
+      mockLicenseService.isPlatinumPlus.mockReturnValue(false);
+      render();
+
+      expect(renderResult.queryByTestId(`${formPrefix}-effectedPolicies`)).not.toBeInTheDocument();
+    });
+
+    it('should display policy assignment when license is at least platinum', () => {
+      render();
+      expect(renderResult.queryByTestId(`${formPrefix}-effectedPolicies`)).toBeInTheDocument();
+    });
+
+    it('should add global tag when global policy is selected', async () => {
+      formProps.item.tags = ['policy:1234'];
+      render();
+
+      renderResult.getByTestId(`${formPrefix}-effectedPolicies-global`).click();
+      rerenderWithLatestProps();
+
+      expect(formProps.item.tags).toEqual([GLOBAL_ARTIFACT_TAG]);
+    });
+
+    it('should remove tags when no policy is selected', async () => {
+      formProps.item.tags = [GLOBAL_ARTIFACT_TAG];
+      render();
+
+      await userEvent.click(renderResult.getByTestId(`${formPrefix}-effectedPolicies-perPolicy`));
+      rerenderWithLatestProps();
+
+      expect(formProps.item.tags).toEqual([]);
+    });
+
+    it('should add policy tags when specific policies are selected', async () => {
+      formProps.item.tags = [GLOBAL_ARTIFACT_TAG];
+
+      render();
+
+      await userEvent.click(renderResult.getByTestId(`${formPrefix}-effectedPolicies-perPolicy`));
+      await userEvent.click(
+        renderResult.getByTestId(`${formPrefix}-effectedPolicies-policiesSelector-selectAllButton`)
+      );
+      rerenderWithLatestProps();
+
+      expect(formProps.item.tags).toEqual([
+        buildPerPolicyTag('policy-1'),
+        buildPerPolicyTag('policy-2'),
+      ]);
     });
   });
 });
