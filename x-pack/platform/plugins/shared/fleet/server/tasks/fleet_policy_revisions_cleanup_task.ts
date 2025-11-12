@@ -23,6 +23,7 @@ export const VERSION = '1.0.0';
 const TITLE = 'Fleet Policy Revisions Cleanup Task';
 const SCOPE = ['fleet'];
 const TASK_TIMEOUT = '5m';
+const MAX_DOCS = 5000;
 
 interface FleetPolicyRevisionsCleanupTaskConfig {
   max_revisions?: number;
@@ -55,23 +56,25 @@ interface RevisionsToDeleteParams {
   revisionIdxCutoff: number;
 }
 
+interface Context {
+  abortController: AbortController;
+  pitId: string;
+}
+
 export class FleetPolicyRevisionsCleanupTask {
   private logger: Logger;
   private wasStarted: boolean = false;
   private taskInterval: string;
   private maxRevisions: number;
   private maxPoliciesPerRun: number;
-  private pitId: string | null;
 
   constructor(setupContract: FleetPolicyRevisionsCleanupTaskSetupContract) {
     const { core, taskManager, logFactory, config } = setupContract;
     this.logger = logFactory.get(this.taskId);
 
-    // Use config values with fallback to defaults
     this.taskInterval = config.frequency ?? '1h';
     this.maxRevisions = config.max_revisions ?? 10;
     this.maxPoliciesPerRun = config.max_policies_per_run ?? 100;
-    this.pitId = null;
 
     taskManager.registerTaskDefinitions({
       [TYPE]: {
@@ -163,17 +166,26 @@ export class FleetPolicyRevisionsCleanupTask {
 
     const [coreStart, _startDeps] = (await core.getStartServices()) as any;
     const esClient = coreStart.elasticsearch.client.asInternalUser;
+    let pitId: string | null = null;
 
     try {
-      await this.cleanupPolicyRevisions(esClient, abortController);
-      if (this.pitId) {
-        await esClient.closePointInTime({ id: this.pitId });
+      const pitRes = await esClient.openPointInTime({
+        index: AGENT_POLICY_INDEX,
+        keep_alive: TASK_TIMEOUT,
+      });
+
+      pitId = pitRes.id;
+
+      await this.cleanupPolicyRevisions(esClient, { abortController, pitId: pitId! });
+
+      if (pitId) {
+        await esClient.closePointInTime({ id: pitId });
       }
 
       this.endRun('success');
     } catch (err) {
-      if (this.pitId) {
-        await esClient.closePointInTime({ id: this.pitId });
+      if (pitId) {
+        await esClient.closePointInTime({ id: pitId });
       }
 
       if (err instanceof errors.RequestAbortedError) {
@@ -190,20 +202,13 @@ export class FleetPolicyRevisionsCleanupTask {
 
   private cleanupPolicyRevisions = async (
     esClient: ElasticsearchClient,
-    abortController: AbortController
+    context: { abortController: AbortController; pitId: string }
   ) => {
     this.logger.debug(
       `[FleetPolicyRevisionsCleanupTask] Starting cleanup with max_revisions: ${this.maxRevisions}, max_policies_per_run: ${this.maxPoliciesPerRun}`
     );
 
-    const pitRes = await esClient.openPointInTime({
-      index: AGENT_POLICY_INDEX,
-      keep_alive: TASK_TIMEOUT,
-    });
-
-    this.pitId = pitRes.id;
-
-    const policiesToClean = await this.getPoliciesToClean(esClient);
+    const policiesToClean = await this.getPoliciesToClean(esClient, context);
 
     if (Object.keys(policiesToClean).length === 0) {
       this.logger.info(
@@ -219,22 +224,35 @@ export class FleetPolicyRevisionsCleanupTask {
       } policies with more than ${this.maxRevisions} revisions.`
     );
 
-    this.throwIfAborted(abortController);
+    this.throwIfAborted(context.abortController);
 
     const policiesRevisionSummaries = await this.populateMinimumRevisionsUsedByAgents(
       esClient,
-      policiesToClean
+      policiesToClean,
+      context
     );
 
-    this.throwIfAborted(abortController);
+    this.throwIfAborted(context.abortController);
 
-    await this.deletePolicyRevisions(esClient, policiesRevisionSummaries);
+    const docCount = Object.values(policiesRevisionSummaries).reduce(
+      (sum, summary) => sum + summary.count,
+      0
+    );
+
+    this.logger.debug(
+      `[FleetPolicyRevisionsCleanupTask] Attempting to delete a maximum of ${MAX_DOCS} out of ${docCount} policy revision documents.`
+    );
+
+    await this.deletePolicyRevisions(esClient, policiesRevisionSummaries, context);
 
     this.logger.debug('[FleetPolicyRevisionsCleanupTask] Cleanup completed');
   };
 
-  private getPoliciesToClean = async (esClient: ElasticsearchClient) => {
-    const results = await this.queryMaxRevisionsAndCounts(esClient);
+  private getPoliciesToClean = async (
+    esClient: ElasticsearchClient,
+    context: { pitId: string; abortController: AbortController }
+  ) => {
+    const results = await this.queryMaxRevisionsAndCounts(esClient, context);
 
     return (
       results.aggregations?.latest_revisions_by_policy_id.buckets.reduce<PoliciesRevisionSummaries>(
@@ -252,7 +270,7 @@ export class FleetPolicyRevisionsCleanupTask {
     );
   };
 
-  private queryMaxRevisionsAndCounts = async (esClient: ElasticsearchClient) => {
+  private queryMaxRevisionsAndCounts = async (esClient: ElasticsearchClient, context: Context) => {
     interface Aggregations {
       latest_revisions_by_policy_id: {
         buckets: Array<{
@@ -265,39 +283,44 @@ export class FleetPolicyRevisionsCleanupTask {
       };
     }
 
-    return await esClient.search<{}, Aggregations>({
-      index: AGENT_POLICY_INDEX,
-      pit: {
-        id: this.pitId!,
-        keep_alive: TASK_TIMEOUT,
-      },
-      size: 0,
-      aggs: {
-        latest_revisions_by_policy_id: {
-          terms: {
-            field: 'policy_id',
-            order: { _count: 'desc' },
-            size: this.maxPoliciesPerRun,
-          },
-          aggs: {
-            latest_revision: {
-              max: {
-                field: 'revision_idx',
+    return await esClient.search<{}, Aggregations>(
+      {
+        index: AGENT_POLICY_INDEX,
+        pit: {
+          id: context.pitId,
+          keep_alive: TASK_TIMEOUT,
+        },
+        size: 0,
+        aggs: {
+          latest_revisions_by_policy_id: {
+            terms: {
+              field: 'policy_id',
+              order: { _count: 'desc' },
+              size: this.maxPoliciesPerRun,
+            },
+            aggs: {
+              latest_revision: {
+                max: {
+                  field: 'revision_idx',
+                },
               },
             },
           },
         },
       },
-    });
+      { signal: context.abortController.signal }
+    );
   };
 
   private populateMinimumRevisionsUsedByAgents = async (
     esClient: ElasticsearchClient,
-    policiesRevisionSummaries: PoliciesRevisionSummaries
+    policiesRevisionSummaries: PoliciesRevisionSummaries,
+    context: Context
   ) => {
     const result = await this.queryMinimumRevisionsUsedByAgents(
       esClient,
-      Object.keys(policiesRevisionSummaries)
+      Object.keys(policiesRevisionSummaries),
+      context
     );
 
     result.aggregations?.min_used_revisions_by_policy_id.buckets.forEach((bucket) => {
@@ -312,7 +335,8 @@ export class FleetPolicyRevisionsCleanupTask {
 
   private queryMinimumRevisionsUsedByAgents = async (
     esClient: ElasticsearchClient,
-    policyIds: string[]
+    policyIds: string[],
+    context: Context
   ) => {
     interface Aggregations {
       min_used_revisions_by_policy_id: {
@@ -326,39 +350,43 @@ export class FleetPolicyRevisionsCleanupTask {
       };
     }
 
-    return await esClient.search<{}, Aggregations>({
-      index: AGENTS_INDEX,
-      pit: {
-        id: this.pitId!,
-        keep_alive: TASK_TIMEOUT,
-      },
-      size: 0,
-      query: {
-        terms: {
-          policy_id: policyIds,
+    return await esClient.search<{}, Aggregations>(
+      {
+        index: AGENTS_INDEX,
+        pit: {
+          id: context.pitId,
+          keep_alive: TASK_TIMEOUT,
         },
-      },
-      aggs: {
-        min_used_revisions_by_policy_id: {
+        size: 0,
+        query: {
           terms: {
-            field: 'policy_id',
-            size: this.maxPoliciesPerRun,
+            policy_id: policyIds,
           },
-          aggs: {
-            min_used_revision: {
-              min: {
-                field: 'policy_revision_idx',
+        },
+        aggs: {
+          min_used_revisions_by_policy_id: {
+            terms: {
+              field: 'policy_id',
+              size: this.maxPoliciesPerRun,
+            },
+            aggs: {
+              min_used_revision: {
+                min: {
+                  field: 'policy_revision_idx',
+                },
               },
             },
           },
         },
       },
-    });
+      { signal: context.abortController.signal }
+    );
   };
 
   private deletePolicyRevisions = async (
     esClient: ElasticsearchClient,
-    policiesRevisionSummaries: PoliciesRevisionSummaries
+    policiesRevisionSummaries: PoliciesRevisionSummaries,
+    context: Context
   ) => {
     const policiesToDelete = Object.entries(policiesRevisionSummaries).reduce<
       RevisionsToDeleteParams[]
@@ -377,12 +405,13 @@ export class FleetPolicyRevisionsCleanupTask {
       return [...acc, { policyId, revisionIdxCutoff }];
     }, []);
 
-    return await this.queryDeletePolicyRevisions(esClient, policiesToDelete);
+    return await this.queryDeletePolicyRevisions(esClient, policiesToDelete, context);
   };
 
   private queryDeletePolicyRevisions = async (
     esClient: ElasticsearchClient,
-    policiesToDelete: Array<RevisionsToDeleteParams>
+    policiesToDelete: Array<RevisionsToDeleteParams>,
+    context: Context
   ) => {
     const policyCutoffClauses = policiesToDelete.map(({ policyId, revisionIdxCutoff }) => ({
       bool: {
@@ -393,14 +422,22 @@ export class FleetPolicyRevisionsCleanupTask {
       },
     }));
 
-    return await esClient.deleteByQuery({
-      index: AGENT_POLICY_INDEX,
-      query: {
-        bool: {
-          should: policyCutoffClauses,
+    return await esClient.deleteByQuery(
+      {
+        index: AGENT_POLICY_INDEX,
+        max_docs: MAX_DOCS,
+        conflicts: 'proceed',
+        scroll: TASK_TIMEOUT,
+        scroll_size: 1000,
+        wait_for_completion: true,
+        query: {
+          bool: {
+            should: policyCutoffClauses,
+          },
         },
       },
-    });
+      { signal: context.abortController.signal }
+    );
   };
   private throwIfAborted(abortController: AbortController) {
     if (abortController.signal.aborted) {

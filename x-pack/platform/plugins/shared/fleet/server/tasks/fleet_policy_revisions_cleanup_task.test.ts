@@ -23,6 +23,14 @@ jest.mock('../services');
 
 const mockAppContextService = appContextService as jest.Mocked<typeof appContextService>;
 
+const expectedDeleteByQueryConfig = {
+  conflicts: 'proceed',
+  max_docs: expect.any(Number),
+  scroll: expect.any(String),
+  scroll_size: expect.any(Number),
+  wait_for_completion: true,
+};
+
 describe('FleetPolicyRevisionsCleanupTask', () => {
   let mockTask: FleetPolicyRevisionsCleanupTask;
   let mockCore: ReturnType<typeof coreMock.createSetup>;
@@ -299,23 +307,29 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
       expect(logger.info).toHaveBeenCalledWith(
         '[FleetPolicyRevisionsCleanupTask] Found 1 policies with more than 10 revisions.'
       );
-      expect(mockEsClient.deleteByQuery).toHaveBeenCalledWith({
-        index: '.fleet-policies',
-        query: {
-          bool: {
-            should: [
-              {
-                bool: {
-                  must: [
-                    { term: { policy_id: 'policy-1' } },
-                    { range: { revision_idx: { lt: 5 } } }, // 15 - 10 = 5
-                  ],
+      expect(mockEsClient.deleteByQuery).toHaveBeenCalledWith(
+        {
+          index: '.fleet-policies',
+          ...expectedDeleteByQueryConfig,
+          query: {
+            bool: {
+              should: [
+                {
+                  bool: {
+                    must: [
+                      { term: { policy_id: 'policy-1' } },
+                      { range: { revision_idx: { lt: 5 } } }, // 15 - 10 = 5
+                    ],
+                  },
                 },
-              },
-            ],
+              ],
+            },
           },
         },
-      });
+        {
+          signal: abortController.signal,
+        }
+      );
     });
 
     it('should favor cutting off deletions from the minimum used revision', async () => {
@@ -365,23 +379,29 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
       expect(logger.info).toHaveBeenCalledWith(
         '[FleetPolicyRevisionsCleanupTask] Found 1 policies with more than 10 revisions.'
       );
-      expect(mockEsClient.deleteByQuery).toHaveBeenCalledWith({
-        index: '.fleet-policies',
-        query: {
-          bool: {
-            should: [
-              {
-                bool: {
-                  must: [
-                    { term: { policy_id: 'policy-1' } },
-                    { range: { revision_idx: { lt: 2 } } }, // 12 - 10 = 2
-                  ],
+      expect(mockEsClient.deleteByQuery).toHaveBeenCalledWith(
+        {
+          index: '.fleet-policies',
+          ...expectedDeleteByQueryConfig,
+          query: {
+            bool: {
+              should: [
+                {
+                  bool: {
+                    must: [
+                      { term: { policy_id: 'policy-1' } },
+                      { range: { revision_idx: { lt: 2 } } }, // 12 - 10 = 2
+                    ],
+                  },
                 },
-              },
-            ],
+              ],
+            },
           },
         },
-      });
+        {
+          signal: abortController.signal,
+        }
+      );
     });
 
     it('should skip deletions of a policy revision if the calculated cutoff idx from minimum used revision is equal or below 1', async () => {
@@ -436,23 +456,29 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
       expect(logger.info).toHaveBeenCalledWith(
         '[FleetPolicyRevisionsCleanupTask] Found 2 policies with more than 10 revisions.'
       );
-      expect(mockEsClient.deleteByQuery).toHaveBeenCalledWith({
-        index: '.fleet-policies',
-        query: {
-          bool: {
-            should: [
-              {
-                bool: {
-                  must: [
-                    { term: { policy_id: 'policy-1' } },
-                    { range: { revision_idx: { lt: 5 } } }, // 15 - 10 = 5
-                  ],
+      expect(mockEsClient.deleteByQuery).toHaveBeenCalledWith(
+        {
+          index: '.fleet-policies',
+          ...expectedDeleteByQueryConfig,
+          query: {
+            bool: {
+              should: [
+                {
+                  bool: {
+                    must: [
+                      { term: { policy_id: 'policy-1' } },
+                      { range: { revision_idx: { lt: 5 } } }, // 15 - 10 = 5
+                    ],
+                  },
                 },
-              },
-            ],
+              ],
+            },
           },
         },
-      });
+        {
+          signal: abortController.signal,
+        }
+      );
     });
 
     it('should calculate the deletion cutoff for a policy from the latest revision if not use by agents', async () => {
@@ -491,23 +517,29 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
       expect(logger.info).toHaveBeenCalledWith(
         '[FleetPolicyRevisionsCleanupTask] Found 1 policies with more than 10 revisions.'
       );
-      expect(mockEsClient.deleteByQuery).toHaveBeenCalledWith({
-        index: '.fleet-policies',
-        query: {
-          bool: {
-            should: [
-              {
-                bool: {
-                  must: [
-                    { term: { policy_id: 'policy-1' } },
-                    { range: { revision_idx: { lt: 10 } } }, // 20 - 10 = 10
-                  ],
+      expect(mockEsClient.deleteByQuery).toHaveBeenCalledWith(
+        {
+          index: '.fleet-policies',
+          ...expectedDeleteByQueryConfig,
+          query: {
+            bool: {
+              should: [
+                {
+                  bool: {
+                    must: [
+                      { term: { policy_id: 'policy-1' } },
+                      { range: { revision_idx: { lt: 10 } } }, // 20 - 10 = 10
+                    ],
+                  },
                 },
-              },
-            ],
+              ],
+            },
           },
         },
-      });
+        {
+          signal: abortController.signal,
+        }
+      );
     });
   });
 
@@ -529,30 +561,35 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
 
       await mockTask.runTask(taskInstance, mockCore, abortController);
 
-      expect(mockEsClient.search).toHaveBeenCalledWith({
-        index: '.fleet-policies',
-        pit: {
-          id: 'test-pit-id',
-          keep_alive: '5m',
-        },
-        size: 0,
-        aggs: {
-          latest_revisions_by_policy_id: {
-            terms: {
-              field: 'policy_id',
-              order: { _count: 'desc' },
-              size: 100,
-            },
-            aggs: {
-              latest_revision: {
-                max: {
-                  field: 'revision_idx',
+      expect(mockEsClient.search).toHaveBeenCalledWith(
+        {
+          index: '.fleet-policies',
+          pit: {
+            id: 'test-pit-id',
+            keep_alive: '5m',
+          },
+          size: 0,
+          aggs: {
+            latest_revisions_by_policy_id: {
+              terms: {
+                field: 'policy_id',
+                order: { _count: 'desc' },
+                size: 100,
+              },
+              aggs: {
+                latest_revision: {
+                  max: {
+                    field: 'revision_idx',
+                  },
                 },
               },
             },
           },
         },
-      });
+        {
+          signal: abortController.signal,
+        }
+      );
     });
 
     it('should query minimum revisions used by agents filtered to the policy ids with more than max revisions', async () => {
@@ -620,7 +657,10 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
               },
             },
           },
-        })
+        }),
+        {
+          signal: abortController.signal,
+        }
       );
     });
   });
