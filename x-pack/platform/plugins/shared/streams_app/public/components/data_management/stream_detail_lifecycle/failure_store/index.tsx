@@ -9,6 +9,7 @@ import { Streams, isRoot } from '@kbn/streams-schema';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { withSuspense } from '@kbn/shared-ux-utility';
+import { isInheritFailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
 import { NoFailureStorePanel } from './no_failure_store_panel';
 import { FailureStoreInfo } from './failure_store_info';
 import { useUpdateFailureStore } from '../../../../hooks/use_update_failure_store';
@@ -35,13 +36,13 @@ export const StreamDetailFailureStore = ({
   refreshDefinition: () => void;
 }) => {
   const [isFailureStoreModalOpen, setIsFailureStoreModalOpen] = useState(false);
-  const [updateInProgress, setUpdateInProgress] = useState(false);
   const { updateFailureStore } = useUpdateFailureStore(definition.stream);
   const {
     core: { notifications },
   } = useKibana();
 
   const { timeState } = useTimefilter();
+  const { isServerless } = useKibana();
 
   const {
     privileges: {
@@ -57,11 +58,9 @@ export const StreamDetailFailureStore = ({
   const handleSaveModal = async (update: {
     failureStoreEnabled?: boolean;
     customRetentionPeriod?: string;
-    inherit?: object;
+    inherit?: boolean;
   }) => {
     try {
-      setUpdateInProgress(true);
-
       if (update.inherit) {
         await updateFailureStore(definition.stream.name, {
           inherit: {},
@@ -82,8 +81,6 @@ export const StreamDetailFailureStore = ({
       }
 
       refreshDefinition();
-      closeModal();
-      data.refresh();
 
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.streams.streamDetailFailureStore.updateFailureStoreSuccess', {
@@ -98,7 +95,8 @@ export const StreamDetailFailureStore = ({
         toastMessage: getFormattedError(error).message,
       });
     } finally {
-      setUpdateInProgress(false);
+      closeModal();
+      data.refresh();
     }
   };
 
@@ -108,8 +106,7 @@ export const StreamDetailFailureStore = ({
   const isRootStream = isRoot(definition.stream.name);
 
   // Check if current failure store is inherited
-  const isCurrentlyInherited =
-    !!definition.stream.ingest.failure_store && 'inherit' in definition.stream.ingest.failure_store;
+  const isCurrentlyInherited = isInheritFailureStore(definition.stream.ingest.failure_store);
 
   const canShowInherit = (isWired && !isRootStream) || isClassicStream;
 
@@ -134,7 +131,7 @@ export const StreamDetailFailureStore = ({
                   customRetentionPeriod: data?.stats?.fs.config.retentionPeriod.custom,
                 }}
                 inheritOptions={inheritOptions}
-                isLoading={updateInProgress}
+                showIlmDescription={isServerless}
               />
             )}
             {data.isLoading || data?.stats?.fs.config?.enabled ? (

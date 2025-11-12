@@ -8,7 +8,10 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Streams } from '@kbn/streams-schema';
 import { isRoot } from '@kbn/streams-schema';
-import type { EffectiveFailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
+import {
+  isInheritFailureStore,
+  type EffectiveFailureStore,
+} from '@kbn/streams-schema/src/models/ingest/failure_store';
 import { useFailureStoreRedirectLink } from '../../hooks/use_failure_store_redirect_link';
 import { BaseMetricCard } from '../../common/base_metric_card';
 import { getTimeSizeAndUnitLabel } from '../../helpers/format_size_units';
@@ -40,9 +43,7 @@ export const RetentionCard = ({
   const isRootStream = isRoot(definition.stream.name);
   const isWiredStream = Streams.WiredStream.GetResponse.is(definition);
   const isClassicStream = Streams.ClassicStream.GetResponse.is(definition);
-  const isInheritingFailureStore =
-    !!definition.stream.ingest.failure_store && 'inherit' in definition.stream.ingest.failure_store;
-
+  const isInheritingFailureStore = isInheritFailureStore(definition.stream.ingest.failure_store);
   const title = i18n.translate(
     'xpack.streams.streamDetailView.failureStoreEnabled.failureRetentionCard.title',
     {

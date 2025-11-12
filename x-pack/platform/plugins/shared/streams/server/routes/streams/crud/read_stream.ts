@@ -18,8 +18,8 @@ import type { AssetClient } from '../../../lib/streams/assets/asset_client';
 import type { StreamsClient } from '../../../lib/streams/client';
 import {
   getDataStreamLifecycle,
-  getDataStreamSettings,
   getFailureStore,
+  getDataStreamSettings,
   getUnmanagedElasticsearchAssets,
 } from '../../../lib/streams/stream_crud';
 import { addAliasesForNamespacedFields } from '../../../lib/streams/component_templates/logs_layer';
@@ -149,6 +149,5 @@ export async function readStream({
         }
       : undefined,
   };
-
   return body;
 }

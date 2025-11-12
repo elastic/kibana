@@ -16,6 +16,8 @@ import { ingestStreamLifecycleSchema } from './lifecycle';
 import { BaseStream } from '../base';
 import type { IngestStreamSettings } from './settings';
 import { ingestStreamSettingsSchema } from './settings';
+import type { FailureStore } from './failure_store';
+import { failureStoreSchema } from './failure_store';
 
 interface IngestStreamPrivileges {
   // User can change everything about the stream
@@ -51,6 +53,7 @@ export interface IngestBase {
   lifecycle: IngestStreamLifecycle;
   processing: StreamlangDSL;
   settings: IngestStreamSettings;
+  failure_store?: FailureStore;
 }
 
 export const IngestBase: Validation<unknown, IngestBase> = validation(
@@ -59,6 +62,7 @@ export const IngestBase: Validation<unknown, IngestBase> = validation(
     lifecycle: ingestStreamLifecycleSchema,
     processing: streamlangDSLSchema,
     settings: ingestStreamSettingsSchema,
+    failure_store: z.optional(failureStoreSchema),
   })
 );
 
