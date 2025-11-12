@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
-  EuiFormRow,
   EuiFieldText,
-  EuiIcon,
   EuiFormLabel,
+  EuiFormRow,
+  EuiIcon,
   EuiScreenReaderOnly,
   EuiTextTruncate,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { useStreamsRoutingSelector } from './state_management/stream_routing_state_machine';
 
 interface StreamNameFormRowProps {
@@ -28,12 +28,12 @@ interface StreamNameFormRowProps {
   isInvalid?: boolean;
 }
 
-const MIN_NAME_LENGTH = 6; // 'logs.' is already included which is 5 characters, so user must enter at least one more
+const MIN_NAME_LENGTH = 1;
 const MAX_NAME_LENGTH = 200;
 const PREFIX_MAX_VISIBLE_CHARACTERS = 25;
 
-const getHelpText = (value: string, readOnly: boolean): string | undefined => {
-  if (value.length < MIN_NAME_LENGTH && !readOnly) {
+const getHelpText = (prefix: string, value: string, readOnly: boolean): string | undefined => {
+  if (value.length <= prefix.length && !readOnly) {
     return i18n.translate('xpack.streams.streamDetailRouting.emptyNameErrorHelpText', {
       defaultMessage: 'Stream name must not be empty.',
     });
@@ -118,6 +118,7 @@ export function StreamNameFormRow({
         readOnly={readOnly}
         autoFocus={autoFocus}
         onChange={handleChange}
+        minLength={MIN_NAME_LENGTH}
         maxLength={MAX_NAME_LENGTH - prefix.length}
         prepend={[
           <EuiIcon type="streamsWired" />,
