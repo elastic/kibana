@@ -87,6 +87,7 @@ const DefaultStory = () => {
     <Form
       connectorSchema={webhookConnectorFormSchema}
       onSubmit={({ data }) => {
+        // eslint-disable-next-line no-console
         console.log(data);
         window.alert(JSON.stringify(data));
       }}
