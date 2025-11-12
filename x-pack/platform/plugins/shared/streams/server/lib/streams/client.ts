@@ -34,7 +34,6 @@ import { State } from './state_management/state';
 import { checkAccess, checkAccessBulk } from './stream_crud';
 import { StreamsStatusConflictError } from './errors/streams_status_conflict_error';
 import type { FeatureClient } from './feature/feature_client';
-
 interface AcknowledgeResponse<TResult extends Result> {
   acknowledged: true;
   result: TResult;
@@ -324,13 +323,11 @@ export class StreamsClient {
       throw new StatusError(`Child stream ${name} already exists`, 409);
     }
 
-    // TODO - These constants need to be shared between both plugins so I don't have to duplicate them
-    // TODO: need to know prefix to do min check properly
-    logger.info(`parent: ${parent}, \n name: ${name}`);
-    const MIN_NAME_LENGTH = 6; // 'logs.' is already included which is 5 characters, so user must enter at least one more.
+    const prefix = parent + '.';
+    // TODO - constants need to be shared between both plugins so we don't have to duplicate them
     const MAX_NAME_LENGTH = 200;
 
-    if (name.length < MIN_NAME_LENGTH) {
+    if (name.length <= prefix.length) {
       throw new StatusError('Stream name must not be empty.', 400);
     }
 
