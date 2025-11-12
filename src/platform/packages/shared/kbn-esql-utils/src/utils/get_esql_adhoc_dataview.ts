@@ -68,11 +68,12 @@ export async function getESQLAdHocDataview({
   // optional http service to use to fetch the time field, if needed
   http?: HttpStart;
 }) {
-  const timeField = (await http?.get(`${TIMEFIELD_ROUTE}${query}`).catch((error) => {
+  const response = (await http?.get(`${TIMEFIELD_ROUTE}${query}`).catch((error) => {
     // eslint-disable-next-line no-console
     console.error('Failed to fetch the timefield', error);
     return undefined;
-  })) as string | undefined;
+  })) as { timeField?: string } | undefined;
+  const timeField = response?.timeField;
   const indexPattern = getIndexPatternFromESQLQuery(query);
   const dataViewId = await sha256(`esql-${indexPattern}`);
 

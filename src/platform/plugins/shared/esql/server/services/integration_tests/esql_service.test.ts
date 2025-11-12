@@ -98,7 +98,7 @@ describe('EsqlService', () => {
       const url = `/internal/esql/get_timefield/${encodeURIComponent(query)}`;
       const result = await testbed.GET(url).send().expect(200);
 
-      expect(result.body).toBe('my_time_field');
+      expect(result.body.timeField).toBe('my_time_field');
     });
 
     it('should return @timestamp when no time field in query but index has @timestamp', async () => {
@@ -119,7 +119,7 @@ describe('EsqlService', () => {
       const url = `/internal/esql/get_timefield/${encodeURIComponent(query)}`;
       const result = await testbed.GET(url).send().expect(200);
 
-      expect(result.body).toBe('@timestamp');
+      expect(result.body.timeField).toBe('@timestamp');
 
       // Cleanup
       await client.indices.delete({ index: indexName });
@@ -130,7 +130,7 @@ describe('EsqlService', () => {
       const url = `/internal/esql/get_timefield/${encodeURIComponent(query)}`;
       const result = await testbed.GET(url).send().expect(200);
 
-      expect(result.body).toBe(undefined);
+      expect(result.body.timeField).toBe(undefined);
     });
 
     it('should return @timestamp for subqueries when all indices have @timestamp', async () => {
@@ -163,7 +163,7 @@ describe('EsqlService', () => {
       const url = `/internal/esql/get_timefield/${encodeURIComponent(query)}`;
       const result = await testbed.GET(url).send().expect(200);
 
-      expect(result.body).toBe('@timestamp');
+      expect(result.body.timeField).toBe('@timestamp');
 
       // Cleanup
       await client.indices.delete({ index: index1 });
@@ -199,7 +199,7 @@ describe('EsqlService', () => {
       const url = `/internal/esql/get_timefield/${encodeURIComponent(query)}`;
       const result = await testbed.GET(url).send().expect(200);
 
-      expect(result.body).toBe(undefined);
+      expect(result.body.timeField).toBe(undefined);
 
       // Cleanup
       await client.indices.delete({ index: index1 });

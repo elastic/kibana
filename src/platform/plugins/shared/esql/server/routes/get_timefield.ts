@@ -46,12 +46,13 @@ export const registerGetTimeFieldRoute = (
     },
     async (requestHandlerContext, request, response) => {
       const { query } = request.params;
+
       // Query is of the form "from index | where timefield >= ?_tstart".
       // At this point we just want to extract the timefield if present in the query
       const timeField = getTimeFieldFromESQLQuery(query);
       if (timeField) {
         return response.ok({
-          body: timeField,
+          body: { timeField },
         });
       }
       const core = await requestHandlerContext.core;
@@ -62,7 +63,7 @@ export const registerGetTimeFieldRoute = (
       const sourceCommand = root.commands.find(({ name }) => ['from', 'ts'].includes(name));
       if (!sourceCommand) {
         return response.ok({
-          body: undefined,
+          body: { timeField: undefined },
         });
       }
       const sources = getIndexPatternFromESQLQuery(query);
@@ -88,7 +89,7 @@ export const registerGetTimeFieldRoute = (
         );
 
         return response.ok({
-          body: allHaveTimestamp ? '@timestamp' : undefined,
+          body: { timeField: allHaveTimestamp ? '@timestamp' : undefined },
         });
       } catch (error) {
         logger.get().debug(error);
