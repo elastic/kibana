@@ -23,6 +23,6 @@ export function getUpdatedTypes({
     }
     const infoBefore = from.typeDefinitions[type];
     const infoAfter = to.typeDefinitions[type]!;
-    return !infoBefore || !equal(infoBefore, infoAfter);
+    return infoBefore && !equal(infoBefore, infoAfter);
   });
 }

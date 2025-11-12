@@ -57,12 +57,6 @@ function validateChangesExistingType({ from, to }: ValidateChangesExistingTypePa
     );
   }
 
-  // check that the new modelVersion has schemas and that schemas have both create and forwardCompatibility defined
-  if (to.modelVersions.length > from.modelVersions.length) {
-    const newModelVersion = to.modelVersions[to.modelVersions.length - 1];
-    validateNewModelVersion(newModelVersion);
-  }
-
   // check that existing model versions have not been mutated
   const mutatedModelVersions = getMutatedModelVersions(from, to);
   if (mutatedModelVersions.length > 0) {
@@ -71,8 +65,42 @@ function validateChangesExistingType({ from, to }: ValidateChangesExistingTypePa
     );
   }
 
+  // check that the last modelVersion has schemas and that schemas have both create and forwardCompatibility defined
+  if (to.modelVersions.length > from.modelVersions.length) {
+    validateLastModelVersion(to.modelVersions);
+  }
+
   // check that defined modelVersions are consecutive integer numbers, starting at 1
-  to.modelVersions
+  validateModelVersionNumbers(to.modelVersions);
+
+  // ensure that updates in mappings go together with a modelVersion bump
+  if (mappingsUpdated(from, to) && to.modelVersions.length === from.modelVersions.length) {
+    throw new Error(
+      `❌ The '${name}' SO type has changes in the mappings, but is missing a modelVersion that defines these changes.`
+    );
+  }
+}
+
+function validateChangesNewType({ to }: ValidateChangesNewTypeParams): void {
+  const name = to.name;
+
+  if (to.migrationVersions?.length) {
+    throw new Error(`❌ New SO type ${name} cannot define legacy 'migrations'.`);
+  }
+
+  if (!to.modelVersions?.length) {
+    throw new Error(`❌ New SO type ${name} must define the first model version '1'.`);
+  }
+
+  // check that the last modelVersion has schemas and that schemas have both create and forwardCompatibility defined
+  validateModelVersionNumbers(to.modelVersions);
+
+  // check that defined modelVersions are consecutive integer numbers, starting at 1
+  validateLastModelVersion(to.modelVersions);
+}
+
+function validateModelVersionNumbers(mvs: ModelVersionSummary[]) {
+  mvs
     .map<number>(({ version }) => {
       const parsed = parseInt(version, 10);
       if (isNaN(parsed)) {
@@ -92,42 +120,10 @@ function validateChangesExistingType({ from, to }: ValidateChangesExistingTypePa
         );
       }
     });
-
-  // ensure that updates in mappings go together with a modelVersion bump
-  if (mappingsUpdated(from, to) && to.modelVersions.length === from.modelVersions.length) {
-    throw new Error(
-      `❌ The '${name}' SO type has changes in the mappings, but is missing a modelVersion that defines these changes.`
-    );
-  }
 }
 
-function validateChangesNewType({ to }: ValidateChangesNewTypeParams): void {
-  const name = to.name;
-
-  if (to.migrationVersions?.length) {
-    throw new Error(`❌ New SO types cannot define legacy 'migrations'.`);
-  }
-
-  if (!to.modelVersions?.length) {
-    throw new Error(`❌ New SO types must define the first model version '1'.`);
-  }
-
-  if (to.modelVersions?.length > 1) {
-    throw new Error(
-      `❌ The SO type '${name}' is defining two (or more) new model versions. Please refer to our troubleshooting guide: https://docs.elastic.dev/kibana-dev-docs/tutorials/saved-objects#troubleshooting`
-    );
-  }
-
-  if (to.modelVersions[0].version !== '1') {
-    throw new Error(
-      `❌ Invalid model version '${to.modelVersions[0].version}' for SO type '${name}'. Model versions must be consecutive integer numbers starting at 1.`
-    );
-  }
-
-  validateNewModelVersion(to.modelVersions[0]);
-}
-
-function validateNewModelVersion(mv: ModelVersionSummary) {
+function validateLastModelVersion(mvs: ModelVersionSummary[]) {
+  const mv = mvs[mvs.length - 1];
   if (!mv.schemas) {
     throw new Error(
       `❌ The new model version '${mv.version}' for SO type '${name}' is missing the 'schemas' definition.`

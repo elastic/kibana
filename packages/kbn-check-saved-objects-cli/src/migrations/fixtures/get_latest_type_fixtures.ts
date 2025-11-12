@@ -28,6 +28,6 @@ export async function getLatestTypeFixtures({
 }> {
   const typeSnapshot = snapshot.typeDefinitions[type.name];
   const [current, previous] = getVersions(typeSnapshot);
-  const fixtures = await getTypeFixtures({ type, current, previous, generate: Boolean(fix) });
+  const fixtures = await getTypeFixtures({ type, current, previous, generate: fix });
   return { previous: fixtures[previous], current: fixtures[current] };
 }

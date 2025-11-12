@@ -12,7 +12,13 @@ import { Listr } from 'listr2';
 import { run } from '@kbn/dev-cli-runner';
 import type { MigrationSnapshot, ServerHandles } from '../types';
 import { startServers, stopServers } from '../util/servers';
-import { fetchSnapshot, getUpdatedTypes, takeSnapshot, validateChanges } from '../snapshots';
+import {
+  fetchSnapshot,
+  getNewTypes,
+  getUpdatedTypes,
+  takeSnapshot,
+  validateChanges,
+} from '../snapshots';
 import { getLatestTypeFixtures } from '../migrations/fixtures';
 import type { FixtureTemplate } from '../migrations/fixtures';
 
@@ -20,6 +26,7 @@ interface TaskContext {
   serverHandles?: ServerHandles;
   from?: MigrationSnapshot;
   to?: MigrationSnapshot;
+  newTypes: string[];
   updatedTypes: string[];
   fixtures: Record<
     string,
@@ -39,6 +46,7 @@ export function runCheckSavedObjectsCli() {
       const gitRev = flagsReader.string('gitRev');
       const fix = flagsReader.boolean('fix');
       const context: TaskContext = {
+        newTypes: [],
         updatedTypes: [],
         fixtures: {},
       };
@@ -52,17 +60,17 @@ export function runCheckSavedObjectsCli() {
       globalTask = new Listr(
         [
           {
-            title: 'Starting ES + Kibana',
+            title: 'Start ES + Kibana',
             task: async (ctx) => {
               ctx.serverHandles = await startServers();
             },
           },
           {
-            title: 'Obtaining SO type registry snapshots',
+            title: 'Get type registry snapshots',
             task: async (ctx, task) => {
               const subtasks: ListrTask<TaskContext>[] = [
                 {
-                  title: `Obtanining snapshot for baseline '${gitRev}'`,
+                  title: `Obtain snapshot for baseline '${gitRev}'`,
                   task: async () => {
                     ctx.from = await fetchSnapshot(gitRev);
                   },
@@ -72,7 +80,7 @@ export function runCheckSavedObjectsCli() {
                   },
                 },
                 {
-                  title: `Taking snapshot of current SO type definitions`,
+                  title: `Take snapshot of current SO type definitions`,
                   task: async () => {
                     ctx.to = await takeSnapshot(ctx.serverHandles!);
                   },
@@ -83,59 +91,100 @@ export function runCheckSavedObjectsCli() {
             },
           },
           {
-            title: 'Detecting updated types',
-            task: (ctx) => {
-              ctx.updatedTypes = getUpdatedTypes({ from: ctx.from!, to: ctx.to! });
-            },
-          },
-          {
-            title: 'Validating changes in updated types',
+            title: 'Validate new SO types',
             task: (ctx, task) => {
-              const subtasks: ListrTask<TaskContext>[] = ctx.updatedTypes.map((name) => ({
-                title: `Checking updates on type '${name}'`,
-                task: () =>
-                  validateChanges({
-                    from: ctx.from?.typeDefinitions[name],
-                    to: ctx.to?.typeDefinitions[name]!,
-                  }),
-              }));
-
-              return task.newListr<TaskContext>(subtasks, { exitOnError: false });
-            },
-            skip: (ctx) => ctx.updatedTypes.length === 0,
-          },
-          {
-            title: 'Checking for SO fixtures',
-            task: (ctx, task) => {
-              const registry = ctx.serverHandles?.coreStart.savedObjects.getTypeRegistry();
-              const subtasks: ListrTask<TaskContext>[] = ctx.updatedTypes.map((type) => {
-                return {
-                  title: `Loading fixtures for type '${type}'`,
-                  task: async () => {
-                    const typeFixtures = await getLatestTypeFixtures({
-                      type: registry?.getType(type)!,
-                      snapshot: ctx.to!,
-                      fix,
-                    });
-                    ctx.fixtures[type] = typeFixtures;
+              const subtasks: ListrTask<TaskContext>[] = [
+                {
+                  title: 'Detecting new types',
+                  task: () => {
+                    ctx.newTypes = getNewTypes({ from: ctx.from!, to: ctx.to! });
                   },
-                };
-              });
-              return task.newListr<TaskContext>(subtasks, { exitOnError: false });
+                },
+                {
+                  title: 'Checking new types',
+                  task: (_, subtask) => {
+                    const subsubtasks: ListrTask<TaskContext>[] = ctx.newTypes.map((name) => ({
+                      title: `Checking '${name}'`,
+                      task: () =>
+                        validateChanges({
+                          from: ctx.from?.typeDefinitions[name],
+                          to: ctx.to?.typeDefinitions[name]!,
+                        }),
+                    }));
+
+                    return subtask.newListr<TaskContext>(subsubtasks, { exitOnError: false });
+                  },
+                  skip: () => ctx.newTypes.length === 0,
+                },
+              ];
+              return task.newListr<TaskContext>(subtasks);
             },
-            skip: (ctx) => ctx.updatedTypes.length === 0,
           },
           {
-            title: 'Automated rollback tests',
-            task: () => {},
-            skip: () => globalTask.errors.length > 0,
+            title: 'Validate existing SO types',
+            task: (ctx, task) => {
+              const subtasks: ListrTask<TaskContext>[] = [
+                {
+                  title: 'Detecting updated types',
+                  task: () => {
+                    ctx.updatedTypes = getUpdatedTypes({ from: ctx.from!, to: ctx.to! });
+                  },
+                },
+                {
+                  title: 'Validating changes in updated types',
+                  task: (_, subtask) => {
+                    const subsubtasks: ListrTask<TaskContext>[] = ctx.updatedTypes.map((name) => ({
+                      title: `Checking updates on type '${name}'`,
+                      task: () =>
+                        validateChanges({
+                          from: ctx.from?.typeDefinitions[name],
+                          to: ctx.to?.typeDefinitions[name]!,
+                        }),
+                    }));
+
+                    return subtask.newListr<TaskContext>(subsubtasks, { exitOnError: false });
+                  },
+                  skip: () => ctx.updatedTypes.length === 0,
+                },
+                {
+                  title: 'Verifying fixtures for updated types',
+                  task: (_, subtask) => {
+                    const registry = ctx.serverHandles?.coreStart.savedObjects.getTypeRegistry();
+                    const subsubtasks: ListrTask<TaskContext>[] = ctx.updatedTypes.map((type) => {
+                      return {
+                        title: `Loading fixtures for type '${type}'`,
+                        task: async () => {
+                          const typeFixtures = await getLatestTypeFixtures({
+                            type: registry?.getType(type)!,
+                            snapshot: ctx.to!,
+                            fix,
+                          });
+                          ctx.fixtures[type] = typeFixtures;
+                        },
+                      };
+                    });
+                    return subtask.newListr<TaskContext>(subsubtasks, { exitOnError: false });
+                  },
+                  skip: () => ctx.updatedTypes.length === 0,
+                },
+                {
+                  title: 'Automated rollback tests',
+                  task: () => {},
+                  skip: () => ctx.updatedTypes.length === 0 || globalTask.errors.length > 0,
+                },
+              ];
+              return task.newListr<TaskContext>(subtasks);
+            },
           },
         ],
         {
-          fallbackRenderer: 'simple',
           collectErrors: 'minimal',
-          exitOnError: true,
           concurrent: false,
+          exitOnError: true,
+          fallbackRenderer: 'simple',
+          rendererOptions: {
+            collapseSubtasks: false,
+          },
         }
       );
 
@@ -149,7 +198,7 @@ export function runCheckSavedObjectsCli() {
         await new Listr<TaskContext, 'default', 'simple'>(
           [
             {
-              title: 'Stopping Kibana + ES',
+              title: 'Stop Kibana + ES',
               task: async (ctx) => {
                 await stopServers(ctx.serverHandles!);
               },
