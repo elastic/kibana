@@ -15,7 +15,6 @@ import type { UseEuiTheme } from '@elastic/eui';
 import { EuiSkipLink, useEuiTheme } from '@elastic/eui';
 import { ChromeLayout, ChromeLayoutConfigProvider } from '@kbn/core-chrome-layout-components';
 import { Box } from '@kbn/core-chrome-layout-components/__stories__/box';
-import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
 
 import { Navigation } from '../components/navigation';
 import { LOGO, PRIMARY_MENU_FOOTER_ITEMS, PRIMARY_MENU_ITEMS } from '../mocks/observability';
@@ -188,7 +187,7 @@ const Layout = ({ ...props }: PropsAndArgs) => {
 
   return (
     <>
-      <EuiSkipLink destinationId={APP_MAIN_SCROLL_CONTAINER_ID}>Skip the navigation</EuiSkipLink>
+      <EuiSkipLink destinationId="app-content">Skip the navigation</EuiSkipLink>
       <ChromeLayoutConfigProvider
         value={{
           bannerHeight: 48,
