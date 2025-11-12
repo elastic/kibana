@@ -27,5 +27,7 @@ export interface DashboardSavedObjectUserContent extends UserContentCommonSchema
     title: string;
     description?: string;
     timeRestore: boolean;
+    visType?: string; // For visualizations only
+    readOnly?: boolean; // For deprecated visualizations
   };
 }

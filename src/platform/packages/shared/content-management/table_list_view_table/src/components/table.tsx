@@ -25,13 +25,13 @@ import {
   useEuiTheme,
   EuiCode,
   EuiText,
+  EuiEmptyPrompt,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import {
   cssFavoriteHoverWithinEuiTableRow,
   useFavorites,
-  FavoritesEmptyState,
 } from '@kbn/content-management-favorites-public';
 
 import { useServices } from '../services';
@@ -53,8 +53,7 @@ import {
 } from './user_filter_panel';
 import { FavoritesFilterButton } from './favorites_filter_panel';
 
-// Temporarily hiding tabs filter because we now have favorite filter as a button, and will rework tabs filter later
-// import { TabbedTableFilter } from './tabbed_filter';
+import { TabbedTableFilter } from './tabbed_filter';
 
 type State<T extends UserContentCommonSchema> = Pick<
   TableListViewState<T>,
@@ -88,6 +87,8 @@ interface Props<T extends UserContentCommonSchema> extends State<T>, TagManageme
   clearTagSelection: () => void;
   createdByEnabled: boolean;
   favoritesEnabled: boolean;
+  contentTypeTabsEnabled?: boolean;
+  emptyPrompt?: JSX.Element;
 }
 
 export function Table<T extends UserContentCommonSchema>({
@@ -119,9 +120,29 @@ export function Table<T extends UserContentCommonSchema>({
   clearTagSelection,
   createdByEnabled,
   favoritesEnabled,
+  contentTypeTabsEnabled,
+  emptyPrompt,
 }: Props<T>) {
   const euiTheme = useEuiTheme();
-  const { getTagList, isTaggingEnabled, isKibanaVersioningEnabled } = useServices();
+  const { getTagList, isTaggingEnabled, isKibanaVersioningEnabled, navigateToUrl, getUrlForApp } =
+    useServices();
+
+  // Compute dynamic entity name plural based on active tab
+  const dynamicEntityNamePlural = useMemo(() => {
+    if (contentTypeTabsEnabled && tableFilter.contentTypeTab) {
+      switch (tableFilter.contentTypeTab) {
+        case 'dashboards':
+          return 'dashboards';
+        case 'visualizations':
+          return 'visualizations';
+        case 'annotation-groups':
+          return 'annotation groups';
+        default:
+          return entityNamePlural;
+      }
+    }
+    return entityNamePlural;
+  }, [contentTypeTabsEnabled, tableFilter.contentTypeTab, entityNamePlural]);
 
   const renderToolsLeft = useCallback(() => {
     if (!deleteItems || selectedIds.length === 0) {
@@ -140,12 +161,67 @@ export function Table<T extends UserContentCommonSchema>({
           defaultMessage="Delete {itemCount} {entityName}"
           values={{
             itemCount: selectedIds.length,
-            entityName: selectedIds.length === 1 ? entityName : entityNamePlural,
+            entityName: selectedIds.length === 1 ? entityName : dynamicEntityNamePlural,
           }}
         />
       </EuiButton>
     );
-  }, [deleteItems, dispatch, entityName, entityNamePlural, selectedIds.length]);
+  }, [deleteItems, dispatch, entityName, dynamicEntityNamePlural, selectedIds.length]);
+
+  // Dynamic create button for toolbar (changes based on active tab)
+  const renderDynamicCreateButton = useCallback(() => {
+    if (contentTypeTabsEnabled && tableFilter.contentTypeTab) {
+      switch (tableFilter.contentTypeTab) {
+        case 'visualizations':
+          // For visualizations, open the visualization creation modal
+          return (
+            <EuiButton
+              fill
+              iconType="plusInCircle"
+              onClick={async () => {
+                const { showNewVisModal } = await import('@kbn/visualizations-plugin/public');
+                showNewVisModal();
+              }}
+              data-test-subj="newItemButton"
+            >
+              <FormattedMessage
+                id="contentManagement.tableList.listing.visualizations.createButtonToolbar"
+                defaultMessage="Create visualization"
+              />
+            </EuiButton>
+          );
+        case 'annotation-groups':
+          // For annotation groups, button navigates to Lens
+          return (
+            <EuiButton
+              fill
+              iconType="plusInCircle"
+              onClick={() => {
+                const lensUrl = getUrlForApp('lens', { path: '#/' });
+                navigateToUrl(lensUrl);
+              }}
+              data-test-subj="createAnnotationInLensButton"
+            >
+              <FormattedMessage
+                id="contentManagement.tableList.listing.annotationGroups.createButtonToolbar"
+                defaultMessage="Create annotation in Lens"
+              />
+            </EuiButton>
+          );
+        default:
+          // Dashboards - use the create button from parent
+          return renderCreateButton();
+      }
+    }
+
+    return renderCreateButton();
+  }, [
+    contentTypeTabsEnabled,
+    tableFilter.contentTypeTab,
+    renderCreateButton,
+    navigateToUrl,
+    getUrlForApp,
+  ]);
 
   const selection = useMemo<EuiTableSelectionType<T> | undefined>(() => {
     if (deleteItems) {
@@ -259,7 +335,7 @@ export function Table<T extends UserContentCommonSchema>({
     return {
       onChange: onTableSearchChange,
       toolsLeft: renderToolsLeft(),
-      toolsRight: renderCreateButton(),
+      toolsRight: renderDynamicCreateButton(),
       query: searchQuery.query ?? undefined,
       box: {
         incremental: true,
@@ -285,36 +361,148 @@ export function Table<T extends UserContentCommonSchema>({
     };
   }, [
     onTableSearchChange,
-    renderCreateButton,
+    renderDynamicCreateButton,
     renderToolsLeft,
     searchFilters,
     searchQuery.query,
     searchQuery.error,
   ]);
 
-  const hasQueryOrFilters = Boolean(searchQuery.text || tableFilter.createdBy.length > 0);
-
-  const noItemsMessage = tableFilter.favorites ? (
-    <FavoritesEmptyState
-      emptyStateType={hasQueryOrFilters ? 'noMatchingItems' : 'noItems'}
-      entityName={entityName}
-      entityNamePlural={entityNamePlural}
-    />
-  ) : (
-    <FormattedMessage
-      id="contentManagement.tableList.listing.noMatchedItemsMessage"
-      defaultMessage="No {entityNamePlural} matched your search."
-      values={{ entityNamePlural }}
-    />
+  // Simple message shown while loading
+  const loadingMessage = useMemo(
+    () => (
+      <FormattedMessage
+        id="contentManagement.tableList.listing.loadingMessage"
+        defaultMessage="No {entityNamePlural} matched your search."
+        values={{ entityNamePlural: dynamicEntityNamePlural }}
+      />
+    ),
+    [dynamicEntityNamePlural]
   );
+
+  const emptyPromptTitle = useMemo(
+    () => (
+      <FormattedMessage
+        id="contentManagement.tableList.listing.noItemsTitle"
+        defaultMessage="No {entityNamePlural} to display"
+        values={{ entityNamePlural: dynamicEntityNamePlural }}
+      />
+    ),
+    [dynamicEntityNamePlural]
+  );
+
+  const emptyPromptBody = useMemo(() => {
+    if (contentTypeTabsEnabled && tableFilter.contentTypeTab) {
+      switch (tableFilter.contentTypeTab) {
+        case 'visualizations':
+          return (
+            <FormattedMessage
+              id="contentManagement.tableList.listing.visualizations.noItemsBody"
+              defaultMessage="Create a visualization to get started."
+            />
+          );
+        case 'annotation-groups':
+          return (
+            <FormattedMessage
+              id="contentManagement.tableList.listing.annotationGroups.noItemsBody"
+              defaultMessage="Create and save annotations for use across multiple visualizations in the Lens editor."
+            />
+          );
+        default:
+          // Dashboards
+          return (
+            <FormattedMessage
+              id="contentManagement.tableList.listing.dashboards.noItemsBody"
+              defaultMessage="Create a dashboard to get started."
+            />
+          );
+      }
+    }
+
+    return (
+      <FormattedMessage
+        id="contentManagement.tableList.listing.noItemsBody"
+        defaultMessage="Create a new item to get started."
+      />
+    );
+  }, [contentTypeTabsEnabled, tableFilter.contentTypeTab]);
+
+  const emptyPromptActions = useMemo(() => {
+    if (contentTypeTabsEnabled && tableFilter.contentTypeTab) {
+      switch (tableFilter.contentTypeTab) {
+        case 'visualizations':
+          // For visualizations, open the visualization creation modal
+          return (
+            <EuiButton
+              fill
+              onClick={async () => {
+                // Dynamically import showNewVisModal from visualizations plugin
+                const { showNewVisModal } = await import('@kbn/visualizations-plugin/public');
+                showNewVisModal();
+              }}
+              data-test-subj="newItemButton"
+            >
+              <FormattedMessage
+                id="contentManagement.tableList.listing.visualizations.createButton"
+                defaultMessage="Create visualization"
+              />
+            </EuiButton>
+          );
+        case 'annotation-groups':
+          // For annotation groups, button navigates to Lens
+          return (
+            <EuiButton
+              fill
+              onClick={() => {
+                const lensUrl = getUrlForApp('lens', { path: '#/' });
+                navigateToUrl(lensUrl);
+              }}
+              data-test-subj="createAnnotationInLensButton"
+            >
+              <FormattedMessage
+                id="contentManagement.tableList.listing.annotationGroups.createButton"
+                defaultMessage="Create annotation in Lens"
+              />
+            </EuiButton>
+          );
+        default:
+          // Dashboards - use the create button from parent
+          return renderCreateButton();
+      }
+    }
+
+    return renderCreateButton();
+  }, [
+    contentTypeTabsEnabled,
+    tableFilter.contentTypeTab,
+    renderCreateButton,
+    navigateToUrl,
+    getUrlForApp,
+  ]);
 
   const { data: favorites, isError: favoritesError } = useFavorites({ enabled: favoritesEnabled });
 
   const visibleItems = React.useMemo(() => {
     let filteredItems = items;
 
+    // Filter by content type tab
+    if (contentTypeTabsEnabled && tableFilter?.contentTypeTab) {
+      const currentTab = tableFilter.contentTypeTab;
+      filteredItems = filteredItems.filter((item) => {
+        const itemType = (item as any).type;
+        if (currentTab === 'dashboards') {
+          return itemType === 'dashboard' || !itemType; // Default to dashboard if no type
+        } else if (currentTab === 'visualizations') {
+          return itemType === 'visualization' || itemType === 'map';
+        } else if (currentTab === 'annotation-groups') {
+          return itemType === 'event-annotation-group';
+        }
+        return true;
+      });
+    }
+
     if (tableFilter?.createdBy?.length > 0) {
-      filteredItems = items.filter((item) => {
+      filteredItems = filteredItems.filter((item) => {
         if (item.createdBy) return tableFilter.createdBy.includes(item.createdBy);
         else if (item.managed) return false;
         else return tableFilter.createdBy.includes(USER_FILTER_NULL_USER);
@@ -330,7 +518,7 @@ export function Table<T extends UserContentCommonSchema>({
     }
 
     return filteredItems;
-  }, [items, tableFilter, favorites, favoritesError]);
+  }, [items, tableFilter, favorites, favoritesError, contentTypeTabsEnabled]);
 
   const { allUsers, showNoUserOption } = useMemo(() => {
     if (!createdByEnabled) return { allUsers: [], showNoUserOption: false };
@@ -353,56 +541,73 @@ export function Table<T extends UserContentCommonSchema>({
       ? true // by passing "true" we disable the EuiInMemoryTable sorting and handle it ourselves, but sorting is still enabled
       : { sort: tableSort };
 
-  // const favoritesFilter =
-  //   favoritesEnabled && !favoritesError ? (
-  //     <TabbedTableFilter
-  //       selectedTabId={tableFilter.favorites ? 'favorite' : 'all'}
-  //       onSelectedTabChanged={(newTab) => {
-  //         onFilterChange({ favorites: newTab === 'favorite' });
-  //       }}
-  //     />
-  //   ) : undefined;
+  const tabbedFilter = contentTypeTabsEnabled ? (
+    <TabbedTableFilter
+      selectedTabId={tableFilter.contentTypeTab ?? 'dashboards'}
+      onSelectedTabChanged={(newTab) => {
+        onFilterChange({ contentTypeTab: newTab });
+      }}
+    />
+  ) : undefined;
+
+  // Show search/filters for all tabs (annotation-groups now behaves like other tabs)
+  const showSearch = true;
 
   return (
-    <UserFilterContextProvider
-      enabled={createdByEnabled}
-      allUsers={allUsers}
-      onSelectedUsersChange={(selectedUsers) => {
-        onFilterChange({ createdBy: selectedUsers });
-      }}
-      selectedUsers={tableFilter.createdBy}
-      showNoUserOption={showNoUserOption}
-      isKibanaVersioningEnabled={isKibanaVersioningEnabled}
-      entityNamePlural={entityNamePlural}
-    >
-      <TagFilterContextProvider
-        isPopoverOpen={isPopoverOpen}
-        closePopover={closePopover}
-        onFilterButtonClick={onFilterButtonClick}
-        onSelectChange={onSelectChange}
-        options={options}
-        totalActiveFilters={totalActiveFilters}
-        clearTagSelection={clearTagSelection}
+    <>
+      {tabbedFilter}
+      <UserFilterContextProvider
+        enabled={createdByEnabled}
+        allUsers={allUsers}
+        onSelectedUsersChange={(selectedUsers) => {
+          onFilterChange({ createdBy: selectedUsers });
+        }}
+        selectedUsers={tableFilter.createdBy}
+        showNoUserOption={showNoUserOption}
+        isKibanaVersioningEnabled={isKibanaVersioningEnabled}
+        entityNamePlural={dynamicEntityNamePlural}
       >
-        <EuiInMemoryTable<T>
-          itemId="id"
-          items={visibleItems}
-          columns={tableColumns}
-          pagination={pagination}
-          loading={isFetchingItems}
-          message={noItemsMessage}
-          selection={selection}
-          search={search}
-          executeQueryOptions={{ enabled: false }}
-          sorting={sorting}
-          onChange={onTableChange}
-          data-test-subj="itemsInMemTable"
-          rowHeader="attributes.title"
-          tableCaption={tableCaption}
-          css={cssFavoriteHoverWithinEuiTableRow(euiTheme.euiTheme)}
-          // childrenBetween={favoritesFilter}
-        />
-      </TagFilterContextProvider>
-    </UserFilterContextProvider>
+        <TagFilterContextProvider
+          isPopoverOpen={isPopoverOpen}
+          closePopover={closePopover}
+          onFilterButtonClick={onFilterButtonClick}
+          onSelectChange={onSelectChange}
+          options={options}
+          totalActiveFilters={totalActiveFilters}
+          clearTagSelection={clearTagSelection}
+        >
+          <EuiInMemoryTable<T>
+            itemId="id"
+            items={visibleItems}
+            columns={tableColumns}
+            pagination={pagination}
+            loading={isFetchingItems}
+            noItemsMessage={
+              isFetchingItems ? (
+                // Show simple message while loading
+                loadingMessage
+              ) : (
+                // Show full empty prompt when confirmed no items
+                <EuiEmptyPrompt
+                  title={<h3>{emptyPromptTitle}</h3>}
+                  titleSize="xs"
+                  body={emptyPromptBody}
+                  actions={emptyPromptActions}
+                />
+              )
+            }
+            selection={selection}
+            search={showSearch ? search : false}
+            executeQueryOptions={{ enabled: false }}
+            sorting={sorting}
+            onChange={onTableChange}
+            data-test-subj="itemsInMemTable"
+            rowHeader="attributes.title"
+            tableCaption={tableCaption}
+            css={cssFavoriteHoverWithinEuiTableRow(euiTheme.euiTheme)}
+          />
+        </TagFilterContextProvider>
+      </UserFilterContextProvider>
+    </>
   );
 }

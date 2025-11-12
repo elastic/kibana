@@ -58,6 +58,7 @@ import type { RowActions, SearchQueryError, TableItemsRowActions } from './types
 import type { CustomSortingOptions } from './components/table_sort_select';
 import { sortByRecentlyAccessed } from './components/table_sort_select';
 import { ContentEditorActivityRow } from './components/content_editor_activity_row';
+import type { ContentType } from './components/tabbed_filter';
 
 const disabledEditAction = {
   enabled: false,
@@ -84,6 +85,8 @@ export interface TableListViewTableProps<
   customSortingOptions?: CustomSortingOptions;
   urlStateEnabled?: boolean;
   createdByEnabled?: boolean;
+  /** Enable content type tabs filter (dashboards, visualizations, annotation-groups). Only used in dashboards app. */
+  contentTypeTabsEnabled?: boolean;
   /**
    * Id of the heading element describing the table. This id will be used as `aria-labelledby` of the wrapper element.
    * If the table is not empty, this component renders its own h1 element using the same id.
@@ -101,6 +104,7 @@ export interface TableListViewTableProps<
     refs?: {
       references?: SavedObjectsFindOptionsReference[];
       referencesToExclude?: SavedObjectsFindOptionsReference[];
+      contentType?: ContentType;
     }
   ): Promise<{ total: number; hits: T[] }>;
   /** Handler to set the item title "href" value. If it returns undefined there won't be a link for this item. */
@@ -167,6 +171,7 @@ export interface State<T extends UserContentCommonSchema = UserContentCommonSche
   tableFilter: {
     createdBy: string[];
     favorites: boolean;
+    contentTypeTab?: ContentType;
   };
 }
 
@@ -178,7 +183,7 @@ export interface URLState {
   };
   filter?: {
     createdBy?: string[];
-    favorites?: boolean;
+    contentTypeTab?: ContentType;
   };
 
   [key: string]: unknown;
@@ -190,7 +195,7 @@ interface URLQueryParams {
   sort?: string;
   sortdir?: string;
   created_by?: string[];
-  favorites?: 'true';
+  contentTypeTab?: string;
 
   [key: string]: unknown;
 }
@@ -250,10 +255,12 @@ const urlStateDeserializer = (params: URLQueryParams): URLState => {
     stateFromURL.filter = { createdBy: [] };
   }
 
-  if (sanitizedParams.favorites === 'true') {
-    stateFromURL.filter.favorites = true;
-  } else {
-    stateFromURL.filter.favorites = false;
+  if (sanitizedParams.contentTypeTab === 'dashboards') {
+    stateFromURL.filter.contentTypeTab = 'dashboards';
+  } else if (sanitizedParams.contentTypeTab === 'visualizations') {
+    stateFromURL.filter.contentTypeTab = 'visualizations';
+  } else if (sanitizedParams.contentTypeTab === 'annotation-groups') {
+    stateFromURL.filter.contentTypeTab = 'annotation-groups';
   }
 
   return stateFromURL;
@@ -268,7 +275,10 @@ const urlStateDeserializer = (params: URLQueryParams): URLState => {
 const urlStateSerializer = (updated: {
   s?: string;
   sort?: { field: 'title' | 'updatedAt'; direction: Direction };
-  filter?: { createdBy?: string[]; favorites?: boolean };
+  filter?: {
+    createdBy?: string[];
+    contentTypeTab?: ContentType;
+  };
 }) => {
   const updatedQueryParams: Partial<URLQueryParams> = {};
 
@@ -291,8 +301,8 @@ const urlStateSerializer = (updated: {
     updatedQueryParams.created_by = updated.filter.createdBy;
   }
 
-  if (updated?.filter && 'favorites' in updated.filter) {
-    updatedQueryParams.favorites = updated.filter.favorites ? 'true' : undefined;
+  if (updated?.filter?.contentTypeTab) {
+    updatedQueryParams.contentTypeTab = updated.filter.contentTypeTab;
   }
 
   return updatedQueryParams;
@@ -339,6 +349,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   refreshListBouncer,
   setPageDataTestSubject,
   createdByEnabled = false,
+  contentTypeTabsEnabled = false,
   recentlyAccessed,
 }: TableListViewTableProps<T>) {
   useEffect(() => {
@@ -428,6 +439,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
       tableFilter: {
         createdBy: [],
         favorites: false,
+        contentTypeTab: 'dashboards',
       },
     };
   }, [initialPageSize, entityName, recentlyAccessed]);
@@ -468,7 +480,11 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         ? await searchQueryParser(searchQuery.text)
         : { searchQuery: searchQuery.text, references: undefined, referencesToExclude: undefined };
 
-      const response = await findItems(searchQueryParsed, { references, referencesToExclude });
+      const response = await findItems(searchQueryParsed, {
+        references,
+        referencesToExclude,
+        contentType: tableFilter.contentTypeTab,
+      });
 
       if (!isMounted.current) {
         return;
@@ -496,7 +512,14 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         data: err,
       });
     }
-  }, [searchQueryParser, searchQuery.text, findItems, onFetchSuccess, recentlyAccessed]);
+  }, [
+    searchQueryParser,
+    searchQuery.text,
+    findItems,
+    onFetchSuccess,
+    recentlyAccessed,
+    tableFilter.contentTypeTab,
+  ]);
 
   const updateQuery = useCallback(
     (query: Query | null, error: SearchQueryError | null) => {
@@ -1055,6 +1078,13 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   // ------------
   useDebounce(fetchItems, 300, [fetchItems, refreshListBouncer]);
 
+  // Immediately set loading state when tab changes (before debounced fetch)
+  useEffect(() => {
+    if (contentTypeTabsEnabled) {
+      dispatch({ type: 'onFetchItems' });
+    }
+  }, [tableFilter.contentTypeTab, contentTypeTabsEnabled]);
+
   // set the initial state from the URL
   useEffect(() => {
     if (!urlStateEnabled) {
@@ -1102,7 +1132,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         data: {
           filter: {
             createdBy: filter.createdBy ?? [],
-            favorites: filter.favorites ?? false,
+            contentTypeTab: filter.contentTypeTab ?? 'dashboards',
           },
         },
       });
@@ -1149,7 +1179,9 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     return null;
   }
 
-  if (!showFetchError && hasNoItems) {
+  // When tabs are enabled, always show the table structure (including tabs)
+  // even when there are no items, so users can switch between tabs
+  if (!showFetchError && hasNoItems && !contentTypeTabsEnabled) {
     return (
       <PageTemplate isEmptyState={true}>
         <KibanaPageTemplate.Section
@@ -1203,6 +1235,8 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           clearTagSelection={clearTagSelection}
           createdByEnabled={createdByEnabled}
           favoritesEnabled={favoritesEnabled}
+          contentTypeTabsEnabled={contentTypeTabsEnabled}
+          emptyPrompt={emptyPrompt}
         />
 
         {/* Delete modal */}
