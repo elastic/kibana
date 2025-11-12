@@ -590,9 +590,9 @@ type DetectionAlertSchema = {
     version: Version8190;
   };
   [ALERT_ATTACK_IDS]?: {
-    type: string[] | undefined,
-    version: Version930
-  }
+    type: string[] | undefined;
+    version: Version930;
+  };
 };
 
 export type DetectionAlertRead = ConvertSchemaTypeToReadSchema<Version800, DetectionAlertSchema> & {
