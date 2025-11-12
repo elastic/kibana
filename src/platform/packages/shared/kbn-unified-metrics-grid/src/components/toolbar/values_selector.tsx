@@ -21,6 +21,7 @@ import {
 import type { TimeRange } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { comboBoxFieldOptionMatcher } from '@kbn/field-utils';
+import { css } from '@emotion/react';
 import { FIELD_VALUE_SEPARATOR } from '../../common/constants';
 import { useDimensionsQuery } from '../../hooks';
 import { ClearAllSection } from './clear_all_section';
@@ -35,6 +36,8 @@ export interface ValuesFilterProps {
   indices?: string[];
   disabled?: boolean;
   timeRange: TimeRange;
+
+  fullWidth?: boolean;
   onChange: (values: string[]) => void;
   onClear: () => void;
 }
@@ -43,6 +46,7 @@ export const ValuesSelector = ({
   selectedValues,
   onChange,
   timeRange,
+  fullWidth = false,
   disabled = false,
   indices = [],
   onClear,
@@ -105,7 +109,12 @@ export const ValuesSelector = ({
 
     return (
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem
+          grow={false}
+          css={css`
+            align-items: flex-start;
+          `}
+        >
           {count > 0 ? (
             <FormattedMessage
               id="metricsExperience.valuesSelector.valuesSelectorButtonLabelWithSelection"
@@ -186,6 +195,7 @@ export const ValuesSelector = ({
       onChange={handleChange}
       disabled={disabled}
       popoverContentBelowSearch={popoverContentBelowSearch}
+      fullWidth={fullWidth}
     />
   );
 };

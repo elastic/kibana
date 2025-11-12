@@ -49,6 +49,7 @@ export interface ConversationActions {
   }) => void;
   setAssistantMessage: ({ assistantMessage }: { assistantMessage: string }) => void;
   addAssistantMessageChunk: ({ messageChunk }: { messageChunk: string }) => void;
+  setTimeToFirstToken: ({ timeToFirstToken }: { timeToFirstToken: number }) => void;
   onConversationCreated: ({
     conversationId,
     title,
@@ -57,6 +58,7 @@ export interface ConversationActions {
     title: string;
   }) => void;
   deleteConversation: (id: string) => Promise<void>;
+  renameConversation: (id: string, title: string) => Promise<void>;
 }
 
 interface UseConversationActionsParams {
@@ -110,6 +112,9 @@ const createConversationActions = ({
             input: { message: userMessage },
             response: { message: '' },
             steps: [],
+            started_at: new Date().toISOString(),
+            time_to_first_token: 0,
+            time_to_last_token: 0,
           };
 
           if (!draft) {
@@ -129,7 +134,6 @@ const createConversationActions = ({
         })
       );
     },
-
     setAgentId: (agentId: string) => {
       // We allow to change agent only at the start of the conversation
       if (conversationId) {
@@ -148,7 +152,6 @@ const createConversationActions = ({
       );
       setAgentIdStorage(agentId);
     },
-
     addReasoningStep: ({ step }: { step: ReasoningStep }) => {
       setCurrentRound((round) => {
         round.steps.push(step);
@@ -194,7 +197,11 @@ const createConversationActions = ({
         round.response.message += messageChunk;
       });
     },
-
+    setTimeToFirstToken: ({ timeToFirstToken }: { timeToFirstToken: number }) => {
+      setCurrentRound((round) => {
+        round.time_to_first_token = timeToFirstToken;
+      });
+    },
     onConversationCreated: ({
       conversationId: id,
       title,
@@ -224,7 +231,6 @@ const createConversationActions = ({
         onConversationCreated({ conversationId: id, title });
       }
     },
-
     deleteConversation: async (id: string) => {
       await conversationsService.delete({ conversationId: id });
 
@@ -238,6 +244,24 @@ const createConversationActions = ({
       if (onDeleteConversation) {
         onDeleteConversation({ id, isCurrentConversation });
       }
+    },
+    renameConversation: async (id: string, title: string) => {
+      await conversationsService.rename({ conversationId: id, title });
+
+      // Update the conversation in cache if it exists
+      const conversationQueryKey = queryKeys.conversations.byId(id);
+      const currentConversation = queryClient.getQueryData<Conversation>(conversationQueryKey);
+      if (currentConversation) {
+        queryClient.setQueryData<Conversation>(
+          conversationQueryKey,
+          produce(currentConversation, (draft) => {
+            draft.title = title;
+          })
+        );
+      }
+
+      // Invalidate conversation list to get updated data from server
+      queryClient.invalidateQueries({ queryKey: queryKeys.conversations.all });
     },
   };
 };
