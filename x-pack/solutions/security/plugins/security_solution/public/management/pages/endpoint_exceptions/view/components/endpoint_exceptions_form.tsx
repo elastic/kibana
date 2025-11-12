@@ -36,6 +36,9 @@ import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import type { OnChangeProps } from '@kbn/lists-plugin/public';
 import type { ValueSuggestionsGetFn } from '@kbn/unified-search-plugin/public/autocomplete/providers/value_suggestion_provider';
+import type { EffectedPolicySelectProps } from '../../../../components/effected_policy_select';
+import { EffectedPolicySelect } from '../../../../components/effected_policy_select';
+import { useCanAssignArtifactPerPolicy } from '../../../../hooks/artifacts';
 import { useSuggestions } from '../../../../hooks/use_suggestions';
 import {
   ENDPOINT_FIELDS_SEARCH_STRATEGY,
@@ -130,10 +133,11 @@ export const EndpointExceptionsForm: React.FC<
   const [hasWildcardWithWrongOperator, setHasWildcardWithWrongOperator] = useState<boolean>(
     hasWrongOperatorWithWildcard([exception])
   );
-
   const [hasPartialCodeSignatureWarning, setHasPartialCodeSignatureWarning] = useState<boolean>(
     hasPartialCodeSignatureEntry([exception])
   );
+
+  const showAssignmentSection = useCanAssignArtifactPerPolicy(exception, mode, hasFormChanged);
 
   const [isIndexPatternLoading, { indexPatterns }] = useFetchIndex(
     ENDPOINT_ALERTS_INDEX_NAMES,
@@ -486,6 +490,27 @@ export const EndpointExceptionsForm: React.FC<
     [allowSelectOs, exceptionBuilderComponentMemo, osInputMemo]
   );
 
+  const handleEffectedPolicyOnChange: EffectedPolicySelectProps['onChange'] = useCallback(
+    (updatedItem) => {
+      processChanged({ tags: updatedItem.tags ?? [] });
+      if (!hasFormChanged) {
+        setHasFormChanged(true);
+      }
+    },
+    [hasFormChanged, processChanged]
+  );
+
+  const policiesSection = useMemo(
+    () => (
+      <EffectedPolicySelect
+        item={exception}
+        onChange={handleEffectedPolicyOnChange}
+        data-test-subj={getTestId('effectedPolicies')}
+      />
+    ),
+    [exception, handleEffectedPolicyOnChange, getTestId]
+  );
+
   useEffect(() => {
     processChanged();
   }, [processChanged]);
@@ -519,6 +544,13 @@ export const EndpointExceptionsForm: React.FC<
               defaultMessage="Using multiples of the same field values can degrade Endpoint performance and/or create ineffective rules"
             />
           </EuiText>
+        </>
+      )}
+
+      {showAssignmentSection && (
+        <>
+          <EuiHorizontalRule />
+          {policiesSection}
         </>
       )}
 
