@@ -17,6 +17,8 @@ import type {
   IndexResponse,
   Result,
   SearchRequest,
+  UpdateRequest,
+  UpdateResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { InferSearchResponseOf } from '@kbn/es-types';
 import type { StorageFieldTypeOf, StorageMappingProperty } from './types';
@@ -85,6 +87,13 @@ export type StorageClientIndexResponse = IndexResponse;
 export type StorageClientGetRequest = Omit<GetRequest & SearchRequest, 'index'>;
 export type StorageClientGetResponse<TDocument extends { _id?: string }> = GetResponse<TDocument>;
 
+export type StorageClientUpdateRequest<TDocument = unknown> = Omit<
+  UpdateRequest<Partial<TDocument>, Partial<TDocument>>,
+  'index'
+>;
+
+export type StorageClientUpdateResponse = UpdateResponse;
+
 export type StorageClientSearch<TDocumentType = never> = <
   TSearchRequest extends StorageClientSearchRequest
 >(
@@ -109,12 +118,17 @@ export type StorageClientGet<TDocumentType extends { _id?: string } = never> = (
   request: StorageClientGetRequest
 ) => Promise<StorageClientGetResponse<TDocumentType>>;
 
+export type StorageClientUpdate<TDocumentType = never> = (
+  request: StorageClientUpdateRequest<TDocumentType>
+) => Promise<StorageClientUpdateResponse>;
+
 export type StorageClientExistsIndex = () => Promise<boolean>;
 
 export interface InternalIStorageClient<TDocumentType extends { _id?: string } = never> {
   search: StorageClientSearch<TDocumentType>;
   bulk: StorageClientBulk<TDocumentType>;
   index: StorageClientIndex<TDocumentType>;
+  update: StorageClientUpdate<TDocumentType>;
   delete: StorageClientDelete;
   clean: StorageClientClean;
   get: StorageClientGet<TDocumentType>;

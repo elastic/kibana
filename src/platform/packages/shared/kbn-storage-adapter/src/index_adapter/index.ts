@@ -36,6 +36,8 @@ import type {
   StorageClientSearchResponse,
   StorageClientClean,
   StorageClientCleanResponse,
+  StorageClientUpdate,
+  StorageClientUpdateResponse,
   InternalIStorageClient,
 } from '../..';
 import { getSchemaVersion } from '../get_schema_version';
@@ -348,6 +350,75 @@ export class StorageIndexAdapter<
     });
   };
 
+  private update: StorageClientUpdate<TApplicationType> = async ({
+    id,
+    refresh = 'wait_for',
+    ...request
+  }): Promise<StorageClientUpdateResponse> => {
+    this.logger.debug(`Updating document with id ${id}`);
+    
+    // First, find which index the document is in
+    const searchResponse = await this.search({
+      track_total_hits: false,
+      size: 1,
+      query: {
+        bool: {
+          filter: [
+            {
+              term: {
+                _id: id,
+              },
+            },
+          ],
+        },
+      },
+    });
+
+    const document = searchResponse.hits.hits[0];
+    const isUpsert = request.doc_as_upsert === true || request.upsert !== undefined;
+
+    // If document doesn't exist and upsert is not enabled, throw 404
+    if (!document && !isUpsert) {
+      throw new errors.ResponseError({
+        meta: {
+          aborted: false,
+          attempts: 1,
+          connection: null,
+          context: null,
+          name: 'resource_not_found_exception',
+          request: {} as unknown as DiagnosticResult['meta']['request'],
+        },
+        warnings: [],
+        body: 'resource_not_found_exception',
+        statusCode: 404,
+      });
+    }
+
+    // Use the document's index if it exists, otherwise use the write target for upserts
+    const targetIndex = document?._index ?? this.getWriteTarget();
+
+    const attemptUpdate = async () => {
+      return wrapEsCall(
+        this.esClient.update({
+          ...request,
+          id,
+          refresh,
+          index: targetIndex,
+          require_alias: !document, // Only require alias for upserts
+        })
+      );
+    };
+
+    // For upserts to a new index, validate components first
+    const updateResponse = !document
+      ? await this.validateComponentsBeforeWriting(attemptUpdate)
+      : await attemptUpdate();
+
+    this.logger.debug(() => `Updated document ${id} in ${updateResponse._index}`);
+
+    return updateResponse;
+  };
+
   private bulk: StorageClientBulk<TApplicationType> = ({
     operations,
     refresh = 'wait_for',
@@ -541,6 +612,7 @@ export class StorageIndexAdapter<
       delete: this.delete,
       clean: this.clean,
       index: this.index,
+      update: this.update,
       search: this.search,
       get: this.get,
       existsIndex: this.existsIndex,
