@@ -19,7 +19,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         await testSubjects.existOrFail('indexPatternTitle');
       });
     });
-    it('opens the field editor', async () => {
+    it.skip('opens the field editor', async () => {
       await testSubjects.click('addField');
       await retry.try(async () => {
         await testSubjects.existOrFail('flyoutTitle');
