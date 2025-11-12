@@ -134,12 +134,12 @@ export const registerESQLEditorAnalyticsEvents = once((analytics: AnalyticsServi
   analytics.registerEventType({
     eventType: ESQL_CONTROL_CONFIG_OPENED,
     schema: {
-      // prefilled: {
-      //   type: 'boolean',
-      //   _meta: {
-      //     description: 'Whether the control configuration was prefilled from the context.',
-      //   },
-      // },
+      prefilled: {
+        type: 'boolean',
+        _meta: {
+          description: 'Whether the control configuration was prefilled from the context.',
+        },
+      },
       control_kind: {
         type: 'keyword',
         _meta: {
