@@ -11,31 +11,6 @@ import expect from '@kbn/expect';
 import { PUBLIC_API_PATH } from '@kbn/dashboard-plugin/server';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
-const updatedDashboard = {
-  title: 'Refresh Requests (Updated)',
-  options: { useMargins: false },
-  panels: [
-    {
-      config: {},
-      type: 'visualization',
-      grid: { x: 0, y: 0, w: 48, h: 60 },
-      uid: '1',
-      version: '7.3.0',
-    },
-  ],
-  timeRange: {
-    from: 'Wed Sep 16 2015 22:52:17 GMT-0700',
-    to: 'Fri Sep 18 2015 12:24:38 GMT-0700',
-  },
-  references: [
-    {
-      id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-      name: '1:panel_1',
-      type: 'visualization',
-    },
-  ],
-};
-
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   describe('main', () => {
@@ -45,12 +20,29 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'true')
         .set('ELASTIC_HTTP_VERSION_HEADER', '2023-10-31')
         .set('elastic-api-version', '1')
-        .send(updatedDashboard);
+        .send({
+          data: {
+            title: 'Refresh Requests (Updated)',
+            options: { useMargins: false },
+            panels: [
+              {
+                config: {},
+                type: 'visualization',
+                grid: { x: 0, y: 0, w: 48, h: 60 },
+                uid: '1',
+                version: '7.3.0',
+              },
+            ],
+            timeRange: {
+              from: 'Wed Sep 16 2015 22:52:17 GMT-0700',
+              to: 'Fri Sep 18 2015 12:24:38 GMT-0700',
+            }
+          }
+        });
 
       expect(response.status).to.be(200);
 
       expect(response.body.id).to.be('be3733a0-9efe-11e7-acb3-3dab96693fab');
-      expect(response.body.type).to.be('dashboard');
       expect(response.body.data.title).to.be('Refresh Requests (Updated)');
     });
 
@@ -61,14 +53,16 @@ export default function ({ getService }: FtrProviderContext) {
         .set('ELASTIC_HTTP_VERSION_HEADER', '2023-10-31')
         .set('elastic-api-version', '1')
         .send({
-          title: 'Some other dashboard (updated)',
+          data: {
+            title: 'Some other dashboard (updated)',
+          }
         });
 
       expect(response.status).to.be(404);
       expect(response.body).to.eql({
         statusCode: 404,
         error: 'Not Found',
-        message: 'A dashboard with saved object ID not-an-id was not found.',
+        message: 'A dashboard with ID not-an-id was not found.',
       });
     });
   });
