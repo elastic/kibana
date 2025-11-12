@@ -17,7 +17,7 @@ import type {
   InferenceConnector,
 } from '@kbn/inference-common';
 import type { InferenceChatModel, InferenceChatModelParams } from '@kbn/inference-langchain';
-import type { InferenceCallbackManager } from '@kbn/inference-common/src/chat_complete/api';
+import type { InferenceCallbacks } from '@kbn/inference-common/src/chat_complete';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
@@ -43,9 +43,9 @@ export interface InferenceUnboundClientCreateOptions {
    */
   request: KibanaRequest;
   /**
-   * Callback manager to be used by the client to report lifecycle events.
+   * Callbacks to be used by the client to report lifecycle events.
    */
-  callbackManager?: InferenceCallbackManager;
+  callbacks?: InferenceCallbacks;
 }
 
 /**
@@ -160,9 +160,9 @@ export interface CreateChatModelOptions {
    */
   connectorId: string;
   /**
-   * Callback manager to be used by the client to report lifecycle events.
+   * Callback to be used by the client to report lifecycle events.
    */
-  callbackManager?: InferenceCallbackManager;
+  callbacks?: InferenceCallbacks;
   /**
    * Additional parameters to be passed down to the model constructor.
    */

@@ -15,7 +15,6 @@ import {
   type ChatCompleteCompositeResponse,
   MessageRole,
 } from '@kbn/inference-common';
-import type { InferenceCallbackManager } from '@kbn/inference-common/src/chat_complete/api';
 import type { Logger } from '@kbn/logging';
 import { defer, forkJoin, from, identity, share, switchMap, throwError } from 'rxjs';
 import { withChatCompleteSpan } from '@kbn/inference-tracing';
@@ -30,6 +29,7 @@ import {
   handleLifecycleCallbacks,
   streamToResponse,
 } from './utils';
+import type { InferenceCallbackManager } from '../inference_client/callback_manager';
 import { retryWithExponentialBackoff } from '../../common/utils/retry_with_exponential_backoff';
 import { getRetryFilter } from '../../common/utils/error_retry_filter';
 import { anonymizeMessages } from './anonymization/anonymize_messages';

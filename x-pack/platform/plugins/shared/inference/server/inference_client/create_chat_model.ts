@@ -11,7 +11,7 @@ import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plu
 import { InferenceChatModel, type InferenceChatModelParams } from '@kbn/inference-langchain';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { AnonymizationRule } from '@kbn/inference-common';
-import type { InferenceCallbackManager } from '@kbn/inference-common/src/chat_complete/api';
+import type { InferenceCallbacks } from '@kbn/inference-common/src/chat_complete';
 import { getConnectorById } from '../util/get_connector_by_id';
 import { createClient } from './create_client';
 import type { RegexWorkerService } from '../chat_complete/anonymization/regex_worker_service';
@@ -25,7 +25,7 @@ export interface CreateChatModelOptions {
   anonymizationRulesPromise: Promise<AnonymizationRule[]>;
   regexWorker: RegexWorkerService;
   esClient: ElasticsearchClient;
-  callbackManager?: InferenceCallbackManager;
+  callbacks?: InferenceCallbacks;
 }
 
 export const createChatModel = async ({
@@ -37,7 +37,7 @@ export const createChatModel = async ({
   anonymizationRulesPromise,
   regexWorker,
   esClient,
-  callbackManager,
+  callbacks,
 }: CreateChatModelOptions): Promise<InferenceChatModel> => {
   const client = createClient({
     actions,
@@ -46,7 +46,7 @@ export const createChatModel = async ({
     regexWorker,
     esClient,
     logger,
-    callbackManager,
+    callbacks,
   });
   const connector = await getConnectorById({ connectorId, actions, request });
   return new InferenceChatModel({

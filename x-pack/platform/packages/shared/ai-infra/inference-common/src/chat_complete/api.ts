@@ -7,7 +7,6 @@
 
 import type { Overwrite } from 'utility-types';
 import type { Observable } from 'rxjs';
-import type { InferenceTaskError } from '../errors';
 import type { ToolChoiceType, ToolOptions } from './tools';
 import type { Message } from './messages';
 import type { ChatCompletionEvent, ChatCompletionTokenCount } from './events';
@@ -215,16 +214,3 @@ export interface ChatCompleteResponse<
  * - "auto": will use "native" for providers we know are supporting native function call, "simulated" otherwise
  */
 export type FunctionCallingMode = 'native' | 'simulated' | 'auto';
-
-export interface ChatCompleteSuccessCallbackData {
-  tokens?: ChatCompletionTokenCount;
-}
-
-export interface ChatCompleteErrorCallbackData {
-  error: InferenceTaskError<string, any>;
-}
-
-export interface InferenceCallbackManager {
-  onSuccess?: (event: ChatCompleteSuccessCallbackData) => void;
-  onError?: (event: ChatCompleteErrorCallbackData) => void;
-}

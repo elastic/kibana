@@ -93,3 +93,11 @@ export type {
   NamedEntityRecognitionRule,
   AnonymizationSettings,
 } from './anonymization';
+
+export type {
+  InferenceCallbacks,
+  InferenceCallbackErrorEvent,
+  InferenceCallbackSuccessEvent,
+  InferenceCompleteCallbackHandler,
+  InferenceErrorCallbackHandler,
+} from './callbacks';

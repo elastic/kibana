@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { BoundChatCompleteAPI, ChatCompleteAPI } from '../chat_complete';
+import type {
+  BoundChatCompleteAPI,
+  ChatCompleteAPI,
+  InferenceCompleteCallbackHandler,
+  InferenceErrorCallbackHandler,
+} from '../chat_complete';
 import type { InferenceConnector } from '../connectors';
 import type { BoundOutputAPI, OutputAPI } from '../output';
 import type { BoundPromptAPI, PromptAPI } from '../prompt';
@@ -14,7 +19,7 @@ import type { BoundOptions } from '../bind';
 /**
  * An inference client, scoped to a request, that can be used to interact with LLMs.
  */
-export interface InferenceClient {
+export interface InferenceClient extends InferenceEventEmitter {
   /**
    * `chatComplete` requests the LLM to generate a response to
    * a prompt or conversation, which might be plain text
@@ -46,7 +51,7 @@ export interface InferenceClient {
 /**
  * A version of the {@link InferenceClient} that is pre-bound to a set of parameters.
  */
-export interface BoundInferenceClient {
+export interface BoundInferenceClient extends InferenceEventEmitter {
   /**
    * `chatComplete` requests the LLM to generate a response to
    * a prompt or conversation, which might be plain text
@@ -73,4 +78,9 @@ export interface BoundInferenceClient {
    * Create a {@link BoundInferenceClient}.
    */
   bindTo: (options: BoundOptions) => BoundInferenceClient;
+}
+
+export interface InferenceEventEmitter {
+  on(type: 'complete', handler: InferenceCompleteCallbackHandler): void;
+  on(type: 'error', handler: InferenceErrorCallbackHandler): void;
 }

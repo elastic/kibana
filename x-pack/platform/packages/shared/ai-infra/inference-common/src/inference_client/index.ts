@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export type { BoundInferenceClient, InferenceClient } from './types';
+export type { BoundInferenceClient, InferenceClient, InferenceEventEmitter } from './types';

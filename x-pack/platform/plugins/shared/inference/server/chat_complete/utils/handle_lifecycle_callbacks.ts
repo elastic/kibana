@@ -9,7 +9,7 @@ import type { OperatorFunction } from 'rxjs';
 import { Observable } from 'rxjs';
 import type { ChatCompletionEvent, ChatCompletionTokenCount } from '@kbn/inference-common';
 import { isChatCompletionTokenCountEvent } from '@kbn/inference-common';
-import type { InferenceCallbackManager } from '@kbn/inference-common/src/chat_complete/api';
+import type { InferenceCallbackManager } from '../../inference_client/callback_manager';
 
 export function handleLifecycleCallbacks({
   callbackManager,
@@ -28,14 +28,15 @@ export function handleLifecycleCallbacks({
           subscriber.next(value);
         },
         error: (err) => {
+          callbackManager.onError({
+            error: err,
+          });
           subscriber.error(err);
         },
         complete: () => {
-          if (callbackManager.onSuccess) {
-            callbackManager.onSuccess({
-              tokens: tokenCount,
-            });
-          }
+          callbackManager.onComplete({
+            tokens: tokenCount,
+          });
           subscriber.complete();
         },
       });

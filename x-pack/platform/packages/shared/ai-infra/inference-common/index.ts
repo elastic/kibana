@@ -80,7 +80,11 @@ export {
   type ToolCallbackResult,
 } from './src/chat_complete';
 
-export type { BoundInferenceClient, InferenceClient } from './src/inference_client';
+export type {
+  BoundInferenceClient,
+  InferenceClient,
+  InferenceEventEmitter,
+} from './src/inference_client';
 export {
   OutputEventType,
   type OutputAPI,
