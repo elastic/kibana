@@ -1213,7 +1213,7 @@ x-pack/solutions/security/plugins/security_solution_serverless @elastic/security
 x-pack/solutions/security/plugins/session_view @elastic/contextual-security-apps
 x-pack/solutions/security/test
 x-pack/solutions/security/test/plugin_functional/plugins/resolver_test @elastic/security-solution
-x-pack/solutions/security/test/security_solution_api_integration
+x-pack/solutions/security/test/security_solution_api_integration @elastic/secutity-detection-engine
 x-pack/solutions/security/test/security_solution_api_integration/config/services/detections_response
 x-pack/solutions/security/test/security_solution_endpoint
 x-pack/solutions/workplaceai/plugins/serverless_workplace_ai @elastic/search-kibana @elastic/workchat-eng
