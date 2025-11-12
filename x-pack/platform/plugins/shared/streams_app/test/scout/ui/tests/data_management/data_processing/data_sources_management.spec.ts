@@ -11,7 +11,7 @@ import { expect } from '@kbn/scout';
 import { test } from '../../../fixtures';
 import { DATE_RANGE, generateLogsData } from '../../../fixtures/generators';
 
-test.describe(
+test.describe.only(
   'Stream data processing - data sources management',
   { tag: ['@ess', '@svlOblt'] },
   () => {
@@ -36,7 +36,7 @@ test.describe(
     test('should load by default a latest samples data source', async ({ pageObjects }) => {
       await expect(pageObjects.streams.getDataSourcesList()).toBeVisible();
       const dataSourcesSelector = await pageObjects.streams.getDataSourcesSelector();
-      await expect(dataSourcesSelector).toHaveText('Latest samples');
+      await expect(dataSourcesSelector).toHaveText('Latest samplesPartial');
     });
 
     test('should allow adding a new kql data source', async ({ page, pageObjects }) => {
@@ -70,7 +70,7 @@ test.describe(
       // Assert that the custom samples are correctly displayed in the preview
       await pageObjects.streams.closeFlyout();
       const dataSourcesSelector = await pageObjects.streams.getDataSourcesSelector();
-      await expect(dataSourcesSelector).toHaveText('Custom Samples');
+      await expect(dataSourcesSelector).toHaveText('Custom SamplesComplete');
     });
 
     test('should persist existing data sources on page reload', async ({ page, pageObjects }) => {
@@ -80,7 +80,9 @@ test.describe(
       await page.getByTestId('streamsAppKqlSamplesDataSourceNameField').fill('Kql Samples');
       await page.waitForURL(/Kql%20Samples/);
       await page.reload();
-      await expect(await pageObjects.streams.getDataSourcesSelector()).toHaveText('Kql Samples');
+      await expect(await pageObjects.streams.getDataSourcesSelector()).toHaveText(
+        'Kql SamplesPartial'
+      );
 
       // Create a new custom data source and assert existence on refresh
       await pageObjects.streams.clickManageDataSourcesButton();
@@ -88,7 +90,9 @@ test.describe(
       await page.getByTestId('streamsAppCustomSamplesDataSourceNameField').fill('Custom Samples');
       await page.waitForURL(/Custom%20Samples/);
       await page.reload();
-      await expect(await pageObjects.streams.getDataSourcesSelector()).toHaveText('Custom Samples');
+      await expect(await pageObjects.streams.getDataSourcesSelector()).toHaveText(
+        'Custom SamplesComplete'
+      );
     });
   }
 );
