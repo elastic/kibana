@@ -23,11 +23,7 @@ import {
 
 import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import { EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION } from '@kbn/security-solution-plugin/common/constants';
-import {
-  deleteAllRules,
-  deleteAllAlerts,
-  createRule,
-} from '@kbn/security-solution-detections-response-service';
+import { deleteAllRules, deleteAllAlerts, createRule } from '@kbn/detections-response-ftr-services';
 import {
   getPreviewAlerts,
   previewRule,

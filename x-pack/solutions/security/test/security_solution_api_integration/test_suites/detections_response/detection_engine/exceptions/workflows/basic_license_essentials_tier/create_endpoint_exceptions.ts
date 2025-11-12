@@ -18,7 +18,7 @@ import {
   getAlertsById,
   waitForRuleSuccess,
   waitForAlertsToBePresent,
-} from '@kbn/security-solution-detections-response-service';
+} from '@kbn/detections-response-ftr-services';
 import { createRuleWithExceptionEntries } from '../../../../utils';
 import {
   createListsIndex,

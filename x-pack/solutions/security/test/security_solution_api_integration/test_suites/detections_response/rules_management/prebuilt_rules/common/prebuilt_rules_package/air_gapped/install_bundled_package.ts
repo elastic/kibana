@@ -12,7 +12,7 @@ import JSON5 from 'json5';
 import expect from 'expect';
 import type { PackageSpecManifest } from '@kbn/fleet-plugin/common';
 import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
-import { deleteAllRules } from '@kbn/security-solution-detections-response-service';
+import { deleteAllRules } from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../../../ftr_provider_context';
 import {
   deleteAllPrebuiltRuleAssets,

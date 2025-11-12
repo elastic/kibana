@@ -6,7 +6,7 @@
  */
 
 import expect from 'expect';
-import { deleteAllRules, deleteRule } from '@kbn/security-solution-detections-response-service';
+import { deleteAllRules, deleteRule } from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   deleteAllTimelines,

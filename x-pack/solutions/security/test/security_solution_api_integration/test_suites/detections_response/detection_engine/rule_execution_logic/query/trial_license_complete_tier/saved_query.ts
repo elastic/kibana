@@ -21,7 +21,7 @@ import {
   deleteAllRules,
   deleteAllAlerts,
   getRuleForAlertTesting,
-} from '@kbn/security-solution-detections-response-service';
+} from '@kbn/detections-response-ftr-services';
 import { getAlerts } from '../../../../utils';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';

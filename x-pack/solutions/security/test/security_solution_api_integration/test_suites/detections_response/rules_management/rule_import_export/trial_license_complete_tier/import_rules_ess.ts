@@ -9,7 +9,7 @@ import expect from 'expect';
 
 import { DETECTION_ENGINE_RULES_IMPORT_URL } from '@kbn/security-solution-plugin/common/constants';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import { deleteAllRules, createRule } from '@kbn/security-solution-detections-response-service';
+import { deleteAllRules, createRule } from '@kbn/detections-response-ftr-services';
 import {
   createLegacyRuleAction,
   getLegacyActionSO,

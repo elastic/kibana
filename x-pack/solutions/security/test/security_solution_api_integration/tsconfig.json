@@ -59,7 +59,7 @@
     "@kbn/setup-node-env",
     "@kbn/security-solution-test-api-clients",
     "@kbn/cloud-security-posture-common",
-    "@kbn/security-solution-detections-response-service",
+    "@kbn/detections-response-ftr-services",
     "@kbn/connector-schemas",
   ]
 }

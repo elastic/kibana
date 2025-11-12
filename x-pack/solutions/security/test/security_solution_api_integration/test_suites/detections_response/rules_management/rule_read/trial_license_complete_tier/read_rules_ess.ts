@@ -17,7 +17,7 @@ import {
   createAlertsIndex,
   deleteAllRules,
   deleteAllAlerts,
-} from '@kbn/security-solution-detections-response-service';
+} from '@kbn/detections-response-ftr-services';
 import {
   getSimpleRule,
   getSimpleRuleOutput,

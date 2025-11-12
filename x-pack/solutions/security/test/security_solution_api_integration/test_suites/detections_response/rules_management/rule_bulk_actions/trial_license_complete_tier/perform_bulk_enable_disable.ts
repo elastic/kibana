@@ -7,7 +7,7 @@
 
 import expect from 'expect';
 import { BulkActionTypeEnum } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management';
-import { createRule, deleteAllRules } from '@kbn/security-solution-detections-response-service';
+import { createRule, deleteAllRules } from '@kbn/detections-response-ftr-services';
 import { getCustomQueryRuleParams, fetchRule } from '../../../utils';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 

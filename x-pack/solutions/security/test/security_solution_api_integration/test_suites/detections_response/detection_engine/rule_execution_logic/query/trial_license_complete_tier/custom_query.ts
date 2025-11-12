@@ -53,7 +53,7 @@ import {
   deleteAllAlerts,
   getRuleForAlertTesting,
   getLuceneRuleForTesting,
-} from '@kbn/security-solution-detections-response-service';
+} from '@kbn/detections-response-ftr-services';
 import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/utils';
 import {
   createExceptionList,

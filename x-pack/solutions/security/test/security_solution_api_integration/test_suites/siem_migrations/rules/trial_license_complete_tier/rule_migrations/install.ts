@@ -13,7 +13,7 @@ import type {
 } from '@kbn/security-solution-plugin/common/siem_migrations/model/rule_migration.gen';
 import { MigrationTranslationResult } from '@kbn/security-solution-plugin/common/siem_migrations/constants';
 import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { deleteAllRules } from '@kbn/security-solution-detections-response-service';
+import { deleteAllRules } from '@kbn/detections-response-ftr-services';
 import {
   createMigrationRules,
   defaultElasticRule,

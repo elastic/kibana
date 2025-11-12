@@ -16,7 +16,7 @@ import {
   createAlertsIndex,
   waitForRulePartialFailure,
   getRuleForAlertTesting,
-} from '@kbn/security-solution-detections-response-service';
+} from '@kbn/detections-response-ftr-services';
 import { createRuleWithAuth, getThresholdRuleForAlertTesting } from '../../../utils';
 import { createUserAndRole, deleteUserAndRole } from '../../../../../config/services/common';
 

@@ -14,7 +14,7 @@ import type {
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
-import { createRule } from '@kbn/security-solution-detections-response-service';
+import { createRule } from '@kbn/detections-response-ftr-services';
 import {
   createContainerWithEntries,
   createContainerWithEndpointEntries,

@@ -29,7 +29,7 @@ import {
   getAlertsByIds,
   waitForRuleSuccess,
   getRuleForAlertTesting,
-} from '@kbn/security-solution-detections-response-service';
+} from '@kbn/detections-response-ftr-services';
 import { refreshIndex, setAlertStatus } from '../../../../utils';
 import { createUserAndRole, deleteUserAndRole } from '../../../../../../config/services/common';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';

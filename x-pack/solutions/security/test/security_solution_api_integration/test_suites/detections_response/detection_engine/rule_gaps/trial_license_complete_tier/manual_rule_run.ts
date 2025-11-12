@@ -14,7 +14,7 @@ import {
   deleteAllRules,
   createRule,
   deleteAllAlerts,
-} from '@kbn/security-solution-detections-response-service';
+} from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { getCustomQueryRuleParams, scheduleRuleRun } from '../../../utils';
 

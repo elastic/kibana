@@ -28,7 +28,7 @@
   ],
   "kbn_references": [
     "@kbn/security-solution-test-api-clients",
-    "@kbn/security-solution-detections-response-service",
+    "@kbn/detections-response-ftr-services",
     "@kbn/test",
     "@kbn/expect",
     "@kbn/core-http-common",

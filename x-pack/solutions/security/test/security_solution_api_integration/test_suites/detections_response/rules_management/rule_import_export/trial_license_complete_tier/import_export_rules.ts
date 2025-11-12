@@ -26,7 +26,7 @@ import {
   createAlertsIndex,
   deleteAllRules,
   deleteAllAlerts,
-} from '@kbn/security-solution-detections-response-service';
+} from '@kbn/detections-response-ftr-services';
 import { binaryToString, getCustomQueryRuleParams } from '../../../utils';
 import { createUserAndRole, deleteUserAndRole } from '../../../../../config/services/common';
 import { deleteAllExceptions } from '../../../../lists_and_exception_lists/utils';

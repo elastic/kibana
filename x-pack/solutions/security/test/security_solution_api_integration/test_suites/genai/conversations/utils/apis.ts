@@ -25,7 +25,7 @@ import {
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
 } from '@kbn/elastic-assistant-common';
 
-import { routeWithNamespace } from '@kbn/security-solution-detections-response-service';
+import { routeWithNamespace } from '@kbn/detections-response-ftr-services';
 import type { User } from '../../utils/auth/types';
 
 /**

@@ -27,7 +27,7 @@ import {
   getAlertsByIds,
   waitForRuleSuccess,
   getRuleForAlertTesting,
-} from '@kbn/security-solution-detections-response-service';
+} from '@kbn/detections-response-ftr-services';
 import {
   setAlertStatus,
   getAlertUpdateByQueryEmptyResponse,

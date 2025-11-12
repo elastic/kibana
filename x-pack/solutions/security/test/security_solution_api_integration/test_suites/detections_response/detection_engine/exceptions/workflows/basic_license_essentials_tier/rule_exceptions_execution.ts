@@ -28,7 +28,7 @@ import {
   waitForAlertsToBePresent,
   getAlertsByIds,
   deleteAllAlerts,
-} from '@kbn/security-solution-detections-response-service';
+} from '@kbn/detections-response-ftr-services';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 import {
   getSimpleRule,

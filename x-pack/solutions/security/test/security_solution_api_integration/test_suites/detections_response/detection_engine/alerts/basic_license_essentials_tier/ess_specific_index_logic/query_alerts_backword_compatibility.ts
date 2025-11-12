@@ -8,10 +8,7 @@
 import expect from '@kbn/expect';
 
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '@kbn/security-solution-plugin/common/constants';
-import {
-  createAlertsIndex,
-  deleteAllAlerts,
-} from '@kbn/security-solution-detections-response-service';
+import { createAlertsIndex, deleteAllAlerts } from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {

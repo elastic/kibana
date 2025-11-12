@@ -16,7 +16,7 @@ import {
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL,
 } from '@kbn/elastic-assistant-common';
-import { routeWithNamespace } from '@kbn/security-solution-detections-response-service';
+import { routeWithNamespace } from '@kbn/detections-response-ftr-services';
 import type { User } from '../../../utils/auth/types';
 
 /**

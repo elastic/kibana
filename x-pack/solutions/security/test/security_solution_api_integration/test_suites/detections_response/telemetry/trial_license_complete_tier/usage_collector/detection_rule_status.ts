@@ -29,7 +29,7 @@ import {
   getRuleForAlertTesting,
   waitForRuleSuccess,
   waitForAlertsToBePresent,
-} from '@kbn/security-solution-detections-response-service';
+} from '@kbn/detections-response-ftr-services';
 import {
   getEqlRuleForAlertTesting,
   getSimpleThreatMatch,

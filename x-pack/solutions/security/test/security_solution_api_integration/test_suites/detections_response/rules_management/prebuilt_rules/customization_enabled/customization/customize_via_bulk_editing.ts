@@ -15,7 +15,7 @@ import {
   BulkActionEditTypeEnum,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management';
 import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { deleteAllRules } from '@kbn/security-solution-detections-response-service';
+import { deleteAllRules } from '@kbn/detections-response-ftr-services';
 import {
   createPrebuiltRuleAssetSavedObjects,
   createRuleAssetSavedObject,

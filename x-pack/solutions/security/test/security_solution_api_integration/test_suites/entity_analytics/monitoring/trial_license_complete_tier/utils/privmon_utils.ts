@@ -22,7 +22,7 @@ import type {
 } from '@kbn/security-solution-plugin/common/api/entity_analytics';
 import type { TaskStatus } from '@kbn/task-manager-plugin/server';
 import moment from 'moment';
-import { routeWithNamespace, waitFor } from '@kbn/security-solution-detections-response-service';
+import { routeWithNamespace, waitFor } from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 type PrivmonUser = ListPrivMonUsersResponse[number];

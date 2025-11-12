@@ -11,7 +11,7 @@ import {
   createAlertsIndex,
   deleteAllRules,
   deleteAllAlerts,
-} from '@kbn/security-solution-detections-response-service';
+} from '@kbn/detections-response-ftr-services';
 import { getSecurityTelemetryStats, removeExtraFieldsFromTelemetryStats } from '../../../utils';
 import { deleteAllExceptions } from '../../../../lists_and_exception_lists/utils';
 

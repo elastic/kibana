@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import { waitFor } from '@kbn/security-solution-detections-response-service';
+import { waitFor } from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {

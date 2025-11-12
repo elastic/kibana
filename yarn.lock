@@ -8307,7 +8307,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-solution-detections-response-service@link:x-pack/solutions/security/test/security_solution_api_integration/config/services/detections_response":
+"@kbn/detections-response-ftr-services@link:x-pack/solutions/security/test/security_solution_api_integration/config/services/detections_response":
   version "0.0.0"
   uid ""
 
@@ -8363,7 +8363,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security_solution_api_integration@link:x-pack/solutions/security/test/security_solution_api_integration":
+"@kbn/test-suites-security-solution-apis@link:x-pack/solutions/security/test/security_solution_api_integration":
   version "0.0.0"
   uid ""
 

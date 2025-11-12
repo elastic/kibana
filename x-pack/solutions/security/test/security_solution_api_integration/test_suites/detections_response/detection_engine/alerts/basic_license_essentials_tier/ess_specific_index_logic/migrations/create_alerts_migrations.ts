@@ -16,10 +16,7 @@ import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { SIGNALS_TEMPLATE_VERSION } from '@kbn/security-solution-plugin/server/lib/detection_engine/routes/index/get_signals_template';
 import type { Signal } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/types';
 
-import {
-  createAlertsIndex,
-  deleteAllAlerts,
-} from '@kbn/security-solution-detections-response-service';
+import { createAlertsIndex, deleteAllAlerts } from '@kbn/detections-response-ftr-services';
 import {
   deleteMigrations,
   getIndexNameFromLoad,

@@ -11,7 +11,7 @@ import {
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
   SECURITY_FEATURE_ID,
 } from '@kbn/security-solution-plugin/common/constants';
-import { deleteAllAlerts } from '@kbn/security-solution-detections-response-service';
+import { deleteAllAlerts } from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 const roleToAccessSecuritySolution = {

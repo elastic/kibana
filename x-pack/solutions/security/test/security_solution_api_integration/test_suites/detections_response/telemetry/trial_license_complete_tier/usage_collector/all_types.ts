@@ -12,7 +12,7 @@ import {
   createAlertsIndex,
   deleteAllRules,
   deleteAllAlerts,
-} from '@kbn/security-solution-detections-response-service';
+} from '@kbn/detections-response-ftr-services';
 import { getStats } from '../../../utils';
 
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';

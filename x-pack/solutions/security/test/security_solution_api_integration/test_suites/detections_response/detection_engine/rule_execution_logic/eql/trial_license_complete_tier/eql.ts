@@ -43,7 +43,7 @@ import {
   deleteAllAlerts,
   waitForRuleFailure,
   routeWithNamespace,
-} from '@kbn/security-solution-detections-response-service';
+} from '@kbn/detections-response-ftr-services';
 import {
   getEqlRuleForAlertTesting,
   getAlerts,

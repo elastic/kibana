@@ -42,11 +42,7 @@ import {
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
 import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
-import {
-  deleteAllAlerts,
-  deleteAllRules,
-  createRule,
-} from '@kbn/security-solution-detections-response-service';
+import { deleteAllAlerts, deleteAllRules, createRule } from '@kbn/detections-response-ftr-services';
 import {
   previewRule,
   getAlerts,

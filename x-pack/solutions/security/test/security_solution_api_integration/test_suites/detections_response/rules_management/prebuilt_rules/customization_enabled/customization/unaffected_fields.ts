@@ -10,7 +10,7 @@ import {
   BulkActionEditTypeEnum,
   BulkActionTypeEnum,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { deleteAllRules } from '@kbn/security-solution-detections-response-service';
+import { deleteAllRules } from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   createPrebuiltRuleAssetSavedObjects,

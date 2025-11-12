@@ -1,6 +1,6 @@
 {
   "type": "test-helper",
-  "id": "@kbn/security-solution-detections-response-service",
+  "id": "@kbn/detections-response-ftr-services",
   "owner": [],
   "group": "security",
   "visibility": "private",

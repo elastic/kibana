@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import { createRule, deleteAllRules } from '@kbn/security-solution-detections-response-service';
+import { createRule, deleteAllRules } from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
   getComplexRule,

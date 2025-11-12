@@ -8,7 +8,7 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
 import { getCases } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/api/case';
-import { waitFor } from '@kbn/security-solution-detections-response-service';
+import { waitFor } from '@kbn/detections-response-ftr-services';
 
 export const waitForCases = async (supertest: SuperTest.Agent, log: ToolingLog): Promise<void> => {
   await waitFor(

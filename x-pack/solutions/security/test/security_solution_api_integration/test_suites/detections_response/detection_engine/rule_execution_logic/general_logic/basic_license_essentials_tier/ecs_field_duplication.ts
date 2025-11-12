@@ -22,8 +22,8 @@ import {
   getRuleForAlertTesting,
   waitForAlertsToBePresent,
   waitForRuleSuccess,
-} from '@kbn/security-solution-detections-response-service';
-import { searchAlerts } from '@kbn/security-solution-detections-response-service/alerts/search_alerts';
+} from '@kbn/detections-response-ftr-services';
+import { searchAlerts } from '@kbn/detections-response-ftr-services/alerts/search_alerts';
 import { getPreviewAlerts, previewRule } from '../../../../utils';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 

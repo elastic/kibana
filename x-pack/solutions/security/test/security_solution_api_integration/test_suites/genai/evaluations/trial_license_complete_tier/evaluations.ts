@@ -9,7 +9,7 @@ import type { PostEvaluateBody } from '@kbn/elastic-assistant-common';
 import { API_VERSIONS, ELASTIC_AI_ASSISTANT_EVALUATE_URL } from '@kbn/elastic-assistant-common';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import os from 'os';
-import { routeWithNamespace } from '@kbn/security-solution-detections-response-service';
+import { routeWithNamespace } from '@kbn/detections-response-ftr-services';
 import { getSecurityGenAIConfigFromEnvVar } from '../../../../scripts/genai/vault/manage_secrets';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 

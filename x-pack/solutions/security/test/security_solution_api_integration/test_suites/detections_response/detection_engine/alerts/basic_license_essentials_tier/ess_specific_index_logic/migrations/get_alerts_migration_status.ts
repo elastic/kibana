@@ -9,10 +9,7 @@ import expect from '@kbn/expect';
 
 import { DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL } from '@kbn/security-solution-plugin/common/constants';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import {
-  createAlertsIndex,
-  deleteAllAlerts,
-} from '@kbn/security-solution-detections-response-service';
+import { createAlertsIndex, deleteAllAlerts } from '@kbn/detections-response-ftr-services';
 import { getIndexNameFromLoad } from '../../../../../utils';
 import { createUserAndRole, deleteUserAndRole } from '../../../../../../../config/services/common';
 

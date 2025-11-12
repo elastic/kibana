@@ -6,7 +6,7 @@
  */
 
 import type { ThresholdRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { getRuleForAlertTesting } from '@kbn/security-solution-detections-response-service';
+import { getRuleForAlertTesting } from '@kbn/detections-response-ftr-services';
 
 /**
  * This is a typical signal testing rule that is easy for most basic testing of output of Threshold alerts.

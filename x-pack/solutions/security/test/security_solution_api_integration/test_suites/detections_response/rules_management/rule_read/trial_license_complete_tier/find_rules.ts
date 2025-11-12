@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
-import { createRule, deleteAllRules } from '@kbn/security-solution-detections-response-service';
+import { createRule, deleteAllRules } from '@kbn/detections-response-ftr-services';
 import {
   getComplexRule,
   getComplexRuleOutput,

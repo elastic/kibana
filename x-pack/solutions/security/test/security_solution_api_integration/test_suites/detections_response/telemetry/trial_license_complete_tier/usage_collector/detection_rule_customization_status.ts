@@ -7,7 +7,7 @@
 
 import expect from 'expect';
 import { PrebuiltRuleAsset } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules';
-import { deleteAllRules } from '@kbn/security-solution-detections-response-service';
+import { deleteAllRules } from '@kbn/detections-response-ftr-services';
 import { customizeRule, getStats } from '../../../utils';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {

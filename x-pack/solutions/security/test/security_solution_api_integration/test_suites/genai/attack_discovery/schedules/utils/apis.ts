@@ -25,7 +25,7 @@ import {
   ATTACK_DISCOVERY_INTERNAL_SCHEDULES_FIND,
 } from '@kbn/elastic-assistant-common';
 
-import { routeWithNamespace } from '@kbn/security-solution-detections-response-service';
+import { routeWithNamespace } from '@kbn/detections-response-ftr-services';
 import type { User } from '../../../utils/auth/types';
 
 const configureTest = (test: SuperTest.Test, user: User | undefined) => {

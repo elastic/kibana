@@ -19,8 +19,8 @@ import type {
   ReadExceptionListItemRequestQueryInput,
   ReadExceptionListRequestQueryInput,
 } from '@kbn/securitysolution-exceptions-common/api';
-import { createRule } from '@kbn/security-solution-detections-response-service';
-import { deleteAllRules } from '@kbn/security-solution-detections-response-service';
+import { createRule } from '@kbn/detections-response-ftr-services';
+import { deleteAllRules } from '@kbn/detections-response-ftr-services';
 import { PRECONFIGURED_EMAIL_ACTION_CONNECTOR_ID } from '../../../../../config/shared';
 import {
   fetchRule,

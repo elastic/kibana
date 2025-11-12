@@ -21,7 +21,7 @@ import {
   deleteAllRules,
   deleteAllAlerts,
   createAlertsIndex,
-} from '@kbn/security-solution-detections-response-service';
+} from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 import { getSimpleRule, createExceptionList } from '../../../../utils';

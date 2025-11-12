@@ -15,7 +15,7 @@ import {
   deleteAllRules,
   deleteAllAlerts,
   waitForRulePartialFailure,
-} from '@kbn/security-solution-detections-response-service';
+} from '@kbn/detections-response-ftr-services';
 import { PRECONFIGURED_EMAIL_ACTION_CONNECTOR_ID } from '../../../../../config/shared';
 import { binaryToString, getCustomQueryRuleParams } from '../../../utils';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';

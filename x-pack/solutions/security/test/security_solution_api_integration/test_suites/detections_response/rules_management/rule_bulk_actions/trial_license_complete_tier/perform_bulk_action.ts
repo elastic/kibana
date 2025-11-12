@@ -22,8 +22,8 @@ import { getCreateExceptionListItemMinimalSchemaMock } from '@kbn/lists-plugin/c
 import { AuthType } from '@kbn/connector-schemas/common/auth/constants';
 import type { BaseDefaultableFields } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import moment from 'moment';
-import { createRule, deleteAllRules } from '@kbn/security-solution-detections-response-service';
-import { getGapsByRuleId } from '@kbn/security-solution-detections-response-service/rules/get_gaps_by_rule_id';
+import { createRule, deleteAllRules } from '@kbn/detections-response-ftr-services';
+import { getGapsByRuleId } from '@kbn/detections-response-ftr-services/rules/get_gaps_by_rule_id';
 import {
   binaryToString,
   getSimpleMlRule,

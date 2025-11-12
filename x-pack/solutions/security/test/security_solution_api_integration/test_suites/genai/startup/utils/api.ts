@@ -17,7 +17,7 @@ import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
-import { routeWithNamespace } from '@kbn/security-solution-detections-response-service';
+import { routeWithNamespace } from '@kbn/detections-response-ftr-services';
 
 export const updateAnonymizationFields = ({
   supertest,
