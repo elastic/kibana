@@ -40,7 +40,7 @@ import {
   dashboardListingTableStrings,
 } from '../_dashboard_listing_strings';
 import { confirmCreateWithUnsaved } from '../confirm_overlays';
-import { SmartEmptyPrompt } from '../annotation_groups_empty_prompt';
+import { DashboardListingEmptyPrompt } from '../dashboard_listing_empty_prompt';
 import type { DashboardSavedObjectUserContent } from '../types';
 import {
   checkForDuplicateDashboardTitle,
@@ -218,7 +218,7 @@ export const useDashboardListingTable = ({
 
   const emptyPrompt = useMemo(
     () => (
-      <SmartEmptyPrompt
+      <DashboardListingEmptyPrompt
         createItem={createItem}
         disableCreateDashboardButton={disableCreateDashboardButton}
         goToDashboard={goToDashboard}

@@ -1078,6 +1078,13 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   // ------------
   useDebounce(fetchItems, 300, [fetchItems, refreshListBouncer]);
 
+  // Immediately set loading state when tab changes (before debounced fetch)
+  useEffect(() => {
+    if (contentTypeTabsEnabled) {
+      dispatch({ type: 'onFetchItems' });
+    }
+  }, [tableFilter.contentTypeTab, contentTypeTabsEnabled]);
+
   // set the initial state from the URL
   useEffect(() => {
     if (!urlStateEnabled) {
