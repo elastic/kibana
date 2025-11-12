@@ -6,7 +6,11 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { DocumentationGroup, LanguageDocumentationSections } from '../types';
+import type {
+  DocumentationGroup,
+  DocumentationGroupItem,
+  LanguageDocumentationSections,
+} from '../types';
 import { highlightMatches } from './highlight_matches';
 
 /**
@@ -46,8 +50,8 @@ export const getFilteredGroups = (
       .slice(numOfGroupsToOmit)
       .map((group) => {
         // Separate items that match on label vs description
-        const labelMatches: typeof group.items = [];
-        const descriptionMatches: typeof group.items = [];
+        const labelMatches: DocumentationGroupItem[] = [];
+        const descriptionMatches: DocumentationGroupItem[] = [];
 
         group.items.forEach((helpItem) => {
           const labelMatch = helpItem.label.toLocaleLowerCase().includes(normalizedSearchText);
