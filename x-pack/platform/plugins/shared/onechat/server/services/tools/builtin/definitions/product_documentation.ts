@@ -8,7 +8,6 @@
 import { z } from '@kbn/zod';
 import { platformCoreTools, ToolType } from '@kbn/onechat-common';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
-import { InferenceConnectorType } from '@kbn/inference-common';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { createErrorResult } from '@kbn/onechat-server';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
@@ -47,34 +46,12 @@ export const productDocumentationTool = (): BuiltinToolDefinition<
       }
 
       try {
-        // Get the default model to extract the connector and inference endpoint
+        // Get the default model to extract the connector
         const model = await modelProvider.getDefaultModel();
         const connector = model.connector;
 
-        // Get inferenceId from connector config if it's an inference connector
-        let inferenceId: string | undefined;
-        if (connector.type === InferenceConnectorType.Inference) {
-          inferenceId = connector.config?.inferenceId;
-        }
-
-        // Fallback to default ELSER endpoint if no inferenceId found
-        const defaultInferenceEndpoint = inferenceId ?? defaultInferenceEndpoints.ELSER;
-
-        // Check if documentation is available for this inference endpoint
-        const productDocsAvailable =
-          (await llmTasks.retrieveDocumentationAvailable({
-            inferenceId: defaultInferenceEndpoint,
-          })) ?? false;
-
-        if (!productDocsAvailable) {
-          return {
-            results: [
-              createErrorResult({
-                message: `Product documentation is not available for inference endpoint: ${defaultInferenceEndpoint}. Please ensure the product documentation is installed.`,
-              }),
-            ],
-          };
-        }
+        // Use static inferenceId (default ELSER endpoint)
+        const inferenceId = defaultInferenceEndpoints.ELSER;
 
         // Retrieve documentation
         const result = await llmTasks.retrieveDocumentation({
@@ -83,7 +60,7 @@ export const productDocumentationTool = (): BuiltinToolDefinition<
           max,
           connectorId: connector.connectorId,
           request,
-          inferenceId: defaultInferenceEndpoint,
+          inferenceId,
         });
 
         if (!result.success || result.documents.length === 0) {

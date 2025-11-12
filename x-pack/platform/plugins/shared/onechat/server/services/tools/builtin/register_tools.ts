@@ -29,10 +29,17 @@ export const registerBuiltinTools = ({ registry }: { registry: BuiltinToolRegist
     listIndicesTool(),
     indexExplorerTool(),
     createVisualizationTool(),
-    productDocumentationTool(),
   ];
 
   tools.forEach((tool) => {
     registry.register(tool);
   });
+};
+
+export const registerProductDocumentationTool = ({
+  registry,
+}: {
+  registry: BuiltinToolRegistry;
+}) => {
+  registry.register(productDocumentationTool());
 };

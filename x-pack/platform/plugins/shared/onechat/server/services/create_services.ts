@@ -50,7 +50,7 @@ export class ServiceManager {
     return this.internalSetup;
   }
 
-  startServices({
+  async startServices({
     logger,
     security,
     spaces,
@@ -60,7 +60,7 @@ export class ServiceManager {
     savedObjects,
     llmTasks,
     trackingService,
-  }: ServicesStartDeps): InternalStartServices {
+  }: ServicesStartDeps): Promise<InternalStartServices> {
     if (!this.services) {
       throw new Error('#startServices called before #setupServices');
     }
@@ -76,12 +76,13 @@ export class ServiceManager {
 
     const attachments = this.services.attachments.start();
 
-    const tools = this.services.tools.start({
+    const tools = await this.services.tools.start({
       getRunner,
       spaces,
       elasticsearch,
       uiSettings,
       savedObjects,
+      llmTasks,
     });
 
     const agents = this.services.agents.start({

@@ -104,11 +104,11 @@ export class OnechatPlugin
     };
   }
 
-  start(
+  async start(
     { elasticsearch, security, uiSettings, savedObjects }: CoreStart,
     { inference, spaces, llmTasks }: OnechatStartDependencies
-  ): OnechatPluginStart {
-    const startServices = this.serviceManager.startServices({
+  ): Promise<OnechatPluginStart> {
+    const startServices = await this.serviceManager.startServices({
       logger: this.logger.get('services'),
       security,
       elasticsearch,
