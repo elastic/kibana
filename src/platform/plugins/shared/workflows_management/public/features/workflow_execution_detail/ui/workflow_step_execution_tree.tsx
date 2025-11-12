@@ -28,6 +28,7 @@ import React from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { JsonValue } from '@kbn/utility-types';
 import type { WorkflowExecutionDto, WorkflowStepExecutionDto, WorkflowYaml } from '@kbn/workflows';
 import { ExecutionStatus, isDangerousStatus, isInProgressStatus } from '@kbn/workflows';
 import type { StepExecutionTreeItem } from './build_step_executions_tree';
@@ -58,11 +59,11 @@ function convertTreeToEuiTreeViewItems(
 
     return {
       id: item.stepExecutionId ?? `${item.stepId}-${item.executionIndex}-no-step-execution`,
-      css: getStatusCss({ status, selected }, euiTheme),
+      css: getStatusCss({ status, selected, isPseudoStep: item.isPseudoStep }, euiTheme),
       icon: (
         <StepIcon
           stepType={item.stepType}
-          executionStatus={status ?? null}
+          executionStatus={item.isPseudoStep ? null : status ?? null}
           onClick={selectStepExecution}
         />
       ),
@@ -200,7 +201,49 @@ export const WorkflowStepExecutionTree = ({
         stepExecutionMap.set(skeletonStepExecution.id, skeletonStepExecution);
       }
     }
-    const stepExecutionsTree = buildStepExecutionsTree(Array.from(stepExecutionMap.values()));
+    const stepExecutionsTree = buildStepExecutionsTree(
+      Array.from(stepExecutionMap.values()),
+      execution.context
+    );
+
+    const triggerStep = stepExecutionsTree.find((item) => item.stepType === '__trigger');
+    if (triggerStep?.stepExecutionId && execution.context?.event) {
+      const triggerExecution: WorkflowStepExecutionDto = {
+        id: triggerStep.stepExecutionId,
+        stepId: triggerStep.stepId,
+        stepType: triggerStep.stepType,
+        status: triggerStep.status ?? ExecutionStatus.COMPLETED,
+        input: execution.context.event as JsonValue,
+        scopeStack: [],
+        workflowRunId: execution.id,
+        workflowId: execution.workflowId || '',
+        startedAt: '',
+        globalExecutionIndex: -1,
+        stepExecutionIndex: 0,
+        topologicalIndex: -1,
+      };
+      stepExecutionMap.set(triggerStep.stepExecutionId, triggerExecution);
+    }
+
+    const inputsStep = stepExecutionsTree.find((item) => item.stepType === '__inputs');
+    if (inputsStep?.stepExecutionId && execution.context?.inputs) {
+      const inputsExecution: WorkflowStepExecutionDto = {
+        id: inputsStep.stepExecutionId,
+        stepId: inputsStep.stepId,
+        stepType: inputsStep.stepType,
+        status: inputsStep.status ?? ExecutionStatus.COMPLETED,
+        input: execution.context.inputs as JsonValue,
+        scopeStack: [],
+        workflowRunId: execution.id,
+        workflowId: execution.workflowId || '',
+        startedAt: '',
+        globalExecutionIndex: -1,
+        stepExecutionIndex: 0,
+        topologicalIndex: -1,
+      };
+      stepExecutionMap.set(inputsStep.stepExecutionId, inputsExecution);
+    }
+
     const items: EuiTreeViewProps['items'] = convertTreeToEuiTreeViewItems(
       stepExecutionsTree,
       stepExecutionMap,
@@ -296,9 +339,32 @@ const componentStyles = {
 };
 
 const getStatusCss = (
-  { status, selected }: { status?: ExecutionStatus; selected?: boolean },
+  {
+    status,
+    selected,
+    isPseudoStep,
+  }: { status?: ExecutionStatus; selected?: boolean; isPseudoStep?: boolean },
   euiTheme: EuiThemeComputed
 ) => {
+  if (isPseudoStep) {
+    const pseudoBackground = euiTheme.colors.backgroundBasePlain;
+    if (selected) {
+      return css`
+        &,
+        &:active,
+        &:focus,
+        &:hover {
+          background-color: ${transparentize(pseudoBackground, 0.5)};
+        }
+      `;
+    }
+    return css`
+      &:hover {
+        background-color: ${transparentize(pseudoBackground, 0.7)};
+      }
+    `;
+  }
+
   if (!status) {
     return;
   }

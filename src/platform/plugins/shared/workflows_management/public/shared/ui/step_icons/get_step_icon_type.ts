@@ -13,6 +13,14 @@ import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 export const getStepIconType = (nodeType: string): EuiIconType => {
   let iconType: EuiIconType = 'info';
   switch (nodeType) {
+    // pseudo-steps
+    case '__trigger':
+      iconType = 'bolt';
+      break;
+    case '__inputs':
+      iconType = 'inputOutput';
+      break;
+
     // triggers
     case 'manual':
       iconType = 'user';

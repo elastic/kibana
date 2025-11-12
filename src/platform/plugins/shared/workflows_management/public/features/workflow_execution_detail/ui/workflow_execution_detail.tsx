@@ -16,6 +16,7 @@ import {
   ResizableLayoutMode,
   ResizableLayoutOrder,
 } from '@kbn/resizable-layout';
+import { ExecutionStatus } from '@kbn/workflows';
 import { useWorkflowExecutionPolling } from '@kbn/workflows-ui';
 import { WorkflowExecutionPanel } from './workflow_execution_panel';
 import { WorkflowStepExecutionDetails } from './workflow_step_execution_details';
@@ -64,11 +65,56 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
     }, [workflowExecution]);
 
     const selectedStepExecution = useMemo(() => {
-      if (!workflowExecution?.stepExecutions?.length || !selectedStepExecutionId) {
+      if (!selectedStepExecutionId) {
+        return undefined;
+      }
+
+      if (selectedStepExecutionId.startsWith('__pseudo_')) {
+        const isPseudoTrigger = selectedStepExecutionId === '__pseudo_trigger__';
+        const isPseudoInputs = selectedStepExecutionId === '__pseudo_inputs__';
+
+        if (isPseudoTrigger && workflowExecution?.context?.event) {
+          return {
+            id: '__pseudo_trigger__',
+            stepId: 'Event',
+            stepType: '__trigger',
+            status: ExecutionStatus.COMPLETED,
+            input: workflowExecution.context.event,
+            scopeStack: [],
+            workflowRunId: workflowExecution.id,
+            workflowId: workflowExecution.workflowId || '',
+            startedAt: '',
+            globalExecutionIndex: -1,
+            stepExecutionIndex: 0,
+            topologicalIndex: -1,
+          };
+        }
+
+        if (isPseudoInputs && workflowExecution?.context?.inputs) {
+          return {
+            id: '__pseudo_inputs__',
+            stepId: 'Inputs',
+            stepType: '__inputs',
+            status: ExecutionStatus.COMPLETED,
+            input: workflowExecution.context.inputs,
+            scopeStack: [],
+            workflowRunId: workflowExecution.id,
+            workflowId: workflowExecution.workflowId || '',
+            startedAt: '',
+            globalExecutionIndex: -1,
+            stepExecutionIndex: 0,
+            topologicalIndex: -1,
+          };
+        }
+
+        return undefined;
+      }
+
+      if (!workflowExecution?.stepExecutions?.length) {
         return undefined;
       }
       return workflowExecution.stepExecutions.find((step) => step.id === selectedStepExecutionId);
-    }, [workflowExecution?.stepExecutions, selectedStepExecutionId]);
+    }, [workflowExecution, selectedStepExecutionId]);
 
     return (
       <EuiPanel paddingSize="none" color="plain" hasShadow={false} style={{ height: '100%' }}>
