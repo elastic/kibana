@@ -7,7 +7,7 @@
 
 import { mapValues } from 'lodash';
 import { z } from '@kbn/zod';
-import type { IModel, ModelRepresentation, OmitName } from '../core';
+import type { IModel, ModelRepresentation, OmitUpsertProps } from '../core';
 import type { Validation } from './validation';
 import { validation } from './validation';
 
@@ -137,6 +137,6 @@ type WithDefaults<TRightSchema extends ModelSchema> = {
     stream: z.input<TRightSchema['Definition']>;
   };
   UpsertRequest: {
-    stream: OmitName<{} & z.input<TRightSchema['Definition']>>;
+    stream: OmitUpsertProps<{} & z.input<TRightSchema['Definition']>>;
   };
 } & ModelOfSchema<TRightSchema>;
