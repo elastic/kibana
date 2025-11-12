@@ -39,10 +39,10 @@ import type {
   LensAttributesService,
 } from '@kbn/lens-common';
 import { LENS_SHARE_STATE_ACTION } from '@kbn/lens-common';
+import type { LensSerializedAPIConfig } from '@kbn/lens-common-2';
 import { App } from './app';
 import { addHelpMenuToAppChrome } from '../help_menu_util';
 import type { LensPluginStartDependencies } from '../plugin';
-import { extractLensReferences } from '../../common/references';
 import { LENS_EMBEDDABLE_TYPE, LENS_EDIT_BY_VALUE, APP_ID } from '../../common/constants';
 import type { RedirectToOriginProps, HistoryLocationState } from './types';
 import type { LensRootStore } from '../state_management';
@@ -218,21 +218,22 @@ export async function mountApp(
     }
     if (stateTransfer && props?.state) {
       const { state: rawState, isCopied } = props;
-      const { references } = extractLensReferences(rawState);
-      stateTransfer.navigateToWithEmbeddablePackages<LensSerializedState>(mergedOriginatingApp, {
-        path: embeddableEditorIncomingState?.originatingPath,
-        state: [
-          {
-            embeddableId: isCopied ? undefined : embeddableId,
-            type: LENS_EMBEDDABLE_TYPE,
-            serializedState: {
-              references,
-              rawState,
+      stateTransfer.navigateToWithEmbeddablePackages<LensSerializedAPIConfig>(
+        mergedOriginatingApp,
+        {
+          path: embeddableEditorIncomingState?.originatingPath,
+          state: [
+            {
+              embeddableId: isCopied ? undefined : embeddableId,
+              type: LENS_EMBEDDABLE_TYPE,
+              serializedState: {
+                rawState,
+              },
+              searchSessionId: data.search.session.getSessionId(),
             },
-            searchSessionId: data.search.session.getSessionId(),
-          },
-        ],
-      });
+          ],
+        }
+      );
     } else {
       coreStart.application.navigateToApp(mergedOriginatingApp, {
         path: embeddableEditorIncomingState?.originatingPath,

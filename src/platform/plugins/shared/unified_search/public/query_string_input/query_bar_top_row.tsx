@@ -12,7 +12,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import useObservable from 'react-use/lib/useObservable';
 import classNames from 'classnames';
 import deepEqual from 'fast-deep-equal';
-import { EMPTY } from 'rxjs';
+import { EMPTY, delay, mergeMap, of } from 'rxjs';
 import { map } from 'rxjs';
 import { throttle } from 'lodash';
 
@@ -232,6 +232,10 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
      */
     controlsWrapper: React.ReactNode;
   };
+  /**
+   * Optional ES|QL prop - Callback function invoked to open the given ES|QL query in a new Discover tab
+   */
+  onOpenQueryInNewTab?: ESQLEditorProps['onOpenQueryInNewTab'];
   useBackgroundSearchButton?: boolean;
   showProjectPicker?: boolean;
 }
@@ -327,7 +331,15 @@ export const QueryBarTopRow = React.memo(
 
     const isQueryLangSelected = props.query && !isOfQueryType(props.query);
 
-    const backgroundSearchState = useObservable(data.search.session.state$);
+    const backgroundSearchState = useObservable(
+      data.search.session.state$.pipe(
+        mergeMap((state) => {
+          // We want to delay enabling the button to avoid flickering when searches are quick
+          if (state === SearchSessionState.Loading) return of(state).pipe(delay(500));
+          return of(state);
+        })
+      )
+    );
     const canSendToBackground =
       backgroundSearchState === SearchSessionState.Loading && !isSendingToBackground;
 
@@ -919,6 +931,7 @@ export const QueryBarTopRow = React.memo(
                 : undefined
             }
             esqlVariables={props.esqlVariablesConfig?.esqlVariables ?? []}
+            onOpenQueryInNewTab={props.onOpenQueryInNewTab}
           />
         )
       );
