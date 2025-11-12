@@ -22,15 +22,10 @@ import {
 import type { NotificationsStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { convertRequestToLanguage } from '../../../../../services';
 import type { EditorRequest } from '../../types';
 
 import { useServicesContext } from '../../../../contexts';
-import {
-  DEFAULT_LANGUAGE,
-  AVAILABLE_LANGUAGES,
-  KIBANA_API_PREFIX,
-} from '../../../../../../common/constants';
+import { DEFAULT_LANGUAGE, AVAILABLE_LANGUAGES } from '../../../../../../common/constants';
 
 interface Props {
   getRequests: () => Promise<EditorRequest[]>;
@@ -43,6 +38,9 @@ interface Props {
   getIsKbnRequestSelected: () => Promise<boolean | null>;
   currentLanguage: string;
   onLanguageChange: (language: string) => void;
+  isKbnRequestSelected: boolean;
+  onMenuOpen: () => void;
+  onCopyAs: (language?: string) => Promise<void>;
 }
 
 const DELAY_FOR_HIDING_SPINNER = 500;
@@ -59,11 +57,13 @@ export const ContextMenu = ({
   getIsKbnRequestSelected,
   currentLanguage,
   onLanguageChange,
+  isKbnRequestSelected,
+  onMenuOpen,
+  onCopyAs,
 }: Props) => {
   const { euiTheme } = useEuiTheme();
 
   const {
-    services: { esHostService },
     config: { isPackagedEnvironment },
   } = useServicesContext();
 
@@ -74,71 +74,6 @@ export const ContextMenu = ({
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isRequestConverterLoading, setRequestConverterLoading] = useState(false);
   const [isLanguageSelectorVisible, setLanguageSelectorVisibility] = useState(false);
-  const [isKbnRequestSelected, setIsKbnRequestSelected] = useState<boolean | null>(null);
-
-  const copyText = async (text: string) => {
-    if (window.navigator?.clipboard) {
-      await window.navigator.clipboard.writeText(text);
-      return;
-    }
-    throw new Error('Could not copy to clipboard!');
-  };
-
-  // This function will convert all the selected requests to the language by
-  // calling convertRequestToLanguage and then copy the data to clipboard.
-  const copyAs = async (language?: string) => {
-    // Get the language we want to convert the requests to
-    const withLanguage = language || currentLanguage;
-    // Get all the selected requests
-    const requests = await getRequests();
-
-    // If we have any kbn requests, we should not allow the user to copy as
-    // anything other than curl
-    const hasKbnRequests = requests.some((req) => req.url.startsWith(KIBANA_API_PREFIX));
-
-    if (hasKbnRequests && withLanguage !== 'curl') {
-      notifications.toasts.addDanger({
-        title: i18n.translate('console.consoleMenu.copyAsMixedRequestsMessage', {
-          defaultMessage: 'Kibana requests can only be copied as curl',
-        }),
-      });
-
-      return;
-    }
-
-    const { data: requestsAsCode, error: requestError } = await convertRequestToLanguage({
-      language: withLanguage,
-      esHost: esHostService.getHost(),
-      kibanaHost: window.location.origin,
-      requests,
-    });
-
-    if (requestError) {
-      notifications.toasts.addDanger({
-        title: i18n.translate('console.consoleMenu.copyAsFailedMessage', {
-          defaultMessage:
-            '{requestsCount, plural, one {Request} other {Requests}} could not be copied to clipboard',
-          values: { requestsCount: requests.length },
-        }),
-      });
-
-      return;
-    }
-
-    notifications.toasts.addSuccess({
-      title: i18n.translate('console.consoleMenu.copyAsSuccessMessage', {
-        defaultMessage:
-          '{requestsCount, plural, one {Request} other {Requests}} copied to clipboard as {language}',
-        values: { language: getLanguageLabelByValue(withLanguage), requestsCount: requests.length },
-      }),
-    });
-
-    await copyText(requestsAsCode);
-  };
-
-  const checkIsKbnRequestSelected = async () => {
-    setIsKbnRequestSelected(await getIsKbnRequestSelected());
-  };
 
   const onCopyAsSubmit = async (language?: string) => {
     const withLanguage = language || currentLanguage;
@@ -147,7 +82,7 @@ export const ContextMenu = ({
     setRequestConverterLoading(true);
 
     // When copying as worked as expected, close the context menu popover
-    copyAs(withLanguage)
+    onCopyAs(withLanguage)
       .then(() => {
         setIsPopoverOpen(false);
       })
@@ -193,7 +128,7 @@ export const ContextMenu = ({
     <EuiButtonIcon
       onClick={() => {
         setIsPopoverOpen((prev) => !prev);
-        checkIsKbnRequestSelected();
+        onMenuOpen();
       }}
       data-test-subj="toggleConsoleMenu"
       aria-label={i18n.translate('console.requestOptionsButtonAriaLabel', {
@@ -244,26 +179,34 @@ export const ContextMenu = ({
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiContextMenuItem>,
-          <EuiContextMenuItem
-            key="Language clients"
-            data-test-subj="consoleMenuLanguageClients"
-            id="languageClients"
-            disabled={isKbnRequestSelected || false}
-            onClick={() => setLanguageSelectorVisibility(true)}
-            icon="editorCodeBlock"
-          >
-            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <FormattedMessage
-                  id="console.monaco.requestOptions.languageClientsButtonLabel"
-                  defaultMessage="Language clients"
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <span style={{ fontSize: euiTheme.size.l }}>›</span>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiContextMenuItem>,
+          // Hide Language clients option for Kibana requests
+          ...(!isKbnRequestSelected
+            ? [
+                <EuiContextMenuItem
+                  key="Language clients"
+                  data-test-subj="consoleMenuLanguageClients"
+                  id="languageClients"
+                  onClick={() => setLanguageSelectorVisibility(true)}
+                  icon="editorCodeBlock"
+                >
+                  <EuiFlexGroup
+                    alignItems="center"
+                    justifyContent="spaceBetween"
+                    responsive={false}
+                  >
+                    <EuiFlexItem grow={false}>
+                      <FormattedMessage
+                        id="console.monaco.requestOptions.languageClientsButtonLabel"
+                        defaultMessage="Language clients"
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <span style={{ fontSize: euiTheme.size.l }}>›</span>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiContextMenuItem>,
+              ]
+            : []),
         ]
       : []),
     <EuiContextMenuItem

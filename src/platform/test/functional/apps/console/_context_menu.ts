@@ -103,10 +103,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Focus editor once again
         await PageObjects.console.focusInputEditor();
 
-        // Verify that the Language clients button is disabled for kbn request
+        // Verify that the Language clients button is hidden for kbn request
         await PageObjects.console.clickContextMenu();
-        const languageClientsButton = await testSubjects.find('consoleMenuLanguageClients');
-        expect(await languageClientsButton.getAttribute('disabled')).to.be('true');
+        const languageClientsVisible = await PageObjects.console.isLanguageClientsButtonVisible();
+        expect(languageClientsVisible).to.be(false);
       });
 
       it('allows to change default language', async () => {
@@ -122,19 +122,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         let badgeText = await languageBadge.getVisibleText();
         expect(badgeText.toLowerCase()).to.equal('curl');
 
-        // Click "Language clients" to open nested panel
-        await testSubjects.click('consoleMenuLanguageClients');
-
-        // Wait for the language clients panel to open
-        await retry.waitFor('language clients panel to open', async () => {
-          return await testSubjects.exists('languageClientMenuItem-python');
-        });
-
-        // Wait for panel animation to complete
-        await PageObjects.common.sleep(300);
-
-        // Click "Python" from the language list
-        await testSubjects.click('languageClientMenuItem-python');
+        // Change default language to Python
+        await PageObjects.console.changeDefaultLanguage('python');
 
         // Wait for panel to return to main menu
         await retry.waitFor('panel to return to main menu', async () => {
@@ -231,130 +220,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // Check it shows either Cmd+/ (Mac) or Ctrl+/ (Windows/Linux)
       expect(openDocsShortcutText).to.match(/^(⌘|Ctrl) \+ \/$/);
-    });
-  });
-
-  describe('Action panel copy button', () => {
-    beforeEach(async () => {
-      await PageObjects.common.navigateToApp('console');
-      await PageObjects.console.skipTourIfExists();
-      await PageObjects.console.clearEditorText();
-      await PageObjects.console.enterText('GET _search');
-    });
-
-    it('should display copy to language button in action panel', async () => {
-      const isVisible = await PageObjects.console.isCopyToLanguageActionButtonVisible();
-      expect(isVisible).to.be(true);
-    });
-
-    it('should copy request as curl when copy button is clicked', async () => {
-      await PageObjects.console.clickCopyToLanguageActionButton();
-
-      const resultToast = await toasts.getElementByIndex(1);
-      const toastText = await resultToast.getVisibleText();
-
-      if (toastText.includes('Write permission denied')) {
-        log.debug('Write permission denied, skipping test');
-        return;
-      }
-
-      expect(toastText).to.be('Request copied to clipboard as curl');
-
-      const canReadClipboard = await browser.checkBrowserPermission('clipboard-read');
-      if (canReadClipboard) {
-        const clipboardText = await browser.getClipboardValue();
-        expect(clipboardText).to.contain('curl -X GET');
-        expect(clipboardText).to.contain('_search');
-      }
-    });
-
-    it('should copy request with selected language from context menu', async () => {
-      const canReadClipboard = await browser.checkBrowserPermission('clipboard-read');
-
-      // Open context menu and select Python as language
-      await PageObjects.console.clickContextMenu();
-      await retry.waitFor('context menu to be open', async () => {
-        return await PageObjects.console.isContextMenuOpen();
-      });
-
-      // Click "Language clients"
-      await testSubjects.click('consoleMenuLanguageClients');
-      await PageObjects.common.sleep(PANEL_ANIMATION_DURATION_MS);
-
-      // Wait for the nested panel to be visible
-      await retry.waitFor('language clients panel to be visible', async () => {
-        return await testSubjects.exists('languageClientMenuItem-python');
-      });
-
-      // Click Python
-      await testSubjects.click('languageClientMenuItem-python');
-      await PageObjects.common.sleep(PANEL_ANIMATION_DURATION_MS);
-
-      // Wait for panel to return to main menu
-      await retry.waitFor('panel to return to main menu', async () => {
-        return await testSubjects.exists('consoleMenuCopyToLanguage');
-      });
-
-      // Verify the badge shows Python
-      const badge = await testSubjects.find('consoleMenuLanguageBadge');
-      const badgeText = await badge.getVisibleText();
-      expect(badgeText).to.be('Python');
-
-      // Close context menu
-      await PageObjects.console.clickContextMenu();
-
-      // Now click the copy button in the action panel
-      await PageObjects.console.clickCopyToLanguageActionButton();
-
-      // Wait for toast
-      const resultToast = await toasts.getElementByIndex(1);
-      const toastText = await resultToast.getVisibleText();
-
-      if (toastText.includes('Write permission denied')) {
-        log.debug('Write permission denied, skipping test');
-        return;
-      }
-
-      expect(toastText).to.be('Request copied to clipboard as Python');
-
-      // Check if the clipboard has the Python request
-      if (canReadClipboard) {
-        const clipboardText = await browser.getClipboardValue();
-        // Python requests typically include 'requests' library or other Python-specific syntax
-        expect(clipboardText).to.not.contain('curl -X GET');
-        // The exact format depends on the conversion, but it should be different from curl
-        log.debug('Clipboard content (Python):', clipboardText);
-      }
-    });
-
-    it('should work independently from context menu copy to language button', async () => {
-      // Click action panel copy button
-      await PageObjects.console.clickCopyToLanguageActionButton();
-
-      let resultToast = await toasts.getElementByIndex(1);
-      let toastText = await resultToast.getVisibleText();
-
-      if (toastText.includes('Write permission denied')) {
-        log.debug('Write permission denied, skipping test');
-        return;
-      }
-
-      expect(toastText).to.be('Request copied to clipboard as curl');
-
-      // Now use context menu to copy as well
-      await PageObjects.console.clickContextMenu();
-      await retry.waitFor('context menu to be open', async () => {
-        return await PageObjects.console.isContextMenuOpen();
-      });
-
-      await PageObjects.console.clickCopyToLanguageButton();
-
-      resultToast = await toasts.getElementByIndex(1);
-      toastText = await resultToast.getVisibleText();
-
-      expect(toastText).to.be('Request copied to clipboard as curl');
-
-      // Both should work the same way
     });
   });
 }

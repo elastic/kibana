@@ -57,6 +57,9 @@ const useStyles = () => {
       // For IE11
       min-width: calc(${euiTheme.size.l} * 2);
     `,
+    playButton: css`
+      margin-left: ${euiTheme.size.xs} !important;
+    `,
   };
 };
 
@@ -118,6 +121,16 @@ export const MonacoEditor = ({
     storage.get(StorageKeys.DEFAULT_LANGUAGE, DEFAULT_LANGUAGE)
   );
   const [currentLanguage, setCurrentLanguage] = useState(defaultLanguage);
+  const [isKbnRequestSelected, setIsKbnRequestSelected] = useState<boolean>(false);
+
+  // When a Kibana request is selected, force language to curl
+  useEffect(() => {
+    if (isKbnRequestSelected) {
+      setCurrentLanguage(DEFAULT_LANGUAGE);
+    } else {
+      setCurrentLanguage(defaultLanguage);
+    }
+  }, [defaultLanguage, isKbnRequestSelected]);
 
   const getRequestsCallback = useCallback(async (): Promise<EditorRequest[]> => {
     const requests = await actionsProvider.current?.getRequests();
@@ -192,17 +205,29 @@ export const MonacoEditor = ({
     await copyText(requestsAsCode);
   };
 
+  const checkIsKbnRequestSelected = async () => {
+    const isKbn = await isKbnRequestSelectedCallback();
+    setIsKbnRequestSelected(isKbn || false);
+    return isKbn;
+  };
+
   const onCopyAsSubmit = async () => {
-    await copyAs(currentLanguage);
+    // Check if current request is a Kibana request
+    const isKbn = await checkIsKbnRequestSelected();
+    // If it's a Kibana request, use curl; otherwise use the current language
+    const languageToUse = isKbn ? DEFAULT_LANGUAGE : currentLanguage;
+    await copyAs(languageToUse);
   };
 
   const handleLanguageChange = useCallback(
     (language: string) => {
       storage.set(StorageKeys.DEFAULT_LANGUAGE, language);
       setDefaultLanguage(language);
-      setCurrentLanguage(language);
+      if (!isKbnRequestSelected) {
+        setCurrentLanguage(language);
+      }
     },
-    [storage]
+    [storage, isKbnRequestSelected]
   );
 
   const editorDidMountCallback = useCallback(
@@ -357,6 +382,7 @@ export const MonacoEditor = ({
               size="m"
               color="primary"
               iconType="play"
+              iconSize="s"
               onClick={sendRequestsCallback}
               onMouseEnter={() => setIsPlayButtonHovered(true)}
               onMouseLeave={() => setIsPlayButtonHovered(false)}
@@ -364,6 +390,7 @@ export const MonacoEditor = ({
               aria-label={i18n.translate('console.monaco.sendRequestButtonTooltipAriaLabel', {
                 defaultMessage: 'Click to send request',
               })}
+              css={styles.playButton}
             />
           </EuiToolTip>
         </EuiFlexItem>
@@ -396,6 +423,9 @@ export const MonacoEditor = ({
             getIsKbnRequestSelected={isKbnRequestSelectedCallback}
             currentLanguage={currentLanguage}
             onLanguageChange={handleLanguageChange}
+            isKbnRequestSelected={isKbnRequestSelected}
+            onMenuOpen={checkIsKbnRequestSelected}
+            onCopyAs={copyAs}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

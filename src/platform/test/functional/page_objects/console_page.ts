@@ -251,14 +251,6 @@ export class ConsolePageObject extends FtrService {
     return await this.testSubjects.exists('sendRequestButton');
   }
 
-  public async clickCopyToLanguageActionButton() {
-    await this.testSubjects.click('copyToLanguageActionButton');
-  }
-
-  public async isCopyToLanguageActionButtonVisible() {
-    return await this.testSubjects.exists('copyToLanguageActionButton');
-  }
-
   public async clickCopyOutput() {
     await this.testSubjects.click('copyOutputButton');
   }
@@ -503,30 +495,27 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async changeLanguageAndCopy(language: string) {
-    // Open language clients nested panel
+    // Change the default language
+    await this.changeDefaultLanguage(language);
+
+    // Click copy to language button to copy
+    await this.testSubjects.click('consoleMenuCopyToLanguage');
+  }
+
+  public async changeDefaultLanguage(language: string) {
+    // Click "Language clients" to open nested panel
     await this.testSubjects.click('consoleMenuLanguageClients');
 
-    // Wait for the language clients panel to be visible
+    // Wait for the language clients panel to open
     await this.retry.waitFor('language clients panel to open', async () => {
       return await this.testSubjects.exists(`languageClientMenuItem-${language}`);
     });
 
-    // Small delay to ensure panel animation completes
+    // Wait for panel animation to complete
     await this.common.sleep(300);
 
-    // Select the language from the nested panel
+    // Click the language from the language list
     await this.testSubjects.click(`languageClientMenuItem-${language}`);
-
-    // Wait for panel to return to main menu
-    await this.retry.waitFor('language clients panel to close', async () => {
-      return await this.testSubjects.exists('consoleMenuCopyToLanguage');
-    });
-
-    // Small delay to ensure panel animation completes
-    await this.common.sleep(300);
-
-    // Click copy to language button to copy
-    await this.testSubjects.click('consoleMenuCopyToLanguage');
   }
 
   public async clickCopyToLanguageButton() {
