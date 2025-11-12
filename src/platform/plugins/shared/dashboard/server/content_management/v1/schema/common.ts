@@ -115,7 +115,7 @@ export const dashboardMetaSchema = schema.object({
   createdBy: schema.maybe(schema.string()),
   managed: schema.maybe(schema.boolean()),
   error: schema.maybe(apiError),
-  version: schema.string(),
+  version: schema.maybe(schema.string()),
 });
 
 export const optionsSchema = schema.object({
@@ -203,14 +203,6 @@ export function getDashboardAPICreateResultSchema() {
     },
     { unknowns: 'forbid' }
   );
-}
-
-export function getDashboardResponseAttributesSchema() {
-  return schema.object({
-    ...getDashboardStateSchema(),
-    references: schema.maybe(schema.arrayOf(referenceSchema)),
-    spaces: schema.maybe(schema.arrayOf(schema.string())),
-  });
 }
 
 export function getDashboardStorageSchema() {
