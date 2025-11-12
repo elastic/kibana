@@ -41,7 +41,8 @@ export const ProcessDescendantsIconTip = memo<ProcessDescendantsIconTipProps>(
                 <FormattedMessage
                   id="xpack.securitySolution.processDescendantsTooltip.trustedApps.content"
                   defaultMessage="When enabled, all child processes of a trusted parent process also become Trusted Applications. Supported by Elastic Agent v9.2+."
-                />)}
+                />
+              )}
             </p>
             {indicateExtraEntry && (
               <>
@@ -56,16 +57,14 @@ export const ProcessDescendantsIconTip = memo<ProcessDescendantsIconTipProps>(
                 </p>
               </>
             )}
-            {
-              isEventFilterForm && (
-                <p>
-                  <FormattedMessage
-                    id="xpack.securitySolution.processDescendantsTooltip.versionInfo"
-                    defaultMessage="Process descendant filtering works only with Agents v8.15 and newer."
-                  />
-                </p>
-              )
-            }
+            {isEventFilterForm && (
+              <p>
+                <FormattedMessage
+                  id="xpack.securitySolution.processDescendantsTooltip.versionInfo"
+                  defaultMessage="Process descendant filtering works only with Agents v8.15 and newer."
+                />
+              </p>
+            )}
           </EuiText>
         }
         data-test-subj={getTestId('tooltipText')}

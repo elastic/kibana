@@ -55,7 +55,7 @@ describe('ProcessDescendantIndicator', () => {
 
     expect(renderResult.queryByTestId('test-processDescendantsIndication')).not.toBeInTheDocument();
   });
-  
+
   it('should display indication if Event Filter is for process descendants', () => {
     render({ item: getProcessDescendantEventFilter() });
 

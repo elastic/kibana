@@ -720,9 +720,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
               <EuiIconTip
                 content={
                   <EuiText size="s">
-                    <p>
-                      {TRUSTED_APP_PROCESS_DESCENDANTS_INFO}
-                    </p>
+                    <p>{TRUSTED_APP_PROCESS_DESCENDANTS_INFO}</p>
                   </EuiText>
                 }
                 data-test-subj="trustedAppsProcessDescendantsTooltip"
