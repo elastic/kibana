@@ -5,23 +5,16 @@
  * 2.0.
  */
 
-import type { BuiltInAgentDefinition } from '@kbn/onechat-server/agents';
+import type { BuiltInAgentDefinition, InternalAgentDefinition } from '@kbn/onechat-server/agents';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import { getExampleAlertsUrl } from '../tools/utils/kibana_urls';
+import { getPluginServices } from '../services/service_locator';
 
 export const catchupAgentDefinition = (): BuiltInAgentDefinition => {
   return {
     id: 'hackathon.catchup.agent',
     name: 'Elastic CatchUp Agent',
-    description: `Provides context-rich summaries of Elastic Security, Observability, and external system activity (Slack, GitHub, Gmail) since a given timestamp. Helps users catch up on security updates, observability alerts, cases, rules, and related external communications while they were away.
-
-**Time Range Handling:**
-When the user requests a catch-up without specifying a time range, use the following defaults:
-- "catch me up" or "what's new" → use last 7 days (start = current date minus 7 days at 00:00:00Z)
-- "since yesterday" → use yesterday at 00:00:00Z
-- "since last week" → use 7 days ago at 00:00:00Z
-- "since [specific date]" → use the specified date at 00:00:00Z
-- No time mentioned → default to last 7 days for a reasonable catch-up window
-
-**Important:** When calling multiple tools, use the SAME time range (start and end parameters) for all tools to ensure consistency across security cases, detections, attack discoveries, rule changes, and external system summaries.`,
+    description: `Provides context-rich summaries of Elastic Security, Observability, and external system activity (Slack, GitHub, Gmail) since a given timestamp.`,
     configuration: {
       instructions: `**CRITICAL: Tool Selection Priority - READ IN ORDER**
 
@@ -87,8 +80,8 @@ When formatting your responses, use markdown to improve readability:
   - Format mentions as: **You were mentioned in #channel-name by @username**: [message summary]
   - Follow with a "### Slack Channel Messages" section for regular messages (where mentions array is empty)
   - Never skip messages with mentions - they are the highest priority
-- **CRITICAL FOR LINKS**: When creating markdown links, ALWAYS wrap URLs in angle brackets <URL> to handle special characters. Format: [Link text](<URL>). Do NOT use bold formatting around links. Examples:
-  - Correct: [View all alerts](<http://localhost:5601/kbn/app/security/alerts?timerange=...>)
+- **CRITICAL FOR LINKS**: When creating markdown links, ALWAYS wrap URLs in angle brackets <URL> to handle special characters. Format: [Link text](<URL>). Do NOT use bold formatting around links. URLs provided by tools are already dynamically generated with the correct Kibana host, base path, and space. Examples:
+  - Correct: [View all alerts](<EXAMPLE_ALERTS_URL>)
   - Wrong: **[View all alerts](URL)** or [View all alerts](URL) without angle brackets
 - Include clickable links when URLs are available in the tool results (cases, attack discoveries, rules, alerts page)
 - **For Slack messages**: Link to EVERY message you mention using the permalink field. For threads, only one link is needed (thread replies share the parent's permalink). Use markdown format: [View message](<permalink_url>) or [View thread](<permalink_url>)
@@ -119,4 +112,42 @@ When formatting your responses, use markdown to improve readability:
       ],
     },
   };
+};
+
+/**
+ * Customize the catchup agent definition with dynamic URLs based on request context
+ */
+export const customizeCatchupAgentDefinition = (
+  definition: InternalAgentDefinition,
+  request?: KibanaRequest
+): InternalAgentDefinition => {
+  if (!request || definition.id !== 'hackathon.catchup.agent') {
+    return definition;
+  }
+
+  try {
+    const { core } = getPluginServices();
+    const exampleUrl = getExampleAlertsUrl(request, core);
+
+    // Replace the placeholder in the answer instructions
+    const answerInstructions = definition.configuration?.answer?.instructions || '';
+    const customizedAnswerInstructions = answerInstructions.replace(
+      '<EXAMPLE_ALERTS_URL>',
+      exampleUrl
+    );
+
+    return {
+      ...definition,
+      configuration: {
+        ...definition.configuration,
+        answer: {
+          ...definition.configuration?.answer,
+          instructions: customizedAnswerInstructions,
+        },
+      },
+    };
+  } catch (error) {
+    // If we can't customize, return the original definition
+    return definition;
+  }
 };
