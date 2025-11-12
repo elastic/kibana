@@ -41,6 +41,7 @@ describe('CreateESQLControlAction', () => {
     onSaveControl: jest.fn(),
     onCancelControl: jest.fn(),
     parentApi: {},
+    source: 'question_mark_test',
   };
 
   beforeEach(() => {

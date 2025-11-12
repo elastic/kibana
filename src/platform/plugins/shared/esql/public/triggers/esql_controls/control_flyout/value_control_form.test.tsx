@@ -70,6 +70,7 @@ describe('ValueControlForm', () => {
     search: searchMock,
     esqlVariables: [],
     ariaLabelledBy: 'esqlControlsFlyoutTitle',
+    telemetryTriggerSource: 'question_mark_test',
   };
 
   describe('Interval type', () => {

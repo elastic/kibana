@@ -31,6 +31,7 @@ const defaultProps = {
   cursorPosition: { column: 19, lineNumber: 1 } as monaco.Position,
   esqlVariables: [],
   ariaLabelledBy: 'esqlControlFlyoutTitle',
+  telemetryTriggerSource: 'question_mark_test',
 };
 
 describe('IdentifierControlForm', () => {
