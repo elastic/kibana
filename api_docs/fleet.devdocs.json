@@ -1124,7 +1124,6 @@
             "label": "vars",
             "description": [],
             "signature": [
-              "Record<string, unknown> | ",
               "AwsCloudConnectorVars",
               " | ",
               "AzureCloudConnectorVars"
@@ -1221,6 +1220,20 @@
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.CloudConnectorListOptions.kuery",
+            "type": "string",
+            "tags": [],
+            "label": "kuery",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1288,7 +1301,7 @@
         "tags": [],
         "label": "CreateCloudConnectorRequest",
         "description": [],
-        "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
+        "path": "x-pack/platform/plugins/shared/fleet/common/types/rest_spec/cloud_connector.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1299,7 +1312,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/rest_spec/cloud_connector.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1311,12 +1324,11 @@
             "label": "vars",
             "description": [],
             "signature": [
-              "Record<string, unknown> | ",
               "AwsCloudConnectorVars",
               " | ",
               "AzureCloudConnectorVars"
             ],
-            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/rest_spec/cloud_connector.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1330,7 +1342,7 @@
             "signature": [
               "\"aws\" | \"azure\" | \"gcp\""
             ],
-            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/rest_spec/cloud_connector.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4726,7 +4738,6 @@
         "label": "CloudConnectorVars",
         "description": [],
         "signature": [
-          "Record<string, unknown> | ",
           "AwsCloudConnectorVars",
           " | ",
           "AzureCloudConnectorVars"
@@ -30255,6 +30266,21 @@
           ">"
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/rest_spec/package_policy.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.CLOUD_CONNECTOR_SAVED_OBJECT_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "CLOUD_CONNECTOR_SAVED_OBJECT_TYPE",
+        "description": [],
+        "signature": [
+          "\"fleet-cloud-connector\""
+        ],
+        "path": "x-pack/platform/plugins/shared/fleet/common/constants/saved_objects.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

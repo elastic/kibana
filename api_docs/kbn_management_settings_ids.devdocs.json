@@ -1374,6 +1374,21 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_REGISTER_OBSERVABILITY_AGENT_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_REGISTER_OBSERVABILITY_AGENT_ID",
+        "description": [],
+        "signature": [
+          "\"observability:registerObservabilityAgent\""
+        ],
+        "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
         "id": "def-common.OBSERVABILITY_SEARCH_EXCLUDED_DATA_TIERS",
         "type": "string",
         "tags": [],
