@@ -16,7 +16,7 @@ import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import { dslOnlyPanelInfoSchema, layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
 import {
   mergeAllBucketsWithChartDimensionSchema,
-  mergeAllMetricsWithChartDimensionSchema,
+  mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
 } from './shared';
 
 const tagcloudStateMetricOptionsSchema = schema.object({
@@ -77,7 +77,7 @@ export const tagcloudStateSchemaNoESQL = schema.object({
   /**
    * Primary value configuration, must define operation.
    */
-  metric: mergeAllMetricsWithChartDimensionSchema(tagcloudStateMetricOptionsSchema),
+  metric: mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(tagcloudStateMetricOptionsSchema),
   /**
    * Configure how to break down to tags
    */

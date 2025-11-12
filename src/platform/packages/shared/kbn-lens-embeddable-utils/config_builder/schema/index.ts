@@ -31,7 +31,10 @@ export type { GaugeState, gaugeStateSchemaNoESQL } from './charts/gauge';
 export type { TagcloudState, TagcloudStateNoESQL, TagcloudStateESQL } from './charts/tagcloud';
 export { tagcloudStateSchema } from './charts/tagcloud';
 
-export type { LensApiFieldOrFormulaMetricOperation } from './metric_ops';
+export type {
+  LensApiFieldOrFormulaMetricOperation,
+  LensApiAllMetricOrFromulaOperations,
+} from './metric_ops';
 export type { LensApiBucketOperations } from './bucket_ops';
 
 export type NarrowByType<T, U> = T extends { type: U } ? T : never;

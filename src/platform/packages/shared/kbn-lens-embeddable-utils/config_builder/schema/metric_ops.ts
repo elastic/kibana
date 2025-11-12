@@ -268,3 +268,11 @@ export type LensApiStaticValueOperation = typeof staticOperationDefinitionSchema
 export type LensApiFieldOrFormulaMetricOperation =
   | LensApiFieldMetricOperations
   | LensApiFormulaOperation;
+
+export type LensApiAllMetricOrFromulaOperations =
+  | LensApiFieldMetricOperations
+  | LensApiFormulaOperation
+  | LensApiDifferencesOperation
+  | LensApiMovingAverageOperation
+  | LensApiCumulativeSumOperation
+  | LensApiCounterRateOperation;

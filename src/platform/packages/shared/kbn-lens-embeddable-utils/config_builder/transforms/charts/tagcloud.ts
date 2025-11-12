@@ -20,7 +20,7 @@ import type { SavedObjectReference } from '@kbn/core/types';
 import type {
   LensApiState,
   TagcloudState,
-  LensApiFieldOrFormulaMetricOperation,
+  LensApiAllMetricOrFromulaOperations,
   LensApiBucketOperations,
   TagcloudStateESQL,
   TagcloudStateNoESQL,
@@ -110,7 +110,7 @@ function reverseBuildVisualizationState(
       : (operationFromColumn(
           visualization.valueAccessor,
           layer as FormBasedLayer
-        ) as LensApiFieldOrFormulaMetricOperation),
+        ) as LensApiAllMetricOrFromulaOperations),
     tag_by: isEsqlTableTypeDataset(dataset)
       ? getValueApiColumn(visualization.tagAccessor, layer as TextBasedLayer)
       : (operationFromColumn(
@@ -138,7 +138,7 @@ function reverseBuildVisualizationState(
 }
 
 function buildFormBasedLayer(layer: TagcloudStateNoESQL): FormBasedPersistedState['layers'] {
-  const columns = fromMetricAPItoLensState(layer.metric as LensApiFieldOrFormulaMetricOperation);
+  const columns = fromMetricAPItoLensState(layer.metric as LensApiAllMetricOrFromulaOperations);
 
   const layers: Record<string, PersistedIndexPatternLayer> = generateLayer(DEFAULT_LAYER_ID, layer);
   const defaultLayer = layers[DEFAULT_LAYER_ID];
