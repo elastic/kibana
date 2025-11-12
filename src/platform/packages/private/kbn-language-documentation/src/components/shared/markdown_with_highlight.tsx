@@ -8,6 +8,8 @@
  */
 
 import { getDefaultEuiMarkdownPlugins, EuiLink, EuiMarkdownFormat } from '@elastic/eui';
+import type { Plugin as MarkdownPlugin } from 'unified';
+import type { RemarkTokenizer } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
 /**
@@ -26,20 +28,15 @@ export const MarkdownWithHighlight = React.memo(
         exclude: ['tooltip', 'lineBreaks', 'linkValidator'],
       });
 
-      const parsingPluginList = [...parsingPlugins, highlightParsingPlugin];
-      const processingPluginList = [...processingPlugins];
-
       // Components overwrites
       if (openLinksInNewTab) {
-        (processingPluginList[1] as any)[1].components.a = (props: any) => (
-          <EuiLink {...props} target="_blank" />
-        );
+        processingPlugins[1][1].components.a = (props) => <EuiLink {...props} target="_blank" />;
       }
-      (processingPluginList[1] as any)[1].components.highlightPlugin = highlightProcessorPlugin;
+      processingPlugins[1][1].components.highlightPlugin = highlightProcessorPlugin;
 
       return {
-        modifiedParsingPlugins: parsingPluginList,
-        modifiedProcessingPlugins: processingPluginList,
+        modifiedParsingPlugins: [...parsingPlugins, highlightParsingPlugin],
+        modifiedProcessingPlugins: processingPlugins,
       };
     }, [openLinksInNewTab]);
 
@@ -56,14 +53,16 @@ export const MarkdownWithHighlight = React.memo(
   }
 );
 
-const highlightProcessorPlugin = ({ content, ...props }: any) => <mark {...props}>{content}</mark>;
+const highlightProcessorPlugin = ({ content, ...props }: { content: string }) => (
+  <mark {...props}>{content}</mark>
+);
 
-const highlightParsingPlugin = function (this: any) {
+const highlightParsingPlugin: MarkdownPlugin = function (this) {
   const Parser = this.Parser;
   const tokenizers = Parser.prototype.inlineTokenizers;
   const methods = Parser.prototype.inlineMethods;
 
-  function tokenizeHighlight(eat: any, value: string, silent: boolean) {
+  const tokenizeHighlight: RemarkTokenizer = function (eat, value, silent) {
     const match = value.match(/^==(.*?)==/);
     if (!match) return false;
 
@@ -74,7 +73,7 @@ const highlightParsingPlugin = function (this: any) {
       type: 'highlightPlugin',
       content,
     });
-  }
+  };
 
   tokenizeHighlight.locator = (value: string, fromIndex: number) => {
     return value.indexOf('==', fromIndex);
