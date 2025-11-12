@@ -30,13 +30,15 @@ import { getValueApiColumn, getValueColumn } from '../columns/esql_column';
 import type {
   LensApiState,
   LegacyMetricState,
-  LegacyMetricStateESQL,
-  LegacyMetricStateNoESQL,
+  LensApiFieldOrFormulaMetricOperation,
 } from '../../schema';
 import { fromMetricAPItoLensState } from '../columns/metric';
-import type { LensApiFieldOrFormulaMetricOperation } from '../../schema/metric_ops';
 import type { DeepMutable, DeepPartial } from '../utils';
 import { generateLayer } from '../utils';
+import type {
+  LegacyMetricStateESQL,
+  LegacyMetricStateNoESQL,
+} from '../../schema/charts/legacy_metric';
 import { getSharedChartLensStateToAPI, getSharedChartAPIToLensState } from './utils';
 import { fromColorByValueAPIToLensState, fromColorByValueLensStateToAPI } from '../coloring';
 import { isEsqlTableTypeDataset } from '../../utils';

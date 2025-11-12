@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { GaugeState } from '../../schema';
+import type { GaugeState } from '../../schema/charts/gauge';
 
 /**
  * Basic gauge chart with ad hoc dataView

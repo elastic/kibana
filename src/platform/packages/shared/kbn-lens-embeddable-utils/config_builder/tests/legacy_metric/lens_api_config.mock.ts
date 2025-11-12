@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { LegacyMetricState } from '../../schema';
+import type { LegacyMetricState } from '../../schema/charts/legacy_metric';
 
 /**
  * Basic legacy metric chart with ad hoc dataView

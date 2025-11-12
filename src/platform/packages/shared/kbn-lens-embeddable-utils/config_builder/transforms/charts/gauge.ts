@@ -15,7 +15,7 @@ import type {
 } from '@kbn/lens-common';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/types';
-import type { GaugeState, LensApiState, GaugeStateESQL, GaugeStateNoESQL } from '../../schema';
+import type { GaugeState, LensApiState, LensApiFieldOrFormulaMetricOperation } from '../../schema';
 import { fromColorByValueAPIToLensState, fromColorByValueLensStateToAPI } from '../coloring';
 import type { LensAttributes } from '../../types';
 import { DEFAULT_LAYER_ID } from '../../types';
@@ -35,11 +35,9 @@ import {
   getSharedChartAPIToLensState,
   getSharedChartLensStateToAPI,
 } from './utils';
+import type { GaugeStateESQL, GaugeStateNoESQL } from '../../schema/charts/gauge';
 import { fromMetricAPItoLensState } from '../columns/metric';
-import type {
-  LensApiAllMetricOperations,
-  LensApiFieldOrFormulaMetricOperation,
-} from '../../schema/metric_ops';
+import type { LensApiAllMetricOperations } from '../../schema/metric_ops';
 import { getValueApiColumn, getValueColumn } from '../columns/esql_column';
 import { isEsqlTableTypeDataset } from '../../utils';
 
