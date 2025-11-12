@@ -9,6 +9,18 @@
 
 // Import SUB_ACTION enums from all stack connectors
 import {
+  CONNECTOR_ID as D3_SECURITY_CONNECTOR_ID,
+  SUB_ACTION as D3SECURITY_SUB_ACTION,
+} from '@kbn/connector-schemas/d3security/constants';
+import {
+  CONNECTOR_ID as JIRA_SERVICE_MANAGEMENT_CONNECTOR_TYPE_ID,
+  SUB_ACTION as JiraServiceManagementSubActions,
+} from '@kbn/connector-schemas/jira-service-management/constants';
+import {
+  CONNECTOR_ID as OpsgenieConnectorTypeId,
+  SUB_ACTION as OpsgenieSubActions,
+} from '@kbn/connector-schemas/opsgenie/constants';
+import {
   BEDROCK_CONNECTOR_ID,
   SUB_ACTION as BEDROCK_SUB_ACTION,
 } from '@kbn/stack-connectors-plugin/common/bedrock/constants';
@@ -16,10 +28,6 @@ import {
   CROWDSTRIKE_CONNECTOR_ID,
   SUB_ACTION as CROWDSTRIKE_SUB_ACTION,
 } from '@kbn/stack-connectors-plugin/common/crowdstrike/constants';
-import {
-  D3_SECURITY_CONNECTOR_ID,
-  SUB_ACTION as D3SECURITY_SUB_ACTION,
-} from '@kbn/stack-connectors-plugin/common/d3security/constants';
 import {
   GEMINI_CONNECTOR_ID,
   SUB_ACTION as GEMINI_SUB_ACTION,
@@ -29,10 +37,6 @@ import {
   SUB_ACTION as INFERENCE_SUB_ACTION,
 } from '@kbn/stack-connectors-plugin/common/inference/constants';
 import {
-  JIRA_SERVICE_MANAGEMENT_CONNECTOR_TYPE_ID,
-  JiraServiceManagementSubActions,
-} from '@kbn/stack-connectors-plugin/common/jira-service-management/constants';
-import {
   MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID,
   MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION,
 } from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/constants';
@@ -40,10 +44,6 @@ import {
   OPENAI_CONNECTOR_ID,
   SUB_ACTION as OPENAI_SUB_ACTION,
 } from '@kbn/stack-connectors-plugin/common/openai/constants';
-import {
-  OpsgenieConnectorTypeId,
-  OpsgenieSubActions,
-} from '@kbn/stack-connectors-plugin/common/opsgenie';
 import {
   SENTINELONE_CONNECTOR_ID,
   SUB_ACTION as SENTINELONE_SUB_ACTION,

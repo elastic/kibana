@@ -179,18 +179,28 @@ export const MetricsExperienceGrid = ({
             direction="row"
           >
             <EuiFlexItem grow={false}>
-              {isFieldsLoading ? (
-                <EuiLoadingSpinner size="s" />
-              ) : (
-                <EuiText size="s">
-                  <strong>
-                    {i18n.translate('metricsExperience.grid.metricsCount.label', {
-                      defaultMessage: '{count} {count, plural, one {metric} other {metrics}}',
-                      values: { count: filteredFieldsCount },
-                    })}
-                  </strong>
-                </EuiText>
-              )}
+              <EuiFlexGroup
+                justifyContent="spaceBetween"
+                alignItems="center"
+                responsive={false}
+                gutterSize="s"
+              >
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s">
+                    <strong>
+                      {i18n.translate('metricsExperience.grid.metricsCount.label', {
+                        defaultMessage: '{count} {count, plural, one {metric} other {metrics}}',
+                        values: { count: filteredFieldsCount },
+                      })}
+                    </strong>
+                  </EuiText>
+                </EuiFlexItem>
+                {isFieldsLoading && (
+                  <EuiFlexItem grow={false}>
+                    <EuiLoadingSpinner size="s" />
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiBetaBadge

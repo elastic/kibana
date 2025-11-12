@@ -723,6 +723,14 @@
       ],
       "enabled": true,
       "minimumReleaseAge": "14 days"
+    },{
+      "groupName": "virtualized",
+      "matchDepNames": ["@tanstack/react-table", "@tanstack/react-virtual"],
+      "reviewers": ["team:appex-sharedux"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:SharedUX", "release_note:skip", "backport:all-open"],
+      "enabled": true,
+      "minimumReleaseAge": "14 days"
     },
     {
       "groupName": "@reduxjs/toolkit",
@@ -2812,7 +2820,6 @@
         "pdfmake"
       ],
       "reviewers": [
-        "team:kibana-presentation",
         "team:response-ops"
       ],
       "matchBaseBranches": [

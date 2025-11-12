@@ -10,19 +10,19 @@ import { screen, render, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import JiraServiceManagementParamFields from './params';
 import { ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public';
-import type { JiraServiceManagementActionParams } from '../../../server/connector_types';
-import { JiraServiceManagementSubActions } from '../../../common/jira-service-management/constants';
+import type { Params as JiraServiceManagementActionParams } from '@kbn/connector-schemas/jira-service-management';
+import { SUB_ACTION } from '@kbn/connector-schemas/jira-service-management/constants';
 import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 describe('JiraServiceManagementParamFields', () => {
   const editAction = jest.fn();
   const createAlertActionParams: JiraServiceManagementActionParams = {
-    subAction: JiraServiceManagementSubActions.CreateAlert,
+    subAction: SUB_ACTION.CreateAlert,
     subActionParams: { message: 'hello', alias: '123' },
   };
 
   const closeAlertActionParams: JiraServiceManagementActionParams = {
-    subAction: JiraServiceManagementSubActions.CloseAlert,
+    subAction: SUB_ACTION.CloseAlert,
     subActionParams: { alias: '456' },
   };
 

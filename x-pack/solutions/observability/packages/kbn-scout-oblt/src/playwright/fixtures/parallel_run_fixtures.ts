@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { spaceTest as spaceBase } from '@kbn/scout';
+import { spaceTest as spaceBase, mergeTests } from '@kbn/scout';
 import type { ApiServicesFixture, KbnClient } from '@kbn/scout';
 import { extendPageObjects } from '../page_objects';
+import { profilingSetupFixture } from './worker';
 
 import type {
   ObltApiServicesFixture,
@@ -15,10 +16,7 @@ import type {
   ObltParallelWorkerFixtures,
 } from './types';
 
-/**
- * Should be used test spec files, running in parallel in isolated spaces against the same Kibana instance.
- */
-export const spaceTest = spaceBase.extend<ObltParallelTestFixtures, ObltParallelWorkerFixtures>({
+const baseFixture = spaceBase.extend<ObltParallelTestFixtures, ObltParallelWorkerFixtures>({
   pageObjects: async (
     {
       pageObjects,
@@ -46,3 +44,8 @@ export const spaceTest = spaceBase.extend<ObltParallelTestFixtures, ObltParallel
     { scope: 'worker' },
   ],
 });
+
+/**
+ * Should be used test spec files, running in parallel in isolated spaces against the same Kibana instance.
+ */
+export const spaceTest = mergeTests(baseFixture, profilingSetupFixture);

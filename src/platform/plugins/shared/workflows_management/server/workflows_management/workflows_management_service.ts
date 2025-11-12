@@ -23,6 +23,7 @@ import type {
   Logger,
   SecurityServiceStart,
 } from '@kbn/core/server';
+import { isResponseError } from '@kbn/es-errors';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
   ConnectorTypeInfo,
@@ -70,7 +71,7 @@ import {
   WorkflowValidationError,
 } from '../../common/lib/errors';
 import { validateStepNameUniqueness } from '../../common/lib/validate_step_names';
-import { parseWorkflowYamlToJSON, stringifyWorkflowDefinition } from '../../common/lib/yaml_utils';
+import { parseWorkflowYamlToJSON, stringifyWorkflowDefinition } from '../../common/lib/yaml';
 import { getWorkflowZodSchema, getWorkflowZodSchemaLoose } from '../../common/schema';
 import { getAuthenticatedUser } from '../lib/get_user';
 import { hasScheduledTriggers } from '../lib/schedule_utils';
@@ -1006,7 +1007,10 @@ export class WorkflowsService {
 
       return result;
     } catch (error) {
-      this.logger.error(`Failed to fetch recent executions for workflows: ${error}`);
+      // Index not found is expected when no workflows have been executed yet
+      if (!isResponseError(error) || error.body?.error?.type !== 'index_not_found_exception') {
+        this.logger.error(`Failed to fetch recent executions for workflows: ${error}`);
+      }
       return {};
     }
   }

@@ -45,6 +45,9 @@ If a setting is applicable to {{ech}} environments, its name is followed by this
 `csp.img_src`
 :   Add sources for the [Content Security Policy `img-src` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/img-src).
 
+`csp.object_src` {applies_to}`stack: ga 9.3`
+:   Add sources for the [Content Security Policy `object-src` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/object-src).
+
 `csp.frame_ancestors`
 :   Add sources for the [Content Security Policy `frame-ancestors` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/frame-ancestors).
 
@@ -58,6 +61,11 @@ If a setting is applicable to {{ech}} environments, its name is followed by this
 
 `csp.report_only.object_src`
 :   Add sources for the [Content Security Policy `object-src` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy/object-src) in reporting mode.
+
+    :::{note}
+    :applies_to: stack: deprecated 9.3
+    This setting is deprecated in favor of `csp.object_src`.
+    :::
 
 `csp.report_uri`
 :   Add sources for the [Content Security Policy `report-uri` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/report-uri).
