@@ -10,60 +10,86 @@
 import { useState, useCallback } from 'react';
 import type { FieldDefinition } from './form';
 
-interface FormState {
-  values: Record<string, unknown>;
+interface FormState<T> {
+  values: T;
   errors: Record<string, string | string[]>;
   touched: Record<string, boolean>;
 }
 
-const getNestedValue = (obj: any, path: string): any => {
+/**
+ * Type utility that extracts the type of a nested property using dot-notation path.
+ *
+ * This recursively traverses the type structure to infer the correct type at any depth:
+ * - For path "name": returns T['name']
+ * - For path "authType.username": returns T['authType']['username']
+ * - For path "config.nested.deep.value": recursively extracts the type at each level
+ *
+ * @example
+ * type Form = { user: { profile: { name: string } } }
+ * PathValue<Form, "user.profile.name"> // → string
+ * PathValue<Form, "user.profile"> // → { name: string }
+ * PathValue<Form, "user"> // → { profile: { name: string } }
+ */
+type PathValue<T, P extends string> = P extends `${infer K}.${infer Rest}`
+  ? K extends keyof T
+    ? T[K] extends object
+      ? PathValue<T[K], Rest>
+      : unknown
+    : unknown
+  : P extends keyof T
+  ? T[P]
+  : unknown;
+
+const getNestedValue = <T, P extends string>(obj: T, path: P): PathValue<T, P> => {
   const keys = path.split('.');
-  let current = obj;
+  let current: unknown = obj;
   for (const key of keys) {
-    if (current === undefined || current === null) return undefined;
-    current = current[key];
+    if (current === undefined || current === null) return undefined as PathValue<T, P>;
+    current = (current as Record<string, unknown>)[key];
   }
-  return current;
+  return current as PathValue<T, P>;
 };
 
-const setNestedValue = (obj: any, path: string, value: any): any => {
+const setNestedValue = <T, P extends string>(obj: T, path: P, value: PathValue<T, P>): T => {
   const keys = path.split('.');
-  const result = { ...obj };
-  let current = result;
+  const result = { ...obj } as T;
+  let current: Record<string, unknown> = result as Record<string, unknown>;
 
   for (let i = 0; i < keys.length - 1; i++) {
     const key = keys[i];
-    if (current[key] === undefined || current[key] === null || typeof current[key] !== 'object') {
+    const currentValue = current[key];
+    if (currentValue === undefined || currentValue === null || typeof currentValue !== 'object') {
       current[key] = {};
     } else {
-      current[key] = { ...current[key] };
+      current[key] = { ...(currentValue as Record<string, unknown>) };
     }
-    current = current[key];
+    current = current[key] as Record<string, unknown>;
   }
 
   current[keys[keys.length - 1]] = value;
   return result;
 };
 
-export const useFormState = (fields: FieldDefinition[]) => {
+export const useFormState = <T>(fields: FieldDefinition[]) => {
   const initialValues = fields.reduce((acc, field) => {
-    acc[field.id] = field.initialValue ?? field.value ?? '';
+    const key = field.id as keyof T;
+    (acc as T)[key] = (field.initialValue ?? field.value ?? '') as T[keyof T];
     return acc;
-  }, {} as Record<string, unknown>);
+  }, {} as T);
 
-  const [formState, setFormState] = useState<FormState>({
+  const [formState, setFormState] = useState<FormState<T>>({
     values: initialValues,
     errors: {},
     touched: {},
   });
 
   const handleChange = useCallback((fieldId: string, value: unknown) => {
-    setFormState((prev) => {
+    setFormState((prev: FormState<T>) => {
       const isNestedPath = fieldId.includes('.');
 
-      let newValues;
+      let newValues: T;
       if (isNestedPath) {
-        newValues = setNestedValue(prev.values, fieldId, value);
+        newValues = setNestedValue(prev.values, fieldId, value as PathValue<T, typeof fieldId>);
       } else {
         newValues = { ...prev.values, [fieldId]: value };
       }
@@ -87,7 +113,7 @@ export const useFormState = (fields: FieldDefinition[]) => {
 
   const handleBlur = useCallback(
     (fieldId: string) => {
-      setFormState((prev) => ({
+      setFormState((prev: FormState<T>) => ({
         ...prev,
         touched: { ...prev.touched, [fieldId]: true },
       }));
@@ -97,10 +123,10 @@ export const useFormState = (fields: FieldDefinition[]) => {
       if (field) {
         const fieldValue = fieldId.includes('.')
           ? getNestedValue(formState.values, fieldId)
-          : formState.values[fieldId];
+          : formState.values[fieldId as unknown as keyof T];
         const validationResult = field.validate(fieldValue);
         if (validationResult) {
-          setFormState((prev) => ({
+          setFormState((prev: FormState<T>) => ({
             ...prev,
             errors: { ...prev.errors, [fieldId]: validationResult },
           }));
@@ -111,7 +137,7 @@ export const useFormState = (fields: FieldDefinition[]) => {
   );
 
   const setFieldError = useCallback((fieldId: string, error: string | string[] | undefined) => {
-    setFormState((prev) => {
+    setFormState((prev: FormState<T>) => {
       const newErrors = { ...prev.errors };
       if (error) {
         newErrors[fieldId] = error;
@@ -126,18 +152,18 @@ export const useFormState = (fields: FieldDefinition[]) => {
   }, []);
 
   const setFieldTouched = useCallback((fieldId: string, touched: boolean = true) => {
-    setFormState((prev) => ({
+    setFormState((prev: FormState<T>) => ({
       ...prev,
       touched: { ...prev.touched, [fieldId]: touched },
     }));
   }, []);
 
   const getFieldValue = useCallback(
-    (fieldId: string): unknown => {
+    <P extends string>(fieldId: P): PathValue<T, P> | T[keyof T] => {
       if (fieldId.includes('.')) {
         return getNestedValue(formState.values, fieldId);
       }
-      return formState.values[fieldId];
+      return formState.values[fieldId as unknown as keyof T];
     },
     [formState.values]
   );
@@ -159,7 +185,7 @@ export const useFormState = (fields: FieldDefinition[]) => {
     []
   );
 
-  const handleSubmit = (onSuccess: ({ data }: { data: Record<string, unknown> }) => void) => {
+  const handleSubmit = (onSuccess: ({ data }: { data: T }) => void) => {
     return (e: React.FormEvent) => {
       e.preventDefault();
 
@@ -168,17 +194,18 @@ export const useFormState = (fields: FieldDefinition[]) => {
         return acc;
       }, {} as Record<string, boolean>);
 
-      setFormState((prev) => ({ ...prev, touched: allTouched }));
+      setFormState((prev: FormState<T>) => ({ ...prev, touched: allTouched }));
 
       const errors: Record<string, string | string[]> = {};
       let hasErrors = false;
 
-      const cleanedValues: Record<string, unknown> = {};
+      const cleanedValues = {} as Partial<T>;
 
       fields.forEach((field) => {
-        const value = formState.values[field.id];
+        const fieldKey = field.id as keyof T;
+        const value = formState.values[fieldKey];
         const cleanedValue = typeof field.cleanup === 'function' ? field.cleanup(value) : value;
-        cleanedValues[field.id] = cleanedValue;
+        cleanedValues[fieldKey] = cleanedValue as T[keyof T];
 
         const validationResult = field.validate(cleanedValue);
         if (validationResult) {
@@ -188,12 +215,12 @@ export const useFormState = (fields: FieldDefinition[]) => {
       });
 
       if (hasErrors) {
-        setFormState((prev) => ({
+        setFormState((prev: FormState<T>) => ({
           ...prev,
           errors,
         }));
       } else {
-        onSuccess({ data: cleanedValues });
+        onSuccess({ data: cleanedValues as T });
       }
     };
   };

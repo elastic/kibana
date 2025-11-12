@@ -52,11 +52,11 @@ const getStaticProps = ({ schema }: { schema: z.ZodTypeAny }) => {
   return mergedOptions;
 };
 
-const getFieldsFromSchema = (schema: z.ZodObject<any>) => {
+const getFieldsFromSchema = <T extends z.ZodRawShape>(schema: z.ZodObject<T>) => {
   const fields: FieldDefinition[] = [];
 
   Object.entries(schema.shape).forEach(([key, subSchema]) => {
-    const schemaAny = subSchema as z.ZodObject<any>;
+    const schemaAny = subSchema as z.ZodTypeAny;
 
     const uiMeta = getUIMeta(schemaAny);
     if (!uiMeta || !uiMeta.widget) {
@@ -107,15 +107,18 @@ const getFieldsFromSchema = (schema: z.ZodObject<any>) => {
   return fields;
 };
 
-interface FormProps {
-  connectorSchema: z.ZodObject<any>;
-  onSubmit?: ({ data }: { data: Record<string, unknown> }) => void;
+interface FormProps<TSchema extends z.ZodObject<z.ZodRawShape>> {
+  connectorSchema: TSchema;
+  onSubmit?: ({ data }: { data: z.infer<TSchema> }) => void;
 }
-export const Form = ({ connectorSchema, onSubmit }: FormProps) => {
+export const Form = <TSchema extends z.ZodObject<z.ZodRawShape>>({
+  connectorSchema,
+  onSubmit,
+}: FormProps<TSchema>) => {
   const fields = useMemo(() => getFieldsFromSchema(connectorSchema), [connectorSchema]);
-  const form = useFormState(fields);
+  const form = useFormState<z.infer<TSchema>>(fields);
 
-  const _onSubmit = ({ data }: { data: Record<string, unknown> }) => {
+  const _onSubmit = ({ data }: { data: z.infer<TSchema> }) => {
     onSubmit?.({ data });
     form.reset();
   };
