@@ -1592,6 +1592,7 @@
     "@kbn/evals": "link:x-pack/platform/packages/shared/kbn-evals",
     "@kbn/evals-suite-obs-ai-assistant": "link:x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant",
     "@kbn/evals-suite-onechat": "link:x-pack/platform/packages/shared/onechat/kbn-evals-suite-onechat",
+    "@kbn/evals-suite-siem-entity-analytics": "link:x-pack/solutions/security/packages/kbn-evals-suite-siem-entity-analytics",
     "@kbn/evals-suite-streams": "link:x-pack/platform/packages/shared/kbn-evals-suite-streams",
     "@kbn/expect": "link:src/platform/packages/shared/kbn-expect",
     "@kbn/extract-plugin-translations": "link:packages/kbn-extract-plugin-translations",
