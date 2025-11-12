@@ -20,20 +20,23 @@ import type { ESQLAstAllCommands } from '@kbn/esql-ast/src/types';
 import { QueryColumns } from '../shared/resources_helpers';
 import type { ESQLCallbacks } from '../shared/types';
 import { retrievePolicies, retrieveSources } from './resources';
-import type { ReferenceMaps, ValidationResult } from './types';
+import type { ReferenceMaps, ValidationOptions, ValidationResult } from './types';
 import { getSubqueriesToValidate } from './helpers';
 
 /**
  * ES|QL validation public API
- * It takes a query string and returns a list of messages (errors and warnings) after validate
- * The astProvider is optional, but if not provided the default one from '@kbn/esql-validation-autocomplete' will be used.
- * This is useful for async loading the ES|QL parser and reduce the bundle size, or to swap grammar version.
- * As for the callbacks, while optional, the validation function will selectively ignore some errors types based on each callback missing.
+ *
+ * @param queryString - The ES|QL query string to validate
+ * @param callbacks - Optional callbacks for resource retrieval. Missing callbacks will skip related validations.
+ * @param options - Validation options
+ * @param options.forceRefresh - Forces cache invalidation for column metadata. Has no effect if 'getColumnsFor' callback is not provided.
+ *
+ * @returns Promise resolving to validation result with errors and warnings
  */
 export async function validateQuery(
   queryString: string,
   callbacks?: ESQLCallbacks,
-  options?: { forceRefresh?: boolean }
+  options?: ValidationOptions
 ): Promise<ValidationResult> {
   return validateAst(queryString, callbacks, options);
 }
@@ -54,7 +57,7 @@ function shouldValidateCallback<K extends keyof ESQLCallbacks>(
 async function validateAst(
   queryString: string,
   callbacks?: ESQLCallbacks,
-  options?: { forceRefresh?: boolean }
+  options?: ValidationOptions
 ): Promise<ValidationResult> {
   const messages: ESQLMessage[] = [];
 

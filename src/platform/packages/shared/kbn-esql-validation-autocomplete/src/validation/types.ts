@@ -27,5 +27,11 @@ export interface ValidationResult {
 }
 
 export interface ValidationOptions {
-  ignoreOnMissingCallbacks?: boolean;
+  /**
+   * Forces cache invalidation for column metadata.
+   * Only effective when 'getColumnsFor' callback is provided in ESQLCallbacks.
+   * Use when schema changes have occurred (e.g., new fields added to lookup indices).
+   * @default false
+   */
+  forceRefresh?: boolean;
 }
