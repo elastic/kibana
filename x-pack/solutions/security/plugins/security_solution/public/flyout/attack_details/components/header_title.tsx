@@ -1,0 +1,27 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { memo } from 'react';
+import { FlyoutTitle } from '../../shared/components/flyout_title';
+import { useAttackDetailsContext } from '../context';
+
+export const HEADER_TITLE_TEST_ID = 'attack-details-flyout-header-title';
+
+/**
+ * Header data for the Attack details flyout
+ */
+export const HeaderTitle = memo(() => {
+  const { dataAttackDetails } = useAttackDetailsContext();
+  const { title } = dataAttackDetails;
+  return (
+    <>
+      <FlyoutTitle data-test-subj={HEADER_TITLE_TEST_ID} title={title} iconType={'warning'} />
+    </>
+  );
+});
+
+HeaderTitle.displayName = 'HeaderTitle';
