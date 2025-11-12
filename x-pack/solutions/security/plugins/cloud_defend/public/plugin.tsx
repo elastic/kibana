@@ -9,7 +9,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import React, { lazy, Suspense } from 'react';
 import type { CloudDefendRouterProps } from './application/router';
-import {
+import type {
   CloudDefendPluginSetup,
   CloudDefendPluginStart,
   CloudDefendPluginStartDeps,

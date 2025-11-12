@@ -11,7 +11,7 @@ import userEvent from '@testing-library/user-event';
 import { showEuiComboBoxOptions } from '@elastic/eui/lib/test/rtl';
 import { TestProvider } from '../../test/test_provider';
 import { ControlGeneralViewResponse } from '.';
-import { Response, Selector } from '../../../common';
+import type { Response, Selector } from '../../../common';
 import * as i18n from '../control_general_view/translations';
 
 describe('<ControlGeneralViewSelector />', () => {
