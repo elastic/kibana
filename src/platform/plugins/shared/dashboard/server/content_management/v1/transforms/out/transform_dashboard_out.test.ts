@@ -62,6 +62,7 @@ describe('transformDashboardOut', () => {
             grow: DEFAULT_CONTROL_GROW,
             id: 'foo',
             order: 0,
+            // @ts-expect-error Test type
             type: 'type1',
             width: DEFAULT_CONTROL_WIDTH,
           },
@@ -156,6 +157,7 @@ describe('transformDashboardOut', () => {
             grow: false,
             width: 'small',
             order: 0,
+            // @ts-expect-error Test type
             type: 'type1',
           },
         ],

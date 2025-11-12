@@ -13,16 +13,13 @@ import { BehaviorSubject } from 'rxjs';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { act, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import type { OptionsListControlState } from '@kbn/controls-schemas';
 
-import type { DefaultDataControlState } from '../../../../../common';
-import type { OptionsListControlState } from '../../../../../common/options_list';
-import type { ControlGroupApi } from '../../../../control_group/types';
-import { getMockedControlGroupApi } from '../../../mocks/control_mocks';
 import type { CustomOptionsComponentProps } from '../../types';
 import { OptionsListEditorOptions } from './options_list_editor_options';
 
 describe('Options list sorting button', () => {
-  const getMockedState = <State extends DefaultDataControlState = DefaultDataControlState>(
+  const getMockedState = <State extends OptionsListControlState = OptionsListControlState>(
     overwrite?: Partial<OptionsListControlState>
   ): State => {
     return {
@@ -36,17 +33,13 @@ describe('Options list sorting button', () => {
   const mountComponent = ({
     initialState,
     field,
-    controlGroupApi = getMockedControlGroupApi(),
-  }: Pick<CustomOptionsComponentProps, 'initialState' | 'field'> & {
-    controlGroupApi?: ControlGroupApi;
-  }) => {
+  }: Pick<CustomOptionsComponentProps, 'initialState' | 'field'>) => {
     const component = render(
       <OptionsListEditorOptions
         initialState={initialState}
         field={field}
         updateState={updateState}
         setControlEditorValid={jest.fn()}
-        controlGroupApi={controlGroupApi}
       />
     );
     return component;
@@ -94,11 +87,9 @@ describe('Options list sorting button', () => {
   describe('custom search options', () => {
     test('do not show custom search options when `allowExpensiveQueries` is false', async () => {
       const allowExpensiveQueries$ = new BehaviorSubject<boolean>(false);
-      const controlGroupApi = getMockedControlGroupApi(undefined, { allowExpensiveQueries$ });
       const component = mountComponent({
         initialState: getMockedState(),
         field: { type: 'string' } as DataViewField,
-        controlGroupApi,
       });
       expect(
         component.queryByTestId('optionsListControl__searchOptionsRadioGroup')
@@ -165,14 +156,12 @@ describe('Options list sorting button', () => {
     describe('responds to field type changing', () => {
       test('reset back to initial state when valid', async () => {
         const initialState = getMockedState({ searchTechnique: 'exact' });
-        const controlGroupApi = getMockedControlGroupApi();
         const component = render(
           <OptionsListEditorOptions
             initialState={initialState}
             field={{ type: 'string' } as DataViewField}
             updateState={updateState}
             setControlEditorValid={jest.fn()}
-            controlGroupApi={controlGroupApi}
           />
         );
 
@@ -188,7 +177,6 @@ describe('Options list sorting button', () => {
             field={{ type: 'ip' } as DataViewField} // initial search technique IS valid
             updateState={jest.fn()}
             setControlEditorValid={jest.fn()}
-            controlGroupApi={controlGroupApi}
           />
         );
 
@@ -200,14 +188,12 @@ describe('Options list sorting button', () => {
 
       test('if the current selection is valid, send that to the parent editor state', async () => {
         const initialState = getMockedState();
-        const controlGroupApi = getMockedControlGroupApi();
         const component = render(
           <OptionsListEditorOptions
             initialState={initialState}
             field={{ type: 'string' } as DataViewField}
             updateState={updateState}
             setControlEditorValid={jest.fn()}
-            controlGroupApi={controlGroupApi}
           />
         );
 
@@ -231,7 +217,6 @@ describe('Options list sorting button', () => {
             field={{ type: 'number' } as DataViewField} // current selected search technique IS valid, initial state is not
             updateState={jest.fn()}
             setControlEditorValid={jest.fn()}
-            controlGroupApi={controlGroupApi}
           />
         );
 
@@ -240,14 +225,12 @@ describe('Options list sorting button', () => {
 
       test('if neither the initial or current search technique is valid, revert to the default', async () => {
         const initialState = getMockedState({ searchTechnique: 'wildcard' });
-        const controlGroupApi = getMockedControlGroupApi();
         const component = render(
           <OptionsListEditorOptions
             initialState={initialState}
             field={{ type: 'string' } as DataViewField}
             updateState={updateState}
             setControlEditorValid={jest.fn()}
-            controlGroupApi={controlGroupApi}
           />
         );
 
@@ -263,7 +246,6 @@ describe('Options list sorting button', () => {
             field={{ type: 'number' } as DataViewField} // neither initial nor current search technique is valid
             updateState={jest.fn()}
             setControlEditorValid={jest.fn()}
-            controlGroupApi={controlGroupApi}
           />
         );
 

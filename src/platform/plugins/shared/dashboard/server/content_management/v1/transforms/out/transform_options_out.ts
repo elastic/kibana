@@ -13,7 +13,7 @@ const OPTION_KEYS = ['hidePanelTitles', 'useMargins', 'syncColors', 'syncCursor'
 
 export function transformOptionsOut(
   optionsJSON: string,
-  controlGroupShowApplyButtonSetting: boolean | undefined
+  controlGroupShowApplyButtonSetting?: boolean
 ): Required<DashboardState>['options'] {
   const options = JSON.parse(optionsJSON);
   const knownOptions: { [key: string]: unknown } = {};

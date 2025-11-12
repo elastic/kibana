@@ -9,10 +9,7 @@
 
 import { waitFor } from '@testing-library/react';
 import { EsqlControlType, type ESQLControlState } from '@kbn/esql-types';
-import { getMockedControlGroupApi } from '../mocks/control_mocks';
-import type { ControlFetchContext } from '../../control_group/control_fetch';
 import { initializeESQLControlSelections } from './esql_control_selections';
-import type { BehaviorSubject } from 'rxjs';
 
 const MOCK_VALUES_FROM_QUERY = ['option1', 'option2', 'option3', 'option4', 'option5'];
 
@@ -32,8 +29,6 @@ describe('initializeESQLControlSelections', () => {
   const uuid = 'myESQLControl';
 
   const dashboardApi = {};
-  const controlGroupApi = getMockedControlGroupApi(dashboardApi);
-  const controlFetch$ = controlGroupApi.controlFetch$(uuid) as BehaviorSubject<ControlFetchContext>;
 
   describe('values from query', () => {
     test('should load availableOptions but not serialize them', async () => {
@@ -47,8 +42,12 @@ describe('initializeESQLControlSelections', () => {
       } as ESQLControlState;
 
       let dataHasLoaded = false;
-      const selections = initializeESQLControlSelections(initialState, controlFetch$, jest.fn());
-      controlFetch$.next({});
+      const selections = initializeESQLControlSelections(
+        uuid,
+        dashboardApi,
+        initialState,
+        jest.fn()
+      );
 
       selections.internalApi.availableOptions$.subscribe((result) => {
         if (result?.length === 5) dataHasLoaded = true;
@@ -86,8 +85,12 @@ describe('initializeESQLControlSelections', () => {
         controlType: EsqlControlType.STATIC_VALUES,
       } as ESQLControlState;
 
-      const selections = initializeESQLControlSelections(initialState, controlFetch$, jest.fn());
-      controlFetch$.next({});
+      const selections = initializeESQLControlSelections(
+        uuid,
+        dashboardApi,
+        initialState,
+        jest.fn()
+      );
 
       await waitFor(() => {
         const availableOptions = selections.internalApi.availableOptions$.getValue();
@@ -128,8 +131,12 @@ describe('initializeESQLControlSelections', () => {
         esqlQuery: '',
       } as ESQLControlState;
 
-      const selections = initializeESQLControlSelections(initialState, controlFetch$, jest.fn());
-
+      const selections = initializeESQLControlSelections(
+        uuid,
+        dashboardApi,
+        initialState,
+        jest.fn()
+      );
       await waitFor(() => {
         const variable = selections.api.esqlVariable$.getValue();
         expect(variable).toEqual({
@@ -152,8 +159,12 @@ describe('initializeESQLControlSelections', () => {
         esqlQuery: '',
       } as ESQLControlState;
 
-      const selections = initializeESQLControlSelections(initialState, controlFetch$, jest.fn());
-
+      const selections = initializeESQLControlSelections(
+        uuid,
+        dashboardApi,
+        initialState,
+        jest.fn()
+      );
       await waitFor(() => {
         const variable = selections.api.esqlVariable$.getValue();
         expect(variable).toEqual({

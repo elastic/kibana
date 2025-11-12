@@ -18,12 +18,12 @@ import { useEffect, useMemo, useState } from 'react';
 import type { Observable } from 'rxjs';
 import { of } from 'rxjs';
 import useMount from 'react-use/lib/useMount';
-import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
-import type { ControlPanelsState } from '@kbn/controls-plugin/public';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import { cloneDeep } from 'lodash';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import useObservable from 'react-use/lib/useObservable';
 import useLatest from 'react-use/lib/useLatest';
+import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { UnifiedHistogramChartProps } from '../components/chart/chart';
 import type {
   UnifiedHistogramExternalVisContextStatus,
@@ -82,7 +82,7 @@ export type UseUnifiedHistogramProps = Omit<UnifiedHistogramStateOptions, 'servi
   /**
    * The controls state to use for the chart
    */
-  controlsState?: ControlPanelsState<ESQLControlState>;
+  controlsState?: ControlPanelsState;
   /**
    * The external custom Lens vis
    */

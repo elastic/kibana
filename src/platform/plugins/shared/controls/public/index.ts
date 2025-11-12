@@ -15,7 +15,7 @@ export type { DataControlApi } from './controls/data_controls/types';
 export type { OptionsListControlApi } from './controls/data_controls/options_list_control/types';
 export type { RangeSliderControlApi } from './controls/data_controls/range_slider/types';
 export type { ESQLControlApi } from './controls/esql_control/types';
-export type { TimesliderControlApi } from './controls/timeslider_control/types';
+export type { TimeSliderControlApi } from './controls/timeslider_control/types';
 
 export function plugin() {
   return new ControlsPlugin();

@@ -7,7 +7,6 @@
 
 import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
 import type { OptionsListControlApi } from '@kbn/controls-plugin/public/controls/data_controls/options_list_control/types';
-import type { DefaultControlApi } from '@kbn/controls-plugin/public/controls/types';
 import { ALERT_STATUS_ALL } from '../../../common/constants';
 import type { AlertStatus } from '../../../common/typings';
 
@@ -22,7 +21,7 @@ export function updateSelectedOptions(
   if (status === ALERT_STATUS_ALL) {
     const controlApi = alertFilterControlHandler?.children$.getValue()[
       controlIndex
-    ] as DefaultControlApi;
+    ] as OptionsListControlApi;
     controlApi?.clearSelections?.();
   } else {
     const controlApi = alertFilterControlHandler?.children$.getValue()[

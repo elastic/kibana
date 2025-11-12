@@ -42,7 +42,6 @@
     "@kbn/std",
     "@kbn/test-subj-selector",
     "@kbn/rison",
-    "@kbn/controls-plugin",
     "@kbn/field-formats-plugin",
     "@kbn/axe-config",
     "@kbn/data-view-field-editor-plugin",

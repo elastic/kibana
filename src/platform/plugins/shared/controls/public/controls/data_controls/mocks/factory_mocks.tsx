@@ -9,50 +9,40 @@
 
 import React from 'react';
 
-import type { DataControlFactory } from '../types';
+import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 
 export const getMockedSearchControlFactory = (api: any) =>
   ({
     type: 'search',
     getIconType: () => 'searchControlIcon',
     getDisplayName: () => 'Search',
-    isFieldCompatible: (field) =>
-      field.aggregatable &&
-      field.searchable &&
-      field.spec.type === 'string' &&
-      (field.spec.esTypes ?? []).includes('text'),
-    buildControl: jest.fn().mockReturnValue({
+    buildEmbeddable: jest.fn().mockReturnValue({
       api,
       Component: <>Search control component</>,
     }),
-  } as DataControlFactory);
+  } as EmbeddableFactory);
 
 export const getMockedOptionsListControlFactory = (api: any) =>
   ({
     type: 'optionsList',
     getIconType: () => 'optionsListIcon',
     getDisplayName: () => 'Options list',
-    isFieldCompatible: (field) =>
-      field.aggregatable &&
-      !field.spec.scripted &&
-      ['string', 'boolean', 'ip', 'date', 'number'].includes(field.type),
-    buildControl: jest.fn().mockReturnValue({
+    buildEmbeddable: jest.fn().mockReturnValue({
       api,
       Component: <>Options list component</>,
     }),
     CustomOptionsComponent: () => (
       <div data-test-subj="optionsListCustomSettings">Custom options list component</div>
     ),
-  } as DataControlFactory);
+  } as EmbeddableFactory);
 
 export const getMockedRangeSliderControlFactory = (api: any) =>
   ({
     type: 'rangeSlider',
     getIconType: () => 'rangeSliderIcon',
     getDisplayName: () => 'Range slider',
-    isFieldCompatible: (field) => field.aggregatable && field.type === 'number',
-    buildControl: jest.fn().mockReturnValue({
+    buildEmbeddable: jest.fn().mockReturnValue({
       api,
       Component: <>Range slider component</>,
     }),
-  } as DataControlFactory);
+  } as EmbeddableFactory);

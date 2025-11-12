@@ -11,14 +11,14 @@ import { BehaviorSubject } from 'rxjs';
 import type { CanAddNewPanel } from '@kbn/presentation-containers';
 import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import type { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
-import { type ESQLControlState, type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
-import type { ControlPanelsState } from '@kbn/controls-plugin/public';
-import { type ControlGroupRendererApi } from '@kbn/controls-plugin/public';
+import type { PublishesESQLVariables } from '@kbn/esql-types';
+import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import { addControlsFromSavedSession } from './add_controls_from_saved_session';
+import type { ControlGroupRendererApi, ControlPanelsState } from '@kbn/control-group-renderer';
 
 describe('addControlsFromSavedSession', () => {
-  let mockContainer: CanAddNewPanel & { controlGroupApi$?: unknown; esqlVariables$?: unknown };
+  let mockContainer: CanAddNewPanel & PublishesESQLVariables & { controlGroupApi$?: unknown };
   let mockControlGroupApi: jest.Mocked<ControlGroupRendererApi>;
   let mockControlGroupApi$: BehaviorSubject<jest.Mocked<ControlGroupRendererApi>>;
   let mockEsqlVariables$: BehaviorSubject<ESQLControlVariable[]>;
@@ -29,7 +29,6 @@ describe('addControlsFromSavedSession', () => {
       addNewPanel: jest.fn(),
     } as unknown as jest.Mocked<ControlGroupRendererApi>;
 
-    mockControlGroupApi$ = new BehaviorSubject(mockControlGroupApi);
     mockEsqlVariables$ = new BehaviorSubject<ESQLControlVariable[]>([
       { key: 'var1', value: 'value1', type: ESQLVariableType.VALUES },
       { key: 'var2', value: 'value2', type: ESQLVariableType.FIELDS },
@@ -56,19 +55,19 @@ describe('addControlsFromSavedSession', () => {
 
   describe('when controlGroupJson is empty or missing', () => {
     it('should return early when controlGroupJson is undefined', () => {
-      addControlsFromSavedSession(mockContainer, savedObject);
+      addControlsFromSavedSession(mockContainer, JSON.stringify(savedObject));
       expect(mockControlGroupApi.addNewPanel).not.toHaveBeenCalled();
     });
 
     it('should return early when controlGroupJson is empty string', () => {
       savedObject.attributes.controlGroupJson = '';
-      addControlsFromSavedSession(mockContainer, savedObject);
+      addControlsFromSavedSession(mockContainer, JSON.stringify(savedObject));
       expect(mockControlGroupApi.addNewPanel).not.toHaveBeenCalled();
     });
 
     it('should return early when controlGroupJson parses to empty object', () => {
       savedObject.attributes.controlGroupJson = '{}';
-      addControlsFromSavedSession(mockContainer, savedObject);
+      addControlsFromSavedSession(mockContainer, JSON.stringify(savedObject));
       expect(mockControlGroupApi.addNewPanel).not.toHaveBeenCalled();
     });
   });
@@ -84,7 +83,7 @@ describe('addControlsFromSavedSession', () => {
         panel1: { variableName: 'var1', type: 'control' },
       });
 
-      addControlsFromSavedSession(containerWithoutESQL, savedObject);
+      addControlsFromSavedSession(containerWithoutESQL, JSON.stringify(savedObject));
       expect(mockControlGroupApi.addNewPanel).not.toHaveBeenCalled();
     });
 
@@ -98,7 +97,7 @@ describe('addControlsFromSavedSession', () => {
         panel1: { variableName: 'var1', type: 'control' },
       });
 
-      addControlsFromSavedSession(containerWithoutControlGroup, savedObject);
+      addControlsFromSavedSession(containerWithoutControlGroup, JSON.stringify(savedObject));
       expect(mockControlGroupApi.addNewPanel).not.toHaveBeenCalled();
     });
   });
@@ -121,13 +120,13 @@ describe('addControlsFromSavedSession', () => {
           order: 2,
           variableName: 'nonExistentVar',
         },
-      } as unknown as ControlPanelsState<ESQLControlState>;
+      } as unknown as ControlPanelsState;
 
       savedObject.attributes.controlGroupJson = JSON.stringify(controlsState);
     });
 
     it('should add controls only for variables that dont exist in esqlVariables', () => {
-      addControlsFromSavedSession(mockContainer, savedObject);
+      addControlsFromSavedSession(mockContainer, JSON.stringify(savedObject));
 
       expect(mockControlGroupApi.addNewPanel).toHaveBeenCalledTimes(1);
 
@@ -144,7 +143,7 @@ describe('addControlsFromSavedSession', () => {
     });
 
     it('should not add controls for variables that do not exist in esqlVariables', () => {
-      addControlsFromSavedSession(mockContainer, savedObject);
+      addControlsFromSavedSession(mockContainer, JSON.stringify(savedObject));
 
       const addedPanels = mockControlGroupApi.addNewPanel.mock.calls.map(
         (call) => (call[0]?.serializedState?.rawState as { variableName?: string })?.variableName

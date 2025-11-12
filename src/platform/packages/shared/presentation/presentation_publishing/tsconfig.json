@@ -14,7 +14,6 @@
     "@kbn/content-management-utils",
     "@kbn/utility-types",
     "@kbn/presentation-publishing-schemas",
-    "@kbn/esql-types",
-    "@kbn/presentation-containers"
+    "@kbn/esql-types"
   ]
 }

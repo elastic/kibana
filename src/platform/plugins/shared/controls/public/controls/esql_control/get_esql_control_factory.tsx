@@ -127,7 +127,7 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
       });
 
       const componentStaticState = {
-        singleSelect: initialState.singleSelect ?? true,
+        singleSelect: state.singleSelect ?? true,
         exclude: false,
         existsSelected: false,
         requestSize: 0,
@@ -136,6 +136,13 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
         runPastTimeout: false,
         invalidSelections: new Set<OptionsListSelection>(),
         fieldName: state.variableName,
+        useGlobalFilters: false,
+        ignoreValidations: false,
+        dataViewId: '',
+        blockingError: undefined,
+        filtersLoading: false,
+        appliedFilters: undefined,
+        dataViews: undefined,
       };
       // Generate a state manager for all the props this control isn't expected to use, so the getters and setters are available
       const componentStaticStateManager = initializeStateManager<OptionsListESQLUnusedState>(
@@ -146,6 +153,10 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
       const componentApi: OptionsListComponentApi = {
         ...api,
         ...selections.internalApi,
+        isExpandable: false,
+        isCustomizable: false,
+        isDuplicable: false,
+        isPinnable: true,
         uuid,
         makeSelection(key?: string) {
           const singleSelect = selections.api.singleSelect$.value ?? true;
@@ -172,6 +183,7 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
         loadMoreSubject: new BehaviorSubject<void>(undefined),
         fieldFormatter: new BehaviorSubject((v: string) => v),
         allowExpensiveQueries$: new BehaviorSubject<boolean>(true),
+        dataViews$: new BehaviorSubject(undefined) as OptionsListComponentApi['dataViews$'],
       };
 
       return {

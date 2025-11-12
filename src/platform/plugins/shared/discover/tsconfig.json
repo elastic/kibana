@@ -110,7 +110,6 @@
     "@kbn/css-utils",
     "@kbn/restorable-state",
     "@kbn/esql-editor",
-    "@kbn/controls-plugin",
     "@kbn/esql-types",
     "@kbn/controls-constants",
     "@kbn/core-application-browser",

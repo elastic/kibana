@@ -60,6 +60,7 @@ export const optionsListESQLControlSchema = controlSchema
       schema.literal('values'),
       schema.literal('functions'),
       schema.literal('time_literal'),
+      schema.literal('multi_values'),
     ]),
     esqlQuery: schema.string(),
     controlType: schema.oneOf([

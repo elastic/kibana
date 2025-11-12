@@ -40,7 +40,8 @@
     "@kbn/controls-schemas",
     "@kbn/presentation-util",
     "@kbn/control-group-renderer",
-    "@kbn/controls-renderer"
+    "@kbn/controls-renderer",
+    "@kbn/utility-types",
   ],
   "exclude": ["target/**/*"]
 }

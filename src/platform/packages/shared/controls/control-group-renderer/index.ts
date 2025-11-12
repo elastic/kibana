@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { ControlGroupRenderer, apiHasEditorConfig, type ControlGroupRendererProps } from './src';
+export {
+  ControlGroupRenderer,
+  apiHasEditorConfig,
+  type ControlGroupRendererProps,
+  controlGroupStateBuilder,
+} from './src';
 export type {
   ControlGroupRendererApi,
   ControlGroupCreationOptions,

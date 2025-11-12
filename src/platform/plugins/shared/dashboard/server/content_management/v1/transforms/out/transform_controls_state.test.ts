@@ -8,25 +8,35 @@
  */
 
 import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
+import type { StoredControlGroupInput } from '../../../../dashboard_saved_object';
 import {
   transformControlObjectToArray,
-  transformControlsWidthAuto,
   transformControlProperties,
-  transformControlsSetDefaults,
   transformControlsState,
 } from './transform_controls_state';
 
 describe('control_state', () => {
   const mockControls = {
-    control1: { type: 'type1', width: 'auto', explicitInput: { foo: 'bar' } },
-    control2: { type: 'type2', width: 'small', explicitInput: { bizz: 'buzz' } },
+    control1: {
+      type: 'optionsListControl',
+      width: 'medium',
+      explicitInput: { foo: 'bar' },
+      order: 0,
+    },
+    control2: {
+      type: 'rangeSliderControl',
+      width: 'small',
+      explicitInput: { bizz: 'buzz' },
+      order: 1,
+    },
     control3: {
-      type: 'type3',
+      type: 'esqlControl',
       grow: true,
       explicitInput: { boo: 'bear' },
       unsupportedProperty: 'unsupported',
+      order: 2,
     },
-  };
+  } as StoredControlGroupInput['panels'];
 
   describe('transformControlObjectToArray', () => {
     it('should transform control object to array', () => {
@@ -35,15 +45,6 @@ describe('control_state', () => {
       expect(result).toHaveProperty('0.id', 'control1');
       expect(result).toHaveProperty('1.id', 'control2');
       expect(result).toHaveProperty('2.id', 'control3');
-    });
-  });
-
-  describe('transformControlsWidthAuto', () => {
-    it('should transform controls with width auto to default width and grow = true', () => {
-      const controlsArray = transformControlObjectToArray(mockControls);
-      const result = transformControlsWidthAuto(controlsArray);
-      expect(result).toHaveProperty('0.width', DEFAULT_CONTROL_WIDTH);
-      expect(result).toHaveProperty('0.grow', true);
     });
   });
 
@@ -63,19 +64,10 @@ describe('control_state', () => {
     });
   });
 
-  describe('transformControlsSetDefaults', () => {
-    it('should set default values for controls', () => {
-      const controlsArray = transformControlObjectToArray(mockControls);
-      const result = transformControlsSetDefaults(controlsArray);
-      expect(result).toHaveProperty('1.grow', DEFAULT_CONTROL_GROW);
-      expect(result).toHaveProperty('2.width', DEFAULT_CONTROL_WIDTH);
-    });
-  });
-
   describe('transformControlsState', () => {
     it('should transform serialized control state to array with all transformations applied', () => {
       const serializedControlState = JSON.stringify(mockControls);
-      const result = transformControlsState(serializedControlState);
+      const result = transformControlsState(serializedControlState, []);
       expect(result).toEqual([
         {
           id: 'control1',

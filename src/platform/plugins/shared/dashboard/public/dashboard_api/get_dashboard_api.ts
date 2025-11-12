@@ -103,7 +103,6 @@ export function getDashboardApi({
     savedObjectId$,
     settingsManager,
     unifiedSearchManager,
-    getReferences,
     filtersManager,
   });
 
@@ -235,8 +234,6 @@ export function getDashboardApi({
     ...unifiedSearchManager.internalApi,
     dashboardContainerRef$,
     setDashboardContainerRef: (ref: HTMLElement | null) => dashboardContainerRef$.next(ref),
-    // serializeControls: () => controlGroupManager.internalApi.serializeControlGroup(),
-    // untilControlsInitialized: controlGroupManager.internalApi.untilControlsInitialized,
   };
 
   const searchSessionManager = initializeSearchSessionManager(
