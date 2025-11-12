@@ -63,6 +63,56 @@ export function registerDashboardUsageCollector(
           },
         },
       },
+      // TODO https://github.com/elastic/kibana/issues/242763
+      // controls: {
+      //   total: { type: 'long' },
+      //   by_type: {
+      //     DYNAMIC_KEY: {
+      //       total: {
+      //         type: 'long',
+      //         _meta: {
+      //           description: 'The number of this type of control in all Control Groups',
+      //         },
+      //       },
+      //       details: {
+      //         DYNAMIC_KEY: {
+      //           type: 'long',
+      //           _meta: {
+      //             description:
+      //               'Collection of telemetry metrics that embeddable service reports. Will be used for details which are specific to the current control type',
+      //           },
+      //         },
+      //       },
+      //     },
+      //   },
+      //   ignore_settings: {
+      //     DYNAMIC_KEY: {
+      //       type: 'long',
+      //       _meta: {
+      //         description:
+      //           'Collection of telemetry metrics that count the number of control groups which have this ignore setting turned on',
+      //       },
+      //     },
+      //   },
+      //   chaining_system: {
+      //     DYNAMIC_KEY: {
+      //       type: 'long',
+      //       _meta: {
+      //         description:
+      //           'Collection of telemetry metrics that count the number of control groups which are using this chaining system',
+      //       },
+      //     },
+      //   },
+      //   label_position: {
+      //     DYNAMIC_KEY: {
+      //       type: 'long',
+      //       _meta: {
+      //         description:
+      //           'Collection of telemetry metrics that count the number of control groups which have their labels in this position',
+      //       },
+      //     },
+      //   },
+      // },
       sections: {
         total: {
           type: 'long',
