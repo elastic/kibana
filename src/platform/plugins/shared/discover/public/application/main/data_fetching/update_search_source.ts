@@ -9,7 +9,7 @@
 
 import type { ISearchSource } from '@kbn/data-plugin/public';
 import { DataViewType, type DataView } from '@kbn/data-views-plugin/public';
-import type { TimeRange } from '@kbn/es-query';
+import type { ProjectRouting, TimeRange } from '@kbn/es-query';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { SORT_DEFAULT_ORDER_SETTING, getSortForSearchSource } from '@kbn/discover-utils';
 import type { DiscoverServices } from '../../../build_services';
@@ -24,11 +24,13 @@ export function updateVolatileSearchSource(
     services,
     sort,
     inputTimeRange,
+    projectRouting,
   }: {
     dataView: DataView;
     services: DiscoverServices;
     sort?: SortOrder[];
     inputTimeRange?: TimeRange;
+    projectRouting?: ProjectRouting;
   }
 ) {
   const { uiSettings, data } = services;
@@ -49,6 +51,10 @@ export function updateVolatileSearchSource(
       'filter',
       data.query.timefilter.timefilter.createFilter(dataView, inputTimeRange)
     );
+  }
+
+  if (projectRouting) {
+    searchSource.setField('projectRouting', projectRouting);
   }
 
   searchSource.removeField('fieldsFromSource');

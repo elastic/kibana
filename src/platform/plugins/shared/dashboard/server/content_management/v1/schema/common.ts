@@ -14,7 +14,6 @@ import { controlsGroupSchema } from '@kbn/controls-schemas';
 import { referenceSchema } from '@kbn/content-management-utils';
 import { storedFilterSchema, querySchema, timeRangeSchema } from '@kbn/es-query-server';
 import { embeddableService } from '../../../kibana_services';
-
 import {
   DASHBOARD_GRID_COLUMN_COUNT,
   DEFAULT_PANEL_HEIGHT,
@@ -162,6 +161,7 @@ export function getDashboardStateSchema() {
     panels: schema.arrayOf(schema.oneOf([getPanelSchema(), getSectionSchema()]), {
       defaultValue: [],
     }),
+    projectRouting: schema.maybe(schema.string()),
     query: schema.maybe(querySchema),
     refreshInterval: schema.maybe(refreshIntervalSchema),
     tags: schema.maybe(

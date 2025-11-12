@@ -682,6 +682,13 @@ export class SearchSource {
         return addToBody(key, sort);
       case 'pit':
         return addToRoot(key, val);
+      case 'projectRouting':
+        // eslint-disable-next-line no-console
+        console.log(
+          'TODO: request fails for now when sent with a custom project_routing param:',
+          val
+        );
+        return addToBody('project_routing', val);
       case 'aggs':
         if ((val as unknown) instanceof AggConfigs) {
           return addToBody('aggs', val.toDsl());

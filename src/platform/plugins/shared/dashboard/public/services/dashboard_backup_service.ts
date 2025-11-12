@@ -15,6 +15,7 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { set } from '@kbn/safer-lodash-set';
 
 import type { ViewMode } from '@kbn/presentation-publishing';
+import type { ProjectRouting } from '@kbn/es-query';
 import { coreServices, spacesService } from './kibana_services';
 import type { DashboardState } from '../../common';
 
@@ -30,7 +31,8 @@ const getPanelsGetError = (message: string) =>
     values: { message },
   });
 
-export type DashboardBackupState = Partial<DashboardState> & {
+export type DashboardBackupState = Partial<Omit<DashboardState, 'projectRouting'>> & {
+  projectRouting?: ProjectRouting | null;
   viewMode?: ViewMode;
 };
 
@@ -42,6 +44,31 @@ interface DashboardBackupServiceType {
   storeViewMode: (viewMode: ViewMode) => void;
   getDashboardIdsWithUnsavedChanges: () => string[];
   dashboardHasUnsavedEdits: (id?: string) => boolean;
+}
+
+/**
+ * ProjectRouting conversion helpers
+ * JSON.stringify removes undefined values, so we need special handling:
+ * - convertProjectRoutingToBackup: undefined → null (for storage)
+ * - convertProjectRoutingFromBackup: null → undefined (for retrieval)
+ */
+function convertProjectRoutingToBackup(state: DashboardBackupState): DashboardBackupState {
+  if ('projectRouting' in state && state.projectRouting === undefined) {
+    return { ...state, projectRouting: null };
+  }
+  return state;
+}
+
+function convertProjectRoutingFromBackup(state: DashboardBackupState): Partial<DashboardState> {
+  const { projectRouting, ...rest } = state;
+  return {
+    ...rest,
+    ...(projectRouting
+      ? { projectRouting }
+      : projectRouting === null
+      ? { projectRouting: undefined }
+      : {}),
+  };
 }
 
 class DashboardBackupService implements DashboardBackupServiceType {
@@ -102,10 +129,14 @@ class DashboardBackupService implements DashboardBackupServiceType {
     }
   }
 
-  public getState(id = DASHBOARD_PANELS_UNSAVED_ID) {
+  public getState(id = DASHBOARD_PANELS_UNSAVED_ID): Partial<DashboardState> | undefined {
     try {
       const dashboards = this.getDashboards();
-      return dashboards[id];
+      const backupState = dashboards[id];
+      if (!backupState) {
+        return;
+      }
+      return convertProjectRoutingFromBackup(backupState);
     } catch (e) {
       coreServices.notifications.toasts.addDanger({
         title: getPanelsGetError(e.message),
@@ -116,8 +147,10 @@ class DashboardBackupService implements DashboardBackupServiceType {
 
   public setState(id = DASHBOARD_PANELS_UNSAVED_ID, backupState: DashboardBackupState) {
     try {
+      const stateToStore = convertProjectRoutingToBackup(backupState);
+
       const allSpaces = this.sessionStorage.get(DASHBOARD_STATE_SESSION_KEY) ?? {};
-      set(allSpaces, [this.activeSpaceId, id], backupState);
+      set(allSpaces, [this.activeSpaceId, id], stateToStore);
       this.sessionStorage.set(DASHBOARD_STATE_SESSION_KEY, allSpaces);
     } catch (e) {
       coreServices.notifications.toasts.addDanger({

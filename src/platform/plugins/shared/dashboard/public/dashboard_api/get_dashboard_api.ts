@@ -32,6 +32,7 @@ import { initializeTrackPanel } from './track_panel';
 import type { DashboardApi, DashboardCreationOptions, DashboardInternalApi } from './types';
 import { DASHBOARD_API_TYPE } from './types';
 import { initializeUnifiedSearchManager } from './unified_search_manager';
+import { initializeProjectRoutingManager } from './project_routing_manager';
 import { initializeUnsavedChangesManager } from './unsaved_changes_manager';
 import { initializeViewModeManager } from './view_mode_manager';
 import { mergeControlGroupStates } from './merge_control_group_states';
@@ -107,6 +108,8 @@ export function getDashboardApi({
     () => unsavedChangesManager.internalApi.getLastSavedState(),
     creationOptions
   );
+  const projectRoutingManager = initializeProjectRoutingManager(initialState);
+
   const unsavedChangesManager = initializeUnsavedChangesManager({
     viewMode$: viewModeManager.api.viewMode$,
     storeUnsavedChanges: creationOptions?.useSessionStorageIntegration,
@@ -116,15 +119,18 @@ export function getDashboardApi({
     savedObjectId$,
     settingsManager,
     unifiedSearchManager,
+    projectRoutingManager,
     getReferences,
   });
 
   function getState() {
     const { panels, references: panelReferences } = layoutManager.internalApi.serializeLayout();
     const unifiedSearchState = unifiedSearchManager.internalApi.getState();
+    const projectRoutingState = projectRoutingManager.internalApi.getState();
     const dashboardState: DashboardState = {
       ...settingsManager.internalApi.serializeSettings(),
       ...unifiedSearchState,
+      ...projectRoutingState,
       panels,
     };
 
@@ -148,6 +154,7 @@ export function getDashboardApi({
     ...settingsManager.api,
     ...trackPanel,
     ...unifiedSearchManager.api,
+    ...projectRoutingManager.api,
     ...unsavedChangesManager.api,
     ...trackOverlayApi,
     ...initializeTrackContentfulRender(),
@@ -266,6 +273,7 @@ export function getDashboardApi({
       dataViewsManager.cleanup();
       searchSessionManager.cleanup();
       unifiedSearchManager.cleanup();
+      projectRoutingManager.cleanup();
       unsavedChangesManager.cleanup();
       layoutManager.cleanup();
     },

@@ -11,7 +11,7 @@ import type { Reference } from '@kbn/content-management-utils';
 import type { ControlGroupApi } from '@kbn/controls-plugin/public';
 import type { SearchSessionInfoProvider } from '@kbn/data-plugin/public';
 import type { DefaultEmbeddableApi, EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import type { Filter, ProjectRouting, Query, TimeRange } from '@kbn/es-query';
 import type { PublishesESQLVariables } from '@kbn/esql-types';
 import type { GridLayoutData } from '@kbn/grid-layout';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
@@ -38,6 +38,7 @@ import type {
   PublishesSavedObjectId,
   PublishesTitle,
   PublishesUnifiedSearch,
+  PublishesProjectRouting,
   PublishesViewMode,
   PublishesWritableViewMode,
   PublishingSubject,
@@ -112,6 +113,7 @@ export type DashboardApi = CanExpandPanels &
   PublishesSearchSession &
   PublishesSettings &
   PublishesUnifiedSearch &
+  PublishesProjectRouting &
   PublishesViewMode &
   PublishesWritableViewMode &
   PublishesPauseFetch &
@@ -151,6 +153,7 @@ export type DashboardApi = CanExpandPanels &
     setFullScreenMode: (fullScreenMode: boolean) => void;
     setHighlightPanelId: (id: string | undefined) => void;
     setQuery: (query?: Query | undefined) => void;
+    setProjectRouting: (projectRouting?: ProjectRouting) => void;
     setScrollToPanelId: (id: string | undefined) => void;
     setSettings: (settings: DashboardSettings) => void;
     setTags: (tags: string[]) => void;

@@ -261,9 +261,8 @@ export const getDiscoverAppStateContainer = ({
 
   const getGlobalState = (state: DiscoverInternalState): GlobalQueryStateFromUrl => {
     const tabState = selectTab(state, tabId);
-    const { timeRange: time, refreshInterval, filters } = tabState.globalState;
-
-    return { time, refreshInterval, filters };
+    const { timeRange: time, refreshInterval, filters, projectRouting } = tabState.globalState;
+    return { time, refreshInterval, filters, projectRouting };
   };
 
   const globalStateContainer: INullableBaseStateContainer<GlobalQueryStateFromUrl> = {
@@ -273,7 +272,7 @@ export const getDiscoverAppStateContainer = ({
         return;
       }
 
-      const { time: timeRange, refreshInterval, filters } = state;
+      const { time: timeRange, refreshInterval, filters, projectRouting } = state;
 
       internalState.dispatch(
         injectCurrentTab(internalStateActions.setGlobalState)({
@@ -281,6 +280,7 @@ export const getDiscoverAppStateContainer = ({
             timeRange,
             refreshInterval,
             filters,
+            projectRouting,
           },
         })
       );
@@ -372,6 +372,27 @@ export const getDiscoverAppStateContainer = ({
         stateStorage,
       });
 
+    // Sync projectRouting with CPS manager
+    const initialGlobalState = globalStateContainer.get();
+    if (initialGlobalState?.projectRouting && services.cps?.cpsManager) {
+      services.cps.cpsManager.setProjectRouting(initialGlobalState.projectRouting);
+    }
+
+    // Subscribe to CPS projectRouting changes
+    const cpsProjectRoutingSubscription = services.cps?.cpsManager
+      ?.getProjectRouting$()
+      .subscribe((cpsProjectRouting) => {
+        const currentGlobalState = globalStateContainer.get();
+        if (currentGlobalState && cpsProjectRouting !== currentGlobalState.projectRouting) {
+          globalStateContainer.set({
+            ...currentGlobalState,
+            projectRouting: cpsProjectRouting,
+          });
+          // Note: The actual data fetch will be triggered by the globalState change
+          // through the internalState.dispatch call above
+        }
+      });
+
     // current state needs to be pushed to url
     updateUrlWithCurrentState().then(() => {
       startSyncingAppStateWithUrl();
@@ -383,6 +404,7 @@ export const getDiscoverAppStateContainer = ({
       stopSyncingQueryGlobalStateWithStateContainer();
       stopSyncingAppStateWithUrl();
       stopSyncingGlobalStateWithUrl();
+      cpsProjectRoutingSubscription?.unsubscribe();
     };
   };
 
