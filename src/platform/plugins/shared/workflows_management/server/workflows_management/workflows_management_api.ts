@@ -307,7 +307,8 @@ export class WorkflowsManagementApi {
         spaceId,
       },
       stepId,
-      contextOverride
+      contextOverride,
+      request
     );
     return executeResponse.workflowExecutionId;
   }
