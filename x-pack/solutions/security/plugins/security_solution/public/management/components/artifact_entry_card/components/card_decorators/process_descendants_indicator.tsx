@@ -26,10 +26,18 @@ export const ProcessDescendantsIndicator = memo<ArtifactEntryCardDecoratorProps>
           <EuiText {...commonProps} data-test-subj={getTestId('processDescendantsIndication')}>
             <code>
               <strong>
-                <FormattedMessage
-                  defaultMessage="Filtering descendants of process"
-                  id="xpack.securitySolution.filteringProcessDescendants"
-                />{' '}
+                {isEventFiltersProcessDescendantsEnabled ? (
+                  <FormattedMessage
+                    defaultMessage="Filtering descendants of process"
+                    id="xpack.securitySolution.filteringProcessDescendants"
+                  />
+                ) : (
+                  <FormattedMessage
+                    defaultMessage="Trusting descendants of process"
+                    id="xpack.securitySolution.trustedAppProcessDescendants"
+                  />
+                )}
+                {' '}
                 {isEventFiltersProcessDescendantsEnabled ? (
                   <ProcessDescendantsIconTip
                     indicateExtraEntry
