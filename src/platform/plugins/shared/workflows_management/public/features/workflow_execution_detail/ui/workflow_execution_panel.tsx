@@ -23,11 +23,10 @@ import React from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowExecutionDto, WorkflowYaml } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
+import { ExecutionStatus, isCancelableStatus } from '@kbn/workflows';
 import { CancelExecutionButton } from './cancel_execution_button';
 import { WorkflowStepExecutionTree } from './workflow_step_execution_tree';
 import { WorkflowExecutionListItem } from '../../workflow_execution_list/ui/workflow_execution_list_item';
-import { isCancelableStatus } from '../lib/execution_status';
 
 const i18nTexts = {
   backToExecutions: i18n.translate('workflows.workflowStepExecutionList.backToExecution', {
@@ -41,7 +40,6 @@ const i18nTexts = {
 export interface WorkflowExecutionPanelProps {
   execution: WorkflowExecutionDto | null;
   definition: WorkflowYaml | null;
-  isLoading: boolean;
   error: Error | null;
   onStepExecutionClick: (stepExecutionId: string) => void;
   selectedId: string | null;
@@ -53,7 +51,6 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
     execution,
     definition,
     showBackButton = true,
-    isLoading,
     error,
     onStepExecutionClick,
     selectedId: selectedStepExecutionId,
@@ -101,7 +98,6 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
                 <WorkflowStepExecutionTree
                   definition={definition}
                   execution={execution ?? null}
-                  isLoading={isLoading}
                   error={error}
                   onStepExecutionClick={onStepExecutionClick}
                   selectedId={selectedStepExecutionId ?? null}
