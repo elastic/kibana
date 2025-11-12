@@ -646,15 +646,18 @@ const ESQLEditorInternal = function ESQLEditor({
     };
   }, [allowQueryCancellation, code, codeWhenSubmitted, isLoading]);
 
-  const parseMessages = useCallback(async () => {
-    if (editorModel.current) {
-      return await ESQLLang.validate(editorModel.current, code, esqlCallbacks);
-    }
-    return {
-      errors: [],
-      warnings: [],
-    };
-  }, [esqlCallbacks, code]);
+  const parseMessages = useCallback(
+    async (options?: { forceRefresh?: boolean }) => {
+      if (editorModel.current) {
+        return await ESQLLang.validate(editorModel.current, code, esqlCallbacks, options);
+      }
+      return {
+        errors: [],
+        warnings: [],
+      };
+    },
+    [esqlCallbacks, code]
+  );
 
   useEffect(() => {
     const setQueryToTheCache = async () => {
@@ -686,10 +689,12 @@ const ESQLEditorInternal = function ESQLEditor({
   }, [isLoading, isQueryLoading, parseMessages, code]);
 
   const queryValidation = useCallback(
-    async ({ active }: { active: boolean }) => {
+    async ({ active, forceRefresh }: { active: boolean; forceRefresh?: boolean }) => {
       if (!editorModel.current || editorModel.current.isDisposed()) return;
       monaco.editor.setModelMarkers(editorModel.current, 'Unified search', []);
-      const { warnings: parserWarnings, errors: parserErrors } = await parseMessages();
+      const { warnings: parserWarnings, errors: parserErrors } = await parseMessages({
+        forceRefresh,
+      });
 
       let allErrors = parserErrors;
       let allWarnings = parserWarnings;
@@ -737,8 +742,8 @@ const ESQLEditorInternal = function ESQLEditor({
 
   const onLookupIndexCreate = useCallback(
     async (resultQuery: string) => {
+      // forces refresh
       dataSourcesCache?.clear?.();
-      esqlFieldsCache.clear?.();
       if (getJoinIndices) {
         await getJoinIndices({ forceRefresh: true });
       }
@@ -747,13 +752,14 @@ const ESQLEditorInternal = function ESQLEditor({
       // but the lookup index was created
       await queryValidation({ active: true });
     },
-    [dataSourcesCache, esqlFieldsCache, getJoinIndices, onQueryUpdate, queryValidation]
+    [dataSourcesCache, getJoinIndices, onQueryUpdate, queryValidation]
   );
 
   // Refresh the fields cache when a new field has been added to the lookup index
   const onNewFieldsAddedToLookupIndex = useCallback(async () => {
     esqlFieldsCache.clear?.();
-    await queryValidation({ active: true });
+
+    await queryValidation({ active: true, forceRefresh: true });
   }, [esqlFieldsCache, queryValidation]);
 
   const { lookupIndexBadgeStyle, addLookupIndicesDecorator } = useLookupIndexCommand(
