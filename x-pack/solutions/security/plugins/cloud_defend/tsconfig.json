@@ -35,7 +35,8 @@
     "@kbn/core-http-router-server-mocks",
     "@kbn/code-editor",
     "@kbn/code-editor-mock",
-    "@kbn/core-security-common"
+    "@kbn/core-security-common",
+    "@kbn/react-query"
   ],
   "exclude": ["target/**/*"]
 }
