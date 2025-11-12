@@ -89,11 +89,6 @@ jest.mock('../../common/utils/route/spy_routes', () => ({
   },
 }));
 
-const mockUseQueryToggle = jest.fn();
-jest.mock('../../common/containers/query_toggle', () => ({
-  useQueryToggle: (...args: unknown[]) => mockUseQueryToggle(...args),
-}));
-
 jest.mock('../../sourcerer/containers', () => ({
   useSourcererDataView: jest.fn(),
 }));
@@ -129,11 +124,6 @@ describe('ThreatHuntingHomePage', () => {
     mockHeaderPage.mockClear();
     mockEmptyPrompt.mockClear();
     mockSpyRoute.mockClear();
-
-    mockUseQueryToggle.mockImplementation(() => ({
-      toggleStatus: true,
-      setToggleStatus: jest.fn(),
-    }));
 
     useSourcererDataViewMock.mockReturnValue({
       indicesExist: true,
@@ -192,26 +182,9 @@ describe('ThreatHuntingHomePage', () => {
     renderPage();
 
     expect(screen.getByText('Entity Threat Hunting')).toBeInTheDocument();
-    expect(
-      screen.getByText('AI-picked personalized hypotheses for threat hunting')
-    ).toBeInTheDocument();
-    expect(screen.getByTestId('threatHuntingHypothesesPanel')).toBeInTheDocument();
     expect(screen.getByTestId('threatHuntingRiskLevels')).toBeInTheDocument();
     expect(screen.getByTestId('threatHuntingEntitiesTable')).toBeInTheDocument();
     expect(screen.getByTestId('spyRoute')).toBeInTheDocument();
-  });
-
-  it('toggles the hypotheses section when the toggle button is clicked', () => {
-    const setToggleStatus = jest.fn();
-    mockUseQueryToggle.mockImplementation(() => ({
-      toggleStatus: true,
-      setToggleStatus,
-    }));
-
-    renderPage();
-    fireEvent.click(screen.getByTestId('aiHypothesesToggle'));
-
-    expect(setToggleStatus).toHaveBeenCalledWith(false);
   });
 
   it('passes the sourcerer data view to the search bar when the experiment is disabled', () => {

@@ -11,7 +11,6 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { get } from 'lodash/fp';
-import { css } from '@emotion/react';
 import {
   EntityTypeToLevelField,
   EntityTypeToScoreField,
@@ -36,16 +35,6 @@ import { CRITICALITY_LEVEL_TITLE } from '../../asset_criticality/translations';
 import { formatRiskScore } from '../../../common';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useNavigateToTimeline } from '../../../../overview/components/detection_response/hooks/use_navigate_to_timeline';
-
-const ACTIONS_ROW_HEIGHT = 48;
-
-const GRADIENT_TEXT_CLASS = css`
-  background: linear-gradient(106deg, #1750ba 16.88%, #731dcf 88.31%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  color: transparent;
-`;
 
 export type EntitiesListColumns = [
   Columns<Entity>,
@@ -140,40 +129,27 @@ export const useEntitiesListColumns = (): EntitiesListColumns => {
               />
             )}
             {canRenderTimelineActions && (
-              <>
-                <EuiButtonIcon
-                  iconType="timeline"
-                  onClick={() =>
-                    openTimelineWithFilters([
-                      [
-                        {
-                          field: identifierField,
-                          value: timelineIdentifier,
-                        },
-                      ],
-                    ])
+              <EuiButtonIcon
+                iconType="timeline"
+                onClick={() =>
+                  openTimelineWithFilters([
+                    [
+                      {
+                        field: identifierField,
+                        value: timelineIdentifier,
+                      },
+                    ],
+                  ])
+                }
+                aria-label={i18n.translate(
+                  'xpack.securitySolution.entityAnalytics.entityStore.entitiesList.openTimeline.ariaLabel',
+                  {
+                    defaultMessage: 'Open timeline for {name}',
+                    values: { name: displayName ?? timelineIdentifier },
                   }
-                  aria-label={i18n.translate(
-                    'xpack.securitySolution.entityAnalytics.entityStore.entitiesList.openTimeline.ariaLabel',
-                    {
-                      defaultMessage: 'Open timeline for {name}',
-                      values: { name: displayName ?? timelineIdentifier },
-                    }
-                  )}
-                  style={{ color: euiTheme.colors.primary }}
-                />
-                <EuiButtonIcon
-                  iconType="sparkles"
-                  aria-label={i18n.translate(
-                    'xpack.securitySolution.entityAnalytics.entityStore.entitiesList.huntWithAi.ariaLabel',
-                    {
-                      defaultMessage: 'Open AI assistant for {name}',
-                      values: { name: displayName ?? timelineIdentifier },
-                    }
-                  )}
-                  className={GRADIENT_TEXT_CLASS}
-                />
-              </>
+                )}
+                style={{ color: euiTheme.colors.primary }}
+              />
             )}
           </span>
         );

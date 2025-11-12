@@ -10,33 +10,44 @@ import type { AssetInventoryURLStateResult } from '../hooks/use_asset_inventory_
 import { ASSET_FIELDS, DEFAULT_TABLE_SECTION_HEIGHT } from '../constants';
 import { GroupWrapper } from './grouping/asset_inventory_grouping';
 import { useAssetInventoryGrouping } from './grouping/use_asset_inventory_grouping';
-import { AssetInventoryDataTable } from './asset_inventory_data_table';
+import {
+  AssetInventoryDataTable,
+  type AssetInventoryDataTableProps,
+} from './asset_inventory_data_table';
 
 export interface AssetInventoryTableSectionProps {
   state: AssetInventoryURLStateResult;
+  dataTableProps?: Partial<Omit<AssetInventoryDataTableProps, 'state'>>;
 }
 
 /**
  * Recursive component hierarchy
  *
- * AssetInventoryTableSection (renders either/or one of the children)
- * |-- AssetInventoryDataTable (no grouping)
- * |-- GroupWithURLPagination (grouping level = 0, renders both children)
+ * AssetInventoryTableSection (renders either/or one of the children and passes `dataTableProps` through)
+ * |-- AssetInventoryDataTable (no grouping, receives `dataTableProps` as overrides)
+ * |-- GroupWithURLPagination (grouping level = 0, renders both children, forwards `dataTableProps`)
  *     |-- GroupWrapper
- *     |-- GroupContent
- *         |-- GroupWithLocalPagination (grouping level = 1, renders both children)
+ *     |-- GroupContent (inherits `dataTableProps`)
+ *         |-- GroupWithLocalPagination (grouping level = 1, renders both children, forwards `dataTableProps`)
  *             |-- GroupWrapper
- *             |-- GroupContent (renders)
- *                 |-- DataTableWithLocalPagination
- *                     |-- AssetInventoryDataTable (grouping level = 2)
+ *             |-- GroupContent (inherits `dataTableProps` and renders)
+ *                 |-- DataTableWithLocalPagination (merges grouping filters, forwards `dataTableProps`)
+ *                     |-- AssetInventoryDataTable (grouping level = 2, receives `dataTableProps`)
  */
-export const AssetInventoryTableSection = ({ state }: AssetInventoryTableSectionProps) => {
+export const AssetInventoryTableSection = ({
+  state,
+  dataTableProps,
+}: AssetInventoryTableSectionProps) => {
   const { grouping } = useAssetInventoryGrouping({ state });
   const selectedGroup = grouping.selectedGroups[0];
 
   if (selectedGroup === 'none') {
     return (
-      <AssetInventoryDataTable state={state} groupSelectorComponent={grouping.groupSelector} />
+      <AssetInventoryDataTable
+        state={state}
+        groupSelectorComponent={grouping.groupSelector}
+        {...dataTableProps}
+      />
     );
   }
 
@@ -46,6 +57,7 @@ export const AssetInventoryTableSection = ({ state }: AssetInventoryTableSection
       selectedGroup={selectedGroup}
       selectedGroupOptions={grouping.selectedGroups}
       groupSelectorComponent={grouping.groupSelector}
+      dataTableProps={dataTableProps}
     />
   );
 };
@@ -55,6 +67,7 @@ interface GroupWithURLPaginationProps {
   selectedGroup: string;
   selectedGroupOptions: string[];
   groupSelectorComponent?: JSX.Element;
+  dataTableProps?: Partial<Omit<AssetInventoryDataTableProps, 'state'>>;
 }
 
 const GroupWithURLPagination = ({
@@ -62,6 +75,7 @@ const GroupWithURLPagination = ({
   selectedGroup,
   selectedGroupOptions,
   groupSelectorComponent,
+  dataTableProps,
 }: GroupWithURLPaginationProps) => {
   const { groupData, grouping, isFetching } = useAssetInventoryGrouping({
     state,
@@ -89,6 +103,7 @@ const GroupWithURLPagination = ({
           groupingLevel={1}
           selectedGroupOptions={selectedGroupOptions}
           groupSelectorComponent={groupSelectorComponent}
+          dataTableProps={dataTableProps}
         />
       )}
       activePageIndex={state.pageIndex}
@@ -99,6 +114,7 @@ const GroupWithURLPagination = ({
       selectedGroup={selectedGroup}
       groupingLevel={0}
       groupSelectorComponent={groupSelectorComponent}
+      dataTableProps={dataTableProps}
     />
   );
 };
@@ -110,6 +126,7 @@ interface GroupContentProps {
   selectedGroupOptions: string[];
   parentGroupFilters?: string;
   groupSelectorComponent?: JSX.Element;
+  dataTableProps?: Partial<Omit<AssetInventoryDataTableProps, 'state'>>;
 }
 
 /**
@@ -157,6 +174,7 @@ const GroupContent = ({
   selectedGroupOptions,
   parentGroupFilters,
   groupSelectorComponent,
+  dataTableProps,
 }: GroupContentProps) => {
   if (groupingLevel < selectedGroupOptions.length) {
     const nextGroupingLevel = groupingLevel + 1;
@@ -176,6 +194,7 @@ const GroupContent = ({
         selectedGroupOptions={selectedGroupOptions}
         parentGroupFilters={JSON.stringify(newParentGroupFilters)}
         groupSelectorComponent={groupSelectorComponent}
+        dataTableProps={dataTableProps}
       />
     );
   }
@@ -185,6 +204,7 @@ const GroupContent = ({
       state={state}
       currentGroupFilters={currentGroupFilters}
       parentGroupFilters={parentGroupFilters}
+      dataTableProps={dataTableProps}
     />
   );
 };
@@ -201,6 +221,7 @@ const GroupWithLocalPagination = ({
   selectedGroup,
   selectedGroupOptions,
   groupSelectorComponent,
+  dataTableProps,
 }: GroupWithLocalPaginationProps) => {
   const [subgroupPageIndex, setSubgroupPageIndex] = useState(0);
   const [subgroupPageSize, setSubgroupPageSize] = useState(10);
@@ -233,6 +254,7 @@ const GroupWithLocalPagination = ({
           selectedGroupOptions={selectedGroupOptions}
           groupSelectorComponent={groupSelectorComponent}
           parentGroupFilters={JSON.stringify(groupFilters)}
+          dataTableProps={dataTableProps}
         />
       )}
       activePageIndex={subgroupPageIndex}
@@ -243,6 +265,7 @@ const GroupWithLocalPagination = ({
       selectedGroup={selectedGroup}
       groupingLevel={groupingLevel}
       groupSelectorComponent={groupSelectorComponent}
+      dataTableProps={dataTableProps}
     />
   );
 };
@@ -251,6 +274,7 @@ interface DataTableWithLocalPagination {
   state: AssetInventoryURLStateResult;
   currentGroupFilters: Filter[];
   parentGroupFilters?: string;
+  dataTableProps?: Partial<Omit<AssetInventoryDataTableProps, 'state'>>;
 }
 
 const getDataGridFilter = (filter: Filter | null) => {
@@ -264,6 +288,7 @@ const DataTableWithLocalPagination = ({
   state,
   currentGroupFilters,
   parentGroupFilters,
+  dataTableProps,
 }: DataTableWithLocalPagination) => {
   const [tablePageIndex, setTablePageIndex] = useState(0);
   const [tablePageSize, setTablePageSize] = useState(10);
@@ -289,5 +314,11 @@ const DataTableWithLocalPagination = ({
     onChangeItemsPerPage: setTablePageSize,
   };
 
-  return <AssetInventoryDataTable state={newState} height={DEFAULT_TABLE_SECTION_HEIGHT} />;
+  return (
+    <AssetInventoryDataTable
+      state={newState}
+      height={dataTableProps?.height ?? DEFAULT_TABLE_SECTION_HEIGHT}
+      {...dataTableProps}
+    />
+  );
 };

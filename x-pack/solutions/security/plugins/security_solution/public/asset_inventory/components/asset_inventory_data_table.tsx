@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
@@ -127,16 +127,33 @@ const defaultColumns: AssetInventoryDefaultColumn[] = [
   { id: ASSET_FIELDS.TIMESTAMP },
 ];
 
+const buildDefaultSettings = (
+  columns: AssetInventoryDefaultColumn[]
+): UnifiedDataTableSettings => ({
+  columns: columns.reduce((columnSettings, column) => {
+    const columnDefaultSettings = column.width ? { width: column.width } : {};
+    return { ...columnSettings, [column.id]: columnDefaultSettings };
+  }, {} as UnifiedDataTableSettings['columns']),
+});
+
 export interface AssetInventoryDataTableProps {
   state: AssetInventoryURLStateResult;
   height?: number;
   groupSelectorComponent?: JSX.Element;
+  initialColumns?: AssetInventoryDefaultColumn[];
+  columnHeadersOverride?: Record<string, string>;
+  customCellRendererOverrides?: (rows: DataTableRecord[]) => CustomCellRenderer;
+  columnsOverride?: string[];
 }
 
 export const AssetInventoryDataTable = ({
   state,
   height,
   groupSelectorComponent,
+  initialColumns = defaultColumns,
+  columnHeadersOverride,
+  customCellRendererOverrides,
+  columnsOverride,
 }: AssetInventoryDataTableProps) => {
   const {
     pageSize,
@@ -152,7 +169,7 @@ export const AssetInventoryDataTable = ({
 
   // Table Flyout Controls -------------------------------------------------------------------
 
-  const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
+  const [expandedDoc, setExpandedDoc] = React.useState<DataTableRecord | undefined>(undefined);
 
   const { openDynamicFlyout, closeDynamicFlyout } = useDynamicEntityFlyout({
     onFlyoutClose: () => setExpandedDoc(undefined),
@@ -192,37 +209,39 @@ export const AssetInventoryDataTable = ({
   const rows = getRowsFromPages(rowsData?.pages);
   const totalHits = rowsData?.pages[0].total || 0;
 
-  const [localStorageColumns, setLocalStorageColumns] = useLocalStorage(
-    LOCAL_STORAGE_COLUMNS_KEY,
-    defaultColumns.map((c) => c.id)
+  const mergedColumnHeaders = useMemo(
+    () => ({ ...columnHeaders, ...columnHeadersOverride }),
+    [columnHeadersOverride]
   );
+
+  const initialColumnIds = useMemo(() => initialColumns.map((c) => c.id), [initialColumns]);
+  const defaultSettings = useMemo(() => buildDefaultSettings(initialColumns), [initialColumns]);
+
+  const [persistedColumnIds, setPersistedColumnIds] = useLocalStorage<string[]>(
+    LOCAL_STORAGE_COLUMNS_KEY,
+    initialColumnIds
+  );
+  const columnsState = persistedColumnIds ?? initialColumnIds;
+  const tableSettings = persistedColumnIds ? defaultSettings : defaultSettings;
 
   const [persistedSettings, setPersistedSettings] = useLocalStorage<UnifiedDataTableSettings>(
     LOCAL_STORAGE_COLUMNS_SETTINGS_KEY,
-    {
-      columns: defaultColumns.reduce((columnSettings, column) => {
-        const columnDefaultSettings = column.width ? { width: column.width } : {};
-        const newColumn = { [column.id]: columnDefaultSettings };
-        return { ...columnSettings, ...newColumn };
-      }, {} as UnifiedDataTableSettings['columns']),
-    }
+    defaultSettings
   );
-
   const settings = useMemo(() => {
+    const columnsConfig = tableSettings.columns ?? {};
     return {
-      columns: Object.keys(persistedSettings?.columns as UnifiedDataTableSettings).reduce(
-        (columnSettings, columnId) => {
-          const newColumn: UnifiedDataTableSettingsColumn = {
-            ..._.pick(persistedSettings?.columns?.[columnId], ['width']),
-            display: columnHeaders?.[columnId],
-          };
+      columns: Object.keys(columnsConfig).reduce((columnSettings, columnId) => {
+        const newColumn: UnifiedDataTableSettingsColumn = {
+          ..._.pick(columnsConfig[columnId], ['width']),
+          display: mergedColumnHeaders?.[columnId],
+        };
 
-          return { ...columnSettings, [columnId]: newColumn };
-        },
-        {} as UnifiedDataTableSettings['columns']
-      ),
+        columnSettings[columnId] = newColumn;
+        return columnSettings;
+      }, {} as UnifiedDataTableSettings['columns']),
     };
-  }, [persistedSettings]);
+  }, [tableSettings, mergedColumnHeaders]);
 
   const { dataView, dataViewIsLoading } = useDataViewContext();
 
@@ -250,6 +269,23 @@ export const AssetInventoryDataTable = ({
 
   const styles = useStyles();
 
+  const columnsForTable = useMemo(() => {
+    if (!columnsOverride || columnsOverride.length === 0) {
+      return columnsState;
+    }
+
+    const overrideSet = new Set(columnsOverride);
+    const merged = [...columnsOverride];
+
+    columnsState.forEach((columnId) => {
+      if (!overrideSet.has(columnId)) {
+        merged.push(columnId);
+      }
+    });
+
+    return merged;
+  }, [columnsOverride, columnsState]);
+
   const {
     columns: currentColumns,
     onSetColumns,
@@ -260,8 +296,10 @@ export const AssetInventoryDataTable = ({
     defaultOrder: uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
     dataView,
     dataViews,
-    setAppState: (props) => setLocalStorageColumns(props.columns),
-    columns: localStorageColumns,
+    setAppState: (props) => {
+      setPersistedColumnIds(props.columns);
+    },
+    columns: columnsForTable,
     sort,
   });
 
@@ -310,19 +348,27 @@ export const AssetInventoryDataTable = ({
   );
 
   const onResize = (colSettings: { columnId: string; width: number | undefined }) => {
-    const grid = persistedSettings || {};
-    const newColumns = { ...(grid.columns || {}) };
+    const gridColumns = tableSettings.columns ?? {};
+    const newColumns = { ...gridColumns };
     newColumns[colSettings.columnId] = colSettings.width
       ? { width: Math.round(colSettings.width) }
       : {};
-    const newGrid = { ...grid, columns: newColumns };
+    const newGrid: UnifiedDataTableSettings = {
+      ...tableSettings,
+      columns: newColumns,
+    };
     setPersistedSettings(newGrid);
   };
 
-  const externalCustomRenderers = useMemo(() => customCellRenderer(rows), [rows]);
+  const externalCustomRenderers = useMemo(() => {
+    const baseRenderers = customCellRenderer(rows);
+    const overrides = customCellRendererOverrides ? customCellRendererOverrides(rows) : {};
+    return { ...baseRenderers, ...overrides };
+  }, [rows, customCellRendererOverrides]);
 
   const onResetColumns = () => {
-    setLocalStorageColumns(defaultColumns.map((c) => c.id));
+    setPersistedColumnIds([...initialColumnIds]);
+    setPersistedSettings(buildDefaultSettings(initialColumns));
   };
 
   const handleAddColumn = (columnId: string) => {

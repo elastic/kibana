@@ -31,18 +31,29 @@ interface RiskScoreKpi {
   timerange?: { to: string; from: string };
 }
 
-interface UseRiskScoreKpiProps {
+interface RiskScoreKpiCommonProps {
   filterQuery?: string | ESQuery;
   skip?: boolean;
-  riskEntity: EntityType;
   timerange?: { to: string; from: string };
 }
+
+interface SingleEntityProps {
+  riskEntity: EntityType;
+  riskEntities?: undefined;
+}
+
+interface MultipleEntityProps {
+  riskEntity?: EntityType;
+  riskEntities: EntityType[];
+}
+
+type UseRiskScoreKpiProps = RiskScoreKpiCommonProps & (SingleEntityProps | MultipleEntityProps);
 
 export const useRiskScoreKpi = ({
   filterQuery,
   skip,
-  riskEntity,
   timerange,
+  ...rest
 }: UseRiskScoreKpiProps): RiskScoreKpi => {
   const { addError } = useAppToasts();
   const defaultIndex = useGetDefaultRiskIndex();
@@ -69,12 +80,27 @@ export const useRiskScoreKpi = ({
     [timerange]
   );
 
+  const singleEntity = 'riskEntity' in rest ? rest.riskEntity : undefined;
+  const multipleEntities = 'riskEntities' in rest ? rest.riskEntities : undefined;
+
+  const riskEntities = useMemo(() => {
+    if (multipleEntities && multipleEntities.length > 0) {
+      return multipleEntities;
+    }
+
+    return singleEntity ? [singleEntity] : [];
+  }, [multipleEntities, singleEntity]);
+
+  const primaryEntity = riskEntities[0] ?? singleEntity;
+  const shouldSkip = skip || riskEntities.length === 0;
+
   useEffect(() => {
-    if (!skip && defaultIndex && !isStatusLoading && riskEngineHasBeenEnabled) {
+    if (!shouldSkip && defaultIndex && !isStatusLoading && riskEngineHasBeenEnabled) {
       search({
         filterQuery,
         defaultIndex: [defaultIndex],
-        entity: riskEntity,
+        entity: primaryEntity,
+        entities: riskEntities,
         timerange: requestTimerange,
       });
     }
@@ -82,8 +108,9 @@ export const useRiskScoreKpi = ({
     defaultIndex,
     search,
     filterQuery,
-    skip,
-    riskEntity,
+    shouldSkip,
+    primaryEntity,
+    riskEntities,
     requestTimerange,
     isStatusLoading,
     riskEngineHasBeenEnabled,

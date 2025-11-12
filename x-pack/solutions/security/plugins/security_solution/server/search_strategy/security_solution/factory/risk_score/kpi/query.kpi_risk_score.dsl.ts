@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import type { EntityType } from '../../../../../../common/entity_analytics/types';
 import { EntityTypeToIdentifierField } from '../../../../../../common/entity_analytics/types';
-import { EntityTypeToLevelField } from '../../../../../../common/search_strategy';
+import { EntityTypeToLevelField, RiskScoreFields } from '../../../../../../common/search_strategy';
 import type { RiskScoreKpiRequestOptions } from '../../../../../../common/api/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 
@@ -14,6 +15,7 @@ export const buildKpiRiskScoreQuery = ({
   defaultIndex,
   filterQuery,
   entity,
+  entities,
   timerange,
 }: RiskScoreKpiRequestOptions) => {
   const filter = [...createQueryFilterClauses(filterQuery)];
@@ -30,25 +32,21 @@ export const buildKpiRiskScoreQuery = ({
     });
   }
 
-  const dslQuery = {
+  const providedEntities = (
+    entities && entities.length > 0 ? entities : entity ? [entity] : []
+  ).filter((entityType): entityType is EntityType => entityType != null);
+
+  const supportedEntities = providedEntities.filter(
+    (entityType) => EntityTypeToLevelField[entityType] !== RiskScoreFields.unsupported
+  );
+
+  const aggregatedEntities = supportedEntities.length > 0 ? supportedEntities : providedEntities;
+
+  const baseQuery = {
     index: defaultIndex,
     allow_no_indices: false,
     ignore_unavailable: true,
     track_total_hits: false,
-    aggs: {
-      risk: {
-        terms: {
-          field: EntityTypeToLevelField[entity],
-        },
-        aggs: {
-          unique_entries: {
-            cardinality: {
-              field: EntityTypeToIdentifierField[entity],
-            },
-          },
-        },
-      },
-    },
     query: {
       bool: {
         filter,
@@ -57,5 +55,49 @@ export const buildKpiRiskScoreQuery = ({
     size: 0,
   };
 
-  return dslQuery;
+  if (aggregatedEntities.length <= 1) {
+    const resolvedEntity = aggregatedEntities[0] ?? entity;
+    if (!resolvedEntity) {
+      return baseQuery;
+    }
+
+    return {
+      ...baseQuery,
+      aggs: {
+        risk: {
+          terms: {
+            field: EntityTypeToLevelField[resolvedEntity],
+          },
+          aggs: {
+            unique_entries: {
+              cardinality: {
+                field: EntityTypeToIdentifierField[resolvedEntity],
+              },
+            },
+          },
+        },
+      },
+    };
+  }
+
+  const combinedAggs = aggregatedEntities.reduce<Record<string, unknown>>((acc, currentEntity) => {
+    acc[currentEntity] = {
+      terms: {
+        field: EntityTypeToLevelField[currentEntity],
+      },
+      aggs: {
+        unique_entries: {
+          cardinality: {
+            field: EntityTypeToIdentifierField[currentEntity],
+          },
+        },
+      },
+    };
+    return acc;
+  }, {});
+
+  return {
+    ...baseQuery,
+    aggs: combinedAggs,
+  };
 };

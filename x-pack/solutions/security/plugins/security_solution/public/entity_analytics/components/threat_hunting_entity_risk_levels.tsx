@@ -165,56 +165,37 @@ export const ThreatHuntingEntityRiskLevels: React.FC = () => {
   );
 
   const entityTypes = useEntityAnalyticsTypes();
-  const includeHost = entityTypes.includes(EntityType.host);
-  const includeUser = entityTypes.includes(EntityType.user);
-  const includeService = entityTypes.includes(EntityType.service);
+  const enabledEntities = useMemo(() => {
+    const types: EntityType[] = [];
+    if (entityTypes.includes(EntityType.host)) {
+      types.push(EntityType.host);
+    }
+    if (entityTypes.includes(EntityType.user)) {
+      types.push(EntityType.user);
+    }
+    if (entityTypes.includes(EntityType.service)) {
+      types.push(EntityType.service);
+    }
+    return types;
+  }, [entityTypes]);
 
   const toggleId = 'threat-hunting-entity-risk-levels';
   const { toggleStatus, setToggleStatus } = useQueryToggle(toggleId);
 
-  const { severityCount: hostSeverityCount, loading: hostLoading } = useRiskScoreKpi({
+  const { severityCount: combinedSeverityCount, loading: kpiLoading } = useRiskScoreKpi({
     filterQuery,
     timerange,
-    riskEntity: EntityType.host,
-    skip: !includeHost || !toggleStatus,
-  });
-
-  const { severityCount: userSeverityCount, loading: userLoading } = useRiskScoreKpi({
-    filterQuery,
-    timerange,
-    riskEntity: EntityType.user,
-    skip: !includeUser || !toggleStatus,
-  });
-
-  const { severityCount: serviceSeverityCount, loading: serviceLoading } = useRiskScoreKpi({
-    filterQuery,
-    timerange,
-    riskEntity: EntityType.service,
-    skip: !includeService || !toggleStatus,
+    riskEntities: enabledEntities,
+    skip: !toggleStatus || enabledEntities.length === 0,
   });
 
   const aggregatedSeverityCount = useMemo<SeverityCount>(() => {
-    const accumulator = createEmptySeverityCount();
-
-    if (!toggleStatus) {
-      return accumulator;
+    if (!toggleStatus || !combinedSeverityCount) {
+      return createEmptySeverityCount();
     }
 
-    const counts = [hostSeverityCount, userSeverityCount, serviceSeverityCount];
-    counts.forEach((severityCount) => {
-      if (!severityCount) {
-        return;
-      }
-
-      accumulator[RiskSeverity.Unknown] += severityCount[RiskSeverity.Unknown];
-      accumulator[RiskSeverity.Low] += severityCount[RiskSeverity.Low];
-      accumulator[RiskSeverity.Moderate] += severityCount[RiskSeverity.Moderate];
-      accumulator[RiskSeverity.High] += severityCount[RiskSeverity.High];
-      accumulator[RiskSeverity.Critical] += severityCount[RiskSeverity.Critical];
-    });
-
-    return accumulator;
-  }, [hostSeverityCount, userSeverityCount, serviceSeverityCount, toggleStatus]);
+    return { ...createEmptySeverityCount(), ...combinedSeverityCount };
+  }, [combinedSeverityCount, toggleStatus]);
 
   const riskLevelItems = useMemo<RiskLevelDatum[]>(
     () =>
@@ -254,11 +235,7 @@ export const ThreatHuntingEntityRiskLevels: React.FC = () => {
     [baseFillColor, labelToSeverity]
   );
 
-  const isLoading =
-    toggleStatus &&
-    ((includeHost && hostLoading) ||
-      (includeUser && userLoading) ||
-      (includeService && serviceLoading));
+  const isLoading = toggleStatus && kpiLoading;
 
   return (
     <EuiPanel

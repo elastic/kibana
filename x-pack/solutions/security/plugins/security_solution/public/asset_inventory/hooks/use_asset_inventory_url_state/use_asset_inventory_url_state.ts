@@ -4,13 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { type Dispatch, type SetStateAction, useCallback } from 'react';
+import { type Dispatch, type SetStateAction, useCallback, useState, useEffect } from 'react';
 import type { BoolQuery, Filter, Query } from '@kbn/es-query';
 import type { CriteriaWithPagination } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { LOCAL_STORAGE_DATA_TABLE_COLUMNS_KEY } from '../../constants';
+import {
+  LOCAL_STORAGE_DATA_TABLE_COLUMNS_KEY,
+  DEFAULT_VISIBLE_ROWS_PER_PAGE,
+} from '../../constants';
 import { useUrlQuery } from './use_url_query';
-import { usePageSize } from './use_page_size';
 import { useBaseEsQuery } from './use_base_es_query';
 import { usePersistedQuery } from './use_persisted_query';
 
@@ -59,6 +61,47 @@ const getDefaultQuery = ({ query, filters }: AssetsBaseURLQuery) => ({
   pageIndex: 0,
 });
 
+const usePageSizePreference = (localStorageKey?: string) => {
+  const [pageSize, setPageSize] = useState<number>(() => {
+    if (!localStorageKey || typeof window === 'undefined') {
+      return DEFAULT_VISIBLE_ROWS_PER_PAGE;
+    }
+
+    const storedValue = window.localStorage.getItem(localStorageKey);
+    const parsedValue = storedValue != null ? Number(JSON.parse(storedValue)) : NaN;
+
+    return Number.isFinite(parsedValue) && parsedValue > 0
+      ? parsedValue
+      : DEFAULT_VISIBLE_ROWS_PER_PAGE;
+  });
+
+  useEffect(() => {
+    if (!localStorageKey || typeof window === 'undefined') {
+      return;
+    }
+
+    try {
+      window.localStorage.setItem(localStorageKey, JSON.stringify(pageSize));
+    } catch (error) {
+      // noop - best effort persistence
+    }
+  }, [localStorageKey, pageSize]);
+
+  const setPageSizePreference = useCallback((value: SetStateAction<number | undefined>) => {
+    setPageSize((previous) => {
+      const resolvedValue =
+        typeof value === 'function'
+          ? (value as (prev: number) => number | undefined)(previous)
+          : value;
+
+      const nextValue = resolvedValue ?? DEFAULT_VISIBLE_ROWS_PER_PAGE;
+      return nextValue > 0 ? nextValue : DEFAULT_VISIBLE_ROWS_PER_PAGE;
+    });
+  }, []);
+
+  return { pageSize, setPageSize: setPageSizePreference };
+};
+
 /*
   Hook for managing common table state and methods for the Asset Inventory DataTable
 */
@@ -68,12 +111,12 @@ export const useAssetInventoryURLState = ({
   columnsLocalStorageKey,
 }: {
   defaultQuery?: (params: AssetsBaseURLQuery) => URLQuery;
-  paginationLocalStorageKey: string;
+  paginationLocalStorageKey?: string;
   columnsLocalStorageKey?: string;
 }): AssetInventoryURLStateResult => {
   const getPersistedDefaultQuery = usePersistedQuery<URLQuery>(defaultQuery);
   const { urlQuery, setUrlQuery } = useUrlQuery<URLQuery>(getPersistedDefaultQuery);
-  const { pageSize, setPageSize } = usePageSize(paginationLocalStorageKey);
+  const { pageSize, setPageSize } = usePageSizePreference(paginationLocalStorageKey);
 
   const onChangeItemsPerPage = useCallback(
     (newPageSize: number) => {

@@ -12,7 +12,8 @@ import { riskScoreEntity } from './model/risk_score_entity';
 import { EntityRiskQueries } from '../model/factory_query_type';
 
 export const riskScoreKpiRequestOptionsSchema = requestBasicOptionsSchema.extend({
-  entity: riskScoreEntity,
+  entity: riskScoreEntity.optional(),
+  entities: z.array(riskScoreEntity).optional(),
   factoryQueryType: z.literal(EntityRiskQueries.kpi),
 });
 
