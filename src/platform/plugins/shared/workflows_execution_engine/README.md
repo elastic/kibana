@@ -403,7 +403,6 @@ const executionId = await workflowsExecutionEngine.executeWorkflow(
     definition: {
       steps: [
         {
-          id: 'step1',
           name: 'Send Notification',
           type: 'action',
           action: 'slack.postMessage',
