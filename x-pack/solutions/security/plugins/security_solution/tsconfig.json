@@ -259,6 +259,8 @@
     "@kbn/onechat-server",
     "@kbn/core-analytics-server-mocks",
     "@kbn/object-utils",
-    "@kbn/react-query"
+    "@kbn/core-ui-settings-common",
+    "@kbn/react-query",
+    "@kbn/core-lifecycle-browser-mocks"
   ]
 }

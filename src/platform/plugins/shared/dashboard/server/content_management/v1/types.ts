@@ -9,12 +9,11 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import type {
-  CreateIn,
-  CreateResult,
   GetIn,
   SearchIn,
   SearchResult,
   UpdateIn,
+  UpdateResult,
 } from '@kbn/content-management-plugin/common';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import type { storedFilterSchema, querySchema } from '@kbn/es-query-server';
@@ -47,15 +46,8 @@ export type DashboardAPIGetOut = TypeOf<typeof schema.getDashboardAPIGetResultSc
 // TODO remove and have RPC endpoints return same shape as REST API or remove RPC routes altogether
 export type DashboardGetOut = TypeOf<ReturnType<typeof schema.getDashboardGetResultSchema>>;
 
-export type DashboardCreateIn = CreateIn<typeof CONTENT_ID, DashboardState>;
-export type DashboardCreateOut = CreateResult<
-  TypeOf<ReturnType<typeof schema.getDashboardItemSchema>>,
-  TypeOf<typeof schema.dashboardMetaSchema>
->;
-export type DashboardCreateOptions = TypeOf<typeof schema.dashboardCreateOptionsSchema>;
-
 export type DashboardUpdateIn = UpdateIn<typeof CONTENT_ID, Partial<DashboardState>>;
-export type DashboardUpdateOut = CreateResult<
+export type DashboardUpdateOut = UpdateResult<
   TypeOf<ReturnType<typeof schema.getDashboardItemSchema>>,
   TypeOf<typeof schema.dashboardMetaSchema>
 >;
