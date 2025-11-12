@@ -28,6 +28,7 @@ import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
+import useObservable from 'react-use/lib/useObservable';
 import { useProfileAccessor } from '../../../../context_awareness';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -69,13 +70,16 @@ export const useDiscoverHistogram = (
   } = stateContainer.dataState;
   const savedSearchState = useSavedSearch();
   const isEsqlMode = useIsEsqlMode();
+  const documentsState = useObservable<DataDocumentsMsg>(documents$, documents$.getValue());
+  const isChartLoading = useMemo(() => {
+    return isEsqlMode && documentsState?.fetchStatus === FetchStatus.LOADING;
+  }, [isEsqlMode, documentsState?.fetchStatus]);
 
   /**
    * API initialization
    */
 
   const [unifiedHistogramApi, setUnifiedHistogramApi] = useState<UnifiedHistogramApi>();
-  const [isSuggestionLoading, setIsSuggestionLoading] = useState(false);
 
   /**
    * Sync Unified Histogram state with Discover state
@@ -186,25 +190,6 @@ export const useDiscoverHistogram = (
     stateContainer.appState,
     unifiedHistogramApi?.state$,
   ]);
-
-  useEffect(() => {
-    if (!isEsqlMode) {
-      setIsSuggestionLoading(false);
-      return;
-    }
-
-    const documentsLoading = documents$.subscribe((state) => {
-      if (state.fetchStatus === FetchStatus.LOADING) {
-        setIsSuggestionLoading(true);
-      } else {
-        setIsSuggestionLoading(false);
-      }
-    });
-
-    return () => {
-      documentsLoading.unsubscribe();
-    };
-  }, [isEsqlMode, documents$]);
 
   /**
    * Request params
@@ -436,7 +421,7 @@ export const useDiscoverHistogram = (
       onBrushEnd: histogramCustomization?.onBrushEnd,
       withDefaultActions: histogramCustomization?.withDefaultActions,
       disabledActions: histogramCustomization?.disabledActions,
-      isChartLoading: isSuggestionLoading,
+      isChartLoading,
       onVisContextChanged: isEsqlMode ? onVisContextChanged : undefined,
       onBreakdownFieldChange,
       onTimeIntervalChange,
@@ -448,7 +433,7 @@ export const useDiscoverHistogram = (
       histogramCustomization?.onFilter,
       histogramCustomization?.withDefaultActions,
       isEsqlMode,
-      isSuggestionLoading,
+      isChartLoading,
       onBreakdownFieldChange,
       onTimeIntervalChange,
       onVisContextChanged,
