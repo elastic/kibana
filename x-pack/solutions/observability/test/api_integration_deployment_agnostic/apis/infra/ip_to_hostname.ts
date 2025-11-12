@@ -14,6 +14,8 @@ export default function ipToHostNameTest({ getService }: DeploymentAgnosticFtrPr
   const esArchiver = getService('esArchiver');
 
   describe('API /api/infra/ip_to_host', () => {
+    // Fails on MKI: https://github.com/elastic/kibana/issues/242628
+    this.tags(['failsOnMKI']);
     let supertestWithAdminScope: SupertestWithRoleScopeType;
 
     before(async () => {

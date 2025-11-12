@@ -23,6 +23,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
 
   describe('API /api/metrics/source', () => {
+    // Fails on MKI: https://github.com/elastic/kibana/issues/242627
+    this.tags(['failsOnMKI']);
     let supertestWithAdminScope: SupertestWithRoleScopeType;
 
     const patchRequest = async (
