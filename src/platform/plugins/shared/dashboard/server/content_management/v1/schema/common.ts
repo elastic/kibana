@@ -12,7 +12,7 @@ import { schema } from '@kbn/config-schema';
 import { refreshIntervalSchema } from '@kbn/data-service-server';
 import { controlsGroupSchema } from '@kbn/controls-schemas';
 import { referenceSchema } from '@kbn/content-management-utils';
-import { storedFilterSchema, querySchema, timeRangeSchema } from '@kbn/es-query-server';
+import { asCodeFilterSchema, querySchema, timeRangeSchema } from '@kbn/es-query-server';
 import { embeddableService } from '../../../kibana_services';
 
 import {
@@ -157,7 +157,7 @@ export function getDashboardStateSchema() {
   return {
     controlGroupInput: schema.maybe(controlsGroupSchema),
     description: schema.maybe(schema.string({ meta: { description: 'A short description.' } })),
-    filters: schema.maybe(schema.arrayOf(storedFilterSchema)),
+    filters: schema.maybe(schema.arrayOf(asCodeFilterSchema)),
     options: schema.maybe(optionsSchema),
     panels: schema.arrayOf(schema.oneOf([getPanelSchema(), getSectionSchema()]), {
       defaultValue: [],

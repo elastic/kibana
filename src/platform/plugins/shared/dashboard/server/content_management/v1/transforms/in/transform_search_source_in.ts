@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { toStoredFilter } from '@kbn/es-query';
 import { extractReferences } from '@kbn/data-plugin/common';
 import type { DashboardState } from '../../types';
 import { logger } from '../../../../kibana_services';
@@ -20,10 +21,11 @@ export function transformSearchSourceIn(
   }
 
   try {
+    const storedFilters = filters?.map(toStoredFilter);
     // Extract references expects an object with singular `filter` and `query`.
     // But `DashboardState` uses plural `filters` and singular `query`.
     const [extractedState, references] = extractReferences({
-      filter: filters,
+      filter: storedFilters,
       query,
     });
     return { searchSourceJSON: JSON.stringify(extractedState), references };
