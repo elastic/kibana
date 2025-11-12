@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
 import { EuiBadgeGroup, EuiCallOut, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
 import { useStreamsAppParams } from '../../../hooks/use_streams_app_params';
+import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
 import { RedirectTo } from '../../redirect_to';
 import { StreamDetailRouting } from '../stream_detail_routing';
 import { StreamDetailSchemaEditor } from '../stream_detail_schema_editor';
@@ -19,6 +20,7 @@ import { WiredAdvancedView } from './wired_advanced_view';
 import { StreamDetailDataQuality } from '../../stream_data_quality';
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
 import { WiredStreamBadge } from '../../stream_badges';
+import { StreamDetailAttachments } from '../../stream_detail_attachments';
 
 const wiredStreamManagementSubTabs = [
   'partitioning',
@@ -28,6 +30,7 @@ const wiredStreamManagementSubTabs = [
   'advanced',
   'significantEvents',
   'dataQuality',
+  'attachments',
   'references',
 ] as const;
 
@@ -53,6 +56,10 @@ export function WiredStreamDetailManagement({
   const {
     path: { key, tab },
   } = useStreamsAppParams('/{key}/management/{tab}');
+
+  const {
+    features: { attachments },
+  } = useStreamsPrivileges();
 
   const { processing, isLoading, ...otherTabs } = useStreamsDetailManagementTabs({
     definition,
@@ -148,6 +155,16 @@ export function WiredStreamDetailManagement({
         </EuiToolTip>
       ),
     },
+    ...(attachments?.enabled
+      ? {
+          attachments: {
+            content: <StreamDetailAttachments definition={definition} />,
+            label: i18n.translate('xpack.streams.streamDetailView.attachmentsTab', {
+              defaultMessage: 'Attachments',
+            }),
+          },
+        }
+      : {}),
     ...otherTabs,
     ...(definition.privileges.manage
       ? {
