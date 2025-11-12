@@ -45,10 +45,19 @@ export const fetchGraph = async ({
     }
   });
 
+  // Filter out empty index patterns
+  const validIndexPatterns = indexPatterns.filter((indexPattern) => indexPattern.length > 0);
+
+  // If no valid index patterns, return empty result
+  if (validIndexPatterns.length === 0) {
+    logger.warn('No valid index patterns provided, returning empty result');
+    return [] as unknown as EsqlToRecords<GraphEdge>;
+  }
+
   const isEnrichPolicyExists = await checkEnrichPolicyExists(esClient, logger, spaceId);
 
   const query = buildEsqlQuery({
-    indexPatterns,
+    indexPatterns: validIndexPatterns,
     originEventIds,
     originAlertIds,
     isEnrichPolicyExists,
