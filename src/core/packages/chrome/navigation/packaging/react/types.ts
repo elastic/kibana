@@ -23,8 +23,11 @@
  *    path mappings, etc.) and significantly slower builds.
  *
  * 3. By defining types inline, we can use a simple build command:
- *    `tsc types.ts --declaration --emitDeclarationOnly --skipLibCheck`
+ *    `tsc types.ts --declaration --emitDeclarationOnly --outFile --skipLibCheck`
  *    This compiles in < 1 second and produces clean, minimal output (3.2 KB).
+ *
+ * 4. IMPORTANT: We cannot use any imports in this file when using --outFile, as TypeScript will
+ *    wrap the output in a `declare module` block, making it unusable. All types must be inlined.
  *
  * MAINTENANCE:
  * - When public API types change, update both the source types and this file in the same commit.
@@ -32,9 +35,9 @@
  * - Public API types rarely change, so duplication is minimal maintenance burden.
  */
 
-import type { ReactNode } from 'react';
-
 // Re-define all types inline to avoid importing from source files
+// ReactNode equivalent (string | number | React.ReactElement | null | undefined)
+type ReactNode = any;
 
 export type BadgeType = 'beta' | 'techPreview';
 
@@ -140,3 +143,7 @@ export interface NavigationProps {
 
 // Alias for external package
 export type OneNavigationProps = NavigationProps;
+
+// Component declarations (will be compiled to function declarations in .d.ts)
+export declare function OneNavigation(props: OneNavigationProps): any;
+export declare function Navigation(props: NavigationProps): any;
