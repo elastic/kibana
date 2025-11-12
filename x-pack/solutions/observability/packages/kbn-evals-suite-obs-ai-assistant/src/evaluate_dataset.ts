@@ -14,7 +14,7 @@ import {
 } from '@kbn/evals';
 import type { Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
-import type { ChatClient } from './clients/chat/chat_client';
+import type { ChatClient } from './clients/chat';
 
 interface ObservabilityAIAssistantDatasetExample extends Example {
   input: {
