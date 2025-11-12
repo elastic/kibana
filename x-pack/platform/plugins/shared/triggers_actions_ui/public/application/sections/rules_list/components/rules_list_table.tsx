@@ -417,7 +417,11 @@ export const RulesListTable = (props: RulesListTableProps) => {
                 <EuiFlexItem grow={false}>
                   <EuiFlexGroup gutterSize="xs">
                     <EuiFlexItem grow={false}>
-                      <EuiLink title={name} href={pathToRuleDetails}>
+                      <EuiLink
+                        title={name}
+                        href={pathToRuleDetails}
+                        data-test-subj={`ruleNameLink-${rule.id}`}
+                      >
                         {name}
                       </EuiLink>
                     </EuiFlexItem>
