@@ -44,6 +44,7 @@ import { useAlertResultsToast } from './hooks/use_alert_results_toast';
 import { setBreadcrumbs } from '../../utils/breadcrumbs';
 import { useUnsavedChanges } from './state_management/hooks/use_unsaved_changes';
 import { DiscoverTopNavMenuProvider } from './components/top_nav/discover_topnav_menu';
+import { i18n } from '@kbn/i18n';
 
 export interface MainRouteProps {
   customizationContext: DiscoverCustomizationContext;
@@ -252,11 +253,29 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
     <rootProfileState.AppWrapper>
       <ChartPortalsRenderer runtimeStateManager={runtimeStateManager}>
         <DiscoverTopNavMenuProvider>
-          {tabsEnabled && customizationContext.displayMode !== 'embedded' ? (
-            <TabsView {...props} />
-          ) : (
-            <SingleTabView {...props} />
-          )}
+          <>
+            <h1
+              id="savedSearchTitle"
+              className="euiScreenReaderOnly"
+              data-test-subj="discoverSavedSearchTitle"
+            >
+              {persistedDiscoverSession?.title
+                ? i18n.translate('discover.pageTitleWithSavedSearch', {
+                    defaultMessage: 'Discover - {savedSearchTitle}',
+                    values: {
+                      savedSearchTitle: persistedDiscoverSession.title,
+                    },
+                  })
+                : i18n.translate('discover.pageTitleWithoutSavedSearch', {
+                    defaultMessage: 'Discover - Search not yet saved',
+                  })}
+            </h1>
+            {tabsEnabled && customizationContext.displayMode !== 'embedded' ? (
+              <TabsView {...props} />
+            ) : (
+              <SingleTabView {...props} />
+            )}
+          </>
         </DiscoverTopNavMenuProvider>
       </ChartPortalsRenderer>
     </rootProfileState.AppWrapper>
