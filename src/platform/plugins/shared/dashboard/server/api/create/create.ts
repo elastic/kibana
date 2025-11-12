@@ -22,8 +22,7 @@ import type { DashboardState } from '../../content_management';
 
 export async function create(
   requestCtx: RequestHandlerContext,
-  searchBody: DashboardCreateRequestBody,
-  isAccessControlEnabled: boolean
+  searchBody: DashboardCreateRequestBody
 ): Promise<DashboardCreateResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
 
@@ -43,6 +42,8 @@ export async function create(
   if (transformInError) {
     throw Boom.badRequest(`Invalid data. ${transformInError.message}`);
   }
+
+  const isAccessControlEnabled = core.savedObjects.typeRegistry.isAccessControlEnabled();
 
   const savedObject = await core.savedObjects.client.create<DashboardSavedObjectAttributes>(
     DASHBOARD_SAVED_OBJECT_TYPE,

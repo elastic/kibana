@@ -29,7 +29,6 @@ interface RegisterAPIRoutesArgs {
   contentManagement: ContentManagementServerSetup;
   restCounter?: UsageCounter;
   logger: Logger;
-  isAccessControlEnabled: boolean;
 }
 
 const formatResult = (item: DashboardItem) => {
@@ -61,11 +60,10 @@ export function registerAPIRoutes({
   contentManagement,
   restCounter,
   logger,
-  isAccessControlEnabled,
 }: RegisterAPIRoutesArgs) {
   const { versioned: versionedRouter } = http.createRouter();
 
-  registerCreateRoute(versionedRouter, isAccessControlEnabled);
+  registerCreateRoute(versionedRouter);
 
   // Update API route
 

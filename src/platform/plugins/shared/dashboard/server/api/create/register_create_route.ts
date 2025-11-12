@@ -13,10 +13,7 @@ import { commonRouteConfig, INTERNAL_API_VERSION, PUBLIC_API_PATH } from '../con
 import { getCreateRequestBody, getCreateResponseBody } from './schemas';
 import { create } from './create';
 
-export function registerCreateRoute(
-  router: VersionedRouter<RequestHandlerContext>,
-  isAccessControlEnabled: boolean
-) {
+export function registerCreateRoute(router: VersionedRouter<RequestHandlerContext>) {
   const createRoute = router.post({
     path: PUBLIC_API_PATH,
     summary: 'Create a dashboard',
@@ -40,7 +37,7 @@ export function registerCreateRoute(
     async (ctx, req, res) => {
       let result;
       try {
-        result = await create(ctx, req.body, isAccessControlEnabled);
+        result = await create(ctx, req.body);
       } catch (e) {
         if (e.isBoom && e.output.statusCode === 409) {
           return res.conflict({
