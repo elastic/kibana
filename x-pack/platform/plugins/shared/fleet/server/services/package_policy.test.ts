@@ -86,6 +86,7 @@ import { agentPolicyService } from './agent_policy';
 import { isSpaceAwarenessEnabled } from './spaces/helpers';
 import { licenseService } from './license';
 import { cloudConnectorService } from './cloud_connector';
+import { isSecretStorageEnabled, extractAndWriteSecrets } from './secrets';
 
 jest.mock('./spaces/helpers');
 
@@ -275,6 +276,7 @@ jest.mock('./secrets', () => ({
     id,
     isSecretRef: true,
   })),
+  extractAndWriteSecrets: jest.fn(),
 }));
 
 type CombinedExternalCallback = PutPackagePolicyUpdateCallback | PostPackagePolicyCreateCallback;
@@ -589,6 +591,208 @@ describe('Package policy service', () => {
       );
 
       expect(result.supports_cloud_connector).toBe(false);
+    });
+
+    it('should remove cloud_connector_name transient var when creating package policy with cloud connector', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const soClient = createSavedObjectClientMock();
+
+      // Enable secret storage so the removal logic executes
+      jest.mocked(isSecretStorageEnabled).mockResolvedValue(true);
+
+      // Mock extractAndWriteSecrets to return policy with cloud_connector_name
+      jest.mocked(extractAndWriteSecrets).mockResolvedValue({
+        packagePolicy: {
+          name: 'Test Cloud Connector Policy',
+          namespace: 'test',
+          enabled: true,
+          policy_id: 'test-policy',
+          policy_ids: ['test-policy'],
+          supports_cloud_connector: true,
+          supports_agentless: true,
+          package: {
+            name: 'aws',
+            title: 'AWS',
+            version: '0.3.3',
+          },
+          inputs: [
+            {
+              type: 'aws',
+              enabled: true,
+              streams: [
+                {
+                  enabled: true,
+                  data_stream: { dataset: 'test', type: 'logs' },
+                  vars: {
+                    role_arn: {
+                      value: 'arn:aws:iam::123456789012:role/TestRole',
+                      type: 'text',
+                    },
+                    external_id: {
+                      value: {
+                        id: 'ABCDEFGHIJKLMNOPQRST',
+                        isSecretRef: true,
+                      },
+                      type: 'password',
+                    },
+                    cloud_connector_name: {
+                      value: 'My Custom Connector Name',
+                      type: 'text',
+                    },
+                  },
+                },
+              ],
+            },
+          ],
+        } as any,
+        secretReferences: [],
+      });
+
+      // Mock cloud connector creation
+      const originalCreate = cloudConnectorService.create;
+      cloudConnectorService.create = jest.fn().mockResolvedValue({
+        id: 'cloud-connector-123',
+        name: 'test-connector',
+        cloudProvider: 'aws',
+      });
+
+      // Mock packageToPackagePolicy to return policy with cloud connector support
+      (packageToPackagePolicy as jest.Mock).mockReturnValue({
+        name: 'Test Cloud Connector Policy',
+        namespace: 'test',
+        enabled: true,
+        policy_id: 'test-policy',
+        policy_ids: ['test-policy'],
+        supports_cloud_connector: true,
+        supports_agentless: true,
+        package: {
+          name: 'aws',
+          title: 'AWS',
+          version: '0.3.3',
+        },
+        inputs: [
+          {
+            type: 'aws',
+            enabled: true,
+            streams: [
+              {
+                enabled: true,
+                data_stream: { dataset: 'test', type: 'logs' },
+                vars: {
+                  role_arn: {
+                    value: 'arn:aws:iam::123456789012:role/TestRole',
+                    type: 'text',
+                  },
+                  external_id: {
+                    value: {
+                      id: 'ABCDEFGHIJKLMNOPQRST',
+                      isSecretRef: true,
+                    },
+                    type: 'password',
+                  },
+                  cloud_connector_name: {
+                    value: 'My Custom Connector Name',
+                    type: 'text',
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      });
+
+      const packagePolicyWithTransientVar = {
+        name: 'Test Cloud Connector Policy',
+        namespace: 'test',
+        enabled: true,
+        policy_id: 'test-policy',
+        policy_ids: ['test-policy'],
+        supports_cloud_connector: true,
+        supports_agentless: true,
+        cloud_connector_id: undefined,
+        inputs: [
+          {
+            type: 'aws',
+            enabled: true,
+            streams: [
+              {
+                enabled: true,
+                data_stream: { dataset: 'test', type: 'logs' },
+                vars: {
+                  role_arn: {
+                    value: 'arn:aws:iam::123456789012:role/TestRole',
+                    type: 'text',
+                  },
+                  external_id: {
+                    value: {
+                      id: 'ABCDEFGHIJKLMNOPQRST',
+                      isSecretRef: true,
+                    },
+                    type: 'password',
+                  },
+                  cloud_connector_name: {
+                    value: 'My Custom Connector Name',
+                    type: 'text',
+                  },
+                },
+              },
+            ],
+          },
+        ],
+        package: {
+          name: 'aws',
+          title: 'AWS',
+          version: '0.3.3',
+        },
+      };
+
+      // Capture what's actually saved to verify cloud_connector_name is removed
+      let savedAttributes: any;
+      soClient.create.mockImplementation(async (_type, attributes) => {
+        savedAttributes = attributes;
+        return {
+          id: 'test-package-policy',
+          attributes: savedAttributes,
+          references: [],
+          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        };
+      });
+
+      mockAgentPolicyGet(undefined, {
+        id: 'test-policy',
+        supports_agentless: true,
+        agentless: {
+          cloud_connectors: {
+            enabled: true,
+            target_csp: 'aws',
+          },
+        },
+      });
+
+      try {
+        const result = await packagePolicyService.create(
+          soClient,
+          esClient,
+          packagePolicyWithTransientVar,
+          { skipUniqueNameVerification: true }
+        );
+
+        // Verify cloud_connector_name was removed from the saved policy
+        const savedVars = savedAttributes.inputs[0].streams[0].vars;
+        expect(savedVars).toHaveProperty('role_arn');
+        expect(savedVars).toHaveProperty('external_id');
+        expect(savedVars).not.toHaveProperty('cloud_connector_name');
+
+        // Also verify the returned result has it removed
+        expect(result.inputs[0].streams[0].vars).not.toHaveProperty('cloud_connector_name');
+
+        // Verify cloud connector was created
+        expect(result.cloud_connector_id).toBe('cloud-connector-123');
+      } finally {
+        cloudConnectorService.create = originalCreate;
+        jest.mocked(isSecretStorageEnabled).mockReset();
+        jest.mocked(extractAndWriteSecrets).mockReset();
+      }
     });
   });
   describe('createCloudConnectorForPackagePolicy', () => {

@@ -558,9 +558,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         }
 
         // TODO: Remove after https://github.com/elastic/security-team/issues/14608
-        enrichedPackagePolicy = removeCloudConnectorTransientVars(enrichedPackagePolicy, [
-          'cloud_connector_name',
-        ]);
+        enrichedPackagePolicy = removeCloudConnectorTransientVars(enrichedPackagePolicy);
       }
 
       inputs = enrichedPackagePolicy.inputs as PackagePolicyInput[];
@@ -3022,10 +3020,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       logger
     );
 
-    // Extract cloud connector name from input vars
-    const vars = enrichedPackagePolicy.inputs.find((input) => input.enabled)?.streams[0]?.vars;
-    const cloudConnectorName = vars?.cloud_connector_name?.value;
-
     if (cloudConnectorVars && enrichedPackagePolicy?.supports_cloud_connector) {
       if (enrichedPackagePolicy?.cloud_connector_id) {
         const existingCloudConnector = await soClient.get<CloudConnector>(
@@ -3051,11 +3045,15 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       } else {
         logger.info(`Creating cloud connector: ${enrichedPackagePolicy.cloud_connector_id}`);
         try {
-          // Use user-provided name if available, fallback to generated name
-          const connectorName =
-            cloudConnectorName || `${cloudProvider}-cloud-connector: ${enrichedPackagePolicy.name}`;
+          // Extract cloud connector name from input vars
+          const vars = enrichedPackagePolicy.inputs?.find((input) => input.enabled)?.streams[0]
+            ?.vars;
+          const cloudConnectorName = vars?.cloud_connector_name?.value;
+
           const cloudConnector = await cloudConnectorService.create(soClient, {
-            name: connectorName,
+            name:
+              cloudConnectorName ||
+              `${cloudProvider}-cloud-connector: ${enrichedPackagePolicy.name}`,
             vars: cloudConnectorVars,
             cloudProvider,
           });
