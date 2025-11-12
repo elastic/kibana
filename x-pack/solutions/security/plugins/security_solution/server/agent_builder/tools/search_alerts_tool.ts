@@ -37,32 +37,41 @@ export const searchAlertsTool = (): BuiltinToolDefinition<typeof searchAlertsSch
       const spaceId = getSpaceIdFromRequest(request);
       const spaceAwareIndex = `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
 
-      // Get the ESQL query with the space-aware index
-      const spaceAwareQuery = getAlertsEsqlQuery(
-        spaceAwareIndex,
-        '(@timestamp <=?end and @timestamp >?start) and TO_LOWER(kibana.alert.workflow_status) == ?status'
-      );
+      // Build WHERE clause conditionally based on provided parameters
+      const hasStatus = params.status !== undefined && params.status !== null;
+      const whereClause = hasStatus
+        ? '(@timestamp <=?end and @timestamp >?start) and TO_LOWER(kibana.alert.workflow_status) == ?status'
+        : '(@timestamp <=?end and @timestamp >?start)';
 
-      // Create ESQL tool configuration
+      // Get the ESQL query with the space-aware index
+      const spaceAwareQuery = getAlertsEsqlQuery(spaceAwareIndex, whereClause);
+
+      // Create ESQL tool configuration with conditional status param
+      const baseParams = {
+        end: {
+          type: 'keyword' as const,
+          description: 'The end of the date range',
+          optional: false,
+        },
+        start: {
+          type: 'keyword' as const,
+          description: 'The start of the date range',
+          optional: false,
+        },
+      };
+
       const esqlConfig: EsqlToolConfig = {
         query: spaceAwareQuery,
-        params: {
-          end: {
-            type: 'keyword',
-            description: 'The end of the date range',
-            optional: false,
-          },
-          start: {
-            type: 'keyword',
-            description: 'The start of the date range',
-            optional: false,
-          },
-          status: {
-            type: 'keyword',
-            description: 'The alert workflow status',
-            optional: true,
-          },
-        },
+        params: hasStatus
+          ? {
+              ...baseParams,
+              status: {
+                type: 'keyword' as const,
+                description: 'The alert workflow status',
+                optional: true,
+              },
+            }
+          : baseParams,
       };
 
       // Resolve parameters with defaults
@@ -74,16 +83,14 @@ export const searchAlertsTool = (): BuiltinToolDefinition<typeof searchAlertsSch
           acc[paramName] = providedValue;
         } else if (param.optional && param.defaultValue !== undefined) {
           acc[paramName] = param.defaultValue;
-        } else {
-          acc[paramName] = null;
         }
 
         return acc;
       }, {} as Record<string, unknown>);
 
-      // Build parameter array for ES client
+      // Build parameter array for ES client (only include provided params)
       const paramArray = Object.keys(esqlConfig.params).map((param) => ({
-        [param]: resolvedParams[param] ?? null,
+        [param]: resolvedParams[param],
       }));
 
       // Execute ESQL query
