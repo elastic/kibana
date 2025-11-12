@@ -63,17 +63,31 @@ if [ -z "$VAULT_USERNAME" ] || [ -z "$VAULT_PASSWORD" ]; then
   exit 1
 fi
 
-#TODO: Remove this after debugging
-echo "Username length: ${#VAULT_USERNAME} characters"
-echo "Password length: ${#VAULT_PASSWORD} characters"
-
 # Checkout security-documents-generator
 echo "--- Checkout security-documents-generator"
 SECURITY_DOCS_GEN_DIR="${KIBANA_DIR}/security-documents-generator"
 rm -rf "$SECURITY_DOCS_GEN_DIR"
 
-git clone https://github.com/elastic/security-documents-generator.git "$SECURITY_DOCS_GEN_DIR"
-cd "$SECURITY_DOCS_GEN_DIR"
+# Allow specifying a branch or PR number via environment variable
+# Usage: SECURITY_DOCS_GEN_BRANCH=my-branch or SECURITY_DOCS_GEN_PR=123
+SECURITY_DOCS_GEN_REPO="https://github.com/elastic/security-documents-generator.git"
+
+if [ -n "${SECURITY_DOCS_GEN_PR:-}" ]; then
+  echo "Checking out PR #${SECURITY_DOCS_GEN_PR} from security-documents-generator"
+  git clone "$SECURITY_DOCS_GEN_REPO" "$SECURITY_DOCS_GEN_DIR"
+  cd "$SECURITY_DOCS_GEN_DIR"
+  # Fetch the PR and checkout the merge commit
+  git fetch origin "pull/${SECURITY_DOCS_GEN_PR}/head:pr-${SECURITY_DOCS_GEN_PR}"
+  git checkout "pr-${SECURITY_DOCS_GEN_PR}"
+elif [ -n "${SECURITY_DOCS_GEN_BRANCH:-}" ]; then
+  echo "Checking out branch '${SECURITY_DOCS_GEN_BRANCH}' from security-documents-generator"
+  git clone --branch "${SECURITY_DOCS_GEN_BRANCH}" "$SECURITY_DOCS_GEN_REPO" "$SECURITY_DOCS_GEN_DIR"
+  cd "$SECURITY_DOCS_GEN_DIR"
+else
+  echo "Checking out main branch from security-documents-generator"
+  git clone "$SECURITY_DOCS_GEN_REPO" "$SECURITY_DOCS_GEN_DIR"
+  cd "$SECURITY_DOCS_GEN_DIR"
+fi
 
 # Setup Node.js version for security-documents-generator
 echo "--- Setup Node.js for security-documents-generator"

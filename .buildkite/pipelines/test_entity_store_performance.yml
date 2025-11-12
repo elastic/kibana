@@ -72,6 +72,8 @@ steps:
 
       - command: .buildkite/scripts/steps/entity_store_performance/run_performance_tests_orchestrator.sh
         label: 'Run Entity Store Performance Tests'
+        env:
+          SECURITY_DOCS_GEN_BRANCH: dg-update-entity-store-perf #TODO: Remove this after debugging
         agents:
           provider: gcp
           image: family/kibana-ubuntu-2404
