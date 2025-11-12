@@ -137,6 +137,12 @@ jest.mock('../epm/packages/cleanup', () => {
   };
 });
 
+jest.mock('../agents/crud', () => {
+  return {
+    fetchAllAgentsByKuery: jest.fn(),
+  };
+});
+
 jest.mock('../upgrade_sender', () => {
   return {
     sendTelemetryEvents: jest.fn(),
@@ -420,6 +426,54 @@ describe('Upgrade', () => {
         },
       ]);
     });
+
+    it('should fail an item when agent version constraint is not met and force is false', async () => {
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'pp-1',
+            type: 'abcd',
+            references: [],
+            version: '0.9.0',
+            attributes: {
+              ...createPackagePolicyMock(),
+              id: 'pp-1',
+              name: 'pp-1',
+              policy_ids: ['ap-1'],
+              is_managed: false,
+              package: { name: 'endpoint', title: 'Endpoint', version: '0.9.0' },
+            },
+          },
+        ],
+      } as any);
+      soClient.bulkUpdate.mockResolvedValue({ saved_objects: [] } as any);
+
+      const { getPackageInfo } = jest.requireMock('../epm/packages');
+      getPackageInfo.mockResolvedValue({
+        name: 'endpoint',
+        version: '1.0.0',
+        conditions: { agent: { version: '8.12.0' } },
+      });
+
+      const { fetchAllAgentsByKuery } = jest.requireMock('../agents/crud');
+      fetchAllAgentsByKuery.mockResolvedValue(
+        (async function* () {
+          yield [{ id: 'a1', local_metadata: { elastic: { agent: { version: '8.11.0' } } } }];
+        })()
+      );
+
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const res = await _packagePoliciesBulkUpgrade({
+        packagePolicyService,
+        soClient,
+        esClient,
+        ids: ['pp-1'],
+        options: { force: false },
+      });
+
+      expect(res[0].success).toBe(false);
+      expect(String((res[0] as any).body?.message)).toMatch(/required version range.*8\.12\.0/i);
+    });
   });
 
   describe('upgrade', () => {
@@ -473,6 +527,107 @@ describe('Upgrade', () => {
         }),
         expect.anything()
       );
+    });
+
+    it('should reject upgrade if agent version constraint is not satisfied and force is false', async () => {
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'pp-2',
+            type: 'abcd',
+            references: [],
+            version: '0.9.0',
+            attributes: {
+              ...createPackagePolicyMock(),
+              id: 'pp-2',
+              name: 'pp-2',
+              policy_ids: ['ap-1'],
+              is_managed: false,
+              package: { name: 'endpoint', title: 'Endpoint', version: '0.9.0' },
+            },
+          },
+        ],
+      } as any);
+
+      const { getPackageInfo } = jest.requireMock('../epm/packages');
+      getPackageInfo.mockResolvedValue({
+        name: 'endpoint',
+        version: '1.0.0',
+        conditions: { agent: { version: '8.12.0' } },
+      });
+
+      const { fetchAllAgentsByKuery } = jest.requireMock('../agents/crud');
+      fetchAllAgentsByKuery.mockResolvedValue(
+        (async function* () {
+          yield [{ id: 'a1', local_metadata: { elastic: { agent: { version: '8.11.0' } } } }];
+        })()
+      );
+
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const res = await _packagePoliciesUpgrade({
+        packagePolicyService,
+        soClient,
+        esClient,
+        id: 'pp-2',
+        options: { force: false },
+      });
+
+      expect(res[0].success).toBe(false);
+      expect(String((res[0] as any).body?.message)).toMatch(/required version range.*8\.12\.0/i);
+    });
+
+    it('should allow upgrade with force true if agent version constraint is not satisfied', async () => {
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'pp-3',
+            type: 'abcd',
+            references: [],
+            version: '0.9.0',
+            attributes: {
+              ...createPackagePolicyMock(),
+              id: 'pp-3',
+              name: 'pp-3',
+              policy_ids: ['ap-1'],
+              is_managed: false,
+              package: { name: 'endpoint', title: 'Endpoint', version: '0.9.0' },
+            },
+          },
+        ],
+      } as any);
+
+      // Mock packagePolicyService.update to succeed
+      jest.spyOn(packagePolicyService, 'update').mockResolvedValue({
+        ...createPackagePolicyMock(),
+        id: 'pp-3',
+        name: 'pp-3',
+        package: { name: 'endpoint', title: 'Endpoint', version: '1.0.0' },
+      } as any);
+
+      const { getPackageInfo } = jest.requireMock('../epm/packages');
+      getPackageInfo.mockResolvedValue({
+        name: 'endpoint',
+        version: '1.0.0',
+        conditions: { agent: { version: '8.12.0' } },
+      });
+
+      const { fetchAllAgentsByKuery } = jest.requireMock('../agents/crud');
+      fetchAllAgentsByKuery.mockResolvedValue(
+        (async function* () {
+          yield [{ id: 'a1', local_metadata: { elastic: { agent: { version: '8.11.0' } } } }];
+        })()
+      );
+
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const res = await _packagePoliciesUpgrade({
+        packagePolicyService,
+        soClient,
+        esClient,
+        id: 'pp-3',
+        options: { force: true },
+      });
+
+      expect(res[0].success).toBe(true);
     });
   });
 });

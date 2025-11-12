@@ -222,6 +222,7 @@ export const AgentPolicyBaseSchema = {
       ),
     ])
   ),
+  min_agent_version: schema.maybe(schema.string()),
 };
 
 function validateGlobalDataTagInput(tags: GlobalDataTag[]): string | undefined {

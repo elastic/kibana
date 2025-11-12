@@ -458,6 +458,7 @@ export const PostAgentReassignRequestSchema = {
   }),
   body: schema.object({
     policy_id: schema.string(),
+    force: schema.maybe(schema.boolean()),
   }),
 };
 
@@ -535,6 +536,7 @@ export const PostBulkAgentReassignRequestSchema = {
     agents: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
     batchSize: schema.maybe(schema.number()),
     includeInactive: schema.boolean({ defaultValue: false }),
+    force: schema.maybe(schema.boolean()),
   }),
 };
 

@@ -158,6 +158,29 @@ jest.mock('../../services/epm/packages', () => {
   };
 });
 
+jest.mock('../../services/agents/crud', () => {
+  return {
+    fetchAllAgentsByKuery: jest.fn(),
+  };
+});
+
+jest.mock('../../services/agents/version_compatibility', () => {
+  return {
+    isAnyAgentBelowRequiredVersion: jest.fn(),
+    extractMinVersionFromRanges: jest.fn((ranges) => {
+      // Simple mock: return the first range as-is for testing
+      // In real implementation, this extracts minimum version from semver ranges
+      if (ranges && ranges.length > 0) {
+        const range = ranges[0];
+        // Extract version from common patterns like "8.12.0", "^8.12.0", ">=8.12.0"
+        const match = range.match(/(\d+\.\d+\.\d+)/);
+        return match ? match[1] : undefined;
+      }
+      return undefined;
+    }),
+  };
+});
+
 let testPackagePolicy: PackagePolicy;
 
 describe('When calling package policy', () => {
@@ -539,6 +562,119 @@ describe('When calling package policy', () => {
       const validationResp = PackagePolicyResponseSchema.validate(responseItem);
       expect(validationResp).toEqual(responseItem);
     });
+
+    it('should reject when package update requires higher agent version and force is false', async () => {
+      const { getPackageInfo } = jest.requireMock('../../services/epm/packages');
+      const { isAnyAgentBelowRequiredVersion } = jest.requireMock(
+        '../../services/agents/version_compatibility'
+      );
+
+      // Package update requires agent >= 8.12.0
+      getPackageInfo.mockResolvedValue({
+        name: 'endpoint',
+        version: '0.6.0',
+        conditions: { agent: { version: '8.12.0' } },
+      });
+
+      // Some agents on the policy have version 8.11.0
+      isAnyAgentBelowRequiredVersion.mockResolvedValue(true);
+
+      const newData = {
+        package: { name: 'endpoint', title: 'Elastic Endpoint', version: '0.6.0' },
+      };
+      const request = getUpdateKibanaRequest(newData as any);
+
+      await expect(() => routeHandler(context, request, response)).rejects.toThrow(
+        /required version range.*8\.12\.0/i
+      );
+    });
+
+    it('should allow package update when all agents meet version requirement', async () => {
+      const { getPackageInfo } = jest.requireMock('../../services/epm/packages');
+      const { isAnyAgentBelowRequiredVersion } = jest.requireMock(
+        '../../services/agents/version_compatibility'
+      );
+
+      // Package update requires agent >= 8.12.0
+      getPackageInfo.mockResolvedValue({
+        name: 'endpoint',
+        version: '0.6.0',
+        conditions: { agent: { version: '8.12.0' } },
+      });
+
+      // All agents meet the requirement
+      isAnyAgentBelowRequiredVersion.mockResolvedValue(false);
+
+      const newData = {
+        package: { name: 'endpoint', title: 'Elastic Endpoint', version: '0.6.0' },
+      };
+      const request = getUpdateKibanaRequest(newData as any);
+
+      await routeHandler(context, request, response);
+      expect(response.ok).toHaveBeenCalled();
+    });
+
+    it('should allow package update with force:true even if agents have lower versions', async () => {
+      const { getPackageInfo } = jest.requireMock('../../services/epm/packages');
+      const { isAnyAgentBelowRequiredVersion } = jest.requireMock(
+        '../../services/agents/version_compatibility'
+      );
+
+      // Package update requires agent >= 8.12.0
+      getPackageInfo.mockResolvedValue({
+        name: 'endpoint',
+        version: '0.6.0',
+        conditions: { agent: { version: '8.12.0' } },
+      });
+
+      // Some agents have lower versions, but force is true
+      isAnyAgentBelowRequiredVersion.mockResolvedValue(true);
+
+      const newData = {
+        package: { name: 'endpoint', title: 'Elastic Endpoint', version: '0.6.0' },
+        force: true,
+      };
+      const request = getUpdateKibanaRequest(newData as any);
+
+      await routeHandler(context, request, response);
+      expect(response.ok).toHaveBeenCalled();
+      // Should not have called the version check since force is true
+      expect(isAnyAgentBelowRequiredVersion).not.toHaveBeenCalled();
+    });
+
+    it('should check agent versions when policy assignment changes', async () => {
+      const { getPackageInfo } = jest.requireMock('../../services/epm/packages');
+      const { isAnyAgentBelowRequiredVersion } = jest.requireMock(
+        '../../services/agents/version_compatibility'
+      );
+
+      // Package requires agent >= 8.12.0
+      getPackageInfo.mockResolvedValue({
+        name: 'endpoint',
+        version: '0.6.0',
+        conditions: { agent: { version: '8.12.0' } },
+      });
+
+      // Some agents on the new policy have lower versions
+      isAnyAgentBelowRequiredVersion.mockResolvedValue(true);
+
+      const newData = {
+        package: { name: 'endpoint', title: 'Elastic Endpoint', version: '0.6.0' },
+        policy_ids: ['3'], // Different policy than existing
+      };
+      const request = getUpdateKibanaRequest(newData as any);
+
+      await expect(() => routeHandler(context, request, response)).rejects.toThrow(
+        /required version range.*8\.12\.0/i
+      );
+
+      // Should only check the destination policy IDs (where the package policy will be after update)
+      expect(isAnyAgentBelowRequiredVersion).toHaveBeenCalledWith(
+        expect.objectContaining({
+          policyIds: ['3'], // Only the new/destination policy IDs
+        })
+      );
+    });
   });
 
   describe('list api handler', () => {
@@ -600,6 +736,129 @@ describe('When calling package policy', () => {
       const validationResp = ListResponseSchema(PackagePolicyResponseSchema).validate(responseBody);
       expect(validationResp).toEqual(responseBody);
     });
+
+    it('should populate min_agent_version for all items when packages have version requirements', async () => {
+      const { getPackageInfo } = jest.requireMock('../../services/epm/packages');
+
+      const packagePolicy1 = {
+        ...testPackagePolicy,
+        id: '1',
+        package: {
+          name: 'package-1',
+          title: 'Package 1',
+          version: '1.0.0',
+        },
+      };
+
+      const packagePolicy2 = {
+        ...testPackagePolicy,
+        id: '2',
+        package: {
+          name: 'package-2',
+          title: 'Package 2',
+          version: '2.0.0',
+        },
+      };
+
+      packagePolicyServiceMock.list.mockResolvedValue({
+        total: 2,
+        perPage: 10,
+        page: 1,
+        items: [packagePolicy1, packagePolicy2],
+      });
+
+      getPackageInfo
+        .mockResolvedValueOnce({
+          name: 'package-1',
+          version: '1.0.0',
+          conditions: { agent: { version: '8.12.0' } },
+        })
+        .mockResolvedValueOnce({
+          name: 'package-2',
+          version: '2.0.0',
+          conditions: { agent: { version: '8.13.0' } },
+        });
+
+      const request = httpServerMock.createKibanaRequest({
+        query: {},
+      });
+
+      await getPackagePoliciesHandler(context, request, response);
+
+      expect(response.ok).toHaveBeenCalled();
+      const callArgs = response.ok.mock.calls[0]?.[0];
+      expect((callArgs?.body as any)?.items?.[0]?.min_agent_version).toBe('8.12.0');
+      expect((callArgs?.body as any)?.items?.[1]?.min_agent_version).toBe('8.13.0');
+    });
+
+    it('should return undefined for min_agent_version when packages have no version requirements', async () => {
+      const { getPackageInfo } = jest.requireMock('../../services/epm/packages');
+
+      const packagePolicy = {
+        ...testPackagePolicy,
+        package: {
+          name: 'a-package',
+          title: 'package A',
+          version: '1.0.0',
+        },
+      };
+
+      packagePolicyServiceMock.list.mockResolvedValue({
+        total: 1,
+        perPage: 10,
+        page: 1,
+        items: [packagePolicy],
+      });
+
+      getPackageInfo.mockResolvedValue({
+        name: 'a-package',
+        version: '1.0.0',
+        conditions: {},
+      });
+
+      const request = httpServerMock.createKibanaRequest({
+        query: {},
+      });
+
+      await getPackagePoliciesHandler(context, request, response);
+
+      expect(response.ok).toHaveBeenCalled();
+      const callArgs = response.ok.mock.calls[0]?.[0];
+      expect((callArgs?.body as any)?.items?.[0]?.min_agent_version).toBeUndefined();
+    });
+
+    it('should handle package info retrieval failures gracefully', async () => {
+      const { getPackageInfo } = jest.requireMock('../../services/epm/packages');
+
+      const packagePolicy = {
+        ...testPackagePolicy,
+        package: {
+          name: 'a-package',
+          title: 'package A',
+          version: '1.0.0',
+        },
+      };
+
+      packagePolicyServiceMock.list.mockResolvedValue({
+        total: 1,
+        perPage: 10,
+        page: 1,
+        items: [packagePolicy],
+      });
+
+      getPackageInfo.mockRejectedValue(new Error('Package not found'));
+
+      const request = httpServerMock.createKibanaRequest({
+        query: {},
+      });
+
+      await getPackagePoliciesHandler(context, request, response);
+
+      expect(response.ok).toHaveBeenCalled();
+      const callArgs = response.ok.mock.calls[0]?.[0];
+      // Should not populate min_agent_version when package info fails
+      expect((callArgs?.body as any)?.items?.[0]?.min_agent_version).toBeUndefined();
+    });
   });
 
   describe('bulk api handler', () => {
@@ -616,6 +875,120 @@ describe('When calling package policy', () => {
       });
       const validationResp = BulkGetPackagePoliciesResponseBodySchema.validate({ items });
       expect(validationResp).toEqual({ items });
+    });
+
+    it('should populate min_agent_version for all items when packages have version requirements', async () => {
+      const { getPackageInfo } = jest.requireMock('../../services/epm/packages');
+
+      const packagePolicy1 = {
+        ...testPackagePolicy,
+        id: '1',
+        package: {
+          name: 'package-1',
+          title: 'Package 1',
+          version: '1.0.0',
+        },
+      };
+
+      const packagePolicy2 = {
+        ...testPackagePolicy,
+        id: '2',
+        package: {
+          name: 'package-2',
+          title: 'Package 2',
+          version: '2.0.0',
+        },
+      };
+
+      const items: PackagePolicy[] = [packagePolicy1, packagePolicy2];
+      packagePolicyServiceMock.getByIDs.mockResolvedValue(items);
+
+      getPackageInfo
+        .mockResolvedValueOnce({
+          name: 'package-1',
+          version: '1.0.0',
+          conditions: { agent: { version: '8.12.0' } },
+        })
+        .mockResolvedValueOnce({
+          name: 'package-2',
+          version: '2.0.0',
+          conditions: { agent: { version: '8.13.0' } },
+        });
+
+      const request = httpServerMock.createKibanaRequest({
+        query: {},
+        body: { ids: ['1', '2'] },
+      });
+
+      await bulkGetPackagePoliciesHandler(context, request, response);
+
+      expect(response.ok).toHaveBeenCalled();
+      const callArgs = response.ok.mock.calls[0]?.[0];
+      expect((callArgs?.body as any)?.items?.[0]?.min_agent_version).toBe('8.12.0');
+      expect((callArgs?.body as any)?.items?.[1]?.min_agent_version).toBe('8.13.0');
+    });
+
+    it('should return undefined for min_agent_version when packages have no version requirements', async () => {
+      const { getPackageInfo } = jest.requireMock('../../services/epm/packages');
+
+      const packagePolicy = {
+        ...testPackagePolicy,
+        package: {
+          name: 'a-package',
+          title: 'package A',
+          version: '1.0.0',
+        },
+      };
+
+      const items: PackagePolicy[] = [packagePolicy];
+      packagePolicyServiceMock.getByIDs.mockResolvedValue(items);
+
+      getPackageInfo.mockResolvedValue({
+        name: 'a-package',
+        version: '1.0.0',
+        conditions: {},
+      });
+
+      const request = httpServerMock.createKibanaRequest({
+        query: {},
+        body: { ids: ['1'] },
+      });
+
+      await bulkGetPackagePoliciesHandler(context, request, response);
+
+      expect(response.ok).toHaveBeenCalled();
+      const callArgs = response.ok.mock.calls[0]?.[0];
+      expect((callArgs?.body as any)?.items?.[0]?.min_agent_version).toBeUndefined();
+    });
+
+    it('should handle package info retrieval failures gracefully', async () => {
+      const { getPackageInfo } = jest.requireMock('../../services/epm/packages');
+
+      const packagePolicy = {
+        ...testPackagePolicy,
+        package: {
+          name: 'a-package',
+          title: 'package A',
+          version: '1.0.0',
+        },
+      };
+
+      const items: PackagePolicy[] = [packagePolicy];
+      packagePolicyServiceMock.getByIDs.mockResolvedValue(items);
+
+      getPackageInfo.mockRejectedValue(new Error('Package not found'));
+
+      const request = httpServerMock.createKibanaRequest({
+        query: {},
+        body: { ids: ['1'] },
+      });
+
+      await bulkGetPackagePoliciesHandler(context, request, response);
+
+      expect(response.ok).toHaveBeenCalled();
+      const callArgs = response.ok.mock.calls[0]?.[0];
+      // Should not populate min_agent_version when package info fails
+      expect((callArgs?.body as any)?.items?.[0]?.min_agent_version).toBeUndefined();
     });
   });
 
@@ -663,6 +1036,123 @@ describe('When calling package policy', () => {
       expect(validationResp).toEqual(testPackagePolicy);
     });
 
+    it('should populate min_agent_version when package has agent version requirement', async () => {
+      const { getPackageInfo } = jest.requireMock('../../services/epm/packages');
+
+      const packagePolicyWithVersion = {
+        ...testPackagePolicy,
+        package: {
+          name: 'a-package',
+          title: 'package A',
+          version: '1.0.0',
+        },
+      };
+
+      packagePolicyServiceMock.get.mockResolvedValue(packagePolicyWithVersion);
+
+      getPackageInfo.mockResolvedValue({
+        name: 'a-package',
+        version: '1.0.0',
+        conditions: { agent: { version: '8.12.0' } },
+      });
+
+      const request = httpServerMock.createKibanaRequest({
+        params: {
+          packagePolicyId: '1',
+        },
+      });
+
+      await getOnePackagePolicyHandler(context, request, response);
+
+      expect(response.ok).toHaveBeenCalled();
+      const callArgs = response.ok.mock.calls[0]?.[0];
+      expect((callArgs?.body as any)?.item?.min_agent_version).toBe('8.12.0');
+    });
+
+    it('should return undefined for min_agent_version when package has no version requirement', async () => {
+      const { getPackageInfo } = jest.requireMock('../../services/epm/packages');
+
+      const packagePolicyWithoutVersion = {
+        ...testPackagePolicy,
+        package: {
+          name: 'a-package',
+          title: 'package A',
+          version: '1.0.0',
+        },
+      };
+
+      packagePolicyServiceMock.get.mockResolvedValue(packagePolicyWithoutVersion);
+
+      getPackageInfo.mockResolvedValue({
+        name: 'a-package',
+        version: '1.0.0',
+        conditions: {},
+      });
+
+      const request = httpServerMock.createKibanaRequest({
+        params: {
+          packagePolicyId: '1',
+        },
+      });
+
+      await getOnePackagePolicyHandler(context, request, response);
+
+      expect(response.ok).toHaveBeenCalled();
+      const callArgs = response.ok.mock.calls[0]?.[0];
+      expect((callArgs?.body as any)?.item?.min_agent_version).toBeUndefined();
+    });
+
+    it('should handle package info retrieval failures gracefully', async () => {
+      const { getPackageInfo } = jest.requireMock('../../services/epm/packages');
+
+      const packagePolicy = {
+        ...testPackagePolicy,
+        package: {
+          name: 'a-package',
+          title: 'package A',
+          version: '1.0.0',
+        },
+      };
+
+      packagePolicyServiceMock.get.mockResolvedValue(packagePolicy);
+      getPackageInfo.mockReset();
+      getPackageInfo.mockRejectedValue(new Error('Package not found'));
+
+      const request = httpServerMock.createKibanaRequest({
+        params: {
+          packagePolicyId: '1',
+        },
+      });
+
+      await getOnePackagePolicyHandler(context, request, response);
+
+      expect(response.ok).toHaveBeenCalled();
+      const callArgs = response.ok.mock.calls[0]?.[0];
+      // Should not populate min_agent_version when package info fails
+      expect((callArgs?.body as any)?.item?.min_agent_version).toBeUndefined();
+    });
+
+    it('should return undefined for min_agent_version when package policy has no package', async () => {
+      const packagePolicyWithoutPackage = {
+        ...testPackagePolicy,
+        package: undefined,
+      };
+
+      packagePolicyServiceMock.get.mockResolvedValue(packagePolicyWithoutPackage);
+
+      const request = httpServerMock.createKibanaRequest({
+        params: {
+          packagePolicyId: '1',
+        },
+      });
+
+      await getOnePackagePolicyHandler(context, request, response);
+
+      expect(response.ok).toHaveBeenCalled();
+      const callArgs = response.ok.mock.calls[0]?.[0];
+      expect((callArgs?.body as any)?.item?.min_agent_version).toBeUndefined();
+    });
+
     it('should return valid response simplified format', async () => {
       packagePolicyServiceMock.get.mockResolvedValue(testPackagePolicy);
       const request = httpServerMock.createKibanaRequest({
@@ -706,6 +1196,20 @@ describe('When calling package policy', () => {
 
   describe('create api handler', () => {
     it('should return valid response', async () => {
+      const { isAnyAgentBelowRequiredVersion } = jest.requireMock(
+        '../../services/agents/version_compatibility'
+      );
+      const { getPackageInfo } = jest.requireMock('../../services/epm/packages');
+
+      // Mock no agent version constraints
+      isAnyAgentBelowRequiredVersion.mockResolvedValue(false);
+      // Mock getPackageInfo to return package info without version requirements
+      getPackageInfo.mockResolvedValue({
+        name: 'a-package',
+        version: '1.0.0',
+        conditions: {},
+      });
+
       packagePolicyServiceMock.get.mockResolvedValue(testPackagePolicy);
       (
         (await context.fleet).packagePolicyService.asCurrentUser as jest.Mocked<PackagePolicyClient>
@@ -720,6 +1224,91 @@ describe('When calling package policy', () => {
       });
       const validationResp = CreatePackagePolicyResponseSchema.validate(expectedResponse);
       expect(validationResp).toEqual(expectedResponse);
+    });
+
+    it('should reject when package requires higher agent version and force is false', async () => {
+      const { getPackageInfo } = jest.requireMock('../../services/epm/packages');
+      const { isAnyAgentBelowRequiredVersion } = jest.requireMock(
+        '../../services/agents/version_compatibility'
+      );
+
+      // Package requires agent >= 8.12.0
+      getPackageInfo.mockResolvedValue({
+        name: 'a-package',
+        version: '1.0.0',
+        conditions: { agent: { version: '8.12.0' } },
+      });
+
+      // Some agents on the policy have version 8.11.0
+      isAnyAgentBelowRequiredVersion.mockResolvedValue(true);
+
+      (
+        (await context.fleet).packagePolicyService.asCurrentUser as jest.Mocked<PackagePolicyClient>
+      ).create.mockResolvedValue(testPackagePolicy);
+
+      const request = httpServerMock.createKibanaRequest({
+        body: { ...testPackagePolicy, force: false },
+      });
+
+      await expect(() => createPackagePolicyHandler(context, request, response)).rejects.toThrow(
+        /required version range.*8\.12\.0/i
+      );
+    });
+
+    it('should succeed when all targeted agents satisfy required version', async () => {
+      const { getPackageInfo } = jest.requireMock('../../services/epm/packages');
+      const { isAnyAgentBelowRequiredVersion } = jest.requireMock(
+        '../../services/agents/version_compatibility'
+      );
+
+      getPackageInfo.mockResolvedValue({
+        name: 'a-package',
+        version: '1.0.0',
+        conditions: { agent: { version: '8.12.0' } },
+      });
+
+      // All agents meet the requirement
+      isAnyAgentBelowRequiredVersion.mockResolvedValue(false);
+
+      (
+        (await context.fleet).packagePolicyService.asCurrentUser as jest.Mocked<PackagePolicyClient>
+      ).create.mockResolvedValue(testPackagePolicy);
+
+      const request = httpServerMock.createKibanaRequest({
+        body: { ...testPackagePolicy, force: false },
+      });
+
+      await createPackagePolicyHandler(context, request, response);
+      expect(response.ok).toHaveBeenCalledWith({ body: { item: testPackagePolicy } });
+    });
+
+    it('should allow creation when force is true even if versions are lower', async () => {
+      const { getPackageInfo } = jest.requireMock('../../services/epm/packages');
+      const { isAnyAgentBelowRequiredVersion } = jest.requireMock(
+        '../../services/agents/version_compatibility'
+      );
+
+      getPackageInfo.mockResolvedValue({
+        name: 'a-package',
+        version: '1.0.0',
+        conditions: { agent: { version: '8.12.0' } },
+      });
+
+      // Some agents have lower versions, but force is true so version check should not be called
+      isAnyAgentBelowRequiredVersion.mockResolvedValue(true);
+
+      (
+        (await context.fleet).packagePolicyService.asCurrentUser as jest.Mocked<PackagePolicyClient>
+      ).create.mockResolvedValue(testPackagePolicy);
+
+      const request = httpServerMock.createKibanaRequest({
+        body: { ...testPackagePolicy, force: true },
+      });
+
+      await createPackagePolicyHandler(context, request, response);
+      expect(response.ok).toHaveBeenCalledWith({ body: { item: testPackagePolicy } });
+      // Should not have called the version check since force is true
+      expect(isAnyAgentBelowRequiredVersion).not.toHaveBeenCalled();
     });
   });
 
@@ -828,6 +1417,19 @@ describe('When calling package policy', () => {
 
   describe('dry run upgrade api handler', () => {
     it('should return valid response', async () => {
+      const { getPackageInfo } = jest.requireMock('../../services/epm/packages');
+      const { isAnyAgentBelowRequiredVersion } = jest.requireMock(
+        '../../services/agents/version_compatibility'
+      );
+
+      // Mock no version requirements to avoid triggering version check
+      getPackageInfo.mockResolvedValue({
+        name: 'a-package',
+        version: '1.0.0',
+        conditions: {},
+      });
+      isAnyAgentBelowRequiredVersion.mockResolvedValue(false);
+
       const dryRunPackagePolicy: DryRunPackagePolicy = {
         description: '',
         enabled: true,
@@ -915,6 +1517,331 @@ describe('When calling package policy', () => {
       });
       const validationResp = DryRunPackagePoliciesResponseBodySchema.validate(responseBody);
       expect(validationResp).toEqual(responseBody);
+    });
+
+    it('should set hasErrors to true and add error when agents are incompatible', async () => {
+      const { getPackageInfo } = jest.requireMock('../../services/epm/packages');
+      const { isAnyAgentBelowRequiredVersion } = jest.requireMock(
+        '../../services/agents/version_compatibility'
+      );
+
+      const currentPackagePolicy = {
+        ...testPackagePolicy,
+        policy_ids: ['agent-policy-1'],
+      };
+
+      const proposedPackagePolicy: DryRunPackagePolicy = {
+        ...testPackagePolicy,
+        package: {
+          name: 'a-package',
+          title: 'package A',
+          version: '2.0.0',
+        },
+        policy_ids: ['agent-policy-1'],
+      };
+
+      const responseItem: UpgradePackagePolicyDryRunResponseItem = {
+        hasErrors: false,
+        name: 'policy',
+        statusCode: 200,
+        body: {
+          message: 'success',
+        },
+        diff: [currentPackagePolicy, proposedPackagePolicy],
+        agent_diff: [[]],
+      };
+
+      // Package requires agent >= 8.12.0
+      getPackageInfo.mockResolvedValue({
+        name: 'a-package',
+        version: '2.0.0',
+        conditions: { agent: { version: '8.12.0' } },
+      });
+
+      // Some agents are below required version
+      isAnyAgentBelowRequiredVersion.mockResolvedValue(true);
+
+      packagePolicyServiceMock.getUpgradeDryRunDiff.mockResolvedValueOnce(responseItem);
+
+      const request = httpServerMock.createKibanaRequest({
+        body: {
+          packagePolicyIds: ['1'],
+        },
+      });
+
+      await dryRunUpgradePackagePolicyHandler(context, request, response);
+
+      expect(response.ok).toHaveBeenCalled();
+      const callArgs = response.ok.mock.calls[0]?.[0];
+      const result = (callArgs?.body as any)?.[0];
+
+      expect(result.hasErrors).toBe(true);
+      expect(result.diff[1].errors).toBeDefined();
+      expect(result.diff[1].errors?.length).toBeGreaterThan(0);
+      expect(result.diff[1].errors?.[result.diff[1].errors.length - 1].message).toMatch(
+        /required version range.*8\.12\.0/i
+      );
+      expect(result.diff[1].errors?.[result.diff[1].errors.length - 1].message).toMatch(
+        /Use force:true to override/i
+      );
+    });
+
+    it('should not add errors when all agents are compatible', async () => {
+      const { getPackageInfo } = jest.requireMock('../../services/epm/packages');
+      const { isAnyAgentBelowRequiredVersion } = jest.requireMock(
+        '../../services/agents/version_compatibility'
+      );
+
+      const currentPackagePolicy = {
+        ...testPackagePolicy,
+        policy_ids: ['agent-policy-1'],
+      };
+
+      const proposedPackagePolicy: DryRunPackagePolicy = {
+        ...testPackagePolicy,
+        package: {
+          name: 'a-package',
+          title: 'package A',
+          version: '2.0.0',
+        },
+        policy_ids: ['agent-policy-1'],
+      };
+
+      const responseItem: UpgradePackagePolicyDryRunResponseItem = {
+        hasErrors: false,
+        name: 'policy',
+        statusCode: 200,
+        body: {
+          message: 'success',
+        },
+        diff: [currentPackagePolicy, proposedPackagePolicy],
+        agent_diff: [[]],
+      };
+
+      // Package requires agent >= 8.12.0
+      getPackageInfo.mockResolvedValue({
+        name: 'a-package',
+        version: '2.0.0',
+        conditions: { agent: { version: '8.12.0' } },
+      });
+
+      // All agents meet the requirement
+      isAnyAgentBelowRequiredVersion.mockResolvedValue(false);
+
+      packagePolicyServiceMock.getUpgradeDryRunDiff.mockResolvedValueOnce(responseItem);
+
+      const request = httpServerMock.createKibanaRequest({
+        body: {
+          packagePolicyIds: ['1'],
+        },
+      });
+
+      await dryRunUpgradePackagePolicyHandler(context, request, response);
+
+      expect(response.ok).toHaveBeenCalled();
+      const callArgs = response.ok.mock.calls[0]?.[0];
+      const result = (callArgs?.body as any)?.[0];
+
+      expect(result.hasErrors).toBe(false);
+      // Should not have added any version-related errors
+      const versionErrors = (result.diff[1].errors || []).filter((e: any) =>
+        e.message?.includes('required version range')
+      );
+      expect(versionErrors.length).toBe(0);
+    });
+
+    it('should handle package info retrieval failures gracefully', async () => {
+      const { getPackageInfo } = jest.requireMock('../../services/epm/packages');
+
+      const currentPackagePolicy = {
+        ...testPackagePolicy,
+        policy_ids: ['agent-policy-1'],
+      };
+
+      const proposedPackagePolicy: DryRunPackagePolicy = {
+        ...testPackagePolicy,
+        package: {
+          name: 'a-package',
+          title: 'package A',
+          version: '2.0.0',
+        },
+        policy_ids: ['agent-policy-1'],
+      };
+
+      const responseItem: UpgradePackagePolicyDryRunResponseItem = {
+        hasErrors: false,
+        name: 'policy',
+        statusCode: 200,
+        body: {
+          message: 'success',
+        },
+        diff: [currentPackagePolicy, proposedPackagePolicy],
+        agent_diff: [[]],
+      };
+
+      // Package info retrieval fails
+      getPackageInfo.mockRejectedValue(new Error('Package not found'));
+
+      packagePolicyServiceMock.getUpgradeDryRunDiff.mockResolvedValueOnce(responseItem);
+
+      const request = httpServerMock.createKibanaRequest({
+        body: {
+          packagePolicyIds: ['1'],
+        },
+      });
+
+      await dryRunUpgradePackagePolicyHandler(context, request, response);
+
+      expect(response.ok).toHaveBeenCalled();
+      const callArgs = response.ok.mock.calls[0]?.[0];
+      const result = (callArgs?.body as any)?.[0];
+
+      // Should not have modified hasErrors or added errors
+      expect(result.hasErrors).toBe(false);
+    });
+
+    it('should not check agent versions when package has no version requirements', async () => {
+      const { getPackageInfo } = jest.requireMock('../../services/epm/packages');
+      const { isAnyAgentBelowRequiredVersion } = jest.requireMock(
+        '../../services/agents/version_compatibility'
+      );
+
+      const currentPackagePolicy = {
+        ...testPackagePolicy,
+        policy_ids: ['agent-policy-1'],
+      };
+
+      const proposedPackagePolicy: DryRunPackagePolicy = {
+        ...testPackagePolicy,
+        package: {
+          name: 'a-package',
+          title: 'package A',
+          version: '2.0.0',
+        },
+        policy_ids: ['agent-policy-1'],
+      };
+
+      const responseItem: UpgradePackagePolicyDryRunResponseItem = {
+        hasErrors: false,
+        name: 'policy',
+        statusCode: 200,
+        body: {
+          message: 'success',
+        },
+        diff: [currentPackagePolicy, proposedPackagePolicy],
+        agent_diff: [[]],
+      };
+
+      // Package has no version requirements
+      getPackageInfo.mockResolvedValue({
+        name: 'a-package',
+        version: '2.0.0',
+        conditions: {},
+      });
+
+      packagePolicyServiceMock.getUpgradeDryRunDiff.mockResolvedValueOnce(responseItem);
+
+      const request = httpServerMock.createKibanaRequest({
+        body: {
+          packagePolicyIds: ['1'],
+        },
+      });
+
+      await dryRunUpgradePackagePolicyHandler(context, request, response);
+
+      expect(response.ok).toHaveBeenCalled();
+      // Should not have called version check
+      expect(isAnyAgentBelowRequiredVersion).not.toHaveBeenCalled();
+    });
+
+    it('should not check agent versions when there are no policy IDs', async () => {
+      const { getPackageInfo } = jest.requireMock('../../services/epm/packages');
+      const { isAnyAgentBelowRequiredVersion } = jest.requireMock(
+        '../../services/agents/version_compatibility'
+      );
+
+      const currentPackagePolicy = {
+        ...testPackagePolicy,
+        policy_ids: [],
+        policy_id: undefined,
+      };
+
+      const proposedPackagePolicy: DryRunPackagePolicy = {
+        ...testPackagePolicy,
+        package: {
+          name: 'a-package',
+          title: 'package A',
+          version: '2.0.0',
+        },
+        policy_ids: [],
+        policy_id: undefined,
+      };
+
+      const responseItem: UpgradePackagePolicyDryRunResponseItem = {
+        hasErrors: false,
+        name: 'policy',
+        statusCode: 200,
+        body: {
+          message: 'success',
+        },
+        diff: [currentPackagePolicy, proposedPackagePolicy],
+        agent_diff: [[]],
+      };
+
+      // Package requires agent >= 8.12.0
+      getPackageInfo.mockResolvedValue({
+        name: 'a-package',
+        version: '2.0.0',
+        conditions: { agent: { version: '8.12.0' } },
+      });
+
+      packagePolicyServiceMock.getUpgradeDryRunDiff.mockResolvedValueOnce(responseItem);
+
+      const request = httpServerMock.createKibanaRequest({
+        body: {
+          packagePolicyIds: ['1'],
+        },
+      });
+
+      await dryRunUpgradePackagePolicyHandler(context, request, response);
+
+      expect(response.ok).toHaveBeenCalled();
+      // Should not have called version check when there are no policy IDs
+      expect(isAnyAgentBelowRequiredVersion).not.toHaveBeenCalled();
+    });
+
+    it('should not check agent versions when dry run has errors', async () => {
+      const { getPackageInfo } = jest.requireMock('../../services/epm/packages');
+      const { isAnyAgentBelowRequiredVersion } = jest.requireMock(
+        '../../services/agents/version_compatibility'
+      );
+
+      const responseItem: UpgradePackagePolicyDryRunResponseItem = {
+        hasErrors: true,
+        name: 'policy',
+        statusCode: 400,
+        body: {
+          message: 'error',
+        },
+        diff: [testPackagePolicy, testPackagePolicy],
+        agent_diff: [[]],
+      };
+
+      packagePolicyServiceMock.getUpgradeDryRunDiff.mockResolvedValueOnce(responseItem);
+
+      const request = httpServerMock.createKibanaRequest({
+        body: {
+          packagePolicyIds: ['1'],
+        },
+      });
+
+      await dryRunUpgradePackagePolicyHandler(context, request, response);
+
+      // Should return error response
+      expect(response.customError).toHaveBeenCalled();
+      // Should not have called version check when dry run already has errors
+      expect(getPackageInfo).not.toHaveBeenCalled();
+      expect(isAnyAgentBelowRequiredVersion).not.toHaveBeenCalled();
     });
   });
 });

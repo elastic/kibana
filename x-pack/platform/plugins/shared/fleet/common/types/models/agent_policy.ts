@@ -66,6 +66,7 @@ export interface NewAgentPolicy {
     };
   };
   required_versions?: AgentTargetVersion[] | null;
+  min_agent_version?: string;
 }
 
 export interface AgentTargetVersion {

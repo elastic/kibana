@@ -47,6 +47,7 @@ import { getAgentStatusForAgentPolicy } from '../../services/agents';
 import { isAgentInNamespace } from '../../services/spaces/agent_namespaces';
 import { getCurrentNamespace } from '../../services/spaces/get_current_namespace';
 import { getPackageInfo } from '../../services/epm/packages';
+import { checkAgentVersionCompatibilityForReassign } from '../../services/agents/reassign';
 import { generateTemplateIndexPattern } from '../../services/epm/elasticsearch/template/template';
 import { buildAgentStatusRuntimeField } from '../../services/agents/build_status_runtime_field';
 
@@ -266,12 +267,17 @@ export const postAgentReassignHandler: RequestHandler<
   const coreContext = await context.core;
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  await AgentService.reassignAgent(
-    soClient,
-    esClient,
-    request.params.agentId,
-    request.body.policy_id
-  );
+  const { force, policy_id: policyId } = request.body;
+
+  if (!force) {
+    const agent = await AgentService.getAgentById(esClient, soClient, request.params.agentId);
+    const versionError = await checkAgentVersionCompatibilityForReassign(soClient, agent, policyId);
+    if (versionError) {
+      throw versionError;
+    }
+  }
+
+  await AgentService.reassignAgent(soClient, esClient, request.params.agentId, policyId);
 
   const body: PostAgentReassignResponse = {};
   return response.ok({ body });
@@ -285,6 +291,8 @@ export const postBulkAgentReassignHandler: RequestHandler<
   const coreContext = await context.core;
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const { force, policy_id: policyId } = request.body;
+
   const agentOptions = Array.isArray(request.body.agents)
     ? { agentIds: request.body.agents }
     : { kuery: request.body.agents, showInactive: request.body.includeInactive };
@@ -292,8 +300,8 @@ export const postBulkAgentReassignHandler: RequestHandler<
   const results = await AgentService.reassignAgents(
     soClient,
     esClient,
-    { ...agentOptions, batchSize: request.body.batchSize },
-    request.body.policy_id
+    { ...agentOptions, batchSize: request.body.batchSize, force },
+    policyId
   );
 
   return response.ok({ body: { actionId: results.actionId } });

@@ -270,6 +270,7 @@ export const getSavedObjectTypes = (
           monitoring_http: { type: 'flattened', index: false },
           monitoring_diagnostics: { type: 'flattened', index: false },
           required_versions: { type: 'flattened', index: false },
+          min_agent_version: { type: 'keyword' },
         },
       },
       migrations: {
@@ -357,6 +358,16 @@ export const getSavedObjectTypes = (
             },
           ],
         },
+        '8': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                min_agent_version: { type: 'keyword' },
+              },
+            },
+          ],
+        },
       },
     },
     [AGENT_POLICY_SAVED_OBJECT_TYPE]: {
@@ -406,6 +417,7 @@ export const getSavedObjectTypes = (
             properties: {},
           },
           required_versions: { type: 'flattened', index: false },
+          min_agent_version: { type: 'keyword' },
         },
       },
       modelVersions: {
@@ -423,6 +435,16 @@ export const getSavedObjectTypes = (
               type: 'mappings_addition',
               addedMappings: {
                 required_versions: { type: 'flattened', index: false },
+              },
+            },
+          ],
+        },
+        '3': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                min_agent_version: { type: 'keyword' },
               },
             },
           ],
@@ -712,6 +734,7 @@ export const getSavedObjectTypes = (
           created_by: { type: 'keyword' },
           bump_agent_policy_revision: { type: 'boolean' },
           latest_revision: { type: 'boolean' },
+          min_agent_version: { type: 'keyword' },
         },
       },
       modelVersions: {
@@ -925,6 +948,14 @@ export const getSavedObjectTypes = (
             },
           ],
         },
+        '22': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: { min_agent_version: { type: 'keyword' } },
+            },
+          ],
+        },
       },
       migrations: {
         '7.10.0': migratePackagePolicyToV7100,
@@ -991,6 +1022,7 @@ export const getSavedObjectTypes = (
           created_by: { type: 'keyword' },
           bump_agent_policy_revision: { type: 'boolean' },
           latest_revision: { type: 'boolean' },
+          min_agent_version: { type: 'keyword' },
         },
       },
       modelVersions: {
@@ -1060,6 +1092,14 @@ export const getSavedObjectTypes = (
             {
               type: 'unsafe_transform',
               transformFn: (typeSafeGuard) => typeSafeGuard(disableBrowserInputWhenBothEnabled),
+            },
+          ],
+        },
+        '8': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: { min_agent_version: { type: 'keyword' } },
             },
           ],
         },

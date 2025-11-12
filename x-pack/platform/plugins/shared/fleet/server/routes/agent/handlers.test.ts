@@ -10,11 +10,15 @@ import { errors } from '@elastic/elasticsearch';
 
 import { getAgentStatusForAgentPolicy } from '../../services/agents/status';
 import { fetchAndAssignAgentMetrics } from '../../services/agents/agent_metrics';
+import { appContextService } from '../../services/app_context';
+import { createAppContextStartContractMock } from '../../mocks';
 
 import {
   getAgentStatusForAgentPolicyHandler,
   getAvailableVersionsHandler,
   getAgentsHandler,
+  postAgentReassignHandler,
+  postBulkAgentReassignHandler,
 } from './handlers';
 
 jest.mock('../../services/agents/versions', () => {
@@ -23,14 +27,7 @@ jest.mock('../../services/agents/versions', () => {
   };
 });
 
-jest.mock('../../services/app_context', () => {
-  const { loggerMock } = jest.requireActual('@kbn/logging-mocks');
-  return {
-    appContextService: {
-      getLogger: () => loggerMock.create(),
-    },
-  };
-});
+jest.mock('../../services/app_context');
 
 jest.mock('../../services/agents/status', () => ({
   getAgentStatusForAgentPolicy: jest.fn(),
@@ -38,6 +35,30 @@ jest.mock('../../services/agents/status', () => ({
 
 jest.mock('../../services/agents/agent_metrics', () => ({
   fetchAndAssignAgentMetrics: jest.fn(),
+}));
+
+jest.mock('../../services/agents', () => {
+  const statusModule = jest.requireMock('../../services/agents/status');
+  const versionsModule = jest.requireMock('../../services/agents/versions');
+  return {
+    getAgentStatusForAgentPolicy: statusModule.getAgentStatusForAgentPolicy,
+    getAvailableVersions: versionsModule.getAvailableVersions,
+    getAgentById: jest.fn(),
+    getAgentsById: jest.fn(),
+    getAgentsByKuery: jest.fn(),
+    reassignAgent: jest.fn(),
+    reassignAgents: jest.fn(),
+  };
+});
+
+jest.mock('../../services/agent_policy', () => ({
+  agentPolicyService: {
+    get: jest.fn(),
+  },
+}));
+
+jest.mock('../../services/epm/packages', () => ({
+  getPackageInfo: jest.fn(),
 }));
 
 describe('Handlers', () => {
@@ -349,6 +370,387 @@ describe('Handlers', () => {
       expect(response.ok.mock.calls[0][0]?.body).toEqual({
         items: ['8.1.0', '8.0.0', '7.17.0'],
       });
+    });
+  });
+
+  describe('postAgentReassignHandler', () => {
+    const { getAgentById, reassignAgent } = jest.requireMock('../../services/agents');
+    const { agentPolicyService } = jest.requireMock('../../services/agent_policy');
+    const { getPackageInfo } = jest.requireMock('../../services/epm/packages');
+
+    let mockContext: any;
+    let mockResponse: any;
+    let mockSoClient: any;
+    let mockEsClient: any;
+
+    const mockAgent = {
+      id: 'agent-1',
+      agent: { id: 'agent-1', version: '8.11.0' },
+      local_metadata: {
+        elastic: { agent: { version: '8.11.0' } },
+      },
+      policy_id: 'policy-1',
+      packages: [],
+      type: 'PERMANENT',
+      active: true,
+      enrolled_at: '2023-01-01T00:00:00Z',
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockSoClient = {};
+      mockEsClient = {};
+
+      const coreContext = coreMock.createRequestHandlerContext();
+      coreContext.savedObjects.client = mockSoClient;
+      coreContext.elasticsearch.client.asInternalUser = mockEsClient;
+
+      mockContext = {
+        core: Promise.resolve(coreContext),
+      };
+
+      mockResponse = httpServerMock.createResponseFactory();
+
+      // Initialize appContextService for agentPolicyService
+      appContextService.start(
+        createAppContextStartContractMock({}, false, {
+          internal: mockSoClient,
+          withoutSpaceExtensions: mockSoClient,
+        })
+      );
+    });
+
+    afterEach(() => {
+      appContextService.stop();
+    });
+
+    it('should allow reassign when target policy has no package policies', async () => {
+      agentPolicyService.get.mockResolvedValue({
+        id: 'policy-2',
+        package_policies: [],
+      });
+
+      getAgentById.mockResolvedValue(mockAgent);
+      reassignAgent.mockResolvedValue(undefined);
+
+      const request = httpServerMock.createKibanaRequest({
+        params: { agentId: 'agent-1' },
+        body: { policy_id: 'policy-2' },
+      });
+
+      await postAgentReassignHandler(mockContext, request, mockResponse);
+
+      expect(reassignAgent).toHaveBeenCalled();
+      expect(mockResponse.ok).toHaveBeenCalled();
+    });
+
+    it('should allow reassign when package policies have no agent version requirements', async () => {
+      agentPolicyService.get.mockResolvedValue({
+        id: 'policy-2',
+        package_policies: [
+          {
+            id: 'pp-1',
+            package: { name: 'test-package', version: '1.0.0' },
+          },
+        ],
+      });
+
+      getPackageInfo.mockResolvedValue({
+        name: 'test-package',
+        version: '1.0.0',
+        conditions: {},
+      });
+
+      getAgentById.mockResolvedValue(mockAgent);
+      reassignAgent.mockResolvedValue(undefined);
+
+      const request = httpServerMock.createKibanaRequest({
+        params: { agentId: 'agent-1' },
+        body: { policy_id: 'policy-2' },
+      });
+
+      await postAgentReassignHandler(mockContext, request, mockResponse);
+
+      expect(reassignAgent).toHaveBeenCalled();
+      expect(mockResponse.ok).toHaveBeenCalled();
+    });
+
+    it('should reject reassign when agent version is below required version and force is false', async () => {
+      agentPolicyService.get.mockResolvedValue({
+        id: 'policy-2',
+        package_policies: [
+          {
+            id: 'pp-1',
+            package: { name: 'test-package', version: '1.0.0' },
+          },
+        ],
+      });
+
+      getPackageInfo.mockResolvedValue({
+        name: 'test-package',
+        version: '1.0.0',
+        conditions: { agent: { version: '8.12.0' } },
+      });
+
+      getAgentById.mockResolvedValue(mockAgent);
+
+      const request = httpServerMock.createKibanaRequest({
+        params: { agentId: 'agent-1' },
+        body: { policy_id: 'policy-2', force: false },
+      });
+
+      await expect(() =>
+        postAgentReassignHandler(mockContext, request, mockResponse)
+      ).rejects.toThrow(/does not satisfy required version range/i);
+
+      expect(reassignAgent).not.toHaveBeenCalled();
+    });
+
+    it('should allow reassign when agent version meets requirement', async () => {
+      const agentWithHigherVersion = {
+        ...mockAgent,
+        agent: { id: 'agent-1', version: '8.12.0' },
+        local_metadata: {
+          elastic: { agent: { version: '8.12.0' } },
+        },
+      };
+
+      agentPolicyService.get.mockResolvedValue({
+        id: 'policy-2',
+        package_policies: [
+          {
+            id: 'pp-1',
+            package: { name: 'test-package', version: '1.0.0' },
+          },
+        ],
+      });
+
+      getPackageInfo.mockResolvedValue({
+        name: 'test-package',
+        version: '1.0.0',
+        conditions: { agent: { version: '8.12.0' } },
+      });
+
+      getAgentById.mockResolvedValue(agentWithHigherVersion);
+      reassignAgent.mockResolvedValue(undefined);
+
+      const request = httpServerMock.createKibanaRequest({
+        params: { agentId: 'agent-1' },
+        body: { policy_id: 'policy-2' },
+      });
+
+      await postAgentReassignHandler(mockContext, request, mockResponse);
+
+      expect(reassignAgent).toHaveBeenCalled();
+      expect(mockResponse.ok).toHaveBeenCalled();
+    });
+
+    it('should allow reassign with force:true even if agent version is below required', async () => {
+      agentPolicyService.get.mockResolvedValue({
+        id: 'policy-2',
+        package_policies: [
+          {
+            id: 'pp-1',
+            package: { name: 'test-package', version: '1.0.0' },
+          },
+        ],
+      });
+
+      getPackageInfo.mockResolvedValue({
+        name: 'test-package',
+        version: '1.0.0',
+        conditions: { agent: { version: '8.12.0' } },
+      });
+
+      getAgentById.mockResolvedValue(mockAgent);
+      reassignAgent.mockResolvedValue(undefined);
+
+      const request = httpServerMock.createKibanaRequest({
+        params: { agentId: 'agent-1' },
+        body: { policy_id: 'policy-2', force: true },
+      });
+
+      await postAgentReassignHandler(mockContext, request, mockResponse);
+
+      expect(reassignAgent).toHaveBeenCalled();
+      expect(mockResponse.ok).toHaveBeenCalled();
+      // Should not have called getPackageInfo since force is true
+      expect(getPackageInfo).not.toHaveBeenCalled();
+    });
+
+    it('should check highest version requirement when multiple package policies have different requirements', async () => {
+      const agentWithVersion = {
+        ...mockAgent,
+        agent: { id: 'agent-1', version: '8.12.0' },
+        local_metadata: {
+          elastic: { agent: { version: '8.12.0' } },
+        },
+      };
+
+      agentPolicyService.get.mockResolvedValue({
+        id: 'policy-2',
+        package_policies: [
+          {
+            id: 'pp-1',
+            package: { name: 'test-package-1', version: '1.0.0' },
+          },
+          {
+            id: 'pp-2',
+            package: { name: 'test-package-2', version: '2.0.0' },
+          },
+        ],
+      });
+
+      getPackageInfo
+        .mockResolvedValueOnce({
+          name: 'test-package-1',
+          version: '1.0.0',
+          conditions: { agent: { version: '8.11.0' } },
+        })
+        .mockResolvedValueOnce({
+          name: 'test-package-2',
+          version: '2.0.0',
+          conditions: { agent: { version: '8.13.0' } },
+        });
+
+      getAgentById.mockResolvedValue(agentWithVersion);
+      reassignAgent.mockResolvedValue(undefined);
+
+      const request = httpServerMock.createKibanaRequest({
+        params: { agentId: 'agent-1' },
+        body: { policy_id: 'policy-2' },
+      });
+
+      await expect(() =>
+        postAgentReassignHandler(mockContext, request, mockResponse)
+      ).rejects.toThrow(/does not satisfy required version range/i);
+    });
+  });
+
+  describe('postBulkAgentReassignHandler', () => {
+    const { reassignAgents } = jest.requireMock('../../services/agents');
+
+    let mockContext: any;
+    let mockResponse: any;
+    let mockSoClient: any;
+    let mockEsClient: any;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockSoClient = {};
+      mockEsClient = {};
+
+      const coreContext = coreMock.createRequestHandlerContext();
+      coreContext.savedObjects.client = mockSoClient;
+      coreContext.elasticsearch.client.asInternalUser = mockEsClient;
+
+      mockContext = {
+        core: Promise.resolve(coreContext),
+      };
+
+      mockResponse = httpServerMock.createResponseFactory();
+    });
+
+    it('should call reassignAgents with agentIds when agents is an array', async () => {
+      reassignAgents.mockResolvedValue({ actionId: 'action-1' });
+
+      const request = httpServerMock.createKibanaRequest({
+        body: {
+          policy_id: 'policy-2',
+          agents: ['agent-1', 'agent-2'],
+        },
+      });
+
+      await postBulkAgentReassignHandler(mockContext, request, mockResponse);
+
+      expect(reassignAgents).toHaveBeenCalledWith(
+        mockSoClient,
+        mockEsClient,
+        {
+          agentIds: ['agent-1', 'agent-2'],
+          force: undefined,
+          batchSize: undefined,
+        },
+        'policy-2'
+      );
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: { actionId: 'action-1' },
+      });
+    });
+
+    it('should call reassignAgents with kuery when agents is a string', async () => {
+      reassignAgents.mockResolvedValue({ actionId: 'action-1' });
+
+      const request = httpServerMock.createKibanaRequest({
+        body: {
+          policy_id: 'policy-2',
+          agents: 'policy_id:policy-1',
+          includeInactive: true,
+        },
+      });
+
+      await postBulkAgentReassignHandler(mockContext, request, mockResponse);
+
+      expect(reassignAgents).toHaveBeenCalledWith(
+        mockSoClient,
+        mockEsClient,
+        {
+          kuery: 'policy_id:policy-1',
+          showInactive: true,
+          force: undefined,
+          batchSize: undefined,
+        },
+        'policy-2'
+      );
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: { actionId: 'action-1' },
+      });
+    });
+
+    it('should pass force flag to reassignAgents', async () => {
+      reassignAgents.mockResolvedValue({ actionId: 'action-1' });
+
+      const request = httpServerMock.createKibanaRequest({
+        body: {
+          policy_id: 'policy-2',
+          agents: ['agent-1'],
+          force: true,
+        },
+      });
+
+      await postBulkAgentReassignHandler(mockContext, request, mockResponse);
+
+      expect(reassignAgents).toHaveBeenCalledWith(
+        mockSoClient,
+        mockEsClient,
+        expect.objectContaining({
+          force: true,
+        }),
+        'policy-2'
+      );
+    });
+
+    it('should pass batchSize to reassignAgents', async () => {
+      reassignAgents.mockResolvedValue({ actionId: 'action-1' });
+
+      const request = httpServerMock.createKibanaRequest({
+        body: {
+          policy_id: 'policy-2',
+          agents: ['agent-1'],
+          batchSize: 100,
+        },
+      });
+
+      await postBulkAgentReassignHandler(mockContext, request, mockResponse);
+
+      expect(reassignAgents).toHaveBeenCalledWith(
+        mockSoClient,
+        mockEsClient,
+        expect.objectContaining({
+          batchSize: 100,
+        }),
+        'policy-2'
+      );
     });
   });
 });

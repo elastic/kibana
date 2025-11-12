@@ -136,6 +136,9 @@ export interface PackageSpecConditions {
     subscription?: string;
     capabilities?: string[];
   };
+  agent?: {
+    version?: string;
+  };
 }
 
 export interface PackageSpecIcon {

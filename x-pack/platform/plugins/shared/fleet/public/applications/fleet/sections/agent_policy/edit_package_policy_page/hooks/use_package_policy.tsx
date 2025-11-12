@@ -104,7 +104,8 @@ export function usePackagePolicyWithRelatedData(
           ...packagePolicy,
           ...(packagePolicyOverride ?? {}),
         },
-        'spaceIds'
+        'spaceIds',
+        'min_agent_version'
       )
     );
     const result = await sendUpdatePackagePolicy(packagePolicyId, restPackagePolicy);
@@ -247,6 +248,7 @@ export function usePackagePolicyWithRelatedData(
             updated_by,
             updated_at,
             secret_references,
+            min_agent_version,
             /* eslint-enable @typescript-eslint/naming-convention */
             ...restOfPackagePolicy
           } = basePolicy;

@@ -651,9 +651,6 @@
         },
         "type": "nested"
       },
-      "total_observables": {
-        "type": "integer"
-      },
       "owner": {
         "type": "keyword"
       },
@@ -691,6 +688,9 @@
         "type": "integer"
       },
       "total_events": {
+        "type": "integer"
+      },
+      "total_observables": {
         "type": "integer"
       },
       "updated_at": {
@@ -1819,6 +1819,9 @@
       "keep_monitoring_alive": {
         "type": "boolean"
       },
+      "min_agent_version": {
+        "type": "keyword"
+      },
       "monitoring_enabled": {
         "index": false,
         "type": "keyword"
@@ -1952,6 +1955,9 @@
       },
       "latest_revision": {
         "type": "boolean"
+      },
+      "min_agent_version": {
+        "type": "keyword"
       },
       "name": {
         "type": "keyword"
@@ -2218,6 +2224,9 @@
       },
       "keep_monitoring_alive": {
         "type": "boolean"
+      },
+      "min_agent_version": {
+        "type": "keyword"
       },
       "monitoring_diagnostics": {
         "index": false,
@@ -2549,6 +2558,9 @@
       },
       "latest_revision": {
         "type": "boolean"
+      },
+      "min_agent_version": {
+        "type": "keyword"
       },
       "name": {
         "type": "keyword"

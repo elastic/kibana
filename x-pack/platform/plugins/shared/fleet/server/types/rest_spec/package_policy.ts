@@ -157,6 +157,7 @@ export const DeleteOnePackagePolicyResponseSchema = schema.object({
 export const UpgradePackagePoliciesRequestSchema = {
   body: schema.object({
     packagePolicyIds: schema.arrayOf(schema.string()),
+    force: schema.maybe(schema.boolean()),
   }),
 };
 
