@@ -17,10 +17,8 @@ import {
   catchError,
   combineLatest,
   defer,
-  EMPTY,
   finalize,
   from,
-  fromEvent,
   identity,
   isObservable,
   last,
@@ -31,13 +29,13 @@ import {
   ReplaySubject,
   shareReplay,
   switchMap,
-  takeUntil,
   takeWhile,
   tap,
   throwError,
   timer,
 } from 'rxjs';
-import { now, AbortError, calculateObjectHash, AbortReason } from '@kbn/kibana-utils-plugin/common';
+import { AbortReason } from '@kbn/kibana-utils-plugin/common';
+import { AbortError, calculateObjectHash, now } from '@kbn/kibana-utils-plugin/common';
 import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { Executor } from '../executor';
 import type { ExecutionContainer } from './container';
@@ -51,8 +49,8 @@ import type {
   ExpressionAstFunction,
   ExpressionAstNode,
 } from '../ast';
-import { parse, formatExpression, parseExpression } from '../ast';
-import type { ExecutionContext, DefaultInspectorAdapters } from './types';
+import { formatExpression, parse, parseExpression } from '../ast';
+import type { DefaultInspectorAdapters, ExecutionContext } from './types';
 import type { Datatable } from '../expression_types';
 import { getType } from '../expression_types';
 import type { ExpressionFunction, ExpressionFunctionParameter } from '../expression_functions';
@@ -177,6 +175,24 @@ function throttle<T>(timeout: number) {
     });
 }
 
+function takeUntilAborted<T>(signal: AbortSignal) {
+  return (source: Observable<T>) =>
+    new Observable<T>((subscriber) => {
+      const throwAbortError = (e?: Event) => {
+        if ((e?.target as AbortSignal)?.reason !== AbortReason.CANCELED)
+          subscriber.error(new AbortError());
+      };
+
+      subscriber.add(source.subscribe(subscriber));
+      subscriber.add(() => signal.removeEventListener('abort', throwAbortError));
+
+      signal.addEventListener('abort', throwAbortError);
+      if (signal.aborted) {
+        throwAbortError();
+      }
+    });
+}
+
 export interface ExecutionParams {
   executor: Executor;
   ast?: ExpressionAstExpression;
@@ -277,15 +293,6 @@ export class Execution<
     const inspectorAdapters =
       (execution.params.inspectorAdapters as InspectorAdapters) || createDefaultInspectorAdapters();
 
-    const abortSignal = this.abortController.signal;
-    const aborted$ = fromEvent(abortSignal, 'abort').pipe(
-      switchMap((e) =>
-        (e.target as AbortSignal).reason === AbortReason.CANCELED
-          ? EMPTY
-          : throwError(new AbortError())
-      )
-    );
-
     this.context = {
       getSearchContext: () => this.execution.params.searchContext || {},
       getSearchSessionId: () => execution.params.searchSessionId,
@@ -310,7 +317,7 @@ export class Execution<
     this.result = this.input$.pipe(
       switchMap((input) =>
         this.invokeChain<Output>(this.state.get().ast.chain, input).pipe(
-          takeUntil(aborted$),
+          takeUntilAborted(this.abortController.signal),
           markPartial(),
           this.execution.params.partial && this.execution.params.throttle
             ? throttle(this.execution.params.throttle)
