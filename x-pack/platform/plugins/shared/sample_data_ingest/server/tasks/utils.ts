@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import type { InstalledResponse, InstallingResponse, StatusResponse } from '../../../common';
-
-export interface InstallationAPI {
-  getStatus(): Promise<StatusResponse>;
-  install(): Promise<InstallingResponse | InstalledResponse>;
-}
+export const isTaskCurrentlyRunningError = (error: any): boolean => {
+  return error?.message?.includes('task is currently running');
+};
