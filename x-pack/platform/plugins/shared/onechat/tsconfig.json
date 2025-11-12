@@ -91,6 +91,7 @@
     "@kbn/react-kibana-mount",
     "@kbn/react-query",
     "@kbn/maps-plugin",
-    "@kbn/shared-ux-utility"
+    "@kbn/shared-ux-utility",
+    "@kbn/langgraph-checkpoint-saver"
   ]
 }
