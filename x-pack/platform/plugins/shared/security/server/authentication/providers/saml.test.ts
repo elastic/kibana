@@ -1673,34 +1673,34 @@ describe('SAMLAuthenticationProvider', () => {
   });
 
   describe('`doesSessionNeedToBeCheckedForRequestIds` method', () => {
-    it('returns false when state is undefined', () => {
-      expect(provider.doesSessionNeedToBeCheckedForRequestIds(undefined)).toBe(false);
+    it('returns true when state is undefined', () => {
+      expect(provider.shouldInvalidateIntermediateSessionAfterLogin(undefined)).toBe(true);
     });
 
-    it('returns false when state is null', () => {
-      expect(provider.doesSessionNeedToBeCheckedForRequestIds(null)).toBe(false);
+    it('returns true when state is null', () => {
+      expect(provider.shouldInvalidateIntermediateSessionAfterLogin(null)).toBe(true);
     });
 
-    it('returns false when state has no requestIdMap', () => {
+    it('returns true when state has no requestIdMap', () => {
       const state = {
         accessToken: 'some-token',
         refreshToken: 'some-refresh-token',
         realm: 'test-realm',
       };
-      expect(provider.doesSessionNeedToBeCheckedForRequestIds(state)).toBe(false);
+      expect(provider.shouldInvalidateIntermediateSessionAfterLogin(state)).toBe(true);
     });
 
-    it('returns false when requestIdMap is empty', () => {
+    it('returns true when requestIdMap is empty', () => {
       const state = {
         accessToken: 'some-token',
         refreshToken: 'some-refresh-token',
         realm: 'test-realm',
         requestIdMap: {},
       };
-      expect(provider.doesSessionNeedToBeCheckedForRequestIds(state)).toBe(false);
+      expect(provider.shouldInvalidateIntermediateSessionAfterLogin(state)).toBe(true);
     });
 
-    it('returns true when requestIdMap has one entry', () => {
+    it('returns false when requestIdMap has one entry', () => {
       const state = {
         accessToken: 'some-token',
         refreshToken: 'some-refresh-token',
@@ -1709,10 +1709,10 @@ describe('SAMLAuthenticationProvider', () => {
           'request-id-1': { redirectURL: '/some-path' },
         },
       };
-      expect(provider.doesSessionNeedToBeCheckedForRequestIds(state)).toBe(true);
+      expect(provider.shouldInvalidateIntermediateSessionAfterLogin(state)).toBe(false);
     });
 
-    it('returns true when requestIdMap has multiple entries', () => {
+    it('returns false when requestIdMap has multiple entries', () => {
       const state = {
         accessToken: 'some-token',
         refreshToken: 'some-refresh-token',
@@ -1723,7 +1723,7 @@ describe('SAMLAuthenticationProvider', () => {
           'request-id-3': { redirectURL: '/third-path' },
         },
       };
-      expect(provider.doesSessionNeedToBeCheckedForRequestIds(state)).toBe(true);
+      expect(provider.shouldInvalidateIntermediateSessionAfterLogin(state)).toBe(false);
     });
   });
 

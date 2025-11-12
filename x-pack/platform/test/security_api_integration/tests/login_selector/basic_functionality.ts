@@ -611,9 +611,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       describe('SAML Multi tab', () => {
         it('should be able to have many pending SP initiated logins all successfully succeed', async () => {
-          const samlResponseMapByRequestId: Record<string, { samlResponse: string; cookie: any }> =
-            {};
-
+          const samlResponses: { index: number; samlResponse: string; cookie: any }[] = [];
           const beforeCookies = [];
 
           let sharedCookie;
@@ -645,7 +643,7 @@ export default function ({ getService }: FtrProviderContext) {
               inResponseTo: samlRequestId,
             });
 
-            samlResponseMapByRequestId[samlRequestId] = { samlResponse, cookie };
+            samlResponses.push({ index: i, samlResponse, cookie });
           }
           await es.indices.refresh({ index: '.kibana_security_session*' });
 
@@ -672,14 +670,7 @@ export default function ({ getService }: FtrProviderContext) {
           // There should be only one intermediate session with all requestIds in it
           expect(totalHits).to.equal(1);
 
-          const sources = sessionResponse.hits.hits.map((hit) => {
-            if (!hit._source) {
-              return { id: hit._id };
-            }
-            return {
-              id: hit._id,
-            };
-          });
+          const sources = sessionResponse.hits.hits.map((hit) => ({ id: hit._id }));
 
           const { id: intermediateSessionId } = sources[0];
 
@@ -688,10 +679,7 @@ export default function ({ getService }: FtrProviderContext) {
           let newCookie: Cookie | undefined;
           let firstResponse: Response | undefined;
 
-          for (const requestId of Object.keys(samlResponseMapByRequestId)) {
-            const index = Object.keys(samlResponseMapByRequestId).indexOf(requestId);
-            const samlValues = samlResponseMapByRequestId[requestId];
-
+          for (const { index, samlResponse, cookie } of samlResponses) {
             // For the first request, we perform the callback immediately to obtain the authenticated cookie.
             // This is to mock real world scenario where some callbacks may happen after the cookie has been updated to reference
             // the authenticated session.
@@ -699,27 +687,24 @@ export default function ({ getService }: FtrProviderContext) {
               firstResponse = await supertest
                 .post('/api/security/saml/callback')
                 .ca(CA_CERT)
-                .set('Cookie', samlValues.cookie.cookieString())
+                .set('Cookie', cookie.cookieString())
                 .send({
-                  SAMLResponse: samlValues.samlResponse,
+                  SAMLResponse: samlResponse,
                 });
 
               newCookie = parseCookie(firstResponse!.headers['set-cookie'][0])!;
             } else {
+              // We are going to alternate between authenticated cookie and cookies that corresponded to the initial login attempts
+              const callbackCookie = index % 2 === 0 ? newCookie : cookie;
               const callbackFunc = () => {
                 return new Promise<Response>((resolve) => {
                   resolve(
                     supertest
                       .post('/api/security/saml/callback')
                       .ca(CA_CERT)
-                      .set(
-                        'Cookie',
-                        index % 2 === 0 // We are going to alternate between authenticated cookie and cookies that corresponded to the initial login attempts
-                          ? newCookie?.cookieString()
-                          : samlValues.cookie.cookieString()
-                      )
+                      .set('Cookie', callbackCookie.cookieString())
                       .send({
-                        SAMLResponse: samlValues.samlResponse,
+                        SAMLResponse: samlResponse,
                       })
                   );
                 });
@@ -794,9 +779,9 @@ export default function ({ getService }: FtrProviderContext) {
           // - 1 intermediate session
           expect(finalSources).to.have.length(7);
 
-          const intermediateSession = finalSources.filter((session) => {
+          const intermediateSession = finalSources.find((session) => {
             return session.id === intermediateSessionId;
-          })[0];
+          });
 
           expect(intermediateSession).to.not.be(undefined);
         });

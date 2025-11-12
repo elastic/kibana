@@ -142,7 +142,7 @@ describe('Authenticator', () => {
       authenticate: jest.fn().mockResolvedValue(AuthenticationResult.notHandled()),
       logout: jest.fn().mockResolvedValue(DeauthenticationResult.notHandled()),
       getHTTPAuthenticationScheme: jest.fn(),
-      doesSessionNeedToBeCheckedForRequestIds: jest.fn().mockReturnValue(false),
+      shouldInvalidateIntermediateSessionAfterLogin: jest.fn().mockReturnValue(true),
     };
 
     mockBasicAuthenticationProvider = {
@@ -150,7 +150,7 @@ describe('Authenticator', () => {
       authenticate: jest.fn().mockResolvedValue(AuthenticationResult.notHandled()),
       logout: jest.fn().mockResolvedValue(DeauthenticationResult.notHandled()),
       getHTTPAuthenticationScheme: jest.fn(),
-      doesSessionNeedToBeCheckedForRequestIds: jest.fn().mockReturnValue(false),
+      shouldInvalidateIntermediateSessionAfterLogin: jest.fn().mockReturnValue(true),
     };
 
     mockSamlAuthenticationProvider = {
@@ -158,7 +158,7 @@ describe('Authenticator', () => {
       authenticate: jest.fn().mockResolvedValue(AuthenticationResult.notHandled()),
       logout: jest.fn().mockResolvedValue(DeauthenticationResult.notHandled()),
       getHTTPAuthenticationScheme: jest.fn(),
-      doesSessionNeedToBeCheckedForRequestIds: jest.fn().mockReturnValue(false),
+      shouldInvalidateIntermediateSessionAfterLogin: jest.fn().mockReturnValue(true),
     };
 
     jest.requireMock('./providers/http').HTTPAuthenticationProvider.mockImplementation(() => ({
@@ -729,7 +729,7 @@ describe('Authenticator', () => {
           authenticate: jest.fn(),
           logout: jest.fn(),
           getHTTPAuthenticationScheme: jest.fn(),
-          doesSessionNeedToBeCheckedForRequestIds: jest.fn().mockReturnValue(false),
+          shouldInvalidateIntermediateSessionAfterLogin: jest.fn().mockReturnValue(true),
         };
 
         mockSAMLAuthenticationProvider2 = {
@@ -737,7 +737,7 @@ describe('Authenticator', () => {
           authenticate: jest.fn(),
           logout: jest.fn(),
           getHTTPAuthenticationScheme: jest.fn(),
-          doesSessionNeedToBeCheckedForRequestIds: jest.fn().mockReturnValue(false),
+          shouldInvalidateIntermediateSessionAfterLogin: jest.fn().mockReturnValue(true),
         };
 
         jest
@@ -1510,8 +1510,8 @@ describe('Authenticator', () => {
         });
 
         // Mock to indicate that session needs to be kept alive for pending request IDs
-        mockSamlAuthenticationProvider.doesSessionNeedToBeCheckedForRequestIds.mockReturnValue(
-          true
+        mockSamlAuthenticationProvider.shouldInvalidateIntermediateSessionAfterLogin.mockReturnValue(
+          false
         );
 
         mockSamlAuthenticationProvider.login.mockResolvedValue(
@@ -1526,7 +1526,7 @@ describe('Authenticator', () => {
 
         // Verify the provider method was called with the session state
         expect(
-          mockSamlAuthenticationProvider.doesSessionNeedToBeCheckedForRequestIds
+          mockSamlAuthenticationProvider.shouldInvalidateIntermediateSessionAfterLogin
         ).toHaveBeenCalledWith(samlState);
 
         // Intermediate session should not be invalidated since we're keeping it alive for pending requests
@@ -1578,7 +1578,7 @@ describe('Authenticator', () => {
 
         // Verify the provider method was called with the session state
         expect(
-          mockSamlAuthenticationProvider.doesSessionNeedToBeCheckedForRequestIds
+          mockSamlAuthenticationProvider.shouldInvalidateIntermediateSessionAfterLogin
         ).toHaveBeenCalledWith(samlState);
 
         // Intermediate session should be invalidated

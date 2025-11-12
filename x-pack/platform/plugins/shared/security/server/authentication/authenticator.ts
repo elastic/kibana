@@ -368,6 +368,7 @@ export class Authenticator {
 
         const sessionUpdateResult = await this.updateSessionValue(request, {
           provider: { type: provider.type, name: providerName },
+          providerInstance: provider,
           authenticationResult,
           existingSessionValue,
         });
@@ -452,6 +453,7 @@ export class Authenticator {
 
         const sessionUpdateResult = await this.updateSessionValue(request, {
           provider: { type: provider.type, name: providerName },
+          providerInstance: provider,
           authenticationResult,
           existingSessionValue: existingSession.value,
         });
@@ -564,6 +566,7 @@ export class Authenticator {
     if (!authenticationResult.notHandled()) {
       const sessionUpdateResult = await this.updateSessionValue(request, {
         provider: existingSessionValue.provider,
+        providerInstance: provider,
         authenticationResult,
         existingSessionValue,
       });
@@ -758,10 +761,12 @@ export class Authenticator {
     request: KibanaRequest,
     {
       provider,
+      providerInstance,
       authenticationResult,
       existingSessionValue,
     }: {
       provider: AuthenticationProvider;
+      providerInstance: BaseAuthenticationProvider;
       authenticationResult: AuthenticationResult;
       existingSessionValue: Readonly<SessionValue> | null;
     }
@@ -829,8 +834,6 @@ export class Authenticator {
       isNewSessionAuthenticated &&
       authenticationResult.user!.username !== existingSessionValue!.username;
 
-    let intermediateSessionStillNeedsToExist = false;
-
     // There are 3 cases when we SHOULD invalidate existing session and create a new one with
     // regenerated SID/AAD:
     // 1. If a new session must be created while existing is still valid (e.g. IdP initiated login
@@ -846,14 +849,9 @@ export class Authenticator {
       await this.invalidateSessionValue({ request, sessionValue: existingSessionValue });
       existingSessionValue = null;
     } else if (sessionHasBeenAuthenticated) {
-      const providerInstance = this.providers.get(provider.name);
-      if (providerInstance?.doesSessionNeedToBeCheckedForRequestIds(existingSessionValue?.state)) {
-        this.logger.info(
-          'Existing unauthenticated session still has pending requestIds. Keeping session alive until so all pending requestIds can complete'
-        );
-
-        intermediateSessionStillNeedsToExist = true;
-      } else {
+      if (
+        providerInstance.shouldInvalidateIntermediateSessionAfterLogin(existingSessionValue?.state)
+      ) {
         this.logger.debug(
           'Session is authenticated, existing unauthenticated session will be invalidated.'
         );
@@ -862,8 +860,13 @@ export class Authenticator {
           sessionValue: existingSessionValue,
           skipAuditEvent: true, // Skip writing an audit event when we are replacing an intermediate session with a fully authenticated session
         });
-        existingSessionValue = null;
+      } else {
+        this.logger.info(
+          `Session is authenticated, but the existing unauthenticated session is still needed and won't be invalidated.`
+        );
       }
+
+      existingSessionValue = null;
     } else if (usernameHasChanged) {
       this.logger.warn('Username has changed, existing session will be invalidated.');
       await this.invalidateSessionValue({ request, sessionValue: existingSessionValue });
@@ -902,7 +905,7 @@ export class Authenticator {
 
     let newSessionValue: Readonly<SessionValue> | null;
 
-    if (!existingSessionValue || intermediateSessionStillNeedsToExist) {
+    if (!existingSessionValue) {
       const startTime = performance.now();
 
       newSessionValue = await this.session.create(request, {

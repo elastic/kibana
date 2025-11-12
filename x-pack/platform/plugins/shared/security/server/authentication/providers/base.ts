@@ -81,8 +81,16 @@ export abstract class BaseAuthenticationProvider {
     this.logger = options.logger;
   }
 
-  doesSessionNeedToBeCheckedForRequestIds(state?: unknown): boolean {
-    return false;
+  /**
+   * Determines whether intermediate session should be invalidated after a successful login.
+   * Some providers need to have their state checked to make sure all pending login attempts have
+   * completed before invalidating the session. This is particularly important for the SAML Provider,
+   * which may have pending login requests pending
+   * @param [state] Optional state object associated with the provider.
+   * @returns `true` if the intermediate session should be invalidated, `false` otherwise.
+   */
+  shouldInvalidateIntermediateSessionAfterLogin(state?: unknown) {
+    return true;
   }
 
   /**
