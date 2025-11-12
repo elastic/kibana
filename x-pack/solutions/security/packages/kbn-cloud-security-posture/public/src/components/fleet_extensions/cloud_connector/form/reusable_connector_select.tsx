@@ -11,6 +11,10 @@ import { EuiSuperSelect, EuiFormRow, EuiFlexGroup, EuiFlexItem, EuiText } from '
 import type { EuiSuperSelectOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  AWS_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ,
+  AZURE_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ,
+} from '@kbn/cloud-security-posture-common';
 import type {
   AwsCloudConnectorCredentials,
   AzureCloudConnectorCredentials,
@@ -117,6 +121,11 @@ export const ReusableConnectorSelect = <
     [cloudConnectors, provider, setCredentials]
   );
 
+  const testSubj =
+    provider === 'aws'
+      ? AWS_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ
+      : AZURE_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ;
+
   return (
     <EuiFormRow label={label} fullWidth>
       <EuiSuperSelect
@@ -131,7 +140,7 @@ export const ReusableConnectorSelect = <
           }
         )}
         hasDividers
-        data-test-subj={`${provider}-cloud-connector-super-select`}
+        data-test-subj={testSubj}
       />
     </EuiFormRow>
   );

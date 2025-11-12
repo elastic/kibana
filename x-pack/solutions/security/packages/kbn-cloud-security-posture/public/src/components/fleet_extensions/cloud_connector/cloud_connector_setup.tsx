@@ -160,21 +160,15 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
     (tab: { id: 'new-connection' | 'existing-connection' }) => {
       setSelectedTabId(tab.id);
 
-      if (
-        tab.id === TABS.NEW_CONNECTION &&
-        hasValidNewConnectionCredentials(newConnectionCredentials, cloudProvider)
-      ) {
+      // Always update policy when switching tabs to ensure validation is correct
+      if (tab.id === TABS.NEW_CONNECTION) {
         updatePolicyWithNewCredentials(newConnectionCredentials);
-      } else if (
-        tab.id === TABS.EXISTING_CONNECTION &&
-        existingConnectionCredentials.cloudConnectorId
-      ) {
+      } else if (tab.id === TABS.EXISTING_CONNECTION) {
         updatePolicyWithExistingCredentials(existingConnectionCredentials);
       }
     },
     [
       newConnectionCredentials,
-      cloudProvider,
       existingConnectionCredentials,
       updatePolicyWithNewCredentials,
       updatePolicyWithExistingCredentials,
