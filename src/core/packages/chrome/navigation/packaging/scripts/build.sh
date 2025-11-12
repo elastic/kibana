@@ -32,7 +32,10 @@ NODE_ENV=production BUILD_OUTPUT_DIR="$OUTPUT_DIR" \
 
 echo "Step 2: Generating TypeScript definitions..."
 cd "$PACKAGING_DIR"
-npx tsc react/types.ts --declaration --emitDeclarationOnly --outFile "$OUTPUT_DIR/index.d.ts" --skipLibCheck
+# Generate declarations without --outFile to avoid module wrapper
+npx tsc react/types.ts --declaration --emitDeclarationOnly --outDir "$OUTPUT_DIR" --skipLibCheck
+# Rename the generated types.d.ts to index.d.ts
+mv "$OUTPUT_DIR/types.d.ts" "$OUTPUT_DIR/index.d.ts"
 
 echo "Step 3: Copying package.json and cleaning up..."
 cp package.json "$OUTPUT_DIR/package.json"
