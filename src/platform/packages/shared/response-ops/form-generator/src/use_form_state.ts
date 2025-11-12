@@ -113,27 +113,82 @@ export const useFormState = <T>(fields: FieldDefinition[]) => {
 
   const handleBlur = useCallback(
     (fieldId: string) => {
-      setFormState((prev: FormState<T>) => ({
-        ...prev,
-        touched: { ...prev.touched, [fieldId]: true },
-      }));
-
       const parentFieldId = fieldId.split('.')[0];
       const field = fields.find((f) => f.id === parentFieldId);
-      if (field) {
-        const fieldValue = fieldId.includes('.')
-          ? getNestedValue(formState.values, fieldId)
-          : formState.values[fieldId as unknown as keyof T];
-        const validationResult = field.validate(fieldValue);
-        if (validationResult) {
-          setFormState((prev: FormState<T>) => ({
+
+      setFormState((prev: FormState<T>) => {
+        const newTouched = { ...prev.touched, [fieldId]: true };
+
+        if (!field) {
+          return {
             ...prev,
-            errors: { ...prev.errors, [fieldId]: validationResult },
-          }));
+            touched: newTouched,
+          };
         }
-      }
+
+        const fieldValue = fieldId.includes('.')
+          ? getNestedValue(prev.values, fieldId)
+          : prev.values[fieldId as unknown as keyof T];
+        const validationResult = field.validate(fieldValue);
+
+        if (!validationResult) {
+          return {
+            ...prev,
+            touched: newTouched,
+          };
+        }
+
+        if (
+          Array.isArray(validationResult) &&
+          validationResult.length > 0 &&
+          typeof validationResult[0] === 'object' &&
+          'path' in validationResult[0]
+        ) {
+          if (fieldId.includes('.')) {
+            const nestedFieldName = fieldId.split('.').slice(1).join('.');
+            const matchingIssue: any = validationResult.find((issue: any) => {
+              return issue.path && issue.path.join('.') === nestedFieldName;
+            });
+
+            if (matchingIssue && typeof matchingIssue === 'object' && 'message' in matchingIssue) {
+              return {
+                ...prev,
+                touched: newTouched,
+                errors: { ...prev.errors, [fieldId]: matchingIssue.message },
+              };
+            }
+          } else {
+            const topLevelIssue: any = validationResult.find((issue: any) => {
+              return !issue.path || issue.path.length === 0;
+            });
+
+            if (topLevelIssue && typeof topLevelIssue === 'object' && 'message' in topLevelIssue) {
+              return {
+                ...prev,
+                touched: newTouched,
+                errors: { ...prev.errors, [fieldId]: topLevelIssue.message },
+              };
+            }
+          }
+        } else if (
+          typeof validationResult === 'string' ||
+          (Array.isArray(validationResult) &&
+            (validationResult.length === 0 || typeof validationResult[0] === 'string'))
+        ) {
+          return {
+            ...prev,
+            touched: newTouched,
+            errors: { ...prev.errors, [fieldId]: validationResult as string | string[] },
+          };
+        }
+
+        return {
+          ...prev,
+          touched: newTouched,
+        };
+      });
     },
-    [fields, formState.values]
+    [fields]
   );
 
   const setFieldError = useCallback((fieldId: string, error: string | string[] | undefined) => {
@@ -178,7 +233,33 @@ export const useFormState = <T>(fields: FieldDefinition[]) => {
       const field = fieldDefinitions.find((f) => f.id === parentFieldId);
 
       if (field) {
-        return field.validate(value);
+        const validationResult = field.validate(value);
+
+        if (
+          Array.isArray(validationResult) &&
+          validationResult.length > 0 &&
+          typeof validationResult[0] === 'object' &&
+          'path' in validationResult[0] &&
+          fieldId.includes('.')
+        ) {
+          const nestedFieldName = fieldId.split('.').slice(1).join('.');
+
+          const matchingIssue: any = validationResult.find((issue: any) => {
+            return issue.path && issue.path.join('.') === nestedFieldName;
+          });
+
+          return matchingIssue && typeof matchingIssue === 'object' && 'message' in matchingIssue
+            ? matchingIssue.message
+            : undefined;
+        }
+
+        if (
+          typeof validationResult === 'string' ||
+          (Array.isArray(validationResult) &&
+            (validationResult.length === 0 || typeof validationResult[0] === 'string'))
+        ) {
+          return validationResult as string | string[];
+        }
       }
       return undefined;
     },
@@ -204,13 +285,30 @@ export const useFormState = <T>(fields: FieldDefinition[]) => {
       fields.forEach((field) => {
         const fieldKey = field.id as keyof T;
         const value = formState.values[fieldKey];
-        const cleanedValue = typeof field.cleanup === 'function' ? field.cleanup(value) : value;
-        cleanedValues[fieldKey] = cleanedValue as T[keyof T];
+        cleanedValues[fieldKey] = value as T[keyof T];
 
-        const validationResult = field.validate(cleanedValue);
+        const validationResult = field.validate(value);
         if (validationResult) {
-          errors[field.id] = validationResult;
-          hasErrors = true;
+          if (
+            Array.isArray(validationResult) &&
+            validationResult.length > 0 &&
+            typeof validationResult[0] === 'object' &&
+            'path' in validationResult[0]
+          ) {
+            validationResult.forEach((issue: any) => {
+              if (issue.path && issue.path.length > 0) {
+                const nestedFieldId = `${field.id}.${issue.path.join('.')}`;
+                errors[nestedFieldId] = issue.message;
+                allTouched[nestedFieldId] = true;
+              } else {
+                errors[field.id] = issue.message;
+              }
+            });
+            hasErrors = true;
+          } else {
+            errors[field.id] = validationResult as string | string[];
+            hasErrors = true;
+          }
         }
       });
 
@@ -218,6 +316,7 @@ export const useFormState = <T>(fields: FieldDefinition[]) => {
         setFormState((prev: FormState<T>) => ({
           ...prev,
           errors,
+          touched: allTouched,
         }));
       } else {
         onSuccess({ data: cleanedValues as T });
