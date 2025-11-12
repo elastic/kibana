@@ -23,7 +23,7 @@
 
 import { z } from '@kbn/zod';
 import type { ConnectorSpec } from '../connector_spec';
-import { UISchemas, withUIMeta } from '../connector_spec_ui';
+import { withUIMeta } from '../connector_spec_ui';
 
 export const D3SecurityConnectorExample: ConnectorSpec = {
   // ---- Metadata ----
