@@ -331,12 +331,6 @@ steps:
   });
 
   describe('completion provider', () => {
-    let completionProvider: monaco.languages.CompletionItemProvider;
-
-    beforeEach(() => {
-      completionProvider = getCompletionItemProvider(() => createMockStore().getState().detail);
-    });
-
     it('registers the completion provider when the editor mounts', () => {
       const yamlContent = 'version: "1"\nname: "test"';
       const store = createMockStore();
