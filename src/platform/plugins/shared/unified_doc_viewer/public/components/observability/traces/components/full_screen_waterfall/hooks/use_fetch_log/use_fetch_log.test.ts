@@ -8,7 +8,7 @@
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
-import { useLog } from '.';
+import { useFetchLog } from '.';
 import { getUnifiedDocViewerServices } from '../../../../../../../plugin';
 
 jest.mock('../../../../../../../plugin', () => ({
@@ -61,7 +61,7 @@ const mockGetById: jest.Mock<
   },
 });
 
-describe('useLog', () => {
+describe('useFetchLog', () => {
   const id = 'test-log-id';
 
   beforeEach(() => {
@@ -75,7 +75,7 @@ describe('useLog', () => {
   it('should return undefined when feature is not registered', async () => {
     mockGetById.mockReturnValue(undefined);
 
-    const { result } = renderHook(() => useLog({ id }));
+    const { result } = renderHook(() => useFetchLog({ id }));
 
     await waitFor(() => !result.current.loading);
 
@@ -86,7 +86,7 @@ describe('useLog', () => {
   });
 
   it('should return undefined when id is empty', async () => {
-    const { result } = renderHook(() => useLog({ id: '' }));
+    const { result } = renderHook(() => useFetchLog({ id: '' }));
 
     await waitFor(() => !result.current.loading);
 
@@ -101,7 +101,7 @@ describe('useLog', () => {
       () => new Promise(() => {}) // Never resolves to keep loading
     );
 
-    const { result } = renderHook(() => useLog({ id }));
+    const { result } = renderHook(() => useFetchLog({ id }));
 
     expect(result.current.loading).toBe(true);
     expect(result.current.log).toBeUndefined();
@@ -125,7 +125,7 @@ describe('useLog', () => {
 
     mockFetchLogDocumentById.mockResolvedValue(mockLogData);
 
-    const { result } = renderHook(() => useLog({ id }));
+    const { result } = renderHook(() => useFetchLog({ id }));
 
     await waitFor(() => !result.current.loading);
 
@@ -143,7 +143,7 @@ describe('useLog', () => {
   it('should handle when log document is not found (returns undefined)', async () => {
     mockFetchLogDocumentById.mockResolvedValue(undefined);
 
-    const { result } = renderHook(() => useLog({ id }));
+    const { result } = renderHook(() => useFetchLog({ id }));
 
     await waitFor(() => !result.current.loading);
 
@@ -161,7 +161,7 @@ describe('useLog', () => {
 
     mockFetchLogDocumentById.mockResolvedValue(mockLogData);
 
-    const { result } = renderHook(() => useLog({ id }));
+    const { result } = renderHook(() => useFetchLog({ id }));
 
     await waitFor(() => !result.current.loading);
 
@@ -175,7 +175,7 @@ describe('useLog', () => {
     const errorMessage = 'Fetch error';
     mockFetchLogDocumentById.mockRejectedValue(new Error(errorMessage));
 
-    const { result } = renderHook(() => useLog({ id }));
+    const { result } = renderHook(() => useFetchLog({ id }));
 
     await waitFor(() => !result.current.loading);
 
@@ -189,7 +189,7 @@ describe('useLog', () => {
     const errorMessage = 'Fetch error';
     mockFetchLogDocumentById.mockRejectedValue(new Error(errorMessage));
 
-    const { result } = renderHook(() => useLog({ id }));
+    const { result } = renderHook(() => useFetchLog({ id }));
 
     await waitFor(() => !result.current.loading);
 
@@ -205,7 +205,7 @@ describe('useLog', () => {
     const errorMessage = 'String error';
     mockFetchLogDocumentById.mockRejectedValue(errorMessage);
 
-    const { result } = renderHook(() => useLog({ id }));
+    const { result } = renderHook(() => useFetchLog({ id }));
 
     await waitFor(() => !result.current.loading);
 
@@ -232,7 +232,7 @@ describe('useLog', () => {
       .mockResolvedValueOnce(mockLogData2);
 
     const { result, rerender } = renderHook(
-      ({ logId }: { logId: string }) => useLog({ id: logId }),
+      ({ logId }: { logId: string }) => useFetchLog({ id: logId }),
       {
         initialProps: { logId: 'log-1' },
       }
@@ -271,7 +271,7 @@ describe('useLog', () => {
       return Promise.resolve(mockLogData);
     });
 
-    const { result } = renderHook(() => useLog({ id }));
+    const { result } = renderHook(() => useFetchLog({ id }));
 
     await waitFor(() => !result.current.loading);
 

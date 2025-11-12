@@ -9,7 +9,7 @@
 
 import { renderHook, waitFor } from '@testing-library/react';
 import type { SpanDocument } from '@kbn/apm-types';
-import { useSpan } from '.';
+import { useFetchSpan } from '.';
 import { getUnifiedDocViewerServices } from '../../../../../../../plugin';
 
 jest.mock('../../../../../../../plugin', () => ({
@@ -46,7 +46,7 @@ const mockGetById: jest.Mock<
   },
 });
 
-describe('useSpan', () => {
+describe('useFetchSpan', () => {
   const spanId = 'test-span-id';
   const traceId = 'test-trace-id';
 
@@ -61,7 +61,7 @@ describe('useSpan', () => {
   it('should return undefined when feature is not registered', async () => {
     mockGetById.mockReturnValue(undefined);
 
-    const { result } = renderHook(() => useSpan({ spanId, traceId }));
+    const { result } = renderHook(() => useFetchSpan({ spanId, traceId }));
 
     await waitFor(() => !result.current.loading);
 
@@ -71,7 +71,7 @@ describe('useSpan', () => {
   });
 
   it('should return undefined when spanId is empty', async () => {
-    const { result } = renderHook(() => useSpan({ spanId: '', traceId }));
+    const { result } = renderHook(() => useFetchSpan({ spanId: '', traceId }));
 
     await waitFor(() => !result.current.loading);
 
@@ -81,7 +81,7 @@ describe('useSpan', () => {
   });
 
   it('should return undefined when traceId is empty', async () => {
-    const { result } = renderHook(() => useSpan({ spanId, traceId: '' }));
+    const { result } = renderHook(() => useFetchSpan({ spanId, traceId: '' }));
 
     await waitFor(() => !result.current.loading);
 
@@ -95,7 +95,7 @@ describe('useSpan', () => {
       () => new Promise(() => {}) // Never resolves to keep loading
     );
 
-    const { result } = renderHook(() => useSpan({ spanId, traceId }));
+    const { result } = renderHook(() => useFetchSpan({ spanId, traceId }));
 
     expect(result.current.loading).toBe(true);
     expect(result.current.span).toBeUndefined();
@@ -123,7 +123,7 @@ describe('useSpan', () => {
 
     mockFetchSpan.mockResolvedValue(mockSpan);
 
-    const { result } = renderHook(() => useSpan({ spanId, traceId }));
+    const { result } = renderHook(() => useFetchSpan({ spanId, traceId }));
 
     await waitFor(() => !result.current.loading);
 
@@ -141,7 +141,7 @@ describe('useSpan', () => {
   it('should handle when span is not found (returns undefined)', async () => {
     mockFetchSpan.mockResolvedValue(undefined);
 
-    const { result } = renderHook(() => useSpan({ spanId, traceId }));
+    const { result } = renderHook(() => useFetchSpan({ spanId, traceId }));
 
     await waitFor(() => !result.current.loading);
 
@@ -154,7 +154,7 @@ describe('useSpan', () => {
     const errorMessage = 'Fetch error';
     mockFetchSpan.mockRejectedValue(new Error(errorMessage));
 
-    const { result } = renderHook(() => useSpan({ spanId, traceId }));
+    const { result } = renderHook(() => useFetchSpan({ spanId, traceId }));
 
     await waitFor(() => !result.current.loading);
 
@@ -169,7 +169,7 @@ describe('useSpan', () => {
     const errorMessage = 'Fetch error';
     mockFetchSpan.mockRejectedValue(new Error(errorMessage));
 
-    const { result } = renderHook(() => useSpan({ spanId, traceId }));
+    const { result } = renderHook(() => useFetchSpan({ spanId, traceId }));
 
     await waitFor(() => !result.current.loading);
 
@@ -196,7 +196,7 @@ describe('useSpan', () => {
     mockFetchSpan.mockResolvedValueOnce(mockSpan1).mockResolvedValueOnce(mockSpan2);
 
     const { result, rerender } = renderHook(
-      ({ sId, tId }: { sId: string; tId: string }) => useSpan({ spanId: sId, traceId: tId }),
+      ({ sId, tId }: { sId: string; tId: string }) => useFetchSpan({ spanId: sId, traceId: tId }),
       {
         initialProps: { sId: 'span-1', tId: traceId },
       }
@@ -236,7 +236,7 @@ describe('useSpan', () => {
     mockFetchSpan.mockResolvedValue(mockSpan);
 
     const { result, rerender } = renderHook(
-      ({ sId, tId }: { sId: string; tId: string }) => useSpan({ spanId: sId, traceId: tId }),
+      ({ sId, tId }: { sId: string; tId: string }) => useFetchSpan({ spanId: sId, traceId: tId }),
       {
         initialProps: { sId: spanId, tId: 'trace-1' },
       }
@@ -276,7 +276,7 @@ describe('useSpan', () => {
       return Promise.resolve(mockSpan);
     });
 
-    const { result } = renderHook(() => useSpan({ spanId, traceId }));
+    const { result } = renderHook(() => useFetchSpan({ spanId, traceId }));
 
     await waitFor(() => !result.current.loading);
 

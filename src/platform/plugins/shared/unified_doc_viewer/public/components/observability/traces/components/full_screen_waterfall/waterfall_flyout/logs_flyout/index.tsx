@@ -17,7 +17,7 @@ import { WaterfallFlyout } from '..';
 import LogsOverview from '../../../../../../doc_viewer_logs_overview';
 import { useDataSourcesContext } from '../../../../hooks/use_data_sources';
 import { useAdhocDataView } from '../../hooks/use_adhoc_data_view';
-import { useLog } from '../../hooks/use_log';
+import { useFetchLog } from '../../hooks/use_fetch_log';
 
 export const logsFlyoutId = 'logsFlyout' as const;
 
@@ -28,7 +28,7 @@ export interface SpanFlyoutProps {
 }
 
 export function LogsFlyout({ onCloseFlyout, id, dataView }: SpanFlyoutProps) {
-  const { loading, log, index } = useLog({ id });
+  const { loading, log, index } = useFetchLog({ id });
   const { indexes } = useDataSourcesContext();
   const {
     dataView: logDataView,

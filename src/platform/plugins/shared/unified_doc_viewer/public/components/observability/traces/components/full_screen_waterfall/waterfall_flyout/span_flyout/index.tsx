@@ -17,7 +17,7 @@ import type { OverviewApi } from '../../../../doc_viewer_overview/overview';
 import { Overview, type TraceOverviewSections } from '../../../../doc_viewer_overview/overview';
 import { useDataSourcesContext } from '../../../../hooks/use_data_sources';
 import { isSpanHit } from '../../helpers/is_span';
-import { useSpan } from '../../hooks/use_span';
+import { useFetchSpan } from '../../hooks/use_fetch_span';
 
 export const spanFlyoutId = 'spanDetailFlyout' as const;
 
@@ -36,7 +36,7 @@ export const SpanFlyout = ({
   onCloseFlyout,
   activeSection,
 }: SpanFlyoutProps) => {
-  const { span, loading } = useSpan({ spanId, traceId });
+  const { span, loading } = useFetchSpan({ spanId, traceId });
   const { indexes } = useDataSourcesContext();
   const [flyoutRef, setFlyoutRef] = useState<OverviewApi | null>(null);
 

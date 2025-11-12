@@ -12,12 +12,12 @@ import { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { getUnifiedDocViewerServices } from '../../../../../../../plugin';
 
-interface UseSpanParams {
+interface UseFetchSpanParams {
   spanId: string;
   traceId: string;
 }
 
-export const useSpan = ({ spanId, traceId }: UseSpanParams) => {
+export const useFetchSpan = ({ spanId, traceId }: UseFetchSpanParams) => {
   const { discoverShared, core } = getUnifiedDocViewerServices();
 
   const fetchSpanFeature = discoverShared.features.registry.getById(

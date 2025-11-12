@@ -13,11 +13,11 @@ import { i18n } from '@kbn/i18n';
 import { unflattenObject } from '@kbn/object-utils';
 import { getUnifiedDocViewerServices } from '../../../../../../../plugin';
 
-interface Props {
+interface UseFetchLogParams {
   id: string;
 }
 
-export function useLog({ id }: Props) {
+export function useFetchLog({ id }: UseFetchLogParams) {
   const { discoverShared, core } = getUnifiedDocViewerServices();
 
   const fetchLogDocumentByIdFeature = discoverShared.features.registry.getById(
