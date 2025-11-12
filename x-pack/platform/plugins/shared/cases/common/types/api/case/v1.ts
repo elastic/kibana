@@ -538,7 +538,11 @@ export const FindCasesContainingAllDocumentsRequestRt = rt.exact(
     /**
      * The IDs of the documents to find cases for.
      */
-    documentIds: rt.array(rt.string),
+    documentIds: rt.union([rt.array(rt.string), rt.undefined]),
+    /**
+     * The IDs of the alerts to find cases for. TODO: remove this in the next serverless release cycle https://github.com/elastic/security-team/issues/14718
+     */
+    alertIds: rt.union([rt.array(rt.string), rt.undefined]),
     // The IDs of the cases to find alerts for.
     caseIds: rt.array(rt.string),
   })

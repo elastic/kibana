@@ -97,6 +97,9 @@ export const INTERNAL_CASE_FIND_USER_ACTIONS_URL =
   `${CASES_INTERNAL_URL}/{case_id}/user_actions/_find` as const;
 export const INTERNAL_CASE_GET_CASES_BY_ATTACHMENT_URL =
   `${CASES_INTERNAL_URL}/case/attachments/_find_containing_all` as const;
+// TODO: below is an alias to INTERNAL_CASE_GET_CASES_BY_ATTACHMENT_URL that should be removed in the next serverless development cycle
+export const INTERNAL_CASE_GET_CASES_BY_ALERTS_URL =
+  `${CASES_INTERNAL_URL}/case/alerts/_find_containing_all` as const;
 export const INTERNAL_BULK_CREATE_CASE_OBSERVABLES_URL = `${CASES_INTERNAL_URL}/{case_id}/observables/_bulk_create`;
 
 /**

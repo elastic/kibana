@@ -9,7 +9,10 @@ import { schema } from '@kbn/config-schema';
 import { type IKibanaResponse } from '@kbn/core/server';
 import pLimit from 'p-limit';
 import { createCasesRoute } from '../create_cases_route';
-import { INTERNAL_CASE_GET_CASES_BY_ATTACHMENT_URL } from '../../../../common/constants';
+import {
+  INTERNAL_CASE_GET_CASES_BY_ALERTS_URL,
+  INTERNAL_CASE_GET_CASES_BY_ATTACHMENT_URL,
+} from '../../../../common/constants';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
 import { type CasesClient } from '../../../client';
 import { type caseApiV1 } from '../../../../common/types/api';
@@ -24,7 +27,9 @@ export const findCasesContainingAllDocumentsRoute = createCasesRoute({
   security: DEFAULT_CASES_ROUTE_SECURITY,
   params: {
     body: schema.object({
-      documentIds: schema.arrayOf(schema.string()),
+      documentIds: schema.maybe(schema.arrayOf(schema.string())),
+      // TODO: remove this field in the next serverless release cycle https://github.com/elastic/security-team/issues/14718
+      alertIds: schema.maybe(schema.arrayOf(schema.string())),
       caseIds: schema.arrayOf(schema.string()),
     }),
   },
@@ -36,10 +41,16 @@ export const findCasesContainingAllDocumentsRoute = createCasesRoute({
     request,
     response,
   }): Promise<IKibanaResponse<{ casesWithAllAttachments: string[] }>> => {
-    const { documentIds, caseIds } =
+    const { documentIds, caseIds, alertIds } =
       request.body as caseApiV1.FindCasesContainingAllDocumentsRequest;
 
-    if (!caseIds.length || !documentIds.length) {
+    // TODO: remove this in the next serverless release cycle https://github.com/elastic/security-team/issues/14718
+    let filterIds = documentIds;
+    if (!filterIds) {
+      filterIds = alertIds;
+    }
+
+    if (!caseIds.length || !filterIds?.length) {
       return response.ok({
         body: { casesWithAllAttachments: [] },
       });
@@ -65,6 +76,24 @@ export const findCasesContainingAllDocumentsRoute = createCasesRoute({
       },
     });
   },
+});
+
+// TODO: remove this route in the next serverless release cycle https://github.com/elastic/security-team/issues/14718
+export const findCasesContainingAllAlertsRoute = createCasesRoute({
+  method: 'post',
+  path: INTERNAL_CASE_GET_CASES_BY_ALERTS_URL,
+  security: DEFAULT_CASES_ROUTE_SECURITY,
+  params: {
+    body: schema.object({
+      documentIds: schema.arrayOf(schema.string()),
+      alertIds: schema.arrayOf(schema.string()),
+      caseIds: schema.arrayOf(schema.string()),
+    }),
+  },
+  routerOptions: {
+    access: 'internal',
+  },
+  handler: findCasesContainingAllDocumentsRoute.handler,
 });
 
 export const isStringOrArray = (value: unknown): value is string | string[] => {
