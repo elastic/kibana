@@ -1706,6 +1706,7 @@
     "@kbn/tooling-log": "link:src/platform/packages/shared/kbn-tooling-log",
     "@kbn/ts-projects": "link:packages/kbn-ts-projects",
     "@kbn/ts-type-check-cli": "link:packages/kbn-ts-type-check-cli",
+    "@kbn/tsconfig-base": "link:packages/kbn-tsconfig/base",
     "@kbn/uiam-dev-cli": "link:x-pack/platform/packages/private/security/kbn_uiam_dev_cli",
     "@kbn/validate-next-docs-cli": "link:packages/kbn-validate-next-docs-cli",
     "@kbn/validate-oas": "link:src/platform/packages/private/kbn-validate-oas",
