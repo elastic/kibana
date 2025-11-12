@@ -290,9 +290,9 @@ export function initializeUnifiedSearchManager(
       setTimeRange: setAndSyncTimeRange,
       timeRange$,
       timeslice$,
-      unifiedSearchFilters$,
     },
     internalApi: {
+      unifiedSearchFilters$,
       startComparing$: (lastSavedState$: BehaviorSubject<DashboardState>) => {
         return combineLatest([
           unifiedSearchFilters$,

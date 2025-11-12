@@ -76,6 +76,7 @@ export function buildMockDashboardApi({
   const initialState = getSampleDashboardState(overrides);
   const results = getDashboardApi({
     initialState,
+    incomingEmbeddables: undefined,
     savedObjectId,
     savedObjectResult: savedObjectId
       ? ({
