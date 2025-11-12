@@ -32,7 +32,7 @@ export type { TagcloudState, TagcloudStateNoESQL, TagcloudStateESQL } from './ch
 export { tagcloudStateSchema } from './charts/tagcloud';
 
 export type {
-  LensApiFieldOrFormulaMetricOperation,
+  LensApiFieldMetricOrFormulaOperation,
   LensApiAllMetricOrFromulaOperations,
 } from './metric_ops';
 export type { LensApiBucketOperations } from './bucket_ops';

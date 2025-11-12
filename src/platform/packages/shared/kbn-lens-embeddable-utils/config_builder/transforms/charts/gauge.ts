@@ -15,7 +15,7 @@ import type {
 } from '@kbn/lens-common';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/types';
-import type { GaugeState, LensApiState, LensApiFieldOrFormulaMetricOperation } from '../../schema';
+import type { GaugeState, LensApiState, LensApiFieldMetricOrFormulaOperation } from '../../schema';
 import { fromColorByValueAPIToLensState, fromColorByValueLensStateToAPI } from '../coloring';
 import type { LensAttributes } from '../../types';
 import { DEFAULT_LAYER_ID } from '../../types';
@@ -122,7 +122,7 @@ function reverseBuildVisualizationState(
           ...(operationFromColumn(
             metricAccessor,
             layer as FormBasedLayer
-          ) as LensApiFieldOrFormulaMetricOperation),
+          ) as LensApiFieldMetricOrFormulaOperation),
           ...(visualization.minAccessor
             ? {
                 min: operationFromColumn(
@@ -178,7 +178,7 @@ function reverseBuildVisualizationState(
 }
 
 function buildFormBasedLayer(layer: GaugeStateNoESQL): FormBasedPersistedState['layers'] {
-  const columns = fromMetricAPItoLensState(layer.metric as LensApiFieldOrFormulaMetricOperation);
+  const columns = fromMetricAPItoLensState(layer.metric as LensApiFieldMetricOrFormulaOperation);
 
   const layers: Record<string, PersistedIndexPatternLayer> = generateLayer(DEFAULT_LAYER_ID, layer);
 

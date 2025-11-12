@@ -265,7 +265,7 @@ export type LensApiCounterRateOperation = typeof counterRateOperationSchema.type
 export type LensApiFormulaOperation = typeof formulaOperationDefinitionSchema.type;
 export type LensApiStaticValueOperation = typeof staticOperationDefinitionSchema.type;
 
-export type LensApiFieldOrFormulaMetricOperation =
+export type LensApiFieldMetricOrFormulaOperation =
   | LensApiFieldMetricOperations
   | LensApiFormulaOperation;
 

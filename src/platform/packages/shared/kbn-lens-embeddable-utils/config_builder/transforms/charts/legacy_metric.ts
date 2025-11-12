@@ -30,7 +30,7 @@ import { getValueApiColumn, getValueColumn } from '../columns/esql_column';
 import type {
   LensApiState,
   LegacyMetricState,
-  LensApiFieldOrFormulaMetricOperation,
+  LensApiFieldMetricOrFormulaOperation,
 } from '../../schema';
 import { fromMetricAPItoLensState } from '../columns/metric';
 import type { DeepMutable, DeepPartial } from '../utils';
@@ -90,7 +90,7 @@ function reverseBuildVisualizationState(
       : (operationFromColumn(
           visualization.accessor,
           layer as FormBasedLayer
-        ) as LensApiFieldOrFormulaMetricOperation),
+        ) as LensApiFieldMetricOrFormulaOperation),
   } as LegacyMetricState;
 
   if (props.metric) {
@@ -124,7 +124,7 @@ function reverseBuildVisualizationState(
 }
 
 function buildFormBasedLayer(layer: LegacyMetricStateNoESQL): FormBasedPersistedState['layers'] {
-  const columns = fromMetricAPItoLensState(layer.metric as LensApiFieldOrFormulaMetricOperation);
+  const columns = fromMetricAPItoLensState(layer.metric as LensApiFieldMetricOrFormulaOperation);
 
   const layers: Record<string, PersistedIndexPatternLayer> = generateLayer(DEFAULT_LAYER_ID, layer);
   const defaultLayer = layers[DEFAULT_LAYER_ID];
