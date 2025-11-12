@@ -421,10 +421,10 @@ describe('When using the kill-process action from response actions console', () 
             'Kill/terminate a process' +
             'Usage' +
             'kill-process --processName [--comment]' +
-            'Example' +
-            'kill-process --processName="notepad" --comment="kill malware"' +
             'Required parameters--processName - The process name to kill' +
-            'Optional parameters--comment - A comment to go along with the action'
+            'Optional parameters--comment - A comment to go along with the action' +
+            'Example' +
+            'kill-process --processName="notepad" --comment="kill malware"'
         );
       });
     });
