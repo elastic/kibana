@@ -258,6 +258,9 @@ describe('Text based languages utils', () => {
       const dataViewsMock = dataViewPluginMocks.createStartContract();
       const dataMock = dataPluginMock.createStartContract();
       const coreStart = coreMock.createStart();
+
+      coreStart.http.get = jest.fn().mockResolvedValue(undefined);
+
       const expressionsMock = expressionsPluginMock.createStartContract();
       const updatedState = await getStateFromAggregateQuery(
         state,
@@ -278,12 +281,12 @@ describe('Text based languages utils', () => {
               timeFieldName: 'timeField',
             })
           ),
-          create: jest.fn().mockReturnValue(
+          create: jest.fn().mockImplementation((spec) =>
             Promise.resolve({
               id: '4',
               title: 'my-adhoc-index-pattern',
               name: 'my-adhoc-index-pattern',
-              timeFieldName: 'timeField',
+              timeFieldName: spec.timeFieldName,
               isPersisted: () => false,
             })
           ),
@@ -365,6 +368,8 @@ describe('Text based languages utils', () => {
       const dataMock = dataPluginMock.createStartContract();
       const expressionsMock = expressionsPluginMock.createStartContract();
       const coreStart = coreMock.createStart();
+
+      coreStart.http.get = jest.fn().mockResolvedValue('time');
       const updatedState = await getStateFromAggregateQuery(
         state,
         { esql: 'FROM my-fake-index-pattern | WHERE time <= ?_tend' },
@@ -384,12 +389,12 @@ describe('Text based languages utils', () => {
               timeFieldName: 'timeField',
             })
           ),
-          create: jest.fn().mockReturnValue(
+          create: jest.fn().mockImplementation((spec) =>
             Promise.resolve({
               id: '4',
               title: 'my-adhoc-index-pattern',
               name: 'my-adhoc-index-pattern',
-              timeFieldName: 'timeField',
+              timeFieldName: spec.timeFieldName,
               isPersisted: () => false,
             })
           ),
@@ -471,6 +476,8 @@ describe('Text based languages utils', () => {
       const dataMock = dataPluginMock.createStartContract();
       const expressionsMock = expressionsPluginMock.createStartContract();
       const coreStart = coreMock.createStart();
+
+      coreStart.http.get = jest.fn().mockResolvedValue('@timestamp');
       const updatedState = await getStateFromAggregateQuery(
         state,
         { esql: 'FROM my-fake-index-*' },
@@ -490,12 +497,12 @@ describe('Text based languages utils', () => {
               timeFieldName: 'timeField',
             })
           ),
-          create: jest.fn().mockReturnValue(
+          create: jest.fn().mockImplementation((spec) =>
             Promise.resolve({
               id: 'adHoc-id',
               title: 'my-fake-index-*',
               name: 'my-fake-index-*',
-              timeFieldName: 'timeField',
+              timeFieldName: spec.timeFieldName,
               isPersisted: () => false,
               fields: {
                 getByName: jest.fn().mockReturnValue({

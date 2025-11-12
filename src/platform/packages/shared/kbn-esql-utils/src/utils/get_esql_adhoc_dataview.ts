@@ -68,12 +68,11 @@ export async function getESQLAdHocDataview({
   // optional http service to use to fetch the time field, if needed
   http?: HttpStart;
 }) {
-  const response = (await http?.get(`${TIMEFIELD_ROUTE}${query}`).catch((error) => {
+  const timeField = (await http?.get(`${TIMEFIELD_ROUTE}${query}`).catch((error) => {
     // eslint-disable-next-line no-console
     console.error('Failed to fetch the timefield', error);
-    return '';
+    return undefined;
   })) as string | undefined;
-  const timeField = response;
   const indexPattern = getIndexPatternFromESQLQuery(query);
   const dataViewId = await sha256(`esql-${indexPattern}`);
 
@@ -89,7 +88,7 @@ export async function getESQLAdHocDataview({
       type: ESQL_TYPE,
       id: dataViewId,
       allowNoIndex: options?.allowNoIndex,
-      timeFieldName: timeField,
+      timeFieldName: timeField || undefined,
     },
     // important to skip if you just need the dataview without the fields for performance reasons
     skipFetchFields
