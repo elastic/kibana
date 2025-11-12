@@ -6031,6 +6031,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/cps-utils@link:src/platform/packages/shared/kbn-cps-utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/cps@link:src/platform/plugins/shared/cps":
   version "0.0.0"
   uid ""
