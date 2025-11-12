@@ -6,22 +6,23 @@
  */
 
 import React from 'react';
-
 import { coreMock } from '@kbn/core/public/mocks';
 import { mockIndexPattern } from '../../../../../../common/mock';
 import { TestProviders } from '../../../../../../common/mock/test_providers';
 import { FilterManager } from '@kbn/data-plugin/public';
 import { mockDataProviders } from '../../../data_providers/mock/mock_data_providers';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
-
 import { QueryTabHeader } from '.';
 import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../../../../common/api/timeline';
 import { waitFor } from '@testing-library/react';
 import { TimelineId, TimelineTabs } from '../../../../../../../common/types';
+import { useShouldShowAlertsOnlyMigrationMessage } from '../hooks/use_show_alerts_only_migration_message';
+import { CALLOUT_TEST_ID } from './migration_message_callout';
 
 const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
 
 jest.mock('../../../../../../common/lib/kibana');
+jest.mock('../hooks/use_show_alerts_only_migration_message');
 
 describe('Header', () => {
   const indexPattern = mockIndexPattern;
@@ -34,6 +35,7 @@ describe('Header', () => {
   const props = {
     activeTab: TimelineTabs.query,
     currentIndices: ['index-1', 'index-2'],
+    dataViewId: '',
     showEventsCountBadge: true,
     totalCount: 1,
     browserFields: {},
@@ -52,8 +54,8 @@ describe('Header', () => {
     timelineType: TimelineTypeEnum.default,
   };
 
-  describe('rendering', () => {
-    test('it renders the data providers when show is true', async () => {
+  describe('QueryTabHeader', () => {
+    test('should render the data providers when show is true', async () => {
       const testProps = { ...props, show: true };
       const wrapper = await getWrapper(
         <TestProviders>
@@ -64,7 +66,7 @@ describe('Header', () => {
       expect(wrapper.find('[data-test-subj="dataProviders"]').exists()).toEqual(true);
     });
 
-    test('it renders the unauthorized call out providers', async () => {
+    test('should render the unauthorized call out providers', async () => {
       const testProps = {
         ...props,
         filterManager: new FilterManager(mockUiSettingsForFilterManager),
@@ -80,7 +82,7 @@ describe('Header', () => {
       expect(wrapper.find('[data-test-subj="timelineCallOutUnauthorized"]').exists()).toEqual(true);
     });
 
-    test('it renders the unauthorized call out with correct icon', async () => {
+    test('should render the unauthorized call out with correct icon', async () => {
       const testProps = {
         ...props,
         filterManager: new FilterManager(mockUiSettingsForFilterManager),
@@ -98,7 +100,7 @@ describe('Header', () => {
       ).toEqual('warning');
     });
 
-    test('it renders the unauthorized call out with correct message', async () => {
+    test('should render the unauthorized call out with correct message', async () => {
       const testProps = {
         ...props,
         filterManager: new FilterManager(mockUiSettingsForFilterManager),
@@ -118,7 +120,7 @@ describe('Header', () => {
       );
     });
 
-    test('it renders the immutable timeline call out providers', async () => {
+    test('should render the immutable timeline call out providers', async () => {
       const testProps = {
         ...props,
         filterManager: new FilterManager(mockUiSettingsForFilterManager),
@@ -135,7 +137,7 @@ describe('Header', () => {
       expect(wrapper.find('[data-test-subj="timelineImmutableCallOut"]').exists()).toEqual(true);
     });
 
-    test('it renders the immutable timeline call out with correct icon', async () => {
+    test('should render the immutable timeline call out with correct icon', async () => {
       const testProps = {
         ...props,
         filterManager: new FilterManager(mockUiSettingsForFilterManager),
@@ -154,7 +156,7 @@ describe('Header', () => {
       ).toEqual('warning');
     });
 
-    test('it renders the immutable timeline call out with correct message', async () => {
+    test('should render the immutable timeline call out with correct message', async () => {
       const testProps = {
         ...props,
         filterManager: new FilterManager(mockUiSettingsForFilterManager),
@@ -174,5 +176,17 @@ describe('Header', () => {
         'This prebuilt timeline template cannot be modified. To make changes, please duplicate this template and make modifications to the duplicate template.'
       );
     });
+  });
+
+  test('should render the migration callout', async () => {
+    (useShouldShowAlertsOnlyMigrationMessage as jest.Mock).mockReturnValue(true);
+
+    const wrapper = await getWrapper(
+      <TestProviders>
+        <QueryTabHeader {...props} />
+      </TestProviders>
+    );
+
+    expect(wrapper.find(`[data-test-subj="${CALLOUT_TEST_ID}"]`).exists()).toEqual(true);
   });
 });

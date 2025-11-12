@@ -51,10 +51,3 @@ export const CALL_OUT_FILTER_FOR_ALERTS_BUTTON = i18n.translate(
     defaultMessage: 'Filter for alerts.',
   }
 );
-
-export const ALERTS_ONLY_FILTER_ALIAS = i18n.translate(
-  'xpack.securitySolution.timeline.filters.alertsOnlyFilterAlias',
-  {
-    defaultMessage: 'Alerts only',
-  }
-);

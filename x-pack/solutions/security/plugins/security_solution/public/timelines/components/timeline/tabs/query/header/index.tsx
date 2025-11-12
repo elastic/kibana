@@ -5,20 +5,14 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import type { FilterManager } from '@kbn/data-plugin/public';
 import { InPortal } from 'react-reverse-portal';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 import { css } from '@emotion/react';
+import { MigrationMessageCallout } from './migration_message_callout';
+import { useShouldShowAlertsOnlyMigrationMessage } from '../hooks/use_show_alerts_only_migration_message';
 import { useTimelineEventsCountPortal } from '../../../../../../common/hooks/use_timeline_events_count';
 import {
   type TimelineStatus,
@@ -33,15 +27,16 @@ import * as i18n from './translations';
 import { StatefulSearchOrFilter } from '../../../search_or_filter';
 import { DataProviders } from '../../../data_providers';
 import { EventsCountBadge, StyledEuiFlyoutHeader, TabHeaderContainer } from '../../shared/layout';
-import {
-  useAddAlertsOnlyFilter,
-  useShouldShowAlertsOnlyMigrationMessage,
-  useTimelineSelectAlertsOnlyDataView,
-} from './use_show_alerts_only_migration_helpers';
 
 interface Props {
   activeTab: TimelineTabs;
+  /**
+   * The currently selected timeline indices
+   */
   currentIndices: string[];
+  /**
+   * The id of the dataview
+   */
   dataViewId: string | null;
   filterManager: FilterManager;
   show: boolean;
@@ -111,9 +106,6 @@ const QueryTabHeaderComponent: React.FC<Props> = ({
     dataViewId,
   });
 
-  const selectAlertsDataView = useTimelineSelectAlertsOnlyDataView();
-  const addAlertsFilter = useAddAlertsOnlyFilter(timelineId);
-
   return (
     <StyledEuiFlyoutHeader data-test-subj={`${activeTab}-tab-flyout-header`} hasBorder={false}>
       <InPortal node={timelineEventsCountPortalNode}>
@@ -130,45 +122,7 @@ const QueryTabHeaderComponent: React.FC<Props> = ({
               </EuiFlexItem>
               {showAlertsOnlyMigrationMessage && (
                 <EuiFlexItem>
-                  <EuiCallOut
-                    announceOnMount
-                    data-test-subj="timelineCallOutAlertsOnlyMigrationMessage"
-                    title={i18n.CALL_OUT_ALERTS_ONLY_MIGRATION_TITLE}
-                    color="warning"
-                    iconType="warning"
-                    size="m"
-                  >
-                    <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
-                      <EuiFlexItem>
-                        <EuiText size="s">{i18n.CALL_OUT_ALERTS_ONLY_MIGRATION_CONTENT}</EuiText>
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-                          <EuiFlexItem grow={false}>
-                            <EuiButtonEmpty
-                              aria-label={i18n.CALL_OUT_ALERTS_ONLY_MIGRATION_SWITCH_BUTTON}
-                              color="text"
-                              onClick={selectAlertsDataView}
-                              size="s"
-                            >
-                              {i18n.CALL_OUT_ALERTS_ONLY_MIGRATION_SWITCH_BUTTON}
-                            </EuiButtonEmpty>
-                          </EuiFlexItem>
-                          <EuiFlexItem grow={false}>
-                            <EuiButton
-                              aria-label={i18n.CALL_OUT_FILTER_FOR_ALERTS_BUTTON}
-                              color="warning"
-                              onClick={addAlertsFilter}
-                              fill
-                              size="s"
-                            >
-                              {i18n.CALL_OUT_FILTER_FOR_ALERTS_BUTTON}
-                            </EuiButton>
-                          </EuiFlexItem>
-                        </EuiFlexGroup>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiCallOut>
+                  <MigrationMessageCallout timelineId={timelineId} />
                 </EuiFlexItem>
               )}
               {showCallOutUnauthorizedMsg && (
