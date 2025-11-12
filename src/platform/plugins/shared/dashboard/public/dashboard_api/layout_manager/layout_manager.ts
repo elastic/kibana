@@ -53,7 +53,7 @@ import { getPanelSettings } from '../../panel_placement/get_panel_placement_sett
 import { placeClonePanel } from '../../panel_placement/place_clone_panel_strategy';
 import { runPanelPlacementStrategy } from '../../panel_placement/place_new_panel_strategies';
 import type { PanelResizeSettings } from '../../panel_placement/types';
-import { PanelPlacementStrategy } from '../../plugin_constants';
+import { DEFAULT_PANEL_PLACEMENT_SETTINGS, PanelPlacementStrategy } from '../../plugin_constants';
 import { coreServices, usageCollectionService } from '../../services/kibana_services';
 import { DASHBOARD_UI_METRIC_ID } from '../../utils/telemetry_constants';
 import type { initializeTrackPanel } from '../track_panel';
@@ -171,9 +171,7 @@ export function initializeLayoutManager(
     }
     const panelSettings = await getPanelSettings(type, serializedState);
     const panelPlacementSettings = {
-      strategy: PanelPlacementStrategy.findTopLeftMostOpenSpace,
-      height: DEFAULT_PANEL_HEIGHT,
-      width: DEFAULT_PANEL_WIDTH,
+      ...DEFAULT_PANEL_PLACEMENT_SETTINGS,
       ...panelSettings?.placementSettings,
     };
     const { newPanelPlacement, otherPanels } = runPanelPlacementStrategy(
@@ -199,6 +197,9 @@ export function initializeLayoutManager(
   // Place the incoming embeddables if there is at least one
   // --------------------------------------------------------------------------------------
   if (incomingEmbeddables?.length) {
+    const first = incomingEmbeddables[0];
+    if (!first.embeddableId) first.embeddableId = v4(); // give first panel an ID so we can place others around it
+
     for (const incomingEmbeddable of incomingEmbeddables) {
       const { serializedState, size, type } = incomingEmbeddable;
       const uuid = incomingEmbeddable.embeddableId ?? v4();
@@ -211,6 +212,11 @@ export function initializeLayoutManager(
             width: size?.width ?? DEFAULT_PANEL_WIDTH,
             height: size?.height ?? DEFAULT_PANEL_HEIGHT,
             currentPanels: layout$.value.panels,
+            /**
+             * We can assume that all panels being sent as a single package are related; so,
+             * place them close together by grouping them around the first embeddable.
+             */
+            beside: uuid === first.embeddableId ? undefined : first.embeddableId,
           }).newPanelPlacement;
       currentChildState[uuid] = {
         rawState: {
@@ -227,9 +233,9 @@ export function initializeLayoutManager(
           [uuid]: { grid, type },
         },
       });
-      trackPanel.setScrollToPanelId(uuid);
-      trackPanel.setHighlightPanelId(uuid);
     }
+    trackPanel.setScrollToPanelId(first.embeddableId);
+    trackPanel.setHighlightPanelId(first.embeddableId);
   }
 
   function getDashboardPanelFromId(panelId: string) {
