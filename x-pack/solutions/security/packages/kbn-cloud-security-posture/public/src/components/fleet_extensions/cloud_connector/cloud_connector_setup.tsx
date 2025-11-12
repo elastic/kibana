@@ -24,7 +24,7 @@ import { useCloudConnectorSetup } from './hooks/use_cloud_connector_setup';
 import { CloudConnectorTabs, type CloudConnectorTab } from './cloud_connector_tabs';
 import type { UpdatePolicy } from '../types';
 import { TABS, CLOUD_FORMATION_EXTERNAL_DOC_URL } from './constants';
-import { hasValidNewConnectionCredentials, isCloudConnectorReusableEnabled } from './utils';
+import { isCloudConnectorReusableEnabled } from './utils';
 export interface CloudConnectorSetupProps {
   input: NewPackagePolicyInput;
   newPolicy: NewPackagePolicy;
