@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { AGENT_BUILDER_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import type { ApmSynthtraceEsClient, LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { isOtherResult } from '@kbn/onechat-common/tools';
 import type { ToolResult, OtherResult } from '@kbn/onechat-common';
@@ -15,7 +14,7 @@ import { createLlmProxy } from '@kbn/test-suites-xpack-platform/onechat_api_inte
 import { OBSERVABILITY_GET_DATA_SOURCES_TOOL_ID } from '@kbn/observability-agent-plugin/server/tools';
 import { OBSERVABILITY_AGENT_ID } from '@kbn/observability-agent-plugin/server/agent/register_observability_agent';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
-import { createOneChatApiClient } from '../utils/one_chat_client';
+import { createAgentBuilderApiClient } from '../utils/agent_builder_client';
 import { setupToolCallThenAnswer } from '../utils/llm_proxy/scenarios';
 import { createSyntheticLogsData, createSyntheticApmData } from '../utils/synthtrace_scenarios';
 import {
@@ -28,7 +27,6 @@ const USER_PROMPT = 'Do I have any data sources? ';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const log = getService('log');
-  const kibanaServer = getService('kibanaServer');
   const roleScopedSupertest = getService('roleScopedSupertest');
 
   describe(`tool: ${OBSERVABILITY_GET_DATA_SOURCES_TOOL_ID}`, function () {
@@ -37,7 +35,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     let llmProxy: LlmProxy;
     let connectorId: string;
-    let oneChatApiClient: ReturnType<typeof createOneChatApiClient>;
+    let agentBuilderApiClient: ReturnType<typeof createAgentBuilderApiClient>;
 
     describe('POST /api/agent_builder/converse', () => {
       let toolResponseContent: { results: ToolResult[] };
@@ -45,16 +43,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       let logsSynthtraceEsClient: LogsSynthtraceEsClient;
 
       before(async () => {
-        // Enable Agent Builder (can be removed when the agent builder is enabled by default)
-        await kibanaServer.uiSettings.update({
-          [AGENT_BUILDER_ENABLED_SETTING_ID]: true,
-        });
-
         llmProxy = await createLlmProxy(log);
         connectorId = await createLlmProxyActionConnector(getService, { port: llmProxy.getPort() });
 
         const scoped = await roleScopedSupertest.getSupertestWithRoleScope('editor');
-        oneChatApiClient = createOneChatApiClient(scoped);
+        agentBuilderApiClient = createAgentBuilderApiClient(scoped);
 
         ({ apmSynthtraceEsClient } = await createSyntheticApmData({ getService }));
         ({ logsSynthtraceEsClient } = await createSyntheticLogsData({ getService }));
@@ -64,7 +57,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           toolName: LLM_EXPOSED_TOOL_NAME_FOR_GET_DATA_SOURCES,
         });
 
-        const body = await oneChatApiClient.converse({
+        const body = await agentBuilderApiClient.converse({
           input: USER_PROMPT,
           connector_id: connectorId,
           agent_id: OBSERVABILITY_AGENT_ID,
@@ -90,11 +83,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await deleteActionConnector(getService, { actionId: connectorId });
 
         llmProxy.close();
-
-        // Disable Agent Builder (can be removed when the agent builder is enabled by default)
-        await kibanaServer.uiSettings.update({
-          [AGENT_BUILDER_ENABLED_SETTING_ID]: false,
-        });
       });
 
       it('returns the correct tool results structure', () => {

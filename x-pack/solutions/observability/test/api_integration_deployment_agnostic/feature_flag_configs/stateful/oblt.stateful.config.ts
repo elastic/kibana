@@ -13,6 +13,7 @@ export default createStatefulFeatureFlagTestConfig<typeof services>({
   testFiles: [require.resolve('./oblt.index.ts')],
   kbnServerArgs: [
     '--xpack.actions.preconfigured',
+    '--uiSettings.overrides.agentBuilder:enabled=true',
     '--feature_flags.overrides.observabilityAgent.enabled=true',
   ],
   junit: {

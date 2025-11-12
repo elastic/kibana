@@ -12,7 +12,7 @@ import type {
 import type { Conversation } from '@kbn/onechat-common';
 import type { SupertestWithRoleScopeType } from '../../../services';
 
-export function createOneChatApiClient(supertest: SupertestWithRoleScopeType) {
+export function createAgentBuilderApiClient(supertest: SupertestWithRoleScopeType) {
   return {
     async converse(payload: ChatRequestBodyPayload): Promise<ChatResponse> {
       const res = await supertest
@@ -31,4 +31,4 @@ export function createOneChatApiClient(supertest: SupertestWithRoleScopeType) {
   };
 }
 
-export type ObservabilityOneChatApiClient = ReturnType<typeof createOneChatApiClient>;
+export type ObservabilityAgentBuilderApiClient = ReturnType<typeof createAgentBuilderApiClient>;

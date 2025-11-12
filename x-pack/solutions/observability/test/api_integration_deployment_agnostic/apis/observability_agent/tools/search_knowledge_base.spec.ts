@@ -7,7 +7,6 @@
 
 import expect from '@kbn/expect';
 import { maxBy, get } from 'lodash';
-import { AGENT_BUILDER_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import type { ToolResult, OtherResult } from '@kbn/onechat-common';
 import { isOtherResult } from '@kbn/onechat-common/tools';
 import type { LlmProxy } from '@kbn/test-suites-xpack-platform/onechat_api_integration/utils/llm_proxy';
@@ -17,7 +16,7 @@ import {
   type KnowledgeBaseEntry,
   OBSERVABILITY_SEARCH_KNOWLEDGE_BASE_TOOL_ID,
 } from '@kbn/observability-agent-plugin/server/tools';
-import { createOneChatApiClient } from '../utils/one_chat_client';
+import { createAgentBuilderApiClient } from '../utils/agent_builder_client';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import {
   createLlmProxyActionConnector,
@@ -68,21 +67,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     this.tags(['skipCloud']);
     let llmProxy: LlmProxy;
     let connectorId: string;
-    let oneChatApiClient: ReturnType<typeof createOneChatApiClient>;
+    let agentBuilderApiClient: ReturnType<typeof createAgentBuilderApiClient>;
     let toolResponseContent: { results: ToolResult[] };
     let otherResult!: OtherResult;
 
     describe('POST /api/agent_builder/converse', () => {
       before(async () => {
-        // Enable Agent Builder (can be removed when the agent builder is enabled by default)
-        await kibanaServer.uiSettings.update({
-          [AGENT_BUILDER_ENABLED_SETTING_ID]: true,
-        });
-
         llmProxy = await createLlmProxy(log);
         connectorId = await createLlmProxyActionConnector(getService, { port: llmProxy.getPort() });
         const scoped = await roleScopedSupertest.getSupertestWithRoleScope('editor');
-        oneChatApiClient = createOneChatApiClient(scoped);
+        agentBuilderApiClient = createAgentBuilderApiClient(scoped);
 
         // KB setup
         await restoreIndexAssets(getService);
@@ -95,7 +89,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           toolArg: { query: USER_PROMPT },
         });
 
-        const body = await oneChatApiClient.converse({
+        const body = await agentBuilderApiClient.converse({
           input: USER_PROMPT,
           connector_id: connectorId,
           agent_id: OBSERVABILITY_AGENT_ID,
@@ -126,11 +120,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await deleteActionConnector(getService, { actionId: connectorId });
         await teardownTinyElserModelAndInferenceEndpoint(getService);
         await clearKnowledgeBase(getService);
-
-        // Disable Agent Builder (can be removed when the agent builder is enabled by default)
-        await kibanaServer.uiSettings.update({
-          [AGENT_BUILDER_ENABLED_SETTING_ID]: false,
-        });
       });
 
       it('returns the correct tool results structure', () => {
