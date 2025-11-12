@@ -33,7 +33,8 @@ export async function registerObservabilityAgent({
         `- Use only the \`selectedFields\` metadata to define up to 5 columns for the table. Do **NOT** pick more than 5 fields.\n` +
         `- When choosing fields for the columns, choose fields that are most relevant to the user's request and conversation context.\n` +
         `- Generate human-friendly column names by converting dotted paths to Title Case and stripping common prefixes like \`kibana.alert.\` or \`service.\`.\n` +
-        `- Leave cells blank when values are missing.\n`,
+        `- Leave cells blank when values are missing.\n` +
+        `- Always add a summary of the results in addition to the table. Mention the total number of alerts in the summary.`,
       tools: [
         {
           tool_ids: OBSERVABILITY_AGENT_TOOL_IDS,
