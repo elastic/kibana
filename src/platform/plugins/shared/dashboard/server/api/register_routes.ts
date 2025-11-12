@@ -14,15 +14,15 @@ import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { Logger } from '@kbn/logging';
 
 import { CONTENT_ID, LATEST_VERSION } from '../../common/content_management';
-import { INTERNAL_API_VERSION, PUBLIC_API_PATH } from './constants';
+import { INTERNAL_API_VERSION, PUBLIC_API_PATH, commonRouteConfig } from './constants';
 import type { DashboardItem } from '../content_management/v1';
 import { getDashboardAPIGetResultSchema } from '../content_management/v1';
 import {
   getDashboardDataSchema,
-  getDashboardAPICreateResultSchema,
   getDashboardListResultAPISchema,
   getDashboardUpdateResultSchema,
 } from '../content_management/v1/schema';
+import { registerCreateRoute } from './create';
 
 interface RegisterAPIRoutesArgs {
   http: HttpServiceSetup;
@@ -30,32 +30,6 @@ interface RegisterAPIRoutesArgs {
   restCounter?: UsageCounter;
   logger: Logger;
 }
-
-const commonRouteConfig = {
-  // This route is in development and not yet intended for public use.
-  access: 'internal',
-  /**
-   * `enableQueryVersion` is a temporary solution for testing internal endpoints.
-   * Requests to these internal endpoints from Kibana Dev Tools or external clients
-   * should include the ?apiVersion=1 query parameter.
-   * This will be removed when the API is finalized and moved to a stable version.
-   */
-  enableQueryVersion: true,
-  description:
-    'This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
-  options: {
-    tags: ['oas-tag:Dashboards'],
-    availability: {
-      stability: 'experimental',
-    },
-  },
-  security: {
-    authz: {
-      enabled: false,
-      reason: 'Relies on Content Client for authorization',
-    },
-  },
-} as const;
 
 const formatResult = (item: DashboardItem) => {
   const {
@@ -89,69 +63,7 @@ export function registerAPIRoutes({
 }: RegisterAPIRoutesArgs) {
   const { versioned: versionedRouter } = http.createRouter();
 
-  // Create API route
-  const createRoute = versionedRouter.post({
-    path: `${PUBLIC_API_PATH}/{id?}`,
-    summary: 'Create a dashboard',
-    ...commonRouteConfig,
-  });
-
-  createRoute.addVersion(
-    {
-      version: INTERNAL_API_VERSION,
-      validate: () => ({
-        request: {
-          params: schema.object({
-            id: schema.maybe(
-              schema.string({
-                meta: { description: 'A unique identifier for the dashboard.' },
-              })
-            ),
-          }),
-          body: getDashboardDataSchema(),
-        },
-        response: {
-          200: {
-            body: getDashboardAPICreateResultSchema,
-          },
-        },
-      }),
-    },
-    async (ctx, req, res) => {
-      const { id } = req.params;
-      const { references, spaces: initialNamespaces, ...attributes } = req.body;
-      const client = contentManagement.contentClient
-        .getForRequest({ request: req, requestHandlerContext: ctx })
-        .for<DashboardItem>(CONTENT_ID, LATEST_VERSION);
-      let result;
-      try {
-        ({ result } = await client.create(attributes, {
-          id,
-          references,
-          initialNamespaces,
-        }));
-      } catch (e) {
-        if (e.isBoom && e.output.statusCode === 409) {
-          return res.conflict({
-            body: {
-              message: `A dashboard with saved object ID ${id} already exists.`,
-            },
-          });
-        }
-
-        if (e.isBoom && e.output.statusCode === 403) {
-          return res.forbidden();
-        }
-
-        return res.badRequest({ body: e });
-      }
-      const formattedResult = formatResult(result.item);
-      const response = { ...formattedResult, meta: { ...formattedResult.meta, ...result.meta } };
-      return res.ok({
-        body: response,
-      });
-    }
-  );
+  registerCreateRoute(versionedRouter);
 
   // Update API route
 

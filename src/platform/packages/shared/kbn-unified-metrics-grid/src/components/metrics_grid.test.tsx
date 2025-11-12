@@ -92,7 +92,7 @@ describe('MetricsGrid', () => {
       />
     );
 
-    expect(Chart).toHaveBeenCalledWith(expect.objectContaining({ size: 'm' }), expect.anything());
+    expect(Chart).toHaveBeenCalledWith(expect.objectContaining({ size: 's' }), expect.anything());
 
     rerender(
       <MetricsGrid
