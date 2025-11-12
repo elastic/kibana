@@ -38,7 +38,7 @@ export const getMessageFromRawResponse = (
   }
 };
 
-const ELASTIC_LLM_CONNECTOR_ID = 'Elastic-Managed-LLM';
+const ELASTIC_LLM_CONNECTOR_ID = 'General-Purpose-LLM-v1';
 
 /**
  * Returns a default connector if there is only one connector
