@@ -36,8 +36,8 @@ export default function ({ getService }: FtrProviderContext) {
             timeRange: {
               from: 'Wed Sep 16 2015 22:52:17 GMT-0700',
               to: 'Fri Sep 18 2015 12:24:38 GMT-0700',
-            }
-          }
+            },
+          },
         });
 
       expect(response.status).to.be(200);
@@ -55,7 +55,7 @@ export default function ({ getService }: FtrProviderContext) {
         .send({
           data: {
             title: 'Some other dashboard (updated)',
-          }
+          },
         });
 
       expect(response.status).to.be(404);
