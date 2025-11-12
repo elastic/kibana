@@ -64,7 +64,7 @@ describe('getUnifiedTraceRootSpanByTraceId', () => {
         duration: transactionDuration,
       });
       expect(mockSearch).toHaveBeenCalledWith(
-        'get_trace_root_item_by_trace_id',
+        'get_unified_trace_root_span_by_trace_id',
         expect.objectContaining({
           apm: {
             events: [ProcessorEvent.transaction, ProcessorEvent.span],

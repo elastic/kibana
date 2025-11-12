@@ -78,7 +78,7 @@ export async function getUnifiedTraceRootSpanByTraceId({
     fields: optionalFields,
   };
 
-  const resp = await apmEventClient.search('get_trace_root_item_by_trace_id', params, {
+  const resp = await apmEventClient.search('get_unified_trace_root_span_by_trace_id', params, {
     skipProcessorEventFilter: true,
   });
 
