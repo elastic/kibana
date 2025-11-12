@@ -144,6 +144,10 @@ export default function getGapsSummaryByRuleIdsTests({ getService }: FtrProvider
                 expect(rule2Data.total_in_progress_duration_ms).to.eql(0);
                 expect(rule1Data.total_filled_duration_ms).to.eql(0);
                 expect(rule2Data.total_filled_duration_ms).to.eql(0);
+                expect(rule1Data.status).to.eql('unfilled');
+                expect(rule2Data.status).to.eql('unfilled');
+                expect(rule1Data.last_gap_timestamp).to.be.a('number');
+                expect(rule2Data.last_gap_timestamp).to.be.a('number');
                 break;
 
               default:

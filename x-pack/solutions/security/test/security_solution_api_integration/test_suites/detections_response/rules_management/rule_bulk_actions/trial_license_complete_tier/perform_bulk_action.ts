@@ -3399,6 +3399,7 @@ export default ({ getService }: FtrProviderContext): void => {
           action: BulkActionTypeEnum.duplicate,
           gaps_range_start: '2025-01-01T00:00:00.000Z',
           gaps_range_end: '2025-01-02T00:00:00.000Z',
+          gap_status: 'unfilled',
           duplicate: { include_exceptions: false, include_expired_exceptions: false },
         });
 

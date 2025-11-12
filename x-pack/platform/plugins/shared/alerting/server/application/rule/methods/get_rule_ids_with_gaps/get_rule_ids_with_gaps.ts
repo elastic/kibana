@@ -68,7 +68,14 @@ export async function getRuleIdsWithGaps(
     const { start, end, statuses, aggregatedStatuses } = params;
     const eventLogClient = await context.getEventLogClient();
 
-    const filter = buildGapsFilter({ start, end, statuses });
+    const filter = buildGapsFilter({
+      start,
+      end,
+      statuses,
+      hasUnfilledIntervals: params.hasUnfilledIntervals,
+      hasInProgressIntervals: params.hasInProgressIntervals,
+      hasFilledIntervals: params.hasFilledIntervals,
+    });
 
     const aggs = await eventLogClient.aggregateEventsWithAuthFilter(
       RULE_SAVED_OBJECT_TYPE,
@@ -89,9 +96,7 @@ export async function getRuleIdsWithGaps(
       key: string;
     }
 
-    const byRuleAgg = aggs.aggregations?.by_rule as unknown as
-      | { buckets: ByRuleBucket[] }
-      | undefined;
+    const byRuleAgg = aggs.aggregations?.by_rule as { buckets: ByRuleBucket[] };
     const buckets = byRuleAgg?.buckets ?? [];
 
     const ruleIds: string[] = [];
@@ -100,6 +105,10 @@ export async function getRuleIdsWithGaps(
         const sums = extractGapDurationSums(b);
         const aggregatedStatus = calculateAggregatedGapStatus(sums);
         if (aggregatedStatus && aggregatedStatuses?.includes(aggregatedStatus)) ruleIds.push(b.key);
+      }
+    } else {
+      for (const b of buckets) {
+        ruleIds.push(b.key);
       }
     }
 
