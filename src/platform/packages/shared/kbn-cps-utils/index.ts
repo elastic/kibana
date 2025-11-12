@@ -10,3 +10,4 @@
 export type { ProjectPickerProps } from './components/project_picker';
 export type { CPSProject, ProjectTagsResponse, ICPSManager, ProjectsData } from './types';
 export { ProjectPicker } from './components/project_picker';
+export { ProjectPickerContainer } from './components/project_picker_container';

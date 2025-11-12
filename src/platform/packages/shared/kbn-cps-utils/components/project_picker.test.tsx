@@ -7,19 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import '@testing-library/jest-dom';
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import type { ProjectRouting } from '@kbn/es-query';
 import userEvent from '@testing-library/user-event';
 import { EuiThemeProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
-import { ProjectPickerComponent } from './project_picker_component';
+import { ProjectPicker } from './project_picker';
 
-describe('ProjectPickerComponent', () => {
-  const defaultProps = {
-    projectRouting: undefined as ProjectRouting | undefined,
-    onProjectRoutingChange: jest.fn(),
-    originProject: {
+describe('ProjectPicker', () => {
+  const mockFetchProjects = jest.fn().mockResolvedValue({
+    origin: {
       _id: 'origin',
       _alias: 'Origin CPSProject',
       _type: 'observability',
@@ -39,16 +38,26 @@ describe('ProjectPickerComponent', () => {
         _organisation: 'test-org',
       },
     ],
+  });
+
+  const defaultProps = {
+    projectRouting: undefined as ProjectRouting | undefined,
+    onProjectRoutingChange: jest.fn(),
+    fetchProjects: mockFetchProjects,
   };
 
-  const renderProjectPicker = (props: Partial<typeof defaultProps> = {}) => {
-    return render(
-      <I18nProvider>
-        <EuiThemeProvider>
-          <ProjectPickerComponent {...defaultProps} {...props} />
-        </EuiThemeProvider>
-      </I18nProvider>
-    );
+  const renderProjectPicker = async (props: Partial<typeof defaultProps> = {}) => {
+    let result;
+    await act(async () => {
+      result = render(
+        <I18nProvider>
+          <EuiThemeProvider>
+            <ProjectPicker {...defaultProps} {...props} />
+          </EuiThemeProvider>
+        </I18nProvider>
+      );
+    });
+    return result!;
   };
 
   const getButton = () => screen.getByLabelText('Cross-project search project picker');
@@ -57,12 +66,16 @@ describe('ProjectPickerComponent', () => {
     jest.clearAllMocks();
   });
 
-  it('should render the project picker button', () => {
-    renderProjectPicker();
+  it('should render the project picker button', async () => {
+    await renderProjectPicker();
+
     expect(getButton()).toBeInTheDocument();
   });
   it('should display button group options in popover', async () => {
-    renderProjectPicker();
+    await renderProjectPicker();
+
+    expect(getButton()).toBeInTheDocument();
+
     await userEvent.click(getButton());
     expect(screen.getByText('All projects')).toBeInTheDocument();
     expect(screen.getByText('This project')).toBeInTheDocument();
@@ -70,7 +83,8 @@ describe('ProjectPickerComponent', () => {
 
   describe('projectRouting selection', () => {
     it('should show "All projects" selected when projectRouting is undefined', async () => {
-      renderProjectPicker({ projectRouting: undefined });
+      await renderProjectPicker({ projectRouting: undefined });
+
       await userEvent.click(getButton());
 
       const allProjectsButton = screen.getByRole('button', { name: /All projects/i });
@@ -78,7 +92,7 @@ describe('ProjectPickerComponent', () => {
     });
 
     it('should show "This project" selected when projectRouting is _alias:_origin', async () => {
-      renderProjectPicker({ projectRouting: '_alias:_origin' });
+      await renderProjectPicker({ projectRouting: '_alias:_origin' });
 
       await userEvent.click(getButton());
 
@@ -90,7 +104,7 @@ describe('ProjectPickerComponent', () => {
   describe('projectRouting change events', () => {
     it('should call onProjectRoutingChange with undefined when "All projects" is clicked', async () => {
       const onProjectRoutingChange = jest.fn();
-      renderProjectPicker({
+      await renderProjectPicker({
         projectRouting: '_alias:_origin',
         onProjectRoutingChange,
       });
@@ -106,7 +120,7 @@ describe('ProjectPickerComponent', () => {
 
     it('should call onProjectRoutingChange with _alias:_origin when "This project" is clicked', async () => {
       const onProjectRoutingChange = jest.fn();
-      renderProjectPicker({
+      await renderProjectPicker({
         projectRouting: undefined,
         onProjectRoutingChange,
       });
@@ -125,7 +139,7 @@ describe('ProjectPickerComponent', () => {
   describe('state transitions', () => {
     it('should reflect prop changes correctly', async () => {
       const onProjectRoutingChange = jest.fn();
-      const { rerender } = renderProjectPicker({
+      const { rerender } = await renderProjectPicker({
         projectRouting: undefined,
         onProjectRoutingChange,
       });
@@ -147,7 +161,7 @@ describe('ProjectPickerComponent', () => {
       rerender(
         <I18nProvider>
           <EuiThemeProvider>
-            <ProjectPickerComponent
+            <ProjectPicker
               {...defaultProps}
               projectRouting="_alias:_origin"
               onProjectRoutingChange={onProjectRoutingChange}
@@ -168,8 +182,9 @@ describe('ProjectPickerComponent', () => {
 
   describe('accessibility', () => {
     it('should have proper ARIA labels', async () => {
-      renderProjectPicker();
+      await renderProjectPicker();
 
+      expect(getButton()).toBeInTheDocument();
       const button = screen.getByLabelText('Cross-project search project picker');
       expect(button).toHaveAttribute('aria-label', 'Cross-project search project picker');
 
@@ -183,11 +198,10 @@ describe('ProjectPickerComponent', () => {
 
     it('should support keyboard navigation', async () => {
       const onProjectRoutingChange = jest.fn();
-      renderProjectPicker({
+      await renderProjectPicker({
         projectRouting: undefined,
         onProjectRoutingChange,
       });
-
       // Tab to the button
       await userEvent.tab();
 

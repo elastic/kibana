@@ -42,12 +42,12 @@ export class CpsPlugin implements Plugin<CPSPluginSetup, CPSPluginStart> {
       });
 
       // Register project picker in the navigation
-      import('@kbn/cps-utils').then(({ ProjectPicker }) => {
+      import('@kbn/cps-utils').then(({ ProjectPickerContainer }) => {
         core.chrome.navControls.registerLeft({
           mount: (element) => {
             ReactDOM.render(
               <I18nProvider>
-                <ProjectPicker cpsManager={manager} fetchProjects={manager.fetchProjects.bind(manager)} />
+                <ProjectPickerContainer cpsManager={manager} />
               </I18nProvider>,
               element,
               () => {}

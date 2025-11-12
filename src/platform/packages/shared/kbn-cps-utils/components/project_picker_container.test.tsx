@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import '@testing-library/jest-dom';
 import React from 'react';
 import { render, screen, act } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
@@ -14,16 +15,9 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { BehaviorSubject } from 'rxjs';
 import type { ProjectRouting } from '@kbn/es-query';
 import type { CPSProject, ICPSManager } from '../types';
-import { ProjectPicker } from './project_picker';
+import { ProjectPickerContainer } from './project_picker_container';
 
-// Mock the lazy-loaded component
-jest.mock('./project_picker_component', () => ({
-  ProjectPickerComponent: jest.fn(({ originProject }) => (
-    <div data-test-subj="project-picker-component">CPSProject: {originProject._alias}</div>
-  )),
-}));
-
-describe('ProjectPicker', () => {
+describe('ProjectPickerContainer', () => {
   const mockOriginProject: CPSProject = {
     _id: 'origin-project',
     _alias: 'Origin CPSProject',
@@ -51,17 +45,14 @@ describe('ProjectPicker', () => {
   const renderProjectPicker = async (
     props: { cpsManager: ICPSManager } = { cpsManager: mockCPSManager }
   ) => {
-    let result;
-    await act(async () => {
-      const component = <ProjectPicker cpsManager={props.cpsManager} />;
-      result = render(
+    return await act(async () => {
+      const component = <ProjectPickerContainer cpsManager={props.cpsManager} />;
+      return render(
         <I18nProvider>
           <EuiThemeProvider>{component}</EuiThemeProvider>
         </I18nProvider>
       );
     });
-
-    return result!;
   };
 
   beforeEach(() => {
@@ -83,14 +74,13 @@ describe('ProjectPicker', () => {
   describe('rendering conditions', () => {
     it('should render when all required props and services are available', async () => {
       await renderProjectPicker();
-
-      expect(screen.getByTestId('project-picker-component')).toBeInTheDocument();
+      expect(screen.getByTestId('project-picker-button')).toBeInTheDocument();
     });
 
     it('should call fetchProjects when component mounts', async () => {
       await renderProjectPicker();
-
       expect(mockFetchProjects).toHaveBeenCalledTimes(1);
+      expect(screen.queryByTestId('project-picker-button')).toBeInTheDocument();
     });
 
     it('should not render when there is no origin project', async () => {
@@ -99,7 +89,7 @@ describe('ProjectPicker', () => {
         linkedProjects: mockLinkedProjects,
       });
       await renderProjectPicker();
-      expect(screen.queryByTestId('project-picker-component')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('project-picker-button')).not.toBeInTheDocument();
     });
 
     it('should not render when there are no linked projects', async () => {
@@ -109,7 +99,7 @@ describe('ProjectPicker', () => {
       });
 
       await renderProjectPicker();
-      expect(screen.queryByTestId('project-picker-component')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('project-picker-button')).not.toBeInTheDocument();
     });
   });
 });
