@@ -27,6 +27,7 @@ export function getImportTransformsFactory(): AccessControlImportTransformsFacto
 
       // In phase 1, these checks are irrelevent. We strip the incoming metadata to apply the default behavior of bulk_create.
       // In phase 2, we will need to make these checks in order to validate when an Admin chooses to apply access control on import.
+      // GH Issue: https://github.com/elastic/kibana/issues/242671
 
       // if (typeSupportsAccessControl && obj.accessControl && !obj.accessControl.accessMode) {
       //   errors.push({
