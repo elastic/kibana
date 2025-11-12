@@ -20,6 +20,8 @@ import {
   EuiBasicTable,
   EuiFlexGroup,
   EuiBadge,
+  EuiToolTip,
+  EuiTextTruncate,
 } from '@elastic/eui';
 import { isEqual } from 'lodash';
 import { FieldIcon } from '@kbn/react-field';
@@ -29,6 +31,7 @@ import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { useAbortController } from '@kbn/react-hooks';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/css';
 import { useKibana } from '../../../hooks/use_kibana';
 import { getFormattedError } from '../../../util/errors';
 import type { MappedSchemaField, SchemaEditorField } from './types';
@@ -136,13 +139,24 @@ export function SchemaChangesReviewModal({
           defaultMessage: 'Field',
         }),
         width: '272px',
-        truncateText: true,
-        render: (name: string) => <>{name}</>,
+        render: (name: string) => (
+          <EuiToolTip
+            content={name}
+            delay="long"
+            display="block"
+            anchorClassName={css`
+              width: 272px;
+            `}
+          >
+            {/* Need to truncate manually because of tooltip wrapper */}
+            <EuiTextTruncate text={name} />
+          </EuiToolTip>
+        ),
       },
       {
         field: 'type',
         name: i18n.translate('xpack.streams.schemaEditor.confirmChangesModal.tableColumnType', {
-          defaultMessage: 'type',
+          defaultMessage: 'Type',
         }),
         width: '160px',
         truncateText: true,
