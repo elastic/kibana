@@ -32,8 +32,7 @@ export const productDocumentationTool = (): BuiltinToolDefinition<
   return {
     id: platformCoreTools.productDocumentation,
     type: ToolType.builtin,
-    description: `Retrieve documentation about Elastic products, such as Kibana, Elasticsearch, Elastic Security, and Elastic Observability.
-Use this tool to search the Elastic product documentation index for relevant articles.`,
+    description: `Search and retrieve documentation about Elastic products (Kibana, Elasticsearch, Elastic Security, Elastic Observability).`,
     schema: productDocumentationSchema,
     handler: async ({ query, product, max = 3 }, { modelProvider, llmTasks, logger, request }) => {
       if (!llmTasks) {
