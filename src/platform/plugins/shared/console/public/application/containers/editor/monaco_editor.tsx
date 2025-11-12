@@ -273,7 +273,7 @@ export const MonacoEditor = ({
           >
             <EuiButtonIcon
               display={isPlayButtonHovered ? 'fill' : 'base'}
-              size="s"
+              size="m"
               color="primary"
               iconType="play"
               onClick={sendRequestsCallback}

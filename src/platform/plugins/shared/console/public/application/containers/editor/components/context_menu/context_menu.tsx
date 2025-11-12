@@ -16,12 +16,12 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiBadge,
+  EuiLoadingSpinner,
   useEuiTheme,
 } from '@elastic/eui';
 import type { NotificationsStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { LanguageSelectorModal } from './language_selector_modal';
 import { convertRequestToLanguage } from '../../../../../services';
 import type { EditorRequest } from '../../types';
 
@@ -44,6 +44,8 @@ interface Props {
   getIsKbnRequestSelected: () => Promise<boolean | null>;
 }
 
+const DELAY_FOR_HIDING_SPINNER = 500;
+
 const getLanguageLabelByValue = (value: string) => {
   return AVAILABLE_LANGUAGES.find((lang) => lang.value === value)?.label || DEFAULT_LANGUAGE;
 };
@@ -64,13 +66,13 @@ export const ContextMenu = ({
   } = useServicesContext();
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [isRequestConverterLoading, setRequestConverterLoading] = useState(false);
   const [isLanguageSelectorVisible, setLanguageSelectorVisibility] = useState(false);
   const [isKbnRequestSelected, setIsKbnRequestSelected] = useState<boolean | null>(null);
   const [defaultLanguage, setDefaultLanguage] = useState(
     storage.get(StorageKeys.DEFAULT_LANGUAGE, DEFAULT_LANGUAGE)
   );
   const [currentLanguage, setCurrentLanguage] = useState(defaultLanguage);
-  const [activePanelId, setActivePanelId] = useState<string>('main');
 
   useEffect(() => {
     if (isKbnRequestSelected) {
@@ -147,13 +149,21 @@ export const ContextMenu = ({
   const onCopyAsSubmit = async (language?: string) => {
     const withLanguage = language || currentLanguage;
 
-    // Close language selector modal
-    setLanguageSelectorVisibility(false);
+    // Show loading spinner
+    setRequestConverterLoading(true);
 
     // When copying as worked as expected, close the context menu popover
-    copyAs(withLanguage).then(() => {
-      setIsPopoverOpen(false);
-    });
+    copyAs(withLanguage)
+      .then(() => {
+        setIsPopoverOpen(false);
+      })
+      .finally(() => {
+        // Delay hiding the spinner to avoid flickering between the spinner and
+        // the change language button
+        setTimeout(() => {
+          setRequestConverterLoading(false);
+        }, DELAY_FOR_HIDING_SPINNER);
+      });
   };
 
   const changeDefaultLanguage = (language: string) => {
@@ -169,7 +179,7 @@ export const ContextMenu = ({
 
   const closePopover = () => {
     setIsPopoverOpen(false);
-    setActivePanelId('main');
+    setLanguageSelectorVisibility(false);
   };
 
   const openDocs = async () => {
@@ -193,7 +203,7 @@ export const ContextMenu = ({
 
   const handleLanguageSelect = (language: string) => {
     changeDefaultLanguage(language);
-    setActivePanelId('main');
+    setLanguageSelectorVisibility(false);
   };
 
   const button = (
@@ -231,11 +241,11 @@ export const ContextMenu = ({
             key="Copy to language"
             data-test-subj="consoleMenuCopyToLanguage"
             id="copyToLanguage"
-            disabled={!window.navigator?.clipboard}
+            disabled={!window.navigator?.clipboard || isRequestConverterLoading}
             onClick={() => {
               onCopyAsSubmit();
             }}
-            icon="copyClipboard"
+            icon={isRequestConverterLoading ? <EuiLoadingSpinner size="m" /> : 'copyClipboard'}
           >
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
               <EuiFlexItem grow={false}>
@@ -256,7 +266,7 @@ export const ContextMenu = ({
             data-test-subj="consoleMenuLanguageClients"
             id="languageClients"
             disabled={isKbnRequestSelected || false}
-            onClick={() => setActivePanelId('languageClients')}
+            onClick={() => setLanguageSelectorVisibility(true)}
             icon="editorCodeBlock"
           >
             <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
@@ -297,70 +307,42 @@ export const ContextMenu = ({
     </EuiContextMenuItem>,
   ];
 
-  // Define panels for nested menu
-  const panels = [
-    {
-      id: 'main',
-      items: mainMenuItems,
-    },
-    {
-      id: 'languageClients',
-      title: i18n.translate('console.consoleMenu.languageClientsPanelTitle', {
-        defaultMessage: 'Language clients',
-      }),
-      items: languageClientsItems,
-    },
-  ];
+  // Determine which items and title to show based on language selector visibility
+  const items = isLanguageSelectorVisible ? languageClientsItems : mainMenuItems;
 
-  const activePanel = panels.find((panel) => panel.id === activePanelId);
-
-  // Custom title with back button for language clients panel
-  const languageClientsTitle =
-    activePanelId === 'languageClients' ? (
-      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            size="s"
-            iconType="arrowLeft"
-            aria-label={i18n.translate('console.consoleMenu.languageClientsBackAriaLabel', {
-              defaultMessage: 'Back to main menu',
-            })}
-            onClick={() => setActivePanelId('main')}
-            data-test-subj="languageClientsPanelBackButton"
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <strong>{activePanel?.title}</strong>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    ) : (
-      activePanel?.title
-    );
+  const title = isLanguageSelectorVisible ? (
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiButtonIcon
+          size="s"
+          iconType="arrowLeft"
+          aria-label={i18n.translate('console.consoleMenu.languageClientsBackAriaLabel', {
+            defaultMessage: 'Back to main menu',
+          })}
+          onClick={() => setLanguageSelectorVisibility(false)}
+          data-test-subj="languageClientsPanelBackButton"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <strong>
+          {i18n.translate('console.consoleMenu.languageClientsPanelTitle', {
+            defaultMessage: 'Language clients',
+          })}
+        </strong>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  ) : undefined;
 
   return (
-    <>
-      <EuiPopover
-        id="contextMenu"
-        button={button}
-        isOpen={isPopoverOpen}
-        closePopover={closePopover}
-        panelPaddingSize="none"
-        anchorPosition="downLeft"
-      >
-        <EuiContextMenuPanel
-          items={activePanel?.items}
-          title={languageClientsTitle}
-          data-test-subj="consoleMenu"
-        />
-      </EuiPopover>
-      {isLanguageSelectorVisible && (
-        <LanguageSelectorModal
-          currentLanguage={currentLanguage}
-          changeDefaultLanguage={changeDefaultLanguage}
-          closeModal={() => setLanguageSelectorVisibility(false)}
-          onSubmit={onCopyAsSubmit}
-        />
-      )}
-    </>
+    <EuiPopover
+      id="contextMenu"
+      button={button}
+      isOpen={isPopoverOpen}
+      closePopover={closePopover}
+      panelPaddingSize="none"
+      anchorPosition="downLeft"
+    >
+      <EuiContextMenuPanel items={items} title={title} data-test-subj="consoleMenu" />
+    </EuiPopover>
   );
 };
