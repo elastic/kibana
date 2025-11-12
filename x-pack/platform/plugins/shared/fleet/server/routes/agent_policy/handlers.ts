@@ -20,6 +20,7 @@ import { fullAgentPolicyToYaml } from '../../../common/services';
 import { appContextService, agentPolicyService, licenseService } from '../../services';
 import { type AgentClient, getLatestAvailableAgentVersion } from '../../services/agents';
 import { AGENTS_PREFIX, UNPRIVILEGED_AGENT_KUERY } from '../../constants';
+import { type AgentClient } from '../../services/agents';
 import type {
   GetAgentPoliciesRequestSchema,
   GetOneAgentPolicyRequestSchema,
@@ -54,6 +55,7 @@ import { createAgentPolicyWithPackages } from '../../services/agent_policy_creat
 import { updateAgentPolicySpaces } from '../../services/spaces/agent_policy';
 import { packagePolicyToSimplifiedPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
 import { getAutoUpgradeAgentsStatus } from '../../services/agents';
+import { getLatestAgentAvailableDockerImageVersion } from '../../services/agents';
 
 export async function populateAssignedAgentsCount(
   agentClient: AgentClient,
@@ -497,7 +499,7 @@ export const getFullAgentPolicy: FleetRequestHandler<
 
   if (request.query.kubernetes === true) {
     const agentVersion =
-      await fleetContext.agentClient.asInternalUser.getLatestAgentAvailableVersion();
+      await fleetContext.agentClient.asInternalUser.getLatestAgentAvailableDockerImageVersion();
     const fullAgentConfigMap = await agentPolicyService.getFullAgentConfigMap(
       soClient,
       request.params.agentPolicyId,
@@ -553,7 +555,7 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
 
   if (request.query.kubernetes === true) {
     const agentVersion =
-      await fleetContext.agentClient.asInternalUser.getLatestAgentAvailableVersion();
+      await fleetContext.agentClient.asInternalUser.getLatestAgentAvailableDockerImageVersion();
     const fullAgentConfigMap = await agentPolicyService.getFullAgentConfigMap(
       soClient,
       request.params.agentPolicyId,
@@ -606,7 +608,7 @@ export const getK8sManifest: FleetRequestHandler<
   const fleetServer = request.query.fleetServer ?? '';
   const token = request.query.enrolToken ?? '';
 
-  const agentVersion = await getLatestAvailableAgentVersion();
+  const agentVersion = await getLatestAgentAvailableDockerImageVersion();
 
   const fullAgentManifest = await agentPolicyService.getFullAgentManifest(
     fleetServer,
@@ -634,7 +636,7 @@ export const downloadK8sManifest: FleetRequestHandler<
 > = async (context, request, response) => {
   const fleetServer = request.query.fleetServer ?? '';
   const token = request.query.enrolToken ?? '';
-  const agentVersion = await getLatestAvailableAgentVersion();
+  const agentVersion = await getLatestAgentAvailableDockerImageVersion();
   const fullAgentManifest = await agentPolicyService.getFullAgentManifest(
     fleetServer,
     token,
