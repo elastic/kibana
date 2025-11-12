@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -92,7 +92,8 @@
     "@kbn/controls-constants",
     "@kbn/presentation-util",
     "@kbn/react-query",
-    "@kbn/core-chrome-layout-utils"
+    "@kbn/core-chrome-layout-utils",
+    "@kbn/core-http-server"
   ],
   "exclude": ["target/**/*"]
 }

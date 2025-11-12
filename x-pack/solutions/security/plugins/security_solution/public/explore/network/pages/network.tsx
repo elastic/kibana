@@ -90,7 +90,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
     const {
       indicesExist: oldIndicesExist,
       selectedPatterns: oldSelectedPatterns,
-      sourcererDataView: oldSourcererDataView,
+      sourcererDataView: oldSourcererDataViewSpec,
     } = useSourcererDataView();
 
     const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
@@ -131,24 +131,24 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
       () =>
         convertToBuildEsQuery({
           config: getEsQueryConfig(uiSettings),
-          dataViewSpec: oldSourcererDataView,
+          dataViewSpec: oldSourcererDataViewSpec,
           dataView,
           queries: [query],
           filters: globalFilters,
         }),
-      [uiSettings, oldSourcererDataView, dataView, query, globalFilters]
+      [uiSettings, oldSourcererDataViewSpec, dataView, query, globalFilters]
     );
 
     const [tabsFilterQuery] = useMemo(
       () =>
         convertToBuildEsQuery({
           config: getEsQueryConfig(uiSettings),
-          dataViewSpec: oldSourcererDataView,
+          dataViewSpec: oldSourcererDataViewSpec,
           dataView,
           queries: [query],
           filters: tabsFilters,
         }),
-      [uiSettings, oldSourcererDataView, dataView, query, tabsFilters]
+      [uiSettings, oldSourcererDataViewSpec, dataView, query, tabsFilters]
     );
 
     useInvalidFilterQuery({ id: ID, filterQuery, kqlError, query, startDate: from, endDate: to });
@@ -164,8 +164,9 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
             <EuiWindowEvent event="resize" handler={noop} />
             <FiltersGlobal>
               <SiemSearchBar
+                dataView={dataView}
                 id={InputsModelId.global}
-                sourcererDataView={newDataViewPickerEnabled ? dataView : oldSourcererDataView}
+                sourcererDataViewSpec={oldSourcererDataViewSpec} // TODO remove when we remove the newDataViewPickerEnabled feature flag
               />
             </FiltersGlobal>
 
@@ -204,7 +205,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                 <NetworkKpiComponent from={from} to={to} />
               </Display>
 
-              {capabilitiesFetched && !isInitializing && oldSourcererDataView ? (
+              {capabilitiesFetched && !isInitializing && oldSourcererDataViewSpec ? (
                 <>
                   <Display show={!globalFullScreen}>
                     <EuiSpacer />
