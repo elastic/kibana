@@ -50,15 +50,14 @@ const alertsSchema = z.object({
     .string()
     .describe('The end of the time range, in Elasticsearch date math, like `now`.')
     .min(1),
-  query: z
-    .string()
-    .min(1)
-    .describe('Natural language request used to guide relevant field selection'),
-  kqlFilter: z.string().optional().describe('Filter alerts by KQL field:value pairs'),
+  query: z.string().min(1).describe('Natural language query to guide relevant field selection.'),
+  kqlFilter: z.string().optional().describe('Filter alerts by field:value pairs'),
   includeRecovered: z
     .boolean()
     .optional()
-    .describe('Whether to include recovered/closed alerts. Defaults to false.'),
+    .describe(
+      'Whether to include recovered/closed alerts. Defaults to false, which means only active alerts will be returned.'
+    ),
 });
 
 export function createGetAlertsTool({
@@ -71,31 +70,31 @@ export function createGetAlertsTool({
   const toolDefinition: BuiltinToolDefinition<typeof alertsSchema> = {
     id: OBSERVABILITY_GET_ALERTS_TOOL_ID,
     type: ToolType.builtin,
-    description: `Retrieve Observability alerts and relevant fields for a given time range. Defaults to active alerts (set includeRecovered to include recovered).`,
+    description: `Retrieve Observability alerts and relevant fields for a given time range. Defaults to active alerts (set includeRecovered to true to include recovered alerts).`,
     schema: alertsSchema,
     tags: ['observability', 'alerts'],
     handler: async (
       { start: startAsDatemath, end: endAsDatemath, kqlFilter, includeRecovered, query },
-      { request, modelProvider }
+      handlerinfo
     ) => {
       try {
         const [coreStart, pluginStart] = await core.getStartServices();
-        const alertsClient = await pluginStart.ruleRegistry.getRacClientWithRequest(request);
+        const alertsClient = await pluginStart.ruleRegistry.getRacClientWithRequest(
+          handlerinfo.request
+        );
 
         const start = datemath.parse(startAsDatemath)!.valueOf();
         const end = datemath.parse(endAsDatemath)!.valueOf();
 
-        // --- Step 1: Resolve relevant alert fields (merged from get_alerts_datasource_fields) ---
         const selectedFields = await getRelevantAlertFields({
           coreStart,
           pluginStart,
-          request,
-          startAsDatemath,
-          endAsDatemath,
-          modelProvider,
+          request: handlerinfo.request,
+          modelProvider: handlerinfo.modelProvider,
           logger,
           query,
         });
+
         const filters: QueryDslQueryContainer[] = [
           {
             range: {

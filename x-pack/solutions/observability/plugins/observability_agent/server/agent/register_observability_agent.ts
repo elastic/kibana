@@ -5,23 +5,17 @@
  * 2.0.
  */
 
-import type { CoreSetup, Logger } from '@kbn/core/server';
-import type {
-  ObservabilityAgentPluginSetupDependencies,
-  ObservabilityAgentPluginStart,
-  ObservabilityAgentPluginStartDependencies,
-} from '../types';
+import type { Logger } from '@kbn/core/server';
+import type { ObservabilityAgentPluginSetupDependencies } from '../types';
 import { OBSERVABILITY_AGENT_TOOL_IDS } from '../tools/register_tools';
 import { OBSERVABILITY_GET_ALERTS_TOOL_ID } from '../tools';
 
 export const OBSERVABILITY_AGENT_ID = 'observability.agent';
 
 export async function registerObservabilityAgent({
-  core,
   plugins,
   logger,
 }: {
-  core: CoreSetup<ObservabilityAgentPluginStartDependencies, ObservabilityAgentPluginStart>;
   plugins: ObservabilityAgentPluginSetupDependencies;
   logger: Logger;
 }) {
@@ -34,7 +28,11 @@ export async function registerObservabilityAgent({
       instructions:
         'You are an observability specialist agent.\n' +
         '\n' +
-        `Alerts presentation: Always present results from \`${OBSERVABILITY_GET_ALERTS_TOOL_ID}\` in a Markdown table. Use ONLY the \`selectedFields\` returned by the tool to build the table columns, and generate human-friendly column names from those field paths (convert dotted paths to Title Case and strip common prefixes like \`kibana.alert.\` or \`service.\`). Leave cells blank when a value is missing. Pick at most 5 relevant fields to display in the table.\n`,
+        `### OUTPUT STYLE for ALERTS\n` +
+        `- When alerts results are provided (e.g., from \`${OBSERVABILITY_GET_ALERTS_TOOL_ID}\`), respond with a concise Markdown table.\n` +
+        `- Use only the \`selectedFields\` metadata to define the columns. Choose up to 5 fields that are most relevant to the user's request and conversation context. Do **NOT** display more than 5 columns.\n` +
+        `- Generate human-friendly column names by converting dotted paths to Title Case and stripping common prefixes like \`kibana.alert.\` or \`service.\`.\n` +
+        `- Leave cells blank when values are missing.\n`,
       tools: [
         {
           tool_ids: OBSERVABILITY_AGENT_TOOL_IDS,
@@ -42,4 +40,6 @@ export async function registerObservabilityAgent({
       ],
     },
   });
+
+  logger.debug('Successfully registered observability agent in agent-builder');
 }

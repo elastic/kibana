@@ -15,28 +15,33 @@ import type { ObservabilityAgentPluginStartDependencies } from '../../types';
 import { selectRelevantAlertFields } from './select_relevant_alert_fields';
 
 export async function getRelevantAlertFields({
+  query,
+  start,
+  end,
   coreStart,
   pluginStart,
   request,
-  startAsDatemath,
-  endAsDatemath,
   modelProvider,
   logger,
-  query,
 }: {
+  query: string;
+  start?: string;
+  end?: string;
   coreStart: CoreStart;
   pluginStart: ObservabilityAgentPluginStartDependencies;
   request: KibanaRequest;
-  startAsDatemath: string;
-  endAsDatemath: string;
   modelProvider: ModelProvider;
   logger: Logger;
-  query: string;
 }): Promise<string[]> {
-  const esClientInternal = coreStart.elasticsearch.client.asInternalUser;
+  const esClient = coreStart.elasticsearch.client.asInternalUser;
+  const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
+  const dataViewsService = await pluginStart.dataViews.dataViewsServiceFactory(
+    savedObjectsClient,
+    esClient
+  );
 
-  const hasAnyHitsResponse = await esClientInternal.search({
-    index: ['.alerts-observability*'],
+  const hasAnyHitsResponse = await esClient.search({
+    index: '.alerts-observability*',
     _source: false,
     track_total_hits: 1,
     terminate_after: 1,
@@ -47,26 +52,24 @@ export async function getRelevantAlertFields({
       ? hasAnyHitsResponse.hits.total
       : hasAnyHitsResponse.hits.total?.value ?? 0;
 
+  // all fields are empty in this case, so get them all
   const includeEmptyFields = hitCount === 0;
-
-  const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
-  const dataViewsService = await pluginStart.dataViews.dataViewsServiceFactory(
-    savedObjectsClient,
-    esClientInternal
-  );
 
   const fieldsForWildcard = await dataViewsService.getFieldsForWildcard({
     pattern: '.alerts-observability*',
     allowNoIndex: true,
     includeEmptyFields,
-    indexFilter: {
-      range: {
-        '@timestamp': {
-          gte: datemath.parse(startAsDatemath)!.toISOString(),
-          lt: datemath.parse(endAsDatemath)!.toISOString(),
-        },
-      },
-    },
+    indexFilter:
+      start && end
+        ? {
+            range: {
+              '@timestamp': {
+                gte: datemath.parse(start)!.toISOString(),
+                lt: datemath.parse(end)!.toISOString(),
+              },
+            },
+          }
+        : undefined,
   });
 
   const allFields = fieldsForWildcard.flatMap((field) => {
@@ -74,17 +77,17 @@ export async function getRelevantAlertFields({
     return types.map((type) => ({ name: field.name, type }));
   });
 
-  const fieldNames = uniq(allFields.map((f) => f.name));
-  const groupedFields = groupBy(allFields, (f) => f.name);
+  const fieldNames = uniq(allFields.map((field) => field.name));
+  const groupedFields = groupBy(allFields, (field) => field.name);
 
-  const selectedNames = await selectRelevantAlertFields({
-    modelProvider,
+  const selectedFieldNames = await selectRelevantAlertFields({
+    query,
     candidateFieldNames: fieldNames,
     logger,
-    query,
+    modelProvider,
   });
 
-  const selectedFields = selectedNames.map((field) => {
+  const selectedFields = selectedFieldNames.map((field) => {
     const desc = groupedFields[field] ?? [];
     const types = desc.map((d) => d.type).join(',');
     return types ? `${field}:${types}` : field;
