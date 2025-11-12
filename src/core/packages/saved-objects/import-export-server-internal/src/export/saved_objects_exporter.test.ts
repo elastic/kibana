@@ -8,7 +8,11 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import type { SavedObject, SavedObjectsType } from '@kbn/core-saved-objects-server';
+import type {
+  SavedObject,
+  SavedObjectsExportTransform,
+  SavedObjectsType,
+} from '@kbn/core-saved-objects-server';
 import { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
 import { SavedObjectsExporter } from './saved_objects_exporter';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
@@ -1040,129 +1044,129 @@ describe('getSortedObjectsForExport()', () => {
       );
     });
 
-    // GH Issue: https://github.com/elastic/kibana/issues/242671
-    // describe('access control', () => {
-    //   test('applies the access control transform if defined', async () => {
-    //     const accessControlExportTransform: SavedObjectsExportTransform = (ctx, objects) => {
-    //       objects.forEach((obj: SavedObject<any>) => {
-    //         if (typeRegistry.supportsAccessControl(obj.type))
-    //           obj.attributes.foo = 'modified by access control transform';
-    //       });
-    //       return objects;
-    //     };
+    // Unskip after: https://github.com/elastic/kibana/issues/242671
+    describe.skip('access control', () => {
+      test('applies the access control transform if defined', async () => {
+        const accessControlExportTransform: SavedObjectsExportTransform = (ctx, objects) => {
+          objects.forEach((obj: SavedObject<any>) => {
+            if (typeRegistry.supportsAccessControl(obj.type))
+              obj.attributes.foo = 'modified by access control transform';
+          });
+          return objects;
+        };
 
-    //     typeRegistry.registerType({
-    //       name: 'foo',
-    //       mappings: { properties: {} },
-    //       namespaceType: 'single',
-    //       hidden: false,
-    //       supportsAccessControl: true,
-    //       management: {
-    //         importableAndExportable: true,
-    //         onExport: (ctx, objects) => {
-    //           objects.forEach((obj: SavedObject<any>) => {
-    //             obj.attributes.foo = 'modified';
-    //           });
-    //           return objects;
-    //         },
-    //       },
-    //     });
-    //     exporter = new SavedObjectsExporter({
-    //       exportSizeLimit,
-    //       logger,
-    //       savedObjectsClient,
-    //       typeRegistry,
-    //     });
+        typeRegistry.registerType({
+          name: 'foo',
+          mappings: { properties: {} },
+          namespaceType: 'single',
+          hidden: false,
+          supportsAccessControl: true,
+          management: {
+            importableAndExportable: true,
+            onExport: (ctx, objects) => {
+              objects.forEach((obj: SavedObject<any>) => {
+                obj.attributes.foo = 'modified';
+              });
+              return objects;
+            },
+          },
+        });
+        exporter = new SavedObjectsExporter({
+          exportSizeLimit,
+          logger,
+          savedObjectsClient,
+          typeRegistry,
+        });
 
-    //     savedObjectsClient.find.mockResolvedValueOnce({
-    //       total: 1,
-    //       saved_objects: [
-    //         {
-    //           id: '1',
-    //           type: 'foo',
-    //           attributes: {
-    //             foo: 'initial',
-    //           },
-    //           score: 0,
-    //           references: [],
-    //         },
-    //       ],
-    //       per_page: 1,
-    //       page: 0,
-    //     });
-    //     const exportStream = await exporter.exportByTypes({
-    //       request,
-    //       types: ['foo'],
-    //       excludeExportDetails: true,
-    //     });
+        savedObjectsClient.find.mockResolvedValueOnce({
+          total: 1,
+          saved_objects: [
+            {
+              id: '1',
+              type: 'foo',
+              attributes: {
+                foo: 'initial',
+              },
+              score: 0,
+              references: [],
+            },
+          ],
+          per_page: 1,
+          page: 0,
+        });
+        const exportStream = await exporter.exportByTypes({
+          request,
+          types: ['foo'],
+          excludeExportDetails: true,
+        });
 
-    //     const response = await readStreamToCompletion(exportStream);
+        const response = await readStreamToCompletion(exportStream);
 
-    //     expect(response).toHaveLength(1);
-    //     expect(response[0].attributes.foo).toEqual('modified by access control transform');
-    //   });
+        expect(response).toHaveLength(1);
+        expect(response[0].attributes.foo).toEqual('modified by access control transform');
+      });
 
-    //   test('does not apply the access control transform to types that do not support access control', async () => {
-    //     const accessControlExportTransform: SavedObjectsExportTransform = (ctx, objects) => {
-    //       objects.forEach((obj: SavedObject<any>) => {
-    //         if (typeRegistry.supportsAccessControl(obj.type))
-    //           obj.attributes.foo = 'modified by access control transform';
-    //       });
-    //       return objects;
-    //     };
+      test('does not apply the access control transform to types that do not support access control', async () => {
+        // const accessControlExportTransform: SavedObjectsExportTransform = (ctx, objects) => {
+        //   objects.forEach((obj: SavedObject<any>) => {
+        //     if (typeRegistry.supportsAccessControl(obj.type))
+        //       obj.attributes.foo = 'modified by access control transform';
+        //   });
+        //   return objects;
+        // };
 
-    //     typeRegistry.registerType({
-    //       name: 'foo',
-    //       mappings: { properties: {} },
-    //       namespaceType: 'single',
-    //       hidden: false,
-    //       supportsAccessControl: false,
-    //       management: {
-    //         importableAndExportable: true,
-    //         onExport: (ctx, objects) => {
-    //           objects.forEach((obj: SavedObject<any>) => {
-    //             obj.attributes.foo = 'modified by type onExport';
-    //           });
-    //           return objects;
-    //         },
-    //       },
-    //     });
-    //     exporter = new SavedObjectsExporter({
-    //       exportSizeLimit,
-    //       logger,
-    //       savedObjectsClient,
-    //       typeRegistry,
-    //       accessControlExportTransform,
-    //     });
+        typeRegistry.registerType({
+          name: 'foo',
+          mappings: { properties: {} },
+          namespaceType: 'single',
+          hidden: false,
+          supportsAccessControl: false,
+          management: {
+            importableAndExportable: true,
+            onExport: (ctx, objects) => {
+              objects.forEach((obj: SavedObject<any>) => {
+                obj.attributes.foo = 'modified by type onExport';
+              });
+              return objects;
+            },
+          },
+        });
+        exporter = new SavedObjectsExporter({
+          exportSizeLimit,
+          logger,
+          savedObjectsClient,
+          typeRegistry,
+          // accessControlExportTransform,
+        });
 
-    //     savedObjectsClient.find.mockResolvedValueOnce({
-    //       total: 1,
-    //       saved_objects: [
-    //         {
-    //           id: '1',
-    //           type: 'foo',
-    //           attributes: {
-    //             foo: 'initial',
-    //           },
-    //           score: 0,
-    //           references: [],
-    //         },
-    //       ],
-    //       per_page: 1,
-    //       page: 0,
-    //     });
-    //     const exportStream = await exporter.exportByTypes({
-    //       request,
-    //       types: ['foo'],
-    //       excludeExportDetails: true,
-    //     });
+        savedObjectsClient.find.mockResolvedValueOnce({
+          total: 1,
+          saved_objects: [
+            {
+              id: '1',
+              type: 'foo',
+              attributes: {
+                foo: 'initial',
+              },
+              score: 0,
+              references: [],
+            },
+          ],
+          per_page: 1,
+          page: 0,
+        });
+        const exportStream = await exporter.exportByTypes({
+          request,
+          types: ['foo'],
+          excludeExportDetails: true,
+        });
 
-    //     const response = await readStreamToCompletion(exportStream);
+        const response = await readStreamToCompletion(exportStream);
 
-    //     expect(response).toHaveLength(1);
-    //     expect(response[0].attributes.foo).toEqual('modified by type onExport');
-    //   });
-    // });
+        expect(response).toHaveLength(1);
+        expect(response[0].attributes.foo).toEqual('modified by type onExport');
+      });
+    });
   });
 
   describe('#exportByObjects', () => {
@@ -1482,128 +1486,129 @@ describe('getSortedObjectsForExport()', () => {
         `);
     });
 
-    // describe('access control', () => {
-    //   test('applies the access control transform to supporting types if defined', async () => {
-    //     const accessControlExportTransform: SavedObjectsExportTransform = (ctx, objects) => {
-    //       objects.forEach((obj: SavedObject<any>) => {
-    //         if (typeRegistry.supportsAccessControl(obj.type))
-    //           obj.attributes.foo = 'modified by access control transform';
-    //       });
-    //       return objects;
-    //     };
+    // Unskip after: https://github.com/elastic/kibana/issues/242671
+    describe.skip('access control', () => {
+      test('applies the access control transform to supporting types if defined', async () => {
+        // const accessControlExportTransform: SavedObjectsExportTransform = (ctx, objects) => {
+        //   objects.forEach((obj: SavedObject<any>) => {
+        //     if (typeRegistry.supportsAccessControl(obj.type))
+        //       obj.attributes.foo = 'modified by access control transform';
+        //   });
+        //   return objects;
+        // };
 
-    //     typeRegistry.registerType({
-    //       name: 'foo',
-    //       mappings: { properties: {} },
-    //       namespaceType: 'single',
-    //       hidden: false,
-    //       supportsAccessControl: true,
-    //       management: {
-    //         importableAndExportable: true,
-    //         onExport: (ctx, objects) => {
-    //           objects.forEach((obj: SavedObject<any>) => {
-    //             obj.attributes.foo = 'modified';
-    //           });
-    //           return objects;
-    //         },
-    //       },
-    //     });
+        typeRegistry.registerType({
+          name: 'foo',
+          mappings: { properties: {} },
+          namespaceType: 'single',
+          hidden: false,
+          supportsAccessControl: true,
+          management: {
+            importableAndExportable: true,
+            onExport: (ctx, objects) => {
+              objects.forEach((obj: SavedObject<any>) => {
+                obj.attributes.foo = 'modified';
+              });
+              return objects;
+            },
+          },
+        });
 
-    //     savedObjectsClient.bulkGet.mockResolvedValueOnce({
-    //       saved_objects: [
-    //         {
-    //           id: '1',
-    //           type: 'index-pattern',
-    //           attributes: {},
-    //           references: [],
-    //         },
-    //         {
-    //           id: '2',
-    //           type: 'foo',
-    //           attributes: {
-    //             foo: 'initial',
-    //           },
-    //           references: [],
-    //         },
-    //         {
-    //           id: '3',
-    //           type: 'search',
-    //           attributes: {},
-    //           references: [
-    //             {
-    //               id: '1',
-    //               name: 'name',
-    //               type: 'index-pattern',
-    //             },
-    //           ],
-    //         },
-    //       ],
-    //     });
+        savedObjectsClient.bulkGet.mockResolvedValueOnce({
+          saved_objects: [
+            {
+              id: '1',
+              type: 'index-pattern',
+              attributes: {},
+              references: [],
+            },
+            {
+              id: '2',
+              type: 'foo',
+              attributes: {
+                foo: 'initial',
+              },
+              references: [],
+            },
+            {
+              id: '3',
+              type: 'search',
+              attributes: {},
+              references: [
+                {
+                  id: '1',
+                  name: 'name',
+                  type: 'index-pattern',
+                },
+              ],
+            },
+          ],
+        });
 
-    //     exporter = new SavedObjectsExporter({
-    //       exportSizeLimit,
-    //       logger,
-    //       savedObjectsClient,
-    //       typeRegistry,
-    //       accessControlExportTransform,
-    //     });
+        exporter = new SavedObjectsExporter({
+          exportSizeLimit,
+          logger,
+          savedObjectsClient,
+          typeRegistry,
+          // accessControlExportTransform,
+        });
 
-    //     const exportStream = await exporter.exportByObjects({
-    //       request,
-    //       objects: [
-    //         {
-    //           type: 'index-pattern',
-    //           id: '1',
-    //         },
-    //         {
-    //           type: 'foo',
-    //           id: '2',
-    //         },
-    //         {
-    //           type: 'search',
-    //           id: '3',
-    //         },
-    //       ],
-    //     });
-    //     const response = await readStreamToCompletion(exportStream);
-    //     expect(response).toMatchInlineSnapshot(`
-    //       Array [
-    //         Object {
-    //           "attributes": Object {},
-    //           "id": "1",
-    //           "references": Array [],
-    //           "type": "index-pattern",
-    //         },
-    //         Object {
-    //           "attributes": Object {
-    //             "foo": "modified by access control transform",
-    //           },
-    //           "id": "2",
-    //           "references": Array [],
-    //           "type": "foo",
-    //         },
-    //         Object {
-    //           "attributes": Object {},
-    //           "id": "3",
-    //           "references": Array [
-    //             Object {
-    //               "id": "1",
-    //               "name": "name",
-    //               "type": "index-pattern",
-    //             },
-    //           ],
-    //           "type": "search",
-    //         },
-    //         Object {
-    //           "excludedObjects": Array [],
-    //           "excludedObjectsCount": 0,
-    //           "exportedCount": 3,
-    //           "missingRefCount": 0,
-    //           "missingReferences": Array [],
-    //         },
-    //       ]
-    //     `);
-    //   });
-    // });
+        const exportStream = await exporter.exportByObjects({
+          request,
+          objects: [
+            {
+              type: 'index-pattern',
+              id: '1',
+            },
+            {
+              type: 'foo',
+              id: '2',
+            },
+            {
+              type: 'search',
+              id: '3',
+            },
+          ],
+        });
+        const response = await readStreamToCompletion(exportStream);
+        expect(response).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "attributes": Object {},
+              "id": "1",
+              "references": Array [],
+              "type": "index-pattern",
+            },
+            Object {
+              "attributes": Object {
+                "foo": "modified by access control transform",
+              },
+              "id": "2",
+              "references": Array [],
+              "type": "foo",
+            },
+            Object {
+              "attributes": Object {},
+              "id": "3",
+              "references": Array [
+                Object {
+                  "id": "1",
+                  "name": "name",
+                  "type": "index-pattern",
+                },
+              ],
+              "type": "search",
+            },
+            Object {
+              "excludedObjects": Array [],
+              "excludedObjectsCount": 0,
+              "exportedCount": 3,
+              "missingRefCount": 0,
+              "missingReferences": Array [],
+            },
+          ]
+        `);
+      });
+    });
   });
 });

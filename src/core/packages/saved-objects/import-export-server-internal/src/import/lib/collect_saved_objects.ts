@@ -66,7 +66,7 @@ export async function collectSavedObjects({
       });
       return false;
     }),
-    ...(accessControlTransforms?.filterStream ? [accessControlTransforms.filterStream] : []),
+    ...accessControlTransforms.filterStream,
     ...(accessControlTransforms?.mapStream ? [accessControlTransforms.mapStream] : []),
     createFilterStream<SavedObject>((obj) => (filter ? filter(obj) : true)),
     createMapStream((obj: SavedObject) => {
