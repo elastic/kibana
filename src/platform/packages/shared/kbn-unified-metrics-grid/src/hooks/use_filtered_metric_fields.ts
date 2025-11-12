@@ -54,22 +54,26 @@ export const useFilteredMetricFields = ({
     });
   }, [allFields, searchTermLower, dimensionsSet]);
 
-  const { fieldNames, indices } = useMemo(() => {
+  const { fiedNamesSearch, indicesSearch } = useMemo(() => {
+    if (!kuery) {
+      return { fiedNamesSearch: new Set<string>(), indicesSearch: new Set<string>() };
+    }
+
     return filteredFields.reduce(
       (acc, field) => {
-        acc.fieldNames.add(field.name);
-        acc.indices.add(field.index);
+        acc.fiedNamesSearch.add(field.name);
+        acc.indicesSearch.add(field.index);
         return acc;
       },
-      { fieldNames: new Set<string>(), indices: new Set<string>() }
+      { fiedNamesSearch: new Set<string>(), indicesSearch: new Set<string>() }
     );
-  }, [filteredFields]);
+  }, [filteredFields, kuery]);
 
-  const shouldSearch = !!kuery && fieldNames.size > 0;
+  const shouldSearch = fiedNamesSearch.size > 0;
 
   const { data: fieldsFilteredByValue = [], isFetching } = useMetricFieldsSearchQuery({
-    fields: Array.from(fieldNames),
-    index: Array.from(indices).join(','),
+    fields: Array.from(fiedNamesSearch),
+    index: Array.from(indicesSearch).join(','),
     timeRange,
     kuery,
     enabled: shouldSearch,
