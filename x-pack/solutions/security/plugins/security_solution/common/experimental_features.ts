@@ -182,7 +182,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    *  Enables the QRadar rules import feature
    */
-  qradarRulesMigration: false
+  qradarRulesMigration: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
