@@ -12,8 +12,6 @@ export type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValue
  * This object is then used to validate and parse the value entered.
  */
 export const allowedExperimentalValues = Object.freeze({
-  donutChartEmbeddablesEnabled: false, // Depends on https://github.com/elastic/kibana/issues/136409 item 2 - 6
-
   /**
    * This is used for enabling the end-to-end tests for the security_solution telemetry.
    * We disable the telemetry since we don't have specific roles or permissions around it and
@@ -75,6 +73,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Entity Analytics: Disables the Risk Score AI Assistant tool.
    */
   entityDetailsHighlightsEnabled: false,
+
+  /**
+   * Enables the experimental Threat Hunting home experience.
+   */
+  entityThreatHuntingEnabled: false,
 
   /**
    * disables ES|QL rules
@@ -172,10 +175,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Release: 9.2.0
    */
   microsoftDefenderEndpointCancelEnabled: true,
-  /**
-   * Protects all the work related to the attacks and alerts alignment effort
-   */
-  attacksAlertsAlignment: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

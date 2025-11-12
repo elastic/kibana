@@ -1,5 +1,5 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -32,5 +32,6 @@
     "@kbn/core-root-server-internal",
     "@kbn/core-lifecycle-server-internal",
     "@kbn/core-test-helpers-so-type-serializer",
+    "@kbn/std",
   ]
 }

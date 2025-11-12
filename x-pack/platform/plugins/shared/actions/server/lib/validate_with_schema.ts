@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import { ZodError } from '@kbn/zod';
 import type {
   ActionType,
   ActionTypeConfig,
@@ -13,6 +14,7 @@ import type {
   ActionTypeParams,
   ValidatorServices,
 } from '../types';
+import { formatZodError } from './format_zod_error';
 
 export function validateParams<
   Config extends ActionTypeConfig = ActionTypeConfig,
@@ -113,7 +115,7 @@ function validateWithSchema<
           }
           break;
         case 'config':
-          name = 'action type config';
+          name = 'connector type config';
           if (actionType.validate.config) {
             const validatedValue = actionType.validate.config.schema.parse(value);
 
@@ -128,7 +130,7 @@ function validateWithSchema<
 
           break;
         case 'secrets':
-          name = 'action type secrets';
+          name = 'connector type secrets';
           if (actionType.validate.secrets) {
             const validatedValue = actionType.validate.secrets.schema.parse(value);
 
@@ -146,8 +148,12 @@ function validateWithSchema<
           throw new Error(`invalid actionType validate key: ${key}`);
       }
     } catch (err) {
+      let errMessage = err.message;
+      if (err instanceof ZodError) {
+        errMessage = formatZodError(err);
+      }
       // we can't really i18n this yet, since the err.message isn't i18n'd itself
-      throw Boom.badRequest(`error validating ${name}: ${err.message}`);
+      throw Boom.badRequest(`error validating ${name}: ${errMessage}`);
     }
   }
 

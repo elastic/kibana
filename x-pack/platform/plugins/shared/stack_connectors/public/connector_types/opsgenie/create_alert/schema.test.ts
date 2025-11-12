@@ -9,7 +9,7 @@ import { decodeCreateAlert, isPartialCreateAlertSchema } from './schema';
 import {
   OpsgenieCreateAlertExample,
   ValidCreateAlertSchema,
-} from '../../../../server/connector_types/opsgenie/test_schema';
+} from '@kbn/connector-schemas/opsgenie/schemas/test_schema';
 
 describe('schema', () => {
   describe('decodeCreateAlert', () => {
