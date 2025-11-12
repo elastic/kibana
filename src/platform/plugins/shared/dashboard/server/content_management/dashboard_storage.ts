@@ -10,7 +10,6 @@
 import Boom from '@hapi/boom';
 import type { Logger } from '@kbn/logging';
 
-import type { DeleteResult } from '@kbn/content-management-plugin/common';
 import type { StorageContext } from '@kbn/content-management-plugin/server';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../dashboard_saved_object';
 import { cmServicesDefinition } from './cm_services';
@@ -100,15 +99,8 @@ export class DashboardStorage {
     throw Boom.badRequest(`Use REST API update endpoint`);
   }
 
-  async delete(
-    ctx: StorageContext,
-    id: string,
-    // force is necessary to delete saved objects that exist in multiple namespaces
-    options?: { force: boolean }
-  ): Promise<DeleteResult> {
-    const soClient = await savedObjectClientFromRequest(ctx);
-    await soClient.delete(DASHBOARD_SAVED_OBJECT_TYPE, id, { force: options?.force ?? false });
-    return { success: true };
+  async delete(): Promise<any> {
+    throw Boom.badRequest(`Use REST API delete endpoint`);
   }
 
   async search(): Promise<any> {
