@@ -107,6 +107,7 @@ export const generateMockIndicator = (): Indicator => {
   indicator.fields['threat.indicator.type'] = ['type'];
   indicator.fields['threat.indicator.ip'] = ['0.0.0.0'];
   indicator.fields['threat.indicator.name'] = ['0.0.0.0'];
+  indicator.fields['threat.indicator.name_origin'] = ['forwarded', 'abusech-malware'];
 
   return indicator;
 };
