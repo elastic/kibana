@@ -369,7 +369,7 @@ describe('Text based languages utils', () => {
       const expressionsMock = expressionsPluginMock.createStartContract();
       const coreStart = coreMock.createStart();
 
-      coreStart.http.get = jest.fn().mockResolvedValue('time');
+      coreStart.http.get = jest.fn().mockResolvedValue({ timeField: 'time' });
       const updatedState = await getStateFromAggregateQuery(
         state,
         { esql: 'FROM my-fake-index-pattern | WHERE time <= ?_tend' },
@@ -477,7 +477,7 @@ describe('Text based languages utils', () => {
       const expressionsMock = expressionsPluginMock.createStartContract();
       const coreStart = coreMock.createStart();
 
-      coreStart.http.get = jest.fn().mockResolvedValue('@timestamp');
+      coreStart.http.get = jest.fn().mockResolvedValue({ timeField: '@timestamp' });
       const updatedState = await getStateFromAggregateQuery(
         state,
         { esql: 'FROM my-fake-index-*' },

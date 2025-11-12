@@ -34,8 +34,8 @@ describe('getEsqlDataView', () => {
   const mockGetTimeFieldRoute = (query: string, timeFieldResponse: string) => {
     const originalHttpGet = services.http.get;
     services.http.get = jest.fn().mockImplementation((url: string) => {
-      if (url.includes(`${TIMEFIELD_ROUTE}${query}`)) {
-        return Promise.resolve(timeFieldResponse);
+      if (url.includes(`${TIMEFIELD_ROUTE}${encodeURIComponent(query)}`)) {
+        return Promise.resolve({ timeField: timeFieldResponse });
       }
       return Promise.resolve('');
     });
