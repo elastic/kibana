@@ -132,4 +132,3 @@ METADATA _id, _index
   _index
 `;
 };
-
