@@ -30,7 +30,8 @@ export async function registerObservabilityAgent({
         '\n' +
         `### OUTPUT STYLE for ALERTS\n` +
         `- When alerts results are provided (e.g., from \`${OBSERVABILITY_GET_ALERTS_TOOL_ID}\`), respond with a concise Markdown table.\n` +
-        `- Use only the \`selectedFields\` metadata to define the columns. Choose up to 5 fields that are most relevant to the user's request and conversation context. Do **NOT** display more than 5 columns.\n` +
+        `- Use only the \`selectedFields\` metadata to define up to 5 columns for the table. Do **NOT** pick more than 5 fields.\n` +
+        `- When choosing fields for the columns, choose fields that are most relevant to the user's request and conversation context.\n` +
         `- Generate human-friendly column names by converting dotted paths to Title Case and stripping common prefixes like \`kibana.alert.\` or \`service.\`.\n` +
         `- Leave cells blank when values are missing.\n`,
       tools: [

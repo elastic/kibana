@@ -8,30 +8,12 @@
 import { chunk, uniq } from 'lodash';
 import type { Logger } from '@kbn/core/server';
 import type { ModelProvider } from '@kbn/onechat-server';
+import { ShortIdTable } from '../../utils/short_id_table';
 
 const SELECT_RELEVANT_FIELD_NAMES_SYSTEM_MESSAGE = `You are a helpful AI assistant for Elastic Observability. 
 Your task is to determine which fields are relevant to the conversation by selecting only the field IDs from the provided list. 
 The list in the user message consists of JSON objects that map a human-readable field "name" to its unique "id". 
 You must not output any field names — only the corresponding "id" values. Ensure that your output follows the exact JSON format specified.`;
-
-class ShortIdTable {
-  private readonly nameToId = new Map<string, string>();
-  private readonly idToName = new Map<string, string>();
-  private counter = 0;
-
-  take(name: string): string {
-    const existing = this.nameToId.get(name);
-    if (existing) return existing;
-    const id = `f${++this.counter}`;
-    this.nameToId.set(name, id);
-    this.idToName.set(id, name);
-    return id;
-  }
-
-  lookup(id: string): string | undefined {
-    return this.idToName.get(id);
-  }
-}
 
 export async function selectRelevantAlertFields({
   query,
@@ -86,17 +68,16 @@ export async function selectRelevantAlertFields({
           schema,
         });
 
-        const fieldIds = Array.isArray((response as any).output?.fieldIds)
-          ? ((response as any).output.fieldIds as unknown[]).filter(
-              (v): v is string => typeof v === 'string'
-            )
+        const fieldIds = Array.isArray(response.output?.fieldIds)
+          ? response.output.fieldIds.filter((v): v is string => typeof v === 'string')
           : [];
 
-        const pickedNames = fieldIds
-          .map((id) => shortIdTable.lookup(id))
+        const pickedFieldNames = fieldIds
+          .map((fieldId) => shortIdTable.lookup(fieldId))
           .filter((name): name is string => typeof name === 'string')
           .filter((name) => fieldsChunk.includes(name));
-        selectedFieldsAcrossChunks.push(...pickedNames);
+
+        selectedFieldsAcrossChunks.push(...pickedFieldNames);
       } catch (e) {
         logger.debug(`Chunk selection failed: ${e?.message}`);
         logger.debug(e);
