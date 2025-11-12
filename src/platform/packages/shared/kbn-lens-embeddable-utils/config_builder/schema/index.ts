@@ -33,7 +33,7 @@ export { tagcloudStateSchema } from './charts/tagcloud';
 
 export type {
   LensApiFieldMetricOrFormulaOperation,
-  LensApiAllMetricOrFromulaOperations,
+  LensApiAllMetricOrFormulaOperations,
 } from './metric_ops';
 export type { LensApiBucketOperations } from './bucket_ops';
 

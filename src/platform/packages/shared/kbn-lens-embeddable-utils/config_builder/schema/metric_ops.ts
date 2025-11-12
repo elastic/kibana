@@ -269,7 +269,7 @@ export type LensApiFieldMetricOrFormulaOperation =
   | LensApiFieldMetricOperations
   | LensApiFormulaOperation;
 
-export type LensApiAllMetricOrFromulaOperations =
+export type LensApiAllMetricOrFormulaOperations =
   | LensApiFieldMetricOperations
   | LensApiFormulaOperation
   | LensApiDifferencesOperation
