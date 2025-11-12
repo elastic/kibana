@@ -18,7 +18,7 @@ import { TagsFilterPopover } from './tags_filter_popover';
 import { RuleExecutionStatusSelector } from './rule_execution_status_selector';
 import { RuleSearchField } from './rule_search_field';
 import type { RuleExecutionStatus } from '../../../../../../common/api/detection_engine';
-import { AllRulesTabs } from '../rules_table_toolbar';
+import type { AllRulesTabs } from '../rules_table_toolbar';
 import { GapStatusSelector } from './gap_status_selector';
 
 const FilterWrapper = styled(EuiFlexGroup)`
@@ -128,16 +128,14 @@ const RulesTableFiltersComponent = ({ selectedTab }: RulesTableFiltersProps) => 
         </EuiFilterGroup>
       </EuiFlexItem>
 
-      {selectedTab === AllRulesTabs.monitoring && (
-        <EuiFlexItem grow={false}>
-          <EuiFilterGroup>
-            <GapStatusSelector
-              selectedStatus={gapStatus}
-              onSelectedStatusChanged={handleSelectedGapStatus}
-            />
-          </EuiFilterGroup>
-        </EuiFlexItem>
-      )}
+      <EuiFlexItem grow={false}>
+        <EuiFilterGroup>
+          <GapStatusSelector
+            selectedStatus={gapStatus}
+            onSelectedStatusChanged={handleSelectedGapStatus}
+          />
+        </EuiFilterGroup>
+      </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
         <EuiFilterGroup>
