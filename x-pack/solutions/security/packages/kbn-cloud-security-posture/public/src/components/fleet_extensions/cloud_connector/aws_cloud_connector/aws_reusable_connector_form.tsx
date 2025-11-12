@@ -5,17 +5,12 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiComboBox, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
-import type { AwsCloudConnectorVars } from '@kbn/fleet-plugin/common/types';
-import type {
-  AwsCloudConnectorCredentials,
-  AwsCloudConnectorOption,
-  ComboBoxOption,
-} from '../types';
-import { useGetCloudConnectors } from '../hooks/use_get_cloud_connectors';
+import { EuiSpacer, EuiText } from '@elastic/eui';
+import type { AwsCloudConnectorCredentials } from '../types';
 import { AWS_PROVIDER } from '../constants';
+import { ReusableConnectorSelect } from '../form/reusable_connector_select';
 
 export const AWSReusableConnectorForm: React.FC<{
   cloudConnectorId: string | undefined;
@@ -23,64 +18,6 @@ export const AWSReusableConnectorForm: React.FC<{
   credentials: AwsCloudConnectorCredentials;
   setCredentials: (credentials: AwsCloudConnectorCredentials) => void;
 }> = ({ credentials, setCredentials, isEditPage, cloudConnectorId }) => {
-  const { data: cloudConnectors = [] } = useGetCloudConnectors(AWS_PROVIDER);
-
-  // Map connectors to AWS format
-  const awsConnectionData: AwsCloudConnectorOption[] = useMemo(() => {
-    return cloudConnectors.map((connector) => {
-      const awsVars = connector.vars as AwsCloudConnectorVars;
-      return {
-        label: connector.name,
-        value: connector.id,
-        id: connector.id,
-        roleArn: awsVars.role_arn,
-        externalId: awsVars.external_id,
-      };
-    });
-  }, [cloudConnectors]);
-
-  // Convert cloud connectors to combo box options (only standard properties for EuiComboBox)
-  const comboBoxOptions: ComboBoxOption[] = useMemo(
-    () =>
-      awsConnectionData.map((connector) => ({
-        label: connector.label,
-        value: connector.value,
-      })),
-    [awsConnectionData]
-  );
-
-  // Find the currently selected connector based on credentials
-  const selectedConnector = useMemo(() => {
-    const targetId = cloudConnectorId || credentials?.cloudConnectorId;
-    return targetId ? comboBoxOptions.find((opt) => opt.value === targetId) || null : null;
-  }, [cloudConnectorId, credentials?.cloudConnectorId, comboBoxOptions]);
-
-  const handleConnectorChange = useCallback(
-    (selected: Array<{ label: string; value?: string }>) => {
-      const [selectedOption] = selected;
-
-      if (selectedOption?.value) {
-        const connector = awsConnectionData.find((opt) => opt.id === selectedOption.value);
-
-        if (connector?.roleArn?.value && connector?.externalId?.value) {
-          setCredentials({
-            roleArn: connector.roleArn.value,
-            externalId: connector.externalId.value,
-            cloudConnectorId: connector.id,
-          });
-        }
-      } else {
-        // Handle deselection
-        setCredentials({
-          roleArn: undefined,
-          externalId: undefined,
-          cloudConnectorId: undefined,
-        });
-      }
-    },
-    [awsConnectionData, setCredentials]
-  );
-
   return (
     <>
       <EuiSpacer size="m" />
@@ -91,17 +28,12 @@ export const AWSReusableConnectorForm: React.FC<{
         />
       </EuiText>
       <EuiSpacer size="m" />
-      <EuiFormRow label="Role ARN" fullWidth>
-        <EuiComboBox
-          aria-label="Select Role ARN"
-          placeholder="Select a Role ARN"
-          options={comboBoxOptions}
-          fullWidth
-          singleSelection={true}
-          selectedOptions={selectedConnector ? [selectedConnector] : []}
-          onChange={handleConnectorChange}
-        />
-      </EuiFormRow>
+      <ReusableConnectorSelect
+        provider={AWS_PROVIDER}
+        cloudConnectorId={cloudConnectorId}
+        credentials={credentials}
+        setCredentials={setCredentials}
+      />
       <EuiSpacer size="m" />
     </>
   );
