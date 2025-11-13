@@ -25,14 +25,12 @@ const MAX_STRING_FIELD_LENGTH = 1024;
 
 const MAX_USER_PROFILE_DATA_SIZE_BYTES = 1000 * 1024;
 
-const MAX_IMAGE_DATA_SIZE_BYTES = 64 * 1024;
-
 const userProfileUpdateSchema = schema.object({
   avatar: schema.maybe(
     schema.object({
       initials: schema.nullable(schema.string({ maxLength: MAX_STRING_FIELD_LENGTH })),
       color: schema.nullable(schema.string({ maxLength: MAX_STRING_FIELD_LENGTH })),
-      imageUrl: schema.nullable(schema.string({ maxLength: MAX_IMAGE_DATA_SIZE_BYTES })),
+      imageUrl: schema.nullable(schema.string()),
     })
   ),
   userSettings: schema.maybe(
