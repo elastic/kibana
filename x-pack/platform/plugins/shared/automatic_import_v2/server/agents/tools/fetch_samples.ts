@@ -16,7 +16,7 @@ import { z } from '@kbn/zod';
  * @param samples - Array of all available samples
  * @returns DynamicStructuredTool that returns requested samples
  */
-export function createFetchSamplesTool(samples: string[]): DynamicStructuredTool {
+export function fetchSamplesTool(samples: string[]): DynamicStructuredTool {
   return new DynamicStructuredTool({
     name: 'fetch_log_samples',
     description:

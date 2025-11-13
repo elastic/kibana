@@ -5,12 +5,19 @@
  * 2.0.
  */
 
-import '@langchain/langgraph/zod';
 import { MessagesZodState } from '@langchain/langgraph';
 import { z } from '@kbn/zod';
 
 export const AutomaticImportAgentState = MessagesZodState.extend({
-  current_pipeline: z.object({}).default({}),
+  current_pipeline: z
+    .object({
+      processors: z.array(z.any()).describe('The processors in the pipeline'),
+      on_failure: z
+        .array(z.any())
+        .optional()
+        .describe('Optional failure handlers for the pipeline'),
+    })
+    .describe('The generated ingest pipeline to validate'),
   pipeline_generation_results: z
     .object({
       docs: z
