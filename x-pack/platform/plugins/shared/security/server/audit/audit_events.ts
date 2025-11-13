@@ -259,6 +259,12 @@ const savedObjectAuditVerbs: Record<AuditAction, VerbsTuple> = {
     'updating spaces of',
     'updated spaces of',
   ],
+  saved_object_update_objects_owner: ['update owner of', 'updating owner of', 'updated owner of'],
+  saved_object_update_objects_access_mode: [
+    'update access mode of',
+    'updating access mode of',
+    'updated access mode of',
+  ],
 };
 
 const savedObjectAuditTypes: Record<AuditAction, ArrayElement<EcsEvent['type']>> = {
@@ -273,6 +279,8 @@ const savedObjectAuditTypes: Record<AuditAction, ArrayElement<EcsEvent['type']>>
   saved_object_remove_references: 'change',
   saved_object_collect_multinamespace_references: 'access',
   saved_object_update_objects_spaces: 'change',
+  saved_object_update_objects_owner: 'change',
+  saved_object_update_objects_access_mode: 'change',
 };
 
 export function savedObjectEvent({

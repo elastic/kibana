@@ -22,6 +22,7 @@ import {
   getDashboardUpdateResultSchema,
 } from '../content_management/v1/schema';
 import { registerCreateRoute } from './create';
+import { registerDeleteRoute } from './delete';
 import { registerSearchRoute } from './search';
 
 interface RegisterAPIRoutesArgs {
@@ -64,6 +65,7 @@ export function registerAPIRoutes({
   const { versioned: versionedRouter } = http.createRouter();
 
   registerCreateRoute(versionedRouter);
+  registerDeleteRoute(versionedRouter);
   registerSearchRoute(versionedRouter);
 
   // Update API route
@@ -175,52 +177,6 @@ export function registerAPIRoutes({
       return res.ok({
         body: { ...formattedResult, meta: { ...formattedResult.meta, ...result.meta } },
       });
-    }
-  );
-
-  // Delete API route
-  const deleteRoute = versionedRouter.delete({
-    path: `${PUBLIC_API_PATH}/{id}`,
-    summary: `Delete a dashboard`,
-    ...commonRouteConfig,
-  });
-
-  deleteRoute.addVersion(
-    {
-      version: INTERNAL_API_VERSION,
-      validate: {
-        request: {
-          params: schema.object({
-            id: schema.string({
-              meta: {
-                description: 'A unique identifier for the dashboard.',
-              },
-            }),
-          }),
-        },
-      },
-    },
-    async (ctx, req, res) => {
-      const client = contentManagement.contentClient
-        .getForRequest({ request: req, requestHandlerContext: ctx })
-        .for(CONTENT_ID, LATEST_VERSION);
-      try {
-        await client.delete(req.params.id);
-      } catch (e) {
-        if (e.isBoom && e.output.statusCode === 404) {
-          return res.notFound({
-            body: {
-              message: `A dashboard with saved object ID ${req.params.id} was not found.`,
-            },
-          });
-        }
-        if (e.isBoom && e.output.statusCode === 403) {
-          return res.forbidden();
-        }
-        return res.badRequest();
-      }
-
-      return res.ok();
     }
   );
 }

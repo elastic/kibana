@@ -195,6 +195,18 @@ export interface SavedObjectsType<Attributes = any> {
    * If not defined, will use the object's type and id to generate a label.
    */
   getTitle?: (savedObject: Attributes) => string;
+
+  /**
+   * If defined and set to `true`, this saved object type will support access control functionality.
+   *
+   * When enabled, objects of this type can have an `accessControl` property containing:
+   * - `owner`: The ID of the user who owns this object
+   * - `accessMode`: Access mode setting, supports 'write_restricted' or 'default'.
+   *
+   * This property works in conjunction with the SavedObjectAccessControl interface defined
+   * in server_types.ts.
+   */
+  supportsAccessControl?: boolean;
 }
 
 /**

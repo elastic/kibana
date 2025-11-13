@@ -62,12 +62,20 @@ export type {
   SavedObjectsBulkDeleteOptions,
   SavedObjectsBulkDeleteStatus,
   SavedObjectsBulkDeleteResponse,
+  SavedObjectsChangeAccessControlOptions,
+  SavedObjectsChangeAccessControlResponse,
+  SavedObjectsChangeAccessControlObject,
+  SavedObjectsChangeOwnershipOptions,
+  SavedObjectsChangeAccessModeOptions,
   SavedObjectsSearchOptions,
   SavedObjectsSearchResponse,
 } from './src/apis';
 
+export { type Left, type Either, type Right, isLeft, isRight, left, right } from './src/utils';
+
 export type {
   SavedObject,
+  SavedObjectAccessControl,
   SavedObjectAttribute,
   SavedObjectAttributes,
   SavedObjectAttributeSingle,

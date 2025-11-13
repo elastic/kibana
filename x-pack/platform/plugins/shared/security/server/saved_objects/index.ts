@@ -12,6 +12,8 @@ import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 import { SavedObjectsSecurityExtension } from './saved_objects_security_extension';
 import type { AuthorizationServiceSetupInternal } from '../authorization';
 
+export { SecurityAction } from './types';
+
 interface SetupSavedObjectsParams {
   audit: AuditServiceSetup;
   authz: Pick<
@@ -42,7 +44,7 @@ export function setupSavedObjects({
       }
   );
 
-  savedObjects.setSecurityExtension(({ request }) => {
+  savedObjects.setSecurityExtension(({ request, typeRegistry }) => {
     return authz.mode.useRbacForRequest(request)
       ? new SavedObjectsSecurityExtension({
           actions: authz.actions,
@@ -50,6 +52,7 @@ export function setupSavedObjects({
           checkPrivileges: authz.checkSavedObjectsPrivilegesWithRequest(request),
           errors: SavedObjectsClient.errors,
           getCurrentUser: () => getCurrentUser(request),
+          typeRegistry,
         })
       : undefined;
   });

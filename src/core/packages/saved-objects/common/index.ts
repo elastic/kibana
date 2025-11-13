@@ -9,6 +9,7 @@
 
 export type {
   SavedObject,
+  SavedObjectAccessControl,
   SavedObjectsNamespaceType,
   SavedObjectAttributeSingle,
   SavedObjectAttribute,
