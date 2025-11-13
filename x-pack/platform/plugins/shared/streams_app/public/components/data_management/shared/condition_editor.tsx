@@ -153,95 +153,102 @@ function FilterConditionForm(props: {
   };
 
   const showValueField = useMemo(() => conditionNeedsValueField(condition), [condition]);
+  const isRangeValue = typeof value === 'object' && value !== null;
 
   return (
-    <EuiFlexGroup gutterSize="s" alignItems="center" data-test-subj="streamsAppConditionEditor">
-      <EuiFlexItem grow={2}>
-        <AutocompleteSelector
-          value={condition.field}
-          onChange={(fieldValue) => handleConditionChange({ field: fieldValue })}
-          placeholder={i18n.translate('xpack.streams.filter.fieldPlaceholder', {
-            defaultMessage: 'Field',
-          })}
-          suggestions={fieldSuggestions}
-          compressed
-          disabled={disabled}
-          dataTestSubj="streamsAppConditionEditorFieldText"
-          showIcon={true}
-        />
+    <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="streamsAppConditionEditor">
+      <EuiFlexItem>
+        <EuiFlexGroup gutterSize="s" alignItems="center" wrap responsive={false}>
+          <EuiFlexItem grow={2} style={{ minWidth: '120px' }}>
+            <AutocompleteSelector
+              value={condition.field}
+              onChange={(fieldValue) => handleConditionChange({ field: fieldValue })}
+              placeholder={i18n.translate('xpack.streams.filter.fieldPlaceholder', {
+                defaultMessage: 'Field',
+              })}
+              suggestions={fieldSuggestions}
+              compressed
+              disabled={disabled}
+              dataTestSubj="streamsAppConditionEditorFieldText"
+              showIcon={true}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={showValueField && !isRangeValue ? 1 : 2} style={{ minWidth: '80px' }}>
+            <OperatorSelector
+              condition={condition}
+              onConditionChange={onConditionChange}
+              compressed
+              disabled={disabled}
+              dataTestSubj="streamsAppConditionEditorOperator"
+            />
+          </EuiFlexItem>
+          {showValueField && !isRangeValue ? (
+            <EuiFlexItem grow={2} style={{ minWidth: '120px' }}>
+              {typeof value === 'string' ? (
+                <AutocompleteSelector
+                  aria-label={i18n.translate('xpack.streams.filter.value', {
+                    defaultMessage: 'Value',
+                  })}
+                  placeholder={i18n.translate('xpack.streams.filter.valuePlaceholder', {
+                    defaultMessage: 'Value',
+                  })}
+                  suggestions={valueSuggestions}
+                  compressed
+                  value={value}
+                  dataTestSubj="streamsAppConditionEditorValueText"
+                  onChange={(newValue) => {
+                    handleValueChange(newValue);
+                  }}
+                  disabled={disabled}
+                />
+              ) : typeof value === 'boolean' ? (
+                <EuiSelect
+                  aria-label={i18n.translate('xpack.streams.conditionEditor.booleanLabel', {
+                    defaultMessage: 'Value',
+                  })}
+                  compressed
+                  options={[
+                    {
+                      value: 'true',
+                      text: i18n.translate('xpack.streams.conditionEditor.booleanValueTrue', {
+                        defaultMessage: 'True',
+                      }),
+                    },
+                    {
+                      value: 'false',
+                      text: i18n.translate('xpack.streams.conditionEditor.booleanFalseValue', {
+                        defaultMessage: 'False',
+                      }),
+                    },
+                  ]}
+                  value={String(value)}
+                  data-test-subj="streamsAppFilterFormValueBoolean"
+                  onChange={(e) => {
+                    const nextValue = e.target.value === 'true';
+                    handleValueChange(nextValue);
+                  }}
+                  disabled={disabled}
+                />
+              ) : null}
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem grow={showValueField ? 1 : 2}>
-        <OperatorSelector
-          condition={condition}
-          onConditionChange={onConditionChange}
-          compressed
-          disabled={disabled}
-          dataTestSubj="streamsAppConditionEditorOperator"
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={2}>
-        {showValueField ? (
-          <>
-            {typeof value === 'string' ? (
-              <AutocompleteSelector
-                aria-label={i18n.translate('xpack.streams.filter.value', {
-                  defaultMessage: 'Value',
-                })}
-                placeholder={i18n.translate('xpack.streams.filter.valuePlaceholder', {
-                  defaultMessage: 'Value',
-                })}
-                suggestions={valueSuggestions}
-                compressed
-                value={value}
-                dataTestSubj="streamsAppConditionEditorValueText"
-                onChange={(newValue) => {
-                  handleValueChange(newValue);
-                }}
-                disabled={disabled}
-              />
-            ) : typeof value === 'boolean' ? (
-              <EuiSelect
-                aria-label={i18n.translate('xpack.streams.conditionEditor.booleanLabel', {
-                  defaultMessage: 'Value',
-                })}
-                compressed
-                options={[
-                  {
-                    value: 'true',
-                    text: i18n.translate('xpack.streams.conditionEditor.booleanValueTrue', {
-                      defaultMessage: 'True',
-                    }),
-                  },
-                  {
-                    value: 'false',
-                    text: i18n.translate('xpack.streams.conditionEditor.booleanFalseValue', {
-                      defaultMessage: 'False',
-                    }),
-                  },
-                ]}
-                value={String(value)}
-                data-test-subj="streamsAppFilterFormValueBoolean"
-                onChange={(e) => {
-                  const nextValue = e.target.value === 'true';
-                  handleValueChange(nextValue);
-                }}
-                disabled={disabled}
-              />
-            ) : typeof value === 'object' && value !== null ? (
-              <RangeInput
-                value={value as RangeCondition}
-                onChange={(newValue) => {
-                  handleValueChange(newValue);
-                }}
-                valueSuggestions={valueSuggestions}
-                compressed
-                disabled={disabled}
-                dataTestSubj="streamsAppConditionEditorValueRange"
-              />
-            ) : null}
-          </>
-        ) : null}
-      </EuiFlexItem>
+
+      {showValueField && isRangeValue ? (
+        <EuiFlexItem>
+          <RangeInput
+            value={value as RangeCondition}
+            onChange={(newValue) => {
+              handleValueChange(newValue);
+            }}
+            valueSuggestions={valueSuggestions}
+            compressed
+            disabled={disabled}
+            dataTestSubj="streamsAppConditionEditorValueRange"
+          />
+        </EuiFlexItem>
+      ) : null}
     </EuiFlexGroup>
   );
 }
