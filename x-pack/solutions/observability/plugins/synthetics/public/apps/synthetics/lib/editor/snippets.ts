@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { monaco } from '@kbn/monaco';
+import { getSnippets } from '../../components/settings/snippets/api';
 
 /**
  * Minimal suggestion provider exposing a few commonly used snippets.
@@ -94,12 +95,20 @@ export const syntheticsSuggestionProvider: monaco.languages.CompletionItemProvid
         range,
         sortText: '5',
       },
+      ...getSnippets().map((snippet, index) => ({
+        label: snippet.label,
+        kind: monaco.languages.CompletionItemKind.Snippet,
+        insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+        detail: snippet.detail,
+        documentation: snippet.detail,
+        insertText: snippet.insertText,
+        range,
+      })),
     ];
 
     if (lineContent.includes('page.')) {
       suggestions.forEach((s) => (s.sortText = '0'));
     }
-
     return { suggestions };
   },
 };
