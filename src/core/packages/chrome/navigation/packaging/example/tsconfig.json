@@ -1,8 +1,10 @@
 {
   "extends": "../../../../../../../tsconfig.base.json",
   "compilerOptions": {
-    "lib": ["ES2020", "DOM"],
-    "jsx": "react-jsx",
+    "lib": [
+      "ES2020",
+      "DOM"
+    ],
     "module": "ESNext",
     "moduleResolution": "bundler",
     "esModuleInterop": true,
@@ -12,9 +14,10 @@
     "baseUrl": ".",
     "outDir": "target/types",
   },
-  "include": ["src/**/*"],
+  "include": [
+    "src/**/*"
+  ],
   "exclude": [
     "target/**/*"
   ]
 }
-

@@ -11,7 +11,12 @@ import { TsProject } from './ts_project';
 
 export const TS_PROJECTS = TsProject.loadAll({
   /** Array of repo-relative paths to projects which should be ignored and not treated as a TS project in the repo */
-  ignore: ['**/__fixtures__/**/*'],
+  ignore: [
+    '**/__fixtures__/**/*',
+    // This packaging tsconfig is only used for build-time type validation with --noEmit
+    // It imports files from parent directories which would cause conflicts with the main package tsconfig
+    'src/core/packages/chrome/navigation/packaging/tsconfig.json',
+  ],
 
   /** Array of repo-relative paths to projects which should have their type-check disabled */
   disableTypeCheck: [
