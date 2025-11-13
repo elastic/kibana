@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { monaco } from '@kbn/monaco';
-import { getSnippets } from '../../components/settings/snippets/api';
+import { getSnippets } from '../../components/settings/snippets/localStorageApi';
 
 /**
  * Minimal suggestion provider exposing a few commonly used snippets.

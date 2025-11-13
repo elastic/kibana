@@ -4,16 +4,35 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type {
+  SyntheticsServiceGetSnippetsResponse,
+  SyntheticsServiceGetSnippetsSuccessResponse,
+  SyntheticsServicePostSnippetResponse,
+  SyntheticsServicePostSnippetSuccessResponse,
+  SyntheticsServiceSnippet,
+} from '../../../../../../common/runtime_types/synthetics_service_snippet';
+import { apiService } from '../../../../../utils/api_service';
+import { SYNTHETICS_API_URLS } from '../../../../../../common/constants';
 
-import type { SnippetData } from './snippets';
+export const getSnippets = async () => {
+  const response = (await apiService.get(
+    SYNTHETICS_API_URLS.SYNTHETICS_PROJECT_SNIPPETS
+  )) as SyntheticsServiceGetSnippetsResponse;
 
-const SNIPPETS_LOCAL_STORAGE_KEY = 'synthetics.snippets.repository';
-
-export const getSnippets = () => {
-  const snippets = localStorage.getItem(SNIPPETS_LOCAL_STORAGE_KEY);
-  return (snippets ? JSON.parse(snippets) : []) as SnippetData[];
+  if (response.error) {
+    throw new Error(response.message);
+  }
+  return response as SyntheticsServiceGetSnippetsSuccessResponse;
 };
 
-export const saveSnippets = (snippets: SnippetData[]) => {
-  localStorage.setItem(SNIPPETS_LOCAL_STORAGE_KEY, JSON.stringify(snippets));
+export const postSnippet = async (payload: { snippet: SyntheticsServiceSnippet }) => {
+  const response = (await apiService.post(
+    SYNTHETICS_API_URLS.SYNTHETICS_PROJECT_SNIPPETS,
+    payload
+  )) as SyntheticsServicePostSnippetResponse;
+
+  if (response.error) {
+    throw new Error(response.message);
+  }
+  return response as SyntheticsServicePostSnippetSuccessResponse;
 };

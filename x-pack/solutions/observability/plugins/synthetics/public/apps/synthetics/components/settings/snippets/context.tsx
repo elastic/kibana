@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { SnippetData } from './snippets';
-import { getSnippets } from './api';
+import { getSnippets } from './localStorageApi';
 
 interface SnippetsContextValue {
   snippets: SnippetData[];

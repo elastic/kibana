@@ -9,9 +9,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiTabbedContent, EuiFormRow } from '@elastic/eui';
 import { CodeEditor } from './code_editor';
-import { syntheticsSuggestionProvider } from '../../../lib/editor/snippets';
 import { ScriptRecorderFields } from './script_recorder_fields';
 import { ConfigKey, MonacoEditorLangId } from '../types';
+import { useSuggestionProvider } from '../../settings/snippets/use_suggestion_provider';
+import { useGetSnippets } from '../../settings/snippets/hooks';
 
 enum SourceType {
   INLINE = 'syntheticsBrowserInlineConfig',
@@ -37,6 +38,8 @@ export const SourceField = ({ onChange, onBlur, value, isEditFlow = false }: Sou
     value.type === 'inline' ? SourceType.INLINE : SourceType.SCRIPT_RECORDER
   );
   const [config, setConfig] = useState<SourceConfig>(value);
+  const { snippets = [] } = useGetSnippets();
+  useSuggestionProvider({ snippets });
 
   useEffect(() => {
     onChange(config);
@@ -98,7 +101,7 @@ export const SourceField = ({ onChange, onBlur, value, isEditFlow = false }: Sou
             })}
             id="javascript"
             languageId={MonacoEditorLangId.JAVASCRIPT}
-            suggestionProvider={syntheticsSuggestionProvider}
+            // suggestionProvider={syntheticsSuggestionProvider}
             onChange={(code) => {
               setConfig((prevConfig) => ({ ...prevConfig, script: code }));
               onBlur(ConfigKey.SOURCE_INLINE);

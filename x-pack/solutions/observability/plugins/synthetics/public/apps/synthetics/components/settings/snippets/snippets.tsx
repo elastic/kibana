@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
@@ -26,9 +26,9 @@ import { euiStyled } from '@kbn/react-kibana-context-styled';
 import { MonacoEditorLangId } from '../../../../../../common/runtime_types';
 import { useFormWrapped } from '../../../../../hooks/use_form_wrapped';
 import { CodeEditor } from '../../monitor_add_edit/fields/code_editor';
-import { syntheticsSuggestionProvider } from '../../../lib/editor/snippets';
-import { useSnippetsContext } from './context';
-import { saveSnippets } from './api';
+// import { syntheticsSuggestionProvider } from '../../../lib/editor/snippets';
+import { useGetSnippets, usePostSnippet } from './hooks';
+import { useSuggestionProvider } from './use_suggestion_provider';
 
 export interface SnippetData {
   name: string;
@@ -55,11 +55,16 @@ export interface SnippetData {
 export const Snippets = () => {
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const [selectedSnippet, setSelectedSnippet] = useState<SnippetData | undefined>(undefined);
-  const { snippets, setSnippets } = useSnippetsContext();
 
-  useEffect(() => {
-    saveSnippets(snippets);
-  }, [snippets]);
+  const {
+    snippets = [],
+    refetch: refetchSnippets,
+    isLoading: isLoadingSnippets,
+  } = useGetSnippets();
+  const postSnippetMutation = usePostSnippet();
+  useSuggestionProvider({ snippets });
+
+  const isLoading = isLoadingSnippets || postSnippetMutation.isLoading;
 
   const handleEditSnippet = (snippet: SnippetData) => {
     // Logic to open the snippet in an editor or modal for editing
@@ -69,7 +74,8 @@ export const Snippets = () => {
 
   const handleDeleteSnippet = (snippet: SnippetData) => {
     // Logic to delete the snippet
-    setSnippets((prevSnippets) => prevSnippets.filter((s) => s.label !== snippet.label));
+    // setSnippets((prevSnippets) => prevSnippets.filter((s) => s.label !== snippet.label));
+    // console.log('Delete snippet:', snippet);
   };
 
   const handleCreateSnippet = () => {
@@ -77,15 +83,17 @@ export const Snippets = () => {
     setIsFlyoutVisible(true);
   };
 
-  const submitAddSnippet = (snippet: SnippetData) => {
-    setSnippets((prevSnippets) => [...prevSnippets, snippet]);
+  const submitAddSnippet = async (snippet: SnippetData) => {
+    // setSnippets((prevSnippets) => [...prevSnippets, snippet]);
+    await postSnippetMutation.mutateAsync({ snippet });
+    refetchSnippets();
     setIsFlyoutVisible(false);
   };
 
   const submitEditSnippet = (snippet: SnippetData) => {
-    setSnippets((prevSnippets) =>
-      prevSnippets.map((s) => (s.label === snippet.label ? snippet : s))
-    );
+    // setSnippets((prevSnippets) =>
+    //   prevSnippets.map((s) => (s.label === snippet.label ? snippet : s))
+    // );
     setIsFlyoutVisible(false);
   };
 
@@ -138,7 +146,7 @@ export const Snippets = () => {
   ];
 
   return (
-    <div style={{ overflowX: 'scroll' }}>
+    <>
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem>
           <EuiText>
@@ -149,7 +157,12 @@ export const Snippets = () => {
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton data-test-subj="syntheticsAddSnippetButton" onClick={handleCreateSnippet} fill>
+          <EuiButton
+            data-test-subj="syntheticsAddSnippetButton"
+            onClick={handleCreateSnippet}
+            fill
+            isLoading={isLoading}
+          >
             {i18n.translate('xpack.synthetics.snippets.addSnippetButtonLabel', {
               defaultMessage: 'Add Snippet',
             })}
@@ -174,18 +187,21 @@ export const Snippets = () => {
               <SnippetForm
                 initialData={selectedSnippet}
                 onSubmit={isEditing ? submitEditSnippet : submitAddSnippet}
+                isLoading={isLoading}
               />
             </EuiFlyoutBody>
           </FlyoutBodyContainer>
         </EuiFlyout>
       )}
-    </div>
+    </>
   );
 };
 
 interface SnippetFormProps {
   initialData?: SnippetData;
   onSubmit?: (data: SnippetData) => void;
+  // suggestionProvider: monaco.languages.CompletionItemProvider;
+  isLoading?: boolean;
 }
 const SnippetForm = (props: SnippetFormProps) => {
   const form = useFormWrapped<SnippetData>({
@@ -245,6 +261,7 @@ const SnippetForm = (props: SnippetFormProps) => {
           <EuiButton
             data-test-subj="syntheticsAddParamFlyoutButton"
             onClick={handleSubmit(props.onSubmit ?? (() => {}))}
+            isLoading={props.isLoading}
             fill
             // isLoading={isSaving}
           >
@@ -273,7 +290,7 @@ const SnippetEditor = () => {
       )}
       id="javascript"
       languageId={MonacoEditorLangId.JAVASCRIPT}
-      suggestionProvider={syntheticsSuggestionProvider}
+      // suggestionProvider={props.suggestionProvider}
       onChange={onChange}
       value={value}
       placeholder={i18n.translate('xpack.synthetics.addEditMonitor.scriptEditor.placeholder', {
