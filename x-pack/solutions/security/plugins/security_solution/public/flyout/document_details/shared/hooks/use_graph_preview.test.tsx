@@ -595,12 +595,24 @@ describe('useGraphPreview', () => {
     });
   });
 
-  it('should return false when all conditions are met but env does not have required license', () => {
-    mockUseHasGraphVisualizationLicense.mockReturnValue(false);
+  it(`should return true when alert has graph preview with new ECS schema user.entity.id`, () => {
+    const getFieldsData: GetFieldsData = (field: string) => {
+      if (field === 'kibana.alert.uuid') {
+        return 'alertId';
+      } else if (field === 'kibana.alert.original_event.id') {
+        return 'eventId';
+      } else if (field === 'user.entity.id') {
+        return 'userActorId';
+      } else if (field === 'service.target.entity.id') {
+        return 'serviceTargetId';
+      }
+
+      return mockFieldData[field];
+    };
 
     const hookResult = renderHook((props: UseGraphPreviewParams) => useGraphPreview(props), {
       initialProps: {
-        getFieldsData: alertMockGetFieldsData,
+        getFieldsData,
         ecsData: {
           _id: 'id',
           event: {
@@ -611,24 +623,35 @@ describe('useGraphPreview', () => {
       },
     });
 
-    expect(hookResult.result.current.shouldShowGraph).toBe(false);
     expect(hookResult.result.current).toStrictEqual({
-      shouldShowGraph: false,
+      hasGraphRepresentation: true,
       timestamp: mockFieldData['@timestamp'][0],
       eventIds: ['eventId'],
-      actorIds: ['actorId'],
+      actorIds: ['userActorId'],
       action: ['action'],
-      targetIds: ['targetId'],
+      targetIds: ['serviceTargetId'],
       isAlert: true,
     });
   });
 
-  it('should return false for shouldShowGraph when UI setting is disabled', () => {
-    mockUseUiSetting.mockReturnValue([false, jest.fn()]);
+  it(`should return true when alert has graph preview with new ECS schema host.entity.id`, () => {
+    const getFieldsData: GetFieldsData = (field: string) => {
+      if (field === 'kibana.alert.uuid') {
+        return 'alertId';
+      } else if (field === 'kibana.alert.original_event.id') {
+        return 'eventId';
+      } else if (field === 'host.entity.id') {
+        return 'hostActorId';
+      } else if (field === 'entity.target.id') {
+        return 'entityTargetId';
+      }
+
+      return mockFieldData[field];
+    };
 
     const hookResult = renderHook((props: UseGraphPreviewParams) => useGraphPreview(props), {
       initialProps: {
-        getFieldsData: alertMockGetFieldsData,
+        getFieldsData,
         ecsData: {
           _id: 'id',
           event: {
@@ -639,6 +662,135 @@ describe('useGraphPreview', () => {
       },
     });
 
-    expect(hookResult.result.current.shouldShowGraph).toBe(false);
+    expect(hookResult.result.current).toStrictEqual({
+      hasGraphRepresentation: true,
+      timestamp: mockFieldData['@timestamp'][0],
+      eventIds: ['eventId'],
+      actorIds: ['hostActorId'],
+      action: ['action'],
+      targetIds: ['entityTargetId'],
+      isAlert: true,
+    });
+  });
+
+  it(`should return true when alert has graph preview with new ECS schema service.entity.id`, () => {
+    const getFieldsData: GetFieldsData = (field: string) => {
+      if (field === 'kibana.alert.uuid') {
+        return 'alertId';
+      } else if (field === 'kibana.alert.original_event.id') {
+        return 'eventId';
+      } else if (field === 'service.entity.id') {
+        return 'serviceActorId';
+      } else if (field === 'user.target.entity.id') {
+        return 'userTargetId';
+      }
+
+      return mockFieldData[field];
+    };
+
+    const hookResult = renderHook((props: UseGraphPreviewParams) => useGraphPreview(props), {
+      initialProps: {
+        getFieldsData,
+        ecsData: {
+          _id: 'id',
+          event: {
+            action: ['action'],
+          },
+        },
+        dataFormattedForFieldBrowser: alertMockDataFormattedForFieldBrowser,
+      },
+    });
+
+    expect(hookResult.result.current).toStrictEqual({
+      hasGraphRepresentation: true,
+      timestamp: mockFieldData['@timestamp'][0],
+      eventIds: ['eventId'],
+      actorIds: ['serviceActorId'],
+      action: ['action'],
+      targetIds: ['userTargetId'],
+      isAlert: true,
+    });
+  });
+
+  it(`should return true when alert has graph preview with new ECS schema entity.id`, () => {
+    const getFieldsData: GetFieldsData = (field: string) => {
+      if (field === 'kibana.alert.uuid') {
+        return 'alertId';
+      } else if (field === 'kibana.alert.original_event.id') {
+        return 'eventId';
+      } else if (field === 'entity.id') {
+        return 'entityActorId';
+      } else if (field === 'host.target.entity.id') {
+        return 'hostTargetId';
+      }
+
+      return mockFieldData[field];
+    };
+
+    const hookResult = renderHook((props: UseGraphPreviewParams) => useGraphPreview(props), {
+      initialProps: {
+        getFieldsData,
+        ecsData: {
+          _id: 'id',
+          event: {
+            action: ['action'],
+          },
+        },
+        dataFormattedForFieldBrowser: alertMockDataFormattedForFieldBrowser,
+      },
+    });
+
+    expect(hookResult.result.current).toStrictEqual({
+      hasGraphRepresentation: true,
+      timestamp: mockFieldData['@timestamp'][0],
+      eventIds: ['eventId'],
+      actorIds: ['entityActorId'],
+      action: ['action'],
+      targetIds: ['hostTargetId'],
+      isAlert: true,
+    });
+  });
+
+  it(`should return true when alert has graph preview with mixed legacy and new ECS schema fields`, () => {
+    const getFieldsData: GetFieldsData = (field: string) => {
+      if (field === 'kibana.alert.uuid') {
+        return 'alertId';
+      } else if (field === 'kibana.alert.original_event.id') {
+        return 'eventId';
+      } else if (field === 'actor.entity.id') {
+        return 'legacyActorId';
+      } else if (field === 'user.entity.id') {
+        return 'userActorId';
+      } else if (field === 'target.entity.id') {
+        return 'legacyTargetId';
+      } else if (field === 'service.target.entity.id') {
+        return 'serviceTargetId';
+      }
+
+      return mockFieldData[field];
+    };
+
+    const hookResult = renderHook((props: UseGraphPreviewParams) => useGraphPreview(props), {
+      initialProps: {
+        getFieldsData,
+        ecsData: {
+          _id: 'id',
+          event: {
+            action: ['action'],
+          },
+        },
+        dataFormattedForFieldBrowser: alertMockDataFormattedForFieldBrowser,
+      },
+    });
+
+    expect(hookResult.result.current).toStrictEqual({
+      hasGraphRepresentation: true,
+      timestamp: mockFieldData['@timestamp'][0],
+      eventIds: ['eventId'],
+      actorIds: ['legacyActorId', 'userActorId'],
+      action: ['action'],
+      targetIds: ['legacyTargetId', 'serviceTargetId'],
+      isAlert: true,
+    });
   });
 });
