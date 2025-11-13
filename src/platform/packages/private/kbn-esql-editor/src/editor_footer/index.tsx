@@ -313,7 +313,6 @@ export const EditorFooter = memo(function EditorFooter({
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
                   {!hideQuickSearch && <QuickSearchAction toggleVisor={toggleVisor} />}
-                  <SubmitFeedbackComponent isSpaceReduced={true} />
                   {!hideQueryHistory && (
                     <QueryHistoryAction
                       toggleHistory={toggleHistoryComponent}
