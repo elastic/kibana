@@ -3,6 +3,7 @@ plugins:
   enabled:
     - apm
     - discover_enhanced
+    - index_management
     - maps
     - observability
     - observability_onboarding
