@@ -7,5 +7,5 @@
 import { schema } from '@kbn/config-schema';
 
 export const muteAlertBodySchema = schema.object({
-  validateAlertsExistence: schema.boolean({ defaultValue: true }),
+  validateAlertsExistence: schema.maybe(schema.boolean({ defaultValue: true })),
 });
