@@ -64,7 +64,8 @@ function convertUrlParamToZodString(paramName, paramValue, isRequired = false) {
 
   if (Array.isArray(paramValue)) {
     if (paramValue.length === 0) {
-      return `z.array(z.string())${optionalSuffix}.describe('Array parameter: ${paramName}${requiredMarker}')`;
+      // Empty array in Console definitions means "unknown allowed values" - be fully permissive
+      return `z.any()${optionalSuffix}.describe('Parameter: ${paramName}${requiredMarker}')`;
     }
 
     // Check if all values are numeric
