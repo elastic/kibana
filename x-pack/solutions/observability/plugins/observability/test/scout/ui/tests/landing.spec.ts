@@ -9,7 +9,7 @@ import { test, expect } from '@kbn/scout-oblt';
 import { generateApmData, generateLogsData } from '../fixtures/generators';
 
 test.describe('Observability Landing Page', { tag: ['@ess', '@svlOblt'] }, () => {
-  test.beforeAll(async ({ kbnClient, page }) => {
+  test.beforeAll(async ({ kbnClient }) => {
     await kbnClient.savedObjects.cleanStandardList();
   });
 

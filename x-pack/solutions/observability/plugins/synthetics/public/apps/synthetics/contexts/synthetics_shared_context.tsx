@@ -18,7 +18,6 @@ import { SyntheticsRefreshContextProvider } from './synthetics_refresh_context';
 import { SyntheticsDataViewContextProvider } from './synthetics_data_view_context';
 import type { SyntheticsAppProps } from './synthetics_settings_context';
 import { storage, store } from '../state';
-import { SnippetsContextProvider } from '../components/settings/snippets/context';
 const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
 
 export const SyntheticsSharedContext: React.FC<
@@ -64,18 +63,16 @@ export const SyntheticsSharedContext: React.FC<
           <QueryClientProvider client={queryClient}>
             <SyntheticsRefreshContextProvider reload$={reload$}>
               <SyntheticsDataViewContextProvider dataViews={startPlugins.dataViews}>
-                <SnippetsContextProvider>
-                  <RedirectAppLinks
-                    coreStart={{
-                      application: coreStart.application,
-                    }}
-                    style={{
-                      height: '100%',
-                    }}
-                  >
-                    <ContextWrapper>{children}</ContextWrapper>
-                  </RedirectAppLinks>
-                </SnippetsContextProvider>
+                <RedirectAppLinks
+                  coreStart={{
+                    application: coreStart.application,
+                  }}
+                  style={{
+                    height: '100%',
+                  }}
+                >
+                  <ContextWrapper>{children}</ContextWrapper>
+                </RedirectAppLinks>
               </SyntheticsDataViewContextProvider>
             </SyntheticsRefreshContextProvider>
           </QueryClientProvider>

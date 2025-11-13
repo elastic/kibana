@@ -12,10 +12,10 @@ import type { SyntheticsServerSetup } from '../types';
 import type { SyntheticsServiceApiKey } from '../../common/runtime_types/synthetics_service_api_key';
 
 export const syntheticsApiKeyID = 'ba997842-b0cf-4429-aa9d-578d9bf0d391';
-export const syntheticsApiKeyObjectTypeName = 'uptime-synthetics-api-key';
+export const syntheticsApiKeyObjectType = 'uptime-synthetics-api-key';
 
 export const syntheticsServiceApiKey: SavedObjectsType = {
-  name: syntheticsApiKeyObjectTypeName,
+  name: syntheticsApiKeyObjectType,
   hidden: true,
   namespaceType: 'agnostic',
   mappings: {

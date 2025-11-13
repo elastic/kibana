@@ -17,6 +17,10 @@ interface UseSuggestionProviderParams {
 export const useSuggestionProvider = (params: UseSuggestionProviderParams) => {
   const { snippets } = params;
 
+  /**
+   * This is necessary to register the provider when snippets change. Otherwise,
+   * the editor won't pick up new snippets added after initial registration.
+   */
   useEffect(() => {
     const disposable = monaco.languages.registerCompletionItemProvider(
       MonacoEditorLangId.JAVASCRIPT,

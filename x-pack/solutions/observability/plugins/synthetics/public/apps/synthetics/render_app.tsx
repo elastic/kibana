@@ -66,9 +66,6 @@ export const getSyntheticsAppProps = (): SyntheticsAppProps => {
     setBadge,
     appMountParameters,
     isServerless,
-    featureFlags: {
-      coreChromeLayoutType: featureFlags.getStringValue('core.chrome.layoutType', '') || undefined,
-    },
   };
 };
 
