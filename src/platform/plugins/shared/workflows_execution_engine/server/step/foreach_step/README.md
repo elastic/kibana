@@ -142,18 +142,6 @@ foreach: '[{{ steps.getCount }}, {{ steps.getCount | plus: 1 }}]'
 
 **Flow:** Template rendering → Evaluate templates → Rendered string → JSON parse → Array
 
-### 4. Direct Property Path (Not Recommended)
-
-**Syntax:** Plain property path without template syntax
-
-**Evaluation:** Template rendering → JSON parse (may fail)
-
-**Use when:** ⚠️ Not recommended - use `{{ consts.items }}` instead
-
-```yaml
-foreach: 'consts.items'  # Not recommended
-foreach: "{{ consts.items }}"  # Preferred
-```
 
 ## Context Variables
 

@@ -69,6 +69,10 @@ function getLiquidInstance(): Liquid {
       strictVariables: false,
     });
     
+    // TODO: This duplicate registration will be refactored to use a single source of truth
+    // for filter registration. Filters should be registered once and shared between
+    // server-side execution and client-side validation.
+    
     // Register all custom filters (for validation)
     liquidInstance.registerFilter('json_parse', (value: unknown): unknown => {
       return value; // No-op for validation
@@ -133,33 +137,17 @@ describe('my_custom_filter', () => {
 });
 ```
 
-## Step 5: Contribute to OSS (Recommended)
+## Step 5: Contribute to OSS (Optional)
 
-The best approach is to contribute your filter to the [liquidjs](https://github.com/harttle/liquidjs) project so it's available to all users.
+If you want to contribute your filter to the [liquidjs](https://github.com/harttle/liquidjs) project:
 
-### 5a. Open an Issue
+1. Open an issue or PR on the liquidjs repository
+2. Once your contribution is merged and released:
+   - **Update liquidjs version** in `package.json`
+   - **Remove custom registration** from Kibana code (filter now built-in)
+   - **Update autocompletion** to reflect it's now a standard filter
+   - **Update tests** if behavior changed
 
-1. Go to [liquidjs GitHub issues](https://github.com/harttle/liquidjs/issues)
-2. Create an issue describing your filter/tag
-3. Explain the use case and proposed API
-4. Wait for maintainer feedback
-
-### 5b. Open a Pull Request
-
-1. Fork the liquidjs repository
-2. Implement your filter/tag
-3. Add tests
-4. Update documentation
-5. Submit PR with clear description
-
-### 5c. Update Kibana After Merge
-
-Once merged and released:
-
-1. **Update liquidjs version** in `package.json`
-2. **Remove custom registration** from Kibana code (filter now built-in)
-3. **Update autocompletion** to reflect it's now a standard filter
-4. **Update tests** if behavior changed
 
 ## Adding Custom Tags
 

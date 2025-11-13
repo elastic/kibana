@@ -75,7 +75,7 @@ If the rendered condition is a string, it's evaluated as a KQL expression:
 
 ```yaml
 condition: "status: active"  # KQL expression
-condition: "{{ steps.getData.output.status }}: active"  # Template → KQL
+condition: "steps.getData.output.status: {{ steps.resolveStatusStep.output }}"  # Template → KQL
 ```
 
 ##### Invalid Type (Error)

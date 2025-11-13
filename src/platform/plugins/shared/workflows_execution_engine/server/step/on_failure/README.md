@@ -67,7 +67,8 @@ on-failure:
 **Behavior:**
 - Executes fallback steps only after retries are exhausted (if retry is configured)
 - Original error is preserved in workflow execution
-- Workflow continues after fallback execution
+- **By default, workflow still fails after fallback execution** (error is re-thrown)
+- To continue execution after fallback, use `continue: true` (see below)
 
 ### Continue
 
@@ -105,6 +106,8 @@ on-failure:
 ```
 
 **Flow:** Retry → Fallback → Continue
+
+**Note:** Without `continue: true`, the workflow will fail after executing fallback steps. The fallback executes, but the original error is re-thrown, causing the workflow to fail.
 
 ## Restrictions
 
