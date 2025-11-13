@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-export * from './es_fields';
-export type * from './es_schemas_raw';
-export type * from './es_schemas_ui';
-export type * from './src/span_links';
-export type * from './src/errors';
-export type * from './src/traces';
+import type { Span } from './es_schemas/ui/span';
+
+export interface TraceRootSpan {
+  duration: number;
+}
+
+export interface SpanDocument extends Span {
+  _id: string;
+  _index: string;
+}
