@@ -12,7 +12,7 @@ import { useEuiTheme } from '@elastic/eui';
 
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getLensLayerTypeTabDisplayName } from '@kbn/lens-common';
-import type { AddLayerFunction, LayerAction, Visualization } from '@kbn/lens-common';
+import type { LayerAction, Visualization } from '@kbn/lens-common';
 import {
   UPDATE_FILTER_REFERENCES_ACTION,
   UPDATE_FILTER_REFERENCES_TRIGGER,
@@ -22,29 +22,24 @@ import type { TabItem } from '@kbn/unified-tabs';
 import { UnifiedTabs, useNewTabProps } from '@kbn/unified-tabs';
 
 import {
-  addLayer as addLayerAction,
-  changeIndexPattern,
   cloneLayer,
   registerLibraryAnnotationGroup,
   removeOrClearLayer,
   selectSelectedLayerId,
   selectVisualization,
   setSelectedLayerId,
-  updateIndexPatterns,
   updateVisualizationState,
   useLensDispatch,
   useLensSelector,
 } from '../../../state_management';
-import { replaceIndexpattern } from '../../../state_management/lens_slice';
 import { useEditorFrameService } from '../../../editor_frame_service/editor_frame_service_context';
-import { generateId } from '../../../id_generator';
 import type { LayerPanelProps } from '../../../editor_frame_service/editor_frame/config_panel/types';
-import { createIndexPatternService } from '../../../data_views_service/service';
 import { LayerActions } from '../../../editor_frame_service/editor_frame/config_panel/layer_actions/layer_actions';
 import { getSharedActions } from '../../../editor_frame_service/editor_frame/config_panel/layer_actions/layer_actions';
 import { getRemoveOperation } from '../../../utils';
 
 import type { LayerTabsProps } from './types';
+import { useAddLayerButton } from './use_add_layer_button';
 
 export const LENS_LAYER_TABS_CONTENT_ID = 'lnsLayerTabsContent';
 
@@ -74,9 +69,7 @@ export function LayerTabs({
 }) {
   const { euiTheme } = useEuiTheme();
   const { datasourceMap } = useEditorFrameService();
-  const { isSaveable, visualization, datasourceStates, query } = useLensSelector(
-    (state) => state.lens
-  );
+  const { isSaveable, visualization, datasourceStates } = useLensSelector((state) => state.lens);
   const selectedLayerId = useLensSelector(selectSelectedLayerId);
 
   const [datasource] = Object.values(framePublicAPI.datasourceLayers);
@@ -87,34 +80,7 @@ export function LayerTabs({
 
   const dispatchLens = useLensDispatch();
 
-  const indexPatternService = useMemo(
-    () =>
-      createIndexPatternService({
-        dataViews,
-        uiActions,
-        core: coreStart,
-        updateIndexPatterns: (newIndexPatternsState, options) => {
-          dispatchLens(updateIndexPatterns(newIndexPatternsState));
-        },
-        replaceIndexPattern: (newIndexPattern, oldId, options) => {
-          dispatchLens(replaceIndexpattern({ newIndexPattern, oldId }));
-        },
-      }),
-    [coreStart, dispatchLens, dataViews, uiActions]
-  );
-
   const layerIds = activeVisualization.getLayerIds(visualization.state);
-
-  const addLayer: AddLayerFunction = useCallback(
-    (layerType, extraArg, ignoreInitialValues, seriesType) => {
-      const layerId = generateId();
-      dispatchLens(
-        addLayerAction({ layerId, layerType, extraArg, ignoreInitialValues, seriesType })
-      );
-      dispatchLens(setSelectedLayerId({ layerId }));
-    },
-    [dispatchLens]
-  );
 
   const registerLibraryAnnotationGroupFunction = useCallback<
     LayerPanelProps['registerLibraryAnnotationGroup']
@@ -126,8 +92,6 @@ export function LayerTabs({
       dispatchLens(setSelectedLayerId({ layerId: layerIds[0] }));
     }
   }, [dispatchLens, selectedLayerId, layerIds]);
-
-  const hideAddLayerButton = query && isOfAggregateQueryType(query);
 
   const layerConfigs = useMemo(() => {
     return layerIds.map((layerId) => ({
@@ -301,63 +265,13 @@ export function LayerTabs({
     visualization,
   ]);
 
-  const addLayerButton = useMemo(() => {
-    if (hideAddLayerButton) {
-      return null;
-    }
-
-    return activeVisualization?.getAddLayerButtonComponent?.({
-      state: visualization.state,
-      supportedLayers: activeVisualization.getSupportedLayers(visualization.state, framePublicAPI),
-      addLayer,
-      ensureIndexPattern: async (specOrId) => {
-        let indexPatternId;
-
-        if (typeof specOrId === 'string') {
-          indexPatternId = specOrId;
-        } else {
-          const dataView = await dataViews.create(specOrId);
-
-          if (!dataView.id) {
-            return;
-          }
-
-          indexPatternId = dataView.id;
-        }
-
-        const newIndexPatterns = await indexPatternService?.ensureIndexPattern({
-          id: indexPatternId,
-          cache: framePublicAPI.dataViews.indexPatterns,
-        });
-
-        if (newIndexPatterns) {
-          dispatchLens(
-            changeIndexPattern({
-              dataViews: { indexPatterns: newIndexPatterns },
-              datasourceIds: Object.keys(datasourceStates),
-              visualizationIds: visualization.activeId ? [visualization.activeId] : [],
-              indexPatternId,
-            })
-          );
-        }
-      },
-      registerLibraryAnnotationGroup: registerLibraryAnnotationGroupFunction,
-      isInlineEditing: Boolean(setIsInlineFlyoutVisible),
-    });
-  }, [
-    activeVisualization,
-    addLayer,
-    datasourceStates,
-    dispatchLens,
-    hideAddLayerButton,
-    indexPatternService,
-    dataViews,
+  const addLayerButton = useAddLayerButton(
     framePublicAPI,
-    setIsInlineFlyoutVisible,
-    registerLibraryAnnotationGroupFunction,
-    visualization.activeId,
-    visualization.state,
-  ]);
+    coreStart,
+    dataViews,
+    uiActions,
+    setIsInlineFlyoutVisible
+  );
 
   return (
     <div
@@ -367,7 +281,7 @@ export function LayerTabs({
         border-bottom: ${euiTheme.border.thin};
       `}
     >
-      {!!addLayerButton ? (
+      {!!addLayerButton && managedItems.length > 1 ? (
         <UnifiedTabs
           items={managedItems}
           selectedItemId={selectedLayerId ?? undefined}
