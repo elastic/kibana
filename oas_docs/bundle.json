@@ -11209,7 +11209,6 @@
                           "id",
                           "name",
                           "namespace",
-                          "is_managed",
                           "is_protected",
                           "status",
                           "updated_at",
@@ -12576,7 +12575,6 @@
                         "id",
                         "name",
                         "namespace",
-                        "is_managed",
                         "is_protected",
                         "status",
                         "updated_at",
@@ -13649,7 +13647,6 @@
                           "id",
                           "name",
                           "namespace",
-                          "is_managed",
                           "is_protected",
                           "status",
                           "updated_at",
@@ -14972,7 +14969,6 @@
                         "id",
                         "name",
                         "namespace",
-                        "is_managed",
                         "is_protected",
                         "status",
                         "updated_at",
@@ -16340,7 +16336,6 @@
                         "id",
                         "name",
                         "namespace",
-                        "is_managed",
                         "is_protected",
                         "status",
                         "updated_at",
@@ -17515,7 +17510,6 @@
                         "id",
                         "name",
                         "namespace",
-                        "is_managed",
                         "is_protected",
                         "status",
                         "updated_at",
@@ -17899,8 +17893,56 @@
                                       "type": "string"
                                     },
                                     "apm": {},
+                                    "diagnostics": {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "limit": {
+                                          "additionalProperties": false,
+                                          "properties": {
+                                            "burst": {
+                                              "type": "number"
+                                            },
+                                            "interval": {
+                                              "type": "string"
+                                            }
+                                          },
+                                          "type": "object"
+                                        },
+                                        "uploader": {
+                                          "additionalProperties": false,
+                                          "properties": {
+                                            "init_dur": {
+                                              "type": "string"
+                                            },
+                                            "max_dur": {
+                                              "type": "string"
+                                            },
+                                            "max_retries": {
+                                              "type": "number"
+                                            }
+                                          },
+                                          "type": "object"
+                                        }
+                                      },
+                                      "type": "object"
+                                    },
                                     "enabled": {
                                       "type": "boolean"
+                                    },
+                                    "http": {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "enabled": {
+                                          "type": "boolean"
+                                        },
+                                        "host": {
+                                          "type": "string"
+                                        },
+                                        "port": {
+                                          "type": "number"
+                                        }
+                                      },
+                                      "type": "object"
                                     },
                                     "logs": {
                                       "type": "boolean"
@@ -17910,6 +17952,18 @@
                                     },
                                     "namespace": {
                                       "type": "string"
+                                    },
+                                    "pprof": {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "enabled": {
+                                          "type": "boolean"
+                                        }
+                                      },
+                                      "required": [
+                                        "enabled"
+                                      ],
+                                      "type": "object"
                                     },
                                     "traces": {
                                       "type": "boolean"
