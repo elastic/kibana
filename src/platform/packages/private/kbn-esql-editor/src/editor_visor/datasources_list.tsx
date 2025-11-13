@@ -49,6 +49,11 @@ export function DataSourcesList({
         }[];
         const newSelectedValues = selectedChoices.map((choice) => choice.value);
 
+        // Prevent deselecting the last remaining source
+        if (newSelectedValues.length === 0 && currentSources.length === 1) {
+          return;
+        }
+
         // I am doing this to preserve the order of existing selections and append new ones at the end
         const orderedSelections = [
           ...currentSources.filter((source) => newSelectedValues.includes(source)),
