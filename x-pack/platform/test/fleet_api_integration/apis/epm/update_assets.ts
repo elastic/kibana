@@ -644,6 +644,7 @@ export default function (providerContext: FtrProviderContext) {
       expect(settingsSO.attributes.ilm_migration_status).eql({
         logs: 'success',
         metrics: 'success',
+        synthetics: 'success',
       });
     });
   });
