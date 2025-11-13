@@ -55,7 +55,7 @@ export const SelectField: React.FC<SelectWidgetProps> = ({
         value={value}
         options={options}
         onChange={(e) => onChange(fieldId, e.target.value)}
-        onBlur={() => onBlur(fieldId)}
+        onBlur={() => onBlur(fieldId, value)}
         isInvalid={isInvalid}
         fullWidth={fullWidth}
       />

@@ -148,7 +148,7 @@ describe('SelectField', () => {
     const select = screen.getByRole('combobox');
     fireEvent.blur(select);
 
-    expect(mockOnBlur).toHaveBeenCalledWith('choice');
+    expect(mockOnBlur).toHaveBeenCalledWith('choice', 'option1');
   });
 
   it('displays error message when invalid', () => {

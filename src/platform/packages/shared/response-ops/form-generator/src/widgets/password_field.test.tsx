@@ -90,7 +90,7 @@ describe('PasswordField', () => {
     const input = screen.getByLabelText('Password');
     fireEvent.blur(input);
 
-    expect(mockOnBlur).toHaveBeenCalledWith('password');
+    expect(mockOnBlur).toHaveBeenCalledWith('password', '');
   });
 
   it('displays error message when invalid', () => {

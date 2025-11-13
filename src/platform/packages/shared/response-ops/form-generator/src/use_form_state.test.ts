@@ -20,9 +20,9 @@ describe('useFormState', () => {
       label: `Label ${id}`,
     },
     initialValue,
-    validate: jest.fn((value: unknown) => {
+    validate: jest.fn((value: unknown): Record<string, string | string[]> | undefined => {
       if (typeof value === 'string' && value.length < 3) {
-        return 'Too short';
+        return { '': 'Too short' };
       }
       return undefined;
     }),
@@ -61,11 +61,11 @@ describe('useFormState', () => {
   it('clears errors on field change', () => {
     const fields: FieldDefinition[] = [createMockField('username')];
 
-    const { result } = renderHook(() => useFormState(fields));
+    const { result } = renderHook(() => useFormState<{ username: string }>(fields));
 
     // Set an error first
     act(() => {
-      result.current.handleBlur('username');
+      result.current.handleBlur('username', result.current.values.username);
     });
 
     // Change the field value
@@ -73,16 +73,16 @@ describe('useFormState', () => {
       result.current.handleChange('username', 'validValue');
     });
 
-    expect(result.current.errors.username).toBe('');
+    expect(result.current.errors.username).toBeUndefined();
   });
 
   it('marks field as touched on blur', () => {
     const fields: FieldDefinition[] = [createMockField('username')];
 
-    const { result } = renderHook(() => useFormState(fields));
+    const { result } = renderHook(() => useFormState<{ username: string }>(fields));
 
     act(() => {
-      result.current.handleBlur('username');
+      result.current.handleBlur('username', result.current.values.username);
     });
 
     expect(result.current.touched.username).toBe(true);
@@ -94,7 +94,7 @@ describe('useFormState', () => {
     const { result } = renderHook(() => useFormState(fields));
 
     act(() => {
-      result.current.handleBlur('username');
+      result.current.handleBlur('username', 'ab');
     });
 
     expect(fields[0].validate).toHaveBeenCalledWith('ab');
@@ -104,10 +104,10 @@ describe('useFormState', () => {
   it('does not set error if validation passes', () => {
     const fields: FieldDefinition[] = [createMockField('username', 'validUsername')];
 
-    const { result } = renderHook(() => useFormState(fields));
+    const { result } = renderHook(() => useFormState<{ username: string }>(fields));
 
     act(() => {
-      result.current.handleBlur('username');
+      result.current.handleBlur('username', result.current.values.username);
     });
 
     expect(result.current.errors.username).toBeUndefined();
@@ -206,12 +206,12 @@ describe('useFormState', () => {
       createMockField('email', 'default@example.com'),
     ];
 
-    const { result } = renderHook(() => useFormState(fields));
+    const { result } = renderHook(() => useFormState<{ username: string; email: string }>(fields));
 
     act(() => {
       result.current.handleChange('username', 'newUser');
       result.current.handleChange('email', 'new@example.com');
-      result.current.handleBlur('username');
+      result.current.handleBlur('username', result.current.values.username);
     });
 
     act(() => {
@@ -288,16 +288,16 @@ describe('useFormState', () => {
         id: 'username',
         staticProps: { fullWidth: true },
         initialValue: 'ab',
-        validate: jest.fn(() => ['Error 1', 'Error 2']),
+        validate: jest.fn(() => ({ '': ['Error 1', 'Error 2'] })),
         schema: z.string(),
         widget: 'text',
       },
     ];
 
-    const { result } = renderHook(() => useFormState(fields));
+    const { result } = renderHook(() => useFormState<{ username: string }>(fields));
 
     act(() => {
-      result.current.handleBlur('username');
+      result.current.handleBlur('username', result.current.values.username);
     });
 
     expect(result.current.errors.username).toEqual(['Error 1', 'Error 2']);

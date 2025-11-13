@@ -21,7 +21,7 @@ export interface BaseWidgetProps<T = unknown> {
   error?: string | string[];
   isInvalid?: boolean;
   onChange: (fieldId: string, value: T) => void;
-  onBlur: (fieldId: string) => void;
+  onBlur: (fieldId: string, value: T) => void;
   schema?: z.ZodTypeAny;
   widgetOptions?: Record<string, unknown>;
   setFieldError?: (fieldId: string, error: string | string[] | undefined) => void;

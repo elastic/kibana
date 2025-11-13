@@ -587,6 +587,29 @@ describe('Authentication Form Integration Tests', () => {
     expect(mockOnSubmit).not.toHaveBeenCalled();
   });
 
+  it('shows only username error on blur, not password error', async () => {
+    render(<Form connectorSchema={authSchema} onSubmit={mockOnSubmit} />, { wrapper });
+
+    const basicCard = screen.getByLabelText('Basic Auth');
+    fireEvent.click(basicCard);
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('authType.username')).toBeDefined();
+      expect(screen.queryByTestId('authType.password')).toBeDefined();
+    });
+
+    const usernameInput = screen.getByTestId('authType.username');
+
+    fireEvent.focus(usernameInput);
+    fireEvent.blur(usernameInput);
+
+    await waitFor(() => {
+      expect(screen.getByText('Username cannot be empty')).toBeInTheDocument();
+    });
+
+    expect(screen.queryByText('Password cannot be empty')).not.toBeInTheDocument();
+  });
+
   it('submits single-option union with full structure', async () => {
     const singleOptionSchema = z.object({
       apiKey: z

@@ -117,7 +117,8 @@ export const SingleOptionUnionField: React.FC<DiscriminatedUnionWidgetProps> = (
         if (setFieldError) {
           setFieldError(subFieldId, validationErrors);
         }
-        onBlur(fieldId);
+
+        onBlur(subFieldId, value);
       };
 
       return (
@@ -141,6 +142,7 @@ export const SingleOptionUnionField: React.FC<DiscriminatedUnionWidgetProps> = (
   }, [
     singleOptionSchema.shape,
     fieldId,
+    value,
     valueObj,
     touched,
     internalTouched,

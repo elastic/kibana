@@ -90,7 +90,7 @@ describe('TextField', () => {
     const input = screen.getByLabelText('Username');
     fireEvent.blur(input);
 
-    expect(mockOnBlur).toHaveBeenCalledWith('username');
+    expect(mockOnBlur).toHaveBeenCalledWith('username', '');
   });
 
   it('displays error message when invalid', () => {

@@ -29,7 +29,7 @@ export const TextField: React.FC<TextWidgetProps> = ({
         value={value}
         placeholder={placeholder}
         onChange={(e) => onChange(fieldId, e.target.value)}
-        onBlur={() => onBlur(fieldId)}
+        onBlur={() => onBlur(fieldId, value)}
         isInvalid={isInvalid}
         fullWidth={fullWidth}
       />

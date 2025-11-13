@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useState, useCallback } from 'react';
+import { useReducer, useCallback, useMemo } from 'react';
 import type { FieldDefinition } from './form';
 
 interface FormState<T> {
@@ -15,6 +15,19 @@ interface FormState<T> {
   errors: Record<string, string | string[]>;
   touched: Record<string, boolean>;
 }
+
+type FormAction<T> =
+  | { type: 'CHANGE_FIELD'; fieldId: string; value: unknown }
+  | { type: 'BLUR_FIELD'; fieldId: string; value: unknown; field?: FieldDefinition }
+  | { type: 'SET_ERROR'; fieldId: string; error?: string | string[] }
+  | { type: 'SET_TOUCHED'; fieldId: string; touched: boolean }
+  | { type: 'SET_ALL_TOUCHED'; touched: Record<string, boolean> }
+  | {
+      type: 'SUBMIT_ERRORS';
+      errors: Record<string, string | string[]>;
+      touched: Record<string, boolean>;
+    }
+  | { type: 'RESET'; initialValues: T };
 
 /**
  * Type utility that extracts the type of a option property using dot-notation path.
@@ -70,104 +83,147 @@ const setOptionValue = <T, P extends string>(obj: T, path: P, value: PathValue<T
   return result;
 };
 
-export const useFormState = <T>(fields: FieldDefinition[]) => {
-  const initialValues = fields.reduce((acc, field) => {
-    const key = field.id as keyof T;
-    (acc as T)[key] = (field.initialValue ?? field.value ?? '') as T[keyof T];
-    return acc;
-  }, {} as T);
+const clearFieldErrors = (
+  errors: Record<string, string | string[]>,
+  fieldId: string
+): Record<string, string | string[]> => {
+  const newErrors = { ...errors };
+  delete newErrors[fieldId];
+  Object.keys(newErrors).forEach((errorKey) => {
+    if (errorKey.startsWith(fieldId + '.')) {
+      delete newErrors[errorKey];
+    }
+  });
+  return newErrors;
+};
 
-  const [formState, setFormState] = useState<FormState<T>>({
+const formReducer = <T>(state: FormState<T>, action: FormAction<T>): FormState<T> => {
+  switch (action.type) {
+    case 'CHANGE_FIELD': {
+      const { fieldId, value } = action;
+      const isOptionPath = fieldId.includes('.');
+
+      const newValues: T = isOptionPath
+        ? setOptionValue(state.values, fieldId, value as PathValue<T, typeof fieldId>)
+        : { ...state.values, [fieldId]: value };
+
+      return {
+        ...state,
+        values: newValues,
+        errors: clearFieldErrors(state.errors, fieldId),
+      };
+    }
+
+    case 'BLUR_FIELD': {
+      const { fieldId, value, field } = action;
+      const newTouched = { ...state.touched, [fieldId]: true };
+
+      if (!field) {
+        return { ...state, touched: newTouched };
+      }
+
+      const validationResult = field.validate(value);
+      const newErrors = { ...clearFieldErrors(state.errors, fieldId) };
+
+      if (validationResult) {
+        Object.entries(validationResult).forEach(([path, error]) => {
+          const errorKey = path ? `${fieldId}.${path}` : fieldId;
+          newErrors[errorKey] = error;
+          newTouched[errorKey] = true;
+        });
+      }
+
+      return {
+        ...state,
+        touched: newTouched,
+        errors: newErrors,
+      };
+    }
+
+    case 'SET_ERROR': {
+      const { fieldId, error } = action;
+      const newErrors = { ...state.errors };
+      if (error) {
+        newErrors[fieldId] = error;
+      } else {
+        delete newErrors[fieldId];
+      }
+      return { ...state, errors: newErrors };
+    }
+
+    case 'SET_TOUCHED': {
+      const { fieldId, touched } = action;
+      return {
+        ...state,
+        touched: { ...state.touched, [fieldId]: touched },
+      };
+    }
+
+    case 'SET_ALL_TOUCHED': {
+      return {
+        ...state,
+        touched: action.touched,
+      };
+    }
+
+    case 'SUBMIT_ERRORS': {
+      const { errors, touched } = action;
+      return {
+        ...state,
+        errors,
+        touched,
+      };
+    }
+
+    case 'RESET': {
+      return {
+        values: action.initialValues,
+        errors: {},
+        touched: {},
+      };
+    }
+
+    default:
+      return state;
+  }
+};
+
+export const useFormState = <T>(fields: FieldDefinition[]) => {
+  const initialValues = useMemo(
+    () =>
+      fields.reduce((acc, field) => {
+        const key = field.id as keyof T;
+        (acc as T)[key] = (field.initialValue ?? field.value ?? '') as T[keyof T];
+        return acc;
+      }, {} as T),
+    [fields]
+  );
+
+  const [formState, dispatch] = useReducer(formReducer<T>, {
     values: initialValues,
     errors: {},
     touched: {},
   });
 
   const handleChange = useCallback((fieldId: string, value: unknown) => {
-    setFormState((prev: FormState<T>) => {
-      const isOptionPath = fieldId.includes('.');
-
-      let newValues: T;
-      if (isOptionPath) {
-        newValues = setOptionValue(prev.values, fieldId, value as PathValue<T, typeof fieldId>);
-      } else {
-        newValues = { ...prev.values, [fieldId]: value };
-      }
-
-      const newErrors = { ...prev.errors };
-      newErrors[fieldId] = '';
-
-      Object.keys(newErrors).forEach((errorKey) => {
-        if (errorKey.startsWith(fieldId + '.')) {
-          newErrors[errorKey] = '';
-        }
-      });
-
-      return {
-        ...prev,
-        values: newValues,
-        errors: newErrors,
-      };
-    });
+    dispatch({ type: 'CHANGE_FIELD', fieldId, value });
   }, []);
 
   const handleBlur = useCallback(
-    (fieldId: string) => {
+    (fieldId: string, value: unknown) => {
       const parentFieldId = fieldId.split('.')[0];
       const field = fields.find((f) => f.id === parentFieldId);
-
-      setFormState((prev: FormState<T>) => {
-        const newTouched = { ...prev.touched, [fieldId]: true };
-
-        if (!field) {
-          return {
-            ...prev,
-            touched: newTouched,
-          };
-        }
-
-        const fieldValue = fieldId.includes('.')
-          ? getOptionValue(prev.values, fieldId)
-          : prev.values[fieldId as unknown as keyof T];
-        const validationResult = field.validate(fieldValue);
-
-        const newErrors = { ...prev.errors };
-        if (validationResult) {
-          newErrors[fieldId] = validationResult;
-        } else {
-          delete newErrors[fieldId];
-        }
-
-        return {
-          ...prev,
-          touched: newTouched,
-          errors: newErrors,
-        };
-      });
+      dispatch({ type: 'BLUR_FIELD', fieldId, value, field });
     },
     [fields]
   );
 
   const setFieldError = useCallback((fieldId: string, error: string | string[] | undefined) => {
-    setFormState((prev: FormState<T>) => {
-      const newErrors = { ...prev.errors };
-      if (error) {
-        newErrors[fieldId] = error;
-      } else {
-        delete newErrors[fieldId];
-      }
-      return {
-        ...prev,
-        errors: newErrors,
-      };
-    });
+    dispatch({ type: 'SET_ERROR', fieldId, error });
   }, []);
 
   const setFieldTouched = useCallback((fieldId: string, touched: boolean = true) => {
-    setFormState((prev: FormState<T>) => ({
-      ...prev,
-      touched: { ...prev.touched, [fieldId]: touched },
-    }));
+    dispatch({ type: 'SET_TOUCHED', fieldId, touched });
   }, []);
 
   const getFieldValue = useCallback(
@@ -181,76 +237,66 @@ export const useFormState = <T>(fields: FieldDefinition[]) => {
   );
 
   const validateField = useCallback(
-    (
-      fieldId: string,
-      value: unknown,
-      fieldDefinitions: FieldDefinition[]
-    ): string | string[] | undefined => {
+    (fieldId: string, value: unknown, fieldDefinitions: FieldDefinition[]) => {
       const parentFieldId = fieldId.split('.')[0];
       const field = fieldDefinitions.find((f) => f.id === parentFieldId);
 
       if (field) {
-        return field.validate(value);
+        const validationResult = field.validate(value);
+        // Return only the root error (empty string key) if it exists
+        return validationResult?.[''];
       }
       return undefined;
     },
     []
   );
 
-  const handleSubmit = (onSuccess: ({ data }: { data: T }) => void) => {
-    return (e: React.FormEvent) => {
-      e.preventDefault();
+  const handleSubmit = useCallback(
+    (onSuccess: ({ data }: { data: T }) => void) => {
+      return (e: React.FormEvent) => {
+        e.preventDefault();
 
-      const allTouched = fields.reduce((acc, field) => {
-        acc[field.id] = true;
-        return acc;
-      }, {} as Record<string, boolean>);
+        const allTouched = fields.reduce((acc, field) => {
+          acc[field.id] = true;
+          return acc;
+        }, {} as Record<string, boolean>);
 
-      setFormState((prev: FormState<T>) => ({ ...prev, touched: allTouched }));
+        dispatch({ type: 'SET_ALL_TOUCHED', touched: allTouched });
 
-      const errors: Record<string, string | string[]> = {};
-      let hasErrors = false;
+        const errors: Record<string, string | string[]> = {};
+        let hasErrors = false;
 
-      const cleanedValues = {} as Partial<T>;
+        const cleanedValues = {} as Partial<T>;
 
-      fields.forEach((field) => {
-        const fieldKey = field.id as keyof T;
-        const value = formState.values[fieldKey];
-        cleanedValues[fieldKey] = value as T[keyof T];
+        fields.forEach((field) => {
+          const fieldKey = field.id as keyof T;
+          const value = formState.values[fieldKey];
+          cleanedValues[fieldKey] = value as T[keyof T];
 
-        if (field.validateOptions) {
-          const optionErrors = field.validateOptions(value);
-          if (optionErrors) {
-            Object.entries(optionErrors).forEach(([fieldPath, errorMessage]) => {
-              const optionFieldId = `${field.id}.${fieldPath}`;
-              errors[optionFieldId] = errorMessage;
-              allTouched[optionFieldId] = true;
+          const validationResult = field.validate(value);
+          if (validationResult) {
+            Object.entries(validationResult).forEach(([path, error]) => {
+              const errorKey = path ? `${field.id}.${path}` : field.id;
+              errors[errorKey] = error;
+              allTouched[errorKey] = true;
             });
             hasErrors = true;
           }
-        }
-        const validationResult = field.validate(value);
-        if (validationResult) {
-          errors[field.id] = validationResult;
-          hasErrors = true;
-        }
-      });
+        });
 
-      if (hasErrors) {
-        setFormState((prev: FormState<T>) => ({
-          ...prev,
-          errors,
-          touched: allTouched,
-        }));
-      } else {
-        onSuccess({ data: cleanedValues as T });
-      }
-    };
-  };
+        if (hasErrors) {
+          dispatch({ type: 'SUBMIT_ERRORS', errors, touched: allTouched });
+        } else {
+          onSuccess({ data: cleanedValues as T });
+        }
+      };
+    },
+    [fields, formState.values]
+  );
 
-  const reset = () => {
-    setFormState({ values: initialValues, errors: {}, touched: {} });
-  };
+  const reset = useCallback(() => {
+    dispatch({ type: 'RESET', initialValues });
+  }, [initialValues]);
 
   return {
     values: formState.values,

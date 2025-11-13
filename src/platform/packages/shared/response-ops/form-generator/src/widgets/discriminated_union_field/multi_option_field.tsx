@@ -148,7 +148,8 @@ export const MultiOptionUnionField: React.FC<DiscriminatedUnionWidgetProps> = ({
                   if (setFieldError) {
                     setFieldError(optionFieldId, fieldErrors);
                   }
-                  onBlur(fieldId);
+
+                  onBlur(optionFieldId, value);
                 };
 
                 return (

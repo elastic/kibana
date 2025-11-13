@@ -225,7 +225,7 @@ describe('DiscriminatedUnionField', () => {
     fireEvent.blur(usernameInput);
 
     await waitFor(() => {
-      expect(mockOnBlur).toHaveBeenCalledWith('auth');
+      expect(mockOnBlur).toHaveBeenCalledWith('auth.username', { type: 'basic', username: 'ab' });
     });
   });
 

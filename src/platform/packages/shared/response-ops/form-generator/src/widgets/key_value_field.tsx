@@ -176,8 +176,8 @@ export const KeyValueField: React.FC<KeyValueWidgetProps> = ({
   );
 
   const handleBlur = useCallback(() => {
-    onBlur(fieldId);
-  }, [fieldId, onBlur]);
+    onBlur(fieldId, value);
+  }, [fieldId, value, onBlur]);
 
   const hasAnyPairError = Object.keys(pairErrors).length > 0;
   const showError = isInvalid || hasAnyPairError;
