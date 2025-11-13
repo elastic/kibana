@@ -11,8 +11,8 @@ import { dashboardTools } from '../common';
 
 export const DASHBOARD_AGENT_ID = 'platform.dashboard.dashboard_agent';
 
-//@TODO: remove
-console.log(`--@@platformCoreTools`,platformCoreTools );
+// @TODO: remove
+console.log(`--@@platformCoreTools`, platformCoreTools);
 
 export function registerDashboardAgent(onechat: OnechatPluginSetup) {
   onechat.agents.register({
