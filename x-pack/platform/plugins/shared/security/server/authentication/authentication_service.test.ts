@@ -10,6 +10,7 @@ jest.mock('./authenticator');
 import { mockCanRedirectRequest } from './authentication_service.test.mocks';
 
 import { errors } from '@elastic/elasticsearch';
+import dedent from 'dedent';
 
 import type {
   AuthenticationHandler,
@@ -780,13 +781,22 @@ describe('AuthenticationService', () => {
         ).resolves.toBe(mockReturnedValue);
 
         expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
-          body: '',
-          statusCode: 302,
+          body: dedent`
+            <html>
+              <head>
+                <title>Elastic</title>
+              </head>
+              <body>
+                <h1>Unauthenticated</h1>
+                <a href="/mock-server-basepath/login?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2Fapp%2Fsome">Click here if you are not redirected automatically</a>
+              </body>
+            </html>
+          `,
           headers: {
             'Content-Security-Policy': CspConfig.DEFAULT.header,
             'Content-Security-Policy-Report-Only': CspConfig.DEFAULT.reportOnlyHeader,
-            location:
-              '/mock-server-basepath/login?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2Fapp%2Fsome',
+            Refresh:
+              '0;url=/mock-server-basepath/login?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2Fapp%2Fsome',
           },
         });
       });
@@ -807,13 +817,22 @@ describe('AuthenticationService', () => {
         ).resolves.toBe(mockReturnedValue);
 
         expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
-          body: '',
-          statusCode: 302,
+          body: dedent`
+            <html>
+              <head>
+                <title>Elastic</title>
+              </head>
+              <body>
+                <h1>Unauthenticated</h1>
+                <a href="/mock-server-basepath/logout?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2Fapp%2Fsome">Click here if you are not redirected automatically</a>
+              </body>
+            </html>
+          `,
           headers: {
             'Content-Security-Policy': CspConfig.DEFAULT.header,
             'Content-Security-Policy-Report-Only': CspConfig.DEFAULT.reportOnlyHeader,
-            location:
-              '/mock-server-basepath/logout?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2Fapp%2Fsome',
+            Refresh:
+              '0;url=/mock-server-basepath/logout?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2Fapp%2Fsome',
           },
         });
       });
@@ -836,13 +855,22 @@ describe('AuthenticationService', () => {
         ).resolves.toBe(mockReturnedValue);
 
         expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
-          body: '',
-          statusCode: 302,
+          body: dedent`
+            <html>
+              <head>
+                <title>Elastic</title>
+              </head>
+              <body>
+                <h1>Unauthenticated</h1>
+                <a href="/mock-server-basepath/login?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2F">Click here if you are not redirected automatically</a>
+              </body>
+            </html>
+          `,
           headers: {
             'Content-Security-Policy': CspConfig.DEFAULT.header,
             'Content-Security-Policy-Report-Only': CspConfig.DEFAULT.reportOnlyHeader,
-            location:
-              '/mock-server-basepath/login?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2F',
+            Refresh:
+              '0;url=/mock-server-basepath/login?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2F',
           },
         });
       });
@@ -884,13 +912,22 @@ describe('AuthenticationService', () => {
         ).resolves.toBe(mockReturnedValue);
 
         expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
-          body: '',
-          statusCode: 302,
+          body: dedent`
+            <html>
+              <head>
+                <title>Elastic</title>
+              </head>
+              <body>
+                <h1>Unauthenticated</h1>
+                <a href="/mock-server-basepath/login?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2Fapp%2Fsome">Click here if you are not redirected automatically</a>
+              </body>
+            </html>
+          `,
           headers: {
             'Content-Security-Policy': CspConfig.DEFAULT.header,
             'Content-Security-Policy-Report-Only': CspConfig.DEFAULT.reportOnlyHeader,
-            location:
-              '/mock-server-basepath/login?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2Fapp%2Fsome',
+            Refresh:
+              '0;url=/mock-server-basepath/login?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2Fapp%2Fsome',
           },
         });
       });
@@ -911,13 +948,22 @@ describe('AuthenticationService', () => {
         ).resolves.toBe(mockReturnedValue);
 
         expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
-          body: '',
-          statusCode: 302,
+          body: dedent`
+            <html>
+              <head>
+                <title>Elastic</title>
+              </head>
+              <body>
+                <h1>Unauthenticated</h1>
+                <a href="/mock-server-basepath/logout?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2Fapp%2Fsome">Click here if you are not redirected automatically</a>
+              </body>
+            </html>
+          `,
           headers: {
             'Content-Security-Policy': CspConfig.DEFAULT.header,
             'Content-Security-Policy-Report-Only': CspConfig.DEFAULT.reportOnlyHeader,
-            location:
-              '/mock-server-basepath/logout?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2Fapp%2Fsome',
+            Refresh:
+              '0;url=/mock-server-basepath/logout?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2Fapp%2Fsome',
           },
         });
       });
@@ -940,13 +986,22 @@ describe('AuthenticationService', () => {
         ).resolves.toBe(mockReturnedValue);
 
         expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
-          body: '',
-          statusCode: 302,
+          body: dedent`
+            <html>
+              <head>
+                <title>Elastic</title>
+              </head>
+              <body>
+                <h1>Unauthenticated</h1>
+                <a href="/mock-server-basepath/login?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2F">Click here if you are not redirected automatically</a>
+              </body>
+            </html>
+          `,
           headers: {
             'Content-Security-Policy': CspConfig.DEFAULT.header,
             'Content-Security-Policy-Report-Only': CspConfig.DEFAULT.reportOnlyHeader,
-            location:
-              '/mock-server-basepath/login?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2F',
+            Refresh:
+              '0;url=/mock-server-basepath/login?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2F',
           },
         });
       });
@@ -969,7 +1024,7 @@ describe('AuthenticationService', () => {
         );
       });
 
-      it('redirects to unauthenticated page if user does not have an active session', async () => {
+      it('renders unauthenticated page if user does not have an active session', async () => {
         const { authenticator, onPreResponseHandler } = getService();
         authenticator.getRequestOriginalURL.mockReturnValue('/mock-server-basepath/app/some');
         mockCanRedirectRequest.mockReturnValue(true);
@@ -982,18 +1037,27 @@ describe('AuthenticationService', () => {
         ).resolves.toBe(mockReturnedValue);
 
         expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
-          body: '',
-          statusCode: 302,
+          body: dedent`
+            <html>
+              <head>
+                <title>Elastic</title>
+              </head>
+              <body>
+                <h1>Unauthenticated</h1>
+                <a href="/mock-server-basepath/security/unauthenticated?next=%2Fmock-server-basepath%2Fapp%2Fsome">Click here if you are not redirected automatically</a>
+              </body>
+            </html>
+          `,
           headers: {
             'Content-Security-Policy': CspConfig.DEFAULT.header,
             'Content-Security-Policy-Report-Only': CspConfig.DEFAULT.reportOnlyHeader,
-            location:
-              '/mock-server-basepath/security/unauthenticated?next=%2Fmock-server-basepath%2Fapp%2Fsome',
+            Refresh:
+              '0;url=/mock-server-basepath/security/unauthenticated?next=%2Fmock-server-basepath%2Fapp%2Fsome',
           },
         });
       });
 
-      it('redirects to unauthenticated page if user has an active session', async () => {
+      it('renders unauthenticated page if user has an active session', async () => {
         mockStartAuthenticationParams.session.getSID.mockResolvedValue('some-sid');
 
         const { authenticator, onPreResponseHandler } = getService();
@@ -1009,13 +1073,22 @@ describe('AuthenticationService', () => {
         ).resolves.toBe(mockReturnedValue);
 
         expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
-          body: '',
-          statusCode: 302,
+          body: dedent`
+            <html>
+              <head>
+                <title>Elastic</title>
+              </head>
+              <body>
+                <h1>Unauthenticated</h1>
+                <a href="/mock-server-basepath/security/unauthenticated?next=%2Fmock-server-basepath%2Fapp%2Fsome">Click here if you are not redirected automatically</a>
+              </body>
+            </html>
+          `,
           headers: {
             'Content-Security-Policy': CspConfig.DEFAULT.header,
             'Content-Security-Policy-Report-Only': CspConfig.DEFAULT.reportOnlyHeader,
-            location:
-              '/mock-server-basepath/security/unauthenticated?next=%2Fmock-server-basepath%2Fapp%2Fsome',
+            Refresh:
+              '0;url=/mock-server-basepath/security/unauthenticated?next=%2Fmock-server-basepath%2Fapp%2Fsome',
           },
         });
       });
@@ -1038,13 +1111,22 @@ describe('AuthenticationService', () => {
         ).resolves.toBe(mockReturnedValue);
 
         expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
-          body: '',
-          statusCode: 302,
+          body: dedent`
+            <html>
+              <head>
+                <title>Elastic</title>
+              </head>
+              <body>
+                <h1>Unauthenticated</h1>
+                <a href="/mock-server-basepath/security/unauthenticated?next=%2Fmock-server-basepath%2F">Click here if you are not redirected automatically</a>
+              </body>
+            </html>
+          `,
           headers: {
             'Content-Security-Policy': CspConfig.DEFAULT.header,
             'Content-Security-Policy-Report-Only': CspConfig.DEFAULT.reportOnlyHeader,
-            location:
-              '/mock-server-basepath/security/unauthenticated?next=%2Fmock-server-basepath%2F',
+            Refresh:
+              '0;url=/mock-server-basepath/security/unauthenticated?next=%2Fmock-server-basepath%2F',
           },
         });
       });
@@ -1069,7 +1151,6 @@ describe('AuthenticationService', () => {
           loggingSystemMock.create().get(),
           { isTLSEnabled: false }
         );
-
         const { authenticator, onPreResponseHandler } = getService();
         authenticator.getRequestOriginalURL.mockReturnValue('/mock-server-basepath/app/some');
         mockCanRedirectRequest.mockReturnValue(true);
@@ -1087,13 +1168,22 @@ describe('AuthenticationService', () => {
         ).resolves.toBe(mockReturnedValue);
 
         expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
-          body: '',
-          statusCode: 302,
+          body: dedent`
+            <html>
+              <head>
+                <title>Elastic</title>
+              </head>
+              <body>
+                <h1>Unauthenticated</h1>
+                <a href="/mock-server-basepath/security/unauthenticated?next=%2Fmock-server-basepath%2F">Click here if you are not redirected automatically</a>
+              </body>
+            </html>
+          `,
           headers: {
             'Content-Security-Policy': CspConfig.DEFAULT.header,
             'Content-Security-Policy-Report-Only': CspConfig.DEFAULT.reportOnlyHeader,
-            location:
-              '/mock-server-basepath/security/unauthenticated?next=%2Fmock-server-basepath%2F',
+            Refresh:
+              '0;url=/mock-server-basepath/security/unauthenticated?next=%2Fmock-server-basepath%2F',
           },
         });
       });
@@ -1125,13 +1215,22 @@ describe('AuthenticationService', () => {
         ).resolves.toBe(mockReturnedValue);
 
         expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
-          body: '',
-          statusCode: 302,
+          body: dedent`
+            <html>
+              <head>
+                <title>Elastic</title>
+              </head>
+              <body>
+                <h1>Unauthenticated</h1>
+                <a href="/mock-server-basepath/login?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2F">Click here if you are not redirected automatically</a>
+              </body>
+            </html>
+          `,
           headers: {
             'Content-Security-Policy': CspConfig.DEFAULT.header,
             'Content-Security-Policy-Report-Only': CspConfig.DEFAULT.reportOnlyHeader,
-            location:
-              '/mock-server-basepath/login?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2F',
+            Refresh:
+              '0;url=/mock-server-basepath/login?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2F',
           },
         });
       });
@@ -1151,6 +1250,26 @@ describe('AuthenticationService', () => {
             mockOnPreResponseToolkit
           )
         ).resolves.toBe(mockReturnedValue);
+
+        expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
+          body: dedent`
+            <html>
+              <head>
+                <title>Elastic</title>
+              </head>
+              <body>
+                <h1>Unauthenticated</h1>
+                <a href="/mock-server-basepath/security/unauthenticated?next=%2Fmock-server-basepath%2F">Click here if you are not redirected automatically</a>
+              </body>
+            </html>
+          `,
+          headers: {
+            'Content-Security-Policy': CspConfig.DEFAULT.header,
+            'Content-Security-Policy-Report-Only': CspConfig.DEFAULT.reportOnlyHeader,
+            Refresh:
+              '0;url=/mock-server-basepath/security/unauthenticated?next=%2Fmock-server-basepath%2F',
+          },
+        });
       });
     });
   });

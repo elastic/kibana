@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import dedent from 'dedent';
 import type { Observable, Subscription } from 'rxjs';
 import { switchMap } from 'rxjs';
 
@@ -195,13 +196,23 @@ export class AuthorizationService {
             `/security/reset_session?next=${encodeURIComponent(next)}`
           );
 
+          const body = dedent`
+            <html>
+              <head>
+                <title>Elastic</title>
+              </head>
+              <body>
+                <h1>Unauthenticated</h1>
+                <a href="${location}">Click here if you are not redirected automatically</a>
+              </body>
+            </html>
+          `;
           return toolkit.render({
-            body: ``,
-            statusCode: 302,
+            body,
             headers: {
               'Content-Security-Policy': http.csp.header,
               'Content-Security-Policy-Report-Only': http.csp.reportOnlyHeader,
-              Location: location,
+              Refresh: `0;url=${location}`,
             },
           });
         }

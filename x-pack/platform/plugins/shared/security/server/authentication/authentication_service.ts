@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import dedent from 'dedent';
+
 import type { BuildFlavor } from '@kbn/config';
 import type {
   CustomBrandingSetup,
@@ -222,13 +224,23 @@ export class AuthenticationService {
         const location = http.basePath.prepend(
           `/security/unauthenticated?next=${encodeURIComponent(originalURL)}`
         );
+        const body = dedent`
+          <html>
+            <head>
+              <title>Elastic</title>
+            </head>
+            <body>
+              <h1>Unauthenticated</h1>
+              <a href="${location}">Click here if you are not redirected automatically</a>
+            </body>
+          </html>
+        `;
         return toolkit.render({
-          body: ``,
-          statusCode: 302,
+          body,
           headers: {
             'Content-Security-Policy': http.csp.header,
             'Content-Security-Policy-Report-Only': http.csp.reportOnlyHeader,
-            location,
+            Refresh: `0;url=${location}`,
           },
         });
       }
@@ -238,17 +250,26 @@ export class AuthenticationService {
         this.logger.warn('Could not authenticate user with the existing session. Forcing logout.');
       }
 
+      const location = http.basePath.prepend(
+        `${
+          needsToLogout ? '/logout' : '/login'
+        }?msg=UNAUTHENTICATED&${NEXT_URL_QUERY_STRING_PARAMETER}=${encodeURIComponent(originalURL)}`
+      );
+      const body = dedent`
+        <html>
+          <head>
+            <title>Elastic</title>
+          </head>
+          <body>
+            <h1>Unauthenticated</h1>
+            <a href="${location}">Click here if you are not redirected automatically</a>
+          </body>
+        </html>
+      `;
       return toolkit.render({
-        body: '',
-        statusCode: 302,
+        body,
         headers: {
-          location: http.basePath.prepend(
-            `${
-              needsToLogout ? '/logout' : '/login'
-            }?msg=UNAUTHENTICATED&${NEXT_URL_QUERY_STRING_PARAMETER}=${encodeURIComponent(
-              originalURL
-            )}`
-          ),
+          Refresh: `0;url=${location}`,
           'Content-Security-Policy': http.csp.header,
           'Content-Security-Policy-Report-Only': http.csp.reportOnlyHeader,
         },
