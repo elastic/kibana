@@ -31,7 +31,6 @@ export function transformControlGroupIn(controlGroupInput?: ControlsGroupState) 
       try {
         if (transforms?.transformIn) {
           const transformed = transforms.transformIn(controlState.config);
-          // console.log({ transformed });
           // prefix all the reference names with their IDs so that they are unique
           references = [
             ...references,

@@ -39,7 +39,6 @@ export function injectReferences(
   refName: string,
   references: Reference[] = []
 ): DataControlState {
-  console.log({ state });
   let { dataViewRefName } = state;
   if (!dataViewRefName && id) {
     // backwards compatibility for when we didn't store the ref name with the saved object (<v9.2.0)
