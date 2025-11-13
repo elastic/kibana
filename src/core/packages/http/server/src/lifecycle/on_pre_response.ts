@@ -24,7 +24,6 @@ export interface OnPreResponseResultRender {
   type: OnPreResponseResultType.render;
   body: string;
   headers?: ResponseHeaders;
-  statusCode?: number;
 }
 
 /**
@@ -49,8 +48,6 @@ export interface OnPreResponseRender {
   headers?: ResponseHeaders;
   /** the body to use in the response */
   body: string;
-  /** optional status code to override the response status */
-  statusCode?: number;
 }
 
 /**
