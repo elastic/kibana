@@ -44,7 +44,7 @@ const CreateAlertFlyout: React.FC<{
   onFinishAction: () => void;
   stateContainer: DiscoverStateContainer;
 }> = ({ stateContainer, discoverParams, services, onFinishAction }) => {
-  const query = stateContainer.appState.getState().query;
+  const query = stateContainer.appState.get().query;
 
   const {
     dataView,
@@ -68,7 +68,7 @@ const CreateAlertFlyout: React.FC<{
         timeField,
       };
     }
-    const savedQueryId = stateContainer.appState.getState().savedQuery;
+    const savedQueryId = stateContainer.appState.get().savedQuery;
     return {
       searchType: 'searchSource',
       searchConfiguration: stateContainer.savedSearchState
