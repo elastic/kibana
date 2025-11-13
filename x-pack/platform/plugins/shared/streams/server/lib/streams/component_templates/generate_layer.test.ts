@@ -12,6 +12,7 @@ describe('generateLayer', () => {
   const definition: Streams.WiredStream.Definition = {
     name: 'logs.abc',
     description: '',
+    updated_at: new Date().toISOString(),
     ingest: {
       processing: { steps: [] },
       wired: {

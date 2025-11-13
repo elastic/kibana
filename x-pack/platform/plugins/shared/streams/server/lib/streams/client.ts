@@ -144,7 +144,7 @@ export class StreamsClient {
         [
           {
             type: 'upsert',
-            definition: rootStreamDefinition,
+            definition: { ...rootStreamDefinition, updated_at: new Date().toISOString() },
           },
         ],
         {
@@ -260,7 +260,11 @@ export class StreamsClient {
     name: string;
     request: Streams.all.UpsertRequest;
   }): Promise<UpsertStreamResponse> {
-    const stream: Streams.all.Definition = { ...request.stream, name };
+    const stream: Streams.all.Definition = {
+      ...request.stream,
+      name,
+      updated_at: new Date().toISOString(),
+    };
 
     const result = await State.attemptChanges(
       [
@@ -287,7 +291,11 @@ export class StreamsClient {
     const result = await State.attemptChanges(
       streams.map(({ name, request }) => ({
         type: 'upsert',
-        definition: { ...request.stream, name } as Streams.all.Definition,
+        definition: {
+          ...request.stream,
+          name,
+          updated_at: new Date().toISOString(),
+        },
       })),
       {
         ...this.dependencies,
@@ -331,6 +339,7 @@ export class StreamsClient {
           type: 'upsert',
           definition: {
             ...parentDefinition,
+            updated_at: new Date().toISOString(),
             ingest: {
               ...parentDefinition.ingest,
               wired: {
@@ -349,6 +358,7 @@ export class StreamsClient {
           definition: {
             name,
             description: '',
+            updated_at: new Date().toISOString(),
             ingest: {
               lifecycle: { inherit: {} },
               processing: { steps: [] },
@@ -582,6 +592,7 @@ export class StreamsClient {
     const definition: Streams.ClassicStream.Definition = {
       name: dataStream.name,
       description: '',
+      updated_at: new Date().toISOString(),
       ingest: {
         lifecycle: { inherit: {} },
         processing: { steps: [] },
@@ -668,6 +679,7 @@ export class StreamsClient {
     return response.data_streams.map((dataStream) => ({
       name: dataStream.name,
       description: '',
+      updated_at: new Date().toISOString(),
       ingest: {
         lifecycle: { inherit: {} },
         processing: { steps: [] },

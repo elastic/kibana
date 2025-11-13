@@ -78,7 +78,7 @@ async function updateWiredIngest({
     throw badData(`Can't update wired capabilities of a non-wired stream`);
   }
 
-  const { name: _name, ...stream } = definition;
+  const { name: _name, updated_at: _updatedAt, ...stream } = definition;
 
   const upsertRequest: Streams.WiredStream.UpsertRequest = {
     dashboards,
@@ -121,7 +121,7 @@ async function updateClassicIngest({
     throw badData(`Can't update classic capabilities of a non-classic stream`);
   }
 
-  const { name: _name, ...stream } = definition;
+  const { name: _name, updated_at: _updatedAt, ...stream } = definition;
 
   const upsertRequest: Streams.ClassicStream.UpsertRequest = {
     dashboards,

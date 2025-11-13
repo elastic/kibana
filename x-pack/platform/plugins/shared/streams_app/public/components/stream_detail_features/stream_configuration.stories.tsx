@@ -22,6 +22,7 @@ export const StreamConfigurationStory: StoryFn<{}> = () => {
       definition={{
         name: 'synthetics-http-default',
         description: '',
+        updated_at: new Date().toISOString(),
         ingest: {
           settings: {},
           lifecycle: { inherit: {} },

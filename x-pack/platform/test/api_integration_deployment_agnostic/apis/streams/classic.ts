@@ -50,9 +50,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         const classicStream = streams.find((stream) => stream.name === TEST_STREAM_NAME);
 
+        expect(classicStream).not.to.be(undefined);
         expect(classicStream).to.eql({
           name: TEST_STREAM_NAME,
           description: '',
+          updated_at: classicStream!.updated_at,
           ingest: {
             lifecycle: { inherit: {} },
             settings: {},
@@ -123,6 +125,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(stream).to.eql({
           name: TEST_STREAM_NAME,
           description: '',
+          updated_at: stream.updated_at,
           ingest: {
             lifecycle: { inherit: {} },
             settings: {},

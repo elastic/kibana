@@ -56,10 +56,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       expect(status).to.eql(200);
-
+      expect(stream).not.to.be(undefined);
       expect(stream).to.eql({
         name: TEST_STREAM_NAME,
         description: '',
+        updated_at: stream!.updated_at,
         ingest: {
           lifecycle: { inherit: {} },
           settings: {},

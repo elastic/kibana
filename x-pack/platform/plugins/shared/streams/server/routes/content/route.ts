@@ -118,7 +118,7 @@ function asContentPackEntry({
     type: 'stream' as const,
     name: stream.name,
     request: {
-      stream: { ...omit(stream, ['name']) },
+      stream: { ...omit(stream, ['name', 'updated_at']) },
       ...emptyAssets,
       queries: queryLinks.map(({ query }) => query),
     },

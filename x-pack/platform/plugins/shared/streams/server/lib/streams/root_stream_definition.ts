@@ -14,6 +14,7 @@ export const LOGS_ROOT_STREAM_NAME = 'logs';
 export const rootStreamDefinition: Streams.WiredStream.Definition = {
   name: LOGS_ROOT_STREAM_NAME,
   description: 'Root stream',
+  updated_at: new Date(0).toISOString(),
   ingest: {
     lifecycle: { dsl: {} },
     failure_store: {
