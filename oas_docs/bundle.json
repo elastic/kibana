@@ -7913,6 +7913,23 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "validate_alerts_existence": {
+                    "default": true,
+                    "description": "Whether to validate the existence of the alert.",
+                    "type": "boolean"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
         "responses": {
           "204": {
             "description": "Indicates a successful call."
