@@ -257,6 +257,8 @@
     "@kbn/connector-specs": "link:src/platform/packages/shared/kbn-connector-specs",
     "@kbn/console-plugin": "link:src/platform/plugins/shared/console",
     "@kbn/content-connectors-plugin": "link:x-pack/platform/plugins/shared/content_connectors",
+    "@kbn/content-management-access-control-public": "link:src/platform/packages/shared/content-management/access_control/access_control_public",
+    "@kbn/content-management-access-control-server": "link:src/platform/packages/shared/content-management/access_control/access_control_server",
     "@kbn/content-management-content-editor": "link:src/platform/packages/shared/content-management/content_editor",
     "@kbn/content-management-content-insights-public": "link:src/platform/packages/shared/content-management/content_insights/content_insights_public",
     "@kbn/content-management-content-insights-server": "link:src/platform/packages/shared/content-management/content_insights/content_insights_server",

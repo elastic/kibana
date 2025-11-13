@@ -11,6 +11,7 @@ import { LRUCache } from 'lru-cache';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import type { DeleteResult } from '@kbn/content-management-plugin/common';
 import type { Reference } from '@kbn/content-management-utils';
+import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import type { DashboardSearchRequestBody, DashboardSearchResponseBody } from '../../server';
 import { CONTENT_ID, DASHBOARD_API_VERSION } from '../../common/content_management/constants';
 import type {
@@ -31,13 +32,22 @@ const cache = new LRUCache<string, DashboardAPIGetOut>({
 });
 
 export const dashboardClient = {
-  create: async (dashboardState: DashboardState, references: Reference[]) => {
+  create: async (
+    dashboardState: DashboardState,
+    references: Reference[],
+    accessMode?: SavedObjectAccessControl['accessMode']
+  ) => {
     return coreServices.http.post<DashboardAPIGetOut>(`/api/dashboards/dashboard`, {
       version: DASHBOARD_API_VERSION,
       body: JSON.stringify({
         data: {
           ...dashboardState,
           references,
+          accessControl: accessMode
+            ? {
+                accessMode,
+              }
+            : undefined,
         },
       }),
     });

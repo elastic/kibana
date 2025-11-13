@@ -3,7 +3,13 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["*.ts", ".storybook/**/*.ts", "common/**/*", "public/**/*", "server/**/*"],
+  "include": [
+    "*.ts",
+    ".storybook/**/*.ts",
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+  ],
   "kbn_references": [
     "@kbn/core",
     "@kbn/inspector-plugin",
@@ -91,6 +97,10 @@
     "@kbn/controls-schemas",
     "@kbn/controls-constants",
     "@kbn/presentation-util",
+    "@kbn/security-plugin-types-server",
+    "@kbn/core-saved-objects-common",
+    "@kbn/content-management-access-control-public",
+    "@kbn/content-management-access-control-server",
     "@kbn/react-query",
     "@kbn/core-http-server",
     "@kbn/core-chrome-layout-utils"

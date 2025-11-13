@@ -44,7 +44,6 @@ describe('<ContentEditorFlyoutContent />', () => {
       item: savedObjectItem,
       entityName: 'foo',
       services: mockedServices,
-      onCancel: jest.fn(),
     };
 
     const setup = registerTestBed<string, ContentEditorFlyoutContentProps>(

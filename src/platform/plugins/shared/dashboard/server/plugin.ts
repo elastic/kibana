@@ -32,6 +32,8 @@ import type {
 import { registerContentInsights } from '@kbn/content-management-content-insights-server';
 
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
+import { registerAccessControl } from '@kbn/content-management-access-control-server';
 import { tagSavedObjectTypeName } from '@kbn/saved-objects-tagging-plugin/common';
 import {
   initializeDashboardTelemetryTask,
@@ -69,6 +71,7 @@ export interface StartDeps {
   usageCollection?: UsageCollectionStart;
   savedObjectsTagging?: SavedObjectTaggingStart;
   share?: SharePluginStart;
+  security?: SecurityPluginStart;
 }
 
 export class DashboardPlugin
@@ -96,6 +99,7 @@ export class DashboardPlugin
       storage: new DashboardStorage({
         throwOnResultValidationError: this.initializerContext.env.mode.dev,
         logger: this.logger.get('storage'),
+        isAccessControlEnabled: core.savedObjects.isAccessControlEnabled(),
       }),
       version: {
         latest: LATEST_VERSION,
@@ -145,6 +149,15 @@ export class DashboardPlugin
       http: core.http,
       contentManagement: plugins.contentManagement,
       logger: this.logger,
+    });
+
+    void registerAccessControl({
+      http: core.http,
+      isAccessControlEnabled: core.savedObjects.isAccessControlEnabled(),
+      getStartServices: () =>
+        core.getStartServices().then(([_, { security }]) => ({
+          security,
+        })),
     });
 
     return {};
