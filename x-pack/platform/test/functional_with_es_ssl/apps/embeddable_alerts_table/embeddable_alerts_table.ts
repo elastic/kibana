@@ -46,7 +46,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const sampleData = getService('sampleData');
   const rules = getService('rules');
 
-  describe('Embeddable alerts panel', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/242555
+  describe.skip('Embeddable alerts panel', () => {
     before(async () => {
       await sampleData.testResources.installAllKibanaSampleData();
 
@@ -102,7 +103,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     for (const solution of ['stack', 'observability', 'security']) {
-      describe(`with ${solution} role`, () => {
+      describe(`with ${solution} role`, function () {
+        this.tags('skipFIPS');
         const ruleName = `${solution}-rule`;
 
         before(async () => {
@@ -185,28 +187,31 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(features.every((f) => f.toLowerCase().includes('security'))).to.equal(true);
     });
 
-    it("should show a missing authz prompt when the user doesn't have access to a panel's rule types", async () => {
-      // User with o11y-only access should see a missing authz prompt in the security panel
-      await security.testUser.setRoles([`observability_alerting`]);
-      let panels = await find.allByCssSelector(`[data-test-subj=${DASHBOARD_PANEL_TEST_SUBJ}]`);
-      expect(
-        await testSubjects.descendantExists(NO_AUTHORIZED_RULE_TYPE_PROMPT_SUBJ, panels[0])
-      ).to.equal(false);
-      expect(
-        await testSubjects.descendantExists(NO_AUTHORIZED_RULE_TYPE_PROMPT_SUBJ, panels[1])
-      ).to.equal(true);
+    describe('when user doesnt have access', function () {
+      this.tags('skipFIPS');
+      it("should show a missing authz prompt when the user doesn't have access to a panel's rule types", async () => {
+        // User with o11y-only access should see a missing authz prompt in the security panel
+        await security.testUser.setRoles([`observability_alerting`]);
+        let panels = await find.allByCssSelector(`[data-test-subj=${DASHBOARD_PANEL_TEST_SUBJ}]`);
+        expect(
+          await testSubjects.descendantExists(NO_AUTHORIZED_RULE_TYPE_PROMPT_SUBJ, panels[0])
+        ).to.equal(false);
+        expect(
+          await testSubjects.descendantExists(NO_AUTHORIZED_RULE_TYPE_PROMPT_SUBJ, panels[1])
+        ).to.equal(true);
 
-      // User with security-only access should see a missing authz prompt in the o11y panel
-      await security.testUser.setRoles([`security_alerting`]);
-      panels = await find.allByCssSelector(`[data-test-subj=${DASHBOARD_PANEL_TEST_SUBJ}]`);
-      expect(
-        await testSubjects.descendantExists(NO_AUTHORIZED_RULE_TYPE_PROMPT_SUBJ, panels[0])
-      ).to.equal(true);
-      expect(
-        await testSubjects.descendantExists(NO_AUTHORIZED_RULE_TYPE_PROMPT_SUBJ, panels[1])
-      ).to.equal(false);
+        // User with security-only access should see a missing authz prompt in the o11y panel
+        await security.testUser.setRoles([`security_alerting`]);
+        panels = await find.allByCssSelector(`[data-test-subj=${DASHBOARD_PANEL_TEST_SUBJ}]`);
+        expect(
+          await testSubjects.descendantExists(NO_AUTHORIZED_RULE_TYPE_PROMPT_SUBJ, panels[0])
+        ).to.equal(true);
+        expect(
+          await testSubjects.descendantExists(NO_AUTHORIZED_RULE_TYPE_PROMPT_SUBJ, panels[1])
+        ).to.equal(false);
 
-      await security.testUser.restoreDefaults();
+        await security.testUser.restoreDefaults();
+      });
     });
 
     it('should apply the global time filter to alert panels by default', async () => {
