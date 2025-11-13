@@ -24,10 +24,9 @@ import { OnboardingFlow } from '../../shared/templates/no_data_config';
 import { HostHeaderTitle } from '../header/host_header_title';
 
 export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
-  const { loading } = useAssetDetailsRenderPropsContext();
   const { metadata, loading: metadataLoading } = useMetadataStateContext();
   const { rightSideItems, tabEntries, breadcrumbs: headerBreadcrumbs } = usePageHeader(tabs, links);
-  const { entity, schema } = useAssetDetailsRenderPropsContext();
+  const { entity, loading, schema } = useAssetDetailsRenderPropsContext();
   const trackOnlyOnce = React.useRef(false);
   const { activeTabId } = useTabSwitcherContext();
   const {
