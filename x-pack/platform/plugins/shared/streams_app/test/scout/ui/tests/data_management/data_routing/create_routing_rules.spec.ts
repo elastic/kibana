@@ -9,12 +9,12 @@ import { expect } from '@kbn/scout';
 import { test } from '../../../fixtures';
 
 test.describe('Stream data routing - creating routing rules', { tag: ['@ess', '@svlOblt'] }, () => {
-  test.beforeEach(async ({ browserAuth, pageObjects }) => {
+  test.beforeEach(async ({ browserAuth, pageObjects, apiServices }) => {
     await browserAuth.loginAsAdmin();
     await pageObjects.streams.gotoPartitioningTab('logs');
   });
 
-  test.afterAll(async ({ apiServices }) => {
+  test.afterEach(async ({ apiServices }) => {
     // Clear existing rules
     await apiServices.streams.clearStreamChildren('logs');
   });
@@ -38,11 +38,12 @@ test.describe('Stream data routing - creating routing rules', { tag: ['@ess', '@
     });
 
     // Save the rule (fork stream)
-    await page.getByRole('button', { name: 'Save' }).click();
+    await pageObjects.streams.saveRoutingRule();
 
     // Verify success
     const rountingRuleName = 'logs.nginx';
     const routingRuleLocator = page.testSubj.locator(`streamDetailRoutingItem-${rountingRuleName}`);
+    await expect(page.testSubj.locator('streamsAppStreamDetailRoutingSaveButton')).toBeHidden();
     await pageObjects.streams.expectRoutingRuleVisible(rountingRuleName);
     await expect(routingRuleLocator).toBeVisible();
     await expect(routingRuleLocator.locator('[title="service.name"]')).toBeVisible();

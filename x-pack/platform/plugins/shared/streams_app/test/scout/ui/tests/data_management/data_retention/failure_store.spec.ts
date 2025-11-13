@@ -39,7 +39,8 @@ test.describe(
       });
     });
 
-    test.afterAll(async ({ logsSynthtraceEsClient }) => {
+    test.afterAll(async ({ logsSynthtraceEsClient, apiServices }) => {
+      await apiServices.streams.clearStreamChildren('logs');
       await logsSynthtraceEsClient.clean();
     });
 
