@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export const ENRICHMENT_URL_STATE_KEY = 'pageState';
+import { MetadataFieldNames } from './metadata_fields';
 
-export const CUSTOM_SAMPLES_DATA_SOURCE_STORAGE_KEY_PREFIX = 'streams:custom-samples__';
+export function isMetadataField(fieldName: string) {
+  return MetadataFieldNames.includes(fieldName);
+}
