@@ -93,7 +93,8 @@ export const getControlGroupEmbeddableFactory = () => {
               editorStateManager.api.ignoreParentSettings$,
               parentApi ? parentApi : {},
               onReload
-            )
+            ),
+            esqlVariables$
           ),
         ignoreParentSettings$: editorStateManager.api.ignoreParentSettings$,
         autoApplySelections$: editorStateManager.api.autoApplySelections$,

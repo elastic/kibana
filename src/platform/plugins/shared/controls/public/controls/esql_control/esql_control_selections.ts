@@ -8,11 +8,11 @@
  */
 import deepEqual from 'react-fast-compare';
 import { BehaviorSubject, combineLatest, debounceTime, filter, map, merge, switchMap } from 'rxjs';
-import { ESQLVariableType } from '@kbn/esql-types';
+import { ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
 import type { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { ESQLControlVariable, ESQLControlState } from '@kbn/esql-types';
-import { EsqlControlType } from '@kbn/esql-types';
+import { getESQLQueryVariables } from '@kbn/esql-utils';
 import type {
   OptionsListSearchTechnique,
   OptionsListSelection,
@@ -93,16 +93,61 @@ export function initializeESQLControlSelections(
     }
   }
 
+  function haveDependenciesChanged(
+    currentVariables: ESQLControlVariable[],
+    previousVariables: ESQLControlVariable[],
+    queryDependencies: string[]
+  ): boolean {
+    if (queryDependencies.length === 0) return false;
+
+    for (const depName of queryDependencies) {
+      const currentVar = currentVariables.find((v) => v.key === depName);
+      const previousVar = previousVariables.find((v) => v.key === depName);
+
+      if (!deepEqual(currentVar?.value, previousVar?.value)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   // For Values From Query controls, update values on dashboard load/reload
+  // or when dependencies change in case of chaining controls
+  let previousESQLVariables: ESQLControlVariable[] = [];
   const fetchSubscription = controlFetch$
     .pipe(
       filter(() => controlType$.getValue() === EsqlControlType.VALUES_FROM_QUERY),
-      switchMap(async ({ timeRange }) => {
+      filter(({ esqlVariables }) => {
+        // Only proceed if this is the initial fetch or if dependencies have actually changed
+        const variablesInParent = esqlVariables || [];
+
+        const queryDependencies = getESQLQueryVariables(esqlQuery$.getValue());
+
+        // Filter out this control's own variable
+        const currentVariableName = variableName$.getValue();
+        const externalVariables = variablesInParent.filter(
+          (variable) => variable.key !== currentVariableName
+        );
+
+        const shouldFetch =
+          previousESQLVariables.length === 0 ||
+          haveDependenciesChanged(externalVariables, previousESQLVariables, queryDependencies);
+
+        if (shouldFetch) {
+          previousESQLVariables = [...externalVariables];
+        }
+
+        return shouldFetch;
+      }),
+      switchMap(async ({ timeRange, esqlVariables }) => {
         setDataLoading(true);
+        const variablesInParent = esqlVariables || [];
+
         return await getESQLSingleColumnValues({
           query: esqlQuery$.getValue(),
           search: dataService.search.search,
           timeRange,
+          esqlVariables: variablesInParent,
         });
       })
     )

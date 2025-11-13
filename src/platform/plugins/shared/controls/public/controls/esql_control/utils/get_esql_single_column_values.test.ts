@@ -34,6 +34,7 @@ describe('getESQLSingleColumnValues', () => {
     const result = (await getESQLSingleColumnValues({
       query: 'FROM index | STATS BY column',
       search: searchMock,
+      esqlVariables: [],
     })) as GetESQLSingleColumnValuesSuccess;
     expect(getESQLSingleColumnValues.isSuccess(result)).toBe(true);
     expect(result).toMatchInlineSnapshot(`
@@ -55,6 +56,7 @@ describe('getESQLSingleColumnValues', () => {
     const result = (await getESQLSingleColumnValues({
       query: 'FROM index',
       search: searchMock,
+      esqlVariables: [],
     })) as GetESQLSingleColumnValuesFailure;
     expect(getESQLSingleColumnValues.isSuccess(result)).toBe(false);
     expect('values' in result).toBe(false);
@@ -71,6 +73,7 @@ describe('getESQLSingleColumnValues', () => {
     const result = (await getESQLSingleColumnValues({
       query: 'FROM index | EVAL',
       search: searchMock,
+      esqlVariables: [],
     })) as GetESQLSingleColumnValuesFailure;
     expect(getESQLSingleColumnValues.isSuccess(result)).toBe(false);
     expect('values' in result).toBe(false);
@@ -89,6 +92,7 @@ describe('getESQLSingleColumnValues', () => {
       query: 'FROM index | STATS BY column',
       search: searchMock,
       timeRange,
+      esqlVariables: [],
     });
     expect(mockGetESQLResults).toHaveBeenCalledWith(
       expect.objectContaining({
