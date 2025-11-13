@@ -15,6 +15,7 @@ import {
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
+import type { AggregatedGapStatus } from '@kbn/alerting-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { aggregatedGapStatus } from '@kbn/alerting-plugin/common';
 import moment from 'moment';
@@ -499,41 +500,45 @@ export const useGapStatusColumn = (): TableColumn => {
               total_unfilled_duration_ms: number;
               total_in_progress_duration_ms: number;
               total_filled_duration_ms: number;
-              status: string;
+              status?: AggregatedGapStatus;
             }
           | undefined
       ) => {
-        if (!gapInfo) return getEmptyTagValue();
+        const status = gapInfo?.status;
+        if (!gapInfo || !status) return getEmptyTagValue();
 
-        const status: string | undefined = gapInfo.status;
         const totalInProgressDurationMs = gapInfo.total_in_progress_duration_ms;
         const totalUnfilledDurationMs = gapInfo.total_unfilled_duration_ms;
         const totalFilledDurationMs = gapInfo.total_filled_duration_ms;
-
-        const getGapStatusMeta = (s: string): { color: string; label: string } => {
-          if (s === aggregatedGapStatus.IN_PROGRESS) {
-            return {
-              color: euiTheme.colors.backgroundBaseWarning,
-              label: GAP_STATUS_IN_PROGRESS_LABEL,
-            };
-          }
-          if (s === aggregatedGapStatus.UNFILLED) {
-            return {
-              color: euiTheme.colors.backgroundBaseDanger,
-              label: GAP_STATUS_UNFILLED_LABEL,
-            };
-          }
-          return {
-            color: euiTheme.colors.backgroundBaseSuccess,
-            label: GAP_STATUS_FILLED_LABEL,
-          };
-        };
 
         const formatDurationHumanized = (duration: number) => {
           return duration === 0 ? '0ms' : moment.duration(duration, 'ms').humanize();
         };
 
-        const { color, label } = getGapStatusMeta(status);
+        let color;
+        let label;
+
+        const byStatus: Record<AggregatedGapStatus, { color: string; label: string }> = {
+          [aggregatedGapStatus.IN_PROGRESS]: {
+            color: euiTheme.colors.backgroundBaseWarning,
+            label: GAP_STATUS_IN_PROGRESS_LABEL,
+          },
+          [aggregatedGapStatus.UNFILLED]: {
+            color: euiTheme.colors.backgroundBaseDanger,
+            label: GAP_STATUS_UNFILLED_LABEL,
+          },
+          [aggregatedGapStatus.FILLED]: {
+            color: euiTheme.colors.backgroundBaseSuccess,
+            label: GAP_STATUS_FILLED_LABEL,
+          },
+        };
+
+        const match = byStatus[status];
+
+        if (match) {
+          color = match.color;
+          label = match.label;
+        }
 
         const tooltip = (
           <div>

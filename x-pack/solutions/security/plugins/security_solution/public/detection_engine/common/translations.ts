@@ -970,6 +970,34 @@ export const RULE_EXECUTION_STATUS_FILTER = i18n.translate(
   }
 );
 
+export const GAP_STATUS_FILTER_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.filters.gapStatus.label',
+  {
+    defaultMessage: 'Gap status',
+  }
+);
+
+export const GAP_STATUS_IN_PROGRESS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.filters.gapStatus.inProgress',
+  {
+    defaultMessage: 'In progress',
+  }
+);
+
+export const GAP_STATUS_UNFILLED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.filters.gapStatus.unfilled',
+  {
+    defaultMessage: 'Unfilled',
+  }
+);
+
+export const GAP_STATUS_FILLED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.filters.gapStatus.filled',
+  {
+    defaultMessage: 'Filled',
+  }
+);
+
 export const SOLVABLE_CONFLICT_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.upgradeRules.solvableConflictLabel',
   {

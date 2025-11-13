@@ -8,6 +8,7 @@
 import { EuiFilterButton, EuiFilterGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEqual } from 'lodash/fp';
 import React, { useCallback } from 'react';
+import type { AggregatedGapStatus } from '@kbn/alerting-plugin/common';
 import styled from 'styled-components';
 import { useRuleManagementFilters } from '../../../../rule_management/logic/use_rule_management_filters';
 import { RULES_TABLE_ACTIONS } from '../../../../../common/lib/apm/user_actions';
@@ -18,7 +19,6 @@ import { TagsFilterPopover } from './tags_filter_popover';
 import { RuleExecutionStatusSelector } from './rule_execution_status_selector';
 import { RuleSearchField } from './rule_search_field';
 import type { RuleExecutionStatus } from '../../../../../../common/api/detection_engine';
-import type { AllRulesTabs } from '../rules_table_toolbar';
 import { GapStatusSelector } from './gap_status_selector';
 
 const FilterWrapper = styled(EuiFlexGroup)`
@@ -29,14 +29,7 @@ const FilterWrapper = styled(EuiFlexGroup)`
  * Collection of filters for filtering data within the RulesTable. Contains search bar, Elastic/Custom
  * Rules filter button toggle, and tag selection
  */
-interface RulesTableFiltersProps {
-  selectedTab?: AllRulesTabs;
-}
-
-// Local UI type for aggregated gap status values
-type AggregatedGapStatus = 'unfilled' | 'in_progress' | 'filled';
-
-const RulesTableFiltersComponent = ({ selectedTab }: RulesTableFiltersProps) => {
+const RulesTableFiltersComponent = () => {
   const { startTransaction } = useStartTransaction();
   const {
     state: { filterOptions },

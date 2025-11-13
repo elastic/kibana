@@ -9,9 +9,14 @@ import React, { useMemo, useState } from 'react';
 import type { EuiSelectableOption } from '@elastic/eui';
 import { EuiFilterButton, EuiPopover, EuiSelectable } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
 import type { AggregatedGapStatus } from '@kbn/alerting-plugin/common';
 import { aggregatedGapStatus } from '@kbn/alerting-plugin/common';
+import {
+  GAP_STATUS_FILTER_LABEL,
+  GAP_STATUS_FILLED,
+  GAP_STATUS_IN_PROGRESS,
+  GAP_STATUS_UNFILLED,
+} from '../../../../common/translations';
 
 interface GapStatusSelectorProps {
   selectedStatus?: AggregatedGapStatus;
@@ -27,26 +32,17 @@ export const GapStatusSelector = ({
   const options: EuiSelectableOption[] = useMemo(
     () => [
       {
-        label: i18n.translate(
-          'xpack.securitySolution.detectionEngine.rules.filters.gapStatus.inProgress',
-          { defaultMessage: 'In progress' }
-        ),
+        label: GAP_STATUS_IN_PROGRESS,
         data: { status: aggregatedGapStatus.IN_PROGRESS as AggregatedGapStatus },
         checked: selectedStatus === aggregatedGapStatus.IN_PROGRESS ? 'on' : undefined,
       },
       {
-        label: i18n.translate(
-          'xpack.securitySolution.detectionEngine.rules.filters.gapStatus.unfilled',
-          { defaultMessage: 'Unfilled' }
-        ),
+        label: GAP_STATUS_UNFILLED,
         data: { status: aggregatedGapStatus.UNFILLED as AggregatedGapStatus },
         checked: selectedStatus === aggregatedGapStatus.UNFILLED ? 'on' : undefined,
       },
       {
-        label: i18n.translate(
-          'xpack.securitySolution.detectionEngine.rules.filters.gapStatus.filled',
-          { defaultMessage: 'Filled' }
-        ),
+        label: GAP_STATUS_FILLED,
         data: { status: aggregatedGapStatus.FILLED as AggregatedGapStatus },
         checked: selectedStatus === aggregatedGapStatus.FILLED ? 'on' : undefined,
       },
@@ -79,9 +75,7 @@ export const GapStatusSelector = ({
       numActiveFilters={selectedStatus !== undefined ? 1 : 0}
       data-test-subj="gapStatusFilterButton"
     >
-      {i18n.translate('xpack.securitySolution.detectionEngine.rules.filters.gapStatus.label', {
-        defaultMessage: 'Gap status',
-      })}
+      {GAP_STATUS_FILTER_LABEL}
     </EuiFilterButton>
   );
 
@@ -95,12 +89,7 @@ export const GapStatusSelector = ({
       repositionOnScroll
     >
       <EuiSelectable
-        aria-label={i18n.translate(
-          'xpack.securitySolution.detectionEngine.rules.filters.gapStatus.label',
-          {
-            defaultMessage: 'Gap status',
-          }
-        )}
+        aria-label={GAP_STATUS_FILTER_LABEL}
         options={options}
         onChange={onChange}
         singleSelection

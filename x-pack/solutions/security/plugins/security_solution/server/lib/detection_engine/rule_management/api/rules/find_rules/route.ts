@@ -60,7 +60,7 @@ export const findRulesRoute = (router: SecuritySolutionPluginRouter, logger: Log
               end: query.gaps_range_end,
             });
             ruleIds = ruleIdsWithGaps.ruleIds;
-            if ((ruleIds?.length ?? 0) === 0) {
+            if (ruleIds.length === 0) {
               const emptyRules = transformFindAlerts({
                 data: [],
                 page: query.page,

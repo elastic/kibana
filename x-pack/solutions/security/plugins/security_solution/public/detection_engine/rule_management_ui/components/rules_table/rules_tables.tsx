@@ -369,7 +369,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
               <EuiSpacer />
             </>
           )}
-          <RulesTableFilters selectedTab={selectedTab} />
+          <RulesTableFilters />
           <RulesTableUtilityBar
             canBulkEdit={hasPermissions}
             onGetBulkItemsPopoverContent={getBulkItemsPopoverContent}
