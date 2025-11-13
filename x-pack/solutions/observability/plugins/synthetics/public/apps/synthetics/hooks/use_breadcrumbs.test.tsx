@@ -63,7 +63,6 @@ describe('useBreadcrumbs', () => {
               isInfraAvailable: false,
               isLogsAvailable: false,
               canManagePrivateLocations: false,
-              featureFlags: {},
             }}
           >
             <Component />
