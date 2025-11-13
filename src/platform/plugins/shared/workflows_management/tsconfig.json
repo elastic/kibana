@@ -68,7 +68,9 @@
     "@kbn/core-http-server",
     "@kbn/test-jest-helpers",
     "@kbn/es-errors",
-    "@kbn/core-http-server-mocks"
+    "@kbn/core-http-server-mocks",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/safer-lodash-set"
   ],
   "exclude": ["target/**/*"]
 }
