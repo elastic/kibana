@@ -39,70 +39,29 @@ export const slackDigestTool = (): BuiltinToolDefinition<typeof slackDigestSchem
     type: ToolType.builtin,
     description: `Fetches messages and threads from Slack since a given timestamp.
 
-**IMPORTANT:** This tool requires a Slack Web API connector with a User Token (NOT bot tokens or webhooks).
-- Slack Webhook connectors (".slack") can only send messages, not read them
-- Slack Web API connectors (".slack_api") with Bot Tokens require the bot to be invited to each channel
-- Slack Web API connectors (".slack_api") with User Tokens can read from channels the user is already a member of (no invites needed)
+**Response Data:**
+- userMentionMessages: Messages where you are mentioned (HIGH PRIORITY) - each message has a permalink field
+- channelMessages: Regular channel messages - each message has a permalink field
+- dmMessages: Direct messages (only if includeDMs=true) - each message has a permalink field
 
-**Automatic Connector Discovery:**
-This tool automatically searches for a Slack Web API connector with a name containing "UserToken" or "user token" (e.g., "Slack UserToken Connector").
+**Message Structure:**
+Each message object contains: channel, text, user_name, timestamp, thread_replies_count, permalink, and thread_replies array.
 
-**Required Scopes:**
-The User Token connector must have these scopes:
-- channels:read, channels:history (for public channels the user is a member of)
-- groups:read, groups:history (for private channels the user is a member of)
-- im:read, im:history (for direct messages)
-- users:read (for user information)
-- search:read (REQUIRED for searching messages and mentions across all channels)
+**Summary Structure:**
+- Prioritize important threads/conversations first
+- Group related messages together
+- Use user_name or user_real_name (never user_id)
+- Include specific details (case IDs, host names, etc.)
+- For threads, use the parent message's permalink
 
-**Connector Setup:**
-1. Create a Slack Web API connector (type: .slack_api) with a name containing "UserToken" or "user token"
-2. Configure the User Token OAuth scopes listed above
-3. The tool will automatically discover and use this connector
+**DM Handling:**
+- If includeDMs=false, do not mention DMs at all
+- If includeDMs=true, include participant names from the channel field (e.g., "DM with John Doe")
 
-**Benefits of User Tokens:**
-- No need to invite bots to channels
-- Can access all channels the user is already a member of
-- Works for public channels, private channels, and DMs
+**Connector Requirements:**
+Requires Slack Web API connector (.slack_api) with User Token. Connector name must contain "UserToken" or "user token". Required scopes: channels:read, channels:history, groups:read, groups:history, im:read, im:history, users:read, search:read.
 
-**Direct Messages (DMs):**
-By default, DMs are NOT included in the results. Only include DMs if the user explicitly requests them (e.g., "including DMs", "with DMs", "direct messages", "catch me up including DMs").
-
-When summarizing Direct Messages, you MUST include the name of the user(s) the DM is with in your summary. The channel field for DMs will be formatted as "DM with [User Name]" or "DM with [User1, User2, ...]" for group DMs.
-
-**CRITICAL**: The tool returns messages with the channel field already formatted to include participant names (e.g., "DM with John Doe" or "DM with Alice, Bob, Charlie"). When you see messages with channel names starting with "DM with", you MUST reference these names in your summary. For example:
-- "DM with John Doe: [summary of messages]"
-- "In a DM with Alice, Bob, and Charlie: [summary]"
-- "Direct message from John Doe: [summary]"
-
-Do NOT omit or ignore the participant names that are provided in the channel field. Always explicitly mention who each DM conversation is with when summarizing.
-
-**Mentions:**
-The tool automatically: (1) searches for mentions of the authenticated user across ALL public channels, (2) fetches messages from allowed channels, and (3) extracts ALL mentions from message text.
-
-**Response Structure:**
-The tool returns messages in THREE separate arrays:
-- **userMentionMessages**: Messages where the authenticated user is mentioned (mentions array contains authenticated user's ID)
-- **channelMessages**: Regular channel messages (no mention of authenticated user, or empty mentions array)
-- **dmMessages**: Direct messages (DMs) - only included when includeDMs=true
-
-**CRITICAL - Summarization Rules:**
-1. **PRIORITIZE AND GROUP, DON'T LIST EVERYTHING** - Your goal is to save time by surfacing what matters, not restating every message. Group related messages into conversations/threads and prioritize by importance.
-2. **Start with "### Key Topics Requiring Attention"** - Begin your summary with a prioritized list of the most important threads/conversations. Include: (a) Threads with decisions made, (b) Blockers or issues needing resolution, (c) Important updates or announcements, (d) Questions awaiting answers, (e) Action items assigned. For each key topic, provide: **Topic/Thread Title** - [1-2 sentence summary of what happened, what was decided, or what needs attention]. [View thread](<permalink>)
-3. **Use userMentionMessages array for mentions** - ALL messages in this array mention the authenticated user. These are HIGH PRIORITY and should appear in the "Key Topics" section if they contain decisions, blockers, or action items.
-4. **Group related messages** - Don't summarize each message individually. Group messages from the same thread or conversation together. If multiple messages discuss the same topic, summarize them as one conversation.
-5. **Identify important threads** - Look for threads with: multiple replies (thread_replies_count > 0), questions being asked, decisions being made, blockers mentioned, PRs/issues being discussed, or action items assigned.
-6. **Brief summaries for routine chatter** - For less important messages (routine updates, casual conversation, non-blocking discussions), provide only brief summaries or group them under a "### Other Updates" section at the end. Don't waste space on low-value content.
-7. **Format mentions** - For mentions: "You were mentioned in #channel by @username: [summary]" (use user_name/user_real_name from mentions array, not user_id). If the mention is part of an important thread, include it in the Key Topics section.
-8. **Use human-readable names** - ALWAYS use user_name or user_real_name from mentions array, NEVER user_id
-9. **Include permalinks for important threads** - For key topics and important conversations, include the permalink. For threads, use the parent message's permalink (thread replies share the parent's permalink). Format: [View thread](<permalink>) or [View message](<permalink>)
-10. **Structure your summary**:
-    - Start with "### Key Topics Requiring Attention" (prioritized list)
-    - Follow with "### Mentions" (if any userMentionMessages that aren't already in Key Topics)
-    - End with "### Other Updates" (brief summaries of routine chatter, grouped by channel)
-
-The 'start' parameter should be an ISO datetime string (e.g., '2025-01-15T00:00:00Z' or '01-15T00:00:00Z'). If no year is specified, the current year is assumed.
-Optionally filters by keywords for user mentions or project names.`,
+The 'start' parameter should be an ISO datetime string (e.g., '2025-01-15T00:00:00Z' or '01-15T00:00:00Z'). If no year is specified, the current year is assumed.`,
     schema: slackDigestSchema,
     handler: async ({ start, keywords, includeDMs = false }, { request, logger }) => {
       try {
@@ -305,7 +264,6 @@ Optionally filters by keywords for user mentions or project names.`,
           userDigest.userMentionMessages.length +
           userDigest.channelMessages.length +
           userDigest.dmMessages.length;
-
 
         // Format results - return messages in the same structure as the service
         return {

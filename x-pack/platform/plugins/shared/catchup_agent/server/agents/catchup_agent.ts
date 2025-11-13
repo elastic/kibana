@@ -39,50 +39,30 @@ When the user requests a catch-up WITHOUT specifying a date range (e.g., "catch 
 - "since [specific date]" → use the specified date at 00:00:00Z
 - No time mentioned → default to last 7 days
 
-**CRITICAL: Slack Mention Summarization**
-When using the Slack tool (hackathon.catchup.external.slack), you MUST:
-1. **Use the userMentionMessages array for mentions** - ALL messages in this array mention the authenticated user
-2. **Use the channelMessages array for regular messages** - These are general channel messages, NOT mentions
-3. **Structure your Slack summary as follows:**
-   - **First section: MENTIONS** - Use ALL messages from userMentionMessages array
-     - Explicitly state "You were mentioned" or "Mentioned by [user]"
-     - Use the user_name or user_real_name from the mentions array, NEVER user_id
-     - Group by channel if helpful
-     - Include thread replies that have mentions
-   - **Second section: Regular Channel Messages** - Use messages from channelMessages array
-   - **Third section: Direct Messages** (if includeDMs=true) - Include participant names from either array
-4. **PRIORITIZE userMentionMessages** - these are the most important and should be listed first
-5. **Never skip or ignore messages from userMentionMessages** - they are the highest priority
-6. **CRITICAL: Do NOT report messages from channelMessages as mentions** - Only messages in userMentionMessages are actual mentions
-
-When formatting your responses, use markdown to improve readability:
-- Use **bold** for section headers and important terms
-- Use ### for major section headings (e.g., ### Attack Discoveries, ### Security Cases, ### Slack Mentions)
-- Use bullet points (-) for lists
-- Use inline code (\`code\`) for technical values like case IDs, rule names, or alert IDs
-- Structure information in clear sections with appropriate spacing
-- For security cases, format as: **Case Title** (severity: [severity]) - [brief description]
-- For Slack mentions, format as: **You were mentioned in #channel-name by @username**: [message summary]`,
+**Slack Tool Usage:**
+- Use userMentionMessages for mentions, channelMessages for regular messages
+- Follow the tool description for formatting requirements`,
       answer: {
-        instructions: `Format your final response using markdown for better readability:
-- Use **bold** for emphasis and section labels
-- Use ### for major section headings (e.g., ### Attack Discoveries, ### Detection Activity, ### Slack Mentions)
-- Use bullet points (-) for lists with proper indentation for nested items
-- Use inline code (\`code\`) for technical values like case IDs, rule names, alert IDs, or timestamps
-- Structure information in clear, visually distinct sections
-- For security cases, format as: **Case Title** (severity: [severity]) - [brief description]
-- **CRITICAL FOR SLACK SUMMARIES**: When summarizing Slack messages:
-  - **ALWAYS start with a "### Slack Mentions" section** if any messages have non-empty mentions arrays
-  - In the mentions section, explicitly state "You were mentioned" or "Mentioned by [user]"
-  - Format mentions as: **You were mentioned in #channel-name by @username**: [message summary]
-  - Follow with a "### Slack Channel Messages" section for regular messages (where mentions array is empty)
-  - Never skip messages with mentions - they are the highest priority
-- **CRITICAL FOR LINKS**: When creating markdown links, ALWAYS wrap URLs in angle brackets <URL> to handle special characters. Format: [Link text](<URL>). Do NOT use bold formatting around links. URLs provided by tools are already dynamically generated with the correct Kibana host, base path, and space. Examples:
-  - Correct: [View all alerts](<EXAMPLE_ALERTS_URL>)
-  - Wrong: **[View all alerts](URL)** or [View all alerts](URL) without angle brackets
-- Include clickable links when URLs are available in the tool results (cases, attack discoveries, rules, alerts page)
-- **For Slack messages**: Link to EVERY message you mention using the permalink field. For threads, only one link is needed (thread replies share the parent's permalink). Use markdown format: [View message](<permalink_url>) or [View thread](<permalink_url>)
-- Use clear spacing between sections for readability`,
+        instructions: `**MANDATORY: Extract permalinks from Slack tool results**
+
+When summarizing Slack messages (hackathon.catchup.external.slack), you MUST include permalinks. This is an EXCEPTION to the "do not summarize JSON" rule.
+
+**Process:**
+1. Find the ToolMessage from hackathon.catchup.external.slack in the conversation history
+2. Parse the JSON content: results[0].data.userMentionMessages[].permalink or results[0].data.channelMessages[].permalink
+3. For EVERY message you mention, include its permalink as: [View thread](<permalink_url>) or [View message](<permalink_url>)
+4. NO EXCEPTIONS - every Slack message in your summary must have its permalink
+
+**Example:** Message with permalink "https://elastic.slack.com/archives/C123/p456" → Include: [View thread](<https://elastic.slack.com/archives/C123/p456>)
+
+---
+
+**Formatting:**
+- Use ### for section headings (### Attack Discoveries, ### Slack Mentions)
+- Use **bold** for emphasis, inline code (\`code\`) for IDs/timestamps
+- For cases: **Case Title** (severity: [severity]) - [description]
+- For links: Always wrap URLs in angle brackets: [Link text](<URL>)
+- Include clickable links when available in tool results`,
       },
       tools: [
         {
