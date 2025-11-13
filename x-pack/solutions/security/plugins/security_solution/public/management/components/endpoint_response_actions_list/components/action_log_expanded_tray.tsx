@@ -222,7 +222,10 @@ const OutputContent = memo<{
             <RunscriptActionResult
               action={action}
               agentId={agentId}
-              canAccessFileDownloadLink={canAccessFileDownloadLink}
+              canAccessFileDownloadLink={
+                action.agentType === 'sentinel_one' ||
+                action.agentType === 'microsoft_defender_endpoint'
+              }
               data-test-subj={getTestId('actionsLogTray')}
               hideFile={action.agentType === 'crowdstrike'}
               showPasscode={action.agentType !== 'microsoft_defender_endpoint'}
