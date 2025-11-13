@@ -11,12 +11,13 @@ import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import { createErrorResult } from '@kbn/onechat-server';
 import { executeEsql } from '@kbn/onechat-genai-utils/tools/utils/esql';
+import { OBSERVABILITY_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { getPluginServices } from '../../services/service_locator';
 import { getCaseUrl, getAttackDiscoveryUrl } from '../utils/kibana_urls';
 import { getSpaceId } from '../../services/service_locator';
 
 const fetchIncidentSchema = z.object({
-  incident_id: z
+  incidentId: z
     .string()
     .describe('The incident ID to fetch. Can be a case ID, alert ID, or attack discovery ID.'),
 });
@@ -27,9 +28,8 @@ export const fetchIncidentTool = (): BuiltinToolDefinition<typeof fetchIncidentS
     type: ToolType.builtin,
     description: `Fetches a specific incident by ID. Tries to identify the incident type (case, alert, or attack discovery) and fetches it from the appropriate source. Returns the incident data along with its type and extracted entities.`,
     schema: fetchIncidentSchema,
-    handler: async ({ incident_id }, { request, esClient, logger }) => {
+    handler: async ({ incidentId }, { request, esClient, logger }) => {
       try {
-
         const { core, plugin } = getPluginServices();
         const spaceId = getSpaceId(request);
         let incident: any = null;
@@ -41,7 +41,7 @@ export const fetchIncidentTool = (): BuiltinToolDefinition<typeof fetchIncidentS
           try {
             const casesClient = await plugin.getCasesClient(request);
             const theCase = await casesClient.cases.get({
-              id: incident_id,
+              id: incidentId,
               includeComments: true,
             });
 
@@ -66,7 +66,7 @@ export const fetchIncidentTool = (): BuiltinToolDefinition<typeof fetchIncidentS
           for (const index of securityIndices) {
             try {
               const racClient = await plugin.ruleRegistry.getRacClientWithRequest(request);
-              const alert = await racClient.get({ id: incident_id, index });
+              const alert = await racClient.get({ id: incidentId, index });
 
               if (alert) {
                 incident = alert;
@@ -81,28 +81,48 @@ export const fetchIncidentTool = (): BuiltinToolDefinition<typeof fetchIncidentS
 
           // Try observability alerts indices
           if (!incident) {
-            const observabilityIndices = [
-              `.alerts-observability.apm.alerts-${spaceId}`,
-              `.alerts-observability.logs.alerts-${spaceId}`,
-              `.alerts-observability.metrics.alerts-${spaceId}`,
-              `.alerts-observability.uptime.alerts-${spaceId}`,
-              `.alerts-observability.alerts-${spaceId}`,
-            ];
+            try {
+              const racClient = await plugin.ruleRegistry.getRacClientWithRequest(request);
 
-            for (const index of observabilityIndices) {
-              try {
-                const racClient = await plugin.ruleRegistry.getRacClientWithRequest(request);
-                const alert = await racClient.get({ id: incident_id, index });
+              // Get all authorized observability alert indices (covers .alerts-observability.*,
+              // .alerts-default.*, .alerts-stack.*, .alerts-ml.*, .alerts-dataset.*, etc.)
+              const authorizedIndices = await racClient.getAuthorizedAlertsIndices(
+                OBSERVABILITY_RULE_TYPE_IDS
+              );
 
-                if (alert) {
-                  incident = alert;
-                  incidentType = 'alert';
-                  owner = 'observability';
-                  break;
+              if (authorizedIndices && authorizedIndices.length > 0) {
+                // Filter out internal/preview indices and join with commas
+                const filteredIndices = authorizedIndices.filter(
+                  (idx: string) =>
+                    !idx.includes('.preview.') &&
+                    !idx.includes('.internal.') &&
+                    !idx.startsWith('.internal.')
+                );
+
+                if (filteredIndices.length > 0) {
+                  // Try to get the alert using all authorized indices at once
+                  const indexString = filteredIndices.join(',');
+                  try {
+                    const alert = await racClient.get({ id: incidentId, index: indexString });
+
+                    if (alert) {
+                      incident = alert;
+                      incidentType = 'alert';
+                      owner = 'observability';
+                    }
+                  } catch (alertError: any) {
+                    // Alert not found in any observability index, continue to try attack discovery
+                    logger.debug(
+                      `[CatchUp Agent] Observability alert ${incidentId} not found: ${alertError.message}`
+                    );
+                  }
                 }
-              } catch (alertError: any) {
-                // Alert not found in this index, continue
               }
+            } catch (observabilityError: any) {
+              // Failed to get authorized indices or fetch alert, continue to try attack discovery
+              logger.debug(
+                `[CatchUp Agent] Failed to fetch observability alert ${incidentId}: ${observabilityError.message}`
+              );
             }
           }
         }
@@ -121,7 +141,7 @@ export const fetchIncidentTool = (): BuiltinToolDefinition<typeof fetchIncidentS
             for (const indexPattern of attackDiscoveryIndices) {
               try {
                 const query = `FROM ${indexPattern} METADATA _id
-| WHERE _id == "${incident_id}"
+| WHERE _id == "${incidentId}"
 | KEEP _id, kibana.alert.attack_discovery.title, kibana.alert.severity, kibana.alert.workflow_status, kibana.alert.attack_discovery.alert_ids, kibana.alert.case_ids, @timestamp, *
 | LIMIT 1`;
 
@@ -138,10 +158,10 @@ export const fetchIncidentTool = (): BuiltinToolDefinition<typeof fetchIncidentS
                   for (let i = 0; i < columns.length && i < values.length; i++) {
                     incident[columns[i].name] = values[i];
                   }
-                  incident._id = incident_id;
+                  incident._id = incidentId;
                   incidentType = 'attack_discovery';
                   owner = 'securitySolution';
-                break;
+                  break;
                 }
               } catch (indexError: any) {
                 // If it's an index not found error, try next pattern
@@ -165,9 +185,9 @@ export const fetchIncidentTool = (): BuiltinToolDefinition<typeof fetchIncidentS
               {
                 type: ToolResultType.other,
                 data: {
-                  incident_id,
+                  incidentId,
                   found: false,
-                  message: `Incident ${incident_id} not found as a case, alert, or attack discovery`,
+                  message: `Incident ${incidentId} not found as a case, alert, or attack discovery`,
                 },
               },
             ],
@@ -199,9 +219,8 @@ export const fetchIncidentTool = (): BuiltinToolDefinition<typeof fetchIncidentS
               const casesClient = await plugin.getCasesClient(request);
 
               const alertsResponse = await casesClient.attachments.getAllAlertsAttachToCase({
-                caseId: incident_id,
+                caseId: incidentId,
               });
-
 
               if (alertsResponse.length > 0) {
                 const racClient = await plugin.ruleRegistry.getRacClientWithRequest(request);
@@ -225,7 +244,6 @@ export const fetchIncidentTool = (): BuiltinToolDefinition<typeof fetchIncidentS
                     const alert = await racClient.get({ id: alertId, index: alertIndex });
 
                     if (alert) {
-
                       // Extract entities from alert - try multiple possible field paths
                       const serviceName =
                         alert['service.name'] ||
@@ -302,7 +320,6 @@ export const fetchIncidentTool = (): BuiltinToolDefinition<typeof fetchIncidentS
                           entities.destination_ips.push(value);
                         }
                       }
-
                     } else {
                       logger.warn(
                         `[CatchUp Agent] Alert ${alertId} from ${alertIndex} returned null/undefined`
@@ -315,11 +332,10 @@ export const fetchIncidentTool = (): BuiltinToolDefinition<typeof fetchIncidentS
                     // Continue to next alert
                   }
                 }
-
               }
             } catch (fetchError: any) {
               logger.warn(
-                `[CatchUp Agent] Could not fetch alerts for case ${incident_id}: ${fetchError.message}`
+                `[CatchUp Agent] Could not fetch alerts for case ${incidentId}: ${fetchError.message}`
               );
             }
           }
@@ -386,9 +402,9 @@ export const fetchIncidentTool = (): BuiltinToolDefinition<typeof fetchIncidentS
         // Generate URL for the incident
         let url: string | null = null;
         if (incidentType === 'case' && owner) {
-          url = getCaseUrl(request, core, incident_id, owner);
+          url = getCaseUrl(request, core, incidentId, owner);
         } else if (incidentType === 'attack_discovery') {
-          url = getAttackDiscoveryUrl(request, core, incident_id);
+          url = getAttackDiscoveryUrl(request, core, incidentId);
         }
 
         // Deduplicate entities
@@ -399,9 +415,9 @@ export const fetchIncidentTool = (): BuiltinToolDefinition<typeof fetchIncidentS
             {
               type: ToolResultType.other,
               data: {
-                incident_id,
+                incidentId,
                 found: true,
-                incident_type: incidentType,
+                incidentType,
                 owner,
                 incident,
                 entities: {

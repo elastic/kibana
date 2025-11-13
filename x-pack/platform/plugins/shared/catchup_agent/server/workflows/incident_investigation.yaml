@@ -10,7 +10,7 @@ triggers:
   - type: manual
 inputs:
   - type: string
-    name: incident_id
+    name: incidentId
     description: 'Incident ID to investigate. Can be: security case ID, observability case ID, security alert ID, observability alert ID, or attack discovery ID. The workflow will fetch all data types and search for the specific incident across all sources.'
     required: true
   - type: string
@@ -37,7 +37,7 @@ steps:
       body:
         tool_id: 'hackathon.catchup.incident.fetch'
         tool_params:
-          incident_id: '{{ inputs.incident_id }}'
+          incidentId: '{{ inputs.incidentId }}'
 
   - name: fetch_security_data
     type: kibana.request
@@ -75,7 +75,7 @@ steps:
             incident: '{{ steps.fetch_incident.output }}'
             security_summary: '{{ steps.fetch_security_data.output }}'
             observability: '{{ steps.fetch_observability_data.output }}'
-            incident_id: '{{ inputs.incident_id }}'
+            incidentId: '{{ inputs.incidentId }}'
 
   - name: search_alerts_by_entities
     type: kibana.request
@@ -105,7 +105,7 @@ steps:
           toolParams:
             start: '{{ inputs.start }}'
             keywords:
-              - '{{ inputs.incident_id }}'
+              - '{{ inputs.incidentId }}'
               - '{{ steps.extract_entities_from_incident.output.entities.service_names[0] }}'
               - '{{ steps.extract_entities_from_incident.output.entities.service_names[1] }}'
               - '{{ steps.extract_entities_from_incident.output.entities.service_names[2] }}'

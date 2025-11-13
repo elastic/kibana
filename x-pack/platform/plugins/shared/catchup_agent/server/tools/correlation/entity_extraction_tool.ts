@@ -42,7 +42,6 @@ The extracted entities are used by the correlation engine to find relationships 
     schema: entityExtractionSchema,
     handler: async ({ data }, { logger }) => {
       try {
-
         const entities: {
           service_names: string[];
           user_names: string[];
@@ -178,7 +177,7 @@ The extracted entities are used by the correlation engine to find relationships 
           }
         }
 
-        // NOTE: incident_id is NOT an entity - it's just an identifier
+        // NOTE: incidentId is NOT an entity - it's just an identifier
         // We don't extract IDs as entities, only actual entity values (host names, service names, etc.)
 
         // Extract entities from Slack data
@@ -246,7 +245,6 @@ The extracted entities are used by the correlation engine to find relationships 
           finalEntities.host_names.length +
           finalEntities.source_ips.length +
           finalEntities.destination_ips.length;
-
 
         return {
           results: [
