@@ -21,6 +21,52 @@ To check for security updates, go to [Security announcements for the Elastic sta
 % ### Fixes [kibana-X.X.X-fixes]
 % *
 
+## 9.2.1 [kibana-9.2.1-release-notes]
+
+% ::::{NOTE}
+% ::::
+
+
+### Features and enhancements [kibana-9.2.1-features-enhancements]
+
+**{{product.kibana}} platform**:
+* The `defaultRoute` advanced setting now controls the target of the Elastic logo link for spaces using a solution view [#241571]({{kib-pull}}241571).
+* Enforces the `object_src 'none'` directive in {{product.kibana}}'s Content Security Policy and introduces a new `csp.object_src` configuration option to control its behavior [#241029]({{kib-pull}}241029).
+
+**Machine Learning**:
+* Improves layout wrapping in the **Overview** and **Notifications** tabs on the {{product.machine-learning}} Overview page [#239113]({{kib-pull}}239113).
+
+
+### Fixes [kibana-9.2.1-fixes]
+
+**Alerting**:
+* Fixes missing accessibility announcements in Cases [#240132]({{kib-pull}}240132).
+
+**Dashboards and visualizations**:
+* Fixes an issue where references were being lost in Links, Maps, and legacy Visualize panels when updating a dashboard [#241893]({{kib-pull}}241893).
+* Fixes layout issues for markdown content in small panels [#240806]({{kib-pull}}240806).
+
+**Data ingestion and Fleet**:
+* Shows warnings in the integrations synchronization UI when referencing other entities [#241623]({{kib-pull}}241623).
+* Adds proxy SSL options to download sources [#241115]({{kib-pull}}241115).
+* Omits system properties when syncing ingest pipelines [#241096]({{kib-pull}}241096).
+* Fixes Fleet policy name uniqueness not being consistently enforced across spaces when name or space changes occur [#239631]({{kib-pull}}239631).
+
+**{{esql}} editor**:
+* Fixes the autocomplete suggestion of time series sources in `TS` commands after a comma [#241402]({{kib-pull}}241402).
+
+**{{product.observability}} solution**:
+For the {{product.observability}} 9.2.1 release information, refer to [{{product.observability}} Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**{{product.security}} solution**:
+For the {{product.security}} 9.2.1 release information, refer to [{{product.security}} Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**{{product.kibana}} platform**:
+* Ensures all authentication fields show up correctly when setting up an AI connector [#240913]({{kib-pull}}240913).
+
+**Search**:
+* Fixes an issue with Agents and Playground icons not rendering correctly in the {{product.elasticsearch}} solution side navigation when using dark mode [#240475]({{kib-pull}}240475).
+
 ## 9.2.0 [kibana-9.2.0-release-notes]
 
 ### Features and enhancements [kibana-9.2.0-features-enhancements]
