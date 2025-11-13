@@ -92,8 +92,8 @@
     "@kbn/controls-constants",
     "@kbn/presentation-util",
     "@kbn/react-query",
-    "@kbn/core-chrome-layout-utils",
-    "@kbn/core-http-server"
+    "@kbn/core-http-server",
+    "@kbn/core-chrome-layout-utils"
   ],
   "exclude": ["target/**/*"]
 }
