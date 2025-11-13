@@ -19,7 +19,7 @@ import type {
   TextBasedLayer,
   DataViewsState,
 } from '@kbn/lens-common';
-import { generateId } from '../../../id_generator';
+import { generateId } from '../../id_generator';
 import { fetchDataFromAggregateQuery } from './fetch_data_from_aggregate_query';
 import { addColumnsToCache } from './fieldlist_cache';
 
