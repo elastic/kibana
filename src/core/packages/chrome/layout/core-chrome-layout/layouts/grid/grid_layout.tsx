@@ -33,7 +33,7 @@ const layoutConfigs: { classic: ChromeLayoutConfig; project: ChromeLayoutConfig 
 
     /** for debug for now */
     sidebarWidth: 48,
-    footerHeight: 48,
+    footerHeight: 0,
     navigationWidth: 48,
   },
   project: {
@@ -46,7 +46,7 @@ const layoutConfigs: { classic: ChromeLayoutConfig; project: ChromeLayoutConfig 
 
     /** for debug for now */
     sidebarWidth: 48,
-    footerHeight: 48,
+    footerHeight: 0,
     navigationWidth: 48,
   },
 };
@@ -86,12 +86,15 @@ export class GridLayout implements LayoutService {
 
     const projectSideNavigation = chrome.getProjectSideNavComponentForGridLayout();
 
+    const footer$ = chrome.getGlobalFooter$();
+
     return React.memo(() => {
       // TODO: Get rid of observables https://github.com/elastic/kibana/issues/225265
       const chromeVisible = useObservable(chromeVisible$, false);
       const hasHeaderBanner = useObservable(hasHeaderBanner$, false);
       const chromeStyle = useObservable(chromeStyle$, 'classic');
       const hasAppMenu = useObservable(hasAppMenu$, false);
+      const footer: ReactNode = useObservable(footer$, null);
 
       const layoutConfig = layoutConfigs[chromeStyle];
 
@@ -102,7 +105,6 @@ export class GridLayout implements LayoutService {
       let applicationTopBar: ReactNode;
       // not implemented, just for debug
       let sidebar: ReactNode;
-      let footer: ReactNode;
 
       if (chromeVisible) {
         if (chromeStyle === 'classic') {
@@ -129,7 +131,6 @@ export class GridLayout implements LayoutService {
       if (debug) {
         if (chromeVisible) {
           if (!sidebar) sidebar = <SimpleDebugOverlay label="Debug Sidebar" />;
-          if (!footer) footer = <SimpleDebugOverlay label="Debug Footer" />;
           if (!navigation) {
             navigation = <SimpleDebugOverlay label="Debug Navigation" />;
           }
