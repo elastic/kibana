@@ -160,12 +160,6 @@ async function savePackagePolicy(pkgPolicy: CreatePackagePolicyRequest['body']) 
       return omit(pkg, 'title');
     }
 
-    if (policy.supports_cloud_connector) {
-      throw new Error(
-        'Cloud connectors are not supported with agentless API yet disable useAgentlessAPIInUI'
-      );
-    }
-
     const result = await sendCreateAgentlessPolicy(
       {
         package: formatPackage(pkgPolicy.package),
