@@ -1217,7 +1217,7 @@
     "byte-size": "^9.0.1",
     "cacheable-lookup": "6",
     "camelcase-keys": "7.0.2",
-    "canvas-confetti": "^1.9.3",
+    "canvas-confetti": "^1.9.4",
     "canvg": "^3.0.9",
     "chalk": "^4.1.0",
     "cheerio": "^1.0.0-rc.12",
