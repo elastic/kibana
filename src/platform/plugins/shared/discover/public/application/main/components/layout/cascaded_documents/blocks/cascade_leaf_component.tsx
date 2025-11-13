@@ -21,7 +21,6 @@ import {
 import type { CascadeRowCellNestedVirtualizationAnchorProps } from '@kbn/shared-ux-document-data-cascade';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 
 interface ESQLDataCascadeLeafCellProps
   extends Omit<
@@ -38,7 +37,6 @@ interface ESQLDataCascadeLeafCellProps
     CascadeRowCellNestedVirtualizationAnchorProps<DataTableRecord> {
   cellData: DataTableRecord[];
   cellId: string;
-  queryColumns: DatatableColumn[];
 }
 
 interface CustomCascadeGridBodyProps

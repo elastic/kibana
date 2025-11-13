@@ -23,6 +23,7 @@ import {
   type ESQLCommandOption,
   type ESQLColumn,
   isBinaryExpression,
+  Walker,
 } from '@kbn/esql-ast';
 import type {
   StatsCommandSummary,
@@ -33,12 +34,11 @@ import type {
   BinaryExpressionWhereOperator,
   ESQLBinaryExpression,
 } from '@kbn/esql-ast/src/types';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { extractCategorizeTokens } from './extract_categorize_tokens';
 import { getOperator, PARAM_TYPES_NO_NEED_IMPLICIT_STRING_CASTING } from './append_to_query';
 
 type NodeType = 'group' | 'leaf';
-
-type StatsCommand = ESQLCommand<'stats'>;
 
 export interface AppliedStatsFunction {
   identifier: string;
@@ -123,26 +123,6 @@ function getStatsCommandRuntimeFields(esqlQuery: EsqlQuery) {
 }
 
 /**
- * Returns a set of all the runtime fields in the query, created by the EVAL command
- */
-function getEvalCommandRuntimeFields(esqlQuery: EsqlQuery) {
-  return esqlQuery.ast.commands.reduce((acc, cur) => {
-    if (cur.name !== 'eval') {
-      return acc;
-    }
-
-    cur.args.forEach((arg) => {
-      // runtime fields are created in the EVAL as arguments that are function assignments
-      if (isFunctionExpression(arg) && isColumn(arg.args[0])) {
-        acc.push(((arg as ESQLFunction).args[0] as ESQLColumn).name);
-      }
-    });
-
-    return acc;
-  }, [] as string[]);
-}
-
-/**
  * Returns the summary of the stats command at the given command index in the esql query
  */
 function getStatsCommandAtIndexSummary(esqlQuery: EsqlQuery, commandIndex: number) {
@@ -191,7 +171,7 @@ export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta =
     let groupDeclarationCommandSummary: StatsCommandSummary | null = null;
 
     if (
-      groupDeclarationCommandIndex !== -1 &&
+      groupDeclarationCommandIndex >= 0 &&
       (groupDeclarationCommandSummary = getStatsCommandAtIndexSummary(
         esqlQuery,
         groupDeclarationCommandIndex
@@ -201,15 +181,32 @@ export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta =
       groupFieldNode = groupDeclarationCommandSummary.grouping[groupFieldName];
     }
 
-    // check if there is a where command targeting the group field in the stats command
-    const whereCommandGroupFieldSearch = mutate.commands.where.byField(
-      esqlQuery.ast,
-      Builder.expression.column({
-        args: [Builder.identifier({ name: groupFieldName })],
-      })
-    );
+    // check if there is a where command after the operating stats command targeting any of it's grouping options
+    const whereCommandGroupFieldSearch = esqlQuery.ast.commands
+      .slice(groupDeclarationCommandIndex)
+      .find((cmd) => {
+        if (cmd.name !== 'where') {
+          return false;
+        }
 
-    if (whereCommandGroupFieldSearch?.length) {
+        let found = false;
+
+        Walker.walk(cmd, {
+          visitIdentifier: (node) => {
+            if (found) {
+              return;
+            }
+
+            if (node.name === groupFieldName) {
+              found = true;
+            }
+          },
+        });
+
+        return found;
+      });
+
+    if (whereCommandGroupFieldSearch) {
       if (groupByFields.length > 0) {
         // if there's a where command targeting the group in this current iteration,
         // then this specific query can only be grouped by the current group, pivoting on any other columns though they exist
@@ -264,6 +261,10 @@ export interface CascadeQueryArgs {
    */
   query: AggregateQuery;
   /**
+   * data view for the query
+   */
+  dataView: DataView;
+  /**
    * Node type (group or leaf) for which we are constructing the cascade query
    */
   nodeType: NodeType;
@@ -282,6 +283,7 @@ export interface CascadeQueryArgs {
  */
 export const constructCascadeQuery = ({
   query,
+  dataView,
   nodeType,
   nodePath,
   nodePathMap,
@@ -298,31 +300,39 @@ export const constructCascadeQuery = ({
     throw new Error('Query does not have a valid stats command with grouping options');
   }
 
-  const statsCommandRuntimeFields = getStatsCommandRuntimeFields(EditorESQLQuery);
-  const evalCommandRuntimeFields = getEvalCommandRuntimeFields(EditorESQLQuery);
-
   if (nodeType === 'leaf') {
     const pathSegment = nodePath[nodePath.length - 1];
 
-    const groupDeclarationCommandIndex = statsCommandRuntimeFields.findIndex((field) =>
-      field.has(pathSegment)
-    );
+    // we make an initial assumption that the field was declared by the stats command being operated on
+    let fieldDeclarationCommandSummary = summarizedStatsCommand;
 
-    const groupIsStatsDeclaredRuntimeField = groupDeclarationCommandIndex >= 0;
+    // if field name is not marked as a new field then we want ascertain it wasn't created by a preceding stats command
+    if (!fieldDeclarationCommandSummary.newFields.has(pathSegment)) {
+      const statsCommandRuntimeFields = getStatsCommandRuntimeFields(EditorESQLQuery);
 
-    let groupDeclarationCommandSummary: StatsCommandSummary | null = null;
-
-    if (groupIsStatsDeclaredRuntimeField) {
-      groupDeclarationCommandSummary = getStatsCommandAtIndexSummary(
-        EditorESQLQuery,
-        groupDeclarationCommandIndex
+      const groupDeclarationCommandIndex = statsCommandRuntimeFields.findIndex((field) =>
+        field.has(pathSegment)
       );
+
+      const groupIsStatsDeclaredRuntimeField = groupDeclarationCommandIndex >= 0;
+
+      let groupDeclarationCommandSummary: StatsCommandSummary | null = null;
+
+      if (groupIsStatsDeclaredRuntimeField) {
+        groupDeclarationCommandSummary = getStatsCommandAtIndexSummary(
+          EditorESQLQuery,
+          groupDeclarationCommandIndex
+        );
+      }
+
+      fieldDeclarationCommandSummary =
+        groupDeclarationCommandSummary ?? fieldDeclarationCommandSummary;
     }
 
     const groupValue =
-      (groupDeclarationCommandSummary ?? summarizedStatsCommand).grouping[pathSegment] ??
-      // when a column name is not assigned, one is created automatically that includes backticks
-      (groupDeclarationCommandSummary ?? summarizedStatsCommand).grouping[`\`${pathSegment}\``];
+      fieldDeclarationCommandSummary.grouping[pathSegment] ??
+      // when a column name is not assigned on using a grouping function, one is created automatically from the function expression that includes backticks
+      fieldDeclarationCommandSummary.grouping[`\`${pathSegment}\``];
 
     // check if we have a value for the path segment in the node path map to match on
     if (!(groupValue && nodePathMap[pathSegment] !== undefined)) {
@@ -349,11 +359,11 @@ export const constructCascadeQuery = ({
       mutate.generic.commands.append(cascadeOperationQuery.ast, cmd);
     });
 
-    const groupIsRuntimeDeclared =
-      groupIsStatsDeclaredRuntimeField || evalCommandRuntimeFields.includes(pathSegment);
+    // get field type for the group field
+    const groupDataViewFieldDefinition = dataView.fields.getByName(pathSegment);
 
     if (isColumn(groupValue.definition)) {
-      return handleStatsByColumnLeafOperation(cascadeOperationQuery, groupIsRuntimeDeclared, {
+      return handleStatsByColumnLeafOperation(cascadeOperationQuery, groupDataViewFieldDefinition, {
         [pathSegment]: nodePathMap[pathSegment],
       });
     } else if (isFunctionExpression(groupValue.definition)) {
@@ -379,31 +389,37 @@ export const constructCascadeQuery = ({
 
 /**
  * @description adds a where command with current value for a matched column option as a side-effect on the passed query,
- * helps us with fetching leaf node data for stats operation in the data cascade experience.
+ * helps us with fetching documents that match the value of a specified column on a stats operation in the data cascade experience.
  */
 function handleStatsByColumnLeafOperation(
   cascadeOperationQuery: EsqlQuery,
-  groupIsRuntimeDeclared: boolean,
+  groupDataViewFieldDefinition: DataViewField | undefined,
   columnInterpolationRecord: Record<string, string>
 ): AggregateQuery {
+  // if value is a text or keyword field and it's not "aggregatable", we use match phrase for the where command
+  const useMatchPhrase =
+    (groupDataViewFieldDefinition?.spec.esTypes?.includes('text') ||
+      groupDataViewFieldDefinition?.spec.esTypes?.includes('keyword')) &&
+    !groupDataViewFieldDefinition?.spec.aggregatable;
+
   // build a where command with match expressions for the selected column
   const newCommands = Object.entries(columnInterpolationRecord).map(([key, value]) => {
     return Builder.command({
       name: 'where',
       args: [
-        /* Number.isInteger(Number(value)) || groupIsRuntimeDeclared
-          ? */ Builder.expression.func.binary('==', [
-          Builder.expression.column({
-            args: [Builder.identifier({ name: key })],
-          }),
-          Number.isInteger(Number(value))
-            ? Builder.expression.literal.integer(Number(value))
-            : Builder.expression.literal.string(value),
-        ]),
-        // : Builder.expression.func.call('match_phrase', [
-        //     Builder.identifier({ name: key }),
-        //     Builder.expression.literal.string(value),
-        //   ]),
+        useMatchPhrase
+          ? Builder.expression.func.call('match_phrase', [
+              Builder.identifier({ name: key }),
+              Builder.expression.literal.string(value),
+            ])
+          : Builder.expression.func.binary('==', [
+              Builder.expression.column({
+                args: [Builder.identifier({ name: key })],
+              }),
+              Number.isInteger(Number(value))
+                ? Builder.expression.literal.integer(Number(value))
+                : Builder.expression.literal.string(value),
+            ]),
       ],
     });
   });
@@ -580,55 +596,63 @@ export const appendFilteringWhereClauseForCascadeLayout = <
 ) => {
   const ESQLQuery = EsqlQuery.fromSrc(query);
 
-  const { ast } = ESQLQuery;
+  // we make an initial assumption that the field was declared by the stats command being operated on
+  let fieldDeclarationCommandSummary = getStatsCommandToOperateOn(ESQLQuery)!;
 
-  const queryRuntimeFields = Array.from(mutate.commands.stats.summarize(ESQLQuery)).map(
-    (command) => command.newFields
-  );
+  // if field name is not marked as a new field then we want ascertain it wasn't created by a preceding stats command
+  if (!fieldDeclarationCommandSummary.newFields.has(fieldName)) {
+    const statsCommandRuntimeFields = getStatsCommandRuntimeFields(ESQLQuery);
 
-  const fieldDeclarationCommandIndex = queryRuntimeFields.findIndex((field) =>
-    field.has(fieldName)
-  );
+    const groupDeclarationCommandIndex = statsCommandRuntimeFields.findIndex((field) =>
+      field.has(fieldName)
+    );
 
-  const fieldIsRuntimeDeclared = fieldDeclarationCommandIndex >= 0;
+    const groupIsStatsDeclaredRuntimeField = groupDeclarationCommandIndex >= 0;
 
-  let fieldDeclarationCommand: StatsCommand | null = null;
+    let groupDeclarationCommandSummary: StatsCommandSummary | null = null;
 
-  // if the field that's being filtered on is a new field created by some stats command in the query,
-  // then we want to find the command that created it
-  if (fieldIsRuntimeDeclared) {
-    fieldDeclarationCommand = mutate.commands.stats.byIndex(
-      ast,
-      fieldDeclarationCommandIndex
-    ) as StatsCommand;
+    if (groupIsStatsDeclaredRuntimeField) {
+      groupDeclarationCommandSummary = getStatsCommandAtIndexSummary(
+        ESQLQuery,
+        groupDeclarationCommandIndex
+      );
+    }
+
+    fieldDeclarationCommandSummary =
+      groupDeclarationCommandSummary ?? fieldDeclarationCommandSummary;
   }
 
-  const datasourceCommand = getESQLQueryDataSourceCommand(ESQLQuery);
+  let insertionAnchorCommand: ESQLCommand = fieldDeclarationCommandSummary.command;
 
-  const insertionAnchorCommand = fieldDeclarationCommand ?? datasourceCommand;
-
-  if (!insertionAnchorCommand) {
-    throw new Error('No insertion anchor command found, nothing to do');
+  if (
+    !fieldDeclarationCommandSummary.usedFields.has(fieldName) &&
+    !fieldDeclarationCommandSummary.newFields.has(fieldName)
+  ) {
+    // This function is also invoked on records that exits directly from the data source,
+    // in those instances the field selected will not exist in the query,
+    // hence we use the data source command as the insertion anchor
+    insertionAnchorCommand = getESQLQueryDataSourceCommand(ESQLQuery)!;
   }
 
-  const insertionAnchorCommandIndex = ast.commands.findIndex(
+  const insertionAnchorCommandIndex = ESQLQuery.ast.commands.findIndex(
     (cmd) => cmd.text === insertionAnchorCommand.text
   );
 
-  // we would always want to insert our new query right after the insertion anchor command
-  const filterInsertionIndex = insertionAnchorCommandIndex + 1;
-
   // since we can't anticipate the nature of the query we could be dealing with
-  // we simply select the commands that exist from start of the query including the insertion anchor command
-  const commandsBeforeInsertionAnchor = ast.commands.slice(0, filterInsertionIndex + 1);
+  // we simply select the determined insertion anchor and the command immediately following it
+  const commandsFollowingInsertionAnchor = ESQLQuery.ast.commands.slice(
+    insertionAnchorCommandIndex,
+    insertionAnchorCommandIndex + 2
+  );
 
-  const filteringWhereCommandIndex = commandsBeforeInsertionAnchor.findLastIndex(
+  // we search to see if there already exists a where command that applies to our insertion anchor command
+  const filteringWhereCommandIndex = commandsFollowingInsertionAnchor.findIndex(
     (cmd) => cmd.name === 'where'
   );
 
   const { operator, expressionType } = getOperator(operation);
 
-  // This is the computed expression for the filter operation that has been requested by the user
+  // we compute the expression for the filter operation that has been requested by the user
   const computedFilteringExpression =
     expressionType === 'postfix-unary'
       ? Builder.expression.func.postfix(operator, [Builder.identifier({ name: fieldName! })])
@@ -650,12 +674,18 @@ export const appendFilteringWhereClauseForCascadeLayout = <
       args: [computedFilteringExpression],
     });
 
-    mutate.generic.commands.insert(ast, filteringWhereCommand, filterInsertionIndex);
+    // when no where command exists following the insertion anchor command,
+    // we insert the new where command right after the insertion anchor command
+    mutate.generic.commands.insert(
+      ESQLQuery.ast,
+      filteringWhereCommand,
+      insertionAnchorCommandIndex + 1
+    );
 
-    return BasicPrettyPrinter.print(ast);
+    return BasicPrettyPrinter.print(ESQLQuery.ast);
   }
 
-  const filteringWhereCommand = commandsBeforeInsertionAnchor[filteringWhereCommandIndex];
+  const filteringWhereCommand = commandsFollowingInsertionAnchor[filteringWhereCommandIndex];
 
   let modifiedFilteringWhereCommand: ESQLCommand | null = null;
 
@@ -684,9 +714,13 @@ export const appendFilteringWhereClauseForCascadeLayout = <
 
   // if we where able to create a new filtering where command, we need to add it in and remove the old one
   if (modifiedFilteringWhereCommand) {
-    mutate.generic.commands.insert(ast, modifiedFilteringWhereCommand, filteringWhereCommandIndex);
-    mutate.generic.commands.remove(ast, filteringWhereCommand);
+    const insertionIndex = ESQLQuery.ast.commands.findIndex(
+      (cmd) => cmd.text === filteringWhereCommand.text
+    );
+
+    mutate.generic.commands.insert(ESQLQuery.ast, modifiedFilteringWhereCommand, insertionIndex);
+    mutate.generic.commands.remove(ESQLQuery.ast, filteringWhereCommand);
   }
 
-  return BasicPrettyPrinter.print(ast);
+  return BasicPrettyPrinter.print(ESQLQuery.ast);
 };

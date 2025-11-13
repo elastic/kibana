@@ -8,6 +8,7 @@
  */
 
 import type { AggregateQuery } from '@kbn/es-query';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import {
   getESQLStatsQueryMeta,
   constructCascadeQuery,
@@ -149,6 +150,32 @@ describe('cascaded documents helpers utils', () => {
         },
       ]);
     });
+
+    it('should return a single group by field if there is a where command preceding a STATS by command targeting a column specified as a grouping option in the operatingstats command', () => {
+      const queryString = `
+        FROM kibana_sample_data_logs
+          | WHERE clientip == "177.120.218.48"
+          | STATS count = COUNT(bytes), average = AVG(memory)
+                BY Pattern = CATEGORIZE(message), agent.keyword, clientip
+          | WHERE Pattern ==
+                ".*?177\\.120\\.218\\.48.+?2018.+?07.+?GET.+?HTTP.+?1\\.1.+?200.+?Mozilla.+?4\\.0.+?compatible.+?MSIE.+?6\\.0.+?Windows.+?NT.+?5\\.1.+?SV1.+?NET.+?CLR.+?1\\.1\\.4322.*?"
+          | SORT count DESC 
+      `;
+
+      const result = getESQLStatsQueryMeta(queryString);
+
+      expect(result.groupByFields).toEqual([
+        {
+          field: 'Pattern',
+          type: 'categorize',
+        },
+      ]);
+
+      expect(result.appliedFunctions).toEqual([
+        { identifier: 'count', aggregation: 'COUNT' },
+        { identifier: 'average', aggregation: 'AVG' },
+      ]);
+    });
   });
 
   describe('constructCascadeQuery', () => {
@@ -170,6 +197,7 @@ describe('cascaded documents helpers utils', () => {
 
           const cascadeQuery = constructCascadeQuery({
             query: editorQuery,
+            dataView: dataViewMock,
             nodeType,
             nodePath,
             nodePathMap,
@@ -177,7 +205,7 @@ describe('cascaded documents helpers utils', () => {
 
           expect(cascadeQuery).toBeDefined();
           expect(cascadeQuery!.esql).toBe(
-            'FROM kibana_sample_data_logs | WHERE MATCH_PHRASE(clientip, "192.168.1.1")'
+            'FROM kibana_sample_data_logs | WHERE clientip == "192.168.1.1"'
           );
         });
 
@@ -217,6 +245,7 @@ describe('cascaded documents helpers utils', () => {
 
           const cascadeQuery = constructCascadeQuery({
             query: editorQuery,
+            dataView: dataViewMock,
             nodeType,
             nodePath,
             nodePathMap,
@@ -224,11 +253,11 @@ describe('cascaded documents helpers utils', () => {
 
           expect(cascadeQuery).toBeDefined();
           expect(cascadeQuery!.esql).toBe(
-            'FROM kibana_sample_data_logs | WHERE MATCH_PHRASE(`url.keyword`, "https://www.elastic.co/downloads/beats/metricbeat")'
+            'FROM kibana_sample_data_logs | WHERE `url.keyword` == "https://www.elastic.co/downloads/beats/metricbeat"'
           );
         });
 
-        it('should not use a match_phrase operator when the group is a runtime field created by an EVAL command', () => {
+        it('should preserve runtime declarations created by EVAL commands that precede  a STATS command', () => {
           const editorQuery: AggregateQuery = {
             esql: `
               FROM remote_cluster:traces* | EVAL event = CASE(span.duration.us > 100000, "Bad", "Good") | STATS COUNT (*) by event
@@ -240,6 +269,7 @@ describe('cascaded documents helpers utils', () => {
 
           const cascadeQuery = constructCascadeQuery({
             query: editorQuery,
+            dataView: dataViewMock,
             nodeType,
             nodePath,
             nodePathMap,
@@ -268,6 +298,7 @@ describe('cascaded documents helpers utils', () => {
 
           const cascadeQuery = constructCascadeQuery({
             query: editorQuery,
+            dataView: dataViewMock,
             nodeType,
             nodePath,
             nodePathMap,
@@ -296,6 +327,7 @@ describe('cascaded documents helpers utils', () => {
 
           const cascadeQuery = constructCascadeQuery({
             query: editorQuery,
+            dataView: dataViewMock,
             nodeType,
             nodePath,
             nodePathMap,
@@ -320,6 +352,7 @@ describe('cascaded documents helpers utils', () => {
 
           const cascadeQuery = constructCascadeQuery({
             query: editorQuery,
+            dataView: dataViewMock,
             nodeType,
             nodePath,
             nodePathMap,
@@ -344,6 +377,7 @@ describe('cascaded documents helpers utils', () => {
 
           const cascadeQuery = constructCascadeQuery({
             query: editorQuery,
+            dataView: dataViewMock,
             nodeType,
             nodePath,
             nodePathMap,
@@ -368,6 +402,7 @@ describe('cascaded documents helpers utils', () => {
 
           const cascadeQuery = constructCascadeQuery({
             query: editorQuery,
+            dataView: dataViewMock,
             nodeType,
             nodePath,
             nodePathMap,
@@ -482,7 +517,7 @@ describe('cascaded documents helpers utils', () => {
           'string'
         )
       ).toBe(
-        'FROM logstash-* | WHERE `geo.dest` != "BT" | SORT @timestamp DESC | LIMIT 10000 | STATS countB = COUNT(bytes) BY geo.dest | SORT countB'
+        'FROM logstash-* | WHERE `geo.dest` == "BT" | SORT @timestamp DESC | LIMIT 10000 | STATS countB = COUNT(bytes) BY geo.dest | WHERE `geo.dest` != "BT" | SORT countB'
       );
     });
 
@@ -517,20 +552,20 @@ describe('cascaded documents helpers utils', () => {
     it('handles the case where the field being filtered on is a runtime field created by a stats command, followed by other commands', () => {
       expect(
         appendFilteringWhereClauseForCascadeLayout(
-          'FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY Pattern = CATEGORIZE(message), agent.keyword, clientip | SORT count DESC',
+          'FROM kibana_sample_data_logs | WHERE clientip == "177.120.218.48" | STATS count = COUNT(bytes), average = AVG(memory) BY Pattern = CATEGORIZE(message), agent.keyword, clientip  | SORT count DESC',
           'Pattern',
           'tada!',
           '+',
           'string'
         )
       ).toBe(
-        'FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY Pattern = CATEGORIZE(message), agent.keyword, clientip | WHERE Pattern == "tada!" | SORT count DESC'
+        'FROM kibana_sample_data_logs | WHERE clientip == "177.120.218.48" | STATS count = COUNT(bytes), average = AVG(memory) BY Pattern = CATEGORIZE(message), agent.keyword, clientip | WHERE Pattern == "tada!" | SORT count DESC'
       );
     });
 
-    it('handles the case where the field being filtered on is a runtime field created by a stats command, and with another filter applied there after', () => {
+    it('handles the case where the field being filtered on is a runtime field created by a stats command, and with another filter from the data source applied there after', () => {
       const initialFilterResult = appendFilteringWhereClauseForCascadeLayout(
-        'FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY Pattern = CATEGORIZE(message), agent.keyword, clientip | SORT count DESC',
+        'FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY Pattern = CATEGORIZE(message), agent.keyword | SORT count DESC',
         'Pattern',
         'tada!',
         '+',
@@ -538,7 +573,7 @@ describe('cascaded documents helpers utils', () => {
       );
 
       expect(initialFilterResult).toBe(
-        'FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY Pattern = CATEGORIZE(message), agent.keyword, clientip | WHERE Pattern == "tada!" | SORT count DESC'
+        'FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY Pattern = CATEGORIZE(message), agent.keyword | WHERE Pattern == "tada!" | SORT count DESC'
       );
 
       expect(
@@ -550,7 +585,7 @@ describe('cascaded documents helpers utils', () => {
           'string'
         )
       ).toBe(
-        'FROM kibana_sample_data_logs | WHERE clientip == "192.168.1.1" | STATS count = COUNT(bytes), average = AVG(memory) BY Pattern = CATEGORIZE(message), agent.keyword, clientip | WHERE Pattern == "tada!" | SORT count DESC'
+        'FROM kibana_sample_data_logs | WHERE clientip == "192.168.1.1" | STATS count = COUNT(bytes), average = AVG(memory) BY Pattern = CATEGORIZE(message), agent.keyword | WHERE Pattern == "tada!" | SORT count DESC'
       );
     });
   });

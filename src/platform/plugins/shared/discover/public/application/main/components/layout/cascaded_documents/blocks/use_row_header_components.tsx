@@ -34,6 +34,7 @@ import {
   type ESQLStatsQueryMeta,
   type SupportedStatsFunction,
 } from '@kbn/esql-utils/src/utils/cascaded_documents_helpers';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { getPatternCellRenderer } from '../../../../../../context_awareness/profile_providers/common/patterns_data_source_profile/pattern_cell_renderer';
 
 import type { ESQLDataGroupNode, DataTableRecord } from './types';
@@ -49,6 +50,7 @@ interface RowContext {
 }
 
 interface RowClickActionContext {
+  dataView: DataView;
   editorQuery: AggregateQuery;
   editorQueryMeta: ESQLStatsQueryMeta;
   rowContext: RowContext;
@@ -141,6 +143,7 @@ const contextRowActions: Array<
         appState: {
           query: constructCascadeQuery({
             query: this.editorQuery,
+            dataView: this.dataView,
             nodeType: 'leaf',
             nodePath: [this.rowContext.groupId],
             nodePathMap: { [this.rowContext.groupId]: this.rowContext.groupValue },
@@ -154,7 +157,7 @@ const contextRowActions: Array<
 interface ContextMenuProps
   extends Pick<
     RowClickActionContext,
-    'editorQuery' | 'editorQueryMeta' | 'globalState' | 'openInNewTab'
+    'editorQuery' | 'editorQueryMeta' | 'globalState' | 'openInNewTab' | 'dataView'
   > {
   row: RowContext;
   services: UnifiedDataTableProps['services'];
@@ -211,10 +214,11 @@ const ContextMenu = React.memo(
 );
 
 export const useEsqlDataCascadeRowActionHelpers = (
-  services: UnifiedDataTableProps['services'],
+  dataView: DataView,
   editorQuery: AggregateQuery,
   editorQueryMeta: ESQLStatsQueryMeta,
-  globalState: TabStateGlobalState
+  globalState: TabStateGlobalState,
+  services: UnifiedDataTableProps['services']
 ) => {
   const popoverRef = useRef<HTMLButtonElement | null>(null);
   const [popoverRowData, setPopoverRowData] = useState<RowContext | null>(null);
@@ -273,6 +277,7 @@ export const useEsqlDataCascadeRowActionHelpers = (
             globalState={globalState}
             row={popoverRowData!}
             services={services}
+            dataView={dataView}
             openInNewTab={openInNewTab}
           />
         </EuiWrappingPopover>
@@ -285,6 +290,7 @@ export const useEsqlDataCascadeRowActionHelpers = (
       editorQueryMeta,
       globalState,
       services,
+      dataView,
       openInNewTab,
     ]
   );

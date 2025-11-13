@@ -66,10 +66,6 @@ const ESQLDataCascade = React.memo(
     const globalTimeRange = globalState?.timeRange;
     const { scopedProfilesManager } = useScopedServices();
     const { expressions } = useDiscoverServices();
-    // use a ref to store the query columns for each query, so setting this value will not trigger a re-render
-    const queryColumnsMap = useRef<
-      Map<string[], NonNullable<Awaited<ReturnType<typeof fetchEsql>>['esqlQueryColumns']>>
-    >(new Map());
 
     const queryMeta = useMemo(() => {
       return getESQLStatsQueryMeta((query as AggregateQuery).esql);
@@ -132,20 +128,12 @@ const ESQLDataCascade = React.memo(
     const cascadeLeafRowRenderer = useCallback<
       DataCascadeRowCellProps<ESQLDataGroupNode, DataTableRecord>['children']
     >(
-      ({
-        data: cellData,
-        cellId,
-        getScrollElement,
-        getScrollOffset,
-        getScrollMargin,
-        nodePath,
-      }) => (
+      ({ data: cellData, cellId, getScrollElement, getScrollOffset, getScrollMargin }) => (
         <ESQLDataCascadeLeafCell
           {...props}
           dataView={dataView}
           cellData={cellData!}
           cellId={cellId}
-          queryColumns={queryColumnsMap.current.get(nodePath) ?? []}
           getScrollElement={getScrollElement}
           getScrollOffset={getScrollOffset}
           getScrollMargin={getScrollMargin}
@@ -155,9 +143,10 @@ const ESQLDataCascade = React.memo(
     );
 
     const fetchCascadeData = useCallback(
-      async ({ nodeType, nodePath, nodePathMap }: Omit<CascadeQueryArgs, 'query'>) => {
+      async ({ nodeType, nodePath, nodePathMap }: Omit<CascadeQueryArgs, 'query' | 'dataView'>) => {
         const newQuery = constructCascadeQuery({
           query: query as AggregateQuery,
+          dataView,
           nodeType,
           nodePath,
           nodePathMap,
@@ -168,15 +157,11 @@ const ESQLDataCascade = React.memo(
           return [];
         }
 
-        const { records, esqlQueryColumns } = await scopedESQLQueryFetch(newQuery);
-
-        if (esqlQueryColumns) {
-          queryColumnsMap.current.set(nodePath, esqlQueryColumns);
         }
 
         return records;
       },
-      [query, scopedESQLQueryFetch]
+      [query, dataView, scopedESQLQueryFetch]
     );
 
     const onCascadeGroupNodeExpanded = useCallback<
@@ -253,10 +238,11 @@ export const CascadedDocumentsLayout = React.memo(
     }, [query]);
 
     const { renderRowActionPopover, togglePopover } = useEsqlDataCascadeRowActionHelpers(
-      props.services,
+      dataView,
       query as AggregateQuery,
       queryMeta,
-      globalState
+      globalState,
+      props.services
     );
 
     return (
