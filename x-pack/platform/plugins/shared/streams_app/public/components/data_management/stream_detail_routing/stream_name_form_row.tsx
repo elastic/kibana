@@ -24,6 +24,8 @@ interface StreamNameFormRowProps {
   onChange?: (value: string) => void;
   readOnly?: boolean;
   autoFocus?: boolean;
+  error?: string;
+  isInvalid?: boolean;
 }
 
 const MIN_NAME_LENGTH = 1;
@@ -31,16 +33,16 @@ const MAX_NAME_LENGTH = 200;
 const PREFIX_MAX_VISIBLE_CHARACTERS = 25;
 
 export const getHelpText = (
-  prefix: string,
-  value: string,
+  isStreamNameEmpty: boolean,
+  isStreamNameTooLong: boolean,
   readOnly: boolean
 ): string | undefined => {
-  if (value.length <= prefix.length && !readOnly) {
-    return i18n.translate('xpack.streams.streamDetailRouting.emptyNameErrorHelpText', {
-      defaultMessage: 'Stream name must not be empty.',
+  if (isStreamNameEmpty && !readOnly) {
+    return i18n.translate('xpack.streams.streamDetailRouting.minimumNameHelpText', {
+      defaultMessage: `Stream name is required.`,
     });
-  } else if (value.length >= MAX_NAME_LENGTH && !readOnly) {
-    return i18n.translate('xpack.streams.streamDetailRouting.nameTooLongErrorHelpText', {
+  } else if (isStreamNameTooLong && !readOnly) {
+    return i18n.translate('xpack.streams.streamDetailRouting.maximumNameHelpText', {
       defaultMessage: `Stream name cannot be longer than {maxLength} characters.`,
       values: {
         maxLength: MAX_NAME_LENGTH,
@@ -56,6 +58,8 @@ export function StreamNameFormRow({
   onChange = () => {},
   readOnly = false,
   autoFocus = false,
+  error,
+  isInvalid = false,
 }: StreamNameFormRowProps) {
   const descriptionId = useGeneratedHtmlId();
 
@@ -65,9 +69,14 @@ export function StreamNameFormRow({
   const prefix = parentStreamName + '.';
   const partitionName = value.replace(prefix, '');
 
-  const helpText = getHelpText(prefix, value, readOnly);
-  const isInvalid = !readOnly && partitionName.includes('.');
-  const errorMessage = isInvalid
+  const isStreamNameEmpty = value.length <= prefix.length;
+  const isStreamNameTooLong = value.length > MAX_NAME_LENGTH;
+  const isLengthValid = !isStreamNameEmpty && !isStreamNameTooLong;
+
+  const helpText = getHelpText(isStreamNameEmpty, isStreamNameTooLong, readOnly);
+
+  const isDotPresent = !readOnly && partitionName.includes('.');
+  const dotErrorMessage = isDotPresent
     ? i18n.translate('xpack.streams.streamDetailRouting.nameContainsDotErrorMessage', {
         defaultMessage: `Stream name cannot contain the "." character.`,
       })
@@ -87,11 +96,11 @@ export function StreamNameFormRow({
       })}
       helpText={helpText}
       describedByIds={[descriptionId]}
-      isInvalid={isInvalid}
-      error={errorMessage}
+      isInvalid={isInvalid || isDotPresent || !isLengthValid}
+      error={error || dotErrorMessage}
     >
       <EuiFieldText
-        isInvalid={isInvalid}
+        isInvalid={isInvalid || isDotPresent || !isLengthValid}
         data-test-subj="streamsAppRoutingStreamEntryNameField"
         value={partitionName}
         fullWidth
