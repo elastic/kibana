@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "isolatedModules": true
@@ -16,7 +16,6 @@
     "@kbn/presentation-util-plugin",
     "@kbn/expressions-plugin",
     "@kbn/usage-collection-plugin",
-    "@kbn/visualizations-plugin",
     "@kbn/charts-plugin",
     "@kbn/field-formats-plugin",
     "@kbn/kibana-utils-plugin",
@@ -32,6 +31,7 @@
     "@kbn/charts-theme",
     "@kbn/ebt-tools",
     "@kbn/react-kibana-context-theme",
+    "@kbn/visualizations-common"
   ],
   "exclude": [
     "target/**/*",

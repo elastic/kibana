@@ -281,6 +281,13 @@ export const ReadinessTasksTable: React.FC = () => {
     [statusFilter, taskCounts.completed, taskCounts.incomplete, setStatusFilter]
   );
 
+  const categoriesSelectLabel = i18n.translate(
+    'xpack.securitySolution.siemReadiness.categoriesPlaceholder',
+    {
+      defaultMessage: 'Categories',
+    }
+  );
+
   return (
     <EuiSplitPanel.Outer hasBorder hasShadow={false} css={{ height: PANEL_HEIGHT }}>
       <EuiSplitPanel.Inner grow={false} css={{ width: '100%' }}>
@@ -326,12 +333,8 @@ export const ReadinessTasksTable: React.FC = () => {
                   options={selectOptions}
                   valueOfSelected={selectedPillar}
                   onChange={(value) => setSelectedPillar(value)}
-                  placeholder={i18n.translate(
-                    'xpack.securitySolution.siemReadiness.categoriesPlaceholder',
-                    {
-                      defaultMessage: 'Categories',
-                    }
-                  )}
+                  placeholder={categoriesSelectLabel}
+                  aria-label={categoriesSelectLabel}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

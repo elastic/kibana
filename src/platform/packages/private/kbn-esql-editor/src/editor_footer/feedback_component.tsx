@@ -15,21 +15,20 @@ import { FEEDBACK_LINK } from '@kbn/esql-utils';
 
 export function SubmitFeedbackComponent({ isSpaceReduced }: { isSpaceReduced?: boolean }) {
   const { euiTheme } = useEuiTheme();
+  const feedbackLabel = i18n.translate('esqlEditor.query.feedback', {
+    defaultMessage: 'Feedback',
+  });
   return (
     <>
       {isSpaceReduced && (
         <EuiFlexItem grow={false}>
-          <EuiToolTip
-            position="top"
-            content={i18n.translate('esqlEditor.query.feedback', {
-              defaultMessage: 'Feedback',
-            })}
-          >
+          <EuiToolTip position="top" content={feedbackLabel} disableScreenReaderOutput>
             <EuiButtonIcon
               href={FEEDBACK_LINK}
               iconType="editorComment"
               target="_blank"
               data-test-subj="ESQLEditor-feedback-link"
+              aria-label={feedbackLabel}
             />
           </EuiToolTip>
         </EuiFlexItem>

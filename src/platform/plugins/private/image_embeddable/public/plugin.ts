@@ -20,10 +20,7 @@ import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/publ
 import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import { imageClickTrigger } from './actions';
 import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
-import {
-  ADD_IMAGE_EMBEDDABLE_ACTION_ID,
-  IMAGE_EMBEDDABLE_TYPE,
-} from './image_embeddable/constants';
+import { ADD_IMAGE_EMBEDDABLE_ACTION_ID, IMAGE_EMBEDDABLE_TYPE } from '../common/constants';
 
 export interface ImageEmbeddableSetupDependencies {
   embeddable: EmbeddableSetup;

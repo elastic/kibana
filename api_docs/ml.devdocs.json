@@ -595,40 +595,6 @@
     "interfaces": [
       {
         "parentPluginId": "ml",
-        "id": "def-public.AnomalySwimLaneEmbeddableState",
-        "type": "Interface",
-        "tags": [],
-        "label": "AnomalySwimLaneEmbeddableState",
-        "description": [
-          "\nPersisted state for the Anomaly Swim Lane Embeddable."
-        ],
-        "signature": [
-          {
-            "pluginId": "ml",
-            "scope": "public",
-            "docId": "kibMlPluginApi",
-            "section": "def-public.AnomalySwimLaneEmbeddableState",
-            "text": "AnomalySwimLaneEmbeddableState"
-          },
-          " extends ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.SerializedTitles",
-            "text": "SerializedTitles"
-          },
-          ",",
-          "AnomalySwimlaneEmbeddableCustomInput"
-        ],
-        "path": "x-pack/platform/plugins/shared/ml/public/embeddables/anomaly_swimlane/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "ml",
         "id": "def-public.DataRecognizerConfigResponse",
         "type": "Interface",
         "tags": [],
@@ -1295,15 +1261,23 @@
         "description": [],
         "signature": [
           "MlEmbeddableBaseApi",
-          "<",
+          "<Readonly<{ id?: string | undefined; title?: string | undefined; description?: string | undefined; timeRange?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; perPage?: number | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; filters?: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
           {
-            "pluginId": "ml",
-            "scope": "public",
-            "docId": "kibMlPluginApi",
-            "section": "def-public.AnomalySwimLaneEmbeddableState",
-            "text": "AnomalySwimLaneEmbeddableState"
+            "pluginId": "@kbn/es-query-constants",
+            "scope": "common",
+            "docId": "kibKbnEsQueryConstantsPluginApi",
+            "section": "def-common.FilterStateStore",
+            "text": "FilterStateStore"
           },
-          "> & ",
+          "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; alias?: string | null | undefined; index?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; relation?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; hidePanelTitles?: boolean | undefined; refreshConfig?: Readonly<{} & { value: number; pause: boolean; }> | undefined; } & { jobIds: string[]; viewBy: string; swimlaneType: \"viewBy\"; }> | Readonly<{ id?: string | undefined; title?: string | undefined; description?: string | undefined; timeRange?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; perPage?: number | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; filters?: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          {
+            "pluginId": "@kbn/es-query-constants",
+            "scope": "common",
+            "docId": "kibKbnEsQueryConstantsPluginApi",
+            "section": "def-common.FilterStateStore",
+            "text": "FilterStateStore"
+          },
+          "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; alias?: string | null | undefined; index?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; relation?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; hidePanelTitles?: boolean | undefined; refreshConfig?: Readonly<{} & { value: number; pause: boolean; }> | undefined; } & { jobIds: string[]; swimlaneType: \"overall\"; }>> & ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -1369,6 +1343,39 @@
           },
           " & ",
           "AnomalySwimLaneComponentApi"
+        ],
+        "path": "x-pack/platform/plugins/shared/ml/public/embeddables/anomaly_swimlane/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-public.AnomalySwimLaneEmbeddableState",
+        "type": "Type",
+        "tags": [],
+        "label": "AnomalySwimLaneEmbeddableState",
+        "description": [
+          "\nPersisted state for the Anomaly Swim Lane Embeddable."
+        ],
+        "signature": [
+          "Readonly<{ id?: string | undefined; title?: string | undefined; description?: string | undefined; timeRange?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; perPage?: number | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; filters?: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          {
+            "pluginId": "@kbn/es-query-constants",
+            "scope": "common",
+            "docId": "kibKbnEsQueryConstantsPluginApi",
+            "section": "def-common.FilterStateStore",
+            "text": "FilterStateStore"
+          },
+          "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; alias?: string | null | undefined; index?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; relation?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; hidePanelTitles?: boolean | undefined; refreshConfig?: Readonly<{} & { value: number; pause: boolean; }> | undefined; } & { jobIds: string[]; viewBy: string; swimlaneType: \"viewBy\"; }> | Readonly<{ id?: string | undefined; title?: string | undefined; description?: string | undefined; timeRange?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; perPage?: number | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; filters?: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          {
+            "pluginId": "@kbn/es-query-constants",
+            "scope": "common",
+            "docId": "kibKbnEsQueryConstantsPluginApi",
+            "section": "def-common.FilterStateStore",
+            "text": "FilterStateStore"
+          },
+          "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; alias?: string | null | undefined; index?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; relation?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; hidePanelTitles?: boolean | undefined; refreshConfig?: Readonly<{} & { value: number; pause: boolean; }> | undefined; } & { jobIds: string[]; swimlaneType: \"overall\"; }>"
         ],
         "path": "x-pack/platform/plugins/shared/ml/public/embeddables/anomaly_swimlane/types.ts",
         "deprecated": false,
@@ -1738,17 +1745,15 @@
         "Filter",
         ">; updateFilter(filterId: string, description: string, addItems: string[], removeItems: string[]): Promise<",
         "Filter",
-        ">; deleteFilter(filterId: string): Promise<{ acknowledged: boolean; }>; }; results: { getAnomaliesTableData(jobIds: string[], criteriaFields: string[], influencers: ",
+        ">; deleteFilter(filterId: string): Promise<{ acknowledged: boolean; }>; }; results: { getAnomaliesTableData(jobIds: string[], criteriaFields: string[], influencers: Readonly<{ operation?: \"+\" | \"-\" | undefined; cardinality?: number | undefined; fieldValue?: string | number | undefined; fieldType?: ",
         {
           "pluginId": "@kbn/ml-anomaly-utils",
           "scope": "common",
           "docId": "kibKbnMlAnomalyUtilsPluginApi",
-          "section": "def-common.MlEntityField",
-          "text": "MlEntityField"
+          "section": "def-common.ML_ENTITY_FIELD_TYPE",
+          "text": "ML_ENTITY_FIELD_TYPE"
         },
-        "[], aggregationInterval: string, threshold: ",
-        "SeverityThreshold",
-        "[], earliestMs: number, latestMs: number, dateFormatTz: string, maxRecords: number, maxExamples?: number | undefined, influencersFilterQuery?: any, functionDescription?: string | undefined): ",
+        " | undefined; } & { fieldName: string; }>[], aggregationInterval: string, threshold: Readonly<{ max?: number | undefined; } & { min: number; }>[], earliestMs: number, latestMs: number, dateFormatTz: string, maxRecords: number, maxExamples?: number | undefined, influencersFilterQuery?: any, functionDescription?: string | undefined): ",
         "Observable",
         "<",
         "GetAnomaliesTableDataResult",
@@ -1806,17 +1811,15 @@
         "GetStoppedPartitionResult",
         ">; getDatafeedResultChartData(jobId: string, start: number, end: number): Promise<",
         "GetDatafeedResultsChartDataResult",
-        ">; getAnomalyCharts$(jobIds: string[], influencers: ",
+        ">; getAnomalyCharts$(jobIds: string[], influencers: Readonly<{ operation?: \"+\" | \"-\" | undefined; cardinality?: number | undefined; fieldValue?: string | number | undefined; fieldType?: ",
         {
           "pluginId": "@kbn/ml-anomaly-utils",
           "scope": "common",
           "docId": "kibKbnMlAnomalyUtilsPluginApi",
-          "section": "def-common.MlEntityField",
-          "text": "MlEntityField"
+          "section": "def-common.ML_ENTITY_FIELD_TYPE",
+          "text": "ML_ENTITY_FIELD_TYPE"
         },
-        "[], threshold: ",
-        "SeverityThreshold",
-        "[], earliestMs: number, latestMs: number, timeBounds: { min?: number | undefined; max?: number | undefined; }, maxResults: number, numberOfPoints: number, influencersFilterQuery?: ",
+        " | undefined; } & { fieldName: string; }>[], threshold: Readonly<{ max?: number | undefined; } & { min: number; }>[], earliestMs: number, latestMs: number, timeBounds: { min?: number | undefined; max?: number | undefined; }, maxResults: number, numberOfPoints: number, influencersFilterQuery?: ",
         "QueryDslQueryContainer",
         " | undefined): ",
         "Observable",
@@ -2835,11 +2838,15 @@
         "label": "ResultsService",
         "description": [],
         "signature": [
-          "{ getAnomaliesTableData: (jobIds: string[], criteriaFields: ",
-          "CriteriaField",
-          "[], influencers: Influencer[], aggregationInterval: string, threshold: ",
-          "SeverityThreshold",
-          "[], earliestMs: number, latestMs: number, dateFormatTz: string, maxRecords?: number, maxExamples?: number, influencersFilterQuery?: any, functionDescription?: string | undefined) => Promise<{ anomalies: ",
+          "{ getAnomaliesTableData: (jobIds: string[], criteriaFields: Readonly<{ fieldValue?: any; fieldType?: ",
+          {
+            "pluginId": "@kbn/ml-anomaly-utils",
+            "scope": "common",
+            "docId": "kibKbnMlAnomalyUtilsPluginApi",
+            "section": "def-common.ML_ENTITY_FIELD_TYPE",
+            "text": "ML_ENTITY_FIELD_TYPE"
+          },
+          " | undefined; } & { fieldName: string; }>[], influencers: Readonly<{ fieldValue?: any; } & { fieldName: string; }>[], aggregationInterval: string, threshold: Readonly<{ max?: number | undefined; } & { min: number; }>[], earliestMs: number, latestMs: number, dateFormatTz: string, maxRecords?: number, maxExamples?: number, influencersFilterQuery?: any, functionDescription?: string | undefined) => Promise<{ anomalies: ",
           {
             "pluginId": "@kbn/ml-anomaly-utils",
             "scope": "common",

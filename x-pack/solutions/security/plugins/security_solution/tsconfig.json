@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -17,11 +17,7 @@
     "../../../../../typings/**/*",
     "emotion.d.ts"
   ],
-  "exclude": [
-    "target/**/*",
-    "**/cypress/**",
-    "public/management/cypress.config.ts"
-  ],
+  "exclude": ["target/**/*", "**/cypress/**", "public/management/cypress.config.ts"],
   "kbn_references": [
     "@kbn/core",
     {
@@ -171,7 +167,6 @@
     "@kbn/react-kibana-mount",
     "@kbn/react-kibana-context-styled",
     "@kbn/unified-doc-viewer-plugin",
-    "@kbn/openapi-generator",
     "@kbn/unified-data-table",
     "@kbn/unified-doc-viewer",
     "@kbn/dom-drag-drop",
@@ -255,15 +250,18 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/elastic-assistant-shared-state",
     "@kbn/elastic-assistant-shared-state-plugin",
-    "@kbn/spaces-utils",
     "@kbn/core-lifecycle-server-mocks",
     "@kbn/licensing-types",
     "@kbn/core-metrics-server",
+    "@kbn/core-elasticsearch-server-utils",
     "@kbn/rrule",
     "@kbn/onechat-genai-utils",
     "@kbn/onechat-server",
     "@kbn/core-analytics-server-mocks",
     "@kbn/object-utils",
     "@kbn/core-ui-settings-common",
+    "@kbn/react-query",
+    "@kbn/core-chrome-layout-constants",
+    "@kbn/core-lifecycle-browser-mocks"
   ]
 }

@@ -36,12 +36,15 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: PostHealthCheckRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => PostHealthCheckResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
             404: {
+              description: 'Not found.',
               body: genericErrorResponse,
             },
           },

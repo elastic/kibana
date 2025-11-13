@@ -121,8 +121,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   } = useConfig();
   const hasFleetAddAgentsPrivileges = useAuthz().fleet.addAgents;
   const fleetStatus = useFleetStatus();
-  const { docLinks, cloud } = useStartServices();
-  const isServerless = !!cloud?.isServerlessEnabled;
+  const { docLinks } = useStartServices();
   const spaceSettings = useSpaceSettingsContext();
   const [newAgentPolicy, setNewAgentPolicy] = useState<NewAgentPolicy>(
     generateNewAgentPolicyWithDefaults({
@@ -472,7 +471,6 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
           {/* Show SetupTechnologySelector for all agentless integrations, including extension views */}
           {!isAddIntegrationFlyout && isAgentlessIntegration(packageInfo) && (
             <SetupTechnologySelector
-              showLimitationsMessage={!isServerless}
               disabled={false}
               allowedSetupTechnologies={allowedSetupTechnologies}
               setupTechnology={selectedSetupTechnology}
@@ -532,7 +530,6 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       handleSetupTechnologyChange,
       allowedSetupTechnologies,
       isAddIntegrationFlyout,
-      isServerless,
     ]
   );
 
@@ -608,6 +605,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       {fipsAgentsCount > 0 && !fipsCompatibleIntegration && (
         <>
           <EuiCallOut
+            announceOnMount={false}
             size="m"
             color="warning"
             iconType="warning"
@@ -640,6 +638,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       {showSecretsDisabledCallout && (
         <>
           <EuiCallOut
+            announceOnMount
             size="m"
             color="warning"
             title={

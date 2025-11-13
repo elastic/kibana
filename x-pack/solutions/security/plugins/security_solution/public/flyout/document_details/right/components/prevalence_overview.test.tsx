@@ -54,10 +54,7 @@ describe('<PrevalenceOverview />', () => {
       error: false,
       data: [],
     });
-    (useNavigateToLeftPanel as jest.Mock).mockReturnValue({
-      navigateToLeftPanel: mockNavigateToLeftPanel,
-      isEnabled: true,
-    });
+    (useNavigateToLeftPanel as jest.Mock).mockReturnValue(mockNavigateToLeftPanel);
   });
 
   it('should render wrapper component', () => {
@@ -76,17 +73,6 @@ describe('<PrevalenceOverview />', () => {
     });
     expect(getByTestId(TITLE_LINK_TEST_ID)).toBeInTheDocument();
     expect(queryByTestId(TITLE_ICON_TEST_ID)).not.toBeInTheDocument();
-  });
-
-  it('should not render link if navigation is disabled', () => {
-    (useNavigateToLeftPanel as jest.Mock).mockReturnValue({
-      navigateToLeftPanel: mockNavigateToLeftPanel,
-      isEnabled: false,
-    });
-
-    const { getByTestId, queryByTestId } = renderPrevalenceOverview(mockContextValue);
-    expect(queryByTestId(TITLE_LINK_TEST_ID)).not.toBeInTheDocument();
-    expect(getByTestId(TITLE_TEXT_TEST_ID)).toBeInTheDocument();
   });
 
   it('should render loading', () => {

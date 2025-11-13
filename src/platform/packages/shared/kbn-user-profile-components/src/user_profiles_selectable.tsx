@@ -401,6 +401,7 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
             <>
               <EuiHorizontalRule margin="none" />
               <EuiCallOut
+                announceOnMount
                 title={
                   limitReachedMessage ? (
                     limitReachedMessage(limit)

@@ -149,7 +149,7 @@
               "Specifies the group to which this module belongs"
             ],
             "signature": [
-              "\"search\" | \"security\" | \"observability\" | \"chat\" | \"platform\" | \"common\""
+              "\"search\" | \"security\" | \"observability\" | \"workplaceai\" | \"platform\" | \"common\""
             ],
             "path": "packages/kbn-repo-source-classifier/src/module_id.ts",
             "deprecated": false,

@@ -41,9 +41,14 @@ import type {
 import type { DeleteMonitoringEngineRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/engine/delete.gen';
 import type { DeletePrivMonUserRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/users/delete.gen';
 import type {
+  DeleteSingleEntityRequestParamsInput,
+  DeleteSingleEntityRequestBodyInput,
+} from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/entities/delete_entity.gen';
+import type {
   DeprecatedTriggerRiskScoreCalculationRequestBodyInput,
   TriggerRiskScoreCalculationRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/entity_calculation_route.gen';
+import type { EntityDetailsHighlightsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_details/highlights.gen';
 import type { FindAssetCriticalityRecordsRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/list_asset_criticality.gen';
 import type { GetAssetCriticalityRecordRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/get_asset_criticality.gen';
 import type { GetEntityEngineRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/get.gen';
@@ -63,6 +68,10 @@ import type {
   UpdatePrivMonUserRequestParamsInput,
   UpdatePrivMonUserRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/users/update.gen';
+import type {
+  UpsertEntitiesBulkRequestQueryInput,
+  UpsertEntitiesBulkRequestBodyInput,
+} from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/entities/upsert_entities_bulk.gen';
 import type {
   UpsertEntityRequestQueryInput,
   UpsertEntityRequestParamsInput,
@@ -237,6 +246,24 @@ If a record already exists for the specified entity, that record is overwritten 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     /**
+      * Delete a single entity in Entity Store.
+The entity will be immediately deleted from the latest index.  It will remain available in historical snapshots if it has been snapshotted.  The delete operation does not prevent the entity from being recreated if it is observed again in the future. 
+
+      */
+    deleteSingleEntity(props: DeleteSingleEntityProps, kibanaSpace: string = 'default') {
+      return supertest
+        .delete(
+          getRouteUrlForSpace(
+            replaceParams('/api/entity_store/entities/{entityType}', props.params),
+            kibanaSpace
+          )
+        )
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
+    /**
      * Calculates and persists Risk Scores for an entity, returning the calculated risk score.
      */
     deprecatedTriggerRiskScoreCalculation(
@@ -270,6 +297,14 @@ If a record already exists for the specified entity, that record is overwritten 
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
+    entityDetailsHighlights(props: EntityDetailsHighlightsProps, kibanaSpace: string = 'default') {
+      return supertest
+        .post(getRouteUrlForSpace('/internal/entity_details/highlights', kibanaSpace))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
     },
     entityStoreGetPrivileges(kibanaSpace: string = 'default') {
       return supertest
@@ -619,6 +654,21 @@ If a record already exists for the specified entity, that record is overwritten 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     /**
+      * Update or create many entities in Entity Store.
+If the specified entity already exists, it is updated with the provided values.  If the entity does not exist, a new one is created.
+The creation is asynchronous. The time for a document to be present in the  final index depends on the entity store transform and usually takes more than 1 minute.
+
+      */
+    upsertEntitiesBulk(props: UpsertEntitiesBulkProps, kibanaSpace: string = 'default') {
+      return supertest
+        .put(getRouteUrlForSpace('/api/entity_store/entities/bulk', kibanaSpace))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object)
+        .query(props.query);
+    },
+    /**
       * Update or create an entity in Entity Store.
 If the specified entity already exists, it is updated with the provided values.  If the entity does not exist, a new one is created. By default, only the following fields can be updated: * `entity.attributes.*` * `entity.lifecycle.*` * `entity.behavior.*` To update other fields, set the `force` query parameter to `true`. > info > Some fields always retain the first observed value. Updates to these fields will not appear in the final index.
 > Due to technical limitations, not all updates are guaranteed to appear in the final list of observed values.
@@ -676,8 +726,15 @@ export interface DeleteMonitoringEngineProps {
 export interface DeletePrivMonUserProps {
   params: DeletePrivMonUserRequestParamsInput;
 }
+export interface DeleteSingleEntityProps {
+  params: DeleteSingleEntityRequestParamsInput;
+  body: DeleteSingleEntityRequestBodyInput;
+}
 export interface DeprecatedTriggerRiskScoreCalculationProps {
   body: DeprecatedTriggerRiskScoreCalculationRequestBodyInput;
+}
+export interface EntityDetailsHighlightsProps {
+  body: EntityDetailsHighlightsRequestBodyInput;
 }
 export interface FindAssetCriticalityRecordsProps {
   query: FindAssetCriticalityRecordsRequestQueryInput;
@@ -732,6 +789,10 @@ export interface UpdateEntitySourceProps {
 export interface UpdatePrivMonUserProps {
   params: UpdatePrivMonUserRequestParamsInput;
   body: UpdatePrivMonUserRequestBodyInput;
+}
+export interface UpsertEntitiesBulkProps {
+  query: UpsertEntitiesBulkRequestQueryInput;
+  body: UpsertEntitiesBulkRequestBodyInput;
 }
 export interface UpsertEntityProps {
   query: UpsertEntityRequestQueryInput;

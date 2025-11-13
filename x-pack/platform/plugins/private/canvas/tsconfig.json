@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
 
@@ -81,7 +81,8 @@
     "@kbn/shared-ux-markdown",
     "@kbn/content-management-utils",
     "@kbn/deeplinks-analytics",
-    "@kbn/core-saved-objects-api-server"
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/visualizations-common"
   ],
   "exclude": ["target/**/*"]
 }

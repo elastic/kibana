@@ -7,17 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
+import type { MapParameters } from '../../../definitions/utils/autocomplete/map_expression';
+import { getCommandMapExpressionSuggestions } from '../../../definitions/utils/autocomplete/map_expression';
 import {
   commaCompleteItem,
   withAutoSuggest,
   pipeCompleteItem,
   withCompleteItem,
   EDITOR_MARKER,
+  minMaxValueCompleteItem,
+  noneValueCompleteItem,
 } from '../../../..';
 import { isColumn } from '../../../ast/is';
 import { ESQL_STRING_TYPES } from '../../../definitions/types';
 import { columnExists, handleFragment } from '../../../definitions/utils/autocomplete/helpers';
-import type { ESQLAstFuseCommand, ESQLCommand } from '../../../types';
+import type { ESQLAstAllCommands, ESQLAstFuseCommand } from '../../../types';
 import type { ICommandCallbacks } from '../../types';
 import { type ISuggestionItem, type ICommandContext } from '../../types';
 import {
@@ -64,7 +68,7 @@ function getPosition(innerText: string, command: ESQLAstFuseCommand): FusePositi
 // FUSE <fuse_method> SCORE BY <score_column> GROUP BY <group_column> KEY BY <key_columns> WITH <options>
 export async function autocomplete(
   query: string,
-  command: ESQLCommand,
+  command: ESQLAstAllCommands,
   callbacks?: ICommandCallbacks,
   context?: ICommandContext,
   cursorPosition?: number
@@ -95,7 +99,7 @@ export async function autocomplete(
 
     // WITH suggests a map of options that depends on the <fuse_method>
     case FusePosition.WITH:
-      return [];
+      return await withOptionAutocomplete(innerText, fuseCommand);
   }
 }
 
@@ -236,6 +240,66 @@ async function keyByAutocomplete(
     getSuggestionsForIncomplete,
     getSuggestionsForComplete
   );
+}
+
+/**
+ * Returns suggestions for the `WITH` argument of the `FUSE` command.
+ * The suggestions depend on the `<fuse_method>` used.
+ * The default fuse method is `rrf`.
+ * If `rrf`, it suggests `rank_constant` and `weights`.
+ * If `linear` method is used, it suggests `normalizer` and `weights`.
+ */
+async function withOptionAutocomplete(innerText: string, command: ESQLAstFuseCommand) {
+  const withOption = findCommandOptionByName(command, 'with');
+  if (!withOption) {
+    return [];
+  }
+
+  // Means the map is not present - FUSE WITH /
+  if (withOption.args.length === 0) {
+    return [
+      withAutoSuggest({
+        label: '{ }',
+        kind: 'Reference',
+        detail: '{ ... }',
+        text: '{ $0 }',
+        sortText: '0',
+        asSnippet: true,
+      }),
+    ];
+  }
+
+  // Select map parameters based on fuseType; default to rrf if missing, if unknown keep the empty map and don't suggest nothing
+  let mapParameters: MapParameters = {};
+  if (!command.fuseType || command.fuseType.text === 'rrf') {
+    mapParameters = {
+      rank_constant: {
+        type: 'number',
+        suggestions: [
+          {
+            label: '60',
+            text: '60',
+            kind: 'Value',
+            sortText: '1',
+            detail: i18n.translate('kbn-esql-ast.esql.autocomplete.fuse.rank_constant_default', {
+              defaultMessage: 'Default value',
+            }),
+          },
+        ],
+      },
+      weights: { type: 'map' },
+    };
+  } else if (command.fuseType.text === 'linear') {
+    mapParameters = {
+      normalizer: {
+        type: 'string',
+        suggestions: [noneValueCompleteItem, minMaxValueCompleteItem],
+      },
+      weights: { type: 'map' },
+    };
+  }
+
+  return getCommandMapExpressionSuggestions(innerText, mapParameters);
 }
 
 /**

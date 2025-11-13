@@ -14,7 +14,7 @@ import type {
   MinIndexPatternColumn,
   StandardDeviationIndexPatternColumn,
   SumIndexPatternColumn,
-} from '@kbn/lens-plugin/public';
+} from '@kbn/lens-common';
 import { fromFormatAPIToLensState, fromFormatLensStateToAPI } from './format';
 import { getLensStateMetricSharedProps, getLensAPIMetricSharedProps } from './utils';
 import type { LensApiMetricOperation, LensApiSumMetricOperation } from '../../schema/metric_ops';

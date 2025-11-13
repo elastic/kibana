@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -144,5 +144,8 @@
     "@kbn/core-saved-objects-server",
     "@kbn/presentation-util",
     "@kbn/licensing-types",
+    "@kbn/data-service-server",
+    "@kbn/es-query-server",
+    "@kbn/presentation-publishing-schemas",
   ]
 }

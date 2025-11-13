@@ -9,6 +9,7 @@ import type { DiagnosticResult } from '@elastic/elasticsearch';
 import { errors } from '@elastic/elasticsearch';
 import type {
   IndicesDataStream,
+  IndicesGetDataStreamResponse,
   QueryDslQueryContainer,
   Result,
 } from '@elastic/elasticsearch/lib/api/types';
@@ -32,7 +33,7 @@ import type { StreamsStorageClient } from './storage/streams_storage_client';
 import { State } from './state_management/state';
 import { checkAccess, checkAccessBulk } from './stream_crud';
 import { StreamsStatusConflictError } from './errors/streams_status_conflict_error';
-import type { SystemClient } from './system/system_client';
+import type { FeatureClient } from './feature/feature_client';
 
 interface AcknowledgeResponse<TResult extends Result> {
   acknowledged: true;
@@ -69,7 +70,7 @@ export class StreamsClient {
       assetClient: AssetClient;
       queryClient: QueryClient;
       storageClient: StreamsStorageClient;
-      systemClient: SystemClient;
+      featureClient: FeatureClient;
       logger: Logger;
       request: KibanaRequest;
       isServerless: boolean;
@@ -524,6 +525,7 @@ export class StreamsClient {
       'create',
       'manage',
       'monitor',
+      'view_index_metadata',
       'manage_data_stream_lifecycle',
       'read_failure_store',
       'manage_failure_store',
@@ -550,6 +552,7 @@ export class StreamsClient {
           Object.values(privileges.index[name]).every((privilege) => privilege === true)
         ),
       monitor: names.every((name) => privileges.index[name].monitor),
+      view_index_metadata: names.every((name) => privileges.index[name].view_index_metadata),
       // on serverless, there is no ILM, so we map lifecycle to true if the user has manage_data_stream_lifecycle
       lifecycle: isServerless
         ? names.every((name) => privileges.index[name].manage_data_stream_lifecycle)
@@ -646,9 +649,18 @@ export class StreamsClient {
    * stored definition).
    */
   private async getUnmanagedDataStreams(): Promise<Streams.ClassicStream.Definition[]> {
-    const response = await wrapEsCall(
-      this.dependencies.scopedClusterClient.asCurrentUser.indices.getDataStream()
-    );
+    let response: IndicesGetDataStreamResponse;
+    try {
+      response = await wrapEsCall(
+        this.dependencies.scopedClusterClient.asCurrentUser.indices.getDataStream()
+      );
+    } catch (e) {
+      // if permissions are insufficient, we just return an empty list
+      if (e.statusCode === 403) {
+        return [];
+      }
+      throw e;
+    }
 
     return response.data_streams.map((dataStream) => ({
       name: dataStream.name,

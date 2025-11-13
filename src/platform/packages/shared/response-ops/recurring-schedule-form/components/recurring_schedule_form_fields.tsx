@@ -101,6 +101,11 @@ export const RecurringScheduleFormFields = memo(
         const { dayOfWeek, nthWeekdayOfMonth, isLastOfMonth } = getWeekdayInfo(date);
         _options = [
           {
+            text: i18n.RECURRING_SCHEDULE_FORM_FREQUENCY_HOURLY,
+            value: Frequency.HOURLY,
+            'data-test-subj': 'recurringScheduleOptionHourly',
+          },
+          {
             text: i18n.RECURRING_SCHEDULE_FORM_FREQUENCY_DAILY,
             value: Frequency.DAILY,
             'data-test-subj': 'recurringScheduleOptionDaily',
@@ -234,6 +239,7 @@ export const RecurringScheduleFormFields = memo(
                           singleSelection={{ asPlainText: true }}
                           selectedOptions={[{ label: timezone[0] }]}
                           isClearable={false}
+                          aria-label={i18n.RECURRING_SCHEDULE_FORM_TIMEZONE}
                           prepend={
                             <EuiFormLabel htmlFor={'disabled-timezone'}>
                               {i18n.RECURRING_SCHEDULE_FORM_TIMEZONE}

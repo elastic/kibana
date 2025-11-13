@@ -243,12 +243,12 @@ export const runTask = async ({
     const taskStartTime = moment().utc().toISOString();
     log('running task');
 
-    let scoresWritten = 0;
+    let totalScoresWritten = 0;
     const updatedState = {
       lastExecutionTimestamp: taskStartTime,
       namespace: state.namespace,
       runs: state.runs + 1,
-      scoresWritten,
+      scoresWritten: totalScoresWritten,
     };
 
     if (taskId !== getTaskId(state.namespace)) {
@@ -302,6 +302,7 @@ export const runTask = async ({
     const runs: Array<{
       identifierType: EntityType;
       scoresWritten: number;
+      resetScoresWritten: number;
       tookMs: number;
     }> = [];
 
@@ -335,36 +336,39 @@ export const runTask = async ({
          * The last run is always an "extra" run, with empty afterKeys and entities list, used to detect work completion
          * Running reset to zero on an empty list will result in ALL scores being reset to zero, hence skipping it
          **/
+        let resetScoresWritten = 0;
         if (
           (isFirstRunForEntityType || !isWorkComplete) &&
           experimentalFeatures.enableRiskScoreResetToZero &&
           enableResetToZero
         ) {
           log(`Resetting to zero all ${identifierType} risk scores without recent risk input data`);
-          await riskScoreService.resetToZero({
+          const resetResult = await riskScoreService.resetToZero({
             entityType: identifierType,
             refresh: 'wait_for',
             excludedEntities: result.entities[identifierType],
           });
+          resetScoresWritten = resetResult.scoresWritten;
         }
 
         const tookMs = Date.now() - now;
         runs.push({
           identifierType,
           scoresWritten: result.scores_written,
+          resetScoresWritten,
           tookMs,
         });
         afterKeys = result.after_keys;
-        scoresWritten += result.scores_written;
+        totalScoresWritten += result.scores_written + resetScoresWritten;
       }
     });
 
-    updatedState.scoresWritten = scoresWritten;
+    updatedState.scoresWritten = totalScoresWritten;
 
     const taskCompletionTime = moment().utc().toISOString();
     const taskDurationInSeconds = moment(taskCompletionTime).diff(moment(taskStartTime), 'seconds');
     const telemetryEvent = {
-      scoresWritten,
+      scoresWritten: totalScoresWritten,
       taskDurationInSeconds,
       interval: taskInstance?.schedule?.interval,
       alertSampleSizePerShard,
@@ -376,7 +380,7 @@ export const runTask = async ({
       telemetry.reportEvent(RISK_SCORE_EXECUTION_CANCELLATION_EVENT.eventType, telemetryEvent);
     }
 
-    if (scoresWritten > 0) {
+    if (totalScoresWritten > 0) {
       log('refreshing risk score index and scheduling transform');
       await riskScoreService.refreshRiskScoreIndex();
       await riskScoreService.scheduleLatestTransformNow();

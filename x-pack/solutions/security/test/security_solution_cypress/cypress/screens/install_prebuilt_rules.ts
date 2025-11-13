@@ -7,4 +7,3 @@
 
 export const RULE_NAME = `[data-test-subj="ruleName"]`;
 export const INSTALL_SINGLE_RULE_BUTTON = `[data-test-subj*="installSinglePrebuiltRuleButton"]`;
-export const INSTALL_SINGLE_RULE_SPINNER = `[data-test-subj*="installSinglePrebuiltRuleButton-loadingSpinner"]`;

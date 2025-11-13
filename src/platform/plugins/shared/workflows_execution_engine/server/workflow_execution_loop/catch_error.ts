@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExecutionStatus } from '@kbn/workflows';
-import type { GraphNodeUnion } from '@kbn/workflows/graph';
-import type { NodeWithErrorCatching } from '../step/node_implementation';
-import { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
 import type { WorkflowExecutionLoopParams } from './types';
+import type { NodeWithErrorCatching } from '../step/node_implementation';
+import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
+import { WorkflowScopeStack } from '../workflow_context_manager/workflow_scope_stack';
 
 /**
  * Handles workflow execution errors by bubbling them up through the scope hierarchy
@@ -51,12 +50,12 @@ import type { WorkflowExecutionLoopParams } from './types';
  *   - fakeRequest: Request context for service interactions
  *   - coreStart: Kibana core services
  *
- * @param failedStepContext - The context manager for the step that originally failed,
+ * @param failedStepExecutionRuntime - The context manager for the step that originally failed,
  *   used to update the step's status and identify the failure point
  */
 export async function catchError(
   params: WorkflowExecutionLoopParams,
-  failedStepContext: WorkflowContextManager
+  failedStepExecutionRuntime: StepExecutionRuntime
 ) {
   try {
     // Loop through nested scopes in reverse order to handle errors at each level.
@@ -66,67 +65,64 @@ export async function catchError(
     // 3. The top stack entry has nested scopes to process
     // This allows error handling to bubble up through the scope hierarchy.
 
-    if (!params.workflowRuntime.getWorkflowExecution().error) {
+    if (!params.workflowExecutionState.getWorkflowExecution().error) {
       return;
     }
 
-    if (params.workflowExecutionState.getStepExecution(failedStepContext.stepExecutionId)) {
-      await params.workflowExecutionState.upsertStep({
-        id: failedStepContext.stepExecutionId,
-        status: ExecutionStatus.FAILED,
-        error: params.workflowRuntime.getWorkflowExecution().error,
-      });
+    if (failedStepExecutionRuntime.stepExecutionExists()) {
+      await failedStepExecutionRuntime.failStep(
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        params.workflowExecutionState.getWorkflowExecution().error!
+      );
     }
 
     while (
-      params.workflowRuntime.getWorkflowExecution().error &&
-      params.workflowRuntime.getWorkflowExecution().scopeStack.length
+      params.workflowExecutionState.getWorkflowExecution().error &&
+      params.workflowExecutionState.getWorkflowExecution().scopeStack.length
     ) {
-      // exit the whole node scope
-      const scopeEntry = params.workflowRuntime
-        .getWorkflowExecution()
-        .scopeStack.at(-1)!
-        .nestedScopes.at(-1)!;
+      const workflowScopeStack = WorkflowScopeStack.fromStackFrames(
+        params.workflowExecutionState.getWorkflowExecution().scopeStack
+      );
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const scopeEntry = workflowScopeStack.getCurrentScope()!;
+      const newWorkflowScopeStack = workflowScopeStack.exitScope();
+      params.workflowExecutionState.updateWorkflowExecution({
+        currentNodeId: scopeEntry.nodeId,
+        scopeStack: newWorkflowScopeStack.stackFrames,
+      });
       params.workflowRuntime.navigateToNode(scopeEntry.nodeId);
-      params.workflowRuntime.exitScope();
 
-      const node = params.workflowExecutionGraph.getNode(scopeEntry.nodeId);
+      const stepExecutionRuntime = params.stepExecutionRuntimeFactory.createStepExecutionRuntime({
+        nodeId: scopeEntry.nodeId,
+        stackFrames: newWorkflowScopeStack.stackFrames,
+      });
+      const stepImplementation = params.nodesFactory.create(stepExecutionRuntime);
 
-      if (node) {
-        params.workflowRuntime.navigateToNode(node.id);
-        const stepContext = new WorkflowContextManager({
-          workflowExecutionGraph: params.workflowExecutionGraph,
-          workflowExecutionState: params.workflowExecutionState,
-          esClient: params.esClient,
-          fakeRequest: params.fakeRequest,
-          coreStart: params.coreStart,
-          node: node as GraphNodeUnion,
-          stackFrames: params.workflowRuntime.getCurrentNodeScope(),
-        });
-        const stepImplementation = params.nodesFactory.create(stepContext);
+      if ((stepImplementation as unknown as NodeWithErrorCatching).catchError) {
+        const stepErrorCatcher = stepImplementation as unknown as NodeWithErrorCatching;
 
-        if ((stepImplementation as unknown as NodeWithErrorCatching).catchError) {
-          const stepErrorCatcher = stepImplementation as unknown as NodeWithErrorCatching;
-
-          try {
-            await stepErrorCatcher.catchError();
-          } catch (error) {
-            params.workflowRuntime.setWorkflowError(error);
-          }
+        try {
+          await stepErrorCatcher.catchError();
+        } catch (error) {
+          params.workflowExecutionState.updateWorkflowExecution({
+            error,
+          });
         }
+      }
 
-        if (
-          params.workflowRuntime.getWorkflowExecution().error &&
-          params.workflowExecutionState.getStepExecution(stepContext.stepExecutionId)
-        ) {
-          await params.workflowRuntime.failStep(
-            params.workflowRuntime.getWorkflowExecution().error!
+      if (params.workflowExecutionState.getWorkflowExecution().error) {
+        if (stepExecutionRuntime.stepExecutionExists()) {
+          await stepExecutionRuntime.failStep(
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            params.workflowExecutionState.getWorkflowExecution().error!
           );
         }
       }
     }
   } catch (error) {
-    params.workflowRuntime.setWorkflowError(error);
+    params.workflowExecutionState.updateWorkflowExecution({
+      error,
+    });
     params.workflowLogger.logError(
       `Error in catchError: ${error.message}. Workflow execution may be in an inconsistent state.`
     );

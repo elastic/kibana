@@ -8,12 +8,12 @@
  */
 
 import { DEFAULT_DASHBOARD_OPTIONS } from '../../../../../common/content_management';
-import type { DashboardAttributes } from '../../types';
+import type { DashboardState } from '../../types';
 import { transformDashboardIn } from './transform_dashboard_in';
 
 describe('transformDashboardIn', () => {
   test('should transform dashboard state to saved object', () => {
-    const dashboardState: DashboardAttributes = {
+    const dashboardState: DashboardState = {
       controlGroupInput: {
         chainingSystem: 'NONE',
         labelPosition: 'twoLine',
@@ -58,7 +58,6 @@ describe('transformDashboardIn', () => {
         },
       ],
       tags: [],
-      timeRestore: true,
       title: 'title',
       refreshInterval: { pause: true, value: 1000 },
       timeRange: {
@@ -100,10 +99,9 @@ describe('transformDashboardIn', () => {
   });
 
   it('should handle missing optional state keys', () => {
-    const dashboardState: DashboardAttributes = {
+    const dashboardState: DashboardState = {
       title: 'title',
       description: 'my description',
-      timeRestore: false,
       panels: [],
       options: DEFAULT_DASHBOARD_OPTIONS,
     };
@@ -116,7 +114,7 @@ describe('transformDashboardIn', () => {
           "kibanaSavedObjectMeta": Object {
             "searchSourceJSON": "{}",
           },
-          "optionsJSON": "{\\"hidePanelTitles\\":false,\\"useMargins\\":true,\\"syncColors\\":true,\\"syncCursor\\":true,\\"syncTooltips\\":true}",
+          "optionsJSON": "{\\"hidePanelTitles\\":false,\\"useMargins\\":true,\\"syncColors\\":false,\\"syncCursor\\":true,\\"syncTooltips\\":false}",
           "panelsJSON": "[]",
           "timeRestore": false,
           "title": "title",

@@ -12,7 +12,6 @@ import type { NavigationTourManager } from '@kbn/core-chrome-navigation-tour';
 import type { UserProfileServiceStart } from '@kbn/core-user-profile-browser';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
-import { getSideNavVersion } from '@kbn/core-chrome-layout-feature-flags';
 
 /**
  * This tour combines the spaces solution view tour and new navigation tour into a single
@@ -22,7 +21,7 @@ export class SolutionNavigationTourManager {
   constructor(
     private deps: {
       navigationTourManager: NavigationTourManager;
-      spacesSolutionViewTourManager: SpacesSolutionViewTourManager;
+      spacesSolutionViewTourManager?: SpacesSolutionViewTourManager;
       userProfile: UserProfileServiceStart;
       capabilities: ApplicationStart['capabilities'];
       featureFlags: FeatureFlagsStart;
@@ -31,13 +30,14 @@ export class SolutionNavigationTourManager {
 
   async startTour(): Promise<void> {
     // first start the spaces tour (if applicable)
-    const spacesTour = await this.deps.spacesSolutionViewTourManager.startTour();
-    if (spacesTour.result === 'started') {
-      await this.deps.spacesSolutionViewTourManager.waitForTourEnd();
+    if (this.deps.spacesSolutionViewTourManager) {
+      const spacesTour = await this.deps.spacesSolutionViewTourManager.startTour();
+      if (spacesTour.result === 'started') {
+        await this.deps.spacesSolutionViewTourManager.waitForTourEnd();
+      }
     }
 
     // when completes, maybe start the navigation tour (if applicable)
-    if (getSideNavVersion(this.deps.featureFlags) !== 'v2') return;
     const hasCompletedTour = await checkTourCompletion(this.deps.userProfile);
     if (hasCompletedTour) return;
 
@@ -53,7 +53,7 @@ const SOLUTION_NAVIGATION_TOUR_KEY = 'solutionNavigationTour:completed';
 async function preserveTourCompletion(userProfile: UserProfileServiceStart): Promise<void> {
   try {
     localStorage.setItem(SOLUTION_NAVIGATION_TOUR_KEY, 'true');
-    return await userProfile.update({ [SOLUTION_NAVIGATION_TOUR_KEY]: true });
+    return await userProfile.partialUpdate({ [SOLUTION_NAVIGATION_TOUR_KEY]: true });
   } catch (e) {
     // ignore
   }

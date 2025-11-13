@@ -16,11 +16,14 @@ import {
   EuiButtonIcon,
   EuiDataGrid,
   EuiFlexGroup,
+  EuiFlexItem,
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SampleDocument } from '@kbn/streams-schema';
+import ColumnHeaderTruncateContainer from '@kbn/unified-data-table/src/components/column_header_truncate_container';
+import { FieldIcon } from '@kbn/react-field';
 import React, { useMemo, useState, useCallback, createContext, useContext } from 'react';
 import type {
   IgnoredField,
@@ -92,6 +95,7 @@ export function PreviewTable({
   showLeadingControlColumns = true,
   originalSamples,
   cellActions,
+  dataViewFieldTypes,
 }: {
   documents: SampleDocument[] | DocumentWithIgnoredFields[];
   displayColumns?: string[];
@@ -111,8 +115,27 @@ export function PreviewTable({
   showLeadingControlColumns?: boolean;
   originalSamples?: SampleDocumentWithUIAttributes[];
   cellActions?: EuiDataGridColumnCellAction[];
+  dataViewFieldTypes?: Array<{ name: string; type: string; esType?: string }>;
 }) {
   const { euiTheme: theme } = useEuiTheme();
+
+  // Create a map of field names to their ES types for quick lookup from DataView
+  const fieldTypeMap = useMemo(() => {
+    const typeMap = new Map<string, string>();
+
+    if (dataViewFieldTypes && dataViewFieldTypes.length > 0) {
+      dataViewFieldTypes.forEach((field) => {
+        // Use esType if available (more specific), otherwise use type
+        const fieldType = field.esType || field.type;
+        if (fieldType) {
+          typeMap.set(field.name, fieldType);
+        }
+      });
+    }
+
+    return typeMap;
+  }, [dataViewFieldTypes]);
+
   // Determine canonical column order
   const canonicalColumnOrder = useMemo(() => {
     const cols = new Set<string>();
@@ -244,23 +267,55 @@ export function PreviewTable({
   );
 
   const gridColumns = useMemo(() => {
-    return canonicalColumnOrder.map((column) => ({
-      id: column,
-      displayAsText: column,
-      actions:
-        Boolean(setVisibleColumns) || Boolean(setSorting)
-          ? {
-              showHide: Boolean(setVisibleColumns),
-              showMoveLeft: Boolean(setVisibleColumns),
-              showMoveRight: Boolean(setVisibleColumns),
-              showSortAsc: Boolean(setSorting),
-              showSortDesc: Boolean(setSorting),
-            }
-          : (false as false),
-      initialWidth: columnWidths[column],
-      cellActions,
-    }));
-  }, [canonicalColumnOrder, setVisibleColumns, setSorting, columnWidths, cellActions]);
+    return canonicalColumnOrder.map((column) => {
+      const columnparts = column.split('.');
+      // interlave the columnparts with a dot and a breakable non-whitespace character
+      const interleavedColumnParts = columnparts.reduce((acc, part, index) => {
+        if (index === 0) {
+          return [part];
+        }
+        return [...acc, '.', <wbr key={index} />, part];
+      }, [] as React.ReactNode[]);
+
+      // Get the field type from the map
+      const fieldType = fieldTypeMap.get(column);
+
+      return {
+        id: column,
+        display: (
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <FieldIcon type={fieldType || 'unknown'} size="s" />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <ColumnHeaderTruncateContainer wordBreak="normal">
+                {interleavedColumnParts}
+              </ColumnHeaderTruncateContainer>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ),
+        actions:
+          Boolean(setVisibleColumns) || Boolean(setSorting)
+            ? {
+                showHide: Boolean(setVisibleColumns),
+                showMoveLeft: Boolean(setVisibleColumns),
+                showMoveRight: Boolean(setVisibleColumns),
+                showSortAsc: Boolean(setSorting),
+                showSortDesc: Boolean(setSorting),
+              }
+            : (false as false),
+        initialWidth: columnWidths[column],
+        cellActions,
+      };
+    });
+  }, [
+    cellActions,
+    canonicalColumnOrder,
+    fieldTypeMap,
+    setSorting,
+    setVisibleColumns,
+    columnWidths,
+  ]);
 
   return (
     <EuiDataGrid

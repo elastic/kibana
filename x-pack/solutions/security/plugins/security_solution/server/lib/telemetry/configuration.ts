@@ -83,6 +83,7 @@ class TelemetryConfigurationDTO {
     maxResponseSize: 10 * 1024 * 1024, // 10 MB
     maxCompressedResponseSize: 8 * 1024 * 1024, // 8 MB
   };
+  private readonly DEFAULT_ENCRYPTION_PUBLIC_KEYS: Record<string, string> = {};
 
   private _telemetry_max_buffer_size = this.DEFAULT_TELEMETRY_MAX_BUFFER_SIZE;
   private _max_security_list_telemetry_batch = this.DEFAULT_MAX_SECURITY_LIST_TELEMETRY_BATCH;
@@ -101,6 +102,7 @@ class TelemetryConfigurationDTO {
   private _health_diagnostic_config: HealthDiagnosticConfiguration =
     this.DEFAULT_HEALTH_DIAGNOSTIC_CONFIG;
   private _query_config: TelemetryQueryConfiguration = this.DEFAULT_QUERY_CONFIG;
+  private _encryption_public_keys: Record<string, string> = this.DEFAULT_ENCRYPTION_PUBLIC_KEYS;
 
   public get telemetry_max_buffer_size(): number {
     return this._telemetry_max_buffer_size;
@@ -202,6 +204,14 @@ class TelemetryConfigurationDTO {
     return this._query_config;
   }
 
+  public set encryption_public_keys(keys: Record<string, string>) {
+    this._encryption_public_keys = keys;
+  }
+
+  public get encryption_public_keys(): Record<string, string> {
+    return this._encryption_public_keys;
+  }
+
   public resetAllToDefault() {
     this._telemetry_max_buffer_size = this.DEFAULT_TELEMETRY_MAX_BUFFER_SIZE;
     this._max_security_list_telemetry_batch = this.DEFAULT_MAX_SECURITY_LIST_TELEMETRY_BATCH;
@@ -214,6 +224,7 @@ class TelemetryConfigurationDTO {
     this._ingest_pipelines_stats_config = this.DEFAULT_INGEST_PIPELINES_STATS_CONFIG;
     this._health_diagnostic_config = this.DEFAULT_HEALTH_DIAGNOSTIC_CONFIG;
     this._query_config = this.DEFAULT_QUERY_CONFIG;
+    this._encryption_public_keys = this.DEFAULT_ENCRYPTION_PUBLIC_KEYS;
   }
 }
 

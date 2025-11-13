@@ -60,7 +60,7 @@ function Wrapper({ children, sloList }: { children: React.ReactNode } & Pick<Pro
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
-        <HealthCallout sloList={sloList} />
+        <HealthCallout />
       </EuiFlexItem>
       <EuiFlexItem>
         <ActionModalProvider>{children}</ActionModalProvider>

@@ -21,6 +21,13 @@ export const HIDE_USERS_RISK_SCORE = i18n.translate(
   }
 );
 
+export const LOADING_RISK_ENGINE_SETTINGS = i18n.translate(
+  'xpack.securitySolution.riskScore.riskScorePreview.loadingRiskEngineSettings',
+  {
+    defaultMessage: 'Loading risk engine settings...',
+  }
+);
+
 export const RISK_ENGINE_STATUS = i18n.translate(
   'xpack.securitySolution.riskScore.riskScorePreview.status',
   {
@@ -42,13 +49,6 @@ export const RISK_ENGINE_STATUS_OFF = i18n.translate(
   }
 );
 
-export const ENTITY_RISK_SCORING = i18n.translate(
-  'xpack.securitySolution.riskScore.riskScorePreview.entityRiskScoring',
-  {
-    defaultMessage: 'Entity risk score',
-  }
-);
-
 export const RISK_SCORE_GENERAL_SECTION = i18n.translate(
   'xpack.securitySolution.riskScore.riskScorePreview.generalSection',
   {
@@ -59,7 +59,7 @@ export const RISK_SCORE_GENERAL_SECTION = i18n.translate(
 export const RISK_SCORE_RETAINMENT_CHECKBOX = i18n.translate(
   'xpack.securitySolution.riskScore.riskScorePreview.generalSection.retainmentCheckbox',
   {
-    defaultMessage: 'Retain previously calculated risk scores',
+    defaultMessage: 'Retain last calculated risk scores',
   }
 );
 
@@ -67,7 +67,7 @@ export const RISK_SCORE_RETAINMENT_TOOLTIP = i18n.translate(
   'xpack.securitySolution.riskScore.riskScorePreview.generalSection.retainmentTooltip',
   {
     defaultMessage:
-      'When checked, entities will retain their most recently computed risk score indefinitely until a new input (e.g., alert) causes the score to be recalculated. If unchecked, risk scores are reset to zero when no inputs are found.',
+      'When selected, entities keep their last calculated risk score until a new input (for example, an alert) triggers recalculation. When deselected, risk scores reset to zero if no new inputs are found.',
   }
 );
 
@@ -132,13 +132,6 @@ export const PREVIEW_ERROR_TRY_AGAIN = i18n.translate(
   }
 );
 
-export const PREVIEW_QUERY_ERROR_TITLE = i18n.translate(
-  'xpack.securitySolution.riskScore.riskScorePreview.queryErrorTitle',
-  {
-    defaultMessage: 'Invalid query',
-  }
-);
-
 export const ERROR_PANEL_TITLE = i18n.translate(
   'xpack.securitySolution.riskScore.errorPanel.title',
   {
@@ -157,20 +150,6 @@ export const ERROR_PANEL_ERRORS = i18n.translate(
   'xpack.securitySolution.riskScore.errorPanel.errors',
   {
     defaultMessage: 'Errors',
-  }
-);
-
-export const CHECK_PRIVILEGES = i18n.translate(
-  'xpack.securitySolution.riskScore.errors.privileges.check',
-  {
-    defaultMessage: 'Check privileges',
-  }
-);
-
-export const NEED_TO_HAVE = i18n.translate(
-  'xpack.securitySolution.riskScore.errors.privileges.needToHave',
-  {
-    defaultMessage: 'You need to have:',
   }
 );
 
@@ -209,10 +188,17 @@ export const RISK_SCORE_ALERT_CONFIG = i18n.translate(
   }
 );
 
+export const CLOSED_ALERTS_TEXT = i18n.translate(
+  'xpack.securitySolution.riskScore.closedAlertsText',
+  {
+    defaultMessage: 'Closed Alerts',
+  }
+);
+
 export const INCLUDE_CLOSED_ALERTS_LABEL = i18n.translate(
   'xpack.securitySolution.riskScore.includeClosedAlertsLabel',
   {
-    defaultMessage: 'Include closed alerts for risk scoring',
+    defaultMessage: 'Include closed alerts in calculation',
   }
 );
 
@@ -245,14 +231,14 @@ export const RUN_RISK_SCORE_ENGINE = i18n.translate('xpack.securitySolution.risk
 export const SAVE_CHANGES = i18n.translate(
   'xpack.securitySolution.riskScore.engineSavedObjectsaveChanges',
   {
-    defaultMessage: 'Save',
+    defaultMessage: 'Save Changes',
   }
 );
 
 export const DISCARD_CHANGES = i18n.translate(
   'xpack.securitySolution.riskScore.engineSavedObject.discardChanges',
   {
-    defaultMessage: 'Discard',
+    defaultMessage: 'Discard Changes',
   }
 );
 
@@ -262,3 +248,39 @@ export const RISK_SCORE_ENGINE_RUN_FAILURE = i18n.translate(
     defaultMessage: 'Entity risk score engine failed to start',
   }
 );
+
+export const ALERT_TIME_WINDOW_LABEL = i18n.translate(
+  'xpack.securitySolution.riskScore.alertTimeWindowLabel',
+  {
+    defaultMessage: 'Alert time window',
+  }
+);
+
+export const ALERT_FILTERS_LABEL = i18n.translate(
+  'xpack.securitySolution.riskScore.alertFiltersLabel',
+  {
+    defaultMessage: 'Alert filters',
+  }
+);
+
+export const ALERT_FILTERS_PLACEHOLDER = i18n.translate(
+  'xpack.securitySolution.riskScore.alertFiltersPlaceholder',
+  {
+    defaultMessage: 'Filter out alerts using KQL syntax',
+  }
+);
+
+export const APPLIED_TO_RISK_SCORES_OF = i18n.translate(
+  'xpack.securitySolution.riskScore.appliedToRiskScoresOf',
+  {
+    defaultMessage: 'applied to risk scores of',
+  }
+);
+
+export const REMOVE_FILTER = i18n.translate('xpack.securitySolution.riskScore.removeFilter', {
+  defaultMessage: 'Remove filter',
+});
+
+export const SAVE_FILTERS = i18n.translate('xpack.securitySolution.riskScore.saveFilters', {
+  defaultMessage: 'Save changes',
+});

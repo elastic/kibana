@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import type { Trigger } from '@kbn/ui-actions-plugin/public';
-import type { SearchEmbeddableSerializedState } from './types';
+import type { SearchEmbeddableState } from '../../common/embeddable/types';
 
 export { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
 
@@ -29,20 +28,8 @@ export const ACTION_VIEW_SAVED_SEARCH = 'ACTION_VIEW_SAVED_SEARCH';
 
 export const DEFAULT_HEADER_ROW_HEIGHT_LINES = 3;
 
-/** This constant refers to the parts of the saved search state that can be edited from a dashboard */
-export const EDITABLE_SAVED_SEARCH_KEYS = [
-  'sort',
-  'columns',
-  'rowHeight',
-  'sampleSize',
-  'rowsPerPage',
-  'headerRowHeight',
-  'density',
-  'grid',
-] as const satisfies ReadonlyArray<keyof SavedSearchAttributes>;
-
 /** This constant refers to the dashboard panel specific state */
-export const EDITABLE_PANEL_KEYS: Readonly<Array<keyof SearchEmbeddableSerializedState>> = [
+export const EDITABLE_PANEL_KEYS: Readonly<Array<keyof SearchEmbeddableState>> = [
   'title', // panel title
   'description', // panel description
   'timeRange', // panel custom time range

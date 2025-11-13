@@ -63,16 +63,20 @@ export class RequestSelector extends Component<RequestSelectorProps> {
         value: item.id,
       };
     });
+    const requestLabel = i18n.translate('inspector.requests.requestLabel', {
+      defaultMessage: 'Request',
+    });
 
     return (
       <EuiComboBox
+        aria-label={requestLabel}
         data-test-subj="inspectorRequestChooser"
         fullWidth={true}
         id="inspectorRequestChooser"
         isClearable={false}
         onChange={this.handleSelected}
         options={options}
-        prepend="Request"
+        prepend={requestLabel}
         selectedOptions={[
           {
             label: this.props.selectedRequest.name,

@@ -6,7 +6,13 @@
  */
 
 import type { EuiContextMenuPanelDescriptor, EuiSuperSelectProps } from '@elastic/eui';
-import { EuiButton, EuiButtonEmpty, EuiContextMenu, EuiInputPopover } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiContextMenu,
+  EuiInputPopover,
+  useEuiTheme,
+} from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { some } from 'lodash';
 import type { ConnectorSelectableComponentProps } from '@kbn/ai-assistant-connector-selector-action';
@@ -38,6 +44,7 @@ export const ConnectorSelector = React.memo<ConnectorSelectorProps>(
     mode = 'default',
     settings,
   }) => {
+    const { euiTheme } = useEuiTheme();
     const styles = useConnectorSelectorStyles(mode);
     const [modalOpen, setModalOpen] = useState(false);
 
@@ -149,6 +156,7 @@ export const ConnectorSelector = React.memo<ConnectorSelectorProps>(
                     flexDirection: 'row',
                     justifyContent: 'space-between',
                     alignItems: 'center',
+                    color: isDisabled ? euiTheme.colors.textDisabled : euiTheme.colors.textPrimary,
                   },
                 }}
                 data-test-subj="connector-selector"

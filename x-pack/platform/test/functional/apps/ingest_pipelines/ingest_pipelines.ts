@@ -219,6 +219,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
           await pageObjects.ingestPipelines.clickTreeNode(TEST_PIPELINE_NAME);
 
+          // Allow for new pipeline data to load
+          await pageObjects.common.sleep(1000);
+
           // The details panel should have changed
           detailsPanelTitle = await pageObjects.ingestPipelines.getDetailsFlyoutTitle();
           expect(detailsPanelTitle).to.be(TEST_PIPELINE_NAME);

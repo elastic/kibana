@@ -12,6 +12,7 @@ import { useAIConnectors } from './use_ai_connectors';
 import { getDefaultConnector } from '@kbn/elastic-assistant/impl/assistant/helpers';
 import {
   AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED,
+  AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED_VALUE,
   DEFAULT_AI_CONNECTOR,
 } from '../../../common/constants';
 
@@ -96,7 +97,7 @@ describe('useDefaultAIConnectorId', () => {
 
     expect(mockFeatureFlags.getBooleanValue).toHaveBeenCalledWith(
       AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED,
-      false
+      AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED_VALUE
     );
   });
 

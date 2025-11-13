@@ -28,7 +28,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(response.body.data.title).to.be('Requests');
 
       // Does not return unsupported options from the saved object
-      expect(response.body.data.options).to.not.have.keys(['darkTheme']);
+      expect(response.body.data.options).to.be(undefined);
       expect(response.body.data.refreshInterval).to.not.have.keys(['display']);
     });
 

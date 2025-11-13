@@ -112,7 +112,7 @@ export const DashboardMigrationDataInputFlyout = React.memo(
         if (migrationStats?.id) {
           startMigration(
             migrationStats.id,
-            isRetry ? SiemMigrationRetryFilter.FAILED : undefined,
+            isRetry ? SiemMigrationRetryFilter.NOT_FULLY_TRANSLATED : undefined,
             settings
           );
         }

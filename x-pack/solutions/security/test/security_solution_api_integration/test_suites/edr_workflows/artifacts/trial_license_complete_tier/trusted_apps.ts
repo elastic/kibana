@@ -11,6 +11,7 @@ import expect from '@kbn/expect';
 import {
   BY_POLICY_ARTIFACT_TAG_PREFIX,
   GLOBAL_ARTIFACT_TAG,
+  TRUSTED_PROCESS_DESCENDANTS_TAG,
 } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts';
 import { ExceptionsListItemGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/exceptions_list_item_generator';
 import type TestAgent from 'supertest/lib/agent';
@@ -302,6 +303,20 @@ export default function ({ getService }: FtrProviderContext) {
               .expect(anErrorMessageWith(/invalid policy ids/));
           });
 
+          it(`should error on [${trustedAppApiCall.method}] if process descendants is used in basic mode`, async () => {
+            const body = trustedAppApiCall.getBody();
+            body.tags.push(TRUSTED_PROCESS_DESCENDANTS_TAG);
+
+            await endpointPolicyManagerSupertest[trustedAppApiCall.method](trustedAppApiCall.path)
+              .set('kbn-xsrf', 'true')
+              .send(body)
+              .expect(400)
+              .expect(anEndpointArtifactError)
+              .expect(
+                anErrorMessageWith(/Process descendants feature is only allowed on advanced mode/)
+              );
+          });
+
           describe('when in advanced form mode', () => {
             const getAdvancedModeBody = () => {
               const body = trustedAppApiCall.getBody();
@@ -388,7 +403,7 @@ export default function ({ getService }: FtrProviderContext) {
                 .expect(200);
             });
 
-            it('should not error if signer is set for a windows os entry item', async () => {
+            it('should NOT error if signer is set for a windows os entry item', async () => {
               const body = getAdvancedModeBody();
 
               body.os_types = ['windows'];
@@ -400,11 +415,22 @@ export default function ({ getService }: FtrProviderContext) {
                 .expect(200);
             });
 
-            it('should not error if signer is set for a mac os entry item', async () => {
+            it('should NOT error if signer is set for a mac os entry item', async () => {
               const body = getAdvancedModeBody();
 
               body.os_types = ['macos'];
               body.entries = exceptionsGenerator.generateTrustedAppSignerEntry('mac');
+              await endpointPolicyManagerSupertest[trustedAppApiCall.method](trustedAppApiCall.path)
+                .set('kbn-xsrf', 'true')
+                .send(body)
+                .expect(200);
+            });
+
+            it(`should NOT error on [${trustedAppApiCall.method}] if process descendants is used`, async () => {
+              const body = getAdvancedModeBody();
+
+              body.tags.push(TRUSTED_PROCESS_DESCENDANTS_TAG);
+
               await endpointPolicyManagerSupertest[trustedAppApiCall.method](trustedAppApiCall.path)
                 .set('kbn-xsrf', 'true')
                 .send(body)

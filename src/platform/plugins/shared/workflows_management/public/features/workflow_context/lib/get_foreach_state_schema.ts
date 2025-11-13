@@ -9,29 +9,35 @@
 
 import type { DynamicStepContextSchema } from '@kbn/workflows';
 import { ForEachContextSchema } from '@kbn/workflows';
-import { z } from '@kbn/zod';
 import type { EnterForeachNodeConfiguration } from '@kbn/workflows/graph';
+import { z } from '@kbn/zod';
+import { parseVariablePath } from '../../../../common/lib/parse_variable_path';
 import {
   getDetailedTypeDescription,
   getSchemaAtPath,
   inferZodType,
 } from '../../../../common/lib/zod';
-import { parseVariablePath } from '../../../../common/lib/parse_variable_path';
 
 const extractForeachItemSchemaFromJson = (foreachParam: string) => {
   try {
     const json = JSON.parse(foreachParam);
     if (!Array.isArray(json)) {
-      throw new Error('Foreach step must iterate over an array type, but received an object');
+      return z
+        .any()
+        .describe('Foreach step must iterate over an array type, but received an object');
     }
     if (json.length > 0) {
       return inferZodType(json[0]);
     }
-    throw new Error('Foreach step must iterate over an array type, but received an empty array');
+    return z
+      .any()
+      .describe('Foreach step must iterate over an array type, but received an empty array');
   } catch (e) {
-    throw new Error(
-      'Foreach step must iterate over an array type, but received no valid path or JSON string'
-    );
+    return z
+      .any()
+      .describe(
+        'Foreach step must iterate over an array type, but received no valid path or JSON string'
+      );
   }
 };
 
@@ -45,7 +51,7 @@ export function getForeachItemSchema(
   // If we have a valid variable path syntax (e.g., {{some.path}})
   if (parsedPath && !parsedPath.errors && iterateOverPath) {
     let itemSchema: z.ZodType = z.unknown(); // we need this constant to have references in json schema
-    const iterableSchema = getSchemaAtPath(stepContextSchema, iterateOverPath);
+    const { schema: iterableSchema } = getSchemaAtPath(stepContextSchema, iterateOverPath);
     if (!iterableSchema) {
       // if we cannot resolve the path in the schema, we return an unknown schema
       return itemSchema;
@@ -60,11 +66,13 @@ export function getForeachItemSchema(
       // If the resolved path is a string, we return a string schema and will tell the user we will try to parse it as JSON in runtime
       return z.any().describe('Foreach item type is unknown');
     } else {
-      throw new Error(
-        `Foreach step must iterate over an array type, but received: ${getDetailedTypeDescription(
-          iterableSchema
-        )}`
-      );
+      return z
+        .any()
+        .describe(
+          `Foreach step must iterate over an array type, but received: ${getDetailedTypeDescription(
+            iterableSchema
+          )}`
+        );
     }
   } else {
     // Not a valid variable path syntax or has errors, try to parse as JSON

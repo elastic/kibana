@@ -12,7 +12,7 @@ import type { CustomizationCallback } from '@kbn/discover-plugin/public/customiz
 import { createGlobalStyle } from 'styled-components';
 import type { ScopedHistory } from '@kbn/core/public';
 import { from, type Subscription } from 'rxjs';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { isEqualWith } from 'lodash';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import type { TimeRange } from '@kbn/es-query';
@@ -122,8 +122,8 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
       ...(discoverStateContainer.current?.savedSearchState.getState() ?? discoverSavedSearchState),
       timeRange: discoverDataService.query.timefilter.timefilter.getTime(),
       refreshInterval: discoverStateContainer.current?.getCurrentTab().globalState.refreshInterval,
-      breakdownField: discoverStateContainer.current?.appState.getState().breakdownField,
-      rowsPerPage: discoverStateContainer.current?.appState.getState().rowsPerPage,
+      breakdownField: discoverStateContainer.current?.appState.get().breakdownField,
+      rowsPerPage: discoverStateContainer.current?.appState.get().rowsPerPage,
       title: GET_TIMELINE_DISCOVER_SAVED_SEARCH_TITLE(title),
       description,
     };
@@ -210,7 +210,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
           discoverAppState) ??
         defaultDiscoverAppState;
 
-      const hasESQLUrlState = (stateContainer.appState.getState()?.query as { esql: string })?.esql;
+      const hasESQLUrlState = (stateContainer.appState.get()?.query as { esql: string })?.esql;
 
       if (!stateContainer.stateStorage.get(APP_STATE_URL_KEY) || !hasESQLUrlState) {
         if (savedSearchAppState?.savedSearch.timeRange) {

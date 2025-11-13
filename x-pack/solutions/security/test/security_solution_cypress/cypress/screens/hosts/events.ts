@@ -20,11 +20,6 @@ export const HOST_GEO_COUNTRY_NAME_CHECKBOX =
 
 export const HOST_GEO_COUNTRY_NAME_HEADER = '[data-test-subj="header-text-host.geo.country_name"]';
 
-export const INSPECT_MODAL = '[data-test-subj="modal-inspect-euiModal"]';
-
-export const INSPECT_QUERY =
-  '[data-test-subj="events-viewer-panel"] [data-test-subj="inspect-icon-button"]';
-
 export const SERVER_SIDE_EVENT_COUNT =
   '[data-test-subj="events-viewer-panel"] [data-test-subj="server-side-event-count"]';
 

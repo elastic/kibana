@@ -29,7 +29,7 @@ import {
   lensService,
 } from '../../services/kibana_services';
 import { getDashboardBackupService } from '../../services/dashboard_backup_service';
-import { getDashboardContentManagementService } from '../../services/dashboard_content_management_service';
+import { dashboardClient } from '../../dashboard_client';
 
 export const DashboardAppNoDataPage = ({
   onDataViewCreated,
@@ -96,22 +96,24 @@ export const DashboardAppNoDataPage = ({
 
           await embeddableService
             .getStateTransfer()
-            .navigateToWithEmbeddablePackage<LensSerializedState>('dashboards', {
-              state: {
-                type: 'lens',
-                serializedState: {
-                  rawState: {
-                    attributes: getLensAttributesFromSuggestion({
-                      filters: [],
-                      query: {
-                        esql: esqlQuery,
-                      },
-                      suggestion,
-                      dataView,
-                    }),
+            .navigateToWithEmbeddablePackages<LensSerializedState>('dashboards', {
+              state: [
+                {
+                  type: 'lens',
+                  serializedState: {
+                    rawState: {
+                      attributes: getLensAttributesFromSuggestion({
+                        filters: [],
+                        query: {
+                          esql: esqlQuery,
+                        },
+                        suggestion,
+                        dataView,
+                      }),
+                    },
                   },
                 },
-              },
+              ],
               path: '#/create',
             });
         }
@@ -151,8 +153,8 @@ export const isDashboardAppInNoDataState = async () => {
   if (getDashboardBackupService().dashboardHasUnsavedEdits()) return false;
 
   // consider has data if there is at least one dashboard
-  const { total } = await getDashboardContentManagementService()
-    .findDashboards.search({ search: '', size: 1 })
+  const { total } = await dashboardClient
+    .search({ search: '', per_page: 1 })
     .catch(() => ({ total: 0 }));
   if (total > 0) return false;
 

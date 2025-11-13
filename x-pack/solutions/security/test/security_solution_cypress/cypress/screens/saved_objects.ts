@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export const IMPORT_OBJECTS = '[data-test-subj="importObjects"]';
 export const INPUT = '.euiFilePicker__input';
-export const IMPORT_BTN = '[data-test-subj="importSavedObjectsImportBtn"]';

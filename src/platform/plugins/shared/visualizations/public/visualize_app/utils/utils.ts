@@ -13,7 +13,7 @@ import type { ChromeStart, DocLinksStart } from '@kbn/core/public';
 import type { Filter, Query } from '@kbn/es-query';
 import { redirectWhenMissing } from '@kbn/kibana-utils-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { VisualizeConstants } from '../../../common/constants';
+import { VisualizeConstants } from '@kbn/visualizations-common';
 import { convertFromSerializedVis } from '../../utils/saved_visualize_utils';
 import type { VisualizeServices, VisualizeEditorVisInstance } from '../types';
 

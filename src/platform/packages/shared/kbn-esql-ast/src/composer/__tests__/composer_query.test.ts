@@ -725,3 +725,381 @@ describe('.toRequest()', () => {
     });
   });
 });
+
+describe('.header``', () => {
+  test('can add a header SET command', () => {
+    const query = esql`
+      FROM kibana_ecommerce_index
+      | WHERE foo > 42 AND bar < 24
+      | EVAL a = 123
+      | LIMIT 10`;
+
+    query.header`SET x = 10`;
+
+    expect(query.print('basic')).toBe(
+      'SET x = 10; FROM kibana_ecommerce_index | WHERE foo > 42 AND bar < 24 | EVAL a = 123 | LIMIT 10'
+    );
+  });
+
+  test('can chain together and add multiple commands', () => {
+    // prettier-ignore
+    const query = esql.from('kibana_ecommerce_index')
+      .header `SET x = 10`
+      .header `SET y = "asdf";` // comma at the end should be ignored
+      .header `SET z = false`
+      .pipe `WHERE foo > 42 AND bar < 24`
+      .pipe `EVAL a = 123`
+      .pipe `LIMIT 10`;
+
+    expect(query.print('basic')).toBe(
+      'SET x = 10; SET y = "asdf"; SET z = FALSE; FROM kibana_ecommerce_index | WHERE foo > 42 AND bar < 24 | EVAL a = 123 | LIMIT 10'
+    );
+  });
+});
+
+describe('SET commands', () => {
+  describe('.addSetCommand()', () => {
+    test('can add a SET command to an existing query', () => {
+      const query = esql`FROM index | WHERE bar > 42 | LIMIT 10`;
+
+      query.addSetCommand('setting1', 'value1');
+
+      expect(query.print('basic')).toBe(
+        'SET setting1 = "value1"; FROM index | WHERE bar > 42 | LIMIT 10'
+      );
+      expect(query.ast.header?.length).toBe(1);
+    });
+
+    test('can add multiple SET commands', () => {
+      const query = esql`FROM index | LIMIT 10`;
+
+      query.addSetCommand('a', 'foo');
+      query.addSetCommand('b', 123);
+      query.addSetCommand('c', true);
+
+      const printed = query.print('basic');
+
+      expect(printed).toContain('SET a = "foo"');
+      expect(printed).toContain('SET b = 123');
+      expect(printed).toContain('SET c = TRUE');
+      expect(query.ast.header?.length).toBe(3);
+    });
+
+    test('returns ComposerQuery for chaining', () => {
+      const query = esql`FROM index | LIMIT 10`;
+
+      const result = query.addSetCommand('x', 1).addSetCommand('y', 2);
+
+      expect(result).toBe(query);
+      expect(query.ast.header?.length).toBe(2);
+    });
+  });
+
+  describe('.getSetInstructions()', () => {
+    test('returns empty array for query without SET commands', () => {
+      const query = esql`FROM index | LIMIT 10`;
+
+      const sets = query.getSetInstructions();
+
+      expect(sets).toEqual([]);
+    });
+
+    test('returns SET commands after adding them', () => {
+      const query = esql`FROM index | LIMIT 10`;
+
+      query.addSetCommand('x', 'test');
+      query.addSetCommand('y', 42);
+      query.addSetCommand('z', false);
+
+      const sets = query.getSetInstructions();
+
+      expect(sets).toMatchObject([
+        ['x', { type: 'literal' }],
+        ['y', { type: 'literal' }],
+        ['z', { type: 'literal' }],
+      ]);
+    });
+  });
+
+  describe('.removeSetCommand()', () => {
+    test('removes specific SET command by name', () => {
+      const query = esql`FROM index | LIMIT 10`;
+
+      query.addSetCommand('a', 'foo');
+      query.addSetCommand('b', 123);
+      query.addSetCommand('c', true);
+
+      query.removeSetCommand('b');
+
+      const sets = query.getSetInstructionRecord();
+
+      expect(sets).toEqual({
+        a: 'foo',
+        c: true,
+      });
+      expect(query.print('basic')).not.toContain('SET b = 123');
+      expect(query.print('basic')).toContain('SET a = "foo"');
+      expect(query.print('basic')).toContain('SET c = TRUE');
+    });
+
+    test('does nothing if SET command does not exist', () => {
+      const query = esql`FROM index | LIMIT 10`;
+      query.addSetCommand('a', 'foo');
+
+      query.removeSetCommand('nonexistent');
+
+      const sets = query.getSetInstructionRecord();
+      expect(sets).toEqual({ a: 'foo' });
+    });
+
+    test('works on query without SET commands', () => {
+      const query = esql`FROM index | LIMIT 10`;
+
+      expect(() => query.removeSetCommand('a')).not.toThrow();
+      expect(query.getSetInstructions()).toEqual([]);
+    });
+
+    test('returns ComposerQuery for chaining', () => {
+      const query = esql`FROM index | LIMIT 10`;
+      query.addSetCommand('x', 1);
+
+      const result = query.removeSetCommand('x');
+
+      expect(result).toBe(query);
+    });
+  });
+
+  describe('.clearSetCommands()', () => {
+    test('removes all SET commands', () => {
+      const query = esql`SET a = "foo"; SET b = 123; SET c = TRUE; FROM index | LIMIT 10`;
+
+      query.clearSetCommands();
+
+      expect(query.getSetInstructions()).toEqual([]);
+      expect(query.print('basic')).toBe('FROM index | LIMIT 10');
+    });
+
+    test('does nothing if no SET commands exist', () => {
+      const query = esql`FROM index | LIMIT 10`;
+
+      expect(() => query.clearSetCommands()).not.toThrow();
+      expect(query.getSetInstructions()).toEqual([]);
+    });
+
+    test('returns ComposerQuery for chaining', () => {
+      const query = esql`FROM index | LIMIT 10`;
+
+      const result = query.clearSetCommands();
+
+      expect(result).toBe(query);
+    });
+  });
+
+  describe('SET commands with .pipe()', () => {
+    test('can chain commands after adding SET', () => {
+      const query = esql`FROM index`;
+
+      query.addSetCommand('x', 1);
+      query.pipe`WHERE foo > 10`;
+      query.pipe`LIMIT 5`;
+
+      expect(query.print('basic')).toBe('SET x = 1; FROM index | WHERE foo > 10 | LIMIT 5');
+    });
+
+    test('SET commands remain when modifying query', () => {
+      const query = esql`FROM index | LIMIT 10`;
+
+      query.addSetCommand('a', 'test');
+      query.pipe`WHERE bar == 42`;
+
+      expect(query.print('basic')).toBe('SET a = "test"; FROM index | LIMIT 10 | WHERE bar == 42');
+    });
+  });
+
+  describe('SET command value types', () => {
+    test('handles string values', () => {
+      const query = esql`FROM index`;
+      query.addSetCommand('str', 'hello world');
+
+      const sets = query.getSetInstructionRecord();
+      expect(sets.str).toBe('hello world');
+      expect(query.print('basic')).toBe('SET str = "hello world"; FROM index');
+    });
+
+    test('handles numeric values', () => {
+      const query = esql`FROM index`;
+
+      query.addSetCommand('int', 42);
+      query.addSetCommand('float', 3.14);
+
+      const sets = query.getSetInstructionRecord();
+
+      expect(sets).toEqual({
+        int: 42,
+        float: 3.14,
+      });
+      expect(query.print('basic')).toBe('SET int = 42; SET float = 3.14; FROM index');
+    });
+
+    test('handles boolean values', () => {
+      const query = esql`FROM index`;
+      query.addSetCommand('bool_true', true);
+      query.addSetCommand('bool_false', false);
+
+      const sets = query.getSetInstructionRecord();
+
+      expect(sets).toEqual({
+        bool_true: true,
+        bool_false: false,
+      });
+    });
+  });
+
+  describe('SET header instructions in template tag', () => {
+    test('can create a query with a single SET instruction', () => {
+      const query = esql`SET a = 123; FROM index | LIMIT 10`;
+
+      expect(query.print('basic')).toBe('SET a = 123; FROM index | LIMIT 10');
+      expect(query.ast.header).toBeDefined();
+      expect(query.ast.header).toHaveLength(1);
+      expect(query.getSetInstructionRecord()).toEqual({
+        a: 123,
+      });
+    });
+
+    test('can create a query with multiple SET instructions', () => {
+      const query = esql`SET a = "foo"; SET b = 123; SET c = TRUE; FROM index | LIMIT 10`;
+
+      const printed = query.print('basic');
+      expect(printed).toContain('SET a = "foo"');
+      expect(printed).toContain('SET b = 123');
+      expect(printed).toContain('SET c = TRUE');
+      expect(query.ast.header).toHaveLength(3);
+      expect(query.getSetInstructionRecord()).toEqual({
+        a: 'foo',
+        b: 123,
+        c: true,
+      });
+    });
+
+    test('can create a query with SET and use params in query body', () => {
+      const query = esql`SET threshold = 100; FROM index | WHERE value > ?threshold`;
+
+      expect(query.print('basic')).toBe(
+        'SET threshold = 100; FROM index | WHERE value > ?threshold'
+      );
+      expect(query.ast.header).toHaveLength(1);
+    });
+
+    test('can combine SET instructions with string template', () => {
+      const query = esql('SET x = 10; FROM index | LIMIT 20');
+
+      expect(query.print('basic')).toBe('SET x = 10; FROM index | LIMIT 20');
+      expect(query.getSetInstructionRecord()).toEqual({ x: 10 });
+    });
+
+    test('can combine SET instructions with parametrized query', () => {
+      const threshold = 100;
+      const limit = 10;
+      const query = esql('SET x = 5; FROM index | WHERE value > ?threshold | LIMIT ?limit', {
+        threshold,
+        limit,
+      });
+
+      expect(query.print('basic')).toBe(
+        'SET x = 5; FROM index | WHERE value > ?threshold | LIMIT ?limit'
+      );
+      expect(query.getSetInstructionRecord()).toEqual({ x: 5 });
+      expect(query.getParams()).toEqual({ threshold: 100, limit: 10 });
+    });
+
+    test('SET instructions work with ROW command', () => {
+      const query = esql`SET x = 10; ROW a = 1, b = 2`;
+
+      expect(query.print('basic')).toBe('SET x = 10; ROW a = 1, b = 2');
+      expect(query.ast.header).toHaveLength(1);
+      expect(query.ast.commands[0].name).toBe('row');
+    });
+
+    test('can interpolate values into SET instructions', () => {
+      const value = 42;
+      const query = esql`SET limit = ${value}; FROM index | LIMIT ?limit`;
+
+      expect(query.print('basic')).toBe('SET `limit` = 42; FROM index | LIMIT ?limit');
+      expect(query.getSetInstructionRecord()).toEqual({ limit: 42 });
+    });
+
+    test('can use parameter holes in SET instructions', () => {
+      const myLimit = 100;
+      const query = esql`SET limit = ${{ myLimit }}; FROM index | WHERE count > 10`;
+
+      expect(query.print('basic')).toBe('SET `limit` = ?myLimit; FROM index | WHERE count > 10');
+      expect(query.getParams()).toEqual({ myLimit: 100 });
+    });
+
+    test('combining SET instructions from template with .addSetCommand()', () => {
+      const query = esql`SET a = 1; FROM index | LIMIT 10`;
+      query.addSetCommand('b', 2);
+      query.addSetCommand('c', 3);
+
+      const printed = query.print('basic');
+      expect(printed).toContain('SET a = 1');
+      expect(printed).toContain('SET b = 2');
+      expect(printed).toContain('SET c = 3');
+      expect(query.ast.header).toHaveLength(3);
+    });
+
+    test('can use .removeSetCommand() on SET instructions from template', () => {
+      const query = esql`SET a = 1; SET b = 2; FROM index`;
+      query.removeSetCommand('b');
+
+      const printed = query.print('basic');
+      expect(printed).toContain('SET a = 1');
+      expect(printed).not.toContain('SET b = 2');
+      expect(query.getSetInstructionRecord()).toEqual({ a: 1 });
+    });
+
+    test('can clear all SET instructions including those from template', () => {
+      const query = esql`SET a = 1; SET b = 2; FROM index`;
+      query.clearSetCommands();
+
+      expect(query.print('basic')).toBe('FROM index');
+      expect(query.getSetInstructions()).toEqual([]);
+    });
+
+    test('SET instructions with complex nested queries', () => {
+      const subQuery = esql`WHERE bytes > 1000`;
+      const query = esql`SET threshold = 1000; FROM logs | FORK (${subQuery}) (WHERE level == "error")`;
+
+      expect(query.print('basic')).toContain('SET threshold = 1000');
+      expect(query.ast.header).toHaveLength(1);
+    });
+
+    test('toRequest() includes SET instructions', () => {
+      const query = esql`SET x = 10; FROM index | WHERE value > ?threshold`;
+      query.setParam('threshold', 100);
+
+      const request = query.toRequest();
+
+      expect(request.query).toContain('SET x = 10');
+      expect(request.query).toContain('FROM index');
+      expect(request.params).toEqual([{ threshold: 100 }]);
+    });
+
+    test('multiple SET instructions with semicolon separator', () => {
+      const query = esql`SET a = 1; SET b = 2; SET c = 3; FROM index`;
+
+      expect(query.ast.header).toHaveLength(3);
+      expect(query.getSetInstructions()).toHaveLength(3);
+    });
+
+    test('works with parametrized template wrapper', () => {
+      const initialParam = 50;
+      const query = esql({ initialParam })`SET x = 10; FROM index | WHERE value > ?initialParam`;
+
+      expect(query.print('basic')).toBe('SET x = 10; FROM index | WHERE value > ?initialParam');
+      expect(query.getParams()).toEqual({ initialParam: 50 });
+      expect(query.getSetInstructionRecord()).toEqual({ x: 10 });
+    });
+  });
+});

@@ -233,7 +233,7 @@ const absentOverTimeDefinition: FunctionDefinition = {
   ],
   locationsAvailable: [Location.STATS_TIMESERIES],
   examples: [
-    'TS k8s\n| WHERE cluster == "prod" AND pod == "two"\n| STATS events_received = max(absent_over_time(events_received)) BY pod, time_bucket = tbucket(2 minute)',
+    'TS k8s\n| WHERE cluster == "prod" AND pod == "two"\n| STATS events_received = MAX(ABSENT_OVER_TIME(events_received)) BY pod, time_bucket = TBUCKET(2 minute)',
   ],
 };
 
@@ -290,7 +290,7 @@ const avgOverTimeDefinition: FunctionDefinition = {
   ],
   locationsAvailable: [Location.STATS_TIMESERIES],
   examples: [
-    'TS k8s\n| STATS max_cost=max(avg_over_time(network.cost)) BY cluster, time_bucket = bucket(@timestamp,1minute)',
+    'TS k8s\n| STATS max_cost=MAX(AVG_OVER_TIME(network.cost)) BY cluster, time_bucket = TBUCKET(1minute)',
   ],
 };
 
@@ -857,7 +857,7 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
   ],
   locationsAvailable: [Location.STATS_TIMESERIES],
   examples: [
-    'TS k8s\n| STATS distincts=count_distinct(count_distinct_over_time(network.cost)),\n        distincts_imprecise=count_distinct(count_distinct_over_time(network.cost, 100))\n  BY cluster, time_bucket = bucket(@timestamp,1minute)',
+    'TS k8s\n| STATS distincts=COUNT_DISTINCT(COUNT_DISTINCT_OVER_TIME(network.cost)),\n        distincts_imprecise=COUNT_DISTINCT(COUNT_DISTINCT_OVER_TIME(network.cost, 100))\n  BY cluster, time_bucket = TBUCKET(1minute)',
   ],
 };
 
@@ -1064,7 +1064,7 @@ const countOverTimeDefinition: FunctionDefinition = {
   ],
   locationsAvailable: [Location.STATS_TIMESERIES],
   examples: [
-    'TS k8s\n| STATS count=count(count_over_time(network.cost))\n  BY cluster, time_bucket = bucket(@timestamp,1minute)',
+    'TS k8s\n| STATS count=COUNT(COUNT_OVER_TIME(network.cost))\n  BY cluster, time_bucket = BUCKET(@timestamp,1minute)',
   ],
 };
 
@@ -1111,7 +1111,7 @@ const deltaDefinition: FunctionDefinition = {
   ],
   locationsAvailable: [Location.STATS_TIMESERIES],
   examples: [
-    'TS k8s\n| WHERE pod == "one"\n| STATS tx = sum(delta(network.bytes_in)) BY cluster, time_bucket = bucket(@timestamp, 10minute)',
+    'TS k8s\n| WHERE pod == "one"\n| STATS tx = SUM(DELTA(network.bytes_in)) BY cluster, time_bucket = TBUCKET(10minute)',
   ],
 };
 
@@ -1189,7 +1189,7 @@ const firstOverTimeDefinition: FunctionDefinition = {
   ],
   locationsAvailable: [Location.STATS_TIMESERIES],
   examples: [
-    'TS k8s\n| STATS max_cost=max(first_over_time(network.cost)) BY cluster, time_bucket = bucket(@timestamp,1minute)',
+    'TS k8s\n| STATS max_cost=MAX(FIRST_OVER_TIME(network.cost)) BY cluster, time_bucket = TBUCKET(1minute)',
   ],
 };
 
@@ -1237,7 +1237,7 @@ const ideltaDefinition: FunctionDefinition = {
   ],
   locationsAvailable: [Location.STATS_TIMESERIES],
   examples: [
-    'TS k8s\n| STATS events = sum(idelta(events_received)) by pod, time_bucket = bucket(@timestamp, 10minute)',
+    'TS k8s\n| STATS events = SUM(IDELTA(events_received)) by pod, time_bucket = TBUCKET(10minute)',
   ],
 };
 
@@ -1284,7 +1284,7 @@ const increaseDefinition: FunctionDefinition = {
   ],
   locationsAvailable: [Location.STATS_TIMESERIES],
   examples: [
-    'TS k8s\n| WHERE pod == "one"\n| STATS increase_bytes_in = sum(increase(network.total_bytes_in)) BY cluster, time_bucket = bucket(@timestamp, 10minute)',
+    'TS k8s\n| WHERE pod == "one"\n| STATS increase_bytes_in = SUM(INCREASE(network.total_bytes_in)) BY cluster, time_bucket = TBUCKET(10minute)',
   ],
 };
 
@@ -1332,7 +1332,7 @@ const irateDefinition: FunctionDefinition = {
   ],
   locationsAvailable: [Location.STATS_TIMESERIES],
   examples: [
-    'TS k8s | WHERE pod == "one"\n| STATS irate_bytes_in = sum(irate(network.total_bytes_in)) BY cluster, time_bucket = bucket(@timestamp, 10minute)',
+    'TS k8s | WHERE pod == "one"\n| STATS irate_bytes_in = SUM(IRATE(network.total_bytes_in)) BY cluster, time_bucket = TBUCKET(10minute)',
   ],
 };
 
@@ -1410,7 +1410,7 @@ const lastOverTimeDefinition: FunctionDefinition = {
   ],
   locationsAvailable: [Location.STATS_TIMESERIES],
   examples: [
-    'TS k8s\n| STATS max_cost=max(last_over_time(network.cost)) BY cluster, time_bucket = bucket(@timestamp,1minute)',
+    'TS k8s\n| STATS max_cost=MAX(LAST_OVER_TIME(network.cost)) BY cluster, time_bucket = TBUCKET(1minute)',
   ],
 };
 
@@ -1547,7 +1547,7 @@ const maxOverTimeDefinition: FunctionDefinition = {
   ],
   locationsAvailable: [Location.STATS_TIMESERIES],
   examples: [
-    'TS k8s\n| STATS cost=sum(max_over_time(network.cost)) BY cluster, time_bucket = bucket(@timestamp,1minute)',
+    'TS k8s\n| STATS cost=SUM(MAX_OVER_TIME(network.cost)) BY cluster, time_bucket = TBUCKET(1minute)',
   ],
 };
 
@@ -1684,7 +1684,159 @@ const minOverTimeDefinition: FunctionDefinition = {
   ],
   locationsAvailable: [Location.STATS_TIMESERIES],
   examples: [
-    'TS k8s\n| STATS cost=sum(min_over_time(network.cost)) BY cluster, time_bucket = bucket(@timestamp,1minute)',
+    'TS k8s\n| STATS cost=SUM(MIN_OVER_TIME(network.cost)) BY cluster, time_bucket = TBUCKET(1minute)',
+  ],
+};
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const percentileOverTimeDefinition: FunctionDefinition = {
+  type: FunctionDefinitionTypes.TIME_SERIES_AGG,
+  name: 'percentile_over_time',
+  description: i18n.translate('kbn-esql-ast.esql.definitions.percentile_over_time', {
+    defaultMessage: 'Calculates the percentile over time of a numeric field.',
+  }),
+  preview: true,
+  alias: undefined,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'number',
+          type: 'double',
+          optional: false,
+        },
+        {
+          name: 'percentile',
+          type: 'double',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'number',
+          type: 'double',
+          optional: false,
+        },
+        {
+          name: 'percentile',
+          type: 'integer',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'number',
+          type: 'double',
+          optional: false,
+        },
+        {
+          name: 'percentile',
+          type: 'long',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'number',
+          type: 'integer',
+          optional: false,
+        },
+        {
+          name: 'percentile',
+          type: 'double',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'number',
+          type: 'integer',
+          optional: false,
+        },
+        {
+          name: 'percentile',
+          type: 'integer',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'number',
+          type: 'integer',
+          optional: false,
+        },
+        {
+          name: 'percentile',
+          type: 'long',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'number',
+          type: 'long',
+          optional: false,
+        },
+        {
+          name: 'percentile',
+          type: 'double',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'number',
+          type: 'long',
+          optional: false,
+        },
+        {
+          name: 'percentile',
+          type: 'integer',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'number',
+          type: 'long',
+          optional: false,
+        },
+        {
+          name: 'percentile',
+          type: 'long',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+    },
+  ],
+  locationsAvailable: [Location.STATS_TIMESERIES],
+  examples: [
+    'TS k8s\n| STATS p95_cost=MAX(PERCENTILE_OVER_TIME(network.cost, 95)), p99_cost=MAX(PERCENTILE_OVER_TIME(network.cost, 99)) BY cluster, time_bucket = TBUCKET(1minute)',
   ],
 };
 
@@ -1891,7 +2043,7 @@ const presentOverTimeDefinition: FunctionDefinition = {
   ],
   locationsAvailable: [Location.STATS_TIMESERIES],
   examples: [
-    'TS k8s\n| WHERE cluster == "prod" AND pod == "two"\n| STATS events_received = max(present_over_time(events_received)) BY pod, time_bucket = tbucket(2 minute)',
+    'TS k8s\n| WHERE cluster == "prod" AND pod == "two"\n| STATS events_received = MAX(PRESENT_OVER_TIME(events_received)) BY pod, time_bucket = TBUCKET(2 minute)',
   ],
 };
 
@@ -1939,7 +2091,54 @@ const rateDefinition: FunctionDefinition = {
   ],
   locationsAvailable: [Location.STATS_TIMESERIES],
   examples: [
-    'TS k8s\n| STATS max(rate(network.total_bytes_in)) BY time_bucket = bucket(@timestamp,5minute)',
+    'TS k8s\n| STATS max_rate=MAX(RATE(network.total_bytes_in)) BY time_bucket = TBUCKET(5minute)',
+  ],
+};
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const stddevOverTimeDefinition: FunctionDefinition = {
+  type: FunctionDefinitionTypes.TIME_SERIES_AGG,
+  name: 'stddev_over_time',
+  description: i18n.translate('kbn-esql-ast.esql.definitions.stddev_over_time', {
+    defaultMessage: 'Calculates the population standard deviation over time of a numeric field.',
+  }),
+  preview: true,
+  alias: undefined,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'number',
+          type: 'double',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'number',
+          type: 'integer',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'number',
+          type: 'long',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+    },
+  ],
+  locationsAvailable: [Location.STATS_TIMESERIES],
+  examples: [
+    'TS k8s\n| STATS max_stddev_cost=MAX(STDDEV_OVER_TIME(network.cost)) BY cluster, time_bucket = TBUCKET(1minute)',
   ],
 };
 
@@ -1996,7 +2195,54 @@ const sumOverTimeDefinition: FunctionDefinition = {
   ],
   locationsAvailable: [Location.STATS_TIMESERIES],
   examples: [
-    'TS k8s\n| STATS sum_cost=sum(sum_over_time(network.cost)) BY cluster, time_bucket = bucket(@timestamp,1minute)',
+    'TS k8s\n| STATS sum_cost=SUM(SUM_OVER_TIME(network.cost)) BY cluster, time_bucket = TBUCKET(1minute)',
+  ],
+};
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const varianceOverTimeDefinition: FunctionDefinition = {
+  type: FunctionDefinitionTypes.TIME_SERIES_AGG,
+  name: 'variance_over_time',
+  description: i18n.translate('kbn-esql-ast.esql.definitions.variance_over_time', {
+    defaultMessage: 'Calculates the population variance over time of a numeric field.',
+  }),
+  preview: true,
+  alias: undefined,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'number',
+          type: 'double',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'number',
+          type: 'integer',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'number',
+          type: 'long',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+    },
+  ],
+  locationsAvailable: [Location.STATS_TIMESERIES],
+  examples: [
+    'TS k8s\n| STATS avg_var_cost=AVG(VARIANCE_OVER_TIME(network.cost)) BY cluster, time_bucket = TBUCKET(1minute)',
   ],
 };
 export const timeSeriesAggFunctionDefinitions = [
@@ -2012,7 +2258,10 @@ export const timeSeriesAggFunctionDefinitions = [
   lastOverTimeDefinition,
   maxOverTimeDefinition,
   minOverTimeDefinition,
+  percentileOverTimeDefinition,
   presentOverTimeDefinition,
   rateDefinition,
+  stddevOverTimeDefinition,
   sumOverTimeDefinition,
+  varianceOverTimeDefinition,
 ];

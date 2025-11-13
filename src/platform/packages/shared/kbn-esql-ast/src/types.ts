@@ -20,6 +20,8 @@ export type ESQLAstCommand =
   | ESQLAstCompletionCommand
   | ESQLAstFuseCommand;
 
+export type ESQLAstAllCommands = ESQLAstCommand | ESQLAstHeaderCommand;
+
 export type ESQLAstNode = ESQLAstCommand | ESQLAstHeaderCommand | ESQLAstExpression | ESQLAstItem;
 
 /**
@@ -32,6 +34,7 @@ export type ESQLSingleAstItem =
   | ESQLFunction
   | ESQLCommandOption
   | ESQLSource
+  | ESQLParens
   | ESQLColumn
   | ESQLDatePeriodLiteral
   | ESQLTimeDurationLiteral
@@ -370,6 +373,18 @@ export interface ESQLSource extends ESQLAstBaseItem {
   selector?: ESQLStringLiteral | undefined;
 }
 
+/**
+ * Represents any expression wrapped in parentheses.
+ *
+ * ```
+ * FROM ( <query> )
+ * ```
+ */
+export interface ESQLParens extends ESQLAstBaseItem {
+  type: 'parens';
+  child: ESQLAstExpression;
+}
+
 export interface ESQLColumn extends ESQLAstBaseItem {
   type: 'column';
 
@@ -586,6 +601,8 @@ export interface ESQLMessage {
   text: string;
   location: ESQLLocation;
   code: string;
+  errorType?: 'semantic';
+  requiresCallback?: 'getColumnsFor' | 'getSources' | 'getPolicies' | 'getJoinIndices' | string;
 }
 
 export interface EditorError {

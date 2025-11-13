@@ -105,7 +105,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await dashboard.saveDashboard(dashboardName, { saveAsNew: false });
 
-      await dashboard.gotoDashboardLandingPage();
       await dashboard.loadSavedDashboard(dashboardName);
 
       await enableNewChartLibraryDebug(true);
@@ -307,7 +306,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             (appState: Partial<DashboardLocatorParams>) => {
               return {
                 panels: (appState.panels ?? []).map((widget) => {
-                  const panel = widget as DashboardPanel;
+                  const panel = widget as DashboardPanel & { config: Record<string, unknown> };
                   return {
                     ...panel,
                     config: {
@@ -352,7 +351,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             (appState: Partial<DashboardLocatorParams>) => {
               return {
                 panels: (appState.panels ?? []).map((widget) => {
-                  const panel = widget as DashboardPanel;
+                  const panel = widget as DashboardPanel & { config: Record<string, unknown> };
                   return {
                     ...panel,
                     config: {

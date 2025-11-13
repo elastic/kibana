@@ -19,6 +19,9 @@ export const processorFieldRenames: Record<string, Record<string, string>> = {
   rename: { from: 'field', to: 'target_field', where: 'if' },
   set: { to: 'field', where: 'if' },
   append: { to: 'field', where: 'if' },
+  convert: { from: 'field', to: 'target_field', where: 'if' },
+  remove_by_prefix: { from: 'fields' },
+  remove: { from: 'field', where: 'if' },
   manual_ingest_pipeline: { where: 'if' },
 };
 
@@ -40,8 +43,7 @@ export const applyPreProcessing = (
   action: StreamlangProcessorDefinition['action'],
   processorWithRenames: IngestPipelineProcessor
 ): IngestProcessorContainer[] => {
-  // Placeholder for future pre-processing logic
-  // Currently returns processor as-is without any template escaping
+  // Default: return processor as-is
   return [
     {
       [action]: { ...processorWithRenames },

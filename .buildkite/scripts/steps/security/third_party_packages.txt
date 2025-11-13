@@ -1,3 +1,5 @@
+ajv-draft-04
+ajv-formats
 @moonrepo/cli
 @langchain/langgraph-checkpoint
 dom-to-image-more
@@ -10,3 +12,8 @@ inversify
 canvas-confetti
 @types/canvas-confetti
 undici
+liquidjs
+xml-formatter
+@tanstack/react-table
+@tanstack/react-virtual
+@storybook/addon-docs

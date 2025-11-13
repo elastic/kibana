@@ -7,20 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useRef } from 'react';
-import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
-import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
-import type { Observable } from 'rxjs';
-import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
+import { css } from '@emotion/react';
+import type { LensSeriesLayer } from '@kbn/lens-embeddable-utils/config_builder';
 import { useBoolean } from '@kbn/react-hooks';
-import { createESQLQuery } from '../../common/utils/esql/create_esql_query';
+import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
+import React, { useRef } from 'react';
+import type { Observable } from 'rxjs';
+import type { LensYBoundsConfig } from '@kbn/lens-embeddable-utils/config_builder/types';
+import { useLensProps } from './hooks/use_lens_props';
 import type { LensWrapperProps } from './lens_wrapper';
 import { LensWrapper } from './lens_wrapper';
-import { useChartLayers } from './hooks/use_chart_layers';
-import { useLensProps } from './hooks/use_lens_props';
 
-const ChartSizes = {
+export const ChartSizes = {
   s: 230,
   m: 350,
 };
@@ -28,57 +27,43 @@ const ChartSizes = {
 export type ChartSize = keyof typeof ChartSizes;
 export type ChartProps = Pick<ChartSectionProps, 'searchSessionId' | 'requestParams'> &
   Omit<LensWrapperProps, 'lensProps' | 'onViewDetails' | 'onCopyToDashboard' | 'description'> & {
-    dimensions: string[];
-    color?: string;
     size?: ChartSize;
-    filters?: Array<{ field: string; value: string }>;
     discoverFetch$: Observable<UnifiedHistogramInputMessage>;
-    metric: MetricField;
-    onViewDetails: (esqlQuery: string, metric: MetricField, chartId: string) => void;
-    chartId: string;
+    onViewDetails?: () => void;
+    esqlQuery: string;
+    title: string;
+    chartLayers: LensSeriesLayer[];
+    yBounds?: LensYBoundsConfig;
   };
 
 const LensWrapperMemo = React.memo(LensWrapper);
 export const Chart = ({
   abortController,
-  metric,
-  color,
   services,
   searchSessionId,
   onBrushEnd,
   onFilter,
   onViewDetails,
   requestParams,
+  titleHighlight,
   discoverFetch$,
-  dimensions = [],
   size = 'm',
-  filters = [],
-  chartId,
+  esqlQuery,
+  title,
+  chartLayers,
+  syncCursor,
+  syncTooltips,
+  yBounds,
 }: ChartProps) => {
-  const { euiTheme } = useEuiTheme();
   const chartRef = useRef<HTMLDivElement>(null);
+  const { euiTheme } = useEuiTheme();
 
   const [isSaveModalVisible, { toggle: toggleSaveModalVisible }] = useBoolean(false);
   const { SaveModalComponent } = services.lens;
-
   const { getTimeRange } = requestParams;
 
-  const esqlQuery = useMemo(() => {
-    const isSupported = metric.type !== 'unsigned_long' && metric.type !== 'histogram';
-    if (!isSupported) {
-      return '';
-    }
-    return createESQLQuery({
-      metric,
-      dimensions,
-      filters,
-    });
-  }, [metric, dimensions, filters]);
-
-  const chartLayers = useChartLayers({ dimensions, metric, color });
-
   const lensProps = useLensProps({
-    title: metric.name,
+    title,
     query: esqlQuery,
     services,
     searchSessionId,
@@ -86,11 +71,8 @@ export const Chart = ({
     getTimeRange,
     chartRef,
     chartLayers,
+    yBounds,
   });
-
-  const handleViewDetails = useCallback(() => {
-    onViewDetails(esqlQuery, metric, chartId);
-  }, [onViewDetails, esqlQuery, metric, chartId]);
 
   return (
     <div
@@ -116,8 +98,11 @@ export const Chart = ({
             onBrushEnd={onBrushEnd}
             onFilter={onFilter}
             abortController={abortController}
-            onViewDetails={handleViewDetails}
+            onViewDetails={onViewDetails}
             onCopyToDashboard={toggleSaveModalVisible}
+            syncCursor={syncCursor}
+            titleHighlight={titleHighlight}
+            syncTooltips={syncTooltips}
           />
           {isSaveModalVisible && (
             <SaveModalComponent

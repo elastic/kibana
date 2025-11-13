@@ -59,13 +59,22 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
     log.debug(
       'SolutionNavigation.sidenav.expandMoreIfNeeded - checking if "More" menu needs to be expanded'
     );
-    if (await testSubjects.exists('sideNavMoreMenuItem', { timeout: 100 })) {
-      const moreMenuItem = await testSubjects.find('sideNavMoreMenuItem', TIMEOUT_CHECK);
-      const isExpanded = await moreMenuItem.getAttribute('aria-expanded');
-      log.debug('SolutionNavigation.sidenav.expandMoreIfNeeded - More Popover Visible', isExpanded);
-      if (isExpanded === 'false') {
-        await moreMenuItem.click();
-      }
+    if (await testSubjects.exists('sideNavMoreMenuItem', { timeout: TIMEOUT_CHECK })) {
+      await retry.try(async () => {
+        const moreMenuItem = await testSubjects.find('sideNavMoreMenuItem', TIMEOUT_CHECK);
+        let isExpanded = await moreMenuItem.getAttribute('aria-expanded');
+        log.debug(
+          'SolutionNavigation.sidenav.expandMoreIfNeeded - More Popover Visible',
+          isExpanded
+        );
+        if (isExpanded === 'false') {
+          await moreMenuItem.click();
+        }
+        isExpanded = await moreMenuItem.getAttribute('aria-expanded');
+        if (isExpanded === 'false') {
+          throw new Error('More menu still hidden');
+        }
+      });
     }
   }
 
@@ -74,7 +83,7 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
     log.debug(
       'SolutionNavigation.sidenav.collapseMoreIfNeeded - checking if "More" menu needs to be collapsed'
     );
-    if (await testSubjects.exists('sideNavMoreMenuItem', { timeout: 100 })) {
+    if (await testSubjects.exists('sideNavMoreMenuItem', { timeout: TIMEOUT_CHECK })) {
       // TODO: find a better way to collapse
       // https://github.com/elastic/kibana/issues/236242
       await retry.try(async () => {
@@ -347,7 +356,7 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
       },
       async expectPanelExists(sectionId: NavigationId) {
         log.debug('SolutionNavigation.sidenav.expectPanelExists', sectionId);
-        await testSubjects.existOrFail(`~sideNavPanel-id-${sectionId}`, {
+        await testSubjects.existOrFail(`~side-navigation-panel_${sectionId}`, {
           timeout: TIMEOUT_CHECK,
         });
       },
@@ -392,7 +401,8 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
         await panelOpenerBtn.click();
       },
       async isCollapsed() {
-        const collapseNavBtn = await testSubjects.find('euiCollapsibleNavButton', TIMEOUT_CHECK);
+        const selector = (await this.isV2()) ? 'sideNavCollapseButton' : 'euiCollapsibleNavButton';
+        const collapseNavBtn = await testSubjects.find(selector, TIMEOUT_CHECK);
         return (await collapseNavBtn.getAttribute('aria-expanded')) === 'false';
       },
       async isExpanded() {
@@ -411,7 +421,10 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
             shouldBeCollapsed ? 'Collapsing' : 'Expanding'
           );
 
-          const collapseNavBtn = await testSubjects.find('euiCollapsibleNavButton', TIMEOUT_CHECK);
+          const selector = (await this.isV2())
+            ? 'sideNavCollapseButton'
+            : 'euiCollapsibleNavButton';
+          const collapseNavBtn = await testSubjects.find(selector, TIMEOUT_CHECK);
           await collapseNavBtn.click();
         }
       },
@@ -443,6 +456,10 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
           await browser.setLocalStorageItem('solutionNavigationTour:completed', 'true');
           await browser.refresh();
         },
+        isTourStepVisible: async (stepId: TourStepId) => {
+          log.debug('SolutionNavigation.sidenav.tour.isTourStepVisible', stepId);
+          return await testSubjects.exists(`nav-tour-step-${stepId}`, { timeout: TIMEOUT_CHECK });
+        },
         expectTourStepVisible: async (stepId: TourStepId) => {
           log.debug('SolutionNavigation.sidenav.tour.expectTourStepVisible', stepId);
           await testSubjects.existOrFail(`nav-tour-step-${stepId}`);
@@ -470,7 +487,7 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
         },
         async getFeedbackDismissTestSubjectId() {
           return (await isV2())
-            ? 'feedbackSnippetPanel > feedbackSnippetPanelDismiss'
+            ? 'feedbackSnippetPanel > sideNavigationFeedbackPanelDismiss'
             : 'sideNavfeedbackCallout > euiDismissCalloutButton';
         },
         async expectExists() {
@@ -480,7 +497,7 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
         },
         async expectMissing() {
           return (await isV2())
-            ? await testSubjects.existOrFail('feedbackSnippetButton', {
+            ? await testSubjects.existOrFail('sideNavigationFeedbackButtonSurveyLink', {
                 timeout: TIMEOUT_CHECK,
               })
             : await testSubjects.missingOrFail(await this.getFeedbackTestSubjectId(), {

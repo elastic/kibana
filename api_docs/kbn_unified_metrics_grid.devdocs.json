@@ -5,17 +5,59 @@
     "functions": [
       {
         "parentPluginId": "@kbn/unified-metrics-grid",
+        "id": "def-public.LazyTraceMetricsGrid",
+        "type": "Function",
+        "tags": [],
+        "label": "LazyTraceMetricsGrid",
+        "description": [],
+        "signature": [
+          "React.ForwardRefExoticComponent<Omit<any, \"ref\"> & React.RefAttributes<{}>>"
+        ],
+        "path": "src/platform/packages/shared/kbn-unified-metrics-grid/src/components/trace_metrics_grid/lazy_trace_metrics_grid.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-metrics-grid",
+            "id": "def-public.LazyTraceMetricsGrid.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-metrics-grid",
         "id": "def-public.LazyUnifiedMetricsExperienceGrid",
         "type": "Function",
         "tags": [],
         "label": "LazyUnifiedMetricsExperienceGrid",
         "description": [],
         "signature": [
-          "React.ForwardRefExoticComponent<",
+          "React.ForwardRefExoticComponent<Omit<Omit<",
           "ChartSectionProps",
           " & { client?: { getDimensions: (params: { dimensions: string; indices?: string | string[] | undefined; from?: string | undefined; to?: string | undefined; }, signal?: AbortSignal | null | undefined) => Promise<{ values: { value: string; field: string; }[]; }>; getFields: (params: { page?: number | undefined; index?: string | undefined; size?: number | undefined; fields?: string | string[] | undefined; from?: string | undefined; to?: string | undefined; }, signal?: AbortSignal | null | undefined) => Promise<{ fields: ",
           "MetricField",
-          "[]; total: number; page: number; }>; getIndexPatternMetadata({ indexPattern, from, to, }: { indexPattern: string; } & { from: string; to: string; }, signal?: AbortSignal | null | undefined): Promise<{ indexPatternMetadata: { [k: string]: { hasTimeSeriesFields: boolean; }; }; }>; } | undefined; } & React.RefAttributes<{}>>"
+          "[]; total: number; page: number; }>; } | undefined; } & Pick<",
+          {
+            "pluginId": "@kbn/restorable-state",
+            "scope": "public",
+            "docId": "kibKbnRestorableStatePluginApi",
+            "section": "def-public.RestorableStateProviderProps",
+            "text": "RestorableStateProviderProps"
+          },
+          "<",
+          "MetricsExperienceRestorableState",
+          ">, \"initialState\" | \"onInitialStateChange\"> & React.RefAttributes<never>, \"ref\"> & { ref?: ((instance: null) => void) | React.RefObject<never> | null | undefined; }, \"ref\"> & React.RefAttributes<{}>>"
         ],
         "path": "src/platform/packages/shared/kbn-unified-metrics-grid/src/components/lazy_unified_metrics_experience_grid.tsx",
         "deprecated": false,
@@ -42,7 +84,40 @@
     ],
     "interfaces": [],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/unified-metrics-grid",
+        "id": "def-public.DataSource",
+        "type": "Type",
+        "tags": [],
+        "label": "DataSource",
+        "description": [],
+        "signature": [
+          "\"apm\" | \"otel\""
+        ],
+        "path": "src/platform/packages/shared/kbn-unified-metrics-grid/src/components/trace_metrics_grid/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-metrics-grid",
+        "id": "def-public.UnifiedMetricsGridRestorableState",
+        "type": "Type",
+        "tags": [],
+        "label": "UnifiedMetricsGridRestorableState",
+        "description": [],
+        "signature": [
+          "MetricsExperienceRestorableState",
+          " | ",
+          "TracesRestorableState"
+        ],
+        "path": "src/platform/packages/shared/kbn-unified-metrics-grid/src/restorable_state.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   },
   "server": {

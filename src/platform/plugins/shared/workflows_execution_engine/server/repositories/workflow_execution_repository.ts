@@ -13,6 +13,7 @@ import { WORKFLOWS_EXECUTIONS_INDEX } from '../../common';
 
 export class WorkflowExecutionRepository {
   private indexName = WORKFLOWS_EXECUTIONS_INDEX;
+
   constructor(private esClient: ElasticsearchClient) {}
 
   /**

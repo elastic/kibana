@@ -10,19 +10,25 @@
 import type { WaitStep } from '@kbn/workflows';
 import type { WaitGraphNode } from '@kbn/workflows/graph';
 import { WaitStepImpl } from './wait_step';
+import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
+import type { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
 import type { WorkflowTaskManager } from '../../workflow_task_manager/workflow_task_manager';
-import type { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
 
 describe('WaitStepImpl', () => {
   let underTest: WaitStepImpl;
 
   let node: WaitGraphNode;
-  let workflowRuntime: WorkflowExecutionRuntimeManager;
+  let mockStepExecutionRuntime: jest.Mocked<StepExecutionRuntime>;
+  let mockWorkflowRuntime: jest.Mocked<WorkflowExecutionRuntimeManager>;
   let workflowLogger: IWorkflowEventLogger;
   let workflowTaskManager: WorkflowTaskManager;
-  let stepContext: WorkflowContextManager;
+
+  let stepContextAbortController: AbortController;
+  let mockContextManager: jest.Mocked<Pick<WorkflowContextManager, 'getContext'>> & {
+    abortController: AbortController;
+  };
 
   beforeAll(() => {
     jest.useFakeTimers();
@@ -33,6 +39,12 @@ describe('WaitStepImpl', () => {
   });
 
   beforeEach(() => {
+    stepContextAbortController = new AbortController();
+    mockContextManager = {
+      getContext: jest.fn(),
+      abortController: stepContextAbortController,
+    };
+
     node = {
       id: 'wait-step',
       type: 'wait',
@@ -45,14 +57,22 @@ describe('WaitStepImpl', () => {
       } as WaitStep,
     };
 
-    workflowRuntime = {} as unknown as WorkflowExecutionRuntimeManager;
-    workflowRuntime.startStep = jest.fn();
-    workflowRuntime.finishStep = jest.fn();
-    workflowRuntime.setWaitStep = jest.fn();
-    workflowRuntime.setCurrentStepState = jest.fn();
-    workflowRuntime.getCurrentStepState = jest.fn();
-    workflowRuntime.navigateToNextNode = jest.fn();
-    workflowRuntime.getWorkflowExecution = jest.fn();
+    mockStepExecutionRuntime = {
+      contextManager: mockContextManager,
+      startStep: jest.fn().mockResolvedValue(undefined),
+      finishStep: jest.fn().mockResolvedValue(undefined),
+      failStep: jest.fn().mockResolvedValue(undefined),
+      getCurrentStepState: jest.fn(),
+      setCurrentStepState: jest.fn().mockResolvedValue(undefined),
+      setWaitStep: jest.fn().mockResolvedValue(undefined),
+      stepExecutionId: 'test-step-exec-id',
+      abortController: stepContextAbortController,
+    } as any;
+
+    mockWorkflowRuntime = {
+      navigateToNextNode: jest.fn(),
+      getWorkflowExecution: jest.fn(),
+    } as any;
 
     workflowLogger = {} as unknown as IWorkflowEventLogger;
     workflowLogger.logInfo = jest.fn();
@@ -61,12 +81,10 @@ describe('WaitStepImpl', () => {
     workflowTaskManager = {} as unknown as WorkflowTaskManager;
     workflowTaskManager.scheduleResumeTask = jest.fn();
 
-    stepContext = {} as unknown as WorkflowContextManager;
-
     underTest = new WaitStepImpl(
       node,
-      stepContext,
-      workflowRuntime,
+      mockStepExecutionRuntime,
+      mockWorkflowRuntime,
       workflowLogger,
       workflowTaskManager
     );
@@ -100,10 +118,6 @@ describe('WaitStepImpl', () => {
   });
 
   describe('short duration', () => {
-    beforeEach(() => {
-      (stepContext as any).abortController = new AbortController();
-    });
-
     it('should handle short duration for up to 5 seconds', async () => {
       node.configuration.with.duration = '5s';
       underTest.handleShortDuration = jest.fn();
@@ -117,12 +131,12 @@ describe('WaitStepImpl', () => {
       node.configuration.with.duration = '5s';
       const runPromise = underTest.handleShortDuration();
       await jest.advanceTimersByTimeAsync(0);
-      expect(workflowRuntime.startStep).toHaveBeenCalledWith();
+      expect(mockStepExecutionRuntime.startStep).toHaveBeenCalledWith();
 
       await jest.advanceTimersByTimeAsync(5000);
       await runPromise;
 
-      expect(workflowRuntime.finishStep).toHaveBeenCalledWith();
+      expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith();
     });
 
     it('should go to the next node', async () => {
@@ -132,7 +146,7 @@ describe('WaitStepImpl', () => {
       await jest.advanceTimersByTimeAsync(1000);
       await runPromise;
 
-      expect(workflowRuntime.navigateToNextNode).toHaveBeenCalledWith();
+      expect(mockWorkflowRuntime.navigateToNextNode).toHaveBeenCalledWith();
     });
 
     it('should log start and finish wait', async () => {
@@ -155,13 +169,13 @@ describe('WaitStepImpl', () => {
       const runPromise = underTest.handleShortDuration();
 
       await jest.advanceTimersByTimeAsync(2000);
-      (stepContext as any).abortController.abort();
+      stepContextAbortController.abort();
 
       await expect(runPromise).rejects.toThrow(new Error('Wait step was aborted'));
 
-      expect(workflowRuntime.startStep).toHaveBeenCalledWith();
-      expect(workflowRuntime.finishStep).not.toHaveBeenCalled();
-      expect(workflowRuntime.navigateToNextNode).not.toHaveBeenCalled();
+      expect(mockStepExecutionRuntime.startStep).toHaveBeenCalledWith();
+      expect(mockStepExecutionRuntime.finishStep).not.toHaveBeenCalled();
+      expect(mockWorkflowRuntime.navigateToNextNode).not.toHaveBeenCalled();
     });
   });
 
@@ -180,9 +194,10 @@ describe('WaitStepImpl', () => {
 
     describe('entering long wait', () => {
       beforeEach(() => {
-        (workflowRuntime.getCurrentStepState as jest.Mock).mockReturnValue(undefined);
-        (workflowRuntime.getWorkflowExecution as jest.Mock).mockReturnValue({
+        (mockStepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue(undefined);
+        (mockWorkflowRuntime.getWorkflowExecution as jest.Mock).mockReturnValue({
           id: 'workflow-1',
+          spaceId: 'default',
         });
         (workflowTaskManager.scheduleResumeTask as jest.Mock).mockResolvedValue({
           taskId: 'resume-task-1',
@@ -192,15 +207,15 @@ describe('WaitStepImpl', () => {
       it('should call getCurrentStepState one time', async () => {
         node.configuration.with.duration = '6s';
         await underTest.handleLongDuration();
-        expect(workflowRuntime.getCurrentStepState).toHaveBeenCalledWith();
-        expect(workflowRuntime.getCurrentStepState).toHaveBeenCalledTimes(1);
+        expect(mockStepExecutionRuntime.getCurrentStepState).toHaveBeenCalledWith();
+        expect(mockStepExecutionRuntime.getCurrentStepState).toHaveBeenCalledTimes(1);
       });
 
       it('should start the step', async () => {
         node.configuration.with.duration = '10s';
         await underTest.handleLongDuration();
-        expect(workflowRuntime.startStep).toHaveBeenCalledWith();
-        expect(workflowRuntime.finishStep).not.toHaveBeenCalled();
+        expect(mockStepExecutionRuntime.startStep).toHaveBeenCalledWith();
+        expect(mockStepExecutionRuntime.finishStep).not.toHaveBeenCalled();
       });
 
       it('should schedule a resume task for the duration', async () => {
@@ -209,13 +224,14 @@ describe('WaitStepImpl', () => {
         expect(workflowTaskManager.scheduleResumeTask).toHaveBeenCalledWith({
           runAt: new Date(Date.now() + 604800000), // 1 week in ms
           workflowRunId: 'workflow-1',
+          spaceId: 'default',
         });
       });
 
       it('should set step state with resume task ID', async () => {
         node.configuration.with.duration = '6s';
         await underTest.handleLongDuration();
-        expect(workflowRuntime.setCurrentStepState).toHaveBeenCalledWith({
+        expect(mockStepExecutionRuntime.setCurrentStepState).toHaveBeenCalledWith({
           resumeExecutionTaskId: 'resume-task-1',
         });
       });
@@ -240,14 +256,20 @@ describe('WaitStepImpl', () => {
           )
         );
       });
+
+      it('should set wait step status', async () => {
+        node.configuration.with.duration = '6s';
+        await underTest.handleLongDuration();
+        expect(mockStepExecutionRuntime.setWaitStep).toHaveBeenCalledWith();
+      });
     });
 
     describe('exiting long wait', () => {
       beforeEach(() => {
-        (workflowRuntime.getCurrentStepState as jest.Mock).mockReturnValue({
+        (mockStepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({
           resumeExecutionTaskId: 'resume-task-1',
         });
-        (workflowRuntime.getWorkflowExecution as jest.Mock).mockReturnValue({
+        (mockWorkflowRuntime.getWorkflowExecution as jest.Mock).mockReturnValue({
           id: 'workflow-1',
         });
       });
@@ -255,13 +277,13 @@ describe('WaitStepImpl', () => {
       it('should reset step state', async () => {
         node.configuration.with.duration = '6s';
         await underTest.handleLongDuration();
-        expect(workflowRuntime.setCurrentStepState).toHaveBeenCalledWith(undefined);
+        expect(mockStepExecutionRuntime.setCurrentStepState).toHaveBeenCalledWith(undefined);
       });
 
       it('should finish the step', async () => {
         node.configuration.with.duration = '6s';
         await underTest.handleLongDuration();
-        expect(workflowRuntime.finishStep).toHaveBeenCalledWith();
+        expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith();
       });
 
       it('should log finish wait', async () => {
@@ -283,7 +305,7 @@ describe('WaitStepImpl', () => {
       it('should go to the next step', async () => {
         node.configuration.with.duration = '200s';
         await underTest.handleLongDuration();
-        expect(workflowRuntime.navigateToNextNode).toHaveBeenCalledWith();
+        expect(mockWorkflowRuntime.navigateToNextNode).toHaveBeenCalledWith();
       });
     });
   });

@@ -17,7 +17,7 @@ describe('Workflow Step Validation Integration', () => {
       version: '1',
       name: 'Test Workflow',
       enabled: true,
-      triggers: [{ type: 'manual', enabled: true }],
+      triggers: [{ type: 'manual' }],
       steps: [
         { name: 'step1', type: 'console' },
         { name: 'step2', type: 'http' },
@@ -60,7 +60,7 @@ describe('Workflow Step Validation Integration', () => {
       version: '1',
       name: 'Complex Workflow',
       enabled: true,
-      triggers: [{ type: 'manual', enabled: true }],
+      triggers: [{ type: 'manual' }],
       steps: [
         { name: 'root_step', type: 'console' },
         {

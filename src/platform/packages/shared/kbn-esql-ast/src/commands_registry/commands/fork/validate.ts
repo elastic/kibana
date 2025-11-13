@@ -6,18 +6,19 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLAst, ESQLCommand, ESQLMessage } from '../../../types';
+import type { ESQLAst, ESQLAstAllCommands, ESQLMessage } from '../../../types';
 import { Walker } from '../../../walker';
 import type { ICommandContext, ICommandCallbacks } from '../../types';
 import { validateCommandArguments } from '../../../definitions/utils/validation';
 import { esqlCommandRegistry } from '../..';
 import { errors } from '../../../definitions/utils';
+import { isSubQuery } from '../../../ast/is';
 
 const MIN_BRANCHES = 2;
 const MAX_BRANCHES = 8;
 
 export const validate = (
-  command: ESQLCommand,
+  command: ESQLAstAllCommands,
   ast: ESQLAst,
   context?: ICommandContext,
   callbacks?: ICommandCallbacks
@@ -50,6 +51,14 @@ export const validate = (
 
   if (forks.length > 1) {
     messages.push(errors.tooManyForks(forks[1]));
+  }
+
+  // FORK is not allowed when the query contains subqueries
+  const fromCommands = allCommands.filter(({ name }) => name.toLowerCase() === 'from');
+  const hasSubqueries = fromCommands.some((cmd) => cmd.args.some((arg) => isSubQuery(arg)));
+
+  if (hasSubqueries) {
+    messages.push(errors.forkNotAllowedWithSubqueries(command));
   }
 
   return messages;

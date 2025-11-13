@@ -12,6 +12,7 @@ export type {
   CreateWorkflowCommand,
   // elasticsearch documents types
   EsWorkflow,
+  EsWorkflowCreate,
   EsWorkflowExecution,
   EsWorkflowStepExecution,
   // execution engine
@@ -36,8 +37,22 @@ export type {
   WorkflowListDto,
   WorkflowListItemAction,
   WorkflowListItemDto,
+  WorkflowAggsDto,
+  WorkflowStatsDto,
+  // enums
   ExecutionStatusUnion,
   ExecutionTypeUnion,
+  // api types
+  WorkflowsSearchParams,
+  // connector types
+  ConnectorSubAction,
+  ConnectorInstance,
+  ConnectorTypeInfo,
+  ConnectorTypeInfoMinimal,
+  ConnectorContractUnion,
+  EnhancedInternalConnectorContract,
+  InternalConnectorContract,
+  DynamicConnectorContract,
 } from './v1';
 
 // exported full to use enum as values

@@ -6,7 +6,7 @@
  */
 
 import type { FunctionComponent } from 'react';
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useRef } from 'react';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -116,6 +116,8 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
     editor,
     processorsDispatch,
   }) {
+    const editButtonRef = useRef<HTMLAnchorElement>(null);
+    const contextMenuButtonRef = useRef<HTMLButtonElement>(null);
     const isEditorNotInIdleMode = editor.mode.id !== 'idle';
     const isInMoveMode = Boolean(movingProcessor);
     const isMovingThisProcessor = processor.id === movingProcessor?.id;
@@ -240,12 +242,13 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
               <EuiFlexItem grow={false}>
                 <EuiText css={styles.processorText} color={isDimmed ? 'subdued' : undefined}>
                   <EuiLink
+                    ref={editButtonRef}
                     tabIndex={isEditorNotInIdleMode ? -1 : 0}
                     disabled={isEditorNotInIdleMode}
                     onClick={() => {
                       editor.setMode({
                         id: 'managingProcessor',
-                        arg: { processor, selector },
+                        arg: { processor, selector, buttonRef: editButtonRef },
                       });
                     }}
                     data-test-subj="manageItemButton"
@@ -275,12 +278,16 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <ContextMenu
+              ref={contextMenuButtonRef}
               data-test-subj="moreMenu"
               disabled={isEditorNotInIdleMode}
               hidden={isInMoveMode}
               showAddOnFailure={!processor.onFailure?.length}
               onAddOnFailure={() => {
-                editor.setMode({ id: 'creatingProcessor', arg: { selector } });
+                editor.setMode({
+                  id: 'creatingProcessor',
+                  arg: { selector, buttonRef: contextMenuButtonRef },
+                });
               }}
               onDelete={() => {
                 editor.setMode({ id: 'removingProcessor', arg: { selector } });

@@ -10,17 +10,14 @@ import { EuiContextMenuItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { LICENSE_FOR_AGENT_MIGRATION } from '../../../../../../../common/constants';
-
 import { useLicense } from '../../../../hooks';
-
-import { FLEET_SERVER_PACKAGE } from '../../../../../../../common';
+import { ExperimentalFeaturesService } from '../../../../services';
 import {
-  isAgentMigrationSupported,
+  isAgentEligibleForMigration,
+  isAgentEligibleForPrivilegeLevelChange,
   isAgentRequestDiagnosticsSupported,
 } from '../../../../../../../common/services';
-
 import { isStuckInUpdating } from '../../../../../../../common/services/agent_status';
-
 import type { Agent, AgentPolicy } from '../../../../types';
 import { useLink } from '../../../../hooks';
 import { useAuthz } from '../../../../../../hooks/use_authz';
@@ -37,6 +34,7 @@ export const TableRowActions: React.FunctionComponent<{
   onAddRemoveTagsClick: (button: HTMLElement) => void;
   onRequestDiagnosticsClick: () => void;
   onMigrateAgentClick: () => void;
+  onChangeAgentPrivilegeLevelClick: () => void;
 }> = ({
   agent,
   agentPolicy,
@@ -47,14 +45,15 @@ export const TableRowActions: React.FunctionComponent<{
   onAddRemoveTagsClick,
   onRequestDiagnosticsClick,
   onMigrateAgentClick,
+  onChangeAgentPrivilegeLevelClick,
 }) => {
   const { getHref } = useLink();
   const authz = useAuthz();
   const licenseService = useLicense();
-  const isFleetServerAgent =
-    agentPolicy?.package_policies?.some((p) => p.package?.name === FLEET_SERVER_PACKAGE) ?? false;
   const isUnenrolling = agent.status === 'unenrolling';
-  const doesLicenseAllowMigration = licenseService.hasAtLeast(LICENSE_FOR_AGENT_MIGRATION);
+  const agentPrivilegeLevelChangeEnabled =
+    ExperimentalFeaturesService.get().enableAgentPrivilegeLevelChange;
+
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuItems = [
     <EuiContextMenuItem
@@ -66,20 +65,15 @@ export const TableRowActions: React.FunctionComponent<{
     </EuiContextMenuItem>,
   ];
 
-  if (
-    authz.fleet.allAgents &&
-    !agentPolicy?.is_protected &&
-    !isFleetServerAgent &&
-    isAgentMigrationSupported(agent)
-  ) {
+  if (authz.fleet.allAgents && isAgentEligibleForMigration(agent, agentPolicy)) {
     menuItems.push(
       <EuiContextMenuItem
         icon="cluster"
-        onClick={(e) => {
+        onClick={() => {
           onMigrateAgentClick();
           setIsMenuOpen(false);
         }}
-        disabled={!agent.active || !doesLicenseAllowMigration}
+        disabled={!agent.active || !licenseService.hasAtLeast(LICENSE_FOR_AGENT_MIGRATION)}
         key="migrateAgent"
         data-test-subj="migrateAgentMenuItem"
       >
@@ -90,6 +84,7 @@ export const TableRowActions: React.FunctionComponent<{
       </EuiContextMenuItem>
     );
   }
+
   if (authz.fleet.allAgents && agentPolicy?.is_managed === false) {
     menuItems.push(
       <EuiContextMenuItem
@@ -191,6 +186,30 @@ export const TableRowActions: React.FunctionComponent<{
         </EuiContextMenuItem>
       );
     }
+  }
+
+  if (
+    authz.fleet.allAgents &&
+    isAgentEligibleForPrivilegeLevelChange(agent, agentPolicy) &&
+    agentPrivilegeLevelChangeEnabled
+  ) {
+    menuItems.push(
+      <EuiContextMenuItem
+        icon="lock"
+        onClick={() => {
+          onChangeAgentPrivilegeLevelClick();
+          setIsMenuOpen(false);
+        }}
+        disabled={!agent.active}
+        key="changeAgentPrivilegeLevel"
+        data-test-subj="changeAgentPrivilegeLevelMenuItem"
+      >
+        <FormattedMessage
+          id="xpack.fleet.agentList.changeAgentPrivilegeLevelActionText"
+          defaultMessage="Remove root privilege"
+        />
+      </EuiContextMenuItem>
+    );
   }
 
   if (authz.fleet.readAgents) {

@@ -14,12 +14,8 @@ import {
   MOVING_AVERAGE_ID,
   MOVING_AVERAGE_WINDOW_DEFAULT_VALUE,
 } from '@kbn/lens-formula-docs';
+import type { FormBasedLayer, MovingAverageIndexPatternColumn } from '@kbn/lens-common';
 import { useDebounceWithOptions } from '../../../../../shared_components';
-import type {
-  FormattedIndexPatternColumn,
-  ReferenceBasedIndexPatternColumn,
-} from '../column_types';
-import type { FormBasedLayer } from '../../../types';
 import {
   buildLabelFunction,
   checkForDateHistogram,
@@ -44,14 +40,6 @@ const ofName = buildLabelFunction((name?: string) => {
     },
   });
 });
-
-export type MovingAverageIndexPatternColumn = FormattedIndexPatternColumn &
-  ReferenceBasedIndexPatternColumn & {
-    operationType: typeof MOVING_AVERAGE_ID;
-    params: {
-      window: number;
-    };
-  };
 
 export const movingAverageOperation: OperationDefinition<
   MovingAverageIndexPatternColumn,

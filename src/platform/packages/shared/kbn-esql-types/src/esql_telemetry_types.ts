@@ -11,3 +11,16 @@ export interface ESQLTelemetryCallbacks {
   onDecorationHoverShown?: (hoverMessage: string) => void;
   onSuggestionsWithCustomCommandShown?: (commandNames: string[]) => void;
 }
+
+export enum QuerySource {
+  HISTORY = 'history',
+  STARRED = 'starred',
+  MANUAL = 'manual',
+  HELP = 'help',
+  AUTOCOMPLETE = 'autocomplete',
+}
+
+export interface TelemetryQuerySubmittedProps {
+  source: QuerySource;
+  query: string;
+}

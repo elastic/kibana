@@ -13,10 +13,7 @@ import {
 } from '@kbn/cases-plugin/common/types/domain';
 import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common';
 import {
-  runActivitySynchronizationTask,
-  runAttachmentsSynchronizationTask,
-  runCasesSynchronizationTask,
-  runCommentsSynchronizationTask,
+  runCAISynchronizationTask,
   runSchedulerTask,
 } from '../../../../../common/lib/api/analytics';
 import {
@@ -101,11 +98,11 @@ export default ({ getService }: FtrProviderContext): void => {
         200
       );
 
-      await runCasesSynchronizationTask(supertest);
+      await runCAISynchronizationTask(supertest);
 
       await retry.tryForTime(300000, async () => {
         const caseAnalytics = await esClient.get({
-          index: '.internal.cases.default-securitysolution',
+          index: '.internal.cases.securitysolution-default',
           id: `cases:${caseToBackfill.id}`,
         });
 
@@ -188,18 +185,18 @@ export default ({ getService }: FtrProviderContext): void => {
         auth: authSpace1,
       });
 
-      await runAttachmentsSynchronizationTask(supertest);
+      await runCAISynchronizationTask(supertest);
 
       await retry.tryForTime(300000, async () => {
         const firstAttachmentAnalytics = await esClient.get({
-          index: '.internal.cases-attachments.space1-securitysolution',
+          index: '.internal.cases-attachments.securitysolution-space1',
           id: `cases-comments:${postedCaseWithAttachments.comments![0].id}`,
         });
 
         expect(firstAttachmentAnalytics.found).to.be(true);
 
         const secondAttachmentAnalytics = await esClient.get({
-          index: '.internal.cases-attachments.space1-securitysolution',
+          index: '.internal.cases-attachments.securitysolution-space1',
           id: `cases-comments:${postedCaseWithAttachments.comments![1].id}`,
         });
 
@@ -219,11 +216,11 @@ export default ({ getService }: FtrProviderContext): void => {
         params: { ...postCommentUserReq, owner: SECURITY_SOLUTION_OWNER },
       });
 
-      await runCommentsSynchronizationTask(supertest);
+      await runCAISynchronizationTask(supertest);
 
       await retry.try(async () => {
         const commentAnalytics = await esClient.get({
-          index: '.internal.cases-comments.default-securitysolution',
+          index: '.internal.cases-comments.securitysolution-default',
           id: `cases-comments:${patchedCase.comments![0].id}`,
         });
 
@@ -278,12 +275,12 @@ export default ({ getService }: FtrProviderContext): void => {
         },
       });
 
-      await runActivitySynchronizationTask(supertest);
+      await runCAISynchronizationTask(supertest);
 
       let activityArray: any[] = [];
       await retry.try(async () => {
         const activityAnalytics = await esClient.search({
-          index: '.internal.cases-activity.default-securitysolution',
+          index: '.internal.cases-activity.securitysolution-default',
         });
 
         // @ts-ignore

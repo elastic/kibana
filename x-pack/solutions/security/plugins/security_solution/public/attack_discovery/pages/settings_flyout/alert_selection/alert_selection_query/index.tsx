@@ -203,6 +203,7 @@ const AlertSelectionQueryComponent: React.FC<Props> = ({
       >
         <EuiSuperDatePicker
           commonlyUsedRanges={commonlyUsedRanges}
+          compressed={true}
           data-test-subj="alertSelectionDatePicker"
           end={settings.end}
           isDisabled={false}

@@ -11,27 +11,25 @@ import type { Reference } from '@kbn/content-management-utils';
 import { transformPanels } from './transform_panels';
 import type { DashboardPanel, DashboardSection } from '../../../server';
 
-jest.mock('../../services/kibana_services', () => {
-  function mockTransformOut(state: object, references?: Reference[]) {
-    // Implemenation exists for testing purposes only
-    // transformOut should not throw if there are no references
-    if (!references || references.length === 0) throw new Error('Simulated transformOut error');
-
-    return {
-      savedObjectId: references[0].id,
-    };
-  }
-  return {
-    embeddableService: {
-      getTransforms: async () => ({
-        transformOut: mockTransformOut,
-      }),
-    },
-  };
-});
-
 describe('transformPanels', () => {
+  const mockTransformOut = jest.fn();
+  beforeAll(() => {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    require('../../services/kibana_services').embeddableService = {
+      getLegacyURLTransform: async () => mockTransformOut,
+    };
+  });
+
+  beforeEach(() => {
+    mockTransformOut.mockReset();
+  });
+
   test('should transform panels', async () => {
+    mockTransformOut.mockImplementation((state: object, references?: Reference[]) => {
+      return {
+        savedObjectId: references?.[0]?.id,
+      };
+    });
     const panels = await transformPanels(
       [
         {
@@ -79,6 +77,9 @@ describe('transformPanels', () => {
   });
 
   test('should handle transformOut throw', async () => {
+    mockTransformOut.mockImplementation((state: object, references?: Reference[]) => {
+      throw new Error('Simulated transformOut error');
+    });
     const panels = await transformPanels([
       {
         grid: { x: 0, y: 0, w: 6, h: 6 },

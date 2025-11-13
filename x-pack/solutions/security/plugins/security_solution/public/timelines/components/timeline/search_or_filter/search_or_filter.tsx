@@ -11,7 +11,7 @@ import styled from 'styled-components';
 import type { Filter } from '@kbn/es-query';
 
 import type { FilterManager } from '@kbn/data-plugin/public';
-import { useEnableExperimental } from '../../../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { type TimelineType, TimelineTypeEnum } from '../../../../../common/api/timeline';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import type { KqlMode } from '../../../store/model';
@@ -87,7 +87,7 @@ export const SearchOrFilter = React.memo<Props>(
     toggleDataProviderVisibility,
     timelineType,
   }) => {
-    const { newDataViewPickerEnabled } = useEnableExperimental();
+    const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
     const isDataProviderEmpty = useMemo(() => dataProviders?.length === 0, [dataProviders]);
 
     const dataProviderIconTooltipContent = useMemo(() => {

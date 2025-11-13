@@ -10,9 +10,6 @@ import { getDataTestSubjectSelector } from '../../helpers/common';
 export const DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_BUTTON = getDataTestSubjectSelector(
   'securitySolutionFlyoutInsightsTabEntitiesButton'
 );
-export const DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_USER_DETAILS_TITLE = getDataTestSubjectSelector(
-  'securitySolutionFlyoutUsersDetailsTitleText'
-);
 export const DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_USER_DETAILS_LINK = getDataTestSubjectSelector(
   'securitySolutionFlyoutUsersDetailsTitleLink'
 );
@@ -24,9 +21,6 @@ export const DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_USER_DETAILS = getDataTestSubj
 
 export const DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_HOST_DETAILS_LINK = getDataTestSubjectSelector(
   'securitySolutionFlyoutHostsDetailsTitleLink'
-);
-export const DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_HOST_DETAILS_TITLE = getDataTestSubjectSelector(
-  'securitySolutionFlyoutHostsDetailsTitleText'
 );
 export const DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_HOST_DETAILS_RIGHT_SECTION =
   getDataTestSubjectSelector('securitySolutionFlyoutHostsDetailsRightSection');

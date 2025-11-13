@@ -239,7 +239,7 @@ describe('When the tabular page is loaded', () => {
     const techPreview = 'TECH PREVIEW';
 
     const rows = screen.getAllByRole('row');
-    expect(rows[1]).toHaveTextContent(techPreview);
+    expect(rows[1]).not.toHaveTextContent(techPreview);
     expect(rows[2]).not.toHaveTextContent(techPreview);
     expect(rows[3]).not.toHaveTextContent(techPreview);
     expect(rows[4]).toHaveTextContent(techPreview);

@@ -14,7 +14,7 @@ import { isCommand } from '../ast/is';
 import { LeafPrinter } from '../pretty_print';
 import { getPosition } from './tokens';
 import { nonNullable } from './helpers';
-import { firstItem, lastItem, resolveItem } from '../visitor/utils';
+import { firstItem, lastItem, resolveItem, singleItems } from '../visitor/utils';
 import { type AstNodeParserFields, Builder } from '../builder';
 import { type ArithmeticUnaryContext } from '../antlr/esql_parser';
 import type { Parser } from './parser';
@@ -149,21 +149,22 @@ export class CstToAstConverter {
     const setCommandCtxs = ctx.setCommand_list();
     const singleStatement = ctx.singleStatement();
 
+    let header: ast.ESQLAstSetHeaderCommand[] | undefined;
+    // Process SET instructions and create header if they exist
+    if (setCommandCtxs && setCommandCtxs.length > 0) {
+      header = this.fromSetCommands(setCommandCtxs);
+    }
+
     // Get the main query from singleStatement
     const query = this.fromSingleStatement(singleStatement);
 
     if (!query) {
-      return undefined;
+      const emptyQuery = Builder.expression.query([], this.getParserFields(ctx), header);
+      emptyQuery.incomplete = true;
+      return emptyQuery;
     }
 
-    // Process SET instructions and create header if they exist
-    if (setCommandCtxs && setCommandCtxs.length > 0) {
-      const header = this.fromSetCommands(setCommandCtxs);
-
-      if (header && header.length > 0) {
-        query.header = header;
-      }
-    }
+    query.header = header;
 
     return query;
   }
@@ -271,18 +272,29 @@ export class CstToAstConverter {
 
   private fromSetCommand(ctx: cst.SetCommandContext): ast.ESQLAstSetHeaderCommand {
     const setFieldCtx = ctx.setField();
-    const arg = this.fromSetFieldContext(setFieldCtx);
-    const command = Builder.header.command.set([arg], {}, this.getParserFields(ctx));
+    const binaryExpression = this.fromSetFieldContext(setFieldCtx);
+
+    const args = binaryExpression ? [binaryExpression] : [];
+    const command = Builder.header.command.set(args, {}, this.getParserFields(ctx));
 
     return command;
   }
 
-  private fromSetFieldContext(ctx: cst.SetFieldContext): ast.ESQLBinaryExpression<'='> {
+  private fromSetFieldContext(ctx: cst.SetFieldContext): ast.ESQLBinaryExpression<'='> | null {
     const leftCtx = ctx.identifier();
     const rightCtx = ctx.constant();
+
+    if (!leftCtx || !rightCtx) {
+      return null;
+    }
+
     const left = this.toIdentifierFromContext(leftCtx);
     const right = this.fromConstant(rightCtx) as ast.ESQLLiteral;
     const expression = this.toBinaryExpression('=', ctx, [left, right]);
+
+    if (left.incomplete || right.incomplete) {
+      expression.incomplete = true;
+    }
 
     return expression;
   }
@@ -485,7 +497,7 @@ export class CstToAstConverter {
       args,
       incomplete:
         incomplete ??
-        Boolean(
+        (Boolean(
           ctx.exception ||
             ctx.children?.some((c) => {
               // TODO: 1. Remove this expect error comment
@@ -493,7 +505,8 @@ export class CstToAstConverter {
               // @ts-expect-error not exposed in type but exists see https://github.com/antlr/antlr4/blob/v4.11.1/runtime/JavaScript/src/antlr4/tree/ErrorNodeImpl.js#L19
               return Boolean(c.isErrorNode);
             })
-        ),
+        ) ||
+          [...singleItems(args)].some((arg) => arg.incomplete)),
     };
   }
 
@@ -512,8 +525,23 @@ export class CstToAstConverter {
 
   // --------------------------------------------------------------------- FROM
 
-  private fromFromCommand(ctx: cst.FromCommandContext): ast.ESQLCommand<'from'> {
-    return this.fromFromCompatibleCommand('from', ctx);
+  private fromFromCommand(ctx: cst.FromCommandContext): ast.ESQLCommand<'from'> | undefined {
+    // When parsing queries with nested empty subqueries like "FROM a, (FROM b, ())",
+    // ANTLR incorrectly identifies the empty parentheses "()" as a fromCommand context.
+    // This phantom context contains only closing parentheses (e.g., ")" or "))")
+    // without any actual FROM keyword, which would lead to malformed AST nodes.
+    if (!ctx.FROM()) {
+      return undefined;
+    }
+
+    const command = this.fromFromCompatibleCommand('from', ctx);
+    const hasValidText = textExistsAndIsValid(ctx.getText());
+
+    if (!hasValidText) {
+      command.incomplete = true;
+    }
+
+    return command;
   }
 
   private fromFromCompatibleCommand<Name extends string>(
@@ -521,11 +549,24 @@ export class CstToAstConverter {
     ctx: antlr.ParserRuleContext & Pick<cst.FromCommandContext, 'indexPatternAndMetadataFields'>
   ): ast.ESQLCommand<Name> {
     const command = this.createCommand(commandName, ctx);
-    const indexPatternCtx = ctx.indexPatternAndMetadataFields();
-    const metadataCtx = indexPatternCtx.metadata();
-    const sources = indexPatternCtx
-      .getTypedRuleContexts(cst.IndexPatternContext as any)
-      .map((sourceCtx) => this.toSource(sourceCtx));
+    const indexPatternAndMetadataCtx = ctx.indexPatternAndMetadataFields();
+    const metadataCtx = indexPatternAndMetadataCtx.metadata();
+    const indexPatternOrSubqueryCtxs = indexPatternAndMetadataCtx.indexPatternOrSubquery_list();
+    const sources = indexPatternOrSubqueryCtxs
+      .map((indexPatternOrSubqueryCtx) => {
+        const indexPatternCtx = indexPatternOrSubqueryCtx.indexPattern();
+        if (indexPatternCtx) {
+          return this.toSource(indexPatternCtx);
+        }
+
+        const subqueryCtx = indexPatternOrSubqueryCtx.subquery();
+        if (subqueryCtx) {
+          return this.fromSubquery(subqueryCtx);
+        }
+
+        return null;
+      })
+      .filter((source): source is ast.ESQLSource => source !== null);
 
     command.args.push(...sources);
 
@@ -539,6 +580,49 @@ export class CstToAstConverter {
     }
 
     return command;
+  }
+
+  private fromSubquery(ctx: cst.SubqueryContext): ast.ESQLParens {
+    const fromCommandCtx = ctx.fromCommand();
+    const processingCommandCtxs = ctx.processingCommand_list();
+    const commands: ast.ESQLCommand[] = [];
+
+    if (fromCommandCtx) {
+      const fromCommand = this.fromFromCommand(fromCommandCtx);
+
+      if (fromCommand) {
+        commands.push(fromCommand);
+      }
+    }
+
+    for (const procCmdCtx of processingCommandCtxs) {
+      const procCommand = this.fromProcessingCommand(procCmdCtx);
+
+      if (procCommand) {
+        commands.push(procCommand);
+      }
+    }
+
+    const openParen = ctx.LP();
+    const closeParen = ctx.RP();
+
+    // ANTLR inserts tokens with text like "<missing ')'>" when they're missing
+    const closeParenText = closeParen?.getText() ?? '';
+    const hasCloseParen = closeParen && !/<missing /.test(closeParenText);
+    const incomplete = Boolean(ctx.exception) || !hasCloseParen;
+
+    const query = Builder.expression.query(commands, {
+      ...this.getParserFields(ctx),
+      incomplete,
+    });
+
+    return Builder.expression.parens(query, {
+      incomplete: incomplete || query.incomplete,
+      location: getPosition(
+        openParen?.symbol ?? ctx.start,
+        hasCloseParen ? closeParen.symbol : ctx.stop
+      ),
+    });
   }
 
   // ---------------------------------------------------------------------- ROW
@@ -886,21 +970,24 @@ export class CstToAstConverter {
   private fromGrokCommand(ctx: cst.GrokCommandContext): ast.ESQLCommand<'grok'> {
     const command = this.createCommand('grok', ctx);
     const primaryExpression = this.visitPrimaryExpression(ctx.primaryExpression());
-    const stringContext = ctx.string_();
-    const pattern = stringContext.getToken(cst.default.QUOTED_STRING, 0);
-    const doParseStringAndOptions = pattern && textExistsAndIsValid(pattern.getText());
 
     command.args.push(primaryExpression);
 
-    if (doParseStringAndOptions) {
-      const stringNode = this.toStringLiteral(stringContext);
+    const stringContexts = ctx.string__list();
 
-      command.args.push(stringNode);
+    for (let i = 0; i < stringContexts.length; i++) {
+      const stringContext = stringContexts[i];
+      const pattern = stringContext.getToken(cst.default.QUOTED_STRING, 0);
+      const doParseStringAndOptions = pattern && textExistsAndIsValid(pattern.getText());
+
+      if (doParseStringAndOptions) {
+        const stringNode = this.toStringLiteral(stringContext);
+        command.args.push(stringNode);
+      }
     }
 
     return command;
   }
-
   // ------------------------------------------------------------------- ENRICH
 
   private fromEnrichCommand(ctx: cst.EnrichCommandContext): ast.ESQLCommand<'enrich'> {
@@ -1126,6 +1213,10 @@ export class CstToAstConverter {
 
       if (expression) {
         joinPredicates.push(expression);
+
+        if (resolveItem(expression).incomplete) {
+          onOption.incomplete = true;
+        }
       }
     }
 
@@ -1133,6 +1224,10 @@ export class CstToAstConverter {
 
     if (onOption.args.length) {
       command.args.push(onOption);
+
+      if (onOption.incomplete) {
+        command.incomplete = true;
+      }
     }
 
     return command;

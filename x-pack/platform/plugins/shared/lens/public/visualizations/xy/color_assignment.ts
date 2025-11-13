@@ -15,7 +15,7 @@ import {
   isRangeAnnotationConfig,
 } from '@kbn/event-annotation-common';
 import type { AccessorConfig } from '@kbn/visualization-ui-components';
-import type { FramePublicAPI } from '../../types';
+import type { FramePublicAPI } from '@kbn/lens-common';
 import { getColumnToLabelMap } from './state_helpers';
 import type { FormatFactory } from '../../../common/types';
 import { isDataLayer, isReferenceLayer, isAnnotationsLayer } from './visualization_helpers';

@@ -9,6 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { isOptionNode } from '../../../..';
 import type {
+  ESQLAstAllCommands,
   ESQLAstFuseCommand,
   ESQLCommand,
   ESQLCommandOption,
@@ -71,7 +72,7 @@ export function immediatelyAfterOptionFieldsList(
 }
 
 export function buildMissingMetadataMessage(
-  command: ESQLCommand,
+  command: ESQLAstAllCommands,
   metadataField: string
 ): ESQLMessage {
   return {

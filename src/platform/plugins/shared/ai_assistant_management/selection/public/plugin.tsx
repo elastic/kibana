@@ -57,6 +57,7 @@ export class AIAssistantManagementPlugin
 {
   private readonly kibanaBranch: string;
   private readonly buildFlavor: BuildFlavor;
+  private readonly isServerless: boolean;
   private registeredAiAssistantManagementSelectionApp?: ManagementApp;
   private licensingSubscription?: Subscription;
   private aiAssistantTypeSubscription?: Subscription;
@@ -64,6 +65,7 @@ export class AIAssistantManagementPlugin
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.kibanaBranch = this.initializerContext.env.packageInfo.branch;
     this.buildFlavor = this.initializerContext.env.packageInfo.buildFlavor;
+    this.isServerless = this.initializerContext.env.packageInfo.buildFlavor === 'serverless';
   }
 
   public setup(
@@ -98,6 +100,31 @@ export class AIAssistantManagementPlugin
       order: 2,
       keywords: ['ai'],
       mount: async (mountParams) => {
+        const [coreStart] = await core.getStartServices();
+
+        const hasObservabilityAssistant =
+          coreStart.application.capabilities.observabilityAIAssistant?.show === true;
+        const hasSecurityAssistant =
+          coreStart.application.capabilities.securitySolutionAssistant?.['ai-assistant'] === true;
+
+        // Redirect to specific assistant management if only one is available
+        if (hasObservabilityAssistant && !hasSecurityAssistant) {
+          coreStart.application.navigateToApp('management', {
+            path: 'ai/observabilityAiAssistantManagement',
+            replace: true,
+          });
+          return () => {};
+        }
+
+        if (hasSecurityAssistant && !hasObservabilityAssistant) {
+          coreStart.application.navigateToApp('management', {
+            path: 'ai/securityAiAssistantManagement',
+            replace: true,
+          });
+          return () => {};
+        }
+
+        // User has both assistants - show selection page
         const { mountManagementSection } = await import('./management_section/mount_section');
         const securityAIAssistantEnabled = !!management?.sections.section.ai
           .getAppsEnabled()
@@ -121,15 +148,15 @@ export class AIAssistantManagementPlugin
 
   public start(coreStart: CoreStart, startDeps: StartDependencies) {
     const { licensing } = startDeps;
-    const preferredAIAssistantType: AIAssistantType = coreStart.uiSettings.get(
+    const preferredAIAssistantType: AIAssistantType = coreStart.settings.client.get(
       PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
       AIAssistantType.Default
     );
 
     const aiAssistantType$ = new BehaviorSubject<AIAssistantType>(preferredAIAssistantType);
     // Keep aiAssistantType$ in sync with UI setting without page reload
-    this.aiAssistantTypeSubscription = coreStart.uiSettings
-      .get$<AIAssistantType>(PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY)
+    this.aiAssistantTypeSubscription = coreStart.settings.client
+      .get$<AIAssistantType>(PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY, AIAssistantType.Default)
       .subscribe((nextValue) => {
         aiAssistantType$.next(nextValue);
       });
@@ -140,14 +167,20 @@ export class AIAssistantManagementPlugin
       openChatSubject.next({ assistant: AIAssistantType.Default });
     };
 
-    const isAiAssistantManagementSelectionEnabled =
-      coreStart.application.capabilities.management.ai.aiAssistantManagementSelection;
+    // Check which assistants the user has access to
+    const hasObservabilityAssistant =
+      coreStart.application.capabilities.observabilityAIAssistant?.show === true;
+    const hasSecurityAssistant =
+      coreStart.application.capabilities.securitySolutionAssistant?.['ai-assistant'] === true;
+    const hasAnyAssistant = hasObservabilityAssistant || hasSecurityAssistant;
 
     // Toggle visibility based on license at runtime
-    if (licensing) {
+    if (!this.isServerless && licensing) {
       this.licensingSubscription = licensing.license$.subscribe((license) => {
         const isEnterprise = license?.hasAtLeast('enterprise');
-        if (isEnterprise && isAiAssistantManagementSelectionEnabled) {
+
+        // Show selection app when user has at least one assistant
+        if (isEnterprise && hasAnyAssistant) {
           this.registeredAiAssistantManagementSelectionApp?.enable();
         } else {
           this.registeredAiAssistantManagementSelectionApp?.disable();
@@ -155,33 +188,49 @@ export class AIAssistantManagementPlugin
       });
     }
 
+    this.registerNavControl(coreStart, openChatSubject, startDeps.spaces);
+
+    return {
+      aiAssistantType$: aiAssistantType$.asObservable(),
+      openChat$: openChatSubject.asObservable(),
+      completeOpenChat,
+    };
+  }
+
+  private registerNavControl(
+    coreStart: CoreStart,
+    openChatSubject: BehaviorSubject<{ assistant: AIAssistantType }>,
+    spaces?: SpacesPluginStart
+  ) {
     const isObservabilityAIAssistantEnabled =
       coreStart.application.capabilities.observabilityAIAssistant?.show === true;
     const isSecurityAIAssistantEnabled =
       coreStart.application.capabilities.securitySolutionAssistant?.['ai-assistant'] === true;
 
-    const isUntouchedUiSetting = coreStart.uiSettings.isDefault(
+    const isUntouchedUiSetting = coreStart.settings.client.isDefault(
       PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY
     );
 
     if (
+      !this.isServerless &&
       isUntouchedUiSetting &&
       (isObservabilityAIAssistantEnabled || isSecurityAIAssistantEnabled)
     ) {
       coreStart.chrome.navControls.registerRight({
         mount: (element) => {
           ReactDOM.render(
-            <NavControlInitiator
-              isObservabilityAIAssistantEnabled={isObservabilityAIAssistantEnabled}
-              isSecurityAIAssistantEnabled={isSecurityAIAssistantEnabled}
-              coreStart={coreStart}
-              triggerOpenChat={(event: { assistant: AIAssistantType }) =>
-                openChatSubject.next(event)
-              }
-              spaces={startDeps.spaces}
-            />,
-            element,
-            () => {}
+            coreStart.rendering.addContext(
+              <NavControlInitiator
+                isObservabilityAIAssistantEnabled={isObservabilityAIAssistantEnabled}
+                isSecurityAIAssistantEnabled={isSecurityAIAssistantEnabled}
+                coreStart={coreStart}
+                triggerOpenChat={(event: { assistant: AIAssistantType }) =>
+                  openChatSubject.next(event)
+                }
+                spaces={spaces}
+              />
+            ),
+            element
           );
 
           return () => {
@@ -192,12 +241,6 @@ export class AIAssistantManagementPlugin
         order: 1001,
       });
     }
-
-    return {
-      aiAssistantType$: aiAssistantType$.asObservable(),
-      openChat$: openChatSubject.asObservable(),
-      completeOpenChat,
-    };
   }
 
   public stop() {

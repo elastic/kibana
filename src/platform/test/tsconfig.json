@@ -1,5 +1,5 @@
 {
-  "extends": "../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -28,7 +28,6 @@
     "@kbn/saved-objects-management-plugin",
     "@kbn/telemetry-plugin",
     "@kbn/usage-collection-plugin",
-    "@kbn/visualizations-plugin",
     "@kbn/analytics-ftr-helpers-plugin",
     "@kbn/analytics-plugin-a-plugin",
     "@kbn/core-app-status-plugin",
@@ -82,5 +81,6 @@
     "@kbn/field-formats-common",
     "@kbn/ai-assistant-management-plugin",
     "@kbn/core-chrome-navigation-tour",
+    "@kbn/visualizations-common",
   ]
 }

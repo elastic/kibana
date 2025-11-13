@@ -9,10 +9,10 @@ import React from 'react';
 import CasesWebhookActionConnectorFields from './webhook_connectors';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
 import { render, screen, waitFor } from '@testing-library/react';
-import { AuthType } from '../../../common/auth/constants';
+import { AuthType } from '@kbn/connector-schemas/common/auth/constants';
 import userEvent from '@testing-library/user-event';
 import * as i18n from './translations';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useSecretHeaders } from '../../common/auth/use_secret_headers';
 
 jest.mock('../../common/auth/use_secret_headers');
@@ -293,6 +293,86 @@ describe('CasesWebhookActionConnectorFields renders', () => {
 
       expect(await screen.findByTestId('horizontalStep1-complete')).toBeInTheDocument();
       expect(await screen.findByTestId('horizontalStep2-current')).toBeInTheDocument();
+    });
+
+    it('form submit works with valid headers', async () => {
+      const customActionConnector = {
+        ...actionConnector,
+        secrets: {
+          user: 'user',
+          password: 'pass',
+        },
+        __internal__: {
+          headers: [
+            {
+              key: 'configKey',
+              value: 'configValue',
+              type: 'config',
+            },
+            {
+              key: 'secretKey',
+              value: 'secretValue',
+              type: 'secret',
+            },
+          ],
+        },
+      };
+      render(
+        <ConnectorFormTestProvider connector={customActionConnector}>
+          <CasesWebhookActionConnectorFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>,
+        { wrapper: customQueryProviderWrapper }
+      );
+      expect(await screen.findByTestId('horizontalStep1-current')).toBeInTheDocument();
+      await userEvent.click(await screen.findByTestId('casesWebhookNext'));
+      expect(await screen.findByTestId('horizontalStep1-complete')).toBeInTheDocument();
+    });
+
+    it('marks step 1 as danger if the header fields are invalid', async () => {
+      useSecretHeadersMock.mockReturnValue({ isLoading: false, isFetching: false, data: [] });
+
+      const customActionConnector = {
+        ...actionConnector,
+        secrets: {
+          user: 'user',
+          password: 'pass',
+        },
+        __internal__: {
+          headers: [
+            {
+              key: 'configKey',
+              value: 'configValue',
+              type: 'config',
+            },
+          ],
+        },
+      };
+      render(
+        <ConnectorFormTestProvider connector={customActionConnector}>
+          <CasesWebhookActionConnectorFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>,
+        { wrapper: customQueryProviderWrapper }
+      );
+
+      expect(await screen.findByTestId('webhookViewHeadersSwitch')).toHaveAttribute(
+        'aria-checked',
+        'true'
+      );
+
+      const keyInput = await screen.findByTestId('webhookHeadersKeyInput');
+      expect(keyInput).toHaveValue('configKey');
+      await userEvent.clear(keyInput);
+
+      await userEvent.click(await screen.findByTestId('casesWebhookNext'));
+      expect(await screen.findByTestId('horizontalStep1-danger')).toBeInTheDocument();
     });
 
     // Flaky - https://github.com/elastic/kibana/issues/205708

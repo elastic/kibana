@@ -29,7 +29,7 @@ export const GetAttackDiscoveryGenerationsRequestQuery = z.object({
   /**
    * The maximum number of generations to retrieve
    */
-  size: z.coerce.number().min(1),
+  size: z.coerce.number().min(1).optional().default(50),
   /**
    * Start of the time range for filtering generations. Accepts absolute timestamps (ISO 8601) or relative date math (e.g. "now-7d").
    */

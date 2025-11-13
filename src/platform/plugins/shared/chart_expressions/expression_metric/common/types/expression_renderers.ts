@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
 import type { CustomPaletteState } from '@kbn/charts-plugin/common';
 import type { LayoutDirection, MetricStyle, SecondaryMetricProps } from '@elastic/charts';
 import type { PaletteOutput } from '@kbn/coloring';

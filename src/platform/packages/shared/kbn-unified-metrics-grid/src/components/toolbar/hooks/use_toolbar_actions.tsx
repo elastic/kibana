@@ -7,105 +7,66 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
-import { keys } from '@elastic/eui';
-import { useMetricsGridState } from '../../../hooks';
+import { useEuiTheme, useIsWithinMaxBreakpoint } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import type { IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
+import { css } from '@emotion/react';
+import { useMetricsExperienceState } from '../../../context/metrics_experience_state_provider';
 import { DimensionsSelector } from '../dimensions_selector';
 import { ValuesSelector } from '../values_selector';
+import { MAX_DIMENSIONS_SELECTIONS } from '../../../common/constants';
 
 interface UseToolbarActionsProps
   extends Pick<ChartSectionProps, 'requestParams' | 'renderToggleActions'> {
   fields: MetricField[];
   indexPattern: string;
+  hideDimensionsSelector?: boolean;
+  hideRightSideActions?: boolean;
 }
 export const useToolbarActions = ({
   fields,
   requestParams,
-  indexPattern,
   renderToggleActions,
+  indexPattern,
+  hideDimensionsSelector = false,
+  hideRightSideActions = false,
 }: UseToolbarActionsProps) => {
   const {
     dimensions,
     valueFilters,
     onDimensionsChange,
     onValuesChange,
-    onClearValues,
-    onClearAllDimensions,
-    onClearSearchTerm,
     isFullscreen,
     onToggleFullscreen,
-  } = useMetricsGridState();
+  } = useMetricsExperienceState();
 
-  const [showSearchInput, setShowSearchInput] = useState(false);
+  const { euiTheme } = useEuiTheme();
 
-  const onShowSearch = useCallback(() => {
-    setShowSearchInput(true);
-  }, []);
+  const onClearValues = useCallback(() => {
+    onValuesChange([]);
+  }, [onValuesChange]);
 
-  const onClearSearch = useCallback(() => {
-    setShowSearchInput(false);
-    onClearSearchTerm();
-  }, [onClearSearchTerm]);
+  const isSmallScreen = useIsWithinMaxBreakpoint(isFullscreen ? 'm' : 'l');
 
-  // Check if dimensions or values selector portals are open
-  const areSelectorPortalsOpen = useCallback(() => {
-    const portals = document.querySelectorAll('[data-euiportal]');
-
-    for (const portal of portals) {
-      const hasBreakdownSelector = portal.querySelector(
-        '[data-test-subj*="metricsExperienceBreakdownSelector"]'
-      );
-      const hasValuesSelector = portal.querySelector(
-        '[data-test-subj*="metricsExperienceValuesSelector"]'
-      );
-      const hasSelectableList = portal.querySelector('[data-test-subj*="Selectable"]');
-
-      if (hasBreakdownSelector || hasValuesSelector || hasSelectableList) {
-        // Check if the portal is visible and has focusable content
-        const style = window.getComputedStyle(portal);
-        if (style.display !== 'none' && style.visibility !== 'hidden') {
-          return true;
-        }
-      }
-    }
-
-    return false;
-  }, []);
-
-  const onExitFullscreen = useCallback(
-    (e: React.KeyboardEvent<HTMLElement>) => {
-      if (e.key === keys.ESCAPE && isFullscreen) {
-        if (!areSelectorPortalsOpen()) {
-          onToggleFullscreen();
-        }
-      }
-    },
-    [onToggleFullscreen, isFullscreen, areSelectorPortalsOpen]
-  );
-
-  const onKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLElement>) => {
-      if (e.key === keys.ESCAPE && isFullscreen) {
-        onToggleFullscreen();
-      }
-      if (e.key === keys.ESCAPE && !isFullscreen && showSearchInput) {
-        onClearSearch();
-      }
-    },
-    [isFullscreen, showSearchInput, onToggleFullscreen, onClearSearch]
+  const toggleActions = useMemo(
+    () => (isFullscreen ? undefined : renderToggleActions()),
+    [isFullscreen, renderToggleActions]
   );
 
   const leftSideActions = useMemo(
     () => [
-      isFullscreen ? null : renderToggleActions(),
-      <DimensionsSelector
-        fields={fields}
-        onChange={onDimensionsChange}
-        selectedDimensions={dimensions}
-        onClear={onClearAllDimensions}
-      />,
+      hideDimensionsSelector ? null : (
+        <DimensionsSelector
+          fields={fields}
+          onChange={onDimensionsChange}
+          selectedDimensions={dimensions}
+          singleSelection={MAX_DIMENSIONS_SELECTIONS === 1}
+          fullWidth={isSmallScreen}
+        />
+      ),
       dimensions.length > 0 ? (
         <ValuesSelector
           selectedDimensions={dimensions}
@@ -115,32 +76,59 @@ export const useToolbarActions = ({
           indices={[indexPattern]}
           timeRange={requestParams.getTimeRange()}
           onClear={onClearValues}
+          fullWidth={isSmallScreen}
         />
       ) : null,
     ],
     [
+      isSmallScreen,
       dimensions,
       fields,
       indexPattern,
-      onClearAllDimensions,
       onClearValues,
       onDimensionsChange,
       onValuesChange,
-      renderToggleActions,
       requestParams,
       valueFilters,
-      isFullscreen,
+      hideDimensionsSelector,
     ]
   );
 
+  const rightSideActions: IconButtonGroupProps['buttons'] = useMemo(() => {
+    if (hideRightSideActions) {
+      return [];
+    }
+
+    const fullscreenButtonLabel = isFullscreen
+      ? i18n.translate('metricsExperience.fullScreenExitButton', {
+          defaultMessage: 'Exit fullscreen (esc)',
+        })
+      : i18n.translate('metricsExperience.fullScreenButton', {
+          defaultMessage: 'Enter fullscreen',
+        });
+
+    return [
+      {
+        iconType: isFullscreen ? 'fullScreenExit' : 'fullScreen',
+        label: fullscreenButtonLabel,
+        title: fullscreenButtonLabel,
+        onClick: onToggleFullscreen,
+        'data-test-subj': 'metricsExperienceToolbarFullScreen',
+        css: css`
+          &.euiButtonGroupButton:first-of-type {
+            border: ${euiTheme.border.thin} !important;
+            border-left: none !important;
+            border-top-left-radius: 0px !important;
+            border-bottom-left-radius: 0px !important;
+          }
+        `,
+      },
+    ];
+  }, [isFullscreen, hideRightSideActions, onToggleFullscreen, euiTheme.border.thin]);
+
   return {
+    toggleActions,
     leftSideActions,
-    onClearSearch,
-    showSearchInput,
-    isFullscreen,
-    onToggleFullscreen,
-    onShowSearch,
-    onExitFullscreen,
-    onKeyDown,
+    rightSideActions,
   };
 };

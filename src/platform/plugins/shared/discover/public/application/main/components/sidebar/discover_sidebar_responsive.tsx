@@ -57,6 +57,7 @@ const getCreationOptions: UnifiedFieldListSidebarContainerProps['getCreationOpti
     compressed: true,
     showSidebarToggleButton: true,
     disableFieldsExistenceAutoFetching: true,
+    shouldKeepAdHocDataViewImmutable: true,
     buttonAddFieldVariant: 'toolbar',
     buttonAddFieldToWorkspaceProps: {
       'aria-label': i18n.translate('discover.fieldChooser.discoverField.addFieldTooltip', {
@@ -131,7 +132,10 @@ export interface DiscoverSidebarResponsiveProps {
   /**
    * callback to execute on edit runtime field
    */
-  onFieldEdited: (options?: { removedFieldName?: string }) => Promise<void>;
+  onFieldEdited: (options: {
+    editedDataView: DataView;
+    removedFieldName?: string;
+  }) => Promise<void>;
   /**
    * callback to execute on create dataview
    */

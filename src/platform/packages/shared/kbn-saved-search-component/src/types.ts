@@ -9,8 +9,9 @@
 
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
-import type { DataViewsContract, ISearchStartSearchSource } from '@kbn/data-plugin/public';
-import type { NonPersistedDisplayOptions } from '@kbn/discover-plugin/public';
+import type { ISearchStartSearchSource } from '@kbn/data-plugin/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { NonPersistedDisplayOptions } from '@kbn/discover-plugin/common';
 import type { CSSProperties } from 'react';
 
 export interface SavedSearchComponentDependencies {
@@ -25,6 +26,12 @@ export interface SavedSearchComponentProps {
   timeRange?: TimeRange;
   query?: Query;
   filters?: Filter[];
+  /**
+   * Filters that should not trigger highlighting.
+   * These filters will be included in the search query for document retrieval,
+   * but excluded from the highlight_query parameter in Elasticsearch.
+   */
+  nonHighlightingFilters?: Filter[];
   timestampField?: string;
   columns?: string[];
   height?: CSSProperties['height'];

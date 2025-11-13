@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiIcon,
   EuiText,
   EuiTimeline,
-  useEuiTheme,
   type EuiTimelineProps,
+  useEuiTheme,
 } from '@elastic/eui';
 import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
+import React, { useMemo } from 'react';
 import type { WorkflowExecutionLogEntry } from '../../../entities/workflows/api/use_workflow_execution_logs';
 import { useGetFormattedDateTime } from '../../../shared/ui/use_formatted_date';
 

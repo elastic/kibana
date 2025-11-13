@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -26,5 +26,6 @@
     "@kbn/i18n",
     "@kbn/presentation-publishing",
     "@kbn/saved-search-plugin",
+    "@kbn/data-views-plugin",
   ]
 }

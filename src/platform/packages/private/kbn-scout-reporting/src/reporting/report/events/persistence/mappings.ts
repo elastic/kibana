@@ -45,7 +45,7 @@ export const buildkiteProperties: Record<PropertyName, MappingProperty> = {
         type: 'text',
       },
       slug: {
-        type: 'wildcard',
+        type: 'keyword',
       },
     },
   },
@@ -90,6 +90,20 @@ export const buildkiteProperties: Record<PropertyName, MappingProperty> = {
     fields: {
       text: {
         type: 'match_only_text',
+      },
+    },
+  },
+  triggered_from_build: {
+    type: 'object',
+    properties: {
+      id: {
+        type: 'wildcard',
+      },
+      number: {
+        type: 'integer',
+      },
+      pipeline_slug: {
+        type: 'keyword',
       },
     },
   },
@@ -139,6 +153,23 @@ export const testRunProperties: Record<PropertyName, MappingProperty> = {
   },
   duration: {
     type: 'long',
+  },
+  tests: {
+    type: 'object',
+    properties: {
+      passes: {
+        type: 'long',
+      },
+      failures: {
+        type: 'long',
+      },
+      pending: {
+        type: 'long',
+      },
+      total: {
+        type: 'long',
+      },
+    },
   },
   config: {
     type: 'object',

@@ -106,7 +106,7 @@ export class SiemMigrationsDataResourcesClient extends SiemMigrationsDataBaseCli
             ]),
           })
           .catch((error) => {
-            this.logger.error(`Error upsert resources: ${error.message}`);
+            this.logger.error(`Error creating resources: ${error.message}`);
             throw error;
           })
       );

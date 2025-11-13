@@ -194,6 +194,7 @@ export const ConnectorSchedulingComponent: React.FC<ConnectorContentSchedulingPr
               {isDocumentLevelSecurityDisabled && (
                 <EuiFlexItem>
                   <EuiCallOut
+                    announceOnMount={false}
                     title={i18n.translate(
                       'searchConnectors.connectorScheduling.schedulePanel.documentLevelSecurity.dlsDisabledCallout.title',
                       { defaultMessage: 'Access control syncs not allowed' }

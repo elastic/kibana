@@ -40,16 +40,6 @@ const defaultValues = [
     path: 'breakdown_by',
     value: {
       breakdown_by: {
-        // defaults for terms breakdown by
-        excludes: {
-          as_regex: false,
-          values: [],
-        },
-        includes: {
-          as_regex: false,
-          values: [],
-        },
-        increase_accuracy: false,
         other_bucket: { include_documents_without_field: false },
         rank_by: { direction: 'asc', type: 'alphabetical' },
       },
@@ -71,7 +61,9 @@ const defaultValues = [
  * Mind that this won't include query/filters validation/defaults
  */
 function validateAndApiToApiTransforms(originalObject: InputTypeMetricChart) {
-  return fromLensStateToAPI(fromAPItoLensState(lensApiStateSchema.validate(originalObject)));
+  return fromLensStateToAPI(
+    fromAPItoLensState(lensApiStateSchema.validate(originalObject) as MetricState)
+  );
 }
 
 function mergeWithDefaults(originalObject: InputTypeMetricChart) {
@@ -195,6 +187,8 @@ describe('metric chart transformations', () => {
           columns: 3,
           size: 5,
           collapse_by: 'sum',
+          // encode the rank as it would be detected by the transforms
+          rank_by: { type: 'column', metric: 0, direction: 'desc' },
         },
       };
 
@@ -298,6 +292,8 @@ describe('metric chart transformations', () => {
           fields: ['service_name'],
           columns: 5,
           size: 10,
+          // encode the rank as it would be detected by the transforms
+          rank_by: { type: 'column', metric: 0, direction: 'desc' },
         },
       };
 
@@ -330,8 +326,13 @@ describe('metric chart transformations', () => {
             align: 'right',
           },
           color: {
-            type: 'static',
-            color: '#00FF00',
+            type: 'dynamic',
+            steps: [
+              { type: 'from', from: 0, color: '#00FF00' },
+              { type: 'exact', value: 300, color: '#FFFF00' },
+              { type: 'to', to: 300, color: '#FF0000' },
+            ],
+            range: 'absolute',
           },
           background_chart: {
             type: 'trend',
@@ -352,6 +353,8 @@ describe('metric chart transformations', () => {
           fields: ['service_name'],
           columns: 5,
           size: 10,
+          // encode the rank as it would be detected by the transforms
+          rank_by: { type: 'column', metric: 0, direction: 'desc' },
         },
       };
       const finalAPIState = validateAndApiToApiTransforms(comprehensiveMetricConfig);

@@ -21,6 +21,7 @@ import {
   ChatEventType,
   ConversationRoundStepType,
   isMessageCompleteEvent,
+  isThinkingCompleteEvent,
   isToolCallEvent,
   isToolResultEvent,
   isToolProgressEvent,
@@ -38,8 +39,12 @@ const isStepEvent = (event: SourceEvents): event is StepEvents => {
 
 export const addRoundCompleteEvent = ({
   userInput,
+  startTime,
+  endTime,
 }: {
   userInput: RoundInput;
+  startTime: Date;
+  endTime?: Date;
 }): OperatorFunction<SourceEvents, SourceEvents | RoundCompleteEvent> => {
   return (events$) => {
     const shared$ = events$.pipe(share());
@@ -48,7 +53,7 @@ export const addRoundCompleteEvent = ({
       shared$.pipe(
         toArray(),
         map<SourceEvents[], RoundCompleteEvent>((events) => {
-          const round = createRoundFromEvents({ events, input: userInput });
+          const round = createRoundFromEvents({ events, input: userInput, startTime, endTime });
 
           const event: RoundCompleteEvent = {
             type: ChatEventType.roundComplete,
@@ -67,16 +72,26 @@ export const addRoundCompleteEvent = ({
 const createRoundFromEvents = ({
   events,
   input,
+  startTime,
+  endTime = new Date(),
 }: {
   events: SourceEvents[];
   input: RoundInput;
+  startTime: Date;
+  endTime?: Date;
 }): ConversationRound => {
   const toolResults = events.filter(isToolResultEvent).map((event) => event.data);
   const toolProgressions = events.filter(isToolProgressEvent).map((event) => event.data);
   const messages = events.filter(isMessageCompleteEvent).map((event) => event.data);
   const stepEvents = events.filter(isStepEvent);
+  const thinkingCompleteEvent = events.find(isThinkingCompleteEvent);
 
-  const eventToStep = (event: StepEvents): ConversationRoundStep => {
+  const timeToLastToken = endTime.getTime() - startTime.getTime();
+  const timeToFirstToken = thinkingCompleteEvent
+    ? thinkingCompleteEvent.data.time_to_first_token
+    : 0;
+
+  const eventToStep = (event: StepEvents): ConversationRoundStep[] => {
     if (isToolCallEvent(event)) {
       const toolCall = event.data;
 
@@ -90,20 +105,28 @@ const createRoundFromEvents = ({
           message: progress.message,
         }));
 
-      return {
-        type: ConversationRoundStepType.toolCall,
-        tool_call_id: toolCall.tool_call_id,
-        tool_id: toolCall.tool_id,
-        progression: toolProgress,
-        params: toolCall.params,
-        results: toolResult?.results ?? [],
-      };
+      return [
+        {
+          type: ConversationRoundStepType.toolCall,
+          tool_call_id: toolCall.tool_call_id,
+          tool_id: toolCall.tool_id,
+          progression: toolProgress,
+          params: toolCall.params,
+          results: toolResult?.results ?? [],
+        },
+      ];
     }
     if (isReasoningEvent(event)) {
-      return {
-        type: ConversationRoundStepType.reasoning,
-        reasoning: event.data.reasoning,
-      };
+      if (event.data.transient !== true) {
+        return [
+          {
+            type: ConversationRoundStepType.reasoning,
+            reasoning: event.data.reasoning,
+          },
+        ];
+      } else {
+        return [];
+      }
     }
     throw new Error(`Unknown event type: ${(event as any).type}`);
   };
@@ -111,8 +134,11 @@ const createRoundFromEvents = ({
   const round: ConversationRound = {
     id: uuidv4(),
     input,
-    steps: stepEvents.map(eventToStep),
+    steps: stepEvents.flatMap(eventToStep),
     trace_id: getCurrentTraceId(),
+    started_at: startTime.toISOString(),
+    time_to_first_token: timeToFirstToken,
+    time_to_last_token: timeToLastToken,
     response: { message: messages[messages.length - 1].message_content },
   };
 

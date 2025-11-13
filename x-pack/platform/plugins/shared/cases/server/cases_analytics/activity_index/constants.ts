@@ -12,12 +12,12 @@ import type { Owner } from '../../../common/constants/types';
 
 const CAI_ACTIVITY_INDEX_NAME_BASE = '.internal.cases-activity';
 export function getActivityDestinationIndexName(spaceId: string, owner: Owner) {
-  return `${CAI_ACTIVITY_INDEX_NAME_BASE}.${spaceId}-${owner}`.toLowerCase();
+  return `${CAI_ACTIVITY_INDEX_NAME_BASE}.${owner}-${spaceId}`.toLowerCase();
 }
 
 const CAI_ACTIVITY_INDEX_ALIAS_BASE = '.cases-activity';
 export function getActivityDestinationIndexAlias(spaceId: string, owner: Owner) {
-  return `${CAI_ACTIVITY_INDEX_ALIAS_BASE}.${spaceId}-${owner}`.toLowerCase();
+  return `${CAI_ACTIVITY_INDEX_ALIAS_BASE}.${owner}-${spaceId}`.toLowerCase();
 }
 
 export const CAI_ACTIVITY_INDEX_VERSION = 1;
@@ -84,12 +84,7 @@ export const CAI_ACTIVITY_SOURCE_INDEX = ALERTING_CASES_SAVED_OBJECT_INDEX;
 
 const CAI_ACTIVITY_BACKFILL_TASK_ID = 'cai_activity_backfill_task';
 export const getCAIActivityBackfillTaskId = (spaceId: string, owner: Owner): string => {
-  return `${CAI_ACTIVITY_BACKFILL_TASK_ID}-${spaceId}-${owner}`;
-};
-
-const CAI_ACTIVITY_SYNCHRONIZATION_TASK_ID = 'cai_cases_activity_synchronization_task';
-export const getCAIActivitySynchronizationTaskId = (spaceId: string, owner: Owner): string => {
-  return `${CAI_ACTIVITY_SYNCHRONIZATION_TASK_ID}-${spaceId}-${owner}`;
+  return `${CAI_ACTIVITY_BACKFILL_TASK_ID}-${owner}-${spaceId}`;
 };
 
 export const getActivitySynchronizationSourceQuery = (

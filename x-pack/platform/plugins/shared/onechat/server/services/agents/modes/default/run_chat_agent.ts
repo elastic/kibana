@@ -8,23 +8,29 @@
 import { v4 as uuidv4 } from 'uuid';
 import { from, filter, shareReplay, merge, Subject, finalize } from 'rxjs';
 import { isStreamEvent, toolsToLangchain } from '@kbn/onechat-genai-utils/langchain';
-import type { ChatAgentEvent } from '@kbn/onechat-common';
-import { allToolsSelection } from '@kbn/onechat-common';
+import type { ChatAgentEvent, RoundInput } from '@kbn/onechat-common';
+import type { BrowserApiToolMetadata } from '@kbn/onechat-common';
 import type { AgentHandlerContext, AgentEventEmitterFn } from '@kbn/onechat-server';
 import {
   addRoundCompleteEvent,
   extractRound,
   selectProviderTools,
   conversationToLangchainMessages,
+  prepareConversation,
 } from '../utils';
 import { resolveCapabilities } from '../utils/capabilities';
+import { resolveConfiguration } from '../utils/configuration';
 import { createAgentGraph } from './graph';
 import { convertGraphEvents } from './convert_graph_events';
 import type { RunAgentParams, RunAgentResponse } from '../run_agent';
+import { browserToolsToLangchain } from '../../../tools/browser_tool_adapter';
 
 const chatAgentGraphName = 'default-onechat-agent';
 
-export type RunChatAgentParams = Omit<RunAgentParams, 'mode'>;
+export type RunChatAgentParams = Omit<RunAgentParams, 'mode'> & {
+  browserApiTools?: BrowserApiToolMetadata[];
+  startTime?: Date;
+};
 
 export type RunChatAgentFn = (
   params: RunChatAgentParams,
@@ -37,23 +43,25 @@ export type RunChatAgentFn = (
 export const runDefaultAgentMode: RunChatAgentFn = async (
   {
     nextInput,
-    conversation = [],
+    conversation,
+    agentConfiguration,
     capabilities,
-    toolSelection = allToolsSelection,
-    customInstructions,
     runId = uuidv4(),
     agentId,
     abortSignal,
+    browserApiTools,
+    startTime = new Date(),
   },
-  { logger, request, modelProvider, toolProvider, events }
+  { logger, request, modelProvider, toolProvider, attachments, events }
 ) => {
   const model = await modelProvider.getDefaultModel();
   const resolvedCapabilities = resolveCapabilities(capabilities);
+  const resolvedConfiguration = resolveConfiguration(agentConfiguration);
   logger.debug(`Running chat agent with connector: ${model.connector.name}, runId: ${runId}`);
 
   const selectedTools = await selectProviderTools({
     provider: toolProvider,
-    selection: toolSelection,
+    selection: agentConfiguration.tools,
     request,
   });
 
@@ -69,23 +77,47 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     sendEvent: eventEmitter,
   });
 
-  const initialMessages = conversationToLangchainMessages({
+  let browserLangchainTools: any[] = [];
+  let browserIdMappings = new Map<string, string>();
+  if (browserApiTools && browserApiTools.length > 0) {
+    const browserToolResult = browserToolsToLangchain({
+      browserApiTools,
+    });
+    browserLangchainTools = browserToolResult.tools;
+    browserIdMappings = browserToolResult.idMappings;
+  }
+
+  const allTools = [...langchainTools, ...browserLangchainTools];
+  const allToolIdMappings = new Map([...toolIdMapping, ...browserIdMappings]);
+
+  const cycleLimit = 10;
+  // langchain's recursionLimit is basically the number of nodes we can traverse before hitting a recursion limit error
+  // we have two steps per cycle (agent node + tool call node), and then a few other steps (prepare + answering), and some extra buffer
+  const graphRecursionLimit = cycleLimit * 2 + 8;
+
+  const processedConversation = await prepareConversation({
     nextInput,
-    previousRounds: conversation,
+    previousRounds: conversation?.rounds ?? [],
+    attachmentsService: attachments,
+  });
+
+  const initialMessages = conversationToLangchainMessages({
+    conversation: processedConversation,
   });
 
   const agentGraph = createAgentGraph({
     logger,
+    events: { emit: eventEmitter },
     chatModel: model.chatModel,
-    tools: langchainTools,
+    tools: allTools,
+    configuration: resolvedConfiguration,
     capabilities: resolvedCapabilities,
-    customInstructions,
   });
 
   logger.debug(`Running chat agent with graph: ${chatAgentGraphName}, runId: ${runId}`);
 
   const eventStream = agentGraph.streamEvents(
-    { initialMessages },
+    { initialMessages, cycleLimit },
     {
       version: 'v2',
       signal: abortSignal,
@@ -93,9 +125,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       metadata: {
         graphName: chatAgentGraphName,
         agentId,
-        runId,
       },
-      recursionLimit: 25,
+      recursionLimit: graphRecursionLimit,
       callbacks: [],
     }
   );
@@ -104,14 +135,20 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     filter(isStreamEvent),
     convertGraphEvents({
       graphName: chatAgentGraphName,
-      toolIdMapping,
+      toolIdMapping: allToolIdMappings,
       logger,
+      startTime,
     }),
     finalize(() => manualEvents$.complete())
   );
 
+  const processedInput: RoundInput = {
+    message: processedConversation.nextInput.message,
+    attachments: processedConversation.nextInput.attachments.map((a) => a.attachment),
+  };
+
   const events$ = merge(graphEvents$, manualEvents$).pipe(
-    addRoundCompleteEvent({ userInput: nextInput }),
+    addRoundCompleteEvent({ userInput: processedInput, startTime }),
     shareReplay()
   );
 

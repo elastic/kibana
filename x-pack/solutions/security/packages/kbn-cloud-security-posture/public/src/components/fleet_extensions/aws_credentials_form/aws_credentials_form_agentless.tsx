@@ -104,14 +104,9 @@ const updatePolicyCloudConnectorSupport = (
     return;
   }
 
-  if (awsCredentialsType === 'cloud_connectors' && !newPolicy.supports_cloud_connector) {
-    updatePolicy({
-      updatedPolicy: {
-        ...newPolicy,
-        supports_cloud_connector: true,
-      },
-    });
-  } else if (awsCredentialsType !== 'cloud_connectors' && newPolicy.supports_cloud_connector) {
+  // Ensure cloud connector support is false if credential type is not cloud_connectors
+  // (CloudConnectorSetup component handles setting it to true when cloud_connectors is selected)
+  if (awsCredentialsType !== 'cloud_connectors' && newPolicy.supports_cloud_connector) {
     updatePolicy({
       updatedPolicy: {
         ...newPolicy,
@@ -123,31 +118,14 @@ const updatePolicyCloudConnectorSupport = (
 
 const getCloudFormationConfig = (
   awsCredentialsType: string,
-  automationCredentialTemplate: string | undefined,
-  awsCloudConnectorRemoteRoleTemplate: string | undefined
+  automationCredentialTemplate: string | undefined
 ) => {
-  const settings = {
-    [AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS]: {
-      accordianTitleLink: <EuiLink>{'Steps to Generate AWS Account Credentials'}</EuiLink>,
-      templateUrl: automationCredentialTemplate,
-    },
-    [AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS]: {
-      accordianTitleLink: <EuiLink>{'Steps to Generate Cloud Connection'}</EuiLink>,
-      templateUrl: awsCloudConnectorRemoteRoleTemplate,
-    },
-  };
-
-  const isSupported =
-    awsCredentialsType === AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS ||
-    awsCredentialsType === AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS;
-
-  const currentSettings = settings[awsCredentialsType as keyof typeof settings];
+  const isSupported = awsCredentialsType === AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS;
 
   return {
-    settings,
     isSupported,
-    accordionTitleLink: currentSettings?.accordianTitleLink || '',
-    templateUrl: currentSettings?.templateUrl || '',
+    accordionTitleLink: <EuiLink>{'Steps to Generate AWS Account Credentials'}</EuiLink> || '',
+    templateUrl: automationCredentialTemplate || '',
   };
 };
 
@@ -169,20 +147,29 @@ export const AwsCredentialsFormAgentless = ({
     templateName,
     showCloudTemplates,
     shortName,
-    awsCloudConnectorRemoteRoleTemplate,
     isAwsCloudConnectorEnabled,
   } = useCloudSetup();
 
   const accountType = input?.streams?.[0].vars?.['aws.account_type']?.value ?? SINGLE_ACCOUNT;
   const awsCredentialsType = getAgentlessCredentialsType(input, isAwsCloudConnectorEnabled);
 
-  updatePolicyCloudConnectorSupport(
+  // Update cloud connector support when relevant values change
+  React.useEffect(() => {
+    updatePolicyCloudConnectorSupport(
+      awsCredentialsType,
+      newPolicy,
+      updatePolicy,
+      input,
+      awsPolicyType
+    );
+  }, [
     awsCredentialsType,
+    newPolicy.supports_cloud_connector,
+    input,
+    awsPolicyType,
     newPolicy,
     updatePolicy,
-    input,
-    awsPolicyType
-  );
+  ]);
 
   const automationCredentialTemplate = getTemplateUrlFromPackageInfo(
     packageInfo,
@@ -192,8 +179,7 @@ export const AwsCredentialsFormAgentless = ({
 
   const cloudFormationConfig = getCloudFormationConfig(
     awsCredentialsType,
-    automationCredentialTemplate,
-    awsCloudConnectorRemoteRoleTemplate
+    automationCredentialTemplate
   );
 
   const isOrganization = accountType === ORGANIZATION_ACCOUNT;
@@ -203,7 +189,7 @@ export const AwsCredentialsFormAgentless = ({
 
   const group =
     agentlessCredentialFormGroups[awsCredentialsType as keyof typeof agentlessCredentialFormGroups];
-  const fields = getInputVarsFields(input, group.fields);
+  const fields = getInputVarsFields(input, group?.fields || {});
 
   const selectorOptions = getSelectorOptions(
     isEditPage,
@@ -217,7 +203,10 @@ export const AwsCredentialsFormAgentless = ({
     awsCredentialsType === AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS &&
     isAwsCloudConnectorEnabled;
 
-  const showCloudFormationAccordion = cloudFormationConfig.isSupported && showCloudTemplates;
+  const showCloudFormationAccordion =
+    awsCredentialsType !== 'cloud_connectors' &&
+    cloudFormationConfig.isSupported &&
+    showCloudTemplates;
 
   return (
     <>

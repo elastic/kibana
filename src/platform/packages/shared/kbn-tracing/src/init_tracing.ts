@@ -14,8 +14,8 @@ import type { TracingConfig } from '@kbn/tracing-config';
 import { context, propagation, trace } from '@opentelemetry/api';
 import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
 import { castArray } from 'lodash';
+import { cleanupBeforeExit } from '@kbn/cleanup-before-exit';
 import { LateBindingSpanProcessor } from '..';
-import { installShutdownHandlers } from './on_exit_cleanup';
 
 /**
  * Initialize the OpenTelemetry tracing provider
@@ -81,5 +81,5 @@ export function initTracing({
     await Promise.all(allSpanProcessors.map((processor) => processor.shutdown()));
   };
 
-  installShutdownHandlers(shutdown);
+  cleanupBeforeExit(() => shutdown(), { blockExit: true, timeout: 30_000 });
 }

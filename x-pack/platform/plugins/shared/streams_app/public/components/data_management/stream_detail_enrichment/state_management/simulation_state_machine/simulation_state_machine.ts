@@ -107,7 +107,6 @@ export const simulationMachine = setup({
     }),
     resetSimulationOutcome: assign({
       detectedSchemaFields: [],
-      detectedSchemaFieldsCache: new Map(),
       explicitlyEnabledPreviewColumns: [],
       explicitlyDisabledPreviewColumns: [],
       previewColumnsOrder: [],
@@ -121,7 +120,7 @@ export const simulationMachine = setup({
     processorChangeDebounceTime: 300,
   },
   guards: {
-    canSimulate: ({ context }) => hasSamples(context.samples) && hasAnyValidSteps(context.steps),
+    canSimulate: ({ context }) => hasAnyValidSteps(context.steps),
     hasSteps: (_, params: StepsEventParams) => !isEmpty(params.steps),
     '!hasSamples': (_, params: { samples: SampleDocumentWithUIAttributes[] }) =>
       !hasSamples(params.samples),

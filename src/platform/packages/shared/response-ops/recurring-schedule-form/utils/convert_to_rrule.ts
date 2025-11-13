@@ -34,12 +34,20 @@ export const convertToRRule = ({
   const rRule: RRuleParams = {
     dtstart: startDateMoment.toISOString(),
     tzid: timezone,
-    ...(Boolean(includeTime)
-      ? { byhour: [startDateMoment.get('hour')], byminute: [startDateMoment.get('minute')] }
-      : {}),
   };
 
-  if (!parsedSchedule)
+  if (Boolean(includeTime)) {
+    // Do not include the byhour field if the frequency is hourly as we do not support the byhourly field for this frequency
+    if (
+      parsedSchedule?.frequency !== Frequency.HOURLY &&
+      parsedSchedule?.customFrequency !== Frequency.HOURLY
+    ) {
+      rRule.byhour = [startDateMoment.get('hour')];
+    }
+    rRule.byminute = [startDateMoment.get('minute')];
+  }
+
+  if (!parsedSchedule) {
     return {
       ...rRule,
       // default to yearly and a count of 1
@@ -47,6 +55,7 @@ export const convertToRRule = ({
       freq: Frequency.YEARLY,
       count: 1,
     };
+  }
 
   let form = parsedSchedule;
   if (parsedSchedule.frequency !== 'CUSTOM') {

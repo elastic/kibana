@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { pick } from 'lodash';
-
 import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
 import { transformDashboardOut, transformReferencesOut } from './transforms';
@@ -32,20 +30,7 @@ export function savedObjectToItem(
   savedObject:
     | SavedObject<DashboardSavedObjectAttributes>
     | PartialSavedObject<DashboardSavedObjectAttributes>,
-  partial: boolean /* partial arg is used to enforce the correct savedObject type */,
-  {
-    allowedAttributes,
-    allowedReferences,
-  }: {
-    /**
-     * attributes to include in the output item
-     */
-    allowedAttributes?: string[];
-    /**
-     * references to include in the output item
-     */
-    allowedReferences?: string[];
-  } = {}
+  partial: boolean /* partial arg is used to enforce the correct savedObject type */
 ): SavedObjectToItemReturn<DashboardItem | PartialDashboardItem> {
   const {
     id,
@@ -63,7 +48,7 @@ export function savedObjectToItem(
   try {
     const dashboardState = transformDashboardOut(attributes, savedObject.references);
 
-    const references = transformReferencesOut(savedObject.references ?? []);
+    const references = transformReferencesOut(savedObject.references ?? [], dashboardState.panels);
 
     return {
       item: {
@@ -73,12 +58,10 @@ export function savedObjectToItem(
         updatedBy,
         createdAt,
         createdBy,
-        attributes: allowedAttributes ? pick(dashboardState, allowedAttributes) : dashboardState,
+        attributes: dashboardState,
         error,
         namespaces,
-        references: allowedReferences
-          ? references?.filter((reference) => allowedReferences.includes(reference.type))
-          : references,
+        references,
         version,
         managed,
       },

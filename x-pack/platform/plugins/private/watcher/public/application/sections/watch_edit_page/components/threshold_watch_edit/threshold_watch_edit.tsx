@@ -502,6 +502,12 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                     </EuiPopoverTitle>
                     <EuiSelect
                       value={watch.aggType}
+                      aria-label={i18n.translate(
+                        'xpack.watcher.sections.watchEdit.threshold.aggTypeSelectAriaLabel',
+                        {
+                          defaultMessage: 'Aggregation type',
+                        }
+                      )}
                       onChange={(e) => {
                         setWatchProperty('aggType', e.target.value);
                         setAggTypePopoverOpen(false);
@@ -652,6 +658,12 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                       <EuiFlexItem grow={false}>
                         <EuiSelect
                           value={watch.groupBy}
+                          aria-label={i18n.translate(
+                            'xpack.watcher.sections.watchEdit.threshold.groupBySelectAriaLabel',
+                            {
+                              defaultMessage: 'Group by',
+                            }
+                          )}
                           onChange={(e) => {
                             setWatchProperty('termSize', null);
                             setWatchProperty('termField', null);
@@ -757,6 +769,12 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                       <EuiFlexItem grow={false}>
                         <EuiSelect
                           value={watch.thresholdComparator}
+                          aria-label={i18n.translate(
+                            'xpack.watcher.sections.watchEdit.threshold.comparatorSelectAriaLabel',
+                            {
+                              defaultMessage: 'Comparator',
+                            }
+                          )}
                           onChange={(e) => {
                             setWatchProperty('thresholdComparator', e.target.value);
                           }}
@@ -864,6 +882,12 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                       <EuiFlexItem grow={false}>
                         <EuiSelect
                           value={watch.timeWindowUnit}
+                          aria-label={i18n.translate(
+                            'xpack.watcher.sections.watchEdit.threshold.timeWindowUnitSelectAriaLabel',
+                            {
+                              defaultMessage: 'Time window unit',
+                            }
+                          )}
                           onChange={(e) => {
                             setWatchProperty('timeWindowUnit', e.target.value);
                           }}

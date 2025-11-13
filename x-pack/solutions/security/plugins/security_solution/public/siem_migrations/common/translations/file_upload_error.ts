@@ -40,13 +40,4 @@ export const FILE_UPLOAD_ERROR = {
     'xpack.securitySolution.siemMigrations.common.dataInputFlyout.fileUploadError.notObject',
     { defaultMessage: 'The file contains non-object entries' }
   ),
-  WRONG_FORMAT: (formatError: string) => {
-    return i18n.translate(
-      'xpack.securitySolution.siemMigrations.common.dataInputFlyout.fileUploadError.wrongFormat',
-      {
-        defaultMessage: 'The file has wrong format: {formatError}',
-        values: { formatError },
-      }
-    );
-  },
 };

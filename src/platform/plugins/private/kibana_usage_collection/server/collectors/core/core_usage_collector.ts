@@ -73,12 +73,6 @@ export function getCoreUsageCollector(
                 'Time in milliseconds to wait for responses from the back end or Elasticsearch.',
             },
           },
-          pingTimeoutMs: {
-            type: 'long',
-            _meta: {
-              description: 'Time in milliseconds to wait for Elasticsearch to respond to pings.',
-            },
-          },
           logQueries: {
             type: 'boolean',
             _meta: { description: 'Indicates if queries sent to Elasticsearch should be logged.' },

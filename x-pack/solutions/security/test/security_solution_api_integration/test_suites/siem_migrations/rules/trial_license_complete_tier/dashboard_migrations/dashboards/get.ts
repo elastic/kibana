@@ -101,6 +101,25 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
+      it('should filter by search term failed translations', async () => {
+        const response = await dashboardMigrationRoutes.getDashboards({
+          migrationId,
+          queryParams: {
+            search_term: 'Second',
+          },
+        });
+        expect(response.body).toEqual({
+          total: 1,
+          data: [
+            expect.objectContaining({
+              original_dashboard: expect.objectContaining({
+                title: 'Dashboard 2 - Second',
+              }),
+            }),
+          ],
+        });
+      });
+
       it('should filter by ids', async () => {
         const response = await dashboardMigrationRoutes.getDashboards({
           migrationId,

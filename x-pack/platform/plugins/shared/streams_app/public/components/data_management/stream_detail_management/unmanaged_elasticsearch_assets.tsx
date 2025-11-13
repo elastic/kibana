@@ -9,8 +9,8 @@ import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import type { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
+import { StreamFeatureConfiguration } from '../../stream_detail_features/stream_feature_configuration';
 import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
-import { StreamSystemConfiguration } from './stream_system_configuration';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../../hooks/use_kibana';
 import { ComponentTemplatePanel } from './component_template_panel';
@@ -100,7 +100,7 @@ export function UnmanagedElasticsearchAssets({
         <p>
           {i18n.translate('xpack.streams.unmanagedStreamOverview.missingDatastream.description', {
             defaultMessage:
-              'The underlying Elasticsearch data stream for this classic stream is missing. Recreate the data stream to restore the stream by sending data before using the management features.',
+              'The underlying Elasticsearch data stream for this classic stream is missing or not accessible because the view_index_metadata privilege is missing. Make sure you have sufficient privileges and the data stream actually exists.',
           })}
         </p>
       </EuiCallOut>
@@ -112,7 +112,7 @@ export function UnmanagedElasticsearchAssets({
       <EuiFlexGroup direction="column" gutterSize="m">
         <EuiFlexItem>
           {significantEvents?.available && (
-            <StreamSystemConfiguration definition={definition.stream} />
+            <StreamFeatureConfiguration definition={definition.stream} />
           )}
         </EuiFlexItem>
         <IndexConfiguration definition={definition} refreshDefinition={refreshDefinition}>

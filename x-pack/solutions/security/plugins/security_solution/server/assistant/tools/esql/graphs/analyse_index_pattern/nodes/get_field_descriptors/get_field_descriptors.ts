@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
+import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { Command } from '@langchain/langgraph';
 import type { AnalyzeIndexPatternAnnotation } from '../../state';

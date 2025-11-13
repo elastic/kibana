@@ -8,55 +8,30 @@
  */
 
 import type { ContentManagementServicesDefinition as ServicesDefinition } from '@kbn/object-versioning';
-import { schema } from '@kbn/config-schema';
 import {
-  dashboardGetResultSchema,
-  dashboardCreateOptionsSchema,
+  getDashboardGetResultSchema,
   dashboardUpdateOptionsSchema,
-  dashboardUpdateRequestAttributesSchema,
-  dashboardSearchOptionsSchema,
-  dashboardItemSchema,
-  dashboardState,
+  getDashboardUpdateRequestAttributesSchema,
 } from './schema';
 
-export const serviceDefinition: ServicesDefinition = {
-  get: {
-    out: {
-      result: {
-        schema: dashboardGetResultSchema,
+export function getServiceDefinition(): ServicesDefinition {
+  return {
+    get: {
+      out: {
+        result: {
+          schema: getDashboardGetResultSchema(),
+        },
       },
     },
-  },
-  create: {
-    in: {
-      options: {
-        schema: dashboardCreateOptionsSchema,
-      },
-      data: {
-        schema: schema.object(dashboardState),
-      },
-    },
-    out: {
-      result: {
-        schema: dashboardItemSchema,
+    update: {
+      in: {
+        options: {
+          schema: dashboardUpdateOptionsSchema,
+        },
+        data: {
+          schema: getDashboardUpdateRequestAttributesSchema(),
+        },
       },
     },
-  },
-  update: {
-    in: {
-      options: {
-        schema: dashboardUpdateOptionsSchema,
-      },
-      data: {
-        schema: dashboardUpdateRequestAttributesSchema,
-      },
-    },
-  },
-  search: {
-    in: {
-      options: {
-        schema: dashboardSearchOptionsSchema,
-      },
-    },
-  },
-};
+  };
+}

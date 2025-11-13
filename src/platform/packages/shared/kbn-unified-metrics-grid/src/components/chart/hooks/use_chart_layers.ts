@@ -18,9 +18,11 @@ import {
 } from '../../../common/utils';
 
 interface UseChartLayersParams {
-  dimensions: string[];
+  dimensions?: string[];
   metric: MetricField;
   color?: string;
+  seriesType?: LensSeriesLayer['seriesType'];
+  customFunction?: string;
 }
 
 /**
@@ -32,21 +34,24 @@ interface UseChartLayersParams {
  * @returns An array of LensSeriesLayer configurations.
  */
 export const useChartLayers = ({
-  dimensions,
+  dimensions = [],
   metric,
   color,
+  seriesType,
+  customFunction,
 }: UseChartLayersParams): LensSeriesLayer[] => {
   return useMemo((): LensSeriesLayer[] => {
     const metricField = createMetricAggregation({
       instrument: metric.instrument,
       metricName: metric.name,
+      customFunction,
     });
     const hasDimensions = dimensions.length > 0;
 
     return [
       {
         type: 'series',
-        seriesType: hasDimensions ? 'line' : 'area',
+        seriesType: seriesType || hasDimensions ? 'line' : 'area',
         xAxis: {
           field: createTimeBucketAggregation({}),
           type: 'dateHistogram',
@@ -60,8 +65,12 @@ export const useChartLayers = ({
             ...(metric.unit ? getLensMetricFormat(metric.unit) : {}),
           },
         ],
-        breakdown: hasDimensions ? DIMENSIONS_COLUMN : undefined,
+        breakdown: hasDimensions
+          ? dimensions.length === 1
+            ? dimensions[0]
+            : DIMENSIONS_COLUMN
+          : undefined,
       },
     ];
-  }, [dimensions, metric, color]);
+  }, [color, customFunction, dimensions, metric.instrument, metric.name, metric.unit, seriesType]);
 };

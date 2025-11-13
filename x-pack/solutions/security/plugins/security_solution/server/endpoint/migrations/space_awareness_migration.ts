@@ -18,6 +18,7 @@ import type {
   SearchTotalHits,
 } from '@elastic/elasticsearch/lib/api/types';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import { clone, pick } from 'lodash';
 import { ALLOWED_ACTION_REQUEST_TAGS } from '../services/actions/constants';
 import { GLOBAL_ARTIFACT_TAG } from '../../../common/endpoint/service/artifacts';
 import { ensureActionRequestsIndexIsConfigured } from '../services';
@@ -62,13 +63,6 @@ type PolicyPartialUpdate = Pick<LogsEndpointAction, 'originSpaceId'> & {
 export const migrateEndpointDataToSupportSpaces = async (
   endpointService: EndpointAppContextService
 ): Promise<void> => {
-  const logger = endpointService.createLogger(LOGGER_KEY);
-
-  if (!endpointService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
-    logger.debug('Space awareness feature flag is disabled. Nothing to do.');
-    return;
-  }
-
   await Promise.all([
     migrateArtifactsToSpaceAware(endpointService),
     migrateResponseActionsToSpaceAware(endpointService),
@@ -97,17 +91,34 @@ const migrateArtifactsToSpaceAware = async (
   const refDataClient = endpointService.getReferenceDataClient();
   const migrationState = await getMigrationState(refDataClient, ARTIFACTS_MIGRATION_REF_DATA_ID);
 
-  if (migrationState.metadata.status !== 'not-started') {
+  // If migration has already been run and the version was 2 or higher -or- the status is pending (already running),
+  // then we don't need to run it again
+  if (
+    (migrationState.metadata.status === 'complete' &&
+      (migrationState.metadata.version ?? 0) >= 2) ||
+    migrationState.metadata.status === 'pending'
+  ) {
     logger.debug(
-      `Migration for endpoint artifacts in support of spaces has a status of [${migrationState.metadata.status}]. Nothing to do.`
+      `Migration (v2) for endpoint artifacts in support of spaces has a status of [${migrationState.metadata.status}], version [${migrationState.metadata.version}]. Nothing to do.`
     );
     return;
   }
 
-  logger.info(`starting migration of endpoint artifacts in support of spaces`);
+  logger.debug(`starting migration (v2) of endpoint artifacts in support of spaces`);
 
+  // If there are statuses about a prior run, then store a clone of it in the migration object for reference
+  const priorRunData =
+    migrationState.metadata.status === 'complete' ? clone(migrationState.metadata) : undefined;
+
+  // Migration version history:
+  // V1: original migration of artifacts with release 9.1.0
+  // v2: fixes for migration issue: https://github.com/elastic/kibana/issues/238711
+  migrationState.metadata.version = 2;
   migrationState.metadata.status = 'pending';
   migrationState.metadata.started = new Date().toISOString();
+  migrationState.metadata.finished = '';
+  migrationState.metadata.data = undefined;
+
   await updateMigrationState(refDataClient, ARTIFACTS_MIGRATION_REF_DATA_ID, migrationState);
 
   const exceptionsClient = endpointService.getExceptionListsClient();
@@ -129,15 +140,36 @@ const migrateArtifactsToSpaceAware = async (
 
       return acc;
     }, {} as Record<string, { success: number; failed: number; errors: string[] }>),
+    priorRuns: [] as Array<typeof migrationState.metadata>,
   };
 
   migrationState.metadata.data = migrationStats;
 
+  if (priorRunData) {
+    migrationStats.priorRuns.push(
+      ...((priorRunData.data as typeof migrationStats)?.priorRuns ?? [])
+    );
+
+    migrationStats.priorRuns.push({
+      ...(pick(priorRunData, [
+        'status',
+        'started',
+        'finished',
+        'version',
+      ]) as typeof migrationState.metadata),
+      data: pick(priorRunData.data as typeof migrationStats, [
+        'totalItems',
+        'itemsNeedingUpdates',
+        'successUpdates',
+        'failedUpdates',
+        'artifacts',
+      ]),
+    });
+  }
+
   const updateProcessor = new QueueProcessor<UpdateExceptionListItemOptions & { listId: string }>({
     batchSize: 50,
     batchHandler: async ({ data: artifactUpdates }) => {
-      // TODO:PT add a `bulkUpdate()` to the exceptionsListClient
-
       migrationStats.itemsNeedingUpdates += artifactUpdates.length;
 
       await pMap(
@@ -171,9 +203,9 @@ const migrateArtifactsToSpaceAware = async (
       namespaceType: listIds.map(() => 'agnostic'),
       filter: listIds.map(
         // Find all artifacts that do NOT have a space owner id tag
-        () => `NOT exception-list-agnostic.attributes.tags:"${buildSpaceOwnerIdTag('*')}"`
+        () => `NOT exception-list-agnostic.attributes.tags:(ownerSpaceId*)`
       ),
-      perPage: undefined,
+      perPage: 1_000,
       sortField: undefined,
       sortOrder: undefined,
       maxSize: undefined,
@@ -224,7 +256,7 @@ const migrateArtifactsToSpaceAware = async (
   migrationState.metadata.finished = new Date().toISOString();
   await updateMigrationState(refDataClient, ARTIFACTS_MIGRATION_REF_DATA_ID, migrationState);
 
-  logger.info(
+  logger.debug(
     `migration of endpoint artifacts in support of spaces done.\n${JSON.stringify(
       migrationStats,
       null,
@@ -250,7 +282,7 @@ const migrateResponseActionsToSpaceAware = async (
     return;
   }
 
-  logger.info(`starting migration of endpoint response actions in support of spaces`);
+  logger.debug(`starting migration of endpoint response actions in support of spaces`);
 
   const migrationStats = {
     totalItems: 0,
@@ -421,7 +453,7 @@ const migrateResponseActionsToSpaceAware = async (
   migrationState.metadata.finished = new Date().toISOString();
   await updateMigrationState(refDataClient, RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID, migrationState);
 
-  logger.info(
+  logger.debug(
     `migration of endpoint response actions in support of spaces done.\n${JSON.stringify(
       migrationStats,
       null,
@@ -465,8 +497,6 @@ class AgentPolicyInfoBuilder {
   ) {}
 
   public async buildPolicyUpdate(actionRequest: LogsEndpointAction): Promise<ActionPolicyInfo> {
-    // TODO: trigger retrieval of agent records and package polices for those agents in bulk??
-
     const agentsPolicyInfo = (
       Array.isArray(actionRequest.agent.id) ? actionRequest.agent.id : [actionRequest.agent.id]
     ).map((agentId) => {

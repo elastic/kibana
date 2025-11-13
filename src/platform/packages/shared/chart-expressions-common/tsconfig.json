@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -20,5 +20,7 @@
     "@kbn/expressions-plugin",
     "@kbn/data-plugin",
     "@kbn/coloring",
+    "@kbn/i18n",
+    "@kbn/field-formats-plugin",
   ]
 }

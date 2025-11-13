@@ -7,89 +7,74 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiThemeComputed, EuiTreeViewProps, UseEuiTheme } from '@elastic/eui';
+import type {
+  EuiEmptyPromptProps,
+  EuiThemeComputed,
+  EuiTreeViewProps,
+  UseEuiTheme,
+} from '@elastic/eui';
 import {
   EuiEmptyPrompt,
   EuiIcon,
   EuiLoadingSpinner,
   EuiText,
-  useEuiTheme,
   EuiTreeView,
   logicalCSS,
-  type EuiEmptyPromptProps,
+  transparentize,
+  useEuiTheme,
 } from '@elastic/eui';
-import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import type { WorkflowStepExecutionDto, WorkflowYaml } from '@kbn/workflows';
-import { ExecutionStatus, isInProgressStatus } from '@kbn/workflows';
-import { isDangerousStatus, type WorkflowExecutionDto } from '@kbn/workflows';
 import { css } from '@emotion/react';
+import React from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
-import { StepExecutionTreeItemLabel } from './step_execution_tree_item_label';
-import { getExecutionStatusColors } from '../../../shared/ui/status_badge';
-import { StepIcon } from '../../../shared/ui/step_icon';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { WorkflowExecutionDto, WorkflowStepExecutionDto, WorkflowYaml } from '@kbn/workflows';
+import { ExecutionStatus, isDangerousStatus, isInProgressStatus } from '@kbn/workflows';
 import type { StepExecutionTreeItem } from './build_step_executions_tree';
 import { buildStepExecutionsTree } from './build_step_executions_tree';
-
-// handle special nodes like foreachstep:0, foreachstep:1, if:true, if:false
-function getStepStatus(item: StepExecutionTreeItem, status: ExecutionStatus | null) {
-  const stepType = item.stepType;
-  if (
-    (stepType === 'foreach-iteration' ||
-      stepType === 'foreach' ||
-      stepType === 'if-branch' ||
-      stepType === 'if') &&
-    !item.children.length &&
-    !isInProgressStatus(status ?? ExecutionStatus.PENDING)
-  ) {
-    return ExecutionStatus.SKIPPED;
-  }
-
-  if (status) {
-    return status;
-  }
-
-  return null;
-}
+import { StepExecutionTreeItemLabel } from './step_execution_tree_item_label';
+import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
 
 function convertTreeToEuiTreeViewItems(
   treeItems: StepExecutionTreeItem[],
   stepExecutionMap: Map<string, WorkflowStepExecutionDto>,
   euiTheme: EuiThemeComputed,
   selectedId: string | null,
-  onClickHandler: (stepExecutionId: string) => void
+  onSelectStepExecution: (stepExecutionId: string) => void
 ): EuiTreeViewProps['items'] {
-  const onClickFn = onClickHandler;
   return treeItems.map((item) => {
     const stepExecution = stepExecutionMap.get(item.stepExecutionId ?? '');
-    const status = getStepStatus(item, stepExecution?.status ?? null);
-    return {
-      ...item,
-      id: item.stepExecutionId ?? `${item.stepId}-${item.executionIndex}-no-step-execution`,
-      icon: <StepIcon stepType={item.stepType} executionStatus={status} />,
-      css:
-        status && isDangerousStatus(status)
-          ? css`
-              &,
-              &:active,
-              &:focus {
-                background-color: ${getExecutionStatusColors(euiTheme, status).backgroundColor};
-              }
+    const status = stepExecution?.status;
+    const selected = selectedId === stepExecution?.id;
 
-              &:hover {
-                background-color: ${euiTheme.colors.backgroundLightDanger};
-              }
-            `
-          : undefined,
+    const selectStepExecution: React.MouseEventHandler = (e) => {
+      // Prevent the click event from bubbling up to the tree view item so that the tree view item is not expanded/collapsed when selected
+      e.preventDefault();
+      e.stopPropagation();
+      if (stepExecution?.id) {
+        onSelectStepExecution(stepExecution.id);
+      }
+    };
+
+    return {
+      id: item.stepExecutionId ?? `${item.stepId}-${item.executionIndex}-no-step-execution`,
+      css: getStatusCss({ status, selected }, euiTheme),
+      icon: (
+        <StepIcon
+          stepType={item.stepType}
+          executionStatus={status ?? null}
+          onClick={selectStepExecution}
+        />
+      ),
       label: (
         <StepExecutionTreeItemLabel
           stepId={item.stepId}
+          stepType={item.stepType}
+          selected={selected}
           status={status}
           executionIndex={item.executionIndex}
           executionTimeMs={stepExecution?.executionTimeMs ?? null}
-          stepType={item.stepType}
-          selected={selectedId === stepExecution?.id}
+          onClick={selectStepExecution}
         />
       ),
       children:
@@ -99,18 +84,19 @@ function convertTreeToEuiTreeViewItems(
               stepExecutionMap,
               euiTheme,
               selectedId,
-              onClickFn
+              onSelectStepExecution
             )
           : undefined,
       callback:
-        // TODO: for nodes with children, we don't want other onClick behavior besides expanding/collapsing
+        // collapse/expand the tree view item when the button is clicked
         () => {
           let toOpen = item.stepExecutionId;
           if (!toOpen && item.children.length) {
             toOpen = item.children[0].stepExecutionId;
           }
-          onClickFn(toOpen ?? '');
-          // string is expected by EuiTreeView for some reason
+          if (toOpen) {
+            onSelectStepExecution(toOpen);
+          }
           return toOpen ?? '';
         },
     };
@@ -120,7 +106,6 @@ function convertTreeToEuiTreeViewItems(
 export interface WorkflowStepExecutionTreeProps {
   execution: WorkflowExecutionDto | null;
   definition: WorkflowYaml | null;
-  isLoading: boolean;
   error: Error | null;
   onStepExecutionClick: (stepExecutionId: string) => void;
   selectedId: string | null;
@@ -129,7 +114,6 @@ export interface WorkflowStepExecutionTreeProps {
 const emptyPromptCommonProps: EuiEmptyPromptProps = { titleSize: 'xs', paddingSize: 's' };
 
 export const WorkflowStepExecutionTree = ({
-  isLoading,
   error,
   execution,
   definition,
@@ -139,7 +123,7 @@ export const WorkflowStepExecutionTree = ({
   const styles = useMemoCss(componentStyles);
   const { euiTheme } = useEuiTheme();
 
-  if (isLoading || !execution) {
+  if (!execution) {
     return (
       <EuiEmptyPrompt
         {...emptyPromptCommonProps}
@@ -259,8 +243,6 @@ export const WorkflowStepExecutionTree = ({
 
 const componentStyles = {
   treeViewContainer: ({ euiTheme }: UseEuiTheme) => css`
-    overflow-y: auto;
-
     & .euiTreeView__nodeLabel {
       flex-grow: 1;
       text-align: left;
@@ -309,4 +291,34 @@ const componentStyles = {
       }
     }
   `,
+};
+
+const getStatusCss = (
+  { status, selected }: { status?: ExecutionStatus; selected?: boolean },
+  euiTheme: EuiThemeComputed
+) => {
+  if (!status) {
+    return;
+  }
+  let background = euiTheme.colors.backgroundLightPrimary;
+  if (isDangerousStatus(status)) {
+    background = euiTheme.colors.backgroundBaseDanger;
+  }
+
+  if (selected) {
+    return css`
+      &,
+      &:active,
+      &:focus,
+      &:hover {
+        background-color: ${background};
+      }
+    `;
+  }
+
+  return css`
+    &:hover {
+      background-color: ${transparentize(background, 0.4)};
+    }
+  `;
 };

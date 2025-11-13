@@ -8,7 +8,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router } from '@kbn/shared-ux-router';
-import { QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@kbn/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 import type { Storage } from '@kbn/kibana-utils-plugin/public';

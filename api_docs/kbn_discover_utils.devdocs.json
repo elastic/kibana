@@ -907,40 +907,108 @@
       },
       {
         "parentPluginId": "@kbn/discover-utils",
-        "id": "def-common.createApmErrorsContextService",
+        "id": "def-common.createApmContextService",
         "type": "Function",
         "tags": [],
-        "label": "createApmErrorsContextService",
+        "label": "createApmContextService",
         "description": [],
         "signature": [
-          "({ apmSourcesAccess, }: ApmErrorsContextServiceDeps) => Promise<",
+          "({ apmSourcesAccess, }: { apmSourcesAccess?: { getApmIndices: (options?: Omit<",
+          {
+            "pluginId": "apmSourcesAccess",
+            "scope": "public",
+            "docId": "kibApmSourcesAccessPluginApi",
+            "section": "def-public.SourcesApiOptions",
+            "text": "SourcesApiOptions"
+          },
+          ", \"body\"> | undefined) => Promise<Readonly<{} & { error: string; transaction: string; span: string; metric: string; onboarding: string; sourcemap: string; }>>; getApmIndexSettings: (options?: Omit<",
+          {
+            "pluginId": "apmSourcesAccess",
+            "scope": "public",
+            "docId": "kibApmSourcesAccessPluginApi",
+            "section": "def-public.SourcesApiOptions",
+            "text": "SourcesApiOptions"
+          },
+          ", \"body\"> | undefined) => Promise<",
+          "ApmIndexSettingsResponse",
+          ">; saveApmIndices: (options: ",
+          {
+            "pluginId": "apmSourcesAccess",
+            "scope": "public",
+            "docId": "kibApmSourcesAccessPluginApi",
+            "section": "def-public.SourcesApiOptions",
+            "text": "SourcesApiOptions"
+          },
+          " & { body: Partial<Record<\"error\" | \"transaction\" | \"span\" | \"metric\" | \"onboarding\" | \"sourcemap\", string>>; }) => Promise<",
+          "SavedObject",
+          "<{}>>; } | undefined; }) => Promise<",
           {
             "pluginId": "@kbn/discover-utils",
             "scope": "common",
             "docId": "kibKbnDiscoverUtilsPluginApi",
-            "section": "def-common.ApmErrorsContextService",
-            "text": "ApmErrorsContextService"
+            "section": "def-common.ApmContextService",
+            "text": "ApmContextService"
           },
           ">"
         ],
-        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/apm/errors/errors_context_service.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/apm/apm_context_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.createApmErrorsContextService.$1",
+            "id": "def-common.createApmContextService.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  apmSourcesAccess,\n}",
             "description": [],
-            "signature": [
-              "ApmErrorsContextServiceDeps"
-            ],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/apm/errors/errors_context_service.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/apm/apm_context_service.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": true
+            "children": [
+              {
+                "parentPluginId": "@kbn/discover-utils",
+                "id": "def-common.createApmContextService.$1.apmSourcesAccess",
+                "type": "Object",
+                "tags": [],
+                "label": "apmSourcesAccess",
+                "description": [],
+                "signature": [
+                  "{ getApmIndices: (options?: Omit<",
+                  {
+                    "pluginId": "apmSourcesAccess",
+                    "scope": "public",
+                    "docId": "kibApmSourcesAccessPluginApi",
+                    "section": "def-public.SourcesApiOptions",
+                    "text": "SourcesApiOptions"
+                  },
+                  ", \"body\"> | undefined) => Promise<Readonly<{} & { error: string; transaction: string; span: string; metric: string; onboarding: string; sourcemap: string; }>>; getApmIndexSettings: (options?: Omit<",
+                  {
+                    "pluginId": "apmSourcesAccess",
+                    "scope": "public",
+                    "docId": "kibApmSourcesAccessPluginApi",
+                    "section": "def-public.SourcesApiOptions",
+                    "text": "SourcesApiOptions"
+                  },
+                  ", \"body\"> | undefined) => Promise<",
+                  "ApmIndexSettingsResponse",
+                  ">; saveApmIndices: (options: ",
+                  {
+                    "pluginId": "apmSourcesAccess",
+                    "scope": "public",
+                    "docId": "kibApmSourcesAccessPluginApi",
+                    "section": "def-public.SourcesApiOptions",
+                    "text": "SourcesApiOptions"
+                  },
+                  " & { body: Partial<Record<\"error\" | \"transaction\" | \"span\" | \"metric\" | \"onboarding\" | \"sourcemap\", string>>; }) => Promise<",
+                  "SavedObject",
+                  "<{}>>; } | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/apm/apm_context_service.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "returnComment": [],
@@ -1131,49 +1199,6 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/discover-utils",
-        "id": "def-common.createTracesContextService",
-        "type": "Function",
-        "tags": [],
-        "label": "createTracesContextService",
-        "description": [],
-        "signature": [
-          "({ apmSourcesAccess, }: ",
-          "TracesContextServiceDeps",
-          ") => Promise<",
-          {
-            "pluginId": "@kbn/discover-utils",
-            "scope": "common",
-            "docId": "kibKbnDiscoverUtilsPluginApi",
-            "section": "def-common.TracesContextService",
-            "text": "TracesContextService"
-          },
-          ">"
-        ],
-        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/traces/traces_context_service.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.createTracesContextService.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  apmSourcesAccess,\n}",
-            "description": [],
-            "signature": [
-              "TracesContextServiceDeps"
-            ],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/traces/traces_context_service.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -2292,6 +2317,53 @@
       },
       {
         "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.getLogEventTypeFieldWithFallback",
+        "type": "Function",
+        "tags": [],
+        "label": "getLogEventTypeFieldWithFallback",
+        "description": [],
+        "signature": [
+          "(doc: ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.LogDocumentOverview",
+            "text": "LogDocumentOverview"
+          },
+          ") => { field: \"processor.event\" | \"event_name\"; value: string | undefined; formattedValue: string | undefined; } | { field: undefined; value?: undefined; formattedValue?: undefined; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_log_event_type_field_with_fallback.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.getLogEventTypeFieldWithFallback.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "doc",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.LogDocumentOverview",
+                "text": "LogDocumentOverview"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_log_event_type_field_with_fallback.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
         "id": "def-common.getLogLevelCoalescedValue",
         "type": "Function",
         "tags": [],
@@ -2445,6 +2517,53 @@
       },
       {
         "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.getLogLevelFieldWithFallback",
+        "type": "Function",
+        "tags": [],
+        "label": "getLogLevelFieldWithFallback",
+        "description": [],
+        "signature": [
+          "(doc: ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.LogDocumentOverview",
+            "text": "LogDocumentOverview"
+          },
+          ") => { field: \"log.level\" | \"error.log.level\"; value: string | undefined; formattedValue: string | undefined; } | { field: undefined; value?: undefined; formattedValue?: undefined; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_log_level_field_with_fallback.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.getLogLevelFieldWithFallback.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "doc",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.LogDocumentOverview",
+                "text": "LogDocumentOverview"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_log_level_field_with_fallback.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
         "id": "def-common.getMessageFieldWithFallbacks",
         "type": "Function",
         "tags": [],
@@ -2459,7 +2578,7 @@
             "section": "def-common.LogDocumentOverview",
             "text": "LogDocumentOverview"
           },
-          ", { includeFormattedValue }?: { includeFormattedValue?: boolean | undefined; }) => { field: \"message\" | \"event.original\" | \"error.message\"; value: string; formattedValue: string | undefined; } | { field: undefined; value?: undefined; formattedValue?: undefined; }"
+          ", { includeFormattedValue }?: { includeFormattedValue?: boolean | undefined; }) => { field: \"message\" | \"event.original\" | \"error.message\" | \"exception.message\" | \"error.exception.message\" | \"attributes.exception.message\"; value: string | undefined; formattedValue: string | undefined; } | { field: undefined; value?: undefined; formattedValue?: undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_message_field_with_fallbacks.ts",
         "deprecated": false,
@@ -3327,6 +3446,90 @@
       },
       {
         "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.prepareDataViewForEditing",
+        "type": "Function",
+        "tags": [],
+        "label": "prepareDataViewForEditing",
+        "description": [],
+        "signature": [
+          "(dataView: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          ", dataViewsService: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "public",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-public.DataViewsServicePublic",
+            "text": "DataViewsServicePublic"
+          },
+          ") => Promise<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          ">"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/prepare_data_view_for_editing.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.prepareDataViewForEditing.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "dataView",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/prepare_data_view_for_editing.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.prepareDataViewForEditing.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "dataViewsService",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "public",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-public.DataViewsServicePublic",
+                "text": "DataViewsServicePublic"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/prepare_data_view_for_editing.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
         "id": "def-common.usePager",
         "type": "Function",
         "tags": [],
@@ -3382,30 +3585,95 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/discover-utils",
-        "id": "def-common.ApmErrorsContextService",
+        "id": "def-common.ApmContextService",
         "type": "Interface",
         "tags": [],
-        "label": "ApmErrorsContextService",
+        "label": "ApmContextService",
         "description": [],
-        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/apm/errors/errors_context_service.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/apm/apm_context_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.ApmErrorsContextService.getErrorsIndexPattern",
-            "type": "Function",
+            "id": "def-common.ApmContextService.tracesService",
+            "type": "Object",
             "tags": [],
-            "label": "getErrorsIndexPattern",
+            "label": "tracesService",
             "description": [],
             "signature": [
-              "() => string | undefined"
+              "TracesContextService"
             ],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/apm/errors/errors_context_service.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/apm/apm_context_service.ts",
             "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.ApmContextService.errorsService",
+            "type": "Object",
+            "tags": [],
+            "label": "errorsService",
+            "description": [],
+            "signature": [
+              "ErrorsContextService"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/apm/apm_context_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.ApmErrorLogFields",
+        "type": "Interface",
+        "tags": [],
+        "label": "ApmErrorLogFields",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.ApmErrorLogFields.processor.event",
+            "type": "string",
+            "tags": [],
+            "label": "'processor.event'",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.ApmErrorLogFields.error.log.level",
+            "type": "string",
+            "tags": [],
+            "label": "'error.log.level'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.ApmErrorLogFields.error.exception.message",
+            "type": "string",
+            "tags": [],
+            "label": "'error.exception.message'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4421,7 +4689,32 @@
             "docId": "kibKbnDiscoverUtilsPluginApi",
             "section": "def-common.LogCloudFields",
             "text": "LogCloudFields"
-          }
+          },
+          ",",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.LogOtelStackTraceFields",
+            "text": "LogOtelStackTraceFields"
+          },
+          ",Partial<",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.ApmErrorLogFields",
+            "text": "ApmErrorLogFields"
+          },
+          ">,Partial<",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.OtelExceptionLogFields",
+            "text": "OtelExceptionLogFields"
+          },
+          ">"
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
         "deprecated": false,
@@ -4568,6 +4861,76 @@
             "tags": [],
             "label": "'data_stream.dataset'",
             "description": [],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.LogDocumentOverview.exception.message",
+            "type": "string",
+            "tags": [],
+            "label": "'exception.message'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.LogOtelStackTraceFields",
+        "type": "Interface",
+        "tags": [],
+        "label": "LogOtelStackTraceFields",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.LogOtelStackTraceFields.attributes.exception.stacktrace",
+            "type": "string",
+            "tags": [],
+            "label": "'attributes.exception.stacktrace'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.LogOtelStackTraceFields.attributes.exception.type",
+            "type": "string",
+            "tags": [],
+            "label": "'attributes.exception.type'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.LogOtelStackTraceFields.attributes.exception.message",
+            "type": "string",
+            "tags": [],
+            "label": "'attributes.exception.message'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4854,45 +5217,38 @@
             "signature": [
               "() => { getDimensions: (params: { dimensions: string; indices?: string | string[] | undefined; from?: string | undefined; to?: string | undefined; }, signal?: AbortSignal | null | undefined) => Promise<{ values: { value: string; field: string; }[]; }>; getFields: (params: { page?: number | undefined; index?: string | undefined; size?: number | undefined; fields?: string | string[] | undefined; from?: string | undefined; to?: string | undefined; }, signal?: AbortSignal | null | undefined) => Promise<{ fields: ",
               "MetricField",
-              "[]; total: number; page: number; }>; getIndexPatternMetadata({ indexPattern, from, to, }: { indexPattern: string; } & { from: string; to: string; }, signal?: AbortSignal | null | undefined): Promise<{ indexPatternMetadata: { [k: string]: { hasTimeSeriesFields: boolean; }; }; }>; } | undefined"
+              "[]; total: number; page: number; }>; } | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/metrics/metrics_context_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
             "returnComment": []
-          },
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.OtelExceptionLogFields",
+        "type": "Interface",
+        "tags": [],
+        "label": "OtelExceptionLogFields",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
           {
             "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.MetricsContextService.isMetricsIndexPattern",
-            "type": "Function",
+            "id": "def-common.OtelExceptionLogFields.event_name",
+            "type": "string",
             "tags": [],
-            "label": "isMetricsIndexPattern",
+            "label": "event_name",
             "description": [],
-            "signature": [
-              "(indexPattern: string) => boolean"
-            ],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/metrics/metrics_context_service.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
             "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/discover-utils",
-                "id": "def-common.MetricsContextService.isMetricsIndexPattern.$1",
-                "type": "string",
-                "tags": [],
-                "label": "indexPattern",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/metrics/metrics_context_service.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5777,100 +6133,6 @@
       },
       {
         "parentPluginId": "@kbn/discover-utils",
-        "id": "def-common.TracesContextService",
-        "type": "Interface",
-        "tags": [],
-        "label": "TracesContextService",
-        "description": [],
-        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/traces/traces_context_service.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.TracesContextService.getAllTracesIndexPattern",
-            "type": "Function",
-            "tags": [],
-            "label": "getAllTracesIndexPattern",
-            "description": [],
-            "signature": [
-              "() => string | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/traces/traces_context_service.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.TracesContextService.isTracesIndexPattern",
-            "type": "Function",
-            "tags": [],
-            "label": "isTracesIndexPattern",
-            "description": [],
-            "signature": [
-              "(indexPattern: unknown) => boolean"
-            ],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/traces/traces_context_service.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/discover-utils",
-                "id": "def-common.TracesContextService.isTracesIndexPattern.$1",
-                "type": "Unknown",
-                "tags": [],
-                "label": "indexPattern",
-                "description": [],
-                "signature": [
-                  "unknown"
-                ],
-                "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/traces/traces_context_service.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.TracesContextService.containsTracesIndexPattern",
-            "type": "Function",
-            "tags": [],
-            "label": "containsTracesIndexPattern",
-            "description": [],
-            "signature": [
-              "(indexPattern: unknown) => boolean"
-            ],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/traces/traces_context_service.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/discover-utils",
-                "id": "def-common.TracesContextService.containsTracesIndexPattern.$1",
-                "type": "Unknown",
-                "tags": [],
-                "label": "indexPattern",
-                "description": [],
-                "signature": [
-                  "unknown"
-                ],
-                "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/traces/traces_context_service.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/discover-utils",
         "id": "def-common.TransactionFields",
         "type": "Interface",
         "tags": [],
@@ -6056,6 +6318,45 @@
           "\"agent.name\""
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.ALL_RECOMMENDED_FIELDS_FOR_ESQL",
+        "type": "Array",
+        "tags": [],
+        "label": "ALL_RECOMMENDED_FIELDS_FOR_ESQL",
+        "description": [
+          "\nMerged list of all recommended fields for ES|QL autocomplete."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/esql-types",
+            "scope": "common",
+            "docId": "kibKbnEsqlTypesPluginApi",
+            "section": "def-common.RecommendedField",
+            "text": "RecommendedField"
+          },
+          "[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/recommended_fields/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.ApacheErrorLogsProfile",
+        "type": "Type",
+        "tags": [],
+        "label": "ApacheErrorLogsProfile",
+        "description": [],
+        "signature": [
+          "{ readonly pattern: \"logs-apache.error\"; readonly recommendedFields: readonly [\"client.ip\", \"destination.ip\", \"http.request.method\", \"http.response.bytes\", \"http.response.status_code\", \"log.level\", \"message\", \"referrer\", \"source.ip\", \"url.path\", \"user.agent\"]; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/recommended_fields/apache_error_logs.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6684,6 +6985,21 @@
       },
       {
         "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.DefaultLogsProfile",
+        "type": "Type",
+        "tags": [],
+        "label": "DefaultLogsProfile",
+        "description": [],
+        "signature": [
+          "{ readonly pattern: \"logs-*\"; readonly recommendedFields: readonly [\"event.dataset\", \"host.name\", \"log.level\", \"message\", \"service.name\"]; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/recommended_fields/default_logs.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
         "id": "def-common.DOC_HIDE_TIME_COLUMN_SETTING",
         "type": "string",
         "tags": [],
@@ -6699,6 +7015,21 @@
       },
       {
         "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.ERROR_EXCEPTION_MESSAGE",
+        "type": "string",
+        "tags": [],
+        "label": "ERROR_EXCEPTION_MESSAGE",
+        "description": [],
+        "signature": [
+          "\"error.exception.message\""
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
         "id": "def-common.ERROR_EXCEPTION_STACKTRACE_ABS_PATH",
         "type": "string",
         "tags": [],
@@ -6706,6 +7037,21 @@
         "description": [],
         "signature": [
           "\"error.exception.stacktrace.abs_path\""
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.ERROR_LOG_LEVEL_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "ERROR_LOG_LEVEL_FIELD",
+        "description": [],
+        "signature": [
+          "\"error.log.level\""
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
         "deprecated": false,
@@ -6796,6 +7142,21 @@
         "description": [],
         "signature": [
           "\"event.outcome\""
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.EXCEPTION_MESSAGE_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "EXCEPTION_MESSAGE_FIELD",
+        "description": [],
+        "signature": [
+          "\"exception.message\""
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
         "deprecated": false,
@@ -6950,6 +7311,21 @@
           "\"_index\""
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.KubernetesContainerLogsProfile",
+        "type": "Type",
+        "tags": [],
+        "label": "KubernetesContainerLogsProfile",
+        "description": [],
+        "signature": [
+          "{ readonly pattern: \"logs-kubernetes.container_logs\"; readonly recommendedFields: readonly [\"container.image.name\", \"kubernetes.container.name\", \"kubernetes.namespace\", \"kubernetes.node.name\", \"kubernetes.pod.name\", \"log.level\", \"message\", \"orchestrator.resource.name\"]; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/recommended_fields/kubernetes_container_logs.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -7121,6 +7497,36 @@
       },
       {
         "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.OTEL_ATTRIBUTES_EXCEPTION_MESSAGE",
+        "type": "string",
+        "tags": [],
+        "label": "OTEL_ATTRIBUTES_EXCEPTION_MESSAGE",
+        "description": [],
+        "signature": [
+          "\"attributes.exception.message\""
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.OTEL_ATTRIBUTES_EXCEPTION_STACKTRACE",
+        "type": "string",
+        "tags": [],
+        "label": "OTEL_ATTRIBUTES_EXCEPTION_STACKTRACE",
+        "description": [],
+        "signature": [
+          "\"attributes.exception.stacktrace\""
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
         "id": "def-common.OTEL_DURATION",
         "type": "string",
         "tags": [],
@@ -7128,6 +7534,21 @@
         "description": [],
         "signature": [
           "\"duration\""
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.OTEL_EVENT_NAME_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "OTEL_EVENT_NAME_FIELD",
+        "description": [],
+        "signature": [
+          "\"event_name\""
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
         "deprecated": false,
@@ -7851,6 +8272,23 @@
     "objects": [
       {
         "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.APACHE_ERROR_LOGS_PROFILE",
+        "type": "Object",
+        "tags": [],
+        "label": "APACHE_ERROR_LOGS_PROFILE",
+        "description": [
+          "\nConfiguration for Apache Error Logs profile recommended fields"
+        ],
+        "signature": [
+          "{ readonly pattern: \"logs-apache.error\"; readonly recommendedFields: readonly [\"client.ip\", \"destination.ip\", \"http.request.method\", \"http.response.bytes\", \"http.response.status_code\", \"log.level\", \"message\", \"referrer\", \"source.ip\", \"url.path\", \"user.agent\"]; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/recommended_fields/apache_error_logs.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
         "id": "def-common.CONTENT_FIELD_CONFIGURATION",
         "type": "Object",
         "tags": [],
@@ -7907,6 +8345,23 @@
       },
       {
         "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.DEFAULT_LOGS_PROFILE",
+        "type": "Object",
+        "tags": [],
+        "label": "DEFAULT_LOGS_PROFILE",
+        "description": [
+          "\nConfiguration for Default Logs profile recommended fields.\nThis is used as a fallback when no specific log sub-profile matches.\nThe wildcard pattern 'logs-*' ensures these fields are available for\nany logs index that doesn't have more specific profile."
+        ],
+        "signature": [
+          "{ readonly pattern: \"logs-*\"; readonly recommendedFields: readonly [\"event.dataset\", \"host.name\", \"log.level\", \"message\", \"service.name\"]; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/recommended_fields/default_logs.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
         "id": "def-common.DEGRADED_DOCS_FIELDS",
         "type": "Object",
         "tags": [],
@@ -7931,6 +8386,23 @@
           "readonly string[]"
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.KUBERNETES_CONTAINER_LOGS_PROFILE",
+        "type": "Object",
+        "tags": [],
+        "label": "KUBERNETES_CONTAINER_LOGS_PROFILE",
+        "description": [
+          "\nConfiguration for Kubernetes Container Logs profile recommended fields"
+        ],
+        "signature": [
+          "{ readonly pattern: \"logs-kubernetes.container_logs\"; readonly recommendedFields: readonly [\"container.image.name\", \"kubernetes.container.name\", \"kubernetes.namespace\", \"kubernetes.node.name\", \"kubernetes.pod.name\", \"log.level\", \"message\", \"orchestrator.resource.name\"]; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/recommended_fields/kubernetes_container_logs.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -87,16 +87,19 @@
     "@kbn/monaco",
     "@kbn/code-editor",
     "@kbn/logging",
-    "@kbn/core-elasticsearch-client-server-mocks",
     "@kbn/core-test-helpers-model-versions",
     "@kbn/alerting-types",
     "@kbn/elastic-assistant-common",
     "@kbn/test",
     "@kbn/dev-utils",
     "@kbn/tooling-log",
+    "@kbn/core-elasticsearch-server-utils",
+    "@kbn/core-notifications-browser-mocks",
     "@kbn/licensing-types",
     "@kbn/lazy-object",
     "@kbn/core-notifications-browser-mocks",
+    "@kbn/react-query",
+    "@kbn/zod"
   ],
   "exclude": [
     "target/**/*"

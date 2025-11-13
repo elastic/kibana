@@ -14,9 +14,9 @@ import { useRedirectPath } from '../../../../hooks/redirect_path';
 import { breadcrumbService, IndexManagementBreadcrumb } from '../../../../services/breadcrumbs';
 import type { ComponentTemplateDeserialized } from '../../shared_imports';
 import { useComponentTemplatesContext } from '../../component_templates_context';
+import { useUpdateAssociatedDsMappings } from '../component_template_ds_mappings/use_update_associated_ds_mappings';
 import { ComponentTemplateForm } from '../component_template_form';
 import { useStepFromQueryString } from '../use_step_from_query_string';
-import { useDatastreamsRollover } from '../component_template_datastreams_rollover/use_datastreams_rollover';
 
 interface Props {
   /**
@@ -83,7 +83,7 @@ export const ComponentTemplateCreate: React.FunctionComponent<RouteComponentProp
     };
   }, [locationSearchParams, sourceComponentTemplate]);
 
-  const { showDatastreamRolloverModal } = useDatastreamsRollover();
+  const { updateAssociatedDsMappings } = useUpdateAssociatedDsMappings();
 
   const onSave = async (componentTemplate: ComponentTemplateDeserialized) => {
     const { name } = componentTemplate;
@@ -100,11 +100,11 @@ export const ComponentTemplateCreate: React.FunctionComponent<RouteComponentProp
       return;
     }
 
-    // We only want to allow rolling over linked datastreams for either @custom templates
-    // or when the component template is referenced by an index template that is part of
-    // a package and is managed.
+    // Update mappings from template for associated data streams for @custom templates or when
+    // the component template is referenced by a managed package index template. Each data stream
+    // updates its mappings from its index template. If updating fails, a modal prompts to rollover.
     if (componentTemplate.name.endsWith('@custom') || canRollover) {
-      await showDatastreamRolloverModal(componentTemplate.name);
+      await updateAssociatedDsMappings(componentTemplate.name);
     }
 
     redirectTo(encodeURI(`/component_templates/${encodeURIComponent(name)}`));

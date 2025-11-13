@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { FormInfoField } from '@kbn/search-shared-ui';
 import { i18n } from '@kbn/i18n';
 import { ApiKeyFlyoutWrapper, useSearchApiKey, Status } from '@kbn/search-api-keys-components';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@kbn/react-query';
 import { useKibana } from '../hooks/use_kibana';
 import { QueryKeys } from '../constants';
 
@@ -28,6 +28,9 @@ interface ApiKeyFormContentProps {
   status: Status;
   manageKeysLink?: string;
 }
+
+// TODO: Instead of this component, use the shared ApiKeyForm from @kbn/search-api-keys-components
+//   or remove after getting started page is complete.
 const ApiKeyFormContent = ({
   apiKey,
   status,
@@ -37,78 +40,64 @@ const ApiKeyFormContent = ({
 }: ApiKeyFormContentProps) => {
   const [showFlyout, setShowFlyout] = useState(false);
 
-  return (
+  return apiKey ? (
+    <FormInfoField
+      value={status === Status.showPreviewKey ? apiKey : API_KEY_MASK}
+      copyValue={apiKey}
+      dataTestSubj="searchHomepageApiKeyFormAPIKey"
+      copyValueDataTestSubj="searchHomepageAPIKeyButtonCopy"
+      actions={[
+        <EuiButtonIcon
+          size="s"
+          iconType={status === Status.showPreviewKey ? 'eyeClosed' : 'eye'}
+          color="text"
+          display="empty"
+          onClick={toggleApiKeyVisibility}
+          data-test-subj="searchHomepageShowAPIKeyButton"
+          aria-label={i18n.translate('xpack.searchHomepage.apiKeyForm.showApiKey', {
+            defaultMessage: 'Show API key',
+          })}
+        />,
+        <EuiButtonIcon
+          size="s"
+          iconType="gear"
+          display="empty"
+          color="text"
+          href={manageKeysLink}
+          target="_blank"
+          aria-label={i18n.translate('xpack.searchHomepage.apiKeyForm.manageApiKeys', {
+            defaultMessage: 'Manage API keys',
+          })}
+          data-test-subj="manageApiKeysButton"
+        />,
+      ]}
+    />
+  ) : (
     <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="flexStart">
-      {apiKey ? (
-        <>
-          <EuiFlexItem grow={false}>
-            <span>
-              <FormattedMessage
-                id="xpack.searchHomepage.connectToElasticsearch.apiKeysLabel"
-                defaultMessage="API key:"
-              />
-            </span>
-          </EuiFlexItem>
-          <EuiFlexItem grow={0}>
-            <FormInfoField
-              value={status === Status.showPreviewKey ? apiKey : API_KEY_MASK}
-              copyValue={apiKey}
-              dataTestSubj="searchHomepageApiKeyFormAPIKey"
-              copyValueDataTestSubj="searchHomepageAPIKeyButtonCopy"
-              actions={[
-                <EuiButtonIcon
-                  size="s"
-                  iconType={status === Status.showPreviewKey ? 'eyeClosed' : 'eye'}
-                  color="text"
-                  display="base"
-                  onClick={toggleApiKeyVisibility}
-                  data-test-subj="searchHomepageShowAPIKeyButton"
-                  aria-label={i18n.translate('xpack.searchHomepage.apiKeyForm.showApiKey', {
-                    defaultMessage: 'Show API key',
-                  })}
-                />,
-                <EuiButtonIcon
-                  size="s"
-                  display="base"
-                  color="text"
-                  iconType="gear"
-                  href={manageKeysLink}
-                  target="_blank"
-                  aria-label={i18n.translate('xpack.searchHomepage.apiKeyForm.manageApiKeys', {
-                    defaultMessage: 'Manage API keys',
-                  })}
-                  data-test-subj="manageApiKeysButton"
-                />,
-              ]}
-            />
-          </EuiFlexItem>
-        </>
-      ) : (
-        <EuiFlexItem grow={0}>
-          <EuiButton
-            color="primary"
-            size="s"
-            iconSide="left"
-            iconType="key"
-            onClick={() => setShowFlyout(true)}
-            data-test-subj="createApiKeyButton"
-          >
-            <FormattedMessage
-              id="xpack.searchHomepage.apiKeyForm.createButton"
-              defaultMessage="Create API key"
-            />
-          </EuiButton>
-          {showFlyout && (
-            <ApiKeyFlyoutWrapper
-              onCancel={() => setShowFlyout(false)}
-              onSuccess={({ id, encoded }) => {
-                updateApiKey({ id, encoded });
-                setShowFlyout(false);
-              }}
-            />
-          )}
-        </EuiFlexItem>
-      )}
+      <EuiFlexItem grow={0}>
+        <EuiButton
+          color="primary"
+          size="s"
+          iconSide="left"
+          iconType="key"
+          onClick={() => setShowFlyout(true)}
+          data-test-subj="createApiKeyButton"
+        >
+          <FormattedMessage
+            id="xpack.searchHomepage.apiKeyForm.createButton"
+            defaultMessage="Create API key"
+          />
+        </EuiButton>
+        {showFlyout && (
+          <ApiKeyFlyoutWrapper
+            onCancel={() => setShowFlyout(false)}
+            onSuccess={({ id, encoded }) => {
+              updateApiKey({ id, encoded });
+              setShowFlyout(false);
+            }}
+          />
+        )}
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

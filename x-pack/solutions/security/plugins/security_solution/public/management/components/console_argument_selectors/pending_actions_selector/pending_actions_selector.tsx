@@ -35,6 +35,7 @@ import {
 } from '../shared/hooks';
 import { createSelectionHandler, createKeyDownHandler } from '../shared/utils';
 import { ERROR_LOADING_PENDING_ACTIONS } from '../../../common/translations';
+import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../../../../../common/endpoint/service/response_actions/constants';
 
 /**
  * State for the pending actions selector component
@@ -69,10 +70,10 @@ export const PendingActionsSelector = memo<
       page: 1,
       pageSize: 200,
       statuses: ['pending'],
+      commands: RESPONSE_ACTION_API_COMMANDS_NAMES.filter((action) => action !== 'cancel'),
     },
     {
-      refetchInterval: state.isPopoverOpen ? 3000 : false, // Only refetch when popover is open
-      enabled: true, // Always keep query enabled for initial load
+      enabled: state.isPopoverOpen,
     }
   );
 
@@ -220,7 +221,7 @@ export const PendingActionsSelector = memo<
             error ? (
               <FormattedMessage
                 id="xpack.securitySolution.baseArgumentSelector.errorLoading"
-                defaultMessage="Error loading data"
+                defaultMessage="Error loading pending actions"
               />
             ) : undefined
           }

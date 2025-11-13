@@ -34,6 +34,7 @@ import type {
   PublishesDataLoading,
   PublishesDataViews,
   PublishesDescription,
+  PublishesPauseFetch,
   PublishesSavedObjectId,
   PublishesTitle,
   PublishesUnifiedSearch,
@@ -49,13 +50,11 @@ import { type TracksOverlays } from '@kbn/presentation-util';
 import type { ControlsGroupState } from '@kbn/controls-schemas';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { BehaviorSubject, Observable, Subject } from 'rxjs';
-import type { DashboardLocatorParams, DashboardSettings, DashboardState } from '../../common';
-import type { DashboardAttributes, GridData } from '../../server/content_management';
-import type {
-  LoadDashboardReturn,
-  SaveDashboardReturn,
-} from '../services/dashboard_content_management_service/types';
+import type { DashboardLocatorParams } from '../../common';
+import type { DashboardAPIGetOut, DashboardState, GridData } from '../../server/content_management';
+import type { SaveDashboardReturn } from './save_modal/types';
 import type { DashboardLayout } from './layout_manager/types';
+import type { DashboardSettings } from './settings_manager';
 
 export const DASHBOARD_API_TYPE = 'dashboard';
 
@@ -66,7 +65,7 @@ export interface DashboardCreationOptions {
 
   getPassThroughContext?: PassThroughContext['getPassThroughContext'];
 
-  getIncomingEmbeddable?: () => EmbeddablePackageState | undefined;
+  getIncomingEmbeddables?: () => EmbeddablePackageState[] | undefined;
 
   useSearchSessionsIntegration?: boolean;
   searchSessionSettings?: {
@@ -85,7 +84,7 @@ export interface DashboardCreationOptions {
   useUnifiedSearchIntegration?: boolean;
   unifiedSearchSettings?: { kbnUrlStateStorage: IKbnUrlStateStorage };
 
-  validateLoadedSavedObject?: (result: LoadDashboardReturn) => 'valid' | 'invalid' | 'redirected';
+  validateLoadedSavedObject?: (result: DashboardAPIGetOut) => 'valid' | 'invalid' | 'redirected';
 
   fullScreenMode?: boolean;
   isEmbeddedExternally?: boolean;
@@ -106,7 +105,7 @@ export type DashboardApi = CanExpandPanels &
   PublishesDataLoading &
   PublishesDataViews &
   PublishesDescription &
-  Pick<PublishesTitle, 'title$'> &
+  Pick<PublishesTitle, 'title$' | 'hideTitle$'> &
   PublishesReload &
   PublishesSavedObjectId &
   PublishesESQLVariables &
@@ -115,6 +114,7 @@ export type DashboardApi = CanExpandPanels &
   PublishesUnifiedSearch &
   PublishesViewMode &
   PublishesWritableViewMode &
+  PublishesPauseFetch &
   TrackContentfulRender &
   TracksOverlays & {
     asyncResetToLastSavedState: () => Promise<void>;
@@ -125,7 +125,7 @@ export type DashboardApi = CanExpandPanels &
     forceRefresh: () => void;
     getSettings: () => DashboardSettings;
     getSerializedState: () => {
-      attributes: DashboardAttributes;
+      attributes: DashboardState;
       references: Reference[];
     };
     getDashboardPanelFromId: (id: string) => {
@@ -159,8 +159,6 @@ export type DashboardApi = CanExpandPanels &
   };
 
 export interface DashboardInternalApi {
-  controlGroupReload$: Subject<void>;
-  panelsReload$: Subject<void>;
   layout$: BehaviorSubject<DashboardLayout>;
   gridLayout$: BehaviorSubject<GridLayoutData>;
   registerChildApi: (api: DefaultEmbeddableApi) => void;
@@ -173,5 +171,4 @@ export interface DashboardInternalApi {
     controlGroupInput: ControlsGroupState | undefined;
     controlGroupReferences: Reference[];
   };
-  untilControlsInitialized: () => Promise<void>;
 }

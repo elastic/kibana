@@ -42,7 +42,8 @@ import type {
   StreamsServer,
 } from './types';
 import { createStreamsGlobalSearchResultProvider } from './lib/streams/create_streams_global_search_result_provider';
-import { SystemService } from './lib/streams/system/system_service';
+import { FeatureService } from './lib/streams/feature/feature_service';
+import { ProcessorSuggestionsService } from './lib/streams/ingest_pipelines/processor_suggestions_service';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
@@ -69,11 +70,13 @@ export class StreamsPlugin
   private isDev: boolean;
   private ebtTelemetryService = new EbtTelemetryService();
   private statsTelemetryService = new StatsTelemetryService();
+  private processorSuggestionsService: ProcessorSuggestionsService;
 
   constructor(context: PluginInitializerContext<StreamsConfig>) {
     this.isDev = context.env.mode.dev;
     this.config = context.config.get();
     this.logger = context.logger.get();
+    this.processorSuggestionsService = new ProcessorSuggestionsService();
   }
 
   public setup(
@@ -101,7 +104,7 @@ export class StreamsPlugin
 
     const assetService = new AssetService(core, this.logger);
     const streamsService = new StreamsService(core, this.logger, this.isDev);
-    const systemService = new SystemService(core, this.logger);
+    const featureService = new FeatureService(core, this.logger);
     const contentService = new ContentService(core, this.logger);
     const queryService = new QueryService(core, this.logger);
 
@@ -163,19 +166,20 @@ export class StreamsPlugin
       repository: streamsRouteRepository,
       dependencies: {
         assets: assetService,
-        systems: systemService,
+        features: featureService,
         server: this.server,
         telemetry: this.ebtTelemetryService.getClient(),
+        processorSuggestions: this.processorSuggestionsService,
         getScopedClients: async ({
           request,
         }: {
           request: KibanaRequest;
         }): Promise<RouteHandlerScopedClients> => {
-          const [[coreStart, pluginsStart], assetClient, systemClient, contentClient] =
+          const [[coreStart, pluginsStart], assetClient, featureClient, contentClient] =
             await Promise.all([
               core.getStartServices(),
               assetService.getClientWithRequest({ request }),
-              systemService.getClientWithRequest({ request }),
+              featureService.getClientWithRequest({ request }),
               contentService.getClient(),
             ]);
 
@@ -191,7 +195,7 @@ export class StreamsPlugin
             request,
             assetClient,
             queryClient,
-            systemClient,
+            featureClient,
           });
 
           const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
@@ -205,7 +209,7 @@ export class StreamsPlugin
             soClient,
             assetClient,
             streamsClient,
-            systemClient,
+            featureClient,
             inferenceClient,
             contentClient,
             queryClient,
@@ -236,9 +240,12 @@ export class StreamsPlugin
       this.server.core = core;
       this.server.isServerless = core.elasticsearch.getCapabilities().serverless;
       this.server.security = plugins.security;
+      this.server.actions = plugins.actions;
       this.server.encryptedSavedObjects = plugins.encryptedSavedObjects;
       this.server.taskManager = plugins.taskManager;
     }
+
+    this.processorSuggestionsService.setConsoleStart(plugins.console);
 
     return {};
   }

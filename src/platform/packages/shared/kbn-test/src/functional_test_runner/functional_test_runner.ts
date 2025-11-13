@@ -11,7 +11,6 @@ import { writeFileSync, mkdirSync } from 'fs';
 import Path, { dirname } from 'path';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/repo-info';
-
 import type { Suite, Test } from './fake_mocha_types';
 import type { Providers, Config } from './lib';
 import {
@@ -44,12 +43,11 @@ export class FunctionalTestRunner {
 
   async run(abortSignal?: AbortSignal) {
     const testStats = await this.getTestStats();
+    const realServices =
+      !testStats || (testStats.testCount > 0 && testStats.nonSkippedTestCount > 0);
 
-    return await this.runHarness(async (lifecycle, coreProviders) => {
+    return await this.runHarness({ realServices }, async (lifecycle, coreProviders) => {
       SuiteTracker.startTracking(lifecycle, this.config.path);
-
-      const realServices =
-        !testStats || (testStats.testCount > 0 && testStats.nonSkippedTestCount > 0);
 
       const providers = realServices
         ? new ProviderCollection(this.log, [
@@ -113,10 +111,12 @@ export class FunctionalTestRunner {
         return;
       }
 
-      await lifecycle.beforeTests.trigger(mocha.suite);
-      if (abortSignal?.aborted) {
-        this.log.warning('run aborted');
-        return;
+      if (realServices) {
+        await lifecycle.beforeTests.trigger(mocha.suite);
+        if (abortSignal?.aborted) {
+          this.log.warning('run aborted');
+          return;
+        }
       }
 
       this.log.info('Starting tests');
@@ -152,7 +152,7 @@ export class FunctionalTestRunner {
   }
 
   async getTestStats() {
-    return await this.runHarness(async (lifecycle, coreProviders) => {
+    return await this.runHarness({ realServices: false }, async (lifecycle, coreProviders) => {
       if (this.config.get('testRunner')) {
         return;
       }
@@ -165,24 +165,30 @@ export class FunctionalTestRunner {
         providers,
         skipRootHooks: true,
         esVersion: this.esVersion,
+        reporter: 'base',
       });
 
-      const queue = new Set([mocha.suite]);
-      const allTests: Test[] = [];
-      for (const suite of queue) {
-        for (const test of suite.tests) {
-          allTests.push(test);
-        }
-        for (const childSuite of suite.suites) {
-          queue.add(childSuite);
-        }
-      }
+      // Run Mocha in dry-run mode to let its native filtering (grep, tags, etc.) determine
+      // which tests would execute, and capture the resulting execution/pending counts.
+      const statsFromDryRun = await new Promise<{
+        suites: number;
+        tests: number;
+        passes: number;
+        pending: number;
+        failures: number;
+      }>((resolve) => {
+        const runner = mocha.dryRun(true).run(() => {
+          resolve(runner.stats);
+        });
+      });
 
-      return {
-        testCount: allTests.length,
-        nonSkippedTestCount: allTests.filter((t) => !t.pending).length,
+      const stats = {
+        testCount: statsFromDryRun.tests,
+        nonSkippedTestCount: statsFromDryRun.tests - statsFromDryRun.pending,
         testsExcludedByTag: mocha.testsExcludedByTag.map((t: Test) => t.fullTitle()),
       };
+
+      return stats;
     });
   }
 
@@ -222,6 +228,11 @@ export class FunctionalTestRunner {
   }
 
   private async runHarness<T = any>(
+    {
+      realServices,
+    }: {
+      realServices: boolean;
+    },
     handler: (lifecycle: Lifecycle, coreProviders: Providers) => Promise<T>
   ): Promise<T> {
     let runErrorOccurred = false;
@@ -239,7 +250,8 @@ export class FunctionalTestRunner {
       const dockerServers = new DockerServersService(
         this.config.get('dockerServers'),
         this.log,
-        lifecycle
+        lifecycle,
+        !realServices
       );
 
       // base level services that functional_test_runner exposes

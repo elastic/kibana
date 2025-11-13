@@ -133,6 +133,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
           ...defaultValues,
           url: webhookSimulatorURL,
         },
+        is_connector_type_deprecated: false,
       });
 
       expect(typeof createdAction.id).to.be('string');
@@ -153,6 +154,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
           ...defaultValues,
           url: webhookSimulatorURL,
         },
+        is_connector_type_deprecated: false,
       });
     });
 
@@ -191,6 +193,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
             someHeader: '123',
           },
         },
+        is_connector_type_deprecated: false,
       });
 
       await supertest
@@ -230,6 +233,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
             someOtherHeader: '456',
           },
         },
+        is_connector_type_deprecated: false,
       });
     });
 
@@ -544,60 +548,6 @@ export default function webhookTest({ getService }: FtrProviderContext) {
           .expect(400);
 
         expect(result.message).to.match(/Connector must be a webhook or cases webhook/);
-      });
-    });
-
-    describe('validation', () => {
-      before(() => {
-        proxyHaveBeenCalled = false;
-      });
-
-      it('DELETE method with body should return error when trying to execute', async () => {
-        const webhookActionId = await createWebhookAction(
-          webhookSimulatorURL,
-          { method: 'delete' },
-          kibanaURL
-        );
-        objectRemover.add('default', webhookActionId, 'connector', 'actions', false);
-        const { body: result } = await supertest
-          .post(`/api/actions/connector/${webhookActionId}/_execute`)
-          .set('kbn-xsrf', 'test')
-          .send({
-            params: {
-              body: 'somebody',
-            },
-          })
-          .expect(200);
-
-        expect(proxyHaveBeenCalled).to.equal(false);
-        expect(result.status).to.eql('error');
-        expect(result.message).to.eql(
-          'error calling webhook, delete operation should not define a body'
-        );
-      });
-
-      it('GET method with body should return error when trying to execute', async () => {
-        const webhookActionId = await createWebhookAction(
-          webhookSimulatorURL,
-          { method: 'get' },
-          kibanaURL
-        );
-        objectRemover.add('default', webhookActionId, 'connector', 'actions', false);
-        const { body: result } = await supertest
-          .post(`/api/actions/connector/${webhookActionId}/_execute`)
-          .set('kbn-xsrf', 'test')
-          .send({
-            params: {
-              body: 'somebody',
-            },
-          })
-          .expect(200);
-
-        expect(proxyHaveBeenCalled).to.equal(false);
-        expect(result.status).to.eql('error');
-        expect(result.message).to.eql(
-          'error calling webhook, get operation should not define a body'
-        );
       });
     });
 
