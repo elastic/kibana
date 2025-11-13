@@ -314,7 +314,7 @@ export const CONSOLE_COMMANDS = {
       'xpack.securitySolution.translations.memoryDump.entityIdArgAbout',
       {
         defaultMessage:
-          'Process Entity ID to generate a memory dump for.  Valid only when "--process" is used',
+          'Process Entity ID to generate a memory dump for. Valid only when "--process" is used',
       }
     ),
     agentResultMissing: i18n.translate(
