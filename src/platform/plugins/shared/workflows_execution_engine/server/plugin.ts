@@ -312,8 +312,6 @@ export class WorkflowsExecutionEnginePlugin
     if (!this.setupDependencies) {
       throw new Error('Setup not called before start');
     }
-    const dependencies: ContextDependencies = this.setupDependencies; // TODO: append start dependencies
-
     const executeWorkflow = async (
       workflow: WorkflowExecutionEngineModel,
       context: Record<string, any>,
@@ -325,8 +323,6 @@ export class WorkflowsExecutionEnginePlugin
       // Get ES client and create repository for this execution
       const esClient = coreStart.elasticsearch.client.asInternalUser as Client;
       const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
-      const stepExecutionRepository = new StepExecutionRepository(esClient);
-      const logsRepository = new LogsRepository(esClient);
 
       const triggeredBy = context.triggeredBy || 'manual'; // 'manual' or 'scheduled'
       const workflowExecution: Partial<EsWorkflowExecution> = {
