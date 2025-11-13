@@ -14,7 +14,7 @@ import {
   AWS_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ,
   AZURE_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ,
 } from '@kbn/cloud-security-posture-common';
-import { ReusableConnectorSelect } from './reusable_connector_select';
+import { CloudConnectorSelector } from './cloud_connector_selector';
 import type { AwsCloudConnectorCredentials, AzureCloudConnectorCredentials } from '../types';
 
 // Mock the useGetCloudConnectors hook
@@ -74,7 +74,7 @@ const mockAzureCloudConnectors = [
   },
 ];
 
-describe('ReusableConnectorSelect', () => {
+describe('CloudConnectorSelector', () => {
   const mockSetCredentials = jest.fn();
 
   beforeEach(() => {
@@ -101,7 +101,7 @@ describe('ReusableConnectorSelect', () => {
     });
 
     it('displays AWS cloud connectors as options', async () => {
-      renderWithIntl(<ReusableConnectorSelect {...awsProps} />);
+      renderWithIntl(<CloudConnectorSelector {...awsProps} />);
 
       const select = screen.getByTestId(AWS_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ);
       await userEvent.click(select);
@@ -113,7 +113,7 @@ describe('ReusableConnectorSelect', () => {
     });
 
     it('calls setCredentials with correct AWS values when connector is selected', async () => {
-      renderWithIntl(<ReusableConnectorSelect {...awsProps} />);
+      renderWithIntl(<CloudConnectorSelector {...awsProps} />);
 
       const select = screen.getByTestId(AWS_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ);
       await userEvent.click(select);
@@ -137,7 +137,7 @@ describe('ReusableConnectorSelect', () => {
         cloudConnectorId: 'aws-connector-1',
       };
 
-      renderWithIntl(<ReusableConnectorSelect {...propsWithSelection} />);
+      renderWithIntl(<CloudConnectorSelector {...propsWithSelection} />);
 
       await waitFor(() => {
         expect(screen.getByText('AWS Connector 1')).toBeInTheDocument();
@@ -166,7 +166,7 @@ describe('ReusableConnectorSelect', () => {
     });
 
     it('displays Azure cloud connectors as options', async () => {
-      renderWithIntl(<ReusableConnectorSelect {...azureProps} />);
+      renderWithIntl(<CloudConnectorSelector {...azureProps} />);
 
       const select = screen.getByTestId(AZURE_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ);
       await userEvent.click(select);
@@ -177,7 +177,7 @@ describe('ReusableConnectorSelect', () => {
     });
 
     it('calls setCredentials with correct Azure values when connector is selected', async () => {
-      renderWithIntl(<ReusableConnectorSelect {...azureProps} />);
+      renderWithIntl(<CloudConnectorSelector {...azureProps} />);
 
       const select = screen.getByTestId(AZURE_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ);
       await userEvent.click(select);
@@ -202,7 +202,7 @@ describe('ReusableConnectorSelect', () => {
         cloudConnectorId: 'azure-connector-1',
       };
 
-      renderWithIntl(<ReusableConnectorSelect {...propsWithSelection} />);
+      renderWithIntl(<CloudConnectorSelector {...propsWithSelection} />);
 
       await waitFor(() => {
         expect(screen.getByText('Azure Connector 1')).toBeInTheDocument();
@@ -228,7 +228,7 @@ describe('ReusableConnectorSelect', () => {
         setCredentials: mockSetCredentials,
       };
 
-      renderWithIntl(<ReusableConnectorSelect {...props} />);
+      renderWithIntl(<CloudConnectorSelector {...props} />);
 
       expect(mockUseGetCloudConnectors).toHaveBeenCalledWith('aws');
     });
@@ -251,7 +251,7 @@ describe('ReusableConnectorSelect', () => {
         setCredentials: mockSetCredentials,
       };
 
-      renderWithIntl(<ReusableConnectorSelect {...props} />);
+      renderWithIntl(<CloudConnectorSelector {...props} />);
 
       expect(mockUseGetCloudConnectors).toHaveBeenCalledWith('azure');
     });
@@ -273,7 +273,7 @@ describe('ReusableConnectorSelect', () => {
         setCredentials: mockSetCredentials,
       };
 
-      renderWithIntl(<ReusableConnectorSelect {...props} />);
+      renderWithIntl(<CloudConnectorSelector {...props} />);
 
       const select = screen.getByTestId(AWS_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ);
       expect(select).toBeInTheDocument();
@@ -297,7 +297,7 @@ describe('ReusableConnectorSelect', () => {
         setCredentials: mockSetCredentials,
       };
 
-      renderWithIntl(<ReusableConnectorSelect {...props} />);
+      renderWithIntl(<CloudConnectorSelector {...props} />);
 
       const select = screen.getByTestId(AZURE_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ);
       expect(select).toBeInTheDocument();
