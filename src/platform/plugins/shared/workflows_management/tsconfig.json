@@ -10,7 +10,8 @@
     "server/**/*",
     "../../../../../typings/**/*",
     ".storybook/**/*.ts",
-    ".storybook/**/*.tsx"
+    ".storybook/**/*.tsx",
+    "server/**/*.json"
   ],
   "kbn_references": [
     "@kbn/core",
