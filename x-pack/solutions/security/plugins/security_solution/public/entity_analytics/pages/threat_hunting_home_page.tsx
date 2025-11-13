@@ -47,7 +47,7 @@ const SignalsSection = () => (
         <ThreatHuntingEntityRiskLevels />
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiPanel paddingSize="m" hasShadow={false} color="subdued">
+        <EuiPanel paddingSize="m" hasShadow={false} color="accent">
           <EuiTitle size="xs">
             <h4>
               {i18n.translate(

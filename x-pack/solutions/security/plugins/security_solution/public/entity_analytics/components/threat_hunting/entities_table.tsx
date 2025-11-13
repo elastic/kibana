@@ -10,9 +10,17 @@ import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { CustomCellRenderer } from '@kbn/unified-data-table';
 import { css } from '@emotion/react';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiBadge,
+  useEuiTheme,
+} from '@elastic/eui';
 
-import { RiskBadge } from '../../../asset_inventory/components/risk_badge';
+import { getRiskLevel } from '../../../../common/entity_analytics/risk_engine/risk_levels';
+import { formatRiskScoreWholeNumber } from '../../common/utils';
 import { type AssetInventoryDataTableProps } from '../../../asset_inventory/components/asset_inventory_data_table';
 import { AssetInventoryTableSection } from '../../../asset_inventory/components/asset_inventory_table_section';
 import {
@@ -77,6 +85,7 @@ const COLUMN_HEADERS_OVERRIDE: Record<string, string> = {
 
 const ThreatHuntingEntitiesTableInner: React.FC = () => {
   const { openTimelineWithFilters } = useNavigateToTimeline();
+  const { euiTheme } = useEuiTheme();
   const urlState = useAssetInventoryURLState({
     defaultQuery: getDefaultQuery,
   });
@@ -182,11 +191,59 @@ const ThreatHuntingEntitiesTableInner: React.FC = () => {
         }
 
         const roundedRisk = Number(riskValue.toFixed(2));
+        const riskLevel = getRiskLevel(roundedRisk);
 
-        return <RiskBadge risk={roundedRisk} />;
+        const colors: { background: string; text: string } = (() => {
+          switch (riskLevel) {
+            case 'Unknown':
+              return {
+                background: euiTheme.colors.backgroundBaseSubdued,
+                text: euiTheme.colors.textSubdued,
+              };
+            case 'Low':
+              return {
+                background: euiTheme.colors.backgroundBaseNeutral,
+                text: euiTheme.colors.textNeutral,
+              };
+            case 'Moderate':
+              return {
+                background: euiTheme.colors.backgroundLightWarning,
+                text: euiTheme.colors.textWarning,
+              };
+            case 'High':
+              return {
+                background: euiTheme.colors.backgroundLightRisk,
+                text: euiTheme.colors.textRisk,
+              };
+            case 'Critical':
+              return {
+                background: euiTheme.colors.backgroundLightDanger,
+                text: euiTheme.colors.textDanger,
+              };
+            default:
+              return {
+                background: euiTheme.colors.backgroundBaseSubdued,
+                text: euiTheme.colors.textSubdued,
+              };
+          }
+        })();
+
+        return (
+          <EuiBadge color={colors.background}>
+            <EuiText
+              css={css`
+                font-weight: ${euiTheme.font.weight.semiBold};
+              `}
+              size={'s'}
+              color={colors.text}
+            >
+              {formatRiskScoreWholeNumber(roundedRisk)}
+            </EuiText>
+          </EuiBadge>
+        );
       },
     }),
-    [openTimelineWithFilters]
+    [openTimelineWithFilters, euiTheme]
   );
 
   const dataTableProps = useMemo<Partial<Omit<AssetInventoryDataTableProps, 'state'>>>(
