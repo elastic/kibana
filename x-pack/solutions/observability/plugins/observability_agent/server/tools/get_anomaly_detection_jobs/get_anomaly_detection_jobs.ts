@@ -54,7 +54,7 @@ const getAnomalyDetectionJobsSchema = z.object({
     .min(2)
     .max(200)
     .describe(
-      `End of the time range for anomaly records, expressed with Elastic date math. Defaults to ${DEFAULT_TIME_RANGE.end}.`
+      `End of the time range for anomaly records, expressed with Elasticsearch date math. Defaults to ${DEFAULT_TIME_RANGE.end}.`
     )
     .optional(),
 });
