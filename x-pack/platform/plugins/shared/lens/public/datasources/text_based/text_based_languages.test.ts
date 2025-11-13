@@ -19,7 +19,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { getTextBasedDatasource } from './text_based_languages';
 import { generateId } from '../../id_generator';
-jest.mock('../../../id_generator');
+jest.mock('../../id_generator');
 
 const fieldsOne = [
   {
