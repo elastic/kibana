@@ -11,25 +11,26 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { CustomCellRenderer } from '@kbn/unified-data-table';
 import { css } from '@emotion/react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import { RiskBadge } from '../../asset_inventory/components/risk_badge';
+
+import { RiskBadge } from '../../../asset_inventory/components/risk_badge';
+import { type AssetInventoryDataTableProps } from '../../../asset_inventory/components/asset_inventory_data_table';
+import { AssetInventoryTableSection } from '../../../asset_inventory/components/asset_inventory_table_section';
 import {
-  type AssetInventoryColumnConfig,
-  type AssetInventoryDataTableProps,
-} from '../../asset_inventory/components/asset_inventory_data_table';
-import { AssetInventoryTableSection } from '../../asset_inventory/components/asset_inventory_table_section';
-import { ASSET_FIELDS, ASSET_INVENTORY_DATA_VIEW_ID_PREFIX } from '../../asset_inventory/constants';
+  ASSET_FIELDS,
+  ASSET_INVENTORY_DATA_VIEW_ID_PREFIX,
+} from '../../../asset_inventory/constants';
 import {
   useAssetInventoryURLState,
   type AssetsBaseURLQuery,
   type URLQuery,
-} from '../../asset_inventory/hooks/use_asset_inventory_url_state/use_asset_inventory_url_state';
-import { DataViewContext } from '../../asset_inventory/hooks/data_view_context';
-import { useDataView } from '../../asset_inventory/hooks/use_data_view';
-import { AssetInventoryLoading } from '../../asset_inventory/components/asset_inventory_loading';
-import { DataViewNotFound } from '../../asset_inventory/components/errors/data_view_not_found';
-import { useSpaceId } from '../../common/hooks/use_space_id';
-import { useNavigateToTimeline } from '../../overview/components/detection_response/hooks/use_navigate_to_timeline';
-import { EntityTypeToIdentifierField, EntityType } from '../../../common/entity_analytics/types';
+} from '../../../asset_inventory/hooks/use_asset_inventory_url_state/use_asset_inventory_url_state';
+import { DataViewContext } from '../../../asset_inventory/hooks/data_view_context';
+import { useDataView } from '../../../asset_inventory/hooks/use_data_view';
+import { AssetInventoryLoading } from '../../../asset_inventory/components/asset_inventory_loading';
+import { DataViewNotFound } from '../../../asset_inventory/components/errors/data_view_not_found';
+import { useSpaceId } from '../../../common/hooks/use_space_id';
+import { useNavigateToTimeline } from '../../../overview/components/detection_response/hooks/use_navigate_to_timeline';
+import { EntityTypeToIdentifierField, EntityType } from '../../../../common/entity_analytics/types';
 
 const getDefaultQuery = ({ query, filters, pageFilters }: AssetsBaseURLQuery): URLQuery => ({
   query,
@@ -50,7 +51,7 @@ const ENTITY_TYPE_RISK_FIELDS: Record<string, string[]> = {
   generic: ['entity.risk.calculated_score_norm', 'entity.risk'],
 };
 
-const INITIAL_COLUMNS: AssetInventoryColumnConfig[] = [
+const INITIAL_COLUMNS: NonNullable<AssetInventoryDataTableProps['initialColumns']> = [
   { id: ASSET_FIELDS.ENTITY_NAME, width: 320 },
   { id: ASSET_FIELDS.ENTITY_ID },
   { id: ASSET_FIELDS.ENTITY_TYPE },
@@ -81,13 +82,13 @@ const ThreatHuntingEntitiesTableInner: React.FC = () => {
   });
 
   const customCellRenderers = useCallback<
-    AssetInventoryDataTableProps['customCellRendererOverrides']
+    NonNullable<AssetInventoryDataTableProps['customCellRendererOverrides']>
   >(
     (rows: DataTableRecord[]): CustomCellRenderer => ({
       [ASSET_FIELDS.ENTITY_NAME]: ({ rowIndex }) => {
         const row = rows[rowIndex];
         const flattened = row.flattened;
-        const name = flattened[ASSET_FIELDS.ENTITY_NAME];
+        const name = flattened[ASSET_FIELDS.ENTITY_NAME] as string | undefined;
         const rawEntityType = flattened[ASSET_FIELDS.ENTITY_TYPE];
         const entityType =
           typeof rawEntityType === 'string' ? rawEntityType.toLowerCase() : undefined;
@@ -100,9 +101,15 @@ const ThreatHuntingEntitiesTableInner: React.FC = () => {
         const identifierValue = Array.isArray(identifierValueRaw)
           ? identifierValueRaw[0]
           : identifierValueRaw;
+        const normalizedIdentifierValue =
+          typeof identifierValue === 'string' && identifierValue.length > 0
+            ? identifierValue
+            : undefined;
+
+        const displayName = name ?? normalizedIdentifierValue ?? '';
 
         const handleTimelineClick = () => {
-          if (!identifierValue) {
+          if (!normalizedIdentifierValue) {
             return;
           }
 
@@ -110,7 +117,7 @@ const ThreatHuntingEntitiesTableInner: React.FC = () => {
             [
               {
                 field: identifierField,
-                value: identifierValue,
+                value: normalizedIdentifierValue,
               },
             ],
           ]);
@@ -134,7 +141,7 @@ const ThreatHuntingEntitiesTableInner: React.FC = () => {
                     'xpack.securitySolution.entityAnalytics.threatHunting.entitiesTable.actions.timeline',
                     {
                       defaultMessage: 'Open timeline for {name}',
-                      values: { name: name ?? '' },
+                      values: { name: displayName },
                     }
                   )}
                   size="s"
@@ -182,12 +189,12 @@ const ThreatHuntingEntitiesTableInner: React.FC = () => {
     [openTimelineWithFilters]
   );
 
-  const dataTableProps = useMemo(
+  const dataTableProps = useMemo<Partial<Omit<AssetInventoryDataTableProps, 'state'>>>(
     () => ({
       initialColumns: INITIAL_COLUMNS,
       columnHeadersOverride: COLUMN_HEADERS_OVERRIDE,
       customCellRendererOverrides: customCellRenderers,
-      columnsOverride: INITIAL_COLUMNS.map((column) => column.id),
+      columnsOverride: INITIAL_COLUMNS.map((column): string => column.id),
     }),
     [customCellRenderers]
   );
@@ -205,21 +212,29 @@ export const ThreatHuntingEntitiesTable: React.FC = () => {
     spaceId ? `${ASSET_INVENTORY_DATA_VIEW_ID_PREFIX}-${spaceId}` : undefined
   );
 
-  const dataViewContextValue = useMemo(
-    () => ({
+  const dataViewContextValue = useMemo(() => {
+    if (!dataViewQuery.data) {
+      return null;
+    }
+
+    return {
       dataView: dataViewQuery.data,
       dataViewRefetch: dataViewQuery.refetch,
       dataViewIsLoading: dataViewQuery.isLoading,
       dataViewIsRefetching: dataViewQuery.isRefetching,
-    }),
-    [dataViewQuery.data, dataViewQuery.isLoading, dataViewQuery.isRefetching, dataViewQuery.refetch]
-  );
+    };
+  }, [
+    dataViewQuery.data,
+    dataViewQuery.refetch,
+    dataViewQuery.isLoading,
+    dataViewQuery.isRefetching,
+  ]);
 
   if (dataViewQuery.isLoading) {
     return <AssetInventoryLoading />;
   }
 
-  if (dataViewQuery.isError || !dataViewQuery.data) {
+  if (dataViewQuery.isError || !dataViewContextValue) {
     return <DataViewNotFound refetchDataView={dataViewQuery.refetch} />;
   }
 

@@ -7,118 +7,41 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
+
+import { DonutChart, type DonutChartProps } from '../../../../common/components/charts/donutchart';
+import { ChartLabel } from '../../../../overview/components/detection_response/alerts_by_status/chart_label';
+import { useGlobalTime } from '../../../../common/containers/use_global_time';
+import { useGlobalFilterQuery } from '../../../../common/hooks/use_global_filter_query';
+import { EntityType, RiskSeverity } from '../../../../../common/search_strategy';
+import type { SeverityCount } from '../../severity/types';
+import { useRiskScoreKpi } from '../../../api/hooks/use_risk_score_kpi';
+import { useRiskScoreFillColor } from '../../risk_score_donut_chart/use_risk_score_fill_color';
+import { useEntityAnalyticsTypes } from '../../../hooks/use_enabled_entity_types';
+import { HeaderSection } from '../../../../common/components/header_section';
+import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import {
-  EuiBasicTable,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  type EuiBasicTableColumn,
-  EuiSpacer,
-} from '@elastic/eui';
-import { DonutChart, type DonutChartProps } from '../../common/components/charts/donutchart';
-import { ChartLabel } from '../../overview/components/detection_response/alerts_by_status/chart_label';
-import { useGlobalTime } from '../../common/containers/use_global_time';
-import { useGlobalFilterQuery } from '../../common/hooks/use_global_filter_query';
-import { EntityType, RiskSeverity } from '../../../common/search_strategy';
-import type { SeverityCount } from './severity/types';
-import { useRiskScoreKpi } from '../api/hooks/use_risk_score_kpi';
-import { useRiskScoreFillColor } from './risk_score_donut_chart/use_risk_score_fill_color';
-import { useEntityAnalyticsTypes } from '../hooks/use_enabled_entity_types';
-import { HeaderSection } from '../../common/components/header_section';
-import { useQueryToggle } from '../../common/containers/query_toggle';
+  COUNT_COLUMN,
+  RANGE_COLUMN,
+  RISK_LEVEL_COLUMN,
+  RISK_LEVEL_CONFIG,
+  type RiskLevelDatum,
+} from './constants';
 
-interface RiskLevelDatum {
-  riskLevel: string;
-  range: string;
-  entities: number;
-}
+const QUERY_ID = 'ThreatHuntingEntityRiskLevels';
 
-const RISK_LEVEL_COLUMN: EuiBasicTableColumn<RiskLevelDatum> = {
-  field: 'riskLevel',
-  name: i18n.translate(
-    'xpack.securitySolution.entityAnalytics.threatHunting.riskLevels.table.riskLevel',
-    { defaultMessage: 'Risk level' }
-  ),
-  width: '40%',
-};
+const createEmptySeverityCount = (): SeverityCount =>
+  ({
+    [RiskSeverity.Unknown]: 0,
+    [RiskSeverity.Low]: 0,
+    [RiskSeverity.Moderate]: 0,
+    [RiskSeverity.High]: 0,
+    [RiskSeverity.Critical]: 0,
+  } as SeverityCount);
 
-const RANGE_COLUMN: EuiBasicTableColumn<RiskLevelDatum> = {
-  field: 'range',
-  name: i18n.translate(
-    'xpack.securitySolution.entityAnalytics.threatHunting.riskLevels.table.range',
-    { defaultMessage: 'Risk score' }
-  ),
-  width: '25%',
-};
-
-const COUNT_COLUMN: EuiBasicTableColumn<RiskLevelDatum> = {
-  field: 'entities',
-  name: i18n.translate(
-    'xpack.securitySolution.entityAnalytics.threatHunting.riskLevels.table.entities',
-    { defaultMessage: 'Number of entities' }
-  ),
-  dataType: 'number',
-  width: '35%',
-};
-
-const RISK_LEVEL_CONFIG: Array<{
-  severity: RiskSeverity;
-  label: string;
-  range: string;
-}> = [
-  {
-    severity: RiskSeverity.Critical,
-    label: i18n.translate(
-      'xpack.securitySolution.entityAnalytics.threatHunting.riskLevels.critical',
-      {
-        defaultMessage: 'Critical',
-      }
-    ),
-    range: '> 90',
-  },
-  {
-    severity: RiskSeverity.High,
-    label: i18n.translate('xpack.securitySolution.entityAnalytics.threatHunting.riskLevels.high', {
-      defaultMessage: 'High',
-    }),
-    range: '70 - 90',
-  },
-  {
-    severity: RiskSeverity.Moderate,
-    label: i18n.translate(
-      'xpack.securitySolution.entityAnalytics.threatHunting.riskLevels.medium',
-      {
-        defaultMessage: 'Medium',
-      }
-    ),
-    range: '40 - 70',
-  },
-  {
-    severity: RiskSeverity.Low,
-    label: i18n.translate('xpack.securitySolution.entityAnalytics.threatHunting.riskLevels.low', {
-      defaultMessage: 'Low',
-    }),
-    range: '20 - 40',
-  },
-  {
-    severity: RiskSeverity.Unknown,
-    label: i18n.translate(
-      'xpack.securitySolution.entityAnalytics.threatHunting.riskLevels.unknown',
-      {
-        defaultMessage: 'Unknown',
-      }
-    ),
-    range: '< 20',
-  },
-];
-
-const createEmptySeverityCount = (): SeverityCount => ({
-  [RiskSeverity.Unknown]: 0,
-  [RiskSeverity.Low]: 0,
-  [RiskSeverity.Moderate]: 0,
-  [RiskSeverity.High]: 0,
-  [RiskSeverity.Critical]: 0,
-});
+const getSeverityValue = (counts: SeverityCount, severity: RiskSeverity): number =>
+  counts[severity as keyof SeverityCount];
 
 const RiskLevelsTable = ({ items, loading }: { items: RiskLevelDatum[]; loading: boolean }) => (
   <EuiBasicTable
@@ -145,10 +68,12 @@ const RiskLevelsPie = ({
     fillColor={fillColor}
     height={donutHeight}
     title={<ChartLabel count={totalCount} />}
-    label={i18n.translate(
-      'xpack.securitySolution.entityAnalytics.threatHunting.riskLevels.totalEntities',
-      { defaultMessage: 'entities' }
-    )}
+    label={
+      <FormattedMessage
+        id="xpack.securitySolution.entityAnalytics.threatHunting.riskLevels.totalEntities"
+        defaultMessage="entities"
+      />
+    }
     totalCount={totalCount}
   />
 );
@@ -179,8 +104,7 @@ export const ThreatHuntingEntityRiskLevels: React.FC = () => {
     return types;
   }, [entityTypes]);
 
-  const toggleId = 'threat-hunting-entity-risk-levels';
-  const { toggleStatus, setToggleStatus } = useQueryToggle(toggleId);
+  const { toggleStatus, setToggleStatus } = useQueryToggle(QUERY_ID);
 
   const { severityCount: combinedSeverityCount, loading: kpiLoading } = useRiskScoreKpi({
     filterQuery,
@@ -202,7 +126,7 @@ export const ThreatHuntingEntityRiskLevels: React.FC = () => {
       RISK_LEVEL_CONFIG.map(({ severity, label, range }) => ({
         riskLevel: label,
         range,
-        entities: aggregatedSeverityCount[severity],
+        entities: getSeverityValue(aggregatedSeverityCount, severity),
       })),
     [aggregatedSeverityCount]
   );
@@ -212,7 +136,7 @@ export const ThreatHuntingEntityRiskLevels: React.FC = () => {
       RISK_LEVEL_CONFIG.map(({ severity, label }) => ({
         key: severity,
         label,
-        value: aggregatedSeverityCount[severity],
+        value: getSeverityValue(aggregatedSeverityCount, severity),
       })),
     [aggregatedSeverityCount]
   );
@@ -227,10 +151,15 @@ export const ThreatHuntingEntityRiskLevels: React.FC = () => {
     () => new Map(RISK_LEVEL_CONFIG.map(({ severity, label }) => [label, severity])),
     []
   );
-  const fillColor = useCallback<NonNullable<DonutChartProps['fillColor']>>(
+  const fillColor = useCallback(
     (dataName: string) => {
-      const severity = labelToSeverity.get(dataName) ?? (dataName as RiskSeverity);
-      return baseFillColor(severity);
+      const severity = labelToSeverity.get(dataName);
+      // If severity is not found in the map (shouldn't happen in normal operation),
+      // pass empty string to baseFillColor which will return emptyDonutColor as fallback.
+      // We use empty string instead of dataName because dataName is an i18n translated string
+      // and won't match the RiskSeverity enum keys expected by baseFillColor.
+      const severityString = severity ?? '';
+      return baseFillColor(severityString);
     },
     [baseFillColor, labelToSeverity]
   );
@@ -245,12 +174,12 @@ export const ThreatHuntingEntityRiskLevels: React.FC = () => {
       data-test-subj="threatHuntingRiskLevelsPanel"
     >
       <HeaderSection
-        title={i18n.translate(
-          'xpack.securitySolution.entityAnalytics.threatHunting.riskLevels.title',
-          {
-            defaultMessage: 'Entity risk levels',
-          }
-        )}
+        title={
+          <FormattedMessage
+            id="xpack.securitySolution.entityAnalytics.threatHunting.riskLevels.title"
+            defaultMessage="Entity risk levels"
+          />
+        }
         titleSize="s"
         toggleStatus={toggleStatus}
         toggleQuery={setToggleStatus}

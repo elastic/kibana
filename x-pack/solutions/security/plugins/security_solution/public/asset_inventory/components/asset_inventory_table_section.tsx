@@ -114,7 +114,6 @@ const GroupWithURLPagination = ({
       selectedGroup={selectedGroup}
       groupingLevel={0}
       groupSelectorComponent={groupSelectorComponent}
-      dataTableProps={dataTableProps}
     />
   );
 };
@@ -265,7 +264,6 @@ const GroupWithLocalPagination = ({
       selectedGroup={selectedGroup}
       groupingLevel={groupingLevel}
       groupSelectorComponent={groupSelectorComponent}
-      dataTableProps={dataTableProps}
     />
   );
 };

@@ -6,7 +6,6 @@
  */
 
 import React, { useMemo } from 'react';
-import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
   UnifiedDataTable,
@@ -14,7 +13,6 @@ import {
   DataGridDensity,
   useColumns,
   type UnifiedDataTableSettings,
-  type UnifiedDataTableSettingsColumn,
   type CustomCellRenderer,
 } from '@kbn/unified-data-table';
 import { CellActionsProvider } from '@kbn/cell-actions';
@@ -221,25 +219,28 @@ export const AssetInventoryDataTable = ({
     LOCAL_STORAGE_COLUMNS_KEY,
     initialColumnIds
   );
-  const columnsState = persistedColumnIds ?? initialColumnIds;
-  const tableSettings = persistedColumnIds ? defaultSettings : defaultSettings;
-
   const [persistedSettings, setPersistedSettings] = useLocalStorage<UnifiedDataTableSettings>(
     LOCAL_STORAGE_COLUMNS_SETTINGS_KEY,
     defaultSettings
   );
+
+  const columnsState = persistedColumnIds ?? initialColumnIds;
+  const tableSettings = persistedSettings ?? defaultSettings;
   const settings = useMemo(() => {
     const columnsConfig = tableSettings.columns ?? {};
-    return {
-      columns: Object.keys(columnsConfig).reduce((columnSettings, columnId) => {
-        const newColumn: UnifiedDataTableSettingsColumn = {
-          ..._.pick(columnsConfig[columnId], ['width']),
-          display: mergedColumnHeaders?.[columnId],
-        };
+    const columnsWithHeaders: UnifiedDataTableSettings['columns'] = {};
 
-        columnSettings[columnId] = newColumn;
-        return columnSettings;
-      }, {} as UnifiedDataTableSettings['columns']),
+    Object.keys(columnsConfig).forEach((columnId) => {
+      const columnConfig = columnsConfig[columnId];
+      const widthConfig = columnConfig?.width != null ? { width: columnConfig.width } : {};
+      columnsWithHeaders[columnId] = {
+        ...widthConfig,
+        display: mergedColumnHeaders?.[columnId],
+      };
+    });
+
+    return {
+      columns: columnsWithHeaders,
     };
   }, [tableSettings, mergedColumnHeaders]);
 

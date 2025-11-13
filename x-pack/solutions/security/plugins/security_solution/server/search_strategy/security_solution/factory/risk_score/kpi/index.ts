@@ -6,7 +6,6 @@
  */
 
 import { getOr } from 'lodash/fp';
-
 import type { IEsSearchResponse } from '@kbn/search-types';
 
 import type { EntityRiskQueries } from '../../../../../../common/api/search_strategy';
@@ -66,16 +65,18 @@ export const kpiRiskScore: SecuritySolutionFactory<EntityRiskQueries.kpi> = {
 
     const aggregatedResult: Record<RiskSeverity, number> = {} as Record<RiskSeverity, number>;
 
+    const rawAggregations = (
+      response.rawResponse as {
+        aggregations?: Record<string, AggregationBucket>;
+      }
+    ).aggregations;
+
     if (entitiesToProcess.length <= 1) {
-      const riskBuckets = getOr([], 'aggregations.risk.buckets', response.rawResponse);
+      const riskBuckets = rawAggregations?.risk?.buckets ?? [];
       accumulateBuckets(aggregatedResult, riskBuckets);
     } else {
       entitiesToProcess.forEach((entityType) => {
-        const buckets = getOr<AggBucket[]>(
-          [],
-          `aggregations.${entityType}.buckets`,
-          response.rawResponse as { aggregations?: Record<string, AggregationBucket> }
-        );
+        const buckets = rawAggregations?.[entityType]?.buckets ?? [];
         accumulateBuckets(aggregatedResult, buckets);
       });
     }

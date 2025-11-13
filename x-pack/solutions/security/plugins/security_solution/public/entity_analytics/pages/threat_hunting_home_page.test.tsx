@@ -11,6 +11,7 @@ import { ThreatHuntingHomePage } from './threat_hunting_home_page';
 import { TestProviders } from '../../common/mock';
 import { SecurityPageName } from '../../app/types';
 
+// Mock components - this page renders many child components that need to be mocked
 const mockSiemSearchBar = jest.fn();
 jest.mock('../../common/components/search_bar', () => ({
   SiemSearchBar: (props: Record<string, unknown>) => {
@@ -30,52 +31,39 @@ jest.mock('../../common/components/filters_global', () => ({
   ),
 }));
 
-const mockSecuritySolutionPageWrapper = jest.fn();
 jest.mock('../../common/components/page_wrapper', () => ({
   SecuritySolutionPageWrapper: ({
     children,
     ...rest
-  }: { children: React.ReactNode } & Record<string, unknown>) => {
-    mockSecuritySolutionPageWrapper(rest);
-    return (
-      <div data-test-subj={(rest['data-test-subj'] as string) ?? 'securitySolutionPageWrapper'}>
-        {children}
-      </div>
-    );
-  },
+  }: { children: React.ReactNode } & Record<string, unknown>) => (
+    <div data-test-subj={(rest['data-test-subj'] as string) ?? 'securitySolutionPageWrapper'}>
+      {children}
+    </div>
+  ),
 }));
 
-const mockHeaderPage = jest.fn();
 jest.mock('../../common/components/header_page', () => ({
-  HeaderPage: ({ title, ...rest }: { title: React.ReactNode } & Record<string, unknown>) => {
-    mockHeaderPage({ title, ...rest });
-    return <h1 data-test-subj="headerPage">{title}</h1>;
-  },
+  HeaderPage: ({ title, ...rest }: { title: React.ReactNode } & Record<string, unknown>) => (
+    <h1 data-test-subj="headerPage">{title}</h1>
+  ),
 }));
 
-const mockEmptyPrompt = jest.fn();
 jest.mock('../../common/components/empty_prompt', () => ({
-  EmptyPrompt: ({ onSkip }: { onSkip: () => void }) => {
-    mockEmptyPrompt(onSkip);
-    return (
-      <button type="button" data-test-subj="emptyPrompt" onClick={onSkip}>
-        {'Empty prompt'}
-      </button>
-    );
-  },
+  EmptyPrompt: ({ onSkip }: { onSkip: () => void }) => (
+    <button type="button" data-test-subj="emptyPrompt" onClick={onSkip}>
+      {'Empty prompt'}
+    </button>
+  ),
 }));
 
 jest.mock('../../common/components/page_loader', () => ({
   PageLoader: () => <div data-test-subj="pageLoader" />,
 }));
 
-jest.mock('../components/threat_hunting_entities_table', () => ({
+jest.mock('../components/threat_hunting', () => ({
   ThreatHuntingEntitiesTable: () => (
     <div data-test-subj="threatHuntingEntitiesTable">{'Threat table'}</div>
   ),
-}));
-
-jest.mock('../components/threat_hunting_entity_risk_levels', () => ({
   ThreatHuntingEntityRiskLevels: () => (
     <div data-test-subj="threatHuntingRiskLevels">{'Risk levels'}</div>
   ),
@@ -120,9 +108,6 @@ describe('ThreatHuntingHomePage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockSiemSearchBar.mockClear();
-    mockSecuritySolutionPageWrapper.mockClear();
-    mockHeaderPage.mockClear();
-    mockEmptyPrompt.mockClear();
     mockSpyRoute.mockClear();
 
     useSourcererDataViewMock.mockReturnValue({

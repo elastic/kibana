@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { ISearchRequestParams } from '@kbn/search-types';
 import type { EntityType } from '../../../../../../common/entity_analytics/types';
 import { EntityTypeToIdentifierField } from '../../../../../../common/entity_analytics/types';
 import { EntityTypeToLevelField, RiskScoreFields } from '../../../../../../common/search_strategy';
@@ -42,7 +44,7 @@ export const buildKpiRiskScoreQuery = ({
 
   const aggregatedEntities = supportedEntities.length > 0 ? supportedEntities : providedEntities;
 
-  const baseQuery = {
+  const baseQuery: ISearchRequestParams = {
     index: defaultIndex,
     allow_no_indices: false,
     ignore_unavailable: true,
@@ -55,7 +57,24 @@ export const buildKpiRiskScoreQuery = ({
     size: 0,
   };
 
-  if (aggregatedEntities.length <= 1) {
+  if (aggregatedEntities.length === 0) {
+    return baseQuery;
+  }
+
+  const buildAggregationForEntity = (entityType: EntityType): AggregationsAggregationContainer => ({
+    terms: {
+      field: EntityTypeToLevelField[entityType],
+    },
+    aggs: {
+      unique_entries: {
+        cardinality: {
+          field: EntityTypeToIdentifierField[entityType],
+        },
+      },
+    },
+  });
+
+  if (aggregatedEntities.length === 1) {
     const resolvedEntity = aggregatedEntities[0] ?? entity;
     if (!resolvedEntity) {
       return baseQuery;
@@ -64,37 +83,18 @@ export const buildKpiRiskScoreQuery = ({
     return {
       ...baseQuery,
       aggs: {
-        risk: {
-          terms: {
-            field: EntityTypeToLevelField[resolvedEntity],
-          },
-          aggs: {
-            unique_entries: {
-              cardinality: {
-                field: EntityTypeToIdentifierField[resolvedEntity],
-              },
-            },
-          },
-        },
+        risk: buildAggregationForEntity(resolvedEntity),
       },
     };
   }
 
-  const combinedAggs = aggregatedEntities.reduce<Record<string, unknown>>((acc, currentEntity) => {
-    acc[currentEntity] = {
-      terms: {
-        field: EntityTypeToLevelField[currentEntity],
-      },
-      aggs: {
-        unique_entries: {
-          cardinality: {
-            field: EntityTypeToIdentifierField[currentEntity],
-          },
-        },
-      },
-    };
-    return acc;
-  }, {});
+  const combinedAggs = aggregatedEntities.reduce<Record<string, AggregationsAggregationContainer>>(
+    (acc, currentEntity) => {
+      acc[currentEntity] = buildAggregationForEntity(currentEntity);
+      return acc;
+    },
+    {}
+  );
 
   return {
     ...baseQuery,

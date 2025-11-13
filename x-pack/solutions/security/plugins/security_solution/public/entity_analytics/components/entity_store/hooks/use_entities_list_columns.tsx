@@ -15,10 +15,7 @@ import {
   EntityTypeToLevelField,
   EntityTypeToScoreField,
 } from '../../../../../common/search_strategy';
-import {
-  EntityTypeToIdentifierField,
-  EntityIdentifierFields,
-} from '../../../../../common/entity_analytics/types';
+import { EntityTypeToIdentifierField } from '../../../../../common/entity_analytics/types';
 import {
   EntityPanelKeyByType,
   EntityPanelParamByType,
@@ -35,6 +32,14 @@ import { CRITICALITY_LEVEL_TITLE } from '../../asset_criticality/translations';
 import { formatRiskScore } from '../../../common';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useNavigateToTimeline } from '../../../../overview/components/detection_response/hooks/use_navigate_to_timeline';
+
+const toArray = <T,>(value: T | T[] | null | undefined): T[] => {
+  if (value == null) {
+    return [];
+  }
+
+  return Array.isArray(value) ? value : [value];
+};
 
 export type EntitiesListColumns = [
   Columns<Entity>,
@@ -64,27 +69,18 @@ export const useEntitiesListColumns = (): EntitiesListColumns => {
       render: (record: Entity) => {
         const entityType = getEntityType(record);
 
-        const identifierField =
-          EntityTypeToIdentifierField[entityType] ?? EntityIdentifierFields.generic;
+        const identifierField = EntityTypeToIdentifierField[entityType];
         const rawIdentifier = get(identifierField, record);
-        const identifierCandidates = Array.isArray(rawIdentifier)
-          ? rawIdentifier
-          : rawIdentifier
-          ? [rawIdentifier]
-          : [];
+        const identifierCandidates = toArray(rawIdentifier);
 
-        const candidateNames: Array<string | undefined> = [
-          record.entity?.name,
-          record.service?.name,
-          record.user?.name,
-          record.host?.name,
-          ...identifierCandidates,
-          record.entity?.id,
-        ];
-
-        const displayName = candidateNames.find(
-          (name): name is string => typeof name === 'string' && name.length > 0
-        );
+        // Use entity.name as primary display name (same as used in the name column)
+        // Fall back to identifier or entity.id if name is not available
+        const displayName =
+          record.entity?.name ||
+          identifierCandidates.find(
+            (value): value is string => typeof value === 'string' && value.length > 0
+          ) ||
+          record.entity?.id;
 
         const flyoutKey = EntityPanelKeyByType[entityType];
 
@@ -125,7 +121,7 @@ export const useEntitiesListColumns = (): EntitiesListColumns => {
                     values: { name: displayName },
                   }
                 )}
-                style={{ color: euiTheme.colors.primary }}
+                style={{ color: 'primary' }}
               />
             )}
             {canRenderTimelineActions && (

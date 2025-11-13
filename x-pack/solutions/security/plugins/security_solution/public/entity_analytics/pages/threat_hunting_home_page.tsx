@@ -28,8 +28,10 @@ import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experime
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { PageLoader } from '../../common/components/page_loader';
 import { EmptyPrompt } from '../../common/components/empty_prompt';
-import { ThreatHuntingEntitiesTable } from '../components/threat_hunting_entities_table';
-import { ThreatHuntingEntityRiskLevels } from '../components/threat_hunting_entity_risk_levels';
+import {
+  ThreatHuntingEntitiesTable,
+  ThreatHuntingEntityRiskLevels,
+} from '../components/threat_hunting';
 
 const THREAT_HUNTING_TITLE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.threatHunting.home.title',
@@ -76,22 +78,14 @@ const SignalsSection = () => (
 export const ThreatHuntingHomePage: React.FC = () => {
   const [skipEmptyPrompt, setSkipEmptyPrompt] = React.useState(false);
   const onSkip = React.useCallback(() => setSkipEmptyPrompt(true), []);
-  const {
-    indicesExist: oldIndicesExist,
-    loading: oldIsSourcererLoading,
-    sourcererDataView: oldSourcererDataViewSpec,
-  } = useSourcererDataView();
+  const { indicesExist: oldIndicesExist, sourcererDataView: oldSourcererDataViewSpec } =
+    useSourcererDataView();
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const { dataView, status } = useDataView();
   const indicesExist = useMemo(
     () => (newDataViewPickerEnabled ? !!dataView?.matchedIndices?.length : oldIndicesExist),
     [dataView?.matchedIndices?.length, newDataViewPickerEnabled, oldIndicesExist]
-  );
-
-  const isSourcererLoading = useMemo(
-    () => (newDataViewPickerEnabled ? status !== 'ready' : oldIsSourcererLoading),
-    [newDataViewPickerEnabled, oldIsSourcererLoading, status]
   );
 
   const showEmptyPrompt = !indicesExist && !skipEmptyPrompt;
