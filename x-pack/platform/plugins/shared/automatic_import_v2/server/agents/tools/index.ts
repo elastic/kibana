@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-export {
-  IngestPipelineValidator,
-  createIngestPipelineValidatorTool,
-} from './ingest_pipeline_validator';
+export { ingestPipelineValidatorTool } from './ingest_pipeline_validator';
 
 export { fetchSamplesTool } from './fetch_samples';
 export { fetchUniqueKeysTool } from './fetch_unique_keys';

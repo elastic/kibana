@@ -12,7 +12,6 @@ import { ToolMessage } from '@langchain/core/messages';
 import { z } from '@kbn/zod';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { CallbackManagerForToolRun } from '@langchain/core/callbacks/manager';
-import type { AutomaticImportSamplesIndexService } from '../../services/samples_index/index_service';
 
 interface DocTemplate {
   _index: string;
@@ -44,7 +43,7 @@ interface FailedSample {
  * @param samples - Array of log samples to validate the pipeline against
  * @returns DynamicStructuredTool instance for use in langgraph agents
  */
-export function createIngestPipelineValidatorTool(
+export function ingestPipelineValidatorTool(
   esClient: ElasticsearchClient,
   samples: string[]
 ): DynamicStructuredTool {
@@ -237,40 +236,4 @@ export function createIngestPipelineValidatorTool(
       }
     },
   });
-}
-
-/**
- * Class-based wrapper for the ingest pipeline validator tool.
- * Stores dependencies (esClient and samplesIndexService) as instance members
- * and provides a method to create the tool with samples fetched from the index.
- * Can be instantiated and used by multiple agent instances simultaneously.
- */
-export class IngestPipelineValidator {
-  private readonly esClient: ElasticsearchClient;
-  private readonly samplesIndexService: AutomaticImportSamplesIndexService;
-
-  constructor(
-    esClient: ElasticsearchClient,
-    samplesIndexService: AutomaticImportSamplesIndexService
-  ) {
-    this.esClient = esClient;
-    this.samplesIndexService = samplesIndexService;
-  }
-
-  /**
-   * Creates the DynamicStructuredTool instance with samples fetched from the index
-   * @param integrationId - The integration ID to fetch samples for
-   * @param dataStreamId - The data stream ID to fetch samples for
-   * @returns Promise<DynamicStructuredTool> - The tool with samples loaded
-   */
-  public async getTool(
-    integrationId: string,
-    dataStreamId: string
-  ): Promise<DynamicStructuredTool> {
-    const samples = await this.samplesIndexService.getSamplesForDataStream(
-      integrationId,
-      dataStreamId
-    );
-    return createIngestPipelineValidatorTool(this.esClient, samples);
-  }
 }
