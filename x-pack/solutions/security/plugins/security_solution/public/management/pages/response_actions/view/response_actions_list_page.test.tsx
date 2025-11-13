@@ -686,7 +686,7 @@ describe('Response actions history page', () => {
       }
 
       expect(history.location.search).toEqual(
-        '?agentTypes=endpoint%2Csentinel_one%2Ccrowdstrike%2Cmicrosof_defender_endpoint&types=automated%2Cmanual'
+        '?agentTypes=endpoint%2Csentinel_one%2Ccrowdstrike%2Cmicrosoft_defender_endpoint&types=automated%2Cmanual'
       );
 
       const clearAllButton = getByTestId(`${testPrefix}-${filterPrefix}-clearAllButton`);
