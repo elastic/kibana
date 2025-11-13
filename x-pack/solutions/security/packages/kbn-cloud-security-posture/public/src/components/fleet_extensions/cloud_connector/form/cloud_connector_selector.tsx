@@ -131,7 +131,7 @@ export const CloudConnectorSelector = ({
         onChange={handleChange}
         fullWidth
         placeholder={i18n.translate(
-          'xpack.cloudSecurityPosture.cloudConnectorSetup.reusableConnectorSelect.placeholder',
+          'securitySolutionPackages.cloudSecurityPosture.cloudConnectorSetup.reusableConnectorSelect.placeholder',
           {
             defaultMessage: 'Select a cloud connector',
           }
