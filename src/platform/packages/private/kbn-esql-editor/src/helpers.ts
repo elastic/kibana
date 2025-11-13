@@ -337,6 +337,47 @@ export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
   return css`
     .monaco-hover {
       display: block !important;
+      background-color: ${theme.euiTheme.colors.backgroundBasePlain} !important;
+      line-height: 1.5rem;
+      border-radius: ${theme.euiTheme.border.radius.medium} !important;
+      box-shadow: ${theme.euiTheme.shadows.l.down} !important;
+    }
+
+    // Fixes inline suggestions hover styles and only
+    .monaco-hover:has(.inlineSuggestionsHints) {
+      height: auto !important;
+      width: auto !important;
+      overflow-y: hidden !important;
+      a {
+        color: ${theme.euiTheme.colors.textParagraph} !important;
+      }
+      .inlineSuggestionStatusBarItemLabel {
+        font-size: 10px !important;
+        display: flex;
+        align-items: center;
+        color: ${theme.euiTheme.colors.textParagraph} !important;
+      }
+      .slider {
+        display: none;
+      }
+      .keybinding {
+        opacity: 1 !important;
+      }
+      .monaco-keybinding-key {
+        background-color: ${theme.euiTheme.colors.backgroundBaseSubdued} !important;
+        box-shadow: none !important;
+        border: 1px solid ${theme.euiTheme.colors.borderBasePlain} !important;
+      }
+      .codicon-toolbar-more {
+        opacity: 0 !important;
+      }
+      .codicon-inline-suggestion-hints-next {
+        margin-right: ${theme.euiTheme.size.xs} !important;
+      }
+      .codicon-inline-suggestion-hints-previous,
+      .codicon-inline-suggestion-hints-next {
+        color: ${theme.euiTheme.colors.textParagraph} !important;
+      }
     }
     .hover-row.status-bar {
       display: none;
