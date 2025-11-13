@@ -206,7 +206,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 expect(resp.body).to.eql({
                   statusCode: 400,
                   error: 'Bad Request',
-                  message: `error validating action type config: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"${field}\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
+                  message: `error validating connector type config: Field \"${field}\": Required`,
                 });
               });
           });
@@ -237,7 +237,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type config: error configuring cases webhook action: target url "http://casesWebhook.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
+                'error validating connector type config: error configuring cases webhook action: target url "http://casesWebhook.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
             });
           });
       });
@@ -322,7 +322,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                message: `error validating action params: [\n  {\n    \"code\": \"invalid_union_discriminator\",\n    \"options\": [\n      \"pushToService\"\n    ],\n    \"path\": [\n      \"subAction\"\n    ],\n    \"message\": \"Invalid discriminator value. Expected 'pushToService'\"\n  }\n]`,
+                message: `error validating action params: Field \"subAction\": Invalid discriminator value. Expected 'pushToService'`,
                 errorSource: TaskErrorSource.USER,
               });
             });
@@ -340,7 +340,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                message: `error validating action params: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"object\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"subActionParams\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
+                message: `error validating action params: Field \"subActionParams\": Required`,
                 errorSource: TaskErrorSource.USER,
               });
             });
@@ -366,7 +366,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                message: `error validating action params: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"subActionParams\",\n      \"incident\",\n      \"title\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
+                message: `error validating action params: Field \"subActionParams.incident.title\": Required`,
                 errorSource: TaskErrorSource.USER,
               });
             });
@@ -394,7 +394,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                message: `error validating action params: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"subActionParams\",\n      \"comments\",\n      0,\n      \"commentId\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
+                message: `error validating action params: Field \"subActionParams.comments.0.commentId\": Required`,
                 errorSource: TaskErrorSource.USER,
               });
             });
@@ -421,7 +421,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                message: `error validating action params: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"subActionParams\",\n      \"comments\",\n      0,\n      \"comment\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
+                message: `error validating action params: Field \"subActionParams.comments.0.comment\": Required`,
                 errorSource: TaskErrorSource.USER,
               });
             });
