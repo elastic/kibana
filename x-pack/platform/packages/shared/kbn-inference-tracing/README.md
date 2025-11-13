@@ -81,13 +81,6 @@ provider.addSpanProcessor(
 provider.register();
 ```
 
-The OTLP exporter works with any OTLP-compatible backend:
-
-- **OpenTelemetry Collector** (recommended for flexibility)
-- **APM Server** (for viewing in Kibana APM UI)
-- **Jaeger** with OTLP receiver
-- Any other OTLP-compliant observability platform
-
 You can configure multiple exporters to send traces to different backends simultaneously.
 
 All processors transform spans into the format understood by the back-end and log a handy "View trace at ..." link when a root span finishes.

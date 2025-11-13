@@ -52,18 +52,6 @@ The YAML follows the schema exported from `@kbn/inference-tracing-config`:
 
 See those types for a full list of allowed fields.
 
-### OTLP Backend Compatibility
-
-The OTLP exporter works with any OTLP-compatible receiver, including:
-
-- **OpenTelemetry Collector** (recommended for flexibility and fan-out capabilities)
-- APM Server (for viewing in Kibana APM UI)
-- EDOT Collector
-- Jaeger with OTLP receiver
-- Any other OTLP-compatible observability backend
-
-Using an OpenTelemetry Collector as an intermediary is recommended as it allows you to forward traces to multiple backends, apply processing/filtering, and handle backpressure.
-
 ---
 
 ## 2. What happens at runtime?
