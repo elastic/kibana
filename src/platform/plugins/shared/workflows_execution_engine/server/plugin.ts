@@ -274,11 +274,6 @@ export class WorkflowsExecutionEnginePlugin
               };
               await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
 
-              // We're already in a task - execute directly without scheduling another task
-              logger.debug(
-                `Executing scheduled workflow directly (already in Task Manager context): ${workflow.id}`
-              );
-
               await runWorkflow({
                 workflowRunId: workflowExecution.id!,
                 spaceId: workflowExecution.spaceId!,
