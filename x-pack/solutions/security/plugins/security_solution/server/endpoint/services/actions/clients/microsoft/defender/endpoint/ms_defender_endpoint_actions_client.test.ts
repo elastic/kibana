@@ -2049,7 +2049,7 @@ describe('MS Defender response actions client', () => {
       );
     });
 
-    describe.only('for Runscript', () => {
+    describe('for Runscript', () => {
       let msMachineActionsApiResponse: MicrosoftDefenderEndpointGetActionsResponse;
 
       beforeEach(() => {
