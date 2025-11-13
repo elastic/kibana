@@ -1842,74 +1842,12 @@ export class CstToAstConverter {
     return fn;
   }
 
-  /**
-   * Constructs a tuple list (round parens):
-   *
-   * ```
-   * (1, 2, 3)
-   * ```
-   *
-   * Can be used in IN-expression:
-   *
-   * ```
-   * WHERE x IN (1, 2, 3)
-   * ```
-   *
-   * @todo Rename this method.
-   * @todo Move to "list"
-   */
-  private visitTuple(
-    ctxs: cst.ValueExpressionContext[],
-    leftParen?: antlr.TerminalNode,
-    rightParen?: antlr.TerminalNode
-  ): ast.ESQLList {
-    const values: ast.ESQLAstExpression[] = [];
-    let incomplete = false;
-
-    for (const elementCtx of ctxs) {
-      const element = this.visitValueExpression(elementCtx);
-
-      if (!element) {
-        continue;
-      }
-
-      const resolved = resolveItem(element) as ast.ESQLAstExpression;
-
-      if (!resolved) {
-        continue;
-      }
-
-      values.push(resolved);
-
-      if (resolved.incomplete) {
-        incomplete = true;
-      }
-    }
-
-    if (!values.length) {
-      incomplete = true;
-    }
-
-    const node = Builder.expression.list.tuple(
-      { values },
-      {
-        incomplete,
-        location: getPosition(
-          leftParen?.symbol ?? ctxs[0]?.start,
-          rightParen?.symbol ?? ctxs[ctxs.length - 1]?.stop
-        ),
-      }
-    );
-
-    return node;
-  }
-
   private visitLogicalIns(ctx: cst.LogicalInContext) {
     const [leftCtx, ...rightCtxs] = ctx.valueExpression_list();
     const left = resolveItem(
       this.visitValueExpression(leftCtx) ?? this.fromParserRuleToUnknown(leftCtx)
     ) as ast.ESQLAstExpression;
-    const right = this.visitTuple(rightCtxs, ctx.LP(), ctx.RP());
+    const right = this.toTuple(rightCtxs, ctx.LP(), ctx.RP());
     const expression = this.toFunction(
       ctx.NOT() ? 'not in' : 'in',
       ctx,
@@ -2907,6 +2845,65 @@ export class CstToAstConverter {
     const parserFields = this.getParserFields(ctx);
 
     return Builder.expression.list.literal({ values }, parserFields);
+  }
+
+  /**
+   * Constructs a *tuple* `list` AST node (round parens):
+   *
+   * ```
+   * (1, 2, 3)
+   * ```
+   *
+   * Can be used in IN-expression:
+   *
+   * ```
+   * WHERE x IN (1, 2, 3)
+   * ```
+   */
+  private toTuple(
+    ctxs: cst.ValueExpressionContext[],
+    leftParen?: antlr.TerminalNode,
+    rightParen?: antlr.TerminalNode
+  ): ast.ESQLList {
+    const values: ast.ESQLAstExpression[] = [];
+    let incomplete = false;
+
+    for (const elementCtx of ctxs) {
+      const element = this.visitValueExpression(elementCtx);
+
+      if (!element) {
+        continue;
+      }
+
+      const resolved = resolveItem(element) as ast.ESQLAstExpression;
+
+      if (!resolved) {
+        continue;
+      }
+
+      values.push(resolved);
+
+      if (resolved.incomplete) {
+        incomplete = true;
+      }
+    }
+
+    if (!values.length) {
+      incomplete = true;
+    }
+
+    const node = Builder.expression.list.tuple(
+      { values },
+      {
+        incomplete,
+        location: getPosition(
+          leftParen?.symbol ?? ctxs[0]?.start,
+          rightParen?.symbol ?? ctxs[ctxs.length - 1]?.stop
+        ),
+      }
+    );
+
+    return node;
   }
 
   // -------------------------------------- constant expression: "timeInterval"
