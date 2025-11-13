@@ -9,25 +9,22 @@
 
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiButtonEmpty, EuiText, EuiTextColor } from '@elastic/eui';
+import type { EuiButtonEmptyPropsForButton } from '@elastic/eui/src/components/button/button_empty/button_empty';
 import { css } from '@emotion/react';
 import React from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isMac } from '../../../shared/utils/is_mac';
 
-export interface WorkflowYAMLEditorShortcutsProps {
-  onOpenActionsMenu: (open: boolean) => void;
-}
+type ActionsMenuButtonProps = Omit<EuiButtonEmptyPropsForButton, 'children'>;
 
-export function WorkflowYAMLEditorShortcuts({
-  onOpenActionsMenu,
-}: WorkflowYAMLEditorShortcutsProps) {
+export function ActionsMenuButton(props: ActionsMenuButtonProps) {
   const styles = useMemoCss(componentStyles);
 
   const commandKey = isMac() ? '⌘' : 'Ctrl';
 
   return (
-    <EuiButtonEmpty onClick={() => onOpenActionsMenu(true)} size="s">
+    <EuiButtonEmpty size="s" {...props}>
       <EuiText css={{ display: 'flex', alignItems: 'center', gap: '6px' }} size="xs">
         <b>
           <FormattedMessage

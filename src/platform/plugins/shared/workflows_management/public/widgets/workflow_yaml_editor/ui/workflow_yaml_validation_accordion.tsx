@@ -31,23 +31,23 @@ import type {
 
 const severityOrder = ['error', 'warning', 'info'];
 
-interface WorkflowYAMLValidationErrorsProps {
+interface WorkflowYamlValidationAccordionProps {
   isMounted: boolean;
   isLoading: boolean;
   error: Error | null;
   validationErrors: YamlValidationResult[] | null;
   onErrorClick?: (error: YamlValidationResult) => void;
-  rightSide?: React.ReactNode;
+  extraAction?: React.ReactNode;
 }
 
-export function WorkflowYAMLValidationErrors({
+export function WorkflowYamlValidationAccordion({
   isMounted,
   isLoading,
   error: errorValidating,
   validationErrors,
   onErrorClick,
-  rightSide,
-}: WorkflowYAMLValidationErrorsProps) {
+  extraAction,
+}: WorkflowYamlValidationAccordionProps) {
   const styles = useMemoCss(componentStyles);
   const { euiTheme } = useEuiTheme();
   const accordionId = useGeneratedHtmlId({ prefix: 'wf-yaml-editor-validation-errors' });
@@ -158,9 +158,6 @@ export function WorkflowYAMLValidationErrors({
           <EuiFlexItem css={styles.buttonContentText} className="button-content-text">
             {buttonContent}
           </EuiFlexItem>
-          <EuiFlexItem css={styles.buttonContentRightSide} grow={false}>
-            {rightSide}
-          </EuiFlexItem>
         </EuiFlexGroup>
       }
       arrowDisplay={
@@ -169,6 +166,7 @@ export function WorkflowYAMLValidationErrors({
       initialIsOpen={allValidationErrors !== null && allValidationErrors.length > 0}
       isDisabled={allValidationErrors == null || allValidationErrors.length === 0}
       css={styles.accordion}
+      extraAction={extraAction}
     >
       <div css={styles.separator} />
       <div css={styles.accordionContent} className="eui-yScrollWithShadows">
@@ -240,7 +238,6 @@ export function WorkflowYAMLValidationErrors({
 const componentStyles = {
   accordion: ({ euiTheme }: UseEuiTheme) =>
     css({
-      height: '100%',
       padding: `0 ${euiTheme.size.m}`,
       borderTop: `1px solid ${euiTheme.colors.borderBasePlain}`,
       backgroundColor: euiTheme.colors.backgroundBasePlain,
@@ -259,6 +256,8 @@ const componentStyles = {
     }),
   buttonContent: ({ euiTheme }: UseEuiTheme) => css`
     width: 100%;
+    // using min-height to avoid jumping when right side is present/absent
+    min-height: 48px;
     padding: ${euiTheme.size.s} 0;
     color: ${euiTheme.colors.textParagraph};
     flex-wrap: nowrap !important;
@@ -268,9 +267,6 @@ const componentStyles = {
       ...euiFontSize(euiThemeContext, 'xs'),
       whiteSpace: 'nowrap',
     }),
-  buttonContentRightSide: css({
-    justifySelf: 'flex-end',
-  }),
   accordionContent: ({ euiTheme }: UseEuiTheme) =>
     css({
       maxHeight: '200px',
