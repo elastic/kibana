@@ -40,10 +40,10 @@ import { assertDetailsNotExist, getDetails } from '../../../../tasks/rule_detail
 import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
 
 // Failing: See https://github.com/elastic/kibana/issues/241848
-describe.skip(
+describe(
   'Machine Learning Detection Rules - Editing',
   {
-    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
+    tags: ['@ess', '@serverless'],
   },
   () => {
     let mlRule: ReturnType<typeof getMachineLearningRule>;
