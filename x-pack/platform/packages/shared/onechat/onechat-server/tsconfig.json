@@ -22,5 +22,6 @@
     "@kbn/onechat-common",
     "@kbn/inference-common",
     "@kbn/logging",
+    "@kbn/core-ui-settings-server",
   ]
 }
