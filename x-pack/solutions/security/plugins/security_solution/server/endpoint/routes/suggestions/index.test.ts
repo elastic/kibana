@@ -209,7 +209,7 @@ describe('when calling the Suggestions route handler', () => {
           .mockReturnValue(mockFleetServices);
 
         // Mock the buildIndexNameWithNamespace function to return null (indicating failure)
-        buildIndexNameWithNamespaceMock.mockReturnValue(null);
+        buildIndexNameWithNamespaceMock.mockReturnValue(null as unknown as string);
 
         const mockRequest = httpServerMock.createKibanaRequest<
           TypeOf<typeof EndpointSuggestionsSchema.params>,
@@ -797,7 +797,8 @@ describe('when calling the Suggestions route handler', () => {
           .fn()
           .mockReturnValue(mockFleetServices);
 
-        buildIndexNameWithNamespaceMock.mockReturnValue(null);
+        // Mock the buildIndexNameWithNamespace function to return null (indicating failure)
+        buildIndexNameWithNamespaceMock.mockReturnValue(null as unknown as string);
 
         const mockRequest = httpServerMock.createKibanaRequest<
           TypeOf<typeof EndpointSuggestionsSchema.params>,
