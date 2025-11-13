@@ -255,7 +255,6 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
         <DiscoverTopNavMenuProvider>
           <>
             <h1
-              id="savedSearchTitle"
               className="euiScreenReaderOnly"
               data-test-subj="discoverSavedSearchTitle"
             >
