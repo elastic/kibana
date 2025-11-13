@@ -15,6 +15,10 @@ import type {
 } from '@kbn/core/server';
 import { alertsLocatorID } from '@kbn/observability-plugin/common';
 import { Dataset } from '@kbn/rule-registry-plugin/server';
+import {
+  OBSERVABILITY_AGENT_FEATURE_FLAG,
+  OBSERVABILITY_AGENT_FEATURE_FLAG_DEFAULT,
+} from '@kbn/observability-agent-plugin/common/constants';
 import { isEmpty, mapValues } from 'lodash';
 import type { APMConfig } from '.';
 import { APM_SERVER_FEATURE_ID } from '.';
@@ -250,10 +254,34 @@ export class APMPlugin
     );
 
     if (plugins.onechat) {
-      registerAgentTools({ core, plugins, logger: this.logger.get('agent') }).catch((e) => {
-        this.logger?.error('Failed to register observability agent APM tools');
-        this.logger?.error(e);
-      });
+      core
+        .getStartServices()
+        .then(async ([coreStart]) => {
+          const isObservabilityAgentEnabled = await coreStart.featureFlags.getBooleanValue(
+            OBSERVABILITY_AGENT_FEATURE_FLAG,
+            OBSERVABILITY_AGENT_FEATURE_FLAG_DEFAULT
+          );
+
+          if (!isObservabilityAgentEnabled) {
+            this.logger?.debug(
+              `Skipping observability agent APM tools registration because feature flag "${OBSERVABILITY_AGENT_FEATURE_FLAG}" is set to false`
+            );
+            return;
+          }
+
+          registerAgentTools({ core, plugins, logger: this.logger.get('agent') }).catch((e) => {
+            this.logger?.error('Failed to register observability agent APM tools');
+            this.logger?.error(e);
+          });
+
+          this.logger?.debug('Successfully registered observability agent APM tools');
+        })
+        .catch((error) => {
+          this.logger?.error(
+            `Error checking whether the observability agent is enabled: ${error?.message}`
+          );
+          this.logger?.debug(error);
+        });
     }
 
     registerDeprecations({

@@ -50,7 +50,7 @@ export async function createApmGetServicesTool({
   const toolDefinition: BuiltinToolDefinition<typeof schema> = {
     id: OBSERVABILITY_GET_SERVICES_TOOL_ID,
     type: ToolType.builtin,
-    description: 'Gets the list of monitored APM services, their health status, and alerts.',
+    description: 'Get the list of monitored APM services, their health status, and alerts.',
     schema,
     tags: ['apm', 'services', 'observability'],
     handler: async (args, { request, logger: scopedLogger }) => {
