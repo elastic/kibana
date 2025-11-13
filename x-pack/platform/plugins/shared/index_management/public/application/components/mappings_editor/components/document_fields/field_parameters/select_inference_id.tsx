@@ -42,6 +42,17 @@ type SelectInferenceIdContentProps = SelectInferenceIdProps & {
   value: string;
 };
 
+// Task types that are compatible with semantic_text field type
+const COMPATIBLE_TASK_TYPES = ['text_embedding', 'sparse_embedding'] as const;
+type CompatibleTaskType = (typeof COMPATIBLE_TASK_TYPES)[number];
+
+/**
+ * Type guard to check if a task type is compatible with semantic_text fields
+ */
+const isCompatibleTaskType = (taskType: string): taskType is CompatibleTaskType => {
+  return COMPATIBLE_TASK_TYPES.includes(taskType as CompatibleTaskType);
+};
+
 export const SelectInferenceId: React.FC<SelectInferenceIdProps> = ({
   'data-test-subj': dataTestSubj,
 }: SelectInferenceIdProps) => {
@@ -85,7 +96,11 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
     ?.useUrl({});
 
   const onFlyoutClose = useCallback(() => {
-    setIsInferenceFlyoutVisible((prev) => !prev);
+    setIsInferenceFlyoutVisible(false);
+  }, []);
+
+  const closePopover = useCallback(() => {
+    setIsInferencePopoverVisible(false);
   }, []);
 
   const onSubmitSuccess = useCallback(
@@ -96,39 +111,60 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
     [resendRequest, setValue]
   );
 
-  // Get the ID of the default inference endpoint (.elser-2-elastic), and if that's not an option
-  // then return the ID of the first endpoint in the list
+  /**
+   * Determines the default inference endpoint ID to select.
+   * Prioritizes .elser-2-elastic (ELSER in EIS), falls back to the first available compatible endpoint.
+   * Only considers endpoints compatible with semantic_text field type.
+   */
   const getDefaultInferenceId = useCallback((endpointsList: typeof endpoints) => {
-    const elserInEis = endpointsList?.find(
-      (e) => e.inference_id === defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID
+    if (!endpointsList?.length) {
+      return undefined;
+    }
+
+    // Filter to only compatible endpoints first
+    const compatibleEndpoints = endpointsList.filter((endpoint) =>
+      isCompatibleTaskType(endpoint.task_type)
     );
-    return elserInEis?.inference_id || endpointsList?.[0]?.inference_id;
+
+    if (!compatibleEndpoints.length) {
+      return undefined;
+    }
+
+    const elserInEis = compatibleEndpoints.find(
+      (endpoint) => endpoint.inference_id === defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID
+    );
+
+    return elserInEis?.inference_id ?? compatibleEndpoints[0].inference_id;
   }, []);
 
-  // Compute selectable options from endpoints and current value
+  /**
+   * Computes the selectable options for the inference endpoint dropdown.
+   * Only includes endpoints compatible with semantic_text (text_embedding and sparse_embedding).
+   * Includes optimistic updates for newly created endpoints that may not be in the list yet.
+   */
   const options: EuiSelectableOption[] = useMemo(() => {
-    const filteredEndpoints =
-      endpoints?.filter(
-        (endpoint) =>
-          endpoint.task_type === 'text_embedding' || endpoint.task_type === 'sparse_embedding'
-      ) || [];
+    // Filter to only text and sparse embedding endpoints (compatible with semantic_text)
+    const compatibleEndpoints =
+      endpoints?.filter((endpoint) => isCompatibleTaskType(endpoint.task_type)) ?? [];
 
-    const baseOptions: EuiSelectableOption[] = filteredEndpoints.map((endpoint) => ({
+    const selectableOptions: EuiSelectableOption[] = compatibleEndpoints.map((endpoint) => ({
       label: endpoint.inference_id,
       'data-test-subj': `custom-inference_${endpoint.inference_id}`,
       checked: value === endpoint.inference_id ? 'on' : undefined,
     }));
 
-    // Sometimes we create a new endpoint but the backend is slow in updating so we need to optimistically update
-    if (value && !baseOptions.find((o) => o.label === value)) {
-      baseOptions.push({
+    // Optimistic update: if a value is set but not in the list, add it
+    // (handles race condition where backend hasn't updated yet after creating a new endpoint)
+    const isValueInOptions = selectableOptions.some((option) => option.label === value);
+    if (value && !isValueInOptions) {
+      selectableOptions.push({
         label: value,
         checked: 'on',
         'data-test-subj': `custom-inference_${value}`,
       });
     }
 
-    return baseOptions;
+    return selectableOptions;
   }, [endpoints, value]);
 
   const selectedOptionLabel = options.find((option) => option.checked)?.label;
@@ -164,7 +200,7 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
       }
       isOpen={isInferencePopoverVisible}
       panelPaddingSize="none"
-      closePopover={() => setIsInferencePopoverVisible((prev) => !prev)}
+      closePopover={closePopover}
     >
       <EuiContextMenuPanel>
         <EuiContextMenuItem
@@ -175,7 +211,7 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
           onClick={(e) => {
             e.preventDefault();
             setIsInferenceFlyoutVisible(true);
-            setIsInferencePopoverVisible((prev) => !prev);
+            setIsInferencePopoverVisible(false);
           }}
         >
           {i18n.translate(
@@ -272,13 +308,21 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
     </EuiPopover>
   );
 
-  // When no inference endpoint is selected, automatically set it to the default endpoint
+  /**
+   * Auto-select default inference endpoint when:
+   * - No endpoint is currently selected (!value)
+   * - Endpoints have been loaded (endpoints?.length)
+   * This ensures a good default UX without requiring manual selection.
+   */
   useEffect(() => {
-    if (!value && endpoints?.length) {
-      const defaultId = getDefaultInferenceId(endpoints);
-      if (defaultId) {
-        setValue(defaultId);
-      }
+    const shouldSetDefault = !value && endpoints?.length;
+    if (!shouldSetDefault) {
+      return;
+    }
+
+    const defaultId = getDefaultInferenceId(endpoints);
+    if (defaultId) {
+      setValue(defaultId);
     }
   }, [endpoints, value, setValue, getDefaultInferenceId]);
 
