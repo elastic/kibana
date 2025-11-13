@@ -65,13 +65,13 @@ export const ChartSectionTemplate = ({
                 flex-basis: 100%;
                 order: 3;
 
-                .euiFlexGroup {
+                > .euiFlexGroup {
                   flex-wrap: wrap;
-                }
 
-                .euiFlexItem {
-                  flex-grow: 1;
-                  flex-basis: 100%;
+                  > .euiFlexItem {
+                    flex-grow: 1;
+                    flex-basis: 100%;
+                  }
                 }
               }
               [data-toolbar-section='right'] {
