@@ -98,9 +98,9 @@ export function conditionToESQLAst(condition: Condition): ESQLSingleAstItem {
       // Make contains case-insensitive by lowercasing both field and value
       const lowerField = Builder.expression.func.call('TO_LOWER', [field]);
       const lowerValue = String(condition.contains).toLowerCase();
-      return Builder.expression.func.binary('like', [
+      return Builder.expression.func.call('CONTAINS', [
         lowerField,
-        Builder.expression.literal.string(`*${lowerValue}*`),
+        Builder.expression.literal.string(lowerValue),
       ]);
     }
     if ('startsWith' in condition) {

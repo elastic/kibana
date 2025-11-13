@@ -104,8 +104,8 @@ describe('conditionToESQLAst', () => {
         };
         const result = prettyPrint(condition);
         expect(result).toBe(
-          'TO_LOWER(`resource.attributes.service.name`) LIKE "*synth-service-2*"'
-        ); // LIKE should be applied with both sides lowercased
+          'CONTAINS(TO_LOWER(`resource.attributes.service.name`), "synth-service-2")'
+        ); // CONTAINS should be applied with both sides lowercased
         expect(result).not.toContain('LIKE(');
         expect(result).not.toContain('%');
       });
@@ -128,7 +128,7 @@ describe('conditionToESQLAst', () => {
 
       it('should handle contains with special characters', () => {
         const condition: Condition = { field: 'path', contains: '/api/v1/' };
-        expect(prettyPrint(condition)).toBe('TO_LOWER(path) LIKE "*/api/v1/*"');
+        expect(prettyPrint(condition)).toBe('CONTAINS(TO_LOWER(path), "/api/v1/")');
       });
 
       it('should handle startsWith with numbers', () => {
@@ -186,7 +186,7 @@ describe('conditionToESQLAst', () => {
           ],
         };
         expect(prettyPrint(condition)).toBe(
-          'status == "active" AND count > 10 AND TO_LOWER(name) LIKE "*test*"'
+          'status == "active" AND count > 10 AND CONTAINS(TO_LOWER(name), "test")'
         );
       });
     });
@@ -228,7 +228,7 @@ describe('conditionToESQLAst', () => {
         const condition: Condition = {
           not: { field: 'message', contains: 'debug' },
         };
-        expect(prettyPrint(condition)).toBe('NOT TO_LOWER(message) LIKE "*debug*"');
+        expect(prettyPrint(condition)).toBe('NOT CONTAINS(TO_LOWER(message), "debug")');
       });
     });
 
@@ -299,7 +299,7 @@ describe('conditionToESQLAst', () => {
           ],
         };
         expect(prettyPrint(condition)).toBe(
-          'active == TRUE AND (role == "admin" AND TO_LOWER(department) LIKE "*engineering*" OR NOT suspended == TRUE)'
+          'active == TRUE AND (role == "admin" AND CONTAINS(TO_LOWER(department), "engineering") OR NOT suspended == TRUE)'
         );
       });
     });
@@ -315,7 +315,7 @@ describe('conditionToESQLAst', () => {
   describe('edge cases', () => {
     it('should handle empty string in contains', () => {
       const condition: Condition = { field: 'message', contains: '' };
-      expect(prettyPrint(condition)).toBe('TO_LOWER(message) LIKE "**"');
+      expect(prettyPrint(condition)).toBe('CONTAINS(TO_LOWER(message), "")');
     });
 
     it('should handle nested field names with dots', () => {
