@@ -507,7 +507,7 @@ export async function pickTestGroupRunOrder() {
             key: 'jest',
             agents: {
               ...expandAgentQueue('n2-4-spot'),
-              diskSizeGb: 100,
+              diskSizeGb: 115,
             },
             env: {
               SCOUT_TARGET_TYPE: 'local',
