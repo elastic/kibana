@@ -42,7 +42,7 @@
     "cypress:rule_management:prebuilt_rules:installation:run:serverless": "yarn cypress:serverless --spec './cypress/e2e/detection_response/rule_management/prebuilt_rules/installation/**/*.cy.ts'",
     "cypress:rule_management:prebuilt_rules:upgrade:run:serverless": "yarn cypress:serverless --spec './cypress/e2e/detection_response/rule_management/prebuilt_rules/upgrade/**/*.cy.ts'",
     "cypress:rule_management:prebuilt_rules:customization:run:serverless": "yarn cypress:serverless --spec './cypress/e2e/detection_response/rule_management/prebuilt_rules/customization/**/*.cy.ts'",
-    "cypress:detection_engine:run:serverless": "yarn cypress:serverless --spec './cypress/e2e/detection_response/detection_engine/!(exceptions)/**/*.cy.ts'",
+    "cypress:detection_engine:run:serverless": "yarn cypress:serverless --spec './cypress/e2e/detection_response/detection_engine/rule_edit/machine_learning_rule.cy.ts'",
     "cypress:detection_engine:exceptions:run:serverless": "yarn cypress:serverless --spec './cypress/e2e/detection_response/detection_engine/exceptions/**/*.cy.ts'",
     "cypress:ai_assistant:run:serverless": "yarn cypress:serverless --spec './cypress/e2e/ai_assistant/**/*.cy.ts'",
     "cypress:ai4dsoc:run:serverless": "yarn cypress:ai4dsoc:serverless --spec './cypress/e2e/ai4dsoc/**/*.cy.ts'",
