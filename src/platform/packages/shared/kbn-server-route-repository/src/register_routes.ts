@@ -180,6 +180,14 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
       }
     } else if (isZod(params)) {
       validationObject = makeZodValidationObject(params as ZodParamsObject);
+      // If a route declares params but no body schema, treat the request body as
+      // undefined so the OpenAPI generator does not emit a phantom requestBody.
+      if (!(params as ZodParamsObject).shape.body) {
+        validationObject = {
+          ...validationObject,
+          body: z.undefined(),
+        };
+      }
     } else {
       validationObject = passThroughValidationObject;
     }

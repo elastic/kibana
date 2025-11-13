@@ -7,13 +7,12 @@
 
 import { z } from '@kbn/zod';
 
-export type Primitive = string | number | boolean | null | undefined;
+export type Primitive = string | number | boolean | undefined;
 
 export const primitive: z.ZodType<Primitive> = z.union([
   z.string(),
   z.number(),
   z.boolean(),
-  z.null(),
   z.undefined(),
 ]);
 
