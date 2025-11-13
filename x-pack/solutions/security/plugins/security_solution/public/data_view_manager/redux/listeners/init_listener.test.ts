@@ -11,7 +11,7 @@ import { createInitListener } from './init_listener';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { RootState } from '../reducer';
 import { sharedDataViewManagerSlice } from '../slices';
-import { DataViewManagerScopeName, DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '../../constants';
+import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, PageScope } from '../../constants';
 import {
   DEFAULT_ALERT_DATA_VIEW_ID,
   DEFAULT_ATTACK_DATA_VIEW_ID,
@@ -104,31 +104,31 @@ describe('createInitListener', () => {
     expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
       selectDataViewAsync({
         id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
-        scope: DataViewManagerScopeName.default,
+        scope: PageScope.default,
       })
     );
     expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
       selectDataViewAsync({
         id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
-        scope: DataViewManagerScopeName.timeline,
+        scope: PageScope.timeline,
       })
     );
     expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
       selectDataViewAsync({
         id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
-        scope: DataViewManagerScopeName.alerts,
+        scope: PageScope.alerts,
       })
     );
     expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
       selectDataViewAsync({
         id: DEFAULT_ATTACK_DATA_VIEW_ID,
-        scope: DataViewManagerScopeName.attacks,
+        scope: PageScope.attacks,
       })
     );
     expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
       selectDataViewAsync({
         id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
-        scope: DataViewManagerScopeName.analyzer,
+        scope: PageScope.analyzer,
       })
     );
   });

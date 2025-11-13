@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { OnTimeChangeProps, EuiSuperUpdateButtonProps } from '@elastic/eui';
+import type { EuiSuperUpdateButtonProps, OnTimeChangeProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { FilterManager } from '@kbn/data-plugin/public';
@@ -14,11 +14,11 @@ import type { Filter, Query } from '@kbn/es-query';
 import { debounce } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 
+import { PageScope } from '../../../../../data_view_manager/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { getCommonTimeRanges } from '../helpers/get_common_time_ranges';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
-import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import { useCreateDataView } from '../../../../../common/hooks/use_create_data_view';
 import type { AlertsSelectionSettings } from '../../types';
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
@@ -51,11 +51,11 @@ const AlertSelectionQueryComponent: React.FC<Props> = ({
   const { euiTheme } = useEuiTheme();
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataView: experimentalDataView, status } = useDataView(SourcererScopeName.alerts);
+  const { dataView: experimentalDataView, status } = useDataView(PageScope.alerts);
 
   // get the sourcerer `DataViewSpec` for alerts:
   const { sourcererDataView: oldSourcererDataViewSpec, loading: oldIsLoadingIndexPattern } =
-    useSourcererDataView(SourcererScopeName.alerts);
+    useSourcererDataView(PageScope.alerts);
 
   // create a `DataView` from the `DataViewSpec`:
   const { dataView: oldDataView, loading: oldIsLoadingDataView } = useCreateDataView({

@@ -16,7 +16,7 @@ import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal'
 import { i18n } from '@kbn/i18n';
 
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { DataViewManagerScopeName } from '../../../data_view_manager/constants';
+import { PageScope } from '../../../data_view_manager/constants';
 import { SECURITY_FEATURE_ID } from '../../../../common';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { MlPopover } from '../../../common/components/ml_popover/ml_popover';
@@ -87,10 +87,7 @@ export const GlobalHeader = React.memo(() => {
   }, [portalNode, setHeaderActionMenu, theme, kibanaServiceI18n, dashboardViewPath]);
 
   const dataViewPicker = newDataViewPickerEnabled ? (
-    <DataViewPicker
-      scope={sourcererScope}
-      disabled={sourcererScope === DataViewManagerScopeName.alerts}
-    />
+    <DataViewPicker scope={sourcererScope} disabled={sourcererScope === PageScope.alerts} />
   ) : (
     <Sourcerer scope={sourcererScope} data-test-subj="sourcerer" />
   );

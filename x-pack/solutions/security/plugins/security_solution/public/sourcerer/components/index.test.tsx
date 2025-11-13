@@ -9,9 +9,9 @@ import React from 'react';
 import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
 
-import { type SelectedDataView, SourcererScopeName } from '../store/model';
+import { type SelectedDataView } from '../store/model';
 import { Sourcerer } from '.';
-import { sourcererActions, sourcererModel } from '../store';
+import { sourcererActions } from '../store';
 import { createMockStore, mockGlobalState, TestProviders } from '../../common/mock';
 import type { EuiSuperSelectOption } from '@elastic/eui';
 import { fireEvent, render, waitFor } from '@testing-library/react';
@@ -19,6 +19,7 @@ import { useSourcererDataView } from '../containers';
 import { useSignalHelpers } from '../containers/use_signal_helpers';
 import { DEFAULT_INDEX_PATTERN } from '../../../common/constants';
 import { sortWithExcludesAtEnd } from '../../../common/utils/sourcerer';
+import { PageScope } from '../../data_view_manager/constants';
 
 const mockDispatch = jest.fn();
 
@@ -59,7 +60,7 @@ jest.mock('../../common/utils/global_query_string', () => {
 const mockOptions = DEFAULT_INDEX_PATTERN.map((index) => ({ label: index, value: index }));
 
 const defaultProps = {
-  scope: sourcererModel.SourcererScopeName.default,
+  scope: PageScope.default,
 };
 
 const checkOptionsAndSelections = (wrapper: ReactWrapper, patterns: string[]) => ({
@@ -190,8 +191,8 @@ describe.skip('Sourcerer component', () => {
         ],
         sourcererScopes: {
           ...mockGlobalState.sourcerer.sourcererScopes,
-          [SourcererScopeName.default]: {
-            ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
+          [PageScope.default]: {
+            ...mockGlobalState.sourcerer.sourcererScopes[PageScope.default],
             loading: false,
             selectedDataViewId: '1234',
             selectedPatterns: ['filebeat-*'],
@@ -236,8 +237,8 @@ describe.skip('Sourcerer component', () => {
         ],
         sourcererScopes: {
           ...mockGlobalState.sourcerer.sourcererScopes,
-          [SourcererScopeName.default]: {
-            ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
+          [PageScope.default]: {
+            ...mockGlobalState.sourcerer.sourcererScopes[PageScope.default],
             selectedDataViewId: '1234',
             selectedPatterns: ['filebeat-*'],
           },
@@ -283,8 +284,8 @@ describe.skip('Sourcerer component', () => {
         ],
         sourcererScopes: {
           ...mockGlobalState.sourcerer.sourcererScopes,
-          [SourcererScopeName.default]: {
-            ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
+          [PageScope.default]: {
+            ...mockGlobalState.sourcerer.sourcererScopes[PageScope.default],
             selectedDataViewId: id,
             selectedPatterns: patternListNoSignals.slice(0, 2),
           },
@@ -328,8 +329,8 @@ describe.skip('Sourcerer component', () => {
         ],
         sourcererScopes: {
           ...mockGlobalState.sourcerer.sourcererScopes,
-          [SourcererScopeName.timeline]: {
-            ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
+          [PageScope.timeline]: {
+            ...mockGlobalState.sourcerer.sourcererScopes[PageScope.timeline],
             selectedDataViewId: id,
             selectedPatterns: patternList.slice(0, 2),
           },
@@ -340,7 +341,7 @@ describe.skip('Sourcerer component', () => {
     const store = createMockStore(state2);
     const { getByTestId, queryByTitle, queryAllByTestId } = render(
       <TestProviders store={store}>
-        <Sourcerer scope={sourcererModel.SourcererScopeName.timeline} />
+        <Sourcerer scope={PageScope.timeline} />
       </TestProviders>
     );
 
@@ -372,8 +373,8 @@ describe.skip('Sourcerer component', () => {
         ],
         sourcererScopes: {
           ...mockGlobalState.sourcerer.sourcererScopes,
-          [SourcererScopeName.default]: {
-            ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
+          [PageScope.default]: {
+            ...mockGlobalState.sourcerer.sourcererScopes[PageScope.default],
             selectedDataViewId: id,
             selectedPatterns: patternListNoSignals.slice(0, 2),
           },
@@ -401,7 +402,7 @@ describe.skip('Sourcerer component', () => {
 
     expect(mockDispatch).toHaveBeenCalledWith(
       sourcererActions.setSelectedDataView({
-        id: SourcererScopeName.default,
+        id: PageScope.default,
         selectedDataViewId: id,
         selectedPatterns: patternListNoSignals.slice(0, 3),
       })
@@ -424,8 +425,8 @@ describe.skip('Sourcerer component', () => {
         ],
         sourcererScopes: {
           ...mockGlobalState.sourcerer.sourcererScopes,
-          [SourcererScopeName.default]: {
-            ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
+          [PageScope.default]: {
+            ...mockGlobalState.sourcerer.sourcererScopes[PageScope.default],
             selectedDataViewId: id,
             selectedPatterns: patternListNoSignals.slice(0, 2),
           },
@@ -533,8 +534,8 @@ describe.skip('Sourcerer component', () => {
         ],
         sourcererScopes: {
           ...mockGlobalState.sourcerer.sourcererScopes,
-          [SourcererScopeName.timeline]: {
-            ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
+          [PageScope.timeline]: {
+            ...mockGlobalState.sourcerer.sourcererScopes[PageScope.timeline],
             loading: false,
             selectedDataViewId: id,
             selectedPatterns: patternListNoSignals.slice(0, 2),
@@ -546,7 +547,7 @@ describe.skip('Sourcerer component', () => {
     const store = createMockStore(state2);
     const el = render(
       <TestProviders store={store}>
-        <Sourcerer scope={sourcererModel.SourcererScopeName.timeline} />
+        <Sourcerer scope={PageScope.timeline} />
       </TestProviders>
     );
 
@@ -581,8 +582,8 @@ describe.skip('Sourcerer component', () => {
         ],
         sourcererScopes: {
           ...mockGlobalState.sourcerer.sourcererScopes,
-          [SourcererScopeName.default]: {
-            ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
+          [PageScope.default]: {
+            ...mockGlobalState.sourcerer.sourcererScopes[PageScope.default],
             loading: false,
             selectedDataViewId: id,
             selectedPatterns: patternListNoSignals.slice(0, 2),
@@ -616,7 +617,7 @@ describe.skip('Sourcerer component', () => {
 
     mount(
       <TestProviders>
-        <Sourcerer scope={sourcererModel.SourcererScopeName.timeline} />
+        <Sourcerer scope={PageScope.timeline} />
       </TestProviders>
     );
 
@@ -631,7 +632,7 @@ describe.skip('Sourcerer component', () => {
 
     mount(
       <TestProviders>
-        <Sourcerer scope={sourcererModel.SourcererScopeName.default} />
+        <Sourcerer scope={PageScope.default} />
       </TestProviders>
     );
 
@@ -646,7 +647,7 @@ describe.skip('Sourcerer component', () => {
 
     mount(
       <TestProviders>
-        <Sourcerer scope={sourcererModel.SourcererScopeName.timeline} />
+        <Sourcerer scope={PageScope.timeline} />
       </TestProviders>
     );
     expect(pollForSignalIndexMock).toHaveBeenCalledTimes(1);
@@ -660,7 +661,7 @@ describe.skip('Sourcerer component', () => {
 
     mount(
       <TestProviders>
-        <Sourcerer scope={sourcererModel.SourcererScopeName.alerts} />
+        <Sourcerer scope={PageScope.alerts} />
       </TestProviders>
     );
     expect(pollForSignalIndexMock).toHaveBeenCalledTimes(1);
@@ -669,7 +670,7 @@ describe.skip('Sourcerer component', () => {
   it('renders without a popover when analyzer is the scope', () => {
     mount(
       <TestProviders>
-        <Sourcerer scope={sourcererModel.SourcererScopeName.analyzer} />
+        <Sourcerer scope={PageScope.analyzer} />
       </TestProviders>
     );
     expect(wrapper.find(`[data-test-subj="sourcerer-popover"]`).exists()).toBeFalsy();

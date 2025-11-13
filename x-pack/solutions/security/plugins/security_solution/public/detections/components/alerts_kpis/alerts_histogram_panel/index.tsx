@@ -9,7 +9,7 @@ import type { Action } from '@kbn/ui-actions-plugin/public';
 import type { EuiComboBox, EuiTitleSize } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiToolTip } from '@elastic/eui';
 import type { SyntheticEvent } from 'react';
-import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { noop } from 'lodash/fp';
 import { v4 as uuidv4 } from 'uuid';
@@ -17,6 +17,7 @@ import numeral from '@elastic/numeral';
 
 import type { Filter } from '@kbn/es-query';
 
+import { PageScope } from '../../../../data_view_manager/constants';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { APP_UI_ID, DEFAULT_NUMBER_FORMAT } from '../../../../../common/constants';
 import type { UpdateDateRange } from '../../../../common/components/charts/common';
@@ -24,11 +25,12 @@ import { HeaderSection } from '../../../../common/components/header_section';
 import { getDetectionEngineUrl, useFormatUrl } from '../../../../common/components/link_to';
 import { useKibana, useUiSetting$ } from '../../../../common/lib/kibana';
 import {
-  showInitialLoadingSpinner,
-  createGenericSubtitle,
   createEmbeddedDataSubtitle,
+  createGenericSubtitle,
+  showInitialLoadingSpinner,
 } from './helpers';
 import * as i18n from './translations';
+import { SHOWING_ALERTS } from './translations';
 import { LinkButton } from '../../../../common/components/links';
 import { SecurityPageName } from '../../../../app/types';
 import { DEFAULT_STACK_BY_FIELD, PANEL_HEIGHT } from '../common/config';
@@ -38,10 +40,8 @@ import { KpiPanel, StackByComboBox } from '../common/components';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { GROUP_BY_TOP_LABEL } from '../common/translations';
 import { getAlertsHistogramLensAttributes as getLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/common/alerts/alerts_histogram';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
 import { useVisualizationResponse } from '../../../../common/components/visualization_actions/use_visualization_response';
-import { SHOWING_ALERTS } from './translations';
 
 export const DETECTIONS_HISTOGRAM_ID = 'detections-histogram';
 
@@ -293,7 +293,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
             height={chartHeight ?? CHART_HEIGHT}
             id={visualizationId}
             inspectTitle={inspectTitle ?? title}
-            scopeId={SourcererScopeName.alerts}
+            scopeId={PageScope.alerts}
             stackByField={selectedStackByOption}
             timerange={timerange}
           />

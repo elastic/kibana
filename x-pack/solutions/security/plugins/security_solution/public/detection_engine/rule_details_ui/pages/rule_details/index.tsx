@@ -38,6 +38,7 @@ import {
   tableDefaults,
   TableId,
 } from '@kbn/securitysolution-data-table';
+import { PageScope } from '../../../../data_view_manager/constants';
 import { RuleCustomizationsContextProvider } from '../../../rule_management/components/rule_details/rule_customizations_diff/rule_customizations_context';
 import { useGroupTakeActionsItems } from '../../../../detections/hooks/alerts_table/use_group_take_action_items';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
@@ -104,7 +105,6 @@ import {
   resetKeyboardFocus,
 } from '../../../../timelines/components/timeline/helpers';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import {
   canEditRuleWithActions,
   explainLackOfPermission,
@@ -269,9 +269,9 @@ export const RuleDetailsPage = connector(
       useListsConfig();
 
     const { sourcererDataView: oldSourcererDataViewSpec, loading: oldIsLoadingIndexPattern } =
-      useSourcererDataView(SourcererScopeName.alerts);
+      useSourcererDataView(PageScope.alerts);
     const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-    const { dataView: experimentalDataView, status } = useDataView(SourcererScopeName.alerts);
+    const { dataView: experimentalDataView, status } = useDataView(PageScope.alerts);
     const isLoadingIndexPattern = newDataViewPickerEnabled
       ? status !== 'ready'
       : oldIsLoadingIndexPattern;

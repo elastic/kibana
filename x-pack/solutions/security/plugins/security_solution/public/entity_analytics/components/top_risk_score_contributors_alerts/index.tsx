@@ -9,6 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
+import { PageScope } from '../../../data_view_manager/constants';
 import { useGroupTakeActionsItems } from '../../../detections/hooks/alerts_table/use_group_take_action_items';
 import {
   defaultGroupingOptions,
@@ -32,7 +33,6 @@ import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { inputsSelectors } from '../../../common/store/inputs';
 import { useUserData } from '../../../detections/components/user_info';
 import { useSourcererDataView } from '../../../sourcerer/containers';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { RiskInformationButtonEmpty } from '../risk_information';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 
@@ -54,11 +54,9 @@ export const TopRiskScoreContributorsAlerts = <T extends EntityType>({
   const { to, from } = useGlobalTime();
   const [{ loading: userInfoLoading, hasIndexWrite, hasIndexMaintenance }] = useUserData();
 
-  const { sourcererDataView: oldSourcererDataViewSpec } = useSourcererDataView(
-    SourcererScopeName.alerts
-  );
+  const { sourcererDataView: oldSourcererDataViewSpec } = useSourcererDataView(PageScope.alerts);
 
-  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.alerts);
+  const { dataView: experimentalDataView } = useDataView(PageScope.alerts);
 
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),

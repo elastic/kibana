@@ -7,7 +7,8 @@
 
 import { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { SourcererScopeName, type SourcererUrlState } from '../../sourcerer/store/model';
+import { PageScope } from '../constants';
+import { type SourcererUrlState } from '../../sourcerer/store/model';
 import { useInitializeUrlParam, useUpdateUrlParam } from '../../common/utils/global_query_string';
 import { URL_PARAM_KEY } from '../../common/hooks/constants';
 import type { State } from '../../common/store/types';
@@ -19,10 +20,10 @@ import { type SelectDataViewAsyncPayload } from '../redux/actions';
 // TODO: remove this in cleanup phase Remove deprecated sourcerer code https://github.com/elastic/security-team/issues/12665
 export const useSyncSourcererUrlState = (
   scopeId:
-    | SourcererScopeName.default
-    | SourcererScopeName.explore
-    | SourcererScopeName.attacks
-    | SourcererScopeName.alerts = SourcererScopeName.default
+    | PageScope.default
+    | PageScope.explore
+    | PageScope.attacks
+    | PageScope.alerts = PageScope.default
 ) => {
   const scopeDataViewId = useSelector((state: State) => {
     return sourcererSelectors.sourcererScopeSelectedDataViewId(state, scopeId);
@@ -47,8 +48,8 @@ export const useSyncSourcererUrlState = (
 
       // Initialize the store with value from UrlParam.
       if (initialState != null) {
-        (Object.keys(initialState) as SourcererScopeName[]).forEach((scope) => {
-          if (!(scope === SourcererScopeName.default && scopeId === SourcererScopeName.alerts)) {
+        (Object.keys(initialState) as PageScope[]).forEach((scope) => {
+          if (!(scope === PageScope.default && scopeId === PageScope.alerts)) {
             dispatch(
               sourcererActions.setSelectedDataView({
                 id: scope,
@@ -63,7 +64,7 @@ export const useSyncSourcererUrlState = (
         // It isn't strictly necessary but I am keeping it for compatibility with the previous implementation.
         if (scopeDataViewId) {
           updateUrlParam({
-            [SourcererScopeName.default]: {
+            [PageScope.default]: {
               id: scopeDataViewId,
               selectedPatterns,
             },
@@ -85,10 +86,10 @@ export const useSyncSourcererUrlState = (
 export const useRestoreDataViewManagerStateFromURL = (
   initDataViewPickerWithSelection: (initialSelection: SelectDataViewAsyncPayload[]) => void,
   scopeId:
-    | SourcererScopeName.default
-    | SourcererScopeName.explore
-    | SourcererScopeName.attacks
-    | SourcererScopeName.alerts = SourcererScopeName.default
+    | PageScope.default
+    | PageScope.explore
+    | PageScope.attacks
+    | PageScope.alerts = PageScope.default
 ) => {
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
@@ -105,11 +106,11 @@ export const useRestoreDataViewManagerStateFromURL = (
       }
 
       // Select data view for specific scope, based on the UrlParam.
-      const urlBasedSelection = (Object.keys(initialState) as SourcererScopeName[])
+      const urlBasedSelection = (Object.keys(initialState) as PageScope[])
         .map((scope) => {
-          // NOTE: looks like this is about skipping the init when the active page is detections
+          // NOTE: looks like this is about skipping the init when the active page is alerts
           // We should investigate this.
-          if (scope === SourcererScopeName.default && scopeId === SourcererScopeName.alerts) {
+          if (scope === PageScope.default && scopeId === PageScope.alerts) {
             return undefined;
           }
 

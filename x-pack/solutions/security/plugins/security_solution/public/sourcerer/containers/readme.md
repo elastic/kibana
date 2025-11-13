@@ -4,7 +4,7 @@
 
 - called at the top of the app in HomePageComponent to initialize the sourcerer state!
 - Calls `useSourcererDataView` (see below) for the active scope (ex:
-  `SourcererScopeName.default | SourcererScopeName.alerts`)
+  `PageScope.default | PageScope.alerts`)
 - If there is an error with the data view, thrown here
 - Run index field search for the active data view id, and when the active data view id updates
 - we changed the logic to not fetch all the index fields for every data view on the loading of the app because user can
@@ -51,7 +51,7 @@ interface SelectedDataView {
     - Our app uses `dataViewId`, getting the fields from a Data View that includes runtime fields. No matter what the
       sourcerer indices are set to, we will get the same fields always from the Data View. If we only requested
       `indices`, we would get just the fields for those indices (not all like Data View) and therefore would not get the
-      runtime fields. So even when we are in `SourcererScopeName.alerts` narrowed down to just
+      runtime fields. So even when we are in `PageScope.alerts` narrowed down to just
       `.alerts-security.alerts-default`, we get all the fields from the entire Security Solution Data View.
 
 ### `useSignalHelpers`

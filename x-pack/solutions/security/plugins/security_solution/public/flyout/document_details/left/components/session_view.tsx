@@ -11,6 +11,7 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { EuiPanel } from '@elastic/eui';
 import type { Process } from '@kbn/session-view-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { PageScope } from '../../../../data_view_manager/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import type { CustomProcess } from '../../session_view/context';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
@@ -22,7 +23,6 @@ import {
 } from '../../shared/constants/panel_keys';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useDocumentDetailsContext } from '../../shared/context';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { ALERT_PREVIEW_BANNER } from '../../preview/constants';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { useSessionViewConfig } from '../../shared/hooks/use_session_view_config';
@@ -61,10 +61,10 @@ export const SessionView: FC = memo(() => {
   const isEnterprisePlus = useLicense().isEnterprise();
   const isEnabled = sessionViewConfig && isEnterprisePlus;
 
-  const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView(SourcererScopeName.alerts);
+  const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView(PageScope.alerts);
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.alerts);
+  const experimentalSelectedPatterns = useSelectedPatterns(PageScope.alerts);
 
   const selectedPatterns = newDataViewPickerEnabled
     ? experimentalSelectedPatterns

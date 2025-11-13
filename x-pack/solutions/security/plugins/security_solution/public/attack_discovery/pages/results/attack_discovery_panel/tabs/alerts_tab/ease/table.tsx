@@ -12,7 +12,7 @@ import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { AlertsTableImperativeApi } from '@kbn/response-ops-alerts-table/types';
 import { useBrowserFields } from '../../../../../../../data_view_manager/hooks/use_browser_fields';
-import { DataViewManagerScopeName } from '../../../../../../../data_view_manager/constants';
+import { PageScope } from '../../../../../../../data_view_manager/constants';
 import type { AdditionalTableContext } from '../../../../../../../detections/components/alert_summary/table/table';
 import {
   ACTION_COLUMN_WIDTH,
@@ -71,7 +71,7 @@ export const Table = memo(({ dataView, id, packages, query }: TableProps) => {
     [application, cases, data, fieldFormats, http, licensing, notifications, settings]
   );
 
-  const browserFields = useBrowserFields(DataViewManagerScopeName.alerts, dataView);
+  const browserFields = useBrowserFields(PageScope.alerts, dataView);
 
   const additionalContext: AdditionalTableContext = useMemo(
     () => ({

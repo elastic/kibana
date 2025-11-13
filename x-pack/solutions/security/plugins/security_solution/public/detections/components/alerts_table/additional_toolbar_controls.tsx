@@ -6,22 +6,22 @@
  */
 
 import type { ComponentProps } from 'react';
-import React, { useCallback, useMemo, memo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
+import type { ViewSelection } from '@kbn/securitysolution-data-table';
 import {
   dataTableActions,
   dataTableSelectors,
   tableDefaults,
   TableId,
 } from '@kbn/securitysolution-data-table';
-import type { ViewSelection } from '@kbn/securitysolution-data-table';
 import { useGetGroupSelectorStateless } from '@kbn/grouping/src/hooks/use_get_group_selector';
 import { getTelemetryEvent } from '@kbn/grouping/src/telemetry/const';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { PageScope } from '../../../data_view_manager/constants';
 import type { GetSecurityAlertsTableProp } from './types';
 import { groupIdSelector } from '../../../common/store/grouping/selectors';
 import { useSourcererDataView } from '../../../sourcerer/containers';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { SummaryViewSelector } from '../../../common/components/events_viewer/summary_view_select';
 import { updateGroups } from '../../../common/store/grouping/actions';
 import { useKibana } from '../../../common/lib/kibana';
@@ -45,12 +45,10 @@ const AdditionalToolbarControlsComponent = ({
     services: { telemetry },
   } = useKibana();
 
-  const { sourcererDataView: oldSourcererDataView } = useSourcererDataView(
-    SourcererScopeName.alerts
-  );
+  const { sourcererDataView: oldSourcererDataView } = useSourcererDataView(PageScope.alerts);
 
   const isNewDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.alerts);
+  const { dataView: experimentalDataView } = useDataView(PageScope.alerts);
 
   const groupId = useMemo(() => groupIdSelector(), []);
   const { options } = useDeepEqualSelector((state) => groupId(state, tableType)) ?? {

@@ -8,7 +8,6 @@
 import { renderHook } from '@testing-library/react';
 
 import { useBulkActionsByTableType } from './use_bulk_actions';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import * as useBulkAlertAssigneesItemsModule from '../../../common/components/toolbar/bulk_actions/use_bulk_alert_assignees_items';
@@ -16,6 +15,7 @@ import * as useBulkAlertTagsItemsModule from '../../../common/components/toolbar
 import * as useAddBulkToTimelineActionModule from '../../components/alerts_table/timeline_actions/use_add_bulk_to_timeline';
 import * as useBulkAlertActionItemsModule from './use_alert_actions';
 import type { TableId } from '@kbn/securitysolution-data-table';
+import { PageScope } from '../../../data_view_manager/constants';
 
 jest.mock('../../../common/containers/use_global_time');
 jest.mock('../../../common/hooks/use_selector');
@@ -84,7 +84,7 @@ describe('useBulkActionsByTableType', () => {
     renderHook(() => useBulkActionsByTableType(mockTableId, mockQuery, mockRefresh));
 
     expect(useBulkAlertActionItemsModule.useBulkAlertActionItems).toHaveBeenCalledWith({
-      scopeId: SourcererScopeName.alerts,
+      scopeId: PageScope.alerts,
       filters: [],
       from: '2020-07-07T08:20:18.966Z',
       to: '2020-07-08T08:20:18.966Z',
@@ -96,7 +96,7 @@ describe('useBulkActionsByTableType', () => {
       localFilters: [],
       from: '2020-07-07T08:20:18.966Z',
       to: '2020-07-08T08:20:18.966Z',
-      scopeId: SourcererScopeName.alerts,
+      scopeId: PageScope.alerts,
       tableId: mockTableId,
     });
   });

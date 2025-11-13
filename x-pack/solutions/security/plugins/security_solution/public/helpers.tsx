@@ -16,6 +16,7 @@ import type { DocLinks } from '@kbn/doc-links';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { dataTableActions, TableId } from '@kbn/securitysolution-data-table';
 import { isObject } from 'lodash';
+import { PageScope } from './data_view_manager/constants';
 import {
   ALERTS_PATH,
   APP_UI_ID,
@@ -37,7 +38,6 @@ import type { InspectResponse, StartedSubPlugins, StartServices } from './types'
 import { CASES_SUB_PLUGIN_KEY } from './types';
 import { timelineActions } from './timelines/store';
 import { TimelineId } from '../common/types';
-import { SourcererScopeName } from './sourcerer/store/model';
 import { hasAccessToSecuritySolution } from './helpers_access';
 
 export const parseRoute = (location: Pick<Location, 'hash' | 'pathname' | 'search'>) => {
@@ -315,12 +315,12 @@ export const getScopedActions = (scopeId: string) => {
 
 export const isActiveTimeline = (timelineId: string) => timelineId === TimelineId.active;
 
-export const getSourcererScopeId = (scopeId: string): SourcererScopeName => {
+export const getSourcererScopeId = (scopeId: string): PageScope => {
   if (isTimelineScope(scopeId)) {
-    return SourcererScopeName.timeline;
+    return PageScope.timeline;
   } else if (isAlertsPageScope(scopeId)) {
-    return SourcererScopeName.alerts;
+    return PageScope.alerts;
   } else {
-    return SourcererScopeName.default;
+    return PageScope.default;
   }
 };

@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { EuiComboBoxOptionOption, EuiSuperSelectOption } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 
+import { PageScope } from '../../data_view_manager/constants';
 import { getScopePatternListSelection } from '../store/helpers';
-import { sourcererActions, sourcererModel } from '../store';
+import type { sourcererModel } from '../store';
+import { sourcererActions } from '../store';
 import { getDataViewSelectOptions, getPatternListWithoutSignals } from './helpers';
-import { SourcererScopeName } from '../store/model';
 import { sortWithExcludesAtEnd } from '../../../common/utils/sourcerer';
 import { useKibana } from '../../common/lib/kibana';
 import { getSourcererDataView } from '../containers/get_sourcerer_data_view';
@@ -23,7 +24,7 @@ interface UsePickIndexPatternsProps {
   isOnlyDetectionAlerts: boolean;
   kibanaDataViews: sourcererModel.SourcererModel['kibanaDataViews'];
   missingPatterns: string[];
-  scopeId: sourcererModel.SourcererScopeName;
+  scopeId: PageScope;
   selectedDataViewId: string | null;
   selectedPatterns: string[];
   signalIndexName: string | null;
@@ -103,7 +104,7 @@ export const usePickIndexPatterns = ({
 
     const titleAsList = [...new Set(theDataView.title.split(','))];
 
-    return scopeId === sourcererModel.SourcererScopeName.default
+    return scopeId === PageScope.default
       ? {
           allPatterns: getPatternListWithoutSignals(titleAsList, signalIndexName),
           selectablePatterns: getPatternListWithoutSignals(
@@ -124,7 +125,7 @@ export const usePickIndexPatterns = ({
 
   const getDefaultSelectedOptionsByDataView = useCallback(
     (id: string, isAlerts: boolean = false): Array<EuiComboBoxOptionOption<string>> =>
-      scopeId === SourcererScopeName.alerts || isAlerts
+      scopeId === PageScope.alerts || isAlerts
         ? signalPatternListToOptions
         : patternListToOptions(
             getScopePatternListSelection(
@@ -165,7 +166,7 @@ export const usePickIndexPatterns = ({
 
   useEffect(() => {
     setSelectedOptions(
-      scopeId === SourcererScopeName.alerts ? signalPatternListToOptions : selectedPatternsAsOptions
+      scopeId === PageScope.alerts ? signalPatternListToOptions : selectedPatternsAsOptions
     );
   }, [selectedPatterns, scopeId, selectedPatternsAsOptions, signalPatternListToOptions]);
   // when scope updates, check modified to set/remove alerts label

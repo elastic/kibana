@@ -43,7 +43,7 @@ import { ScheduleDefinition } from './definition';
 import { Header } from './header';
 import { ScheduleExecutionLogs } from './execution_logs';
 import { convertFormDataInBaseSchedule } from '../utils/convert_form_data';
-import { DataViewManagerScopeName } from '../../../../../data_view_manager/constants';
+import { PageScope } from '../../../../../data_view_manager/constants';
 import { WithMissingPrivileges } from '../missing_privileges';
 
 interface Props {
@@ -85,7 +85,7 @@ export const DetailsFlyout: React.FC<Props> = React.memo(({ scheduleId, onClose 
     });
 
   const { sourcererDataView } = useSourcererDataView();
-  const { dataView: experimentalDataView } = useDataView(DataViewManagerScopeName.alerts);
+  const { dataView: experimentalDataView } = useDataView(PageScope.alerts);
 
   const [isEditing, setIsEditing] = useState(false);
 

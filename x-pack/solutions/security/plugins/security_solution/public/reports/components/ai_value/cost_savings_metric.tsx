@@ -9,12 +9,12 @@ import React, { useCallback, useMemo } from 'react';
 
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
+import { PageScope } from '../../../data_view_manager/constants';
 import * as i18n from './translations';
 import {
   type GetLensAttributes,
   VisualizationContextMenuActions,
 } from '../../../common/components/visualization_actions/types';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
 import { getCostSavingsMetricLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/ai/cost_savings_metric';
 import { useMetricAnimation } from '../../hooks/use_metric_animation';
@@ -96,7 +96,7 @@ const CostSavingsMetricComponent: React.FC<Props> = ({
         timerange={timerange}
         id={`${ID}-metric`}
         inspectTitle={i18n.COST_SAVINGS_TREND}
-        scopeId={SourcererScopeName.alerts}
+        scopeId={PageScope.alerts}
         withActions={[
           VisualizationContextMenuActions.addToExistingCase,
           VisualizationContextMenuActions.addToNewCase,

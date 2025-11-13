@@ -20,13 +20,13 @@ import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { PageScope } from '../../../../../data_view_manager/constants';
 import { useEuiComboBoxReset } from '../../../../../common/components/use_combo_box_reset';
 import { StackByComboBox } from '../../../../../detections/components/alerts_kpis/common/components';
 import { useSignalIndex } from '../../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import type { LensAttributes } from '../../../../../common/components/visualization_actions/types';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { sourcererActions } from '../../../../../sourcerer/store';
-import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import * as i18n from '../translations';
 import type { Sorting } from '../types';
 
@@ -161,7 +161,7 @@ const PreviewTabComponent = ({
       // action to have any effect.
       dispatch(
         sourcererActions.setSelectedDataView({
-          id: SourcererScopeName.alerts,
+          id: PageScope.alerts,
           selectedDataViewId: signalIndexName,
           selectedPatterns: [signalIndexName],
           shouldValidateSelectedPatterns: false,

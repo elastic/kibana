@@ -15,11 +15,11 @@ import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { DynamicGroupingProps } from '@kbn/grouping/src';
 import { parseGroupingQuery } from '@kbn/grouping/src';
 import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
+import { PageScope } from '../../../data_view_manager/constants';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import type { GroupTakeActionItems } from './types';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import type { RunTimeMappings } from '../../../sourcerer/store/model';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { combineQueries } from '../../../common/lib/kuery';
 import type { AlertsGroupingAggregation } from './grouping_settings/types';
 import { InspectButton } from '../../../common/components/inspect';
@@ -115,12 +115,12 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     services: { uiSettings },
   } = useKibana();
   const { browserFields: oldBrowserFields, sourcererDataView: oldSourcererDataView } =
-    useSourcererDataView(SourcererScopeName.alerts);
+    useSourcererDataView(PageScope.alerts);
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
-  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.alerts);
-  const experimentalBrowserFields = useBrowserFields(SourcererScopeName.alerts);
+  const { dataView: experimentalDataView } = useDataView(PageScope.alerts);
+  const experimentalBrowserFields = useBrowserFields(PageScope.alerts);
 
   const sourcererDataView = oldSourcererDataView;
   const browserFields = newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields;

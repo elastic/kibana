@@ -10,6 +10,7 @@ import type { Action } from '@kbn/ui-actions-plugin/public';
 import React, { memo, useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import type { Filter } from '@kbn/es-query';
+import { PageScope } from '../../../../data_view_manager/constants';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { InspectButtonContainer } from '../../../../common/components/inspect';
@@ -17,7 +18,6 @@ import * as i18n from './translations';
 import { KpiPanel } from '../common/components';
 import { FieldSelection } from '../common/field_selection';
 import { getAlertsTableLensAttributes as getLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/common/alerts/alerts_table';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
 
 export const DETECTIONS_ALERTS_COUNT_ID = 'detections-alerts-count';
@@ -127,7 +127,7 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
               height={CHART_HEIGHT}
               id={`${uniqueQueryId}-embeddable`}
               inspectTitle={inspectTitle}
-              scopeId={SourcererScopeName.alerts}
+              scopeId={PageScope.alerts}
               stackByField={stackByField0}
               timerange={timerange}
             />
