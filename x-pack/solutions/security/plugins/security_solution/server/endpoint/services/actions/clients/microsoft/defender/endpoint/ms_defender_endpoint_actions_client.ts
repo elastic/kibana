@@ -1048,7 +1048,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
 
             const isRunscriptAction = mdeCommand === 'LiveResponse' && command === 'runscript';
             let output: ActionResponseOutput<EndpointActionResponseDataOutput> | undefined;
-            let meta = {};
+            let meta: {} | undefined;
 
             if (isRunscriptAction) {
               const outputFile = await this.fetchMachineLiveResponseFile(machineActionId);

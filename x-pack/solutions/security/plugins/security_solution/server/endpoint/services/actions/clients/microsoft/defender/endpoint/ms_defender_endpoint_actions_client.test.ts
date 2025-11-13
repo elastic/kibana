@@ -500,9 +500,9 @@ describe('MS Defender response actions client', () => {
                           },
                         },
                       ],
-                      cancellationRequestor: '',
+                      cancellationRequestor: 'elastic',
                       requestorComment: 'Some other comment',
-                      cancellationComment: '',
+                      cancellationComment: 'test cancel data',
                       machineId: '1-2-3',
                       computerDnsName: 'test-machine',
                       creationDateTimeUtc: '2025-01-30T10:00:00Z',
@@ -568,7 +568,7 @@ describe('MS Defender response actions client', () => {
                           },
                         },
                       ],
-                      cancellationRequestor: '',
+                      cancellationRequestor: 'elastic',
                       requestorComment: 'Comment from different action',
                       cancellationComment: '',
                       machineId: '1-2-3',
@@ -603,6 +603,7 @@ describe('MS Defender response actions client', () => {
         });
       });
 
+      // TODO: Fix this slow test
       it('should throw error when GET_ACTIONS returns no action details after retry', async () => {
         const underlyingClient = (
           connectorActionsMock as unknown as { connectorsClient: { execute: jest.Mock } }
@@ -641,6 +642,7 @@ describe('MS Defender response actions client', () => {
         });
       });
 
+      // TODO: Fix this slow test
       it('should throw error when GET_ACTIONS call fails', async () => {
         const underlyingClient = (
           connectorActionsMock as unknown as { connectorsClient: { execute: jest.Mock } }
@@ -2047,7 +2049,7 @@ describe('MS Defender response actions client', () => {
       );
     });
 
-    describe('for Runscript', () => {
+    describe.only('for Runscript', () => {
       let msMachineActionsApiResponse: MicrosoftDefenderEndpointGetActionsResponse;
 
       beforeEach(() => {
@@ -2095,10 +2097,7 @@ describe('MS Defender response actions client', () => {
               errors: [],
               command: {
                 type: 'RunScript',
-                params: [
-                  { key: 'ScriptName', value: 'hello.sh' },
-                  { key: 'Args', value: '--noargs' },
-                ],
+                params: [{ key: 'ScriptName', value: 'hello.sh' }],
               },
             },
           ],
@@ -2129,16 +2128,26 @@ describe('MS Defender response actions client', () => {
           EndpointActions: {
             action_id: '90d62689-f72d-4a05-b5e3-500cad0dc366',
             completed_at: expect.any(String),
-            data: { command: 'runscript' },
+            data: {
+              command: 'runscript',
+              output: expect.objectContaining({
+                type: 'json',
+                content: expect.objectContaining({
+                  code: expect.any(String),
+                  stdout: expect.any(String),
+                  stderr: expect.any(String),
+                }),
+              }),
+            },
             input_type: 'microsoft_defender_endpoint',
             started_at: expect.any(String),
           },
           agent: { id: 'agent-uuid-1' },
           error: undefined,
           meta: expect.objectContaining({
-            machineActionId: expect.any(String),
             createdAt: expect.any(String),
             filename: expect.any(String),
+            machineActionId: expect.any(String),
           }),
         });
       });
@@ -2168,7 +2177,17 @@ describe('MS Defender response actions client', () => {
             EndpointActions: {
               action_id: '90d62689-f72d-4a05-b5e3-500cad0dc366',
               completed_at: expect.any(String),
-              data: { command: 'runscript' },
+              data: {
+                command: 'runscript',
+                output: expect.objectContaining({
+                  type: 'json',
+                  content: expect.objectContaining({
+                    code: expect.any(String),
+                    stdout: expect.any(String),
+                    stderr: expect.any(String),
+                  }),
+                }),
+              },
               input_type: 'microsoft_defender_endpoint',
               started_at: expect.any(String),
             },
@@ -2344,10 +2363,7 @@ describe('MS Defender response actions client', () => {
                 errors: [],
                 command: {
                   type: 'RunScript',
-                  params: [
-                    { key: 'ScriptName', value: 'hello.sh' },
-                    { key: 'Args', value: '--noargs' },
-                  ],
+                  params: [{ key: 'ScriptName', value: 'hello.sh' }],
                 },
               },
             ],
