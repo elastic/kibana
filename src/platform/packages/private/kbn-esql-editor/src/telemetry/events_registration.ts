@@ -20,6 +20,7 @@ export const ESQL_QUERY_HISTORY_OPENED = 'esql.query_history_opened';
 export const ESQL_QUERY_HISTORY_CLICKED = 'esql.query_history_clicked';
 export const ESQL_STARRED_QUERY_CLICKED = 'esql.starred_query_clicked';
 export const ESQL_QUERY_SUBMITTED = 'esql.query_submitted';
+export const ESQL_RECOMMENDED_QUERY_CLICKED = 'esql.recommended_query_clicked';
 
 /**
  * Registers the esql editor analytics events.
@@ -107,6 +108,24 @@ export const registerESQLEditorAnalyticsEvents = once((analytics: AnalyticsServi
       anti_missing_sort_before_limit: {
         type: 'boolean',
         _meta: { description: 'Whether the query was missing a SORT before a LIMIT.' },
+      },
+    },
+  });
+  analytics.registerEventType({
+    eventType: ESQL_RECOMMENDED_QUERY_CLICKED,
+    schema: {
+      trigger_source: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'The UI surface where the recommendation was shown. Possible values are: help|autocomplete',
+        },
+      },
+      recommended_query: {
+        type: 'keyword',
+        _meta: {
+          description: 'The label of the recommended query that was clicked',
+        },
       },
     },
   });

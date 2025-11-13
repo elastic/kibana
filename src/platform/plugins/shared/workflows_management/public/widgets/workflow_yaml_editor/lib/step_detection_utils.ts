@@ -11,7 +11,7 @@
 
 import type YAML from 'yaml';
 import { monaco } from '@kbn/monaco';
-import { getCurrentPath } from '../../../../common/lib/yaml_utils';
+import { getPathAtOffset } from '../../../../common/lib/yaml';
 
 export interface StepInfo {
   stepIndex: number;
@@ -57,7 +57,7 @@ export function findAllSteps(
       const absolutePosition = model.getOffsetAt(position);
 
       try {
-        const yamlPath = getCurrentPath(yamlDocument, absolutePosition);
+        const yamlPath = getPathAtOffset(yamlDocument, absolutePosition);
 
         // Check if this is within a step using the same logic as unified actions provider
         const stepsIndex = yamlPath.findIndex((segment) => segment === 'steps');

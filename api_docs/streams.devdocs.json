@@ -2,7 +2,253 @@
   "id": "streams",
   "client": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "streams",
+        "id": "def-public.buildEsqlFilter",
+        "type": "Function",
+        "tags": [],
+        "label": "buildEsqlFilter",
+        "description": [
+          "\nBuilds a combined filter for ES|QL queries following the same pattern\nas the server-side route used to apply."
+        ],
+        "signature": [
+          "({\n  filter,\n  kuery,\n  start,\n  end,\n}: { filter?: ",
+          "QueryDslQueryContainer",
+          " | undefined; kuery?: string | undefined; start?: number | undefined; end?: number | undefined; }) => ",
+          "QueryDslQueryContainer"
+        ],
+        "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "streams",
+            "id": "def-public.buildEsqlFilter.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  filter,\n  kuery,\n  start,\n  end,\n}",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "streams",
+                "id": "def-public.buildEsqlFilter.$1.filter",
+                "type": "Object",
+                "tags": [],
+                "label": "filter",
+                "description": [],
+                "signature": [
+                  "QueryDslQueryContainer",
+                  " | undefined"
+                ],
+                "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "streams",
+                "id": "def-public.buildEsqlFilter.$1.kuery",
+                "type": "string",
+                "tags": [],
+                "label": "kuery",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "streams",
+                "id": "def-public.buildEsqlFilter.$1.start",
+                "type": "number",
+                "tags": [],
+                "label": "start",
+                "description": [],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "streams",
+                "id": "def-public.buildEsqlFilter.$1.end",
+                "type": "number",
+                "tags": [],
+                "label": "end",
+                "description": [],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "streams",
+        "id": "def-public.excludeFrozenQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "excludeFrozenQuery",
+        "description": [],
+        "signature": [
+          "() => ",
+          "QueryDslQueryContainer",
+          "[]"
+        ],
+        "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "streams",
+        "id": "def-public.isKqlQueryValid",
+        "type": "Function",
+        "tags": [],
+        "label": "isKqlQueryValid",
+        "description": [],
+        "signature": [
+          "(kql: string | undefined) => boolean"
+        ],
+        "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "streams",
+            "id": "def-public.isKqlQueryValid.$1",
+            "type": "string",
+            "tags": [],
+            "label": "kql",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "streams",
+        "id": "def-public.kqlQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "kqlQuery",
+        "description": [],
+        "signature": [
+          "(kql: string | undefined) => ",
+          "QueryDslQueryContainer",
+          "[]"
+        ],
+        "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "streams",
+            "id": "def-public.kqlQuery.$1",
+            "type": "string",
+            "tags": [],
+            "label": "kql",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "streams",
+        "id": "def-public.rangeQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "rangeQuery",
+        "description": [],
+        "signature": [
+          "(start: number | undefined, end: number | undefined, field: string) => ",
+          "QueryDslQueryContainer",
+          "[]"
+        ],
+        "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "streams",
+            "id": "def-public.rangeQuery.$1",
+            "type": "number",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "streams",
+            "id": "def-public.rangeQuery.$2",
+            "type": "number",
+            "tags": [],
+            "label": "end",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "streams",
+            "id": "def-public.rangeQuery.$3",
+            "type": "string",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [],
     "enums": [],
     "misc": [],
@@ -528,7 +774,7 @@
             },
             "; name: string; description: string; } | undefined; }>; }, \"strip\", ",
             "ZodTypeAny",
-            ", { query: { connectorId: string; from: Date; to: Date; currentDate?: Date | undefined; }; path: { name: string; }; body: { feature?: { filter: ",
+            ", { path: { name: string; }; query: { connectorId: string; from: Date; to: Date; currentDate?: Date | undefined; }; body: { feature?: { filter: ",
             {
               "pluginId": "@kbn/streamlang",
               "scope": "common",
@@ -536,7 +782,7 @@
               "section": "def-common.Condition",
               "text": "Condition"
             },
-            "; name: string; description: string; } | undefined; }; }, { query: { connectorId: string; from: string; to: string; currentDate?: string | undefined; }; path: { name: string; }; body: { feature?: { filter: ",
+            "; name: string; description: string; } | undefined; }; }, { path: { name: string; }; query: { connectorId: string; from: string; to: string; currentDate?: string | undefined; }; body: { feature?: { filter: ",
             {
               "pluginId": "@kbn/streamlang",
               "scope": "common",
@@ -678,7 +924,7 @@
             },
             "; name: string; } | undefined; }; }>; }, \"strip\", ",
             "ZodTypeAny",
-            ", { query: { from: Date; to: Date; bucketSize: string; }; path: { name: string; }; body: { query: { kql: { query: string; }; feature?: { filter: ",
+            ", { path: { name: string; }; query: { from: Date; to: Date; bucketSize: string; }; body: { query: { kql: { query: string; }; feature?: { filter: ",
             {
               "pluginId": "@kbn/streamlang",
               "scope": "common",
@@ -686,7 +932,7 @@
               "section": "def-common.Condition",
               "text": "Condition"
             },
-            "; name: string; } | undefined; }; }; }, { query: { from: string; to: string; bucketSize: string; }; path: { name: string; }; body: { query: { kql: { query: string; }; feature?: { filter: ",
+            "; name: string; } | undefined; }; }; }, { path: { name: string; }; query: { from: string; to: string; bucketSize: string; }; body: { query: { kql: { query: string; }; feature?: { filter: ",
             {
               "pluginId": "@kbn/streamlang",
               "scope": "common",
@@ -736,7 +982,7 @@
             "ZodTypeAny",
             ", { from: Date; to: Date; bucketSize: string; }, { from: string; to: string; bucketSize: string; }>; }, \"strip\", ",
             "ZodTypeAny",
-            ", { query: { from: Date; to: Date; bucketSize: string; }; path: { name: string; }; }, { query: { from: string; to: string; bucketSize: string; }; path: { name: string; }; }>, ",
+            ", { path: { name: string; }; query: { from: Date; to: Date; bucketSize: string; }; }, { path: { name: string; }; query: { from: string; to: string; bucketSize: string; }; }>, ",
             "StreamsRouteHandlerResources",
             ", ",
             {
@@ -1526,7 +1772,7 @@
             "ZodTypeAny",
             ", { tags?: string[] | undefined; }, { tags?: string[] | undefined; }>; }, \"strip\", ",
             "ZodTypeAny",
-            ", { query: { query: string; }; path: { name: string; }; body: { tags?: string[] | undefined; }; }, { query: { query: string; }; path: { name: string; }; body: { tags?: string[] | undefined; }; }>, ",
+            ", { path: { name: string; }; query: { query: string; }; body: { tags?: string[] | undefined; }; }, { path: { name: string; }; query: { query: string; }; body: { tags?: string[] | undefined; }; }>, ",
             "StreamsRouteHandlerResources",
             ", ",
             "SuggestDashboardResponse",
@@ -1600,7 +1846,19 @@
             "StreamsRouteHandlerResources",
             ", ",
             "ListDashboardsResponse",
-            ", undefined>; \"GET /internal/streams/ingest/processor_suggestions\": ",
+            ", undefined>; \"GET /internal/streams/connectors\": { endpoint: \"GET /internal/streams/connectors\"; handler: ServerRouteHandler<",
+            "StreamsRouteHandlerResources",
+            ", undefined, { connectors: ",
+            {
+              "pluginId": "actions",
+              "scope": "server",
+              "docId": "kibActionsPluginApi",
+              "section": "def-server.ConnectorWithExtraFindData",
+              "text": "ConnectorWithExtraFindData"
+            },
+            "[]; }>; security: ",
+            "RouteSecurity",
+            "; }; \"GET /internal/streams/ingest/processor_suggestions\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
               "scope": "common",
@@ -1654,7 +1912,7 @@
             "ZodTypeAny",
             ", { connectorId: string; from: Date; to: Date; }, { connectorId: string; from: string; to: string; }>; }, \"strip\", ",
             "ZodTypeAny",
-            ", { query: { connectorId: string; from: Date; to: Date; }; path: { name: string; }; }, { query: { connectorId: string; from: string; to: string; }; path: { name: string; }; }>, ",
+            ", { path: { name: string; }; query: { connectorId: string; from: Date; to: Date; }; }, { path: { name: string; }; query: { connectorId: string; from: string; to: string; }; }>, ",
             "StreamsRouteHandlerResources",
             ", ",
             "Observable",
@@ -1690,9 +1948,11 @@
             "ZodTypeAny",
             ", { connectorId: string; from: Date; to: Date; }, { connectorId: string; from: string; to: string; }>; }, \"strip\", ",
             "ZodTypeAny",
-            ", { query: { connectorId: string; from: Date; to: Date; }; path: { name: string; }; }, { query: { connectorId: string; from: string; to: string; }; path: { name: string; }; }>, ",
+            ", { path: { name: string; }; query: { connectorId: string; from: Date; to: Date; }; }, { path: { name: string; }; query: { connectorId: string; from: string; to: string; }; }>, ",
             "StreamsRouteHandlerResources",
-            ", { features: ",
+            ", ",
+            "Observable",
+            "<{ features: ",
             {
               "pluginId": "@kbn/streams-schema",
               "scope": "common",
@@ -1700,7 +1960,7 @@
               "section": "def-common.Feature",
               "text": "Feature"
             },
-            "[]; } & { type: \"identified_features\"; }, undefined>; \"POST /internal/streams/{name}/features/_bulk\": ",
+            "[]; } & { type: \"identified_features\"; }>, undefined>; \"POST /internal/streams/{name}/features/_bulk\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
               "scope": "common",
@@ -2438,7 +2698,7 @@
             "ZodTypeAny",
             ", { start: string; end: string; }, { start: string; end: string; }>; }, \"strip\", ",
             "ZodTypeAny",
-            ", { query: { start: string; end: string; }; path: { name: string; }; }, { query: { start: string; end: string; }; path: { name: string; }; }>, ",
+            ", { path: { name: string; }; query: { start: string; end: string; }; }, { path: { name: string; }; query: { start: string; end: string; }; }>, ",
             "StreamsRouteHandlerResources",
             ", ",
             "StreamDetailsResponse",
@@ -2458,79 +2718,7 @@
             "StreamsRouteHandlerResources",
             ", { streams: ",
             "ListStreamDetail",
-            "[]; canReadFailureStore: boolean; }, undefined>; \"POST /internal/streams/esql\": ",
-            {
-              "pluginId": "@kbn/server-route-repository-utils",
-              "scope": "common",
-              "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-              "section": "def-common.ServerRoute",
-              "text": "ServerRoute"
-            },
-            "<\"POST /internal/streams/esql\", ",
-            "ZodObject",
-            "<{ body: ",
-            "ZodObject",
-            "<{ query: ",
-            "ZodString",
-            "; operationName: ",
-            "ZodString",
-            "; filter: ",
-            "ZodOptional",
-            "<",
-            "ZodObject",
-            "<{}, \"passthrough\", ",
-            "ZodTypeAny",
-            ", ",
-            "objectOutputType",
-            "<{}, ",
-            "ZodTypeAny",
-            ", \"passthrough\">, ",
-            "objectInputType",
-            "<{}, ",
-            "ZodTypeAny",
-            ", \"passthrough\">>>; kuery: ",
-            "ZodOptional",
-            "<",
-            "ZodString",
-            ">; start: ",
-            "ZodOptional",
-            "<",
-            "ZodNumber",
-            ">; end: ",
-            "ZodOptional",
-            "<",
-            "ZodNumber",
-            ">; }, \"strip\", ",
-            "ZodTypeAny",
-            ", { query: string; operationName: string; start?: number | undefined; end?: number | undefined; filter?: ",
-            "objectOutputType",
-            "<{}, ",
-            "ZodTypeAny",
-            ", \"passthrough\"> | undefined; kuery?: string | undefined; }, { query: string; operationName: string; start?: number | undefined; end?: number | undefined; filter?: ",
-            "objectInputType",
-            "<{}, ",
-            "ZodTypeAny",
-            ", \"passthrough\"> | undefined; kuery?: string | undefined; }>; }, \"strip\", ",
-            "ZodTypeAny",
-            ", { body: { query: string; operationName: string; start?: number | undefined; end?: number | undefined; filter?: ",
-            "objectOutputType",
-            "<{}, ",
-            "ZodTypeAny",
-            ", \"passthrough\"> | undefined; kuery?: string | undefined; }; }, { body: { query: string; operationName: string; start?: number | undefined; end?: number | undefined; filter?: ",
-            "objectInputType",
-            "<{}, ",
-            "ZodTypeAny",
-            ", \"passthrough\"> | undefined; kuery?: string | undefined; }; }>, ",
-            "StreamsRouteHandlerResources",
-            ", ",
-            {
-              "pluginId": "@kbn/traced-es-client",
-              "scope": "server",
-              "docId": "kibKbnTracedEsClientPluginApi",
-              "section": "def-server.UnparsedEsqlResponse",
-              "text": "UnparsedEsqlResponse"
-            },
-            ", undefined>; }, ",
+            "[]; canReadFailureStore: boolean; }, undefined>; }, ",
             "StreamsRepositoryClientOptions",
             ">"
           ],
@@ -2557,20 +2745,21 @@
         },
         {
           "parentPluginId": "streams",
-          "id": "def-public.StreamsPluginStart.wiredStatus$",
-          "type": "Object",
+          "id": "def-public.StreamsPluginStart.getWiredStatus",
+          "type": "Function",
           "tags": [],
-          "label": "wiredStatus$",
+          "label": "getWiredStatus",
           "description": [],
           "signature": [
-            "Observable",
-            "<",
+            "() => Promise<",
             "WiredStreamsStatus",
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/streams/public/types.ts",
           "deprecated": false,
-          "trackAdoption": false
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
         },
         {
           "parentPluginId": "streams",
@@ -3225,7 +3414,7 @@
           },
           "; name: string; description: string; } | undefined; }>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { query: { connectorId: string; from: Date; to: Date; currentDate?: Date | undefined; }; path: { name: string; }; body: { feature?: { filter: ",
+          ", { path: { name: string; }; query: { connectorId: string; from: Date; to: Date; currentDate?: Date | undefined; }; body: { feature?: { filter: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -3233,7 +3422,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; name: string; description: string; } | undefined; }; }, { query: { connectorId: string; from: string; to: string; currentDate?: string | undefined; }; path: { name: string; }; body: { feature?: { filter: ",
+          "; name: string; description: string; } | undefined; }; }, { path: { name: string; }; query: { connectorId: string; from: string; to: string; currentDate?: string | undefined; }; body: { feature?: { filter: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -3375,7 +3564,7 @@
           },
           "; name: string; } | undefined; }; }>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { query: { from: Date; to: Date; bucketSize: string; }; path: { name: string; }; body: { query: { kql: { query: string; }; feature?: { filter: ",
+          ", { path: { name: string; }; query: { from: Date; to: Date; bucketSize: string; }; body: { query: { kql: { query: string; }; feature?: { filter: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -3383,7 +3572,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; name: string; } | undefined; }; }; }, { query: { from: string; to: string; bucketSize: string; }; path: { name: string; }; body: { query: { kql: { query: string; }; feature?: { filter: ",
+          "; name: string; } | undefined; }; }; }, { path: { name: string; }; query: { from: string; to: string; bucketSize: string; }; body: { query: { kql: { query: string; }; feature?: { filter: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -3433,7 +3622,7 @@
           "ZodTypeAny",
           ", { from: Date; to: Date; bucketSize: string; }, { from: string; to: string; bucketSize: string; }>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { query: { from: Date; to: Date; bucketSize: string; }; path: { name: string; }; }, { query: { from: string; to: string; bucketSize: string; }; path: { name: string; }; }>, ",
+          ", { path: { name: string; }; query: { from: Date; to: Date; bucketSize: string; }; }, { path: { name: string; }; query: { from: string; to: string; bucketSize: string; }; }>, ",
           "StreamsRouteHandlerResources",
           ", ",
           {
@@ -4223,7 +4412,7 @@
           "ZodTypeAny",
           ", { tags?: string[] | undefined; }, { tags?: string[] | undefined; }>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { query: { query: string; }; path: { name: string; }; body: { tags?: string[] | undefined; }; }, { query: { query: string; }; path: { name: string; }; body: { tags?: string[] | undefined; }; }>, ",
+          ", { path: { name: string; }; query: { query: string; }; body: { tags?: string[] | undefined; }; }, { path: { name: string; }; query: { query: string; }; body: { tags?: string[] | undefined; }; }>, ",
           "StreamsRouteHandlerResources",
           ", ",
           "SuggestDashboardResponse",
@@ -4297,7 +4486,19 @@
           "StreamsRouteHandlerResources",
           ", ",
           "ListDashboardsResponse",
-          ", undefined>; \"GET /internal/streams/ingest/processor_suggestions\": ",
+          ", undefined>; \"GET /internal/streams/connectors\": { endpoint: \"GET /internal/streams/connectors\"; handler: ServerRouteHandler<",
+          "StreamsRouteHandlerResources",
+          ", undefined, { connectors: ",
+          {
+            "pluginId": "actions",
+            "scope": "server",
+            "docId": "kibActionsPluginApi",
+            "section": "def-server.ConnectorWithExtraFindData",
+            "text": "ConnectorWithExtraFindData"
+          },
+          "[]; }>; security: ",
+          "RouteSecurity",
+          "; }; \"GET /internal/streams/ingest/processor_suggestions\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -4351,7 +4552,7 @@
           "ZodTypeAny",
           ", { connectorId: string; from: Date; to: Date; }, { connectorId: string; from: string; to: string; }>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { query: { connectorId: string; from: Date; to: Date; }; path: { name: string; }; }, { query: { connectorId: string; from: string; to: string; }; path: { name: string; }; }>, ",
+          ", { path: { name: string; }; query: { connectorId: string; from: Date; to: Date; }; }, { path: { name: string; }; query: { connectorId: string; from: string; to: string; }; }>, ",
           "StreamsRouteHandlerResources",
           ", ",
           "Observable",
@@ -4387,9 +4588,11 @@
           "ZodTypeAny",
           ", { connectorId: string; from: Date; to: Date; }, { connectorId: string; from: string; to: string; }>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { query: { connectorId: string; from: Date; to: Date; }; path: { name: string; }; }, { query: { connectorId: string; from: string; to: string; }; path: { name: string; }; }>, ",
+          ", { path: { name: string; }; query: { connectorId: string; from: Date; to: Date; }; }, { path: { name: string; }; query: { connectorId: string; from: string; to: string; }; }>, ",
           "StreamsRouteHandlerResources",
-          ", { features: ",
+          ", ",
+          "Observable",
+          "<{ features: ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
@@ -4397,7 +4600,7 @@
             "section": "def-common.Feature",
             "text": "Feature"
           },
-          "[]; } & { type: \"identified_features\"; }, undefined>; \"POST /internal/streams/{name}/features/_bulk\": ",
+          "[]; } & { type: \"identified_features\"; }>, undefined>; \"POST /internal/streams/{name}/features/_bulk\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -5135,7 +5338,7 @@
           "ZodTypeAny",
           ", { start: string; end: string; }, { start: string; end: string; }>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { query: { start: string; end: string; }; path: { name: string; }; }, { query: { start: string; end: string; }; path: { name: string; }; }>, ",
+          ", { path: { name: string; }; query: { start: string; end: string; }; }, { path: { name: string; }; query: { start: string; end: string; }; }>, ",
           "StreamsRouteHandlerResources",
           ", ",
           "StreamDetailsResponse",
@@ -5155,79 +5358,7 @@
           "StreamsRouteHandlerResources",
           ", { streams: ",
           "ListStreamDetail",
-          "[]; canReadFailureStore: boolean; }, undefined>; \"POST /internal/streams/esql\": ",
-          {
-            "pluginId": "@kbn/server-route-repository-utils",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-            "section": "def-common.ServerRoute",
-            "text": "ServerRoute"
-          },
-          "<\"POST /internal/streams/esql\", ",
-          "ZodObject",
-          "<{ body: ",
-          "ZodObject",
-          "<{ query: ",
-          "ZodString",
-          "; operationName: ",
-          "ZodString",
-          "; filter: ",
-          "ZodOptional",
-          "<",
-          "ZodObject",
-          "<{}, \"passthrough\", ",
-          "ZodTypeAny",
-          ", ",
-          "objectOutputType",
-          "<{}, ",
-          "ZodTypeAny",
-          ", \"passthrough\">, ",
-          "objectInputType",
-          "<{}, ",
-          "ZodTypeAny",
-          ", \"passthrough\">>>; kuery: ",
-          "ZodOptional",
-          "<",
-          "ZodString",
-          ">; start: ",
-          "ZodOptional",
-          "<",
-          "ZodNumber",
-          ">; end: ",
-          "ZodOptional",
-          "<",
-          "ZodNumber",
-          ">; }, \"strip\", ",
-          "ZodTypeAny",
-          ", { query: string; operationName: string; start?: number | undefined; end?: number | undefined; filter?: ",
-          "objectOutputType",
-          "<{}, ",
-          "ZodTypeAny",
-          ", \"passthrough\"> | undefined; kuery?: string | undefined; }, { query: string; operationName: string; start?: number | undefined; end?: number | undefined; filter?: ",
-          "objectInputType",
-          "<{}, ",
-          "ZodTypeAny",
-          ", \"passthrough\"> | undefined; kuery?: string | undefined; }>; }, \"strip\", ",
-          "ZodTypeAny",
-          ", { body: { query: string; operationName: string; start?: number | undefined; end?: number | undefined; filter?: ",
-          "objectOutputType",
-          "<{}, ",
-          "ZodTypeAny",
-          ", \"passthrough\"> | undefined; kuery?: string | undefined; }; }, { body: { query: string; operationName: string; start?: number | undefined; end?: number | undefined; filter?: ",
-          "objectInputType",
-          "<{}, ",
-          "ZodTypeAny",
-          ", \"passthrough\"> | undefined; kuery?: string | undefined; }; }>, ",
-          "StreamsRouteHandlerResources",
-          ", ",
-          {
-            "pluginId": "@kbn/traced-es-client",
-            "scope": "server",
-            "docId": "kibKbnTracedEsClientPluginApi",
-            "section": "def-server.UnparsedEsqlResponse",
-            "text": "UnparsedEsqlResponse"
-          },
-          ", undefined>; }"
+          "[]; canReadFailureStore: boolean; }, undefined>; }"
         ],
         "path": "x-pack/platform/plugins/shared/streams/server/routes/index.ts",
         "deprecated": false,
@@ -5267,7 +5398,253 @@
   },
   "common": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "streams",
+        "id": "def-common.buildEsqlFilter",
+        "type": "Function",
+        "tags": [],
+        "label": "buildEsqlFilter",
+        "description": [
+          "\nBuilds a combined filter for ES|QL queries following the same pattern\nas the server-side route used to apply."
+        ],
+        "signature": [
+          "({\n  filter,\n  kuery,\n  start,\n  end,\n}: { filter?: ",
+          "QueryDslQueryContainer",
+          " | undefined; kuery?: string | undefined; start?: number | undefined; end?: number | undefined; }) => ",
+          "QueryDslQueryContainer"
+        ],
+        "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "streams",
+            "id": "def-common.buildEsqlFilter.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  filter,\n  kuery,\n  start,\n  end,\n}",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "streams",
+                "id": "def-common.buildEsqlFilter.$1.filter",
+                "type": "Object",
+                "tags": [],
+                "label": "filter",
+                "description": [],
+                "signature": [
+                  "QueryDslQueryContainer",
+                  " | undefined"
+                ],
+                "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "streams",
+                "id": "def-common.buildEsqlFilter.$1.kuery",
+                "type": "string",
+                "tags": [],
+                "label": "kuery",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "streams",
+                "id": "def-common.buildEsqlFilter.$1.start",
+                "type": "number",
+                "tags": [],
+                "label": "start",
+                "description": [],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "streams",
+                "id": "def-common.buildEsqlFilter.$1.end",
+                "type": "number",
+                "tags": [],
+                "label": "end",
+                "description": [],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "streams",
+        "id": "def-common.excludeFrozenQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "excludeFrozenQuery",
+        "description": [],
+        "signature": [
+          "() => ",
+          "QueryDslQueryContainer",
+          "[]"
+        ],
+        "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "streams",
+        "id": "def-common.isKqlQueryValid",
+        "type": "Function",
+        "tags": [],
+        "label": "isKqlQueryValid",
+        "description": [],
+        "signature": [
+          "(kql: string | undefined) => boolean"
+        ],
+        "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "streams",
+            "id": "def-common.isKqlQueryValid.$1",
+            "type": "string",
+            "tags": [],
+            "label": "kql",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "streams",
+        "id": "def-common.kqlQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "kqlQuery",
+        "description": [],
+        "signature": [
+          "(kql: string | undefined) => ",
+          "QueryDslQueryContainer",
+          "[]"
+        ],
+        "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "streams",
+            "id": "def-common.kqlQuery.$1",
+            "type": "string",
+            "tags": [],
+            "label": "kql",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "streams",
+        "id": "def-common.rangeQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "rangeQuery",
+        "description": [],
+        "signature": [
+          "(start: number | undefined, end: number | undefined, field: string) => ",
+          "QueryDslQueryContainer",
+          "[]"
+        ],
+        "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "streams",
+            "id": "def-common.rangeQuery.$1",
+            "type": "number",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "streams",
+            "id": "def-common.rangeQuery.$2",
+            "type": "number",
+            "tags": [],
+            "label": "end",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "streams",
+            "id": "def-common.rangeQuery.$3",
+            "type": "string",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/plugins/shared/streams/common/query_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [
       {
         "parentPluginId": "streams",

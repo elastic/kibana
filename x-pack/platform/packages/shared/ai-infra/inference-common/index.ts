@@ -55,7 +55,7 @@ export {
   type ChatCompletionToolValidationError,
   type ChatCompletionTokenLimitReachedError,
   isToolValidationError,
-  isTokenLimitReachedError,
+  isOutputTokenLimitReachedError,
   isToolNotFoundError,
   type ChatCompleteMetadata,
   type ConnectorTelemetryMetadata,

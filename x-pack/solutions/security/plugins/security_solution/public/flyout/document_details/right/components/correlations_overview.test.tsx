@@ -121,10 +121,7 @@ describe('<CorrelationsOverview />', () => {
     (useSecurityDefaultPatterns as jest.Mock).mockReturnValue({
       indexPatterns: ['index'],
     });
-    (useNavigateToLeftPanel as jest.Mock).mockReturnValue({
-      navigateToLeftPanel: mockNavigateToLeftPanel,
-      isEnabled: true,
-    });
+    (useNavigateToLeftPanel as jest.Mock).mockReturnValue(mockNavigateToLeftPanel);
   });
 
   it('should render wrapper component', () => {
@@ -141,18 +138,6 @@ describe('<CorrelationsOverview />', () => {
     );
     expect(getByTestId(TITLE_LINK_TEST_ID)).toBeInTheDocument();
     expect(queryByTestId(TITLE_ICON_TEST_ID)).not.toBeInTheDocument();
-  });
-
-  it('should not render link when navigation is disabled', () => {
-    (useNavigateToLeftPanel as jest.Mock).mockReturnValue({
-      navigateToLeftPanel: mockNavigateToLeftPanel,
-      isEnabled: false,
-    });
-
-    const { getByTestId, queryByTestId } = render(renderCorrelationsOverview(panelContextValue));
-    expect(queryByTestId(TOGGLE_ICON_TEST_ID)).not.toBeInTheDocument();
-    expect(queryByTestId(TITLE_LINK_TEST_ID)).not.toBeInTheDocument();
-    expect(getByTestId(TITLE_TEXT_TEST_ID)).toBeInTheDocument();
   });
 
   it('should show component with all rows in expandable panel', () => {

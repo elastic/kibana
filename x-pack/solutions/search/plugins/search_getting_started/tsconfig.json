@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -30,7 +30,10 @@
     "@kbn/search-shared-ui",
     "@kbn/search-code-examples",
     "@kbn/search-api-keys-components",
+    "@kbn/react-query",
     "@kbn/doc-links",
+    "@kbn/cloud",
+    "@kbn/deeplinks-search",
   ],
   "exclude": [
     "target/**/*"

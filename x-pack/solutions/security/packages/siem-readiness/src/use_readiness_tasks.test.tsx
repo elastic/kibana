@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useReadinessTasks } from './use_readiness_tasks';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {

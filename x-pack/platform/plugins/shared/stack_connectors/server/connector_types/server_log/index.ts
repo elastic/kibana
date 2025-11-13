@@ -6,8 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
 
 import type { Logger, LogMeta } from '@kbn/core/server';
 import type {
@@ -20,51 +18,37 @@ import {
   UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
+import {
+  CONNECTOR_NAME,
+  CONNECTOR_ID,
+  ConfigSchema,
+  SecretsSchema,
+  ParamsSchema,
+} from '@kbn/connector-schemas/server_log';
+import type { Config, Secrets, ActionParamsType } from '@kbn/connector-schemas/server_log';
 import { withoutControlCharacters } from '../lib/string_utils';
 
 export type ServerLogConnectorType = ConnectorType<{}, {}, ActionParamsType>;
 export type ServerLogConnectorTypeExecutorOptions = ConnectorTypeExecutorOptions<
-  {},
-  {},
+  Config,
+  Secrets,
   ActionParamsType
 >;
 
-// params definition
-
-export type ActionParamsType = TypeOf<typeof ParamsSchema>;
-
-const ParamsSchema = schema.object({
-  message: schema.string(),
-  level: schema.oneOf(
-    [
-      schema.literal('trace'),
-      schema.literal('debug'),
-      schema.literal('info'),
-      schema.literal('warn'),
-      schema.literal('error'),
-      schema.literal('fatal'),
-    ],
-    { defaultValue: 'info' }
-  ),
-});
-
-export const ConnectorTypeId = '.server-log';
 // connector type definition
 export function getConnectorType(): ServerLogConnectorType {
   return {
-    id: ConnectorTypeId,
+    id: CONNECTOR_ID,
     minimumLicenseRequired: 'basic',
-    name: i18n.translate('xpack.stackConnectors.serverLog.title', {
-      defaultMessage: 'Server log',
-    }),
+    name: CONNECTOR_NAME,
     supportedFeatureIds: [
       AlertingConnectorFeatureId,
       UptimeConnectorFeatureId,
       SecurityConnectorFeatureId,
     ],
     validate: {
-      config: { schema: schema.object({}, { defaultValue: {} }) },
-      secrets: { schema: schema.object({}, { defaultValue: {} }) },
+      config: { schema: ConfigSchema },
+      secrets: { schema: SecretsSchema },
       params: {
         schema: ParamsSchema,
       },

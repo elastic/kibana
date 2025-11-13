@@ -10,6 +10,7 @@ import { EuiButtonEmpty, EuiFlexItem } from '@elastic/eui';
 import { type DataView } from '@kbn/data-views-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getAbbreviatedNumber } from '@kbn/cloud-security-posture-common';
+import { i18n } from '@kbn/i18n';
 import { FieldsSelectorModal, useFieldsModal } from './fields_selector';
 import { useStyles } from './use_styles';
 import { CSP_FIELDS_SELECTOR_OPEN_BUTTON } from '../test_subjects';
@@ -59,7 +60,18 @@ export const AdditionalControls = ({
         />
       )}
       <EuiFlexItem grow={0}>
-        <span className="cspDataTableTotal">{`${getAbbreviatedNumber(total)} ${title}`}</span>
+        <div
+          className="cspDataTableTotal"
+          role="status"
+          aria-live="polite"
+          aria-label={i18n.translate('xpack.csp.dataTable.totalFindings', {
+            defaultMessage: 'Total findings: {total} {title}',
+            values: { total: getAbbreviatedNumber(total), title },
+          })}
+          tabIndex={0}
+        >
+          {`${getAbbreviatedNumber(total)} ${title}`}
+        </div>
       </EuiFlexItem>
       <EuiFlexItem grow={0}>
         <EuiButtonEmpty
@@ -68,6 +80,12 @@ export const AdditionalControls = ({
           size="xs"
           color="text"
           data-test-subj={CSP_FIELDS_SELECTOR_OPEN_BUTTON}
+          aria-label={i18n.translate('xpack.csp.dataTable.fieldsButtonAriaLabel', {
+            defaultMessage: 'Open fields selector to customize table columns',
+          })}
+          title={i18n.translate('xpack.csp.dataTable.fieldsButtonTooltip', {
+            defaultMessage: 'Select which fields to display in the table',
+          })}
         >
           <FormattedMessage id="xpack.csp.dataTable.fieldsButton" defaultMessage="Fields" />
         </EuiButtonEmpty>

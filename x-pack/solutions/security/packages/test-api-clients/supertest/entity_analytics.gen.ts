@@ -41,6 +41,10 @@ import type {
 import type { DeleteMonitoringEngineRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/engine/delete.gen';
 import type { DeletePrivMonUserRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/users/delete.gen';
 import type {
+  DeleteSingleEntityRequestParamsInput,
+  DeleteSingleEntityRequestBodyInput,
+} from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/entities/delete_entity.gen';
+import type {
   DeprecatedTriggerRiskScoreCalculationRequestBodyInput,
   TriggerRiskScoreCalculationRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/entity_calculation_route.gen';
@@ -240,6 +244,24 @@ If a record already exists for the specified entity, that record is overwritten 
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
+    /**
+      * Delete a single entity in Entity Store.
+The entity will be immediately deleted from the latest index.  It will remain available in historical snapshots if it has been snapshotted.  The delete operation does not prevent the entity from being recreated if it is observed again in the future. 
+
+      */
+    deleteSingleEntity(props: DeleteSingleEntityProps, kibanaSpace: string = 'default') {
+      return supertest
+        .delete(
+          getRouteUrlForSpace(
+            replaceParams('/api/entity_store/entities/{entityType}', props.params),
+            kibanaSpace
+          )
+        )
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
     },
     /**
      * Calculates and persists Risk Scores for an entity, returning the calculated risk score.
@@ -703,6 +725,10 @@ export interface DeleteMonitoringEngineProps {
 }
 export interface DeletePrivMonUserProps {
   params: DeletePrivMonUserRequestParamsInput;
+}
+export interface DeleteSingleEntityProps {
+  params: DeleteSingleEntityRequestParamsInput;
+  body: DeleteSingleEntityRequestBodyInput;
 }
 export interface DeprecatedTriggerRiskScoreCalculationProps {
   body: DeprecatedTriggerRiskScoreCalculationRequestBodyInput;

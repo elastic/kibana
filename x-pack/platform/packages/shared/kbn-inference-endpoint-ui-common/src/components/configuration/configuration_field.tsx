@@ -7,25 +7,37 @@
 
 import React, { useEffect, useState } from 'react';
 
+import type { EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiAccordion,
+  EuiButton,
+  EuiButtonIcon,
   EuiFieldText,
   EuiFieldPassword,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFormControlLayout,
+  EuiFormRow,
   EuiSwitch,
   EuiTextArea,
   EuiFieldNumber,
 } from '@elastic/eui';
 
 import { isEmpty } from 'lodash/fp';
-import type { ConfigEntryView } from '../../types/types';
-import { FieldType } from '../../types/types';
+import { FieldType, type Map, type ConfigEntryView } from '../../types/types';
+import {
+  ADD_LABEL,
+  DELETE_LABEL,
+  HEADERS_KEY_LABEL,
+  HEADERS_VALUE_LABEL,
+  HEADERS_SWITCH_LABEL,
+} from '../../translations';
 import { ensureBooleanType, ensureCorrectTyping, ensureStringType } from './configuration_utils';
 
 interface ConfigurationFieldProps {
   configEntry: ConfigEntryView;
   isLoading: boolean;
-  setConfigValue: (value: number | string | boolean | null) => void;
+  setConfigValue: (value: number | string | boolean | null | Map) => void;
   isEdit?: boolean;
   isPreconfigured?: boolean;
 }
@@ -33,10 +45,14 @@ interface ConfigurationFieldProps {
 interface ConfigInputFieldProps {
   configEntry: ConfigEntryView;
   isLoading: boolean;
-  validateAndSetConfigValue: (value: string | boolean) => void;
+  validateAndSetConfigValue: (value: string | boolean | Map) => void;
   isEdit?: boolean;
   isPreconfigured?: boolean;
 }
+
+const KEY_INDEX = 0;
+const VALUE_INDEX = 1;
+
 export const ConfigInputField: React.FC<ConfigInputFieldProps> = ({
   configEntry,
   isLoading,
@@ -200,6 +216,134 @@ export const ConfigInputPassword: React.FC<ConfigInputFieldProps> = ({
   );
 };
 
+const emptyHeaders: Map = { '': '' };
+
+export const ConfigInputMapField: React.FC<ConfigInputFieldProps> = ({
+  configEntry,
+  isLoading,
+  validateAndSetConfigValue,
+  isEdit = false,
+}) => {
+  const { isValid, value, default_value: defaultValue, key, updatable } = configEntry;
+  const [showHeaderInputs, setShowHeaderInputs] = useState<boolean>(false);
+  const [headers, setHeaders] = useState<Map>((value as Map) ?? defaultValue ?? emptyHeaders);
+
+  const onChange = (e: EuiSwitchEvent) => {
+    setShowHeaderInputs(e.target.checked);
+    // clear headers if unchecking
+    if (e.target.checked === false) {
+      setHeaders(emptyHeaders);
+      validateAndSetConfigValue('');
+    }
+  };
+
+  const iterableHeaders: [string, string][] = Object.entries(headers);
+
+  const handleHeaderChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    headerIndex: number,
+    elementIndex: number
+  ) => {
+    setHeaders((prevHeaders) => {
+      const newHeaders = [...Object.entries(prevHeaders)];
+      newHeaders[headerIndex][elementIndex] = e.target.value;
+      const headersObj = Object.fromEntries(newHeaders);
+      validateAndSetConfigValue(headersObj);
+      return headersObj;
+    });
+  };
+
+  return (
+    <>
+      <EuiFlexGroup direction="column" gutterSize="s" data-test-subj={'config-field-map-type'}>
+        <EuiFlexItem grow={false}>
+          <EuiSwitch
+            data-test-subj={`${key}-switch-${showHeaderInputs ? 'checked' : 'unchecked'}`}
+            label={HEADERS_SWITCH_LABEL}
+            checked={showHeaderInputs}
+            onChange={(e) => onChange(e)}
+          />
+        </EuiFlexItem>
+        {showHeaderInputs
+          ? iterableHeaders.map((header, index) => (
+              <EuiFlexItem key={`${key}-header-${index}`}>
+                <EuiFlexGroup gutterSize="s" alignItems="center">
+                  <EuiFlexItem>
+                    <EuiFormRow label={HEADERS_KEY_LABEL}>
+                      <EuiFieldText
+                        data-test-subj={`${key}-key-${index}`}
+                        isInvalid={!isValid}
+                        disabled={isLoading || (isEdit && !updatable)}
+                        value={header[0]}
+                        onChange={(e) => {
+                          handleHeaderChange(e, index, KEY_INDEX);
+                        }}
+                        aria-label={HEADERS_KEY_LABEL}
+                      />
+                    </EuiFormRow>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiFormRow label={HEADERS_VALUE_LABEL}>
+                      <EuiFieldText
+                        data-test-subj={`${key}-value-${index}`}
+                        disabled={isLoading || (isEdit && !updatable)}
+                        value={header[1]}
+                        onChange={(e) => {
+                          handleHeaderChange(e, index, VALUE_INDEX);
+                        }}
+                        aria-label={HEADERS_VALUE_LABEL}
+                      />
+                    </EuiFormRow>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonIcon
+                      disabled={isLoading || (isEdit && !updatable)}
+                      display="base"
+                      color="danger"
+                      css={{ marginTop: '22px' }}
+                      onClick={() => {
+                        const newHeaders = iterableHeaders.toSpliced(index, 1);
+                        const headersObj = Object.fromEntries(newHeaders);
+                        setHeaders(headersObj);
+                        validateAndSetConfigValue(headersObj);
+                      }}
+                      iconType="minusInCircle"
+                      aria-label={DELETE_LABEL}
+                      data-test-subj={`${key}-delete-button-${index}`}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            ))
+          : null}
+        <EuiFlexItem grow={false}>
+          <span>
+            <EuiButton
+              size="s"
+              disabled={
+                isLoading ||
+                (isEdit && !updatable) ||
+                (!isEdit &&
+                  iterableHeaders.length === 1 &&
+                  (iterableHeaders[0][0] === '' || iterableHeaders[0][1] === ''))
+              }
+              iconType="plusInCircle"
+              onClick={() => {
+                const newHeaders = [...iterableHeaders, ['', '']];
+                setHeaders(Object.fromEntries(newHeaders));
+              }}
+              data-test-subj={`${key}-add-button`}
+              aria-label={ADD_LABEL}
+            >
+              {ADD_LABEL}
+            </EuiButton>
+          </span>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
+  );
+};
+
 export const ConfigurationField: React.FC<ConfigurationFieldProps> = ({
   configEntry,
   isLoading,
@@ -207,7 +351,7 @@ export const ConfigurationField: React.FC<ConfigurationFieldProps> = ({
   isEdit,
   isPreconfigured,
 }) => {
-  const validateAndSetConfigValue = (value: number | string | boolean) => {
+  const validateAndSetConfigValue = (value: number | string | boolean | Map) => {
     setConfigValue(ensureCorrectTyping(configEntry.type, value));
   };
 
@@ -229,6 +373,16 @@ export const ConfigurationField: React.FC<ConfigurationFieldProps> = ({
     case FieldType.BOOLEAN:
       return (
         <ConfigSwitchField
+          isLoading={isLoading}
+          configEntry={configEntry}
+          validateAndSetConfigValue={validateAndSetConfigValue}
+        />
+      );
+
+    case FieldType.MAP:
+      return (
+        <ConfigInputMapField
+          isEdit={isEdit}
           isLoading={isLoading}
           configEntry={configEntry}
           validateAndSetConfigValue={validateAndSetConfigValue}

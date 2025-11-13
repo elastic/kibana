@@ -163,12 +163,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.editDimensionLabel('Test of label');
       await PageObjects.lens.editDimensionFormat('Percent');
       await PageObjects.lens.editDimensionColor('#ff0000');
-      await PageObjects.lens.openVisualOptions();
+
+      await PageObjects.lens.openStyleSettingsFlyout();
 
       await PageObjects.lens.setCurvedLines('CURVE_MONOTONE_X');
       await PageObjects.lens.editMissingValues('Linear');
 
       await PageObjects.lens.assertMissingValues('Linear');
+
+      await PageObjects.lens.closeFlyoutWithBackButton();
 
       await PageObjects.lens.openDimensionEditor('lnsXY_yDimensionPanel > lns-dimensionTrigger');
       await PageObjects.lens.assertColor('#ff0000');
@@ -253,8 +256,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should show value labels on bar charts when enabled', async () => {
       // enable value labels
-      await PageObjects.lens.openTextOptions();
+      await PageObjects.lens.openStyleSettingsFlyout();
       await testSubjects.click('lns_valueLabels_inside');
+      await PageObjects.lens.closeFlyoutWithBackButton();
 
       // check for value labels
       const data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
@@ -263,7 +267,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should override axis title', async () => {
       const axisTitle = 'overridden axis';
-      await PageObjects.lens.toggleToolbarPopover('lnsLeftAxisButton');
+      await PageObjects.lens.openStyleSettingsFlyout();
       await testSubjects.setValue('lnsyLeftAxisTitle', axisTitle, {
         clearWithKeyboard: true,
       });
@@ -276,6 +280,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
       expect(data?.axes?.y?.[1].gridlines.length).to.eql(0);
+
+      await PageObjects.lens.closeFlyoutWithBackButton();
     });
 
     it('should transition from a multi-layer stacked bar to treemap chart using suggestions', async () => {
@@ -742,11 +748,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualize.clickVisType('lens');
       await PageObjects.lens.switchToVisualization('pie');
 
-      const hasVisualOptionsButton = await PageObjects.lens.hasVisualOptionsButton();
-      expect(hasVisualOptionsButton).to.be(true);
+      await PageObjects.lens.openStyleSettingsFlyout();
 
       const donutHole = await PageObjects.lens.getDonutHoleSize();
       expect(donutHole).to.be('None');
+
+      await PageObjects.lens.closeFlyoutWithBackButton();
     });
 
     it('switches donut hole size', async () => {

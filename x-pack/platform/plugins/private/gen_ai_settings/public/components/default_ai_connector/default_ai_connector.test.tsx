@@ -9,7 +9,7 @@ import { act, render, screen } from '@testing-library/react';
 import { DefaultAIConnector } from './default_ai_connector';
 import React from 'react';
 import { SettingsContextProvider, useSettingsContext } from '../../contexts/settings_context';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { I18nProvider } from '@kbn/i18n-react';
 import userEvent from '@testing-library/user-event';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';

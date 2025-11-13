@@ -32,7 +32,7 @@ import { getCustomAssets } from './custom_assets';
 import type { SyncIntegrationsData } from './model';
 
 export const TYPE = 'fleet:sync-integrations-task';
-export const VERSION = '1.0.5';
+export const VERSION = '1.0.6';
 const TITLE = 'Fleet Sync Integrations Task';
 const SCOPE = ['fleet'];
 const DEFAULT_INTERVAL = '5m';
@@ -115,7 +115,7 @@ export class SyncIntegrationsTask {
   }
 
   private endRun(msg: string = '') {
-    this.logger.info(`[SyncIntegrationsTask] runTask ended${msg ? ': ' + msg : ''}`);
+    this.logger.debug(`[SyncIntegrationsTask] runTask ended${msg ? ': ' + msg : ''}`);
   }
 
   public runTask = async (
@@ -135,7 +135,7 @@ export class SyncIntegrationsTask {
       return getDeleteTaskRunResult();
     }
 
-    this.logger.info(`[runTask()] started`);
+    this.logger.debug(`[runTask()] started`);
 
     if (!canEnableSyncIntegrations()) {
       this.logger.debug(`[SyncIntegrationsTask] Remote synced integration cannot be enabled.`);
@@ -241,7 +241,11 @@ export class SyncIntegrationsTask {
       sortOrder: 'asc',
     });
     newDoc.integrations = packageSavedObjects.saved_objects
-      .filter((item) => item.attributes.install_source === 'registry')
+      .filter(
+        (item) =>
+          item.attributes.install_source === 'registry' ||
+          item.attributes.install_source === 'bundled'
+      ) // not included install sources: 'custom' and 'upload'
       .map((item) => {
         return {
           package_name: item.attributes.name,

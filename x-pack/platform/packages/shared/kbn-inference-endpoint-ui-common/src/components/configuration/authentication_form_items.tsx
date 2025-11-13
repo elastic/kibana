@@ -8,7 +8,7 @@
 import React, { useMemo, useState } from 'react';
 import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { ConfigEntryView } from '../../types/types';
+import type { ConfigEntryView, Map } from '../../types/types';
 import { ItemFormRow } from './item_form_row';
 
 interface AuthenticationFormItemsProps {
@@ -16,7 +16,7 @@ interface AuthenticationFormItemsProps {
   isLoading: boolean;
   isPreconfigured?: boolean;
   items: ConfigEntryView[];
-  setConfigEntry: (key: string, value: string | number | boolean | null) => void;
+  setConfigEntry: (key: string, value: string | number | boolean | null | Map) => void;
   reenterSecretsOnEdit?: boolean;
 }
 
@@ -42,7 +42,7 @@ export const AuthenticationFormItems: React.FC<AuthenticationFormItemsProps> = (
       })),
     [items]
   );
-  const configEntry = useMemo(
+  const selectedConfigEntry = useMemo(
     () => items.find((item) => item.key === authType) || items[0],
     [authType, items]
   );
@@ -60,28 +60,44 @@ export const AuthenticationFormItems: React.FC<AuthenticationFormItemsProps> = (
         </EuiTitle>
       </EuiFlexItem>
       {isMultiAuthType ? (
-        <EuiFlexItem grow={false}>
-          <EuiButtonGroup
-            isDisabled={isLoading}
-            data-test-subj="authTypeSelect"
-            legend="Authentication type"
-            defaultValue={authType}
-            idSelected={authType}
-            onChange={(id) => setAuthType(id)}
-            options={authTypeOptions}
-            color="text"
-            type="single"
+        <>
+          <EuiFlexItem grow={false}>
+            <EuiButtonGroup
+              isDisabled={isLoading}
+              data-test-subj="authTypeSelect"
+              legend="Authentication type"
+              defaultValue={authType}
+              idSelected={authType}
+              onChange={(id) => setAuthType(id)}
+              options={authTypeOptions}
+              color="text"
+              type="single"
+            />
+          </EuiFlexItem>
+          <ItemFormRow
+            configEntry={selectedConfigEntry}
+            isPreconfigured={isPreconfigured}
+            isEdit={isEdit}
+            isLoading={isLoading}
+            setConfigEntry={setConfigEntry}
+            reenterSecretsOnEdit={reenterSecretsOnEdit}
           />
-        </EuiFlexItem>
+        </>
       ) : null}
-      <ItemFormRow
-        configEntry={configEntry}
-        isPreconfigured={isPreconfigured}
-        isEdit={isEdit}
-        isLoading={isLoading}
-        setConfigEntry={setConfigEntry}
-        reenterSecretsOnEdit={reenterSecretsOnEdit}
-      />
+      {isMultiAuthType === false
+        ? items.map((configEntry) => {
+            return (
+              <ItemFormRow
+                configEntry={configEntry}
+                isPreconfigured={isPreconfigured}
+                isEdit={isEdit}
+                isLoading={isLoading}
+                setConfigEntry={setConfigEntry}
+                reenterSecretsOnEdit={reenterSecretsOnEdit}
+              />
+            );
+          })
+        : null}
     </EuiFlexGroup>
   );
 };

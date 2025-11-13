@@ -256,7 +256,7 @@ describe('Tab', () => {
     expect(onLabelEdited).not.toHaveBeenCalled();
   });
 
-  it('shows preview when disablePreview is false', async () => {
+  it('shows preview when getPreviewData is set', async () => {
     const user = userEvent.setup({ delay: null, advanceTimers: jest.advanceTimersByTime });
     const onLabelEdited = jest.fn();
     const onSelect = jest.fn();
@@ -273,7 +273,6 @@ describe('Tab', () => {
         onLabelEdited={onLabelEdited}
         onSelect={onSelect}
         onClose={onClose}
-        disablePreview={false}
       />
     );
 
@@ -288,12 +287,14 @@ describe('Tab', () => {
     });
 
     await waitFor(() => {
+      const tabWithBackground = screen.getByTestId(`unifiedTabs_tab_${tabItem.id}`);
+      expect(tabWithBackground).toBeInTheDocument();
       const preview = screen.getByTestId(`unifiedTabs_tabPreviewCodeBlock_${tabItem.id}`);
       expect(preview).toBeInTheDocument();
     });
   });
 
-  it('does not show preview when disablePreview is true', async () => {
+  it('does not show preview when getPreviewData is not set', async () => {
     const user = userEvent.setup({ delay: null, advanceTimers: jest.advanceTimersByTime });
     const onLabelEdited = jest.fn();
     const onSelect = jest.fn();
@@ -306,11 +307,9 @@ describe('Tab', () => {
         item={tabItem}
         isSelected={false}
         services={servicesMock}
-        getPreviewData={getPreviewDataMock}
         onLabelEdited={onLabelEdited}
         onSelect={onSelect}
         onClose={onClose}
-        disablePreview={true}
       />
     );
 
@@ -325,6 +324,8 @@ describe('Tab', () => {
     });
 
     await waitFor(() => {
+      const tabWithBackground = screen.getByTestId(`unifiedTabs_tab_${tabItem.id}`);
+      expect(tabWithBackground).toBeInTheDocument();
       const preview = screen.queryByTestId(`unifiedTabs_tabPreviewCodeBlock_${tabItem.id}`);
       expect(preview).not.toBeInTheDocument();
     });

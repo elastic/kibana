@@ -7,12 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import { uniqBy } from 'lodash';
-import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
+import { within } from '../../../ast/location';
+import { isOptionNode } from '../../../ast/is';
 import { buildFieldsDefinitionsWithMetadata } from '../../../definitions/utils';
-import { isColumn } from '../../../ast/is';
-import { columnExists, handleFragment } from '../../../definitions/utils/autocomplete/helpers';
-import { unescapeColumnName } from '../../../definitions/utils/shared';
 import * as mutate from '../../../mutate';
 import { LeafPrinter } from '../../../pretty_print/leaf_printer';
 import type {
@@ -20,25 +17,22 @@ import type {
   ESQLAstJoinCommand,
   ESQLCommand,
   ESQLCommandOption,
+  ESQLSingleAstItem,
 } from '../../../types';
-import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
 
 import type { ICommand } from '../../registry';
 import type {
-  ESQLColumnData,
   ESQLFieldWithMetadata,
   GetColumnsByTypeFn,
   ICommandContext,
   ISuggestionItem,
 } from '../../types';
-import type { JoinCommandPosition, JoinPosition, JoinStaticPosition } from './types';
+import type { JoinCommandPosition, JoinStaticPosition } from './types';
 
 const REGEX =
-  /^(?<type>\w+((?<after_type>\s+((?<mnemonic>(JOIN|JOI|JO|J)((?<after_mnemonic>\s+((?<index>\S+((?<after_index>\s+(?<as>(AS|A))?(?<after_as>\s+(((?<alias>\S+)?(?<after_alias>\s+)?)?))?((?<on>(ON|O)((?<after_on>\s+(?<cond>[^\s])?)?))?))?))?))?))?))?))?/i;
+  /^(?<type>\w+((?<after_type>\s+((?<mnemonic>(JOIN|JOI|JO|J)((?<after_mnemonic>\s+((?<index>\S+((?<after_index>\s+(?<as>(AS|A))?(?<after_as>\s+(((?<alias>\S+)?(?<after_alias>\s+)?)?))?((?<on>(ON|O))?))?))?))?))?))?))?/i;
 
-const positions: Array<JoinStaticPosition | 'cond'> = [
-  'cond',
-  'after_on',
+const positions: JoinStaticPosition[] = [
   'on',
   'after_alias',
   'alias',
@@ -94,134 +88,15 @@ export const getLookupFields = async (
   return columns;
 };
 
-export const getFieldSuggestions = async (
-  command: ESQLCommand,
-  getColumnsByType: GetColumnsByTypeFn,
-  getColumnsForQuery: (query: string) => Promise<ESQLFieldWithMetadata[]>,
-  context?: ICommandContext
-) => {
-  if (!context) {
-    return { suggestions: [], lookupIndexFieldExists: () => false };
-  }
-
-  const onOption = command.args.find(
-    (arg) => !Array.isArray(arg) && arg.name === 'on'
-  ) as ESQLCommandOption;
-
-  const ignoredFields = onOption.args.map((arg) => (isColumn(arg) ? arg.parts.join('.') : ''));
-
-  const [lookupIndexFields, sourceFields] = await Promise.all([
-    getLookupFields(command, getColumnsForQuery, context),
-    getColumnsByType(['any'], ignoredFields, {
-      advanceCursor: false,
-      openSuggestions: true,
-    }),
-  ]);
-
-  const joinFields = buildFieldsDefinitionsWithMetadata(
-    lookupIndexFields.filter((f) => !ignoredFields.includes(f.name)),
-    [],
-    { supportsControls: false }, // Controls are being added as part of the sourceFields, no need to add them again as joinFields.
-    context?.variables
-  );
-
-  const intersection = suggestionIntersection(joinFields, sourceFields);
-  const union = suggestionUnion(sourceFields, joinFields);
-
-  for (const commonField of intersection) {
-    commonField.sortText = '1';
-    commonField.documentation = {
-      value: i18n.translate('kbn-esql-ast.esql.autocomplete.join.sharedField', {
-        defaultMessage: 'Field shared between the source and the lookup index',
-      }),
-    };
-
-    let detail = commonField.detail || '';
-
-    if (detail) {
-      detail += ' ';
-    }
-
-    detail += i18n.translate('kbn-esql-ast.esql.autocomplete.join.commonFieldNote', {
-      defaultMessage: '(common field)',
-    });
-
-    commonField.detail = detail;
-  }
-
-  return {
-    suggestions: uniqBy([...intersection, ...union], 'label'),
-    lookupIndexFieldExists: (field: string) =>
-      lookupIndexFieldSet.set.has(unescapeColumnName(field)),
-  };
-};
-
-export const suggestFields = async (
-  innerText: string,
-  command: ESQLAstAllCommands,
-  getColumnsByType: GetColumnsByTypeFn,
-  getColumnsForQuery: (query: string) => Promise<ESQLColumnData[]>,
-  context?: ICommandContext
-) => {
-  if (!context) {
-    return [];
-  }
-
-  const { suggestions: fieldSuggestions, lookupIndexFieldExists } = await getFieldSuggestions(
-    command as ESQLCommand,
-    getColumnsByType,
-    // this type cast is ok because getFieldSuggestions only ever fetches columns
-    // from a bare FROM clause, so they will always be fields, not user-defined columns
-    getColumnsForQuery as (query: string) => Promise<ESQLFieldWithMetadata[]>,
-    context
-  );
-
-  return handleFragment(
-    innerText,
-    (fragment) => columnExists(fragment, context) || lookupIndexFieldExists(fragment),
-    (_fragment: string, rangeToReplace?: { start: number; end: number }) => {
-      // fie<suggest>
-      return fieldSuggestions.map((suggestion) => {
-        return withAutoSuggest({
-          ...suggestion,
-          text: suggestion.text,
-          rangeToReplace,
-        });
-      });
-    },
-    (fragment: string, rangeToReplace: { start: number; end: number }) => {
-      // field<suggest>
-      const finalSuggestions = [{ ...pipeCompleteItem, text: ' | ' }];
-      // when we fix the editor marker, this should probably be checked against 0 instead of 1
-      // this is because the last field in the AST is currently getting removed (because it contains
-      // the editor marker) so it is not included in the ignored list which is used to filter out
-      // existing fields above.
-      if (fieldSuggestions.length > 1) finalSuggestions.push({ ...commaCompleteItem, text: ', ' });
-
-      return finalSuggestions.map<ISuggestionItem>((s) =>
-        withAutoSuggest({
-          ...s,
-          filterText: fragment,
-          text: fragment + s.text,
-          rangeToReplace,
-        })
-      );
-    }
-  );
-};
-
-/**
- * Returns the static position, or `cond` if the caret is in the `<conditions>`
- * part of the command, in which case further parsing is needed.
- */
-const getStaticPosition = (text: string): JoinStaticPosition | 'cond' => {
+/** Returns the position based on regex matching. */
+export const getStaticPosition = (text: string): JoinStaticPosition => {
   const match = text.match(REGEX);
 
   if (!match || !match.groups) {
     return 'none';
   }
 
-  let pos: JoinStaticPosition | 'cond' = 'cond';
+  let pos: JoinStaticPosition = 'none';
 
   for (const position of positions) {
     if (match.groups[position]) {
@@ -233,60 +108,183 @@ const getStaticPosition = (text: string): JoinStaticPosition | 'cond' => {
   return pos;
 };
 
-export const getPosition = (text: string): JoinCommandPosition => {
-  const pos0: JoinStaticPosition | 'cond' = getStaticPosition(text);
-  const pos: JoinPosition = pos0 === 'cond' ? 'condition' : pos0;
+export const getOnOption = (command: ESQLAstJoinCommand): ESQLCommandOption | undefined => {
+  return command.args?.find((arg) => isOptionNode(arg) && arg.name === 'on') as
+    | ESQLCommandOption
+    | undefined;
+};
+
+export const getPosition = (
+  text: string,
+  command: ESQLAstAllCommands,
+  cursorPosition: number
+): JoinCommandPosition => {
+  const pos = getStaticPosition(text);
+  const joinCommand = command as ESQLAstJoinCommand;
+  const onOption = getOnOption(joinCommand);
+
+  if (onOption) {
+    const expressions = onOption.args as ESQLSingleAstItem[];
+
+    // No expressions yet or starting new expression after comma
+    if (expressions.length === 0 || /,\s*$/.test(text)) {
+      return { pos: 'on_expression', expression: undefined, isExpressionComplete: false };
+    }
+
+    const lastExpression = expressions[expressions.length - 1];
+
+    // Cursor within incomplete expression
+    if (
+      lastExpression?.incomplete &&
+      lastExpression.location &&
+      within(cursorPosition, lastExpression)
+    ) {
+      return { pos: 'on_expression', expression: lastExpression, isExpressionComplete: false };
+    }
+
+    // Cursor within any complete expression
+    for (const expr of expressions) {
+      if (expr.location && within(cursorPosition, expr)) {
+        return { pos: 'on_expression', expression: expr, isExpressionComplete: !expr.incomplete };
+      }
+    }
+
+    // Cursor after all expressions
+    return {
+      pos: 'on_expression',
+      expression: lastExpression,
+      isExpressionComplete: !lastExpression?.incomplete,
+    };
+  }
+
+  return { pos };
+};
+
+/**
+ * Identifies common fields between source and lookup suggestions and marks them appropriately.
+ * Common fields are those that exist in both source and lookup with the same label.
+
+ */
+export const markCommonFields = (
+  sourceSuggestions: ISuggestionItem[],
+  lookupSuggestions: ISuggestionItem[]
+): {
+  markedSourceSuggestions: ISuggestionItem[];
+  uniqueLookupSuggestions: ISuggestionItem[];
+  commonFieldLabels: Set<string>;
+} => {
+  const sourceLabels = new Set(sourceSuggestions.map(({ label }) => label));
+  const commonFieldLabels = new Set(
+    lookupSuggestions.map(({ label }) => label).filter((label) => sourceLabels.has(label))
+  );
+
+  // Mark common fields in source suggestions
+  const markedSourceSuggestions = sourceSuggestions.map((suggestion) => {
+    if (commonFieldLabels.has(suggestion.label)) {
+      let detail = suggestion.detail || '';
+
+      if (detail) {
+        detail += ' ';
+      }
+
+      detail += i18n.translate('kbn-esql-ast.esql.autocomplete.join.commonFieldNote', {
+        defaultMessage: '(common field)',
+      });
+
+      return {
+        ...suggestion,
+        sortText: '1-' + (suggestion.sortText || suggestion.label),
+        detail,
+        documentation: {
+          value: i18n.translate('kbn-esql-ast.esql.autocomplete.join.sharedField', {
+            defaultMessage: 'Field shared between the source and the lookup index',
+          }),
+        },
+      };
+    }
+
+    return suggestion;
+  });
+
+  // Filter out duplicate lookup fields
+  const uniqueLookupSuggestions = lookupSuggestions.filter(
+    ({ label }) => !commonFieldLabels.has(label)
+  );
 
   return {
-    pos,
-    type: '',
+    markedSourceSuggestions,
+    uniqueLookupSuggestions,
+    commonFieldLabels,
   };
 };
 
-export const suggestionIntersection = (
-  suggestions1: ISuggestionItem[],
-  suggestions2: ISuggestionItem[]
-): ISuggestionItem[] => {
-  const labels1 = new Set<string>();
-  const intersection: ISuggestionItem[] = [];
-
-  for (const suggestion1 of suggestions1) {
-    labels1.add(suggestion1.label);
+/** Creates an enriched context that includes lookup table fields in the columns map. */
+export const createEnrichedContext = async (
+  originalContext: ICommandContext | undefined,
+  joinCommand: ESQLAstJoinCommand,
+  getColumnsForQuery: (query: string) => Promise<ESQLFieldWithMetadata[]>
+): Promise<ICommandContext | undefined> => {
+  if (!originalContext) {
+    return undefined;
   }
 
-  for (const suggestion2 of suggestions2) {
-    if (labels1.has(suggestion2.label)) {
-      intersection.push({ ...suggestion2 });
+  const lookupFields = await getLookupFields(joinCommand, getColumnsForQuery, originalContext);
+  const enrichedColumns = new Map(originalContext.columns);
+
+  for (const field of lookupFields) {
+    if (!enrichedColumns.has(field.name)) {
+      enrichedColumns.set(field.name, field);
     }
   }
 
-  return intersection;
+  return {
+    ...originalContext,
+    columns: enrichedColumns,
+  };
 };
 
-export const suggestionUnion = (
-  suggestions1: ISuggestionItem[],
-  suggestions2: ISuggestionItem[]
-): ISuggestionItem[] => {
-  const labels = new Set<string>();
-  const union: ISuggestionItem[] = [];
+/**
+ * Creates an enriched getByType function that includes lookup table fields
+ * in addition to the source table fields.
+ */
+export const createEnrichedGetByType = async (
+  originalGetByType: GetColumnsByTypeFn,
+  joinCommand: ESQLAstJoinCommand,
+  getColumnsForQuery: (query: string) => Promise<ESQLFieldWithMetadata[]>,
+  context?: ICommandContext
+): Promise<GetColumnsByTypeFn> => {
+  const lookupFields = await getLookupFields(joinCommand, getColumnsForQuery, context);
 
-  for (const suggestion of suggestions1) {
-    const label = suggestion.label;
+  // Return wrapper function
+  return async (type: Readonly<string> | Readonly<string[]>, ignored?: string[], options?: any) => {
+    const sourceColumns = await originalGetByType(type, ignored, options);
+    const types = Array.isArray(type) ? type : [type];
+    const filteredLookupFields = lookupFields.filter(({ name, type: t }) => {
+      return !ignored?.includes(name) && (types[0] === 'any' || types.includes(t));
+    });
 
-    if (!labels.has(label)) {
-      union.push(suggestion);
-      labels.add(label);
-    }
+    const lookupSuggestions = buildFieldsDefinitionsWithMetadata(
+      filteredLookupFields,
+      [],
+      options,
+      context?.variables
+    );
+
+    // Use the utility function to mark common fields
+    const { markedSourceSuggestions, uniqueLookupSuggestions } = markCommonFields(
+      sourceColumns,
+      lookupSuggestions
+    );
+
+    return [...markedSourceSuggestions, ...uniqueLookupSuggestions];
+  };
+};
+
+// Check if a field is common (exists in both source and lookup tables)
+export const isCommonField = (fieldName: string, context?: ICommandContext): boolean => {
+  if (!context?.columns) {
+    return false;
   }
 
-  for (const suggestion of suggestions2) {
-    const label = suggestion.label;
-
-    if (!labels.has(label)) {
-      union.push(suggestion);
-      labels.add(label);
-    }
-  }
-
-  return union;
+  return context.columns.has(fieldName) && lookupIndexFieldSet.set.has(fieldName);
 };

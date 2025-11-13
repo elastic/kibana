@@ -198,7 +198,7 @@ export const WorkflowExecutionList = ({
 const componentStyles = {
   container: ({ euiTheme }: UseEuiTheme) =>
     css({
-      padding: euiTheme.size.s,
+      padding: euiTheme.size.m,
       height: '100%',
       overflow: 'hidden',
     }),

@@ -5,16 +5,19 @@
  * 2.0.
  */
 
-import { useMutation } from '@tanstack/react-query';
-import { useRef, useState } from 'react';
-import { useAgentId } from '../../hooks/use_conversation';
-import { useConversationActions } from '../../hooks/use_conversation_actions';
-import { useConversationId } from '../../hooks/use_conversation_id';
+import { useMutation } from '@kbn/react-query';
+import { useRef, useState, useMemo } from 'react';
+import { toToolMetadata } from '@kbn/onechat-browser/tools/browser_api_tool';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useAgentId, useConversation } from '../../hooks/use_conversation';
+import { useConversationContext } from '../conversation/conversation_context';
+import { useConversationId } from '../conversation/use_conversation_id';
 import { useOnechatServices } from '../../hooks/use_onechat_service';
 import { useReportConverseError } from '../../hooks/use_report_error';
 import { mutationKeys } from '../../mutation_keys';
 import { usePendingMessageState } from './use_pending_message_state';
 import { useSubscribeToChatEvents } from './use_subscribe_to_chat_events';
+import { BrowserToolExecutor } from '../../services/browser_tool_executor';
 
 interface UseSendMessageMutationProps {
   connectorId?: string;
@@ -22,14 +25,27 @@ interface UseSendMessageMutationProps {
 
 export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationProps = {}) => {
   const { chatService } = useOnechatServices();
+  const { services } = useKibana();
   const { reportConverseError } = useReportConverseError();
-  const conversationActions = useConversationActions();
+  const { conversationActions, getProcessedAttachments, browserApiTools } =
+    useConversationContext();
   const [isResponseLoading, setIsResponseLoading] = useState(false);
   const [agentReasoning, setAgentReasoning] = useState<string | null>(null);
   const conversationId = useConversationId();
   const isMutatingNewConversationRef = useRef(false);
   const agentId = useAgentId();
   const messageControllerRef = useRef<AbortController | null>(null);
+  const { conversation } = useConversation();
+
+  const browserApiToolsMetadata = useMemo(() => {
+    if (!browserApiTools) return undefined;
+    return browserApiTools.map(toToolMetadata);
+  }, [browserApiTools]);
+
+  const browserToolExecutor = useMemo(() => {
+    return new BrowserToolExecutor(services.notifications?.toasts);
+  }, [services.notifications?.toasts]);
+
   const {
     pendingMessageState: { error, pendingMessage },
     setPendingMessage,
@@ -41,19 +57,27 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
     setAgentReasoning,
     setIsResponseLoading,
     isAborted: () => Boolean(messageControllerRef?.current?.signal?.aborted),
+    browserToolExecutor,
   });
 
-  const sendMessage = ({ message }: { message: string }) => {
+  const sendMessage = async ({ message }: { message: string }) => {
     const signal = messageControllerRef.current?.signal;
     if (!signal) {
       return Promise.reject(new Error('Abort signal not present'));
     }
+
+    const processedAttachments = getProcessedAttachments
+      ? await getProcessedAttachments(conversation)
+      : [];
+
     const events$ = chatService.chat({
       signal,
       input: message,
       conversationId,
       agentId,
       connectorId,
+      attachments: processedAttachments,
+      browserApiTools: browserApiToolsMetadata,
     });
 
     return subscribeToChatEvents(events$);

@@ -76,14 +76,22 @@ export const ConnectorSelector: React.FC<ConnectorSelectorProps> = ({
     defaultConnectorId,
   });
 
-  // If no user preference is set, initialize with reasonable default connector
-  useEffect(() => {
-    if (!selectedConnectorId && !isLoading && initialConnectorId) {
-      onSelectConnector(initialConnectorId);
-    }
-  }, [selectedConnectorId, isLoading, initialConnectorId, onSelectConnector]);
-
   const selectedConnector = connectors.find((c) => c.id === selectedConnectorId);
+
+  useEffect(() => {
+    if (!isLoading && initialConnectorId) {
+      // No user preference set
+      if (!selectedConnectorId) {
+        onSelectConnector(initialConnectorId);
+      }
+      // User preference is set but connector is not available in the list.
+      // Scenario: the connector was deleted or admin changed GenAI settings
+      else if (selectedConnectorId && !selectedConnector) {
+        onSelectConnector(initialConnectorId);
+      }
+    }
+  }, [selectedConnectorId, selectedConnector, isLoading, initialConnectorId, onSelectConnector]);
+
   const selectedConnectorName = selectedConnector?.name || selectedConnectorId;
 
   const buttonLabel =

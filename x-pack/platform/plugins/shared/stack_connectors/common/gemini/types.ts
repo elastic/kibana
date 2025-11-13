@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
+import type { z } from '@kbn/zod';
 import type {
   ConfigSchema,
   DashboardActionParamsSchema,
@@ -22,16 +22,16 @@ import type {
   StreamingResponseSchema,
 } from './schema';
 
-export type Config = TypeOf<typeof ConfigSchema>;
-export type Secrets = TypeOf<typeof SecretsSchema>;
-export type RunActionParams = TypeOf<typeof RunActionParamsSchema>;
-export type RunApiResponse = TypeOf<typeof RunApiResponseSchema>;
-export type RunActionResponse = TypeOf<typeof RunActionResponseSchema>;
-export type RunActionRawResponse = TypeOf<typeof RunActionRawResponseSchema>;
-export type DashboardActionParams = TypeOf<typeof DashboardActionParamsSchema>;
-export type DashboardActionResponse = TypeOf<typeof DashboardActionResponseSchema>;
-export type InvokeAIActionParams = TypeOf<typeof InvokeAIActionParamsSchema>;
-export type InvokeAIActionResponse = TypeOf<typeof InvokeAIActionResponseSchema>;
-export type InvokeAIRawActionParams = TypeOf<typeof InvokeAIRawActionParamsSchema>;
-export type InvokeAIRawActionResponse = TypeOf<typeof InvokeAIRawActionResponseSchema>;
-export type StreamingResponse = TypeOf<typeof StreamingResponseSchema>;
+export type Config = z.input<typeof ConfigSchema>;
+export type Secrets = z.infer<typeof SecretsSchema>;
+export type RunActionParams = z.infer<typeof RunActionParamsSchema>;
+export type RunApiResponse = z.infer<typeof RunApiResponseSchema>;
+export type RunActionResponse = z.infer<typeof RunActionResponseSchema>;
+export type RunActionRawResponse = z.infer<typeof RunActionRawResponseSchema>;
+export type DashboardActionParams = z.infer<typeof DashboardActionParamsSchema>;
+export type DashboardActionResponse = z.infer<typeof DashboardActionResponseSchema>;
+export type InvokeAIActionParams = z.infer<typeof InvokeAIActionParamsSchema>;
+export type InvokeAIActionResponse = z.infer<typeof InvokeAIActionResponseSchema>;
+export type InvokeAIRawActionParams = z.infer<typeof InvokeAIRawActionParamsSchema>;
+export type InvokeAIRawActionResponse = z.infer<typeof InvokeAIRawActionResponseSchema>;
+export type StreamingResponse = z.infer<typeof StreamingResponseSchema>;

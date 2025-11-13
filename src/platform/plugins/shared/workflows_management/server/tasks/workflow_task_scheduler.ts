@@ -27,14 +27,14 @@ export class WorkflowTaskScheduler {
   ) {}
 
   /**
-   * Schedules tasks for all enabled scheduled triggers in a workflow
+   * Schedules tasks for all scheduled triggers in a workflow
    */
   async scheduleWorkflowTasks(
     workflow: EsWorkflow,
     spaceId: string,
     request?: KibanaRequest
   ): Promise<string[]> {
-    const scheduledTriggers = getScheduledTriggers(workflow.definition.triggers);
+    const scheduledTriggers = getScheduledTriggers(workflow.definition?.triggers ?? []);
     const scheduledTaskIds: string[] = [];
 
     for (const trigger of scheduledTriggers) {
@@ -144,7 +144,7 @@ export class WorkflowTaskScheduler {
     // First, unschedule all existing tasks
     await this.unscheduleWorkflowTasks(workflow.id);
 
-    // Then, schedule new tasks for enabled scheduled triggers
+    // Then, schedule new tasks for scheduled triggers
     await this.scheduleWorkflowTasks(workflow, spaceId, request);
   }
 }

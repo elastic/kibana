@@ -24,6 +24,7 @@ import { ControlledEsqlChart } from '../../esql_chart/controlled_esql_chart';
 import { StreamsAppSearchBar } from '../../streams_app_search_bar';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { useTimefilter } from '../../../hooks/use_timefilter';
+import { executeEsqlQuery } from '../../../hooks/use_execute_esql_query';
 
 interface StreamChartPanelProps {
   definition: Streams.ingest.all.GetResponse;
@@ -32,13 +33,11 @@ interface StreamChartPanelProps {
 export function StreamChartPanel({ definition }: StreamChartPanelProps) {
   const {
     dependencies: {
-      start: {
-        dataViews,
-        streams: { streamsRepositoryClient },
-        share,
-      },
+      start: { dataViews, share, streams },
+
     },
   } = useKibana();
+  const { streamsRepositoryClient } = streams;
 
   const { timeState } = useTimefilter();
 
@@ -95,19 +94,15 @@ export function StreamChartPanel({ definition }: StreamChartPanelProps) {
         return undefined;
       }
 
-      return streamsRepositoryClient.fetch('POST /internal/streams/esql', {
-        params: {
-          body: {
-            operationName: 'get_histogram_for_stream',
-            query: queries.histogramQuery,
-            start,
-            end,
-          },
-        },
+      return executeEsqlQuery({
+        query: queries.histogramQuery,
+        search: data.search.search,
         signal,
+        start,
+        end,
       });
     },
-    [indexPatterns, dataViews, streamsRepositoryClient, queries?.histogramQuery],
+    [indexPatterns, dataViews, data.search.search, queries?.histogramQuery],
     {
       withTimeRange: true,
     }

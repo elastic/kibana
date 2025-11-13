@@ -302,6 +302,7 @@ export interface DocLinks {
   readonly server: {
     readonly protocol: string;
     readonly publicBaseUrl: string;
+    readonly troubleshootServerNotReady: string;
   };
   readonly logging: {
     readonly enableDeprecationHttpDebugLogs: string;
@@ -368,6 +369,7 @@ export interface DocLinks {
     readonly queryDsl: string;
     readonly queryESQL: string;
     readonly queryESQLExamples: string;
+    readonly queryESQLMultiValueControls: string;
   };
   readonly date: {
     readonly dateMath: string;
