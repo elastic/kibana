@@ -20,7 +20,7 @@ import { fromCache, setToCache } from './inline_suggestions_cache';
 
 const FALLBACK_FROM_COMMAND = 'FROM *';
 
-export function getSourceFromQuery(esql?: string) {
+function getSourceFromQuery(esql?: string) {
   const queryExpression = EsqlQuery.fromSrc(esql || '').ast;
   const sourceCommand = queryExpression.commands.find(({ name }) => ['from', 'ts'].includes(name));
   const args = (sourceCommand?.args ?? []) as ESQLSource[];
