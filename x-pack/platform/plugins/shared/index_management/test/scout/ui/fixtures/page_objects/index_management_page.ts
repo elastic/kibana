@@ -67,6 +67,8 @@ export class IndexManagement {
     // Check if any of the links contain the index name
     let found = false;
     for (let i = 0; i < count; i++) {
+      // todo
+      // eslint-disable-next-line playwright/no-nth-methods
       const text = await indexLinks.nth(i).textContent();
       if (text === indexName) {
         found = true;
@@ -77,5 +79,60 @@ export class IndexManagement {
     if (!found) {
       throw new Error(`Expected index "${indexName}" to exist in the table, but it was not found`);
     }
+  }
+
+  async toggleHiddenIndices() {
+    await this.page.testSubj.locator('checkboxToggles-includeHiddenIndices').click();
+  }
+
+  async openIndexDetailsPage(indexOfRow: number) {
+    const indexLinks = this.page.testSubj.locator('indexTableIndexNameLink');
+    // todo
+    // eslint-disable-next-line playwright/no-nth-methods
+    await indexLinks.nth(indexOfRow).click();
+
+    // Wait for index details page to load
+    await this.page.testSubj.locator('indexDetailsHeader').waitFor({ state: 'visible' });
+  }
+
+  async navigateToIndexManagementTab(
+    tab: 'indices' | 'data_streams' | 'templates' | 'component_templates' | 'enrich_policies'
+  ) {
+    await this.goto();
+    const tabMap = {
+      indices: 'indicesTab',
+      data_streams: 'data_streamsTab',
+      templates: 'templatesTab',
+      component_templates: 'component_templatesTab',
+      enrich_policies: 'enrich_policiesTab',
+    };
+    await this.page.testSubj.locator(tabMap[tab]).click();
+  }
+
+  async clickNextButton() {
+    await this.page.testSubj.locator('nextButton').click();
+  }
+
+  async setComboBox(testSubject: string, value: string) {
+    const comboBox = this.page.testSubj.locator(testSubject);
+    await comboBox.click();
+
+    // Type the value
+    const input = comboBox.locator('input');
+    await input.fill(value);
+
+    // Wait for and click the option
+    const option = this.page.locator(`[role="option"]`).filter({ hasText: value });
+    await option.waitFor({ state: 'visible' });
+    await option.click();
+  }
+
+  async changeMappingsEditorTab(tab: 'fields' | 'advancedOptions' | 'templates') {
+    const tabMap = {
+      fields: 'formTab',
+      advancedOptions: 'advancedOptionsTab',
+      templates: 'templatesTab',
+    };
+    await this.page.testSubj.locator(tabMap[tab]).click();
   }
 }
