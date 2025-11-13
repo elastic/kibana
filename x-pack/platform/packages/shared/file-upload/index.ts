@@ -15,3 +15,22 @@ export { FileUploadManager, STATUS } from './file_upload_manager/file_manager';
 export type { UploadStatus } from './file_upload_manager/file_manager';
 export type { FileAnalysis } from './file_upload_manager/file_wrapper';
 export { CLASH_TYPE, CLASH_ERROR_TYPE } from './file_upload_manager/merge_tools';
+
+export {
+  FileDataVisualizer,
+  FileDataVisualizerWrapper,
+  getFileDataVisualizerWrapper,
+  type FileDataVisualizerSpec,
+} from './src/file_upload_component';
+
+export {
+  createOpenFileUploadLiteAction,
+  createOpenFileUploadLiteTrigger,
+} from './src/file_upload_component/new/file_upload_lite_action';
+
+export type { FileUploadStartDependencies } from './src/file_upload_component/kibana_context';
+
+export type {
+  GetAdditionalLinksParams,
+  GetAdditionalLinks,
+} from './src/file_upload_component/new/results_links';

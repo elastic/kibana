@@ -4,23 +4,47 @@
     "outDir": "target/types",
     "types": [
       "jest",
-      "node"
+      "node",
+      "react",
+      "@emotion/react/types/css-prop",
+      "../../../../../typings/emotion.d.ts"
     ]
   },
   "include": [
+    "**/*.js",
     "**/*.ts",
+    "**/*.tsx",
+    "**/*.svg",
+    "**/*.d.ts",
+    "../../../../../typings/emotion.d.ts"
   ],
   "exclude": [
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/file-upload-plugin",
-    "@kbn/file-upload-common",
-    "@kbn/index-management-shared-types",
+    "@kbn/charts-theme",
+    "@kbn/code-editor",
     "@kbn/core",
-    "@kbn/data-views-plugin",
-    "@kbn/i18n",
     "@kbn/data-plugin",
+    "@kbn/data-views-plugin",
     "@kbn/discover-utils",
+    "@kbn/es-query",
+    "@kbn/field-types",
+    "@kbn/field-utils",
+    "@kbn/fields-metadata-plugin",
+    "@kbn/file-upload-common",
+    "@kbn/file-upload-plugin",
+    "@kbn/i18n-react",
+    "@kbn/i18n",
+    "@kbn/index-management-shared-types",
+    "@kbn/kibana-react-plugin",
+    "@kbn/ml-is-defined",
+    "@kbn/ml-time-buckets",
+    "@kbn/react-field",
+    "@kbn/search-types",
+    "@kbn/shared-ux-prompt-no-data-views-types",
+    "@kbn/shared-ux-prompt-no-data-views",
+    "@kbn/test-jest-helpers",
   ]
 }
+

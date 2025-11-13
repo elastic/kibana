@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { ResultLinks } from '../../common/app';
+import type { ResultLinks } from '@kbn/file-upload-common';
 import { lazyLoadModules } from '../lazy_load_bundle';
 import type {
   DataDriftSpec,
-  FileDataVisualizerSpec,
+  // FileDataVisualizerSpec,
   IndexDataVisualizerSpec,
 } from '../application';
 
@@ -19,12 +19,12 @@ export interface SpecWithLinks<T> {
 }
 
 export function getComponents(resultLinks: ResultLinks) {
-  async function getFileDataVisualizerComponent(): Promise<
-    () => SpecWithLinks<FileDataVisualizerSpec>
-  > {
-    const modules = await lazyLoadModules(resultLinks);
-    return () => ({ component: modules.FileDataVisualizer, resultLinks });
-  }
+  // async function getFileDataVisualizerComponent(): Promise<
+  //   () => SpecWithLinks<FileDataVisualizerSpec>
+  // > {
+  //   const modules = await lazyLoadModules(resultLinks);
+  //   return () => ({ component: modules.FileDataVisualizer, resultLinks });
+  // }
 
   async function getIndexDataVisualizerComponent(): Promise<() => IndexDataVisualizerSpec> {
     const modules = await lazyLoadModules(resultLinks);
@@ -36,7 +36,7 @@ export function getComponents(resultLinks: ResultLinks) {
     return () => modules.DataDrift;
   }
   return {
-    getFileDataVisualizerComponent,
+    // getFileDataVisualizerComponent,
     getIndexDataVisualizerComponent,
     getDataDriftComponent,
   };

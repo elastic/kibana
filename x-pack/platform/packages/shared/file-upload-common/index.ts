@@ -26,6 +26,7 @@ export type {
   ImportResults,
   CreateDocsResponse,
   ImportFactoryOptions,
+  TestGrokPatternResponse,
 } from './src/types';
 
 export {
@@ -50,3 +51,10 @@ export {
   FILE_UPLOAD_EVENT,
   FileUploadTelemetryService,
 } from './src/telemetry';
+
+export type { ConfigSchema, ResultLink, ResultLinks } from './src/app';
+
+export {
+  getFieldsFromGrokPattern,
+  replaceFieldInGrokPattern,
+} from './src/grok_pattern_utils/grok_pattern';

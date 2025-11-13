@@ -10,7 +10,12 @@ import type { FileUploadStartApi } from '@kbn/file-upload-plugin/public/api';
 import type { Subscription } from 'rxjs';
 import type { Observable } from 'rxjs';
 import { switchMap, combineLatest, BehaviorSubject, of } from 'rxjs';
-import type { CoreStart, HttpSetup, NotificationsStart } from '@kbn/core/public';
+import type {
+  AnalyticsServiceStart,
+  // CoreStart,
+  HttpSetup,
+  NotificationsStart,
+} from '@kbn/core/public';
 import type { IImporter } from '@kbn/file-upload-plugin/public/importer/types';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
 import { AbortError, FileUploadTelemetryService } from '@kbn/file-upload-common';
@@ -53,6 +58,14 @@ export enum STATUS {
   ABORTED,
 }
 
+export interface Dependencies {
+  analytics: AnalyticsServiceStart;
+  data: DataPublicPluginStart;
+  fileUpload: FileUploadStartApi;
+  http: HttpSetup;
+  notifications: NotificationsStart;
+}
+
 export interface Config<T = IndicesIndexSettings | MappingTypeMapping> {
   json: T;
   valid: boolean;
@@ -82,6 +95,8 @@ export interface UploadStatus {
 export class FileUploadManager {
   private uploadSessionId: string;
   private http: HttpSetup;
+  private data: DataPublicPluginStart;
+  private fileUpload: FileUploadStartApi;
   private notifications: NotificationsStart;
   private readonly files$ = new BehaviorSubject<FileWrapper[]>([]);
   private readonly analysisValid$ = new BehaviorSubject<boolean>(false);
@@ -148,9 +163,7 @@ export class FileUploadManager {
   private autoAddSemanticTextField: boolean = false;
 
   constructor(
-    private fileUpload: FileUploadStartApi,
-    coreStart: CoreStart,
-    private data: DataPublicPluginStart,
+    dependencies: Dependencies,
     private autoAddInferenceEndpointName: string | null = null,
     private autoCreateDataView: boolean = true,
     private removePipelinesAfterImport: boolean = true,
@@ -160,9 +173,12 @@ export class FileUploadManager {
     onIndexSearchable?: (indexName: string) => void,
     onAllDocsSearchable?: (indexName: string) => void
   ) {
+    this.data = dependencies.data;
+    this.fileUpload = dependencies.fileUpload;
+    this.http = dependencies.http;
+    this.notifications = dependencies.notifications;
+
     this.uploadSessionId = Math.random().toString(36).substring(2, 15);
-    this.http = coreStart.http;
-    this.notifications = coreStart.notifications;
     this.setExistingIndexName(existingIndexName);
     this.initializedWithExistingIndex = existingIndexName !== null;
 
@@ -189,7 +205,7 @@ export class FileUploadManager {
     );
 
     this.fileUploadTelemetryService = new FileUploadTelemetryService(
-      coreStart.analytics,
+      dependencies.analytics,
       location ?? 'unknown'
     );
 

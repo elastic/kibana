@@ -10,13 +10,10 @@ import {
   OPEN_FILE_UPLOAD_LITE_ACTION,
   OPEN_FILE_UPLOAD_LITE_TRIGGER,
 } from '@kbn/file-upload-common';
-import type { DataVisualizerStartDependencies } from './application/common/types/data_visualizer_plugin';
-import {
-  createOpenFileUploadLiteTrigger,
-  createOpenFileUploadLiteAction,
-} from './application/file_data_visualizer/new/file_upload_lite_action';
+import type { FileUploadStartDependencies } from '@kbn/file-upload';
+import { createOpenFileUploadLiteAction, createOpenFileUploadLiteTrigger } from '@kbn/file-upload';
 
-export function registerUiActions(coreStart: CoreStart, plugins: DataVisualizerStartDependencies) {
+export function registerUiActions(coreStart: CoreStart, plugins: FileUploadStartDependencies) {
   const { uiActions } = plugins;
   if (uiActions === undefined) {
     return;

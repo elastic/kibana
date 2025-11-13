@@ -220,3 +220,10 @@ export interface ImportFactoryOptions {
   excludeLinesPattern?: string;
   multilineStartPattern?: string;
 }
+
+export interface TestGrokPatternResponse {
+  matches: Array<{
+    matched: boolean;
+    fields: Record<string, Array<{ match: string; offset: number; length: number }>>;
+  }>;
+}

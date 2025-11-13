@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { Index } from '@kbn/index-management-shared-types/src/types';
 import type { ApplicationStart, HttpSetup, NotificationsStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { FindFileStructureResponse } from '@kbn/file-upload-common';
 import { isAbortError, type FileUploadResults } from '@kbn/file-upload-common';
 import useMountedState from 'react-use/lib/useMountedState';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
@@ -27,6 +28,7 @@ export function useFileUpload(
   application: ApplicationStart,
   http: HttpSetup,
   notifications: NotificationsStart,
+  getFieldsStatsGrid?: () => React.FC<{ results: FindFileStructureResponse | null }>,
   onUploadComplete?: (results: FileUploadResults | null) => void
 ) {
   const isMounted = useMountedState();
@@ -276,6 +278,7 @@ export function useFileUpload(
     setExistingIndexName,
     abortAllAnalysis,
     abortImport,
+    getFieldsStatsGrid,
   };
 }
 
