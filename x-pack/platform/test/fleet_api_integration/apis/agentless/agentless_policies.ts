@@ -329,5 +329,131 @@ export default function (providerContext: FtrProviderContext) {
         expect(apiCalls[0].method).to.be('DELETE');
       });
     });
+
+    describe('Agentless Policy with Cloud Connectors', () => {
+      before(async () => {
+        const mockAgentlessApiService = setupMockServer();
+        mockApiServer = await mockAgentlessApiService.listen(8089);
+      });
+
+      after(async () => {
+        await mockApiServer.close();
+      });
+
+      beforeEach(async () => {
+        await kibanaServer.savedObjects.cleanStandardList();
+        await cleanFleetIndices(es);
+        await apiClient.setup();
+      });
+
+      afterEach(async () => {
+        await kibanaServer.savedObjects.cleanStandardList();
+        await cleanFleetIndices(es);
+      });
+
+      it.skip('should create agentless policy with AWS cloud connector (requires cloud connector support in test package)', async () => {
+        // Note: This test is skipped because the test_agentless package doesn't support cloud connectors
+        // To enable this test, we would need to:
+        // 1. Create a test package with cloud connector support in the deployment_modes
+        // 2. Configure the agent policy to enable cloud connectors with target_csp: 'aws'
+        // 3. Provide the necessary vars (role_arn, external_id) in the inputs
+
+        const id = uuidv4();
+
+        const policy = await apiClient.createAgentlessPolicy({
+          id,
+          package: {
+            name: 'cloud_security_posture', // Would need to use a real CSP package or create test package
+            version: '3.1.1',
+          },
+          name: `cspm-aws-${Date.now()}`,
+          description: 'test agentless policy with AWS cloud connector',
+          namespace: 'default',
+          inputs: {
+            'cspm-cloudbeat/cis_aws': {
+              enabled: true,
+              streams: {
+                'cloud_security_posture.findings': {
+                  enabled: true,
+                  vars: {
+                    role_arn: 'arn:aws:iam::123456789012:role/TestRole',
+                    external_id: {
+                      id: 'test-external-id',
+                      isSecretRef: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        });
+
+        const packagePolicy = await apiClient.getPackagePolicy(policy.item.id);
+        expect(packagePolicy.item.supports_agentless).to.be(true);
+        expect(packagePolicy.item.supports_cloud_connector).to.be(true);
+        expect(packagePolicy.item.cloud_connector_id).not.to.be(undefined);
+      });
+
+      it.skip('should decrement cloud connector package count when deleting agentless policy (requires cloud connector setup)', async () => {
+        // Note: This test is skipped for the same reasons as above
+        // This would test:
+        // 1. Create an agentless policy with cloud connector
+        // 2. Verify cloud connector packagePolicyCount is 1
+        // 3. Delete the agentless policy
+        // 4. Verify cloud connector packagePolicyCount is decremented to 0
+
+        const id = uuidv4();
+
+        const policy = await apiClient.createAgentlessPolicy({
+          id,
+          package: {
+            name: 'cloud_security_posture',
+            version: '3.1.1',
+          },
+          name: `cspm-aws-${Date.now()}`,
+          description: 'test agentless policy with AWS cloud connector',
+          namespace: 'default',
+          inputs: {
+            'cspm-cloudbeat/cis_aws': {
+              enabled: true,
+              streams: {
+                'cloud_security_posture.findings': {
+                  enabled: true,
+                  vars: {
+                    role_arn: 'arn:aws:iam::123456789012:role/TestRole',
+                    external_id: {
+                      id: 'test-external-id',
+                      isSecretRef: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        });
+
+        const packagePolicy = await apiClient.getPackagePolicy(policy.item.id);
+        const cloudConnectorId = packagePolicy.item.cloud_connector_id;
+
+        // Get cloud connector before deletion
+        const cloudConnectorBefore = await supertest
+          .get(`/api/fleet/cloud_connectors/${cloudConnectorId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+
+        expect(cloudConnectorBefore.body.item.packagePolicyCount).to.be(1);
+
+        // Delete the agentless policy
+        await apiClient.deleteAgentlessPolicy(id);
+
+        // Get cloud connector after deletion
+        const cloudConnectorAfter = await supertest
+          .get(`/api/fleet/cloud_connectors/${cloudConnectorId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+
+        expect(cloudConnectorAfter.body.item.packagePolicyCount).to.be(0);
+      });
+    });
   });
 }
