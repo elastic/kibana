@@ -17,9 +17,7 @@ import type {
 import type { Streams } from '@kbn/streams-schema';
 import { getAdvancedParameters, isRoot, namespacePrefixes } from '@kbn/streams-schema';
 import { ASSET_VERSION } from '../../../../common/constants';
-import { logsSettings, otelEquivalentLookupMap } from './logs_layer';
 import { getComponentTemplateName } from './name';
-import { baseMappings } from './logs_layer';
 
 export function generateLayer(
   name: string,
@@ -63,19 +61,21 @@ export function generateLayer(
 
   // check whether the field has an otel equivalent. If yes, set the ECS equivalent as an alias
   // This needs to be done after the initial properties are set, so the ECS equivalent aliases win out
-  Object.entries(definition.ingest.wired.fields).forEach(([field, props]) => {
-    const matchingPrefix = namespacePrefixes.find((prefix) => field.startsWith(prefix));
-    if (matchingPrefix) {
-      const aliasName = field.substring(matchingPrefix.length);
-      const otelEquivalent = otelEquivalentLookupMap[aliasName];
-      if (otelEquivalent) {
-        aliases[otelEquivalent] = {
-          type: 'alias',
-          path: field,
-        };
+  if (definition.otelEquivalentLookupMap) {
+    Object.entries(definition.ingest.wired.fields).forEach(([field, props]) => {
+      const matchingPrefix = namespacePrefixes.find((prefix) => field.startsWith(prefix));
+      if (matchingPrefix) {
+        const aliasName = field.substring(matchingPrefix.length);
+        const otelEquivalent = definition.otelEquivalentLookupMap![aliasName];
+        if (otelEquivalent) {
+          aliases[otelEquivalent] = {
+            type: 'alias',
+            path: field,
+          };
+        }
       }
-    }
-  });
+    });
+  }
 
   return {
     name: getComponentTemplateName(name),
@@ -85,7 +85,7 @@ export function generateLayer(
         dynamic: false,
         properties: isRoot(name)
           ? {
-              ...baseMappings,
+              ...(definition.baseMappings ?? {}),
               ...properties,
               ...aliases,
             }
@@ -101,6 +101,6 @@ export function generateLayer(
 }
 
 function getTemplateSettings(definition: Streams.WiredStream.Definition, isServerless: boolean) {
-  const baseSettings = isRoot(definition.name) ? logsSettings : {};
+  const baseSettings = isRoot(definition.name) ? definition.baseSettings ?? {} : {};
   return baseSettings;
 }

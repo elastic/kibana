@@ -53,6 +53,9 @@ export namespace WiredStream {
 
   export interface Definition extends IngestBaseStream.Definition {
     ingest: WiredIngest;
+    baseSettings?: Record<string, any>;
+    baseMappings?: Record<string, any>;
+    otelEquivalentLookupMap?: Record<string, string>;
   }
 
   export type Source = IngestBaseStream.Source<WiredStream.Definition>;
@@ -73,6 +76,9 @@ export const WiredStream: ModelValidation<BaseStream.Model, WiredStream.Model> =
       IngestBaseStream.Definition.right,
       z.object({
         ingest: IngestWired,
+        baseSettings: z.record(z.any()).optional(),
+        baseMappings: z.record(z.any()).optional(),
+        otelEquivalentLookupMap: z.record(z.string()).optional(),
       })
     ),
     Source: z.intersection(IngestBaseStream.Definition.right, z.object({})),
