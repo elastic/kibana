@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { MAX_NESTING_LEVEL, getSegments } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
 import { NestedView } from '../../nested_view';
@@ -78,6 +78,17 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
   const maxNestingLevel = getSegments(definition.stream.name).length >= MAX_NESTING_LEVEL;
   const shouldDisplayCreateButton = definition.privileges.simulate;
   const CreateButtonComponent = aiFeatures && aiFeatures.enabled ? EuiButtonEmpty : EuiButton;
+  const suggestionsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (suggestionsRef.current && suggestions) {
+      suggestionsRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+        inline: 'nearest',
+      });
+    }
+  }, [suggestions]);
 
   const handlerItemDrag: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {
     if (source && destination) {
@@ -214,7 +225,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
         </EuiDragDropContext>
 
         {aiFeatures && aiFeatures.enabled && shouldDisplayCreateButton && (
-          <>
+          <div ref={suggestionsRef}>
             <EuiSpacer size="m" />
             {suggestions ? (
               isEmpty(suggestions) ? (
@@ -239,7 +250,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
                 />
               )
             ) : null}
-          </>
+          </div>
         )}
       </EuiFlexItem>
 
