@@ -266,7 +266,7 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
                     },
                   })
                 : i18n.translate('discover.pageTitleWithoutSavedSearch', {
-                    defaultMessage: 'Discover - Search not yet saved',
+                    defaultMessage: 'Discover - Session not yet saved',
                   })}
             </h1>
             {tabsEnabled && customizationContext.displayMode !== 'embedded' ? (
