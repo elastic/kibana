@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { fileToJson } from "../../util/json";
-import { REMOVED_TYPES_JSON_PATH } from "./constants";
+import { fileToJson } from '../../util/json';
+import { REMOVED_TYPES_JSON_PATH } from './constants';
 
 /**
  * Gets the removed types from the removed_types.json file.
  */
 export async function getRemovedTypes(): Promise<string[]> {
-  return await fileToJson(REMOVED_TYPES_JSON_PATH) as string[];
+  return (await fileToJson(REMOVED_TYPES_JSON_PATH)) as string[];
 }
