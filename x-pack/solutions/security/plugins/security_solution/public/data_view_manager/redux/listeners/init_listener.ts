@@ -52,7 +52,7 @@ export const createInitListener = (
     ) => {
       try {
         // Initialize default data views first
-        const { defaultDataView, alertDataView } = await createDefaultDataView({
+        const { defaultDataView, alertDataView, attackDataView } = await createDefaultDataView({
           dataViewService: dependencies.dataViews,
           uiSettings: dependencies.uiSettings,
           spaces: dependencies.spaces,
@@ -93,6 +93,7 @@ export const createInitListener = (
         // Whats more, portions of the state that already have selections applied to them will not be reset in the init listener.
         [
           DataViewManagerScopeName.detections,
+          DataViewManagerScopeName.attacks,
           DataViewManagerScopeName.analyzer,
           DataViewManagerScopeName.timeline,
           DataViewManagerScopeName.default,
@@ -105,6 +106,15 @@ export const createInitListener = (
               return listenerApi.dispatch(
                 selectDataViewAsync({
                   id: exploreDataView.id,
+                  scope,
+                })
+              );
+            }
+
+            if (scope === DataViewManagerScopeName.attacks) {
+              return listenerApi.dispatch(
+                selectDataViewAsync({
+                  id: attackDataView.id,
                   scope,
                 })
               );
