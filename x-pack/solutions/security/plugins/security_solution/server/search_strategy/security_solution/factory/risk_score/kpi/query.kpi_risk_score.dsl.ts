@@ -75,15 +75,10 @@ export const buildKpiRiskScoreQuery = ({
   });
 
   if (aggregatedEntities.length === 1) {
-    const resolvedEntity = aggregatedEntities[0] ?? entity;
-    if (!resolvedEntity) {
-      return baseQuery;
-    }
-
     return {
       ...baseQuery,
       aggs: {
-        risk: buildAggregationForEntity(resolvedEntity),
+        risk: buildAggregationForEntity(aggregatedEntities[0]),
       },
     };
   }

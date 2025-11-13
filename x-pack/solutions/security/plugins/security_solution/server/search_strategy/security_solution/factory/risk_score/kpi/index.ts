@@ -46,7 +46,7 @@ export const kpiRiskScore: SecuritySolutionFactory<EntityRiskQueries.kpi> = {
         : options.entity
         ? [options.entity]
         : []
-    ) as EntityType[];
+    ).filter((e): e is EntityType => e != null);
 
     const supportedEntities = requestedEntities.filter(
       (entityType) => EntityTypeToLevelField[entityType] !== RiskScoreFields.unsupported

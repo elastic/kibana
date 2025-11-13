@@ -154,10 +154,11 @@ export const ThreatHuntingEntityRiskLevels: React.FC = () => {
   const fillColor = useCallback(
     (dataName: string) => {
       const severity = labelToSeverity.get(dataName);
-      // If severity is not found in the map (shouldn't happen in normal operation),
-      // pass empty string to baseFillColor which will return emptyDonutColor as fallback.
-      // We use empty string instead of dataName because dataName is an i18n translated string
-      // and won't match the RiskSeverity enum keys expected by baseFillColor.
+      // If severity is not found in the map (i.e., dataName is not a known risk level label,
+      // which could happen due to future changes, data corruption, or localization issues),
+      // pass an empty string to baseFillColor. This triggers baseFillColor's fallback to
+      // emptyDonutColor, visually indicating an unmapped or unexpected value in the chart.
+      // Note: We cannot pass dataName directly because it is a translated label, not a RiskSeverity enum key.
       const severityString = severity ?? '';
       return baseFillColor(severityString);
     },
