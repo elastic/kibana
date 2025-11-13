@@ -1059,12 +1059,12 @@ describe('AlertsTable', () => {
     });
 
     it("doesn't call `refresh` when paginating and using `lastReloadRequestTime`", async () => {
-      render(<AlertsTable {...tableProps} lastReloadRequestTime={Date.now()} pageSize={1} />);
+      render(<AlertsTable {...tableProps} lastReloadRequestTime={Date.now()} />);
 
-      await waitFor(() => expect(onPageIndexChange).not.toBeUndefined());
+      await waitFor(() => expect(onChangePageIndex).not.toBeUndefined());
 
       act(() => {
-        onPageIndexChange(1);
+        onChangePageIndex(1);
       });
 
       expect(refreshSpy).not.toHaveBeenCalled();
