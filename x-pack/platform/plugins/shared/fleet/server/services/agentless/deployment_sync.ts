@@ -13,6 +13,7 @@ import { agentPolicyService, appContextService } from '..';
 
 import { AGENT_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../constants';
 
+const AGENTLESS_CONCURRENCY = 1;
 const PAGE_SIZE = 20;
 
 function dryRunTag(dryRun = false) {
@@ -41,7 +42,7 @@ export async function syncAgentlessDeployments(
   try {
     // retrieve all agentless deployments
     const currentDeployments: Array<{ policy_id: string; revision_idx?: number }> = [];
-    let hasMore = false;
+    let hasMore = true;
     let nextPageToken: string | undefined;
 
     while (hasMore) {
@@ -99,7 +100,7 @@ export async function syncAgentlessDeployments(
                 .createAgentlessAgent(esClient, spacedScoppedSoClient, agentPolicy)
                 .catch((error) => {
                   logger.error(
-                    `[Agentless Deployment Sync] Failed to create deployment ${deployment.policy_id}`,
+                    `[Agentless Deployment Sync] Failed to update deployment ${deployment.policy_id}`,
                     { error }
                   );
                 });
@@ -107,7 +108,7 @@ export async function syncAgentlessDeployments(
           }
         },
         {
-          concurrency: 5,
+          concurrency: AGENTLESS_CONCURRENCY,
         }
       );
       currentDeployments.push(...deploymentRes.deployments);
@@ -115,7 +116,7 @@ export async function syncAgentlessDeployments(
 
     const agentlessPolicies = await agentPolicyService.list(soClient, {
       perPage: SO_SEARCH_LIMIT,
-      fields: ['revision', 'supports_agentless'],
+      fields: ['revision', 'supports_agentless', 'global_data_tags'],
       kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.supports_agentless:true`,
       spaceId: '*',
     });
@@ -146,7 +147,7 @@ export async function syncAgentlessDeployments(
         }
       },
       {
-        concurrency: 5,
+        concurrency: AGENTLESS_CONCURRENCY,
       }
     );
     logger.info(`[Agentless Deployment Sync] Finished sync process`);
