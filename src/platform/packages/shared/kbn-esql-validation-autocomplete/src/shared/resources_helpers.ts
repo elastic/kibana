@@ -180,3 +180,18 @@ export function getSourcesHelper(resourceRetriever?: ESQLCallbacks) {
     return (await resourceRetriever?.getSources?.()) || [];
   };
 }
+
+export async function getFromCommandHelper(resourceRetriever?: ESQLCallbacks): Promise<string> {
+  const getSources = getSourcesHelper(resourceRetriever);
+  const sources = await getSources?.();
+  const visibleSources = sources.filter((source) => !source.hidden) || [];
+
+  if (visibleSources.find((source) => source.name.startsWith('logs'))) {
+    return 'FROM logs*';
+  }
+
+  if (visibleSources.length > 0) {
+    return `FROM ${visibleSources[0].name}`;
+  }
+  return '';
+}
