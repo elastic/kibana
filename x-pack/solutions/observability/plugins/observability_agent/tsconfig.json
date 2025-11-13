@@ -13,7 +13,6 @@
     "@kbn/logs-data-access-plugin",
     "@kbn/zod",
     "@kbn/onechat-server",
-    "@kbn/inference-common",
     "@kbn/spaces-plugin",
     "@kbn/security-plugin",
     "@kbn/es-query",
