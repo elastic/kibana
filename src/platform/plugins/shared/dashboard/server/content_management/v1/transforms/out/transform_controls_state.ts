@@ -46,7 +46,7 @@ export function transformControlProperties(controls: Array<StoredControlState>) 
     .sort(({ order: orderA = 0 }, { order: orderB = 0 }) => orderA - orderB)
     .map(({ explicitInput, id, type, grow, width }) => {
       return {
-        id,
+        uid: id,
         type,
         grow,
         width,
@@ -68,7 +68,7 @@ function injectControlReferences(
       if (transforms?.transformOut) {
         transformedControls.push({
           ...rest,
-          config: transforms.transformOut(config, references, control.id),
+          config: transforms.transformOut(config, references, control.uid),
         } as DashboardControlsState[number]);
       } else {
         transformedControls.push({ ...rest, config } as DashboardControlsState[number]);

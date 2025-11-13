@@ -51,10 +51,10 @@ export function serializeLayout(
         .sort(([, { order: orderA }], [, { order: orderB }]) => orderA - orderB)
         .map(([id, control]) => {
           return {
-            id,
+            uid: id,
             ...omit(control, 'order'),
-            config: childState[id].rawState as ControlsGroupState['controls'][number],
-          };
+            config: childState[id].rawState,
+          } as ControlsGroupState['controls'][number];
         }),
     },
     references,
