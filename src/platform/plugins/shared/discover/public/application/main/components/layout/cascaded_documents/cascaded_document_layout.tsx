@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useCallback, Fragment, useRef } from 'react';
+import React, { useMemo, useCallback, Fragment, useRef, useEffect } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { type AggregateQuery } from '@kbn/es-query';
 import { type Filter } from '@kbn/es-query';
@@ -67,12 +67,23 @@ const ESQLDataCascade = React.memo(
     const { scopedProfilesManager } = useScopedServices();
     const { expressions } = useDiscoverServices();
 
+    const abortController = useRef<AbortController | null>(null);
+
+    useEffect(
+      // handle cleanup for when the component unmounts
+      () => () => {
+        // cancel any pending requests
+        abortController.current?.abort();
+      },
+      []
+    );
+
     const queryMeta = useMemo(() => {
       return getESQLStatsQueryMeta((query as AggregateQuery).esql);
     }, [query]);
 
     const scopedESQLQueryFetch = useCallback(
-      (esqlQuery: AggregateQuery) => {
+      (esqlQuery: AggregateQuery, abortSignal: AbortSignal) => {
         const inspectorAdapters = { requests: new RequestAdapter() };
 
         return fetchEsql({
@@ -80,6 +91,7 @@ const ESQLDataCascade = React.memo(
           dataView,
           data: props.services.data,
           expressions,
+          abortSignal,
           filters: [
             ...(globalFilters?.filter((f) => f.meta.disabled === false) ?? []),
             ...(defaultFilters ?? []),
@@ -157,7 +169,14 @@ const ESQLDataCascade = React.memo(
           return [];
         }
 
+        if (!abortController.current?.signal?.aborted) {
+          // cancel pending requests, if any
+          abortController.current?.abort();
         }
+
+        abortController.current = new AbortController();
+
+        const { records } = await scopedESQLQueryFetch(newQuery, abortController.current!.signal);
 
         return records;
       },

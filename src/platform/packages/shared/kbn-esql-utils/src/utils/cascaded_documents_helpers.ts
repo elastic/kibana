@@ -91,17 +91,12 @@ function getStatsCommandToOperateOn(esqlQuery: EsqlQuery): StatsCommandSummary |
     return null;
   }
 
-  let summarizedStatsCommand: StatsCommandSummary | null = null;
-
   // accounting for the possibility of multiple stats commands in the query,
-  // we always want to operate on the last stats command that has valid grouping options
-  for (let i = statsCommands.length - 1; i >= 0; i--) {
-    summarizedStatsCommand = mutate.commands.stats.summarizeCommand(esqlQuery, statsCommands[i]);
-
-    if (summarizedStatsCommand.grouping && Object.keys(summarizedStatsCommand.grouping).length) {
-      break;
-    }
-  }
+  // we always want to operate on the last stats command
+  const summarizedStatsCommand = mutate.commands.stats.summarizeCommand(
+    esqlQuery,
+    statsCommands[statsCommands.length - 1]
+  );
 
   return summarizedStatsCommand;
 }
@@ -143,7 +138,7 @@ export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta =
 
   const summarizedStatsCommand = getStatsCommandToOperateOn(esqlQuery);
 
-  if (!summarizedStatsCommand) {
+  if (!summarizedStatsCommand || Object.keys(summarizedStatsCommand?.grouping ?? {}).length === 0) {
     return { groupByFields, appliedFunctions };
   }
 
@@ -296,7 +291,7 @@ export const constructCascadeQuery = ({
 
   const summarizedStatsCommand = getStatsCommandToOperateOn(EditorESQLQuery);
 
-  if (!summarizedStatsCommand) {
+  if (!summarizedStatsCommand || Object.keys(summarizedStatsCommand?.grouping ?? {}).length === 0) {
     throw new Error('Query does not have a valid stats command with grouping options');
   }
 
