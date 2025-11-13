@@ -7,6 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('../src/setup_node_env');
-require('../src/cli/apm')('functional-tests', []);
-require('@kbn/test').runTestsCli();
+import { instrumentAsyncMethods } from '@kbn/apm-utils';
+
+export function instrumentProvider(name: string, instance: object) {
+  instrumentAsyncMethods(name, instance, (prevSpanOptions) => {
+    prevSpanOptions.type = 'functional_test_service_call';
+    prevSpanOptions.type = name;
+    return prevSpanOptions;
+  });
+}
