@@ -1,0 +1,20 @@
+id: .yaml-connector-2
+displayName: YAML Connector 2
+icon: logoWebhook
+description: Another YAML connector
+documentation: The connector documentation URL
+authenticators: # one (at most) is required
+  - BasicAuth
+  # - headers:
+  #     X-API-KEY:
+  #       displayName: API Key
+  #       description: The API key to authenticate with Slack
+  #       documentation?: URL
+  #       hint?: string
+  #       type: string # or url/enum(select)/checkbox/toggle/...more primitives
+  #       sensitive: true
+  #       hidden: false
+  #       required: true
+  # - jwt:
+  #   ...
+  # - oauth2:

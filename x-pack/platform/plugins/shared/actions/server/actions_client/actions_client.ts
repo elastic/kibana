@@ -20,6 +20,7 @@ import type {
 import type { AuditLogger } from '@kbn/security-plugin/server';
 import type { IEventLogClient } from '@kbn/event-log-plugin/server';
 import type { KueryNode } from '@kbn/es-query';
+import type { AxiosInstance } from 'axios';
 import type { Connector, ConnectorWithExtraFindData } from '../application/connector/types';
 import type { ConnectorType } from '../application/connector/types';
 import { get } from '../application/connector/methods/get';
@@ -81,6 +82,8 @@ import { isPreconfigured } from '../lib/is_preconfigured';
 import { isSystemAction } from '../lib/is_system_action';
 import type { ConnectorExecuteParams } from '../application/connector/methods/execute/types';
 import { connectorFromInMemoryConnector } from '../application/connector/lib/connector_from_in_memory_connector';
+import { getAxiosInstance } from '../application/connector/methods/get_axios_instance';
+import type { GetAxiosParams } from '../lib/action_executor';
 
 export interface ConstructorOptions {
   logger: Logger;
@@ -497,6 +500,10 @@ export class ActionsClient {
     connectorExecuteParams: ConnectorExecuteParams
   ): Promise<ActionTypeExecutorResult<unknown>> {
     return execute(this.context, connectorExecuteParams);
+  }
+
+  public async getAxiosInstance(getAxiosParams: GetAxiosParams): Promise<AxiosInstance> {
+    return getAxiosInstance(this.context, getAxiosParams);
   }
 
   public async bulkEnqueueExecution(
