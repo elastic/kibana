@@ -31,5 +31,6 @@
     "@kbn/core-saved-objects-server-internal",
     "@kbn/core-root-server-internal",
     "@kbn/core-test-helpers-so-type-serializer",
+    "@kbn/check-saved-objects-cli",
   ]
 }

@@ -47,6 +47,7 @@
     "@kbn/core-http-router-server-internal",
     "@kbn/logging-mocks",
     "@kbn/std",
+    "@kbn/check-saved-objects-cli",
   ],
   "exclude": [
     "target/**/*",
