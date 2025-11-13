@@ -62,9 +62,15 @@ jest.mock('../../../../common/endpoint/utils/index_name_utilities', () => ({
   buildIndexNameWithNamespace: jest.fn(),
 }));
 
-const termsEnumSuggestionsMock = termsEnumSuggestions as jest.Mock;
-const termsAggSuggestionsMock = termsAggSuggestions as jest.Mock;
-const buildIndexNameWithNamespaceMock = buildIndexNameWithNamespace as jest.Mock;
+const termsEnumSuggestionsMock = termsEnumSuggestions as jest.MockedFunction<
+  typeof termsEnumSuggestions
+>;
+const termsAggSuggestionsMock = termsAggSuggestions as jest.MockedFunction<
+  typeof termsAggSuggestions
+>;
+const buildIndexNameWithNamespaceMock = buildIndexNameWithNamespace as jest.MockedFunction<
+  typeof buildIndexNameWithNamespace
+>;
 
 interface CallRouteInterface {
   params: TypeOf<typeof EndpointSuggestionsSchema.params>;
@@ -101,7 +107,7 @@ describe('when calling the Suggestions route handler', () => {
       .create();
 
     // Reset mocks
-    termsEnumSuggestionsMock.mockClear().mockResolvedValue({});
+    termsEnumSuggestionsMock.mockClear().mockResolvedValue([]);
     termsAggSuggestionsMock.mockClear().mockResolvedValue(['suggestion1', 'suggestion2']);
     buildIndexNameWithNamespaceMock.mockClear();
   });
@@ -169,7 +175,7 @@ describe('when calling the Suggestions route handler', () => {
           1,
           expect.any(Object),
           expect.any(Object),
-          expect.any(Object),
+          mockScopedEsClient.asInternalUser,
           mockIndexPattern,
           fieldName,
           'test-query',
@@ -688,7 +694,7 @@ describe('when calling the Suggestions route handler', () => {
           1,
           expect.any(Object),
           expect.any(Object),
-          expect.any(Object),
+          mockScopedEsClient.asInternalUser,
           mockIndexPattern,
           fieldName,
           'test-query',
@@ -762,7 +768,7 @@ describe('when calling the Suggestions route handler', () => {
           1,
           expect.any(Object),
           expect.any(Object),
-          expect.any(Object),
+          mockScopedEsClient.asCurrentUser, // called with current user esClient
           mockIndexPattern,
           fieldName,
           'test-query',
