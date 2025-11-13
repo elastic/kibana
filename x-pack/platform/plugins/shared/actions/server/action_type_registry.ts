@@ -274,6 +274,7 @@ export class ActionTypeRegistry {
             }
           : {}),
         isDeprecated: !!actionType.isDeprecated,
+        uiFields: actionType.uiFields,
       }));
   }
 

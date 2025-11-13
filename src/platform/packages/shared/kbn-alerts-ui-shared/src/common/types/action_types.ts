@@ -130,13 +130,13 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
   selectMessage: string;
   selectMessagePreconfigured?: string;
   actionTypeTitle?: string;
-  validateParams: (
+  validateParams?: (
     actionParams: ActionParams
   ) => Promise<GenericValidationResult<Partial<ActionParams> | unknown>>;
-  actionConnectorFields: React.LazyExoticComponent<
+  actionConnectorFields?: React.LazyExoticComponent<
     ComponentType<ActionConnectorFieldsProps>
   > | null;
-  actionParamsFields: React.LazyExoticComponent<ComponentType<ActionParamsProps<ActionParams>>>;
+  actionParamsFields?: React.LazyExoticComponent<ComponentType<ActionParamsProps<ActionParams>>>;
   actionReadOnlyExtraComponent?: React.LazyExoticComponent<
     ComponentType<ActionReadOnlyElementProps>
   >;
