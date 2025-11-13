@@ -22,6 +22,7 @@ import type {
 } from '../../common/http_api/tools';
 import { apiPrivileges } from '../../common/features';
 import { publicApiPath } from '../../common/constants';
+import { AGENT_SOCKET_TIMEOUT_MS } from './utils';
 
 export function registerToolsRoutes({ router, getInternalServices, logger }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
@@ -312,6 +313,9 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
       description:
         'Execute a tool with parameters. Use this endpoint to run a tool directly with specified inputs and optional external connector integration.',
       options: {
+        timeout: {
+          idleSocket: AGENT_SOCKET_TIMEOUT_MS,
+        },
         tags: ['tools', 'oas-tag:agent builder'],
         availability: {
           stability: 'experimental',

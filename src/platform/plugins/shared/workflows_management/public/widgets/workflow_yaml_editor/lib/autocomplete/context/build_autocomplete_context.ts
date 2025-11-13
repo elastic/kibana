@@ -11,7 +11,7 @@ import { isScalar } from 'yaml';
 import type { monaco } from '@kbn/monaco';
 import { DynamicStepContextSchema } from '@kbn/workflows';
 import type { z } from '@kbn/zod';
-import type { AutocompleteContext, MinimalWorkflowDetailState } from './autocomplete.types';
+import type { AutocompleteContext } from './autocomplete.types';
 import { getFocusedYamlPair } from './get_focused_yaml_pair';
 import { isInsideLiquidBlock } from './liquid_utils';
 import { parseLineForCompletion } from './parse_line_for_completion';
@@ -22,11 +22,11 @@ import {
 } from './triggers_utils';
 import { getPathAtOffset } from '../../../../../../common/lib/yaml';
 import { getSchemaAtPath } from '../../../../../../common/lib/zod';
+import type { StepInfo, WorkflowDetailState } from '../../../../../entities/workflows/store';
 import { getContextSchemaForPath } from '../../../../../features/workflow_context/lib/get_context_for_path';
-import type { StepInfo } from '../../store';
 
 export interface BuildAutocompleteContextParams {
-  editorState: MinimalWorkflowDetailState | undefined;
+  editorState: WorkflowDetailState;
   model: monaco.editor.ITextModel;
   position: monaco.Position;
   completionContext: monaco.languages.CompletionContext;
@@ -62,12 +62,6 @@ export function buildAutocompleteContext({
     return null;
   }
 
-  // variables
-  let shouldUseCurlyBraces = true;
-  if (completionContext.triggerCharacter === '@' && focusedYamlPair) {
-    shouldUseCurlyBraces = focusedYamlPair.keyNode.value !== 'foreach';
-  }
-
   let range: monaco.IRange;
   if (completionContext.triggerCharacter === ' ') {
     // When triggered by space, set range to start at current position
@@ -91,7 +85,6 @@ export function buildAutocompleteContext({
   const path = getPathAtOffset(yamlDocument, absoluteOffset);
   const yamlNode = yamlDocument.getIn(path, true);
   const scalarType = isScalar(yamlNode) ? yamlNode.type ?? null : null;
-  const shouldBeQuoted = scalarType === null || scalarType === 'PLAIN';
 
   let contextSchema: z.ZodType = DynamicStepContextSchema;
   let contextScopedToPath: string | null = null;
@@ -131,19 +124,19 @@ export function buildAutocompleteContext({
     lineUpToCursor,
     lineParseResult: parseResult,
 
+    // position of the cursor
+    path,
+    range,
+    absoluteOffset,
+    focusedStepInfo,
+    focusedYamlPair,
+    // TODO: add currentTriggerInfo
+
     // context
     contextSchema,
     contextScopedToPath,
     yamlDocument,
     scalarType,
-
-    // position of the cursor
-    path,
-    range,
-    absoluteOffset,
-    // currentStepInfo
-    focusedStepInfo,
-    // TODO: add currentTriggerInfo
 
     // kind of ast info
     isInLiquidBlock,
@@ -153,9 +146,5 @@ export function buildAutocompleteContext({
 
     // dynamic connector types
     dynamicConnectorTypes: currentDynamicConnectorTypes ?? null,
-
-    // formatting
-    shouldUseCurlyBraces,
-    shouldBeQuoted,
   };
 }
