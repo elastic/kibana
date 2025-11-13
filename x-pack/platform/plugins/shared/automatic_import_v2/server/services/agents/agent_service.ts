@@ -13,7 +13,7 @@ import {
   createLogsAnalyzerAgent,
   textToEcsSubAgent,
 } from '../../agents/sub_agents';
-import { createFetchSamplesTool, createIngestPipelineValidatorTool } from '../../agents/tools';
+import { fetchSamplesTool, createIngestPipelineValidatorTool } from '../../agents/tools';
 import type { AutomaticImportSamplesIndexService } from '../samples_index/index_service';
 import { INGEST_PIPELINE_GENERATOR_PROMPT } from '../../agents/prompts';
 
@@ -44,7 +44,7 @@ export class AgentService {
 
     // Create tools at the service level
     // Tools capture samples and esClient in their closures
-    const fetchSamplesTool = createFetchSamplesTool(samples);
+    const fetchSamplesToolInstance = fetchSamplesTool(samples);
     const validatorTool = createIngestPipelineValidatorTool(this.esClient, samples);
 
     // Create the sub agents with tools
@@ -55,7 +55,7 @@ export class AgentService {
         2. Analyze the samples to identify format, fields, and characteristics
         3. Provide structured analysis output as specified in your system prompt
       </workflow>`,
-      tools: [fetchSamplesTool],
+      tools: [fetchSamplesToolInstance],
     });
 
     const pipelineGeneratorSubAgent = createIngestPipelineGeneratorAgent({

@@ -10,4 +10,6 @@ export {
   createIngestPipelineValidatorTool,
 } from './ingest_pipeline_validator';
 
-export { createFetchSamplesTool } from './fetch_samples';
+export { fetchSamplesTool } from './fetch_samples';
+export { fetchUniqueKeysTool } from './fetch_unique_keys';
+export { fetchCurrentPipelineTool } from './fetch_current_pipeline';

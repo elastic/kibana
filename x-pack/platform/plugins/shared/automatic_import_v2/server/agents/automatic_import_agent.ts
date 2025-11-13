@@ -8,8 +8,7 @@
 import { createReactAgent } from '@langchain/langgraph/prebuilt';
 import type { StructuredTool } from '@langchain/core/tools';
 import { createTaskTool } from './sub_agents';
-import { fetchUniqueKeysTool } from './tools/fetch_unique_keys';
-import { fetchCurrentPipelineTool } from './tools/fetch_current_pipeline';
+import { fetchCurrentPipelineTool, fetchUniqueKeysTool } from './tools';
 import type { AutomaticImportAgentParams } from './types';
 import { AUTOMATIC_IMPORT_AGENT_PROMPT } from './prompts';
 import { AutomaticImportAgentState } from './state';
