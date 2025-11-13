@@ -21,27 +21,12 @@ export class WaitStepImpl implements NodeImplementation {
   ) {}
 
   async run(): Promise<void> {
-    const state = this.stepExecutionRuntime.getCurrentStepState();
-
-    if (!state?.waitStarted) {
-      await this.enterWait();
+    if (this.stepExecutionRuntime.tryEnterWait(this.node.configuration.with.duration)) {
+      this.logStartWait();
       return;
     }
 
     await this.exitWait();
-  }
-
-  private async enterWait(): Promise<void> {
-    await this.stepExecutionRuntime.startStep();
-    this.stepExecutionRuntime.setWaitStep(this.node.configuration.with.duration);
-    await this.stepExecutionRuntime.setInput({
-      duration: this.node.configuration.with.duration,
-    });
-    await this.stepExecutionRuntime.setCurrentStepState({
-      ...this.stepExecutionRuntime.getCurrentStepState(),
-      waitStarted: true,
-    });
-    this.logStartWait();
   }
 
   private async exitWait(): Promise<void> {

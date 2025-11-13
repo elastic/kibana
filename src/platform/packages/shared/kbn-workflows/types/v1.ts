@@ -66,10 +66,6 @@ export interface EsWorkflowExecution {
   workflowId: string;
   isTestRun: boolean;
   status: ExecutionStatus;
-  /**
-   * If specified, the execution will resume at this time (ISO string).
-   */
-  resumeAt?: string;
   context: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
   workflowDefinition: WorkflowYaml;
   yaml: string;

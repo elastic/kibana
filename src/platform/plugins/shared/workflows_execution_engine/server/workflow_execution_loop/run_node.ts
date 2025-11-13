@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExecutionStatus } from '@kbn/workflows';
 import { catchError } from './catch_error';
+import { handleExecutionDelay } from './handle_execution_delay';
 import { runStackMonitor } from './run_stack_monitor';
 import type { WorkflowExecutionLoopParams } from './types';
-import { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 
 /**
  * Executes a single step in the workflow execution process.
@@ -61,7 +60,10 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
 
   // Sometimes monitoring can prevent the step from running, e.g. when the workflow is cancelled, timeout occured right before running step, etc.
   if (!monitorAbortController.signal.aborted) {
-    runStepPromise = nodeImplementation.run().then(() => monitorAbortController.abort());
+    runStepPromise = nodeImplementation
+      .run()
+      .finally(() => handleExecutionDelay(params, stepExecutionRuntime))
+      .finally(() => monitorAbortController.abort());
   }
 
   try {
@@ -74,34 +76,5 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
     monitorAbortController.abort();
     await catchError(params, stepExecutionRuntime);
     await params.workflowRuntime.saveState(); // Ensure state is updated after each step
-  }
-
-  await handleExecutionDelay(params);
-}
-
-const SHORT_DURATION_THRESHOLD = 1000 * 5; // 5 seconds
-async function handleExecutionDelay(params: WorkflowExecutionLoopParams) {
-  const workflowExecution = params.workflowRuntime.getWorkflowExecution();
-
-  if (workflowExecution.status === ExecutionStatus.WAITING && workflowExecution.resumeAt) {
-    const resumeAt = new Date(workflowExecution.resumeAt);
-    const now = new Date();
-    const diff = resumeAt.getTime() - now.getTime();
-
-    if (diff < SHORT_DURATION_THRESHOLD) {
-      const timeout = diff > 0 ? diff : 0;
-      await new Promise((resolve) => setTimeout(resolve, timeout));
-      params.workflowExecutionState.updateWorkflowExecution({
-        status: ExecutionStatus.RUNNING,
-        resumeAt: undefined,
-      });
-    } else {
-      await params.workflowTaskManager.scheduleResumeTask({
-        runAt: resumeAt,
-        workflowRunId: workflowExecution.id,
-        spaceId: workflowExecution.spaceId,
-      });
-    }
-    await params.workflowExecutionState.flush();
   }
 }

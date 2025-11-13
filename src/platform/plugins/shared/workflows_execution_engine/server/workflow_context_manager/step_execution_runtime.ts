@@ -191,17 +191,41 @@ export class StepExecutionRuntime {
     this.logStepFail(stepExecutionUpdate.id!, error);
   }
 
-  public setWaitStep(delay: string): void {
+  /**
+   * Attempts to enter a wait state for the step execution based on the provided delay.
+   * If the step is already in a wait state, it exits the wait state instead.
+   * @param delay - The delay duration as a string (e.g., "5s", "1m").
+   * @returns A boolean indicating whether the step has entered a wait state (true) or exited it (false).
+   */
+  public tryEnterWait(delay: string): boolean {
+    const resumeAt = this.stepExecution?.state?.resumeAt;
+
+    if (resumeAt) {
+      // already in wait state
+      const newState = { ...(this.stepExecution?.state || {}) };
+      delete newState.resumeAt;
+      this.workflowExecutionState.upsertStep({
+        id: this.stepExecutionId,
+        state: Object.keys(newState).length ? newState : undefined,
+      });
+      return false; // did not enter wait, was already waiting and exiting
+    }
+
     const durationInMs = parseDuration(delay);
     this.workflowExecutionState.upsertStep({
       id: this.stepExecutionId,
+      stepId: this.node.stepId,
+      stepType: this.node.stepType,
+      scopeStack: this.workflowExecution.scopeStack,
+      topologicalIndex: this.topologicalOrder.indexOf(this.node.id),
+      startedAt: this.stepExecution?.startedAt || new Date().toISOString(),
       status: ExecutionStatus.WAITING,
+      state: {
+        ...(this.stepExecution?.state || {}),
+        resumeAt: new Date(new Date().getTime() + durationInMs).toISOString(),
+      },
     });
-
-    this.workflowExecutionState.updateWorkflowExecution({
-      status: ExecutionStatus.WAITING,
-      resumeAt: new Date(new Date().getTime() + durationInMs).toISOString(),
-    });
+    return true; // successfully entered wait state
   }
 
   private logStepStart(stepId: string, stepExecutionId: string): void {
