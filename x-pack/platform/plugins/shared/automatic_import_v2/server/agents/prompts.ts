@@ -52,7 +52,7 @@ When a user requests an ingest pipeline for an integration and datastream, orche
 
 ### Step 2: Generate Initial Pipeline
 **Delegate to ingest_pipeline_generator sub-agent:**
-- Task: "Based on the following log analysis: [analysis from Step 1], generate an optimal ingest pipeline. The pipeline will be validated automatically."
+- Task: "Based on the following log analysis: [analysis from Step 1], generate an optimal ingest pipeline. Ensure there is a single pipeline-level 'on_failure' handler covering the whole pipeline, and never attach 'on_failure' to individual processors. The pipeline will be validated automatically."
 - Expected output: SUCCESS or FAILURE status
 - Note: The pipeline is stored in state automatically. Pipeline generator has its own validator - trust the result.
 - **Wait for completion before proceeding**
@@ -60,14 +60,25 @@ When a user requests an ingest pipeline for an integration and datastream, orche
 ### Step 3: Get ECS Field Mappings
 **Delegate to text_to_ecs sub-agent:**
 - First, call the \`fetch_unique_keys\` tool to retrieve unique keys from the pipeline output and include them in the task description.
-- Task: "Review these pipeline output snippets and provide ECS (Elastic Common Schema) field mappings. For each field that can be mapped to ECS, provide the ECS field name and mapping type. This is best-effort — map only the fields with clear ECS equivalents."
-- Expected output: Markdown table with field mappings (original_field → ecs_field, mapping_type)
+- Task: "Review these pipeline output snippets and provide ECS (Elastic Common Schema) field mappings. For each field that can be mapped to ECS, provide the ECS field name and mapping type. This is best-effort — map only the fields with clear ECS equivalents. In addition to the main mapping table, provide a separate section listing the possible values for \`event.type\` and \`event.category\` derived from the unique fields (if determinable). Also report explicitly whether any of the mappings include \`related.ip\`, \`related.hash\`, \`related.host\`, or \`related.user\`, and for each such ECS field include the original field name that maps to it."
+- Expected output:
+  1. Markdown table with field mappings (original_field → ecs_field, mapping_type)
+  2. Separate section with possible values for \`event.type\` and \`event.category\`
+  3. Statement identifying whether \`related.ip\`, \`related.hash\`, \`related.host\`, or \`related.user\` are present in the mappings, listing the original field(s) corresponding to each related.* ECS field
 - **Wait for completion before proceeding**
 
 ### Step 4: Append ECS Rename Processors
 **Delegate to ingest_pipeline_generator sub-agent:**
 - First, call the \`fetch_current_pipeline\` tool and include the returned pipeline in your task description.
 - Task: "Here is the validated pipeline currently stored in state: [output from fetch_current_pipeline]. Append rename processors for the following ECS mappings: [mappings from Step 3] at the VERY END of this pipeline. Do not alter, reorder, or remove any existing processors or configuration. Only append the new rename processors and then validate the final pipeline."
+- Expected output: SUCCESS or FAILURE status
+- Note: The updated pipeline remains in state
+- **Wait for completion before proceeding**
+
+### Step 5: Append ECS \`Append\` Processors
+**Delegate to ingest_pipeline_generator sub-agent:**
+- First, call the \`fetch_current_pipeline\` tool again and include the returned pipeline in your task description.
+- Task: "Here is the validated pipeline currently stored in state: [output from fetch_current_pipeline]. Add \`Append\` processors at the VERY END of this pipeline to populate ECS fields based on the findings from the text_to_ecs step. For each determined value of \`event.type\`, \`event.category\`, \`related.ip\`, \`related.hash\`, \`related.hosts\`, and \`related.user\`, append processors that append these values without altering existing processors and ensure \`allow_duplicates: false\` on each processor. Add multiple append processors when multiple values exist for the same ECS field. After appending these processors, validate the final pipeline."
 - Expected output: SUCCESS or FAILURE status
 - Note: The updated pipeline remains in state
 - **Wait for completion before proceeding**

@@ -25,7 +25,7 @@ export class AgentService {
   ) {}
 
   /**
-   * Invokes the agent with samples fetched from the index.
+   * Invokes the deep research agent with samples fetched from the index.
    * Uses tool-based approach:
    * - Service creates tools with samples and esClient
    * - Agent can fetch samples on demand using fetch_log_samples tool
