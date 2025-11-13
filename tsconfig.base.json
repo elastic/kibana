@@ -976,6 +976,8 @@
       "@kbn/es-archiver/*": ["src/platform/packages/shared/kbn-es-archiver/*"],
       "@kbn/es-errors": ["src/platform/packages/shared/kbn-es-errors"],
       "@kbn/es-errors/*": ["src/platform/packages/shared/kbn-es-errors/*"],
+      "@kbn/es-mappings": ["src/platform/packages/shared/kbn-es-mappings"],
+      "@kbn/es-mappings/*": ["src/platform/packages/shared/kbn-es-mappings/*"],
       "@kbn/es-query": ["src/platform/packages/shared/kbn-es-query"],
       "@kbn/es-query/*": ["src/platform/packages/shared/kbn-es-query/*"],
       "@kbn/es-query-server": ["src/platform/packages/shared/kbn-es-query-server"],

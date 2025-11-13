@@ -8,25 +8,18 @@
  */
 
 import type { TransportRequestOptionsWithOutMeta } from '@elastic/elasticsearch';
+import type SearchApi from '@elastic/elasticsearch/lib/api/api/search';
 import type api from '@elastic/elasticsearch/lib/api/types';
-
-import type { Strict, StrictMappingTypeMapping, AnyMapping, StringMapping } from './mappings/types';
-
-export type {
-  AnyMapping,
-  StringMapping,
-  BooleanMapping,
+import type {
+  MappingsToProperties,
+  KeywordMapping,
+  TextMapping,
   DateMapping,
   DateNanosMapping,
-  FlattenedMapping,
-  IntegerMapping,
-  KeywordMapping,
-  LongMapping,
-  ShortMapping,
-  ObjectMapping,
-  StrictDynamic,
-  TextMapping,
-} from './mappings/types';
+  AnyMapping,
+  Strict,
+  StrictMappingTypeMapping,
+} from '@kbn/es-mappings';
 
 // interface JestIntegrationTestHelpers {
 //   assertBackwardsCompatible: (
@@ -47,24 +40,18 @@ export type {
 //   }) => api.MappingRuntimeField;
 // }
 
-type DataStreamDefinitionMappings<Schema extends {}> = Pick<
-  Omit<StrictMappingTypeMapping, 'properties'> & {
-    properties?: ObjectToPropertiesDefinition<Schema>;
-  },
-  'dynamic' | 'properties'
->;
-
 export interface BaseSearchRuntimeMappings {
   [objectPath: string]: api.MappingRuntimeField;
 }
 
 /**
  * A definition of a data stream that encompasses the data stream and the index template.
- *
+ *w
  * TODO: design/expose definition component templates.
  */
-export interface DataStreamDefinition<
-  Schema extends {} = {},
+export interface DataStreamDefinitionOLD<
+  Schema extends {} = never,
+  SchemaFields extends MappingsToProperties<Schema> = MappingsToProperties<Schema>,
   SearchRuntimeMappings extends BaseSearchRuntimeMappings = {}
 > {
   /**
@@ -128,8 +115,10 @@ export interface DataStreamDefinition<
 
 // Data client
 
-export interface SearchRequestImproved<SearchRuntimeMappings extends BaseSearchRuntimeMappings = {}>
-  extends Omit<api.SearchRequest, 'index' | 'fields'> {
+export interface SearchRequestImproved<
+  S extends {},
+  SearchRuntimeMappings extends BaseSearchRuntimeMappings = {}
+> extends Omit<typeof SearchApi<MappingsToProperties<S>>, 'index' | 'fields'> {
   fields?: Array<Exclude<keyof SearchRuntimeMappings, number | symbol>>;
 }
 
@@ -140,9 +129,15 @@ export interface ClientHelpers<SRM extends BaseSearchRuntimeMappings> {
   };
 }
 
-export type IDataStreamClientIndexRequest<S extends object> = Omit<api.IndexRequest<S>, 'index'>;
+export type IDataStreamClientIndexRequest<S extends {}> = Omit<
+  api.IndexRequest<MappingsToProperties<S>>,
+  'index'
+>;
 
-export type IDataStreamClientBulkRequest<S extends object> = Omit<api.BulkRequest<S>, 'bulk'>;
+export type IDataStreamClientBulkRequest<S extends {}> = Omit<
+  api.BulkRequest<MappingsToProperties<S>>,
+  'bulk'
+>;
 
 /**
  * A client for interacting with data streams in Elasticsearch.
@@ -154,9 +149,9 @@ export interface IDataStreamClient<S extends {}, SRM extends BaseSearchRuntimeMa
    * The Elasticsearch JS client search interface
    */
   search: <Agg extends Record<string, api.AggregationsAggregate> = {}>(
-    req: SearchRequestImproved<SRM>,
+    req: SearchRequestImproved<S, SRM>,
     transportOpts?: TransportRequestOptionsWithOutMeta
-  ) => Promise<api.SearchResponse<S, Agg>>;
+  ) => Promise<api.SearchResponse<MappingsToProperties<S>, Agg>>;
 
   /**
    * The Elasticsearch JS client index interface.
@@ -171,8 +166,17 @@ export interface IDataStreamClient<S extends {}, SRM extends BaseSearchRuntimeMa
   helpers: ClientHelpers<SRM>;
 }
 
+type StringMapping = KeywordMapping | TextMapping | DateMapping | DateNanosMapping;
+
+export type DataStreamDefinitionMappings<Schema extends {}> = Pick<
+  Omit<StrictMappingTypeMapping, 'properties'> & {
+    properties?: ObjectToPropertiesDefinition<Schema>;
+  },
+  'dynamic' | 'properties'
+>;
+
 // An attempt at getting TS to check mapping properties match the schema
-type ObjectToPropertiesDefinition<O extends Record<string, unknown> = {}> = O extends {}
+export type ObjectToPropertiesDefinition<O extends Record<string, unknown> = {}> = O extends {}
   ? never
   : {
       [K in keyof O]?: {} extends O[K]
@@ -186,5 +190,3 @@ type ObjectToPropertiesDefinition<O extends Record<string, unknown> = {}> = O ex
         ? StringMapping
         : AnyMapping;
     };
-
-export type AnyDataStreamDefinition = DataStreamDefinition<any, any>;

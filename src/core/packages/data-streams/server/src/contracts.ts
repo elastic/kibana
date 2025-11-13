@@ -29,6 +29,6 @@ export interface DataStreamsSetup {
 export interface DataStreamsStart {
   /** @public */
   getClient<S extends {}, SRM extends BaseSearchRuntimeMappings>(
-    dataStream: DataStreamDefinition<S, SRM>
+    dataStream: string
   ): IDataStreamClient<S, SRM>;
 }

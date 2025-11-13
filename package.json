@@ -553,6 +553,7 @@
     "@kbn/entityManager-plugin": "link:x-pack/platform/plugins/shared/entity_manager",
     "@kbn/error-boundary-example-plugin": "link:examples/error_boundary",
     "@kbn/es-errors": "link:src/platform/packages/shared/kbn-es-errors",
+    "@kbn/es-mappings": "link:src/platform/packages/shared/kbn-es-mappings",
     "@kbn/es-query": "link:src/platform/packages/shared/kbn-es-query",
     "@kbn/es-query-server": "link:src/platform/packages/shared/kbn-es-query-server",
     "@kbn/es-types": "link:src/platform/packages/shared/kbn-es-types",

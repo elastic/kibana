@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defaultsDeep, merge, extend } from 'lodash';
+import { merge } from 'lodash';
 
 import type {
   DateMapping,
@@ -21,28 +21,11 @@ import type {
   FlattenedMapping,
   ObjectMapping,
 } from './types';
+import { omitUnsetKeys } from './utils';
 
 type WithoutTypeField<T> = Omit<T, 'type'>;
 
-const isSet = <T extends Record<string, any>>(def: T | undefined, key: string): def is T =>
-  Object.keys(def ?? {}).includes(key);
-
-export const omitUnsetKeys = <T>(
-  defaults: Record<string, unknown>,
-  def?: Record<string, unknown>
-): T => {
-  return extend<T>({}, defaults, def, (objValue: unknown, _: unknown, key: string) => {
-    if (isSet(def, key) && objValue === undefined) {
-      return undefined;
-    }
-    return objValue;
-  });
-};
-
-export function object(
-  properties: ObjectMapping['properties'],
-  def?: WithoutTypeField<ObjectMapping>
-): ObjectMapping {
+export function object(def: WithoutTypeField<ObjectMapping>): ObjectMapping {
   const defaults: ObjectMapping = omitUnsetKeys(
     {
       type: 'object',
@@ -50,7 +33,7 @@ export function object(
     def
   );
 
-  return defaultsDeep(def, defaults, { properties });
+  return merge(defaults, def);
 }
 
 export function text(def?: WithoutTypeField<TextMapping>): TextMapping {
@@ -78,7 +61,7 @@ export function keyword(def?: WithoutTypeField<KeywordMapping>): KeywordMapping 
     },
     def
   );
-  return defaultsDeep(def, defaults);
+  return merge(defaults, def);
 }
 
 export function date(def?: WithoutTypeField<DateMapping>): DateMapping {
@@ -88,7 +71,7 @@ export function date(def?: WithoutTypeField<DateMapping>): DateMapping {
     },
     def
   );
-  return defaultsDeep(def, defaults);
+  return merge(defaults, def);
 }
 
 export function dateNanos(def?: WithoutTypeField<DateNanosMapping>): DateNanosMapping {
@@ -98,7 +81,7 @@ export function dateNanos(def?: WithoutTypeField<DateNanosMapping>): DateNanosMa
     },
     def
   );
-  return defaultsDeep(def, defaults);
+  return merge(defaults, def);
 }
 
 export function integer(def?: WithoutTypeField<IntegerMapping>): IntegerMapping {
@@ -108,7 +91,7 @@ export function integer(def?: WithoutTypeField<IntegerMapping>): IntegerMapping 
     },
     def
   );
-  return defaultsDeep(def, defaults);
+  return merge(defaults, def);
 }
 
 export function long(def?: WithoutTypeField<LongMapping>): LongMapping {
@@ -118,7 +101,7 @@ export function long(def?: WithoutTypeField<LongMapping>): LongMapping {
     },
     def
   );
-  return defaultsDeep(def, defaults);
+  return merge(defaults, def);
 }
 
 export function short(def?: WithoutTypeField<ShortMapping>): ShortMapping {
@@ -128,7 +111,7 @@ export function short(def?: WithoutTypeField<ShortMapping>): ShortMapping {
     },
     def
   );
-  return defaultsDeep(def, defaults);
+  return merge(defaults, def);
 }
 
 export function boolean(def?: WithoutTypeField<BooleanMapping>): BooleanMapping {
@@ -138,7 +121,7 @@ export function boolean(def?: WithoutTypeField<BooleanMapping>): BooleanMapping 
     },
     def
   );
-  return defaultsDeep(def, defaults);
+  return merge(defaults, def);
 }
 
 export function flattened(def?: WithoutTypeField<FlattenedMapping>): FlattenedMapping {
@@ -149,5 +132,5 @@ export function flattened(def?: WithoutTypeField<FlattenedMapping>): FlattenedMa
     def
   );
 
-  return defaultsDeep(def, defaults);
+  return merge(defaults, def);
 }

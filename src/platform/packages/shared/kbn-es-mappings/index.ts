@@ -7,17 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  boolean,
-  date,
-  dateNanos,
-  flattened,
-  integer,
-  keyword,
-  long,
-  object,
-  short,
-  text,
-} from './mappings';
-
-export { createTypedMappings } from './lib';
+export * as mappings from './src/mappings';
+export * from './src/types';

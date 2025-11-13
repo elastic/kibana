@@ -14,7 +14,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import type { EsTestCluster } from '@kbn/test';
 import { createTestEsCluster } from '@kbn/test';
 import type { DataStreamDefinition } from '../types';
-import * as mappings from '../mappings';
+import { mappings } from '@kbn/es-mappings';
 
 describe('DataStreamClient', () => {
   let esServer: EsTestCluster;

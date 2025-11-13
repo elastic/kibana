@@ -9,15 +9,11 @@
   },
   "include": [
     "**/*.ts",
-  ],
-  "exclude": [
-    "target/**/*"
+    "**/*.js",
   ],
   "kbn_references": [
-    "@kbn/logging",
-    "@kbn/test",
-    "@kbn/es-mappings",
-    "@kbn/core-logging-server-mocks",
-    "@kbn/tooling-log",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

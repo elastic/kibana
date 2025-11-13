@@ -6447,6 +6447,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/es-mappings@link:src/platform/packages/shared/kbn-es-mappings":
+  version "0.0.0"
+  uid ""
+
 "@kbn/es-query-server@link:src/platform/packages/shared/kbn-es-query-server":
   version "0.0.0"
   uid ""

@@ -10,43 +10,25 @@
 import type { Logger } from '@kbn/logging';
 import type { Client, TransportRequestOptionsWithOutMeta } from '@elastic/elasticsearch';
 import type api from '@elastic/elasticsearch/lib/api/types';
+import type { MappingsToProperties } from '@kbn/es-mappings';
 import type {
-  IDataStreamClient,
   BaseSearchRuntimeMappings,
-  DataStreamDefinition,
   IDataStreamClientIndexRequest,
   IDataStreamClientBulkRequest,
   SearchRequestImproved,
-  ClientHelpers,
 } from './types';
 import { initialize } from './initialize';
 import { validateClientArgs } from './validate_client_args';
 
-type AnyDataStream = DataStreamDefinition<any>;
+import type { DataStreamDefinition, IDataStreamClient, ClientHelpers } from './client_type';
 
 type ElasticsearchClient = Omit<
   Client,
   'connectionPool' | 'serializer' | 'extend' | 'close' | 'diagnostic'
 >;
 
-export interface DataStreamClientArgs<
-  S extends object,
-  SRM extends BaseSearchRuntimeMappings = {}
-> {
-  /**
-   * @remark For now just one
-   */
-  dataStreams: DataStreamDefinition<S, SRM>;
-  elasticsearchClient: ElasticsearchClient;
-  logger: Logger;
-
-  // TODO: support serialize/deserialize opts so that we can map from S => Deserialized values
-  //       For example: read a doc { date: '2023-10-01T00:00:00Z' } and deserialize it to { date: moment.Moment }
-  //                    write a doc { date: moment.Moment } and serialize it to { date: '2023-10-01T00:00:00Z' }
-}
-
-export class DataStreamClient<S extends object, SRM extends BaseSearchRuntimeMappings>
-  implements IDataStreamClient<S, SRM>
+export class DataStreamClient<Definition extends DataStreamDefinition, SRM extends any>
+  implements IDataStreamClient<Definition>
 {
   public helpers: ClientHelpers<SRM> = {
     getFieldsFromHit: (hit) => {
@@ -57,33 +39,33 @@ export class DataStreamClient<S extends object, SRM extends BaseSearchRuntimeMap
   private readonly runtimeFields: string[];
   private constructor(
     private readonly client: ElasticsearchClient,
-    private readonly dataStreams: AnyDataStream
+    private readonly dataStreamDefinition: DataStreamDefinition
   ) {
-    this.runtimeFields = Object.keys(dataStreams.searchRuntimeMappings ?? {});
+    this.runtimeFields = Object.keys(dataStreamDefinition.searchRuntimeMappings ?? {});
   }
 
   public async index(args: IDataStreamClientIndexRequest<S>) {
     return this.client.index({
-      index: this.dataStreams.name,
+      index: this.dataStreamDefinition.name,
       ...args,
     });
   }
 
   public async bulk(args: IDataStreamClientBulkRequest<S>) {
     return this.client.bulk({
-      index: this.dataStreams.name,
+      index: this.dataStreamDefinition.name,
       ...args,
     });
   }
 
   public async search<Agg extends Record<string, api.AggregationsAggregate> = {}>(
-    args: SearchRequestImproved<SRM>,
+    args: SearchRequestImproved<S, SRM>,
     transportOpts?: TransportRequestOptionsWithOutMeta
   ) {
-    return this.client.search<S, Agg>(
+    return this.client.search<MappingsToProperties<S>, Agg>(
       {
-        index: this.dataStreams.name,
-        runtime_mappings: this.dataStreams.searchRuntimeMappings,
+        index: this.dataStreamDefinition.name,
+        runtime_mappings: this.dataStreamDefinition.searchRuntimeMappings,
         fields: this.runtimeFields,
         ...args,
       },
@@ -97,12 +79,14 @@ export class DataStreamClient<S extends object, SRM extends BaseSearchRuntimeMap
    * @remark This function should execute early in the application lifecycle and preferably once per
    *         data stream. However, it should be idempotent.
    */
-  public static async initialize<S extends object, SRM extends BaseSearchRuntimeMappings>(
-    args: DataStreamClientArgs<S, SRM>
-  ): Promise<DataStreamClient<S, SRM>> {
+  public static async initialize<S extends object, SRM extends BaseSearchRuntimeMappings>(args: {
+    dataStream: DataStreamDefinition;
+    elasticsearchClient: ElasticsearchClient;
+    logger: Logger;
+  }): Promise<DataStreamClient<S, SRM>> {
     validateClientArgs(args);
     await initialize(args);
-    return new DataStreamClient<S, SRM>(args.elasticsearchClient, args.dataStreams);
+    return new DataStreamClient<S, SRM>(args.elasticsearchClient, args.dataStream);
   }
 
   // TODO: expose a create function that skips initialization
