@@ -34,22 +34,23 @@ export function MetricsExperienceStateProvider({ children }: { children: React.R
     (nextDimensions: string[]) => {
       setCurrentPage(0);
       setDimensions(nextDimensions);
-      const filteredValues =
-        nextDimensions.length === 0
-          ? []
-          : valueFilters.filter((v) => nextDimensions.includes(v.split(FIELD_VALUE_SEPARATOR)[0]));
-
-      setValueFilters(filteredValues);
+      setValueFilters((prevValueFilters) => {
+        if (nextDimensions.length === 0) {
+          return [];
+        }
+        return prevValueFilters.filter((v) =>
+          nextDimensions.includes(v.split(FIELD_VALUE_SEPARATOR)[0])
+        );
+      });
     },
-    [valueFilters, setValueFilters, setDimensions, setCurrentPage]
+    [setValueFilters, setCurrentPage, setDimensions]
   );
 
   const onValuesChange = useCallback(
     (values: string[]) => {
-      setCurrentPage(0);
       setValueFilters(values);
     },
-    [setValueFilters, setCurrentPage]
+    [setValueFilters]
   );
 
   const onPageChange = useCallback((page: number) => setCurrentPage(page), [setCurrentPage]);
@@ -63,8 +64,8 @@ export function MetricsExperienceStateProvider({ children }: { children: React.R
   );
 
   const onToggleFullscreen = useCallback(() => {
-    setIsFullscreen(!isFullscreen);
-  }, [isFullscreen, setIsFullscreen]);
+    setIsFullscreen((prev) => !prev);
+  }, [setIsFullscreen]);
 
   return (
     <MetricsExperienceStateContext.Provider

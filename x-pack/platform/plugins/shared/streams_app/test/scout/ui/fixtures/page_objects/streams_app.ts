@@ -222,7 +222,7 @@ export class StreamsApp {
   }
 
   async updateRoutingRule() {
-    await this.page.getByRole('button', { name: 'Change routing' }).click();
+    await this.page.getByRole('button', { name: 'Update' }).click();
   }
 
   async cancelRoutingRule() {
@@ -622,6 +622,12 @@ export class StreamsApp {
 
   getDataSourcesList() {
     return this.page.getByTestId('streamsAppProcessingDataSourcesList');
+  }
+
+  async getDataSourcesSelector() {
+    const dataSourcesSelector = this.page.getByTestId('streamsAppProcessingDataSourceSelector');
+    await expect(dataSourcesSelector).toBeVisible();
+    return dataSourcesSelector;
   }
 
   getDataSourcesListItems() {

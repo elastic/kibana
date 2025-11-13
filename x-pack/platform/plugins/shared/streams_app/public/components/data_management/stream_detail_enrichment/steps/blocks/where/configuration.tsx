@@ -116,7 +116,7 @@ export const WhereBlockConfiguration = forwardRef<HTMLDivElement, WhereBlockConf
             )}
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFlexGroup>
+            <EuiFlexGroup justifyContent="flexEnd">
               <div>
                 <EuiButtonEmpty
                   data-test-subj="streamsAppWhereBlockConfigurationCancelButton"
