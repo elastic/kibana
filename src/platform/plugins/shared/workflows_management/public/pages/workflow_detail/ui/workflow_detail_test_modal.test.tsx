@@ -45,6 +45,7 @@ jest.mock('../../../entities/workflows/store/workflow_detail/selectors', () => (
   selectHasChanges: jest.fn(),
   selectIsTestModalOpen: jest.fn(),
   selectWorkflowDefinition: jest.fn(),
+  selectWorkflowId: jest.fn(),
 }));
 
 // Mock WorkflowExecuteModal
