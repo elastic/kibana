@@ -31,29 +31,35 @@ test.describe('Stream data routing - editing routing rules', { tag: ['@ess', '@s
   });
 
   test('should edit an existing routing rule', async ({ page, pageObjects }) => {
-    await pageObjects.streams.clickEditRoutingRule('logs.edit-test');
+    const rountingRuleName = 'logs.edit-test';
+    await pageObjects.streams.clickEditRoutingRule(rountingRuleName);
 
     // Update condition
     await pageObjects.streams.fillConditionEditor({ value: 'updated-service' });
     await pageObjects.streams.updateRoutingRule();
 
     // Verify success
-    await expect(page.getByText('service.name')).toBeVisible();
-    await expect(page.getByText('equals')).toBeVisible();
-    await expect(page.getByText('updated-service')).toBeVisible();
+    const routingRuleLocator = page.testSubj.locator(`streamDetailRoutingItem-${rountingRuleName}`);
+    await expect(routingRuleLocator).toBeVisible();
+    await expect(routingRuleLocator.locator('[title="service.name"]')).toBeVisible();
+    await expect(routingRuleLocator.locator('text=equals')).toBeVisible();
+    await expect(routingRuleLocator.locator('[title="updated-service"]')).toBeVisible();
   });
 
   test('should cancel editing routing rule', async ({ page, pageObjects }) => {
-    await pageObjects.streams.clickEditRoutingRule('logs.edit-test');
+    const rountingRuleName = 'logs.edit-test';
+    await pageObjects.streams.clickEditRoutingRule(rountingRuleName);
 
     // Update and cancel changes
     await pageObjects.streams.fillConditionEditor({ value: 'updated-service' });
     await pageObjects.streams.cancelRoutingRule();
 
     // Verify success
-    await expect(page.getByText('service.name')).toBeVisible();
-    await expect(page.getByText('equals')).toBeVisible();
-    await expect(page.getByText('test-service')).toBeVisible();
+    const routingRuleLocator = page.testSubj.locator(`streamDetailRoutingItem-${rountingRuleName}`);
+    await expect(routingRuleLocator).toBeVisible();
+    await expect(routingRuleLocator.locator('[title="service.name"]')).toBeVisible();
+    await expect(routingRuleLocator.locator('text=equals')).toBeVisible();
+    await expect(routingRuleLocator.locator('[title="test-service"]')).toBeVisible();
   });
 
   test('should switch between editing different rules', async ({ pageObjects }) => {

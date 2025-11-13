@@ -14,13 +14,18 @@ test.describe('Stream data routing - creating routing rules', { tag: ['@ess', '@
     await pageObjects.streams.gotoPartitioningTab('logs');
   });
 
+  test.afterAll(async ({ apiServices }) => {
+    // Clear existing rules
+    await apiServices.streams.clearStreamChildren('logs');
+  });
+
   test('should create a new routing rule successfully', async ({ page, pageObjects }) => {
     await pageObjects.streams.clickCreateRoutingRule();
 
     // Verify we're in the creating new rule state
     await expect(page.getByTestId('streamsAppRoutingStreamEntryNameField')).toBeVisible();
     await expect(page.getByText('Stream name')).toBeVisible();
-    await expect(page.getByText('logs.')).toBeVisible();
+    await expect(page.testSubj.locator('streamNamePrefix')).toHaveText('logs.');
 
     // Fill in the stream name
     await page.getByTestId('streamsAppRoutingStreamEntryNameField').fill('nginx');
@@ -36,10 +41,13 @@ test.describe('Stream data routing - creating routing rules', { tag: ['@ess', '@
     await page.getByRole('button', { name: 'Save' }).click();
 
     // Verify success
-    await pageObjects.streams.expectRoutingRuleVisible('logs.nginx');
-    await expect(page.getByText('service.name')).toBeVisible();
-    await expect(page.getByText('equals')).toBeVisible();
-    await expect(page.getByText('nginxlogs')).toBeVisible();
+    const rountingRuleName = 'logs.nginx';
+    const routingRuleLocator = page.testSubj.locator(`streamDetailRoutingItem-${rountingRuleName}`);
+    await pageObjects.streams.expectRoutingRuleVisible(rountingRuleName);
+    await expect(routingRuleLocator).toBeVisible();
+    await expect(routingRuleLocator.locator('[title="service.name"]')).toBeVisible();
+    await expect(routingRuleLocator.locator('text=equals')).toBeVisible();
+    await expect(routingRuleLocator.locator('[title="nginxlogs"]')).toBeVisible();
   });
 
   test('should cancel creating new routing rule', async ({ page, pageObjects }) => {

@@ -155,6 +155,7 @@ export function IdleRoutingStreamEntry({
         </EuiFlexGroup>
         <EuiFlexItem
           grow={false}
+          data-test-subj={`streamDetailRoutingItem-${routingRule.destination}`}
           className={css`
             overflow: hidden;
             padding: ${euiTheme.size.xs} 0px;
