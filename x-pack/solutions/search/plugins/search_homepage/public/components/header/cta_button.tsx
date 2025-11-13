@@ -5,23 +5,24 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiLink } from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
 
-export interface HeaderCTALinkProps {
-  href: string;
+export interface HeaderCTAButtonProps {
+  handleOnClick: () => void;
   'data-telemetry-id': string;
   'data-test-subj'?: string;
   children: React.ReactNode | React.ReactNode[];
+  ariaLabel: string;
 }
 
-export const HeaderCTALink = (props: HeaderCTALinkProps) => (
-  <EuiLink
-    data-test-subj={props['data-test-subj'] || 'searchHomepageHeaderCTA'}
-    href={props.href}
-    target="_blank"
+export const HeaderCTAButton = (props: HeaderCTAButtonProps) => (
+  <EuiButton
     // keep "search-promo-homepage" as the prefix for every tracking ID so we can filter on that prefix for the total homepage promo clicks overall
     data-telemetry-id={`search-promo-homepage-${props['data-telemetry-id']}`}
+    data-test-subj={props['data-test-subj'] || 'searchHomepageHeaderButton'}
+    onClick={props.handleOnClick}
+    aria-label={props.ariaLabel}
   >
     {props.children}
-  </EuiLink>
+  </EuiButton>
 );
