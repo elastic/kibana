@@ -101,7 +101,7 @@ function JsonDiffViewer({ hit, decreaseAvailableHeightBy }: DocViewRenderProps) 
     }
     editorRef.current.setModel({ original: oldModel, modified: newModel });
     const commonOptions: monaco.editor.IEditorOptions = {
-      lightbulb: { enabled: false },
+      lightbulb: { enabled: monaco.editor.ShowLightbulbIconMode.Off },
       fontSize: 12,
       lineNumbers: 'off',
       minimap: { enabled: false },

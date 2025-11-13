@@ -83,3 +83,56 @@ if (!Object.hasOwn(global, 'Worker')) {
 if (!Object.hasOwn(global, 'MessagePort')) {
   global.MessagePort = {};
 }
+
+if (!Object.hasOwn(global, 'ClipboardItem')) {
+  /**
+   * @typedef {Record<string, Blob | string | Promise<Blob | string>>} ItemData
+   */
+
+  /**
+   * @implements {ClipboardItem}
+   */
+  class ClipboardItemMockImpl {
+    /**
+     * @type {ItemData}
+     */
+    #data;
+
+    /**
+     * @param {ItemData} d
+     */
+    constructor(d) {
+      this.data = d;
+    }
+
+    get types() {
+      return Array.from(Object.keys(this.data));
+    }
+
+    /**
+     * @param {string} type
+     * @returns {Promise<Blob | string>}
+     */
+    async getType(type) {
+      const value = await this.data[type];
+
+      if (!value) {
+        throw new Error(`${type} is not one of the available MIME types on this item.`);
+      }
+
+      return value instanceof window.Blob ? value : new window.Blob([value], { type });
+    }
+  }
+
+  Object.defineProperty(global, 'ClipboardItem', {
+    value: ClipboardItemMockImpl,
+  });
+}
+
+if (!Object.hasOwn(global.navigator, 'clipboard')) {
+  const {
+    attachClipboardStubToView,
+  } = require('@testing-library/user-event/dist/cjs/utils/dataTransfer/Clipboard.js');
+
+  attachClipboardStubToView(global);
+}

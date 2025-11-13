@@ -938,8 +938,8 @@ const ESQLEditorInternal = function ESQLEditor({
 
   onLayoutChangeRef.current = onLayoutChange;
 
-  const codeEditorOptions: CodeEditorProps['options'] = useMemo(
-    () => ({
+  const codeEditorOptions = useMemo(
+    (): NonNullable<CodeEditorProps['options']> => ({
       hover: {
         above: false,
       },
@@ -955,7 +955,7 @@ const ESQLEditorInternal = function ESQLEditor({
       fontSize: 14,
       hideCursorInOverviewRuler: true,
       lightbulb: {
-        enabled: false,
+        enabled: monaco.editor.ShowLightbulbIconMode.Off,
       },
       lineDecorationsWidth: 20,
       lineNumbers: 'on',

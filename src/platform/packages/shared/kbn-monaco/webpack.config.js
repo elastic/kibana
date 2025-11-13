@@ -77,9 +77,8 @@ const workerConfig = (languages) => ({
         /**
          * further process the modules exported by monaco-editor and monaco-yaml
          * because their exports leverage some none-standard language APIs at this time.
-         * Also includes /vs/editor/ to transpile worker files that may use modern syntax like class static blocks.
          */
-        test: /(monaco-editor\/esm\/vs\/(language|editor)|monaco-yaml|vscode-uri)\/.*m?(t|j)sx?$/,
+        test: /(monaco-editor\/esm\/vs\/language|monaco-yaml|vscode-uri)\/.*m?(t|j)sx?$/,
         use: {
           loader: 'babel-loader',
           options: {
@@ -88,18 +87,6 @@ const workerConfig = (languages) => ({
             presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
           },
         },
-      },
-    ],
-  },
-  optimization: {
-    minimizer: [
-      (compiler) => {
-        const TerserPlugin = require('terser-webpack-plugin');
-        new TerserPlugin({
-          // exclude this file from being processed by terser,
-          // because attempts at tree shaking actually botches up the file
-          exclude: /monaco-editor[\\/]esm[\\/]vs[\\/]base[\\/]common[\\/]map.js/,
-        }).apply(compiler);
       },
     ],
   },
