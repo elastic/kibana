@@ -22,10 +22,12 @@ import type { ControlGroupRendererApi, ControlPanelsState } from '@kbn/control-g
 class MockControlGroupRendererApi {
   inputSubject: BehaviorSubject<Record<string, ControlPanelsState> | null>;
   addNewPanel: jest.Mock;
+  esqlVariables$: BehaviorSubject<ESQLControlVariable[]>;
 
   constructor() {
     this.inputSubject = new BehaviorSubject<Record<string, ControlPanelsState> | null>(null);
     this.addNewPanel = jest.fn();
+    this.esqlVariables$ = new BehaviorSubject<ESQLControlVariable[]>([]);
   }
 
   getInput$() {
@@ -139,8 +141,8 @@ describe('useESQLVariables', () => {
 
       // Assert dispatches happened
       await waitFor(() => {
-        expect(dispatchSpy).toHaveBeenCalledTimes(2);
         const dispatchCalls = dispatchSpy.mock.calls;
+        expect(dispatchSpy).toHaveBeenCalledTimes(2);
         dispatchCalls.forEach((call) => {
           const action = call[0] as { type: string; payload?: unknown };
           if (action.type === 'internalState/setControlGroupState') {
