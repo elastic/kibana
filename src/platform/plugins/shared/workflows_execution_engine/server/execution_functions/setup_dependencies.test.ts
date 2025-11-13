@@ -24,7 +24,7 @@ import { StepExecutionRuntimeFactory } from '../workflow_context_manager/step_ex
 import type { ContextDependencies } from '../workflow_context_manager/types';
 import { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
-import { WorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
+import { WorkflowEventLogger } from '../workflow_event_logger';
 import { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 
 jest.mock('../connector_executor');
@@ -33,7 +33,7 @@ jest.mock('../step/nodes_factory');
 jest.mock('../workflow_context_manager/step_execution_runtime_factory');
 jest.mock('../workflow_context_manager/workflow_execution_runtime_manager');
 jest.mock('../workflow_context_manager/workflow_execution_state');
-jest.mock('../workflow_event_logger/workflow_event_logger');
+jest.mock('../workflow_event_logger');
 jest.mock('../workflow_task_manager/workflow_task_manager');
 jest.mock('@kbn/workflows/graph');
 
