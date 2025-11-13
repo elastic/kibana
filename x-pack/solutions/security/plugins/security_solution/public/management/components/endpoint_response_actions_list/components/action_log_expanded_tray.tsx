@@ -9,7 +9,6 @@ import React, { memo, useMemo } from 'react';
 import { EuiCodeBlock, EuiDescriptionList, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css, euiStyled } from '@kbn/kibana-react-plugin/common';
 import { reduce } from 'lodash';
-import { i18n } from '@kbn/i18n';
 import { ActionResponseOutputs } from './action_response_outputs';
 import { getAgentTypeName } from '../../../../common/translations';
 import { RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP } from '../../../../../common/endpoint/service/response_actions/constants';
@@ -77,12 +76,9 @@ const StyledEuiFlexGroup = euiStyled(EuiFlexGroup).attrs({
 
 export const ActionsLogExpandedTray = memo<{
   action: MaybeImmutable<ActionDetails>;
-  // Delete prop `fromAlert` once we refactor automated response actions
-  fromAlertWorkaround?: boolean;
   'data-test-subj'?: string;
-}>(({ action, fromAlertWorkaround = false, 'data-test-subj': dataTestSubj }) => {
+}>(({ action, 'data-test-subj': dataTestSubj }) => {
   const getTestId = useTestIdGenerator(dataTestSubj);
-
   const {
     hosts,
     startedAt,
@@ -174,26 +170,12 @@ export const ActionsLogExpandedTray = memo<{
         description: (
           // codeblock for output
           <StyledEuiCodeBlock data-test-subj={getTestId('details-tray-output')}>
-            {fromAlertWorkaround && action.errors?.length ? (
-              <>
-                {(
-                  action.errors ?? [
-                    i18n.translate('xpack.securitySolution.actionLogExpandedTray.missingErrors', {
-                      defaultMessage: 'Action did not specify any errors',
-                    }),
-                  ]
-                ).map((error) => (
-                  <EuiFlexItem>{error}</EuiFlexItem>
-                ))}
-              </>
-            ) : (
-              <ActionResponseOutputs action={action} data-test-subj={getTestId('output')} />
-            )}
+            <ActionResponseOutputs action={action} data-test-subj={getTestId('output')} />
           </StyledEuiCodeBlock>
         ),
       },
     ],
-    [action, fromAlertWorkaround, getTestId]
+    [action, getTestId]
   );
 
   return (
