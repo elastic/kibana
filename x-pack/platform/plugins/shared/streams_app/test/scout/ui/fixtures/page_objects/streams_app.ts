@@ -620,6 +620,12 @@ export class StreamsApp {
     return this.page.getByTestId('streamsAppProcessingDataSourcesList');
   }
 
+  async getDataSourcesSelector() {
+    const dataSourcesSelector = this.page.getByTestId('streamsAppProcessingDataSourceSelector');
+    await expect(dataSourcesSelector).toBeVisible();
+    return dataSourcesSelector;
+  }
+
   getDataSourcesListItems() {
     return this.getDataSourcesList().getByTestId('streamsAppProcessingDataSourceListItem');
   }
