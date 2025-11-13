@@ -59,13 +59,15 @@ When a user requests an ingest pipeline for an integration and datastream, orche
 
 ### Step 3: Get ECS Field Mappings
 **Delegate to text_to_ecs sub-agent:**
-- Task: "Review the pipeline results in state and provide ECS (Elastic Common Schema) field mappings. For each field that can be mapped to ECS, provide the ECS field name and mapping type. This is best-effort - you don't need to map every field, only those with clear ECS equivalents."
+- First, call the \`fetch_unique_keys\` tool to retrieve unique keys from the pipeline output and include them in the task description.
+- Task: "Review these pipeline output snippets and provide ECS (Elastic Common Schema) field mappings. For each field that can be mapped to ECS, provide the ECS field name and mapping type. This is best-effort — map only the fields with clear ECS equivalents."
 - Expected output: Markdown table with field mappings (original_field → ecs_field, mapping_type)
 - **Wait for completion before proceeding**
 
-### Step 4: Add ECS Rename Processors
+### Step 4: Append ECS Rename Processors
 **Delegate to ingest_pipeline_generator sub-agent:**
-- Task: "Using the current pipeline in state, append rename processors for the following ECS mappings: [mappings from Step 3]. Add these rename processors at the END of the existing pipeline. DO NOT modify existing processors - only append the rename processors. Validate the final pipeline."
+- First, call the \`fetch_current_pipeline\` tool and include the returned pipeline in your task description.
+- Task: "Here is the validated pipeline currently stored in state: [output from fetch_current_pipeline]. Append rename processors for the following ECS mappings: [mappings from Step 3] at the VERY END of this pipeline. Do not alter, reorder, or remove any existing processors or configuration. Only append the new rename processors and then validate the final pipeline."
 - Expected output: SUCCESS or FAILURE status
 - Note: The updated pipeline remains in state
 - **Wait for completion before proceeding**
@@ -259,7 +261,7 @@ Based on the provided log analysis, create an ingest pipeline using the most app
 - **Focus on parsing and field extraction** - This is your primary goal
 - Use the simplest processor that works for the identified format
 - Handle edge cases: null values, missing fields, data type variations
-- Add \`on_failure\` handlers to prevent complete pipeline failures
+- Use a single top-level \`on_failure\` handler at the end of the pipeline that captures any processor failure and sets \`error.message\`; do not attach \`on_failure\` to each processor individually
 - Keep pipelines efficient - avoid unnecessary processors
 
 ### Step 2: Validate and Iterate

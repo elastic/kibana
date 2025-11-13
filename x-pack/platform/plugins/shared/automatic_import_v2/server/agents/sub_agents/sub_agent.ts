@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
 import type { ToolRunnableConfig } from '@langchain/core/tools';
 import { tool } from '@langchain/core/tools';
 import { ToolMessage } from '@langchain/core/messages';
 import { Command } from '@langchain/langgraph';
 import { createReactAgent } from '@langchain/langgraph/prebuilt';
+import { z } from '@kbn/zod';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { TASK_TOOL_DESCRIPTION } from '../prompts';
 import { AutomaticImportAgentState } from '../state';
@@ -19,19 +19,22 @@ import type { SubAgent } from '../types';
 interface TaskToolParams {
   subagents: SubAgent[];
   model: InferenceChatModel;
+  recursionLimit?: number;
 }
 
 export const createTaskTool = (params: TaskToolParams) => {
-  const { subagents, model } = params;
+  const { subagents, model, recursionLimit } = params;
   const agentsMap = new Map<string, any>();
   for (const subagent of subagents) {
     // Create ReAct agent for the subagent
-    const ReActSubAgent = createReactAgent({
+    const baseSubAgent = createReactAgent({
       llm: model,
       tools: (subagent.tools || []) as any,
       messageModifier: subagent.prompt,
       stateSchema: AutomaticImportAgentState,
     });
+    const ReActSubAgent =
+      recursionLimit != null ? baseSubAgent.withConfig({ recursionLimit }) : baseSubAgent;
 
     agentsMap.set(subagent.name, ReActSubAgent);
   }
