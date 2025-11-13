@@ -24,14 +24,14 @@ export const CloudConnectorNameField: React.FC<CloudConnectorNameFieldProps> = (
   const validateFormat = (name: string): string | undefined => {
     if (!name)
       return i18n.translate(
-        'xpack.cloudSecurityPosture.cloudConnectorSetup.cloudConnectorNameField.requiredError',
+        'securitySolutionPackages.cloudSecurityPosture.cloudConnectorSetup.cloudConnectorNameField.requiredError',
         {
           defaultMessage: 'Cloud Connector Name is required',
         }
       );
     if (name.length > 255)
       return i18n.translate(
-        'xpack.cloudSecurityPosture.cloudConnectorSetup.cloudConnectorNameField.tooLongError',
+        'securitySolutionPackages.cloudSecurityPosture.cloudConnectorSetup.cloudConnectorNameField.tooLongError',
         {
           defaultMessage: 'Cloud Connector Name must be 255 characters or less',
         }
@@ -51,7 +51,7 @@ export const CloudConnectorNameField: React.FC<CloudConnectorNameFieldProps> = (
   return (
     <EuiFormRow
       label={i18n.translate(
-        'xpack.cloudSecurityPosture.cloudConnectorSetup.cloudConnectorNameField.label',
+        'securitySolutionPackages.cloudSecurityPosture.cloudConnectorSetup.cloudConnectorNameField.label',
         {
           defaultMessage: 'Cloud Connector Name',
         }
