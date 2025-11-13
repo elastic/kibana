@@ -12,6 +12,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./rule_migrations'));
 
     /* Automatic Dashboard Migrations */
-    loadTestFile(require.resolve('./dashboard_migrations'));
+    // loadTestFile(require.resolve('./dashboard_migrations'));
   });
 }

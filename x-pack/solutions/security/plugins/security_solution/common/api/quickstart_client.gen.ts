@@ -453,6 +453,9 @@ import type {
   CreateRuleMigrationRulesRequestParamsInput,
   CreateRuleMigrationRulesRequestBodyInput,
   DeleteRuleMigrationRequestParamsInput,
+  EnhanceRuleMigrationsRequestParamsInput,
+  EnhanceRuleMigrationsRequestBodyInput,
+  EnhanceRuleMigrationsResponse,
   GetAllStatsRuleMigrationResponse,
   GetRuleMigrationRequestParamsInput,
   GetRuleMigrationResponse,
@@ -1424,6 +1427,25 @@ The entity will be immediately deleted from the latest index.  It will remain av
         },
         method: 'POST',
         body: props.attachment,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Enhances existing migration rules with additional vendor-specific data such as MITRE mappings
+   */
+  async enhanceRuleMigrations(props: EnhanceRuleMigrationsProps) {
+    this.log.info(`${new Date().toISOString()} Calling API EnhanceRuleMigrations`);
+    return this.kbnClient
+      .request<EnhanceRuleMigrationsResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/rules/{migration_id}/rules/enhance',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -3341,6 +3363,10 @@ export interface EndpointUnisolateActionProps {
 }
 export interface EndpointUploadActionProps {
   attachment: FormData;
+}
+export interface EnhanceRuleMigrationsProps {
+  params: EnhanceRuleMigrationsRequestParamsInput;
+  body: EnhanceRuleMigrationsRequestBodyInput;
 }
 export interface EntityDetailsHighlightsProps {
   body: EntityDetailsHighlightsRequestBodyInput;
