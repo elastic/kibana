@@ -26,16 +26,37 @@ export const getMaintenanceWindowDateAndStatus = ({
   events,
   dateToCompare,
   expirationDate,
+  enabled,
 }: {
   events: DateRange[];
   dateToCompare: Date;
   expirationDate: Date;
+  enabled: Boolean;
 }): MaintenanceWindowDateAndStatus => {
+  // if enabled = false, the mw should be disabled
+  if (!enabled) {
+    if (!events.length) {
+      return {
+        eventStartTime: null,
+        eventEndTime: null,
+        status: MaintenanceWindowStatus.Disabled,
+      };
+    }
+
+    const { event, index } = findRecentEventWithStatus(events, dateToCompare);
+    return {
+      eventStartTime: event.gte,
+      eventEndTime: event.lte,
+      status: MaintenanceWindowStatus.Disabled,
+      index,
+    };
+  }
   // No events, status is finished or archived
   if (!events.length) {
     const status = moment.utc(expirationDate).isBefore(dateToCompare)
       ? MaintenanceWindowStatus.Archived
       : MaintenanceWindowStatus.Finished;
+
     return {
       eventStartTime: null,
       eventEndTime: null,
@@ -68,6 +89,7 @@ export const findRecentEventWithStatus = (
   dateToCompare: Date
 ): DateSearchResult => {
   const result = binaryDateSearch(events, dateToCompare, 0, events.length - 1)!;
+
   // Has running or upcoming event, just return the event
   if (
     result.status === MaintenanceWindowStatus.Running ||
