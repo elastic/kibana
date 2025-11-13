@@ -20,10 +20,10 @@ export async function registerAgentTools({
   plugins: APMPluginSetupDependencies;
   logger: Logger;
 }) {
-  const apmTools: StaticToolRegistration<any>[] = await Promise.all([
+  const apmTools: StaticToolRegistration<any>[] = [
     createApmDownstreamDependenciesTool({ core, plugins, logger }),
     createApmGetServicesTool({ core, plugins, logger }),
-  ]);
+  ];
 
   for (const tool of apmTools) {
     plugins.onechat?.tools.register(tool);

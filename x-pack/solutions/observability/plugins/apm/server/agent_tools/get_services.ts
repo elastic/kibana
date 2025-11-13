@@ -39,7 +39,7 @@ const schema = z.object({
     .describe('Filter service list by health status'),
 });
 
-export async function createApmGetServicesTool({
+export function createApmGetServicesTool({
   core,
   plugins,
   logger,

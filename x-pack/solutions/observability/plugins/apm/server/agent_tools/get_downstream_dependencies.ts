@@ -28,7 +28,7 @@ const schema = z.object({
   end: z.string().min(1).describe('The end time in date math (e.g., now)'),
 });
 
-export async function createApmDownstreamDependenciesTool({
+export function createApmDownstreamDependenciesTool({
   core,
   plugins,
   logger,
