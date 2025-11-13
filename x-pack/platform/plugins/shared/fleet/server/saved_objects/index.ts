@@ -9,6 +9,8 @@ import type { SavedObjectsServiceSetup, SavedObjectsType } from '@kbn/core/serve
 
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 
+import { schema } from '@kbn/config-schema';
+
 import {
   LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
@@ -367,6 +369,14 @@ export const getSavedObjectTypes = (
               },
             },
           ],
+          schemas: {
+            forwardCompatibility: schema.object(
+              {
+                min_agent_version: schema.maybe(schema.string()),
+              },
+              { unknowns: 'ignore' }
+            ),
+          },
         },
       },
     },
@@ -448,6 +458,14 @@ export const getSavedObjectTypes = (
               },
             },
           ],
+          schemas: {
+            forwardCompatibility: schema.object(
+              {
+                min_agent_version: schema.maybe(schema.string()),
+              },
+              { unknowns: 'ignore' }
+            ),
+          },
         },
       },
     },
@@ -955,6 +973,14 @@ export const getSavedObjectTypes = (
               addedMappings: { min_agent_version: { type: 'keyword' } },
             },
           ],
+          schemas: {
+            forwardCompatibility: schema.object(
+              {
+                min_agent_version: schema.maybe(schema.string()),
+              },
+              { unknowns: 'ignore' }
+            ),
+          },
         },
       },
       migrations: {
@@ -1102,6 +1128,14 @@ export const getSavedObjectTypes = (
               addedMappings: { min_agent_version: { type: 'keyword' } },
             },
           ],
+          schemas: {
+            forwardCompatibility: schema.object(
+              {
+                min_agent_version: schema.maybe(schema.string()),
+              },
+              { unknowns: 'ignore' }
+            ),
+          },
         },
       },
     },
