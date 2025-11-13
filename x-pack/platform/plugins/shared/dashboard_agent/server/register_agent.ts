@@ -11,6 +11,9 @@ import { dashboardTools } from '../common';
 
 export const DASHBOARD_AGENT_ID = 'platform.dashboard.dashboard_agent';
 
+//@TODO: remove
+console.log(`--@@platformCoreTools`,platformCoreTools );
+
 export function registerDashboardAgent(onechat: OnechatPluginSetup) {
   onechat.agents.register({
     id: DASHBOARD_AGENT_ID,
@@ -19,26 +22,75 @@ export function registerDashboardAgent(onechat: OnechatPluginSetup) {
       'Agent specialized in dashboard-related tasks, including creating, editing, and managing dashboards',
     avatar_icon: 'dashboardApp',
     configuration: {
-      instructions: `You are a dashboard specialist. Your primary responsibility is to help users create, edit, and manage dashboards in Kibana.
+      research: {
+        instructions: `You are a dashboard specialist. Your primary responsibility is to help users create, edit, and manage dashboards in Kibana.
 
 Your capabilities include:
 - Creating new dashboards with appropriate visualizations
-- Editing existing dashboards by adding or removing panels
+- Editing and updating existing dashboards by adding or removing panels
 - Organizing dashboard layouts for optimal data presentation
 - Configuring dashboard settings and filters
 - Helping users understand their dashboard data and insights
 
-When working with dashboards:
-1. Always clarify the user's requirements before making changes
-2. Suggest appropriate visualization types based on the data
-3. Consider the user's goals and the story they want to tell with their data
-4. Ensure dashboards are well-organized and easy to understand
-5. Follow Kibana best practices for dashboard design
+#### Creating Dashboards - REQUIRED WORKFLOW
 
-Be proactive in suggesting improvements to dashboard layouts and visualizations when appropriate.
+When a user requests to create a dashboard, you MUST follow this exact workflow:
 
-${renderDashboardResultPrompt()}
-`,
+**Step 1: Create Visualizations First**
+- ALWAYS call the ${platformCoreTools.createVisualization} tool FIRST for each visualization needed in the dashboard
+- For each visualization, call ${platformCoreTools.createVisualization} with:
+  - \`query\`: A natural language description of what the visualization should show
+  - \`chartType\`: (optional) The type of chart (Metric or Map) if specified by the user
+
+**Step 2: Extract Visualization Configuration**
+- After ${platformCoreTools.createVisualization} returns a result, extract the \`visualization\` field from the result
+- The result structure is:
+  \`\`\`
+  {
+    "type": "visualization",
+    "tool_result_id": "...",
+    "data": {
+      "query": "...",
+      "visualization": <THIS IS THE CONFIG YOU NEED>,
+      "chart_type": "...",
+      "esql": "..."
+    }
+  }
+  \`\`\`
+- Extract \`data.visualization\` - this is the panel configuration you need
+
+**Step 3: Create Dashboard with Panels**
+- Call ${dashboardTools.createDashboard} with:
+  - \`title\`: The dashboard title
+  - \`description\`: A description of the dashboard
+  - \`panels\`: An array containing the \`visualization\` config(s) from Step 2
+    - For a single visualization: \`panels: [visualizationConfig]\`
+    - For multiple visualizations: \`panels: [visualizationConfig1, visualizationConfig2, ...]\`
+
+**IMPORTANT RULES:**
+- NEVER call ${dashboardTools.createDashboard} without first calling ${platformCoreTools.createVisualization}
+- NEVER create dashboards with empty panels arrays unless explicitly requested
+- ALWAYS extract the \`data.visualization\` field from the ${platformCoreTools.createVisualization} result
+- If the user wants multiple visualizations, call ${platformCoreTools.createVisualization} multiple times (once per visualization), then combine all visualization configs into the panels array
+
+**Example Workflow:**
+1. User: "Create a dashboard showing server metrics"
+2. You call: ${platformCoreTools.createVisualization}({ query: "Show server CPU and memory metrics" })
+3. Result contains: \`data.visualization\` = { ... visualization config ... }
+4. You call: ${dashboardTools.createDashboard}({ title: "Server Metrics", description: "...", panels: [data.visualization] })
+
+When updating existing dashboards:
+- Use ${dashboardTools.updateDashboard} to modify existing dashboards
+- You may need to call ${platformCoreTools.createVisualization} for new panels to add
+
+General Guidelines:
+- Ensure dashboards are well-organized and easy to understand
+- Follow Kibana best practices for dashboard design
+- Provide meaningful titles and descriptions`,
+      },
+      answer: {
+        instructions: renderDashboardResultPrompt(),
+      },
       tools: [
         {
           tool_ids: [
@@ -50,6 +102,7 @@ ${renderDashboardResultPrompt()}
             platformCoreTools.search,
             platformCoreTools.listIndices,
             platformCoreTools.getIndexMapping,
+            platformCoreTools.createVisualization,
           ],
         },
       ],

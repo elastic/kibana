@@ -82,7 +82,7 @@ This tool will:
           {
             title,
             description,
-            // panels: panels || [],
+            panels: panels || [],
           },
           {} // options
         )) as CreateItemResponse<DashboardItem>;
