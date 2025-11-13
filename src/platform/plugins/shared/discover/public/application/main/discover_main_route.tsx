@@ -254,10 +254,7 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
       <ChartPortalsRenderer runtimeStateManager={runtimeStateManager}>
         <DiscoverTopNavMenuProvider>
           <>
-            <h1
-              className="euiScreenReaderOnly"
-              data-test-subj="discoverSavedSearchTitle"
-            >
+            <h1 className="euiScreenReaderOnly" data-test-subj="discoverSavedSearchTitle">
               {persistedDiscoverSession?.title
                 ? i18n.translate('discover.pageTitleWithSavedSearch', {
                     defaultMessage: 'Discover - {savedSearchTitle}',
