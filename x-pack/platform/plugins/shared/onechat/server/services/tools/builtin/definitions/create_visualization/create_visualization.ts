@@ -55,7 +55,7 @@ This tool will:
 3. Generate a valid visualization configuration`,
     schema: createVisualizationSchema,
     availability: {
-      cacheMode: 'global',
+      cacheMode: 'space',
       handler: async ({ uiSettings }) => {
         const enabled = await uiSettings.get<boolean>(AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID);
         return { status: enabled ? 'available' : 'unavailable' };

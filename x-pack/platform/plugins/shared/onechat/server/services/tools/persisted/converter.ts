@@ -35,7 +35,7 @@ export const convertPersistedDefinition = ({
     readonly: false,
     isAvailable: () => {
       // persisted tools are always available atm (space check is done via the persistence client)
-      return true;
+      return { status: 'available' };
     },
     getSchema: async () => {
       const props = await getDynamicProps();
