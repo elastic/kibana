@@ -284,8 +284,9 @@ The 'start' parameter should be an ISO datetime string (e.g., '2025-01-15T00:00:
         };
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        const errorStack = error instanceof Error ? error.stack : undefined;
-        logger.error(`[CatchUp Agent] Error in Slack digest tool: ${errorMessage}`);
+        logger.error(`[CatchUp Agent] Error in Slack digest tool: ${errorMessage}`, {
+          error: error instanceof Error ? error.stack : undefined,
+        });
         return {
           results: [createErrorResult(`Error fetching Slack digest: ${errorMessage}`)],
         };

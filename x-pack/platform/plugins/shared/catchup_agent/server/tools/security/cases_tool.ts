@@ -253,8 +253,9 @@ Returns cases with detailed information including id, title, description, status
         };
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        const errorStack = error instanceof Error ? error.stack : undefined;
-        logger.error(`[CatchUp Agent] Error in cases tool: ${errorMessage}`);
+        logger.error(`[CatchUp Agent] Error in cases tool: ${errorMessage}`, {
+          error: error instanceof Error ? error.stack : undefined,
+        });
         return {
           results: [createErrorResult(`Error fetching cases: ${errorMessage}`)],
         };

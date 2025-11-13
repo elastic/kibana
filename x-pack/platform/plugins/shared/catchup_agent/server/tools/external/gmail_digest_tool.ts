@@ -96,9 +96,6 @@ Or provide it via the 'token' parameter. The token should have 'gmail.readonly' 
           throw new Error(`Invalid datetime format: ${start}. Expected ISO 8601 format.`);
         }
 
-        // Convert to Unix timestamp (seconds) for Gmail API
-        const startTimestamp = Math.floor(startDate.getTime() / 1000);
-
         // TODO: Full implementation would:
         // 1. Use OAuth token from config or parameter
         // 2. Call Gmail API: users.messages.list with query filter (after:timestamp)

@@ -74,26 +74,25 @@ Returns structured correlation data with confidence scores linking related event
         // Extract data from results - handle both direct data objects and workflow response structures
         const securityData = extractDataFromResponse(results.security_summary);
         const observabilityData = extractDataFromResponse(results.observability);
-        const searchData = extractDataFromResponse(results.search);
 
         // Handle external data structure - it might be {external: {slack: {...}}}
-        let externalData = results.external || {};
+        let externalData: Record<string, unknown> =
+          (results.external as Record<string, unknown>) || {};
         if (externalData.slack) {
           externalData = {
             ...externalData,
             slack: extractDataFromResponse(externalData.slack),
           };
         } else {
-          externalData = extractDataFromResponse(externalData);
+          externalData = extractDataFromResponse(externalData) as Record<string, unknown>;
         }
 
         // Use extracted entities if provided
-        const extractedEntities = entities?.entities || {};
-        const entityServiceNames = extractedEntities.service_names || [];
-        const entityHostNames = extractedEntities.host_names || [];
-        const entityUserNames = extractedEntities.user_names || [];
-        const entitySourceIPs = extractedEntities.source_ips || [];
-        const entityDestinationIPs = extractedEntities.destination_ips || [];
+        const extractedEntities = (entities?.entities as Record<string, unknown>) || {};
+        const entityServiceNames = (extractedEntities.service_names as string[]) || [];
+        const entityHostNames = (extractedEntities.host_names as string[]) || [];
+        const entitySourceIPs = (extractedEntities.source_ips as string[]) || [];
+        const entityDestinationIPs = (extractedEntities.destination_ips as string[]) || [];
 
         // Simple correlation logic - match by service names, alert IDs, case IDs
         const alerts = observabilityData.top_services || [];
@@ -112,11 +111,19 @@ Returns structured correlation data with confidence scores linking related event
           ? obsCases
           : obsCases.cases || obsCases.values || [];
 
-        const githubPRs = externalData.github?.pull_requests || [];
+        const githubData = externalData.github as { pull_requests?: unknown[] } | undefined;
+        const slackData = externalData.slack as
+          | {
+              userMentionMessages?: unknown[];
+              channelMessages?: unknown[];
+              dmMessages?: unknown[];
+            }
+          | undefined;
+        const githubPRs = githubData?.pull_requests || [];
         const slackMessages = [
-          ...(externalData.slack?.userMentionMessages || []),
-          ...(externalData.slack?.channelMessages || []),
-          ...(externalData.slack?.dmMessages || []),
+          ...(slackData?.userMentionMessages || []),
+          ...(slackData?.channelMessages || []),
+          ...(slackData?.dmMessages || []),
         ];
 
         // Correlate Slack messages with cases by extracting case IDs from URLs
@@ -167,7 +174,9 @@ Returns structured correlation data with confidence scores linking related event
 
             correlations.push({
               case: caseId,
-              alert: caseItem.related_alerts?.[0] || caseItem.total_alerts ? 'linked_alerts' : null,
+              alert:
+                caseItem.related_alerts?.[0] ||
+                (caseItem.total_alerts ? 'linked_alerts' : undefined),
               confidence: 0.9,
               match_type: 'exact_case_alert',
               // Add text fields for reranking
@@ -367,7 +376,6 @@ Returns structured correlation data with confidence scores linking related event
         if (entityHostNames.length > 0) {
           for (const hostName of entityHostNames) {
             const hostLower = hostName.toLowerCase();
-            const relatedItems: any[] = [];
 
             // Find observability cases mentioning this host
             const relatedObsCases = observabilityCases.filter((obsCase: any) => {

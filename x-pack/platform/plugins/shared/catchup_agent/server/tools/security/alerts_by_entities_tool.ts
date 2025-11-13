@@ -498,8 +498,9 @@ Returns alert details including alert IDs, timestamps, severity, rule names, ent
         };
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        const errorStack = error instanceof Error ? error.stack : undefined;
-        logger.error(`Error in alerts by entities tool: ${errorMessage}`);
+        logger.error(`Error in alerts by entities tool: ${errorMessage}`, {
+          error: error instanceof Error ? error.stack : undefined,
+        });
         return {
           results: [createErrorResult(`Error searching alerts by entities: ${errorMessage}`)],
         };

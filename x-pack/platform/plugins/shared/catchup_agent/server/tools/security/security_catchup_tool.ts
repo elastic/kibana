@@ -103,8 +103,9 @@ This tool calls all security sub-tools in parallel and aggregates their results.
         };
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        const errorStack = error instanceof Error ? error.stack : undefined;
-        logger.error(`Error in security catchup tool: ${errorMessage}`);
+        logger.error(`Error in security catchup tool: ${errorMessage}`, {
+          error: error instanceof Error ? error.stack : undefined,
+        });
         return {
           results: [createErrorResult(`Error generating security summary: ${errorMessage}`)],
         };

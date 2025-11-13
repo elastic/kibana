@@ -18,19 +18,13 @@ import { fetchIncidentTool } from './fetch_incident_tool';
 export function registerSecurityTools(toolsSetup: ToolsSetup, logger: Logger): void {
 
   try {
-    const tools = [
-      attackDiscoveryTool(),
-      detectionsSummaryTool(),
-      casesTool(),
-      ruleChangesTool(),
-      securityCatchupTool(),
-      alertsByEntitiesTool(),
-      fetchIncidentTool(),
-    ];
-
-    for (const tool of tools) {
-      toolsSetup.register(tool);
-    }
+    toolsSetup.register(attackDiscoveryTool());
+    toolsSetup.register(detectionsSummaryTool());
+    toolsSetup.register(casesTool());
+    toolsSetup.register(ruleChangesTool());
+    toolsSetup.register(securityCatchupTool());
+    toolsSetup.register(alertsByEntitiesTool());
+    toolsSetup.register(fetchIncidentTool());
   } catch (error) {
     logger.error(`Error registering Security tools: ${error}`);
     throw error;

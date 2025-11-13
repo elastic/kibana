@@ -104,7 +104,7 @@ export async function registerCatchupWorkflows(
   for (const workflowFile of WORKFLOW_FILES) {
     try {
       const workflowPath = join(workflowsDir, workflowFile);
-      let workflowYaml = readFileSync(workflowPath, 'utf-8');
+      const workflowYaml = readFileSync(workflowPath, 'utf-8');
 
       // Note: Dynamic date values (__DYNAMIC_24H_AGO__, __DYNAMIC_NOW__, __DYNAMIC_7D_AGO__)
       // are kept as placeholders and will be calculated at execution time.

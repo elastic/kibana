@@ -88,8 +88,9 @@ Returns analytics data including CTR changes and top queries.`,
         };
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        const errorStack = error instanceof Error ? error.stack : undefined;
-        logger.error(`Error in search updates tool: ${errorMessage}`);
+        logger.error(`Error in search updates tool: ${errorMessage}`, {
+          error: error instanceof Error ? error.stack : undefined,
+        });
         return {
           results: [createErrorResult(`Error fetching search updates: ${errorMessage}`)],
         };

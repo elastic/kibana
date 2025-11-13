@@ -70,7 +70,7 @@ Returns rules with name, updated_by, enabled status, and updated_at fields.`,
                 data: {
                   rules: [],
                   total: 0,
-                  since,
+                  start: normalizedStart,
                   message: 'Alerting plugin not available',
                 },
               },
@@ -97,7 +97,7 @@ Returns rules with name, updated_by, enabled status, and updated_at fields.`,
         const startTimestamp = startDate.getTime();
         const endTimestamp = endDate ? endDate.getTime() : null;
         const filteredRules = findResult.data.filter((rule) => {
-          const updatedAt = new Date(rule.updatedAt ?? rule.updated_at ?? '').getTime();
+          const updatedAt = new Date(rule.updatedAt ?? '').getTime();
           const afterStart = updatedAt >= startTimestamp;
           const beforeEnd = endTimestamp === null || updatedAt < endTimestamp;
           return afterStart && beforeEnd;
@@ -107,9 +107,9 @@ Returns rules with name, updated_by, enabled status, and updated_at fields.`,
         const rulesData = filteredRules.map((rule) => ({
           id: rule.id,
           name: rule.name,
-          updated_by: rule.updatedBy || rule.updated_by || null,
+          updated_by: rule.updatedBy || null,
           enabled: rule.enabled ?? false,
-          updated_at: rule.updatedAt || rule.updated_at || null,
+          updated_at: rule.updatedAt || null,
           url: getRuleUrl(request, core, rule.id),
         }));
 
@@ -142,8 +142,9 @@ Returns rules with name, updated_by, enabled status, and updated_at fields.`,
         };
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        const errorStack = error instanceof Error ? error.stack : undefined;
-        logger.error(`[CatchUp Agent] Error in rule changes tool: ${errorMessage}`);
+        logger.error(`[CatchUp Agent] Error in rule changes tool: ${errorMessage}`, {
+          error: error instanceof Error ? error.stack : undefined,
+        });
         return {
           results: [createErrorResult(`Error fetching rule changes: ${errorMessage}`)],
         };

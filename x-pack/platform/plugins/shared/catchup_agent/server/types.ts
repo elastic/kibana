@@ -16,6 +16,8 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { CatchupAgentConfigType } from './config';
 
+export type { CatchupAgentConfigType };
+
 export interface CatchupAgentPluginSetup {
   // Setup contract (empty for now)
 }

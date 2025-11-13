@@ -139,8 +139,9 @@ Returns attack discoveries with metadata including attack name, severity, status
         };
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        const errorStack = error instanceof Error ? error.stack : undefined;
-        logger.error(`Error in attack discovery tool: ${errorMessage}`);
+        logger.error(`Error in attack discovery tool: ${errorMessage}`, {
+          error: error instanceof Error ? error.stack : undefined,
+        });
         return {
           results: [createErrorResult(`Error fetching attack discoveries: ${errorMessage}`)],
         };
