@@ -343,7 +343,7 @@ describe('useEntityNodeExpandPopover', () => {
     });
 
     it('should treat no-data mode (which returns na) as single-entity even if onShowEntityDetailsClick is provided', () => {
-      const node = createMockNode('no-data');
+      const node = createMockNode('na');
       renderHook(() =>
         useEntityNodeExpandPopover(
           mockSetSearchFilters,
