@@ -83,6 +83,11 @@ interface OwnProps {
    * in 2 groups: one for mac1 and a second formac2.
    */
   multiValueFieldsToFlatten?: string[];
+
+  /**
+   * Data view scope
+   */
+  sourcererScope?: SourcererScopeName;
 }
 
 export type AlertsTableComponentProps = OwnProps;
@@ -110,17 +115,18 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   tableId,
   to,
   multiValueFieldsToFlatten,
+  sourcererScope = SourcererScopeName.detections,
 }) => {
   const {
     services: { uiSettings },
   } = useKibana();
   const { browserFields: oldBrowserFields, sourcererDataView: oldSourcererDataView } =
-    useSourcererDataView(SourcererScopeName.detections);
+    useSourcererDataView(sourcererScope);
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
-  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.detections);
-  const experimentalBrowserFields = useBrowserFields(SourcererScopeName.detections);
+  const { dataView: experimentalDataView } = useDataView(sourcererScope);
+  const experimentalBrowserFields = useBrowserFields(sourcererScope);
 
   const sourcererDataView = oldSourcererDataView;
   const browserFields = newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields;
@@ -179,7 +185,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   const uniqueValue = useMemo(() => `SuperUniqueValue-${uuidv4()}`, []);
 
   const queryGroups = useMemo(() => {
-    return getAlertsGroupingQuery({
+    const query = getAlertsGroupingQuery({
       groupStatsAggregations,
       additionalFilters,
       selectedGroup,
@@ -191,6 +197,10 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
       pageIndex,
       multiValueFieldsToFlatten,
     });
+    return {
+      ...query,
+      include_attacks: sourcererScope === SourcererScopeName.attacks,
+    };
   }, [
     additionalFilters,
     from,
@@ -202,6 +212,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     to,
     uniqueValue,
     multiValueFieldsToFlatten,
+    sourcererScope,
   ]);
 
   const emptyGlobalQuery = useMemo(() => getGlobalQuery([]), [getGlobalQuery]);

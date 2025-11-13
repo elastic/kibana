@@ -28,7 +28,7 @@ import { groupIdSelector } from '../../../common/store/grouping/selectors';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { updateGroups } from '../../../common/store/grouping/actions';
 import { defaultUnit } from '../../../common/components/toolbar/unit';
-import type { RunTimeMappings } from '../../../sourcerer/store/model';
+import type { RunTimeMappings, SourcererScopeName } from '../../../sourcerer/store/model';
 import { useKibana } from '../../../common/lib/kibana';
 import { GroupedSubLevel } from './alerts_sub_grouping';
 import { AlertsEventTypes, track } from '../../../common/lib/telemetry';
@@ -56,6 +56,10 @@ export interface AlertsTableComponentProps {
      */
     renderer: GetGroupStats<AlertsGroupingAggregation>;
   };
+  /**
+   * Data view scope
+   */
+  sourcererScope?: SourcererScopeName;
   // TODO remove when we remove the newDataViewPickerEnabled feature flag
   /**
    * DataViewSpec object to use internally to fetch the data

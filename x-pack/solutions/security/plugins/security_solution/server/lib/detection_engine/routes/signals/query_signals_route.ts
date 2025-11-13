@@ -13,6 +13,7 @@ import type {
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX } from '@kbn/elastic-assistant-common';
 import { SearchAlertsRequestBody } from '../../../../../common/api/detection_engine/signals';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../../common/constants';
@@ -64,7 +65,17 @@ export const querySignalsRoute = (
         }
         try {
           const spaceId = (await context.securitySolution).getSpaceId();
-          const indexPattern = ruleDataClient?.indexNameWithNamespace(spaceId);
+          const alertsIndex = ruleDataClient?.indexNameWithNamespace(spaceId);
+          const includeAttacks = request.body.include_attacks;
+          const indexPattern =
+            !alertsIndex && !includeAttacks
+              ? undefined
+              : [
+                  ...(alertsIndex ? [alertsIndex] : []),
+                  ...(includeAttacks
+                    ? [`${ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX}-${spaceId}`]
+                    : []),
+                ];
           const result = await esClient.search({
             index: indexPattern,
             query,

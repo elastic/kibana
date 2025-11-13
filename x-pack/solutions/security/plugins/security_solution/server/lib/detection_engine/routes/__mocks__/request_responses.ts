@@ -313,6 +313,13 @@ export const getSignalsAggsAndQueryRequest = () =>
     body: { ...typicalSignalsQuery(), ...typicalSignalsQueryAggs() },
   });
 
+export const getSignalsQueryRequestWithAttacks = (includeAttacks?: boolean) =>
+  requestMock.create({
+    method: 'post',
+    path: DETECTION_ENGINE_QUERY_SIGNALS_URL,
+    body: { ...typicalSignalsQuery(), include_attacks: includeAttacks },
+  });
+
 export const nonRuleAlert = () => ({
   // Defaulting to QueryRuleParams because ts doesn't like empty objects
   ...getRuleMock(getQueryRuleParams()),

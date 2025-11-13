@@ -47,6 +47,8 @@ paths:
                   additionalProperties: true
                 sort:
                   $ref: '#/components/schemas/AlertsSort'
+                include_attacks:
+                  type: boolean
               description: Elasticsearch query and aggregation request
             examples:
               query:

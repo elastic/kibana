@@ -13,6 +13,7 @@ import {
   typicalSignalsQueryAggs,
   getSignalsAggsAndQueryRequest,
   getEmptySignalsResponse,
+  getSignalsQueryRequestWithAttacks,
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { querySignalsRoute } from './query_signals_route';
@@ -20,6 +21,7 @@ import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { SecuritySolutionRequestHandlerContextMock } from '../__mocks__/request_context';
 import type { RuleDataClientMock } from '@kbn/rule-registry-plugin/server/rule_data_client/rule_data_client.mock';
+import { ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX } from '@kbn/elastic-assistant-common';
 
 describe('query for signal', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -69,7 +71,53 @@ describe('query for signal', () => {
       expect(response.status).toEqual(200);
       expect(context.core.elasticsearch.client.asCurrentUser.search).toHaveBeenCalledWith(
         expect.objectContaining({
-          index: '.alerts-security.alerts-default',
+          index: ['.alerts-security.alerts-default'],
+        })
+      );
+    });
+
+    test('search on an index pattern with attacks included', async () => {
+      const response = await server.inject(
+        getSignalsQueryRequestWithAttacks(true),
+        requestContextMock.convertContext(context)
+      );
+      const spaceId = await context.securitySolution.getSpaceId();
+
+      expect(response.status).toEqual(200);
+      expect(context.core.elasticsearch.client.asCurrentUser.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: [
+            '.alerts-security.alerts-default',
+            `${ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX}-${spaceId}`,
+          ],
+        })
+      );
+    });
+
+    test('search on an index pattern without attacks included', async () => {
+      const response = await server.inject(
+        getSignalsQueryRequestWithAttacks(false),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(200);
+      expect(context.core.elasticsearch.client.asCurrentUser.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: ['.alerts-security.alerts-default'],
+        })
+      );
+    });
+
+    test('search on an index pattern with attacks undefined', async () => {
+      const response = await server.inject(
+        getSignalsQueryRequestWithAttacks(undefined),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(200);
+      expect(context.core.elasticsearch.client.asCurrentUser.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: ['.alerts-security.alerts-default'],
         })
       );
     });

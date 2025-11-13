@@ -258,7 +258,7 @@ describe('GroupedAlertsTable', () => {
     );
     expect(mockUseQueryAlerts).toHaveBeenLastCalledWith({
       indexName: 'test',
-      query: getQuery('kibana.alert.rule.name', 'SuperUniqueValue-test-uuid', mockDate),
+      query: getQuery('kibana.alert.rule.name', 'SuperUniqueValue-test-uuid', mockDate, false),
       queryName: 'securitySolutionUI fetchAlerts grouping',
       skip: false,
     });
