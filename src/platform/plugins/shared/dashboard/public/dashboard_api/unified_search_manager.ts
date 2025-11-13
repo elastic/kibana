@@ -288,7 +288,6 @@ export function initializeUnifiedSearchManager(
       setTimeRange: setAndSyncTimeRange,
       timeRange$,
       timeslice$,
-      unifiedSearchFilters$,
     },
     internalApi: {
       unifiedSearchFilters$,
