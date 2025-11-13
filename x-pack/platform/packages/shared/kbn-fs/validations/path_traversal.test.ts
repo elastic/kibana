@@ -6,28 +6,27 @@
  */
 
 import { validateNoPathTraversal } from './path_traversal';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { join } from 'path';
+
+const DATA_PATH = join(REPO_ROOT, 'data');
 
 describe('validateNoPathTraversal', () => {
   describe('valid paths', () => {
     it('should allow simple file paths', () => {
-      expect(() => validateNoPathTraversal('file.txt')).not.toThrow();
-      expect(() => validateNoPathTraversal('folder/file.txt')).not.toThrow();
-      expect(() => validateNoPathTraversal('folder/subfolder/file.txt')).not.toThrow();
+      expect(() => validateNoPathTraversal(join(DATA_PATH, 'file.txt'))).not.toThrow();
+      expect(() => validateNoPathTraversal(join(DATA_PATH, 'folder/file.txt'))).not.toThrow();
+      expect(() =>
+        validateNoPathTraversal(join(DATA_PATH, 'folder/subfolder/file.txt'))
+      ).not.toThrow();
     });
 
     it('should allow paths with valid characters', () => {
-      expect(() => validateNoPathTraversal('file-name_123.txt')).not.toThrow();
-      expect(() => validateNoPathTraversal('folder/file.name.txt')).not.toThrow();
-      expect(() => validateNoPathTraversal('folder/sub-folder/file_name.txt')).not.toThrow();
-    });
-
-    it('should allow single dots in paths', () => {
-      expect(() => validateNoPathTraversal('./file.txt')).not.toThrow();
-      expect(() => validateNoPathTraversal('folder/./file.txt')).not.toThrow();
-    });
-
-    it('should allow empty string', () => {
-      expect(() => validateNoPathTraversal('')).not.toThrow();
+      expect(() => validateNoPathTraversal(join(DATA_PATH, 'file-name_123.txt'))).not.toThrow();
+      expect(() => validateNoPathTraversal(join(DATA_PATH, 'folder/file.name.txt'))).not.toThrow();
+      expect(() =>
+        validateNoPathTraversal(join(DATA_PATH, 'folder/sub-folder/file_name.txt'))
+      ).not.toThrow();
     });
   });
 
@@ -84,25 +83,25 @@ describe('validateNoPathTraversal', () => {
   describe('null byte detection', () => {
     it('should detect null bytes in paths', () => {
       expect(() => validateNoPathTraversal('file\0.txt')).toThrow(
-        'Null bytes not allowed in paths'
+        'Path traversal detected: file\0.txt'
       );
       expect(() => validateNoPathTraversal('folder\0/file.txt')).toThrow(
-        'Null bytes not allowed in paths'
+        'Path traversal detected: folder\0/file.txt'
       );
       expect(() => validateNoPathTraversal('file%00.txt')).toThrow(
-        'Null bytes not allowed in paths'
+        'Path traversal detected: file%00.txt'
       );
       expect(() => validateNoPathTraversal('folder%00/file.txt')).toThrow(
-        'Null bytes not allowed in paths'
+        'Path traversal detected: folder%00/file.txt'
       );
     });
 
     it('should detect null bytes in middle of path', () => {
       expect(() => validateNoPathTraversal('folder\0subfolder/file.txt')).toThrow(
-        'Null bytes not allowed in paths'
+        'Path traversal detected: folder\0subfolder/file.txt'
       );
       expect(() => validateNoPathTraversal('folder%00subfolder/file.txt')).toThrow(
-        'Null bytes not allowed in paths'
+        'Path traversal detected: folder%00subfolder/file.txt'
       );
     });
   });
@@ -110,37 +109,37 @@ describe('validateNoPathTraversal', () => {
   describe('URL encoded path sequences', () => {
     it('should detect URL encoded path traversal', () => {
       expect(() => validateNoPathTraversal('%2e%2e%2f')).toThrow(
-        'URL encoded path sequences not allowed'
+        'Path traversal detected: %2e%2e%2f'
       );
       expect(() => validateNoPathTraversal('%2e%2e%5c')).toThrow(
-        'URL encoded path sequences not allowed'
+        'Path traversal detected: %2e%2e%5c'
       );
       expect(() => validateNoPathTraversal('folder%2f..%2f')).toThrow(
-        'URL encoded path sequences not allowed'
+        'Path traversal detected: folder%2f..%2f'
       );
     });
 
     it('should detect mixed case URL encoding', () => {
       expect(() => validateNoPathTraversal('%2E%2E%2F')).toThrow(
-        'URL encoded path sequences not allowed'
+        'Path traversal detected: %2E%2E%2F'
       );
       expect(() => validateNoPathTraversal('%2e%2E%2f')).toThrow(
-        'URL encoded path sequences not allowed'
+        'Path traversal detected: %2e%2E%2f'
       );
     });
 
     it('should detect URL encoded sequences in middle of path', () => {
       expect(() => validateNoPathTraversal('folder%2f..%2fother')).toThrow(
-        'URL encoded path sequences not allowed'
+        'Path traversal detected: folder%2f..%2fother'
       );
       expect(() => validateNoPathTraversal('folder%2e%2e%2fother')).toThrow(
-        'URL encoded path sequences not allowed'
+        'Path traversal detected: folder%2e%2e%2fother'
       );
     });
 
     it('should allow valid URL encoded characters that are not path traversal', () => {
-      expect(() => validateNoPathTraversal('file%20name.txt')).not.toThrow(); // space
-      expect(() => validateNoPathTraversal('file%2dname.txt')).not.toThrow(); // hyphen
+      expect(() => validateNoPathTraversal(join(DATA_PATH, 'file%20name.txt'))).not.toThrow(); // space
+      expect(() => validateNoPathTraversal(join(DATA_PATH, 'file%2dname.txt'))).not.toThrow(); // hyphen
     });
   });
 });

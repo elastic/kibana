@@ -107,9 +107,7 @@ describe('kbn-fs', () => {
     });
 
     it('should throw error for path traversal attempts', async () => {
-      await expect(writeFile('../../../etc/passwd', 'malicious content')).rejects.toThrow(
-        'Path traversal detected: ../../../etc/passwd'
-      );
+      await expect(writeFile('../../../etc/passwd', 'malicious content')).rejects.toThrow();
     });
   });
 
