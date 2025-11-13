@@ -7,114 +7,11 @@
 
 import { join } from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
-import {
-  sanitizeFileName,
-  getSafePath,
-  ensureDirectory,
-  ensureDirectorySync,
-  sanitizeVolume,
-} from './utils';
+import { getSafePath, ensureDirectory, ensureDirectorySync } from './utils';
 
 const DATA_PATH = join(REPO_ROOT, 'data');
 
 describe('kbn-fs utils', () => {
-  describe('sanitizeFileName', () => {
-    it('should remove dangerous characters', () => {
-      expect(sanitizeFileName('file:with*chars?.txt')).toBe('filewithchars.txt');
-      expect(sanitizeFileName('file<with>chars|.txt')).toBe('filewithchars.txt');
-      expect(sanitizeFileName('file"with\'chars.txt')).toBe('filewithchars.txt');
-    });
-
-    it('should remove path traversal attempts', () => {
-      expect(() => sanitizeFileName('../../../etc/passwd')).toThrow(
-        'Path traversal detected: ../../../etc/passwd'
-      );
-      expect(() => sanitizeFileName('file/../../other.txt')).toThrow(
-        'Path traversal detected: file/../../other.txt'
-      );
-    });
-
-    it('should preserve safe characters', () => {
-      expect(sanitizeFileName('file-name_123.txt')).toBe('file-name_123.txt');
-      expect(sanitizeFileName('file.name.txt')).toBe('file.name.txt');
-      expect(sanitizeFileName('FILE_NAME-123.TXT')).toBe('FILE_NAME-123.TXT');
-    });
-
-    it('should handle empty string', () => {
-      expect(sanitizeFileName('')).toBe('');
-    });
-
-    it('should handle string with only dangerous characters', () => {
-      expect(sanitizeFileName('*?:<>|')).toBe('');
-    });
-  });
-
-  describe('sanitizeVolume', () => {
-    it('should allow valid volume names', () => {
-      expect(() => sanitizeVolume('reports')).not.toThrow();
-      expect(() => sanitizeVolume('exports')).not.toThrow();
-      expect(() => sanitizeVolume('reports_2024')).not.toThrow();
-      expect(() => sanitizeVolume('reports/2024')).not.toThrow();
-      expect(() => sanitizeVolume('reports/2024/january')).not.toThrow();
-      expect(() => sanitizeVolume('data_export_2024')).not.toThrow();
-      expect(() => sanitizeVolume('a')).not.toThrow();
-      expect(() => sanitizeVolume('123')).not.toThrow();
-      expect(() => sanitizeVolume('_private')).not.toThrow();
-    });
-
-    it('should reject invalid volume names', () => {
-      expect(() => sanitizeVolume('reports../2024')).toThrow(
-        'Invalid volume name: reports../2024. Volume must only contain alphanumeric characters, underscores, and forward slashes for path separators.'
-      );
-      expect(() => sanitizeVolume('reports*2024')).toThrow(
-        'Invalid volume name: reports*2024. Volume must only contain alphanumeric characters, underscores, and forward slashes for path separators.'
-      );
-      expect(() => sanitizeVolume('reports?2024')).toThrow(
-        'Invalid volume name: reports?2024. Volume must only contain alphanumeric characters, underscores, and forward slashes for path separators.'
-      );
-      expect(() => sanitizeVolume('reports<2024')).toThrow(
-        'Invalid volume name: reports<2024. Volume must only contain alphanumeric characters, underscores, and forward slashes for path separators.'
-      );
-      expect(() => sanitizeVolume('reports>2024')).toThrow(
-        'Invalid volume name: reports>2024. Volume must only contain alphanumeric characters, underscores, and forward slashes for path separators.'
-      );
-      expect(() => sanitizeVolume('reports|2024')).toThrow(
-        'Invalid volume name: reports|2024. Volume must only contain alphanumeric characters, underscores, and forward slashes for path separators.'
-      );
-      expect(() => sanitizeVolume('reports"2024')).toThrow(
-        'Invalid volume name: reports"2024. Volume must only contain alphanumeric characters, underscores, and forward slashes for path separators.'
-      );
-      expect(() => sanitizeVolume("reports'2024")).toThrow(
-        "Invalid volume name: reports'2024. Volume must only contain alphanumeric characters, underscores, and forward slashes for path separators."
-      );
-      expect(() => sanitizeVolume('reports\\2024')).toThrow(
-        'Invalid volume name: reports\\2024. Volume must only contain alphanumeric characters, underscores, and forward slashes for path separators.'
-      );
-      expect(() => sanitizeVolume('reports 2024')).toThrow(
-        'Invalid volume name: reports 2024. Volume must only contain alphanumeric characters, underscores, and forward slashes for path separators.'
-      );
-      expect(() => sanitizeVolume('reports\t2024')).toThrow(
-        'Invalid volume name: reports\t2024. Volume must only contain alphanumeric characters, underscores, and forward slashes for path separators.'
-      );
-      expect(() => sanitizeVolume('reports\n2024')).toThrow(
-        'Invalid volume name: reports\n2024. Volume must only contain alphanumeric characters, underscores, and forward slashes for path separators.'
-      );
-    });
-
-    it('should reject empty volume names', () => {
-      expect(() => sanitizeVolume('')).toThrow(
-        'Invalid volume name: . Volume must only contain alphanumeric characters, underscores, and forward slashes for path separators.'
-      );
-    });
-
-    it('should allow complex valid volume names', () => {
-      expect(() => sanitizeVolume('reports_2024/january/data')).not.toThrow();
-      expect(() => sanitizeVolume('exports/user_data/backup_2024')).not.toThrow();
-      expect(() => sanitizeVolume('temp_files/processing/stage_1')).not.toThrow();
-      expect(() => sanitizeVolume('A1B2C3_Test/SubDir')).not.toThrow();
-    });
-  });
-
   describe('getSafePath', () => {
     it('should create safe path without volume', () => {
       const result = getSafePath('test-file.txt');
@@ -123,18 +20,18 @@ describe('kbn-fs utils', () => {
       expect(result.alias).toBe('disk:data/test-file.txt');
     });
 
+    it('should create safe path without volume with subfolder', () => {
+      const result = getSafePath('test/test-file.txt');
+
+      expect(result.fullPath).toBe(join(DATA_PATH, 'test/test-file.txt'));
+      expect(result.alias).toBe('disk:data/test/test-file.txt');
+    });
+
     it('should create safe path with volume', () => {
       const result = getSafePath('test-file.txt', 'reports');
 
       expect(result.fullPath).toBe(join(DATA_PATH, 'reports', 'test-file.txt'));
       expect(result.alias).toBe('disk:data/reports/test-file.txt');
-    });
-
-    it('should sanitize file name', () => {
-      const result = getSafePath('file/with*chars?.txt');
-
-      expect(result.fullPath).toBe(join(DATA_PATH, 'filewithchars.txt'));
-      expect(result.alias).toBe('disk:data/filewithchars.txt');
     });
 
     it('should resolve absolute path', () => {
@@ -145,21 +42,8 @@ describe('kbn-fs utils', () => {
     });
 
     it('should throw error for path traversal attempts', () => {
-      expect(() => getSafePath('../../../etc/passwd')).toThrow(
-        'Path traversal detected: ../../../etc/passwd'
-      );
-      expect(() => getSafePath('file/../../other.txt')).toThrow(
-        'Path traversal detected: file/../../other.txt'
-      );
-    });
-
-    it('should validate volume names', () => {
-      expect(() => getSafePath('test.txt', 'reports:2024')).toThrow(
-        'Invalid volume name: reports:2024. Volume must only contain alphanumeric characters, underscores, and forward slashes for path separators.'
-      );
-      expect(() => getSafePath('test.txt', 'reports*2024')).toThrow(
-        'Invalid volume name: reports*2024. Volume must only contain alphanumeric characters, underscores, and forward slashes for path separators.'
-      );
+      expect(() => getSafePath('../../../etc/passwd')).toThrow();
+      expect(() => getSafePath('file/../../other.txt')).toThrow();
     });
 
     it('should handle nested volume paths', () => {

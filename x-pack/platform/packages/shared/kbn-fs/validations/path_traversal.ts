@@ -5,19 +5,18 @@
  * 2.0.
  */
 
-export function validateNoPathTraversal(path: string): void {
-  // Check for null bytes which can be used to trick path validation
-  if (path.includes('\0') || path.includes('%00')) {
-    throw new Error('Null bytes not allowed in paths');
+import { REPO_ROOT } from '@kbn/repo-info';
+import { join, resolve } from 'path';
+
+const DATA_PATH = join(REPO_ROOT, 'data');
+const DATA_PATH_RESOLVED = resolve(DATA_PATH);
+
+export function validateNoPathTraversal(fullPath: string): string {
+  const resolvedPath = resolve(fullPath);
+
+  if (!resolvedPath.startsWith(DATA_PATH_RESOLVED)) {
+    throw new Error(`Path traversal detected: ${fullPath}`);
   }
 
-  // Detect URL encoding tricks like %2e%2e%2f = ../
-  if (/%2e|%2f/i.test(path)) {
-    throw new Error('URL encoded path sequences not allowed');
-  }
-
-  // Check for suspicious path traversal patterns even before normalization
-  if (/\.{2,}[/\\]/.test(path) || path.includes('..')) {
-    throw new Error(`Path traversal detected: ${path}`);
-  }
+  return resolvedPath;
 }

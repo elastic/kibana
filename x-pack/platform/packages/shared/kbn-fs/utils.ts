@@ -13,50 +13,14 @@ import { validateNoPathTraversal, validateFileExtension } from './validations';
 const DATA_PATH = join(REPO_ROOT, 'data');
 const DATA_PATH_RESOLVED = resolve(DATA_PATH);
 
-export function sanitizeFileName(name: string): string {
-  validateNoPathTraversal(name);
-
-  const sanitized = name.replace(/[/\:*?"<>|']/g, '');
-
-  return sanitized;
-}
-
-export function sanitizeVolume(volume: string): string {
-  // Volume must only contain forward slashes for path separators and underscores
-  const validVolumeRegex = /^[a-zA-Z0-9_\-\/]+$/;
-
-  if (!validVolumeRegex.test(volume)) {
-    throw new Error(
-      `Invalid volume name: ${volume}. Volume must only contain alphanumeric characters, underscores, and forward slashes for path separators.`
-    );
-  }
-
-  return volume
-    .replace(/^\/+/, '')
-    .replace(/\/{2,}/g, '/')
-    .replace(/\/+$/, '');
-}
-
 export function getSafePath(name: string, volume?: string): { fullPath: string; alias: string } {
-  const sanitizedName = sanitizeFileName(name);
-  const sanitizedVolume = volume ? sanitizeVolume(volume) : undefined;
+  const fullPath = volume ? join(DATA_PATH, volume, name) : join(DATA_PATH, name);
 
-  const fullPath = sanitizedVolume
-    ? join(DATA_PATH, sanitizedVolume, sanitizedName)
-    : join(DATA_PATH, sanitizedName);
+  const resolvedPath = validateNoPathTraversal(fullPath);
 
-  // Check if the path is within the data path
-  const resolvedPath = resolve(fullPath);
+  validateFileExtension(fullPath);
 
-  validateFileExtension(resolvedPath);
-
-  if (!resolvedPath.startsWith(DATA_PATH_RESOLVED)) {
-    throw new Error(`Path outside of data path: ${name}`);
-  }
-
-  const alias = volume
-    ? `disk:data/${sanitizedVolume}/${sanitizedName}`
-    : `disk:data/${sanitizedName}`;
+  const alias = volume ? `disk:data/${volume}/${name}` : `disk:data/${name}`;
 
   return { fullPath: resolvedPath, alias };
 }
