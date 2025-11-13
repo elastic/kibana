@@ -46,7 +46,7 @@ export function registerAgentlessDeploymentSyncTask(
             logger.debug(`Starting agentless deployment sync`);
 
             try {
-              syncAgentlessDeployments(
+              await syncAgentlessDeployments(
                 {
                   agentlessAgentService,
                   logger,
