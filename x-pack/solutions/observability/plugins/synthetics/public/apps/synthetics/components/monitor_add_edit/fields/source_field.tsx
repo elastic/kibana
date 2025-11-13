@@ -9,7 +9,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiTabbedContent, EuiFormRow } from '@elastic/eui';
 import { CodeEditor } from './code_editor';
-import { syntheticsSuggestionProvider } from '../../../lib/editor/snippets';
 import { ScriptRecorderFields } from './script_recorder_fields';
 import { ConfigKey, MonacoEditorLangId } from '../types';
 
@@ -98,7 +97,6 @@ export const SourceField = ({ onChange, onBlur, value, isEditFlow = false }: Sou
             })}
             id="javascript"
             languageId={MonacoEditorLangId.JAVASCRIPT}
-            suggestionProvider={syntheticsSuggestionProvider}
             onChange={(code) => {
               setConfig((prevConfig) => ({ ...prevConfig, script: code }));
               onBlur(ConfigKey.SOURCE_INLINE);

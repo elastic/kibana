@@ -12,7 +12,6 @@ import useThrottle from 'react-use/lib/useThrottle';
 import { EuiPanel } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { CodeEditor as MonacoCodeEditor } from '@kbn/code-editor';
-import type { monaco } from '@kbn/monaco';
 
 import { MonacoEditorLangId } from '../types';
 import { useDimensions } from '../../../hooks';
@@ -30,7 +29,6 @@ export interface CodeEditorProps {
   placeholder?: string;
   height?: string;
   readOnly?: boolean;
-  suggestionProvider?: monaco.languages.CompletionItemProvider;
 }
 
 export const CodeEditor = ({
@@ -42,7 +40,6 @@ export const CodeEditor = ({
   placeholder,
   height = '250px',
   readOnly,
-  suggestionProvider,
 }: CodeEditorProps) => {
   const { elementRef: containerRef, width: containerWidth } = useDimensions<HTMLDivElement>();
   const containerWidthThrottled = useThrottle(containerWidth, 500);
@@ -66,7 +63,6 @@ export const CodeEditor = ({
             height={height}
             value={value}
             onChange={onChange}
-            suggestionProvider={suggestionProvider}
             options={{
               renderValidationDecorations: value ? 'on' : 'off',
               readOnly,

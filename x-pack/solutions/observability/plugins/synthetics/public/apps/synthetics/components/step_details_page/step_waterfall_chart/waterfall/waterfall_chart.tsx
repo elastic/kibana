@@ -25,7 +25,6 @@ import { MAIN_GROW_SIZE, SIDEBAR_GROW_SIZE } from './constants';
 import { Sidebar } from './sidebar';
 import { useBarCharts } from './use_bar_charts';
 import { WaterfallBarChart } from './waterfall_bar_chart';
-import { useSyntheticsSettingsContext } from '../../../../contexts';
 
 export type RenderItem<I = any> = (
   item: I,
@@ -67,10 +66,6 @@ export const WaterfallChart = ({
     fetchedNetworkRequests,
   } = useWaterfallContext();
 
-  const {
-    featureFlags: { coreChromeLayoutType },
-  } = useSyntheticsSettingsContext();
-
   const shouldRenderSidebar = !!(sidebarItems && renderSidebarItem);
 
   const chartsToDisplay = useBarCharts({ data });
@@ -84,7 +79,6 @@ export const WaterfallChart = ({
       <WaterfallChartStickyHeaderContainer
         data-test-sub="syntheticsWaterfallChartStickyHeaderContainer"
         style={{ background: euiTheme.colors.body }}
-        isGridLayout={coreChromeLayoutType === 'grid'}
       >
         <EuiFlexGroup
           style={{ height: '100%' }}
