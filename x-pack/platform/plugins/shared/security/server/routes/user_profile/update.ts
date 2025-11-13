@@ -21,12 +21,18 @@ const ALLOWED_KEYS_UPDATE_CLOUD = [
   'solutionNavigationTour:completed', // TODO: remove with https://github.com/elastic/kibana/issues/239313
 ];
 
+const MAX_STRING_FIELD_LENGTH = 1024;
+
+const MAX_USER_PROFILE_DATA_SIZE_BYTES = 1000 * 1024;
+
+const MAX_IMAGE_DATA_SIZE_BYTES = 64 * 1024;
+
 const userProfileUpdateSchema = schema.object({
   avatar: schema.maybe(
     schema.object({
-      initials: schema.nullable(schema.string()),
-      color: schema.nullable(schema.string()),
-      imageUrl: schema.nullable(schema.string()),
+      initials: schema.nullable(schema.string({ maxLength: MAX_STRING_FIELD_LENGTH })),
+      color: schema.nullable(schema.string({ maxLength: MAX_STRING_FIELD_LENGTH })),
+      imageUrl: schema.nullable(schema.string({ maxLength: MAX_IMAGE_DATA_SIZE_BYTES })),
     })
   ),
   userSettings: schema.maybe(
@@ -66,6 +72,11 @@ export function defineUpdateUserProfileDataRoute({
       },
       validate: {
         body: userProfileUpdateSchema,
+      },
+      options: {
+        body: {
+          maxBytes: MAX_USER_PROFILE_DATA_SIZE_BYTES,
+        },
       },
     },
     createLicensedRouteHandler(async (context, request, response) => {
