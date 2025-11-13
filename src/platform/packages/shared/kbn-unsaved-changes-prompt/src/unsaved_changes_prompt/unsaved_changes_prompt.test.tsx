@@ -139,4 +139,40 @@ describe('useUnsavedChangesPrompt', () => {
     expect(coreStart.overlays.openConfirm).not.toBeCalled();
     expect(addSpy).not.toBeCalledWith('beforeunload', expect.anything());
   });
+
+  it('should not re-block navigation after user confirms leaving', async () => {
+    coreStart.overlays.openConfirm.mockResolvedValue(true);
+
+    const { rerender } = renderHook(
+      ({ hasChanges }: { hasChanges: boolean }) =>
+        useUnsavedChangesPrompt({
+          hasUnsavedChanges: hasChanges,
+          http: coreStart.http,
+          openConfirm: coreStart.overlays.openConfirm,
+          history,
+          navigateToUrl,
+        }),
+      { initialProps: { hasChanges: true } }
+    );
+
+    // User tries to navigate away
+    act(() => history.push('/test'));
+
+    // Wait for the confirmation dialog and navigation
+    await waitFor(() => expect(navigateToUrl).toHaveBeenCalled());
+
+    expect(coreStart.overlays.openConfirm).toHaveBeenCalledTimes(1);
+    expect(blockSpy).toHaveBeenCalledTimes(1);
+
+    // Component re-renders (still with hasUnsavedChanges: true)
+    rerender({ hasChanges: true });
+
+    // Try to navigate again - should not be blocked this time
+    const blockCallCountBeforeSecondNav = blockSpy.mock.calls.length;
+    act(() => history.push('/another-path'));
+
+    // Block should not be called again
+    expect(blockSpy).toHaveBeenCalledTimes(blockCallCountBeforeSecondNav);
+    expect(coreStart.overlays.openConfirm).toHaveBeenCalledTimes(1);
+  });
 });

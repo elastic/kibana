@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import type { ApplicationStart, ScopedHistory, OverlayStart, HttpStart } from '@kbn/core/public';
@@ -57,6 +57,8 @@ const isSpaBlocking = (props: Props): props is SpaBlockingProps =>
 
 export const useUnsavedChangesPrompt = (props: Props) => {
   const { hasUnsavedChanges, blockSpaNavigation = true, shouldPromptOnReplace = true } = props;
+  // Track if user has confirmed navigation to prevent re-blocking
+  const hasConfirmedNavigationRef = useRef(false);
 
   useEffect(() => {
     if (hasUnsavedChanges) {
@@ -73,7 +75,14 @@ export const useUnsavedChangesPrompt = (props: Props) => {
   }, [hasUnsavedChanges]);
 
   useEffect(() => {
-    if (!hasUnsavedChanges || !isSpaBlocking(props)) {
+    // Reset the confirmation flag when unsaved changes are cleared
+    if (!hasUnsavedChanges) {
+      hasConfirmedNavigationRef.current = false;
+    }
+  }, [hasUnsavedChanges]);
+
+  useEffect(() => {
+    if (!hasUnsavedChanges || !isSpaBlocking(props) || hasConfirmedNavigationRef.current) {
       return;
     }
 
@@ -103,6 +112,8 @@ export const useUnsavedChangesPrompt = (props: Props) => {
         });
 
         if (confirmResponse) {
+          // Mark that user has confirmed navigation
+          hasConfirmedNavigationRef.current = true;
           // Compute the URL we want to redirect to
           const url = http.basePath.prepend(state.pathname) + state.hash + state.search;
           // Unload history block
