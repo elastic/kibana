@@ -8,6 +8,7 @@
 import { encode } from '@kbn/rison';
 
 import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '@kbn/security-solution-plugin/common/constants';
+import { time } from 'console';
 import { GET_STARTED_URL, hostDetailsUrl, userDetailsUrl } from '../urls/navigation';
 import { IS_SERVERLESS } from '../env_var_names_constants';
 
@@ -58,6 +59,15 @@ export const visitWithTimeRange = (
       options?.visitOptions?.onBeforeLoad?.(win);
 
       disableNewFeaturesTours(win);
+
+      const resizeObserverLoopErrRe =
+        /^[^(ResizeObserver loop completed with undelivered notifications)]/;
+      Cypress.on('uncaught:exception', (err) => {
+        /* returning false here prevents Cypress from failing the test */
+        if (resizeObserverLoopErrRe.test(err.message)) {
+          return false;
+        }
+      });
     },
     onLoad: (win) => {
       options?.visitOptions?.onLoad?.(win);
@@ -106,6 +116,7 @@ const disableNewFeaturesTours = (window: Window) => {
   // other keys in incompatible format
   // TODO: remove in https://github.com/elastic/kibana/issues/239313
   window.localStorage.setItem('solutionNavigationTour:completed', 'true');
+  fixCrashingChrome(window);
 };
 
 // This should work on both classic and serverless navigation
@@ -122,4 +133,68 @@ export const navigateUsingGlobalSearch = (page: keyof typeof navSearchText) => {
   }
   cy.get('[data-test-subj="nav-search-input"]').type(navSearchText[page]);
   cy.get('[data-test-subj="nav-search-option"]').first().click();
+};
+
+const fixCrashingChrome = (window: Window) => {
+  // store real observer
+  const RealResizeObserver = ResizeObserver;
+
+  let queueFlushTimeout;
+  let queue = [];
+
+  /**
+   * ResizeObserver wrapper with "enforced batches"
+   */
+  class ResizeObserverPolyfill {
+    constructor(callback) {
+      this.callback = callback;
+      this.observer = new RealResizeObserver(this.check.bind(this));
+    }
+
+    observe(element) {
+      this.observer.observe(element);
+    }
+
+    unobserve(element) {
+      this.observer.unobserve(element);
+    }
+
+    disconnect() {
+      this.observer.disconnect();
+    }
+
+    check(entries) {
+      setTimeout(() => {
+        // remove previous invocations of "self"
+        queue = queue.filter((x) => x.cb !== this.callback);
+        // put a new one
+        queue.push({ cb: this.callback, args: entries });
+        // trigger update
+        // if (!queueFlushTimeout) {
+        //   queueFlushTimeout = requestAnimationFrame(() => {
+        //     queueFlushTimeout = undefined;
+        //     const q = queue;
+        //     queue = [];
+        //     q.forEach(({ cb, args }) => cb(args));
+        //   }, 0);
+        // }
+
+        queueFlushTimeout = requestAnimationFrame(() => {
+          queueFlushTimeout = undefined;
+          const q = queue;
+          queue = [];
+          q.forEach(({ cb, args }) => cb(args));
+        }, 0);
+      }, 0);
+    }
+  }
+
+  window.ResizeObserver = ResizeObserverPolyfill;
+
+  // cy.on('uncaught:exception', (err) => {
+  //   console.log('>>>>>>> Cypress caught error: ', err);
+  //   if (err.message.includes('ResizeObserver')) {
+  //     return false;
+  //   }
+  // });
 };
