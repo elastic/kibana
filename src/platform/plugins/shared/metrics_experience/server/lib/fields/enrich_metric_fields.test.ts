@@ -16,7 +16,7 @@ import type { Logger } from '@kbn/core/server';
 import type { FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/types';
 import { normalizeUnit } from './normalize_unit';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-
+import { kqlQuery } from '@kbn/es-query';
 jest.mock('../dimensions/extract_dimensions');
 jest.mock('./normalize_unit');
 
@@ -31,14 +31,14 @@ describe('enrichMetricFields', () => {
   let indexFieldCapsMap: IndexFieldCapsMap;
 
   const TEST_METRIC_NAME = 'system.cpu.utilization';
-  const TEST_INDEX = 'metrics-*';
-  const NO_DATA_INDEX = 'metricbeat*';
+  const TEST_INDEX_METRICS = 'metrics-*';
+  const TEST_INDEX_METRICBEAT = 'metricbeat*';
   const TEST_HOST_FIELD = 'host.name';
   const TEST_HOST_VALUE = 'host-1';
 
   const createMetricField = (
     name: string = TEST_METRIC_NAME,
-    index: string = TEST_INDEX,
+    index: string = TEST_INDEX_METRICS,
     overrides: Partial<MetricField> = {}
   ): MetricField => ({
     name,
@@ -48,11 +48,15 @@ describe('enrichMetricFields', () => {
     ...overrides,
   });
 
-  const createMsearchResponse = (fields: Record<string, string[]> = {}, totalHits: number = 1) => ({
+  const createMsearchResponse = (
+    index: string,
+    fields: Record<string, string[]> = {},
+    totalHits: number = 1
+  ) => ({
     responses: [
       {
         hits: {
-          hits: totalHits > 0 ? [{ fields, _index: TEST_INDEX, _source: {} }] : [],
+          hits: totalHits > 0 ? [{ fields, _index: index, _source: {} }] : [],
           total: { value: totalHits, relation: 'eq' as const },
         },
         _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
@@ -102,10 +106,10 @@ describe('enrichMetricFields', () => {
     const testCases = [
       {
         description: 'marks noData true when no sample docs exist',
-        mockResponse: createMsearchResponse({}, 0),
+        mockResponse: createMsearchResponse(TEST_INDEX_METRICS, {}, 0),
         expectedResult: {
           dimensions: [],
-          index: TEST_INDEX,
+          index: TEST_INDEX_METRICS,
           name: TEST_METRIC_NAME,
           noData: true,
           type: 'long',
@@ -113,11 +117,13 @@ describe('enrichMetricFields', () => {
       },
       {
         description: 'marks noData false when sample docs exist',
-        mockResponse: createMsearchResponse({ [TEST_HOST_FIELD]: [TEST_HOST_VALUE] }),
+        mockResponse: createMsearchResponse(TEST_INDEX_METRICS, {
+          [TEST_HOST_FIELD]: [TEST_HOST_VALUE],
+        }),
         setupFieldCaps: true,
         expectedResult: {
+          index: TEST_INDEX_METRICS,
           name: TEST_METRIC_NAME,
-          index: TEST_INDEX,
           noData: false,
           dimensions: [{ name: TEST_HOST_FIELD, type: 'keyword' }],
         },
@@ -130,7 +136,7 @@ describe('enrichMetricFields', () => {
         msearchMock.mockResolvedValue(mockResponse);
 
         if (setupFieldCaps) {
-          indexFieldCapsMap.set(TEST_INDEX, createFieldCaps());
+          indexFieldCapsMap.set(TEST_INDEX_METRICS, createFieldCaps());
         }
 
         const result = await enrichMetricFields({
@@ -148,15 +154,19 @@ describe('enrichMetricFields', () => {
     it('should return duplicate fields from different indices', async () => {
       const metricFields = [
         createMetricField(),
-        createMetricField(TEST_METRIC_NAME, 'metricbeat*'),
+        createMetricField(TEST_METRIC_NAME, TEST_INDEX_METRICBEAT),
       ];
 
-      msearchMock.mockResolvedValue(
-        createMsearchResponse({ [TEST_HOST_FIELD]: [TEST_HOST_VALUE] })
-      );
+      msearchMock.mockResolvedValue({
+        responses: [
+          ...createMsearchResponse(TEST_INDEX_METRICS, { [TEST_HOST_FIELD]: [TEST_HOST_VALUE] })
+            .responses,
+          ...createMsearchResponse(TEST_INDEX_METRICBEAT, {}).responses,
+        ],
+      });
 
-      indexFieldCapsMap.set(TEST_INDEX, createFieldCaps());
-      indexFieldCapsMap.set(NO_DATA_INDEX, createFieldCaps());
+      indexFieldCapsMap.set(TEST_INDEX_METRICS, createFieldCaps());
+      indexFieldCapsMap.set(TEST_INDEX_METRICBEAT, createFieldCaps());
 
       const result = await enrichMetricFields({
         esClient: esClientMock,
@@ -174,19 +184,53 @@ describe('enrichMetricFields', () => {
               type: 'keyword',
             },
           ],
-          index: TEST_INDEX,
+          index: TEST_INDEX_METRICS,
           name: 'system.cpu.utilization',
-          noData: false,
           type: 'long',
+          noData: false,
         },
         {
           dimensions: [],
-          index: NO_DATA_INDEX,
+          index: TEST_INDEX_METRICBEAT,
           name: 'system.cpu.utilization',
-          noData: true,
           type: 'long',
+          noData: false,
         },
       ]);
+    });
+  });
+
+  describe('kuery filtering', () => {
+    it('passes kuery filter to Elasticsearch query', async () => {
+      const metricFields = [createMetricField()];
+      const kuery = 'host.name: "server-1"';
+
+      msearchMock.mockResolvedValue(
+        createMsearchResponse(TEST_INDEX_METRICS, { [TEST_HOST_FIELD]: [TEST_HOST_VALUE] })
+      );
+
+      indexFieldCapsMap.set(TEST_INDEX_METRICS, createFieldCaps());
+
+      await enrichMetricFields({
+        esClient: esClientMock,
+        metricFields,
+        indexFieldCapsMap,
+        logger,
+        timerange: timeRangeFixture,
+        kuery,
+      });
+
+      expect(msearchMock).toHaveBeenCalledWith('sample_metrics_documents', {
+        body: expect.arrayContaining([
+          expect.objectContaining({
+            query: expect.objectContaining({
+              bool: expect.objectContaining({
+                filter: expect.arrayContaining([...kqlQuery(kuery)]),
+              }),
+            }),
+          }),
+        ]),
+      });
     });
   });
 
@@ -196,9 +240,12 @@ describe('enrichMetricFields', () => {
       normalizeUnitMock.mockReturnValue('percent');
 
       msearchMock.mockResolvedValue(
-        createMsearchResponse({ [TEST_HOST_FIELD]: [TEST_HOST_VALUE], unit: ['1'] })
+        createMsearchResponse(TEST_INDEX_METRICS, {
+          [TEST_HOST_FIELD]: [TEST_HOST_VALUE],
+          unit: ['1'],
+        })
       );
-      indexFieldCapsMap.set(TEST_INDEX, createFieldCaps());
+      indexFieldCapsMap.set(TEST_INDEX_METRICS, createFieldCaps());
 
       const result = await enrichMetricFields({
         esClient: esClientMock,
@@ -221,14 +268,16 @@ describe('enrichMetricFields', () => {
     });
 
     it('preserves unit from field caps', async () => {
-      const metricFields = [createMetricField(TEST_METRIC_NAME, TEST_INDEX, { unit: 'ms' })];
+      const metricFields = [
+        createMetricField(TEST_METRIC_NAME, TEST_INDEX_METRICS, { unit: 'ms' }),
+      ];
 
       normalizeUnitMock.mockReturnValue('ms');
 
       msearchMock.mockResolvedValue(
-        createMsearchResponse({ [TEST_HOST_FIELD]: [TEST_HOST_VALUE] })
+        createMsearchResponse(TEST_INDEX_METRICS, { [TEST_HOST_FIELD]: [TEST_HOST_VALUE] })
       );
-      indexFieldCapsMap.set(TEST_INDEX, createFieldCaps());
+      indexFieldCapsMap.set(TEST_INDEX_METRICS, createFieldCaps());
 
       const result = await enrichMetricFields({
         esClient: esClientMock,
