@@ -21,14 +21,15 @@ pageLoadAssetSize:
   contentConnectors: 33014
   contentManagement: 8350
   controls: 12234
-  core: 574609
-  cps: 1580
+  core: 572422
+  cps: 6000
   crossClusterReplication: 12662
   customIntegrations: 11715
   dashboard: 19000
   dashboardEnhanced: 12500
   dashboardMarkdown: 5056
   data: 453742
+  dataConnectors: 7214
   dataQuality: 11469
   datasetQuality: 49315
   dataSourcesRegistry: 4162
@@ -89,10 +90,10 @@ pageLoadAssetSize:
   interactiveSetup: 36654
   intercepts: 19011
   kibanaOverview: 6339
-  kibanaReact: 23031
+  kibanaReact: 22503
   kibanaUsageCollection: 1736
   kibanaUtils: 54848
-  lens: 65117
+  lens: 71747
   licenseManagement: 8265
   licensing: 10078
   links: 8620
@@ -158,15 +159,15 @@ pageLoadAssetSize:
   serverless: 7852
   serverlessObservability: 23774
   serverlessSearch: 31189
-  serverlessWorkplaceAI: 6600
+  serverlessWorkplaceAI: 7279
   sessionView: 47912
   share: 58677
   slo: 36645
   snapshotRestore: 22068
-  spaces: 30782
+  spaces: 30783
   stackAlerts: 31499
   stackConnectors: 83751
-  streams: 9000
+  streams: 10000
   streamsApp: 17000
   synthetics: 31571
   telemetry: 25755
@@ -197,7 +198,7 @@ pageLoadAssetSize:
   visTypeVega: 38538
   visTypeVislib: 14679
   visTypeXy: 32342
-  visualizations: 38374
+  visualizations: 38375
   watcher: 10485
   workflowsManagement: 7267
-  workplaceAIApp: 5759
+  workplaceAIApp: 5760
