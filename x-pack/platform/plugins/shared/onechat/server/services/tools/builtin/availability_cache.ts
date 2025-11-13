@@ -47,6 +47,14 @@ export class ToolAvailabilityCache {
   clear() {
     this.cache.clear();
   }
+
+  /**
+   * Check if a value is cached for the given tool and context.
+   */
+  has(toolId: string, config: ToolAvailabilityConfig, context: ToolAvailabilityContext): boolean {
+    const cacheKey = getCacheKey(toolId, config, context);
+    return cacheKey ? this.cache.has(cacheKey) : false;
+  }
 }
 
 const getCacheKey = (
