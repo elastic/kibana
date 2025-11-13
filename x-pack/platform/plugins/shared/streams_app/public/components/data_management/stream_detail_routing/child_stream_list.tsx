@@ -120,7 +120,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
           `}
           wrap
         >
-          {aiFeatures && aiFeatures.enabled && (
+          {aiFeatures && aiFeatures.enabled && !suggestions && (
             <EuiFlexItem grow={false}>
               <GenerateSuggestionButton
                 size="s"
@@ -254,7 +254,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
         )}
       </EuiFlexItem>
 
-      {shouldDisplayCreateButton && !suggestions && renderCreateButton()}
+      {shouldDisplayCreateButton && renderCreateButton()}
     </EuiFlexGroup>
   );
 }
