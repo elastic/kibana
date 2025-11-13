@@ -44,7 +44,11 @@ export function createGetHostNames({ apmEventClient }: ApmDataAccessServicesPara
       bucketSizeInSeconds: getBucketSize({ start, end, numBuckets: 50 }).bucketSize,
     });
 
-    const schemaFilter = getDatasetFilterForSchema(sourcesToUse.source.documentType, schema);
+    const schemaFilter = getDatasetFilterForSchema(
+      sourcesToUse.source.documentType,
+      sourcesToUse.source.rollupInterval,
+      schema
+    );
 
     const esResponse = await apmEventClient.search('get_apm_host_names', {
       apm: {
