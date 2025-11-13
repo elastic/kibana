@@ -110,6 +110,7 @@ export const ScheduledReportForm = ({
     isLoading: isReportingHealthLoading,
     isError: isReportingHealthError,
   } = useGetReportingHealthQuery({ http });
+
   const hasManageReportingPrivilege = useMemo(() => {
     if (!capabilities) {
       return false;
@@ -206,27 +207,26 @@ export const ScheduledReportForm = ({
             <p>{i18n.UNMET_REPORTING_PREREQUISITES_MESSAGE}</p>
           </EuiCallOut>
         ) : (
-          <Form form={form} id={SCHEDULED_REPORT_FORM_ID}>
+          <Form form={form} id={SCHEDULED_REPORT_FORM_ID} data-test-subj="scheduleExportForm">
             <ResponsiveFormGroup
               title={<h3>{i18n.SCHEDULED_REPORT_FORM_DETAILS_SECTION_TITLE}</h3>}
             >
               <FormField
                 path="title"
                 componentProps={{
-                  compressed: true,
                   fullWidth: true,
                   euiFieldProps: {
                     compressed: true,
                     fullWidth: true,
                     append: i18n.SCHEDULED_REPORT_FORM_FILE_NAME_SUFFIX,
                     readOnly,
+                    'data-test-subj': 'reportTitleInput',
                   },
                 }}
               />
               <FormField
                 path="reportTypeId"
                 componentProps={{
-                  compressed: true,
                   fullWidth: true,
                   euiFieldProps: {
                     compressed: true,
@@ -235,6 +235,7 @@ export const ScheduledReportForm = ({
                       availableReportTypes?.map((f) => ({ inputDisplay: f.label, value: f.id })) ??
                       [],
                     readOnly: editMode || readOnly,
+                    'data-test-subj': 'reportTypeIdSelect',
                   },
                 }}
               />
@@ -271,20 +272,19 @@ export const ScheduledReportForm = ({
                       validator: emptyField(i18n.SCHEDULED_REPORT_FORM_START_DATE_REQUIRED_MESSAGE),
                     },
                     {
-                      validator: getStartDateValidator(now, timezone ?? defaultTimezone),
+                      validator: getStartDateValidator(now, timezone ?? defaultTimezone, startDate),
                     },
                   ],
                 }}
                 componentProps={{
-                  compressed: true,
                   fullWidth: true,
-                  'data-test-subj': 'startDatePicker',
                   euiFieldProps: {
                     compressed: true,
                     fullWidth: true,
                     showTimeSelect: true,
                     minDate: now,
-                    readOnly,
+                    readOnly: readOnly || editMode,
+                    'data-test-subj': 'startDatePicker',
                   },
                 }}
               />
@@ -301,14 +301,13 @@ export const ScheduledReportForm = ({
                 }}
                 componentProps={{
                   id: 'timezone',
-                  compressed: true,
                   fullWidth: true,
-                  'data-test-subj': 'timezoneCombobox',
                   euiFieldProps: {
                     compressed: true,
                     fullWidth: true,
                     options: TIMEZONE_OPTIONS,
                     readOnly,
+                    'data-test-subj': 'timezoneCombobox',
                     prepend: (
                       <EuiFormLabel htmlFor="timezone">
                         {i18n.SCHEDULED_REPORT_FORM_TIMEZONE_LABEL}
@@ -326,7 +325,7 @@ export const ScheduledReportForm = ({
                 minFrequency={Frequency.MONTHLY}
                 showTimeInSummary
                 compressed
-                readOnly
+                readOnly={readOnly}
               />
             </ResponsiveFormGroup>
             <ResponsiveFormGroup
@@ -348,6 +347,7 @@ export const ScheduledReportForm = ({
                       : undefined,
                   euiFieldProps: {
                     compressed: true,
+                    'data-test-subj': 'sendByEmailToggle',
                     disabled:
                       readOnly ||
                       editMode ||
@@ -364,7 +364,6 @@ export const ScheduledReportForm = ({
                       <FormField
                         path="emailRecipients"
                         componentProps={{
-                          compressed: true,
                           fullWidth: true,
                           helpText: !editMode
                             ? hasManageReportingPrivilege
@@ -415,6 +414,7 @@ export const ScheduledReportForm = ({
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
+              data-test-subj="scheduleExportCancelButton"
               onClick={onClose}
               flush="left"
               aria-label={i18n.SCHEDULED_REPORT_FLYOUT_CANCEL_BUTTON_LABEL}
@@ -427,7 +427,7 @@ export const ScheduledReportForm = ({
               type="submit"
               form={SCHEDULED_REPORT_FORM_ID}
               data-test-subj="scheduleExportSubmitButton"
-              isDisabled={isReportingHealthLoading || isUserProfileLoading}
+              isDisabled={isReportingHealthLoading || isUserProfileLoading || readOnly}
               onClick={onSubmit}
               isLoading={isSubmitLoading}
               fill

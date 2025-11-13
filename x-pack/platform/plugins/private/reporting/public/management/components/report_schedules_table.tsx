@@ -401,7 +401,7 @@ export const ReportSchedulesTable = (props: { apiClient: ReportingAPIClient }) =
       />
       {selectedReport &&
         isConfigFlyOutOpen &&
-        (!canEditSchedule(selectedReport) ? (
+        (canEditSchedule(selectedReport) ? (
           <EditScheduledReportFlyout
             onClose={() => {
               unSetReportAndCloseConfigFlyout();
