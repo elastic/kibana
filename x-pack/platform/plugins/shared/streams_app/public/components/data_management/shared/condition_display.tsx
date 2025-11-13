@@ -107,21 +107,23 @@ const FilterBadges = ({ condition }: { condition: FilterCondition }) => {
 
   if (operator === 'range' && typeof value === 'object' && value !== null) {
     const rangeValue = value as RangeCondition;
+    const { gte, gt, lte, lt } = rangeValue;
+
     const parts: string[] = [];
 
-    if (rangeValue.gte !== undefined) {
-      parts.push(`${rangeValue.gte}`);
-    } else if (rangeValue.gt !== undefined) {
-      parts.push(`> ${rangeValue.gt}`);
+    if (gte !== undefined) {
+      parts.push(`≥ ${gte}`);
+    } else if (gt !== undefined) {
+      parts.push(`> ${gt}`);
     }
 
-    if (rangeValue.lt !== undefined) {
-      parts.push(`${rangeValue.lt}`);
-    } else if (rangeValue.lte !== undefined) {
-      parts.push(`≤ ${rangeValue.lte}`);
+    if (lte !== undefined) {
+      parts.push(`≤ ${lte}`);
+    } else if (lt !== undefined) {
+      parts.push(`< ${lt}`);
     }
 
-    displayText = parts.length === 2 ? `${parts[0]} to ${parts[1]}` : parts.join(' ');
+    displayText = parts.length > 0 ? parts.join(' to ') : '-';
   }
 
   return (
