@@ -75,6 +75,7 @@ export class DashboardStorage {
     }
 
     const response = { item, meta: { aliasPurpose, aliasTargetId, outcome } };
+
     const validationError = transforms.get.out.result.validate(response);
     if (validationError) {
       if (this.throwOnResultValidationError) {
