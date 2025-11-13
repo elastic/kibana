@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type { BuiltInAgentDefinition, InternalAgentDefinition } from '@kbn/onechat-server/agents';
-import type { KibanaRequest } from '@kbn/core-http-server';
-import { getExampleAlertsUrl } from '../tools/utils/kibana_urls';
-import { getPluginServices } from '../services/service_locator';
+import type { BuiltInAgentDefinition } from '@kbn/onechat-server/agents';
 
 export const catchupAgentDefinition = (): BuiltInAgentDefinition => {
   return {
@@ -112,42 +109,4 @@ When formatting your responses, use markdown to improve readability:
       ],
     },
   };
-};
-
-/**
- * Customize the catchup agent definition with dynamic URLs based on request context
- */
-export const customizeCatchupAgentDefinition = (
-  definition: InternalAgentDefinition,
-  request?: KibanaRequest
-): InternalAgentDefinition => {
-  if (!request || definition.id !== 'hackathon.catchup.agent') {
-    return definition;
-  }
-
-  try {
-    const { core } = getPluginServices();
-    const exampleUrl = getExampleAlertsUrl(request, core);
-
-    // Replace the placeholder in the answer instructions
-    const answerInstructions = definition.configuration?.answer?.instructions || '';
-    const customizedAnswerInstructions = answerInstructions.replace(
-      '<EXAMPLE_ALERTS_URL>',
-      exampleUrl
-    );
-
-    return {
-      ...definition,
-      configuration: {
-        ...definition.configuration,
-        answer: {
-          ...definition.configuration?.answer,
-          instructions: customizedAnswerInstructions,
-        },
-      },
-    };
-  } catch (error) {
-    // If we can't customize, return the original definition
-    return definition;
-  }
 };
