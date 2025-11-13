@@ -323,47 +323,47 @@ interface WorkflowsExecutionEnginePluginSetup {
 interface WorkflowsExecutionEnginePluginStart {
   /**
    * Start execution of a workflow
+   * @param workflow - The workflow definition to execute
+   * @param context - Execution context containing spaceId, inputs, triggeredBy, etc.
+   * @param request - Kibana request object for authentication context
+   * @returns Promise resolving to execution response with workflowExecutionId
    */
   executeWorkflow(
     workflow: WorkflowExecutionEngineModel,
-    spaceId: string,
-    inputs: Record<string, unknown>,
-    executionType?: ExecutionType
-  ): Promise<string>; // Returns workflow execution ID
+    context: Record<string, any>,
+    request: KibanaRequest
+  ): Promise<ExecuteWorkflowResponse>;
 
   /**
-   * Get workflow execution status
+   * Execute a single step from a workflow
+   * @param workflow - The workflow definition
+   * @param stepId - The ID of the step to execute
+   * @param contextOverride - Context values to override for this execution
+   * @returns Promise resolving to execution response with workflowExecutionId
    */
-  getWorkflowExecution(
-    executionId: string,
-    spaceId: string
-  ): Promise<EsWorkflowExecution | null>;
+  executeWorkflowStep(
+    workflow: WorkflowExecutionEngineModel,
+    stepId: string,
+    contextOverride: Record<string, any>
+  ): Promise<ExecuteWorkflowStepResponse>;
 
   /**
    * Cancel a running workflow execution
+   * @param workflowExecutionId - The ID of the execution to cancel
+   * @param spaceId - The space ID where the execution exists
    */
   cancelWorkflowExecution(
-    executionId: string,
+    workflowExecutionId: string,
     spaceId: string
   ): Promise<void>;
+}
 
-  /**
-   * Get execution logs for a workflow
-   */
-  getExecutionLogs(
-    executionId: string,
-    spaceId: string,
-    options?: PaginationOptions
-  ): Promise<ExecutionLogs>;
+interface ExecuteWorkflowResponse {
+  workflowExecutionId: string;
+}
 
-  /**
-   * Get step execution details
-   */
-  getStepExecution(
-    executionId: string,
-    stepId: string,
-    spaceId: string
-  ): Promise<StepExecution | null>;
+interface ExecuteWorkflowStepResponse {
+  workflowExecutionId: string;
 }
 ```
 
@@ -376,6 +376,8 @@ interface WorkflowExecutionEngineModel {
   enabled: boolean;
   definition: WorkflowDefinition;
   yaml?: string;
+  spaceId?: string;
+  isTestRun?: boolean;
 }
 
 interface WorkflowDefinition {
@@ -394,7 +396,7 @@ interface WorkflowDefinition {
 const { workflowsExecutionEngine } = plugins;
 
 // Execute a workflow
-const executionId = await workflowsExecutionEngine.executeWorkflow(
+const response = await workflowsExecutionEngine.executeWorkflow(
   {
     id: 'my-workflow-id',
     name: 'My Workflow',
@@ -412,17 +414,15 @@ const executionId = await workflowsExecutionEngine.executeWorkflow(
       ]
     }
   },
-  'default', // space ID
-  { userId: '123' } // inputs
+  {
+    spaceId: 'default',
+    inputs: { userId: '123' },
+    triggeredBy: 'manual'
+  },
+  request // KibanaRequest object
 );
 
-// Check execution status
-const execution = await workflowsExecutionEngine.getWorkflowExecution(
-  executionId,
-  'default'
-);
-
-console.log(`Execution status: ${execution.status}`);
+console.log(`Execution ID: ${response.workflowExecutionId}`);
 ```
 
 ---
@@ -433,7 +433,7 @@ The plugin stores data in Elasticsearch using the following indices:
 
 ### Workflow Executions Index
 
-**Index Pattern**: `.kibana-workflows-executions-*`
+**Index Name**: `.workflows-executions`
 
 **Document Structure**:
 ```json
@@ -442,12 +442,16 @@ The plugin stores data in Elasticsearch using the following indices:
   "workflowId": "workflow-id",
   "spaceId": "default",
   "status": "running",
-  "startTime": "2024-01-01T00:00:00Z",
-  "endTime": null,
-  "inputs": {...},
-  "outputs": {...},
-  "error": null,
-  "executionType": "manual"
+  "createdAt": "2024-01-01T00:00:00Z",
+  "startedAt": "2024-01-01T00:00:00Z",
+  "finishedAt": null,
+  "duration": null,
+  "triggeredBy": "manual",
+  "isTestRun": false,
+  "createdBy": "user-id",
+  "workflowDefinition": {...},
+  "yaml": "...",
+  "context": {...}
 }
 ```
 
@@ -455,20 +459,20 @@ The plugin stores data in Elasticsearch using the following indices:
 
 ### Step Executions Index
 
-**Index Pattern**: `.kibana-workflows-step-executions-*`
+**Index Name**: `.workflows-step-executions`
 
 **Document Structure**:
 ```json
 {
   "id": "step-execution-id",
-  "workflowExecutionId": "execution-id",
+  "workflowRunId": "execution-id",
+  "workflowId": "workflow-id",
   "stepId": "step-1",
+  "spaceId": "default",
   "status": "completed",
-  "startTime": "2024-01-01T00:00:00Z",
-  "endTime": "2024-01-01T00:00:05Z",
-  "inputs": {...},
-  "outputs": {...},
-  "error": null
+  "startedAt": "2024-01-01T00:00:00Z",
+  "finishedAt": "2024-01-01T00:00:05Z",
+  "duration": 5000
 }
 ```
 
@@ -476,17 +480,35 @@ The plugin stores data in Elasticsearch using the following indices:
 
 ### Execution Logs Index
 
-**Index Pattern**: `.kibana-workflows-logs-*`
+**Index Name**: `.workflows-execution-logs`
 
 **Document Structure**:
 ```json
 {
-  "timestamp": "2024-01-01T00:00:00Z",
-  "workflowExecutionId": "execution-id",
-  "stepId": "step-1",
-  "level": "info",
+  "@timestamp": "2024-01-01T00:00:00Z",
+  "spaceId": "default",
   "message": "Step completed successfully",
-  "metadata": {...}
+  "level": "info",
+  "workflow": {
+    "id": "workflow-id",
+    "name": "My Workflow",
+    "execution_id": "execution-id",
+    "step_id": "step-1",
+    "step_name": "Step Name",
+    "step_type": "action"
+  },
+  "event": {
+    "action": "step.completed",
+    "category": "workflow",
+    "type": "info",
+    "provider": "workflowsExecutionEngine",
+    "outcome": "success",
+    "duration": 5000,
+    "start": "2024-01-01T00:00:00Z",
+    "end": "2024-01-01T00:00:05Z"
+  },
+  "error": null,
+  "tags": []
 }
 ```
 
@@ -509,41 +531,131 @@ Execute a Kibana connector action.
     message: "Workflow started"
 ```
 
-### Conditional Step
+### HTTP Step
+
+Make HTTP requests to external services.
+
+```yaml
+- id: step2
+  name: Call API
+  type: http
+  with:
+    url: "https://api.example.com/endpoint"
+    method: "POST"
+    headers:
+      Content-Type: "application/json"
+    body:
+      message: "Hello"
+```
+
+### Conditional Step (If)
 
 Execute steps based on conditions.
 
 ```yaml
-- id: step2
+- id: step3
   name: Check Status
-  type: condition
-  condition: "${{ workflow.inputs.status == 'active' }}"
+  type: if
+  if: "${{ workflow.inputs.status == 'active' }}"
   then:
-    - id: step2a
+    - id: step3a
       name: Process Active
       type: action
       action: .email
   else:
-    - id: step2b
+    - id: step3b
       name: Process Inactive
       type: action
       action: .webhook
 ```
 
-### Loop Step
+### Loop Step (ForEach)
 
 Iterate over a collection.
 
 ```yaml
-- id: step3
+- id: step4
   name: Process Items
-  type: loop
-  items: "${{ workflow.inputs.items }}"
+  type: foreach
+  foreach: "${{ workflow.inputs.items }}"
   step:
     id: process_item
     name: Process Single Item
     type: action
     action: .index
+```
+
+### Wait Step
+
+Pause execution for a specified duration.
+
+```yaml
+- id: step5
+  name: Wait
+  type: wait
+  with:
+    duration: "5m"
+```
+
+### On Failure Handlers
+
+Steps can include error handling:
+
+#### Retry
+
+Retry a step on failure.
+
+```yaml
+- id: step6
+  name: Retryable Action
+  type: action
+  action: .webhook
+  on_failure:
+    retry:
+      attempts: 3
+      delay: "10s"
+```
+
+#### Continue
+
+Continue execution even if step fails.
+
+```yaml
+- id: step7
+  name: Optional Action
+  type: action
+  action: .email
+  on_failure:
+    continue: true
+```
+
+#### Fallback
+
+Execute alternative steps on failure.
+
+```yaml
+- id: step8
+  name: Primary Action
+  type: action
+  action: .webhook
+  on_failure:
+    fallback:
+      - id: step8a
+        name: Fallback Action
+        type: action
+        action: .email
+```
+
+### Timeout Zones
+
+Steps and workflows can have timeout configurations:
+
+```yaml
+- id: step9
+  name: Timeout Protected Step
+  type: action
+  action: .webhook
+  timeout: "30s"
 ```
 
 ---
@@ -556,11 +668,6 @@ Iterate over a collection.
 |--------|---------|
 | `taskManager` | Scheduled and long-running workflow execution |
 | `actions` | Connector execution for action steps |
-
-### Optional Plugins
-
-| Plugin | Purpose |
-|--------|---------|
 | `cloud` | Cloud-specific configuration and features |
 
 ---
@@ -574,14 +681,13 @@ workflowsExecutionEngine:
   # Enable/disable the plugin
   enabled: true
   
-  # Default workflow execution timeout
-  defaultTimeout: "1h"
+  # Enable console logging for debugging
+  logging:
+    console: false
   
-  # Maximum workflow execution timeout
-  maxTimeout: "24h"
-  
-  # Enable detailed execution logging
-  verboseLogging: false
+  # Configure allowed hosts for HTTP steps
+  http:
+    allowedHosts: ['*']  # Use specific hosts in production
 ```
 
 ---
@@ -642,15 +748,21 @@ View execution logs:
 
 ```bash
 # Query execution logs via Dev Tools
-GET .kibana-workflows-logs-*/_search
+GET .workflows-execution-logs/_search
 {
   "query": {
-    "match": {
-      "workflowExecutionId": "your-execution-id"
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "workflow.execution_id": "your-execution-id"
+          }
+        }
+      ]
     }
   },
   "sort": [
-    { "timestamp": "asc" }
+    { "@timestamp": "asc" }
   ]
 }
 ```
@@ -665,8 +777,7 @@ GET .kibana-workflows-logs-*/_search
 const workflowDefinition = {
   name: 'Daily Report',
   description: 'Generate and send daily report',
-  inputs: [{ name: 'date', type: 'string', required: true }]
-  },
+  inputs: [{ name: 'date', type: 'string', required: true }],
   steps: [
     {
       id: 'generate_report',
@@ -695,41 +806,49 @@ const workflowDefinition = {
   ]
 };
 
-const executionId = await workflowsExecutionEngine.executeWorkflow(
+const response = await workflowsExecutionEngine.executeWorkflow(
   {
     id: 'daily-report-workflow',
     name: 'Daily Report',
     enabled: true,
     definition: workflowDefinition
   },
-  'default',
-  { date: '2024-01-01' }
+  {
+    spaceId: 'default',
+    inputs: { date: '2024-01-01' },
+    triggeredBy: 'manual'
+  },
+  request // KibanaRequest object
+);
+
+console.log(`Execution started: ${response.workflowExecutionId}`);
+```
+
+### Example 2: Execute a Single Step
+
+```typescript
+const response = await workflowsExecutionEngine.executeWorkflowStep(
+  workflow,
+  'step-1',
+  {
+    spaceId: 'default',
+    inputs: { customValue: 'test' }
+  }
+);
+
+console.log(`Step execution ID: ${response.workflowExecutionId}`);
+```
+
+### Example 3: Cancel a Workflow
+
+```typescript
+await workflowsExecutionEngine.cancelWorkflowExecution(
+  'execution-id',
+  'default'
 );
 ```
 
-### Example 2: Monitor Execution Progress
-
-```typescript
-// Poll for execution status
-const checkStatus = async (executionId: string) => {
-  const execution = await workflowsExecutionEngine.getWorkflowExecution(
-    executionId,
-    'default'
-  );
-  
-  if (execution.status === 'running') {
-    console.log('Workflow is still running...');
-    setTimeout(() => checkStatus(executionId), 5000);
-  } else if (execution.status === 'completed') {
-    console.log('Workflow completed successfully!');
-    console.log('Outputs:', execution.outputs);
-  } else if (execution.status === 'failed') {
-    console.error('Workflow failed:', execution.error);
-  }
-};
-
-checkStatus(executionId);
-```
+**Note**: To retrieve workflow execution status and logs, use the workflows_management plugin's API. The execution engine plugin focuses on execution control and does not expose query methods in its public API.
 
 ---
 

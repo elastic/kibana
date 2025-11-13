@@ -175,10 +175,12 @@ POST /api/workflows/search
 **Response:**
 ```json
 {
-  "workflows": [...],
-  "total": 42,
-  "page": 1,
-  "perPage": 20
+  "results": [...],
+  "_pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 42
+  }
 }
 ```
 
@@ -201,7 +203,9 @@ GET /api/workflows/{id}
   "yaml": "workflow yaml content",
   "valid": true,
   "createdAt": "2024-01-01T00:00:00Z",
-  "updatedAt": "2024-01-01T00:00:00Z"
+  "createdBy": "user@example.com",
+  "lastUpdatedAt": "2024-01-01T00:00:00Z",
+  "lastUpdatedBy": "user@example.com"
 }
 ```
 
@@ -336,8 +340,19 @@ POST /api/workflows/testStep
 **Request Body:**
 ```json
 {
-  "stepYaml": "step yaml definition",
-  "inputs": {...}
+  "stepId": "step-1",
+  "contextOverride": {
+    "spaceId": "default",
+    "inputs": {...}
+  },
+  "workflowYaml": "workflow yaml definition"
+}
+```
+
+**Response:**
+```json
+{
+  "workflowExecutionId": "execution-id"
 }
 ```
 
@@ -361,10 +376,12 @@ GET /api/workflowExecutions?workflowId={id}&statuses=running&page=1&perPage=20
 **Response:**
 ```json
 {
-  "executions": [...],
-  "total": 10,
-  "page": 1,
-  "perPage": 20
+  "results": [...],
+  "_pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 10
+  }
 }
 ```
 
@@ -380,12 +397,18 @@ GET /api/workflowExecutions/{workflowExecutionId}
 ```json
 {
   "id": "execution-id",
-  "workflowId": "workflow-id",
+  "spaceId": "default",
   "status": "completed",
-  "startTime": "2024-01-01T00:00:00Z",
-  "endTime": "2024-01-01T00:05:00Z",
-  "inputs": {...},
-  "outputs": {...}
+  "startedAt": "2024-01-01T00:00:00Z",
+  "finishedAt": "2024-01-01T00:05:00Z",
+  "workflowId": "workflow-id",
+  "workflowName": "My Workflow",
+  "workflowDefinition": {...},
+  "stepId": null,
+  "stepExecutions": [...],
+  "duration": 300000,
+  "triggeredBy": "manual",
+  "yaml": "..."
 }
 ```
 
@@ -394,23 +417,40 @@ GET /api/workflowExecutions/{workflowExecutionId}
 #### Get Execution Logs
 
 ```http
-GET /api/workflowExecutions/{workflowExecutionId}/logs?page=1&perPage=50
+GET /api/workflowExecutions/{workflowExecutionId}/logs?limit=50&offset=0&sortField=@timestamp&sortOrder=asc&stepExecutionId=step-1
 ```
+
+**Query Parameters:**
+- `limit` (optional): Maximum number of logs to return (default: 50, max: 1000)
+- `offset` (optional): Number of logs to skip (default: 0)
+- `sortField` (optional): Field to sort by (default: `@timestamp`)
+- `sortOrder` (optional): Sort order - `asc` or `desc` (default: `asc`)
+- `stepExecutionId` (optional): Filter logs by step execution ID
 
 **Response:**
 ```json
 {
   "logs": [
     {
+      "id": "log-id",
       "timestamp": "2024-01-01T00:00:00Z",
       "level": "info",
       "message": "Step started",
-      "stepId": "step-1"
+      "stepId": "step-1",
+      "stepName": "Step Name",
+      "connectorType": "action",
+      "duration": 5000,
+      "additionalData": {
+        "workflowId": "workflow-id",
+        "workflowName": "My Workflow",
+        "executionId": "execution-id",
+        "event": {...}
+      }
     }
   ],
   "total": 100,
-  "page": 1,
-  "perPage": 50
+  "limit": 50,
+  "offset": 0
 }
 ```
 
@@ -419,7 +459,7 @@ GET /api/workflowExecutions/{workflowExecutionId}/logs?page=1&perPage=50
 #### Get Step Execution Details
 
 ```http
-GET /api/workflowExecutions/{executionId}/steps/{stepId}
+GET /api/workflowExecutions/{executionId}/steps/{id}
 ```
 
 **Response:** Detailed information about a specific step execution
@@ -447,10 +487,19 @@ GET /api/workflows/stats
 **Response:**
 ```json
 {
-  "totalWorkflows": 50,
-  "enabledWorkflows": 30,
-  "totalExecutions": 1000,
-  "successRate": 0.95
+  "workflows": {
+    "enabled": 30,
+    "disabled": 20
+  },
+  "executions": [
+    {
+      "date": "2024-01-01",
+      "timestamp": "2024-01-01T00:00:00Z",
+      "completed": 100,
+      "failed": 5,
+      "cancelled": 2
+    }
+  ]
 }
 ```
 
@@ -459,10 +508,33 @@ GET /api/workflows/stats
 #### Get Workflow Aggregations
 
 ```http
-GET /api/workflows/aggs
+GET /api/workflows/aggs?fields=field1&fields=field2
 ```
 
-**Response:** Aggregated workflow data for analytics
+**Query Parameters:**
+- `fields` (required): Array of field names to aggregate
+
+**Response:**
+```json
+{
+  "field1": [
+    {
+      "key": "value1",
+      "label": "Value 1"
+    },
+    {
+      "key": "value2",
+      "label": "Value 2"
+    }
+  ],
+  "field2": [
+    {
+      "key": "value3",
+      "label": "Value 3"
+    }
+  ]
+}
+```
 
 ---
 
@@ -500,7 +572,7 @@ GET /api/workflows/workflow-json-schema?loose=false
 ```
 
 **Query Parameters:**
-- `loose` (boolean): Whether to use loose validation
+- `loose` (required): Boolean - Whether to use loose validation
 
 **Response:** JSON Schema for workflow validation
 
