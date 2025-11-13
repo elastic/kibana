@@ -5,16 +5,9 @@
  * 2.0.
  */
 
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiPageHeader,
-  useEuiTheme,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiPageHeader, useEuiTheme, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { Streams } from '@kbn/streams-schema';
 import type { ReactNode } from 'react';
 import useAsync from 'react-use/lib/useAsync';
