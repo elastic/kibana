@@ -10,9 +10,9 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { EuiButtonEmpty, EuiFlexItem, EuiToolTip, useEuiTheme } from '@elastic/eui';
-export function QuickEditAction({ toggleVisor }: { toggleVisor: () => void }) {
-  const quickEditLabel = i18n.translate('esqlEditor.visor.quickEditLabel', {
-    defaultMessage: 'Quick edit',
+export function QuickSearchAction({ toggleVisor }: { toggleVisor: () => void }) {
+  const quickSearchLabel = i18n.translate('esqlEditor.visor.quickSearchLabel', {
+    defaultMessage: 'Quick search',
   });
 
   const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
@@ -23,19 +23,19 @@ export function QuickEditAction({ toggleVisor }: { toggleVisor: () => void }) {
   return (
     <>
       <EuiFlexItem grow={false}>
-        <EuiToolTip position="top" content={quickEditLabel} disableScreenReaderOutput>
+        <EuiToolTip position="top" content={quickSearchLabel} disableScreenReaderOutput>
           <EuiButtonEmpty
             size="xs"
             color="primary"
             flush="both"
             onClick={toggleVisor}
-            data-test-subj="ESQLEditor-toggle-quick-edit-visor"
-            aria-label={quickEditLabel}
+            data-test-subj="ESQLEditor-toggle-quick-search-visor"
+            aria-label={quickSearchLabel}
             css={css`
               margin-right: ${euiTheme.size.m};
             `}
           >
-            {`${quickEditLabel} (${shortCut})`}
+            {`${quickSearchLabel} (${shortCut})`}
           </EuiButtonEmpty>
         </EuiToolTip>
       </EuiFlexItem>

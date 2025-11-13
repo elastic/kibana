@@ -36,7 +36,7 @@ import { HistoryAndStarredQueriesTabs, QueryHistoryAction } from './history_star
 import { KeyboardShortcuts } from './keyboard_shortcuts';
 import { QueryWrapComponent } from './query_wrap_component';
 import type { ESQLEditorTelemetryService } from '../telemetry/telemetry_service';
-import { QuickEditAction } from '../editor_visor/quick_edit_action';
+import { QuickSearchAction } from '../editor_visor/quick_search_action';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 const COMMAND_KEY = isMac ? '⌘' : '^';
@@ -247,7 +247,7 @@ export const EditorFooter = memo(function EditorFooter({
             <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
               {!Boolean(editorIsInline) && (
                 <>
-                  <QuickEditAction toggleVisor={toggleVisor} />
+                  <QuickSearchAction toggleVisor={toggleVisor} />
                   <SubmitFeedbackComponent />
                   {!hideQueryHistory && (
                     <QueryHistoryAction

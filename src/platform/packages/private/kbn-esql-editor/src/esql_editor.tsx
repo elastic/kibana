@@ -51,7 +51,7 @@ import type { TelemetryQuerySubmittedProps } from '@kbn/esql-types/src/esql_tele
 import { QuerySource } from '@kbn/esql-types/src/esql_telemetry_types';
 import { useCanCreateLookupIndex, useLookupIndexCommand } from './custom_commands';
 import { EditorFooter } from './editor_footer';
-import { QuickEditVisor } from './editor_visor';
+import { QuickSearchVisor } from './editor_visor';
 import {
   EDITOR_INITIAL_HEIGHT,
   EDITOR_INITIAL_HEIGHT_INLINE_EDITING,
@@ -1105,7 +1105,7 @@ const ESQLEditorInternal = function ESQLEditor({
           }
         />
       )}
-      <QuickEditVisor
+      <QuickSearchVisor
         query={code}
         isSpaceReduced={measuredEditorWidth < BREAKPOINT_WIDTH}
         isVisible={isVisorOpen}

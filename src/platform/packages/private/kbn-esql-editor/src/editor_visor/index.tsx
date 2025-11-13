@@ -22,7 +22,7 @@ import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { SourcesDropdown } from './sources_dropdown';
 import { visorStyles } from './visor.styles';
 
-export function QuickEditVisor({
+export function QuickSearchVisor({
   query,
   isSpaceReduced,
   isVisible,
