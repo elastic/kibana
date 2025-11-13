@@ -104,8 +104,7 @@ const MyComponent = () => {
 | `onSaveModal` | `(data: FailureStoreFormData) => Promise<void> \| void` | ✓ | Callback function called when the form is submitted with valid data |
 | `failureStoreProps` | `FailureStoreFormProps` | ✓ | Configuration object for the failure store settings |
 | `inheritOptions` | `InheritOptions` | ✗ | Configuration for inheritance behavior from parent stream or index template |
-| `isServerless` | `boolean` | ✗ | Whether running in serverless mode (hides tier-specific messaging) |
-| `isLoading` | `boolean` | ✗ | Loading state for the modal |
+| `showIlmDescription` | `boolean` | ✗ | Whether to display tier-specific messaging |
 
 ### FailureStoreFormProps
 
