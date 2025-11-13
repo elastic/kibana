@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { first, last } from 'lodash';
+import { first } from 'lodash';
 import type { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
 import type {
   KnowledgeBaseEntry,
@@ -211,8 +211,19 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       describe('The third request - Sending the user prompt', () => {
+        let userContentStr: string;
+        let steps: any[];
+
+        before(() => {
+          const content = thirdRequestBody.messages[1].content as string;
+          userContentStr = content.replace(/<steps>[\s\S]*?<\/steps>/, '').trim();
+          const match = content.match(/<steps>([\s\S]*?)<\/steps>/);
+          steps = match ? JSON.parse(match[1]) : [];
+        });
+
         it('contains the correct number of messages', () => {
-          expect(thirdRequestBody.messages.length).to.be(4);
+          // system and user messages (everything else is collapsed as steps and appended to the user message)
+          expect(thirdRequestBody.messages.length).to.be(2);
         });
 
         it('contains the system message as the first message in the request', () => {
@@ -221,7 +232,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         it('contains the user prompt', () => {
           expect(thirdRequestBody.messages[1].role).to.be(MessageRole.User);
-          expect(thirdRequestBody.messages[1].content).to.be(userPrompt);
+          expect(userContentStr).to.be(userPrompt);
+        });
+
+        it('contains a steps payload that is valid JSON', () => {
+          expect(Array.isArray(steps)).to.be(true);
+          expect(steps.length).to.be.greaterThan(0);
         });
 
         it('leaves the LLM to choose the correct tool by leave tool_choice as auto and passes tools', () => {
@@ -230,24 +246,19 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
 
         it('contains the tool call for context and the corresponding response', () => {
-          expect(thirdRequestBody.messages[2].role).to.be(MessageRole.Assistant);
-          // @ts-expect-error
-          expect(thirdRequestBody.messages[2].tool_calls[0].function.name).to.be(
-            CONTEXT_FUNCTION_NAME
-          );
+          const assistantStep = steps.find((s: any) => s.role === 'assistant');
+          const toolStep = steps.find((s: any) => s.role === 'tool');
 
-          expect(last(thirdRequestBody.messages)?.role).to.be('tool');
-          // @ts-expect-error
-          expect(last(thirdRequestBody.messages)?.tool_call_id).to.equal(
-            // @ts-expect-error
-            thirdRequestBody.messages[2].tool_calls[0].id
-          );
+          expect(assistantStep).to.not.be(undefined);
+          expect(toolStep).to.not.be(undefined);
+          expect(assistantStep.toolCalls?.[0]?.function?.name).to.be(CONTEXT_FUNCTION_NAME);
+          expect(toolStep.name).to.be(CONTEXT_FUNCTION_NAME);
+          expect(Boolean(toolStep.toolCallId)).to.be(true);
         });
 
         it('sends the knowledge base entries to the LLM', () => {
-          const content = last(thirdRequestBody.messages)?.content as string;
-          const parsedContent = JSON.parse(content);
-          const learnings = parsedContent.learnings;
+          const toolStep = steps.find((s: any) => s.role === 'tool');
+          const learnings = toolStep?.response?.learnings ?? [];
 
           const expectedTexts = sampleDocsForInternalKb.map((doc) => doc.text).sort();
           const actualTexts = learnings.map((learning: KnowledgeBaseEntry) => learning.text).sort();
