@@ -5,7 +5,7 @@
  * 2.0.
  */
 import * as t from 'io-ts';
-import { healthStatusSchema, sloIdSchema, stateSchema, transformHealthSchema } from '../../schema';
+import { healthStatusSchema, sloIdSchema, transformHealthSchema } from '../../schema';
 import { allOrAnyString } from '../../schema/common';
 
 const fetchSLOHealthDataSchema = t.array(
@@ -13,7 +13,6 @@ const fetchSLOHealthDataSchema = t.array(
     sloId: sloIdSchema,
     sloRevision: t.number,
     sloName: t.string,
-    state: stateSchema,
     health: t.type({
       overall: transformHealthSchema,
       rollup: healthStatusSchema,

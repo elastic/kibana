@@ -11,7 +11,7 @@ import { allOrAnyStringOrArray, dateType } from './common';
 import { durationType } from './duration';
 import { indicatorSchema } from './indicators';
 import { timeWindowSchema } from './time_window';
-import { healthStatusSchema, stateSchema, transformHealthSchema } from './health';
+import { healthStatusSchema, transformHealthSchema } from './health';
 
 const occurrencesBudgetingMethodSchema = t.literal('occurrences');
 const timeslicesBudgetingMethodSchema = t.literal('timeslices');
@@ -115,7 +115,6 @@ const sloDefinitionAndHealthSchema = t.intersection([
   baseSloSchema,
   artifactsWithIdSchema,
   t.partial({
-    state: stateSchema,
     health: t.type({
       overall: transformHealthSchema,
       rollup: healthStatusSchema,
