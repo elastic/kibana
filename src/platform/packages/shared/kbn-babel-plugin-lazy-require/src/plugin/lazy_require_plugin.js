@@ -62,6 +62,7 @@ const EXCLUDED_MODULES = [
   '@testing-library/*',
   '@elastic/eui/lib/test/*',
   '@elastic/eui/test-env/test/*',
+  '@emotion/*',
 ];
 
 // Test file detection patterns
