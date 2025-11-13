@@ -560,9 +560,12 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
             rowHeight={32}
             isClearable
             singleSelection={isSingleSelection ? SINGLE_SELECTION : false}
-            aria-label={i18n.translate('xpack.osquery.pack.queryFlyoutForm.mappingValueFieldLabel', {
-              defaultMessage: 'Value',
-            })}
+            aria-label={i18n.translate(
+              'xpack.osquery.pack.queryFlyoutForm.mappingValueFieldLabel',
+              {
+                defaultMessage: 'Value',
+              }
+            )}
             idAria={idAria}
             helpText={selectedOptions[0]?.value?.description}
             {...euiFieldProps}
