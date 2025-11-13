@@ -19,6 +19,9 @@ import {
   useGeneratedHtmlId,
   type EuiButtonColor,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import moment from 'moment';
+import { isEqual, memoize } from 'lodash';
 import { Global, css } from '@emotion/react';
 import { getESQLQueryColumns } from '@kbn/esql-utils';
 import type { CodeEditorProps } from '@kbn/code-editor';
@@ -34,15 +37,13 @@ import {
   type IndicesAutocompleteResult,
 } from '@kbn/esql-types';
 import { fixESQLQueryWithVariables, getRemoteClustersFromESQLQuery } from '@kbn/esql-utils';
+import { FavoritesClient } from '@kbn/content-management-favorites-public';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { i18n } from '@kbn/i18n';
 import type { SerializedEnrichPolicy } from '@kbn/index-management-shared-types';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ILicense } from '@kbn/licensing-types';
 import { ESQLLang, ESQL_LANG_ID, monaco, type ESQLCallbacks } from '@kbn/monaco';
 import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
-import { isEqual, memoize } from 'lodash';
-import moment from 'moment';
 import type { ComponentProps } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -73,6 +74,8 @@ import {
 import { addQueriesToCache } from './history_local_storage';
 import { ResizableButton } from './resizable_button';
 import { useRestorableState, withRestorableState } from './restorable_state';
+import { getHistoryItems } from './history_local_storage';
+import type { StarredQueryMetadata } from './editor_footer/esql_starred_queries_service';
 import type {
   ControlsContext,
   ESQLEditorDeps,
@@ -139,7 +142,18 @@ const ESQLEditorInternal = function ESQLEditor({
   const datePickerOpenStatusRef = useRef<boolean>(false);
   const theme = useEuiTheme();
   const kibana = useKibana<ESQLEditorDeps>();
-  const { application, core, fieldsMetadata, uiSettings, uiActions, data } = kibana.services;
+  const { application, core, fieldsMetadata, uiSettings, uiActions, data, usageCollection } =
+    kibana.services;
+
+  const favoritesClient = useMemo(
+    () =>
+      new FavoritesClient<StarredQueryMetadata>('esql_editor', 'esql_query', {
+        http: core.http,
+        userProfile: core.userProfile,
+        usageCollection,
+      }),
+    [core.http, core.userProfile, usageCollection]
+  );
 
   const activeSolutionId = useObservable(core.chrome.getActiveSolutionNavId$());
 
@@ -464,6 +478,37 @@ const ESQLEditorInternal = function ESQLEditor({
     return { cache: fn.cache, memoizedSources: fn };
   }, []);
 
+  const { cache: historyStarredItemsCache, memoizedHistoryStarredItems } = useMemo(() => {
+    const fn = memoize(
+      (...args: [typeof getHistoryItems, typeof favoritesClient]) => ({
+        timestamp: Date.now(),
+        result: (async () => {
+          const [getHistoryItemsFn, favoritesClientInstance] = args;
+          const historyItems = getHistoryItemsFn('desc');
+          // exclude error queries from history items as
+          // we don't want to suggest them
+          const historyStarredItems = historyItems
+            .filter((item) => item.status !== 'error')
+            .map((item) => item.queryString);
+
+          const { favoriteMetadata } = (await favoritesClientInstance?.getFavorites()) || {};
+
+          if (favoriteMetadata) {
+            Object.keys(favoriteMetadata).forEach((id) => {
+              const item = favoriteMetadata[id];
+              const { queryString } = item;
+              historyStarredItems.push(queryString);
+            });
+          }
+          return historyStarredItems;
+        })(),
+      }),
+      () => 'historyStarredItems'
+    );
+
+    return { cache: fn.cache, memoizedHistoryStarredItems: fn };
+  }, []);
+
   const canCreateLookupIndex = useCanCreateLookupIndex();
 
   const getJoinIndices = useCallback<Required<ESQLCallbacks>['getJoinIndices']>(
@@ -594,12 +639,17 @@ const ESQLEditorInternal = function ESQLEditor({
         };
       },
       getActiveProduct: () => core.pricing.getActiveProduct(),
+      getHistoryStarredItems: async () => {
+        clearCacheWhenOld(historyStarredItemsCache, 'historyStarredItems');
+        return await memoizedHistoryStarredItems(getHistoryItems, favoritesClient).result;
+      },
       canCreateLookupIndex,
       isServerless: Boolean(kibana.services?.esql?.isServerless),
     };
     return callbacks;
   }, [
     fieldsMetadata,
+    favoritesClient,
     kibana.services?.esql,
     dataSourcesCache,
     fixedQuery,
@@ -616,6 +666,8 @@ const ESQLEditorInternal = function ESQLEditor({
     activeSolutionId,
     canCreateLookupIndex,
     getJoinIndices,
+    historyStarredItemsCache,
+    memoizedHistoryStarredItems,
   ]);
 
   const queryRunButtonProperties = useMemo(() => {
@@ -806,6 +858,10 @@ const ESQLEditorInternal = function ESQLEditor({
     [esqlCallbacks, telemetryCallbacks]
   );
 
+  const inlineCompletionsProvider = useMemo(() => {
+    return ESQLLang.getInlineCompletionsProvider?.(esqlCallbacks);
+  }, [esqlCallbacks]);
+
   const onErrorClick = useCallback(({ startLineNumber, startColumn }: MonacoMessage) => {
     if (!editor1.current) {
       return;
@@ -871,7 +927,13 @@ const ESQLEditorInternal = function ESQLEditor({
         top: 8,
         bottom: 8,
       },
-      quickSuggestions: true,
+      quickSuggestions: false,
+      inlineSuggest: {
+        enabled: true,
+        showToolbar: 'onHover',
+        suppressSuggestions: false,
+        keepOnBlur: false,
+      },
       readOnly: isDisabled,
       renderLineHighlight: 'line',
       renderLineHighlightOnlyWhenFocus: true,
@@ -991,6 +1053,7 @@ const ESQLEditorInternal = function ESQLEditor({
                       return hoverProvider?.provideHover(model, position, token);
                     },
                   }}
+                  inlineCompletionsProvider={inlineCompletionsProvider}
                   onChange={onQueryUpdate}
                   onFocus={() => setLabelInFocus(true)}
                   onBlur={() => setLabelInFocus(false)}
@@ -1001,6 +1064,22 @@ const ESQLEditorInternal = function ESQLEditor({
                       editorModel.current = model;
                       await addLookupIndicesDecorator();
                     }
+
+                    // When both inline and suggestion widget are visible,
+                    // we want Tab to accept inline suggestions,
+                    // so we need to unbind the default suggestion widget behavior
+                    monaco.editor.addKeybindingRule({
+                      keybinding: monaco.KeyCode.Tab,
+                      command: '-acceptSelectedSuggestion',
+                      when: 'suggestWidgetHasFocusedSuggestion && suggestWidgetVisible && textInputFocus && inlineSuggestionVisible',
+                    });
+
+                    // Add explicit binding for Tab to accept inline suggestions when they're visible
+                    monaco.editor.addKeybindingRule({
+                      keybinding: monaco.KeyCode.Tab,
+                      command: 'editor.action.inlineSuggest.commit',
+                      when: 'inlineSuggestionVisible && textInputFocus',
+                    });
 
                     // this is fixing a bug between the EUIPopover and the monaco editor
                     // when the user clicks the editor, we force it to focus and the onDidFocusEditorText
@@ -1030,6 +1109,7 @@ const ESQLEditorInternal = function ESQLEditor({
                       monaco.KeyMod.CtrlCmd | monaco.KeyCode.Slash,
                       onCommentLine
                     );
+
                     setMeasuredEditorWidth(editor.getLayoutInfo().width);
                     if (expandToFitQueryOnMount) {
                       const lineHeight = editor.getOption(monaco.editor.EditorOption.lineHeight);
