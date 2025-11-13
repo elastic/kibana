@@ -28,6 +28,7 @@
     "@kbn/logging-mocks",
     "@kbn/core-security-common",
     "@kbn/storage-adapter",
-    "@kbn/core-saved-objects-server-mocks"
+    "@kbn/core-saved-objects-server-mocks",
+    "@kbn/task-manager-plugin"
   ]
 }
