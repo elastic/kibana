@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  useEuiTheme,
-  EuiButtonIcon,
-  useEuiOverflowScroll,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme, EuiButtonIcon } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useEffect, useRef } from 'react';
 import { useHasActiveConversation } from '../../hooks/use_conversation';
@@ -74,9 +68,6 @@ export const Conversation: React.FC<{}> = () => {
   const scrollContainerStyles = css`
     overflow-y: auto;
     height: 100%;
-    ${useEuiOverflowScroll('y', true)} // applies a mask (blur) to the overflow content
-    // Padding ensures content isn't too close to the edges where the mask (blur) is applied.
-    padding: ${euiTheme.size.s} 0;
   `;
 
   const scrollDownButtonStyles = css`
