@@ -41,6 +41,30 @@ export const convertTool = ({
       return definition.getDynamicProps(tool.configuration, context);
     };
 
+    // Preserve workflow tool type and configuration
+    if (tool.type === ToolType.workflow) {
+      return {
+        id: tool.id,
+        type: ToolType.workflow,
+        description: tool.description,
+        tags: tool.tags,
+        configuration: tool.configuration,
+        readonly: false,
+        getSchema: async () => {
+          const props = await getDynamicProps();
+          return props.getSchema();
+        },
+        getHandler: async () => {
+          const props = await getDynamicProps();
+          return props.getHandler();
+        },
+        getLlmDescription: async (args) => {
+          const props = await getDynamicProps();
+          return props.getLlmDescription ? props.getLlmDescription(args) : tool.description;
+        },
+      };
+    }
+
     return {
       id: tool.id,
       // static tools are surfaced as builtin

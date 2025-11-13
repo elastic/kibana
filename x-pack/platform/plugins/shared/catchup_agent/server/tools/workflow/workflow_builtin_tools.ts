@@ -9,6 +9,7 @@ import type { StaticWorkflowTool } from '@kbn/onechat-server/tools';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { ToolsSetup } from '@kbn/onechat-plugin/server';
 import type { Logger } from '@kbn/logging';
+import { ToolType } from '@kbn/onechat-common';
 
 /**
  * Finds a workflow by exact name match
@@ -51,7 +52,7 @@ export function createWorkflowTool(
 ): StaticWorkflowTool {
   return {
     id: toolId,
-    type: 'workflow' as const,
+    type: ToolType.workflow,
     description,
     tags: [],
     configuration: {
@@ -70,9 +71,7 @@ export async function registerWorkflowBuiltinTools(
   spaceId: string
 ): Promise<void> {
   if (!workflowsManagement?.management) {
-    logger.warn(
-      'Workflows Management not available. Cannot register workflow builtin tools.'
-    );
+    logger.warn('Workflows Management not available. Cannot register workflow builtin tools.');
     return;
   }
 
@@ -92,15 +91,25 @@ export async function registerWorkflowBuiltinTools(
 
     // Register Daily Security Catchup tool
     if (dailySecurityCatchupId) {
-      const tool = createWorkflowTool(
-        'workflow.daily_security_catchup',
-        'Call this tool for a daily security catchup.',
-        dailySecurityCatchupId
-      );
-      toolsSetup.register(tool);
-      logger.info(
-        `Registered workflow tool: workflow.daily_security_catchup with workflow_id: ${dailySecurityCatchupId}`
-      );
+      const toolId = 'workflow.daily_security_catchup';
+      try {
+        const tool = createWorkflowTool(
+          toolId,
+          'Call this tool for a daily security catchup.',
+          dailySecurityCatchupId
+        );
+        toolsSetup.register(tool);
+        logger.info(
+          `Registered workflow tool: ${toolId} with workflow_id: ${dailySecurityCatchupId}`
+        );
+      } catch (error) {
+        // Tool might already be registered (e.g., from a previous call or custom tool)
+        if (error instanceof Error && error.message.includes('already registered')) {
+          logger.debug(`Workflow tool ${toolId} is already registered, skipping registration.`);
+        } else {
+          throw error;
+        }
+      }
     } else {
       logger.warn(
         'Workflow "Daily Security Catchup" not found. Tool workflow.daily_security_catchup will not be registered.'
@@ -109,15 +118,25 @@ export async function registerWorkflowBuiltinTools(
 
     // Register Incident Investigation tool
     if (incidentInvestigationId) {
-      const tool = createWorkflowTool(
-        'workflow.incidient_investigation',
-        'Comprehensive incident investigation workflow that fetches security and observability data (alerts, cases, attack discoveries), extracts entities (host.name, user.name, service.name) from the incident, and correlates those entities across observability, security, and Slack',
-        incidentInvestigationId
-      );
-      toolsSetup.register(tool);
-      logger.info(
-        `Registered workflow tool: workflow.incidient_investigation with workflow_id: ${incidentInvestigationId}`
-      );
+      const toolId = 'workflow.incidient_investigation';
+      try {
+        const tool = createWorkflowTool(
+          toolId,
+          'Comprehensive incident investigation workflow that fetches security and observability data (alerts, cases, attack discoveries), extracts entities (host.name, user.name, service.name) from the incident, and correlates those entities across observability, security, and Slack',
+          incidentInvestigationId
+        );
+        toolsSetup.register(tool);
+        logger.info(
+          `Registered workflow tool: ${toolId} with workflow_id: ${incidentInvestigationId}`
+        );
+      } catch (error) {
+        // Tool might already be registered (e.g., from a previous call or custom tool)
+        if (error instanceof Error && error.message.includes('already registered')) {
+          logger.debug(`Workflow tool ${toolId} is already registered, skipping registration.`);
+        } else {
+          throw error;
+        }
+      }
     } else {
       logger.warn(
         'Workflow "Incident Investigation" not found. Tool workflow.incidient_investigation will not be registered.'
@@ -125,11 +144,12 @@ export async function registerWorkflowBuiltinTools(
     }
   } catch (error) {
     logger.error(
-      `Failed to register workflow builtin tools: ${error instanceof Error ? error.message : String(error)}`
+      `Failed to register workflow builtin tools: ${
+        error instanceof Error ? error.message : String(error)
+      }`
     );
     if (error instanceof Error && error.stack) {
       logger.error(error.stack);
     }
   }
 }
-

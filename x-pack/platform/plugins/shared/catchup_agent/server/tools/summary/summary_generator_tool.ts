@@ -28,6 +28,10 @@ const summaryGeneratorSchema = z.object({
     .optional()
     .default('markdown')
     .describe('Output format: markdown or json'),
+  instructions: z
+    .string()
+    .optional()
+    .describe('Additional instructions for generating the summary (e.g., formatting requirements)'),
 });
 
 export const summaryGeneratorTool = (): BuiltinToolDefinition<typeof summaryGeneratorSchema> => {
@@ -49,9 +53,11 @@ export const summaryGeneratorTool = (): BuiltinToolDefinition<typeof summaryGene
 
 **Required parameter:** correlatedData (object) - Must contain correlated results from the correlation engine. This is a REQUIRED parameter - do not call this tool without it.
 
+**IMPORTANT**: When cases are mentioned in the summary, they MUST include clickable links to the case detail pages. All case references should be formatted as markdown links: [Case Title](case_url).
+
 Output can be in markdown (human-readable) or JSON (structured) format.`,
     schema: summaryGeneratorSchema,
-    handler: async ({ correlatedData, format = 'markdown' }, { logger }) => {
+    handler: async ({ correlatedData, format = 'markdown', instructions }, { logger }) => {
       try {
         // Extract and normalize all correlated data
         const {

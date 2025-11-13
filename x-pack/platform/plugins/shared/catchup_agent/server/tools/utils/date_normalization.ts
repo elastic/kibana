@@ -102,8 +102,11 @@ export interface NormalizedTimeRange {
  * For fixed date ranges (e.g., "September 2024", "2024-01-01 to 2024-01-31"):
  * - Keeps the range as-is, assuming it's intentionally fixed
  *
- * @param start - ISO datetime string for the start time (inclusive)
- * @param end - Optional ISO datetime string for the end time (exclusive)
+ * **IMPORTANT**: This function expects static ISO datetime strings. Dynamic date placeholders
+ * (__DYNAMIC_*__) should be resolved at the workflow level before being passed to tools.
+ *
+ * @param start - ISO datetime string for the start time (inclusive). Must be a static ISO string, not a dynamic placeholder.
+ * @param end - Optional ISO datetime string for the end time (exclusive). Must be a static ISO string, not a dynamic placeholder.
  * @param options - Options for normalization
  * @returns Normalized time range with start/end as ISO strings and Date objects
  */
@@ -122,7 +125,9 @@ export function normalizeTimeRange(
   const normalizedStart = normalizeDateToCurrentYear(start);
   const startDate = moment(normalizedStart).toDate();
   if (isNaN(startDate.getTime())) {
-    throw new Error(`Invalid datetime format: ${start}. Expected ISO 8601 format.`);
+    throw new Error(
+      `Invalid datetime format: ${start}. Expected ISO 8601 format.`
+    );
   }
 
   const now = moment();
@@ -135,7 +140,9 @@ export function normalizeTimeRange(
     normalizedEnd = normalizeDateToCurrentYear(end);
     endDate = moment(normalizedEnd).toDate();
     if (isNaN(endDate.getTime())) {
-      throw new Error(`Invalid datetime format: ${end}. Expected ISO 8601 format.`);
+      throw new Error(
+        `Invalid datetime format: ${end}. Expected ISO 8601 format.`
+      );
     }
 
     const endMoment = moment(endDate);

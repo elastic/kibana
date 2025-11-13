@@ -105,3 +105,4 @@ steps:
                 slack: '{{ steps.fetch_slack_messages.output }}'
               correlations: '{{ steps.correlate_events.output }}'
             format: 'markdown'
+            instructions: 'REQUIRED: All cases mentioned in the summary MUST include clickable links to their case detail pages. Format all case references as markdown links: [Case Title](case_url).'

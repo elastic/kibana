@@ -10,7 +10,7 @@
 import type { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
-import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
+import type { WorkflowExecutionEngineModel, WorkflowYaml } from '@kbn/workflows';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import {
   getReadableFrequency,
@@ -19,6 +19,7 @@ import {
 } from '../lib/rrule_logging_utils';
 import { getScheduledTriggers } from '../lib/schedule_utils';
 import type { WorkflowsService } from '../workflows_management/workflows_management_service';
+import { processDynamicInputs } from '../utils/process_dynamic_inputs';
 
 export interface WorkflowTaskParams {
   workflowId: string;
@@ -113,11 +114,14 @@ export function createWorkflowTaskRunner({
             yaml: workflow.yaml,
           };
 
+          // Process dynamic inputs (replace __DYNAMIC_*__ placeholders with actual dates)
+          const processedInputs = processDynamicInputs(workflow.definition);
+
           // Execute the workflow with user context from fakeRequest if available
           const executionContext = {
             workflowRunId: `scheduled-${Date.now()}`,
             spaceId,
-            inputs: {},
+            inputs: processedInputs,
             event: {
               type: 'scheduled',
               timestamp: new Date().toISOString(),

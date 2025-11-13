@@ -919,7 +919,10 @@ const formatCorrelationSummary = (
         const caseData =
           cases.cases?.find((c: any) => c.id === caseId) ||
           cases.values?.find((c: any) => c.id === caseId);
-        return caseData?.title || caseId;
+        if (caseData) {
+          return formatCaseReference(caseData);
+        }
+        return caseId;
       })
       .slice(0, 5);
     text += `- **Cases found**: ${caseTitles.join(', ')}${

@@ -167,3 +167,4 @@ steps:
               entities: '{{ steps.extract_entities_from_incident.output }}'
               related_alerts: '{{ steps.search_alerts_by_entities.output }}'
             format: 'markdown'
+            instructions: 'REQUIRED: All cases mentioned in the investigation report MUST include clickable links to their case detail pages. Format all case references as markdown links: [Case Title](case_url).'

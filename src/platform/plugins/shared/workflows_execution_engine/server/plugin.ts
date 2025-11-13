@@ -201,6 +201,17 @@ export class WorkflowsExecutionEnginePlugin
       const stepExecutionRepository = new StepExecutionRepository(esClient);
       const logsRepository = new LogsRepository(esClient);
 
+      // Process dynamic inputs (replace __DYNAMIC_*__ placeholders with actual dates)
+      // This ensures tools always receive static ISO datetime strings, not dynamic placeholders
+      const { processDynamicInputs } = await import('./utils/process_dynamic_inputs');
+      const processedInputs = processDynamicInputs(workflow.definition, context.inputs);
+
+      // Update context with processed inputs
+      const processedContext = {
+        ...context,
+        inputs: processedInputs,
+      };
+
       const triggeredBy = context.triggeredBy || 'manual'; // 'manual' or 'scheduled'
       const workflowExecution: Partial<EsWorkflowExecution> = {
         id: generateUuid(),
@@ -209,7 +220,7 @@ export class WorkflowsExecutionEnginePlugin
         isTestRun: workflow.isTestRun,
         workflowDefinition: workflow.definition,
         yaml: workflow.yaml,
-        context,
+        context: processedContext,
         status: ExecutionStatus.PENDING,
         createdAt: workflowCreatedAt.toISOString(),
         createdBy: context.createdBy || '', // TODO: set if available

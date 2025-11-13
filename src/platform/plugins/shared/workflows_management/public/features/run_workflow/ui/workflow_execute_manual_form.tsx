@@ -96,15 +96,48 @@ const getDefaultWorkflowInput = (definition: WorkflowYaml): string => {
         placeholder = placeholder(input);
       }
 
-      // Calculate dynamic dates for date-related inputs (always calculate, ignore YAML defaults)
+      // Always calculate dynamic dates for date-related inputs (start/end)
+      // This ensures dates are always fresh, even if workflow was registered with old hardcoded dates
+      const defaultValue = input.default || '';
+      const isDynamicPlaceholder =
+        typeof defaultValue === 'string' &&
+        (defaultValue.includes('__DYNAMIC_') ||
+          defaultValue === '__DYNAMIC_24H_AGO__' ||
+          defaultValue === '__DYNAMIC_7D_AGO__' ||
+          defaultValue === '__DYNAMIC_NOW__');
+
+      // Always calculate dates for start/end inputs, regardless of default value
+      // This ensures dates are always current when the form is opened
       if (input.type === 'string' && input.name === 'start') {
-        // Default to 24 hours ago
-        const dayAgo = new Date();
-        dayAgo.setTime(dayAgo.getTime() - 24 * 60 * 60 * 1000);
-        inputPlaceholder[input.name] = dayAgo.toISOString();
+        // Check if it's a 7-day placeholder or default to 24 hours ago
+        if (defaultValue === '__DYNAMIC_7D_AGO__') {
+          const sevenDaysAgo = new Date();
+          sevenDaysAgo.setTime(sevenDaysAgo.getTime() - 7 * 24 * 60 * 60 * 1000);
+          inputPlaceholder[input.name] = sevenDaysAgo.toISOString();
+        } else {
+          // Always default to 24 hours ago for start inputs
+          const dayAgo = new Date();
+          dayAgo.setTime(dayAgo.getTime() - 24 * 60 * 60 * 1000);
+          inputPlaceholder[input.name] = dayAgo.toISOString();
+        }
       } else if (input.type === 'string' && input.name === 'end') {
-        // Default to now
+        // Always default to now for end inputs
         inputPlaceholder[input.name] = new Date().toISOString();
+      } else if (isDynamicPlaceholder) {
+        // Handle other dynamic placeholders
+        if (defaultValue === '__DYNAMIC_7D_AGO__') {
+          const sevenDaysAgo = new Date();
+          sevenDaysAgo.setTime(sevenDaysAgo.getTime() - 7 * 24 * 60 * 60 * 1000);
+          inputPlaceholder[input.name] = sevenDaysAgo.toISOString();
+        } else if (defaultValue === '__DYNAMIC_24H_AGO__') {
+          const dayAgo = new Date();
+          dayAgo.setTime(dayAgo.getTime() - 24 * 60 * 60 * 1000);
+          inputPlaceholder[input.name] = dayAgo.toISOString();
+        } else if (defaultValue === '__DYNAMIC_NOW__') {
+          inputPlaceholder[input.name] = new Date().toISOString();
+        } else {
+          inputPlaceholder[input.name] = input.default || placeholder;
+        }
       } else {
         inputPlaceholder[input.name] = input.default || placeholder;
       }
