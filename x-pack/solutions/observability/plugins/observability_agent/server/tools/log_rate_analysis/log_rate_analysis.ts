@@ -42,7 +42,7 @@ const logRateAnalysisSchema = z.object({
     )
     .optional(),
   baseline: dateRangeSchema.describe(
-    'Time range representing “normal” behavior that the deviation window will be compared against.'
+    'Time range representing "normal" behavior that the deviation window will be compared against.'
   ),
   deviation: dateRangeSchema.describe(
     'Time range representing the time period with unusual behavior.'
@@ -60,7 +60,7 @@ export function createRunLogRateAnalysisTool({
     id: OBSERVABILITY_RUN_LOG_RATE_ANALYSIS_TOOL_ID,
     type: ToolType.builtin,
     description:
-      "Explain log spikes or dips by comparing two time windows (baseline vs deviation) and letting Kibana's log rate analysis surface the most significant field/value cohorts and categorized messages. Use this whenever you need to answer “what changed in the logs?” for a given index.",
+      'Explain log spikes or dips by comparing two time windows (baseline vs deviation) and letting Kibana\'s log rate analysis surface the most significant field/value cohorts and categorized messages. Use this whenever you need to answer "what changed in the logs?" for a given index.',
     schema: logRateAnalysisSchema,
     tags: ['observability', 'logs'],
     handler: async ({ index, timeFieldName = '@timestamp', baseline, deviation }, context) => {
