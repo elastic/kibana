@@ -95,7 +95,13 @@ export const useRiskScoreKpi = ({
   const shouldSkip = skip || riskEntities.length === 0;
 
   useEffect(() => {
-    if (!shouldSkip && defaultIndex && !isStatusLoading && riskEngineHasBeenEnabled) {
+    if (
+      !shouldSkip &&
+      defaultIndex &&
+      !isStatusLoading &&
+      riskEngineHasBeenEnabled &&
+      primaryEntity
+    ) {
       search({
         filterQuery,
         defaultIndex: [defaultIndex],

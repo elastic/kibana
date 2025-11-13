@@ -54,16 +54,19 @@ export const kpiRiskScore: SecuritySolutionFactory<EntityRiskQueries.kpi> = {
 
     const entitiesToProcess = supportedEntities.length > 0 ? supportedEntities : requestedEntities;
 
-    const accumulateBuckets = (accumulator: Record<RiskSeverity, number>, buckets: AggBucket[]) => {
+    const accumulateBuckets = (
+      accumulator: Record<RiskSeverity, number>,
+      buckets: AggBucket[]
+    ): Record<RiskSeverity, number> => {
+      const result = { ...accumulator };
       buckets.forEach((bucket) => {
         const key = bucket.key;
-        const currentTotal = accumulator[key] ?? 0;
+        const currentTotal = result[key] ?? 0;
         const bucketValue = getOr(0, 'unique_entries.value', bucket);
-        accumulator[key] = currentTotal + bucketValue;
+        result[key] = currentTotal + bucketValue;
       });
+      return result;
     };
-
-    const aggregatedResult: Record<RiskSeverity, number> = {} as Record<RiskSeverity, number>;
 
     const rawAggregations = (
       response.rawResponse as {
@@ -71,13 +74,15 @@ export const kpiRiskScore: SecuritySolutionFactory<EntityRiskQueries.kpi> = {
       }
     ).aggregations;
 
+    let aggregatedResult: Record<RiskSeverity, number> = {} as Record<RiskSeverity, number>;
+
     if (entitiesToProcess.length <= 1) {
       const riskBuckets = rawAggregations?.risk?.buckets ?? [];
-      accumulateBuckets(aggregatedResult, riskBuckets);
+      aggregatedResult = accumulateBuckets(aggregatedResult, riskBuckets);
     } else {
       entitiesToProcess.forEach((entityType) => {
         const buckets = rawAggregations?.[entityType]?.buckets ?? [];
-        accumulateBuckets(aggregatedResult, buckets);
+        aggregatedResult = accumulateBuckets(aggregatedResult, buckets);
       });
     }
 
