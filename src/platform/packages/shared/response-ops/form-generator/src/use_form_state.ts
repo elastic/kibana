@@ -17,12 +17,12 @@ interface FormState<T> {
 }
 
 /**
- * Type utility that extracts the type of a nested property using dot-notation path.
+ * Type utility that extracts the type of a option property using dot-notation path.
  *
  * This recursively traverses the type structure to infer the correct type at any depth:
  * - For path "name": returns T['name']
  * - For path "authType.username": returns T['authType']['username']
- * - For path "config.nested.deep.value": recursively extracts the type at each level
+ * - For path "config.option.deep.value": recursively extracts the type at each level
  *
  * @example
  * type Form = { user: { profile: { name: string } } }
@@ -40,7 +40,7 @@ type PathValue<T, P extends string> = P extends `${infer K}.${infer Rest}`
   ? T[P]
   : unknown;
 
-const getNestedValue = <T, P extends string>(obj: T, path: P): PathValue<T, P> => {
+const getOptionValue = <T, P extends string>(obj: T, path: P): PathValue<T, P> => {
   const keys = path.split('.');
   let current: unknown = obj;
   for (const key of keys) {
@@ -50,7 +50,7 @@ const getNestedValue = <T, P extends string>(obj: T, path: P): PathValue<T, P> =
   return current as PathValue<T, P>;
 };
 
-const setNestedValue = <T, P extends string>(obj: T, path: P, value: PathValue<T, P>): T => {
+const setOptionValue = <T, P extends string>(obj: T, path: P, value: PathValue<T, P>): T => {
   const keys = path.split('.');
   const result = { ...obj } as T;
   let current: Record<string, unknown> = result as Record<string, unknown>;
@@ -85,11 +85,11 @@ export const useFormState = <T>(fields: FieldDefinition[]) => {
 
   const handleChange = useCallback((fieldId: string, value: unknown) => {
     setFormState((prev: FormState<T>) => {
-      const isNestedPath = fieldId.includes('.');
+      const isOptionPath = fieldId.includes('.');
 
       let newValues: T;
-      if (isNestedPath) {
-        newValues = setNestedValue(prev.values, fieldId, value as PathValue<T, typeof fieldId>);
+      if (isOptionPath) {
+        newValues = setOptionValue(prev.values, fieldId, value as PathValue<T, typeof fieldId>);
       } else {
         newValues = { ...prev.values, [fieldId]: value };
       }
@@ -127,64 +127,21 @@ export const useFormState = <T>(fields: FieldDefinition[]) => {
         }
 
         const fieldValue = fieldId.includes('.')
-          ? getNestedValue(prev.values, fieldId)
+          ? getOptionValue(prev.values, fieldId)
           : prev.values[fieldId as unknown as keyof T];
         const validationResult = field.validate(fieldValue);
 
-        if (!validationResult) {
-          return {
-            ...prev,
-            touched: newTouched,
-          };
-        }
-
-        if (
-          Array.isArray(validationResult) &&
-          validationResult.length > 0 &&
-          typeof validationResult[0] === 'object' &&
-          'path' in validationResult[0]
-        ) {
-          if (fieldId.includes('.')) {
-            const nestedFieldName = fieldId.split('.').slice(1).join('.');
-            const matchingIssue: any = validationResult.find((issue: any) => {
-              return issue.path && issue.path.join('.') === nestedFieldName;
-            });
-
-            if (matchingIssue && typeof matchingIssue === 'object' && 'message' in matchingIssue) {
-              return {
-                ...prev,
-                touched: newTouched,
-                errors: { ...prev.errors, [fieldId]: matchingIssue.message },
-              };
-            }
-          } else {
-            const topLevelIssue: any = validationResult.find((issue: any) => {
-              return !issue.path || issue.path.length === 0;
-            });
-
-            if (topLevelIssue && typeof topLevelIssue === 'object' && 'message' in topLevelIssue) {
-              return {
-                ...prev,
-                touched: newTouched,
-                errors: { ...prev.errors, [fieldId]: topLevelIssue.message },
-              };
-            }
-          }
-        } else if (
-          typeof validationResult === 'string' ||
-          (Array.isArray(validationResult) &&
-            (validationResult.length === 0 || typeof validationResult[0] === 'string'))
-        ) {
-          return {
-            ...prev,
-            touched: newTouched,
-            errors: { ...prev.errors, [fieldId]: validationResult as string | string[] },
-          };
+        const newErrors = { ...prev.errors };
+        if (validationResult) {
+          newErrors[fieldId] = validationResult;
+        } else {
+          delete newErrors[fieldId];
         }
 
         return {
           ...prev,
           touched: newTouched,
+          errors: newErrors,
         };
       });
     },
@@ -216,7 +173,7 @@ export const useFormState = <T>(fields: FieldDefinition[]) => {
   const getFieldValue = useCallback(
     <P extends string>(fieldId: P): PathValue<T, P> | T[keyof T] => {
       if (fieldId.includes('.')) {
-        return getNestedValue(formState.values, fieldId);
+        return getOptionValue(formState.values, fieldId);
       }
       return formState.values[fieldId as unknown as keyof T];
     },
@@ -233,33 +190,7 @@ export const useFormState = <T>(fields: FieldDefinition[]) => {
       const field = fieldDefinitions.find((f) => f.id === parentFieldId);
 
       if (field) {
-        const validationResult = field.validate(value);
-
-        if (
-          Array.isArray(validationResult) &&
-          validationResult.length > 0 &&
-          typeof validationResult[0] === 'object' &&
-          'path' in validationResult[0] &&
-          fieldId.includes('.')
-        ) {
-          const nestedFieldName = fieldId.split('.').slice(1).join('.');
-
-          const matchingIssue: any = validationResult.find((issue: any) => {
-            return issue.path && issue.path.join('.') === nestedFieldName;
-          });
-
-          return matchingIssue && typeof matchingIssue === 'object' && 'message' in matchingIssue
-            ? matchingIssue.message
-            : undefined;
-        }
-
-        if (
-          typeof validationResult === 'string' ||
-          (Array.isArray(validationResult) &&
-            (validationResult.length === 0 || typeof validationResult[0] === 'string'))
-        ) {
-          return validationResult as string | string[];
-        }
+        return field.validate(value);
       }
       return undefined;
     },
@@ -287,28 +218,21 @@ export const useFormState = <T>(fields: FieldDefinition[]) => {
         const value = formState.values[fieldKey];
         cleanedValues[fieldKey] = value as T[keyof T];
 
-        const validationResult = field.validate(value);
-        if (validationResult) {
-          if (
-            Array.isArray(validationResult) &&
-            validationResult.length > 0 &&
-            typeof validationResult[0] === 'object' &&
-            'path' in validationResult[0]
-          ) {
-            validationResult.forEach((issue: any) => {
-              if (issue.path && issue.path.length > 0) {
-                const nestedFieldId = `${field.id}.${issue.path.join('.')}`;
-                errors[nestedFieldId] = issue.message;
-                allTouched[nestedFieldId] = true;
-              } else {
-                errors[field.id] = issue.message;
-              }
+        if (field.validateOptions) {
+          const optionErrors = field.validateOptions(value);
+          if (optionErrors) {
+            Object.entries(optionErrors).forEach(([fieldPath, errorMessage]) => {
+              const optionFieldId = `${field.id}.${fieldPath}`;
+              errors[optionFieldId] = errorMessage;
+              allTouched[optionFieldId] = true;
             });
             hasErrors = true;
-          } else {
-            errors[field.id] = validationResult as string | string[];
-            hasErrors = true;
           }
+        }
+        const validationResult = field.validate(value);
+        if (validationResult) {
+          errors[field.id] = validationResult;
+          hasErrors = true;
         }
       });
 

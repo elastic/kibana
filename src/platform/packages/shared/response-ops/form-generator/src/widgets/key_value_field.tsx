@@ -40,6 +40,7 @@ export const KeyValueField: React.FC<KeyValueWidgetProps> = ({
   fullWidth = true,
   setFieldError,
   errors = {},
+  helpText,
 }) => {
   const [pairs, setPairs] = useState<KeyValuePair[]>(() => {
     if (value && typeof value === 'object' && Object.keys(value).length > 0) {

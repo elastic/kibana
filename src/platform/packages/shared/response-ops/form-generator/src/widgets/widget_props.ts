@@ -16,6 +16,7 @@ export interface BaseWidgetProps<T = unknown> {
   value: T;
   label?: string;
   placeholder?: string;
+  helpText?: string;
   fullWidth?: boolean;
   error?: string | string[];
   isInvalid?: boolean;

@@ -36,6 +36,36 @@ export const AbuseIPDBConnector: StoryObj = {
   },
 };
 
+export const AlienVaultOTXConnector: StoryObj = {
+  render: () => {
+    return <Form connectorSchema={alienVaultOTXConnectorSchema} onSubmit={submit} />;
+  },
+};
+
+export const GreyNoiseConnector: StoryObj = {
+  render: () => {
+    return <Form connectorSchema={GreyNoiseConnectorSchema} onSubmit={submit} />;
+  },
+};
+
+export const ShodanConnector: StoryObj = {
+  render: () => {
+    return <Form connectorSchema={ShodanConnectorSchema} onSubmit={submit} />;
+  },
+};
+
+export const UrlVoidConnector: StoryObj = {
+  render: () => {
+    return <Form connectorSchema={UrlVoidConnectorSchema} onSubmit={submit} />;
+  },
+};
+
+export const VirusTotalConnector: StoryObj = {
+  render: () => {
+    return <Form connectorSchema={VirusTotalConnectorSchema} onSubmit={submit} />;
+  },
+};
+
 // this is not the object that would be created as SingleConnectorFile, this is the internal
 // representation after parsing a SingleConnectorFile
 const webhookConnectorFormSchema = z.object({
@@ -121,6 +151,122 @@ const abuseIPDBConnectorSchema = z.object({
               widgetOptions: {
                 label: 'API Key',
                 placeholder: 'Your AbuseIPDB API Key',
+              },
+            }),
+        })
+        .meta({
+          widgetOptions: { label: 'Headers' },
+        }),
+    ])
+    .meta({ widget: 'formFieldset', widgetOptions: { label: 'Authentication' } }),
+});
+
+const alienVaultOTXConnectorSchema = z.object({
+  authType: z
+    .discriminatedUnion('type', [
+      z
+        .object({
+          type: z.literal('apiKey'), // this literal is irrelevant
+          'X-OTX-API-KEY': z
+            .string()
+            .min(1, { message: 'API Key cannot be empty' })
+            .meta({
+              widget: 'password',
+              widgetOptions: {
+                label: 'API Key',
+              },
+            }),
+        })
+        .meta({
+          widgetOptions: { label: 'Headers' },
+        }),
+    ])
+    .meta({ widget: 'formFieldset', widgetOptions: { label: 'Authentication' } }),
+});
+
+const GreyNoiseConnectorSchema = z.object({
+  authType: z
+    .discriminatedUnion('type', [
+      z
+        .object({
+          type: z.literal('apiKey'), // this literal is irrelevant
+          key: z
+            .string()
+            .min(1, { message: 'API Key cannot be empty' })
+            .meta({
+              widget: 'password',
+              widgetOptions: {
+                label: 'API Key',
+              },
+            }),
+        })
+        .meta({
+          widgetOptions: { label: 'Headers' },
+        }),
+    ])
+    .meta({ widget: 'formFieldset', widgetOptions: { label: 'Authentication' } }),
+});
+
+const ShodanConnectorSchema = z.object({
+  authType: z
+    .discriminatedUnion('type', [
+      z
+        .object({
+          type: z.literal('apiKey'), // this literal is irrelevant
+          'X-Api-Key': z
+            .string()
+            .min(1, { message: 'API Key cannot be empty' })
+            .meta({
+              widget: 'password',
+              widgetOptions: {
+                label: 'API Key',
+              },
+            }),
+        })
+        .meta({
+          widgetOptions: { label: 'Headers' },
+        }),
+    ])
+    .meta({ widget: 'formFieldset', widgetOptions: { label: 'Authentication' } }),
+});
+
+const UrlVoidConnectorSchema = z.object({
+  authType: z
+    .discriminatedUnion('type', [
+      z
+        .object({
+          type: z.literal('apiKey'), // this literal is irrelevant
+          'X-Api-Key': z
+            .string()
+            .min(1, { message: 'API Key cannot be empty' })
+            .meta({
+              widget: 'password',
+              widgetOptions: {
+                label: 'API Key',
+              },
+            }),
+        })
+        .meta({
+          widgetOptions: { label: 'Headers' },
+        }),
+    ])
+    .meta({ widget: 'formFieldset', widgetOptions: { label: 'Authentication' } }),
+});
+
+const VirusTotalConnectorSchema = z.object({
+  authType: z
+    .discriminatedUnion('type', [
+      z
+        .object({
+          type: z.literal('apiKey'), // this literal is irrelevant
+          'x-apikey': z
+            .string()
+            .min(1, { message: 'API Key cannot be empty' })
+            .meta({
+              widget: 'password',
+              widgetOptions: {
+                label: 'API Key',
+                placeholder: 'vt-...',
               },
             }),
         })

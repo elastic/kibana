@@ -25,7 +25,8 @@ export interface FieldDefinition {
   };
   initialValue?: unknown;
   value?: unknown;
-  validate: (value: unknown) => string[] | string | z.ZodIssue[] | undefined;
+  validate: (value: unknown) => string[] | string | undefined;
+  validateOptions?: (value: unknown) => Record<string, string> | undefined;
   schema?: z.ZodTypeAny;
   widget?: WidgetType;
 }
@@ -39,6 +40,7 @@ const getStaticProps = ({ schema }: { schema: z.ZodTypeAny }) => {
     label: widgetOptions?.label,
     placeholder: widgetOptions?.placeholder,
     default: widgetOptions?.default,
+    helpText: widgetOptions?.helpText,
   };
 
   const mergedOptions = {
@@ -84,9 +86,31 @@ const getFieldsFromSchema = <T extends z.ZodRawShape>(schema: z.ZodObject<T>) =>
           return undefined;
         } catch (error) {
           if (error instanceof z.ZodError) {
-            return error.issues;
+            const rootErrors = error.issues
+              .filter((issue) => !issue.path || issue.path.length === 0)
+              .map((issue) => issue.message);
+
+            if (rootErrors.length === 0) return undefined;
+            return rootErrors.length === 1 ? rootErrors[0] : rootErrors;
           }
           return 'Invalid value';
+        }
+      },
+      validateOptions: (value: unknown) => {
+        try {
+          schemaAny.parse(value);
+          return undefined;
+        } catch (error) {
+          if (error instanceof z.ZodError) {
+            const optionErrors: Record<string, string> = {};
+            error.issues.forEach((issue) => {
+              if (issue.path && issue.path.length > 0) {
+                optionErrors[issue.path.join('.')] = issue.message;
+              }
+            });
+            return Object.keys(optionErrors).length > 0 ? optionErrors : undefined;
+          }
+          return undefined;
         }
       },
     });

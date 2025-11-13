@@ -21,9 +21,16 @@ export const PasswordField: React.FC<TextWidgetProps> = ({
   isInvalid,
   onChange,
   onBlur,
+  helpText,
 }) => {
   return (
-    <EuiFormRow label={label} error={error} isInvalid={isInvalid} fullWidth={fullWidth}>
+    <EuiFormRow
+      label={label}
+      error={error}
+      isInvalid={isInvalid}
+      fullWidth={fullWidth}
+      helpText={helpText}
+    >
       <EuiFieldPassword
         data-test-subj={fieldId}
         type="dual"

@@ -93,7 +93,7 @@ describe('DiscriminatedUnionField', () => {
     expect(oauthCard.checked).toBe(true);
   });
 
-  it('renders nested fields for selected option', () => {
+  it('renders option fields for selected option', () => {
     const option1 = z.object({
       type: z.literal('basic'),
       username: z.string().meta({ widget: 'text', widgetOptions: { label: 'Username' } }),
@@ -166,7 +166,7 @@ describe('DiscriminatedUnionField', () => {
     });
   });
 
-  it('calls onChange when nested field changes', async () => {
+  it('calls onChange when option field changes', async () => {
     const option1 = z.object({
       type: z.literal('basic'),
       username: z.string().meta({ widget: 'text', widgetOptions: { label: 'Username' } }),
@@ -196,7 +196,7 @@ describe('DiscriminatedUnionField', () => {
     });
   });
 
-  it('validates nested fields on blur', async () => {
+  it('validates option fields on blur', async () => {
     const option1 = z.object({
       type: z.literal('basic'),
       username: z
@@ -307,7 +307,7 @@ describe('DiscriminatedUnionField', () => {
     consoleError.mockRestore();
   });
 
-  it('displays validation errors for nested fields', async () => {
+  it('displays validation errors for option fields', async () => {
     const option1 = z.object({
       type: z.literal('basic'),
       username: z

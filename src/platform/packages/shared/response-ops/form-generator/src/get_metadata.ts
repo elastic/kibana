@@ -7,12 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/**
- * Helper to retrieve metadata from Zod schemas
- *
- * Uses Zod v4's native .meta() method to store and retrieve metadata
- */
-
 import { z } from '@kbn/zod/v4';
 import type { FieldMeta } from './schema_metadata';
 import type { WidgetType } from './widgets';
@@ -37,4 +31,20 @@ export function getMeta(schema: z.ZodTypeAny): UIMetadata | undefined {
 
 export function getTypedMeta(schema: z.ZodTypeAny): FieldMeta | undefined {
   return z.globalRegistry.get(schema) as FieldMeta | undefined;
+}
+
+export function getUIMeta(schema: z.ZodTypeAny): UIMetadata | undefined {
+  const meta = getMeta(schema);
+  if (!meta) return {};
+
+  const { label, placeholder, default: defaultValue, widgetOptions, helpText } = meta as UIMetadata;
+
+  return {
+    label: widgetOptions?.label ?? label,
+    placeholder: widgetOptions?.placeholder ?? placeholder,
+    default: widgetOptions?.default ?? defaultValue,
+    helpText: widgetOptions?.helpText ?? helpText,
+    fullWidth: true,
+    ...widgetOptions,
+  };
 }

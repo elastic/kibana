@@ -45,7 +45,7 @@ export const MultiOptionUnionField: React.FC<DiscriminatedUnionWidgetProps> = ({
     Record<string, string[] | undefined>
   >({});
 
-  const validateNestedField = useCallback(
+  const validateOptionField = useCallback(
     (fieldValue: unknown, subSchema: z.ZodTypeAny): string[] | undefined => {
       try {
         subSchema.parse(fieldValue);
@@ -79,34 +79,34 @@ export const MultiOptionUnionField: React.FC<DiscriminatedUnionWidgetProps> = ({
         onChange(fieldId, newValue);
       };
 
-      const renderNestedFields = () => {
+      const renderOptionsFields = () => {
         if (!isChecked) return null;
 
         return (
           <>
             {Object.entries(optionSchema.shape).map(
-              ([fieldKey, subSchema], nestedFieldsIndex: number) => {
-                if (nestedFieldsIndex === 0) return null;
+              ([fieldKey, subSchema], optionFieldsIndex: number) => {
+                if (optionFieldsIndex === 0) return null;
 
                 const fieldSchema = subSchema as z.ZodTypeAny;
-                const nestedFieldMeta = getMeta(fieldSchema);
-                const nestedWidget = nestedFieldMeta?.widget || 'text';
+                const optionFieldMeta = getMeta(fieldSchema);
+                const optionWidget = optionFieldMeta?.widget || 'text';
                 const valueObj =
                   typeof value === 'object' && value !== null ? value : { type: value };
-                const nestedValue = valueObj[fieldKey] ?? '';
+                const optionValue = valueObj[fieldKey] ?? '';
 
-                const NestedWidgetComponent = getWidget(nestedWidget);
-                if (!NestedWidgetComponent) {
-                  throw new Error(`Unsupported widget type: ${nestedWidget}`);
+                const OptionWidgetComponent = getWidget(optionWidget);
+                if (!OptionWidgetComponent) {
+                  throw new Error(`Unsupported widget type: ${optionWidget}`);
                 }
 
-                const nestedFieldId = `${fieldId}.${fieldKey}`;
-                const nestedFieldTouched =
-                  touched[nestedFieldId] || internalTouchedFields.has(fieldKey);
-                const nestedFieldError = errors[nestedFieldId] || internalFieldErrors[fieldKey];
-                const nestedFieldIsInvalid = !!(nestedFieldTouched && nestedFieldError);
+                const optionFieldId = `${fieldId}.${fieldKey}`;
+                const optionFieldTouched =
+                  touched[optionFieldId] || internalTouchedFields.has(fieldKey);
+                const optionFieldError = errors[optionFieldId] || internalFieldErrors[fieldKey];
+                const optionFieldIsInvalid = !!(optionFieldTouched && optionFieldError);
 
-                const handleNestedChange = (_nestedFieldIdArg: string, newValue: unknown) => {
+                const handleOptionChange = (_optionFieldIdArg: string, newValue: unknown) => {
                   const currentValueObj =
                     typeof value === 'object' && value !== null
                       ? value
@@ -119,26 +119,26 @@ export const MultiOptionUnionField: React.FC<DiscriminatedUnionWidgetProps> = ({
 
                   onChange(fieldId, updatedValue);
 
-                  const fieldErrors = validateNestedField(newValue, fieldSchema);
+                  const fieldErrors = validateOptionField(newValue, fieldSchema);
                   setInternalFieldErrors((prev) => ({
                     ...prev,
                     [fieldKey]: fieldErrors,
                   }));
 
                   if (setFieldError) {
-                    setFieldError(nestedFieldId, fieldErrors);
+                    setFieldError(optionFieldId, fieldErrors);
                   }
                 };
 
-                const handleNestedBlur = () => {
+                const handleOptionBlur = () => {
                   setInternalTouchedFields((prev) => new Set(prev).add(fieldKey));
 
                   if (setFieldTouched) {
-                    setFieldTouched(nestedFieldId, true);
+                    setFieldTouched(optionFieldId, true);
                   }
 
                   const fieldValue = valueObj[fieldKey];
-                  const fieldErrors = validateNestedField(fieldValue, fieldSchema);
+                  const fieldErrors = validateOptionField(fieldValue, fieldSchema);
 
                   setInternalFieldErrors((prev) => ({
                     ...prev,
@@ -146,7 +146,7 @@ export const MultiOptionUnionField: React.FC<DiscriminatedUnionWidgetProps> = ({
                   }));
 
                   if (setFieldError) {
-                    setFieldError(nestedFieldId, fieldErrors);
+                    setFieldError(optionFieldId, fieldErrors);
                   }
                   onBlur(fieldId);
                 };
@@ -154,17 +154,17 @@ export const MultiOptionUnionField: React.FC<DiscriminatedUnionWidgetProps> = ({
                 return (
                   <React.Fragment key={fieldKey}>
                     <EuiSpacer size="s" />
-                    <NestedWidgetComponent
+                    <OptionWidgetComponent
                       {...staticProps}
-                      fieldId={nestedFieldId}
-                      value={nestedValue}
+                      fieldId={optionFieldId}
+                      value={optionValue}
                       label={
-                        nestedFieldMeta?.label || nestedFieldMeta?.widgetOptions?.label || fieldKey
+                        optionFieldMeta?.label || optionFieldMeta?.widgetOptions?.label || fieldKey
                       }
-                      error={nestedFieldError}
-                      isInvalid={nestedFieldIsInvalid}
-                      onChange={handleNestedChange}
-                      onBlur={handleNestedBlur}
+                      error={optionFieldError}
+                      isInvalid={optionFieldIsInvalid}
+                      onChange={handleOptionChange}
+                      onBlur={handleOptionBlur}
                       schema={fieldSchema}
                       fullWidth
                     />
@@ -185,7 +185,7 @@ export const MultiOptionUnionField: React.FC<DiscriminatedUnionWidgetProps> = ({
             checked={isChecked}
             onChange={handleCardChange}
           >
-            {renderNestedFields()}
+            {renderOptionsFields()}
           </EuiCheckableCard>
           {index < totalOptions - 1 && <EuiSpacer size="s" />}
         </React.Fragment>
@@ -197,7 +197,7 @@ export const MultiOptionUnionField: React.FC<DiscriminatedUnionWidgetProps> = ({
     fieldId,
     totalOptions,
     onChange,
-    validateNestedField,
+    validateOptionField,
     onBlur,
     errors,
     setFieldError,

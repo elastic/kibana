@@ -24,6 +24,7 @@ export const SelectField: React.FC<SelectWidgetProps> = ({
   onBlur,
   schema,
   options: providedOptions,
+  helpText,
 }) => {
   let options = providedOptions;
 
@@ -43,7 +44,13 @@ export const SelectField: React.FC<SelectWidgetProps> = ({
   }
 
   return (
-    <EuiFormRow label={label} error={error} isInvalid={isInvalid} fullWidth={fullWidth}>
+    <EuiFormRow
+      label={label}
+      error={error}
+      isInvalid={isInvalid}
+      fullWidth={fullWidth}
+      helpText={helpText}
+    >
       <EuiSelect
         value={value}
         options={options}
