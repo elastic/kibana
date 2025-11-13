@@ -165,7 +165,6 @@ import {
   handleExperimentalDatastreamFeatureOptIn,
   mapPackagePolicySavedObjectToPackagePolicy,
   preflightCheckPackagePolicy,
-  removeCloudConnectorTransientVars,
 } from './package_policies';
 import type {
   PackagePolicyClient,
@@ -556,9 +555,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         if (cloudConnector) {
           enrichedPackagePolicy.cloud_connector_id = cloudConnector.id;
         }
-
-        // TODO: Remove after https://github.com/elastic/security-team/issues/14608
-        enrichedPackagePolicy = removeCloudConnectorTransientVars(enrichedPackagePolicy);
       }
 
       inputs = enrichedPackagePolicy.inputs as PackagePolicyInput[];
@@ -603,7 +599,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       .create<PackagePolicySOAttributes>(
         savedObjectType,
         {
-          ...enrichedPackagePolicy,
+          ...omit(enrichedPackagePolicy, 'cloud_connector_name'),
           ...(enrichedPackagePolicy.package
             ? { package: omit(enrichedPackagePolicy.package, 'experimental_data_stream_features') }
             : {}),
@@ -803,7 +799,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           type: savedObjectType,
           id: packagePolicyId,
           attributes: {
-            ...pkgPolicyWithoutId,
+            ...omit(pkgPolicyWithoutId, 'cloud_connector_name'),
             ...(packagePolicy.package
               ? { package: omit(packagePolicy.package, 'experimental_data_stream_features') }
               : {}),
@@ -1439,7 +1435,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         ...currentPackagePolicySO,
         id: `${id}:prev`,
         attributes: {
-          ...currentPackagePolicySO.attributes,
+          ...omit(currentPackagePolicySO.attributes, 'cloud_connector_name'),
           latest_revision: false,
         },
       };
@@ -1470,7 +1466,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         savedObjectType,
         id,
         {
-          ...restOfPackagePolicy,
+          ...omit(restOfPackagePolicy, 'cloud_connector_name'),
           ...(restOfPackagePolicy.package
             ? { package: omit(restOfPackagePolicy.package, 'experimental_data_stream_features') }
             : {}),
@@ -1722,7 +1718,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
               ...currentPackagePolicySO,
               id: `${id}:prev`,
               attributes: {
-                ...currentPackagePolicySO.attributes,
+                ...omit(currentPackagePolicySO.attributes, 'cloud_connector_name'),
                 latest_revision: false,
               },
             };
@@ -1834,7 +1830,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           type: savedObjectType,
           id,
           attributes: {
-            ...restOfPackagePolicy,
+            ...omit(restOfPackagePolicy, 'cloud_connector_name'),
             ...(restOfPackagePolicy.package
               ? { package: omit(restOfPackagePolicy.package, 'experimental_data_stream_features') }
               : {}),
@@ -2337,6 +2333,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           supports_agentless: newPolicy.supports_agentless,
           supports_cloud_connector: newPolicy.supports_cloud_connector,
           cloud_connector_id: newPolicy.cloud_connector_id,
+          cloud_connector_name: newPolicy.cloud_connector_name,
           additional_datastreams_permissions: newPolicy.additional_datastreams_permissions,
         };
       }
@@ -3045,10 +3042,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       } else {
         logger.info(`Creating cloud connector: ${enrichedPackagePolicy.cloud_connector_id}`);
         try {
-          // Extract cloud connector name from input vars
-          const vars = enrichedPackagePolicy.inputs?.find((input) => input.enabled)?.streams[0]
-            ?.vars;
-          const cloudConnectorName = vars?.cloud_connector_name?.value;
+          // Extract cloud connector name from package policy
+          const cloudConnectorName = enrichedPackagePolicy.cloud_connector_name;
 
           const cloudConnector = await cloudConnectorService.create(soClient, {
             name:

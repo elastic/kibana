@@ -147,6 +147,13 @@ export const PackagePolicyBaseSchema = {
       })
     )
   ),
+  cloud_connector_name: schema.maybe(
+    schema.string({
+      meta: {
+        description: 'Name for the cloud connector to be created with this package policy.',
+      },
+    })
+  ),
   enabled: schema.boolean(),
   is_managed: schema.maybe(schema.boolean()),
   package: schema.maybe(PackagePolicyPackageSchema),
