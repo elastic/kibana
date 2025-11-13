@@ -72,7 +72,10 @@ export function ConfigPanel(
 
   const dispatchLens = useLensDispatch();
 
-  const layerIds = activeVisualization.getLayerIds(visualization.state);
+  const layerIds = useMemo(
+    () => activeVisualization.getLayerIds(visualization.state),
+    [activeVisualization, visualization.state]
+  );
 
   const focusLayerTabsContent = () => {
     setTimeout(() => {
@@ -309,7 +312,6 @@ export function ConfigPanel(
         registerLibraryAnnotationGroup={registerLibraryAnnotationGroupFunction}
         dimensionGroups={layerConfig.config.groups}
         activeVisualization={activeVisualization}
-        key={selectedLayerId}
         layerId={selectedLayerId}
         layerIndex={layerIds.indexOf(selectedLayerId)}
         visualizationState={visualization.state}
