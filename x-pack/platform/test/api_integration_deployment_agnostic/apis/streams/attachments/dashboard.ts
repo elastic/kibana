@@ -12,6 +12,9 @@ import {
   linkDashboard,
   putStream,
   deleteStream,
+  getStream,
+  getDashboards,
+  getDashboardSuggestions,
 } from '../helpers/requests';
 import type { StreamsSupertestRepositoryClient } from '../helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from '../helpers/repository_client';
@@ -38,11 +41,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const BASIC_DASHBOARD_TITLE = 'Requests';
   const TAG_ID = '00ad6a46-6ac3-4f6c-892c-2f72c54a5e7d';
 
-  async function unlinkDashboard(id: string) {
+  async function unlinkDashboard(id: string, streamName = 'logs') {
     const response = await apiClient.fetch(
       'DELETE /api/streams/{name}/dashboards/{dashboardId} 2023-10-31',
       {
-        params: { path: { name: 'logs', dashboardId: id } },
+        params: { path: { name: streamName, dashboardId: id } },
       }
     );
 
@@ -115,23 +118,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('lists the dashboard in the stream response', async () => {
-        const response = await apiClient.fetch('GET /api/streams/{name} 2023-10-31', {
-          params: { path: { name: 'logs' } },
-        });
+        const response = await getStream(apiClient, 'logs');
 
-        expect(response.status).to.eql(200);
-
-        expect(response.body.dashboards?.length).to.eql(1);
+        expect(response.dashboards?.length).to.eql(1);
       });
 
       it('lists the dashboard in the dashboards get response', async () => {
-        const response = await apiClient.fetch('GET /api/streams/{name}/dashboards 2023-10-31', {
-          params: { path: { name: 'logs' } },
-        });
+        const response = await getDashboards(apiClient, 'logs');
 
-        expect(response.status).to.eql(200);
-
-        expect(response.body.dashboards.length).to.eql(1);
+        expect(response.dashboards.length).to.eql(1);
       });
 
       describe('after disabling', () => {
@@ -142,25 +137,17 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         it('dropped all dashboards', async () => {
-          const response = await apiClient.fetch('GET /api/streams/{name}/dashboards 2023-10-31', {
-            params: { path: { name: 'logs' } },
-          });
+          const response = await getDashboards(apiClient, 'logs');
 
-          expect(response.status).to.eql(200);
-
-          expect(response.body.dashboards.length).to.eql(0);
+          expect(response.dashboards.length).to.eql(0);
         });
 
         it('recovers on write and lists the linked dashboard ', async () => {
           await linkDashboard(apiClient, 'logs', SEARCH_DASHBOARD_ID);
 
-          const response = await apiClient.fetch('GET /api/streams/{name}/dashboards 2023-10-31', {
-            params: { path: { name: 'logs' } },
-          });
+          const response = await getDashboards(apiClient, 'logs');
 
-          expect(response.status).to.eql(200);
-
-          expect(response.body.dashboards.length).to.eql(1);
+          expect(response.dashboards.length).to.eql(1);
         });
       });
 
@@ -170,13 +157,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         it('no longer lists the dashboard as a linked attachment', async () => {
-          const response = await apiClient.fetch('GET /api/streams/{name}/dashboards 2023-10-31', {
-            params: { path: { name: 'logs' } },
-          });
+          const response = await getDashboards(apiClient, 'logs');
 
-          expect(response.status).to.eql(200);
-
-          expect(response.body.dashboards.length).to.eql(0);
+          expect(response.dashboards.length).to.eql(0);
         });
       });
 
@@ -215,50 +198,29 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         it('lists the dashboard in the logs stream', async () => {
-          const response = await apiClient.fetch('GET /api/streams/{name}/dashboards 2023-10-31', {
-            params: { path: { name: 'logs' } },
-          });
+          const response = await getDashboards(apiClient, 'logs');
 
-          expect(response.status).to.eql(200);
-          expect(response.body.dashboards.length).to.eql(1);
-          expect(response.body.dashboards[0].id).to.eql(SEARCH_DASHBOARD_ID);
+          expect(response.dashboards.length).to.eql(1);
+          expect(response.dashboards[0].id).to.eql(SEARCH_DASHBOARD_ID);
         });
 
         it('lists the dashboard in the logs.child stream', async () => {
-          const response = await apiClient.fetch('GET /api/streams/{name}/dashboards 2023-10-31', {
-            params: { path: { name: 'logs.child' } },
-          });
+          const response = await getDashboards(apiClient, 'logs.child');
 
-          expect(response.status).to.eql(200);
-          expect(response.body.dashboards.length).to.eql(1);
-          expect(response.body.dashboards[0].id).to.eql(SEARCH_DASHBOARD_ID);
+          expect(response.dashboards.length).to.eql(1);
+          expect(response.dashboards[0].id).to.eql(SEARCH_DASHBOARD_ID);
         });
 
         it('unlinking from one stream does not affect the other stream', async () => {
-          await apiClient.fetch('DELETE /api/streams/{name}/dashboards/{dashboardId} 2023-10-31', {
-            params: { path: { name: 'logs.child', dashboardId: SEARCH_DASHBOARD_ID } },
-          });
+          await unlinkDashboard(SEARCH_DASHBOARD_ID, 'logs.child');
 
-          const logsResponse = await apiClient.fetch(
-            'GET /api/streams/{name}/dashboards 2023-10-31',
-            {
-              params: { path: { name: 'logs' } },
-            }
-          );
+          const logsResponse = await getDashboards(apiClient, 'logs');
+          const childResponse = await getDashboards(apiClient, 'logs.child');
 
-          const childResponse = await apiClient.fetch(
-            'GET /api/streams/{name}/dashboards 2023-10-31',
-            {
-              params: { path: { name: 'logs.child' } },
-            }
-          );
+          expect(logsResponse.dashboards.length).to.eql(1);
+          expect(logsResponse.dashboards[0].id).to.eql(SEARCH_DASHBOARD_ID);
 
-          expect(logsResponse.status).to.eql(200);
-          expect(logsResponse.body.dashboards.length).to.eql(1);
-          expect(logsResponse.body.dashboards[0].id).to.eql(SEARCH_DASHBOARD_ID);
-
-          expect(childResponse.status).to.eql(200);
-          expect(childResponse.body.dashboards.length).to.eql(0);
+          expect(childResponse.dashboards.length).to.eql(0);
         });
       });
     });
@@ -276,11 +238,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('shows the linked dashboards', async () => {
-        const response = await apiClient.fetch('GET /api/streams/{name}/dashboards 2023-10-31', {
-          params: { path: { name: 'logs' } },
-        });
+        const response = await getDashboards(apiClient, 'logs');
 
-        expect(response.body.dashboards.length).to.eql(2);
+        expect(response.dashboards.length).to.eql(2);
       });
 
       describe('after unlinking one dashboard', () => {
@@ -289,13 +249,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         it('only shows the remaining linked dashboard', async () => {
-          const response = await apiClient.fetch('GET /api/streams/{name}/dashboards 2023-10-31', {
-            params: { path: { name: 'logs' } },
-          });
+          const response = await getDashboards(apiClient, 'logs');
 
-          expect(response.body.dashboards.length).to.eql(1);
-
-          expect(response.body.dashboards[0].id).to.eql(BASIC_DASHBOARD_ID);
+          expect(response.dashboards.length).to.eql(1);
+          expect(response.dashboards[0].id).to.eql(BASIC_DASHBOARD_ID);
         });
       });
     });
@@ -312,12 +269,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
       });
       it('does not list any dashboards but returns 200', async () => {
-        const response = await apiClient.fetch('GET /api/streams/{name}/dashboards 2023-10-31', {
-          params: { path: { name: 'logs-testlogs-default' } },
-        });
+        const response = await getDashboards(apiClient, 'logs-testlogs-default');
 
-        expect(response.status).to.eql(200);
-        expect(response.body.dashboards.length).to.eql(0);
+        expect(response.dashboards.length).to.eql(0);
       });
     });
 
@@ -335,45 +289,31 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       describe('after creating multiple dashboards', () => {
         it('suggests dashboards to link', async () => {
-          const response = await apiClient.fetch(
-            'POST /internal/streams/{name}/dashboards/_suggestions',
-            {
-              params: { path: { name: 'logs' }, body: { tags: [] }, query: { query: '' } },
-            }
-          );
+          const response = await getDashboardSuggestions({ apiClient, stream: 'logs', tags: [] });
 
-          expect(response.status).to.eql(200);
-          expect(response.body.suggestions.length).to.eql(3);
+          expect(response.suggestions.length).to.eql(3);
         });
 
         it('filters suggested dashboards based on tags', async () => {
-          const response = await apiClient.fetch(
-            'POST /internal/streams/{name}/dashboards/_suggestions',
-            {
-              params: { path: { name: 'logs' }, body: { tags: [TAG_ID] }, query: { query: '' } },
-            }
-          );
+          const response = await getDashboardSuggestions({
+            apiClient,
+            stream: 'logs',
+            tags: [TAG_ID],
+          });
 
-          expect(response.status).to.eql(200);
-          expect(response.body.suggestions.length).to.eql(1);
+          expect(response.suggestions.length).to.eql(1);
         });
 
         it('filters suggested dashboards based on the query', async () => {
-          const response = await apiClient.fetch(
-            'POST /internal/streams/{name}/dashboards/_suggestions',
-            {
-              params: {
-                path: { name: 'logs' },
-                body: { tags: [] },
-                query: { query: BASIC_DASHBOARD_TITLE },
-              },
-            }
-          );
+          const response = await getDashboardSuggestions({
+            apiClient,
+            stream: 'logs',
+            tags: [],
+            query: BASIC_DASHBOARD_TITLE,
+          });
 
-          expect(response.status).to.eql(200);
-          expect(response.body.suggestions.length).to.eql(1);
-
-          expect(response.body.suggestions[0].id).to.eql(BASIC_DASHBOARD_ID);
+          expect(response.suggestions.length).to.eql(1);
+          expect(response.suggestions[0].id).to.eql(BASIC_DASHBOARD_ID);
         });
       });
     });

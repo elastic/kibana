@@ -12,6 +12,8 @@ import {
   unlinkRule,
   putStream,
   deleteStream,
+  getStream,
+  getRules,
 } from '../helpers/requests';
 import type { StreamsSupertestRepositoryClient } from '../helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from '../helpers/repository_client';
@@ -54,21 +56,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('lists the rule in the stream response', async () => {
-        const response = await apiClient.fetch('GET /api/streams/{name} 2023-10-31', {
-          params: { path: { name: 'logs' } },
-        });
+        const response = await getStream(apiClient, 'logs');
 
-        expect(response.status).to.eql(200);
-        expect(response.body.rules?.length).to.eql(1);
+        expect(response.rules?.length).to.eql(1);
       });
 
       it('lists the rule in the rules get response', async () => {
-        const response = await apiClient.fetch('GET /api/streams/{name}/rules 2023-10-31', {
-          params: { path: { name: 'logs' } },
-        });
+        const response = await getRules(apiClient, 'logs');
 
-        expect(response.status).to.eql(200);
-        expect(response.body.rules.length).to.eql(1);
+        expect(response.rules.length).to.eql(1);
       });
 
       describe('add second rule', () => {
@@ -81,32 +77,23 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         it('lists the second rule in the stream response', async () => {
-          const response = await apiClient.fetch('GET /api/streams/{name} 2023-10-31', {
-            params: { path: { name: 'logs' } },
-          });
+          const response = await getStream(apiClient, 'logs');
 
-          expect(response.status).to.eql(200);
-          expect(response.body.rules?.length).to.eql(2);
+          expect(response.rules?.length).to.eql(2);
         });
 
         it('lists the second rule in the rules get response', async () => {
-          const response = await apiClient.fetch('GET /api/streams/{name}/rules 2023-10-31', {
-            params: { path: { name: 'logs' } },
-          });
+          const response = await getRules(apiClient, 'logs');
 
-          expect(response.status).to.eql(200);
-          expect(response.body.rules.length).to.eql(2);
+          expect(response.rules.length).to.eql(2);
         });
 
         it('unlinking one rule keeps the other', async () => {
           await unlinkRule(apiClient, 'logs', FIRST_RULE_ATTACHMENT_LINKING);
 
-          const response = await apiClient.fetch('GET /api/streams/{name}/rules 2023-10-31', {
-            params: { path: { name: 'logs' } },
-          });
+          const response = await getRules(apiClient, 'logs');
 
-          expect(response.status).to.eql(200);
-          expect(response.body.rules.length).to.eql(1);
+          expect(response.rules.length).to.eql(1);
         });
       });
 
@@ -118,23 +105,17 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         it('dropped all rules', async () => {
-          const response = await apiClient.fetch('GET /api/streams/{name}/rules 2023-10-31', {
-            params: { path: { name: 'logs' } },
-          });
+          const response = await getRules(apiClient, 'logs');
 
-          expect(response.status).to.eql(200);
-          expect(response.body.rules.length).to.eql(0);
+          expect(response.rules.length).to.eql(0);
         });
 
         it('recovers on write and lists the linked rule', async () => {
           await linkRule(apiClient, 'logs', FIRST_RULE_ATTACHMENT_LINKING);
 
-          const response = await apiClient.fetch('GET /api/streams/{name}/rules 2023-10-31', {
-            params: { path: { name: 'logs' } },
-          });
+          const response = await getRules(apiClient, 'logs');
 
-          expect(response.status).to.eql(200);
-          expect(response.body.rules.length).to.eql(1);
+          expect(response.rules.length).to.eql(1);
         });
       });
 
@@ -149,12 +130,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         it('no longer lists the rule as a linked attachment', async () => {
-          const response = await apiClient.fetch('GET /api/streams/{name}/rules 2023-10-31', {
-            params: { path: { name: 'logs' } },
-          });
+          const response = await getRules(apiClient, 'logs');
 
-          expect(response.status).to.eql(200);
-          expect(response.body.rules.length).to.eql(0);
+          expect(response.rules.length).to.eql(0);
         });
       });
 
@@ -189,42 +167,29 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         it('lists the rule in the logs stream', async () => {
-          const response = await apiClient.fetch('GET /api/streams/{name}/rules 2023-10-31', {
-            params: { path: { name: 'logs' } },
-          });
+          const response = await getRules(apiClient, 'logs');
 
-          expect(response.status).to.eql(200);
-          expect(response.body.rules.length).to.eql(1);
-          expect(response.body.rules[0].id).to.eql(FIRST_RULE_ATTACHMENT_LINKING);
+          expect(response.rules.length).to.eql(1);
+          expect(response.rules[0].id).to.eql(FIRST_RULE_ATTACHMENT_LINKING);
         });
 
         it('lists the rule in the logs.child stream', async () => {
-          const response = await apiClient.fetch('GET /api/streams/{name}/rules 2023-10-31', {
-            params: { path: { name: 'logs.child' } },
-          });
+          const response = await getRules(apiClient, 'logs.child');
 
-          expect(response.status).to.eql(200);
-          expect(response.body.rules.length).to.eql(1);
-          expect(response.body.rules[0].id).to.eql(FIRST_RULE_ATTACHMENT_LINKING);
+          expect(response.rules.length).to.eql(1);
+          expect(response.rules[0].id).to.eql(FIRST_RULE_ATTACHMENT_LINKING);
         });
 
         it('unlinking from one stream does not affect the other stream', async () => {
           await unlinkRule(apiClient, 'logs.child', FIRST_RULE_ATTACHMENT_LINKING);
 
-          const logsResponse = await apiClient.fetch('GET /api/streams/{name}/rules 2023-10-31', {
-            params: { path: { name: 'logs' } },
-          });
+          const logsResponse = await getRules(apiClient, 'logs');
+          const childResponse = await getRules(apiClient, 'logs.child');
 
-          const childResponse = await apiClient.fetch('GET /api/streams/{name}/rules 2023-10-31', {
-            params: { path: { name: 'logs.child' } },
-          });
+          expect(logsResponse.rules.length).to.eql(1);
+          expect(logsResponse.rules[0].id).to.eql(FIRST_RULE_ATTACHMENT_LINKING);
 
-          expect(logsResponse.status).to.eql(200);
-          expect(logsResponse.body.rules.length).to.eql(1);
-          expect(logsResponse.body.rules[0].id).to.eql(FIRST_RULE_ATTACHMENT_LINKING);
-
-          expect(childResponse.status).to.eql(200);
-          expect(childResponse.body.rules.length).to.eql(0);
+          expect(childResponse.rules.length).to.eql(0);
         });
       });
     });
@@ -241,12 +206,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
       });
       it('does not list any rules but returns 200', async () => {
-        const response = await apiClient.fetch('GET /api/streams/{name}/rules 2023-10-31', {
-          params: { path: { name: 'logs-testlogs-default' } },
-        });
+        const response = await getRules(apiClient, 'logs-testlogs-default');
 
-        expect(response.status).to.eql(200);
-        expect(response.body.rules.length).to.eql(0);
+        expect(response.rules.length).to.eql(0);
       });
     });
   });
