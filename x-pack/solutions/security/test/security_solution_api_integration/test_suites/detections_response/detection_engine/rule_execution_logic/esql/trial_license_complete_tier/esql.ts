@@ -68,8 +68,7 @@ export default ({ getService }: FtrProviderContext) => {
    */
   const internalIdPipe = (id: string) => `| where id=="${id}"`;
 
-  // Failing: See https://github.com/elastic/kibana/issues/235886
-  describe.skip('@ess @serverless ES|QL rule type', () => {
+  describe('@ess @serverless ES|QL rule type', () => {
     before(async () => {
       await esArchiver.load(
         'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
