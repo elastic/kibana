@@ -104,9 +104,9 @@ export function conditionToESQLAst(condition: Condition): ESQLSingleAstItem {
       ]);
     }
     if ('startsWith' in condition) {
-      return Builder.expression.func.binary('like', [
+      return Builder.expression.func.call('STARTS_WITH', [
         field,
-        Builder.expression.literal.string(`${condition.startsWith}*`),
+        Builder.expression.literal.string(String(condition.startsWith)),
       ]);
     }
     if ('endsWith' in condition) {

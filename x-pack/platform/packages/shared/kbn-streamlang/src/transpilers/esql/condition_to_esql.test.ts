@@ -113,7 +113,7 @@ describe('conditionToESQLAst', () => {
       it('should handle startsWith with trailing wildcard', () => {
         const condition: Condition = { field: 'message', startsWith: 'Error:' };
         const result = prettyPrint(condition);
-        expect(result).toBe('message LIKE "Error:*"');
+        expect(result).toBe('STARTS_WITH(message, "Error:")');
         expect(result).not.toContain('LIKE(');
         expect(result).not.toContain('%');
       });
@@ -133,7 +133,7 @@ describe('conditionToESQLAst', () => {
 
       it('should handle startsWith with numbers', () => {
         const condition: Condition = { field: 'code', startsWith: '404' };
-        expect(prettyPrint(condition)).toBe('code LIKE "404*"');
+        expect(prettyPrint(condition)).toBe('STARTS_WITH(code, "404")');
       });
 
       it('should handle endsWith with spaces', () => {
