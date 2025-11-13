@@ -15,7 +15,6 @@ import 'monaco-editor/esm/vs/base/common/worker/webWorker';
 import 'monaco-editor/esm/vs/base/browser/webWorkerFactory';
 
 import 'monaco-editor/esm/vs/editor/browser/coreCommands.js';
-// Monaco 0.54.0+ moved codeEditorWidget into a subdirectory
 import 'monaco-editor/esm/vs/editor/browser/widget/codeEditor/codeEditorWidget.js';
 
 import 'monaco-editor/esm/vs/editor/contrib/wordOperations/browser/wordOperations.js'; // Needed for word-wise char navigation
@@ -68,14 +67,19 @@ const languageThemeResolverDefinitions = new Map<
 >();
 
 declare module 'monaco-editor/esm/vs/editor/editor.api' {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
+  // eslint-disable-next-line @typescript-eslint/no-namespace -- augment monaco editor types
   export namespace editor {
-    // augment monaco editor types
+    /**
+     * @description Registers language theme definition for a language
+     */
     function registerLanguageThemeResolver(
       langId: string,
       languageThemeResolver: CustomLangModuleType['languageThemeResolver'],
       forceOverride?: boolean
     ): void;
+    /**
+     * @description Returns the registered language theme definition for the provided id
+     */
     function getLanguageThemeResolver(
       langId: string
     ): CustomLangModuleType['languageThemeResolver'];
@@ -85,7 +89,7 @@ declare module 'monaco-editor/esm/vs/editor/editor.api' {
 // add custom methods to monaco editor
 Object.defineProperties(monaco.editor, {
   /**
-   * @description Registers language theme definition for a language
+   * @description Registration for implementation of {@link monaco.editor.registerLanguageThemeResolver}
    */
   registerLanguageThemeResolver: {
     value: ((langId, languageThemeDefinition, forceOverride) => {
@@ -98,7 +102,7 @@ Object.defineProperties(monaco.editor, {
     configurable: false,
   },
   /**
-   * @description Returns language theme definition for a language
+   * @description Registration for implementation of {@link monaco.editor.getLanguageThemeResolver}
    */
   getLanguageThemeResolver: {
     value: ((langId) =>
