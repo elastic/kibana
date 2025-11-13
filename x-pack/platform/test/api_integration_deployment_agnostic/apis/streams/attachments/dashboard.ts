@@ -5,7 +5,14 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { disableStreams, enableStreams, indexDocument, linkDashboard } from '../helpers/requests';
+import {
+  disableStreams,
+  enableStreams,
+  indexDocument,
+  linkDashboard,
+  putStream,
+  deleteStream,
+} from '../helpers/requests';
 import type { StreamsSupertestRepositoryClient } from '../helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from '../helpers/repository_client';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
@@ -80,7 +87,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     expect(response.status).to.be(200);
   }
 
-  describe('Dashboard asset linking', function () {
+  describe('Dashboard attachment linking', function () {
     before(async () => {
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       await enableStreams(apiClient);
@@ -129,7 +136,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       describe('after disabling', () => {
         before(async () => {
-          // disabling and re-enabling streams wipes the asset links
+          // disabling and re-enabling streams wipes the attachment links
           await disableStreams(apiClient);
           await enableStreams(apiClient);
         });
@@ -162,7 +169,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await unloadDashboards(kibanaServer, ARCHIVES, SPACE_ID);
         });
 
-        it('no longer lists the dashboard as a linked asset', async () => {
+        it('no longer lists the dashboard as a linked attachment', async () => {
           const response = await apiClient.fetch('GET /api/streams/{name}/dashboards 2023-10-31', {
             params: { path: { name: 'logs' } },
           });
@@ -170,6 +177,88 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           expect(response.status).to.eql(200);
 
           expect(response.body.dashboards.length).to.eql(0);
+        });
+      });
+
+      describe('linking a dashboard to multiple streams', () => {
+        before(async () => {
+          // Reload dashboards since previous test unloaded them
+          await loadDashboards(kibanaServer, ARCHIVES, SPACE_ID);
+
+          // Create one additional stream to test with
+          await putStream(apiClient, 'logs.child', {
+            dashboards: [],
+            rules: [],
+            queries: [],
+            stream: {
+              description: '',
+              ingest: {
+                lifecycle: { inherit: {} },
+                processing: { steps: [] },
+                settings: {},
+                wired: {
+                  routing: [],
+                  fields: {},
+                },
+              },
+            },
+          });
+
+          // Link the same dashboard to both logs and logs.child
+          await linkDashboard(apiClient, 'logs', SEARCH_DASHBOARD_ID);
+          await linkDashboard(apiClient, 'logs.child', SEARCH_DASHBOARD_ID);
+        });
+
+        after(async () => {
+          await deleteStream(apiClient, 'logs.child');
+          await unloadDashboards(kibanaServer, ARCHIVES, SPACE_ID);
+        });
+
+        it('lists the dashboard in the logs stream', async () => {
+          const response = await apiClient.fetch('GET /api/streams/{name}/dashboards 2023-10-31', {
+            params: { path: { name: 'logs' } },
+          });
+
+          expect(response.status).to.eql(200);
+          expect(response.body.dashboards.length).to.eql(1);
+          expect(response.body.dashboards[0].id).to.eql(SEARCH_DASHBOARD_ID);
+        });
+
+        it('lists the dashboard in the logs.child stream', async () => {
+          const response = await apiClient.fetch('GET /api/streams/{name}/dashboards 2023-10-31', {
+            params: { path: { name: 'logs.child' } },
+          });
+
+          expect(response.status).to.eql(200);
+          expect(response.body.dashboards.length).to.eql(1);
+          expect(response.body.dashboards[0].id).to.eql(SEARCH_DASHBOARD_ID);
+        });
+
+        it('unlinking from one stream does not affect the other stream', async () => {
+          await apiClient.fetch('DELETE /api/streams/{name}/dashboards/{dashboardId} 2023-10-31', {
+            params: { path: { name: 'logs.child', dashboardId: SEARCH_DASHBOARD_ID } },
+          });
+
+          const logsResponse = await apiClient.fetch(
+            'GET /api/streams/{name}/dashboards 2023-10-31',
+            {
+              params: { path: { name: 'logs' } },
+            }
+          );
+
+          const childResponse = await apiClient.fetch(
+            'GET /api/streams/{name}/dashboards 2023-10-31',
+            {
+              params: { path: { name: 'logs.child' } },
+            }
+          );
+
+          expect(logsResponse.status).to.eql(200);
+          expect(logsResponse.body.dashboards.length).to.eql(1);
+          expect(logsResponse.body.dashboards[0].id).to.eql(SEARCH_DASHBOARD_ID);
+
+          expect(childResponse.status).to.eql(200);
+          expect(childResponse.body.dashboards.length).to.eql(0);
         });
       });
     });
