@@ -204,6 +204,14 @@
                     "pluginId": "@kbn/onechat-common",
                     "scope": "common",
                     "docId": "kibKbnOnechatCommonPluginApi",
+                    "section": "def-common.BrowserToolCallEvent",
+                    "text": "BrowserToolCallEvent"
+                  },
+                  " | ",
+                  {
+                    "pluginId": "@kbn/onechat-common",
+                    "scope": "common",
+                    "docId": "kibKbnOnechatCommonPluginApi",
                     "section": "def-common.ToolProgressEvent",
                     "text": "ToolProgressEvent"
                   },
@@ -238,6 +246,14 @@
                     "docId": "kibKbnOnechatCommonPluginApi",
                     "section": "def-common.MessageCompleteEvent",
                     "text": "MessageCompleteEvent"
+                  },
+                  " | ",
+                  {
+                    "pluginId": "@kbn/onechat-common",
+                    "scope": "common",
+                    "docId": "kibKbnOnechatCommonPluginApi",
+                    "section": "def-common.ThinkingCompleteEvent",
+                    "text": "ThinkingCompleteEvent"
                   },
                   " | ",
                   {
@@ -352,7 +368,7 @@
             "tags": [],
             "label": "runner",
             "description": [
-              "\nOnechat runner scoped to the current execution.\nCan be used to run other workchat primitive as part of the tool execution."
+              "\nOnechat runner scoped to the current execution."
             ],
             "signature": [
               {
@@ -362,6 +378,22 @@
                 "section": "def-common.ScopedRunner",
                 "text": "ScopedRunner"
               }
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-server/agents/provider.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/onechat-server",
+            "id": "def-common.AgentHandlerContext.attachments",
+            "type": "Object",
+            "tags": [],
+            "label": "attachments",
+            "description": [
+              "\nAttachment service to interact with attachments."
+            ],
+            "signature": [
+              "AttachmentsService"
             ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-server/agents/provider.ts",
             "deprecated": false,
@@ -613,7 +645,9 @@
               "\nHandler to call to execute the tool."
             ],
             "signature": [
-              "(args: Zod.TypeOf<RunInput>, context: ",
+              "(args: ",
+              "TypeOf",
+              "<RunInput>, context: ",
               {
                 "pluginId": "@kbn/onechat-server",
                 "scope": "common",
@@ -766,7 +800,9 @@
                 "section": "def-common.ExecutableToolHandlerParams",
                 "text": "ExecutableToolHandlerParams"
               },
-              "<Zod.TypeOf<TSchema>>) => Promise<",
+              "<",
+              "TypeOf",
+              "<TSchema>>) => Promise<",
               {
                 "pluginId": "@kbn/onechat-server",
                 "scope": "common",
@@ -900,7 +936,7 @@
             "tags": [],
             "label": "getDefaultModel",
             "description": [
-              "\nReturns the default model to be used for LLM tasks.\n\nWill use Elasticsearch LLMs by default if present, otherwise will pick\nthe first GenAI compatible connector."
+              "\nReturns the model used for LLM tasks in the current round."
             ],
             "signature": [
               "() => Promise<",
@@ -1806,7 +1842,7 @@
             "tags": [],
             "label": "runner",
             "description": [
-              "\nOnechat runner scoped to the current execution.\nCan be used to run other workchat primitive as part of the tool execution."
+              "\nOnechat runner scoped to the current execution."
             ],
             "signature": [
               {
@@ -2014,7 +2050,13 @@
                 "section": "def-common.ExecutableTool",
                 "text": "ExecutableTool"
               },
-              "<{}, Zod.ZodObject<any, Zod.UnknownKeysParam, Zod.ZodTypeAny, { [x: string]: any; }, { [x: string]: any; }>>>"
+              "<{}, ",
+              "ZodObject",
+              "<any, ",
+              "UnknownKeysParam",
+              ", ",
+              "ZodTypeAny",
+              ", { [x: string]: any; }, { [x: string]: any; }>>>"
             ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-server/runner/tool_provider.ts",
             "deprecated": false,
@@ -2070,7 +2112,13 @@
                 "section": "def-common.ExecutableTool",
                 "text": "ExecutableTool"
               },
-              "<{}, Zod.ZodObject<any, Zod.UnknownKeysParam, Zod.ZodTypeAny, { [x: string]: any; }, { [x: string]: any; }>>[]>"
+              "<{}, ",
+              "ZodObject",
+              "<any, ",
+              "UnknownKeysParam",
+              ", ",
+              "ZodTypeAny",
+              ", { [x: string]: any; }, { [x: string]: any; }>>[]>"
             ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-server/runner/tool_provider.ts",
             "deprecated": false,
@@ -2487,6 +2535,14 @@
                 "pluginId": "@kbn/onechat-common",
                 "scope": "common",
                 "docId": "kibKbnOnechatCommonPluginApi",
+                "section": "def-common.BrowserToolCallEvent",
+                "text": "BrowserToolCallEvent"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/onechat-common",
+                "scope": "common",
+                "docId": "kibKbnOnechatCommonPluginApi",
                 "section": "def-common.ToolProgressEvent",
                 "text": "ToolProgressEvent"
               },
@@ -2521,6 +2577,14 @@
                 "docId": "kibKbnOnechatCommonPluginApi",
                 "section": "def-common.MessageCompleteEvent",
                 "text": "MessageCompleteEvent"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/onechat-common",
+                "scope": "common",
+                "docId": "kibKbnOnechatCommonPluginApi",
+                "section": "def-common.ThinkingCompleteEvent",
+                "text": "ThinkingCompleteEvent"
               },
               " | ",
               {
@@ -2906,6 +2970,14 @@
                 "pluginId": "@kbn/onechat-common",
                 "scope": "common",
                 "docId": "kibKbnOnechatCommonPluginApi",
+                "section": "def-common.BrowserToolCallEvent",
+                "text": "BrowserToolCallEvent"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/onechat-common",
+                "scope": "common",
+                "docId": "kibKbnOnechatCommonPluginApi",
                 "section": "def-common.ToolProgressEvent",
                 "text": "ToolProgressEvent"
               },
@@ -2940,6 +3012,14 @@
                 "docId": "kibKbnOnechatCommonPluginApi",
                 "section": "def-common.MessageCompleteEvent",
                 "text": "MessageCompleteEvent"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/onechat-common",
+                "scope": "common",
+                "docId": "kibKbnOnechatCommonPluginApi",
+                "section": "def-common.ThinkingCompleteEvent",
+                "text": "ThinkingCompleteEvent"
               },
               " | ",
               {

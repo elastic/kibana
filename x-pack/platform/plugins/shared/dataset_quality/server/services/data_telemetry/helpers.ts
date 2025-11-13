@@ -374,10 +374,17 @@ async function getDataStreamsInfoForPattern({
   esClient: ElasticsearchClient;
   pattern: DatasetIndexPattern;
 }): Promise<IndexBasicInfo[]> {
-  const resp = await esClient.indices.getDataStream({
-    name: pattern.pattern,
-    expand_wildcards: 'all',
-  });
+  const resp = await safeEsCall(() =>
+    esClient.indices.getDataStream({
+      name: pattern.pattern,
+      expand_wildcards: 'all',
+    })
+  );
+
+  // If safeEsCall returned empty object due to error, return empty array
+  if (!resp || !resp.data_streams) {
+    return [];
+  }
 
   return resp.data_streams.map((dataStream) => ({
     patternName: pattern.patternName,
@@ -664,6 +671,25 @@ async function safeEsCall<T>(fn: () => Promise<T>): Promise<T> {
   try {
     return await fn();
   } catch (error) {
+    // Handle transient errors during telemetry collection:
+    // - 404: index/resource not found
+    // - Custom ES errors: deleted or unavailable resources
+    // - Cluster state errors: master not discovered, cluster blocks
+    const is404 = error.meta?.statusCode === 404 || error.meta?.body?.status === 404;
+    const isCustomError = error.meta?.body?.ok === false;
+    const errorMessage = error.meta?.body?.message?.toLowerCase() || '';
+    const errorType = error.meta?.body?.error?.type || '';
+    const isTransientResourceError =
+      errorMessage.includes('deleted') || errorMessage.includes('unavailable');
+    const isClusterStateError =
+      errorType === 'master_not_discovered_exception' ||
+      errorType === 'cluster_block_exception' ||
+      errorType === 'no_master_block_exception';
+
+    if (is404 || (isCustomError && isTransientResourceError) || isClusterStateError) {
+      return {} as T;
+    }
+
     throw error;
   }
 }

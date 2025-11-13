@@ -218,7 +218,8 @@ describe('WorkflowsParamsFields', () => {
     fireEvent.click(input);
 
     await waitFor(() => {
-      expect(screen.getByText('No workflows available')).toBeInTheDocument();
+      const createButtons = screen.getAllByText('Create your first workflow');
+      expect(createButtons.length).toBeGreaterThan(0);
     });
   });
 
@@ -397,9 +398,6 @@ describe('WorkflowsParamsFields', () => {
   });
 
   test('should handle create new workflow click', async () => {
-    const originalOpen = window.open;
-    window.open = jest.fn();
-
     // Mock the application service
     const mockGetUrlForApp = jest.fn().mockReturnValue('/app/workflows');
     mockUseKibana.mockReturnValue({
@@ -418,14 +416,18 @@ describe('WorkflowsParamsFields', () => {
     });
 
     await waitFor(() => {
-      const createLink = screen.getByText('Create new');
-      fireEvent.click(createLink);
+      const createLink = screen.getByRole('link', { name: /Create new/i });
+      expect(createLink).toBeInTheDocument();
     });
 
-    expect(mockGetUrlForApp).toHaveBeenCalledWith('workflows');
-    expect(window.open).toHaveBeenCalledWith('/app/workflows', '_blank');
+    const createLink = screen.getByRole('link', { name: /Create new/i });
 
-    window.open = originalOpen;
+    // Verify that the link has the correct href and target attributes
+    expect(createLink).toHaveAttribute('href', '/app/workflows');
+    expect(createLink).toHaveAttribute('target', '_blank');
+
+    // Verify that getUrlForApp was called (indirectly through the component)
+    expect(mockGetUrlForApp).toHaveBeenCalledWith('workflows');
   });
 
   test('should handle missing HTTP service gracefully', async () => {
@@ -448,7 +450,11 @@ describe('WorkflowsParamsFields', () => {
 
     // Should show no workflows available
     await waitFor(() => {
-      expect(screen.getByText('No workflows available')).toBeInTheDocument();
+      // Check that the empty state is shown
+      expect(screen.getAllByText("You don't have any workflows yet").length).toBeGreaterThan(0);
+      // Check that there's at least one "Create your first workflow" button
+      const createButtons = screen.getAllByText('Create your first workflow');
+      expect(createButtons.length).toBeGreaterThan(0);
     });
   });
 
@@ -716,9 +722,6 @@ describe('WorkflowsParamsFields', () => {
   });
 
   test('should render view all workflows link and handle click to open in new tab', async () => {
-    const originalOpen = window.open;
-    window.open = jest.fn();
-
     // Mock the application service
     const mockGetUrlForApp = jest.fn().mockReturnValue('/app/workflows');
     mockUseKibana.mockReturnValue({
@@ -771,16 +774,82 @@ describe('WorkflowsParamsFields', () => {
     });
 
     // Find the "View all workflows" link button in the footer
-    const viewAllWorkflowsButton = screen.getByRole('button', { name: 'View all workflows' });
-    expect(viewAllWorkflowsButton).toBeInTheDocument();
+    const viewAllWorkflowsLink = screen.getByRole('link', { name: 'View all workflows' });
+    expect(viewAllWorkflowsLink).toBeInTheDocument();
 
-    // Click the "View all workflows" button
-    fireEvent.click(viewAllWorkflowsButton);
+    // Verify that the link has the correct href and target attributes
+    expect(viewAllWorkflowsLink).toHaveAttribute('href', '/app/workflows');
+    expect(viewAllWorkflowsLink).toHaveAttribute('target', '_blank');
 
-    // Verify that the workflows page was opened in a new tab
+    // Verify that getUrlForApp was called (indirectly through the component)
     expect(mockGetUrlForApp).toHaveBeenCalledWith('workflows');
-    expect(window.open).toHaveBeenCalledWith('/app/workflows', '_blank');
+  });
 
-    window.open = originalOpen;
+  test('should show disabled badge for disabled workflows', async () => {
+    const mockWorkflows = {
+      results: [
+        {
+          id: 'workflow-1',
+          name: 'Disabled Workflow',
+          description: 'A disabled workflow',
+          enabled: false,
+          definition: { triggers: [] },
+        },
+      ],
+    };
+
+    mockHttpPost.mockResolvedValue(mockWorkflows);
+
+    await act(async () => {
+      renderWithIntl(<WorkflowsParamsFields {...defaultProps} />);
+    });
+
+    await waitFor(() => {
+      expect(mockHttpPost).toHaveBeenCalled();
+    });
+
+    // Click on the input to open the popover
+    const input = screen.getByRole('searchbox');
+    fireEvent.click(input);
+
+    // Wait for the disabled workflow to appear
+    await waitFor(() => {
+      expect(screen.getByText('Disabled Workflow')).toBeInTheDocument();
+      expect(screen.getByText('Disabled')).toBeInTheDocument();
+    });
+  });
+
+  test('should show "No description" for workflows with undefined description', async () => {
+    const mockWorkflows = {
+      results: [
+        {
+          id: 'workflow-1',
+          name: 'Workflow without description',
+          description: undefined,
+          enabled: true,
+          definition: { triggers: [] },
+        },
+      ],
+    };
+
+    mockHttpPost.mockResolvedValue(mockWorkflows);
+
+    await act(async () => {
+      renderWithIntl(<WorkflowsParamsFields {...defaultProps} />);
+    });
+
+    await waitFor(() => {
+      expect(mockHttpPost).toHaveBeenCalled();
+    });
+
+    // Click on the input to open the popover
+    const input = screen.getByRole('searchbox');
+    fireEvent.click(input);
+
+    // Wait for the workflow to appear
+    await waitFor(() => {
+      expect(screen.getByText('Workflow without description')).toBeInTheDocument();
+      expect(screen.getByText('No description')).toBeInTheDocument();
+    });
   });
 });

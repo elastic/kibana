@@ -189,6 +189,8 @@ const SecurityAlertOptional = rt.partial({
   'kibana.alert.rule.updated_at': schemaDate,
   'kibana.alert.rule.updated_by': schemaString,
   'kibana.alert.rule.version': schemaString,
+  'kibana.alert.scheduled_action.date': schemaString,
+  'kibana.alert.scheduled_action.group': schemaString,
   'kibana.alert.severity': schemaString,
   'kibana.alert.severity_improving': schemaBoolean,
   'kibana.alert.start': schemaDate,

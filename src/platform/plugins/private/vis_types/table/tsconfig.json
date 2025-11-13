@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
   },
@@ -30,6 +30,7 @@
     "@kbn/css-utils",
     "@kbn/visualizations-common",
     "@kbn/chart-expressions-common",
+    "@kbn/lens-common",
   ],
   "exclude": [
     "target/**/*",

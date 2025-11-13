@@ -10,7 +10,7 @@ import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { useFetchAlertSummary } from './use_fetch_alert_summary';
 import { useAssistantContext } from '@kbn/elastic-assistant';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
 jest.mock('@kbn/elastic-assistant', () => ({
   useAssistantContext: jest.fn(),

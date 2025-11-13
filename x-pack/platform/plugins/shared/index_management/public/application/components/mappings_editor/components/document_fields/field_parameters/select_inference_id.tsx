@@ -24,6 +24,7 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import React, { useState, useCallback, useMemo, lazy, Suspense } from 'react';
 
 import { getFieldConfig } from '../../../lib';
@@ -110,8 +111,30 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
      * Adding this check to ensure we have the preconfigured elser endpoint selected by default.
      */
     const hasInferenceSelected = newOptions.some((option) => option.checked === 'on');
+    // If nothing has been selected, select .elser-2-elasticsearch as default if it exists.
+    // Use a constant for the ELSER inference endpoint label instead of a hard-coded string
+
     if (!hasInferenceSelected && newOptions.length > 0) {
-      newOptions[0].checked = 'on';
+      const elserOption = newOptions.find(
+        (option) => option.label === defaultInferenceEndpoints.ELSER
+      );
+      if (elserOption) {
+        elserOption.checked = 'on';
+        if (!value) {
+          setValue(defaultInferenceEndpoints.ELSER);
+        }
+      } else {
+        // fallback: select the first option if the Elser option does not exist
+        // This line uses array destructuring to select the first element from newOptions array.
+        // `firstOption` will be assigned the first option object from newOptions, or undefined if the array is empty.
+        const firstOption = newOptions[0];
+        if (firstOption) {
+          firstOption.checked = 'on';
+          if (!value) {
+            setValue(firstOption.label);
+          }
+        }
+      }
     }
 
     if (value && !newOptions.find((option) => option.label === value)) {
@@ -124,7 +147,7 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
       return [...newOptions, newOption];
     }
     return newOptions;
-  }, [endpoints, value]);
+  }, [endpoints, value, setValue]);
 
   const [isInferencePopoverVisible, setIsInferencePopoverVisible] = useState<boolean>(false);
 

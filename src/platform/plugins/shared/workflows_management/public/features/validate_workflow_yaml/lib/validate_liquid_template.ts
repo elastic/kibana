@@ -20,7 +20,7 @@ function getLiquidInstance(): Liquid {
       strictFilters: true,
       strictVariables: false, // Allow undefined variables during validation
     });
-    // register json_parse filter, for validation purposes only
+    // register filters, for validation purposes only
     liquidInstance.registerFilter('json_parse', (value: unknown): unknown => {
       return value;
     });

@@ -236,7 +236,7 @@
           "\nConstant for the Kibana Workplace AI serverless project type."
         ],
         "signature": [
-          "\"workplace_ai\""
+          "\"workplaceai\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/project_types.ts",
         "deprecated": false,
@@ -253,7 +253,7 @@
           "\nConstant for the Kibana Workplace AI solution."
         ],
         "signature": [
-          "\"workplace_ai\""
+          "\"workplaceai\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/solutions.ts",
         "deprecated": false,
@@ -270,7 +270,7 @@
           "\nA type that defines the existing groups (platform + solutions)."
         ],
         "signature": [
-          "\"search\" | \"security\" | \"observability\" | \"workplace_ai\" | \"platform\""
+          "\"search\" | \"security\" | \"observability\" | \"workplaceai\" | \"platform\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/module_groups.ts",
         "deprecated": false,
@@ -304,7 +304,7 @@
           "\nA type that defines the existing serverless project types."
         ],
         "signature": [
-          "\"security\" | \"workplace_ai\" | \"oblt\" | \"es\""
+          "\"security\" | \"workplaceai\" | \"oblt\" | \"es\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/project_types.ts",
         "deprecated": false,
@@ -321,7 +321,7 @@
           "\nA type that defines the existing solutions."
         ],
         "signature": [
-          "\"search\" | \"security\" | \"observability\" | \"workplace_ai\""
+          "\"search\" | \"security\" | \"observability\" | \"workplaceai\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/solutions.ts",
         "deprecated": false,
@@ -338,7 +338,7 @@
           "\nThe groups to which a module can belong.\n'common' is the default for uncategorised modules."
         ],
         "signature": [
-          "\"search\" | \"security\" | \"observability\" | \"workplace_ai\" | \"platform\" | \"common\""
+          "\"search\" | \"security\" | \"observability\" | \"workplaceai\" | \"platform\" | \"common\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/module_groups.ts",
         "deprecated": false,
@@ -374,7 +374,7 @@
           "\nA list of all Kibana groups (platform + solutions)."
         ],
         "signature": [
-          "readonly [\"platform\", \"observability\", \"security\", \"search\", \"workplace_ai\"]"
+          "readonly [\"platform\", \"observability\", \"security\", \"search\", \"workplaceai\"]"
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/module_groups.ts",
         "deprecated": false,
@@ -391,7 +391,7 @@
           "\nPossible product tiers for Kibana solutions."
         ],
         "signature": [
-          "{ readonly observability: readonly [\"complete\", \"logs_essentials\"]; readonly security: readonly [\"complete\", \"essentials\", \"search_ai_lake\"]; readonly search: readonly []; readonly workplace_ai: readonly []; }"
+          "{ readonly observability: readonly [\"complete\", \"logs_essentials\"]; readonly security: readonly [\"complete\", \"essentials\", \"search_ai_lake\"]; readonly search: readonly []; readonly workplaceai: readonly []; }"
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/solutions.ts",
         "deprecated": false,
@@ -408,7 +408,7 @@
           "\nA list of all Kibana serverless project types."
         ],
         "signature": [
-          "readonly [\"oblt\", \"security\", \"es\", \"workplace_ai\"]"
+          "readonly [\"oblt\", \"security\", \"es\", \"workplaceai\"]"
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/project_types.ts",
         "deprecated": false,
@@ -425,7 +425,7 @@
           "\nA list of all Kibana solutions."
         ],
         "signature": [
-          "readonly [\"observability\", \"security\", \"search\", \"workplace_ai\"]"
+          "readonly [\"observability\", \"security\", \"search\", \"workplaceai\"]"
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/solutions.ts",
         "deprecated": false,

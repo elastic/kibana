@@ -7,6 +7,8 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 
+import type { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
+
 import type {
   ASSETS_SAVED_OBJECT_TYPE,
   agentAssetTypes,
@@ -791,6 +793,15 @@ export interface IndexTemplate {
   ignore_missing_component_templates?: string[];
   _meta: object;
 
+  // These properties are returned on ES read operations and
+  // not allowed to be set on ES write operations
+  created_date?: number;
+  created_date_millis?: number;
+  modified_date?: number;
+  modified_date_millis?: number;
+}
+
+export interface IngestPipelineWithDateFields extends IngestPipeline {
   // These properties are returned on ES read operations and
   // not allowed to be set on ES write operations
   created_date?: number;

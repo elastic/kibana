@@ -8,7 +8,6 @@
 import React, { useEffect, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
-import type { ESQLColumn } from '@kbn/es-types';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import type { EuiSwitchEvent } from '@elastic/eui';
 import { EuiFormRow, EuiPanel, EuiSkeletonText, EuiSpacer, EuiSwitch } from '@elastic/eui';
@@ -18,7 +17,6 @@ import type { ESQLSourceDescriptor } from '../../../../common/descriptor_types';
 import { getIndexPatternService } from '../../../kibana_services';
 import { ESQLEditor } from './esql_editor';
 import { NarrowByMapBounds, NarrowByTime } from './narrow_by_field';
-import { ESQL_GEO_POINT_TYPE, ESQL_GEO_SHAPE_TYPE } from './esql_utils';
 
 interface Props {
   mostCommonDataViewId?: string;
@@ -27,8 +25,6 @@ interface Props {
 
 export function CreateSourceEditor(props: Props) {
   const [isInitialized, setIsInitialized] = useState(false);
-  const [adhocDataViewId, setAdhocDataViewId] = useState<string | undefined>();
-  const [columns, setColumns] = useState<ESQLColumn[]>([]);
   const [esql, setEsql] = useState('');
   const [dateField, setDateField] = useState<string | undefined>();
   const [dateFields, setDateFields] = useState<string[]>([]);
@@ -88,16 +84,6 @@ export function CreateSourceEditor(props: Props) {
             const initialEsql = `from ${adhocDataView.getIndexPattern()} | keep ${
               initialGeoField.name
             } | limit 10000`;
-            setColumns([
-              {
-                name: initialGeoField.name,
-                type:
-                  initialGeoField.type === ES_GEO_FIELD_TYPE.GEO_SHAPE
-                    ? ESQL_GEO_SHAPE_TYPE
-                    : ESQL_GEO_POINT_TYPE,
-              },
-            ]);
-            setAdhocDataViewId(adhocDataView.id);
             setDateField(initialDateField);
             setDateFields(initialDateFields);
             setGeoField(initialGeoField.name);
@@ -127,31 +113,20 @@ export function CreateSourceEditor(props: Props) {
   useDebounce(
     () => {
       const sourceConfig =
-        esql && esql.length && adhocDataViewId
-          ? {
-              columns,
-              dataViewId: adhocDataViewId,
+        esql && esql.length
+          ? ({
               dateField,
               geoField,
               esql,
               narrowByGlobalSearch,
               narrowByGlobalTime,
               narrowByMapBounds,
-            }
+            } as ESQLSourceDescriptor)
           : null;
       props.onSourceConfigChange(sourceConfig);
     },
     0,
-    [
-      adhocDataViewId,
-      columns,
-      dateField,
-      geoField,
-      esql,
-      narrowByGlobalSearch,
-      narrowByGlobalTime,
-      narrowByMapBounds,
-    ]
+    [dateField, geoField, esql, narrowByGlobalSearch, narrowByGlobalTime, narrowByMapBounds]
   );
 
   return (
@@ -160,8 +135,6 @@ export function CreateSourceEditor(props: Props) {
         <ESQLEditor
           esql={esql}
           onESQLChange={(change) => {
-            setAdhocDataViewId(change.adhocDataViewId);
-            setColumns(change.columns);
             setEsql(change.esql);
             setDateFields(change.dateFields);
             setGeoFields(change.geoFields);

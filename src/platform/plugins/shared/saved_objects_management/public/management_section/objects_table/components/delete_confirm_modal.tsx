@@ -96,6 +96,7 @@ export const DeleteConfirmModal: FC<DeleteConfirmModalProps> = ({
         {hiddenObjects.length > 0 && (
           <>
             <EuiCallOut
+              announceOnMount
               data-test-subj="cannotDeleteObjectsConfirmWarning"
               title={
                 <FormattedMessage
@@ -126,6 +127,7 @@ export const DeleteConfirmModal: FC<DeleteConfirmModalProps> = ({
         {sharedObjectsCount > 0 && (
           <>
             <EuiCallOut
+              announceOnMount
               data-test-subj="sharedObjectsWarning"
               title={
                 <FormattedMessage

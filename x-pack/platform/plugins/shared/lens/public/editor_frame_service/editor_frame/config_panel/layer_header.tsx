@@ -7,12 +7,12 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { StaticHeader } from '../../../shared_components';
 import type {
   FramePublicAPI,
   VisualizationLayerWidgetProps,
   VisualizationMap,
-} from '../../../types';
+} from '@kbn/lens-common';
+import { StaticHeader } from '../../../shared_components';
 import { ChartSwitchPopover } from './chart_switch/chart_switch_popover';
 import { useEditorFrameService } from '../../editor_frame_service_context';
 

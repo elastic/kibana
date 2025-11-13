@@ -8,7 +8,7 @@
  */
 
 import { fromCountAPItoLensState, fromCountLensStateToAPI } from './count';
-import type { CountIndexPatternColumn } from '@kbn/lens-plugin/public';
+import type { CountIndexPatternColumn } from '@kbn/lens-common';
 import type { LensApiCountMetricOperation } from '../../schema/metric_ops';
 import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from './utils';
 

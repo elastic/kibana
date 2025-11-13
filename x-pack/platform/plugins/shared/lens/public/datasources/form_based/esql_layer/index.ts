@@ -10,7 +10,7 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { EditorFrameSetup } from '../../../types';
+import type { EditorFrameSetup } from '@kbn/lens-common';
 
 export interface TextBasedSetupPlugins {
   data: DataPublicPluginSetup;

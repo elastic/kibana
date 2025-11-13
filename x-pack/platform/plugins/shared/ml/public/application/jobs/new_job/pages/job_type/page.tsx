@@ -288,7 +288,12 @@ export const Page: FC = () => {
 
       {isTimeBasedIndex === false && (
         <>
-          <EuiCallOut title={indexWarningTitle} color="warning" iconType="warning">
+          <EuiCallOut
+            announceOnMount={false}
+            title={indexWarningTitle}
+            color="warning"
+            iconType="warning"
+          >
             <FormattedMessage
               id="xpack.ml.newJob.wizard.jobType.howToRunAnomalyDetectionDescription"
               defaultMessage="Anomaly detection can only be run over indices which are time based."

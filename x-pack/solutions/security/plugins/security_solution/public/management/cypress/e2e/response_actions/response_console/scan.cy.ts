@@ -123,7 +123,7 @@ describe(
 
         cy.getByTestSubj('scan-actionFailure')
           .should('exist')
-          .contains('File path or folder was not found (404)');
+          .contains('File path or folder was not found');
       });
     });
   }

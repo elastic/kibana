@@ -10,7 +10,7 @@
 import { schema } from '@kbn/config-schema';
 import { WORKFLOW_ROUTE_OPTIONS } from './route_constants';
 import { handleRouteError } from './route_error_handlers';
-import { ADMIN_SECURITY } from './route_security';
+import { WORKFLOW_EXECUTION_READ_SECURITY } from './route_security';
 import type { RouteDependencies } from './types';
 
 export function registerGetWorkflowExecutionLogsRoute({
@@ -23,7 +23,7 @@ export function registerGetWorkflowExecutionLogsRoute({
     {
       path: '/api/workflowExecutions/{workflowExecutionId}/logs',
       options: WORKFLOW_ROUTE_OPTIONS,
-      security: ADMIN_SECURITY,
+      security: WORKFLOW_EXECUTION_READ_SECURITY,
       validate: {
         params: schema.object({
           workflowExecutionId: schema.string(),

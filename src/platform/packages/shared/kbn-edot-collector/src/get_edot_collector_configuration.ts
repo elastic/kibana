@@ -76,17 +76,14 @@ export function getEdotCollectorConfiguration({
         },
         metrics: {
           receivers: ['otlp'],
-          processors: [],
           exporters: ['elasticsearch'],
         },
         'metrics/aggregated': {
           receivers: ['elasticapm'],
-          processors: [],
           exporters: ['elasticsearch'],
         },
         logs: {
           receivers: ['otlp'],
-          processors: [],
           exporters: ['elasticapm', 'elasticsearch'],
         },
       },

@@ -115,8 +115,7 @@ export default function geminiTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message:
-                'error validating action type config: [apiUrl]: expected value of type [string] but got [undefined]',
+              message: `error validating connector type config: 3 errors:\n [1]: Field \"apiUrl\": Required;\n [2]: Field \"gcpRegion\": Required;\n [3]: Field \"gcpProjectID\": Required`,
             });
           });
       });
@@ -137,8 +136,7 @@ export default function geminiTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message:
-                'error validating action type config: [gcpProjectID]: expected value of type [string] but got [undefined]',
+              message: `error validating connector type config: Field \"gcpProjectID\": Required`,
             });
           });
       });
@@ -159,8 +157,7 @@ export default function geminiTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message:
-                'error validating action type config: [gcpRegion]: expected value of type [string] but got [undefined]',
+              message: `error validating connector type config: Field \"gcpRegion\": Required`,
             });
           });
       });
@@ -184,7 +181,7 @@ export default function geminiTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type config: Error configuring Google Gemini action: Error: error validating url: target url "http://gemini.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
+                'error validating connector type config: Error configuring Google Gemini action: Error: error validating url: target url "http://gemini.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
             });
           });
       });
@@ -203,8 +200,7 @@ export default function geminiTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message:
-                'error validating action type secrets: [credentialsJson]: expected value of type [string] but got [undefined]',
+              message: `error validating connector type secrets: Field \"credentialsJson\": Required`,
             });
           });
       });
@@ -240,8 +236,7 @@ export default function geminiTest({ getService }: FtrProviderContext) {
           expect(body).to.eql({
             status: 'error',
             connector_id: geminiActionId,
-            message:
-              'error validating action params: [subAction]: expected value of type [string] but got [undefined]',
+            message: `error validating action params: Field \"subAction\": Required`,
             retry: false,
             errorSource: TaskErrorSource.USER,
           });
@@ -375,8 +370,7 @@ export default function geminiTest({ getService }: FtrProviderContext) {
             expect(body).to.eql({
               status: 'error',
               connector_id: geminiActionId,
-              message:
-                'error validating action params: [subAction]: expected value of type [string] but got [undefined]',
+              message: `error validating action params: Field \"subAction\": Required`,
               retry: false,
               errorSource: TaskErrorSource.USER,
             });

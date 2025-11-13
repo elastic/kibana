@@ -152,7 +152,7 @@ export const CoverageOverviewSearchBarPlaceholder = i18n.translate(
   'xpack.securitySolution.coverageOverviewDashboard.searchBarPlaceholder',
   {
     defaultMessage:
-      'Search for the tactic, technique (e.g.,"defense evasion" or "TA0005") or rule name',
+      'Search for the tactic, technique (e.g.,"Defense Evasion" or "TA0005") or rule name',
   }
 );
 

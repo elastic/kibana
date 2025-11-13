@@ -12,6 +12,10 @@ import semver from 'semver';
 import { kibanaPackageJson, REPO_ROOT } from '@kbn/repo-info';
 import Fs from 'fs';
 import Path from 'path';
+import execa from 'execa';
+import type { ToolingLog } from '@kbn/tooling-log';
+
+const COLLECTOR_IMAGE = 'docker.elastic.co/elastic-agent/elastic-otel-collector';
 
 interface VersionEntry {
   version: string;
@@ -19,7 +23,21 @@ interface VersionEntry {
   branchType: 'development' | 'release' | 'unmaintained';
 }
 
-function getLatestAgentReleaseTag(): string {
+async function checkDockerImageExists(version: string, log: ToolingLog): Promise<boolean> {
+  try {
+    log.debug(`Checking if image exists: ${COLLECTOR_IMAGE}:${version}`);
+    await execa.command(`docker manifest inspect ${COLLECTOR_IMAGE}:${version}`, {
+      stdio: 'ignore',
+      timeout: 10000,
+    });
+    log.info(`Using image: ${COLLECTOR_IMAGE}:${version} as the latest available version`);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function getLatestAgentReleaseTag(log: ToolingLog): Promise<string> {
   const currentVersion = kibanaPackageJson.version;
 
   try {
@@ -31,18 +49,50 @@ function getLatestAgentReleaseTag(): string {
       .filter((v) => v.branchType === 'release')
       .map((v) => v.version);
 
-    const { major: currentMajor, minor: currentMinor } = semver.parse(currentVersion, {}, true);
+    // Best effort to find the latest image available based on the current semantic version, given the agent doesn't support "latest" tag
+    async function findLatestImageAvailable(
+      major: number,
+      minor: number,
+      patch: number
+    ): Promise<string | undefined> {
+      if (patch < 0) {
+        const nextVersion = releaseVersions.find((v) => {
+          const parsed = semver.parse(v, {}, true);
+          return parsed.major === major && parsed.minor < minor;
+        });
 
-    const matchingMinor = releaseVersions.find((version) => {
-      const { major, minor } = semver.parse(version, {}, true);
-      return major === currentMajor && minor === currentMinor;
-    });
+        if (!nextVersion) {
+          const nextMajorVersion = releaseVersions.find((v) => {
+            const parsed = semver.parse(v, {}, true);
+            return parsed.major < major;
+          });
 
-    if (matchingMinor) {
-      return matchingMinor;
+          if (!nextMajorVersion) {
+            return undefined;
+          }
+
+          const parsed = semver.parse(nextMajorVersion, {}, true);
+          return findLatestImageAvailable(parsed.major, parsed.minor, parsed.patch);
+        }
+
+        const parsed = semver.parse(nextVersion, {}, true);
+        return findLatestImageAvailable(parsed.major, parsed.minor, parsed.patch);
+      }
+
+      const version = `${major}.${minor}.${patch}`;
+      const imageExists = await checkDockerImageExists(version, log);
+
+      if (imageExists) {
+        return version;
+      }
+
+      return findLatestImageAvailable(major, minor, patch - 1);
     }
 
-    return releaseVersions[0];
+    const { major, minor, patch } = semver.parse(currentVersion, {}, true);
+    const found = await findLatestImageAvailable(major, minor, patch);
+
+    return found || currentVersion;
   } catch (error) {
     return currentVersion;
   }
@@ -56,16 +106,18 @@ function getLatestAgentReleaseTag(): string {
  * @param httpPort - Host port for HTTP endpoint (defaults to 4318)
  * @returns Docker Compose YAML configuration string
  */
-export function getDockerComposeYaml({
+export async function getDockerComposeYaml({
   collectorConfigPath,
   grpcPort = 4317,
   httpPort = 4318,
+  log,
 }: {
   collectorConfigPath: string;
   grpcPort: number;
   httpPort: number;
+  log: ToolingLog;
 }) {
-  const agentVersion = getLatestAgentReleaseTag();
+  const agentVersion = await getLatestAgentReleaseTag(log);
   return dedent(`
     services:
       otel-collector:

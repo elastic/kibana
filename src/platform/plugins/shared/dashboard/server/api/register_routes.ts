@@ -14,15 +14,16 @@ import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { Logger } from '@kbn/logging';
 
 import { CONTENT_ID, LATEST_VERSION } from '../../common/content_management';
-import { INTERNAL_API_VERSION, PUBLIC_API_PATH } from './constants';
+import { commonRouteConfig, INTERNAL_API_VERSION, PUBLIC_API_PATH } from './constants';
 import type { DashboardItem } from '../content_management/v1';
 import { getDashboardAPIGetResultSchema } from '../content_management/v1';
 import {
   getDashboardDataSchema,
-  getDashboardAPICreateResultSchema,
-  getDashboardListResultAPISchema,
   getDashboardUpdateResultSchema,
 } from '../content_management/v1/schema';
+import { registerCreateRoute } from './create';
+import { registerDeleteRoute } from './delete';
+import { registerSearchRoute } from './search';
 
 interface RegisterAPIRoutesArgs {
   http: HttpServiceSetup;
@@ -30,32 +31,6 @@ interface RegisterAPIRoutesArgs {
   restCounter?: UsageCounter;
   logger: Logger;
 }
-
-const commonRouteConfig = {
-  // This route is in development and not yet intended for public use.
-  access: 'internal',
-  /**
-   * `enableQueryVersion` is a temporary solution for testing internal endpoints.
-   * Requests to these internal endpoints from Kibana Dev Tools or external clients
-   * should include the ?apiVersion=1 query parameter.
-   * This will be removed when the API is finalized and moved to a stable version.
-   */
-  enableQueryVersion: true,
-  description:
-    'This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
-  options: {
-    tags: ['oas-tag:Dashboards'],
-    availability: {
-      stability: 'experimental',
-    },
-  },
-  security: {
-    authz: {
-      enabled: false,
-      reason: 'Relies on Content Client for authorization',
-    },
-  },
-} as const;
 
 const formatResult = (item: DashboardItem) => {
   const {
@@ -69,6 +44,8 @@ const formatResult = (item: DashboardItem) => {
     error,
     managed,
     version,
+    // TODO rest contains spaces and namespaces
+    // These should not be spread into data and instead be moved to meta
     ...rest
   } = item;
   return {
@@ -87,69 +64,9 @@ export function registerAPIRoutes({
 }: RegisterAPIRoutesArgs) {
   const { versioned: versionedRouter } = http.createRouter();
 
-  // Create API route
-  const createRoute = versionedRouter.post({
-    path: `${PUBLIC_API_PATH}/{id?}`,
-    summary: 'Create a dashboard',
-    ...commonRouteConfig,
-  });
-
-  createRoute.addVersion(
-    {
-      version: INTERNAL_API_VERSION,
-      validate: () => ({
-        request: {
-          params: schema.object({
-            id: schema.maybe(
-              schema.string({
-                meta: { description: 'A unique identifier for the dashboard.' },
-              })
-            ),
-          }),
-          body: getDashboardDataSchema(),
-        },
-        response: {
-          200: {
-            body: getDashboardAPICreateResultSchema,
-          },
-        },
-      }),
-    },
-    async (ctx, req, res) => {
-      const { id } = req.params;
-      const { references, spaces: initialNamespaces, ...attributes } = req.body;
-      const client = contentManagement.contentClient
-        .getForRequest({ request: req, requestHandlerContext: ctx })
-        .for<DashboardItem>(CONTENT_ID, LATEST_VERSION);
-      let result;
-      try {
-        ({ result } = await client.create(attributes, {
-          id,
-          references,
-          initialNamespaces,
-        }));
-      } catch (e) {
-        if (e.isBoom && e.output.statusCode === 409) {
-          return res.conflict({
-            body: {
-              message: `A dashboard with saved object ID ${id} already exists.`,
-            },
-          });
-        }
-
-        if (e.isBoom && e.output.statusCode === 403) {
-          return res.forbidden();
-        }
-
-        return res.badRequest({ body: e });
-      }
-      const formattedResult = formatResult(result.item);
-      const response = { ...formattedResult, meta: { ...formattedResult.meta, ...result.meta } };
-      return res.ok({
-        body: response,
-      });
-    }
-  );
+  registerCreateRoute(versionedRouter);
+  registerDeleteRoute(versionedRouter);
+  registerSearchRoute(versionedRouter);
 
   // Update API route
 
@@ -207,76 +124,6 @@ export function registerAPIRoutes({
     }
   );
 
-  // List API route
-  const listRoute = versionedRouter.get({
-    path: `${PUBLIC_API_PATH}`,
-    summary: `Get a list of dashboards`,
-    ...commonRouteConfig,
-  });
-
-  listRoute.addVersion(
-    {
-      version: INTERNAL_API_VERSION,
-      validate: {
-        request: {
-          query: schema.object({
-            page: schema.number({
-              meta: { description: 'The page number to return. Default is "1".' },
-              min: 1,
-              defaultValue: 1,
-            }),
-            perPage: schema.number({
-              meta: {
-                description:
-                  'The number of dashboards to display on each page (max 1000). Default is "20".',
-              },
-              defaultValue: 20,
-              min: 1,
-              max: 1000,
-            }),
-          }),
-        },
-        response: {
-          200: {
-            body: getDashboardListResultAPISchema,
-          },
-        },
-      },
-    },
-    async (ctx, req, res) => {
-      const { page, perPage: limit } = req.query;
-      const client = contentManagement.contentClient
-        .getForRequest({ request: req, requestHandlerContext: ctx })
-        .for<DashboardItem>(CONTENT_ID, LATEST_VERSION);
-      let result;
-      try {
-        // TODO add filtering
-        ({ result } = await client.search(
-          {
-            cursor: page.toString(),
-            limit,
-          },
-          {
-            fields: ['title', 'description', 'timeRestore'],
-          }
-        ));
-      } catch (e) {
-        if (e.isBoom && e.output.statusCode === 403) {
-          return res.forbidden();
-        }
-
-        return res.badRequest();
-      }
-
-      const body = {
-        items: result.hits.map(formatResult),
-        total: result.pagination.total,
-      };
-
-      return res.ok({ body });
-    }
-  );
-
   // Get API route
   const getRoute = versionedRouter.get({
     path: `${PUBLIC_API_PATH}/{id}`,
@@ -330,52 +177,6 @@ export function registerAPIRoutes({
       return res.ok({
         body: { ...formattedResult, meta: { ...formattedResult.meta, ...result.meta } },
       });
-    }
-  );
-
-  // Delete API route
-  const deleteRoute = versionedRouter.delete({
-    path: `${PUBLIC_API_PATH}/{id}`,
-    summary: `Delete a dashboard`,
-    ...commonRouteConfig,
-  });
-
-  deleteRoute.addVersion(
-    {
-      version: INTERNAL_API_VERSION,
-      validate: {
-        request: {
-          params: schema.object({
-            id: schema.string({
-              meta: {
-                description: 'A unique identifier for the dashboard.',
-              },
-            }),
-          }),
-        },
-      },
-    },
-    async (ctx, req, res) => {
-      const client = contentManagement.contentClient
-        .getForRequest({ request: req, requestHandlerContext: ctx })
-        .for(CONTENT_ID, LATEST_VERSION);
-      try {
-        await client.delete(req.params.id);
-      } catch (e) {
-        if (e.isBoom && e.output.statusCode === 404) {
-          return res.notFound({
-            body: {
-              message: `A dashboard with saved object ID ${req.params.id} was not found.`,
-            },
-          });
-        }
-        if (e.isBoom && e.output.statusCode === 403) {
-          return res.forbidden();
-        }
-        return res.badRequest();
-      }
-
-      return res.ok();
     }
   );
 }

@@ -162,6 +162,7 @@ export interface WorkflowExecutionDto {
   workflowId?: string;
   workflowName?: string;
   workflowDefinition: WorkflowYaml;
+  /** If specified, only this step and its children were executed */
   stepId?: string | undefined;
   stepExecutions: WorkflowStepExecutionDto[];
   duration: number | null;
@@ -197,7 +198,7 @@ export const EsWorkflowSchema = z.object({
   createdBy: z.string(),
   lastUpdatedAt: z.date(),
   lastUpdatedBy: z.string(),
-  definition: WorkflowSchema,
+  definition: WorkflowSchema.optional(),
   deleted_at: z.date().nullable().default(null),
   yaml: z.string(),
   valid: z.boolean().readonly(),
@@ -205,8 +206,14 @@ export const EsWorkflowSchema = z.object({
 
 export type EsWorkflow = z.infer<typeof EsWorkflowSchema>;
 
+export type EsWorkflowCreate = Omit<
+  EsWorkflow,
+  'id' | 'createdAt' | 'createdBy' | 'lastUpdatedAt' | 'lastUpdatedBy' | 'yaml' | 'deleted_at'
+>;
+
 export const CreateWorkflowCommandSchema = z.object({
   yaml: z.string(),
+  id: z.string().optional(),
 });
 
 export const UpdateWorkflowCommandSchema = z.object({
@@ -260,7 +267,7 @@ export type CreateWorkflowCommand = z.infer<typeof CreateWorkflowCommandSchema>;
 
 export interface UpdatedWorkflowResponseDto {
   id: string;
-  lastUpdatedAt: Date;
+  lastUpdatedAt: string;
   lastUpdatedBy: string | undefined;
   enabled: boolean;
   valid: boolean;
@@ -272,9 +279,9 @@ export interface WorkflowDetailDto {
   name: string;
   description?: string;
   enabled: boolean;
-  createdAt: Date;
+  createdAt: string;
   createdBy: string;
-  lastUpdatedAt: Date;
+  lastUpdatedAt: string;
   lastUpdatedBy: string;
   definition: WorkflowYaml | null;
   yaml: string;
@@ -287,7 +294,7 @@ export interface WorkflowListItemDto {
   description: string;
   enabled: boolean;
   definition: WorkflowYaml | null;
-  createdAt: Date;
+  createdAt: string;
   history: WorkflowExecutionHistoryModel[];
   tags?: string[];
   valid: boolean;
@@ -423,3 +430,11 @@ export interface EnhancedInternalConnectorContract extends InternalConnectorCont
 }
 
 export type ConnectorContractUnion = DynamicConnectorContract | EnhancedInternalConnectorContract;
+
+export interface WorkflowsSearchParams {
+  limit: number;
+  page: number;
+  query?: string;
+  createdBy?: string[];
+  enabled?: boolean[];
+}

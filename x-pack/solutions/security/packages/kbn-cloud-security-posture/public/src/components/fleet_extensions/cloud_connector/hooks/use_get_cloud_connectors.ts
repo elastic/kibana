@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
-import type { CloudConnector, CloudConnectorListOptions } from '@kbn/fleet-plugin/public';
+import { useQuery } from '@kbn/react-query';
+import type {
+  CloudConnector,
+  CloudConnectorListOptions,
+  CloudProvider,
+} from '@kbn/fleet-plugin/public';
+import { CLOUD_CONNECTOR_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { CLOUD_CONNECTOR_API_ROUTES } from '@kbn/fleet-plugin/public';
 import type { CoreStart, HttpStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -15,27 +20,41 @@ const fetchCloudConnectors = async (
   http: HttpStart,
   options?: CloudConnectorListOptions
 ): Promise<CloudConnector[]> => {
-  const queryParams = new URLSearchParams();
+  const query: Record<string, string> = {};
 
   if (options?.page !== undefined) {
-    queryParams.append('page', options.page.toString());
+    query.page = options.page.toString();
   }
 
   if (options?.perPage !== undefined) {
-    queryParams.append('perPage', options.perPage.toString());
+    query.perPage = options.perPage.toString();
   }
 
-  const url = `${CLOUD_CONNECTOR_API_ROUTES.LIST_PATTERN}`;
+  if (options?.kuery) {
+    query.kuery = options.kuery;
+  }
 
   return http
-    .get<{ items: CloudConnector[] }>(url)
+    .get<{ items: CloudConnector[] }>(CLOUD_CONNECTOR_API_ROUTES.LIST_PATTERN, {
+      query,
+    })
     .then((res: { items: CloudConnector[] }) => res.items);
 };
 
-export const useGetCloudConnectors = () => {
+export const useGetCloudConnectors = (cloudProvider?: CloudProvider) => {
   const CLOUD_CONNECTOR_QUERY_KEY = 'get-cloud-connectors';
   const { http } = useKibana<CoreStart>().services;
-  return useQuery([CLOUD_CONNECTOR_QUERY_KEY], () => fetchCloudConnectors(http), {
-    enabled: true,
-  });
+
+  // Construct KQL query if cloudProvider is specified
+  const kuery = cloudProvider
+    ? `${CLOUD_CONNECTOR_SAVED_OBJECT_TYPE}.attributes.cloudProvider: "${cloudProvider}"`
+    : undefined;
+
+  return useQuery(
+    [CLOUD_CONNECTOR_QUERY_KEY, cloudProvider],
+    () => fetchCloudConnectors(http, { kuery }),
+    {
+      enabled: true,
+    }
+  );
 };

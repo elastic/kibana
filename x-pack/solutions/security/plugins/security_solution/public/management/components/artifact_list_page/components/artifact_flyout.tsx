@@ -28,7 +28,6 @@ import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
 import { useLocation } from 'react-router-dom';
 import { GLOBAL_ARTIFACT_TAG } from '../../../../../common/endpoint/service/artifacts';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useMarkInsightAsRemediated } from '../hooks/use_mark_workflow_insight_as_remediated';
 import type { WorkflowInsightRouteState } from '../../../pages/endpoint_hosts/types';
 import { useUrlParams } from '../../../hooks/use_url_params';
@@ -209,9 +208,6 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
     const setUrlParams = useSetUrlParams();
     const { urlParams } = useUrlParams<ArtifactListPageUrlParams>();
     const isMounted = useIsMounted();
-    const isSpaceAwarenessEnabled = useIsExperimentalFeatureEnabled(
-      'endpointManagementSpaceAwarenessEnabled'
-    );
     const canManageGlobalArtifacts =
       useUserPrivileges().endpointPrivileges.canManageGlobalArtifacts;
     const labels = useMemo<typeof ARTIFACT_FLYOUT_LABELS>(() => {
@@ -262,7 +258,7 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
       const initialFormState = createFormInitialState(apiClient.listId, item);
 
       // for Create Mode: If user is not able to manage global artifacts then the initial item should be per-policy
-      if (!item && isSpaceAwarenessEnabled && !canManageGlobalArtifacts) {
+      if (!item && !canManageGlobalArtifacts) {
         initialFormState.item.tags = (initialFormState.item.tags ?? []).filter(
           (tag) => tag !== GLOBAL_ARTIFACT_TAG
         );
@@ -469,6 +465,7 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
         </EuiFlyoutHeader>
         {!isInitializing && showExpiredLicenseBanner && (
           <EuiCallOut
+            announceOnMount={false}
             title={labels.flyoutDowngradedLicenseTitle}
             color="warning"
             iconType="question"

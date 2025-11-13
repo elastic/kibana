@@ -8,14 +8,14 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core/server';
-import type { DashboardAttributes, DashboardPanel } from '../../types';
+import type { DashboardState, DashboardPanel } from '../../types';
 import { isDashboardSection } from '../../../../../common';
 import { embeddableService } from '../../../../kibana_services';
 import { getPanelIdFromReference } from '../../../../../common/reference_utils';
 
 export function transformReferencesOut(
   references: SavedObjectReference[],
-  panels?: DashboardAttributes['panels']
+  panels?: DashboardState['panels']
 ): SavedObjectReference[] {
   // key: panel uid
   // value: boolean indicating to drop references for panel

@@ -7,18 +7,17 @@
 
 import { tinymathFunctions } from '@kbn/lens-formula-docs';
 import { createMockedIndexPattern } from '../../../mocks';
-import {
-  formulaOperation,
-  type GenericOperationDefinition,
-  type GenericIndexPatternColumn,
-} from '..';
-import type { FormulaIndexPatternColumn } from './formula';
+import { formulaOperation, type GenericOperationDefinition } from '..';
+import type {
+  FormulaIndexPatternColumn,
+  GenericIndexPatternColumn,
+  MovingAverageIndexPatternColumn,
+  TermsIndexPatternColumn,
+  StaticValueIndexPatternColumn,
+  FormBasedLayer,
+  IndexPattern,
+} from '@kbn/lens-common';
 import { insertOrReplaceFormulaColumn } from './parse';
-import type { FormBasedLayer } from '../../../types';
-import type { IndexPattern } from '../../../../../types';
-import type { TermsIndexPatternColumn } from '../terms';
-import type { MovingAverageIndexPatternColumn } from '../calculations';
-import type { StaticValueIndexPatternColumn } from '../static_value';
 import { getFilter } from '../helpers';
 import { createOperationDefinitionMock } from './mocks/operation_mocks';
 import { FORMULA_LAYER_ONLY_STATIC_VALUES } from '../../../../../user_messages_ids';

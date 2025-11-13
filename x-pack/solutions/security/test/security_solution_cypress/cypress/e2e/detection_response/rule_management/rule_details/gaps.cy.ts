@@ -14,130 +14,115 @@ import { createRule } from '../../../../tasks/api_calls/rules';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 import { TOASTER } from '../../../../screens/alerts_detection_rules';
 import {
-  goToExecutionLogTab,
-  getGapsTableRows,
   filterGapsByStatus,
+  getGapsTableRows,
+  goToExecutionLogTab,
   refreshGapsTable,
 } from '../../../../tasks/rule_details';
 import { getNewRule } from '../../../../objects/rule';
 import {
+  RULE_GAPS_FILL_BUTTON,
   RULE_GAPS_INFO,
   RULE_GAPS_TABLE,
-  RULE_GAPS_FILL_BUTTON,
   RULE_SWITCH,
 } from '../../../../screens/rule_details';
 import {
+  interceptFillGap,
   interceptGetRuleGaps,
   interceptGetRuleGapsNoData,
-  interceptFillGap,
 } from '../../../../tasks/api_calls/gaps';
 import { TOOLTIP } from '../../../../screens/common';
 
-describe(
-  'Rule gaps',
-  {
-    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
-    env: {
-      ftrConfig: {
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'storeGapsInEventLogEnabled',
-          ])}`,
-        ],
-      },
-    },
-  },
-  function () {
-    before(() => {
-      installMockPrebuiltRulesPackage();
-    });
+describe('Rule gaps', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, function () {
+  before(() => {
+    installMockPrebuiltRulesPackage();
+  });
 
-    before(() => {
-      login();
-      deleteAlertsAndRules();
-      createRule(getNewRule()).then((rule) => {
-        cy.wrap(rule.body.id).as('ruleId');
+  before(() => {
+    login();
+    deleteAlertsAndRules();
+    createRule(getNewRule()).then((rule) => {
+      cy.wrap(rule.body.id).as('ruleId');
+    });
+  });
+
+  it('displays and interacts with rule gaps', function () {
+    // Intercept API calls with data
+    interceptGetRuleGaps();
+    interceptFillGap();
+
+    // Visit rule details and go to execution log tab
+    visit(ruleDetailsUrl(this.ruleId));
+    waitForAlertsToPopulate();
+    goToExecutionLogTab();
+    cy.wait('@getRuleGaps');
+
+    // Check gaps table is displayed with metrics
+    cy.get(RULE_GAPS_INFO).should('exist');
+    cy.get(RULE_GAPS_TABLE).should('exist');
+
+    // Check table rows content
+    getGapsTableRows().should('have.length', 4);
+
+    // Check first row - unfilled gap
+    getGapsTableRows()
+      .eq(0)
+      .within(() => {
+        cy.contains('Unfilled');
+        cy.contains('0%');
+        cy.contains('In progress').should('not.exist');
+        cy.contains('Fill gap');
       });
-    });
 
-    it('displays and interacts with rule gaps', function () {
-      // Intercept API calls with data
-      interceptGetRuleGaps();
-      interceptFillGap();
+    // Check second row - partially filled gap
+    getGapsTableRows()
+      .eq(1)
+      .within(() => {
+        cy.contains('Partially filled');
+        cy.contains('In progress');
+        cy.contains('50%');
+        cy.contains('Fill gap').should('not.exist');
+      });
 
-      // Visit rule details and go to execution log tab
-      visit(ruleDetailsUrl(this.ruleId));
-      waitForAlertsToPopulate();
-      goToExecutionLogTab();
-      cy.wait('@getRuleGaps');
+    // Check third row - filled gap
+    getGapsTableRows()
+      .eq(2)
+      .within(() => {
+        cy.contains('Filled');
+        cy.contains('100%');
+        cy.contains('In progress').should('not.exist');
+        cy.contains('Fill gap').should('not.exist');
+      });
 
-      // Check gaps table is displayed with metrics
-      cy.get(RULE_GAPS_INFO).should('exist');
-      cy.get(RULE_GAPS_TABLE).should('exist');
+    // Check fourth row - partially filled gap with unfilled intervals
+    getGapsTableRows()
+      .eq(3)
+      .within(() => {
+        cy.contains('Partially filled');
+        cy.contains('50%');
+        cy.contains('In progress').should('not.exist');
+        cy.contains('Fill remaining gap');
+      });
 
-      // Check table rows content
-      getGapsTableRows().should('have.length', 4);
+    // Test status filtering
+    filterGapsByStatus('Unfilled');
+    refreshGapsTable();
+    cy.wait('@getRuleGaps');
 
-      // Check first row - unfilled gap
-      getGapsTableRows()
-        .eq(0)
-        .within(() => {
-          cy.contains('Unfilled');
-          cy.contains('0%');
-          cy.contains('In progress').should('not.exist');
-          cy.contains('Fill gap');
-        });
+    // Test filling gaps with enabled rule
+    cy.get(RULE_GAPS_FILL_BUTTON).first().click();
+    cy.wait('@fillGap');
+    cy.get(TOASTER).contains('Manual run requested');
 
-      // Check second row - partially filled gap
-      getGapsTableRows()
-        .eq(1)
-        .within(() => {
-          cy.contains('Partially filled');
-          cy.contains('In progress');
-          cy.contains('50%');
-          cy.contains('Fill gap').should('not.exist');
-        });
+    // Test filling gaps with disabled rule
+    cy.get(RULE_SWITCH).click();
+    cy.get(RULE_GAPS_FILL_BUTTON).first().realHover();
+    cy.get(TOOLTIP).contains('Rule should be enabled to fill gaps');
 
-      // Check third row - filled gap
-      getGapsTableRows()
-        .eq(2)
-        .within(() => {
-          cy.contains('Filled');
-          cy.contains('100%');
-          cy.contains('In progress').should('not.exist');
-          cy.contains('Fill gap').should('not.exist');
-        });
-
-      // Check fourth row - partially filled gap with unfilled intervals
-      getGapsTableRows()
-        .eq(3)
-        .within(() => {
-          cy.contains('Partially filled');
-          cy.contains('50%');
-          cy.contains('In progress').should('not.exist');
-          cy.contains('Fill remaining gap');
-        });
-
-      // Test status filtering
-      filterGapsByStatus('Unfilled');
-      refreshGapsTable();
-      cy.wait('@getRuleGaps');
-
-      // Test filling gaps with enabled rule
-      cy.get(RULE_GAPS_FILL_BUTTON).first().click();
-      cy.wait('@fillGap');
-      cy.get(TOASTER).contains('Manual run requested');
-
-      // Test filling gaps with disabled rule
-      cy.get(RULE_SWITCH).click();
-      cy.get(RULE_GAPS_FILL_BUTTON).first().realHover();
-      cy.get(TOOLTIP).contains('Rule should be enabled to fill gaps');
-
-      // Test no data scenario
-      interceptGetRuleGapsNoData();
-      refreshGapsTable();
-      cy.wait('@getRuleGaps');
-      cy.get(RULE_GAPS_TABLE).contains('No items found');
-    });
-  }
-);
+    // Test no data scenario
+    interceptGetRuleGapsNoData();
+    refreshGapsTable();
+    cy.wait('@getRuleGaps');
+    cy.get(RULE_GAPS_TABLE).contains('No items found');
+  });
+});

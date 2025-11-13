@@ -8,8 +8,8 @@
  */
 
 import { Position } from '@elastic/charts';
-import { XYCurveTypes } from '@kbn/visualizations-plugin/public';
-import type { XYConfiguration, XYLayerConfig } from '@kbn/visualizations-plugin/common';
+import type { XYState as XYConfiguration, XYLayerConfig } from '@kbn/lens-common';
+import { XYCurveTypes } from '@kbn/expression-xy-plugin/common';
 import type { Panel } from '../../../../../common/types';
 import { getYExtents } from './extents';
 
@@ -38,6 +38,7 @@ export const getConfigurationForTimeseries = (
     yRightExtent: extents.yRightExtent,
     yLeftScale: model.axis_scale === 'log' ? 'log' : 'linear',
     yRightScale: model.axis_scale === 'log' ? 'log' : 'linear',
+    preferredSeriesType: 'bar',
   };
 };
 
@@ -70,4 +71,5 @@ export const getConfigurationForTopN = (
     yRight: false,
   },
   valueLabels: 'show',
+  preferredSeriesType: 'bar',
 });
