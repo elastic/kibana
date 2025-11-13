@@ -14,6 +14,7 @@ export type {
   ToolAvailabilityContext,
   ToolAvailabilityHandler,
   ToolAvailabilityResult,
+  ToolAvailabilityConfig,
 } from './builtin';
 export type {
   ToolHandlerFn,

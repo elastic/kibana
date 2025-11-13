@@ -20,6 +20,7 @@ import type {
 } from '../tool_types/definitions';
 import { isDisabledDefinition } from '../tool_types/definitions';
 import { convertTool } from './converter';
+import { ToolAvailabilityCache } from './availability_cache';
 
 export const createBuiltinProviderFn =
   ({
@@ -76,6 +77,8 @@ export const createBuiltinToolProvider = ({
   };
   const context = { spaceId: space, request };
 
+  const availabilityCache = new ToolAvailabilityCache();
+
   return {
     id: 'builtin',
     readonly: true,
@@ -97,7 +100,7 @@ export const createBuiltinToolProvider = ({
       if (!definition) {
         throw createBadRequestError(`Unknown type for tool '${toolId}': '${tool.type}'`);
       }
-      return convertTool({ tool, definition, context });
+      return convertTool({ tool, definition, context, cache: availabilityCache });
     },
     list() {
       const tools = registry.list();
@@ -109,7 +112,7 @@ export const createBuiltinToolProvider = ({
         .filter((tool) => isToolEnabled(tool.id))
         .map((tool) => {
           const definition = definitionMap[tool.type]!;
-          return convertTool({ tool, definition, context });
+          return convertTool({ tool, definition, context, cache: availabilityCache });
         });
     },
   };

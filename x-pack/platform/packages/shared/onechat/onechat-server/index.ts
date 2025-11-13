@@ -46,6 +46,7 @@ export type {
   ToolAvailabilityContext,
   ToolAvailabilityHandler,
   ToolAvailabilityResult,
+  ToolAvailabilityConfig,
 } from './tools';
 export { getToolResultId, createErrorResult, isToolResultId } from './tools';
 export type {

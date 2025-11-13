@@ -11,9 +11,14 @@ import type { ToolDefinition, ToolType } from '@kbn/onechat-common';
 import type {
   ToolHandlerFn,
   LlmDescriptionHandler,
-  ToolAvailabilityHandler,
+  ToolAvailabilityContext,
+  ToolAvailabilityResult,
 } from '@kbn/onechat-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
+
+type InternalToolAvailabilityHandler = (
+  context: ToolAvailabilityContext
+) => MaybePromise<ToolAvailabilityResult>;
 
 export interface InternalToolDefinition<
   TType extends ToolType = ToolType,
@@ -23,7 +28,7 @@ export interface InternalToolDefinition<
   /**
    * Check if the tool is available for the current context.
    */
-  isAvailable: ToolAvailabilityHandler;
+  isAvailable: InternalToolAvailabilityHandler;
   /**
    * Generates the schema attached to this tool.
    */

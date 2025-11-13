@@ -31,19 +31,7 @@ export interface ToolAvailabilityResult {
   /**
    * Whether the tool is available or not.
    */
-  available: 'available' | 'unavailable';
-  /**
-   * Cache mode for the result
-   * - global: the result will be cached globally, for all spaces
-   * - space: the result will be cached per-space
-   * - none: the result shouldn't be cached (warning: this can lead to performance issues)
-   */
-  cacheMode: 'global' | 'space' | 'none';
-  /**
-   * Optional TTL for the cached result, in seconds.
-   * Default to 300 seconds (5 minutes).
-   */
-  cacheTtl?: number;
+  status: 'available' | 'unavailable';
   /**
    * Optional reason for why the tool is unavailable.
    */
@@ -57,23 +45,34 @@ export type ToolAvailabilityHandler = (
   context: ToolAvailabilityContext
 ) => MaybePromise<ToolAvailabilityResult>;
 
-interface ToolAvailabilityMixin {
+export interface ToolAvailabilityConfig {
   /**
-   * Optional handler which can be defined to add conditional availability of the tool.
+   * handler which can be defined to add conditional availability of the tool.
    *
    * Note: this is meant to be used for tools that are gated behind a feature flag,
    *       or tools which have some condition to be available.
    *       it *IS NOT* meant to be used as a replacement for RBAC.
    */
-  isAvailable?: ToolAvailabilityHandler;
+  handler: ToolAvailabilityHandler;
+  /**
+   * Cache mode for the result
+   * - global: the result will be cached globally, for all spaces
+   * - space: the result will be cached per-space
+   * - none: the result shouldn't be cached (warning: this can lead to performance issues)
+   */
+  cacheMode: 'global' | 'space' | 'none';
+  /**
+   * Optional TTL for the cached result, *in seconds*.
+   * Default to 300 seconds (5 minutes).
+   */
+  cacheTtl?: number;
 }
 
 /**
  * Built-in tool, as registered as static tool.
  */
 export interface BuiltinToolDefinition<RunInput extends ZodObject<any> = ZodObject<any>>
-  extends Omit<ToolDefinition, 'type' | 'readonly' | 'configuration'>,
-    ToolAvailabilityMixin {
+  extends Omit<ToolDefinition, 'type' | 'readonly' | 'configuration'> {
   /**
    * built-in tool types
    */
@@ -86,10 +85,20 @@ export interface BuiltinToolDefinition<RunInput extends ZodObject<any> = ZodObje
    * Handler to call to execute the tool.
    */
   handler: ToolHandlerFn<z.infer<RunInput>>;
+  /**
+   * Optional dynamic availability configuration.
+   * Refer to {@link ToolAvailabilityConfig}
+   */
+  availability?: ToolAvailabilityConfig;
 }
 
-type StaticToolRegistrationMixin<T extends ToolDefinition> = Omit<T, 'readonly'> &
-  ToolAvailabilityMixin;
+type StaticToolRegistrationMixin<T extends ToolDefinition> = Omit<T, 'readonly'> & {
+  /**
+   * Optional dynamic availability configuration.
+   * Refer to {@link ToolAvailabilityConfig}
+   */
+  availability?: ToolAvailabilityConfig;
+};
 
 export type StaticEsqlTool = StaticToolRegistrationMixin<EsqlToolDefinition>;
 export type StaticIndexSearchTool = StaticToolRegistrationMixin<IndexSearchToolDefinition>;

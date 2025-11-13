@@ -17,6 +17,8 @@ import type {
   ScopedRunnerRunToolsParams,
   ToolAvailabilityContext,
 } from '@kbn/onechat-server';
+import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
+import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type {
   InternalToolDefinition,
   ToolCreateParams,
@@ -47,15 +49,17 @@ export interface ToolRegistry {
   ): Promise<RunToolReturn>;
 }
 
-interface CreateToolClientParams {
+interface CreateToolRegistryParams {
   getRunner: () => Runner;
   persistedProvider: WritableToolProvider;
   builtinProvider: ReadonlyToolProvider;
   request: KibanaRequest;
   space: string;
+  uiSettings: UiSettingsServiceStart;
+  savedObjects: SavedObjectsServiceStart;
 }
 
-export const createToolRegistry = (params: CreateToolClientParams): ToolRegistry => {
+export const createToolRegistry = (params: CreateToolRegistryParams): ToolRegistry => {
   return new ToolRegistryImpl(params);
 };
 
@@ -64,6 +68,8 @@ class ToolRegistryImpl implements ToolRegistry {
   private readonly builtinProvider: ReadonlyToolProvider;
   private readonly spaceId: string;
   private readonly request: KibanaRequest;
+  private readonly uiSettings: UiSettingsServiceStart;
+  private readonly savedObjects: SavedObjectsServiceStart;
   private readonly getRunner: () => Runner;
 
   constructor({
@@ -72,11 +78,15 @@ class ToolRegistryImpl implements ToolRegistry {
     request,
     getRunner,
     space,
-  }: CreateToolClientParams) {
+    uiSettings,
+    savedObjects,
+  }: CreateToolRegistryParams) {
     this.persistedProvider = persistedProvider;
     this.builtinProvider = builtinProvider;
     this.request = request;
     this.spaceId = space;
+    this.uiSettings = uiSettings;
+    this.savedObjects = savedObjects;
     this.getRunner = getRunner;
   }
 
@@ -171,7 +181,15 @@ class ToolRegistryImpl implements ToolRegistry {
   }
 
   private async isAvailable(tool: InternalToolDefinition): Promise<boolean> {
-    const context: ToolAvailabilityContext = { spaceId: this.spaceId, request: this.request };
-    return tool.isAvailable(context);
+    const soClient = this.savedObjects.getScopedClient(this.request);
+    const uiSettingsClient = this.uiSettings.asScopedToClient(soClient);
+
+    const context: ToolAvailabilityContext = {
+      spaceId: this.spaceId,
+      request: this.request,
+      uiSettings: uiSettingsClient,
+    };
+    const toolStatus = await tool.isAvailable(context);
+    return toolStatus.status === 'available';
   }
 }
