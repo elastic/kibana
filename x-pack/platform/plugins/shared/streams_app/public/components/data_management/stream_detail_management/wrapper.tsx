@@ -106,29 +106,6 @@ export function Wrapper({
       <EuiPageHeader
         paddingSize="l"
         bottomBorder="extended"
-        breadcrumbs={[
-          {
-            href: router.link('/'),
-            text: (
-              <EuiButtonEmpty
-                iconType="arrowLeft"
-                size="s"
-                flush="left"
-                aria-label={i18n.translate(
-                  'xpack.streams.entityDetailViewWithoutParams.breadcrumb',
-                  {
-                    defaultMessage: 'Back to Streams',
-                  }
-                )}
-                data-test-subj="backToStreamsButton"
-              >
-                {i18n.translate('xpack.streams.entityDetailViewWithoutParams.breadcrumb', {
-                  defaultMessage: 'Streams',
-                })}
-              </EuiButtonEmpty>
-            ),
-          },
-        ]}
         css={css`
           background: ${euiTheme.colors.backgroundBasePlain};
         `}
