@@ -48,6 +48,9 @@ export class StreamsApp {
 
   async gotoStreamManagementTab(streamName: string, tabName: string) {
     await this.page.gotoApp(`streams/${streamName}/management/${tabName}`);
+    await expect(this.page.testSubj.locator('backToStreamsButton')).toBeVisible({
+      timeout: 20_000,
+    });
   }
 
   async gotoPartitioningTab(streamName: string) {
