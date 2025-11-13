@@ -143,26 +143,19 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
       const timestamps = range.interval('30s');
 
       const logs = timestamps.rate(1).generator((timestamp, index) => {
-        const docs = [];
-
-        docs.push(
+        return [
           ...generateCoreAppLogs({
             timestamp,
             index,
             isLogsDb,
-          })
-        );
-
-        docs.push(
+          }),
           ...generateAuditPipelineLogs({
             timestamp,
             index,
             isLogsDb,
             isHealthy: timestamp < pipelineDropStart,
-          })
-        );
-
-        return docs;
+          }),
+        ];
       });
 
       return withClient(
