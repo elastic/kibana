@@ -76,6 +76,8 @@ export {
   SectionLoading,
 } from './application/components';
 
+export { AddMessageVariablesOptional } from './application/components/add_message_variables_optional';
+
 export { AlertProvidedActionVariables } from '@kbn/alerts-ui-shared';
 export { templateActionVariable, updateActionConnector, executeAction } from './application/lib';
 

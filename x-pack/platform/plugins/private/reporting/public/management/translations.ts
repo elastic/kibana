@@ -205,6 +205,41 @@ export const SCHEDULED_REPORT_FORM_EMAIL_SELF_HINT = i18n.translate(
   }
 );
 
+export const SCHEDULED_REPORT_FORM_EMAIL_SHOW_CC_BCC_LABEL = i18n.translate(
+  'xpack.reporting.scheduledReportingForm.emailShowCcBccLabel',
+  {
+    defaultMessage: 'Cc Bcc',
+  }
+);
+
+export const SCHEDULED_REPORT_FORM_EMAIL_CC_RECIPIENTS_LABEL = i18n.translate(
+  'xpack.reporting.scheduledReportingForm.emailCcRecipientsLabel',
+  {
+    defaultMessage: 'Cc',
+  }
+);
+
+export const SCHEDULED_REPORT_FORM_EMAIL_BCC_RECIPIENTS_LABEL = i18n.translate(
+  'xpack.reporting.scheduledReportingForm.emailBccRecipientsLabel',
+  {
+    defaultMessage: 'Bcc',
+  }
+);
+
+export const SCHEDULED_REPORT_FORM_EMAIL_SUBJECT_LABEL = i18n.translate(
+  'xpack.reporting.scheduledReportingForm.emailSubjectLabel',
+  {
+    defaultMessage: 'Subject',
+  }
+);
+
+export const SCHEDULED_REPORT_FORM_EMAIL_MESSAGE_LABEL = i18n.translate(
+  'xpack.reporting.scheduledReportingForm.emailMessageLabel',
+  {
+    defaultMessage: 'Message',
+  }
+);
+
 export const SCHEDULED_REPORT_FORM_MISSING_EMAIL_CONNECTOR_TITLE = i18n.translate(
   'xpack.reporting.scheduledReportingForm.missingEmailConnectorTitle',
   {

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import { applicationServiceMock, coreMock, httpServiceMock } from '@kbn/core/public/mocks';
 import { ReportingAPIClient, useKibana } from '@kbn/reporting-public';
 import { mockScheduledReports } from '../../../common/test/fixtures';
@@ -30,7 +30,7 @@ jest.mock('@kbn/reporting-public', () => ({
 jest.mock('../hooks/use_get_user_profile_query');
 jest.mock('../apis/get_reporting_health');
 
-const mockValidateEmailAddresses = jest.fn().mockResolvedValue([]);
+const mockValidateEmailAddresses = jest.fn().mockReturnValue([]);
 const mockReportingHealth = jest.mocked(getReportingHealth);
 const mockGetUserProfileQuery = jest.mocked(useGetUserProfileQuery);
 const mockedUseUiSetting = jest.mocked(useUiSetting);
@@ -41,6 +41,16 @@ describe('ScheduledReportForm', () => {
   const application = applicationServiceMock.createStartContract();
   const http = httpServiceMock.createSetupContract();
   const uiSettings = coreMock.createSetup().uiSettings;
+  const mockKibanaServices = {
+    application: {
+      capabilities: { ...application.capabilities, manageReporting: { show: true } },
+    },
+    http,
+    userProfile: userProfileServiceMock.createStart(),
+    actions: {
+      validateEmailAddresses: mockValidateEmailAddresses,
+    },
+  };
   const apiClient = new ReportingAPIClient(http, uiSettings, 'x.x.x');
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -78,16 +88,7 @@ describe('ScheduledReportForm', () => {
 
   beforeEach(() => {
     (useKibana as jest.Mock).mockReturnValue({
-      services: {
-        application: {
-          capabilities: { ...application.capabilities, manageReporting: { show: true } },
-        },
-        http,
-        userProfile: userProfileServiceMock.createStart(),
-        actions: {
-          validateEmailAddresses: mockValidateEmailAddresses,
-        },
-      },
+      services: mockKibanaServices,
     });
     mockReportingHealth.mockResolvedValue({
       isSufficientlySecure: true,
@@ -162,6 +163,31 @@ describe('ScheduledReportForm', () => {
         true
       );
     });
+  });
+
+  it('should not allow showing the Cc and Bcc fields when user is not reporting manager', async () => {
+    user = userEvent.setup({ delay: null });
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        ...mockKibanaServices,
+        application: {
+          capabilities: { ...application.capabilities, manageReporting: { show: false } },
+        },
+      },
+    });
+
+    renderWithProviders(<ScheduledReportForm {...defaultProps} />);
+
+    const toggle = await screen.findByText('Send by email');
+    await user.click(toggle);
+
+    const emailField = await screen.findByTestId('emailRecipientsCombobox');
+    const emailInput = within(emailField).getByTestId('comboBoxSearchInput');
+    expect(emailInput).toBeDisabled();
+    expect(screen.queryByTestId('showCcBccButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('emailCcRecipientsCombobox')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('emailBccRecipientsCombobox')).not.toBeInTheDocument();
+    expect(screen.getByText('Sensitive information')).toBeInTheDocument();
   });
 
   describe('Edit mode', () => {

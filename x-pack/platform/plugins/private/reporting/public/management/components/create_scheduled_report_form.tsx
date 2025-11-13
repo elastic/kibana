@@ -80,6 +80,10 @@ export const CreateScheduledReportForm = ({
         optimizedForPrinting,
         sendByEmail,
         emailRecipients,
+        emailCcRecipients,
+        emailBccRecipients,
+        emailSubject,
+        emailMessage,
       } = formData;
       const rrule = convertToRRule({
         startDate,
@@ -99,7 +103,17 @@ export const CreateScheduledReportForm = ({
           ...(reportTypeId === 'printablePdfV2' ? { optimizedForPrinting } : {}),
         }),
         schedule: { rrule: rrule as Rrule },
-        notification: sendByEmail ? { email: { to: emailRecipients } } : undefined,
+        notification: sendByEmail
+          ? {
+              email: {
+                to: emailRecipients,
+                cc: emailCcRecipients,
+                bcc: emailBccRecipients,
+                subject: emailSubject,
+                message: emailMessage,
+              },
+            }
+          : undefined,
       });
       toasts.addSuccess({
         title: i18n.SCHEDULED_REPORT_FORM_SUCCESS_TOAST_TITLE,
