@@ -313,6 +313,64 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await networkEventsPage.flyout.assertPreviewPanelGroupedItemsNumber(2);
     });
 
+    it('show only entity details action for grouped entities nodes', async () => {
+      // Setting the timerange to fit the data and open the flyout for a specific alert
+      await networkEventsPage.navigateToNetworkEventsPage(
+        `${networkEventsPage.getAbsoluteTimerangeFilter(
+          '2024-09-01T00:00:00.000Z',
+          '2024-09-02T00:00:00.000Z'
+        )}&${networkEventsPage.getFlyoutFilter('1')}`
+      );
+      await networkEventsPage.waitForListToHaveEvents();
+
+      await networkEventsPage.flyout.expandVisualizations();
+      await networkEventsPage.flyout.assertGraphPreviewVisible();
+
+      await expandedFlyoutGraph.expandGraph();
+      await expandedFlyoutGraph.waitGraphIsLoaded();
+
+      // Test grouped entity nodes: Add filter to show all CreateRole events
+      // This creates a graph where the target entity (projects/your-project-id/roles/customRole)
+      // is connected to multiple different actors, causing it to become a grouped entity node
+      await expandedFlyoutGraph.showSearchBar();
+      await expandedFlyoutGraph.addFilter({
+        field: 'event.action',
+        operation: 'is',
+        value: 'google.iam.admin.v1.CreateRole',
+      });
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
+
+      // Find the label node for google.iam.admin.v1.CreateRole and extract target ID
+      const labelNodeId = await expandedFlyoutGraph.findLabelNodeByAction(
+        'label(google.iam.admin.v1.CreateRole)oe(0)oa(0)'
+      );
+
+      if (labelNodeId) {
+        // The target node (projects/your-project-id/roles/customRole) is connected to multiple actors
+        // This node should only show "View entity details" action when it represents grouped entities
+        const targetNodeId = expandedFlyoutGraph.extractTargetIdFromLabelNode(labelNodeId);
+        if (targetNodeId) {
+          await expandedFlyoutGraph.toggleNodeExpandButton(targetNodeId);
+          await expandedFlyoutGraph.assertAllEntityActionsVisible();
+          await expandedFlyoutGraph.toggleNodeExpandButton(targetNodeId);
+        }
+
+        // Pick one of the actor nodes (which should be a single entity)
+        // This node should show all actions
+        const actorNodeId = expandedFlyoutGraph.extractActorIdFromLabelNode(labelNodeId);
+        if (actorNodeId) {
+          await expandedFlyoutGraph.toggleNodeExpandButton(actorNodeId);
+          await expandedFlyoutGraph.assertOnlyEntityDetailsActionVisible();
+          await expandedFlyoutGraph.toggleNodeExpandButton(actorNodeId);
+        }
+      }
+
+      // Revert filter bar to original state
+      await expandedFlyoutGraph.clearAllFilters();
+      await pageObjects.header.waitUntilLoadingHasFinished();
+    });
+
     describe('ECS fields only', function () {
       const entitiesIndex = '.entities.v1.latest.security_*';
       const enrichPolicyName = getEnrichPolicyId(); // defaults to 'default' space

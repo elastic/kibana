@@ -99,13 +99,17 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
     return nodes[0];
   }
 
+  async toggleNodeExpandButton(nodeId: string): Promise<void> {
+    const node = await this.selectNode(nodeId);
+    const expandButton = await node.findByTestSubject(NODE_EXPAND_BUTTON_TEST_ID);
+    await expandButton.click();
+  }
+
   async clickOnNodeExpandButton(
     nodeId: string,
     popoverId: string = GRAPH_NODE_EXPAND_POPOVER_TEST_ID
   ): Promise<void> {
-    const node = await this.selectNode(nodeId);
-    const expandButton = await node.findByTestSubject(NODE_EXPAND_BUTTON_TEST_ID);
-    await expandButton.click();
+    await this.toggleNodeExpandButton(nodeId);
     await this.testSubjects.existOrFail(popoverId);
   }
 
@@ -290,5 +294,76 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
 
   async closePreviewSection(): Promise<void> {
     await this.testSubjects.click(PREVIEW_SECTION_CLOSE_BUTTON_TEST_ID);
+  }
+
+  async assertPopoverActionVisible(testSubjectId: string): Promise<void> {
+    await this.testSubjects.existOrFail(testSubjectId);
+  }
+
+  async assertPopoverActionNotVisible(testSubjectId: string): Promise<void> {
+    await this.testSubjects.missingOrFail(testSubjectId);
+  }
+
+  async assertAllEntityActionsVisible(): Promise<void> {
+    // Assert all 4 actions are visible for single entity nodes
+    await this.assertPopoverActionVisible(GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID);
+    await this.assertPopoverActionVisible(GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_TEST_ID);
+    await this.assertPopoverActionVisible(GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_TEST_ID);
+    await this.assertPopoverActionVisible(GRAPH_NODE_POPOVER_EXPLORE_RELATED_TEST_ID);
+  }
+
+  async assertOnlyEntityDetailsActionVisible(): Promise<void> {
+    // Assert "Show entity details" is visible
+    await this.assertPopoverActionVisible(GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID);
+
+    // Assert other actions are NOT visible
+    await this.assertPopoverActionNotVisible(GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_TEST_ID);
+    await this.assertPopoverActionNotVisible(GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_TEST_ID);
+    await this.assertPopoverActionNotVisible(GRAPH_NODE_POPOVER_EXPLORE_RELATED_TEST_ID);
+  }
+
+  /**
+   * Find a label node ID that contains the specified action pattern.
+   * Returns the full label node ID, or null if not found.
+   * Example: findLabelNodeByAction('google.iam.admin.v1.CreateRole')
+   *   might return 'a(uuid-123)-b(targetId)label(google.iam.admin.v1.CreateRole)oe(1)oa(0)'
+   */
+  async findLabelNodeByAction(actionPattern: string): Promise<string | null> {
+    await this.waitGraphIsLoaded();
+    const graph = await this.testSubjects.find(GRAPH_INVESTIGATION_TEST_ID);
+    const nodes = await graph.findAllByCssSelector('.react-flow__nodes .react-flow__node');
+
+    for (const node of nodes) {
+      try {
+        const nodeId = await node.getAttribute('data-id');
+        if (nodeId && nodeId.includes(actionPattern)) {
+          return nodeId;
+        }
+      } catch (e) {
+        // Node doesn't have data-id attribute, continue
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Extract actor node ID from a label node ID.
+   * Label node pattern: a(actorId)-b(targetId)label(action)
+   * Returns the actor node ID, or null if pattern doesn't match.
+   */
+  extractActorIdFromLabelNode(labelNodeId: string): string | null {
+    const match = labelNodeId.match(/^a\(([^)]+)\)-b\(/);
+    return match ? match[1] : null;
+  }
+
+  /**
+   * Extract target node ID from a label node ID.
+   * Label node pattern: a(actorId)-b(targetId)label(action)
+   * Returns the target node ID, or null if pattern doesn't match.
+   */
+  extractTargetIdFromLabelNode(labelNodeId: string): string | null {
+    const match = labelNodeId.match(/-b\(([^)]+)\)label\(/);
+    return match ? match[1] : null;
   }
 }
