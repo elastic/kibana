@@ -880,7 +880,7 @@ describe('parseRecords', () => {
   });
 
   describe('entities enrichment', () => {
-    it('should create single non-enriched entity node with tag "Entity", label undefined, and no count', () => {
+    it('should create single non-enriched entity node with tag "Entity", label as entity.id, and no count', () => {
       const records: GraphEdge[] = [
         {
           action: 'test.action',
@@ -888,8 +888,8 @@ describe('parseRecords', () => {
           targetIds: ['non-enriched-target-456'],
           actorEntityType: 'Entity',
           targetEntityType: 'Entity',
-          actorLabel: '', // Empty string from ESQL
-          targetLabel: '', // Empty string from ESQL
+          actorLabel: 'non-enriched-actor-123', // entity.id from ESQL
+          targetLabel: 'non-enriched-target-456', // entity.id from ESQL
           actorIdsCount: 1,
           targetIdsCount: 1,
           badge: 1,
@@ -917,14 +917,14 @@ describe('parseRecords', () => {
       ) as EntityNodeDataModel;
 
       expect(actorNode).toBeDefined();
-      expect(actorNode.label).toBeUndefined(); // UI will fallback to node ID
+      expect(actorNode.label).toBe('non-enriched-actor-123'); // entity.id
       expect(actorNode.tag).toBe('Entity');
       expect(actorNode.icon).toBe('magnifyWithExclamation');
       expect(actorNode.shape).toBe('rectangle');
       expect(actorNode.count).toBeUndefined();
 
       expect(targetNode).toBeDefined();
-      expect(targetNode.label).toBeUndefined(); // UI will fallback to node ID
+      expect(targetNode.label).toBe('non-enriched-target-456'); // entity.id
       expect(targetNode.tag).toBe('Entity');
       expect(targetNode.icon).toBe('magnifyWithExclamation');
       expect(targetNode.shape).toBe('rectangle');
@@ -983,7 +983,7 @@ describe('parseRecords', () => {
       expect(targetNode.count).toBe(2);
     });
 
-    it('should create single enriched entity node with tag as entity.type, label undefined, and no count', () => {
+    it('should create single enriched entity node with tag as entity.type, label as entity.name, and no count', () => {
       const records: GraphEdge[] = [
         {
           action: 'test.action',
@@ -991,8 +991,8 @@ describe('parseRecords', () => {
           targetIds: ['host-456'],
           actorEntityType: 'user',
           targetEntityType: 'host',
-          actorLabel: '', // Empty string from ESQL
-          targetLabel: '', // Empty string from ESQL
+          actorLabel: 'John Doe', // entity.name from ESQL
+          targetLabel: 'web-server-01', // entity.name from ESQL
           actorIdsCount: 1,
           targetIdsCount: 1,
           badge: 1,
@@ -1016,14 +1016,14 @@ describe('parseRecords', () => {
       const targetNode = result.nodes.find((n) => n.id === 'host-456') as EntityNodeDataModel;
 
       expect(actorNode).toBeDefined();
-      expect(actorNode.label).toBeUndefined(); // UI will fallback to node ID
+      expect(actorNode.label).toBe('John Doe'); // entity.name
       expect(actorNode.tag).toBe('user');
       expect(actorNode.icon).toBe('user');
       expect(actorNode.shape).toBe('ellipse');
       expect(actorNode.count).toBeUndefined();
 
       expect(targetNode).toBeDefined();
-      expect(targetNode.label).toBeUndefined(); // UI will fallback to node ID
+      expect(targetNode.label).toBe('web-server-01'); // entity.name
       expect(targetNode.tag).toBe('host');
       expect(targetNode.icon).toBe('storage');
       expect(targetNode.shape).toBe('hexagon');
@@ -1076,6 +1076,58 @@ describe('parseRecords', () => {
 
       expect(targetNode).toBeDefined();
       expect(targetNode.label).toBe('server');
+      expect(targetNode.tag).toBe('host');
+      expect(targetNode.icon).toBe('storage');
+      expect(targetNode.shape).toBe('hexagon');
+      expect(targetNode.count).toBe(2);
+    });
+
+    it('should create group enriched entity node with type only (no sub_type), label undefined, and count', () => {
+      const records: GraphEdge[] = [
+        {
+          action: 'test.action',
+          actorIds: ['user-1', 'user-2', 'user-3'],
+          targetIds: ['host-1', 'host-2'],
+          actorEntityType: 'user',
+          targetEntityType: 'host',
+          actorLabel: '', // No sub_type means no label
+          targetLabel: '', // No sub_type means no label
+          actorIdsCount: 3,
+          targetIdsCount: 2,
+          badge: 5,
+          uniqueEventsCount: 5,
+          uniqueAlertsCount: 0,
+          docs: [
+            '{"id":"event1","type":"event"}',
+            '{"id":"event2","type":"event"}',
+            '{"id":"event3","type":"event"}',
+            '{"id":"event4","type":"event"}',
+            '{"id":"event5","type":"event"}',
+          ],
+          isOrigin: false,
+          isOriginAlert: false,
+          isAlert: false,
+          actorHostIps: [],
+          targetHostIps: [],
+          sourceIps: [],
+          sourceCountryCodes: [],
+        },
+      ];
+
+      const result = parseRecords(mockLogger, records);
+
+      const actorNode = result.nodes.find((n) => n.id === 'uuid-1') as EntityNodeDataModel;
+      const targetNode = result.nodes.find((n) => n.id === 'uuid-2') as EntityNodeDataModel;
+
+      expect(actorNode).toBeDefined();
+      expect(actorNode.label).toBeUndefined(); // No label when only type exists
+      expect(actorNode.tag).toBe('user');
+      expect(actorNode.icon).toBe('user');
+      expect(actorNode.shape).toBe('ellipse');
+      expect(actorNode.count).toBe(3);
+
+      expect(targetNode).toBeDefined();
+      expect(targetNode.label).toBeUndefined(); // No label when only type exists
       expect(targetNode.tag).toBe('host');
       expect(targetNode.icon).toBe('storage');
       expect(targetNode.shape).toBe('hexagon');

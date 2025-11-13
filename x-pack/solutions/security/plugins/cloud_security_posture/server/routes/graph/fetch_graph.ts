@@ -218,12 +218,14 @@ ${
 `
     : `
 // Fallback to null string with non-enriched actor
+| EVAL actorEntityName = TO_STRING(null)
 | EVAL actorEntityType = TO_STRING(null)
 | EVAL actorEntitySubType = TO_STRING(null)
 | EVAL actorHostIp = TO_STRING(null)
 | EVAL actorDocData = TO_STRING(null)
 
 // Fallback to null string with non-enriched target
+| EVAL targetEntityName = TO_STRING(null)
 | EVAL targetEntityType = TO_STRING(null)
 | EVAL targetEntitySubType = TO_STRING(null)
 | EVAL targetHostIp = TO_STRING(null)
@@ -290,6 +292,7 @@ ${
   // actor attributes
   actorIds = VALUES(actor.entity.id),
   actorIdsCount = COUNT_DISTINCT(actor.entity.id),
+  actorEntityName = VALUES(actorEntityName),
   actorEntityType = VALUES(actorEntityType),
   actorEntitySubType = VALUES(actorEntitySubType),
   actorsDocData = VALUES(actorDocData),
@@ -297,6 +300,7 @@ ${
   // target attributes
   targetIds = VALUES(target.entity.id),
   targetIdsCount = COUNT_DISTINCT(target.entity.id),
+  targetEntityName = VALUES(targetEntityName),
   targetEntityType = VALUES(targetEntityType),
   targetEntitySubType = VALUES(targetEntitySubType),
   targetsDocData = VALUES(targetDocData)
@@ -320,11 +324,19 @@ ${
     "${NON_ENRICHED_ENTITY_TYPE_PLURAL}"
   )
 | EVAL actorLabel = CASE(
+    actorIdsCount == 1 AND actorEntityType == "${NON_ENRICHED_ENTITY_TYPE_SINGULAR}",
+    TO_STRING(actorIds),
+    actorIdsCount == 1 AND actorEntityType != "${NON_ENRICHED_ENTITY_TYPE_SINGULAR}",
+    actorEntityName,
     actorIdsCount > 1 AND actorEntitySubType IS NOT NULL,
     actorEntitySubType,
     ""
   )
 | EVAL targetLabel = CASE(
+    targetIdsCount == 1 AND targetEntityType == "${NON_ENRICHED_ENTITY_TYPE_SINGULAR}",
+    TO_STRING(targetIds),
+    targetIdsCount == 1 AND targetEntityType != "${NON_ENRICHED_ENTITY_TYPE_SINGULAR}",
+    targetEntityName,
     targetIdsCount > 1 AND targetEntitySubType IS NOT NULL,
     targetEntitySubType,
     ""

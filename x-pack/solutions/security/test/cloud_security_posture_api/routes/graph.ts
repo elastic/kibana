@@ -997,8 +997,8 @@ export default function (providerContext: FtrProviderContext) {
 
             // Verify entity enrichment
             expect(actorNode).not.to.be(undefined);
-            // For single enriched entities, label should be undefined
-            expect(actorNode.label).to.be(undefined);
+            // For single enriched entities, label should be entity.name
+            expect(actorNode.label).to.equal('AdminExample');
             expect(actorNode.icon).to.equal('user');
             expect(actorNode.shape).to.equal('ellipse');
             expect(actorNode.tag).to.equal('Identity');
@@ -1099,8 +1099,8 @@ export default function (providerContext: FtrProviderContext) {
 
             // Verify entity enrichment
             expect(actorNode).not.to.be(undefined);
-            // For single enriched entities, label should be undefined
-            expect(actorNode.label).to.be(undefined);
+            // For single enriched entities, label should be entity.name
+            expect(actorNode.label).to.equal('AdminExample');
             expect(actorNode.icon).to.equal('user');
             expect(actorNode.shape).to.equal('ellipse');
             expect(actorNode.tag).to.equal('Identity');
