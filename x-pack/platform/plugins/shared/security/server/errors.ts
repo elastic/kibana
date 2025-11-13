@@ -54,7 +54,18 @@ export function getDetailedErrorMessage(error: any): string {
     return JSON.stringify(error.output.payload);
   }
 
-  return error.message;
+  if (!error.cause) {
+    return error.message;
+  }
+
+  // Usually it's enough to get the first level cause message.
+  return `${error.message} (cause: ${
+    typeof error.cause === 'string'
+      ? error.cause
+      : error.cause instanceof Error
+      ? error.cause.message
+      : JSON.stringify(error.cause)
+  })`;
 }
 
 export function isExpiredOrInvalidRefreshTokenError(error: errors.ResponseError): boolean {
