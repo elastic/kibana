@@ -69,11 +69,16 @@ import { createUsageCollector } from './collectors';
 import { getEql, getEsaggs, getEsdsl, getEssql, getEsql } from './expressions';
 import type { ISearchInterceptor } from './search_interceptor';
 import { SearchInterceptor } from './search_interceptor';
-import type { ISessionsClient, ISessionService } from './session';
-import { SessionsClient, SessionService } from './session';
-import { registerSearchSessionsMgmt } from './session/sessions_mgmt';
+import type { ISearchSessionEBTManager, ISessionsClient, ISessionService } from './session';
+import {
+  SessionsClient,
+  SessionService,
+  SearchSessionEBTManager,
+  registerSearchSessionEBTManagerAnalytics,
+} from './session';
+import { registerSearchSessionsMgmt, openSearchSessionsFlyout } from './session/sessions_mgmt';
 import type { ISearchSetup, ISearchStart } from './types';
-import { openSearchSessionsFlyout } from './session/sessions_mgmt';
+
 /** @internal */
 export interface SearchServiceSetupDependencies {
   expressions: ExpressionsSetup;
@@ -99,6 +104,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private usageCollector?: SearchUsageCollector;
   private sessionService!: ISessionService;
   private sessionsClient!: ISessionsClient;
+  private searchSessionEBTManager!: ISearchSessionEBTManager;
 
   constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
@@ -110,9 +116,17 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     this.usageCollector = createUsageCollector(getStartServices, usageCollection);
 
     this.sessionsClient = new SessionsClient({ http });
+
+    registerSearchSessionEBTManagerAnalytics(core);
+    this.searchSessionEBTManager = new SearchSessionEBTManager({
+      core,
+      logger: this.initializerContext.logger.get(),
+    });
+
     this.sessionService = new SessionService(
       this.initializerContext,
       getStartServices,
+      this.searchSessionEBTManager,
       this.sessionsClient,
       nowProvider,
       this.usageCollector
@@ -203,6 +217,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
           management,
           searchUsageCollector: this.usageCollector!,
           sessionsClient: this.sessionsClient,
+          searchSessionEBTManager: this.searchSessionEBTManager,
         },
         sessionsConfig,
         this.initializerContext.env.packageInfo.version
@@ -297,6 +312,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         usageCollector: this.usageCollector!,
         config: config.search.sessions,
         sessionsClient: this.sessionsClient,
+        ebtManager: this.searchSessionEBTManager,
         share,
       }),
       showWarnings: (adapter, callback) => {

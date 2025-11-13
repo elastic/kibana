@@ -14,6 +14,8 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { withProcRunner } from '@kbn/dev-proc-runner';
 
+import apm from 'elastic-apm-node';
+import { withSpan } from '@kbn/apm-utils';
 import { applyFipsOverrides } from '../lib/fips_overrides';
 import { Config, readConfigFile } from '../../functional_test_runner';
 
@@ -22,7 +24,6 @@ import { runElasticsearch } from '../lib/run_elasticsearch';
 import { runKibanaServer } from '../lib/run_kibana_server';
 import { runDockerServers } from '../lib/run_docker_servers';
 import type { RunTestsOptions } from './flags';
-
 /**
  * Run servers and tests for each config
  */
@@ -65,6 +66,8 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
 
   for (const [i, path] of options.configs.entries()) {
     await log.indent(0, async () => {
+      const tx = apm.startTransaction(`RUN ${Path.relative(REPO_ROOT, path)}`, 'config');
+
       if (options.configs.length > 1) {
         const progress = `${i + 1}/${options.configs.length}`;
         log.write(`--- [${progress}] Running ${Path.relative(REPO_ROOT, path)}`);
@@ -94,6 +97,8 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
           log,
           config,
           esVersion: options.esVersion,
+        }).finally(() => {
+          tx.end();
         });
         return;
       }
@@ -106,11 +111,14 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
           abortCtrl.abort();
         };
 
-        let shutdownEs;
-        let shutdownDockerServers;
+        let shutdownEs: (() => Promise<void>) | undefined;
+        let shutdownDockerServers: (() => Promise<void>) | undefined;
+
         try {
           if (process.env.TEST_ES_DISABLE_STARTUP !== 'true') {
-            shutdownEs = await runElasticsearch({ ...options, log, config, onEarlyExit });
+            shutdownEs = await withSpan('start_elasticsearch', () =>
+              runElasticsearch({ ...options, log, config, onEarlyExit })
+            );
             if (abortCtrl.signal.aborted) {
               return;
             }
@@ -137,27 +145,10 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
             ],
           });
 
-          const startRemoteKibana = config.get('kbnTestServer.startRemoteKibana');
-
-          if (startRemoteKibana) {
-            await runKibanaServer({
+          await withSpan('start_kibana', () =>
+            runKibanaServer({
               procs,
-              config: new Config({
-                settings: {
-                  ...config.getAll(),
-                  kbnTestServer: {
-                    sourceArgs: ['--no-base-path'],
-                    serverArgs: [
-                      ...config.get('kbnTestServer.serverArgs'),
-                      `--xpack.fleet.syncIntegrations.taskInterval=5s`,
-                      `--elasticsearch.hosts=http://localhost:9221`,
-                      `--server.port=5621`,
-                    ],
-                  },
-                },
-                path: config.path,
-                module: config.module,
-              }),
+              config,
               logsDir: options.logsDir,
               installDir: options.installDir,
               onEarlyExit,
@@ -166,20 +157,62 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
                   ? '--server.versioned.versionResolution=newest'
                   : '--server.versioned.versionResolution=oldest',
               ],
-              remote: true,
-            });
+            })
+          );
+
+          const startRemoteKibana = config.get('kbnTestServer.startRemoteKibana');
+
+          if (startRemoteKibana) {
+            await withSpan('start_remote_kibana', () =>
+              runKibanaServer({
+                procs,
+                config: new Config({
+                  settings: {
+                    ...config.getAll(),
+                    kbnTestServer: {
+                      sourceArgs: ['--no-base-path'],
+                      serverArgs: [
+                        ...config.get('kbnTestServer.serverArgs'),
+                        `--xpack.fleet.syncIntegrations.taskInterval=5s`,
+                        `--elasticsearch.hosts=http://localhost:9221`,
+                        `--server.port=5621`,
+                      ],
+                    },
+                  },
+                  path: config.path,
+                  module: config.module,
+                }),
+                logsDir: options.logsDir,
+                installDir: options.installDir,
+                onEarlyExit,
+                extraKbnOpts: [
+                  config.get('serverless')
+                    ? '--server.versioned.versionResolution=newest'
+                    : '--server.versioned.versionResolution=oldest',
+                ],
+                remote: true,
+              })
+            );
           }
 
           if (abortCtrl.signal.aborted) {
+            tx.setOutcome('failure');
             return;
           }
 
-          await runFtr({
-            log,
-            config,
-            esVersion: options.esVersion,
-            signal: abortCtrl.signal,
-          });
+          await withSpan('run_tests', () =>
+            runFtr({
+              log,
+              config,
+              esVersion: options.esVersion,
+              signal: abortCtrl.signal,
+            })
+          );
+
+          tx.setOutcome('success');
+        } catch (err) {
+          tx.setOutcome('failure');
+          throw err;
         } finally {
           try {
             const delay = config.get('kbnTestServer.delayShutdown');
@@ -188,17 +221,19 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
               await setTimeout(delay);
             }
 
-            await procs.stop('kibana');
+            await withSpan('shutdown_kibana', () => procs.stop('kibana'));
           } finally {
             // Clean up docker servers before ES
             if (shutdownDockerServers) {
-              await shutdownDockerServers();
+              await withSpan('shutdown_docker_servers', () => shutdownDockerServers!());
             }
             if (shutdownEs) {
-              await shutdownEs();
+              await withSpan('shutdown_es', () => shutdownEs!());
             }
           }
         }
+      }).finally(() => {
+        tx.end();
       });
     });
   }
