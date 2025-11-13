@@ -150,7 +150,7 @@ const ThreatHuntingEntitiesTableInner: React.FC = () => {
                     'xpack.securitySolution.entityAnalytics.threatHunting.entitiesTable.actions.timeline',
                     {
                       defaultMessage: 'Open timeline for {name}',
-                      values: { name: displayName },
+                      values: { name: displayName || normalizedIdentifierValue || '' },
                     }
                   )}
                   size="s"
