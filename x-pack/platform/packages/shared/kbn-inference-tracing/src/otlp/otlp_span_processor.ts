@@ -11,7 +11,6 @@ import { OTLPTraceExporter as OTLPTraceExporterHTTP } from '@opentelemetry/expor
 import { OTLPTraceExporter as OTLPTraceExporterProto } from '@opentelemetry/exporter-trace-otlp-proto';
 import { diag } from '@opentelemetry/api';
 import { BaseInferenceSpanProcessor } from '../base_inference_span_processor';
-import { IS_ROOT_INFERENCE_SPAN_ATTRIBUTE_NAME } from '../root_inference_span';
 
 export class OTLPSpanProcessor extends BaseInferenceSpanProcessor {
   private readonly config: InferenceTracingOtlpExportConfig;
@@ -36,7 +35,7 @@ export class OTLPSpanProcessor extends BaseInferenceSpanProcessor {
   }
 
   processInferenceSpan(span: tracing.ReadableSpan): tracing.ReadableSpan {
-    // Orphan @kbn/evals spans to make them queryable as roots in OTLP
+    // Drop parent context from @kbn/evals spans to make them queryable as roots
     if (span.attributes['inscrumentationScope.name'] === '@kbn/evals' && span.parentSpanContext) {
       span = {
         ...span,
@@ -45,14 +44,12 @@ export class OTLPSpanProcessor extends BaseInferenceSpanProcessor {
       };
     }
 
-    // Clean up internal tracking attributes
-    delete span.attributes._should_track;
-    delete span.attributes[IS_ROOT_INFERENCE_SPAN_ATTRIBUTE_NAME];
-
     if (!span.parentSpanContext) {
       const traceId = span.spanContext().traceId;
+      // No guarantee the trace is available in the same Kibana instance that generated it (OTLP exporter my route this to an external, monitoring cluster, hence not deep linking Kibana url)
       diag.info(
-        `OTLP: Exporting root span "${span.name}" (trace: ${traceId}) to ${this.config.url}`
+        `OTLP: Exporting root span "${span.name}" (trace: ${traceId}) to ${this.config.url}. 
+        To view the trace, replace <kibana-url> with the actual Kibana url and open the link in your browser. at https://<kibana-url>/app/apm/traces/explorer/waterfall?traceId=${traceId}&rangeFrom=now-15m&rangeTo=now`
       );
     }
     return span;
