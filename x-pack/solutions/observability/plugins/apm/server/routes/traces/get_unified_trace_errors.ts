@@ -19,11 +19,9 @@ import {
   OTEL_EVENT_NAME,
   TIMESTAMP_US,
   PROCESSOR_EVENT,
-  ERROR_LOG_LEVEL,
   ERROR_EXC_MESSAGE,
   ERROR_EXC_TYPE,
   ERROR_EXC_HANDLED,
-  ERROR_LOG_MESSAGE,
   ERROR_GROUP_ID,
   ERROR_CULPRIT,
 } from '../../../common/es_fields/apm';
@@ -31,8 +29,11 @@ import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import type { LogsClient } from '../../lib/helpers/create_es_client/create_logs_client';
 import type { TimestampUs } from '../../../typings/es_schemas/raw/fields/timestamp_us';
 import type { Exception } from '../../../typings/es_schemas/raw/error_raw';
-import { ApmDocumentType } from '../../../common/document_type';
-import { RollupInterval } from '../../../common/rollup';
+import {
+  getApmTraceErrorQuery,
+  requiredFields as requiredApmFields,
+} from './get_apm_trace_error_query';
+import { compactMap } from '../../utils/compact_map';
 
 export interface UnifiedTraceErrors {
   apmErrors: Awaited<ReturnType<typeof getUnifiedApmTraceError>>;
@@ -69,21 +70,6 @@ export async function getUnifiedTraceErrors({
   };
 }
 
-export const requiredApmFields = asMutableArray([
-  TIMESTAMP_US,
-  PROCESSOR_EVENT,
-  ID,
-  ERROR_GROUP_ID,
-] as const);
-export const optionalApmFields = asMutableArray([
-  TRANSACTION_ID,
-  SPAN_ID,
-  ERROR_CULPRIT,
-  ERROR_EXC_MESSAGE,
-  ERROR_EXC_HANDLED,
-  ERROR_EXC_TYPE,
-] as const);
-
 export const requiredOtelFields = asMutableArray([SPAN_ID, ID] as const);
 export const optionalOtelFields = asMutableArray([
   EXCEPTION_TYPE,
@@ -91,8 +77,6 @@ export const optionalOtelFields = asMutableArray([
   TIMESTAMP_US,
   OTEL_EVENT_NAME,
 ] as const);
-
-const excludedLogLevels = ['debug', 'info', 'warning'];
 
 export interface UnifiedError {
   id: string;
@@ -109,76 +93,43 @@ export interface UnifiedError {
   };
 }
 
-async function getUnifiedApmTraceError({
-  apmEventClient,
-  traceId,
-  docId,
-  start,
-  end,
-}: {
+async function getUnifiedApmTraceError(params: {
   apmEventClient: APMEventClient;
   traceId: string;
   docId?: string;
   start: number;
   end: number;
 }) {
-  const response = await apmEventClient.search('get_errors_docs', {
-    apm: {
-      sources: [
-        {
-          documentType: ApmDocumentType.ErrorEvent,
-          rollupInterval: RollupInterval.None,
+  const response = await getApmTraceErrorQuery(params);
+
+  return compactMap(response.hits.hits, (hit) => {
+    const errorSource = 'error' in hit._source ? hit._source : undefined;
+    const event = hit.fields ? accessKnownApmEventFields(hit.fields, requiredApmFields) : undefined;
+
+    const spanId = event?.[TRANSACTION_ID] ?? event?.[SPAN_ID];
+
+    if (!event || !spanId) {
+      return null;
+    }
+
+    const error: UnifiedError = {
+      id: event[ID],
+      spanId,
+      timestamp: { us: event[TIMESTAMP_US] },
+      error: {
+        grouping_key: event[ERROR_GROUP_ID],
+        log: errorSource?.error.log,
+        culprit: event[ERROR_CULPRIT],
+        exception: errorSource?.error.exception?.[0] ?? {
+          type: event[ERROR_EXC_TYPE],
+          message: event[ERROR_EXC_MESSAGE],
+          handled: event[ERROR_EXC_HANDLED],
         },
-      ],
-    },
-    track_total_hits: false,
-    size: 1000,
-    query: {
-      bool: {
-        filter: [
-          ...termQuery(TRACE_ID, traceId),
-          ...termQuery(SPAN_ID, docId),
-          ...rangeQuery(start, end),
-        ],
-        must_not: { terms: { [ERROR_LOG_LEVEL]: excludedLogLevels } },
       },
-    },
-    fields: [...requiredApmFields, ...optionalApmFields],
-    _source: [ERROR_LOG_MESSAGE, ERROR_EXC_MESSAGE, ERROR_EXC_HANDLED, ERROR_EXC_TYPE],
+    };
+
+    return error;
   });
-
-  return response.hits.hits
-    .map((hit) => {
-      const errorSource = 'error' in hit._source ? hit._source : undefined;
-      const event = hit.fields
-        ? accessKnownApmEventFields(hit.fields, requiredApmFields)
-        : undefined;
-
-      const spanId = event?.[TRANSACTION_ID] ?? event?.[SPAN_ID];
-
-      if (!event || !spanId) {
-        return undefined;
-      }
-
-      const error: UnifiedError = {
-        id: event[ID],
-        spanId,
-        timestamp: { us: event[TIMESTAMP_US] },
-        error: {
-          grouping_key: event[ERROR_GROUP_ID],
-          log: errorSource?.error.log,
-          culprit: event[ERROR_CULPRIT],
-          exception: errorSource?.error.exception?.[0] ?? {
-            type: event[ERROR_EXC_TYPE],
-            message: event[ERROR_EXC_MESSAGE],
-            handled: event[ERROR_EXC_HANDLED],
-          },
-        },
-      };
-
-      return error;
-    })
-    .filter((doc): doc is UnifiedError => !!doc);
 }
 
 async function getUnprocessedOtelErrors({
@@ -214,30 +165,28 @@ async function getUnprocessedOtelErrors({
     fields: [...requiredOtelFields, ...optionalOtelFields],
   });
 
-  return response.hits.hits
-    .map((hit) => {
-      const event = hit.fields
-        ? accessKnownApmEventFields(hit.fields as Partial<FlattenedApmEvent>, requiredOtelFields)
-        : undefined;
+  return compactMap(response.hits.hits, (hit) => {
+    const event = hit.fields
+      ? accessKnownApmEventFields(hit.fields as Partial<FlattenedApmEvent>, requiredOtelFields)
+      : undefined;
 
-      if (!event) return null;
+    if (!event) return null;
 
-      const timestamp = event[TIMESTAMP_US];
+    const timestamp = event[TIMESTAMP_US];
 
-      const error: UnifiedError = {
-        id: event[ID],
-        spanId: event[SPAN_ID],
-        timestamp: timestamp != null ? { us: timestamp } : undefined,
-        eventName: event[OTEL_EVENT_NAME],
-        error: {
-          exception: {
-            type: event[EXCEPTION_TYPE],
-            message: event[EXCEPTION_MESSAGE],
-          },
+    const error: UnifiedError = {
+      id: event[ID],
+      spanId: event[SPAN_ID],
+      timestamp: timestamp != null ? { us: timestamp } : undefined,
+      eventName: event[OTEL_EVENT_NAME],
+      error: {
+        exception: {
+          type: event[EXCEPTION_TYPE],
+          message: event[EXCEPTION_MESSAGE],
         },
-      };
+      },
+    };
 
-      return error;
-    })
-    .filter((doc): doc is UnifiedError => !!doc);
+    return error;
+  });
 }
