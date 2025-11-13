@@ -29,7 +29,7 @@ import {
   syntheticsSettingsObjectType,
   uptimeSettingsObjectType,
 } from './saved_objects/synthetics_settings';
-import { syntheticsApiKeyObjectType } from './saved_objects/service_api_key';
+import { syntheticsApiKeyObjectTypeName } from './saved_objects/service_api_key';
 
 export const PRIVATE_LOCATION_WRITE_API = 'private-location-write';
 
@@ -98,7 +98,7 @@ export const syntheticsFeature = {
           syntheticsSettingsObjectType,
           legacySyntheticsMonitorTypeSingle,
           syntheticsMonitorSavedObjectType,
-          syntheticsApiKeyObjectType,
+          syntheticsApiKeyObjectTypeName,
           syntheticsParamType,
 
           // uptime settings object is also registered here since feature is shared between synthetics and uptime
@@ -130,7 +130,7 @@ export const syntheticsFeature = {
           syntheticsSettingsObjectType,
           syntheticsMonitorSavedObjectType,
           legacySyntheticsMonitorTypeSingle,
-          syntheticsApiKeyObjectType,
+          syntheticsApiKeyObjectTypeName,
           privateLocationSavedObjectName,
           legacyPrivateLocationsSavedObjectName,
           // uptime settings object is also registered here since feature is shared between synthetics and uptime

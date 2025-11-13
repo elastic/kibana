@@ -26,6 +26,7 @@ import {
   LEGACY_SYNTHETICS_MONITOR_ENCRYPTED_TYPE_SINGLE,
 } from './synthetics_monitor/legacy_synthetics_monitor';
 import { syntheticsServiceApiKey } from './service_api_key';
+import { syntheticsSnippetType } from './synthetics_snippet';
 
 export const registerSyntheticsSavedObjects = (
   savedObjectsService: SavedObjectsServiceSetup,
@@ -57,4 +58,7 @@ export const registerSyntheticsSavedObjects = (
   // global params saved object type
   savedObjectsService.registerType(syntheticsParamSavedObjectType);
   encryptedSavedObjects.registerType(SYNTHETICS_PARAMS_SECRET_ENCRYPTED_TYPE);
+
+  // snippet saved object type
+  savedObjectsService.registerType(syntheticsSnippetType);
 };

@@ -33,6 +33,7 @@ import { createJourneyFailedStepsRoute, createJourneyRoute } from './pings/journ
 import { updateDefaultAlertingRoute } from './default_alerts/update_default_alert';
 import { getIndexSizesRoute } from './settings/settings';
 import { getAPIKeySyntheticsRoute } from './monitor_cruds/get_api_key';
+import { getSyntheticsSnippetsRoute } from './monitor_cruds/get_snippets';
 import { getServiceLocationsRoute } from './synthetics_service/get_service_locations';
 import { deleteSyntheticsMonitorRoute } from './monitor_cruds/delete_monitor';
 import {
@@ -77,6 +78,7 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   runOnceSyntheticsMonitorRoute,
   getServiceAllowedRoute,
   getAPIKeySyntheticsRoute,
+  getSyntheticsSnippetsRoute,
   syntheticsGetPingsRoute,
   getHasIntegrationMonitorsRoute,
   createGetCurrentStatusRoute,
