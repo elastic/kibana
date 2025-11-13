@@ -7,6 +7,7 @@
 
 import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
+import { inspect } from 'util';
 
 import type { CustomHttpResponseOptions, ResponseError } from '@kbn/core/server';
 
@@ -64,7 +65,7 @@ export function getDetailedErrorMessage(error: any): string {
       ? error.cause
       : error.cause instanceof Error
       ? error.cause.message
-      : JSON.stringify(error.cause)
+      : inspect(error.cause)
   })`;
 }
 

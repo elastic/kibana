@@ -121,7 +121,7 @@ describe('lib/errors', () => {
 
       expect(
         errors.getDetailedErrorMessage(new Error('some-message', { cause: { oh: 'no' } }))
-      ).toBe('some-message (cause: {"oh":"no"})');
+      ).toBe(`some-message (cause: { oh: 'no' })`);
 
       expect(
         errors.getDetailedErrorMessage(
