@@ -12,40 +12,50 @@ import type { TimeRange } from '@kbn/es-query';
 import { useMetricsExperienceClient } from '../context/metrics_experience_client_provider';
 import { usePaginatedMetricFieldsQuery } from './use_paginated_metric_fields_query';
 
-export const useMetricFieldsQuery = (params?: {
+export const useMetricFieldsSearchQuery = (params?: {
+  fields: string[];
   index: string;
   timeRange: TimeRange | undefined;
+  kuery: string | undefined;
+  enabled?: boolean;
 }) => {
   const { client } = useMetricsExperienceClient();
 
   return usePaginatedMetricFieldsQuery({
     queryKey: [
-      'metricFields',
+      'metricFieldsSearch',
+      params?.fields,
       params?.index,
       params?.timeRange?.from,
       params?.timeRange?.to,
+      params?.kuery,
     ] as const,
     queryFn: async ({
       queryKey,
       pageParam = 1,
       signal,
-    }: QueryFunctionContext<readonly [string, string?, string?, string?], number>) => {
+    }: QueryFunctionContext<
+      readonly [string, string[]?, string?, string?, string?, string?],
+      number
+    >) => {
       try {
-        const [, index, from, to] = queryKey;
+        const [, fields, index, from, to, kuery] = queryKey;
 
-        const response = await client.getFields(
+        const response = await client.searchFields(
           {
+            fields,
             index,
             from,
             to,
             page: pageParam,
             size: 200,
+            kuery,
           },
           signal
         );
 
         if (!response) {
-          throw new Error(`Failed to fetch fields for ${index}`);
+          throw new Error(`Failed to search fields for ${index}`);
         }
 
         return response;
@@ -53,5 +63,6 @@ export const useMetricFieldsQuery = (params?: {
         throw error;
       }
     },
+    enabled: params?.enabled !== false,
   });
 };
