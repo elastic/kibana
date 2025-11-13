@@ -151,6 +151,7 @@ export const RunScriptActionResult = memo<
         shouldShowOutput={
           command.commandDefinition?.meta?.agentType === 'microsoft_defender_endpoint'
         }
+        showPasscode={command.commandDefinition?.meta?.agentType !== 'microsoft_defender_endpoint'}
         textSize="s"
       />
     </ResultComponent>
