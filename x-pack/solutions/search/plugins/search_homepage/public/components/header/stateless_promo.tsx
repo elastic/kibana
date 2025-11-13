@@ -17,20 +17,21 @@ export const StatelessHeaderPromo = () => {
     services: { application },
   } = useKibana();
 
-  const ctaButtonLabel = i18n.translate('xpack.searchHomepage.statelessPromo.content.ctaButton', {
+  const ctaButtonLabel = i18n.translate('xpack.searchHomepage.statelessPromo12.content.ctaButton', {
     defaultMessage: 'Start Building',
   });
   return (
     <HeaderPromo
-      title={i18n.translate('xpack.searchHomepage.header.statelessPromo.title', {
+      title={i18n.translate('xpack.searchHomepage.header.statelessPromo12.title', {
         defaultMessage: 'Get started building AI Agents and chatting with your data',
       })}
-      description={i18n.translate('xpack.searchHomepage.header.statelessPromo.description', {
+      description={i18n.translate('xpack.searchHomepage.header.statelessPromo12.description', {
         defaultMessage:
           'Start building AI agents. Try Agent Builder to chat with your data using powerful native tools, or create your own agents and tools with hybrid search and ES|QL.',
       })}
       actions={[
         <HeaderCTAButton
+          key="12-agent-builder-button"
           data-telemetry-id="12-agent-builder-button"
           handleOnClick={() => {
             application.navigateToApp('agent_builder');
@@ -40,11 +41,12 @@ export const StatelessHeaderPromo = () => {
           {ctaButtonLabel}
         </HeaderCTAButton>,
         <HeaderCTALink
+          key="12-agent-builder-blog"
           // "search-promo-homepage-" is prepended to the telemetry id in HeaderCTALink
           data-telemetry-id="12-agent-builder-blog"
           href="https://www.elastic.co/search-labs/blog/ai-agentic-workflows-elastic-ai-agent-builder"
         >
-          {i18n.translate('xpack.searchHomepage.statelessPromo.content.ctaLink', {
+          {i18n.translate('xpack.searchHomepage.statelessPromo12.content.ctaLink', {
             defaultMessage: 'Check out the docs',
           })}
         </HeaderCTALink>,

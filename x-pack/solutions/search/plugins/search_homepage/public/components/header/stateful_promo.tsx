@@ -22,7 +22,7 @@ export const StatefulHeaderPromo = () => {
       })}
       actions={[
         <HeaderCTALink
-          data-test-subj="searchHomepageSearchHomepageHeaderCTA"
+          key="10-elser-on-eis"
           // "search-promo-homepage-" is prepended to the telemetry id in HeaderCTALink
           data-telemetry-id="10-elser-on-eis"
           href="https://www.elastic.co/docs/explore-analyze/elastic-inference/eis#elser-on-eis"

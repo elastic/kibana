@@ -28,7 +28,7 @@ export const HeaderPromo = ({ title, description, updates, actions }: HeaderProm
       <EuiSpacer size="xl" />
       {updates && updates.length > 0 ? <FeatureUpdateGroup updates={updates} /> : null}
       <EuiFlexGroup alignItems="center" gutterSize="m">
-        {actions.map((cta) => cta)}
+        {actions}
       </EuiFlexGroup>
     </EuiPanel>
   );
