@@ -5,10 +5,13 @@
   },
   "include": [
     "**/*",
-    "common/**/*.ts"
+    "../common/utils/profiling_data.ts"
   ],
   "kbn_references": [
-    "@kbn/scout-oblt"
+    "@kbn/scout-oblt",
+    "@kbn/tooling-log",
+    "@kbn/fleet-plugin",
+    "@kbn/profiling-data-access-plugin"
   ],
   "exclude": [
     "target/**/*"
