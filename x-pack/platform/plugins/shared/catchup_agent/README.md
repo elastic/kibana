@@ -38,12 +38,11 @@ The Elastic CatchUp Agent helps users catch up on everything that happened while
 2. **platform.catchup.external.github** - Summarizes GitHub PRs and issues (requires connector or token)
 3. **platform.catchup.external.gmail** - Summarizes Gmail conversations (requires connector)
 
-#### Correlation & Summary Tools (4 tools)
+#### Correlation & Summary Tools (3 tools)
 
 1. **platform.catchup.correlation.engine** - Correlates events across sources by shared identifiers (enhanced with entity extraction)
 2. **platform.catchup.correlation.entity_extraction** - Extracts entities (service names, alert IDs, case IDs, PR numbers) from messages/alerts
-3. **platform.catchup.correlation.semantic_search** - Uses semantic search with embeddings (ELSER/E5) and hybrid search (RRF) for fuzzy correlation
-4. **platform.catchup.summary.generator** - Generates unified markdown or JSON summary
+3. **platform.catchup.summary.generator** - Generates unified markdown or JSON summary
 
 #### Prioritization Tools (1 tool)
 
@@ -91,9 +90,8 @@ The plugin includes three pre-built workflows that demonstrate orchestration cap
 - ✅ All Security tools (using ES|QL queries)
 - ✅ Observability tool (using ES|QL queries)
 - ✅ Search tool (using ES|QL queries)
-- ✅ Correlation engine (enhanced with entity extraction and semantic search)
+- ✅ Correlation engine (enhanced with entity extraction)
 - ✅ Entity extraction tool
-- ✅ Semantic search tool (with hybrid search support)
 - ✅ Reranker prioritization tool (using ES|QL RERANK)
 - ✅ Unified search tool (demonstrates "Better Together" story)
 - ✅ Summary generator (markdown and JSON output)
@@ -107,9 +105,8 @@ The plugin includes three pre-built workflows that demonstrate orchestration cap
 This plugin demonstrates Elastic's search and relevance capabilities:
 
 - **Rerankers**: Uses ES|QL `RERANK` command to prioritize items by relevance
-- **Hybrid Search (RRF)**: Combines keyword and semantic search using Reciprocal Rank Fusion
+- **Hybrid Search (RRF)**: Combines keyword and semantic search using Reciprocal Rank Fusion (via unified search tool)
 - **Entity Extraction**: Identifies and extracts entities (services, alerts, cases, PRs) for correlation
-- **Semantic Search**: Uses embeddings (ELSER/E5) for similarity matching
 - **"Better Together" Story**: Integrates Security, Observability, and Search solutions with external context
 
 ### Pending (Future Enhancements)
