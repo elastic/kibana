@@ -86,6 +86,7 @@ export interface NewPackagePolicy {
   // Nullable to allow user to reset to default outputs
   output_id?: string | null;
   cloud_connector_id?: string | null;
+  cloud_connector_name?: string;
   package?: PackagePolicyPackage;
   inputs: NewPackagePolicyInput[];
   vars?: PackagePolicyConfigRecord;
