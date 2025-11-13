@@ -88,7 +88,7 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
               service
                 .transaction('POST /api/checkout', 'request')
                 .timestamp(timestamp + 100)
-                .duration(duration * 1.2)
+                .duration(traceDuration * 1.2)
                 .outcome('failure')
             );
           }
