@@ -165,30 +165,26 @@ export function createTracedEsClient({
           .query(
             { ...parameters },
             {
-              querystring: {
-                drop_null_columns: true,
-              },
+              querystring: { drop_null_columns: true },
+              ...requestOpts,
             }
           )
           .then((response) => {
-            const esqlResponse = response as unknown as UnparsedEsqlResponseOf<EsqlOutput>;
-
             const transform = options?.transform ?? 'none';
 
             if (transform === 'none') {
-              return esqlResponse;
+              return response;
             }
 
-            const parsedResponse = { hits: esqlResultToPlainObjects(esqlResponse) };
+            const rawEsqlResponse = response.body as unknown as UnparsedEsqlResponseOf<EsqlOutput>;
+            const hits = esqlResultToPlainObjects(rawEsqlResponse);
 
             if (transform === 'plain') {
-              return parsedResponse;
+              return { ...response, body: { hits } };
             }
 
-            return {
-              hits: parsedResponse.hits.map((hit) => unflattenObject(hit)),
-            };
-          }) as Promise<InferEsqlResponseOf<EsqlOutput, EsqlOptions>>;
+            return { ...response, body: { hits: hits.map((hit) => unflattenObject(hit)) } };
+          }) as Promise<{ body: InferEsqlResponseOf<EsqlOutput, EsqlOptions> }>;
       });
     },
     search<TDocument = unknown, TSearchRequest extends SearchRequest = SearchRequest>(
