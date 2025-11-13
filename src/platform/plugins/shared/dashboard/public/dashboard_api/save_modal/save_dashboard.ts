@@ -23,7 +23,7 @@ export const saveDashboard = async ({
    * Save the saved object using the content management
    */
   const idToSaveTo = saveOptions.saveAsCopy ? undefined : lastSavedId;
-
+  console.log({ dashboardState });
   try {
     const result = idToSaveTo
       ? await dashboardClient.update(idToSaveTo, dashboardState, references)

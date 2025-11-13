@@ -56,7 +56,9 @@ export function transformDashboardOut(
       : undefined;
 
   const options = transformOptionsOut(optionsJSON ?? '{}', controlGroupInput?.showApplySelections);
-
+  // controlGroupOut?.controls.forEach((control) => {
+  //   console.log({ control });
+  // });
   // try to maintain a consistent (alphabetical) order of keys
   return {
     ...(controlGroupOut && { controlGroupInput: controlGroupOut }),

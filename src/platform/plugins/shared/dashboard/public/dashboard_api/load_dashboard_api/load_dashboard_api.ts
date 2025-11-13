@@ -44,9 +44,9 @@ export async function loadDashboardApi({
     };
     embeddable.size = panelPlacementSettings;
   }
-
+  console.log('BEFORE ');
   const savedObjectResult = savedObjectId ? await dashboardClient.get(savedObjectId) : undefined;
-
+  console.log({ savedObjectResult });
   const validationResult =
     savedObjectResult && creationOptions?.validateLoadedSavedObject?.(savedObjectResult);
   if (validationResult === 'invalid') {

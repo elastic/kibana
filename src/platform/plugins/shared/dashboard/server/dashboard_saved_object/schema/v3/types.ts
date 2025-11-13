@@ -8,7 +8,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { LegacyIgnoreParentSettings, controlsGroupSchema } from '@kbn/controls-schemas';
+import type { ControlsGroupState, LegacyIgnoreParentSettings } from '@kbn/controls-schemas';
 import type { SavedDashboardPanel as SavedDashboardPanelV2 } from '../v2';
 import type { dashboardAttributesSchema, gridDataSchema, sectionSchema } from './v3';
 
@@ -29,13 +29,12 @@ export type SavedDashboardSection = TypeOf<typeof sectionSchema>;
  * A saved sticky dashboard control parsed directly from the Dashboard Attributes control panels JSON
  */
 export type StoredControlState = Pick<
-  TypeOf<typeof controlsGroupSchema>['controls'][number],
+  ControlsGroupState['controls'][number],
   'grow' | 'type' | 'width'
 > & {
   order: number; // order is generated from the array order
   id: string; // id is required
-  dataViewRefName?: string;
-  explicitInput: TypeOf<typeof controlsGroupSchema>['controls'][number]['config'];
+  explicitInput: ControlsGroupState['controls'][number]['config'] & { dataViewRefName?: string };
 };
 
 export type StoredControlGroupInput = Omit<

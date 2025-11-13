@@ -11,6 +11,7 @@ import { flow } from 'lodash';
 
 import type { Reference } from '@kbn/content-management-utils';
 import type { SerializableRecord } from '@kbn/utility-types';
+import type { ControlsGroupState } from '@kbn/controls-schemas';
 
 import type {
   StoredControlGroupInput,
@@ -55,7 +56,7 @@ export function transformControlProperties(controls: Array<StoredControlState>) 
 }
 
 function injectControlReferences(
-  controls: Array<StoredControlState>,
+  controls: ControlsGroupState['controls'],
   references: Reference[]
 ): DashboardControlsState {
   const transformedControls: DashboardControlsState = [];
@@ -63,7 +64,6 @@ function injectControlReferences(
   controls.forEach((control) => {
     const transforms = embeddableService.getTransforms(control.type);
     const { config, ...rest } = control;
-    console.log({ config, rest });
     try {
       if (transforms?.transformOut) {
         transformedControls.push({

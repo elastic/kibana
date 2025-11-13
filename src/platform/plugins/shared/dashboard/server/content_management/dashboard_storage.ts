@@ -75,8 +75,9 @@ export class DashboardStorage {
     }
 
     const response = { item, meta: { aliasPurpose, aliasTargetId, outcome } };
-
+    console.log({ response });
     const validationError = transforms.get.out.result.validate(response);
+    console.log({ validationError });
     if (validationError) {
       if (this.throwOnResultValidationError) {
         throw Boom.badRequest(`Invalid response. ${validationError.message}`);
@@ -100,6 +101,7 @@ export class DashboardStorage {
       throw Boom.badRequest(`Invalid response. ${resultError.message}`);
     }
 
+    console.log({ value });
     return value;
   }
 

@@ -53,7 +53,7 @@ export function serializeLayout(
           return {
             id,
             ...omit(control, 'order'),
-            ...(childState[id].rawState as ControlsGroupState['controls'][number]),
+            config: childState[id].rawState as ControlsGroupState['controls'][number],
           };
         }),
     },

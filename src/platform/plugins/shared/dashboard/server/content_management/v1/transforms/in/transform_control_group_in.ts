@@ -27,19 +27,20 @@ export function transformControlGroupIn(controlGroupInput?: ControlsGroupState) 
       const { id = uuidv4(), type } = controlState;
       const transforms = embeddableService.getTransforms(type);
 
-      let transformedControlState = controlState as Partial<StoredControlState>;
+      const transformedControlState = { ...controlState } as Partial<StoredControlState>;
       try {
         if (transforms?.transformIn) {
-          const transformed = transforms.transformIn(controlState);
+          const transformed = transforms.transformIn(controlState.config);
+          // console.log({ transformed });
           // prefix all the reference names with their IDs so that they are unique
           references = [
             ...references,
             ...prefixReferencesFromPanel(id, transformed.references ?? []),
           ];
           // update the reference names in the SO so that we can inject the references later
-          const transformedState = transformed.state as StoredControlState;
-          transformedState.dataViewRefName = `${id}:${transformedState.dataViewRefName}`;
-          transformedControlState = transformedState;
+          const transformedState = transformed.state as StoredControlState['explicitInput'];
+          transformedControlState.explicitInput = transformedState;
+          transformedControlState.explicitInput.dataViewRefName = `${id}:${transformedState.dataViewRefName}`;
         }
       } catch (transformInError) {
         // do not prevent save if transformIn throws
@@ -48,7 +49,7 @@ export function transformControlGroupIn(controlGroupInput?: ControlsGroupState) 
         );
       }
 
-      const { width, grow, ...rest } = transformedControlState;
+      const { width, grow, explicitInput } = transformedControlState;
       return [
         id,
         {
@@ -56,7 +57,7 @@ export function transformControlGroupIn(controlGroupInput?: ControlsGroupState) 
           type,
           width,
           grow,
-          explicitInput: { id, ...omit(rest, ['type']) },
+          explicitInput: { id, ...omit(explicitInput, ['type']) },
         },
       ];
     })

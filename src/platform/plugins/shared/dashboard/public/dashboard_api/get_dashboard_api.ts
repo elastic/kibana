@@ -112,6 +112,7 @@ export function getDashboardApi({
       controlGroupInput,
       references: panelReferences,
     } = layoutManager.internalApi.serializeLayout();
+    console.log({ controlGroupInput });
     const unifiedSearchState = unifiedSearchManager.internalApi.getState();
     const dashboardState: DashboardState = {
       ...settingsManager.internalApi.serializeSettings(),

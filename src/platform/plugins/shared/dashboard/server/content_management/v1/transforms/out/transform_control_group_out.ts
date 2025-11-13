@@ -14,14 +14,14 @@ import type {
   StoredControlGroupInput,
 } from '../../../../dashboard_saved_object';
 import { transformControlsState } from './transform_controls_state';
-import type { DashboardControlsState, DashboardState } from '../../types';
+import type { DashboardState } from '../../types';
 
 export function transformControlGroupOut(
   controlGroupInput: NonNullable<DashboardSavedObjectAttributes['controlGroupInput']>,
   references: Reference[],
   ignoreParentSettingsJSON?: string
 ): DashboardState['controlGroupInput'] {
-  let controls = controlGroupInput.panelsJSON
+  const controls = controlGroupInput.panelsJSON
     ? transformControlsState(controlGroupInput.panelsJSON, references)
     : [];
 
@@ -36,23 +36,15 @@ export function transformControlGroupOut(
       controlGroupInput.chainingSystem === 'NONE' ||
       legacyControlGroupOptions.ignoreFilters ||
       legacyControlGroupOptions.ignoreQuery;
-    controls = controls.reduce((prev, control) => {
-      const { config, ...rest } = control;
-      return [
-        ...prev,
-        {
-          ...rest,
-          config: {
-            ...config,
-            useGlobalFilters: !ignoreFilters,
-            ignoreValidations: legacyControlGroupOptions.ignoreValidations,
-          },
-        },
-      ];
-    }, [] as DashboardControlsState);
+    controls.map(({ config, ...rest }) => ({
+      ...rest,
+      config: {
+        useGlobalFilters: !ignoreFilters,
+        ignoreValidations: legacyControlGroupOptions.ignoreValidations,
+        ...config,
+      },
+    }));
   }
-  controls.forEach((control) => {
-    console.log({ control, config: control.config });
-  });
+
   return { controls };
 }
