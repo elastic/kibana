@@ -35,10 +35,7 @@ export type StoredControlState = Pick<
   order: number; // order is generated from the array order
   id: string; // id is required
   dataViewRefName?: string;
-  explicitInput: Omit<
-    TypeOf<typeof controlsGroupSchema>['controls'][number],
-    'grow' | 'type' | 'width'
-  >;
+  explicitInput: TypeOf<typeof controlsGroupSchema>['controls'][number]['config'];
 };
 
 export type StoredControlGroupInput = Omit<

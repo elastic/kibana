@@ -30,6 +30,7 @@ const isState816To819 = (state: unknown): state is State816To819 =>
 export function extractControlGroupState(state: {
   [key: string]: unknown;
 }): DashboardState['controlGroupInput'] {
+  console.log({ state });
   if (isState816To819(state)) {
     // URL state created in 8.16 through 8.18 passed control group runtime state in with controlGroupState key
     return {

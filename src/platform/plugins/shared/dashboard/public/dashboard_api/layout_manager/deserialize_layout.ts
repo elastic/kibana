@@ -25,9 +25,9 @@ export function deserializeLayout(
     controls: Object.values((controls ?? { controls: {} }).controls).reduce(
       (prev, control, index) => {
         const controlId = control.id ?? v4(); // TODO: Rename this to `uid`
-        const { width, grow, ...rest } = control;
-        childState[controlId] = { rawState: rest }; // push to child state
-        return { ...prev, [controlId]: { type: control.type, width, grow, order: index } };
+        const { width, grow, type, config } = control;
+        childState[controlId] = { rawState: config }; // push to child state
+        return { ...prev, [controlId]: { type, width, grow, order: index } };
       },
       {}
     ),

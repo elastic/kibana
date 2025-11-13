@@ -53,27 +53,27 @@ export const controlsGroupSchema = schema.object({
       schema
         .allOf([
           schema.object({ type: schema.literal(OPTIONS_LIST_CONTROL) }),
-          optionsListDSLControlSchema,
+          schema.object({ config: optionsListDSLControlSchema }),
           stickyControlSchema,
         ])
         .extendsDeep({ unknowns: 'allow' }), // allows for legacy unknowns such as `parentField` and `enhancements`
       schema
         .allOf([
           schema.object({ type: schema.literal(RANGE_SLIDER_CONTROL) }),
-          rangeSliderControlSchema,
+          schema.object({ config: rangeSliderControlSchema }),
           stickyControlSchema,
         ])
         .extendsDeep({ unknowns: 'allow' }),
       schema
         .allOf([
           schema.object({ type: schema.literal(TIME_SLIDER_CONTROL) }),
-          timeSliderControlSchema,
+          schema.object({ config: timeSliderControlSchema }),
           stickyControlSchema,
         ])
         .extendsDeep({ unknowns: 'allow' }), // allows for legacy unknowns such as `useGlobalFilters`
       schema.allOf([
         schema.object({ type: schema.literal(ESQL_CONTROL) }),
-        optionsListESQLControlSchema,
+        schema.object({ config: optionsListESQLControlSchema }),
         stickyControlSchema,
       ]), // variable controls do not need `unknowns: 'allow'` because they have no legacy values
     ]),

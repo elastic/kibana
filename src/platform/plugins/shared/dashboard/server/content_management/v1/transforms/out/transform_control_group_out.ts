@@ -37,15 +37,22 @@ export function transformControlGroupOut(
       legacyControlGroupOptions.ignoreFilters ||
       legacyControlGroupOptions.ignoreQuery;
     controls = controls.reduce((prev, control) => {
+      const { config, ...rest } = control;
       return [
         ...prev,
         {
-          ...control,
-          useGlobalFilters: !ignoreFilters,
-          ignoreValidations: legacyControlGroupOptions.ignoreValidations,
+          ...rest,
+          config: {
+            ...config,
+            useGlobalFilters: !ignoreFilters,
+            ignoreValidations: legacyControlGroupOptions.ignoreValidations,
+          },
         },
       ];
     }, [] as DashboardControlsState);
   }
+  controls.forEach((control) => {
+    console.log({ control, config: control.config });
+  });
   return { controls };
 }

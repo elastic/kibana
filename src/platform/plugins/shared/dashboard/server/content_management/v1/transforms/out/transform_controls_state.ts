@@ -49,7 +49,7 @@ export function transformControlProperties(controls: Array<StoredControlState>) 
         type,
         grow,
         width,
-        ...(explicitInput as SerializableRecord),
+        config: explicitInput as SerializableRecord,
       };
     });
 }
@@ -62,13 +62,16 @@ function injectControlReferences(
 
   controls.forEach((control) => {
     const transforms = embeddableService.getTransforms(control.type);
+    const { config, ...rest } = control;
+    console.log({ config, rest });
     try {
       if (transforms?.transformOut) {
-        transformedControls.push(
-          transforms.transformOut(control, references, control.id) as DashboardControlsState[number]
-        );
+        transformedControls.push({
+          ...rest,
+          config: transforms.transformOut(config, references, control.id),
+        } as DashboardControlsState[number]);
       } else {
-        transformedControls.push(control as DashboardControlsState[number]);
+        transformedControls.push({ ...rest, config } as DashboardControlsState[number]);
       }
     } catch (transformOutError) {
       // do not prevent read on transformOutError
@@ -77,6 +80,5 @@ function injectControlReferences(
       );
     }
   });
-
   return transformedControls;
 }
