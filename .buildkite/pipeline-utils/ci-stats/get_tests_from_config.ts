@@ -36,9 +36,9 @@ export async function getTestsFromJestConfig(configPath: string): Promise<string
     const results = await searchSource.getTestPaths(config.globalConfig, config.projectConfig);
     return results.tests.map((t) => t.path);
   } catch (error) {
-    console.error(`Error while resolving test files from config: ${configPath}`, error);
-    // If Jest config fails to load, return empty array
-    return [];
+    console.error(
+      `Error while resolving test files from config: ${configPath} - validate your config.`);
+    throw error;
   }
 }
 
