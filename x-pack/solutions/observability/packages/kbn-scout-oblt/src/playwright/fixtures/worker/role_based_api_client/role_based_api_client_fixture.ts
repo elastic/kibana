@@ -7,11 +7,11 @@
 
 import { coreWorkerFixtures } from '@kbn/scout/src/playwright/fixtures/scope/worker';
 import type request from 'superagent';
-import { ProfilingUsername } from './create_profiling_users/authentication';
-import { PROFILING_TEST_PASSWORD } from './create_profiling_users/authentication';
-import { createProfilingApiClient } from './api_supertest';
+import { RoleBasedUsername } from './create_users/authentication';
+import { USER_TEST_PASSWORD } from './create_users/authentication';
+import { createApiClient } from './api_client';
 
-export interface ProfilingClientFixture {
+export interface RoleBasedApiClientFixture {
   adminUser(options: {
     endpoint: string;
     params?: { query?: any; path?: any };
@@ -25,37 +25,37 @@ export interface ProfilingClientFixture {
     params?: { query?: any; path?: any };
   }): Promise<request.Response>;
 }
-export const profilingClientFixture = coreWorkerFixtures.extend<
+export const roleBasedApiClientFixture = coreWorkerFixtures.extend<
   {},
-  { profilingClient: ProfilingClientFixture }
+  { roleBasedApiClient: RoleBasedApiClientFixture }
 >({
-  profilingClient: [
+  roleBasedApiClient: [
     async ({ config, log, esClient }, use) => {
       log.info('Setting up profiling users for profilingClientFixture');
 
       await Promise.all([
         esClient.security.putUser({
           username: 'viewer',
-          password: PROFILING_TEST_PASSWORD,
+          password: USER_TEST_PASSWORD,
           roles: ['viewer'],
         }),
         esClient.security.putUser({
           username: 'no_access_user',
-          password: PROFILING_TEST_PASSWORD,
+          password: USER_TEST_PASSWORD,
           roles: [],
         }),
       ]);
 
-      function getProfilingApiClient({ username }: { username: ProfilingUsername | 'elastic' }) {
+      function getRoleBasedApiClient({ username }: { username: Users | 'elastic' }) {
         const url = new URL(config.hosts.kibana);
         url.username = username;
-        url.password = username === 'elastic' ? config.auth.password : PROFILING_TEST_PASSWORD;
-        return createProfilingApiClient(url);
+        url.password = username === 'elastic' ? config.auth.password : USER_TEST_PASSWORD;
+        return createApiClient(url);
       }
       await use({
-        adminUser: getProfilingApiClient({ username: 'elastic' }),
-        viewerUser: getProfilingApiClient({ username: ProfilingUsername.viewerUser }),
-        NoAccessUser: getProfilingApiClient({ username: ProfilingUsername.noAccessUser }),
+        adminUser: getRoleBasedApiClient({ username: 'elastic' }),
+        viewerUser: getRoleBasedApiClient({ username: RoleBasedUsername.viewerUser }),
+        NoAccessUser: getRoleBasedApiClient({ username: RoleBasedUsername.noAccessUser }),
       });
     },
     { scope: 'worker' },

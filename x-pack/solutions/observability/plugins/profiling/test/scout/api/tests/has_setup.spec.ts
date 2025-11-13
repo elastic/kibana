@@ -26,8 +26,8 @@ apiTest.describe('Profiling is not setup and no data is loaded', { tag: ['@ess']
     });
   });
 
-  apiTest('Admin users', async ({ profilingClient }) => {
-    const adminRes = await profilingClient.adminUser({
+  apiTest('Admin users', async ({ roleBasedApiClient }) => {
+    const adminRes = await roleBasedApiClient.adminUser({
       endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
     });
     const adminStatus = adminRes.body;
@@ -36,8 +36,8 @@ apiTest.describe('Profiling is not setup and no data is loaded', { tag: ['@ess']
     expect(adminStatus.pre_8_9_1_data).toBe(false);
   });
 
-  apiTest('Viewer users', async ({ profilingClient, apiServices }) => {
-    const readRes = await profilingClient.viewerUser({
+  apiTest('Viewer users', async ({ roleBasedApiClient, apiServices }) => {
+    const readRes = await roleBasedApiClient.viewerUser({
       endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
     });
 
@@ -53,8 +53,8 @@ apiTest.describe('APM integration not installed but setup completed', { tag: ['@
   apiTest.beforeEach(async ({ apiServices, config, log }) => {
     await setupProfiling(config, apiServices, log);
   });
-  apiTest('Admin user', async ({ profilingClient }) => {
-    const adminRes = await profilingClient.adminUser({
+  apiTest('Admin user', async ({ roleBasedApiClient }) => {
+    const adminRes = await roleBasedApiClient.adminUser({
       endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
     });
 
@@ -64,8 +64,8 @@ apiTest.describe('APM integration not installed but setup completed', { tag: ['@
     expect(adminStatus.pre_8_9_1_data).toBe(false);
   });
 
-  apiTest('Viewer user', async ({ profilingClient }) => {
-    const readRes = await profilingClient.viewerUser({
+  apiTest('Viewer user', async ({ roleBasedApiClient }) => {
+    const readRes = await roleBasedApiClient.viewerUser({
       endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
     });
 
@@ -93,8 +93,8 @@ apiTest.describe('Profiling is setup', { tag: ['@ess'] }, () => {
       logger: log,
     });
   });
-  apiTest('without data', async ({ profilingClient }) => {
-    const adminRes = await profilingClient.adminUser({
+  apiTest('without data', async ({ roleBasedApiClient }) => {
+    const adminRes = await roleBasedApiClient.adminUser({
       endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
     });
     const adminStatus = adminRes.body;
@@ -102,7 +102,7 @@ apiTest.describe('Profiling is setup', { tag: ['@ess'] }, () => {
     expect(adminStatus.has_data).toBe(false);
     expect(adminStatus.pre_8_9_1_data).toBe(false);
 
-    const readRes = await profilingClient.viewerUser({
+    const readRes = await roleBasedApiClient.viewerUser({
       endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
     });
     const readStatus = readRes.body;
@@ -112,9 +112,9 @@ apiTest.describe('Profiling is setup', { tag: ['@ess'] }, () => {
     expect(readStatus.has_required_role).toBe(false);
   });
 
-  apiTest('Admin user with data', async ({ esClient, profilingClient, log }) => {
+  apiTest('Admin user with data', async ({ esClient, roleBasedApiClient, log }) => {
     await loadProfilingData(esClient, log);
-    const adminRes = await profilingClient.adminUser({
+    const adminRes = await roleBasedApiClient.adminUser({
       endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
     });
     const adminStatus = adminRes.body;
@@ -123,8 +123,8 @@ apiTest.describe('Profiling is setup', { tag: ['@ess'] }, () => {
     expect(adminStatus.pre_8_9_1_data).toBe(false);
   });
 
-  apiTest('Viewer user with data', async ({ profilingClient }) => {
-    const readRes = await profilingClient.viewerUser({
+  apiTest('Viewer user with data', async ({ roleBasedApiClient }) => {
+    const readRes = await roleBasedApiClient.viewerUser({
       endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
     });
     const readStatus = readRes.body;
@@ -140,14 +140,14 @@ apiTest.describe('Collector integration is not installed', { tag: ['@ess'] }, ()
     await setupProfiling(config, apiServices, log);
   });
 
-  apiTest('Admin user collector integration missing', async ({ profilingClient, config }) => {
+  apiTest('Admin user collector integration missing', async ({ roleBasedApiClient, config }) => {
     const ids = await getProfilingPackagePolicyIds(config);
     const collectorId = ids.collectorId;
     await deletePackagePolicy(config, collectorId!);
 
     expect(collectorId).toBeDefined();
 
-    const adminRes = await profilingClient.adminUser({
+    const adminRes = await roleBasedApiClient.adminUser({
       endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
     });
     const adminStatus = adminRes.body;
@@ -156,14 +156,14 @@ apiTest.describe('Collector integration is not installed', { tag: ['@ess'] }, ()
     expect(adminStatus.pre_8_9_1_data).toBe(false);
   });
 
-  apiTest('Viewer user collector integration missing', async ({ profilingClient, config }) => {
+  apiTest('Viewer user collector integration missing', async ({ roleBasedApiClient, config }) => {
     const ids = await getProfilingPackagePolicyIds(config);
     const collectorId = ids.collectorId;
     await deletePackagePolicy(config, collectorId!);
 
     expect(collectorId).toBeDefined();
 
-    const readRes = await profilingClient.viewerUser({
+    const readRes = await roleBasedApiClient.viewerUser({
       endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
     });
     const readStatus = readRes.body;
@@ -175,7 +175,7 @@ apiTest.describe('Collector integration is not installed', { tag: ['@ess'] }, ()
 
   apiTest(
     'Admin user symbolizer integration is not installed',
-    async ({ profilingClient, config }) => {
+    async ({ roleBasedApiClient, config }) => {
       const ids = await getProfilingPackagePolicyIds(config);
 
       const symbolizerId = ids.symbolizerId;
@@ -184,7 +184,7 @@ apiTest.describe('Collector integration is not installed', { tag: ['@ess'] }, ()
 
       expect(symbolizerId).toBeDefined();
 
-      const adminRes = await profilingClient.adminUser({
+      const adminRes = await roleBasedApiClient.adminUser({
         endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
       });
       const adminStatus = adminRes.body;
@@ -196,14 +196,14 @@ apiTest.describe('Collector integration is not installed', { tag: ['@ess'] }, ()
 
   apiTest(
     'Viewer user symbolizer integration is not installed',
-    async ({ profilingClient, config }) => {
+    async ({ roleBasedApiClient, config }) => {
       const ids = await getProfilingPackagePolicyIds(config);
       const symbolizerId = ids.symbolizerId;
       await deletePackagePolicy(config, symbolizerId!);
 
       expect(symbolizerId).toBeDefined();
 
-      const readRes = await profilingClient.viewerUser({
+      const readRes = await roleBasedApiClient.viewerUser({
         endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
       });
       const readStatus = readRes.body;

@@ -4,6 +4,5 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-export { profilingSetupFixture } from './profiling_setup_fixture';
-export type { ProfilingSetupFixture } from './profiling_setup_fixture';
+export { roleBasedApiClientFixture } from './role_based_api_client_fixture';
+export type { RoleBasedApiClientFixture } from './role_based_api_client_fixture';

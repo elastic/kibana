@@ -11,7 +11,7 @@ import supertest from 'supertest';
 import type { URL } from 'url';
 import { format } from 'url';
 
-export function createProfilingApiClient(kbnUrl: URL) {
+export function createApiClient(kbnUrl: URL) {
   return async (options: {
     endpoint: string;
     params?: {
@@ -52,7 +52,7 @@ export function createProfilingApiClient(kbnUrl: URL) {
     }
     // supertest doesn't throw on http errors
     if (res?.status !== 200 && res?.status !== 202) {
-      throw new ProfilingApiError(res, endpoint);
+      throw new ApiError(res, endpoint);
     }
 
     return res;
@@ -68,14 +68,12 @@ type ApiErrorResponse = Omit<request.Response, 'body'> & {
   };
 };
 
-export type ProfilingApiSupertest = ReturnType<typeof createProfilingApiClient>;
-
-export class ProfilingApiError extends Error {
+export class ApiError extends Error {
   res: ApiErrorResponse;
 
   constructor(res: request.Response, endpoint: string) {
     super(
-      `Unhandled ProfilingApiError.
+      `Unhandled ApiError.
       Status: "${res.status}"
       Endpoint: "${endpoint}"
       Body: ${JSON.stringify(res.body)}`

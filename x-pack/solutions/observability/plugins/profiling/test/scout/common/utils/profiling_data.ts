@@ -71,11 +71,6 @@ export async function setupProfiling(
 
   await apiServices.fleet.agent.setup();
 
-  // await st
-  //   .post('/api/fleet/setup')
-  //   .set({ 'kbn-xsrf': 'foo' })
-  //   .set('x-elastic-internal-origin', 'Kibana');
-
   const res = await st
     .get(profilingRoutePaths.HasSetupESResources)
     .set({ 'kbn-xsrf': 'foo' })

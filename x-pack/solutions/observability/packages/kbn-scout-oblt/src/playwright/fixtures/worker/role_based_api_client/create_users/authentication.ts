@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-export enum ProfilingUsername {
+export enum RoleBasedUsername {
   noAccessUser = 'no_access_user',
   viewerUser = 'viewer',
   editorUser = 'editor',
 }
 
-export const PROFILING_TEST_PASSWORD = 'changeme';
+export const USER_TEST_PASSWORD = 'changeme';
 
-export const profilingUsers: Record<ProfilingUsername, { builtInRoleNames?: string[] }> = {
-  [ProfilingUsername.noAccessUser]: {},
-  [ProfilingUsername.viewerUser]: {
+export const Users: Record<RoleBasedUsername, { builtInRoleNames?: string[] }> = {
+  [RoleBasedUsername.noAccessUser]: {},
+  [RoleBasedUsername.viewerUser]: {
     builtInRoleNames: ['viewer'],
   },
-  [ProfilingUsername.editorUser]: {
+  [RoleBasedUsername.editorUser]: {
     builtInRoleNames: ['editor'],
   },
 };
