@@ -25,6 +25,11 @@ test.describe(
       await pageObjects.streams.gotoDataRetentionTab('logs.nginx');
     });
 
+    test.afterAll(async ({ apiServices }) => {
+      // Clear existing rules
+      await apiServices.streams.clearStreamChildren('logs');
+    });
+
     test('should update a stream data retention policy successfully', async ({ page }) => {
       // Update to a specific retention policy first
       await page.getByTestId('streamsAppRetentionMetadataEditDataRetentionButton').click();

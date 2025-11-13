@@ -9,7 +9,7 @@ import { expect } from '@kbn/scout';
 import { test } from '../../../fixtures';
 
 test.describe('Stream data routing - creating routing rules', { tag: ['@ess', '@svlOblt'] }, () => {
-  test.beforeEach(async ({ browserAuth, pageObjects, apiServices }) => {
+  test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
     await pageObjects.streams.gotoPartitioningTab('logs');
   });

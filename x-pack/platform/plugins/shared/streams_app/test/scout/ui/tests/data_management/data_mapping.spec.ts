@@ -32,7 +32,8 @@ test.describe('Stream data mapping - schema editor', { tag: ['@ess', '@svlOblt']
     await pageObjects.streams.gotoSchemaEditorTab('logs.info');
   });
 
-  test.afterAll(async ({ logsSynthtraceEsClient }) => {
+  test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
+    await apiServices.streams.clearStreamChildren('logs');
     await logsSynthtraceEsClient.clean();
   });
 

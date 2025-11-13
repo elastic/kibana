@@ -28,7 +28,8 @@ test.describe('Stream data processing - simulation preview', { tag: ['@ess', '@s
     await pageObjects.streams.gotoProcessingTab('logs-generic-default');
   });
 
-  test.afterAll(async ({ logsSynthtraceEsClient }) => {
+  test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
+    await apiServices.streams.clearStreamProcessors('logs-generic-default');
     await logsSynthtraceEsClient.clean();
   });
 
