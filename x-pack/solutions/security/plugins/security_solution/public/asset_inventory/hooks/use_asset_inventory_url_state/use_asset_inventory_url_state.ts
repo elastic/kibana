@@ -89,13 +89,9 @@ const usePageSizePreference = (localStorageKey?: string) => {
 
   const setPageSizePreference = useCallback((value: SetStateAction<number | undefined>) => {
     setPageSize((previous) => {
-      const resolvedValue =
-        typeof value === 'function'
-          ? (value as (prev: number) => number | undefined)(previous)
-          : value;
-
+      const resolvedValue = typeof value === 'function' ? value(previous) : value;
       const nextValue = resolvedValue ?? DEFAULT_VISIBLE_ROWS_PER_PAGE;
-      return nextValue > 0 ? nextValue : DEFAULT_VISIBLE_ROWS_PER_PAGE;
+      return nextValue > 0 ? nextValue : previous;
     });
   }, []);
 
