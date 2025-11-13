@@ -109,6 +109,7 @@ function DiscoverDocumentsComponent({
   stateContainer: DiscoverStateContainer;
   onFieldEdited?: (options: { editedDataView: DataView }) => void;
 }) {
+  const [isDataGridFullScreen, setIsDataGridFullScreen] = React.useState(false);
   const styles = useMemoCss(componentStyles);
   const services = useDiscoverServices();
   const { scopedEBTManager } = useScopedServices();
@@ -409,7 +410,7 @@ function DiscoverDocumentsComponent({
   const renderCustomToolbarWithElements = useMemo(
     () =>
       getRenderCustomToolbarWithElements({
-        leftSide: viewModeToggle,
+        leftSide: !isDataGridFullScreen ? viewModeToggle : undefined,
         bottomSection: (
           <>
             {callouts}
@@ -417,7 +418,7 @@ function DiscoverDocumentsComponent({
           </>
         ),
       }),
-    [viewModeToggle, callouts, loadingIndicator]
+    [viewModeToggle, callouts, loadingIndicator, isDataGridFullScreen]
   );
 
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
@@ -500,6 +501,9 @@ function DiscoverDocumentsComponent({
             cellActionsHandling="append"
             initialState={dataGridUiState}
             onInitialStateChange={onInitialStateChange}
+            onFullScreenChange={(isFullScreen) => {
+              setIsDataGridFullScreen(isFullScreen);
+            }}
           />
         </CellActionsProvider>
       </div>
