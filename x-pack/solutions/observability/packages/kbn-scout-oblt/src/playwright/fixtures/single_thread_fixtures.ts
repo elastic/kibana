@@ -44,7 +44,7 @@ const baseFixture = base.extend<ObltTestFixtures, ObltWorkerFixtures>({
 const apiFixture = apiBase.extend<ObltApiServicesFixture>({
   apiServices: [
     async (
-      { apiServices }: { apiServices: ApiServicesFixture; },
+      { apiServices }: { apiServices: ApiServicesFixture },
       use: (extendedApiServices: ObltApiServicesFixture) => Promise<void>
     ) => {
       const extendedApiServices = apiServices as ObltApiServicesFixture;
