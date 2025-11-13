@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { SavedObjectsType } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import type { SyntheticsServerSetup } from '../types';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { SyntheticsServiceSnippet } from '../../common/runtime_types/synthetics_service_snippet';
 
 // export const syntheticsApiKeyID = 'ba997842-b0cf-4429-aa9d-578d9bf0d391';
@@ -49,49 +49,36 @@ export const syntheticsSnippetType: SavedObjectsType = {
   },
 };
 
-const getClientOrThrow = (server: SyntheticsServerSetup) => {
-  const soClient = server.savedObjectsClient;
-  if (!soClient) {
-    throw new Error('Saved objects client is not available');
-  }
-  return soClient;
-};
+export class SyntheticsSnippetsService {
+  constructor(private readonly soClient: SavedObjectsClientContract) {}
 
-const getSyntheticsServiceSnippets = async (server: SyntheticsServerSetup) => {
-  try {
-    const soClient = getClientOrThrow(server);
-    const response = await soClient.find<SyntheticsServiceSnippet>({
-      type: syntheticsSnippetType.name,
-    });
-    return response.saved_objects.map((obj) => obj.attributes);
-  } catch (getErr) {
-    if (SavedObjectsErrorHelpers.isNotFoundError(getErr)) {
-      return undefined;
+  async getSnippets() {
+    try {
+      const response = await this.soClient.find<SyntheticsServiceSnippet>({
+        type: syntheticsSnippetType.name,
+      });
+      console.log('Retrieved synthetics snippets:', response);
+      return response.saved_objects.map((obj) => obj.attributes);
+    } catch (getErr) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(getErr)) {
+        return undefined;
+      }
+      throw getErr;
     }
-    throw getErr;
   }
-};
 
-// export const setSyntheticsServiceApiKey = async (
-//   soClient: SavedObjectsClientContract,
-//   apiKey: SyntheticsServiceApiKey
-// ) => {
-//   await soClient.create(syntheticsSnippet.name, apiKey, {
-//     id: syntheticsApiKeyID,
-//     overwrite: true,
-//   });
-// };
-
-// const deleteSyntheticsServiceApiKey = async (soClient: SavedObjectsClientContract) => {
-//   try {
-//     return await soClient.delete(syntheticsSnippet.name, syntheticsApiKeyID);
-//   } catch (e) {
-//     throw e;
-//   }
-// };
-
-export const syntheticsServiceSnippetsSavedObject = {
-  get: getSyntheticsServiceSnippets,
-  //   set: setSyntheticsServiceApiKey,
-  //   delete: deleteSyntheticsServiceApiKey,
-};
+  async addSnippet(syntheticsSnippet: SyntheticsServiceSnippet) {
+    try {
+      const createdSnippet = await this.soClient.create(
+        syntheticsSnippetType.name,
+        syntheticsSnippet
+      );
+      return {
+        snippet: createdSnippet.attributes,
+      };
+    } catch (error) {
+      console.error('Error creating synthetics snippet', error);
+      throw error;
+    }
+  }
+}
