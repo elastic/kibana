@@ -35,6 +35,7 @@ import type {
   ESQLBinaryExpression,
 } from '@kbn/esql-ast/src/types';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import { extractCategorizeTokens } from './extract_categorize_tokens';
 import { getOperator, PARAM_TYPES_NO_NEED_IMPLICIT_STRING_CASTING } from './append_to_query';
 
@@ -252,13 +253,17 @@ export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta =
 
 export interface CascadeQueryArgs {
   /**
+   * data view for the query
+   */
+  dataView: DataView;
+  /**
    * anchor query for generating the next valid query
    */
   query: AggregateQuery;
   /**
-   * data view for the query
+   * ESQL variables for the query
    */
-  dataView: DataView;
+  esqlVariables: ESQLControlVariable[] | undefined;
   /**
    * Node type (group or leaf) for which we are constructing the cascade query
    */
@@ -279,6 +284,7 @@ export interface CascadeQueryArgs {
 export const constructCascadeQuery = ({
   query,
   dataView,
+  esqlVariables,
   nodeType,
   nodePath,
   nodePathMap,
@@ -329,8 +335,16 @@ export const constructCascadeQuery = ({
       // when a column name is not assigned on using a grouping function, one is created automatically from the function expression that includes backticks
       fieldDeclarationCommandSummary.grouping[`\`${pathSegment}\``];
 
-    // check if we have a value for the path segment in the node path map to match on
-    if (!(groupValue && nodePathMap[pathSegment] !== undefined)) {
+    if (
+      !(
+        // check if we have a value for the path segment in the node path map to match on
+        (
+          (groupValue && nodePathMap[pathSegment] !== undefined) ||
+          // or in the case where the field is an ESQL variable, we check that we have the current path is one of the variables available in the query
+          (esqlVariables?.findIndex((variable) => variable.value === pathSegment) ?? -1) >= 0
+        )
+      )
+    ) {
       throw new Error(`The "${pathSegment}" field is not operable`);
     }
 
@@ -356,6 +370,16 @@ export const constructCascadeQuery = ({
 
     // get field type for the group field
     const groupDataViewFieldDefinition = dataView.fields.getByName(pathSegment);
+
+    if (
+      !groupValue &&
+      (esqlVariables?.findIndex((variable) => variable.value === pathSegment) ?? -1) >= 0
+    ) {
+      // Handling for columns received from ESQL variables
+      return handleStatsByColumnLeafOperation(cascadeOperationQuery, groupDataViewFieldDefinition, {
+        [pathSegment]: nodePathMap[pathSegment],
+      });
+    }
 
     if (isColumn(groupValue.definition)) {
       return handleStatsByColumnLeafOperation(cascadeOperationQuery, groupDataViewFieldDefinition, {
@@ -529,11 +553,7 @@ export function mutateQueryStatsGrouping(query: AggregateQuery, pick: string[]):
           name: statsCommandArg.name,
           args: statsCommandArg.args.reduce<Array<ESQLAstItem>>((acc, cur) => {
             if (isColumn(cur) && pick.includes(removeBackticks(cur.name))) {
-              acc.push(
-                Builder.expression.column({
-                  args: [Builder.identifier({ name: cur.name })],
-                })
-              );
+              acc.push(synth.exp(cur.text, { withFormatting: false }));
             } else if (
               isFunctionExpression(cur) &&
               isSupportedStatsFunction(

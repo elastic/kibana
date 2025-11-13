@@ -35,6 +35,7 @@ import {
   type SupportedStatsFunction,
 } from '@kbn/esql-utils/src/utils/cascaded_documents_helpers';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import { getPatternCellRenderer } from '../../../../../../context_awareness/profile_providers/common/patterns_data_source_profile/pattern_cell_renderer';
 
 import type { ESQLDataGroupNode, DataTableRecord } from './types';
@@ -53,6 +54,7 @@ interface RowClickActionContext {
   dataView: DataView;
   editorQuery: AggregateQuery;
   editorQueryMeta: ESQLStatsQueryMeta;
+  esqlVariables: ESQLControlVariable[] | undefined;
   rowContext: RowContext;
   services: UnifiedDataTableProps['services'];
   closeActionMenu: () => void;
@@ -144,6 +146,7 @@ const contextRowActions: Array<
           query: constructCascadeQuery({
             query: this.editorQuery,
             dataView: this.dataView,
+            esqlVariables: this.esqlVariables,
             nodeType: 'leaf',
             nodePath: [this.rowContext.groupId],
             nodePathMap: { [this.rowContext.groupId]: this.rowContext.groupValue },
@@ -157,7 +160,12 @@ const contextRowActions: Array<
 interface ContextMenuProps
   extends Pick<
     RowClickActionContext,
-    'editorQuery' | 'editorQueryMeta' | 'globalState' | 'openInNewTab' | 'dataView'
+    | 'editorQuery'
+    | 'editorQueryMeta'
+    | 'globalState'
+    | 'openInNewTab'
+    | 'dataView'
+    | 'esqlVariables'
   > {
   row: RowContext;
   services: UnifiedDataTableProps['services'];
@@ -215,6 +223,7 @@ const ContextMenu = React.memo(
 
 export const useEsqlDataCascadeRowActionHelpers = (
   dataView: DataView,
+  esqlVariables: ESQLControlVariable[] | undefined,
   editorQuery: AggregateQuery,
   editorQueryMeta: ESQLStatsQueryMeta,
   globalState: TabStateGlobalState,
@@ -274,6 +283,7 @@ export const useEsqlDataCascadeRowActionHelpers = (
             close={closePopover}
             editorQuery={editorQuery}
             editorQueryMeta={editorQueryMeta}
+            esqlVariables={esqlVariables}
             globalState={globalState}
             row={popoverRowData!}
             services={services}
@@ -288,6 +298,7 @@ export const useEsqlDataCascadeRowActionHelpers = (
       closePopover,
       editorQuery,
       editorQueryMeta,
+      esqlVariables,
       globalState,
       services,
       dataView,
@@ -325,9 +336,9 @@ export function useEsqlDataCascadeRowHeaderComponents(
   >(
     ({ rowData, nodePath }) => {
       const rowGroup = nodePath[nodePath.length - 1];
-      const type = editorQueryMeta.groupByFields.find((field) => field.field === rowGroup)!.type;
+      const type = editorQueryMeta.groupByFields.find((field) => field.field === rowGroup)?.type;
 
-      if (/categorize/i.test(type)) {
+      if (type && /categorize/i.test(type)) {
         return (
           <div data-test-subj={`${rowData.id}-dscCascadeRowTitlePatternCellRenderer`}>
             {getPatternCellRenderer(

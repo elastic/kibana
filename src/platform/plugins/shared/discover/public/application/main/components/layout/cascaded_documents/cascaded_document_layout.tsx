@@ -61,7 +61,10 @@ const ESQLDataCascade = React.memo(
     ...props
   }: ESQLDataCascadeProps) => {
     const [query, defaultFilters] = useAppStateSelector((state) => [state.query, state.filters]);
-    const globalState = useCurrentTabSelector((state) => state.globalState);
+    const [globalState, esqlVariables] = useCurrentTabSelector((state) => [
+      state.globalState,
+      state.esqlVariables,
+    ]);
     const globalFilters = globalState?.filters;
     const globalTimeRange = globalState?.timeRange;
     const { scopedProfilesManager } = useScopedServices();
@@ -88,6 +91,7 @@ const ESQLDataCascade = React.memo(
 
         return fetchEsql({
           query: esqlQuery,
+          esqlVariables,
           dataView,
           data: props.services.data,
           expressions,
@@ -109,6 +113,7 @@ const ESQLDataCascade = React.memo(
       [
         dataView,
         defaultFilters,
+        esqlVariables,
         expressions,
         globalFilters,
         globalTimeRange,
@@ -155,9 +160,14 @@ const ESQLDataCascade = React.memo(
     );
 
     const fetchCascadeData = useCallback(
-      async ({ nodeType, nodePath, nodePathMap }: Omit<CascadeQueryArgs, 'query' | 'dataView'>) => {
+      async ({
+        nodeType,
+        nodePath,
+        nodePathMap,
+      }: Omit<CascadeQueryArgs, 'query' | 'dataView' | 'esqlVariables'>) => {
         const newQuery = constructCascadeQuery({
           query: query as AggregateQuery,
+          esqlVariables,
           dataView,
           nodeType,
           nodePath,
@@ -180,7 +190,7 @@ const ESQLDataCascade = React.memo(
 
         return records;
       },
-      [query, dataView, scopedESQLQueryFetch]
+      [query, dataView, esqlVariables, scopedESQLQueryFetch]
     );
 
     const onCascadeGroupNodeExpanded = useCallback<
@@ -213,13 +223,25 @@ const ESQLDataCascade = React.memo(
       [fetchCascadeData]
     );
 
+    const selectedCascadeGroups = useMemo<string[]>(
+      () =>
+        cascadeConfig.selectedCascadeGroups.map((group) => {
+          return (
+            // replace occurrences of esql variables with their actual values for use within the cascade group data
+            (esqlVariables?.find((variable) => variable.key === group.replace(/^\?\?/, ''))
+              ?.value as string | undefined) ?? group
+          );
+        }),
+      [cascadeConfig.selectedCascadeGroups, esqlVariables]
+    );
+
     return (
       <DataCascade<ESQLDataGroupNode>
         size="s"
         overscan={25}
         data={cascadeGroupData}
         cascadeGroups={cascadeConfig.availableCascadeGroups}
-        initialGroupColumn={[...cascadeConfig.selectedCascadeGroups]}
+        initialGroupColumn={selectedCascadeGroups}
         customTableHeader={customTableHeading}
       >
         <DataCascadeRow<ESQLDataGroupNode, DataTableRecord>
@@ -246,7 +268,10 @@ export const CascadedDocumentsLayout = React.memo(
     ...props
   }: Omit<ESQLDataCascadeProps, 'togglePopover'>) => {
     const [query] = useAppStateSelector((state) => [state.query, state.filters]);
-    const globalState = useCurrentTabSelector((state) => state.globalState);
+    const [globalState, esqlVariables] = useCurrentTabSelector((state) => [
+      state.globalState,
+      state.esqlVariables,
+    ]);
     const { euiTheme } = useEuiTheme();
     const cascadeWrapperRef = useRef<HTMLDivElement | null>(null);
 
@@ -258,6 +283,7 @@ export const CascadedDocumentsLayout = React.memo(
 
     const { renderRowActionPopover, togglePopover } = useEsqlDataCascadeRowActionHelpers(
       dataView,
+      esqlVariables,
       query as AggregateQuery,
       queryMeta,
       globalState,
