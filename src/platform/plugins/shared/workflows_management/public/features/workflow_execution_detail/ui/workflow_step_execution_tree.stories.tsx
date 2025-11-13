@@ -474,7 +474,6 @@ export const Empty = {
 
 export const Loading: StoryObj<typeof WorkflowStepExecutionTree> = {
   args: {
-    isLoading: true,
     error: null,
     selectedId: null,
   },
@@ -482,7 +481,6 @@ export const Loading: StoryObj<typeof WorkflowStepExecutionTree> = {
 
 export const NoStepExecutionsExecuting: StoryObj<typeof WorkflowStepExecutionTree> = {
   args: {
-    isLoading: false,
     error: null,
     execution: {
       id: 'db38b255-ec34-4048-8b77-776081cb3a97',
@@ -503,7 +501,6 @@ export const NoStepExecutionsExecuting: StoryObj<typeof WorkflowStepExecutionTre
 
 export const NoStepExecutions: StoryObj<typeof WorkflowStepExecutionTree> = {
   args: {
-    isLoading: false,
     error: null,
     execution: {
       id: 'db38b255-ec34-4048-8b77-776081cb3a97',
@@ -523,7 +520,6 @@ export const NoStepExecutions: StoryObj<typeof WorkflowStepExecutionTree> = {
 
 export const ErrorStory: StoryObj<typeof WorkflowStepExecutionTree> = {
   args: {
-    isLoading: false,
     error: new Error('Internal server error'),
     selectedId: null,
   },
