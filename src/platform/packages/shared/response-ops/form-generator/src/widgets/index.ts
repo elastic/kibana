@@ -13,9 +13,8 @@ import { SelectField } from './select_field';
 import { PasswordField } from './password_field';
 import { DiscriminatedUnionField } from './discriminated_union_field/discriminated_union_field';
 import { KeyValueField } from './key_value_field';
-import type { UIMetadata } from '../connector_spec_ui';
 
-export type WidgetType = NonNullable<UIMetadata['widget']>;
+export type WidgetType = 'text' | 'password' | 'select' | 'formFieldset' | 'keyValue';
 
 export const WIDGET_REGISTRY: Partial<Record<WidgetType, React.ComponentType<any>>> = {
   text: TextField,
@@ -23,16 +22,6 @@ export const WIDGET_REGISTRY: Partial<Record<WidgetType, React.ComponentType<any
   select: SelectField,
   formFieldset: DiscriminatedUnionField,
   keyValue: KeyValueField,
-  // TODO: Add more widgets as they are implemented:
-  // textarea: TextAreaField,
-  // json: JsonField,
-  // code: CodeField,
-  // number: NumberField,
-  // multiSelect: MultiSelectField,
-  // toggle: ToggleField,
-  // date: DateField,
-  // dateTime: DateTimeField,
-  // fileUpload: FileUploadField,
 };
 
 export function getWidget(widgetType: WidgetType): React.ComponentType<any> | undefined {

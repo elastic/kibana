@@ -15,7 +15,6 @@ import {
   DiscriminatedUnionField,
   getDiscriminatedUnionInitialValue,
 } from './discriminated_union_field';
-import { withUIMeta } from '../../connector_spec_ui';
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <IntlProvider locale="en">{children}</IntlProvider>
@@ -32,17 +31,17 @@ describe('DiscriminatedUnionField', () => {
   it('renders all union options as checkable cards', () => {
     const option1 = z.object({
       type: z.literal('basic'),
-      username: withUIMeta(z.string(), { widget: 'text', label: 'Username' }),
+      username: z.string().meta({ widget: 'text', label: 'Username' }),
     });
 
     const option2 = z.object({
       type: z.literal('oauth'),
-      token: withUIMeta(z.string(), { widget: 'text', label: 'Token' }),
+      token: z.string().meta({ widget: 'text', label: 'Token' }),
     });
 
     const schema = z.discriminatedUnion('type', [
-      withUIMeta(option1, { widgetOptions: { label: 'Basic Auth' } }),
-      withUIMeta(option2, { widgetOptions: { label: 'OAuth' } }),
+      option1.meta({ widgetOptions: { label: 'Basic Auth' } }),
+      option2.meta({ widgetOptions: { label: 'OAuth' } }),
     ]);
 
     render(
@@ -65,17 +64,17 @@ describe('DiscriminatedUnionField', () => {
   it('shows selected option as checked', () => {
     const option1 = z.object({
       type: z.literal('basic'),
-      username: withUIMeta(z.string(), { widget: 'text', label: 'Username' }),
+      username: z.string().meta({ widget: 'text', label: 'Username' }),
     });
 
     const option2 = z.object({
       type: z.literal('oauth'),
-      token: withUIMeta(z.string(), { widget: 'text', label: 'Token' }),
+      token: z.string().meta({ widget: 'text', label: 'Token' }),
     });
 
     const schema = z.discriminatedUnion('type', [
-      withUIMeta(option1, { widgetOptions: { label: 'Basic Auth' } }),
-      withUIMeta(option2, { widgetOptions: { label: 'OAuth' } }),
+      option1.meta({ widgetOptions: { label: 'Basic Auth' } }),
+      option2.meta({ widgetOptions: { label: 'OAuth' } }),
     ]);
 
     render(
@@ -97,18 +96,18 @@ describe('DiscriminatedUnionField', () => {
   it('renders nested fields for selected option', () => {
     const option1 = z.object({
       type: z.literal('basic'),
-      username: withUIMeta(z.string(), { widget: 'text', label: 'Username' }),
-      password: withUIMeta(z.string(), { widget: 'password', label: 'Password' }),
+      username: z.string().meta({ widget: 'text', label: 'Username' }),
+      password: z.string().meta({ widget: 'password', label: 'Password' }),
     });
 
     const option2 = z.object({
       type: z.literal('oauth'),
-      token: withUIMeta(z.string(), { widget: 'text', label: 'Token' }),
+      token: z.string().meta({ widget: 'text', label: 'Token' }),
     });
 
     const schema = z.discriminatedUnion('type', [
-      withUIMeta(option1, { widgetOptions: { label: 'Basic Auth' } }),
-      withUIMeta(option2, { widgetOptions: { label: 'OAuth' } }),
+      option1.meta({ widgetOptions: { label: 'Basic Auth' } }),
+      option2.meta({ widgetOptions: { label: 'OAuth' } }),
     ]);
 
     render(
@@ -131,17 +130,17 @@ describe('DiscriminatedUnionField', () => {
   it('calls onChange when switching options', async () => {
     const option1 = z.object({
       type: z.literal('basic'),
-      username: withUIMeta(z.string(), { widget: 'text', label: 'Username' }),
+      username: z.string().meta({ widget: 'text', label: 'Username' }),
     });
 
     const option2 = z.object({
       type: z.literal('oauth'),
-      token: withUIMeta(z.string(), { widget: 'text', label: 'Token' }),
+      token: z.string().meta({ widget: 'text', label: 'Token' }),
     });
 
     const schema = z.discriminatedUnion('type', [
-      withUIMeta(option1, { widgetOptions: { label: 'Basic Auth' } }),
-      withUIMeta(option2, { widgetOptions: { label: 'OAuth' } }),
+      option1.meta({ widgetOptions: { label: 'Basic Auth' } }),
+      option2.meta({ widgetOptions: { label: 'OAuth' } }),
     ]);
 
     render(
@@ -170,11 +169,11 @@ describe('DiscriminatedUnionField', () => {
   it('calls onChange when nested field changes', async () => {
     const option1 = z.object({
       type: z.literal('basic'),
-      username: withUIMeta(z.string(), { widget: 'text', label: 'Username' }),
+      username: z.string().meta({ widget: 'text', label: 'Username' }),
     });
 
     const schema = z.discriminatedUnion('type', [
-      withUIMeta(option1, { widgetOptions: { label: 'Basic Auth' } }),
+      option1.meta({ widgetOptions: { label: 'Basic Auth' } }),
     ]);
 
     render(
@@ -189,12 +188,10 @@ describe('DiscriminatedUnionField', () => {
       { wrapper }
     );
 
-    // Get the input by its current value (empty string)
     const usernameInput = screen.getByRole('textbox');
     fireEvent.change(usernameInput, { target: { value: 'testuser' } });
 
     await waitFor(() => {
-      // Widget passes full object to onChange, transformation happens at form submit
       expect(mockOnChange).toHaveBeenCalledWith('auth', { type: 'basic', username: 'testuser' });
     });
   });
@@ -202,11 +199,11 @@ describe('DiscriminatedUnionField', () => {
   it('validates nested fields on blur', async () => {
     const option1 = z.object({
       type: z.literal('basic'),
-      username: withUIMeta(z.string().min(3), { widget: 'text', label: 'Username' }),
+      username: z.string().min(3).meta({ widget: 'text', label: 'Username' }),
     });
 
     const schema = z.discriminatedUnion('type', [
-      withUIMeta(option1, { widgetOptions: { label: 'Basic Auth' } }),
+      option1.meta({ widgetOptions: { label: 'Basic Auth' } }),
     ]);
 
     render(
@@ -232,12 +229,12 @@ describe('DiscriminatedUnionField', () => {
   it('should not show validation error for untouched fields when tabbing through', async () => {
     const option1 = z.object({
       type: z.literal('basic'),
-      username: withUIMeta(z.string().min(3), { widget: 'text', label: 'Username' }),
-      password: withUIMeta(z.string().min(3), { widget: 'password', label: 'Password' }),
+      username: z.string().min(3).meta({ widget: 'text', label: 'Username' }),
+      password: z.string().min(3).meta({ widget: 'password', label: 'Password' }),
     });
 
     const schema = z.discriminatedUnion('type', [
-      withUIMeta(option1, { widgetOptions: { label: 'Basic Auth' } }),
+      option1.meta({ widgetOptions: { label: 'Basic Auth' } }),
     ]);
 
     render(
@@ -252,36 +249,28 @@ describe('DiscriminatedUnionField', () => {
       { wrapper }
     );
 
-    // Initially, no errors should be visible (fields are untouched)
     expect(screen.queryByText(/>=3 characters/i)).toBeNull();
 
-    // Get inputs
     const usernameInput = screen.getByDisplayValue('ab');
     const passwordInput = screen.getByDisplayValue('xy');
 
-    // Blur username - this should trigger validation and show error for username only
     fireEvent.blur(usernameInput);
 
     await waitFor(() => {
-      // Username error should appear (it was touched and is invalid)
       const errors = screen.queryAllByText(/>=3 characters/i);
-      expect(errors.length).toBe(1); // Only one error (username), not both
+      expect(errors.length).toBe(1);
     });
 
-    // Password error should STILL not be visible (password wasn't touched yet)
-    // We can verify this by checking the password field itself doesn't have error styling
     const passwordLabel = screen.getByText('Password');
     const passwordFormRow = passwordLabel.closest('.euiFormRow');
     const passwordError = passwordFormRow?.querySelector('.euiFormErrorText');
-    expect(passwordError).toBeNull(); // No error text for password yet
+    expect(passwordError).toBeNull();
 
-    // Now blur password field
     fireEvent.blur(passwordInput);
 
-    // After touching password, its error should also appear
     await waitFor(() => {
       const errors = screen.queryAllByText(/>=3 characters/i);
-      expect(errors.length).toBe(2); // Both errors should now be visible
+      expect(errors.length).toBe(2);
     });
   });
 
@@ -312,11 +301,11 @@ describe('DiscriminatedUnionField', () => {
   it('displays validation errors for nested fields', async () => {
     const option1 = z.object({
       type: z.literal('basic'),
-      username: withUIMeta(z.string().min(3), { widget: 'text', label: 'Username' }),
+      username: z.string().min(3).meta({ widget: 'text', label: 'Username' }),
     });
 
     const schema = z.discriminatedUnion('type', [
-      withUIMeta(option1, { widgetOptions: { label: 'Basic Auth' } }),
+      option1.meta({ widgetOptions: { label: 'Basic Auth' } }),
     ]);
 
     render(
@@ -333,12 +322,10 @@ describe('DiscriminatedUnionField', () => {
       { wrapper }
     );
 
-    // Touch the username field to trigger validation error display
     const usernameInput = screen.getByTestId('auth.username');
     fireEvent.blur(usernameInput);
 
     await waitFor(() => {
-      // The error message from Zod v4 uses ">=" instead of "at least"
       expect(screen.getByText(/>=3 characters/i)).toBeDefined();
     });
   });
@@ -346,7 +333,7 @@ describe('DiscriminatedUnionField', () => {
   it('renders single option union without checkable card', () => {
     const option1 = z.object({
       type: z.literal('basic'),
-      username: withUIMeta(z.string(), { widget: 'text', label: 'Username' }),
+      username: z.string().meta({ widget: 'text', label: 'Username' }),
     });
 
     const schema = z.discriminatedUnion('type', [option1]);
@@ -363,28 +350,28 @@ describe('DiscriminatedUnionField', () => {
       { wrapper }
     );
 
-    // Single option union should NOT render checkable card
     expect(screen.queryByLabelText('basic')).toBeNull();
 
-    // But should render the field directly
     expect(screen.getByText('Username')).toBeDefined();
   });
 
   it('handles single option union with field interactions and validation', async () => {
-    const option1 = withUIMeta(
-      z.object({
+    const option1 = z
+      .object({
         type: z.literal('headers'),
-        key: withUIMeta(z.string().min(1, { message: 'API Key cannot be empty' }), {
-          widget: 'password',
-          widgetOptions: {
-            label: 'API Key',
-          },
-        }),
-      }),
-      {
+        key: z
+          .string()
+          .min(1, { message: 'API Key cannot be empty' })
+          .meta({
+            widget: 'password',
+            widgetOptions: {
+              label: 'API Key',
+            },
+          }),
+      })
+      .meta({
         widgetOptions: { label: 'Headers' },
-      }
-    );
+      });
 
     const schema = z.discriminatedUnion('type', [option1]);
 
@@ -400,28 +387,22 @@ describe('DiscriminatedUnionField', () => {
       { wrapper }
     );
 
-    // Should render fieldset with label
     expect(screen.getByText('Authentication')).toBeInTheDocument();
 
-    // Should NOT render checkable card since there's only one option
     expect(screen.queryByLabelText('Headers')).not.toBeInTheDocument();
 
-    // Should render the password field directly
     const apiKeyInput = screen.getByTestId('apiKey.key');
     expect(apiKeyInput).toBeInTheDocument();
 
-    // Fill in the API key
     fireEvent.change(apiKeyInput, { target: { value: 'my-secret-api-key' } });
 
     await waitFor(() => {
-      // Widget passes full object to onChange, transformation happens at form submit
       expect(mockOnChange).toHaveBeenCalledWith('apiKey', {
         type: 'headers',
         key: 'my-secret-api-key',
       });
     });
 
-    // Blur the field
     fireEvent.blur(apiKeyInput);
 
     await waitFor(() => {
@@ -432,26 +413,25 @@ describe('DiscriminatedUnionField', () => {
   it('selects the first option by default when no default is specified', () => {
     const option1 = z.object({
       type: z.literal('basic'),
-      username: withUIMeta(z.string(), { widget: 'text', label: 'Username' }),
+      username: z.string().meta({ widget: 'text', label: 'Username' }),
     });
 
     const option2 = z.object({
       type: z.literal('oauth'),
-      token: withUIMeta(z.string(), { widget: 'text', label: 'Token' }),
+      token: z.string().meta({ widget: 'text', label: 'Token' }),
     });
 
     const option3 = z.object({
       type: z.literal('apiKey'),
-      key: withUIMeta(z.string(), { widget: 'text', label: 'API Key' }),
+      key: z.string().meta({ widget: 'text', label: 'API Key' }),
     });
 
     const schema = z.discriminatedUnion('type', [
-      withUIMeta(option1, { widgetOptions: { label: 'Basic Auth' } }),
-      withUIMeta(option2, { widgetOptions: { label: 'OAuth' } }),
-      withUIMeta(option3, { widgetOptions: { label: 'API Key Auth' } }),
+      option1.meta({ widgetOptions: { label: 'Basic Auth' } }),
+      option2.meta({ widgetOptions: { label: 'OAuth' } }),
+      option3.meta({ widgetOptions: { label: 'API Key Auth' } }),
     ]);
 
-    // Get the default initial value (should be first option)
     const initialValue = getDiscriminatedUnionInitialValue(schema);
 
     render(
@@ -466,17 +446,14 @@ describe('DiscriminatedUnionField', () => {
       { wrapper }
     );
 
-    // First option should be checked
     const basicAuthCard = screen.getByLabelText('Basic Auth') as HTMLInputElement;
     expect(basicAuthCard.checked).toBe(true);
 
-    // Other options should not be checked
     const oauthCard = screen.getByLabelText('OAuth') as HTMLInputElement;
     const apiKeyCard = screen.getByLabelText('API Key Auth') as HTMLInputElement;
     expect(oauthCard.checked).toBe(false);
     expect(apiKeyCard.checked).toBe(false);
 
-    // Should render nested fields for the first option
     expect(screen.getByText('Username')).toBeDefined();
     expect(screen.queryByText('Token')).toBeNull();
     expect(screen.queryByText('API Key')).toBeNull();
@@ -485,29 +462,27 @@ describe('DiscriminatedUnionField', () => {
   it('selects the specified default option when default is provided', () => {
     const option1 = z.object({
       type: z.literal('basic'),
-      username: withUIMeta(z.string(), { widget: 'text', label: 'Username' }),
+      username: z.string().meta({ widget: 'text', label: 'Username' }),
     });
 
     const option2 = z.object({
       type: z.literal('oauth'),
-      token: withUIMeta(z.string(), { widget: 'text', label: 'Token' }),
+      token: z.string().meta({ widget: 'text', label: 'Token' }),
     });
 
     const option3 = z.object({
       type: z.literal('apiKey'),
-      key: withUIMeta(z.string(), { widget: 'text', label: 'API Key' }),
+      key: z.string().meta({ widget: 'text', label: 'API Key' }),
     });
 
-    const schema = withUIMeta(
-      z.discriminatedUnion('type', [
-        withUIMeta(option1, { widgetOptions: { label: 'Basic Auth' } }),
-        withUIMeta(option2, { widgetOptions: { label: 'OAuth' } }),
-        withUIMeta(option3, { widgetOptions: { label: 'API Key Auth' } }),
-      ]),
-      { widgetOptions: { default: 'oauth' } }
-    );
+    const schema = z
+      .discriminatedUnion('type', [
+        option1.meta({ widgetOptions: { label: 'Basic Auth' } }),
+        option2.meta({ widgetOptions: { label: 'OAuth' } }),
+        option3.meta({ widgetOptions: { label: 'API Key Auth' } }),
+      ])
+      .meta({ widgetOptions: { default: 'oauth' } });
 
-    // Get the default initial value (should be the specified default option)
     const initialValue = getDiscriminatedUnionInitialValue(schema);
 
     render(
@@ -522,17 +497,14 @@ describe('DiscriminatedUnionField', () => {
       { wrapper }
     );
 
-    // OAuth (the default) should be checked
     const oauthCard = screen.getByLabelText('OAuth') as HTMLInputElement;
     expect(oauthCard.checked).toBe(true);
 
-    // Other options should not be checked
     const basicAuthCard = screen.getByLabelText('Basic Auth') as HTMLInputElement;
     const apiKeyCard = screen.getByLabelText('API Key Auth') as HTMLInputElement;
     expect(basicAuthCard.checked).toBe(false);
     expect(apiKeyCard.checked).toBe(false);
 
-    // Should render nested fields for the default option (OAuth)
     expect(screen.getByText('Token')).toBeDefined();
     expect(screen.queryByText('Username')).toBeNull();
     expect(screen.queryByText('API Key')).toBeNull();

@@ -11,7 +11,6 @@ import React from 'react';
 import type { StoryObj } from '@storybook/react';
 import { z } from '@kbn/zod/v4';
 import { Form } from './form';
-import { withUIMeta } from './connector_spec_ui';
 
 const meta = {
   title: 'Form Generator',
@@ -40,85 +39,94 @@ export const AbuseIPDBConnector: StoryObj = {
 // this is not the object that would be created as SingleConnectorFile, this is the internal
 // representation after parsing a SingleConnectorFile
 const webhookConnectorFormSchema = z.object({
-  name: withUIMeta(z.string().min(1, { message: 'Name cannot be empty' }), {
-    widget: 'text',
-    widgetOptions: { label: 'Connector Name' },
-  }),
-  method: withUIMeta(z.enum(['POST', 'PUT', 'GET', 'DELETE']), {
+  name: z
+    .string()
+    .min(1, { message: 'Name cannot be empty' })
+    .meta({
+      widget: 'text',
+      widgetOptions: { label: 'Connector Name' },
+    }),
+  method: z.enum(['POST', 'PUT', 'GET', 'DELETE']).meta({
     widget: 'select',
     widgetOptions: { label: 'Method', default: 'POST' },
   }),
-  url: withUIMeta(z.url(), { widget: 'text', widgetOptions: { label: 'URL' } }),
-  authType: withUIMeta(
-    z.discriminatedUnion('type', [
-      withUIMeta(z.object({ type: z.literal('none') }), {
+  url: z.url().meta({ widget: 'text', widgetOptions: { label: 'URL' } }),
+  authType: z
+    .discriminatedUnion('type', [
+      z.object({ type: z.literal('none') }).meta({
         widgetOptions: { label: 'None' },
       }),
-      withUIMeta(
-        z.object({
+      z
+        .object({
           type: z.literal('basic'),
-          username: withUIMeta(z.string().min(1, { message: 'Username cannot be empty' }), {
-            widget: 'text',
-            widgetOptions: { label: 'Username' },
-          }),
-          password: withUIMeta(z.string().min(1, { message: 'Password cannot be empty' }), {
-            widget: 'password',
-            widgetOptions: { label: 'Password' },
-          }),
-        }),
-        { widgetOptions: { label: 'Basic Authentication' } }
-      ),
-      withUIMeta(
-        z.object({
+          username: z
+            .string()
+            .min(1, { message: 'Username cannot be empty' })
+            .meta({
+              widget: 'text',
+              widgetOptions: { label: 'Username' },
+            }),
+          password: z
+            .string()
+            .min(1, { message: 'Password cannot be empty' })
+            .meta({
+              widget: 'password',
+              widgetOptions: { label: 'Password' },
+            }),
+        })
+        .meta({ widgetOptions: { label: 'Basic Authentication' } }),
+      z
+        .object({
           type: z.literal('bearer'),
-          token: withUIMeta(z.string().min(1, { message: 'Token cannot be empty' }), {
-            widget: 'password',
-            widgetOptions: { label: 'Token' },
-          }),
-        }),
-        { widgetOptions: { label: 'Bearer Token' } }
-      ),
-      withUIMeta(
-        z.object({
+          token: z
+            .string()
+            .min(1, { message: 'Token cannot be empty' })
+            .meta({
+              widget: 'password',
+              widgetOptions: { label: 'Token' },
+            }),
+        })
+        .meta({ widgetOptions: { label: 'Bearer Token' } }),
+      z
+        .object({
           type: z.literal('headers'),
-          headers: withUIMeta(z.record(z.string(), z.string()), {
+          headers: z.record(z.string(), z.string()).meta({
             widget: 'keyValue',
             widgetOptions: {
               label: 'Headers',
             },
           }),
-        }),
-        {
+        })
+        .meta({
           widgetOptions: { label: 'Headers' },
-        }
-      ),
-    ]),
-    {
+        }),
+    ])
+    .meta({
       widget: 'formFieldset',
       widgetOptions: { label: 'Authentication', default: 'basic' },
-    }
-  ),
+    }),
 });
 
 const abuseIPDBConnectorSchema = z.object({
-  authType: withUIMeta(
-    z.discriminatedUnion('type', [
-      withUIMeta(
-        z.object({
+  authType: z
+    .discriminatedUnion('type', [
+      z
+        .object({
           type: z.literal('apiKey'), // this literal is irrelevant
-          Key: withUIMeta(z.string().min(1, { message: 'API Key cannot be empty' }), {
-            widget: 'password',
-            widgetOptions: {
-              label: 'API Key',
-              placeholder: 'Your AbuseIPDB API Key',
-            },
-          }),
-        }),
-        {
+          Key: z
+            .string()
+            .min(1, { message: 'API Key cannot be empty' })
+            .meta({
+              widget: 'password',
+              widgetOptions: {
+                label: 'API Key',
+                placeholder: 'Your AbuseIPDB API Key',
+              },
+            }),
+        })
+        .meta({
           widgetOptions: { label: 'Headers' },
-        }
-      ),
-    ]),
-    { widget: 'formFieldset', widgetOptions: { label: 'Authentication' } }
-  ),
+        }),
+    ])
+    .meta({ widget: 'formFieldset', widgetOptions: { label: 'Authentication' } }),
 });

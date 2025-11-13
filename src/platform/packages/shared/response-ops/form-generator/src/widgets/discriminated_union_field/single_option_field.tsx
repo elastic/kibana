@@ -10,7 +10,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { z } from '@kbn/zod/v4';
 import { EuiFormFieldset, EuiFormRow, EuiSpacer } from '@elastic/eui';
-import { getUIMeta } from '../../connector_spec_ui';
+import { getMeta } from '../../get_metadata';
 import type { DiscriminatedUnionWidgetProps } from '../widget_props';
 import { getWidget } from '..';
 
@@ -66,8 +66,8 @@ export const SingleOptionUnionField: React.FC<DiscriminatedUnionWidgetProps> = (
       if (fieldKey === 'type') return null; // Skip discriminator field
 
       const fieldSchema = subSchema as z.ZodTypeAny;
-      const uiMeta = getUIMeta(fieldSchema);
-      const widget = uiMeta?.widget || 'text';
+      const metaInfo = getMeta(fieldSchema);
+      const widget = metaInfo?.widget || 'text';
       const fieldValue = valueObj[fieldKey] ?? '';
 
       const WidgetComponent = getWidget(widget);
@@ -125,7 +125,7 @@ export const SingleOptionUnionField: React.FC<DiscriminatedUnionWidgetProps> = (
           <WidgetComponent
             fieldId={subFieldId}
             value={fieldValue}
-            label={uiMeta?.label || uiMeta?.widgetOptions?.label || fieldKey}
+            label={metaInfo?.label || metaInfo?.widgetOptions?.label || fieldKey}
             error={error}
             isInvalid={isInvalid}
             onChange={handleChange}

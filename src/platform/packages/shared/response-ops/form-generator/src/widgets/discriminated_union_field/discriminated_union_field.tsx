@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { z } from '@kbn/zod/v4';
-import { getUIMeta } from '../../connector_spec_ui';
+import { getMeta } from '../../get_metadata';
 import { SingleOptionUnionField } from './single_option_field';
 import { MultiOptionUnionField } from './multi_option_field';
 import type { DiscriminatedUnionWidgetProps } from '../widget_props';
@@ -27,8 +27,8 @@ export const getDiscriminatedUnionInitialValue = (
     throw new Error('Schema provided is not a ZodDiscriminatedUnion');
   }
 
-  const uiMeta = getUIMeta(schema);
-  const metadataDefault = uiMeta?.widgetOptions?.default;
+  const metaInfo = getMeta(schema);
+  const metadataDefault = metaInfo?.widgetOptions?.default;
   const valueToUse = metadataDefault ?? defaultValue;
 
   if (valueToUse) {

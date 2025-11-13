@@ -12,7 +12,6 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { z } from '@kbn/zod/v4';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { Form } from './form';
-import { withUIMeta } from './connector_spec_ui';
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <IntlProvider locale="en">{children}</IntlProvider>
@@ -27,12 +26,12 @@ describe('Form', () => {
 
   it('renders a form with text fields', () => {
     const schema = z.object({
-      username: withUIMeta(z.string(), {
+      username: z.string().meta({
         widget: 'text',
         label: 'Username',
         placeholder: 'Enter username',
       }),
-      email: withUIMeta(z.string().email(), {
+      email: z.string().email().meta({
         widget: 'text',
         label: 'Email',
         placeholder: 'Enter email',
@@ -50,7 +49,7 @@ describe('Form', () => {
 
   it('renders a form with password field', () => {
     const schema = z.object({
-      password: withUIMeta(z.string(), {
+      password: z.string().meta({
         widget: 'password',
         label: 'Password',
         placeholder: 'Enter password',
@@ -65,7 +64,7 @@ describe('Form', () => {
 
   it('renders a form with select field', () => {
     const schema = z.object({
-      country: withUIMeta(z.enum(['US', 'UK', 'CA']), {
+      country: z.enum(['US', 'UK', 'CA']).meta({
         widget: 'select',
         label: 'Country',
       }),
@@ -80,7 +79,7 @@ describe('Form', () => {
 
   it('handles form submission with valid data', async () => {
     const schema = z.object({
-      username: withUIMeta(z.string(), {
+      username: z.string().meta({
         widget: 'text',
         label: 'Username',
       }),
@@ -103,7 +102,7 @@ describe('Form', () => {
 
   it('displays validation errors on submit with invalid data', async () => {
     const schema = z.object({
-      email: withUIMeta(z.string().email(), {
+      email: z.string().email().meta({
         widget: 'text',
         label: 'Email',
       }),
@@ -126,7 +125,7 @@ describe('Form', () => {
 
   it('validates field on blur', async () => {
     const schema = z.object({
-      email: withUIMeta(z.string().email(), {
+      email: z.string().email().meta({
         widget: 'text',
         label: 'Email',
       }),
@@ -145,7 +144,7 @@ describe('Form', () => {
 
   it('clears validation errors when input becomes valid', async () => {
     const schema = z.object({
-      email: withUIMeta(z.string().email(), {
+      email: z.string().email().meta({
         widget: 'text',
         label: 'Email',
       }),
@@ -173,7 +172,7 @@ describe('Form', () => {
 
   it('resets form after successful submission', async () => {
     const schema = z.object({
-      username: withUIMeta(z.string(), {
+      username: z.string().meta({
         widget: 'text',
         label: 'Username',
       }),
@@ -211,7 +210,7 @@ describe('Form', () => {
 
   it('throws error when unsupported widget type is provided', () => {
     const schema = z.object({
-      username: withUIMeta(z.string(), {
+      username: z.string().meta({
         widget: 'textarea' as any, // Unsupported widget
         label: 'Username',
       }),
@@ -228,15 +227,15 @@ describe('Form', () => {
 
   it('handles multiple fields with different types', async () => {
     const schema = z.object({
-      username: withUIMeta(z.string(), {
+      username: z.string().meta({
         widget: 'text',
         label: 'Username',
       }),
-      password: withUIMeta(z.string(), {
+      password: z.string().meta({
         widget: 'password',
         label: 'Password',
       }),
-      role: withUIMeta(z.enum(['admin', 'user']), {
+      role: z.enum(['admin', 'user']).meta({
         widget: 'select',
         label: 'Role',
         widgetOptions: {
@@ -276,11 +275,11 @@ describe('Form', () => {
 
   it('uses default values from widgetOptions', () => {
     const schema = z.object({
-      username: withUIMeta(z.string(), {
+      username: z.string().meta({
         widget: 'text',
         label: 'Username',
         widgetOptions: {
-          default: 'defaultuser',
+          default: 'defaultUser',
         },
       }),
     });
@@ -288,12 +287,12 @@ describe('Form', () => {
     render(<Form connectorSchema={schema} onSubmit={mockOnSubmit} />, { wrapper });
 
     const input = screen.getByLabelText('Username') as HTMLInputElement;
-    expect(input.value).toBe('defaultuser');
+    expect(input.value).toBe('defaultUser');
   });
 
   it('renders keyValue widget with empty object as initial value', () => {
     const schema = z.object({
-      headers: withUIMeta(z.record(z.string(), z.string()), {
+      headers: z.record(z.string(), z.string()).meta({
         widget: 'keyValue',
         label: 'Headers',
       }),
@@ -306,7 +305,7 @@ describe('Form', () => {
 
   it('handles form submission when onSubmit is not provided', async () => {
     const schema = z.object({
-      username: withUIMeta(z.string(), {
+      username: z.string().meta({
         widget: 'text',
         label: 'Username',
       }),
@@ -334,62 +333,61 @@ describe('Authentication Form Integration Tests', () => {
   });
 
   const authSchema = z.object({
-    authType: withUIMeta(
-      z.discriminatedUnion('type', [
-        withUIMeta(z.object({ type: z.literal('none') }), {
+    authType: z
+      .discriminatedUnion('type', [
+        z.object({ type: z.literal('none') }).meta({
           widgetOptions: { label: 'None' },
         }),
-        withUIMeta(
-          z.object({
+        z
+          .object({
             type: z.literal('basic'),
-            username: withUIMeta(z.string().min(1, 'Username cannot be empty'), {
-              widget: 'text',
-              widgetOptions: { label: 'Username' },
-            }),
-            password: withUIMeta(z.string().min(1, 'Password cannot be empty'), {
-              widget: 'password',
-              widgetOptions: { label: 'Password' },
-            }),
-          }),
-          {
+            username: z
+              .string()
+              .min(1, 'Username cannot be empty')
+              .meta({
+                widget: 'text',
+                widgetOptions: { label: 'Username' },
+              }),
+            password: z
+              .string()
+              .min(1, 'Password cannot be empty')
+              .meta({
+                widget: 'password',
+                widgetOptions: { label: 'Password' },
+              }),
+          })
+          .meta({
             widgetOptions: { label: 'Basic Auth' },
-          }
-        ),
-        withUIMeta(
-          z.object({
+          }),
+        z
+          .object({
             type: z.literal('bearer'),
-            token: withUIMeta(z.string(), {
+            token: z.string().meta({
               widget: 'text',
               widgetOptions: { label: 'Bearer Token' },
             }),
-          }),
-          {
+          })
+          .meta({
             widgetOptions: { label: 'Bearer Token' },
-          }
-        ),
-        withUIMeta(
-          z.object({
-            type: z.literal('headers'),
-            headers: withUIMeta(
-              z.record(z.string().min(1, 'Header key cannot be empty.'), z.string()),
-              {
-                widget: 'keyValue',
-                widgetOptions: {
-                  label: 'Headers',
-                },
-              }
-            ),
           }),
-          {
+        z
+          .object({
+            type: z.literal('headers'),
+            headers: z.record(z.string().min(1, 'Header key cannot be empty.'), z.string()).meta({
+              widget: 'keyValue',
+              widgetOptions: {
+                label: 'Headers',
+              },
+            }),
+          })
+          .meta({
             widgetOptions: { label: 'Headers' },
-          }
-        ),
-      ]),
-      {
+          }),
+      ])
+      .meta({
         widget: 'formFieldset',
         widgetOptions: { label: 'Authentication', default: 'none' },
-      }
-    ),
+      }),
   });
 
   it('submits form with headers authentication containing multiple unique headers', async () => {
@@ -560,25 +558,26 @@ describe('Authentication Form Integration Tests', () => {
 
   it('submits single-option union with full structure', async () => {
     const singleOptionSchema = z.object({
-      apiKey: withUIMeta(
-        z.discriminatedUnion('type', [
-          withUIMeta(
-            z.object({
+      apiKey: z
+        .discriminatedUnion('type', [
+          z
+            .object({
               type: z.literal('headers'),
-              headers: withUIMeta(z.string().min(1, { message: 'API Key cannot be empty' }), {
-                widget: 'password',
-                widgetOptions: {
-                  label: 'API Key',
-                },
-              }),
-            }),
-            {
+              headers: z
+                .string()
+                .min(1, { message: 'API Key cannot be empty' })
+                .meta({
+                  widget: 'password',
+                  widgetOptions: {
+                    label: 'API Key',
+                  },
+                }),
+            })
+            .meta({
               widgetOptions: { label: 'Headers' },
-            }
-          ),
-        ]),
-        { widget: 'formFieldset', widgetOptions: { label: 'Authentication' } }
-      ),
+            }),
+        ])
+        .meta({ widget: 'formFieldset', widgetOptions: { label: 'Authentication' } }),
     });
 
     render(<Form connectorSchema={singleOptionSchema} onSubmit={mockOnSubmit} />, { wrapper });

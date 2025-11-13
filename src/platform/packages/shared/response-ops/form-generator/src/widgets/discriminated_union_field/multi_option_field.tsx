@@ -10,7 +10,7 @@
 import React, { useMemo, useCallback } from 'react';
 import { z } from '@kbn/zod/v4';
 import { EuiCheckableCard, EuiFormFieldset, EuiFormRow, EuiSpacer } from '@elastic/eui';
-import { getUIMeta } from '../../connector_spec_ui';
+import { getMeta } from '../../get_metadata';
 import type { DiscriminatedUnionWidgetProps } from '../widget_props';
 import { getDefaultValuesForOption } from './get_default_values';
 import { getWidget } from '..';
@@ -67,9 +67,9 @@ export const MultiOptionUnionField: React.FC<DiscriminatedUnionWidgetProps> = ({
       const isChecked = currentType === discriminatorValue;
       const checkableCardId = `${fieldId}-option-${discriminatorValue}`;
 
-      const optionUiMeta = getUIMeta(optionSchema);
+      const optionMeta = getMeta(optionSchema);
       const cardLabel: string =
-        (optionUiMeta?.widgetOptions?.label as string | undefined) || discriminatorValue;
+        (optionMeta?.widgetOptions?.label as string | undefined) || discriminatorValue;
 
       const handleCardChange = () => {
         const newValue = getDefaultValuesForOption(optionSchema);
@@ -88,8 +88,8 @@ export const MultiOptionUnionField: React.FC<DiscriminatedUnionWidgetProps> = ({
                 if (nestedFieldsIndex === 0) return null;
 
                 const fieldSchema = subSchema as z.ZodTypeAny;
-                const nestedUiMeta = getUIMeta(fieldSchema);
-                const nestedWidget = nestedUiMeta?.widget || 'text';
+                const nestedFieldMeta = getMeta(fieldSchema);
+                const nestedWidget = nestedFieldMeta?.widget || 'text';
                 const valueObj =
                   typeof value === 'object' && value !== null ? value : { type: value };
                 const nestedValue = valueObj[fieldKey] ?? '';
@@ -156,7 +156,9 @@ export const MultiOptionUnionField: React.FC<DiscriminatedUnionWidgetProps> = ({
                     <NestedWidgetComponent
                       fieldId={nestedFieldId}
                       value={nestedValue}
-                      label={nestedUiMeta?.label || nestedUiMeta?.widgetOptions?.label || fieldKey}
+                      label={
+                        nestedFieldMeta?.label || nestedFieldMeta?.widgetOptions?.label || fieldKey
+                      }
                       error={nestedFieldError}
                       isInvalid={nestedFieldIsInvalid}
                       onChange={handleNestedChange}

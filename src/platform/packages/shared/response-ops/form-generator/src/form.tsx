@@ -10,12 +10,10 @@
 import React, { useMemo } from 'react';
 import { z } from '@kbn/zod/v4';
 import { EuiButton, EuiForm, EuiSpacer } from '@elastic/eui';
+import { getMeta } from './get_metadata';
 import { useFormState } from './use_form_state';
-import type { UIMetadata } from './connector_spec_ui';
-import { getUIMeta } from './connector_spec_ui';
+import type { WidgetType } from './widgets';
 import { getDiscriminatedUnionInitialValue, getWidget } from './widgets';
-
-type WidgetType = NonNullable<UIMetadata['widget']>;
 
 export interface FieldDefinition {
   id: string;
@@ -33,8 +31,8 @@ export interface FieldDefinition {
 }
 
 const getStaticProps = ({ schema }: { schema: z.ZodTypeAny }) => {
-  const uiMeta = getUIMeta(schema) || {};
-  const { placeholder, label, widgetOptions } = uiMeta;
+  const metaInfo = getMeta(schema) || {};
+  const { placeholder, label, widgetOptions } = metaInfo;
 
   const commonProps = {
     fullWidth: true,
@@ -57,8 +55,8 @@ const getFieldsFromSchema = <T extends z.ZodRawShape>(schema: z.ZodObject<T>) =>
   Object.entries(schema.shape).forEach(([key, subSchema]) => {
     const schemaAny = subSchema as z.ZodTypeAny;
 
-    const uiMeta = getUIMeta(schemaAny);
-    if (!uiMeta || !uiMeta.widget) {
+    const metaInfo = getMeta(schemaAny);
+    if (!metaInfo || !metaInfo.widget) {
       throw new Error(`UI metadata is missing for field: ${key}`);
     }
 
@@ -66,11 +64,11 @@ const getFieldsFromSchema = <T extends z.ZodRawShape>(schema: z.ZodObject<T>) =>
 
     let initialValue = staticProps.default;
 
-    if (uiMeta.widget === 'formFieldset' && schemaAny instanceof z.ZodDiscriminatedUnion) {
+    if (metaInfo.widget === 'formFieldset' && schemaAny instanceof z.ZodDiscriminatedUnion) {
       initialValue = getDiscriminatedUnionInitialValue(
         schemaAny as z.ZodDiscriminatedUnion<z.ZodObject<z.ZodRawShape>[]>
       );
-    } else if (uiMeta.widget === 'keyValue' && !initialValue) {
+    } else if (metaInfo.widget === 'keyValue' && !initialValue) {
       initialValue = {};
     }
 
@@ -79,7 +77,7 @@ const getFieldsFromSchema = <T extends z.ZodRawShape>(schema: z.ZodObject<T>) =>
       staticProps,
       initialValue,
       schema: schemaAny,
-      widget: uiMeta.widget,
+      widget: metaInfo.widget,
       validate: (value: unknown) => {
         try {
           schemaAny.parse(value);
