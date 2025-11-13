@@ -77,6 +77,7 @@ export class GroupStream extends StreamActiveRecord<Streams.GroupStream.Definiti
         definition: {
           name: member,
           description: '',
+          updated_at: new Date().toISOString(),
           ingest: {
             classic: {},
             lifecycle: { inherit: {} },

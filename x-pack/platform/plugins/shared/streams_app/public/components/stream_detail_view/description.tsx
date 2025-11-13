@@ -84,7 +84,7 @@ export function StreamDescription({ definition }: Props) {
           await updateStream({
             queries: definition.queries,
             dashboards: definition.dashboards,
-            stream: { ...omit(definition.stream, ['name']), description: sanitized },
+            stream: { ...omit(definition.stream, ['name', 'updated_at']), description: sanitized },
           } as Streams.all.UpsertRequest);
 
           refresh();

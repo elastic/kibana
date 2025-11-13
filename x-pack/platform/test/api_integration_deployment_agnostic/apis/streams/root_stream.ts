@@ -16,6 +16,7 @@ import { createStreamsRepositoryAdminClient } from './helpers/repository_client'
 const rootStreamDefinition: Streams.WiredStream.Definition = {
   name: 'logs',
   description: '',
+  updated_at: new Date().toISOString(),
   ingest: {
     lifecycle: { dsl: {} },
     processing: { steps: [] },
