@@ -110,7 +110,7 @@ export function SourcesDropdown({ currentSources, onChangeSources }: SourcesDrop
         }}
       >
         {Boolean(currentSources.length) && (
-          <EuiNotificationBadge color="success">{currentSources.length}</EuiNotificationBadge>
+          <EuiNotificationBadge color="accent">{currentSources.length}</EuiNotificationBadge>
         )}
       </EuiFormControlButton>
     );
