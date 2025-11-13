@@ -164,7 +164,8 @@ export default ({ getService }: FtrProviderContext) => {
     },
     {
       testTitleSuffix: 'for siem azure activity logs dataset',
-      sourceDataArchive: 'x-pack/platform/test/fixtures/es_archives/ml/module_security_azure_activitylogs',
+      sourceDataArchive:
+        'x-pack/platform/test/fixtures/es_archives/ml/module_security_azure_activitylogs',
       indexPattern: 'ft_module_security_azure_activitylogs',
       user: USER.ML_POWERUSER,
       expected: {
