@@ -23,4 +23,10 @@ describe('compactMap', () => {
       '5',
     ]);
   });
+
+  it('removes nullish values, not falsey values', () => {
+    const values = [0, null, '', false, undefined, {}];
+
+    expect(compactMap(values, (value) => value)).toEqual([0, '', false, {}]);
+  });
 });
