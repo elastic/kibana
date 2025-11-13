@@ -22,7 +22,7 @@ export const CloudConnectorNameField: React.FC<CloudConnectorNameFieldProps> = (
 }) => {
   // Format validation only
   const validateFormat = (name: string): string | undefined => {
-    if (!name)
+    if (!name || !name.trim())
       return i18n.translate(
         'securitySolutionPackages.cloudSecurityPosture.cloudConnectorSetup.cloudConnectorNameField.requiredError',
         {

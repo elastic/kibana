@@ -29,7 +29,6 @@ import type {
 import {
   AWS_CLOUD_CONNECTOR_FIELD_NAMES,
   AZURE_CLOUD_CONNECTOR_FIELD_NAMES,
-  CLOUD_CONNECTOR_NAME_FIELD,
   CLOUD_FORMATION_TEMPLATE_URL_CLOUD_CONNECTORS,
   ARM_TEMPLATE_URL_CLOUD_CONNECTORS,
   CLOUD_CONNECTOR_AWS_ASSET_INVENTORY_REUSABLE_MIN_VERSION,
@@ -398,18 +397,6 @@ export const updateInputVarsWithAwsCredentials = (
     }
   }
 
-  // Update cloud_connector_name field
-  if (inputCredentials?.name !== undefined) {
-    updatedInputVars[CLOUD_CONNECTOR_NAME_FIELD] = {
-      value: inputCredentials.name,
-    };
-  } else {
-    // Clear cloud_connector_name field when name is undefined
-    if (updatedInputVars[CLOUD_CONNECTOR_NAME_FIELD]) {
-      updatedInputVars[CLOUD_CONNECTOR_NAME_FIELD] = { value: undefined };
-    }
-  }
-
   return updatedInputVars;
 };
 
@@ -496,18 +483,6 @@ export const updateInputVarsWithAzureCredentials = (
       updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID] = {
         value: undefined,
       };
-    }
-  }
-
-  // Update cloud_connector_name field
-  if (credentials?.name !== undefined) {
-    updatedInputVars[CLOUD_CONNECTOR_NAME_FIELD] = {
-      value: credentials.name,
-    };
-  } else {
-    // Clear cloud_connector_name field when name is undefined
-    if (updatedInputVars[CLOUD_CONNECTOR_NAME_FIELD]) {
-      updatedInputVars[CLOUD_CONNECTOR_NAME_FIELD] = { value: undefined };
     }
   }
 
