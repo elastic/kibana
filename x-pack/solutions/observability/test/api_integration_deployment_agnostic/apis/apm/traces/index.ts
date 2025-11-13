@@ -17,5 +17,6 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./transaction_details.spec.ts'));
     loadTestFile(require.resolve('./focused_trace.spec.ts'));
     loadTestFile(require.resolve('./unified_trace_errors.spec.ts'));
+    loadTestFile(require.resolve('./unified_trace_span.spec.ts'));
   });
 }
