@@ -60,7 +60,9 @@ export function getForeachItemSchema(
       // If the resolved path is a string, we return a string schema and will tell the user we will try to parse it as JSON in runtime
       return z.any().describe('Unable to determine foreach item type');
     } else if (iterableSchema instanceof z.ZodUnion) {
-      const arrayOption = iterableSchema.options.find((option: z.ZodType) => option instanceof z.ZodArray);
+      const arrayOption = iterableSchema.options.find(
+        (option: z.ZodType) => option instanceof z.ZodArray
+      );
       if (arrayOption && arrayOption instanceof z.ZodArray) {
         return arrayOption.element;
       } else {
