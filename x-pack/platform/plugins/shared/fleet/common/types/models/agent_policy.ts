@@ -327,6 +327,14 @@ export interface AgentlessApiDeploymentResponse {
   error: string | null;
 }
 
+export interface AgentlessApiListDeploymentResponse {
+  deployments: Array<{
+    policy_id: string;
+    revision_idx?: number;
+  }>;
+  nextPageToken?: string;
+}
+
 // Definitions for agent policy outputs endpoints
 export interface MinimalOutput {
   name?: string;

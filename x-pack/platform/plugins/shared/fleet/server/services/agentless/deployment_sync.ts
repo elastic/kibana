@@ -50,6 +50,9 @@ export async function syncAgentlessDeployments(
         perPage: PAGE_SIZE,
         nextPageToken,
       });
+      if (!deploymentRes) {
+        return;
+      }
 
       nextPageToken = deploymentRes.nextPageToken;
       if (!nextPageToken) {
@@ -66,6 +69,7 @@ export async function syncAgentlessDeployments(
         deploymentRes.deployments,
         async (deployment) => {
           const agentPolicy = agentPolicies.find((ap) => ap.id === deployment.policy_id);
+
           if (!agentPolicy) {
             logger.info(
               `[Agentless Deployment Sync]${dryRunTag(opts?.dryRun)} Deleting deployment ${
