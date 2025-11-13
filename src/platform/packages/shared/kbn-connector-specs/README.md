@@ -199,20 +199,6 @@ test: {
 }
 ```
 
-### Policies (Optional)
-
-Configure connector behavior:
-
-```typescript
-policies: {
-  rateLimit?: RateLimitPolicy,
-  pagination?: PaginationPolicy,
-  retry?: RetryPolicy,
-  error?: ErrorPolicy,
-  streaming?: StreamingPolicy,
-}
-```
-
 ## Authentication Patterns
 
 ### Header-Based Authentication
@@ -254,12 +240,12 @@ schema: z.object({
 
 ## UI Metadata
 
-Use the `withUIMeta` helper or `UISchemas` to add UI hints:
+Use Zod's built-in `.meta()` or `UISchemas` helpers to add UI hints:
 
 ```typescript
-import { withUIMeta, UISchemas } from '../connector_spec_ui';
+import { UISchemas } from '../connector_spec_ui';
 
-// Sensitive field (password/token)
+// Sensitive field (password/token) - using helper
 apiKey: UISchemas.secret('sk-...').describe('API Key')
 
 // Multi-line text
@@ -268,14 +254,16 @@ message: UISchemas.textarea({ rows: 5 }).describe('Message')
 // JSON editor
 config: UISchemas.json().describe('Configuration')
 
-// With custom metadata
-field: withUIMeta(z.string(), {
-  sensitive: true,
-  section: 'Authentication',
-  order: 1,
-  placeholder: 'Enter value...',
-  helpText: 'Additional help text',
-}).describe('Field Label')
+// With custom metadata - using .meta() directly
+field: z.string()
+  .meta({
+    sensitive: true,
+    section: 'Authentication',
+    order: 1,
+    placeholder: 'Enter value...',
+    helpText: 'Additional help text',
+  })
+  .describe('Field Label')
 ```
 
 ## Examples
@@ -326,34 +314,6 @@ customHost: z.string().meta({
     then: 'show',
   },
 }).describe('Custom Host')
-```
-
-### Streaming Support
-
-Enable streaming responses:
-
-```typescript
-policies: {
-  streaming: {
-    enabled: true,
-    mechanism: 'sse',  // or 'chunked', 'websocket'
-    parser: 'ndjson',  // or 'json', 'text', 'custom'
-  },
-}
-```
-
-### Rate Limiting
-
-Configure rate limit handling:
-
-```typescript
-policies: {
-  rateLimit: {
-    strategy: 'header',
-    remainingHeader: 'X-RateLimit-Remaining',
-    resetHeader: 'X-RateLimit-Reset',
-  },
-}
 ```
 
 ## Icons

@@ -235,27 +235,14 @@ declare module 'zod' {
 }
 
 /**
- * Helper function to add UI metadata to any Zod schema
- * WHY: Provides type-safe way to attach metadata
- *
- * @example
- * const apiKey = withUIMeta(
- *   z.string(),
- *   { sensitive: true, placeholder: "sk-..." }
- * );
- */
-export function withUIMeta<T extends z.ZodTypeAny>(
-  schema: T,
-  meta: NonNullable<z.ZodTypeDef['uiMeta']>
-): T {
-  (schema._def as z.ZodTypeDef).uiMeta = meta;
-  return schema;
-}
-
-/**
  * Pre-configured schema types for common field patterns
  * WHY: Reduces boilerplate for frequently used field types
- * These are convenience wrappers that apply common metadata
+ * These use Zod's built-in .meta() to attach UI metadata
+ *
+ * @example
+ * const apiKey = z.string().meta({ sensitive: true, placeholder: "sk-..." });
+ * // Or use the helper:
+ * const apiKey = UISchemas.secret("sk-...");
  */
 export const UISchemas = {
   /**
@@ -264,7 +251,7 @@ export const UISchemas = {
    * @example secrets: { apiKey: UISchemas.secret().describe("API Key") }
    */
   secret: (placeholder?: string) =>
-    withUIMeta(z.string(), {
+    z.string().meta({
       sensitive: true,
       widget: 'password',
       placeholder,
@@ -276,7 +263,7 @@ export const UISchemas = {
    * @example message: UISchemas.textarea({ rows: 5 }).describe("Message body")
    */
   textarea: (options?: { rows?: number }) =>
-    withUIMeta(z.string(), {
+    z.string().meta({
       widget: 'textarea',
       widgetOptions: options,
     }),
@@ -287,7 +274,7 @@ export const UISchemas = {
    * @example config: UISchemas.json().describe("Configuration object")
    */
   json: () =>
-    withUIMeta(z.string(), {
+    z.string().meta({
       widget: 'json',
     }),
 
@@ -297,7 +284,7 @@ export const UISchemas = {
    * @example script: UISchemas.code("javascript").describe("Custom script")
    */
   code: (language: 'javascript' | 'typescript' | 'python') =>
-    withUIMeta(z.string(), {
+    z.string().meta({
       widget: 'code',
       widgetOptions: { language },
     }),
@@ -308,8 +295,11 @@ export const UISchemas = {
    * @example webhookUrl: UISchemas.url().describe("Webhook URL")
    */
   url: (placeholder?: string) =>
-    withUIMeta(z.string().url(), {
-      widget: 'text',
-      placeholder: placeholder ?? 'https://',
-    }),
+    z
+      .string()
+      .url()
+      .meta({
+        widget: 'text',
+        placeholder: placeholder ?? 'https://',
+      }),
 };
