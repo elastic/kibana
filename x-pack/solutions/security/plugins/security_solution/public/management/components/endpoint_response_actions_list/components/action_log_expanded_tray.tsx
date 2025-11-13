@@ -228,7 +228,7 @@ const OutputContent = memo<{
               }
               data-test-subj={getTestId('actionsLogTray')}
               hideFile={action.agentType === 'crowdstrike'}
-              showPasscode={action.agentType !== 'microsoft_defender_endpoint'}
+              showPasscode={action.agentType === 'sentinel_one'}
               shouldShowOutput={action.agentType === 'microsoft_defender_endpoint'}
               textSize="xs"
             />

@@ -30,6 +30,7 @@ export interface RunscriptActionResultProps {
   // should be true for microsoft_defender_endpoint
   shouldShowOutput?: boolean;
   // should be false for microsoft_defender_endpoint
+  // true for sentinel_one
   showPasscode: boolean;
   textSize?: Exclude<EuiTextProps['size'], 'm' | 'relative'>;
 }
