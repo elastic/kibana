@@ -113,6 +113,7 @@ export const FlyoutWrapper = ({
                 </EuiText>
               </EuiFlexItem>
             )}
+            <EuiFlexItem grow={true} />
             {toolbar && (
               <EuiFlexItem grow={false} data-test-subj="lnsVisualizationToolbar">
                 {toolbar}
