@@ -30,8 +30,8 @@ import { DataSourcesList } from './datasources_list';
 import { generateDashPatterns } from './utils';
 
 interface SourcesDropdownProps {
-  currentSource: string;
-  onChangeSource: (newSource: string) => void;
+  currentSources: string[];
+  onChangeSources: (newSource: string[]) => void;
 }
 const DEFAULT_WIDTH = 350;
 
@@ -40,7 +40,7 @@ const shrinkableContainerCss = css`
   flex-direction: row;
 `;
 
-export function SourcesDropdown({ currentSource, onChangeSource }: SourcesDropdownProps) {
+export function SourcesDropdown({ currentSources, onChangeSources }: SourcesDropdownProps) {
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
   const [sourcesOptions, setSourcesOptions] = useState<EuiComboBoxOptionOption[]>([]);
   const euiTheme = useEuiTheme();
@@ -76,9 +76,10 @@ export function SourcesDropdown({ currentSource, onChangeSource }: SourcesDropdo
   const createTrigger = function () {
     return (
       <EuiFormControlButton
+        role="combobox"
         compressed
         style={{ maxWidth: DEFAULT_WIDTH }}
-        title={currentSource}
+        title={currentSources.join(', ')}
         data-test-subj="visorSourcesDropdownButton"
         aria-expanded={isPopoverOpen}
         aria-controls={popoverId}
@@ -103,7 +104,7 @@ export function SourcesDropdown({ currentSource, onChangeSource }: SourcesDropdo
           responsive={false}
           css={{ maxWidth: '100%' }}
         >
-          <span className="eui-textTruncate">{currentSource}</span>
+          <span className="eui-textTruncate">{currentSources.join(', ')}</span>
         </EuiFlexGroup>
       </EuiFormControlButton>
     );
@@ -121,15 +122,15 @@ export function SourcesDropdown({ currentSource, onChangeSource }: SourcesDropdo
           </h5>
         </EuiText>
         <DataSourcesList
-          currentSourceId={currentSource}
-          onChangeDatasource={onChangeSource}
+          currentSources={currentSources}
+          onChangeDatasources={onChangeSources}
           sourcesList={sourcesOptions.map((option) => option.label)}
         />
       </React.Fragment>
     );
 
     return panelItems;
-  }, [currentSource, euiTheme.euiTheme.size.s, onChangeSource, sourcesOptions]);
+  }, [currentSources, euiTheme.euiTheme.size.s, onChangeSources, sourcesOptions]);
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>

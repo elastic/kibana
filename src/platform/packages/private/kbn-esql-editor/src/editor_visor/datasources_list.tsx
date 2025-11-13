@@ -14,14 +14,14 @@ import { css } from '@emotion/react';
 
 export interface DataSourcesListProps {
   sourcesList: string[];
-  onChangeDatasource: (newId: string) => void;
-  currentSourceId?: string;
+  onChangeDatasources: (newId: string[]) => void;
+  currentSources: string[];
 }
 
 export function DataSourcesList({
   sourcesList,
-  onChangeDatasource,
-  currentSourceId,
+  onChangeDatasources,
+  currentSources,
 }: DataSourcesListProps) {
   return (
     <EuiSelectable<{
@@ -37,18 +37,25 @@ export function DataSourcesList({
       }}
       data-test-subj="indexPattern-switcher"
       searchable
-      singleSelection="always"
       options={sourcesList?.map((source) => ({
         key: source,
         label: source,
         value: source,
-        checked: source === currentSourceId ? 'on' : undefined,
+        checked: currentSources?.includes(source) ? 'on' : undefined,
       }))}
       onChange={(choices) => {
-        const choice = choices.find(({ checked }) => checked) as unknown as {
+        const selectedChoices = choices.filter(({ checked }) => checked) as unknown as {
           value: string;
-        };
-        onChangeDatasource(choice.value);
+        }[];
+        const newSelectedValues = selectedChoices.map((choice) => choice.value);
+
+        // I am doing this to preserve the order of existing selections and append new ones at the end
+        const orderedSelections = [
+          ...currentSources.filter((source) => newSelectedValues.includes(source)),
+          ...newSelectedValues.filter((value) => !currentSources.includes(value)),
+        ];
+
+        onChangeDatasources(orderedSelections);
       }}
       searchProps={{
         id: 'visorSearchListId',

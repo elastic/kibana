@@ -19,6 +19,7 @@ import {
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { calculateWidthFromCharCount } from '@kbn/calculate-width-from-char-count';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import { isEqual } from 'lodash';
 import { SourcesDropdown } from './sources_dropdown';
 import { visorStyles } from './visor.styles';
 
@@ -41,7 +42,7 @@ export function QuickSearchVisor({
 }) {
   const isDarkMode = useKibanaIsDarkMode();
   const { euiTheme } = useEuiTheme();
-  const [selectedSource, setSelectedSource] = useState<EuiComboBoxOptionOption[]>([]);
+  const [selectedSources, setSelectedSources] = useState<EuiComboBoxOptionOption[]>([]);
   const [searchValue, setSearchValue] = useState('');
   const searchInputRef = useRef<HTMLInputElement>(null);
   const initializedRef = useRef(false);
@@ -62,36 +63,36 @@ export function QuickSearchVisor({
 
   const onSearchKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === 'Enter' && selectedSource.length > 0 && searchValue.trim()) {
-        const selectedSourceName = selectedSource[0]?.label || '';
-        if (selectedSourceName && searchValue.trim()) {
+      if (e.key === 'Enter' && selectedSources.length > 0 && searchValue.trim()) {
+        const selectedSourceNames = selectedSources.map((source) => source.label).join(', ');
+        if (selectedSourceNames && searchValue.trim()) {
           const sourceCommand = query.trim().toUpperCase().startsWith('TS ') ? 'TS' : 'FROM';
-          const newQuery = `${sourceCommand} ${selectedSourceName} | WHERE KQL("${searchValue.trim()}")`;
+          const newQuery = `${sourceCommand} ${selectedSourceNames} | WHERE KQL("${searchValue.trim()}")`;
           onUpdateAndSubmitQuery(newQuery);
           // Clear the search value after submitting the query
           setSearchValue('');
         }
       }
     },
-    [selectedSource, searchValue, query, onUpdateAndSubmitQuery]
+    [selectedSources, searchValue, query, onUpdateAndSubmitQuery]
   );
 
   useEffect(() => {
     const sourceFromUpdatedQuery = getIndexPatternFromESQLQuery(query);
-
+    const sources = sourceFromUpdatedQuery.split(',').map((source) => ({ label: source.trim() }));
     if (!initializedRef.current) {
-      if (sourceFromUpdatedQuery) {
-        setSelectedSource([{ label: sourceFromUpdatedQuery }]);
+      if (sources.length > 0) {
+        setSelectedSources(sources);
       }
       setSearchValue('');
       initializedRef.current = true;
-    } else if (sourceFromUpdatedQuery && !userSelectedSourceRef.current) {
+    } else if (sources.length > 0 && !userSelectedSourceRef.current) {
       // Update from query prop only if user hasn't manually selected a source
-      if (selectedSource[0]?.label !== sourceFromUpdatedQuery) {
-        setSelectedSource([{ label: sourceFromUpdatedQuery }]);
+      if (!isEqual(selectedSources, sources)) {
+        setSelectedSources(sources);
       }
     }
-  }, [query, selectedSource]);
+  }, [query, selectedSources]);
 
   useEffect(() => {
     if (isVisible && searchInputRef.current) {
@@ -107,8 +108,9 @@ export function QuickSearchVisor({
   }, [isVisible]);
 
   const comboBoxWidth = useMemo(() => {
-    return calculateWidthFromCharCount(selectedSource[0]?.label.length || 0);
-  }, [selectedSource]);
+    const labelLength = selectedSources.map((s) => s.label).join(', ').length || 0;
+    return calculateWidthFromCharCount(labelLength);
+  }, [selectedSources]);
 
   const styles = visorStyles(
     euiTheme,
@@ -129,9 +131,9 @@ export function QuickSearchVisor({
       >
         <EuiFlexItem css={styles.comboBoxWrapper}>
           <SourcesDropdown
-            currentSource={selectedSource[0]?.label || ''}
-            onChangeSource={(newSource) => {
-              setSelectedSource([{ label: newSource }]);
+            currentSources={selectedSources.map((source) => source.label)}
+            onChangeSources={(newSources) => {
+              setSelectedSources(newSources.map((source) => ({ label: source })));
               userSelectedSourceRef.current = true;
             }}
           />
