@@ -299,8 +299,8 @@ describe('useCloudSetup', () => {
         <CloudSetupContext.Provider
           value={{
             config: mockConfigWithCloudConnectors,
-            cloud: mockCloud,
             uiSettings: mockCore.uiSettings,
+            cloud: mockCloud,
             packageInfo,
             packagePolicy,
           }}
