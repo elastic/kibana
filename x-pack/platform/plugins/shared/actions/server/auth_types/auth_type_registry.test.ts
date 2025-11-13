@@ -6,12 +6,12 @@
  */
 
 import { z } from '@kbn/zod';
+import type { NormalizedAuthType } from './auth_type_registry';
 import { AuthTypeRegistry } from './auth_type_registry';
-import type { AuthTypeSpec } from '@kbn/connector-specs';
 import { registerAuthTypes } from './register_auth_types';
 import zodToJsonSchema from 'zod-to-json-schema';
 
-const getAuthType = (overrides = {}): AuthTypeSpec => {
+const getAuthType = (overrides = {}): NormalizedAuthType => {
   return {
     id: 'my-auth-type',
     name: 'My test auth type',
@@ -19,7 +19,7 @@ const getAuthType = (overrides = {}): AuthTypeSpec => {
       apiKey: z.string().describe('API Key'),
     }),
     ...overrides,
-  };
+  } as unknown as NormalizedAuthType;
 };
 
 describe('AuthTypeRegistry', () => {

@@ -8,19 +8,30 @@
  */
 
 import { z } from '@kbn/zod';
+import type { AxiosInstance } from 'axios';
 import type { AuthTypeSpec } from '../connector_spec';
+
+const authSchema = z.object({
+  // these should default to being registered as a secret field so we don't explicitly define it here
+  token: z.string().describe('Bearer Token'),
+});
+
+type AuthSchemaType = z.infer<typeof authSchema>;
 
 /**
  * Bearer Token Authentication
  * Use for: OAuth tokens, API tokens sent as "Authorization: Bearer <token>"
  */
-export const BearerAuth: AuthTypeSpec = {
+export const BearerAuth: AuthTypeSpec<AuthSchemaType> = {
   id: 'bearer',
   name: 'Bearer Token Authentication',
-  schema: z.object({
-    // these should default to being registered as a secret field so we don't explicitly define it here
-    token: z.string().describe('Bearer Token'),
-  }),
+  schema: authSchema,
+  configure: (axiosInstance: AxiosInstance, secret: AuthSchemaType): AxiosInstance => {
+    // set global defaults
+    axiosInstance.defaults.headers.common.Authorization = `Bearer ${secret.token}`;
+
+    return axiosInstance;
+  },
 };
 
 // export const BearerAuthSchema = z.object({

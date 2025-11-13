@@ -13,8 +13,9 @@ import { isString } from 'lodash';
 
 const AUTH_TYPE_DISCRIMINATOR = 'authType';
 
+export type NormalizedAuthType = AuthType<Record<string, unknown>>;
 export class AuthTypeRegistry {
-  private readonly authTypes: Map<string, AuthType> = new Map();
+  private readonly authTypes: Map<string, NormalizedAuthType> = new Map();
 
   constructor() {}
 
@@ -28,7 +29,7 @@ export class AuthTypeRegistry {
   /**
    * Registers an auth type
    */
-  public register(authType: AuthType) {
+  public register(authType: NormalizedAuthType) {
     if (this.has(authType.id)) {
       throw new Error(
         i18n.translate('xpack.actions.authTypeRegistry.register.duplicateAuthTypeErrorMessage', {
@@ -57,7 +58,7 @@ export class AuthTypeRegistry {
   /**
    * Returns an auth type, throws if not registered
    */
-  public get(id: string): AuthType {
+  public get(id: string): NormalizedAuthType {
     if (!this.has(id)) {
       throw Boom.badRequest(
         i18n.translate('xpack.actions.authTypeRegistry.get.missingAuthTypeErrorMessage', {
@@ -68,7 +69,7 @@ export class AuthTypeRegistry {
         })
       );
     }
-    return this.authTypes.get(id)! as AuthType;
+    return this.authTypes.get(id)! as NormalizedAuthType;
   }
 
   public getAllTypes(): string[] {

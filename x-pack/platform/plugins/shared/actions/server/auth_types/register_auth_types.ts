@@ -5,10 +5,10 @@
  * 2.0.
  */
 import { authTypeSpecs } from '@kbn/connector-specs';
-import type { AuthTypeRegistry } from './auth_type_registry';
+import type { AuthTypeRegistry, NormalizedAuthType } from './auth_type_registry';
 
 export function registerAuthTypes(registry: AuthTypeRegistry) {
   for (const spec of Object.values(authTypeSpecs)) {
-    registry.register(spec);
+    registry.register(spec as NormalizedAuthType);
   }
 }

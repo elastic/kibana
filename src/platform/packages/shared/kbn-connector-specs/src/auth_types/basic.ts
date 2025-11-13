@@ -8,20 +8,34 @@
  */
 
 import { z } from '@kbn/zod';
+import type { AxiosInstance } from 'axios';
 import type { AuthTypeSpec } from '../connector_spec';
+
+const authSchema = z.object({
+  // these should default to being registered as a secret field so we don't explicitly define it here
+  username: z.string().describe('Username'),
+  password: z.string().describe('Password'),
+});
+
+type AuthSchemaType = z.infer<typeof authSchema>;
 
 /**
  * HTTP Basic Authentication
  * Use for: Username + Password auth (Jira, etc.)
  */
-export const BasicAuth: AuthTypeSpec = {
+export const BasicAuth: AuthTypeSpec<AuthSchemaType> = {
   id: 'basic',
   name: 'HTTP Basic Authentication',
-  // these should default to being registered as a secret field so we don't explicitly define it here
-  schema: z.object({
-    username: z.string().describe('Username'),
-    password: z.string().describe('Password'),
-  }),
+  schema: authSchema,
+  configure: (axiosInstance: AxiosInstance, secret: AuthSchemaType): AxiosInstance => {
+    // set global defaults
+    axiosInstance.defaults.auth = {
+      username: secret.username,
+      password: secret.password,
+    };
+
+    return axiosInstance;
+  },
 };
 
 // export const BasicAuthSchema = z.object({

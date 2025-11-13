@@ -76,10 +76,11 @@ export interface ConnectorMetadata {
 
 // Auth schemas defined in ./auth_types
 
-export interface AuthTypeSpec {
+export interface AuthTypeSpec<T extends Record<string, unknown>> {
   id: string;
   name: string;
   schema: z.ZodObject<Record<string, z.ZodType>>;
+  configure: (axiosInstance: AxiosInstance, secret: T) => AxiosInstance;
 }
 
 // ============================================================================
