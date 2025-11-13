@@ -52,6 +52,7 @@ describe('parseServerFlags', () => {
       mode: 'serverless=oblt',
       esFrom: undefined,
       installDir: undefined,
+      kibanaConfig: undefined,
       logsDir: undefined,
     });
   });
@@ -68,6 +69,25 @@ describe('parseServerFlags', () => {
       mode: 'stateful',
       esFrom: 'snapshot',
       installDir: undefined,
+      kibanaConfig: undefined,
+      logsDir: undefined,
+    });
+  });
+
+  it(`should parse with kibana-config`, () => {
+    const flags = new FlagsReader({
+      stateful: true,
+      logToFile: false,
+      esFrom: 'snapshot',
+      'kibana-config': 'my-config.yml',
+    });
+    const result = parseServerFlags(flags);
+
+    expect(result).toEqual({
+      mode: 'stateful',
+      esFrom: 'snapshot',
+      installDir: undefined,
+      kibanaConfig: 'my-config.yml',
       logsDir: undefined,
     });
   });
