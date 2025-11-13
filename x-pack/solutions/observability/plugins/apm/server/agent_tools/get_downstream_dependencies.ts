@@ -11,6 +11,7 @@ import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { ToolType } from '@kbn/onechat-common';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import { buildApmToolResources } from './utils/build_apm_tool_resources';
+import { getApmToolAvailability } from './utils/get_apm_tool_availability';
 import { getAssistantDownstreamDependencies } from '../routes/assistant_functions/get_apm_downstream_dependencies';
 import type { APMPluginSetupDependencies, APMPluginStartDependencies } from '../types';
 import { OBSERVABILITY_GET_APM_DOWNSTREAM_DEPENDENCIES_TOOL_ID } from '../../common/agent_tool_ids';
@@ -43,25 +44,20 @@ export async function createApmDownstreamDependenciesTool({
       'Get downstream dependencies (services or uninstrumented backends) for a given APM service and time range.',
     schema,
     tags: ['apm', 'dependencies', 'observability'],
+    availability: {
+      cacheMode: 'space',
+      handler: async ({ request }) => {
+        return getApmToolAvailability({ core, plugins, request, logger });
+      },
+    },
     handler: async (args, { request, logger: scopedLogger }) => {
       try {
-        const { apmEventClient, randomSampler, hasHistoricalData } = await buildApmToolResources({
+        const { apmEventClient, randomSampler } = await buildApmToolResources({
           core,
           plugins,
           request,
           logger: scopedLogger,
         });
-
-        if (!hasHistoricalData) {
-          return {
-            results: [
-              {
-                type: ToolResultType.other,
-                data: { dependencies: [] },
-              },
-            ],
-          };
-        }
 
         const result = await getAssistantDownstreamDependencies({
           arguments: {

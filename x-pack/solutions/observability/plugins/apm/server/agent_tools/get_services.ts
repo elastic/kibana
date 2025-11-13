@@ -12,6 +12,7 @@ import { ToolType } from '@kbn/onechat-common';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import { getDataTierFilterCombined } from '@kbn/apm-data-access-plugin/server/utils';
 import { buildApmToolResources } from './utils/build_apm_tool_resources';
+import { getApmToolAvailability } from './utils/get_apm_tool_availability';
 import { getApmServiceList } from '../routes/assistant_functions/get_apm_service_list';
 import type { APMPluginSetupDependencies, APMPluginStartDependencies } from '../types';
 import { ServiceHealthStatus } from '../../common/service_health_status';
@@ -53,6 +54,12 @@ export async function createApmGetServicesTool({
     description: 'Get the list of monitored APM services, their health status, and alerts.',
     schema,
     tags: ['apm', 'services', 'observability'],
+    availability: {
+      cacheMode: 'space',
+      handler: async ({ request }) => {
+        return getApmToolAvailability({ core, plugins, request, logger });
+      },
+    },
     handler: async (args, { request, logger: scopedLogger }) => {
       try {
         const { apmEventClient, randomSampler, hasHistoricalData } = await buildApmToolResources({
