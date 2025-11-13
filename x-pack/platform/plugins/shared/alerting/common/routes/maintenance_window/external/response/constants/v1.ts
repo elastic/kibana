@@ -10,6 +10,7 @@ export const maintenanceWindowStatus = {
   UPCOMING: 'upcoming',
   FINISHED: 'finished',
   ARCHIVED: 'archived',
+  DISABLED: 'disabled',
 } as const;
 
 export type MaintenanceWindowStatus =

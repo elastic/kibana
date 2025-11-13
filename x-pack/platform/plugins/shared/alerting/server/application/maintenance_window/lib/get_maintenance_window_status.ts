@@ -15,5 +15,6 @@ export const getMaintenanceWindowStatus = () => {
     [MaintenanceWindowStatus.Finished]:
       '(not maintenance-window.attributes.events >= "now" and maintenance-window.attributes.expirationDate >"now")',
     [MaintenanceWindowStatus.Archived]: '(maintenance-window.attributes.expirationDate < "now")',
+    [MaintenanceWindowStatus.Disabled]: '(maintenance-window.attributes.enabled: false)',
   };
 };
