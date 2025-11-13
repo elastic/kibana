@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
-import type { FramePublicAPI, Visualization } from '@kbn/lens-common';
+import { memo, useCallback } from 'react';
+import type { FramePublicAPI } from '@kbn/lens-common';
 import {
   useLensDispatch,
   updateVisualizationState,
@@ -16,17 +16,23 @@ import {
 } from '../../state_management';
 import { useEditorFrameService } from '../editor_frame_service_context';
 
-const VisualizationToolbar = memo(function VisualizationToolbar({
-  activeVisualization,
+export const VisualizationToolbarWrapper = memo(function VisualizationToolbar({
   framePublicAPI,
-  enableFlyoutToolbar = false,
+  isInlineEditing = false,
 }: {
-  activeVisualization: Visualization | null;
   framePublicAPI: FramePublicAPI;
-  enableFlyoutToolbar?: boolean;
+  isInlineEditing?: boolean;
 }) {
   const dispatchLens = useLensDispatch();
-  const visualization = useLensSelector(selectVisualizationState);
+  const lensVisualization = useLensSelector(selectVisualization);
+  const visualizationState = useLensSelector(selectVisualizationState);
+
+  const { visualizationMap } = useEditorFrameService();
+
+  const activeVisualization = lensVisualization.activeId
+    ? visualizationMap[lensVisualization.activeId]
+    : null;
+
   const setVisualizationState = useCallback(
     (newState: unknown) => {
       if (!activeVisualization) {
@@ -42,43 +48,20 @@ const VisualizationToolbar = memo(function VisualizationToolbar({
     [dispatchLens, activeVisualization]
   );
 
-  const { FlyoutToolbarComponent, ToolbarComponent: RegularToolbarComponent } =
-    activeVisualization ?? {};
-
-  let ToolbarComponent;
-  if (enableFlyoutToolbar) {
-    ToolbarComponent = FlyoutToolbarComponent ?? RegularToolbarComponent;
-  } else {
-    ToolbarComponent = RegularToolbarComponent;
-  }
-
-  if (!ToolbarComponent) {
+  if (!activeVisualization || !visualizationState) {
     return null;
   }
 
-  return ToolbarComponent({
+  const { FlyoutToolbarComponent } = activeVisualization;
+
+  if (!FlyoutToolbarComponent) {
+    return null;
+  }
+
+  return FlyoutToolbarComponent({
     frame: framePublicAPI,
-    state: visualization.state,
+    state: visualizationState.state,
     setState: setVisualizationState,
+    isInlineEditing,
   });
 });
-
-export function VisualizationToolbarWrapper({
-  framePublicAPI,
-}: {
-  framePublicAPI: FramePublicAPI;
-}) {
-  const { visualizationMap } = useEditorFrameService();
-  const visualization = useLensSelector(selectVisualization);
-
-  const activeVisualization = visualization.activeId
-    ? visualizationMap[visualization.activeId]
-    : null;
-
-  return activeVisualization && visualization.state ? (
-    <VisualizationToolbar
-      framePublicAPI={framePublicAPI}
-      activeVisualization={activeVisualization}
-    />
-  ) : null;
-}

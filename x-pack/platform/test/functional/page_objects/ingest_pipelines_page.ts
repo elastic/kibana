@@ -133,7 +133,7 @@ export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrP
     },
 
     async clickTreeNode(pipeline: string) {
-      await testSubjects.click(`pipelineTreeNode-${pipeline}`);
+      await testSubjects.click(`pipelineTreeNode-${pipeline}-link`);
     },
 
     async increasePipelineListPageSize() {

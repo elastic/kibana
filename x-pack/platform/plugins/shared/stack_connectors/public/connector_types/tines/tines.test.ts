@@ -10,7 +10,7 @@ import { registerConnectorTypes } from '..';
 import type { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { experimentalFeaturesMock, registrationServicesMock } from '../../mocks';
 import type { TinesExecuteActionParams } from './types';
-import { SUB_ACTION, TINES_CONNECTOR_ID, TINES_TITLE } from '../../../common/tines/constants';
+import { SUB_ACTION, CONNECTOR_ID, CONNECTOR_NAME } from '@kbn/connector-schemas/tines/constants';
 import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
 
 let actionTypeModel: ConnectorTypeModel;
@@ -36,7 +36,7 @@ beforeAll(() => {
   const connectorTypeRegistry = new TypeRegistry<ConnectorTypeModel>();
   ExperimentalFeaturesService.init({ experimentalFeatures: experimentalFeaturesMock });
   registerConnectorTypes({ connectorTypeRegistry, services: registrationServicesMock });
-  const getResult = connectorTypeRegistry.get(TINES_CONNECTOR_ID);
+  const getResult = connectorTypeRegistry.get(CONNECTOR_ID);
   if (getResult !== null) {
     actionTypeModel = getResult;
   }
@@ -44,8 +44,8 @@ beforeAll(() => {
 
 describe('actionTypeRegistry.get() works', () => {
   it('should get Tines action type static data', () => {
-    expect(actionTypeModel.id).toEqual(TINES_CONNECTOR_ID);
-    expect(actionTypeModel.actionTypeTitle).toEqual(TINES_TITLE);
+    expect(actionTypeModel.id).toEqual(CONNECTOR_ID);
+    expect(actionTypeModel.actionTypeTitle).toEqual(CONNECTOR_NAME);
   });
 });
 

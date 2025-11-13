@@ -249,18 +249,21 @@ describe('prepareConversation', () => {
 
   describe('previousRounds with attachments', () => {
     it('should process previous rounds without attachments', async () => {
-      const previousRounds: ConversationRound[] = [
-        {
-          id: 'round-1',
-          input: {
-            message: 'Previous message',
-          },
-          steps: [],
-          response: {
-            message: 'Response',
-          },
+      const previousRound: ConversationRound = {
+        id: 'round-1',
+        input: {
+          message: 'Previous message',
         },
-      ];
+        steps: [],
+        response: {
+          message: 'Response',
+        },
+        started_at: new Date().toISOString(),
+        time_to_first_token: 0,
+        time_to_last_token: 0,
+      };
+
+      const previousRounds: ConversationRound[] = [previousRound];
 
       const result = await prepareConversation({
         previousRounds,
@@ -270,14 +273,10 @@ describe('prepareConversation', () => {
 
       expect(result.previousRounds).toHaveLength(1);
       expect(result.previousRounds[0]).toEqual({
-        id: 'round-1',
+        ...previousRound,
         input: {
-          message: 'Previous message',
+          ...previousRound.input,
           attachments: [],
-        },
-        steps: [],
-        response: {
-          message: 'Response',
         },
       });
     });
@@ -307,6 +306,9 @@ describe('prepareConversation', () => {
           response: {
             message: 'Response',
           },
+          started_at: new Date().toISOString(),
+          time_to_first_token: 0,
+          time_to_last_token: 0,
         },
       ];
 
@@ -351,6 +353,9 @@ describe('prepareConversation', () => {
           },
           steps: [],
           response: { message: 'Response 1' },
+          started_at: new Date().toISOString(),
+          time_to_first_token: 0,
+          time_to_last_token: 0,
         },
         {
           id: 'round-2',
@@ -359,6 +364,9 @@ describe('prepareConversation', () => {
           },
           steps: [],
           response: { message: 'Response 2' },
+          started_at: new Date().toISOString(),
+          time_to_first_token: 0,
+          time_to_last_token: 0,
         },
         {
           id: 'round-3',
@@ -374,6 +382,9 @@ describe('prepareConversation', () => {
           },
           steps: [],
           response: { message: 'Response 3' },
+          started_at: new Date().toISOString(),
+          time_to_first_token: 0,
+          time_to_last_token: 0,
         },
       ];
 
@@ -418,6 +429,9 @@ describe('prepareConversation', () => {
             message: 'Response 1',
           },
           trace_id: 'trace-123',
+          started_at: new Date().toISOString(),
+          time_to_first_token: 0,
+          time_to_last_token: 0,
         },
       ];
 
@@ -428,14 +442,11 @@ describe('prepareConversation', () => {
       });
 
       expect(result.previousRounds[0]).toEqual({
-        id: 'round-1',
+        ...previousRounds[0],
         input: {
-          message: 'Message 1',
+          ...previousRounds[0].input,
           attachments: [],
         },
-        steps: previousRounds[0].steps,
-        response: previousRounds[0].response,
-        trace_id: 'trace-123',
       });
     });
   });
@@ -464,6 +475,9 @@ describe('prepareConversation', () => {
           },
           steps: [],
           response: { message: 'Response' },
+          started_at: new Date().toISOString(),
+          time_to_first_token: 0,
+          time_to_last_token: 0,
         },
       ];
 

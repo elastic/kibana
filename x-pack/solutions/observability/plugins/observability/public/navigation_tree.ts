@@ -486,10 +486,23 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
             spaceBefore: null,
             children: [
               {
-                id: 'stack_monitoring_title',
+                id: 'stack_management_home',
                 title: '',
                 renderAs: 'panelOpener',
-                children: [{ link: 'monitoring' }],
+                children: [
+                  {
+                    // We include this link here to ensure that the settings icon does not land on Stack Monitoring by default
+                    // https://github.com/elastic/kibana/issues/241518
+                    // And that the sidenav panel opens when user lands to legacy management landing page
+                    // https://github.com/elastic/kibana/issues/240275
+                    link: 'management',
+                    title: i18n.translate('xpack.observability.obltNav.management_home', {
+                      defaultMessage: 'Home',
+                    }),
+                    breadcrumbStatus: 'hidden',
+                  },
+                  { link: 'monitoring' },
+                ],
               },
               {
                 id: 'alerts_and_insights',
@@ -604,12 +617,6 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                     link: 'management:search_sessions',
                   },
                 ],
-              },
-              {
-                // We include this link here to ensure that sidenav panel opens when user lands to legacy management landing page
-                // https://github.com/elastic/kibana/issues/240275
-                link: 'management',
-                sideNavStatus: 'hidden',
               },
             ],
           },

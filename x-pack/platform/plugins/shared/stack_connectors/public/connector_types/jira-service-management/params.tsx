@@ -10,25 +10,25 @@ import type { ActionParamsProps, IErrorObject } from '@kbn/triggers-actions-ui-p
 import { ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { isEmpty, unset, cloneDeep } from 'lodash';
-import { JiraServiceManagementSubActions } from '../../../common/jira-service-management/constants';
+import { SUB_ACTION } from '@kbn/connector-schemas/jira-service-management/constants';
+import type {
+  Params as JiraServiceManagementActionParams,
+  CreateAlertSubActionParams as JiraServiceManagementCreateAlertSubActionParams,
+} from '@kbn/connector-schemas/jira-service-management';
 import * as i18n from './translations';
 import { CreateAlert, isPartialCreateAlertSchema } from './create_alert';
 import { CloseAlert } from './close_alert';
 import { isPartialCloseAlertSchema } from './close_alert_schema';
-import type {
-  JiraServiceManagementActionParams,
-  JiraServiceManagementCreateAlertSubActionParams,
-} from '../../../server/connector_types';
 import type { EditActionCallback } from './types';
 
 const actionOptions = [
   {
-    value: JiraServiceManagementSubActions.CreateAlert,
+    value: SUB_ACTION.CreateAlert,
     text: i18n.CREATE_ALERT_ACTION,
     'data-test-subj': 'jsm-subActionSelect-create-alert',
   },
   {
-    value: JiraServiceManagementSubActions.CloseAlert,
+    value: SUB_ACTION.CloseAlert,
     text: i18n.CLOSE_ALERT_ACTION,
     'data-test-subj': 'jsm-subActionSelect-close-alert',
   },
@@ -39,7 +39,7 @@ const JiraServiceManagementParamFields: React.FC<
 > = ({ actionParams, editAction, errors, index, messageVariables, executionMode }) => {
   const { subAction, subActionParams } = actionParams;
 
-  const currentSubAction = useRef<string>(subAction ?? JiraServiceManagementSubActions.CreateAlert);
+  const currentSubAction = useRef<string>(subAction ?? SUB_ACTION.CreateAlert);
 
   const onActionChange = useCallback(
     (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -71,7 +71,7 @@ const JiraServiceManagementParamFields: React.FC<
 
   useEffect(() => {
     if (!subAction) {
-      editAction('subAction', JiraServiceManagementSubActions.CreateAlert, index);
+      editAction('subAction', SUB_ACTION.CreateAlert, index);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index, subAction]);
@@ -83,10 +83,8 @@ const JiraServiceManagementParamFields: React.FC<
       // check for a mismatch in the subAction and params, if the subAction does not match the params then we need to
       // clear them by calling editAction. We can carry over the alias if it exists
       if (
-        (subAction === JiraServiceManagementSubActions.CreateAlert &&
-          !isPartialCreateAlertSchema(subActionParams)) ||
-        (subAction === JiraServiceManagementSubActions.CloseAlert &&
-          !isPartialCloseAlertSchema(subActionParams))
+        (subAction === SUB_ACTION.CreateAlert && !isPartialCreateAlertSchema(subActionParams)) ||
+        (subAction === SUB_ACTION.CloseAlert && !isPartialCloseAlertSchema(subActionParams))
       ) {
         const params = subActionParams?.alias ? { alias: subActionParams.alias } : undefined;
         editAction('subActionParams', params, index);
@@ -110,7 +108,7 @@ const JiraServiceManagementParamFields: React.FC<
         </EuiFormRow>
       )}
 
-      {subAction === JiraServiceManagementSubActions.CreateAlert && (
+      {subAction === SUB_ACTION.CreateAlert && (
         <CreateAlert
           showSaveError={showCreateAlertSaveError(actionParams, errors)}
           subActionParams={subActionParams}
@@ -123,7 +121,7 @@ const JiraServiceManagementParamFields: React.FC<
         />
       )}
 
-      {subAction === JiraServiceManagementSubActions.CloseAlert && (
+      {subAction === SUB_ACTION.CloseAlert && (
         <CloseAlert
           showSaveError={showCloseAlertSaveError(actionParams, errors)}
           subActionParams={subActionParams}
@@ -172,12 +170,12 @@ const showCloseAlertSaveError = (
 const isCreateAlertParams = (
   params: Partial<JiraServiceManagementActionParams>
 ): params is Partial<JiraServiceManagementCreateAlertSubActionParams> =>
-  params.subAction === JiraServiceManagementSubActions.CreateAlert;
+  params.subAction === SUB_ACTION.CreateAlert;
 
 const isCloseAlertParams = (
   params: Partial<JiraServiceManagementActionParams>
 ): params is JiraServiceManagementCreateAlertSubActionParams =>
-  params.subAction === JiraServiceManagementSubActions.CloseAlert;
+  params.subAction === SUB_ACTION.CloseAlert;
 
 // eslint-disable-next-line import/no-default-export
 export { JiraServiceManagementParamFields as default };
