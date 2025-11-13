@@ -63,7 +63,7 @@ const getTargetFieldFromNamespace = (sourceNamespace: string | undefined): strin
   if (!sourceNamespace) {
     return TARGET_ENTITY_ID;
   }
-  return sourceNamespace === 'entity' ? 'target.entity.id' : `${sourceNamespace}.target.entity.id`;
+  return sourceNamespace === 'entity' ? 'entity.target.id' : `${sourceNamespace}.target.entity.id`;
 };
 
 /**

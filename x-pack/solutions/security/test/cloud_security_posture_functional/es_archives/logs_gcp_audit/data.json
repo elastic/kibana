@@ -860,24 +860,20 @@
   "type": "doc",
   "value": {
     "data_stream": "logs-gcp.audit-default",
-    "id": "multivalue-ui-test",
-    "index": ".ds-logs-gcp.audit-default-2024.10.07-000001",
+    "id": "NewSchemaEventDoc123",
+    "index": ".ds-logs-gcp.audit-default-2024.10.13-000001",
     "source": {
-      "@timestamp": "2024-09-01T12:40:00.000Z",
-      "actor": {
+      "@timestamp": "2024-09-01T12:55:00.000Z",
+      "user": {
         "entity": {
-          "id": [
-            "admin-user1@example.com",
-            "admin-user2@example.com"
-          ]
-        }
+          "id": "serviceaccount@example.com"
+        },
+        "email": "serviceaccount@example.com",
+        "name": "Service Account"
       },
       "client": {
         "user": {
-          "email": [
-            "admin-user1@example.com",
-            "admin-user2@example.com"
-          ]
+          "email": "serviceaccount@example.com"
         }
       },
       "cloud": {
@@ -890,20 +886,20 @@
         "version": "8.11.0"
       },
       "event": {
-        "action": "google.iam.admin.v1.CreateRole",
+        "action": "google.iam.admin.v1.UpdateServiceAccount",
         "agent_id_status": "missing",
         "category": [
           "session",
           "network",
           "configuration"
         ],
-        "id": "multivalue-ui-test",
+        "id": "new-schema-event-id",
         "ingested": "2024-10-07T17:47:35Z",
         "kind": "event",
         "outcome": "success",
         "provider": "activity",
         "type": [
-          "end",
+          "change",
           "access",
           "allowed"
         ]
@@ -913,64 +909,28 @@
           "authorization_info": [
             {
               "granted": true,
-              "permission": "iam.roles.create",
+              "permission": "iam.serviceAccounts.update",
               "resource": "projects/your-project-id"
             }
           ],
           "logentry_operation": {
-            "id": "operation-multivalue-test"
+            "id": "operation-new-schema-123"
           },
           "request": {
-            "@type": "type.googleapis.com/google.iam.admin.v1.CreateRoleRequest",
+            "@type": "type.googleapis.com/google.iam.admin.v1.UpdateServiceAccountRequest",
             "parent": "projects/your-project-id",
-            "role": {
-              "description": "Multi-value test role",
-              "includedPermissions": [
-                "resourcemanager.projects.get",
-                "resourcemanager.projects.list"
-              ],
-              "name": [
-                "projects/your-project-id/roles/customRole1",
-                "projects/your-project-id/roles/customRole2",
-                "projects/your-project-id/roles/customRole3"
-              ],
-              "title": "Multi-Value Custom Role"
-            },
-            "roleId": [
-              "customRole1",
-              "customRole2",
-              "customRole3"
-            ]
+            "serviceAccount": {
+              "displayName": "Updated Service Account",
+              "email": "api-service@your-project-id.iam.gserviceaccount.com"
+            }
           },
-          "resource_name": [
-            "projects/your-project-id/roles/customRole1",
-            "projects/your-project-id/roles/customRole2",
-            "projects/your-project-id/roles/customRole3"
-          ],
+          "resource_name": "projects/your-project-id/serviceAccounts/api-service@your-project-id.iam.gserviceaccount.com",
           "response": {
-            "@type": "type.googleapis.com/google.iam.admin.v1.Role",
-            "description": "Multi-value test role",
-            "includedPermissions": [
-              "resourcemanager.projects.get",
-              "resourcemanager.projects.list"
-            ],
-            "name": [
-              "projects/your-project-id/roles/customRole1",
-              "projects/your-project-id/roles/customRole2",
-              "projects/your-project-id/roles/customRole3"
-            ],
-            "stage": "GA",
-            "title": "Multi-Value Custom Role"
+            "@type": "type.googleapis.com/google.iam.admin.v1.ServiceAccount",
+            "displayName": "Updated Service Account",
+            "email": "api-service@your-project-id.iam.gserviceaccount.com"
           },
           "type": "type.googleapis.com/google.cloud.audit.AuditLog"
-        }
-      },
-      "host": {
-        "hostname": "multivalue-test-host",
-        "ip": "192.168.1.10",
-        "os": {
-          "name": "Linux",
-          "version": "5.4.0-42-generic"
         }
       },
       "log": {
@@ -979,46 +939,171 @@
       },
       "related": {
         "entity": [
-          "10.0.0.10",
-          "projects/your-project-id/roles/customRole1",
-          "projects/your-project-id/roles/customRole2",
-          "projects/your-project-id/roles/customRole3",
-          "admin-user1@example.com",
-          "admin-user2@example.com"
+          "10.0.0.5",
+          "serviceaccount@example.com",
+          "api-service@your-project-id.iam.gserviceaccount.com",
+          "projects/your-project-id/serviceAccounts/api-service@your-project-id.iam.gserviceaccount.com"
         ],
         "ip": [
-          "10.0.0.10"
+          "10.0.0.5"
         ],
         "user": [
-          "admin-user1@example.com",
-          "admin-user2@example.com"
+          "serviceaccount@example.com"
         ]
       },
       "service": {
+        "entity": {
+          "id": "api-service@your-project-id.iam.gserviceaccount.com"
+        },
         "name": "iam.googleapis.com"
       },
+      "user": {
+        "entity": {
+          "id": "serviceaccount@example.com"
+        }
+      },
+      "entity": {
+        "target": {
+          "id": "projects/your-project-id/serviceAccounts/api-service@your-project-id.iam.gserviceaccount.com"
+        }
+      },
       "source": {
-        "ip": "10.0.0.10"
+        "ip": "10.0.0.5"
       },
       "tags": [
         "_geoip_database_unavailable_GeoLite2-City.mmdb",
         "_geoip_database_unavailable_GeoLite2-ASN.mmdb"
       ],
-      "target": {
-        "entity": {
-          "id": [
-            "projects/your-project-id/roles/customRole1",
-            "projects/your-project-id/roles/customRole2",
-            "projects/your-project-id/roles/customRole3"
-          ]
-        }
-      },
       "user_agent": {
         "device": {
           "name": "Other"
         },
         "name": "Other",
-        "original": "google-cloud-sdk/324.0.0"
+        "original": "google-cloud-sdk/350.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-gcp.audit-default",
+    "id": "NewSchemaEventDoc456",
+    "index": ".ds-logs-gcp.audit-default-2024.10.13-000001",
+    "source": {
+      "@timestamp": "2024-09-01T12:56:00.000Z",
+      "user": {
+        "entity": {
+          "id": "serviceaccount@example.com"
+        },
+        "email": "serviceaccount@example.com",
+        "name": "Service Account"
+      },
+      "client": {
+        "user": {
+          "email": "serviceaccount@example.com"
+        }
+      },
+      "cloud": {
+        "project": {
+          "id": "your-project-id"
+        },
+        "provider": "gcp"
+      },
+      "ecs": {
+        "version": "8.11.0"
+      },
+      "event": {
+        "action": "google.iam.admin.v1.CreateServiceAccount",
+        "agent_id_status": "missing",
+        "category": [
+          "session",
+          "network",
+          "configuration"
+        ],
+        "id": "new-schema-event-id-2",
+        "ingested": "2024-10-07T17:47:35Z",
+        "kind": "event",
+        "outcome": "success",
+        "provider": "activity",
+        "type": [
+          "creation",
+          "access",
+          "allowed"
+        ]
+      },
+      "gcp": {
+        "audit": {
+          "authorization_info": [
+            {
+              "granted": true,
+              "permission": "iam.serviceAccounts.create",
+              "resource": "projects/your-project-id"
+            }
+          ],
+          "logentry_operation": {
+            "id": "operation-new-schema-456"
+          },
+          "request": {
+            "@type": "type.googleapis.com/google.iam.admin.v1.CreateServiceAccountRequest",
+            "parent": "projects/your-project-id",
+            "serviceAccount": {
+              "displayName": "New Service Account",
+              "email": "new-service@your-project-id.iam.gserviceaccount.com"
+            }
+          },
+          "resource_name": "projects/your-project-id/serviceAccounts/new-service@your-project-id.iam.gserviceaccount.com",
+          "response": {
+            "@type": "type.googleapis.com/google.iam.admin.v1.ServiceAccount",
+            "displayName": "New Service Account",
+            "email": "new-service@your-project-id.iam.gserviceaccount.com"
+          },
+          "type": "type.googleapis.com/google.cloud.audit.AuditLog"
+        }
+      },
+      "log": {
+        "level": "NOTICE",
+        "logger": "projects/your-project-id/logs/cloudaudit.googleapis.com%2Factivity"
+      },
+      "related": {
+        "entity": [
+          "10.0.0.5",
+          "serviceaccount@example.com",
+          "new-service@your-project-id.iam.gserviceaccount.com",
+          "projects/your-project-id/serviceAccounts/new-service@your-project-id.iam.gserviceaccount.com"
+        ],
+        "ip": [
+          "10.0.0.5"
+        ],
+        "user": [
+          "serviceaccount@example.com"
+        ]
+      },
+      "service": {
+        "entity": {
+          "id": "new-service@your-project-id.iam.gserviceaccount.com"
+        },
+        "name": "iam.googleapis.com"
+      },
+      "entity": {
+        "target": {
+          "id": "projects/your-project-id/serviceAccounts/new-service@your-project-id.iam.gserviceaccount.com"
+        }
+      },
+      "source": {
+        "ip": "10.0.0.5"
+      },
+      "tags": [
+        "_geoip_database_unavailable_GeoLite2-City.mmdb",
+        "_geoip_database_unavailable_GeoLite2-ASN.mmdb"
+      ],
+      "user_agent": {
+        "device": {
+          "name": "Other"
+        },
+        "name": "Other",
+        "original": "google-cloud-sdk/350.0.0"
       }
     }
   }

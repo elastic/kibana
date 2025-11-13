@@ -228,5 +228,131 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await alertsPage.flyout.assertPreviewPanelIsOpen('group');
       await alertsPage.flyout.assertPreviewPanelGroupedItemsNumber(2);
     });
+
+    it('expanded flyout - new ECS schema fields (user.entity.id, service.entity.id, entity.target.id)', async () => {
+      // Setting the timerange to fit the data and open the flyout for a specific alert with new ECS schema
+      await alertsPage.navigateToAlertsPage(
+        `${alertsPage.getAbsoluteTimerangeFilter(
+          '2024-09-01T00:00:00.000Z',
+          '2024-09-02T00:00:00.000Z'
+        )}&${alertsPage.getFlyoutFilter(
+          'new-schema-alert-789xyz456abc123def789ghi012jkl345mno678pqr901stu234vwx567'
+        )}`
+      );
+      await alertsPage.waitForListToHaveAlerts(20000);
+
+      await alertsPage.flyout.expandVisualizations();
+      await alertsPage.flyout.assertGraphPreviewVisible();
+      await alertsPage.flyout.assertGraphNodesNumber(3);
+
+      await expandedFlyoutGraph.expandGraph();
+      await expandedFlyoutGraph.waitGraphIsLoaded();
+      await expandedFlyoutGraph.assertGraphNodesNumber(3);
+      await expandedFlyoutGraph.toggleSearchBar();
+
+      // Show actions by entity (user.entity.id)
+      await expandedFlyoutGraph.showActionsByEntity('serviceaccount@example.com');
+      await expandedFlyoutGraph.showSearchBar();
+      await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
+      await expandedFlyoutGraph.expectFilterTextEquals(
+        0,
+        'user.entity.id: serviceaccount@example.com'
+      );
+      await expandedFlyoutGraph.expectFilterPreviewEquals(
+        0,
+        'user.entity.id: serviceaccount@example.com'
+      );
+
+      // Show actions on entity (entity.target.id)
+      await expandedFlyoutGraph.showActionsOnEntity(
+        'projects/your-project-id/serviceAccounts/api-service@your-project-id.iam.gserviceaccount.com'
+      );
+      await expandedFlyoutGraph.expectFilterTextEquals(
+        0,
+        'user.entity.id: serviceaccount@example.com OR entity.target.id: projects/your-project-id/serviceAccounts/api-service@your-project-id.iam.gserviceaccount.com'
+      );
+      await expandedFlyoutGraph.expectFilterPreviewEquals(
+        0,
+        'user.entity.id: serviceaccount@example.com OR entity.target.id: projects/your-project-id/serviceAccounts/api-service@your-project-id.iam.gserviceaccount.com'
+      );
+
+      // Explore related entities
+      await expandedFlyoutGraph.exploreRelatedEntities('serviceaccount@example.com');
+      await expandedFlyoutGraph.expectFilterTextEquals(
+        0,
+        'user.entity.id: serviceaccount@example.com OR entity.target.id: projects/your-project-id/serviceAccounts/api-service@your-project-id.iam.gserviceaccount.com OR related.entity: serviceaccount@example.com'
+      );
+      await expandedFlyoutGraph.expectFilterPreviewEquals(
+        0,
+        'user.entity.id: serviceaccount@example.com OR entity.target.id: projects/your-project-id/serviceAccounts/api-service@your-project-id.iam.gserviceaccount.com OR related.entity: serviceaccount@example.com'
+      );
+
+      // Show events with the same action
+      await expandedFlyoutGraph.showEventsOfSameAction(
+        'a(serviceaccount@example.com)-b(projects/your-project-id/serviceAccounts/api-service@your-project-id.iam.gserviceaccount.com)label(google.iam.admin.v1.UpdateServiceAccount)oe(1)oa(1)'
+      );
+      await expandedFlyoutGraph.expectFilterTextEquals(
+        0,
+        'user.entity.id: serviceaccount@example.com OR entity.target.id: projects/your-project-id/serviceAccounts/api-service@your-project-id.iam.gserviceaccount.com OR related.entity: serviceaccount@example.com OR event.action: google.iam.admin.v1.UpdateServiceAccount'
+      );
+      await expandedFlyoutGraph.expectFilterPreviewEquals(
+        0,
+        'user.entity.id: serviceaccount@example.com OR entity.target.id: projects/your-project-id/serviceAccounts/api-service@your-project-id.iam.gserviceaccount.com OR related.entity: serviceaccount@example.com OR event.action: google.iam.admin.v1.UpdateServiceAccount'
+      );
+
+      await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
+
+      // Hide events with the same action
+      await expandedFlyoutGraph.hideEventsOfSameAction(
+        'a(serviceaccount@example.com)-b(projects/your-project-id/serviceAccounts/api-service@your-project-id.iam.gserviceaccount.com)label(google.iam.admin.v1.UpdateServiceAccount)oe(1)oa(1)'
+      );
+      await expandedFlyoutGraph.expectFilterTextEquals(
+        0,
+        'user.entity.id: serviceaccount@example.com OR entity.target.id: projects/your-project-id/serviceAccounts/api-service@your-project-id.iam.gserviceaccount.com OR related.entity: serviceaccount@example.com'
+      );
+      await expandedFlyoutGraph.expectFilterPreviewEquals(
+        0,
+        'user.entity.id: serviceaccount@example.com OR entity.target.id: projects/your-project-id/serviceAccounts/api-service@your-project-id.iam.gserviceaccount.com OR related.entity: serviceaccount@example.com'
+      );
+
+      // Hide actions on entity
+      await expandedFlyoutGraph.hideActionsOnEntity(
+        'projects/your-project-id/serviceAccounts/api-service@your-project-id.iam.gserviceaccount.com'
+      );
+      await expandedFlyoutGraph.expectFilterTextEquals(
+        0,
+        'user.entity.id: serviceaccount@example.com OR related.entity: serviceaccount@example.com'
+      );
+      await expandedFlyoutGraph.expectFilterPreviewEquals(
+        0,
+        'user.entity.id: serviceaccount@example.com OR related.entity: serviceaccount@example.com'
+      );
+
+      // Clear filters
+      await expandedFlyoutGraph.clearAllFilters();
+
+      // Add custom filter
+      await expandedFlyoutGraph.addFilter({
+        field: 'user.entity.id',
+        operation: 'is',
+        value: 'serviceaccount@example.com',
+      });
+      await pageObjects.header.waitUntilLoadingHasFinished();
+
+      await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
+      await expandedFlyoutGraph.assertGraphNodesNumber(5);
+
+      // Open timeline
+      await expandedFlyoutGraph.clickOnInvestigateInTimelineButton();
+      await timelinePage.ensureTimelineIsOpen();
+      await timelinePage.waitForEvents();
+      await timelinePage.closeTimeline();
+
+      // Test query bar
+      await expandedFlyoutGraph.setKqlQuery('cannotFindThis');
+      await expandedFlyoutGraph.clickOnInvestigateInTimelineButton();
+      await timelinePage.ensureTimelineIsOpen();
+      await timelinePage.waitForEvents();
+    });
   });
 }
