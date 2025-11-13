@@ -121,7 +121,7 @@ describe('conditionToESQLAst', () => {
       it('should handle endsWith with leading wildcard', () => {
         const condition: Condition = { field: 'filename', endsWith: '.log' };
         const result = prettyPrint(condition);
-        expect(result).toBe('filename LIKE "*.log"');
+        expect(result).toBe('ENDS_WITH(filename, ".log")');
         expect(result).not.toContain('LIKE(');
         expect(result).not.toContain('%');
       });
@@ -138,7 +138,7 @@ describe('conditionToESQLAst', () => {
 
       it('should handle endsWith with spaces', () => {
         const condition: Condition = { field: 'message', endsWith: ' failed' };
-        expect(prettyPrint(condition)).toBe('message LIKE "* failed"');
+        expect(prettyPrint(condition)).toBe('ENDS_WITH(message, " failed")');
       });
     });
 

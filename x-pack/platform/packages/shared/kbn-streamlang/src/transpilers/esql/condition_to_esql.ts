@@ -110,9 +110,9 @@ export function conditionToESQLAst(condition: Condition): ESQLSingleAstItem {
       ]);
     }
     if ('endsWith' in condition) {
-      return Builder.expression.func.binary('like', [
+      return Builder.expression.func.call('ENDS_WITH', [
         field,
-        Builder.expression.literal.string(`*${condition.endsWith}`),
+        Builder.expression.literal.string(String(condition.endsWith)),
       ]);
     }
   } else if (isAndCondition(condition)) {
