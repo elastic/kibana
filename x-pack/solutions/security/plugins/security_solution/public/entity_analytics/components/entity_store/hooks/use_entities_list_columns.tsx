@@ -121,7 +121,7 @@ export const useEntitiesListColumns = (): EntitiesListColumns => {
                     values: { name: displayName },
                   }
                 )}
-                style={{ color: 'primary' }}
+                style={{ color: euiTheme.colors.primary }}
               />
             )}
             {canRenderTimelineActions && (
