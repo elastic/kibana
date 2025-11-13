@@ -122,7 +122,7 @@ The tool accepts an array of items with text content and uses a reranking model 
         // Items is already normalized to an array by the schema transform
         // No need for additional extraction logic here
         logger.debug(`Rerank tool received ${items.length} items for query: ${query}`);
-        
+
         if (items.length === 0) {
           logger.warn('Rerank tool received empty items array - data extraction may have failed');
           return {
@@ -162,7 +162,7 @@ The tool accepts an array of items with text content and uses a reranking model 
         if (!rerankInferenceId) {
           // Try to find a rerank inference endpoint
           try {
-            const inferenceEndpoints = await esClient.inference.get({
+            await esClient.inference.get({
               inference_id: '_all',
             });
             // Look for a rerank endpoint (this is a simplified check)
@@ -176,8 +176,6 @@ The tool accepts an array of items with text content and uses a reranking model 
           }
         }
 
-        // Create a temporary index with items for reranking
-        const tempIndex = `.catchup-rerank-${Date.now()}`;
         const itemsWithText = items
           .map((item, index) => {
             const textFieldName = detectTextField(item);
@@ -188,10 +186,7 @@ The tool accepts an array of items with text content and uses a reranking model 
             return {
               ...item,
               _id: `item-${index}`,
-              _source: {
-                ...item,
-                text: item[textFieldName], // Normalize to 'text' field for reranking
-              },
+              text: item[textFieldName], // Normalize to 'text' field for reranking
             };
           })
           .filter((item) => item !== null);
@@ -219,8 +214,8 @@ The tool accepts an array of items with text content and uses a reranking model 
 
         // Alternative approach: Use Elasticsearch's text similarity without full ES|QL RERANK
         // This is a fallback that still demonstrates prioritization
-        const scoredItems = itemsWithText.map((item) => {
-          const text = (item._source.text as string) || '';
+        const scoredItems = itemsWithText.map((item, itemIndex) => {
+          const text = (item.text as string) || '';
           // Simple text matching score (in production, this would use the reranker)
           const queryLower = query.toLowerCase();
           const textLower = text.toLowerCase();
@@ -236,17 +231,19 @@ The tool accepts an array of items with text content and uses a reranking model 
             score += 5;
           }
           // Boost for items with higher priority indicators
-          if (item._source.severity === 'critical' || item._source.severity === 'high') {
+          if (item.severity === 'critical' || item.severity === 'high') {
             score += 3;
           }
-          if (item._source.mentions && Array.isArray(item._source.mentions)) {
-            score += item._source.mentions.length;
+          if (item.mentions && Array.isArray(item.mentions)) {
+            score += item.mentions.length;
           }
 
+          // Remove internal fields before returning
+          const { _id, text: _text, ...rest } = item;
           return {
-            ...item._source,
+            ...rest,
             _rerank_score: score,
-            _original_index: items.indexOf(item._source),
+            _original_index: itemIndex,
           };
         });
 

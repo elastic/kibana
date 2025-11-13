@@ -125,9 +125,7 @@ export function normalizeTimeRange(
   const normalizedStart = normalizeDateToCurrentYear(start);
   const startDate = moment(normalizedStart).toDate();
   if (isNaN(startDate.getTime())) {
-    throw new Error(
-      `Invalid datetime format: ${start}. Expected ISO 8601 format.`
-    );
+    throw new Error(`Invalid datetime format: ${start}. Expected ISO 8601 format.`);
   }
 
   const now = moment();
@@ -140,9 +138,7 @@ export function normalizeTimeRange(
     normalizedEnd = normalizeDateToCurrentYear(end);
     endDate = moment(normalizedEnd).toDate();
     if (isNaN(endDate.getTime())) {
-      throw new Error(
-        `Invalid datetime format: ${end}. Expected ISO 8601 format.`
-      );
+      throw new Error(`Invalid datetime format: ${end}. Expected ISO 8601 format.`);
     }
 
     const endMoment = moment(endDate);
@@ -151,7 +147,6 @@ export function normalizeTimeRange(
     // If end date is in the past (beyond threshold), check if this is a relative time range
     if (endMoment.isBefore(pastThreshold)) {
       const durationMs = endMoment.valueOf() - moment(startDate).valueOf();
-      const duration = moment.duration(durationMs);
 
       // Check if this looks like a relative time range by comparing to common durations
       // We'll check for: 24 hours, 7 days, 30 days, etc.
