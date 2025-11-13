@@ -18,7 +18,6 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import {
   createBuiltinToolRegistry,
-  registerBuiltinTools,
   createBuiltinProviderFn,
   type BuiltinToolRegistry,
 } from './builtin';
@@ -51,7 +50,6 @@ export class ToolsService {
 
   setup(deps: ToolsServiceSetupDeps): ToolsServiceSetup {
     this.setupDeps = deps;
-    registerBuiltinTools({ registry: this.builtinRegistry });
 
     return {
       register: (reg) => {
