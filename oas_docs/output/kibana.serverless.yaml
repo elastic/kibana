@@ -6321,6 +6321,17 @@ paths:
           required: true
           schema:
             type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                validate_alerts_existence:
+                  default: true
+                  description: Whether to validate the existence of the alert.
+                  type: boolean
       responses:
         '204':
           description: Indicates a successful call.
