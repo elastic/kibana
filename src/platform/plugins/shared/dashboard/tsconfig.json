@@ -101,7 +101,6 @@
     "@kbn/core-saved-objects-common",
     "@kbn/content-management-access-control-public",
     "@kbn/content-management-access-control-server",
-    "@kbn/background-search",
     "@kbn/react-query",
     "@kbn/core-http-server",
     "@kbn/core-chrome-layout-utils"
