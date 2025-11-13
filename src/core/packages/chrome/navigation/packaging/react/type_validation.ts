@@ -9,7 +9,7 @@
 
 /**
  * BUILD-TIME TYPE VALIDATION
- * 
+ *
  * This file ensures the duplicated types in packaging/react/types.ts remain compatible
  * with the source types in src/ and types.ts. It is compiled during packaging builds
  * (build.sh Step 1.5) using packaging/tsconfig.json.
