@@ -60,6 +60,7 @@ export async function resumeWorkflow({
     clientToUse,
     fakeRequest: fakeRequestFromContainer,
     coreStart: coreStartFromContainer,
+    workflowTaskManager,
   } = await setupDependencies(
     workflowRunId,
     spaceId,
@@ -89,5 +90,6 @@ export async function resumeWorkflow({
     fakeRequest: fakeRequestFromContainer,
     coreStart: coreStartFromContainer,
     taskAbortController,
+    workflowTaskManager,
   });
 }

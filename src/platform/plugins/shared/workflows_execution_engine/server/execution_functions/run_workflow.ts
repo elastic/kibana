@@ -59,6 +59,7 @@ export async function runWorkflow({
     clientToUse,
     fakeRequest: fakeRequestFromContainer,
     coreStart: coreStartFromContainer,
+    workflowTaskManager,
   } = await setupDependencies(
     workflowRunId,
     spaceId,
@@ -88,5 +89,6 @@ export async function runWorkflow({
     fakeRequest: fakeRequestFromContainer,
     coreStart: coreStartFromContainer,
     taskAbortController,
+    workflowTaskManager,
   });
 }

@@ -365,6 +365,7 @@ export class WorkflowExecutionRuntimeManager {
     this.nextNodeId = this.workflowExecution.currentNodeId;
     const updatedWorkflowExecution: Partial<EsWorkflowExecution> = {
       status: ExecutionStatus.RUNNING,
+      resumeAt: undefined,
     };
     this.workflowExecutionState.updateWorkflowExecution(updatedWorkflowExecution);
   }

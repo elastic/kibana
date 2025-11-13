@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ExecutionStatus } from '@kbn/workflows';
 import { catchError } from './catch_error';
 import { runStackMonitor } from './run_stack_monitor';
 import type { WorkflowExecutionLoopParams } from './types';
+import { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 
 /**
  * Executes a single step in the workflow execution process.
@@ -72,5 +74,37 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
     monitorAbortController.abort();
     await catchError(params, stepExecutionRuntime);
     await params.workflowRuntime.saveState(); // Ensure state is updated after each step
+  }
+
+  await handleExecutionDelay(params, stepExecutionRuntime);
+}
+
+const SHORT_DURATION_THRESHOLD = 1000 * 5; // 5 seconds
+async function handleExecutionDelay(
+  params: WorkflowExecutionLoopParams,
+  stepExecutionRuntime: StepExecutionRuntime
+) {
+  const workflowExecution = params.workflowRuntime.getWorkflowExecution();
+
+  if (workflowExecution.status === ExecutionStatus.WAITING && workflowExecution.resumeAt) {
+    const resumeAt = new Date(workflowExecution.resumeAt);
+    const now = new Date();
+    const diff = resumeAt.getTime() - now.getTime();
+
+    if (diff < SHORT_DURATION_THRESHOLD) {
+      const timeout = diff > 0 ? diff : 0;
+      await new Promise((resolve) => setTimeout(resolve, timeout));
+      params.workflowExecutionState.updateWorkflowExecution({
+        status: ExecutionStatus.RUNNING,
+        resumeAt: undefined,
+      });
+    } else {
+      await params.workflowTaskManager.scheduleResumeTask({
+        runAt: resumeAt,
+        workflowRunId: workflowExecution.id,
+        spaceId: workflowExecution.spaceId,
+      });
+    }
+    await params.workflowExecutionState.flush();
   }
 }

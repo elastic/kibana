@@ -9,9 +9,31 @@
 
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { ResumeWorkflowExecutionParams } from './types';
+import { parseDuration } from '../utils';
+import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
+import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 
-export class WorkflowTaskManager {
-  constructor(private taskManager: TaskManagerStartContract) {}
+export class WorkflowTask {
+  private static readonly SHORT_DURATION_THRESHOLD = 1000 * 5; // 5 seconds
+
+  constructor(
+    private deps: {
+      taskManager: TaskManagerStartContract;
+      workflowExecutionRuntimeManager: WorkflowExecutionRuntimeManager;
+      stepExecutionRuntime: StepExecutionRuntime;
+    }
+  ) {}
+
+  async delay(duration: string): Promise<void> {
+    const durationMs = parseDuration(duration);
+
+    if (durationMs > WorkflowTask.SHORT_DURATION_THRESHOLD) {
+      await this.handleLongDelay();
+      return;
+    }
+
+    await this.handleShortDelay();
+  }
 
   async scheduleResumeTask({
     runAt,
@@ -22,7 +44,7 @@ export class WorkflowTaskManager {
     workflowRunId: string;
     spaceId: string;
   }): Promise<{ taskId: string }> {
-    const task = await this.taskManager.schedule({
+    const task = await this.deps.taskManager.schedule({
       taskType: 'workflow:resume',
       params: {
         workflowRunId,
@@ -35,5 +57,11 @@ export class WorkflowTaskManager {
     return {
       taskId: task.id,
     };
+  }
+
+  private async handleLongDelay(): Promise<void> {}
+
+  private async handleShortDelay(): Promise<void> {
+
   }
 }

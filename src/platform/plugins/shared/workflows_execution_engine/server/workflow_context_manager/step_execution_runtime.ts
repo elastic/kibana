@@ -15,6 +15,7 @@ import type { WorkflowExecutionState } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import type { RunStepResult } from '../step/node_implementation';
 import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
+import { parseDuration } from '../utils';
 
 interface StepExecutionRuntimeInit {
   contextManager: WorkflowContextManager;
@@ -190,7 +191,8 @@ export class StepExecutionRuntime {
     this.logStepFail(stepExecutionUpdate.id!, error);
   }
 
-  public async setWaitStep(): Promise<void> {
+  public setWaitStep(delay: string): void {
+    const durationInMs = parseDuration(delay);
     this.workflowExecutionState.upsertStep({
       id: this.stepExecutionId,
       status: ExecutionStatus.WAITING,
@@ -198,6 +200,7 @@ export class StepExecutionRuntime {
 
     this.workflowExecutionState.updateWorkflowExecution({
       status: ExecutionStatus.WAITING,
+      resumeAt: new Date(new Date().getTime() + durationInMs).toISOString(),
     });
   }
 

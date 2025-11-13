@@ -25,7 +25,7 @@ import { WorkflowExecutionNotFoundError } from '@kbn/workflows/common/errors';
 
 import type { WorkflowsExecutionEngineConfig } from './config';
 
-import { resumeWorkflow, runWorkflow } from './execution_functions';
+import { resumeWorkflow, runWorkflow, setupDependencies } from './execution_functions';
 import { LogsRepository } from './repositories/logs_repository';
 import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
@@ -45,6 +45,15 @@ import type {
 import { createIndexes } from '../common';
 
 type SetupDependencies = Pick<ContextDependencies, 'cloudSetup'>;
+
+function generateExecutionTaskScope(workflowExecution: EsWorkflowExecution): string[] {
+  return [
+    'workflows',
+    `workflow:${workflowExecution.workflowId}`,
+    `workflow-execution:${workflowExecution.id}`,
+    ...(workflowExecution.stepId ? [`workflow-execution-step:${workflowExecution.stepId}`] : []),
+  ];
+}
 
 export class WorkflowsExecutionEnginePlugin
   implements
@@ -248,7 +257,7 @@ export class WorkflowsExecutionEnginePlugin
       } else {
         // Normal manual execution - schedule a task
         const taskInstance = {
-          id: `workflow:${workflowExecution.id}:${context.triggeredBy}`,
+          id: `workflow:${workflowExecution.id}:${workflowExecution.triggeredBy}`,
           taskType: 'workflow:run',
           params: {
             workflowRunId: workflowExecution.id,
@@ -259,7 +268,7 @@ export class WorkflowsExecutionEnginePlugin
             lastRunStatus: null,
             lastRunError: null,
           },
-          scope: ['workflows'],
+          scope: generateExecutionTaskScope(workflowExecution as EsWorkflowExecution),
           enabled: true,
         };
 
@@ -325,7 +334,7 @@ export class WorkflowsExecutionEnginePlugin
           lastRunStatus: null,
           lastRunError: null,
         },
-        scope: ['workflows'],
+        scope: generateExecutionTaskScope(workflowExecution as EsWorkflowExecution),
         enabled: true,
       };
 
@@ -368,23 +377,34 @@ export class WorkflowsExecutionEnginePlugin
         return;
       }
 
-      // Request cancellation
-      await workflowExecutionRepository.updateWorkflowExecution({
-        id: workflowExecution.id,
-        cancelRequested: true,
-        cancellationReason: 'Cancelled by user',
-        cancelledAt: new Date().toISOString(),
-        cancelledBy: 'system', // TODO: set user if available
-      });
-
-      if (
-        [ExecutionStatus.WAITING, ExecutionStatus.WAITING_FOR_INPUT].includes(
-          workflowExecution.status
-        )
-      ) {
-        // TODO: handle WAITING states
-        // It should clean up resume tasks, etc
+      const { taskManager } = plugins;
+      try {
+        await taskManager.remove(
+          `workflow:${workflowExecution.id}:${workflowExecution.triggeredBy}`
+        );
+      } catch (error) {
+        this.logger.error(
+          `Error removing task for workflow execution ${workflowExecution.id}: ${error}`
+        );
       }
+
+      // // Request cancellation
+      // await workflowExecutionRepository.updateWorkflowExecution({
+      //   id: workflowExecution.id,
+      //   cancelRequested: true,
+      //   cancellationReason: 'Cancelled by user',
+      //   cancelledAt: new Date().toISOString(),
+      //   cancelledBy: 'system', // TODO: set user if available
+      // });
+
+      // if (
+      //   [ExecutionStatus.WAITING, ExecutionStatus.WAITING_FOR_INPUT].includes(
+      //     workflowExecution.status
+      //   )
+      // ) {
+      //   // TODO: handle WAITING states
+      //   // It should clean up resume tasks, etc
+      // }
     };
 
     return {
