@@ -22,7 +22,6 @@
 import { z } from '@kbn/zod';
 
 import type { ConnectorSpec } from '../connector_spec';
-import { UISchemas } from '../connector_spec_ui';
 
 export const URLVoidConnector: ConnectorSpec = {
   metadata: {
@@ -33,14 +32,18 @@ export const URLVoidConnector: ConnectorSpec = {
     supportedFeatureIds: ['alerting', 'siem'],
   },
 
-  schema: z.discriminatedUnion('method', [
-    z.object({
-      method: z.literal('headers'),
-      headers: z.object({
-        'X-Api-Key': UISchemas.secret().describe('API Key'),
+  authTypes: [
+    {
+      type: 'header',
+      customSchema: z.object({
+        headers: z.object({
+          'X-Api-Key': z.string().describe('API Key'),
+        }),
       }),
-    }),
-  ]),
+    },
+  ],
+
+  schema: z.object({}),
 
   actions: {
     scanDomain: {

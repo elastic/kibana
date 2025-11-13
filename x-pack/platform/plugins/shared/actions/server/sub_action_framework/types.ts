@@ -117,7 +117,7 @@ export interface SubActionConnectorType<Config, Secrets> {
   supportedFeatureIds: string[];
   schema: {
     config: z.ZodType<Config>;
-    secrets: z.ZodType<Secrets>;
+    secrets: z.ZodType<Secrets, z.ZodTypeDef, Secrets | undefined>;
   };
   validators?: Array<ConfigValidator<Config> | SecretsValidator<Secrets>>;
   getService: (params: ServiceParams<Config, Secrets>) => SubActionConnector<Config, Secrets>;

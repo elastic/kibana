@@ -57,9 +57,10 @@ export const MyConnector: SingleFileConnectorDefinition = {
     supportedFeatureIds: ['alerting'],
   },
 
+  authTypes: ['bearer'],
+
   schema: z.object({
     url: z.string().url().describe('API URL'),
-    ...BearerAuthSchema.shape,
   }),
 
   actions: {
@@ -147,9 +148,31 @@ metadata: {
 }
 ```
 
+### Auth Type
+
+Specify which standard auth schemas (if any) are supported by this connector. If none
+are specified, defaults to no authentication. Can also specify a custom schema for the authType
+which will be used in place of the default
+
+```typescript
+authTypes: [
+  // use basic auth type with the default schema
+  'basic',
+  // use header auth type with a custom header schema
+  {
+    type: 'header',
+    customSchema: z.object({
+      headers: z.object({
+        'custom-api-key-field': z.string().describe('API Key'),
+      }),
+    }),
+  }
+]
+```
+
 ### Schema
 
-A single Zod schema containing all connector fields (config + secrets):
+A single Zod schema containing all connector config fields and any secrets fields outside of the standard auth schemas
 
 ```typescript
 schema: z.object({
@@ -158,9 +181,6 @@ schema: z.object({
   
   // Secret fields (marked with meta.sensitive)
   apiKey: UISchemas.secret().describe('API Key'),
-  
-  // Or use standard auth schemas
-  ...BearerAuthSchema.shape,
 })
 ```
 

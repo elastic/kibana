@@ -15,16 +15,16 @@
  *
  * Key principles:
  * - Single schema (config + secrets together)
+ * - Standard auth types
  * - Secrets marked with meta.sensitive
  * - Standard auth schemas (reusable)
  * - Zod for validation and UI derivation
  */
 
-import { z } from '@kbn/zod';
+import type { z } from '@kbn/zod';
 import type { Logger } from '@kbn/logging';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { AxiosInstance } from 'axios';
-import { withUIMeta } from './connector_spec_ui';
 
 export { withUIMeta, UISchemas } from './connector_spec_ui';
 
@@ -74,35 +74,13 @@ export interface ConnectorMetadata {
 // Phase 1 supports only: Header, Basic, Bearer
 // OAuth2, SSL/mTLS, AWS SigV4 → Phase 2 (see connector_rfc.ts)
 
-/**
- * Header-based authentication (generic)
- * Use for: API keys, custom headers (X-API-Key, etc.)
- */
-export const HeaderAuthSchema = z.object({
-  method: z.literal('headers'),
-  headers: z.record(z.string(), z.string()).describe('Custom Headers'),
-});
+// Auth schemas defined in ./auth_types
 
-/**
- * HTTP Basic Authentication
- * Use for: Username + Password auth (Jira, etc.)
- */
-export const BasicAuthSchema = z.object({
-  method: z.literal('basic'),
-  credentials: z.object({
-    username: z.string().describe('Username'),
-    password: withUIMeta(z.string(), { sensitive: true }).describe('Password'),
-  }),
-});
-
-/**
- * Bearer Token Authentication
- * Use for: OAuth tokens, API tokens sent as "Authorization: Bearer <token>"
- */
-export const BearerAuthSchema = z.object({
-  method: z.literal('bearer'),
-  token: withUIMeta(z.string(), { sensitive: true }).describe('Bearer Token'),
-});
+export interface AuthTypeSpec {
+  id: string;
+  name: string;
+  schema: z.ZodObject<Record<string, z.ZodType>>;
+}
 
 // ============================================================================
 // PHASE 2 AUTH TYPES (Not supported yet - see connector_rfc.ts)
@@ -234,8 +212,16 @@ export interface ConnectorTest {
 // MAIN CONNECTOR DEFINITION
 // ============================================================================
 
+export interface AuthTypeDef {
+  type: string;
+  // defaults to 'override' if not specified
+  mergeStrategy?: 'override' | 'merge';
+  customSchema: z.ZodObject<Record<string, z.ZodType>>;
+}
 export interface ConnectorSpec {
   metadata: ConnectorMetadata;
+
+  authTypes?: Array<string | AuthTypeDef>;
 
   // Single unified schema for all connector fields (config + secrets)
   // Mark sensitive fields with withUIMeta({ sensitive: true })

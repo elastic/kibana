@@ -1,0 +1,221 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AuthTypeRegistry getSchemaForAuthType() "merge" merge strategy" correctly returns custom schema when there are no overlapping keys 1`] = `
+Object {
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "properties": Object {
+    "additionalHeaders": Object {
+      "additionalProperties": false,
+      "properties": Object {
+        "additional-custom-api-key-field": Object {
+          "description": "A custom field",
+          "type": "string",
+        },
+      },
+      "required": Array [
+        "additional-custom-api-key-field",
+      ],
+      "type": "object",
+    },
+    "authType": Object {
+      "const": "header",
+      "type": "string",
+    },
+    "headers": Object {
+      "additionalProperties": Object {
+        "type": "string",
+      },
+      "description": "Custom Headers",
+      "type": "object",
+    },
+  },
+  "required": Array [
+    "headers",
+    "additionalHeaders",
+    "authType",
+  ],
+  "type": "object",
+}
+`;
+
+exports[`AuthTypeRegistry getSchemaForAuthType() "merge" merge strategy" correctly returns custom schema when there are overlapping and non-overlapping keys 1`] = `
+Object {
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "properties": Object {
+    "authType": Object {
+      "const": "basic",
+      "type": "string",
+    },
+    "email": Object {
+      "description": "Username",
+      "type": "string",
+    },
+    "password": Object {
+      "description": "Password",
+      "minLength": 5,
+      "type": "string",
+    },
+    "username": Object {
+      "description": "Username",
+      "type": "string",
+    },
+  },
+  "required": Array [
+    "username",
+    "password",
+    "email",
+    "authType",
+  ],
+  "type": "object",
+}
+`;
+
+exports[`AuthTypeRegistry getSchemaForAuthType() "merge" merge strategy" correctly returns custom schema when there are overlapping keys 1`] = `
+Object {
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "properties": Object {
+    "authType": Object {
+      "const": "header",
+      "type": "string",
+    },
+    "headers": Object {
+      "additionalProperties": false,
+      "properties": Object {
+        "custom-api-key-field": Object {
+          "description": "A custom field",
+          "type": "string",
+        },
+      },
+      "required": Array [
+        "custom-api-key-field",
+      ],
+      "type": "object",
+    },
+  },
+  "required": Array [
+    "headers",
+    "authType",
+  ],
+  "type": "object",
+}
+`;
+
+exports[`AuthTypeRegistry getSchemaForAuthType() "override" merge strategy" correctly returns custom schema when there are no overlapping keys 1`] = `
+Object {
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "properties": Object {
+    "additionalHeaders": Object {
+      "additionalProperties": false,
+      "properties": Object {
+        "additional-custom-api-key-field": Object {
+          "description": "A custom field",
+          "type": "string",
+        },
+      },
+      "required": Array [
+        "additional-custom-api-key-field",
+      ],
+      "type": "object",
+    },
+    "authType": Object {
+      "const": "header",
+      "type": "string",
+    },
+  },
+  "required": Array [
+    "additionalHeaders",
+    "authType",
+  ],
+  "type": "object",
+}
+`;
+
+exports[`AuthTypeRegistry getSchemaForAuthType() "override" merge strategy" correctly returns custom schema when there are overlapping and non-overlapping keys 1`] = `
+Object {
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "properties": Object {
+    "authType": Object {
+      "const": "basic",
+      "type": "string",
+    },
+    "email": Object {
+      "description": "Username",
+      "type": "string",
+    },
+    "password": Object {
+      "description": "Password",
+      "minLength": 5,
+      "type": "string",
+    },
+  },
+  "required": Array [
+    "password",
+    "email",
+    "authType",
+  ],
+  "type": "object",
+}
+`;
+
+exports[`AuthTypeRegistry getSchemaForAuthType() "override" merge strategy" correctly returns custom schema when there are overlapping keys 1`] = `
+Object {
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "properties": Object {
+    "authType": Object {
+      "const": "header",
+      "type": "string",
+    },
+    "headers": Object {
+      "additionalProperties": false,
+      "properties": Object {
+        "custom-api-key-field": Object {
+          "description": "A custom field",
+          "type": "string",
+        },
+      },
+      "required": Array [
+        "custom-api-key-field",
+      ],
+      "type": "object",
+    },
+  },
+  "required": Array [
+    "headers",
+    "authType",
+  ],
+  "type": "object",
+}
+`;
+
+exports[`AuthTypeRegistry getSchemaForAuthType() correctly returns schema for auth type definition when only type ID is provided 1`] = `
+Object {
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "properties": Object {
+    "authType": Object {
+      "const": "basic",
+      "type": "string",
+    },
+    "password": Object {
+      "description": "Password",
+      "type": "string",
+    },
+    "username": Object {
+      "description": "Username",
+      "type": "string",
+    },
+  },
+  "required": Array [
+    "username",
+    "password",
+    "authType",
+  ],
+  "type": "object",
+}
+`;
