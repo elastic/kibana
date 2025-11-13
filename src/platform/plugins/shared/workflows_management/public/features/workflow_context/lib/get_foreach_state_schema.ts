@@ -60,8 +60,18 @@ export function getForeachItemSchema(
       // If the resolved path is a string, we return a string schema and will tell the user we will try to parse it as JSON in runtime
       return z.any().describe('Unable to determine foreach item type');
     } else if (iterableSchema instanceof z.ZodUnion) {
-      return iterableSchema.options.find((option: z.ZodType) => option instanceof z.ZodArray)
-        ?.element;
+      const arrayOption = iterableSchema.options.find((option: z.ZodType) => option instanceof z.ZodArray);
+      if (arrayOption && arrayOption instanceof z.ZodArray) {
+        return arrayOption.element;
+      } else {
+        return z
+          .any()
+          .describe(
+            `Expected array in union for foreach iteration, but no array type was found. Union options: [${iterableSchema.options
+              .map((opt) => getZodTypeName(opt))
+              .join(', ')}]`
+          );
+      }
     } else {
       return z
         .any()
