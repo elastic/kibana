@@ -90,11 +90,6 @@ describe('useCloudConnectorSetup', () => {
 
       const updatedVars = { ...inputVars };
 
-      // Add cloud_connector_name if name is provided
-      if (credentials.name !== undefined) {
-        updatedVars.cloud_connector_name = { value: credentials.name };
-      }
-
       return updatedVars;
     });
 
@@ -664,17 +659,7 @@ describe('useCloudConnectorSetup', () => {
           isValid: undefined,
           updatedPolicy: expect.objectContaining({
             cloud_connector_id: undefined,
-            inputs: expect.arrayContaining([
-              expect.objectContaining({
-                streams: expect.arrayContaining([
-                  expect.objectContaining({
-                    vars: expect.objectContaining({
-                      cloud_connector_name: { value: 'Valid Connector Name 123' },
-                    }),
-                  }),
-                ]),
-              }),
-            ]),
+            cloud_connector_name: 'Valid Connector Name 123',
           }),
         });
       });
@@ -744,17 +729,7 @@ describe('useCloudConnectorSetup', () => {
           isValid: undefined,
           updatedPolicy: expect.objectContaining({
             cloud_connector_id: undefined,
-            inputs: expect.arrayContaining([
-              expect.objectContaining({
-                streams: expect.arrayContaining([
-                  expect.objectContaining({
-                    vars: expect.objectContaining({
-                      cloud_connector_name: { value: 'Special@Connector#Name!' },
-                    }),
-                  }),
-                ]),
-              }),
-            ]),
+            cloud_connector_name: 'Special@Connector#Name!',
           }),
         });
       });
@@ -848,17 +823,7 @@ describe('useCloudConnectorSetup', () => {
           isValid: undefined,
           updatedPolicy: expect.objectContaining({
             cloud_connector_id: undefined,
-            inputs: expect.arrayContaining([
-              expect.objectContaining({
-                streams: expect.arrayContaining([
-                  expect.objectContaining({
-                    vars: expect.objectContaining({
-                      cloud_connector_name: { value: longName },
-                    }),
-                  }),
-                ]),
-              }),
-            ]),
+            cloud_connector_name: longName,
           }),
         });
       });
@@ -937,17 +902,7 @@ describe('useCloudConnectorSetup', () => {
           isValid: undefined,
           updatedPolicy: expect.objectContaining({
             cloud_connector_id: undefined,
-            inputs: expect.arrayContaining([
-              expect.objectContaining({
-                streams: expect.arrayContaining([
-                  expect.objectContaining({
-                    vars: expect.objectContaining({
-                      cloud_connector_name: { value: 'Valid Azure Connector' },
-                    }),
-                  }),
-                ]),
-              }),
-            ]),
+            cloud_connector_name: 'Valid Azure Connector',
           }),
         });
       });
@@ -1017,17 +972,7 @@ describe('useCloudConnectorSetup', () => {
           isValid: undefined,
           updatedPolicy: expect.objectContaining({
             cloud_connector_id: undefined,
-            inputs: expect.arrayContaining([
-              expect.objectContaining({
-                streams: expect.arrayContaining([
-                  expect.objectContaining({
-                    vars: expect.objectContaining({
-                      cloud_connector_name: { value: 'Azure@Connector#2024' },
-                    }),
-                  }),
-                ]),
-              }),
-            ]),
+            cloud_connector_name: 'Azure@Connector#2024',
           }),
         });
       });
@@ -1116,17 +1061,7 @@ describe('useCloudConnectorSetup', () => {
           isValid: undefined,
           updatedPolicy: expect.objectContaining({
             cloud_connector_id: undefined,
-            inputs: expect.arrayContaining([
-              expect.objectContaining({
-                streams: expect.arrayContaining([
-                  expect.objectContaining({
-                    vars: expect.objectContaining({
-                      cloud_connector_name: { value: longName },
-                    }),
-                  }),
-                ]),
-              }),
-            ]),
+            cloud_connector_name: longName,
           }),
         });
       });
