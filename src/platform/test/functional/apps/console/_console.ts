@@ -282,5 +282,134 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(actualResponse).to.contain('"statusCode": 400');
       });
     });
+
+    describe('Action panel copy to language button', () => {
+      beforeEach(async () => {
+        await PageObjects.common.navigateToApp('console');
+        await PageObjects.console.skipTourIfExists();
+        await PageObjects.console.clearEditorText();
+        await PageObjects.console.enterText('GET _search');
+      });
+
+      it('should display copy to language button in action panel', async () => {
+        const testSubjects = getService('testSubjects');
+
+        // Verify the copy button exists in the action panel
+        const copyButtonExists = await testSubjects.exists('copyToLanguageActionButton');
+        expect(copyButtonExists).to.be(true);
+
+        // Verify it's visible
+        const copyButton = await testSubjects.find('copyToLanguageActionButton');
+        expect(await copyButton.isDisplayed()).to.be(true);
+      });
+
+      it('should copy request as curl by default when copy button is clicked', async () => {
+        const testSubjects = getService('testSubjects');
+        const toasts = getService('toasts');
+
+        // Select the request to make action panel appear
+        await PageObjects.console.selectAllRequests();
+
+        // Click the action panel copy button without changing language
+        await testSubjects.click('copyToLanguageActionButton');
+
+        // Verify toast message shows curl
+        const resultToast = await toasts.getElementByIndex(1);
+        const toastText = await resultToast.getVisibleText();
+
+        if (toastText.includes('Write permission denied')) {
+          log.debug('Write permission denied, skipping test');
+          return;
+        }
+
+        expect(toastText).to.be('Request copied to clipboard as curl');
+
+        // Verify clipboard contains curl command
+        const canReadClipboard = await browser.checkBrowserPermission('clipboard-read');
+        if (canReadClipboard) {
+          const clipboardText = await browser.getClipboardValue();
+          expect(clipboardText).to.contain('curl -X GET');
+        }
+      });
+
+      it('should copy request with selected language from context menu', async () => {
+        const testSubjects = getService('testSubjects');
+        const toasts = getService('toasts');
+
+        // Select the request to make action panel appear
+        await PageObjects.console.selectAllRequests();
+
+        // Open context menu and change language to Python
+        await PageObjects.console.clickContextMenu();
+        await PageObjects.console.changeDefaultLanguage('python');
+
+        // Close the context menu by clicking on the editor
+        await PageObjects.console.focusInputEditor();
+
+        // Wait for context menu to close
+        await retry.waitFor('context menu to close', async () => {
+          return !(await PageObjects.console.isContextMenuOpen());
+        });
+
+        // Select the request again to ensure action panel is visible
+        await PageObjects.console.selectAllRequests();
+
+        // Click the action panel copy button
+        await testSubjects.click('copyToLanguageActionButton');
+
+        // Verify toast message shows Python
+        const resultToast = await toasts.getElementByIndex(1);
+        const toastText = await resultToast.getVisibleText();
+
+        if (toastText.includes('Write permission denied')) {
+          log.debug('Write permission denied, skipping test');
+          return;
+        }
+
+        expect(toastText).to.be('Request copied to clipboard as Python');
+
+        // Verify clipboard contains Python code
+        const canReadClipboard = await browser.checkBrowserPermission('clipboard-read');
+        if (canReadClipboard) {
+          const clipboardText = await browser.getClipboardValue();
+          expect(clipboardText).to.contain('from elasticsearch import Elasticsearch');
+        }
+      });
+
+      it('should copy kbn requests as curl', async () => {
+        const testSubjects = getService('testSubjects');
+        const toasts = getService('toasts');
+
+        // First, set language to Python
+        await PageObjects.console.selectAllRequests();
+        await PageObjects.console.clickContextMenu();
+        await PageObjects.console.changeDefaultLanguage('python');
+        await PageObjects.console.focusInputEditor();
+
+        // Wait for context menu to close
+        await retry.waitFor('context menu to close', async () => {
+          return !(await PageObjects.console.isContextMenuOpen());
+        });
+
+        // Clear and enter a Kibana request
+        await PageObjects.console.clearEditorText();
+        await PageObjects.console.enterText('GET kbn:/api/spaces/space');
+        await PageObjects.console.selectAllRequests();
+
+        // Click action panel copy button
+        await testSubjects.click('copyToLanguageActionButton');
+
+        // Verify it copies as curl (forced for Kibana requests)
+        const resultToast = await toasts.getElementByIndex(1);
+        const toastText = await resultToast.getVisibleText();
+
+        if (toastText.includes('Write permission denied')) {
+          log.debug('Write permission denied, skipping test');
+          return;
+        }
+
+        expect(toastText).to.be('Request copied to clipboard as curl');
+      });
+    });
   });
 }
