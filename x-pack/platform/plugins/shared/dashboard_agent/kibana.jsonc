@@ -15,6 +15,9 @@
     "requiredPlugins": [
       "onechat",
       "dashboard"
+    ],
+    "optionalPlugins": [
+      "share"
     ]
   }
 }

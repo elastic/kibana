@@ -43,6 +43,8 @@ ${renderDashboardResultPrompt()}
         {
           tool_ids: [
             dashboardTools.createDashboard,
+            dashboardTools.getDashboard,
+            dashboardTools.updateDashboard,
             platformCoreTools.executeEsql,
             platformCoreTools.generateEsql,
             platformCoreTools.search,

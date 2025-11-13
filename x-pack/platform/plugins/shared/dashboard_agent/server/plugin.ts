@@ -14,7 +14,7 @@ import type {
   DashboardAgentPluginStart,
 } from './types';
 import { registerDashboardAgent } from './register_agent';
-import { createDashboardTool } from './tools';
+import { createDashboardTool, getDashboardTool, updateDashboardTool } from './tools';
 
 export class DashboardAgentPlugin
   implements
@@ -39,8 +39,28 @@ export class DashboardAgentPlugin
 
     // Register dashboard-specific tools during start lifecycle when dashboard plugin is available
     void coreSetup.getStartServices().then(([coreStart, startDeps]) => {
+      // @TODO: Check using uiSettings if dashboard tools enable
+      // const uiSettingsClient = coreStart.uiSettings.asScopedToClient(soClient);
+      // const createVisualizationsEnabled = await uiSettingsClient.get<boolean>(
+      //   AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID
+      // ); // @TODO: remove
+
+      // @TODO: remove
+      console.log(`--@@coreStart.share`, coreStart.share);
+      console.log(`--@@coreStart.uiSettings`, coreStart.uiSettings);
+
+      console.log(`--@@startDeps.share`, startDeps.share);
+      const dashboardLocator = startDeps.share?.url?.locators?.get('DASHBOARD_APP_LOCATOR');
+      // @TODO: remove
+      console.log(`--@@dashboardLocator`, dashboardLocator);
       setupDeps.onechat.tools.register(
-        createDashboardTool(startDeps.dashboard, coreStart.savedObjects)
+        createDashboardTool(startDeps.dashboard, coreStart.savedObjects, { dashboardLocator })
+      );
+      setupDeps.onechat.tools.register(
+        getDashboardTool(startDeps.dashboard, coreStart.savedObjects, { dashboardLocator })
+      );
+      setupDeps.onechat.tools.register(
+        updateDashboardTool(startDeps.dashboard, coreStart.savedObjects, { dashboardLocator })
       );
     });
 

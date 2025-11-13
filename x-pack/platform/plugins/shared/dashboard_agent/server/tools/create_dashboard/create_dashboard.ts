@@ -27,14 +27,15 @@ const createDashboardSchema = z.object({
   title: z.string().describe('The title of the dashboard to create.'),
   description: z.string().describe('A description of the dashboard.'),
   panels: z
-    .array(z.string())
+    .array(z.unknown())
     .optional()
     .describe('An array of panel configurations (PanelJSON or lens_tool_artifact).'),
 });
 
 export const createDashboardTool = (
   dashboard: DashboardPluginStart,
-  savedObjects: SavedObjectsServiceStart
+  savedObjects: SavedObjectsServiceStart,
+  { dashboardLocator }: { dashboardLocator: LocatorPublic<DashboardAppLocatorDefinition> }
 ): BuiltinToolDefinition<typeof createDashboardSchema> => {
   return {
     id: dashboardTools.createDashboard,
@@ -47,8 +48,10 @@ This tool will:
 3. Create a dashboard with the provided configuration`,
     schema: createDashboardSchema,
     tags: [],
-    handler: async ({ title, description, panels }, { logger, request, esClient }) => {
+    handler: async ({ title, description, panels, ...rest }, { logger, request, esClient }) => {
       try {
+        // @TODO: remove
+        console.log(`--@@panels\n`, JSON.stringify(panels, null, 2));
         const dashboardContentClient = dashboard.getContentClient();
         if (!dashboardContentClient) {
           throw new Error('Dashboard content client is not available');
@@ -79,7 +82,7 @@ This tool will:
           {
             title,
             description,
-            panels: panels || [],
+            // panels: panels || [],
           },
           {} // options
         )) as CreateItemResponse<DashboardItem>;
@@ -90,7 +93,9 @@ This tool will:
         const dashboardId = response.result.item.id;
         logger.info(`Dashboard created successfully: ${dashboardId}`);
 
-        const dashboardUrl = `/app/dashboards#/view/${dashboardId}`;
+        const dashboardUrl = await dashboardLocator?.getRedirectUrl({
+          dashboardId,
+        });
 
         return {
           results: [

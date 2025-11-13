@@ -102,6 +102,29 @@ This tool will:
           );
         }
 
+        // @TODO: remove
+        console.log(
+          `--@@{
+              type: ToolResultType.visualization,
+              tool_result_id: getToolResultId(),
+              data: {
+                query: nlQuery,
+                visualization: validatedConfig,
+                chart_type: selectedChartType,
+                esql: esqlQuery,
+              },
+            }`,
+          {
+            type: ToolResultType.visualization,
+            tool_result_id: getToolResultId(),
+            data: {
+              query: nlQuery,
+              visualization: validatedConfig,
+              chart_type: selectedChartType,
+              esql: esqlQuery,
+            },
+          }
+        );
         return {
           results: [
             {
