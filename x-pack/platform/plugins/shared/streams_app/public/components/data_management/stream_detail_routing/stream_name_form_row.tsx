@@ -33,16 +33,16 @@ const MAX_NAME_LENGTH = 200;
 const PREFIX_MAX_VISIBLE_CHARACTERS = 25;
 
 export const getHelpText = (
-  prefix: string,
-  value: string,
+  isStreamNameEmpty: boolean,
+  isStreamNameTooLong: boolean,
   readOnly: boolean
 ): string | undefined => {
-  if (value.length <= prefix.length && !readOnly) {
-    return i18n.translate('xpack.streams.streamDetailRouting.emptyNameErrorHelpText', {
-      defaultMessage: 'Stream name must not be empty.',
+  if (isStreamNameEmpty && !readOnly) {
+    return i18n.translate('xpack.streams.streamDetailRouting.minimumNameHelpText', {
+      defaultMessage: `Stream name is required.`,
     });
-  } else if (value.length >= MAX_NAME_LENGTH && !readOnly) {
-    return i18n.translate('xpack.streams.streamDetailRouting.nameTooLongErrorHelpText', {
+  } else if (isStreamNameTooLong && !readOnly) {
+    return i18n.translate('xpack.streams.streamDetailRouting.maximumNameHelpText', {
       defaultMessage: `Stream name cannot be longer than {maxLength} characters.`,
       values: {
         maxLength: MAX_NAME_LENGTH,
