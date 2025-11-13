@@ -11,7 +11,6 @@ import { waitFor } from '@testing-library/react';
 import { EsqlControlType, type ESQLControlState } from '@kbn/esql-types';
 import { getMockedControlGroupApi } from '../mocks/control_mocks';
 import type { ControlFetchContext } from '../../control_group/control_fetch';
-import type { ControlGroupApi } from '../../control_group/types';
 import { initializeESQLControlSelections } from './esql_control_selections';
 import type { BehaviorSubject } from 'rxjs';
 
@@ -48,7 +47,7 @@ describe('initializeESQLControlSelections', () => {
       } as ESQLControlState;
 
       let dataHasLoaded = false;
-      const selections = initializeESQLControlSelections(initialState, controlFetch$, jest.fn(), {} as ControlGroupApi);
+      const selections = initializeESQLControlSelections(initialState, controlFetch$, jest.fn());
       controlFetch$.next({});
 
       selections.internalApi.availableOptions$.subscribe((result) => {
