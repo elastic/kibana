@@ -70,7 +70,6 @@ export class AutomaticImportV2Plugin
       core.savedObjects
     );
 
-    // what task definitions are we registering? And can we register multiple? TODO
     this.taskManagerService = new TaskManagerService(this.logger, plugins.taskManager);
 
     const requestContextFactory = new RequestContextFactory({
@@ -103,7 +102,6 @@ export class AutomaticImportV2Plugin
   ): AutomaticImportV2PluginStart {
     this.logger.debug('automaticImportV2: Started');
 
-    // TODO better error handling
     if (!this.automaticImportService || !this.taskManagerService) {
       throw new Error('Services not initialized during setup');
     }
@@ -129,7 +127,6 @@ export class AutomaticImportV2Plugin
         this.logger.error('Failed to initialize AutomaticImportService', error);
       });
 
-    // setup the taskmanager service so that API calls can be made to it freely.
     this.taskManagerService.initialize(plugins.taskManager);
     this.logger.info('TaskManagerService initialized successfully');
 

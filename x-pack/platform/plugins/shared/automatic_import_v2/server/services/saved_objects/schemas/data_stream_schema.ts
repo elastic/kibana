@@ -8,14 +8,15 @@
 import type { Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { INPUT_TYPES, TASK_STATUSES } from '../constants';
+import { MAX_ID_LENGTH, MAX_VERSION_LENGTH, MIN_VERSION_LENGTH } from './constants';
 
 export const dataStreamSchemaV1 = schema.object({
-  integration_id: schema.string({ maxLength: 50, minLength: 1 }),
-  data_stream_id: schema.string({ maxLength: 50, minLength: 1 }),
+  integration_id: schema.string({ maxLength: MAX_ID_LENGTH, minLength: 1 }),
+  data_stream_id: schema.string({ maxLength: MAX_ID_LENGTH, minLength: 1 }),
   created_by: schema.string({ minLength: 1 }),
   job_info: schema.object({
-    job_id: schema.string({ maxLength: 50, minLength: 1 }),
-    job_type: schema.string({ maxLength: 50, minLength: 1 }), // TODO: Add Enum
+    job_id: schema.string({ maxLength: MAX_ID_LENGTH, minLength: 1 }),
+    job_type: schema.string({ maxLength: MAX_ID_LENGTH, minLength: 1 }), // TODO: Add Enum
     status: schema.oneOf(
       Object.values(TASK_STATUSES).map((status) => schema.literal(status)) as [Type<string>]
     ),
@@ -26,8 +27,8 @@ export const dataStreamSchemaV1 = schema.object({
       created_at: schema.maybe(schema.string({ minLength: 1 })),
       version: schema.maybe(
         schema.string({
-          minLength: 5,
-          maxLength: 20,
+          minLength: MIN_VERSION_LENGTH,
+          maxLength: MAX_VERSION_LENGTH,
           validate(value) {
             if (!/^\d+\.\d+\.\d+$/.test(value)) {
               return 'version must be in semantic versioning format (x.y.z)';

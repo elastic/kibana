@@ -23,6 +23,7 @@ import {
   DATA_STREAM_SAVED_OBJECT_TYPE,
   INTEGRATION_SAVED_OBJECT_TYPE,
   TASK_STATUSES,
+  BULK_DELETE_CHUNK_SIZE,
 } from './constants';
 
 export class AutomaticImportSavedObjectService {
@@ -313,10 +314,9 @@ export class AutomaticImportSavedObjectService {
         `Found ${dataStreamsToDelete.length} data streams to delete for integration ${integrationId}`
       );
 
-      const CHUNK_SIZE = 50;
       if (dataStreamsToDelete.length > 0) {
-        for (let i = 0; i < dataStreamsToDelete.length; i += CHUNK_SIZE) {
-          const chunk = dataStreamsToDelete.slice(i, i + CHUNK_SIZE);
+        for (let i = 0; i < dataStreamsToDelete.length; i += BULK_DELETE_CHUNK_SIZE) {
+          const chunk = dataStreamsToDelete.slice(i, i + BULK_DELETE_CHUNK_SIZE);
           try {
             const bulkDeleteResult = await this.savedObjectsClient.bulkDelete(chunk, {
               ...options,

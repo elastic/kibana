@@ -8,6 +8,7 @@
 import type { Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { TASK_STATUSES } from '../constants';
+import { MAX_VERSION_LENGTH, MIN_VERSION_LENGTH } from './constants';
 
 export const integrationSchemaV1 = schema.object({
   integration_id: schema.string(),
@@ -21,8 +22,8 @@ export const integrationSchemaV1 = schema.object({
       title: schema.maybe(schema.string()),
       version: schema.maybe(
         schema.string({
-          minLength: 5,
-          maxLength: 20,
+          minLength: MIN_VERSION_LENGTH,
+          maxLength: MAX_VERSION_LENGTH,
           validate(value) {
             if (!/^\d+\.\d+\.\d+$/.test(value)) {
               return 'version must be in semantic versioning format (x.y.z)';

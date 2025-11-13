@@ -5,6 +5,7 @@
  * 2.0.
  */
 
-// Task Manager Configuration
-export const MAX_ATTEMPTS_AI_WORKFLOWS = 3;
-export const TASK_TIMEOUT_DURATION = '30m';
+// Schema Validation Lengths
+export const MAX_ID_LENGTH = 50;
+export const MAX_VERSION_LENGTH = 20;
+export const MIN_VERSION_LENGTH = 5;

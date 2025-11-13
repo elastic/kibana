@@ -32,3 +32,6 @@ export const INPUT_TYPES = {
   tcp: 'tcp',
   udp: 'udp',
 } as const;
+
+// Saved Objects Operations
+export const BULK_DELETE_CHUNK_SIZE = 50;

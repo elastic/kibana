@@ -12,10 +12,10 @@ import type {
   ConcreteTaskInstance,
 } from '@kbn/task-manager-plugin/server';
 import { TaskCost, TaskPriority } from '@kbn/task-manager-plugin/server/task';
-import { MAX_ATTEMPTS_AI_WORKFLOWS } from './constants';
+import { MAX_ATTEMPTS_AI_WORKFLOWS, TASK_TIMEOUT_DURATION } from './constants';
 import { TASK_STATUSES } from './saved_objects/constants';
 
-const TASK_TYPE = 'automaticImport-aiWorkflow';
+const TASK_TYPE = 'autoImport-task';
 
 export class TaskManagerService {
   private logger: Logger;
@@ -47,7 +47,7 @@ export class TaskManagerService {
       [TASK_TYPE]: {
         title: 'Automatic Import AI Workflow',
         description: 'Executes long-running AI agent workflows for automatic import',
-        timeout: '30m',
+        timeout: TASK_TIMEOUT_DURATION,
         maxAttempts: MAX_ATTEMPTS_AI_WORKFLOWS,
         cost: TaskCost.Normal,
         priority: TaskPriority.Normal,
