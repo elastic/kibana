@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EuiIconProps } from '@elastic/eui';
 import { EuiBeacon, EuiIcon, EuiLoadingSpinner, EuiToken, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
@@ -15,16 +16,15 @@ import { ExecutionStatus } from '@kbn/workflows';
 import { getStepIconType } from './get_step_icon_type';
 import { getExecutionStatusColors } from '../status_badge';
 
-export function StepIcon({
-  stepType,
-  executionStatus = null,
-  onClick,
-}: {
+interface StepIconProps extends Omit<EuiIconProps, 'type'> {
   stepType: string;
-  executionStatus?: ExecutionStatus | null;
+  executionStatus: ExecutionStatus | null | undefined;
   onClick?: React.MouseEventHandler;
-}) {
+}
+
+export function StepIcon({ stepType, executionStatus, onClick, ...rest }: StepIconProps) {
   const { euiTheme } = useEuiTheme();
+  const shouldApplyColorToIcon = executionStatus !== undefined;
   if (executionStatus === ExecutionStatus.RUNNING) {
     return <EuiLoadingSpinner size="m" />;
   }
@@ -41,7 +41,11 @@ export function StepIcon({
       <EuiToken
         iconType={iconType}
         size="s"
-        color={getExecutionStatusColors(euiTheme, executionStatus).tokenColor}
+        color={
+          shouldApplyColorToIcon
+            ? getExecutionStatusColors(euiTheme, executionStatus).tokenColor
+            : undefined
+        }
         fill="light"
         onClick={onClick}
       />
@@ -51,9 +55,14 @@ export function StepIcon({
     <EuiIcon
       type={iconType}
       size="m"
-      color={getExecutionStatusColors(euiTheme, executionStatus).color}
+      color={
+        shouldApplyColorToIcon
+          ? getExecutionStatusColors(euiTheme, executionStatus).color
+          : undefined
+      }
       css={
         // change fill and color of the icon for non-completed statuses, for multi-color logos
+        shouldApplyColorToIcon &&
         executionStatus !== ExecutionStatus.COMPLETED &&
         css`
           & * {
@@ -63,6 +72,7 @@ export function StepIcon({
         `
       }
       onClick={onClick}
+      {...rest}
     />
   );
 }

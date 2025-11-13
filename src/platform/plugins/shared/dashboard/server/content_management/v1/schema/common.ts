@@ -12,7 +12,7 @@ import { schema } from '@kbn/config-schema';
 import { refreshIntervalSchema } from '@kbn/data-service-server';
 import { controlsGroupSchema } from '@kbn/controls-schemas';
 import { referenceSchema } from '@kbn/content-management-utils';
-import { filterSchema, querySchema, timeRangeSchema } from '@kbn/es-query-server';
+import { storedFilterSchema, querySchema, timeRangeSchema } from '@kbn/es-query-server';
 import { embeddableService } from '../../../kibana_services';
 
 import {
@@ -115,7 +115,7 @@ export const dashboardMetaSchema = schema.object({
   createdBy: schema.maybe(schema.string()),
   managed: schema.maybe(schema.boolean()),
   error: schema.maybe(apiError),
-  version: schema.string(),
+  version: schema.maybe(schema.string()),
 });
 
 export const optionsSchema = schema.object({
@@ -157,7 +157,7 @@ export function getDashboardStateSchema() {
   return {
     controlGroupInput: schema.maybe(controlsGroupSchema),
     description: schema.maybe(schema.string({ meta: { description: 'A short description.' } })),
-    filters: schema.maybe(schema.arrayOf(filterSchema)),
+    filters: schema.maybe(schema.arrayOf(storedFilterSchema)),
     options: schema.maybe(optionsSchema),
     panels: schema.arrayOf(schema.oneOf([getPanelSchema(), getSectionSchema()]), {
       defaultValue: [],
@@ -203,14 +203,6 @@ export function getDashboardAPICreateResultSchema() {
     },
     { unknowns: 'forbid' }
   );
-}
-
-export function getDashboardResponseAttributesSchema() {
-  return schema.object({
-    ...getDashboardStateSchema(),
-    references: schema.maybe(schema.arrayOf(referenceSchema)),
-    spaces: schema.maybe(schema.arrayOf(schema.string())),
-  });
 }
 
 export function getDashboardStorageSchema() {

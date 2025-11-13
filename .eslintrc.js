@@ -1572,6 +1572,7 @@ module.exports = {
         'src/platform/test/*api_integration*/**/*.{js,ts}',
         'x-pack/platform/test/{accessibility,*functional*}/apps/**/*.{js,ts}',
         'x-pack/platform/test/*api_integration*/**/*.{js,ts}',
+        'x-pack/platform/test/*functional/tests/**/*.{js,ts}',
       ],
       extends: ['plugin:mocha/recommended'],
       plugins: ['mocha'],
@@ -1813,6 +1814,30 @@ module.exports = {
         'x-pack/platform/test/api_integration/apis/cases/**/*.{ts, tsx}',
         'x-pack/solutions/**/test/api_integration/apis/cases/**/*.{ts, tsx}',
       ],
+    },
+    /**
+     * Stack Connectors Specs package
+     * This package contains common code for public and server side
+     */
+    {
+      files: ['src/platform/packages/shared/kbn-connector-specs/**/*.{js,mjs,ts,tsx}'],
+      rules: {
+        'import/no-nodejs-modules': 'error',
+        'no-duplicate-imports': 'off',
+        'import/no-duplicates': 'error',
+        'no-restricted-imports': [
+          'error',
+          {
+            // prevents UI code from importing server side code and then webpack including it when doing builds
+            patterns: ['**/*server*'],
+            paths: RESTRICTED_IMPORTS,
+          },
+        ],
+        '@typescript-eslint/no-explicit-any': 'error',
+        '@typescript-eslint/no-non-null-assertion': 'error',
+        '@typescript-eslint/no-this-alias': 'error',
+        '@typescript-eslint/no-unused-vars': 'error',
+      },
     },
 
     /**
@@ -2251,6 +2276,7 @@ module.exports = {
         'src/platform/plugins/shared/workflows_management/**/*.{js,mjs,ts,tsx}',
         'src/platform/plugins/shared/workflows_execution_engine/**/*.{js,mjs,ts,tsx}',
         'src/platform/packages/shared/kbn-workflows/**/*.{js,mjs,ts,tsx}',
+        'src/platform/packages/shared/kbn-workflows-ui/**/*.{js,mjs,ts,tsx}',
       ],
       plugins: ['eslint-plugin-node', 'react'],
       env: {
@@ -2399,6 +2425,7 @@ module.exports = {
         'src/platform/plugins/shared/workflows_management/public/**/*.{js,mjs,ts,tsx}',
         'src/platform/plugins/shared/workflows_management/common/**/*.{js,mjs,ts,tsx}',
         'src/platform/packages/shared/kbn-workflows/**/*.{js,mjs,ts,tsx}',
+        'src/platform/packages/shared/kbn-workflows-ui/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         'import/no-nodejs-modules': 'error',
@@ -2414,6 +2441,7 @@ module.exports = {
         'src/platform/plugins/shared/workflows_management/**/*.{test,mock,test_helper}.{ts,tsx}',
         'src/platform/plugins/shared/workflows_execution_engine/**/*.{test,mock,test_helper}.{ts,tsx}',
         'src/platform/packages/shared/kbn-workflows/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'src/platform/packages/shared/kbn-workflows-ui/**/*.{test,mock,test_helper}.{ts,tsx}',
       ],
       rules: {
         '@typescript-eslint/no-non-null-assertion': 'off',
