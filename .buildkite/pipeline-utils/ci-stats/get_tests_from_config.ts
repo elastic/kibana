@@ -9,6 +9,8 @@
 import { readConfig } from 'jest-config';
 import { SearchSource } from 'jest';
 import Runtime from 'jest-runtime';
+import { resolve } from 'path';
+import { getKibanaDir, runBatchedPromises } from '#pipeline-utils';
 
 export async function getTestsFromJestConfig(configPath: string): Promise<string[]> {
   try {
@@ -34,8 +36,22 @@ export async function getTestsFromJestConfig(configPath: string): Promise<string
     const results = await searchSource.getTestPaths(config.globalConfig, config.projectConfig);
     return results.tests.map((t) => t.path);
   } catch (error) {
-    console.error(error);
+    console.error(`Error while resolving test files from config: ${configPath}`, error);
     // If Jest config fails to load, return empty array
     return [];
   }
+}
+
+export async function filterEmptyJestConfigs(
+  jestUnitConfigsWithEmpties: string[],
+  maxParallelism = 1
+): Promise<string[]> {
+  const promiseThunks = jestUnitConfigsWithEmpties.map((configPath) => async () => {
+    const kibanaRelativePath = resolve(getKibanaDir(), configPath);
+    const testFiles = await getTestsFromJestConfig(kibanaRelativePath);
+    return testFiles?.length > 0 ? [configPath] : [];
+  });
+  const nonEmptyConfigPaths = await runBatchedPromises(promiseThunks, maxParallelism);
+  // flat-mapping works better type-wise than filtering an Array<string | null>
+  return nonEmptyConfigPaths.flat();
 }

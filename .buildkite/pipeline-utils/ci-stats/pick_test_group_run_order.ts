@@ -8,7 +8,6 @@
  */
 
 import * as Fs from 'fs';
-import { resolve } from 'path';
 import os from 'os';
 
 import * as globby from 'globby';
@@ -23,14 +22,8 @@ import { CiStatsClient } from './client';
 
 import DISABLED_JEST_CONFIGS from '../../disabled_jest_configs.json';
 import { serverless, stateful } from '../../ftr_configs_manifests.json';
-import { getTestsFromJestConfig } from './get_tests_from_config';
-import {
-  collectEnvFromLabels,
-  expandAgentQueue,
-  getRequiredEnv,
-  runBatchedPromises,
-  getKibanaDir,
-} from '#pipeline-utils';
+import { filterEmptyJestConfigs } from './get_tests_from_config';
+import { collectEnvFromLabels, expandAgentQueue, getRequiredEnv } from '#pipeline-utils';
 
 const ALL_FTR_MANIFEST_REL_PATHS = serverless.concat(stateful);
 
@@ -167,15 +160,10 @@ export async function pickTestGroupRunOrder() {
         ignore: [...DISABLED_JEST_CONFIGS, '**/node_modules/**'],
       })
     : [];
-  const jestUnitConfigs = await runBatchedPromises(
-    jestUnitConfigsWithEmpties.map(
-      (configPath) => () =>
-        getTestsFromJestConfig(resolve(getKibanaDir(), configPath)).then((tests) =>
-          tests?.length > 0 ? [configPath] : []
-        )
-    ),
+  const jestUnitConfigs = await filterEmptyJestConfigs(
+    jestUnitConfigsWithEmpties,
     os.availableParallelism()
-  ).then((results) => results.flat());
+  );
 
   const jestIntegrationConfigs = LIMIT_CONFIG_TYPE.includes('integration')
     ? globby.sync(getJestConfigGlobs(['**/jest.integration.config.*js', '!**/__fixtures__/**']), {
