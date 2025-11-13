@@ -45,11 +45,12 @@ export const findNestedKey = (
 
 /**
  * Helper function to extract and parse data from workflow tool response structure
- * Workflow tools return {results: [{data: "<json string>"}]}, we need to extract and parse
- * This function handles both:
- * 1. Workflow response structure: {results: [{data: "..."}]}
- * 2. Direct data objects (when template engine preserves objects)
- * 3. JSON strings (legacy format)
+ * Workflow tools return {results: [{data: {content: "<json string>"}}]} or {results: [{data: "<json string>"}]}
+ * This function handles:
+ * 1. Workflow response structure with content: {results: [{data: {content: "..."}}]}
+ * 2. Workflow response structure with direct data: {results: [{data: "..."}]}
+ * 3. Direct data objects (when template engine preserves objects)
+ * 4. JSON strings (legacy format)
  */
 export const extractDataFromResponse = (value: any): any => {
   if (!value) return {};
@@ -57,6 +58,28 @@ export const extractDataFromResponse = (value: any): any => {
   // If it's a workflow tool response structure, extract the data
   if (value.results && Array.isArray(value.results) && value.results.length > 0) {
     const data = value.results[0]?.data;
+    // Check if data has a content property (workflow tool format: {data: {content: "..."}})
+    if (data && typeof data === 'object' && 'content' in data) {
+      const content = data.content;
+      if (typeof content === 'string') {
+        try {
+          const parsed = JSON.parse(content);
+          // If the parsed result is still a string (double-stringified), parse again
+          if (typeof parsed === 'string') {
+            try {
+              return JSON.parse(parsed);
+            } catch {
+              return {};
+            }
+          }
+          return parsed;
+        } catch {
+          return {};
+        }
+      }
+      // If content is not a string, return it as-is
+      return content || {};
+    }
     // If data is a JSON string, parse it
     if (typeof data === 'string') {
       try {

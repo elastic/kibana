@@ -10,6 +10,7 @@ import { ToolType } from '@kbn/onechat-common';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import { createErrorResult } from '@kbn/onechat-server';
+import { extractDataFromResponse } from '../summary/helpers/data_extraction';
 
 const correlationEngineSchema = z.object({
   results: z
@@ -69,86 +70,6 @@ Returns structured correlation data with confidence scores linking related event
           severity?: string | null;
           status?: string | null;
         }> = [];
-
-        // Helper function to extract and parse data from workflow tool response structure
-        // Workflow tools return {results: [{data: {content: "<json string>"}}]}, we need to extract and parse
-        const extractDataFromResponse = (value: any): any => {
-          if (!value) return {};
-          // If it's a workflow tool response structure, extract the data
-          if (value.results && Array.isArray(value.results) && value.results.length > 0) {
-            const data = value.results[0]?.data;
-            // Check if data has a content property (workflow tool format: {data: {content: "..."}})
-            if (data && typeof data === 'object' && 'content' in data) {
-              const content = data.content;
-              if (typeof content === 'string') {
-                try {
-                  return JSON.parse(content);
-                } catch (e) {
-                  logger.warn(`Failed to parse data.content as JSON: ${e}`);
-                  return {};
-                }
-              }
-              // If content is not a string, return it as-is
-              return content || {};
-            }
-            // If data is a JSON string, parse it
-            if (typeof data === 'string') {
-              try {
-                return JSON.parse(data);
-              } catch (e) {
-                logger.warn(`Failed to parse data as JSON: ${e}`);
-                return {};
-              }
-            }
-            // Otherwise, return data as-is
-            return data || {};
-          }
-          // If it's already a JSON string, parse it
-          if (typeof value === 'string') {
-            // Check if it's the "[object Object]" string (which means it was incorrectly stringified)
-            if (value === '[object Object]') {
-              logger.warn(
-                `Received "[object Object]" string - this indicates an object was incorrectly converted to string`
-              );
-              return {};
-            }
-            try {
-              return JSON.parse(value);
-            } catch (e) {
-              logger.warn(`Failed to parse value as JSON: ${e}`);
-              return {};
-            }
-          }
-          // Otherwise, assume it's already the data object
-          // But check if it's the actual data we want (not wrapped in results)
-          // If it has a 'results' property, it might be a workflow response structure
-          if (value.results && Array.isArray(value.results) && value.results.length > 0) {
-            // This is a workflow response structure, extract the data
-            const data = value.results[0]?.data;
-            // Check if data has a content property (workflow tool format)
-            if (data && typeof data === 'object' && 'content' in data) {
-              const content = data.content;
-              if (typeof content === 'string') {
-                try {
-                  return JSON.parse(content);
-                } catch (e) {
-                  return content || {};
-                }
-              }
-              return content || {};
-            }
-            if (typeof data === 'string') {
-              try {
-                return JSON.parse(data);
-              } catch (e) {
-                return data || {};
-              }
-            }
-            return data || {};
-          }
-          // It's already the data object, return as-is
-          return value;
-        };
 
         // Extract data from results - handle both direct data objects and workflow response structures
         const securityData = extractDataFromResponse(results.security_summary);

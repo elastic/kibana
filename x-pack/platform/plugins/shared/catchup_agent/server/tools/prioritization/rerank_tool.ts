@@ -265,7 +265,6 @@ The tool accepts an array of items with text content and uses a reranking model 
             };
           });
 
-
         return {
           results: [
             {
