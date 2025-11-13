@@ -76,7 +76,8 @@ const isCloudConnectorEnabledForProvider = ({
   const providerConfig = config.providers[provider];
   const cloudConnectorEnabledVersion = providerConfig.cloudConnectorEnabledVersion;
   const allowedProviders = [AWS_PROVIDER, AZURE_PROVIDER];
-  if (provider in allowedProviders) {
+
+  if (!allowedProviders.includes(provider)) {
     return false;
   }
 
