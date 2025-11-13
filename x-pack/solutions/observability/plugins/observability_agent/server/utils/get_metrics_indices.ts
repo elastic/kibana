@@ -29,12 +29,12 @@ export async function getMetricsIndices({
   );
 
   try {
-    const metricsDataAccess = plugins.metricsDataAccess;
+    const { metricsDataAccess } = plugins;
     const metricIndices = await metricsDataAccess.client.getMetricIndices({ savedObjectsClient });
     // getMetricIndices returns a comma-separated string, split it into an array
     return metricIndices.split(',').map((index) => index.trim());
   } catch (error) {
     logger.warn(`Failed to resolve metrics indices for Observability Agent: ${error.message}`);
-    return [];
+    return ['metrics-*'];
   }
 }
