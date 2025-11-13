@@ -10557,6 +10557,10 @@
                                       "nullable": true,
                                       "type": "string"
                                     },
+                                    "cloud_connector_name": {
+                                      "description": "Name for the cloud connector to be created with this package policy.",
+                                      "type": "string"
+                                    },
                                     "created_at": {
                                       "type": "string"
                                     },
@@ -11924,6 +11928,10 @@
                                     "nullable": true,
                                     "type": "string"
                                   },
+                                  "cloud_connector_name": {
+                                    "description": "Name for the cloud connector to be created with this package policy.",
+                                    "type": "string"
+                                  },
                                   "created_at": {
                                     "type": "string"
                                   },
@@ -12995,6 +13003,10 @@
                                     "cloud_connector_id": {
                                       "description": "ID of the cloud connector associated with this package policy.",
                                       "nullable": true,
+                                      "type": "string"
+                                    },
+                                    "cloud_connector_name": {
+                                      "description": "Name for the cloud connector to be created with this package policy.",
                                       "type": "string"
                                     },
                                     "created_at": {
@@ -14318,6 +14330,10 @@
                                   "cloud_connector_id": {
                                     "description": "ID of the cloud connector associated with this package policy.",
                                     "nullable": true,
+                                    "type": "string"
+                                  },
+                                  "cloud_connector_name": {
+                                    "description": "Name for the cloud connector to be created with this package policy.",
                                     "type": "string"
                                   },
                                   "created_at": {
@@ -15688,6 +15704,10 @@
                                     "nullable": true,
                                     "type": "string"
                                   },
+                                  "cloud_connector_name": {
+                                    "description": "Name for the cloud connector to be created with this package policy.",
+                                    "type": "string"
+                                  },
                                   "created_at": {
                                     "type": "string"
                                   },
@@ -16861,6 +16881,10 @@
                                   "cloud_connector_id": {
                                     "description": "ID of the cloud connector associated with this package policy.",
                                     "nullable": true,
+                                    "type": "string"
+                                  },
+                                  "cloud_connector_name": {
+                                    "description": "Name for the cloud connector to be created with this package policy.",
                                     "type": "string"
                                   },
                                   "created_at": {
@@ -19280,6 +19304,10 @@
                         "cloud_connector_id": {
                           "description": "ID of the cloud connector associated with this package policy.",
                           "nullable": true,
+                          "type": "string"
+                        },
+                        "cloud_connector_name": {
+                          "description": "Name for the cloud connector to be created with this package policy.",
                           "type": "string"
                         },
                         "created_at": {
@@ -40676,6 +40704,10 @@
                             "nullable": true,
                             "type": "string"
                           },
+                          "cloud_connector_name": {
+                            "description": "Name for the cloud connector to be created with this package policy.",
+                            "type": "string"
+                          },
                           "created_at": {
                             "type": "string"
                           },
@@ -41362,6 +41394,10 @@
                         "nullable": true,
                         "type": "string"
                       },
+                      "cloud_connector_name": {
+                        "description": "Name for the cloud connector to be created with this package policy.",
+                        "type": "string"
+                      },
                       "description": {
                         "description": "Package policy description",
                         "type": "string"
@@ -42021,6 +42057,10 @@
                         "cloud_connector_id": {
                           "description": "ID of the cloud connector associated with this package policy.",
                           "nullable": true,
+                          "type": "string"
+                        },
+                        "cloud_connector_name": {
+                          "description": "Name for the cloud connector to be created with this package policy.",
                           "type": "string"
                         },
                         "created_at": {
@@ -42757,6 +42797,10 @@
                           "cloud_connector_id": {
                             "description": "ID of the cloud connector associated with this package policy.",
                             "nullable": true,
+                            "type": "string"
+                          },
+                          "cloud_connector_name": {
+                            "description": "Name for the cloud connector to be created with this package policy.",
                             "type": "string"
                           },
                           "created_at": {
@@ -43954,6 +43998,10 @@
                                   "nullable": true,
                                   "type": "string"
                                 },
+                                "cloud_connector_name": {
+                                  "description": "Name for the cloud connector to be created with this package policy.",
+                                  "type": "string"
+                                },
                                 "created_at": {
                                   "type": "string"
                                 },
@@ -44544,6 +44592,10 @@
                                 "cloud_connector_id": {
                                   "description": "ID of the cloud connector associated with this package policy.",
                                   "nullable": true,
+                                  "type": "string"
+                                },
+                                "cloud_connector_name": {
+                                  "description": "Name for the cloud connector to be created with this package policy.",
                                   "type": "string"
                                 },
                                 "created_at": {
@@ -45160,6 +45212,10 @@
                         "cloud_connector_id": {
                           "description": "ID of the cloud connector associated with this package policy.",
                           "nullable": true,
+                          "type": "string"
+                        },
+                        "cloud_connector_name": {
+                          "description": "Name for the cloud connector to be created with this package policy.",
                           "type": "string"
                         },
                         "created_at": {
@@ -45862,6 +45918,10 @@
                         "nullable": true,
                         "type": "string"
                       },
+                      "cloud_connector_name": {
+                        "description": "Name for the cloud connector to be created with this package policy.",
+                        "type": "string"
+                      },
                       "description": {
                         "description": "Package policy description",
                         "type": "string"
@@ -46513,6 +46573,10 @@
                         "cloud_connector_id": {
                           "description": "ID of the cloud connector associated with this package policy.",
                           "nullable": true,
+                          "type": "string"
+                        },
+                        "cloud_connector_name": {
+                          "description": "Name for the cloud connector to be created with this package policy.",
                           "type": "string"
                         },
                         "created_at": {
