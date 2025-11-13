@@ -66,7 +66,7 @@ describe('SiemDashboardMigrationsTelemetry', () => {
   });
 
   it('reports setup migration created', () => {
-    telemetry.reportSetupMigrationCreated({ migrationId: 'def', rulesCount: 10 });
+    telemetry.reportSetupMigrationCreated({ migrationId: 'def', count: 10 });
     expect(telemetryService.reportEvent).toHaveBeenCalledWith(
       SiemMigrationsDashboardEventTypes.SetupMigrationCreated,
       {
@@ -82,7 +82,7 @@ describe('SiemDashboardMigrationsTelemetry', () => {
     const error = new Error('test error');
     telemetry.reportSetupMigrationCreated({
       migrationId: 'def',
-      rulesCount: 10,
+      count: 10,
       error,
     });
     expect(telemetryService.reportEvent).toHaveBeenCalledWith(
@@ -90,7 +90,7 @@ describe('SiemDashboardMigrationsTelemetry', () => {
       {
         eventName: siemMigrationEventNames[SiemMigrationsDashboardEventTypes.SetupMigrationCreated],
         migrationId: 'def',
-        rulesCount: 10,
+        count: 10,
         result: 'failed',
         errorMessage: 'test error',
       }
