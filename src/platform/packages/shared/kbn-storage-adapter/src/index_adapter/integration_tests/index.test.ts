@@ -254,6 +254,128 @@ describe('StorageIndexAdapter', () => {
       });
     });
 
+    describe('when bulk updating with upsert', () => {
+      it('upserts a new document', async () => {
+        const bulkUpdateResponse = await client.bulk({
+          operations: [
+            {
+              update: {
+                _id: 'doc2',
+                doc: { foo: 'baz' },
+                doc_as_upsert: true,
+              },
+            },
+          ],
+        });
+
+        expect(bulkUpdateResponse).toMatchObject({
+          errors: false,
+          items: [
+            {
+              update: {
+                _id: 'doc2',
+                result: 'created',
+                status: 201,
+              },
+            },
+          ],
+        });
+      });
+
+      it('returns the upserted document when searching', async () => {
+        const searchResponse = await client.search({
+          track_total_hits: true,
+          size: 10,
+          query: {
+            bool: {
+              filter: [
+                {
+                  term: {
+                    foo: 'baz',
+                  },
+                },
+              ],
+            },
+          },
+        });
+
+        expect(searchResponse.hits.hits).toContainEqual(
+          expect.objectContaining({
+            _id: 'doc2',
+            _source: {
+              foo: 'baz',
+            },
+          })
+        );
+      });
+
+      it('updates an existing document via bulk upsert', async () => {
+        const bulkUpdateResponse = await client.bulk({
+          operations: [
+            {
+              update: {
+                _id: 'doc2',
+                doc: { foo: 'updated-via-bulk' },
+                doc_as_upsert: true,
+              },
+            },
+          ],
+        });
+
+        expect(bulkUpdateResponse).toMatchObject({
+          errors: false,
+          items: [
+            {
+              update: {
+                _id: 'doc2',
+                result: 'updated',
+              },
+            },
+          ],
+        });
+
+        const getResponse = await client.get({ id: 'doc2' });
+        expect(getResponse._source).toMatchObject({
+          foo: 'updated-via-bulk',
+        });
+      });
+
+      it('handles mixed bulk operations', async () => {
+        const bulkMixedResponse = await client.bulk({
+          operations: [
+            {
+              index: {
+                _id: 'doc3',
+                document: { foo: 'indexed' },
+              },
+            },
+            {
+              update: {
+                _id: 'doc4',
+                doc: { foo: 'upserted' },
+                doc_as_upsert: true,
+              },
+            },
+            {
+              update: {
+                _id: 'doc3',
+                doc: { foo: 'updated' },
+              },
+            },
+          ],
+        });
+
+        expect(bulkMixedResponse.errors).toBe(false);
+        expect(bulkMixedResponse.items).toHaveLength(3);
+
+        const doc3 = await client.get({ id: 'doc3' });
+        expect(doc3._source).toMatchObject({ foo: 'updated' });
+
+        const doc4 = await client.get({ id: 'doc4' });
+        expect(doc4._source).toMatchObject({ foo: 'upserted' });
+      });
+    });
+
     describe('migrates a document with a legacy property', () => {
       let migratingClient: SimpleIStorageClient<typeof storageSettings>;
       beforeAll(async () => {

@@ -242,4 +242,280 @@ describe('ElasticSearchSaver', () => {
       expect(checkpointTuple2.checkpoint.ts).toBe('2025-07-22T17:42:34.754Z');
     }
   );
+
+  describe('upsert operations', () => {
+    it('should upsert checkpoint when calling put with the same checkpoint_id', async () => {
+      const initialCheckpoint: Checkpoint = {
+        v: 1,
+        id: uuid6(-1),
+        ts: '2025-07-22T17:42:34.754Z',
+        channel_values: {
+          initialKey: 'initialValue',
+        },
+        channel_versions: {
+          version: 1,
+        },
+        versions_seen: {
+          seen: {
+            initial: 1,
+          },
+        },
+      };
+
+      const updatedCheckpoint: Checkpoint = {
+        v: 1,
+        id: initialCheckpoint.id, // Same ID
+        ts: initialCheckpoint.ts, // Same timestamp
+        channel_values: {
+          initialKey: 'updatedValue', // Changed value
+          newKey: 'newValue', // Added new key
+        },
+        channel_versions: {
+          version: 2, // Updated version
+        },
+        versions_seen: {
+          seen: {
+            initial: 2,
+          },
+        },
+      };
+
+      // Save initial checkpoint
+      await saver.put(
+        { configurable: { thread_id: THREAD_ID, checkpoint_ns: CHECKPOINT_NS } },
+        initialCheckpoint,
+        {
+          source: 'update',
+          step: -1,
+          parents: {},
+        }
+      );
+
+      // Verify initial checkpoint was saved
+      const firstTuple = await saver.getTuple({
+        configurable: { thread_id: THREAD_ID, checkpoint_ns: CHECKPOINT_NS },
+      });
+      expect(firstTuple?.checkpoint.channel_values).toEqual({ initialKey: 'initialValue' });
+
+      // Upsert with updated checkpoint (same ID)
+      await saver.put(
+        { configurable: { thread_id: THREAD_ID, checkpoint_ns: CHECKPOINT_NS } },
+        updatedCheckpoint,
+        {
+          source: 'update',
+          step: -1,
+          parents: {},
+        }
+      );
+
+      // Verify checkpoint was updated, not duplicated
+      const updatedTuple = await saver.getTuple({
+        configurable: { thread_id: THREAD_ID, checkpoint_ns: CHECKPOINT_NS },
+      });
+      expect(updatedTuple?.checkpoint.channel_values).toEqual({
+        initialKey: 'updatedValue',
+        newKey: 'newValue',
+      });
+      expect(updatedTuple?.checkpoint.channel_versions.version).toBe(2);
+
+      // List all checkpoints and verify only one exists
+      const checkpointTupleGenerator = saver.list({
+        configurable: { thread_id: THREAD_ID, checkpoint_ns: CHECKPOINT_NS },
+      });
+      const checkpointTuples: CheckpointTuple[] = [];
+      for await (const checkpoint of checkpointTupleGenerator) {
+        checkpointTuples.push(checkpoint);
+      }
+      expect(checkpointTuples.length).toBe(1);
+      expect(checkpointTuples[0].checkpoint.id).toBe(initialCheckpoint.id);
+    });
+
+    it('should upsert writes when calling putWrites multiple times with the same checkpoint_id', async () => {
+      const testCheckpoint: Checkpoint = {
+        v: 1,
+        id: uuid6(-1),
+        ts: '2025-07-22T17:42:34.754Z',
+        channel_values: {
+          someKey: 'someValue',
+        },
+        channel_versions: {
+          version: 1,
+        },
+        versions_seen: {},
+      };
+
+      // Save checkpoint first
+      await saver.put(
+        { configurable: { thread_id: THREAD_ID, checkpoint_ns: CHECKPOINT_NS } },
+        testCheckpoint,
+        {
+          source: 'update',
+          step: -1,
+          parents: {},
+        }
+      );
+
+      // Add first set of writes
+      await saver.putWrites(
+        {
+          configurable: {
+            checkpoint_id: testCheckpoint.id,
+            checkpoint_ns: CHECKPOINT_NS,
+            thread_id: THREAD_ID,
+          },
+        },
+        [['write1', 'data1']],
+        'task1'
+      );
+
+      // Verify first writes
+      const firstTuple = await saver.getTuple({
+        configurable: { thread_id: THREAD_ID, checkpoint_ns: CHECKPOINT_NS },
+      });
+      expect(firstTuple?.pendingWrites).toEqual([['task1', 'write1', 'data1']]);
+
+      // Add second set of writes with same checkpoint_id
+      await saver.putWrites(
+        {
+          configurable: {
+            checkpoint_id: testCheckpoint.id,
+            checkpoint_ns: CHECKPOINT_NS,
+            thread_id: THREAD_ID,
+          },
+        },
+        [['write2', 'data2']],
+        'task2'
+      );
+
+      // Verify both writes are present
+      const secondTuple = await saver.getTuple({
+        configurable: { thread_id: THREAD_ID, checkpoint_ns: CHECKPOINT_NS },
+      });
+      expect(secondTuple?.pendingWrites).toHaveLength(2);
+      expect(secondTuple?.pendingWrites).toEqual(
+        expect.arrayContaining([
+          ['task1', 'write1', 'data1'],
+          ['task2', 'write2', 'data2'],
+        ])
+      );
+    });
+
+    it('should handle multiple upserts of the same checkpoint in rapid succession', async () => {
+      const checkpointId = uuid6(-1);
+      const baseCheckpoint: Checkpoint = {
+        v: 1,
+        id: checkpointId,
+        ts: '2025-07-22T17:42:34.754Z',
+        channel_values: {},
+        channel_versions: {},
+        versions_seen: {},
+      };
+
+      // Perform multiple rapid upserts
+      const upsertPromises = [];
+      for (let i = 0; i < 5; i++) {
+        const checkpoint = {
+          ...baseCheckpoint,
+          channel_values: { counter: i },
+        };
+        upsertPromises.push(
+          saver.put(
+            { configurable: { thread_id: THREAD_ID, checkpoint_ns: CHECKPOINT_NS } },
+            checkpoint,
+            {
+              source: 'update',
+              step: -1,
+              parents: {},
+            }
+          )
+        );
+      }
+
+      await Promise.all(upsertPromises);
+
+      // Verify only one checkpoint exists
+      const checkpointTupleGenerator = saver.list({
+        configurable: { thread_id: THREAD_ID, checkpoint_ns: CHECKPOINT_NS },
+      });
+      const checkpointTuples: CheckpointTuple[] = [];
+      for await (const checkpoint of checkpointTupleGenerator) {
+        checkpointTuples.push(checkpoint);
+      }
+      expect(checkpointTuples.length).toBe(1);
+      expect(checkpointTuples[0].checkpoint.id).toBe(checkpointId);
+      // The final value should be one of the upserted values
+      expect(checkpointTuples[0].checkpoint.channel_values.counter).toBeGreaterThanOrEqual(0);
+      expect(checkpointTuples[0].checkpoint.channel_values.counter).toBeLessThanOrEqual(4);
+    });
+
+    it('should handle upserts across different namespaces independently', async () => {
+      const checkpointId = uuid6(-1);
+      const namespace1 = 'namespace-1';
+      const namespace2 = 'namespace-2';
+
+      const checkpoint1: Checkpoint = {
+        v: 1,
+        id: checkpointId,
+        ts: '2025-07-22T17:42:34.754Z',
+        channel_values: { namespace: 'first' },
+        channel_versions: {},
+        versions_seen: {},
+      };
+
+      const checkpoint2: Checkpoint = {
+        v: 1,
+        id: checkpointId,
+        ts: '2025-07-22T17:42:34.754Z',
+        channel_values: { namespace: 'second' },
+        channel_versions: {},
+        versions_seen: {},
+      };
+
+      // Save checkpoint with same ID to different namespaces
+      await saver.put(
+        { configurable: { thread_id: THREAD_ID, checkpoint_ns: namespace1 } },
+        checkpoint1,
+        { source: 'update', step: -1, parents: {} }
+      );
+
+      await saver.put(
+        { configurable: { thread_id: THREAD_ID, checkpoint_ns: namespace2 } },
+        checkpoint2,
+        { source: 'update', step: -1, parents: {} }
+      );
+
+      // Verify both checkpoints exist independently
+      const tuple1 = await saver.getTuple({
+        configurable: { thread_id: THREAD_ID, checkpoint_ns: namespace1 },
+      });
+      expect(tuple1?.checkpoint.channel_values).toEqual({ namespace: 'first' });
+
+      const tuple2 = await saver.getTuple({
+        configurable: { thread_id: THREAD_ID, checkpoint_ns: namespace2 },
+      });
+      expect(tuple2?.checkpoint.channel_values).toEqual({ namespace: 'second' });
+
+      // Upsert namespace1 checkpoint
+      const updatedCheckpoint1: Checkpoint = {
+        ...checkpoint1,
+        channel_values: { namespace: 'first-updated' },
+      };
+      await saver.put(
+        { configurable: { thread_id: THREAD_ID, checkpoint_ns: namespace1 } },
+        updatedCheckpoint1,
+        { source: 'update', step: -1, parents: {} }
+      );
+
+      // Verify only namespace1 was updated
+      const updatedTuple1 = await saver.getTuple({
+        configurable: { thread_id: THREAD_ID, checkpoint_ns: namespace1 },
+      });
+      expect(updatedTuple1?.checkpoint.channel_values).toEqual({ namespace: 'first-updated' });
+
+      const unchangedTuple2 = await saver.getTuple({
+        configurable: { thread_id: THREAD_ID, checkpoint_ns: namespace2 },
+      });
+      expect(unchangedTuple2?.checkpoint.channel_values).toEqual({ namespace: 'second' });
+    });
+  });
 });

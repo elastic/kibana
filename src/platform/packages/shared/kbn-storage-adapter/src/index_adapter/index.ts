@@ -71,6 +71,13 @@ function catchConflictError(error: Error) {
   if (isResponseError(error) && error.statusCode === 409) {
     return;
   }
+  // Also catch resource_already_exists_exception which can have status 400
+  if (
+    isResponseError(error) &&
+    error.body?.error?.type === 'resource_already_exists_exception'
+  ) {
+    return;
+  }
   throw error;
 }
 
@@ -445,6 +452,34 @@ export class StorageIndexAdapter<
             },
           },
           operation.index.document as {},
+        ];
+      }
+
+      if ('update' in operation) {
+        const updateOp = operation.update;
+        const updateBody: Record<string, any> = {};
+        const updateMeta: Record<string, any> = {
+          _id: updateOp._id,
+        };
+        
+        if (updateOp.doc !== undefined) {
+          updateBody.doc = updateOp.doc;
+        }
+        if (updateOp.upsert !== undefined) {
+          updateBody.upsert = updateOp.upsert;
+        }
+        if (updateOp.doc_as_upsert !== undefined) {
+          updateBody.doc_as_upsert = updateOp.doc_as_upsert;
+        }
+        if (updateOp.retry_on_conflict !== undefined) {
+          updateMeta.retry_on_conflict = updateOp.retry_on_conflict;
+        }
+        
+        return [
+          {
+            update: updateMeta,
+          },
+          updateBody,
         ];
       }
 

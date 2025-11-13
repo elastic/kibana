@@ -55,7 +55,16 @@ export type StorageClientBulkOperation<TDocument extends { _id?: string }> =
   | {
       index: { document: Omit<TDocument, '_id'>; _id?: string };
     }
-  | { delete: { _id: string } };
+  | { delete: { _id: string } }
+  | {
+      update: {
+        _id: string;
+        doc?: Partial<Omit<TDocument, '_id'>>;
+        upsert?: Omit<TDocument, '_id'>;
+        doc_as_upsert?: boolean;
+        retry_on_conflict?: number;
+      };
+    };
 
 export type StorageClientBulkRequest<TDocument extends { _id?: string }> = Omit<
   BulkRequest,

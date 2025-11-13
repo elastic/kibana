@@ -213,12 +213,12 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
       parentConfig:
         doc.parent_checkpoint_id != null
           ? {
-              configurable: {
-                thread_id: threadId,
-                checkpoint_ns: checkpointNs,
-                checkpoint_id: doc.parent_checkpoint_id,
-              },
-            }
+            configurable: {
+              thread_id: threadId,
+              checkpoint_ns: checkpointNs,
+              checkpoint_id: doc.parent_checkpoint_id,
+            },
+          }
           : undefined,
     };
   }
@@ -290,12 +290,12 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
         metadata,
         parentConfig: source.parent_checkpoint_id
           ? {
-              configurable: {
-                thread_id: source.thread_id,
-                checkpoint_ns: source.checkpoint_ns,
-                checkpoint_id: source.parent_checkpoint_id,
-              },
-            }
+            configurable: {
+              thread_id: source.thread_id,
+              checkpoint_ns: source.checkpoint_ns,
+              checkpoint_id: source.parent_checkpoint_id,
+            },
+          }
           : undefined,
       };
     }
@@ -345,10 +345,12 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
     const compositeId = `thread_id:${threadId}|checkpoint_ns:${checkpointNs}|checkpoint_id:${checkpointId}`;
 
     // Use storage adapter which handles index creation automatically
-    await this.checkpointsStorage.index({
+    await this.checkpointsStorage.update({
       id: compositeId,
-      document: doc,
+      doc: doc,
+      doc_as_upsert: true,
       refresh: this.refreshPolicy,
+      retry_on_conflict: 3,
     });
 
     return {
@@ -396,28 +398,52 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
           type,
         };
 
-        this.logger.debug(`Indexing write operation for checkpoint ${checkpointId}`);
+        this.logger.debug(`Upserting write operation for checkpoint ${checkpointId}`);
 
         return {
-          index: {
+          update: {
             _id: compositeId,
-            document: doc,
+            doc,
+            doc_as_upsert: true,
+            retry_on_conflict: 3,
           },
         };
       })
     );
 
-    const result = await this.checkpointWritesStorage.bulk({
-      operations,
-      refresh: this.refreshPolicy,
-    });
+    try {
+      const result = await this.checkpointWritesStorage.bulk({
+        operations,
+        refresh: this.refreshPolicy,
+      });
 
-    if (result.errors) {
-      this.logger.error(`Failed to index writes for checkpoint ${checkpointId}`);
+      if (result.errors) {
+        const errorDetails = result.items
+          .map((item, idx) => {
+            const operation = item.update || item.index || item.delete;
+            if (operation?.error) {
+              return `Operation ${idx}: ${JSON.stringify(operation.error)}`;
+            }
+            return null;
+          })
+          .filter(Boolean)
+          .join(', ');
+
+        console.error(errorDetails);
+        this.logger.error(
+          `Failed to index writes for checkpoint ${checkpointId}. Errors: ${errorDetails}`
+        );
+        throw new Error(
+          `Failed to index writes for checkpoint ${checkpointId}. Errors: ${errorDetails}`
+        );
+      }
+
+    } catch (error) {
+      console.error(error);
       throw new Error(`Failed to index writes for checkpoint ${checkpointId}`);
     }
   }
 
   // TODO: Implement this
-  async deleteThread() {}
+  async deleteThread() { }
 }
