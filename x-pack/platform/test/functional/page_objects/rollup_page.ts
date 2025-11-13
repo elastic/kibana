@@ -20,7 +20,7 @@ export class RollupPageObject extends FtrService {
   private readonly esArchiver = this.ctx.getService('esArchiver');
 
   // This feature is deprecated and disabled by default. To enable it, follow the steps in:
-  // https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/p
+  // https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/rollup/README.md
   async activateFeature() {
     const postfix = Date.now();
 
