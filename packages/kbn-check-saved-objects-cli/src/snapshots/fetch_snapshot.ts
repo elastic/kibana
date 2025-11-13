@@ -7,43 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ToolingLog } from '@kbn/tooling-log';
 import { existsSync } from 'fs';
 import { readFile } from 'fs/promises';
 import * as os from 'os';
 import { basename, resolve } from 'path';
-import { downloadFile } from './download_file';
+import { downloadFile } from '../util/download_file';
 import type { MigrationSnapshot } from '../types';
 
 const SO_MIGRATIONS_BUCKET_PREFIX = 'https://storage.googleapis.com/kibana-so-types-snapshots';
 
-export async function fetchSnapshotFromGCSBucket({
-  gitRev,
-  log,
-}: {
-  gitRev: string;
-  log: ToolingLog;
-}): Promise<MigrationSnapshot> {
+export async function fetchSnapshot(gitRev: string): Promise<MigrationSnapshot> {
   const googleCloudUrl = `${SO_MIGRATIONS_BUCKET_PREFIX}/${gitRev}.json`;
-  const path = await downloadToTemp(googleCloudUrl, log);
+  const path = await downloadToTemp(googleCloudUrl);
   return await loadSnapshotFromFile(path);
 }
 
-async function downloadToTemp(googleCloudUrl: string, log: ToolingLog): Promise<string> {
+async function downloadToTemp(googleCloudUrl: string): Promise<string> {
   const fileName = basename(googleCloudUrl);
   const filePath = resolve(os.tmpdir(), fileName);
 
   if (existsSync(filePath)) {
-    log.info('✅ ' + filePath);
     return filePath;
   } else {
     try {
-      log.info('🌐 GET ' + googleCloudUrl);
       await downloadFile(googleCloudUrl, filePath);
-      log.info('✅ ' + filePath);
       return filePath;
     } catch (err) {
-      log.error("Couldn't download snapshot from: " + googleCloudUrl);
       throw err;
     }
   }

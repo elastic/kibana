@@ -69,3 +69,35 @@ export function isKqlQueryValid(kql?: string): boolean {
     return false;
   }
 }
+
+/**
+ * Builds a combined filter for ES|QL queries following the same pattern
+ * as the server-side route used to apply.
+ */
+export function buildEsqlFilter({
+  filter,
+  kuery,
+  start,
+  end,
+}: {
+  filter?: estypes.QueryDslQueryContainer;
+  kuery?: string;
+  start?: number;
+  end?: number;
+}): estypes.QueryDslQueryContainer {
+  const filters: estypes.QueryDslQueryContainer[] = [
+    filter || { match_all: {} },
+    ...kqlQuery(kuery),
+    ...excludeFrozenQuery(),
+  ];
+
+  if (start !== undefined && end !== undefined) {
+    filters.push(...rangeQuery(start, end));
+  }
+
+  return {
+    bool: {
+      filter: filters,
+    },
+  };
+}
