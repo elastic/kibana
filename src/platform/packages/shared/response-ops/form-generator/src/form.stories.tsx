@@ -13,6 +13,30 @@ import { z } from '@kbn/zod/v4';
 import { Form } from './form';
 import { withUIMeta } from './connector_spec_ui';
 
+const meta = {
+  title: 'Form Generator',
+};
+
+export default meta;
+
+const submit = ({ data }: { data: unknown }) => {
+  // eslint-disable-next-line no-console
+  console.log(data);
+  window.alert(JSON.stringify(data, null, 2));
+};
+
+export const WebhookConnector: StoryObj = {
+  render: () => {
+    return <Form connectorSchema={webhookConnectorFormSchema} onSubmit={submit} />;
+  },
+};
+
+export const AbuseIPDBConnector: StoryObj = {
+  render: () => {
+    return <Form connectorSchema={abuseIPDBConnectorSchema} onSubmit={submit} />;
+  },
+};
+
 // this is not the object that would be created as SingleConnectorFile, this is the internal
 // representation after parsing a SingleConnectorFile
 const webhookConnectorFormSchema = z.object({
@@ -76,31 +100,25 @@ const webhookConnectorFormSchema = z.object({
   ),
 });
 
-const meta = {
-  title: 'Form Generator',
-};
-
-export default meta;
-
-const DefaultStory = () => {
-  return (
-    <Form
-      connectorSchema={webhookConnectorFormSchema}
-      onSubmit={({ data }) => {
-        // eslint-disable-next-line no-console
-        console.log(data);
-        window.alert(JSON.stringify(data));
-      }}
-    />
-  );
-};
-
-export const WebhookConnector: StoryObj<typeof DefaultStory> = {
-  argTypes: {
-    connectorSchema: {
-      control: false,
-      description: 'Controls the schema',
-    },
-  },
-  render: DefaultStory,
-};
+const abuseIPDBConnectorSchema = z.object({
+  authType: withUIMeta(
+    z.discriminatedUnion('type', [
+      withUIMeta(
+        z.object({
+          type: z.literal('apiKey'), // this literal is irrelevant
+          Key: withUIMeta(z.string().min(1, { message: 'API Key cannot be empty' }), {
+            widget: 'password',
+            widgetOptions: {
+              label: 'API Key',
+              placeholder: 'Your AbuseIPDB API Key',
+            },
+          }),
+        }),
+        {
+          widgetOptions: { label: 'Headers' },
+        }
+      ),
+    ]),
+    { widget: 'formFieldset', widgetOptions: { label: 'Authentication' } }
+  ),
+});

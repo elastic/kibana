@@ -67,7 +67,9 @@ const getFieldsFromSchema = <T extends z.ZodRawShape>(schema: z.ZodObject<T>) =>
     let initialValue = staticProps.default;
 
     if (uiMeta.widget === 'formFieldset' && schemaAny instanceof z.ZodDiscriminatedUnion) {
-      initialValue = getDiscriminatedUnionInitialValue(schemaAny);
+      initialValue = getDiscriminatedUnionInitialValue(
+        schemaAny as z.ZodDiscriminatedUnion<z.ZodObject<z.ZodRawShape>[]>
+      );
     } else if (uiMeta.widget === 'keyValue' && !initialValue) {
       initialValue = {};
     }
