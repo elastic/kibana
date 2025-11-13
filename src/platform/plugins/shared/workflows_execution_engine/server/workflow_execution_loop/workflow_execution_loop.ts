@@ -42,10 +42,8 @@ export async function workflowExecutionLoop(params: WorkflowExecutionLoopParams)
     });
   });
 
-  while (true) {
-    while (params.workflowRuntime.getWorkflowExecution().status === ExecutionStatus.RUNNING) {
-      await runNode(params);
-      await params.workflowLogger.flushEvents();
-    }
+  while (params.workflowRuntime.getWorkflowExecution().status === ExecutionStatus.RUNNING) {
+    await runNode(params);
+    await params.workflowLogger.flushEvents();
   }
 }

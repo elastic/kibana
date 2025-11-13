@@ -76,14 +76,11 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
     await params.workflowRuntime.saveState(); // Ensure state is updated after each step
   }
 
-  await handleExecutionDelay(params, stepExecutionRuntime);
+  await handleExecutionDelay(params);
 }
 
 const SHORT_DURATION_THRESHOLD = 1000 * 5; // 5 seconds
-async function handleExecutionDelay(
-  params: WorkflowExecutionLoopParams,
-  stepExecutionRuntime: StepExecutionRuntime
-) {
+async function handleExecutionDelay(params: WorkflowExecutionLoopParams) {
   const workflowExecution = params.workflowRuntime.getWorkflowExecution();
 
   if (workflowExecution.status === ExecutionStatus.WAITING && workflowExecution.resumeAt) {

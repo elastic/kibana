@@ -216,8 +216,7 @@ export class NodesFactory {
           node as any,
           stepExecutionRuntime,
           this.workflowRuntime,
-          stepLogger,
-          this.workflowTaskManager
+          stepLogger
         );
       case 'atomic':
         // Default atomic step (connector-based)
