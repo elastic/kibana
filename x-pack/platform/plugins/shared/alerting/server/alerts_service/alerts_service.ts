@@ -52,7 +52,8 @@ import type { SetAlertsToUntrackedParams } from './lib/set_alerts_to_untracked';
 import { setAlertsToUntracked } from './lib/set_alerts_to_untracked';
 import type { ClearAlertFlappingHistoryParams } from './lib/clear_alert_flapping_history';
 import { clearAlertFlappingHistory } from './lib/clear_alert_flapping_history';
-
+import type { IsExistingAlertParams } from './lib/is_existing_alert';
+import { isExistingAlert } from './lib/is_existing_alert';
 export const TOTAL_FIELDS_LIMIT = 2500;
 const LEGACY_ALERT_CONTEXT = 'legacy-alert';
 export const ECS_CONTEXT = `ecs`;
@@ -509,6 +510,14 @@ export class AlertsService implements IAlertsService {
       logger: this.options.logger,
       esClient: await this.options.elasticsearchClientPromise,
       ...opts,
+    });
+  }
+
+  public async isExistingAlert(params: IsExistingAlertParams): Promise<boolean> {
+    return isExistingAlert({
+      logger: this.options.logger,
+      esClient: await this.options.elasticsearchClientPromise,
+      ...params,
     });
   }
 }

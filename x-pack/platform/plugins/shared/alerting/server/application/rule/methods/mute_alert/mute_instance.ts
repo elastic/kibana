@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { updateRuleSo } from '../../../../data/rule/methods/update_rule_so';
 import { muteAlertParamsSchema } from './schemas';
-import type { MuteAlertParams } from './types';
+import type { MuteAlertBody, MuteAlertParams } from './types';
 import type { Rule } from '../../../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
@@ -19,7 +19,7 @@ import { updateMeta } from '../../../../rules_client/lib';
 
 export async function muteInstance(
   context: RulesClientContext,
-  params: MuteAlertParams
+  params: MuteAlertParams & MuteAlertBody
 ): Promise<void> {
   const ruleId = params.alertId;
   try {
@@ -37,7 +37,7 @@ export async function muteInstance(
 
 async function muteInstanceWithOCC(
   context: RulesClientContext,
-  { alertId: ruleId, alertInstanceId }: MuteAlertParams
+  { alertId: ruleId, alertInstanceId, validateAlertsExistence }: MuteAlertParams & MuteAlertBody
 ) {
   const { attributes, version } = await context.unsecuredSavedObjectsClient.get<Rule>(
     RULE_SAVED_OBJECT_TYPE,
@@ -75,6 +75,21 @@ async function muteInstanceWithOCC(
   );
 
   context.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
+
+  if (validateAlertsExistence) {
+    const indices = await context.getAlertIndicesAlias([attributes.alertTypeId], context.spaceId);
+    const isExistingAlert = await context.alertsService?.isExistingAlert({
+      indices,
+      alertId: alertInstanceId,
+      ruleId,
+    });
+
+    if (!isExistingAlert) {
+      throw Boom.notFound(
+        `Alert instance with id "${alertInstanceId}" does not exist for rule with id "${ruleId}"`
+      );
+    }
+  }
 
   const mutedInstanceIds = attributes.mutedInstanceIds || [];
   if (!attributes.muteAll && !mutedInstanceIds.includes(alertInstanceId)) {

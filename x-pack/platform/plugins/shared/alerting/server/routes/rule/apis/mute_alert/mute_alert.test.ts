@@ -43,6 +43,9 @@ describe('muteAlertRoute', () => {
           rule_id: '1',
           alert_id: '2',
         },
+        body: {
+          validate_alerts_existence: true,
+        },
       },
       ['noContent']
     );
@@ -55,6 +58,7 @@ describe('muteAlertRoute', () => {
         Object {
           "alertId": "1",
           "alertInstanceId": "2",
+          "validateAlertsExistence": true,
         },
       ]
     `);
