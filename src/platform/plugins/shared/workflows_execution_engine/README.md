@@ -848,7 +848,7 @@ await workflowsExecutionEngine.cancelWorkflowExecution(
 );
 ```
 
-**Note**: To retrieve workflow execution status and logs, use the workflows_management plugin's API or query Elasticsearch indices directly. The execution engine plugin focuses on execution control and does not expose query methods in its public API.
+**Note**: To retrieve workflow execution status and logs, use the workflows_management plugin's API. The execution engine plugin focuses on execution control and does not expose query methods in its public API.
 
 ---
 
