@@ -30,6 +30,7 @@ export const useInitSourcerer = (
   scopeId:
     | SourcererScopeName.default
     | SourcererScopeName.detections
+    | SourcererScopeName.attacks
     | SourcererScopeName.explore = SourcererScopeName.default
 ) => {
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');

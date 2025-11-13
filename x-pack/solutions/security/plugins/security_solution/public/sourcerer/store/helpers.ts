@@ -25,6 +25,8 @@ const getPatternListFromScope = (
     case SourcererScopeName.detections:
       // set to signalIndexName whether or not it exists yet in the patternList
       return signalIndexName != null ? [signalIndexName] : [];
+    case SourcererScopeName.attacks:
+      return sortWithExcludesAtEnd(patternList);
     case SourcererScopeName.timeline:
       return sortWithExcludesAtEnd(patternList);
     case SourcererScopeName.analyzer:

@@ -489,6 +489,16 @@ export const mockGlobalState: State = {
           true
         ),
       },
+      [SourcererScopeName.attacks]: {
+        ...mockSourcererState.sourcererScopes[SourcererScopeName.attacks],
+        selectedDataViewId: mockSourcererState.defaultDataView.id,
+        selectedPatterns: getScopePatternListSelection(
+          mockSourcererState.defaultDataView,
+          SourcererScopeName.attacks,
+          mockSourcererState.signalIndexName,
+          true
+        ),
+      },
       [SourcererScopeName.timeline]: {
         ...mockSourcererState.sourcererScopes[SourcererScopeName.timeline],
         selectedDataViewId: mockSourcererState.defaultDataView.id,
