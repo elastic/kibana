@@ -83,6 +83,7 @@ export type FormData = Pick<
   | 'reportTypeId'
   | 'startDate'
   | 'timezone'
+  | 'recurring'
   | 'recurringSchedule'
   | 'sendByEmail'
   | 'emailRecipients'
