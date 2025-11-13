@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -20,5 +20,6 @@
     "@kbn/inference-common",
     "@kbn/i18n",
     "@kbn/licensing-types",
+    "@kbn/task-manager-plugin",
   ]
 }
