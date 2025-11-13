@@ -20,7 +20,7 @@ export const FLYOUT_BODY_TEST_ID = 'attack-details-flyout-body';
  * Panel to be displayed in Attack Details flyout
  */
 export const AttackDetailsPanel: React.FC<Partial<AttackDetailsProps>> = memo(() => {
-  const { documentId } = useAttackDetailsContext();
+  const { attackId } = useAttackDetailsContext();
 
   return (
     <>
@@ -28,7 +28,7 @@ export const AttackDetailsPanel: React.FC<Partial<AttackDetailsProps>> = memo(()
       <FlyoutHeader>
         <HeaderTitle />
       </FlyoutHeader>
-      <FlyoutBody data-test-subj={FLYOUT_BODY_TEST_ID}>{documentId}</FlyoutBody>
+      <FlyoutBody data-test-subj={FLYOUT_BODY_TEST_ID}>{attackId}</FlyoutBody>
       <PanelFooter />
     </>
   );

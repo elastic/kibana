@@ -4,21 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { createContext, memo, useContext, useMemo } from 'react';
+import React, { createContext, memo, useContext, useEffect, useMemo, useState } from 'react';
 import { useAssistantContext } from '@kbn/elastic-assistant';
+import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import type { AttackDetailsProps } from './types';
-import type { AttackDiscoveryItem } from './hooks/use_find_attack_details_by_id';
-import { useFindAttackDetailsById } from './hooks/use_find_attack_details_by_id';
 import { FlyoutLoading } from '../shared/components/flyout_loading';
 import { FlyoutError } from '../shared/components/flyout_error';
+import { useFindAttackDiscoveries } from '../../attack_discovery/pages/use_find_attack_discoveries';
 
 export interface AttackDetailsContext {
   /**
-   * Id of the document
+   * Id of the attack document
    */
-  documentId: string;
-
-  dataAttackDetails: AttackDiscoveryItem;
+  attackId: string;
+  /**
+   * Attack details
+   */
+  attack: AttackDiscoveryAlert;
 }
 
 /**
@@ -33,18 +35,27 @@ export type AttackDetailsProviderProps = {
   children: React.ReactNode;
 } & Partial<AttackDetailsProps['params']>;
 
-export const AttackDetailsProvider = memo(({ id, children }: AttackDetailsProviderProps) => {
+export const AttackDetailsProvider = memo(({ attackId, children }: AttackDetailsProviderProps) => {
   const { assistantAvailability, http } = useAssistantContext();
 
-  const { data, isLoading: loading } = useFindAttackDetailsById({
-    id: id || '',
+  const { data, isLoading: loading } = useFindAttackDiscoveries({
+    ids: [attackId || ''],
     http,
     isAssistantEnabled: assistantAvailability.isAssistantEnabled,
+    page: 1,
+    perPage: 1,
   });
+  const [attack, setAttack] = useState<AttackDiscoveryAlert | null>(null);
+
+  useEffect(() => {
+    if (data != null && data.data.length > 0) {
+      setAttack(data.data[0]);
+    }
+  }, [data]);
 
   const contextValue = useMemo<AttackDetailsContext | undefined>(
-    () => (data && id ? { dataAttackDetails: data, documentId: id } : undefined),
-    [id, data]
+    () => (attack && attackId ? { attack, attackId } : undefined),
+    [attackId, attack]
   );
 
   if (loading) {

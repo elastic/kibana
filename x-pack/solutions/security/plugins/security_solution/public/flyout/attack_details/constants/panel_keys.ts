@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const AttackDetailsPanelKey = 'attack-details' as const;
+export const AttackDetailsRightPanelKey = 'attack-details-right' as const;

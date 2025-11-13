@@ -15,8 +15,10 @@ export const HEADER_TITLE_TEST_ID = 'attack-details-flyout-header-title';
  * Header data for the Attack details flyout
  */
 export const HeaderTitle = memo(() => {
-  const { dataAttackDetails } = useAttackDetailsContext();
-  const { title } = dataAttackDetails;
+  const {
+    attack: { title },
+  } = useAttackDetailsContext();
+
   return (
     <>
       <FlyoutTitle data-test-subj={HEADER_TITLE_TEST_ID} title={title} iconType={'warning'} />

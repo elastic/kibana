@@ -85,7 +85,7 @@ import {
   VulnerabilityFindingsPreviewPanelKey,
 } from './csp_details/vulnerabilities_flyout/constants';
 import { FindingsVulnerabilityPanel } from './csp_details/vulnerabilities_flyout/vulnerabilities_right';
-import { AttackDetailsPanelKey } from './attack_details/constants/panel_keys';
+import { AttackDetailsRightPanelKey } from './attack_details/constants/panel_keys';
 import type { AttackDetailsProps } from './attack_details/types';
 import { AttackDetailsProvider } from './attack_details/context';
 import { AttackDetailsPanel } from './attack_details';
@@ -255,7 +255,7 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
     ),
   },
   {
-    key: AttackDetailsPanelKey,
+    key: AttackDetailsRightPanelKey,
     component: (props) => (
       <AttackDetailsProvider {...(props as AttackDetailsProps).params}>
         <AttackDetailsPanel />
