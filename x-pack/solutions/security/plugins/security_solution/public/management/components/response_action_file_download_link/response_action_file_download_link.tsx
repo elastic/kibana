@@ -187,7 +187,7 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
         <EuiText size={textSize} color="warning">
           <FormattedMessage
             id="xpack.securitySolution.responseActionFileDownloadLink.apiError"
-            defaultMessage="Attempt to retrive file download information failed."
+            defaultMessage="Attempt to retrieve file download information failed."
           />
           <FormattedError error={error} data-test-subj={getTestId('apiError')} />
         </EuiText>
