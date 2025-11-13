@@ -105,18 +105,21 @@ function reverseBuildVisualizationState(
       min: visualization.minFontSize,
       max: visualization.maxFontSize,
     },
-    metric: isEsqlTableTypeDataset(dataset)
-      ? getValueApiColumn(visualization.valueAccessor, layer as TextBasedLayer)
-      : (operationFromColumn(
-          visualization.valueAccessor,
-          layer as FormBasedLayer
-        ) as LensApiAllMetricOrFormulaOperations),
-    tag_by: isEsqlTableTypeDataset(dataset)
-      ? getValueApiColumn(visualization.tagAccessor, layer as TextBasedLayer)
-      : (operationFromColumn(
-          visualization.tagAccessor,
-          layer as FormBasedLayer
-        ) as LensApiBucketOperations),
+    ...(isEsqlTableTypeDataset(dataset)
+      ? {
+          metric: getValueApiColumn(visualization.valueAccessor, layer as TextBasedLayer),
+          tag_by: getValueApiColumn(visualization.tagAccessor, layer as TextBasedLayer),
+        }
+      : {
+          metric: operationFromColumn(
+            visualization.valueAccessor,
+            layer as FormBasedLayer
+          ) as LensApiAllMetricOrFormulaOperations,
+          tag_by: operationFromColumn(
+            visualization.tagAccessor,
+            layer as FormBasedLayer
+          ) as LensApiBucketOperations,
+        }),
   } as TagcloudState;
 
   if (props.metric) {
