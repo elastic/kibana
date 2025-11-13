@@ -11,7 +11,6 @@ import { z } from '@kbn/zod';
 
 export const AutomaticImportAgentState = MessagesZodState.extend({
   current_pipeline: z.object({}).default({}),
-  unique_fields: z.object({}).default({}),
   pipeline_generation_results: z
     .object({
       docs: z
