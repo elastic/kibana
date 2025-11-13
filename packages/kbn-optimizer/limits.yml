@@ -17,12 +17,12 @@ pageLoadAssetSize:
   cloudFullStory: 4752
   cloudLinks: 36333
   cloudSecurityPosture: 19988
-  console: 31322
+  console: 31271
   contentConnectors: 33014
   contentManagement: 8350
   controls: 12234
-  core: 572422
-  cps: 6000
+  core: 569774
+  cps: 5918
   crossClusterReplication: 12662
   customIntegrations: 11715
   dashboard: 19000
@@ -93,9 +93,9 @@ pageLoadAssetSize:
   kibanaReact: 22503
   kibanaUsageCollection: 1736
   kibanaUtils: 54848
-  lens: 71747
+  lens: 71739
   licenseManagement: 8265
-  licensing: 10078
+  licensing: 10073
   links: 8620
   lists: 5093
   logsDataAccess: 7900
@@ -109,7 +109,7 @@ pageLoadAssetSize:
   ml: 89000
   mockIdpPlugin: 7544
   monitoring: 28983
-  navigation: 14000
+  navigation: 12923
   newsfeed: 12371
   noDataPage: 1749
   observability: 107955
@@ -152,7 +152,7 @@ pageLoadAssetSize:
   searchprofiler: 6509
   searchQueryRules: 6689
   searchSynonyms: 6371
-  security: 79724
+  security: 79627
   securitySolution: 119378
   securitySolutionEss: 43319
   securitySolutionServerless: 62689
@@ -164,11 +164,11 @@ pageLoadAssetSize:
   share: 58677
   slo: 36645
   snapshotRestore: 22068
-  spaces: 30783
+  spaces: 30665
   stackAlerts: 31499
   stackConnectors: 83751
   streams: 10000
-  streamsApp: 17000
+  streamsApp: 19225
   synthetics: 31571
   telemetry: 25755
   telemetryManagementSection: 5522
