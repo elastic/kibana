@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { createContext, memo, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, memo, useContext, useMemo } from 'react';
 import { useAssistantContext } from '@kbn/elastic-assistant';
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import type { AttackDetailsProps } from './types';
@@ -42,16 +42,9 @@ export const AttackDetailsProvider = memo(({ attackId, children }: AttackDetails
     ids: [attackId || ''],
     http,
     isAssistantEnabled: assistantAvailability.isAssistantEnabled,
-    page: 1,
-    perPage: 1,
   });
-  const [attack, setAttack] = useState<AttackDiscoveryAlert | null>(null);
 
-  useEffect(() => {
-    if (data != null && data.data.length > 0) {
-      setAttack(data.data[0]);
-    }
-  }, [data]);
+  const attack = useMemo<AttackDiscoveryAlert | null>(() => data?.data?.[0] ?? null, [data]);
 
   const contextValue = useMemo<AttackDetailsContext | undefined>(
     () => (attack && attackId ? { attack, attackId } : undefined),

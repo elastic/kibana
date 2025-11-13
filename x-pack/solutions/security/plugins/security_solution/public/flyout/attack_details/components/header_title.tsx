@@ -19,11 +19,7 @@ export const HeaderTitle = memo(() => {
     attack: { title },
   } = useAttackDetailsContext();
 
-  return (
-    <>
-      <FlyoutTitle data-test-subj={HEADER_TITLE_TEST_ID} title={title} iconType={'warning'} />
-    </>
-  );
+  return <FlyoutTitle data-test-subj={HEADER_TITLE_TEST_ID} title={title} iconType={'warning'} />;
 });
 
 HeaderTitle.displayName = 'HeaderTitle';
