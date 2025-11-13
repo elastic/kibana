@@ -8,13 +8,32 @@
  */
 
 /**
- * Type validation file to ensure packaging/react/types.ts matches source types.
+ * BUILD-TIME TYPE VALIDATION
+ * 
+ * This file ensures the duplicated types in packaging/react/types.ts remain compatible
+ * with the source types in src/ and types.ts. It is compiled during packaging builds
+ * (build.sh Step 1.5) using packaging/tsconfig.json.
  *
- * This file is compiled during the webpack build. If the duplicated types in types.ts
- * diverge from the source types in incompatible ways, TypeScript will emit compilation errors.
+ * WHY TYPES ARE DUPLICATED:
+ * - The standalone package (@kbn/one-navigation) duplicates types instead of importing them
+ * - This allows fast type generation (~1s) without compiling all Kibana dependencies
+ * - See types.ts header comments for full rationale
  *
- * Note: Some intentional simplifications are allowed (e.g., IconType -> string) as long as
- * the packaged types remain compatible with source types (consumers can pass source types).
+ * HOW VALIDATION WORKS:
+ * - This file imports types from BOTH source (../../src, ../../types) AND packaged (./types.ts)
+ * - TypeScript validates that packaged types are compatible with source types
+ * - Build fails if types diverge in incompatible ways (e.g., required field removed)
+ * - Intentional simplifications are allowed (e.g., IconType union -> string)
+ *
+ * WHEN THIS RUNS:
+ * - During packaging builds: `npx tsc --project packaging/tsconfig.json --noEmit`
+ * - NOT during regular Kibana development (tsconfig is excluded from TS_PROJECTS)
+ * - See build.sh Step 1.5 for usage
+ *
+ * MAINTENANCE:
+ * - When public API types change, update types in src/ and packaging/react/types.ts together
+ * - Run packaging build to verify compatibility: `cd packaging/scripts && ./build.sh`
+ * - If validation fails, update packaged types to maintain compatibility
  */
 
 // Import source types

@@ -1,4 +1,25 @@
 {
+  // ============================================================================
+  // BUILD-TIME TYPE VALIDATION CONFIG
+  // ============================================================================
+  // This tsconfig is ONLY used during packaging builds (via build.sh Step 1.5)
+  // to validate that the duplicated types in packaging/react/types.ts remain
+  // compatible with the source types.
+  //
+  // WHY THIS EXISTS:
+  // - The standalone package duplicates types to avoid importing dependencies
+  // - This enables fast builds (~1s) using: tsc types.ts --declaration --emitDeclarationOnly
+  // - type_validation.ts imports from BOTH source and packaged types to ensure compatibility
+  // - This tsconfig allows importing from parent directories (../src, ../types.ts)
+  //
+  // WHY IT'S EXCLUDED FROM TS_PROJECTS:
+  // - This is NOT a regular Kibana package - it's a build-time validation tool
+  // - It intentionally crosses directory boundaries which conflicts with the main tsconfig
+  // - It's ignored in packages/kbn-ts-projects/ts_projects.ts
+  // - The main package tsconfig handles regular type-checking of these files
+  //
+  // USAGE: Only run via `npx tsc --project tsconfig.json --noEmit` in build.sh
+  // ============================================================================
   "extends": "../../../../../../tsconfig.base.json",
   "compilerOptions": {
     "noEmit": true,
