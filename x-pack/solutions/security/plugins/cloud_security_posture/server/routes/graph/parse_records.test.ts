@@ -1188,5 +1188,57 @@ describe('parseRecords', () => {
       expect(targetNode.shape).toBe('hexagon');
       expect(targetNode.count).toBe(2);
     });
+
+    it('should create group enriched entity node with type only (no sub_type), label undefined, and count', () => {
+      const records: GraphEdge[] = [
+        {
+          action: 'test.action',
+          actorIds: ['user-1', 'user-2', 'user-3'],
+          targetIds: ['host-1', 'host-2'],
+          actorEntityType: 'user',
+          targetEntityType: 'host',
+          actorLabel: '', // No sub_type means no label
+          targetLabel: '', // No sub_type means no label
+          actorIdsCount: 3,
+          targetIdsCount: 2,
+          badge: 5,
+          uniqueEventsCount: 5,
+          uniqueAlertsCount: 0,
+          docs: [
+            '{"id":"event1","type":"event"}',
+            '{"id":"event2","type":"event"}',
+            '{"id":"event3","type":"event"}',
+            '{"id":"event4","type":"event"}',
+            '{"id":"event5","type":"event"}',
+          ],
+          isOrigin: false,
+          isOriginAlert: false,
+          isAlert: false,
+          actorHostIps: [],
+          targetHostIps: [],
+          sourceIps: [],
+          sourceCountryCodes: [],
+        },
+      ];
+
+      const result = parseRecords(mockLogger, records);
+
+      const actorNode = result.nodes.find((n) => n.id === 'uuid-1') as EntityNodeDataModel;
+      const targetNode = result.nodes.find((n) => n.id === 'uuid-2') as EntityNodeDataModel;
+
+      expect(actorNode).toBeDefined();
+      expect(actorNode.label).toBeUndefined(); // No label when only type exists
+      expect(actorNode.tag).toBe('user');
+      expect(actorNode.icon).toBe('user');
+      expect(actorNode.shape).toBe('ellipse');
+      expect(actorNode.count).toBe(3);
+
+      expect(targetNode).toBeDefined();
+      expect(targetNode.label).toBeUndefined(); // No label when only type exists
+      expect(targetNode.tag).toBe('host');
+      expect(targetNode.icon).toBe('storage');
+      expect(targetNode.shape).toBe('hexagon');
+      expect(targetNode.count).toBe(2);
+    });
   });
 });
