@@ -26,7 +26,6 @@ import { listEnrollmentApiKeys } from '../api_keys';
 import { fleetServerHostService } from '../fleet_server_host';
 
 import { agentlessAgentService } from './agentless_agent';
-import M from 'minimatch';
 
 jest.mock('axios');
 
