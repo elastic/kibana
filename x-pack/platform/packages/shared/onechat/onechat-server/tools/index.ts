@@ -13,6 +13,7 @@ export type {
   StaticIndexSearchTool,
   ToolAvailabilityContext,
   ToolAvailabilityHandler,
+  ToolAvailabilityResult,
 } from './builtin';
 export type {
   ToolHandlerFn,

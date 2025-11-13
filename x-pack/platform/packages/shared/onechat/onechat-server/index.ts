@@ -45,6 +45,7 @@ export type {
   StaticIndexSearchTool,
   ToolAvailabilityContext,
   ToolAvailabilityHandler,
+  ToolAvailabilityResult,
 } from './tools';
 export { getToolResultId, createErrorResult, isToolResultId } from './tools';
 export type {
