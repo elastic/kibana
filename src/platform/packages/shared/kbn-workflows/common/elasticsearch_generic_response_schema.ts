@@ -66,6 +66,8 @@ export const EsAggregationBucketSchema = z
     key_as_string: z.string().optional(),
     doc_count: z.number().optional(),
   })
+  // Aggregation buckets may contain additional fields depending on the aggregation type,
+  // such as 'from', 'to', or nested sub-aggregations. `.passthrough()` allows these extra fields.
   .passthrough();
 
 /**
