@@ -17,7 +17,7 @@ import {
   EuiFlexItem,
   EuiBadge,
   EuiLoadingSpinner,
-  useEuiTheme,
+  EuiIcon,
 } from '@elastic/eui';
 import type { NotificationsStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -61,8 +61,6 @@ export const ContextMenu = ({
   onMenuOpen,
   onCopyAs,
 }: Props) => {
-  const { euiTheme } = useEuiTheme();
-
   const {
     config: { isPackagedEnvironment },
   } = useServicesContext();
@@ -160,9 +158,7 @@ export const ContextMenu = ({
             data-test-subj="consoleMenuCopyToLanguage"
             id="copyToLanguage"
             disabled={!window.navigator?.clipboard}
-            onClick={() => {
-              onCopyAsSubmit();
-            }}
+            onClick={() => onCopyAsSubmit()}
             icon={isRequestConverterLoading ? <EuiLoadingSpinner size="m" /> : 'copyClipboard'}
           >
             <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
@@ -201,7 +197,7 @@ export const ContextMenu = ({
                       />
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
-                      <span style={{ fontSize: euiTheme.size.l }}>›</span>
+                      <EuiIcon type="arrowRight" size="m" />
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiContextMenuItem>,

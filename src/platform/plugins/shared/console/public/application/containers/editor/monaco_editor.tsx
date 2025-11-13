@@ -161,10 +161,16 @@ export const MonacoEditor = ({
     throw new Error('Could not copy to clipboard!');
   };
 
+  // This function will convert all the selected requests to the language by
+  // calling convertRequestToLanguage and then copy the data to clipboard.
   const copyAs = async (language?: string) => {
+    // Get the language we want to convert the requests to
     const withLanguage = language || currentLanguage;
+    // Get all the selected requests
     const requests = await getRequestsCallback();
 
+    // If we have any kbn requests, we should not allow the user to copy as
+    // anything other than curl
     const hasKbnRequests = requests.some((req) => req.url.startsWith(KIBANA_API_PREFIX));
 
     if (hasKbnRequests && withLanguage !== 'curl') {
