@@ -69,6 +69,7 @@ export const SingleOptionUnionField: React.FC<DiscriminatedUnionWidgetProps> = (
       const metaInfo = getMeta(fieldSchema);
       const widget = metaInfo?.widget || 'text';
       const fieldValue = valueObj[fieldKey] ?? '';
+      const staticProps = metaInfo?.widgetOptions || {};
 
       const WidgetComponent = getWidget(widget);
       if (!WidgetComponent) {
@@ -132,6 +133,7 @@ export const SingleOptionUnionField: React.FC<DiscriminatedUnionWidgetProps> = (
             onBlur={handleBlur}
             schema={fieldSchema}
             fullWidth
+            {...staticProps}
           />
         </React.Fragment>
       );

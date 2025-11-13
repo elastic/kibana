@@ -11,7 +11,7 @@ import type React from 'react';
 import { TextField } from './text_field';
 import { SelectField } from './select_field';
 import { PasswordField } from './password_field';
-import { DiscriminatedUnionField } from './discriminated_union_field/discriminated_union_field';
+import { DiscriminatedUnionField } from './discriminated_union_field';
 import { KeyValueField } from './key_value_field';
 
 export type WidgetType = 'text' | 'password' | 'select' | 'formFieldset' | 'keyValue';
@@ -35,7 +35,7 @@ export { KeyValueField } from './key_value_field';
 export {
   DiscriminatedUnionField,
   getDiscriminatedUnionInitialValue,
-} from './discriminated_union_field/discriminated_union_field';
+} from './discriminated_union_field';
 export type {
   WidgetProps,
   TextWidgetProps,

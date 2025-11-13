@@ -32,12 +32,12 @@ export interface FieldDefinition {
 
 const getStaticProps = ({ schema }: { schema: z.ZodTypeAny }) => {
   const metaInfo = getMeta(schema) || {};
-  const { placeholder, label, widgetOptions } = metaInfo;
+  const { widgetOptions } = metaInfo;
 
   const commonProps = {
     fullWidth: true,
-    label,
-    placeholder,
+    label: widgetOptions?.label,
+    placeholder: widgetOptions?.placeholder,
     default: widgetOptions?.default,
   };
 

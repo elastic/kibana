@@ -28,14 +28,21 @@ describe('Form', () => {
     const schema = z.object({
       username: z.string().meta({
         widget: 'text',
-        label: 'Username',
-        placeholder: 'Enter username',
+        widgetOptions: {
+          label: 'Username',
+          placeholder: 'Enter username',
+        },
       }),
-      email: z.string().email().meta({
-        widget: 'text',
-        label: 'Email',
-        placeholder: 'Enter email',
-      }),
+      email: z
+        .string()
+        .email()
+        .meta({
+          widget: 'text',
+          widgetOptions: {
+            label: 'Email',
+            placeholder: 'Enter email',
+          },
+        }),
     });
 
     render(<Form connectorSchema={schema} onSubmit={mockOnSubmit} />, { wrapper });
@@ -51,8 +58,10 @@ describe('Form', () => {
     const schema = z.object({
       password: z.string().meta({
         widget: 'password',
-        label: 'Password',
-        placeholder: 'Enter password',
+        widgetOptions: {
+          label: 'Password',
+          placeholder: 'Enter password',
+        },
       }),
     });
 
@@ -66,7 +75,9 @@ describe('Form', () => {
     const schema = z.object({
       country: z.enum(['US', 'UK', 'CA']).meta({
         widget: 'select',
-        label: 'Country',
+        widgetOptions: {
+          label: 'Country',
+        },
       }),
     });
 
@@ -81,7 +92,9 @@ describe('Form', () => {
     const schema = z.object({
       username: z.string().meta({
         widget: 'text',
-        label: 'Username',
+        widgetOptions: {
+          label: 'Username',
+        },
       }),
     });
 
@@ -102,10 +115,15 @@ describe('Form', () => {
 
   it('displays validation errors on submit with invalid data', async () => {
     const schema = z.object({
-      email: z.string().email().meta({
-        widget: 'text',
-        label: 'Email',
-      }),
+      email: z
+        .string()
+        .email()
+        .meta({
+          widget: 'text',
+          widgetOptions: {
+            label: 'Email',
+          },
+        }),
     });
 
     render(<Form connectorSchema={schema} onSubmit={mockOnSubmit} />, { wrapper });
@@ -125,10 +143,15 @@ describe('Form', () => {
 
   it('validates field on blur', async () => {
     const schema = z.object({
-      email: z.string().email().meta({
-        widget: 'text',
-        label: 'Email',
-      }),
+      email: z
+        .string()
+        .email()
+        .meta({
+          widget: 'text',
+          widgetOptions: {
+            label: 'Email',
+          },
+        }),
     });
 
     render(<Form connectorSchema={schema} onSubmit={mockOnSubmit} />, { wrapper });
@@ -144,17 +167,21 @@ describe('Form', () => {
 
   it('clears validation errors when input becomes valid', async () => {
     const schema = z.object({
-      email: z.string().email().meta({
-        widget: 'text',
-        label: 'Email',
-      }),
+      email: z
+        .string()
+        .email()
+        .meta({
+          widget: 'text',
+          widgetOptions: {
+            label: 'Email',
+          },
+        }),
     });
 
     render(<Form connectorSchema={schema} onSubmit={mockOnSubmit} />, { wrapper });
 
     const input = screen.getByLabelText('Email');
 
-    // Enter invalid email
     fireEvent.change(input, { target: { value: 'invalid' } });
     fireEvent.blur(input);
 
@@ -162,7 +189,6 @@ describe('Form', () => {
       expect(screen.getByText(/Invalid email/i)).toBeInTheDocument();
     });
 
-    // Enter valid email
     fireEvent.change(input, { target: { value: 'test@example.com' } });
 
     await waitFor(() => {
@@ -174,7 +200,9 @@ describe('Form', () => {
     const schema = z.object({
       username: z.string().meta({
         widget: 'text',
-        label: 'Username',
+        widgetOptions: {
+          label: 'Username',
+        },
       }),
     });
 
@@ -211,8 +239,11 @@ describe('Form', () => {
   it('throws error when unsupported widget type is provided', () => {
     const schema = z.object({
       username: z.string().meta({
-        widget: 'textarea' as any, // Unsupported widget
-        label: 'Username',
+        widget: 'fakeWidget' as any, // Unsupported widget
+
+        widgetOptions: {
+          label: 'Username',
+        },
       }),
     });
 
@@ -220,7 +251,7 @@ describe('Form', () => {
 
     expect(() => {
       render(<Form connectorSchema={schema} onSubmit={mockOnSubmit} />, { wrapper });
-    }).toThrow('Unsupported widget type: textarea');
+    }).toThrow('Unsupported widget type: fakeWidget');
 
     consoleError.mockRestore();
   });
@@ -229,16 +260,20 @@ describe('Form', () => {
     const schema = z.object({
       username: z.string().meta({
         widget: 'text',
-        label: 'Username',
+        widgetOptions: {
+          label: 'Username',
+        },
       }),
       password: z.string().meta({
         widget: 'password',
-        label: 'Password',
+        widgetOptions: {
+          label: 'Password',
+        },
       }),
       role: z.enum(['admin', 'user']).meta({
         widget: 'select',
-        label: 'Role',
         widgetOptions: {
+          label: 'Role',
           default: 'user',
         },
       }),
@@ -248,11 +283,8 @@ describe('Form', () => {
       wrapper,
     });
 
-    // Get username input - it's a text input
     const usernameInput = container.querySelector('input[type="text"]') as HTMLInputElement;
-    // Get password input - it has type="password"
     const passwordInput = container.querySelector('input[type="password"]') as HTMLInputElement;
-    // Get select
     const roleSelect = screen.getByRole('combobox');
 
     fireEvent.change(usernameInput, { target: { value: 'testuser' } });
@@ -277,8 +309,8 @@ describe('Form', () => {
     const schema = z.object({
       username: z.string().meta({
         widget: 'text',
-        label: 'Username',
         widgetOptions: {
+          label: 'Username',
           default: 'defaultUser',
         },
       }),
@@ -294,7 +326,9 @@ describe('Form', () => {
     const schema = z.object({
       headers: z.record(z.string(), z.string()).meta({
         widget: 'keyValue',
-        label: 'Headers',
+        widgetOptions: {
+          label: 'Headers',
+        },
       }),
     });
 
@@ -307,7 +341,9 @@ describe('Form', () => {
     const schema = z.object({
       username: z.string().meta({
         widget: 'text',
-        label: 'Username',
+        widgetOptions: {
+          label: 'Username',
+        },
       }),
     });
 
@@ -318,7 +354,6 @@ describe('Form', () => {
 
     const submitButton = screen.getByRole('button', { name: 'Submit' });
 
-    // Should not throw error when onSubmit is undefined
     expect(() => {
       fireEvent.click(submitButton);
     }).not.toThrow();
@@ -533,7 +568,6 @@ describe('Authentication Form Integration Tests', () => {
   it('displays validation errors when submitting basic auth with empty username/password', async () => {
     render(<Form connectorSchema={authSchema} onSubmit={mockOnSubmit} />, { wrapper });
 
-    // Select Basic Auth
     const basicCard = screen.getByLabelText('Basic Auth');
     fireEvent.click(basicCard);
 
@@ -542,17 +576,14 @@ describe('Authentication Form Integration Tests', () => {
       expect(screen.queryByTestId('authType.password')).toBeDefined();
     });
 
-    // Submit without filling in username/password
     const submitButton = screen.getByRole('button', { name: 'Submit' });
     fireEvent.click(submitButton);
 
-    // Should show validation errors
     await waitFor(() => {
       expect(screen.getByText('Username cannot be empty')).toBeInTheDocument();
       expect(screen.getByText('Password cannot be empty')).toBeInTheDocument();
     });
 
-    // Should not have called onSubmit
     expect(mockOnSubmit).not.toHaveBeenCalled();
   });
 
@@ -588,7 +619,6 @@ describe('Authentication Form Integration Tests', () => {
     const submitButton = screen.getByRole('button', { name: 'Submit' });
     fireEvent.click(submitButton);
 
-    // Should submit the full discriminated union structure naturally
     await waitFor(() => {
       expect(mockOnSubmit).toHaveBeenCalledWith({
         data: {

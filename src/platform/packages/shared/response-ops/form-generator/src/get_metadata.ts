@@ -14,12 +14,27 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import type { FieldMeta } from './schema_metadata';
+import type { WidgetType } from './widgets';
 
-/**
- * Helper function to retrieve metadata from a Zod schema
- *
- * Retrieves metadata that was attached using Zod's native .meta() method
- */
-export function getMeta(schema: z.ZodTypeAny): any {
+export interface UIMetadata {
+  widget?: WidgetType;
+  label?: string;
+  placeholder?: string;
+  default?: unknown;
+  widgetOptions?: {
+    label?: string;
+    placeholder?: string;
+    default?: unknown;
+    [key: string]: unknown;
+  };
+  [key: string]: unknown;
+}
+
+export function getMeta(schema: z.ZodTypeAny): UIMetadata | undefined {
   return z.globalRegistry.get(schema);
+}
+
+export function getTypedMeta(schema: z.ZodTypeAny): FieldMeta | undefined {
+  return z.globalRegistry.get(schema) as FieldMeta | undefined;
 }

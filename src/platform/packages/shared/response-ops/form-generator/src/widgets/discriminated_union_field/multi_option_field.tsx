@@ -68,6 +68,7 @@ export const MultiOptionUnionField: React.FC<DiscriminatedUnionWidgetProps> = ({
       const checkableCardId = `${fieldId}-option-${discriminatorValue}`;
 
       const optionMeta = getMeta(optionSchema);
+      const staticProps = optionMeta?.widgetOptions || {};
       const cardLabel: string =
         (optionMeta?.widgetOptions?.label as string | undefined) || discriminatorValue;
 
@@ -154,6 +155,7 @@ export const MultiOptionUnionField: React.FC<DiscriminatedUnionWidgetProps> = ({
                   <React.Fragment key={fieldKey}>
                     <EuiSpacer size="s" />
                     <NestedWidgetComponent
+                      {...staticProps}
                       fieldId={nestedFieldId}
                       value={nestedValue}
                       label={
