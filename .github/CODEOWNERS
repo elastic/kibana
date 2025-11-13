@@ -808,7 +808,6 @@ src/platform/test/analytics/plugins/analytics_ftr_helpers @elastic/kibana-core
 src/platform/test/analytics/plugins/analytics_plugin_a @elastic/kibana-core
 src/platform/test/common/plugins/newsfeed @elastic/kibana-core
 src/platform/test/common/plugins/otel_metrics @elastic/obs-ux-infra_services-team
-src/platform/test/functional/apps/management @elastic/kibana-management
 src/platform/test/health_gateway/plugins/status @elastic/kibana-core
 src/platform/test/interactive_setup_api_integration/plugins/test_endpoints @elastic/kibana-security
 src/platform/test/interpreter_functional/plugins/kbn_tp_run_pipeline @elastic/kibana-core
