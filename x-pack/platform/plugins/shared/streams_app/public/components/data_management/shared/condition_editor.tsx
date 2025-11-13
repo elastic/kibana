@@ -182,21 +182,6 @@ function FilterConditionForm(props: {
   }, [condition]);
 
   const handleConditionChange = (updatedCondition: Partial<FilterCondition>) => {
-    if ('field' in updatedCondition && updatedCondition.field !== condition.field) {
-      const currentValue = getFilterValue(condition);
-      const shouldClearValue = typeof currentValue !== 'boolean';
-
-      if (shouldClearValue) {
-        // Preserve the operator but clear the value
-        const clearedValue = operator === 'range' ? {} : '';
-        onConditionChange({
-          field: updatedCondition.field || '',
-          [operator as OperatorKeys]: clearedValue,
-        } as FilterCondition);
-        return;
-      }
-    }
-
     onConditionChange({
       ...condition,
       ...updatedCondition,
