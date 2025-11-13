@@ -50,13 +50,13 @@ export const GoogleDriveConnectorFlyout: React.FC<GoogleDriveConnectorFlyoutProp
       }
 
       // Call server to initiate OAuth
-      const response = await httpClient.post<{ requestId: string; connectorId: string; googleUrl: string }>(
+      const response = await httpClient.post<{ requestId: string; connectorId: string; authUrl: string }>(
         '/api/workplace_connectors/google/initiate',
       );
 
-      const google_url = response['googleUrl']
-      const requestId = response['requestId']
-      const connectorId = response['connectorId']
+      const google_url = response.authUrl;
+      const requestId = response.requestId;
+      const connectorId = response.connectorId;
 
       const oauthWindow = window.open(google_url, '_blank');
 
@@ -67,18 +67,18 @@ export const GoogleDriveConnectorFlyout: React.FC<GoogleDriveConnectorFlyoutProp
         try {
           if (oauthWindow?.closed) {
             clearInterval(pollInterval);
-            
+
               await httpClient.get('/api/workplace_connectors/oauth/complete', {
                 query: {
-                  request_id: requestId,
-                  connector_id: connectorId,
+                  requestId: requestId,
+                  connectorId: connectorId,
                 },
             });
               console.log('OAuth completed successfully');
               setIsLoading(false);
               onConnectionSuccess?.();
             }
-          
+
         } catch (err) {
           clearInterval(pollInterval);
           console.error('Failed to complete OAuth:', err);

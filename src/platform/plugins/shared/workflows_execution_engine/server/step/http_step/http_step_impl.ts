@@ -118,12 +118,38 @@ export class HttpStepImpl extends BaseAtomicNodeImplementation<HttpStep> {
 
       // Resolve headers secrets
       if (finalHeaders && typeof finalHeaders === 'object') {
+        // TEMP DEBUG: Log original headers before resolution
+        this.workflowLogger.logInfo(
+          `[HttpStep] DEBUG: Original headers before secret resolution: ${JSON.stringify(finalHeaders)}`,
+          {
+            workflow: { step_id: this.step.name },
+            event: { action: 'http_request', outcome: 'unknown' },
+            tags: ['http', 'debug'],
+          }
+        );
         const resolvedHeaders = await dependencies.secretResolver.resolveSecretsInObject(
           finalHeaders as unknown as Record<string, unknown>,
           savedObjectsClient,
           namespace
         );
         finalHeaders = resolvedHeaders as unknown as HttpHeaders;
+        // TEMP DEBUG: Log resolved headers (mask Authorization token)
+        const debugHeaders = { ...finalHeaders };
+        if (debugHeaders.Authorization) {
+          const authValue = String(debugHeaders.Authorization);
+          const preview = authValue.length > 30 
+            ? `${authValue.substring(0, 20)}...${authValue.substring(authValue.length - 10)}`
+            : authValue.substring(0, Math.min(20, authValue.length)) + '...';
+          debugHeaders.Authorization = `[MASKED: ${preview}]`;
+        }
+        this.workflowLogger.logInfo(
+          `[HttpStep] DEBUG: Resolved headers after secret resolution: ${JSON.stringify(debugHeaders)}`,
+          {
+            workflow: { step_id: this.step.name },
+            event: { action: 'http_request', outcome: 'unknown' },
+            tags: ['http', 'debug'],
+          }
+        );
       }
 
       // Resolve body secrets
