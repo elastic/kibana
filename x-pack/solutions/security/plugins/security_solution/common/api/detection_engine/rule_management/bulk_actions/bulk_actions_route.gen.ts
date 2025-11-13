@@ -19,6 +19,7 @@ import { BooleanFromString } from '@kbn/zod-helpers';
 
 import { RuleResponse } from '../../model/rule_schema/rule_schemas.gen';
 import {
+  AggregatedGapStatus,
   RuleActionGroup,
   RuleActionId,
   RuleActionParams,
@@ -134,7 +135,7 @@ Only valid when query property is undefined.
   /**
    * Gap status to filter rules with gaps by status (used together with gaps_range_*).
    */
-  gap_status: z.enum(['unfilled', 'in_progress', 'filled']).optional(),
+  gap_status: AggregatedGapStatus.optional(),
 });
 
 export type BulkDeleteRules = z.infer<typeof BulkDeleteRules>;
