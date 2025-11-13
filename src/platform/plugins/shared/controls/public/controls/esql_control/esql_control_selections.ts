@@ -118,10 +118,8 @@ export function initializeESQLControlSelections(
     .pipe(
       filter(() => controlType$.getValue() === EsqlControlType.VALUES_FROM_QUERY),
       filter(({ esqlVariables }) => {
-        // Only proceed if this is the initial fetch or if dependencies have actually changed
-        const variablesInParent = esqlVariables || [];
-
         const queryDependencies = getESQLQueryVariables(esqlQuery$.getValue());
+        const variablesInParent = esqlVariables || [];
 
         // Filter out this control's own variable
         const currentVariableName = variableName$.getValue();
@@ -236,6 +234,7 @@ export function initializeESQLControlSelections(
       if (lastSaved?.controlType) controlType$.next(lastSaved?.controlType);
       esqlQuery$.next(lastSaved?.esqlQuery ?? '');
       title$.next(lastSaved?.title);
+      previousESQLVariables = [];
     },
     getLatestState: () => {
       return {
