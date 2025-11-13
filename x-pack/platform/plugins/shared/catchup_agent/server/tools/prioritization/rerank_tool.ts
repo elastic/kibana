@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { ToolType } from '@kbn/onechat-common';
+import { ToolType, platformCoreTools } from '@kbn/onechat-common';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import { createErrorResult } from '@kbn/onechat-server';
@@ -117,7 +117,7 @@ The tool accepts an array of items with text content and uses a reranking model 
 - Prioritize Slack messages: query="important team updates", items=[messages with text fields]
 - Sort cases by urgency: query="urgent issues requiring attention", items=[cases with descriptions]`,
     schema: rerankSchema,
-    handler: async ({ items, query, limit = 10, inferenceId, textField }, { logger }) => {
+    handler: async ({ items, query, limit = 10, inferenceId, textField }, { logger, runner }) => {
       try {
         // Items is already normalized to an array by the schema transform
         // No need for additional extraction logic here
@@ -189,7 +189,10 @@ The tool accepts an array of items with text content and uses a reranking model 
               text: item[textFieldName], // Normalize to 'text' field for reranking
             };
           })
-          .filter((item) => item !== null);
+          .filter(
+            (item): item is Record<string, unknown> & { _id: string; text: unknown } =>
+              item !== null
+          );
 
         if (itemsWithText.length === 0) {
           return {
@@ -207,72 +210,192 @@ The tool accepts an array of items with text content and uses a reranking model 
           };
         }
 
-        // Build ES|QL query with RERANK
-        // Note: In practice, we'd need to index items first, but for simplicity,
-        // we'll use a different approach: create documents in memory and use ES|QL
-        // For now, we'll use a simpler scoring approach based on text similarity
+        // Create a temporary index for reranking
+        let tempIndex: string | null = null;
 
-        // Alternative approach: Use Elasticsearch's text similarity without full ES|QL RERANK
-        // This is a fallback that still demonstrates prioritization
-        const scoredItems = itemsWithText.map((item, itemIndex) => {
-          const text = (item.text as string) || '';
-          // Simple text matching score (in production, this would use the reranker)
-          const queryLower = query.toLowerCase();
-          const textLower = text.toLowerCase();
-          let score = 0;
-          const queryWords = queryLower.split(/\s+/);
-          for (const word of queryWords) {
-            if (textLower.includes(word)) {
-              score += 1;
-            }
-          }
-          // Boost score for exact phrase matches
-          if (textLower.includes(queryLower)) {
-            score += 5;
-          }
-          // Boost for items with higher priority indicators
-          if (item.severity === 'critical' || item.severity === 'high') {
-            score += 3;
-          }
-          if (item.mentions && Array.isArray(item.mentions)) {
-            score += item.mentions.length;
+        try {
+          tempIndex = `.catchup-rerank-${Date.now()}-${Math.random().toString(36).substring(7)}`;
+          // Create the temporary index
+          await esClient.indices.create({
+            index: tempIndex,
+            mappings: {
+              properties: {
+                text: { type: 'text' },
+              },
+            },
+            settings: {
+              number_of_shards: 1,
+              number_of_replicas: 0,
+            },
+          });
+
+          // Index items using bulk helper
+          const bulkResult = await esClient.helpers.bulk({
+            datasource: itemsWithText,
+            index: tempIndex,
+            onDocument: (doc) => {
+              const { _id, ...source } = doc as typeof doc & { _id: string };
+              return [{ index: { _id } }, source];
+            },
+            refresh: 'wait_for',
+          });
+
+          if (bulkResult.failed > 0) {
+            logger.warn(`Failed to index ${bulkResult.failed} items for reranking`);
           }
 
-          // Remove internal fields before returning
-          const { _id, text: _text, ...rest } = item;
-          return {
-            ...rest,
-            _rerank_score: score,
-            _original_index: itemIndex,
+          // Build ES|QL query with RERANK
+          // Escape single quotes in query for ES|QL (use single quotes for string literals)
+          const escapedQuery = query.replace(/'/g, "''");
+          const rerankWithClause = rerankInferenceId
+            ? `WITH '{"inference_id": "${rerankInferenceId}"}'`
+            : '';
+
+          const esqlQuery = `FROM ${tempIndex} | RERANK _rerank_score = '${escapedQuery}' ON text ${rerankWithClause} | SORT _rerank_score DESC | LIMIT ${limit}`;
+
+          logger.debug(`Executing ES|QL RERANK query: ${esqlQuery}`);
+
+          // Execute ES|QL query with RERANK using platform.core.execute_esql tool
+          const esqlResult = await runner.runTool({
+            toolId: platformCoreTools.executeEsql,
+            toolParams: {
+              query: esqlQuery,
+            },
+          });
+
+          // Extract tabular data from tool result
+          const tabularResult = esqlResult.results.find(
+            (r) => r.type === ToolResultType.tabularData
+          );
+          if (!tabularResult || !tabularResult.data) {
+            throw new Error('ES|QL query did not return tabular data');
+          }
+
+          const { columns, values } = tabularResult.data as {
+            columns: Array<{ name: string; type: string }>;
+            values: unknown[][];
           };
-        });
 
-        // Sort by score (descending) and take top N
-        const prioritized = scoredItems
-          .sort((a, b) => (b._rerank_score as number) - (a._rerank_score as number))
-          .slice(0, limit)
-          .map((item) => {
-            const { _rerank_score, _original_index, ...rest } = item;
+          // Find column indices
+          const scoreColIndex = columns.findIndex((col) => col.name === '_rerank_score');
+          const idColIndex = columns.findIndex((col) => col.name === '_id');
+
+          // Map ES|QL results back to original item format
+          const prioritized = values.map((row) => {
+            const rowObj: Record<string, unknown> = {};
+
+            // Reconstruct the original item by finding it by _id
+            const itemId = idColIndex >= 0 ? String(row[idColIndex]) : null;
+            const originalItem = itemId ? itemsWithText.find((item) => item._id === itemId) : null;
+
+            if (originalItem) {
+              // Start with original item, but remove internal fields
+              const { _id, text: _text, ...rest } = originalItem;
+              Object.assign(rowObj, rest);
+            }
+
+            // Add all columns from ES|QL response (except internal ones)
+            columns.forEach((col, idx) => {
+              if (col.name !== '_id' && col.name !== 'text') {
+                rowObj[col.name] = row[idx];
+              }
+            });
+
+            // Add relevance score
+            if (scoreColIndex >= 0) {
+              rowObj.relevance_score = row[scoreColIndex];
+            }
+
+            return rowObj;
+          });
+
+          return {
+            results: [
+              {
+                type: ToolResultType.other,
+                data: {
+                  prioritized_items: prioritized,
+                  total: prioritized.length,
+                  query,
+                  inference_id_used: rerankInferenceId || 'default',
+                },
+              },
+            ],
+          };
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          logger.error(`Error executing ES|QL RERANK: ${errorMessage}`);
+
+          // Fallback to simple text similarity if ES|QL RERANK fails
+          logger.warn('Falling back to text similarity scoring');
+
+          const scoredItems = itemsWithText.map((item, itemIndex) => {
+            const text = (item.text as string) || '';
+            const queryLower = query.toLowerCase();
+            const textLower = text.toLowerCase();
+            let score = 0;
+            const queryWords = queryLower.split(/\s+/);
+            for (const word of queryWords) {
+              if (textLower.includes(word)) {
+                score += 1;
+              }
+            }
+            if (textLower.includes(queryLower)) {
+              score += 5;
+            }
+            const severity = item.severity as string | undefined;
+            if (severity === 'critical' || severity === 'high') {
+              score += 3;
+            }
+            const mentions = item.mentions;
+            if (mentions && Array.isArray(mentions)) {
+              score += mentions.length;
+            }
+
+            const { _id, text: _text, ...rest } = item;
             return {
               ...rest,
-              relevance_score: _rerank_score,
+              _rerank_score: score,
+              _original_index: itemIndex,
             };
           });
 
-        return {
-          results: [
-            {
-              type: ToolResultType.other,
-              data: {
-                prioritized_items: prioritized,
-                total: prioritized.length,
-                query,
-                inference_id_used: rerankInferenceId,
-                note: 'Using text similarity scoring. For production, configure a rerank inference endpoint and use ES|QL RERANK command.',
+          const prioritized = scoredItems
+            .sort((a, b) => (b._rerank_score as number) - (a._rerank_score as number))
+            .slice(0, limit)
+            .map((item) => {
+              const { _rerank_score, _original_index, ...rest } = item;
+              return {
+                ...rest,
+                relevance_score: _rerank_score,
+              };
+            });
+
+          return {
+            results: [
+              {
+                type: ToolResultType.other,
+                data: {
+                  prioritized_items: prioritized,
+                  total: prioritized.length,
+                  query,
+                  inference_id_used: rerankInferenceId || 'fallback',
+                  note: 'ES|QL RERANK failed, using text similarity fallback',
+                },
               },
-            },
-          ],
-        };
+            ],
+          };
+        } finally {
+          // Clean up temporary index
+          if (tempIndex) {
+            try {
+              await esClient.indices.delete({ index: tempIndex }, { ignore: [404] });
+              logger.debug(`Cleaned up temporary index: ${tempIndex}`);
+            } catch (cleanupError) {
+              logger.warn(`Failed to delete temporary index ${tempIndex}: ${cleanupError}`);
+            }
+          }
+        }
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         logger.error(`Error in rerank tool: ${errorMessage}`);
