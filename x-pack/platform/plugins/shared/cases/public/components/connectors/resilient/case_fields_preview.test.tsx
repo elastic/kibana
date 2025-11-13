@@ -15,7 +15,7 @@ import { useGetFields } from './use_get_fields';
 import FieldsPreview from './case_fields_preview';
 
 import { renderWithTestingProviders } from '../../../common/mock';
-import { createQueryWithMarkup } from '../../../common/test_utils';
+import { tableMatchesExpectedContent } from '../../../common/test_utils';
 import { resilientFields } from './mocks';
 
 jest.mock('../../../common/lib/kibana');
@@ -78,6 +78,7 @@ describe('Resilient Fields: Preview', () => {
     incidentTypes: ['19', '21'],
     severityCode: '5',
     additionalFields: `{
+      "unknown_field": "some value",
       "customField1": "customValue1",
       "test_text": "some text",
       "test_text_area": "some textarea",
@@ -104,20 +105,23 @@ describe('Resilient Fields: Preview', () => {
   it('renders all fields correctly', () => {
     renderWithTestingProviders(<FieldsPreview connector={connector} fields={fields} />);
 
-    const getByTextWithMarkup = createQueryWithMarkup(screen.getByText);
+    const rows = screen.getAllByTestId('card-list-item-row');
+    const expectedContent = [
+      ['Incident types', 'Malware, Denial of Service'],
+      ['Severity', 'Medium'],
+      ['unknown_field', 'some value'],
+      ['Custom Field 1', 'customValue1'],
+      ['Test text', 'some text'],
+      ['Test textarea', 'some textarea'],
+      ['Test boolean', 'false'],
+      ['Test number', '1234'],
+      ['Test select', 'Option 2'],
+      ['Test multiselect', 'Option 3, Option 4'],
+      ['Test datepicker', 'February 13, 2009'],
+      ['Test datetimepicker', 'February 13, 2009 @ 23:31:30'],
+      ['Resolution summary', 'some resolution summary'],
+    ];
 
-    expect(getByTextWithMarkup('Incident types: Malware, Denial of Service')).toBeInTheDocument();
-    expect(getByTextWithMarkup('Severity: Medium')).toBeInTheDocument();
-    expect(getByTextWithMarkup('Test text: some text')).toBeInTheDocument();
-    expect(getByTextWithMarkup('Test textarea: some textarea')).toBeInTheDocument();
-    expect(getByTextWithMarkup('Test boolean: false')).toBeInTheDocument();
-    expect(getByTextWithMarkup('Test number: 1234')).toBeInTheDocument();
-    expect(getByTextWithMarkup('Test select: Option 2')).toBeInTheDocument();
-    expect(getByTextWithMarkup('Test multiselect: Option 3, Option 4')).toBeInTheDocument();
-    expect(getByTextWithMarkup('Test datepicker: February 13, 2009')).toBeInTheDocument();
-    expect(
-      getByTextWithMarkup('Test datetimepicker: February 13, 2009 @ 23:31:30')
-    ).toBeInTheDocument();
-    expect(getByTextWithMarkup('Resolution summary: some resolution summary')).toBeInTheDocument();
+    tableMatchesExpectedContent({ expectedContent, tableRows: rows });
   });
 });

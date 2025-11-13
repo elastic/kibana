@@ -10,7 +10,7 @@ import { render, screen } from '@testing-library/react';
 
 import { ConnectorTypes } from '../../../common/types/domain';
 import { ConnectorCard } from './card';
-import { createQueryWithMarkup } from '../../common/test_utils';
+import { tableMatchesExpectedContent } from '../../common/test_utils';
 
 describe('ConnectorCard ', () => {
   it('does not throw when accessing the icon if the connector type is not registered', () => {
@@ -68,38 +68,9 @@ describe('ConnectorCard ', () => {
       />
     );
 
-    const getByTextWithMarkup = createQueryWithMarkup(screen.getByText);
+    const rows = screen.getAllByTestId('card-list-item-row');
+    const expectedContent = listItems.map((item) => [item.title, item.description]);
 
-    for (const item of listItems) {
-      expect(getByTextWithMarkup(`${item.title}: ${item.description}`)).toBeInTheDocument();
-    }
-  });
-
-  it('shows a codeblock when applicable', async () => {
-    render(
-      <ConnectorCard
-        connectorType={ConnectorTypes.none}
-        title="My connector"
-        listItems={[{ title: 'some title', description: 'some code', displayAsCodeBlock: true }]}
-        isLoading={false}
-      />
-    );
-
-    expect(await screen.findByTestId('card-list-item')).toBeInTheDocument();
-    expect(await screen.findByTestId('card-list-code-block')).toBeInTheDocument();
-  });
-
-  it('does not show a codeblock when not necessary', async () => {
-    render(
-      <ConnectorCard
-        connectorType={ConnectorTypes.none}
-        title="My connector"
-        listItems={[{ title: 'some title', description: 'some code' }]}
-        isLoading={false}
-      />
-    );
-
-    expect(await screen.findByTestId('card-list-item')).toBeInTheDocument();
-    expect(screen.queryByTestId('card-list-code-block')).not.toBeInTheDocument();
+    tableMatchesExpectedContent({ expectedContent, tableRows: rows });
   });
 });

@@ -91,7 +91,7 @@ export const resilientFields: ResilientFieldMetadata[] = [
     read_only: false,
     values: [],
     required: null,
-    text: '',
+    text: 'Custom Field 1',
     internal: false,
     prefix: 'properties',
   },

@@ -68,7 +68,13 @@ const ResilientFieldsComponent: React.FunctionComponent<
   const severity = severityData?.data;
 
   const listItems = useMemo(() => {
-    const additionalFieldsParsed = additionalFields ? JSON.parse(additionalFields) : {};
+    let additionalFieldsParsed: Record<string, string> = {};
+    try {
+      additionalFieldsParsed = additionalFields ? JSON.parse(additionalFields) : {};
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Error parsing additional fields:', error, { additionalFields });
+    }
 
     return [
       ...(incidentTypes != null && incidentTypes.length > 0
