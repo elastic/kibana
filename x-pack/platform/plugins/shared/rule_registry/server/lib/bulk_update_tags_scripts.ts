@@ -11,6 +11,7 @@ export const ADD_TAGS_UPDATE_SCRIPT = `
   if (ctx._source['${ALERT_WORKFLOW_TAGS}'] == null) {
     ctx._source['${ALERT_WORKFLOW_TAGS}'] = new ArrayList();
   }
+
   for (item in params.add) {
     if (!ctx._source['${ALERT_WORKFLOW_TAGS}'].contains(item.trim())) {
       ctx._source['${ALERT_WORKFLOW_TAGS}'].add(item.trim());

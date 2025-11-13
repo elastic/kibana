@@ -26,3 +26,8 @@ export const MAX_ALERTS_PAGES = 100;
  * The maximum number of alerts to paginate
  */
 export const MAX_PAGINATED_ALERTS = 10000;
+
+/**
+ * The maximum number of alerts to paginate
+ */
+export const MAX_ALERT_IDS_PER_REQUEST = 1000;

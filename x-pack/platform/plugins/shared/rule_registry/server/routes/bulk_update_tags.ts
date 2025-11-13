@@ -12,6 +12,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidation } from './utils/route_validation';
 import type { RacRequestHandlerContext } from '../types';
 import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
+import { MAX_ALERT_IDS_PER_REQUEST } from '../alert_data_client/constants';
 
 export const bulkUpdateTagsRoute = (router: IRouter<RacRequestHandlerContext>) => {
   router.post(
@@ -55,15 +56,15 @@ export const bulkUpdateTagsRoute = (router: IRouter<RacRequestHandlerContext>) =
         const alertsClient = await racContext.getAlertsClient();
         const { query, alertIds, index, add, remove } = req.body;
 
-        if (alertIds != null && alertIds.length > 1000) {
+        if (alertIds && alertIds.length > MAX_ALERT_IDS_PER_REQUEST) {
           return response.badRequest({
             body: {
-              message: 'cannot use more than 1000 ids',
+              message: `Cannot use more than ${MAX_ALERT_IDS_PER_REQUEST} ids`,
             },
           });
         }
 
-        const updatedAlert = await alertsClient.bulkUpdateTags({
+        const res = await alertsClient.bulkUpdateTags({
           alertIds,
           add,
           remove,
@@ -71,13 +72,7 @@ export const bulkUpdateTagsRoute = (router: IRouter<RacRequestHandlerContext>) =
           index,
         });
 
-        if (updatedAlert == null) {
-          return response.notFound({
-            body: { message: `alerts with ids ${alertIds} and index ${index} not found` },
-          });
-        }
-
-        return response.ok({ body: { success: true, ...updatedAlert } });
+        return response.multiStatus({ body: res });
       } catch (exc) {
         const err = transformError(exc);
 
