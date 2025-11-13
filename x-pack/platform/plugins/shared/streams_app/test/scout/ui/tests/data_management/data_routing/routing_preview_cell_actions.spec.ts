@@ -39,7 +39,8 @@ test.describe(
 
       const cell = dataGrid
         .locator('[role="gridcell"][data-gridcell-column-id="severity_text"]')
-        .last();
+        .first();
+      await dataGrid.scrollIntoViewIfNeeded();
       await cell.scrollIntoViewIfNeeded();
 
       const cellValue = await cell.textContent();
@@ -64,7 +65,8 @@ test.describe(
 
       const cell = dataGrid
         .locator('[role="gridcell"][data-gridcell-column-id="severity_text"]')
-        .last();
+        .first();
+      await dataGrid.scrollIntoViewIfNeeded();
       await cell.scrollIntoViewIfNeeded();
 
       const cellValue = await cell.textContent();
@@ -102,7 +104,8 @@ test.describe(
       const dataGrid = page.getByTestId('streamsAppRoutingPreviewPanelWithResults');
       const cell = dataGrid
         .locator('[role="gridcell"][data-gridcell-column-id="severity_text"]')
-        .last();
+        .first();
+      await dataGrid.scrollIntoViewIfNeeded();
       await cell.scrollIntoViewIfNeeded();
 
       const cellValue = await cell.textContent();
