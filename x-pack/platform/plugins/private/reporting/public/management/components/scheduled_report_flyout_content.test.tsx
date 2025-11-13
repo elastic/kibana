@@ -271,6 +271,45 @@ describe('ScheduledReportFlyoutContent', () => {
     expect(screen.getByText('Sensitive information')).toBeInTheDocument();
   });
 
+  it('should not allow showing the Cc and Bcc fields when user is not reporting manager', async () => {
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        ...mockKibanaServices,
+        application: {
+          ...mockKibanaServices.application,
+          capabilities: {
+            ...mockKibanaServices.application.capabilities,
+            manageReporting: { show: false },
+          },
+        },
+      },
+    });
+
+    render(
+      <TestProviders>
+        <ScheduledReportFlyoutContent
+          apiClient={mockApiClient}
+          objectType={objectType}
+          sharingData={sharingData}
+          scheduledReport={scheduledReport}
+          availableReportTypes={availableFormats}
+          onClose={mockOnClose}
+        />
+      </TestProviders>
+    );
+
+    const toggle = await screen.findByText('Send by email');
+    await userEvent.click(toggle);
+
+    const emailField = await screen.findByTestId('emailRecipientsCombobox');
+    const emailInput = within(emailField).getByTestId('comboBoxSearchInput');
+    expect(emailInput).toBeDisabled();
+    expect(screen.queryByTestId('showCcBccButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('emailCcRecipientsCombobox')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('emailBccRecipientsCombobox')).not.toBeInTheDocument();
+    expect(screen.getByText('Sensitive information')).toBeInTheDocument();
+  });
+
   it('should show a warning callout when the notification email connector is missing', async () => {
     mockGetReportingHealth.mockResolvedValueOnce({
       isSufficientlySecure: true,

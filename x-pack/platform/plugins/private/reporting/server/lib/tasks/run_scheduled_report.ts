@@ -20,7 +20,7 @@ import { SCHEDULED_REPORT_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import type { PrepareJobResults } from './run_report';
 import { RunReportTask } from './run_report';
 import { ScheduledReport } from '../store/scheduled_report';
-import type { ScheduledReportType } from '../../types';
+import type { ScheduledReportTemplateVariables, ScheduledReportType } from '../../types';
 
 const MAX_ATTACHMENT_SIZE = 10 * 1024 * 1024; // 10mb
 
@@ -154,7 +154,7 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
             hasUserError: output.user_error,
             warnings: output.warnings,
           },
-        };
+        } satisfies ScheduledReportTemplateVariables;
         const subject = email.subject
           ? renderMustacheString(this.logger, email.subject, templateVariables, 'none')
           : `${title}-${runAt.toISOString()} scheduled report`;

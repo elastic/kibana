@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Moment } from 'moment';
 import moment from 'moment';
 import {
@@ -48,6 +48,11 @@ import {
   convertStringToMoment,
   convertMomentToString,
 } from '@kbn/response-ops-recurring-schedule-form/converters/moment';
+import {
+  AddMessageVariablesOptional,
+  templateActionVariable,
+} from '@kbn/triggers-actions-ui-plugin/public';
+import type { ActionVariable } from '@kbn/alerting-types';
 import { useGetUserProfileQuery } from '../hooks/use_get_user_profile_query';
 import { ResponsiveFormGroup } from './responsive_form_group';
 import { getReportParams } from '../report_params';
@@ -59,6 +64,7 @@ import type { ReportTypeData, ScheduledReport } from '../../types';
 import * as i18n from '../translations';
 import { SCHEDULED_REPORT_FORM_ID } from '../constants';
 import { getStartDateValidator } from '../validators/start_date_validator';
+import { scheduledReportMessageVariables } from '../schemas/scheduled_report_message_variables';
 
 const { emptyField } = fieldValidators;
 
@@ -80,6 +86,10 @@ export type FormData = Pick<
   | 'recurringSchedule'
   | 'sendByEmail'
   | 'emailRecipients'
+  | 'emailCcRecipients'
+  | 'emailBccRecipients'
+  | 'emailSubject'
+  | 'emailMessage'
   | 'optimizedForPrinting'
 >;
 
@@ -138,6 +148,7 @@ export const ScheduledReportFlyoutContent = ({
     http,
   });
   const { defaultTimezone } = useDefaultTimezone();
+  const [showCcBccFields, setShowCcBccFields] = useState(false);
   const schema = useMemo(
     () =>
       getScheduledReportFormSchema(
@@ -162,6 +173,10 @@ export const ScheduledReportFlyoutContent = ({
           optimizedForPrinting,
           sendByEmail,
           emailRecipients,
+          emailCcRecipients,
+          emailBccRecipients,
+          emailSubject,
+          emailMessage,
         } = formData;
         const rrule = convertToRRule({
           startDate,
@@ -181,7 +196,17 @@ export const ScheduledReportFlyoutContent = ({
             ...(reportTypeId === 'printablePdfV2' ? { optimizedForPrinting } : {}),
           }),
           schedule: { rrule: rrule as Rrule },
-          notification: sendByEmail ? { email: { to: emailRecipients } } : undefined,
+          notification: sendByEmail
+            ? {
+                email: {
+                  to: emailRecipients,
+                  cc: emailCcRecipients,
+                  bcc: emailBccRecipients,
+                  subject: emailSubject,
+                  message: emailMessage,
+                },
+              }
+            : undefined,
         });
         toasts.addSuccess({
           title: i18n.SCHEDULED_REPORT_FORM_SUCCESS_TOAST_TITLE,
@@ -203,12 +228,46 @@ export const ScheduledReportFlyoutContent = ({
       }
     },
   });
-  const [{ reportTypeId, startDate, timezone, sendByEmail }] = useFormData<FormData>({
-    form,
-    watch: ['reportTypeId', 'startDate', 'timezone', 'sendByEmail'],
-  });
+  const [{ reportTypeId, startDate, timezone, sendByEmail, emailSubject, emailMessage }] =
+    useFormData<FormData>({
+      form,
+      watch: [
+        'reportTypeId',
+        'startDate',
+        'timezone',
+        'sendByEmail',
+        'emailSubject',
+        'emailMessage',
+      ],
+    });
   const now = useMemo(() => moment().set({ second: 0, millisecond: 0 }), []);
   const defaultStartDateValue = useMemo(() => now.toISOString(), [now]);
+
+  const emailSubjectFieldRef = useRef<HTMLInputElement | null>(null);
+  const emailMessageFieldRef = useRef<HTMLTextAreaElement | null>(null);
+
+  const onSelectMessageVariable = useCallback(
+    (field: 'emailSubject' | 'emailMessage', variable: ActionVariable) => {
+      const templatedVar = templateActionVariable(variable);
+      const fieldElement =
+        field === 'emailSubject' ? emailSubjectFieldRef.current : emailMessageFieldRef.current;
+      if (!fieldElement) {
+        return;
+      }
+      const startPosition = fieldElement.selectionStart ?? 0;
+      const endPosition = fieldElement.selectionEnd ?? 0;
+      const targetValue = field === 'emailSubject' ? emailSubject : emailMessage;
+      const newValue =
+        (targetValue ?? '').substring(0, startPosition) +
+        templatedVar +
+        (targetValue ?? '').substring(endPosition, (targetValue ?? '').length);
+      form.setFieldValue(field, newValue);
+      setTimeout(() => {
+        fieldElement.focus();
+      }, 0);
+    },
+    [emailMessage, emailSubject, form]
+  );
 
   useEffect(() => {
     if (!readOnly && !hasManageReportingPrivilege && userProfile?.user.email) {
@@ -438,6 +497,17 @@ export const ScheduledReportFlyoutContent = ({
                               ? i18n.SCHEDULED_REPORT_FORM_EMAIL_RECIPIENTS_HINT
                               : i18n.SCHEDULED_REPORT_FORM_EMAIL_SELF_HINT
                             : undefined,
+                          labelAppend: hasManageReportingPrivilege && (
+                            <EuiButtonEmpty
+                              size="xs"
+                              data-test-subj="showCcBccButton"
+                              onClick={() => {
+                                setShowCcBccFields((old) => !old);
+                              }}
+                            >
+                              {i18n.SCHEDULED_REPORT_FORM_EMAIL_SHOW_CC_BCC_LABEL}
+                            </EuiButtonEmpty>
+                          ),
                           euiFieldProps: {
                             compressed: true,
                             fullWidth: true,
@@ -446,6 +516,87 @@ export const ScheduledReportFlyoutContent = ({
                           },
                         }}
                       />
+                      {hasManageReportingPrivilege && showCcBccFields && (
+                        <>
+                          <FormField
+                            path="emailCcRecipients"
+                            componentProps={{
+                              compressed: true,
+                              fullWidth: true,
+                              euiFieldProps: {
+                                compressed: true,
+                                fullWidth: true,
+                                isDisabled: readOnly,
+                                'data-test-subj': 'emailCcRecipientsCombobox',
+                              },
+                            }}
+                          />
+                          <FormField
+                            path="emailBccRecipients"
+                            componentProps={{
+                              compressed: true,
+                              fullWidth: true,
+                              euiFieldProps: {
+                                compressed: true,
+                                fullWidth: true,
+                                isDisabled: readOnly,
+                                'data-test-subj': 'emailBccRecipientsCombobox',
+                              },
+                            }}
+                          />
+                        </>
+                      )}
+
+                      <FormField
+                        path="emailSubject"
+                        componentProps={{
+                          compressed: true,
+                          fullWidth: true,
+                          labelAppend: (
+                            <AddMessageVariablesOptional
+                              isOptionalField
+                              messageVariables={scheduledReportMessageVariables}
+                              onSelectEventHandler={(variable) =>
+                                onSelectMessageVariable('emailSubject', variable)
+                              }
+                              paramsProperty="emailSubject"
+                            />
+                          ),
+                          euiFieldProps: {
+                            inputRef: emailSubjectFieldRef,
+                            compressed: true,
+                            fullWidth: true,
+                            isDisabled: readOnly,
+                            'data-test-subj': 'emailSubjectInput',
+                          },
+                        }}
+                      />
+
+                      <FormField
+                        path="emailMessage"
+                        componentProps={{
+                          compressed: true,
+                          fullWidth: true,
+                          labelAppend: (
+                            <AddMessageVariablesOptional
+                              isOptionalField
+                              messageVariables={scheduledReportMessageVariables}
+                              onSelectEventHandler={(variable) =>
+                                onSelectMessageVariable('emailMessage', variable)
+                              }
+                              paramsProperty="emailMessage"
+                            />
+                          ),
+                          euiFieldProps: {
+                            inputRef: emailMessageFieldRef,
+                            compressed: true,
+                            fullWidth: true,
+                            isDisabled: readOnly,
+                            'data-test-subj': 'emailMessageTextArea',
+                          },
+                        }}
+                      />
+
                       {!readOnly && (
                         <EuiCallOut
                           announceOnMount
