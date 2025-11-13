@@ -344,22 +344,35 @@ export class WorkflowsExecutionEnginePlugin
       };
       await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
 
-      await runWorkflow({
-        workflowRunId: workflowExecution.id!,
-        spaceId: workflowExecution.spaceId!,
-        workflowExecutionRepository,
-        stepExecutionRepository,
-        logsRepository,
-        taskAbortController: new AbortController(), // TODO: We need to think how to pass this properly from outer task
-        coreStart,
-        esClient,
-        actions: plugins.actions,
-        taskManager: plugins.taskManager,
-        logger: this.logger,
-        config: this.config,
-        fakeRequest: request, // will be undefined if not available
-        dependencies,
-      });
+      const taskInstance = {
+        id: `workflow:${workflowExecution.id}:${context.triggeredBy}`,
+        taskType: 'workflow:run',
+        params: {
+          workflowRunId: workflowExecution.id,
+          spaceId: workflowExecution.spaceId,
+        } as StartWorkflowExecutionParams,
+        state: {
+          lastRunAt: null,
+          lastRunStatus: null,
+          lastRunError: null,
+        },
+        scope: ['workflows'],
+        enabled: true,
+      };
+
+      // Use Task Manager's first-class API key support by passing the request
+      // Task Manager will automatically create and manage the API key
+      if (request) {
+        // Debug: Log the user info from the original request
+        this.logger.debug(
+          `Scheduling workflow task with user context for workflow ${workflow.id}`
+        );
+        await plugins.taskManager.schedule(taskInstance, { request });
+      } else {
+        this.logger.debug(`Scheduling workflow task without user context`);
+        await plugins.taskManager.schedule(taskInstance);
+      }
+      
       return {
         workflowExecutionId: workflowExecution.id!,
       };
