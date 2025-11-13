@@ -140,9 +140,9 @@
           },
           ", \"id\">, disabled: boolean | undefined, negate: boolean | undefined, alias: string | null | undefined, store: ",
           {
-            "pluginId": "@kbn/es-query",
+            "pluginId": "@kbn/es-query-constants",
             "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
+            "docId": "kibKbnEsQueryConstantsPluginApi",
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
@@ -283,9 +283,9 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "@kbn/es-query",
+                "pluginId": "@kbn/es-query-constants",
                 "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
+                "docId": "kibKbnEsQueryConstantsPluginApi",
                 "section": "def-common.FilterStateStore",
                 "text": "FilterStateStore"
               }
@@ -313,9 +313,9 @@
           "QueryDslQueryContainer",
           ", disabled: boolean, negate: boolean, alias: string | null, store: ",
           {
-            "pluginId": "@kbn/es-query",
+            "pluginId": "@kbn/es-query-constants",
             "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
+            "docId": "kibKbnEsQueryConstantsPluginApi",
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
@@ -416,9 +416,9 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "@kbn/es-query",
+                "pluginId": "@kbn/es-query-constants",
                 "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
+                "docId": "kibKbnEsQueryConstantsPluginApi",
                 "section": "def-common.FilterStateStore",
                 "text": "FilterStateStore"
               }
@@ -790,9 +790,9 @@
           },
           ", alias: string | null, store: ",
           {
-            "pluginId": "@kbn/es-query",
+            "pluginId": "@kbn/es-query-constants",
             "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
+            "docId": "kibKbnEsQueryConstantsPluginApi",
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
@@ -955,9 +955,9 @@
             ],
             "signature": [
               {
-                "pluginId": "@kbn/es-query",
+                "pluginId": "@kbn/es-query-constants",
                 "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
+                "docId": "kibKbnEsQueryConstantsPluginApi",
                 "section": "def-common.FilterStateStore",
                 "text": "FilterStateStore"
               },
@@ -4335,9 +4335,9 @@
           "FilterMetaParams",
           " | undefined; value?: string | undefined; }; $state?: { store: ",
           {
-            "pluginId": "@kbn/es-query",
+            "pluginId": "@kbn/es-query-constants",
             "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
+            "docId": "kibKbnEsQueryConstantsPluginApi",
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
@@ -4396,9 +4396,9 @@
           "FilterMetaParams",
           " | undefined; value?: string | undefined; }; $state?: { store: ",
           {
-            "pluginId": "@kbn/es-query",
+            "pluginId": "@kbn/es-query-constants",
             "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
+            "docId": "kibKbnEsQueryConstantsPluginApi",
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
@@ -4455,9 +4455,9 @@
           },
           ") => { $state: { store: ",
           {
-            "pluginId": "@kbn/es-query",
+            "pluginId": "@kbn/es-query-constants",
             "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
+            "docId": "kibKbnEsQueryConstantsPluginApi",
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
@@ -5355,6 +5355,20 @@
             "path": "src/platform/packages/shared/kbn-es-query/src/expressions/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.ExecutionContextSearch.projectRouting",
+            "type": "string",
+            "tags": [],
+            "label": "projectRouting",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-es-query/src/expressions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5936,7 +5950,7 @@
         "description": [
           "\n  Filter,\nAn enum to denote whether a filter is specific to an application's context or whether it should be applied globally."
         ],
-        "path": "src/platform/packages/shared/kbn-es-query/src/filters/build_filters/types.ts",
+        "path": "src/platform/packages/shared/kbn-es-query-constants/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5968,9 +5982,9 @@
         "signature": [
           "{ $state?: { store: ",
           {
-            "pluginId": "@kbn/es-query",
+            "pluginId": "@kbn/es-query-constants",
             "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
+            "docId": "kibKbnEsQueryConstantsPluginApi",
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
@@ -6164,9 +6178,9 @@
         "signature": [
           "{ $state?: { store: ",
           {
-            "pluginId": "@kbn/es-query",
+            "pluginId": "@kbn/es-query-constants",
             "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
+            "docId": "kibKbnEsQueryConstantsPluginApi",
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
@@ -6297,6 +6311,23 @@
           "; }"
         ],
         "path": "src/platform/packages/shared/kbn-es-query/src/filters/build_filters/phrases_filter.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-query",
+        "id": "def-common.ProjectRouting",
+        "type": "Type",
+        "tags": [],
+        "label": "ProjectRouting",
+        "description": [
+          "\nProject routing configuration for cross-project search (CPS).\n\nUsed in serverless environments to control whether searches are scoped to a single project or span multiple projects.\n\nExamples:\n- undefined - Search across all projects (default)\n- '_alias:_origin' - Search only in the current project\n"
+        ],
+        "signature": [
+          "string | undefined"
+        ],
+        "path": "src/platform/packages/shared/kbn-es-query/src/project_routing/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

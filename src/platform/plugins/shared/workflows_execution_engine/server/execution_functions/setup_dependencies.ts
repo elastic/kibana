@@ -11,13 +11,12 @@ import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/act
 import type { CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { EsWorkflowExecution, WorkflowSettings } from '@kbn/workflows';
-
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 
 import { ConnectorExecutor } from '../connector_executor';
 import { UrlValidator } from '../lib/url_validator';
-import type { LogsRepository } from '../repositories/logs_repository/logs_repository';
+import type { LogsRepository } from '../repositories/logs_repository';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import { NodesFactory } from '../step/nodes_factory';

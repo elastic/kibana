@@ -37,6 +37,7 @@ export {
   ASSETS_SAVED_OBJECT_TYPE,
   MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
   UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
+  CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
   // Fleet server index
   FLEET_SERVER_ARTIFACTS_INDEX,
   AGENTS_INDEX,
@@ -125,6 +126,10 @@ export type {
   BulkGetPackagePoliciesResponse,
   BulkGetAgentPoliciesResponse,
   GetBulkAssetsResponse,
+  CreateAgentlessPolicyRequest,
+  CreateAgentlessPolicyResponse,
+  DeleteAgentlessPolicyRequest,
+  DeleteAgentlessPolicyResponse,
   // Models
   Agent,
   AgentStatus,

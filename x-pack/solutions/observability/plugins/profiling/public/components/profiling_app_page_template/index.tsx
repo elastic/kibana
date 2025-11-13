@@ -82,9 +82,7 @@ export function ProfilingAppPageTemplate({
         ],
         pageTitle: (
           <EuiFlexGroup gutterSize="s" alignItems="baseline">
-            <EuiFlexItem grow={false}>
-              <h1>{pageTitle}</h1>
-            </EuiFlexItem>
+            <EuiFlexItem grow={false}>{pageTitle}</EuiFlexItem>
             {showBetaBadge && (
               <EuiFlexItem grow={false}>
                 <EuiBetaBadge

@@ -11,6 +11,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { AutoSizer, WindowScroller } from 'react-virtualized';
 import type { ListChildComponentProps } from 'react-window';
 import { VariableSizeList as List, areEqual } from 'react-window';
+import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
 import type { IWaterfallGetRelatedErrorsHref } from '../../../../common/waterfall/typings';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
 import { TimelineAxisContainer, VerticalLinesContainer } from '../charts/timeline';
@@ -169,7 +170,12 @@ function TraceTree() {
   );
 
   return (
-    <WindowScroller onScroll={onScroll} scrollElement={scrollElement}>
+    <WindowScroller
+      onScroll={onScroll}
+      scrollElement={
+        scrollElement ?? document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID) ?? undefined
+      }
+    >
       {({ registerChild }) => (
         <AutoSizer disableHeight>
           {({ width }) => (
