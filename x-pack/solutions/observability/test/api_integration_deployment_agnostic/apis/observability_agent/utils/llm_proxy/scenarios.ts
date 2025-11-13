@@ -60,34 +60,16 @@ function interceptSelectRelevantAlertFields({
   });
 }
 
-function mockAssistantHandover(llmProxy: LlmProxy, reply: string = 'handover') {
-  void llmProxy.interceptors.userMessage({
-    name: 'handover-to-answer',
-    when: ({ messages }) => {
-      // Match against the most recent assistant and user messages in this request
-      const lastAssistant = [...messages].reverse().find((m) => m.role === 'assistant');
-      const lastUser = [...messages].reverse().find((m) => m.role === 'user');
-      const assistantMsg = lastAssistant?.content as string;
-      const userMsg = lastUser?.content as string;
-      return (
-        typeof assistantMsg === 'string' &&
-        assistantMsg.includes('[researcher agent] Finished the research step. Handover') &&
-        typeof userMsg === 'string' &&
-        userMsg.startsWith('Ack. forwarding to answering agent')
-      );
-    },
-    response: reply,
-  });
-}
-
 export function setupObservabilityAlertsToolThenAnswer({
   llmProxy,
+  toolName,
   toolArg,
   title = MOCKED_TITLE,
   fieldIds = [],
   finalResponse = LLM_PROXY_FINAL_MESSAGE,
 }: {
   llmProxy: LlmProxy;
+  toolName: string;
   toolArg: Record<string, unknown>;
   title?: string;
   fieldIds?: string[];
@@ -97,7 +79,7 @@ export function setupObservabilityAlertsToolThenAnswer({
 
   mockAgentToolCall({
     llmProxy,
-    toolName: 'observability_get_alerts',
+    toolName,
     toolArg,
   });
 

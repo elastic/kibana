@@ -118,6 +118,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         setupObservabilityAlertsToolThenAnswer({
           llmProxy,
+          toolName: LLM_EXPOSED_TOOL_NAME_FOR_GET_ALERTS,
           toolArg: {
             start: 'now-100h',
             end: 'now',
@@ -127,7 +128,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           fieldIds: defaultFields,
         });
 
-        const body = await agentBuilderApiClient.converse({
+        await agentBuilderApiClient.converse({
           input: USER_PROMPT,
           connector_id: connectorId,
           agent_id: OBSERVABILITY_AGENT_ID,
@@ -140,13 +141,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .reverse()
           .find((r) => r.requestBody?.messages?.some((m: any) => m.role === 'tool'));
 
-        const toolMessages = toolRequest.requestBody.messages;
-        const toolResponseMessage = [...toolMessages]
-          .reverse()
-          .find((m: any) => m.role === 'tool')!;
-        toolResponseContent = JSON.parse(toolResponseMessage.content as string) as {
-          results: ToolResult[];
-        };
+        const toolMessages = toolRequest?.requestBody?.messages;
+        if (toolMessages) {
+          const toolResponseMessage = [...toolMessages]
+            .reverse()
+            .find((m: any) => m.role === 'tool')!;
+          toolResponseContent = JSON.parse(toolResponseMessage.content as string) as {
+            results: ToolResult[];
+          };
+        }
       });
 
       after(async () => {
