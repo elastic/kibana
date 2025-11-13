@@ -226,8 +226,9 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       });
 
       it('changes link text on hover when failure store is not enabled', async () => {
-        const linkSelector = 'datasetQualitySetFailureStoreLink';
-        const links = await testSubjects.findAll(linkSelector);
+        const links = await testSubjects.findAll(
+          PageObjects.datasetQuality.testSubjectSelectors.enableFailureStoreFromTableButton
+        );
         expect(links.length).to.be.greaterThan(0);
         const link = links[links.length - 1];
 
@@ -241,6 +242,32 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
         const table = await PageObjects.datasetQuality.getDatasetsTable();
         await table.moveMouseTo();
+      });
+
+      it('enables failure store through modal and removes link from table', async () => {
+        const {
+          editFailureStoreModal,
+          failureStoreModalSaveButton,
+          enableFailureStoreToggle,
+          enableFailureStoreFromTableButton,
+        } = PageObjects.datasetQuality.testSubjectSelectors;
+
+        const originalLinks = await testSubjects.findAll(enableFailureStoreFromTableButton);
+        expect(originalLinks.length).to.be.greaterThan(0);
+
+        const link = originalLinks[0];
+        await link.click();
+
+        await testSubjects.existOrFail(editFailureStoreModal);
+
+        const saveModalButton = await testSubjects.find(failureStoreModalSaveButton);
+        await testSubjects.click(enableFailureStoreToggle);
+        expect(await saveModalButton.isEnabled()).to.be(true);
+        await testSubjects.click(failureStoreModalSaveButton);
+        await testSubjects.missingOrFail(editFailureStoreModal);
+
+        const updatedLinks = await testSubjects.findAll(enableFailureStoreFromTableButton);
+        expect(updatedLinks.length).to.be.lessThan(originalLinks.length);
       });
     });
   });
