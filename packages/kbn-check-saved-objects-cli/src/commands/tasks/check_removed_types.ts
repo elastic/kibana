@@ -9,11 +9,10 @@
 
 import type { ListrTask } from 'listr2';
 import type { Task, TaskContext } from '../types';
-import { fileToJson } from '../../util/json';
-import { REMOVED_TYPES_JSON_PATH } from '../../migrations/removed_types/constants';
 import {
   detectConflictsWithRemovedTypes,
-  detectRemovedTypes,
+  detectNewRemovedTypes,
+  getRemovedTypes,
   updateRemovedTypes,
 } from '../../migrations/removed_types';
 
@@ -22,20 +21,20 @@ export const checkRemovedTypes: Task = async (ctx, task) => {
     {
       title: 'Detecting conflicts with removed types',
       task: async () => {
-        ctx.currentRemovedTypes = (await fileToJson(REMOVED_TYPES_JSON_PATH)) as string[];
+        ctx.currentRemovedTypes = await getRemovedTypes();
         await detectConflictsWithRemovedTypes(ctx.to!, ctx.currentRemovedTypes);
       },
     },
     {
       title: `Detecting new removed types`,
       task: () => {
-        ctx.newRemovedTypes = detectRemovedTypes(ctx.from!, ctx.to!, ctx.currentRemovedTypes);
+        ctx.newRemovedTypes = detectNewRemovedTypes(ctx.from!, ctx.to!, ctx.currentRemovedTypes);
       },
     },
     {
       title: `Updating removed types`,
       task: async () => {
-        await updateRemovedTypes(ctx.newRemovedTypes!, ctx.currentRemovedTypes, ctx.fix);
+        await updateRemovedTypes(ctx.newRemovedTypes, ctx.currentRemovedTypes, ctx.fix);
       },
       skip: () => ctx.newRemovedTypes.length === 0,
     },

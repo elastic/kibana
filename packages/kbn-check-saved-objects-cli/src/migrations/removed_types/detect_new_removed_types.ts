@@ -13,7 +13,7 @@ import type { MigrationSnapshot } from '../../types';
  * Detects for new removed types by comparing two snapshots and identifying
  * types that exist in 'from' but not in 'to' and not already in removed_types.json
  */
-export function detectRemovedTypes(
+export function detectNewRemovedTypes(
   from: MigrationSnapshot,
   to: MigrationSnapshot,
   currentRemovedTypes: string[]

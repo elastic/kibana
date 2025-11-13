@@ -11,19 +11,22 @@ import { jsonToFile } from '../../util/json';
 import { REMOVED_TYPES_JSON_PATH } from './constants';
 
 /**
- * Updates the removed_types.json file by adding new removed types
+ * Updates the removed_types.json file by adding new removed types.
+ * Always throw an error to fail the check either to prompt for --fix or to indicate the file was updated.
  */
 export async function updateRemovedTypes(
   removedTypes: string[],
   currentRemovedTypes: string[],
   fix: boolean
 ) {
-  if (!fix) {
-    throw new Error(
-      `❌ Removed types detected, but fix flag was not provided. Please run with --fix to update removed_types.json.`
-    );
+  if (fix) {
+    const allTypes = [...currentRemovedTypes, ...removedTypes].sort();
+    await jsonToFile(REMOVED_TYPES_JSON_PATH, allTypes);
   }
 
-  const allTypes = [...currentRemovedTypes, ...removedTypes].sort();
-  await jsonToFile(REMOVED_TYPES_JSON_PATH, allTypes);
+  const errorMessage = fix
+    ? `❌ The following SO types are no longer registered: '${removedTypes.join(', ')}'. Updated 'removed_types.json' to prevent the same names from being reused in the future.`
+    : `❌ The following SO types are no longer registered: '${removedTypes.join(', ')}'. Please run with --fix to update 'removed_types.json'.`;
+
+  throw new Error(errorMessage);
 }
