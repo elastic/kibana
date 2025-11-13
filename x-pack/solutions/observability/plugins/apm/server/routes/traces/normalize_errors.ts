@@ -12,10 +12,7 @@ export const normalizeErrors = (errors: UnifiedError[]): Error[] =>
   errors.map(
     ({ error, timestamp, eventName }): Error => ({
       eventName,
-      error: {
-        ...error,
-        exception: Array.isArray(error?.exception) ? error.exception[0] : error?.exception,
-      },
+      error,
       timestamp,
     })
   );

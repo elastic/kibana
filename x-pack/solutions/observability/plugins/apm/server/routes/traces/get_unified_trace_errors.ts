@@ -12,20 +12,25 @@ import type { FlattenedApmEvent } from '@kbn/apm-data-access-plugin/server/utils
 import {
   EXCEPTION_MESSAGE,
   EXCEPTION_TYPE,
+  ID,
   SPAN_ID,
   TRACE_ID,
+  TRANSACTION_ID,
   OTEL_EVENT_NAME,
   TIMESTAMP_US,
   PROCESSOR_EVENT,
-  ID,
   ERROR_LOG_LEVEL,
   ERROR_EXC_MESSAGE,
   ERROR_EXC_TYPE,
-  TRANSACTION_ID,
+  ERROR_EXC_HANDLED,
+  ERROR_LOG_MESSAGE,
+  ERROR_GROUP_ID,
+  ERROR_CULPRIT,
 } from '../../../common/es_fields/apm';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import type { LogsClient } from '../../lib/helpers/create_es_client/create_logs_client';
 import type { TimestampUs } from '../../../typings/es_schemas/raw/fields/timestamp_us';
+import type { Exception } from '../../../typings/es_schemas/raw/error_raw';
 import { ApmDocumentType } from '../../../common/document_type';
 import { RollupInterval } from '../../../common/rollup';
 
@@ -64,11 +69,18 @@ export async function getUnifiedTraceErrors({
   };
 }
 
-export const requiredApmFields = asMutableArray([TIMESTAMP_US, PROCESSOR_EVENT, ID] as const);
+export const requiredApmFields = asMutableArray([
+  TIMESTAMP_US,
+  PROCESSOR_EVENT,
+  ID,
+  ERROR_GROUP_ID,
+] as const);
 export const optionalApmFields = asMutableArray([
   TRANSACTION_ID,
   SPAN_ID,
+  ERROR_CULPRIT,
   ERROR_EXC_MESSAGE,
+  ERROR_EXC_HANDLED,
   ERROR_EXC_TYPE,
 ] as const);
 
@@ -85,9 +97,16 @@ const excludedLogLevels = ['debug', 'info', 'warning'];
 export interface UnifiedError {
   id: string;
   spanId: string;
-  timestamp: TimestampUs | undefined;
-  eventName: string | undefined;
-  error: { exception: { type: string | undefined; message: string | undefined } };
+  timestamp?: TimestampUs;
+  eventName?: string;
+  error: {
+    exception?: Exception;
+    grouping_key?: string;
+    culprit?: string;
+    log?: {
+      message: string;
+    };
+  };
 }
 
 async function getUnifiedApmTraceError({
@@ -125,7 +144,7 @@ async function getUnifiedApmTraceError({
       },
     },
     fields: [...requiredApmFields, ...optionalApmFields],
-    _source: [ERROR_EXC_MESSAGE, ERROR_EXC_TYPE],
+    _source: [ERROR_LOG_MESSAGE, ERROR_EXC_MESSAGE, ERROR_EXC_HANDLED, ERROR_EXC_TYPE],
   });
 
   return response.hits.hits
@@ -141,17 +160,19 @@ async function getUnifiedApmTraceError({
         return undefined;
       }
 
-      const exceptionSource = errorSource?.error.exception?.[0];
-
       const error: UnifiedError = {
         id: event[ID],
         spanId,
-        eventName: undefined,
         timestamp: { us: event[TIMESTAMP_US] },
         error: {
-          exception: exceptionSource
-            ? { type: exceptionSource.type, message: exceptionSource.message }
-            : { type: event[ERROR_EXC_TYPE], message: event[ERROR_EXC_MESSAGE] },
+          grouping_key: event[ERROR_GROUP_ID],
+          log: errorSource?.error.log,
+          culprit: event[ERROR_CULPRIT],
+          exception: errorSource?.error.exception?.[0] ?? {
+            type: event[ERROR_EXC_TYPE],
+            message: event[ERROR_EXC_MESSAGE],
+            handled: event[ERROR_EXC_HANDLED],
+          },
         },
       };
 
@@ -203,7 +224,7 @@ async function getUnprocessedOtelErrors({
 
       const timestamp = event[TIMESTAMP_US];
 
-      return {
+      const error: UnifiedError = {
         id: event[ID],
         spanId: event[SPAN_ID],
         timestamp: timestamp != null ? { us: timestamp } : undefined,
@@ -214,7 +235,9 @@ async function getUnprocessedOtelErrors({
             message: event[EXCEPTION_MESSAGE],
           },
         },
-      } satisfies UnifiedError;
+      };
+
+      return error;
     })
     .filter((doc): doc is UnifiedError => !!doc);
 }
