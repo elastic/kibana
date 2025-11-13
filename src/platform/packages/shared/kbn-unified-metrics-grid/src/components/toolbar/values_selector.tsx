@@ -36,7 +36,6 @@ export interface ValuesFilterProps {
   indices?: string[];
   disabled?: boolean;
   timeRange: TimeRange;
-
   fullWidth?: boolean;
   onChange: (values: string[]) => void;
   onClear: () => void;
@@ -61,17 +60,22 @@ export const ValuesSelector = ({
     from: timeRange.from,
     to: timeRange.to,
   });
+
+  const groupedValues = useMemo(() => {
+    const result = new Map<string, Array<string>>();
+    values.forEach(({ value, field }) => {
+      const arr = result.get(field) ?? [];
+      arr.push(value);
+      result.set(field, arr);
+    });
+
+    return result;
+  }, [values]);
+
   // Convert values to EuiSelectable options with group labels
   const options: SelectableEntry[] = useMemo(() => {
-    const groupedValues = new Map<string, string[]>();
     const selectedSet = new Set(selectedValues);
     const isAtMaxLimit = selectedValues.length >= MAX_VALUES_SELECTIONS;
-
-    values.forEach(({ value, field }) => {
-      const arr = groupedValues.get(field) ?? [];
-      arr.push(value);
-      groupedValues.set(field, arr);
-    });
 
     return Array.from(groupedValues.entries()).flatMap<SelectableEntry>(([field, fieldValues]) => [
       { label: field, isGroupLabel: true, value: field },
@@ -89,13 +93,13 @@ export const ValuesSelector = ({
         };
       }),
     ]);
-  }, [values, selectedValues]);
+  }, [groupedValues, selectedValues]);
 
   const handleChange = useCallback(
     (chosenOption?: SelectableEntry[]) => {
       const newSelectedValues = chosenOption
         ?.filter((option) => !option.isGroupLabel && option.key)
-        .map((option) => option.key!);
+        .map((option: SelectableEntry) => option.key!);
 
       // Enforce the maximum limit
       const limitedSelection = (newSelectedValues ?? []).slice(0, MAX_VALUES_SELECTIONS);

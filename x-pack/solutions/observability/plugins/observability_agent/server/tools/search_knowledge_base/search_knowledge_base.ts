@@ -35,7 +35,7 @@ enum KnowledgeBaseType {
   Contextual = 'contextual',
 }
 
-interface KnowledgeBaseEntry {
+export interface KnowledgeBaseEntry {
   '@timestamp': string;
   id: string;
   title?: string;

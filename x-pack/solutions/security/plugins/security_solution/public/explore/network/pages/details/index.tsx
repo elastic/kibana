@@ -20,8 +20,8 @@ import { AlertsByStatus } from '../../../../overview/components/detection_respon
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { LastEventIndexKey } from '../../../../../common/search_strategy';
 import type { FlowTargetSourceDest } from '../../../../../common/search_strategy';
+import { LastEventIndexKey } from '../../../../../common/search_strategy';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { FiltersGlobal } from '../../../../common/components/filters_global';
 import { HeaderPage } from '../../../../common/components/header_page';
@@ -36,7 +36,7 @@ import { IpOverview } from '../../components/details';
 import { SiemSearchBar } from '../../../../common/components/search_bar';
 import { PageLoader } from '../../../../common/components/page_loader';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
-import { useNetworkDetails, ID } from '../../containers/details';
+import { ID, useNetworkDetails } from '../../containers/details';
 import { useKibana } from '../../../../common/lib/kibana';
 import { decodeIpv6 } from '../../../../common/lib/helpers';
 import { inputsSelectors } from '../../../../common/store';
@@ -58,8 +58,8 @@ import { navTabsNetworkDetails } from './nav_tabs';
 import { NetworkDetailsTabs } from './details_tabs';
 import { useInstalledSecurityJobNameById } from '../../../../common/components/ml/hooks/use_installed_security_jobs';
 import {
-  SecurityCellActions,
   CellActionsMode,
+  SecurityCellActions,
   SecurityCellActionsTrigger,
 } from '../../../../common/components/cell_actions';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
@@ -114,7 +114,7 @@ const NetworkDetailsComponent: React.FC = () => {
   const {
     indicesExist: oldIndicesExist,
     selectedPatterns: oldSelectedPatterns,
-    sourcererDataView: oldSourcererDataView,
+    sourcererDataView: oldSourcererDataViewSpec,
   } = useSourcererDataView();
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
@@ -138,7 +138,7 @@ const NetworkDetailsComponent: React.FC = () => {
         buildEsQuery(
           newDataViewPickerEnabled
             ? experimentalDataView
-            : dataViewSpecToViewBase(oldSourcererDataView),
+            : dataViewSpecToViewBase(oldSourcererDataViewSpec),
           [query],
           [...networkDetailsFilter, ...globalFilters],
           getEsQueryConfig(uiSettings)
@@ -152,7 +152,7 @@ const NetworkDetailsComponent: React.FC = () => {
     globalFilters,
     networkDetailsFilter,
     newDataViewPickerEnabled,
-    oldSourcererDataView,
+    oldSourcererDataViewSpec,
     query,
     uiSettings,
   ]);
@@ -201,8 +201,8 @@ const NetworkDetailsComponent: React.FC = () => {
   const indexPattern = useMemo(() => {
     return newDataViewPickerEnabled
       ? experimentalDataView || { title: '', fields: [] }
-      : dataViewSpecToViewBase(oldSourcererDataView);
-  }, [experimentalDataView, newDataViewPickerEnabled, oldSourcererDataView]);
+      : dataViewSpecToViewBase(oldSourcererDataViewSpec);
+  }, [experimentalDataView, newDataViewPickerEnabled, oldSourcererDataViewSpec]);
 
   if (newDataViewPickerEnabled && status === 'pristine') {
     return <PageLoader />;
@@ -214,10 +214,9 @@ const NetworkDetailsComponent: React.FC = () => {
         <>
           <FiltersGlobal>
             <SiemSearchBar
-              sourcererDataView={
-                newDataViewPickerEnabled ? experimentalDataView : oldSourcererDataView
-              }
+              dataView={experimentalDataView}
               id={InputsModelId.global}
+              sourcererDataViewSpec={oldSourcererDataViewSpec} // TODO remove when we remove the newDataViewPickerEnabled feature flag
             />
           </FiltersGlobal>
 

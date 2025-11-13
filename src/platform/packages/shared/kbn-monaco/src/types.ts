@@ -37,6 +37,7 @@ interface LanguageProvidersModule<Deps = unknown, MarkerDataType = monaco.editor
   getSuggestionProvider: (callbacks?: Deps) => monaco.languages.CompletionItemProvider;
   getSignatureProvider?: (callbacks?: Deps) => monaco.languages.SignatureHelpProvider;
   getHoverProvider?: (callbacks?: Deps) => monaco.languages.HoverProvider;
+  getInlineCompletionsProvider?: (callbacks?: Deps) => monaco.languages.InlineCompletionsProvider;
   getCodeActionProvider?: (callbacks?: Deps) => monaco.languages.CodeActionProvider;
 }
 

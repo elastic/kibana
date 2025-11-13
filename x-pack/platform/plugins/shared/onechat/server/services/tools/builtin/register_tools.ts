@@ -6,7 +6,7 @@
  */
 
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
-import type { BuiltinToolRegistry } from './builtin_registry';
+import type { CoreSetup } from '@kbn/core/server';
 import {
   getDocumentByIdTool,
   executeEsqlTool,
@@ -17,8 +17,22 @@ import {
   indexExplorerTool,
   createVisualizationTool,
 } from './definitions';
+import type {
+  OnechatSetupDependencies,
+  OnechatStartDependencies,
+  OnechatPluginStart,
+} from '../../../types';
+import type { ToolsServiceSetup } from '../types';
 
-export const registerBuiltinTools = ({ registry }: { registry: BuiltinToolRegistry }) => {
+export const registerBuiltinTools = ({
+  registry,
+  coreSetup,
+  setupDeps,
+}: {
+  registry: ToolsServiceSetup;
+  coreSetup: CoreSetup<OnechatStartDependencies, OnechatPluginStart>;
+  setupDeps: OnechatSetupDependencies;
+}) => {
   const tools: Array<BuiltinToolDefinition<any>> = [
     searchTool(),
     getDocumentByIdTool(),

@@ -13,6 +13,7 @@ canvas-confetti
 @types/canvas-confetti
 undici
 liquidjs
+xml-formatter
 @tanstack/react-table
 @tanstack/react-virtual
 @storybook/addon-docs

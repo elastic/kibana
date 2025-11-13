@@ -62,12 +62,6 @@ export function buildAutocompleteContext({
     return null;
   }
 
-  // variables
-  let shouldUseCurlyBraces = true;
-  if (completionContext.triggerCharacter === '@' && focusedYamlPair) {
-    shouldUseCurlyBraces = focusedYamlPair.keyNode.value !== 'foreach';
-  }
-
   let range: monaco.IRange;
   if (completionContext.triggerCharacter === ' ') {
     // When triggered by space, set range to start at current position
@@ -91,7 +85,6 @@ export function buildAutocompleteContext({
   const path = getPathAtOffset(yamlDocument, absoluteOffset);
   const yamlNode = yamlDocument.getIn(path, true);
   const scalarType = isScalar(yamlNode) ? yamlNode.type ?? null : null;
-  const shouldBeQuoted = scalarType === null || scalarType === 'PLAIN';
 
   let contextSchema: z.ZodType = DynamicStepContextSchema;
   let contextScopedToPath: string | null = null;
@@ -131,19 +124,19 @@ export function buildAutocompleteContext({
     lineUpToCursor,
     lineParseResult: parseResult,
 
+    // position of the cursor
+    path,
+    range,
+    absoluteOffset,
+    focusedStepInfo,
+    focusedYamlPair,
+    // TODO: add currentTriggerInfo
+
     // context
     contextSchema,
     contextScopedToPath,
     yamlDocument,
     scalarType,
-
-    // position of the cursor
-    path,
-    range,
-    absoluteOffset,
-    // currentStepInfo
-    focusedStepInfo,
-    // TODO: add currentTriggerInfo
 
     // kind of ast info
     isInLiquidBlock,
@@ -153,9 +146,5 @@ export function buildAutocompleteContext({
 
     // dynamic connector types
     dynamicConnectorTypes: currentDynamicConnectorTypes ?? null,
-
-    // formatting
-    shouldUseCurlyBraces,
-    shouldBeQuoted,
   };
 }

@@ -47,13 +47,12 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { SplitButton } from '@kbn/split-button';
-
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { AddFilterPopover } from './add_filter_popover';
 import type { DataViewPickerProps } from '../dataview_picker';
 import { DataViewPicker } from '../dataview_picker';
 import { FilterButtonGroup } from '../filter_bar/filter_button_group/filter_button_group';
 import { NoDataPopover } from './no_data_popover';
-import { ProjectPicker } from '../project_picker';
 import type {
   SuggestionsAbstraction,
   SuggestionsListSize,
@@ -102,8 +101,6 @@ export const strings = {
       defaultMessage: 'Send to background',
     }),
 };
-
-const SHOW_PROJECT_PICKER_KEY = 'unifiedSearch.showProjectPicker';
 
 const getWrapperWithTooltip = (
   children: JSX.Element,
@@ -237,7 +234,6 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
    */
   onOpenQueryInNewTab?: ESQLEditorProps['onOpenQueryInNewTab'];
   useBackgroundSearchButton?: boolean;
-  showProjectPicker?: boolean;
 }
 
 export const SharingMetaFields = React.memo(function SharingMetaFields({
@@ -632,7 +628,7 @@ export const QueryBarTopRow = React.memo(
       const component = getWrapperWithTooltip(datePicker, enableTooltip, props.query);
 
       return (
-        <EuiFlexItem className={wrapperClasses} css={inputStringStyles.datePickerWrapper}>
+        <EuiFlexItem className={wrapperClasses} css={styles.datePickerWrapper}>
           {component}
         </EuiFlexItem>
       );
@@ -786,18 +782,6 @@ export const QueryBarTopRow = React.memo(
       }
     }
 
-    function renderProjectPicker() {
-      // temporarily adding a local storage key to toggle the project picker visibility
-      if (props.showProjectPicker && localStorage.getItem(SHOW_PROJECT_PICKER_KEY) === 'true') {
-        return (
-          <EuiFlexItem grow={isMobile}>
-            <ProjectPicker />
-          </EuiFlexItem>
-        );
-      }
-      return null;
-    }
-
     function renderAddButton() {
       return (
         Boolean(props.showAddFilter) && (
@@ -938,6 +922,7 @@ export const QueryBarTopRow = React.memo(
     }
     const { euiTheme } = useEuiTheme();
     const isScreenshotMode = props.isScreenshotMode === true;
+    const styles = useMemoCss(inputStringStyles);
 
     return (
       <>
@@ -962,7 +947,6 @@ export const QueryBarTopRow = React.memo(
               justifyContent={shouldShowDatePickerAsBadge() ? 'flexStart' : 'flexEnd'}
               wrap
             >
-              {props.showProjectPicker && renderProjectPicker()}
               {props.dataViewPickerOverride || renderDataViewsPicker()}
               {Boolean(isQueryLangSelected) && (
                 <ESQLMenuPopover

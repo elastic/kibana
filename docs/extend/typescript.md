@@ -47,7 +47,7 @@ Additionally, in order to migrate into project refs, you also need to make sure 
 
 ```
 {
-  "extends": "../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "./target/types",
     "emitDeclarationOnly": true,

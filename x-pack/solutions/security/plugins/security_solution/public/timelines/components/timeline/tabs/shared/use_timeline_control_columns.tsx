@@ -25,9 +25,6 @@ interface UseTimelineControlColumnArgs {
   onToggleShowNotes: (eventId?: string) => void;
 }
 
-const EMPTY_STRING_ARRAY: string[] = [];
-
-const noOp = () => {};
 export const useTimelineControlColumn = ({
   timelineId,
   refetch,
@@ -69,40 +66,29 @@ export const useTimelineControlColumn = ({
         if ('rowIndex' in props && props.rowIndex >= events.length) return <></>;
         return (
           <TimelineControlColumnCellRender
-            rowIndex={props.rowIndex}
-            columnId={props.columnId}
-            timelineId={timelineId}
             ariaRowindex={props.rowIndex}
-            checked={false}
             columnValues=""
-            data={events[props.rowIndex].data}
-            ecsData={events[props.rowIndex].ecs}
-            loadingEventIds={EMPTY_STRING_ARRAY}
-            eventId={events[props.rowIndex]?._id}
-            index={props.rowIndex}
-            onEventDetailsPanelOpened={noOp}
-            onRowSelected={noOp}
-            refetch={refetch}
-            showCheckboxes={false}
-            setEventsLoading={noOp}
-            setEventsDeleted={noOp}
-            pinnedEventIds={pinnedEventIds}
-            eventIdToNoteIds={eventIdToNoteIds}
-            toggleShowNotes={onToggleShowNotes}
-            showNotes={canReadNotes}
             disablePinAction={!canWriteTimelines}
+            ecsData={events[props.rowIndex].ecs}
+            eventId={events[props.rowIndex]?._id}
+            eventIdToNoteIds={eventIdToNoteIds}
+            pinnedEventIds={pinnedEventIds}
+            refetch={refetch}
+            showNotes={canReadNotes}
+            timelineId={timelineId}
+            toggleShowNotes={onToggleShowNotes}
           />
         );
       },
     [
-      events,
-      timelineId,
-      refetch,
-      pinnedEventIds,
-      eventIdToNoteIds,
-      onToggleShowNotes,
       canReadNotes,
       canWriteTimelines,
+      eventIdToNoteIds,
+      events,
+      onToggleShowNotes,
+      pinnedEventIds,
+      refetch,
+      timelineId,
     ]
   );
 

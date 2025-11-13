@@ -86,7 +86,9 @@ export const DiscoverMainContent = ({
 
       return new Promise<VIEW_MODE>((resolve, reject) => {
         // return a promise to report when the view mode has been updated
-        stateContainer.appState.subscribe((state) => {
+        const subscription = stateContainer.appState.state$.subscribe((state) => {
+          subscription.unsubscribe();
+
           if (state.viewMode === mode) {
             resolve(mode);
           } else {

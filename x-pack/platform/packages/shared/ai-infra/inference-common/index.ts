@@ -78,6 +78,7 @@ export {
   type ToolsOfChoice,
   type ToolCallArguments,
   type ToolCallbackResult,
+  type InferenceEventEmitter,
 } from './src/chat_complete';
 
 export type { BoundInferenceClient, InferenceClient } from './src/inference_client';

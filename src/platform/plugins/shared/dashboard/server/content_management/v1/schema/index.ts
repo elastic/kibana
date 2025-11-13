@@ -9,5 +9,4 @@
 
 export * from './get';
 export * from './update';
-export * from './search';
 export * from './common';

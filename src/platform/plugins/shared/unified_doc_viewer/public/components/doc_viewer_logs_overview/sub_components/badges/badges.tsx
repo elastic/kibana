@@ -16,12 +16,14 @@ import {
 } from '@kbn/discover-utils';
 import { EuiFlexGroup } from '@elastic/eui';
 import type { ObservabilityStreamsFeature } from '@kbn/discover-shared-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { HoverActionPopover } from '../hover_popover_action';
 import { LogLevel } from './log_level';
 import { EventType } from './event_type';
 import { Timestamp } from './timestamp';
 
 interface BadgesProps {
+  dataView: DataView;
   hasMessageField: boolean;
   hit: DataTableRecord;
   formattedDoc: LogDocumentOverview;
@@ -29,6 +31,7 @@ interface BadgesProps {
 }
 
 export const Badges = ({
+  dataView,
   formattedDoc,
   hit,
   renderFlyoutStreamProcessingLink,
@@ -52,7 +55,7 @@ export const Badges = ({
     <EuiFlexGroup responsive={false} gutterSize="m" alignItems="center" wrap={true}>
       {hasMessageField &&
         renderFlyoutStreamProcessingLink &&
-        renderFlyoutStreamProcessingLink({ doc: hit })}
+        renderFlyoutStreamProcessingLink({ dataView, doc: hit })}
 
       {hasLogLevel && logLevelField && (
         <HoverActionPopover value={logLevelValue} field={logLevelField}>
