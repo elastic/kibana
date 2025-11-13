@@ -27,6 +27,8 @@ import {
   isToolProgressEvent,
   isReasoningEvent,
 } from '@kbn/onechat-common';
+import type { RoundModelUsageStats } from '@kbn/onechat-common/chat';
+import type { ModelProvider, ModelProviderStats } from '@kbn/onechat-server/runner';
 import { getCurrentTraceId } from '../../../../tracing';
 
 type SourceEvents = ChatAgentEvent;
@@ -41,9 +43,11 @@ export const addRoundCompleteEvent = ({
   userInput,
   startTime,
   endTime,
+  modelProvider,
 }: {
   userInput: RoundInput;
   startTime: Date;
+  modelProvider: ModelProvider;
   endTime?: Date;
 }): OperatorFunction<SourceEvents, SourceEvents | RoundCompleteEvent> => {
   return (events$) => {
@@ -53,7 +57,13 @@ export const addRoundCompleteEvent = ({
       shared$.pipe(
         toArray(),
         map<SourceEvents[], RoundCompleteEvent>((events) => {
-          const round = createRoundFromEvents({ events, input: userInput, startTime, endTime });
+          const round = createRoundFromEvents({
+            events,
+            input: userInput,
+            startTime,
+            endTime,
+            modelProvider,
+          });
 
           const event: RoundCompleteEvent = {
             type: ChatEventType.roundComplete,
@@ -74,11 +84,13 @@ const createRoundFromEvents = ({
   input,
   startTime,
   endTime = new Date(),
+  modelProvider,
 }: {
   events: SourceEvents[];
   input: RoundInput;
   startTime: Date;
   endTime?: Date;
+  modelProvider: ModelProvider;
 }): ConversationRound => {
   const toolResults = events.filter(isToolResultEvent).map((event) => event.data);
   const toolProgressions = events.filter(isToolProgressEvent).map((event) => event.data);
@@ -139,8 +151,24 @@ const createRoundFromEvents = ({
     started_at: startTime.toISOString(),
     time_to_first_token: timeToFirstToken,
     time_to_last_token: timeToLastToken,
+    model_usage: getModelUsage(modelProvider.getUsageStats()),
     response: { message: messages[messages.length - 1].message_content },
   };
 
   return round;
+};
+
+const getModelUsage = (stats: ModelProviderStats): RoundModelUsageStats => {
+  let inputTokens = 0;
+  let outputTokens = 0;
+  for (const call of stats.calls) {
+    inputTokens += call.tokens?.prompt ?? 0;
+    outputTokens += call.tokens?.completion ?? 0;
+  }
+
+  return {
+    llm_calls: stats.calls.length,
+    input_tokens: inputTokens,
+    output_tokens: outputTokens,
+  };
 };

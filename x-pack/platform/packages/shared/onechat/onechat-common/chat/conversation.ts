@@ -157,8 +157,25 @@ export interface ConversationRound {
   time_to_first_token: number;
   /** time it took to last token, in ms */
   time_to_last_token: number;
+  /** Model Usage statistics for this round */
+  model_usage: RoundModelUsageStats;
   /** when tracing is enabled, contains the traceId associated with this round */
   trace_id?: string;
+}
+
+export interface RoundModelUsageStats {
+  /**
+   * Number of LLM calls which were done during this round.
+   */
+  llm_calls: number;
+  /**
+   * Total number of input tokens sent this round.
+   */
+  input_tokens: number;
+  /**
+   * Total number of output tokens received this round.
+   */
+  output_tokens: number;
 }
 
 /**
