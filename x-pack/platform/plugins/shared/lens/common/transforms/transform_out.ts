@@ -6,7 +6,7 @@
  */
 
 import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
-import type { LensByValueSerializedState } from '@kbn/lens-common';
+import { LENS_UNKNOWN_VIS, type LensByValueSerializedState } from '@kbn/lens-common';
 import type { LensTransformDependencies } from '.';
 import { LENS_ITEM_VERSION_V1, transformToV1LensItemAttributes } from '../content_management/v1';
 import { injectLensReferences } from '../references';
@@ -21,6 +21,7 @@ import { findLensReference, isByRefLensState } from './utils';
  * Transform from Lens Serialized State to Lens API format
  */
 export const getTransformOut = ({
+  builder,
   transformEnhancementsOut,
 }: LensTransformDependencies): LensTransformOut => {
   return function transformOut(state, references) {
@@ -51,7 +52,22 @@ export const getTransformOut = ({
       references
     );
 
-    return injectedState satisfies LensByValueTransformOutResult;
+    const chartType = builder.getType(migratedAttributes);
+
+    if (!builder.isSupported(chartType)) {
+      // TODO: remove this once all formats are supported
+      return injectedState as LensByValueTransformOutResult;
+    }
+
+    const apiConfig = builder.toAPIFormat({
+      ...migratedAttributes,
+      visualizationType: migratedAttributes.visualizationType ?? LENS_UNKNOWN_VIS,
+    });
+
+    return {
+      ...state,
+      attributes: apiConfig,
+    } satisfies LensByValueTransformOutResult;
   };
 };
 
