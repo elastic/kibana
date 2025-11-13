@@ -63,6 +63,12 @@ export function MetricsInDiscoverCallout({ timeRange }: MetricsInDiscoverCallout
     setDismissedCallout(true);
   }
 
+  function handleViewInDiscoverClick() {
+    services.telemetry.reportMetricsExplorerCalloutViewInDiscoverClicked({
+      view: 'metrics_explorer',
+    });
+  }
+
   return (
     <>
       <EuiCallOut
@@ -75,10 +81,12 @@ export function MetricsInDiscoverCallout({ timeRange }: MetricsInDiscoverCallout
       >
         <EuiText size="s">{calloutContent}</EuiText>
         <EuiSpacer size="m" />
+        {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
         <EuiButton
           data-test-subj="infraMetricsExplorerMetricsInDiscoverCalloutButton"
           fill
           href={discoverHref}
+          onClick={handleViewInDiscoverClick}
           aria-label={buttonLabel}
         >
           {buttonLabel}
