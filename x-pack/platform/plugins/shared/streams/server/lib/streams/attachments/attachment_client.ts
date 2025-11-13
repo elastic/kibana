@@ -100,8 +100,8 @@ export class AttachmentClient {
   /**
    * Links an attachment to a stream.
    *
-   * If the attachment already exists, adds the stream name to its list of associated streams.
-   * If the attachment doesn't exist, creates it with the stream name.
+   * If a link to the attachment already exists, adds the stream name to its list of associated streams.
+   * If a link to the attachment doesn't exist, creates it with the stream name.
    *
    * @param streamName - The name of the stream to link the attachment to
    * @param link - The attachment link containing the attachment id and type
