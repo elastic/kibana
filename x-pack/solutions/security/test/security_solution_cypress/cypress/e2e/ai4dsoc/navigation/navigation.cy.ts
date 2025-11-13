@@ -115,7 +115,7 @@ const linkedPagesAssertions: Record<string, () => void> = {
   discover: () => {
     cy.getByTestSubjContains('discoverSavedSearchTitle').should(
       'contain',
-      'Discover - Search not yet saved'
+      'Discover - Session not yet saved'
     );
   },
 };
