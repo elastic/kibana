@@ -13,14 +13,33 @@ import { FIELD_VALUE_SEPARATOR } from '../common/constants';
 export const useValueFilters = (valueFilters?: string[]) => {
   return useMemo(() => {
     if (!valueFilters?.length) {
-      return [];
+      return { kuery: undefined, filters: [] };
     }
 
-    return valueFilters
-      .map((selectedValue) => {
-        const [field, value] = selectedValue.split(FIELD_VALUE_SEPARATOR);
-        return { field, value };
-      })
-      .filter((filter) => filter.field !== '');
+    const filtersMap = new Map<string, string[]>();
+    const filters: Array<{ field: string; value: string }> = [];
+
+    // Build both filters array and map in single pass
+    valueFilters.forEach((filter) => {
+      const [field, value] = filter.split(FIELD_VALUE_SEPARATOR);
+      if (field !== '') {
+        // Build filters array
+        filters.push({ field, value });
+
+        // Build map with quoted values for kuery
+        const arr = filtersMap.get(field) || [];
+        arr.push(`"${value}"`);
+        filtersMap.set(field, arr);
+      }
+    });
+
+    // Build kuery from map
+    const kuery = Array.from(filtersMap.entries())
+      .map(([field, values]) =>
+        values.length > 1 ? `${field}:(${values.join(' or ')})` : `${field}:${values[0]}`
+      )
+      .join(' and ');
+
+    return { kuery, filters };
   }, [valueFilters]);
 };

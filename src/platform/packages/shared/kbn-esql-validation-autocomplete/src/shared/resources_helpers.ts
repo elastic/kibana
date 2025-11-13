@@ -45,7 +45,8 @@ export class QueryColumns {
   constructor(
     private readonly query: ESQLAstQueryExpression,
     private readonly originalQueryText: string,
-    private readonly resourceRetriever?: ESQLCallbacks
+    private readonly resourceRetriever?: ESQLCallbacks,
+    private readonly options?: { invalidateColumnsCache?: boolean }
   ) {
     this.fullQueryCacheKey = BasicPrettyPrinter.print(this.query, { skipHeader: true });
   }
@@ -90,8 +91,14 @@ export class QueryColumns {
     if (!this.fullQueryCacheKey) return;
 
     const getFields = async (queryToES: string) => {
-      const cached = QueryColumns.fromCache(queryToES);
-      if (cached) return cached as ESQLFieldWithMetadata[];
+      if (!this.options?.invalidateColumnsCache) {
+        const cached = QueryColumns.fromCache(queryToES);
+
+        if (cached) {
+          return cached as ESQLFieldWithMetadata[];
+        }
+      }
+
       const fields = await getFieldsFromES(queryToES, this.resourceRetriever);
       QueryColumns.cache.set(queryToES, fields);
       return fields;
@@ -134,10 +141,12 @@ export class QueryColumns {
       return;
     }
 
-    const existsInCache = Boolean(QueryColumns.fromCache(cacheKey));
-    if (existsInCache) {
-      // this is already in the cache
-      return;
+    if (!this.options?.invalidateColumnsCache) {
+      const existsInCache = Boolean(QueryColumns.fromCache(cacheKey));
+      if (existsInCache) {
+        // this is already in the cache
+        return;
+      }
     }
 
     const queryBeforeCurrentCommand = BasicPrettyPrinter.print({
@@ -179,4 +188,19 @@ export function getSourcesHelper(resourceRetriever?: ESQLCallbacks) {
   return async () => {
     return (await resourceRetriever?.getSources?.()) || [];
   };
+}
+
+export async function getFromCommandHelper(resourceRetriever?: ESQLCallbacks): Promise<string> {
+  const getSources = getSourcesHelper(resourceRetriever);
+  const sources = await getSources?.();
+  const visibleSources = sources.filter((source) => !source.hidden) || [];
+
+  if (visibleSources.find((source) => source.name.startsWith('logs'))) {
+    return 'FROM logs*';
+  }
+
+  if (visibleSources.length > 0) {
+    return `FROM ${visibleSources[0].name}`;
+  }
+  return '';
 }
