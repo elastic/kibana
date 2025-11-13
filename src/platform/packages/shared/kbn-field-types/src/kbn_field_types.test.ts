@@ -89,6 +89,7 @@ describe('utils/kbn_field_types', () => {
         KBN_FIELD_TYPES.NUMBER_RANGE,
         KBN_FIELD_TYPES.OBJECT,
         KBN_FIELD_TYPES.STRING,
+        KBN_FIELD_TYPES.TDIGEST,
         KBN_FIELD_TYPES.UNKNOWN,
       ]);
     });

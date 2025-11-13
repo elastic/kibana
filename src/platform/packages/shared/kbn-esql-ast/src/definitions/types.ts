@@ -40,6 +40,7 @@ export const fieldTypes: readonly string[] = [
   'dense_vector',
   'histogram',
   'exponential_histogram',
+  'tdigest',
 ] as const;
 
 export type FieldType = (typeof fieldTypes)[number];
@@ -75,6 +76,7 @@ export const userDefinedTypes = [
   'param', // Defines a named param such as ?value or ??field
   'histogram',
   'exponential_histogram',
+  'tdigest',
 ] as const;
 
 /**

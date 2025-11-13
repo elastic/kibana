@@ -395,6 +395,16 @@ exports[`FieldIcon renders known field types string is rendered 1`] = `
 />
 `;
 
+exports[`FieldIcon renders known field types tdigest is rendered 1`] = `
+<EuiToken
+  aria-label="tdigest"
+  className="kbnFieldIcon"
+  iconType="tokenHistogram"
+  size="s"
+  title="tdigest"
+/>
+`;
+
 exports[`FieldIcon renders known field types text is rendered 1`] = `
 <EuiToken
   aria-label="text"

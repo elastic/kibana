@@ -21,6 +21,7 @@ export const NUMERIC_TYPES = [
   ES_FIELD_TYPES.UNSIGNED_LONG,
   ES_FIELD_TYPES.HISTOGRAM,
   ES_FIELD_TYPES.EXPONENTIAL_HISTOGRAM,
+  ES_FIELD_TYPES.TDIGEST,
 ];
 
 // For the dimensions, the field MUST have `time_series_dimension` attribute set
