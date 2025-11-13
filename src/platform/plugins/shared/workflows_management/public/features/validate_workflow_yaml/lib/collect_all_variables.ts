@@ -27,6 +27,7 @@ export function collectAllVariables(
     const startPosition = model.getPositionAt(startOffset);
     const endPosition = model.getPositionAt(endOffset);
     const yamlPath = getPathAtOffset(yamlDocument, startOffset);
+    // simple heuristic to determine if it's a foreach configuration variable
     const type =
       yamlPath.length > 1 && yamlPath[yamlPath.length - 1] === 'foreach' ? 'foreach' : 'regexp';
     variableItems.push({
