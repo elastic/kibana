@@ -15,6 +15,7 @@ import { esqlMetricState } from '@kbn/lens-embeddable-utils/config_builder/schem
 import { getToolResultId } from '@kbn/onechat-server';
 import { guessChartType } from './guess_chart_type';
 import { createVisualizationGraph } from './graph_lens';
+import { AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID } from '@kbn/management-settings-ids';
 
 const metricSchema = parse(esqlMetricState.getSchema()) as object;
 
@@ -53,6 +54,13 @@ This tool will:
 2. Generate an ES|QL query if not provided
 3. Generate a valid visualization configuration`,
     schema: createVisualizationSchema,
+    availability: {
+      cacheMode: 'global',
+      handler: async ({ uiSettings }) => {
+        const enabled = await uiSettings.get<boolean>(AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID);
+        return { status: enabled ? 'available' : 'unavailable' };
+      },
+    },
     tags: [],
     handler: async (
       { query: nlQuery, chartType, esql, existingConfig },
