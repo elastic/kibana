@@ -10,20 +10,20 @@ import type { EuiDataGridCellValueElementProps, EuiDataGridControlColumn } from 
 import type { ComponentType } from 'react';
 import React from 'react';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
-import { addBuildingBlockStyle, getPageRowIndex } from '@kbn/securitysolution-data-table';
 import type { SortColumnTable } from '@kbn/securitysolution-data-table';
+import { addBuildingBlockStyle, getPageRowIndex } from '@kbn/securitysolution-data-table';
 import type {
   BrowserFields,
   TimelineItem,
   TimelineNonEcsData,
 } from '../../../../common/search_strategy';
 import type {
-  SetEventsDeleted,
-  SetEventsLoading,
   ColumnHeaderOptions,
   ControlColumnProps,
   OnRowSelected,
   OnSelectAll,
+  SetEventsDeleted,
+  SetEventsLoading,
 } from '../../../../common/types';
 import { RowAction } from './row_action';
 
