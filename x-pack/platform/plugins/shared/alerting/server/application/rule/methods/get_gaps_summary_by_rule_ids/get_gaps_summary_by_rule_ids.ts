@@ -19,7 +19,6 @@ import {
   alertingAuthorizationFilterOpts,
   RULE_TYPE_CHECKS_CONCURRENCY,
 } from '../../../../rules_client/common/constants';
-//
 import {
   extractGapDurationSums,
   calculateAggregatedGapStatus,
@@ -49,7 +48,7 @@ export async function getGapsSummaryByRuleIds(
       throw error;
     }
 
-    const { ruleIds, start, end } = params;
+    const { start, end, ruleIds } = params;
     const { filter: authorizationFilter } = authorizationTuple;
     const kueryNodeFilter = convertRuleIdsToKueryNode(ruleIds);
     const kueryNodeFilterWithAuth =
@@ -106,7 +105,10 @@ export async function getGapsSummaryByRuleIds(
       { concurrency: RULE_TYPE_CHECKS_CONCURRENCY }
     );
 
-    const filter = buildGapsFilter({ start, end });
+    const filter = buildGapsFilter({
+      start,
+      end,
+    });
 
     const aggs = await eventLogClient.aggregateEventsBySavedObjectIds(
       RULE_SAVED_OBJECT_TYPE,
@@ -121,7 +123,6 @@ export async function getGapsSummaryByRuleIds(
             },
             aggs: {
               ...COMMON_GAP_AGGREGATIONS,
-              lastGapTimestamp: { max: { field: '@timestamp' } },
             },
           },
         },
@@ -132,7 +133,6 @@ export async function getGapsSummaryByRuleIds(
       buckets: Array<
         GapDurationBucket & {
           key: string;
-          lastGapTimestamp?: { value: number | null };
         }
       >;
     }
@@ -149,9 +149,6 @@ export async function getGapsSummaryByRuleIds(
           totalUnfilledDurationMs: sums.totalUnfilledDurationMs,
           totalInProgressDurationMs: sums.totalInProgressDurationMs,
           totalFilledDurationMs: sums.totalFilledDurationMs,
-          ...(bucket.lastGapTimestamp?.value != null
-            ? { lastGapTimestamp: bucket.lastGapTimestamp.value }
-            : {}),
           ...(status ? { status } : {}),
         };
       }),

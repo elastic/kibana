@@ -500,7 +500,6 @@ export const useGapStatusColumn = (): TableColumn => {
               total_in_progress_duration_ms: number;
               total_filled_duration_ms: number;
               status: string;
-              last_gap_timestamp: number;
             }
           | undefined
       ) => {

@@ -21,7 +21,6 @@ export const getGapsSummaryByRuleIdsResponseSchema = schema.object({
       totalInProgressDurationMs: schema.number(),
       totalFilledDurationMs: schema.number(),
       status: schema.maybe(schema.string()),
-      lastGapTimestamp: schema.maybe(schema.number()),
     })
   ),
 });

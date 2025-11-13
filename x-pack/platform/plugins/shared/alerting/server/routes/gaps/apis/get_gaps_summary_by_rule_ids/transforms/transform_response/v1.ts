@@ -17,10 +17,5 @@ export const transformResponse = (
     total_in_progress_duration_ms: gap.totalInProgressDurationMs,
     total_filled_duration_ms: gap.totalFilledDurationMs,
     status: gap.status ?? '',
-    ...(gap.lastGapTimestamp
-      ? {
-          last_gap_timestamp: gap.lastGapTimestamp,
-        }
-      : {}),
   })),
 });

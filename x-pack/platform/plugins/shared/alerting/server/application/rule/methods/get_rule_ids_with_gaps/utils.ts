@@ -11,7 +11,7 @@ export interface GapDurationSums {
   totalUnfilledDurationMs: number;
   totalInProgressDurationMs: number;
   totalFilledDurationMs: number;
-  totalDurationMs?: number;
+  totalDurationMs: number;
 }
 
 export interface GapDurationBucket {
@@ -29,9 +29,7 @@ export function extractGapDurationSums(bucket: GapDurationBucket): GapDurationSu
     totalUnfilledDurationMs: Math.max(0, bucket.totalUnfilledDurationMs?.value ?? 0),
     totalInProgressDurationMs: Math.max(0, bucket.totalInProgressDurationMs?.value ?? 0),
     totalFilledDurationMs: Math.max(0, bucket.totalFilledDurationMs?.value ?? 0),
-    totalDurationMs: bucket.totalDurationMs
-      ? Math.max(0, bucket.totalDurationMs.value ?? 0)
-      : undefined,
+    totalDurationMs: Math.max(0, bucket.totalDurationMs?.value ?? 0),
   };
 }
 

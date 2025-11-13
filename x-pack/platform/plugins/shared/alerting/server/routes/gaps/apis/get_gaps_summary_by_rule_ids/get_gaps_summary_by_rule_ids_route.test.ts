@@ -38,7 +38,6 @@ describe('getGapsSummaryByRuleIdsRoute', () => {
         totalUnfilledDurationMs: 3600000,
         totalInProgressDurationMs: 0,
         totalFilledDurationMs: 82800000,
-        lastGapTimestamp: 1700125200000,
       },
     ],
   };
@@ -71,7 +70,6 @@ describe('getGapsSummaryByRuleIdsRoute', () => {
             total_unfilled_duration_ms: 3600000,
             total_in_progress_duration_ms: 0,
             total_filled_duration_ms: 82800000,
-            last_gap_timestamp: 1700125200000,
           },
         ],
       },
