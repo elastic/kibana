@@ -18,9 +18,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import {
+  type InitMonitoringEngineResponse,
   PrivilegeMonitoringEngineStatusEnum,
   type PrivMonHealthResponse,
-  type InitMonitoringEngineResponse,
 } from '../../../common/api/entity_analytics';
 import { SecurityPageName } from '../../app/types';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
@@ -207,8 +207,9 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
       {state.type === 'dashboard' && (
         <FiltersGlobal>
           <SiemSearchBar
+            dataView={dataView}
             id={InputsModelId.global}
-            sourcererDataView={newDataViewPickerEnabled ? dataView : oldSourcererDataViewSpec}
+            sourcererDataViewSpec={oldSourcererDataViewSpec} // TODO remove when we remove the newDataViewPickerEnabled feature flag
           />
         </FiltersGlobal>
       )}

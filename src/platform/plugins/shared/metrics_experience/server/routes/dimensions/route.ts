@@ -11,6 +11,7 @@ import { z } from '@kbn/zod';
 import { createTracedEsClient } from '@kbn/traced-es-client';
 import { isoToEpoch } from '@kbn/zod-helpers';
 import { parse as dateMathParse } from '@kbn/datemath';
+import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { createRoute } from '../create_route';
 import { getDimensions } from './get_dimentions';
 import { throwNotFoundIfMetricsExperienceDisabled } from '../../lib/utils';
@@ -43,18 +44,18 @@ export const getDimensionsRoute = createRoute({
         .transform(isoToEpoch),
     }),
   }),
-  handler: async ({ context, params, logger }) => {
+  handler: async ({ context, params, logger, request }) => {
     const { elasticsearch, featureFlags } = await context.core;
     await throwNotFoundIfMetricsExperienceDisabled(featureFlags);
 
     const { dimensions, indices, from, to } = params.query;
     const esClient = elasticsearch.client.asCurrentUser;
-
     const values = await getDimensions({
       esClient: createTracedEsClient({
-        logger,
         client: esClient,
+        logger,
         plugin: 'metrics_experience',
+        abortSignal: getRequestAbortedSignal(request.events.aborted$),
       }),
       dimensions,
       indices,

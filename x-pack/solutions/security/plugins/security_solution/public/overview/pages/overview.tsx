@@ -8,11 +8,11 @@
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
-  EuiShowFor,
   EuiScreenReaderOnly,
+  EuiShowFor,
+  EuiSpacer,
 } from '@elastic/eui';
-import React, { useCallback, useState, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import { OVERVIEW } from '../../app/translations';
 import { InputsModelId } from '../../common/store/inputs/constants';
@@ -56,7 +56,7 @@ const OverviewComponent = () => {
   const { from, deleteQuery, setQuery, to } = useGlobalTime();
   const {
     indicesExist: oldIndicesExist,
-    sourcererDataView: oldSourcererDataView,
+    sourcererDataView: oldSourcererDataViewSpec,
     selectedPatterns: oldSelectedPatterns,
   } = useSourcererDataView();
 
@@ -107,10 +107,9 @@ const OverviewComponent = () => {
         <>
           <FiltersGlobal>
             <SiemSearchBar
+              dataView={experimentalDataView}
               id={InputsModelId.global}
-              sourcererDataView={
-                newDataViewPickerEnabled ? experimentalDataView : oldSourcererDataView
-              }
+              sourcererDataViewSpec={oldSourcererDataViewSpec} // TODO remove when we remove the newDataViewPickerEnabled feature flag
             />
           </FiltersGlobal>
 
@@ -142,7 +141,7 @@ const OverviewComponent = () => {
                       deleteQuery={deleteQuery}
                       filters={filters}
                       from={from}
-                      dataViewSpec={oldSourcererDataView}
+                      dataViewSpec={oldSourcererDataViewSpec}
                       dataView={experimentalDataView}
                       query={query}
                       queryType="overview"
@@ -155,7 +154,7 @@ const OverviewComponent = () => {
                       filters={filters}
                       from={from}
                       indexNames={selectedPatterns}
-                      dataViewSpec={oldSourcererDataView}
+                      dataViewSpec={oldSourcererDataViewSpec}
                       dataView={experimentalDataView}
                       query={query}
                       setQuery={setQuery}

@@ -19,9 +19,9 @@ import {
 } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
+import { isTerminalStatus } from '@kbn/workflows';
 import { StepExecutionDataView } from './step_execution_data_view';
 import { StepExecutionTimelineStateful } from './step_execution_timeline_stateful';
-import { isTerminalStatus } from '../lib/execution_status';
 
 interface WorkflowStepExecutionDetailsProps {
   workflowExecutionId: string;

@@ -84,19 +84,27 @@ export const AzureCredentialsFormAgentless = ({
     isAzureCloudConnectorEnabled;
 
   // Ensures the  cloud connector support is false if the credential if azureCredentialsType is not cloud_connectors
-  if (
-    azureCredentialsType &&
-    azureCredentialsType !== 'cloud_connectors' &&
-    (newPolicy.supports_cloud_connector || newPolicy.cloud_connector_id)
-  ) {
-    updatePolicy({
-      updatedPolicy: {
-        ...newPolicy,
-        supports_cloud_connector: false,
-        cloud_connector_id: undefined,
-      },
-    });
-  }
+  React.useEffect(() => {
+    if (
+      azureCredentialsType &&
+      azureCredentialsType !== 'cloud_connectors' &&
+      (newPolicy.supports_cloud_connector || newPolicy.cloud_connector_id)
+    ) {
+      updatePolicy({
+        updatedPolicy: {
+          ...newPolicy,
+          supports_cloud_connector: false,
+          cloud_connector_id: undefined,
+        },
+      });
+    }
+  }, [
+    azureCredentialsType,
+    newPolicy.supports_cloud_connector,
+    newPolicy.cloud_connector_id,
+    newPolicy,
+    updatePolicy,
+  ]);
 
   // Get agentless options based on whether cloud connector is enabled
   const agentlessOptions = isAzureCloudConnectorEnabled
@@ -147,6 +155,7 @@ export const AzureCredentialsFormAgentless = ({
           hasInvalidRequiredVars={hasInvalidRequiredVars}
           cloudProvider="azure"
           templateName={templateName}
+          isEditPage={isEditPage}
         />
       ) : (
         <AzureInputVarFields

@@ -58,6 +58,7 @@ export interface ConversationActions {
     title: string;
   }) => void;
   deleteConversation: (id: string) => Promise<void>;
+  renameConversation: (id: string, title: string) => Promise<void>;
 }
 
 interface UseConversationActionsParams {
@@ -243,6 +244,24 @@ const createConversationActions = ({
       if (onDeleteConversation) {
         onDeleteConversation({ id, isCurrentConversation });
       }
+    },
+    renameConversation: async (id: string, title: string) => {
+      await conversationsService.rename({ conversationId: id, title });
+
+      // Update the conversation in cache if it exists
+      const conversationQueryKey = queryKeys.conversations.byId(id);
+      const currentConversation = queryClient.getQueryData<Conversation>(conversationQueryKey);
+      if (currentConversation) {
+        queryClient.setQueryData<Conversation>(
+          conversationQueryKey,
+          produce(currentConversation, (draft) => {
+            draft.title = title;
+          })
+        );
+      }
+
+      // Invalidate conversation list to get updated data from server
+      queryClient.invalidateQueries({ queryKey: queryKeys.conversations.all });
     },
   };
 };

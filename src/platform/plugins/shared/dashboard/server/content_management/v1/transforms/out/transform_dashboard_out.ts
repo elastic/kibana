@@ -63,7 +63,7 @@ export function transformDashboardOut(
     }),
     ...(tags && tags.length && { tags }),
     ...(timeRange && { timeRange }),
-    title,
+    title: title ?? '',
     ...(version && { version }),
   };
 }

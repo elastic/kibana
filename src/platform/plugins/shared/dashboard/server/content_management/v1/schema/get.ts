@@ -12,7 +12,6 @@ import {
   dashboardMetaSchema,
   dashboardResolveMetaSchema,
   getDashboardDataSchema,
-  getDashboardAPIItemSchema,
 } from './common';
 
 export function getDashboardGetResultSchema() {
@@ -54,10 +53,3 @@ export function getDashboardAPIGetResultSchema() {
 }
 
 export const dashboardGetResultMetaSchema = dashboardMetaSchema.extends(dashboardResolveMetaSchema);
-
-export function getDashboardListResultAPISchema() {
-  return schema.object({
-    items: schema.arrayOf(getDashboardAPIItemSchema()),
-    total: schema.number(),
-  });
-}

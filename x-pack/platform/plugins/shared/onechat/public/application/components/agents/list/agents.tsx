@@ -24,7 +24,7 @@ export const OnechatAgents = () => {
   const { manageAgents } = useUiPrivileges();
   const headerStyles = css`
     background-color: ${euiTheme.colors.backgroundBasePlain};
-    border: none;
+    border-style: none;
   `;
   const { createOnechatUrl } = useNavigation();
   const headerButtons = [
@@ -35,6 +35,7 @@ export const OnechatAgents = () => {
         fill
         iconSide="left"
         href={createOnechatUrl(appPaths.agents.new)}
+        data-test-subj="agentBuilderNewAgentButton"
       >
         {i18n.translate('xpack.onechat.agents.newAgentButton', {
           defaultMessage: 'New agent',
@@ -44,7 +45,13 @@ export const OnechatAgents = () => {
   ];
   return (
     <DeleteAgentProvider>
-      <KibanaPageTemplate>
+      <KibanaPageTemplate
+        mainProps={{
+          'aria-label': i18n.translate('xpack.onechat.agents.mainAriaLabel', {
+            defaultMessage: 'Agent Builder agents list',
+          }),
+        }}
+      >
         <KibanaPageTemplate.Header
           css={headerStyles}
           pageTitle={
@@ -54,6 +61,7 @@ export const OnechatAgents = () => {
               })}
             />
           }
+          pageTitleProps={{ 'data-test-subj': 'agentBuilderAgentsListPageTitle' }}
           description={
             <FormattedMessage
               id="xpack.onechat.agents.description"
@@ -87,7 +95,7 @@ export const OnechatAgents = () => {
           }
           rightSideItems={headerButtons}
         />
-        <KibanaPageTemplate.Section>
+        <KibanaPageTemplate.Section data-test-subj="agentBuilderAgentsListContent">
           <AgentsList />
         </KibanaPageTemplate.Section>
       </KibanaPageTemplate>

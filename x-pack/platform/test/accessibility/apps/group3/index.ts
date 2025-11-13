@@ -23,11 +23,11 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./reporting'));
     loadTestFile(require.resolve('./search_sessions'));
 
-    // loadTestFile(require.resolve('./license_management'));
-    // loadTestFile(require.resolve('./tags'));
-    // loadTestFile(require.resolve('./stack_monitoring'));
-    // loadTestFile(require.resolve('./watcher'));
+    loadTestFile(require.resolve('./license_management'));
+    loadTestFile(require.resolve('./tags'));
+    loadTestFile(require.resolve('./stack_monitoring'));
+    loadTestFile(require.resolve('./watcher'));
+
     // loadTestFile(require.resolve('./rollup_jobs'));
-    // loadTestFile(require.resolve('./observability'));
   });
 };

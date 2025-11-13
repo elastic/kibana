@@ -12,6 +12,7 @@ import {
   addListener as originalAddListener,
   removeListener as originalRemoveListener,
 } from '@reduxjs/toolkit';
+import { ATTACKS_ALERTS_ALIGNMENT_ENABLED } from '../../../common/constants';
 import type { RootState } from '../redux/reducer';
 import { useKibana } from '../../common/lib/kibana';
 import { createDataViewSelectedListener } from '../redux/listeners/data_view_selected';
@@ -42,7 +43,10 @@ export const useInitDataViewManager = () => {
   const dispatch = useDispatch();
   const services = useKibana().services;
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const attacksAlertsAlignmentEnabled = useIsExperimentalFeatureEnabled('attacksAlertsAlignment');
+  const attacksAlertsAlignmentEnabled = services.featureFlags.getBooleanValue(
+    ATTACKS_ALERTS_ALIGNMENT_ENABLED,
+    false
+  );
 
   const {
     loading: loadingSignalIndex,

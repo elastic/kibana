@@ -861,6 +861,8 @@ export function addDynamicConnectorsToCache(
 /**
  * Get cached dynamic connector types (with instances)
  * Used by completion provider to access connector instances
+ * TODO: This function is not used anywhere, we should clean it up
+ * @deprecated use the store to get dynamic connectors
  */
 export function getCachedDynamicConnectorTypes(): Record<string, ConnectorTypeInfo> | null {
   return dynamicConnectorTypesCache;

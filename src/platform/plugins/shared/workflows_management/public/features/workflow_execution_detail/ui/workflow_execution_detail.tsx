@@ -16,9 +16,9 @@ import {
   ResizableLayoutMode,
   ResizableLayoutOrder,
 } from '@kbn/resizable-layout';
-import { useWorkflowExecutionPolling } from './hooks/use_workflow_execution_polling';
 import { WorkflowExecutionPanel } from './workflow_execution_panel';
 import { WorkflowStepExecutionDetails } from './workflow_step_execution_details';
+import { useWorkflowExecutionPolling } from '../../../entities/workflows/model/use_workflow_execution_polling';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 
 const WidthStorageKey = 'WORKFLOWS_EXECUTION_DETAILS_WIDTH';
@@ -40,14 +40,18 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
     const showBackButton = activeTab === 'executions';
 
     useEffect(() => {
-      if (workflowExecution && !selectedStepExecutionId) {
-        // Auto-select the first step execution if none is selected
-        const firstStepExecutionId = workflowExecution.stepExecutions?.[0]?.id;
+      if (
+        !selectedStepExecutionId && // no step execution selected
+        executionId === workflowExecution?.id && // execution id matches (not stale execution used)
+        workflowExecution?.stepExecutions?.length // step executions are loaded
+      ) {
+        // Auto-select the first step execution
+        const firstStepExecutionId = workflowExecution.stepExecutions[0]?.id;
         if (firstStepExecutionId) {
           setSelectedStepExecution(firstStepExecutionId);
         }
       }
-    }, [workflowExecution, selectedStepExecutionId, setSelectedStepExecution]);
+    }, [workflowExecution, selectedStepExecutionId, setSelectedStepExecution, executionId]);
 
     const setSelectedStepExecutionId = useCallback(
       (stepExecutionId: string | null) => {
@@ -78,7 +82,6 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
               definition={workflowDefinition}
               execution={workflowExecution ?? null}
               showBackButton={showBackButton}
-              isLoading={isLoading}
               error={error}
               onClose={onClose}
               onStepExecutionClick={setSelectedStepExecutionId}

@@ -13,14 +13,20 @@ interface Props {
   hasConnectorTypeSelected: boolean;
   onBack: () => void;
   onCancel: () => void;
+  isUsingInitialConnector: boolean;
 }
 
-const FlyoutFooterComponent: React.FC<Props> = ({ hasConnectorTypeSelected, onCancel, onBack }) => {
+const FlyoutFooterComponent: React.FC<Props> = ({
+  hasConnectorTypeSelected,
+  onCancel,
+  onBack,
+  isUsingInitialConnector,
+}) => {
   return (
     <EuiFlyoutFooter data-test-subj="create-connector-flyout-footer">
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          {hasConnectorTypeSelected ? (
+          {hasConnectorTypeSelected && !isUsingInitialConnector ? (
             <EuiButtonEmpty onClick={onBack} data-test-subj="create-connector-flyout-back-btn">
               {i18n.translate(
                 'xpack.triggersActionsUI.sections.actionConnectorAdd.backButtonLabel',

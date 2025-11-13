@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -49,6 +49,8 @@
     "@kbn/esql-ast",
     "@kbn/background-search",
     "@kbn/split-button",
+    "@kbn/cps",
+    "@kbn/css-utils",
   ],
   "exclude": ["target/**/*"]
 }

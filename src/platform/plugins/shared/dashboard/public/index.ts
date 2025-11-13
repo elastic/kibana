@@ -22,7 +22,7 @@ export { DashboardListingTable } from './dashboard_listing';
 export { DashboardTopNav } from './dashboard_top_nav';
 export type { RedirectToProps } from './dashboard_app/types';
 
-export { type FindDashboardsByIdResponse, type SearchDashboardsResponse } from './dashboard_client';
+export type { FindDashboardsByIdResponse } from './dashboard_client';
 
 export { DASHBOARD_APP_ID } from '../common/constants';
 export { cleanEmptyKeys, DashboardAppLocatorDefinition } from '../common/locator/locator';

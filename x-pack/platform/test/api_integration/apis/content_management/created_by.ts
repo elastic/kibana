@@ -8,12 +8,7 @@
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import type { LoginAsInteractiveUserResponse } from './helpers';
-import {
-  loginAsInteractiveUser,
-  setupInteractiveUser,
-  sampleDashboard,
-  cleanupInteractiveUser,
-} from './helpers';
+import { loginAsInteractiveUser, setupInteractiveUser, cleanupInteractiveUser } from './helpers';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('created_by', function () {
@@ -21,13 +16,18 @@ export default function ({ getService }: FtrProviderContext) {
       const supertest = getService('supertest');
       it('created_by is empty', async () => {
         const { body, status } = await supertest
-          .post('/api/content_management/rpc/create')
+          .post('/api/dashboards/dashboard')
           .set('kbn-xsrf', 'true')
-          .send(sampleDashboard);
+          .set('elastic-api-version', '1')
+          .send({
+            data: {
+              title: 'Sample dashboard',
+            },
+          });
 
         expect(status).to.be(200);
-        expect(body.result.result.item).to.be.ok();
-        expect(body.result.result.item).to.not.have.key('createdBy');
+        expect(body.data).to.be.ok();
+        expect(body.meta).to.not.have.key('createdBy');
       });
     });
 
@@ -46,15 +46,20 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('created_by is with profile_id', async () => {
         const createResponse = await supertest
-          .post('/api/content_management/rpc/create')
+          .post('/api/dashboards/dashboard')
           .set(interactiveUser.headers)
           .set('kbn-xsrf', 'true')
-          .send(sampleDashboard);
+          .set('elastic-api-version', '1')
+          .send({
+            data: {
+              title: 'Sample dashboard',
+            },
+          });
 
         expect(createResponse.status).to.be(200);
-        expect(createResponse.body.result.result.item).to.be.ok();
-        expect(createResponse.body.result.result.item).to.have.key('createdBy');
-        expect(createResponse.body.result.result.item.createdBy).to.be(interactiveUser.uid);
+        expect(createResponse.body.data).to.be.ok();
+        expect(createResponse.body.meta).to.have.key('createdBy');
+        expect(createResponse.body.meta.createdBy).to.be(interactiveUser.uid);
       });
     });
   });
