@@ -18,6 +18,7 @@ import {
   EuiFlexItem,
   EuiFormControlButton,
   EuiFormControlLayout,
+  EuiNotificationBadge,
   EuiPopover,
   EuiText,
   htmlIdGenerator,
@@ -83,6 +84,17 @@ export function SourcesDropdown({ currentSources, onChangeSources }: SourcesDrop
         data-test-subj="visorSourcesDropdownButton"
         aria-expanded={isPopoverOpen}
         aria-controls={popoverId}
+        value={
+          <EuiFlexGroup
+            component="span"
+            alignItems="center"
+            gutterSize="s"
+            responsive={false}
+            css={{ maxWidth: '100%' }}
+          >
+            <span className="eui-textTruncate">{currentSources.join(', ')}</span>
+          </EuiFlexGroup>
+        }
         css={css`
           box-shadow: none;
           &:focus,
@@ -97,15 +109,9 @@ export function SourcesDropdown({ currentSources, onChangeSources }: SourcesDrop
           setPopoverIsOpen(!isPopoverOpen);
         }}
       >
-        <EuiFlexGroup
-          component="span"
-          alignItems="center"
-          gutterSize="s"
-          responsive={false}
-          css={{ maxWidth: '100%' }}
-        >
-          <span className="eui-textTruncate">{currentSources.join(', ')}</span>
-        </EuiFlexGroup>
+        {Boolean(currentSources.length) && (
+          <EuiNotificationBadge color="success">{currentSources.length}</EuiNotificationBadge>
+        )}
       </EuiFormControlButton>
     );
   };
