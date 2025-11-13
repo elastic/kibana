@@ -6,8 +6,14 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ModelProvider, ScopedModel } from '@kbn/onechat-server';
+import type {
+  ModelProvider,
+  ScopedModel,
+  ModelProviderStats,
+  ModelCallInfo,
+} from '@kbn/onechat-server/runner';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { InferenceCompleteCallbackHandler } from '@kbn/inference-common/src/chat_complete';
 import { MODEL_TELEMETRY_METADATA } from '../../telemetry';
 
 export interface CreateModelProviderOpts {
@@ -50,16 +56,40 @@ export const createModelProvider = ({
     return defaultConnector.connectorId;
   };
 
+  const completedCalls: ModelCallInfo[] = [];
+
+  const getUsageStats = (): ModelProviderStats => {
+    return {
+      calls: completedCalls,
+    };
+  };
+
   const getModel = async (connectorId: string): Promise<ScopedModel> => {
+    const completionCallback: InferenceCompleteCallbackHandler = (event) => {
+      completedCalls.push({
+        connectorId,
+        tokens: event.tokens,
+      });
+    };
+
     const chatModel = await inference.getChatModel({
       request,
       connectorId,
+      callbacks: {
+        complete: [completionCallback],
+      },
       chatModelOptions: {
         telemetryMetadata: MODEL_TELEMETRY_METADATA,
       },
     });
 
-    const inferenceClient = inference.getClient({ request, bindTo: { connectorId } });
+    const inferenceClient = inference.getClient({
+      request,
+      bindTo: { connectorId },
+      callbacks: {
+        complete: [completionCallback],
+      },
+    });
     const connector = await inferenceClient.getConnectorById(connectorId);
 
     return {
@@ -72,5 +102,6 @@ export const createModelProvider = ({
   return {
     getDefaultModel: async () => getModel(await getDefaultConnectorId()),
     getModel: ({ connectorId }) => getModel(connectorId),
+    getUsageStats,
   };
 };
