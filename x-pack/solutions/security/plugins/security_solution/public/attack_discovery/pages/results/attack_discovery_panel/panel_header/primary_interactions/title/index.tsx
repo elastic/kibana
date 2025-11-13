@@ -24,13 +24,11 @@ import {
 import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { AccordionButton } from '../accordion_button';
 import { Badges } from '../badges';
 import { DetailsFlyout } from '../../../../../settings_flyout/schedule/details_flyout';
 import * as i18n from './translations';
 import { isAttackDiscoveryAlert } from '../../../../../utils/is_attack_discovery_alert';
-import { AttackDetailsRightPanelKey } from '../../../../../../../flyout/attack_details/constants/panel_keys';
 
 interface Props {
   attackDiscovery: AttackDiscovery | AttackDiscoveryAlert;
@@ -54,18 +52,6 @@ const TitleComponent: React.FC<Props> = ({
   showAnonymized = false,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const { openFlyout } = useExpandableFlyoutApi();
-
-  const handleOnAttackDetailPanelOpened = useCallback(() => {
-    openFlyout({
-      right: {
-        id: AttackDetailsRightPanelKey,
-        params: {
-          attackId: attackDiscovery.id, // OR A VALID ATTACK DOCUMENT ID
-        },
-      },
-    });
-  }, [openFlyout, attackDiscovery.id]);
 
   const htmlId = useGeneratedHtmlId({
     prefix: 'attackDiscoveryAccordion',
@@ -157,7 +143,6 @@ const TitleComponent: React.FC<Props> = ({
             <span data-test-subj="emptyAccordionContent" />
           </EuiAccordion>
         </EuiFlexItem>
-        <EuiButtonIcon iconType="expand" onClick={handleOnAttackDetailPanelOpened} size="xs" />
         {isScheduled && (
           <EuiFlexItem grow={false}>
             <EuiToolTip
