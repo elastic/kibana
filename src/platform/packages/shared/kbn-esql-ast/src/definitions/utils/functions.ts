@@ -410,7 +410,8 @@ export const buildColumnSuggestions = (
       !column.userDefined && Boolean(column.isEcs),
       Boolean(fieldIsRecommended)
     );
-    const suggestion: ISuggestionItem = {
+
+    let suggestion: ISuggestionItem = {
       label: column.name,
       text:
         getSafeInsertText(column.name) +
@@ -421,7 +422,11 @@ export const buildColumnSuggestions = (
       sortText,
     };
 
-    return options?.openSuggestions ? withAutoSuggest(suggestion) : suggestion;
+    if (options?.openSuggestions) {
+      suggestion = withAutoSuggest(suggestion);
+    }
+
+    return suggestion;
   });
 
   const suggestions = [...fieldsSuggestions];
