@@ -14,11 +14,19 @@ import type {
   ManualIngestPipelineProcessor,
   RenameProcessor,
   SetProcessor,
+  DropDocumentProcessor,
 } from '../../../../types/processors';
 import type { StreamlangDSL } from '../../../../types/streamlang';
 
 export const comprehensiveTestDSL: StreamlangDSL = {
   steps: [
+    {
+      action: 'drop_document',
+      where: {
+        field: 'https.status_code',
+        eq: 200,
+      },
+    } as DropDocumentProcessor,
     // Convert a field to a different type
     {
       action: 'convert',
