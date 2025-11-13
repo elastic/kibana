@@ -128,6 +128,7 @@ export const useEntityNodeExpandPopover = (
       const sourceNamespace = getSourceNamespaceFromNode(node);
       const actorField = getActorFieldFromNamespace(sourceNamespace);
       const targetField = getTargetFieldFromNamespace(sourceNamespace);
+      const docMode = getNodeDocumentMode(node.data);
 
       const actionsByEntityAction = containsFilter(searchFilters, actorField, node.id)
         ? 'hide'
@@ -140,110 +141,151 @@ export const useEntityNodeExpandPopover = (
         : 'show';
 
       const shouldDisableEntityDetailsListItem =
-        !onShowEntityDetailsClick ||
-        !['single-entity', 'grouped-entities'].includes(getNodeDocumentMode(node.data));
+        !onShowEntityDetailsClick || !['single-entity', 'grouped-entities'].includes(docMode);
 
-      return [
-        {
-          type: 'item',
-          iconType: 'sortRight',
-          testSubject: GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID,
-          label:
-            actionsByEntityAction === 'show'
-              ? i18n.translate(
-                  'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showThisEntitysActions',
-                  {
-                    defaultMessage: "Show this entity's actions",
-                  }
-                )
-              : i18n.translate(
-                  'securitySolutionPackages.csp.graph.graphNodeExpandPopover.hideThisEntitysActions',
-                  {
-                    defaultMessage: "Hide this entity's actions",
-                  }
-                ),
-          onClick: () => {
-            onToggleActionsByEntityClick(node, actionsByEntityAction);
-          },
-        },
-        {
-          type: 'item',
-          iconType: 'sortLeft',
-          testSubject: GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_ITEM_ID,
-          label:
-            actionsOnEntityAction === 'show'
-              ? i18n.translate(
-                  'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showActionsDoneToThisEntity',
-                  {
-                    defaultMessage: 'Show actions done to this entity',
-                  }
-                )
-              : i18n.translate(
-                  'securitySolutionPackages.csp.graph.graphNodeExpandPopover.hideActionsDoneToThisEntity',
-                  {
-                    defaultMessage: 'Hide actions done to this entity',
-                  }
-                ),
-          onClick: () => {
-            onToggleActionsOnEntityClick(node, actionsOnEntityAction);
-          },
-        },
-        {
-          type: 'item',
-          iconType: 'analyzeEvent',
-          testSubject: GRAPH_NODE_POPOVER_SHOW_RELATED_ITEM_ID,
-          label:
-            relatedEntitiesAction === 'show'
-              ? i18n.translate(
-                  'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showRelatedEntities',
-                  {
-                    defaultMessage: 'Show related events',
-                  }
-                )
-              : i18n.translate(
-                  'securitySolutionPackages.csp.graph.graphNodeExpandPopover.hideRelatedEntities',
-                  {
-                    defaultMessage: 'Hide related events',
-                  }
-                ),
-          onClick: () => {
-            onToggleExploreRelatedEntitiesClick(node, relatedEntitiesAction);
-          },
-        },
-        {
-          type: 'separator',
-        },
-        {
-          type: 'item',
-          iconType: 'expand',
-          testSubject: GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
-          label: i18n.translate(
-            'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showEntityDetails',
-            {
-              defaultMessage: 'Show entity details',
-            }
-          ),
-          disabled: shouldDisableEntityDetailsListItem,
-          onClick: () => {
-            onShowEntityDetailsClick?.(node);
-          },
-          showToolTip: shouldDisableEntityDetailsListItem,
-          toolTipText: shouldDisableEntityDetailsListItem
-            ? i18n.translate(
-                'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showEntityDetailsTooltipText',
-                {
-                  defaultMessage: 'Details not available',
-                }
-              )
-            : undefined,
-          toolTipProps: shouldDisableEntityDetailsListItem
-            ? {
-                position: 'bottom',
-                'data-test-subj': GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_TOOLTIP_ID,
+      // For 'grouped-entities', only show entity details
+      if (docMode === 'grouped-entities') {
+        return [
+          {
+            type: 'item',
+            iconType: 'expand',
+            testSubject: GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
+            label: i18n.translate(
+              'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showEntityDetails',
+              {
+                defaultMessage: 'Show entity details',
               }
-            : undefined,
-        },
-      ] satisfies Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps>;
+            ),
+            disabled: shouldDisableEntityDetailsListItem,
+            onClick: () => {
+              onShowEntityDetailsClick?.(node);
+            },
+            showToolTip: shouldDisableEntityDetailsListItem,
+            toolTipText: shouldDisableEntityDetailsListItem
+              ? i18n.translate(
+                  'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showEntityDetailsTooltipText',
+                  {
+                    defaultMessage: 'Details not available',
+                  }
+                )
+              : undefined,
+            toolTipProps: shouldDisableEntityDetailsListItem
+              ? {
+                  position: 'bottom',
+                  'data-test-subj': GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_TOOLTIP_ID,
+                }
+              : undefined,
+          },
+        ] satisfies Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps>;
+      }
+
+      // For 'single-entity' or 'na', show all items
+      if (docMode === 'single-entity' || docMode === 'na') {
+        return [
+          {
+            type: 'item',
+            iconType: 'sortRight',
+            testSubject: GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID,
+            label:
+              actionsByEntityAction === 'show'
+                ? i18n.translate(
+                    'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showThisEntitysActions',
+                    {
+                      defaultMessage: "Show this entity's actions",
+                    }
+                  )
+                : i18n.translate(
+                    'securitySolutionPackages.csp.graph.graphNodeExpandPopover.hideThisEntitysActions',
+                    {
+                      defaultMessage: "Hide this entity's actions",
+                    }
+                  ),
+            onClick: () => {
+              onToggleActionsByEntityClick(node, actionsByEntityAction);
+            },
+          },
+          {
+            type: 'item',
+            iconType: 'sortLeft',
+            testSubject: GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_ITEM_ID,
+            label:
+              actionsOnEntityAction === 'show'
+                ? i18n.translate(
+                    'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showActionsDoneToThisEntity',
+                    {
+                      defaultMessage: 'Show actions done to this entity',
+                    }
+                  )
+                : i18n.translate(
+                    'securitySolutionPackages.csp.graph.graphNodeExpandPopover.hideActionsDoneToThisEntity',
+                    {
+                      defaultMessage: 'Hide actions done to this entity',
+                    }
+                  ),
+            onClick: () => {
+              onToggleActionsOnEntityClick(node, actionsOnEntityAction);
+            },
+          },
+          {
+            type: 'item',
+            iconType: 'analyzeEvent',
+            testSubject: GRAPH_NODE_POPOVER_SHOW_RELATED_ITEM_ID,
+            label:
+              relatedEntitiesAction === 'show'
+                ? i18n.translate(
+                    'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showRelatedEntities',
+                    {
+                      defaultMessage: 'Show related events',
+                    }
+                  )
+                : i18n.translate(
+                    'securitySolutionPackages.csp.graph.graphNodeExpandPopover.hideRelatedEntities',
+                    {
+                      defaultMessage: 'Hide related events',
+                    }
+                  ),
+            onClick: () => {
+              onToggleExploreRelatedEntitiesClick(node, relatedEntitiesAction);
+            },
+          },
+          {
+            type: 'separator',
+          },
+          {
+            type: 'item',
+            iconType: 'expand',
+            testSubject: GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
+            label: i18n.translate(
+              'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showEntityDetails',
+              {
+                defaultMessage: 'Show entity details',
+              }
+            ),
+            disabled: shouldDisableEntityDetailsListItem,
+            onClick: () => {
+              onShowEntityDetailsClick?.(node);
+            },
+            showToolTip: shouldDisableEntityDetailsListItem,
+            toolTipText: shouldDisableEntityDetailsListItem
+              ? i18n.translate(
+                  'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showEntityDetailsTooltipText',
+                  {
+                    defaultMessage: 'Details not available',
+                  }
+                )
+              : undefined,
+            toolTipProps: shouldDisableEntityDetailsListItem
+              ? {
+                  position: 'bottom',
+                  'data-test-subj': GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_TOOLTIP_ID,
+                }
+              : undefined,
+          },
+        ] satisfies Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps>;
+      }
+
+      // For other modes, return empty array
+      return [];
     },
     [
       onToggleActionsByEntityClick,
