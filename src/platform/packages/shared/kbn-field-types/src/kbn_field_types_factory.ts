@@ -123,12 +123,12 @@ export const createKbnFieldTypes = (): KbnFieldType[] => [
   }),
   new KbnFieldType({
     name: KBN_FIELD_TYPES.EXPONENTIAL_HISTOGRAM,
-    filterable: true,
+    filterable: false,
     esTypes: [ES_FIELD_TYPES.EXPONENTIAL_HISTOGRAM],
   }),
   new KbnFieldType({
     name: KBN_FIELD_TYPES.TDIGEST,
-    filterable: true,
+    filterable: false,
     esTypes: [ES_FIELD_TYPES.TDIGEST],
   }),
   new KbnFieldType({
