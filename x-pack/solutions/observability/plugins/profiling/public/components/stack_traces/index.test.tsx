@@ -66,32 +66,40 @@ jest.mock('../subchart', () => ({
   ),
 }));
 
-jest.mock('../async_component', () => ({
-  AsyncComponent: ({
-    children,
-    ...props
-  }: {
-    children: React.ReactNode;
-    status: string;
-    error?: Error;
-  }) => {
-    if (props.status === 'loading') {
-      return <div data-test-subj="loadingIndicator">Loading...</div>;
-    }
-    if (props.error) {
-      return <div data-test-subj="errorIndicator">Error: {props.error.message}</div>;
-    }
-    return <>{children}</>;
-  },
-}));
+jest.mock('../async_component', () => {
+  const { AsyncStatus: AsyncStatusEnum } = jest.requireActual<{ AsyncStatus: any }>(
+    '../../hooks/use_async'
+  );
+  return {
+    AsyncComponent: ({
+      children,
+      status,
+      error,
+    }: {
+      children: React.ReactNode;
+      status: keyof typeof AsyncStatusEnum;
+      error?: Error;
+      size: 'm' | 'l' | 'xl';
+      style?: React.CSSProperties;
+    }) => {
+      if (status === AsyncStatusEnum.Loading) {
+        return <div data-test-subj="loadingIndicator">Loading...</div>;
+      }
+      if (error) {
+        return <div data-test-subj="errorIndicator">Error: {error.message}</div>;
+      }
+      return <>{children}</>;
+    },
+  };
+});
 
 const mockChart: TopNSubchart = {
   Category: 'test-category',
   Label: 'Test Label',
   Percentage: 50,
   Series: [
-    { Timestamp: 1000, Count: 10 },
-    { Timestamp: 2000, Count: 20 },
+    { Timestamp: 1000, Count: 10, Percentage: 50 },
+    { Timestamp: 2000, Count: 20, Percentage: 50 },
   ],
   Color: '#000000',
   Index: 0,
@@ -220,7 +228,6 @@ describe('StackTraces', () => {
         />
       );
 
-      const buttonGroup = screen.getByTestId('stackTracesDisplayOptionButtonGroup');
       const percentageButton = screen.getByRole('button', { name: /Percentages/i });
       await userEvent.click(percentageButton);
 
