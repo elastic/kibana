@@ -68,7 +68,9 @@
     "@kbn/core-capabilities-common",
     "@kbn/core-ui-settings-common",
     "@kbn/licensing-types",
-    "@kbn/react-query"
+    "@kbn/react-query",
+    "@kbn/triggers-actions-ui-plugin",
+    "@kbn/alerting-types"
   ],
   "exclude": ["target/**/*"]
 }
