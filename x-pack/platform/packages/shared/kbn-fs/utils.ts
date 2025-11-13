@@ -6,12 +6,11 @@
  */
 
 import { promises as fs, mkdirSync, existsSync } from 'fs';
-import { join, resolve, dirname } from 'path';
+import { join, dirname } from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { validateNoPathTraversal, validateFileExtension } from './validations';
 
 const DATA_PATH = join(REPO_ROOT, 'data');
-const DATA_PATH_RESOLVED = resolve(DATA_PATH);
 
 export function getSafePath(name: string, volume?: string): { fullPath: string; alias: string } {
   const fullPath = volume ? join(DATA_PATH, volume, name) : join(DATA_PATH, name);
