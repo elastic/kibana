@@ -10,13 +10,13 @@
 import { monaco } from '@kbn/monaco';
 import type { ConnectorTypeInfo } from '@kbn/workflows';
 import { z } from '@kbn/zod';
-import type { MinimalWorkflowDetailState } from './autocomplete.types';
 import type { BuildAutocompleteContextParams } from './build_autocomplete_context';
 import { buildAutocompleteContext } from './build_autocomplete_context';
 import { expectZodSchemaEqual } from '../../../../../../common/lib/zod';
 import { createFakeMonacoModel } from '../../../../../../common/mocks/monaco_model';
-import { performComputation } from '../../store/utils/computation';
-import { findStepByLine } from '../../store/utils/step_finder';
+import type { WorkflowDetailState } from '../../../../../entities/workflows/store/workflow_detail/types';
+import { performComputation } from '../../../../../entities/workflows/store/workflow_detail/utils/computation';
+import { findStepByLine } from '../../../../../entities/workflows/store/workflow_detail/utils/step_finder';
 
 export function getFakeAutocompleteContextParams(
   yamlContent: string,
@@ -43,14 +43,14 @@ export function getFakeAutocompleteContextParams(
   const position = mockModel.getPositionAt(cursorOffset);
   const triggerCharacter = cleanedYaml.slice(cursorOffset - 1, cursorOffset);
   const computedData = performComputation(cleanedYaml);
-  const mockEditorState: MinimalWorkflowDetailState = {
+  const mockEditorState = {
     yamlString: cleanedYaml,
     focusedStepId: computedData?.workflowLookup
       ? findStepByLine(position.lineNumber, computedData.workflowLookup)
       : undefined,
     computed: computedData,
     connectors: { connectorTypes, totalConnectors: Object.keys(connectorTypes).length },
-  };
+  } as WorkflowDetailState;
 
   return {
     model: mockModel as unknown as monaco.editor.ITextModel,

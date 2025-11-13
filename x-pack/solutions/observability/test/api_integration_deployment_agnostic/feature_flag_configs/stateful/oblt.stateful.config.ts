@@ -11,7 +11,11 @@ import { services } from '../../services';
 export default createStatefulFeatureFlagTestConfig<typeof services>({
   services,
   testFiles: [require.resolve('./oblt.index.ts')],
-  kbnServerArgs: ['--xpack.actions.preconfigured'],
+  kbnServerArgs: [
+    '--xpack.actions.preconfigured',
+    '--uiSettings.overrides.agentBuilder:enabled=true',
+    '--feature_flags.overrides.observabilityAgent.enabled=true',
+  ],
   junit: {
     reportName: 'Stateful Observability - Deployment-agnostic Feature Flag API Integration Tests',
   },

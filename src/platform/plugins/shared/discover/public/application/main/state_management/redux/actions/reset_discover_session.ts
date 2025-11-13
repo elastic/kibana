@@ -18,6 +18,8 @@ import {
 import { createInternalStateAsyncThunk } from '../utils';
 import { setDataView } from './data_views';
 import { updateTabs } from './tabs';
+import type { DiscoverAppState } from '../../discover_app_state_container';
+import { getInitialState } from '../../discover_app_state_container';
 
 export const resetDiscoverSession = createInternalStateAsyncThunk(
   'internalState/resetDiscoverSession',
@@ -51,6 +53,7 @@ export const resetDiscoverSession = createInternalStateAsyncThunk(
 
         const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tab.id);
         const tabStateContainer = tabRuntimeState?.stateContainer$.getValue();
+        let initialAppState: DiscoverAppState | undefined;
 
         if (tabStateContainer) {
           const savedSearch = await fromSavedObjectTabToSavedSearch({
@@ -65,13 +68,18 @@ export const resetDiscoverSession = createInternalStateAsyncThunk(
           }
 
           tabStateContainer.savedSearchState.set(savedSearch);
-          tabStateContainer.actions.undoSavedSearchChanges();
-          tabStateContainer.appState.resetInitialState();
+
+          initialAppState = getInitialState({
+            initialUrlState: undefined,
+            savedSearch,
+            services,
+          });
         }
 
         const tabState = fromSavedObjectTabToTabState({
           tab,
           existingTab: selectTab(state, tab.id),
+          initialAppState,
         });
 
         // If the tab had changes, we force-fetch when selecting it so the data matches the UI state.

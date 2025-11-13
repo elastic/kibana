@@ -6,3 +6,5 @@
  */
 
 export const TELEMETRY_SIEM_MIGRATION_ID = 'siem_migrations';
+
+export const SYSTEM_INSTRUCTIONS = `Do not use quotes for variables or aliases, replace any in the original with snake cased aliases. Only use quotes when necessary as a string literal.`;

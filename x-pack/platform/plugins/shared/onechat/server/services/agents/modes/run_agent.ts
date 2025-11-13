@@ -12,6 +12,7 @@ import type {
   RawRoundInput,
   AgentConfiguration,
 } from '@kbn/onechat-common';
+import type { BrowserApiToolMetadata } from '@kbn/onechat-common';
 import type { AgentHandlerContext } from '@kbn/onechat-server';
 import { runDefaultAgentMode } from './default';
 
@@ -44,6 +45,10 @@ export interface RunAgentParams {
    * optional signal to abort the execution of the agent
    */
   abortSignal?: AbortSignal;
+  /**
+   * Browser API tools to make available to the agent
+   */
+  browserApiTools?: BrowserApiToolMetadata[];
 }
 
 export interface RunAgentResponse {

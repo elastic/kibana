@@ -24,6 +24,7 @@ import type { ToolsServiceStart } from '../tools';
 import type { AgentsServiceStart } from '../agents';
 import type { AttachmentServiceStart } from '../attachments';
 import type { ModelProviderFactoryFn } from './model_provider';
+import type { TrackingService } from '../../telemetry';
 import { createEmptyRunContext } from './utils/run_context';
 import { createResultStore } from './tool_result_store';
 import { runTool } from './run_tool';
@@ -38,6 +39,7 @@ export interface CreateScopedRunnerDeps {
   toolsService: ToolsServiceStart;
   agentsService: AgentsServiceStart;
   attachmentsService: AttachmentServiceStart;
+  trackingService?: TrackingService;
   // other deps
   logger: Logger;
   request: KibanaRequest;

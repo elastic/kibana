@@ -269,7 +269,7 @@ const getFilters = (options: CalculateScoresParams, entityType?: EntityType) => 
           const esQuery = toElasticsearchQuery(kqlQuery);
           if (esQuery) {
             filters.push({
-              bool: { must_not: esQuery },
+              bool: { must: esQuery },
             });
           }
         } catch (error) {

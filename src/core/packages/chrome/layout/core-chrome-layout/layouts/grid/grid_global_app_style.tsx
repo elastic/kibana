@@ -38,6 +38,11 @@ const globalLayoutStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
     --kbnProjectHeaderAppActionMenuHeight: ${layoutVar('application.topBar.height', '0px')};
   }
 
+  :root {
+    // disable document-level scroll, since the application area handles it
+    overflow: hidden;
+  }
+
   #kibana-body {
     // DO NOT ADD ANY OVERFLOW BEHAVIORS HERE
     // It will break the sticky navigation
@@ -67,9 +72,17 @@ const globalLayoutStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
     position: relative; // This is temporary for apps that relied on this being present on \`.application\`
   }
 
+  // make data grid full screen mode respect the header banner
   #kibana-body .euiDataGrid--fullScreen {
     height: calc(100vh - var(--kbnHeaderBannerHeight));
     top: var(--kbnHeaderBannerHeight);
+  }
+
+  // make sure fixed bottom bars are positioned relative to the application area
+  .euiBottomBar.euiBottomBar--fixed {
+    left: ${layoutVar('application.left', '0px')} !important; /* override EUI inline style */
+    right: ${layoutVar('application.right', '0px')} !important; /* override EUI inline style */
+    bottom: ${layoutVar('application.bottom', '0px')} !important; /* override EUI inline style */
   }
 `;
 

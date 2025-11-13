@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { useEuiTheme } from '@elastic/eui';
+import { EuiFlyoutBody, EuiFlyoutHeader, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { EmbeddableConversationInternalProps } from './types';
 import { EmbeddableConversationsProvider } from '../application/context/conversation/embeddable_conversations_provider';
@@ -17,37 +17,50 @@ export const EmbeddableConversationInternal: React.FC<EmbeddableConversationInte
   props
 ) => {
   const { euiTheme } = useEuiTheme();
+  const { onClose, ariaLabelledBy } = props;
 
   const backgroundStyles = css`
     background-color: ${euiTheme.colors.backgroundBasePlain};
   `;
 
-  const headerHeight = `calc(${euiTheme.size.xl} * 2)`;
   const headerStyles = css`
     ${backgroundStyles}
     display: flex;
     align-items: center;
-    block-size: ${headerHeight};
-    padding: 0 ${euiTheme.size.base};
+    &.euiFlyoutHeader {
+      padding-inline: 0;
+      padding-block-start: 0;
+      padding: ${euiTheme.size.base};
+    }
   `;
-  const contentStyles = css`
+  const bodyStyles = css`
     ${backgroundStyles}
-    width: 100%;
-    height: 100%;
-    max-block-size: calc(var(--kbn-application--content-height) - ${headerHeight});
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    flex: 1;
+
+    .euiFlyoutBody__overflow {
+      overflow: hidden;
+      height: 100%;
+    }
+
+    .euiFlyoutBody__overflowContent {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      overflow: hidden;
+      padding: 0;
+    }
   `;
 
   return (
     <EmbeddableConversationsProvider {...props}>
-      <div css={headerStyles}>
-        <EmbeddableConversationHeader />
-      </div>
-      <div css={contentStyles}>
+      <EuiFlyoutHeader css={headerStyles}>
+        <EmbeddableConversationHeader onClose={onClose} ariaLabelledBy={ariaLabelledBy} />
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody css={bodyStyles}>
         <Conversation />
-      </div>
+      </EuiFlyoutBody>
     </EmbeddableConversationsProvider>
   );
 };

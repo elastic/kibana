@@ -78,18 +78,58 @@ jest.mock('../../../hooks', () => ({
   useLink: jest.fn().mockReturnValue({ getHref: jest.fn() }),
   useUrlParams: jest.fn().mockReturnValue({ urlParams: { kuery: '' } }),
   useKibanaVersion: jest.fn().mockReturnValue('8.3.0'),
-  usePagination: jest.fn().mockReturnValue({
-    pagination: {
-      currentPage: 1,
-      pageSize: 5,
-    },
-    pageSizeOptions: [5, 20, 50],
-    setPagination: jest.fn(),
-  }),
   useFleetServerUnhealthy: jest.fn().mockReturnValue({
     isUnhealthy: false,
     isLoading: false,
   }),
+}));
+
+// Create a stateful mock for useSessionAgentListState
+const mockSessionState = {
+  search: '',
+  selectedAgentPolicies: [],
+  selectedStatus: ['healthy', 'unhealthy', 'orphaned', 'updating', 'offline'],
+  selectedTags: [],
+  showUpgradeable: false,
+  sort: { field: 'enrolled_at', direction: 'desc' },
+  page: { index: 0, size: 20 },
+};
+
+const mockOnTableChange = jest.fn((changes: any) => {
+  if (changes.sort) {
+    mockSessionState.sort = changes.sort;
+  }
+  if (changes.page) {
+    mockSessionState.page = changes.page;
+  }
+});
+
+jest.mock('./hooks/use_session_agent_list_state', () => ({
+  useSessionAgentListState: jest.fn(() => ({
+    ...mockSessionState,
+    updateTableState: jest.fn(),
+    onTableChange: mockOnTableChange,
+    clearFilters: jest.fn(),
+    resetToDefaults: jest.fn(),
+  })),
+  getDefaultAgentListState: jest.fn(() => ({
+    search: '',
+    selectedAgentPolicies: [],
+    selectedStatus: ['healthy', 'unhealthy', 'orphaned', 'updating', 'offline'],
+    selectedTags: [],
+    showUpgradeable: false,
+    sort: { field: 'enrolled_at', direction: 'desc' },
+    page: { index: 0, size: 20 },
+  })),
+  defaultAgentListState: {
+    search: '',
+    selectedAgentPolicies: [],
+    selectedStatus: ['healthy', 'unhealthy', 'orphaned', 'updating', 'offline'],
+    selectedTags: [],
+    showUpgradeable: false,
+    sort: { field: 'enrolled_at', direction: 'desc' },
+    page: { index: 0, size: 20 },
+  },
 }));
 
 jest.mock('./components/search_and_filter_bar', () => {
@@ -189,20 +229,27 @@ describe('agent_list_page', () => {
       });
       jest.useFakeTimers({ legacyFakeTimers: true });
 
-      ({ utils } = renderAgentList());
+      await act(async () => {
+        ({ utils } = renderAgentList());
+      });
 
       await waitFor(() => {
         expect(utils.getByText('Showing 6 agents')).toBeInTheDocument();
       });
 
-      const selectAll = utils.container.querySelector('[data-test-subj="checkboxSelectAll"]');
-      fireEvent.click(selectAll!);
+      await act(async () => {
+        const selectAll = utils.container.querySelector('[data-test-subj="checkboxSelectAll"]');
+        fireEvent.click(selectAll!);
+      });
 
       await waitFor(() => {
         utils.getByText('5 agents selected');
       });
 
-      fireEvent.click(utils.getByText('Select everything on all pages'));
+      await act(async () => {
+        fireEvent.click(utils.getByText('Select everything on all pages'));
+      });
+
       utils.getByText('All agents selected');
     });
 
@@ -231,13 +278,17 @@ describe('agent_list_page', () => {
     });
 
     it('should set selection mode when agent selection changed manually', async () => {
-      fireEvent.click(utils.getAllByRole('checkbox')[3]);
+      await act(async () => {
+        fireEvent.click(utils.getAllByRole('checkbox')[3]);
+      });
 
       utils.getByText('4 agents selected');
     });
 
-    it('should pass sort parameters on table sort', () => {
-      fireEvent.click(utils.getByTitle('Last activity'));
+    it('should pass sort parameters on table sort', async () => {
+      await act(async () => {
+        fireEvent.click(utils.getByTitle('Last activity'));
+      });
 
       expect(mockedSendGetAgentsForRq).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -247,8 +298,10 @@ describe('agent_list_page', () => {
       );
     });
 
-    it('should pass keyword field on table sort on version', () => {
-      fireEvent.click(utils.getByTitle('Version'));
+    it('should pass keyword field on table sort on version', async () => {
+      await act(async () => {
+        fireEvent.click(utils.getByTitle('Version'));
+      });
 
       expect(mockedSendGetAgentsForRq).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -258,8 +311,10 @@ describe('agent_list_page', () => {
       );
     });
 
-    it('should pass keyword field on table sort on hostname', () => {
-      fireEvent.click(utils.getByTitle('Host'));
+    it('should pass keyword field on table sort on hostname', async () => {
+      await act(async () => {
+        fireEvent.click(utils.getByTitle('Host'));
+      });
 
       expect(mockedSendGetAgentsForRq).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -300,7 +355,9 @@ describe('agent_list_page', () => {
 
       const renderer = createFleetTestRendererMock();
 
-      renderResult = renderer.render(<AgentListPage />);
+      await act(async () => {
+        renderResult = renderer.render(<AgentListPage />);
+      });
 
       await waitFor(() => {
         expect(renderResult.queryByText('Showing 2 agents')).toBeInTheDocument();
@@ -310,7 +367,9 @@ describe('agent_list_page', () => {
     it('should not render "Uninstall agent" menu item for managed Agent', async () => {
       expect(renderResult.queryByTestId('uninstallAgentMenuItem')).not.toBeInTheDocument();
 
-      fireEvent.click(renderResult.getAllByTestId('agentActionsBtn')[1]);
+      await act(async () => {
+        fireEvent.click(renderResult.getAllByTestId('agentActionsBtn')[1]);
+      });
 
       expect(renderResult.queryByTestId('uninstallAgentMenuItem')).not.toBeInTheDocument();
     });
@@ -318,16 +377,22 @@ describe('agent_list_page', () => {
     it('should render "Uninstall agent" menu item for not managed Agent', async () => {
       expect(renderResult.queryByTestId('uninstallAgentMenuItem')).not.toBeInTheDocument();
 
-      fireEvent.click(renderResult.getAllByTestId('agentActionsBtn')[0]);
+      await act(async () => {
+        fireEvent.click(renderResult.getAllByTestId('agentActionsBtn')[0]);
+      });
 
       expect(renderResult.queryByTestId('uninstallAgentMenuItem')).toBeInTheDocument();
     });
 
-    it('should open uninstall commands flyout when clicking on "Uninstall agent"', () => {
-      fireEvent.click(renderResult.getAllByTestId('agentActionsBtn')[0]);
+    it('should open uninstall commands flyout when clicking on "Uninstall agent"', async () => {
+      await act(async () => {
+        fireEvent.click(renderResult.getAllByTestId('agentActionsBtn')[0]);
+      });
       expect(renderResult.queryByTestId('uninstall-command-flyout')).not.toBeInTheDocument();
 
-      fireEvent.click(renderResult.getByTestId('uninstallAgentMenuItem'));
+      await act(async () => {
+        fireEvent.click(renderResult.getByTestId('uninstallAgentMenuItem'));
+      });
 
       expect(renderResult.queryByTestId('uninstall-command-flyout')).toBeInTheDocument();
     });

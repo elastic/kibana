@@ -47,6 +47,8 @@ export type {
 
 export type { DslQuery, KueryNode, KueryParseOptions, KueryQueryOptions } from './src/kuery';
 
+export type { ProjectRouting } from './src/project_routing';
+
 export {
   buildEsQuery,
   buildQueryFromFilters,
@@ -63,10 +65,11 @@ export {
 
 export { kqlQuery, dateRangeQuery, termQuery } from './src/es_query/helpers';
 
+export { FilterStateStore } from '@kbn/es-query-constants';
+
 export {
   COMPARE_ALL_OPTIONS,
   FILTERS,
-  FilterStateStore,
   buildCustomFilter,
   buildEmptyFilter,
   buildExistsFilter,

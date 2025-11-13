@@ -161,9 +161,9 @@ describe('AutocompleteSelector', () => {
   describe('Field Type Icons', () => {
     it('renders field type icons when showIcon is true and suggestions include type information', async () => {
       const suggestionsWithTypes = [
-        { name: '@timestamp', type: 'date' },
-        { name: 'log.level', type: 'keyword' },
-        { name: 'message', type: 'text' },
+        { name: '@timestamp', type: 'date', icon: true },
+        { name: 'log.level', type: 'keyword', icon: true },
+        { name: 'message', type: 'text', icon: true },
       ];
 
       render(
@@ -183,8 +183,11 @@ describe('AutocompleteSelector', () => {
       expect(screen.getByTestId('field-icon-text')).toBeInTheDocument();
     });
 
-    it('renders unknown icons when showIcon is true and fields have no type information', async () => {
-      const suggestionsWithoutTypes = [{ name: '@timestamp' }, { name: 'log.level' }];
+    it('renders unknown icons for fields without type information', async () => {
+      const suggestionsWithoutTypes = [
+        { name: '@timestamp', icon: true },
+        { name: 'log.level', icon: true },
+      ];
 
       render(
         <AutocompleteSelector
@@ -225,8 +228,8 @@ describe('AutocompleteSelector', () => {
 
     it('does not show icon for selected value (icons only in dropdown)', () => {
       const suggestionsWithTypes = [
-        { name: 'log.level', type: 'keyword' },
-        { name: 'message', type: 'text' },
+        { name: 'log.level', type: 'keyword', icon: true },
+        { name: 'message', type: 'text', icon: true },
       ];
 
       render(
@@ -240,6 +243,26 @@ describe('AutocompleteSelector', () => {
 
       // Selected value should not have icon (only dropdown options have icons)
       expect(screen.queryByTestId('field-icon-keyword')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('field-icon-unknown')).not.toBeInTheDocument();
+    });
+
+    it('hides icons for suggestions when icon is not present', async () => {
+      const suggestionsWithTypes = [
+        { name: '@timestamp', type: 'date' },
+        { name: 'log.level', type: 'keyword' },
+        { name: 'message', type: 'text' },
+        { name: 'test_field' },
+      ];
+
+      render(<AutocompleteSelector {...defaultProps} suggestions={suggestionsWithTypes} />);
+
+      const toggleButton = screen.getByTestId('comboBoxToggleListButton');
+      await userEvent.click(toggleButton);
+
+      // Verify that field icons are not rendered for fields with types
+      expect(screen.queryByTestId('field-icon-date')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('field-icon-keyword')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('field-icon-text')).not.toBeInTheDocument();
       expect(screen.queryByTestId('field-icon-unknown')).not.toBeInTheDocument();
     });
   });

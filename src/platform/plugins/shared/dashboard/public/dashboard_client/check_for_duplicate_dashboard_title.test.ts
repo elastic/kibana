@@ -9,34 +9,32 @@
 
 import { checkForDuplicateDashboardTitle } from './check_for_duplicate_dashboard_title';
 import { extractTitleAndCount } from '../utils/extract_title_and_count';
-import { contentManagementService } from '../services/kibana_services';
+import type { DashboardSearchRequestBody } from '../../server';
+
+const mockSearchDashboards = jest.fn();
+jest.mock('./dashboard_client', () => ({
+  dashboardClient: {
+    search: (searchBody: DashboardSearchRequestBody) => mockSearchDashboards(searchBody),
+  },
+}));
 
 describe('checkForDuplicateDashboardTitle', () => {
   const newTitle = 'Shiny dashboard (1)';
 
-  afterEach(() => {
-    jest.clearAllMocks();
+  beforeEach(() => {
+    mockSearchDashboards.mockReset();
   });
 
   it('will only search using the dashboard basename', async () => {
     const [baseDashboardName] = extractTitleAndCount(newTitle);
-
-    const pageResults = [
-      {
-        attributes: {
-          title: baseDashboardName,
+    mockSearchDashboards.mockResolvedValue({
+      total: 1,
+      dashboards: [
+        {
+          data: { title: baseDashboardName },
         },
-      },
-    ];
-
-    contentManagementService.client.search = jest.fn().mockImplementationOnce(() =>
-      Promise.resolve({
-        hits: pageResults,
-        pagination: {
-          total: pageResults.length,
-        },
-      })
-    );
+      ],
+    });
 
     await checkForDuplicateDashboardTitle({
       title: newTitle,
@@ -45,13 +43,7 @@ describe('checkForDuplicateDashboardTitle', () => {
       isTitleDuplicateConfirmed: false,
     });
 
-    expect(contentManagementService.client.search).toHaveBeenCalledWith(
-      expect.objectContaining({
-        query: expect.objectContaining({
-          text: `${baseDashboardName}*`,
-        }),
-      })
-    );
+    expect(mockSearchDashboards).toHaveBeenCalledWith({ per_page: 20, search: 'Shiny dashboard' });
   });
 
   it('invokes onTitleDuplicate with a speculative collision free value when the new title provided is a duplicate match', async () => {
@@ -59,15 +51,15 @@ describe('checkForDuplicateDashboardTitle', () => {
 
     const userTitleInput = `${baseDashboardName} (10)`;
 
-    const pageResults = [
+    const dashboards = [
       {
-        attributes: {
+        data: {
           title: baseDashboardName,
         },
       },
     ].concat(
       Array.from(new Array(5)).map((_, idx) => ({
-        attributes: {
+        data: {
           title: `${baseDashboardName} (${10 + idx})`,
         },
       }))
@@ -75,14 +67,10 @@ describe('checkForDuplicateDashboardTitle', () => {
 
     const onTitleDuplicate = jest.fn();
 
-    contentManagementService.client.search = jest.fn().mockImplementationOnce(() =>
-      Promise.resolve({
-        hits: pageResults,
-        pagination: {
-          total: pageResults.length,
-        },
-      })
-    );
+    mockSearchDashboards.mockResolvedValue({
+      total: dashboards.length,
+      dashboards,
+    });
 
     await checkForDuplicateDashboardTitle({
       title: userTitleInput,
@@ -92,13 +80,7 @@ describe('checkForDuplicateDashboardTitle', () => {
       onTitleDuplicate,
     });
 
-    expect(contentManagementService.client.search).toHaveBeenCalledWith(
-      expect.objectContaining({
-        query: expect.objectContaining({
-          text: 'Shiny dashboard*',
-        }),
-      })
-    );
+    expect(mockSearchDashboards).toHaveBeenCalledWith({ per_page: 20, search: 'Shiny dashboard' });
 
     expect(onTitleDuplicate).toHaveBeenCalledWith(`${baseDashboardName} (15)`);
   });

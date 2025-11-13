@@ -485,10 +485,12 @@ export default function (providerContext: FtrProviderContext) {
         );
 
         // Should have knowledge base items indexed
+        // Note: ALL .md files from docs/ folder are indexed (including CHANGELOG.md, INSTALL.md, etc.)
         expect(knowledgeBaseItems.length).to.be.greaterThan(0);
-        expect(knowledgeBaseItems.length).to.equal(3); // overview, troubleshooting, configuration
+        // Expect: README, CHANGELOG, INSTALL, overview, troubleshooting, configuration
+        expect(knowledgeBaseItems.length).to.equal(6);
 
-        // Verify knowledge base items have correct structure with packageName-fileName IDs
+        // Verify knowledge base items have correct structure with packageName-fileName format
         // IDs follow the format: packageName-fileName (e.g., "knowledge_base_test-overview.md")
 
         // Verify all items have the correct type and structure
@@ -502,15 +504,22 @@ export default function (providerContext: FtrProviderContext) {
           expect(item.id).to.match(/^knowledge_base_test-.+\.md$/);
         });
 
-        // Verify specific expected document IDs
-        const expectedDocumentIds = [
+        // Verify that expected core documentation files are present
+        const expectedCoreDocumentIds = [
+          'knowledge_base_test-README.md',
+          'knowledge_base_test-CHANGELOG.md',
+          'knowledge_base_test-INSTALL.md',
           'knowledge_base_test-overview.md',
           'knowledge_base_test-troubleshooting.md',
           'knowledge_base_test-configuration.md',
         ];
 
-        const actualDocumentIds = knowledgeBaseItems.map((item: any) => item.id).sort();
-        expect(actualDocumentIds).to.eql(expectedDocumentIds.sort());
+        const actualDocumentIds = knowledgeBaseItems.map((item: any) => item.id);
+
+        // Check that all expected core docs are present
+        expectedCoreDocumentIds.forEach((expectedId: string) => {
+          expect(actualDocumentIds.includes(expectedId)).to.equal(true);
+        });
       });
     });
   });

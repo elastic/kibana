@@ -14,7 +14,6 @@ import {
   EuiFlexItem,
   EuiLink,
   EuiLoadingSpinner,
-  EuiSpacer,
   EuiSwitch,
   EuiText,
   EuiToolTip,
@@ -25,16 +24,15 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { WorkflowListItemDto } from '@kbn/workflows';
+import type { WorkflowListItemDto, WorkflowsSearchParams } from '@kbn/workflows';
+import { useWorkflows } from '@kbn/workflows-ui';
 import { WorkflowsUtilityBar } from './workflows_utility_bar';
 import { WorkflowsEmptyState } from '../../../components';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
-import { useWorkflows } from '../../../entities/workflows/model/use_workflows';
 import { useKibana } from '../../../hooks/use_kibana';
-import { getRunWorkflowTooltipContent, StatusBadge, WorkflowStatus } from '../../../shared/ui';
+import { getRunTooltipContent, StatusBadge, WorkflowStatus } from '../../../shared/ui';
 import { NextExecutionTime } from '../../../shared/ui/next_execution_time';
 import { shouldShowWorkflowsEmptyState } from '../../../shared/utils/workflow_utils';
-import type { WorkflowsSearchParams } from '../../../types';
 import { WorkflowsTriggersList } from '../../../widgets/worflows_triggers_list/worflows_triggers_list';
 import { WorkflowTags } from '../../../widgets/workflow_tags/workflow_tags';
 import { WorkflowExecuteModal } from '../../run_workflow/ui/workflow_execute_modal';
@@ -158,7 +156,6 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
         field: 'name',
         name: 'Name',
         dataType: 'string',
-        width: '45%',
         render: (name: string, item) => (
           <div
             css={css`
@@ -185,7 +182,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiText
-                  size="s"
+                  size="xs"
                   color="subdued"
                   title={item.description}
                   css={css`
@@ -220,7 +217,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
       {
         field: 'triggers',
         name: 'Trigger',
-        width: '16%',
+        width: '12%',
         render: (value: unknown, item: WorkflowListItemDto) => (
           <NextExecutionTime triggers={item.definition?.triggers ?? []} history={item.history}>
             <WorkflowsTriggersList triggers={item.definition?.triggers ?? []} />
@@ -297,7 +294,11 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
             }),
             icon: 'play',
             description: (item: WorkflowListItemDto) =>
-              getRunWorkflowTooltipContent(item.valid, !!canExecuteWorkflow, item.enabled, false) ??
+              getRunTooltipContent({
+                isValid: item.valid,
+                canRunWorkflow: !!canExecuteWorkflow,
+                isEnabled: item.enabled,
+              }) ??
               i18n.translate('workflows.workflowList.run', {
                 defaultMessage: 'Run',
               }),
@@ -434,13 +435,15 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
         showStart={showStart}
         showEnd={showEnd}
       />
-      <EuiSpacer />
       <EuiBasicTable
         css={css`
           .euiBasicTableAction-showOnHover {
             opacity: 1 !important;
           }
         `}
+        rowProps={() => ({
+          style: { height: '68px' },
+        })}
         columns={columns}
         items={workflows?.results ?? []}
         itemId="id"
@@ -466,6 +469,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
       {executeWorkflow?.definition && (
         <WorkflowExecuteModal
           definition={executeWorkflow.definition}
+          workflowId={executeWorkflow.id}
           onClose={() => setExecuteWorkflow(null)}
           onSubmit={(event) => handleRunWorkflow(executeWorkflow.id, event)}
         />

@@ -7,6 +7,7 @@
 
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { SiemSearchBar } from '../../../../common/components/search_bar';
 import { FiltersGlobal } from '../../../../common/components/filters_global';
@@ -26,6 +27,7 @@ import { useColumnSettings } from '../hooks/use_column_settings';
 import { IndicatorsFilters } from '../containers/filters';
 import { UpdateStatus } from '../../../components/update_status';
 import { ScreenReaderAnnouncementsProvider } from '../containers/screen_reader_a11y';
+import { useKibana } from '../../../../common/lib/kibana';
 
 const IndicatorsPageProviders: FC<PropsWithChildren<unknown>> = ({ children }) => (
   <ScreenReaderAnnouncementsProvider>
@@ -42,7 +44,10 @@ const IndicatorsPageProviders: FC<PropsWithChildren<unknown>> = ({ children }) =
 const IndicatorsPageContent: FC = () => {
   const { blockListIndicatorValue } = useBlockListContext();
 
-  const { sourcererDataView, browserFields } = useTIDataView();
+  const { sourcererDataView: sourcererDataViewSpec, browserFields } = useTIDataView();
+
+  const { fieldFormats } = useKibana().services;
+  const dataView = new DataView({ spec: sourcererDataViewSpec, fieldFormats });
 
   const columnSettings = useColumnSettings();
 
@@ -84,7 +89,11 @@ const IndicatorsPageContent: FC = () => {
         subHeader={<UpdateStatus isUpdating={isFetchingIndicators} updatedAt={dataUpdatedAt} />}
       >
         <FiltersGlobal>
-          <SiemSearchBar id={InputsModelId.global} sourcererDataView={sourcererDataView} />
+          <SiemSearchBar
+            dataView={dataView}
+            id={InputsModelId.global}
+            sourcererDataViewSpec={sourcererDataViewSpec} // TODO remove when we remove the newDataViewPickerEnabled feature flag
+          />
         </FiltersGlobal>
 
         <IndicatorsBarChartWrapper

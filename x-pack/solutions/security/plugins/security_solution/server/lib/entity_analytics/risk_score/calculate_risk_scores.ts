@@ -155,7 +155,7 @@ export const buildFiltersForEntityType = (
       try {
         const esQuery = toElasticsearchQuery(fromKueryExpression(f.filter));
         filters.push({
-          bool: { must_not: esQuery },
+          bool: { must: esQuery },
         });
       } catch (error) {
         // Log warning but don't fail the entire query

@@ -48,8 +48,8 @@ describe('hidden functions', () => {
 
     const { suggest } = await setup();
     const suggestedFunctions = (await suggest('FROM index | EVAL /')).map((s) => s.text);
-    expect(suggestedFunctions).toContain('VISIBLE_FUNCTION($0)');
-    expect(suggestedFunctions).not.toContain('HIDDEN_FUNCTION($0)');
+    expect(suggestedFunctions).toContain('VISIBLE_FUNCTION()');
+    expect(suggestedFunctions).not.toContain('HIDDEN_FUNCTION()');
   });
 
   it('does not suggest hidden agg functions', async () => {
@@ -74,8 +74,8 @@ describe('hidden functions', () => {
 
     const { suggest } = await setup();
     const suggestedFunctions = (await suggest('FROM index | STATS /')).map((s) => s.text);
-    expect(suggestedFunctions).toContain('VISIBLE_FUNCTION($0)');
-    expect(suggestedFunctions).not.toContain('HIDDEN_FUNCTION($0)');
+    expect(suggestedFunctions).toContain('VISIBLE_FUNCTION()');
+    expect(suggestedFunctions).not.toContain('HIDDEN_FUNCTION()');
   });
 
   it('does not suggest hidden operators', async () => {

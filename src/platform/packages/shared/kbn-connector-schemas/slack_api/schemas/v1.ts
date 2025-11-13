@@ -8,6 +8,8 @@
  */
 import { z } from '@kbn/zod';
 
+export const MAX_ALLOWED_CHANNELS = 500;
+
 export const SlackApiSecretsSchema = z
   .object({
     token: z.string().min(1),
@@ -20,12 +22,12 @@ export const SlackApiConfigSchema = z
       .array(
         z
           .object({
-            id: z.string().min(1),
+            id: z.string().min(1).optional(),
             name: z.string().min(1),
           })
           .strict()
       )
-      .max(500)
+      .max(MAX_ALLOWED_CHANNELS)
       .optional(),
   })
   .strict();
@@ -45,8 +47,17 @@ export const ValidChannelIdParamsSchema = z
 
 export const PostMessageSubActionParamsSchema = z
   .object({
+    /**
+     * @deprecated Use `channelNames` or `channelIds` instead
+     * `channelNames` takes priority over `channelIds` and `channels`
+     */
     channels: z.array(z.string()).max(1).optional(),
     channelIds: z.array(z.string()).max(1).optional(),
+    channelNames: z
+      // min of two characters to account for '#' prefix
+      .array(z.string().min(2).max(200).superRefine(validateChannelName))
+      .max(1)
+      .optional(),
     text: z.string().min(1),
   })
   .strict();
@@ -69,10 +80,32 @@ export function validateBlockkit(text: string, ctx: z.RefinementCtx) {
   }
 }
 
+export function validateChannelName(value: string | undefined, ctx: z.RefinementCtx) {
+  if (!value || value.length === 0) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Channel name cannot be empty',
+    });
+    return;
+  }
+
+  if (!value.startsWith('#')) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Channel name must start with #',
+    });
+  }
+}
+
 export const PostBlockkitSubActionParamsSchema = z
   .object({
+    /**
+     * @deprecated Use `channelNames` or `channelIds` instead
+     * `channelNames` takes priority over `channelIds` and `channels`
+     */
     channels: z.array(z.string()).max(1).optional(),
     channelIds: z.array(z.string()).max(1).optional(),
+    channelNames: z.array(z.string().superRefine(validateChannelName)).max(1).optional(),
     text: z.string().superRefine(validateBlockkit),
   })
   .strict();

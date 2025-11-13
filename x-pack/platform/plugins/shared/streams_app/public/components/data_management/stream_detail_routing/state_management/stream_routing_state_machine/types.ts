@@ -16,6 +16,7 @@ import type { StreamsTelemetryClient } from '../../../../../telemetry/client';
 import type { RoutingDefinitionWithUIAttributes } from '../../types';
 import type { DocumentMatchFilterOptions } from '.';
 import type { RoutingSamplesContext } from './routing_samples_state_machine';
+import type { PartitionSuggestion } from '../../review_suggestions_form/use_review_suggestions_form';
 
 export interface StreamRoutingServiceDependencies {
   forkSuccessNofitier: (streamName: string) => void;
@@ -37,6 +38,8 @@ export interface StreamRoutingContext {
   initialRouting: RoutingDefinitionWithUIAttributes[];
   routing: RoutingDefinitionWithUIAttributes[];
   suggestedRuleId: string | null;
+  editingSuggestionIndex: number | null;
+  editedSuggestion: PartitionSuggestion | null;
 }
 
 export type StreamRoutingEvent =
@@ -58,4 +61,8 @@ export type StreamRoutingEvent =
       index: number;
       toggle?: boolean;
     }
-  | { type: 'routingRule.reviewSuggested'; id: string };
+  | { type: 'routingRule.reviewSuggested'; id: string }
+  | { type: 'suggestion.edit'; index: number; suggestion: PartitionSuggestion }
+  | { type: 'suggestion.changeName'; name: string }
+  | { type: 'suggestion.changeCondition'; condition: Condition }
+  | { type: 'suggestion.saveSuggestion' };

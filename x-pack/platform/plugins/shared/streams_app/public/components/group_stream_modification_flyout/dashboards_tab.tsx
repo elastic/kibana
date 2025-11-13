@@ -25,14 +25,14 @@ export function DashboardsTab({ formData, setFormData }: TabProps) {
     async (search: string = '') => {
       const findDashboardsService = await dashboardStart.findDashboardsService();
       const searchResults = await findDashboardsService.search({
-        size: 10000,
+        per_page: 10000,
         search,
       });
 
       setFoundDashboards(
-        searchResults.hits.map((hit) => ({
-          title: hit.attributes.title,
-          id: hit.id,
+        searchResults.dashboards.map(({ id, data }) => ({
+          title: data.title,
+          id,
         }))
       );
     },

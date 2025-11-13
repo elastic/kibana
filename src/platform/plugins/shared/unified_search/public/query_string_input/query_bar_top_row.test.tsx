@@ -309,7 +309,9 @@ describe('QueryBarTopRowTopRow', () => {
             )
           );
 
-          await user.click(getByTestId('queryCancelButton-secondary-button'));
+          const button = getByTestId('queryCancelButton-secondary-button');
+          await waitFor(() => expect(button).toBeEnabled(), { timeout: 1000 });
+          await user.click(button);
 
           // Then
           expect(onSendToBackground).toHaveBeenCalled();

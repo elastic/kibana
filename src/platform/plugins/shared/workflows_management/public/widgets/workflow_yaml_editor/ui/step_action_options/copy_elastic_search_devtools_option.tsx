@@ -13,9 +13,12 @@ import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ElasticsearchGraphNode } from '@kbn/workflows/graph/types';
+import {
+  selectEditorFocusedStepInfo,
+  selectEditorWorkflowGraph,
+} from '../../../../entities/workflows/store';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { getElasticsearchRequestInfo } from '../../lib/elasticsearch_step_utils';
-import { selectFocusedStepInfo, selectWorkflowGraph } from '../../lib/store';
 
 export interface CopyElasticSearchDevToolsOptionProps {
   onClick: () => void;
@@ -24,8 +27,8 @@ export interface CopyElasticSearchDevToolsOptionProps {
 export const CopyElasticSearchDevToolsOption: React.FC<CopyElasticSearchDevToolsOptionProps> = ({
   onClick,
 }) => {
-  const workflowGraph = useSelector(selectWorkflowGraph);
-  const focusedStepInfo = useSelector(selectFocusedStepInfo);
+  const workflowGraph = useSelector(selectEditorWorkflowGraph);
+  const focusedStepInfo = useSelector(selectEditorFocusedStepInfo);
   const {
     services: { notifications },
   } = useKibana();

@@ -12,6 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ToolbarSelector, type SelectableEntry } from '@kbn/shared-ux-toolbar-selector';
 import { comboBoxFieldOptionMatcher } from '@kbn/field-utils';
+import { css } from '@emotion/react';
 import {
   MAX_DIMENSIONS_SELECTIONS,
   METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ,
@@ -23,8 +24,8 @@ interface DimensionsFilterProps {
     dimensions: Array<{ name: string; type: string; description?: string }>;
   }>;
   selectedDimensions: string[];
+  fullWidth?: boolean;
   onChange: (dimensions: string[]) => void;
-  onClear: () => void;
   singleSelection?: boolean;
 }
 
@@ -32,7 +33,7 @@ export const DimensionsSelector = ({
   fields,
   selectedDimensions,
   onChange,
-  onClear,
+  fullWidth = false,
   singleSelection = false,
 }: DimensionsFilterProps) => {
   // Extract all unique dimensions from fields that match the search term
@@ -126,8 +127,13 @@ export const DimensionsSelector = ({
       );
     }
     return (
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-        <EuiFlexItem grow={false}>
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem
+          grow={false}
+          css={css`
+            align-items: flex-start;
+          `}
+        >
           <FormattedMessage
             id="metricsExperience.dimensionsSelector.breakdownFieldButtonLabelWithSelection"
             defaultMessage="Breakdown by {dimensionLabel}"
@@ -148,6 +154,7 @@ export const DimensionsSelector = ({
       options={options}
       singleSelection={singleSelection}
       onChange={handleChange}
+      fullWidth={fullWidth}
     />
   );
 };

@@ -102,6 +102,83 @@
       },
       {
         "parentPluginId": "@kbn/workspaces",
+        "id": "def-server.activateWorktreeOrUseSourceRepo",
+        "type": "Function",
+        "tags": [],
+        "label": "activateWorktreeOrUseSourceRepo",
+        "description": [],
+        "signature": [
+          "({\n  log,\n  ref,\n}: { log: ",
+          {
+            "pluginId": "@kbn/tooling-log",
+            "scope": "common",
+            "docId": "kibKbnToolingLogPluginApi",
+            "section": "def-common.ToolingLog",
+            "text": "ToolingLog"
+          },
+          "; ref?: string | undefined; }) => Promise<",
+          "WorktreeWorkspace",
+          " | ",
+          "SourceRepoWorkspace",
+          ">"
+        ],
+        "path": "src/platform/packages/shared/kbn-workspaces/src/activate_worktree_or_use_source_repo.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workspaces",
+            "id": "def-server.activateWorktreeOrUseSourceRepo.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  log,\n  ref,\n}",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-workspaces/src/activate_worktree_or_use_source_repo.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/workspaces",
+                "id": "def-server.activateWorktreeOrUseSourceRepo.$1.log",
+                "type": "Object",
+                "tags": [],
+                "label": "log",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/tooling-log",
+                    "scope": "common",
+                    "docId": "kibKbnToolingLogPluginApi",
+                    "section": "def-common.ToolingLog",
+                    "text": "ToolingLog"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-workspaces/src/activate_worktree_or_use_source_repo.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/workspaces",
+                "id": "def-server.activateWorktreeOrUseSourceRepo.$1.ref",
+                "type": "string",
+                "tags": [],
+                "label": "ref",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-workspaces/src/activate_worktree_or_use_source_repo.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workspaces",
         "id": "def-server.getWorkspaceFromSourceRepo",
         "type": "Function",
         "tags": [],

@@ -14,3 +14,8 @@ export interface ListConversationsResponse {
 export interface DeleteConversationResponse {
   success: boolean;
 }
+
+export interface RenameConversationResponse {
+  id: string;
+  title: string;
+}

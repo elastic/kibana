@@ -643,11 +643,10 @@ export const RuleDetailsPage = connector(
           <EuiWindowEvent event="resize" handler={noop} />
           <FiltersGlobal>
             <SiemSearchBar
-              id={InputsModelId.global}
+              dataView={experimentalDataView}
               pollForSignalIndex={pollForSignalIndex}
-              sourcererDataView={
-                newDataViewPickerEnabled ? experimentalDataView : oldSourcererDataViewSpec
-              }
+              id={InputsModelId.global}
+              sourcererDataViewSpec={oldSourcererDataViewSpec} // TODO remove when we remove the newDataViewPickerEnabled feature flag
             />
           </FiltersGlobal>
           <RuleDetailsContextProvider>
