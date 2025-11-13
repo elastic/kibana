@@ -134,5 +134,9 @@ export const transformScheduledReport = (report: ScheduledReportApiJSON): Schedu
     recurring: true,
     sendByEmail: Boolean(notification?.email),
     emailRecipients: [...(notification?.email?.to || [])],
+    emailCcRecipients: [...(notification?.email?.cc || [])],
+    emailBccRecipients: [...(notification?.email?.bcc || [])],
+    emailSubject: notification?.email?.subject ?? '',
+    emailMessage: notification?.email?.message ?? '',
   };
 };
