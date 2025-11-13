@@ -469,6 +469,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
       {executeWorkflow?.definition && (
         <WorkflowExecuteModal
           definition={executeWorkflow.definition}
+          workflowId={executeWorkflow.id}
           onClose={() => setExecuteWorkflow(null)}
           onSubmit={(event) => handleRunWorkflow(executeWorkflow.id, event)}
         />

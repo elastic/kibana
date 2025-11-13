@@ -163,6 +163,7 @@ export interface WorkflowExecutionDto {
   workflowId?: string;
   workflowName?: string;
   workflowDefinition: WorkflowYaml;
+  /** If specified, only this step and its children were executed */
   stepId?: string | undefined;
   stepExecutions: WorkflowStepExecutionDto[];
   duration: number | null;

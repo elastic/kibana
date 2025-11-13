@@ -10,13 +10,12 @@
 import React, { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
-import { setIsTestModalOpen } from '../../../entities/workflows/store';
 import {
-  selectHasChanges,
   selectIsTestModalOpen,
   selectWorkflowDefinition,
+  selectWorkflowId,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
-import { runWorkflowThunk } from '../../../entities/workflows/store/workflow_detail/thunks/run_workflow_thunk';
+import { setIsTestModalOpen } from '../../../entities/workflows/store/workflow_detail/slice';
 import { testWorkflowThunk } from '../../../entities/workflows/store/workflow_detail/thunks/test_workflow_thunk';
 import { WorkflowExecuteModal } from '../../../features/run_workflow/ui/workflow_execute_modal';
 import { useAsyncThunk } from '../../../hooks/use_async_thunk';
@@ -33,22 +32,17 @@ export const WorkflowDetailTestModal = () => {
 
   const isTestModalOpen = useSelector(selectIsTestModalOpen);
   const definition = useSelector(selectWorkflowDefinition);
-  const hasChanges = useSelector(selectHasChanges);
+  const workflowId = useSelector(selectWorkflowId);
 
   const testWorkflow = useAsyncThunk(testWorkflowThunk);
-  const runWorkflow = useAsyncThunk(runWorkflowThunk);
-
   const handleRunWorkflow = useCallback(
     async (inputs: Record<string, unknown>) => {
-      const workflowExecutionId = hasChanges
-        ? (await testWorkflow({ inputs }))?.workflowExecutionId
-        : (await runWorkflow({ inputs }))?.workflowExecutionId;
-
-      if (workflowExecutionId) {
-        setSelectedExecution(workflowExecutionId);
+      const result = await testWorkflow({ inputs });
+      if (result) {
+        setSelectedExecution(result.workflowExecutionId);
       }
     },
-    [hasChanges, runWorkflow, testWorkflow, setSelectedExecution]
+    [testWorkflow, setSelectedExecution]
   );
 
   const closeModal = useCallback(() => {
@@ -84,6 +78,7 @@ export const WorkflowDetailTestModal = () => {
   return (
     <WorkflowExecuteModal
       definition={definition}
+      workflowId={workflowId}
       onClose={closeModal}
       onSubmit={handleRunWorkflow}
     />
