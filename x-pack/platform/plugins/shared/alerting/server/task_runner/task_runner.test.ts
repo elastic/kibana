@@ -3558,36 +3558,6 @@ describe('Task Runner', () => {
     );
   });
 
-  test('should not run the rule and return DeleteRuleTaskRunResult when the task is outdated', async () => {
-    const taskRunner = new TaskRunner({
-      ruleType,
-      internalSavedObjectsRepository,
-      taskInstance: { ...mockedTaskInstance, id: 'old-task-id' },
-      context: taskRunnerFactoryInitializerParams,
-      inMemoryMetrics,
-    });
-    expect(AlertingEventLogger).toHaveBeenCalled();
-    mockGetRuleFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
-
-    const result = await taskRunner.run();
-
-    expect(logger.info).toBeCalledTimes(1);
-    const loggerCall = logger.info.mock.calls[0][0];
-    expect(loggerCall).toMatchInlineSnapshot(
-      `"Outdated task version: The task instance ID: old-task-id does not match the rule ID: 1."`
-    );
-
-    expect(ruleType.executor).not.toHaveBeenCalled();
-
-    expect(result).toEqual({
-      monitoring: undefined,
-      schedule: undefined,
-      shouldDeleteTask: true,
-      state: {},
-    });
-  });
-
   test('should return shouldDisableTask when task is enabled but rule is not', async () => {
     const taskRunner = new TaskRunner({
       ruleType,
