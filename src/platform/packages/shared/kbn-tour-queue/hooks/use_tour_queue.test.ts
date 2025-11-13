@@ -32,7 +32,7 @@ describe('useTourQueue', () => {
   });
 
   it('should return shouldShow as false for a waiting tour', () => {
-    const tour1Hook = renderHook(() => useTourQueue(TOUR_1));
+    renderHook(() => useTourQueue(TOUR_1));
     const tour2Hook = renderHook(() => useTourQueue(TOUR_2));
 
     expect(tour2Hook.result.current.shouldShow).toBe(false);
