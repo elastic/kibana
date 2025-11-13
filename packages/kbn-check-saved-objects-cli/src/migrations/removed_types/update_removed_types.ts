@@ -25,8 +25,12 @@ export async function updateRemovedTypes(
   }
 
   const errorMessage = fix
-    ? `❌ The following SO types are no longer registered: '${removedTypes.join(', ')}'. Updated 'removed_types.json' to prevent the same names from being reused in the future.`
-    : `❌ The following SO types are no longer registered: '${removedTypes.join(', ')}'. Please run with --fix to update 'removed_types.json'.`;
+    ? `❌ The following SO types are no longer registered: '${removedTypes.join(
+        ', '
+      )}'. Updated 'removed_types.json' to prevent the same names from being reused in the future.`
+    : `❌ The following SO types are no longer registered: '${removedTypes.join(
+        ', '
+      )}'. Please run with --fix to update 'removed_types.json'.`;
 
   throw new Error(errorMessage);
 }

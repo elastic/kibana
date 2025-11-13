@@ -12,7 +12,7 @@ import { set } from '@kbn/safer-lodash-set';
 import { buildTypesMappings } from '@kbn/core-saved-objects-migration-server-internal';
 import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects-base-server-internal';
 import { PLUGIN_SYSTEM_ENABLE_ALL_PLUGINS_CONFIG_PATH } from '@kbn/core-plugins-server-internal/src/constants';
-import { getRemovedTypes } from '@kbn/check-saved-objects-cli';
+import { getRemovedTypes } from '../..';
 
 export interface Result {
   mappings: SavedObjectsTypeMappingDefinitions;
