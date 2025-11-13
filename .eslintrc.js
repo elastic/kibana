@@ -1815,6 +1815,30 @@ module.exports = {
         'x-pack/solutions/**/test/api_integration/apis/cases/**/*.{ts, tsx}',
       ],
     },
+    /**
+     * Stack Connectors Specs package
+     * This package contains common code for public and server side
+     */
+    {
+      files: ['src/platform/packages/shared/kbn-connector-specs/**/*.{js,mjs,ts,tsx}'],
+      rules: {
+        'import/no-nodejs-modules': 'error',
+        'no-duplicate-imports': 'off',
+        'import/no-duplicates': 'error',
+        'no-restricted-imports': [
+          'error',
+          {
+            // prevents UI code from importing server side code and then webpack including it when doing builds
+            patterns: ['**/*server*'],
+            paths: RESTRICTED_IMPORTS,
+          },
+        ],
+        '@typescript-eslint/no-explicit-any': 'error',
+        '@typescript-eslint/no-non-null-assertion': 'error',
+        '@typescript-eslint/no-this-alias': 'error',
+        '@typescript-eslint/no-unused-vars': 'error',
+      },
+    },
 
     /**
      * Lens overrides
