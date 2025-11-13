@@ -57,12 +57,16 @@ export class AutomaticImportV2Plugin
   ) {
     this.logger.debug('automaticImportV2: Setup');
 
-    const coreStartServices = core.getStartServices().then(([coreStart, startPlugins]) => ({
+    const coreStartServices = core.getStartServices().then(([coreStart]) => ({
       esClient: coreStart.elasticsearch.client.asInternalUser as ElasticsearchClient,
     }));
     const esClientPromise = coreStartServices.then(({ esClient }) => esClient);
 
-    this.automaticImportService = new AutomaticImportService(this.logger, esClientPromise);
+    this.automaticImportService = new AutomaticImportService(
+      this.logger,
+      esClientPromise,
+      core.savedObjects
+    );
 
     const requestContextFactory = new RequestContextFactory({
       logger: this.logger,
@@ -76,8 +80,6 @@ export class AutomaticImportV2Plugin
       AutomaticImportV2PluginRequestHandlerContext,
       'automaticImportv2'
     >('automaticImportv2', (context, request) => requestContextFactory.create(context, request));
-
-    this.logger.debug('automaticImportV2: Setup complete');
     return {
       actions: plugins.actions,
     };
@@ -96,15 +98,29 @@ export class AutomaticImportV2Plugin
     this.logger.debug('automaticImportV2: Started');
 
     if (this.automaticImportService) {
-      if (plugins.security) {
-        this.automaticImportService.setSecurityService(core.security);
+      if (!plugins.security) {
+        throw new Error('Security service not initialized.');
       }
+
+      if (!core.savedObjects) {
+        throw new Error('SavedObjects service not initialized.');
+      }
+
+      this.automaticImportService
+        .initialize(core.security, core.savedObjects)
+        .then(() => {
+          this.logger.debug('AutomaticImportService initialized successfully');
+        })
+        .catch((error) => {
+          this.logger.error('Failed to initialize AutomaticImportService', error);
+        });
     }
 
     return {
       actions: plugins.actions,
       inference: plugins.inference,
       licensing: plugins.licensing,
+      security: plugins.security,
     };
   }
 

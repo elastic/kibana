@@ -26,6 +26,7 @@ const EndpointActionCalloutComponent = ({ basePath, editDisabled }: EndpointCall
       <>
         <EuiSpacer size="s" />
         <EuiCallOut
+          announceOnMount={false}
           color="warning"
           iconType="warning"
           title={
@@ -47,6 +48,7 @@ const EndpointActionCalloutComponent = ({ basePath, editDisabled }: EndpointCall
       <>
         <EuiSpacer size="s" />
         <EuiCallOut
+          announceOnMount
           color="warning"
           iconType="warning"
           title={
@@ -72,6 +74,7 @@ const EndpointActionCalloutComponent = ({ basePath, editDisabled }: EndpointCall
       <>
         <EuiSpacer size="s" />
         <EuiCallOut
+          announceOnMount
           color="warning"
           iconType="warning"
           title={

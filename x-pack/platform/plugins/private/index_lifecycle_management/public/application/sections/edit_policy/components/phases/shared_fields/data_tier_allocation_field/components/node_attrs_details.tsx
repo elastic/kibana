@@ -40,6 +40,7 @@ export const NodeAttrsDetails: React.FunctionComponent<Props> = ({ close, select
     const { statusCode, message } = error;
     content = (
       <EuiCallOut
+        announceOnMount
         title={
           <FormattedMessage
             id="xpack.indexLifecycleMgmt.editPolicy.nodeDetailsLoadingFailedTitle"

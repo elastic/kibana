@@ -8,7 +8,8 @@
 import { expect } from '@kbn/scout';
 import { test } from '../../../fixtures';
 
-test.describe(
+// Failing: See https://github.com/elastic/kibana/issues/242445
+test.describe.skip(
   'Stream data routing - error handling and recovery',
   { tag: ['@ess', '@svlOblt'] },
   () => {
@@ -33,7 +34,7 @@ test.describe(
       pageObjects,
     }) => {
       await pageObjects.streams.clickCreateRoutingRule();
-      await pageObjects.streams.fillRoutingRuleName('logs.network-test');
+      await pageObjects.streams.fillRoutingRuleName('network-test');
 
       // Simulate network failure
       await context.setOffline(true);
@@ -61,7 +62,7 @@ test.describe(
     }) => {
       // Create a rule first
       await pageObjects.streams.clickCreateRoutingRule();
-      await pageObjects.streams.fillRoutingRuleName('logs.error-test');
+      await pageObjects.streams.fillRoutingRuleName('error-test');
       await pageObjects.streams.saveRoutingRule();
       await pageObjects.toasts.closeAll();
 

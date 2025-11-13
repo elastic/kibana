@@ -254,7 +254,7 @@ The entity will be immediately deleted from the latest index.  It will remain av
       return supertest
         .delete(
           getRouteUrlForSpace(
-            replaceParams('/api/entity_store/entities/{entityType}/{entityId}', props.params),
+            replaceParams('/api/entity_store/entities/{entityType}', props.params),
             kibanaSpace
           )
         )

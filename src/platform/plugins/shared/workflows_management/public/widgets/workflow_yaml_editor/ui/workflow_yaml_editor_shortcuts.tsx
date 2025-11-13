@@ -8,34 +8,38 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiText, EuiTextColor } from '@elastic/eui';
+import { EuiButtonEmpty, EuiText, EuiTextColor } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isMac } from '../../../shared/utils/is_mac';
 
-export function WorkflowYAMLEditorShortcuts() {
+export interface WorkflowYAMLEditorShortcutsProps {
+  onOpenActionsMenu: (open: boolean) => void;
+}
+
+export function WorkflowYAMLEditorShortcuts({
+  onOpenActionsMenu,
+}: WorkflowYAMLEditorShortcutsProps) {
   const styles = useMemoCss(componentStyles);
 
   const commandKey = isMac() ? '⌘' : 'Ctrl';
 
   return (
-    <div>
-      <EuiText size="xs" css={styles.withKbd}>
-        <p css={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <b>
-            <FormattedMessage
-              id="workflows.workflowDetail.yamlEditor.actionsMenu"
-              defaultMessage="Actions menu"
-            />
-          </b>
-          <EuiTextColor color="subdued">
-            <kbd>{commandKey}</kbd> {'+'} <kbd>{'K'}</kbd>
-          </EuiTextColor>
-        </p>
+    <EuiButtonEmpty onClick={() => onOpenActionsMenu(true)} size="s">
+      <EuiText css={{ display: 'flex', alignItems: 'center', gap: '6px' }} size="xs">
+        <b>
+          <FormattedMessage
+            id="workflows.workflowDetail.yamlEditor.actionsMenu"
+            defaultMessage="Actions menu"
+          />
+        </b>
+        <EuiTextColor color="subdued" css={styles.withKbd}>
+          <kbd>{commandKey}</kbd> {'+'} <kbd>{'K'}</kbd>
+        </EuiTextColor>
       </EuiText>
-    </div>
+    </EuiButtonEmpty>
   );
 }
 
@@ -44,6 +48,10 @@ const componentStyles = {
     css({
       '& kbd': {
         borderColor: euiTheme.colors.borderBaseSubdued,
+        borderRadius: euiTheme.border.radius.small,
+        borderWidth: euiTheme.border.width.thin,
+        borderStyle: 'solid',
+        padding: `${euiTheme.size.xxs} ${euiTheme.size.xs}`,
       },
     }),
 };

@@ -97,7 +97,7 @@ export const PostInstallGoogleCloudShellModal: React.FunctionComponent<{
         {error && isError && (
           <>
             <EuiSpacer size="m" />
-            <EuiCallOut title={error} color="danger" iconType="error" />
+            <EuiCallOut announceOnMount title={error} color="danger" iconType="error" />
           </>
         )}
       </EuiModalBody>

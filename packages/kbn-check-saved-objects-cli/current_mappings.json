@@ -639,17 +639,20 @@
       },
       "observables": {
         "properties": {
+          "description": {
+            "type": "keyword"
+          },
           "typeKey": {
             "type": "keyword"
           },
           "value": {
             "type": "keyword"
-          },
-          "description": {
-            "type": "keyword"
           }
         },
         "type": "nested"
+      },
+      "total_observables": {
+        "type": "integer"
       },
       "owner": {
         "type": "keyword"
@@ -1070,6 +1073,40 @@
       },
       "version": {
         "type": "integer"
+      }
+    }
+  },
+  "data_stream-config": {
+    "dynamic": false,
+    "properties": {
+      "created_by": {
+        "type": "keyword"
+      },
+      "data_stream_id": {
+        "type": "keyword"
+      },
+      "integration_id": {
+        "type": "keyword"
+      },
+      "job_info": {
+        "properties": {
+          "job_id": {
+            "type": "keyword"
+          },
+          "job_type": {
+            "type": "keyword"
+          },
+          "status": {
+            "type": "keyword"
+          }
+        },
+        "type": "nested"
+      },
+      "metadata": {
+        "properties": {}
+      },
+      "result": {
+        "properties": {}
       }
     }
   },
@@ -2618,6 +2655,26 @@
       }
     }
   },
+  "integration-config": {
+    "dynamic": false,
+    "properties": {
+      "created_by": {
+        "type": "keyword"
+      },
+      "data_stream_count": {
+        "type": "integer"
+      },
+      "integration_id": {
+        "type": "keyword"
+      },
+      "metadata": {
+        "properties": {}
+      },
+      "status": {
+        "type": "keyword"
+      }
+    }
+  },
   "intercept_interaction_record": {
     "dynamic": false,
     "properties": {}
@@ -3153,6 +3210,17 @@
       "filter": {
         "dynamic": false,
         "properties": {}
+      },
+      "filters": {
+        "properties": {
+          "entity_types": {
+            "type": "keyword"
+          },
+          "filter": {
+            "type": "text"
+          }
+        },
+        "type": "nested"
       },
       "identifierType": {
         "type": "keyword"

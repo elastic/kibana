@@ -688,7 +688,7 @@
           "UnknownKeysParam",
           ", ",
           "ZodTypeAny",
-          ", { query?: unknown; path?: unknown; body?: unknown; }, { query?: unknown; path?: unknown; body?: unknown; }>"
+          ", { path?: unknown; query?: unknown; body?: unknown; }, { path?: unknown; query?: unknown; body?: unknown; }>"
         ],
         "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts",
         "deprecated": false,

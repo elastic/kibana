@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
+import { useMemo } from 'react';
 import type { QueryClient } from '@kbn/react-query';
 import produce from 'immer';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
@@ -49,6 +49,7 @@ export interface ConversationActions {
   }) => void;
   setAssistantMessage: ({ assistantMessage }: { assistantMessage: string }) => void;
   addAssistantMessageChunk: ({ messageChunk }: { messageChunk: string }) => void;
+  setTimeToFirstToken: ({ timeToFirstToken }: { timeToFirstToken: number }) => void;
   onConversationCreated: ({
     conversationId,
     title,
@@ -57,36 +58,83 @@ export interface ConversationActions {
     title: string;
   }) => void;
   deleteConversation: (id: string) => Promise<void>;
+  renameConversation: (id: string, title: string) => Promise<void>;
 }
 
 interface UseConversationActionsParams {
   conversationId?: string;
-  queryKey: string[];
   queryClient: QueryClient;
   conversationsService: ConversationsService;
   onConversationCreated?: (params: { conversationId: string; title: string }) => void;
   onDeleteConversation?: (params: { id: string; isCurrentConversation: boolean }) => void;
 }
 
-export const useConversationActions = ({
+interface CreateConversationActionsParams extends UseConversationActionsParams {
+  setAgentIdStorage: (value: string) => void;
+}
+
+const createConversationActions = ({
   conversationId,
-  queryKey,
   queryClient,
+  setAgentIdStorage,
   conversationsService,
   onConversationCreated,
   onDeleteConversation,
-}: UseConversationActionsParams): ConversationActions => {
-  const [, setAgentIdStorage] = useLocalStorage<string>(storageKeys.agentId);
+}: CreateConversationActionsParams): ConversationActions => {
+  const queryKey = queryKeys.conversations.byId(conversationId ?? newConversationId);
+  const setConversation = (updater: (conversation?: Conversation) => Conversation) => {
+    queryClient.setQueryData<Conversation>(queryKey, updater);
+  };
+  const setCurrentRound = (updater: (conversationRound: ConversationRound) => void) => {
+    setConversation(
+      produce((draft) => {
+        const round = draft?.rounds?.at(-1);
+        if (round) {
+          updater(round);
+        }
+      })
+    );
+  };
 
-  const setConversation = useCallback(
-    (updater: (conversation?: Conversation) => Conversation) => {
-      queryClient.setQueryData<Conversation>(queryKey, updater);
+  return {
+    removeNewConversationQuery: () => {
+      queryClient.removeQueries({ queryKey: queryKeys.conversations.byId(newConversationId) });
     },
-    [queryClient, queryKey]
-  );
+    invalidateConversation: () => {
+      queryClient.invalidateQueries({ queryKey });
+    },
 
-  const setAgentId = useCallback(
-    (agentId: string) => {
+    addOptimisticRound: ({ userMessage }: { userMessage: string }) => {
+      setConversation(
+        produce((draft) => {
+          const nextRound: ConversationRound = {
+            id: pendingRoundId,
+            input: { message: userMessage },
+            response: { message: '' },
+            steps: [],
+            started_at: new Date().toISOString(),
+            time_to_first_token: 0,
+            time_to_last_token: 0,
+          };
+
+          if (!draft) {
+            const newConversation = createNewConversation();
+            newConversation.rounds.push(nextRound);
+            return newConversation;
+          }
+
+          draft.rounds.push(nextRound);
+        })
+      );
+    },
+    removeOptimisticRound: () => {
+      setConversation(
+        produce((draft) => {
+          draft?.rounds?.pop();
+        })
+      );
+    },
+    setAgentId: (agentId: string) => {
       // We allow to change agent only at the start of the conversation
       if (conversationId) {
         return;
@@ -104,83 +152,23 @@ export const useConversationActions = ({
       );
       setAgentIdStorage(agentId);
     },
-    [conversationId, setConversation, setAgentIdStorage]
-  );
-
-  const setCurrentRound = useCallback(
-    (updater: (conversationRound: ConversationRound) => void) => {
-      setConversation(
-        produce((draft) => {
-          const round = draft?.rounds?.at(-1);
-          if (round) {
-            updater(round);
-          }
-        })
-      );
-    },
-    [setConversation]
-  );
-
-  const removeNewConversationQuery = useCallback(() => {
-    queryClient.removeQueries({ queryKey: queryKeys.conversations.byId(newConversationId) });
-  }, [queryClient]);
-
-  const invalidateConversation = useCallback(() => {
-    queryClient.invalidateQueries({ queryKey });
-  }, [queryClient, queryKey]);
-
-  const addOptimisticRound = useCallback(
-    ({ userMessage }: { userMessage: string }) => {
-      setConversation(
-        produce((draft) => {
-          const nextRound: ConversationRound = {
-            id: pendingRoundId,
-            input: { message: userMessage },
-            response: { message: '' },
-            steps: [],
-          };
-
-          if (!draft) {
-            const newConversation = createNewConversation();
-            newConversation.rounds.push(nextRound);
-            return newConversation;
-          }
-
-          draft.rounds.push(nextRound);
-        })
-      );
-    },
-    [setConversation]
-  );
-
-  const removeOptimisticRound = useCallback(() => {
-    setConversation(
-      produce((draft) => {
-        draft?.rounds?.pop();
-      })
-    );
-  }, [setConversation]);
-
-  const addReasoningStep = useCallback(
-    ({ step }: { step: ReasoningStep }) => {
+    addReasoningStep: ({ step }: { step: ReasoningStep }) => {
       setCurrentRound((round) => {
         round.steps.push(step);
       });
     },
-    [setCurrentRound]
-  );
-
-  const addToolCall = useCallback(
-    ({ step }: { step: ToolCallStep }) => {
+    addToolCall: ({ step }: { step: ToolCallStep }) => {
       setCurrentRound((round) => {
         round.steps.push(step);
       });
     },
-    [setCurrentRound]
-  );
-
-  const setToolCallProgress = useCallback(
-    ({ progress, toolCallId }: { progress: ToolCallProgress; toolCallId: string }) => {
+    setToolCallProgress: ({
+      progress,
+      toolCallId,
+    }: {
+      progress: ToolCallProgress;
+      toolCallId: string;
+    }) => {
       setCurrentRound((round) => {
         const step = round.steps.filter(isToolCallStep).find((s) => s.tool_call_id === toolCallId);
         if (step) {
@@ -191,11 +179,7 @@ export const useConversationActions = ({
         }
       });
     },
-    [setCurrentRound]
-  );
-
-  const setToolCallResult = useCallback(
-    ({ results, toolCallId }: { results: ToolResult[]; toolCallId: string }) => {
+    setToolCallResult: ({ results, toolCallId }: { results: ToolResult[]; toolCallId: string }) => {
       setCurrentRound((round) => {
         const step = round.steps.filter(isToolCallStep).find((s) => s.tool_call_id === toolCallId);
         if (step) {
@@ -203,29 +187,28 @@ export const useConversationActions = ({
         }
       });
     },
-    [setCurrentRound]
-  );
-
-  const setAssistantMessage = useCallback(
-    ({ assistantMessage }: { assistantMessage: string }) => {
+    setAssistantMessage: ({ assistantMessage }: { assistantMessage: string }) => {
       setCurrentRound((round) => {
         round.response.message = assistantMessage;
       });
     },
-    [setCurrentRound]
-  );
-
-  const addAssistantMessageChunk = useCallback(
-    ({ messageChunk }: { messageChunk: string }) => {
+    addAssistantMessageChunk: ({ messageChunk }: { messageChunk: string }) => {
       setCurrentRound((round) => {
         round.response.message += messageChunk;
       });
     },
-    [setCurrentRound]
-  );
-
-  const handleConversationCreated = useCallback(
-    ({ conversationId: id, title }: { conversationId: string; title: string }) => {
+    setTimeToFirstToken: ({ timeToFirstToken }: { timeToFirstToken: number }) => {
+      setCurrentRound((round) => {
+        round.time_to_first_token = timeToFirstToken;
+      });
+    },
+    onConversationCreated: ({
+      conversationId: id,
+      title,
+    }: {
+      conversationId: string;
+      title: string;
+    }) => {
       const current = queryClient.getQueryData<Conversation>(queryKey);
       if (!current) {
         throw new Error('Conversation not created');
@@ -248,11 +231,7 @@ export const useConversationActions = ({
         onConversationCreated({ conversationId: id, title });
       }
     },
-    [queryClient, queryKey, onConversationCreated]
-  );
-
-  const handleDeleteConversation = useCallback(
-    async (id: string) => {
+    deleteConversation: async (id: string) => {
       await conversationsService.delete({ conversationId: id });
 
       // Check if we're deleting the current conversation
@@ -266,22 +245,55 @@ export const useConversationActions = ({
         onDeleteConversation({ id, isCurrentConversation });
       }
     },
-    [conversationsService, conversationId, queryClient, onDeleteConversation]
+    renameConversation: async (id: string, title: string) => {
+      await conversationsService.rename({ conversationId: id, title });
+
+      // Update the conversation in cache if it exists
+      const conversationQueryKey = queryKeys.conversations.byId(id);
+      const currentConversation = queryClient.getQueryData<Conversation>(conversationQueryKey);
+      if (currentConversation) {
+        queryClient.setQueryData<Conversation>(
+          conversationQueryKey,
+          produce(currentConversation, (draft) => {
+            draft.title = title;
+          })
+        );
+      }
+
+      // Invalidate conversation list to get updated data from server
+      queryClient.invalidateQueries({ queryKey: queryKeys.conversations.all });
+    },
+  };
+};
+
+export const useConversationActions = ({
+  conversationId,
+  queryClient,
+  conversationsService,
+  onConversationCreated,
+  onDeleteConversation,
+}: UseConversationActionsParams): ConversationActions => {
+  const [, setAgentIdStorage] = useLocalStorage<string>(storageKeys.agentId);
+
+  const conversationActions = useMemo(
+    () =>
+      createConversationActions({
+        conversationId,
+        queryClient,
+        setAgentIdStorage,
+        conversationsService,
+        onConversationCreated,
+        onDeleteConversation,
+      }),
+    [
+      conversationId,
+      queryClient,
+      setAgentIdStorage,
+      conversationsService,
+      onConversationCreated,
+      onDeleteConversation,
+    ]
   );
 
-  return {
-    removeNewConversationQuery,
-    invalidateConversation,
-    addOptimisticRound,
-    removeOptimisticRound,
-    setAgentId,
-    addReasoningStep,
-    addToolCall,
-    setToolCallProgress,
-    setToolCallResult,
-    setAssistantMessage,
-    addAssistantMessageChunk,
-    onConversationCreated: handleConversationCreated,
-    deleteConversation: handleDeleteConversation,
-  };
+  return conversationActions;
 };

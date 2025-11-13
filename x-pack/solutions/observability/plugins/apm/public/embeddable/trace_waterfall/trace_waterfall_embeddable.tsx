@@ -5,6 +5,8 @@
  * 2.0.
  */
 import React from 'react';
+import { EuiCallOut } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { isPending, useFetcher } from '../../hooks/use_fetcher';
 import { Loading } from './loading';
 import type { ApmTraceWaterfallEmbeddableEntryProps } from './react_embeddable_factory';
@@ -43,9 +45,23 @@ export function TraceWaterfallEmbeddable({
     return <Loading />;
   }
 
+  if (data === undefined) {
+    return (
+      <EuiCallOut
+        announceOnMount
+        data-test-subj="TraceWaterfallEmbeddableNoData"
+        color="danger"
+        size="s"
+        title={i18n.translate('xpack.apm.traceWaterfallEmbeddable.noDataCalloutLabel', {
+          defaultMessage: 'Trace waterfall could not be loaded.',
+        })}
+      />
+    );
+  }
+
   return (
     <TraceWaterfall
-      traceItems={data?.traceItems!}
+      traceItems={data.traceItems}
       onClick={onNodeClick}
       scrollElement={scrollElement}
       getRelatedErrorsHref={getRelatedErrorsHref}

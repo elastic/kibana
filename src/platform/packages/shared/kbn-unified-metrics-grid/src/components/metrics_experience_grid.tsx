@@ -23,7 +23,7 @@ import {
   useEuiTheme,
   type EuiFlexGridProps,
 } from '@elastic/eui';
-import { Subject } from 'rxjs';
+import { Subject, shareReplay } from 'rxjs';
 import {
   METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ,
   METRICS_VALUES_SELECTOR_DATA_TEST_SUBJ,
@@ -75,10 +75,17 @@ export const MetricsExperienceGrid = ({
     [originalInput$]
   );
 
-  const discoverFetch$ = useFetch({
+  const baseFetch$ = useFetch({
     input$,
     beforeFetch: updateTimeRange,
   });
+
+  const discoverFetch$ = useMemo(
+    // Buffer and replay emissions to child components that subscribe in later useEffects
+    // without this, child components would miss emissions that occurred before they subscribed
+    () => baseFetch$.pipe(shareReplay({ bufferSize: 1, refCount: false })),
+    [baseFetch$]
+  );
 
   const indexPattern = useMemo(() => dataView?.getIndexPattern() ?? 'metrics-*', [dataView]);
   const { data: fields = [], isFetching: isFieldsLoading } = useMetricFieldsQuery({
@@ -86,10 +93,10 @@ export const MetricsExperienceGrid = ({
     timeRange,
   });
 
-  const { leftSideActions, rightSideActions } = useToolbarActions({
+  const { toggleActions, leftSideActions, rightSideActions } = useToolbarActions({
     fields,
-    indexPattern,
     renderToggleActions,
+    indexPattern,
     requestParams,
   });
 
@@ -131,6 +138,7 @@ export const MetricsExperienceGrid = ({
       id="metricsExperienceGrid"
       toolbarCss={chartToolbarCss}
       toolbar={{
+        toggleActions,
         leftSide: leftSideActions,
         rightSide: rightSideActions,
         additionalControls: {
@@ -145,6 +153,7 @@ export const MetricsExperienceGrid = ({
           ),
         },
       }}
+      toolbarWrapAt={isFullscreen ? 'l' : 'xl'}
       isComponentVisible={isComponentVisible}
       isFullscreen={isFullscreen}
       onKeyDown={onKeyDown}
@@ -172,18 +181,28 @@ export const MetricsExperienceGrid = ({
             direction="row"
           >
             <EuiFlexItem grow={false}>
-              {isFieldsLoading ? (
-                <EuiLoadingSpinner size="s" />
-              ) : (
-                <EuiText size="s">
-                  <strong>
-                    {i18n.translate('metricsExperience.grid.metricsCount.label', {
-                      defaultMessage: '{count} {count, plural, one {metric} other {metrics}}',
-                      values: { count: filteredFieldsCount },
-                    })}
-                  </strong>
-                </EuiText>
-              )}
+              <EuiFlexGroup
+                justifyContent="spaceBetween"
+                alignItems="center"
+                responsive={false}
+                gutterSize="s"
+              >
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s">
+                    <strong>
+                      {i18n.translate('metricsExperience.grid.metricsCount.label', {
+                        defaultMessage: '{count} {count, plural, one {metric} other {metrics}}',
+                        values: { count: filteredFieldsCount },
+                      })}
+                    </strong>
+                  </EuiText>
+                </EuiFlexItem>
+                {isFieldsLoading && (
+                  <EuiFlexItem grow={false}>
+                    <EuiLoadingSpinner size="s" />
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiBetaBadge
@@ -218,6 +237,7 @@ export const MetricsExperienceGrid = ({
             discoverFetch$={discoverFetch$}
             requestParams={requestParams}
             abortController={abortController}
+            searchTerm={searchTerm}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
