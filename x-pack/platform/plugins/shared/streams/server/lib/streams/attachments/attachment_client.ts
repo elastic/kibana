@@ -158,8 +158,8 @@ export class AttachmentClient {
   /**
    * Unlinks an attachment from a stream.
    *
-   * Removes the stream name from the attachment's list of associated streams.
-   * If this is the last stream associated with the attachment, deletes the attachment entirely.
+   * Removes the stream name from the attachment's link.
+   * If this is the last stream associated with the link, deletes the link entirely.
    *
    * @param streamName - The name of the stream to unlink the attachment from
    * @param attachment - The attachment link containing the attachment id and type
