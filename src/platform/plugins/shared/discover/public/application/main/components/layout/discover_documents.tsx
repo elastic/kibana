@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { memo, useCallback, useMemo, useRef } from 'react';
+import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
 import {
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -109,7 +109,7 @@ function DiscoverDocumentsComponent({
   stateContainer: DiscoverStateContainer;
   onFieldEdited?: (options: { editedDataView: DataView }) => void;
 }) {
-  const [isDataGridFullScreen, setIsDataGridFullScreen] = React.useState(false);
+  const [isDataGridFullScreen, setIsDataGridFullScreen] = useState(false);
   const styles = useMemoCss(componentStyles);
   const services = useDiscoverServices();
   const { scopedEBTManager } = useScopedServices();
@@ -501,9 +501,7 @@ function DiscoverDocumentsComponent({
             cellActionsHandling="append"
             initialState={dataGridUiState}
             onInitialStateChange={onInitialStateChange}
-            onFullScreenChange={(isFullScreen) => {
-              setIsDataGridFullScreen(isFullScreen);
-            }}
+            onFullScreenChange={setIsDataGridFullScreen}
           />
         </CellActionsProvider>
       </div>
