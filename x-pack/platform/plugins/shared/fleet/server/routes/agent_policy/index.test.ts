@@ -69,7 +69,7 @@ jest.mock('../../services', () => ({
 }));
 
 jest.mock('../../services/agents', () => ({
-  getLatestAvailableAgentVersion: jest.fn().mockResolvedValue('1.0.0'),
+  getLatestAgentAvailableDockerImageVersion: jest.fn().mockResolvedValue('1.0.0'),
 }));
 
 describe('schema validation', () => {
