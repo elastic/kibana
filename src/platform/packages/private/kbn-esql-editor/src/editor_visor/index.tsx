@@ -22,6 +22,10 @@ import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { SourcesDropdown } from './sources_dropdown';
 import { visorStyles } from './visor.styles';
 
+const searchPlaceholder = i18n.translate('esqlEditor.visor.searchPlaceholder', {
+  defaultMessage: 'Search ...',
+});
+
 export function QuickSearchVisor({
   query,
   isSpaceReduced,
@@ -115,52 +119,50 @@ export function QuickSearchVisor({
   );
 
   return (
-    <EuiFlexGroup
-      gutterSize="none"
-      alignItems="center"
-      justifyContent="flexStart"
-      responsive={false}
-      css={styles.visorWrapper}
-    >
-      <EuiFlexItem css={styles.comboBoxWrapper}>
-        <SourcesDropdown
-          currentSource={selectedSource[0]?.label || ''}
-          onChangeSource={(newSource) => {
-            setSelectedSource([{ label: newSource }]);
-            userSelectedSourceRef.current = true;
-          }}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false} css={styles.separator} />
-      <EuiFlexItem css={styles.searchWrapper}>
-        <EuiFieldText
-          placeholder={i18n.translate('esqlEditor.visor.searchPlaceholder', {
-            defaultMessage: 'Search ...',
-          })}
-          value={searchValue}
-          onChange={onSearchValueChange}
-          onKeyDown={onSearchKeyDown}
-          onClick={onSearchClick}
-          aria-label={i18n.translate('esqlEditor.visor.searchPlaceholder', {
-            defaultMessage: 'Search ...',
-          })}
-          inputRef={searchInputRef}
-          compressed
-          fullWidth
-          css={styles.searchFieldStyles}
-          append={
-            <EuiButtonIcon
-              color="text"
-              iconSize="m"
-              onClick={onClose}
-              iconType="cross"
-              aria-label={i18n.translate('esqlEditor.visor.searchClearLabel', {
-                defaultMessage: 'Clear the search',
-              })}
-            />
-          }
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <div css={styles.visorContainer} data-test-subj="ESQLEditor-quick-search-visor">
+      <EuiFlexGroup
+        gutterSize="none"
+        alignItems="center"
+        justifyContent="flexStart"
+        responsive={false}
+        css={styles.visorWrapper}
+      >
+        <EuiFlexItem css={styles.comboBoxWrapper}>
+          <SourcesDropdown
+            currentSource={selectedSource[0]?.label || ''}
+            onChangeSource={(newSource) => {
+              setSelectedSource([{ label: newSource }]);
+              userSelectedSourceRef.current = true;
+            }}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} css={styles.separator} />
+        <EuiFlexItem css={styles.searchWrapper}>
+          <EuiFieldText
+            placeholder={searchPlaceholder}
+            value={searchValue}
+            onChange={onSearchValueChange}
+            onKeyDown={onSearchKeyDown}
+            onClick={onSearchClick}
+            aria-label={searchPlaceholder}
+            inputRef={searchInputRef}
+            compressed
+            fullWidth
+            css={styles.searchFieldStyles}
+            append={
+              <EuiButtonIcon
+                color="text"
+                iconSize="m"
+                onClick={onClose}
+                iconType="cross"
+                aria-label={i18n.translate('esqlEditor.visor.searchClearLabel', {
+                  defaultMessage: 'Clear the search',
+                })}
+              />
+            }
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </div>
   );
 }

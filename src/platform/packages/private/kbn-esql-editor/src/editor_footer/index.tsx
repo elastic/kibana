@@ -66,6 +66,7 @@ interface EditorFooterProps {
   isSpaceReduced?: boolean;
   hideTimeFilterInfo?: boolean;
   hideQueryHistory?: boolean;
+  hideQuickSearch?: boolean;
   displayDocumentationAsFlyout?: boolean;
   dataErrorsControl?: DataErrorsControl;
   telemetryService: ESQLEditorTelemetryService;
@@ -92,6 +93,7 @@ export const EditorFooter = memo(function EditorFooter({
   isLanguageComponentOpen,
   setIsLanguageComponentOpen,
   hideQueryHistory,
+  hideQuickSearch,
   displayDocumentationAsFlyout,
   measuredContainerWidth,
   code,
@@ -247,7 +249,7 @@ export const EditorFooter = memo(function EditorFooter({
             <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
               {!Boolean(editorIsInline) && (
                 <>
-                  <QuickSearchAction toggleVisor={toggleVisor} />
+                  {!hideQuickSearch && <QuickSearchAction toggleVisor={toggleVisor} />}
                   <SubmitFeedbackComponent />
                   {!hideQueryHistory && (
                     <QueryHistoryAction
@@ -310,6 +312,7 @@ export const EditorFooter = memo(function EditorFooter({
             <>
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
+                  {!hideQuickSearch && <QuickSearchAction toggleVisor={toggleVisor} />}
                   <SubmitFeedbackComponent isSpaceReduced={true} />
                   {!hideQueryHistory && (
                     <QueryHistoryAction
