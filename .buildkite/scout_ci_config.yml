@@ -13,4 +13,5 @@ plugins:
 
 packages:
   enabled:
+    - kbn-scout-release-testing
   disabled:
