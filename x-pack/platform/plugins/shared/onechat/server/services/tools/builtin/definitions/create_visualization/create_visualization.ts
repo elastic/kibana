@@ -13,9 +13,9 @@ import parse from 'joi-to-json';
 
 import { esqlMetricState } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/metric';
 import { getToolResultId } from '@kbn/onechat-server';
+import { AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID } from '@kbn/management-settings-ids';
 import { guessChartType } from './guess_chart_type';
 import { createVisualizationGraph } from './graph_lens';
-import { AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID } from '@kbn/management-settings-ids';
 
 const metricSchema = parse(esqlMetricState.getSchema()) as object;
 
