@@ -14,7 +14,6 @@ import { css } from '@emotion/react';
 import { SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import useMountedState from 'react-use/lib/useMountedState';
-import { useIsDataGridFullScreen } from '@kbn/unified-data-table';
 import { VIEW_MODE } from '../../../common/constants';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import type { DiscoverStateContainer } from '../../application/main/state_management/discover_state';
@@ -107,12 +106,6 @@ export const DocumentViewModeToggle = ({
       setDiscoverViewMode(VIEW_MODE.DOCUMENT_LEVEL);
     }
   }, [viewMode, isEsqlMode, setDiscoverViewMode]);
-
-  const isFullScreen = useIsDataGridFullScreen();
-
-  if (isFullScreen && !isEsqlMode) {
-    return null;
-  }
 
   return (
     <EuiFlexGroup

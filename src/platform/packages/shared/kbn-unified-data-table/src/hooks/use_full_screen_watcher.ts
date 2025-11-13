@@ -11,58 +11,6 @@ import { useGeneratedHtmlId, useMutationObserver } from '@elastic/eui';
 import { useCallback, useState } from 'react';
 import { css } from '@emotion/css';
 
-export const EUI_DATA_GRID_FULL_SCREEN_CLASS = 'euiDataGrid--fullScreen';
-export const UNIFIED_DATA_TABLE_FULL_SCREEN_CLASS = 'unifiedDataTable__fullScreen';
-export const EUI_DATA_GRID_RESTRICT_BODY_CLASS = 'euiDataGrid__restrictBody';
-
-/**
- * Hook that checks if there is a EUI Data Grid in full screen mode
- * by observing the document.body classList for 'euiDataGrid__restrictBody'.
- *
- * This is a lightweight alternative to `useFullScreenWatcher` for components
- * that need to react to fullscreen state without owning/rendering the data grid.
- *
- * @returns boolean indicating if any data grid is currently in fullscreen mode
- *
- * @example
- * ```tsx
- * const MyComponent = () => {
- *   const isFullScreen = useIsDataGridFullScreen();
- *
- *   if (isFullScreen) {
- *     return null; // hide in fullscreen
- *   }
- *
- *   return <div>My content</div>;
- * };
- * ```
- */
-export const useIsDataGridFullScreen = (): boolean => {
-  const [isFullScreen, setIsFullScreen] = useState(() =>
-    document.body.classList.contains(EUI_DATA_GRID_RESTRICT_BODY_CLASS)
-  );
-
-  const onBodyClassChange = useCallback(() => {
-    setIsFullScreen(document.body.classList.contains(EUI_DATA_GRID_RESTRICT_BODY_CLASS));
-  }, []);
-
-  useMutationObserver(document.body, onBodyClassChange, {
-    attributes: true,
-    attributeFilter: ['class'],
-  });
-
-  return isFullScreen;
-};
-
-/**
- * Hook for components that own and render a data grid.
- * Manages fullscreen state, generates IDs, and provides refs for the grid wrapper.
- *
- * If you just need to know if a grid is fullscreen (without owning it),
- * use `useIsDataGridFullScreen` instead.
- *
- * @returns Object with dataGridId and dataGridWrapper ref setter
- */
 export const useFullScreenWatcher = () => {
   const dataGridId = useGeneratedHtmlId({ prefix: 'unifiedDataTable' });
   const [dataGridWrapper, setDataGridWrapper] = useState<HTMLElement | null>(null);
@@ -95,6 +43,9 @@ export const useFullScreenWatcher = () => {
 
   return { dataGridId, dataGridWrapper, setDataGridWrapper };
 };
+
+export const EUI_DATA_GRID_FULL_SCREEN_CLASS = 'euiDataGrid--fullScreen';
+export const UNIFIED_DATA_TABLE_FULL_SCREEN_CLASS = 'unifiedDataTable__fullScreen';
 
 // Ensure full screen data grids are not covered by elements with a z-index
 const fullScreenStyles = css`
