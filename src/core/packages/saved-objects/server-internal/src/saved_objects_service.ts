@@ -68,8 +68,7 @@ import { calculateStatus$ } from './status';
 import { registerCoreObjectTypes } from './object_types';
 import { getSavedObjectsDeprecationsProvider } from './deprecations';
 import { getAllIndices } from './utils';
-import { MIGRATION_CLIENT_OPTIONS } from './constants';
-import { getRemovedTypes } from '@kbn/check-saved-objects-cli';
+import { MIGRATION_CLIENT_OPTIONS, REMOVED_TYPES } from './constants';
 
 /**
  * @internal
@@ -127,7 +126,7 @@ export class SavedObjectsService
   private spacesExtensionFactory?: SavedObjectsSpacesExtensionFactory;
 
   private migrator$ = new Subject<IKibanaMigrator>();
-  private typeRegistry!: SavedObjectTypeRegistry;
+  private typeRegistry = new SavedObjectTypeRegistry({ legacyTypes: REMOVED_TYPES });
   private started = false;
 
   constructor(private readonly coreContext: CoreContext) {
@@ -140,9 +139,6 @@ export class SavedObjectsService
 
     this.setupDeps = setupDeps;
     const { http, elasticsearch, coreUsageData, deprecations, docLinks } = setupDeps;
-
-    const legacyTypes = await getRemovedTypes();
-    this.typeRegistry = new SavedObjectTypeRegistry({ legacyTypes });
 
     const savedObjectsConfig = await firstValueFrom(
       this.coreContext.configService.atPath<SavedObjectsConfigType>('savedObjects')
