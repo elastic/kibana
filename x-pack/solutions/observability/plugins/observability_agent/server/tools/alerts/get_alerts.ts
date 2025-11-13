@@ -28,6 +28,36 @@ import { getRelevantAlertFields } from './get_relevant_alert_fields';
 
 export const OBSERVABILITY_GET_ALERTS_TOOL_ID = 'observability.get_alerts';
 
+export const defaultFields = [
+  '@timestamp',
+  'kibana.alert.start',
+  'kibana.alert.end',
+  'kibana.alert.flapping',
+  'kibana.alert.group',
+  'kibana.alert.instance.id',
+  'kibana.alert.reason',
+  'kibana.alert.rule.category',
+  'kibana.alert.rule.name',
+  'kibana.alert.rule.tags',
+  'kibana.alert.start',
+  'kibana.alert.status',
+  'kibana.alert.time_range.gte',
+  'kibana.alert.time_range.lte',
+  'kibana.alert.workflow_status',
+  'tags',
+  // infra
+  'host.name',
+  'container.id',
+  'kubernetes.pod.name',
+  // APM
+  'processor.event',
+  'service.environment',
+  'service.name',
+  'service.node.name',
+  'transaction.type',
+  'transaction.name',
+];
+
 const OMITTED_ALERT_FIELDS = [
   'event.action',
   'event.kind',
@@ -152,7 +182,7 @@ export function createGetAlertsTool({
               data: {
                 total,
                 alerts,
-                selectedFields,
+                selectedFields: selectedFields.length === 0 ? defaultFields : selectedFields,
               },
             },
           ],

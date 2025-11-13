@@ -13,9 +13,13 @@ import { isOtherResult } from '@kbn/onechat-common/tools';
 import type { LlmProxy } from '@kbn/test-suites-xpack-platform/onechat_api_integration/utils/llm_proxy';
 import { createLlmProxy } from '@kbn/test-suites-xpack-platform/onechat_api_integration/utils/llm_proxy';
 import { OBSERVABILITY_AGENT_ID } from '@kbn/observability-agent-plugin/server/agent/register_observability_agent';
-import { OBSERVABILITY_GET_ALERTS_TOOL_ID } from '@kbn/observability-agent-plugin/server/tools';
+import {
+  OBSERVABILITY_GET_ALERTS_TOOL_ID,
+  defaultFields,
+} from '@kbn/observability-agent-plugin/server/tools';
+import type { SearchAlertsResult } from '@kbn/alerts-ui-shared/src/common/apis/search_alerts/search_alerts';
 import { ApmRuleType } from '@kbn/rule-data-utils';
-import { APM_ALERTS_INDEX } from '../../apm/alerts/helpers/alerting_helper';
+import { APM_ALERTS_INDEX as APM_ALERTS_INDEX_PATTERN } from '../../apm/alerts/helpers/alerting_helper';
 import type { AgentBuilderApiClient } from '../utils/agent_builder_client';
 import { createAgentBuilderApiClient } from '../utils/agent_builder_client';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
@@ -23,12 +27,28 @@ import {
   createLlmProxyActionConnector,
   deleteActionConnector,
 } from '../utils/llm_proxy/action_connectors';
-import { setupToolCallThenAnswer } from '../utils/llm_proxy/scenarios';
+import { setupObservabilityAlertsToolThenAnswer } from '../utils/llm_proxy/scenarios';
 import { createSyntheticApmData } from '../utils/synthtrace_scenarios';
-import { createRule, deleteRules } from '../../ai_assistant/utils/alerts';
+import { createRule, deleteRules } from '../utils/alerts/alerting_rules';
 
 const LLM_EXPOSED_TOOL_NAME_FOR_GET_ALERTS = 'observability_get_alerts';
-const USER_PROMPT = 'Summarize active alerts over the last 4 hours';
+const USER_PROMPT = 'Do I have any alerts over the last 100 hours?';
+const QUERY_ARG_FOR_TOOL_CALL = 'alerts in the last 100 hours';
+
+const RECENT_ALERT_RULE_NAME = 'Recent Alert';
+const OLD_ALERT_DOC_RULE_NAME = 'Manually Indexed Old Alert';
+const APM_ALERTS_INDEX = '.internal.alerts-observability.apm.alerts-default-000001';
+
+const alertRuleData = {
+  ruleTypeId: ApmRuleType.TransactionErrorRate,
+  indexName: APM_ALERTS_INDEX_PATTERN,
+  consumer: 'apm',
+  environment: 'production',
+  threshold: 1,
+  windowSize: 1,
+  windowUnit: 'h',
+  ruleName: RECENT_ALERT_RULE_NAME,
+};
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const es = getService('es');
@@ -43,13 +63,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     this.tags(['skipCloud']);
 
     describe('POST /api/agent_builder/converse', () => {
-      let llmProxy: LlmProxy;
       let connectorId: string;
+      let createdRuleId: string;
+      let llmProxy: LlmProxy;
       let agentBuilderApiClient: AgentBuilderApiClient;
       let apmSynthtraceEsClient: ApmSynthtraceEsClient;
       let roleAuthc: RoleCredentials;
       let internalReqHeader: InternalRequestHeader;
-      let createdRuleId: string;
+      let toolResponseContent: { results: ToolResult[] };
 
       before(async () => {
         await kibanaServer.savedObjects.cleanStandardList();
@@ -68,28 +89,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           getService,
           roleAuthc,
           internalReqHeader,
-          data: {
-            ruleTypeId: ApmRuleType.TransactionErrorRate,
-            indexName: APM_ALERTS_INDEX,
-            consumer: 'apm',
-            environment: 'production',
-            threshold: 1,
-            windowSize: 1,
-            windowUnit: 'h',
-            ruleName: 'Recent Alert',
-            docCountTarget: 1,
-          },
+          data: alertRuleData,
         });
 
+        // Manually index old alert
         const eightDaysAgo = new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString();
         await es.index({
-          index: '.internal.alerts-observability.apm.alerts-default-000001',
+          index: APM_ALERTS_INDEX,
           refresh: 'wait_for',
           document: {
             '@timestamp': new Date().toISOString(),
             'kibana.alert.start': eightDaysAgo,
             'kibana.alert.status': 'active',
-            'kibana.alert.rule.name': 'Manually Indexed Old Alert',
+            'kibana.alert.rule.name': OLD_ALERT_DOC_RULE_NAME,
             'kibana.alert.rule.consumer': 'apm',
             'kibana.alert.rule.rule_type_id': 'apm.transaction_error_rate',
             'kibana.alert.evaluation.threshold': 1,
@@ -101,39 +113,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         });
 
-        setupToolCallThenAnswer({
+        // Run the created rule to generate an alert
+        await alertingApi.runRule(roleAuthc, createdRuleId);
+
+        setupObservabilityAlertsToolThenAnswer({
           llmProxy,
-          toolName: LLM_EXPOSED_TOOL_NAME_FOR_GET_ALERTS,
           toolArg: {
             start: 'now-100h',
             end: 'now',
             includeRecovered: false,
-            query: 'Summarize the active alerts in the requested range',
+            query: QUERY_ARG_FOR_TOOL_CALL,
           },
-        });
-
-        await alertingApi.runRule(roleAuthc, createdRuleId);
-      });
-
-      after(async () => {
-        await apmSynthtraceEsClient.clean();
-        await deleteRules({ getService, roleAuthc, internalReqHeader });
-        await kibanaServer.savedObjects.cleanStandardList();
-        await deleteActionConnector(getService, { actionId: connectorId });
-        llmProxy.close();
-        await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
-      });
-
-      it('returns the correct tool results structure for a 4h window', async () => {
-        setupToolCallThenAnswer({
-          llmProxy,
-          toolName: LLM_EXPOSED_TOOL_NAME_FOR_GET_ALERTS,
-          toolArg: {
-            start: 'now-4h',
-            end: 'now',
-            includeRecovered: false,
-            query: 'Summarize the active alerts in the last 4 hours',
-          },
+          fieldIds: defaultFields,
         });
 
         const body = await agentBuilderApiClient.converse({
@@ -143,67 +134,88 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
-        expect(body.response.message).to.be('final');
 
-        const handoverRequest = llmProxy.interceptedRequests.find(
-          (r) => r.matchingInterceptorName === 'handover-to-answer'
-        )!.requestBody;
+        const toolRequest = llmProxy.interceptedRequests
+          .slice()
+          .reverse()
+          .find((r) => r.requestBody?.messages?.some((m: any) => m.role === 'tool'));
 
-        const toolResponseMessage = handoverRequest.messages[handoverRequest.messages.length - 1]!;
-        const toolResponseContent = JSON.parse(toolResponseMessage.content as string) as {
+        const toolMessages = toolRequest.requestBody.messages;
+        const toolResponseMessage = [...toolMessages]
+          .reverse()
+          .find((m: any) => m.role === 'tool')!;
+        toolResponseContent = JSON.parse(toolResponseMessage.content as string) as {
           results: ToolResult[];
         };
+      });
 
+      after(async () => {
+        llmProxy.close();
+        await deleteActionConnector(getService, { actionId: connectorId });
+
+        await apmSynthtraceEsClient.clean();
+        await alertingApi.cleanUpAlerts({
+          roleAuthc,
+          ruleId: createdRuleId,
+          alertIndexName: APM_ALERTS_INDEX_PATTERN,
+          consumer: 'apm',
+        });
+        await deleteRules({ getService, roleAuthc, internalReqHeader });
+
+        await kibanaServer.savedObjects.cleanStandardList();
+        await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
+      });
+
+      it('returns the correct tool results structure', () => {
         expect(toolResponseContent).to.have.property('results');
         expect(Array.isArray(toolResponseContent.results)).to.be(true);
         expect(toolResponseContent.results.length).to.be.greaterThan(0);
 
-        const first = toolResponseContent.results[0];
-        expect(isOtherResult(first)).to.be(true);
+        const toolResult = toolResponseContent.results[0] as OtherResult;
+        expect(isOtherResult(toolResult)).to.be(true);
 
-        const data = (first as OtherResult).data as Record<string, unknown>;
+        const { data } = toolResult as OtherResult;
+
         expect(data).to.have.property('alerts');
-        expect(Array.isArray(data.alerts as unknown[])).to.be(true);
+        expect(data.alerts).to.be.an('array');
+
         expect(data).to.have.property('total');
-        expect(typeof data.total).to.be('number');
         expect(data).to.have.property('selectedFields');
-        expect(Array.isArray(data.selectedFields as unknown[])).to.be(true);
+        expect(data.selectedFields).to.be.an('array');
       });
 
-      it('returns active alerts within the time range and includes selected fields', async () => {
-        const body = await agentBuilderApiClient.converse({
-          input: 'Summarize active alerts over the last 100 hours',
-          connector_id: connectorId,
-          agent_id: OBSERVABILITY_AGENT_ID,
-        });
+      it('should retrieve 1 active alert', async () => {
+        const data = (toolResponseContent.results[0] as OtherResult)
+          .data as unknown as SearchAlertsResult;
 
-        await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
-        expect(body.response.message).to.be('final');
+        expect(data.total).to.be(1);
+        expect(data.alerts.length).to.be(1);
+        expect(data.alerts[0]['kibana.alert.status']).to.eql('active');
+      });
 
-        const handoverRequest = llmProxy.interceptedRequests.find(
-          (r) => r.matchingInterceptorName === 'handover-to-answer'
-        )!.requestBody;
+      it('should retrieve correct alert information', async () => {
+        const data = (toolResponseContent.results[0] as OtherResult)
+          .data as unknown as SearchAlertsResult;
+        const alert = data.alerts[0];
 
-        const toolResponseMessage = handoverRequest.messages[handoverRequest.messages.length - 1]!;
-        const toolResponseContent = JSON.parse(toolResponseMessage.content as string) as {
-          results: ToolResult[];
-        };
+        expect(alert['service.environment']).to.eql(alertRuleData.environment);
+        expect(alert['kibana.alert.rule.consumer']).to.eql(alertRuleData.consumer);
+        expect(alert['kibana.alert.evaluation.threshold']).to.eql(alertRuleData.threshold);
+        expect(alert['kibana.alert.rule.rule_type_id']).to.eql(alertRuleData.ruleTypeId);
+        expect(alert['kibana.alert.rule.name']).to.eql(alertRuleData.ruleName);
+      });
 
-        const first = toolResponseContent.results[0] as OtherResult;
-        expect(isOtherResult(first)).to.be(true);
+      it('should only return alerts that started within the requested range', async () => {
+        const data = (toolResponseContent.results[0] as OtherResult)
+          .data as unknown as SearchAlertsResult;
+        const returnedAlert = data.alerts[0];
+        expect(returnedAlert['kibana.alert.rule.name']).to.be(RECENT_ALERT_RULE_NAME);
 
-        const data = first.data as Record<string, any>;
+        const alertStartTime = new Date(returnedAlert['kibana.alert.start'] as unknown as string);
+        const from = new Date(Date.now() - 100 * 60 * 60 * 1000); // now-100h
+        const to = new Date();
 
-        expect(typeof data.total).to.be('number');
-        expect(Array.isArray(data.alerts)).to.be(true);
-        expect(Array.isArray(data.selectedFields)).to.be(true);
-
-        const hasRecentRuleAlert = (data.alerts as any[]).some((a) => {
-          return (
-            a['kibana.alert.rule.name'] === 'Recent Alert' && a['kibana.alert.status'] === 'active'
-          );
-        });
-        expect(hasRecentRuleAlert).to.be(true);
+        expect(alertStartTime >= from && alertStartTime <= to).to.be(true);
       });
     });
   });

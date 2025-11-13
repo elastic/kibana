@@ -13,6 +13,10 @@ import type { LlmProxy } from '@kbn/test-suites-xpack-platform/onechat_api_integ
 import { createLlmProxy } from '@kbn/test-suites-xpack-platform/onechat_api_integration/utils/llm_proxy';
 import { OBSERVABILITY_GET_DATA_SOURCES_TOOL_ID } from '@kbn/observability-agent-plugin/server/tools';
 import { OBSERVABILITY_AGENT_ID } from '@kbn/observability-agent-plugin/server/agent/register_observability_agent';
+import {
+  LLM_PROXY_HANDOVER_INTERCEPTOR,
+  LLM_PROXY_FINAL_MESSAGE,
+} from '../utils/llm_proxy/constants';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import type { AgentBuilderApiClient } from '../utils/agent_builder_client';
 import { createAgentBuilderApiClient } from '../utils/agent_builder_client';
@@ -66,10 +70,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
         const responseMessage = body.response.message;
-        expect(responseMessage).to.be('final');
+        expect(responseMessage).to.be(LLM_PROXY_FINAL_MESSAGE);
 
         const handoverRequest = llmProxy.interceptedRequests.find(
-          (r) => r.matchingInterceptorName === 'handover-to-answer'
+          (r) => r.matchingInterceptorName === LLM_PROXY_HANDOVER_INTERCEPTOR
         )!.requestBody;
 
         const toolResponseMessage = handoverRequest.messages[handoverRequest.messages.length - 1]!;

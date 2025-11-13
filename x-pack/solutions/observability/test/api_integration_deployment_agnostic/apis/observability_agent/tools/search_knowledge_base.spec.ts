@@ -16,6 +16,10 @@ import {
   type KnowledgeBaseEntry,
   OBSERVABILITY_SEARCH_KNOWLEDGE_BASE_TOOL_ID,
 } from '@kbn/observability-agent-plugin/server/tools';
+import {
+  LLM_PROXY_HANDOVER_INTERCEPTOR,
+  LLM_PROXY_FINAL_MESSAGE,
+} from '../utils/llm_proxy/constants';
 import type { AgentBuilderApiClient } from '../utils/agent_builder_client';
 import { createAgentBuilderApiClient } from '../utils/agent_builder_client';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
@@ -96,10 +100,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
-        expect(body.response.message).to.be('final');
+        expect(body.response.message).to.be(LLM_PROXY_FINAL_MESSAGE);
 
         const handoverRequest = llmProxy.interceptedRequests.find(
-          (r) => r.matchingInterceptorName === 'handover-to-answer'
+          (r) => r.matchingInterceptorName === LLM_PROXY_HANDOVER_INTERCEPTOR
         )!.requestBody;
 
         const toolResponseMessage = handoverRequest.messages[handoverRequest.messages.length - 1]!;
