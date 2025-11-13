@@ -52,7 +52,6 @@ export function initializeUnifiedSearchManager(
     timefilter: { timefilter: timefilterService },
   } = dataService.query;
 
-  const filters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
   const reload$ = new Subject<void>();
   const query$ = new BehaviorSubject<Query | undefined>(initialState.query);
   // setAndSyncQuery method not needed since query synced with 2-way data binding
@@ -279,7 +278,6 @@ export function initializeUnifiedSearchManager(
   return {
     api: {
       reload$,
-      filters$,
       forceRefresh: () => {
         reload$.next();
       },
@@ -290,9 +288,9 @@ export function initializeUnifiedSearchManager(
       setTimeRange: setAndSyncTimeRange,
       timeRange$,
       timeslice$,
-      unifiedSearchFilters$,
     },
     internalApi: {
+      unifiedSearchFilters$,
       startComparing$: (lastSavedState$: BehaviorSubject<DashboardState>) => {
         return combineLatest([
           unifiedSearchFilters$,
