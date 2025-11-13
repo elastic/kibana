@@ -11,6 +11,7 @@ import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import { createErrorResult } from '@kbn/onechat-server';
 import { getPluginServices } from '../../services/service_locator';
+import { extractDataFromResponse } from '../summary/helpers/data_extraction';
 
 const rerankSchema = z.object({
   items: z
@@ -39,33 +40,26 @@ const rerankSchema = z.object({
         }
       }
 
-      // If it's a workflow response structure {results: [{data: ...}]}
+      // If it's a workflow response structure {results: [{data: ...}]} or any object
       if (value && typeof value === 'object' && !Array.isArray(value)) {
-        if (value.results && Array.isArray(value.results) && value.results.length > 0) {
-          let data = value.results[0]?.data;
+        // Use extractDataFromResponse to handle workflow response structures
+        // This handles cases where data is nested in {results: [{data: {content: "..."}}]}
+        const extractedData = extractDataFromResponse(value);
 
-          // If data is stringified, parse it
-          if (typeof data === 'string') {
-            try {
-              data = JSON.parse(data);
-            } catch {
-              return [];
-            }
-          }
-
-          // Extract correlations or prioritized_items array
-          if (data?.correlations && Array.isArray(data.correlations)) {
-            return data.correlations;
-          }
-          if (data?.prioritized_items && Array.isArray(data.prioritized_items)) {
-            return data.prioritized_items;
-          }
-          if (Array.isArray(data)) {
-            return data;
-          }
+        // Check if extracted data is an array (direct array of items)
+        if (Array.isArray(extractedData)) {
+          return extractedData;
         }
 
-        // Direct access to correlations or prioritized_items
+        // Extract correlations or prioritized_items array from extracted data
+        if (extractedData?.correlations && Array.isArray(extractedData.correlations)) {
+          return extractedData.correlations;
+        }
+        if (extractedData?.prioritized_items && Array.isArray(extractedData.prioritized_items)) {
+          return extractedData.prioritized_items;
+        }
+
+        // Direct access to correlations or prioritized_items on original value (fallback)
         if (value.correlations && Array.isArray(value.correlations)) {
           return value.correlations;
         }
@@ -127,7 +121,10 @@ The tool accepts an array of items with text content and uses a reranking model 
       try {
         // Items is already normalized to an array by the schema transform
         // No need for additional extraction logic here
+        logger.debug(`Rerank tool received ${items.length} items for query: ${query}`);
+        
         if (items.length === 0) {
+          logger.warn('Rerank tool received empty items array - data extraction may have failed');
           return {
             results: [
               {
