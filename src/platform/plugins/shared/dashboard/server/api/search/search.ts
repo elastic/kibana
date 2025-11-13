@@ -53,7 +53,7 @@ export async function search(
           ...(timeRange && { timeRange }),
           title: title ?? '',
         },
-        meta: getDashboardMeta(so),
+        meta: getDashboardMeta(so, 'search'),
       };
     }),
     page: soResponse.page,

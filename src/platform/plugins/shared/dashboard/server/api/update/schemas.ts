@@ -9,9 +9,17 @@
 
 import { schema } from '@kbn/config-schema';
 import { getDashboardDataSchema } from '../../content_management/v1/schema';
+import { baseMetaSchema, updatedMetaSchema } from '../meta_schemas';
 
 export function getUpdateRequestBodySchema() {
   return schema.object({
     data: getDashboardDataSchema(),
   });
 }
+
+export const updateResponseBodySchema = schema.object({
+  id: schema.string(),
+  data: getDashboardDataSchema(),
+  meta: schema.allOf([baseMetaSchema, updatedMetaSchema]),
+  spaces: schema.maybe(schema.arrayOf(schema.string())),
+});

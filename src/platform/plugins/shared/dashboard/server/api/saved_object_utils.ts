@@ -13,29 +13,33 @@ import type { Reference } from '@kbn/content-management-utils';
 import type { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
 import type { DashboardState } from '../content_management';
 import { transformDashboardOut, transformReferencesOut } from '../content_management/v1/transforms';
-import type { DashboardCRUResponseBody } from './types';
 
 export function getDashboardMeta(
   savedObject:
     | SavedObject<DashboardSavedObjectAttributes>
-    | SavedObjectsUpdateResponse<DashboardSavedObjectAttributes>
-): DashboardCRUResponseBody['meta'] {
+    | SavedObjectsUpdateResponse<DashboardSavedObjectAttributes>,
+  operation: 'create' | 'read' | 'update' | 'search'
+) {
   return {
-    createdAt: savedObject.created_at,
-    createdBy: savedObject.created_by,
     error: savedObject.error,
     managed: savedObject.managed,
     updatedAt: savedObject.updated_at,
     updatedBy: savedObject.updated_by,
     version: savedObject.version ?? '',
+    ...(['create', 'read', 'search'].includes(operation) && {
+      createdAt: savedObject.created_at,
+      createdBy: savedObject.created_by,
+    }),
   };
 }
 
+// CRU is Create, Read, Update
 export function getDashboardCRUResponseBody(
   savedObject:
     | SavedObject<DashboardSavedObjectAttributes>
-    | SavedObjectsUpdateResponse<DashboardSavedObjectAttributes>
-): DashboardCRUResponseBody {
+    | SavedObjectsUpdateResponse<DashboardSavedObjectAttributes>,
+  operation: 'create' | 'read' | 'update' | 'search'
+) {
   let dashboardState: DashboardState;
   let references: Reference[];
   try {
@@ -54,7 +58,7 @@ export function getDashboardCRUResponseBody(
       ...dashboardState,
       references,
     },
-    meta: getDashboardMeta(savedObject),
+    meta: getDashboardMeta(savedObject, operation),
     spaces: savedObject.namespaces,
   };
 }

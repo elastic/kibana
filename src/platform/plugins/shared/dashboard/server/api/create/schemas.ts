@@ -9,6 +9,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { getDashboardDataSchema } from '../../content_management/v1/schema';
+import { baseMetaSchema, createdMetaSchema, updatedMetaSchema } from '../meta_schemas';
 
 export function getCreateRequestBodySchema() {
   return schema.object({
@@ -17,3 +18,10 @@ export function getCreateRequestBodySchema() {
     spaces: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1, maxSize: 1 })),
   });
 }
+
+export const createResponseBodySchema = schema.object({
+  id: schema.string(),
+  data: getDashboardDataSchema(),
+  meta: schema.allOf([baseMetaSchema, createdMetaSchema, updatedMetaSchema]),
+  spaces: schema.maybe(schema.arrayOf(schema.string())),
+});

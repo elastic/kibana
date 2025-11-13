@@ -14,12 +14,12 @@ import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../dashboard_saved_object';
 import type { DashboardCreateRequestBody } from './types';
 import { transformDashboardIn } from '../../content_management/v1/transforms';
 import { getDashboardCRUResponseBody } from '../saved_object_utils';
-import type { DashboardCRUResponseBody } from '../types';
+import type { DashboardCreateResponseBody } from './types';
 
 export async function create(
   requestCtx: RequestHandlerContext,
   searchBody: DashboardCreateRequestBody
-): Promise<DashboardCRUResponseBody> {
+): Promise<DashboardCreateResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
 
   const { references: incomingReferences, ...incomingDashboardState } = searchBody.data;
@@ -45,5 +45,5 @@ export async function create(
     }
   );
 
-  return getDashboardCRUResponseBody(savedObject);
+  return getDashboardCRUResponseBody(savedObject, 'create');
 }

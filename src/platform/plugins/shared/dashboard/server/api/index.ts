@@ -9,6 +9,5 @@
 
 export { registerAPIRoutes } from './register_routes';
 
-export type { DashboardCRUResponseBody } from './types';
 export type { DashboardCreateRequestBody } from './create';
 export type { DashboardSearchRequestBody, DashboardSearchResponseBody } from './search';
