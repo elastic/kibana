@@ -138,7 +138,10 @@ export const RunScriptActionResult = memo<
       <RunscriptActionResult
         action={completedActionDetails}
         agentId={command.commandDefinition?.meta?.endpointId}
-        canAccessFileDownloadLink={command.commandDefinition?.meta?.agentType !== 'crowdstrike'}
+        canAccessFileDownloadLink={
+          command.commandDefinition?.meta?.agentType === 'sentinel_one' ||
+          command.commandDefinition?.meta?.agentType === 'microsoft_defender_endpoint'
+        }
         data-test-subj={
           command.commandDefinition?.meta?.agentType === 'sentinel_one'
             ? 'sentinelOneRunscriptResult'
