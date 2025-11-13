@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -20,5 +20,7 @@
     "@kbn/otel-semantic-conventions",
     "@kbn/i18n",
     "@kbn/core-chrome-browser",
+    "@kbn/data-plugin",
+    "@kbn/esql-composer"
   ]
 }
