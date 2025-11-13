@@ -56,8 +56,9 @@ while read -r config; do
 
   CONFIG_EXECUTION_KEY="${config}_executed"
   IS_CONFIG_EXECUTION=$(buildkite-agent meta-data get "$CONFIG_EXECUTION_KEY" --default "false" --log-level error)
+  IS_FLAKY_TEST_RUN="${KIBANA_FLAKY_TEST_RUNNER_CONFIG:-false}" # we don't want this optimization for flaky test runs
 
-  if [[ "${IS_CONFIG_EXECUTION}" == "true" ]]; then
+  if [[ "$IS_CONFIG_EXECUTION" == "true" && "$IS_FLAKY_TEST_RUN" == "false" ]]; then
     echo "--- [ already-tested ] $FULL_COMMAND"
     continue
   else
