@@ -25,7 +25,6 @@ import { registerIndexEditorActions, registerIndexEditorAnalyticsEvents } from '
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
-import { ESQLEditorTelemetryService } from '@kbn/esql-editor/src/telemetry/telemetry_service';
 import {
   ESQL_CONTROL_TRIGGER,
   esqlControlTrigger,
@@ -133,7 +132,6 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
     });
 
     const variablesService = new EsqlVariablesService();
-    const telemetryService = new ESQLEditorTelemetryService(core.analytics);
 
     const getJoinIndicesAutocomplete = cacheParametrizedAsyncFunction(
       async (remoteClusters?: string) => {
@@ -201,19 +199,9 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
       getInferenceEndpointsAutocomplete,
       variablesService,
       getLicense: async () => await licensing?.getLicense(),
-      telemetryService,
     };
 
-    setKibanaServices(
-      start,
-      core,
-      data,
-      storage,
-      uiActions,
-      telemetryService,
-      fieldsMetadata,
-      usageCollection
-    );
+    setKibanaServices(start, core, data, storage, uiActions, fieldsMetadata, usageCollection);
 
     return start;
   }

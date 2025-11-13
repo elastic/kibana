@@ -14,7 +14,6 @@ import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/publ
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import type { ESQLEditorTelemetryService } from '@kbn/esql-editor/src/telemetry/telemetry_service';
 import type { EsqlPluginStart } from './plugin';
 
 export let core: CoreStart;
@@ -28,7 +27,6 @@ export interface ServiceDeps {
   usageCollection?: UsageCollectionStart;
   esql: EsqlPluginStart;
   docLinks: DocLinksStart;
-  telemetryService: ESQLEditorTelemetryService;
 }
 
 const servicesReady$ = new BehaviorSubject<ServiceDeps | undefined>(undefined);
@@ -50,7 +48,6 @@ export const setKibanaServices = (
   data: DataPublicPluginStart,
   storage: Storage,
   uiActions: UiActionsStart,
-  telemetryService: ESQLEditorTelemetryService,
   fieldsMetadata?: FieldsMetadataPublicStart,
   usageCollection?: UsageCollectionStart
 ) => {
@@ -64,6 +61,5 @@ export const setKibanaServices = (
     usageCollection,
     docLinks: core.docLinks,
     esql,
-    telemetryService,
   });
 };
