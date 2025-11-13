@@ -34,6 +34,7 @@ import { registerWorkflowTools } from './tools/workflow/register_tools';
 import { registerCatchupAgent } from './agents/register_agent';
 import { setPluginServices } from './services/service_locator';
 import { registerCatchupWorkflows } from './workflows/register_workflows';
+import { registerWorkflowBuiltinTools } from './tools/workflow/workflow_builtin_tools';
 
 export class CatchupAgentPlugin
   implements
@@ -47,6 +48,7 @@ export class CatchupAgentPlugin
   private readonly logger: Logger;
   private readonly config: CatchupAgentConfigType;
   private workflowsManagement?: CatchupAgentSetupDependencies['workflowsManagement'];
+  private toolsSetup?: CatchupAgentSetupDependencies['onechat']['tools'];
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -66,6 +68,9 @@ export class CatchupAgentPlugin
         this.logger.error('OneChat plugin is not available! Cannot register tools and agents.');
         return {};
       }
+
+      // Store toolsSetup for later use in start
+      this.toolsSetup = plugins.onechat.tools;
 
       // Register all tools
       registerSecurityTools(plugins.onechat.tools, this.logger);
@@ -114,12 +119,24 @@ export class CatchupAgentPlugin
         this.logger,
         fakeRequest,
         DEFAULT_SPACE_ID
-      ).catch((error) => {
-        this.logger.error(`Error registering workflows: ${error}`);
-        if (error instanceof Error && error.stack) {
-          this.logger.error(error.stack);
-        }
-      });
+      )
+        .then(() => {
+          // After workflows are registered, register the workflow builtin tools
+          if (this.toolsSetup && this.workflowsManagement) {
+            return registerWorkflowBuiltinTools(
+              this.workflowsManagement,
+              this.toolsSetup,
+              this.logger,
+              DEFAULT_SPACE_ID
+            );
+          }
+        })
+        .catch((error) => {
+          this.logger.error(`Error registering workflows or workflow tools: ${error}`);
+          if (error instanceof Error && error.stack) {
+            this.logger.error(error.stack);
+          }
+        });
     } else {
       this.logger.warn(
         'Workflows Management plugin not available. Workflows will not be registered automatically.'

@@ -82,6 +82,9 @@ When summarizing Slack messages (hackathon.catchup.external.slack), you MUST inc
             'hackathon.catchup.external.slack',
             'hackathon.catchup.external.github',
             'hackathon.catchup.external.gmail',
+            // Workflow tools (for executing complete workflows)
+            'workflow.daily_security_catchup',
+            'workflow.incidient_investigation',
             // 'hackathon.catchup.correlation.engine', // Removed from agent - this tool is for workflows only, requires results parameter from multiple tools
             // 'hackathon.catchup.summary.generator', // Removed from agent - this tool is for workflows only, requires correlatedData parameter
           ],
