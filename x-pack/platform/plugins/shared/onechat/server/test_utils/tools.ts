@@ -87,6 +87,7 @@ export const createMockedTool = (parts: Partial<MockedTool> = {}): MockedTool =>
     tags: ['tag-1', 'tag-2'],
     getSchema: jest.fn(async () => z.object({})),
     getHandler: jest.fn(parts.getHandler),
+    isAvailable: jest.fn(),
     ...parts,
   };
 };

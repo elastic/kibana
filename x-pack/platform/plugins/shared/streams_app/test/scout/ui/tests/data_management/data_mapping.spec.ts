@@ -91,7 +91,7 @@ test.describe('Stream data mapping - schema editor', { tag: ['@ess', '@svlOblt']
     });
   });
 
-  test('should allow filtering by field type and status', async ({ page, pageObjects }) => {
+  test('should allow filtering by field type and status', async ({ pageObjects }) => {
     // Wait for the schema editor table to load
     await pageObjects.streams.expectSchemaEditorTableVisible();
 
@@ -126,7 +126,7 @@ test.describe('Stream data mapping - schema editor', { tag: ['@ess', '@svlOblt']
     }
   });
 
-  test('should allow mapping a field', async ({ page, pageObjects }) => {
+  test('should allow mapping a field', async ({ pageObjects }) => {
     // Wait for the schema editor table to load
     await pageObjects.streams.expectSchemaEditorTableVisible();
     // Search specific unmapped field
@@ -168,7 +168,7 @@ test.describe('Stream data mapping - schema editor', { tag: ['@ess', '@svlOblt']
     });
   });
 
-  test('should allow unmapping a field', async ({ page, pageObjects }) => {
+  test('should allow unmapping a field', async ({ pageObjects }) => {
     // Wait for the schema editor table to load
     await pageObjects.streams.expectSchemaEditorTableVisible();
     // Search specific unmapped field
