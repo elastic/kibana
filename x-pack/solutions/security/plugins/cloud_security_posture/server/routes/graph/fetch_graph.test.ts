@@ -306,4 +306,121 @@ describe('fetchGraph', () => {
     expect(query).not.toContain(`ENRICH ${getEnrichPolicyId()}`);
     expect(result).toEqual([{ id: 'dummy' }]);
   });
+
+  describe('COALESCE behavior for isOrigin and isOriginAlert', () => {
+    it('should not apply COALESCE when originEventIds is empty', async () => {
+      const params = {
+        esClient,
+        logger,
+        start: 0,
+        end: 1000,
+        originEventIds: [] as OriginEventId[],
+        showUnknownTarget: false,
+        indexPatterns: ['valid_index'],
+        spaceId: 'default',
+        esQuery: undefined as EsQuery | undefined,
+      };
+
+      await fetchGraph(params);
+
+      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
+      const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+      const query = esqlCallArgs[0].query;
+
+      // When no origin events, both should evaluate to literal false
+      expect(query).toContain('| EVAL isOrigin = false');
+      expect(query).toContain('| EVAL isOriginAlert = false');
+    });
+
+    it('should apply COALESCE to isOrigin when originEventIds are provided', async () => {
+      const originEventIds: OriginEventId[] = [
+        { id: '1', isAlert: false },
+        { id: '2', isAlert: false },
+      ];
+      const params = {
+        esClient,
+        logger,
+        start: 0,
+        end: 1000,
+        originEventIds,
+        showUnknownTarget: false,
+        indexPatterns: ['valid_index'],
+        spaceId: 'default',
+        esQuery: undefined as EsQuery | undefined,
+      };
+
+      await fetchGraph(params);
+
+      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
+      const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+      const query = esqlCallArgs[0].query;
+
+      // COALESCE should wrap the IN operation to handle null event.id
+      expect(query).toContain('| EVAL isOrigin = COALESCE(event.id in (?og_id0, ?og_id1))');
+      // isOriginAlert should be false since no alerts
+      expect(query).toContain('| EVAL isOriginAlert = false');
+    });
+
+    it('should apply COALESCE to both isOrigin and isOriginAlert when alert IDs are provided', async () => {
+      const originEventIds: OriginEventId[] = [
+        { id: '1', isAlert: true },
+        { id: '2', isAlert: true },
+      ];
+      const params = {
+        esClient,
+        logger,
+        start: 0,
+        end: 1000,
+        originEventIds,
+        showUnknownTarget: false,
+        indexPatterns: ['valid_index'],
+        spaceId: 'default',
+        esQuery: undefined as EsQuery | undefined,
+      };
+
+      await fetchGraph(params);
+
+      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
+      const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+      const query = esqlCallArgs[0].query;
+
+      // COALESCE should wrap isOrigin
+      expect(query).toContain('| EVAL isOrigin = COALESCE(event.id in (?og_id0, ?og_id1))');
+      // COALESCE should wrap the entire isOriginAlert expression
+      expect(query).toContain(
+        '| EVAL isOriginAlert = COALESCE(isOrigin AND event.id in (?og_alrt_id0, ?og_alrt_id1))'
+      );
+    });
+
+    it('should apply COALESCE to isOriginAlert when mixed origin events and alerts', async () => {
+      const originEventIds: OriginEventId[] = [
+        { id: '1', isAlert: false },
+        { id: '2', isAlert: true },
+      ];
+      const params = {
+        esClient,
+        logger,
+        start: 0,
+        end: 1000,
+        originEventIds,
+        showUnknownTarget: false,
+        indexPatterns: ['valid_index'],
+        spaceId: 'default',
+        esQuery: undefined as EsQuery | undefined,
+      };
+
+      await fetchGraph(params);
+
+      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
+      const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+      const query = esqlCallArgs[0].query;
+
+      // COALESCE should wrap isOrigin with all origin IDs
+      expect(query).toContain('| EVAL isOrigin = COALESCE(event.id in (?og_id0, ?og_id1))');
+      // COALESCE should wrap isOriginAlert with only alert IDs
+      expect(query).toContain(
+        '| EVAL isOriginAlert = COALESCE(isOrigin AND event.id in (?og_alrt_id0))'
+      );
+    });
+  });
 });
