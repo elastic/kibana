@@ -320,11 +320,19 @@ ${
     "${NON_ENRICHED_ENTITY_TYPE_PLURAL}"
   )
 | EVAL actorLabel = CASE(
+    actorIdsCount == 1 AND actorEntityType == "${NON_ENRICHED_ENTITY_TYPE_SINGULAR}",
+    TO_STRING(actorIds),
+    actorIdsCount == 1 AND actorEntityType != "${NON_ENRICHED_ENTITY_TYPE_SINGULAR}",
+    actorEntityName,
     actorIdsCount > 1 AND actorEntitySubType IS NOT NULL,
     actorEntitySubType,
     ""
   )
 | EVAL targetLabel = CASE(
+    targetIdsCount == 1 AND targetEntityType == "${NON_ENRICHED_ENTITY_TYPE_SINGULAR}",
+    TO_STRING(targetIds),
+    targetIdsCount == 1 AND targetEntityType != "${NON_ENRICHED_ENTITY_TYPE_SINGULAR}",
+    targetEntityName,
     targetIdsCount > 1 AND targetEntitySubType IS NOT NULL,
     targetEntitySubType,
     ""
