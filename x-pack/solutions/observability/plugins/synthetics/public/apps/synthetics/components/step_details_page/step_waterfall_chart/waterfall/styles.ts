@@ -14,6 +14,10 @@ interface WaterfallChartOuterContainerProps {
   height?: string;
 }
 
+interface WaterfallChartStickyHeaderContainerProps {
+  isGridLayout?: boolean;
+}
+
 const StyledScrollDiv = euiStyled.div`
   &::-webkit-scrollbar {
     height: ${({ theme }) => theme.eui.euiScrollBar};
@@ -38,9 +42,11 @@ export const WaterfallChartOuterContainer = euiStyled(
   z-index: 50;
 `;
 
-export const WaterfallChartStickyHeaderContainer = euiStyled(StyledScrollDiv)`
+export const WaterfallChartStickyHeaderContainer = euiStyled(
+  StyledScrollDiv
+)<WaterfallChartStickyHeaderContainerProps>`
   position: sticky;
-  top: var(--kbn-application--top-bar-height, 0px);
+  top: var(--kbn-application--sticky-headers-offset, 0px);
   z-index: ${(props) => props.theme.eui.euiZLevel5 + 10};
   overflow: visible;
   min-height: ${CHART_HEADER_HEIGHT}px;
