@@ -175,10 +175,12 @@ POST /api/workflows/search
 **Response:**
 ```json
 {
-  "workflows": [...],
-  "total": 42,
-  "page": 1,
-  "perPage": 20
+  "results": [...],
+  "_pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 42
+  }
 }
 ```
 
@@ -201,7 +203,9 @@ GET /api/workflows/{id}
   "yaml": "workflow yaml content",
   "valid": true,
   "createdAt": "2024-01-01T00:00:00Z",
-  "updatedAt": "2024-01-01T00:00:00Z"
+  "createdBy": "user@example.com",
+  "lastUpdatedAt": "2024-01-01T00:00:00Z",
+  "lastUpdatedBy": "user@example.com"
 }
 ```
 
@@ -483,10 +487,19 @@ GET /api/workflows/stats
 **Response:**
 ```json
 {
-  "totalWorkflows": 50,
-  "enabledWorkflows": 30,
-  "totalExecutions": 1000,
-  "successRate": 0.95
+  "workflows": {
+    "enabled": 30,
+    "disabled": 20
+  },
+  "executions": [
+    {
+      "date": "2024-01-01",
+      "timestamp": "2024-01-01T00:00:00Z",
+      "completed": 100,
+      "failed": 5,
+      "cancelled": 2
+    }
+  ]
 }
 ```
 
@@ -495,10 +508,33 @@ GET /api/workflows/stats
 #### Get Workflow Aggregations
 
 ```http
-GET /api/workflows/aggs
+GET /api/workflows/aggs?fields=field1&fields=field2
 ```
 
-**Response:** Aggregated workflow data for analytics
+**Query Parameters:**
+- `fields` (required): Array of field names to aggregate
+
+**Response:**
+```json
+{
+  "field1": [
+    {
+      "key": "value1",
+      "label": "Value 1"
+    },
+    {
+      "key": "value2",
+      "label": "Value 2"
+    }
+  ],
+  "field2": [
+    {
+      "key": "value3",
+      "label": "Value 3"
+    }
+  ]
+}
+```
 
 ---
 
@@ -525,7 +561,22 @@ GET /api/workflows/connectors
 }
 ```
 
+---
 
+### Schema & Validation
+
+#### Get Workflow JSON Schema
+
+```http
+GET /api/workflows/workflow-json-schema?loose=false
+```
+
+**Query Parameters:**
+- `loose` (required): Boolean - Whether to use loose validation
+
+**Response:** JSON Schema for workflow validation
+
+---
 
 ## UI Application
 
