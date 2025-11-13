@@ -5,26 +5,69 @@
  * 2.0.
  */
 
-import { evaluate as base } from '../../src/evaluate';
-import type { EvaluateDataset } from '../../src/evaluate_dataset';
-import { createEvaluateDataset } from '../../src/evaluate_dataset';
-
-const evaluate = base.extend<{ evaluateDataset: EvaluateDataset }, {}>({
-  evaluateDataset: [
-    ({ chatClient, evaluators, phoenixClient }, use) => {
-      use(
-        createEvaluateDataset({
-          chatClient,
-          evaluators,
-          phoenixClient,
-        })
-      );
-    },
-    { scope: 'test' },
-  ],
-});
+import { v4 as uuidv4 } from 'uuid';
+import {
+  buildDocument,
+  createAndSyncRuleAndAlertsFactory,
+  waitForRiskScoresToBePresent,
+  dataViewRouteHelpersFactory,
+} from '@kbn/test-suites-xpack-security/security_solution_api_integration/test_suites/entity_analytics/utils';
+import { dataGeneratorFactory } from '@kbn/test-suites-xpack-security/security_solution_api_integration/test_suites/detections_response/utils';
+import { evaluate } from '../../src/evaluate';
 
 evaluate.describe('SIEM Entity Analytics Agent - Basic Tests', { tag: '@svlSecurity' }, () => {
+  const userId = uuidv4();
+
+  evaluate.beforeAll(async ({ log, esClient, esArchiverLoad, supertest, quickApiClient }) => {
+    const { indexListOfDocuments } = dataGeneratorFactory({
+      es: esClient,
+      index: 'ecs_compliant',
+      log,
+    });
+    const dataView = dataViewRouteHelpersFactory(supertest);
+    await dataView.create('security-solution');
+    await esArchiverLoad('ecs_compliant');
+
+    const userDocs = Array(10)
+      .fill({})
+      .map((_, index) => buildDocument({ user: { name: `user-${index}` } }, userId));
+
+    await indexListOfDocuments(userDocs);
+
+    const createAndSyncRuleAndAlerts = createAndSyncRuleAndAlertsFactory({
+      supertest,
+      log,
+    });
+
+    await createAndSyncRuleAndAlerts({
+      query: `id: ${userId}`,
+      alerts: 10,
+      riskScore: 40,
+    });
+
+    await quickApiClient.initRiskEngine();
+    await waitForRiskScoresToBePresent({ es: esClient, log, scoreCount: 10 });
+
+    // TODO
+    //     // Order is critical here: auditbeat data must be loaded before attempting to start the ML job,
+    // // as the job looks for certain indices on start
+    // await kibanaServer.uiSettings.update({
+    //   [DEFAULT_ANOMALY_SCORE]: 1,
+    // });
+    // await esArchiver.load(auditPath);
+    // await setupMlModulesWithRetry({ module: siemModule, supertest, retry });
+    // await forceStartDatafeeds({ jobId: mlJobId, rspCode: 200, supertest });
+    // await esArchiver.load(
+    //   'x-pack/solutions/security/test/fixtures/es_archives/security_solution/anomalies'
+    // );
+  });
+
+  evaluate.afterAll(async ({ quickApiClient, supertest }) => {
+    const dataView = dataViewRouteHelpersFactory(supertest);
+    await dataView.delete('security-solution');
+    await quickApiClient.cleanUpRiskEngine();
+  });
+
   evaluate('basic security questions', async ({ evaluateDataset }) => {
     await evaluateDataset({
       dataset: {
@@ -46,43 +89,6 @@ evaluate.describe('SIEM Entity Analytics Agent - Basic Tests', { tag: '@svlSecur
           },
           {
             input: {
-              question: 'Can you help me with entity analytics?',
-            },
-            output: {
-              criteria: [
-                'Confirms ability to help with entity analytics',
-                'Response is helpful and professional',
-                'Mentions security or Elastic Security context',
-              ],
-            },
-            metadata: { query_intent: 'Procedural' },
-          },
-          {
-            input: {
-              question: 'What tools do you have access to?',
-            },
-            output: {
-              criteria: [
-                'Mentions entity-analytics-tool or security-related tools',
-                'Response describes available capabilities',
-                'Does not claim tools it does not have',
-              ],
-            },
-            metadata: { query_intent: 'Factual' },
-          },
-        ],
-      },
-    });
-  });
-
-  evaluate('off-topic questions', async ({ evaluateDataset }) => {
-    await evaluateDataset({
-      dataset: {
-        name: 'siem-entity-analytics: off-topic-questions',
-        description: 'Tests that the agent rejects off-topic questions',
-        examples: [
-          {
-            input: {
               question: 'What is the weather today?',
             },
             output: {
@@ -94,22 +100,84 @@ evaluate.describe('SIEM Entity Analytics Agent - Basic Tests', { tag: '@svlSecur
             },
             metadata: { query_intent: 'Off-topic' },
           },
+        ],
+      },
+    });
+  });
+
+  evaluate('entity analytics risk score questions', async ({ evaluateDataset }) => {
+    await evaluateDataset({
+      dataset: {
+        name: 'siem-entity-analytics: [entity-analytics-tool-questions] risk score',
+        description: 'Questions to test the SIEM Entity Analytics agent - risk score',
+        examples: [
           {
             input: {
-              question: 'Can you help me cook pasta?',
+              question: 'Which users have the highest risk scores?',
             },
             output: {
-              criteria: [
-                'Politely declines to answer',
-                'Mentions focus on security or entity analytics',
-                'Does not provide cooking instructions',
-              ],
+              criteria: ['Return at least 5 users with the highest risk scores.'],
             },
-            metadata: { query_intent: 'Off-topic' },
+            metadata: { query_intent: 'Factual' },
+          },
+          {
+            input: {
+              question: "Show me how user-1's risk score has changed over the last 90 days",
+            },
+            output: {
+              criteria: ['Return the risk score of user-1 over the last 90 days.'],
+            },
+            metadata: { query_intent: 'Factual' },
+          },
+          {
+            input: {
+              question: 'Which 10 users have the highest risk scores right now?',
+            },
+            output: {
+              criteria: ['Return the 10 users with the highest risk scores right now.'],
+            },
+            metadata: { query_intent: 'Factual' },
+          },
+        ],
+      },
+    });
+  });
+
+  evaluate('entity analytics anomalies questions', async ({ evaluateDataset }) => {
+    await evaluateDataset({
+      dataset: {
+        name: 'siem-entity-analytics: [entity-analytics-tool-questions] anomalies',
+        description: 'Questions to test the SIEM Entity Analytics agent - anomalies',
+        examples: [
+          {
+            input: {
+              question: 'Show me entities with anomalous behavior in the last 24h',
+            },
+            output: {
+              criteria: ['Return at least 5 entities with anomalous behavior in the last 24h.'],
+            },
+            metadata: { query_intent: 'Factual' },
+          },
+          {
+            input: {
+              question: 'Show users who downloaded unusually large data',
+            },
+            output: {
+              criteria: ['Return the users who downloaded unusually large data.'],
+            },
+            metadata: { query_intent: 'Factual' },
+          },
+          {
+            input: {
+              question: 'Which accounts have downloaded more than 1GB this week?',
+            },
+            output: {
+              criteria: ['Return the accounts that have downloaded more than 1GB this week.'],
+            },
+            metadata: { query_intent: 'Factual' },
           },
         ],
       },
     });
   });
 });
-

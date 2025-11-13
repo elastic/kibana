@@ -59,7 +59,12 @@ export class SiemEntityAnalyticsEvaluationChatClient {
       steps?: Step[];
     }> => {
       // Use the Agent Builder API endpoint
-      const response = await this.fetch('/api/agent_builder/converse', {
+      const response: {
+        conversation_id: string;
+        trace_id?: string;
+        steps: Step[];
+        response: { message: string };
+      } = await this.fetch('/api/agent_builder/converse', {
         method: 'POST',
         version: '2023-10-31',
         body: JSON.stringify({
@@ -71,17 +76,12 @@ export class SiemEntityAnalyticsEvaluationChatClient {
       });
 
       // Extract conversation ID and response from the API response
-      const chatResponse = response as {
-        conversation_id: string;
-        trace_id?: string;
-        steps: Step[];
-        response: { message: string };
-      };
+
       const {
         conversation_id: conversationIdFromResponse,
         response: latestResponse,
         steps,
-      } = chatResponse;
+      } = response;
 
       return {
         conversationId: conversationIdFromResponse,
