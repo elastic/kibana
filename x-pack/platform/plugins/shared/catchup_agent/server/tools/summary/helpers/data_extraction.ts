@@ -110,12 +110,7 @@ export const extractDataFromResponse = (value: any): any => {
     try {
       const parsed = JSON.parse(value);
       // Check if parsed result is a workflow response structure
-      if (
-        parsed &&
-        typeof parsed === 'object' &&
-        parsed.results &&
-        Array.isArray(parsed.results)
-      ) {
+      if (parsed && typeof parsed === 'object' && parsed.results && Array.isArray(parsed.results)) {
         // Recursively extract from the workflow response structure
         return extractDataFromResponse(parsed);
       }
@@ -231,4 +226,3 @@ export const extractCorrelatedData = (correlatedData: Record<string, unknown>) =
     relatedAlertsData,
   };
 };
-

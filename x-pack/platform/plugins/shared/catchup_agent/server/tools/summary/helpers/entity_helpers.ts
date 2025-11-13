@@ -31,10 +31,7 @@ export const scoreEntities = (
         // Check if any host names appear in observability case
         for (const hostName of extractedEntities.host_names || []) {
           if (obsText.includes(hostName.toLowerCase())) {
-            entityScores.set(
-              `host:${hostName}`,
-              (entityScores.get(`host:${hostName}`) || 0) + 2
-            );
+            entityScores.set(`host:${hostName}`, (entityScores.get(`host:${hostName}`) || 0) + 2);
           }
         }
       }
@@ -45,15 +42,11 @@ export const scoreEntities = (
   if (relatedAlerts && Array.isArray(relatedAlerts)) {
     for (const alert of relatedAlerts) {
       const alertHost = alert.host?.name || alert.host_name || alert['host.name'];
-      const alertService =
-        alert.service?.name || alert.service_name || alert['service.name'];
+      const alertService = alert.service?.name || alert.service_name || alert['service.name'];
       const alertUser = alert.user?.name || alert.user_name || alert['user.name'];
 
       if (alertHost) {
-        entityScores.set(
-          `host:${alertHost}`,
-          (entityScores.get(`host:${alertHost}`) || 0) + 1
-        );
+        entityScores.set(`host:${alertHost}`, (entityScores.get(`host:${alertHost}`) || 0) + 1);
       }
       if (alertService) {
         entityScores.set(
@@ -62,10 +55,7 @@ export const scoreEntities = (
         );
       }
       if (alertUser) {
-        entityScores.set(
-          `user:${alertUser}`,
-          (entityScores.get(`user:${alertUser}`) || 0) + 1
-        );
+        entityScores.set(`user:${alertUser}`, (entityScores.get(`user:${alertUser}`) || 0) + 1);
       }
     }
   }
@@ -102,9 +92,7 @@ export const findRelatedAlerts = (
   return relatedAlerts.filter((a: any) => {
     if (entityType === 'host') {
       return (
-        a.host?.name === entityName ||
-        a.host_name === entityName ||
-        a['host.name'] === entityName
+        a.host?.name === entityName || a.host_name === entityName || a['host.name'] === entityName
       );
     }
     if (entityType === 'service') {
@@ -120,14 +108,10 @@ export const findRelatedAlerts = (
 /**
  * Find related cases for an entity
  */
-export const findRelatedCases = (
-  entityName: string,
-  allCases: any[]
-): any[] => {
+export const findRelatedCases = (entityName: string, allCases: any[]): any[] => {
   return allCases.filter(
     (c: any) =>
       c.title?.toLowerCase().includes(entityName.toLowerCase()) ||
       c.description?.toLowerCase().includes(entityName.toLowerCase())
   );
 };
-

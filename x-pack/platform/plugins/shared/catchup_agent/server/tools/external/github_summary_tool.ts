@@ -53,7 +53,6 @@ Optionally specify 'repo' and 'owner' to scope to a specific repository (e.g., o
     schema: githubSummarySchema,
     handler: async ({ start, connectorId, token, repo, owner }, { request, logger }) => {
       try {
-
         if (connectorId) {
           throw new Error(
             'GitHub connectorId is not currently supported. Please use "token" parameter or configure in kibana.dev.yml.'

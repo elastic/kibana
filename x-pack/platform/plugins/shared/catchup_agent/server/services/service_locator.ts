@@ -7,8 +7,8 @@
 
 import type { CoreStart } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { CatchupAgentPluginStart, CatchupAgentConfigType } from '../types';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
+import type { CatchupAgentPluginStart, CatchupAgentConfigType } from '../types';
 
 let pluginServices: {
   core: CoreStart;

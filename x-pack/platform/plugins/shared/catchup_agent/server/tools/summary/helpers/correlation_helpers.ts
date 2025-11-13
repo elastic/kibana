@@ -8,10 +8,7 @@
 /**
  * Filter correlations by match type
  */
-export const filterCorrelationsByType = (
-  correlations: any[],
-  matchTypes: string[]
-): any[] => {
+export const filterCorrelationsByType = (correlations: any[], matchTypes: string[]): any[] => {
   return correlations.filter((c: any) => matchTypes.includes(c.match_type));
 };
 
@@ -93,10 +90,7 @@ export const extractMentionedEntities = (correlations: any[]) => {
 /**
  * Prioritize correlations by confidence and severity
  */
-export const prioritizeCorrelations = (
-  correlations: any[],
-  limit: number = 10
-): any[] => {
+export const prioritizeCorrelations = (correlations: any[], limit: number = 10): any[] => {
   return [...correlations]
     .sort((a: any, b: any) => {
       const aScore =
@@ -109,4 +103,3 @@ export const prioritizeCorrelations = (
     })
     .slice(0, limit);
 };
-

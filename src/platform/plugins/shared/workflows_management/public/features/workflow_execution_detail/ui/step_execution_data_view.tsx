@@ -11,10 +11,10 @@ import { EuiText } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { Markdown } from '@kbn/kibana-react-plugin/public';
 import type { JsonValue } from '@kbn/utility-types';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { JSONDataView } from '../../../shared/ui/json_data_view';
-import { Markdown } from '@kbn/kibana-react-plugin/public';
 
 const Titles = {
   output: i18n.translate('workflowsManagement.stepExecutionDataView.outputTitle', {

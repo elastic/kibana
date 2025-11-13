@@ -40,7 +40,6 @@ Returns rules with name, updated_by, enabled status, and updated_at fields.`,
     schema: ruleChangesSchema,
     handler: async ({ start, end }, { request, logger }) => {
       try {
-
         // Normalize dates to current year if year is missing
         const normalizedStart = normalizeDateToCurrentYear(start);
         const startDate = new Date(normalizedStart);

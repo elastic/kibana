@@ -74,7 +74,6 @@ Returns alert details including alert IDs, timestamps, severity, rule names, ent
       { request, esClient, logger }
     ) => {
       try {
-
         // Validate that at least one entity filter is provided
         if (!host_name && !user_name && !service_name && !source_ip && !destination_ip) {
           return {

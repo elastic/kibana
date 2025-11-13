@@ -39,7 +39,6 @@ This tool calls all observability sub-tools in parallel and aggregates their res
     schema: observabilityCatchupSchema,
     handler: async ({ start, end }, { runner, logger }) => {
       try {
-
         // Build tool params with optional end parameter
         const toolParams = end ? { start, end } : { start };
         // Cases tool params - filter to observability cases only

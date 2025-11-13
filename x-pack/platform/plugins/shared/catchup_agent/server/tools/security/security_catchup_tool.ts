@@ -35,7 +35,6 @@ This tool calls all security sub-tools in parallel and aggregates their results.
     schema: securityCatchupSchema,
     handler: async ({ start, end }, { runner, logger }) => {
       try {
-
         // Build tool params with optional end parameter
         const toolParams = end ? { start, end } : { start };
         // Cases tool params - filter to security cases only

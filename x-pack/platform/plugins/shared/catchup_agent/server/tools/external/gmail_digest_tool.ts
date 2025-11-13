@@ -62,7 +62,6 @@ Optionally filters by keywords like "incident", "alert", or "case".`,
     schema: gmailDigestSchema,
     handler: async ({ start, token, connectorId, keywords }, { request, logger }) => {
       try {
-
         if (connectorId) {
           throw new Error(
             'Gmail connectorId is not currently supported. Please use "token" parameter or configure in kibana.dev.yml.'

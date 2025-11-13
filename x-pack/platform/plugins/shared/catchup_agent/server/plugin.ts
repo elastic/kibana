@@ -114,12 +114,7 @@ export class CatchupAgentPlugin
       const fakeRequest = kibanaRequestFactory(fakeRawRequest);
 
       // Register workflows in the default space (async, fire-and-forget)
-      registerCatchupWorkflows(
-        this.workflowsManagement,
-        this.logger,
-        fakeRequest,
-        DEFAULT_SPACE_ID
-      )
+      registerCatchupWorkflows(this.workflowsManagement, this.logger, fakeRequest, DEFAULT_SPACE_ID)
         .then(() => {
           // After workflows are registered, register the workflow builtin tools
           if (this.toolsSetup && this.workflowsManagement) {

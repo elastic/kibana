@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 import type { OnechatPluginSetup } from '@kbn/onechat-plugin/server';
 import type { ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';

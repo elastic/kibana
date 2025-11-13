@@ -60,7 +60,6 @@ This tool demonstrates Elastic's "Better Together" story by:
       { logger }
     ) => {
       try {
-
         // TODO: Use esClient for Elasticsearch hybrid search (RRF) in production
         // const { core } = getPluginServices();
         // const esClient = core.elasticsearch.client.asInternalUser;
@@ -123,7 +122,6 @@ This tool demonstrates Elastic's "Better Together" story by:
 
         // Sort by score (descending) - simulating RRF ranking
         const rankedResults = results.sort((a, b) => b.score - a.score).slice(0, limit);
-
 
         return {
           results: [

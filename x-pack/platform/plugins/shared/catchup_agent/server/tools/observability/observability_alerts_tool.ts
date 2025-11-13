@@ -72,7 +72,6 @@ Returns aggregated statistics including open/resolved alerts and total alerts.`,
     total_alerts = COUNT(*)
 | LIMIT 1`;
 
-
         let result;
         try {
           result = await executeEsql({

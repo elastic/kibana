@@ -27,7 +27,6 @@ Returns analytics data including CTR changes and top queries.`,
     schema: searchUpdatesSchema,
     handler: async ({ start }, { esClient, logger }) => {
       try {
-
         const startDate = new Date(start);
         if (isNaN(startDate.getTime())) {
           throw new Error(`Invalid datetime format: ${start}. Expected ISO 8601 format.`);

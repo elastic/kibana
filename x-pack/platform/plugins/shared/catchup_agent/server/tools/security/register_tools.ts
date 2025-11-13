@@ -16,7 +16,6 @@ import { alertsByEntitiesTool } from './alerts_by_entities_tool';
 import { fetchIncidentTool } from './fetch_incident_tool';
 
 export function registerSecurityTools(toolsSetup: ToolsSetup, logger: Logger): void {
-
   try {
     toolsSetup.register(attackDiscoveryTool());
     toolsSetup.register(detectionsSummaryTool());
