@@ -17,7 +17,6 @@ import {
   dismissAllFlyoutsExceptFor,
   prepareDataViewForEditing,
 } from '@kbn/discover-utils';
-import { css } from '@emotion/react';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
@@ -261,7 +260,7 @@ export const DiscoverTopNav = ({
     !!searchBarCustomization?.CustomDataViewPicker || !!searchBarCustomization?.hideDataViewPicker;
 
   return (
-    <span css={floatingActionStyles}>
+    <span>
       <DiscoverTopNavMenu topNavBadges={topNavBadges} topNavMenu={topNavMenu} />
       <SearchBar
         useBackgroundSearchButton={
@@ -336,13 +335,3 @@ export const DiscoverTopNav = ({
     </span>
   );
 };
-
-// ToDo: Remove when the new layout lands https://github.com/elastic/kibana/issues/234854
-const floatingActionStyles = css({
-  '.controlFrameFloatingActions': {
-    top: '100%',
-    transform: 'translate(0, -20%)',
-    left: '-8px',
-    right: 'auto',
-  },
-});

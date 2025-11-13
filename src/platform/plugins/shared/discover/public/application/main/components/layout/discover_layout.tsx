@@ -18,7 +18,7 @@ import {
   useEuiBreakpoint,
   type UseEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { Global, css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { appendWhereClauseToESQLQuery, hasTransformationalCommand } from '@kbn/esql-utils';
@@ -402,129 +402,142 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   );
 
   return (
-    <EuiPage
-      className="dscPage" // class is used in tests and other styles
-      data-fetch-counter={fetchCounter.current}
-      direction="column"
-      css={[
-        styles.dscPage,
-        css`
-          ${useEuiBreakpoint(['m', 'l', 'xl'])} {
-            ${kbnFullBodyHeightCss(tabsEnabled ? '32px' : undefined)}
+    <>
+      <Global
+        styles={css`
+          #app-main-scroll {
+            z-index: calc(var(--kbn-layout--aboveFlyoutLevel) + 1);
+            overflow: visible !important;
           }
-        `,
-      ]}
-    >
-      <h1
-        id="savedSearchTitle"
-        className="euiScreenReaderOnly"
-        data-test-subj="discoverSavedSearchTitle"
-      >
-        {discoverSession?.title
-          ? i18n.translate('discover.pageTitleWithSavedSearch', {
-              defaultMessage: 'Discover - {savedSearchTitle}',
-              values: {
-                savedSearchTitle: discoverSession.title,
-              },
-            })
-          : i18n.translate('discover.pageTitleWithoutSavedSearch', {
-              defaultMessage: 'Discover - Search not yet saved',
-            })}
-      </h1>
-      <TopNavMemoized
-        savedQuery={savedQuery}
-        stateContainer={stateContainer}
-        esqlModeErrors={esqlModeErrors}
-        esqlModeWarning={esqlModeWarning}
-        onFieldEdited={onFieldEdited}
-        isLoading={isLoading}
-        onCancelClick={onCancelClick}
+        `}
       />
-      <EuiPageBody aria-describedby="savedSearchTitle" css={styles.savedSearchTitle}>
-        <div css={styles.sidebarContainer}>
-          {dataViewLoading && (
-            <EuiDelayRender delay={300}>
-              <EuiProgress size="xs" color="accent" position="absolute" />
-            </EuiDelayRender>
-          )}
-          <SavedSearchURLConflictCallout
-            discoverSession={discoverSession}
-            spaces={spaces}
-            history={history}
-          />
-          <DiscoverResizableLayout
-            sidebarToggleState$={sidebarToggleState$}
-            sidebarPanel={
-              <SidebarMemoized
-                columns={currentColumns}
-                documents$={stateContainer.dataState.data$.documents$}
-                onAddBreakdownField={canSetBreakdownField ? onAddBreakdownField : undefined}
-                onAddField={onAddColumnWithTracking}
-                onAddFilter={onFilter}
-                onChangeDataView={stateContainer.actions.onChangeDataView}
-                onDataViewCreated={stateContainer.actions.onDataViewCreated}
-                onFieldEdited={onFieldEdited}
-                onRemoveField={onRemoveColumnWithTracking}
-                selectedDataView={dataView}
-                sidebarToggleState$={sidebarToggleState$}
-                trackUiMetric={trackUiMetric}
-              />
+      <EuiPage
+        className="dscPage" // class is used in tests and other styles
+        data-fetch-counter={fetchCounter.current}
+        direction="column"
+        css={[
+          styles.dscPage,
+          css`
+            ${useEuiBreakpoint(['m', 'l', 'xl'])} {
+              ${kbnFullBodyHeightCss(tabsEnabled ? '32px' : undefined)}
             }
-            mainPanel={
-              <div css={styles.dscPageContentWrapper}>
-                {resultState === 'none' ? (
-                  <>
-                    {React.isValidElement(panelsToggle) ? (
-                      <div css={styles.mainPanel}>
-                        {React.cloneElement(panelsToggle, {
-                          renderedFor: 'prompt',
-                          isChartAvailable: false,
-                        })}
-                      </div>
-                    ) : null}
-                    {dataState.error ? (
-                      <ErrorCallout
-                        title={i18n.translate(
-                          'discover.noResults.searchExamples.noResultsErrorTitle',
-                          {
-                            defaultMessage: 'Unable to retrieve search results',
-                          }
-                        )}
-                        error={dataState.error}
-                        isEsqlMode={isEsqlMode}
-                      />
-                    ) : (
-                      <DiscoverNoResults
-                        stateContainer={stateContainer}
-                        isTimeBased={isTimeBased}
-                        query={globalQueryState.query}
-                        filters={globalQueryState.filters}
-                        dataView={dataView}
-                        onDisableFilters={onDisableFilters}
-                      />
-                    )}
-                  </>
-                ) : (
-                  <EuiPanel
-                    role="main"
-                    paddingSize="none"
-                    borderRadius="none"
-                    hasShadow={false}
-                    hasBorder={false}
-                    color="transparent"
-                    css={[styles.dscPageContent, contentCentered && styles.dscPageContentCentered]}
-                  >
-                    {mainDisplay}
-                  </EuiPanel>
-                )}
-              </div>
-            }
-            initialState={layoutUiState}
-            onInitialStateChange={onInitialStateChange}
-          />
-        </div>
-      </EuiPageBody>
-    </EuiPage>
+          `,
+        ]}
+      >
+        <h1
+          id="savedSearchTitle"
+          className="euiScreenReaderOnly"
+          data-test-subj="discoverSavedSearchTitle"
+        >
+          {discoverSession?.title
+            ? i18n.translate('discover.pageTitleWithSavedSearch', {
+                defaultMessage: 'Discover - {savedSearchTitle}',
+                values: {
+                  savedSearchTitle: discoverSession.title,
+                },
+              })
+            : i18n.translate('discover.pageTitleWithoutSavedSearch', {
+                defaultMessage: 'Discover - Search not yet saved',
+              })}
+        </h1>
+        <TopNavMemoized
+          savedQuery={savedQuery}
+          stateContainer={stateContainer}
+          esqlModeErrors={esqlModeErrors}
+          esqlModeWarning={esqlModeWarning}
+          onFieldEdited={onFieldEdited}
+          isLoading={isLoading}
+          onCancelClick={onCancelClick}
+        />
+        <EuiPageBody aria-describedby="savedSearchTitle" css={styles.savedSearchTitle}>
+          <div css={styles.sidebarContainer}>
+            {dataViewLoading && (
+              <EuiDelayRender delay={300}>
+                <EuiProgress size="xs" color="accent" position="absolute" />
+              </EuiDelayRender>
+            )}
+            <SavedSearchURLConflictCallout
+              discoverSession={discoverSession}
+              spaces={spaces}
+              history={history}
+            />
+            <DiscoverResizableLayout
+              sidebarToggleState$={sidebarToggleState$}
+              sidebarPanel={
+                <SidebarMemoized
+                  columns={currentColumns}
+                  documents$={stateContainer.dataState.data$.documents$}
+                  onAddBreakdownField={canSetBreakdownField ? onAddBreakdownField : undefined}
+                  onAddField={onAddColumnWithTracking}
+                  onAddFilter={onFilter}
+                  onChangeDataView={stateContainer.actions.onChangeDataView}
+                  onDataViewCreated={stateContainer.actions.onDataViewCreated}
+                  onFieldEdited={onFieldEdited}
+                  onRemoveField={onRemoveColumnWithTracking}
+                  selectedDataView={dataView}
+                  sidebarToggleState$={sidebarToggleState$}
+                  trackUiMetric={trackUiMetric}
+                />
+              }
+              mainPanel={
+                <div css={styles.dscPageContentWrapper}>
+                  {resultState === 'none' ? (
+                    <>
+                      {React.isValidElement(panelsToggle) ? (
+                        <div css={styles.mainPanel}>
+                          {React.cloneElement(panelsToggle, {
+                            renderedFor: 'prompt',
+                            isChartAvailable: false,
+                          })}
+                        </div>
+                      ) : null}
+                      {dataState.error ? (
+                        <ErrorCallout
+                          title={i18n.translate(
+                            'discover.noResults.searchExamples.noResultsErrorTitle',
+                            {
+                              defaultMessage: 'Unable to retrieve search results',
+                            }
+                          )}
+                          error={dataState.error}
+                          isEsqlMode={isEsqlMode}
+                        />
+                      ) : (
+                        <DiscoverNoResults
+                          stateContainer={stateContainer}
+                          isTimeBased={isTimeBased}
+                          query={globalQueryState.query}
+                          filters={globalQueryState.filters}
+                          dataView={dataView}
+                          onDisableFilters={onDisableFilters}
+                        />
+                      )}
+                    </>
+                  ) : (
+                    <EuiPanel
+                      role="main"
+                      paddingSize="none"
+                      borderRadius="none"
+                      hasShadow={false}
+                      hasBorder={false}
+                      color="transparent"
+                      css={[
+                        styles.dscPageContent,
+                        contentCentered && styles.dscPageContentCentered,
+                      ]}
+                    >
+                      {mainDisplay}
+                    </EuiPanel>
+                  )}
+                </div>
+              }
+              initialState={layoutUiState}
+              onInitialStateChange={onInitialStateChange}
+            />
+          </div>
+        </EuiPageBody>
+      </EuiPage>
+    </>
   );
 }
 
@@ -546,7 +559,7 @@ const getOperator = (fieldName: string, values: unknown, operation: '+' | '-') =
 const componentStyles = {
   dscPage: ({ euiTheme }: UseEuiTheme) =>
     css({
-      overflow: 'hidden',
+      overflow: 'visible',
       padding: 0,
       backgroundColor: euiTheme.colors.backgroundBasePlain,
     }),
