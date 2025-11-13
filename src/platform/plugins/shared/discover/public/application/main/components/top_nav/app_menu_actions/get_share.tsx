@@ -135,7 +135,7 @@ export const getShareAppMenuItem = ({
             },
           },
           link: {
-            draftModeCallOut: true,
+            draftModeCallOut: tabsEnabled,
           },
         },
       },
