@@ -6,7 +6,6 @@
   "include": ["../../../../typings/**/*", "server/**/*"],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/core-elasticsearch-server",
     "@kbn/onechat-server",
     "@kbn/onechat-common",
     "@kbn/actions-plugin",
@@ -14,7 +13,18 @@
     "@kbn/cases-plugin",
     "@kbn/rule-registry-plugin",
     "@kbn/zod",
-    "@kbn/logging"
+    "@kbn/logging",
+    "@kbn/config-schema",
+    "@kbn/onechat-plugin",
+    "@kbn/core-http-server",
+    "@kbn/spaces-utils",
+    "@kbn/core-http-server-utils",
+    "@kbn/spaces-plugin",
+    "@kbn/onechat-genai-utils",
+    "@kbn/securitysolution-rules",
+    "@kbn/rule-data-utils",
+    "@kbn/workflows-management-plugin",
+    "@kbn/alerting-plugin"
   ],
   "exclude": ["target/**/*"]
 }
