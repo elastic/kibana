@@ -29,8 +29,6 @@ export interface RunscriptActionResultProps {
   hideFile: boolean;
   // should be true for microsoft_defender_endpoint
   shouldShowOutput?: boolean;
-  // should be false for microsoft_defender_endpoint
-  showPasscode: boolean;
   textSize?: Exclude<EuiTextProps['size'], 'm' | 'relative'>;
 }
 
@@ -55,7 +53,6 @@ export const RunscriptActionResult = memo<RunscriptActionResultProps>(
     'data-test-subj': dataTestSubj,
     hideFile,
     shouldShowOutput = false,
-    showPasscode,
     textSize = 's',
   }) => {
     const outputContent = useMemo(
@@ -76,7 +73,7 @@ export const RunscriptActionResult = memo<RunscriptActionResultProps>(
               data-test-subj={dataTestSubj}
               agentId={agentId}
               textSize={textSize}
-              showPasscode={showPasscode}
+              showPasscode={false}
             />
           </EuiFlexItem>
         )}
