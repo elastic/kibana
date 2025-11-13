@@ -25,6 +25,10 @@ import { getAttachmentDocument, getAttachmentLinkUuid, getSoByIds, getSuggestedS
 /**
  * Client for managing attachments linked to streams.
  *
+ * Attachments are pre-existing objects in the system (such as saved objects like dashboards and rules)
+ * that are externally managed. This client provides functionality to associate these external objects
+ * to streams via links, without taking ownership of their lifecycle management.
+ *
  * Handles the lifecycle of attachments associated with streams, including linking, unlinking, bulk operations, and querying attachments.
  */
 export class AttachmentClient {
@@ -436,7 +440,7 @@ export class AttachmentClient {
 
     const attachments: Attachment[] = (
       await Promise.all(
-        ATTACHMENT_TYPES.map(async (type) => {
+        (attachmentType ? [attachmentType] : ATTACHMENT_TYPES).map(async (type) => {
           const ids = attachmentIdsByType[type];
           if (ids.length === 0) {
             return [];
