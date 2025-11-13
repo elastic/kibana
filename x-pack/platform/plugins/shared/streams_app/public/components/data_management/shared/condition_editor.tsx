@@ -10,11 +10,13 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiLink,
   EuiSelect,
   EuiSwitch,
 } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { Condition, RangeCondition } from '@kbn/streamlang';
 import {
   type FilterCondition,
@@ -26,6 +28,7 @@ import {
 import type { RoutingStatus } from '@kbn/streams-schema';
 import React, { useMemo } from 'react';
 import useToggle from 'react-use/lib/useToggle';
+import { useKibana } from '../../../hooks/use_kibana';
 import {
   alwaysToEmptyEquals,
   conditionNeedsValueField,
@@ -47,6 +50,7 @@ export interface ConditionEditorProps {
 
 export function ConditionEditor(props: ConditionEditorProps) {
   const { status, onConditionChange, fieldSuggestions = [], valueSuggestions = [] } = props;
+  const { core } = useKibana();
 
   const isInvalidCondition = !isCondition(props.condition);
 
@@ -55,6 +59,23 @@ export function ConditionEditor(props: ConditionEditorProps) {
   const conditionEditableInUi = useMemo(() => isConditionEditableInUi(condition), [condition]);
 
   const [usingSyntaxEditor, toggleSyntaxEditor] = useToggle(!conditionEditableInUi);
+
+  // Check if the selected field is a date type AND the operator is "in range"
+  const isDateFieldWithRange = useMemo(() => {
+    if (!conditionEditableInUi || fieldSuggestions.length === 0) {
+      return false;
+    }
+
+    const filterCondition = condition as FilterCondition;
+    const operator = getFilterOperator(filterCondition);
+
+    if (operator !== 'range') {
+      return false;
+    }
+
+    const fieldSuggestion = fieldSuggestions.find((s) => s.name === filterCondition.field);
+    return fieldSuggestion?.type === 'date';
+  }, [condition, conditionEditableInUi, fieldSuggestions]);
 
   const handleConditionChange = (updatedCondition: Condition) => {
     onConditionChange(emptyEqualsToAlways(updatedCondition));
@@ -76,6 +97,28 @@ export function ConditionEditor(props: ConditionEditorProps) {
           onChange={toggleSyntaxEditor}
           disabled={status === 'disabled'}
         />
+      }
+      helpText={
+        isDateFieldWithRange ? (
+          <FormattedMessage
+            id="xpack.streams.conditionEditor.dateRangeHelpText"
+            defaultMessage="You can use {dateMathLink} expressions to query date fields."
+            values={{
+              dateMathLink: (
+                <EuiLink
+                  data-test-subj="streamsAppConditionEditorDateMathLink"
+                  external
+                  target="_blank"
+                  href={core.docLinks.links.date.dateMath}
+                >
+                  {i18n.translate('xpack.streams.conditionEditor.dateMathLinkLabel', {
+                    defaultMessage: 'date math',
+                  })}
+                </EuiLink>
+              ),
+            }}
+          />
+        ) : undefined
       }
       isInvalid={isInvalidCondition}
       error={
