@@ -52162,6 +52162,9 @@
                                     "properties": {
                                       "name": {
                                         "not": {}
+                                      },
+                                      "updated_at": {
+                                        "not": {}
                                       }
                                     },
                                     "type": "object"
@@ -52174,11 +52177,16 @@
                                       },
                                       "name": {
                                         "type": "string"
+                                      },
+                                      "updated_at": {
+                                        "format": "date-time",
+                                        "type": "string"
                                       }
                                     },
                                     "required": [
                                       "name",
-                                      "description"
+                                      "description",
+                                      "updated_at"
                                     ],
                                     "type": "object"
                                   }
@@ -52555,6 +52563,9 @@
                                     "properties": {
                                       "name": {
                                         "not": {}
+                                      },
+                                      "updated_at": {
+                                        "not": {}
                                       }
                                     },
                                     "type": "object"
@@ -52572,11 +52583,16 @@
                                           },
                                           "name": {
                                             "type": "string"
+                                          },
+                                          "updated_at": {
+                                            "format": "date-time",
+                                            "type": "string"
                                           }
                                         },
                                         "required": [
                                           "name",
-                                          "description"
+                                          "description",
+                                          "updated_at"
                                         ],
                                         "type": "object"
                                       },
@@ -56488,6 +56504,9 @@
                                     "properties": {
                                       "name": {
                                         "not": {}
+                                      },
+                                      "updated_at": {
+                                        "not": {}
                                       }
                                     },
                                     "type": "object"
@@ -56500,11 +56519,16 @@
                                       },
                                       "name": {
                                         "type": "string"
+                                      },
+                                      "updated_at": {
+                                        "format": "date-time",
+                                        "type": "string"
                                       }
                                     },
                                     "required": [
                                       "name",
-                                      "description"
+                                      "description",
+                                      "updated_at"
                                     ],
                                     "type": "object"
                                   }
@@ -56880,6 +56904,9 @@
                                     "additionalProperties": true,
                                     "properties": {
                                       "name": {
+                                        "not": {}
+                                      },
+                                      "updated_at": {
                                         "not": {}
                                       }
                                     },
@@ -60367,6 +60394,9 @@
                                     "properties": {
                                       "name": {
                                         "not": {}
+                                      },
+                                      "updated_at": {
+                                        "not": {}
                                       }
                                     },
                                     "type": "object"
@@ -60379,11 +60409,16 @@
                                       },
                                       "name": {
                                         "type": "string"
+                                      },
+                                      "updated_at": {
+                                        "format": "date-time",
+                                        "type": "string"
                                       }
                                     },
                                     "required": [
                                       "name",
-                                      "description"
+                                      "description",
+                                      "updated_at"
                                     ],
                                     "type": "object"
                                   }
@@ -60760,6 +60795,9 @@
                                     "properties": {
                                       "name": {
                                         "not": {}
+                                      },
+                                      "updated_at": {
+                                        "not": {}
                                       }
                                     },
                                     "type": "object"
@@ -60777,11 +60815,16 @@
                                           },
                                           "name": {
                                             "type": "string"
+                                          },
+                                          "updated_at": {
+                                            "format": "date-time",
+                                            "type": "string"
                                           }
                                         },
                                         "required": [
                                           "name",
-                                          "description"
+                                          "description",
+                                          "updated_at"
                                         ],
                                         "type": "object"
                                       },
@@ -64389,6 +64432,9 @@
                                     "properties": {
                                       "name": {
                                         "not": {}
+                                      },
+                                      "updated_at": {
+                                        "not": {}
                                       }
                                     },
                                     "type": "object"
@@ -64401,11 +64447,16 @@
                                       },
                                       "name": {
                                         "type": "string"
+                                      },
+                                      "updated_at": {
+                                        "format": "date-time",
+                                        "type": "string"
                                       }
                                     },
                                     "required": [
                                       "name",
-                                      "description"
+                                      "description",
+                                      "updated_at"
                                     ],
                                     "type": "object"
                                   }
@@ -64781,6 +64832,9 @@
                                     "additionalProperties": true,
                                     "properties": {
                                       "name": {
+                                        "not": {}
+                                      },
+                                      "updated_at": {
                                         "not": {}
                                       }
                                     },
@@ -68270,6 +68324,9 @@
                                 "properties": {
                                   "name": {
                                     "not": {}
+                                  },
+                                  "updated_at": {
+                                    "not": {}
                                   }
                                 },
                                 "type": "object"
@@ -68282,11 +68339,16 @@
                                   },
                                   "name": {
                                     "type": "string"
+                                  },
+                                  "updated_at": {
+                                    "format": "date-time",
+                                    "type": "string"
                                   }
                                 },
                                 "required": [
                                   "name",
-                                  "description"
+                                  "description",
+                                  "updated_at"
                                 ],
                                 "type": "object"
                               }
@@ -68662,6 +68724,9 @@
                                 "additionalProperties": true,
                                 "properties": {
                                   "name": {
+                                    "not": {}
+                                  },
+                                  "updated_at": {
                                     "not": {}
                                   }
                                 },
