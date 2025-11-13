@@ -21,6 +21,7 @@ const INTERNAL_INFERENCE_CONNECTORS = [
   'Elastic-Managed-LLM',
   'General-Purpose-LLM-v1',
   'General-Purpose-LLM-v2',
+  'General-Purpose-LLM-v3',
 ];
 const INTERNAL_CONNECTORS = [...INTERNAL_CLOUD_CONNECTORS, ...INTERNAL_INFERENCE_CONNECTORS];
 
