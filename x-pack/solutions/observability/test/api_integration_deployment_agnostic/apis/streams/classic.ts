@@ -242,6 +242,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       after(async () => {
+        // First, ensure all data streams are deleted to avoid template deletion conflicts
+        try {
+          await esClient.indices.deleteDataStream({
+            name: [FIRST_STREAM_NAME, SECOND_STREAM_NAME],
+          });
+        } catch (error) {
+          // Ignore if already deleted
+        }
+
+        // Then delete the template
         await esClient.indices.deleteIndexTemplate({
           name: TEMPLATE_NAME,
         });
@@ -380,18 +390,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       before(async () => {
         await esClient.indices.putIndexTemplate({
           name: TEMPLATE_NAME,
-          body: {
-            index_patterns: ['mytest*'],
-            priority: 1000,
-            template: {
-              lifecycle: {
-                data_retention: '7d',
-              },
+          index_patterns: ['mytest*'],
+          priority: 1000,
+          template: {
+            lifecycle: {
+              data_retention: '7d',
             },
-            data_stream: {
-              allow_custom_routing: false,
-              hidden: false,
-            },
+          },
+          data_stream: {
+            allow_custom_routing: false,
+            hidden: false,
           },
         });
 
