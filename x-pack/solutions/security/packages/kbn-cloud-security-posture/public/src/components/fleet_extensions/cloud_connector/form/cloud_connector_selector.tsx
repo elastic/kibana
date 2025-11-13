@@ -21,29 +21,23 @@ import {
   AWS_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ,
   AZURE_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ,
 } from '@kbn/cloud-security-posture-common';
-import type {
-  AwsCloudConnectorCredentials,
-  AzureCloudConnectorCredentials,
-  CloudProviders,
-} from '../types';
+import type { CloudConnectorCredentials, CloudProviders } from '../types';
 import { useGetCloudConnectors } from '../hooks/use_get_cloud_connectors';
 import { isAwsCloudConnectorVars, isAzureCloudConnectorVars } from '../utils';
 
-interface ReusableConnectorSelectProps<T> {
+interface CloudConnectorSelectorProps {
   provider: CloudProviders;
   cloudConnectorId: string | undefined;
-  credentials: T;
-  setCredentials: (credentials: T) => void;
+  credentials: CloudConnectorCredentials;
+  setCredentials: (credentials: CloudConnectorCredentials) => void;
 }
 
-export const ReusableConnectorSelect = <
-  T extends AwsCloudConnectorCredentials | AzureCloudConnectorCredentials
->({
+export const CloudConnectorSelector = ({
   provider,
   cloudConnectorId,
   credentials,
   setCredentials,
-}: ReusableConnectorSelectProps<T>) => {
+}: CloudConnectorSelectorProps) => {
   const { data: cloudConnectors = [] } = useGetCloudConnectors(provider);
 
   const label = (
@@ -110,7 +104,7 @@ export const ReusableConnectorSelect = <
           roleArn: connector.vars.role_arn?.value,
           externalId: externalIdValue,
           cloudConnectorId: connector.id,
-        } as T);
+        });
       } else if (isAzureCloudConnectorVars(connector.vars, provider)) {
         setCredentials({
           tenantId: connector.vars.tenant_id?.value,
@@ -118,7 +112,7 @@ export const ReusableConnectorSelect = <
           azure_credentials_cloud_connector_id:
             connector.vars.azure_credentials_cloud_connector_id?.value,
           cloudConnectorId: connector.id,
-        } as T);
+        });
       }
     },
     [cloudConnectors, provider, setCredentials]

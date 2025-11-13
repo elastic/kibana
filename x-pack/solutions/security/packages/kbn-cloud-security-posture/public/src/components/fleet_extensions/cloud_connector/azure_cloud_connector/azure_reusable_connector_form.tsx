@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import type { AzureCloudConnectorCredentials } from '../types';
 import { AZURE_PROVIDER } from '../constants';
-import { ReusableConnectorSelect } from '../form/reusable_connector_select';
+import { CloudConnectorSelector } from '../form/cloud_connector_selector';
 
 export const AzureReusableConnectorForm: React.FC<{
   cloudConnectorId: string | undefined;
@@ -28,7 +28,7 @@ export const AzureReusableConnectorForm: React.FC<{
         />
       </EuiText>
       <EuiSpacer size="m" />
-      <ReusableConnectorSelect
+      <CloudConnectorSelector
         provider={AZURE_PROVIDER}
         cloudConnectorId={cloudConnectorId}
         credentials={credentials}
