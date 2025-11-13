@@ -25,56 +25,56 @@ describe('utils', () => {
   describe('extractGapDurationSums', () => {
     it('extracts all sums when present', () => {
       const bucket: GapDurationBucket = {
-        sum_unfilled_ms: { value: 100 },
-        sum_in_progress_ms: { value: 50 },
-        sum_filled_ms: { value: 25 },
-        sum_total_ms: { value: 175 },
+        totalUnfilledDurationMs: { value: 100 },
+        totalInProgressDurationMs: { value: 50 },
+        totalFilledDurationMs: { value: 25 },
+        totalDurationMs: { value: 175 },
       };
       expect(extractGapDurationSums(bucket)).toEqual({
-        sumUnfilledMs: 100,
-        sumInProgressMs: 50,
-        sumFilledMs: 25,
-        sumTotalMs: 175,
+        totalUnfilledDurationMs: 100,
+        totalInProgressDurationMs: 50,
+        totalFilledDurationMs: 25,
+        totalDurationMs: 175,
       });
     });
 
     it('defaults missing fields to 0 and omits sumTotalMs when absent', () => {
       const bucket: GapDurationBucket = {};
       expect(extractGapDurationSums(bucket)).toEqual({
-        sumUnfilledMs: 0,
-        sumInProgressMs: 0,
-        sumFilledMs: 0,
-        sumTotalMs: undefined,
+        totalUnfilledDurationMs: 0,
+        totalInProgressDurationMs: 0,
+        totalFilledDurationMs: 0,
+        totalDurationMs: undefined,
       });
     });
 
     it('treats null values as 0', () => {
       const bucket: GapDurationBucket = {
-        sum_unfilled_ms: { value: null },
-        sum_in_progress_ms: { value: null },
-        sum_filled_ms: { value: null },
-        sum_total_ms: { value: null },
+        totalUnfilledDurationMs: { value: null },
+        totalInProgressDurationMs: { value: null },
+        totalFilledDurationMs: { value: null },
+        totalDurationMs: { value: null },
       };
       expect(extractGapDurationSums(bucket)).toEqual({
-        sumUnfilledMs: 0,
-        sumInProgressMs: 0,
-        sumFilledMs: 0,
-        sumTotalMs: 0,
+        totalUnfilledDurationMs: 0,
+        totalInProgressDurationMs: 0,
+        totalFilledDurationMs: 0,
+        totalDurationMs: 0,
       });
     });
 
     it('clamps negative values to 0', () => {
       const bucket: GapDurationBucket = {
-        sum_unfilled_ms: { value: -10 },
-        sum_in_progress_ms: { value: -1 },
-        sum_filled_ms: { value: -5 },
-        sum_total_ms: { value: -16 },
+        totalUnfilledDurationMs: { value: -10 },
+        totalInProgressDurationMs: { value: -1 },
+        totalFilledDurationMs: { value: -5 },
+        totalDurationMs: { value: -16 },
       };
       expect(extractGapDurationSums(bucket)).toEqual({
-        sumUnfilledMs: 0,
-        sumInProgressMs: 0,
-        sumFilledMs: 0,
-        sumTotalMs: 0,
+        totalUnfilledDurationMs: 0,
+        totalInProgressDurationMs: 0,
+        totalFilledDurationMs: 0,
+        totalDurationMs: 0,
       });
     });
   });
@@ -83,10 +83,10 @@ describe('utils', () => {
     it('returns unfilled when any unfilled ms > 0', () => {
       expect(
         calculateAggregatedGapStatus({
-          sumUnfilledMs: 1,
-          sumInProgressMs: 0,
-          sumFilledMs: 100,
-          sumTotalMs: 101,
+          totalUnfilledDurationMs: 1,
+          totalInProgressDurationMs: 0,
+          totalFilledDurationMs: 100,
+          totalDurationMs: 101,
         })
       ).toBe('unfilled');
     });
@@ -94,10 +94,10 @@ describe('utils', () => {
     it('returns in_progress when no unfilled and any in_progress > 0', () => {
       expect(
         calculateAggregatedGapStatus({
-          sumUnfilledMs: 0,
-          sumInProgressMs: 50,
-          sumFilledMs: 0,
-          sumTotalMs: 50,
+          totalUnfilledDurationMs: 0,
+          totalInProgressDurationMs: 50,
+          totalFilledDurationMs: 0,
+          totalDurationMs: 50,
         })
       ).toBe('in_progress');
     });
@@ -105,10 +105,10 @@ describe('utils', () => {
     it('returns filled when no unfilled/in_progress and filled > 0', () => {
       expect(
         calculateAggregatedGapStatus({
-          sumUnfilledMs: 0,
-          sumInProgressMs: 0,
-          sumFilledMs: 10,
-          sumTotalMs: 10,
+          totalUnfilledDurationMs: 0,
+          totalInProgressDurationMs: 0,
+          totalFilledDurationMs: 10,
+          totalDurationMs: 10,
         })
       ).toBe('filled');
     });
@@ -116,10 +116,10 @@ describe('utils', () => {
     it('returns null when all sums are 0', () => {
       expect(
         calculateAggregatedGapStatus({
-          sumUnfilledMs: 0,
-          sumInProgressMs: 0,
-          sumFilledMs: 0,
-          sumTotalMs: 0,
+          totalUnfilledDurationMs: 0,
+          totalInProgressDurationMs: 0,
+          totalFilledDurationMs: 0,
+          totalDurationMs: 0,
         })
       ).toBeNull();
     });
@@ -127,16 +127,16 @@ describe('utils', () => {
 
   describe('COMMON_GAP_AGGREGATIONS', () => {
     it('contains expected sum field mappings', () => {
-      expect(COMMON_GAP_AGGREGATIONS.sum_unfilled_ms).toEqual({
+      expect(COMMON_GAP_AGGREGATIONS.totalUnfilledDurationMs).toEqual({
         sum: { field: 'kibana.alert.rule.gap.unfilled_duration_ms' },
       });
-      expect(COMMON_GAP_AGGREGATIONS.sum_in_progress_ms).toEqual({
+      expect(COMMON_GAP_AGGREGATIONS.totalInProgressDurationMs).toEqual({
         sum: { field: 'kibana.alert.rule.gap.in_progress_duration_ms' },
       });
-      expect(COMMON_GAP_AGGREGATIONS.sum_filled_ms).toEqual({
+      expect(COMMON_GAP_AGGREGATIONS.totalFilledDurationMs).toEqual({
         sum: { field: 'kibana.alert.rule.gap.filled_duration_ms' },
       });
-      expect(COMMON_GAP_AGGREGATIONS.sum_total_ms).toEqual({
+      expect(COMMON_GAP_AGGREGATIONS.totalDurationMs).toEqual({
         sum: { field: 'kibana.alert.rule.gap.total_gap_duration_ms' },
       });
     });

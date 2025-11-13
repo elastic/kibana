@@ -111,19 +111,19 @@ describe('getGapsSummaryByRuleIds', () => {
           buckets: [
             {
               key: '1',
-              sum_unfilled_ms: { value: 1000 },
-              sum_in_progress_ms: { value: 2000 },
-              sum_filled_ms: { value: 3000 },
-              sum_total_ms: { value: 6000 },
-              last_gap_ts: { value: 1700125200000 },
+              totalUnfilledDurationMs: { value: 1000 },
+              totalInProgressDurationMs: { value: 2000 },
+              totalFilledDurationMs: { value: 3000 },
+              totalDurationMs: { value: 6000 },
+              lastGapTimestamp: { value: 1700125200000 },
             },
             {
               key: '2',
-              sum_unfilled_ms: { value: 4000 },
-              sum_in_progress_ms: { value: 5000 },
-              sum_filled_ms: { value: 6000 },
-              sum_total_ms: { value: 15000 },
-              last_gap_ts: { value: 1700128800000 },
+              totalUnfilledDurationMs: { value: 4000 },
+              totalInProgressDurationMs: { value: 5000 },
+              totalFilledDurationMs: { value: 6000 },
+              totalDurationMs: { value: 15000 },
+              lastGapTimestamp: { value: 1700128800000 },
             },
           ],
         },
@@ -172,27 +172,27 @@ describe('getGapsSummaryByRuleIds', () => {
             size: 10000,
           },
           aggs: {
-            sum_unfilled_ms: {
+            totalUnfilledDurationMs: {
               sum: {
                 field: 'kibana.alert.rule.gap.unfilled_duration_ms',
               },
             },
-            sum_in_progress_ms: {
+            totalInProgressDurationMs: {
               sum: {
                 field: 'kibana.alert.rule.gap.in_progress_duration_ms',
               },
             },
-            sum_filled_ms: {
+            totalFilledDurationMs: {
               sum: {
                 field: 'kibana.alert.rule.gap.filled_duration_ms',
               },
             },
-            sum_total_ms: {
+            totalDurationMs: {
               sum: {
                 field: 'kibana.alert.rule.gap.total_gap_duration_ms',
               },
             },
-            last_gap_ts: { max: { field: '@timestamp' } },
+            lastGapTimestamp: { max: { field: '@timestamp' } },
           },
         },
       },

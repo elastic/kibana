@@ -153,17 +153,17 @@ describe('getRuleIdsWithGaps', () => {
           buckets: [
             {
               key: 'rule-1',
-              sum_unfilled_ms: { value: 100 },
-              sum_in_progress_ms: { value: 0 },
-              sum_filled_ms: { value: 0 },
-              sum_total_ms: { value: 100 },
+              totalUnfilledDurationMs: { value: 100 },
+              totalInProgressDurationMs: { value: 0 },
+              totalFilledDurationMs: { value: 0 },
+              totalDurationMs: { value: 100 },
             },
             {
               key: 'rule-2',
-              sum_unfilled_ms: { value: 0 },
-              sum_in_progress_ms: { value: 50 },
-              sum_filled_ms: { value: 0 },
-              sum_total_ms: { value: 50 },
+              totalUnfilledDurationMs: { value: 0 },
+              totalInProgressDurationMs: { value: 50 },
+              totalFilledDurationMs: { value: 0 },
+              totalDurationMs: { value: 50 },
             },
           ],
         },
@@ -188,12 +188,16 @@ describe('getRuleIdsWithGaps', () => {
             by_rule: expect.objectContaining({
               terms: { field: 'rule.id', size: 10000, order: { _key: 'asc' } },
               aggs: {
-                sum_unfilled_ms: { sum: { field: 'kibana.alert.rule.gap.unfilled_duration_ms' } },
-                sum_in_progress_ms: {
+                totalUnfilledDurationMs: {
+                  sum: { field: 'kibana.alert.rule.gap.unfilled_duration_ms' },
+                },
+                totalInProgressDurationMs: {
                   sum: { field: 'kibana.alert.rule.gap.in_progress_duration_ms' },
                 },
-                sum_filled_ms: { sum: { field: 'kibana.alert.rule.gap.filled_duration_ms' } },
-                sum_total_ms: { sum: { field: 'kibana.alert.rule.gap.total_gap_duration_ms' } },
+                totalFilledDurationMs: {
+                  sum: { field: 'kibana.alert.rule.gap.filled_duration_ms' },
+                },
+                totalDurationMs: { sum: { field: 'kibana.alert.rule.gap.total_gap_duration_ms' } },
               },
             }),
           }),

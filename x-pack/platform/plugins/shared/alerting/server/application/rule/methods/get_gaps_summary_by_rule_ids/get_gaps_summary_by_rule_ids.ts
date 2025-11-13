@@ -121,7 +121,7 @@ export async function getGapsSummaryByRuleIds(
             },
             aggs: {
               ...COMMON_GAP_AGGREGATIONS,
-              last_gap_ts: { max: { field: '@timestamp' } },
+              lastGapTimestamp: { max: { field: '@timestamp' } },
             },
           },
         },
@@ -132,7 +132,7 @@ export async function getGapsSummaryByRuleIds(
       buckets: Array<
         GapDurationBucket & {
           key: string;
-          last_gap_ts?: { value: number | null };
+          lastGapTimestamp?: { value: number | null };
         }
       >;
     }
@@ -146,11 +146,11 @@ export async function getGapsSummaryByRuleIds(
         const status = calculateAggregatedGapStatus(sums) ?? undefined;
         return {
           ruleId: bucket.key,
-          totalUnfilledDurationMs: sums.sumUnfilledMs,
-          totalInProgressDurationMs: sums.sumInProgressMs,
-          totalFilledDurationMs: sums.sumFilledMs,
-          ...(bucket.last_gap_ts?.value != null
-            ? { lastGapTimestamp: bucket.last_gap_ts.value }
+          totalUnfilledDurationMs: sums.totalUnfilledDurationMs,
+          totalInProgressDurationMs: sums.totalInProgressDurationMs,
+          totalFilledDurationMs: sums.totalFilledDurationMs,
+          ...(bucket.lastGapTimestamp?.value != null
+            ? { lastGapTimestamp: bucket.lastGapTimestamp.value }
             : {}),
           ...(status ? { status } : {}),
         };

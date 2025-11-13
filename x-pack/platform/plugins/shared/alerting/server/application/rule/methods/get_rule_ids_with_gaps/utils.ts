@@ -8,17 +8,17 @@
 import type { AggregatedGapStatus } from '../../../../../common/constants/gap_status';
 
 export interface GapDurationSums {
-  sumUnfilledMs: number;
-  sumInProgressMs: number;
-  sumFilledMs: number;
-  sumTotalMs?: number;
+  totalUnfilledDurationMs: number;
+  totalInProgressDurationMs: number;
+  totalFilledDurationMs: number;
+  totalDurationMs?: number;
 }
 
 export interface GapDurationBucket {
-  sum_unfilled_ms?: { value: number | null };
-  sum_in_progress_ms?: { value: number | null };
-  sum_filled_ms?: { value: number | null };
-  sum_total_ms?: { value: number | null };
+  totalUnfilledDurationMs?: { value: number | null };
+  totalInProgressDurationMs?: { value: number | null };
+  totalFilledDurationMs?: { value: number | null };
+  totalDurationMs?: { value: number | null };
 }
 
 /**
@@ -26,10 +26,12 @@ export interface GapDurationBucket {
  */
 export function extractGapDurationSums(bucket: GapDurationBucket): GapDurationSums {
   return {
-    sumUnfilledMs: Math.max(0, bucket.sum_unfilled_ms?.value ?? 0),
-    sumInProgressMs: Math.max(0, bucket.sum_in_progress_ms?.value ?? 0),
-    sumFilledMs: Math.max(0, bucket.sum_filled_ms?.value ?? 0),
-    sumTotalMs: bucket.sum_total_ms ? Math.max(0, bucket.sum_total_ms.value ?? 0) : undefined,
+    totalUnfilledDurationMs: Math.max(0, bucket.totalUnfilledDurationMs?.value ?? 0),
+    totalInProgressDurationMs: Math.max(0, bucket.totalInProgressDurationMs?.value ?? 0),
+    totalFilledDurationMs: Math.max(0, bucket.totalFilledDurationMs?.value ?? 0),
+    totalDurationMs: bucket.totalDurationMs
+      ? Math.max(0, bucket.totalDurationMs.value ?? 0)
+      : undefined,
   };
 }
 
@@ -38,10 +40,10 @@ export function extractGapDurationSums(bucket: GapDurationBucket): GapDurationSu
  * Precedence: unfilled > in_progress > filled
  */
 export function calculateAggregatedGapStatus(sums: GapDurationSums): AggregatedGapStatus | null {
-  const { sumInProgressMs, sumUnfilledMs, sumFilledMs } = sums;
-  if (sumUnfilledMs > 0) return 'unfilled';
-  if (sumInProgressMs > 0) return 'in_progress';
-  if (sumFilledMs > 0) return 'filled';
+  const { totalInProgressDurationMs, totalUnfilledDurationMs, totalFilledDurationMs } = sums;
+  if (totalUnfilledDurationMs > 0) return 'unfilled';
+  if (totalInProgressDurationMs > 0) return 'in_progress';
+  if (totalFilledDurationMs > 0) return 'filled';
   return null;
 }
 
@@ -49,16 +51,16 @@ export function calculateAggregatedGapStatus(sums: GapDurationSums): AggregatedG
  * Common aggregation fields for gap duration tracking
  */
 export const COMMON_GAP_AGGREGATIONS = {
-  sum_unfilled_ms: {
+  totalUnfilledDurationMs: {
     sum: { field: 'kibana.alert.rule.gap.unfilled_duration_ms' },
   },
-  sum_in_progress_ms: {
+  totalInProgressDurationMs: {
     sum: { field: 'kibana.alert.rule.gap.in_progress_duration_ms' },
   },
-  sum_filled_ms: {
+  totalFilledDurationMs: {
     sum: { field: 'kibana.alert.rule.gap.filled_duration_ms' },
   },
-  sum_total_ms: {
+  totalDurationMs: {
     sum: { field: 'kibana.alert.rule.gap.total_gap_duration_ms' },
   },
 } as const;
