@@ -6,6 +6,6 @@
  */
 
 export { extractDissectPatternDangerouslySlow } from './src/extract_dissect_pattern';
-export { getDissectProcessor, type DissectProcessorResult } from './src/get_dissect_processor';
+export { getDissectProcessor } from './src/get_dissect_processor';
 export { groupMessagesByPattern } from './src/group_messages';
 export type { DissectPattern, DissectField, DissectModifiers, DelimiterNode } from './src/types';

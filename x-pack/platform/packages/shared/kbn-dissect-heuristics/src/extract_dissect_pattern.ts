@@ -6,6 +6,11 @@
  */
 
 import type { DissectPattern } from './types';
+import { findDelimiterSequences } from './find_delimiter_sequences';
+import { buildDelimiterTree } from './build_delimiter_tree';
+import { extractFields } from './extract_fields';
+import { detectModifiers } from './detect_modifiers';
+import { generatePattern } from './generate_pattern';
 
 /**
  * WARNING: DO NOT RUN THIS FUNCTION ON THE MAIN THREAD
@@ -35,16 +40,25 @@ export function extractDissectPatternDangerouslySlow(messages: string[]): Dissec
     };
   }
 
-  // TODO: Implement the full algorithm
-  // For now, return a simple placeholder
+  // Step 1: Find common delimiter sequences
+  const delimiters = findDelimiterSequences(messages);
+
+  // Step 2: Build ordered delimiter tree
+  const delimiterTree = buildDelimiterTree(messages, delimiters);
+
+  // Step 3: Extract fields between delimiters
+  const fields = extractFields(messages, delimiterTree);
+
+  // Step 4: Detect modifiers for each field
+  fields.forEach((field) => {
+    field.modifiers = detectModifiers(field);
+  });
+
+  // Step 5: Generate pattern string
+  const pattern = generatePattern(delimiterTree, fields);
+
   return {
-    pattern: '%{message}',
-    fields: [
-      {
-        name: 'message',
-        values: messages,
-        position: 0,
-      },
-    ],
+    pattern,
+    fields,
   };
 }
