@@ -29,19 +29,29 @@ import { BraveLogo } from './brave_logo';
 export interface ConnectorFlyoutProps {
   connectorType: string;
   connectorName: string;
+  defaultFeatures?: string[];
   onClose: () => void;
   onSave: (data: { apiKey: string; features: string[] }) => Promise<void>;
   isEditing?: boolean;
 }
 
+// Map feature IDs to display labels
+const FEATURE_LABELS: Record<string, string> = {
+  search_web: 'Search Web',
+  search_messages: 'Search Messages',
+  search_channels: 'Search Channels',
+  search_files: 'Search Files',
+};
+
 export const ConnectorFlyout: React.FC<ConnectorFlyoutProps> = ({
   connectorName,
+  defaultFeatures = [],
   onClose,
   onSave,
   isEditing,
 }) => {
   const [apiKey, setApiKey] = useState('');
-  const [features, setFeatures] = useState<string[]>(['search_web']);
+  const [features, setFeatures] = useState<string[]>(defaultFeatures);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -123,25 +133,29 @@ export const ConnectorFlyout: React.FC<ConnectorFlyoutProps> = ({
           </EuiTitle>
           <EuiSpacer size="s" />
 
-          {/* Brave Search: only "Search Web" feature */}
-          <EuiFormRow label="Enable functionality" fullWidth>
-            <EuiFlexGroup gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiCheckbox
-                  id="feature-search-web"
-                  label="Search Web"
-                  checked={features.includes('search_web')}
-                  onChange={(e) =>
-                    setFeatures((prev) =>
-                      e.target.checked
-                        ? Array.from(new Set([...prev, 'search_web']))
-                        : prev.filter((f) => f !== 'search_web')
-                    )
-                  }
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFormRow>
+          {/* Dynamic features based on connector type */}
+          {defaultFeatures.length > 0 && (
+            <EuiFormRow label="Enable functionality" fullWidth>
+              <EuiFlexGroup gutterSize="s" direction="column">
+                {defaultFeatures.map((featureId) => (
+                  <EuiFlexItem key={featureId} grow={false}>
+                    <EuiCheckbox
+                      id={`feature-${featureId}`}
+                      label={FEATURE_LABELS[featureId] || featureId}
+                      checked={features.includes(featureId)}
+                      onChange={(e) =>
+                        setFeatures((prev) =>
+                          e.target.checked
+                            ? Array.from(new Set([...prev, featureId]))
+                            : prev.filter((f) => f !== featureId)
+                        )
+                      }
+                    />
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGroup>
+            </EuiFormRow>
+          )}
         </EuiForm>
       </EuiFlyoutBody>
 

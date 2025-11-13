@@ -139,6 +139,65 @@ export class WorkflowContextManager {
     return this.templateEngine.evaluateExpression(template, context);
   }
 
+  /**
+   * Resolves secret references (e.g., `${workplace_connector:id:secret_key}`) in a value.
+   * This method can be called by step implementations that need to resolve secrets after
+   * template rendering.
+   * 
+   * @param value - The value to resolve secrets in (string, object, array, or primitive)
+   * @returns The value with all secret references resolved
+   */
+  public async resolveSecretsInValue<T>(value: T): Promise<T> {
+    const dependencies = this.getDependencies();
+    if (!dependencies?.secretResolver || !this.coreStart || !this.fakeRequest) {
+      return value;
+    }
+
+    const savedObjectsClient = this.coreStart.savedObjects.getScopedClient(this.fakeRequest);
+    const contextValue = this.getContext();
+    const namespace =
+      (contextValue as any)?.workflow?.spaceId ||
+      (savedObjectsClient as any).getCurrentNamespace?.() ||
+      ((this.fakeRequest as any).headers?.['x-elastic-project-id'] as string | undefined);
+
+    return (await this.resolveSecretsRecursively(value, savedObjectsClient, namespace, dependencies.secretResolver)) as T;
+  }
+
+  /**
+   * Recursively resolves secret references in a value (string, object, array, or primitive).
+   */
+  private async resolveSecretsRecursively(
+    value: unknown,
+    savedObjectsClient: any,
+    namespace: string | undefined,
+    secretResolver: any
+  ): Promise<unknown> {
+    if (value === null || value === undefined) {
+      return value;
+    }
+
+    if (typeof value === 'string') {
+      return await secretResolver.resolveSecrets(value, savedObjectsClient, namespace);
+    }
+
+    if (Array.isArray(value)) {
+      return await Promise.all(
+        value.map((item) => this.resolveSecretsRecursively(item, savedObjectsClient, namespace, secretResolver))
+      );
+    }
+
+    if (typeof value === 'object') {
+      const resolved: Record<string, unknown> = {};
+      for (const [key, val] of Object.entries(value)) {
+        resolved[key] = await this.resolveSecretsRecursively(val, savedObjectsClient, namespace, secretResolver);
+      }
+      return resolved;
+    }
+
+    // Return primitive values as-is (numbers, booleans, etc.)
+    return value;
+  }
+
   public readContextPath(propertyPath: string): { pathExists: boolean; value: unknown } {
     const propertyPathSegments = parseJsPropertyAccess(propertyPath);
     let result: unknown = this.getContext();

@@ -15,6 +15,7 @@ import {
   createGoogleDriveWorkflowTemplate,
   // createGoogleDriveDownloadWorkflowTemplate,
 } from '../workflows/google_drive_template';
+import { createSlackWorkflowTemplate } from '../workflows/slack_template';
 
 export interface WorkflowCreatorService {
   createWorkflowForConnector(
@@ -68,7 +69,9 @@ export class WorkflowCreator implements WorkflowCreatorService {
         break;
       case 'google_drive':
         workflowYaml = createGoogleDriveWorkflowTemplate(connectorId, feature);
-        
+        break;
+      case 'slack':
+        workflowYaml = createSlackWorkflowTemplate(connectorId, feature);
         break;
       default:
         throw new Error(`Unsupported connector type: ${connectorType}`);

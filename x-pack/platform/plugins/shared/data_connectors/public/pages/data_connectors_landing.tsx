@@ -28,7 +28,6 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React, { useMemo, useState } from 'react';
-import { WORKPLACE_CONNECTOR_TYPES } from '../../common';
 import { DATA_CONNECTORS_FULL_TITLE } from '../../common/constants';
 import { ConnectorFlyout } from '../components/connector_flyout';
 import { GoogleDriveConnectorFlyout } from '../components/google_drive_connector_flyout';
@@ -357,6 +356,7 @@ export const DataConnectorsLandingPage = () => {
                 <Flyout
                   connectorType={selectedConnectorType}
                   connectorName={tileData.title}
+                  defaultFeatures={tileData.defaultFeatures}
                   onClose={handleCloseFlyout}
                   onSave={(data: any) => handleSaveConnector(tileData, data)}
                   isEditing={isEditing}
@@ -380,6 +380,7 @@ export const DataConnectorsLandingPage = () => {
           onConfirm={async () => {
             if (connectorToDelete) {
               await deleteConnector(connectorToDelete);
+              await refreshConnectors();
             }
             setShowDeleteModal(false);
             setConnectorToDelete(null);

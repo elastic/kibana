@@ -234,6 +234,8 @@ export const SlackSearchStepSchema = BaseStepSchema.extend({
   with: z.object({
     bearerToken: z.string().min(1),
     query: z.string().min(1),
+    searchType: z.enum(['messages', 'channels']).optional().default('messages'),
+    fields: z.string().optional(),
     body: z.any().optional(),
   }),
 })
