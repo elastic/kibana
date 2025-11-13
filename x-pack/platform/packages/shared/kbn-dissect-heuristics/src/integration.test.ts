@@ -111,9 +111,8 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
 
       const result = extractDissectPatternDangerouslySlow(logs);
 
-      expect(result.pattern).toBeTruthy();
-      // Pattern should be valid even if skip detection varies
-      expect(result.fields.length).toBeGreaterThan(0);
+      expect(result.pattern).toBe('%{field_1} - - [%{field_2}] %{field_3}');
+      expect(result.fields).toHaveLength(3);
     });
 
     it('handles mixed modifiers correctly', () => {
@@ -125,8 +124,10 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
 
       const result = extractDissectPatternDangerouslySlow(logs);
 
-      expect(result.pattern).toBeTruthy();
-      expect(result.fields.length).toBeGreaterThan(0);
+      expect(result.pattern).toBe(
+        '%{field_1} %{field_2} %{field_3->} - - [%{field_4} %{field_5} %{field_6->}] %{field_7->} %{field_8}'
+      );
+      expect(result.fields).toHaveLength(8);
     });
   });
 
@@ -138,13 +139,15 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
       expect(result.fields).toEqual([]);
     });
 
-    it('handles single message', () => {
+    it('handles a single message (ensures no crash)', () => {
       const logs = ['This is a single log message with some data'];
 
       const result = extractDissectPatternDangerouslySlow(logs);
 
-      expect(result.pattern).toBeTruthy();
-      expect(result.fields.length).toBeGreaterThan(0);
+      expect(result.pattern).toBe(
+        '%{field_1} %{field_2} %{field_3} %{field_4} %{field_5} %{field_6} %{field_7} %{field_8} %{field_9}'
+      );
+      expect(result.fields).toHaveLength(9);
     });
 
     it('handles identical messages', () => {
@@ -170,8 +173,8 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
 
       const result = extractDissectPatternDangerouslySlow(logs);
 
-      expect(result.pattern).toBeTruthy();
-      expect(result.fields.length).toBeGreaterThan(0);
+      expect(result.pattern).toBe('%{field_1} %{field_2} %{field_3}');
+      expect(result.fields).toHaveLength(3);
     });
 
     it('handles very long messages efficiently', () => {
@@ -184,8 +187,8 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
 
       const result = extractDissectPatternDangerouslySlow(logs);
 
-      expect(result.pattern).toBeTruthy();
-      expect(result.fields.length).toBeGreaterThan(0);
+      expect(result.pattern).toBe('%{field_1} %{field_2} %{field_3} %{field_4} %{field_5}');
+      expect(result.fields).toHaveLength(5);
     });
 
     it('handles messages with special characters', () => {
@@ -197,10 +200,8 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
 
       const result = extractDissectPatternDangerouslySlow(logs);
 
-      expect(result.pattern).toBeTruthy();
-      expect(result.pattern).toContain(' -> ');
-      expect(result.pattern).toContain(' (');
-      expect(result.pattern).toContain(')');
+      expect(result.pattern).toBe('%{field_1}@%{field_2} -> /%{field_3} (%{field_4})');
+      expect(result.fields).toHaveLength(4);
     });
 
     it('handles messages with nested brackets', () => {
@@ -212,11 +213,10 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
 
       const result = extractDissectPatternDangerouslySlow(logs);
 
-      expect(result.pattern).toBeTruthy();
-      expect(result.pattern).toContain('[');
-      expect(result.pattern).toContain(']');
-      expect(result.pattern).toContain('(');
-      expect(result.pattern).toContain(')');
+      expect(result.pattern).toBe(
+        '%{field_1}-%{field_2}-%{field_3} [%{field_4}] (%{field_5}) - {%{field_6}-%{field_7}: %{field_8}} %{field_9}'
+      );
+      expect(result.fields).toHaveLength(9);
     });
 
     it('handles messages with URLs', () => {
@@ -228,8 +228,8 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
 
       const result = extractDissectPatternDangerouslySlow(logs);
 
-      expect(result.pattern).toBeTruthy();
-      expect(result.fields.length).toBeGreaterThan(3);
+      expect(result.pattern).toBe('%{field_1} %{field_2}://%{field_3} %{field_4} %{field_5}');
+      expect(result.fields).toHaveLength(5);
     });
 
     it('handles messages with timestamps in various formats', () => {
@@ -241,8 +241,8 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
 
       const result = extractDissectPatternDangerouslySlow(logs);
 
-      expect(result.pattern).toBeTruthy();
-      expect(result.fields.length).toBeGreaterThanOrEqual(3);
+      expect(result.pattern).toBe('%{field_1}-%{field_2}-%{field_3} %{field_4} %{field_5}');
+      expect(result.fields).toHaveLength(5);
     });
   });
 
@@ -365,10 +365,10 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
 
       const result = extractDissectPatternDangerouslySlow(logs);
 
-      expect(result.pattern).toBeTruthy();
-      expect(result.fields.length).toBeGreaterThan(8);
-      expect(result.pattern).toContain('"');
-      expect(result.pattern).toContain('[');
+      expect(result.pattern).toBe(
+        '%{field_1} - %{field_2} [%{field_3}/%{field_4}/%{field_5} +%{field_6}] "%{field_7} /%{field_8}/%{field_9}/%{field_10}/%{field_11}" %{field_12}://%{field_13}/%{field_14}/%{field_15}" %{field_16}" "%{field_17}/'
+      );
+      expect(result.fields).toHaveLength(17);
     });
 
     it('handles application logs with stack traces', () => {
@@ -380,23 +380,25 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
 
       const result = extractDissectPatternDangerouslySlow(logs);
 
-      expect(result.pattern).toBeTruthy();
-      expect(result.pattern).toContain('[');
-      expect(result.pattern).toContain(']');
-      expect(result.pattern).toContain(': ');
+      expect(result.pattern).toBe(
+        '[%{field_1}-%{field_2}-%{field_3} %{field_4}] %{} %{field_6}: %{} %{field_8} %{field_9} %{field_10}'
+      );
+      expect(result.fields).toHaveLength(10);
     });
 
     it('handles Kubernetes container logs', () => {
       const logs = [
         '2024-01-15T10:30:00.000Z stdout F Container started successfully',
         '2024-01-15T10:30:01.000Z stderr F Error: Connection refused',
-        '2024-01-15T10:30:02.000Z stdout P Partial log line continues',
+        '2024-01-15T10:30:02.000Z stdout F Request processed',
       ];
 
       const result = extractDissectPatternDangerouslySlow(logs);
 
-      expect(result.pattern).toBeTruthy();
-      expect(result.fields.length).toBeGreaterThanOrEqual(4);
+      expect(result.pattern).toBe(
+        '%{field_1}-%{field_2}-%{field_3} %{field_4} %{field_5} %{field_6} %{field_7}'
+      );
+      expect(result.fields).toHaveLength(7);
     });
 
     it('handles Windows Event Logs format', () => {
@@ -408,9 +410,10 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
 
       const result = extractDissectPatternDangerouslySlow(logs);
 
-      expect(result.pattern).toBeTruthy();
-      expect(result.pattern).toContain(' | ');
-      expect(result.fields.length).toBeGreaterThanOrEqual(4);
+      expect(result.pattern).toBe(
+        '%{field_1} %{field_2}: %{} %{field_4} | %{field_5} %{field_6} %{field_7}: %{} %{field_9} | %{field_10} %{field_11} %{field_12}: %{} %{field_14} | %{field_15} %{field_16} %{field_17}: %{} %{field_19}'
+      );
+      expect(result.fields).toHaveLength(19);
     });
 
     it('handles custom application logs with key-value pairs', () => {
@@ -422,9 +425,10 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
 
       const result = extractDissectPatternDangerouslySlow(logs);
 
-      expect(result.pattern).toBeTruthy();
-      expect(result.pattern).toContain('=');
-      expect(result.fields.length).toBeGreaterThanOrEqual(4);
+      expect(result.pattern).toBe(
+        '%{field_1}=%{field_2}-%{field_3}-%{field_4} %{field_5}=%{field_6} %{field_7}=%{field_8} %{field_9}=%{field_10} %{field_11}_%{field_12}=%{field_13}'
+      );
+      expect(result.fields).toHaveLength(13);
     });
   });
 
