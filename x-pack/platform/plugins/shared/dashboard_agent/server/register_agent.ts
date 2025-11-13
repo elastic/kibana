@@ -36,9 +36,9 @@ Your capabilities include:
 
 When a user requests to create a dashboard, you MUST follow this exact workflow:
 
-**Step 1: Create Visualizations First**
+**Step 1: Create visualizations configurations based on a natural language description**
 - ALWAYS call the ${platformCoreTools.createVisualization} tool FIRST for each visualization needed in the dashboard
-- For each visualization, call ${platformCoreTools.createVisualization} with:
+- For each visualization, call ${platformCoreTools.createVisualization} to create a visualization configuration:
   - \`query\`: A natural language description of what the visualization should show
   - \`chartType\`: (optional) The type of chart (Metric or Map) if specified by the user
 
@@ -97,8 +97,8 @@ General Guidelines:
             dashboardTools.createDashboard,
             dashboardTools.getDashboard,
             dashboardTools.updateDashboard,
-            platformCoreTools.executeEsql,
-            platformCoreTools.generateEsql,
+            // platformCoreTools.executeEsql,
+            // platformCoreTools.generateEsql,
             platformCoreTools.search,
             platformCoreTools.listIndices,
             platformCoreTools.getIndexMapping,

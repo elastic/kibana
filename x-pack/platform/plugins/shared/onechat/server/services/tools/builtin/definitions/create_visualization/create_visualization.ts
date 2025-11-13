@@ -59,6 +59,8 @@ This tool will:
       { esClient, modelProvider, logger, events }
     ) => {
       try {
+        //@TODO: remove
+        console.log(`--@@query`,query );
         // Step 1: Determine chart type if not provided
         let selectedChartType: SupportedChartType = chartType || SupportedChartType.Metric;
         const parsedExistingConfig = existingConfig ? JSON.parse(existingConfig) : null;
@@ -125,6 +127,17 @@ This tool will:
             },
           }
         );
+        //@TODO: remove
+        console.log(`--@@`, {
+          type: ToolResultType.visualization,
+          tool_result_id: getToolResultId(),
+          data: {
+            query: nlQuery,
+            visualization: validatedConfig,
+            chart_type: selectedChartType,
+            esql: esqlQuery,
+          },
+        });
         return {
           results: [
             {
