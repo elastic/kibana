@@ -19,7 +19,8 @@
   ],
   "exclude": [
     "target/**/*",
-    "packaging/**/*"
+    "packaging/target/**/*",
+    "packaging/example/**/*"
   ],
   "kbn_references": [
     "@kbn/i18n",

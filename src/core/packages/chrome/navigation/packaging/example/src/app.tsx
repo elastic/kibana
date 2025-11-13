@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint-disable @kbn/imports/no_unresolvable_imports */
+
 import React, { useState } from 'react';
 import { EuiProvider, EuiSpacer, EuiText, EuiCode } from '@elastic/eui';
 
-// eslint-disable-next-line @kbn/imports/no_unresolvable_imports
+// @ts-expect-error - have to build the package.
 import { OneNavigation } from '@kbn/one-navigation';
-// eslint-disable-next-line @kbn/imports/no_unresolvable_imports
+// @ts-expect-error - have to build the package.
 import type { MenuItem, SecondaryMenuItem, SideNavLogo } from '@kbn/one-navigation';
 
 function App() {
