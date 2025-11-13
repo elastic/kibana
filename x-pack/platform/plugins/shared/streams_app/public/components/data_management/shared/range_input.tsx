@@ -45,7 +45,7 @@ export const RangeInput: React.FC<RangeInputProps> = ({
   const toOperator = useMemo(() => {
     if (value.lte !== undefined) return 'lte';
     if (value.lt !== undefined) return 'lt';
-    return 'lt';
+    return 'lte';
   }, [value]);
 
   const fromValue =
