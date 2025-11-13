@@ -150,7 +150,7 @@ export const useEntitiesListColumns = (): EntitiesListColumns => {
           </span>
         );
       },
-      width: '8%',
+      grow: false,
     },
     {
       field: 'entity.name',
