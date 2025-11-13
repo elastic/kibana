@@ -111,25 +111,34 @@ const formReducer = <T>(state: FormState<T>, action: FormAction<T>): FormState<T
         ...state,
         values: newValues,
         errors: clearFieldErrors(state.errors, fieldId),
+        touched: { ...state.touched, [fieldId]: true },
       };
     }
 
     case 'BLUR_FIELD': {
       const { fieldId, value, field } = action;
-      const newTouched = { ...state.touched, [fieldId]: true };
 
-      if (!field) {
-        return { ...state, touched: newTouched };
+      const wasChanged = state.touched[fieldId];
+
+      if (!field || !wasChanged) {
+        return state;
       }
 
       const validationResult = field.validate(value);
-      const newErrors = { ...clearFieldErrors(state.errors, fieldId) };
+      const newErrors = { ...clearFieldErrors(state.errors, field.id) };
+      const newTouched = { ...state.touched };
 
       if (validationResult) {
+        const isNestedField = fieldId.includes('.');
+        const nestedFieldPath = isNestedField ? fieldId.split('.').slice(1).join('.') : '';
+
         Object.entries(validationResult).forEach(([path, error]) => {
-          const errorKey = path ? `${fieldId}.${path}` : fieldId;
-          newErrors[errorKey] = error;
-          newTouched[errorKey] = true;
+          const errorKey = path ? `${field.id}.${path}` : field.id;
+
+          if (!isNestedField || path === nestedFieldPath) {
+            newErrors[errorKey] = error;
+            newTouched[errorKey] = true;
+          }
         });
       }
 
@@ -243,7 +252,6 @@ export const useFormState = <T>(fields: FieldDefinition[]) => {
 
       if (field) {
         const validationResult = field.validate(value);
-        // Return only the root error (empty string key) if it exists
         return validationResult?.[''];
       }
       return undefined;
@@ -256,13 +264,7 @@ export const useFormState = <T>(fields: FieldDefinition[]) => {
       return (e: React.FormEvent) => {
         e.preventDefault();
 
-        const allTouched = fields.reduce((acc, field) => {
-          acc[field.id] = true;
-          return acc;
-        }, {} as Record<string, boolean>);
-
-        dispatch({ type: 'SET_ALL_TOUCHED', touched: allTouched });
-
+        const allTouched: Record<string, boolean> = {};
         const errors: Record<string, string | string[]> = {};
         let hasErrors = false;
 
@@ -272,6 +274,8 @@ export const useFormState = <T>(fields: FieldDefinition[]) => {
           const fieldKey = field.id as keyof T;
           const value = formState.values[fieldKey];
           cleanedValues[fieldKey] = value as T[keyof T];
+
+          allTouched[field.id] = true;
 
           const validationResult = field.validate(value);
           if (validationResult) {
@@ -284,9 +288,9 @@ export const useFormState = <T>(fields: FieldDefinition[]) => {
           }
         });
 
-        if (hasErrors) {
-          dispatch({ type: 'SUBMIT_ERRORS', errors, touched: allTouched });
-        } else {
+        dispatch({ type: 'SUBMIT_ERRORS', errors, touched: allTouched });
+
+        if (!hasErrors) {
           onSuccess({ data: cleanedValues as T });
         }
       };

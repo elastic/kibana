@@ -63,12 +63,10 @@ describe('useFormState', () => {
 
     const { result } = renderHook(() => useFormState<{ username: string }>(fields));
 
-    // Set an error first
     act(() => {
       result.current.handleBlur('username', result.current.values.username);
     });
 
-    // Change the field value
     act(() => {
       result.current.handleChange('username', 'validValue');
     });
@@ -82,6 +80,12 @@ describe('useFormState', () => {
     const { result } = renderHook(() => useFormState<{ username: string }>(fields));
 
     act(() => {
+      result.current.handleChange('username', 'test');
+    });
+
+    expect(result.current.touched.username).toBe(true);
+
+    act(() => {
       result.current.handleBlur('username', result.current.values.username);
     });
 
@@ -92,6 +96,10 @@ describe('useFormState', () => {
     const fields: FieldDefinition[] = [createMockField('username', 'ab')];
 
     const { result } = renderHook(() => useFormState(fields));
+
+    act(() => {
+      result.current.handleChange('username', 'ab');
+    });
 
     act(() => {
       result.current.handleBlur('username', 'ab');
@@ -295,6 +303,10 @@ describe('useFormState', () => {
     ];
 
     const { result } = renderHook(() => useFormState<{ username: string }>(fields));
+
+    act(() => {
+      result.current.handleChange('username', 'ab');
+    });
 
     act(() => {
       result.current.handleBlur('username', result.current.values.username);

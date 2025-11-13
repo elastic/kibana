@@ -22,6 +22,7 @@ export interface FieldDefinition {
     placeholder?: string;
     label?: string;
     default?: unknown;
+    helpText?: string;
   };
   initialValue?: unknown;
   value?: unknown;
@@ -36,10 +37,10 @@ const getStaticProps = ({ schema }: { schema: z.ZodTypeAny }) => {
 
   const commonProps = {
     fullWidth: true,
-    label: widgetOptions?.label,
-    placeholder: widgetOptions?.placeholder,
+    label: widgetOptions?.label as string | undefined,
+    placeholder: widgetOptions?.placeholder as string | undefined,
     default: widgetOptions?.default,
-    helpText: widgetOptions?.helpText,
+    helpText: widgetOptions?.helpText as string | undefined,
   };
 
   const mergedOptions = {
@@ -128,7 +129,7 @@ export const Form = <TSchema extends z.ZodObject<z.ZodRawShape>>({
   };
 
   return (
-    <EuiForm component="form" onSubmit={form.handleSubmit(_onSubmit)}>
+    <EuiForm component="form" onSubmit={form.handleSubmit(_onSubmit)} noValidate>
       {fields.map((field) => {
         const { id, staticProps, widget, schema: fieldSchema } = field;
 

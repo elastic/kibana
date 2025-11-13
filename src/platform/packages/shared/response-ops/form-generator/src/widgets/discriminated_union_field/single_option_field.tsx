@@ -77,7 +77,7 @@ export const SingleOptionUnionField: React.FC<DiscriminatedUnionWidgetProps> = (
       }
 
       const subFieldId = `${fieldId}.${fieldKey}`;
-      const isTouched = touched[subFieldId] || internalTouched;
+      const isTouched = touched[subFieldId] || touched[fieldId] || internalTouched;
       const error = errors[subFieldId] || fieldErrors[fieldKey];
       const isInvalid = !!(isTouched && error);
 

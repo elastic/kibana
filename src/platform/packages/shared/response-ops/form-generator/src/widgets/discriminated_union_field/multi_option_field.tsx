@@ -102,9 +102,12 @@ export const MultiOptionUnionField: React.FC<DiscriminatedUnionWidgetProps> = ({
 
                 const optionFieldId = `${fieldId}.${fieldKey}`;
                 const optionFieldTouched =
-                  touched[optionFieldId] || internalTouchedFields.has(fieldKey);
+                  touched[optionFieldId] || touched[fieldId] || internalTouchedFields.has(fieldKey);
                 const optionFieldError = errors[optionFieldId] || internalFieldErrors[fieldKey];
-                const optionFieldIsInvalid = !!(optionFieldTouched && optionFieldError);
+                const optionFieldIsInvalid = !!(
+                  (optionFieldTouched && optionFieldError) ||
+                  errors[optionFieldId]
+                );
 
                 const handleOptionChange = (_optionFieldIdArg: string, newValue: unknown) => {
                   const currentValueObj =

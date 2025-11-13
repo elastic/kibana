@@ -33,16 +33,13 @@ describe('Form', () => {
           placeholder: 'Enter username',
         },
       }),
-      email: z
-        .string()
-        .email()
-        .meta({
-          widget: 'text',
-          widgetOptions: {
-            label: 'Email',
-            placeholder: 'Enter email',
-          },
-        }),
+      email: z.email().meta({
+        widget: 'text',
+        widgetOptions: {
+          label: 'Email',
+          placeholder: 'Enter email',
+        },
+      }),
     });
 
     render(<Form connectorSchema={schema} onSubmit={mockOnSubmit} />, { wrapper });
@@ -115,15 +112,12 @@ describe('Form', () => {
 
   it('displays validation errors on submit with invalid data', async () => {
     const schema = z.object({
-      email: z
-        .string()
-        .email()
-        .meta({
-          widget: 'text',
-          widgetOptions: {
-            label: 'Email',
-          },
-        }),
+      email: z.email().meta({
+        widget: 'text',
+        widgetOptions: {
+          label: 'Email',
+        },
+      }),
     });
 
     render(<Form connectorSchema={schema} onSubmit={mockOnSubmit} />, { wrapper });
@@ -134,24 +128,19 @@ describe('Form', () => {
     const submitButton = screen.getByRole('button', { name: 'Submit' });
     fireEvent.click(submitButton);
 
-    await waitFor(() => {
-      expect(screen.getByText(/Invalid email/i)).toBeInTheDocument();
-    });
+    expect(await screen.findByText(/Invalid email/i)).toBeInTheDocument();
 
     expect(mockOnSubmit).not.toHaveBeenCalled();
   });
 
   it('validates field on blur', async () => {
     const schema = z.object({
-      email: z
-        .string()
-        .email()
-        .meta({
-          widget: 'text',
-          widgetOptions: {
-            label: 'Email',
-          },
-        }),
+      email: z.email().meta({
+        widget: 'text',
+        widgetOptions: {
+          label: 'Email',
+        },
+      }),
     });
 
     render(<Form connectorSchema={schema} onSubmit={mockOnSubmit} />, { wrapper });
@@ -160,22 +149,17 @@ describe('Form', () => {
     fireEvent.change(input, { target: { value: 'invalid' } });
     fireEvent.blur(input);
 
-    await waitFor(() => {
-      expect(screen.getByText(/Invalid email/i)).toBeInTheDocument();
-    });
+    expect(await screen.findByText(/Invalid email/i)).toBeInTheDocument();
   });
 
   it('clears validation errors when input becomes valid', async () => {
     const schema = z.object({
-      email: z
-        .string()
-        .email()
-        .meta({
-          widget: 'text',
-          widgetOptions: {
-            label: 'Email',
-          },
-        }),
+      email: z.email().meta({
+        widget: 'text',
+        widgetOptions: {
+          label: 'Email',
+        },
+      }),
     });
 
     render(<Form connectorSchema={schema} onSubmit={mockOnSubmit} />, { wrapper });
@@ -185,9 +169,7 @@ describe('Form', () => {
     fireEvent.change(input, { target: { value: 'invalid' } });
     fireEvent.blur(input);
 
-    await waitFor(() => {
-      expect(screen.getByText(/Invalid email/i)).toBeInTheDocument();
-    });
+    expect(await screen.findByText(/Invalid email/i)).toBeInTheDocument();
 
     fireEvent.change(input, { target: { value: 'test@example.com' } });
 
@@ -511,9 +493,7 @@ describe('Authentication Form Integration Tests', () => {
     const bearerCard = screen.getByLabelText('Bearer Token');
     fireEvent.click(bearerCard);
 
-    await waitFor(() => {
-      expect(screen.queryByTestId('authType.token')).toBeDefined();
-    });
+    await screen.findByTestId('authType.token');
 
     const tokenInput = screen.getByTestId('authType.token');
     fireEvent.change(tokenInput, { target: { value: 'my-secret-token' } });
@@ -571,18 +551,14 @@ describe('Authentication Form Integration Tests', () => {
     const basicCard = screen.getByLabelText('Basic Auth');
     fireEvent.click(basicCard);
 
-    await waitFor(() => {
-      expect(screen.queryByTestId('authType.username')).toBeDefined();
-      expect(screen.queryByTestId('authType.password')).toBeDefined();
-    });
+    await screen.findByTestId('authType.username');
+    await screen.findByTestId('authType.password');
 
     const submitButton = screen.getByRole('button', { name: 'Submit' });
     fireEvent.click(submitButton);
 
-    await waitFor(() => {
-      expect(screen.getByText('Username cannot be empty')).toBeInTheDocument();
-      expect(screen.getByText('Password cannot be empty')).toBeInTheDocument();
-    });
+    expect(await screen.findByText('Username cannot be empty')).toBeInTheDocument();
+    expect(await screen.findByText('Password cannot be empty')).toBeInTheDocument();
 
     expect(mockOnSubmit).not.toHaveBeenCalled();
   });
@@ -593,19 +569,16 @@ describe('Authentication Form Integration Tests', () => {
     const basicCard = screen.getByLabelText('Basic Auth');
     fireEvent.click(basicCard);
 
-    await waitFor(() => {
-      expect(screen.queryByTestId('authType.username')).toBeDefined();
-      expect(screen.queryByTestId('authType.password')).toBeDefined();
-    });
+    await screen.findByTestId('authType.username');
+    await screen.findByTestId('authType.password');
 
     const usernameInput = screen.getByTestId('authType.username');
 
-    fireEvent.focus(usernameInput);
+    fireEvent.change(usernameInput, { target: { value: 'test' } });
+    fireEvent.change(usernameInput, { target: { value: '' } });
     fireEvent.blur(usernameInput);
 
-    await waitFor(() => {
-      expect(screen.getByText('Username cannot be empty')).toBeInTheDocument();
-    });
+    expect(await screen.findByText('Username cannot be empty')).toBeInTheDocument();
 
     expect(screen.queryByText('Password cannot be empty')).not.toBeInTheDocument();
   });
@@ -652,5 +625,77 @@ describe('Authentication Form Integration Tests', () => {
         },
       });
     });
+  });
+
+  it('shows all validation errors on submit even after partial blur validation', async () => {
+    const schema = z.object({
+      name: z
+        .string()
+        .min(1, 'Name cannot be empty')
+        .meta({
+          widget: 'text',
+          widgetOptions: { label: 'Name' },
+        }),
+      authType: z
+        .discriminatedUnion('type', [
+          z.object({ type: z.literal('none') }).meta({
+            widgetOptions: { label: 'None' },
+          }),
+          z
+            .object({
+              type: z.literal('basic'),
+              username: z
+                .string()
+                .min(1, 'Username cannot be empty')
+                .meta({
+                  widget: 'text',
+                  widgetOptions: { label: 'Username' },
+                }),
+              password: z
+                .string()
+                .min(1, 'Password cannot be empty')
+                .meta({
+                  widget: 'password',
+                  widgetOptions: { label: 'Password' },
+                }),
+            })
+            .meta({
+              widgetOptions: { label: 'Basic Auth' },
+            }),
+        ])
+        .meta({
+          widget: 'formFieldset',
+          widgetOptions: { label: 'Authentication', default: 'none' },
+        }),
+    });
+
+    render(<Form connectorSchema={schema} onSubmit={mockOnSubmit} />, { wrapper });
+
+    const basicCard = screen.getByLabelText('Basic Auth');
+    fireEvent.click(basicCard);
+
+    await screen.findByTestId('authType.username');
+    await screen.findByTestId('authType.password');
+
+    const nameInput = screen.getByTestId('name');
+    fireEvent.focus(nameInput);
+
+    const usernameInput = screen.getByTestId('authType.username');
+    fireEvent.change(usernameInput, { target: { value: 'test' } });
+    fireEvent.change(usernameInput, { target: { value: '' } });
+    fireEvent.blur(usernameInput);
+
+    await screen.findByText('Username cannot be empty');
+    expect(screen.queryByText('Name cannot be empty')).not.toBeInTheDocument();
+    expect(screen.queryByText('Password cannot be empty')).not.toBeInTheDocument();
+
+    const submitButton = screen.getByRole('button', { name: 'Submit' });
+    fireEvent.click(submitButton);
+
+    expect(await screen.findByText('Name cannot be empty')).toBeInTheDocument();
+    expect(await screen.findByText('Username cannot be empty')).toBeInTheDocument();
+    expect(await screen.findByText('Password cannot be empty')).toBeInTheDocument();
+
+    expect(mockOnSubmit).not.toHaveBeenCalled();
   });
 });
