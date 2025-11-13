@@ -8,7 +8,9 @@
   ],
   "kbn_references": [
     "@kbn/scout-oblt",
-    "@kbn/tooling-log"
+    "@kbn/tooling-log",
+    "@kbn/fleet-plugin",
+    "@kbn/profiling-data-access-plugin"
   ],
   "exclude": [
     "target/**/*"
