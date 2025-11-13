@@ -35,6 +35,7 @@ const applyAndCloseLabel = i18n.translate('xpack.lens.config.applyFlyoutLabel', 
 export const FlyoutWrapper = ({
   children,
   toolbar,
+  layerTabs,
   isInlineFlyoutVisible,
   isScrollable,
   displayFlyoutHeader,
@@ -121,6 +122,17 @@ export const FlyoutWrapper = ({
             )}
           </EuiFlexGroup>
           <EuiSpacer size="s" />
+          {/* Header row 3: Layer tabs */}
+          {layerTabs ? (
+            <div
+              // Adding negative margin to compensate for EuiFlyout header padding
+              css={css`
+                margin-inline: -${euiTheme.size.base};
+              `}
+            >
+              {layerTabs}
+            </div>
+          ) : null}
         </EuiFlyoutHeader>
       )}
       {isInlineFlyoutVisible && isReadOnly ? (
