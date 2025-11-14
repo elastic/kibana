@@ -12,48 +12,111 @@ import type { IconType } from '@elastic/eui';
 export type BadgeType = 'beta' | 'techPreview';
 
 export interface SecondaryMenuItem {
-  'data-test-subj'?: string;
-  badgeType?: BadgeType;
+  /**
+   * The URL for the menu item link.
+   */
   href: string;
+  /**
+   * The unique identifier of the menu item.
+   */
   id: string;
-  isExternal?: boolean;
+  /**
+   * The label to display for the menu item.
+   */
   label: string;
+  /**
+   * (optional) `data-test-subj` attribute for testing and tracking purposes.
+   */
+  'data-test-subj'?: string;
+  /**
+   * (optional) The type of badge shown next to the item (e.g. `beta`, `techPreview`).
+   */
+  badgeType?: BadgeType;
+  /**
+   * (optional) Whether the link opens in a new tab.
+   */
+  isExternal?: boolean;
 }
 
 export interface SecondaryMenuSection {
+  /**
+   * The unique identifier of the secondary menu section.
+   */
   id: string;
+  /**
+   * The items contained in the secondary menu section.
+   */
   items: SecondaryMenuItem[];
+  /**
+   * (optional) The label to display for the secondary menu section.
+   */
   label?: string;
 }
 
 export interface MenuItem {
-  'data-test-subj'?: string;
-  badgeType?: BadgeType;
+  /**
+   * The URL for the menu item link.
+   */
   href: string;
+  /**
+   * The icon to display for the menu item.
+   */
   iconType: IconType;
+  /**
+   * The unique identifier of the menu item.
+   */
   id: string;
+  /**
+   * The label to display for the menu item.
+   */
   label: string;
+  /**
+   * (optional) `data-test-subj` attribute for testing and tracking purposes.
+   */
+  'data-test-subj'?: string;
+  /**
+   * (optional) The type of badge shown next to the item (e.g. `beta`, `techPreview`).
+   */
+  badgeType?: BadgeType;
+  /**
+   * (optional) The secondary menu sections belonging to the menu item.
+   */
   sections?: SecondaryMenuSection[];
 }
 
 export interface NavigationStructure {
+  /**
+   * The items to be displayed in the navigation footer.
+   */
   footerItems: MenuItem[];
+  /**
+   * The primary navigation items displayed in the navigation main menu.
+   */
   primaryItems: MenuItem[];
 }
 
 export interface MenuCalculations {
+  /**
+   * The total available height (in pixels) for the menu rendering.
+   */
   availableHeight: number;
+  /**
+   * The gap (in pixels) between the menu items.
+   */
   itemGap: number;
+  /**
+   * The maximum number of menu items that can be displayed in the navigation menu.
+   */
   maxVisibleItems: number;
 }
 
 export interface SideNavLogo {
   /**
-   * The route ID for the logo, used for the active state.
+   * The route ID of the logo, used for the active state.
    */
   id: string;
   /**
-   * The href for the logo link, typically the home page.
+   * The href of the logo link, typically the home page.
    */
   href: string;
   /**
@@ -65,7 +128,7 @@ export interface SideNavLogo {
    */
   iconType: string;
   /**
-   * Optional data-test-subj attribute
+   * (optional) `data-test-subj` attribute for testing and tracking purposes.
    */
   'data-test-subj'?: string;
 }
