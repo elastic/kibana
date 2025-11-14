@@ -113,7 +113,6 @@ const SecurityAttackDiscoveryAlertOptional = rt.partial({
       id: schemaString,
     })
   ),
-  'kibana.alert.attack_ids': schemaStringArray,
   'kibana.alert.case_ids': schemaStringArray,
   'kibana.alert.consecutive_matches': schemaStringOrNumber,
   'kibana.alert.duration.us': schemaStringOrNumber,
@@ -148,6 +147,7 @@ const SecurityAttackDiscoveryAlertOptional = rt.partial({
   'kibana.alert.workflow_tags': schemaStringArray,
   'kibana.version': schemaString,
   tags: schemaStringArray,
+  undefined: schemaStringArray,
 });
 
 // prettier-ignore
