@@ -19,7 +19,7 @@ const DEFAULT_PER_PAGE = 100;
 const DEFAULT_PAGE = 1;
 
 export class FindSLODefinitions {
-  constructor(private repository: SLORepository) {}
+  constructor(private repository: SLORepository) { }
 
   public async execute(params: FindSLODefinitionsParams): Promise<FindSLODefinitionsResponse> {
     const requestTags: string[] = params.tags?.split(',') ?? [];
