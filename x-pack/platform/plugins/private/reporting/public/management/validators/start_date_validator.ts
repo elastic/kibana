@@ -18,12 +18,11 @@ export const getStartDateValidator =
     prevStartDate?: string
   ): ValidationFunc<Partial<ScheduledReport>, string, Moment> =>
   ({ value }) => {
-    const valueInTimezone = value.clone().tz(timezone, true);
-    const prevStartDateInTimezone = prevStartDate && moment.tz(prevStartDate, timezone);
-
-    if (prevStartDateInTimezone && prevStartDateInTimezone.isSame(valueInTimezone)) {
+    if (prevStartDate && moment(prevStartDate).isSame(value)) {
       return;
     }
+
+    const valueInTimezone = value.clone().tz(timezone, true);
 
     if (valueInTimezone.isBefore(today)) {
       return {

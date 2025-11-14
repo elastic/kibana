@@ -283,7 +283,7 @@ export const ScheduledReportForm = ({
                     fullWidth: true,
                     showTimeSelect: true,
                     minDate: now,
-                    readOnly: readOnly || editMode,
+                    readOnly,
                     'data-test-subj': 'startDatePicker',
                   },
                 }}

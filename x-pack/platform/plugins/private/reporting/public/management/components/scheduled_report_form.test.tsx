@@ -172,13 +172,6 @@ describe('ScheduledReportForm', () => {
       expect(await screen.findByTestId('reportTypeIdSelect')).toBeDisabled();
     });
 
-    it('disables start date in edit mode', async () => {
-      const props = { ...defaultProps, editMode: true };
-      renderWithProviders(<ScheduledReportForm {...props} />);
-
-      expect(await screen.findByTestId('startDatePicker-input')).toHaveAttribute('readonly');
-    });
-
     it('disables send email in edit mode', async () => {
       const props = { ...defaultProps, editMode: true };
       renderWithProviders(<ScheduledReportForm {...props} />);
@@ -230,13 +223,39 @@ describe('ScheduledReportForm', () => {
   });
 
   describe('Readonly Mode', () => {
-    it('disables form fields in read-only mode', async () => {
+    it('disables title in read-only mode', async () => {
       const props = { ...defaultProps, readOnly: true };
       renderWithProviders(<ScheduledReportForm {...props} />);
 
       expect(await screen.findByTestId('reportTitleInput')).toHaveAttribute('readonly');
-      expect(await screen.findByTestId('startDatePicker-input')).toHaveAttribute('readonly');
+    });
+
+    it('disables report type in read-only mode', async () => {
+      const props = { ...defaultProps, readOnly: true };
+      renderWithProviders(<ScheduledReportForm {...props} />);
+
       expect(await screen.findByTestId('reportTypeIdSelect')).toBeDisabled();
+    });
+
+    it('disables date picker in read-only mode', async () => {
+      const props = { ...defaultProps, readOnly: true };
+      renderWithProviders(<ScheduledReportForm {...props} />);
+
+      expect(await screen.findByTestId('startDatePicker-input')).toHaveAttribute('readonly');
+    });
+
+    it('disables schedule in read-only mode', async () => {
+      const props = { ...defaultProps, readOnly: true };
+      renderWithProviders(<ScheduledReportForm {...props} />);
+
+      expect(await screen.findByTestId('recurringScheduleRepeatSelect')).toBeDisabled();
+    });
+
+    it('disables send email in read-only mode', async () => {
+      const props = { ...defaultProps, readOnly: true };
+      renderWithProviders(<ScheduledReportForm {...props} />);
+
+      expect(await screen.findByTestId('sendByEmailToggle')).toBeDisabled();
     });
 
     it('disables submit button in read-only mode', async () => {
@@ -260,14 +279,10 @@ describe('ScheduledReportForm', () => {
       expect(await screen.findByText('Report file name is required')).toBeInTheDocument();
     });
 
-    it('ignores start date validation when not updated in edit mode', async () => {
+    it('does not throw error for previous start date when it is not updated in edit mode', async () => {
       const props = {
         ...defaultProps,
         availableReportTypes: [{ id: 'printablePdfV2', label: 'PDF' }],
-        scheduledReport: {
-          ...mockScheduledReports[0],
-          timezone: 'America/New_York',
-        },
         editMode: true,
       };
 
