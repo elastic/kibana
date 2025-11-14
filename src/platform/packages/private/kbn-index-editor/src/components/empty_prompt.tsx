@@ -10,7 +10,16 @@
 import type { FC } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButton, EuiEmptyPrompt, EuiLink, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiConfirmModal,
+  EuiEmptyPrompt,
+  EuiLink,
+  EuiSpacer,
+  EuiText,
+  useEuiTheme,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
@@ -45,10 +54,14 @@ export const EmptyPrompt: FC = () => {
       });
     } finally {
       setIsResettingMappings(false);
+      setIsResetMappingsWarningModalOpen(false);
     }
   }, [indexUpdateService, notifications.toasts]);
 
   const maxFileSize = fileUpload.getMaxBytesFormatted();
+
+  const [isResetMappingsWarningModalOpen, setIsResetMappingsWarningModalOpen] = useState(false);
+  const resetMappingsModalTitleId = useGeneratedHtmlId();
 
   const uploading = (
     <EuiLink
@@ -99,7 +112,7 @@ export const EmptyPrompt: FC = () => {
           {allowMappingsReset && (
             <>
               <EuiSpacer size="l" />
-              <EuiButton onClick={resetIndexMappings} isLoading={isResettingMappings}>
+              <EuiButton onClick={() => setIsResetMappingsWarningModalOpen(true)}>
                 <EuiText size="xs">
                   <FormattedMessage
                     id="indexEditor.emptyPrompt.dropAllColumns"
@@ -108,6 +121,41 @@ export const EmptyPrompt: FC = () => {
                 </EuiText>
               </EuiButton>
             </>
+          )}
+          {isResetMappingsWarningModalOpen && (
+            <EuiConfirmModal
+              aria-labelledby={resetMappingsModalTitleId}
+              title={
+                <FormattedMessage
+                  id="indexEditor.mappingsWarningModal.title"
+                  defaultMessage="Drop all columns?"
+                />
+              }
+              onCancel={() => setIsResetMappingsWarningModalOpen(false)}
+              onConfirm={resetIndexMappings}
+              cancelButtonText={
+                <FormattedMessage
+                  id="indexEditor.mappingsWarningModal.cancel"
+                  defaultMessage="Cancel"
+                />
+              }
+              confirmButtonText={
+                <FormattedMessage
+                  id="indexEditor.mappingsWarningModal.continue"
+                  defaultMessage="Continue"
+                />
+              }
+              buttonColor="danger"
+              defaultFocusedButton="confirm"
+              isLoading={isResettingMappings}
+            >
+              <p>
+                <FormattedMessage
+                  id="indexEditor.mappingsWarningModal.body"
+                  defaultMessage="All columns will be permanently deleted, and the index mappings and configuration will be reset."
+                />
+              </p>
+            </EuiConfirmModal>
           )}
         </>
       }
