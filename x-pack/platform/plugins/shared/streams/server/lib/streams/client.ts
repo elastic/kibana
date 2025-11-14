@@ -19,6 +19,7 @@ import type { RoutingStatus } from '@kbn/streams-schema';
 import { Streams, getAncestors, getParentId } from '@kbn/streams-schema';
 import type { LockManagerService } from '@kbn/lock-manager';
 import type { Condition } from '@kbn/streamlang';
+import { MAX_STREAM_NAME_LENGTH } from '../../../common/constants';
 import type { AssetClient } from './assets/asset_client';
 import { ASSET_ID, ASSET_TYPE } from './assets/fields';
 import type { QueryClient } from './assets/query/query_client';
@@ -324,16 +325,13 @@ export class StreamsClient {
     }
 
     const prefix = parent + '.';
-    // TODO - constants need to be shared between both plugins so we don't have to duplicate them
-    const MAX_NAME_LENGTH = 200;
-
     if (name.length <= prefix.length) {
       throw new StatusError('Stream name must not be empty.', 400);
     }
 
-    if (name.length >= MAX_NAME_LENGTH) {
+    if (name.length >= MAX_STREAM_NAME_LENGTH) {
       throw new StatusError(
-        `Stream name cannot be longer than ${MAX_NAME_LENGTH} characters.`,
+        `Stream name cannot be longer than ${MAX_STREAM_NAME_LENGTH} characters.`,
         400
       );
     }
