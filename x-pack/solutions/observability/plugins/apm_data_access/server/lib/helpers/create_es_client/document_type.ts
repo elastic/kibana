@@ -123,15 +123,9 @@ export function getDatasetFilterForSchema(
     return [];
   }
 
-  const datasetValue = `${metricsetName}.${rollupInterval}.otel`;
+  const datasetValue = `${schema === 'ecs' ? 'apm.' : ''}${metricsetName}.${rollupInterval}${
+    schema === 'semconv' ? '.otel' : ''
+  }`;
 
-  return schema === 'semconv'
-    ? termQuery(DATASTREAM_DATASET, datasetValue)
-    : [
-        {
-          bool: {
-            must_not: termQuery(DATASTREAM_DATASET, datasetValue),
-          },
-        },
-      ];
+  return termQuery(DATASTREAM_DATASET, datasetValue);
 }
