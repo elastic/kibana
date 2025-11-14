@@ -29,24 +29,32 @@ export function unwrapPatternDefinitions(
 
   // Recursively inline a single pattern
   function unwrapPattern(pattern: string, seen: Set<string> = new Set()): string {
-    // Match %{PATTERN_NAME} or %{PATTERN_NAME:field}
-    return pattern.replace(/%{([A-Z0-9_]+)(:[^}]*)?}/g, (match, key, fieldName) => {
-      if (pattern_definitions && pattern_definitions[key]) {
-        if (seen.has(key)) {
-          // Prevent infinite recursion on cyclic definitions
-          return match;
-        }
-        seen.add(key);
-        const inlined = unwrapPattern(pattern_definitions[key], seen);
-        seen.delete(key);
-        if (fieldName) {
-          // Named capture group
-          return `(?<${fieldName.substring(1)}>${inlined})`;
-        }
-        return `(${inlined})`;
+    /**
+     * Intentional optimization: previously a single regex /%{([A-Z0-9_]+)(:[^}]*)?}/g
+     * with an optional capture group. We now perform two deterministic passes with two
+     * separate regexes - one for patterns WITH a field name and one for patterns
+     * WITHOUT - eliminating the optional branch.
+     */
+    const WITHOUT_FIELD = /%{([A-Z0-9_]+)}/g; // %{PATTERN}
+    const WITH_FIELD = /%{([A-Z0-9_]+):([^}]*)}/g; // %{PATTERN:field}
+
+    const expand = (match: string, key: string, fieldName?: string): string => {
+      if (!pattern_definitions || !pattern_definitions[key]) {
+        return match; // unknown definition - leave untouched
       }
-      return match; // Leave as is if not in patternDefs
-    });
+      if (seen.has(key)) {
+        return match; // cyclic reference safeguard
+      }
+      seen.add(key);
+      const inlined = unwrapPattern(pattern_definitions[key], seen);
+      seen.delete(key);
+      if (fieldName) {
+        return `(?<${fieldName}>${inlined})`;
+      }
+      return `(${inlined})`;
+    };
+
+    return pattern.replace(WITHOUT_FIELD, expand).replace(WITH_FIELD, expand);
   }
 
   return patterns.map((pattern) => unwrapPattern(pattern));
