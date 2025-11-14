@@ -30,7 +30,8 @@ export function savedObjectToItem(
   savedObject:
     | SavedObject<DashboardSavedObjectAttributes>
     | PartialSavedObject<DashboardSavedObjectAttributes>,
-  partial: boolean /* partial arg is used to enforce the correct savedObject type */
+  partial: boolean /* partial arg is used to enforce the correct savedObject type */,
+  isAccessControlEnabled?: boolean
 ): SavedObjectToItemReturn<DashboardItem | PartialDashboardItem> {
   const {
     id,
@@ -44,6 +45,7 @@ export function savedObjectToItem(
     namespaces,
     version,
     managed,
+    accessControl: originalAccessControl,
   } = savedObject;
   try {
     const dashboardState = transformDashboardOut(attributes, savedObject.references);
@@ -64,6 +66,7 @@ export function savedObjectToItem(
         references,
         version,
         managed,
+        accessControl: isAccessControlEnabled === true ? originalAccessControl : undefined,
       },
       error: null,
     };

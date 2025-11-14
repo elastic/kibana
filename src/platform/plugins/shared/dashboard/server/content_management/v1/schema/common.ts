@@ -181,6 +181,14 @@ export function getDashboardDataSchema() {
     references: schema.maybe(schema.arrayOf(referenceSchema)),
     spaces: schema.maybe(schema.arrayOf(schema.string())),
     namespaces: schema.maybe(schema.arrayOf(schema.string())),
+    accessControl: schema.maybe(
+      schema.object({
+        owner: schema.maybe(schema.string()),
+        accessMode: schema.maybe(
+          schema.oneOf([schema.literal('write_restricted'), schema.literal('default')])
+        ),
+      })
+    ),
   });
 }
 
@@ -254,6 +262,14 @@ export function getDashboardItemSchema() {
       references: schema.arrayOf(referenceSchema),
       namespaces: schema.maybe(schema.arrayOf(schema.string())),
       originId: schema.maybe(schema.string()),
+      accessControl: schema.maybe(
+        schema.object({
+          owner: schema.maybe(schema.string()),
+          accessMode: schema.maybe(
+            schema.oneOf([schema.literal('default'), schema.literal('write_restricted')])
+          ),
+        })
+      ),
     },
     { unknowns: 'allow' }
   );

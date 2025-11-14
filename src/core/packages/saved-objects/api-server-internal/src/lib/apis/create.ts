@@ -22,6 +22,7 @@ import { DEFAULT_REFRESH_SETTING } from '../constants';
 import type { PreflightCheckForCreateResult } from './internals/preflight_check_for_create';
 import { getSavedObjectNamespaces, getCurrentTime, normalizeNamespace, setManaged } from './utils';
 import type { ApiExecutionContext } from './types';
+import { setAccessControl } from './utils/internal_utils';
 
 export interface PerformCreateParams<T = unknown> {
   type: string;
@@ -103,6 +104,29 @@ export const performCreate = async <T>(
     existingOriginId = preflightResult?.existingDocument?._source?.originId;
   }
 
+  const accessMode = options.accessControl?.accessMode;
+  const typeSupportsAccessControl = registry.supportsAccessControl(type);
+
+  if (!typeSupportsAccessControl && accessMode) {
+    throw SavedObjectsErrorHelpers.createBadRequestError(
+      `The "accessMode" field is not supported for saved objects of type "${type}".`
+    );
+  }
+
+  if (!createdBy && accessMode === 'write_restricted') {
+    throw SavedObjectsErrorHelpers.createBadRequestError(
+      `Unable to create "write_restricted" "${type}" saved object. User profile ID not found.`
+    );
+  }
+
+  const accessControlToWrite =
+    preflightResult?.existingDocument?._source?.accessControl ??
+    setAccessControl({
+      typeSupportsAccessControl,
+      createdBy,
+      accessMode,
+    });
+
   const authorizationResult = await securityExtension?.authorizeCreate({
     namespace,
     object: {
@@ -110,6 +134,7 @@ export const performCreate = async <T>(
       id,
       initialNamespaces,
       existingNamespaces: preflightResult?.existingDocument?._source?.namespaces ?? [],
+      accessControl: accessControlToWrite,
       name: SavedObjectsUtils.getName(registry.getNameAttribute(type), {
         attributes: {
           ...(preflightResult?.existingDocument?._source?.[type] ?? {}),
@@ -148,6 +173,7 @@ export const performCreate = async <T>(
     ...(createdBy && { created_by: createdBy }),
     ...(updatedBy && { updated_by: updatedBy }),
     ...(Array.isArray(references) && { references }),
+    ...(accessControlToWrite && { accessControl: accessControlToWrite }),
   });
 
   /**
