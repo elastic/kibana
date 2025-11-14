@@ -31,7 +31,6 @@
     "@kbn/es-query",
     "@kbn/field-types",
     "@kbn/field-utils",
-    "@kbn/fields-metadata-plugin",
     "@kbn/file-upload-common",
     "@kbn/file-upload-plugin",
     "@kbn/i18n-react",
@@ -42,9 +41,14 @@
     "@kbn/ml-time-buckets",
     "@kbn/react-field",
     "@kbn/search-types",
-    "@kbn/shared-ux-prompt-no-data-views-types",
     "@kbn/shared-ux-prompt-no-data-views",
     "@kbn/test-jest-helpers",
+    "@kbn/react-kibana-context-render",
+    "@kbn/field-formats-plugin",
+    "@kbn/share-plugin",
+    "@kbn/ui-actions-plugin",
+    "@kbn/core-http-browser",
+    "@kbn/react-kibana-mount",
   ]
 }
 

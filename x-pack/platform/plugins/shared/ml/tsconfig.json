@@ -147,5 +147,7 @@
     "@kbn/data-service-server",
     "@kbn/es-query-server",
     "@kbn/presentation-publishing-schemas",
+    "@kbn/file-upload-plugin",
+    "@kbn/file-upload",
   ]
 }
