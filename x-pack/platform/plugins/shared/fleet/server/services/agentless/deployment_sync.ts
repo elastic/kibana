@@ -54,7 +54,7 @@ export async function syncAgentlessDeployments(
         return;
       }
 
-      nextPageToken = deploymentRes.nextPageToken;
+      nextPageToken = deploymentRes.next_token;
       if (!nextPageToken) {
         hasMore = false;
       }

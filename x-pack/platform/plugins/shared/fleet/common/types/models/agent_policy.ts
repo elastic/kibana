@@ -332,7 +332,7 @@ export interface AgentlessApiListDeploymentResponse {
     policy_id: string;
     revision_idx?: number;
   }>;
-  nextPageToken?: string;
+  next_token?: string;
 }
 
 // Definitions for agent policy outputs endpoints

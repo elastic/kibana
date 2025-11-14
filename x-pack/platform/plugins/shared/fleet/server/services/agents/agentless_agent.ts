@@ -359,9 +359,13 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
     const traceId = apm.currentTransaction?.traceparent;
     const agentlessConfig = appContextService.getConfig()?.agentless;
     const tlsConfig = this.createTlsConfig(agentlessConfig);
-    const requestConfig = {
+    const requestConfig: AxiosRequestConfig = {
       url: prependAgentlessApiBasePathToEndpoint(agentlessConfig, '/deployments'),
       method: 'GET',
+      params: {
+        next_token: opts?.nextPageToken,
+        limit: opts?.perPage,
+      },
       ...this.getHeaders(tlsConfig, traceId),
     };
 
