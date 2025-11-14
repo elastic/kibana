@@ -79,14 +79,6 @@ function reverseBuildVisualizationState(
   references: SavedObjectReference[],
   adhocReferences?: SavedObjectReference[]
 ): TagcloudState {
-  if (visualization.valueAccessor == null) {
-    throw new Error('Metric accessor is missing in the visualization state');
-  }
-
-  if (visualization.tagAccessor == null || visualization.colorMapping == null) {
-    throw new Error('Tag accessor or color mapping is missing in the visualization state');
-  }
-
   const dataset = buildDatasetState(layer, adHocDataViews, references, adhocReferences, layerId);
 
   if (!dataset || dataset.type == null) {
@@ -105,21 +97,26 @@ function reverseBuildVisualizationState(
       min: visualization.minFontSize,
       max: visualization.maxFontSize,
     },
-    ...(isEsqlTableTypeDataset(dataset)
+    ...(visualization.valueAccessor
       ? {
-          metric: getValueApiColumn(visualization.valueAccessor, layer as TextBasedLayer),
-          tag_by: getValueApiColumn(visualization.tagAccessor, layer as TextBasedLayer),
+          metric: isEsqlTableTypeDataset(dataset)
+            ? getValueApiColumn(visualization.valueAccessor, layer as TextBasedLayer)
+            : (operationFromColumn(
+                visualization.valueAccessor,
+                layer as FormBasedLayer
+              ) as LensApiAllMetricOrFormulaOperations),
         }
-      : {
-          metric: operationFromColumn(
-            visualization.valueAccessor,
-            layer as FormBasedLayer
-          ) as LensApiAllMetricOrFormulaOperations,
-          tag_by: operationFromColumn(
-            visualization.tagAccessor,
-            layer as FormBasedLayer
-          ) as LensApiBucketOperations,
-        }),
+      : {}),
+    ...(visualization.tagAccessor
+      ? {
+          tag_by: isEsqlTableTypeDataset(dataset)
+            ? getValueApiColumn(visualization.tagAccessor, layer as TextBasedLayer)
+            : (operationFromColumn(
+                visualization.tagAccessor,
+                layer as FormBasedLayer
+              ) as LensApiBucketOperations),
+        }
+      : {}),
   } as TagcloudState;
 
   if (props.metric) {
