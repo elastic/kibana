@@ -11,6 +11,7 @@ import { flow } from 'lodash';
 
 import type { Reference } from '@kbn/content-management-utils';
 import type { SerializableRecord } from '@kbn/utility-types';
+import type { ControlsGroupState } from '@kbn/controls-schemas';
 
 import type {
   StoredControlGroupInput,
@@ -45,30 +46,32 @@ export function transformControlProperties(controls: Array<StoredControlState>) 
     .sort(({ order: orderA = 0 }, { order: orderB = 0 }) => orderA - orderB)
     .map(({ explicitInput, id, type, grow, width }) => {
       return {
-        id,
+        uid: id,
         type,
         grow,
         width,
-        ...(explicitInput as SerializableRecord),
+        config: explicitInput as SerializableRecord,
       };
     });
 }
 
 function injectControlReferences(
-  controls: Array<StoredControlState>,
+  controls: ControlsGroupState['controls'],
   references: Reference[]
 ): DashboardControlsState {
   const transformedControls: DashboardControlsState = [];
 
   controls.forEach((control) => {
     const transforms = embeddableService.getTransforms(control.type);
+    const { config, ...rest } = control;
     try {
       if (transforms?.transformOut) {
-        transformedControls.push(
-          transforms.transformOut(control, references, control.id) as DashboardControlsState[number]
-        );
+        transformedControls.push({
+          ...rest,
+          config: transforms.transformOut(config, references, control.uid),
+        } as DashboardControlsState[number]);
       } else {
-        transformedControls.push(control as DashboardControlsState[number]);
+        transformedControls.push({ ...rest, config } as DashboardControlsState[number]);
       }
     } catch (transformOutError) {
       // do not prevent read on transformOutError
@@ -77,6 +80,5 @@ function injectControlReferences(
       );
     }
   });
-
   return transformedControls;
 }
