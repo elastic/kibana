@@ -14,7 +14,8 @@
       "logsDataAccess",
       "security",
       "ruleRegistry",
-      "dataViews"
+      "dataViews",
+      "metricsDataAccess"
     ],
     "optionalPlugins": [],
     "requiredBundles": [],
