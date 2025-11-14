@@ -33,8 +33,8 @@ export const WorkflowDetailTestModal = () => {
   const isTestModalOpen = useSelector(selectIsTestModalOpen);
   const definition = useSelector(selectWorkflowDefinition);
   const workflowId = useSelector(selectWorkflowId);
-  const testWorkflow = useAsyncThunk(testWorkflowThunk);
 
+  const testWorkflow = useAsyncThunk(testWorkflowThunk);
   const handleRunWorkflow = useCallback(
     async (inputs: Record<string, unknown>) => {
       const result = await testWorkflow({ inputs });
