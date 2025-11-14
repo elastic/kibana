@@ -32,6 +32,29 @@ describe('prepareConversation', () => {
     mockGetToolResultId.mockImplementation(() => `generated-id-${++idCounter}`);
   });
 
+  const createRound = (parts: Partial<ConversationRound> = {}): ConversationRound => {
+    return {
+      id: 'round-1',
+      input: {
+        message: '',
+      },
+      steps: [],
+      response: {
+        message: 'Response',
+      },
+      started_at: new Date().toISOString(),
+      time_to_first_token: 0,
+      time_to_last_token: 0,
+      model_usage: {
+        connector_id: 'unknown',
+        llm_calls: 1,
+        input_tokens: 12,
+        output_tokens: 42,
+      },
+      ...parts,
+    };
+  };
+
   describe('with no attachments', () => {
     it('should process a simple nextInput with no attachments', async () => {
       const nextInput: RawRoundInput = {
@@ -249,7 +272,7 @@ describe('prepareConversation', () => {
 
   describe('previousRounds with attachments', () => {
     it('should process previous rounds without attachments', async () => {
-      const previousRound: ConversationRound = {
+      const previousRound = createRound({
         id: 'round-1',
         input: {
           message: 'Previous message',
@@ -258,10 +281,7 @@ describe('prepareConversation', () => {
         response: {
           message: 'Response',
         },
-        started_at: new Date().toISOString(),
-        time_to_first_token: 0,
-        time_to_last_token: 0,
-      };
+      });
 
       const previousRounds: ConversationRound[] = [previousRound];
 
@@ -295,8 +315,8 @@ describe('prepareConversation', () => {
 
       mockAttachmentsService.format.mockResolvedValue(mockRepresentation);
 
-      const previousRounds: ConversationRound[] = [
-        {
+      const previousRounds = [
+        createRound({
           id: 'round-1',
           input: {
             message: 'Previous message',
@@ -306,10 +326,7 @@ describe('prepareConversation', () => {
           response: {
             message: 'Response',
           },
-          started_at: new Date().toISOString(),
-          time_to_first_token: 0,
-          time_to_last_token: 0,
-        },
+        }),
       ];
 
       const result = await prepareConversation({
@@ -338,8 +355,8 @@ describe('prepareConversation', () => {
 
       mockAttachmentsService.format.mockResolvedValue(mockRepresentation);
 
-      const previousRounds: ConversationRound[] = [
-        {
+      const previousRounds = [
+        createRound({
           id: 'round-1',
           input: {
             message: 'Message 1',
@@ -351,24 +368,16 @@ describe('prepareConversation', () => {
               },
             ],
           },
-          steps: [],
           response: { message: 'Response 1' },
-          started_at: new Date().toISOString(),
-          time_to_first_token: 0,
-          time_to_last_token: 0,
-        },
-        {
+        }),
+        createRound({
           id: 'round-2',
           input: {
             message: 'Message 2',
           },
-          steps: [],
           response: { message: 'Response 2' },
-          started_at: new Date().toISOString(),
-          time_to_first_token: 0,
-          time_to_last_token: 0,
-        },
-        {
+        }),
+        createRound({
           id: 'round-3',
           input: {
             message: 'Message 3',
@@ -380,12 +389,8 @@ describe('prepareConversation', () => {
               },
             ],
           },
-          steps: [],
           response: { message: 'Response 3' },
-          started_at: new Date().toISOString(),
-          time_to_first_token: 0,
-          time_to_last_token: 0,
-        },
+        }),
       ];
 
       const result = await prepareConversation({
@@ -410,8 +415,8 @@ describe('prepareConversation', () => {
     });
 
     it('should preserve all round properties', async () => {
-      const previousRounds: ConversationRound[] = [
-        {
+      const previousRounds = [
+        createRound({
           id: 'round-1',
           input: {
             message: 'Message 1',
@@ -429,10 +434,7 @@ describe('prepareConversation', () => {
             message: 'Response 1',
           },
           trace_id: 'trace-123',
-          started_at: new Date().toISOString(),
-          time_to_first_token: 0,
-          time_to_last_token: 0,
-        },
+        }),
       ];
 
       const result = await prepareConversation({
@@ -460,8 +462,8 @@ describe('prepareConversation', () => {
 
       mockAttachmentsService.format.mockResolvedValue(mockRepresentation);
 
-      const previousRounds: ConversationRound[] = [
-        {
+      const previousRounds = [
+        createRound({
           id: 'round-1',
           input: {
             message: 'Previous',
@@ -473,12 +475,8 @@ describe('prepareConversation', () => {
               },
             ],
           },
-          steps: [],
           response: { message: 'Response' },
-          started_at: new Date().toISOString(),
-          time_to_first_token: 0,
-          time_to_last_token: 0,
-        },
+        }),
       ];
 
       const nextInput: RawRoundInput = {

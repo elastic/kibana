@@ -107,7 +107,7 @@ const UsersComponent = () => {
   const {
     indicesExist: oldIndicesExist,
     selectedPatterns: oldSelectedPatterns,
-    sourcererDataView: oldSourcererDataView,
+    sourcererDataView: oldSourcererDataViewSpec,
   } = useSourcererDataView();
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
@@ -126,23 +126,23 @@ const UsersComponent = () => {
     () =>
       convertToBuildEsQuery({
         config: getEsQueryConfig(uiSettings),
-        dataViewSpec: oldSourcererDataView,
+        dataViewSpec: oldSourcererDataViewSpec,
         dataView: experimentalDataView,
         queries: [query],
         filters: globalFilters,
       }),
-    [uiSettings, oldSourcererDataView, experimentalDataView, query, globalFilters]
+    [uiSettings, oldSourcererDataViewSpec, experimentalDataView, query, globalFilters]
   );
   const [tabsFilterQuery] = useMemo(
     () =>
       convertToBuildEsQuery({
         config: getEsQueryConfig(uiSettings),
-        dataViewSpec: oldSourcererDataView,
+        dataViewSpec: oldSourcererDataViewSpec,
         dataView: experimentalDataView,
         queries: [query],
         filters: tabsFilters,
       }),
-    [experimentalDataView, oldSourcererDataView, query, tabsFilters, uiSettings]
+    [experimentalDataView, oldSourcererDataViewSpec, query, tabsFilters, uiSettings]
   );
 
   useInvalidFilterQuery({
@@ -192,10 +192,9 @@ const UsersComponent = () => {
           <EuiWindowEvent event="resize" handler={noop} />
           <FiltersGlobal>
             <SiemSearchBar
-              sourcererDataView={
-                newDataViewPickerEnabled ? experimentalDataView : oldSourcererDataView
-              }
+              dataView={experimentalDataView}
               id={InputsModelId.global}
+              sourcererDataViewSpec={oldSourcererDataViewSpec} // TODO remove when we remove the newDataViewPickerEnabled feature flag
             />
           </FiltersGlobal>
 

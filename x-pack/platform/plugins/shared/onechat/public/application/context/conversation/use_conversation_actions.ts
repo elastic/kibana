@@ -21,9 +21,11 @@ import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
 import type { ConversationsService } from '../../../services/conversations';
 import { queryKeys } from '../../query_keys';
 import { storageKeys } from '../../storage_keys';
-import { createNewConversation, newConversationId } from '../../utils/new_conversation';
-
-const pendingRoundId = '__pending__';
+import {
+  createNewConversation,
+  createNewRound,
+  newConversationId,
+} from '../../utils/new_conversation';
 
 export interface ConversationActions {
   removeNewConversationQuery: () => void;
@@ -58,6 +60,7 @@ export interface ConversationActions {
     title: string;
   }) => void;
   deleteConversation: (id: string) => Promise<void>;
+  renameConversation: (id: string, title: string) => Promise<void>;
 }
 
 interface UseConversationActionsParams {
@@ -106,15 +109,7 @@ const createConversationActions = ({
     addOptimisticRound: ({ userMessage }: { userMessage: string }) => {
       setConversation(
         produce((draft) => {
-          const nextRound: ConversationRound = {
-            id: pendingRoundId,
-            input: { message: userMessage },
-            response: { message: '' },
-            steps: [],
-            started_at: new Date().toISOString(),
-            time_to_first_token: 0,
-            time_to_last_token: 0,
-          };
+          const nextRound = createNewRound({ userMessage });
 
           if (!draft) {
             const newConversation = createNewConversation();
@@ -243,6 +238,24 @@ const createConversationActions = ({
       if (onDeleteConversation) {
         onDeleteConversation({ id, isCurrentConversation });
       }
+    },
+    renameConversation: async (id: string, title: string) => {
+      await conversationsService.rename({ conversationId: id, title });
+
+      // Update the conversation in cache if it exists
+      const conversationQueryKey = queryKeys.conversations.byId(id);
+      const currentConversation = queryClient.getQueryData<Conversation>(conversationQueryKey);
+      if (currentConversation) {
+        queryClient.setQueryData<Conversation>(
+          conversationQueryKey,
+          produce(currentConversation, (draft) => {
+            draft.title = title;
+          })
+        );
+      }
+
+      // Invalidate conversation list to get updated data from server
+      queryClient.invalidateQueries({ queryKey: queryKeys.conversations.all });
     },
   };
 };
