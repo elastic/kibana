@@ -9,10 +9,7 @@
 
 import { merge } from 'lodash';
 import type { Logger } from '@kbn/core/server';
-import type {
-  LogsRepository,
-  WorkflowLogEvent,
-} from '../repositories/logs_repository/logs_repository';
+import type { LogsRepository, WorkflowLogEvent } from '../repositories/logs_repository';
 
 export interface WorkflowEventLoggerContext {
   workflowId?: string;
