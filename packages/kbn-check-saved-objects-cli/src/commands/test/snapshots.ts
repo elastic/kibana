@@ -8,15 +8,20 @@
  */
 
 import type { ListrTask } from 'listr2';
-import { fetchSnapshot, takeSnapshot } from '../../snapshots';
+import { resolve } from 'path';
+import { takeSnapshot } from '../../snapshots';
 import type { Task, TaskContext } from '../types';
+import { fileToJson } from '../../util';
+import type { MigrationSnapshot } from '../../types';
 
-export const getSnapshots: Task = async (ctx, task) => {
+const BASELINE_SNAPSHOT_PATH = resolve(__dirname, './baseline_snapshot.json');
+
+export const getTestSnapshots: Task = async (ctx, task) => {
   const subtasks: ListrTask<TaskContext>[] = [
     {
-      title: `Obtain snapshot for baseline '${ctx.gitRev}'`,
+      title: `Obtain snapshot for baseline (test mode)`,
       task: async () => {
-        ctx.from = await fetchSnapshot(ctx.gitRev);
+        ctx.from = (await fileToJson(BASELINE_SNAPSHOT_PATH)) as MigrationSnapshot;
       },
       retry: {
         delay: 2000,
