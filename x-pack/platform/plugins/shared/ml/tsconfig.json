@@ -149,5 +149,6 @@
     "@kbn/presentation-publishing-schemas",
     "@kbn/file-upload-plugin",
     "@kbn/file-upload",
+    "@kbn/file-upload-common",
   ]
 }
