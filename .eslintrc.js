@@ -1638,6 +1638,17 @@ module.exports = {
         'playwright/valid-title': 'error',
         // Scout has a its own runtime validator for test tags
         'playwright/valid-test-tags': 'off',
+        // Check all function arguments to catch unused destructured params
+        '@typescript-eslint/no-unused-vars': [
+          'error',
+          {
+            vars: 'all',
+            args: 'all',
+            ignoreRestSiblings: true, // Ignore unused vars when destructuring with rest operator
+            varsIgnorePattern: '^_', // Allow _ prefix for intentionally unused variables
+            argsIgnorePattern: '^_', // Allow _ prefix for intentionally unused args
+          },
+        ],
       },
     },
     {
@@ -1836,6 +1847,12 @@ module.exports = {
         '@typescript-eslint/no-non-null-assertion': 'error',
         '@typescript-eslint/no-this-alias': 'error',
         '@typescript-eslint/no-unused-vars': 'error',
+      },
+    },
+    {
+      files: ['src/platform/packages/shared/kbn-connector-specs/src/icons/**/*.{ts,tsx}'],
+      rules: {
+        'import/no-default-export': 'off',
       },
     },
 
