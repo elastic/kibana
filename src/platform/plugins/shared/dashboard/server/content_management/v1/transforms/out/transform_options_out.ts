@@ -9,7 +9,14 @@
 
 import type { DashboardState } from '../../types';
 
-const OPTION_KEYS = ['hidePanelTitles', 'useMargins', 'syncColors', 'syncCursor', 'syncTooltips'];
+const OPTION_KEYS = [
+  'hidePanelTitles',
+  'useMargins',
+  'syncColors',
+  'syncCursor',
+  'syncTooltips',
+  'autoApplyFilters',
+];
 
 export function transformOptionsOut(
   optionsJSON: string,
@@ -22,8 +29,9 @@ export function transformOptionsOut(
   });
   return {
     ...knownOptions,
-    ...(controlGroupShowApplyButtonSetting !== undefined && {
-      autoApplyFilters: !controlGroupShowApplyButtonSetting,
-    }),
+    ...(knownOptions.autoApplyFilters === undefined &&
+      controlGroupShowApplyButtonSetting !== undefined && {
+        autoApplyFilters: !controlGroupShowApplyButtonSetting,
+      }),
   };
 }
