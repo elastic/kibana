@@ -7,8 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { parseDuration } from './parse-duration/parse-duration';
-export { buildStepExecutionId } from './build_step_execution_id/build_step_execution_id';
-export { stringifyStackFrames } from './stringify_stack_frames';
-export { getKibanaUrl, buildWorkflowExecutionUrl } from './get_kibana_url';
-export { generateExecutionTaskScope } from './generate_execution_task_scope';
+import type { EsWorkflowExecution } from '@kbn/workflows';
+
+export function generateExecutionTaskScope(workflowExecution: EsWorkflowExecution): string[] {
+  return [
+    'workflow',
+    `workflow:${workflowExecution.workflowId}`,
+    `workflow:execution:${workflowExecution.id}`,
+
+    // if execution is a single step execution
+    ...(workflowExecution.stepId ? [`workflow:execution:step:${workflowExecution.stepId}`] : []),
+  ];
+}

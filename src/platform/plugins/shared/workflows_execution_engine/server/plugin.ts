@@ -25,7 +25,7 @@ import { WorkflowExecutionNotFoundError } from '@kbn/workflows/common/errors';
 
 import type { WorkflowsExecutionEngineConfig } from './config';
 
-import { resumeWorkflow, runWorkflow, setupDependencies } from './execution_functions';
+import { resumeWorkflow, runWorkflow } from './execution_functions';
 import { LogsRepository } from './repositories/logs_repository';
 import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
@@ -37,6 +37,7 @@ import type {
   WorkflowsExecutionEnginePluginStartDeps,
 } from './types';
 
+import { generateExecutionTaskScope } from './utils';
 import type { ContextDependencies } from './workflow_context_manager/types';
 import type {
   ResumeWorkflowExecutionParams,
@@ -45,15 +46,6 @@ import type {
 import { createIndexes } from '../common';
 
 type SetupDependencies = Pick<ContextDependencies, 'cloudSetup'>;
-
-function generateExecutionTaskScope(workflowExecution: EsWorkflowExecution): string[] {
-  return [
-    'workflows',
-    `workflow:${workflowExecution.workflowId}`,
-    `workflow-execution:${workflowExecution.id}`,
-    ...(workflowExecution.stepId ? [`workflow-execution-step:${workflowExecution.stepId}`] : []),
-  ];
-}
 
 export class WorkflowsExecutionEnginePlugin
   implements
