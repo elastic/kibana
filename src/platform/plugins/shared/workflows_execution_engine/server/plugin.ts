@@ -342,7 +342,7 @@ export class WorkflowsExecutionEnginePlugin
       await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
 
       const taskInstance = {
-        id: `workflow:${workflowExecution.id}:${context.triggeredBy}`,
+        id: `workflow:${workflowExecution.id}:${workflowExecution.triggeredBy}`,
         taskType: 'workflow:run',
         params: {
           workflowRunId: workflowExecution.id,
