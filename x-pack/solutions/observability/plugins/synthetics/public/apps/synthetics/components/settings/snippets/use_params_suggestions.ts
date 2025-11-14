@@ -7,6 +7,7 @@
 import { monaco } from '@kbn/monaco';
 import { useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
+import { MonacoEditorLangId } from '../../monitor_add_edit/types';
 
 export const PARAMS_SUGGESTION_TRIGGER = 'params.';
 export const useParamsSuggestions = () => {
@@ -30,9 +31,13 @@ export const useParamsSuggestions = () => {
 
   const suggestionProvider = getSuggestionProvider(params);
 
+  /**
+   * This is necessary to register the provider when suggestionProvider changes. Otherwise,
+   * the editor won't pick up new params added after initial registration.
+   */
   useEffect(() => {
     const disposable = monaco.languages.registerCompletionItemProvider(
-      'javascript',
+      MonacoEditorLangId.JAVASCRIPT,
       suggestionProvider
     );
     return () => disposable.dispose();
