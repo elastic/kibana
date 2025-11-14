@@ -2650,9 +2650,9 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@file:./eui_109.0.0_super_date_picker_batch_1_9210.tgz":
+"@elastic/eui@file:./eui_109.0.0_super_date_picker_batch_1_9210__a.tgz":
   version "109.0.0"
-  resolved "file:./eui_109.0.0_super_date_picker_batch_1_9210.tgz#174a9bad01c871220867a2a798da1c7883334cbd"
+  resolved "file:./eui_109.0.0_super_date_picker_batch_1_9210__a.tgz#7e99c564c3d3ce1dab614e86be3fbcc08b159475"
   dependencies:
     "@elastic/prismjs-esql" "^1.1.2"
     "@hello-pangea/dnd" "^16.6.0"
