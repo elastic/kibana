@@ -18,41 +18,32 @@ export const validate = (
 ): ESQLMessage[] => {
   const messages: ESQLMessage[] = [];
 
-  let hasIdMetadata = false;
-  let hasIndexMetadata = false;
-  let hasScoreMetadata = false;
+  const requiredMetadataFields = ['_id', '_index', '_score'];
+  let hasMetadata = false;
+  const sourceCommand = ast.find((_command) =>
+    ['ts', 'from'].includes(_command.name.toLocaleLowerCase())
+  );
 
-  const fromCommand = ast.find((_command) => _command.name.toLocaleLowerCase() === 'from');
-
-  if (fromCommand) {
-    walk(fromCommand, {
+  if (sourceCommand) {
+    walk(sourceCommand, {
       visitCommandOption: (node) => {
         if (node.name.toLocaleLowerCase() === 'metadata') {
+          hasMetadata = true;
           const metadataFields = node.args.map((arg) =>
             (arg as ESQLSingleAstItem)?.name?.toLocaleLowerCase()
           );
-          if (metadataFields.includes('_id')) {
-            hasIdMetadata = true;
-          }
-          if (metadataFields.includes('_index')) {
-            hasIndexMetadata = true;
-          }
-          if (metadataFields.includes('_score')) {
-            hasScoreMetadata = true;
+          for (const field of requiredMetadataFields) {
+            if (!metadataFields.includes(field)) {
+              messages.push(buildMissingMetadataMessage(command, field));
+            }
           }
         }
       },
     });
   }
 
-  if (!hasIdMetadata) {
-    messages.push(buildMissingMetadataMessage(command, '_id'));
-  }
-  if (!hasIndexMetadata) {
-    messages.push(buildMissingMetadataMessage(command, '_index'));
-  }
-  if (!hasScoreMetadata) {
-    messages.push(buildMissingMetadataMessage(command, '_score'));
+  if (!hasMetadata) {
+    messages.push(buildMissingMetadataMessage(command, requiredMetadataFields.join(', ')));
   }
 
   return messages;

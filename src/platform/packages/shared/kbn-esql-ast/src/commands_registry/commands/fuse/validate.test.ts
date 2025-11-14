@@ -29,6 +29,15 @@ describe('FUSE Validation', () => {
                     | FUSE`,
         []
       );
+
+      fuseExpectErrors(
+        `TS index METADATA _id, _score, _index
+                    | FORK
+                      (WHERE keywordField != "" | LIMIT 100)
+                      (SORT doubleField ASC NULLS LAST)
+                    | FUSE`,
+        []
+      );
     });
 
     test('requires _id, _index and _score metadata to be selected in the FROM command', () => {
@@ -38,11 +47,18 @@ describe('FUSE Validation', () => {
                       (WHERE keywordField != "" | LIMIT 100)
                       (SORT doubleField ASC NULLS LAST)
                     | FUSE`,
-        [
-          '[FUSE] The FROM command is missing the _id METADATA field.',
-          '[FUSE] The FROM command is missing the _index METADATA field.',
-          '[FUSE] The FROM command is missing the _score METADATA field.',
-        ]
+        ['[FUSE] The FROM command is missing the _id, _index, _score METADATA field.']
+      );
+    });
+
+    test('requires _id metadata to be selected in the FROM command', () => {
+      fuseExpectErrors(
+        `FROM index METADATA _score, _index
+                    | FORK
+                      (WHERE keywordField != "" | LIMIT 100)
+                      (SORT doubleField ASC NULLS LAST)
+                    | FUSE`,
+        ['[FUSE] The FROM command is missing the _id METADATA field.']
       );
     });
   });
