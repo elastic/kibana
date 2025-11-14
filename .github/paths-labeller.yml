@@ -22,7 +22,7 @@
     - 'x-pack/solutions/observability/plugins/slo/**/*.*'
     - 'x-pack/solutions/observability/plugins/synthetics/**/*.*'
     - 'x-pack/solutions/observability/plugins/exploratory_view/**/*.*'
-- 'Team:obs-ai-foundations':
+- 'Team:obs-ai':
     - 'x-pack/platform/plugins/shared/observability_ai_assistant/**/*.*'
     - 'x-pack/plugins/observability_solution/observability_ai_assistant_*/**/*.*'
     - 'x-pack/solutions/observability/test/observability_ai_assistant_functional/**/*.*'
