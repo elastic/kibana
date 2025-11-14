@@ -134,9 +134,6 @@ export const useCloudConnectorSetup = (
       const updatedPolicy = { ...newPolicy };
       const inputVars = input.streams?.find((i) => i.enabled)?.vars;
 
-      // Clear cloud_connector_name since we're using an existing connector
-      updatedPolicy.cloud_connector_name = undefined;
-
       // Handle undefined cases safely
       if (inputVars) {
         const updatedInputVars = updateInputVarsWithCredentials(
