@@ -85,14 +85,7 @@ export function createESQLQuery({ metric, dimensions = [], filters }: CreateESQL
     unfilteredDimensions.length > 0
       ? where(
           unfilteredDimensions
-            .map((dim) => {
-              const escapedDim = sanitazeESQLInput(dim.name);
-              const castedDim =
-                dim.type && needsStringCasting(dim.type as ES_FIELD_TYPES)
-                  ? `${escapedDim}::STRING`
-                  : escapedDim;
-              return `${castedDim} IS NOT NULL`;
-            })
+            .map((dim) => `${sanitazeESQLInput(dim.name)} IS NOT NULL`)
             .join(' AND ')
         )
       : (query) => query,
