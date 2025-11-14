@@ -87,6 +87,8 @@ export function findDelimiterSequences(
   // Step 3: Filter to likely delimiters
   const likelyDelimiters = commonSubstrings.filter(isLikelyDelimiter);
 
+  console.log('Likely delimiters found:', likelyDelimiters);
+
   // Step 4: Score each delimiter by position consistency
   const scoredDelimiters: DelimiterCandidate[] = likelyDelimiters.map((delimiter) => {
     const positions = messages.map((msg) => findPosition(msg, delimiter));
@@ -137,7 +139,10 @@ export function findDelimiterSequences(
   // Remove delimiters that are substrings of other delimiters with same positions
   // Process longer delimiters first to ensure they are kept over their substrings
   const sortedByLength = [...validDelimiters].sort((a, b) => b.literal.length - a.literal.length);
+  console.log('Sorted delimiters by length for substring removal:', sortedByLength);
   const filteredDelimiters = removeDuplicateSubstrings(sortedByLength);
+
+  console.log('Filtered delimiters after removing duplicates:', filteredDelimiters);
 
   return filteredDelimiters.map((d) => d.literal);
 }

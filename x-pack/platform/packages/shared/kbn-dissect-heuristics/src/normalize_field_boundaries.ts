@@ -57,6 +57,14 @@ export function normalizeFieldBoundaries(
       continue;
     }
 
+    // DEBUG: Log what we're normalizing
+    // eslint-disable-next-line no-console
+    console.log(
+      `[normalizeFieldBoundaries] Normalizing field ${i} (${field.name}): moving "${firstChar}" to delimiter ${nextDelimiterIndex}`
+    );
+    // eslint-disable-next-line no-console
+    console.log(`  Before: delimiter = "${delimiterTree[nextDelimiterIndex].literal}"`);
+
     // ONLY normalize if ALL field values have length > 0 AFTER removing the trailing char
     const normalizedValues = field.values.map((val) => val.slice(0, -1));
     if (normalizedValues.some((val) => val.length === 0)) {
@@ -74,6 +82,10 @@ export function normalizeFieldBoundaries(
     // from the end of the field to the start of the delimiter, but the position
     // of where the delimiter "starts" in terms of parsing is now one character earlier
     nextDelimiter.positions = nextDelimiter.positions.map((pos) => pos - 1);
+
+    // DEBUG: Log the result
+    // eslint-disable-next-line no-console
+    console.log(`  After: delimiter = "${nextDelimiter.literal}"`);
   }
 
   return fields;
