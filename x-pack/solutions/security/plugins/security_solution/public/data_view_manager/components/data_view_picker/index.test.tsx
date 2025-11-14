@@ -15,7 +15,7 @@ import { useSelectDataView } from '../../hooks/use_select_data_view';
 import { useUpdateUrlParam } from '../../../common/utils/global_query_string';
 import { URL_PARAM_KEY } from '../../../common/hooks/constants';
 import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__';
-import { DataViewManagerScopeName } from '../../constants';
+import { PageScope } from '../../constants';
 
 jest.mock('../../../common/utils/global_query_string', () => ({
   useUpdateUrlParam: jest.fn(),
@@ -98,7 +98,7 @@ describe('DataViewPicker', () => {
   it('renders with the current data view ID', () => {
     render(
       <TestProviders>
-        <DataViewPicker scope={DataViewManagerScopeName.default} />
+        <DataViewPicker scope={PageScope.default} />
       </TestProviders>
     );
 
@@ -109,7 +109,7 @@ describe('DataViewPicker', () => {
   it('calls selectDataView when changing data view', () => {
     render(
       <TestProviders>
-        <DataViewPicker scope={DataViewManagerScopeName.default} />
+        <DataViewPicker scope={PageScope.default} />
       </TestProviders>
     );
 
@@ -124,7 +124,7 @@ describe('DataViewPicker', () => {
   it('calls useUpdateUrlParam when changing the default scoped data view', () => {
     render(
       <TestProviders>
-        <DataViewPicker scope={DataViewManagerScopeName.default} />
+        <DataViewPicker scope={PageScope.default} />
       </TestProviders>
     );
 
@@ -141,7 +141,7 @@ describe('DataViewPicker', () => {
   it('calls useUpdateUrlParam when changing the explore scoped data view', () => {
     render(
       <TestProviders>
-        <DataViewPicker scope={DataViewManagerScopeName.explore} />
+        <DataViewPicker scope={PageScope.explore} />
       </TestProviders>
     );
 
@@ -163,7 +163,7 @@ describe('DataViewPicker', () => {
 
     render(
       <TestProviders>
-        <DataViewPicker scope={DataViewManagerScopeName.default} />
+        <DataViewPicker scope={PageScope.default} />
       </TestProviders>
     );
 
@@ -185,7 +185,7 @@ describe('DataViewPicker', () => {
 
       render(
         <TestProviders>
-          <DataViewPicker scope={DataViewManagerScopeName.default} />
+          <DataViewPicker scope={PageScope.default} />
         </TestProviders>
       );
 
@@ -199,7 +199,7 @@ describe('DataViewPicker', () => {
 
       render(
         <TestProviders>
-          <DataViewPicker scope={DataViewManagerScopeName.default} />
+          <DataViewPicker scope={PageScope.default} />
         </TestProviders>
       );
 

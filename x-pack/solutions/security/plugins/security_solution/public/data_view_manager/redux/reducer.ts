@@ -7,7 +7,7 @@
 
 import { combineReducers } from '@reduxjs/toolkit';
 
-import { DataViewManagerScopeName } from '../constants';
+import { PageScope } from '../constants';
 import {
   createDataViewSelectionSlice,
   initialScopeState,
@@ -19,24 +19,22 @@ import {
  * Define registered scopes array.
  */
 const REGISTERED_SCOPES = [
-  DataViewManagerScopeName.default,
-  DataViewManagerScopeName.timeline,
-  DataViewManagerScopeName.detections,
-  DataViewManagerScopeName.attacks,
-  DataViewManagerScopeName.analyzer,
-  DataViewManagerScopeName.explore,
+  PageScope.default,
+  PageScope.timeline,
+  PageScope.detections,
+  PageScope.attacks,
+  PageScope.analyzer,
+  PageScope.explore,
 ] as const;
 
 /**
  * Helper function to create objects with Registered Scope names as keys
  */
-const createScopeMap = <T>(
-  valueCreator: (scopeName: DataViewManagerScopeName) => T
-): Record<DataViewManagerScopeName, T> => {
+const createScopeMap = <T>(valueCreator: (scopeName: PageScope) => T): Record<PageScope, T> => {
   return REGISTERED_SCOPES.reduce((acc, scopeName) => {
     acc[scopeName] = valueCreator(scopeName);
     return acc;
-  }, {} as Record<DataViewManagerScopeName, T>);
+  }, {} as Record<PageScope, T>);
 };
 
 /*

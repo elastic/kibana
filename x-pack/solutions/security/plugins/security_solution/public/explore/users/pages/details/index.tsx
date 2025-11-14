@@ -19,8 +19,7 @@ import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { LastEventIndexKey } from '@kbn/timelines-plugin/common';
-import { DataViewManagerScopeName } from '../../../../data_view_manager/constants';
-import { PageScope } from '../../../../sourcerer/store/model';
+import { PageScope } from '../../../../data_view_manager/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { dataViewSpecToViewBase } from '../../../../common/lib/kuery';
 import { useCalculateEntityRiskScore } from '../../../../entity_analytics/api/hooks/use_calculate_entity_risk_score';
@@ -118,8 +117,8 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
-  const { dataView: experimentalDataView, status } = useDataView(DataViewManagerScopeName.explore);
-  const experimentalSelectedPatterns = useSelectedPatterns(DataViewManagerScopeName.explore);
+  const { dataView: experimentalDataView, status } = useDataView(PageScope.explore);
+  const experimentalSelectedPatterns = useSelectedPatterns(PageScope.explore);
 
   const indicesExist = newDataViewPickerEnabled
     ? experimentalDataView.hasMatchedIndices()

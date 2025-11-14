@@ -31,7 +31,6 @@ import type {
 } from '../../../../../../common/types/timeline';
 import type { inputsModel } from '../../../../../common/store';
 import { inputsSelectors } from '../../../../../common/store';
-import { PageScope } from '../../../../../sourcerer/store/model';
 import { timelineDefaults } from '../../../../store/defaults';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { isActiveTimeline } from '../../../../../helpers';
@@ -39,7 +38,7 @@ import type { TimelineModel } from '../../../../store/model';
 import { useTimelineColumns } from '../shared/use_timeline_columns';
 import { EventsCountBadge } from '../shared/layout';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import { DataViewManagerScopeName } from '../../../../../data_view_manager/constants';
+import { PageScope } from '../../../../../data_view_manager/constants';
 
 /**
  * TODO: This component is a pared down duplicate of the logic used in timeline/tabs/query/index.tsx
@@ -104,12 +103,12 @@ export const TimelineQueryTabEventsCountComponent: React.FC<{ timelineId: string
     sourcererDataView,
   } = useSourcererDataView(PageScope.timeline);
   const { dataView: experimentalDataView } = useDataView(PageScope.timeline);
-  const experimentalBrowserfields = useBrowserFields(DataViewManagerScopeName.timeline);
+  const experimentalBrowserfields = useBrowserFields(PageScope.timeline);
   const browserFields = newDataViewPickerEnabled ? experimentalBrowserfields : oldBrowserFields;
   const runtimeMappings: RunTimeMappings = newDataViewPickerEnabled
     ? (experimentalDataView?.getRuntimeMappings() as RunTimeMappings) ?? {}
     : (sourcererDataView.runtimeFieldMap as RunTimeMappings) ?? {};
-  const experimentalSelectedPatterns = useSelectedPatterns(DataViewManagerScopeName.timeline);
+  const experimentalSelectedPatterns = useSelectedPatterns(PageScope.timeline);
   const selectedPatterns = newDataViewPickerEnabled
     ? experimentalSelectedPatterns
     : oldSelectedPatterns;

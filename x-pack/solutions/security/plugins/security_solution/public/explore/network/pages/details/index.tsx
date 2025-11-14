@@ -13,7 +13,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elasti
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 
 import { buildEsQuery } from '@kbn/es-query';
-import { DataViewManagerScopeName } from '../../../../data_view_manager/constants';
+import { PageScope } from '../../../../data_view_manager/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { dataViewSpecToViewBase } from '../../../../common/lib/kuery';
 import { AlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status';
@@ -62,7 +62,6 @@ import {
   SecurityCellActions,
   SecurityCellActionsTrigger,
 } from '../../../../common/components/cell_actions';
-import { PageScope } from '../../../../sourcerer/store/model';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 
@@ -119,8 +118,8 @@ const NetworkDetailsComponent: React.FC = () => {
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
-  const { dataView: experimentalDataView, status } = useDataView(DataViewManagerScopeName.explore);
-  const experimentalSelectedPatterns = useSelectedPatterns(DataViewManagerScopeName.explore);
+  const { dataView: experimentalDataView, status } = useDataView(PageScope.explore);
+  const experimentalSelectedPatterns = useSelectedPatterns(PageScope.explore);
 
   const indicesExist = newDataViewPickerEnabled
     ? experimentalDataView.hasMatchedIndices()

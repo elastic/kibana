@@ -9,13 +9,12 @@ import { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { isEmpty } from 'lodash/fp';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { DataViewManagerScopeName } from '../../../data_view_manager/constants';
+import { PageScope } from '../../../data_view_manager/constants';
 import { useSelectDataView } from '../../../data_view_manager/hooks/use_select_data_view';
 import type { Note } from '../../../../common/api/timeline';
 import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../common/api/timeline';
 import { createNote } from '../notes/helpers';
 import { sourcererActions } from '../../../sourcerer/store';
-import { PageScope } from '../../../sourcerer/store/model';
 
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import {
@@ -69,7 +68,7 @@ export const useUpdateTimeline = () => {
         selectDataView({
           id: _timeline.dataViewId,
           fallbackPatterns: _timeline.indexNames,
-          scope: DataViewManagerScopeName.timeline,
+          scope: PageScope.timeline,
         });
       } else {
         if (!isEmpty(_timeline.indexNames) && !newDataViewPickerEnabled) {

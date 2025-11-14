@@ -16,12 +16,12 @@ import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal'
 import { i18n } from '@kbn/i18n';
 
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { DataViewManagerScopeName } from '../../../data_view_manager/constants';
+import { PageScope } from '../../../data_view_manager/constants';
 import { SECURITY_FEATURE_ID } from '../../../../common';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { MlPopover } from '../../../common/components/ml_popover/ml_popover';
 import { useKibana } from '../../../common/lib/kibana';
-import { isDetectionsPath, isDashboardViewPath } from '../../../helpers';
+import { isDashboardViewPath, isDetectionsPath } from '../../../helpers';
 import { Sourcerer } from '../../../sourcerer/components';
 import { TimelineId } from '../../../../common/types/timeline';
 import { timelineDefaults } from '../../../timelines/store/defaults';
@@ -87,10 +87,7 @@ export const GlobalHeader = React.memo(() => {
   }, [portalNode, setHeaderActionMenu, theme, kibanaServiceI18n, dashboardViewPath]);
 
   const dataViewPicker = newDataViewPickerEnabled ? (
-    <DataViewPicker
-      scope={sourcererScope}
-      disabled={sourcererScope === DataViewManagerScopeName.detections}
-    />
+    <DataViewPicker scope={sourcererScope} disabled={sourcererScope === PageScope.detections} />
   ) : (
     <Sourcerer scope={sourcererScope} data-test-subj="sourcerer" />
   );

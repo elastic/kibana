@@ -18,7 +18,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import { sharedStateSelector } from '../../redux/selectors';
 import { sharedDataViewManagerSlice } from '../../redux/slices';
 import { useSelectDataView } from '../../hooks/use_select_data_view';
-import { DataViewManagerScopeName } from '../../constants';
+import { PageScope } from '../../constants';
 import { useSavedDataViews } from '../../hooks/use_saved_data_views';
 import { LOADING } from './translations';
 import { DATA_VIEW_PICKER_TEST_ID } from './constants';
@@ -28,7 +28,7 @@ interface DataViewPickerProps {
   /**
    * The scope of the data view picker
    */
-  scope: DataViewManagerScopeName;
+  scope: PageScope;
   /**
    * Optional callback when the data view picker is closed
    */
@@ -64,8 +64,8 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
 
   const savedDataViews = useSavedDataViews();
 
-  const isDefaultSourcerer = scope === DataViewManagerScopeName.default;
-  const isExploreSourcerer = scope === DataViewManagerScopeName.explore;
+  const isDefaultSourcerer = scope === PageScope.default;
+  const isExploreSourcerer = scope === PageScope.explore;
   const updateUrlParam = useUpdateUrlParam<SourcererUrlState>(URL_PARAM_KEY.sourcerer);
 
   const dataViewId = dataView?.id;
@@ -78,7 +78,7 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
 
       if (isDefaultSourcerer) {
         updateUrlParam({
-          [DataViewManagerScopeName.default]: {
+          [PageScope.default]: {
             id,
             // NOTE: Boolean filter for removing empty patterns
             selectedPatterns: indexPattern.split(',').filter(Boolean),
@@ -88,7 +88,7 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
 
       if (isExploreSourcerer) {
         updateUrlParam({
-          [DataViewManagerScopeName.explore]: {
+          [PageScope.explore]: {
             id,
             // NOTE: Boolean filter for removing empty patterns
             selectedPatterns: indexPattern.split(',').filter(Boolean),

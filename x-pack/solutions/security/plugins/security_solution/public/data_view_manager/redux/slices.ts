@@ -8,7 +8,7 @@
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
 import type { DataViewSpec, DataView } from '@kbn/data-views-plugin/common';
-import type { DataViewManagerScopeName } from '../constants';
+import type { PageScope } from '../constants';
 import { SLICE_PREFIX } from '../constants';
 import type {
   ScopedDataViewSelectionState,
@@ -81,7 +81,7 @@ export const sharedDataViewManagerSlice = createSlice({
   },
 });
 
-export const createDataViewSelectionSlice = <T extends DataViewManagerScopeName>(scopeName: T) =>
+export const createDataViewSelectionSlice = <T extends PageScope>(scopeName: T) =>
   createSlice({
     name: `${SLICE_PREFIX}/${scopeName}`,
     initialState: initialScopeState,
