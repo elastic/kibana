@@ -8,29 +8,30 @@
 import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
 import { StorageIndexAdapter } from '@kbn/storage-adapter';
 import type { StreamsPluginStartDependencies } from '../../../types';
-import type { StoredAssetLink } from './asset_client';
-import { AssetClient } from './asset_client';
-import type { AssetStorageSettings } from './storage_settings';
-import { assetStorageSettings } from './storage_settings';
+import { AttachmentClient } from './attachment_client';
+import type { AttachmentStorageSettings } from './storage_settings';
+import type { AttachmentDocument } from './types';
+import { attachmentStorageSettings } from './storage_settings';
 
-export class AssetService {
+export class AttachmentService {
   constructor(
     private readonly coreSetup: CoreSetup<StreamsPluginStartDependencies>,
     private readonly logger: Logger
   ) {}
 
-  async getClientWithRequest({ request }: { request: KibanaRequest }): Promise<AssetClient> {
-    const [coreStart] = await this.coreSetup.getStartServices();
+  async getClientWithRequest({ request }: { request: KibanaRequest }): Promise<AttachmentClient> {
+    const [coreStart, pluginsStart] = await this.coreSetup.getStartServices();
 
-    const adapter = new StorageIndexAdapter<AssetStorageSettings, StoredAssetLink>(
+    const adapter = new StorageIndexAdapter<AttachmentStorageSettings, AttachmentDocument>(
       coreStart.elasticsearch.client.asInternalUser,
-      this.logger.get('assets'),
-      assetStorageSettings
+      this.logger.get('attachments'),
+      attachmentStorageSettings
     );
 
-    return new AssetClient({
+    return new AttachmentClient({
       storageClient: adapter.getClient(),
       soClient: coreStart.savedObjects.getScopedClient(request),
+      rulesClient: await pluginsStart.alerting.getRulesClientWithRequest(request),
     });
   }
 }
