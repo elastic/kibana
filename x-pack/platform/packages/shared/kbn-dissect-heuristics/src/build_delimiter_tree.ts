@@ -9,6 +9,73 @@ import type { DelimiterNode } from './types';
 import { median, variance } from './utils';
 
 /**
+ * Filter out weak single-character delimiters that conflict with stronger multi-character delimiters.
+ *
+ * A delimiter node conflicts if it represents a single character that appears within or immediately
+ * adjacent to a multi-character delimiter.
+ *
+ * Example: With messages ["short - value", "very long - value"], we find both " " and " - " as delimiters.
+ * The delimiter tree might have multiple space nodes:
+ * 1. Space at [5,4] - varies because one message has "very long"
+ * 2. " - " at [5,9] - the structural delimiter
+ * 3. Space at [7,11] - after " - "
+ *
+ * We want to keep " - " and the space after it, but remove the space node that conflicts with " - ".
+ *
+ * Algorithm:
+ * 1. Identify multi-character delimiters (stronger, more specific)
+ * 2. Remove single-char nodes whose positions overlap with or are part of multi-char delimiters
+ */
+function filterConflictingDelimiters(nodes: DelimiterNode[], messages: string[]): DelimiterNode[] {
+  if (nodes.length <= 1) {
+    return nodes;
+  }
+
+  // Find all multi-character delimiters (stronger, more specific)
+  const multiCharDelimiters = nodes.filter((n) => n.literal.length > 1);
+
+  // If no multi-char delimiters, keep everything
+  if (multiCharDelimiters.length === 0) {
+    return nodes;
+  }
+
+  // Filter out single-character delimiter nodes that overlap with multi-char delimiters
+  return nodes.filter((node) => {
+    // Keep all multi-character delimiters
+    if (node.literal.length > 1) {
+      return true;
+    }
+
+    // For single-char delimiters, check if this specific occurrence conflicts
+    // A conflict occurs when the single-char appears at positions that are WITHIN
+    // the range of a multi-char delimiter
+
+    const conflictsWithStrongerDelimiter = multiCharDelimiters.some((strongDelim) => {
+      // Check if the single char is part of the strong delimiter
+      if (!strongDelim.literal.includes(node.literal)) {
+        return false; // Not even a substring, no conflict
+      }
+
+      // Check how many messages have this node's position overlapping with the strong delimiter
+      const overlappingMessages = node.positions.filter((weakPos, idx) => {
+        const strongPos = strongDelim.positions[idx];
+        const strongEnd = strongPos + strongDelim.literal.length;
+
+        // Check if weak delimiter position falls within the strong delimiter's range
+        // or immediately adjacent (which would split it)
+        return weakPos >= strongPos && weakPos < strongEnd;
+      }).length;
+
+      // If this node overlaps with the strong delimiter in more than half the messages,
+      // it's a conflict and should be removed
+      return overlappingMessages > messages.length * 0.3;
+    });
+
+    return !conflictsWithStrongerDelimiter;
+  });
+}
+
+/**
  * Build an ordered delimiter tree by finding positions and ordering by median position
  *
  * Algorithm:
@@ -73,8 +140,11 @@ export function buildDelimiterTree(
   // Sort by median position (left to right in the message)
   const sortedNodes = allNodes.sort((a, b) => a.medianPosition - b.medianPosition);
 
+  // Filter out weak delimiters that would unnecessarily fragment fields
+  const nonConflictingNodes = filterConflictingDelimiters(sortedNodes, messages);
+
   // Filter out delimiter nodes that are substrings of longer delimiters at the exact same positions
-  const filteredNodes = sortedNodes.filter((node, index) => {
+  const filteredNodes = nonConflictingNodes.filter((node, index) => {
     // Check if this node is covered by any other (longer) delimiter at the exact same positions
     return !sortedNodes.some((other, otherIndex) => {
       // Skip self and same-length delimiters

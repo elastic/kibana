@@ -35,7 +35,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
       const result = extractDissectPatternDangerouslySlow(logs);
 
       expect(result.pattern).toBe(
-        '%{field_1} %{field_2} %{field_3} %{field_4} %{field_5}[%{field_6}]: %{field_7} %{field_8}'
+        '%{field_1} %{field_2} %{field_3} %{field_4} %{field_5}[%{field_6}]: %{field_7->} %{field_8}'
       );
       expect(result.fields).toHaveLength(8);
     });
@@ -50,7 +50,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
       const result = extractDissectPatternDangerouslySlow(logs);
 
       expect(result.pattern).toBe(
-        '{"%{field_1}":"%{field_2}","%{field_3}":"%{field_4}","%{field_5}":"%{field_6} %{field_7}"}'
+        '{"%{field_1}":"%{field_2}","%{field_3}":"%{field_4}","%{field_5}":"%{field_6->} %{field_7}"}'
       );
       expect(result.fields).toHaveLength(7);
     });
@@ -86,7 +86,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
 
       const result = extractDissectPatternDangerouslySlow(logs);
 
-      expect(result.pattern).toBe('%{field_1}\t%{field_2}\t%{field_3}');
+      expect(result.pattern).toBe('%{field_1}\t%{field_2->}\t%{field_3}');
       expect(result.fields).toHaveLength(3);
     });
   });
@@ -97,7 +97,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
 
       const result = extractDissectPatternDangerouslySlow(logs);
 
-      // Right-padding modifier correctly handles variable spacing
+      // Whitespace varies, so field_1 needs right-padding
       expect(result.pattern).toBe('%{field_1->} %{field_2}');
       expect(result.fields).toHaveLength(2);
     });
@@ -229,7 +229,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
 
       const result = extractDissectPatternDangerouslySlow(logs);
 
-      expect(result.pattern).toBe('%{field_1} %{field_2}://%{field_3} %{field_4} %{field_5}');
+      expect(result.pattern).toBe('%{field_1->} %{field_2}://%{field_3->} %{field_4->} %{field_5}');
       expect(result.fields).toHaveLength(5);
     });
 
@@ -242,7 +242,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
 
       const result = extractDissectPatternDangerouslySlow(logs);
 
-      expect(result.pattern).toBe('%{field_1}-%{field_2}-%{field_3} %{field_4} %{field_5}');
+      expect(result.pattern).toBe('%{field_1}-%{field_2}-%{field_3} %{field_4->} %{field_5}');
       expect(result.fields).toHaveLength(5);
     });
   });
@@ -383,7 +383,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
       const result = extractDissectPatternDangerouslySlow(logs);
 
       expect(result.pattern).toBe(
-        '[%{field_1}-%{field_2}-%{field_3} %{field_4}] %{field_5}: %{field_6} %{field_7} %{field_8}'
+        '[%{field_1}-%{field_2}-%{field_3} %{field_4}] %{field_5}: %{field_6->} %{field_7} %{field_8}'
       );
       expect(result.fields).toHaveLength(8);
     });
@@ -398,7 +398,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
       const result = extractDissectPatternDangerouslySlow(logs);
 
       expect(result.pattern).toBe(
-        '%{field_1}-%{field_2}-%{field_3} %{field_4} %{field_5} %{field_6} %{field_7}'
+        '%{field_1}-%{field_2}-%{field_3} %{field_4} %{field_5} %{field_6->} %{field_7}'
       );
       expect(result.fields).toHaveLength(7);
     });
@@ -428,7 +428,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
       const result = extractDissectPatternDangerouslySlow(logs);
 
       expect(result.pattern).toBe(
-        '%{field_1}=%{field_2}-%{field_3}-%{field_4} %{field_5}=%{field_6} %{field_7}=%{field_8} %{field_9}=%{field_10} %{field_11}_%{field_12}=%{field_13}'
+        '%{field_1}=%{field_2}-%{field_3}-%{field_4} %{field_5}=%{field_6->} %{field_7}=%{field_8->} %{field_9}=%{field_10->} %{field_11}_%{field_12}=%{field_13}'
       );
       expect(result.fields).toHaveLength(13);
     });
@@ -579,7 +579,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
       // After normalization: correctly detects '-' and ':' as delimiters
 
       expect(result.pattern).toBe(
-        '%{} %{field_2} %{field_3} %{field_4} %{field_5} %{field_6} %{field_7} %{field_8} %{field_9}: %{field_10} %{field_11} %{field_12} %{field_13}'
+        '%{} %{field_2} %{field_3} %{field_4->} %{field_5->} %{field_6->} %{field_7->} %{field_8} %{field_9->}: %{field_10} %{field_11} %{field_12} %{field_13}'
       );
       expect(result.fields.length).toBe(13);
     });
@@ -712,7 +712,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
       const result = extractDissectPatternDangerouslySlow(logs);
       // After normalization: correctly detects '-' and ':' as delimiters
       expect(result.pattern).toBe(
-        '%{} %{field_2} %{field_3} %{field_4} %{field_5} %{field_6} %{field_7} %{field_8} %{field_9}: %{field_10}'
+        '%{} %{field_2} %{field_3} %{field_4->} %{field_5->} %{field_6->} %{field_7} %{field_8} %{field_9}: %{field_10}'
       );
     });
 
@@ -821,7 +821,118 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
       ];
       const result = extractDissectPatternDangerouslySlow(logs);
       expect(result.pattern).toBe(
-        '[%{field_1} %{field_2}] %{field_3} - %{field_4} %{field_5} %{field_6} %{field_7} %{field_8} %{field_9}'
+        '[%{field_1} %{field_2}] %{field_3} - %{field_4} %{field_5->} %{field_6->} %{field_7->} %{field_8} %{field_9}'
+      );
+    });
+
+    it('handles this fun case', () => {
+      const logs = [
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS',
+        '[11.13 20:08:27] YodaoDict.exe - oimagec3.ydstatic.com:80 close, 358 bytes sent, 48647 bytes (47.5 KB) received, lifetime 00:30',
+        '[11.13 20:08:27] YodaoDict.exe - oimagec7.ydstatic.com:80 error : A connection request was canceled before the completion.',
+        '[11.13 20:08:27] YodaoDict.exe - oimageb5.ydstatic.com:80 error : A connection request was canceled before the completion.',
+        '[11.13 20:08:27] spoolsv.exe *64 - 127.0.0.1:135 error : Could not connect through proxy proxy.cse.cuhk.edu.hk:5070 - Proxy server cannot establish a connection with the target, status code 403',
+        '[11.13 20:08:27] YodaoDict.exe - oimagea5.ydstatic.com:80 error : A connection request was canceled before the completion.',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS',
+        '[11.13 20:08:27] YodaoDict.exe - oimagea5.ydstatic.com:80 error : A connection request was canceled before the completion.',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 close, 697 bytes sent, 889 bytes received, lifetime <1 sec',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 close, 0 bytes sent, 0 bytes received, lifetime 00:01',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 close, 694 bytes sent, 892 bytes received, lifetime <1 sec',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 close, 806 bytes sent, 1407 bytes (1.37 KB) received, lifetime 00:01',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 close, 0 bytes sent, 0 bytes received, lifetime 00:02',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 close, 4272 bytes (4.17 KB) sent, 20283 bytes (19.8 KB) received, lifetime 00:20',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 close, 0 bytes sent, 0 bytes received, lifetime 00:13',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 close, 1730 bytes (1.68 KB) sent, 4796 bytes (4.68 KB) received, lifetime 00:01',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 close, 0 bytes sent, 0 bytes received, lifetime 00:07',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 close, 3254 bytes (3.17 KB) sent, 5295 bytes (5.17 KB) received, lifetime 00:04',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 close, 935 bytes sent, 6675 bytes (6.51 KB) received, lifetime <1 sec',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 close, 2413 bytes (2.35 KB) sent, 324 bytes received, lifetime 02:01',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 close, 0 bytes sent, 0 bytes received, lifetime 00:13',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 close, 534 bytes sent, 388 bytes received, lifetime 00:05',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 close, 542 bytes sent, 388 bytes received, lifetime 00:05',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS',
+        '[11.13 20:08:27] WeChat.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS',
+        '[11.13 20:08:27] firefox.exe - proxy.cse.cuhk.edu.hk:5070 close, 983 bytes sent, 268665 bytes (262 KB) received, lifetime 01:57',
+        '[11.13 20:08:27] firefox.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS',
+        '[11.13 20:08:27] Skype.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS',
+        '[11.13 20:08:27] firefox.exe - proxy.cse.cuhk.edu.hk:5070 close, 950 bytes sent, 3559 bytes (3.47 KB) received, lifetime 01:01',
+        '[11.13 20:08:27] Skype.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS',
+        '[11.13 20:08:27] firefox.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS',
+        '[11.13 20:08:27] git-remote-https.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS',
+        '[11.13 20:08:27] firefox.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS',
+        '[11.13 20:08:27] WeChat.exe - proxy.cse.cuhk.edu.hk:5070 close, 451 bytes sent, 353 bytes received, lifetime <1 sec',
+        '[11.13 20:08:27] QQ.exe - showxml.qq.com:80 close, 600 bytes sent, 1716 bytes (1.67 KB) received, lifetime <1 sec',
+        '[11.13 20:08:27] QQ.exe - cgi.qqweb.qq.com:80 close, 477 bytes sent, 448 bytes received, lifetime <1 sec',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 close, 860 bytes sent, 3314 bytes (3.23 KB) received, lifetime 00:01',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 close, 5248 bytes (5.12 KB) sent, 1114 bytes (1.08 KB) received, lifetime <1 sec',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 close, 397 bytes sent, 3558 bytes (3.47 KB) received, lifetime 00:01',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 close, 946 bytes sent, 783 bytes received, lifetime <1 sec',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 close, 1166 bytes (1.13 KB) sent, 336 bytes received, lifetime <1 sec',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 close, 952 bytes sent, 782 bytes received, lifetime 00:10',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 close, 2437 bytes (2.37 KB) sent, 842 bytes received, lifetime 02:04',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 close, 445 bytes sent, 5174 bytes (5.05 KB) received, lifetime <1 sec',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 close, 1119 bytes (1.09 KB) sent, 3210 bytes (3.13 KB) received, lifetime <1 sec',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 close, 489 bytes sent, 566 bytes received, lifetime <1 sec',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 close, 1198 bytes (1.16 KB) sent, 344 bytes received, lifetime <1 sec',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 close, 1033 bytes (1.00 KB) sent, 46810 bytes (45.7 KB) received, lifetime <1 sec',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 close, 1248 bytes (1.21 KB) sent, 334 bytes received, lifetime 00:20',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 close, 0 bytes sent, 0 bytes received, lifetime 00:02',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 close, 2473 bytes (2.41 KB) sent, 1926 bytes (1.88 KB) received, lifetime 00:20',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 close, 19904 bytes (19.4 KB) sent, 27629 bytes (26.9 KB) received, lifetime 02:19',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS',
+        '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 close, 508 bytes sent, 47293 bytes (46.1 KB) received, lifetime <1 sec',
+      ];
+      const result = extractDissectPatternDangerouslySlow(logs);
+      // Note: field_3 does not use right-padding because ` - ` is a non-whitespace delimiter
+      // The space is part of the delimiter, not padding. Fields naturally vary in length.
+      expect(result.pattern).toBe(
+        '[%{field_1} %{field_2}] %{field_3} - %{field_4->} %{field_5->} %{field_6} %{field_7} %{field_8} %{field_9}'
       );
     });
 
@@ -932,9 +1043,9 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
       // After normalization: correctly detects ':' as delimiter
       // With lenient position scoring, the colon is detected despite varying process name lengths
       expect(result.pattern).toBe(
-        '%{field_1} %{field_2} %{field_3} %{field_4} %{field_5}: %{field_6} %{field_7} %{field_8}'
+        '%{field_1} %{field_2} %{field_3} %{field_4} %{field_5}: %{field_6->} %{field_7}'
       );
-      expect(result.fields.length).toBe(8);
+      expect(result.fields.length).toBe(7);
     });
   });
 });

@@ -132,13 +132,15 @@ export function mapNormalizedToOriginalPosition(
  */
 export function needsRightPadding(
   delimiterPositions: number[],
-  normalizedMessages: NormalizedMessage[]
+  normalizedMessages: NormalizedMessage[],
+  delimiterLiteral: string
 ): boolean {
   if (delimiterPositions.length !== normalizedMessages.length) {
     return false;
   }
 
   // Check if ANY message had collapsed whitespace at the delimiter position
+  // This is the primary indicator of whitespace padding
   for (let i = 0; i < normalizedMessages.length; i++) {
     const delimiterPos = delimiterPositions[i];
     const collapsedPositions = normalizedMessages[i].collapsedWhitespacePositions;
@@ -150,5 +152,18 @@ export function needsRightPadding(
     }
   }
 
-  return false;
+  // Check if delimiter positions vary across messages
+  const hasVaryingPositions = delimiterPositions.some(
+    (pos) => pos !== delimiterPositions[0]
+  );
+
+  if (!hasVaryingPositions) {
+    return false;
+  }
+
+  // If positions vary AND the delimiter is purely whitespace (space/tab),
+  // this indicates fields with variable length that need right-padding
+  const isWhitespaceDelimiter = /^[\s]+$/.test(delimiterLiteral);
+
+  return isWhitespaceDelimiter;
 }

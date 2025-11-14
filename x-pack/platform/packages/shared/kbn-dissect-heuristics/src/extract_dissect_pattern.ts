@@ -86,14 +86,18 @@ export function extractDissectPatternDangerouslySlow(messages: string[]): Dissec
   fields.forEach((field, index) => {
     field.modifiers = detectModifiers(field);
 
-    // Apply right-padding modifier if whitespace was collapsed before the delimiter after this field
-    if (index < fields.length - 1) {
-      const nextDelimiter = delimiterTree[index];
-      if (nextDelimiter && nextDelimiter.positions.length > 0) {
-        // Check if this delimiter appears at positions where whitespace was collapsed
-        if (needsRightPadding(nextDelimiter.positions, normalizedMessages)) {
-          field.modifiers.rightPadding = true;
-        }
+    // Apply right-padding modifier based on delimiter positions
+    // Find the delimiter that comes after this field by comparing positions
+    // Use MIN length since we want to find the delimiter that appears right after
+    // the shortest value of this field (where the field ends in all messages)
+    const minFieldLength = Math.min(...field.values.map((v) => v.length));
+    const fieldEndMin = field.position + minFieldLength;
+    const nextDelimiter = delimiterTree.find((d) => Math.min(...d.positions) >= fieldEndMin);
+
+    if (nextDelimiter && nextDelimiter.positions.length > 0) {
+      // Check if this delimiter appears at varying positions or where whitespace was collapsed
+      if (needsRightPadding(nextDelimiter.positions, normalizedMessages, nextDelimiter.literal)) {
+        field.modifiers.rightPadding = true;
       }
     }
   });
@@ -120,13 +124,18 @@ export function extractDissectPatternDangerouslySlow(messages: string[]): Dissec
       spaceFields.forEach((field, index) => {
         field.modifiers = detectModifiers(field);
 
-        // Apply right-padding modifier if whitespace was collapsed before the delimiter after this field
-        if (index < spaceFields.length - 1) {
-          const nextDelimiter = spaceDelimiterTree[index];
-          if (nextDelimiter && nextDelimiter.positions.length > 0) {
-            if (needsRightPadding(nextDelimiter.positions, normalizedMessages)) {
-              field.modifiers.rightPadding = true;
-            }
+        // Apply right-padding modifier based on delimiter positions
+        const minFieldLength = Math.min(...field.values.map((v) => v.length));
+        const fieldEndMin = field.position + minFieldLength;
+        const nextDelimiter = spaceDelimiterTree.find(
+          (d) => Math.min(...d.positions) >= fieldEndMin
+        );
+
+        if (nextDelimiter && nextDelimiter.positions.length > 0) {
+          if (
+            needsRightPadding(nextDelimiter.positions, normalizedMessages, nextDelimiter.literal)
+          ) {
+            field.modifiers.rightPadding = true;
           }
         }
       });
@@ -164,13 +173,22 @@ export function extractDissectPatternDangerouslySlow(messages: string[]): Dissec
         prefixFields.forEach((field, index) => {
           field.modifiers = detectModifiers(field);
 
-          // Apply right-padding modifier if whitespace was collapsed before the delimiter after this field
-          if (index < prefixFields.length - 1) {
-            const nextDelimiter = prefixDelimiterTree[index];
-            if (nextDelimiter && nextDelimiter.positions.length > 0) {
-              if (needsRightPadding(nextDelimiter.positions, normalizedPrefixMessages)) {
-                field.modifiers.rightPadding = true;
-              }
+          // Apply right-padding modifier based on delimiter positions
+          const minFieldLength = Math.min(...field.values.map((v) => v.length));
+          const fieldEndMin = field.position + minFieldLength;
+          const nextDelimiter = prefixDelimiterTree.find(
+            (d) => Math.min(...d.positions) >= fieldEndMin
+          );
+
+          if (nextDelimiter && nextDelimiter.positions.length > 0) {
+            if (
+              needsRightPadding(
+                nextDelimiter.positions,
+                normalizedPrefixMessages,
+                nextDelimiter.literal
+              )
+            ) {
+              field.modifiers.rightPadding = true;
             }
           }
         });
