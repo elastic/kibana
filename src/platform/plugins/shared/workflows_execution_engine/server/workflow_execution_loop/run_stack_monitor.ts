@@ -10,6 +10,7 @@
 import { cancelWorkflowIfRequested } from './cancel_workflow_if_requested';
 import type { WorkflowExecutionLoopParams } from './types';
 import type { MonitorableNode } from '../step/node_implementation';
+import { TimeoutAbortedError, abortableTimeout } from '../utils';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import { WorkflowScopeStack } from '../workflow_context_manager/workflow_scope_stack';
 
@@ -71,6 +72,8 @@ export async function runStackMonitor(
   const nodeStackFrames = params.workflowRuntime.getCurrentNodeScope();
 
   while (!monitorAbortController.signal.aborted) {
+    // eslint-disable-next-line no-console
+    console.warn('!!!! MONITOR  loop iteration start', new Date().toISOString());
     await cancelWorkflowIfRequested(
       params.workflowExecutionRepository,
       params.workflowExecutionState,
@@ -98,22 +101,15 @@ export async function runStackMonitor(
       }
     }
 
-    await new Promise<void>((resolve) => {
-      let isResolved = false;
+    try {
+      await abortableTimeout(500, monitorAbortController.signal);
+    } catch (error) {
+      if (error instanceof TimeoutAbortedError) {
+        // Monitoring was aborted, exit early
+        return;
+      }
 
-      const cleanup = () => {
-        if (!isResolved) {
-          isResolved = true;
-          clearTimeout(timeout);
-          monitorAbortController.signal.removeEventListener('abort', abortCallback);
-          resolve();
-        }
-      };
-
-      const abortCallback = cleanup;
-      const timeout = setTimeout(cleanup, 500);
-
-      monitorAbortController.signal.addEventListener('abort', abortCallback);
-    });
+      throw error;
+    }
   }
 }

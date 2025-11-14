@@ -9,7 +9,7 @@
 
 import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowExecutionLoopParams } from './types';
-import { generateExecutionTaskScope } from '../utils';
+import { abortableTimeout, generateExecutionTaskScope, TimeoutAbortedError } from '../utils';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 
 const SHORT_DURATION_THRESHOLD = 1000 * 5; // 5 seconds
@@ -35,10 +35,21 @@ export async function handleExecutionDelay(
   params.workflowExecutionState.updateWorkflowExecution({
     status: ExecutionStatus.WAITING,
   });
+  await params.workflowExecutionState.flush();
 
   if (diff < SHORT_DURATION_THRESHOLD) {
     const timeout = diff > 0 ? diff : 0;
-    await new Promise((resolve) => setTimeout(resolve, timeout));
+
+    try {
+      await abortableTimeout(timeout, stepExecutionRuntime.abortController.signal);
+    } catch (error) {
+      if (error instanceof TimeoutAbortedError) {
+        // Execution was aborted, exit early
+        return;
+      }
+
+      throw error;
+    }
     params.workflowExecutionState.updateWorkflowExecution({
       status: ExecutionStatus.RUNNING,
     });

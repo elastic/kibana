@@ -48,6 +48,8 @@ import type {
   StartWorkflowExecutionParams,
 } from './workflow_task_manager/types';
 import { createIndexes } from '../common';
+import { TaskStatus } from '@kbn/task-manager-plugin/server';
+import { cons } from 'fp-ts/lib/ReadonlyNonEmptyArray';
 
 type SetupDependencies = Pick<ContextDependencies, 'cloudSetup'>;
 
@@ -406,7 +408,7 @@ export class WorkflowsExecutionEnginePlugin
       };
       await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
       const taskInstance = {
-        id: `workflow:${workflowExecution.id}:${context.triggeredBy}`,
+        id: `workflow:${workflowExecution.id}:${workflowExecution.triggeredBy}`,
         taskType: 'workflow:run',
         params: {
           workflowRunId: workflowExecution.id,
@@ -461,33 +463,37 @@ export class WorkflowsExecutionEnginePlugin
       }
 
       const { taskManager } = plugins;
-      try {
-        await taskManager.remove(
-          `workflow:${workflowExecution.id}:${workflowExecution.triggeredBy}`
-        );
-      } catch (error) {
-        this.logger.error(
-          `Error removing task for workflow execution ${workflowExecution.id}: ${error}`
-        );
+
+      const { docs: tasks } = await taskManager.fetch({
+        query: {
+          bool: {
+            must: [
+              {
+                term: {
+                  'task.scope': `workflow:execution:${workflowExecution.id}`,
+                },
+              },
+            ],
+          },
+        },
+      });
+      await workflowExecutionRepository.updateWorkflowExecution({
+        id: workflowExecution.id,
+        cancelRequested: true,
+        cancellationReason: 'Cancelled by user',
+        cancelledAt: new Date().toISOString(),
+        cancelledBy: 'system', // TODO: set user if available
+      });
+
+      if (tasks.length) {
+        await taskManager.bulkRemove(tasks.map((task) => task.id));
       }
+      const idleTasks = tasks.filter((task) => task.status === TaskStatus.Idle);
+      // force delayed tasks to run so that internal cancellation logic can proceed
 
-      // // Request cancellation
-      // await workflowExecutionRepository.updateWorkflowExecution({
-      //   id: workflowExecution.id,
-      //   cancelRequested: true,
-      //   cancellationReason: 'Cancelled by user',
-      //   cancelledAt: new Date().toISOString(),
-      //   cancelledBy: 'system', // TODO: set user if available
-      // });
-
-      // if (
-      //   [ExecutionStatus.WAITING, ExecutionStatus.WAITING_FOR_INPUT].includes(
-      //     workflowExecution.status
-      //   )
-      // ) {
-      //   // TODO: handle WAITING states
-      //   // It should clean up resume tasks, etc
-      // }
+      if (idleTasks.length > 0) {
+        taskManager.bulkSchedule(idleTasks.map((task) => ({ ...task, runAt: undefined })));
+      }
     };
 
     return {
