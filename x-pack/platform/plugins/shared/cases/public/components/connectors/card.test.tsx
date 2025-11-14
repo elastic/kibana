@@ -73,4 +73,35 @@ describe('ConnectorCard ', () => {
 
     tableMatchesExpectedContent({ expectedContent, tableRows: rows });
   });
+
+  it('does not throw for unexpected values', () => {
+    const listItems = [
+      { title: 'item 1 title', description: { testing: true } },
+      { title: 'item 2 title', description: ['item 2 desc'] },
+      { title: 'item 3 title', description: true },
+      { title: 'item 4 title', description: null },
+    ];
+
+    render(
+      <ConnectorCard
+        connectorType={ConnectorTypes.none}
+        title="My connector"
+        // @ts-expect-error testing unexpected values
+        // since the values come from third-party services
+        // it's better to check for unexpected values as well
+        listItems={listItems}
+        isLoading={false}
+      />
+    );
+
+    const rows = screen.getAllByTestId('card-list-item-row');
+    const expectedContent = [
+      ['item 1 title', '{"testing":true}'],
+      ['item 2 title', 'item 2 desc'],
+      ['item 3 title', 'true'],
+      ['item 4 title', 'null'],
+    ];
+
+    tableMatchesExpectedContent({ expectedContent, tableRows: rows });
+  });
 });

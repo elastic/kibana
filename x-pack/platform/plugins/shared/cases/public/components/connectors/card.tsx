@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isString } from 'lodash/fp';
 import React, { memo } from 'react';
 import {
   EuiFlexGroup,
@@ -51,9 +52,11 @@ const columns: Array<EuiBasicTableColumn<Item>> = [
   },
   {
     name: CARD_TABLE_VALUE_COLUMN_NAME,
-    render: (item: Item) => (
-      <EuiText size="xs" data-test-subj="card-list-item" key={item.title}>
-        {item.description}
+    render: ({ description, title }: Item) => (
+      <EuiText size="xs" data-test-subj="card-list-item" key={title}>
+        {Array.isArray(description) || isString(description) || React.isValidElement(description)
+          ? description
+          : JSON.stringify(description)}
       </EuiText>
     ),
   },
