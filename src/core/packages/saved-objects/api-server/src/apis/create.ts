@@ -21,6 +21,10 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
   id?: string;
   /** Overwrite existing documents (defaults to false) */
   overwrite?: boolean;
+  /** Snapshot the object after creation */
+  snapshot?: boolean;
+  /** Why change was made */
+  reason?: string;
   /**
    * An opaque version number which changes on each successful write operation.
    * Can be used in conjunction with `overwrite` for implementing optimistic concurrency control.

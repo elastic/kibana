@@ -71,6 +71,8 @@ export async function createRuleSavedObject<Params extends RuleTypeParams = neve
           savedObjectsCreateOptions: {
             ...options,
             references,
+            snapshot: true,
+            reason: 'rule installed by user',
             id: ruleId,
           },
         })

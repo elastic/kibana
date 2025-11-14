@@ -174,6 +174,24 @@ export const performCreate = async <T>(
       ? await client.index(requestParams as IndexRequest, { meta: true })
       : await client.create(requestParams as CreateRequest, { meta: true });
 
+  // Create snapshot
+  if (options.snapshot) {
+    const { _id, _source } = raw;
+    const snapshotRequestParams = {
+      id: SavedObjectsUtils.generateId(),
+      index: commonHelper.getSnapshotIndexForType(type),
+      document: {
+        '@timestamp': new Date().toISOString(),
+        'user.id': updatedBy || 'unknown',
+        message: options.reason || 'create',
+        id: _id,
+        source: _source,
+      },
+      require_alias: true,
+    };
+    await client.create(snapshotRequestParams as CreateRequest, { meta: true });
+  }
+
   // throw if we can't verify a 404 response is from Elasticsearch
   if (isNotFoundFromUnsupportedServer({ statusCode, headers })) {
     throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(id, type);
