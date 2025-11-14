@@ -490,8 +490,7 @@ describe('getDissectProcessorWithReview', () => {
 
     const result = getDissectProcessorWithReview(pattern, reviewResult);
 
-    // Should collapse %{+message} %{+message} %{+message} %{+message} to just %{+message}
-    expect(result.pattern).toBe('%{log.level} %{+message}');
+    expect(result.pattern).toBe('%{log.level} %{message}');
     expect(result.processor.dissect.append_separator).toBe(' ');
   });
 });

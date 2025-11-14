@@ -123,8 +123,7 @@ describe('extractDissectPatternDangerouslySlow', () => {
       const result = extractDissectPatternDangerouslySlow(VARIABLE_WHITESPACE);
 
       // Multiple spaces are detected as delimiter
-      expect(result.pattern).toMatch(/%\{field_\d+\}\s+%\{field_\d+\}/);
-      expect(result.fields.length).toBeGreaterThan(1);
+      expect(result.pattern).toEqual('%{field_1->} %{field_2->} %{field_3->} %{field_4}');
     });
 
     it('detects skip fields for constant values', () => {

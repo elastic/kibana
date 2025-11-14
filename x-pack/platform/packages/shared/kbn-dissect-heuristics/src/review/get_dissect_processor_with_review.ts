@@ -45,6 +45,11 @@ export function getDissectProcessorWithReview(
   reviewResult.fields.forEach((field) => {
     if (field.is_static && field.static_value) {
       field.columns.forEach((columnName) => {
+        const dissectField = pattern.fields.find((f) => f.name === columnName);
+        if (dissectField?.modifiers?.rightPadding) {
+          // If the field has right padding, we cannot inline it as a static value
+          return;
+        }
         staticFieldMap.set(columnName, field.static_value!);
       });
     }
