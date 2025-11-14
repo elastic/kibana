@@ -99,7 +99,12 @@ export async function evaluateDissectSuggestions() {
       const reviewFields = getReviewFields(dissectPattern, 10);
       console.log(`- ${stream}: ${chalk.dim(dissectPattern.pattern)}`);
 
-      const suggestionData = await getSuggestions(stream, connector, messages, reviewFields);
+      const suggestionData = await getSuggestions(
+        stream,
+        connector,
+        messages.slice(0, 10),
+        reviewFields
+      );
       const dissectProcessor = getDissectProcessorWithReview(
         dissectPattern,
         suggestionData.dissectProcessor,

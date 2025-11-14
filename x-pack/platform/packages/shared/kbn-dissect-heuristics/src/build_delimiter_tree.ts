@@ -146,7 +146,7 @@ export function buildDelimiterTree(
   // Filter out delimiter nodes that are substrings of longer delimiters at the exact same positions
   const filteredNodes = nonConflictingNodes.filter((node, index) => {
     // Check if this node is covered by any other (longer) delimiter at the exact same positions
-    return !sortedNodes.some((other, otherIndex) => {
+    return !nonConflictingNodes.some((other, otherIndex) => {
       // Skip self and same-length delimiters
       if (index === otherIndex || node.literal.length >= other.literal.length) {
         return false;

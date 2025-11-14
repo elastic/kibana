@@ -20,9 +20,9 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
       const result = extractDissectPatternDangerouslySlow(logs);
 
       expect(result.pattern).toBe(
-        '%{field_1} - %{field_2} [%{field_3}/%{field_4}/%{field_5}] "%{field_6} /%{field_7}/%{field_8}" %{field_9}'
+        '%{field_1} - %{field_2} [%{field_3}/%{field_4}/%{field_5->} %{field_6}] "%{field_7} /%{field_8->} %{field_9}/%{field_10->}" %{field_11} %{field_12}'
       );
-      expect(result.fields).toHaveLength(9);
+      expect(result.fields).toHaveLength(12);
     });
 
     it('extracts pattern from Syslog format', () => {
@@ -126,8 +126,10 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
 
       // After whitespace normalization: correctly detects varying log level lengths
       // and applies right-padding modifier. Date is kept as single field.
-      expect(result.pattern).toBe('%{field_1->} - - [%{field_2}] %{field_3}');
-      expect(result.fields).toHaveLength(3);
+      expect(result.pattern).toBe(
+        '%{field_1->} - - [%{field_2}-%{field_3}-%{field_4}] %{field_5->} %{field_6}'
+      );
+      expect(result.fields).toHaveLength(6);
     });
   });
 
@@ -201,8 +203,8 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
 
       const result = extractDissectPatternDangerouslySlow(logs);
 
-      expect(result.pattern).toBe('%{field_1}@%{field_2} -> /%{field_3} (%{field_4})');
-      expect(result.fields).toHaveLength(4);
+      expect(result.pattern).toBe('%{field_1}@%{field_2} -> /%{field_3}/%{field_4} (%{field_5})');
+      expect(result.fields).toHaveLength(5);
     });
 
     it('handles messages with nested brackets', () => {
@@ -229,8 +231,10 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
 
       const result = extractDissectPatternDangerouslySlow(logs);
 
-      expect(result.pattern).toBe('%{field_1->} %{field_2}://%{field_3->} %{field_4->} %{field_5}');
-      expect(result.fields).toHaveLength(5);
+      expect(result.pattern).toBe(
+        '%{field_1->} %{field_2}://%{field_3}/%{field_4}/%{field_5}/%{field_6->} %{field_7->} %{field_8}'
+      );
+      expect(result.fields).toHaveLength(8);
     });
 
     it('handles messages with timestamps in various formats', () => {
@@ -368,9 +372,9 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
       const result = extractDissectPatternDangerouslySlow(logs);
 
       expect(result.pattern).toBe(
-        '%{field_1} - %{field_2} [%{field_3}/%{field_4}/%{field_5} +%{field_6}] "%{field_7} /%{field_8}/%{field_9}/%{field_10}" %{field_11}://%{field_12}" "%{field_13}/%{field_14}'
+        '%{field_1} - %{field_2} [%{field_3}/%{field_4}/%{field_5} +%{field_6}] "%{field_7} /%{field_8}/%{field_9} %{field_10}/%{field_11}" %{field_12} %{field_13} "%{field_14}://%{field_15}" "%{field_16}/%{field_17}"'
       );
-      expect(result.fields).toHaveLength(14);
+      expect(result.fields).toHaveLength(17);
     });
 
     it('handles application logs with stack traces', () => {
@@ -579,9 +583,9 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
       // After normalization: correctly detects '-' and ':' as delimiters
 
       expect(result.pattern).toBe(
-        '%{} %{field_2} %{field_3} %{field_4->} %{field_5->} %{field_6->} %{field_7->} %{field_8} %{field_9->}: %{field_10} %{field_11} %{field_12} %{field_13}'
+        '- %{field_1} %{field_2} %{field_3->} %{field_4->} %{field_5->} %{field_6} %{field_7->}: %{field_8->} %{field_9} %{field_10} %{field_11} %{field_12}'
       );
-      expect(result.fields.length).toBe(13);
+      expect(result.fields.length).toBe(12);
     });
 
     it('handles uniform syslog messages successfully', () => {
@@ -712,7 +716,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
       const result = extractDissectPatternDangerouslySlow(logs);
       // After normalization: correctly detects '-' and ':' as delimiters
       expect(result.pattern).toBe(
-        '%{} %{field_2} %{field_3} %{field_4->} %{field_5->} %{field_6->} %{field_7} %{field_8} %{field_9}: %{field_10}'
+        '- %{field_1} %{field_2} %{field_3->} %{field_4->} %{field_5->} %{field_6->} %{field_7->}: %{field_8} %{field_9}'
       );
     });
 
