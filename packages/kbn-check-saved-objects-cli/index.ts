@@ -9,3 +9,4 @@
 
 export { runCheckSavedObjectsCli } from './src/commands/run_check_saved_objects_cli';
 export { runCheckMappingsUpdateCli } from './src/commands/run_check_mappings_update_cli';
+export { getRemovedTypes } from './src/migrations/removed_types/get_removed_types';

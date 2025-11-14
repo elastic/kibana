@@ -99,6 +99,7 @@ export {
   type ConversationRoundStep,
   type ReasoningStepData,
   type ReasoningStep,
+  type RoundModelUsageStats,
   ConversationRoundStepType,
   isToolCallStep,
   isReasoningStep,

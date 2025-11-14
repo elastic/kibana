@@ -20,6 +20,8 @@ export interface TaskContext {
   to?: MigrationSnapshot;
   newTypes: string[];
   updatedTypes: string[];
+  currentRemovedTypes: string[];
+  newRemovedTypes: string[];
   fixtures: Record<
     string,
     {

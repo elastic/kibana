@@ -7,6 +7,17 @@
 
 import { css } from '@emotion/react';
 
-export const maxConversationWidthStyles = css`
+const maxConversationWidthStyles = css`
   max-width: 800px;
+`;
+
+// Ensures the conversation element is always 100% of it's parent or 800px, whichever is smaller.
+export const conversationElementWidthStyles = css`
+  width: 100%;
+  ${maxConversationWidthStyles}
+`;
+
+export const fullWidthAndHeightStyles = css`
+  width: 100%;
+  height: 100%;
 `;

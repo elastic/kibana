@@ -43,7 +43,7 @@ describe(
         cy.visit(APP_MANAGE_PATH);
         cy.getByTestSubj('pageContainer').contains('Endpoint exceptions').click();
 
-        cy.getByTestSubj('endpointExceptionsPage-container').should('exist');
+        cy.getByTestSubj('endpointExceptionsListPage-container').should('exist');
       });
 
       it('should display Endpoint Exceptions in Manage side panel', () => {
@@ -62,7 +62,7 @@ describe(
         essSecurityHeaders.openNavigationPanelFor(essSecurityHeaders.ENDPOINT_EXCEPTIONS);
         cy.get(essSecurityHeaders.ENDPOINT_EXCEPTIONS).click();
 
-        cy.getByTestSubj('endpointExceptionsPage-container').should('exist');
+        cy.getByTestSubj('endpointExceptionsListPage-container').should('exist');
       });
 
       // todo: add 'should NOT' test case when Endpoint Exceptions sub-feature privilege is separated from Security

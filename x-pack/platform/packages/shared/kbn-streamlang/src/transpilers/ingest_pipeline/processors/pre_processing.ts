@@ -16,6 +16,7 @@ export const processorFieldRenames: Record<string, Record<string, string>> = {
   grok: { from: 'field', where: 'if' },
   dissect: { from: 'field', where: 'if' },
   date: { from: 'field', to: 'target_field', where: 'if' },
+  drop_document: { where: 'if' },
   rename: { from: 'field', to: 'target_field', where: 'if' },
   set: { to: 'field', where: 'if' },
   append: { to: 'field', where: 'if' },
@@ -39,6 +40,18 @@ export function renameFields<T extends Record<string, any>>(
   return result as T;
 }
 
+/**
+ * Mapping of Streamlang action names to Ingest Pipeline processor names. Maps only when they differ.
+ */
+const processorRenames: Record<string, string> = {
+  replace: 'gsub',
+  drop_document: 'drop',
+};
+
+function renameProcessor(action: string) {
+  return processorRenames[action] || action;
+}
+
 export const applyPreProcessing = (
   action: StreamlangProcessorDefinition['action'],
   processorWithRenames: IngestPipelineProcessor
@@ -46,7 +59,7 @@ export const applyPreProcessing = (
   // Default: return processor as-is
   return [
     {
-      [action]: { ...processorWithRenames },
+      [renameProcessor(action)]: { ...processorWithRenames },
     },
   ];
 };
