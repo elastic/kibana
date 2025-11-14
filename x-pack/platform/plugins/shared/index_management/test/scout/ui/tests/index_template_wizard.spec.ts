@@ -207,12 +207,8 @@ test.describe('Index template wizard - Preview template', { tag: ['@ess'] }, () 
     // Click Create template
     await pageObjects.indexManagement.clickNextButton();
 
-    // Click preview tab, we know its the last one
-    const tabs = page.testSubj.locator('tab');
-    const tabCount = await tabs.count();
-    // todo
-    // eslint-disable-next-line playwright/no-nth-methods
-    await tabs.nth(tabCount - 1).click();
+    // Click preview tab
+    page.testSubj.locator('previewTab').click();
 
     const templatePreview = await page.testSubj.locator('simulateTemplatePreview').textContent();
     expect(templatePreview).not.toContain('error');

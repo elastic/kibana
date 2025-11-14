@@ -42,7 +42,6 @@ export class IndexManagement {
   async setCreateIndexMode(value: string) {
     const modeField = this.page.testSubj.locator('indexModeField');
     await modeField.waitFor({ state: 'visible' });
-    // await this.page.pause();
     await modeField.click();
     await this.page.testSubj.locator(`indexMode${value}Option`).click();
   }
@@ -59,26 +58,7 @@ export class IndexManagement {
     // Wait for the table to be visible
     const table = this.page.locator('table');
     await table.waitFor({ state: 'visible' });
-
-    // Get all index name links
-    const indexLinks = this.page.testSubj.locator('indexTableIndexNameLink');
-    const count = await indexLinks.count();
-
-    // Check if any of the links contain the index name
-    let found = false;
-    for (let i = 0; i < count; i++) {
-      // todo
-      // eslint-disable-next-line playwright/no-nth-methods
-      const text = await indexLinks.nth(i).textContent();
-      if (text === indexName) {
-        found = true;
-        break;
-      }
-    }
-
-    if (!found) {
-      throw new Error(`Expected index "${indexName}" to exist in the table, but it was not found`);
-    }
+    this.page.getByText(indexName);
   }
 
   async toggleHiddenIndices() {

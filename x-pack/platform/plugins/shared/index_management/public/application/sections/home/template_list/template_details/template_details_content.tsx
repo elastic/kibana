@@ -55,30 +55,35 @@ const TABS = [
     name: i18n.translate('xpack.idxMgmt.templateDetails.summaryTabTitle', {
       defaultMessage: 'Summary',
     }),
+    dataTestSubj: 'summaryTab',
   },
   {
     id: SETTINGS_TAB_ID,
     name: i18n.translate('xpack.idxMgmt.templateDetails.settingsTabTitle', {
       defaultMessage: 'Settings',
     }),
+    dataTestSubj: 'settingsTab',
   },
   {
     id: MAPPINGS_TAB_ID,
     name: i18n.translate('xpack.idxMgmt.templateDetails.mappingsTabTitle', {
       defaultMessage: 'Mappings',
     }),
+    dataTestSubj: 'mappingsTab',
   },
   {
     id: ALIASES_TAB_ID,
     name: i18n.translate('xpack.idxMgmt.templateDetails.aliasesTabTitle', {
       defaultMessage: 'Aliases',
     }),
+    dataTestSubj: 'aliasesTab',
   },
   {
     id: PREVIEW_TAB_ID,
     name: i18n.translate('xpack.idxMgmt.templateDetails.previewTabTitle', {
       defaultMessage: 'Preview',
     }),
+    dataTestSubj: 'previewTab',
   },
 ];
 
@@ -220,7 +225,7 @@ export const TemplateDetailsContent = ({
                 }}
                 isSelected={tab.id === activeTab}
                 key={tab.id}
-                data-test-subj="tab"
+                data-test-subj={tab.dataTestSubj}
               >
                 {tab.name}
               </EuiTab>
