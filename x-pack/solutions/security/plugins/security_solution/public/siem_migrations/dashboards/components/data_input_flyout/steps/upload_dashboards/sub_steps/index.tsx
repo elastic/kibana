@@ -14,7 +14,7 @@ import { useCopyExportQueryStep } from './copy_export_query';
 import type { OnMigrationCreated, OnMissingResourcesFetched } from '../../../types';
 import { useDashboardsFileUploadStep } from './dashboards_file_upload';
 import { useKibana } from '../../../../../../../common/lib/kibana/kibana_react';
-import { useCheckResourcesStep } from '../../common/check_resources';
+import { useCheckResourcesStep } from '../../../../../../common/components/migration_steps/macros/sub_steps/check_resources';
 interface DashboardsUploadSubStepsProps {
   migrationStats?: DashboardMigrationStats;
   onMissingResourcesFetched: OnMissingResourcesFetched;
@@ -98,6 +98,7 @@ export const DashboardsUploadSubSteps = React.memo(function DashboardsUploadSubS
     status: getEuiStepStatus(4, subStep),
     migrationStats,
     onMissingResourcesFetched: onMissingResourcesFetchedStep,
+    resourceType: 'dashboard',
   });
 
   const steps = useMemo<EuiStepProps[]>(

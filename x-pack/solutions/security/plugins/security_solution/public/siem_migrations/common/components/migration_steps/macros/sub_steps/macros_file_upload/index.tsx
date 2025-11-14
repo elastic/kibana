@@ -7,12 +7,12 @@
 
 import React, { useCallback, useMemo } from 'react';
 import type { EuiStepProps, EuiStepStatus } from '@elastic/eui';
-import { useAppToasts } from '../../../../../../../../common/hooks/use_app_toasts';
-import type { SiemMigrationResourceData } from '../../../../../../../../../common/siem_migrations/model/common.gen';
-import { RuleResourceIdentifier } from '../../../../../../../../../common/siem_migrations/rules/resources';
-import { useUpsertResources } from '../../../../../../service/hooks/use_upsert_resources';
-import type { RuleMigrationTaskStats } from '../../../../../../../../../common/siem_migrations/model/rule_migration.gen';
-import type { OnResourcesCreated } from '../../../../types';
+import { useAppToasts } from '../../../../../../../common/hooks/use_app_toasts';
+import type { SiemMigrationResourceData } from '../../../../../../../../common/siem_migrations/model/common.gen';
+import { RuleResourceIdentifier } from '../../../../../../../../common/siem_migrations/rules/resources';
+import { useUpsertResources } from '../../../../../service/hooks/use_upsert_resources';
+import type { RuleMigrationTaskStats } from '../../../../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { OnResourcesCreated } from '../../../types';
 import { MacrosFileUpload } from './macros_file_upload';
 import * as i18n from './translations';
 
@@ -29,7 +29,7 @@ export const useMacrosFileUploadStep = ({
   onMacrosCreated,
 }: RulesFileUploadStepProps): EuiStepProps => {
   const { addWarning } = useAppToasts();
-  const { upsertResources, isLoading, error } = useUpsertResources(onMacrosCreated);
+  const { upsertResources, isLoading, error } = useUpsertResources(onMacrosCreated, 'rule');
 
   const upsertMigrationResources = useCallback(
     (macrosFromFile: SiemMigrationResourceData[]) => {

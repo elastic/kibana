@@ -63,7 +63,6 @@ export const useDashboardsFileUploadStep = ({
         apiError={error?.message}
         onDashboardsFileChanged={onDashboardsFileChanged}
         onFileUpload={onFileUpload}
-        onMigrationCreated={onMigrationCreated}
       />
     ),
   };

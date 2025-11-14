@@ -8,12 +8,12 @@
 import { renderHook, act } from '@testing-library/react';
 import type { EuiStepStatus } from '@elastic/eui';
 import { useCheckResourcesStep } from '.';
-import { TestProviders } from '../../../../../../../../common/mock';
-import { useGetMissingResources } from '../../../../../../../common/hooks/use_get_missing_resources';
-import { getRuleMigrationStatsMock } from '../../../../../../__mocks__';
-import { SiemMigrationTaskStatus } from '../../../../../../../../../common/siem_migrations/constants';
+import { TestProviders } from '../../../../../../../common/mock';
+import { useGetMissingResources } from '../../../../../hooks/use_get_missing_resources';
+import { getRuleMigrationStatsMock } from '../../../../../../rules/__mocks__';
+import { SiemMigrationTaskStatus } from '../../../../../../../../common/siem_migrations/constants';
 
-jest.mock('../../../../../../../common/hooks/use_get_missing_resources');
+jest.mock('../../../../../hooks/use_get_missing_resources');
 const mockUseGetMissingResources = useGetMissingResources as jest.Mock;
 
 describe('useCheckResourcesStep', () => {
@@ -24,6 +24,7 @@ describe('useCheckResourcesStep', () => {
     status: 'incomplete' as EuiStepStatus,
     migrationStats: getRuleMigrationStatsMock({ status: SiemMigrationTaskStatus.READY }),
     onMissingResourcesFetched,
+    resourceType: 'rule' as const,
   };
 
   afterEach(() => {

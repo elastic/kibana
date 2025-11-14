@@ -12,7 +12,7 @@ import type {
   UploadedLookups,
 } from '../../../../../../../common/components/migration_steps/types';
 import { MissingLookupsList } from '../../../../../../../common/components';
-import { useUpsertResources } from '../../../../../../service/hooks/use_upsert_resources';
+import { useUpsertResources } from '../../../../../../../common/service/hooks/use_upsert_resources';
 import type { RuleMigrationTaskStats } from '../../../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import * as i18n from './translations';
 
@@ -32,7 +32,7 @@ export const useMissingLookupsListStep = ({
   addUploadedLookups,
   onCopied,
 }: MissingLookupsListStepProps): EuiStepProps => {
-  const { upsertResources, isLoading, error } = useUpsertResources(addUploadedLookups);
+  const { upsertResources, isLoading, error } = useUpsertResources(addUploadedLookups, 'rule');
 
   const omitLookup = useCallback(
     (lookupName: string) => {

@@ -12,7 +12,7 @@ import type {
   UploadedLookups,
 } from '../../../../../../../common/components/migration_steps/types';
 import { MissingLookupsList } from '../../../../../../../common/components/migration_steps';
-import { useUpsertResources } from '../../../../../../service/hooks/use_upsert_resources';
+import { useUpsertResources } from '../../../../../../../common/service/hooks/use_upsert_resources';
 import type { DashboardMigrationTaskStats } from '../../../../../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import * as i18n from './translations';
 
@@ -32,7 +32,7 @@ export const useMissingLookupsListStep = ({
   addUploadedLookups,
   onCopied,
 }: MissingLookupsListStepProps): EuiStepProps => {
-  const { upsertResources, isLoading, error } = useUpsertResources(addUploadedLookups);
+  const { upsertResources, isLoading, error } = useUpsertResources(addUploadedLookups, 'dashboard');
 
   const omitLookup = useCallback(
     (lookupName: string) => {
