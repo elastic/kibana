@@ -45,7 +45,7 @@ export function observeContainerLogs(name: string, containerId: string, log: Too
 /**
  * Check if a log line from stderr is actually an error or just info/debug written to stderr
  */
-function isActualError(line: string): boolean {
+export function isActualError(line: string): boolean {
   try {
     const parsed = JSON.parse(line);
     // If it's JSON with a log.level field, check if it's an error/warning level

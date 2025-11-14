@@ -14,6 +14,7 @@ import execa from 'execa';
 import { observeLines } from '@kbn/stdio-dev-helpers';
 import { ToolingLog } from '@kbn/tooling-log';
 import pRetry from 'p-retry';
+import { isActualError } from '@kbn/test/src/functional_test_runner/lib/docker_servers/container_logs';
 
 const BEFORE_SETUP_TIMEOUT = 30 * 60 * 1000; // 30 minutes;
 
@@ -33,30 +34,6 @@ function firstWithTimeout(source$: Rx.Observable<any>, errorMsg: string, ms = 30
       })
     )
   );
-}
-
-/**
- * Check if a log line from stderr is actually an error or just info/debug written to stderr
- */
-function isActualError(line: string): boolean {
-  try {
-    const parsed = JSON.parse(line);
-    // If it's JSON with a log.level field, check if it's an error/warning level
-    if (parsed['log.level']) {
-      const level = parsed['log.level'].toLowerCase();
-      return level === 'error' || level === 'fatal' || level === 'severe';
-    }
-    // If it has a level field (alternative format)
-    if (parsed.level) {
-      const level = parsed.level.toLowerCase();
-      return level === 'error' || level === 'fatal' || level === 'severe';
-    }
-  } catch (e) {
-    // Not JSON, treat as potential error since it's on stderr
-    return true;
-  }
-  // JSON but no log level field, treat as info
-  return false;
 }
 
 function childProcessToLogLine(childProcess: ChildProcess, log: ToolingLog) {
