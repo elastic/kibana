@@ -191,7 +191,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
 
         expect(response.status).to.eql(200);
-        expect(response.body).to.not.be(undefined);
         expect(response.body?.span?.id).to.equal(spanId);
         expect(response.body?.trace?.id).to.equal(traceId);
         expect(response.body?.span?.name).to.equal('otel-processed-db-query');
@@ -272,7 +271,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
 
         expect(response.status).to.eql(200);
-        expect(response.body).to.not.be(undefined);
         expect(response.body?.span?.id).to.equal(spanId);
         expect(response.body?.trace?.id).to.equal(traceId);
         expect(response.body?.span?.name).to.equal('otel-unprocessed-db-query');

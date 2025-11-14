@@ -92,7 +92,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
 
         expect(response.status).to.eql(200);
-        expect(response.body).to.not.be(undefined);
         expect(response.body?.duration).to.equal(1000000);
       });
     });
@@ -166,7 +165,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
 
         expect(response.status).to.eql(200);
-        expect(response.body).to.not.be(undefined);
         expect(response.body?.duration).to.equal(2000000);
       });
     });
@@ -245,7 +243,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
 
         expect(response.status).to.eql(200);
-        expect(response.body).to.not.be(undefined);
         expect(response.body?.duration).to.equal(500);
       });
     });
