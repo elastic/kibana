@@ -11,6 +11,7 @@ import React, { useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { MetricsExperienceClient } from '@kbn/metrics-experience-plugin/public';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { ValuesSelector } from './values_selector';
 import { MetricsExperienceClientProvider } from '../../context/metrics_experience_client_provider';
 import { FIELD_VALUE_SEPARATOR } from '../../common/constants';
@@ -69,8 +70,8 @@ export const Default = () => {
     <StoryWrapper>
       <ValuesSelector
         selectedDimensions={[
-          { name: 'host.name', type: 'keyword' },
-          { name: 'service.name', type: 'keyword' },
+          { name: 'host.name', type: ES_FIELD_TYPES.KEYWORD },
+          { name: 'service.name', type: ES_FIELD_TYPES.KEYWORD },
         ]}
         selectedValues={selectedValues}
         indices={['metrics-*']}
@@ -92,8 +93,8 @@ export const WithSelectedValues = () => {
     <StoryWrapper>
       <ValuesSelector
         selectedDimensions={[
-          { name: 'host.name', type: 'keyword' },
-          { name: 'service.name', type: 'keyword' },
+          { name: 'host.name', type: ES_FIELD_TYPES.KEYWORD },
+          { name: 'service.name', type: ES_FIELD_TYPES.KEYWORD },
         ]}
         selectedValues={selectedValues}
         indices={['metrics-*']}
@@ -111,7 +112,7 @@ export const Disabled = () => {
   return (
     <StoryWrapper>
       <ValuesSelector
-        selectedDimensions={[{ name: 'host.name', type: 'keyword' }]}
+        selectedDimensions={[{ name: 'host.name', type: ES_FIELD_TYPES.KEYWORD }]}
         selectedValues={selectedValues}
         indices={['metrics-*']}
         disabled={true}

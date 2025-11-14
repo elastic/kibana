@@ -11,6 +11,7 @@ import { renderHook } from '@testing-library/react';
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import { DIMENSIONS_COLUMN } from '../../../common/utils';
 import { useChartLayers } from './use_chart_layers';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 
 jest.mock('../../../common/utils', () => ({
   ...jest.requireActual('../../../common/utils'),
@@ -48,7 +49,7 @@ describe('useChartLayers', () => {
     const { result } = renderHook(() =>
       useChartLayers({
         metric: mockMetric,
-        dimensions: [{ name: 'service.name', type: 'keyword' }],
+        dimensions: [{ name: 'service.name', type: ES_FIELD_TYPES.KEYWORD }],
         color: '#FFF',
       })
     );
@@ -65,8 +66,8 @@ describe('useChartLayers', () => {
       useChartLayers({
         metric: mockMetric,
         dimensions: [
-          { name: 'service.name', type: 'keyword' },
-          { name: 'host.name', type: 'keyword' },
+          { name: 'service.name', type: ES_FIELD_TYPES.KEYWORD },
+          { name: 'host.name', type: ES_FIELD_TYPES.KEYWORD },
         ],
         color: '#FFF',
       })
