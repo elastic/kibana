@@ -37,6 +37,21 @@ function needsStringCasting(fieldType: ES_FIELD_TYPES): boolean {
 }
 
 /**
+ * Casts a field name to a string type if needed based on its field type.
+ * This helper ensures consistent type casting for non-keyword fields in CONCAT operations.
+ *
+ * @param fieldName - The field name (should already be sanitized).
+ * @param fieldType - Optional field type to determine if string casting is needed.
+ * @returns The field name with optional string casting applied.
+ */
+function castFieldIfNeeded(fieldName: string, fieldType: string | undefined): string {
+  if (fieldType && needsStringCasting(fieldType as ES_FIELD_TYPES)) {
+    return `${fieldName}::STRING`;
+  }
+  return fieldName;
+}
+
+/**
  * Creates a complete ESQL query string for metrics visualizations.
  * The function constructs a query that includes time series aggregation, filtering,
  * and selective string casting for dimension fields to prevent query failures with
@@ -67,11 +82,8 @@ export function createESQLQuery({ metric, dimensions = [], filters }: CreateESQL
 
     valuesByField.forEach((value, key) => {
       const dimType = dimensionTypeMap.get(key);
-      const escapedKey = sanitazeESQLInput(key);
-      const castedKey =
-        dimType && needsStringCasting(dimType as ES_FIELD_TYPES)
-          ? `${escapedKey}::STRING`
-          : escapedKey;
+      const sanitizedKey = sanitazeESQLInput(key) ?? key;
+      const castedKey = castFieldIfNeeded(sanitizedKey, dimType);
 
       whereConditions.push(
         where(`${castedKey} IN (${new Array(value.size).fill('?').join(', ')})`, Array.from(value))
@@ -109,10 +121,8 @@ export function createESQLQuery({ metric, dimensions = [], filters }: CreateESQL
             evaluate(
               `${DIMENSIONS_COLUMN} = CONCAT(${dimensions
                 .map((dim) => {
-                  const escapedDim = sanitazeESQLInput(dim.name);
-                  return dim.type && needsStringCasting(dim.type as ES_FIELD_TYPES)
-                    ? `${escapedDim}::STRING`
-                    : escapedDim;
+                  const sanitized = sanitazeESQLInput(dim.name) ?? dim.name;
+                  return castFieldIfNeeded(sanitized, dim.type);
                 })
                 .join(`, " ${separator} ", `)})`
             ),
