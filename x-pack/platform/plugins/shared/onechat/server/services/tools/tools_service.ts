@@ -64,13 +64,13 @@ export class ToolsService {
     };
   }
 
-  async start({
+  start({
     getRunner,
     elasticsearch,
     spaces,
     uiSettings,
     savedObjects,
-  }: ToolsServiceStartDeps): Promise<ToolsServiceStart> {
+  }: ToolsServiceStartDeps): ToolsServiceStart {
     const { logger, workflowsManagement } = this.setupDeps!;
 
     const toolTypes = getToolTypeDefinitions({ workflowsManagement });

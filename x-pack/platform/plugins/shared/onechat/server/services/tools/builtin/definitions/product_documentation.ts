@@ -18,7 +18,7 @@ import type { OnechatStartDependencies, OnechatPluginStart } from '../../../../t
 const productDocumentationSchema = z.object({
   query: z.string().describe('Search query to retrieve documentation about Elastic products'),
   product: z
-    .string()
+    .enum(['kibana', 'elasticsearch', 'observability', 'security'])
     .optional()
     .describe('Product to filter by: "kibana", "elasticsearch", "observability", or "security"'),
   max: z

@@ -75,7 +75,7 @@ export class ServiceManager {
 
     const attachments = this.services.attachments.start();
 
-    const tools = await this.services.tools.start({
+    const tools = this.services.tools.start({
       getRunner,
       spaces,
       elasticsearch,
