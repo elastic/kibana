@@ -257,9 +257,9 @@ const styles = {
   }),
   outerWrapperStyles: css({ overflow: 'auto', display: 'flex' }),
   innerWrapperStyles: ({ euiTheme }: UseEuiTheme) =>
-    css({ padding: euiTheme.size.m, margin: 'auto' }),
+    css({ padding: euiTheme?.size.m, margin: 'auto' }),
   popoverErrorStyles: ({ euiTheme }: UseEuiTheme) =>
     css({
-      maxWidth: `calc(${euiTheme.size.xxxl} * 10)`,
+      maxWidth: `calc(${euiTheme?.size.xxxl} * 10)`,
     }),
 };

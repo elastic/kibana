@@ -78,7 +78,7 @@ interface OldFormat {
   };
 }
 
-interface NewFormatExplicitInput {
+export interface NewFormatExplicitInput {
   dataViewId: string;
   fieldName: string;
   title: string;
@@ -120,15 +120,15 @@ export async function migrateAlertPageControlsTo816(storage: Storage, plugins: S
           hideExclude: value.explicitInput.hideExclude ?? true,
           hideSort: value.explicitInput.hideSort ?? true,
           placeholder: value.explicitInput.placeholder ?? '',
-          hideActionBar: value.explicitInput.hideActionBar,
-          hideExists: value.explicitInput.hideExists,
+          hideActionBar: value.explicitInput.hideActionBar ?? false,
+          hideExists: value.explicitInput.hideExists ?? false,
         },
         width: value.width as ControlPanelState['width'],
         dataViewId: value.explicitInput.dataViewId ?? 'security_solution_alerts_dv',
         title: value.explicitInput.title,
         fieldName: value.explicitInput.fieldName,
         selectedOptions: value.explicitInput.selectedOptions,
-        persist: value.explicitInput.persist,
+        persist: value.explicitInput.persist ?? false,
       };
     }
 

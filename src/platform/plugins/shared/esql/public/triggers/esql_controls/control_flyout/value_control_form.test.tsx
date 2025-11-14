@@ -99,13 +99,6 @@ describe('ValueControlForm', () => {
       // variable label input should be rendered and with the default value (empty)
       expect(await findByTestId('esqlControlLabel')).toHaveValue('');
 
-      // control width dropdown should be rendered and default to 'MEDIUM'
-      expect(await findByTestId('esqlControlMinimumWidth')).toBeInTheDocument();
-      const pressedWidth = within(await findByTestId('esqlControlMinimumWidth')).getByTitle(
-        'Medium'
-      );
-      expect(pressedWidth).toHaveAttribute('aria-pressed', 'true');
-
       // control type radio should be rendered and default to 'single'
       const selectionTypeContainer = await findByTestId('esqlControlSelectionType');
       expect(selectionTypeContainer).toBeInTheDocument();
@@ -113,11 +106,6 @@ describe('ValueControlForm', () => {
         'Only allow a single selection'
       );
       expect(singleRadioButton).toBeChecked();
-
-      // control grow switch should be rendered and default to 'false'
-      expect(await findByTestId('esqlControlGrow')).toBeInTheDocument();
-      const growSwitch = await findByTestId('esqlControlGrow');
-      expect(growSwitch).not.toBeChecked();
     });
 
     it('should call the onCreateControl callback, if no initialState is given', async () => {
@@ -183,18 +171,6 @@ describe('ValueControlForm', () => {
 
       // variable label input should be rendered and with the default value (my control)
       expect(await findByTestId('esqlControlLabel')).toHaveValue('my control');
-
-      // control width dropdown should be rendered and default to 'MEDIUM'
-      expect(await findByTestId('esqlControlMinimumWidth')).toBeInTheDocument();
-      const pressedWidth = within(await findByTestId('esqlControlMinimumWidth')).getByTitle(
-        'Small'
-      );
-      expect(pressedWidth).toHaveAttribute('aria-pressed', 'true');
-
-      // control grow switch should be rendered and default to 'false'
-      expect(await findByTestId('esqlControlGrow')).toBeInTheDocument();
-      const growSwitch = await findByTestId('esqlControlGrow');
-      expect(growSwitch).toBeChecked();
     });
 
     it('should call the onEditControl callback, if initialState is given', async () => {

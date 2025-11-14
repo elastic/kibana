@@ -88,13 +88,13 @@ export const useESQLVariables = ({
           })
         );
       }
-    });
 
-    // update the ES|QL query with new variables, if necessary
-    if (pendingQueryUpdate.current) {
-      onUpdateESQLQuery(pendingQueryUpdate.current);
-      pendingQueryUpdate.current = undefined;
-    }
+      // update the ES|QL query with new variables, if necessary
+      if (pendingQueryUpdate.current) {
+        onUpdateESQLQuery(pendingQueryUpdate.current);
+        pendingQueryUpdate.current = undefined;
+      }
+    });
 
     const variableSubscription = controlGroupApi.esqlVariables$.subscribe((newVariables) => {
       // ignore meta data when comparing and storing filters, since we do not use it

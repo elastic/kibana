@@ -161,6 +161,10 @@ describe('embeddable renderer', () => {
         phase$: expect.any(Object),
         hasLockedHoverActions$: expect.any(Object),
         lockHoverActions: expect.any(Function),
+        isCustomizable: true,
+        isDuplicable: true,
+        isExpandable: true,
+        isPinnable: false,
       })
     );
   });
@@ -213,12 +217,14 @@ describe('embeddable renderer', () => {
       />
     );
 
-    await waitFor(() => expect(embeddable.getByTestId('errorMessageMarkdown')).toBeInTheDocument());
+    await waitFor(() =>
+      expect(embeddable.getAllByTestId('errorMessageMarkdown').length).not.toBe(0)
+    );
     expect(onApiAvailable).not.toBeCalled();
     expect(buildEmbeddable).not.toBeCalled();
-    expect(embeddable.getByTestId('errorMessageMarkdown')).toHaveTextContent(
-      'error in buildEmbeddable'
-    );
+    embeddable
+      .getAllByTestId('errorMessageMarkdown')
+      .forEach((element) => expect(element).toHaveTextContent('error in buildEmbeddable'));
   });
 });
 
