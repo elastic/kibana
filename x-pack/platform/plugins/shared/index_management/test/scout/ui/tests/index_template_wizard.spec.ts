@@ -147,7 +147,7 @@ test.describe('Index template wizard - Create', { tag: ['@ess'] }, () => {
 
 test.describe('Index template wizard - Preview template', { tag: ['@ess'] }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
-    // TODO: Create loginAsIndexManagementUser role
+    // await browserAuth.loginWithCustomRole(CUSTOM_ROLES.indexManagement);
     await browserAuth.loginAsAdmin();
     await pageObjects.indexManagement.navigateToIndexManagementTab('templates');
   });
@@ -229,7 +229,7 @@ test.describe('Index template wizard - Preview template', { tag: ['@ess'] }, () 
 
 test.describe('Index template wizard - Mappings step', { tag: ['@ess'] }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects, page }) => {
-    // TODO: Create loginAsIndexManagementUser role
+    // await browserAuth.loginWithCustomRole(CUSTOM_ROLES.indexManagement);
     await browserAuth.loginAsAdmin();
     await pageObjects.indexManagement.navigateToIndexManagementTab('templates');
 
