@@ -148,7 +148,7 @@ apiTest.describe(
       expect(ingestedDocs).toHaveProperty('[0]attributes.status', 'inactive');
     });
 
-    apiTest('should throw error if value and copy_from are missing', async () => {
+    apiTest('should throw error if value and copy_from are missing', async ({ testBed }) => {
       const streamlangDSL: StreamlangDSL = {
         steps: [
           {
@@ -165,7 +165,7 @@ apiTest.describe(
       );
     });
 
-    apiTest('should throw error if value and copy_from are both present', async () => {
+    apiTest('should throw error if value and copy_from are both present', async ({ testBed }) => {
       const streamlangDSL: StreamlangDSL = {
         steps: [
           {
