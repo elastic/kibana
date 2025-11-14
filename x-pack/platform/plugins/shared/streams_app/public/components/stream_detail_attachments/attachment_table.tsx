@@ -8,7 +8,7 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
-import type { SanitizedDashboardAsset } from '@kbn/streams-plugin/server/routes/dashboards/route';
+import type { Attachment } from '@kbn/streams-plugin/server/lib/streams/attachments/types';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
 import { useKibana } from '../../hooks/use_kibana';
@@ -26,10 +26,10 @@ export function AttachmentsTable({
 }: {
   entityId?: string;
   loading: boolean;
-  attachments: SanitizedDashboardAsset[] | undefined;
+  attachments: Attachment[] | undefined;
   compact?: boolean;
-  selectedAttachments?: SanitizedDashboardAsset[];
-  setSelectedAttachments?: (attachments: SanitizedDashboardAsset[]) => void;
+  selectedAttachments?: Attachment[];
+  setSelectedAttachments?: (attachments: Attachment[]) => void;
   dataTestSubj?: string;
 }) {
   const {
@@ -46,7 +46,7 @@ export function AttachmentsTable({
   const { timeState } = useTimefilter();
 
   const dashboardLocator = share.url.locators.get<DashboardLocatorParams>(DASHBOARD_APP_LOCATOR);
-  const columns = useMemo((): Array<EuiBasicTableColumn<SanitizedDashboardAsset>> => {
+  const columns = useMemo((): Array<EuiBasicTableColumn<Attachment>> => {
     return [
       {
         field: 'label',
@@ -105,7 +105,7 @@ export function AttachmentsTable({
                 );
               },
             },
-          ] satisfies Array<EuiBasicTableColumn<SanitizedDashboardAsset>>)
+          ] satisfies Array<EuiBasicTableColumn<Attachment>>)
         : []),
     ];
   }, [
