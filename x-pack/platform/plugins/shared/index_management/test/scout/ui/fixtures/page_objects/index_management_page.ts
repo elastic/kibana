@@ -129,7 +129,7 @@ export class IndexManagement {
 
   async changeMappingsEditorTab(tab: 'fields' | 'advancedOptions' | 'templates') {
     const tabMap = {
-      fields: 'formTab',
+      fields: 'fieldsTab',
       advancedOptions: 'advancedOptionsTab',
       templates: 'templatesTab',
     };

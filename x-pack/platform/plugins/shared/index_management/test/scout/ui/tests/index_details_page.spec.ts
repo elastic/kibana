@@ -34,4 +34,3 @@ test.describe('Index details page', { tag: ['@ess'] }, () => {
     await expect(page.testSubj.locator('indexDetailsBackToIndicesButton')).toBeVisible();
   });
 });
-
