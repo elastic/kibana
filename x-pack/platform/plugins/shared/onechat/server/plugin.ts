@@ -115,7 +115,7 @@ export class OnechatPlugin
     { elasticsearch, security, uiSettings, savedObjects }: CoreStart,
     { inference, spaces }: OnechatStartDependencies
   ): OnechatPluginStart {
-    this.serviceManager.startServices({
+    const startServices = this.serviceManager.startServices({
       logger: this.logger.get('services'),
       security,
       elasticsearch,
@@ -126,20 +126,13 @@ export class OnechatPlugin
       trackingService: this.trackingService,
     });
 
-    const services = this.serviceManager.internalStart;
-    if (!services) {
-      throw new Error('Failed to initialize onechat services');
-    }
+    const { tools, runnerFactory } = startServices;
+    const runner = runnerFactory.getRunner();
 
     return {
       tools: {
-        getRegistry: async ({ request }) => {
-          return services.tools.getRegistry({ request });
-        },
-        execute: async (params) => {
-          const runner = services.runnerFactory.getRunner();
-          return runner.runTool(params);
-        },
+        getRegistry: ({ request }) => tools.getRegistry({ request }),
+        execute: runner.runTool.bind(runner),
       },
     };
   }
