@@ -16,9 +16,7 @@ import { useCreateAttachments } from '../../containers/use_create_attachments';
 
 import { useGetAllCaseConfigurations } from '../../containers/configure/use_get_all_case_configurations';
 
-import { useGetIncidentTypes } from '../connectors/resilient/use_get_incident_types';
-import { useGetSeverity } from '../connectors/resilient/use_get_severity';
-import { useGetIssueTypes } from '../connectors/jira/use_get_issue_types';
+import { useGetFields } from '../connectors/resilient/use_get_fields';
 import { useGetChoices } from '../connectors/servicenow/use_get_choices';
 import { useGetFieldsByIssueType } from '../connectors/jira/use_get_fields_by_issue_type';
 import {
@@ -29,8 +27,7 @@ import {
   sampleConnectorData,
   sampleData,
   sampleTags,
-  useGetIncidentTypesResponse,
-  useGetSeverityResponse,
+  useGetFieldsResponse,
   useGetIssueTypesResponse,
   useGetFieldsByIssueTypeResponse,
   useGetChoicesResponse,
@@ -64,6 +61,7 @@ import { OBSERVABLE_TYPE_HOSTNAME } from '../../../common/constants/observables'
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { useBulkPostObservables } from '../../containers/use_bulk_post_observables';
 import { DEFAULT_FEATURES } from '../../../common/constants';
+import { useGetIssueTypes } from '../connectors/jira/use_get_issue_types';
 
 jest.mock('../../containers/use_post_case');
 jest.mock('../../containers/use_create_attachments');
@@ -72,8 +70,7 @@ jest.mock('../../containers/use_post_push_to_service');
 jest.mock('../../containers/use_get_tags');
 jest.mock('../../containers/configure/use_get_supported_action_connectors');
 jest.mock('../../containers/configure/use_get_all_case_configurations');
-jest.mock('../connectors/resilient/use_get_incident_types');
-jest.mock('../connectors/resilient/use_get_severity');
+jest.mock('../connectors/resilient/use_get_fields');
 jest.mock('../connectors/jira/use_get_issue_types');
 jest.mock('../connectors/jira/use_get_fields_by_issue_type');
 jest.mock('../connectors/jira/use_get_issues');
@@ -90,8 +87,7 @@ const usePostCaseMock = usePostCase as jest.Mock;
 const useCreateAttachmentsMock = useCreateAttachments as jest.Mock;
 const useBulkPostObservablesMock = useBulkPostObservables as jest.Mock;
 const usePostPushToServiceMock = usePostPushToService as jest.Mock;
-const useGetIncidentTypesMock = useGetIncidentTypes as jest.Mock;
-const useGetSeverityMock = useGetSeverity as jest.Mock;
+const useGetFieldsMock = useGetFields as jest.Mock;
 const useGetIssueTypesMock = useGetIssueTypes as jest.Mock;
 const useGetFieldsByIssueTypeMock = useGetFieldsByIssueType as jest.Mock;
 const useGetChoicesMock = useGetChoices as jest.Mock;
@@ -218,8 +214,7 @@ describe('Create case', () => {
     usePostPushToServiceMock.mockImplementation(() => defaultPostPushToService);
     useGetConnectorsMock.mockReturnValue(sampleConnectorData);
     useGetAllCaseConfigurationsMock.mockImplementation(() => useGetAllCaseConfigurationsResponse);
-    useGetIncidentTypesMock.mockReturnValue(useGetIncidentTypesResponse);
-    useGetSeverityMock.mockReturnValue(useGetSeverityResponse);
+    useGetFieldsMock.mockReturnValue(useGetFieldsResponse);
     useGetIssueTypesMock.mockReturnValue(useGetIssueTypesResponse);
     useGetFieldsByIssueTypeMock.mockReturnValue(useGetFieldsByIssueTypeResponse);
     useGetChoicesMock.mockReturnValue(useGetChoicesResponse);

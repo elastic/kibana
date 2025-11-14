@@ -9,8 +9,6 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 
 import { connector } from '../mock';
-import { useGetIncidentTypes } from './use_get_incident_types';
-import { useGetSeverity } from './use_get_severity';
 import { useGetFields } from './use_get_fields';
 import FieldsPreview from './case_fields_preview';
 
@@ -19,53 +17,11 @@ import { tableMatchesExpectedContent } from '../../../common/test_utils';
 import { resilientFields } from './mocks';
 
 jest.mock('../../../common/lib/kibana');
-jest.mock('./use_get_incident_types');
-jest.mock('./use_get_severity');
 jest.mock('./use_get_fields');
 
-const useGetIncidentTypesMock = useGetIncidentTypes as jest.Mock;
-const useGetSeverityMock = useGetSeverity as jest.Mock;
 const useGetFieldsMock = useGetFields as jest.Mock;
 
 describe('Resilient Fields: Preview', () => {
-  const useGetIncidentTypesResponse = {
-    isLoading: false,
-    isFetching: false,
-    data: {
-      data: [
-        {
-          id: 19,
-          name: 'Malware',
-        },
-        {
-          id: 21,
-          name: 'Denial of Service',
-        },
-      ],
-    },
-  };
-
-  const useGetSeverityResponse = {
-    isLoading: false,
-    isFetching: false,
-    data: {
-      data: [
-        {
-          id: 4,
-          name: 'Low',
-        },
-        {
-          id: 5,
-          name: 'Medium',
-        },
-        {
-          id: 6,
-          name: 'High',
-        },
-      ],
-    },
-  };
-
   const useGetFieldsResponse = {
     isLoading: false,
     isFetching: false,
@@ -96,8 +52,6 @@ describe('Resilient Fields: Preview', () => {
   };
 
   beforeEach(() => {
-    useGetIncidentTypesMock.mockReturnValue(useGetIncidentTypesResponse);
-    useGetSeverityMock.mockReturnValue(useGetSeverityResponse);
     useGetFieldsMock.mockReturnValue(useGetFieldsResponse);
     jest.clearAllMocks();
   });

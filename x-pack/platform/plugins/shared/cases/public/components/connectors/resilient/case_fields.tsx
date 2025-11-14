@@ -16,8 +16,7 @@ import {
 import { SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { useKibana } from '../../../common/lib/kibana';
 import type { ConnectorFieldsProps } from '../types';
-import { useGetIncidentTypes } from './use_get_incident_types';
-import { useGetSeverity } from './use_get_severity';
+import { useGetFields } from './use_get_fields';
 
 import * as i18n from './translations';
 import { generateJSONValidator } from '../validate_json';
@@ -27,27 +26,41 @@ const ResilientFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = 
   const { http } = useKibana().services;
 
   const {
-    isLoading: isLoadingIncidentTypesData,
-    isFetching: isFetchingIncidentTypesData,
-    data: allIncidentTypesData,
-  } = useGetIncidentTypes({
+    isLoading: isLoadingFields,
+    isFetching: isFetchingFields,
+    data: fieldsData,
+  } = useGetFields({
     http,
     connector,
   });
 
-  const {
-    isLoading: isLoadingSeverityData,
-    isFetching: isFetchingSeverityData,
-    data: severityData,
-  } = useGetSeverity({
-    http,
-    connector,
-  });
+  const allIncidentTypes = useMemo<EuiComboBoxOptionOption<string>[]>(() => {
+    const incidentTypesField = (
+      fieldsData?.data?.filter((field) => field.name === 'incident_type_ids') || []
+    ).pop();
+    if (incidentTypesField == null || !Array.isArray(incidentTypesField.values)) {
+      return [];
+    }
+    return incidentTypesField.values.map((choice) => ({
+      id: choice.value.toString(),
+      label: choice.label,
+    }));
+  }, [fieldsData]);
 
-  const allIncidentTypes = allIncidentTypesData?.data;
-  const severity = severityData?.data;
-  const isLoadingIncidentTypes = isLoadingIncidentTypesData || isFetchingIncidentTypesData;
-  const isLoadingSeverity = isLoadingSeverityData || isFetchingSeverityData;
+  const severity = useMemo<EuiSelectOption[]>(() => {
+    const severityField = (
+      fieldsData?.data?.filter((field) => field.name === 'severity_code') || []
+    ).pop();
+    if (severityField == null || !Array.isArray(severityField.values)) {
+      return [];
+    }
+    return severityField.values.map((choice) => ({
+      value: choice.value.toString(),
+      text: choice.label,
+    }));
+  }, [fieldsData]);
+
+  const isLoading = isLoadingFields || isFetchingFields;
 
   const additionalFieldsProps = useMemo(() => {
     return {
@@ -63,26 +76,6 @@ const ResilientFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = 
     };
   }, [connector]);
 
-  const severitySelectOptions: EuiSelectOption[] = useMemo(
-    () =>
-      (severity ?? []).map((s) => ({
-        value: s.id.toString(),
-        text: s.name,
-      })),
-    [severity]
-  );
-
-  const incidentTypesComboBoxOptions: Array<EuiComboBoxOptionOption<string>> = useMemo(
-    () =>
-      allIncidentTypes
-        ? allIncidentTypes.map((type: { id: number; name: string }) => ({
-            label: type.name,
-            value: type.id.toString(),
-          }))
-        : [],
-    [allIncidentTypes]
-  );
-
   return (
     <span data-test-subj={'connector-fields-resilient'}>
       <UseField<string[]> path="fields.incidentTypes" config={{ defaultValue: [] }}>
@@ -90,17 +83,17 @@ const ResilientFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = 
           const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
           const onChangeComboBox = (changedOptions: Array<EuiComboBoxOptionOption<string>>) => {
-            field.setValue(changedOptions.map((option) => option.value as string));
+            field.setValue(changedOptions.map((option) => option.id as string));
           };
 
           const selectedOptions =
             field.value && allIncidentTypes?.length
-              ? field.value.map((incidentType) => ({
-                  value: incidentType,
-                  label:
-                    allIncidentTypes.find((type) => incidentType === type.id.toString())?.name ??
-                    '',
-                }))
+              ? field.value.map((incidentType) => {
+                  const matchedOption = allIncidentTypes.find(
+                    (option) => option.id === incidentType
+                  );
+                  return matchedOption ?? { label: incidentType, id: incidentType };
+                })
               : [];
 
           return (
@@ -116,10 +109,10 @@ const ResilientFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = 
                 data-test-subj="incidentTypeComboBox"
                 fullWidth
                 isClearable={true}
-                isDisabled={isLoadingIncidentTypes}
-                isLoading={isLoadingIncidentTypes}
+                isDisabled={isLoading}
+                isLoading={isLoading}
                 onChange={onChangeComboBox}
-                options={incidentTypesComboBoxOptions}
+                options={allIncidentTypes}
                 placeholder={i18n.INCIDENT_TYPES_PLACEHOLDER}
                 selectedOptions={selectedOptions}
               />
@@ -137,11 +130,11 @@ const ResilientFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = 
         componentProps={{
           euiFieldProps: {
             'data-test-subj': 'severitySelect',
-            options: severitySelectOptions,
+            options: severity,
             hasNoInitialSelection: true,
             fullWidth: true,
-            disabled: isLoadingSeverity,
-            isLoading: isLoadingSeverity,
+            disabled: isLoading,
+            isLoading,
           },
         }}
       />

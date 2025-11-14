@@ -9,10 +9,8 @@ import React from 'react';
 import { waitFor, screen, within } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 
-import { connector, resilientIncidentTypes, resilientSeverity } from '../mock';
+import { connector } from '../mock';
 import { resilientFields } from './mocks';
-import { useGetIncidentTypes } from './use_get_incident_types';
-import { useGetSeverity } from './use_get_severity';
 import { useGetFields } from './use_get_fields';
 import Fields from './case_fields';
 
@@ -20,31 +18,11 @@ import { renderWithTestingProviders } from '../../../common/mock';
 import { MockFormWrapperComponent } from '../test_utils';
 
 jest.mock('../../../common/lib/kibana');
-jest.mock('./use_get_incident_types');
-jest.mock('./use_get_severity');
 jest.mock('./use_get_fields');
 
-const useGetIncidentTypesMock = useGetIncidentTypes as jest.Mock;
-const useGetSeverityMock = useGetSeverity as jest.Mock;
 const useGetFieldsMock = useGetFields as jest.Mock;
 
 describe('ResilientParamsFields renders', () => {
-  const useGetIncidentTypesResponse = {
-    isLoading: false,
-    isFetching: false,
-    data: {
-      data: resilientIncidentTypes,
-    },
-  };
-
-  const useGetSeverityResponse = {
-    isLoading: false,
-    isFetching: false,
-    data: {
-      data: resilientSeverity,
-    },
-  };
-
   const useGetFieldsResponse = {
     isLoading: false,
     isFetching: false,
@@ -87,8 +65,6 @@ describe('ResilientParamsFields renders', () => {
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
     user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
 
-    useGetIncidentTypesMock.mockReturnValue(useGetIncidentTypesResponse);
-    useGetSeverityMock.mockReturnValue(useGetSeverityResponse);
     useGetFieldsMock.mockReturnValue(useGetFieldsResponse);
     jest.clearAllMocks();
   });
@@ -105,8 +81,8 @@ describe('ResilientParamsFields renders', () => {
     expect(screen.getByTestId('resilientAdditionalFieldsComboBox')).toBeInTheDocument();
   });
 
-  it('disabled the fields when loading incident types', async () => {
-    useGetIncidentTypesMock.mockReturnValue({ ...useGetIncidentTypesResponse, isLoading: true });
+  it('disables the fields when loading field data', async () => {
+    useGetFieldsMock.mockReturnValue({ ...useGetFieldsResponse, isLoading: true });
 
     renderWithTestingProviders(
       <MockFormWrapperComponent fields={fields}>
@@ -115,20 +91,6 @@ describe('ResilientParamsFields renders', () => {
     );
 
     expect(within(screen.getByTestId('incidentTypeComboBox')).getByRole('combobox')).toBeDisabled();
-  });
-
-  it('disabled the fields when loading severity', () => {
-    useGetSeverityMock.mockReturnValue({
-      ...useGetSeverityResponse,
-      isLoading: true,
-    });
-
-    renderWithTestingProviders(
-      <MockFormWrapperComponent fields={fields}>
-        <Fields connector={connector} />
-      </MockFormWrapperComponent>
-    );
-
     expect(screen.getByTestId('severitySelect')).toBeDisabled();
   });
 

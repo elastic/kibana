@@ -9,8 +9,6 @@ import React, { useMemo } from 'react';
 
 import { useKibana } from '../../../common/lib/kibana';
 import type { ConnectorFieldsPreviewProps } from '../types';
-import { useGetIncidentTypes } from './use_get_incident_types';
-import { useGetSeverity } from './use_get_severity';
 
 import * as i18n from './translations';
 import type { ResilientFieldsType } from '../../../../common/types/domain';
@@ -27,24 +25,6 @@ const ResilientFieldsComponent: React.FunctionComponent<
   const { http } = useKibana().services;
 
   const {
-    isLoading: isLoadingIncidentTypesData,
-    isFetching: isFetchingIncidentTypesData,
-    data: allIncidentTypesData,
-  } = useGetIncidentTypes({
-    http,
-    connector,
-  });
-
-  const {
-    isLoading: isLoadingSeverityData,
-    isFetching: isFetchingSeverityData,
-    data: severityData,
-  } = useGetSeverity({
-    http,
-    connector,
-  });
-
-  const {
     isLoading: isLoadingFields,
     isFetching: isFetchingFields,
     data: fieldsData,
@@ -59,13 +39,29 @@ const ResilientFieldsComponent: React.FunctionComponent<
     }, {} as Record<string, ResilientFieldMetadata>);
   }, [fieldsData]);
 
-  const isLoadingIncidentTypes = isLoadingIncidentTypesData || isFetchingIncidentTypesData;
-  const isLoadingSeverity = isLoadingSeverityData || isFetchingSeverityData;
-  const isLoadingFieldsData = isLoadingFields || isFetchingFields;
-  const isLoading = isLoadingIncidentTypes || isLoadingSeverity || isLoadingFieldsData;
+  const allIncidentTypes = useMemo(() => {
+    const incidentTypesField = (
+      fieldsData?.data?.filter((field) => field.name === 'incident_type_ids') || []
+    ).pop();
+    if (incidentTypesField == null || !Array.isArray(incidentTypesField.values)) {
+      return [];
+    } else {
+      return incidentTypesField.values;
+    }
+  }, [fieldsData]);
 
-  const allIncidentTypes = allIncidentTypesData?.data;
-  const severity = severityData?.data;
+  const severity = useMemo(() => {
+    const severityField = (
+      fieldsData?.data?.filter((field) => field.name === 'severity_code') || []
+    ).pop();
+    if (severityField == null || !Array.isArray(severityField.values)) {
+      return [];
+    } else {
+      return severityField.values;
+    }
+  }, [fieldsData]);
+
+  const isLoading = isLoadingFields || isFetchingFields;
 
   const listItems = useMemo(() => {
     let additionalFieldsParsed: Record<string, string> = {};
@@ -82,8 +78,8 @@ const ResilientFieldsComponent: React.FunctionComponent<
             {
               title: i18n.INCIDENT_TYPES_LABEL,
               description: (allIncidentTypes ?? [])
-                .filter((type) => incidentTypes.includes(type.id.toString()))
-                .map((type) => type.name)
+                .filter((type) => incidentTypes.includes(type.value.toString()))
+                .map((type) => type.label)
                 .join(', '),
             },
           ]
@@ -93,8 +89,8 @@ const ResilientFieldsComponent: React.FunctionComponent<
             {
               title: i18n.SEVERITY_LABEL,
               description:
-                severity?.find((severityObj) => severityObj.id.toString() === severityCode)?.name ??
-                '',
+                severity?.find((severityObj) => severityObj.value.toString() === severityCode)
+                  ?.label ?? '',
             },
           ]
         : []),
