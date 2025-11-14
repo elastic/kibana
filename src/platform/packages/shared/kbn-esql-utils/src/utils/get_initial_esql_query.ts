@@ -34,13 +34,6 @@ const getFinalWhereClause = (timeFilter?: string, queryFilter?: string) => {
   return timeFilter || queryFilter ? ` | WHERE ${timeFilter || queryFilter}` : '';
 };
 
-const getSourceCommand = (dataView: DataView) => {
-  if (dataView.isTSDBMode()) {
-    return 'TS';
-  }
-  return 'FROM';
-};
-
 /**
  * Builds an ES|QL query for the provided dataView
  * If there is @timestamp field in the index, we don't add the WHERE clause
@@ -63,7 +56,8 @@ export function getInitialESQLQuery(
   const filterBySearchText = getFilterBySearchText(query);
 
   const whereClause = getFinalWhereClause(filterByTimeParams, filterBySearchText);
-  const sourceCommand = getSourceCommand(dataView);
+  const sourceCommand = dataView.isTSDBMode() ? 'TS' : 'FROM';
+
   return `${sourceCommand} ${dataView.getIndexPattern()}${whereClause}${
     removeLimit ? '' : ' | LIMIT 10'
   }`;
