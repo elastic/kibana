@@ -30,7 +30,6 @@
     "@kbn/es-query",
     "@kbn/zod",
     "@kbn/share-plugin",
-    "@kbn/shared-ux-link-redirect-app",
     "@kbn/typed-react-router-config",
     "@kbn/i18n",
     "@kbn/code-editor",
@@ -50,7 +49,6 @@
     "@kbn/index-lifecycle-management-common-shared",
     "@kbn/charts-theme",
     "@kbn/index-management-shared-types",
-    "@kbn/traced-es-client",
     "@kbn/discover-plugin",
     "@kbn/content-packs-schema",
     "@kbn/dashboard-plugin",
@@ -92,5 +90,7 @@
     "@kbn/spaces-plugin",
     "@kbn/unified-data-table",
     "@kbn/console-plugin",
+    "@kbn/es-types",
+    "@kbn/esql-utils",
   ]
 }
