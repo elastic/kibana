@@ -43,8 +43,6 @@ export const URLVoidConnector: ConnectorSpec = {
     },
   ],
 
-  schema: z.object({}),
-
   actions: {
     scanDomain: {
       isTool: true,

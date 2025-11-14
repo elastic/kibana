@@ -52,7 +52,11 @@ describe('getAxiosInstance', () => {
       logger,
     });
 
-    expect(result).toBeUndefined();
+    expect(result).not.toBeUndefined();
+    expect(result!.defaults.auth).toBeUndefined();
+
+    // @ts-expect-error
+    expect(result!.interceptors.request.handlers.length).toBe(0);
   });
 
   test('throws error when auth type is not supported', async () => {

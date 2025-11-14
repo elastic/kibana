@@ -42,8 +42,6 @@ export const ShodanConnector: ConnectorSpec = {
     },
   ],
 
-  schema: z.object({}),
-
   actions: {
     searchHosts: {
       isTool: true,

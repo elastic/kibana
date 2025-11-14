@@ -14,7 +14,7 @@ import type { AuthTypeSpec } from '../connector_spec';
 
 const authSchema = z.object({
   // these should default to being registered as a secret field so we don't explicitly define it here
-  headers: z.record(z.string(), z.string()).meta({}).describe('Custom Headers'),
+  headers: z.record(z.string(), z.string()).meta({ sensitive: true }).describe('Custom Headers'),
 });
 
 type AuthSchemaType = z.infer<typeof authSchema>;
@@ -25,7 +25,6 @@ type AuthSchemaType = z.infer<typeof authSchema>;
  */
 export const HeaderAuth: AuthTypeSpec<AuthSchemaType> = {
   id: 'header',
-  name: 'Header Based Authentication',
   schema: authSchema,
   configure: (axiosInstance: AxiosInstance, secret: AuthSchemaType): AxiosInstance => {
     // set global defaults
@@ -36,8 +35,3 @@ export const HeaderAuth: AuthTypeSpec<AuthSchemaType> = {
     return axiosInstance;
   },
 };
-
-// export const HeaderAuthSchema = z.object({
-//   method: z.literal('headers'),
-//   headers: z.record(z.string(), z.string()).describe('Custom Headers'),
-// });

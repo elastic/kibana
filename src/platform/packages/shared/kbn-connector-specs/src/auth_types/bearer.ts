@@ -14,7 +14,7 @@ import type { AuthTypeSpec } from '../connector_spec';
 
 const authSchema = z.object({
   // these should default to being registered as a secret field so we don't explicitly define it here
-  token: z.string().meta({}).describe('Bearer Token'),
+  token: z.string().meta({ sensitive: true }).describe('Bearer Token'),
 });
 
 type AuthSchemaType = z.infer<typeof authSchema>;
@@ -25,7 +25,6 @@ type AuthSchemaType = z.infer<typeof authSchema>;
  */
 export const BearerAuth: AuthTypeSpec<AuthSchemaType> = {
   id: 'bearer',
-  name: 'Bearer Token Authentication',
   schema: authSchema,
   configure: (axiosInstance: AxiosInstance, secret: AuthSchemaType): AxiosInstance => {
     // set global defaults
@@ -34,8 +33,3 @@ export const BearerAuth: AuthTypeSpec<AuthSchemaType> = {
     return axiosInstance;
   },
 };
-
-// export const BearerAuthSchema = z.object({
-//   method: z.literal('bearer'),
-//   token: withUIMeta(z.string(), { sensitive: true }).describe('Bearer Token'),
-// });

@@ -39,9 +39,9 @@ export const getAxiosInstanceWithAuth = async ({
 
     const authTypeId = (validatedSecrets as { authType?: string }).authType || 'none';
 
-    // what do we return if no authentication is needed?
+    // return empty axios instance if no auth
     if (authTypeId === 'none') {
-      return undefined;
+      return axios.create();
     }
 
     // throws if auth type is not found

@@ -42,8 +42,6 @@ export const GreyNoiseConnector: ConnectorSpec = {
     },
   ],
 
-  schema: z.object({}),
-
   actions: {
     getIpContext: {
       isTool: true,

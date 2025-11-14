@@ -42,8 +42,6 @@ export const AlienVaultOTXConnector: ConnectorSpec = {
     },
   ],
 
-  schema: z.object({}),
-
   actions: {
     getIndicator: {
       isTool: true,

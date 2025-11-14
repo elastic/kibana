@@ -42,8 +42,6 @@ export const AbuseIPDBConnector: ConnectorSpec = {
     },
   ],
 
-  schema: z.object({}),
-
   actions: {
     checkIp: {
       isTool: true,

@@ -14,8 +14,8 @@ import type { AuthTypeSpec } from '../connector_spec';
 
 const authSchema = z.object({
   // these should default to being registered as a secret field so we don't explicitly define it here
-  username: z.string().meta({}).describe('Username'),
-  password: z.string().meta({}).describe('Password'),
+  username: z.string().meta({ sensitive: true }).describe('Username'),
+  password: z.string().meta({ sensitive: true }).describe('Password'),
 });
 
 type AuthSchemaType = z.infer<typeof authSchema>;
@@ -26,7 +26,6 @@ type AuthSchemaType = z.infer<typeof authSchema>;
  */
 export const BasicAuth: AuthTypeSpec<AuthSchemaType> = {
   id: 'basic',
-  name: 'HTTP Basic Authentication',
   schema: authSchema,
   configure: (axiosInstance: AxiosInstance, secret: AuthSchemaType): AxiosInstance => {
     // set global defaults
@@ -38,11 +37,3 @@ export const BasicAuth: AuthTypeSpec<AuthSchemaType> = {
     return axiosInstance;
   },
 };
-
-// export const BasicAuthSchema = z.object({
-//   method: z.literal('basic'),
-//   credentials: z.object({
-//     username: z.string().describe('Username'),
-//     password: withUIMeta(z.string(), { sensitive: true }).describe('Password'),
-//   }),
-// });

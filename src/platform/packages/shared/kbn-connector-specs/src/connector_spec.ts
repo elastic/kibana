@@ -78,7 +78,6 @@ export interface ConnectorMetadata {
 
 export interface AuthTypeSpec<T extends Record<string, unknown>> {
   id: string;
-  name: string;
   schema: z.ZodObject<Record<string, z.ZodType>>;
   configure: (axiosInstance: AxiosInstance, secret: T) => AxiosInstance;
 }
@@ -228,7 +227,7 @@ export interface ConnectorSpec {
 
   // Single unified schema for all connector fields (config + secrets)
   // Mark sensitive fields with withUIMeta({ sensitive: true })
-  schema: z.ZodSchema;
+  schema?: z.ZodSchema;
 
   validateUrls?: {
     fields?: string[];

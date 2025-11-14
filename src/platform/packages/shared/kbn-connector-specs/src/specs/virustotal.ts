@@ -44,8 +44,6 @@ export const VirusTotalConnector: ConnectorSpec = {
     },
   ],
 
-  schema: z.object({}),
-
   actions: {
     scanFileHash: {
       isTool: true,
