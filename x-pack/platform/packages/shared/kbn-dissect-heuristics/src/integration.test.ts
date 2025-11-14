@@ -20,9 +20,9 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
       const result = extractDissectPatternDangerouslySlow(logs);
 
       expect(result.pattern).toBe(
-        '%{field_1} - %{field_2} [%{field_3}/%{field_4}/%{field_5}] "%{field_6} /%{field_7}/%{field_8}/%{field_9}" %{field_10}'
+        '%{field_1} - %{field_2} [%{field_3}/%{field_4}/%{field_5}] "%{field_6} /%{field_7}/%{field_8}" %{field_9}'
       );
-      expect(result.fields).toHaveLength(10);
+      expect(result.fields).toHaveLength(9);
     });
 
     it('extracts pattern from Syslog format', () => {
@@ -35,9 +35,9 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
       const result = extractDissectPatternDangerouslySlow(logs);
 
       expect(result.pattern).toBe(
-        '%{field_1} %{field_2} %{field_3} %{field_4} %{field_5}[%{field_6}]: %{} %{field_8} %{field_9}'
+        '%{field_1} %{field_2} %{field_3} %{field_4} %{field_5}[%{field_6}]: %{field_7} %{field_8}'
       );
-      expect(result.fields).toHaveLength(9);
+      expect(result.fields).toHaveLength(8);
     });
 
     it('extracts pattern from JSON-like logs', () => {
@@ -125,7 +125,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
       const result = extractDissectPatternDangerouslySlow(logs);
 
       expect(result.pattern).toBe(
-        '%{field_1} %{field_2} %{field_3->} - - [%{field_4} %{field_5} %{field_6->}] %{field_7->} %{field_8}'
+        '%{field_1} %{field_2->} - - [%{field_3} %{field_4} %{field_5} %{field_6->}] %{field_7->} %{field_8}'
       );
       expect(result.fields).toHaveLength(8);
     });
@@ -214,9 +214,9 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
       const result = extractDissectPatternDangerouslySlow(logs);
 
       expect(result.pattern).toBe(
-        '%{field_1}-%{field_2}-%{field_3} [%{field_4}] (%{field_5}) - {%{field_6}-%{field_7}: %{field_8}} %{field_9}'
+        '%{field_1}-%{field_2}-%{field_3} [%{field_4}] (%{field_5}) - {%{field_6}: %{field_7}} %{field_8}'
       );
-      expect(result.fields).toHaveLength(9);
+      expect(result.fields).toHaveLength(8);
     });
 
     it('handles messages with URLs', () => {
@@ -366,9 +366,9 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
       const result = extractDissectPatternDangerouslySlow(logs);
 
       expect(result.pattern).toBe(
-        '%{field_1} - %{field_2} [%{field_3}/%{field_4}/%{field_5} +%{field_6}] "%{field_7} /%{field_8}/%{field_9}/%{field_10}/%{field_11}" %{field_12}://%{field_13}/%{field_14}/%{field_15}" %{field_16}" "%{field_17}/'
+        '%{field_1} - %{field_2} [%{field_3}/%{field_4}/%{field_5} +%{field_6}] "%{field_7} /%{field_8}/%{field_9}/%{field_10}" %{field_11}://%{field_12}" "%{field_13}/%{field_14}'
       );
-      expect(result.fields).toHaveLength(17);
+      expect(result.fields).toHaveLength(14);
     });
 
     it('handles application logs with stack traces', () => {
@@ -381,9 +381,9 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
       const result = extractDissectPatternDangerouslySlow(logs);
 
       expect(result.pattern).toBe(
-        '[%{field_1}-%{field_2}-%{field_3} %{field_4}] %{} %{field_6}: %{} %{field_8} %{field_9} %{field_10}'
+        '[%{field_1}-%{field_2}-%{field_3} %{field_4}] %{field_5}: %{field_6} %{field_7} %{field_8}'
       );
-      expect(result.fields).toHaveLength(10);
+      expect(result.fields).toHaveLength(8);
     });
 
     it('handles Kubernetes container logs', () => {
@@ -411,9 +411,9 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
       const result = extractDissectPatternDangerouslySlow(logs);
 
       expect(result.pattern).toBe(
-        '%{field_1} %{field_2}: %{} %{field_4} | %{field_5} %{field_6} %{field_7}: %{} %{field_9} | %{field_10} %{field_11} %{field_12}: %{} %{field_14} | %{field_15} %{field_16} %{field_17}: %{} %{field_19}'
+        '%{field_1} %{field_2}: %{field_3} | %{field_4}: %{field_5} | %{field_6}: %{field_7} | %{field_8}: %{field_9}'
       );
-      expect(result.fields).toHaveLength(19);
+      expect(result.fields).toHaveLength(9);
     });
 
     it('handles custom application logs with key-value pairs', () => {
@@ -574,9 +574,10 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
       // These messages have very high structural variability (different timestamps,
       // hostnames, separators, processes, etc.). The heuristic should use space-based
       // extraction as a fallback to capture the structured fields.
+      // After normalization: correctly detects '-' and ':' as delimiters
 
       expect(result.pattern).toBe(
-        '%{} %{field_2} %{field_3} %{field_4} %{field_5} %{field_6} %{field_7} %{field_8} %{field_9} %{field_10} %{field_11} %{field_12} %{field_13}'
+        '%{}- %{field_2} %{field_3} %{field_4} %{field_5} %{field_6} %{field_7} %{field_8} %{field_9}: %{field_10} %{field_11} %{field_12} %{field_13}'
       );
       expect(result.fields.length).toBe(13);
     });
@@ -701,8 +702,9 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
         '- 1763058795 2005.11.09 en257 Nov 9 12:01:01 en257/en257 crond(pam_unix)[8950]: session closed for user root',
       ];
       const result = extractDissectPatternDangerouslySlow(logs);
+      // After normalization: correctly detects '-' and ':' as delimiters
       expect(result.pattern).toBe(
-        '%{} %{field_2} %{field_3} %{field_4} %{field_5} %{field_6} %{field_7} %{field_8} %{field_9} %{field_10} %{field_11} %{field_12} %{field_13}'
+        '%{}- %{field_2} %{field_3} %{field_4} %{field_5} %{field_6} %{field_7} %{field_8} %{field_9}: %{field_10} %{field_11} %{field_12} %{field_13}'
       );
       expect(result.fields.length).toBe(13);
     });
@@ -814,6 +816,118 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
       expect(result.pattern).toBe(
         '[%{field_1} %{field_2}] %{field_3} - %{field_4} %{field_5} %{field_6} %{field_7} %{field_8} %{field_9}'
       );
+    });
+
+    it('handles this other case', () => {
+      const logs = [
+        'Nov 13 20:10:41 combo sshd(pam_unix)[11741]: authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=202-132-40-29.adsl.ttn.net  user=root',
+        'Nov 13 20:10:39 combo su(pam_unix)[10583]: session closed for user news',
+        'Nov 13 20:10:39 combo logrotate: ALERT exited abnormally with [1]',
+        'Nov 13 20:10:37 combo sshd(pam_unix)[8113]: session closed for user test',
+        'Nov 13 20:10:37 combo sshd(pam_unix)[8114]: session closed for user test',
+        'Nov 13 20:10:37 combo sshd(pam_unix)[8117]: session opened for user test by (uid=509)',
+        'Nov 13 20:10:31 combo sshd(pam_unix)[4053]: authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=68.143.156.89.nw.nuvox.net  user=root',
+        'Nov 13 20:10:31 combo sshd(pam_unix)[4052]: authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=68.143.156.89.nw.nuvox.net  user=root',
+        'Nov 13 20:10:28 combo sshd(pam_unix)[1337]: authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=211.137.205.253  user=root',
+        'Nov 13 20:10:27 combo gdm(pam_unix)[2803]: authentication failure; logname= uid=0 euid=0 tty=:0 ruser= rhost=',
+        "Nov 13 20:10:27 combo gdm-binary[2803]: Couldn't authenticate user",
+        'Nov 13 20:10:26 combo su(pam_unix)[32608]: session opened for user news by (uid=0)',
+        'Nov 13 20:10:26 combo su(pam_unix)[32237]: session closed for user cyrus',
+        'Nov 13 20:10:26 combo sshd(pam_unix)[31850]: authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=82.77.200.128  user=root',
+        'Nov 13 20:10:26 combo sshd(pam_unix)[31854]: authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=82.77.200.128  user=root',
+        'Nov 13 20:10:26 combo sshd(pam_unix)[31855]: authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=82.77.200.128  user=root',
+        'Nov 13 20:10:24 combo sshd(pam_unix)[30737]: authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=211.214.161.141  user=root',
+        'Nov 13 20:10:24 combo sshd(pam_unix)[30674]: authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=150.183.249.110  user=root',
+        'Nov 13 20:10:24 combo sshd(pam_unix)[30680]: authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=150.183.249.110  user=root',
+        'Nov 13 20:10:24 combo sshd(pam_unix)[30682]: authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=150.183.249.110  user=root',
+        'Nov 13 20:10:24 combo sshd(pam_unix)[30686]: authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=150.183.249.110  user=root',
+        'Nov 13 20:10:24 combo sshd(pam_unix)[30640]: authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=150.183.249.110  user=root',
+        'Nov 13 20:10:24 combo sshd(pam_unix)[30645]: authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=150.183.249.110  user=root',
+        'Nov 13 20:10:24 combo sshd(pam_unix)[30658]: authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=150.183.249.110  user=root',
+        'Nov 13 20:10:24 combo sshd(pam_unix)[30662]: authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=150.183.249.110  user=root',
+        'Nov 13 20:10:24 combo sshd(pam_unix)[30618]: authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=150.183.249.110  user=root',
+        'Nov 13 20:10:24 combo sshd(pam_unix)[30624]: authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=150.183.249.110  user=root',
+        'Nov 13 20:10:24 combo sshd(pam_unix)[30625]: authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=150.183.249.110  user=root',
+        'Nov 13 20:10:24 combo sshd(pam_unix)[30632]: authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=150.183.249.110  user=root',
+        'Nov 13 20:10:24 combo sshd(pam_unix)[30634]: authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=150.183.249.110  user=root',
+        'Nov 13 20:10:24 combo sshd(pam_unix)[30584]: authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=150.183.249.110  user=root',
+        'Nov 13 20:10:24 combo sshd(pam_unix)[30585]: authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=150.183.249.110  user=root',
+        'Nov 13 20:10:24 combo sshd(pam_unix)[30592]: authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=150.183.249.110  user=root',
+        'Nov 13 20:10:24 combo sshd(pam_unix)[30595]: authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=150.183.249.110  user=root',
+        'Nov 13 20:10:24 combo sshd(pam_unix)[30598]: authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=150.183.249.110  user=root',
+        'Nov 13 20:10:24 combo sshd(pam_unix)[30558]: authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=150.183.249.110  user=root',
+        'Nov 13 20:10:24 combo sshd(pam_unix)[30560]: authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=150.183.249.110  user=root',
+        'Nov 13 20:10:24 combo sshd(pam_unix)[30566]: authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=150.183.249.110  user=root',
+        'Nov 13 20:10:24 combo sshd(pam_unix)[30570]: authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=150.183.249.110  user=root',
+        'Nov 13 20:10:24 combo sshd(pam_unix)[30572]: authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=150.183.249.110  user=root',
+        'Nov 13 20:10:24 combo sshd(pam_unix)[30530]: authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=150.183.249.110  user=root',
+        'Nov 13 20:10:24 combo sshd(pam_unix)[30535]: authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=150.183.249.110  user=root',
+        'Nov 13 20:10:24 combo sshd(pam_unix)[30540]: authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=150.183.249.110  user=root',
+        'Nov 13 20:10:24 combo sshd(pam_unix)[30542]: authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=150.183.249.110  user=root',
+        'Nov 13 20:10:24 combo sshd(pam_unix)[30548]: authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=150.183.249.110  user=root',
+        'Nov 13 20:10:23 combo ftpd[30293]: connection from 220.94.205.45 () at Sun Jul 10 13:17:22 2005',
+        'Nov 13 20:10:23 combo ftpd[30280]: connection from 220.94.205.45 () at Sun Jul 10 13:17:22 2005',
+        'Nov 13 20:10:23 combo ftpd[30282]: connection from 220.94.205.45 () at Sun Jul 10 13:17:22 2005',
+        'Nov 13 20:10:23 combo ftpd[30284]: connection from 220.94.205.45 () at Sun Jul 10 13:17:22 2005',
+        'Nov 13 20:10:23 combo ftpd[30294]: connection from 220.94.205.45 () at Sun Jul 10 13:17:22 2005',
+        'Nov 13 20:10:23 combo ftpd[30296]: connection from 220.94.205.45 () at Sun Jul 10 13:17:22 2005',
+        'Nov 13 20:10:23 combo ftpd[30297]: connection from 220.94.205.45 () at Sun Jul 10 13:17:22 2005',
+        'Nov 13 20:10:22 combo ftpd[29730]: connection from 82.83.227.67 (dsl-082-083-227-067.arcor-ip.net) at Sun Jul 10 07:24:34 2005',
+        'Nov 13 20:10:22 combo ftpd[29731]: connection from 82.83.227.67 (dsl-082-083-227-067.arcor-ip.net) at Sun Jul 10 07:24:34 2005',
+        'Nov 13 20:10:22 combo ftpd[29732]: connection from 82.83.227.67 (dsl-082-083-227-067.arcor-ip.net) at Sun Jul 10 07:24:34 2005',
+        'Nov 13 20:10:22 combo ftpd[29729]: connection from 82.83.227.67 (dsl-082-083-227-067.arcor-ip.net) at Sun Jul 10 07:24:34 2005',
+        'Nov 13 20:10:22 combo ftpd[29734]: connection from 82.83.227.67 (dsl-082-083-227-067.arcor-ip.net) at Sun Jul 10 07:24:34 2005',
+        'Nov 13 20:10:22 combo ftpd[29735]: connection from 82.83.227.67 (dsl-082-083-227-067.arcor-ip.net) at Sun Jul 10 07:24:34 2005',
+        'Nov 13 20:10:22 combo ftpd[29723]: connection from 82.83.227.67 (dsl-082-083-227-067.arcor-ip.net) at Sun Jul 10 07:24:24 2005',
+        'Nov 13 20:10:22 combo ftpd[29720]: connection from 82.83.227.67 (dsl-082-083-227-067.arcor-ip.net) at Sun Jul 10 07:24:24 2005',
+        'Nov 13 20:10:22 combo ftpd[29717]: connection from 82.83.227.67 (dsl-082-083-227-067.arcor-ip.net) at Sun Jul 10 07:24:24 2005',
+        'Nov 13 20:10:22 combo ftpd[29718]: connection from 82.83.227.67 (dsl-082-083-227-067.arcor-ip.net) at Sun Jul 10 07:24:24 2005',
+        'Nov 13 20:10:22 combo ftpd[29721]: connection from 82.83.227.67 (dsl-082-083-227-067.arcor-ip.net) at Sun Jul 10 07:24:24 2005',
+        'Nov 13 20:10:21 combo su(pam_unix)[26353]: session opened for user news by (uid=0)',
+        'Nov 13 20:10:21 combo syslogd 1.4.1: restart.',
+        'Nov 13 20:10:21 combo logrotate: ALERT exited abnormally with [1]',
+        'Nov 13 20:10:21 combo cups: cupsd shutdown succeeded',
+        'Nov 13 20:10:21 combo ftpd[24519]: connection from 217.187.83.139 () at Sun Jul 10 03:55:15 2005',
+        'Nov 13 20:10:21 combo ftpd[24514]: connection from 217.187.83.139 () at Sun Jul 10 03:55:15 2005',
+        'Nov 13 20:10:21 combo ftpd[24516]: connection from 217.187.83.139 () at Sun Jul 10 03:55:15 2005',
+        'Nov 13 20:10:21 combo ftpd[24517]: connection from 217.187.83.139 () at Sun Jul 10 03:55:15 2005',
+        'Nov 13 20:10:21 combo ftpd[24525]: connection from 217.187.83.139 () at Sun Jul 10 03:55:15 2005',
+        'Nov 13 20:10:21 combo ftpd[24529]: connection from 217.187.83.139 () at Sun Jul 10 03:55:15 2005',
+        'Nov 13 20:10:21 combo ftpd[24531]: connection from 217.187.83.139 () at Sun Jul 10 03:55:15 2005',
+        'Nov 13 20:10:20 combo ftpd[24085]: connection from 206.196.21.129 (host129.206.196.21.maximumasp.com) at Sat Jul  9 22:53:19 2005',
+        'Nov 13 20:10:20 combo ftpd[24089]: connection from 206.196.21.129 (host129.206.196.21.maximumasp.com) at Sat Jul  9 22:53:19 2005',
+        'Nov 13 20:10:20 combo ftpd[24071]: connection from 206.196.21.129 (host129.206.196.21.maximumasp.com) at Sat Jul  9 22:53:22 2005',
+        'Nov 13 20:10:20 combo ftpd[24069]: connection from 206.196.21.129 (host129.206.196.21.maximumasp.com) at Sat Jul  9 22:53:22 2005',
+        'Nov 13 20:10:20 combo ftpd[24079]: connection from 206.196.21.129 (host129.206.196.21.maximumasp.com) at Sat Jul  9 22:53:22 2005',
+        'Nov 13 20:10:20 combo ftpd[24075]: connection from 206.196.21.129 (host129.206.196.21.maximumasp.com) at Sat Jul  9 22:53:22 2005',
+        'Nov 13 20:10:20 combo ftpd[24078]: connection from 206.196.21.129 (host129.206.196.21.maximumasp.com) at Sat Jul  9 22:53:22 2005',
+        'Nov 13 20:10:20 combo ftpd[24070]: connection from 206.196.21.129 (host129.206.196.21.maximumasp.com) at Sat Jul  9 22:53:22 2005',
+        'Nov 13 20:10:20 combo ftpd[24082]: connection from 206.196.21.129 (host129.206.196.21.maximumasp.com) at Sat Jul  9 22:53:22 2005',
+        'Nov 13 20:10:20 combo sshd(pam_unix)[23788]: authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=p15105218.pureserver.info  user=root',
+        'Nov 13 20:10:20 combo sshd(pam_unix)[23794]: authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=p15105218.pureserver.info  user=root',
+        'Nov 13 20:10:20 combo sshd(pam_unix)[23798]: authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=p15105218.pureserver.info  user=root',
+        'Nov 13 20:10:20 combo sshd(pam_unix)[23780]: authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=p15105218.pureserver.info  user=root',
+        'Nov 13 20:10:19 combo ftpd[23204]: connection from 81.171.220.226 () at Sat Jul  9 12:59:44 2005',
+        'Nov 13 20:10:19 combo ftpd[23205]: connection from 81.171.220.226 () at Sat Jul  9 12:59:44 2005',
+        'Nov 13 20:10:19 combo ftpd[23217]: connection from 81.171.220.226 () at Sat Jul  9 12:59:44 2005',
+        'Nov 13 20:10:19 combo ftpd[23207]: connection from 81.171.220.226 () at Sat Jul  9 12:59:44 2005',
+        'Nov 13 20:10:19 combo ftpd[23210]: connection from 81.171.220.226 () at Sat Jul  9 12:59:44 2005',
+        'Nov 13 20:10:19 combo ftpd[23212]: connection from 81.171.220.226 () at Sat Jul  9 12:59:44 2005',
+        'Nov 13 20:10:19 combo ftpd[23214]: connection from 81.171.220.226 () at Sat Jul  9 12:59:44 2005',
+        'Nov 13 20:10:19 combo ftpd[23224]: connection from 81.171.220.226 () at Sat Jul  9 12:59:45 2005',
+        'Nov 13 20:10:19 combo ftpd[23226]: connection from 81.171.220.226 () at Sat Jul  9 12:59:45 2005',
+        'Nov 13 20:10:18 combo ftpd[23145]: connection from 211.167.68.59 () at Sat Jul  9 12:16:49 2005',
+        'Nov 13 20:10:18 combo ftpd[23150]: connection from 211.167.68.59 () at Sat Jul  9 12:16:49 2005',
+        'Nov 13 20:10:18 combo ftpd[23147]: connection from 211.167.68.59 () at Sat Jul  9 12:16:49 2005',
+        'Nov 13 20:10:18 combo ftpd[23152]: connection from 211.167.68.59 () at Sat Jul  9 12:16:51 2005',
+      ];
+      const result = extractDissectPatternDangerouslySlow(logs);
+      // After normalization: correctly detects ':' as delimiter, more granular fields
+      // due to varying content after colon (authentication vs session vs ALERT messages)
+      expect(result.pattern).toBe(
+        '%{field_1} %{field_2} %{field_3} %{field_4} %{field_5}: %{field_6} %{field_7} %{field_8} %{field_9}'
+      );
+      expect(result.fields.length).toBe(9);
     });
   });
 });

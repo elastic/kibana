@@ -9,6 +9,7 @@ import type { DissectPattern } from './types';
 import { findDelimiterSequences } from './find_delimiter_sequences';
 import { buildDelimiterTree } from './build_delimiter_tree';
 import { extractFields } from './extract_fields';
+import { normalizeFieldBoundaries } from './normalize_field_boundaries';
 import { detectModifiers } from './detect_modifiers';
 import { generatePattern } from './generate_pattern';
 import { findStructuredPrefixLength } from './utils';
@@ -20,18 +21,18 @@ import { findStructuredPrefixLength } from './utils';
 function hasLowQualityPattern(pattern: string): boolean {
   // Remove all field placeholders to get just the literal parts
   const literalParts = pattern.replace(/%\{[^}]+\}/g, '');
-  
+
   // Check for unbalanced brackets/parentheses - a sign of bad parsing
   const openParen = (literalParts.match(/\(/g) || []).length;
   const closeParen = (literalParts.match(/\)/g) || []).length;
   const openBracket = (literalParts.match(/\[/g) || []).length;
   const closeBracket = (literalParts.match(/\]/g) || []).length;
-  
+
   // If we have unbalanced brackets/parens, it's a bad pattern
   if (openParen !== closeParen || openBracket !== closeBracket) {
     return true;
   }
-  
+
   return false;
 }
 
@@ -72,6 +73,9 @@ export function extractDissectPatternDangerouslySlow(messages: string[]): Dissec
   // Step 3: Extract fields between delimiters
   const fields = extractFields(messages, delimiterTree);
 
+  // Step 3.5: Normalize field boundaries (move trailing non-alphanumeric chars to delimiters)
+  normalizeFieldBoundaries(fields, delimiterTree);
+
   // Step 4: Detect modifiers for each field
   fields.forEach((field) => {
     field.modifiers = detectModifiers(field);
@@ -83,12 +87,15 @@ export function extractDissectPatternDangerouslySlow(messages: string[]): Dissec
   // Check if we got a useful pattern (at least 2 fields and good quality)
   // If not, try space-based extraction as a fallback for structured logs
   const needsFallback = fields.length < 2 || hasLowQualityPattern(pattern);
-  
+
   if (needsFallback && messages.length > 1) {
     // Try forcing space as a delimiter for structured logs
     const spaceDelimiters = [' '];
     const spaceDelimiterTree = buildDelimiterTree(messages, spaceDelimiters);
     const spaceFields = extractFields(messages, spaceDelimiterTree);
+
+    // Normalize field boundaries for space-based extraction too
+    normalizeFieldBoundaries(spaceFields, spaceDelimiterTree);
 
     // If space-based extraction gives us more fields, use it
     if (spaceFields.length >= 2) {
