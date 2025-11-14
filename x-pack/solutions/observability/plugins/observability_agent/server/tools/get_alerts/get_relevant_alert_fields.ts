@@ -14,6 +14,7 @@ import type { ModelProvider } from '@kbn/onechat-server';
 import type { ObservabilityAgentPluginStartDependencies } from '../../types';
 import { selectRelevantAlertFields } from './select_relevant_alert_fields';
 import { getHitsTotal } from '../../utils/get_hits_total';
+import { getTypedSearch } from '../../utils/get_typed_search';
 
 export async function getRelevantAlertFields({
   query,
@@ -41,9 +42,11 @@ export async function getRelevantAlertFields({
     esClient
   );
 
-  const hasAnyHitsResponse = await esClient.search({
+  const search = getTypedSearch(esClient);
+  const hasAnyHitsResponse = await search({
     index: '.alerts-observability*',
     _source: false,
+    size: 1,
     track_total_hits: 1,
     terminate_after: 1,
   });
