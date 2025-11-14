@@ -143,6 +143,7 @@ const TitleComponent: React.FC<Props> = ({
             <span data-test-subj="emptyAccordionContent" />
           </EuiAccordion>
         </EuiFlexItem>
+
         {isScheduled && (
           <EuiFlexItem grow={false}>
             <EuiToolTip
