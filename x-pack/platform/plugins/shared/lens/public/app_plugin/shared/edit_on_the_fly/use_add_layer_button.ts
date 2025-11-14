@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ReactElement } from 'react';
 import { useCallback, useMemo } from 'react';
 
 import type { CoreStart } from '@kbn/core/public';
@@ -33,7 +34,7 @@ export const useAddLayerButton = (
   dataViews: LensPluginStartDependencies['dataViews'],
   uiActions: LensPluginStartDependencies['uiActions'],
   setIsInlineFlyoutVisible: (flag: boolean) => void
-) => {
+): ReactElement | null => {
   const { visualizationMap } = useEditorFrameService();
   const { visualization, datasourceStates, query } = useLensSelector((state) => state.lens);
   const dispatchLens = useLensDispatch();
@@ -80,44 +81,49 @@ export const useAddLayerButton = (
       return null;
     }
 
-    return activeVisualization?.getAddLayerButtonComponent?.({
-      state: visualization.state,
-      supportedLayers: activeVisualization.getSupportedLayers(visualization.state, framePublicAPI),
-      addLayer,
-      ensureIndexPattern: async (specOrId) => {
-        let indexPatternId;
+    return (
+      activeVisualization?.getAddLayerButtonComponent?.({
+        state: visualization.state,
+        supportedLayers: activeVisualization.getSupportedLayers(
+          visualization.state,
+          framePublicAPI
+        ),
+        addLayer,
+        ensureIndexPattern: async (specOrId) => {
+          let indexPatternId;
 
-        if (typeof specOrId === 'string') {
-          indexPatternId = specOrId;
-        } else {
-          const dataView = await dataViews.create(specOrId);
+          if (typeof specOrId === 'string') {
+            indexPatternId = specOrId;
+          } else {
+            const dataView = await dataViews.create(specOrId);
 
-          if (!dataView.id) {
-            return;
+            if (!dataView.id) {
+              return;
+            }
+
+            indexPatternId = dataView.id;
           }
 
-          indexPatternId = dataView.id;
-        }
+          const newIndexPatterns = await indexPatternService?.ensureIndexPattern({
+            id: indexPatternId,
+            cache: framePublicAPI.dataViews.indexPatterns,
+          });
 
-        const newIndexPatterns = await indexPatternService?.ensureIndexPattern({
-          id: indexPatternId,
-          cache: framePublicAPI.dataViews.indexPatterns,
-        });
-
-        if (newIndexPatterns) {
-          dispatchLens(
-            changeIndexPattern({
-              dataViews: { indexPatterns: newIndexPatterns },
-              datasourceIds: Object.keys(datasourceStates),
-              visualizationIds: visualization.activeId ? [visualization.activeId] : [],
-              indexPatternId,
-            })
-          );
-        }
-      },
-      registerLibraryAnnotationGroup: registerLibraryAnnotationGroupFunction,
-      isInlineEditing: Boolean(setIsInlineFlyoutVisible),
-    });
+          if (newIndexPatterns) {
+            dispatchLens(
+              changeIndexPattern({
+                dataViews: { indexPatterns: newIndexPatterns },
+                datasourceIds: Object.keys(datasourceStates),
+                visualizationIds: visualization.activeId ? [visualization.activeId] : [],
+                indexPatternId,
+              })
+            );
+          }
+        },
+        registerLibraryAnnotationGroup: registerLibraryAnnotationGroupFunction,
+        isInlineEditing: Boolean(setIsInlineFlyoutVisible),
+      }) ?? null
+    );
   }, [
     activeVisualization,
     addLayer,

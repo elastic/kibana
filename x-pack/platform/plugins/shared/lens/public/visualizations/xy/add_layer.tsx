@@ -32,7 +32,7 @@ import { getDataLayers } from './visualization_helpers';
 import { ExperimentalBadge } from '../../shared_components';
 import { ChartOption } from '../../editor_frame_service/editor_frame/config_panel/chart_switch/chart_option';
 
-interface AddLayerButtonProps {
+export interface AddLayerButtonProps {
   state: XYState;
   supportedLayers: VisualizationLayerDescription[];
   addLayer: AddLayerFunction<ExtraAppendLayerArg>;
@@ -124,7 +124,7 @@ export function AddLayerButton({
       <EuiPopover
         data-test-subj="lnsConfigPanel__addLayerPopover"
         button={
-          <EuiToolTip content={buttonLabel}>
+          <EuiToolTip content={buttonLabel} disableScreenReaderOutput>
             <EuiButtonIcon
               data-test-subj="lnsLayerAddButton"
               aria-label={buttonLabel}
