@@ -219,9 +219,6 @@ describe('mappingFromFieldMap', () => {
                 action_group: {
                   type: 'keyword',
                 },
-                attack_ids: {
-                  type: 'keyword',
-                },
                 case_ids: {
                   type: 'keyword',
                 },
