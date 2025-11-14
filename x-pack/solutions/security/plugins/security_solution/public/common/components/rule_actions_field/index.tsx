@@ -15,6 +15,7 @@ import type { ActionAccordionFormProps } from '@kbn/triggers-actions-ui-plugin/p
 import styled from 'styled-components';
 
 import type {
+  ActionConnector,
   ActionVariables,
   NotifyWhenSelectOptions,
 } from '@kbn/triggers-actions-ui-plugin/public';
@@ -88,6 +89,7 @@ interface Props {
   summaryMessageVariables: ActionVariables;
   defaultRuleFrequency?: RuleActionFrequency;
   minimumThrottleInterval?: ActionAccordionFormProps['minimumThrottleInterval'];
+  onNewConnectorCreated?: (connector: ActionConnector) => void;
 }
 
 const DEFAULT_ACTION_GROUP_ID = 'default';
@@ -126,6 +128,7 @@ export const RuleActionsField: React.FC<Props> = ({
   summaryMessageVariables,
   defaultRuleFrequency = NOTIFICATION_DEFAULT_FREQUENCY,
   minimumThrottleInterval,
+  onNewConnectorCreated,
 }) => {
   const [fieldErrors, setFieldErrors] = useState<string | null>(null);
   const form = useFormContext();
@@ -155,19 +158,25 @@ export const RuleActionsField: React.FC<Props> = ({
   );
 
   const setActionIdByIndex = useCallback(
-    (id: string, index: number) => {
+    (id: string, index: number, connector?: ActionConnector) => {
       const updatedActions = [...(actions as Array<Partial<RuleAction>>)];
       if (isEmpty(updatedActions[index].params)) {
         setIsInitializingAction(true);
       }
       updatedActions[index] = deepMerge(updatedActions[index], { id });
+      if (connector) {
+        onNewConnectorCreated?.(connector);
+      }
+
       field.setValue(updatedActions);
     },
-    [field, actions]
+    [field, actions, onNewConnectorCreated]
   );
 
   const setAlertActionsProperty = useCallback(
-    (updatedActions: RuleAction[]) => field.setValue(updatedActions),
+    (updatedActions: RuleAction[]) => {
+      field.setValue(updatedActions);
+    },
     [field]
   );
 
