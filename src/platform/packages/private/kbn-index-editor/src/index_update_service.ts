@@ -888,9 +888,8 @@ export class IndexUpdateService {
 
       // Clean all unsaved changes that might be in memory
       this.discardUnsavedChanges();
-
-      // Refetch the new index and update rows data
-      this.refresh();
+      this._docs$.next([]);
+      this._totalHits$.next(0);
     } else {
       this.discardUnsavedChanges();
     }
