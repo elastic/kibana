@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { act } from 'react-dom/test-utils';
 import type { ReactWrapper } from 'enzyme';
 
@@ -25,6 +25,11 @@ import type { MountStoreProps } from '../../../mocks';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import { generateId } from '../../../id_generator';
 import { EditorFrameServiceProvider } from '../../../editor_frame_service/editor_frame_service_context';
+import {
+  addLayer as addLayerAction,
+  setSelectedLayerId,
+  useLensDispatch,
+} from '../../../state_management';
 
 import { LayerTabsWrapper } from './layer_tabs';
 import type { LayerTabsProps } from './types';
@@ -40,6 +45,37 @@ jest.mock('@kbn/kibana-utils-plugin/public', () => {
     },
   };
 });
+
+// Test component that renders add layer buttons connected to Redux
+function AddLayerButtonsTestComponent({
+  visualizationMap,
+}: {
+  visualizationMap: ReturnType<typeof mockVisualizationMap>;
+}) {
+  const dispatchLens = useLensDispatch();
+
+  const addLayer = useCallback(
+    (layerType: LensLayerType) => {
+      const layerId = generateId();
+      dispatchLens(addLayerAction({ layerId, layerType }));
+      dispatchLens(setSelectedLayerId({ layerId }));
+    },
+    [dispatchLens]
+  );
+
+  return (
+    <div data-test-subj="lnsAddLayerButtonWrapper">
+      {visualizationMap.testVis.getAddLayerButtonComponent?.({
+        state: 'state',
+        supportedLayers: [],
+        addLayer,
+        ensureIndexPattern: async () => {},
+        registerLibraryAnnotationGroup: () => {},
+        isInlineEditing: true,
+      })}
+    </div>
+  );
+}
 
 const addNewLayer = (instance: ReactWrapper, type: LensLayerType = LayerTypes.REFERENCELINE) =>
   act(() => {
@@ -75,7 +111,11 @@ describe('LayerTabs', () => {
     const { visualizationMap, datasourceMap, ...rest } = props;
     return mountWithReduxStore(
       <EditorFrameServiceProvider visualizationMap={visualizationMap} datasourceMap={datasourceMap}>
-        <LayerTabsWrapper {...rest} />
+        <div>
+          {/* Render the add layer button component separately like in the actual UI */}
+          <AddLayerButtonsTestComponent visualizationMap={visualizationMap} />
+          <LayerTabsWrapper {...rest} />
+        </div>
       </EditorFrameServiceProvider>,
       {
         preloadedState: {
@@ -277,6 +317,23 @@ describe('LayerTabs', () => {
     it('should use group initial dimension value when adding a new layer if available', async () => {
       const datasourceMap = mockDatasourceMap();
       const visualizationMap = mockVisualizationMap();
+
+      // Set up visualization to return 2 layers initially so tabs render
+      visualizationMap.testVis.getLayerIds = jest.fn(() => ['layer1', 'layer2']);
+      visualizationMap.testVis.getConfiguration = jest.fn(() => ({
+        groups: [
+          {
+            layerId: 'layer1',
+            groupId: 'a',
+            groupLabel: 'A',
+            accessors: [],
+            filterOperations: () => true,
+            supportsMoreColumns: true,
+            dataTestSubj: 'mockVisA',
+          },
+        ],
+      }));
+
       visualizationMap.testVis.getSupportedLayers = jest.fn(() => [
         { type: LayerTypes.DATA, label: 'Data Layer' },
         {
@@ -312,7 +369,7 @@ describe('LayerTabs', () => {
               accessors: [],
               dataTestSubj: 'mockVisA',
               groupId: 'a',
-              groupLabel: 'a',
+              groupLabel: 'A',
               layerId: 'layer1',
               supportsMoreColumns: true,
             }),
