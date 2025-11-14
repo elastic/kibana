@@ -9,9 +9,8 @@ import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@k
 
 import type { AgentPolicy, CloudProvider, NewPackagePolicy } from '../../types';
 import { CloudConnectorCreateError } from '../../errors';
-import { cloudConnectorService } from '../app_context';
+import { cloudConnectorService } from '../cloud_connector';
 import { extractAndCreateCloudConnectorSecrets } from '../secrets/cloud_connector';
-import { removeCloudConnectorTransientVars } from '../package_policies';
 
 import {
   updatePackagePolicyWithCloudConnectorSecrets,
@@ -38,7 +37,6 @@ export interface CloudConnectorIntegrationResult {
  * - If package policy has cloud_connector_id: reuses existing connector and increments usage count
  * - If no cloud_connector_id: extracts and creates secrets, creates new cloud connector
  * - Updates package policy with secret references and cloud connector ID
- * - Removes transient variables
  *
  * This function is designed for the agentless policy API but can be reused
  * in other contexts where cloud connectors need to be integrated with package policies.
@@ -98,9 +96,6 @@ export async function createAndIntegrateCloudConnector(params: {
 
       logger.info(`Successfully reused cloud connector: ${existingCloudConnectorId}`);
 
-      // Remove transient cloud connector vars
-      updatedPackagePolicy = removeCloudConnectorTransientVars(updatedPackagePolicy);
-
       return {
         packagePolicy: updatedPackagePolicy,
         cloudConnectorId: existingCloudConnectorId,
@@ -131,7 +126,7 @@ export async function createAndIntegrateCloudConnector(params: {
 
   logger.debug('Creating new cloud connector for agentless policy with secret references');
 
-  // Extract cloud connector name from input vars if provided
+  // Extract cloud connector name from package policy if provided
   const cloudConnectorName = getCloudConnectorNameFromPackagePolicy(
     updatedPackagePolicy,
     `${cloudProvider}-cloud-connector: ${policyName}`
@@ -159,9 +154,6 @@ export async function createAndIntegrateCloudConnector(params: {
       ...updatedPackagePolicy,
       cloud_connector_id: cloudConnector.id,
     };
-
-    // Remove transient cloud connector vars
-    updatedPackagePolicy = removeCloudConnectorTransientVars(updatedPackagePolicy);
 
     return {
       packagePolicy: updatedPackagePolicy,

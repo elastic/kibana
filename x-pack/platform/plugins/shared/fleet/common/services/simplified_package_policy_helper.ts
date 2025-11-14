@@ -59,6 +59,7 @@ export interface SimplifiedPackagePolicy {
   policy_ids: string[];
   output_id?: string;
   cloud_connector_id?: string | null;
+  cloud_connector_name?: string;
   namespace: string;
   name: string;
   description?: string;
@@ -186,6 +187,7 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
     supports_agentless: supportsAgentless,
     supports_cloud_connector: supportsCloudConnector,
     cloud_connector_id: cloudConnectorId,
+    cloud_connector_name: cloudConnectorName,
     additional_datastreams_permissions: additionalDatastreamsPermissions,
   } = data;
   const packagePolicy = {
@@ -199,6 +201,7 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
     supports_agentless: supportsAgentless,
     supports_cloud_connector: supportsCloudConnector,
     cloud_connector_id: cloudConnectorId,
+    cloud_connector_name: cloudConnectorName,
     output_id: outputId,
   };
 
