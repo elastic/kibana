@@ -301,7 +301,6 @@ test.describe('Index template wizard - Mappings step', { tag: ['@ess'] }, () => 
     pageObjects,
     log,
   }) => {
-    await page.pause();
     await pageObjects.indexManagement.changeMappingsEditorTab('advancedOptions');
     await page.testSubj.locator('previewIndexTemplate').click();
     const templatePreview = await page.testSubj.locator('simulateTemplatePreview').textContent();
