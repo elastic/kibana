@@ -87,7 +87,6 @@ export function useDockerRegistry() {
       await firstWithTimeout(
         childProcessToLogLine(dockerProcess, logger).pipe(
           filter((line) => {
-            process.stdout.write(line);
             return waitForLogLine.test(line);
           })
         ),
