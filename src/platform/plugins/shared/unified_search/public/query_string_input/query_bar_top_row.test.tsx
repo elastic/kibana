@@ -51,6 +51,8 @@ startMock.uiSettings.get.mockImplementation((key: string) => {
       ];
     case 'dateFormat':
       return 'MMM D, YYYY @ HH:mm:ss.SSS';
+    case 'dateFormat:tz':
+      return 'UTC';
     case UI_SETTINGS.HISTORY_LIMIT:
       return 10;
     case UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS:
