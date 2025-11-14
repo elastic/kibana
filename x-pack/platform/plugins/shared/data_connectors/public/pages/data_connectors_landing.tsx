@@ -85,6 +85,7 @@ export const DataConnectorsLandingPage = () => {
     isLoading,
     createConnector,
     deleteConnector,
+    deleteAllConnectors,
     isConnected,
     connectors,
     refreshConnectors,
@@ -122,6 +123,7 @@ export const DataConnectorsLandingPage = () => {
   const [menuOpenStates, setMenuOpenStates] = useState<Record<string, boolean>>({});
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [connectorToDelete, setConnectorToDelete] = useState<string | null>(null);
+  const [showDeleteAllModal, setShowDeleteAllModal] = useState(false);
 
   const handleSelectConnector = (connectorType: string) => {
     setSelectedConnectorType(connectorType);
@@ -289,6 +291,17 @@ export const DataConnectorsLandingPage = () => {
         css={css`
           background-color: ${euiTheme.colors.backgroundBasePlain};
         `}
+        rightSideItems={[
+          <EuiButton
+            key="delete-all"
+            color="danger"
+            iconType="trash"
+            onClick={() => setShowDeleteAllModal(true)}
+            isDisabled={connectors.length === 0 || isLoading}
+          >
+            Delete All Connections
+          </EuiButton>,
+        ]}
       >
         <EuiText>
           {i18n.translate('xpack.dataConnectors.landingPage.description', {
@@ -389,6 +402,34 @@ export const DataConnectorsLandingPage = () => {
           confirmButtonText="Delete"
           buttonColor="danger"
         />
+      )}
+
+      {showDeleteAllModal && (
+        <EuiConfirmModal
+          title="Delete all connectors?"
+          aria-labelledby={modalTitleId}
+          titleProps={{ id: modalTitleId }}
+          onCancel={() => {
+            setShowDeleteAllModal(false);
+          }}
+          onConfirm={async () => {
+            try {
+              await deleteAllConnectors();
+              await refreshConnectors();
+            } catch (err) {
+              // Error is already handled in the hook
+            }
+            setShowDeleteAllModal(false);
+          }}
+          cancelButtonText="Cancel"
+          confirmButtonText="Delete All"
+          buttonColor="danger"
+        >
+          <p>
+            This will permanently delete all {connectors.length} connector{connectors.length !== 1 ? 's' : ''} and
+            their associated workflows. This action cannot be undone.
+          </p>
+        </EuiConfirmModal>
       )}
     </KibanaPageTemplate>
   );

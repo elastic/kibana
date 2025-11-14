@@ -16,6 +16,7 @@ export interface UseConnectorsResult {
     request: CreateWorkplaceConnectorRequest
   ) => Promise<WorkplaceConnectorResponse>;
   deleteConnector: (id: string) => Promise<void>;
+  deleteAllConnectors: () => Promise<void>;
   refreshConnectors: () => Promise<void>;
   isConnected: (connectorType: string) => boolean;
 }
@@ -81,6 +82,21 @@ export function useConnectors(httpClient: any): UseConnectorsResult {
     [httpClient, fetchConnectors]
   );
 
+  const deleteAllConnectors = useCallback(
+    async (): Promise<void> => {
+      setError(null);
+      try {
+        await httpClient.delete('/api/workplace_connectors');
+        await fetchConnectors();
+      } catch (err) {
+        const errorMessage = err.message || 'Failed to delete all connectors';
+        setError(errorMessage);
+        throw new Error(errorMessage);
+      }
+    },
+    [httpClient, fetchConnectors]
+  );
+
   const isConnected = useCallback(
     (connectorType: string): boolean => {
       return connectors.some((connector) => connector.type === connectorType);
@@ -94,6 +110,7 @@ export function useConnectors(httpClient: any): UseConnectorsResult {
     error,
     createConnector,
     deleteConnector,
+    deleteAllConnectors,
     refreshConnectors: fetchConnectors,
     isConnected,
   };

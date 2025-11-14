@@ -709,4 +709,86 @@ export function registerConnectorRoutes(
       }
     }
   );
+
+  // Delete all connectors
+  router.delete(
+    {
+      path: '/api/workplace_connectors',
+      validate: {},
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This is open for now (should be secured)',
+        },
+      },
+    },
+    async (context, request, response) => {
+      const coreContext = await context.core;
+
+      try {
+        const savedObjectsClient = coreContext.savedObjects.client;
+        const spaceId = savedObjectsClient.getCurrentNamespace() ?? DEFAULT_NAMESPACE_STRING;
+
+        // Find all connectors
+        const findResponse = await savedObjectsClient.find({
+          type: WORKPLACE_CONNECTOR_SAVED_OBJECT_TYPE,
+          perPage: 1000, // Should be enough for most cases
+        });
+
+        const connectors = findResponse.saved_objects;
+        const workflowIds: string[] = [];
+        const toolIds: string[] = [];
+
+        // Collect all workflow and tool IDs before deletion
+        for (const connector of connectors) {
+          const attrs = connector.attributes as unknown as {
+            workflowId?: string;
+            workflowIds?: string[];
+            toolIds?: string[];
+          };
+          if (attrs.workflowId) workflowIds.push(attrs.workflowId);
+          if (attrs.workflowIds?.length) workflowIds.push(...attrs.workflowIds);
+          if (attrs.toolIds?.length) toolIds.push(...attrs.toolIds);
+        }
+
+        // Delete all connectors
+        const deletePromises = connectors.map((connector) =>
+          savedObjectsClient.delete(WORKPLACE_CONNECTOR_SAVED_OBJECT_TYPE, connector.id)
+        );
+        await Promise.all(deletePromises);
+
+        // Cascade delete related workflows/tools (best-effort)
+        try {
+          if (workflowIds.length > 0 && workflowCreator.deleteWorkflows) {
+            await workflowCreator.deleteWorkflows(workflowIds, spaceId, request);
+          }
+        } catch (err) {
+          logger.warn(`Failed to delete some workflows: ${(err as Error).message}`);
+        }
+
+        try {
+          if (toolIds.length > 0 && workflowCreator.deleteTools) {
+            await workflowCreator.deleteTools(toolIds, request);
+          }
+        } catch (err) {
+          logger.warn(`Failed to delete some tools: ${(err as Error).message}`);
+        }
+
+        return response.ok({
+          body: {
+            success: true,
+            deletedCount: connectors.length,
+          },
+        });
+      } catch (error) {
+        logger.error(`Failed to delete all connectors: ${(error as Error).message}`);
+        return response.customError({
+          statusCode: 500,
+          body: {
+            message: `Failed to delete all connectors: ${(error as Error).message}`,
+          },
+        });
+      }
+    }
+  );
 }
