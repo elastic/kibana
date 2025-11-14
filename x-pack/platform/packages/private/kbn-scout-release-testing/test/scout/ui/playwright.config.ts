@@ -7,6 +7,7 @@
 
 import { createPlaywrightConfig } from '@kbn/scout';
 
+// eslint-disable-next-line import/no-default-export
 export default createPlaywrightConfig({
   testDir: './discovery_tests',
 });

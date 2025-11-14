@@ -50,7 +50,7 @@ export class RequestDetailsStats extends Component<DetailViewProps> {
             )}
           </span>
         </EuiTableRowCell>
-        <EuiTableRowCell>{stat.value}</EuiTableRowCell>
+        <EuiTableRowCell data-test-subj={`inspector.statistics.${stat.id}`}>{stat.value}</EuiTableRowCell>
       </EuiTableRow>,
     ];
   };
