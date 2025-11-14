@@ -11,14 +11,14 @@ import type { Evaluator } from '../../types';
 import { createTraceBasedEvaluator } from './factory';
 
 export function createOutputTokensEvaluator({
-  esClient,
+  traceEsClient,
   log,
 }: {
-  esClient: EsClient;
+  traceEsClient: EsClient;
   log: ToolingLog;
 }): Evaluator {
   return createTraceBasedEvaluator({
-    esClient,
+    traceEsClient,
     log,
     config: {
       name: 'Output Tokens',
@@ -37,14 +37,14 @@ export function createOutputTokensEvaluator({
 }
 
 export function createInputTokensEvaluator({
-  esClient,
+  traceEsClient,
   log,
 }: {
-  esClient: EsClient;
+  traceEsClient: EsClient;
   log: ToolingLog;
 }): Evaluator {
   return createTraceBasedEvaluator({
-    esClient,
+    traceEsClient,
     log,
     config: {
       name: 'Input Tokens',
@@ -63,14 +63,14 @@ export function createInputTokensEvaluator({
 }
 
 export function createCachedTokensEvaluator({
-  esClient,
+  traceEsClient,
   log,
 }: {
-  esClient: EsClient;
+  traceEsClient: EsClient;
   log: ToolingLog;
 }): Evaluator {
   return createTraceBasedEvaluator({
-    esClient,
+    traceEsClient,
     log,
     config: {
       name: 'Cached Tokens',

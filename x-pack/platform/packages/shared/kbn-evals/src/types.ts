@@ -14,7 +14,7 @@ import type {
 import type { BoundInferenceClient, Model } from '@kbn/inference-common';
 import type { HttpHandler } from '@kbn/core/public';
 import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
-import type { ScoutWorkerFixtures } from '@kbn/scout';
+import type { EsClient, ScoutWorkerFixtures } from '@kbn/scout';
 import type { KibanaPhoenixClient } from './kibana_phoenix_client/client';
 import type { EvaluationCriterion } from './evaluators/criteria';
 import type { EvaluationAnalysisService } from './utils/analysis';
@@ -101,6 +101,7 @@ export interface EvaluationSpecificWorkerFixtures {
   evaluationAnalysisService: EvaluationAnalysisService;
   reportDisplayOptions: ReportDisplayOptions;
   reportModelScore: EvaluationReporter;
+  traceEsClient: EsClient;
 }
 
 export interface EvaluationWorkerFixtures extends ScoutWorkerFixtures {

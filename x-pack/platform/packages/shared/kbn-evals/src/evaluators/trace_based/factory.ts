@@ -22,11 +22,11 @@ export interface TraceBasedEvaluatorConfig {
 }
 
 export function createTraceBasedEvaluator({
-  esClient,
+  traceEsClient,
   log,
   config,
 }: {
-  esClient: EsClient;
+  traceEsClient: EsClient;
   log: ToolingLog;
   config: TraceBasedEvaluatorConfig;
 }): Evaluator {
@@ -47,7 +47,7 @@ export function createTraceBasedEvaluator({
 
       async function fetchStats(): Promise<number> {
         const query = buildQuery(traceId);
-        const response = (await esClient.esql.query({ query })) as unknown as EsqlResponse;
+        const response = (await traceEsClient.esql.query({ query })) as unknown as EsqlResponse;
 
         const { values } = response;
 

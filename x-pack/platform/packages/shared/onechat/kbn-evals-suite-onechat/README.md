@@ -16,13 +16,13 @@ Configure tracing and Phoenix exporter in `kibana.dev.yml`. To enable trace-base
 
 ```yaml
 telemetry.tracing.exporters:
-  phoenix:
-    base_url: 'https://<my-phoenix-host>'
-    public_url: 'https://<my-phoenix-host>'
-    project_name: '<my-name>'
-    api_key: '<my-api-key>'
-  http:
-    url: 'http://localhost:4318/v1/traces'
+  - phoenix:
+      base_url: 'https://<my-phoenix-host>'
+      public_url: 'https://<my-phoenix-host>'
+      project_name: '<my-name>'
+      api_key: '<my-api-key>'
+  - http:
+      url: 'http://localhost:4318/v1/traces'
 ```
 
 ### Configure AI Connectors
@@ -69,6 +69,8 @@ ELASTICSEARCH_HOST=http://localhost:9220 node scripts/edot_collector.js
 
 The EDOT Collector receives traces from Kibana via the HTTP exporter configured above and stores them in your local Elasticsearch cluster, where they can be queried to extract non-functional metrics.
 
+**Note:** If your EDOT Collector stores traces in a different Elasticsearch cluster than your test environment (i.e common cluster for the team), specify the trace cluster URL when running evaluations using `TRACING_ES_URL=https://<username>:<password>@<url>`. Dedicated ES client will be instantiated to query traces from the specified cluster.
+
 ### Load OneChat Datasets
 
 **Note**: You need to be a member of the Elastic organization on HuggingFace to access OneChat datasets. Sign up with your `@elastic.co` email address.
@@ -104,8 +106,8 @@ node scripts/playwright test --config x-pack/platform/packages/shared/onechat/kb
 # Run with specific connector
 node scripts/playwright test --config x-pack/platform/packages/shared/onechat/kbn-evals-suite-onechat/playwright.config.ts --project="my-connector"
 
-# Run with LLM-as-a-judge for consistent evaluation results
-EVALUATION_CONNECTOR_ID=llm-judge-connector-id node scripts/playwright test --config x-pack/platform/packages/shared/onechat/kbn-evals-suite-onechat/playwright.config.ts
+# Run with trace collection from separate cluster and LLM-as-a-judge
+TRACING_ES_URL=http://elastic:changeme@localhost:9200 EVALUATION_CONNECTOR_ID=llm-judge-connector-id node scripts/playwright test --config x-pack/platform/packages/shared/onechat/kbn-evals-suite-onechat/playwright.config.ts
 ```
 
 ### Run Evaluation Comparisons

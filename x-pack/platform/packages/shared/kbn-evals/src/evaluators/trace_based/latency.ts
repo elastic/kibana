@@ -11,14 +11,14 @@ import type { Evaluator } from '../../types';
 import { createTraceBasedEvaluator } from './factory';
 
 export function createLatencyEvaluator({
-  esClient,
+  traceEsClient,
   log,
 }: {
-  esClient: EsClient;
+  traceEsClient: EsClient;
   log: ToolingLog;
 }): Evaluator {
   return createTraceBasedEvaluator({
-    esClient,
+    traceEsClient,
     log,
     config: {
       name: 'Latency',
@@ -30,7 +30,6 @@ export function createLatencyEvaluator({
       extractResult: (response) => {
         return response.values[0][0] as number;
       },
-      unavailableMessage: 'No traceId available for latency evaluation',
     },
   });
 }

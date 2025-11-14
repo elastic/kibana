@@ -11,14 +11,14 @@ import type { Evaluator } from '../../types';
 import { createTraceBasedEvaluator } from './factory';
 
 export function createToolCallsEvaluator({
-  esClient,
+  traceEsClient,
   log,
 }: {
-  esClient: EsClient;
+  traceEsClient: EsClient;
   log: ToolingLog;
 }): Evaluator {
   return createTraceBasedEvaluator({
-    esClient,
+    traceEsClient,
     log,
     config: {
       name: 'Tool Calls',

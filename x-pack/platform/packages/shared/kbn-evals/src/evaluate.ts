@@ -9,6 +9,7 @@ import type { InferenceConnectorType, InferenceConnector, Model } from '@kbn/inf
 import { getConnectorModel, getConnectorFamily, getConnectorProvider } from '@kbn/inference-common';
 import { createRestClient } from '@kbn/inference-plugin/common';
 import { test as base } from '@kbn/scout';
+import { createEsClientForTesting } from '@kbn/test';
 import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
 import { getPhoenixConfig } from './utils/get_phoenix_config';
 import { KibanaPhoenixClient } from './kibana_phoenix_client/client';
@@ -206,7 +207,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
     },
   ],
   evaluators: [
-    async ({ log, inferenceClient, evaluationConnector, esClient }, use) => {
+    async ({ log, inferenceClient, evaluationConnector, traceEsClient }, use) => {
       const evaluatorInferenceClient = inferenceClient.bindTo({
         connectorId: evaluationConnector.id,
       });
@@ -234,23 +235,23 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
         traceBasedEvaluators: () => {
           return [
             createInputTokensEvaluator({
-              esClient,
+              traceEsClient,
               log,
             }),
             createOutputTokensEvaluator({
-              esClient,
+              traceEsClient,
               log,
             }),
             createLatencyEvaluator({
-              esClient,
+              traceEsClient,
               log,
             }),
             createToolCallsEvaluator({
-              esClient,
+              traceEsClient,
               log,
             }),
             createCachedTokensEvaluator({
-              esClient,
+              traceEsClient,
               log,
             }),
           ];
@@ -261,6 +262,17 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
     {
       scope: 'worker',
     },
+  ],
+  traceEsClient: [
+    async ({ esClient }, use) => {
+      const traceEsClient = process.env.TRACING_ES_URL
+        ? createEsClientForTesting({
+            esUrl: process.env.TRACING_ES_URL,
+          })
+        : esClient;
+      await use(traceEsClient);
+    },
+    { scope: 'worker' },
   ],
   repetitions: [
     async ({}, use, testInfo) => {
