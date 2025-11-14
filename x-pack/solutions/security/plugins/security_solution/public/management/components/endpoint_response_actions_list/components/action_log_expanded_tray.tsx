@@ -106,6 +106,10 @@ const OutputContent = memo<{
     canReadActionsLogManagement,
     canAccessEndpointActionsLogManagement,
   } = useUserPrivileges().endpointPrivileges;
+  const canAccessFileDownloadLink = useMemo(
+    () => canAccessEndpointActionsLogManagement || canReadActionsLogManagement,
+    [canAccessEndpointActionsLogManagement, canReadActionsLogManagement]
+  );
 
   const { command: _command, isCompleted, isExpired, wasSuccessful } = action;
   const command = RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[_command];
@@ -171,9 +175,7 @@ const OutputContent = memo<{
             <ExecuteActionHostResponse
               action={action}
               agentId={agentId}
-              canAccessFileDownloadLink={
-                canAccessEndpointActionsLogManagement || canReadActionsLogManagement
-              }
+              canAccessFileDownloadLink={canAccessFileDownloadLink}
               textSize="xs"
               data-test-subj={getTestId('actionsLogTray')}
             />
@@ -217,28 +219,19 @@ const OutputContent = memo<{
         {action.agents.map((agentId) => (
           <div key={agentId}>
             {OUTPUT_MESSAGES.wasSuccessful(command)}
-
-            {action.agentType === 'sentinel_one' ? (
-              <RunscriptActionResult
-                action={action}
-                agentId={agentId}
-                textSize="xs"
-                data-test-subj={getTestId('actionsLogTray')}
-              />
-            ) : (
-              <ExecuteActionHostResponse
-                action={action}
-                agentId={agentId}
-                canAccessFileDownloadLink={
-                  canAccessEndpointActionsLogManagement || canReadActionsLogManagement
-                }
-                textSize="xs"
-                data-test-subj={getTestId('actionsLogTray')}
-                hideFile={action.agentType === 'crowdstrike'}
-                hideContext={true}
-                showPasscode={action.agentType !== 'microsoft_defender_endpoint'}
-              />
-            )}
+            <RunscriptActionResult
+              action={action}
+              agentId={agentId}
+              canAccessFileDownloadLink={
+                action.agentType === 'sentinel_one' ||
+                action.agentType === 'microsoft_defender_endpoint'
+              }
+              data-test-subj={getTestId('actionsLogTray')}
+              hideFile={action.agentType === 'crowdstrike'}
+              showPasscode={action.agentType === 'sentinel_one'}
+              shouldShowOutput={action.agentType === 'microsoft_defender_endpoint'}
+              textSize="xs"
+            />
           </div>
         ))}
       </EuiFlexGroup>

@@ -419,10 +419,14 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
                   key: 'ScriptName',
                   value: payload.parameters.scriptName,
                 },
-                {
-                  key: 'Args',
-                  value: payload.parameters.args || '--noargs',
-                },
+                ...(payload.parameters.args
+                  ? [
+                      {
+                        key: 'Args',
+                        value: payload.parameters.args,
+                      },
+                    ]
+                  : []),
               ],
             },
           ],
@@ -489,7 +493,9 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
     const resultDownloadLink =
       await this.fetchFromMicrosoft<MicrosoftDefenderEndpointGetActionResultsResponse>(
         {
-          url: `${this.urls.machineActions}/${id}/GetLiveResponseResultDownloadLink(index=0)`, // We want to download the first result
+          // index 0 is used to fetch the response for the first element in the list of commands in live response request
+          // live response API request doc https://learn.microsoft.com/en-us/defender-endpoint/api/run-live-response#example
+          url: `${this.urls.machineActions}/${id}/GetLiveResponseResultDownloadLink(index=0)`,
           method: 'GET',
         },
         connectorUsageCollector

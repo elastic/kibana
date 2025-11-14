@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
-import { EuiText, type EuiTextProps } from '@elastic/eui';
+import React, { memo, useMemo } from 'react';
+import { EuiFlexItem, EuiSpacer, type EuiTextProps } from '@elastic/eui';
 import { ResponseActionFileDownloadLink } from '../response_action_file_download_link';
 import type {
   ActionDetails,
   MaybeImmutable,
+  ResponseActionExecuteOutputContent,
   ResponseActionRunScriptOutputContent,
 } from '../../../../common/endpoint/types';
+import { RunscriptOutput } from './runscript_action_output';
+import { RunscriptActionNoOutput } from './runscript_action_no_output';
 
 export interface RunscriptActionResultProps {
   action: MaybeImmutable<ActionDetails<ResponseActionRunScriptOutputContent>>;
@@ -21,8 +24,15 @@ export interface RunscriptActionResultProps {
    * If undefined, then responses for all agents are displayed
    */
   agentId?: string;
-  textSize?: EuiTextProps['size'];
+  canAccessFileDownloadLink: boolean;
   'data-test-subj'?: string;
+  hideFile: boolean;
+  // should be true for microsoft_defender_endpoint
+  shouldShowOutput?: boolean;
+  // should be false for microsoft_defender_endpoint
+  // true for sentinel_one
+  showPasscode: boolean;
+  textSize?: Exclude<EuiTextProps['size'], 'm' | 'relative'>;
 }
 
 /**
@@ -39,19 +49,57 @@ export interface RunscriptActionResultProps {
  * @returns {React.Element} A React component that renders a text block with a file download link.
  */
 export const RunscriptActionResult = memo<RunscriptActionResultProps>(
-  ({ action, agentId, textSize = 's', 'data-test-subj': dataTestSubj }) => {
-    // TODO:PT refactor other EDR responses to use this component (centralize all response UI for runscript)
+  ({
+    action,
+    agentId = action.agents[0],
+    canAccessFileDownloadLink,
+    'data-test-subj': dataTestSubj,
+    hideFile,
+    shouldShowOutput = false,
+    showPasscode,
+    textSize = 's',
+  }) => {
+    const outputContent = useMemo(
+      () =>
+        action.outputs &&
+        action.outputs[agentId] &&
+        (action.outputs[agentId].content as ResponseActionExecuteOutputContent),
+      [action.outputs, agentId]
+    );
+
     return (
-      <EuiText size={textSize}>
-        <ResponseActionFileDownloadLink
-          action={action}
-          canAccessFileDownloadLink={true}
-          data-test-subj={dataTestSubj}
-          agentId={agentId}
-          textSize={textSize}
-          showPasscode={false}
-        />
-      </EuiText>
+      <>
+        {!hideFile && (
+          <EuiFlexItem>
+            <ResponseActionFileDownloadLink
+              action={action}
+              canAccessFileDownloadLink={canAccessFileDownloadLink}
+              data-test-subj={dataTestSubj}
+              agentId={agentId}
+              textSize={textSize}
+              showPasscode={showPasscode}
+            />
+          </EuiFlexItem>
+        )}
+        {shouldShowOutput && !outputContent && (
+          <>
+            <EuiSpacer size="l" />
+            <EuiFlexItem>
+              <RunscriptActionNoOutput textSize={textSize} data-test-subj={dataTestSubj} />
+            </EuiFlexItem>
+          </>
+        )}
+        {shouldShowOutput && outputContent && (
+          <>
+            <EuiSpacer size="l" />
+            <RunscriptOutput
+              outputContent={outputContent}
+              data-test-subj={dataTestSubj}
+              textSize={textSize}
+            />
+          </>
+        )}
+      </>
     );
   }
 );
