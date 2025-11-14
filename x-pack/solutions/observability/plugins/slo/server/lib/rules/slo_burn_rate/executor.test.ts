@@ -805,7 +805,7 @@ describe('BurnRateRuleExecutor', () => {
       });
     });
 
-    it('includes APM service fields in alert payload when available in summary', async () => {
+    it('includes APM service and transaction fields in alert when available in SLO summary', async () => {
       const slo = createSLO({
         objective: { target: 0.9 },
       });
