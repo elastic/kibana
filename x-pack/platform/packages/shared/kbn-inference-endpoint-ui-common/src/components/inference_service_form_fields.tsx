@@ -185,17 +185,20 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
         return;
       }
 
-      const hidden = overrides?.hidden ?? [];
-      const hiddenFields = [
-        ...(enableCustomHeaders !== true ? ['headers', ...hidden] : [...hidden]),
-      ];
+      const hiddenFields = [...(overrides?.hidden ?? [])];
 
-      Object.entries(provider?.configurations ?? {}).forEach(([field, configEntry]) => {
-        if (Object.values(FieldType).includes(configEntry.type) === false) {
-          // hide unknown type fields in form as they aren't handled yet
-          hiddenFields.push(field);
-        }
-      });
+      if (enableCustomHeaders !== true) {
+        hiddenFields.unshift('headers');
+      }
+
+      if (provider?.configurations) {
+        Object.entries(provider.configurations).forEach(([field, configEntry]) => {
+          if (Object.values(FieldType).includes(configEntry.type) === false) {
+            // hide unknown type fields in form as they aren't handled yet
+            hiddenFields.push(field);
+          }
+        });
+      }
 
       overrides = {
         ...(overrides ?? {}),
