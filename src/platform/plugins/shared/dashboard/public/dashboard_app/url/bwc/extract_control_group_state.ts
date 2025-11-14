@@ -7,116 +7,101 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ControlWidth, ControlsGroupState } from '@kbn/controls-schemas';
-import type { DashboardState, DashboardControlsState } from '../../../../common';
+import { omit } from 'lodash';
+import type { ControlsGroupState } from '@kbn/controls-schemas';
+import {
+  DEFAULT_AUTO_APPLY_SELECTIONS,
+  DEFAULT_IGNORE_VALIDATIONS,
+  DEFAULT_USE_GLOBAL_FILTERS,
+} from '@kbn/controls-constants';
+import type { DashboardState } from '../../../../common';
 
-interface State816To819 {
-  controlGroupState: {
-    initialChildControlState: Record<
-      string,
-      object & {
-        grow: boolean;
-        order: number;
-        type: string;
-        width: ControlWidth;
-      }
-    >;
-  };
-}
+export function extractControlGroupState(state: { [key: string]: unknown }): {
+  controlGroupState?: DashboardState['controlGroupInput'];
+  autoApplyFilters?: boolean;
+} {
+  let convertedState: { [key: string]: unknown } = state;
 
-const isState816To819 = (state: unknown): state is State816To819 =>
-  Boolean((state as State816To819).controlGroupState?.initialChildControlState);
-
-interface State819To94 {
-  controlGroupInput: {
-    controls: Array<{ controlConfig: object }>;
-  };
-}
-
-const isState819To94 = (state: unknown): state is State819To94 => {
-  return Boolean(
-    (state as State819To94).controlGroupInput.controls.length &&
-      (state as State819To94).controlGroupInput.controls[0].controlConfig
-  );
-};
-
-export function extractControlGroupState(state: {
-  [key: string]: unknown;
-}): DashboardState['controlGroupInput'] {
-  console.log({ state });
-  if (isState816To819(state)) {
+  if (
+    convertedState.controlGroupState &&
+    typeof convertedState.controlGroupState === 'object' &&
+    'initialChildControlState' in convertedState.controlGroupState &&
+    typeof convertedState.controlGroupState.initialChildControlState === 'object'
+  ) {
     // URL state created in 8.16 through 8.18 passed control group runtime state in with controlGroupState key
-    return {
-      controls: Object.entries(state.controlGroupState.initialChildControlState).map(
-        ([controlId, value]) => {
-          const { grow, order, type, width, ...config } = value;
-          return {
-            id: controlId,
-            grow,
-            order,
-            type,
-            width,
-            config,
-          };
-        }
-      ) as DashboardControlsState,
+    const {
+      controlGroupState: { initialChildControlState },
+      ...rest
+    } = convertedState;
+    convertedState = {
+      ...rest,
+      controlGroupInput: {
+        ...omit(convertedState.controlGroupState, 'initialChildControlState'),
+        controls: initialChildControlState,
+      },
     };
   }
 
-  if (!state.controlGroupInput || typeof state.controlGroupInput !== 'object') return;
-
-  const controlGroupInput = state.controlGroupInput as { [key: string]: unknown };
-
-  if (isState819To94(state)) {
-    // URL state created in 8.19 up to 9.3 had `config` stored under `controlConfig`
-    controlGroupInput.controls = state.controlGroupInput.controls.map(
-      ({ controlConfig, ...rest }) => ({ ...rest, config: controlConfig })
-    );
+  if (!convertedState.controlGroupInput || typeof convertedState.controlGroupInput !== 'object') {
+    return {};
   }
 
-  // TODO: Update bwc for autoApplySelections
-
-  // let autoApplySelections: ControlsGroupState['autoApplySelections'] =
-  //   DEFAULT_AUTO_APPLY_SELECTIONS;
-  // if (typeof controlGroupInput.autoApplySelections === 'boolean') {
-  //   autoApplySelections = controlGroupInput.autoApplySelections;
-  // } else if (typeof controlGroupInput.showApplySelections === 'boolean') {
-  //   // <8.16 autoApplySelections exported as !showApplySelections
-  //   autoApplySelections = !controlGroupInput.showApplySelections;
-  // }
-
-  let controls: DashboardControlsState = [];
-  if (Array.isArray(controlGroupInput.controls)) {
-    controls = controlGroupInput.controls;
-  } else if (controlGroupInput.panels && typeof controlGroupInput.panels === 'object') {
+  const controlGroupInput = convertedState.controlGroupInput as { [key: string]: unknown };
+  let standardizedControls: ControlsGroupState['controls'] = [];
+  if (controlGroupInput.panels && typeof controlGroupInput.panels === 'object') {
     // <8.16 controls exported as panels
-    const panels = controlGroupInput.panels as {
-      [key: string]:
-        | { [key: string]: unknown; explicitInput?: { [key: string]: unknown } }
-        | undefined;
-    };
-    controls = Object.keys(controlGroupInput.panels).map((controlId) => {
+    standardizedControls = Object.keys(controlGroupInput.panels).map((controlId) => {
+      const panels = controlGroupInput.panels as {
+        [key: string]: { [key: string]: unknown } | undefined;
+      };
       const { explicitInput, ...restOfControlState } = panels[controlId] ?? {};
       return {
         ...restOfControlState,
-        ...(explicitInput ? { controlConfig: explicitInput } : {}),
+        config: explicitInput,
       };
-    }) as DashboardControlsState;
+    }) as ControlsGroupState['controls'];
+  } else if (Array.isArray(controlGroupInput.controls)) {
+    standardizedControls = controlGroupInput.controls.map((control) => {
+      if ('controlConfig' in control) {
+        // URL state created in 8.19 up to 9.4 had `config` stored under `controlConfig`
+        const { controlConfig, ...rest } = control;
+        return { ...rest, config: controlConfig };
+      }
+      return control;
+    });
   }
 
-  // TODO: Update bwc for labelPosition
+  let autoApplySelections: boolean = DEFAULT_AUTO_APPLY_SELECTIONS;
+  if (typeof controlGroupInput.autoApplySelections === 'boolean') {
+    autoApplySelections = controlGroupInput.autoApplySelections;
+  } else if (typeof controlGroupInput.showApplySelections === 'boolean') {
+    // <8.16 autoApplySelections exported as !showApplySelections
+    autoApplySelections = !controlGroupInput.showApplySelections;
+  }
 
-  // let labelPosition: ControlsGroupState['labelPosition'] = DEFAULT_CONTROLS_LABEL_POSITION;
-  // if (typeof controlGroupInput.labelPosition === 'string') {
-  //   labelPosition = controlGroupInput.labelPosition as ControlsGroupState['labelPosition'];
-  // } else if (typeof controlGroupInput.controlStyle === 'string') {
-  //   // <8.16 labelPosition exported as controlStyle
-  //   labelPosition = controlGroupInput.controlStyle as ControlsGroupState['labelPosition'];
-  // }
+  if (typeof controlGroupInput.ignoreParentSettings === 'object') {
+    // >9.3 control group `ignoreParentSettings` gets translated to individual control settings and/or dashboard settings
+    const ignoreParentSettings = controlGroupInput.ignoreParentSettings ?? {};
+    const legacyUseGlobalFilters = Boolean(
+      ('ignoreFilters' in ignoreParentSettings && ignoreParentSettings.ignoreFilters) ||
+        ('ignoreQuery' in ignoreParentSettings && ignoreParentSettings.ignoreQuery)
+    );
+    standardizedControls.map((control) => ({
+      ...control,
+      useGlobalFilters: !('useGlobalFilters' in control)
+        ? legacyUseGlobalFilters
+        : DEFAULT_USE_GLOBAL_FILTERS,
+      ignoreValidations:
+        'ignoreValidations' in ignoreParentSettings
+          ? ignoreParentSettings.ignoreValidations
+          : DEFAULT_IGNORE_VALIDATIONS,
+    }));
+  }
 
   return {
-    // autoApplySelections,
-    controls,
-    // labelPosition,
+    autoApplyFilters: autoApplySelections, // >9.3 this control group setting became a dashboard setting
+    controlGroupState: {
+      controls: standardizedControls,
+    },
   };
 }
