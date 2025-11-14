@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import axios, { AxiosInstance } from 'axios';
+import type { AxiosInstance } from 'axios';
+import axios from 'axios';
 import type { Logger } from '@kbn/core/server';
 import type {
   CloudConnectUserResponse,

@@ -96,7 +96,12 @@ export const ServiceCards: React.FC<ServiceCardsProps> = ({ hasPermissions }) =>
 
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty iconType="popout" iconSide="right" href={docLinks.links.cloud.cloudConnect} target="_blank">
+          <EuiButtonEmpty
+            iconType="popout"
+            iconSide="right"
+            href={docLinks.links.cloud.cloudConnect}
+            target="_blank"
+          >
             {i18n.translate('xpack.cloudConnect.serviceCards.learnMore', {
               defaultMessage: 'Learn more',
             })}

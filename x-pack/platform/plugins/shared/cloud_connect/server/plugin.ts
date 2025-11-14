@@ -24,8 +24,10 @@ import {
   CloudConnectApiKeyEncryptionParams,
 } from './saved_objects/cloud_connect_api_key';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CloudConnectedPluginSetup {}
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CloudConnectedPluginStart {}
 
 interface CloudConnectedSetupDeps {

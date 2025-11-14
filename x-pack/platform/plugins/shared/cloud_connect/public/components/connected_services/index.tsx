@@ -61,9 +61,7 @@ export interface ConnectedServicesPageProps {
   clusterDetails: ClusterDetails;
 }
 
-export const ConnectedServicesPage: React.FC<ConnectedServicesPageProps> = ({
-  clusterDetails,
-}) => {
+export const ConnectedServicesPage: React.FC<ConnectedServicesPageProps> = ({ clusterDetails }) => {
   const { euiTheme } = useEuiTheme();
   const { http, notifications } = useCloudConnectedAppContext();
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
@@ -120,10 +118,7 @@ export const ConnectedServicesPage: React.FC<ConnectedServicesPageProps> = ({
   };
 
   const actionsMenuItems = [
-    <EuiContextMenuItem
-      key="disconnect"
-      onClick={showDisconnectModal}
-    >
+    <EuiContextMenuItem key="disconnect" onClick={showDisconnectModal}>
       <EuiText color="danger" size="s">
         <FormattedMessage
           id="xpack.cloudConnect.connectedServices.actions.disconnectCluster"
@@ -179,14 +174,20 @@ export const ConnectedServicesPage: React.FC<ConnectedServicesPageProps> = ({
   );
 
   return (
-    <EuiPage direction="column" restrictWidth={1200} grow={false} css={{ background: euiTheme.colors.backgroundBasePlain }} paddingSize="l">
+    <EuiPage
+      direction="column"
+      restrictWidth={1200}
+      grow={false}
+      css={{ background: euiTheme.colors.backgroundBasePlain }}
+      paddingSize="l"
+    >
       <EuiPageHeader
-        pageTitle={(
+        pageTitle={
           <FormattedMessage
             id="xpack.cloudConnect.connectedServices.pageTitle"
             defaultMessage="Cloud connected services"
           />
-        )}
+        }
         bottomBorder
         description={
           <EuiText size="s">

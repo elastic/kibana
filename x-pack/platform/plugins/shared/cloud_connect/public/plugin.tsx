@@ -15,8 +15,10 @@ import type {
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CloudConnectedPluginSetup {}
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CloudConnectedPluginStart {}
 
 interface CloudConnectedSetupDeps {

@@ -8,7 +8,8 @@
 import React from 'react';
 import { EuiTitle, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ServiceCard, ServiceCardProps } from './service_card';
+import type { ServiceCardProps } from './service_card';
+import { ServiceCard } from './service_card';
 
 interface Service {
   enabled: boolean;
@@ -34,11 +35,10 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ services }) =>
         ? `AWS, N. Virginia (${services.eis.config.region_id})`
         : undefined,
       description: 'Description.',
-      learnMoreUrl: 'https://www.elastic.co/guide/en/elasticsearch/reference/current/inference-apis.html',
+      learnMoreUrl:
+        'https://www.elastic.co/guide/en/elasticsearch/reference/current/inference-apis.html',
       actionLabel: services.eis?.enabled ? 'Open' : 'Connect',
-      onAction: services.eis?.enabled
-        ? () => console.log('Open EIS')
-        : () => console.log('Connect EIS'),
+      onAction: services.eis?.enabled ? () => {} : () => {},
     },
     {
       title: 'AutoOps',
@@ -46,16 +46,15 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ services }) =>
       description: 'Advanced monitoring for your Self-managed cluster.',
       learnMoreUrl: 'https://www.elastic.co/guide/en/cloud/current/ec-autops.html',
       actionLabel: services.auto_ops?.enabled ? 'Open' : 'Connect',
-      onAction: services.auto_ops?.enabled
-        ? () => console.log('Open AutoOps')
-        : () => console.log('Connect AutoOps'),
+      onAction: services.auto_ops?.enabled ? () => {} : () => {},
     },
     {
       title: 'Synthetics',
       enabled: false,
       badge: 'Coming soon',
       description: 'Description.',
-      learnMoreUrl: 'https://www.elastic.co/guide/en/observability/current/synthetics-get-started.html',
+      learnMoreUrl:
+        'https://www.elastic.co/guide/en/observability/current/synthetics-get-started.html',
       isCardDisabled: true,
     },
   ];

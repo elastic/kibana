@@ -8,6 +8,8 @@
 import { schema } from '@kbn/config-schema';
 import type { IRouter, Logger } from '@kbn/core/server';
 import axios from 'axios';
+import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { StartServicesAccessor } from '@kbn/core/server';
 import { CloudConnectClient } from '../services/cloud_connect_client';
 import type { OnboardClusterResponse } from '../types';
 import { getCurrentClusterData } from '../lib/cluster_info';
@@ -17,9 +19,6 @@ import { CLOUD_CONNECT_API_KEY_TYPE } from '../../common/constants';
 const bodySchema = schema.object({
   apiKey: schema.string({ minLength: 1 }),
 });
-
-import type { StartServicesAccessor } from '@kbn/core/server';
-import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 
 interface CloudConnectedStartDeps {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;

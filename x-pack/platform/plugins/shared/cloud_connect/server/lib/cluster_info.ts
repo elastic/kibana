@@ -19,7 +19,11 @@ export async function getClusterInfo(esClient: ElasticsearchClient): Promise<Inf
   try {
     return await esClient.info();
   } catch (error) {
-    throw new Error(`Failed to fetch cluster information: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    throw new Error(
+      `Failed to fetch cluster information: ${
+        error instanceof Error ? error.message : 'Unknown error'
+      }`
+    );
   }
 }
 
@@ -32,7 +36,11 @@ export async function getLicenseInfo(esClient: ElasticsearchClient): Promise<Lic
   try {
     return await esClient.license.get();
   } catch (error) {
-    throw new Error(`Failed to fetch license information: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    throw new Error(
+      `Failed to fetch license information: ${
+        error instanceof Error ? error.message : 'Unknown error'
+      }`
+    );
   }
 }
 
