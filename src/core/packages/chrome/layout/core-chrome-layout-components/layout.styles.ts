@@ -11,7 +11,10 @@ import { css } from '@emotion/react';
 import type { LayoutState } from './layout.types';
 
 const cssProp = css`
-  height: 100vh;
+  @media screen {
+    // do not restrict height when printing
+    height: 100vh;
+  }
   width: 100vw;
   min-height: 100%;
   min-width: 100%;
