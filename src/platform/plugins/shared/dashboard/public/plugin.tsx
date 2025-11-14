@@ -291,7 +291,12 @@ export class DashboardPlugin
   public start(core: CoreStart, plugins: DashboardStartDependencies): DashboardStart {
     setKibanaServices(core, plugins);
 
-    untilPluginStartServicesReady().then(() => registerActions(plugins));
+    registerActions(plugins);
+
+    plugins.uiActions.registerActionAsync('searchDashboardAction', async () => {
+      const { searchAction } = await import('./dashboard_client');
+      return searchAction;
+    });
 
     return {
       registerDashboardPanelSettings,
