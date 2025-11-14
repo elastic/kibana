@@ -36,9 +36,9 @@ describe('FindSLODefinitions with Health validation', () => {
     mockGetSLOHealth.execute.mockResolvedValue({
       data: [
         {
-          sloId: slo.id,
-          sloRevision: slo.revision,
-          sloName: slo.name,
+          id: slo.id,
+          revision: slo.revision,
+          name: slo.name,
           health: {
             overall: 'healthy',
             rollup: { status: 'healthy' },
@@ -80,10 +80,11 @@ describe('FindSLODefinitions with Health validation', () => {
       expect(mockGetSLOHealth.execute).toHaveBeenCalledWith({
         list: [
           {
-            sloId: slo.id,
-            sloInstanceId: '*',
-            sloRevision: slo.revision,
-            sloName: slo.name,
+            id: slo.id,
+            instanceId: '*',
+            revision: slo.revision,
+            name: slo.name,
+            enabled: slo.enabled,
           },
         ],
       });

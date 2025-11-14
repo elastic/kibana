@@ -84,11 +84,11 @@ export function HealthCallout() {
           </span>
           <ul>
             {unhealthyAndMissingSloList.map((result) => (
-              <li key={result.sloId}>
+              <li key={result.id}>
                 <ContentWithInspectCta
                   textSize="xs"
-                  content={result.sloName}
-                  url={paths.sloDetails(result.sloId, '*', undefined, 'overview')}
+                  content={result.name}
+                  url={paths.sloDetails(result.id, '*', undefined, 'overview')}
                 />
               </li>
             ))}

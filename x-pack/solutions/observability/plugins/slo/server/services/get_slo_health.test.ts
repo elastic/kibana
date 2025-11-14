@@ -16,10 +16,13 @@ import {
   aSummaryDocument,
 } from './fixtures/summary_search_document';
 import { GetSLOHealth } from './get_slo_health';
+import type { SLORepository } from './slo_repository';
+import { createSLORepositoryMock } from './mocks';
 
 describe('GetSLOHealth', () => {
   let mockScopedClusterClient: ScopedClusterClientMock;
   let getSLOHealth: GetSLOHealth;
+  let mockRepository: jest.Mocked<SLORepository>;
 
   function mockSLOCompositeAggResponse(slos: { id: any; revision: any; name: any }[]) {
     return mockScopedClusterClient.asCurrentUser.search.mockResolvedValueOnce({
@@ -43,10 +46,10 @@ describe('GetSLOHealth', () => {
         sloIds: {
           buckets: slos.map((slo) => ({
             key: {
-              sloId: slo.id,
-              sloInstanceId: '*',
-              sloRevision: slo.revision,
-              sloName: slo.name,
+              id: slo.id,
+              instanceId: '*',
+              revision: slo.revision,
+              name: slo.name,
             },
             doc_count: 1,
           })),
@@ -57,7 +60,8 @@ describe('GetSLOHealth', () => {
 
   beforeEach(() => {
     mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-    getSLOHealth = new GetSLOHealth(mockScopedClusterClient);
+    mockRepository = createSLORepositoryMock();
+    getSLOHealth = new GetSLOHealth(mockScopedClusterClient, mockRepository);
   });
 
   it('returns the health and state', async () => {
@@ -90,13 +94,14 @@ describe('GetSLOHealth', () => {
     } as any);
 
     const result = await getSLOHealth.execute({
-      list: [{ sloId: slo.id, sloInstanceId: ALL_VALUE }],
+      list: [{ id: slo.id, instanceId: ALL_VALUE, enabled: slo.enabled }],
     });
 
     expect(result).toMatchInlineSnapshot(`
       Object {
         "data": Array [
           Object {
+            "enabled": true,
             "health": Object {
               "overall": "unhealthy",
               "rollup": Object {
@@ -106,10 +111,10 @@ describe('GetSLOHealth', () => {
                 "status": "missing",
               },
             },
-            "sloId": "95ffb9af-1384-4d24-8e3f-345a03d7a439",
-            "sloInstanceId": "*",
-            "sloName": "irrelevant",
-            "sloRevision": 1,
+            "id": "95ffb9af-1384-4d24-8e3f-345a03d7a439",
+            "instanceId": "*",
+            "name": "irrelevant",
+            "revision": 1,
             "state": "no_data",
           },
         ],
@@ -145,7 +150,7 @@ describe('GetSLOHealth', () => {
     } as any);
 
     const result = await getSLOHealth.execute({
-      list: [{ sloId: 'nonexistant', sloInstanceId: ALL_VALUE }],
+      list: [{ id: 'nonexistant', instanceId: ALL_VALUE, enabled: true }],
     });
 
     expect(result.data).toHaveLength(0);
@@ -192,13 +197,14 @@ describe('GetSLOHealth', () => {
       });
 
       const result = await getSLOHealth.execute({
-        list: [{ sloId: slo.id, sloInstanceId: ALL_VALUE }],
+        list: [{ id: slo.id, instanceId: ALL_VALUE, enabled: slo.enabled }],
       });
 
       expect(result).toMatchInlineSnapshot(`
         Object {
           "data": Array [
             Object {
+              "enabled": true,
               "health": Object {
                 "overall": "healthy",
                 "rollup": Object {
@@ -210,10 +216,10 @@ describe('GetSLOHealth', () => {
                   "transformState": "started",
                 },
               },
-              "sloId": "95ffb9af-1384-4d24-8e3f-345a03d7a439",
-              "sloInstanceId": "*",
-              "sloName": "irrelevant",
-              "sloRevision": 1,
+              "id": "95ffb9af-1384-4d24-8e3f-345a03d7a439",
+              "instanceId": "*",
+              "name": "irrelevant",
+              "revision": 1,
               "state": "no_data",
             },
           ],
@@ -264,13 +270,14 @@ describe('GetSLOHealth', () => {
       });
 
       const result = await getSLOHealth.execute({
-        list: [{ sloId: slo.id, sloInstanceId: ALL_VALUE }],
+        list: [{ id: slo.id, instanceId: ALL_VALUE, enabled: slo.enabled }],
       });
 
       expect(result).toMatchInlineSnapshot(`
         Object {
           "data": Array [
             Object {
+              "enabled": true,
               "health": Object {
                 "overall": "unhealthy",
                 "rollup": Object {
@@ -282,10 +289,10 @@ describe('GetSLOHealth', () => {
                   "transformState": "started",
                 },
               },
-              "sloId": "95ffb9af-1384-4d24-8e3f-345a03d7a439",
-              "sloInstanceId": "*",
-              "sloName": "irrelevant",
-              "sloRevision": 1,
+              "id": "95ffb9af-1384-4d24-8e3f-345a03d7a439",
+              "instanceId": "*",
+              "name": "irrelevant",
+              "revision": 1,
               "state": "no_data",
             },
           ],
@@ -347,8 +354,8 @@ describe('GetSLOHealth', () => {
 
       const result = await getSLOHealth.execute({
         list: [
-          { sloId: slo1.id, sloInstanceId: ALL_VALUE },
-          { sloId: slo2.id, sloInstanceId: ALL_VALUE },
+          { id: slo1.id, instanceId: ALL_VALUE, enabled: slo1.enabled },
+          { id: slo2.id, instanceId: ALL_VALUE, enabled: slo2.enabled },
         ],
       });
 
@@ -409,8 +416,8 @@ describe('GetSLOHealth', () => {
 
       const result = await getSLOHealth.execute({
         list: [
-          { sloId: slo1.id, sloInstanceId: ALL_VALUE },
-          { sloId: slo2.id, sloInstanceId: ALL_VALUE },
+          { id: slo1.id, instanceId: ALL_VALUE, enabled: slo1.enabled },
+          { id: slo2.id, instanceId: ALL_VALUE, enabled: slo2.enabled },
         ],
       });
 
@@ -472,7 +479,7 @@ describe('GetSLOHealth', () => {
       });
 
       const result = await getSLOHealth.execute({
-        list: [{ sloId: slo.id, sloInstanceId: ALL_VALUE }],
+        list: [{ id: slo.id, instanceId: ALL_VALUE, enabled: slo.enabled }],
       });
 
       expect(result.data[0].state).toBe('stale');
@@ -526,7 +533,7 @@ describe('GetSLOHealth', () => {
       });
 
       const result = await getSLOHealth.execute({
-        list: [{ sloId: slo.id, sloInstanceId: ALL_VALUE }],
+        list: [{ id: slo.id, instanceId: ALL_VALUE, enabled: slo.enabled }],
       });
 
       expect(result.data[0].state).toBe('indexing');
@@ -580,7 +587,7 @@ describe('GetSLOHealth', () => {
       });
 
       const result = await getSLOHealth.execute({
-        list: [{ sloId: slo.id, sloInstanceId: ALL_VALUE }],
+        list: [{ id: slo.id, instanceId: ALL_VALUE, enabled: slo.enabled }],
       });
 
       expect(result.data[0].state).toBe('running');
@@ -632,7 +639,7 @@ describe('GetSLOHealth', () => {
 
     it('returns the first page', async () => {
       const result = await getSLOHealth.execute({
-        list: slos.map((slo) => ({ sloId: slo.id, sloInstanceId: ALL_VALUE })),
+        list: slos.map((slo) => ({ id: slo.id, instanceId: ALL_VALUE, enabled: slo.enabled })),
         page: 0,
         perPage: 10,
       });
@@ -641,13 +648,13 @@ describe('GetSLOHealth', () => {
       expect(result.page).toBe(0);
       expect(result.perPage).toBe(10);
       expect(result.total).toBe(25);
-      expect(result.data[0].sloId).toBe('slo-id-0');
-      expect(result.data[9].sloId).toBe('slo-id-9');
+      expect(result.data[0].id).toBe('slo-id-0');
+      expect(result.data[9].id).toBe('slo-id-9');
     });
 
     it('returns the second page', async () => {
       const result = await getSLOHealth.execute({
-        list: slos.map((slo) => ({ sloId: slo.id, sloInstanceId: ALL_VALUE })),
+        list: slos.map((slo) => ({ id: slo.id, instanceId: ALL_VALUE, enabled: slo.enabled })),
         page: 1,
         perPage: 10,
       });
@@ -656,13 +663,13 @@ describe('GetSLOHealth', () => {
       expect(result.page).toBe(1);
       expect(result.perPage).toBe(10);
       expect(result.total).toBe(25);
-      expect(result.data[0].sloId).toBe('slo-id-10');
-      expect(result.data[9].sloId).toBe('slo-id-19');
+      expect(result.data[0].id).toBe('slo-id-10');
+      expect(result.data[9].id).toBe('slo-id-19');
     });
 
     it('returns the last page', async () => {
       const result = await getSLOHealth.execute({
-        list: slos.map((slo) => ({ sloId: slo.id, sloInstanceId: ALL_VALUE })),
+        list: slos.map((slo) => ({ id: slo.id, instanceId: ALL_VALUE, enabled: slo.enabled })),
         page: 2,
         perPage: 10,
       });
@@ -671,13 +678,13 @@ describe('GetSLOHealth', () => {
       expect(result.page).toBe(2);
       expect(result.perPage).toBe(10);
       expect(result.total).toBe(25);
-      expect(result.data[0].sloId).toBe('slo-id-20');
-      expect(result.data[4].sloId).toBe('slo-id-24');
+      expect(result.data[0].id).toBe('slo-id-20');
+      expect(result.data[4].id).toBe('slo-id-24');
     });
 
     it('returns an empty page if page is out of bounds', async () => {
       const result = await getSLOHealth.execute({
-        list: slos.map((slo) => ({ sloId: slo.id, sloInstanceId: ALL_VALUE })),
+        list: slos.map((slo) => ({ id: slo.id, instanceId: ALL_VALUE, enabled: slo.enabled })),
         page: 3,
         perPage: 10,
       });
@@ -690,7 +697,7 @@ describe('GetSLOHealth', () => {
 
     it('returns all items if perPage is larger than total', async () => {
       const result = await getSLOHealth.execute({
-        list: slos.map((slo) => ({ sloId: slo.id, sloInstanceId: ALL_VALUE })),
+        list: slos.map((slo) => ({ id: slo.id, instanceId: ALL_VALUE, enabled: slo.enabled })),
         page: 0,
         perPage: 30,
       });
@@ -757,31 +764,31 @@ describe('GetSLOHealth', () => {
 
     it("returns only healthy SLOs when statusFilter is 'healthy'", async () => {
       const result = await getSLOHealth.execute({
-        list: slos.map((slo) => ({ sloId: slo.id, sloInstanceId: ALL_VALUE })),
+        list: slos.map((slo) => ({ id: slo.id, instanceId: ALL_VALUE, enabled: slo.enabled })),
         statusFilter: 'healthy',
       });
 
       expect(result.data).toHaveLength(1);
       expect(result.total).toBe(1);
-      expect(result.data[0].sloId).toBe('healthy-slo');
+      expect(result.data[0].id).toBe('healthy-slo');
       expect(result.data[0].health.overall).toBe('healthy');
     });
 
     it("returns only unhealthy SLOs when statusFilter is 'unhealthy'", async () => {
       const result = await getSLOHealth.execute({
-        list: slos.map((slo) => ({ sloId: slo.id, sloInstanceId: ALL_VALUE })),
+        list: slos.map((slo) => ({ id: slo.id, instanceId: ALL_VALUE, enabled: slo.enabled })),
         statusFilter: 'unhealthy',
       });
 
       expect(result.data).toHaveLength(1);
       expect(result.total).toBe(1);
-      expect(result.data[0].sloId).toBe('unhealthy-slo');
+      expect(result.data[0].id).toBe('unhealthy-slo');
       expect(result.data[0].health.overall).toBe('unhealthy');
     });
 
     it('returns all SLOs when statusFilter is not provided', async () => {
       const result = await getSLOHealth.execute({
-        list: slos.map((slo) => ({ sloId: slo.id, sloInstanceId: ALL_VALUE })),
+        list: slos.map((slo) => ({ id: slo.id, instanceId: ALL_VALUE, enabled: slo.enabled })),
       });
 
       expect(result.data).toHaveLength(2);

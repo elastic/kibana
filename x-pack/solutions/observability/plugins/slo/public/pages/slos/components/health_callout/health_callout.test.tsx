@@ -24,7 +24,7 @@ describe('HealthCallout', () => {
         page: 0,
         data: [
           {
-            sloId: '1',
+            id: '1',
             health: { overall: 'unhealthy', rollup: 'unhealthy', summary: 'healthy' },
           },
         ],
@@ -50,7 +50,7 @@ describe('HealthCallout', () => {
         page: 0,
         data: [
           {
-            sloId: '1',
+            id: '1',
             health: { overall: 'unhealthy', rollup: 'healthy', summary: 'unhealthy' },
           },
         ],
@@ -76,7 +76,7 @@ describe('HealthCallout', () => {
         page: 0,
         data: [
           {
-            sloId: '1',
+            id: '1',
             health: { overall: 'unhealthy', rollup: 'missing', summary: 'healthy' },
           },
         ],
@@ -102,7 +102,7 @@ describe('HealthCallout', () => {
         page: 0,
         data: [
           {
-            sloId: '1',
+            id: '1',
             health: { overall: 'unhealthy', rollup: 'healthy', summary: 'missing' },
           },
         ],
@@ -124,7 +124,7 @@ describe('HealthCallout', () => {
     mockUseFetchSloHealth.mockReturnValue({
       data: [
         {
-          sloId: '1',
+          id: '1',
           health: { overall: 'healthy', rollup: 'healthy', summary: 'healthy' },
         },
       ],
@@ -147,11 +147,11 @@ describe('HealthCallout', () => {
         page: 0,
         data: [
           {
-            sloId: '1',
+            id: '1',
             health: { overall: 'unhealthy', rollup: 'healthy', summary: 'unhealthy' },
           },
           {
-            sloId: '2',
+            id: '2',
             health: { overall: 'unhealthy', rollup: 'unhealthy', summary: 'healthy' },
           },
         ],

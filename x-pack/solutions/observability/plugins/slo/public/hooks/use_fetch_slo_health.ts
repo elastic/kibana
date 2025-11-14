@@ -33,8 +33,9 @@ export function useFetchSloHealth({
   const { sloClient } = usePluginContext();
   const payload = list
     ? list.map((slo) => ({
-        sloId: slo.id,
-        sloInstanceId: slo.instanceId ?? ALL_VALUE,
+        id: slo.id,
+        instanceId: slo.instanceId ?? ALL_VALUE,
+        enabled: slo.enabled,
       }))
     : [];
 
