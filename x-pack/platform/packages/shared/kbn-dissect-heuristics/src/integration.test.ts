@@ -323,30 +323,6 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
       expect(processor.processor.dissect.pattern).toBe(pattern.pattern);
       expect(processor.processor.dissect.ignore_missing).toBe(true);
       expect(processor.metadata.messageCount).toBe(3);
-      expect(processor.metadata.confidence).toBeGreaterThan(0);
-      expect(processor.metadata.confidence).toBeLessThanOrEqual(1);
-    });
-
-    it('calculates higher confidence for complex patterns', () => {
-      const simpleLogs = ['a b', 'c d', 'e f'];
-      const complexLogs = [
-        '2024-01-15 [INFO] (service) {user:123} Action completed successfully',
-        '2024-01-16 [WARN] (service) {user:456} Action failed with error',
-        '2024-01-17 [ERROR] (service) {user:789} Action timeout occurred',
-      ];
-
-      const simplePattern = extractDissectPatternDangerouslySlow(simpleLogs);
-      const complexPattern = extractDissectPatternDangerouslySlow(complexLogs);
-
-      const simpleProcessor = getDissectProcessor(simplePattern);
-      const complexProcessor = getDissectProcessor(complexPattern);
-
-      expect(complexProcessor.metadata.confidence).toBeGreaterThan(
-        simpleProcessor.metadata.confidence!
-      );
-      expect(complexProcessor.metadata.fieldCount).toBeGreaterThan(
-        simpleProcessor.metadata.fieldCount
-      );
     });
 
     it('handles whitespace delimiters in processor config', () => {

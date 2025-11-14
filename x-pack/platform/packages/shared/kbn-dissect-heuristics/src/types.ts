@@ -96,7 +96,5 @@ export interface DissectProcessorResult {
     delimiterCount?: number;
     /** Number of fields extracted */
     fieldCount: number;
-    /** Confidence score (0-1, optional for review-based processors) */
-    confidence?: number;
   };
 }
