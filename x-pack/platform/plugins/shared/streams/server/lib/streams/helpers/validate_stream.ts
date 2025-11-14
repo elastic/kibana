@@ -7,7 +7,7 @@
 
 import { Streams } from '@kbn/streams-schema';
 import { isInheritLifecycle } from '@kbn/streams-schema';
-import { isEqual } from 'lodash';
+import { isEqual, noop } from 'lodash';
 import type {
   AppendProcessor,
   Condition,
@@ -129,6 +129,7 @@ const actionStepValidators: {
   },
   remove_by_prefix: (step: RemoveByPrefixProcessor) => checkFieldName(step.from),
   remove: (step: RemoveProcessor) => checkFieldName(step.from),
+  drop_document: noop, // 'where' condition is already validated in validateSteps function
   replace: (step: ReplaceProcessor) => {
     checkFieldName(step.from);
     if ('to' in step && step.to) {

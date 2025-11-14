@@ -346,6 +346,44 @@ paths:
                     type: boolean
                     description: Indicates rules migrations have been updated.
 
+
+  /internal/siem_migrations/rules/{migration_id}/qradar/rules:
+    post:
+      summary: Add QRadar rules from XML export to a rule migration
+      operationId: CreateQRadarRuleMigrationRules
+      x-codegen-enabled: true
+      x-internal: true
+      description: Parses QRadar XML export and adds rules to an existing migration
+      tags:
+        - SIEM Rule Migrations
+      parameters:
+        - name: migration_id
+          in: path
+          required: true
+          schema:
+            description: The migration id to add QRadar rules to
+            $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - xml
+              properties:
+                xml:
+                  type: string
+                  description: The QRadar rules XML export content
+                  minLength: 1
+      responses:
+        200:
+          description: Indicates QRadar rules have been added to the migration successfully.
+        400:
+          description: Indicates invalid XML or parsing error.
+        404:
+          description: Indicates the migration id was not found.
+
   /internal/siem_migrations/rules/{migration_id}/install:
     post:
       summary: Installs translated migration rules
@@ -423,6 +461,17 @@ paths:
                 retry:
                   $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationRetryFilter'
                   description: The optional indicator to retry the rule translation based on this filter criteria.
+                selection:
+                  type: object
+                  description: Selected rules to retry migration on.
+                  required:
+                    - ids
+                  properties:
+                    ids:
+                      type: array
+                      items:
+                        description: The list of rule item id
+                        $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
       responses:
         200:
           description: Indicates the migration start request has been processed successfully.

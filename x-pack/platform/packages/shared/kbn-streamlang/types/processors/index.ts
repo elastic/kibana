@@ -269,6 +269,22 @@ export const removeProcessorSchema = processorBaseWithWhereSchema.extend({
 }) satisfies z.Schema<RemoveProcessor>;
 
 /**
+ * Drop processor
+ */
+
+export interface DropDocumentProcessor extends ProcessorBaseWithWhere {
+  action: 'drop_document';
+}
+
+export const dropDocumentProcessorSchema = processorBaseWithWhereSchema
+  .extend({
+    action: z.literal('drop_document'),
+  })
+  .refine((schema) => schema.where !== undefined, {
+    message: 'where clause is required in drop_document.',
+  }) satisfies z.Schema<DropDocumentProcessor>;
+
+/**
  * Replace processor
  */
 
@@ -293,6 +309,7 @@ export const replaceProcessorSchema = processorBaseWithWhereSchema.extend({
 export type StreamlangProcessorDefinition =
   | DateProcessor
   | DissectProcessor
+  | DropDocumentProcessor
   | GrokProcessor
   | RenameProcessor
   | SetProcessor
@@ -307,6 +324,7 @@ export const streamlangProcessorSchema = z.union([
   grokProcessorSchema,
   dissectProcessorSchema,
   dateProcessorSchema,
+  dropDocumentProcessorSchema,
   renameProcessorSchema,
   setProcessorSchema,
   appendProcessorSchema,

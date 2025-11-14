@@ -16,6 +16,7 @@ import type {
   IngestPipelineConvertProcessor,
   IngestPipelineRemoveByPrefixProcessor,
   IngestPipelineRemoveProcessor,
+  IngestPipelineDropProcessor,
   IngestPipelineReplaceProcessor,
 } from '../../../../types/processors/ingest_pipeline_processors';
 
@@ -31,6 +32,7 @@ export interface ActionToIngestType {
   convert: WithOptionalTracingTag<IngestPipelineConvertProcessor>;
   remove_by_prefix: WithOptionalTracingTag<IngestPipelineRemoveByPrefixProcessor>;
   remove: WithOptionalTracingTag<IngestPipelineRemoveProcessor>;
+  drop_document: WithOptionalTracingTag<IngestPipelineDropProcessor>;
   replace: WithOptionalTracingTag<IngestPipelineReplaceProcessor>;
   manual_ingest_pipeline: WithOptionalTracingTag<IngestPipelineManualIngestPipelineProcessor>;
 }
