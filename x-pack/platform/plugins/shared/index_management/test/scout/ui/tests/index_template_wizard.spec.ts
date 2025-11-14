@@ -209,7 +209,7 @@ test.describe('Index template wizard - Preview template', { tag: ['@ess'] }, () 
     await pageObjects.indexManagement.clickNextButton();
 
     // Click preview tab
-    page.testSubj.locator('previewTab').click();
+    await page.testSubj.locator('previewTab').click();
 
     const templatePreview = await page.testSubj.locator('simulateTemplatePreview').textContent();
     expect(templatePreview).not.toContain('error');
