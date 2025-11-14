@@ -27,10 +27,25 @@ export const stripRunCommand = (commandArgs: string[]): string => {
 };
 
 export function getRunTarget(argv: string[] = process.argv): string {
+  // First, try to get the target from the environment variable (set by the scout run-tests command)
+  if (process.env.SCOUT_TARGET_MODE) {
+    // Convert mode format (e.g. "serverless=oblt" to display format "serverless-oblt")
+    const mode = process.env.SCOUT_TARGET_MODE;
+    if (mode === 'stateful') {
+      return 'stateful';
+    }
+    if (mode.startsWith('serverless=')) {
+      return mode.replace('=', '-');
+    }
+    return mode;
+  }
+
+  // Fallback to parsing command line arguments
   const tagsToMode: Record<string, string> = {
     '@ess': 'stateful',
     '@svlSearch': 'serverless-search',
     '@svlOblt': 'serverless-oblt',
+    '@svlLogsEssentials': 'serverless-oblt-logs-essentials',
     '@svlSecurity': 'serverless-security',
   };
 
