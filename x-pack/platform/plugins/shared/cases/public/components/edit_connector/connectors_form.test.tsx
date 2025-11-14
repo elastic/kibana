@@ -22,7 +22,6 @@ import { resilientFields } from '../connectors/resilient/mocks';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../connectors/servicenow/use_get_choices');
-jest.mock('../connectors/resilient/use_get_incident_types');
 jest.mock('../connectors/resilient/use_get_fields');
 
 const useGetChoicesMock = useGetChoices as jest.Mock;
