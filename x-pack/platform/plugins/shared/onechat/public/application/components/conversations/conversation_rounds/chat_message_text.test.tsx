@@ -121,6 +121,7 @@ describe('chat_message_text', () => {
         addAssistantMessageChunk: jest.fn(),
         onConversationCreated: jest.fn(),
         deleteConversation: jest.fn(),
+        renameConversation: jest.fn(),
         setTimeToFirstToken: jest.fn(),
       },
     });
