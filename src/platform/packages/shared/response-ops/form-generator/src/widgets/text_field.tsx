@@ -10,10 +10,8 @@
 import React from 'react';
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import type { EuiFieldTextProps } from '@elastic/eui';
-import { createWidgetTypeGuard, type BaseMetadata } from '../schema_metadata';
+import { createWidgetTypeGuard, type BaseMetadata, type StripFormProps } from '../schema_metadata';
 import type { BaseWidgetProps } from './widget_props';
-
-type StripFormProps<T> = Partial<Omit<T, 'value' | 'onChange' | 'onBlur'>>;
 
 export type TextWidgetMeta = BaseMetadata & {
   widget: 'text';

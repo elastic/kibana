@@ -11,10 +11,8 @@ import React from 'react';
 import { z } from '@kbn/zod/v4';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import type { EuiSelectProps } from '@elastic/eui';
-import { createWidgetTypeGuard, type BaseMetadata } from '../schema_metadata';
+import { createWidgetTypeGuard, type BaseMetadata, type StripFormProps } from '../schema_metadata';
 import type { BaseWidgetProps } from './widget_props';
-
-type StripFormProps<T> = Partial<Omit<T, 'value' | 'onChange' | 'onBlur'>>;
 
 export type SelectWidgetMeta = BaseMetadata & {
   widget: 'select';

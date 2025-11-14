@@ -10,10 +10,8 @@
 import React from 'react';
 import { EuiFieldPassword, EuiFormRow } from '@elastic/eui';
 import type { EuiFieldPasswordProps } from '@elastic/eui';
-import { createWidgetTypeGuard, type BaseMetadata } from '../schema_metadata';
+import { createWidgetTypeGuard, type BaseMetadata, type StripFormProps } from '../schema_metadata';
 import type { BaseWidgetProps } from './widget_props';
-
-type StripFormProps<T> = Partial<Omit<T, 'value' | 'onChange' | 'onBlur'>>;
 
 export type PasswordWidgetMeta = BaseMetadata & {
   widget: 'password';

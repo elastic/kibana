@@ -20,6 +20,14 @@ import {
   isKeyValueWidgetMeta,
 } from './widgets';
 
+/**
+ * Key used for root-level field validation errors.
+ * When Zod validates a field value itself (not a nested property), issue.path is an empty array.
+ * Example: z.string().email() fails → issue.path = [] → path.join('.') = ''
+ * Nested errors use dot notation: ['user', 'email'] → 'user.email'
+ */
+const ROOT_ERROR_KEY = '';
+
 export interface FieldDefinition {
   id: string;
   initialValue?: unknown;
@@ -80,7 +88,8 @@ const getFieldsFromSchema = <T extends z.ZodRawShape>(schema: z.ZodObject<T>) =>
 
             return Object.keys(errors).length > 0 ? errors : undefined;
           }
-          return { '': 'Invalid value' };
+          // Non-Zod error: return root-level error
+          return { [ROOT_ERROR_KEY]: 'Invalid value' };
         }
       },
     });
