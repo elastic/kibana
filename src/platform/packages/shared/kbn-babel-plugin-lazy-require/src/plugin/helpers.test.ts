@@ -414,22 +414,21 @@ describe('helpers', () => {
   });
 
   describe('transformJestMockFactories', () => {
-    function getProgramPath(ast: t.File) {
+    it('wraps jest.mock factories that return object literals', () => {
+      const ast = parse("jest.mock('./dep', () => ({ foo: jest.fn() }));", {
+        sourceType: 'module',
+      });
       let programPath: NodePath<t.Program> | undefined;
       traverse(ast, {
         Program(path) {
           programPath = path;
-          path.stop();
         },
       });
-      return programPath!;
-    }
 
-    function getFirstJestFactory(
-      programPath: NodePath<t.Program>
-    ): NodePath<t.ArrowFunctionExpression | t.FunctionExpression> {
+      transformJestMockFactories(programPath!, t);
+
       let factoryPath: NodePath<t.Expression> | undefined;
-      programPath.traverse({
+      programPath!.traverse({
         CallExpression(callPath) {
           if (
             t.isMemberExpression(callPath.node.callee) &&
@@ -442,25 +441,13 @@ describe('helpers', () => {
           }
         },
       });
-      if (!factoryPath) {
-        throw new Error('factory path not found');
-      }
-      return factoryPath as NodePath<t.ArrowFunctionExpression | t.FunctionExpression>;
-    }
 
-    it('wraps jest.mock factories that return object literals', () => {
-      const ast = parse("jest.mock('./dep', () => ({ foo: jest.fn() }));", {
-        sourceType: 'module',
-      });
-      const programPath = getProgramPath(ast);
+      expect(factoryPath).toBeDefined();
+      expect(t.isArrowFunctionExpression(factoryPath!.node)).toBe(true);
+      const factoryBody = (factoryPath!.node as t.ArrowFunctionExpression).body;
+      expect(t.isBlockStatement(factoryBody)).toBe(true);
 
-      transformJestMockFactories(programPath, t);
-
-      const factoryPath = getFirstJestFactory(programPath);
-      expect(t.isArrowFunctionExpression(factoryPath.node)).toBe(true);
-      expect(t.isBlockStatement(factoryPath.node.body)).toBe(true);
-
-      const statements = (factoryPath.node.body as t.BlockStatement).body;
+      const statements = (factoryBody as t.BlockStatement).body;
       expect(statements).toHaveLength(4);
 
       const [actualInit, resultInit, mergeIf, finalReturn] = statements;
@@ -489,13 +476,33 @@ describe('helpers', () => {
 
     it('ignores factories without object literal return', () => {
       const ast = parse("jest.mock('./dep', () => createMock());", { sourceType: 'module' });
-      const programPath = getProgramPath(ast);
+      let programPath: NodePath<t.Program> | undefined;
+      traverse(ast, {
+        Program(path) {
+          programPath = path;
+        },
+      });
 
-      transformJestMockFactories(programPath, t);
+      transformJestMockFactories(programPath!, t);
 
-      const factoryPath = getFirstJestFactory(programPath);
-      expect(t.isArrowFunctionExpression(factoryPath.node)).toBe(true);
-      expect(t.isCallExpression(factoryPath.node.body)).toBe(true);
+      let factoryPath: NodePath<t.Expression> | undefined;
+      programPath!.traverse({
+        CallExpression(callPath) {
+          if (
+            t.isMemberExpression(callPath.node.callee) &&
+            t.isIdentifier(callPath.node.callee.object, { name: 'jest' }) &&
+            t.isIdentifier(callPath.node.callee.property) &&
+            callPath.node.callee.property.name === 'mock'
+          ) {
+            factoryPath = callPath.get('arguments.1') as NodePath<t.Expression>;
+            callPath.stop();
+          }
+        },
+      });
+
+      expect(factoryPath).toBeDefined();
+      expect(t.isArrowFunctionExpression(factoryPath!.node)).toBe(true);
+      expect(t.isCallExpression((factoryPath!.node as t.ArrowFunctionExpression).body)).toBe(true);
     });
   });
 });

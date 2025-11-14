@@ -281,7 +281,7 @@ module.exports = function lazyRequirePlugin({ types: t }) {
 
         // Jest mock factories run in isolated scope and cannot access lazy getters
         // Example: jest.mock('./a', () => ({ default: mockA })) cannot reference lazy imports
-        excludeImports(detectJestMockUsage(programPath, properties, t), properties);
+        excludeImports(detectJestMockUsage(programPath, properties), properties);
 
         // In test files, preserve eager loading for constructors (Date/timer mocking depends on timing)
         if (isTestFile) {

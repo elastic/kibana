@@ -323,13 +323,12 @@ function detectJsxUsage(programPath, properties, t) {
  * Jest mock factories cannot reference out-of-scope variables
  * @param {NodePath} programPath - The program path
  * @param {Map<string, PropertyInfo>} properties - Map of tracked properties
- * @param {import('@babel/types')} t - Babel types helper
  * @returns {Set<string>} Set of variable names used in jest.mock factories
  */
-function detectJestMockUsage(programPath, properties, t) {
+function detectJestMockUsage(programPath, properties) {
   const importsUsedInJestMocks = new Set();
 
-  forEachJestMockFactory(programPath, t, ({ factoryPath }) => {
+  forEachJestMockFactory(programPath, ({ factoryPath }) => {
     const referenced = collectReferencedProperties(factoryPath, properties);
     for (const name of referenced) {
       importsUsedInJestMocks.add(name);
@@ -644,41 +643,21 @@ function isMockRelated(path) {
   return false;
 }
 
-module.exports = {
-  isSimpleRequireCall,
-  collectReferencedProperties,
-  excludeImports,
-  ensureModule,
-  collectDirectReExportSources,
-  hasImportThenExportPattern,
-  isInTypeContext,
-  shouldSkipIdentifier,
-  detectModuleLevelUsage,
-  detectJsxUsage,
-  detectJestMockUsage,
-  detectConstructorUsage,
-  detectConstructorInitNewUsage,
-  detectClassExtendsUsage,
-  isMockRelated,
-  transformJestMockFactories,
-};
-
 /**
  * Iterates over every `jest.mock`, `jest.doMock`, or `jest.unmock`
  * call that provides a factory callback and invokes the supplied handler.
  *
  * @param {import('@babel/traverse').NodePath<import('@babel/types').Program>} programPath
- * @param {import('@babel/types')} t
  * @param {(options: {
  *   callPath: import('@babel/traverse').NodePath<import('@babel/types').CallExpression>;
  *   modulePathNode: import('@babel/types').StringLiteral;
  *   factoryPath: import('@babel/traverse').NodePath<import('@babel/types').Expression>;
  * }) => void} handler
  */
-function forEachJestMockFactory(programPath, t, handler) {
+function forEachJestMockFactory(programPath, handler) {
   programPath.traverse({
     CallExpression(callPath) {
-      if (!isJestMockCall(callPath, t)) {
+      if (!isJestMockCall(callPath)) {
         return;
       }
 
@@ -711,7 +690,7 @@ function forEachJestMockFactory(programPath, t, handler) {
  * @param {import('@babel/types')} t
  */
 function transformJestMockFactories(programPath, t) {
-  forEachJestMockFactory(programPath, t, ({ modulePathNode, factoryPath }) => {
+  forEachJestMockFactory(programPath, ({ modulePathNode, factoryPath }) => {
     const factoryInfo = extractFactoryObjectExpression(factoryPath, t);
     if (!factoryInfo) {
       return;
@@ -790,10 +769,9 @@ function transformJestMockFactories(programPath, t) {
 }
 
 /**
- * Determines whether the provided call path represents a jest mock helper.
- *
+ * Check if a call expression is a jest.mock(), jest.doMock(), or jest.unmock() call
  * @param {import('@babel/traverse').NodePath<import('@babel/types').CallExpression>} callPath
- * @returns {boolean}
+ * @returns {boolean} True if the call is a Jest mock helper
  */
 function isJestMockCall(callPath) {
   const callee = callPath.get('callee');
@@ -823,20 +801,15 @@ function extractFactoryObjectExpression(factoryPath, t) {
     return null;
   }
 
-  const unwrapExpression = (node) => {
-    if (t.isParenthesizedExpression(node)) {
-      return node.expression;
-    }
-    return node;
-  };
-
   if (t.isBlockStatement(factoryPath.node.body)) {
     const bodyStatements = factoryPath.node.body.body;
     if (bodyStatements.length !== 1 || !t.isReturnStatement(bodyStatements[0])) {
       return null;
     }
 
-    const argument = unwrapExpression(bodyStatements[0].argument);
+    const argument = t.isParenthesizedExpression(bodyStatements[0].argument)
+      ? bodyStatements[0].argument.expression
+      : bodyStatements[0].argument;
     if (!t.isObjectExpression(argument)) {
       return null;
     }
@@ -844,7 +817,9 @@ function extractFactoryObjectExpression(factoryPath, t) {
     return { expression: argument };
   }
 
-  const conciseBody = unwrapExpression(factoryPath.node.body);
+  const conciseBody = t.isParenthesizedExpression(factoryPath.node.body)
+    ? factoryPath.node.body.expression
+    : factoryPath.node.body;
   if (!t.isObjectExpression(conciseBody)) {
     return null;
   }
@@ -864,3 +839,22 @@ function createJestSafeIdentifier(scope, baseName, t) {
   const generatedName = scope.generateUid(baseName).replace(/^_+/, baseName);
   return t.identifier(generatedName);
 }
+
+module.exports = {
+  isSimpleRequireCall,
+  collectReferencedProperties,
+  excludeImports,
+  ensureModule,
+  collectDirectReExportSources,
+  hasImportThenExportPattern,
+  isInTypeContext,
+  shouldSkipIdentifier,
+  detectModuleLevelUsage,
+  detectJsxUsage,
+  detectJestMockUsage,
+  detectConstructorUsage,
+  detectConstructorInitNewUsage,
+  detectClassExtendsUsage,
+  isMockRelated,
+  transformJestMockFactories,
+};
