@@ -275,27 +275,9 @@ export const AssetInventoryDataTable = ({
       return columnsState;
     }
 
-    // Place override columns in their specified positions, and keep non-overridden columns in their original order
-    const overrideSet = new Set(columnsOverride);
-    const merged: string[] = [];
-
-    // First, add columns from columnsState, replacing with override columns where specified
-    columnsState.forEach((columnId) => {
-      if (overrideSet.has(columnId)) {
-        // If the column is in override, add it from override in its override position
-        // But only add once, so skip here; will add all override columns in order below
-        return;
-      }
-      merged.push(columnId);
-    });
-
-    // Now, add override columns in their specified order, but only if not already present
-    columnsOverride.forEach((col) => {
-      if (!merged.includes(col)) {
-        merged.push(col);
-      }
-    });
-    return merged;
+    // Only include columns that are present in both columnsState and columnsOverride, in the order specified by columnsOverride
+    const columnsStateSet = new Set(columnsState);
+    return columnsOverride.filter((col) => columnsStateSet.has(col));
   }, [columnsOverride, columnsState]);
 
   const {
