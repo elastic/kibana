@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { Sha256 } from '@kbn/crypto-browser';
 import { lastValueFrom } from 'rxjs';
 import { tap } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
@@ -46,7 +47,7 @@ import type { IESSource } from '../es_source';
 import type { IField } from '../../fields/field';
 import { getData, getIndexPatternService, getUiSettings } from '../../../kibana_services';
 import { convertToGeoJson } from './convert_to_geojson';
-import { isGeometryColumn, ESQL_GEO_SHAPE_TYPE } from './esql_utils';
+import { isGeometryColumn, ESQL_GEO_SHAPE_TYPE, getFields } from './esql_utils';
 import { UpdateSourceEditor } from './update_source_editor';
 import type { ITooltipProperty } from '../../tooltips/tooltip_property';
 import { ESQLField } from '../../fields/esql_field';
@@ -75,6 +76,7 @@ export class ESQLSource
     Pick<IESSource, 'getIndexPattern' | 'getIndexPatternId' | 'getGeoFieldName'>
 {
   readonly _descriptor: NormalizedESQLSourceDescriptor;
+  private _dataViewId: string | undefined;
 
   static createDescriptor(
     descriptor: Partial<ESQLSourceDescriptor>
@@ -83,16 +85,11 @@ export class ESQLSource
       throw new Error('Cannot create ESQLSourceDescriptor when esql is not provided');
     }
 
-    if (!isValidStringConfig(descriptor.dataViewId)) {
-      throw new Error('Cannot create ESQLSourceDescriptor when dataViewId is not provided');
-    }
-
     return {
       ...descriptor,
       id: isValidStringConfig(descriptor.id) ? descriptor.id! : uuidv4(),
       type: SOURCE_TYPES.ESQL,
       esql: descriptor.esql!,
-      dataViewId: descriptor.dataViewId!,
       narrowByGlobalSearch:
         typeof descriptor.narrowByGlobalSearch !== 'undefined'
           ? descriptor.narrowByGlobalSearch
@@ -350,7 +347,13 @@ export class ESQLSource
   }
 
   renderSourceSettingsEditor({ onChange }: SourceEditorArgs) {
-    return <UpdateSourceEditor onChange={onChange} sourceDescriptor={this._descriptor} />;
+    return (
+      <UpdateSourceEditor
+        onChange={onChange}
+        sourceDescriptor={this._descriptor}
+        getDataViewFields={this._getDataViewFields}
+      />
+    );
   }
 
   getSyncMeta(): ESQLSourceSyncMeta {
@@ -364,7 +367,15 @@ export class ESQLSource
   }
 
   getIndexPatternId() {
-    return this._descriptor.dataViewId;
+    if (this._dataViewId) return this._dataViewId;
+
+    // Can not use getESQLAdHocDataview to create adhocDataViewId because it's async
+    // getESQLAdHocDataview is async because `crypto.subtle.digest` is async
+    // getESQLAdHocDataview falls back to `@kbn/crypto-browser` when `crypto` is not available
+    // we will just always use the fallback implemenation.
+    const indexPattern = getIndexPatternFromESQLQuery(this._descriptor.esql);
+    this._dataViewId = new Sha256().update(`esql-${indexPattern}`).digest('hex');
+    return this._dataViewId;
   }
 
   getIndexPattern() {
@@ -378,4 +389,8 @@ export class ESQLSource
   getESQL() {
     return this._descriptor.esql;
   }
+
+  private _getDataViewFields = async () => {
+    return getFields(await this.getIndexPattern());
+  };
 }
