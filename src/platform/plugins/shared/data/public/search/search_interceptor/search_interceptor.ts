@@ -454,20 +454,12 @@ export class SearchInterceptor {
       ? createRequestHashForBackgroundSearches(request.params)
       : undefined;
 
-    if (request.id) {
-      // just polling an existing search, no need to send the body, just the hash
+    const { executionContext, strategy, ...searchOptions } = this.getSerializableOptions(options);
 
-      const { params, ...requestWithoutParams } = request;
-      if (params) {
-        const { body, ...paramsWithoutBody } = params;
-        request = {
-          ...requestWithoutParams,
-          params: paramsWithoutBody,
-        };
-      }
+    if (request.id) {
+      request = optimizeParamsForPoll(request, strategy);
     }
 
-    const { executionContext, strategy, ...searchOptions } = this.getSerializableOptions(options);
     return this.deps.http
       .post<IKibanaSearchResponse | ErrorResponseBase>(
         `/internal/search/${strategy}${request.id ? `/${request.id}` : ''}`,
@@ -717,5 +709,30 @@ export class SearchInterceptor {
     }
   }
 }
+
+/**
+ * Polling requests do not need to include all the info required for initial search requests.
+ */
+const optimizeParamsForPoll = (
+  request: IKibanaSearchRequest,
+  strategy: string | undefined
+): IKibanaSearchRequest => {
+  let optimizedParams = request.params;
+
+  if (strategy === ENHANCED_ES_SEARCH_STRATEGY) {
+    const { body, ...paramsWithoutBody } = request.params;
+    optimizedParams = paramsWithoutBody;
+  }
+
+  if (strategy === ESQL_ASYNC_SEARCH_STRATEGY) {
+    const { query, filter: _filter, ...paramsWithoutQueryAndFilter } = request.params;
+    optimizedParams = paramsWithoutQueryAndFilter;
+  }
+
+  return {
+    ...request,
+    params: optimizedParams,
+  };
+};
 
 export type ISearchInterceptor = PublicMethodsOf<SearchInterceptor>;
