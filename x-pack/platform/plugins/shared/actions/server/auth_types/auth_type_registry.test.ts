@@ -14,7 +14,6 @@ import type { NormalizedAuthType } from '@kbn/connector-specs';
 const getAuthType = (overrides = {}): NormalizedAuthType => {
   return {
     id: 'my-auth-type',
-    name: 'My test auth type',
     schema: z.object({
       apiKey: z.string().describe('API Key'),
     }),
@@ -35,11 +34,13 @@ describe('AuthTypeRegistry', () => {
     });
 
     test('shallow clones the given auth type', () => {
-      const myType = getAuthType();
+      const myType = getAuthType({ foo: 'bar' });
       const authTypeRegistry = new AuthTypeRegistry();
       authTypeRegistry.register(myType);
-      myType.name = 'Changed';
-      expect(authTypeRegistry.get('my-auth-type').name).toEqual('My test auth type');
+      // @ts-expect-error
+      myType.foo = 'baz';
+      // @ts-expect-error
+      expect(authTypeRegistry.get('my-auth-type').foo).toEqual('bar');
     });
 
     test('throws error if auth type already registered', () => {
@@ -67,7 +68,6 @@ describe('AuthTypeRegistry', () => {
       expect(rest).toMatchInlineSnapshot(`
         Object {
           "id": "my-auth-type",
-          "name": "My test auth type",
         }
       `);
     });
