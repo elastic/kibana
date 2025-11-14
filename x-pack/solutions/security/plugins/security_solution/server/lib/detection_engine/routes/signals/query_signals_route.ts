@@ -13,7 +13,6 @@ import type {
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import agent from 'elastic-apm-node';
 import { SearchAlertsRequestBody } from '../../../../../common/api/detection_engine/signals';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../../common/constants';
@@ -45,12 +44,8 @@ export const querySignalsRoute = (
       async (context, request, response) => {
         const esClient = (await context.core).elasticsearch.client.asCurrentUser;
 
-        // Capture query-id header for APM correlation
-        const queryId = request.headers['query-id'] as string;
-        const transaction = agent.currentTransaction;
-        if (transaction && queryId) {
-          transaction.addLabels({ query_id: queryId });
-        }
+        // Capture query-id header for logging correlation
+        const queryId = (request.headers['query-id'] as string) || null;
 
         // eslint-disable-next-line @typescript-eslint/naming-convention
         const { query, aggs, _source, fields, track_total_hits, size, runtime_mappings, sort } =
@@ -73,18 +68,25 @@ export const querySignalsRoute = (
         try {
           const spaceId = (await context.securitySolution).getSpaceId();
           const indexPattern = ruleDataClient?.indexNameWithNamespace(spaceId);
-          const result = await esClient.search({
-            index: indexPattern,
-            query,
-            aggs: aggs as Record<string, AggregationsAggregationContainer>,
-            _source,
-            fields,
-            track_total_hits,
-            size,
-            runtime_mappings: runtime_mappings as MappingRuntimeFields,
-            sort: sort as Sort,
-            ignore_unavailable: true,
-          });
+
+          // Prepare transport options with query-id header for ES cloud logs correlation
+          const transportOptions = queryId ? { headers: { 'unique-query-id': queryId } } : {};
+
+          const result = await esClient.search(
+            {
+              index: indexPattern,
+              query,
+              aggs: aggs as Record<string, AggregationsAggregationContainer>,
+              _source,
+              fields,
+              track_total_hits,
+              size,
+              runtime_mappings: runtime_mappings as MappingRuntimeFields,
+              sort: sort as Sort,
+              ignore_unavailable: true,
+            },
+            transportOptions
+          );
           return response.ok({ body: result });
         } catch (err) {
           // error while getting or updating signal with id: id in signal index .siem-signals
