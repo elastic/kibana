@@ -8,11 +8,7 @@
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import type { LoginAsInteractiveUserResponse } from './helpers';
-import {
-  loginAsInteractiveUser,
-  setupInteractiveUser,
-  cleanupInteractiveUser,
-} from './helpers';
+import { loginAsInteractiveUser, setupInteractiveUser, cleanupInteractiveUser } from './helpers';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('updated_by', function () {
