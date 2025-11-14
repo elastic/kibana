@@ -20,8 +20,6 @@ import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import {
   createBuiltinToolRegistry,
-  registerBuiltinTools,
-  registerProductDocumentationTool,
   createBuiltinProviderFn,
   type BuiltinToolRegistry,
 } from './builtin';
@@ -55,7 +53,6 @@ export class ToolsService {
 
   setup(deps: ToolsServiceSetupDeps): ToolsServiceSetup {
     this.setupDeps = deps;
-    registerBuiltinTools({ registry: this.builtinRegistry });
 
     return {
       register: (reg) => {
@@ -104,8 +101,6 @@ export class ToolsService {
     const builtinProviderFn = createBuiltinProviderFn({
       registry: this.builtinRegistry,
       toolTypes,
-      uiSettings,
-      savedObjects,
     });
     const persistedProviderFn = createPersistedProviderFn({
       logger,
@@ -124,6 +119,8 @@ export class ToolsService {
         request,
         builtinProvider,
         persistedProvider,
+        uiSettings,
+        savedObjects,
       });
     };
 

@@ -105,21 +105,12 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
   manager: RunnerManager;
 }): Promise<ToolHandlerContext> => {
   const { onEvent } = toolExecutionParams;
-  const {
-    request,
-    defaultConnectorId,
-    elasticsearch,
-    modelProviderFactory,
-    toolsService,
-    resultStore,
-    logger,
-    llmTasks,
-  } = manager.deps;
+  const { request, elasticsearch, modelProvider, toolsService, resultStore, logger } = manager.deps;
   return {
     request,
     logger,
     esClient: elasticsearch.client.asScoped(request),
-    modelProvider: modelProviderFactory({ request, defaultConnectorId }),
+    modelProvider,
     runner: manager.getRunner(),
     toolProvider: registryToProvider({
       registry: await toolsService.getRegistry({ request }),
@@ -128,6 +119,5 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
     }),
     resultStore: resultStore.asReadonly(),
     events: createToolEventEmitter({ eventHandler: onEvent, context: manager.context }),
-    llmTasks,
   };
 };
