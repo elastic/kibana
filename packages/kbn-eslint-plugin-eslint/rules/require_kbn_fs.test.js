@@ -37,7 +37,48 @@ ruleTester.run('@kbn/eslint/require_kbn_fs', rule, {
     },
     {
       code: dedent`
-        const fs = require('@kbn/fs');
+        import { readFile } from 'fs';
+      `,
+    },
+    {
+      code: dedent`
+        import * as fs from 'fs';
+      `,
+    },
+    {
+      code: dedent`
+        import { readFile, readFileSync } from 'fs';
+      `,
+      options: [{ restrictedMethods: ['writeFile'] }],
+    },
+    // fs/promises read operations are allowed
+    {
+      code: dedent`
+        import { readFile } from 'fs/promises';
+      `,
+    },
+    // node:fs read operations are allowed
+    {
+      code: dedent`
+        import { readFile } from 'node:fs';
+      `,
+    },
+    {
+      code: dedent`
+        import { readFile } from 'node:fs/promises';
+      `,
+    },
+    // Default import from fs/promises with read operations
+    {
+      code: dedent`
+        import promises from 'fs/promises';
+        await promises.readFile('file.txt');
+      `,
+    },
+    {
+      code: dedent`
+        import fsPromises from 'node:fs/promises';
+        await fsPromises.readFile('file.txt');
       `,
     },
   ],
@@ -45,7 +86,7 @@ ruleTester.run('@kbn/eslint/require_kbn_fs', rule, {
   invalid: [
     {
       code: dedent`
-        import * as fs from 'fs';
+        import { writeFile } from 'fs';
       `,
       errors: [
         {
@@ -53,7 +94,20 @@ ruleTester.run('@kbn/eslint/require_kbn_fs', rule, {
         },
       ],
       output: dedent`
-        import * as fs from '@kbn/fs';
+        import { writeFile } from '@kbn/fs';
+      `,
+    },
+    {
+      code: dedent`
+        import { writeFile, writeFileSync, createWriteStream } from 'fs';
+      `,
+      errors: [
+        {
+          message: 'Use `@kbn/fs` instead of direct `fs` imports',
+        },
+      ],
+      output: dedent`
+        import { writeFile, writeFileSync, createWriteStream } from '@kbn/fs';
       `,
     },
     {
@@ -71,20 +125,94 @@ ruleTester.run('@kbn/eslint/require_kbn_fs', rule, {
     },
     {
       code: dedent`
-        const fs = require('fs');
+        import * as fs from 'fs';
+        fs.writeFileSync('file.txt', 'content');
       `,
       errors: [
         {
           message: 'Use `@kbn/fs` instead of direct `fs` imports',
         },
       ],
+    },
+    {
+      code: dedent`
+        import fs from 'fs';
+        fs.writeFileSync('file.txt', 'content');
+      `,
+      errors: [
+        {
+          message: 'Use `@kbn/fs` instead of direct `fs` imports',
+        },
+      ],
+    },
+    // Custom error message
+    {
+      code: dedent`
+        import { writeFile } from 'fs';
+      `,
+      options: [
+        {
+          restrictedMethods: ['writeFile', 'writeFileSync'],
+          disallowedMessage:
+            'Use `@kbn/fs` for file write operations instead of direct `fs` in production code',
+        },
+      ],
+      errors: [
+        {
+          message:
+            'Use `@kbn/fs` for file write operations instead of direct `fs` in production code',
+        },
+      ],
       output: dedent`
-        const fs = require('@kbn/fs');
+        import { writeFile } from '@kbn/fs';
+      `,
+    },
+    // Empty restrictedMethods - restricts all named imports, but namespace imports still allowed
+    {
+      code: dedent`
+        import { readFile } from 'fs';
+      `,
+      options: [{ restrictedMethods: [] }],
+      errors: [
+        {
+          message: 'Use `@kbn/fs` instead of direct `fs` imports',
+        },
+      ],
+      output: dedent`
+        import { readFile } from '@kbn/fs';
       `,
     },
     {
       code: dedent`
-        const { readFile, writeFile } = require('fs');
+        import * as fs from 'fs';
+        fs.readFile('file.txt');
+      `,
+      options: [{ restrictedMethods: [] }],
+      errors: [
+        {
+          message: 'Use `@kbn/fs` instead of direct `fs` imports',
+        },
+      ],
+    },
+    // Custom restrictedMethods
+    {
+      code: dedent`
+        import { writeFile } from 'fs';
+      `,
+      options: [{ restrictedMethods: ['writeFile'] }],
+      errors: [
+        {
+          message: 'Use `@kbn/fs` instead of direct `fs` imports',
+        },
+      ],
+      output: dedent`
+        import { writeFile } from '@kbn/fs';
+      `,
+    },
+    // fs/promises imports
+    {
+      code: dedent`
+        import { writeFile } from 'fs/promises';
       `,
       errors: [
         {
@@ -92,8 +220,82 @@ ruleTester.run('@kbn/eslint/require_kbn_fs', rule, {
         },
       ],
       output: dedent`
-        const { readFile, writeFile } = require('@kbn/fs');
+        import { writeFile } from '@kbn/fs';
       `,
+    },
+    {
+      code: dedent`
+        import { writeFile, writeFileSync } from 'fs/promises';
+      `,
+      errors: [
+        {
+          message: 'Use `@kbn/fs` instead of direct `fs` imports',
+        },
+      ],
+      output: dedent`
+        import { writeFile, writeFileSync } from '@kbn/fs';
+      `,
+    },
+    // node:fs imports
+    {
+      code: dedent`
+        import { writeFile } from 'node:fs';
+      `,
+      errors: [
+        {
+          message: 'Use `@kbn/fs` instead of direct `fs` imports',
+        },
+      ],
+      output: dedent`
+        import { writeFile } from '@kbn/fs';
+      `,
+    },
+    {
+      code: dedent`
+        import { writeFile } from 'node:fs/promises';
+      `,
+      errors: [
+        {
+          message: 'Use `@kbn/fs` instead of direct `fs` imports',
+        },
+      ],
+      output: dedent`
+        import { writeFile } from '@kbn/fs';
+      `,
+    },
+    // Default import from fs/promises with write operations
+    {
+      code: dedent`
+        import promises from 'fs/promises';
+        await promises.writeFile('file.txt', 'content');
+      `,
+      errors: [
+        {
+          message: 'Use `@kbn/fs` instead of direct `fs` imports',
+        },
+      ],
+    },
+    {
+      code: dedent`
+        import fsPromises from 'node:fs/promises';
+        await fsPromises.writeFile('file.txt', 'content');
+      `,
+      errors: [
+        {
+          message: 'Use `@kbn/fs` instead of direct `fs` imports',
+        },
+      ],
+    },
+    {
+      code: dedent`
+        import * as fs from 'fs';
+        fs.writeFile('file.txt', 'content');
+      `,
+      errors: [
+        {
+          message: 'Use `@kbn/fs` instead of direct `fs` imports',
+        },
+      ],
     },
   ],
 });
