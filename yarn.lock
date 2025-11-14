@@ -2650,9 +2650,9 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@file:./elastic_eui_109.0.0_feat_flyout_system_0037.tgz":
+"@elastic/eui@file:./elastic_eui_109.0.0_feat_flyout_system_0038.tgz":
   version "109.0.0"
-  resolved "file:./elastic_eui_109.0.0_feat_flyout_system_0037.tgz#b06432a3516c7002a0e53a12f517cccdad1c21c2"
+  resolved "file:./elastic_eui_109.0.0_feat_flyout_system_0038.tgz#2585f1cc1daabf8d10fefe29ac203c992417b54a"
   dependencies:
     "@elastic/prismjs-esql" "^1.1.2"
     "@hello-pangea/dnd" "^16.6.0"

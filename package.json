@@ -129,7 +129,7 @@
     "@elastic/ecs": "^9.0.0",
     "@elastic/elasticsearch": "9.1.1",
     "@elastic/ems-client": "8.6.3",
-    "@elastic/eui": "file:./elastic_eui_109.0.0_feat_flyout_system_0037.tgz",
+    "@elastic/eui": "file:./elastic_eui_109.0.0_feat_flyout_system_0038.tgz",
     "@elastic/eui-theme-borealis": "5.0.0",
     "@elastic/eui-theme-common": "7.0.0",
     "@elastic/filesaver": "1.1.2",
