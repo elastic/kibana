@@ -42,6 +42,7 @@ import {
   getConnectors,
   extractMessages,
   getParsingScore,
+  analyzeExtractedFields,
 } from './evaluation_helpers';
 
 async function getSuggestions(
@@ -132,12 +133,22 @@ export async function evaluateGrokSuggestions() {
 
       const parsingScore = await getParsingScore(suggestion.stream, sampleDocs, steps);
       const allDocsParsingScore = await getParsingScore(suggestion.stream, allDocs, steps);
+      const fieldAnalysis = await analyzeExtractedFields(suggestion.stream, sampleDocs, steps);
+
       console.log(`- ${suggestion.stream}: ${chalk.green(allDocsParsingScore)}`);
+      Object.entries(fieldAnalysis).forEach(([field, info]) => {
+        console.log(
+          `  ${chalk.dim('→')} ${field}: ${chalk.cyan(info.uniqueCount)} unique values ${chalk.dim(
+            '(e.g., ' + info.samples.map((s) => `"${s}"`).join(', ') + ')'
+          )}`
+        );
+      });
 
       return {
         ...suggestion,
         parsing_score_samples: parsingScore,
         parsing_score_all_docs: allDocsParsingScore,
+        field_analysis: fieldAnalysis,
       };
     })
   );
@@ -167,6 +178,7 @@ export async function evaluateGrokSuggestions() {
       pattern_definitions: suggestion.pattern_definitions,
       parsing_score_samples: suggestion.parsing_score_samples,
       parsing_score_all_docs: suggestion.parsing_score_all_docs,
+      field_analysis: suggestion.field_analysis,
     };
     return acc;
   }, {});

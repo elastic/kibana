@@ -41,6 +41,7 @@ import {
   getConnectors,
   extractMessages,
   getParsingScore,
+  analyzeExtractedFields,
 } from './evaluation_helpers';
 
 async function getSuggestions(
@@ -128,17 +129,28 @@ export async function evaluateDissectSuggestions() {
           customIdentifier: 'eval-dissect',
           from: MESSAGE_FIELD,
           pattern: suggestion.pattern,
+          append_separator: suggestion.processor.dissect.append_separator,
         },
       ];
 
       const parsingScore = await getParsingScore(suggestion.stream, sampleDocs, steps);
       const allDocsParsingScore = await getParsingScore(suggestion.stream, allDocs, steps);
+      const fieldAnalysis = await analyzeExtractedFields(suggestion.stream, sampleDocs, steps);
+
       console.log(`- ${suggestion.stream}: ${chalk.green(allDocsParsingScore)}`);
+      Object.entries(fieldAnalysis).forEach(([field, info]) => {
+        console.log(
+          `  ${chalk.dim('→')} ${field}: ${chalk.cyan(info.uniqueCount)} unique values ${chalk.dim(
+            '(e.g., ' + info.samples.map((s) => `"${s}"`).join(', ') + ')'
+          )}`
+        );
+      });
 
       return {
         ...suggestion,
         parsing_score_samples: parsingScore,
         parsing_score_all_docs: allDocsParsingScore,
+        field_analysis: fieldAnalysis,
       };
     })
   );
@@ -167,6 +179,7 @@ export async function evaluateDissectSuggestions() {
       pattern: suggestion.pattern,
       parsing_score_samples: suggestion.parsing_score_samples,
       parsing_score_all_docs: suggestion.parsing_score_all_docs,
+      field_analysis: suggestion.field_analysis,
     };
     return acc;
   }, {});

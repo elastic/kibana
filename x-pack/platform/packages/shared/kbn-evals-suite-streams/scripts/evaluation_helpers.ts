@@ -146,3 +146,55 @@ export async function getParsingScore(
   }
   return parsedDocs / documents.length;
 }
+
+/**
+ * Analyze extracted fields from simulation results
+ */
+export async function analyzeExtractedFields(
+  stream: string,
+  documents: any[],
+  steps: any[],
+  sampleCount = 10,
+  batchSize = 1_000
+): Promise<Record<string, { uniqueCount: number; samples: string[] }>> {
+  const fieldValues: Record<string, Set<string>> = {};
+
+  for (let i = 0; i < documents.length; i += batchSize) {
+    const batch = documents.slice(i, i + batchSize);
+    const simResult = await simulateProcessing(stream, batch, steps);
+    const detectedFieldsSet = new Set<string>(simResult.detected_fields.map((f: any) => f.name));
+    simResult.documents.forEach((doc: any) => {
+      if (doc.status === 'parsed' && doc.value) {
+        Object.keys(doc.value).forEach((key) => {
+          if (!detectedFieldsSet.has(key)) {
+            return;
+          }
+          if (!fieldValues[key]) {
+            fieldValues[key] = new Set();
+          }
+          const value = doc.value[key];
+          if (value !== undefined && value !== null) {
+            fieldValues[key].add(String(value));
+          }
+        });
+      }
+    });
+  }
+
+  return Object.entries(fieldValues).reduce<
+    Record<string, { uniqueCount: number; samples: string[] }>
+  >((acc, [field, values]) => {
+    const valuesArray = Array.from(values);
+    acc[field] = {
+      uniqueCount: valuesArray.length,
+      samples: valuesArray.slice(0, sampleCount).map((v) => {
+        const valAsString = String(v);
+        if (valAsString.length <= 100) {
+          return valAsString;
+        }
+        return `$${valAsString.slice(0, 100)}...`;
+      }),
+    };
+    return acc;
+  }, {});
+}
