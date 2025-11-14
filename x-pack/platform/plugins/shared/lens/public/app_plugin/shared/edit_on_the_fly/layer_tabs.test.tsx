@@ -57,7 +57,7 @@ function AddLayerButtonsTestComponent({
   const addLayer = useCallback(
     (layerType: LensLayerType) => {
       const layerId = generateId();
-      dispatchLens(addLayerAction({ layerId, layerType }));
+      dispatchLens(addLayerAction({ layerId, layerType, extraArg: undefined }));
       dispatchLens(setSelectedLayerId({ layerId }));
     },
     [dispatchLens]
