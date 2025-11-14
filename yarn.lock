@@ -8823,6 +8823,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/streamlang-yaml-editor@link:x-pack/platform/packages/shared/kbn-streamlang-yaml-editor":
+  version "0.0.0"
+  uid ""
+
 "@kbn/streamlang@link:x-pack/platform/packages/shared/kbn-streamlang":
   version "0.0.0"
   uid ""
