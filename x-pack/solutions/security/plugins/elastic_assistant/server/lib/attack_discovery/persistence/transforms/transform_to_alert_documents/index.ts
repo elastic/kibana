@@ -59,6 +59,7 @@ import {
   ALERT_ATTACK_DISCOVERY_USER_ID,
   ALERT_ATTACK_DISCOVERY_USER_NAME,
   ALERT_ATTACK_DISCOVERY_USERS,
+  ALERT_ATTACK_IDS,
   ALERT_RISK_SCORE,
 } from '../../../schedules/fields/field_names';
 import type { AttackDiscoveryAlertDocument } from '../../../schedules/types';
@@ -181,6 +182,16 @@ export const transformToBaseAlertDocument = ({
       messageContent: title,
       replacements,
     }),
+
+    /**
+     * This field is shared with security solution alerts.
+     * We want both attacks and alerts to have this field so
+     * we can filter and group them in the security alerts
+     * page using both the attacks and the alerts indexes.
+     *
+     * @see https://github.com/elastic/kibana/issues/232341
+     */
+    [ALERT_ATTACK_IDS]: [alertDocId],
   };
 
   return baseAlertDocument;
