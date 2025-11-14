@@ -20,6 +20,7 @@
  */
 
 import { z } from '@kbn/zod';
+import 'zod-metadata/register';
 import type { ConnectorSpec } from '../connector_spec';
 
 export const AbuseIPDBConnector: ConnectorSpec = {
@@ -36,7 +37,7 @@ export const AbuseIPDBConnector: ConnectorSpec = {
       type: 'header',
       customSchema: z.object({
         headers: z.object({
-          Key: z.string().describe('API Key'),
+          Key: z.string().meta({ sensitive: true }).describe('API Key'),
         }),
       }),
     },

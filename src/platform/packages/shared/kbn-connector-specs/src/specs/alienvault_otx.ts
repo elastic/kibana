@@ -20,6 +20,7 @@
  */
 
 import { z } from '@kbn/zod';
+import 'zod-metadata/register';
 import type { ConnectorSpec } from '../connector_spec';
 
 export const AlienVaultOTXConnector: ConnectorSpec = {
@@ -36,7 +37,7 @@ export const AlienVaultOTXConnector: ConnectorSpec = {
       type: 'header',
       customSchema: z.object({
         headers: z.object({
-          'X-OTX-API-KEY': z.string().describe('API Key'),
+          'X-OTX-API-KEY': z.string().meta({ sensitive: true }).describe('API Key'),
         }),
       }),
     },

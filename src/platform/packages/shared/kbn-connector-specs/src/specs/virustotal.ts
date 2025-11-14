@@ -20,8 +20,8 @@
  */
 
 import { z } from '@kbn/zod';
+import 'zod-metadata/register';
 import type { ConnectorSpec } from '../connector_spec';
-import { withUIMeta } from '../connector_spec_ui';
 
 export const VirusTotalConnector: ConnectorSpec = {
   metadata: {
@@ -38,7 +38,10 @@ export const VirusTotalConnector: ConnectorSpec = {
       type: 'header',
       customSchema: z.object({
         headers: z.object({
-          'x-apikey': withUIMeta(z.string(), { placeholder: 'vt-...' }).describe('API Key'),
+          'x-apikey': z
+            .string()
+            .meta({ sensitive: true, placeholder: 'vt-...' })
+            .describe('API Key'),
         }),
       }),
     },
