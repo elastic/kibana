@@ -23,6 +23,5 @@
     "@kbn/inference-common",
     "@kbn/logging",
     "@kbn/core-ui-settings-server",
-    "@kbn/llm-tasks-plugin",
   ]
 }
