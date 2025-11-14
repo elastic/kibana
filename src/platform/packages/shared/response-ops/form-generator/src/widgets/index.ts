@@ -36,10 +36,16 @@ export {
   DiscriminatedUnionField,
   getDiscriminatedUnionInitialValue,
 } from './discriminated_union_field';
+export type { TextWidgetMeta, TextWidgetProps } from './text_field';
+export type { PasswordWidgetMeta, PasswordWidgetProps } from './password_field';
+export type { SelectWidgetMeta, SelectWidgetProps } from './select_field';
+export type { KeyValueWidgetMeta, KeyValueWidgetProps } from './key_value_field';
 export type {
-  WidgetProps,
-  TextWidgetProps,
-  SelectWidgetProps,
+  FormFieldsetWidgetMeta,
   DiscriminatedUnionWidgetProps,
-  KeyValueWidgetProps,
-} from './widget_props';
+} from './discriminated_union_field';
+export { isTextWidgetMeta } from './text_field';
+export { isPasswordWidgetMeta } from './password_field';
+export { isSelectWidgetMeta } from './select_field';
+export { isKeyValueWidgetMeta } from './key_value_field';
+export { isFormFieldsetWidgetMeta } from './discriminated_union_field';

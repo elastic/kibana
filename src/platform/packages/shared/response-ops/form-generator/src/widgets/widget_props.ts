@@ -10,8 +10,7 @@
 import type { z } from '@kbn/zod/v4';
 import type { FieldDefinition } from '../form';
 
-// could we use EUI's common types instead?
-export interface BaseWidgetProps<T = unknown> {
+export interface BaseWidgetProps<T = unknown, TMeta extends z.GlobalMeta = z.GlobalMeta> {
   fieldId: string;
   value: T;
   label?: string;
@@ -23,7 +22,7 @@ export interface BaseWidgetProps<T = unknown> {
   onChange: (fieldId: string, value: T) => void;
   onBlur: (fieldId: string, value: T) => void;
   schema?: z.ZodTypeAny;
-  widgetOptions?: Record<string, unknown>;
+  meta?: TMeta;
   setFieldError?: (fieldId: string, error: string | string[] | undefined) => void;
   setFieldTouched?: (fieldId: string, touched?: boolean) => void;
   getFieldValue?: (fieldId: string) => unknown;
@@ -35,23 +34,3 @@ export interface BaseWidgetProps<T = unknown> {
   errors?: Record<string, string | string[]>;
   touched?: Record<string, boolean>;
 }
-
-export type TextWidgetProps = BaseWidgetProps<string>;
-
-export interface SelectWidgetProps extends BaseWidgetProps<string> {
-  options?: Array<{ value: string; text: string }>;
-}
-
-export interface DiscriminatedUnionWidgetProps extends BaseWidgetProps<Record<string, any>> {
-  schema: z.ZodDiscriminatedUnion<any>;
-}
-
-export interface KeyValueWidgetProps extends BaseWidgetProps<Record<string, string>> {
-  schema?: z.ZodRecord<z.ZodString, z.ZodString>;
-}
-
-export type WidgetProps =
-  | TextWidgetProps
-  | SelectWidgetProps
-  | DiscriminatedUnionWidgetProps
-  | KeyValueWidgetProps;

@@ -9,7 +9,19 @@
 
 import React from 'react';
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
-import type { TextWidgetProps } from './widget_props';
+import type { EuiFieldTextProps } from '@elastic/eui';
+import { createWidgetTypeGuard, type BaseMetadata } from '../schema_metadata';
+import type { BaseWidgetProps } from './widget_props';
+
+type StripFormProps<T> = Partial<Omit<T, 'value' | 'onChange' | 'onBlur'>>;
+
+export type TextWidgetMeta = BaseMetadata & {
+  widget: 'text';
+} & StripFormProps<EuiFieldTextProps>;
+
+export const isTextWidgetMeta = createWidgetTypeGuard<TextWidgetMeta>('text');
+
+export type TextWidgetProps = BaseWidgetProps<string, TextWidgetMeta>;
 
 export const TextField: React.FC<TextWidgetProps> = ({
   fieldId,
@@ -21,9 +33,19 @@ export const TextField: React.FC<TextWidgetProps> = ({
   isInvalid,
   onChange,
   onBlur,
+  meta,
+  helpText,
 }) => {
+  const { prepend, append, compressed, readOnly, isDisabled } = meta || {};
+
   return (
-    <EuiFormRow label={label} error={error} isInvalid={isInvalid} fullWidth={fullWidth}>
+    <EuiFormRow
+      label={label}
+      error={error}
+      isInvalid={isInvalid}
+      fullWidth={fullWidth}
+      helpText={helpText}
+    >
       <EuiFieldText
         data-test-subj={fieldId}
         value={value}
@@ -32,6 +54,11 @@ export const TextField: React.FC<TextWidgetProps> = ({
         onBlur={() => onBlur(fieldId, value)}
         isInvalid={isInvalid}
         fullWidth={fullWidth}
+        disabled={isDisabled}
+        prepend={prepend}
+        append={append}
+        compressed={compressed}
+        readOnly={readOnly}
       />
     </EuiFormRow>
   );

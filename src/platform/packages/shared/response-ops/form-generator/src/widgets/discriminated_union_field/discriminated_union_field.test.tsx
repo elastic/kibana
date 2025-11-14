@@ -31,17 +31,17 @@ describe('DiscriminatedUnionField', () => {
   it('renders all union options as checkable cards', () => {
     const option1 = z.object({
       type: z.literal('basic'),
-      username: z.string().meta({ widget: 'text', widgetOptions: { label: 'Username' } }),
+      username: z.string().meta({ widget: 'text', label: 'Username' }),
     });
 
     const option2 = z.object({
       type: z.literal('oauth'),
-      token: z.string().meta({ widget: 'text', widgetOptions: { label: 'Token' } }),
+      token: z.string().meta({ widget: 'text', label: 'Token' }),
     });
 
     const schema = z.discriminatedUnion('type', [
-      option1.meta({ widgetOptions: { label: 'Basic Auth' } }),
-      option2.meta({ widgetOptions: { label: 'OAuth' } }),
+      option1.meta({ label: 'Basic Auth' }),
+      option2.meta({ label: 'OAuth' }),
     ]);
 
     render(
@@ -64,17 +64,17 @@ describe('DiscriminatedUnionField', () => {
   it('shows selected option as checked', () => {
     const option1 = z.object({
       type: z.literal('basic'),
-      username: z.string().meta({ widget: 'text', widgetOptions: { label: 'Username' } }),
+      username: z.string().meta({ widget: 'text', label: 'Username' }),
     });
 
     const option2 = z.object({
       type: z.literal('oauth'),
-      token: z.string().meta({ widget: 'text', widgetOptions: { label: 'Token' } }),
+      token: z.string().meta({ widget: 'text', label: 'Token' }),
     });
 
     const schema = z.discriminatedUnion('type', [
-      option1.meta({ widgetOptions: { label: 'Basic Auth' } }),
-      option2.meta({ widgetOptions: { label: 'OAuth' } }),
+      option1.meta({ label: 'Basic Auth' }),
+      option2.meta({ label: 'OAuth' }),
     ]);
 
     render(
@@ -96,18 +96,18 @@ describe('DiscriminatedUnionField', () => {
   it('renders option fields for selected option', () => {
     const option1 = z.object({
       type: z.literal('basic'),
-      username: z.string().meta({ widget: 'text', widgetOptions: { label: 'Username' } }),
-      password: z.string().meta({ widget: 'password', widgetOptions: { label: 'Password' } }),
+      username: z.string().meta({ widget: 'text', label: 'Username' }),
+      password: z.string().meta({ widget: 'password', label: 'Password' }),
     });
 
     const option2 = z.object({
       type: z.literal('oauth'),
-      token: z.string().meta({ widget: 'text', widgetOptions: { label: 'Token' } }),
+      token: z.string().meta({ widget: 'text', label: 'Token' }),
     });
 
     const schema = z.discriminatedUnion('type', [
-      option1.meta({ widgetOptions: { label: 'Basic Auth' } }),
-      option2.meta({ widgetOptions: { label: 'OAuth' } }),
+      option1.meta({ label: 'Basic Auth' }),
+      option2.meta({ label: 'OAuth' }),
     ]);
 
     render(
@@ -130,17 +130,17 @@ describe('DiscriminatedUnionField', () => {
   it('calls onChange when switching options', async () => {
     const option1 = z.object({
       type: z.literal('basic'),
-      username: z.string().meta({ widget: 'text', widgetOptions: { label: 'Username' } }),
+      username: z.string().meta({ widget: 'text', label: 'Username' }),
     });
 
     const option2 = z.object({
       type: z.literal('oauth'),
-      token: z.string().meta({ widget: 'text', widgetOptions: { label: 'Token' } }),
+      token: z.string().meta({ widget: 'text', label: 'Token' }),
     });
 
     const schema = z.discriminatedUnion('type', [
-      option1.meta({ widgetOptions: { label: 'Basic Auth' } }),
-      option2.meta({ widgetOptions: { label: 'OAuth' } }),
+      option1.meta({ label: 'Basic Auth' }),
+      option2.meta({ label: 'OAuth' }),
     ]);
 
     render(
@@ -169,12 +169,10 @@ describe('DiscriminatedUnionField', () => {
   it('calls onChange when option field changes', async () => {
     const option1 = z.object({
       type: z.literal('basic'),
-      username: z.string().meta({ widget: 'text', widgetOptions: { label: 'Username' } }),
+      username: z.string().meta({ widget: 'text', label: 'Username' }),
     });
 
-    const schema = z.discriminatedUnion('type', [
-      option1.meta({ widgetOptions: { label: 'Basic Auth' } }),
-    ]);
+    const schema = z.discriminatedUnion('type', [option1.meta({ label: 'Basic Auth' })]);
 
     render(
       <DiscriminatedUnionField
@@ -199,15 +197,10 @@ describe('DiscriminatedUnionField', () => {
   it('validates option fields on blur', async () => {
     const option1 = z.object({
       type: z.literal('basic'),
-      username: z
-        .string()
-        .min(3)
-        .meta({ widget: 'text', widgetOptions: { label: 'Username' } }),
+      username: z.string().min(3).meta({ widget: 'text', label: 'Username' }),
     });
 
-    const schema = z.discriminatedUnion('type', [
-      option1.meta({ widgetOptions: { label: 'Basic Auth' } }),
-    ]);
+    const schema = z.discriminatedUnion('type', [option1.meta({ label: 'Basic Auth' })]);
 
     render(
       <DiscriminatedUnionField
@@ -232,19 +225,11 @@ describe('DiscriminatedUnionField', () => {
   it('should not show validation error for untouched fields when tabbing through', async () => {
     const option1 = z.object({
       type: z.literal('basic'),
-      username: z
-        .string()
-        .min(3)
-        .meta({ widget: 'text', widgetOptions: { label: 'Username' } }),
-      password: z
-        .string()
-        .min(3)
-        .meta({ widget: 'password', widgetOptions: { label: 'Password' } }),
+      username: z.string().min(3).meta({ widget: 'text', label: 'Username' }),
+      password: z.string().min(3).meta({ widget: 'password', label: 'Password' }),
     });
 
-    const schema = z.discriminatedUnion('type', [
-      option1.meta({ widgetOptions: { label: 'Basic Auth' } }),
-    ]);
+    const schema = z.discriminatedUnion('type', [option1.meta({ label: 'Basic Auth' })]);
 
     render(
       <DiscriminatedUnionField
@@ -310,15 +295,10 @@ describe('DiscriminatedUnionField', () => {
   it('displays validation errors for option fields', async () => {
     const option1 = z.object({
       type: z.literal('basic'),
-      username: z
-        .string()
-        .min(3)
-        .meta({ widget: 'text', widgetOptions: { label: 'Username' } }),
+      username: z.string().min(3).meta({ widget: 'text', label: 'Username' }),
     });
 
-    const schema = z.discriminatedUnion('type', [
-      option1.meta({ widgetOptions: { label: 'Basic Auth' } }),
-    ]);
+    const schema = z.discriminatedUnion('type', [option1.meta({ label: 'Basic Auth' })]);
 
     render(
       <DiscriminatedUnionField
@@ -345,7 +325,7 @@ describe('DiscriminatedUnionField', () => {
   it('renders single option union without checkable card', () => {
     const option1 = z.object({
       type: z.literal('basic'),
-      username: z.string().meta({ widget: 'text', widgetOptions: { label: 'Username' } }),
+      username: z.string().meta({ widget: 'text', label: 'Username' }),
     });
 
     const schema = z.discriminatedUnion('type', [option1]);
@@ -371,18 +351,13 @@ describe('DiscriminatedUnionField', () => {
     const option1 = z
       .object({
         type: z.literal('headers'),
-        key: z
-          .string()
-          .min(1, { message: 'API Key cannot be empty' })
-          .meta({
-            widget: 'password',
-            widgetOptions: {
-              label: 'API Key',
-            },
-          }),
+        key: z.string().min(1, { message: 'API Key cannot be empty' }).meta({
+          widget: 'password',
+          label: 'API Key',
+        }),
       })
       .meta({
-        widgetOptions: { label: 'Headers' },
+        label: 'Headers',
       });
 
     const schema = z.discriminatedUnion('type', [option1]);
@@ -425,23 +400,23 @@ describe('DiscriminatedUnionField', () => {
   it('selects the first option by default when no default is specified', () => {
     const option1 = z.object({
       type: z.literal('basic'),
-      username: z.string().meta({ widget: 'text', widgetOptions: { label: 'Username' } }),
+      username: z.string().meta({ widget: 'text', label: 'Username' }),
     });
 
     const option2 = z.object({
       type: z.literal('oauth'),
-      token: z.string().meta({ widget: 'text', widgetOptions: { label: 'Token' } }),
+      token: z.string().meta({ widget: 'text', label: 'Token' }),
     });
 
     const option3 = z.object({
       type: z.literal('apiKey'),
-      key: z.string().meta({ widget: 'text', widgetOptions: { label: 'API Key' } }),
+      key: z.string().meta({ widget: 'text', label: 'API Key' }),
     });
 
     const schema = z.discriminatedUnion('type', [
-      option1.meta({ widgetOptions: { label: 'Basic Auth' } }),
-      option2.meta({ widgetOptions: { label: 'OAuth' } }),
-      option3.meta({ widgetOptions: { label: 'API Key Auth' } }),
+      option1.meta({ label: 'Basic Auth' }),
+      option2.meta({ label: 'OAuth' }),
+      option3.meta({ label: 'API Key Auth' }),
     ]);
 
     const initialValue = getDiscriminatedUnionInitialValue(schema);
@@ -474,26 +449,26 @@ describe('DiscriminatedUnionField', () => {
   it('selects the specified default option when default is provided', () => {
     const option1 = z.object({
       type: z.literal('basic'),
-      username: z.string().meta({ widget: 'text', widgetOptions: { label: 'Username' } }),
+      username: z.string().meta({ widget: 'text', label: 'Username' }),
     });
 
     const option2 = z.object({
       type: z.literal('oauth'),
-      token: z.string().meta({ widget: 'text', widgetOptions: { label: 'Token' } }),
+      token: z.string().meta({ widget: 'text', label: 'Token' }),
     });
 
     const option3 = z.object({
       type: z.literal('apiKey'),
-      key: z.string().meta({ widget: 'text', widgetOptions: { label: 'API Key' } }),
+      key: z.string().meta({ widget: 'text', label: 'API Key' }),
     });
 
     const schema = z
       .discriminatedUnion('type', [
-        option1.meta({ widgetOptions: { label: 'Basic Auth' } }),
-        option2.meta({ widgetOptions: { label: 'OAuth' } }),
-        option3.meta({ widgetOptions: { label: 'API Key Auth' } }),
+        option1.meta({ label: 'Basic Auth' }),
+        option2.meta({ label: 'OAuth' }),
+        option3.meta({ label: 'API Key Auth' }),
       ])
-      .meta({ widgetOptions: { default: 'oauth' } });
+      .meta({ default: 'oauth' });
 
     const initialValue = getDiscriminatedUnionInitialValue(schema);
 

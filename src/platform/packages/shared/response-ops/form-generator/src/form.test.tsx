@@ -28,17 +28,13 @@ describe('Form', () => {
     const schema = z.object({
       username: z.string().meta({
         widget: 'text',
-        widgetOptions: {
-          label: 'Username',
-          placeholder: 'Enter username',
-        },
+        label: 'Username',
+        placeholder: 'Enter username',
       }),
       email: z.email().meta({
         widget: 'text',
-        widgetOptions: {
-          label: 'Email',
-          placeholder: 'Enter email',
-        },
+        label: 'Email',
+        placeholder: 'Enter email',
       }),
     });
 
@@ -55,10 +51,8 @@ describe('Form', () => {
     const schema = z.object({
       password: z.string().meta({
         widget: 'password',
-        widgetOptions: {
-          label: 'Password',
-          placeholder: 'Enter password',
-        },
+        label: 'Password',
+        placeholder: 'Enter password',
       }),
     });
 
@@ -72,9 +66,7 @@ describe('Form', () => {
     const schema = z.object({
       country: z.enum(['US', 'UK', 'CA']).meta({
         widget: 'select',
-        widgetOptions: {
-          label: 'Country',
-        },
+        label: 'Country',
       }),
     });
 
@@ -89,9 +81,7 @@ describe('Form', () => {
     const schema = z.object({
       username: z.string().meta({
         widget: 'text',
-        widgetOptions: {
-          label: 'Username',
-        },
+        label: 'Username',
       }),
     });
 
@@ -114,9 +104,7 @@ describe('Form', () => {
     const schema = z.object({
       email: z.email().meta({
         widget: 'text',
-        widgetOptions: {
-          label: 'Email',
-        },
+        label: 'Email',
       }),
     });
 
@@ -137,9 +125,7 @@ describe('Form', () => {
     const schema = z.object({
       email: z.email().meta({
         widget: 'text',
-        widgetOptions: {
-          label: 'Email',
-        },
+        label: 'Email',
       }),
     });
 
@@ -156,9 +142,7 @@ describe('Form', () => {
     const schema = z.object({
       email: z.email().meta({
         widget: 'text',
-        widgetOptions: {
-          label: 'Email',
-        },
+        label: 'Email',
       }),
     });
 
@@ -182,9 +166,7 @@ describe('Form', () => {
     const schema = z.object({
       username: z.string().meta({
         widget: 'text',
-        widgetOptions: {
-          label: 'Username',
-        },
+        label: 'Username',
       }),
     });
 
@@ -222,10 +204,7 @@ describe('Form', () => {
     const schema = z.object({
       username: z.string().meta({
         widget: 'fakeWidget' as any, // Unsupported widget
-
-        widgetOptions: {
-          label: 'Username',
-        },
+        label: 'Username',
       }),
     });
 
@@ -242,22 +221,16 @@ describe('Form', () => {
     const schema = z.object({
       username: z.string().meta({
         widget: 'text',
-        widgetOptions: {
-          label: 'Username',
-        },
+        label: 'Username',
       }),
       password: z.string().meta({
         widget: 'password',
-        widgetOptions: {
-          label: 'Password',
-        },
+        label: 'Password',
       }),
       role: z.enum(['admin', 'user']).meta({
         widget: 'select',
-        widgetOptions: {
-          label: 'Role',
-          default: 'user',
-        },
+        label: 'Role',
+        default: 'user',
       }),
     });
 
@@ -287,14 +260,12 @@ describe('Form', () => {
     });
   });
 
-  it('uses default values from widgetOptions', () => {
+  it('uses default values from metadata', () => {
     const schema = z.object({
       username: z.string().meta({
         widget: 'text',
-        widgetOptions: {
-          label: 'Username',
-          default: 'defaultUser',
-        },
+        label: 'Username',
+        default: 'defaultUser',
       }),
     });
 
@@ -308,9 +279,7 @@ describe('Form', () => {
     const schema = z.object({
       headers: z.record(z.string(), z.string()).meta({
         widget: 'keyValue',
-        widgetOptions: {
-          label: 'Headers',
-        },
+        label: 'Headers',
       }),
     });
 
@@ -323,9 +292,7 @@ describe('Form', () => {
     const schema = z.object({
       username: z.string().meta({
         widget: 'text',
-        widgetOptions: {
-          label: 'Username',
-        },
+        label: 'Username',
       }),
     });
 
@@ -353,57 +320,50 @@ describe('Authentication Form Integration Tests', () => {
     authType: z
       .discriminatedUnion('type', [
         z.object({ type: z.literal('none') }).meta({
-          widgetOptions: { label: 'None' },
+          label: 'None',
         }),
         z
           .object({
             type: z.literal('basic'),
-            username: z
-              .string()
-              .min(1, 'Username cannot be empty')
-              .meta({
-                widget: 'text',
-                widgetOptions: { label: 'Username' },
-              }),
-            password: z
-              .string()
-              .min(1, 'Password cannot be empty')
-              .meta({
-                widget: 'password',
-                widgetOptions: { label: 'Password' },
-              }),
+            username: z.string().min(1, 'Username cannot be empty').meta({
+              widget: 'text',
+              label: 'Username',
+            }),
+            password: z.string().min(1, 'Password cannot be empty').meta({
+              widget: 'password',
+              label: 'Password',
+            }),
           })
           .meta({
-            widgetOptions: { label: 'Basic Auth' },
+            label: 'Basic Auth',
           }),
         z
           .object({
             type: z.literal('bearer'),
             token: z.string().meta({
               widget: 'text',
-              widgetOptions: { label: 'Bearer Token' },
+              label: 'Bearer Token',
             }),
           })
           .meta({
-            widgetOptions: { label: 'Bearer Token' },
+            label: 'Bearer Token',
           }),
         z
           .object({
             type: z.literal('headers'),
             headers: z.record(z.string().min(1, 'Header key cannot be empty.'), z.string()).meta({
               widget: 'keyValue',
-              widgetOptions: {
-                label: 'Headers',
-              },
+              label: 'Headers',
             }),
           })
           .meta({
-            widgetOptions: { label: 'Headers' },
+            label: 'Headers',
           }),
       ])
       .meta({
         widget: 'formFieldset',
-        widgetOptions: { label: 'Authentication', default: 'none' },
+        label: 'Authentication',
+        default: 'none',
       }),
   });
 
@@ -590,21 +550,16 @@ describe('Authentication Form Integration Tests', () => {
           z
             .object({
               type: z.literal('headers'),
-              headers: z
-                .string()
-                .min(1, { message: 'API Key cannot be empty' })
-                .meta({
-                  widget: 'password',
-                  widgetOptions: {
-                    label: 'API Key',
-                  },
-                }),
+              headers: z.string().min(1, { message: 'API Key cannot be empty' }).meta({
+                widget: 'password',
+                label: 'API Key',
+              }),
             })
             .meta({
-              widgetOptions: { label: 'Headers' },
+              label: 'Headers',
             }),
         ])
-        .meta({ widget: 'formFieldset', widgetOptions: { label: 'Authentication' } }),
+        .meta({ widget: 'formFieldset', label: 'Authentication' }),
     });
 
     render(<Form connectorSchema={singleOptionSchema} onSubmit={mockOnSubmit} />, { wrapper });
@@ -629,43 +584,35 @@ describe('Authentication Form Integration Tests', () => {
 
   it('shows all validation errors on submit even after partial blur validation', async () => {
     const schema = z.object({
-      name: z
-        .string()
-        .min(1, 'Name cannot be empty')
-        .meta({
-          widget: 'text',
-          widgetOptions: { label: 'Name' },
-        }),
+      name: z.string().min(1, 'Name cannot be empty').meta({
+        widget: 'text',
+        label: 'Name',
+      }),
       authType: z
         .discriminatedUnion('type', [
           z.object({ type: z.literal('none') }).meta({
-            widgetOptions: { label: 'None' },
+            label: 'None',
           }),
           z
             .object({
               type: z.literal('basic'),
-              username: z
-                .string()
-                .min(1, 'Username cannot be empty')
-                .meta({
-                  widget: 'text',
-                  widgetOptions: { label: 'Username' },
-                }),
-              password: z
-                .string()
-                .min(1, 'Password cannot be empty')
-                .meta({
-                  widget: 'password',
-                  widgetOptions: { label: 'Password' },
-                }),
+              username: z.string().min(1, 'Username cannot be empty').meta({
+                widget: 'text',
+                label: 'Username',
+              }),
+              password: z.string().min(1, 'Password cannot be empty').meta({
+                widget: 'password',
+                label: 'Password',
+              }),
             })
             .meta({
-              widgetOptions: { label: 'Basic Auth' },
+              label: 'Basic Auth',
             }),
         ])
         .meta({
           widget: 'formFieldset',
-          widgetOptions: { label: 'Authentication', default: 'none' },
+          label: 'Authentication',
+          default: 'none',
         }),
     });
 

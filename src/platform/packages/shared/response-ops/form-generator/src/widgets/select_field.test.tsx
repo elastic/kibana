@@ -77,7 +77,10 @@ describe('SelectField', () => {
         fieldId="role"
         value="admin"
         label="Role"
-        options={options}
+        meta={{
+          widget: 'select',
+          options,
+        }}
         onChange={mockOnChange}
         onBlur={mockOnBlur}
       />,

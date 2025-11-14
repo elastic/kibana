@@ -8,6 +8,7 @@
  */
 
 import React, { useState, useCallback, useEffect } from 'react';
+import type { z } from '@kbn/zod/v4';
 import {
   EuiFormRow,
   EuiFlexGroup,
@@ -18,7 +19,21 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { v4 as uuidv4 } from 'uuid';
-import type { KeyValueWidgetProps } from './widget_props';
+import { createWidgetTypeGuard, type BaseMetadata } from '../schema_metadata';
+import type { BaseWidgetProps } from './widget_props';
+
+export type KeyValueWidgetMeta = BaseMetadata & {
+  widget: 'keyValue';
+};
+
+export const isKeyValueWidgetMeta = createWidgetTypeGuard<KeyValueWidgetMeta>('keyValue');
+
+export type KeyValueWidgetProps = Omit<
+  BaseWidgetProps<Record<string, string>, KeyValueWidgetMeta>,
+  'schema'
+> & {
+  schema?: z.ZodRecord<z.ZodString, z.ZodString>;
+};
 
 interface KeyValuePair {
   id: string;
@@ -36,12 +51,16 @@ export const KeyValueField: React.FC<KeyValueWidgetProps> = ({
   isInvalid,
   onChange,
   onBlur,
-  widgetOptions,
+  meta,
   fullWidth = true,
   setFieldError,
   errors = {},
-  helpText,
+  helpText: helpTextProp,
 }) => {
+  const { isDisabled, helpText: helpTextMeta } = meta || {};
+  const helpText = helpTextProp || helpTextMeta;
+  const disabled = isDisabled as boolean | undefined;
+
   const [pairs, setPairs] = useState<KeyValuePair[]>(() => {
     if (value && typeof value === 'object' && Object.keys(value).length > 0) {
       return Object.entries(value).map(([key, val]) => ({
@@ -188,7 +207,7 @@ export const KeyValueField: React.FC<KeyValueWidgetProps> = ({
       error={error}
       isInvalid={showError}
       fullWidth={fullWidth}
-      helpText={widgetOptions?.helpText as string}
+      helpText={helpText}
     >
       <div>
         {pairs.map((pair, index) => {
@@ -215,6 +234,7 @@ export const KeyValueField: React.FC<KeyValueWidgetProps> = ({
                       isInvalid={!!keyError}
                       compressed
                       fullWidth
+                      disabled={disabled}
                       data-test-subj={`${fieldId}-key-${index}`}
                     />
                   </EuiFormRow>
@@ -234,6 +254,7 @@ export const KeyValueField: React.FC<KeyValueWidgetProps> = ({
                       isInvalid={!!valueError}
                       compressed
                       fullWidth
+                      disabled={disabled}
                       data-test-subj={`${fieldId}-value-${index}`}
                     />
                   </EuiFormRow>
@@ -244,6 +265,7 @@ export const KeyValueField: React.FC<KeyValueWidgetProps> = ({
                     color="danger"
                     aria-label="Remove key-value pair"
                     onClick={() => handleRemovePair(pair.id)}
+                    disabled={disabled}
                     data-test-subj={`${fieldId}-remove-${index}`}
                   />
                 </EuiFlexItem>
@@ -257,6 +279,7 @@ export const KeyValueField: React.FC<KeyValueWidgetProps> = ({
           size="xs"
           onClick={handleAddPair}
           data-test-subj={`${fieldId}-add`}
+          disabled={disabled}
         >
           Add pair
         </EuiButtonEmpty>

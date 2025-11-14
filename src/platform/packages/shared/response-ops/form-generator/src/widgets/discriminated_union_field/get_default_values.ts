@@ -8,13 +8,14 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { getDiscriminatorFieldValue } from './discriminated_union_field';
 
 export const getDefaultValuesForOption = (optionSchema: z.ZodObject<z.ZodRawShape>) => {
   const defaultValues: Record<string, unknown> = {};
-  const discriminatorValue = getDiscriminatorFieldValue(optionSchema);
 
-  defaultValues.type = discriminatorValue;
+  if ('type' in optionSchema.shape) {
+    const typeField = optionSchema.shape.type as z.ZodLiteral<string>;
+    defaultValues.type = typeField.value;
+  }
 
   Object.entries(optionSchema.shape).forEach(([fieldKey, fieldSchema]) => {
     if (fieldKey === 'type') return; // Skip discriminator
@@ -22,9 +23,10 @@ export const getDefaultValuesForOption = (optionSchema: z.ZodObject<z.ZodRawShap
     const zodFieldSchema = fieldSchema as z.ZodTypeAny;
 
     try {
-      const parsed = zodFieldSchema.parse(undefined);
-      defaultValues[fieldKey] = parsed;
+      // Try to parse undefined - this works if schema has .default() or .optional()
+      defaultValues[fieldKey] = zodFieldSchema.parse(undefined);
     } catch {
+      // Fallback to type-based defaults using instanceof checks
       if (zodFieldSchema instanceof z.ZodString) {
         defaultValues[fieldKey] = '';
       } else if (zodFieldSchema instanceof z.ZodNumber) {

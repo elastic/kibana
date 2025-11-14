@@ -15,10 +15,6 @@ import type { FieldDefinition } from './form';
 describe('useFormState', () => {
   const createMockField = (id: string, initialValue?: unknown): FieldDefinition => ({
     id,
-    staticProps: {
-      fullWidth: true,
-      label: `Label ${id}`,
-    },
     initialValue,
     validate: jest.fn((value: unknown): Record<string, string | string[]> | undefined => {
       if (typeof value === 'string' && value.length < 3) {
@@ -28,6 +24,10 @@ describe('useFormState', () => {
     }),
     schema: z.string(),
     widget: 'text',
+    meta: {
+      widget: 'text',
+      label: `Label ${id}`,
+    },
   });
 
   it('initializes with correct values', () => {
@@ -238,10 +238,10 @@ describe('useFormState', () => {
     const fields: FieldDefinition[] = [
       {
         id: 'username',
-        staticProps: { fullWidth: true },
         validate: jest.fn(),
         schema: z.string(),
         widget: 'text',
+        meta: { widget: 'text' },
       },
     ];
 
@@ -254,12 +254,12 @@ describe('useFormState', () => {
     const fields: FieldDefinition[] = [
       {
         id: 'username',
-        staticProps: { fullWidth: true },
         initialValue: 'initial',
         value: 'value',
         validate: jest.fn(),
         schema: z.string(),
         widget: 'text',
+        meta: { widget: 'text' },
       },
     ];
 
@@ -294,11 +294,11 @@ describe('useFormState', () => {
     const fields: FieldDefinition[] = [
       {
         id: 'username',
-        staticProps: { fullWidth: true },
         initialValue: 'ab',
         validate: jest.fn(() => ({ '': ['Error 1', 'Error 2'] })),
         schema: z.string(),
         widget: 'text',
+        meta: { widget: 'text' },
       },
     ];
 

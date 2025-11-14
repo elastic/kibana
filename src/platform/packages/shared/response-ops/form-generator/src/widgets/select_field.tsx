@@ -10,7 +10,20 @@
 import React from 'react';
 import { z } from '@kbn/zod/v4';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
-import type { SelectWidgetProps } from './widget_props';
+import type { EuiSelectProps } from '@elastic/eui';
+import { createWidgetTypeGuard, type BaseMetadata } from '../schema_metadata';
+import type { BaseWidgetProps } from './widget_props';
+
+type StripFormProps<T> = Partial<Omit<T, 'value' | 'onChange' | 'onBlur'>>;
+
+export type SelectWidgetMeta = BaseMetadata & {
+  widget: 'select';
+  options?: Array<{ value: string; text: string }>;
+} & StripFormProps<Omit<EuiSelectProps, 'options'>>;
+
+export const isSelectWidgetMeta = createWidgetTypeGuard<SelectWidgetMeta>('select');
+
+export type SelectWidgetProps = BaseWidgetProps<string, SelectWidgetMeta>;
 
 export const SelectField: React.FC<SelectWidgetProps> = ({
   fieldId,
@@ -23,10 +36,11 @@ export const SelectField: React.FC<SelectWidgetProps> = ({
   onChange,
   onBlur,
   schema,
-  options: providedOptions,
+  meta,
   helpText,
 }) => {
-  let options = providedOptions;
+  const { options: metaOptions, hasNoInitialSelection, isDisabled } = meta || {};
+  let options = metaOptions;
 
   if (!options && schema) {
     if (schema instanceof z.ZodEnum) {
@@ -58,6 +72,8 @@ export const SelectField: React.FC<SelectWidgetProps> = ({
         onBlur={() => onBlur(fieldId, value)}
         isInvalid={isInvalid}
         fullWidth={fullWidth}
+        disabled={isDisabled}
+        hasNoInitialSelection={hasNoInitialSelection}
       />
     </EuiFormRow>
   );

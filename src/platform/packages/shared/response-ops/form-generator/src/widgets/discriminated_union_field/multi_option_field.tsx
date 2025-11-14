@@ -10,8 +10,8 @@
 import React, { useMemo, useCallback } from 'react';
 import { z } from '@kbn/zod/v4';
 import { EuiCheckableCard, EuiFormFieldset, EuiFormRow, EuiSpacer } from '@elastic/eui';
-import { getMeta } from '../../get_metadata';
-import type { DiscriminatedUnionWidgetProps } from '../widget_props';
+import { getMeta } from '../../schema_metadata';
+import type { DiscriminatedUnionWidgetProps } from './discriminated_union_field';
 import { getDefaultValuesForOption } from './get_default_values';
 import { getWidget } from '..';
 
@@ -31,11 +31,8 @@ export const MultiOptionUnionField: React.FC<DiscriminatedUnionWidgetProps> = ({
   setFieldTouched,
   errors = {},
   touched = {},
+  meta,
 }) => {
-  if (!(schema instanceof z.ZodDiscriminatedUnion)) {
-    throw new Error('Schema provided to MultiOptionUnionField is not a ZodDiscriminatedUnion');
-  }
-
   const discriminatedSchema = schema as z.ZodDiscriminatedUnion<z.ZodObject<z.ZodRawShape>[]>;
   const schemaOptions = discriminatedSchema.options;
   const totalOptions = schemaOptions.length;
@@ -68,9 +65,7 @@ export const MultiOptionUnionField: React.FC<DiscriminatedUnionWidgetProps> = ({
       const checkableCardId = `${fieldId}-option-${discriminatorValue}`;
 
       const optionMeta = getMeta(optionSchema);
-      const staticProps = optionMeta?.widgetOptions || {};
-      const cardLabel: string =
-        (optionMeta?.widgetOptions?.label as string | undefined) || discriminatorValue;
+      const cardLabel: string = (optionMeta?.label as string | undefined) || discriminatorValue;
 
       const handleCardChange = () => {
         const newValue = getDefaultValuesForOption(optionSchema);
@@ -159,12 +154,9 @@ export const MultiOptionUnionField: React.FC<DiscriminatedUnionWidgetProps> = ({
                   <React.Fragment key={fieldKey}>
                     <EuiSpacer size="s" />
                     <OptionWidgetComponent
-                      {...staticProps}
                       fieldId={optionFieldId}
                       value={optionValue}
-                      label={
-                        optionFieldMeta?.label || optionFieldMeta?.widgetOptions?.label || fieldKey
-                      }
+                      label={optionFieldMeta?.label || fieldKey}
                       error={optionFieldError}
                       isInvalid={optionFieldIsInvalid}
                       onChange={handleOptionChange}
@@ -212,7 +204,7 @@ export const MultiOptionUnionField: React.FC<DiscriminatedUnionWidgetProps> = ({
   ]);
 
   return (
-    <EuiFormRow fullWidth={fullWidth}>
+    <EuiFormRow fullWidth={fullWidth} helpText={meta?.helpText}>
       <EuiFormFieldset legend={{ children: label }}>{options}</EuiFormFieldset>
     </EuiFormRow>
   );

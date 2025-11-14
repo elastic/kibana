@@ -9,11 +9,25 @@
 
 import React from 'react';
 import { z } from '@kbn/zod/v4';
-import { getMeta } from '../../get_metadata';
+import { getMeta, createWidgetTypeGuard, type BaseMetadata } from '../../schema_metadata';
 import { SingleOptionUnionField } from './single_option_field';
 import { MultiOptionUnionField } from './multi_option_field';
-import type { DiscriminatedUnionWidgetProps } from '../widget_props';
+import type { BaseWidgetProps } from '../widget_props';
 import { getDefaultValuesForOption } from './get_default_values';
+
+export type FormFieldsetWidgetMeta = BaseMetadata & {
+  widget: 'formFieldset';
+};
+
+export const isFormFieldsetWidgetMeta =
+  createWidgetTypeGuard<FormFieldsetWidgetMeta>('formFieldset');
+
+export type DiscriminatedUnionWidgetProps = Omit<
+  BaseWidgetProps<Record<string, any>, FormFieldsetWidgetMeta>,
+  'schema'
+> & {
+  schema?: z.ZodDiscriminatedUnion<any>;
+};
 
 export const getDiscriminatorFieldValue = (optionSchema: z.ZodObject<z.ZodRawShape>) => {
   return (optionSchema.shape.type as z.ZodLiteral<string>).value;
@@ -28,7 +42,7 @@ export const getDiscriminatedUnionInitialValue = (
   }
 
   const metaInfo = getMeta(schema);
-  const metadataDefault = metaInfo?.widgetOptions?.default;
+  const metadataDefault = metaInfo?.default;
   const valueToUse = metadataDefault ?? defaultValue;
 
   if (valueToUse) {

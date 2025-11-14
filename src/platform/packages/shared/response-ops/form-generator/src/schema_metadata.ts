@@ -7,20 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export interface WidgetOptions {
+import { z } from '@kbn/zod/v4';
+import type { WidgetType } from './widgets';
+
+export interface BaseMetadata {
+  widget: WidgetType;
   label?: string;
   placeholder?: string;
   default?: unknown;
   helpText?: string;
   isDisabled?: boolean;
-  addButtonLabel?: string;
   [key: string]: unknown;
 }
 
-// temporary, I would think this should be in the spec. We definitely need type
-// for our meta object
-export interface FieldMeta {
-  widget: 'text' | 'password' | 'select' | 'formFieldset' | 'keyValue';
-  widgetOptions?: WidgetOptions;
-  [key: string]: unknown;
+declare module '@kbn/zod/v4' {
+  interface GlobalMeta extends Partial<BaseMetadata> {
+    // Allow any additional properties for flexibility
+    [key: string]: unknown;
+  }
+}
+
+export function createWidgetTypeGuard<T extends { widget: WidgetType }>(
+  widgetType: WidgetType
+): (meta: unknown) => meta is T {
+  return (meta): meta is T =>
+    typeof meta === 'object' && meta !== null && 'widget' in meta && meta.widget === widgetType;
+}
+
+export function getMeta(schema: z.ZodTypeAny): z.GlobalMeta | undefined {
+  return z.globalRegistry.get(schema);
 }

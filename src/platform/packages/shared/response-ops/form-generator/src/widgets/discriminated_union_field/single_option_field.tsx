@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { z } from '@kbn/zod/v4';
 import { EuiFormFieldset, EuiFormRow, EuiSpacer } from '@elastic/eui';
-import { getMeta } from '../../get_metadata';
-import type { DiscriminatedUnionWidgetProps } from '../widget_props';
+import { getMeta } from '../../schema_metadata';
+import type { DiscriminatedUnionWidgetProps } from './discriminated_union_field';
 import { getWidget } from '..';
 
 const getDiscriminatorFieldValue = (optionSchema: z.ZodObject<z.ZodRawShape>) => {
@@ -30,11 +30,8 @@ export const SingleOptionUnionField: React.FC<DiscriminatedUnionWidgetProps> = (
   setFieldTouched,
   errors = {},
   touched = {},
+  meta,
 }) => {
-  if (!(schema instanceof z.ZodDiscriminatedUnion)) {
-    throw new Error('Schema provided to SingleOptionUnionField is not a ZodDiscriminatedUnion');
-  }
-
   const discriminatedSchema = schema as z.ZodDiscriminatedUnion<z.ZodObject<z.ZodRawShape>[]>;
   const singleOptionSchema = discriminatedSchema.options[0];
   const discriminatorValue = getDiscriminatorFieldValue(singleOptionSchema);
@@ -69,7 +66,6 @@ export const SingleOptionUnionField: React.FC<DiscriminatedUnionWidgetProps> = (
       const metaInfo = getMeta(fieldSchema);
       const widget = metaInfo?.widget || 'text';
       const fieldValue = valueObj[fieldKey] ?? '';
-      const staticProps = metaInfo?.widgetOptions || {};
 
       const WidgetComponent = getWidget(widget);
       if (!WidgetComponent) {
@@ -127,14 +123,14 @@ export const SingleOptionUnionField: React.FC<DiscriminatedUnionWidgetProps> = (
           <WidgetComponent
             fieldId={subFieldId}
             value={fieldValue}
-            label={metaInfo?.label || metaInfo?.widgetOptions?.label || fieldKey}
+            label={metaInfo?.label || fieldKey}
             error={error}
             isInvalid={isInvalid}
             onChange={handleChange}
             onBlur={handleBlur}
             schema={fieldSchema}
+            meta={metaInfo}
             fullWidth
-            {...staticProps}
           />
         </React.Fragment>
       );
@@ -156,7 +152,7 @@ export const SingleOptionUnionField: React.FC<DiscriminatedUnionWidgetProps> = (
   ]);
 
   return (
-    <EuiFormRow fullWidth={fullWidth}>
+    <EuiFormRow fullWidth={fullWidth} helpText={meta?.helpText}>
       <EuiFormFieldset legend={{ children: label }}>{fields}</EuiFormFieldset>
     </EuiFormRow>
   );

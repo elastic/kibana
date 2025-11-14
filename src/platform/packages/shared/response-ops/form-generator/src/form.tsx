@@ -10,46 +10,25 @@
 import React, { useMemo } from 'react';
 import { z } from '@kbn/zod/v4';
 import { EuiButton, EuiForm, EuiSpacer } from '@elastic/eui';
-import { getMeta } from './get_metadata';
+import { getMeta } from './schema_metadata';
 import { useFormState } from './use_form_state';
 import type { WidgetType } from './widgets';
-import { getDiscriminatedUnionInitialValue, getWidget } from './widgets';
+import {
+  getDiscriminatedUnionInitialValue,
+  getWidget,
+  isFormFieldsetWidgetMeta,
+  isKeyValueWidgetMeta,
+} from './widgets';
 
 export interface FieldDefinition {
   id: string;
-  staticProps: {
-    fullWidth?: boolean;
-    placeholder?: string;
-    label?: string;
-    default?: unknown;
-    helpText?: string;
-  };
   initialValue?: unknown;
   value?: unknown;
   validate: (value: unknown) => Record<string, string | string[]> | undefined;
   schema?: z.ZodTypeAny;
   widget?: WidgetType;
+  meta?: z.GlobalMeta;
 }
-
-const getStaticProps = ({ schema }: { schema: z.ZodTypeAny }) => {
-  const metaInfo = getMeta(schema) || {};
-  const { widgetOptions } = metaInfo;
-
-  const commonProps = {
-    fullWidth: true,
-    label: widgetOptions?.label as string | undefined,
-    placeholder: widgetOptions?.placeholder as string | undefined,
-    default: widgetOptions?.default,
-    helpText: widgetOptions?.helpText as string | undefined,
-  };
-
-  const mergedOptions = {
-    ...commonProps,
-    ...widgetOptions,
-  };
-
-  return mergedOptions;
-};
 
 const getFieldsFromSchema = <T extends z.ZodRawShape>(schema: z.ZodObject<T>) => {
   const fields: FieldDefinition[] = [];
@@ -62,24 +41,22 @@ const getFieldsFromSchema = <T extends z.ZodRawShape>(schema: z.ZodObject<T>) =>
       throw new Error(`UI metadata is missing for field: ${key}`);
     }
 
-    const staticProps = getStaticProps({ schema: schemaAny });
+    let initialValue = metaInfo.default;
 
-    let initialValue = staticProps.default;
-
-    if (metaInfo.widget === 'formFieldset' && schemaAny instanceof z.ZodDiscriminatedUnion) {
+    if (isFormFieldsetWidgetMeta(metaInfo) && schemaAny instanceof z.ZodDiscriminatedUnion) {
       initialValue = getDiscriminatedUnionInitialValue(
         schemaAny as z.ZodDiscriminatedUnion<z.ZodObject<z.ZodRawShape>[]>
       );
-    } else if (metaInfo.widget === 'keyValue' && !initialValue) {
+    } else if (isKeyValueWidgetMeta(metaInfo) && !initialValue) {
       initialValue = {};
     }
 
     fields.push({
       id: key,
-      staticProps,
       initialValue,
       schema: schemaAny,
       widget: metaInfo.widget,
+      meta: metaInfo,
       validate: (value: unknown) => {
         try {
           schemaAny.parse(value);
@@ -131,7 +108,7 @@ export const Form = <TSchema extends z.ZodObject<z.ZodRawShape>>({
   return (
     <EuiForm component="form" onSubmit={form.handleSubmit(_onSubmit)} noValidate>
       {fields.map((field) => {
-        const { id, staticProps, widget, schema: fieldSchema } = field;
+        const { id, widget, schema: fieldSchema, meta } = field;
 
         if (!widget) {
           throw new Error(`Widget type is required for field: ${id}`);
@@ -148,15 +125,15 @@ export const Form = <TSchema extends z.ZodObject<z.ZodRawShape>>({
             key={id}
             fieldId={id}
             value={form.values[id]}
-            label={staticProps.label}
-            placeholder={staticProps.placeholder}
-            fullWidth={staticProps.fullWidth}
+            label={meta?.label || id}
+            placeholder={meta?.placeholder}
+            fullWidth={true}
             error={form.errors[id]}
             isInvalid={!!form.errors[id]}
             onChange={form.handleChange}
             onBlur={form.handleBlur}
             schema={fieldSchema}
-            widgetOptions={staticProps}
+            meta={meta}
             setFieldError={form.setFieldError}
             setFieldTouched={form.setFieldTouched}
             getFieldValue={form.getFieldValue}

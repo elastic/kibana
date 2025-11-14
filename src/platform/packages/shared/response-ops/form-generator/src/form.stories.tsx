@@ -69,71 +69,59 @@ export const VirusTotalConnector: StoryObj = {
 // this is not the object that would be created as SingleConnectorFile, this is the internal
 // representation after parsing a SingleConnectorFile
 const webhookConnectorFormSchema = z.object({
-  name: z
-    .string()
-    .min(1, { message: 'Name cannot be empty' })
-    .meta({
-      widget: 'text',
-      widgetOptions: { label: 'Connector Name' },
-    }),
+  name: z.string().min(1, { message: 'Name cannot be empty' }).meta({
+    widget: 'text',
+    label: 'Connector Name',
+  }),
   method: z.enum(['POST', 'PUT', 'GET', 'DELETE']).meta({
     widget: 'select',
-    widgetOptions: { label: 'Method', default: 'POST' },
+    label: 'Method',
+    default: 'POST',
   }),
-  url: z.url().meta({ widget: 'text', widgetOptions: { label: 'URL' } }),
+  url: z.url().meta({ widget: 'text', label: 'URL' }),
   authType: z
     .discriminatedUnion('type', [
       z.object({ type: z.literal('none') }).meta({
-        widgetOptions: { label: 'None' },
+        label: 'None',
       }),
       z
         .object({
           type: z.literal('basic'),
-          username: z
-            .string()
-            .min(1, { message: 'Username cannot be empty' })
-            .meta({
-              widget: 'text',
-              widgetOptions: { label: 'Username' },
-            }),
-          password: z
-            .string()
-            .min(1, { message: 'Password cannot be empty' })
-            .meta({
-              widget: 'password',
-              widgetOptions: { label: 'Password' },
-            }),
+          username: z.string().min(1, { message: 'Username cannot be empty' }).meta({
+            widget: 'text',
+            label: 'Username',
+          }),
+          password: z.string().min(1, { message: 'Password cannot be empty' }).meta({
+            widget: 'password',
+            label: 'Password',
+          }),
         })
-        .meta({ widgetOptions: { label: 'Basic Authentication' } }),
+        .meta({ label: 'Basic Authentication' }),
       z
         .object({
           type: z.literal('bearer'),
-          token: z
-            .string()
-            .min(1, { message: 'Token cannot be empty' })
-            .meta({
-              widget: 'password',
-              widgetOptions: { label: 'Token' },
-            }),
+          token: z.string().min(1, { message: 'Token cannot be empty' }).meta({
+            widget: 'password',
+            label: 'Token',
+          }),
         })
-        .meta({ widgetOptions: { label: 'Bearer Token' } }),
+        .meta({ label: 'Bearer Token' }),
       z
         .object({
           type: z.literal('headers'),
           headers: z.record(z.string(), z.string()).meta({
             widget: 'keyValue',
-            widgetOptions: {
-              label: 'Headers',
-            },
+            label: 'Headers',
           }),
         })
         .meta({
-          widgetOptions: { label: 'Headers' },
+          label: 'Headers',
         }),
     ])
     .meta({
       widget: 'formFieldset',
-      widgetOptions: { label: 'Authentication', default: 'basic' },
+      label: 'Authentication',
+      default: 'basic',
     }),
 });
 
@@ -143,22 +131,17 @@ const abuseIPDBConnectorSchema = z.object({
       z
         .object({
           type: z.literal('apiKey'), // this literal is irrelevant
-          Key: z
-            .string()
-            .min(1, { message: 'API Key cannot be empty' })
-            .meta({
-              widget: 'password',
-              widgetOptions: {
-                label: 'API Key',
-                placeholder: 'Your AbuseIPDB API Key',
-              },
-            }),
+          Key: z.string().min(1, { message: 'API Key cannot be empty' }).meta({
+            widget: 'password',
+            label: 'API Key',
+            placeholder: 'Your AbuseIPDB API Key',
+          }),
         })
         .meta({
-          widgetOptions: { label: 'Headers' },
+          label: 'Headers',
         }),
     ])
-    .meta({ widget: 'formFieldset', widgetOptions: { label: 'Authentication' } }),
+    .meta({ widget: 'formFieldset', label: 'Authentication' }),
 });
 
 const alienVaultOTXConnectorSchema = z.object({
@@ -167,21 +150,16 @@ const alienVaultOTXConnectorSchema = z.object({
       z
         .object({
           type: z.literal('apiKey'), // this literal is irrelevant
-          'X-OTX-API-KEY': z
-            .string()
-            .min(1, { message: 'API Key cannot be empty' })
-            .meta({
-              widget: 'password',
-              widgetOptions: {
-                label: 'API Key',
-              },
-            }),
+          'X-OTX-API-KEY': z.string().min(1, { message: 'API Key cannot be empty' }).meta({
+            widget: 'password',
+            label: 'API Key',
+          }),
         })
         .meta({
-          widgetOptions: { label: 'Headers' },
+          label: 'Headers',
         }),
     ])
-    .meta({ widget: 'formFieldset', widgetOptions: { label: 'Authentication' } }),
+    .meta({ widget: 'formFieldset', label: 'Authentication' }),
 });
 
 const GreyNoiseConnectorSchema = z.object({
@@ -190,21 +168,16 @@ const GreyNoiseConnectorSchema = z.object({
       z
         .object({
           type: z.literal('apiKey'), // this literal is irrelevant
-          key: z
-            .string()
-            .min(1, { message: 'API Key cannot be empty' })
-            .meta({
-              widget: 'password',
-              widgetOptions: {
-                label: 'API Key',
-              },
-            }),
+          key: z.string().min(1, { message: 'API Key cannot be empty' }).meta({
+            widget: 'password',
+            label: 'API Key',
+          }),
         })
         .meta({
-          widgetOptions: { label: 'Headers' },
+          label: 'Headers',
         }),
     ])
-    .meta({ widget: 'formFieldset', widgetOptions: { label: 'Authentication' } }),
+    .meta({ widget: 'formFieldset', label: 'Authentication' }),
 });
 
 const ShodanConnectorSchema = z.object({
@@ -213,21 +186,16 @@ const ShodanConnectorSchema = z.object({
       z
         .object({
           type: z.literal('apiKey'), // this literal is irrelevant
-          'X-Api-Key': z
-            .string()
-            .min(1, { message: 'API Key cannot be empty' })
-            .meta({
-              widget: 'password',
-              widgetOptions: {
-                label: 'API Key',
-              },
-            }),
+          'X-Api-Key': z.string().min(1, { message: 'API Key cannot be empty' }).meta({
+            widget: 'password',
+            label: 'API Key',
+          }),
         })
         .meta({
-          widgetOptions: { label: 'Headers' },
+          label: 'Headers',
         }),
     ])
-    .meta({ widget: 'formFieldset', widgetOptions: { label: 'Authentication' } }),
+    .meta({ widget: 'formFieldset', label: 'Authentication' }),
 });
 
 const UrlVoidConnectorSchema = z.object({
@@ -236,21 +204,16 @@ const UrlVoidConnectorSchema = z.object({
       z
         .object({
           type: z.literal('apiKey'), // this literal is irrelevant
-          'X-Api-Key': z
-            .string()
-            .min(1, { message: 'API Key cannot be empty' })
-            .meta({
-              widget: 'password',
-              widgetOptions: {
-                label: 'API Key',
-              },
-            }),
+          'X-Api-Key': z.string().min(1, { message: 'API Key cannot be empty' }).meta({
+            widget: 'password',
+            label: 'API Key',
+          }),
         })
         .meta({
-          widgetOptions: { label: 'Headers' },
+          label: 'Headers',
         }),
     ])
-    .meta({ widget: 'formFieldset', widgetOptions: { label: 'Authentication' } }),
+    .meta({ widget: 'formFieldset', label: 'Authentication' }),
 });
 
 const VirusTotalConnectorSchema = z.object({
@@ -259,20 +222,15 @@ const VirusTotalConnectorSchema = z.object({
       z
         .object({
           type: z.literal('apiKey'), // this literal is irrelevant
-          'x-apikey': z
-            .string()
-            .min(1, { message: 'API Key cannot be empty' })
-            .meta({
-              widget: 'password',
-              widgetOptions: {
-                label: 'API Key',
-                placeholder: 'vt-...',
-              },
-            }),
+          'x-apikey': z.string().min(1, { message: 'API Key cannot be empty' }).meta({
+            widget: 'password',
+            label: 'API Key',
+            placeholder: 'vt-...',
+          }),
         })
         .meta({
-          widgetOptions: { label: 'Headers' },
+          label: 'Headers',
         }),
     ])
-    .meta({ widget: 'formFieldset', widgetOptions: { label: 'Authentication' } }),
+    .meta({ widget: 'formFieldset', label: 'Authentication' }),
 });

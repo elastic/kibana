@@ -9,9 +9,21 @@
 
 import React from 'react';
 import { EuiFieldPassword, EuiFormRow } from '@elastic/eui';
-import type { TextWidgetProps } from './widget_props';
+import type { EuiFieldPasswordProps } from '@elastic/eui';
+import { createWidgetTypeGuard, type BaseMetadata } from '../schema_metadata';
+import type { BaseWidgetProps } from './widget_props';
 
-export const PasswordField: React.FC<TextWidgetProps> = ({
+type StripFormProps<T> = Partial<Omit<T, 'value' | 'onChange' | 'onBlur'>>;
+
+export type PasswordWidgetMeta = BaseMetadata & {
+  widget: 'password';
+} & StripFormProps<EuiFieldPasswordProps>;
+
+export const isPasswordWidgetMeta = createWidgetTypeGuard<PasswordWidgetMeta>('password');
+
+export type PasswordWidgetProps = BaseWidgetProps<string, PasswordWidgetMeta>;
+
+export const PasswordField: React.FC<PasswordWidgetProps> = ({
   fieldId,
   value,
   label,
@@ -21,8 +33,11 @@ export const PasswordField: React.FC<TextWidgetProps> = ({
   isInvalid,
   onChange,
   onBlur,
+  meta,
   helpText,
 }) => {
+  const { isDisabled, type: passwordType, compressed } = meta || {};
+
   return (
     <EuiFormRow
       label={label}
@@ -33,13 +48,15 @@ export const PasswordField: React.FC<TextWidgetProps> = ({
     >
       <EuiFieldPassword
         data-test-subj={fieldId}
-        type="dual"
+        type={passwordType ?? 'dual'}
         value={value}
         placeholder={placeholder}
         onChange={(e) => onChange(fieldId, e.target.value)}
         onBlur={() => onBlur(fieldId, value)}
         isInvalid={isInvalid}
         fullWidth={fullWidth}
+        disabled={isDisabled}
+        compressed={compressed}
       />
     </EuiFormRow>
   );
