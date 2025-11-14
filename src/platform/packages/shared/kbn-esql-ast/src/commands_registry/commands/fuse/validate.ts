@@ -11,6 +11,8 @@ import type { ESQLAst, ESQLAstAllCommands, ESQLMessage, ESQLSingleAstItem } from
 import type { ICommandContext } from '../../types';
 import { buildMissingMetadataMessage } from './utils';
 
+const REQUIRED_METADATA_FIELDS = ['_id', '_index', '_score'];
+
 export const validate = (
   command: ESQLAstAllCommands,
   ast: ESQLAst,
@@ -18,8 +20,7 @@ export const validate = (
 ): ESQLMessage[] => {
   const messages: ESQLMessage[] = [];
 
-  const requiredMetadataFields = ['_id', '_index', '_score'];
-  let hasMetadata = false;
+  const missingFields: string[] = [...REQUIRED_METADATA_FIELDS];
   const sourceCommand = ast.find((_command) =>
     ['ts', 'from'].includes(_command.name.toLocaleLowerCase())
   );
@@ -28,13 +29,12 @@ export const validate = (
     walk(sourceCommand, {
       visitCommandOption: (node) => {
         if (node.name.toLocaleLowerCase() === 'metadata') {
-          hasMetadata = true;
           const metadataFields = node.args.map((arg) =>
             (arg as ESQLSingleAstItem)?.name?.toLocaleLowerCase()
           );
-          for (const field of requiredMetadataFields) {
-            if (!metadataFields.includes(field)) {
-              messages.push(buildMissingMetadataMessage(command, field));
+          for (const field of REQUIRED_METADATA_FIELDS) {
+            if (metadataFields.includes(field)) {
+              missingFields.splice(missingFields.indexOf(field), 1);
             }
           }
         }
@@ -42,9 +42,8 @@ export const validate = (
     });
   }
 
-  if (!hasMetadata) {
-    messages.push(buildMissingMetadataMessage(command, requiredMetadataFields.join(', ')));
+  if (missingFields.length > 0) {
+    messages.push(buildMissingMetadataMessage(command, missingFields.join(', ')));
   }
-
   return messages;
 };
