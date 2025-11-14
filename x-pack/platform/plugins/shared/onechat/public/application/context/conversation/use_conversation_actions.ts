@@ -50,6 +50,7 @@ export interface ConversationActions {
   setAssistantMessage: ({ assistantMessage }: { assistantMessage: string }) => void;
   addAssistantMessageChunk: ({ messageChunk }: { messageChunk: string }) => void;
   setTimeToFirstToken: ({ timeToFirstToken }: { timeToFirstToken: number }) => void;
+  markRoundAsAborted: () => void;
   onConversationCreated: ({
     conversationId,
     title,
@@ -201,6 +202,16 @@ const createConversationActions = ({
       setCurrentRound((round) => {
         round.time_to_first_token = timeToFirstToken;
       });
+    },
+    markRoundAsAborted: () => {
+      setConversation(
+        produce((draft) => {
+          const lastRound = draft?.rounds?.at(-1);
+          if (lastRound) {
+            lastRound.status = 'aborted';
+          }
+        })
+      );
     },
     onConversationCreated: ({
       conversationId: id,
