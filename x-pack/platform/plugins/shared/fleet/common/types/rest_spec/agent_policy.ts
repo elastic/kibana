@@ -42,12 +42,28 @@ export interface GetOneAgentPolicyResponse {
 export const GetAutoUpgradeAgentsStatusResponseSchema = schema.object({
   currentVersions: schema.arrayOf(
     schema.object({
-      version: schema.string(),
-      agents: schema.number(),
-      failedUpgradeAgents: schema.number(),
-      failedUpgradeActionIds: schema.maybe(schema.arrayOf(schema.string())),
-      inProgressUpgradeAgents: schema.number(),
-      inProgressUpgradeActionIds: schema.maybe(schema.arrayOf(schema.string())),
+      version: schema.string({
+        meta: { description: 'Agent version' },
+      }),
+      agents: schema.number({
+        meta: { description: 'Number of agents that upgraded to this version' },
+      }),
+      failedUpgradeAgents: schema.number({
+        meta: { description: 'Number of agents that failed to upgrade to this version' },
+      }),
+      failedUpgradeActionIds: schema.maybe(
+        schema.arrayOf(schema.string(), {
+          meta: { description: 'List of action IDs related to failed upgrades' },
+        })
+      ),
+      inProgressUpgradeAgents: schema.number({
+        meta: { description: 'Number of agents that are upgrading to this version' },
+      }),
+      inProgressUpgradeActionIds: schema.maybe(
+        schema.arrayOf(schema.string(), {
+          meta: { description: 'List of action IDs related to in-progress upgrades' },
+        })
+      ),
     })
   ),
   totalAgents: schema.number(),
