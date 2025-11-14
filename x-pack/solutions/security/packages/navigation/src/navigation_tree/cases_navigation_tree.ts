@@ -11,7 +11,7 @@ import { SecurityPageName } from '../constants';
 import { securityLink } from '../links';
 
 const LazyIconBriefcase = lazy(() =>
-  import('./v2_icons/briefcase').then(({ iconBriefcase }) => ({ default: iconBriefcase }))
+  import('./custom_icons/briefcase').then(({ iconBriefcase }) => ({ default: iconBriefcase }))
 );
 
 export const createCasesNavigationTree = (): NodeDefinition => ({

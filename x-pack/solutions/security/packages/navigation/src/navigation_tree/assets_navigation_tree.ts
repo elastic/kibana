@@ -14,7 +14,7 @@ import { securityLink } from '../links';
 import { i18nStrings } from '../i18n_strings';
 
 const LazyIconAssets = lazy(() =>
-  import('./v2_icons/assets').then(({ iconAssets }) => ({ default: iconAssets }))
+  import('./custom_icons/assets').then(({ iconAssets }) => ({ default: iconAssets }))
 );
 
 export const createAssetsNavigationTree = (core: CoreStart): NodeDefinition => ({

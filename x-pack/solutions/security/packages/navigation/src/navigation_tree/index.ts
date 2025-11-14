@@ -27,3 +27,5 @@ export const defaultNavigationTree = {
   ml: createMachineLearningNavigationTree,
 };
 export type DefaultNavigationTree = typeof defaultNavigationTree;
+
+export * from './custom_icons';

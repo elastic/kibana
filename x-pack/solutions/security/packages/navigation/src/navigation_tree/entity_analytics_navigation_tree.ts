@@ -12,7 +12,7 @@ import { SecurityLinkGroup } from '../link_groups';
 import { securityLink } from '../links';
 
 const LazyIconEntityAnalytics = lazy(() =>
-  import('./v2_icons/entity_analytics').then(({ iconEntityAnalytics }) => ({
+  import('./custom_icons/entity_analytics').then(({ iconEntityAnalytics }) => ({
     default: iconEntityAnalytics,
   }))
 );

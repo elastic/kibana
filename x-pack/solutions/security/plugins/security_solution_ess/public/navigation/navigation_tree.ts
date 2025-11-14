@@ -11,35 +11,22 @@ import {
   SecurityPageName,
 } from '@kbn/security-solution-navigation';
 import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
-import { defaultNavigationTree } from '@kbn/security-solution-navigation/navigation_tree';
+import {
+  defaultNavigationTree,
+  LazyIconFindings,
+  LazyIconIntelligence,
+  LazyIconWorkflow,
+} from '@kbn/security-solution-navigation/navigation_tree';
 import { STACK_MANAGEMENT_NAV_ID, DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
-import { lazy } from 'react';
 import { type Services } from '../common/services';
 import { SOLUTION_NAME } from './translations';
-
-const LazyIconWorkflow = lazy(() =>
-  import('./custom_icons/workflow').then(({ iconWorkflow }) => ({ default: iconWorkflow }))
-);
-
-// TODO delete when the `bullseye` EUI icon has been updated
-const LazyIconFindings = lazy(() =>
-  import('./custom_icons/findings').then(({ iconFindings }) => ({ default: iconFindings }))
-);
-
-// TODO delete when the EUI icon has been updated
-const LazyIconIntelligence = lazy(() =>
-  import('./custom_icons/intelligence').then(({ iconIntelligence }) => ({
-    default: iconIntelligence,
-  }))
-);
 
 export const createNavigationTree = (services: Services): NavigationTreeDefinition => ({
   body: [
     {
-      id: 'security_solution_nav',
-      icon: 'logoSecurity',
       link: securityLink(SecurityPageName.landing),
       title: SOLUTION_NAME,
+      icon: 'logoSecurity',
       renderAs: 'home',
     },
     {
