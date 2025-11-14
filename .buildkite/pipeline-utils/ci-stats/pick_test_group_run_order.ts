@@ -611,6 +611,12 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
   const bk = new BuildkiteClient();
   const envFromlabels: Record<string, string> = collectEnvFromLabels();
 
+  // Collect environment variables to pass through to test execution steps
+  const scoutExtraEnv: Record<string, string> = {};
+  if (process.env.SERVERLESS_TESTS_ONLY) {
+    scoutExtraEnv.SERVERLESS_TESTS_ONLY = process.env.SERVERLESS_TESTS_ONLY;
+  }
+
   if (!Fs.existsSync(scoutConfigsPath)) {
     throw new Error(`Scout configs file not found at ${scoutConfigsPath}`);
   }
@@ -650,6 +656,7 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
               SCOUT_CONFIG_GROUP_KEY: key,
               SCOUT_CONFIG_GROUP_TYPE: group,
               ...envFromlabels,
+              ...scoutExtraEnv,
             },
             retry: {
               automatic: [
