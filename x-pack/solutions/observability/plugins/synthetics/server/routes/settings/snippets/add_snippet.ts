@@ -7,16 +7,13 @@
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import type { SyntheticsServiceSnippet } from '../../../../common/runtime_types/synthetics_service_snippet';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
-import {
-  syntheticsSnippetType,
-  SyntheticsSnippetsService,
-} from '../../../saved_objects/synthetics_snippet';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
+import { buildSnippetsService } from './helpers';
+import type { SyntheticsServiceSnippetWithIdType } from '../../../../common/runtime_types/synthetics_service_snippet';
 
-export interface ProjectSnippetsResponse {
-  snippet: SyntheticsServiceSnippet;
+export interface PostSnippetResponse {
+  snippet: SyntheticsServiceSnippetWithIdType;
 }
 
 export const PostSnipppetSchema = schema.object({
@@ -43,13 +40,11 @@ export const postSyntheticsSnippetsRoute: SyntheticsRestApiRouteFactory<
     request,
     response,
     context,
-  }): Promise<ProjectSnippetsResponse | IKibanaResponse> => {
+    server,
+  }): Promise<PostSnippetResponse | IKibanaResponse> => {
     try {
       const { snippet } = request.body;
-      const soClient = (await context.core).savedObjects.getClient({
-        includedHiddenTypes: [syntheticsSnippetType.name],
-      });
-      const snippetsService = new SyntheticsSnippetsService(soClient);
+      const snippetsService = await buildSnippetsService({ context, server });
       const result = await snippetsService.addSnippet(snippet);
 
       return response.created({

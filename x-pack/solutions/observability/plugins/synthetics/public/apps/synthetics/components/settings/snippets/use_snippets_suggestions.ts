@@ -8,11 +8,11 @@
 import { useEffect } from 'react';
 import { monaco } from '@kbn/monaco';
 import { MonacoEditorLangId } from '../../../../../../common/runtime_types';
-import type { SyntheticsServiceSnippet } from '../../../../../../common/runtime_types/synthetics_service_snippet';
+import type { SyntheticsServiceSnippetCodec } from '../../../../../../common/runtime_types/synthetics_service_snippet';
 import { PARAMS_SUGGESTION_TRIGGER } from './use_params_suggestions';
 
 interface UseSuggestionProviderParams {
-  snippets: SyntheticsServiceSnippet[];
+  snippets: SyntheticsServiceSnippetCodec[];
 }
 
 export const useSnippetsSuggestions = (params: UseSuggestionProviderParams) => {
@@ -35,7 +35,7 @@ export const useSnippetsSuggestions = (params: UseSuggestionProviderParams) => {
   };
 };
 
-const getSuggestionProvider = (snippets: SyntheticsServiceSnippet[]) => {
+const getSuggestionProvider = (snippets: SyntheticsServiceSnippetCodec[]) => {
   const provider: monaco.languages.CompletionItemProvider = {
     provideCompletionItems(model, position) {
       const lineNumber = position.lineNumber;

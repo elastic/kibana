@@ -7,49 +7,48 @@
 
 import * as t from 'io-ts';
 
-export const SyntheticsServiceErrorResponse = t.partial({
+export const SyntheticsServiceErrorResponseCodec = t.partial({
   error: t.string,
   message: t.string,
   statusCode: t.number,
 });
-export const SyntheticsServiceSnippet = t.type({
+export const SyntheticsServiceSnippetCodec = t.type({
   name: t.string,
   label: t.string,
   detail: t.string,
   insertText: t.string,
 });
 
-export const SyntheticsServicePostSnippetSuccessResponse = t.type({
-  snippet: SyntheticsServiceSnippet,
-});
-export const SyntheticsServicePostSnippetResponse = t.intersection([
-  SyntheticsServicePostSnippetSuccessResponse,
-  SyntheticsServiceErrorResponse,
-]);
-
-export const SyntheticsServiceGetSnippetsSuccessResponse = t.type({
-  snippets: t.array(SyntheticsServiceSnippet),
-});
-
-export const SyntheticsServiceGetSnippetsResponse = t.intersection([
-  SyntheticsServiceGetSnippetsSuccessResponse,
-  SyntheticsServiceErrorResponse,
-]);
-
-export type SyntheticsServiceSnippet = t.TypeOf<typeof SyntheticsServiceSnippet>;
+export type SyntheticsServiceSnippetType = t.TypeOf<typeof SyntheticsServiceSnippetCodec>;
+export type SyntheticsServiceSnippetWithIdType = SyntheticsServiceSnippetType & { id: string };
 
 // Get
-export type SyntheticsServiceGetSnippetsResponse = t.TypeOf<
-  typeof SyntheticsServiceGetSnippetsResponse
+export const SyntheticsServiceGetSnippetsSuccessResponseCodec = t.type({
+  snippets: t.array(SyntheticsServiceSnippetCodec),
+});
+export const SyntheticsServiceGetSnippetsResponseCodec = t.intersection([
+  SyntheticsServiceGetSnippetsSuccessResponseCodec,
+  SyntheticsServiceErrorResponseCodec,
+]);
+export type SyntheticsServiceGetSnippetsResponseType = t.TypeOf<
+  typeof SyntheticsServiceGetSnippetsResponseCodec
 >;
-export type SyntheticsServiceGetSnippetsSuccessResponse = t.TypeOf<
-  typeof SyntheticsServiceGetSnippetsSuccessResponse
+export type SyntheticsServiceGetSnippetsSuccessResponseType = t.TypeOf<
+  typeof SyntheticsServiceGetSnippetsSuccessResponseCodec
 >;
 
 // Post
-export type SyntheticsServicePostSnippetResponse = t.TypeOf<
-  typeof SyntheticsServicePostSnippetResponse
+export const SyntheticsServicePostSnippetSuccessResponseCodec = t.type({
+  snippet: SyntheticsServiceSnippetCodec,
+});
+export type SyntheticsServicePostSnippetSuccessResponseType = t.TypeOf<
+  typeof SyntheticsServicePostSnippetSuccessResponseCodec
 >;
-export type SyntheticsServicePostSnippetSuccessResponse = t.TypeOf<
-  typeof SyntheticsServicePostSnippetSuccessResponse
+
+export const SyntheticsServicePostSnippetResponseCodec = t.intersection([
+  SyntheticsServicePostSnippetSuccessResponseCodec,
+  SyntheticsServiceErrorResponseCodec,
+]);
+export type SyntheticsServicePostSnippetResponseType = t.TypeOf<
+  typeof SyntheticsServicePostSnippetResponseCodec
 >;

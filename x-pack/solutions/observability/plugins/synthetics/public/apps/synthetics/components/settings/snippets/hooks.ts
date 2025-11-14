@@ -6,7 +6,7 @@
  */
 
 import { useMutation, useQuery } from '@kbn/react-query';
-import type { SyntheticsServiceSnippet } from '../../../../../../common/runtime_types/synthetics_service_snippet';
+import type { SyntheticsServiceSnippetCodec } from '../../../../../../common/runtime_types/synthetics_service_snippet';
 import { getSnippets, postSnippet } from './api';
 
 export const useGetSnippets = () => {
@@ -35,7 +35,7 @@ export const useGetSnippets = () => {
 export const usePostSnippet = () => {
   return useMutation({
     mutationKey: ['postSnippet'],
-    mutationFn: async ({ snippet }: { snippet: SyntheticsServiceSnippet }) => {
+    mutationFn: async ({ snippet }: { snippet: SyntheticsServiceSnippetCodec }) => {
       return await postSnippet({ snippet });
     },
   });

@@ -6,10 +6,10 @@
  */
 import type {
   SyntheticsServiceGetSnippetsResponse,
-  SyntheticsServiceGetSnippetsSuccessResponse,
+  SyntheticsServiceGetSnippetsSuccessResponseCodec,
   SyntheticsServicePostSnippetResponse,
   SyntheticsServicePostSnippetSuccessResponse,
-  SyntheticsServiceSnippet,
+  SyntheticsServiceSnippetCodec,
 } from '../../../../../../common/runtime_types/synthetics_service_snippet';
 import { apiService } from '../../../../../utils/api_service';
 import { SYNTHETICS_API_URLS } from '../../../../../../common/constants';
@@ -22,10 +22,10 @@ export const getSnippets = async () => {
   if (response.error) {
     throw new Error(response.message);
   }
-  return response as SyntheticsServiceGetSnippetsSuccessResponse;
+  return response as SyntheticsServiceGetSnippetsSuccessResponseCodec;
 };
 
-export const postSnippet = async (payload: { snippet: SyntheticsServiceSnippet }) => {
+export const postSnippet = async (payload: { snippet: SyntheticsServiceSnippetCodec }) => {
   const response = (await apiService.post(
     SYNTHETICS_API_URLS.SYNTHETICS_PROJECT_SNIPPETS,
     payload

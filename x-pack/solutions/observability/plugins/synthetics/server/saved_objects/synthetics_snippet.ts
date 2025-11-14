@@ -6,10 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { SavedObjectsType } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import type { SyntheticsServiceSnippet } from '../../common/runtime_types/synthetics_service_snippet';
+import type { SavedObjectsType, Logger } from '@kbn/core/server';
+import type { SavedObject, SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type {
+  SyntheticsServiceSnippetType,
+  SyntheticsServiceSnippetWithIdType,
+} from '../../common/runtime_types/synthetics_service_snippet';
 
 // export const syntheticsApiKeyID = 'ba997842-b0cf-4429-aa9d-578d9bf0d391';
 export const syntheticsSnippetObjectTypeName = 'synthetics-snippet';
@@ -50,35 +52,53 @@ export const syntheticsSnippetType: SavedObjectsType = {
 };
 
 export class SyntheticsSnippetsService {
-  constructor(private readonly soClient: SavedObjectsClientContract) {}
+  constructor(
+    private readonly soClient: SavedObjectsClientContract,
+    private readonly logger: Logger
+  ) {}
 
-  async getSnippets() {
+  async getSnippets(): Promise<SyntheticsServiceSnippetWithIdType[]> {
     try {
-      const response = await this.soClient.find<SyntheticsServiceSnippet>({
+      const response = await this.soClient.find<SyntheticsServiceSnippetType>({
         type: syntheticsSnippetType.name,
       });
-      console.log('Retrieved synthetics snippets:', response);
-      return response.saved_objects.map((obj) => obj.attributes);
+      return response.saved_objects.map((obj) => this.mapSnippetToApiType(obj));
     } catch (getErr) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(getErr)) {
-        return undefined;
-      }
+      this.logger.error(`Error fetching synthetics snippets ${getErr}`);
       throw getErr;
     }
   }
 
-  async addSnippet(syntheticsSnippet: SyntheticsServiceSnippet) {
+  async addSnippet(syntheticsSnippet: SyntheticsServiceSnippetType) {
     try {
       const createdSnippet = await this.soClient.create(
         syntheticsSnippetType.name,
         syntheticsSnippet
       );
       return {
-        snippet: createdSnippet.attributes,
+        snippet: this.mapSnippetToApiType(createdSnippet),
       };
     } catch (error) {
-      console.error('Error creating synthetics snippet', error);
+      this.logger.error(`Error creating synthetics snippet ${error}`);
       throw error;
     }
+  }
+
+  async deleteSnippet(snippetId: string): Promise<void> {
+    try {
+      await this.soClient.delete(syntheticsSnippetType.name, snippetId);
+    } catch (error) {
+      this.logger.error(`Error deleting synthetics snippet with id ${snippetId}: ${error}`);
+      throw error;
+    }
+  }
+
+  mapSnippetToApiType(
+    snippetSavedObject: SavedObject<SyntheticsServiceSnippetType>
+  ): SyntheticsServiceSnippetWithIdType {
+    return {
+      ...snippetSavedObject.attributes,
+      id: snippetSavedObject.id,
+    };
   }
 }

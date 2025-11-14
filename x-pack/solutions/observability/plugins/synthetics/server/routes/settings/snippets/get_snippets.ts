@@ -5,27 +5,21 @@
  * 2.0.
  */
 import type { IKibanaResponse } from '@kbn/core-http-server';
-import type { SyntheticsServiceSnippet } from '../../../../common/runtime_types/synthetics_service_snippet';
+import type { SyntheticsServiceSnippetWithIdType } from '../../../../common/runtime_types/synthetics_service_snippet';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
-import {
-  SyntheticsSnippetsService,
-  syntheticsSnippetType,
-} from '../../../saved_objects/synthetics_snippet';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
+import { buildSnippetsService } from './helpers';
 
-export interface ProjectSnippetsResponse {
-  snippets: SyntheticsServiceSnippet[];
+export interface GetSnippetsResponse {
+  snippets: SyntheticsServiceSnippetWithIdType[];
 }
 
 export const getSyntheticsSnippetsRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
   path: SYNTHETICS_API_URLS.SYNTHETICS_PROJECT_SNIPPETS,
   validate: {},
-  handler: async ({ context }): Promise<ProjectSnippetsResponse | IKibanaResponse> => {
-    const soClient = (await context.core).savedObjects.getClient({
-      includedHiddenTypes: [syntheticsSnippetType.name],
-    });
-    const snippetsService = new SyntheticsSnippetsService(soClient);
+  handler: async ({ context, server }): Promise<GetSnippetsResponse | IKibanaResponse> => {
+    const snippetsService = await buildSnippetsService({ context, server });
     const snippets = await snippetsService.getSnippets();
 
     return { snippets: snippets ?? [] };
