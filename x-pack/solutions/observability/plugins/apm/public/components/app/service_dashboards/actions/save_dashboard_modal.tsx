@@ -84,7 +84,7 @@ export function SaveDashboardModal({
   );
 
   const options = allAvailableDashboards?.map((dashboardItem) => ({
-    label: dashboardItem.attributes.title,
+    label: dashboardItem.data.title,
     value: dashboardItem.id,
     disabled:
       serviceDashboards?.some(
