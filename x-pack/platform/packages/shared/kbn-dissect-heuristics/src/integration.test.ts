@@ -97,8 +97,8 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
 
       const result = extractDissectPatternDangerouslySlow(logs);
 
-      // Multiple spaces are detected as delimiter
-      expect(result.pattern).toMatch(/%\{field_1\}\s+%\{field_2\}/);
+      // Right-padding modifier correctly handles variable spacing
+      expect(result.pattern).toBe('%{field_1->} %{field_2}');
       expect(result.fields).toHaveLength(2);
     });
 
@@ -173,7 +173,8 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
 
       const result = extractDissectPatternDangerouslySlow(logs);
 
-      expect(result.pattern).toBe('%{field_1} %{field_2} %{field_3}');
+      // Right-padding modifier correctly handles varying whitespace
+      expect(result.pattern).toBe('%{field_1->} %{field_2->} %{field_3}');
       expect(result.fields).toHaveLength(3);
     });
 
@@ -350,7 +351,8 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
       const pattern = extractDissectPatternDangerouslySlow(logs);
       const processor = getDissectProcessor(pattern);
 
-      expect(processor.processor.dissect.pattern).toMatch(/%\{field_1\}\s+%\{field_2\}/);
+      // Right-padding modifier correctly handles variable spacing
+      expect(processor.processor.dissect.pattern).toBe('%{field_1->} %{field_2}');
       expect(processor.metadata.fieldCount).toBe(2);
     });
   });
@@ -577,7 +579,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
       // After normalization: correctly detects '-' and ':' as delimiters
 
       expect(result.pattern).toBe(
-        '%{}- %{field_2} %{field_3} %{field_4} %{field_5} %{field_6} %{field_7} %{field_8} %{field_9}: %{field_10} %{field_11} %{field_12} %{field_13}'
+        '%{} %{field_2} %{field_3} %{field_4} %{field_5} %{field_6} %{field_7} %{field_8} %{field_9}: %{field_10} %{field_11} %{field_12} %{field_13}'
       );
       expect(result.fields.length).toBe(13);
     });
@@ -704,7 +706,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
       const result = extractDissectPatternDangerouslySlow(logs);
       // After normalization: correctly detects '-' and ':' as delimiters
       expect(result.pattern).toBe(
-        '%{}- %{field_2} %{field_3} %{field_4} %{field_5} %{field_6} %{field_7} %{field_8} %{field_9}: %{field_10} %{field_11} %{field_12} %{field_13}'
+        '%{} %{field_2} %{field_3} %{field_4} %{field_5} %{field_6} %{field_7} %{field_8} %{field_9}: %{field_10} %{field_11} %{field_12} %{field_13}'
       );
       expect(result.fields.length).toBe(13);
     });

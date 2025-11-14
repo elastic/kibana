@@ -8,24 +8,77 @@
 /* eslint-disable no-console */
 
 import { extractDissectPatternDangerouslySlow } from './extract_dissect_pattern';
+import { normalizeWhitespace } from './normalize_whitespace';
+import { findDelimiterSequences } from './find_delimiter_sequences';
+import { buildDelimiterTree } from './build_delimiter_tree';
+import { extractFields } from './extract_fields';
 
-describe('analyze failing tests - old vs new', () => {
-  it('REGRESSION: handles mixed modifiers - WITH normalization', () => {
+describe('debug mixed modifiers failure', () => {
+  it('step by step analysis WITH normalization', () => {
     const logs = [
       'INFO   - - [2024-01-01] Request received',
       'WARN - - [2024-01-02] Request received',
       'ERROR  - - [2024-01-03] Request received',
     ];
 
-    const result = extractDissectPatternDangerouslySlow(logs);
-    console.log('\n=== WITH NORMALIZATION ===');
-    console.log('Pattern: ' + result.pattern);
-    console.log('Fields:');
-    result.fields.forEach((f, idx) => {
-      console.log(
-        `  field_${idx + 1} (pos ${f.position}): [${f.values.map((v) => `"${v}"`).join(', ')}]`
-      );
+    console.log('\n=== ORIGINAL MESSAGES ===');
+    logs.forEach((log, idx) => {
+      console.log(`${idx}: "${log}"`);
+      const positions = log
+        .split('')
+        .map((c, i) => `${i}:${c === ' ' ? '_' : c}`)
+        .join(' ');
+      console.log(`   ${positions}`);
     });
+
+    // STEP 0: Normalize whitespace
+    const normalized = normalizeWhitespace(logs);
+    console.log('\n=== STEP 0: AFTER WHITESPACE NORMALIZATION ===');
+    normalized.forEach((nm, idx) => {
+      console.log(`  ${idx}: "${nm.normalized}"`);
+      console.log(`     Collapsed positions: [${nm.collapsedWhitespacePositions.join(', ')}]`);
+    });
+
+    // Get normalized strings
+    const normalizedStrings = normalized.map((nm) => nm.normalized);
+
+    // Step 1: Find delimiters
+    const delimiters = findDelimiterSequences(normalizedStrings);
+    console.log('\n=== STEP 1: DELIMITERS FOUND (on normalized) ===');
+    delimiters.forEach((d, i) => {
+      console.log(`  ${i}: "${d}"`);
+    });
+
+    // Step 2: Build tree
+    const tree = buildDelimiterTree(normalizedStrings, delimiters);
+    console.log('\n=== STEP 2: DELIMITER TREE (on normalized) ===');
+    tree.forEach((node, i) => {
+      console.log(`  Node ${i}: "${node.literal}" at positions [${node.positions.join(', ')}]`);
+      // Show what's at those positions in each message
+      node.positions.forEach((pos, msgIdx) => {
+        const snippet = normalizedStrings[msgIdx].substring(pos - 2, pos + node.literal.length + 2);
+        console.log(`    Msg ${msgIdx} pos ${pos}: "...${snippet}..."`);
+      });
+    });
+
+    // Step 3: Extract fields
+    const fields = extractFields(normalizedStrings, tree);
+    console.log('\n=== STEP 3: FIELDS EXTRACTED (from normalized) ===');
+    fields.forEach((f, idx) => {
+      console.log(`  Field ${idx + 1} (pos ${f.position}):`);
+      f.values.forEach((v, msgIdx) => {
+        console.log(`    Msg ${msgIdx}: "${v}"`);
+      });
+    });
+
+    // Step 4: Full result
+    const result = extractDissectPatternDangerouslySlow(logs);
+    console.log('\n=== FINAL PATTERN ===');
+    console.log(
+      `  Expected: %{field_1} %{field_2->} - - [%{field_3} %{field_4} %{field_5} %{field_6->}] %{field_7->} %{field_8}`
+    );
+    console.log(`  Actual:   ${result.pattern}`);
+    console.log(`  Fields: ${result.fields.length} (expected 8)`);
   });
 
   it('FAILURE 2: handles complex syslog messages with varying structure', () => {

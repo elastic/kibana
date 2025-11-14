@@ -292,7 +292,14 @@ export function findPosition(str: string, substring: string): number {
 
 /**
  * Calculate consistency score for delimiter positions
- * Lower variance = higher score
+ *
+ * This is lenient about small positional differences that occur naturally
+ * when alphanumeric fields have varying lengths (e.g., "INFO" vs "ERROR").
+ *
+ * For example, if positions are [10, 10, 11], this indicates the delimiter
+ * appears at nearly the same position, with only a 1-character variance.
+ * This is normal and expected when fields like log levels have different
+ * lengths (INFO=4 chars, ERROR=5 chars).
  */
 export function calculatePositionScore(positions: number[]): number {
   if (positions.length === 0 || positions.some((p) => p === -1)) {
@@ -306,9 +313,26 @@ export function calculatePositionScore(positions: number[]): number {
     return 1.0;
   }
 
-  // Score decreases as variance increases
-  // Using exponential decay: score = e^(-variance/threshold)
-  const threshold = 10; // Adjust based on typical log line lengths
+  // Calculate the range (max - min) to understand positional spread
+  const minPos = Math.min(...positions);
+  const maxPos = Math.max(...positions);
+  const range = maxPos - minPos;
+
+  // Small positional differences (0-3 characters) are very common and acceptable
+  // This happens when alphanumeric fields have varying lengths
+  // Examples:
+  //   - "INFO" (4) vs "ERROR" (5) → 1 char difference
+  //   - "WARN" (4) vs "WARNING" (7) → 3 char difference
+  //   - Different PIDs: "[1234]" vs "[12345]" → 1 char difference
+  if (range <= 3) {
+    // Still score highly - these are effectively "aligned" delimiters
+    // Small penalty proportional to the range
+    return 1.0 - range * 0.05; // Max penalty: 15% for range=3
+  }
+
+  // For larger variances, use exponential decay
+  // This handles cases where delimiters genuinely appear at very different positions
+  const threshold = 15; // More lenient threshold than before
   return Math.exp(-posVariance / threshold);
 }
 

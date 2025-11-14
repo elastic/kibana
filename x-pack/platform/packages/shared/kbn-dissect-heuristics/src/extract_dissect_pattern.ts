@@ -10,6 +10,7 @@ import { findDelimiterSequences } from './find_delimiter_sequences';
 import { buildDelimiterTree } from './build_delimiter_tree';
 import { extractFields } from './extract_fields';
 import { normalizeFieldBoundaries } from './normalize_field_boundaries';
+import { normalizeWhitespace, needsRightPadding } from './normalize_whitespace';
 import { detectModifiers } from './detect_modifiers';
 import { generatePattern } from './generate_pattern';
 import { findStructuredPrefixLength } from './utils';
@@ -64,21 +65,37 @@ export function extractDissectPatternDangerouslySlow(messages: string[]): Dissec
     };
   }
 
-  // Step 1: Find common delimiter sequences
-  const delimiters = findDelimiterSequences(messages);
+  // Step 0: Normalize whitespace to handle varying amounts of spaces/tabs
+  // This ensures delimiters align at consistent positions across all messages
+  const normalizedMessages = normalizeWhitespace(messages);
+  const normalizedStrings = normalizedMessages.map((nm) => nm.normalized);
 
-  // Step 2: Build ordered delimiter tree
-  const delimiterTree = buildDelimiterTree(messages, delimiters);
+  // Step 1: Find common delimiter sequences (on normalized messages)
+  const delimiters = findDelimiterSequences(normalizedStrings);
 
-  // Step 3: Extract fields between delimiters
-  const fields = extractFields(messages, delimiterTree);
+  // Step 2: Build ordered delimiter tree (on normalized messages)
+  const delimiterTree = buildDelimiterTree(normalizedStrings, delimiters);
+
+  // Step 3: Extract fields between delimiters (on normalized messages)
+  const fields = extractFields(normalizedStrings, delimiterTree);
 
   // Step 3.5: Normalize field boundaries (move trailing non-alphanumeric chars to delimiters)
   normalizeFieldBoundaries(fields, delimiterTree);
 
   // Step 4: Detect modifiers for each field
-  fields.forEach((field) => {
+  fields.forEach((field, index) => {
     field.modifiers = detectModifiers(field);
+
+    // Apply right-padding modifier if whitespace was collapsed before the delimiter after this field
+    if (index < fields.length - 1) {
+      const nextDelimiter = delimiterTree[index];
+      if (nextDelimiter && nextDelimiter.positions.length > 0) {
+        // Check if this delimiter appears at positions where whitespace was collapsed
+        if (needsRightPadding(nextDelimiter.positions, normalizedMessages)) {
+          field.modifiers.rightPadding = true;
+        }
+      }
+    }
   });
 
   // Step 5: Generate pattern string
@@ -89,19 +106,29 @@ export function extractDissectPatternDangerouslySlow(messages: string[]): Dissec
   const needsFallback = fields.length < 2 || hasLowQualityPattern(pattern);
 
   if (needsFallback && messages.length > 1) {
-    // Try forcing space as a delimiter for structured logs
+    // Try forcing space as a delimiter for structured logs (on normalized messages)
     const spaceDelimiters = [' '];
-    const spaceDelimiterTree = buildDelimiterTree(messages, spaceDelimiters);
-    const spaceFields = extractFields(messages, spaceDelimiterTree);
+    const spaceDelimiterTree = buildDelimiterTree(normalizedStrings, spaceDelimiters);
+    const spaceFields = extractFields(normalizedStrings, spaceDelimiterTree);
 
     // Normalize field boundaries for space-based extraction too
     normalizeFieldBoundaries(spaceFields, spaceDelimiterTree);
 
     // If space-based extraction gives us more fields, use it
     if (spaceFields.length >= 2) {
-      // Add modifiers to fields
-      spaceFields.forEach((field) => {
+      // Add modifiers to fields (including right-padding from collapsed whitespace)
+      spaceFields.forEach((field, index) => {
         field.modifiers = detectModifiers(field);
+
+        // Apply right-padding modifier if whitespace was collapsed before the delimiter after this field
+        if (index < spaceFields.length - 1) {
+          const nextDelimiter = spaceDelimiterTree[index];
+          if (nextDelimiter && nextDelimiter.positions.length > 0) {
+            if (needsRightPadding(nextDelimiter.positions, normalizedMessages)) {
+              field.modifiers.rightPadding = true;
+            }
+          }
+        }
       });
 
       const spacePattern = generatePattern(spaceDelimiterTree, spaceFields);
@@ -115,23 +142,37 @@ export function extractDissectPatternDangerouslySlow(messages: string[]): Dissec
 
   // Original prefix-based fallback (keeping for other cases)
   if (fields.length < 2 && messages.length > 1) {
-    // Use token-based structured prefix detection
+    // Use token-based structured prefix detection (on ORIGINAL messages, not normalized)
     const structuredPrefixLength = findStructuredPrefixLength(messages);
 
     // If we found a meaningful structured prefix (longer than simple char-by-char match)
     if (structuredPrefixLength > 10) {
       const prefixMessages = messages.map((msg) => msg.substring(0, structuredPrefixLength));
 
-      // Re-run extraction on just the prefix
-      const prefixDelimiters = findDelimiterSequences(prefixMessages);
-      const prefixDelimiterTree = buildDelimiterTree(prefixMessages, prefixDelimiters);
-      const prefixFields = extractFields(prefixMessages, prefixDelimiterTree);
+      // Normalize the prefix messages
+      const normalizedPrefixMessages = normalizeWhitespace(prefixMessages);
+      const normalizedPrefixStrings = normalizedPrefixMessages.map((nm) => nm.normalized);
+
+      // Re-run extraction on just the prefix (on normalized prefix messages)
+      const prefixDelimiters = findDelimiterSequences(normalizedPrefixStrings);
+      const prefixDelimiterTree = buildDelimiterTree(normalizedPrefixStrings, prefixDelimiters);
+      const prefixFields = extractFields(normalizedPrefixStrings, prefixDelimiterTree);
 
       // If prefix extraction worked better, use it and add a catch-all field for the rest
       if (prefixFields.length >= 2) {
-        // Add modifiers to prefix fields
-        prefixFields.forEach((field) => {
+        // Add modifiers to prefix fields (including right-padding from collapsed whitespace)
+        prefixFields.forEach((field, index) => {
           field.modifiers = detectModifiers(field);
+
+          // Apply right-padding modifier if whitespace was collapsed before the delimiter after this field
+          if (index < prefixFields.length - 1) {
+            const nextDelimiter = prefixDelimiterTree[index];
+            if (nextDelimiter && nextDelimiter.positions.length > 0) {
+              if (needsRightPadding(nextDelimiter.positions, normalizedPrefixMessages)) {
+                field.modifiers.rightPadding = true;
+              }
+            }
+          }
         });
 
         // Add a catch-all field for the variable suffix
