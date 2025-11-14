@@ -7,13 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { subj } from '@kbn/test-subj-selector';
 import type { Page } from '@playwright/test';
 import { test as base } from '@playwright/test';
-import { subj } from '@kbn/test-subj-selector';
-import { keyTo } from '../../../../utils';
-import type { PathOptions } from '../../../../../common/services/kibana_url';
-import type { KibanaUrl, ScoutLogger } from '../../worker';
 import type { ScoutPage } from '.';
+import type { PathOptions } from '../../../../../common/services/kibana_url';
+import { keyTo } from '../../../../utils';
+import type { KibanaUrl, ScoutLogger } from '../../worker';
+
+/**
+ * Types text into an input field character by character with a specified delay between each one.
+ */
+async function typeWithDelay(
+  page: Page,
+  selector: string,
+  text: string,
+  options?: { delay: number }
+): Promise<void> {
+  const { delay = 25 } = options || {};
+  await page.locator(selector).click();
+  for (const char of text) {
+    await page.keyboard.insertText(char);
+    // it is important to delay characters input to avoid flakiness, default is 25 ms
+    // eslint-disable-next-line playwright/no-wait-for-timeout
+    await page.waitForTimeout(delay);
+  }
+}
 
 /**
  * Instead of defining each method individually, we use a list of method names and loop through them, creating methods dynamically.
@@ -51,21 +70,8 @@ function extendPageWithTestSubject(page: Page): ScoutPage['testSubj'] {
   }
 
   // custom method to types text into an input field character by character with a delay
-  extendedMethods.typeWithDelay = async (
-    selector: string,
-    text: string,
-    options?: { delay: number }
-  ) => {
-    const { delay = 25 } = options || {};
-    const testSubjSelector = subj(selector);
-    await page.locator(testSubjSelector).click();
-    for (const char of text) {
-      await page.keyboard.insertText(char);
-      // it is important to delay characters input to avoid flakiness, default is 25 ms
-      // eslint-disable-next-line playwright/no-wait-for-timeout
-      await page.waitForTimeout(delay);
-    }
-  };
+  extendedMethods.typeWithDelay = (selector: string, text: string, options?: { delay: number }) =>
+    typeWithDelay(page, subj(selector), text, options);
 
   // custom method to clear an input field
   extendedMethods.clearInput = async (selector: string) => {
@@ -102,6 +108,9 @@ export function extendPlaywrightPage({
   ) => {
     return await keyTo(page, selector, key, maxElementsToTraverse);
   };
+  // Method to type text with delay character by character
+  extendedPage.typeWithDelay = (selector: string, text: string, options?: { delay: number }) =>
+    typeWithDelay(page, selector, text, options);
   return extendedPage;
 }
 

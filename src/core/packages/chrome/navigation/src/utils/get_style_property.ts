@@ -10,9 +10,9 @@
 /**
  * Utility function to get the value of a style property of an element.
  *
- * @param element - The element to get the property value of.
- * @param property - The property to get the value of.
- * @returns The value of the property.
+ * @param element - the element to get the property value of.
+ * @param property - the property to get the value of.
+ * @returns the value of the property.
  */
 export const getStyleProperty = (element: HTMLElement, property: string): number => {
   if (typeof window === 'undefined') return 0;
