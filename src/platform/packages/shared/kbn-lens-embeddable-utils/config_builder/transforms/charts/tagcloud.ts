@@ -203,10 +203,14 @@ export function fromLensStateToAPI(
     (state.datasourceStates.indexpattern?.layers as PersistedIndexPatternLayer[]) ??
     [];
 
+  // Necessary for ESQL panels to find the correct layer, since the old layers are not removed from the state
+  const visLayerId = Object.entries(layers).find(([id]) => id === visualization.layerId);
   // Layers can be in any order, so make sure to get the main one
-  const [layerId, layer] = Object.entries(layers).find(
-    ([, l]) => !('linkToLayers' in l) || l.linkToLayers == null
-  )!;
+  const [layerId, layer] =
+    visLayerId ??
+    Object.entries(layers).find(
+      ([, l]) => !('linkToLayers' in l) || (l as { linkToLayers?: unknown }).linkToLayers == null
+    )!;
 
   const visualizationState = {
     ...getSharedChartLensStateToAPI(config),
