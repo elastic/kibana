@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import axios from 'axios';
+import axios, { type AxiosResponse } from 'axios';
 import https from 'https';
 import { schema } from '@kbn/config-schema';
 import type { IRouter, Logger, KibanaRequest } from '@kbn/core/server';
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type {
+  SavedObjectsClientContract,
+  SavedObject,
+  SavedObjectsFindResponse,
+} from '@kbn/core-saved-objects-api-server';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { WORKPLACE_CONNECTOR_SAVED_OBJECT_TYPE } from '../saved_objects';
 import type {
@@ -27,10 +31,9 @@ import type { WorkflowCreatorService } from '../services/workflow_creator';
 import { CONNECTOR_CONFIG } from '../data/connector_config';
 
 // Helper function to build response from saved object
-function buildConnectorResponse(savedObject: {
-  id: string;
-  attributes: WorkplaceConnectorAttributes;
-}): WorkplaceConnectorResponse {
+function buildConnectorResponse(
+  savedObject: SavedObject<WorkplaceConnectorAttributes>
+): WorkplaceConnectorResponse {
   const attrs = savedObject.attributes;
   return {
     id: savedObject.id,
@@ -135,7 +138,7 @@ async function fetchOAuthSecrets(
   retryDelay: number,
   logger: Logger
 ): Promise<OAuthSecretsResponse> {
-  let secretsresponse: axios.AxiosResponse<OAuthSecretsResponse> | undefined;
+  let secretsresponse: AxiosResponse<OAuthSecretsResponse> | undefined;
   let accessToken: string | undefined;
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
@@ -201,11 +204,11 @@ export function registerConnectorRoutes(
           connectorType,
           title: config.name,
           description: config.description,
-          icon: config.icon,
           defaultFeatures: config.defaultFeatures,
           flyoutComponentId: config.flyoutComponentId,
           customFlyoutComponentId: config.customFlyoutComponentId,
           saveConfig: config.saveConfig,
+          oauthConfig: config.oauthConfig,
         }));
 
         return response.ok({
@@ -507,7 +510,10 @@ export function registerConnectorRoutes(
 
       try {
         const savedObjectsClient = coreContext.savedObjects.client;
-        const savedObject = await savedObjectsClient.get(WORKPLACE_CONNECTOR_SAVED_OBJECT_TYPE, id);
+        const savedObject: SavedObject<WorkplaceConnectorAttributes> = await savedObjectsClient.get(
+          WORKPLACE_CONNECTOR_SAVED_OBJECT_TYPE,
+          id
+        );
 
         const responseData = buildConnectorResponse(savedObject);
 
@@ -549,10 +555,11 @@ export function registerConnectorRoutes(
 
       try {
         const savedObjectsClient = coreContext.savedObjects.client;
-        const findResult = await savedObjectsClient.find({
-          type: WORKPLACE_CONNECTOR_SAVED_OBJECT_TYPE,
-          perPage: 100,
-        });
+        const findResult: SavedObjectsFindResponse<WorkplaceConnectorAttributes> =
+          await savedObjectsClient.find({
+            type: WORKPLACE_CONNECTOR_SAVED_OBJECT_TYPE,
+            perPage: 100,
+          });
 
         const connectors: WorkplaceConnectorResponse[] = findResult.saved_objects.map(
           (savedObject) => buildConnectorResponse(savedObject)
@@ -599,13 +606,15 @@ export function registerConnectorRoutes(
         const savedObjectsClient = coreContext.savedObjects.client;
         const now = new Date().toISOString();
 
-        const savedObject = await savedObjectsClient.update(
+        await savedObjectsClient.update(WORKPLACE_CONNECTOR_SAVED_OBJECT_TYPE, id, {
+          ...updates,
+          updatedAt: now,
+        });
+
+        // Fetch the full updated object to get all attributes
+        const savedObject: SavedObject<WorkplaceConnectorAttributes> = await savedObjectsClient.get(
           WORKPLACE_CONNECTOR_SAVED_OBJECT_TYPE,
-          id,
-          {
-            ...updates,
-            updatedAt: now,
-          }
+          id
         );
 
         const responseData = buildConnectorResponse(savedObject);

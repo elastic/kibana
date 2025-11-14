@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { GoogleAuth } from 'google-auth-library';
 import axios, { type AxiosRequestConfig } from 'axios';
+import { GoogleAuth } from 'google-auth-library';
 
 const DRIVE_API_BASE_URL = 'https://www.googleapis.com/drive/v3';
 const DRIVE_API_TIMEOUT = 60 * 1000; // 1 minute
@@ -19,7 +19,7 @@ const DRIVE_SCOPES = [
 ];
 
 export interface GoogleDriveClientConfig {
-  service_credential: Record<string, any>;
+  service_credential: Record<string, unknown>;
   subject?: string; // For domain-wide delegation
 }
 
@@ -39,7 +39,7 @@ export interface FileMetadata {
   modifiedTime?: string;
   parents?: string[];
   webViewLink?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface ListFilesResponse {
@@ -53,7 +53,7 @@ export class GoogleDriveClient {
   private accessToken: string | null = null;
   private tokenExpiry: number = 0;
 
-  constructor(private config: GoogleDriveClientConfig) {
+  constructor(config: GoogleDriveClientConfig) {
     const credentials = { ...config.service_credential };
 
     // Remove universe_domain if present (not needed for auth)
@@ -100,8 +100,8 @@ export class GoogleDriveClient {
   private async makeRequest<T>(
     method: string,
     endpoint: string,
-    params?: Record<string, any>,
-    data?: any
+    params?: Record<string, unknown>,
+    data?: unknown
   ): Promise<T> {
     const accessToken = await this.getAccessToken();
     const url = `${DRIVE_API_BASE_URL}${endpoint}`;
@@ -121,10 +121,12 @@ export class GoogleDriveClient {
     try {
       const response = await axios(config);
       return response.data;
-    } catch (error: any) {
+    } catch (error) {
       if (error.response) {
         throw new Error(
-          `Google Drive API error: ${error.response.status} ${error.response.statusText} - ${JSON.stringify(error.response.data)}`
+          `Google Drive API error: ${error.response.status} ${
+            error.response.statusText
+          } - ${JSON.stringify(error.response.data)}`
         );
       }
       throw new Error(`Google Drive API request failed: ${error.message}`);
@@ -144,12 +146,7 @@ export class GoogleDriveClient {
    * List files from Google Drive
    */
   async listFiles(options: ListFilesOptions = {}): Promise<ListFilesResponse> {
-    const {
-      folderId,
-      pageSize = 100,
-      pageToken,
-      q: customQuery,
-    } = options;
+    const { folderId, pageSize = 100, pageToken, q: customQuery } = options;
 
     // Build query
     let query = 'trashed=false';
@@ -162,10 +159,11 @@ export class GoogleDriveClient {
       query = customQuery;
     }
 
-    const params: Record<string, any> = {
+    const params: Record<string, unknown> = {
       q: query,
       pageSize,
-      fields: 'nextPageToken,files(id,name,mimeType,size,createdTime,modifiedTime,parents,webViewLink)',
+      fields:
+        'nextPageToken,files(id,name,mimeType,size,createdTime,modifiedTime,parents,webViewLink)',
       corpora: 'allDrives',
       includeItemsFromAllDrives: true,
       supportsAllDrives: true,
@@ -213,7 +211,7 @@ export class GoogleDriveClient {
     const isGoogleWorkspaceFile = fileMetadata.mimeType?.startsWith('application/vnd.google-apps.');
 
     let downloadUrl = url;
-    const params: Record<string, any> = {
+    const params: Record<string, unknown> = {
       supportsAllDrives: true,
     };
 
@@ -264,7 +262,8 @@ export class GoogleDriveClient {
 
       if (isTextFile) {
         // Return as UTF-8 text
-        content = typeof response.data === 'string' ? response.data : response.data.toString('utf8');
+        content =
+          typeof response.data === 'string' ? response.data : response.data.toString('utf8');
         encoding = 'utf8';
         size = Buffer.byteLength(content, 'utf8');
       } else {
@@ -280,14 +279,15 @@ export class GoogleDriveClient {
         encoding,
         size,
       };
-    } catch (error: any) {
+    } catch (error) {
       if (error.response) {
         throw new Error(
-          `Google Drive API error downloading file: ${error.response.status} ${error.response.statusText} - ${JSON.stringify(error.response.data)}`
+          `Google Drive API error downloading file: ${error.response.status} ${
+            error.response.statusText
+          } - ${JSON.stringify(error.response.data)}`
         );
       }
       throw new Error(`Google Drive file download failed: ${error.message}`);
     }
   }
 }
-

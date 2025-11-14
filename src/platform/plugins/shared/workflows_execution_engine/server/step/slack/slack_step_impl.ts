@@ -10,9 +10,7 @@
 import axios, { type AxiosRequestConfig, type AxiosResponse } from 'axios';
 import type { SlackSearchNode } from '@kbn/workflows/graph/types/nodes/base';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
-import type {
-  WorkflowExecutionRuntimeManager
-} from '../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
 import type { BaseStep, RunStepResult } from '../node_implementation';
 import { BaseAtomicNodeImplementation } from '../node_implementation';
@@ -24,7 +22,7 @@ export interface SlackSearchStep extends BaseStep {
     query: string;
     searchType?: 'messages' | 'channels';
     fields?: string;
-    body?: any;
+    body?: unknown;
   };
 }
 
@@ -86,6 +84,13 @@ interface SlackChannelsListResult {
   };
 }
 
+interface SlackSearchInput {
+  bearerToken: string;
+  query: string;
+  searchType?: 'messages' | 'channels';
+  fields?: string;
+}
+
 export class SlackSearchStepImpl extends BaseAtomicNodeImplementation<SlackSearchStep> {
   constructor(
     node: SlackSearchNode,
@@ -118,16 +123,19 @@ export class SlackSearchStepImpl extends BaseAtomicNodeImplementation<SlackSearc
     });
   }
 
-  protected async _run(input: any): Promise<RunStepResult> {
+  protected async _run(input: SlackSearchInput): Promise<RunStepResult> {
     try {
       // Resolve secrets in input (e.g., ${workplace_connector:id:api_key})
-      const resolvedInput = await this.stepExecutionRuntime.contextManager.resolveSecretsInValue(input);
+      const resolvedInput =
+        await this.stepExecutionRuntime.contextManager.resolveSecretsInValue<SlackSearchInput>(
+          input
+        );
       const { bearerToken, query, searchType = 'messages', fields } = resolvedInput;
 
       if (searchType === 'channels') {
-        return await this.searchChannels(bearerToken, query, fields, input);
+        return await this.searchChannels(bearerToken, query, fields, resolvedInput);
       } else {
-        return await this.searchMessages(bearerToken, query, fields, input);
+        return await this.searchMessages(bearerToken, query, fields, resolvedInput);
       }
     } catch (error) {
       let errorMessage: string;
@@ -164,14 +172,16 @@ export class SlackSearchStepImpl extends BaseAtomicNodeImplementation<SlackSearc
     bearerToken: string,
     query: string,
     fields: string | undefined,
-    input: any
+    input: SlackSearchInput
   ): Promise<RunStepResult> {
     const pageSize = 100;
     const allMessages: Array<SlackMessageMatch> = [];
     let page = 1;
     while (true) {
       const config: AxiosRequestConfig = {
-        url: `https://slack.com/api/search.messages?query=${encodeURIComponent(query)}&count=${pageSize}&page=${page}`,
+        url: `https://slack.com/api/search.messages?query=${encodeURIComponent(
+          query
+        )}&count=${pageSize}&page=${page}`,
         method: 'GET',
         headers: {
           Authorization: `Bearer ${bearerToken}`,
@@ -182,12 +192,13 @@ export class SlackSearchStepImpl extends BaseAtomicNodeImplementation<SlackSearc
       const response: AxiosResponse = await axios<SlackMessageSearchResult>(config);
 
       if (!response.data.ok) {
-        const error = (response.data as any).error || 'Unknown error';
+        const error = response.data.error || 'Unknown error';
         let errorMessage = `Slack API error: ${error}`;
 
         // Provide helpful guidance for missing_scope errors
         if (error === 'missing_scope') {
-          errorMessage += '. The Slack token requires the search:read OAuth scope. Please re-authenticate with the correct scope.';
+          errorMessage +=
+            '. The Slack token requires the search:read OAuth scope. Please re-authenticate with the correct scope.';
         }
 
         throw new Error(errorMessage);
@@ -215,7 +226,7 @@ export class SlackSearchStepImpl extends BaseAtomicNodeImplementation<SlackSearc
     bearerToken: string,
     query: string,
     fields: string | undefined,
-    input: any
+    input: SlackSearchInput
   ): Promise<RunStepResult> {
     const allChannels: Array<SlackChannel> = [];
     let cursor: string | undefined;
@@ -241,12 +252,13 @@ export class SlackSearchStepImpl extends BaseAtomicNodeImplementation<SlackSearc
       const response: AxiosResponse = await axios<SlackChannelsListResult>(config);
 
       if (!response.data.ok) {
-        const error = (response.data as any).error || 'Unknown error';
+        const error = response.data.error || 'Unknown error';
         let errorMessage = `Slack API error: ${error}`;
 
         // Provide helpful guidance for missing_scope errors
         if (error === 'missing_scope') {
-          errorMessage += '. The Slack token requires the following OAuth scopes: channels:read (for public channels) and groups:read (for private channels). Please re-authenticate with the correct scopes.';
+          errorMessage +=
+            '. The Slack token requires the following OAuth scopes: channels:read (for public channels) and groups:read (for private channels). Please re-authenticate with the correct scopes.';
         }
 
         throw new Error(errorMessage);
@@ -254,7 +266,7 @@ export class SlackSearchStepImpl extends BaseAtomicNodeImplementation<SlackSearc
 
       // Filter channels by query (case-insensitive search in name, topic, and purpose)
       const queryLower = query.toLowerCase();
-      const matchingChannels = response.data.channels.filter((channel) => {
+      const matchingChannels = response.data.channels.filter((channel: SlackChannel) => {
         const nameMatch = channel.name.toLowerCase().includes(queryLower);
         const topicMatch = channel.topic?.value.toLowerCase().includes(queryLower);
         const purposeMatch = channel.purpose?.value.toLowerCase().includes(queryLower);
