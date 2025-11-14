@@ -15,9 +15,9 @@ import { useConversationId } from '../conversation/use_conversation_id';
 import { useOnechatServices } from '../../hooks/use_onechat_service';
 import { useReportConverseError } from '../../hooks/use_report_error';
 import { mutationKeys } from '../../mutation_keys';
-import { usePendingMessageState } from './use_pending_message_state';
 import { useSubscribeToChatEvents } from './use_subscribe_to_chat_events';
 import { BrowserToolExecutor } from '../../services/browser_tool_executor';
+import { useConversationError } from '../conversation/conversation_error_context';
 
 interface UseSendMessageMutationProps {
   connectorId?: string;
@@ -46,19 +46,17 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
     return new BrowserToolExecutor(services.notifications?.toasts);
   }, [services.notifications?.toasts]);
 
-  const {
-    pendingMessageState: { error, pendingMessage },
-    setPendingMessage,
-    removePendingMessage,
-    setError,
-    removeError,
-  } = usePendingMessageState({ conversationId });
   const subscribeToChatEvents = useSubscribeToChatEvents({
     setAgentReasoning,
     setIsResponseLoading,
     isAborted: () => Boolean(messageControllerRef?.current?.signal?.aborted),
     browserToolExecutor,
   });
+  const { conversationError, setError, removeError } = useConversationError();
+  const [pendingMessage, setPendingMessage] = useState<string | null>(null);
+  const removePendingMessage = () => {
+    setPendingMessage(null);
+  };
 
   const sendMessage = async ({ message }: { message: string }) => {
     const signal = messageControllerRef.current?.signal;
@@ -115,7 +113,8 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
     onError: (err) => {
       setIsResponseLoading(false);
       reportConverseError(err, { connectorId });
-      setError(err);
+      const erroredRound = conversationActions.snapshotOptimisticRound();
+      setError({ error: err, erroredRound });
       // When we error, we should immediately remove the round rather than waiting for a refetch after invalidation
       // Otherwise, the error round and the optimistic round will be visible together.
       conversationActions.removeOptimisticRound();
@@ -123,18 +122,11 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
   });
 
   const canCancel = isLoading;
-  const cancel = () => {
-    if (!canCancel) {
-      return;
-    }
-    removePendingMessage();
-    messageControllerRef.current?.abort();
-  };
 
   return {
     sendMessage: mutate,
     isResponseLoading,
-    error,
+    conversationError,
     pendingMessage,
     agentReasoning,
     retry: () => {
@@ -142,7 +134,7 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
         // Retrying should not be allowed if a response is still being fetched
         // or if we're not in an error state
         isResponseLoading ||
-        !error
+        !conversationError
       ) {
         return;
       }
@@ -156,7 +148,13 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
       mutate({ message: pendingMessage });
     },
     canCancel,
-    cancel,
+    cancel: () => {
+      if (!canCancel) {
+        return;
+      }
+      removePendingMessage();
+      messageControllerRef.current?.abort();
+    },
     // Cleaning only makes sense in the context of an error state on a new conversation round
     // The user can click "New" to clear the pending round and error
     cleanConversation: () => {

@@ -23,7 +23,7 @@ import {
 import { type PluggableList } from 'unified';
 import type { ConversationRoundStep } from '@kbn/onechat-common';
 import { visualizationElement } from '@kbn/onechat-common/tools/tool_result';
-import { useOnechatServices } from '../../../hooks/use_onechat_service';
+import { useOnechatServices } from '../../../../hooks/use_onechat_service';
 import {
   Cursor,
   esqlLanguagePlugin,
@@ -31,7 +31,7 @@ import {
   loadingCursorPlugin,
   visualizationTagParser,
 } from './markdown_plugins';
-import { useStepsFromPrevRounds } from '../../../hooks/use_conversation';
+import { useStepsFromPrevRounds } from '../../../../hooks/use_conversation';
 
 interface Props {
   content: string;

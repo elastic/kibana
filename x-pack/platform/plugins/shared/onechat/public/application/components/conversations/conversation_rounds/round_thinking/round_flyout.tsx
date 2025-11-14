@@ -8,8 +8,8 @@
 import React from 'react';
 import { EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody, EuiCodeBlock } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { ConversationRound } from '@kbn/onechat-common';
 import { css } from '@emotion/react';
+import { useRoundContext } from '../../../../context/conversation_round/round_context';
 
 const rawResponseFlyoutTitle = i18n.translate(
   'xpack.onechat.conversation.rawResponseFlyout.title',
@@ -21,10 +21,11 @@ const rawResponseFlyoutTitle = i18n.translate(
 interface RawResponseFlyoutProps {
   isOpen: boolean;
   onClose: () => void;
-  rawRound: ConversationRound;
 }
 
-export const RoundFlyout: React.FC<RawResponseFlyoutProps> = ({ isOpen, onClose, rawRound }) => {
+export const RoundFlyout: React.FC<RawResponseFlyoutProps> = ({ isOpen, onClose }) => {
+  const { round } = useRoundContext();
+
   if (!isOpen) return null;
 
   return (
@@ -44,7 +45,7 @@ export const RoundFlyout: React.FC<RawResponseFlyoutProps> = ({ isOpen, onClose,
             overflow: auto;
           `}
         >
-          {JSON.stringify(rawRound, null, 2)}
+          {JSON.stringify(round, null, 2)}
         </EuiCodeBlock>
       </EuiFlyoutBody>
     </EuiFlyout>

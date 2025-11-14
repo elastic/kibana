@@ -8,12 +8,15 @@
 import React, { createContext, useContext } from 'react';
 import { useSendMessageMutation } from './use_send_message_mutation';
 import { useConnectorSelection } from '../../hooks/chat/use_connector_selection';
+import type { ConversationError } from '../conversation/conversation_error_context';
+import { ConversationErrorProvider } from '../conversation/conversation_error_context';
+import { useConversationId } from '../conversation/use_conversation_id';
 
 interface SendMessageState {
   sendMessage: ({ message }: { message: string }) => void;
   isResponseLoading: boolean;
-  error: unknown;
-  pendingMessage: string | undefined;
+  conversationError: ConversationError | undefined;
+  pendingMessage: string | null;
   agentReasoning: string | null;
   retry: () => void;
   canCancel: boolean;
@@ -28,13 +31,13 @@ interface SendMessageState {
 
 const SendMessageContext = createContext<SendMessageState | null>(null);
 
-export const SendMessageProvider = ({ children }: { children: React.ReactNode }) => {
+const InternalSendMessageProvider = ({ children }: { children: React.ReactNode }) => {
   const connectorSelection = useConnectorSelection();
 
   const {
     sendMessage,
     isResponseLoading,
-    error,
+    conversationError,
     pendingMessage,
     agentReasoning,
     retry,
@@ -48,7 +51,7 @@ export const SendMessageProvider = ({ children }: { children: React.ReactNode })
       value={{
         sendMessage,
         isResponseLoading,
-        error,
+        conversationError,
         pendingMessage,
         agentReasoning,
         retry,
@@ -64,6 +67,15 @@ export const SendMessageProvider = ({ children }: { children: React.ReactNode })
     >
       {children}
     </SendMessageContext.Provider>
+  );
+};
+
+export const SendMessageProvider = ({ children }: { children: React.ReactNode }) => {
+  const conversationId = useConversationId();
+  return (
+    <ConversationErrorProvider conversationId={conversationId}>
+      <InternalSendMessageProvider>{children}</InternalSendMessageProvider>
+    </ConversationErrorProvider>
   );
 };
 
