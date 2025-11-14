@@ -76,7 +76,7 @@ export class DashboardPlugin
 {
   private readonly logger: Logger;
 
-  constructor(private initializerContext: PluginInitializerContext) {
+  constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
   }
 
@@ -94,7 +94,7 @@ export class DashboardPlugin
     plugins.contentManagement.register<ContentStorage<DashboardItem>>({
       id: CONTENT_ID,
       storage: new DashboardStorage({
-        throwOnResultValidationError: this.initializerContext.env.mode.dev,
+        throwOnResultValidationError: true,
         logger: this.logger.get('storage'),
       }),
       version: {
