@@ -28,7 +28,7 @@ import { useFormWrapped } from '../../../../../hooks/use_form_wrapped';
 import { CodeEditor } from '../../monitor_add_edit/fields/code_editor';
 // import { syntheticsSuggestionProvider } from '../../../lib/editor/snippets';
 import { useGetSnippets, usePostSnippet } from './hooks';
-import { useSuggestionProvider } from './use_suggestion_provider';
+import { useSnippetsSuggestions } from './use_snippets_suggestions';
 
 export interface SnippetData {
   name: string;
@@ -62,7 +62,7 @@ export const Snippets = () => {
     isLoading: isLoadingSnippets,
   } = useGetSnippets();
   const postSnippetMutation = usePostSnippet();
-  useSuggestionProvider({ snippets });
+  useSnippetsSuggestions({ snippets });
 
   const isLoading = isLoadingSnippets || postSnippetMutation.isLoading;
 

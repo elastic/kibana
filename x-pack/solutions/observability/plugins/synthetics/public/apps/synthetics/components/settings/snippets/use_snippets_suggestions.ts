@@ -9,12 +9,13 @@ import { useEffect } from 'react';
 import { monaco } from '@kbn/monaco';
 import { MonacoEditorLangId } from '../../../../../../common/runtime_types';
 import type { SyntheticsServiceSnippet } from '../../../../../../common/runtime_types/synthetics_service_snippet';
+import { PARAMS_SUGGESTION_TRIGGER } from './use_params_suggestions';
 
 interface UseSuggestionProviderParams {
   snippets: SyntheticsServiceSnippet[];
 }
 
-export const useSuggestionProvider = (params: UseSuggestionProviderParams) => {
+export const useSnippetsSuggestions = (params: UseSuggestionProviderParams) => {
   const { snippets } = params;
 
   /**
@@ -39,6 +40,10 @@ const getSuggestionProvider = (snippets: SyntheticsServiceSnippet[]) => {
     provideCompletionItems(model, position) {
       const lineNumber = position.lineNumber;
       const lineContent = model.getLineContent(lineNumber);
+
+      if (lineContent.includes(PARAMS_SUGGESTION_TRIGGER)) {
+        return { suggestions: [] };
+      }
 
       const word = model.getWordAtPosition(position);
 
@@ -133,6 +138,7 @@ const getSuggestionProvider = (snippets: SyntheticsServiceSnippet[]) => {
       if (lineContent.includes('page.')) {
         suggestions.forEach((s) => (s.sortText = '0'));
       }
+
       return { suggestions };
     },
   };
