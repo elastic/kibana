@@ -53,6 +53,9 @@ export class EnterRetryNodeImpl implements NodeImplementation, NodeWithErrorCatc
   }
 
   private async initializeRetry(): Promise<void> {
+    const xxx = this.stepExecutionRuntime.stepExecution;
+    const wfexec = this.workflowRuntime.getWorkflowExecution();
+
     // Enter whole retry step scope
     await this.stepExecutionRuntime.startStep();
     // Enter first attempt scope. Since attempt is 0 based, we add 1 to it.
@@ -65,22 +68,24 @@ export class EnterRetryNodeImpl implements NodeImplementation, NodeWithErrorCatc
   }
 
   private async advanceRetryAttempt(): Promise<void> {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const retryState = this.stepExecutionRuntime.getCurrentStepState()!;
-    const attempt = retryState.attempt + 1;
-
     if (
       this.node.configuration.delay &&
       this.stepExecutionRuntime.tryEnterWait(this.node.configuration.delay)
     ) {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const retryState = this.stepExecutionRuntime.getCurrentStepState()!;
+      const attempt = retryState.attempt + 1;
+      this.workflowLogger.logDebug(`Retrying "${this.node.stepId}" step. (attempt ${attempt}).`);
+      await this.stepExecutionRuntime.setCurrentStepState({ ...retryState, attempt });
       this.workflowLogger.logDebug(`Delaying retry for ${this.node.configuration.delay}.`);
+      // Enter a new scope for the new attempt. Since attempt is 0 based, we add 1 to it.
       return;
     }
 
-    this.workflowLogger.logDebug(`Retrying "${this.node.stepId}" step. (attempt ${attempt}).`);
-    await this.stepExecutionRuntime.setCurrentStepState({ attempt });
-    // Enter a new scope for the new attempt. Since attempt is 0 based, we add 1 to it.
-    this.workflowRuntime.enterScope(`${attempt + 1}-attempt`);
+    this.workflowRuntime.enterScope(
+      `${this.stepExecutionRuntime.getCurrentStepState()!.attempt + 1}-attempt`
+    );
+
     this.workflowRuntime.navigateToNextNode();
   }
 }
