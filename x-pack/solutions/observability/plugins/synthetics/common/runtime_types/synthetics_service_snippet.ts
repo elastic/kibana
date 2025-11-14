@@ -19,12 +19,21 @@ export const SyntheticsServiceSnippetCodec = t.type({
   insertText: t.string,
 });
 
+export const SyntheticsServiceSnippetWithIdCodec = t.intersection([
+  SyntheticsServiceSnippetCodec,
+  t.type({
+    id: t.string,
+  }),
+]);
+
 export type SyntheticsServiceSnippetType = t.TypeOf<typeof SyntheticsServiceSnippetCodec>;
-export type SyntheticsServiceSnippetWithIdType = SyntheticsServiceSnippetType & { id: string };
+export type SyntheticsServiceSnippetWithIdType = t.TypeOf<
+  typeof SyntheticsServiceSnippetWithIdCodec
+>;
 
 // Get
 export const SyntheticsServiceGetSnippetsSuccessResponseCodec = t.type({
-  snippets: t.array(SyntheticsServiceSnippetCodec),
+  snippets: t.array(SyntheticsServiceSnippetWithIdCodec),
 });
 export const SyntheticsServiceGetSnippetsResponseCodec = t.intersection([
   SyntheticsServiceGetSnippetsSuccessResponseCodec,
@@ -39,7 +48,7 @@ export type SyntheticsServiceGetSnippetsSuccessResponseType = t.TypeOf<
 
 // Post
 export const SyntheticsServicePostSnippetSuccessResponseCodec = t.type({
-  snippet: SyntheticsServiceSnippetCodec,
+  snippet: SyntheticsServiceSnippetWithIdCodec,
 });
 export type SyntheticsServicePostSnippetSuccessResponseType = t.TypeOf<
   typeof SyntheticsServicePostSnippetSuccessResponseCodec
@@ -51,4 +60,17 @@ export const SyntheticsServicePostSnippetResponseCodec = t.intersection([
 ]);
 export type SyntheticsServicePostSnippetResponseType = t.TypeOf<
   typeof SyntheticsServicePostSnippetResponseCodec
+>;
+
+// Delete
+export const SyntheticsServiceDeleteSnippetSuccessResponseCodec = t.type({});
+export const SyntheticsServiceDeleteSnippetResponseCodec = t.intersection([
+  SyntheticsServiceDeleteSnippetSuccessResponseCodec,
+  SyntheticsServiceErrorResponseCodec,
+]);
+export type SyntheticsServiceDeleteSnippetSuccessResponseType = t.TypeOf<
+  typeof SyntheticsServiceDeleteSnippetSuccessResponseCodec
+>;
+export type SyntheticsServiceDeleteSnippetResponseType = t.TypeOf<
+  typeof SyntheticsServiceDeleteSnippetResponseCodec
 >;

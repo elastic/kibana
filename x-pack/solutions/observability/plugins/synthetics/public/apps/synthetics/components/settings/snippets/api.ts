@@ -5,11 +5,14 @@
  * 2.0.
  */
 import type {
-  SyntheticsServiceGetSnippetsResponse,
-  SyntheticsServiceGetSnippetsSuccessResponseCodec,
-  SyntheticsServicePostSnippetResponse,
-  SyntheticsServicePostSnippetSuccessResponse,
-  SyntheticsServiceSnippetCodec,
+  SyntheticsServiceDeleteSnippetResponseType,
+  SyntheticsServiceDeleteSnippetSuccessResponseType,
+  SyntheticsServiceGetSnippetsResponseType,
+  SyntheticsServiceGetSnippetsSuccessResponseType,
+  SyntheticsServicePostSnippetResponseType,
+  SyntheticsServicePostSnippetSuccessResponseType,
+  SyntheticsServiceSnippetType,
+  SyntheticsServiceSnippetWithIdType,
 } from '../../../../../../common/runtime_types/synthetics_service_snippet';
 import { apiService } from '../../../../../utils/api_service';
 import { SYNTHETICS_API_URLS } from '../../../../../../common/constants';
@@ -17,22 +20,33 @@ import { SYNTHETICS_API_URLS } from '../../../../../../common/constants';
 export const getSnippets = async () => {
   const response = (await apiService.get(
     SYNTHETICS_API_URLS.SYNTHETICS_PROJECT_SNIPPETS
-  )) as SyntheticsServiceGetSnippetsResponse;
+  )) as SyntheticsServiceGetSnippetsResponseType;
 
   if (response.error) {
     throw new Error(response.message);
   }
-  return response as SyntheticsServiceGetSnippetsSuccessResponseCodec;
+  return response as SyntheticsServiceGetSnippetsSuccessResponseType;
 };
 
-export const postSnippet = async (payload: { snippet: SyntheticsServiceSnippetCodec }) => {
+export const postSnippet = async (payload: { snippet: SyntheticsServiceSnippetType }) => {
   const response = (await apiService.post(
     SYNTHETICS_API_URLS.SYNTHETICS_PROJECT_SNIPPETS,
     payload
-  )) as SyntheticsServicePostSnippetResponse;
+  )) as SyntheticsServicePostSnippetResponseType;
 
   if (response.error) {
     throw new Error(response.message);
   }
-  return response as SyntheticsServicePostSnippetSuccessResponse;
+  return response as SyntheticsServicePostSnippetSuccessResponseType;
+};
+
+export const deleteSnippet = async (payload: { snippet: SyntheticsServiceSnippetWithIdType }) => {
+  const response = (await apiService.delete(
+    SYNTHETICS_API_URLS.DELETE_SYNTHETICS_PROJECT_SNIPPET.replace('{snippetId}', payload.snippet.id)
+  )) as SyntheticsServiceDeleteSnippetResponseType;
+
+  if (response.error) {
+    throw new Error(response.message);
+  }
+  return response as SyntheticsServiceDeleteSnippetSuccessResponseType;
 };

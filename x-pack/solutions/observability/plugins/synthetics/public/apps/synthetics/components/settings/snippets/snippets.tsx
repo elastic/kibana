@@ -21,45 +21,41 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import type { FieldValues } from 'react-hook-form';
 import { FormProvider, useController } from 'react-hook-form';
 import { euiStyled } from '@kbn/react-kibana-context-styled';
+import type {
+  SyntheticsServiceSnippetType,
+  SyntheticsServiceSnippetWithIdType,
+} from '../../../../../../common/runtime_types/synthetics_service_snippet';
 import { MonacoEditorLangId } from '../../../../../../common/runtime_types';
 import { useFormWrapped } from '../../../../../hooks/use_form_wrapped';
 import { CodeEditor } from '../../monitor_add_edit/fields/code_editor';
-import { useGetSnippets, usePostSnippet } from './hooks';
+import { useDeleteSnippet, useGetSnippets, usePostSnippet } from './hooks';
 import { useSnippetsSuggestions } from './use_snippets_suggestions';
-
-export interface SnippetData {
-  name: string;
-  label: string;
-  detail: string;
-  insertText: string;
-}
 
 export const Snippets = () => {
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-  const [selectedSnippet, setSelectedSnippet] = useState<SnippetData | undefined>(undefined);
+  const [selectedSnippet, setSelectedSnippet] = useState<
+    SyntheticsServiceSnippetWithIdType | undefined
+  >(undefined);
 
   const {
     snippets = [],
     refetch: refetchSnippets,
-    isLoading: isLoadingSnippets,
+    isFetching: isFetchingSnippets,
   } = useGetSnippets();
   const postSnippetMutation = usePostSnippet();
+  const deleteSnippetMutation = useDeleteSnippet();
   useSnippetsSuggestions({ snippets });
 
-  const isLoading = isLoadingSnippets || postSnippetMutation.isLoading;
+  const isLoading = isFetchingSnippets || postSnippetMutation.isLoading;
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  const handleEditSnippet = (snippet: SnippetData) => {
+  const handleEditSnippet = (snippet: SyntheticsServiceSnippetWithIdType) => {
     // Logic to open the snippet in an editor or modal for editing
     setSelectedSnippet(snippet);
     setIsFlyoutVisible(true);
-  };
-
-  const handleDeleteSnippet = (snippet: SnippetData) => {
-    // Logic to delete the snippet
-    // setSnippets((prevSnippets) => prevSnippets.filter((s) => s.label !== snippet.label));
-    // console.log('Delete snippet:', snippet);
   };
 
   const handleCreateSnippet = () => {
@@ -67,23 +63,30 @@ export const Snippets = () => {
     setIsFlyoutVisible(true);
   };
 
-  const submitAddSnippet = async (snippet: SnippetData) => {
-    // setSnippets((prevSnippets) => [...prevSnippets, snippet]);
+  const submitAddSnippet = async (snippet: SyntheticsServiceSnippetType) => {
     await postSnippetMutation.mutateAsync({ snippet });
     refetchSnippets();
     setIsFlyoutVisible(false);
   };
 
-  const submitEditSnippet = (snippet: SnippetData) => {
-    // setSnippets((prevSnippets) =>
-    //   prevSnippets.map((s) => (s.label === snippet.label ? snippet : s))
-    // );
+  const submitEditSnippet = (snippet: SyntheticsServiceSnippetWithIdType) => {
+    // ToDo: Logic to save the edited snippet
     setIsFlyoutVisible(false);
   };
 
-  const isEditing = Boolean(selectedSnippet) && isFlyoutVisible;
+  const submitDeleteSnippet = async (snippet: SyntheticsServiceSnippetWithIdType) => {
+    try {
+      setIsDeleting(true);
+      await deleteSnippetMutation.mutateAsync({ snippet });
+      await refetchSnippets();
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
-  const columns: Array<EuiBasicTableColumn<SnippetData>> = [
+  const isEditing = !!selectedSnippet && isFlyoutVisible;
+
+  const columns: Array<EuiBasicTableColumn<SyntheticsServiceSnippetWithIdType>> = [
     {
       field: 'name',
       name: i18n.translate('xpack.synthetics.snippets.table.nameColumn', {
@@ -108,18 +111,31 @@ export const Snippets = () => {
       }),
       actions: [
         {
-          icon: 'pencil',
           name: 'Edit',
           description: 'Edit Snippet',
-          type: 'icon',
-          onClick: handleEditSnippet,
+          render: (snippet) => (
+            <EuiButton
+              iconType="pencil"
+              size="s"
+              data-test-subj="syntheticsEditSnippetButton"
+              onClick={() => handleEditSnippet(snippet)}
+            />
+          ),
         },
         {
-          icon: 'trash',
           name: 'Delete',
           description: 'Delete Snippet',
-          type: 'icon',
-          onClick: handleDeleteSnippet,
+          color: 'danger',
+          render: (snippet) => (
+            <EuiButton
+              color="danger"
+              iconType="trash"
+              onClick={() => submitDeleteSnippet(snippet)}
+              size="s"
+              data-test-subj="syntheticsDeleteSnippetButton"
+              isLoading={isDeleting}
+            />
+          ),
         },
       ],
     },
@@ -169,11 +185,18 @@ export const Snippets = () => {
           </EuiFlyoutHeader>
           <FlyoutBodyContainer>
             <EuiFlyoutBody>
-              <SnippetForm
-                initialData={selectedSnippet}
-                onSubmit={isEditing ? submitEditSnippet : submitAddSnippet}
-                isLoading={isLoading}
-              />
+              {isEditing ? (
+                <EditSnippetForm
+                  initialData={selectedSnippet}
+                  onSubmit={submitEditSnippet}
+                  isLoading={false}
+                />
+              ) : (
+                <CreateSnippetForm
+                  onSubmit={submitAddSnippet}
+                  isLoading={postSnippetMutation.isLoading}
+                />
+              )}
             </EuiFlyoutBody>
           </FlyoutBodyContainer>
         </EuiFlyout>
@@ -182,20 +205,17 @@ export const Snippets = () => {
   );
 };
 
-interface SnippetFormProps {
-  initialData?: SnippetData;
-  onSubmit?: (data: SnippetData) => void;
+interface SnippetFormProps<T extends FieldValues> {
+  initialData?: SyntheticsServiceSnippetType;
+  form: ReturnType<typeof useFormWrapped<T>>;
+  onSubmit?: () => void;
   isLoading?: boolean;
 }
-const SnippetForm = (props: SnippetFormProps) => {
-  const form = useFormWrapped<SnippetData>({
-    defaultValues: props.initialData,
-  });
-  const { register, handleSubmit } = form;
-
-  const customRegister = (name: keyof SnippetData) => {
-    const { ref, ...rest } = register(name);
-    return rest;
+const SnippetForm = <T extends FieldValues>({ form, onSubmit, isLoading }: SnippetFormProps<T>) => {
+  const { register } = form;
+  const customRegister = (name: keyof SyntheticsServiceSnippetType) => {
+    const { ref, ...restField } = register(name);
+    return restField;
   };
 
   return (
@@ -244,8 +264,10 @@ const SnippetForm = (props: SnippetFormProps) => {
         <EuiFormRow>
           <EuiButton
             data-test-subj="syntheticsAddParamFlyoutButton"
-            onClick={handleSubmit(props.onSubmit ?? (() => {}))}
-            isLoading={props.isLoading}
+            disabled={!!form.formState.defaultValues}
+            title={!!form.formState.defaultValues ? 'Coming soon!' : ''}
+            onClick={onSubmit}
+            isLoading={isLoading}
             fill
           >
             {i18n.translate('xpack.synthetics.snippetForm.saveButtonLabel', {
@@ -258,10 +280,34 @@ const SnippetForm = (props: SnippetFormProps) => {
   );
 };
 
+interface CreateSnippetFormProps {
+  onSubmit: (data: SyntheticsServiceSnippetType) => void;
+  isLoading: boolean;
+}
+const CreateSnippetForm = ({ onSubmit, isLoading }: CreateSnippetFormProps) => {
+  const form = useFormWrapped<SyntheticsServiceSnippetType>();
+  const { handleSubmit } = form;
+
+  return <SnippetForm form={form} onSubmit={handleSubmit(onSubmit)} isLoading={isLoading} />;
+};
+interface EditSnippetFormProps {
+  initialData: SyntheticsServiceSnippetWithIdType;
+  onSubmit: (data: SyntheticsServiceSnippetWithIdType) => void;
+  isLoading: boolean;
+}
+const EditSnippetForm = ({ initialData, onSubmit, isLoading }: EditSnippetFormProps) => {
+  const form = useFormWrapped<SyntheticsServiceSnippetWithIdType>({
+    defaultValues: initialData,
+  });
+  const { handleSubmit } = form;
+
+  return <SnippetForm form={form} onSubmit={handleSubmit(onSubmit)} isLoading={isLoading} />;
+};
+
 const SnippetEditor = () => {
   const {
     field: { value, onChange },
-  } = useController<SnippetData>({ name: 'insertText' });
+  } = useController<SyntheticsServiceSnippetType>({ name: 'insertText' });
 
   return (
     <CodeEditor

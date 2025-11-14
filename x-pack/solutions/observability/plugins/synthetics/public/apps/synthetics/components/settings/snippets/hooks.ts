@@ -6,14 +6,18 @@
  */
 
 import { useMutation, useQuery } from '@kbn/react-query';
-import type { SyntheticsServiceSnippetCodec } from '../../../../../../common/runtime_types/synthetics_service_snippet';
-import { getSnippets, postSnippet } from './api';
+import type {
+  SyntheticsServiceSnippetType,
+  SyntheticsServiceSnippetWithIdType,
+} from '../../../../../../common/runtime_types/synthetics_service_snippet';
+import { deleteSnippet, getSnippets, postSnippet } from './api';
 
 export const useGetSnippets = () => {
   const {
     data: snippets,
     error,
     isLoading,
+    isFetching,
     refetch,
   } = useQuery({
     queryKey: ['snippets'],
@@ -29,14 +33,24 @@ export const useGetSnippets = () => {
     refetch,
     error,
     isLoading,
+    isFetching,
   };
 };
 
 export const usePostSnippet = () => {
   return useMutation({
     mutationKey: ['postSnippet'],
-    mutationFn: async ({ snippet }: { snippet: SyntheticsServiceSnippetCodec }) => {
+    mutationFn: async ({ snippet }: { snippet: SyntheticsServiceSnippetType }) => {
       return await postSnippet({ snippet });
+    },
+  });
+};
+
+export const useDeleteSnippet = () => {
+  return useMutation({
+    mutationKey: ['deleteSnippet'],
+    mutationFn: async ({ snippet }: { snippet: SyntheticsServiceSnippetWithIdType }) => {
+      return await deleteSnippet({ snippet });
     },
   });
 };
