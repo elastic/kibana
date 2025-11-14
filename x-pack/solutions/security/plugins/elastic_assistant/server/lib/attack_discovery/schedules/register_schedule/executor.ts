@@ -30,6 +30,7 @@ import {
 } from '../../persistence/transforms/transform_to_alert_documents';
 import { deduplicateAttackDiscoveries } from '../../persistence/deduplication';
 import { getScheduledIndexPattern } from '../../persistence/get_scheduled_index_pattern';
+import { updateAlertsWithAttackIds } from './updateAlertsWithAttackIds';
 
 export interface AttackDiscoveryScheduleExecutorParams {
   options: AttackDiscoveryExecutorOptions;
@@ -137,6 +138,13 @@ export const attackDiscoveryScheduleExecutor = async ({
       spaceId,
     });
 
+    /**
+     * Map that uses alert id as key and an array
+     * of attack ids as value.
+     * Used to update alerts in one query
+     */
+    const alertIdToAttackIds: Record<string, string[]> = {};
+
     await Promise.all(
       dedupedDiscoveries.map(async (attackDiscovery) => {
         const alertInstanceId = generateAttackDiscoveryAlertHash({
@@ -150,6 +158,11 @@ export const attackDiscoveryScheduleExecutor = async ({
           id: alertInstanceId,
           actionGroup: 'default',
         });
+
+        for (const alertId of attackDiscovery.alertIds) {
+          alertIdToAttackIds[alertId] = alertIdToAttackIds[alertId] ?? [];
+          alertIdToAttackIds[alertId].push(alertDocId);
+        }
 
         const baseAlertDocument = transformToBaseAlertDocument({
           alertDocId,
@@ -186,6 +199,8 @@ export const attackDiscoveryScheduleExecutor = async ({
         });
       })
     );
+
+    await updateAlertsWithAttackIds({ alertIdToAttackIdsMap: alertIdToAttackIds, esClient });
   } catch (error) {
     logger.error(error);
     const transformedError = transformError(error);
