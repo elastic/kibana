@@ -38,7 +38,7 @@ export interface AlertsQueryParams {
    * The query name is used for performance monitoring with APM
    */
   queryName: AlertsQueryName;
-  customQueryId?: string | null;
+  uniqueQueryId?: string | null;
 }
 
 /**
@@ -78,7 +78,7 @@ export const useQueryAlerts = <Hit, Aggs>({
   indexName,
   skip,
   queryName,
-  customQueryId,
+  uniqueQueryId,
 }: AlertsQueryParams): ReturnQueryAlerts<Hit, Aggs> => {
   const [query, setQuery] = useState(initialQuery);
   const [alerts, setAlerts] = useState<
@@ -105,7 +105,7 @@ export const useQueryAlerts = <Hit, Aggs>({
         const alertResponse = await fetchAlerts<Hit, Aggs>({
           query,
           signal: abortCtrl.signal,
-          customQueryId,
+          uniqueQueryId,
         });
 
         if (isSubscribed) {

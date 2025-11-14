@@ -44,7 +44,7 @@ import { resolvePathVariables } from '../../../../common/utils/resolve_path_vari
 export const fetchQueryAlerts = async <Hit, Aggregations>({
   query,
   signal,
-  customQueryId,
+  uniqueQueryId,
 }: QueryAlerts): Promise<AlertSearchResponse<Hit, Aggregations>> => {
   return KibanaServices.get().http.fetch<AlertSearchResponse<Hit, Aggregations>>(
     DETECTION_ENGINE_QUERY_SIGNALS_URL,
@@ -53,9 +53,9 @@ export const fetchQueryAlerts = async <Hit, Aggregations>({
       method: 'POST',
       body: JSON.stringify(query),
       signal,
-      headers: customQueryId
+      headers: uniqueQueryId
         ? {
-            'qa-query-id': customQueryId,
+            'query-id': uniqueQueryId,
           }
         : undefined,
     }

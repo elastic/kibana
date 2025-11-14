@@ -124,7 +124,7 @@ export const useSummaryChartData: UseAlerts = ({
     indexName: signalIndexName,
     skip,
     queryName: ALERTS_QUERY_NAMES.COUNT,
-    customQueryId: uniqueQueryId,
+    uniqueQueryId,
   });
 
   useEffect(() => {

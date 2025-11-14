@@ -13,7 +13,7 @@ export interface BasicSignals {
 }
 export interface QueryAlerts extends BasicSignals {
   query: object;
-  customQueryId?: string;
+  uniqueQueryId?: string;
 }
 
 export interface AlertsResponse {
