@@ -3687,8 +3687,10 @@
     {
       "groupName": "inquirer",
       "matchDepNames": [
-        "inquirer",
-        "@types/inquirer"
+        "@inquirer/prompts",
+        "@listr2/prompt-adapter-inquirer",
+        "@types/inquirer",
+        "inquirer"
       ],
       "reviewers": [
         "team:kibana-operations"

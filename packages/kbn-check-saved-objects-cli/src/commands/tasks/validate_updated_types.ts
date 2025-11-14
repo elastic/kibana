@@ -17,13 +17,14 @@ export const validateUpdatedTypes: Task = (ctx, task) => {
     {
       title: 'Detecting updated types',
       task: () => {
-        ctx.updatedTypes = getUpdatedTypes({ from: ctx.from!, to: ctx.to! });
+        const updatedList = getUpdatedTypes({ from: ctx.from!, to: ctx.to! });
+        ctx.updatedTypes = ctx.registeredTypes!.filter(({ name }) => updatedList.includes(name));
       },
     },
     {
       title: 'Validating changes in updated types',
       task: (_, subtask) => {
-        const validateChangesTasks: ListrTask<TaskContext>[] = ctx.updatedTypes.map((name) => ({
+        const validateChangesTasks: ListrTask<TaskContext>[] = ctx.updatedTypes.map(({ name }) => ({
           title: `Checking updates on type '${name}'`,
           task: () =>
             validateChanges({
@@ -41,17 +42,18 @@ export const validateUpdatedTypes: Task = (ctx, task) => {
     {
       title: 'Verifying fixtures for updated types',
       task: (_, subtask) => {
-        const registry = ctx.serverHandles!.typeRegistry;
         const fixturesTasks: ListrTask<TaskContext>[] = ctx.updatedTypes.map((type) => {
+          const { name } = type;
           return {
-            title: `Loading fixtures for type '${type}'`,
+            title: `Loading fixtures for type '${name}'`,
             task: async () => {
               const typeFixtures = await getLatestTypeFixtures({
-                type: registry?.getType(type)!,
+                type,
                 snapshot: ctx.to!,
                 fix: ctx.fix,
               });
-              ctx.fixtures[type] = typeFixtures;
+              ctx.fixtures.previous[name] = typeFixtures.previous;
+              ctx.fixtures.current[name] = typeFixtures.current;
             },
           };
         });
