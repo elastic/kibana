@@ -3407,6 +3407,8 @@ paths:
                   items:
                     type: string
                   type: array
+                include_attacks:
+                  type: boolean
                 query:
                   additionalProperties: true
                   type: object
