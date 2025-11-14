@@ -7,6 +7,7 @@
 
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { isValidTraceId } from '@opentelemetry/api';
 import pRetry from 'p-retry';
 import type { Evaluator } from '../../types';
 
@@ -41,6 +42,17 @@ export function createTraceBasedEvaluator({
           score: null,
           label: 'unavailable',
           explanation: `No traceId available for ${name} evaluation`,
+          metadata: undefined,
+        };
+      }
+
+      const isTraceIdValid = typeof traceId === 'string' && isValidTraceId(traceId);
+      if (!isTraceIdValid) {
+        log.error(`Invalid traceId for ${name} (traceId: ${traceId})`);
+        return {
+          score: null,
+          label: 'error',
+          explanation: 'Invalid traceId',
           metadata: undefined,
         };
       }
