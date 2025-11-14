@@ -33,8 +33,9 @@ import type {
   BinaryExpressionComparisonOperator,
   BinaryExpressionWhereOperator,
   ESQLBinaryExpression,
+  ESQLLiteral,
 } from '@kbn/esql-ast/src/types';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { extractCategorizeTokens } from './extract_categorize_tokens';
 import { getOperator, PARAM_TYPES_NO_NEED_IMPLICIT_STRING_CASTING } from './append_to_query';
@@ -78,6 +79,17 @@ export const isSupportedFieldType = (fieldType: unknown): fieldType is Supported
   return (
     PARAM_TYPES_NO_NEED_IMPLICIT_STRING_CASTING.includes(fieldType as SupportedFieldTypes) &&
     Object.keys(Builder.expression.literal).includes(fieldType as SupportedFieldTypes)
+  );
+};
+
+// if value is a text or keyword field and it's not "aggregatable", we opt to use match phrase for the where command
+const requiresMatchPhrase = (fieldName: string, dataViewFields: DataView['fields']) => {
+  const dataViewField = dataViewFields.getByName(fieldName);
+
+  return (
+    (dataViewField?.spec.esTypes?.includes('text') ||
+      dataViewField?.spec.esTypes?.includes('keyword')) &&
+    !dataViewField?.spec.aggregatable
   );
 };
 
@@ -129,6 +141,26 @@ function getStatsCommandAtIndexSummary(esqlQuery: EsqlQuery, commandIndex: numbe
   }
 
   return mutate.commands.stats.summarizeCommand(esqlQuery, declarationCommand);
+}
+
+function getFieldParamDefinition(
+  fieldName: string,
+  fieldTerminals: StatsFieldSummary['terminals'],
+  esqlVariables: ESQLControlVariable[] | undefined
+): string | undefined {
+  const fieldParamDef = fieldTerminals.find(
+    (arg) => arg.text === fieldName && arg.type === 'literal' && arg.literalType === 'param'
+  ) as ESQLLiteral | undefined;
+
+  if (fieldParamDef) {
+    const controlVariable = esqlVariables?.find((variable) => variable.key === fieldParamDef.value);
+
+    if (!controlVariable) {
+      throw new Error(`The control variable for the "${fieldName}" column was not found`);
+    }
+
+    return controlVariable.value as string;
+  }
 }
 
 export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta => {
@@ -336,14 +368,8 @@ export const constructCascadeQuery = ({
       fieldDeclarationCommandSummary.grouping[`\`${pathSegment}\``];
 
     if (
-      !(
-        // check if we have a value for the path segment in the node path map to match on
-        (
-          (groupValue && nodePathMap[pathSegment] !== undefined) ||
-          // or in the case where the field is an ESQL variable, we check that we have the current path is one of the variables available in the query
-          (esqlVariables?.findIndex((variable) => variable.value === pathSegment) ?? -1) >= 0
-        )
-      )
+      // check if we have a value for the path segment in the node path map to match on
+      !(groupValue && nodePathMap[pathSegment] !== undefined)
     ) {
       throw new Error(`The "${pathSegment}" field is not operable`);
     }
@@ -361,36 +387,28 @@ export const constructCascadeQuery = ({
         // however, when the last command is a stats command, we don't want to include it in the cascade operation query
         // since where commands that use either the MATCH or MATCH_PHRASE function cannot be immediately followed by a stats command
         // and moreover this STATS command doesn't provide any useful context even if it defines new runtime fields
-        // we would not be leveraging them for the cascade operation
+        // as we would have already selected the definition of the field if our operation stats command references it
         return;
       }
 
       mutate.generic.commands.append(cascadeOperationQuery.ast, cmd);
     });
 
-    // get field type for the group field
-    const groupDataViewFieldDefinition = dataView.fields.getByName(pathSegment);
-
-    if (
-      !groupValue &&
-      (esqlVariables?.findIndex((variable) => variable.value === pathSegment) ?? -1) >= 0
-    ) {
-      // Handling for columns received from ESQL variables
-      return handleStatsByColumnLeafOperation(cascadeOperationQuery, groupDataViewFieldDefinition, {
-        [pathSegment]: nodePathMap[pathSegment],
-      });
-    }
-
     if (isColumn(groupValue.definition)) {
-      return handleStatsByColumnLeafOperation(cascadeOperationQuery, groupDataViewFieldDefinition, {
-        [pathSegment]: nodePathMap[pathSegment],
-      });
+      return handleStatsByColumnLeafOperation(
+        cascadeOperationQuery,
+        groupValue,
+        dataView.fields,
+        esqlVariables,
+        nodePathMap[pathSegment]
+      );
     } else if (isFunctionExpression(groupValue.definition)) {
       switch (groupValue.definition.name) {
         case 'categorize': {
           return handleStatsByCategorizeLeafOperation(
             cascadeOperationQuery,
             groupValue,
+            esqlVariables,
             nodePathMap
           );
         }
@@ -412,40 +430,48 @@ export const constructCascadeQuery = ({
  */
 function handleStatsByColumnLeafOperation(
   cascadeOperationQuery: EsqlQuery,
-  groupDataViewFieldDefinition: DataViewField | undefined,
-  columnInterpolationRecord: Record<string, string>
+  columnNode: StatsFieldSummary,
+  dataViewFields: DataView['fields'],
+  esqlVariables: ESQLControlVariable[] | undefined,
+  operationValue: unknown
 ): AggregateQuery {
-  // if value is a text or keyword field and it's not "aggregatable", we use match phrase for the where command
-  const useMatchPhrase =
-    (groupDataViewFieldDefinition?.spec.esTypes?.includes('text') ||
-      groupDataViewFieldDefinition?.spec.esTypes?.includes('keyword')) &&
-    !groupDataViewFieldDefinition?.spec.aggregatable;
+  let operationColumnName = columnNode.definition.name;
+
+  let operationColumnNameParamValue;
+
+  if (
+    (operationColumnNameParamValue = getFieldParamDefinition(
+      operationColumnName,
+      columnNode.terminals,
+      esqlVariables
+    ))
+  ) {
+    operationColumnName = operationColumnNameParamValue;
+  }
+
+  const useMatchPhrase = requiresMatchPhrase(operationColumnName, dataViewFields);
 
   // build a where command with match expressions for the selected column
-  const newCommands = Object.entries(columnInterpolationRecord).map(([key, value]) => {
-    return Builder.command({
-      name: 'where',
-      args: [
-        useMatchPhrase
-          ? Builder.expression.func.call('match_phrase', [
-              Builder.identifier({ name: key }),
-              Builder.expression.literal.string(value),
-            ])
-          : Builder.expression.func.binary('==', [
-              Builder.expression.column({
-                args: [Builder.identifier({ name: key })],
-              }),
-              Number.isInteger(Number(value))
-                ? Builder.expression.literal.integer(Number(value))
-                : Builder.expression.literal.string(value),
-            ]),
-      ],
-    });
+  const filterCommand = Builder.command({
+    name: 'where',
+    args: [
+      useMatchPhrase
+        ? Builder.expression.func.call('match_phrase', [
+            Builder.identifier({ name: operationColumnName }),
+            Builder.expression.literal.string(operationValue as string),
+          ])
+        : Builder.expression.func.binary('==', [
+            Builder.expression.column({
+              args: [Builder.identifier({ name: operationColumnName })],
+            }),
+            Number.isNaN(Number(operationValue))
+              ? Builder.expression.literal.string(operationValue as string)
+              : Builder.expression.literal.integer(Number(operationValue)),
+          ]),
+    ],
   });
 
-  newCommands.forEach((command) => {
-    mutate.generic.commands.append(cascadeOperationQuery.ast, command);
-  });
+  mutate.generic.commands.append(cascadeOperationQuery.ast, filterCommand);
 
   return {
     esql: BasicPrettyPrinter.print(cascadeOperationQuery.ast),
@@ -457,46 +483,58 @@ function handleStatsByColumnLeafOperation(
  */
 function handleStatsByCategorizeLeafOperation(
   cascadeOperationQuery: EsqlQuery,
-  categorizeCommand: StatsFieldSummary,
+  categorizeCommandNode: StatsFieldSummary,
+  esqlVariables: ESQLControlVariable[] | undefined,
   nodePathMap: Record<string, string>
 ): AggregateQuery {
+  // we select the first argument because that's the field being categorized {@see https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/grouping-functions#esql-categorize | here}
+  const categorizedField = (
+    categorizeCommandNode.definition as ESQLFunction<'variadic-call', 'categorize'>
+  ).args[0];
+
+  let categorizedFieldName: string;
+
+  if (isFunctionExpression(categorizedField)) {
+    // this assumes that the function invoked is accepts a column as its first argument and is not in itself another function
+    categorizedFieldName = ((categorizedField as ESQLFunction).args[0] as ESQLColumn).text;
+  } else {
+    categorizedFieldName = (categorizedField as ESQLColumn).name;
+
+    let categorizedFieldNameParamValue;
+
+    if (
+      (categorizedFieldNameParamValue = getFieldParamDefinition(
+        categorizedFieldName,
+        categorizeCommandNode.terminals,
+        esqlVariables
+      ))
+    ) {
+      categorizedFieldName = categorizedFieldNameParamValue;
+    }
+  }
+
+  const matchValue = nodePathMap[removeBackticks(categorizeCommandNode.column.name)];
+
   // build a where command with match expressions for the selected categorize function
   const categorizeWhereCommand = Builder.command({
     name: 'where',
-    args: (categorizeCommand.definition as ESQLFunction<'variadic-call', 'categorize'>).args
-      .map((arg) => {
-        const namedColumn = categorizeCommand.column.name;
-
-        const matchValue = nodePathMap[removeBackticks(namedColumn)];
-
-        if (!matchValue) {
-          return null;
-        }
-
-        let matchField = (arg as ESQLColumn).text;
-
-        if (isFunctionExpression(arg)) {
-          // this assumes that the function invoked is accepts a column as its first argument
-          matchField = ((arg as ESQLFunction).args[0] as ESQLColumn).text;
-        }
-
-        return Builder.expression.func.call('match', [
-          // this search doesn't work well on the keyword field when used with the match function, so we remove the keyword suffix to get the actual field name
-          Builder.identifier({ name: matchField.replace(/\.keyword\b/i, '') }),
-          Builder.expression.literal.string(extractCategorizeTokens(matchValue).join(' ')),
-          Builder.expression.map({
-            entries: [
-              Builder.expression.entry(
-                'auto_generate_synonyms_phrase_query',
-                Builder.expression.literal.boolean(false)
-              ),
-              Builder.expression.entry('fuzziness', Builder.expression.literal.integer(0)),
-              Builder.expression.entry('operator', Builder.expression.literal.string('AND')),
-            ],
-          }),
-        ]);
-      })
-      .filter(Boolean) as ESQLAstItem[],
+    args: [
+      Builder.expression.func.call('match', [
+        // this search doesn't work well on the keyword field when used with the match function, so we remove the keyword suffix to get the actual field name
+        Builder.identifier({ name: categorizedFieldName.replace(/\.keyword\b/i, '') }),
+        Builder.expression.literal.string(extractCategorizeTokens(matchValue).join(' ')),
+        Builder.expression.map({
+          entries: [
+            Builder.expression.entry(
+              'auto_generate_synonyms_phrase_query',
+              Builder.expression.literal.boolean(false)
+            ),
+            Builder.expression.entry('fuzziness', Builder.expression.literal.integer(0)),
+            Builder.expression.entry('operator', Builder.expression.literal.string('AND')),
+          ],
+        }),
+      ]),
+    ],
   });
 
   mutate.generic.commands.append(cascadeOperationQuery.ast, categorizeWhereCommand);
@@ -604,6 +642,8 @@ export const appendFilteringWhereClauseForCascadeLayout = <
   T extends SupportedFieldTypes | string = SupportedFieldTypes | string
 >(
   query: string,
+  esqlVariables: ESQLControlVariable[] | undefined,
+  dataView: DataView,
   fieldName: string,
   value: T extends SupportedFieldTypes ? FieldValue<T> : unknown,
   operation: '+' | '-' | 'is_not_null' | 'is_null',
@@ -611,42 +651,104 @@ export const appendFilteringWhereClauseForCascadeLayout = <
 ) => {
   const ESQLQuery = EsqlQuery.fromSrc(query);
 
-  // we make an initial assumption that the field was declared by the stats command being operated on
+  // we make an initial assumption that the filtering operation's target field was declared by the stats command driving the cascade experience
   let fieldDeclarationCommandSummary = getStatsCommandToOperateOn(ESQLQuery)!;
 
-  // if field name is not marked as a new field then we want ascertain it wasn't created by a preceding stats command
-  if (!fieldDeclarationCommandSummary.newFields.has(fieldName)) {
-    const statsCommandRuntimeFields = getStatsCommandRuntimeFields(ESQLQuery);
+  const isFieldUsedInOperatingStatsCommand = fieldDeclarationCommandSummary.grouping[fieldName];
 
-    const groupDeclarationCommandIndex = statsCommandRuntimeFields.findIndex((field) =>
-      field.has(fieldName)
-    );
+  // create placeholder for the insertion anchor command which is the command that is most suited to accept the user's requested filtering operation
+  let insertionAnchorCommand: ESQLCommand;
 
-    const groupIsStatsDeclaredRuntimeField = groupDeclarationCommandIndex >= 0;
+  // create placeholder for a flag to indicate if the field was declared in a stats command
+  let isFieldRuntimeDeclared = false;
 
-    let groupDeclarationCommandSummary: StatsCommandSummary | null = null;
+  // placeholder for the computed expression of the filter operation that has been requested by the user
+  let computedFilteringExpression: ESQLAstItem;
 
-    if (groupIsStatsDeclaredRuntimeField) {
-      groupDeclarationCommandSummary = getStatsCommandAtIndexSummary(
-        ESQLQuery,
-        groupDeclarationCommandIndex
+  if (isFieldUsedInOperatingStatsCommand) {
+    // if the field name is marked as a new field then we know it was declared by the stats command driving the cascade experience,
+    // so we set the flag to true and use the stats command as the insertion anchor command
+    if (fieldDeclarationCommandSummary.newFields.has(fieldName)) {
+      isFieldRuntimeDeclared = true;
+    } else {
+      // otherwise, we need to ascertain that the field was not created by a preceding stats command
+      // so we check the runtime fields created by the stats commands in the query to see if the field was declared in one of them
+      const statsCommandRuntimeFields = getStatsCommandRuntimeFields(ESQLQuery);
+
+      // attempt to find the index of the stats command that declared the field
+      const groupDeclarationCommandIndex = statsCommandRuntimeFields.findIndex((field) =>
+        field.has(fieldName)
       );
+
+      // if the field was declared in a stats command, then we set the flag to true
+      isFieldRuntimeDeclared = groupDeclarationCommandIndex >= 0;
+
+      let groupDeclarationCommandSummary: StatsCommandSummary | null = null;
+
+      if (isFieldRuntimeDeclared) {
+        groupDeclarationCommandSummary = getStatsCommandAtIndexSummary(
+          ESQLQuery,
+          groupDeclarationCommandIndex
+        );
+      }
+
+      fieldDeclarationCommandSummary =
+        groupDeclarationCommandSummary ?? fieldDeclarationCommandSummary;
     }
 
-    fieldDeclarationCommandSummary =
-      groupDeclarationCommandSummary ?? fieldDeclarationCommandSummary;
+    insertionAnchorCommand = fieldDeclarationCommandSummary.command;
+
+    let fieldNameParamValue;
+
+    if (
+      (fieldNameParamValue = getFieldParamDefinition(
+        fieldName,
+        fieldDeclarationCommandSummary.grouping[fieldName].terminals,
+        esqlVariables
+      ))
+    ) {
+      fieldName = fieldNameParamValue;
+    }
+  } else {
+    // if the requested field doesn't exist on the stats command that's driving the cascade experience,
+    // then the requested field is a field on the index data given this, we opt to use the data source command as the insertion anchor command
+    insertionAnchorCommand = getESQLQueryDataSourceCommand(ESQLQuery)!;
   }
 
-  let insertionAnchorCommand: ESQLCommand = fieldDeclarationCommandSummary.command;
+  const { operator, expressionType } = getOperator(operation);
 
-  if (
-    !fieldDeclarationCommandSummary.usedFields.has(fieldName) &&
-    !fieldDeclarationCommandSummary.newFields.has(fieldName)
-  ) {
-    // This function is also invoked on records that exits directly from the data source,
-    // in those instances the field selected will not exist in the query,
-    // hence we use the data source command as the insertion anchor
-    insertionAnchorCommand = getESQLQueryDataSourceCommand(ESQLQuery)!;
+  // if the value being filtered on is not "aggregatable" and is either a text or keyword field, we opt to use match phrase for the where command
+  const useMatchPhrase = requiresMatchPhrase(fieldName, dataView.fields);
+
+  if (useMatchPhrase) {
+    const matchPhraseExpression = Builder.expression.func.call('match_phrase', [
+      Builder.identifier({ name: fieldName! }),
+      Builder.expression.literal.string(value as string),
+    ]);
+
+    computedFilteringExpression =
+      expressionType === 'postfix-unary'
+        ? Builder.expression.func.postfix(operator, [matchPhraseExpression])
+        : operator === '!='
+        ? Builder.expression.func.unary('not', [matchPhraseExpression])
+        : matchPhraseExpression;
+  } else {
+    computedFilteringExpression =
+      expressionType === 'postfix-unary'
+        ? Builder.expression.func.postfix(operator, [Builder.identifier({ name: fieldName! })])
+        : Builder.expression.func.binary(operator as BinaryExpressionComparisonOperator, [
+            Builder.identifier({ name: fieldName! }),
+            fieldType && isSupportedFieldType(fieldType)
+              ? fieldType === 'boolean'
+                ? Builder.expression.literal.boolean(value as boolean)
+                : fieldType === 'string'
+                ? Builder.expression.literal.string(value as string)
+                : Builder.expression.literal[fieldType](value as number)
+              : // when fieldType is not provided or supported, we default to string
+              Number.isNaN(Number(value))
+              ? Builder.expression.literal.string(value as string)
+              : Builder.expression.literal.integer(value as number),
+          ]);
   }
 
   const insertionAnchorCommandIndex = ESQLQuery.ast.commands.findIndex(
@@ -654,34 +756,20 @@ export const appendFilteringWhereClauseForCascadeLayout = <
   );
 
   // since we can't anticipate the nature of the query we could be dealing with
-  // we simply select the determined insertion anchor and the command immediately following it
-  const commandsFollowingInsertionAnchor = ESQLQuery.ast.commands.slice(
-    insertionAnchorCommandIndex,
-    insertionAnchorCommandIndex + 2
-  );
+  // when its a runtime field or not used in the operating stats command, we need to insert the new where command right after the insertion anchor command
+  // otherwise we insert it right before the insertion anchor command
+  const commandsFollowingInsertionAnchor =
+    !isFieldUsedInOperatingStatsCommand || isFieldRuntimeDeclared
+      ? ESQLQuery.ast.commands.slice(insertionAnchorCommandIndex, insertionAnchorCommandIndex + 2)
+      : ESQLQuery.ast.commands.slice(
+          insertionAnchorCommandIndex - 1,
+          insertionAnchorCommandIndex + 1
+        );
 
   // we search to see if there already exists a where command that applies to our insertion anchor command
   const filteringWhereCommandIndex = commandsFollowingInsertionAnchor.findIndex(
     (cmd) => cmd.name === 'where'
   );
-
-  const { operator, expressionType } = getOperator(operation);
-
-  // we compute the expression for the filter operation that has been requested by the user
-  const computedFilteringExpression =
-    expressionType === 'postfix-unary'
-      ? Builder.expression.func.postfix(operator, [Builder.identifier({ name: fieldName! })])
-      : Builder.expression.func.binary(operator as BinaryExpressionComparisonOperator, [
-          Builder.identifier({ name: fieldName! }),
-          fieldType && isSupportedFieldType(fieldType)
-            ? fieldType === 'boolean'
-              ? Builder.expression.literal.boolean(value as boolean)
-              : fieldType === 'string'
-              ? Builder.expression.literal.string(value as string)
-              : Builder.expression.literal[fieldType](value as number)
-            : // when fieldType is not provided or supported, we default to string
-              Builder.expression.literal.string(value as string),
-        ]);
 
   if (filteringWhereCommandIndex < 0) {
     const filteringWhereCommand = Builder.command({
@@ -689,12 +777,14 @@ export const appendFilteringWhereClauseForCascadeLayout = <
       args: [computedFilteringExpression],
     });
 
-    // when no where command exists following the insertion anchor command,
-    // we insert the new where command right after the insertion anchor command
     mutate.generic.commands.insert(
       ESQLQuery.ast,
       filteringWhereCommand,
-      insertionAnchorCommandIndex + 1
+      // when the field is a runtime field or not used in the operating stats command, we insert the new where command right after the insertion anchor command
+      // otherwise we insert it right before the insertion anchor command
+      !isFieldUsedInOperatingStatsCommand || isFieldRuntimeDeclared
+        ? insertionAnchorCommandIndex + 1
+        : insertionAnchorCommandIndex
     );
 
     return BasicPrettyPrinter.print(ESQLQuery.ast);

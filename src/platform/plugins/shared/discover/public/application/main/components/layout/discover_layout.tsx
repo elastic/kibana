@@ -129,7 +129,10 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   const dataViewLoading = useCurrentTabSelector((state) => state.isDataViewLoading);
   const dataState: DataMainMsg = useDataState(main$);
   const discoverSession = useInternalStateSelector((state) => state.persistedDiscoverSession);
-  const cascadeConfig = useCurrentTabSelector((state) => state.uiState.cascadedDocuments);
+  const [cascadeConfig, esqlVariables] = useCurrentTabSelector((state) => [
+    state.uiState.cascadedDocuments,
+    state.esqlVariables,
+  ]);
 
   const cascadeLayoutSelected = useMemo(() => {
     return Boolean(cascadeConfig?.selectedCascadeGroups?.length);
@@ -244,18 +247,23 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
       // weird existence logic from Discover components
       // in the field it comes the operator _exists_ and in the value the field
       // I need to take care of it here but I think it should be handled on the fieldlist instead
-      const updatedQuery = (
-        cascadeLayoutSelected
-          ? appendFilteringWhereClauseForCascadeLayout
-          : appendWhereClauseToESQLQuery
-      ).call(
-        null,
-        query.esql,
-        fieldName === '_exists_' ? String(values) : fieldName,
-        fieldName === '_exists_' || values == null ? undefined : values,
-        getOperator(fieldName, values, operation),
-        fieldType
-      );
+      const updatedQuery = cascadeLayoutSelected
+        ? appendFilteringWhereClauseForCascadeLayout(
+            query.esql,
+            esqlVariables,
+            dataView,
+            fieldName === '_exists_' ? String(values) : fieldName,
+            fieldName === '_exists_' || values == null ? undefined : values,
+            getOperator(fieldName, values, operation),
+            fieldType
+          )
+        : appendWhereClauseToESQLQuery(
+            query.esql,
+            fieldName === '_exists_' ? String(values) : fieldName,
+            fieldName === '_exists_' || values == null ? undefined : values,
+            getOperator(fieldName, values, operation),
+            fieldType
+          );
 
       if (!updatedQuery) {
         return;
@@ -275,6 +283,8 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     [
       query,
       cascadeLayoutSelected,
+      esqlVariables,
+      dataView,
       data.query.queryString,
       trackUiMetric,
       scopedEBTManager,

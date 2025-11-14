@@ -198,6 +198,7 @@ describe('cascaded documents helpers utils', () => {
           const cascadeQuery = constructCascadeQuery({
             query: editorQuery,
             dataView: dataViewMock,
+            esqlVariables: [],
             nodeType,
             nodePath,
             nodePathMap,
@@ -246,6 +247,7 @@ describe('cascaded documents helpers utils', () => {
           const cascadeQuery = constructCascadeQuery({
             query: editorQuery,
             dataView: dataViewMock,
+            esqlVariables: [],
             nodeType,
             nodePath,
             nodePathMap,
@@ -270,6 +272,7 @@ describe('cascaded documents helpers utils', () => {
           const cascadeQuery = constructCascadeQuery({
             query: editorQuery,
             dataView: dataViewMock,
+            esqlVariables: [],
             nodeType,
             nodePath,
             nodePathMap,
@@ -299,6 +302,7 @@ describe('cascaded documents helpers utils', () => {
           const cascadeQuery = constructCascadeQuery({
             query: editorQuery,
             dataView: dataViewMock,
+            esqlVariables: [],
             nodeType,
             nodePath,
             nodePathMap,
@@ -328,6 +332,7 @@ describe('cascaded documents helpers utils', () => {
           const cascadeQuery = constructCascadeQuery({
             query: editorQuery,
             dataView: dataViewMock,
+            esqlVariables: [],
             nodeType,
             nodePath,
             nodePathMap,
@@ -353,6 +358,7 @@ describe('cascaded documents helpers utils', () => {
           const cascadeQuery = constructCascadeQuery({
             query: editorQuery,
             dataView: dataViewMock,
+            esqlVariables: [],
             nodeType,
             nodePath,
             nodePathMap,
@@ -378,6 +384,7 @@ describe('cascaded documents helpers utils', () => {
           const cascadeQuery = constructCascadeQuery({
             query: editorQuery,
             dataView: dataViewMock,
+            esqlVariables: [],
             nodeType,
             nodePath,
             nodePathMap,
@@ -403,6 +410,7 @@ describe('cascaded documents helpers utils', () => {
           const cascadeQuery = constructCascadeQuery({
             query: editorQuery,
             dataView: dataViewMock,
+            esqlVariables: [],
             nodeType,
             nodePath,
             nodePathMap,
@@ -430,7 +438,7 @@ describe('cascaded documents helpers utils', () => {
       const result = mutateQueryStatsGrouping(editorQuery, ['agent.keyword']);
 
       expect(result.esql).toBe(
-        'FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY `agent.keyword`'
+        'FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY agent.keyword'
       );
     });
 
@@ -487,6 +495,8 @@ describe('cascaded documents helpers utils', () => {
       expect(
         appendFilteringWhereClauseForCascadeLayout(
           'from logstash-* | stats var = avg(woof)',
+          [],
+          dataViewMock,
           'dest',
           'tada!',
           '+',
@@ -499,6 +509,8 @@ describe('cascaded documents helpers utils', () => {
       expect(
         appendFilteringWhereClauseForCascadeLayout(
           'from logstash-* | where country == "GR" | stats var = avg(woof) ',
+          [],
+          dataViewMock,
           'dest',
           'tada!',
           '+',
@@ -511,13 +523,15 @@ describe('cascaded documents helpers utils', () => {
       expect(
         appendFilteringWhereClauseForCascadeLayout(
           `FROM logstash-* | WHERE \`geo.dest\` == "BT" | SORT @timestamp DESC | LIMIT 10000 | STATS countB = COUNT(bytes) BY geo.dest | SORT countB`,
+          [],
+          dataViewMock,
           'geo.dest',
           'BT',
           '-',
           'string'
         )
       ).toBe(
-        'FROM logstash-* | WHERE `geo.dest` == "BT" | SORT @timestamp DESC | LIMIT 10000 | STATS countB = COUNT(bytes) BY geo.dest | WHERE `geo.dest` != "BT" | SORT countB'
+        'FROM logstash-* | WHERE `geo.dest` == "BT" | SORT @timestamp DESC | LIMIT 10000 | WHERE `geo.dest` != "BT" | STATS countB = COUNT(bytes) BY geo.dest | SORT countB'
       );
     });
 
@@ -525,6 +539,8 @@ describe('cascaded documents helpers utils', () => {
       expect(
         appendFilteringWhereClauseForCascadeLayout(
           'from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB | where countB > 0',
+          [],
+          dataViewMock,
           'dest',
           'tada!',
           '+',
@@ -539,6 +555,8 @@ describe('cascaded documents helpers utils', () => {
       expect(
         appendFilteringWhereClauseForCascadeLayout(
           'FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY Pattern = CATEGORIZE(message), agent.keyword, clientip',
+          [],
+          dataViewMock,
           'Pattern',
           'tada!',
           '+',
@@ -553,6 +571,8 @@ describe('cascaded documents helpers utils', () => {
       expect(
         appendFilteringWhereClauseForCascadeLayout(
           'FROM kibana_sample_data_logs | WHERE clientip == "177.120.218.48" | STATS count = COUNT(bytes), average = AVG(memory) BY Pattern = CATEGORIZE(message), agent.keyword, clientip  | SORT count DESC',
+          [],
+          dataViewMock,
           'Pattern',
           'tada!',
           '+',
@@ -566,6 +586,8 @@ describe('cascaded documents helpers utils', () => {
     it('handles the case where the field being filtered on is a runtime field created by a stats command, and with another filter from the data source applied there after', () => {
       const initialFilterResult = appendFilteringWhereClauseForCascadeLayout(
         'FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY Pattern = CATEGORIZE(message), agent.keyword | SORT count DESC',
+        [],
+        dataViewMock,
         'Pattern',
         'tada!',
         '+',
@@ -579,6 +601,8 @@ describe('cascaded documents helpers utils', () => {
       expect(
         appendFilteringWhereClauseForCascadeLayout(
           initialFilterResult,
+          [],
+          dataViewMock,
           'clientip',
           '192.168.1.1',
           '+',
