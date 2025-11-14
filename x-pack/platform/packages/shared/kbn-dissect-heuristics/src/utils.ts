@@ -313,26 +313,18 @@ export function calculatePositionScore(positions: number[]): number {
     return 1.0;
   }
 
-  // Calculate the range (max - min) to understand positional spread
-  const minPos = Math.min(...positions);
-  const maxPos = Math.max(...positions);
-  const range = maxPos - minPos;
-
-  // Small positional differences (0-3 characters) are very common and acceptable
-  // This happens when alphanumeric fields have varying lengths
-  // Examples:
-  //   - "INFO" (4) vs "ERROR" (5) → 1 char difference
-  //   - "WARN" (4) vs "WARNING" (7) → 3 char difference
-  //   - Different PIDs: "[1234]" vs "[12345]" → 1 char difference
-  if (range <= 3) {
-    // Still score highly - these are effectively "aligned" delimiters
-    // Small penalty proportional to the range
-    return 1.0 - range * 0.05; // Max penalty: 15% for range=3
-  }
-
-  // For larger variances, use exponential decay
-  // This handles cases where delimiters genuinely appear at very different positions
-  const threshold = 15; // More lenient threshold than before
+  // Use exponential decay with a moderate threshold
+  // This provides reasonable leniency for natural variance in field lengths
+  // (PIDs, process names, log levels, etc.) while still penalizing excessive
+  // positional inconsistency
+  //
+  // threshold=20 means:
+  //   - variance=5 → score≈0.78
+  //   - variance=10 → score≈0.61
+  //   - variance=15 → score≈0.47
+  //   - variance=20 → score≈0.37
+  //   - variance=25 → score≈0.29
+  const threshold = 20;
   return Math.exp(-posVariance / threshold);
 }
 

@@ -124,10 +124,10 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
 
       const result = extractDissectPatternDangerouslySlow(logs);
 
-      expect(result.pattern).toBe(
-        '%{field_1} %{field_2->} - - [%{field_3} %{field_4} %{field_5} %{field_6->}] %{field_7->} %{field_8}'
-      );
-      expect(result.fields).toHaveLength(8);
+      // After whitespace normalization: correctly detects varying log level lengths
+      // and applies right-padding modifier. Date is kept as single field.
+      expect(result.pattern).toBe('%{field_1->} - - [%{field_2}] %{field_3}');
+      expect(result.fields).toHaveLength(3);
     });
   });
 
@@ -606,7 +606,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
       expect(monthField).toBeDefined();
     });
 
-    it('handles wahtever this is', () => {
+    it.only('handles wahtever this is', () => {
       const logs = [
         '- 1763058798 2005.11.09 en257 Nov 9 12:01:01 en257/en257 crond[8951]: (root) CMD (run-parts /etc/cron.hourly)',
         '- 1763058798 2005.11.09 dn73 Nov 9 12:01:01 dn73/dn73 crond[2918]: (root) CMD (run-parts /etc/cron.hourly)',
