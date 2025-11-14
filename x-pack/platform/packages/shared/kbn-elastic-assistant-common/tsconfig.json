@@ -23,6 +23,7 @@
     "@kbn/zod",
     "@kbn/i18n",
     "@kbn/management-settings-ids",
-    "@kbn/core-ui-settings-browser"
+    "@kbn/core-ui-settings-browser",
+    "@kbn/rule-data-utils"
   ]
 }
