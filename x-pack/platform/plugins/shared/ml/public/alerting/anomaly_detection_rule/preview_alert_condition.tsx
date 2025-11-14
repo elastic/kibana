@@ -178,8 +178,8 @@ export const PreviewAlertCondition: FC<PreviewAlertConditionProps> = ({
 
   return (
     <>
-      <EuiFlexGroup gutterSize="s" alignItems={'flexEnd'}>
-        <EuiFlexItem>
+      <EuiFlexGroup gutterSize="s" alignItems={'flexEnd'} wrap>
+        <EuiFlexItem grow={false} style={{ minWidth: '400px' }}>
           <EuiFormRow
             label={
               <FormattedMessage
