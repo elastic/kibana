@@ -37,16 +37,6 @@ export function variance(values: number[]): number {
 }
 
 /**
- * Escape special characters for Dissect pattern
- * In Dissect, only %{} and %{{}} have special meaning
- */
-export function escapeForDissect(str: string): string {
-  // Dissect doesn't require escaping like regex does
-  // It uses literal string matching, so we return as-is
-  return str;
-}
-
-/**
  * Determine if a string is likely a delimiter vs. data
  * Delimiters typically:
  * - Contain NO alphanumeric characters (except whitespace)
