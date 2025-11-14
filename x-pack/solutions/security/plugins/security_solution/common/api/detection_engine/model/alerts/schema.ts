@@ -9,7 +9,6 @@ import type {
   ConvertSchemaType,
   ConvertSchemaTypeToReadSchema,
 } from '@kbn/rule-registry-plugin/common/schemas/schema';
-import type { ALERT_ATTACK_IDS } from '@kbn/elastic-assistant-common';
 import type {
   ALERT_BUILDING_BLOCK_TYPE,
   ALERT_INTENDED_TIMESTAMP,
@@ -86,6 +85,7 @@ import type {
   ALERT_ORIGINAL_DATA_STREAM_DATASET,
   ALERT_ORIGINAL_DATA_STREAM_NAMESPACE,
   ALERT_ORIGINAL_DATA_STREAM_TYPE,
+  ALERT_ATTACK_IDS,
 } from '../../../../field_maps/field_names';
 // TODO: Create and import 8.0.0 versioned RuleAlertAction type
 import type { SearchTypes } from '../../../../detection_engine/types';

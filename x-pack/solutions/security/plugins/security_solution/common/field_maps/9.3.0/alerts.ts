@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ALERT_ATTACK_IDS } from '@kbn/elastic-assistant-common';
 import { alertsFieldMap8190 } from '../8.19.0';
+import { ALERT_ATTACK_IDS } from '../field_names';
 
 export const alertsFieldMap930 = {
   ...alertsFieldMap8190,

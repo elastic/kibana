@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ALERT_NAMESPACE } from '@kbn/rule-data-utils';
 
 export const ELASTIC_AI_ASSISTANT_URL = '/api/security_ai_assistant';
 export const ELASTIC_AI_ASSISTANT_INTERNAL_URL = '/internal/elastic_assistant';
@@ -171,5 +170,3 @@ export const ELASTIC_AI_ASSISTANT_CHECKPOINT_SAVER_ENABLED_FEATURE_FLAG =
 
 export const ASSISTANT_INTERRUPTS_ENABLED_FEATURE_FLAG =
   'securitySolution.assistantInterruptsEnabled' as const;
-
-export const ALERT_ATTACK_IDS = `${ALERT_NAMESPACE}.attack_ids` as const;

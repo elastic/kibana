@@ -2,19 +2,10 @@
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": [
-      "jest",
-      "node",
-      "react"
-    ]
+    "types": ["jest", "node", "react"]
   },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx",
-  ],
-  "exclude": [
-    "target/**/*"
-  ],
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/zod-helpers",
     "@kbn/securitysolution-io-ts-utils",
@@ -23,7 +14,6 @@
     "@kbn/zod",
     "@kbn/i18n",
     "@kbn/management-settings-ids",
-    "@kbn/core-ui-settings-browser",
-    "@kbn/rule-data-utils"
+    "@kbn/core-ui-settings-browser"
   ]
 }
