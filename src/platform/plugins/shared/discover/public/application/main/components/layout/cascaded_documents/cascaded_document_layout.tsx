@@ -85,6 +85,63 @@ const ESQLDataCascade = React.memo(
       return getESQLStatsQueryMeta((query as AggregateQuery).esql);
     }, [query]);
 
+    const cascadeGroupData = useMemo(() => {
+      return cascadeConfig.selectedCascadeGroups.reduce((acc, cur, levelIdx) => {
+        let dataAccessor: string = cur;
+
+        const selectedGroupVariable = esqlVariables?.find(
+          (variable) => variable.key === cur.replace(/^\?\?/, '')
+        );
+
+        if (selectedGroupVariable) {
+          dataAccessor = selectedGroupVariable.value as string;
+        }
+
+        const groupMatch = Object.groupBy(
+          initialData ?? [],
+          (datum) => datum.flattened[dataAccessor]
+        );
+
+        Object.entries(groupMatch).forEach(([key, value], idx) => {
+          const record = {
+            id: String(idx),
+            [cur]: key,
+            ...value?.reduce((derivedColumns, datum) => {
+              queryMeta.appliedFunctions.forEach(({ identifier }) => {
+                if (datum.flattened[identifier]) {
+                  derivedColumns[identifier] =
+                    (derivedColumns[identifier] ?? 0) + Number(datum.flattened[identifier]);
+                }
+              });
+              return derivedColumns;
+            }, {} as Record<string, number>),
+          };
+
+          if (levelIdx === 0) {
+            acc.push(record);
+          } else {
+            // we need to find the record in acc that has the same value for the previous level of cascade grouping
+            const previousLevelRecord = acc.find(
+              (r: ESQLDataGroupNode) =>
+                r[cascadeConfig.selectedCascadeGroups[levelIdx - 1]] ===
+                record[cascadeConfig.selectedCascadeGroups[levelIdx - 1]]
+            );
+
+            if (previousLevelRecord) {
+              // TODO: insert the record as a child of the previous level record
+            }
+          }
+        });
+
+        return acc;
+      }, [] as ESQLDataGroupNode[]);
+    }, [
+      cascadeConfig.selectedCascadeGroups,
+      esqlVariables,
+      initialData,
+      queryMeta.appliedFunctions,
+    ]);
+
     const scopedESQLQueryFetch = useCallback(
       (esqlQuery: AggregateQuery, abortSignal: AbortSignal) => {
         const inspectorAdapters = { requests: new RequestAdapter() };
@@ -120,15 +177,6 @@ const ESQLDataCascade = React.memo(
         props.services.data,
         scopedProfilesManager,
       ]
-    );
-
-    const cascadeGroupData = React.useMemo(
-      () =>
-        (initialData ?? []).map((datum) => ({
-          id: datum.id,
-          ...datum.flattened,
-        })),
-      [initialData]
     );
 
     const customTableHeading = useEsqlDataCascadeHeaderComponent({
@@ -223,25 +271,13 @@ const ESQLDataCascade = React.memo(
       [fetchCascadeData]
     );
 
-    const selectedCascadeGroups = useMemo<string[]>(
-      () =>
-        cascadeConfig.selectedCascadeGroups.map((group) => {
-          return (
-            // replace occurrences of esql variables with their actual values for use within the cascade group data
-            (esqlVariables?.find((variable) => variable.key === group.replace(/^\?\?/, ''))
-              ?.value as string | undefined) ?? group
-          );
-        }),
-      [cascadeConfig.selectedCascadeGroups, esqlVariables]
-    );
-
     return (
       <DataCascade<ESQLDataGroupNode>
         size="s"
         overscan={25}
         data={cascadeGroupData}
         cascadeGroups={cascadeConfig.availableCascadeGroups}
-        initialGroupColumn={selectedCascadeGroups}
+        initialGroupColumn={cascadeConfig.selectedCascadeGroups}
         customTableHeader={customTableHeading}
       >
         <DataCascadeRow<ESQLDataGroupNode, DataTableRecord>
