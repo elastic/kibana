@@ -67,7 +67,7 @@ export class IndexManagement {
 
   async openIndexDetailsPage(indexOfRow: number) {
     const indexLinks = this.page.testSubj.locator('indexTableIndexNameLink');
-    // todo
+    // this should be refactored to use data-test-subj on the table rows
     // eslint-disable-next-line playwright/no-nth-methods
     await indexLinks.nth(indexOfRow).click();
 
