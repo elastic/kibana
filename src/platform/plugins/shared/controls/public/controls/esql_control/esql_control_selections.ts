@@ -114,6 +114,7 @@ export function initializeESQLControlSelections(
   // For Values From Query controls, update values on dashboard load/reload
   // or when dependencies change in case of chaining controls
   let previousESQLVariables: ESQLControlVariable[] = [];
+  let hasInitialFetch = false;
   const fetchSubscription = controlFetch$
     .pipe(
       filter(() => controlType$.getValue() === EsqlControlType.VALUES_FROM_QUERY),
@@ -128,11 +129,12 @@ export function initializeESQLControlSelections(
         );
 
         const shouldFetch =
-          previousESQLVariables.length === 0 ||
+          !hasInitialFetch ||
           haveVariablesValuesChanged(externalVariables, previousESQLVariables, variablesInQuery);
 
         if (shouldFetch) {
           previousESQLVariables = [...externalVariables];
+          hasInitialFetch = true;
         }
 
         return shouldFetch;
@@ -235,6 +237,7 @@ export function initializeESQLControlSelections(
       esqlQuery$.next(lastSaved?.esqlQuery ?? '');
       title$.next(lastSaved?.title);
       previousESQLVariables = [];
+      hasInitialFetch = false;
     },
     getLatestState: () => {
       return {
