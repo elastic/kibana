@@ -485,37 +485,41 @@ describe('Alerts Client', () => {
           });
 
           expect(clusterClient.search).toHaveBeenNthCalledWith(1, {
-            size: 20,
             ignore_unavailable: true,
             index: useDataStreamForAlerts
               ? '.alerts-test.alerts-default'
               : '.internal.alerts-test.alerts-default-*',
-            query: {
-              bool: {
-                must: [{ term: { [ALERT_RULE_UUID]: '1' } }],
+            body: {
+              query: {
+                bool: {
+                  must: [{ term: { [ALERT_RULE_UUID]: '1' } }],
+                },
               },
+              collapse: {
+                field: ALERT_RULE_EXECUTION_UUID,
+              },
+              _source: false,
+              sort: [{ [TIMESTAMP]: { order: 'desc' } }],
+              size: 20,
             },
-            collapse: {
-              field: ALERT_RULE_EXECUTION_UUID,
-            },
-            _source: false,
-            sort: [{ [TIMESTAMP]: { order: 'desc' } }],
           });
 
           expect(clusterClient.search).toHaveBeenNthCalledWith(2, {
-            size: 2000,
+            body: {
+              size: 2000,
+              seq_no_primary_term: true,
+              query: {
+                bool: {
+                  must: [{ term: { [ALERT_RULE_UUID]: '1' } }],
+                  must_not: [{ term: { [ALERT_STATUS]: ALERT_STATUS_UNTRACKED } }],
+                  filter: [{ terms: { [ALERT_RULE_EXECUTION_UUID]: ['exec-uuid-1'] } }],
+                },
+              },
+            },
             ignore_unavailable: true,
-            seq_no_primary_term: true,
             index: useDataStreamForAlerts
               ? '.alerts-test.alerts-default'
               : '.internal.alerts-test.alerts-default-*',
-            query: {
-              bool: {
-                must: [{ term: { [ALERT_RULE_UUID]: '1' } }],
-                must_not: [{ term: { [ALERT_STATUS]: ALERT_STATUS_UNTRACKED } }],
-                filter: [{ terms: { [ALERT_RULE_EXECUTION_UUID]: ['exec-uuid-1'] } }],
-              },
-            },
           });
 
           spy.mockRestore();
