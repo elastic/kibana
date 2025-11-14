@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getSnapshots } from './get_snapshots';
-export { validateNewTypes } from './validate_new_types';
-export { validateUpdatedTypes } from './validate_updated_types';
-export { automatedRollbackTests } from './automated_rollback_tests';
-export { checkRemovedTypes } from './check_removed_types';
+import { resolve } from 'path';
+
+export const REMOVED_TYPES_JSON_PATH = resolve(__dirname, '../../../removed_types.json');

@@ -7,8 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getSnapshots } from './get_snapshots';
-export { validateNewTypes } from './validate_new_types';
-export { validateUpdatedTypes } from './validate_updated_types';
-export { automatedRollbackTests } from './automated_rollback_tests';
-export { checkRemovedTypes } from './check_removed_types';
+import { fileToJson } from '../../util/json';
+import { REMOVED_TYPES_JSON_PATH } from './constants';
+
+/**
+ * Gets the removed types from the removed_types.json file.
+ */
+export async function getRemovedTypes(): Promise<string[]> {
+  return (await fileToJson(REMOVED_TYPES_JSON_PATH)) as string[];
+}

@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getSnapshots } from './get_snapshots';
-export { validateNewTypes } from './validate_new_types';
-export { validateUpdatedTypes } from './validate_updated_types';
-export { automatedRollbackTests } from './automated_rollback_tests';
-export { checkRemovedTypes } from './check_removed_types';
+export { detectConflictsWithRemovedTypes } from './detect_conflicts_removed_types';
+export { detectNewRemovedTypes } from './detect_new_removed_types';
+export { updateRemovedTypes } from './update_removed_types';
+export { getRemovedTypes } from './get_removed_types';
