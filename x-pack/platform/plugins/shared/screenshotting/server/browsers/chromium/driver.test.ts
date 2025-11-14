@@ -58,6 +58,10 @@ describe('chromium driver', () => {
     };
   });
 
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
   it('return screenshot with preserve layout option', async () => {
     const driver = new HeadlessChromiumDriver(
       mockScreenshotModeSetup,
