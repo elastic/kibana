@@ -44,9 +44,6 @@ export const querySignalsRoute = (
       async (context, request, response) => {
         const esClient = (await context.core).elasticsearch.client.asCurrentUser;
 
-        // Capture query-id header for logging correlation
-        const queryId = (request.headers['query-id'] as string) || null;
-
         // eslint-disable-next-line @typescript-eslint/naming-convention
         const { query, aggs, _source, fields, track_total_hits, size, runtime_mappings, sort } =
           request.body;
@@ -69,8 +66,12 @@ export const querySignalsRoute = (
           const spaceId = (await context.securitySolution).getSpaceId();
           const indexPattern = ruleDataClient?.indexNameWithNamespace(spaceId);
 
-          // Prepare transport options with query-id header for ES cloud logs correlation
-          const transportOptions = queryId ? { headers: { 'unique-query-id': queryId } } : {};
+          // Capture unique-query-id header for logging correlation
+          // Prepare transport options with unique-query-id header for ES cloud logs correlation
+          const uniqueQueryId = (request.headers['unique-query-id'] as string) || null;
+          const transportOptions = uniqueQueryId
+            ? { headers: { 'unique-query-id': uniqueQueryId } }
+            : {};
 
           const result = await esClient.search(
             {

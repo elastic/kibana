@@ -55,7 +55,7 @@ export const fetchQueryAlerts = async <Hit, Aggregations>({
       signal,
       headers: uniqueQueryId
         ? {
-            'query-id': uniqueQueryId,
+            'unique-query-id': uniqueQueryId,
           }
         : undefined,
     }
