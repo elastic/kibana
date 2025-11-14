@@ -2205,6 +2205,23 @@
         "description": [
           "\nA version of the {@link InferenceClient} that is pre-bound to a set of parameters."
         ],
+        "signature": [
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.BoundInferenceClient",
+            "text": "BoundInferenceClient"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.InferenceEventEmitter",
+            "text": "InferenceEventEmitter"
+          }
+        ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/inference_client/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3092,6 +3109,23 @@
         "description": [
           "\nAn inference client, scoped to a request, that can be used to interact with LLMs."
         ],
+        "signature": [
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.InferenceClient",
+            "text": "InferenceClient"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.InferenceEventEmitter",
+            "text": "InferenceEventEmitter"
+          }
+        ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/inference_client/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3527,6 +3561,122 @@
             "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/connectors/connectors.ts",
             "deprecated": false,
             "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-common",
+        "id": "def-common.InferenceEventEmitter",
+        "type": "Interface",
+        "tags": [],
+        "label": "InferenceEventEmitter",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/callbacks.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.InferenceEventEmitter.on",
+            "type": "Function",
+            "tags": [],
+            "label": "on",
+            "description": [],
+            "signature": [
+              "{ (type: \"complete\", handler: ",
+              "InferenceCompleteCallbackHandler",
+              "): void; (type: \"error\", handler: ",
+              "InferenceErrorCallbackHandler",
+              "): void; }"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/callbacks.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/inference-common",
+                "id": "def-common.InferenceEventEmitter.on.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "\"complete\""
+                ],
+                "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/callbacks.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/inference-common",
+                "id": "def-common.InferenceEventEmitter.on.$2",
+                "type": "Function",
+                "tags": [],
+                "label": "handler",
+                "description": [],
+                "signature": [
+                  "InferenceCompleteCallbackHandler"
+                ],
+                "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/callbacks.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.InferenceEventEmitter.on",
+            "type": "Function",
+            "tags": [],
+            "label": "on",
+            "description": [],
+            "signature": [
+              "{ (type: \"complete\", handler: ",
+              "InferenceCompleteCallbackHandler",
+              "): void; (type: \"error\", handler: ",
+              "InferenceErrorCallbackHandler",
+              "): void; }"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/callbacks.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/inference-common",
+                "id": "def-common.InferenceEventEmitter.on.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "\"error\""
+                ],
+                "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/callbacks.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/inference-common",
+                "id": "def-common.InferenceEventEmitter.on.$2",
+                "type": "Function",
+                "tags": [],
+                "label": "handler",
+                "description": [],
+                "signature": [
+                  "InferenceErrorCallbackHandler"
+                ],
+                "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/callbacks.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
