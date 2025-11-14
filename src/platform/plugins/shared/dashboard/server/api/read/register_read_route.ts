@@ -9,40 +9,47 @@
 
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
+import { schema } from '@kbn/config-schema';
 import { commonRouteConfig, INTERNAL_API_VERSION, PUBLIC_API_PATH } from '../constants';
-import { getCreateRequestBodySchema, getCreateResponseBodySchema } from './schemas';
-import { create } from './create';
+import { getReadResponseBodySchema } from './schemas';
+import { read } from './read';
 
-export function registerCreateRoute(router: VersionedRouter<RequestHandlerContext>) {
-  const createRoute = router.post({
-    path: PUBLIC_API_PATH,
-    summary: 'Create a dashboard',
+export function registerReadRoute(router: VersionedRouter<RequestHandlerContext>) {
+  const readRoute = router.post({
+    path: `${PUBLIC_API_PATH}/{id}`,
+    summary: `Get a dashboard`,
     ...commonRouteConfig,
   });
 
-  createRoute.addVersion(
+  readRoute.addVersion(
     {
       version: INTERNAL_API_VERSION,
       validate: () => ({
         request: {
-          body: getCreateRequestBodySchema(),
+          params: schema.object({
+            id: schema.string({
+              meta: {
+                description: 'A unique identifier for the dashboard.',
+              },
+            }),
+          }),
         },
         response: {
           200: {
-            body: getCreateResponseBodySchema,
+            body: getReadResponseBodySchema,
           },
         },
       }),
     },
     async (ctx, req, res) => {
       try {
-        const result = await create(ctx, req.body);
+        const result = await read(ctx, req.params.id);
         return res.ok({ body: result });
       } catch (e) {
-        if (e.isBoom && e.output.statusCode === 409) {
-          return res.conflict({
+        if (e.isBoom && e.output.statusCode === 404) {
+          return res.notFound({
             body: {
-              message: `A dashboard with ID ${req.body.id} already exists.`,
+              message: `A dashboard with ID ${req.params.id}] was not found.`,
             },
           });
         }
@@ -51,7 +58,7 @@ export function registerCreateRoute(router: VersionedRouter<RequestHandlerContex
           return res.forbidden();
         }
 
-        return res.badRequest({ body: e });
+        return res.badRequest(e.message);
       }
     }
   );

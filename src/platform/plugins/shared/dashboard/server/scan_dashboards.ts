@@ -11,8 +11,8 @@ import type { RequestHandlerContext } from '@kbn/core/server';
 import type { Reference } from '@kbn/content-management-utils';
 import type { DashboardSavedObjectAttributes } from './dashboard_saved_object';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from './dashboard_saved_object';
-import { transformDashboardOut } from './content_management/v1/transforms';
-import type { DashboardState } from './content_management';
+import { transformDashboardOut } from './api/transforms';
+import type { DashboardState } from './api';
 
 export interface ScanDashboardsResult {
   dashboards: Array<

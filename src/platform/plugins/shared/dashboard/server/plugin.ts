@@ -16,10 +16,7 @@ import type {
   UsageCollectionSetup,
   UsageCollectionStart,
 } from '@kbn/usage-collection-plugin/server';
-import type {
-  ContentManagementServerSetup,
-  ContentStorage,
-} from '@kbn/content-management-plugin/server';
+import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
 import type {
   PluginInitializerContext,
@@ -39,11 +36,8 @@ import {
   TASK_ID,
 } from './usage/dashboard_telemetry_collection_task';
 import { getUISettings } from './ui_settings';
-import type { DashboardItem } from './content_management';
-import { DashboardStorage } from './content_management';
 import { capabilitiesProvider } from './capabilities_provider';
 import type { DashboardPluginSetup, DashboardPluginStart } from './types';
-import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import type { DashboardSavedObjectAttributes } from './dashboard_saved_object';
 import {
   createDashboardSavedObjectType,
@@ -51,7 +45,7 @@ import {
 } from './dashboard_saved_object';
 import { registerDashboardUsageCollector } from './usage/register_collector';
 import { dashboardPersistableStateServiceFactory } from './dashboard_container/dashboard_container_embeddable_factory';
-import { registerAPIRoutes } from './api';
+import { registerRoutes } from './api';
 import { DashboardAppLocatorDefinition } from '../common/locator/locator';
 import { setKibanaServices } from './kibana_services';
 import { scanDashboards } from './scan_dashboards';
@@ -76,7 +70,7 @@ export class DashboardPlugin
 {
   private readonly logger: Logger;
 
-  constructor(private initializerContext: PluginInitializerContext) {
+  constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
   }
 
@@ -90,17 +84,6 @@ export class DashboardPlugin
         },
       })
     );
-
-    plugins.contentManagement.register<ContentStorage<DashboardItem>>({
-      id: CONTENT_ID,
-      storage: new DashboardStorage({
-        throwOnResultValidationError: this.initializerContext.env.mode.dev,
-        logger: this.logger.get('storage'),
-      }),
-      version: {
-        latest: LATEST_VERSION,
-      },
-    });
 
     plugins.contentManagement.favorites.registerFavoriteType('dashboard');
 
@@ -141,11 +124,7 @@ export class DashboardPlugin
 
     core.uiSettings.register(getUISettings());
 
-    registerAPIRoutes({
-      http: core.http,
-      contentManagement: plugins.contentManagement,
-      logger: this.logger,
-    });
+    registerRoutes(core.http);
 
     return {};
   }

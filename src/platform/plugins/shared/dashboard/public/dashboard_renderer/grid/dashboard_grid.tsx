@@ -19,7 +19,7 @@ import { GridLayout } from '@kbn/grid-layout';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
 import { DASHBOARD_GRID_COLUMN_COUNT } from '../../../common/content_management/constants';
-import type { GridData } from '../../../server/content_management';
+import type { GridData } from '../../../server';
 import { areLayoutsEqual, type DashboardLayout } from '../../dashboard_api/layout_manager';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';

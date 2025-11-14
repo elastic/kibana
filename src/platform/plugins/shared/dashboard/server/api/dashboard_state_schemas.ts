@@ -13,23 +13,16 @@ import { refreshIntervalSchema } from '@kbn/data-service-server';
 import { controlsGroupSchema } from '@kbn/controls-schemas';
 import { referenceSchema } from '@kbn/content-management-utils';
 import { storedFilterSchema, querySchema, timeRangeSchema } from '@kbn/es-query-server';
-import { embeddableService } from '../../../kibana_services';
+import { embeddableService } from '../kibana_services';
 
 import {
   DASHBOARD_GRID_COLUMN_COUNT,
   DEFAULT_PANEL_HEIGHT,
   DEFAULT_PANEL_WIDTH,
   DEFAULT_DASHBOARD_OPTIONS,
-} from '../../../../common/content_management';
+} from '../../common/content_management';
 
-const apiError = schema.object({
-  error: schema.string(),
-  message: schema.string(),
-  statusCode: schema.number(),
-  metadata: schema.maybe(schema.object({}, { unknowns: 'allow' })),
-});
-
-export const panelGridDataSchema = schema.object({
+export const panelGridSchema = schema.object({
   x: schema.number({ meta: { description: 'The x coordinate of the panel in grid units' } }),
   y: schema.number({ meta: { description: 'The y coordinate of the panel in grid units' } }),
   w: schema.number({
@@ -57,7 +50,7 @@ export function getPanelSchema() {
       ),
     ]) as ObjectType<{}>,
     type: schema.string({ meta: { description: 'The embeddable type' } }),
-    grid: panelGridDataSchema,
+    grid: panelGridSchema,
     /**
      * `uid` was chosen as a name instead of `id` to avoid bwc issues with legacy dashboard URL state that used `id` to
      * represent ids of library items in by-reference panels. This was previously called `panelIndex` in DashboardPanelState.
@@ -80,7 +73,7 @@ export function getPanelSchema() {
   });
 }
 
-const sectionGridDataSchema = schema.object({
+const sectionGridSchema = schema.object({
   y: schema.number({ meta: { description: 'The y coordinate of the section in grid units' } }),
 });
 
@@ -95,7 +88,7 @@ export function getSectionSchema() {
         defaultValue: false,
       })
     ),
-    grid: sectionGridDataSchema,
+    grid: sectionGridSchema,
     panels: schema.arrayOf(getPanelSchema(), {
       meta: { description: 'The panels that belong to the section.' },
       defaultValue: [],
@@ -144,7 +137,7 @@ export const optionsSchema = schema.object({
 });
 
 export function getDashboardStateSchema() {
-  return {
+  return schema.object({
     controlGroupInput: schema.maybe(controlsGroupSchema),
     description: schema.maybe(schema.string({ meta: { description: 'A short description.' } })),
     filters: schema.maybe(schema.arrayOf(storedFilterSchema)),
@@ -153,6 +146,7 @@ export function getDashboardStateSchema() {
       defaultValue: [],
     }),
     query: schema.maybe(querySchema),
+    references: schema.maybe(schema.arrayOf(referenceSchema)),
     refreshInterval: schema.maybe(refreshIntervalSchema),
     tags: schema.maybe(
       schema.arrayOf(
@@ -162,35 +156,5 @@ export function getDashboardStateSchema() {
     timeRange: schema.maybe(timeRangeSchema),
     title: schema.string({ meta: { description: 'A human-readable title for the dashboard' } }),
     version: schema.maybe(schema.number({ meta: { deprecated: true } })),
-  };
-}
-
-export function getDashboardDataSchema() {
-  return schema.object({
-    ...getDashboardStateSchema(),
-    references: schema.maybe(schema.arrayOf(referenceSchema)),
-    spaces: schema.maybe(schema.arrayOf(schema.string())),
-    namespaces: schema.maybe(schema.arrayOf(schema.string())),
   });
-}
-
-export function getDashboardItemSchema() {
-  return schema.object(
-    {
-      id: schema.string(),
-      type: schema.string(),
-      version: schema.maybe(schema.string()),
-      createdAt: schema.maybe(schema.string()),
-      updatedAt: schema.maybe(schema.string()),
-      createdBy: schema.maybe(schema.string()),
-      updatedBy: schema.maybe(schema.string()),
-      managed: schema.maybe(schema.boolean()),
-      error: schema.maybe(apiError),
-      attributes: schema.object(getDashboardStateSchema()),
-      references: schema.arrayOf(referenceSchema),
-      namespaces: schema.maybe(schema.arrayOf(schema.string())),
-      originId: schema.maybe(schema.string()),
-    },
-    { unknowns: 'allow' }
-  );
 }

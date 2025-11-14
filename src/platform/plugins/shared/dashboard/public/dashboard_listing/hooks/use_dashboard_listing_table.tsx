@@ -114,7 +114,7 @@ export const useDashboardListingTable = ({
       if (dashboard.status === 'error') {
         return;
       }
-      const { references, spaces, namespaces, ...currentState } = dashboard.attributes;
+      const { references, ...currentState } = dashboard.attributes;
       await dashboardClient.update(
         id,
         {

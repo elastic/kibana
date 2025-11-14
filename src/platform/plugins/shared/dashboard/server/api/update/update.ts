@@ -12,7 +12,7 @@ import type { RequestHandlerContext } from '@kbn/core/server';
 import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../dashboard_saved_object';
 import type { DashboardUpdateRequestBody, DashboardUpdateResponseBody } from './types';
-import { transformDashboardIn } from '../../content_management/v1/transforms';
+import { transformDashboardIn } from '../transforms';
 import { getDashboardCRUResponseBody } from '../saved_object_utils';
 
 export async function update(
