@@ -8,7 +8,8 @@
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import { hostname } from 'os';
-import type { DatasetScoreWithStats, EvaluationReport } from './evaluation_stats';
+import type { DatasetScoreWithStats } from './evaluation_stats';
+import type { EvaluationReport } from '../types';
 
 export interface EvaluationScoreDocument {
   '@timestamp': string;

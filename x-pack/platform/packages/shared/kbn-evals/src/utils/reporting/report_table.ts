@@ -8,9 +8,8 @@
 import { sumBy } from 'lodash';
 import { table } from 'table';
 import chalk from 'chalk';
-import type { EvaluatorStats, DatasetScoreWithStats } from './evaluation_stats';
-import { getUniqueEvaluatorNames, calculateOverallStats } from './evaluation_stats';
-import { EVALUATOR_NAMES } from './evaluator_constants';
+import type { EvaluatorStats, DatasetScoreWithStats } from '../evaluation_stats';
+import { getUniqueEvaluatorNames, calculateOverallStats } from '../evaluation_stats';
 
 export interface EvaluatorDisplayOptions {
   decimalPlaces?: number;
@@ -18,7 +17,7 @@ export interface EvaluatorDisplayOptions {
   statsToInclude?: Array<keyof EvaluatorStats>;
 }
 
-export interface EvaluatorScoreGroup {
+export interface EvaluatorDisplayGroup {
   evaluatorNames: string[];
   combinedColumnName: string;
 }
@@ -26,52 +25,18 @@ export interface EvaluatorScoreGroup {
 export interface EvaluationTableOptions {
   firstColumnHeader?: string;
   styleRowName?: (name: string) => string;
-  displayOptions?: Map<string, EvaluatorDisplayOptions>;
-  groups?: EvaluatorScoreGroup[];
+  evaluatorDisplayOptions?: Map<string, EvaluatorDisplayOptions>;
+  evaluatorDisplayGroups?: EvaluatorDisplayGroup[];
 }
-
-export const DEFAULT_EVALUATOR_SCORE_GROUPS: EvaluatorScoreGroup[] = [
-  {
-    evaluatorNames: [
-      EVALUATOR_NAMES.INPUT_TOKENS,
-      EVALUATOR_NAMES.OUTPUT_TOKENS,
-      EVALUATOR_NAMES.CACHED_TOKENS,
-    ],
-    combinedColumnName: 'Tokens',
-  },
-];
-
-export const DEFAULT_EVALUATOR_FORMATS = new Map<string, EvaluatorDisplayOptions>([
-  [
-    EVALUATOR_NAMES.INPUT_TOKENS,
-    { decimalPlaces: 1, statsToInclude: ['mean', 'median', 'stdDev', 'min', 'max'] },
-  ],
-  [
-    EVALUATOR_NAMES.OUTPUT_TOKENS,
-    { decimalPlaces: 1, statsToInclude: ['mean', 'median', 'stdDev', 'min', 'max'] },
-  ],
-  [
-    EVALUATOR_NAMES.CACHED_TOKENS,
-    { decimalPlaces: 1, statsToInclude: ['mean', 'median', 'stdDev', 'min', 'max'] },
-  ],
-  [
-    EVALUATOR_NAMES.TOOL_CALLS,
-    { decimalPlaces: 1, statsToInclude: ['mean', 'median', 'min', 'max'] },
-  ],
-  [
-    EVALUATOR_NAMES.LATENCY,
-    { unitSuffix: 's', statsToInclude: ['mean', 'median', 'stdDev', 'min', 'max'] },
-  ],
-]);
 
 function groupEvaluatorScores(
   evaluatorNames: string[],
-  evaluatorScoreGroups: EvaluatorScoreGroup[]
+  evaluatorScoreGroups: EvaluatorDisplayGroup[]
 ): {
   columnNames: string[];
-  groupMapping: Map<string, EvaluatorScoreGroup>;
+  groupMapping: Map<string, EvaluatorDisplayGroup>;
 } {
-  const groupMapping = new Map<string, EvaluatorScoreGroup>();
+  const groupMapping = new Map<string, EvaluatorDisplayGroup>();
   const grouped = new Set<string>();
 
   evaluatorScoreGroups.forEach((group) => {
@@ -141,7 +106,7 @@ function formatStatsCell(
 
 function formatEvaluatorScoreGroupCell(
   evaluatorStatsMap: Map<string, Partial<EvaluatorStats>>,
-  group: EvaluatorScoreGroup,
+  group: EvaluatorDisplayGroup,
   isBold: boolean,
   evaluatorFormats: Map<string, EvaluatorDisplayOptions>
 ): string {
@@ -162,7 +127,7 @@ function formatEvaluatorScoreGroupCell(
 function formatRowCells(
   evaluatorStats: Map<string, Partial<EvaluatorStats>>,
   columnNames: string[],
-  groupMapping: Map<string, EvaluatorScoreGroup>,
+  groupMapping: Map<string, EvaluatorDisplayGroup>,
   isBold: boolean,
   evaluatorFormats: Map<string, EvaluatorDisplayOptions>
 ): string[] {
@@ -193,12 +158,12 @@ export function createTable(
   const {
     firstColumnHeader = 'Dataset',
     styleRowName = (name) => name,
-    displayOptions,
-    groups,
+    evaluatorDisplayOptions,
+    evaluatorDisplayGroups,
   } = options;
 
-  const evaluatorFormats = new Map([...DEFAULT_EVALUATOR_FORMATS, ...(displayOptions || [])]);
-  const evaluatorScoreGroups = groups ?? DEFAULT_EVALUATOR_SCORE_GROUPS;
+  const evaluatorFormats = evaluatorDisplayOptions || new Map();
+  const evaluatorScoreGroups = evaluatorDisplayGroups || [];
 
   const evaluatorNames = getUniqueEvaluatorNames(datasetScoresWithStats);
   const { columnNames, groupMapping } = groupEvaluatorScores(evaluatorNames, evaluatorScoreGroups);

@@ -6,7 +6,6 @@
  */
 
 import type { RanExperiment } from '@arizeai/phoenix-client/dist/esm/types/experiments';
-import type { Model } from '@kbn/inference-common';
 import { keyBy } from 'lodash';
 import { mean, median, deviation, min, max } from 'd3';
 import type { KibanaPhoenixClient } from '../kibana_phoenix_client/client';
@@ -31,14 +30,6 @@ export interface DatasetScore {
 
 export interface DatasetScoreWithStats extends DatasetScore {
   evaluatorStats: Map<string, EvaluatorStats>;
-}
-
-export interface EvaluationReport {
-  datasetScoresWithStats: DatasetScoreWithStats[];
-  model: Model;
-  evaluatorModel: Model;
-  repetitions: number;
-  runId: string;
 }
 
 /**

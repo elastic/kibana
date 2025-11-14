@@ -17,7 +17,7 @@ import { httpHandlerFromKbnClient } from './utils/http_handler_from_kbn_client';
 import { createCriteriaEvaluator } from './evaluators/criteria';
 import type { DefaultEvaluators, EvaluationSpecificWorkerFixtures } from './types';
 import { buildEvaluationReport, exportEvaluations } from './utils/report_model_score';
-import { createDefaultTerminalReporter } from './utils/evaluation_reporter';
+import { createDefaultTerminalReporter } from './utils/reporting/evaluation_reporter';
 import { createConnectorFixture } from './utils/create_connector_fixture';
 import { createCorrectnessAnalysisEvaluator } from './evaluators/correctness';
 import { EvaluationAnalysisService } from './utils/analysis';
@@ -90,11 +90,50 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
     },
     { scope: 'worker' },
   ],
+
+  reportDisplayOptions: [
+    async ({ evaluators }, use) => {
+      const traceEvaluators = evaluators.traceBasedEvaluators();
+
+      const inputTokens = traceEvaluators.find((e) => e.name === 'Input Tokens')!;
+      const outputTokens = traceEvaluators.find((e) => e.name === 'Output Tokens')!;
+      const cachedTokens = traceEvaluators.find((e) => e.name === 'Cached Tokens')!;
+      const toolCalls = traceEvaluators.find((e) => e.name === 'Tool Calls')!;
+      const latency = traceEvaluators.find((e) => e.name === 'Latency')!;
+
+      await use({
+        evaluatorDisplayOptions: new Map([
+          [
+            inputTokens.name,
+            { decimalPlaces: 1, statsToInclude: ['mean', 'median', 'stdDev', 'min', 'max'] },
+          ],
+          [
+            outputTokens.name,
+            { decimalPlaces: 1, statsToInclude: ['mean', 'median', 'stdDev', 'min', 'max'] },
+          ],
+          [
+            cachedTokens.name,
+            { decimalPlaces: 1, statsToInclude: ['mean', 'median', 'stdDev', 'min', 'max'] },
+          ],
+          [toolCalls.name, { decimalPlaces: 1, statsToInclude: ['mean', 'median', 'min', 'max'] }],
+          [
+            latency.name,
+            { unitSuffix: 's', statsToInclude: ['mean', 'median', 'stdDev', 'min', 'max'] },
+          ],
+        ]),
+        evaluatorDisplayGroups: [
+          {
+            evaluatorNames: [inputTokens.name, outputTokens.name, cachedTokens.name],
+            combinedColumnName: 'Tokens',
+          },
+        ],
+      });
+    },
+    { scope: 'worker' },
+  ],
   reportModelScore: [
-    async ({}, use) => {
-      // Provide default terminal reporter implementation
-      // Consumers can override this fixture to provide custom reporting
-      await use(createDefaultTerminalReporter());
+    async ({ reportDisplayOptions }, use) => {
+      await use(createDefaultTerminalReporter({ reportDisplayOptions }));
     },
     { scope: 'worker' },
   ],

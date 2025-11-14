@@ -8,10 +8,10 @@
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { Model } from '@kbn/inference-common';
 import chalk from 'chalk';
-import type { EvaluationScoreRepository } from './score_repository';
-import { createTable, type EvaluationTableOptions } from './table_formatter';
-import type { EvaluationReport } from './evaluation_stats';
-import { formatReportData } from './report_model_score';
+import type { EvaluationScoreRepository } from '../score_repository';
+import { createTable } from './report_table';
+import type { ReportDisplayOptions } from '../../types';
+import { formatReportData } from '../report_model_score';
 export type EvaluationReporter = (
   scoreRepository: EvaluationScoreRepository,
   runId: string,
@@ -25,14 +25,9 @@ function buildReportHeader(model: Model, evaluatorModel: Model): string[] {
   ];
 }
 
-export function createEvaluationReportTable(
-  report: EvaluationReport,
-  options: EvaluationTableOptions = {}
-): string {
-  return createTable(report.datasetScoresWithStats, report.repetitions, options);
-}
-
-export function createDefaultTerminalReporter(): EvaluationReporter {
+export function createDefaultTerminalReporter(
+  options: { reportDisplayOptions?: ReportDisplayOptions } = {}
+): EvaluationReporter {
   return async (scoreRepository: EvaluationScoreRepository, runId: string, log: SomeDevLog) => {
     const docs = await scoreRepository.getScoresByRunId(runId);
 
@@ -44,7 +39,11 @@ export function createDefaultTerminalReporter(): EvaluationReporter {
     const report = formatReportData(docs);
 
     const header = buildReportHeader(report.model, report.evaluatorModel);
-    const summaryTable = createEvaluationReportTable(report);
+    const summaryTable = createTable(
+      report.datasetScoresWithStats,
+      report.repetitions,
+      options.reportDisplayOptions
+    );
 
     log.info(`\n\n${header.join('\n')}`);
     log.info(`\n${chalk.bold.blue('═══ EVALUATION RESULTS ═══')}\n${summaryTable}`);

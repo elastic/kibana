@@ -17,11 +17,8 @@ import {
   type EvaluationScoreDocument,
   parseScoreDocuments,
 } from './score_repository';
-import {
-  buildEvaluationResults,
-  calculateEvaluatorStats,
-  type EvaluationReport,
-} from './evaluation_stats';
+import { buildEvaluationResults, calculateEvaluatorStats } from './evaluation_stats';
+import type { EvaluationReport } from '../types';
 
 export async function buildEvaluationReport({
   phoenixClient,
