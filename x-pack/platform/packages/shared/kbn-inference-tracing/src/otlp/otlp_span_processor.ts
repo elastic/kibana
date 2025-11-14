@@ -46,7 +46,7 @@ export class OTLPSpanProcessor extends BaseInferenceSpanProcessor {
 
     if (!span.parentSpanContext) {
       const traceId = span.spanContext().traceId;
-      // No guarantee the trace is available in the same Kibana instance that generated it (OTLP exporter my route this to an external, monitoring cluster, hence not deep linking Kibana url)
+      // Best effort: no guarantee the trace is available in the same Kibana instance that generated it (OTLP exporter may route this to an external, monitoring cluster)
       diag.info(
         `OTLP: Exporting root span "${span.name}" (trace: ${traceId}) to ${this.config.url}. 
         To view the trace, replace <kibana-url> with the actual Kibana url and open the link in your browser. at https://<kibana-url>/app/apm/traces/explorer/waterfall?traceId=${traceId}&rangeFrom=now-15m&rangeTo=now`
