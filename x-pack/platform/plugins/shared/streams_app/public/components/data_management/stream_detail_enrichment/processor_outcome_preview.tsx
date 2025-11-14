@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { EuiDataGridRowHeightsOptions } from '@elastic/eui';
 import {
   EuiFilterButton,
@@ -49,7 +49,7 @@ import {
   NoPreviewDocumentsEmptyPrompt,
   NoProcessingDataAvailableEmptyPrompt,
 } from './empty_prompts';
-import { PreviewFlyout, MemoPreviewTable } from '../shared';
+import { PreviewFlyout, MemoPreviewTable, type PreviewTableMode } from '../shared';
 import { toDataTableRecordWithIndex } from '../stream_detail_routing/utils';
 import { RowSelectionContext } from '../shared/preview_table';
 import { getActiveDataSourceRef } from './state_management/stream_enrichment_state_machine/utils';
@@ -175,6 +175,8 @@ const PreviewDocumentsGroupBy = () => {
 };
 
 const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRecord[] }) => {
+  const [userSelectedViewMode, setViewMode] = useState<PreviewTableMode>('summary');
+
   const detectedFields = useSimulatorSelector((state) => state.context.simulation?.detected_fields);
   const streamName = useSimulatorSelector((state) => state.context.streamName);
 
@@ -254,6 +256,12 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
       ? currentProcessorSourceField
       : undefined;
 
+  // Calculate if view mode should be forced to 'columns'
+  const isViewModeForced = Boolean(validGrokField || validCurrentProcessorSourceField);
+
+  // Determine the effective view mode (forced to 'columns' if needed, otherwise user's choice)
+  const effectiveViewMode = isViewModeForced ? 'columns' : userSelectedViewMode;
+
   const availableColumns = useMemo(() => {
     let cols = getTableColumns({
       currentProcessorSourceField: validCurrentProcessorSourceField,
@@ -262,7 +270,7 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     });
 
     if (cols.length === 0) {
-      // If no columns are detected, we fall back to all fields from the preview documents
+      // If no columns are detected, fall back to all fields from the preview documents
       cols = allColumns;
     }
     // Filter out columns that are explicitly disabled
@@ -273,6 +281,7 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
         filteredCols.push(col);
       }
     });
+
     return filteredCols;
   }, [
     allColumns,
@@ -297,10 +306,13 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
   const setVisibleColumns = useCallback(
     (visibleColumns: string[]) => {
       if (visibleColumns.length === 0) {
-        // If no columns are visible, we reset the explicitly enabled and disabled columns
-        setExplicitlyDisabledPreviewColumns(allColumns);
+        // If no columns are visible, reset to default state
+        setExplicitlyDisabledPreviewColumns([]);
+        setExplicitlyEnabledPreviewColumns([]);
+        setPreviewColumnsOrder([]);
         return;
       }
+
       // find which columns got added or removed comparing visibleColumns with the current displayColumns
       const addedColumns = visibleColumns.filter((col) => !previewColumns.includes(col));
       if (addedColumns.length > 0) {
@@ -319,7 +331,6 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
       setPreviewColumnsOrder(visibleColumns);
     },
     [
-      allColumns,
       explicitlyDisabledPreviewColumns,
       explicitlyEnabledPreviewColumns,
       previewColumns,
@@ -392,6 +403,13 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
           setSorting={setPreviewColumnsSorting}
           columnOrderHint={previewColumnsOrder}
           renderCellValue={renderCellValue}
+          mode={effectiveViewMode}
+          streamName={streamName}
+          viewModeToggle={{
+            currentMode: userSelectedViewMode,
+            setViewMode,
+            isDisabled: isViewModeForced,
+          }}
           dataViewFieldTypes={dataViewFieldTypes}
         />
       </RowSelectionContext.Provider>

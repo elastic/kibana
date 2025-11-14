@@ -10,8 +10,18 @@ import type {
   EuiDataGridProps,
   EuiDataGridRowHeightsOptions,
   EuiDataGridSorting,
+  EuiDataGridToolbarProps,
 } from '@elastic/eui';
-import { EuiButtonIcon, EuiDataGrid, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiDataGrid,
+  EuiFlexGroup,
+  EuiFlexItem,
+  useEuiTheme,
+  EuiButtonGroup,
+  euiScreenReaderOnly,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { SampleDocument } from '@kbn/streams-schema';
 import ColumnHeaderTruncateContainer from '@kbn/unified-data-table/src/components/column_header_truncate_container';
@@ -21,10 +31,23 @@ import type {
   IgnoredField,
   DocumentWithIgnoredFields,
 } from '@kbn/streams-schema/src/shared/record_types';
+import { LazySummaryColumn } from '@kbn/discover-contextual-components';
+import { DataGridDensity } from '@kbn/unified-data-table';
+import useAsync from 'react-use/lib/useAsync';
 import { recalcColumnWidths } from '../stream_detail_enrichment/utils';
+import { useKibana } from '../../../hooks/use_kibana';
 import type { SimulationContext } from '../stream_detail_enrichment/state_management/simulation_state_machine';
 
 const emptyCell = <>&nbsp;</>;
+
+export type PreviewTableMode = 'columns' | 'summary';
+
+export const SUMMARY_COLUMN_ID = i18n.translate(
+  'xpack.streams.resultPanel.euiDataGrid.summaryColumnId',
+  {
+    defaultMessage: '(Summary)',
+  }
+);
 
 interface RowSelectionContextType {
   selectedRowIndex?: number;
@@ -79,6 +102,9 @@ export function PreviewTable({
   columnOrderHint = [],
   showLeadingControlColumns = true,
   cellActions,
+  mode = 'columns',
+  streamName,
+  viewModeToggle,
   dataViewFieldTypes,
 }: {
   documents: SampleDocument[] | DocumentWithIgnoredFields[];
@@ -97,8 +123,27 @@ export function PreviewTable({
   setSorting?: (sorting: SimulationContext['previewColumnsSorting']) => void;
   showLeadingControlColumns?: boolean;
   cellActions?: EuiDataGridColumnCellAction[];
+  mode?: PreviewTableMode;
+  streamName?: string;
+  viewModeToggle?: {
+    currentMode: PreviewTableMode;
+    setViewMode: (mode: PreviewTableMode) => void;
+    isDisabled: boolean;
+  };
   dataViewFieldTypes?: Array<{ name: string; type: string; esType?: string }>;
 }) {
+  const {
+    core,
+    dependencies: {
+      start: { share, fieldFormats, data },
+    },
+  } = useKibana();
+
+  // Create dataView for summary mode
+  const { value: dataView } = useAsync(async () => {
+    if (mode !== 'summary' || !streamName) return undefined;
+    return data.dataViews.create({ title: streamName });
+  }, [mode, streamName, data.dataViews]);
   const { euiTheme: theme } = useEuiTheme();
 
   // Create a map of field names to their ES types for quick lookup from DataView
@@ -120,7 +165,14 @@ export function PreviewTable({
 
   // Determine canonical column order
   const canonicalColumnOrder = useMemo(() => {
+    // In summary mode, only show the summary column
+    if (mode === 'summary') {
+      return [SUMMARY_COLUMN_ID];
+    }
+
+    // In columns mode, show regular columns
     const cols = new Set<string>();
+
     documents.forEach((doc) => {
       const document = isDocumentWithIgnoredFields(doc) ? doc.values : doc;
 
@@ -160,7 +212,21 @@ export function PreviewTable({
       ];
     }
     return allColumns;
-  }, [columnOrderHint, displayColumns, documents]);
+  }, [columnOrderHint, displayColumns, documents, mode]);
+
+  // Derive visibleColumns from canonical order
+  const visibleColumns = useMemo(() => {
+    // In summary mode, always show only the summary column
+    if (mode === 'summary') {
+      return [SUMMARY_COLUMN_ID];
+    }
+
+    // In columns mode, filter by displayColumns or show all
+    if (displayColumns) {
+      return canonicalColumnOrder.filter((col) => displayColumns.includes(col));
+    }
+    return canonicalColumnOrder;
+  }, [canonicalColumnOrder, displayColumns, mode]);
 
   const sortingConfig = useMemo(() => {
     if (!sorting && !setSorting) {
@@ -217,14 +283,6 @@ export function PreviewTable({
     [theme.colors.highlight]
   );
 
-  // Derive visibleColumns from canonical order
-  const visibleColumns = useMemo(() => {
-    if (displayColumns) {
-      return canonicalColumnOrder.filter((col) => displayColumns.includes(col));
-    }
-    return canonicalColumnOrder;
-  }, [canonicalColumnOrder, displayColumns]);
-
   const onColumnResize = useCallback(
     ({ columnId, width }: { columnId: string; width: number | undefined }) => {
       setColumnWidths((prev) => {
@@ -242,6 +300,21 @@ export function PreviewTable({
 
   const gridColumns = useMemo(() => {
     return canonicalColumnOrder.map((column) => {
+      // Special handling for summary column
+      if (column === SUMMARY_COLUMN_ID) {
+        return {
+          id: column,
+          display: (
+            <ColumnHeaderTruncateContainer>
+              {i18n.translate('xpack.streams.resultPanel.euiDataGrid.summaryColumnLabel', {
+                defaultMessage: 'Summary',
+              })}
+            </ColumnHeaderTruncateContainer>
+          ),
+          actions: false as false,
+        };
+      }
+
       const columnparts = column.split('.');
       // interlave the columnparts with a dot and a breakable non-whitespace character
       const interleavedColumnParts = columnparts.reduce((acc, part, index) => {
@@ -291,6 +364,94 @@ export function PreviewTable({
     columnWidths,
   ]);
 
+  const [currentRowHeights, setCurrentRowHeights] = useState<
+    EuiDataGridRowHeightsOptions | undefined
+  >(rowHeightsOptions);
+
+  const renderCustomToolbar: EuiDataGridToolbarProps['renderCustomToolbar'] = useCallback(
+    (props: Parameters<NonNullable<EuiDataGridToolbarProps['renderCustomToolbar']>>[0]) => {
+      const {
+        hasRoomForGridControls,
+        columnControl,
+        columnSortingControl,
+        displayControl,
+        fullScreenControl,
+        keyboardShortcutsControl,
+      } = props;
+
+      const mobileStyles =
+        !hasRoomForGridControls &&
+        css`
+          .euiDataGridToolbarControl__text {
+            ${euiScreenReaderOnly()}
+          }
+        `;
+
+      const viewModeOptions = [
+        {
+          id: 'columns' as const,
+          label: i18n.translate('xpack.streams.processorOutcomePreview.viewMode.columns', {
+            defaultMessage: 'Columns',
+          }),
+        },
+        {
+          id: 'summary' as const,
+          label: i18n.translate('xpack.streams.processorOutcomePreview.viewMode.summary', {
+            defaultMessage: 'Summary',
+          }),
+        },
+      ];
+
+      return (
+        <EuiFlexGroup
+          responsive={false}
+          gutterSize="s"
+          justifyContent="spaceBetween"
+          alignItems="center"
+          css={mobileStyles}
+          className="euiDataGrid__controls"
+        >
+          <EuiFlexItem grow={false}>
+            {viewModeToggle && (
+              <EuiButtonGroup
+                legend={i18n.translate(
+                  'xpack.streams.processorOutcomePreview.viewModeToggle.legend',
+                  {
+                    defaultMessage: 'Preview view mode',
+                  }
+                )}
+                options={viewModeOptions}
+                idSelected={viewModeToggle.currentMode}
+                onChange={(id) => viewModeToggle.setViewMode(id as PreviewTableMode)}
+                buttonSize="compressed"
+                isDisabled={viewModeToggle.isDisabled}
+              />
+            )}
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+              <EuiFlexItem grow={false}>{columnControl}</EuiFlexItem>
+              <EuiFlexItem grow={false}>{columnSortingControl}</EuiFlexItem>
+              <EuiFlexItem grow={false}>{keyboardShortcutsControl}</EuiFlexItem>
+              <EuiFlexItem grow={false}>{displayControl}</EuiFlexItem>
+              <EuiFlexItem grow={false}>{fullScreenControl}</EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    },
+    [viewModeToggle]
+  );
+
+  const toolbarVisibilityConfig = useMemo(() => {
+    if (!toolbarVisibility) {
+      return false;
+    }
+
+    return true;
+  }, [toolbarVisibility]);
+
   return (
     <EuiDataGrid
       aria-label={i18n.translate('xpack.streams.resultPanel.euiDataGrid.previewLabel', {
@@ -308,11 +469,25 @@ export function PreviewTable({
       sorting={sortingConfig}
       inMemory={sortingConfig ? { level: 'sorting' } : undefined}
       height={height}
-      toolbarVisibility={toolbarVisibility}
+      toolbarVisibility={toolbarVisibilityConfig}
+      renderCustomToolbar={viewModeToggle ? renderCustomToolbar : undefined}
       rowCount={documents.length}
-      rowHeightsOptions={rowHeightsOptions}
+      rowHeightsOptions={{
+        ...currentRowHeights,
+        onChange: (newRowHeightOptions) => {
+          setCurrentRowHeights(newRowHeightOptions);
+        },
+      }}
       onColumnResize={onColumnResize}
-      renderCellValue={({ rowIndex, columnId, setCellProps }) => {
+      renderCellValue={({
+        rowIndex,
+        columnId,
+        setCellProps,
+        isDetails,
+        isExpanded,
+        isExpandable,
+        colIndex,
+      }) => {
         // eslint-disable-next-line react-hooks/rules-of-hooks
         const { selectedRowIndex } = useRowSelection();
 
@@ -334,6 +509,51 @@ export function PreviewTable({
 
         if (!document || typeof document !== 'object') {
           return emptyCell;
+        }
+
+        // Special rendering for summary column
+        if (columnId === SUMMARY_COLUMN_ID && mode === 'summary' && dataView) {
+          // Convert to DataTableRecord format expected by SummaryColumn
+          // No normalization - pass documents as-is with OTel fields
+          // The kbn-discover-utils will handle OTel field fallbacks
+          const dataTableRecord = {
+            raw: document,
+            flattened: document,
+            id: `${rowIndex}-summary`,
+          };
+
+          let rowHeight: number | undefined;
+          if (currentRowHeights) {
+            if (
+              currentRowHeights.defaultHeight &&
+              typeof currentRowHeights.defaultHeight === 'object' &&
+              'lineCount' in currentRowHeights.defaultHeight &&
+              currentRowHeights.defaultHeight.lineCount
+            ) {
+              rowHeight = currentRowHeights.defaultHeight.lineCount;
+            }
+          }
+
+          return (
+            <LazySummaryColumn
+              dataView={dataView}
+              row={dataTableRecord}
+              rowIndex={rowIndex}
+              columnId={columnId}
+              isDetails={isDetails}
+              setCellProps={setCellProps}
+              isExpandable={isExpandable}
+              isExpanded={isExpanded}
+              colIndex={colIndex}
+              closePopover={() => {}}
+              density={DataGridDensity.COMPACT}
+              rowHeight={rowHeight}
+              shouldShowFieldHandler={() => true}
+              core={core}
+              share={share}
+              fieldFormats={fieldFormats}
+            />
+          );
         }
 
         if (renderCellValue) {

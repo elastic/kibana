@@ -90,6 +90,7 @@
     "@kbn/spaces-plugin",
     "@kbn/unified-data-table",
     "@kbn/console-plugin",
+    "@kbn/discover-contextual-components",
     "@kbn/es-types",
     "@kbn/esql-utils",
   ]
