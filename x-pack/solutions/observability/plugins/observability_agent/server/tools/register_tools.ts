@@ -16,6 +16,10 @@ import {
   OBSERVABILITY_SEARCH_KNOWLEDGE_BASE_TOOL_ID,
   createSearchKnowledgeBaseTool,
 } from './search_knowledge_base/search_knowledge_base';
+import {
+  OBSERVABILITY_RUN_LOG_RATE_ANALYSIS_TOOL_ID,
+  createRunLogRateAnalysisTool,
+} from './log_rate_analysis/log_rate_analysis';
 import type {
   ObservabilityAgentPluginSetupDependencies,
   ObservabilityAgentPluginStart,
@@ -32,6 +36,7 @@ const PLATFORM_TOOL_IDS = [
 const OBSERVABILITY_TOOL_IDS = [
   OBSERVABILITY_GET_DATA_SOURCES_TOOL_ID,
   OBSERVABILITY_SEARCH_KNOWLEDGE_BASE_TOOL_ID,
+  OBSERVABILITY_RUN_LOG_RATE_ANALYSIS_TOOL_ID,
 ];
 
 export const OBSERVABILITY_AGENT_TOOL_IDS = [...PLATFORM_TOOL_IDS, ...OBSERVABILITY_TOOL_IDS];
@@ -48,6 +53,7 @@ export async function registerTools({
   const observabilityTools: StaticToolRegistration<any>[] = [
     createGetDataSourcesTool({ core, plugins, logger }),
     createSearchKnowledgeBaseTool({ core, logger }),
+    createRunLogRateAnalysisTool({ core, logger }),
   ];
 
   for (const tool of observabilityTools) {
