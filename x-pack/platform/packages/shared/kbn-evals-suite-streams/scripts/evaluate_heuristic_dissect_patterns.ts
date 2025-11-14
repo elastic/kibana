@@ -100,6 +100,12 @@ export async function evaluateDissectSuggestions() {
       const groupedMessages = groupMessagesByPattern(messages);
       const largestGroup = groupedMessages[0]; // Groups are already sorted by probability (descending)
 
+      if (!largestGroup) {
+        console.log(`- ${stream}: ${chalk.red('No messages found for stream ' + stream)}`);
+        console.log(groupedMessages);
+        return { stream, pattern: '', processor: null };
+      }
+
       const dissectPattern = extractDissectPatternDangerouslySlow(largestGroup.messages);
       const reviewFields = getReviewFields(dissectPattern, 10);
       console.log(`- ${stream}: ${chalk.dim(dissectPattern.pattern)}`);
@@ -130,6 +136,9 @@ export async function evaluateDissectSuggestions() {
   console.log();
   const output = await Promise.all(
     suggestions.map(async (suggestion) => {
+      if (!suggestion.processor) {
+        return { ...suggestion, parsing_score_samples: 0, parsing_score_all_docs: 0, field_analysis: {} };
+      }
       const sampleDocs = await fetchDocs(suggestion.stream, 100);
       const allDocs = await fetchDocs(suggestion.stream, 10_000);
 

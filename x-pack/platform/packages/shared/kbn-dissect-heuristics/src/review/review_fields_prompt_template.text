@@ -33,7 +33,6 @@ For every field in the log:
      * Example: `field_1="2024-01-15"` + `field_2="10:30:45"` → `@timestamp="2024-01-15 10:30:45"`  
    * **skip**: Keep only the first field, discard the rest  
      * Use for: redundant data, unwanted delimiters, formatting characters  
-     * Example: Bracketed fields `[INFO]` where you only want `INFO`
 
 3. **Identify static fields that should NOT be extracted**:
    * **IMPORTANT**: If a field always has the **same literal value** across all messages, it should be **part of the pattern itself**, not extracted as a field  
@@ -41,14 +40,15 @@ For every field in the log:
    * Mark such fields as static with `is_static: true` and provide the `static_value`  
    * Common examples:
      * Keys in `key=value` patterns (e.g., `user=john` - the word "user" is static)
-     * Fixed labels or prefixes (e.g., `Level: INFO` - the word "Level:" is static)
-     * Protocol identifiers or type markers
+     * Fixed labels or prefixes (e.g., `Level: INFO` - the word "Level" is static)
+     * Protocol identifiers
    * **Rule of thumb**: If the field appears in **every message with the exact same text**, it belongs in the pattern as a literal, not as an extracted field
    * Example: In log `user=john status=active`, you would have:
      * `field_1="user"` → `{"is_static": true, "static_value": "user", "columns": ["field_1"]}` (becomes literal `user` in pattern)
      * `field_2="john"` → `{"ecs_field": "user.name", "columns": ["field_2"], ...}` (extracted as field)
      * `field_3="status"` → `{"is_static": true, "static_value": "status", "columns": ["field_3"]}` (becomes literal `status` in pattern)
      * `field_4="active"` → `{"ecs_field": "custom.status", "columns": ["field_4"], ...}` (extracted as field)
+   * Use static values for string literals only, not for control characters like = or |, these are extracted already.
 
 4. For **each final field** (combined or uncombined):
 
