@@ -59,6 +59,8 @@ const useStyles = () => {
     `,
     playButton: css`
       margin-left: ${euiTheme.size.xs} !important;
+      height: ${euiTheme.size.l} !important;
+      width: ${euiTheme.size.l} !important;
     `,
   };
 };
@@ -388,7 +390,7 @@ export const MonacoEditor = ({
               size="m"
               color="primary"
               iconType="play"
-              iconSize="s"
+              iconSize="m"
               onClick={sendRequestsCallback}
               onMouseEnter={() => setIsPlayButtonHovered(true)}
               onMouseLeave={() => setIsPlayButtonHovered(false)}
