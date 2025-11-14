@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { useCloudConnectedAppContext } from '../../application/app_context';
+import { useCloudConnectedAppContext } from '../../app_context';
 import { ConnectionWizard } from './connection_wizard';
 import { ServiceCards } from './service_cards';
 import { COLUMN_SIZE } from './constants';

@@ -6,8 +6,8 @@
  */
 
 import { useEffect } from 'react';
-import { useCloudConnectedAppContext } from '../application/app_context';
-import { PLUGIN_NAME } from '../../common';
+import { useCloudConnectedAppContext } from '../app_context';
+import { PLUGIN_NAME } from '../../../common';
 
 export const useBreadcrumbs = () => {
   const { chrome } = useCloudConnectedAppContext();

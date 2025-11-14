@@ -18,7 +18,7 @@ import {
   EuiBadge,
   EuiCallOut,
 } from '@elastic/eui';
-import { useCloudConnectedAppContext } from '../../../application/app_context';
+import { useCloudConnectedAppContext } from '../../../app_context';
 import {
   STEP_1_TITLE,
   STEP_1_DESCRIPTION,

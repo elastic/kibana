@@ -15,7 +15,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { useCloudConnectedAppContext } from '../../../application/app_context';
+import { useCloudConnectedAppContext } from '../../../app_context';
 import { COLUMN_SIZE } from '../constants';
 
 interface ServiceCardsProps {

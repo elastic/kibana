@@ -6,56 +6,14 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import ReactDOM from 'react-dom';
-import type { CoreStart, AppMountParameters } from '@kbn/core/public';
 import { EuiPage, EuiPageBody, EuiLoadingSpinner, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { CloudConnectedAppContextProvider } from './application/app_context';
-import { useCloudConnectedAppContext } from './application/app_context';
+import { useCloudConnectedAppContext } from './app_context';
 import { useBreadcrumbs } from './hooks/use_breadcrumbs';
 import { OnboardingPage } from './components/onboarding';
 import { ConnectedServicesPage } from './components/connected_services';
+import type { ClusterDetails } from '../types';
 
-interface CloudConnectedAppComponentProps {
-  chrome: CoreStart['chrome'];
-  application: CoreStart['application'];
-  http: CoreStart['http'];
-  docLinks: CoreStart['docLinks'];
-  notifications: CoreStart['notifications'];
-  history: AppMountParameters['history'];
-}
-
-interface ClusterDetails {
-  id: string;
-  name: string;
-  metadata: {
-    created_at: string;
-    created_by: string;
-    organization_id: string;
-  };
-  self_managed_cluster: {
-    id: string;
-    name: string;
-    version: string;
-  };
-  license: {
-    type: string;
-    uid: string;
-  };
-  services: {
-    auto_ops?: {
-      enabled: boolean;
-      supported: boolean;
-      config?: { region_id?: string };
-    };
-    eis?: {
-      enabled: boolean;
-      supported: boolean;
-      config?: { region_id?: string };
-    };
-  };
-}
-
-const CloudConnectedAppMain: React.FC = () => {
+export const CloudConnectedAppMain: React.FC = () => {
   const { http, notifications } = useCloudConnectedAppContext();
   const [clusterDetails, setClusterDetails] = useState<ClusterDetails | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -116,39 +74,4 @@ const CloudConnectedAppMain: React.FC = () => {
       </EuiPageBody>
     </EuiPage>
   );
-};
-
-const CloudConnectedAppComponent: React.FC<CloudConnectedAppComponentProps> = ({
-  chrome,
-  application,
-  http,
-  docLinks,
-  notifications,
-  history,
-}) => {
-  return (
-    <CloudConnectedAppContextProvider
-      value={{ chrome, application, http, docLinks, notifications, history }}
-    >
-      <CloudConnectedAppMain />
-    </CloudConnectedAppContextProvider>
-  );
-};
-
-export const CloudConnectedApp = (core: CoreStart, params: AppMountParameters) => {
-  ReactDOM.render(
-    core.rendering.addContext(
-      <CloudConnectedAppComponent
-        chrome={core.chrome}
-        application={core.application}
-        http={core.http}
-        docLinks={core.docLinks}
-        notifications={core.notifications}
-        history={params.history}
-      />
-    ),
-    params.element
-  );
-
-  return () => ReactDOM.unmountComponentAtNode(params.element);
 };

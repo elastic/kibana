@@ -21,7 +21,7 @@ import {
   EuiConfirmModal,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useCloudConnectedAppContext } from '../../application/app_context';
+import { useCloudConnectedAppContext } from '../../app_context';
 import { OverviewSection } from './overview_section';
 import { ServicesSection } from './services_section';
 import { MigrationSection } from './migration_section';

@@ -13,17 +13,13 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
-import type { ManagementSetup } from '@kbn/management-plugin/public';
+import type {
+  CloudConnectedPluginSetup,
+  CloudConnectedPluginStart,
+  CloudConnectedSetupDeps,
+} from './types';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface CloudConnectedPluginSetup {}
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface CloudConnectedPluginStart {}
-
-interface CloudConnectedSetupDeps {
-  management: ManagementSetup;
-}
+export type { CloudConnectedPluginSetup, CloudConnectedPluginStart };
 
 export class CloudConnectedPlugin
   implements Plugin<CloudConnectedPluginSetup, CloudConnectedPluginStart, CloudConnectedSetupDeps>
@@ -42,7 +38,7 @@ export class CloudConnectedPlugin
       category: DEFAULT_APP_CATEGORIES.management,
       async mount(params: AppMountParameters) {
         const [coreStart] = await core.getStartServices();
-        const { CloudConnectedApp } = await import('./application');
+        const { CloudConnectedApp } = await import('./application/mount_plugin');
         return CloudConnectedApp(coreStart, params);
       },
     });
