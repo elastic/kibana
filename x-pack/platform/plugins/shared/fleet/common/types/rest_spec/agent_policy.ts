@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { type TypeOf, schema } from '@kbn/config-schema';
+
 import type {
   AgentPolicy,
   NewAgentPolicy,
@@ -37,17 +39,28 @@ export interface GetOneAgentPolicyResponse {
   item: AgentPolicy;
 }
 
-export interface CurrentVersionCount {
-  version: string;
-  agents: number;
-  failedUpgradeAgents: number;
-  failedUpgradeActionIds?: string[];
-}
+export const GetAutoUpgradeAgentsStatusResponseSchema = schema.object({
+  currentVersions: schema.arrayOf(
+    schema.object({
+      version: schema.string(),
+      agents: schema.number(),
+      failedUpgradeAgents: schema.number(),
+      failedUpgradeActionIds: schema.maybe(schema.arrayOf(schema.string())),
+      inProgressUpgradeAgents: schema.number(),
+      inProgressUpgradeActionIds: schema.maybe(schema.arrayOf(schema.string())),
+    })
+  ),
+  totalAgents: schema.number(),
+});
 
-export interface GetAutoUpgradeAgentsStatusResponse {
-  currentVersions: CurrentVersionCount[];
-  totalAgents: number;
-}
+export type GetAutoUpgradeAgentsStatusResponse = TypeOf<
+  typeof GetAutoUpgradeAgentsStatusResponseSchema
+>;
+
+type Writeable<T> = { -readonly [P in keyof T]: T[P] };
+export type CurrentVersionCount = Writeable<
+  GetAutoUpgradeAgentsStatusResponse['currentVersions'][number]
+>;
 
 export interface CreateAgentPolicyRequest {
   body: NewAgentPolicy;
