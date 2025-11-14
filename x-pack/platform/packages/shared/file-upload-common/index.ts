@@ -27,6 +27,9 @@ export type {
   CreateDocsResponse,
   ImportFactoryOptions,
   TestGrokPatternResponse,
+  GetAdditionalLinksParams,
+  GetAdditionalLinks,
+  ResultLink,
 } from './src/types';
 
 export {
@@ -52,7 +55,7 @@ export {
   FileUploadTelemetryService,
 } from './src/telemetry';
 
-export type { ConfigSchema, ResultLink, ResultLinks } from './src/app';
+export type { ConfigSchema, ResultLinks } from './src/app';
 
 export {
   getFieldsFromGrokPattern,

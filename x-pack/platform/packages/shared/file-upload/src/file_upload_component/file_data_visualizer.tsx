@@ -11,13 +11,13 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type {
   FileUploadResults,
   FindFileStructureResponse,
+  GetAdditionalLinks,
   OpenFileUploadLiteContext,
   ResultLinks,
 } from '@kbn/file-upload-common';
 
 import { FileUploadManager, useFileUpload, FileUploadContext } from '../..';
 
-import type { GetAdditionalLinks } from './new/results_links';
 import { FileUploadView } from './new/file_upload_view';
 import type { FileUploadStartDependencies } from './kibana_context';
 

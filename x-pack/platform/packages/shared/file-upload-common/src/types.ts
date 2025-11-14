@@ -227,3 +227,26 @@ export interface TestGrokPatternResponse {
     fields: Record<string, Array<{ match: string; offset: number; length: number }>>;
   }>;
 }
+
+type LinkType = 'file' | 'index';
+
+export interface GetAdditionalLinksParams {
+  dataViewId: string;
+  dataViewTitle?: string;
+  globalState?: any;
+}
+
+export type GetAdditionalLinks = Array<
+  (params: GetAdditionalLinksParams) => Promise<ResultLink[] | undefined>
+>;
+
+export interface ResultLink {
+  id: string;
+  type: LinkType;
+  title: string;
+  icon: string;
+  description: string;
+  getUrl(params?: any): Promise<string>;
+  canDisplay(params?: any): Promise<boolean>;
+  'data-test-subj'?: string;
+}

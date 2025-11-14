@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React from 'react';
 
-import type { FileUploadResults, ResultLinks } from '@kbn/file-upload-common';
+import type { FileUploadResults, GetAdditionalLinks, ResultLinks } from '@kbn/file-upload-common';
 import { STATUS } from '../../../file_upload_manager';
 import { FileClashWarning } from './file_clash_warning';
 import { FilePicker } from './file_picker';
@@ -20,7 +20,6 @@ import { ImportErrors } from './import_errors';
 import { AdvancedSection } from './advanced_section';
 import { UploadImage } from './upload_image';
 import { IndexSelection } from './index_selection';
-import type { GetAdditionalLinks } from './results_links';
 import { ResultsLinks } from './results_links';
 import { useFileUploadContext } from '../../use_file_upload';
 

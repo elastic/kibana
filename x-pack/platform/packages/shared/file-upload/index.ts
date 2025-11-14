@@ -29,8 +29,3 @@ export {
 } from './src/file_upload_component/new/file_upload_lite_action';
 
 export type { FileUploadStartDependencies } from './src/file_upload_component/kibana_context';
-
-export type {
-  GetAdditionalLinksParams,
-  GetAdditionalLinks,
-} from './src/file_upload_component/new/results_links';

@@ -6,11 +6,10 @@
  */
 
 import { EuiSkeletonText } from '@elastic/eui';
-import type { ResultLinks, FileUploadResults } from '@kbn/file-upload-common';
+import type { ResultLinks, FileUploadResults, GetAdditionalLinks } from '@kbn/file-upload-common';
 import type { FC } from 'react';
 import React, { useState, useEffect } from 'react';
 import type { FileUploadStartDependencies } from './kibana_context';
-import type { GetAdditionalLinks } from './new/results_links';
 
 export type { FileDataVisualizerSpec } from './file_data_visualizer';
 export { FileDataVisualizer } from './file_data_visualizer';

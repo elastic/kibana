@@ -16,31 +16,9 @@ import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
 import { flatten } from 'lodash';
 import { isDefined } from '@kbn/ml-is-defined';
 import type { ResultLinks } from '@kbn/file-upload-common';
+import type { GetAdditionalLinks } from '@kbn/file-upload-common/src/types';
 import type { LinkCardProps } from './link_card';
 import { useFileUploadKibana } from '../../kibana_context';
-
-type LinkType = 'file' | 'index';
-
-export interface GetAdditionalLinksParams {
-  dataViewId: string;
-  dataViewTitle?: string;
-  globalState?: any;
-}
-
-export type GetAdditionalLinks = Array<
-  (params: GetAdditionalLinksParams) => Promise<ResultLink[] | undefined>
->;
-
-export interface ResultLink {
-  id: string;
-  type: LinkType;
-  title: string;
-  icon: string;
-  description: string;
-  getUrl(params?: any): Promise<string>;
-  canDisplay(params?: any): Promise<boolean>;
-  'data-test-subj'?: string;
-}
 
 interface Props {
   index: string;
