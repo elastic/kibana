@@ -7,14 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { EuiSelectable, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
+import { EuiSelectable, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 
-export interface DataSourcesListProps {
+interface DataSourcesListProps {
+  // List of all available data sources
   sourcesList: string[];
+  // Callback when the selected data sources change
   onChangeDatasources: (newId: string[]) => void;
+  // Currently selected data sources
   currentSources: string[];
 }
 
@@ -23,6 +26,22 @@ export function DataSourcesList({
   onChangeDatasources,
   currentSources,
 }: DataSourcesListProps) {
+  const [showOnlySelected, setShowOnlySelected] = useState(false);
+
+  const filterToggleAriaLabel = useMemo(() => {
+    return showOnlySelected
+      ? i18n.translate('esqlEditor.visor.showSelectedOptionsAriaLabel', {
+          defaultMessage: 'Show selected options',
+        })
+      : i18n.translate('esqlEditor.visor.showAllOptionsAriaLabel', {
+          defaultMessage: 'Show all options',
+        });
+  }, [showOnlySelected]);
+
+  const onFilterToggleClick = useCallback(() => {
+    setShowOnlySelected((prev) => !prev);
+  }, []);
+
   return (
     <EuiSelectable<{
       key?: string;
@@ -37,12 +56,14 @@ export function DataSourcesList({
       }}
       data-test-subj="indexPattern-switcher"
       searchable
-      options={sourcesList?.map((source) => ({
-        key: source,
-        label: source,
-        value: source,
-        checked: currentSources?.includes(source) ? 'on' : undefined,
-      }))}
+      options={sourcesList
+        ?.filter((source) => (showOnlySelected ? currentSources?.includes(source) : true))
+        ?.map((source) => ({
+          key: source,
+          label: source,
+          value: source,
+          checked: currentSources?.includes(source) ? 'on' : undefined,
+        }))}
       onChange={(choices) => {
         const selectedChoices = choices.filter(({ checked }) => checked) as unknown as {
           value: string;
@@ -91,6 +112,17 @@ export function DataSourcesList({
               responsive={false}
             >
               <EuiFlexItem>{search}</EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  size="xs"
+                  iconType="list"
+                  aria-pressed={showOnlySelected}
+                  color={showOnlySelected ? 'primary' : 'text'}
+                  display={showOnlySelected ? 'base' : 'empty'}
+                  onClick={onFilterToggleClick}
+                  aria-label={filterToggleAriaLabel}
+                />
+              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>
           {list}

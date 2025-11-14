@@ -10,6 +10,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { EuiButtonEmpty, EuiFlexItem, EuiToolTip, useEuiTheme } from '@elastic/eui';
+
 export function QuickSearchAction({
   toggleVisor,
   hideKeyboardShortcut,

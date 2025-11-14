@@ -31,8 +31,10 @@ import { DataSourcesList } from './datasources_list';
 import { generateDashPatterns } from './utils';
 
 interface SourcesDropdownProps {
+  // Currently selected data sources
   currentSources: string[];
-  onChangeSources: (newSource: string[]) => void;
+  // Callback when the selected data sources change
+  onChangeSources: (newSources: string[]) => void;
 }
 const DEFAULT_WIDTH = 350;
 

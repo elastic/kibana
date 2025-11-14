@@ -23,6 +23,19 @@ import { isEqual } from 'lodash';
 import { SourcesDropdown } from './sources_dropdown';
 import { visorStyles } from './visor.styles';
 
+interface QuickSearchVisorProps {
+  // Current ESQL query
+  query: string;
+  // Handling smaller space for the visor
+  isSpaceReduced?: boolean;
+  // Whether the visor is visible
+  isVisible: boolean;
+  // Callback when the visor is closed
+  onClose: () => void;
+  // Callback when the query is updated and submitted
+  onUpdateAndSubmitQuery: (query: string) => void;
+}
+
 const searchPlaceholder = i18n.translate('esqlEditor.visor.searchPlaceholder', {
   defaultMessage: 'Search ...',
 });
@@ -33,13 +46,7 @@ export function QuickSearchVisor({
   isVisible,
   onClose,
   onUpdateAndSubmitQuery,
-}: {
-  query: string;
-  isSpaceReduced?: boolean;
-  isVisible: boolean;
-  onClose: () => void;
-  onUpdateAndSubmitQuery: (query: string) => void;
-}) {
+}: QuickSearchVisorProps) {
   const isDarkMode = useKibanaIsDarkMode();
   const { euiTheme } = useEuiTheme();
   const [selectedSources, setSelectedSources] = useState<EuiComboBoxOptionOption[]>([]);
