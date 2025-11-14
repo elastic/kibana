@@ -233,6 +233,8 @@ export const ProjectHeader = ({
 
   const topBarStyles = css`
     box-shadow: none !important;
+    background-color: ${euiTheme.colors.backgroundTransparent};
+    border-bottom-color: ${euiTheme.colors.backgroundTransparent};
   `;
 
   return (
