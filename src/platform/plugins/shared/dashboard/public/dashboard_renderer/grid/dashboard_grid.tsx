@@ -18,7 +18,7 @@ import type { GridLayoutData, GridPanelData } from '@kbn/grid-layout';
 import { GridLayout } from '@kbn/grid-layout';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
-import { DASHBOARD_GRID_COLUMN_COUNT } from '../../../common/content_management/constants';
+import { DASHBOARD_GRID_COLUMN_COUNT } from '../../../common/page_bundle_constants';
 import type { GridData } from '../../../server';
 import { areLayoutsEqual, type DashboardLayout } from '../../dashboard_api/layout_manager';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';

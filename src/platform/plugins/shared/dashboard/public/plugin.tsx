@@ -64,7 +64,11 @@ import type {
 
 import { DashboardAppLocatorDefinition } from '../common/locator/locator';
 import type { DashboardMountContextProps } from './dashboard_app/types';
-import { DASHBOARD_APP_ID, LANDING_PAGE_PATH, SEARCH_SESSION_ID } from '../common/constants';
+import {
+  DASHBOARD_APP_ID,
+  LANDING_PAGE_PATH,
+  SEARCH_SESSION_ID,
+} from '../common/page_bundle_constants';
 import type { GetPanelPlacementSettings } from './panel_placement';
 import { registerDashboardPanelSettings } from './panel_placement';
 import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';

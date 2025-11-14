@@ -39,10 +39,8 @@ import { getUISettings } from './ui_settings';
 import { capabilitiesProvider } from './capabilities_provider';
 import type { DashboardPluginSetup, DashboardPluginStart } from './types';
 import type { DashboardSavedObjectAttributes } from './dashboard_saved_object';
-import {
-  createDashboardSavedObjectType,
-  DASHBOARD_SAVED_OBJECT_TYPE,
-} from './dashboard_saved_object';
+import { DASHBOARD_SAVED_OBJECT_TYPE } from '../common/constants';
+import { createDashboardSavedObjectType } from './dashboard_saved_object';
 import { registerDashboardUsageCollector } from './usage/register_collector';
 import { dashboardPersistableStateServiceFactory } from './dashboard_container/dashboard_container_embeddable_factory';
 import { registerRoutes } from './api';

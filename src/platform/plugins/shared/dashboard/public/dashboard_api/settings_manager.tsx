@@ -12,7 +12,7 @@ import { diffComparators, initializeStateManager } from '@kbn/presentation-publi
 import type { BehaviorSubject } from 'rxjs';
 import { combineLatestWith, debounceTime, map } from 'rxjs';
 import type { DashboardState, DashboardOptions } from '../../server';
-import { DEFAULT_DASHBOARD_OPTIONS } from '../../common/content_management';
+import { DEFAULT_DASHBOARD_OPTIONS } from '../../common/constants';
 
 export type DashboardSettings = Required<DashboardOptions> & {
   description?: DashboardState['description'];

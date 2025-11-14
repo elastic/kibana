@@ -17,8 +17,8 @@ import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { ViewMode } from '@kbn/presentation-publishing';
 
 import { asyncMap } from '@kbn/std';
+import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import {
-  DASHBOARD_CONTENT_ID,
   SAVED_OBJECT_DELETE_TIME,
   SAVED_OBJECT_LOADED_TIME,
 } from '../../utils/telemetry_constants';
@@ -212,7 +212,7 @@ export const useDashboardListingTable = ({
             eventName: SAVED_OBJECT_LOADED_TIME,
             duration: searchDuration,
             meta: {
-              saved_object_type: DASHBOARD_CONTENT_ID,
+              saved_object_type: DASHBOARD_SAVED_OBJECT_TYPE,
             },
           });
           const tagApi = savedObjectsTaggingService?.getTaggingApi();
@@ -257,7 +257,7 @@ export const useDashboardListingTable = ({
           eventName: SAVED_OBJECT_DELETE_TIME,
           duration: deleteDuration,
           meta: {
-            saved_object_type: DASHBOARD_CONTENT_ID,
+            saved_object_type: DASHBOARD_SAVED_OBJECT_TYPE,
             total: dashboardsToDelete.length,
           },
         });

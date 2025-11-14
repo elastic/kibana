@@ -10,7 +10,7 @@
 import { PanelNotFoundError } from '@kbn/embeddable-plugin/public';
 import { cloneDeep, forOwn } from 'lodash';
 
-import { DASHBOARD_GRID_COLUMN_COUNT } from '../../common/content_management';
+import { DASHBOARD_GRID_COLUMN_COUNT } from '../../common/page_bundle_constants';
 import type { GridData } from '../../server';
 import type { PanelPlacementProps, PanelPlacementReturn } from './types';
 import type { DashboardLayoutPanel } from '../dashboard_api/layout_manager';

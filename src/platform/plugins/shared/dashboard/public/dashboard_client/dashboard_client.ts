@@ -12,7 +12,7 @@ import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import type { DeleteResult } from '@kbn/content-management-plugin/common';
 import type { Reference } from '@kbn/content-management-utils';
 import type { DashboardSearchRequestBody, DashboardSearchResponseBody } from '../../server';
-import { CONTENT_ID, DASHBOARD_API_VERSION } from '../../common/content_management/constants';
+import { DASHBOARD_API_VERSION, DASHBOARD_SAVED_OBJECT_TYPE } from '../../common/constants';
 import type {
   DashboardCreateResponseBody,
   DashboardReadResponseBody,
@@ -58,7 +58,7 @@ export const dashboardClient = {
       })
       .catch((e) => {
         if (e.response?.status === 404) {
-          throw new SavedObjectNotFound({ type: CONTENT_ID, id });
+          throw new SavedObjectNotFound({ type: DASHBOARD_SAVED_OBJECT_TYPE, id });
         }
         const message = (e.body as { message?: string })?.message ?? e.message;
         throw new Error(message);

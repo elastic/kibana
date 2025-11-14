@@ -12,7 +12,7 @@ import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import { v4 } from 'uuid';
 import { CONTROLS_GROUP_TYPE } from '@kbn/controls-constants';
-import { DASHBOARD_APP_ID } from '../../common/constants';
+import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
 import { getReferencesForControls, getReferencesForPanelId } from '../../common';
 import type { DashboardState } from '../../common/types';
 import {

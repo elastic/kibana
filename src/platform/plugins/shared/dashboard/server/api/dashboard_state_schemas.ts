@@ -14,13 +14,12 @@ import { controlsGroupSchema } from '@kbn/controls-schemas';
 import { referenceSchema } from '@kbn/content-management-utils';
 import { storedFilterSchema, querySchema, timeRangeSchema } from '@kbn/es-query-server';
 import { embeddableService } from '../kibana_services';
-
+import { DASHBOARD_GRID_COLUMN_COUNT } from '../../common/page_bundle_constants';
 import {
-  DASHBOARD_GRID_COLUMN_COUNT,
   DEFAULT_PANEL_HEIGHT,
   DEFAULT_PANEL_WIDTH,
   DEFAULT_DASHBOARD_OPTIONS,
-} from '../../common/content_management';
+} from '../../common/constants';
 
 export const panelGridSchema = schema.object({
   x: schema.number({ meta: { description: 'The x coordinate of the panel in grid units' } }),
