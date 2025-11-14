@@ -150,6 +150,11 @@ import {
   // Torq connector schemas
   TorqParamsSchema,
   TorqResponseSchema,
+  // Notion connector schemas
+  NotionGetDataSourceActionParamsSchema,
+  NotionQueryDataSourceActionParamsSchema,
+  NotionGetPageActionParamsSchema,
+  NotionSearchActionParamsSchema,
 } from './stack_connectors_schema';
 
 /**
@@ -372,6 +377,20 @@ function getSubActionParamsSchema(actionTypeId: string, subActionName: string): 
         return TinesRunParamsSchema;
       case 'test':
         return TinesTestParamsSchema;
+    }
+  }
+
+  // Handle Notion sub-actions
+  if (actionTypeId === '.notion') {
+    switch (subActionName) {
+      case 'searchPageByTitle':
+        return NotionSearchActionParamsSchema;
+      case 'getPage':
+        return NotionGetPageActionParamsSchema;
+      case 'getDataSource':
+        return NotionGetDataSourceActionParamsSchema;
+      case 'queryDataSource':
+        return NotionQueryDataSourceActionParamsSchema;
     }
   }
 

@@ -197,3 +197,11 @@ export {
 
 // Torq connector schemas
 export { TorqParamsSchema, TorqResponseSchema } from './torq';
+
+// Notion connector schemas
+export {
+  NotionGetDataSourceActionParamsSchema,
+  NotionQueryDataSourceActionParamsSchema,
+  NotionSearchActionParamsSchema,
+  NotionGetPageActionParamsSchema,
+} from './notion';

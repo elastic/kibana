@@ -49,6 +49,7 @@ export interface UpdateWorkplaceConnectorRequest {
 export const WORKPLACE_CONNECTOR_TYPES = {
   BRAVE_SEARCH: 'brave_search',
   GOOGLE_DRIVE: 'google_drive',
+  NOTION: 'notion',
 } as const;
 
 export type WorkplaceConnectorType =

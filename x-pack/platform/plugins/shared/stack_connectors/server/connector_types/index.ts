@@ -35,6 +35,7 @@ import { getConnectorType as getD3SecurityConnectorType } from './d3security';
 import { getConnectorType as getTheHiveConnectorType } from './thehive';
 import { getConnectorType as getXSOARConnectorType } from './xsoar';
 import { getOpsgenieConnectorType } from './opsgenie';
+import { getConnectorType as getNotionConnectorType } from './notion';
 import { getSentinelOneConnectorType } from './sentinelone';
 import { getCrowdstrikeConnectorType } from './crowdstrike';
 import type { ExperimentalFeatures } from '../../common/experimental_features';
@@ -77,6 +78,7 @@ export function registerConnectorTypes({
   actions.registerSubActionConnectorType(getResilientConnectorType());
   actions.registerSubActionConnectorType(getTheHiveConnectorType());
   actions.registerSubActionConnectorType(getXSOARConnectorType());
+  actions.registerSubActionConnectorType(getNotionConnectorType());
 
   if (experimentalFeatures.sentinelOneConnectorOn) {
     actions.registerSubActionConnectorType(getSentinelOneConnectorType());

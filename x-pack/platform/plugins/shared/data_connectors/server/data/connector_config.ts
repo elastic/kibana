@@ -80,5 +80,25 @@ export const CONNECTOR_CONFIG: Record<string, ConnectorConfig> = {
       featuresField: 'features',
     },
   },
+  notion: {
+    name: 'Notion',
+    description: 'Connect to Notion to search pages and data sources using OAuth.',
+    icon: '/plugins/dataConnectors/assets/notion_logo.png',
+    defaultFeatures: ['search_files'],
+    customFlyoutComponentId: 'notion_connector_flyout',
+    saveConfig: {
+      secretsMapping: {
+        token: 'token',
+      },
+      config: {},
+      featuresField: 'features',
+    },
+    oauthConfig: {
+      provider: 'notion',
+      scopes: [],
+      initiatePath: '/oauth/start/notion',
+      fetchSecretsPath: '/oauth/fetch_request_secrets',
+      oauthBaseUrl: 'https://localhost:8052',
+    },
+  },
 };
-

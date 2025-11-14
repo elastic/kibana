@@ -18,14 +18,13 @@ import type {
   WorkplaceConnectorResponse,
   WorkplaceConnectorAttributes,
 } from '../../common';
-import { WORKPLACE_CONNECTOR_TYPES } from '../../common';
 import {
   createConnectorRequestSchema,
   updateConnectorRequestSchema,
   connectorIdSchema,
 } from './schemas';
 import type { WorkflowCreatorService } from '../services/workflow_creator';
-import { CONNECTOR_CONFIG, type ConnectorConfig } from '../data/connector_config';
+import { CONNECTOR_CONFIG } from '../data/connector_config';
 
 // Helper function to build response from saved object
 function buildConnectorResponse(savedObject: {

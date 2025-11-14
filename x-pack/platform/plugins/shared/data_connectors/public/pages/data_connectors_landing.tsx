@@ -30,7 +30,7 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React, { useMemo, useState } from 'react';
 import { DATA_CONNECTORS_FULL_TITLE } from '../../common/constants';
 import { ConnectorFlyout } from '../components/connector_flyout';
-import { GoogleDriveConnectorFlyout } from '../components/google_drive_connector_flyout';
+import { KSCConnectorFlyout } from '../components/ksc_connector_flyout';
 import { useConnectors } from '../hooks/use_connectors';
 
 interface ConnectorTileData {
@@ -57,18 +57,14 @@ interface StandardFlyoutProps {
   isEditing: boolean;
 }
 
-interface CustomFlyoutProps {
-  onClose: () => void;
-  isEditing: boolean;
-  onConnectionSuccess: () => void;
-}
-
 const FLYOUT_COMPONENT_REGISTRY: Record<string, React.ComponentType<StandardFlyoutProps>> = {
   connector_flyout: ConnectorFlyout,
 };
 
-const CUSTOM_FLYOUT_COMPONENT_REGISTRY: Record<string, React.ComponentType<CustomFlyoutProps>> = {
-  google_drive_connector_flyout: GoogleDriveConnectorFlyout,
+// Map custom flyout IDs to connector types for the KSCConnectorFlyout
+const KSC_CONNECTOR_FLYOUT_TYPES: Record<string, 'google_drive' | 'notion'> = {
+  google_drive_connector_flyout: 'google_drive',
+  notion_connector_flyout: 'notion',
 };
 
 export const DataConnectorsLandingPage = () => {
@@ -349,10 +345,11 @@ export const DataConnectorsLandingPage = () => {
 
           // Look up custom flyout component from registry
           if (tileData.customFlyoutComponentId) {
-            const CustomFlyout = CUSTOM_FLYOUT_COMPONENT_REGISTRY[tileData.customFlyoutComponentId];
-            if (CustomFlyout) {
+            const kscConnectorType = KSC_CONNECTOR_FLYOUT_TYPES[tileData.customFlyoutComponentId];
+            if (kscConnectorType) {
               return (
-                <CustomFlyout
+                <KSCConnectorFlyout
+                  connectorType={kscConnectorType}
                   onClose={handleCloseFlyout}
                   isEditing={isEditing}
                   onConnectionSuccess={refreshConnectors}

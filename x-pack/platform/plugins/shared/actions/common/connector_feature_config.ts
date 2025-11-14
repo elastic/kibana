@@ -29,6 +29,7 @@ export const GenerativeAIForSecurityConnectorFeatureId = 'generativeAIForSecurit
 export const GenerativeAIForObservabilityConnectorFeatureId = 'generativeAIForObservability';
 export const GenerativeAIForSearchPlaygroundConnectorFeatureId = 'generativeAIForSearchPlayground';
 export const EndpointSecurityConnectorFeatureId = 'endpointSecurity';
+export const FederatedConnectorFeatureId = 'federated';
 
 const compatibilityEndpointSecurity = i18n.translate(
   'xpack.actions.availableConnectorFeatures.compatibility.endpointSecurity',
@@ -134,6 +135,12 @@ export const EndpointSecurityConnectorFeature: ConnectorFeatureConfig = {
   compatibility: compatibilityEndpointSecurity,
 };
 
+export const FederatedSearchConnectorFeature: ConnectorFeatureConfig = {
+  id: FederatedConnectorFeatureId,
+  name: 'Federated Search',
+  compatibility: 'One Chat',
+};
+
 const AllAvailableConnectorFeatures = {
   [AlertingConnectorFeature.id]: AlertingConnectorFeature,
   [CasesConnectorFeature.id]: CasesConnectorFeature,
@@ -143,6 +150,7 @@ const AllAvailableConnectorFeatures = {
   [GenerativeAIForObservabilityFeature.id]: GenerativeAIForObservabilityFeature,
   [GenerativeAIForSearchPlaygroundFeature.id]: GenerativeAIForSearchPlaygroundFeature,
   [EndpointSecurityConnectorFeature.id]: EndpointSecurityConnectorFeature,
+  [FederatedSearchConnectorFeature.id]: FederatedSearchConnectorFeature,
 };
 
 export function areValidFeatures(ids: string[]) {
