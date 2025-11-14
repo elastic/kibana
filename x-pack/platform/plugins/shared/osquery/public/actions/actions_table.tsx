@@ -63,7 +63,8 @@ const ActionsTableComponent = () => {
   const { data: actionsData } = useAllLiveQueries({
     activePage: pageIndex,
     limit: pageSize,
-    kuery: 'user_id: *',
+    // Match documents with either new field (created_by.username) or legacy field (user_id)
+    kuery: '(created_by.username: * OR user_id: *)',
   });
 
   const onTableChange = useCallback(({ page = {} }: any) => {
@@ -101,10 +102,21 @@ const ActionsTableComponent = () => {
     []
   );
 
-  const renderCreatedByColumn = useCallback(
-    (userId: any) => (isArray(userId) ? userId[0] : '-'),
-    []
-  );
+  const renderCreatedByColumn = useCallback((_: any, item: any) => {
+    // Handle new format: created_by.username is a flattened ES field (key with dot in name)
+    const createdByUsername = item?.fields?.['created_by.username'];
+    if (createdByUsername) {
+      return isArray(createdByUsername) ? createdByUsername[0] : createdByUsername;
+    }
+
+    // Fallback to legacy format: user_id is a simple string
+    const legacyUserId = item?.fields?.user_id;
+    if (legacyUserId) {
+      return isArray(legacyUserId) ? legacyUserId[0] : legacyUserId;
+    }
+
+    return '-';
+  }, []);
 
   const renderTimestampColumn = useCallback(
     (_: any, item: any) => <>{formatDate(item.fields['@timestamp'][0])}</>,
@@ -222,7 +234,7 @@ const ActionsTableComponent = () => {
         render: renderTimestampColumn,
       },
       {
-        field: 'fields.user_id',
+        field: 'fields.created_by.username',
         name: i18n.translate('xpack.osquery.liveQueryActions.table.createdByColumnTitle', {
           defaultMessage: 'Run by',
         }),

@@ -57,9 +57,25 @@ export const actionsMapping: MappingTypeMapping = {
       type: 'keyword',
       ignore_above: 1024,
     },
-    user_id: {
-      type: 'keyword',
-      ignore_above: 1024,
+    created_by: {
+      properties: {
+        email: {
+          type: 'keyword',
+          ignore_above: 1024,
+        },
+        full_name: {
+          type: 'keyword',
+          ignore_above: 1024,
+        },
+        username: {
+          type: 'keyword',
+          ignore_above: 1024,
+        },
+        profile_uid: {
+          type: 'keyword',
+          ignore_above: 1024,
+        },
+      },
     },
     metadata: {
       type: 'object',

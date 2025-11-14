@@ -21,9 +21,10 @@ import { TELEMETRY_EBT_LIVE_QUERY_EVENT } from '../../lib/telemetry/constants';
 import type { PackSavedObject } from '../../common/types';
 import { CustomHttpRequestError } from '../../common/error';
 import { getInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
+import type { User } from '../../../common/types/user';
 
 interface Metadata {
-  currentUser: string | undefined;
+  currentUser: User | undefined;
 }
 
 interface CreateActionHandlerOptions {
@@ -94,7 +95,7 @@ export const createActionHandler = async (
     agent_platforms: params.agent_platforms,
     agent_policy_ids: params.agent_policy_ids,
     agents: selectedAgents,
-    user_id: metadata?.currentUser,
+    created_by: metadata?.currentUser,
     metadata: params.metadata,
     pack_id: params.pack_id,
     pack_name: packSO?.attributes?.name,
@@ -142,7 +143,8 @@ export const createActionHandler = async (
           type: 'INPUT_ACTION',
           input_type: 'osquery',
           agents: query.agents,
-          user_id: metadata?.currentUser,
+          // Fleet expects user_id as string for backward compatibility
+          user_id: metadata?.currentUser?.username ?? undefined,
           ...(query.timeout !== QUERY_TIMEOUT.DEFAULT ? { timeout: query.timeout } : {}),
           data: pick(query, ['id', 'query', 'ecs_mapping', 'version', 'platform']),
         })
@@ -165,7 +167,7 @@ export const createActionHandler = async (
   }
 
   osqueryContext.telemetryEventsSender.reportEvent(TELEMETRY_EBT_LIVE_QUERY_EVENT, {
-    ...omit(osqueryAction, ['type', 'input_type', 'user_id', 'error']),
+    ...omit(osqueryAction, ['type', 'input_type', 'created_by', 'error']),
     agents: osqueryAction.agents.length,
   });
 
