@@ -14,8 +14,7 @@ import type {
   OnboardClusterResponse,
   ApiKeyValidationResult,
 } from '../types';
-
-const CLOUD_API_BASE_URL = 'https://console.qa.cld.elstc.co/api/v1';
+import { CLOUD_API_BASE_URL } from '../../common/constants';
 
 export class CloudConnectClient {
   private axiosInstance: AxiosInstance;

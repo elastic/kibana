@@ -15,3 +15,8 @@ export const CLOUD_CONNECT_API_KEY_TYPE = 'cloud-connect-api-key';
  * This UUID is fixed to ensure we always retrieve the same saved object
  */
 export const CLOUD_CONNECT_API_KEY_ID = '239feff0-7e11-4413-b800-f1f1621e9c69';
+
+/**
+ * Base URL for the Cloud API
+ */
+export const CLOUD_API_BASE_URL = 'https://console.qa.cld.elstc.co/api/v1';
