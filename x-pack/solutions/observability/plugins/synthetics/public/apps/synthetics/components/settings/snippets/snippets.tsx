@@ -37,21 +37,6 @@ export interface SnippetData {
   insertText: string;
 }
 
-// const snippetsFixtures: SnippetData[] = [
-//   {
-//     name: 'Custom Snippet 1',
-//     label: 'customSnippet1',
-//     detail: 'This is a custom snippet 1',
-//     insertText: `// Custom Snippet 1\nconsole.log('This is custom snippet 1');`,
-//   },
-//   {
-//     name: 'Custom Snippet 2',
-//     label: 'customSnippet2',
-//     detail: 'This is a custom snippet 2',
-//     insertText: `// Custom Snippet 1\nconsole.log('This is custom snippet 2');`,
-//   },
-// ];
-
 export const Snippets = () => {
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const [selectedSnippet, setSelectedSnippet] = useState<SnippetData | undefined>(undefined);
