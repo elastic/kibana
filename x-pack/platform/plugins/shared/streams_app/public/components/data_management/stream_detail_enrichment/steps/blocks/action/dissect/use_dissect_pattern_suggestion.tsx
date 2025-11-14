@@ -13,6 +13,7 @@ import {
   getReviewFields,
   getDissectProcessorWithReview,
   extractDissectPatternDangerouslySlow,
+  groupMessagesByPattern,
 } from '@kbn/dissect-heuristics';
 import { get } from 'lodash';
 import { lastValueFrom } from 'rxjs';
@@ -97,8 +98,12 @@ export function useDissectPatternSuggestion() {
         connector_id: params.connectorId,
       });
 
-      // Extract dissect pattern from all messages
-      const dissectPattern = extractDissectPatternDangerouslySlow(messages);
+      // Group messages by pattern and use only the largest group
+      const groupedMessages = groupMessagesByPattern(messages);
+      const largestGroup = groupedMessages[0]; // Groups are already sorted by probability (descending)
+
+      // Extract dissect pattern from the largest group
+      const dissectPattern = extractDissectPatternDangerouslySlow(largestGroup.messages);
 
       // The only reason we're streaming the response here is to avoid timeout issues prevalent with long-running requests to LLMs.
       // There is only ever going to be a single event emitted so we can safely use `lastValueFrom`.
@@ -111,7 +116,7 @@ export function useDissectPatternSuggestion() {
               path: { name: params.streamName },
               body: {
                 connector_id: params.connectorId,
-                sample_messages: messages.slice(0, 10),
+                sample_messages: largestGroup.messages.slice(0, 10),
                 review_fields: getReviewFields(dissectPattern, 10),
               },
             },

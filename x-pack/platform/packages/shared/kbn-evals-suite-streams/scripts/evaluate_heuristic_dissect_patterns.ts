@@ -31,6 +31,7 @@ import {
   getDissectProcessorWithReview,
   extractDissectPatternDangerouslySlow,
 } from '@kbn/dissect-heuristics';
+import { groupMessagesByPattern } from '@kbn/grok-heuristics';
 import {
   KIBANA_URL,
   MESSAGE_FIELD,
@@ -95,14 +96,18 @@ export async function evaluateDissectSuggestions() {
       const sampleDocs = await fetchDocs(stream, 100);
       const messages = extractMessages(sampleDocs, MESSAGE_FIELD);
 
-      const dissectPattern = extractDissectPatternDangerouslySlow(messages);
+      // Group messages by pattern and use only the largest group
+      const groupedMessages = groupMessagesByPattern(messages);
+      const largestGroup = groupedMessages[0]; // Groups are already sorted by probability (descending)
+
+      const dissectPattern = extractDissectPatternDangerouslySlow(largestGroup.messages);
       const reviewFields = getReviewFields(dissectPattern, 10);
       console.log(`- ${stream}: ${chalk.dim(dissectPattern.pattern)}`);
 
       const suggestionData = await getSuggestions(
         stream,
         connector,
-        messages.slice(0, 10),
+        largestGroup.messages.slice(0, 10),
         reviewFields
       );
       const dissectProcessor = getDissectProcessorWithReview(

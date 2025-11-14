@@ -53,8 +53,6 @@ export function extractDissectPatternDangerouslySlow(messages: string[]): Dissec
   // Step 2: Build ordered delimiter tree (on normalized messages)
   const delimiterTree = buildDelimiterTree(normalizedStrings, delimiters);
 
-  console.log(JSON.stringify(delimiterTree, null, 2));
-
   // Step 3: Extract fields between delimiters (on normalized messages)
   const fields = extractFields(normalizedStrings, delimiterTree);
 
