@@ -469,4 +469,10 @@ export class TestSubjects extends FtrService {
       }
     );
   }
+
+  public async hasFocus(selector: string) {
+    const targetElement = await this.find(selector);
+    const activeElement = await this.findService.activeElement();
+    return (await targetElement._webElement.getId()) === (await activeElement._webElement.getId());
+  }
 }
