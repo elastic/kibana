@@ -30,9 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Discover a11y tests', () => {
     before(async () => {
       await common.navigateToApp('discover');
-      await discover.waitUntilTabIsLoaded();
       await timePicker.setCommonlyUsedTime('Last_7 days');
-      await discover.waitUntilTabIsLoaded();
     });
 
     it('Discover main page', async () => {
@@ -194,7 +192,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('a11y test for data grid in full screen', async () => {
       await testSubjects.click('dataGridFullScreenButton');
       await a11y.testAppSnapshot();
-      await browser.pressKeys(browser.keys.ESCAPE);
+      await testSubjects.click('dataGridFullScreenButton');
     });
 
     it('a11y test for field statistics data grid view', async () => {
