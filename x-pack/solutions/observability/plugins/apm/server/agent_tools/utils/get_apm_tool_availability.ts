@@ -44,7 +44,7 @@ export async function getApmToolAvailability({
       ? { status: 'available' }
       : { status: 'unavailable', reason: 'No historical APM data' };
   } catch (e: any) {
-    logger.debug(`Failed to check observability agent availability: ${e?.message}`);
+    logger.error(`Failed to check observability agent availability: ${e?.message}`);
     logger.debug(e);
 
     return {

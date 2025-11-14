@@ -12,9 +12,9 @@ import { ToolType } from '@kbn/onechat-common';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import { buildApmToolResources } from './utils/build_apm_tool_resources';
 import { getApmToolAvailability } from './utils/get_apm_tool_availability';
-import { getAssistantDownstreamDependencies } from '../routes/assistant_functions/get_apm_downstream_dependencies';
+import { getApmDownstreamDependencies } from '../routes/assistant_functions/get_apm_downstream_dependencies';
+import { OBSERVABILITY_GET_APM_DOWNSTREAM_DEPENDENCIES_TOOL_ID } from '../../common/observability_agent/agent_tool_ids';
 import type { APMPluginSetupDependencies, APMPluginStartDependencies } from '../types';
-import { OBSERVABILITY_GET_APM_DOWNSTREAM_DEPENDENCIES_TOOL_ID } from '../../common/agent_tool_ids';
 
 const schema = z.object({
   serviceName: z.string().min(1).describe('The name of the service'),
@@ -24,8 +24,14 @@ const schema = z.object({
     .describe(
       'The environment that the service is running in. Leave empty to query for all environments.'
     ),
-  start: z.string().min(1).describe('The start time in date math (e.g., now-24h)'),
-  end: z.string().min(1).describe('The end time in date math (e.g., now)'),
+  start: z
+    .string()
+    .min(1)
+    .describe('The start of the time range, in Elasticsearch date math, like `now-24h`.'),
+  end: z
+    .string()
+    .min(1)
+    .describe('The end of the time range, in Elasticsearch date math, like `now`.'),
 });
 
 export function createApmDownstreamDependenciesTool({
@@ -41,31 +47,29 @@ export function createApmDownstreamDependenciesTool({
     id: OBSERVABILITY_GET_APM_DOWNSTREAM_DEPENDENCIES_TOOL_ID,
     type: ToolType.builtin,
     description:
-      'Get downstream dependencies (services or uninstrumented backends) for a given APM service and time range.',
+      'Get downstream dependencies (services or uninstrumented backends) for a given service and time range.',
     schema,
-    tags: ['apm', 'dependencies', 'observability'],
+    tags: ['observability', 'apm', 'dependencies'],
     availability: {
       cacheMode: 'space',
       handler: async ({ request }) => {
         return getApmToolAvailability({ core, plugins, request, logger });
       },
     },
-    handler: async (args, { request, logger: scopedLogger }) => {
+    handler: async (args, context) => {
+      const { request, esClient, logger: scopedLogger } = context;
+
       try {
         const { apmEventClient, randomSampler } = await buildApmToolResources({
           core,
           plugins,
           request,
+          esClient,
           logger: scopedLogger,
         });
 
-        const result = await getAssistantDownstreamDependencies({
-          arguments: {
-            serviceName: args.serviceName,
-            serviceEnvironment: args.serviceEnvironment,
-            start: args.start,
-            end: args.end,
-          },
+        const result = await getApmDownstreamDependencies({
+          arguments: args,
           apmEventClient,
           randomSampler,
         });
@@ -79,7 +83,9 @@ export function createApmDownstreamDependenciesTool({
           ],
         };
       } catch (error) {
-        logger.error(`APM downstream dependencies tool failed: ${error.message}`);
+        logger.error(`Error getting APM downstream dependencies: ${error.message}`);
+        logger.debug(error);
+
         return {
           results: [
             {

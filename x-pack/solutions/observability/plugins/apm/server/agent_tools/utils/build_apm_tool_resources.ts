@@ -6,16 +6,15 @@
  */
 
 import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
-import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import type { DataTier } from '@kbn/observability-shared-plugin/common';
-import { searchExcludedDataTiers } from '@kbn/observability-plugin/common/ui_settings_keys';
+import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { APMPluginSetupDependencies, APMPluginStartDependencies } from '../../types';
-import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
 import { hasHistoricalAgentData } from '../../routes/historical_data/has_historical_agent_data';
+import type { MinimalApmPluginRequestHandlerContext } from '../../routes/typings';
 
 export interface ApmToolResources {
-  apmEventClient: APMEventClient;
+  apmEventClient: Awaited<ReturnType<typeof getApmEventClient>>;
   randomSampler: Awaited<ReturnType<typeof getRandomSampler>>;
   hasHistoricalData: boolean;
 }
@@ -24,43 +23,50 @@ export async function buildApmToolResources({
   core,
   plugins,
   request,
+  esClient,
   logger,
 }: {
   core: CoreSetup<APMPluginStartDependencies>;
   plugins: APMPluginSetupDependencies;
   request: KibanaRequest;
+  esClient?: IScopedClusterClient;
   logger: Logger;
 }): Promise<ApmToolResources> {
   const [coreStart] = await core.getStartServices();
-
+  const esScoped = esClient ?? coreStart.elasticsearch.client.asScoped(request);
   const soClient = coreStart.savedObjects.getScopedClient(request, { includedHiddenTypes: [] });
-  const apmIndices = await plugins.apmDataAccess.getApmIndices(soClient);
-
   const uiSettingsClient = coreStart.uiSettings.asScopedToClient(soClient);
-  const [includeFrozen, excludedDataTiers] = await Promise.all([
-    uiSettingsClient.get<boolean>(UI_SETTINGS.SEARCH_INCLUDE_FROZEN),
-    uiSettingsClient.get<DataTier[]>(searchExcludedDataTiers),
+
+  const contextAdapter = {
+    core: Promise.resolve({
+      savedObjects: { client: soClient },
+      uiSettings: { client: uiSettingsClient },
+      elasticsearch: { client: esScoped },
+    }),
+  } as unknown as MinimalApmPluginRequestHandlerContext;
+
+  const [apmEventClient, randomSampler] = await Promise.all([
+    getApmEventClient({
+      context: contextAdapter,
+      request,
+      params: {
+        query: {
+          _inspect: false,
+        },
+      },
+      getApmIndices: async () => {
+        return plugins.apmDataAccess.getApmIndices(soClient);
+      },
+    }),
+    getRandomSampler({
+      coreStart,
+      request,
+      probability: 1,
+    }),
   ]);
 
-  const esScoped = coreStart.elasticsearch.client.asScoped(request);
-  const apmEventClient = new APMEventClient({
-    esClient: esScoped.asCurrentUser,
-    debug: false,
-    request,
-    indices: apmIndices,
-    options: {
-      includeFrozen,
-      excludedDataTiers,
-    },
-  });
-
-  const randomSampler = await getRandomSampler({
-    coreStart,
-    request,
-    probability: 1,
-  });
-
-  const hasHistoricalData = await hasHistoricalAgentData(apmEventClient as any);
+  const hasHistoricalData = await hasHistoricalAgentData(apmEventClient);
+  logger.debug(`Has historical data: ${hasHistoricalData}`);
 
   return { apmEventClient, randomSampler, hasHistoricalData };
 }

@@ -17,7 +17,7 @@ import { getApmServiceList } from '../routes/assistant_functions/get_apm_service
 import type { APMPluginSetupDependencies, APMPluginStartDependencies } from '../types';
 import { ServiceHealthStatus } from '../../common/service_health_status';
 import { APM_ALERTING_RULE_TYPE_IDS } from '../../common/alerting/config/apm_alerting_feature_ids';
-import { OBSERVABILITY_GET_SERVICES_TOOL_ID } from '../../common/agent_tool_ids';
+import { OBSERVABILITY_GET_SERVICES_TOOL_ID } from '../../common/observability_agent/agent_tool_ids';
 
 const schema = z.object({
   serviceEnvironment: z
@@ -53,32 +53,24 @@ export function createApmGetServicesTool({
     type: ToolType.builtin,
     description: 'Get the list of monitored APM services, their health status, and alerts.',
     schema,
-    tags: ['apm', 'services', 'observability'],
+    tags: ['observability', 'apm', 'services'],
     availability: {
       cacheMode: 'space',
       handler: async ({ request }) => {
         return getApmToolAvailability({ core, plugins, request, logger });
       },
     },
-    handler: async (args, { request, logger: scopedLogger }) => {
+    handler: async (args, context) => {
+      const { request, esClient, logger: scopedLogger } = context;
+
       try {
-        const { apmEventClient, randomSampler, hasHistoricalData } = await buildApmToolResources({
+        const { apmEventClient, randomSampler } = await buildApmToolResources({
           core,
           plugins,
           request,
+          esClient,
           logger: scopedLogger,
         });
-
-        if (!hasHistoricalData) {
-          return {
-            results: [
-              {
-                type: ToolResultType.other,
-                data: { services: [] },
-              },
-            ],
-          };
-        }
 
         // Alerts client adapter
         const [coreStart, pluginStarts] = await core.getStartServices();
@@ -89,7 +81,6 @@ export function createApmGetServicesTool({
           coreStart.savedObjects.getScopedClient(request)
         );
         const excludedDataTiers = await uiSettingsClient.get<any>(
-          // typed in helper; keep any to avoid import churn
           '@kbn/observability:searchExcludedDataTiers'
         );
         const apmAlertsClient = {

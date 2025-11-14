@@ -11,7 +11,7 @@ import type { StaticToolRegistration } from '@kbn/onechat-server';
 import {
   OBSERVABILITY_GET_APM_DOWNSTREAM_DEPENDENCIES_TOOL_ID,
   OBSERVABILITY_GET_SERVICES_TOOL_ID,
-} from '@kbn/apm-plugin/common/agent_tool_ids';
+} from '@kbn/apm-plugin/common/observability_agent/agent_tool_ids';
 import {
   OBSERVABILITY_GET_DATA_SOURCES_TOOL_ID,
   createGetDataSourcesTool,
