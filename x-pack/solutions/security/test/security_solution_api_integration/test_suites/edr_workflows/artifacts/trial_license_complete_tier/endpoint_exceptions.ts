@@ -14,23 +14,141 @@ import {
 } from '@kbn/securitysolution-list-constants';
 import {
   ALL_ENDPOINT_ARTIFACT_LIST_IDS,
+  BY_POLICY_ARTIFACT_TAG_PREFIX,
   GLOBAL_ARTIFACT_TAG,
 } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts/constants';
 import { ExceptionsListItemGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/exceptions_list_item_generator';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { ArtifactTestData } from '../../../../../security_solution_endpoint/services/endpoint_artifacts';
+import type { PolicyTestResourceInfo } from '../../../../../security_solution_endpoint/services/endpoint_policy';
 import { ROLE } from '../../../../config/services/security_solution_edr_workflows_roles_users';
 import { createSupertestErrorLogger } from '../../utils';
 import type { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 
 export default function ({ getService }: FtrProviderContext) {
+  const endpointPolicyTestResources = getService('endpointPolicyTestResources');
   const endpointArtifactTestResources = getService('endpointArtifactTestResources');
   const utils = getService('securitySolutionUtils');
   const log = getService('log');
 
-  describe('@ess @serverless Endpoint artifacts (via lists plugin): Endpoint Exceptions', function () {
+  // @skipInServerlessMKI due to authentication issues - we should migrate from Basic to Bearer token when available
+  // @skipInServerlessMKI - if you are removing this annotation, make sure to add the test suite to the MKI pipeline in .buildkite/pipelines/security_solution_quality_gate/mki_periodic/mki_periodic_defend_workflows.yml
+  describe('@ess @serverless @skipInServerlessMKI Endpoint artifacts (via lists plugin): Endpoint Exceptions', function () {
+    let fleetEndpointPolicy: PolicyTestResourceInfo;
+
+    let t1AnalystSupertest: TestAgent;
+    let endpointPolicyManagerSupertest: TestAgent;
     let endpointOpsAnalystSupertest: TestAgent;
 
     before(async () => {
+      t1AnalystSupertest = await utils.createSuperTest(ROLE.t1_analyst);
+      endpointPolicyManagerSupertest = await utils.createSuperTest(ROLE.endpoint_policy_manager);
       endpointOpsAnalystSupertest = await utils.createSuperTest(ROLE.endpoint_operations_analyst);
+
+      // Create an endpoint policy in fleet we can work with
+      fleetEndpointPolicy = await endpointPolicyTestResources.createPolicy();
+    });
+
+    after(async () => {
+      if (fleetEndpointPolicy) {
+        await fleetEndpointPolicy.cleanup();
+      }
+    });
+
+    const exceptionsGenerator = new ExceptionsListItemGenerator();
+    let endpointExceptionData: ArtifactTestData;
+
+    type EndpointExceptionApiCallsInterface<BodyReturnType = unknown> = Array<{
+      method: keyof Pick<TestAgent, 'post' | 'put' | 'get' | 'delete' | 'patch'>;
+      info?: string;
+      path: string;
+      // The body just needs to have the properties we care about in the tests. This should cover most
+      // mocks used for testing that support different interfaces
+      getBody: () => BodyReturnType;
+    }>;
+
+    const endpointExceptionCalls: EndpointExceptionApiCallsInterface<
+      Pick<ExceptionListItemSchema, 'item_id' | 'namespace_type' | 'os_types' | 'tags' | 'entries'>
+    > = [
+      {
+        method: 'post',
+        info: 'create single item',
+        path: EXCEPTION_LIST_ITEM_URL,
+        getBody: () =>
+          exceptionsGenerator.generateEndpointExceptionForCreate({
+            tags: endpointExceptionData.artifact.tags,
+          }),
+      },
+      {
+        method: 'put',
+        info: 'update single item',
+        path: EXCEPTION_LIST_ITEM_URL,
+        getBody: () =>
+          exceptionsGenerator.generateEndpointExceptionForUpdate({
+            id: endpointExceptionData.artifact.id,
+            item_id: endpointExceptionData.artifact.item_id,
+            tags: endpointExceptionData.artifact.tags,
+            _version: endpointExceptionData.artifact._version,
+          }),
+      },
+    ];
+
+    const needsWritePrivilege: EndpointExceptionApiCallsInterface = [
+      {
+        method: 'delete',
+        info: 'delete single item',
+        get path() {
+          return `${EXCEPTION_LIST_ITEM_URL}?item_id=${endpointExceptionData.artifact.item_id}&namespace_type=${endpointExceptionData.artifact.namespace_type}`;
+        },
+        getBody: () => undefined,
+      },
+    ];
+
+    const needsReadPrivilege: EndpointExceptionApiCallsInterface = [
+      {
+        method: 'get',
+        info: 'single item',
+        get path() {
+          return `${EXCEPTION_LIST_ITEM_URL}?item_id=${endpointExceptionData.artifact.item_id}&namespace_type=${endpointExceptionData.artifact.namespace_type}`;
+        },
+        getBody: () => undefined,
+      },
+      {
+        method: 'get',
+        info: 'list summary',
+        get path() {
+          return `${EXCEPTION_LIST_URL}/summary?list_id=${endpointExceptionData.artifact.list_id}&namespace_type=${endpointExceptionData.artifact.namespace_type}`;
+        },
+        getBody: () => undefined,
+      },
+      {
+        method: 'get',
+        info: 'find items',
+        get path() {
+          return `${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${endpointExceptionData.artifact.list_id}&namespace_type=${endpointExceptionData.artifact.namespace_type}&page=1&per_page=1&sort_field=name&sort_order=asc`;
+        },
+        getBody: () => undefined,
+      },
+      {
+        method: 'post',
+        info: 'list export',
+        get path() {
+          return `${EXCEPTION_LIST_URL}/_export?list_id=${endpointExceptionData.artifact.list_id}&namespace_type=${endpointExceptionData.artifact.namespace_type}&id=${endpointExceptionData.artifact.id}&include_expired_exceptions=true`;
+        },
+        getBody: () => undefined,
+      },
+    ];
+
+    beforeEach(async () => {
+      endpointExceptionData = await endpointArtifactTestResources.createEndpointException({
+        tags: [`${BY_POLICY_ARTIFACT_TAG_PREFIX}${fleetEndpointPolicy.packagePolicy.id}`],
+      });
+    });
+
+    afterEach(async () => {
+      if (endpointExceptionData) {
+        await endpointExceptionData.cleanup();
+      }
     });
 
     describe(`and using Import API`, function () {
@@ -140,8 +258,96 @@ ${JSON.stringify(createItem())}
 
         for (const endpointException of body.data) {
           expect(endpointException.tags).to.include.string(GLOBAL_ARTIFACT_TAG);
+
+          const deleteUrl = `${EXCEPTION_LIST_ITEM_URL}?item_id=${endpointException.item_id}&namespace_type=${endpointException.namespace_type}`;
+          await endpointOpsAnalystSupertest.delete(deleteUrl).set('kbn-xsrf', 'true');
         }
       });
+    });
+
+    describe('and has authorization to manage endpoint security', () => {
+      for (const endpointExceptionApiCall of endpointExceptionCalls) {
+        it(`should work on [${endpointExceptionApiCall.method}] with valid entry`, async () => {
+          const body = endpointExceptionApiCall.getBody();
+
+          // Using superuser here as we need custom license for this action
+          await endpointPolicyManagerSupertest[endpointExceptionApiCall.method](
+            endpointExceptionApiCall.path
+          )
+            .set('kbn-xsrf', 'true')
+            .send(body)
+            .expect(200);
+
+          const deleteUrl = `${EXCEPTION_LIST_ITEM_URL}?item_id=${body.item_id}&namespace_type=${body.namespace_type}`;
+          await endpointPolicyManagerSupertest.delete(deleteUrl).set('kbn-xsrf', 'true');
+        });
+
+        it(`should work on [${endpointExceptionApiCall.method}] if more than one OS is set`, async () => {
+          const body = endpointExceptionApiCall.getBody();
+          body.os_types = ['linux', 'windows'];
+
+          await endpointPolicyManagerSupertest[endpointExceptionApiCall.method](
+            endpointExceptionApiCall.path
+          )
+            .set('kbn-xsrf', 'true')
+            .send(body)
+            .expect(200);
+
+          const deleteUrl = `${EXCEPTION_LIST_ITEM_URL}?item_id=${body.item_id}&namespace_type=${body.namespace_type}`;
+          await endpointPolicyManagerSupertest.delete(deleteUrl).set('kbn-xsrf', 'true');
+        });
+      }
+      for (const endpointExceptionApiCall of [...needsWritePrivilege, ...needsReadPrivilege]) {
+        it(`should not error on [${endpointExceptionApiCall.method}] - [${endpointExceptionApiCall.info}]`, async () => {
+          await endpointPolicyManagerSupertest[endpointExceptionApiCall.method](
+            endpointExceptionApiCall.path
+          )
+            .set('kbn-xsrf', 'true')
+            .send(endpointExceptionApiCall.getBody() as object)
+            .expect(200);
+        });
+      }
+    });
+
+    describe('@skipInServerless and user has authorization to read endpoint exceptions', function () {
+      let hunterSupertest: TestAgent;
+
+      before(async () => {
+        hunterSupertest = await utils.createSuperTest(ROLE.hunter);
+      });
+
+      for (const endpointExceptionApiCall of [...endpointExceptionCalls, ...needsWritePrivilege]) {
+        it(`should error on [${endpointExceptionApiCall.method}] - [${endpointExceptionApiCall.info}]`, async () => {
+          await hunterSupertest[endpointExceptionApiCall.method](endpointExceptionApiCall.path)
+            .set('kbn-xsrf', 'true')
+            .send(endpointExceptionApiCall.getBody() as object)
+            .expect(403);
+        });
+      }
+
+      for (const endpointExceptionApiCall of needsReadPrivilege) {
+        it(`should not error on [${endpointExceptionApiCall.method}] - [${endpointExceptionApiCall.info}]`, async () => {
+          await hunterSupertest[endpointExceptionApiCall.method](endpointExceptionApiCall.path)
+            .set('kbn-xsrf', 'true')
+            .send(endpointExceptionApiCall.getBody() as object)
+            .expect(200);
+        });
+      }
+    });
+
+    describe('and user has no authorization to endpoint exceptions', () => {
+      for (const endpointExceptionApiCall of [
+        ...endpointExceptionCalls,
+        ...needsWritePrivilege,
+        ...needsReadPrivilege,
+      ]) {
+        it(`should error on [${endpointExceptionApiCall.method}] - [${endpointExceptionApiCall.info}]`, async () => {
+          await t1AnalystSupertest[endpointExceptionApiCall.method](endpointExceptionApiCall.path)
+            .set('kbn-xsrf', 'true')
+            .send(endpointExceptionApiCall.getBody() as object)
+            .expect(403);
+        });
+      }
     });
   });
 }
