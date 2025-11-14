@@ -117,6 +117,7 @@ evaluate.describe('Streams feature identification', { tag: '@svlOblt' }, () => {
           await apiServices.streams.updateStream(stream.name, {
             ingest: {
               ...stream.ingest,
+              type: 'wired',
               wired: {
                 ...(stream.ingest as WiredIngest).wired,
                 fields: {
@@ -319,7 +320,10 @@ evaluate.describe('Streams feature identification', { tag: '@svlOblt' }, () => {
     evaluate.describe(dataset.name, () => {
       evaluate.beforeEach(async ({ apiServices }) => {
         await apiServices.streams.enable();
-        await apiServices.streams.forkStream('logs', 'logs.serverless', { always: {} });
+        await apiServices.streams.forkStream('logs', 'logs.serverless', {
+          type: 'always',
+          always: {},
+        });
       });
 
       evaluate.afterEach(async ({ apiServices, esClient }) => {
@@ -361,13 +365,17 @@ evaluate.describe('Streams feature identification', { tag: '@svlOblt' }, () => {
         await apiServices.streams.enable();
 
         await apiServices.streams.forkStream('logs', 'logs.loghub', {
+          type: 'and',
           and: [
             {
+              type: 'filter',
               field: 'attributes.filepath',
               exists: true,
             },
             {
+              type: 'not',
               not: {
+                type: 'filter',
                 field: 'attributes.filepath',
                 eq: 'Android.log',
               },
@@ -430,7 +438,7 @@ evaluate.describe('Streams feature identification', { tag: '@svlOblt' }, () => {
     evaluate.describe(dataset.name, () => {
       evaluate.beforeEach(async ({ apiServices }) => {
         await apiServices.streams.enable();
-        await apiServices.streams.forkStream('logs', 'logs.mixed', { always: {} });
+        await apiServices.streams.forkStream('logs', 'logs.mixed', { type: 'always', always: {} });
       });
 
       evaluate.afterEach(async ({ apiServices, esClient }) => {

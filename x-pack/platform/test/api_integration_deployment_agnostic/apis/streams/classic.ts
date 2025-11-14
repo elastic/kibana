@@ -77,7 +77,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                     steps: [
                       {
                         action: 'grok',
-                        where: { always: {} },
+                        where: { type: 'always', always: {} },
                         from: 'nested.message',
                         patterns: [
                           '%{TIMESTAMP_ISO8601:inner_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message2}',
@@ -130,7 +130,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   patterns: [
                     '%{TIMESTAMP_ISO8601:inner_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message2}',
                   ],
-                  where: { always: {} },
+                  where: { type: 'always', always: {} },
                 },
               ],
             },
@@ -458,7 +458,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 steps: [
                   {
                     action: 'grok',
-                    where: { always: {} },
+                    where: { type: 'always', always: {} },
                     from: 'message',
                     patterns: [
                       '%{TIMESTAMP_ISO8601:inner_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message2}',
@@ -521,7 +521,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 steps: [
                   {
                     action: 'grok',
-                    where: { always: {} },
+                    where: { type: 'always', always: {} },
                     from: 'message',
                     patterns: [
                       '%{TIMESTAMP_ISO8601:inner_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message2}',
@@ -640,7 +640,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                         },
                       },
                     ],
-                    where: { always: {} },
+                    where: { type: 'always', always: {} },
                   },
                 ],
               },
@@ -696,7 +696,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                         },
                       } as any,
                     ],
-                    where: { always: {} },
+                    where: { type: 'always', always: {} },
                   },
                 ],
               },

@@ -17,6 +17,7 @@ const rootStreamDefinition: Streams.WiredStream.Definition = {
   name: 'logs',
   description: '',
   ingest: {
+    type: 'wired',
     lifecycle: { dsl: {} },
     processing: { steps: [] },
     settings: {},
@@ -83,6 +84,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           description: '',
           ingest: {
             ...rootStreamDefinition.ingest,
+            type: 'wired',
             processing: {
               steps: [
                 {
@@ -91,7 +93,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   patterns: [
                     '%{TIMESTAMP_ISO8601:attributes.inner_timestamp} %{LOGLEVEL:severity_text} %{GREEDYDATA:attributes.message2}',
                   ],
-                  where: { always: {} },
+                  where: { type: 'always', always: {} },
                 },
               ],
             },
@@ -145,6 +147,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 {
                   destination: 'logs.gcpcloud',
                   where: {
+                    type: 'filter',
                     field: 'cloud.provider',
                     eq: 'gcp',
                   },

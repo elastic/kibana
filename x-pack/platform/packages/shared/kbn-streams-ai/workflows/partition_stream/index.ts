@@ -9,8 +9,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
 import type { Streams } from '@kbn/streams-schema';
-import { isEqual } from 'lodash';
-import { conditionSchema, type Condition } from '@kbn/streamlang';
+import { conditionSchema, ensureConditionType, type Condition } from '@kbn/streamlang';
 import { DeepStrict } from '@kbn/zod-helpers';
 import { clusterLogs } from '../../src/cluster_logs/cluster_logs';
 import { SuggestStreamPartitionsPrompt } from './prompt';
@@ -96,6 +95,7 @@ export async function partitionStream({
     response?.toolCalls
       ?.flatMap((toolCall) => toolCall.function.arguments.partitions ?? [])
       .map(({ name, condition }) => {
+        const typedCondition = ensureConditionType(condition as Condition);
         // Sanitize name to be alphanumeric with dashes only, lowercase
         const sanitizedName = name
           .toLowerCase()
@@ -104,12 +104,12 @@ export async function partitionStream({
           .replace(/^-+|-+$/g, '');
         return {
           name: `${definition.name}.${sanitizedName}`,
-          condition: condition as Condition,
+          condition: typedCondition,
         };
       }) ?? [];
 
   return proposedPartitions.filter(
     ({ condition }) =>
-      strictConditionSchema.safeParse(condition).success && !isEqual(condition, { always: {} })
+      strictConditionSchema.safeParse(condition).success && condition.type !== 'always'
   );
 }

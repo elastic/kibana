@@ -219,7 +219,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 routing: [
                   {
                     destination: 'logs.overrides.lifecycle',
-                    where: { never: {} },
+                    where: { type: 'never', never: {} },
                     status: 'disabled',
                   },
                 ],
@@ -275,7 +275,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 routing: [
                   {
                     destination: 'logs.10d.20d.inherits',
-                    where: { never: {} },
+                    where: { type: 'never', never: {} },
                     status: 'disabled',
                   },
                 ],
@@ -349,7 +349,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 wired: {
                   fields: {},
                   routing: [
-                    { destination: 'logs.ilm.stream', where: { never: {} }, status: 'disabled' },
+                    { destination: 'logs.ilm.stream', where: { type: 'never', never: {} }, status: 'disabled' },
                   ],
                 },
                 lifecycle: { ilm: { policy: 'my-policy' } },

@@ -109,30 +109,32 @@ export const shorthandUnaryFilterConditionSchema = z.object({
   exists: z.boolean().optional(),
 });
 
-export type FilterCondition = ShorthandBinaryFilterCondition | ShorthandUnaryFilterCondition;
-
-export const filterConditionSchema = z.union([
-  shorthandBinaryFilterConditionSchema,
-  shorthandUnaryFilterConditionSchema,
-]);
+export type FilterCondition =
+  | (ShorthandBinaryFilterCondition & { type: 'filter' })
+  | (ShorthandUnaryFilterCondition & { type: 'filter' });
 
 export interface AndCondition {
+  type: 'and';
   and: Condition[];
 }
 
 export interface OrCondition {
+  type: 'or';
   or: Condition[];
 }
 
 export interface AlwaysCondition {
+  type: 'always';
   always: {};
 }
 
 export interface NeverCondition {
+  type: 'never';
   never: {};
 }
 
 export interface NotCondition {
+  type: 'not';
   not: Condition;
 }
 
@@ -144,30 +146,128 @@ export type Condition =
   | NeverCondition
   | AlwaysCondition;
 
-export const conditionSchema: z.Schema<Condition> = z.lazy(() =>
-  z.union([
-    filterConditionSchema,
-    andConditionSchema,
-    orConditionSchema,
-    notConditionSchema,
-    neverConditionSchema,
-    alwaysConditionSchema,
-  ])
+const typedFilterConditionObjectSchema = z.object({
+  type: z.literal('filter'),
+  field: NonEmptyString,
+  eq: stringOrNumberOrBoolean.optional(),
+  neq: stringOrNumberOrBoolean.optional(),
+  lt: stringOrNumberOrBoolean.optional(),
+  lte: stringOrNumberOrBoolean.optional(),
+  gt: stringOrNumberOrBoolean.optional(),
+  gte: stringOrNumberOrBoolean.optional(),
+  contains: stringOrNumberOrBoolean.optional(),
+  startsWith: stringOrNumberOrBoolean.optional(),
+  endsWith: stringOrNumberOrBoolean.optional(),
+  range: rangeConditionSchema.optional(),
+  exists: z.boolean().optional(),
+});
+
+const typedFilterConditionSchema = typedFilterConditionObjectSchema;
+
+const typedShorthandBinaryFilterConditionSchema = typedFilterConditionObjectSchema.superRefine(
+  (condition, ctx) => {
+    const hasExists = 'exists' in condition;
+    const hasOperator = BINARY_OPERATORS.some((key) => key in condition);
+
+    if (hasExists) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Binary filter conditions cannot include exists',
+      });
+    }
+
+    if (!hasOperator) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'At least one operator must be specified',
+      });
+    }
+  }
 );
 
-export const andConditionSchema = z.object({ and: z.array(conditionSchema) });
-export const orConditionSchema = z.object({ or: z.array(conditionSchema) });
-export const neverConditionSchema = z.object({ never: z.strictObject({}) });
-export const alwaysConditionSchema = z.object({ always: z.strictObject({}) });
-export const notConditionSchema = z.object({ not: z.lazy(() => conditionSchema) });
+const typedShorthandUnaryFilterConditionSchema = typedFilterConditionObjectSchema.superRefine(
+  (condition, ctx) => {
+    const hasOperator = BINARY_OPERATORS.some((key) => key in condition);
+    if (hasOperator) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Unary filter conditions cannot include binary operators',
+      });
+    }
+  }
+);
+
+export const filterConditionSchema = typedFilterConditionSchema;
+
+const conditionSchemaInternal: z.ZodType<Condition> = z.lazy(
+  () =>
+    z.discriminatedUnion('type', [
+      typedFilterConditionObjectSchema,
+      z.object({ type: z.literal('and'), and: z.array(conditionSchemaInternal) }),
+      z.object({ type: z.literal('or'), or: z.array(conditionSchemaInternal) }),
+      z.object({ type: z.literal('not'), not: conditionSchemaInternal }),
+      z.object({ type: z.literal('never'), never: z.strictObject({}) }),
+      z.object({ type: z.literal('always'), always: z.strictObject({}) }),
+    ]) as unknown as z.ZodType<Condition>
+);
+
+export const conditionSchema = z
+  .preprocess(
+    (value) => ensureConditionType(value as LegacyCondition | Condition),
+    conditionSchemaInternal
+  )
+  .superRefine((obj, ctx) => {
+    if ((obj as any)?.type !== 'filter') return;
+
+    const condition = obj as Record<string, unknown>;
+    const hasOperator = BINARY_OPERATORS.some((key) => key in condition);
+    const hasExists = 'exists' in condition;
+
+    if (hasOperator && hasExists) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Filter condition cannot mix exists with other operators',
+      });
+      return;
+    }
+
+    if (hasExists) {
+      return;
+    }
+
+    if (!hasOperator) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'At least one operator must be specified',
+      });
+    }
+  });
+
+export const andConditionSchema = z.lazy(() =>
+  z.object({ type: z.literal('and'), and: z.array(conditionSchema) })
+);
+export const orConditionSchema = z.lazy(() =>
+  z.object({ type: z.literal('or'), or: z.array(conditionSchema) })
+);
+export const neverConditionSchema = z.object({
+  type: z.literal('never'),
+  never: z.strictObject({}),
+});
+export const alwaysConditionSchema = z.object({
+  type: z.literal('always'),
+  always: z.strictObject({}),
+});
+export const notConditionSchema = z.lazy(() =>
+  z.object({ type: z.literal('not'), not: conditionSchema })
+);
 
 export const isBinaryFilterCondition = createIsNarrowSchema(
   conditionSchema,
-  shorthandBinaryFilterConditionSchema
+  typedShorthandBinaryFilterConditionSchema
 );
 export const isUnaryFilterCondition = createIsNarrowSchema(
   conditionSchema,
-  shorthandUnaryFilterConditionSchema
+  typedShorthandUnaryFilterConditionSchema
 );
 export const isFilterCondition = createIsNarrowSchema(conditionSchema, filterConditionSchema);
 
@@ -179,6 +279,69 @@ export const isNotCondition = createIsNarrowSchema(conditionSchema, notCondition
 
 export const isCondition = createIsNarrowSchema(z.unknown(), conditionSchema);
 
-export const ALWAYS_CONDITION: AlwaysCondition = Object.freeze({ always: {} });
+type LegacyCondition =
+  | ShorthandBinaryFilterCondition
+  | ShorthandUnaryFilterCondition
+  | { and: LegacyCondition[] }
+  | { or: LegacyCondition[] }
+  | { not: LegacyCondition }
+  | { type: 'never'; never: {} }
+  | { type: 'always'; always: {} };
 
-export const NEVER_CONDITION: NeverCondition = Object.freeze({ never: {} });
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
+
+const cloneFilterCondition = (
+  condition: ShorthandBinaryFilterCondition | ShorthandUnaryFilterCondition
+) =>
+  ({
+    type: 'filter',
+    ...condition,
+  } as FilterCondition);
+
+export const ensureConditionType = (condition: LegacyCondition | Condition): Condition => {
+  if (!isRecord(condition)) {
+    return condition as Condition;
+  }
+
+  if ('type' in condition) {
+    return condition as Condition;
+  }
+
+  if ('and' in condition && Array.isArray(condition.and)) {
+    return {
+      type: 'and',
+      and: condition.and.map(ensureConditionType),
+    };
+  }
+
+  if ('or' in condition && Array.isArray(condition.or)) {
+    return {
+      type: 'or',
+      or: condition.or.map(ensureConditionType),
+    };
+  }
+
+  if ('not' in condition && condition.not) {
+    return {
+      type: 'not',
+      not: ensureConditionType(condition.not),
+    };
+  }
+
+  if ('always' in condition) {
+    return { type: 'always', always: {} };
+  }
+
+  if ('never' in condition) {
+    return { type: 'never', never: {} };
+  }
+
+  return cloneFilterCondition(
+    condition as unknown as ShorthandBinaryFilterCondition | ShorthandUnaryFilterCondition
+  );
+};
+
+export const ALWAYS_CONDITION: AlwaysCondition = Object.freeze({ type: 'always', always: {} });
+
+export const NEVER_CONDITION: NeverCondition = Object.freeze({ type: 'never', never: {} });

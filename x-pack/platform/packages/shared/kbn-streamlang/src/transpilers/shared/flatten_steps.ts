@@ -17,7 +17,7 @@ import { isWhereBlockSchema } from '../../../types/streamlang';
 function combineConditionsAsAnd(condA?: Condition, condB?: Condition) {
   if (!condA) return condB;
   if (!condB) return condA;
-  return { and: [condA, condB] };
+  return { type: 'and', and: [condA, condB] };
 }
 
 /**

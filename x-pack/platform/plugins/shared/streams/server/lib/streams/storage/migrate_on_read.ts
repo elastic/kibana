@@ -10,7 +10,12 @@ import { Streams } from '@kbn/streams-schema';
 import type { BaseStream } from '@kbn/streams-schema/src/models/base';
 import { set } from '@kbn/safer-lodash-set';
 import type { Condition } from '@kbn/streamlang';
-import { isNeverCondition } from '@kbn/streamlang';
+import {
+  ALWAYS_CONDITION,
+  ensureConditionType,
+  ensureStreamlangDSLHasTypedConditions,
+  isNeverCondition,
+} from '@kbn/streamlang';
 import {
   migrateRoutingIfConditionToStreamlang,
   migrateOldProcessingArrayToStreamlang,
@@ -83,28 +88,89 @@ export function migrateOnRead(definition: Record<string, unknown>): Streams.all.
       Record<string, unknown>
     >;
 
+    let routingMigrated = false;
+
     const migratedRouting = routings.map((route) => {
+      if (!('where' in route) || !route.where) {
+        return route;
+      }
+
+      const typedWhere = ensureConditionType(route.where as Condition);
+      const whereChanged = typedWhere !== route.where;
+
       // If route doesn't have status field, add it based on the condition
-      if (!('status' in route) && 'where' in route) {
-        const isDisabledCondition = isNeverCondition(route.where as Condition);
+      if (!('status' in route)) {
+        const isDisabledCondition = isNeverCondition(typedWhere);
+
+        routingMigrated = routingMigrated || whereChanged || isDisabledCondition;
 
         return {
           ...route,
-          where: isDisabledCondition ? { always: {} } : route.where,
+          where: isDisabledCondition ? ALWAYS_CONDITION : typedWhere,
           status: isDisabledCondition ? 'disabled' : 'enabled',
         };
       }
-      return route;
+
+      routingMigrated = routingMigrated || whereChanged;
+      return whereChanged
+        ? {
+            ...route,
+            where: typedWhere,
+          }
+        : route;
     });
 
-    set(migratedDefinition, 'ingest.wired.routing', migratedRouting);
-    hasBeenMigrated = true;
+    if (routingMigrated) {
+      set(migratedDefinition, 'ingest.wired.routing', migratedRouting);
+      hasBeenMigrated = true;
+    }
   }
 
   // add settings
   if (isObject(migratedDefinition.ingest) && !('settings' in migratedDefinition.ingest)) {
     set(migratedDefinition, 'ingest.settings', {});
     hasBeenMigrated = true;
+  }
+
+  // Ensure DSL processing steps emit typed conditions
+  if (
+    isObject(migratedDefinition.ingest) &&
+    isObject((migratedDefinition.ingest as { processing?: unknown }).processing)
+  ) {
+    const typedProcessing = ensureStreamlangDSLHasTypedConditions(
+      (migratedDefinition.ingest as { processing?: any }).processing
+    );
+    if ((migratedDefinition.ingest as { processing?: any }).processing !== typedProcessing) {
+      set(migratedDefinition, 'ingest.processing', typedProcessing);
+      hasBeenMigrated = true;
+    }
+  }
+
+  // Ensure query filters have typed conditions
+  if (Array.isArray(migratedDefinition.queries)) {
+    let queriesMigrated = false;
+    const typedQueries = migratedDefinition.queries.map((query: any) => {
+      if (query.feature?.filter) {
+        const typedFilter = ensureConditionType(query.feature.filter as Condition);
+        if (typedFilter !== query.feature.filter) {
+          queriesMigrated = true;
+          return {
+            ...query,
+            feature: {
+              ...query.feature,
+              filter: typedFilter,
+            },
+          };
+        }
+      }
+
+      return query;
+    });
+
+    if (queriesMigrated) {
+      set(migratedDefinition, 'queries', typedQueries);
+      hasBeenMigrated = true;
+    }
   }
 
   // Add ingest.type discriminator if missing

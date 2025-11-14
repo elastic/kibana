@@ -11,6 +11,7 @@ import expect from '@kbn/expect';
 import type { ClientRequestParamsOf } from '@kbn/server-route-repository-utils';
 import type { StreamsRouteRepository } from '@kbn/streams-plugin/server';
 import { disableStreams, enableStreams, forkStream, indexDocument } from './helpers/requests';
+import { ALWAYS_CONDITION } from '@kbn/streamlang';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
@@ -58,7 +59,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       from: 'body.text',
       pattern:
         '%{attributes.parsed_timestamp} %{attributes.parsed_level} %{attributes.parsed_message}',
-      where: { always: {} },
+      where: ALWAYS_CONDITION,
     };
 
     const basicGrokProcessor = {
@@ -68,7 +69,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       patterns: [
         '%{TIMESTAMP_ISO8601:attributes.parsed_timestamp} %{LOGLEVEL:attributes.parsed_level} %{GREEDYDATA:attributes.parsed_message}',
       ],
-      where: { always: {} },
+      where: ALWAYS_CONDITION,
     };
 
     const createTestDocument = (message = TEST_MESSAGE) => ({
@@ -90,6 +91,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           name: 'logs.test',
         },
         where: {
+          type: 'filter',
           field: 'resource.attributes.host.name',
           eq: TEST_HOST,
         },
@@ -154,7 +156,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 action: 'grok' as const,
                 from: 'attributes.parsed_message',
                 patterns: ['%{IP:attributes.parsed_ip}'],
-                where: { always: {} },
+                where: ALWAYS_CONDITION,
               },
             ],
           },
@@ -188,7 +190,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 action: 'grok' as const,
                 from: 'attributes.parsed_message',
                 patterns: ['%{TIMESTAMP_ISO8601:attributes.other_date}'], // This processor will fail, as won't match another date from the remaining message
-                where: { always: {} },
+                where: ALWAYS_CONDITION,
               },
             ],
           },
@@ -222,7 +224,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 action: 'grok' as const,
                 from: 'attributes.parsed_message',
                 patterns: ['%{TIMESTAMP_ISO8601:attributes.other_date}'], // This processor will fail, as won't match another date from the remaining message
-                where: { always: {} },
+                where: ALWAYS_CONDITION,
               },
             ],
           },
@@ -266,7 +268,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 action: 'grok' as const,
                 from: 'attributes.parsed_message',
                 patterns: ['%{IP:attributes.parsed_ip}'],
-                where: { always: {} },
+                where: ALWAYS_CONDITION,
               },
             ],
           },
@@ -303,7 +305,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             steps: [
               {
                 ...basicDissectProcessor,
-                where: { field: 'body.text', contains: 'test' },
+                where: { type: 'filter', field: 'body.text', contains: 'test' },
               },
             ],
           },
@@ -342,7 +344,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 patterns: [
                   '%{WORD:attributes.ignored_field} %{IP:attributes.parsed_ip} %{GREEDYDATA:attributes.parsed_message}',
                 ], // Try overriding parsed_message previously computed by dissect
-                where: { always: {} },
+                where: ALWAYS_CONDITION,
               },
             ],
           },
@@ -375,7 +377,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 action: 'grok' as const,
                 from: 'attributes.parsed_message',
                 patterns: ['%{TIMESTAMP_ISO8601:attributes.other_date}'], // This processor will fail, as won't match another date from the remaining message
-                where: { always: {} },
+                where: ALWAYS_CONDITION,
               },
             ],
           },
@@ -402,7 +404,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 action: 'grok' as const,
                 from: 'body.text',
                 patterns: ['%{INVALID_PATTERN:field}'],
-                where: { always: {} },
+                where: ALWAYS_CONDITION,
               },
             ],
           },
@@ -431,7 +433,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 action: 'grok' as const,
                 from: 'body.text',
                 patterns: ['%{WORD:abc}'],
-                where: { always: {} },
+                where: ALWAYS_CONDITION,
               },
             ],
           },
@@ -471,7 +473,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                     },
                   },
                 ],
-                where: { always: {} },
+                where: ALWAYS_CONDITION,
               },
             ],
           },
@@ -499,7 +501,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 action: 'grok' as const,
                 from: 'body.text',
                 patterns: ['%{TIMESTAMP_ISO8601:@timestamp}'],
-                where: { always: {} },
+                where: ALWAYS_CONDITION,
               },
             ],
           },
@@ -569,7 +571,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 action: 'grok' as const,
                 from: 'message',
                 patterns: ['%{WORD:parsed_field}'],
-                where: { always: {} },
+                where: ALWAYS_CONDITION,
               },
             ],
           },
@@ -608,7 +610,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 action: 'grok' as const,
                 from: 'message',
                 patterns: ['%{WORD:parsed_field}'],
-                where: { always: {} },
+                where: ALWAYS_CONDITION,
               },
             ],
           },

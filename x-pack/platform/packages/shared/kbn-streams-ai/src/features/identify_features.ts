@@ -10,6 +10,7 @@ import type { BoundInferenceClient } from '@kbn/inference-common';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
 import type { Streams, Feature } from '@kbn/streams-schema';
 import type { Condition } from '@kbn/streamlang';
+import { ensureConditionType } from '@kbn/streamlang';
 import { IdentifySystemsPrompt } from './prompt';
 import { clusterLogs } from '../cluster_logs/cluster_logs';
 import conditionSchemaText from '../shared/condition_schema.text';
@@ -100,7 +101,7 @@ export async function identifyFeatures({
           partitions: toolCall.function.arguments.systems.map((system) => {
             return {
               name: system.name,
-              condition: system.filter as Condition,
+              condition: ensureConditionType(system.filter as Condition),
             };
           }),
           dropUnmapped,
@@ -131,7 +132,7 @@ export async function identifyFeatures({
       toolCall.function.arguments.systems.map((args) => {
         const feature = {
           ...args,
-          filter: args.filter as Condition,
+          filter: ensureConditionType(args.filter as Condition),
         };
         return feature;
       })

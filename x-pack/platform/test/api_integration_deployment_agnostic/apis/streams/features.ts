@@ -110,7 +110,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       beforeEach(async () => {
         const resp = await createFeature('feature-a', {
           description: 'Initial description',
-          filter: { always: {} },
+          filter: { type: 'always', always: {} },
         });
         expect(resp.status).to.be(200);
       });
@@ -130,7 +130,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(getResponse.body.feature).to.eql({
           name: 'feature-a',
           description: 'Initial description',
-          filter: { always: {} },
+          filter: { type: 'always', always: {} },
         });
 
         const features = await listFeatures();
@@ -138,14 +138,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(features[0]).to.eql({
           name: 'feature-a',
           description: 'Initial description',
-          filter: { always: {} },
+          filter: { type: 'always', always: {} },
         });
       });
 
       it('cannot create a feature with a name starting with an underscore', async () => {
         const resp = await createFeature('_invalid-feature', {
           description: 'A feature with an invalid name',
-          filter: { always: {} },
+          filter: { type: 'always', always: {} },
         });
         expect(resp.status).to.be(400);
       });
@@ -153,7 +153,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('cannot create a feature with a name starting with a dot', async () => {
         const resp = await createFeature('.invalid-feature', {
           description: 'A feature with an invalid name',
-          filter: { always: {} },
+          filter: { type: 'always', always: {} },
         });
         expect(resp.status).to.be(400);
       });
@@ -187,7 +187,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     describe('bulk operations', () => {
       beforeEach(async () => {
         const bulkCreate = await bulkOps([
-          { index: { feature: { name: 's1', description: 'one', filter: { always: {} } } } },
+          { index: { feature: { name: 's1', description: 'one', filter: { type: 'always', always: {} } } } },
           {
             index: {
               feature: {
@@ -237,8 +237,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     describe('features are removed when stream is deleted', () => {
       beforeEach(async () => {
         const bulkCreate = await bulkOps([
-          { index: { feature: { name: 'sd1', description: 'one', filter: { always: {} } } } },
-          { index: { feature: { name: 'sd2', description: 'two', filter: { always: {} } } } },
+          { index: { feature: { name: 'sd1', description: 'one', filter: { type: 'always', always: {} } } } },
+          { index: { feature: { name: 'sd2', description: 'two', filter: { type: 'always', always: {} } } } },
         ]);
         expect(bulkCreate.status).to.be(200);
         const features = await listFeatures();
@@ -318,7 +318,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const res = await apiClient.fetch('PUT /internal/streams/{name}/features/{featureName}', {
           params: {
             path: { name: STREAM_NAME, featureName: 'nope' },
-            body: { description: 'x', filter: { always: {} } },
+            body: { description: 'x', filter: { type: 'always', always: {} } },
           },
         });
         expect(res.status).to.be(403);
@@ -337,7 +337,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             path: { name: STREAM_NAME },
             body: {
               operations: [
-                { index: { feature: { name: 'a', description: 'A', filter: { always: {} } } } },
+                { index: { feature: { name: 'a', description: 'A', filter: { type: 'always', always: {} } } } },
                 { delete: { feature: { name: 'a' } } },
               ],
             },

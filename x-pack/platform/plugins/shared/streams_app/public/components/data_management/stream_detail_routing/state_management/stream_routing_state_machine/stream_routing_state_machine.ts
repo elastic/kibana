@@ -266,7 +266,7 @@ export const streamRoutingMachine = setup({
             }),
             sendTo('routingSamplesMachine', {
               type: 'routingSamples.updateCondition',
-              condition: { always: {} },
+              condition: ALWAYS_CONDITION,
             }),
           ],
           exit: [

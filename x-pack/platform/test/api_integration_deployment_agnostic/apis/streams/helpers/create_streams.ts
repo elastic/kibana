@@ -19,6 +19,7 @@ const streams: StreamPutItem[] = [
     stream: {
       description: '',
       ingest: {
+        type: 'wired',
         lifecycle: { dsl: {} },
         processing: { steps: [] },
         settings: {},
@@ -62,8 +63,10 @@ const streams: StreamPutItem[] = [
             {
               destination: 'logs.test',
               where: {
+                type: 'and',
                 and: [
                   {
+                    type: 'filter',
                     field: 'attributes.numberfield',
                     gt: 15,
                   },
@@ -74,8 +77,10 @@ const streams: StreamPutItem[] = [
             {
               destination: 'logs.test2',
               where: {
+                type: 'and',
                 and: [
                   {
+                    type: 'filter',
                     field: 'attributes.field2',
                     eq: 'abc',
                   },
@@ -94,6 +99,7 @@ const streams: StreamPutItem[] = [
     stream: {
       description: '',
       ingest: {
+        type: 'wired',
         lifecycle: { inherit: {} },
         processing: { steps: [] },
         settings: {},
@@ -114,6 +120,7 @@ const streams: StreamPutItem[] = [
     stream: {
       description: '',
       ingest: {
+        type: 'wired',
         lifecycle: { inherit: {} },
         settings: {},
         processing: {
@@ -122,7 +129,7 @@ const streams: StreamPutItem[] = [
               action: 'grok',
               from: 'body.text',
               patterns: ['%{NUMBER:attributes.numberfield}'],
-              where: { always: {} },
+              where: { type: 'always', always: {} },
             },
           ],
         },
@@ -143,6 +150,7 @@ const streams: StreamPutItem[] = [
     stream: {
       description: '',
       ingest: {
+        type: 'wired',
         lifecycle: { inherit: {} },
         settings: {},
         processing: { steps: [] },

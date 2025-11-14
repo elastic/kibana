@@ -6,6 +6,7 @@
  */
 
 import type { StreamQueryKql } from '@kbn/streams-schema';
+import { ALWAYS_CONDITION } from '@kbn/streamlang';
 import { v4 } from 'uuid';
 
 export function defaultQuery(): StreamQueryKql {
@@ -19,4 +20,4 @@ export function defaultQuery(): StreamQueryKql {
   };
 }
 
-export const NO_FEATURE = { filter: { always: {} }, name: '_NO_FEATURE' };
+export const NO_FEATURE = { filter: ALWAYS_CONDITION, name: '_NO_FEATURE' };

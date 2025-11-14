@@ -6,7 +6,7 @@
  */
 
 import type { Condition, ManualIngestPipelineProcessor, StreamlangDSL } from '@kbn/streamlang';
-import { ALWAYS_CONDITION, conditionToPainless } from '@kbn/streamlang';
+import { ALWAYS_CONDITION, NEVER_CONDITION, conditionToPainless } from '@kbn/streamlang';
 
 export const migrateRoutingIfConditionToStreamlang = (definition: Record<string, unknown>) => {
   const routingArr = (definition.ingest as { wired: { routing: OldRoutingDefinition[] } }).wired
@@ -113,26 +113,24 @@ export const migrateOldProcessingArrayToStreamlang = (definition: Record<string,
 const recursivelyConvertCondition = (condition: OldCondition): Condition => {
   if ('and' in condition) {
     return {
+      type: 'and',
       and: condition.and.map(recursivelyConvertCondition),
     };
   }
 
   if ('or' in condition) {
     return {
+      type: 'or',
       or: condition.or.map(recursivelyConvertCondition),
     };
   }
 
   if ('always' in condition) {
-    return {
-      always: {},
-    };
+    return ALWAYS_CONDITION;
   }
 
   if ('never' in condition) {
-    return {
-      never: {},
-    };
+    return NEVER_CONDITION;
   }
 
   const newOperator =
@@ -151,6 +149,7 @@ const recursivelyConvertCondition = (condition: OldCondition): Condition => {
 
   // If it's a filter condition, convert formats.
   return {
+    type: 'filter',
     field: condition.field,
     [newOperator]: newValue,
   };

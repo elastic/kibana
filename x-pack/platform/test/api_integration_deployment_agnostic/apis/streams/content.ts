@@ -239,7 +239,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(rootEntry.request.stream.ingest.wired.routing).to.eql([
           {
             destination: 'branch_a',
-            where: { never: {} },
+            where: { type: 'never', never: {} },
             status: 'disabled',
           },
         ]);
@@ -548,7 +548,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(updatedStream.stream.ingest.wired.routing).to.eql([
           {
             destination: 'logs.branch_d.branch_b',
-            where: { never: {} },
+            where: { type: 'never', never: {} },
             status: 'disabled',
           },
         ]);
@@ -669,7 +669,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                       routing: [
                         {
                           destination: 'child',
-                          where: { never: {} },
+                          where: { type: 'never', never: {} },
                           status: 'disabled',
                         },
                       ],

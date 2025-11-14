@@ -8,10 +8,10 @@
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { Condition } from '@kbn/streamlang';
-import { conditionToQueryDsl } from '@kbn/streamlang';
+import { ALWAYS_CONDITION, conditionToQueryDsl, ensureConditionType } from '@kbn/streamlang';
 import { format } from 'util';
 import pLimit from 'p-limit';
-import { compact, isEqual } from 'lodash';
+import { compact } from 'lodash';
 import type { FormattedDocumentAnalysis } from '@kbn/ai-tools';
 import { clusterSampleDocs } from './cluster_sample_docs';
 
@@ -22,14 +22,14 @@ export interface ClusterLogsResponse {
 }
 
 function getFields(condition: Condition): string[] {
-  if ('field' in condition) {
+  if (condition.type === 'filter' && 'field' in condition) {
     return [condition.field];
   }
 
-  if ('and' in condition) {
+  if (condition.type === 'and') {
     return condition.and.flatMap(getFields);
   }
-  if ('or' in condition) {
+  if (condition.type === 'or') {
     return condition.or.flatMap(getFields);
   }
 
@@ -62,6 +62,11 @@ export async function clusterLogs({
   logger: Logger;
   dropUnmapped?: boolean;
 }): Promise<Array<{ name: string; condition: Condition; clustering: ClusterLogsResponse }>> {
+  const normalizedPartitions = partitions.map((partition) => ({
+    ...partition,
+    condition: ensureConditionType(partition.condition),
+  }));
+
   // time filter
   const rangeQuery = {
     range: {
@@ -70,12 +75,10 @@ export async function clusterLogs({
   };
 
   // append an "uncategorized" partition if it does not exist yet
-  if (!isEqual(partitions[partitions.length - 1]?.condition, { always: {} })) {
-    partitions.push({
+  if (normalizedPartitions[normalizedPartitions.length - 1]?.condition?.type !== 'always') {
+    normalizedPartitions.push({
       name: `Uncategorized logs`,
-      condition: {
-        always: {},
-      },
+      condition: ALWAYS_CONDITION,
     });
   }
 
@@ -85,11 +88,11 @@ export async function clusterLogs({
   const fieldsToMap = new Set<string>();
 
   // create requests for exclusive partitions (data only ends up in single bucket)
-  partitions.forEach((partition, idx) => {
+  normalizedPartitions.forEach((partition, idx) => {
     const fields = getFields(partition.condition);
     fields.forEach((field) => fieldsToMap.add(field));
 
-    const prevPartitions = partitions.slice(0, idx);
+    const prevPartitions = normalizedPartitions.slice(0, idx);
 
     requests.push({
       name: partition.name,
@@ -152,7 +155,7 @@ export async function clusterLogs({
   );
 
   return compact(
-    partitions.map((partition, idx) => {
+    normalizedPartitions.map((partition, idx) => {
       const response = sampledDocsResponses[idx];
 
       if (!response || !response.hits || !response.hits.hits) {

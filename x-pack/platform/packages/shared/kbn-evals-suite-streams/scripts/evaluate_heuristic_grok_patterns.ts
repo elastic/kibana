@@ -139,7 +139,7 @@ async function simulateGrokProcessor(stream: string, documents: any[], grokProce
             pattern_definitions: grokProcessor.pattern_definitions,
             ignore_failure: true,
             ignore_missing: true,
-            if: { always: {} },
+            if: { type: 'always', always: {} },
           },
         },
       ],

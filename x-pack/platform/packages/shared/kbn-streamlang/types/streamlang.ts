@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod';
 import { isSchema } from '@kbn/zod-helpers';
 import type { Condition } from './conditions';
-import { conditionSchema } from './conditions';
+import { conditionSchema, ensureConditionType } from './conditions';
 import type { StreamlangProcessorDefinition } from './processors';
 import { streamlangProcessorSchema } from './processors';
 import type { StreamlangStepWithUIAttributes } from './ui';
@@ -83,4 +83,48 @@ export interface StreamlangDSL {
  */
 export const streamlangDSLSchema = z.object({
   steps: z.array(streamlangStepSchema),
+});
+
+const ensureConditionWithStepsHasType = (condition: ConditionWithSteps): ConditionWithSteps => {
+  const { steps, ...rest } = condition;
+  const typedCondition = ensureConditionType(rest as Condition);
+  return {
+    ...typedCondition,
+    steps: steps.map(ensureStreamlangStepHasTypedConditions),
+  };
+};
+
+const ensureWhereBlockHasTypedConditions = (block: StreamlangWhereBlock): StreamlangWhereBlock => ({
+  ...block,
+  where: ensureConditionWithStepsHasType(block.where),
+});
+
+const ensureProcessorHasTypedCondition = <TProcessor extends StreamlangProcessorDefinition>(
+  processor: TProcessor
+): TProcessor => {
+  if (!processor.where) {
+    return processor;
+  }
+
+  return {
+    ...processor,
+    where: ensureConditionType(processor.where),
+  };
+};
+
+const ensureStreamlangStepHasTypedConditions = (step: StreamlangStep): StreamlangStep => {
+  if (isWhereBlock(step)) {
+    return ensureWhereBlockHasTypedConditions(step);
+  }
+
+  if (isActionBlock(step)) {
+    return ensureProcessorHasTypedCondition(step);
+  }
+
+  return step;
+};
+
+export const ensureStreamlangDSLHasTypedConditions = (dsl: StreamlangDSL): StreamlangDSL => ({
+  ...dsl,
+  steps: dsl.steps.map(ensureStreamlangStepHasTypedConditions),
 });

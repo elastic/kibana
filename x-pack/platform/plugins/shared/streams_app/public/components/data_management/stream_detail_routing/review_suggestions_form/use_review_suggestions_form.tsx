@@ -6,6 +6,7 @@
  */
 
 import type { Condition } from '@kbn/streamlang';
+import { ALWAYS_CONDITION } from '@kbn/streamlang';
 import { useState } from 'react';
 import { useAbortController } from '@kbn/react-hooks';
 import { lastValueFrom } from 'rxjs';
@@ -100,7 +101,7 @@ export function useReviewSuggestionsForm() {
   const resetPreview = () => {
     streamsRoutingActorRef.send({
       type: 'suggestion.preview',
-      condition: { always: {} },
+      condition: ALWAYS_CONDITION,
       name: '',
       index: 0,
       toggle: false,

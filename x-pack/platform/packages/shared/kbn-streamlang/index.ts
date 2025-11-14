@@ -6,7 +6,12 @@
  */
 
 export type { StreamlangDSL } from './types/streamlang';
-export { streamlangDSLSchema, isActionBlock, isWhereBlock } from './types/streamlang';
+export {
+  streamlangDSLSchema,
+  isActionBlock,
+  isWhereBlock,
+  ensureStreamlangDSLHasTypedConditions,
+} from './types/streamlang';
 export { transpile as transpileIngestPipeline } from './src/transpilers/ingest_pipeline';
 export { transpile as transpileEsql, conditionToESQL } from './src/transpilers/esql';
 export * from './types/processors';

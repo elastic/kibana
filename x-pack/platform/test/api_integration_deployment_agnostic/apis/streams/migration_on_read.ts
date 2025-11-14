@@ -24,7 +24,7 @@ const oldProcessing = [
       patterns: [
         '%{TIMESTAMP_ISO8601:inner_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message2}',
       ],
-      if: { always: {} },
+      if: { type: 'always', always: {} },
     },
   },
   {

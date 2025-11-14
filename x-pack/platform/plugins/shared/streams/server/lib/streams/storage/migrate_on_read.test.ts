@@ -87,7 +87,7 @@ describe('migrateOnRead', () => {
         mockIsNeverCondition.mockReturnValue(true);
 
         const definition = createCompleteWiredStreamDefinition({
-          routing: [createRoutingRule({ where: { never: {} } })],
+          routing: [createRoutingRule({ where: { type: 'never', never: {} } })],
         });
 
         const result = migrateOnRead(definition);
@@ -95,8 +95,8 @@ describe('migrateOnRead', () => {
 
         expect(routing).toHaveLength(1);
         expect(routing[0].status).toBe('disabled');
-        expect(routing[0].where).toEqual({ always: {} });
-        expect(mockIsNeverCondition).toHaveBeenCalledWith({ never: {} });
+        expect(routing[0].where).toEqual({ type: 'always', always: {} });
+        expect(mockIsNeverCondition).toHaveBeenCalledWith({ type: 'never', never: {} });
         expect(mockStreamsAsserts).toHaveBeenCalled();
       });
 
@@ -112,7 +112,7 @@ describe('migrateOnRead', () => {
               destination: 'test.stream.1',
               where: { field: 'service.name', eq: 'test1' },
             }),
-            createRoutingRule({ destination: 'test.stream.2', where: { never: {} } }),
+            createRoutingRule({ destination: 'test.stream.2', where: { type: 'never', never: {} } }),
             createRoutingRule({
               destination: 'test.stream.3',
               where: { field: 'service.name', eq: 'test3' },
@@ -128,7 +128,7 @@ describe('migrateOnRead', () => {
         expect(routing[0].status).toBe('enabled');
         expect(routing[0].where).toEqual({ field: 'service.name', eq: 'test1' });
         expect(routing[1].status).toBe('disabled');
-        expect(routing[1].where).toEqual({ always: {} });
+        expect(routing[1].where).toEqual({ type: 'always', always: {} });
         expect(routing[2].status).toBe('enabled');
         expect(routing[2].where).toEqual({ field: 'service.name', eq: 'test3' });
         expect(mockStreamsAsserts).toHaveBeenCalled();

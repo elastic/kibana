@@ -151,7 +151,7 @@ describe('useReviewSuggestionsForm', () => {
     expect(mockSend).toHaveBeenCalledWith(
       expect.objectContaining({
         type: 'suggestion.preview',
-        condition: { always: {} },
+        condition: { type: 'always', always: {} },
         name: '',
         index: 0,
         toggle: false,
@@ -259,7 +259,7 @@ describe('useReviewSuggestionsForm', () => {
     expect(mockSend).toHaveBeenCalledWith(
       expect.objectContaining({
         type: 'suggestion.preview',
-        condition: { always: {} },
+        condition: { type: 'always', always: {} },
         name: '',
         index: 0,
         toggle: false,
@@ -295,7 +295,7 @@ describe('useReviewSuggestionsForm', () => {
     expect(mockSend).toHaveBeenCalledWith(
       expect.objectContaining({
         type: 'suggestion.preview',
-        condition: { always: {} },
+        condition: { type: 'always', always: {} },
         name: '',
         index: 0,
         toggle: false,

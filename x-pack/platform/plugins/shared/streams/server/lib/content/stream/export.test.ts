@@ -15,14 +15,14 @@ const streams = [
   testContentPackEntry({
     name: 'logs',
     routing: [
-      { destination: 'logs.foo', where: { always: {} }, status: 'enabled' },
-      { destination: 'logs.hello', where: { always: {} }, status: 'enabled' },
+      { destination: 'logs.foo', where: { type: 'always', always: {} }, status: 'enabled' },
+      { destination: 'logs.hello', where: { type: 'always', always: {} }, status: 'enabled' },
     ],
     queries: [{ id: 'logs-query', title: 'logs-query', kql: { query: 'logs' } }],
   }),
   testContentPackEntry({
     name: 'logs.foo',
-    routing: [{ destination: 'logs.foo.bar', where: { always: {} }, status: 'enabled' }],
+    routing: [{ destination: 'logs.foo.bar', where: { type: 'always', always: {} }, status: 'enabled' }],
   }),
   testContentPackEntry({ name: 'logs.foo.bar' }),
   testContentPackEntry({
@@ -45,14 +45,14 @@ describe('content pack export', () => {
         name: ROOT_STREAM_ID,
         fields: {},
         routing: [
-          { destination: 'foo', where: { always: {} }, status: 'enabled' },
-          { destination: 'hello', where: { always: {} }, status: 'enabled' },
+          { destination: 'foo', where: { type: 'always', always: {} }, status: 'enabled' },
+          { destination: 'hello', where: { type: 'always', always: {} }, status: 'enabled' },
         ],
         queries: [{ id: 'logs-query', title: 'logs-query', kql: { query: 'logs' } }],
       }),
       testContentPackEntry({
         name: 'foo',
-        routing: [{ destination: 'foo.bar', where: { always: {} }, status: 'enabled' }],
+        routing: [{ destination: 'foo.bar', where: { type: 'always', always: {} }, status: 'enabled' }],
       }),
       testContentPackEntry({ name: 'foo.bar' }),
       testContentPackEntry({
@@ -88,7 +88,7 @@ describe('content pack export', () => {
     expect(sortBy(exportedStreams, 'name')).toEqual([
       testContentPackEntry({
         name: ROOT_STREAM_ID,
-        routing: [{ destination: 'hello', where: { always: {} }, status: 'enabled' }],
+        routing: [{ destination: 'hello', where: { type: 'always', always: {} }, status: 'enabled' }],
       }),
       testContentPackEntry({
         name: 'hello',

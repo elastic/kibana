@@ -7,10 +7,12 @@
 
 import { BasicPrettyPrinter } from '@kbn/esql-ast';
 import { conditionToESQLAst } from './condition_to_esql';
-import type { Condition } from '../../../types/conditions';
+import { ensureConditionType } from '../../../types/conditions';
+type Condition = any;
 
 describe('conditionToESQLAst', () => {
-  const prettyPrint = (condition: Condition): string => {
+  const prettyPrint = (c: Condition | any): string => {
+    const condition = ensureConditionType(c as any);
     const ast = conditionToESQLAst(condition);
     return BasicPrettyPrinter.print(ast);
   };
@@ -305,7 +307,7 @@ describe('conditionToESQLAst', () => {
 
   describe('always condition', () => {
     it('should handle always condition', () => {
-      const condition: Condition = { always: {} };
+      const condition: Condition = { type: 'always', always: {} };
       expect(prettyPrint(condition)).toBe('TRUE');
     });
   });
