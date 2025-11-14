@@ -24,7 +24,7 @@ const evaluate = base.extend<{ evaluateDataset: EvaluateDataset }, {}>({
   ],
 });
 evaluate.describe('Default Agent Knowledge Base Retrieval - OneChat', { tag: '@svlSearch' }, () => {
-  evaluate.skip('text retrieval queries', async ({ evaluateDataset }) => {
+  evaluate('text retrieval queries', async ({ evaluateDataset }) => {
     await evaluateDataset({
       dataset: {
         name: 'onechat: default-agent-text-retrieval-queries',
@@ -498,7 +498,7 @@ Click Disconnect`,
     });
   });
 
-  evaluate.skip('analytical queries', async ({ evaluateDataset }) => {
+  evaluate('analytical queries', async ({ evaluateDataset }) => {
     await evaluateDataset({
       dataset: {
         name: 'onechat: default-agent-analytical-queries',
@@ -786,7 +786,7 @@ c06a4866-f097-4eed-b7ca-28d60c9ba864, 4890`,
     });
   });
 
-  evaluate.skip('hybrid queries', async ({ evaluateDataset }) => {
+  evaluate('hybrid queries', async ({ evaluateDataset }) => {
     await evaluateDataset({
       dataset: {
         name: 'onechat: default-agent-hybrid-queries',
@@ -938,7 +938,7 @@ The agent with the slowest response time of about 44 hours has assignee id: 8315
     });
   });
 
-  evaluate.skip('unanswerable queries', async ({ evaluateDataset }) => {
+  evaluate('unanswerable queries', async ({ evaluateDataset }) => {
     await evaluateDataset({
       dataset: {
         name: 'onechat: default-agent-unanswerable-queries',

@@ -74,7 +74,7 @@ export function createEvaluateDataset({
       });
 
       // Running correctness and groundedness evaluators as part of the task since their respective quantitative evaluators need their output
-      // Wrap in inference spans with @kbn/evals scope so OTLP orphans them (separate traces)
+      // Wrap LLM judge calls @kbn/evals spans and assign root context to prevent them from contributing to latency, token use and other metrics of the EvaluateExample span
       const [correctnessResult, groundednessResult] = await Promise.all([
         withEvaluatorSpan('CorrectnessAnalysis', {}, () =>
           evaluators.correctnessAnalysis().evaluate({
