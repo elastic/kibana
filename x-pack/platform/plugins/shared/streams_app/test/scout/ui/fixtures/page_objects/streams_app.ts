@@ -222,7 +222,7 @@ export class StreamsApp {
   }
 
   async updateRoutingRule() {
-    await this.page.getByRole('button', { name: 'Change routing' }).click();
+    await this.page.getByRole('button', { name: 'Update' }).click();
   }
 
   async cancelRoutingRule() {
@@ -520,6 +520,34 @@ export class StreamsApp {
     await this.page.getByTestId('streamsAppPatternExpression').getByRole('textbox').fill(value);
   }
 
+  async fillDateProcessorSourceFieldInput(value: string) {
+    await this.page.getByLabel('Source Field').fill(value);
+  }
+
+  async fillDateProcessorFormatInput(value: string) {
+    await this.page.getByPlaceholder('Type and then hit "Enter"').fill(value);
+  }
+
+  async fillDateProcessorTargetFieldInput(value: string) {
+    await this.page.getByLabel('Target field').fill(value);
+  }
+
+  async fillDateProcessorTimezoneInput(value: string) {
+    await this.page.getByLabel('Timezone').fill(value);
+  }
+
+  async fillDateProcessorLocaleInput(value: string) {
+    await this.page.getByLabel('Locale').fill(value);
+  }
+
+  async fillDateProcessorOutputFormatInput(value: string) {
+    await this.page.getByLabel('Output format').fill(value);
+  }
+
+  async clickDateProcessorAdvancedSettings() {
+    await this.page.getByRole('button', { name: 'Advanced settings' }).click();
+  }
+
   async fillCustomSamplesEditor(value: string) {
     // Clean previous content
     await this.page.getByTestId('streamsAppCustomSamplesDataSourceEditor').click();
@@ -594,6 +622,12 @@ export class StreamsApp {
 
   getDataSourcesList() {
     return this.page.getByTestId('streamsAppProcessingDataSourcesList');
+  }
+
+  async getDataSourcesSelector() {
+    const dataSourcesSelector = this.page.getByTestId('streamsAppProcessingDataSourceSelector');
+    await expect(dataSourcesSelector).toBeVisible();
+    return dataSourcesSelector;
   }
 
   getDataSourcesListItems() {
