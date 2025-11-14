@@ -26,6 +26,7 @@ const {
   detectConstructorInitNewUsage,
   detectClassExtendsUsage,
   isMockRelated,
+  transformJestMockFactories,
 } = require('./helpers');
 
 /**
@@ -93,6 +94,8 @@ module.exports = function lazyRequirePlugin({ types: t }) {
     visitor: {
       Program(programPath, state) {
         const filename = state.filename || state.file.opts.filename || '';
+
+        transformJestMockFactories(programPath, t);
 
         // Skip transformation for mock files - they need immediate access to all imports
         if (isMockRelated(filename)) {

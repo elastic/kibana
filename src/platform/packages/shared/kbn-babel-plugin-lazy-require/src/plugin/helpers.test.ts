@@ -20,6 +20,7 @@ import {
   isInTypeContext,
   shouldSkipIdentifier,
   isMockRelated,
+  transformJestMockFactories,
 } from './helpers';
 
 interface PropertyInfo {
@@ -409,6 +410,92 @@ describe('helpers', () => {
       expect(isMockRelated('@kbn/regular-package')).toBe(false);
       expect(isMockRelated('path/to/file.ts')).toBe(false);
       expect(isMockRelated('./module')).toBe(false);
+    });
+  });
+
+  describe('transformJestMockFactories', () => {
+    function getProgramPath(ast: t.File) {
+      let programPath: NodePath<t.Program> | undefined;
+      traverse(ast, {
+        Program(path) {
+          programPath = path;
+          path.stop();
+        },
+      });
+      return programPath!;
+    }
+
+    function getFirstJestFactory(
+      programPath: NodePath<t.Program>
+    ): NodePath<t.ArrowFunctionExpression | t.FunctionExpression> {
+      let factoryPath: NodePath<t.Expression> | undefined;
+      programPath.traverse({
+        CallExpression(callPath) {
+          if (
+            t.isMemberExpression(callPath.node.callee) &&
+            t.isIdentifier(callPath.node.callee.object, { name: 'jest' }) &&
+            t.isIdentifier(callPath.node.callee.property) &&
+            callPath.node.callee.property.name === 'mock'
+          ) {
+            factoryPath = callPath.get('arguments.1') as NodePath<t.Expression>;
+            callPath.stop();
+          }
+        },
+      });
+      if (!factoryPath) {
+        throw new Error('factory path not found');
+      }
+      return factoryPath as NodePath<t.ArrowFunctionExpression | t.FunctionExpression>;
+    }
+
+    it('wraps jest.mock factories that return object literals', () => {
+      const ast = parse("jest.mock('./dep', () => ({ foo: jest.fn() }));", {
+        sourceType: 'module',
+      });
+      const programPath = getProgramPath(ast);
+
+      transformJestMockFactories(programPath, t);
+
+      const factoryPath = getFirstJestFactory(programPath);
+      expect(t.isArrowFunctionExpression(factoryPath.node)).toBe(true);
+      expect(t.isBlockStatement(factoryPath.node.body)).toBe(true);
+
+      const statements = (factoryPath.node.body as t.BlockStatement).body;
+      expect(statements).toHaveLength(4);
+
+      const [actualInit, resultInit, mergeIf, finalReturn] = statements;
+
+      expect(t.isVariableDeclaration(actualInit)).toBe(true);
+      const actualDecl = (actualInit as t.VariableDeclaration).declarations[0];
+      expect(t.isConditionalExpression(actualDecl.init)).toBe(true);
+      const conditional = actualDecl.init as t.ConditionalExpression;
+      expect(t.isCallExpression(conditional.consequent)).toBe(true);
+      const consequentCall = conditional.consequent as t.CallExpression;
+      expect(t.isMemberExpression(consequentCall.callee)).toBe(true);
+      const callee = consequentCall.callee as t.MemberExpression;
+      expect(t.isIdentifier(callee.object, { name: 'jest' })).toBe(true);
+      expect(t.isIdentifier(callee.property, { name: 'requireActual' })).toBe(true);
+      expect(consequentCall.arguments).toHaveLength(1);
+      expect(t.isStringLiteral(consequentCall.arguments[0])).toBe(true);
+      expect((consequentCall.arguments[0] as t.StringLiteral).value).toBe('./dep');
+
+      expect(t.isVariableDeclaration(resultInit)).toBe(true);
+      const factoryDecl = (resultInit as t.VariableDeclaration).declarations[0];
+      expect(t.isObjectExpression(factoryDecl.init)).toBe(true);
+
+      expect(t.isIfStatement(mergeIf)).toBe(true);
+      expect(t.isReturnStatement(finalReturn)).toBe(true);
+    });
+
+    it('ignores factories without object literal return', () => {
+      const ast = parse("jest.mock('./dep', () => createMock());", { sourceType: 'module' });
+      const programPath = getProgramPath(ast);
+
+      transformJestMockFactories(programPath, t);
+
+      const factoryPath = getFirstJestFactory(programPath);
+      expect(t.isArrowFunctionExpression(factoryPath.node)).toBe(true);
+      expect(t.isCallExpression(factoryPath.node.body)).toBe(true);
     });
   });
 });

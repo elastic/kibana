@@ -329,41 +329,11 @@ function detectJsxUsage(programPath, properties, t) {
 function detectJestMockUsage(programPath, properties, t) {
   const importsUsedInJestMocks = new Set();
 
-  programPath.traverse({
-    CallExpression(callPath) {
-      const { callee } = callPath.node;
-
-      // Check if this is a jest.mock(), jest.doMock(), or jest.unmock() call
-      let isJestMock = false;
-      if (t.isMemberExpression(callee)) {
-        if (
-          t.isIdentifier(callee.object, { name: 'jest' }) &&
-          t.isIdentifier(callee.property) &&
-          ['mock', 'doMock', 'unmock'].includes(callee.property.name)
-        ) {
-          isJestMock = true;
-        }
-      }
-
-      if (!isJestMock) {
-        return;
-      }
-
-      const factoryArg = callPath.node.arguments[1];
-      if (!factoryArg) {
-        return;
-      }
-
-      const factoryPath = callPath.get('arguments.1');
-      if (!factoryPath) {
-        return;
-      }
-
-      const referenced = collectReferencedProperties(factoryPath, properties);
-      for (const name of referenced) {
-        importsUsedInJestMocks.add(name);
-      }
-    },
+  forEachJestMockFactory(programPath, t, ({ factoryPath }) => {
+    const referenced = collectReferencedProperties(factoryPath, properties);
+    for (const name of referenced) {
+      importsUsedInJestMocks.add(name);
+    }
   });
 
   return importsUsedInJestMocks;
@@ -690,4 +660,207 @@ module.exports = {
   detectConstructorInitNewUsage,
   detectClassExtendsUsage,
   isMockRelated,
+  transformJestMockFactories,
 };
+
+/**
+ * Iterates over every `jest.mock`, `jest.doMock`, or `jest.unmock`
+ * call that provides a factory callback and invokes the supplied handler.
+ *
+ * @param {import('@babel/traverse').NodePath<import('@babel/types').Program>} programPath
+ * @param {import('@babel/types')} t
+ * @param {(options: {
+ *   callPath: import('@babel/traverse').NodePath<import('@babel/types').CallExpression>;
+ *   modulePathNode: import('@babel/types').StringLiteral;
+ *   factoryPath: import('@babel/traverse').NodePath<import('@babel/types').Expression>;
+ * }) => void} handler
+ */
+function forEachJestMockFactory(programPath, t, handler) {
+  programPath.traverse({
+    CallExpression(callPath) {
+      if (!isJestMockCall(callPath, t)) {
+        return;
+      }
+
+      const args = callPath.get('arguments');
+      if (args.length < 2) {
+        return;
+      }
+
+      const modulePath = args[0];
+      const factoryPath = args[1];
+
+      if (!modulePath || !modulePath.isStringLiteral() || !factoryPath) {
+        return;
+      }
+
+      handler({
+        callPath,
+        modulePathNode: modulePath.node,
+        factoryPath,
+      });
+    },
+  });
+}
+
+/**
+ * Rewrites jest mock factories that return object literals so that the
+ * actual module exports are preserved while specific properties are overridden.
+ *
+ * @param {import('@babel/traverse').NodePath<import('@babel/types').Program>} programPath
+ * @param {import('@babel/types')} t
+ */
+function transformJestMockFactories(programPath, t) {
+  forEachJestMockFactory(programPath, t, ({ modulePathNode, factoryPath }) => {
+    const factoryInfo = extractFactoryObjectExpression(factoryPath, t);
+    if (!factoryInfo) {
+      return;
+    }
+
+    const actualModuleId = createJestSafeIdentifier(factoryPath.scope, 'mockActualModule', t);
+    const resultId = createJestSafeIdentifier(factoryPath.scope, 'mockFactoryResult', t);
+
+    const hasJestAvailable = t.logicalExpression(
+      '&&',
+      t.binaryExpression(
+        '!==',
+        t.unaryExpression('typeof', t.identifier('jest')),
+        t.stringLiteral('undefined')
+      ),
+      t.binaryExpression(
+        '===',
+        t.unaryExpression(
+          'typeof',
+          t.memberExpression(t.identifier('jest'), t.identifier('requireActual'))
+        ),
+        t.stringLiteral('function')
+      )
+    );
+
+    const actualInit = t.variableDeclaration('const', [
+      t.variableDeclarator(
+        actualModuleId,
+        t.conditionalExpression(
+          hasJestAvailable,
+          t.callExpression(
+            t.memberExpression(t.identifier('jest'), t.identifier('requireActual')),
+            [t.cloneNode(modulePathNode)]
+          ),
+          t.nullLiteral()
+        )
+      ),
+    ]);
+
+    const resultInit = t.variableDeclaration('const', [
+      t.variableDeclarator(resultId, factoryInfo.expression),
+    ]);
+
+    const isObjectCheck = (identifier) =>
+      t.logicalExpression(
+        '&&',
+        t.binaryExpression('!==', identifier, t.nullLiteral()),
+        t.binaryExpression(
+          '===',
+          t.unaryExpression('typeof', identifier),
+          t.stringLiteral('object')
+        )
+      );
+
+    const mergeReturn = t.returnStatement(
+      t.objectExpression([t.spreadElement(actualModuleId), t.spreadElement(resultId)])
+    );
+
+    const statements = [
+      actualInit,
+      resultInit,
+      t.ifStatement(
+        t.logicalExpression('&&', isObjectCheck(actualModuleId), isObjectCheck(resultId)),
+        t.blockStatement([mergeReturn])
+      ),
+      t.returnStatement(resultId),
+    ];
+
+    if (factoryPath.isArrowFunctionExpression()) {
+      factoryPath.node.body = t.blockStatement(statements);
+      factoryPath.node.expression = false;
+    } else {
+      factoryPath.get('body').replaceWith(t.blockStatement(statements));
+    }
+  });
+}
+
+/**
+ * Determines whether the provided call path represents a jest mock helper.
+ *
+ * @param {import('@babel/traverse').NodePath<import('@babel/types').CallExpression>} callPath
+ * @returns {boolean}
+ */
+function isJestMockCall(callPath) {
+  const callee = callPath.get('callee');
+  if (!callee.isMemberExpression()) {
+    return false;
+  }
+
+  const object = callee.get('object');
+  const property = callee.get('property');
+
+  return (
+    object.isIdentifier({ name: 'jest' }) &&
+    property.isIdentifier() &&
+    ['mock', 'doMock', 'unmock'].includes(property.node.name)
+  );
+}
+
+/**
+ * Extracts the returned object expression from a jest mock factory.
+ *
+ * @param {import('@babel/traverse').NodePath<import('@babel/types').FunctionExpression | import('@babel/types').ArrowFunctionExpression>} factoryPath
+ * @param {import('@babel/types')} t
+ * @returns {{ expression: import('@babel/types').ObjectExpression } | null}
+ */
+function extractFactoryObjectExpression(factoryPath, t) {
+  if (!factoryPath.isFunctionExpression() && !factoryPath.isArrowFunctionExpression()) {
+    return null;
+  }
+
+  const unwrapExpression = (node) => {
+    if (t.isParenthesizedExpression(node)) {
+      return node.expression;
+    }
+    return node;
+  };
+
+  if (t.isBlockStatement(factoryPath.node.body)) {
+    const bodyStatements = factoryPath.node.body.body;
+    if (bodyStatements.length !== 1 || !t.isReturnStatement(bodyStatements[0])) {
+      return null;
+    }
+
+    const argument = unwrapExpression(bodyStatements[0].argument);
+    if (!t.isObjectExpression(argument)) {
+      return null;
+    }
+
+    return { expression: argument };
+  }
+
+  const conciseBody = unwrapExpression(factoryPath.node.body);
+  if (!t.isObjectExpression(conciseBody)) {
+    return null;
+  }
+
+  return { expression: conciseBody };
+}
+
+/**
+ * Generates an identifier name that complies with Jest's mocked factory scoping rules.
+ *
+ * @param {import('@babel/traverse').Scope} scope
+ * @param {string} baseName
+ * @param {import('@babel/types')} t
+ * @returns {import('@babel/types').Identifier}
+ */
+function createJestSafeIdentifier(scope, baseName, t) {
+  const generatedName = scope.generateUid(baseName).replace(/^_+/, baseName);
+  return t.identifier(generatedName);
+}
