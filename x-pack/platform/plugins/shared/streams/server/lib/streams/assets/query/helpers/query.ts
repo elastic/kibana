@@ -7,10 +7,10 @@
 
 import objectHash from 'object-hash';
 import { v5 } from 'uuid';
-import type { QueryLink } from '../../../../../../common/assets';
+import type { SignificantEventLink } from '../../../../../../common/significant_events';
 import { ASSET_UUID } from '../../fields';
 
-export function getRuleIdFromQueryLink(query: QueryLink) {
+export function getRuleIdFromQueryLink(query: SignificantEventLink) {
   const queryHash = objectHash([query[ASSET_UUID], query.query.kql.query]);
   return v5(queryHash, v5.DNS);
 }

@@ -15,22 +15,20 @@ import type { ClassicIngest } from '@kbn/streams-schema/src/models/ingest/classi
 import type { AttachmentClient } from '../../../lib/streams/attachments/attachment_client';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
-import { ASSET_TYPE } from '../../../lib/streams/assets/fields';
-import type { QueryAsset } from '../../../../common/assets';
 import type { StreamsClient } from '../../../lib/streams/client';
-import type { AssetClient } from '../../../lib/streams/assets/asset_client';
+import type { SignificantEventsClient } from '../../../lib/streams/significant_events/significant_events_client';
 
 async function getAssets({
   name,
-  assetClient,
+  significantEventsClient,
   attachmentClient,
 }: {
   name: string;
-  assetClient: AssetClient;
+  significantEventsClient: SignificantEventsClient;
   attachmentClient: AttachmentClient;
 }): Promise<{ dashboards: string[]; queries: StreamQuery[]; rules: string[] }> {
-  const [assets, attachments] = await Promise.all([
-    assetClient.getAssets(name),
+  const [significantEvents, attachments] = await Promise.all([
+    significantEventsClient.list(name),
     attachmentClient.getAttachments(name),
   ]);
 
@@ -38,9 +36,7 @@ async function getAssets({
     .filter((attachment) => attachment.type === 'dashboard')
     .map((attachment) => attachment.id);
 
-  const queries = assets
-    .filter((asset): asset is QueryAsset => asset[ASSET_TYPE] === 'query')
-    .map((asset) => asset.query);
+  const queries = significantEvents.map((significantEvent) => significantEvent.query);
 
   const rules = attachments
     .filter((attachment) => attachment.type === 'rule')
@@ -55,20 +51,20 @@ async function getAssets({
 
 async function updateWiredIngest({
   streamsClient,
-  assetClient,
+  significantEventsClient,
   attachmentClient,
   name,
   ingest,
 }: {
   streamsClient: StreamsClient;
-  assetClient: AssetClient;
+  significantEventsClient: SignificantEventsClient;
   attachmentClient: AttachmentClient;
   name: string;
   ingest: WiredIngest;
 }) {
   const { dashboards, queries, rules } = await getAssets({
     name,
-    assetClient,
+    significantEventsClient,
     attachmentClient,
   });
 
@@ -98,20 +94,20 @@ async function updateWiredIngest({
 
 async function updateClassicIngest({
   streamsClient,
-  assetClient,
+  significantEventsClient,
   attachmentClient,
   name,
   ingest,
 }: {
   streamsClient: StreamsClient;
-  assetClient: AssetClient;
+  significantEventsClient: SignificantEventsClient;
   attachmentClient: AttachmentClient;
   name: string;
   ingest: ClassicIngest;
 }) {
   const { dashboards, queries, rules } = await getAssets({
     name,
-    assetClient,
+    significantEventsClient,
     attachmentClient,
   });
 
@@ -202,7 +198,7 @@ const upsertIngestRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, getScopedClients }) => {
-    const { streamsClient, assetClient, attachmentClient } = await getScopedClients({
+    const { streamsClient, significantEventsClient, attachmentClient } = await getScopedClients({
       request,
     });
 
@@ -218,7 +214,7 @@ const upsertIngestRoute = createServerRoute({
     if (WiredIngest.is(ingest)) {
       return await updateWiredIngest({
         streamsClient,
-        assetClient,
+        significantEventsClient,
         attachmentClient,
         name,
         ingest,
@@ -227,7 +223,7 @@ const upsertIngestRoute = createServerRoute({
 
     return await updateClassicIngest({
       streamsClient,
-      assetClient,
+      significantEventsClient,
       attachmentClient,
       name,
       ingest,

@@ -14,21 +14,21 @@ import type { IScopedClusterClient } from '@kbn/core/server';
 import type { ChangePointType } from '@kbn/es-types/src';
 import type { SignificantEventsGetResponse } from '@kbn/streams-schema';
 import { get, isArray, isEmpty, keyBy } from 'lodash';
-import type { AssetClient } from '../streams/assets/asset_client';
+import type { SignificantEventsClient } from '../streams/significant_events/significant_events_client';
 import { getRuleIdFromQueryLink } from '../streams/assets/query/helpers/query';
 import { SecurityError } from '../streams/errors/security_error';
 
 export async function readSignificantEventsFromAlertsIndices(
   params: { name: string; from: Date; to: Date; bucketSize: string },
   dependencies: {
-    assetClient: AssetClient;
+    significantEventsClient: SignificantEventsClient;
     scopedClusterClient: IScopedClusterClient;
   }
 ): Promise<SignificantEventsGetResponse> {
-  const { assetClient, scopedClusterClient } = dependencies;
+  const { significantEventsClient, scopedClusterClient } = dependencies;
   const { name, from, to, bucketSize } = params;
 
-  const { [name]: queryLinks } = await assetClient.getAssetLinks([name], ['query']);
+  const { [name]: queryLinks } = await significantEventsClient.getSignificantEventLinks([name]);
   if (isEmpty(queryLinks)) {
     return [];
   }

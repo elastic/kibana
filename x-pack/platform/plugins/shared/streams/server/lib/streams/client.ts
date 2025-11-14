@@ -19,8 +19,7 @@ import type { RoutingStatus } from '@kbn/streams-schema';
 import { Streams, getAncestors, getParentId } from '@kbn/streams-schema';
 import type { LockManagerService } from '@kbn/lock-manager';
 import type { Condition } from '@kbn/streamlang';
-import type { AssetClient } from './assets/asset_client';
-import type { QueryClient } from './assets/query/query_client';
+import type { SignificantEventsClient } from './significant_events/significant_events_client';
 import {
   DefinitionNotFoundError,
   isDefinitionNotFoundError,
@@ -67,9 +66,8 @@ export class StreamsClient {
     private readonly dependencies: {
       lockManager: LockManagerService;
       scopedClusterClient: IScopedClusterClient;
-      assetClient: AssetClient;
+      significantEventsClient: SignificantEventsClient;
       attachmentClient: AttachmentClient;
-      queryClient: QueryClient;
       storageClient: StreamsStorageClient;
       featureClient: FeatureClient;
       logger: Logger;
@@ -215,8 +213,12 @@ export class StreamsClient {
         }
       );
 
-      const { assetClient, attachmentClient, storageClient } = this.dependencies;
-      await Promise.all([assetClient.clean(), attachmentClient.clean(), storageClient.clean()]);
+      const { significantEventsClient, attachmentClient, storageClient } = this.dependencies;
+      await Promise.all([
+        significantEventsClient.clean(),
+        attachmentClient.clean(),
+        storageClient.clean(),
+      ]);
     }
 
     if (elasticsearchStreamsEnabled) {
@@ -807,7 +809,7 @@ export class StreamsClient {
         })),
         'rule'
       ),
-      this.dependencies.queryClient.syncQueries(name, queries),
+      this.dependencies.significantEventsClient.sync(name, queries),
     ]);
   }
 }
