@@ -12,42 +12,61 @@ import { useCasesToast } from '../../../common/use_cases_toast';
 import type { ServerError } from '../../../types';
 import type { ActionConnector } from '../../../../common/types/domain';
 import { connectorsQueriesKeys } from '../constants';
-import { getSeverity } from './api';
+import { getFields } from './api';
 import * as i18n from './translations';
-import type { ResilientSeverity } from './types';
+import type { ResilientFieldMetadata } from './types';
 
 interface Props {
   http: HttpSetup;
   connector?: ActionConnector;
 }
 
-export const useGetSeverity = ({ http, connector }: Props) => {
+export interface EnhancedFieldMetaData extends ResilientFieldMetadata {
+  label: string;
+  value: string;
+}
+
+export const useGetFields = ({ http, connector }: Props) => {
   const { showErrorToast } = useCasesToast();
-  return useQuery<ActionTypeExecutorResult<ResilientSeverity>, ServerError>(
-    connectorsQueriesKeys.resilientGetSeverity(connector?.id ?? ''),
-    ({ signal }) => {
-      return getSeverity({
+  return useQuery<ActionTypeExecutorResult<EnhancedFieldMetaData[]>, ServerError>(
+    connectorsQueriesKeys.resilientGetFields(connector?.id ?? ''),
+    async ({ signal }) => {
+      const fields = await getFields({
         http,
         signal,
         connectorId: connector?.id ?? '',
       });
+
+      // prepare data for EuiComboBox
+      const fieldData: EnhancedFieldMetaData[] = fields.data
+        ? fields.data.map((field) => ({
+            ...field,
+            label: field.text,
+            value: field.name,
+          }))
+        : [];
+
+      return {
+        ...fields,
+        data: fieldData,
+      };
     },
     {
       enabled: Boolean(connector),
       staleTime: 60 * 1000, // one minute
       onSuccess: (res) => {
         if (res.status && res.status === 'error') {
-          showErrorToast(new Error(i18n.SEVERITY_API_ERROR), {
-            title: i18n.SEVERITY_API_ERROR,
+          showErrorToast(new Error(i18n.INCIDENT_FIELDS_API_ERROR), {
+            title: i18n.INCIDENT_FIELDS_API_ERROR,
             toastMessage: `${res.serviceMessage ?? res.message}`,
           });
         }
       },
       onError: (error: ServerError) => {
-        showErrorToast(error, { title: i18n.SEVERITY_API_ERROR });
+        showErrorToast(error, { title: i18n.INCIDENT_FIELDS_API_ERROR });
       },
     }
   );
 };
 
-export type UseGetSeverity = ReturnType<typeof useGetSeverity>;
+export type UseGetIncidentTypes = ReturnType<typeof useGetFields>;

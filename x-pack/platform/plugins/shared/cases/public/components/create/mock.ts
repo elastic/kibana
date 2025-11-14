@@ -9,6 +9,7 @@ import { CaseSeverity, ConnectorTypes } from '../../../common/types/domain';
 import type { CasePostRequest } from '../../../common/types/api';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { choices } from '../connectors/mock';
+import { resilientFields } from '../connectors/resilient/mocks';
 
 export const sampleTags = ['coke', 'pepsi'];
 
@@ -34,42 +35,6 @@ export const sampleData: CasePostRequest = {
 };
 
 export const sampleConnectorData = { isLoading: false, data: [] };
-
-export const useGetIncidentTypesResponse = {
-  isLoading: false,
-  data: {
-    data: [
-      {
-        id: 19,
-        name: 'Malware',
-      },
-      {
-        id: 21,
-        name: 'Denial of Service',
-      },
-    ],
-  },
-};
-
-export const useGetSeverityResponse = {
-  isLoading: false,
-  data: {
-    data: [
-      {
-        id: 4,
-        name: 'Low',
-      },
-      {
-        id: 5,
-        name: 'Medium',
-      },
-      {
-        id: 6,
-        name: 'High',
-      },
-    ],
-  },
-};
 
 export const useGetIssueTypesResponse = {
   isLoading: false,
@@ -114,4 +79,12 @@ export const useGetFieldsByIssueTypeResponse = {
 export const useGetChoicesResponse = {
   isLoading: false,
   data: { data: choices },
+};
+
+export const useGetFieldsResponse = {
+  isLoading: false,
+  isFetching: false,
+  data: {
+    data: resilientFields,
+  },
 };
