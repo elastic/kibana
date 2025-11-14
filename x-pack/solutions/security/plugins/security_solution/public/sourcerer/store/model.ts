@@ -14,6 +14,7 @@ import type { RuntimeFieldSpec, RuntimePrimitiveTypes } from '@kbn/data-views-pl
 export enum SourcererScopeName {
   default = 'default',
   detections = 'detections',
+  attacks = 'attacks',
   timeline = 'timeline',
   analyzer = 'analyzer',
   explore = 'explore',
@@ -160,6 +161,10 @@ export const initialSourcererState: SourcererModel = {
     [SourcererScopeName.detections]: {
       ...initSourcererScope,
       id: SourcererScopeName.detections,
+    },
+    [SourcererScopeName.attacks]: {
+      ...initSourcererScope,
+      id: SourcererScopeName.attacks,
     },
     [SourcererScopeName.timeline]: {
       ...initSourcererScope,
