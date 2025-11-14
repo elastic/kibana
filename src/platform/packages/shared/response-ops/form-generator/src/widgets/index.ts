@@ -28,24 +28,5 @@ export function getWidget(widgetType: WidgetType): React.ComponentType<any> | un
   return WIDGET_REGISTRY[widgetType];
 }
 
-export { TextField } from './text_field';
-export { SelectField } from './select_field';
-export { PasswordField } from './password_field';
-export { KeyValueField } from './key_value_field';
-export {
-  DiscriminatedUnionField,
-  getDiscriminatedUnionInitialValue,
-} from './discriminated_union_field';
-export type { TextWidgetMeta, TextWidgetProps } from './text_field';
-export type { PasswordWidgetMeta, PasswordWidgetProps } from './password_field';
-export type { SelectWidgetMeta, SelectWidgetProps } from './select_field';
-export type { KeyValueWidgetMeta, KeyValueWidgetProps } from './key_value_field';
-export type {
-  FormFieldsetWidgetMeta,
-  DiscriminatedUnionWidgetProps,
-} from './discriminated_union_field';
-export { isTextWidgetMeta } from './text_field';
-export { isPasswordWidgetMeta } from './password_field';
-export { isSelectWidgetMeta } from './select_field';
-export { isKeyValueWidgetMeta } from './key_value_field';
-export { isFormFieldsetWidgetMeta } from './discriminated_union_field';
+export { getKeyValueInitialValue } from './key_value_field';
+export { getDiscriminatedUnionInitialValue } from './discriminated_union_field';

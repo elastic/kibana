@@ -10,14 +10,12 @@
 import React from 'react';
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import type { EuiFieldTextProps } from '@elastic/eui';
-import { createWidgetTypeGuard, type BaseMetadata, type StripFormProps } from '../schema_metadata';
+import type { BaseMetadata, StripFormProps } from '../schema_metadata';
 import type { BaseWidgetProps } from './widget_props';
 
 export type TextWidgetMeta = BaseMetadata & {
   widget: 'text';
 } & StripFormProps<EuiFieldTextProps>;
-
-export const isTextWidgetMeta = createWidgetTypeGuard<TextWidgetMeta>('text');
 
 export type TextWidgetProps = BaseWidgetProps<string, TextWidgetMeta>;
 

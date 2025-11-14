@@ -10,14 +10,12 @@
 import React from 'react';
 import { EuiFieldPassword, EuiFormRow } from '@elastic/eui';
 import type { EuiFieldPasswordProps } from '@elastic/eui';
-import { createWidgetTypeGuard, type BaseMetadata, type StripFormProps } from '../schema_metadata';
+import type { BaseMetadata, StripFormProps } from '../schema_metadata';
 import type { BaseWidgetProps } from './widget_props';
 
 export type PasswordWidgetMeta = BaseMetadata & {
   widget: 'password';
 } & StripFormProps<EuiFieldPasswordProps>;
-
-export const isPasswordWidgetMeta = createWidgetTypeGuard<PasswordWidgetMeta>('password');
 
 export type PasswordWidgetProps = BaseWidgetProps<string, PasswordWidgetMeta>;
 

@@ -314,4 +314,235 @@ describe('useFormState', () => {
 
     expect(result.current.errors.username).toEqual(['Error 1', 'Error 2']);
   });
+
+  describe('nested field paths (setOptionValue with max 2 levels)', () => {
+    interface NestedForm extends Record<string, unknown> {
+      config: {
+        username: string;
+        password: string;
+        host: string;
+        port: number;
+      };
+      metadata: {
+        tags: string[];
+      };
+    }
+
+    it('handles 2-level nested path', () => {
+      const fields: FieldDefinition[] = [
+        {
+          id: 'config',
+          initialValue: { username: 'admin', password: 'pass' },
+          validate: jest.fn(),
+          schema: z.object({ username: z.string(), password: z.string() }),
+          widget: 'formFieldset',
+          meta: { widget: 'formFieldset' },
+        },
+      ];
+
+      const { result } = renderHook(() => useFormState<NestedForm>(fields));
+
+      act(() => {
+        result.current.handleChange('config.username', 'newuser');
+      });
+
+      expect(result.current.values.config.username).toBe('newuser');
+      expect(result.current.values.config.password).toBe('pass');
+    });
+
+    it('creates missing intermediate objects in 2-level path', () => {
+      const fields: FieldDefinition[] = [
+        {
+          id: 'config',
+          initialValue: {},
+          validate: jest.fn(),
+          schema: z.object({}),
+          widget: 'formFieldset',
+          meta: { widget: 'formFieldset' },
+        },
+      ];
+
+      const { result } = renderHook(() => useFormState<NestedForm>(fields));
+
+      act(() => {
+        result.current.handleChange('config.username', 'admin');
+      });
+
+      expect(result.current.values.config.username).toBe('admin');
+    });
+
+    it('handles nested path with null intermediate value', () => {
+      const fields: FieldDefinition[] = [
+        {
+          id: 'config',
+          initialValue: null,
+          validate: jest.fn(),
+          schema: z.object({}),
+          widget: 'formFieldset',
+          meta: { widget: 'formFieldset' },
+        },
+      ];
+
+      const { result } = renderHook(() =>
+        useFormState<{ config: { username: string } | null }>(fields)
+      );
+
+      act(() => {
+        result.current.handleChange('config.username', 'admin');
+      });
+
+      expect(result.current.values.config).toEqual({ username: 'admin' });
+    });
+
+    it('handles nested path with undefined intermediate value', () => {
+      const fields: FieldDefinition[] = [
+        {
+          id: 'config',
+          initialValue: { host: 'localhost', port: 8080 },
+          validate: jest.fn(),
+          schema: z.object({}),
+          widget: 'formFieldset',
+          meta: { widget: 'formFieldset' },
+        },
+      ];
+
+      const { result } = renderHook(() => useFormState<NestedForm>(fields));
+
+      act(() => {
+        result.current.handleChange('config.username', 'admin');
+      });
+
+      expect(result.current.values.config.username).toBe('admin');
+      expect(result.current.values.config.host).toBe('localhost');
+      expect(result.current.values.config.port).toBe(8080);
+    });
+
+    it('preserves sibling properties when updating nested path', () => {
+      const fields: FieldDefinition[] = [
+        {
+          id: 'config',
+          initialValue: {
+            username: 'admin',
+            password: 'pass',
+            host: 'localhost',
+            port: 8080,
+          },
+          validate: jest.fn(),
+          schema: z.object({}),
+          widget: 'formFieldset',
+          meta: { widget: 'formFieldset' },
+        },
+      ];
+
+      const { result } = renderHook(() => useFormState<NestedForm>(fields));
+
+      act(() => {
+        result.current.handleChange('config.username', 'newuser');
+      });
+
+      expect(result.current.values.config.password).toBe('pass');
+      expect(result.current.values.config.host).toBe('localhost');
+      expect(result.current.values.config.port).toBe(8080);
+    });
+
+    it('handles multiple nested field changes independently', () => {
+      const fields: FieldDefinition[] = [
+        {
+          id: 'config',
+          initialValue: {
+            username: 'admin',
+            password: 'pass',
+            host: 'localhost',
+            port: 8080,
+          },
+          validate: jest.fn(),
+          schema: z.object({}),
+          widget: 'formFieldset',
+          meta: { widget: 'formFieldset' },
+        },
+      ];
+
+      const { result } = renderHook(() => useFormState<NestedForm>(fields));
+
+      act(() => {
+        result.current.handleChange('config.username', 'user1');
+        result.current.handleChange('config.host', 'example.com');
+        result.current.handleChange('config.password', 'newpass');
+      });
+
+      expect(result.current.values.config).toEqual({
+        username: 'user1',
+        password: 'newpass',
+        host: 'example.com',
+        port: 8080,
+      });
+    });
+
+    it('handles nested path with array values', () => {
+      const fields: FieldDefinition[] = [
+        {
+          id: 'metadata',
+          initialValue: { tags: ['tag1', 'tag2'] },
+          validate: jest.fn(),
+          schema: z.object({}),
+          widget: 'formFieldset',
+          meta: { widget: 'formFieldset' },
+        },
+      ];
+
+      const { result } = renderHook(() => useFormState<NestedForm>(fields));
+
+      act(() => {
+        result.current.handleChange('metadata.tags', ['newTag1', 'newTag2', 'newTag3']);
+      });
+
+      expect(result.current.values.metadata.tags).toEqual(['newTag1', 'newTag2', 'newTag3']);
+    });
+
+    it('throws error for paths deeper than 2 levels', () => {
+      const fields: FieldDefinition[] = [
+        {
+          id: 'config',
+          initialValue: {},
+          validate: jest.fn(),
+          schema: z.object({}),
+          widget: 'formFieldset',
+          meta: { widget: 'formFieldset' },
+        },
+      ];
+
+      const { result } = renderHook(() => useFormState(fields));
+
+      expect(() => {
+        act(() => {
+          result.current.handleChange('config.nested.deep.value', 'test');
+        });
+      }).toThrow(
+        'Nested paths deeper than 2 levels are not supported. Got path: "config.nested.deep.value" with 4 levels.'
+      );
+    });
+
+    it('throws error for 3-level path', () => {
+      const fields: FieldDefinition[] = [
+        {
+          id: 'level1',
+          initialValue: {},
+          validate: jest.fn(),
+          schema: z.object({}),
+          widget: 'formFieldset',
+          meta: { widget: 'formFieldset' },
+        },
+      ];
+
+      const { result } = renderHook(() => useFormState(fields));
+
+      expect(() => {
+        act(() => {
+          result.current.handleChange('level1.level2.level3', 'value');
+        });
+      }).toThrow(
+        'Nested paths deeper than 2 levels are not supported. Got path: "level1.level2.level3" with 3 levels.'
+      );
+    });
+  });
 });

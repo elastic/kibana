@@ -28,6 +28,10 @@ export type KeyValueWidgetMeta = BaseMetadata & {
 
 export const isKeyValueWidgetMeta = createWidgetTypeGuard<KeyValueWidgetMeta>('keyValue');
 
+export const getKeyValueInitialValue = (schema: z.ZodTypeAny, defaultValue?: unknown) => {
+  return defaultValue ?? {};
+};
+
 export type KeyValueWidgetProps = Omit<
   BaseWidgetProps<Record<string, string>, KeyValueWidgetMeta>,
   'schema'
@@ -61,9 +65,12 @@ export const KeyValueField: React.FC<KeyValueWidgetProps> = ({
   const helpText = helpTextProp || helpTextMeta;
   const disabled = isDisabled as boolean | undefined;
 
+  const currentValue: Record<string, unknown> =
+    value && typeof value === 'object' && Object.keys(value).length > 0 ? value : {};
+
   const [pairs, setPairs] = useState<KeyValuePair[]>(() => {
-    if (value && typeof value === 'object' && Object.keys(value).length > 0) {
-      return Object.entries(value).map(([key, val]) => ({
+    if (currentValue && typeof currentValue === 'object' && Object.keys(currentValue).length > 0) {
+      return Object.entries(currentValue).map(([key, val]) => ({
         id: generateId(),
         key,
         value: String(val),

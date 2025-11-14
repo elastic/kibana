@@ -13,12 +13,7 @@ import { EuiButton, EuiForm, EuiSpacer } from '@elastic/eui';
 import { getMeta } from './schema_metadata';
 import { useFormState } from './use_form_state';
 import type { WidgetType } from './widgets';
-import {
-  getDiscriminatedUnionInitialValue,
-  getWidget,
-  isFormFieldsetWidgetMeta,
-  isKeyValueWidgetMeta,
-} from './widgets';
+import { getWidget } from './widgets';
 
 /**
  * Key used for root-level field validation errors.
@@ -26,7 +21,7 @@ import {
  * Example: z.string().email() fails → issue.path = [] → path.join('.') = ''
  * Nested errors use dot notation: ['user', 'email'] → 'user.email'
  */
-const ROOT_ERROR_KEY = '';
+export const ROOT_ERROR_KEY = '';
 
 export interface FieldDefinition {
   id: string;
@@ -49,19 +44,9 @@ const getFieldsFromSchema = <T extends z.ZodRawShape>(schema: z.ZodObject<T>) =>
       throw new Error(`UI metadata is missing for field: ${key}`);
     }
 
-    let initialValue = metaInfo.default;
-
-    if (isFormFieldsetWidgetMeta(metaInfo) && schemaAny instanceof z.ZodDiscriminatedUnion) {
-      initialValue = getDiscriminatedUnionInitialValue(
-        schemaAny as z.ZodDiscriminatedUnion<z.ZodObject<z.ZodRawShape>[]>
-      );
-    } else if (isKeyValueWidgetMeta(metaInfo) && !initialValue) {
-      initialValue = {};
-    }
-
     fields.push({
       id: key,
-      initialValue,
+      initialValue: metaInfo.default,
       schema: schemaAny,
       widget: metaInfo.widget,
       meta: metaInfo,

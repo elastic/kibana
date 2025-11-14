@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useReducer, useCallback, useMemo } from 'react';
+import { useReducer, useCallback } from 'react';
 import type { FieldDefinition } from './form';
+import { ROOT_ERROR_KEY } from './form';
 
 interface FormState<T> {
   values: T;
@@ -54,47 +55,56 @@ type PathValue<T, P extends string> = P extends `${infer K}.${infer Rest}`
   : unknown;
 
 const getOptionValue = <T, P extends string>(obj: T, path: P): PathValue<T, P> => {
-  const keys = path.split('.');
-  let current: unknown = obj;
-  for (const key of keys) {
-    if (current === undefined || current === null) return undefined as PathValue<T, P>;
-    current = (current as Record<string, unknown>)[key];
+  const [first, second] = path.split('.');
+  const record = obj as Record<string, unknown>;
+
+  if (!second) {
+    return record[first] as PathValue<T, P>;
   }
-  return current as PathValue<T, P>;
+
+  const nested = record[first];
+  if (nested === undefined || nested === null) {
+    return undefined as PathValue<T, P>;
+  }
+
+  return (nested as Record<string, unknown>)[second] as PathValue<T, P>;
 };
 
 const setOptionValue = <T, P extends string>(obj: T, path: P, value: PathValue<T, P>): T => {
   const keys = path.split('.');
-  const result = { ...obj } as T;
-  let current: Record<string, unknown> = result as Record<string, unknown>;
 
-  for (let i = 0; i < keys.length - 1; i++) {
-    const key = keys[i];
-    const currentValue = current[key];
-    if (currentValue === undefined || currentValue === null || typeof currentValue !== 'object') {
-      current[key] = {};
-    } else {
-      current[key] = { ...(currentValue as Record<string, unknown>) };
-    }
-    current = current[key] as Record<string, unknown>;
+  if (keys.length > 2) {
+    throw new Error(
+      `Nested paths deeper than 2 levels are not supported. Got path: "${path}" with ${keys.length} levels.`
+    );
   }
 
-  current[keys[keys.length - 1]] = value;
-  return result;
+  if (keys.length === 1) {
+    return { ...obj, [keys[0]]: value } as T;
+  }
+
+  const [first, second] = keys;
+  const record = obj as Record<string, unknown>;
+  const currentValue = record[first];
+  const nestedValue = currentValue && typeof currentValue === 'object' ? currentValue : {};
+
+  return {
+    ...obj,
+    [first]: { ...nestedValue, [second]: value },
+  } as T;
 };
 
 const clearFieldErrors = (
   errors: Record<string, string | string[]>,
   fieldId: string
 ): Record<string, string | string[]> => {
-  const newErrors = { ...errors };
-  delete newErrors[fieldId];
-  Object.keys(newErrors).forEach((errorKey) => {
-    if (errorKey.startsWith(fieldId + '.')) {
-      delete newErrors[errorKey];
+  const result: Record<string, string | string[]> = {};
+  Object.keys(errors).forEach((errorKey) => {
+    if (errorKey !== fieldId && !errorKey.startsWith(fieldId + '.')) {
+      result[errorKey] = errors[errorKey];
     }
   });
-  return newErrors;
+  return result;
 };
 
 const formReducer = <T>(state: FormState<T>, action: FormAction<T>): FormState<T> => {
@@ -130,7 +140,7 @@ const formReducer = <T>(state: FormState<T>, action: FormAction<T>): FormState<T
 
       if (validationResult) {
         const isNestedField = fieldId.includes('.');
-        const nestedFieldPath = isNestedField ? fieldId.split('.').slice(1).join('.') : '';
+        const nestedFieldPath = isNestedField ? fieldId.split('.')[1] : '';
 
         Object.entries(validationResult).forEach(([path, error]) => {
           const errorKey = path ? `${field.id}.${path}` : field.id;
@@ -197,16 +207,10 @@ const formReducer = <T>(state: FormState<T>, action: FormAction<T>): FormState<T
   }
 };
 
-export const useFormState = <T>(fields: FieldDefinition[]) => {
-  const initialValues = useMemo(
-    () =>
-      fields.reduce((acc, field) => {
-        const key = field.id as keyof T;
-        (acc as T)[key] = (field.initialValue ?? field.value ?? '') as T[keyof T];
-        return acc;
-      }, {} as T),
-    [fields]
-  );
+export const useFormState = <T extends Record<string, unknown>>(fields: FieldDefinition[]) => {
+  const initialValues = Object.fromEntries(
+    fields.map((field) => [field.id, field.initialValue ?? field.value ?? ''])
+  ) as T;
 
   const [formState, dispatch] = useReducer(formReducer<T>, {
     values: initialValues,
@@ -236,11 +240,11 @@ export const useFormState = <T>(fields: FieldDefinition[]) => {
   }, []);
 
   const getFieldValue = useCallback(
-    <P extends string>(fieldId: P): PathValue<T, P> | T[keyof T] => {
+    (fieldId: string) => {
       if (fieldId.includes('.')) {
         return getOptionValue(formState.values, fieldId);
       }
-      return formState.values[fieldId as unknown as keyof T];
+      return formState.values[fieldId as keyof T];
     },
     [formState.values]
   );
@@ -252,7 +256,7 @@ export const useFormState = <T>(fields: FieldDefinition[]) => {
 
       if (field) {
         const validationResult = field.validate(value);
-        return validationResult?.[''];
+        return validationResult?.[ROOT_ERROR_KEY];
       }
       return undefined;
     },
@@ -268,12 +272,9 @@ export const useFormState = <T>(fields: FieldDefinition[]) => {
         const errors: Record<string, string | string[]> = {};
         let hasErrors = false;
 
-        const cleanedValues = {} as Partial<T>;
-
         fields.forEach((field) => {
           const fieldKey = field.id as keyof T;
           const value = formState.values[fieldKey];
-          cleanedValues[fieldKey] = value as T[keyof T];
 
           allTouched[field.id] = true;
 
@@ -291,7 +292,7 @@ export const useFormState = <T>(fields: FieldDefinition[]) => {
         dispatch({ type: 'SUBMIT_ERRORS', errors, touched: allTouched });
 
         if (!hasErrors) {
-          onSuccess({ data: cleanedValues as T });
+          onSuccess({ data: formState.values });
         }
       };
     },

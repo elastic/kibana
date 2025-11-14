@@ -33,45 +33,51 @@ export const getDiscriminatorFieldValue = (optionSchema: z.ZodObject<z.ZodRawSha
   return (optionSchema.shape.type as z.ZodLiteral<string>).value;
 };
 
-export const getDiscriminatedUnionInitialValue = (
-  schema: z.ZodDiscriminatedUnion<z.ZodObject<z.ZodRawShape>[]>,
-  defaultValue?: unknown
-) => {
+export const getDiscriminatedUnionInitialValue = (schema: z.ZodTypeAny, defaultValue?: unknown) => {
   if (!(schema instanceof z.ZodDiscriminatedUnion)) {
     throw new Error('Schema provided is not a ZodDiscriminatedUnion');
   }
 
-  const metaInfo = getMeta(schema);
+  const discriminatedSchema = schema as z.ZodDiscriminatedUnion<z.ZodObject<z.ZodRawShape>[]>;
+  const metaInfo = getMeta(discriminatedSchema);
   const metadataDefault = metaInfo?.default;
   const valueToUse = metadataDefault ?? defaultValue;
 
   if (valueToUse) {
-    const matchingOption = schema.options.find((option: z.ZodObject<z.ZodRawShape>) => {
-      const discriminatorValue = getDiscriminatorFieldValue(option);
-      return discriminatorValue === valueToUse;
-    });
+    const matchingOption = discriminatedSchema.options.find(
+      (option: z.ZodObject<z.ZodRawShape>) => {
+        const discriminatorValue = getDiscriminatorFieldValue(option);
+        return discriminatorValue === valueToUse;
+      }
+    );
 
     if (matchingOption) {
       return getDefaultValuesForOption(matchingOption);
     }
   }
 
-  return getDefaultValuesForOption(schema.options[0]);
+  return getDefaultValuesForOption(discriminatedSchema.options[0]);
 };
 
 export const DiscriminatedUnionField: React.FC<DiscriminatedUnionWidgetProps> = (props) => {
-  const { schema } = props;
+  const { schema, value } = props;
 
   if (!(schema instanceof z.ZodDiscriminatedUnion)) {
     throw new Error('Schema provided to DiscriminatedUnionField is not a ZodDiscriminatedUnion');
   }
 
   const discriminatedSchema = schema as z.ZodDiscriminatedUnion<z.ZodObject<z.ZodRawShape>[]>;
+
+  const currentValue =
+    value && typeof value === 'object' && Object.keys(value).length > 0
+      ? value
+      : getDiscriminatedUnionInitialValue(discriminatedSchema);
+
   const isSingleOption = discriminatedSchema.options.length === 1;
 
   return isSingleOption ? (
-    <SingleOptionUnionField {...props} />
+    <SingleOptionUnionField {...props} value={currentValue} />
   ) : (
-    <MultiOptionUnionField {...props} />
+    <MultiOptionUnionField {...props} value={currentValue} />
   );
 };
