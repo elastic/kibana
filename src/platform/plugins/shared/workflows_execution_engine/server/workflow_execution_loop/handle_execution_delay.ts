@@ -48,5 +48,4 @@ export async function handleExecutionDelay(
       spaceId: workflowExecution.spaceId,
     });
   }
-  await params.workflowExecutionState.flush();
 }
