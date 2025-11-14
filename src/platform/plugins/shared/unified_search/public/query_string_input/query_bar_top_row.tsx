@@ -38,6 +38,7 @@ import {
   EuiButton,
   EuiButtonIcon,
   useEuiTheme,
+  type EuiTimeZoneDisplayProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SearchSessionState, getQueryLog } from '@kbn/data-plugin/public';
@@ -602,6 +603,25 @@ export const QueryBarTopRow = React.memo(
 
       const wrapperClasses = classNames('kbnQueryBar__datePickerWrapper');
 
+      const timeZoneName = uiSettings.get('dateFormat:tz');
+      // Dummy example of adding a link for admins
+      const userIsAdmin = true; // TODO add logic
+      const SPACE_SETTINGS_URL = 'https://example.com'; // add correct URL e.g. `management:settings`
+      const timeZoneSettingsLinkRender: EuiTimeZoneDisplayProps['customRender'] = userIsAdmin
+        ? ({ nameDisplay }) => (
+            <>
+              {nameDisplay}
+              <EuiButtonIcon
+                aria-label="Time zone settings" // TODO translate
+                href={SPACE_SETTINGS_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                iconType="pencil"
+              />
+            </>
+          )
+        : undefined;
+
       const datePicker = (
         <SuperDatePicker
           isDisabled={isDisabled}
@@ -624,6 +644,10 @@ export const QueryBarTopRow = React.memo(
           width={isMobile ? 'full' : 'auto'}
           compressed
           showTimeWindowButtons
+          timeZoneDisplayProps={{
+            timeZone: timeZoneName,
+            customRender: timeZoneSettingsLinkRender,
+          }}
         />
       );
       const component = getWrapperWithTooltip(datePicker, enableTooltip, props.query);
