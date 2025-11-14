@@ -313,6 +313,10 @@ export const updateTableItemsPerPage = ({
     [id]: {
       ...dataTable,
       itemsPerPage,
+      expandedAlertIndex:
+        (dataTable?.expandedAlertIndex ?? 0) < itemsPerPage
+          ? dataTable.expandedAlertIndex
+          : itemsPerPage - 1,
     },
   };
 };

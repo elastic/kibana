@@ -6,9 +6,15 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiPagination, EuiSpacer } from '@elastic/eui';
 import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  dataTableActions,
+  dataTableSelectors,
+  tableDefaults,
+} from '@kbn/securitysolution-data-table';
+import { useDispatch } from 'react-redux';
 import { Notes } from './notes';
 import { useRuleDetailsLink } from '../../shared/hooks/use_rule_details_link';
 import { DocumentStatus } from './status';
@@ -28,6 +34,7 @@ import { Assignees } from './assignees';
 import { FlyoutTitle } from '../../../shared/components/flyout_title';
 import { getAlertTitle } from '../../shared/utils';
 import { AlertHeaderBlock } from '../../../shared/components/alert_header_block';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 
 // minWidth for each block, allows to switch for a 1 row 4 blocks to 2 rows with 2 block each
 const blockStyles = {
@@ -46,6 +53,12 @@ export const AlertHeaderTitle = memo(() => {
     refetchFlyoutData,
     getFieldsData,
   } = useDocumentDetailsContext();
+  const dispatch = useDispatch();
+
+  const { expandedAlertIndex, totalCount } = useDeepEqualSelector((state) => {
+    return dataTableSelectors.getTableByIdSelector()(state, scopeId) ?? tableDefaults;
+  });
+
   const { ruleName, timestamp, ruleId } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
   const title = useMemo(() => getAlertTitle({ ruleName }), [ruleName]);
   const href = useRuleDetailsLink({ ruleId: !isRulePreview ? ruleId : null });
@@ -79,6 +92,14 @@ export const AlertHeaderTitle = memo(() => {
     refetch();
     refetchFlyoutData();
   }, [refetch, refetchFlyoutData]);
+  const onPaginate = useCallback(
+    (pageIndex: number) => {
+      dispatch(
+        dataTableActions.updateExpandedAlertIndex({ id: scopeId, expandedAlertIndex: pageIndex })
+      );
+    },
+    [dispatch, scopeId]
+  );
 
   const riskScore = useMemo(
     () => (
@@ -125,7 +146,20 @@ export const AlertHeaderTitle = memo(() => {
     <>
       <DocumentSeverity getFieldsData={getFieldsData} />
       <EuiSpacer size="m" />
-      {timestamp && <PreferenceFormattedDate value={new Date(timestamp)} />}
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          {timestamp && <PreferenceFormattedDate value={new Date(timestamp)} />}
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiPagination
+            aria-label=""
+            pageCount={totalCount}
+            activePage={expandedAlertIndex}
+            onPageClick={onPaginate}
+            compressed
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer size="xs" />
       {ruleTitle}
       <EuiSpacer size="m" />
