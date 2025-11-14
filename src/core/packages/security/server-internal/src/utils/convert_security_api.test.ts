@@ -22,9 +22,11 @@ describe('convertSecurityApi', () => {
           validate: jest.fn(),
           invalidate: jest.fn(),
           invalidateAsInternalUser: jest.fn(),
+          invalidateViaUiam: jest.fn(),
           grantAsInternalUser: jest.fn(),
           create: jest.fn(),
           update: jest.fn(),
+          getScopedClusterClient: jest.fn(),
         },
       },
       audit: {

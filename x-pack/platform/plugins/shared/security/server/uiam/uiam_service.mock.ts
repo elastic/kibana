@@ -27,5 +27,6 @@ export const uiamServiceMock = {
       key: 'mock-api-key-value',
       description: 'mock-api-key-name',
     }),
+    revokeApiKey: jest.fn().mockResolvedValue(undefined),
   }),
 };

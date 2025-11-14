@@ -546,4 +546,56 @@ describe('UiamService', () => {
       ).rejects.toThrowError('Internal Server Error');
     });
   });
+
+  describe('#revokeApiKey', () => {
+    it('properly calls UIAM service to revoke an API key', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        status: 204,
+      });
+
+      await uiamService.revokeApiKey('test-key-id', 'access-token');
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/api-keys/test-key-id',
+        {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+            Authorization: 'ApiKey access-token',
+          },
+          dispatcher: AGENT_MOCK,
+        }
+      );
+    });
+
+    it('throws error if revocation fails with 400 status code', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 400,
+        headers: new Headers(),
+        json: async () => ({ error: { message: 'Bad request' } }),
+      });
+
+      await expect(uiamService.revokeApiKey('test-key-id', 'access-token')).rejects.toThrowError(
+        'Bad request'
+      );
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/api-keys/test-key-id',
+        {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+            Authorization: 'ApiKey access-token',
+          },
+          dispatcher: AGENT_MOCK,
+        }
+      );
+    });
+  });
 });

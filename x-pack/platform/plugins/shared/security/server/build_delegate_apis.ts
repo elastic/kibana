@@ -34,6 +34,8 @@ export const buildSecurityApi = ({
         validate: (apiKeyParams) => getAuthc().apiKeys.validate(apiKeyParams),
         invalidate: (request, params) => getAuthc().apiKeys.invalidate(request, params),
         invalidateAsInternalUser: (params) => getAuthc().apiKeys.invalidateAsInternalUser(params),
+        invalidateViaUiam: (request, apiKeyId) =>
+          getAuthc().apiKeys.invalidateViaUiam(request, apiKeyId),
         getScopedClusterClient: (request) => getAuthc().apiKeys.getScopedClusterClient(request),
       },
     },

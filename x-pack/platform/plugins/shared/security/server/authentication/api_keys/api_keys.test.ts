@@ -1111,6 +1111,150 @@ describe('API Keys', () => {
     });
   });
 
+  describe('invalidateViaUiam()', () => {
+    let mockUiam: any;
+
+    beforeEach(() => {
+      mockUiam = {
+        revokeApiKey: jest.fn(),
+      };
+      apiKeys = new APIKeys({
+        clusterClient: mockClusterClient,
+        logger,
+        license: mockLicense,
+        applicationName: 'kibana-.kibana',
+        kibanaFeatures: [],
+        uiam: mockUiam,
+      });
+    });
+
+    it('returns null when security feature is disabled', async () => {
+      mockLicense.isEnabled.mockReturnValue(false);
+      const result = await apiKeys.invalidateViaUiam(
+        httpServerMock.createKibanaRequest({
+          headers: { authorization: 'ApiKey test-key' },
+        }),
+        'test-key-id'
+      );
+      expect(result).toBeNull();
+      expect(mockUiam.revokeApiKey).not.toHaveBeenCalled();
+    });
+
+    it('throws an error when UIAM service is not available', async () => {
+      apiKeys = new APIKeys({
+        clusterClient: mockClusterClient,
+        logger,
+        license: mockLicense,
+        applicationName: 'kibana-.kibana',
+        kibanaFeatures: [],
+      });
+      mockLicense.isEnabled.mockReturnValue(true);
+
+      await expect(
+        apiKeys.invalidateViaUiam(
+          httpServerMock.createKibanaRequest({
+            headers: { authorization: 'ApiKey test-key' },
+          }),
+          'test-key-id'
+        )
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"UIAM service is not available"`);
+      expect(mockUiam.revokeApiKey).not.toHaveBeenCalled();
+    });
+
+    it('throws an error when authorization header is missing', async () => {
+      mockLicense.isEnabled.mockReturnValue(true);
+
+      await expect(
+        apiKeys.invalidateViaUiam(httpServerMock.createKibanaRequest(), 'test-key-id')
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Unable to invalidate API key via UIAM, request does not contain an authorization header"`
+      );
+      expect(mockUiam.revokeApiKey).not.toHaveBeenCalled();
+    });
+
+    it('successfully invalidates an API key via UIAM', async () => {
+      mockLicense.isEnabled.mockReturnValue(true);
+      mockUiam.revokeApiKey.mockResolvedValue(undefined);
+
+      const result = await apiKeys.invalidateViaUiam(
+        httpServerMock.createKibanaRequest({
+          headers: { authorization: 'ApiKey test-credential' },
+        }),
+        'test-key-id'
+      );
+
+      expect(result).toEqual({
+        invalidated_api_keys: ['test-key-id'],
+        previously_invalidated_api_keys: [],
+        error_count: 0,
+      });
+      expect(mockUiam.revokeApiKey).toHaveBeenCalledWith('test-key-id', 'test-credential');
+    });
+
+    it('returns error result when UIAM revocation fails', async () => {
+      mockLicense.isEnabled.mockReturnValue(true);
+      const error = new Error('UIAM service error');
+      mockUiam.revokeApiKey.mockRejectedValue(error);
+
+      const result = await apiKeys.invalidateViaUiam(
+        httpServerMock.createKibanaRequest({
+          headers: { authorization: 'ApiKey test-credential' },
+        }),
+        'test-key-id'
+      );
+
+      expect(result).toEqual({
+        invalidated_api_keys: [],
+        previously_invalidated_api_keys: [],
+        error_count: 1,
+        error_details: [
+          {
+            type: 'exception',
+            reason: 'UIAM service error',
+          },
+        ],
+      });
+      expect(mockUiam.revokeApiKey).toHaveBeenCalledWith('test-key-id', 'test-credential');
+    });
+
+    it('logs debug message on successful invalidation', async () => {
+      mockLicense.isEnabled.mockReturnValue(true);
+      mockUiam.revokeApiKey.mockResolvedValue(undefined);
+
+      await apiKeys.invalidateViaUiam(
+        httpServerMock.createKibanaRequest({
+          headers: { authorization: 'ApiKey test-credential' },
+        }),
+        'test-key-id'
+      );
+
+      expect(loggingSystemMock.collect(logger).debug).toEqual([
+        ['Trying to invalidate API key test-key-id via UIAM'],
+        ['API key test-key-id was invalidated successfully via UIAM'],
+      ]);
+    });
+
+    it('logs error message on failed invalidation', async () => {
+      mockLicense.isEnabled.mockReturnValue(true);
+      const error = new Error('UIAM service error');
+      mockUiam.revokeApiKey.mockRejectedValue(error);
+
+      await apiKeys.invalidateViaUiam(
+        httpServerMock.createKibanaRequest({
+          headers: { authorization: 'ApiKey test-credential' },
+        }),
+        'test-key-id'
+      );
+
+      expect(loggingSystemMock.collect(logger).debug).toEqual([
+        ['Trying to invalidate API key test-key-id via UIAM'],
+      ]);
+      expect(loggingSystemMock.collect(logger).error).toEqual([
+        ['Failed to invalidate API key test-key-id via UIAM: UIAM service error'],
+      ]);
+    });
+  });
+
   describe('with kibana privileges', () => {
     it('creates api key with application privileges', async () => {
       mockLicense.isEnabled.mockReturnValue(true);

@@ -28,6 +28,7 @@ export const getDefaultSecurityImplementation = (): CoreSecurityDelegateContract
         validate: REJECT_WHEN_API_KEYS_DISABLED,
         invalidate: REJECT_WHEN_API_KEYS_DISABLED,
         invalidateAsInternalUser: REJECT_WHEN_API_KEYS_DISABLED,
+        invalidateViaUiam: REJECT_WHEN_API_KEYS_DISABLED,
         getScopedClusterClient: THROW_WHEN_API_KEYS_DISABLED,
       },
     },

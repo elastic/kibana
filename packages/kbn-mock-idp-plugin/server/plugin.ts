@@ -308,6 +308,56 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
           }
         }
       );
+
+      router.post(
+        {
+          path: '/mock_idp/invalidate_api_key_via_uiam',
+          validate: {
+            body: schema.object({
+              apiKeyId: schema.string(),
+              authcScheme: schema.string(),
+              credential: schema.string(),
+            }),
+          },
+          options: { authRequired: 'optional' },
+          security: { authz: { enabled: false, reason: 'Mock IDP plugin for testing' } },
+        },
+        async (context, request, response) => {
+          try {
+            if (!getAuthenticationService) {
+              return response.badRequest({
+                body: { message: 'Authentication service not available yet' },
+              });
+            }
+
+            const { apiKeyId, authcScheme, credential } = request.body;
+            const authcService = getAuthenticationService();
+
+            // Create a request with authentication header for UIAM
+            const requestHeaders: Headers = {
+              ...request.headers,
+              authorization: `${authcScheme} ${credential}`,
+            };
+            const fakeRawRequest: FakeRawRequest = {
+              headers: requestHeaders,
+              path: request.url.pathname,
+            };
+            const requestToUse = kibanaRequestFactory(fakeRawRequest);
+
+            const result = await authcService.apiKeys.invalidateViaUiam(requestToUse, apiKeyId);
+
+            return response.ok({
+              body: result,
+            });
+          } catch (err) {
+            logger.error(`Failed to invalidate API key via UIAM: ${err}`, err);
+            return response.customError({
+              statusCode: 500,
+              body: { message: err.message },
+            });
+          }
+        }
+      );
     },
     start(core) {
       getAuthenticationService = () => core.security.authc;

@@ -95,6 +95,16 @@ export interface APIKeys {
   invalidateAsInternalUser(params: InvalidateAPIKeysParams): Promise<InvalidateAPIKeyResult | null>;
 
   /**
+   * Tries to invalidate an API key via UIAM service.
+   * @param request Request instance containing the API key for authentication.
+   * @param apiKeyId The ID of the API key to invalidate.
+   */
+  invalidateViaUiam(
+    request: KibanaRequest,
+    apiKeyId: string
+  ): Promise<InvalidateAPIKeyResult | null>;
+
+  /**
    * Creates a scoped Elasticsearch client with UIAM authentication headers if
    * the ApiKey in the request is a UIAM ApiKey, otherwise returns a standard scoped client.
    * @param request Request instance.
