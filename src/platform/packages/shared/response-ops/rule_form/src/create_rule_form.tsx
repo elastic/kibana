@@ -15,7 +15,7 @@ import { type RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import type { RuleFormData, RuleFormPlugins, RuleTypeMetaData } from './types';
 import { DEFAULT_VALID_CONSUMERS, getDefaultFormData } from './constants';
 import { RuleFormStateProvider } from './rule_form_state';
-import { useCreateRule } from './common/hooks';
+import { useCreateRule, usePreviewRule } from './common/hooks';
 import { RulePage } from './rule_page';
 import { RuleFlyout } from './rule_flyout';
 import {
@@ -100,6 +100,14 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
     },
   });
 
+  const { mutateAsync: onPreviewRule, isLoading: isLoadingPreview } = usePreviewRule({
+    http,
+    onError: (error) => {
+      // TODO: How to handle error
+      console.log('----->error:', error);
+    },
+  });
+
   const {
     isInitialLoading,
     ruleType,
@@ -143,6 +151,27 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
       });
     },
     [mutate]
+  );
+
+  const onPreview = useCallback(
+    async (newFormData: RuleFormData) => {
+      return await onPreviewRule({
+        formData: {
+          name: newFormData.name,
+          ruleTypeId: newFormData.ruleTypeId!,
+          enabled: true,
+          consumer: newFormData.consumer,
+          tags: newFormData.tags,
+          params: newFormData.params,
+          schedule: newFormData.schedule,
+          actions: newFormData.actions,
+          alertDelay: newFormData.alertDelay,
+          flapping: newFormData.flapping,
+          artifacts: newFormData.artifacts,
+        },
+      });
+    },
+    [onPreviewRule]
   );
 
   if (isInitialLoading) {
@@ -219,8 +248,10 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
       <RuleFormUIComponent
         isEdit={false}
         isSaving={isSaving}
+        isLoadingPreview={isLoadingPreview}
         onCancel={onCancel}
         onSave={onSave}
+        onPreview={onPreview}
         onChangeMetaData={onChangeMetaData}
         focusTrapProps={props.focusTrapProps}
         http={http}

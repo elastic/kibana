@@ -26,7 +26,7 @@ import { useRuleFormInspector } from './inspector_context';
 export interface RulePageFooterProps {
   isEdit?: boolean;
   isSaving?: boolean;
-  isRunningPreview?: boolean;
+  isLoadingPreview?: boolean;
   onCancel: () => void;
   onSave: () => void;
   onPreview: (formData: any) => Promise<any>;
@@ -44,7 +44,7 @@ export const RulePageFooter = (props: RulePageFooterProps) => {
   const {
     isEdit = false,
     isSaving = false,
-    isRunningPreview = false,
+    isLoadingPreview = false,
     onCancel,
     onSave,
     onPreview,
@@ -115,13 +115,13 @@ export const RulePageFooter = (props: RulePageFooterProps) => {
                 requestParams: operation.params,
               });
             }
-          } catch (queryError: any) {
+          } catch (error: any) {
             // TODO: how to handle error
             console.log('error:', error);
-            requestResponder.error({
-              body: Joperation.response.body,
-              requestParams: operation.params,
-            });
+            // requestResponder.error({
+            //   body: operation.response.body,
+            //   requestParams: operation.params,
+            // });
           }
         });
       }
@@ -129,10 +129,10 @@ export const RulePageFooter = (props: RulePageFooterProps) => {
     } catch (error: any) {
       // TODO: how to handle error
       console.log('error:', error);
-      requestsAdapter.reset();
-      requestsAdapter.start('Rule execution query', {
-        id: uuidv4(),
-      });
+      // requestsAdapter.reset();
+      // requestsAdapter.start('Rule execution query', {
+      //   id: uuidv4(),
+      // });
       inspector.open({ requests: requestsAdapter });
     }
   }, [formData, onPreview, inspector, requestsAdapter]);
@@ -186,8 +186,8 @@ export const RulePageFooter = (props: RulePageFooterProps) => {
               <EuiButton
                 data-test-subj="rulePageFooterPreviewButton"
                 onClick={onPreviewClick}
-                disabled={isSaving || hasErrors || isRunningPreview}
-                isLoading={isRunningPreview}
+                disabled={isSaving || hasErrors || isLoadingPreview}
+                isLoading={isLoadingPreview}
               >
                 {RULE_PAGE_FOOTER_PREVIEW_TEXT}
               </EuiButton>
