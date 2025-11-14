@@ -37,7 +37,7 @@ const useAppMenuBarStyles = (euiTheme: UseEuiTheme['euiTheme']) =>
       justifyContent: 'end',
       alignItems: 'center',
       padding: `0 ${euiTheme.size.s}`,
-      background: euiTheme.colors.body,
+      background: euiTheme.colors.backgroundBasePlain,
       borderBottom: euiTheme.border.thin,
       marginBottom: `-${euiTheme.border.width.thin}`,
     };
