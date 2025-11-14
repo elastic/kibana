@@ -6,7 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLAst, ESQLAstAllCommands, ESQLMessage } from '../../../types';
+import { walk } from '../../../walker';
+import type { ESQLAst, ESQLAstAllCommands, ESQLMessage, ESQLSingleAstItem } from '../../../types';
 import type { ICommandContext } from '../../types';
 import { buildMissingMetadataMessage } from './utils';
 
@@ -17,20 +18,38 @@ export const validate = (
 ): ESQLMessage[] => {
   const messages: ESQLMessage[] = [];
 
-  // If no columns are provided don't perform the client side validation, to avoid false positives.
-  if (context?.columns?.size === 0) {
-    return messages;
+  let hasIdMetadata = false;
+  let hasIndexMetadata = false;
+  let hasScoreMetadata = false;
+
+  const fromCommand = ast.find((_command) => _command.name.toLocaleLowerCase() === 'from');
+
+  if (fromCommand) {
+    walk(fromCommand, {
+      visitCommandOption: (node) => {
+        if (node.name.toLocaleLowerCase() === 'metadata') {
+          const metadataFields = node.args.map((arg) => (arg as ESQLSingleAstItem).name);
+          if (metadataFields.includes('_id')) {
+            hasIdMetadata = true;
+          }
+          if (metadataFields.includes('_index')) {
+            hasIndexMetadata = true;
+          }
+          if (metadataFields.includes('_score')) {
+            hasScoreMetadata = true;
+          }
+        }
+      },
+    });
   }
 
-  if (!context?.columns.get('_id')) {
+  if (!hasIdMetadata) {
     messages.push(buildMissingMetadataMessage(command, '_id'));
   }
-
-  if (!context?.columns.get('_index')) {
+  if (!hasIndexMetadata) {
     messages.push(buildMissingMetadataMessage(command, '_index'));
   }
-
-  if (!context?.columns.get('_score')) {
+  if (!hasScoreMetadata) {
     messages.push(buildMissingMetadataMessage(command, '_score'));
   }
 
