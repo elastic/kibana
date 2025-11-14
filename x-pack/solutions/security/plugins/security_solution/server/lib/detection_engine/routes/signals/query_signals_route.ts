@@ -13,6 +13,7 @@ import type {
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import agent from 'elastic-apm-node';
 import { SearchAlertsRequestBody } from '../../../../../common/api/detection_engine/signals';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../../common/constants';
@@ -43,6 +44,13 @@ export const querySignalsRoute = (
       },
       async (context, request, response) => {
         const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+
+        // Capture query-id header for APM correlation
+        const queryId = request.headers['query-id'] as string;
+        const transaction = agent.currentTransaction;
+        if (transaction && queryId) {
+          transaction.addLabels({ query_id: queryId });
+        }
 
         // eslint-disable-next-line @typescript-eslint/naming-convention
         const { query, aggs, _source, fields, track_total_hits, size, runtime_mappings, sort } =
