@@ -15,53 +15,103 @@
  * captures all remaining content.
  *
  * Algorithm:
- * 1. Look for a pattern of: (separator + append_field) repeated 2+ times at the end
- * 2. Replace with single instance: separator + append_field
+ * 1. Look for a pattern of: (space + append_field) repeated 2+ times at the end
+ * 2. Compare only the base field name (ignoring modifiers like ->)
+ * 3. Replace with single instance: space + first append_field occurrence
  *
  * @param pattern The dissect pattern to process
  * @returns The pattern with collapsed trailing repeats
  */
 export function collapseTrailingRepeats(pattern: string): string {
+  // Helper function to extract base field name without modifiers
+  const getBaseFieldName = (field: string): string => {
+    // Match %{+fieldname} or %{+fieldname->} or %{+fieldname?} etc.
+    const match = field.match(/%\{\+([^}\->?]+)/);
+    return match ? match[1] : '';
+  };
+
   let currentPattern = pattern;
   let changed = true;
+  const collapsedFields = new Set<string>(); // Track which fields we collapsed
 
-  // Keep applying both patterns until no more changes
+  // Keep applying until no more changes
   while (changed) {
     changed = false;
 
-    // First, try to match from the end with separator+field pattern
-    // Pattern: (separator + append_field) repeated at end
-    const regexWithSeparator = /([^%]*%\{\+[^}]+\})(\1)+$/;
-
-    let match = currentPattern.match(regexWithSeparator);
-    if (match) {
-      const beforeRepeats = currentPattern.substring(0, match.index);
-      const singleInstance = match[1];
-      currentPattern = beforeRepeats + singleInstance;
-      changed = true;
-      continue;
-    }
-
-    // If no match, try pattern that starts with append field (no prefix)
-    // This handles: %{+field}%{+field}%{+field} or %{+field} %{+field} %{+field}
-    // Match an append field followed by (separator + same field) repeated
-    const regexFromStart = /^(%\{\+[^}]+\})(([^%]*)%\{\+[^}]+\})+$/;
-    match = currentPattern.match(regexFromStart);
+    // Match trailing append fields separated by single spaces
+    // Pattern: %{+field[modifiers]}( %{+field[modifiers]})+ at the end
+    const regex = /(%\{\+[^}]+\})( %\{\+[^}]+\})+$/;
+    const match = currentPattern.match(regex);
 
     if (match) {
-      // Extract the field name from first field
+      const trailingPart = match[0];
+      const beforeTrailing = currentPattern.substring(0, match.index);
+
+      // Split the trailing part into individual fields (including the first one without leading space)
       const firstField = match[1];
-      const separator = match[3] || '';
+      const remainingFields =
+        trailingPart.substring(firstField.length).match(/ %\{\+[^}]+\}/g) || [];
+      const fields = [firstField, ...remainingFields];
 
-      // Split by separator and check if all parts are identical
-      const parts = currentPattern.split(separator).filter((p) => p.length > 0);
-      const allSame = parts.every((p) => p === firstField);
+      if (fields.length > 1) {
+        // Extract base field names for each field
+        const baseNames = fields.map((f) => getBaseFieldName(f.trim()));
 
-      if (allSame) {
-        currentPattern = firstField;
-        changed = true;
+        // Find the longest sequence of the same base field name at the end
+        const lastBaseName = baseNames[baseNames.length - 1];
+
+        if (lastBaseName) {
+          // Count consecutive occurrences of the last base field name from the end
+          let count = 0;
+          for (let i = baseNames.length - 1; i >= 0; i--) {
+            if (baseNames[i] === lastBaseName) {
+              count++;
+            } else {
+              break;
+            }
+          }
+
+          if (count > 1) {
+            // Keep only the first occurrence of the repeated field
+            const keptFields = fields.slice(0, baseNames.length - count + 1);
+            // Reconstruct: first field doesn't need leading space, rest do
+            const reconstructed = keptFields[0] + keptFields.slice(1).join('');
+            currentPattern = beforeTrailing + reconstructed;
+            collapsedFields.add(lastBaseName); // Track that we collapsed this field
+            changed = true;
+          }
+        }
       }
     }
+  }
+
+  // Strip + and -> modifiers only from fields that we collapsed
+  // and that now only appear once in the pattern
+  if (collapsedFields.size > 0) {
+    const allAppendFields = currentPattern.match(/%\{\+[^}]+\}/g) || [];
+
+    // Count occurrences of each base field name
+    const fieldCounts = new Map<string, string[]>();
+
+    allAppendFields.forEach((field) => {
+      const baseName = getBaseFieldName(field);
+      if (baseName) {
+        if (!fieldCounts.has(baseName)) {
+          fieldCounts.set(baseName, []);
+        }
+        fieldCounts.get(baseName)!.push(field);
+      }
+    });
+
+    // For collapsed fields that now appear only once, strip the + and modifiers
+    fieldCounts.forEach((occurrences, baseName) => {
+      if (collapsedFields.has(baseName) && occurrences.length === 1) {
+        const fieldWithModifiers = occurrences[0];
+        // Remove + and any modifiers like -> or ?
+        const fieldWithoutModifiers = `%{${baseName}}`;
+        currentPattern = currentPattern.replace(fieldWithModifiers, fieldWithoutModifiers);
+      }
+    });
   }
 
   return currentPattern;
