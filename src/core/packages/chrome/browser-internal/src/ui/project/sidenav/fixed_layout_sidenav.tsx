@@ -72,6 +72,7 @@ const CollapsibleNavigationFlyout: FunctionComponent<{
         css={css`
           border-inline-end: none; // Remove default euiFlyout border when used as a sidenav
         `}
+        session="never"
       >
         <div css={{ height: '100%', display: 'flex' }}>{children(childrenProps)}</div>
       </EuiFlyout>
