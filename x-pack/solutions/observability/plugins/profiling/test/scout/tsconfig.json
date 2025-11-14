@@ -10,7 +10,8 @@
     "@kbn/scout-oblt",
     "@kbn/tooling-log",
     "@kbn/fleet-plugin",
-    "@kbn/profiling-data-access-plugin"
+    "@kbn/profiling-data-access-plugin",
+    "@kbn/observability-plugin"
   ],
   "exclude": [
     "target/**/*"
