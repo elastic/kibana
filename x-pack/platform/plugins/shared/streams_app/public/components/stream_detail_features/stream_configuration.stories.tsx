@@ -27,6 +27,7 @@ export const StreamConfigurationStory: StoryFn<{}> = () => {
           lifecycle: { inherit: {} },
           processing: { steps: [] },
           classic: {},
+          failure_store: { inherit: {} },
         },
       }}
     />
