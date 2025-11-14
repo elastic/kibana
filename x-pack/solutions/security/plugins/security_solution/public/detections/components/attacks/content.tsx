@@ -8,12 +8,14 @@
 import { EuiHorizontalRule, EuiSpacer, EuiWindowEvent } from '@elastic/eui';
 import styled from '@emotion/styled';
 import { noop } from 'lodash/fp';
-import React, { memo, useRef } from 'react';
+import React, { useRef } from 'react';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { PAGE_TITLE } from '../../pages/attacks/translations';
 import { HeaderPage } from '../../../common/components/header_page';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { useGlobalFullScreen } from '../../../common/containers/use_full_screen';
 import { Display } from '../../../explore/hosts/pages/display';
+import { SearchBarSection } from './search_bar/search_bar_section';
 
 export const CONTENT_TEST_ID = 'attacks-page-content';
 export const SECURITY_SOLUTION_PAGE_WRAPPER_TEST_ID = 'attacks-page-security-solution-page-wrapper';
@@ -27,10 +29,17 @@ const StyledFullHeightContainer = styled.div`
   flex: 1 1 auto;
 `;
 
+export interface AttacksPageContentProps {
+  /**
+   * DataView for the attacks page
+   */
+  dataView: DataView;
+}
+
 /**
  * Renders the content of the attacks page: search bar, header, filters, KPIs, and table sections.
  */
-export const AttacksPageContent = memo(() => {
+export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentProps) => {
   const containerElement = useRef<HTMLDivElement | null>(null);
 
   const { globalFullScreen } = useGlobalFullScreen();
@@ -38,6 +47,7 @@ export const AttacksPageContent = memo(() => {
   return (
     <StyledFullHeightContainer data-test-subj={CONTENT_TEST_ID} ref={containerElement}>
       <EuiWindowEvent event="resize" handler={noop} />
+      <SearchBarSection dataView={dataView} />
       <SecuritySolutionPageWrapper
         noPadding={globalFullScreen}
         data-test-subj={SECURITY_SOLUTION_PAGE_WRAPPER_TEST_ID}
@@ -51,5 +61,4 @@ export const AttacksPageContent = memo(() => {
     </StyledFullHeightContainer>
   );
 });
-
 AttacksPageContent.displayName = 'AttacksPageContent';
