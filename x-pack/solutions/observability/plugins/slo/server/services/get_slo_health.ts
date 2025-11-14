@@ -52,7 +52,7 @@ export class GetSLOHealth {
     let sloKeysFromES: Array<SloData> = [];
 
     const page = params.page ?? 0;
-    const perPage = params.perPage ?? 20;
+    const perPage = params.perPage ?? 100;
 
     do {
       const sloIdCompositeQueryResponse = await this.scopedClusterClient.asCurrentUser.search({
