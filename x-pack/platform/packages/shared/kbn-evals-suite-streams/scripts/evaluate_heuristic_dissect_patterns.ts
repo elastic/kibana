@@ -17,7 +17,7 @@
  * Run evaluation script using:
  *
  * ```bash
- * node --require ./src/setup_node_env/ ./x-pack/platform/plugins/shared/streams/scripts/evaluate_heuristic_grok_patterns.ts
+ * node --require ./src/setup_node_env/ ./x-pack/platform/packages/shared/kbn-evals-suite-streams/scripts/evaluate_heuristic_dissect_patterns.ts
  * ```
  */
 
@@ -28,10 +28,9 @@ import chalk from 'chalk';
 import yargs from 'yargs/yargs';
 import {
   getReviewFields,
-  getGrokProcessor,
-  getGrokPattern,
-  extractGrokPatternDangerouslySlow,
-} from '@kbn/grok-heuristics';
+  getDissectProcessorWithReview,
+  extractDissectPatternDangerouslySlow,
+} from '@kbn/dissect-heuristics';
 import {
   KIBANA_URL,
   MESSAGE_FIELD,
@@ -51,7 +50,7 @@ async function getSuggestions(
   reviewFields: ReturnType<typeof getReviewFields>
 ) {
   const response = await fetch(
-    `${KIBANA_URL}/internal/streams/${stream}/processing/_suggestions/grok`,
+    `${KIBANA_URL}/internal/streams/${stream}/processing/_suggestions/dissect`,
     {
       method: 'POST',
       headers: getKibanaAuthHeaders(),
@@ -72,7 +71,7 @@ async function getSuggestions(
   return data;
 }
 
-export async function evaluateGrokSuggestions() {
+export async function evaluateDissectSuggestions() {
   const [streams, connectors] = await Promise.all([getStreams(), getConnectors()]);
 
   if (streams.length === 0) {
@@ -95,19 +94,22 @@ export async function evaluateGrokSuggestions() {
       const sampleDocs = await fetchDocs(stream, 100);
       const messages = extractMessages(sampleDocs, MESSAGE_FIELD);
 
-      const grokPatternNodes = extractGrokPatternDangerouslySlow(messages);
-      const grokPattern = getGrokPattern(grokPatternNodes);
-      const reviewFields = getReviewFields(grokPatternNodes, 10);
-      console.log(`- ${stream}: ${chalk.dim(grokPattern)}`);
+      const dissectPattern = extractDissectPatternDangerouslySlow(messages);
+      const reviewFields = getReviewFields(dissectPattern, 10);
+      console.log(`- ${stream}: ${chalk.dim(dissectPattern.pattern)}`);
 
       const suggestionData = await getSuggestions(stream, connector, messages, reviewFields);
-      const grokProcessor = getGrokProcessor(grokPatternNodes, suggestionData.grokProcessor);
-      if (!grokProcessor) {
-        throw new Error('No grokProcessor returned');
+      const dissectProcessor = getDissectProcessorWithReview(
+        dissectPattern,
+        suggestionData.dissectProcessor,
+        MESSAGE_FIELD
+      );
+      if (!dissectProcessor) {
+        throw new Error('No dissectProcessor returned');
       }
-      console.log(`- ${stream}: ${chalk.green(grokProcessor.patterns.join(', '))}`);
+      console.log(`- ${stream}: ${chalk.green(dissectProcessor.pattern)}`);
 
-      return { stream, ...grokProcessor };
+      return { stream, ...dissectProcessor };
     })
   );
 
@@ -122,11 +124,10 @@ export async function evaluateGrokSuggestions() {
 
       const steps = [
         {
-          action: 'grok',
-          customIdentifier: 'eval-grok',
+          action: 'dissect',
+          customIdentifier: 'eval-dissect',
           from: MESSAGE_FIELD,
-          patterns: suggestion.patterns,
-          pattern_definitions: suggestion.pattern_definitions,
+          pattern: suggestion.pattern,
         },
       ];
 
@@ -163,8 +164,7 @@ export async function evaluateGrokSuggestions() {
 
   return output.reduce<Record<string, any>>((acc, suggestion) => {
     acc[suggestion.stream] = {
-      patterns: suggestion.patterns,
-      pattern_definitions: suggestion.pattern_definitions,
+      pattern: suggestion.pattern,
       parsing_score_samples: suggestion.parsing_score_samples,
       parsing_score_all_docs: suggestion.parsing_score_all_docs,
     };
@@ -172,10 +172,10 @@ export async function evaluateGrokSuggestions() {
   }, {});
 }
 
-async function runGrokSuggestionsEvaluation() {
-  await evaluateGrokSuggestions()
+async function runDissectSuggestionsEvaluation() {
+  await evaluateDissectSuggestions()
     .then((result) => {
-      const file = `suggestion_results.${Date.now()}.json`;
+      const file = `dissect_suggestion_results.${Date.now()}.json`;
       console.log();
       console.log(`Evaluation complete. Writing results to ${chalk.underline.dim(file)}`);
       console.log();
@@ -185,5 +185,5 @@ async function runGrokSuggestionsEvaluation() {
 }
 
 yargs(process.argv.slice(2))
-  .command('*', 'Evaluate AI suggestions for Grok patterns', runGrokSuggestionsEvaluation)
+  .command('*', 'Evaluate AI suggestions for Dissect patterns', runDissectSuggestionsEvaluation)
   .parse();
