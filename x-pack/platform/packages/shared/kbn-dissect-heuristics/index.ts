@@ -8,4 +8,13 @@
 export { extractDissectPatternDangerouslySlow } from './src/extract_dissect_pattern';
 export { getDissectProcessor } from './src/get_dissect_processor';
 export { groupMessagesByPattern } from './src/group_messages';
-export type { DissectPattern, DissectField, DissectModifiers, DelimiterNode } from './src/types';
+export { getReviewFields, type ReviewFields } from './src/review/get_review_fields';
+export { getDissectProcessorWithReview } from './src/review/get_dissect_processor_with_review';
+export { ReviewDissectFieldsPrompt } from './src/review/review_fields_prompt';
+export type {
+  DissectPattern,
+  DissectField,
+  DissectModifiers,
+  DelimiterNode,
+  DissectProcessorResult,
+} from './src/types';

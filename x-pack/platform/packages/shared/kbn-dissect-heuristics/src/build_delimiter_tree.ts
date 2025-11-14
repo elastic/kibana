@@ -71,5 +71,42 @@ export function buildDelimiterTree(
   }
 
   // Sort by median position (left to right in the message)
-  return allNodes.sort((a, b) => a.medianPosition - b.medianPosition);
+  const sortedNodes = allNodes.sort((a, b) => a.medianPosition - b.medianPosition);
+
+  // Filter out delimiter nodes that are substrings of longer delimiters at the exact same positions
+  const filteredNodes = sortedNodes.filter((node, index) => {
+    // Check if this node is covered by any other (longer) delimiter at the exact same positions
+    return !sortedNodes.some((other, otherIndex) => {
+      // Skip self and same-length delimiters
+      if (index === otherIndex || node.literal.length >= other.literal.length) {
+        return false;
+      }
+
+      // Check if node.literal is a substring of other.literal
+      // Try all possible substring positions (in case the substring appears multiple times)
+      const possibleIndexes: number[] = [];
+      let searchStart = 0;
+      let foundIndex = other.literal.indexOf(node.literal, searchStart);
+      while (foundIndex !== -1) {
+        possibleIndexes.push(foundIndex);
+        searchStart = foundIndex + 1;
+        foundIndex = other.literal.indexOf(node.literal, searchStart);
+      }
+
+      if (possibleIndexes.length === 0) {
+        return false;
+      }
+
+      // Check if this node appears at EXACTLY the same positions as a substring within the other delimiter
+      // This means: for EVERY message, node's position must equal other's position + substring offset
+      return possibleIndexes.some((substringIndex) => {
+        return node.positions.every((nodePos, msgIndex) => {
+          const otherPos = other.positions[msgIndex];
+          return nodePos === otherPos + substringIndex;
+        });
+      });
+    });
+  });
+
+  return filteredNodes;
 }

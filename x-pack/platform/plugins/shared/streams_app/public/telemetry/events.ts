@@ -8,6 +8,8 @@
 import {
   STREAMS_AI_GROK_SUGGESTION_ACCEPTED_EVENT_TYPE,
   STREAMS_AI_GROK_SUGGESTION_LATENCY_EVENT_TYPE,
+  STREAMS_AI_DISSECT_SUGGESTION_ACCEPTED_EVENT_TYPE,
+  STREAMS_AI_DISSECT_SUGGESTION_LATENCY_EVENT_TYPE,
   STREAMS_ATTACHMENT_CLICK_EVENT_TYPE,
   STREAMS_ATTACHMENT_COUNT_EVENT_TYPE,
   STREAMS_CHILD_STREAM_CREATED_EVENT_TYPE,
@@ -21,6 +23,8 @@ import {
 import {
   streamsAIGrokSuggestionAcceptedSchema,
   streamsAIGrokSuggestionLatencySchema,
+  streamsAIDissectSuggestionAcceptedSchema,
+  streamsAIDissectSuggestionLatencySchema,
   streamsAttachmentClickEventSchema,
   streamsAttachmentCountSchema,
   streamsChildStreamCreatedSchema,
@@ -50,6 +54,16 @@ const streamsAIGrokSuggestionLatencyEventType = {
 const streamsAIGrokSuggestionAcceptedEventType = {
   eventType: STREAMS_AI_GROK_SUGGESTION_ACCEPTED_EVENT_TYPE,
   schema: streamsAIGrokSuggestionAcceptedSchema,
+};
+
+const streamsAIDissectSuggestionLatencyEventType = {
+  eventType: STREAMS_AI_DISSECT_SUGGESTION_LATENCY_EVENT_TYPE,
+  schema: streamsAIDissectSuggestionLatencySchema,
+};
+
+const streamsAIDissectSuggestionAcceptedEventType = {
+  eventType: STREAMS_AI_DISSECT_SUGGESTION_ACCEPTED_EVENT_TYPE,
+  schema: streamsAIDissectSuggestionAcceptedSchema,
 };
 
 const streamsProcessingSavedEventType = {
@@ -92,6 +106,8 @@ export {
   streamsAttachmentClickEventType,
   streamsAIGrokSuggestionLatencyEventType,
   streamsAIGrokSuggestionAcceptedEventType,
+  streamsAIDissectSuggestionLatencyEventType,
+  streamsAIDissectSuggestionAcceptedEventType,
   streamsProcessingSavedEventType,
   streamsRetentionChangedEventType,
   streamsChildStreamCreatedEventType,

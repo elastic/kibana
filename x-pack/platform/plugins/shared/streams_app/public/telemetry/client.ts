@@ -10,6 +10,8 @@ import type { IngestStreamLifecycle } from '@kbn/streams-schema';
 import type {
   StreamsAIGrokSuggestionAcceptedProps,
   StreamsAIGrokSuggestionLatencyProps,
+  StreamsAIDissectSuggestionAcceptedProps,
+  StreamsAIDissectSuggestionLatencyProps,
   StreamsAttachmentClickEventProps,
   StreamsAttachmentCountProps,
   StreamsChildStreamCreatedProps,
@@ -22,6 +24,8 @@ import type {
 import {
   STREAMS_AI_GROK_SUGGESTION_ACCEPTED_EVENT_TYPE,
   STREAMS_AI_GROK_SUGGESTION_LATENCY_EVENT_TYPE,
+  STREAMS_AI_DISSECT_SUGGESTION_ACCEPTED_EVENT_TYPE,
+  STREAMS_AI_DISSECT_SUGGESTION_LATENCY_EVENT_TYPE,
   STREAMS_ATTACHMENT_CLICK_EVENT_TYPE,
   STREAMS_ATTACHMENT_COUNT_EVENT_TYPE,
   STREAMS_CHILD_STREAM_CREATED_EVENT_TYPE,
@@ -60,6 +64,24 @@ export class StreamsTelemetryClient {
 
   public trackAIGrokSuggestionAccepted(params: StreamsAIGrokSuggestionAcceptedProps) {
     this.analytics.reportEvent(STREAMS_AI_GROK_SUGGESTION_ACCEPTED_EVENT_TYPE, params);
+  }
+
+  public startTrackingAIDissectSuggestionLatency(
+    params: Pick<StreamsAIDissectSuggestionLatencyProps, 'name' | 'field' | 'connector_id'>
+  ) {
+    const start = Date.now();
+    return (count: number, rates: number[]) => {
+      this.analytics.reportEvent(STREAMS_AI_DISSECT_SUGGESTION_LATENCY_EVENT_TYPE, {
+        ...params,
+        duration_ms: Date.now() - start,
+        suggestion_count: count,
+        match_rate: rates,
+      });
+    };
+  }
+
+  public trackAIDissectSuggestionAccepted(params: StreamsAIDissectSuggestionAcceptedProps) {
+    this.analytics.reportEvent(STREAMS_AI_DISSECT_SUGGESTION_ACCEPTED_EVENT_TYPE, params);
   }
 
   public trackWiredStreamsStatusChanged(params: WiredStreamsStatusChangedProps) {

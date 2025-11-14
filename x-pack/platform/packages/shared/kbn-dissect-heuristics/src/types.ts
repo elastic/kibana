@@ -75,6 +75,10 @@ export interface DelimiterDetectionConfig {
  * Result from getDissectProcessor()
  */
 export interface DissectProcessorResult {
+  /** Description of the log source (from LLM review) */
+  description?: string;
+  /** The dissect pattern string */
+  pattern: string;
   /** The processor configuration */
   processor: {
     dissect: {
@@ -88,11 +92,11 @@ export interface DissectProcessorResult {
   metadata: {
     /** Number of messages analyzed */
     messageCount: number;
-    /** Number of delimiters found */
-    delimiterCount: number;
+    /** Number of delimiters found (optional for review-based processors) */
+    delimiterCount?: number;
     /** Number of fields extracted */
     fieldCount: number;
-    /** Confidence score (0-1) */
-    confidence: number;
+    /** Confidence score (0-1, optional for review-based processors) */
+    confidence?: number;
   };
 }

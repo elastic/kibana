@@ -22,6 +22,7 @@ export function getDissectProcessor(
   const confidence = calculateConfidence(pattern);
 
   return {
+    pattern: pattern.pattern,
     processor: {
       dissect: {
         field: sourceField,

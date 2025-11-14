@@ -79,6 +79,162 @@ export function isLikelyDelimiter(str: string): boolean {
 }
 
 /**
+ * Score delimiter quality for single-message processing
+ * Higher scores indicate better structural delimiters
+ *
+ * Priority order:
+ * 1. Multi-character delimiters with mixed punctuation (e.g., ": ", "][")
+ * 2. Multi-character whitespace-based (e.g., "  ")
+ * 3. Single structural characters (e.g., "[", "(", "|")
+ * 4. Single space (lowest priority, causes fragmentation)
+ */
+export function scoreDelimiterQuality(delimiter: string): number {
+  // Multi-character delimiters are preferred
+  if (delimiter.length > 1) {
+    // Mixed punctuation + whitespace (e.g., ": ", "] ", ")[") = highest quality
+    if (/[^\s]/.test(delimiter) && /\s/.test(delimiter)) {
+      return 100;
+    }
+    // Multi-character non-whitespace (e.g., "::" , "--", "][")
+    if (!/\s/.test(delimiter)) {
+      return 80;
+    }
+    // Multi-space or tab
+    if (/^\s{2,}$/.test(delimiter)) {
+      return 60;
+    }
+    // Other multi-char
+    return 50;
+  }
+
+  // Single character delimiters
+  // Structural characters that often denote boundaries
+  if (/[\[\](){}|]/.test(delimiter)) {
+    return 40;
+  }
+
+  // Other single punctuation
+  if (/[^\s]/.test(delimiter)) {
+    return 30;
+  }
+
+  // Single space - lowest priority (causes over-fragmentation)
+  if (delimiter === ' ') {
+    return 10;
+  }
+
+  return 0;
+}
+
+/**
+ * Find the common character-by-character prefix across multiple messages
+ */
+export function findCommonPrefix(messages: string[]): {
+  prefix: string;
+  hasStructure: boolean;
+  prefixLength: number;
+} {
+  if (messages.length === 0) {
+    return { prefix: '', hasStructure: false, prefixLength: 0 };
+  }
+
+  if (messages.length === 1) {
+    return { prefix: messages[0], hasStructure: true, prefixLength: messages[0].length };
+  }
+
+  const firstMsg = messages[0];
+  let prefixLength = 0;
+
+  // Find common character prefix
+  for (let i = 0; i < firstMsg.length; i++) {
+    if (messages.every((msg) => msg[i] === firstMsg[i])) {
+      prefixLength++;
+    } else {
+      break;
+    }
+  }
+
+  const prefix = firstMsg.substring(0, prefixLength);
+
+  // Check if prefix has structural delimiters (not just alphanumeric)
+  // Look for at least 2 delimiter-like characters (spaces, punctuation)
+  const delimiterCount = (prefix.match(/[^a-zA-Z0-9]/g) || []).length;
+  const hasStructure = delimiterCount >= 2;
+
+  return { prefix, hasStructure, prefixLength };
+}
+
+/**
+ * Find common structured prefix by detecting repeated token patterns
+ * even when the actual token values vary.
+ * Returns the length of the structured prefix in characters.
+ */
+export function findStructuredPrefixLength(messages: string[]): number {
+  if (messages.length < 2) {
+    return 0;
+  }
+
+  // Tokenize each message by splitting on whitespace and punctuation
+  // but keep track of delimiter positions
+  const tokenizedMessages = messages.map((msg) => {
+    const tokens: Array<{ value: string; endPos: number; isDelimiter: boolean }> = [];
+    let currentToken = '';
+    let currentPos = 0;
+
+    for (let i = 0; i < msg.length; i++) {
+      const char = msg[i];
+      const isDelimiter = /[\s\-\/\[\]():,.]/.test(char);
+
+      if (isDelimiter) {
+        if (currentToken.length > 0) {
+          tokens.push({ value: currentToken, endPos: currentPos, isDelimiter: false });
+          currentToken = '';
+        }
+        tokens.push({ value: char, endPos: i + 1, isDelimiter: true });
+        currentPos = i + 1;
+      } else {
+        currentToken += char;
+        currentPos = i + 1;
+      }
+    }
+
+    if (currentToken.length > 0) {
+      tokens.push({ value: currentToken, endPos: currentPos, isDelimiter: false });
+    }
+
+    return tokens;
+  });
+
+  // Find how many token positions have matching delimiters
+  const minTokenCount = Math.min(...tokenizedMessages.map((t) => t.length));
+  let lastCommonDelimiterPos = 0;
+
+  for (let tokenIdx = 0; tokenIdx < minTokenCount; tokenIdx++) {
+    const firstToken = tokenizedMessages[0][tokenIdx];
+
+    // Check if all messages have matching delimiter at this position
+    const allMatch = tokenizedMessages.every(
+      (tokens) =>
+        tokens[tokenIdx].isDelimiter === firstToken.isDelimiter &&
+        (firstToken.isDelimiter ? tokens[tokenIdx].value === firstToken.value : true)
+    );
+
+    if (!allMatch) {
+      break;
+    }
+
+    // If this token is a delimiter, record its end position
+    if (firstToken.isDelimiter) {
+      lastCommonDelimiterPos = firstToken.endPos;
+    }
+  }
+
+  // Return position after the last common delimiter
+  // This ensures we include full structured fields up to (but not including) varying values
+  return lastCommonDelimiterPos;
+}
+
+/**
  * Check if a string looks like an IPv4 address
  */
 export function looksLikeIPv4(str: string): boolean {

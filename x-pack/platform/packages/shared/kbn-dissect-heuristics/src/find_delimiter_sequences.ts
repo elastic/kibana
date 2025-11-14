@@ -9,6 +9,7 @@ import type { DelimiterDetectionConfig } from './types';
 import {
   extractSubstrings,
   isLikelyDelimiter,
+  scoreDelimiterQuality,
   countOccurrences,
   findPosition,
   calculatePositionScore,
@@ -48,9 +49,30 @@ export function findDelimiterSequences(
   }
 
   if (messages.length === 1) {
-    // For single message, extract likely delimiters
+    // For single message, extract likely delimiters and score them
     const substrings = extractSubstrings(messages[0], minLength, maxLength);
-    return substrings.filter(isLikelyDelimiter).slice(0, 20);
+    const likelyDelimiters = substrings.filter(isLikelyDelimiter);
+
+    // Score and sort by quality (prefer multi-char and structural delimiters)
+    const scoredDelimiters = likelyDelimiters.map((delimiter) => ({
+      delimiter,
+      score: scoreDelimiterQuality(delimiter),
+    }));
+
+    scoredDelimiters.sort((a, b) => b.score - a.score);
+
+    // Take top 20, but filter out single spaces if we have better alternatives
+    const topDelimiters = scoredDelimiters.slice(0, 30).map((d) => d.delimiter);
+    const hasBetterThanSpace = topDelimiters.some(
+      (d) => d !== ' ' && scoreDelimiterQuality(d) > 10
+    );
+
+    if (hasBetterThanSpace) {
+      // Filter out single spaces to reduce fragmentation
+      return topDelimiters.filter((d) => d !== ' ').slice(0, 20);
+    }
+
+    return topDelimiters.slice(0, 20);
   }
 
   // Step 1: Extract all possible substrings from first message as candidates
@@ -113,7 +135,9 @@ export function findDelimiterSequences(
     });
 
   // Remove delimiters that are substrings of other delimiters with same positions
-  const filteredDelimiters = removeDuplicateSubstrings(validDelimiters);
+  // Process longer delimiters first to ensure they are kept over their substrings
+  const sortedByLength = [...validDelimiters].sort((a, b) => b.literal.length - a.literal.length);
+  const filteredDelimiters = removeDuplicateSubstrings(sortedByLength);
 
   return filteredDelimiters.map((d) => d.literal);
 }
@@ -130,14 +154,18 @@ function removeDuplicateSubstrings(candidates: DelimiterCandidate[]): DelimiterC
     // at the same positions
     const isDuplicate = result.some((existing) => {
       // Check if candidate is a substring of existing
-      if (!existing.literal.includes(candidate.literal)) {
+      const substringIndex = existing.literal.indexOf(candidate.literal);
+      if (substringIndex === -1) {
         return false;
       }
 
-      // Check if positions are the same or very close
-      const positionsMatch = candidate.positions.every((pos, idx) => {
-        const existingPos = existing.positions[idx];
-        return Math.abs(pos - existingPos) <= existing.literal.indexOf(candidate.literal);
+      // Check if candidate positions match existing positions + offset
+      // For each position of the candidate, check if there's a corresponding existing position
+      // where the candidate would appear within the existing delimiter
+      const positionsMatch = candidate.positions.every((candidatePos) => {
+        return existing.positions.some((existingPos) => {
+          return candidatePos === existingPos + substringIndex;
+        });
       });
 
       return positionsMatch;
