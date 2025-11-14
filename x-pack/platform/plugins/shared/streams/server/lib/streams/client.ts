@@ -24,6 +24,7 @@ import {
 } from '@kbn/streams-schema';
 import type { LockManagerService } from '@kbn/lock-manager';
 import type { Condition } from '@kbn/streamlang';
+import { MAX_STREAM_NAME_LENGTH } from '../../../common/constants';
 import type { AssetClient } from './assets/asset_client';
 import type { QueryClient } from './assets/query/query_client';
 import {

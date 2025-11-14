@@ -17,6 +17,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-plugin/public';
 import { useStreamsRoutingSelector } from './state_management/stream_routing_state_machine';
 
 interface StreamNameFormRowProps {
@@ -29,7 +30,6 @@ interface StreamNameFormRowProps {
 }
 
 const MIN_NAME_LENGTH = 1;
-const MAX_NAME_LENGTH = 200;
 const PREFIX_MAX_VISIBLE_CHARACTERS = 25;
 
 export const getHelpText = (
@@ -45,7 +45,7 @@ export const getHelpText = (
     return i18n.translate('xpack.streams.streamDetailRouting.maximumNameHelpText', {
       defaultMessage: `Stream name cannot be longer than {maxLength} characters.`,
       values: {
-        maxLength: MAX_NAME_LENGTH,
+        maxLength: MAX_STREAM_NAME_LENGTH,
       },
     });
   } else {
@@ -123,7 +123,7 @@ export function StreamNameFormRow({
         autoFocus={autoFocus}
         onChange={handleChange}
         minLength={MIN_NAME_LENGTH}
-        maxLength={MAX_NAME_LENGTH - prefix.length}
+        maxLength={MAX_STREAM_NAME_LENGTH - prefix.length}
         prepend={[
           <EuiIcon type="streamsWired" />,
           <EuiFormLabel
