@@ -176,11 +176,8 @@ export const getSavedObjectTypes = (
           },
           action_secret_storage_requirements_met: { type: 'boolean' },
           ilm_migration_status: {
-            properties: {
-              logs: { type: 'keyword', index: false },
-              metrics: { type: 'keyword', index: false },
-              synthetics: { type: 'keyword', index: false },
-            },
+            dynamic: false,
+            properties: {},
           },
         },
       },
@@ -233,11 +230,8 @@ export const getSavedObjectTypes = (
               type: 'mappings_addition',
               addedMappings: {
                 ilm_migration_status: {
-                  properties: {
-                    logs: { type: 'keyword', index: false },
-                    metrics: { type: 'keyword', index: false },
-                    synthetics: { type: 'keyword', index: false },
-                  },
+                  dynamic: false,
+                  properties: {},
                 },
               },
             },
