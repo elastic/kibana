@@ -35,6 +35,7 @@ export const SearchAlertsRequestBody = z.object({
   fields: z.array(z.string()).optional(),
   runtime_mappings: z.object({}).catchall(z.unknown()).optional(),
   sort: AlertsSort.optional(),
+  include_attacks: z.boolean().optional(),
 });
 export type SearchAlertsRequestBodyInput = z.input<typeof SearchAlertsRequestBody>;
 

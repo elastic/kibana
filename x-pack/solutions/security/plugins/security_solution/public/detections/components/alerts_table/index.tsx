@@ -23,6 +23,7 @@ import type { SetOptional } from 'type-fest';
 import { noop } from 'lodash';
 import type { Alert } from '@kbn/alerting-types';
 import { AlertsTable as ResponseOpsAlertsTable } from '@kbn/response-ops-alerts-table';
+import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { useAlertsContext } from './alerts_context';
 import { useBulkActionsByTableType } from '../../hooks/trigger_actions_alert_table/use_bulk_actions';
@@ -379,7 +380,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
   }, [alertsTableRef]);
 
   const fieldsBrowserOptions = useAlertsTableFieldsBrowserOptions(
-    SourcererScopeName.detections,
+    sourcererScope,
     alertsTableRef.current?.toggleColumn
   );
   const cellActionsOptions = useCellActionsOptions(tableType, tableContext);
@@ -450,6 +451,13 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
   const shouldRenderAdditionalToolbarControls =
     disableAdditionalToolbarControls || tableType === TableId.alertsOnCasePage;
 
+  const ruleTypeIds = useMemo(() => {
+    if (sourcererScope === SourcererScopeName.attacks) {
+      return [...SECURITY_SOLUTION_RULE_TYPE_IDS, ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID];
+    }
+    return SECURITY_SOLUTION_RULE_TYPE_IDS;
+  }, [sourcererScope]);
+
   if (isLoading) {
     return null;
   }
@@ -458,15 +466,12 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
     <FullWidthFlexGroupTable gutterSize="none">
       <StatefulEventContext.Provider value={activeStatefulEventContext}>
         <EuiDataGridContainer hideLastPage={false}>
-          <AlertTableCellContextProvider
-            tableId={tableType}
-            sourcererScope={SourcererScopeName.detections}
-          >
+          <AlertTableCellContextProvider tableId={tableType} sourcererScope={sourcererScope}>
             <ResponseOpsAlertsTable<SecurityAlertsTableContext>
               ref={alertsTableRef}
               // Stores separate configuration based on the view of the table
               id={id ?? `detection-engine-alert-table-${tableType}-${tableView}`}
-              ruleTypeIds={SECURITY_SOLUTION_RULE_TYPE_IDS}
+              ruleTypeIds={ruleTypeIds}
               consumers={ALERT_TABLE_CONSUMERS}
               query={finalBoolQuery}
               sort={sort}

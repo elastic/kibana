@@ -12,7 +12,8 @@ import { mockAlertSearchResponse } from '../../alerts_kpis/alerts_treemap_panel/
 export const getQuery = (
   selectedGroup: string,
   uniqueValue: string,
-  timeRange: { from: string; to: string }
+  timeRange: { from: string; to: string },
+  includeAttacks?: boolean
 ) => ({
   _source: false,
   aggs: {
@@ -115,6 +116,7 @@ export const getQuery = (
       },
     },
   },
+  ...(includeAttacks != null ? { include_attacks: includeAttacks } : {}),
   size: 0,
 });
 

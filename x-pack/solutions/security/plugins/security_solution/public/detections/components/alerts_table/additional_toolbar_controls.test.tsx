@@ -14,6 +14,7 @@ import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__';
 import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
+import { SourcererScopeName } from '../../../sourcerer/store/model';
 
 const mockDispatch = jest.fn();
 const mockedUseKibana = mockUseKibana();
@@ -88,7 +89,10 @@ describe('AdditionalToolbarControls', () => {
     });
     render(
       <TestProviders store={store}>
-        <AdditionalToolbarControls tableType={tableId} />
+        <AdditionalToolbarControls
+          tableType={tableId}
+          sourcererScope={SourcererScopeName.detections}
+        />
       </TestProviders>
     );
 
