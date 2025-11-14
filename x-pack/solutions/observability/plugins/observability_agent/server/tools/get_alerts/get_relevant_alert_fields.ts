@@ -13,6 +13,7 @@ import { groupBy, uniq } from 'lodash';
 import type { ModelProvider } from '@kbn/onechat-server';
 import type { ObservabilityAgentPluginStartDependencies } from '../../types';
 import { selectRelevantAlertFields } from './select_relevant_alert_fields';
+import { getHitsTotal } from '../../utils/get_hits_total';
 
 export async function getRelevantAlertFields({
   query,
@@ -47,10 +48,7 @@ export async function getRelevantAlertFields({
     terminate_after: 1,
   });
 
-  const hitCount =
-    typeof hasAnyHitsResponse.hits.total === 'number'
-      ? hasAnyHitsResponse.hits.total
-      : hasAnyHitsResponse.hits.total?.value ?? 0;
+  const hitCount = getHitsTotal(hasAnyHitsResponse);
 
   // all fields are empty in this case, so get them all
   const includeEmptyFields = hitCount === 0;

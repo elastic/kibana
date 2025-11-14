@@ -21,7 +21,7 @@ import type {
   ObservabilityAgentPluginStart,
   ObservabilityAgentPluginStartDependencies,
 } from '../types';
-import { OBSERVABILITY_GET_ALERTS_TOOL_ID, createGetAlertsTool } from './alerts/get_alerts';
+import { OBSERVABILITY_GET_ALERTS_TOOL_ID, createGetAlertsTool } from './get_alerts/get_alerts';
 
 const PLATFORM_TOOL_IDS = [
   platformCoreTools.search,

@@ -12,8 +12,6 @@ import { ToolType } from '@kbn/onechat-common';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import type { CoreSetup, Logger } from '@kbn/core/server';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import {
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
@@ -25,6 +23,8 @@ import type {
   ObservabilityAgentPluginStartDependencies,
 } from '../../types';
 import { getRelevantAlertFields } from './get_relevant_alert_fields';
+import { getHitsTotal } from '../../utils/get_hits_total';
+import { kqlFilter as buildKqlFilter } from '../../utils/dsl_filters';
 
 export const OBSERVABILITY_GET_ALERTS_TOOL_ID = 'observability.get_alerts';
 
@@ -125,32 +125,6 @@ export function createGetAlertsTool({
           query,
         });
 
-        const filters: QueryDslQueryContainer[] = [
-          {
-            range: {
-              'kibana.alert.start': {
-                gte: start,
-                lte: end,
-              },
-            },
-          },
-        ];
-
-        if (kqlFilter) {
-          try {
-            const astFromKqlFilter = fromKueryExpression(kqlFilter);
-            const kueryQuery = toElasticsearchQuery(astFromKqlFilter);
-            filters.push(kueryQuery);
-          } catch (e) {
-            logger.warn(`Failed to parse KQL filter: ${kqlFilter}. Error: ${e.message}`);
-            logger.debug(e);
-          }
-        }
-
-        if (!includeRecovered) {
-          filters.push({ term: { [ALERT_STATUS]: ALERT_STATUS_ACTIVE } });
-        }
-
         const response = await alertsClient.find({
           ruleTypeIds: OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES,
           consumers: [
@@ -164,13 +138,25 @@ export function createGetAlertsTool({
           ],
           query: {
             bool: {
-              filter: filters,
+              filter: [
+                {
+                  range: {
+                    'kibana.alert.start': {
+                      gte: start,
+                      lte: end,
+                    },
+                  },
+                },
+                ...buildKqlFilter(kqlFilter),
+                ...(includeRecovered ? [] : [{ term: { [ALERT_STATUS]: ALERT_STATUS_ACTIVE } }]),
+              ],
             },
           },
           size: 10,
         });
 
-        const total = (response.hits as { total: { value: number } }).total.value;
+        const total = getHitsTotal(response);
+
         const alerts = response.hits.hits.map((hit) =>
           omit(hit._source ?? {}, ...OMITTED_ALERT_FIELDS)
         );
