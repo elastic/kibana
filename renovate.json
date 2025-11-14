@@ -3526,7 +3526,6 @@
         "node-forge",
         "formik",
         "handlebars",
-        "js-sha256",
         "js-yaml",
         "minimist",
         "object-hash",

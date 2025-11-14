@@ -48,4 +48,4 @@ test_node
 # For now only on POSIX platforms, term signals work differently on Windows.
 NODE_OPTIONS_HEAPSNAPSHOT_DEFAULT="${NODE_OPTIONS_HEAPSNAPSHOT_DEFAULT:---heapsnapshot-signal=SIGUSR2 --diagnostic-dir=$DIR/data}"
 
-NODE_OPTIONS="--no-warnings --max-http-header-size=65536 $NODE_OPTIONS_HEAPSNAPSHOT_DEFAULT $KBN_NODE_OPTS $NODE_OPTIONS" NODE_ENV=production exec "${NODE}" "${DIR}/src/cli/dist" "${@}"
+NODE_OPTIONS="--no-warnings --disallow-code-generation-from-strings --max-http-header-size=65536 $NODE_OPTIONS_HEAPSNAPSHOT_DEFAULT $KBN_NODE_OPTS $NODE_OPTIONS" NODE_ENV=production exec "${NODE}" "${DIR}/src/cli/dist" "${@}"

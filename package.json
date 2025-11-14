@@ -1306,7 +1306,6 @@
     "joi-to-json": "^5.0.0",
     "jquery": "^3.7.1",
     "js-search": "^1.4.3",
-    "js-sha256": "^0.11.1",
     "js-yaml": "^4.1.0",
     "json-schema-to-ts": "^3.1.1",
     "json-stable-stringify": "^1.0.1",

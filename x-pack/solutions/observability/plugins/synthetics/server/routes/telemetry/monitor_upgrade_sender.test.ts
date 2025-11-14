@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { sha256 } from 'js-sha256';
+
 import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { SavedObject } from '@kbn/core/server';
@@ -21,7 +21,7 @@ import type { TelemetryEventsSender } from '../../telemetry/sender';
 import { createMockTelemetryEventsSender } from '../../telemetry/__mocks__';
 
 import { MONITOR_UPDATE_CHANNEL, MONITOR_CURRENT_CHANNEL } from '../../telemetry/constants';
-
+import { createHash } from 'crypto';
 import {
   formatTelemetryEvent,
   formatTelemetryUpdateEvent,
@@ -94,7 +94,7 @@ describe('monitor upgrade telemetry helpers', () => {
     });
     expect(actual).toEqual({
       stackVersion,
-      configId: sha256.create().update(testConfig.id).hex(),
+      configId: createHash('sha256').update(testConfig.id).digest('hex'),
       locations: ['us_central', 'other'],
       locationsCount: 2,
       monitorNameLength: testConfig.attributes[ConfigKey.NAME].length,
@@ -132,7 +132,7 @@ describe('monitor upgrade telemetry helpers', () => {
       });
       expect(actual).toEqual({
         stackVersion,
-        configId: sha256.create().update(testConfig.id).hex(),
+        configId: createHash('sha256').update(testConfig.id).digest('hex'),
         locations: ['us_central', 'other'],
         locationsCount: 2,
         monitorNameLength: testConfig.attributes[ConfigKey.NAME].length,
@@ -159,7 +159,7 @@ describe('monitor upgrade telemetry helpers', () => {
     );
     expect(actual).toEqual({
       stackVersion,
-      configId: sha256.create().update(testConfig.id).hex(),
+      configId: createHash('sha256').update(testConfig.id).digest('hex'),
       locations: ['us_central', 'other'],
       locationsCount: 2,
       monitorNameLength: testConfig.attributes[ConfigKey.NAME].length,
@@ -185,7 +185,7 @@ describe('monitor upgrade telemetry helpers', () => {
     );
     expect(actual).toEqual({
       stackVersion,
-      configId: sha256.create().update(testConfig.id).hex(),
+      configId: createHash('sha256').update(testConfig.id).digest('hex'),
       locations: ['us_central', 'other'],
       locationsCount: 2,
       monitorNameLength: testConfig.attributes[ConfigKey.NAME].length,
