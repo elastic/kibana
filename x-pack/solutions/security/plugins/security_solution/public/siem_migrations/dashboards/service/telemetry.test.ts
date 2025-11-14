@@ -72,7 +72,7 @@ describe('SiemDashboardMigrationsTelemetry', () => {
       {
         eventName: siemMigrationEventNames[SiemMigrationsDashboardEventTypes.SetupMigrationCreated],
         migrationId: 'def',
-        rulesCount: 10,
+        count: 10,
         result: 'success',
       }
     );
