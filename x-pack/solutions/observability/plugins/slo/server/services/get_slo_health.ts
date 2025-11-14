@@ -13,11 +13,10 @@ import type {
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { FetchSLOHealthParams, FetchSLOHealthResponse } from '@kbn/slo-schema';
 import { fetchSLOHealthResponseSchema } from '@kbn/slo-schema';
-import { type Dictionary, groupBy, keyBy } from 'lodash';
+import { type Dictionary, keyBy } from 'lodash';
 import moment from 'moment';
 import {
   SUMMARY_DESTINATION_INDEX_PATTERN,
-  SUMMARY_INDEX_TEMPLATE_PATTERN,
   getSLOSummaryTransformId,
   getSLOTransformId,
 } from '../../common/constants';
@@ -27,6 +26,14 @@ import type { EsSummaryDocument } from './summary_transform_generator/helpers/cr
 const LAG_THRESHOLD_MINUTES = 10;
 const STALE_THRESHOLD_MINUTES = 2 * 24 * 60;
 const ES_PAGESIZE_LIMIT = 1000;
+
+interface SloData {
+  sloId: string;
+  sloRevision: number;
+  sloName: string;
+  summaryDoc: EsSummaryDocument;
+  hasOnlyTempSummaryDoc: boolean;
+}
 
 function getAfterKey(
   agg: AggregationsAggregate | undefined
@@ -42,22 +49,14 @@ export class GetSLOHealth {
 
   public async execute(params: FetchSLOHealthParams): Promise<FetchSLOHealthResponse> {
     let afterKey: AggregationsAggregate | undefined;
-    let sloKeysFromES: Array<{
-      sloId: string;
-      sloInstanceId: string;
-      sloRevision: number;
-      sloName: string;
-    }> = [];
+    let sloKeysFromES: Array<SloData> = [];
 
-    const page = typeof params.page === 'number' && params.page >= 0 ? params.page : 0;
-    const perPage =
-      typeof params.perPage === 'number' && params.perPage >= 1 && params.perPage <= 100
-        ? params.perPage
-        : 100;
+    const page = params.page ?? 0;
+    const perPage = params.perPage ?? 20;
 
     do {
       const sloIdCompositeQueryResponse = await this.scopedClusterClient.asCurrentUser.search({
-        index: SUMMARY_INDEX_TEMPLATE_PATTERN,
+        index: SUMMARY_DESTINATION_INDEX_PATTERN,
         size: 0,
         aggs: {
           sloIds: {
@@ -69,15 +68,24 @@ export class GetSLOHealth {
                   sloId: { terms: { field: 'slo.id' } },
                 },
                 {
-                  sloInstanceId: { terms: { field: 'slo.instanceId' } },
-                },
-                {
                   sloRevision: { terms: { field: 'slo.revision' } },
                 },
                 {
                   sloName: { terms: { field: 'slo.name.keyword' } },
                 },
               ],
+            },
+            aggs: {
+              summaryDoc: {
+                top_hits: {
+                  size: 1,
+                },
+              },
+              nonTempSummaryDocs: {
+                filter: {
+                  term: { isTempDoc: false },
+                },
+              },
             },
           },
         },
@@ -95,7 +103,11 @@ export class GetSLOHealth {
       const buckets = (
         sloIdCompositeQueryResponse.aggregations?.sloIds as {
           buckets?: Array<{
-            key: { sloId: string; sloInstanceId: string; sloRevision: number; sloName: string };
+            key: { sloId: string; sloRevision: number; sloName: string };
+            summaryDoc: { hits: { hits: Array<{ _source: EsSummaryDocument }> } };
+            nonTempSummaryDocs: {
+              doc_count: number;
+            };
           }>;
         }
       )?.buckets;
@@ -105,9 +117,10 @@ export class GetSLOHealth {
           ...buckets.map((bucket) => {
             return {
               sloId: bucket.key.sloId,
-              sloInstanceId: bucket.key.sloInstanceId,
               sloRevision: bucket.key.sloRevision,
               sloName: bucket.key.sloName,
+              summaryDoc: bucket.summaryDoc.hits.hits[0]._source!,
+              hasOnlyTempSummaryDoc: bucket.nonTempSummaryDocs.doc_count === 0,
             };
           }),
         ]);
@@ -116,23 +129,21 @@ export class GetSLOHealth {
 
     const filteredList = sloKeysFromES.map((item) => ({
       sloId: item.sloId,
-      sloInstanceId: item.sloInstanceId,
       sloRevision: item.sloRevision,
       sloName: item.sloName,
+      summaryDoc: item.summaryDoc,
+      hasOnlyTempSummaryDoc: item.hasOnlyTempSummaryDoc,
     }));
-
-    const summaryDocsById = await this.getSummaryDocsById(filteredList);
 
     const results = await Promise.all(
       filteredList.map(async (item) => {
         const transformStatsById = await this.getTransformStatsForSLO(item);
         const health = computeHealth(transformStatsById, item);
-        const state = computeState(summaryDocsById, item);
+        const state = computeState(item);
 
         return {
           sloId: item.sloId,
           sloName: item.sloName,
-          sloInstanceId: item.sloInstanceId,
           sloRevision: item.sloRevision,
           state,
           health,
@@ -154,32 +165,6 @@ export class GetSLOHealth {
       perPage,
       total: uniqueResults.length,
     });
-  }
-
-  private async getSummaryDocsById(
-    filteredList: Array<{ sloId: string; sloInstanceId: string; sloRevision: number }>
-  ) {
-    const summaryDocs = await this.scopedClusterClient.asCurrentUser.search<EsSummaryDocument>({
-      index: SUMMARY_DESTINATION_INDEX_PATTERN,
-      query: {
-        bool: {
-          should: filteredList.map((item) => ({
-            bool: {
-              must: [
-                { term: { 'slo.id': item.sloId } },
-                { term: { 'slo.instanceId': item.sloInstanceId } },
-              ],
-            },
-          })),
-        },
-      },
-    });
-
-    const summaryDocsById = groupBy(
-      summaryDocs.hits.hits.map((hit) => hit._source!),
-      (doc: EsSummaryDocument) => buildSummaryKey(doc.slo.id, doc.slo.instanceId)
-    );
-    return summaryDocsById;
   }
 
   private async getTransformStatsForSLO(item: {
@@ -215,26 +200,15 @@ export class GetSLOHealth {
   }
 }
 
-function buildSummaryKey(id: string, instanceId: string) {
-  return id + '|' + instanceId;
-}
-
-function computeState(
-  summaryDocsById: Dictionary<EsSummaryDocument[]>,
-  item: { sloId: string; sloInstanceId: string; sloRevision: number }
-): State {
-  const sloSummaryDocs = summaryDocsById[buildSummaryKey(item.sloId, item.sloInstanceId)];
+function computeState(item: SloData): State {
+  const sloSummaryDoc = item.summaryDoc;
 
   let state: State = 'no_data';
-  if (!sloSummaryDocs) {
-    return state;
-  }
-  const hasOnlyTempSummaryDoc = sloSummaryDocs.every((doc) => doc.isTempDoc); // only temporary documents mean the summary transform did not run yet
-  const sloSummarydoc = sloSummaryDocs.find((doc) => !doc.isTempDoc);
-  const latestSliTimestamp = sloSummarydoc?.latestSliTimestamp;
-  const summaryUpdatedAt = sloSummarydoc?.summaryUpdatedAt;
 
-  if (hasOnlyTempSummaryDoc) {
+  const latestSliTimestamp = sloSummaryDoc?.latestSliTimestamp;
+  const summaryUpdatedAt = sloSummaryDoc?.summaryUpdatedAt;
+
+  if (item.hasOnlyTempSummaryDoc) {
     state = 'no_data';
   } else if (summaryUpdatedAt && latestSliTimestamp) {
     const summaryLag = moment().diff(new Date(summaryUpdatedAt), 'minute');
@@ -275,7 +249,7 @@ function getTransformHealth(
 
 function computeHealth(
   transformStatsById: Dictionary<TransformGetTransformStatsTransformStats>,
-  item: { sloId: string; sloInstanceId: string; sloRevision: number }
+  item: SloData
 ): { overall: 'healthy' | 'unhealthy'; rollup: HealthStatus; summary: HealthStatus } {
   const rollup = getTransformHealth(
     transformStatsById[getSLOTransformId(item.sloId, item.sloRevision)]
