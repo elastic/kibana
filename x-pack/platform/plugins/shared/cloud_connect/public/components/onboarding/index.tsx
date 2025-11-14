@@ -23,7 +23,7 @@ import { ServiceCards } from './service_cards';
 import { COLUMN_SIZE } from './constants';
 
 interface OnboardingPageProps {
-  onConnect: (apiKey: string) => void;
+  onConnect: () => void;
 }
 
 export const OnboardingPage: React.FC<OnboardingPageProps> = ({ onConnect }) => {
@@ -33,7 +33,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ onConnect }) => 
     application.capabilities.cloudConnect?.connect === true;
 
   return (
-    <EuiPageSection>
+    <EuiPageSection restrictWidth={1200}>
       {/* Header Section with Title and Image */}
       <EuiFlexGroup alignItems="center" gutterSize="xl">
         <EuiFlexItem>

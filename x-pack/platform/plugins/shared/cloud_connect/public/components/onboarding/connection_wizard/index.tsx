@@ -34,7 +34,7 @@ import {
 } from './translations';
 
 interface ConnectionWizardProps {
-  onConnect: (apiKey: string) => void;
+  onConnect: () => void;
 }
 
 export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect }) => {
@@ -59,7 +59,7 @@ export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect })
       });
 
       setSuccess(true);
-      onConnect(apiKey);
+      onConnect();
       // eslint-disable-next-line no-console
       console.log('Authentication successful:', response);
     } catch (err) {
@@ -88,7 +88,7 @@ export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect })
             <EuiFlexItem grow={false}>
               <EuiButton
                 fill
-                href="https://cloud.elastic.co/registration?redirectTo=%2Faccount%2Fkeys"
+                href="https://cloud.elastic.co/registration?onboarding_service_type=ccm&redirectTo=%2Faccount%2Fkeys"
                 target="_blank"
                 iconType="popout"
                 iconSide="right"
@@ -98,7 +98,7 @@ export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect })
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton
-                href="https://cloud.elastic.co/login?redirectTo=%2Faccount%2Fkeys"
+                href="https://cloud.elastic.co/login?onboarding_service_type=ccm&redirectTo=%2Faccount%2Fkeys"
                 target="_blank"
                 iconType="popout"
                 iconSide="right"

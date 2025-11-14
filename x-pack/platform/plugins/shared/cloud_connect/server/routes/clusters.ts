@@ -27,6 +27,7 @@ export const registerClustersRoute = ({
   logger,
   getStartServices,
 }: ClustersRouteOptions) => {
+  // GET /internal/cloud_connect/cluster_details
   router.get(
     {
       path: '/internal/cloud_connect/cluster_details',
@@ -128,6 +129,62 @@ export const registerClustersRoute = ({
           statusCode: 500,
           body: {
             message: 'An error occurred while retrieving cluster details',
+          },
+        });
+      }
+    }
+  );
+
+  // DELETE /internal/cloud_connect/cluster
+  router.delete(
+    {
+      path: '/internal/cloud_connect/cluster',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route performs internal cleanup of stored credentials.',
+        },
+      },
+      validate: false,
+      options: {
+        access: 'internal',
+      },
+    },
+    async (context, request, response) => {
+      try {
+        // Initialize storage service for deleting the API key
+        const coreContext = await context.core;
+        const [, { encryptedSavedObjects }] = await getStartServices();
+        const encryptedSavedObjectsClient = encryptedSavedObjects.getClient({
+          includedHiddenTypes: [CLOUD_CONNECT_API_KEY_TYPE],
+        });
+        const savedObjectsClient = coreContext.savedObjects.getClient({
+          includedHiddenTypes: [CLOUD_CONNECT_API_KEY_TYPE],
+        });
+        const storageService = new StorageService({
+          encryptedSavedObjectsClient,
+          savedObjectsClient,
+          logger,
+        });
+
+        // Delete the stored API key
+        await storageService.deleteApiKey();
+
+        logger.info('Cluster disconnected successfully - API key removed');
+
+        return response.ok({
+          body: {
+            success: true,
+            message: 'Cluster disconnected successfully',
+          },
+        });
+      } catch (error) {
+        logger.error('Failed to disconnect cluster', { error });
+
+        return response.customError({
+          statusCode: 500,
+          body: {
+            message: 'An error occurred while disconnecting the cluster',
           },
         });
       }

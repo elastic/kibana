@@ -13,6 +13,7 @@ export interface CloudConnectedAppContextValue {
   application: CoreStart['application'];
   http: CoreStart['http'];
   docLinks: CoreStart['docLinks'];
+  notifications: CoreStart['notifications'];
   history: AppMountParameters['history'];
 }
 
