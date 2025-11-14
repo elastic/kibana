@@ -69,6 +69,12 @@ export interface APIKeysServiceWithContext {
   invalidate(params: InvalidateAPIKeysParams): Promise<InvalidateAPIKeyResult | null>;
 
   /**
+   * Tries to invalidate an API key via UIAM service.
+   * @param apiKeyId The ID of the API key to invalidate.
+   */
+  invalidateViaUiam(apiKeyId: string): Promise<InvalidateAPIKeyResult | null>;
+
+  /**
    * Tries to grant an API key for the current user.
    * @param createParams Create operation parameters.
    * @param isForUiam Indicates whether the API key is being granted for UIAM purposes.

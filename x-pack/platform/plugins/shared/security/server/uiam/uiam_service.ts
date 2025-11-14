@@ -80,6 +80,13 @@ export interface UiamServicePublic {
     name: string,
     expiration?: string
   ): Promise<GrantApiKeyResponse>;
+
+  /**
+   * Revokes a UIAM API key by its ID.
+   * @param apiKeyId The ID of the API key to revoke.
+   * @param apiKey The API key to revoke; will be used for authentication on this request.
+   */
+  revokeApiKey(apiKeyId: string, apiKey: string): Promise<void>;
 }
 
 /**
@@ -234,6 +241,34 @@ export class UiamService implements UiamServicePublic {
       return response;
     } catch (err) {
       this.#logger.error(() => `Failed to grant API key: ${getDetailedErrorMessage(err)}`);
+
+      throw err;
+    }
+  }
+
+  /**
+   * See {@link UiamServicePublic.revokeApiKey}.
+   */
+  async revokeApiKey(apiKeyId: string, apiKey: string): Promise<void> {
+    try {
+      this.#logger.debug(`Attempting to revoke API key: ${apiKeyId}`);
+
+      await UiamService.#parseUiamResponse(
+        await fetch(`${this.#config.url}/uiam/api/v1/api-keys/${apiKeyId}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
+            Authorization: `ApiKey ${apiKey}`,
+          },
+          // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
+          dispatcher: this.#dispatcher,
+        })
+      );
+
+      this.#logger.debug(`Successfully revoked API key: ${apiKeyId}`);
+    } catch (err) {
+      this.#logger.error(() => `Failed to revoke API key: ${getDetailedErrorMessage(err)}`);
 
       throw err;
     }

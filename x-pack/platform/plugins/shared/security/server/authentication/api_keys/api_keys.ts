@@ -453,6 +453,7 @@ export class APIKeys implements APIKeysType {
       result = await this.clusterClient.asInternalUser.security.invalidateApiKey({
         ids: params.ids,
       });
+
       this.logger.debug(`API keys by ids=[${params.ids.join(', ')}] was invalidated successfully`);
     } catch (e) {
       this.logger.error(
@@ -462,6 +463,62 @@ export class APIKeys implements APIKeysType {
     }
 
     return result;
+  }
+
+  /**
+   * Tries to invalidate an API key via UIAM service.
+   * @param request Request instance containing the API key for authentication.
+   * @param apiKeyId The ID of the API key to invalidate.
+   */
+  async invalidateViaUiam(
+    request: KibanaRequest,
+    apiKeyId: string
+  ): Promise<InvalidateAPIKeyResult | null> {
+    if (!this.license.isEnabled()) {
+      return null;
+    }
+
+    if (!this.uiam) {
+      throw new Error('UIAM service is not available');
+    }
+
+    this.logger.debug(`Trying to invalidate API key ${apiKeyId} via UIAM`);
+
+    // Extract the API key from the authorization header for authentication
+    const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
+    if (authorizationHeader == null) {
+      throw new Error(
+        `Unable to invalidate API key via UIAM, request does not contain an authorization header`
+      );
+    }
+
+    const apiKey = authorizationHeader.credentials;
+
+    try {
+      await this.uiam.revokeApiKey(apiKeyId, apiKey);
+
+      this.logger.debug(`API key ${apiKeyId} was invalidated successfully via UIAM`);
+
+      return {
+        invalidated_api_keys: [apiKeyId],
+        previously_invalidated_api_keys: [],
+        error_count: 0,
+      };
+    } catch (e) {
+      this.logger.error(`Failed to invalidate API key ${apiKeyId} via UIAM: ${e.message}`);
+
+      return {
+        invalidated_api_keys: [],
+        previously_invalidated_api_keys: [],
+        error_count: 1,
+        error_details: [
+          {
+            type: 'exception',
+            reason: e.message,
+          },
+        ],
+      };
+    }
   }
 
   /**
