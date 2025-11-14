@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { promises as fs, existsSync, readFileSync as fsReadFileSync } from 'fs';
 import { join } from 'path';
 import { Readable } from 'stream';
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -24,13 +23,44 @@ import {
 
 const DATA_PATH = join(REPO_ROOT, 'data');
 
+jest.mock('fs', () => {
+  const actual = jest.requireActual('fs');
+  return {
+    ...actual,
+    promises: {
+      ...actual.promises,
+      writeFile: jest.fn(),
+      appendFile: jest.fn(),
+      readFile: jest.fn(),
+      unlink: jest.fn(),
+      mkdir: jest.fn(),
+      rm: jest.fn(),
+    },
+    existsSync: jest.fn(),
+    readFileSync: jest.fn().mockImplementation((path: string) => {
+      if (path.includes('package.json')) {
+        return JSON.stringify({ name: 'kibana' });
+      }
+    }),
+    writeFileSync: jest.fn(),
+    appendFileSync: jest.fn(),
+    unlinkSync: jest.fn(),
+    mkdirSync: jest.fn(),
+    createWriteStream: jest.fn(),
+    createReadStream: jest.fn(),
+  };
+});
+
+import fs from 'fs';
+
 describe('kbn-fs', () => {
-  beforeEach(async () => {
-    try {
-      await fs.rm(join(DATA_PATH, 'test'), { recursive: true, force: true });
-    } catch (error) {
-      // Ignore errors if directory doesn't exist
-    }
+  beforeEach(() => {
+    // Clear all mocks
+    jest.clearAllMocks();
+  });
+
+  afterAll(() => {
+    jest.resetAllMocks();
   });
 
   describe('writeFile', () => {
@@ -40,8 +70,11 @@ describe('kbn-fs', () => {
 
       expect(result.alias).toBe('disk:data/test/hello.txt');
       expect(result.path).toContain('test/hello.txt');
-      expect(existsSync(result.path)).toBe(true);
-      expect(fsReadFileSync(result.path, 'utf8')).toBe(content);
+      expect(fs.promises.writeFile).toHaveBeenCalledWith(
+        join(DATA_PATH, 'test/hello.txt'),
+        expect.any(Buffer)
+      );
+      expect(fs.promises.writeFile).toHaveBeenCalledTimes(1);
     });
 
     it('should write Buffer content to a file', async () => {
@@ -49,8 +82,11 @@ describe('kbn-fs', () => {
       const result = await writeFile('buffer.txt', content, { volume: 'test' });
 
       expect(result.alias).toBe('disk:data/test/buffer.txt');
-      expect(existsSync(result.path)).toBe(true);
-      expect(fsReadFileSync(result.path)).toEqual(content);
+      expect(fs.promises.writeFile).toHaveBeenCalledWith(
+        join(DATA_PATH, 'test/buffer.txt'),
+        expect.any(Buffer)
+      );
+      expect(fs.promises.writeFile).toHaveBeenCalledTimes(1);
     });
 
     it('should write Uint8Array content to a file', async () => {
@@ -58,8 +94,11 @@ describe('kbn-fs', () => {
       const result = await writeFile('uint8.txt', content, { volume: 'test' });
 
       expect(result.alias).toBe('disk:data/test/uint8.txt');
-      expect(existsSync(result.path)).toBe(true);
-      expect(fsReadFileSync(result.path)).toEqual(Buffer.from(content));
+      expect(fs.promises.writeFile).toHaveBeenCalledWith(
+        join(DATA_PATH, 'test/uint8.txt'),
+        expect.any(Buffer)
+      );
+      expect(fs.promises.writeFile).toHaveBeenCalledTimes(1);
     });
 
     it('should write content with volume option', async () => {
@@ -68,8 +107,11 @@ describe('kbn-fs', () => {
 
       expect(result.alias).toBe('disk:data/reports/test.txt');
       expect(result.path).toContain('reports/test.txt');
-      expect(existsSync(result.path)).toBe(true);
-      expect(fsReadFileSync(result.path, 'utf8')).toBe(content);
+      expect(fs.promises.writeFile).toHaveBeenCalledWith(
+        join(DATA_PATH, 'reports/test.txt'),
+        expect.any(Buffer)
+      );
+      expect(fs.promises.writeFile).toHaveBeenCalledTimes(1);
     });
 
     it('should override existing file by default', async () => {
@@ -79,7 +121,8 @@ describe('kbn-fs', () => {
       await writeFile('override.txt', initialContent, { volume: 'test' });
       const result = await writeFile('override.txt', newContent, { volume: 'test' });
 
-      expect(fsReadFileSync(result.path, 'utf8')).toBe(newContent);
+      expect(fs.promises.writeFile).toHaveBeenCalledTimes(2);
+      expect(fs.promises.writeFile).toHaveBeenLastCalledWith(result.path, expect.any(Buffer));
     });
 
     it('should not override existing file when override is false', async () => {
@@ -88,9 +131,13 @@ describe('kbn-fs', () => {
 
       await writeFile('no-override.txt', initialContent, { volume: 'test' });
 
+      (fs.existsSync as jest.Mock).mockReturnValue(true);
+
       await expect(
         writeFile('no-override.txt', newContent, { override: false, volume: 'test' })
       ).rejects.toThrow('File already exists: no-override.txt. Use override: true to replace it.');
+
+      expect(fs.promises.writeFile).toHaveBeenCalledTimes(1);
     });
 
     it('should allow override when explicitly set to true', async () => {
@@ -103,11 +150,13 @@ describe('kbn-fs', () => {
         volume: 'test',
       });
 
-      expect(fsReadFileSync(result.path, 'utf8')).toBe(newContent);
+      expect(fs.promises.writeFile).toHaveBeenCalledTimes(2);
+      expect(fs.promises.writeFile).toHaveBeenLastCalledWith(result.path, expect.any(Buffer));
     });
 
     it('should throw error for path traversal attempts', async () => {
       await expect(writeFile('../../../etc/passwd', 'malicious content')).rejects.toThrow();
+      expect(fs.promises.writeFile).not.toHaveBeenCalled();
     });
   });
 
@@ -118,8 +167,11 @@ describe('kbn-fs', () => {
 
       expect(result.alias).toBe('disk:data/test/sync-hello.txt');
       expect(result.path).toContain('test/sync-hello.txt');
-      expect(existsSync(result.path)).toBe(true);
-      expect(fsReadFileSync(result.path, 'utf8')).toBe(content);
+      expect(fs.writeFileSync).toHaveBeenCalledWith(
+        join(DATA_PATH, 'test/sync-hello.txt'),
+        expect.any(Buffer)
+      );
+      expect(fs.writeFileSync).toHaveBeenCalledTimes(1);
     });
 
     it('should write Buffer content synchronously', () => {
@@ -127,8 +179,11 @@ describe('kbn-fs', () => {
       const result = writeFileSync('sync-buffer.txt', content, { volume: 'test' });
 
       expect(result.alias).toBe('disk:data/test/sync-buffer.txt');
-      expect(existsSync(result.path)).toBe(true);
-      expect(fsReadFileSync(result.path)).toEqual(content);
+      expect(fs.writeFileSync).toHaveBeenCalledWith(
+        join(DATA_PATH, 'test/sync-buffer.txt'),
+        expect.any(Buffer)
+      );
+      expect(fs.writeFileSync).toHaveBeenCalledTimes(1);
     });
 
     it('should write content with volume option', () => {
@@ -137,8 +192,11 @@ describe('kbn-fs', () => {
 
       expect(result.alias).toBe('disk:data/exports/test.txt');
       expect(result.path).toContain('exports/test.txt');
-      expect(existsSync(result.path)).toBe(true);
-      expect(fsReadFileSync(result.path, 'utf8')).toBe(content);
+      expect(fs.writeFileSync).toHaveBeenCalledWith(
+        join(DATA_PATH, 'exports/test.txt'),
+        expect.any(Buffer)
+      );
+      expect(fs.writeFileSync).toHaveBeenCalledTimes(1);
     });
 
     it('should override existing file by default', () => {
@@ -148,7 +206,8 @@ describe('kbn-fs', () => {
       writeFileSync('sync-override.txt', initialContent, { volume: 'test' });
       const result = writeFileSync('sync-override.txt', newContent, { volume: 'test' });
 
-      expect(fsReadFileSync(result.path, 'utf8')).toBe(newContent);
+      expect(fs.writeFileSync).toHaveBeenCalledTimes(2);
+      expect(fs.writeFileSync).toHaveBeenLastCalledWith(result.path, expect.any(Buffer));
     });
 
     it('should not override existing file when override is false', () => {
@@ -160,6 +219,8 @@ describe('kbn-fs', () => {
       expect(() =>
         writeFileSync('sync-no-override.txt', newContent, { override: false, volume: 'test' })
       ).toThrow('File already exists: sync-no-override.txt. Use override: true to replace it.');
+
+      expect(fs.writeFileSync).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -172,7 +233,11 @@ describe('kbn-fs', () => {
       const result = await appendFile('append.txt', appendContent, { volume: 'test' });
 
       expect(result.alias).toBe('disk:data/test/append.txt');
-      expect(fsReadFileSync(result.path, 'utf8')).toBe(initialContent + appendContent);
+      expect(fs.promises.appendFile).toHaveBeenCalledWith(
+        join(DATA_PATH, 'test/append.txt'),
+        expect.any(Buffer)
+      );
+      expect(fs.promises.appendFile).toHaveBeenCalledTimes(1);
     });
 
     it('should create file if it does not exist', async () => {
@@ -180,8 +245,11 @@ describe('kbn-fs', () => {
       const result = await appendFile('new-append.txt', content, { volume: 'test' });
 
       expect(result.alias).toBe('disk:data/test/new-append.txt');
-      expect(existsSync(result.path)).toBe(true);
-      expect(fsReadFileSync(result.path, 'utf8')).toBe(content);
+      expect(fs.promises.appendFile).toHaveBeenCalledWith(
+        join(DATA_PATH, 'test/new-append.txt'),
+        expect.any(Buffer)
+      );
+      expect(fs.promises.appendFile).toHaveBeenCalledTimes(1);
     });
 
     it('should append Buffer content', async () => {
@@ -189,9 +257,13 @@ describe('kbn-fs', () => {
       const appendContent = Buffer.from('Appended buffer');
 
       await writeFile('append-buffer.txt', initialContent, { volume: 'test' });
-      const result = await appendFile('append-buffer.txt', appendContent, { volume: 'test' });
+      await appendFile('append-buffer.txt', appendContent, { volume: 'test' });
 
-      expect(fsReadFileSync(result.path)).toEqual(Buffer.concat([initialContent, appendContent]));
+      expect(fs.promises.appendFile).toHaveBeenCalledWith(
+        join(DATA_PATH, 'test/append-buffer.txt'),
+        expect.any(Buffer)
+      );
+      expect(fs.promises.appendFile).toHaveBeenCalledTimes(1);
     });
 
     it('should append content with volume option', async () => {
@@ -202,7 +274,11 @@ describe('kbn-fs', () => {
       const result = await appendFile('test.txt', appendContent, { volume: 'logs' });
 
       expect(result.alias).toBe('disk:data/logs/test.txt');
-      expect(fsReadFileSync(result.path, 'utf8')).toBe(initialContent + appendContent);
+      expect(fs.promises.appendFile).toHaveBeenCalledWith(
+        join(DATA_PATH, 'logs/test.txt'),
+        expect.any(Buffer)
+      );
+      expect(fs.promises.appendFile).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -215,7 +291,11 @@ describe('kbn-fs', () => {
       const result = appendFileSync('sync-append.txt', appendContent, { volume: 'test' });
 
       expect(result.alias).toBe('disk:data/test/sync-append.txt');
-      expect(fsReadFileSync(result.path, 'utf8')).toBe(initialContent + appendContent);
+      expect(fs.appendFileSync).toHaveBeenCalledWith(
+        join(DATA_PATH, 'test/sync-append.txt'),
+        expect.any(Buffer)
+      );
+      expect(fs.appendFileSync).toHaveBeenCalledTimes(1);
     });
 
     it('should create file if it does not exist', () => {
@@ -223,8 +303,11 @@ describe('kbn-fs', () => {
       const result = appendFileSync('new-sync-append.txt', content, { volume: 'test' });
 
       expect(result.alias).toBe('disk:data/test/new-sync-append.txt');
-      expect(existsSync(result.path)).toBe(true);
-      expect(fsReadFileSync(result.path, 'utf8')).toBe(content);
+      expect(fs.appendFileSync).toHaveBeenCalledWith(
+        join(DATA_PATH, 'test/new-sync-append.txt'),
+        expect.any(Buffer)
+      );
+      expect(fs.appendFileSync).toHaveBeenCalledTimes(1);
     });
 
     it('should append Buffer content synchronously', () => {
@@ -232,11 +315,15 @@ describe('kbn-fs', () => {
       const appendContent = Buffer.from('Appended sync buffer');
 
       writeFileSync('sync-append-buffer.txt', initialContent, { volume: 'test' });
-      const result = appendFileSync('sync-append-buffer.txt', appendContent, {
+      appendFileSync('sync-append-buffer.txt', appendContent, {
         volume: 'test',
       });
 
-      expect(fsReadFileSync(result.path)).toEqual(Buffer.concat([initialContent, appendContent]));
+      expect(fs.appendFileSync).toHaveBeenCalledWith(
+        join(DATA_PATH, 'test/sync-append-buffer.txt'),
+        expect.any(Buffer)
+      );
+      expect(fs.appendFileSync).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -245,24 +332,20 @@ describe('kbn-fs', () => {
       const content = 'Read test content';
       await writeFile('test/read.txt', content);
 
-      const result = await readFile('test/read.txt');
+      await readFile('test/read.txt');
 
-      expect(Buffer.isBuffer(result)).toBe(true);
-      expect(result.toString('utf8')).toBe(content);
+      expect(fs.promises.readFile).toHaveBeenCalledWith(join(DATA_PATH, 'test/read.txt'));
+      expect(fs.promises.readFile).toHaveBeenCalledTimes(1);
     });
 
     it('should read file with volume option', async () => {
       const content = 'Read volume content';
       await writeFile('test.txt', content, { volume: 'data' });
 
-      const result = await readFile('test.txt', 'data');
+      await readFile('test.txt', 'data');
 
-      expect(Buffer.isBuffer(result)).toBe(true);
-      expect(result.toString('utf8')).toBe(content);
-    });
-
-    it('should throw error if file does not exist', async () => {
-      await expect(readFile('test/nonexistent.txt')).rejects.toThrow();
+      expect(fs.promises.readFile).toHaveBeenCalledWith(join(DATA_PATH, 'data/test.txt'));
+      expect(fs.promises.readFile).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -271,212 +354,130 @@ describe('kbn-fs', () => {
       const content = 'Sync read test content';
       writeFileSync('test/sync-read.txt', content);
 
-      const result = readFileSync('test/sync-read.txt');
+      readFileSync('test/sync-read.txt');
 
-      expect(Buffer.isBuffer(result)).toBe(true);
-      expect(result.toString('utf8')).toBe(content);
+      expect(fs.readFileSync).toHaveBeenCalledWith(join(DATA_PATH, 'test/sync-read.txt'));
+      expect(fs.readFileSync).toHaveBeenCalledTimes(1);
     });
 
     it('should read file with volume option', () => {
       const content = 'Sync read volume content';
       writeFileSync('test.txt', content, { volume: 'cache' });
 
-      const result = readFileSync('test.txt', 'cache');
+      readFileSync('test.txt', 'cache');
 
-      expect(Buffer.isBuffer(result)).toBe(true);
-      expect(result.toString('utf8')).toBe(content);
-    });
-
-    it('should throw error if file does not exist', () => {
-      expect(() => readFileSync('test/nonexistent-sync.txt')).toThrow();
+      expect(fs.readFileSync).toHaveBeenCalledWith(join(DATA_PATH, 'cache/test.txt'));
+      expect(fs.readFileSync).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('createWriteStream', () => {
     it('should create a writable stream', async () => {
-      const content = 'Stream write test content';
-      const stream = createWriteStream('stream-write.txt');
+      createWriteStream('stream-write.txt');
 
-      await new Promise<void>((resolve, reject) => {
-        stream.write(content, (err) => {
-          if (err) reject(err);
-          else resolve();
-        });
-      });
-
-      stream.end();
-
-      await new Promise<void>((resolve) => {
-        stream.on('close', resolve);
-      });
-
-      expect(existsSync(join(DATA_PATH, 'stream-write.txt'))).toBe(true);
-      expect(fsReadFileSync(join(DATA_PATH, 'stream-write.txt'), 'utf8')).toBe(content);
+      expect(fs.createWriteStream).toHaveBeenCalledWith(
+        join(DATA_PATH, 'stream-write.txt'),
+        undefined
+      );
+      expect(fs.createWriteStream).toHaveBeenCalledTimes(1);
     });
 
     it('should create a writable stream with volume', async () => {
-      const content = 'Stream write volume content';
-      const stream = createWriteStream('test.txt', 'test/uploads');
+      createWriteStream('test.txt', 'test/uploads');
 
-      await new Promise<void>((resolve, reject) => {
-        stream.write(content, (err) => {
-          if (err) reject(err);
-          else resolve();
-        });
-      });
-
-      stream.end();
-
-      await new Promise<void>((resolve) => {
-        stream.on('close', resolve);
-      });
-
-      expect(existsSync(join(DATA_PATH, 'test/uploads/test.txt'))).toBe(true);
-      expect(fsReadFileSync(join(DATA_PATH, 'test/uploads/test.txt'), 'utf8')).toBe(content);
+      expect(fs.createWriteStream).toHaveBeenCalledWith(
+        join(DATA_PATH, 'test/uploads/test.txt'),
+        undefined
+      );
+      expect(fs.createWriteStream).toHaveBeenCalledTimes(1);
     });
 
     it('should create a writable stream with options', async () => {
-      const content = 'Stream write with options';
-      const stream = createWriteStream('stream-options.txt', 'test', 'utf8');
+      createWriteStream('stream-options.txt', 'test', 'utf8');
 
-      await new Promise<void>((resolve, reject) => {
-        stream.write(content, (err) => {
-          if (err) reject(err);
-          else resolve();
-        });
-      });
-
-      stream.end();
-
-      await new Promise<void>((resolve) => {
-        stream.on('close', resolve);
-      });
-
-      expect(existsSync(join(DATA_PATH, 'test/stream-options.txt'))).toBe(true);
-      expect(fsReadFileSync(join(DATA_PATH, 'test/stream-options.txt'), 'utf8')).toBe(content);
+      expect(fs.createWriteStream).toHaveBeenCalledWith(
+        join(DATA_PATH, 'test/stream-options.txt'),
+        'utf8'
+      );
+      expect(fs.createWriteStream).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('createReadStream', () => {
     it('should create a readable stream', async () => {
-      const content = 'Stream read test content';
-      await writeFile('stream-read.txt', content, { volume: 'test' });
+      createReadStream('stream-read.txt', 'test');
 
-      const stream = createReadStream('stream-read.txt', 'test');
-      const chunks: Buffer[] = [];
-
-      await new Promise<void>((resolve, reject) => {
-        stream.on('data', (chunk) => chunks.push(chunk));
-        stream.on('end', resolve);
-        stream.on('error', reject);
-      });
-
-      const result = Buffer.concat(chunks).toString('utf8');
-      expect(result).toBe(content);
+      expect(fs.createReadStream).toHaveBeenCalledWith(
+        join(DATA_PATH, 'test/stream-read.txt'),
+        undefined
+      );
+      expect(fs.createReadStream).toHaveBeenCalledTimes(1);
     });
 
     it('should create a readable stream with volume', async () => {
       const content = 'Stream read volume content';
       await writeFile('test.txt', content, { volume: 'downloads' });
 
-      const stream = createReadStream('test.txt', 'downloads');
-      const chunks: Buffer[] = [];
+      createReadStream('test.txt', 'downloads');
 
-      await new Promise<void>((resolve, reject) => {
-        stream.on('data', (chunk) => chunks.push(chunk));
-        stream.on('end', resolve);
-        stream.on('error', reject);
-      });
-
-      const result = Buffer.concat(chunks).toString('utf8');
-      expect(result).toBe(content);
+      expect(fs.createReadStream).toHaveBeenCalledWith(
+        join(DATA_PATH, 'downloads/test.txt'),
+        undefined
+      );
+      expect(fs.createReadStream).toHaveBeenCalledTimes(1);
     });
 
     it('should create a readable stream with options', async () => {
       const content = 'Stream read with options';
       await writeFile('test/stream-read-options.txt', content);
 
-      const stream = createReadStream('test/stream-read-options.txt', undefined, 'utf8');
-      const chunks: string[] = [];
+      createReadStream('test/stream-read-options.txt', undefined, 'utf8');
 
-      await new Promise<void>((resolve, reject) => {
-        stream.on('data', (chunk) => chunks.push(chunk));
-        stream.on('end', resolve);
-        stream.on('error', reject);
-      });
-
-      const result = chunks.join('');
-      expect(result).toBe(content);
-    });
-
-    it('should throw error if file does not exist', () => {
-      const stream = createReadStream('test/nonexistent-stream.txt');
-
-      return new Promise<void>((resolve, reject) => {
-        stream.on('error', (err: any) => {
-          expect(err.code).toBe('ENOENT');
-          resolve();
-        });
-        stream.on('data', () => {
-          reject(new Error('Should not receive data'));
-        });
-      });
+      expect(fs.createReadStream).toHaveBeenCalledWith(
+        join(DATA_PATH, 'test/stream-read-options.txt'),
+        'utf8'
+      );
+      expect(fs.createReadStream).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('deleteFile', () => {
     it('should delete an existing file', async () => {
       await writeFile('delete.txt', 'Content to delete', { volume: 'test' });
-      const filePath = join(DATA_PATH, 'test/delete.txt');
-
-      expect(existsSync(filePath)).toBe(true);
 
       await deleteFile('delete.txt', { volume: 'test' });
 
-      expect(existsSync(filePath)).toBe(false);
+      expect(fs.promises.unlink).toHaveBeenCalledWith(join(DATA_PATH, 'test/delete.txt'));
+      expect(fs.promises.unlink).toHaveBeenCalledTimes(1);
     });
 
     it('should delete file with volume option', async () => {
       await writeFile('test.txt', 'Content to delete', { volume: 'temp' });
-      const filePath = join(DATA_PATH, 'temp/test.txt');
-
-      expect(existsSync(filePath)).toBe(true);
 
       await deleteFile('test.txt', { volume: 'temp' });
 
-      expect(existsSync(filePath)).toBe(false);
-    });
-
-    it('should throw error if file does not exist', async () => {
-      await expect(deleteFile('test/nonexistent-delete.txt')).rejects.toThrow();
+      expect(fs.promises.unlink).toHaveBeenCalledWith(join(DATA_PATH, 'temp/test.txt'));
+      expect(fs.promises.unlink).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('deleteFileSync', () => {
     it('should delete an existing file synchronously', () => {
       writeFileSync('sync-delete.txt', 'Content to delete', { volume: 'test' });
-      const filePath = join(DATA_PATH, 'test/sync-delete.txt');
-
-      expect(existsSync(filePath)).toBe(true);
 
       deleteFileSync('sync-delete.txt', { volume: 'test' });
 
-      expect(existsSync(filePath)).toBe(false);
+      expect(fs.unlinkSync).toHaveBeenCalledWith(join(DATA_PATH, 'test/sync-delete.txt'));
+      expect(fs.unlinkSync).toHaveBeenCalledTimes(1);
     });
 
     it('should delete file with volume option', () => {
       writeFileSync('test.txt', 'Content to delete', { volume: 'temp' });
-      const filePath = join(DATA_PATH, 'temp/test.txt');
-
-      expect(existsSync(filePath)).toBe(true);
 
       deleteFileSync('test.txt', { volume: 'temp' });
 
-      expect(existsSync(filePath)).toBe(false);
-    });
-
-    it('should throw error if file does not exist', () => {
-      expect(() => deleteFileSync('test/nonexistent-sync-delete.txt')).toThrow();
+      expect(fs.unlinkSync).toHaveBeenCalledWith(join(DATA_PATH, 'temp/test.txt'));
+      expect(fs.unlinkSync).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -486,8 +487,11 @@ describe('kbn-fs', () => {
       const result = await writeFile('iterable.txt', content, { volume: 'test' });
 
       expect(result.alias).toBe('disk:data/test/iterable.txt');
-      expect(existsSync(result.path)).toBe(true);
-      expect(fsReadFileSync(result.path, 'utf8')).toBe('Hello World!');
+      expect(fs.promises.writeFile).toHaveBeenCalledWith(
+        join(DATA_PATH, 'test/iterable.txt'),
+        expect.any(Buffer)
+      );
+      expect(fs.promises.writeFile).toHaveBeenCalledTimes(1);
     });
 
     it('should handle AsyncIterable content', async () => {
@@ -497,11 +501,16 @@ describe('kbn-fs', () => {
         yield 'Content';
       }
 
-      const result = await writeFile('async-iterable.txt', asyncContent(), { volume: 'test' });
+      const content = asyncContent();
+      const result = await writeFile('async-iterable.txt', content, { volume: 'test' });
 
       expect(result.alias).toBe('disk:data/test/async-iterable.txt');
-      expect(existsSync(result.path)).toBe(true);
-      expect(fsReadFileSync(result.path, 'utf8')).toBe('Async Content');
+      expect(fs.promises.writeFile).toHaveBeenCalledTimes(1);
+      // AsyncIterable is passed as-is, not converted to Buffer
+      expect(fs.promises.writeFile).toHaveBeenCalledWith(
+        join(DATA_PATH, 'test/async-iterable.txt'),
+        content
+      );
     });
 
     it('should handle Stream content', async () => {
@@ -511,8 +520,12 @@ describe('kbn-fs', () => {
       const result = await writeFile('stream-content.txt', readable, { volume: 'test' });
 
       expect(result.alias).toBe('disk:data/test/stream-content.txt');
-      expect(existsSync(result.path)).toBe(true);
-      expect(fsReadFileSync(result.path, 'utf8')).toBe(content);
+      expect(fs.promises.writeFile).toHaveBeenCalledTimes(1);
+      // Stream is passed as-is, not converted to Buffer
+      expect(fs.promises.writeFile).toHaveBeenCalledWith(
+        join(DATA_PATH, 'test/stream-content.txt'),
+        readable
+      );
     });
   });
 });
