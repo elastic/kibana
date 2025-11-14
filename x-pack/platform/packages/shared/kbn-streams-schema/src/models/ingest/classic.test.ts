@@ -19,6 +19,7 @@ describe('ClassicStream', () => {
           processing: { steps: [] },
           settings: {},
           classic: {},
+          failure_store: { inherit: {} },
         },
       },
       {
@@ -35,6 +36,7 @@ describe('ClassicStream', () => {
               },
             },
           },
+          failure_store: { inherit: {} },
         },
       },
     ])('is valid', (val) => {
@@ -87,6 +89,7 @@ describe('ClassicStream', () => {
             processing: { steps: [] },
             settings: {},
             classic: {},
+            failure_store: { inherit: {} },
           },
         },
         effective_lifecycle: {
@@ -154,6 +157,7 @@ describe('ClassicStream', () => {
             processing: { steps: [] },
             settings: {},
             classic: {},
+            failure_store: { inherit: {} },
           },
         },
         ...emptyAssets,

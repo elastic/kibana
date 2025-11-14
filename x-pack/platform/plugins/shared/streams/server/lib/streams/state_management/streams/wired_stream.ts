@@ -179,6 +179,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
                 },
               ],
             },
+            failure_store: { inherit: {} },
           },
         },
       });
@@ -204,6 +205,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
                   fields: {},
                   routing: [],
                 },
+                failure_store: { inherit: {} },
               },
             },
           });

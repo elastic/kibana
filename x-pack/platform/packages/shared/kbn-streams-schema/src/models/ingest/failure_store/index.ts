@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IndicesDataStreamFailureStore } from '@elastic/elasticsearch/lib/api/types';
+import type { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
 import { z } from '@kbn/zod';
 import { NonEmptyString } from '@kbn/zod-helpers';
 
@@ -23,6 +23,24 @@ export interface FailureStoreStatsResponse {
   creationDate?: number;
 }
 
+export interface FailureStoreInherit {
+  inherit: {};
+}
+
+export interface FailureStoreDisabled {
+  enabled: boolean;
+}
+
+export interface FailureStoreEnabled {
+  enabled: boolean;
+  lifecycle?: {
+    enabled: boolean;
+    data_retention?: string;
+  };
+}
+
+export type FailureStore = FailureStoreInherit | FailureStoreEnabled | FailureStoreDisabled;
+
 export const effectiveFailureStoreSchema: z.Schema<EffectiveFailureStore> = z.object({
   enabled: z.boolean(),
   retentionPeriod: z.object({
@@ -31,21 +49,24 @@ export const effectiveFailureStoreSchema: z.Schema<EffectiveFailureStore> = z.ob
   }),
 });
 
-export type FailureStore = IndicesDataStreamFailureStore | { inherit: {} };
+const inheritFailureStoreSchema = z.object({ inherit: z.strictObject({}) });
+const disabledFailureStoreSchema = z.object({ enabled: z.boolean() });
+const enabledFailureStoreSchema = z
+  .object({
+    enabled: z.boolean(),
+    lifecycle: z.optional(
+      z.object({
+        enabled: z.boolean(),
+        data_retention: z.optional(NonEmptyString),
+      })
+    ),
+  })
+  .strict();
 
 export const failureStoreSchema: z.Schema<FailureStore> = z.union([
-  z.object({ inherit: z.object({}) }).strict(),
-  z
-    .object({
-      enabled: z.optional(z.boolean()),
-      lifecycle: z.optional(
-        z.object({
-          enabled: z.boolean(),
-          data_retention: z.optional(NonEmptyString),
-        })
-      ),
-    })
-    .strict(),
+  inheritFailureStoreSchema,
+  enabledFailureStoreSchema,
+  disabledFailureStoreSchema,
 ]);
 
 export const failureStoreStatsSchema: z.Schema<FailureStoreStatsResponse> = z.object({
@@ -73,3 +94,15 @@ export function isInheritFailureStore(
 ): input is { inherit: {} } | undefined {
   return !input || 'inherit' in input;
 }
+
+export type DataStreamWithFailureStore = IndicesDataStream & {
+  failure_store: {
+    enabled?: boolean;
+    lifecycle?: {
+      enabled?: boolean;
+      data_retention?: string;
+      effective_retention?: string;
+      retention_determined_by?: 'default_failures_retention' | 'data_stream_configuration';
+    };
+  };
+};

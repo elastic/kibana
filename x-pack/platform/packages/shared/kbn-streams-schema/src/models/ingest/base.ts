@@ -53,7 +53,7 @@ export interface IngestBase {
   lifecycle: IngestStreamLifecycle;
   processing: StreamlangDSL;
   settings: IngestStreamSettings;
-  failure_store?: FailureStore;
+  failure_store: FailureStore;
 }
 
 export const IngestBase: Validation<unknown, IngestBase> = validation(
@@ -62,7 +62,7 @@ export const IngestBase: Validation<unknown, IngestBase> = validation(
     lifecycle: ingestStreamLifecycleSchema,
     processing: streamlangDSLSchema,
     settings: ingestStreamSettingsSchema,
-    failure_store: z.optional(failureStoreSchema),
+    failure_store: failureStoreSchema,
   })
 );
 
