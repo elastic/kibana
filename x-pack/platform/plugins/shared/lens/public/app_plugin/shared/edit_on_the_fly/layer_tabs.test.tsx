@@ -419,12 +419,12 @@ describe('LayerTabs', () => {
       expect(instance.find('button[title="Delete layer"]').exists()).toBe(true);
     });
 
-    it('should call the clear callback when resetting layer', async () => {
+    it('should call the remove callback when deleting layer', async () => {
       const datasourceMap = mockDatasourceMap();
       const visualizationMap = mockVisualizationMap();
 
-      // Set up visualization to return a single layer
-      visualizationMap.testVis.getLayerIds = jest.fn(() => ['layer1']);
+      // Set up visualization to return 2 layers (tabs visible, shows "Delete layer")
+      visualizationMap.testVis.getLayerIds = jest.fn(() => ['layer1', 'layer2']);
       visualizationMap.testVis.getConfiguration = jest.fn(() => ({
         groups: [
           {
@@ -436,6 +436,15 @@ describe('LayerTabs', () => {
             supportsMoreColumns: true,
             dataTestSubj: 'mockVisA',
           },
+          {
+            layerId: 'layer2',
+            groupId: 'b',
+            groupLabel: 'B',
+            accessors: [],
+            filterOperations: () => true,
+            supportsMoreColumns: true,
+            dataTestSubj: 'mockVisB',
+          },
         ],
       }));
 
@@ -445,14 +454,15 @@ describe('LayerTabs', () => {
 
       // Click the tab action button to open the menu
       act(() => {
-        instance.find('button[aria-label="Layer actions"]').simulate('click');
+        instance.find('button[aria-label="Layer actions"]').first().simulate('click');
       });
       instance.update();
 
-      // Click the clear layer button
+      // Click the delete layer button
       act(() => {
-        instance.find('button[title="Clear layer"]').simulate('click');
+        instance.find('button[title="Delete layer"]').first().simulate('click');
       });
+      instance.update();
 
       // Wait for state updates
       await waitMs(0);
@@ -461,7 +471,7 @@ describe('LayerTabs', () => {
       expect(lensStore.dispatch).toHaveBeenCalledWith({
         payload: {
           layerId: 'layer1',
-          layerIds: ['layer1'],
+          layerIds: ['layer1', 'layer2'],
           visualizationId: 'testVis',
         },
         type: 'lens/removeOrClearLayer',
