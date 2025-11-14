@@ -7,7 +7,10 @@
 
 import type { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { ValidatorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
-import { EndpointSecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
+import {
+  EndpointSecurityConnectorFeatureId,
+  WorkflowsConnectorFeatureId,
+} from '@kbn/actions-plugin/common';
 import { urlAllowListValidator, ActionExecutionSourceType } from '@kbn/actions-plugin/server';
 import {
   ENDPOINT_SECURITY_EXECUTE_PRIVILEGE,
@@ -37,7 +40,7 @@ export const getCrowdstrikeConnectorType = (
     secrets: CrowdstrikeSecretsSchema,
   },
   validators: [{ type: ValidatorType.CONFIG, validator: urlAllowListValidator('url') }],
-  supportedFeatureIds: [EndpointSecurityConnectorFeatureId],
+  supportedFeatureIds: [EndpointSecurityConnectorFeatureId, WorkflowsConnectorFeatureId],
   minimumLicenseRequired: 'enterprise' as const,
   subFeature: 'endpointSecurity',
   getKibanaPrivileges: (args) => {

@@ -30,7 +30,7 @@ export const VirusTotalConnector: ConnectorSpec = {
     icon: `data:image/png;base64,${getIconPngBase64()}`,
     description: 'File scanning, URL analysis, and threat intelligence lookups',
     minimumLicense: 'gold',
-    supportedFeatureIds: ['alerting', 'siem'],
+    supportedFeatureIds: ['workflows'],
   },
 
   schema: z.discriminatedUnion('method', [

@@ -54,7 +54,7 @@ export const MyConnector: SingleFileConnectorDefinition = {
     displayName: 'My Connector',
     description: 'A custom connector example',
     minimumLicense: 'gold',
-    supportedFeatureIds: ['alerting'],
+    supportedFeatureIds: ['workflows'],
   },
 
   schema: z.object({
@@ -143,7 +143,7 @@ metadata: {
   description: 'Description',        // Connector description
   docsUrl?: string,                  // Link to documentation
   minimumLicense: 'basic' | 'gold' | 'platinum' | 'enterprise',
-  supportedFeatureIds: ['alerting', 'cases', ...],
+  supportedFeatureIds: ['workflows', 'alerting', 'cases', ...],
 }
 ```
 
