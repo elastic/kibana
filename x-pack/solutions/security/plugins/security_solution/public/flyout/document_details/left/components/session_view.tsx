@@ -22,7 +22,7 @@ import {
 } from '../../shared/constants/panel_keys';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useDocumentDetailsContext } from '../../shared/context';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { PageScope } from '../../../../sourcerer/store/model';
 import { ALERT_PREVIEW_BANNER } from '../../preview/constants';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { useSessionViewConfig } from '../../shared/hooks/use_session_view_config';
@@ -61,12 +61,10 @@ export const SessionView: FC = memo(() => {
   const isEnterprisePlus = useLicense().isEnterprise();
   const isEnabled = sessionViewConfig && isEnterprisePlus;
 
-  const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView(
-    SourcererScopeName.detections
-  );
+  const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView(PageScope.detections);
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.detections);
+  const experimentalSelectedPatterns = useSelectedPatterns(PageScope.detections);
 
   const selectedPatterns = newDataViewPickerEnabled
     ? experimentalSelectedPatterns

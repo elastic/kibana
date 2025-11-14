@@ -20,7 +20,7 @@ import {
 } from '../../shared/constants/panel_keys';
 import { ALERT_PREVIEW_BANNER } from '../../preview/constants';
 import { useSessionViewPanelContext } from '../context';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { PageScope } from '../../../../sourcerer/store/model';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 
@@ -38,11 +38,9 @@ export const AlertsTab = memo(() => {
     hasNextPage: hasNextPageAlerts,
   } = useFetchSessionViewAlerts(sessionEntityId, sessionStartTime, investigatedAlertId);
 
-  const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView(
-    SourcererScopeName.detections
-  );
+  const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView(PageScope.detections);
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.detections);
+  const experimentalSelectedPatterns = useSelectedPatterns(PageScope.detections);
 
   const selectedPatterns = newDataViewPickerEnabled
     ? experimentalSelectedPatterns

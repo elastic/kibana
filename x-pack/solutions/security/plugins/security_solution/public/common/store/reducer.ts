@@ -26,7 +26,7 @@ import type { ManagementPluginReducer } from '../../management';
 import type { State } from './types';
 import type { AppAction } from './actions';
 import type { SourcererModel } from '../../sourcerer/store/model';
-import { initDataView, SourcererScopeName } from '../../sourcerer/store/model';
+import { initDataView, PageScope } from '../../sourcerer/store/model';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import { getScopePatternListSelection } from '../../sourcerer/store/helpers';
 import { globalUrlParamReducer, initialGlobalUrlParam } from './global_url_param';
@@ -76,21 +76,21 @@ export const createInitialState = (
   notesState: NotesState
 ): State => {
   const initialPatterns = {
-    [SourcererScopeName.default]: getScopePatternListSelection(
+    [PageScope.default]: getScopePatternListSelection(
       defaultDataView,
-      SourcererScopeName.default,
+      PageScope.default,
       signalIndexName,
       true
     ),
-    [SourcererScopeName.detections]: getScopePatternListSelection(
+    [PageScope.detections]: getScopePatternListSelection(
       defaultDataView,
-      SourcererScopeName.detections,
+      PageScope.detections,
       signalIndexName,
       true
     ),
-    [SourcererScopeName.timeline]: getScopePatternListSelection(
+    [PageScope.timeline]: getScopePatternListSelection(
       defaultDataView,
-      SourcererScopeName.timeline,
+      PageScope.timeline,
       signalIndexName,
       true
     ),
@@ -105,20 +105,20 @@ export const createInitialState = (
       ...sourcererModel.initialSourcererState,
       sourcererScopes: {
         ...sourcererModel.initialSourcererState.sourcererScopes,
-        [SourcererScopeName.default]: {
+        [PageScope.default]: {
           ...sourcererModel.initialSourcererState.sourcererScopes.default,
           selectedDataViewId: defaultDataView.id,
-          selectedPatterns: initialPatterns[SourcererScopeName.default],
+          selectedPatterns: initialPatterns[PageScope.default],
         },
-        [SourcererScopeName.detections]: {
+        [PageScope.detections]: {
           ...sourcererModel.initialSourcererState.sourcererScopes.detections,
           selectedDataViewId: defaultDataView.id,
-          selectedPatterns: initialPatterns[SourcererScopeName.detections],
+          selectedPatterns: initialPatterns[PageScope.detections],
         },
-        [SourcererScopeName.timeline]: {
+        [PageScope.timeline]: {
           ...sourcererModel.initialSourcererState.sourcererScopes.timeline,
           selectedDataViewId: defaultDataView.id,
-          selectedPatterns: initialPatterns[SourcererScopeName.timeline],
+          selectedPatterns: initialPatterns[PageScope.timeline],
         },
       },
       defaultDataView,

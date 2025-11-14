@@ -16,7 +16,7 @@ import {
   parseExistingEnrichments,
   timelineDataToEnrichment,
 } from '../../shared/utils/threat_intelligence';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { PageScope } from '../../../../sourcerer/store/model';
 import { useInvestigationTimeEnrichment } from '../../shared/hooks/use_investigation_enrichment';
 import { useTimelineEventsDetails } from '../../../../timelines/containers/details';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
@@ -63,9 +63,7 @@ export const useThreatIntelligenceDetails = (): ThreatIntelligenceDetailsResult 
   const { indexName, eventId } = useDocumentDetailsContext();
   const [{ pageName }] = useRouteSpy();
   const sourcererScope =
-    pageName === SecurityPageName.detections
-      ? SourcererScopeName.detections
-      : SourcererScopeName.default;
+    pageName === SecurityPageName.detections ? PageScope.detections : PageScope.default;
   const sourcererDataView = useSourcererDataView(sourcererScope);
 
   const [isEventDataLoading, eventData] = useTimelineEventsDetails({

@@ -10,7 +10,7 @@ import { useSelector } from 'react-redux';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 import { sourcererSelectors } from '../store';
 import type { SelectedDataView, SourcererDataView, RunTimeMappings } from '../store/model';
-import { SourcererScopeName } from '../store/model';
+import { PageScope } from '../store/model';
 import { checkIfIndicesExist } from '../store/helpers';
 import { getDataViewStateFromIndexFields } from '../../common/containers/source/use_data_view';
 import { useFetchIndex } from '../../common/containers/source';
@@ -18,9 +18,7 @@ import type { State } from '../../common/store/types';
 import { sortWithExcludesAtEnd } from '../../../common/utils/sourcerer';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
-export const useSourcererDataView = (
-  scopeId: SourcererScopeName = SourcererScopeName.default
-): SelectedDataView => {
+export const useSourcererDataView = (scopeId: PageScope = PageScope.default): SelectedDataView => {
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   const kibanaDataViews = useSelector(sourcererSelectors.kibanaDataViews);

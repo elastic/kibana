@@ -13,7 +13,7 @@ import { useSignalIndexWithDefault } from '../../hooks/use_signal_index_with_def
 import { getExcludeAlertsFilters } from './utils';
 import type { GetLensAttributes } from '../../../common/components/visualization_actions/types';
 import { VisualizationContextMenuActions } from '../../../common/components/visualization_actions/types';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { PageScope } from '../../../sourcerer/store/model';
 import { getAlertFilteringMetricLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/ai/alert_filtering_metric';
 import * as i18n from './translations';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
@@ -86,7 +86,7 @@ const AlertFilteringMetricComponent: React.FC<Props> = ({
         timerange={{ from, to }}
         id={`${ID}-area-embeddable`}
         inspectTitle={i18n.FILTERING_RATE}
-        scopeId={SourcererScopeName.detections}
+        scopeId={PageScope.detections}
         withActions={[
           VisualizationContextMenuActions.addToExistingCase,
           VisualizationContextMenuActions.addToNewCase,

@@ -15,7 +15,7 @@ import type { Note } from '../../../../common/api/timeline';
 import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../common/api/timeline';
 import { createNote } from '../notes/helpers';
 import { sourcererActions } from '../../../sourcerer/store';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { PageScope } from '../../../sourcerer/store/model';
 
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import {
@@ -75,7 +75,7 @@ export const useUpdateTimeline = () => {
         if (!isEmpty(_timeline.indexNames) && !newDataViewPickerEnabled) {
           dispatch(
             sourcererActions.setSelectedDataView({
-              id: SourcererScopeName.timeline,
+              id: PageScope.timeline,
               selectedDataViewId: _timeline.dataViewId,
               selectedPatterns: _timeline.indexNames,
             })

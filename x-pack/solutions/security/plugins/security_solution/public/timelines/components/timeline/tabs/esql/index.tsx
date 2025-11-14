@@ -25,7 +25,7 @@ import { updateSavedSearchId } from '../../../../store/actions';
 import { useDiscoverInTimelineContext } from '../../../../../common/components/discover_in_timeline/use_discover_in_timeline_context';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useDiscoverState } from './use_discover_state';
-import { SourcererScopeName } from '../../../../../sourcerer/store/model';
+import { PageScope } from '../../../../../sourcerer/store/model';
 import { useSetDiscoverCustomizationCallbacks } from './customizations/use_set_discover_customizations';
 import { EmbeddedDiscoverContainer, TimelineESQLGlobalStyles } from './styles';
 import { timelineSelectors } from '../../../../store';
@@ -63,9 +63,9 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
   const dispatch = useDispatch();
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { status: dataViewStatus } = useDataView(SourcererScopeName.detections);
+  const { status: dataViewStatus } = useDataView(PageScope.detections);
 
-  const { dataViewId } = useSourcererDataView(SourcererScopeName.detections);
+  const { dataViewId } = useSourcererDataView(PageScope.detections);
 
   const [oldDataViewSpec, setDataViewSpec] = useState<DataViewSpec | undefined>();
 

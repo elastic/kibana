@@ -25,7 +25,7 @@ import { networkSelectors } from '../../store';
 import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
 import { getDnsTopDomainsLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/network/dns_top_domains';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { PageScope } from '../../../../sourcerer/store/model';
 
 const HISTOGRAM_ID = 'networkDnsHistogramQuery';
 
@@ -112,9 +112,7 @@ const DnsQueryTabBodyComponent: React.FC<NetworkComponentQueryProps> = ({
         filterQuery={filterQuery}
         startDate={startDate}
         {...dnsHistogramConfigs}
-        sourcererScopeId={
-          newDataViewPickerEnabled ? SourcererScopeName.explore : SourcererScopeName.default
-        }
+        sourcererScopeId={newDataViewPickerEnabled ? PageScope.explore : PageScope.default}
       />
       <NetworkDnsTableManage
         data={networkDns}

@@ -26,7 +26,7 @@ import { useSignalIndex } from '../../../../../detections/containers/detection_e
 import type { LensAttributes } from '../../../../../common/components/visualization_actions/types';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { sourcererActions } from '../../../../../sourcerer/store';
-import { SourcererScopeName } from '../../../../../sourcerer/store/model';
+import { PageScope } from '../../../../../sourcerer/store/model';
 import * as i18n from '../translations';
 import type { Sorting } from '../types';
 
@@ -162,7 +162,7 @@ const PreviewTabComponent = ({
       // action to have any effect.
       dispatch(
         sourcererActions.setSelectedDataView({
-          id: SourcererScopeName.detections,
+          id: PageScope.detections,
           selectedDataViewId: signalIndexName,
           selectedPatterns: [signalIndexName],
           shouldValidateSelectedPatterns: false,

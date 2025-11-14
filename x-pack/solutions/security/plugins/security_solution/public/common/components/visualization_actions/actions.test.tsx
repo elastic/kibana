@@ -15,7 +15,7 @@ import { TestProviders } from '../../mock';
 
 import type { VisualizationActionsProps } from './types';
 import * as useLensAttributesModule from './use_lens_attributes';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { PageScope } from '../../../sourcerer/store/model';
 
 jest.mock('./use_actions');
 
@@ -64,7 +64,7 @@ describe('VisualizationActions', () => {
         extraOptions: props.extraOptions,
         getLensAttributes: props.getLensAttributes,
         lensAttributes: props.lensAttributes,
-        scopeId: SourcererScopeName.default,
+        scopeId: PageScope.default,
         stackByField: props.stackByField,
         title: '',
       })

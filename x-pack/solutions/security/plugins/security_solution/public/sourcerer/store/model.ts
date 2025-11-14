@@ -11,7 +11,7 @@ import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { RuntimeFieldSpec, RuntimePrimitiveTypes } from '@kbn/data-views-plugin/common';
 
 /** Uniquely identifies a Sourcerer Scope */
-export enum SourcererScopeName {
+export enum PageScope {
   default = 'default',
   detections = 'detections',
   attacks = 'attacks',
@@ -25,7 +25,7 @@ export enum SourcererScopeName {
  */
 export interface SourcererScope {
   /** Uniquely identifies a Sourcerer Scope */
-  id: SourcererScopeName;
+  id: PageScope;
   /** is an update being made to the sourcerer data view */
   loading: boolean;
   /** selected data view id, null if it is legacy index patterns*/
@@ -33,13 +33,13 @@ export interface SourcererScope {
   /** selected patterns within the data view */
   selectedPatterns: string[];
   /** if has length,
-   * id === SourcererScopeName.timeline
+   * id === PageScope.timeline
    * selectedDataViewId === null OR defaultDataView.id
    * saved timeline has pattern that is not in the default */
   missingPatterns: string[];
 }
 
-export type SourcererScopeById = Record<SourcererScopeName, SourcererScope>;
+export type SourcererScopeById = Record<PageScope, SourcererScope>;
 
 export interface KibanaDataView {
   /** Uniquely identifies a Kibana Data View */
@@ -123,7 +123,7 @@ export interface SourcererModel {
 }
 
 export type SourcererUrlState = Partial<{
-  [id in SourcererScopeName]: {
+  [id in PageScope]: {
     id: string;
     selectedPatterns: string[];
   };
@@ -154,29 +154,29 @@ export const initialSourcererState: SourcererModel = {
   signalIndexName: null,
   signalIndexMappingOutdated: null,
   sourcererScopes: {
-    [SourcererScopeName.default]: {
+    [PageScope.default]: {
       ...initSourcererScope,
-      id: SourcererScopeName.default,
+      id: PageScope.default,
     },
-    [SourcererScopeName.detections]: {
+    [PageScope.detections]: {
       ...initSourcererScope,
-      id: SourcererScopeName.detections,
+      id: PageScope.detections,
     },
-    [SourcererScopeName.attacks]: {
+    [PageScope.attacks]: {
       ...initSourcererScope,
-      id: SourcererScopeName.attacks,
+      id: PageScope.attacks,
     },
-    [SourcererScopeName.timeline]: {
+    [PageScope.timeline]: {
       ...initSourcererScope,
-      id: SourcererScopeName.timeline,
+      id: PageScope.timeline,
     },
-    [SourcererScopeName.analyzer]: {
+    [PageScope.analyzer]: {
       ...initSourcererScope,
-      id: SourcererScopeName.analyzer,
+      id: PageScope.analyzer,
     },
-    [SourcererScopeName.explore]: {
+    [PageScope.explore]: {
       ...initSourcererScope,
-      id: SourcererScopeName.explore,
+      id: PageScope.explore,
     },
   },
 };

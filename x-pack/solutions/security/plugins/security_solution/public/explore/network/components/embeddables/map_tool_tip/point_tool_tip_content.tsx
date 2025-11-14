@@ -17,7 +17,7 @@ import { DescriptionListStyled } from '../../../../../common/components/page';
 import { HostDetailsLink, NetworkDetailsLink } from '../../../../../common/components/links';
 import { DefaultFieldRenderer } from '../../../../../timelines/components/field_renderers/default_renderer';
 import type { FlowTarget } from '../../../../../../common/search_strategy';
-import { SourcererScopeName } from '../../../../../sourcerer/store/model';
+import { PageScope } from '../../../../../sourcerer/store/model';
 
 interface PointToolTipContentProps {
   contextId: string;
@@ -46,11 +46,7 @@ export const PointToolTipContentComponent = ({
                   attrName={key}
                   idPrefix={`map-point-tooltip-${contextId}-${key}-${value}`}
                   render={(item) => getRenderedFieldValue(key, item)}
-                  scopeId={
-                    newDataViewPickerEnabled
-                      ? SourcererScopeName.explore
-                      : SourcererScopeName.default
-                  }
+                  scopeId={newDataViewPickerEnabled ? PageScope.explore : PageScope.default}
                 />
               ) : (
                 getEmptyTagValue()

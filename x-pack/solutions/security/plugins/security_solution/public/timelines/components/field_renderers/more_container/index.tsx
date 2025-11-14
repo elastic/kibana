@@ -13,7 +13,7 @@ import { TimelineContext } from '../../timeline/context';
 import { getSourcererScopeId } from '../../../../helpers';
 import { escapeDataProviderId } from '../../../../common/components/drag_and_drop/helpers';
 import { defaultToEmptyTag } from '../../../../common/components/empty_value';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { PageScope } from '../../../../sourcerer/store/model';
 import {
   SecurityCellActions,
   CellActionsMode,
@@ -61,7 +61,7 @@ export const MoreContainer = React.memo<MoreContainerProps>(
                   showActionTooltips
                   triggerId={SecurityCellActionsTrigger.DEFAULT}
                   data={{ value, field: fieldName }}
-                  sourcererScopeId={sourcererScopeId ?? SourcererScopeName.default}
+                  sourcererScopeId={sourcererScopeId ?? PageScope.default}
                   metadata={{ scopeId: defaultedScopeId ?? undefined }}
                 >
                   <>{render ? render(value) : defaultToEmptyTag(value)}</>

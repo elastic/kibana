@@ -12,7 +12,7 @@ import { useDispatch } from 'react-redux';
 import { getScopePatternListSelection } from '../store/helpers';
 import { sourcererActions, sourcererModel } from '../store';
 import { getDataViewSelectOptions, getPatternListWithoutSignals } from './helpers';
-import { SourcererScopeName } from '../store/model';
+import { PageScope } from '../store/model';
 import { sortWithExcludesAtEnd } from '../../../common/utils/sourcerer';
 import { useKibana } from '../../common/lib/kibana';
 import { getSourcererDataView } from '../containers/get_sourcerer_data_view';
@@ -23,7 +23,7 @@ interface UsePickIndexPatternsProps {
   isOnlyDetectionAlerts: boolean;
   kibanaDataViews: sourcererModel.SourcererModel['kibanaDataViews'];
   missingPatterns: string[];
-  scopeId: sourcererModel.SourcererScopeName;
+  scopeId: sourcererModel.PageScope;
   selectedDataViewId: string | null;
   selectedPatterns: string[];
   signalIndexName: string | null;
@@ -103,7 +103,7 @@ export const usePickIndexPatterns = ({
 
     const titleAsList = [...new Set(theDataView.title.split(','))];
 
-    return scopeId === sourcererModel.SourcererScopeName.default
+    return scopeId === sourcererModel.PageScope.default
       ? {
           allPatterns: getPatternListWithoutSignals(titleAsList, signalIndexName),
           selectablePatterns: getPatternListWithoutSignals(
@@ -124,7 +124,7 @@ export const usePickIndexPatterns = ({
 
   const getDefaultSelectedOptionsByDataView = useCallback(
     (id: string, isAlerts: boolean = false): Array<EuiComboBoxOptionOption<string>> =>
-      scopeId === SourcererScopeName.detections || isAlerts
+      scopeId === PageScope.detections || isAlerts
         ? signalPatternListToOptions
         : patternListToOptions(
             getScopePatternListSelection(
@@ -165,9 +165,7 @@ export const usePickIndexPatterns = ({
 
   useEffect(() => {
     setSelectedOptions(
-      scopeId === SourcererScopeName.detections
-        ? signalPatternListToOptions
-        : selectedPatternsAsOptions
+      scopeId === PageScope.detections ? signalPatternListToOptions : selectedPatternsAsOptions
     );
   }, [selectedPatterns, scopeId, selectedPatternsAsOptions, signalPatternListToOptions]);
   // when scope updates, check modified to set/remove alerts label

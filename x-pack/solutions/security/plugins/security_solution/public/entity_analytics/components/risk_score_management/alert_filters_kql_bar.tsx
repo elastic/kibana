@@ -24,7 +24,7 @@ import type { Query } from '@kbn/es-query';
 import { fromKueryExpression } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { useSourcererDataView } from '../../../sourcerer/containers';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { PageScope } from '../../../sourcerer/store/model';
 import { useKibana } from '../../../common/lib/kibana';
 import * as i18n from '../../translations';
 import type { UIAlertFilter } from './common';
@@ -218,7 +218,7 @@ export const AlertFiltersKqlBar: React.FC<AlertFiltersKqlBarProps> = ({
   compressed = true,
   'data-test-subj': dataTestSubj = 'alertFiltersKqlBar',
 }) => {
-  const { sourcererDataView } = useSourcererDataView(SourcererScopeName.explore);
+  const { sourcererDataView } = useSourcererDataView(PageScope.explore);
   const {
     unifiedSearch: {
       ui: { SearchBar },

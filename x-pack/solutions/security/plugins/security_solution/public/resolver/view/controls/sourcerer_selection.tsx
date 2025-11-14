@@ -10,7 +10,7 @@ import { EuiPopover } from '@elastic/eui';
 import { StyledEuiButtonIcon } from './styles';
 import { useColors } from '../use_colors';
 import { Sourcerer } from '../../../sourcerer/components';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { PageScope } from '../../../sourcerer/store/model';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { DataViewPicker } from '../../../data_view_manager/components/data_view_picker';
 
@@ -60,9 +60,9 @@ export const SourcererButton = memo(
         anchorPosition="leftCenter"
       >
         {newDataViewPickerEnabled ? (
-          <DataViewPicker scope={SourcererScopeName.analyzer} onClosePopover={closePopover} />
+          <DataViewPicker scope={PageScope.analyzer} onClosePopover={closePopover} />
         ) : (
-          <Sourcerer scope={SourcererScopeName.analyzer} />
+          <Sourcerer scope={PageScope.analyzer} />
         )}
       </EuiPopover>
     );

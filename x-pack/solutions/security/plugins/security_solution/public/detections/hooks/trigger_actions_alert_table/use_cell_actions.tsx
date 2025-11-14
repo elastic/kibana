@@ -13,7 +13,7 @@ import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_exper
 import type { UseDataGridColumnsSecurityCellActionsProps } from '../../../common/components/cell_actions';
 import { useDataGridColumnsSecurityCellActions } from '../../../common/components/cell_actions';
 import { SecurityCellActionsTrigger, SecurityCellActionType } from '../../../app/actions/constants';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { PageScope } from '../../../sourcerer/store/model';
 import { useGetFieldSpec } from '../../../common/hooks/use_get_field_spec';
 import { useDataViewId } from '../../../common/hooks/use_data_view_id';
 import type {
@@ -30,7 +30,7 @@ export const useCellActionsOptions = (
   >
 ) => {
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.detections);
+  const { dataView: experimentalDataView } = useDataView(PageScope.detections);
 
   const {
     columns = [],
@@ -39,8 +39,8 @@ export const useCellActionsOptions = (
     pageSize = 0,
     dataGridRef,
   } = context ?? {};
-  const oldGetFieldSpec = useGetFieldSpec(SourcererScopeName.detections);
-  const oldDataViewId = useDataViewId(SourcererScopeName.detections);
+  const oldGetFieldSpec = useGetFieldSpec(PageScope.detections);
+  const oldDataViewId = useDataViewId(PageScope.detections);
   const dataViewId = newDataViewPickerEnabled ? experimentalDataView.id : oldDataViewId;
 
   const cellActionsMetadata = useMemo(

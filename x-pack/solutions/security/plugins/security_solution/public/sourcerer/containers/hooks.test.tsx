@@ -27,7 +27,7 @@ import {
   createMockStore,
 } from '../../common/mock';
 import type { SelectedDataView } from '../store/model';
-import { SourcererScopeName } from '../store/model';
+import { PageScope } from '../store/model';
 import * as source from '../../common/containers/source/use_data_view';
 import { sourcererActions } from '../store';
 import { useInitializeUrlParam, useUpdateUrlParam } from '../../common/utils/global_query_string';
@@ -253,7 +253,7 @@ describe.skip('Sourcerer Hooks', () => {
     const selectedDataViewId = 'security-solution-default';
     (useInitializeUrlParam as jest.Mock).mockImplementation((_, onInitialize) =>
       onInitialize({
-        [SourcererScopeName.default]: {
+        [PageScope.default]: {
           id: selectedDataViewId,
           selectedPatterns,
         },
@@ -266,7 +266,7 @@ describe.skip('Sourcerer Hooks', () => {
 
     expect(mockDispatch).toHaveBeenCalledWith(
       sourcererActions.setSelectedDataView({
-        id: SourcererScopeName.default,
+        id: PageScope.default,
         selectedDataViewId,
         selectedPatterns,
       })
@@ -285,7 +285,7 @@ describe.skip('Sourcerer Hooks', () => {
     });
 
     expect(updateUrlParam).toHaveBeenCalledWith({
-      [SourcererScopeName.default]: {
+      [PageScope.default]: {
         id: DEFAULT_DATA_VIEW_ID,
         selectedPatterns: DEFAULT_INDEX_PATTERN,
       },
@@ -396,7 +396,7 @@ describe.skip('Sourcerer Hooks', () => {
       signalIndexName: mockSourcererState.signalIndexName,
       isSignalIndexExists: true,
     }));
-    const { rerender } = renderHook(() => useInitSourcerer(SourcererScopeName.detections), {
+    const { rerender } = renderHook(() => useInitSourcerer(PageScope.detections), {
       wrapper: StoreProvider,
     });
     await waitFor(() => new Promise((resolve) => resolve(null)));
@@ -427,8 +427,8 @@ describe.skip('Sourcerer Hooks', () => {
         ...mockGlobalState.sourcerer,
         sourcererScopes: {
           ...mockGlobalState.sourcerer.sourcererScopes,
-          [SourcererScopeName.timeline]: {
-            ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
+          [PageScope.timeline]: {
+            ...mockGlobalState.sourcerer.sourcererScopes[PageScope.timeline],
             selectedDataViewId: 'different-id',
           },
         },
@@ -463,7 +463,7 @@ describe.skip('Sourcerer Hooks', () => {
         expect(mockIndexFieldsSearch).toHaveBeenCalledWith({
           dataViewId: mockSourcererState.defaultDataView.id,
           needToBeInit: false,
-          scopeId: SourcererScopeName.default,
+          scopeId: PageScope.default,
         });
       });
     });
@@ -475,8 +475,8 @@ describe.skip('Sourcerer Hooks', () => {
           ...mockGlobalState.sourcerer,
           sourcererScopes: {
             ...mockGlobalState.sourcerer.sourcererScopes,
-            [SourcererScopeName.default]: {
-              ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
+            [PageScope.default]: {
+              ...mockGlobalState.sourcerer.sourcererScopes[PageScope.default],
               selectedPatterns: [],
               missingPatterns: [],
             },
@@ -492,7 +492,7 @@ describe.skip('Sourcerer Hooks', () => {
         expect(mockIndexFieldsSearch).toHaveBeenCalledWith({
           dataViewId: mockSourcererState.defaultDataView.id,
           needToBeInit: true,
-          scopeId: SourcererScopeName.default,
+          scopeId: PageScope.default,
         });
       });
     });
@@ -508,8 +508,8 @@ describe.skip('Sourcerer Hooks', () => {
           ],
           sourcererScopes: {
             ...mockGlobalState.sourcerer.sourcererScopes,
-            [SourcererScopeName.timeline]: {
-              ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
+            [PageScope.timeline]: {
+              ...mockGlobalState.sourcerer.sourcererScopes[PageScope.timeline],
               selectedDataViewId: 'something-weird',
               selectedPatterns: [],
               missingPatterns: [],
@@ -526,7 +526,7 @@ describe.skip('Sourcerer Hooks', () => {
         expect(mockIndexFieldsSearch).toHaveBeenNthCalledWith(2, {
           dataViewId: 'something-weird',
           needToBeInit: true,
-          scopeId: SourcererScopeName.timeline,
+          scopeId: PageScope.timeline,
           skipScopeUpdate: false,
         });
       });
@@ -543,8 +543,8 @@ describe.skip('Sourcerer Hooks', () => {
           ],
           sourcererScopes: {
             ...mockGlobalState.sourcerer.sourcererScopes,
-            [SourcererScopeName.timeline]: {
-              ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
+            [PageScope.timeline]: {
+              ...mockGlobalState.sourcerer.sourcererScopes[PageScope.timeline],
               selectedDataViewId: 'something-weird',
               selectedPatterns: ['ohboy'],
               missingPatterns: [],
@@ -561,7 +561,7 @@ describe.skip('Sourcerer Hooks', () => {
         expect(mockIndexFieldsSearch).toHaveBeenNthCalledWith(2, {
           dataViewId: 'something-weird',
           needToBeInit: true,
-          scopeId: SourcererScopeName.timeline,
+          scopeId: PageScope.timeline,
           skipScopeUpdate: true,
         });
       });
@@ -582,8 +582,8 @@ describe.skip('Sourcerer Hooks', () => {
           ],
           sourcererScopes: {
             ...mockGlobalState.sourcerer.sourcererScopes,
-            [SourcererScopeName.timeline]: {
-              ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
+            [PageScope.timeline]: {
+              ...mockGlobalState.sourcerer.sourcererScopes[PageScope.timeline],
               selectedDataViewId: 'something-weird',
               selectedPatterns: [],
               missingPatterns: [],
@@ -600,7 +600,7 @@ describe.skip('Sourcerer Hooks', () => {
         expect(mockIndexFieldsSearch).toHaveBeenNthCalledWith(2, {
           dataViewId: 'something-weird',
           needToBeInit: false,
-          scopeId: SourcererScopeName.timeline,
+          scopeId: PageScope.timeline,
         });
       });
     });
@@ -614,8 +614,8 @@ describe.skip('Sourcerer Hooks', () => {
           ...mockGlobalState.sourcerer,
           sourcererScopes: {
             ...mockGlobalState.sourcerer.sourcererScopes,
-            [SourcererScopeName.default]: {
-              ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
+            [PageScope.default]: {
+              ...mockGlobalState.sourcerer.sourcererScopes[PageScope.default],
               selectedPatterns: [
                 '-packetbeat-*',
                 'endgame-*',
@@ -632,12 +632,9 @@ describe.skip('Sourcerer Hooks', () => {
         },
       });
 
-      const { result, rerender } = renderHook<SelectedDataView, SourcererScopeName>(
-        useSourcererDataView,
-        {
-          wrapper: StoreProvider,
-        }
-      );
+      const { result, rerender } = renderHook<SelectedDataView, PageScope>(useSourcererDataView, {
+        wrapper: StoreProvider,
+      });
       await waitFor(() => new Promise((resolve) => resolve(null)));
       rerender();
       await waitFor(() =>
@@ -668,7 +665,7 @@ describe.skip('Sourcerer Hooks', () => {
       await act(async () => {
         store.dispatch(
           sourcererActions.setSelectedDataView({
-            id: SourcererScopeName.default,
+            id: PageScope.default,
             selectedDataViewId: 'security-solution-default',
             selectedPatterns: testPatterns,
           })
@@ -685,15 +682,15 @@ describe.skip('Sourcerer Hooks', () => {
 
 describe('getScopeFromPath', () => {
   it('should return default scope', async () => {
-    expect(getScopeFromPath('/')).toBe(SourcererScopeName.default);
-    expect(getScopeFromPath('/exceptions')).toBe(SourcererScopeName.default);
-    expect(getScopeFromPath('/rules')).toBe(SourcererScopeName.default);
-    expect(getScopeFromPath('/rules/create')).toBe(SourcererScopeName.default);
+    expect(getScopeFromPath('/')).toBe(PageScope.default);
+    expect(getScopeFromPath('/exceptions')).toBe(PageScope.default);
+    expect(getScopeFromPath('/rules')).toBe(PageScope.default);
+    expect(getScopeFromPath('/rules/create')).toBe(PageScope.default);
   });
 
   it('should return detections scope', async () => {
-    expect(getScopeFromPath('/alerts')).toBe(SourcererScopeName.detections);
-    expect(getScopeFromPath('/rules/id/foo')).toBe(SourcererScopeName.detections);
-    expect(getScopeFromPath('/rules/id/foo/edit')).toBe(SourcererScopeName.detections);
+    expect(getScopeFromPath('/alerts')).toBe(PageScope.detections);
+    expect(getScopeFromPath('/rules/id/foo')).toBe(PageScope.detections);
+    expect(getScopeFromPath('/rules/id/foo/edit')).toBe(PageScope.detections);
   });
 });

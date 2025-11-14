@@ -47,7 +47,7 @@ import type { RowRenderer, SortColumnTimeline as Sort } from '../../../../common
 import { InputsModelId } from '../../store/inputs/constants';
 import type { State } from '../../store';
 import { inputsActions } from '../../store/actions';
-import type { SourcererScopeName } from '../../../sourcerer/store/model';
+import type { PageScope } from '../../../sourcerer/store/model';
 import { useSourcererDataView } from '../../../sourcerer/containers';
 import type { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
 import { useKibana } from '../../lib/kibana';
@@ -82,7 +82,7 @@ export interface EventsViewerProps {
   pageFilters?: Filter[];
   renderCellValue: React.FC<CellValueElementProps>;
   rowRenderers: RowRenderer[];
-  sourcererScope: SourcererScopeName;
+  sourcererScope: PageScope;
   start: string;
   tableId: TableId;
   topRightMenuOptions?: React.ReactNode;

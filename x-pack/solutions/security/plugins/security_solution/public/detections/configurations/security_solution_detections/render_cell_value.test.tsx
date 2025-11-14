@@ -18,7 +18,7 @@ import { defaultRowRenderers } from '../../../timelines/components/timeline/body
 import type { TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
 import type { RenderCellValueProps } from './render_cell_value';
 import { CellValue } from './render_cell_value';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { PageScope } from '../../../sourcerer/store/model';
 import { AlertTableCellContextProvider } from './cell_value_context';
 
 jest.mock('../../../common/lib/kibana');
@@ -74,12 +74,12 @@ describe('RenderCellValue', () => {
         <DragDropContextWrapper browserFields={mockBrowserFields}>
           <AlertTableCellContextProvider
             tableId={TableId.test}
-            sourcererScope={SourcererScopeName.detections}
+            sourcererScope={PageScope.detections}
           >
             <CellValue
               {...defaultProps}
               {...props}
-              sourcererScope={SourcererScopeName.detections}
+              sourcererScope={PageScope.detections}
               tableType={TableId.test}
             />
           </AlertTableCellContextProvider>
@@ -95,7 +95,7 @@ describe('RenderCellValue', () => {
           <DragDropContextWrapper browserFields={mockBrowserFields}>
             <CellValue
               {...defaultProps}
-              sourcererScope={SourcererScopeName.detections}
+              sourcererScope={PageScope.detections}
               tableType={TableId.test}
             />
           </DragDropContextWrapper>

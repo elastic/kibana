@@ -20,7 +20,7 @@ import { CellActionsRenderer } from '../../../../common/components/cell_actions/
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { ReputationLink, WhoIsLink } from '../../../../common/components/links';
 import * as i18n from '../details/translations';
-import type { SourcererScopeName } from '../../../../sourcerer/store/model';
+import type { PageScope } from '../../../../sourcerer/store/model';
 import { FlyoutLink } from '../../../../flyout/shared/components/flyout_link';
 
 export const IpOverviewId = 'ip-overview';
@@ -126,7 +126,7 @@ export const hostIdRenderer = ({
 };
 
 interface HostNameRendererTypes {
-  scopeId: SourcererScopeName;
+  scopeId: PageScope;
   host: HostEcs;
   ipFilter?: string;
   isFlyoutOpen: boolean;

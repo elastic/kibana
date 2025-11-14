@@ -1,6 +1,7 @@
 # Sourcerer Redux
 
 Sourcerer model for redux
+
 ```typescript
 interface SourcererModel {
   /** default security-solution data view */
@@ -14,9 +15,10 @@ interface SourcererModel {
 }
 ```
 
-The SourcererScopeName uniquely identifies a Sourcerer Scope. There are 3 in our app:
+The PageScope uniquely identifies a Sourcerer Scope. There are 3 in our app:
+
 ```typescript
-enum SourcererScopeName {
+enum PageScope {
   default = 'default',
   detections = 'detections',
   timeline = 'timeline',
@@ -24,10 +26,11 @@ enum SourcererScopeName {
 ```
 
 Data related to each sourcerer scope
+
 ```typescript
 interface SourcererScope {
   /** Uniquely identifies a Sourcerer Scope */
-  id: SourcererScopeName;
+  id: PageScope;
   /** is an update being made to the sourcerer data view */
   loading: boolean;
   /** selected data view id, null if it is legacy index patterns*/
@@ -35,13 +38,13 @@ interface SourcererScope {
   /** selected patterns within the data view */
   selectedPatterns: string[];
   /** if has length,
-   * id === SourcererScopeName.timeline
+   * id === PageScope.timeline
    * selectedDataViewId === null OR defaultDataView.id
    * saved timeline has pattern that is not in the default */
   missingPatterns: string[];
 }
 
-type SourcererScopeById = Record<SourcererScopeName, SourcererScope>;
+type SourcererScopeById = Record<PageScope, SourcererScope>;
 ```
 
 ```typescript
@@ -60,6 +63,7 @@ interface KibanaDataView {
 ```
 
 KibanaDataView + timelines/index_fields enhanced field data
+
 ```typescript
 interface SourcererDataView extends KibanaDataView {
   id: string;

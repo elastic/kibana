@@ -10,7 +10,7 @@ import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
 import { cloneDeep } from 'lodash';
 
-import { initialSourcererState, type SelectedDataView, SourcererScopeName } from '../store/model';
+import { initialSourcererState, type SelectedDataView, PageScope } from '../store/model';
 import { Sourcerer } from '.';
 import { sourcererActions, sourcererModel } from '../store';
 import { createMockStore, mockGlobalState, TestProviders } from '../../common/mock';
@@ -58,7 +58,7 @@ jest.mock('../../common/utils/global_query_string', () => {
 });
 
 const defaultProps = {
-  scope: sourcererModel.SourcererScopeName.default,
+  scope: sourcererModel.PageScope.default,
 };
 
 const checkOptionsAndSelections = (wrapper: ReactWrapper, patterns: string[]) => ({
@@ -119,7 +119,7 @@ describe.skip('No data', () => {
   test('Hide sourcerer - detections ', () => {
     const wrapper = mount(
       <TestProviders store={store}>
-        <Sourcerer scope={sourcererModel.SourcererScopeName.detections} />
+        <Sourcerer scope={sourcererModel.PageScope.detections} />
       </TestProviders>
     );
 
@@ -128,7 +128,7 @@ describe.skip('No data', () => {
   test('Hide sourcerer - timeline ', () => {
     const wrapper = mount(
       <TestProviders store={store}>
-        <Sourcerer scope={sourcererModel.SourcererScopeName.timeline} />
+        <Sourcerer scope={sourcererModel.PageScope.timeline} />
       </TestProviders>
     );
 
@@ -160,8 +160,8 @@ describe.skip('Update available', () => {
       ],
       sourcererScopes: {
         ...mockGlobalState.sourcerer.sourcererScopes,
-        [SourcererScopeName.timeline]: {
-          ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
+        [PageScope.timeline]: {
+          ...mockGlobalState.sourcerer.sourcererScopes[PageScope.timeline],
           loading: false,
           patternList,
           selectedDataViewId: null,
@@ -186,7 +186,7 @@ describe.skip('Update available', () => {
 
     render(
       <TestProviders store={store}>
-        <Sourcerer scope={sourcererModel.SourcererScopeName.timeline} />
+        <Sourcerer scope={sourcererModel.PageScope.timeline} />
       </TestProviders>
     );
   });
@@ -251,7 +251,7 @@ describe.skip('Update available', () => {
     await waitFor(() => {
       expect(mockDispatch).toHaveBeenCalledWith(
         sourcererActions.setSelectedDataView({
-          id: SourcererScopeName.timeline,
+          id: PageScope.timeline,
           selectedDataViewId: 'security-solution',
           selectedPatterns: ['myFakebeat-*'],
           shouldValidateSelectedPatterns: false,
@@ -295,8 +295,8 @@ describe.skip('Update available for timeline template', () => {
       ],
       sourcererScopes: {
         ...mockGlobalState.sourcerer.sourcererScopes,
-        [SourcererScopeName.timeline]: {
-          ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
+        [PageScope.timeline]: {
+          ...mockGlobalState.sourcerer.sourcererScopes[PageScope.timeline],
           loading: false,
           patternList,
           selectedDataViewId: null,
@@ -317,7 +317,7 @@ describe.skip('Update available for timeline template', () => {
 
     render(
       <TestProviders store={store}>
-        <Sourcerer scope={sourcererModel.SourcererScopeName.timeline} />
+        <Sourcerer scope={sourcererModel.PageScope.timeline} />
       </TestProviders>
     );
   });
@@ -373,8 +373,8 @@ describe.skip('Missing index patterns', () => {
       ],
       sourcererScopes: {
         ...mockGlobalState.sourcerer.sourcererScopes,
-        [SourcererScopeName.timeline]: {
-          ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
+        [PageScope.timeline]: {
+          ...mockGlobalState.sourcerer.sourcererScopes[PageScope.timeline],
           loading: false,
           patternList,
           selectedDataViewId: 'fake-data-view-id',
@@ -408,7 +408,7 @@ describe.skip('Missing index patterns', () => {
 
     render(
       <TestProviders store={store}>
-        <Sourcerer scope={sourcererModel.SourcererScopeName.timeline} />
+        <Sourcerer scope={sourcererModel.PageScope.timeline} />
       </TestProviders>
     );
 
@@ -439,7 +439,7 @@ describe.skip('Missing index patterns', () => {
 
     render(
       <TestProviders store={store}>
-        <Sourcerer scope={sourcererModel.SourcererScopeName.timeline} />
+        <Sourcerer scope={sourcererModel.PageScope.timeline} />
       </TestProviders>
     );
 
@@ -485,8 +485,8 @@ describe.skip('Sourcerer integration tests', () => {
       ],
       sourcererScopes: {
         ...mockGlobalState.sourcerer.sourcererScopes,
-        [SourcererScopeName.default]: {
-          ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
+        [PageScope.default]: {
+          ...mockGlobalState.sourcerer.sourcererScopes[PageScope.default],
           loading: false,
           selectedDataViewId: id,
           selectedPatterns: patternListNoSignals.slice(0, 2),
@@ -529,7 +529,7 @@ describe.skip('Sourcerer integration tests', () => {
 
     expect(mockDispatch).toHaveBeenCalledWith(
       sourcererActions.setSelectedDataView({
-        id: SourcererScopeName.default,
+        id: PageScope.default,
         selectedDataViewId: '1234',
         selectedPatterns: ['fakebeat-*'],
       })

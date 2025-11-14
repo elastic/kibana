@@ -18,7 +18,7 @@ import { sourcererActions } from '../../common/store/actions';
 import { inputsActions } from '../../common/store/inputs';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import type { TimeRange } from '../../common/store/inputs/model';
-import { SourcererScopeName } from '../../sourcerer/store/model';
+import { PageScope } from '../../sourcerer/store/model';
 import { TimelineTabs, TimelineId } from '../../../common/types/timeline';
 import {
   ACTION_CANNOT_INVESTIGATE_IN_TIMELINE,
@@ -64,10 +64,10 @@ export const SendToTimelineButton: FC<PropsWithChildren<SendToTimelineButtonProp
   const [isTimelineBottomBarVisible] = useShowTimeline();
   const { discoverStateContainer, defaultDiscoverAppState } = useDiscoverInTimelineContext();
 
-  const { dataViewId: oldTimelineDataViewId } = useSourcererDataView(SourcererScopeName.timeline);
+  const { dataViewId: oldTimelineDataViewId } = useSourcererDataView(PageScope.timeline);
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
-  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.timeline);
+  const { dataView: experimentalDataView } = useDataView(PageScope.timeline);
 
   const timelineDataViewId = newDataViewPickerEnabled
     ? experimentalDataView.id ?? null
@@ -229,7 +229,7 @@ export const SendToTimelineButton: FC<PropsWithChildren<SendToTimelineButtonProp
       if (!keepDataView) {
         dispatch(
           sourcererActions.setSelectedDataView({
-            id: SourcererScopeName.timeline,
+            id: PageScope.timeline,
             selectedDataViewId: defaultDataView.id,
             selectedPatterns: [signalIndexName || ''],
           })

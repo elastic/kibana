@@ -56,7 +56,7 @@ import { TableId } from '@kbn/securitysolution-data-table';
 
 import type { TimelineEventsType } from '../../../../common/types/timeline';
 import { TimelineId } from '../../../../common/types/timeline';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { PageScope } from '../../../sourcerer/store/model';
 
 import * as i18n from './translations';
 
@@ -223,27 +223,27 @@ export const removeIgnoredAlertFilters = ({
   return filters.filter((x) => !IGNORED_ALERT_FILTERS.includes(`${x.meta.key}`));
 };
 
-/** returns the SourcererScopeName applicable to the specified timelineId and view */
-export const getSourcererScopeName = ({
+/** returns the PageScope applicable to the specified timelineId and view */
+export const getPageScope = ({
   scopeId,
   view,
 }: {
   scopeId: string | undefined;
   view: TimelineEventsType;
-}): SourcererScopeName => {
+}): PageScope => {
   // When alerts should be ignored, use the `default` Sourcerer scope,
   // because it does NOT include alert indexes:
   if (shouldIgnoreAlertFilters({ tableId: scopeId, view })) {
-    return SourcererScopeName.default; // no alerts in this scope
+    return PageScope.default; // no alerts in this scope
   }
 
   if (isDetectionsAlertsTable(scopeId)) {
-    return SourcererScopeName.detections;
+    return PageScope.detections;
   }
 
   if (scopeId === TimelineId.active) {
-    return SourcererScopeName.timeline;
+    return PageScope.timeline;
   }
 
-  return SourcererScopeName.default;
+  return PageScope.default;
 };

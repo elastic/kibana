@@ -38,7 +38,7 @@ import { KpiPanel, StackByComboBox } from '../common/components';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { GROUP_BY_TOP_LABEL } from '../common/translations';
 import { getAlertsHistogramLensAttributes as getLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/common/alerts/alerts_histogram';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { PageScope } from '../../../../sourcerer/store/model';
 import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
 import { useVisualizationResponse } from '../../../../common/components/visualization_actions/use_visualization_response';
 import { SHOWING_ALERTS } from './translations';
@@ -293,7 +293,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
             height={chartHeight ?? CHART_HEIGHT}
             id={visualizationId}
             inspectTitle={inspectTitle ?? title}
-            scopeId={SourcererScopeName.detections}
+            scopeId={PageScope.detections}
             stackByField={selectedStackByOption}
             timerange={timerange}
           />

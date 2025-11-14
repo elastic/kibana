@@ -29,7 +29,7 @@ import {
 } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { useGetScopedSourcererDataView } from '../../../../sourcerer/components/use_get_sourcerer_data_view';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { PageScope } from '../../../../sourcerer/store/model';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { GRAPH_VISUALIZATION_TEST_ID } from './test_ids';
 import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
@@ -62,10 +62,10 @@ const MAX_DOCUMENTS_TO_LOAD = 50;
 export const GraphVisualization: React.FC = memo(() => {
   const toasts = useToasts();
   const oldDataView = useGetScopedSourcererDataView({
-    sourcererScope: SourcererScopeName.default,
+    sourcererScope: PageScope.default,
   });
 
-  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.default);
+  const { dataView: experimentalDataView } = useDataView(PageScope.default);
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   const dataView = newDataViewPickerEnabled ? experimentalDataView : oldDataView;

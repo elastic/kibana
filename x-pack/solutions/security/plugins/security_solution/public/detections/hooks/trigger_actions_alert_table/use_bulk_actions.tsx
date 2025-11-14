@@ -14,7 +14,7 @@ import type { TableId } from '@kbn/securitysolution-data-table';
 import type { AlertsTableProps } from '@kbn/response-ops-alerts-table/types';
 import { useBulkAlertAssigneesItems } from '../../../common/components/toolbar/bulk_actions/use_bulk_alert_assignees_items';
 import { useBulkAlertTagsItems } from '../../../common/components/toolbar/bulk_actions/use_bulk_alert_tags_items';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { PageScope } from '../../../sourcerer/store/model';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useAddBulkToTimelineAction } from '../../components/alerts_table/timeline_actions/use_add_bulk_to_timeline';
 import { useBulkAlertActionItems } from './use_alert_actions';
@@ -82,7 +82,7 @@ export const useBulkActionsByTableType = (
       localFilters: filters,
       from,
       to,
-      scopeId: SourcererScopeName.detections,
+      scopeId: PageScope.detections,
       tableId,
     };
   }, [filters, from, to, tableId]);
@@ -97,7 +97,7 @@ export const useBulkActionsByTableType = (
 
   const alertActionParams = useMemo(() => {
     return {
-      scopeId: SourcererScopeName.detections,
+      scopeId: PageScope.detections,
       filters,
       from,
       to,

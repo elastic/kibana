@@ -15,7 +15,7 @@ import { mockEventViewerResponse } from './mock';
 import { type EventsViewerProps, StatefulEventsViewer } from '.';
 import { eventsDefaultModel } from './default_model';
 import { EntityType } from '@kbn/timelines-plugin/common';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { PageScope } from '../../../sourcerer/store/model';
 import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 import { useTimelineEvents } from './use_timelines_events';
 import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
@@ -62,7 +62,7 @@ const testProps: EventsViewerProps = {
   leadingControlColumns: getDefaultControlColumn(ACTION_BUTTON_COUNT),
   renderCellValue: DefaultCellRenderer,
   rowRenderers: defaultRowRenderers,
-  sourcererScope: SourcererScopeName.default,
+  sourcererScope: PageScope.default,
   start: from,
   tableId: TableId.test,
 };

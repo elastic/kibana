@@ -11,7 +11,7 @@ import { AlertFilteringMetric } from './alert_filtering_metric';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
 import { getExcludeAlertsFilters } from './utils';
 import { getAlertFilteringMetricLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/ai/alert_filtering_metric';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { PageScope } from '../../../sourcerer/store/model';
 import { VisualizationContextMenuActions } from '../../../common/components/visualization_actions/types';
 import { useSignalIndexWithDefault } from '../../hooks/use_signal_index_with_default';
 
@@ -88,7 +88,7 @@ describe('AlertFilteringMetric', () => {
           to: defaultProps.to,
         },
         id: 'AlertFilteringMetricQuery-area-embeddable',
-        scopeId: SourcererScopeName.detections,
+        scopeId: PageScope.detections,
         withActions: [
           VisualizationContextMenuActions.addToExistingCase,
           VisualizationContextMenuActions.addToNewCase,

@@ -29,7 +29,7 @@ import { RISK_SCORE_INDEX_PATTERN } from '../../../../common/entity_analytics/ri
 import { RiskScorePreviewTable } from './risk_score_preview_table';
 import * as i18n from '../../translations';
 import { useRiskScorePreview } from '../../api/hooks/use_preview_risk_scores';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { PageScope } from '../../../sourcerer/store/model';
 import { useSourcererDataView } from '../../../sourcerer/containers';
 import type { RiskEngineMissingPrivilegesResponse } from '../../hooks/use_missing_risk_engine_privileges';
 import { userHasRiskEngineReadPermissions } from '../../common';
@@ -160,12 +160,10 @@ const RiskEnginePreview: React.FC<{
     bool: { must: [], filter: [], should: [], must_not: [] },
   });
 
-  const { sourcererDataView: oldSourcererDataView } = useSourcererDataView(
-    SourcererScopeName.detections
-  );
+  const { sourcererDataView: oldSourcererDataView } = useSourcererDataView(PageScope.detections);
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.detections);
+  const { dataView: experimentalDataView } = useDataView(PageScope.detections);
 
   const sourcererDataView = newDataViewPickerEnabled ? experimentalDataView : oldSourcererDataView;
 

@@ -13,7 +13,7 @@ import { NetworkRouteType } from '../../../explore/network/pages/navigation/type
 import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { inputsSelectors } from '../../store';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { PageScope } from '../../../sourcerer/store/model';
 import { useRouteSpy } from '../../utils/route/use_route_spy';
 import type { LensAttributes, UseLensAttributesProps } from './types';
 import {
@@ -34,7 +34,7 @@ export const useLensAttributes = ({
   extraOptions,
   getLensAttributes,
   lensAttributes,
-  scopeId = SourcererScopeName.default,
+  scopeId = PageScope.default,
   stackByField,
   title,
   esql,

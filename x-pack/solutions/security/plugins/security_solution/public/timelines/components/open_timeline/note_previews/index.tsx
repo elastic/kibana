@@ -33,7 +33,7 @@ import { NOTE_CONTENT_CLASS_NAME } from '../../timeline/body/helpers';
 import * as i18n from './translations';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { PageScope } from '../../../../sourcerer/store/model';
 import { useDeleteNote } from './hooks/use_delete_note';
 import { getTimelineNoteSelector } from '../../timeline/tabs/notes/selectors';
 import { DocumentEventTypes } from '../../../../common/lib/telemetry';
@@ -55,10 +55,8 @@ const ToggleEventDetailsButtonComponent: React.FC<ToggleEventDetailsButtonProps>
   eventId,
   timelineId,
 }) => {
-  const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
-  const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView(
-    SourcererScopeName.timeline
-  );
+  const experimentalSelectedPatterns = useSelectedPatterns(PageScope.timeline);
+  const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView(PageScope.timeline);
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 

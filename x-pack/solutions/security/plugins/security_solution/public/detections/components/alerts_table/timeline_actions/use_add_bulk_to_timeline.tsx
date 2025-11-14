@@ -36,7 +36,7 @@ import { TimelineId } from '../../../../../common/types/timeline';
 import { TimelineTypeEnum } from '../../../../../common/api/timeline';
 import { sendBulkEventsToTimelineAction } from '../actions';
 import type { CreateTimelineProps } from '../types';
-import type { SourcererScopeName } from '../../../../sourcerer/store/model';
+import type { PageScope } from '../../../../sourcerer/store/model';
 import type { Direction } from '../../../../../common/search_strategy';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { globalFiltersQuerySelector } from '../../../../common/store/inputs/selectors';
@@ -53,7 +53,7 @@ export interface UseAddBulkToTimelineActionProps {
   /* End Time of the table being passed to the Events Table */
   to: string;
   /* Sourcerer Scope Id*/
-  scopeId: SourcererScopeName;
+  scopeId: PageScope;
 }
 
 const fields = ['_id', 'timestamp'];

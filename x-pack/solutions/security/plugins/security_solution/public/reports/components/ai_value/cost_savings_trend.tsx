@@ -23,7 +23,7 @@ import type {
   VisualizationTablesWithMeta,
 } from '../../../common/components/visualization_actions/types';
 import { VisualizationContextMenuActions } from '../../../common/components/visualization_actions/types';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { PageScope } from '../../../sourcerer/store/model';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
 import { getCostSavingsTrendAreaLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/ai/cost_savings_trend_area';
 import { CostSavingsKeyInsight } from './cost_savings_key_insight';
@@ -112,7 +112,7 @@ const CostSavingsTrendComponent: React.FC<Props> = ({
             id={`${ID}-area-embeddable`}
             height={300}
             inspectTitle={i18n.COST_SAVINGS_TREND}
-            scopeId={SourcererScopeName.detections}
+            scopeId={PageScope.detections}
             withActions={[
               VisualizationContextMenuActions.addToExistingCase,
               VisualizationContextMenuActions.addToNewCase,

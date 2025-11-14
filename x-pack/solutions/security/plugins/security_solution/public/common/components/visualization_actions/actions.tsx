@@ -21,7 +21,7 @@ import type { VisualizationActionsProps } from './types';
 import { MORE_ACTIONS } from './translations';
 import { VISUALIZATION_ACTIONS_BUTTON_CLASS } from './utils';
 import { DEFAULT_ACTIONS, useActions, VISUALIZATION_CONTEXT_MENU_TRIGGER } from './use_actions';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { PageScope } from '../../../sourcerer/store/model';
 
 const Wrapper = styled.div`
   &.viz-actions {
@@ -50,7 +50,7 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
   queryId,
   timerange,
   title: inspectTitle,
-  scopeId = SourcererScopeName.default,
+  scopeId = PageScope.default,
   stackByField,
   withActions = DEFAULT_ACTIONS,
   casesAttachmentMetadata,

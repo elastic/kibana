@@ -59,7 +59,7 @@ const sourcererDataView = {
 // See https://github.com/elastic/security-team/issues/11959
 describe.skip('sourcerer on alerts page or rules details page', () => {
   const testProps = {
-    scope: sourcererModel.SourcererScopeName.detections,
+    scope: sourcererModel.PageScope.detections,
   };
 
   const pollForSignalIndexMock = jest.fn();

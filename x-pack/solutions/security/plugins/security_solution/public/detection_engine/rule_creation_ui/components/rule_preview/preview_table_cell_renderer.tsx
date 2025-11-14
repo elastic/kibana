@@ -10,7 +10,7 @@ import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { TableId } from '@kbn/securitysolution-data-table';
 import type { LegacyField } from '@kbn/alerting-types';
 import type { CellValueElementProps } from '../../../../../common/types';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { PageScope } from '../../../../sourcerer/store/model';
 import { CellValue } from '../../../../detections/configurations/security_solution_detections';
 
 const emptyUserProfiles = { profiles: [], isLoading: false };
@@ -34,7 +34,7 @@ export const PreviewRenderCellValue: React.FC<
   return (
     <CellValue
       tableType={TableId.rulePreview}
-      sourcererScope={SourcererScopeName.detections}
+      sourcererScope={PageScope.detections}
       legacyAlert={legacyAlert}
       ecsAlert={ecsData}
       asPlainText={true}

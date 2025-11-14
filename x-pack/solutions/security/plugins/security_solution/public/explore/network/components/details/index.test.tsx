@@ -19,7 +19,7 @@ import { mockData } from './mock';
 import { mockAnomalies } from '../../../../common/components/ml/mock';
 import type { NarrowDateRange } from '../../../../common/components/ml/types';
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { PageScope } from '../../../../sourcerer/store/model';
 
 describe('IP Overview Component', () => {
   describe('rendering', () => {
@@ -41,7 +41,7 @@ describe('IP Overview Component', () => {
       }>,
       indexPatterns: [],
       jobNameById: {},
-      scopeId: SourcererScopeName.default,
+      scopeId: PageScope.default,
       isFlyoutOpen: false,
     };
 

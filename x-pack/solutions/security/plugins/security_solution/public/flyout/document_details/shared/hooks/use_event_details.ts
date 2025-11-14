@@ -13,7 +13,7 @@ import { DEFAULT_ALERTS_INDEX, DEFAULT_PREVIEW_INDEX } from '../../../../../comm
 import type { RunTimeMappings } from '../../../../../common/api/search_strategy';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { PageScope } from '../../../../sourcerer/store/model';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useTimelineEventsDetails } from '../../../../timelines/containers/details';
 import type { SearchHit } from '../../../../../common/search_strategy';
@@ -92,9 +92,7 @@ export const useEventDetails = ({
   const eventIndex = indexName ? getAlertIndexAlias(indexName, currentSpaceId) ?? indexName : '';
   const [{ pageName }] = useRouteSpy();
   const sourcererScope =
-    pageName === SecurityPageName.detections
-      ? SourcererScopeName.detections
-      : SourcererScopeName.default;
+    pageName === SecurityPageName.detections ? PageScope.detections : PageScope.default;
 
   const sourcererDataView = useSourcererDataView(sourcererScope);
 

@@ -8,7 +8,7 @@
 import { useMemo } from 'react';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useBrowserFields } from '../../../../../data_view_manager/hooks/use_browser_fields';
-import { SourcererScopeName } from '../../../../../sourcerer/store/model';
+import { PageScope } from '../../../../../sourcerer/store/model';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { requiredFieldsForActions } from '../../../../../detections/components/alerts_table/default_config';
 import { defaultUdtHeaders } from '../../body/column_headers/default_headers';
@@ -17,8 +17,8 @@ import { memoizedGetTimelineColumnHeaders } from './utils';
 
 export const useTimelineColumns = (columns: ColumnHeaderOptions[]) => {
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { browserFields: oldBrowserFields } = useSourcererDataView(SourcererScopeName.timeline);
-  const experimentalBrowserFields = useBrowserFields(SourcererScopeName.timeline);
+  const { browserFields: oldBrowserFields } = useSourcererDataView(PageScope.timeline);
+  const experimentalBrowserFields = useBrowserFields(PageScope.timeline);
 
   const browserFields = newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields;
 

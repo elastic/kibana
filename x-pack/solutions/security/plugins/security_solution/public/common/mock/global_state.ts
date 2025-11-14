@@ -38,7 +38,7 @@ import { TimelineId, TimelineTabs } from '../../../common/types/timeline';
 import { TimelineStatusEnum, TimelineTypeEnum } from '../../../common/api/timeline';
 import { mockManagementState } from '../../management/store/reducer';
 import type { ManagementState } from '../../management/types';
-import { initialSourcererState, SourcererScopeName } from '../../sourcerer/store/model';
+import { initialSourcererState, PageScope } from '../../sourcerer/store/model';
 import { allowedExperimentalValues } from '../../../common/experimental_features';
 import { getScopePatternListSelection } from '../../sourcerer/store/helpers';
 import { mockBrowserFields, mockIndexFields } from '../containers/source/mock';
@@ -469,62 +469,62 @@ export const mockGlobalState: State = {
     ],
     sourcererScopes: {
       ...mockSourcererState.sourcererScopes,
-      [SourcererScopeName.default]: {
-        ...mockSourcererState.sourcererScopes[SourcererScopeName.default],
+      [PageScope.default]: {
+        ...mockSourcererState.sourcererScopes[PageScope.default],
         selectedDataViewId: mockSourcererState.defaultDataView.id,
         selectedPatterns: getScopePatternListSelection(
           mockSourcererState.defaultDataView,
-          SourcererScopeName.default,
+          PageScope.default,
           mockSourcererState.signalIndexName,
           true
         ),
       },
-      [SourcererScopeName.detections]: {
-        ...mockSourcererState.sourcererScopes[SourcererScopeName.detections],
+      [PageScope.detections]: {
+        ...mockSourcererState.sourcererScopes[PageScope.detections],
         selectedDataViewId: mockSourcererState.defaultDataView.id,
         selectedPatterns: getScopePatternListSelection(
           mockSourcererState.defaultDataView,
-          SourcererScopeName.detections,
+          PageScope.detections,
           mockSourcererState.signalIndexName,
           true
         ),
       },
-      [SourcererScopeName.attacks]: {
-        ...mockSourcererState.sourcererScopes[SourcererScopeName.attacks],
+      [PageScope.attacks]: {
+        ...mockSourcererState.sourcererScopes[PageScope.attacks],
         selectedDataViewId: mockSourcererState.defaultDataView.id,
         selectedPatterns: getScopePatternListSelection(
           mockSourcererState.defaultDataView,
-          SourcererScopeName.attacks,
+          PageScope.attacks,
           mockSourcererState.signalIndexName,
           true
         ),
       },
-      [SourcererScopeName.timeline]: {
-        ...mockSourcererState.sourcererScopes[SourcererScopeName.timeline],
+      [PageScope.timeline]: {
+        ...mockSourcererState.sourcererScopes[PageScope.timeline],
         selectedDataViewId: mockSourcererState.defaultDataView.id,
         selectedPatterns: getScopePatternListSelection(
           mockSourcererState.defaultDataView,
-          SourcererScopeName.timeline,
+          PageScope.timeline,
           mockSourcererState.signalIndexName,
           true
         ),
       },
-      [SourcererScopeName.analyzer]: {
-        ...mockSourcererState.sourcererScopes[SourcererScopeName.default],
+      [PageScope.analyzer]: {
+        ...mockSourcererState.sourcererScopes[PageScope.default],
         selectedDataViewId: mockSourcererState.defaultDataView.id,
         selectedPatterns: getScopePatternListSelection(
           mockSourcererState.defaultDataView,
-          SourcererScopeName.default,
+          PageScope.default,
           mockSourcererState.signalIndexName,
           true
         ),
       },
-      [SourcererScopeName.explore]: {
-        ...mockSourcererState.sourcererScopes[SourcererScopeName.default],
+      [PageScope.explore]: {
+        ...mockSourcererState.sourcererScopes[PageScope.default],
         selectedDataViewId: mockSourcererState.defaultDataView.id,
         selectedPatterns: getScopePatternListSelection(
           mockSourcererState.defaultDataView,
-          SourcererScopeName.default,
+          PageScope.default,
           mockSourcererState.signalIndexName,
           true
         ),

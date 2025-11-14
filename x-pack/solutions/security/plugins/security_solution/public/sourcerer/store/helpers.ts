@@ -8,35 +8,35 @@
 import { isEmpty } from 'lodash';
 import type { SourcererDataView, SourcererModel, SourcererScopeById } from './model';
 import type { sourcererModel } from '.';
-import { SourcererScopeName } from './model';
+import { PageScope } from './model';
 import type { SelectedDataViewPayload } from './actions';
 import { ensurePatternFormat, sortWithExcludesAtEnd } from '../../../common/utils/sourcerer';
 
 const getPatternListFromScope = (
-  scope: SourcererScopeName,
+  scope: PageScope,
   patternList: string[],
   signalIndexName: string | null
 ) => {
   // when our SIEM data view is set, here are the defaults
   switch (scope) {
-    case SourcererScopeName.default:
-    case SourcererScopeName.explore:
+    case PageScope.default:
+    case PageScope.explore:
       return sortWithExcludesAtEnd(patternList.filter((index) => index !== signalIndexName));
-    case SourcererScopeName.detections:
+    case PageScope.detections:
       // set to signalIndexName whether or not it exists yet in the patternList
       return signalIndexName != null ? [signalIndexName] : [];
-    case SourcererScopeName.attacks:
+    case PageScope.attacks:
       return sortWithExcludesAtEnd(patternList);
-    case SourcererScopeName.timeline:
+    case PageScope.timeline:
       return sortWithExcludesAtEnd(patternList);
-    case SourcererScopeName.analyzer:
+    case PageScope.analyzer:
       return sortWithExcludesAtEnd(patternList);
   }
 };
 
 export const getScopePatternListSelection = (
   theDataView: SourcererDataView | undefined,
-  sourcererScope: SourcererScopeName,
+  sourcererScope: PageScope,
   signalIndexName: SourcererModel['signalIndexName'],
   isDefaultDataView: boolean
 ): string[] => {
@@ -101,7 +101,7 @@ export const validateSelectedPatterns = (
       missingPatterns,
       // if in timeline, allow for empty in case pattern was deleted
       // need flow for this
-      ...(isEmpty(selectedPatterns) && id !== SourcererScopeName.timeline
+      ...(isEmpty(selectedPatterns) && id !== PageScope.timeline
         ? {
             selectedPatterns: getScopePatternListSelection(
               dataView ?? state.defaultDataView,
@@ -118,7 +118,7 @@ export const validateSelectedPatterns = (
 
 interface CheckIfIndicesExistParams {
   patternList: sourcererModel.SourcererDataView['patternList'];
-  scopeId: sourcererModel.SourcererScopeName;
+  scopeId: sourcererModel.PageScope;
   signalIndexName: string | null;
   isDefaultDataViewSelected: boolean;
 }
@@ -129,11 +129,11 @@ export const checkIfIndicesExist = ({
   signalIndexName,
   isDefaultDataViewSelected,
 }: CheckIfIndicesExistParams) => {
-  if (scopeId === SourcererScopeName.detections) {
+  if (scopeId === PageScope.detections) {
     return patternList.includes(`${signalIndexName}`);
   }
 
-  if (scopeId === SourcererScopeName.default) {
+  if (scopeId === PageScope.default) {
     if (isDefaultDataViewSelected) {
       return patternList.filter((i) => i !== signalIndexName).length > 0;
     }

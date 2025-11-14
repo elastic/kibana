@@ -18,7 +18,7 @@ import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use
 import { useKibana } from '../../../../../common/lib/kibana';
 import { getCommonTimeRanges } from '../helpers/get_common_time_ranges';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
-import { SourcererScopeName } from '../../../../../sourcerer/store/model';
+import { PageScope } from '../../../../../sourcerer/store/model';
 import { useCreateDataView } from '../../../../../common/hooks/use_create_data_view';
 import type { AlertsSelectionSettings } from '../../types';
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
@@ -51,11 +51,11 @@ const AlertSelectionQueryComponent: React.FC<Props> = ({
   const { euiTheme } = useEuiTheme();
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataView: experimentalDataView, status } = useDataView(SourcererScopeName.detections);
+  const { dataView: experimentalDataView, status } = useDataView(PageScope.detections);
 
   // get the sourcerer `DataViewSpec` for alerts:
   const { sourcererDataView: oldSourcererDataViewSpec, loading: oldIsLoadingIndexPattern } =
-    useSourcererDataView(SourcererScopeName.detections);
+    useSourcererDataView(PageScope.detections);
 
   // create a `DataView` from the `DataViewSpec`:
   const { dataView: oldDataView, loading: oldIsLoadingDataView } = useCreateDataView({

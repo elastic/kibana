@@ -36,7 +36,7 @@ import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml
 import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
 import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
 import { OverviewDescriptionList } from '../../../../common/components/overview_description_list';
-import type { SourcererScopeName } from '../../../../sourcerer/store/model';
+import type { PageScope } from '../../../../sourcerer/store/model';
 
 export interface IpOverviewProps {
   anomaliesData: Anomalies | null;
@@ -50,7 +50,7 @@ export interface IpOverviewProps {
   isLoadingAnomaliesData: boolean;
   loading: boolean;
   narrowDateRange: NarrowDateRange;
-  scopeId: SourcererScopeName;
+  scopeId: PageScope;
   startDate: string;
   type: networkModel.NetworkType;
   indexPatterns: string[];

@@ -14,7 +14,7 @@ import { useNormalizedAppLinks } from '../../links/links_hooks';
 import { useKibana } from '../../lib/kibana';
 import { hasAccessToSecuritySolution } from '../../../helpers_access';
 
-import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { PageScope } from '../../../sourcerer/store/model';
 import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 
@@ -37,12 +37,10 @@ export const useShowTimelineForGivenPath = () => {
   const { capabilities } = useKibana().services.application;
   const userHasSecuritySolutionVisible = hasAccessToSecuritySolution(capabilities);
 
-  const { indicesExist: oldIndicesExist, dataViewId } = useSourcererDataView(
-    SourcererScopeName.timeline
-  );
+  const { indicesExist: oldIndicesExist, dataViewId } = useSourcererDataView(PageScope.timeline);
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataView } = useDataView(SourcererScopeName.timeline);
+  const { dataView } = useDataView(PageScope.timeline);
 
   const indicesExist = newDataViewPickerEnabled ? dataView.hasMatchedIndices() : oldIndicesExist;
 

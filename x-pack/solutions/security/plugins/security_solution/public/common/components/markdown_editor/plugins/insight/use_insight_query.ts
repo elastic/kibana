@@ -16,7 +16,7 @@ import { useKibana } from '../../../../lib/kibana';
 import { combineQueries } from '../../../../lib/kuery';
 import { useTimelineEvents } from '../../../../../timelines/containers';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
-import { SourcererScopeName } from '../../../../../sourcerer/store/model';
+import { PageScope } from '../../../../../sourcerer/store/model';
 import type { TimeRange } from '../../../../store/inputs/model';
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import { useSelectedPatterns } from '../../../../../data_view_manager/hooks/use_selected_patterns';
@@ -50,13 +50,13 @@ export const useInsightQuery = ({
     selectedPatterns: oldSelectedPatterns,
     sourcererDataView: oldSourcererDataView,
     dataViewId: oldDataViewId,
-  } = useSourcererDataView(SourcererScopeName.timeline);
+  } = useSourcererDataView(PageScope.timeline);
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
-  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.timeline);
-  const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
-  const experimentalBrowserFields = useBrowserFields(SourcererScopeName.timeline);
+  const { dataView: experimentalDataView } = useDataView(PageScope.timeline);
+  const experimentalSelectedPatterns = useSelectedPatterns(PageScope.timeline);
+  const experimentalBrowserFields = useBrowserFields(PageScope.timeline);
 
   const selectedPatterns = newDataViewPickerEnabled
     ? experimentalSelectedPatterns

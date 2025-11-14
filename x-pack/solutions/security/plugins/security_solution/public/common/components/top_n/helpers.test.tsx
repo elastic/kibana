@@ -13,14 +13,14 @@ import {
   allEvents,
   defaultOptions,
   getOptions,
-  getSourcererScopeName,
+  getPageScope,
   isDetectionsAlertsTable,
   rawEvents,
   removeIgnoredAlertFilters,
   shouldIgnoreAlertFilters,
   detectionAlertsTables,
 } from './helpers';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { PageScope } from '../../../sourcerer/store/model';
 import { TableId } from '@kbn/securitysolution-data-table';
 
 /** the following scopes are NOT detection alert tables */
@@ -234,36 +234,34 @@ describe('removeIgnoredAlertFilters', () => {
   });
 });
 
-describe('getSourcererScopeName', () => {
+describe('getPageScope', () => {
   detectionAlertsTables.forEach((tableId) => {
-    test(`it returns the 'default' SourcererScopeName when the view is 'raw' for detections alerts table '${tableId}'`, () => {
+    test(`it returns the 'default' PageScope when the view is 'raw' for detections alerts table '${tableId}'`, () => {
       const view = 'raw';
-      expect(getSourcererScopeName({ scopeId: tableId, view })).toEqual(SourcererScopeName.default);
+      expect(getPageScope({ scopeId: tableId, view })).toEqual(PageScope.default);
     });
 
-    test(`it returns the 'detections' SourcererScopeName when the view is NOT 'raw' for detections alerts table '${tableId}'`, () => {
+    test(`it returns the 'detections' PageScope when the view is NOT 'raw' for detections alerts table '${tableId}'`, () => {
       const view = 'alert';
-      expect(getSourcererScopeName({ scopeId: tableId, view })).toEqual(
-        SourcererScopeName.detections
-      );
+      expect(getPageScope({ scopeId: tableId, view })).toEqual(PageScope.detections);
     });
   });
 
-  test(`it returns the 'default' SourcererScopeName when timelineId is undefined'`, () => {
+  test(`it returns the 'default' PageScope when timelineId is undefined'`, () => {
     const tableId = undefined;
     const view = 'raw';
-    expect(getSourcererScopeName({ scopeId: tableId, view })).toEqual(SourcererScopeName.default);
+    expect(getPageScope({ scopeId: tableId, view })).toEqual(PageScope.default);
   });
 
   othersWithoutActive.forEach((tableId) => {
-    test(`it returns the 'default' SourcererScopeName when the view is 'raw' for (NON alert table) timeline '${tableId}'`, () => {
+    test(`it returns the 'default' PageScope when the view is 'raw' for (NON alert table) timeline '${tableId}'`, () => {
       const view = 'raw';
-      expect(getSourcererScopeName({ scopeId: tableId, view })).toEqual(SourcererScopeName.default);
+      expect(getPageScope({ scopeId: tableId, view })).toEqual(PageScope.default);
     });
 
-    test(`it returns the 'default' SourcererScopeName when the view is NOT 'raw' for detections alerts table '${tableId}'`, () => {
+    test(`it returns the 'default' PageScope when the view is NOT 'raw' for detections alerts table '${tableId}'`, () => {
       const view = 'alert';
-      expect(getSourcererScopeName({ scopeId: tableId, view })).toEqual(SourcererScopeName.default);
+      expect(getPageScope({ scopeId: tableId, view })).toEqual(PageScope.default);
     });
   });
 });

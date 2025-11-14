@@ -10,7 +10,7 @@ import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { tableDefaults, dataTableSelectors } from '@kbn/securitysolution-data-table';
 import type { BrowserFields } from '@kbn/timelines-plugin/common';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import type { SourcererScopeName } from '../../../sourcerer/store/model';
+import type { PageScope } from '../../../sourcerer/store/model';
 import { useLicense } from '../../../common/hooks/use_license';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { useSourcererDataView } from '../../../sourcerer/containers';
@@ -34,7 +34,7 @@ export const AlertTableCellContextProvider = ({
   children,
 }: {
   tableId?: string;
-  sourcererScope: SourcererScopeName;
+  sourcererScope: PageScope;
   children: React.ReactNode;
 }) => {
   const { browserFields: oldBrowserFields } = useSourcererDataView(sourcererScope);

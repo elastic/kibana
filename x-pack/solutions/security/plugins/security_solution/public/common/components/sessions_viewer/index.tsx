@@ -19,7 +19,7 @@ import { getSessionsDefaultModel, sessionsHeaders } from './default_headers';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 import * as i18n from './translations';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { PageScope } from '../../../sourcerer/store/model';
 import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 import { useLicense } from '../../hooks/use_license';
 import { eventsDefaultModel } from '../events_viewer/default_model';
@@ -132,7 +132,7 @@ const SessionsViewComponent: React.FC<SessionsComponentsProps> = ({
     tableId,
     from: startDate,
     to: endDate,
-    scopeId: SourcererScopeName.default,
+    scopeId: PageScope.default,
   });
 
   const bulkActions = useMemo<BulkActionsProp | boolean>(() => {
@@ -158,7 +158,7 @@ const SessionsViewComponent: React.FC<SessionsComponentsProps> = ({
         leadingControlColumns={leadingControlColumns}
         renderCellValue={DefaultCellRenderer}
         rowRenderers={defaultRowRenderers}
-        sourcererScope={SourcererScopeName.default}
+        sourcererScope={PageScope.default}
         start={startDate}
         unit={unit}
       />

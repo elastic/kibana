@@ -37,7 +37,7 @@ import type { InspectResponse, StartedSubPlugins, StartServices } from './types'
 import { CASES_SUB_PLUGIN_KEY } from './types';
 import { timelineActions } from './timelines/store';
 import { TimelineId } from '../common/types';
-import { SourcererScopeName } from './sourcerer/store/model';
+import { PageScope } from './sourcerer/store/model';
 import { hasAccessToSecuritySolution } from './helpers_access';
 
 export const parseRoute = (location: Pick<Location, 'hash' | 'pathname' | 'search'>) => {
@@ -315,12 +315,12 @@ export const getScopedActions = (scopeId: string) => {
 
 export const isActiveTimeline = (timelineId: string) => timelineId === TimelineId.active;
 
-export const getSourcererScopeId = (scopeId: string): SourcererScopeName => {
+export const getSourcererScopeId = (scopeId: string): PageScope => {
   if (isTimelineScope(scopeId)) {
-    return SourcererScopeName.timeline;
+    return PageScope.timeline;
   } else if (isAlertsPageScope(scopeId)) {
-    return SourcererScopeName.detections;
+    return PageScope.detections;
   } else {
-    return SourcererScopeName.default;
+    return PageScope.default;
   }
 };

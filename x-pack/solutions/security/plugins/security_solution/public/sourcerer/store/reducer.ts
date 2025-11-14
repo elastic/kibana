@@ -16,7 +16,7 @@ import {
   setDataViewLoading,
 } from './actions';
 import type { SourcererModel } from './model';
-import { initDataView, initialSourcererState, SourcererScopeName } from './model';
+import { initDataView, initialSourcererState, PageScope } from './model';
 import { validateSelectedPatterns } from './helpers';
 
 export type SourcererState = SourcererModel;
@@ -58,16 +58,16 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
             },
           }
         : {
-            [SourcererScopeName.default]: {
-              ...state.sourcererScopes[SourcererScopeName.default],
+            [PageScope.default]: {
+              ...state.sourcererScopes[PageScope.default],
               loading,
             },
-            [SourcererScopeName.detections]: {
-              ...state.sourcererScopes[SourcererScopeName.detections],
+            [PageScope.detections]: {
+              ...state.sourcererScopes[PageScope.detections],
               loading,
             },
-            [SourcererScopeName.timeline]: {
-              ...state.sourcererScopes[SourcererScopeName.timeline],
+            [PageScope.timeline]: {
+              ...state.sourcererScopes[PageScope.timeline],
               loading,
             },
           }),

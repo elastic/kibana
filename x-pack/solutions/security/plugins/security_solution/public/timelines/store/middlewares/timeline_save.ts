@@ -46,7 +46,7 @@ import type {
 import type { TimelineModel } from '../model';
 import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
 import { extractTimelineIdsAndVersions, refreshTimelines } from './helpers';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { PageScope } from '../../../sourcerer/store/model';
 
 function isSaveTimelineAction(action: Action): action is ReturnType<typeof saveTimeline> {
   return action.type === saveTimeline.type;
@@ -70,16 +70,16 @@ export const saveTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, State
     const timelineTimeRange = inputsSelectors.timelineTimeRangeSelector(storeState);
     const selectedDataViewIdSourcerer = sourcererSelectors.sourcererScopeSelectedDataViewId(
       storeState,
-      SourcererScopeName.timeline
+      PageScope.timeline
     );
     const selectedPatternsSourcerer = sourcererSelectors.sourcererScopeSelectedPatterns(
       storeState,
-      SourcererScopeName.timeline
+      PageScope.timeline
     );
 
-    const { dataViewId: experimentalDataViewId } = sourcererAdapterSelector(
-      SourcererScopeName.timeline
-    )(storeState);
+    const { dataViewId: experimentalDataViewId } = sourcererAdapterSelector(PageScope.timeline)(
+      storeState
+    );
 
     const experimentalIsDataViewEnabled =
       storeState.app.enableExperimental.newDataViewPickerEnabled;

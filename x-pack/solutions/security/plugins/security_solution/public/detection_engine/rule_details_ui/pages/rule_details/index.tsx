@@ -104,7 +104,7 @@ import {
   resetKeyboardFocus,
 } from '../../../../timelines/components/timeline/helpers';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { PageScope } from '../../../../sourcerer/store/model';
 import {
   canEditRuleWithActions,
   explainLackOfPermission,
@@ -269,9 +269,9 @@ export const RuleDetailsPage = connector(
       useListsConfig();
 
     const { sourcererDataView: oldSourcererDataViewSpec, loading: oldIsLoadingIndexPattern } =
-      useSourcererDataView(SourcererScopeName.detections);
+      useSourcererDataView(PageScope.detections);
     const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-    const { dataView: experimentalDataView, status } = useDataView(SourcererScopeName.detections);
+    const { dataView: experimentalDataView, status } = useDataView(PageScope.detections);
     const isLoadingIndexPattern = newDataViewPickerEnabled
       ? status !== 'ready'
       : oldIsLoadingIndexPattern;

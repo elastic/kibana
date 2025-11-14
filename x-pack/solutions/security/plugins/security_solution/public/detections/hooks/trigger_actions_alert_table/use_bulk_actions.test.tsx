@@ -8,7 +8,7 @@
 import { renderHook } from '@testing-library/react';
 
 import { useBulkActionsByTableType } from './use_bulk_actions';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { PageScope } from '../../../sourcerer/store/model';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import * as useBulkAlertAssigneesItemsModule from '../../../common/components/toolbar/bulk_actions/use_bulk_alert_assignees_items';
@@ -84,7 +84,7 @@ describe('useBulkActionsByTableType', () => {
     renderHook(() => useBulkActionsByTableType(mockTableId, mockQuery, mockRefresh));
 
     expect(useBulkAlertActionItemsModule.useBulkAlertActionItems).toHaveBeenCalledWith({
-      scopeId: SourcererScopeName.detections,
+      scopeId: PageScope.detections,
       filters: [],
       from: '2020-07-07T08:20:18.966Z',
       to: '2020-07-08T08:20:18.966Z',
@@ -96,7 +96,7 @@ describe('useBulkActionsByTableType', () => {
       localFilters: [],
       from: '2020-07-07T08:20:18.966Z',
       to: '2020-07-08T08:20:18.966Z',
-      scopeId: SourcererScopeName.detections,
+      scopeId: PageScope.detections,
       tableId: mockTableId,
     });
   });

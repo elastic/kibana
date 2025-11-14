@@ -76,7 +76,7 @@ import { AlertCountByRuleByStatus } from '../../../../common/components/alert_co
 import { useLicense } from '../../../../common/hooks/use_license';
 import { ResponderActionButton } from '../../../../common/components/endpoint/responder';
 import { useRefetchOverviewPageRiskScore } from '../../../../entity_analytics/api/hooks/use_refetch_overview_page_risk_score';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { PageScope } from '../../../../sourcerer/store/model';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 import { PageLoader } from '../../../../common/components/page_loader';
@@ -295,7 +295,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                     hostName={detailName}
                     indexNames={selectedPatterns}
                     jobNameById={jobNameById}
-                    scopeId={SourcererScopeName.explore}
+                    scopeId={PageScope.explore}
                   />
                 )}
               </AnomalyTableProvider>

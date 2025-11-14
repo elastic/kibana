@@ -20,7 +20,7 @@ import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { LastEventIndexKey } from '@kbn/timelines-plugin/common';
 import { DataViewManagerScopeName } from '../../../../data_view_manager/constants';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { PageScope } from '../../../../sourcerer/store/model';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { dataViewSpecToViewBase } from '../../../../common/lib/kuery';
 import { useCalculateEntityRiskScore } from '../../../../entity_analytics/api/hooks/use_calculate_entity_risk_score';
@@ -281,11 +281,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
                   narrowDateRange={narrowDateRange}
                   indexPatterns={selectedPatterns}
                   jobNameById={jobNameById}
-                  scopeId={
-                    newDataViewPickerEnabled
-                      ? SourcererScopeName.explore
-                      : SourcererScopeName.default
-                  }
+                  scopeId={newDataViewPickerEnabled ? PageScope.explore : PageScope.default}
                 />
               )}
             </AnomalyTableProvider>

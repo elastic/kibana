@@ -17,7 +17,7 @@ import { indexPatternFieldEditorPluginMock } from '@kbn/data-view-field-editor-p
 import { TestProviders } from '../../../common/mock';
 import { useKibana } from '../../../common/lib/kibana';
 import type { DataView, DataViewField } from '@kbn/data-plugin/common';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { PageScope } from '../../../sourcerer/store/model';
 import { defaultColumnHeaderType } from '../timeline/body/column_headers/default_headers';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../timeline/body/constants';
 import { EuiInMemoryTable } from '@elastic/eui';
@@ -46,7 +46,7 @@ const renderUseFieldBrowserOptions = ({
   >(
     () =>
       useFieldBrowserOptions({
-        sourcererScope: SourcererScopeName.default,
+        sourcererScope: PageScope.default,
         removeColumn: mockRemoveColumn,
         upsertColumn: mockUpsertColumn,
         ...props,

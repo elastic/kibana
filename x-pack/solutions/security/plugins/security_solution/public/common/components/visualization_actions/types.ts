@@ -20,7 +20,7 @@ import type { LensProps } from '@kbn/cases-plugin/public/types';
 import type { EuiThemeComputed } from '@elastic/eui';
 import type { TablesAdapter } from '@kbn/expressions-plugin/common';
 import type { InputsModelId } from '../../store/inputs/constants';
-import type { SourcererScopeName } from '../../../sourcerer/store/model';
+import type { PageScope } from '../../../sourcerer/store/model';
 import type { Status } from '../../../../common/api/detection_engine';
 
 export type ColorSchemas = Record<string, string>;
@@ -39,7 +39,7 @@ export interface UseLensAttributesProps {
   extraOptions?: ExtraOptions;
   getLensAttributes?: GetLensAttributes;
   lensAttributes?: LensAttributes | null;
-  scopeId?: SourcererScopeName;
+  scopeId?: PageScope;
   stackByField?: string;
   title?: string;
   esql?: string;
@@ -70,7 +70,7 @@ export interface VisualizationActionsProps {
   lensAttributes?: LensAttributes | null;
   onCloseInspect?: () => void;
   queryId: string;
-  scopeId?: SourcererScopeName;
+  scopeId?: PageScope;
   stackByField?: string;
   timerange: { from: string; to: string };
   title: React.ReactNode;
@@ -123,7 +123,7 @@ export interface LensEmbeddableComponentProps {
   lensAttributes?: LensAttributes;
   onLoad?: OnEmbeddableLoaded;
   enableLegendActions?: boolean;
-  scopeId?: SourcererScopeName;
+  scopeId?: PageScope;
   stackByField?: string;
   timerange: { from: string; to: string };
   /**

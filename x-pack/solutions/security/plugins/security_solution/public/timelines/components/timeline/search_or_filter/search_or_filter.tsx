@@ -24,7 +24,7 @@ import { Sourcerer } from '../../../../sourcerer/components';
 import { DataViewPicker } from '../../../../data_view_manager/components/data_view_picker';
 
 import { TimelineDatePickerLock } from '../date_picker_lock';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { PageScope } from '../../../../sourcerer/store/model';
 import {
   DATA_PROVIDER_HIDDEN_EMPTY,
   DATA_PROVIDER_HIDDEN_POPULATED,
@@ -116,9 +116,9 @@ export const SearchOrFilter = React.memo<Props>(
           >
             <EuiFlexItem grow={false}>
               {newDataViewPickerEnabled ? (
-                <DataViewPicker scope={SourcererScopeName.timeline} />
+                <DataViewPicker scope={PageScope.timeline} />
               ) : (
-                <Sourcerer scope={SourcererScopeName.timeline} />
+                <Sourcerer scope={PageScope.timeline} />
               )}
             </EuiFlexItem>
             <EuiFlexItem data-test-subj="timeline-search-or-filter-search-container" grow={1}>

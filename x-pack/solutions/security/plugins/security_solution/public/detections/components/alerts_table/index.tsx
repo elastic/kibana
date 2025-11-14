@@ -46,7 +46,7 @@ import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_
 import { StatefulEventContext } from '../../../common/components/events_viewer/stateful_event_context';
 import { useSourcererDataView } from '../../../sourcerer/containers';
 import type { RunTimeMappings } from '../../../sourcerer/store/model';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { PageScope } from '../../../sourcerer/store/model';
 import { useKibana } from '../../../common/lib/kibana';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { CellValue, getColumns } from '../../configurations/security_solution_detections';
@@ -127,7 +127,7 @@ interface AlertTableProps
   extends SetOptional<SecurityAlertsTableProps, 'id' | 'ruleTypeIds' | 'query'> {
   inputFilters?: Filter[];
   tableType?: TableId;
-  sourcererScope?: SourcererScopeName;
+  sourcererScope?: PageScope;
   isLoading?: boolean;
   onRuleChange?: () => void;
   disableAdditionalToolbarControls?: boolean;
@@ -151,7 +151,7 @@ const emptyInputFilters: Filter[] = [];
 const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
   inputFilters = emptyInputFilters,
   tableType = TableId.alertsOnAlertsPage,
-  sourcererScope = SourcererScopeName.detections,
+  sourcererScope = PageScope.detections,
   isLoading,
   onRuleChange,
   disableAdditionalToolbarControls,
@@ -379,7 +379,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
   }, [alertsTableRef]);
 
   const fieldsBrowserOptions = useAlertsTableFieldsBrowserOptions(
-    SourcererScopeName.detections,
+    PageScope.detections,
     alertsTableRef.current?.toggleColumn
   );
   const cellActionsOptions = useCellActionsOptions(tableType, tableContext);
@@ -458,10 +458,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
     <FullWidthFlexGroupTable gutterSize="none">
       <StatefulEventContext.Provider value={activeStatefulEventContext}>
         <EuiDataGridContainer hideLastPage={false}>
-          <AlertTableCellContextProvider
-            tableId={tableType}
-            sourcererScope={SourcererScopeName.detections}
-          >
+          <AlertTableCellContextProvider tableId={tableType} sourcererScope={PageScope.detections}>
             <ResponseOpsAlertsTable<SecurityAlertsTableContext>
               ref={alertsTableRef}
               // Stores separate configuration based on the view of the table

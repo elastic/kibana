@@ -20,7 +20,7 @@ import { useDataView as useDataViewOld } from '../../../common/containers/source
 import { useKibana } from '../../../common/lib/kibana';
 import { sourcererSelectors } from '../../../common/store';
 import type { State } from '../../../common/store';
-import type { SourcererScopeName } from '../../../sourcerer/store/model';
+import type { PageScope } from '../../../sourcerer/store/model';
 import { defaultColumnHeaderType } from '../timeline/body/column_headers/default_headers';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../timeline/body/constants';
 import { useCreateFieldButton } from './create_field_button';
@@ -35,7 +35,7 @@ export type OpenFieldEditor = (fieldName?: string) => void;
 export type OpenDeleteFieldModal = (fieldName: string) => void;
 
 export interface UseFieldBrowserOptionsProps {
-  sourcererScope: SourcererScopeName;
+  sourcererScope: PageScope;
   removeColumn: (columnId: string) => void;
   upsertColumn: (column: ColumnHeaderOptions, index: number) => void;
   editorActionsRef?: FieldEditorActionsRef;

@@ -30,7 +30,7 @@ import { getLayerList } from './map_config';
 import { sourcererSelectors } from '../../../../sourcerer/store';
 import type { State } from '../../../../common/store';
 import type { SourcererDataView } from '../../../../sourcerer/store/model';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { PageScope } from '../../../../sourcerer/store/model';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 
@@ -116,11 +116,11 @@ export const EmbeddedMapComponent = ({
   const { addError } = useAppToasts();
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.explore);
+  const { dataView: experimentalDataView } = useDataView(PageScope.explore);
   // TODO This can be completely removed once we switch the newDataViewPickerEnabled on
   const kibanaDataViews = useSelector(sourcererSelectors.kibanaDataViews);
   const selectedPatterns = useSelector((state: State) => {
-    return sourcererSelectors.sourcererScopeSelectedPatterns(state, SourcererScopeName.default);
+    return sourcererSelectors.sourcererScopeSelectedPatterns(state, PageScope.default);
   });
 
   const isFieldInIndexPattern = useIsFieldInIndexPattern();

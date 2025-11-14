@@ -26,7 +26,7 @@ import { timelineSelectors } from '../../../../store';
 import type { Direction } from '../../../../../../common/search_strategy';
 import { useTimelineEvents } from '../../../../containers';
 import { requiredFieldsForActions } from '../../../../../detections/components/alerts_table/default_config';
-import { SourcererScopeName } from '../../../../../sourcerer/store/model';
+import { PageScope } from '../../../../../sourcerer/store/model';
 import { timelineDefaults } from '../../../../store/defaults';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import type { TimelineModel } from '../../../../store/model';
@@ -85,10 +85,10 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
     dataViewId: oldDataViewId,
     sourcererDataView: oldSourcererDataViewSpec,
     selectedPatterns: oldSelectedPatterns,
-  } = useSourcererDataView(SourcererScopeName.timeline);
+  } = useSourcererDataView(PageScope.timeline);
 
-  const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
-  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.timeline);
+  const experimentalSelectedPatterns = useSelectedPatterns(PageScope.timeline);
+  const { dataView: experimentalDataView } = useDataView(PageScope.timeline);
 
   const selectedPatterns = useMemo(
     () => (newDataViewPickerEnabled ? experimentalSelectedPatterns : oldSelectedPatterns),

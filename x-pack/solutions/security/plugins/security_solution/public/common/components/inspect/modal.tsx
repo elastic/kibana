@@ -32,7 +32,7 @@ import { NO_ALERT_INDEX } from '../../../../common/constants';
 import * as i18n from './translations';
 import { getScopeFromPath } from '../../../sourcerer/containers/sourcerer_paths';
 import { useSourcererDataView } from '../../../sourcerer/containers';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { PageScope } from '../../../sourcerer/store/model';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 
 export interface ModalInspectProps {
@@ -130,8 +130,7 @@ export const ModalInspectQuery = ({
   title,
 }: ModalInspectProps) => {
   const { pathname } = useLocation();
-  const sourcererScope =
-    inputId === 'timeline' ? SourcererScopeName.timeline : getScopeFromPath(pathname);
+  const sourcererScope = inputId === 'timeline' ? PageScope.timeline : getScopeFromPath(pathname);
 
   const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView(sourcererScope);
 

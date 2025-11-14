@@ -24,7 +24,7 @@ import type { AutonomousSystem } from '../../../../../common/search_strategy';
 import { FlowTarget } from '../../../../../common/search_strategy';
 import type { HostEcs } from '@kbn/securitysolution-ecs';
 import { mockGetUrlForApp } from '@kbn/security-solution-navigation/mocks/context';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { PageScope } from '../../../../sourcerer/store/model';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('@kbn/security-solution-navigation/src/context');
@@ -38,7 +38,7 @@ jest.mock('../../../../common/hooks/use_get_field_spec');
 const mockHost: HostEcs = mockData.complete.host as HostEcs;
 
 describe('Field Renderers', () => {
-  const scopeId = SourcererScopeName.default;
+  const scopeId = PageScope.default;
 
   describe('#locationRenderer', () => {
     test('it renders correctly against snapshot', () => {

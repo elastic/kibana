@@ -21,7 +21,7 @@ import {
   ENTITY_ANALYTICS_MANAGEMENT_PATH,
   ATTACKS_PATH,
 } from '../../../common/constants';
-import { SourcererScopeName } from '../store/model';
+import { PageScope } from '../store/model';
 
 export const sourcererPaths = [
   ALERTS_PATH,
@@ -54,18 +54,14 @@ const explorePaths = [
 export const getScopeFromPath = (
   pathname: string,
   newDataViewPickerEnabled?: boolean
-):
-  | SourcererScopeName.default
-  | SourcererScopeName.detections
-  | SourcererScopeName.attacks
-  | SourcererScopeName.explore => {
+): PageScope.default | PageScope.detections | PageScope.attacks | PageScope.explore => {
   if (
     matchPath(pathname, {
       path: detectionsPaths,
       strict: false,
     })
   ) {
-    return SourcererScopeName.detections;
+    return PageScope.detections;
   }
 
   if (
@@ -75,7 +71,7 @@ export const getScopeFromPath = (
       strict: false,
     })
   ) {
-    return SourcererScopeName.attacks;
+    return PageScope.attacks;
   }
 
   if (
@@ -85,10 +81,10 @@ export const getScopeFromPath = (
       strict: false,
     })
   ) {
-    return SourcererScopeName.explore;
+    return PageScope.explore;
   }
 
-  return SourcererScopeName.default;
+  return PageScope.default;
 };
 
 export const showSourcererByPath = (pathname: string): boolean =>

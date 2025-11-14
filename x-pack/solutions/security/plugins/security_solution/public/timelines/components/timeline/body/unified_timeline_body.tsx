@@ -15,7 +15,7 @@ import { DataViewErrorComponent } from '../../../../common/components/data_view_
 import { StyledTableFlexGroup, StyledUnifiedTableFlexItem } from '../unified_components/styles';
 import { UnifiedTimeline } from '../unified_components';
 import { defaultUdtHeaders } from './column_headers/default_headers';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { PageScope } from '../../../../sourcerer/store/model';
 
 export interface UnifiedTimelineBodyProps
   extends Omit<ComponentProps<typeof UnifiedTimeline>, 'dataView'> {
@@ -44,11 +44,11 @@ export const UnifiedTimelineBody = (props: UnifiedTimelineBodyProps) => {
     onUpdatePageIndex,
   } = props;
   const oldDataView = useGetScopedSourcererDataView({
-    sourcererScope: SourcererScopeName.timeline,
+    sourcererScope: PageScope.timeline,
   });
   const columnsHeader = useMemo(() => columns ?? defaultUdtHeaders, [columns]);
 
-  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.timeline);
+  const { dataView: experimentalDataView } = useDataView(PageScope.timeline);
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   const dataView = newDataViewPickerEnabled ? experimentalDataView : oldDataView;

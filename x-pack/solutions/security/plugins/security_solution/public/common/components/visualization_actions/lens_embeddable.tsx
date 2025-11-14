@@ -26,7 +26,7 @@ import { DEFAULT_ACTIONS, useActions } from './use_actions';
 
 import { ModalInspectQuery } from '../inspect/modal';
 import { InputsModelId } from '../../store/inputs/constants';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { PageScope } from '../../../sourcerer/store/model';
 import { VisualizationActions } from './actions';
 import { useEmbeddableInspect } from './use_embeddable_inspect';
 import { useVisualizationResponse } from './use_visualization_response';
@@ -61,7 +61,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   inspectTitle,
   lensAttributes,
   onLoad,
-  scopeId = SourcererScopeName.default,
+  scopeId = PageScope.default,
   enableLegendActions = true,
   stackByField,
   timerange,

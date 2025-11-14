@@ -62,7 +62,7 @@ import {
   SecurityCellActions,
   SecurityCellActionsTrigger,
 } from '../../../../common/components/cell_actions';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { PageScope } from '../../../../sourcerer/store/model';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 
@@ -265,7 +265,7 @@ const NetworkDetailsComponent: React.FC = () => {
               narrowDateRange={narrowDateRange}
               indexPatterns={selectedPatterns}
               jobNameById={jobNameById}
-              scopeId={SourcererScopeName.explore}
+              scopeId={PageScope.explore}
             />
 
             <EuiHorizontalRule />

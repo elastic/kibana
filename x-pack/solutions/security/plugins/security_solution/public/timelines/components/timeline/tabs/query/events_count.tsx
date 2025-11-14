@@ -31,7 +31,7 @@ import type {
 } from '../../../../../../common/types/timeline';
 import type { inputsModel } from '../../../../../common/store';
 import { inputsSelectors } from '../../../../../common/store';
-import { SourcererScopeName } from '../../../../../sourcerer/store/model';
+import { PageScope } from '../../../../../sourcerer/store/model';
 import { timelineDefaults } from '../../../../store/defaults';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { isActiveTimeline } from '../../../../../helpers';
@@ -102,8 +102,8 @@ export const TimelineQueryTabEventsCountComponent: React.FC<{ timelineId: string
     // in order to include the exclude filters in the search that are not stored in the timeline
     selectedPatterns: oldSelectedPatterns,
     sourcererDataView,
-  } = useSourcererDataView(SourcererScopeName.timeline);
-  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.timeline);
+  } = useSourcererDataView(PageScope.timeline);
+  const { dataView: experimentalDataView } = useDataView(PageScope.timeline);
   const experimentalBrowserfields = useBrowserFields(DataViewManagerScopeName.timeline);
   const browserFields = newDataViewPickerEnabled ? experimentalBrowserfields : oldBrowserFields;
   const runtimeMappings: RunTimeMappings = newDataViewPickerEnabled

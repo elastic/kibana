@@ -40,7 +40,7 @@ import type { KueryFilterQueryKind } from '../../../../../../common/types/timeli
 import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import type { inputsModel, State } from '../../../../../common/store';
 import { inputsSelectors } from '../../../../../common/store';
-import { SourcererScopeName } from '../../../../../sourcerer/store/model';
+import { PageScope } from '../../../../../sourcerer/store/model';
 import { timelineDefaults } from '../../../../store/defaults';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { isActiveTimeline } from '../../../../../helpers';
@@ -85,10 +85,10 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   const { dataView: experimentalDataView, status: sourcererStatus } = useDataView(
-    SourcererScopeName.timeline
+    PageScope.timeline
   );
-  const experimentalBrowserFields = useBrowserFields(SourcererScopeName.timeline);
-  const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
+  const experimentalBrowserFields = useBrowserFields(PageScope.timeline);
+  const experimentalSelectedPatterns = useSelectedPatterns(PageScope.timeline);
 
   const {
     browserFields: oldBrowserFields,
@@ -98,7 +98,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     // in order to include the exclude filters in the search that are not stored in the timeline
     selectedPatterns: oldSelectedPatterns,
     sourcererDataView: oldSourcererDataViewSpec,
-  } = useSourcererDataView(SourcererScopeName.timeline);
+  } = useSourcererDataView(PageScope.timeline);
 
   const loadingSourcerer = useMemo(
     () => (newDataViewPickerEnabled ? sourcererStatus !== 'ready' : oldLoadingSourcerer),

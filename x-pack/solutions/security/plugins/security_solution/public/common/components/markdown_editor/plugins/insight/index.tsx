@@ -55,7 +55,7 @@ import {
 import type { TimeRange } from '../../../../store/inputs/model';
 import { DEFAULT_TIMEPICKER_QUICK_RANGES } from '../../../../../../common/constants';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
-import { SourcererScopeName } from '../../../../../sourcerer/store/model';
+import { PageScope } from '../../../../../sourcerer/store/model';
 import { filtersToInsightProviders } from './provider';
 import { useLicense } from '../../../../hooks/use_license';
 import { isProviderValid } from './helpers';
@@ -284,13 +284,11 @@ const InsightEditorComponent = ({
 }: EuiMarkdownEditorUiPluginEditorProps<InsightComponentProps & { relativeTimerange: string }>) => {
   const isEditMode = node != null;
 
-  const { sourcererDataView: oldSourcererDataView } = useSourcererDataView(
-    SourcererScopeName.default
-  );
+  const { sourcererDataView: oldSourcererDataView } = useSourcererDataView(PageScope.default);
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
-  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.default);
+  const { dataView: experimentalDataView } = useDataView(PageScope.default);
   const dataViewName = newDataViewPickerEnabled
     ? experimentalDataView.name
     : oldSourcererDataView.name;
@@ -303,7 +301,7 @@ const InsightEditorComponent = ({
   } = useKibana().services;
 
   const oldDataView = useGetScopedSourcererDataView({
-    sourcererScope: SourcererScopeName.default,
+    sourcererScope: PageScope.default,
   });
 
   const dataView = newDataViewPickerEnabled ? experimentalDataView : oldDataView;

@@ -72,7 +72,7 @@ import type {
   RelativeTimeRange,
 } from '../../../../../common/store/inputs/model';
 import { isAbsoluteTimeRange, isRelativeTimeRange } from '../../../../../common/store/inputs/model';
-import { SourcererScopeName } from '../../../../../sourcerer/store/model';
+import { PageScope } from '../../../../../sourcerer/store/model';
 import { useExecutionResults } from '../../../../rule_monitoring';
 import { useRuleDetailsContext } from '../rule_details_context';
 import { useExpandableRows } from '../../../../rule_monitoring/components/basic/tables/use_expandable_rows';
@@ -163,12 +163,10 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
   } = useRuleDetailsContext();
 
   // Index for `add filter` action and toasts for errors
-  const { sourcererDataView: oldSourcererDataView } = useSourcererDataView(
-    SourcererScopeName.detections
-  );
+  const { sourcererDataView: oldSourcererDataView } = useSourcererDataView(PageScope.detections);
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.detections);
+  const { dataView: experimentalDataView } = useDataView(PageScope.detections);
 
   const { addError, addSuccess, remove } = useAppToasts();
 

@@ -7,6 +7,6 @@
 
 export const DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID = 'security-solution-default';
 
-export { SourcererScopeName as DataViewManagerScopeName } from '../sourcerer/store/model';
+export { PageScope as DataViewManagerScopeName } from '../sourcerer/store/model';
 
 export const SLICE_PREFIX = 'x-pack/security_solution/dataViewManager' as const;

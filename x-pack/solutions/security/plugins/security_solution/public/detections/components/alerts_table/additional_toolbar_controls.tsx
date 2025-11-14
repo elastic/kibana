@@ -21,7 +21,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { GetSecurityAlertsTableProp } from './types';
 import { groupIdSelector } from '../../../common/store/grouping/selectors';
 import { useSourcererDataView } from '../../../sourcerer/containers';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { PageScope } from '../../../sourcerer/store/model';
 import { SummaryViewSelector } from '../../../common/components/events_viewer/summary_view_select';
 import { updateGroups } from '../../../common/store/grouping/actions';
 import { useKibana } from '../../../common/lib/kibana';
@@ -45,12 +45,10 @@ const AdditionalToolbarControlsComponent = ({
     services: { telemetry },
   } = useKibana();
 
-  const { sourcererDataView: oldSourcererDataView } = useSourcererDataView(
-    SourcererScopeName.detections
-  );
+  const { sourcererDataView: oldSourcererDataView } = useSourcererDataView(PageScope.detections);
 
   const isNewDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.detections);
+  const { dataView: experimentalDataView } = useDataView(PageScope.detections);
 
   const groupId = useMemo(() => groupIdSelector(), []);
   const { options } = useDeepEqualSelector((state) => groupId(state, tableType)) ?? {
