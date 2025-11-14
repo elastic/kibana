@@ -275,12 +275,12 @@ export const getVisualizeEmbeddableFactory: (deps: {
           titleManager.api.setTitle(visUpdates.title);
         }
       },
-      openInspector: () => {
+      openInspector: async () => {
         const adapters = inspectorAdapters$.getValue();
         if (!adapters) return;
         const inspector = getInspector();
-        if (!inspector.isAvailable(adapters)) return;
-        return getInspector().open(adapters, {
+        if (!(await inspector.isAvailable(adapters))) return;
+        return await inspector.open(adapters, {
           title:
             titleManager.api.title$?.getValue() ||
             i18n.translate('visualizations.embeddable.inspectorTitle', {
