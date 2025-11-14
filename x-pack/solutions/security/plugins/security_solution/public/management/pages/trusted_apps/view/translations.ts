@@ -71,7 +71,7 @@ export const SELECT_OS_LABEL = i18n.translate('xpack.securitySolution.trustedApp
   defaultMessage: 'Select operating system',
 });
 
-export const PROCESS_DESCENDANTS_TRUSTED_APP = i18n.translate(
+export const TRUSTED_APP_PROCESS_DESCENDANTS = i18n.translate(
   'xpack.securitySolution.trustedApps.processDescendants.label',
   {
     defaultMessage: 'Process Descendants',
@@ -82,6 +82,14 @@ export const TRUSTED_APPLICATIONS = i18n.translate(
   'xpack.securitySolution.trustedApps.processDescendants.label',
   {
     defaultMessage: 'Trusted Applications',
+  }
+);
+
+export const TRUSTED_APP_PROCESS_DESCENDANTS_INFO = i18n.translate(
+  'xpack.securitySolution.trustedApps.processDescendants.info',
+  {
+    defaultMessage:
+      'When enabled, all child processes of a trusted parent process also become Trusted Applications. Supported by Elastic Agent v9.2+.',
   }
 );
 
