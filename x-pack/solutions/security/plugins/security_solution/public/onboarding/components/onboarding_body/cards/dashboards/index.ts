@@ -6,18 +6,16 @@
  */
 
 import React from 'react';
+import { IconDashboards } from '../../../../../common/icons/dashboards';
 import type { OnboardingCardConfig } from '../../../../types';
 import { OnboardingCardId } from '../../../../constants';
 import { DASHBOARDS_CARD_TITLE } from './translations';
-import dashboardsIcon from './images/dashboards_icon.png';
-import dashboardsDarkIcon from './images/dashboards_icon_dark.png';
 import { SECURITY_FEATURE_ID } from '../../../../../../common/constants';
 
 export const dashboardsCardConfig: OnboardingCardConfig = {
   id: OnboardingCardId.dashboards,
   title: DASHBOARDS_CARD_TITLE,
-  icon: dashboardsIcon,
-  iconDark: dashboardsDarkIcon,
+  icon: IconDashboards,
   Component: React.lazy(
     () =>
       import(

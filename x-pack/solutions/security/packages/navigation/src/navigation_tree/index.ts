@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { createLaunchpadNavigationTree } from './security_launchpad_navigation_tree';
 import { createDashboardsNavigationTree } from './dashboards_navigation_tree';
 import { createRulesNavigationTree } from './rules_navigation_tree';
 import { createCasesNavigationTree } from './cases_navigation_tree';
@@ -15,14 +14,15 @@ import { createAssetsNavigationTree } from './assets_navigation_tree';
 import { createEntityAnalyticsNavigationTree } from './entity_analytics_navigation_tree';
 import { createMachineLearningNavigationTree } from './ml_navigation_tree';
 import { createV2NavigationTree } from './v2_navigation_tree';
+import { createAlertDetectionsNavigationTree } from './alert_detections_navigation_tree';
 
 export const defaultNavigationTree = {
+  alertDetections: createAlertDetectionsNavigationTree,
   dashboards: createDashboardsNavigationTree,
   rules: createRulesNavigationTree,
   cases: createCasesNavigationTree,
   investigations: createInvestigationsNavigationTree,
   explore: createExploreNavigationTree,
-  launchpad: createLaunchpadNavigationTree,
   assets: createAssetsNavigationTree,
   entityAnalytics: createEntityAnalyticsNavigationTree,
   ml: createMachineLearningNavigationTree,

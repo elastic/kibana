@@ -18,10 +18,6 @@ export const ALL_CASES_IN_PROGRESS_CASES_STATS =
 
 export const ALL_CASES_NAME = '[data-test-subj="case-details-link"]';
 
-export const ALL_CASES_NOT_PUSHED = '[data-test-subj="case-table-column-external-notPushed"]';
-
-export const ALL_CASES_NUMBER_OF_ALERTS = '[data-test-subj="case-table-column-alertsCount"]';
-
 export const ALL_CASES_STATUS_FILTER = '[data-test-subj="options-filter-popover-button-status"]';
 
 export const ALL_CASES_OPEN_FILTER = '[data-test-subj="options-filter-popover-item-open"]';
@@ -34,8 +30,6 @@ export const ALL_CASES_PAGE_TITLE = '[data-test-subj="header-page-title"]';
 
 export const ALL_CASES_SERVICE_NOW_INCIDENT =
   '[data-test-subj="case-table-column-external-notPushed"]';
-
-export const ALL_CASES_IN_PROGRESS_STATUS = '[data-test-subj="status-badge-in-progress"]';
 
 export const ALL_CASES_TAGS = (tag: string) => {
   return `[data-test-subj="case-table-column-tags-${tag}"]`;

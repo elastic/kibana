@@ -66,6 +66,7 @@ export default function jiraServiceManagementTest({ getService }: FtrProviderCon
           config: {
             apiUrl: simulatorUrl,
           },
+          is_connector_type_deprecated: false,
         });
       });
 
@@ -86,8 +87,7 @@ export default function jiraServiceManagementTest({ getService }: FtrProviderCon
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message:
-                'error validating action type config: [apiUrl]: expected value of type [string] but got [undefined]',
+              message: `error validating connector type config: Field \"apiUrl\": Required`,
             });
           });
       });
@@ -112,7 +112,7 @@ export default function jiraServiceManagementTest({ getService }: FtrProviderCon
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type config: error validating url: target url "http://jsm.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
+                'error validating connector type config: error validating url: target url "http://jsm.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
             });
           });
       });
@@ -133,8 +133,7 @@ export default function jiraServiceManagementTest({ getService }: FtrProviderCon
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message:
-                'error validating action type secrets: [apiKey]: expected value of type [string] but got [undefined]',
+              message: `error validating connector type secrets: Field \"apiKey\": Required`,
             });
           });
       });
@@ -213,8 +212,7 @@ export default function jiraServiceManagementTest({ getService }: FtrProviderCon
             retry: true,
             message: 'an error occurred while running the action',
             errorSource: TaskErrorSource.USER,
-            service_message:
-              'Request validation failed (Error: [message]: expected value of type [string] but got [undefined])',
+            service_message: `Request validation failed (Field \"message\": Required)`,
           });
         });
 
@@ -233,8 +231,7 @@ export default function jiraServiceManagementTest({ getService }: FtrProviderCon
             retry: true,
             message: 'an error occurred while running the action',
             errorSource: TaskErrorSource.USER,
-            service_message:
-              'Request validation failed (Error: [alias]: expected value of type [string] but got [undefined])',
+            service_message: `Request validation failed (Field \"alias\": Required)`,
           });
         });
 
@@ -266,8 +263,7 @@ export default function jiraServiceManagementTest({ getService }: FtrProviderCon
                 retry: true,
                 message: 'an error occurred while running the action',
                 errorSource: TaskErrorSource.USER,
-                service_message:
-                  'Request validation failed (Error: [responders.0.id]: expected value of type [string] but got [undefined])',
+                service_message: `Request validation failed (Field \"responders.0\": Unrecognized key(s) in object: 'name')`,
               });
             });
 
@@ -296,8 +292,7 @@ export default function jiraServiceManagementTest({ getService }: FtrProviderCon
                 retry: true,
                 message: 'an error occurred while running the action',
                 errorSource: TaskErrorSource.USER,
-                service_message:
-                  'Request validation failed (Error: [responders.0.id]: expected value of type [string] but got [undefined])',
+                service_message: `Request validation failed (Field \"responders.0.id\": Required)`,
               });
             });
 
@@ -361,8 +356,7 @@ export default function jiraServiceManagementTest({ getService }: FtrProviderCon
                 retry: true,
                 message: 'an error occurred while running the action',
                 errorSource: TaskErrorSource.USER,
-                service_message:
-                  'Request validation failed (Error: [details.bananas]: expected value of type [string] but got [number])',
+                service_message: `Request validation failed (Field \"details.bananas\": Expected string, received number)`,
               });
             });
 

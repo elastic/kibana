@@ -89,10 +89,6 @@ docker images "docker.elastic.co/elasticsearch/elasticsearch" --format "{{.Tag}}
 docker images "docker.elastic.co/elasticsearch/elasticsearch" --format "{{.Tag}}" | xargs -n1 bash -c 'docker save docker.elastic.co/elasticsearch/elasticsearch:${0} | gzip > ../es-build/elasticsearch-${0}-docker-image.tar.gz'
 
 echo "--- Create kibana-ci docker cloud image archives"
-# Ignore build failures.  This docker image downloads metricbeat and filebeat.
-# When we bump versions, these dependencies may not exist yet, but we don't want to
-# block the rest of the snapshot promotion process
-set +e
 ./gradlew :distribution:docker:cloud-ess-docker-export:assemble && {
   ES_CLOUD_ID=$(docker images "docker.elastic.co/elasticsearch/elasticsearch-cloud-ess" --format "{{.ID}}")
   ES_CLOUD_VERSION=$(docker images "docker.elastic.co/elasticsearch/elasticsearch-cloud-ess" --format "{{.Tag}}")
@@ -106,7 +102,6 @@ set +e
   export ELASTICSEARCH_CLOUD_IMAGE="$KIBANA_ES_CLOUD_IMAGE"
   export ELASTICSEARCH_CLOUD_IMAGE_CHECKSUM="$(docker images "$KIBANA_ES_CLOUD_IMAGE" --format "{{.Digest}}")"
 }
-set -e
 
 echo "--- Create checksums for snapshot files"
 cd "$destination"

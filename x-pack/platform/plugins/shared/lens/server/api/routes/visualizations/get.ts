@@ -16,13 +16,13 @@ import {
   LENS_CONTENT_TYPE,
 } from '../../../../common/constants';
 import type { LensSavedObject } from '../../../content_management';
-import type { RegisterAPIRouteFn } from '../../types';
+import type { CMItemResultMeta, RegisterAPIRouteFn } from '../../types';
 import { lensGetRequestParamsSchema, lensGetResponseBodySchema } from './schema';
 import { getLensResponseItem } from '../utils';
 
 export const registerLensVisualizationsGetAPIRoute: RegisterAPIRouteFn = (
   router,
-  { contentManagement }
+  { contentManagement, builder }
 ) => {
   const getRoute = router.get({
     path: `${LENS_VIS_API_PATH}/{id}`,
@@ -87,15 +87,11 @@ export const registerLensVisualizationsGetAPIRoute: RegisterAPIRouteFn = (
           throw result.item.error;
         }
 
-        const body = getLensResponseItem(result.item);
+        const resultMeta: CMItemResultMeta = result.meta;
+        const responseItem = getLensResponseItem(builder, result.item, resultMeta);
+
         return res.ok<TypeOf<typeof lensGetResponseBodySchema>>({
-          body: {
-            ...body,
-            meta: {
-              ...body.meta,
-              ...result.meta,
-            },
-          },
+          body: responseItem,
         });
       } catch (error) {
         if (isBoom(error)) {

@@ -22,7 +22,7 @@ const CONSOLE_DEFINITIONS_PATH = path.resolve(
   __dirname,
   '../../../../plugins/shared/console/server/lib/spec_definitions/json/generated'
 );
-const OUTPUT_PATH = path.resolve(__dirname, '../common/generated_es_connectors.ts');
+const OUTPUT_PATH = path.resolve(__dirname, '../common/generated/elasticsearch_connectors.ts');
 
 console.log('🔧 Generating Elasticsearch connectors from Console definitions...');
 console.log(`📁 Reading from: ${CONSOLE_DEFINITIONS_PATH}`);
@@ -64,7 +64,9 @@ function convertUrlParamToZodString(paramName, paramValue, isRequired = false) {
 
   if (Array.isArray(paramValue)) {
     if (paramValue.length === 0) {
-      return `z.array(z.string())${optionalSuffix}.describe('Array parameter: ${paramName}${requiredMarker}')`;
+      // Empty array in Console definitions means "unknown allowed values" - be fully permissive
+      // Use z.unknown() to be semantically correct (we don't know the type, so consumers should validate)
+      return `z.unknown()${optionalSuffix}.describe('Parameter: ${paramName}${requiredMarker}')`;
     }
 
     // Check if all values are numeric
@@ -529,10 +531,8 @@ function convertBodyParamToZodString(paramName, isRequired = false) {
       return `z.array(z.object({}).passthrough())${optionalSuffix}.describe('Failure processors${requiredMarker}')`;
 
     // Search template parameters
-    case 'template':
-      return `z.object({}).passthrough()${optionalSuffix}.describe('Template configuration${requiredMarker}')`;
-    case 'params':
-      return `z.object({}).passthrough()${optionalSuffix}.describe('Template parameters${requiredMarker}')`;
+    // Note: 'template' and 'params' are already handled above with different types
+    // Removed duplicate case labels to fix ESLint error
     case 'explain':
       return `z.boolean()${optionalSuffix}.describe('Explain query${requiredMarker}')`;
 
@@ -652,6 +652,15 @@ function generateElasticsearchConnectors() {
 
     // Generate the TypeScript file
     const fileContent = `/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+/*
  * AUTO-GENERATED FILE - DO NOT EDIT
  * 
  * This file contains Elasticsearch connector definitions generated from Console's API specifications.
@@ -662,7 +671,7 @@ function generateElasticsearchConnectors() {
  */
 
 import { z } from '@kbn/zod';
-import type { InternalConnectorContract } from '@kbn/workflows';
+import type { InternalConnectorContract } from '../../types/v1';
 
 export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
 ${connectorDefinitions.join(',\n')}

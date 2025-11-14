@@ -11,7 +11,7 @@ import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 import type {
   SingleMetricViewerEmbeddableState,
   SingleMetricViewerEmbeddableUserInput,
-} from '../types';
+} from './types';
 
 export type AnomalySwimLaneControlsState = Pick<
   SingleMetricViewerEmbeddableState,

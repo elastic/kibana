@@ -9,7 +9,10 @@ import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
 import * as i18n from './translations';
 
-export { SecurityPageName } from '@kbn/security-solution-navigation';
+export {
+  SecurityPageName,
+  ATTACKS_ALERTS_ALIGNMENT_ENABLED,
+} from '@kbn/security-solution-navigation';
 /**
  * as const
  *
@@ -25,7 +28,7 @@ export const CASES_FEATURE_ID = 'securitySolutionCasesV3' as const;
 export const TIMELINE_FEATURE_ID = 'securitySolutionTimeline' as const;
 export const NOTES_FEATURE_ID = 'securitySolutionNotes' as const;
 export const SERVER_APP_ID = 'siem' as const;
-export const SECURITY_FEATURE_ID = 'siemV3' as const;
+export const SECURITY_FEATURE_ID = 'siemV4' as const;
 export const APP_NAME = 'Security' as const;
 export const APP_ICON_SOLUTION = 'logoSecurity' as const;
 export const APP_PATH = `/app/security` as const;
@@ -39,6 +42,7 @@ export const DEFAULT_INDEX_KEY = 'securitySolution:defaultIndex' as const;
 export const DEFAULT_NUMBER_FORMAT = 'format:number:defaultPattern' as const;
 export const DEFAULT_DATA_VIEW_ID = 'security-solution' as const;
 export const DEFAULT_ALERT_DATA_VIEW_ID = 'security-solution-alert' as const;
+export const DEFAULT_ATTACK_DATA_VIEW_ID = 'security-solution-attack' as const;
 export const DEFAULT_TIME_FIELD = '@timestamp' as const;
 export const DEFAULT_TIME_RANGE = 'timepicker:timeDefaults' as const;
 export const DEFAULT_REFRESH_RATE_INTERVAL = 'timepicker:refreshIntervalDefaults' as const;
@@ -96,7 +100,13 @@ export const REPORTS_PATH = '/reports' as const;
 export const AI_VALUE_PATH = `${REPORTS_PATH}/ai_value` as const;
 export const DETECTION_RESPONSE_PATH = '/detection_response' as const;
 export const DETECTIONS_PATH = '/detections' as const;
+
+// TODO: https://github.com/elastic/kibana/issues/242434
+// Investigate possibility of using `detections` instead
 export const ALERTS_PATH = '/alerts' as const;
+export const ATTACKS_PATH = '/attacks' as const;
+export const ALERT_DETECTIONS = '/alert_detections' as const;
+
 export const ALERT_DETAILS_REDIRECT_PATH = `${ALERTS_PATH}/redirect` as const;
 export const ALERT_SUMMARY_PATH = `/alert_summary` as const;
 export const RULES_PATH = '/rules' as const;
@@ -156,7 +166,7 @@ export const SIEM_MIGRATIONS_LANDING_PATH = `${SIEM_MIGRATIONS_PATH}/landing` as
 export const SIEM_MIGRATIONS_RULES_PATH = `${SIEM_MIGRATIONS_PATH}/rules` as const;
 export const SIEM_MIGRATIONS_DASHBOARDS_PATH = `${SIEM_MIGRATIONS_PATH}/dashboards` as const;
 
-// AI SOC exclusive paths
+// EASE exclusive paths
 export const CONFIGURATIONS_PATH = '/configurations' as const;
 export const CONFIGURATIONS_INTEGRATIONS_PATH =
   `${APP_PATH}/${CONFIGURATIONS_PATH}/integrations/browse` as const;
@@ -181,8 +191,15 @@ export const DEFAULT_INDEX_PATTERN = [...INCLUDE_INDEX_PATTERN, ...EXCLUDE_ELAST
 /** This Kibana Advanced Setting enables the `Security news` feed widget */
 export const ENABLE_NEWS_FEED_SETTING = 'securitySolution:enableNewsFeed' as const;
 
-/** This Kibana Advanced Setting sets a default AI connector for serverless AI features (AI for SOC) */
+/** This Kibana Advanced Setting sets a default AI connector for serverless AI features (EASE) */
 export const DEFAULT_AI_CONNECTOR = 'securitySolution:defaultAIConnector' as const;
+
+/** Feature flag for the default AI connector setting */
+export const AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED =
+  'aiAssistant.defaultLlmSettingEnabled' as const;
+
+/** The default value for the default AI connector setting */
+export const AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED_VALUE = true as const;
 
 /** This Kibana Advanced Setting sets a default AI value report minutes per alert */
 export const DEFAULT_VALUE_REPORT_MINUTES = 'securitySolution:defaultValueReportMinutes' as const;
@@ -259,6 +276,10 @@ export const ENABLE_SIEM_READINESS_SETTING = 'securitySolution:enableSiemReadine
 /** This Kibana Advanced Setting allows users to enable/disable the privilged user monitoring feature */
 export const ENABLE_PRIVILEGED_USER_MONITORING_SETTING =
   'securitySolution:enablePrivilegedUserMonitoring' as const;
+
+/** This Kibana Advanced Setting allows users to enable/disable ESQL-based risk scoring */
+export const ENABLE_ESQL_RISK_SCORING = 'securitySolution:enableEsqlRiskScoring' as const;
+
 /**
  * Id for the notifications alerting type
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
@@ -460,6 +481,7 @@ export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
   TIMELINES: 'securitySolution.security.timelineFlyoutHeader.saveTimelineTour',
   SIEM_MAIN_LANDING_PAGE: 'securitySolution.siemMigrations.setupGuide.v8.18',
   SIEM_RULE_TRANSLATION_PAGE: 'securitySolution.siemMigrations.ruleTranslationGuide.v8.18',
+  DEFAULT_LLM: `elasticAssistant.elasticLLM.costAwarenessTour.assistantHeader.v8.19.default`,
 };
 
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
@@ -549,7 +571,7 @@ export const MAX_BULK_FILL_RULE_GAPS_BULK_SIZE = 100;
 export const JEST_ENVIRONMENT = typeof jest !== 'undefined';
 
 /*
- * The tag to mark promotion rules that are related to the AI for SOC integrations
+ * The tag to mark promotion rules that are related to EASE integrations
  */
 export const PROMOTION_RULE_TAGS = [
   'Promotion', // This is the legacy tag for promotion rules and can be safely removed once promotion rules go live

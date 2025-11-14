@@ -9,11 +9,16 @@ import React, { memo, useState, useMemo, useCallback } from 'react';
 import { EuiPortal, EuiContextMenuItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { isAgentRequestDiagnosticsSupported } from '../../../../../../../common/services';
+import { LICENSE_FOR_AGENT_MIGRATION } from '../../../../../../../common/constants';
+import {
+  isAgentEligibleForMigration,
+  isAgentEligibleForPrivilegeLevelChange,
+  isAgentRequestDiagnosticsSupported,
+} from '../../../../../../../common/services';
 import { isStuckInUpdating } from '../../../../../../../common/services/agent_status';
 
 import type { Agent, AgentPolicy } from '../../../../types';
-import { useAuthz } from '../../../../hooks';
+import { useAuthz, useLicense } from '../../../../hooks';
 import { ContextMenuActions } from '../../../../components';
 import {
   AgentUnenrollAgentModal,
@@ -21,8 +26,13 @@ import {
   AgentUpgradeAgentModal,
 } from '../../components';
 import { useAgentRefresh } from '../hooks';
+import { ExperimentalFeaturesService } from '../../../../services';
 import { isAgentUpgradeable, policyHasFleetServer } from '../../../../services';
 import { AgentRequestDiagnosticsModal } from '../../components/agent_request_diagnostics_modal';
+import {
+  AgentMigrateFlyout,
+  ChangeAgentPrivilegeLevelFlyout,
+} from '../../agent_list_page/components';
 
 import { AgentDetailsJsonFlyout } from './agent_details_json_flyout';
 
@@ -41,16 +51,21 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
     onAddRemoveTagsClick,
   }) => {
     const authz = useAuthz();
+    const licenseService = useLicense();
     const hasFleetAllPrivileges = authz.fleet.allAgents;
     const refreshAgent = useAgentRefresh();
+
     const [isReassignFlyoutOpen, setIsReassignFlyoutOpen] = useState(assignFlyoutOpenByDefault);
     const [isUnenrollModalOpen, setIsUnenrollModalOpen] = useState(false);
     const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
     const [isRequestDiagnosticsModalOpen, setIsRequestDiagnosticsModalOpen] = useState(false);
-    const [isAgentDetailsJsonFlyoutOpen, setIsAgentDetailsJsonFlyoutOpen] =
-      useState<boolean>(false);
+    const [isAgentDetailsJsonFlyoutOpen, setIsAgentDetailsJsonFlyoutOpen] = useState(false);
+    const [isAgentMigrateFlyoutOpen, setIsAgentMigrateFlyoutOpen] = useState(false);
+    const [isChangePrivilegeLevelFlyoutOpen, setIsChangePrivilegeLevelFlyoutOpen] = useState(false);
     const isUnenrolling = agent.status === 'unenrolling';
     const isAgentUpdating = isStuckInUpdating(agent);
+    const agentPrivilegeLevelChangeEnabled =
+      ExperimentalFeaturesService.get().enableAgentPrivilegeLevelChange;
 
     const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
     const onContextMenuChange = useCallback(
@@ -146,6 +161,46 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
           defaultMessage="View agent JSON"
         />
       </EuiContextMenuItem>,
+      ...(authz.fleet.allAgents && isAgentEligibleForMigration(agent, agentPolicy)
+        ? [
+            <EuiContextMenuItem
+              icon="cluster"
+              onClick={() => {
+                setIsContextMenuOpen(false);
+                setIsAgentMigrateFlyoutOpen(!isAgentMigrateFlyoutOpen);
+              }}
+              disabled={!agent.active || !licenseService.hasAtLeast(LICENSE_FOR_AGENT_MIGRATION)}
+              key="migrateAgent"
+              data-test-subj="migrateAgentBtn"
+            >
+              <FormattedMessage
+                id="xpack.fleet.agentList.migrateAgentActionText"
+                defaultMessage="Migrate agent"
+              />
+            </EuiContextMenuItem>,
+          ]
+        : []),
+      ...(authz.fleet.allAgents &&
+      isAgentEligibleForPrivilegeLevelChange(agent, agentPolicy) &&
+      agentPrivilegeLevelChangeEnabled
+        ? [
+            <EuiContextMenuItem
+              icon="lock"
+              onClick={() => {
+                setIsContextMenuOpen(false);
+                setIsChangePrivilegeLevelFlyoutOpen(!isChangePrivilegeLevelFlyoutOpen);
+              }}
+              disabled={!agent.active}
+              key="changeAgentPrivilegeLevel"
+              data-test-subj="changeAgentPrivilegeLevelBtn"
+            >
+              <FormattedMessage
+                id="xpack.fleet.agentList.changeAgentPrivilegeLevelActionText"
+                defaultMessage="Remove root privilege"
+              />
+            </EuiContextMenuItem>,
+          ]
+        : []),
       ...(authz.fleet.readAgents
         ? [
             <EuiContextMenuItem
@@ -242,6 +297,36 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
             <AgentDetailsJsonFlyout
               agent={agent}
               onClose={() => setIsAgentDetailsJsonFlyoutOpen(false)}
+            />
+          </EuiPortal>
+        )}
+        {isAgentMigrateFlyoutOpen && (
+          <EuiPortal>
+            <AgentMigrateFlyout
+              agents={[agent]}
+              agentCount={1}
+              unsupportedMigrateAgents={[]}
+              onClose={() => {
+                setIsAgentMigrateFlyoutOpen(false);
+              }}
+              onSave={() => {
+                setIsAgentMigrateFlyoutOpen(false);
+              }}
+            />
+          </EuiPortal>
+        )}
+        {isChangePrivilegeLevelFlyoutOpen && (
+          <EuiPortal>
+            <ChangeAgentPrivilegeLevelFlyout
+              agents={[agent]}
+              agentCount={1}
+              unsupportedAgents={[]}
+              onClose={() => {
+                setIsChangePrivilegeLevelFlyoutOpen(false);
+              }}
+              onSave={() => {
+                setIsChangePrivilegeLevelFlyoutOpen(false);
+              }}
             />
           </EuiPortal>
         )}

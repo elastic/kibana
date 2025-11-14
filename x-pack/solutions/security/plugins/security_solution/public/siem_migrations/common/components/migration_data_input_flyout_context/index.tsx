@@ -6,10 +6,10 @@
  */
 
 import React, { createContext, useContext, useMemo, type PropsWithChildren } from 'react';
-import type { MigrationTaskStats } from '../../../../../common/siem_migrations/model/common.gen';
+import type { MigrationStats } from '../../types';
 
 interface MigrationDataInputContextValue {
-  openFlyout: (migrationStats?: MigrationTaskStats) => void;
+  openFlyout: (migrationStats?: MigrationStats) => void;
   closeFlyout: () => void;
 }
 

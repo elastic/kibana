@@ -1,6 +1,6 @@
 # @kbn/sample-log-parser
 
-This library downloads, parses and re-generates data from [loghub](https://github.com/logpai/loghub), a collection of sample log data sets.
+This library downloads, parses and re-generates data from [loghub](https://github.com/logpai/loghub), a collection of sample log data sets. It also supports log samples from select private repositories. The latter are only accessible to Elastic employees, and will fail without the right authentication.
 
 ## CLI
 

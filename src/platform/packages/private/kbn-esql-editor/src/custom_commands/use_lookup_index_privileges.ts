@@ -28,6 +28,12 @@ const hasPrivilege = (
   permission: keyof IndexPrivileges[string]
 ): boolean => !!(privileges['*']?.[permission] || privileges[index]?.[permission]);
 
+export interface LookupIndexPrivileges {
+  canCreateIndex: boolean;
+  canEditIndex: boolean;
+  canReadIndex: boolean;
+}
+
 export const useLookupIndexPrivileges = () => {
   const {
     services: { http },
@@ -72,7 +78,7 @@ export const useLookupIndexPrivileges = () => {
         canReadIndex: hasPrivilege(privileges, indexName, 'read'),
       };
       return acc;
-    }, {} as Record<string, { canCreateIndex: boolean; canEditIndex: boolean; canReadIndex: boolean }>);
+    }, {} as Record<string, LookupIndexPrivileges>);
 
     return permissions;
   }, []);

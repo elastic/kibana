@@ -25,7 +25,7 @@ import { appendWhereClauseToESQLQuery, hasTransformationalCommand } from '@kbn/e
 import { METRIC_TYPE } from '@kbn/analytics';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { useDragDropContext } from '@kbn/dom-drag-drop';
-import { type DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
+import { type DataView, type DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
 import { SHOW_FIELD_STATISTICS, SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
 import type { UseColumnsProps } from '@kbn/unified-data-table';
 import { popularizeField, useColumns } from '@kbn/unified-data-table';
@@ -34,7 +34,7 @@ import { BehaviorSubject } from 'rxjs';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { VIEW_MODE } from '../../../../../common/constants';
 import { useAppStateSelector } from '../../state_management/discover_app_state_container';
@@ -66,7 +66,6 @@ import {
   useInternalStateDispatch,
   useInternalStateSelector,
 } from '../../state_management/redux';
-import { TABS_ENABLED_FEATURE_FLAG_KEY } from '../../../../constants';
 import { DiscoverHistogramLayout } from './discover_histogram_layout';
 import type { DiscoverLayoutRestorableState } from './discover_layout_restorable_state';
 import { useScopedServices } from '../../../../components/scoped_services_provider';
@@ -89,7 +88,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   const {
     trackUiMetric,
     capabilities,
-    core,
     dataViews,
     data,
     uiSettings,
@@ -99,6 +97,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     observabilityAIAssistant,
     dataVisualizer: dataVisualizerService,
     fieldsMetadata,
+    discoverFeatureFlags,
   } = useDiscoverServices();
   const { scopedEBTManager } = useScopedServices();
   const styles = useMemoCss(componentStyles);
@@ -113,7 +112,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     state.grid,
   ]);
   const isEsqlMode = useIsEsqlMode();
-  const tabsEnabled = core.featureFlags.getBooleanValue(TABS_ENABLED_FEATURE_FLAG_KEY, false);
+  const tabsEnabled = discoverFeatureFlags.getTabsEnabled();
   const viewMode: VIEW_MODE = useAppStateSelector((state) => {
     const fieldStatsNotAvailable =
       !uiSettings.get(SHOW_FIELD_STATISTICS) && !!dataVisualizerService;
@@ -278,13 +277,19 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     [stateContainer]
   );
 
-  const onFieldEdited = useCallback(
-    async ({ removedFieldName }: { removedFieldName?: string } = {}) => {
+  const onFieldEdited: (options: {
+    editedDataView: DataView;
+    removedFieldName?: string;
+  }) => Promise<void> = useCallback(
+    async (options) => {
+      const { editedDataView, removedFieldName } = options || {
+        editedDataView: dataView,
+      };
       if (removedFieldName && currentColumns.includes(removedFieldName)) {
         onRemoveColumn(removedFieldName);
       }
-      if (!dataView.isPersisted()) {
-        await stateContainer.actions.updateAdHocDataViewId();
+      if (!editedDataView.isPersisted()) {
+        await stateContainer.actions.updateAdHocDataViewId(editedDataView);
       }
       stateContainer.dataState.refetch$.next('reset');
     },
@@ -410,22 +415,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
         `,
       ]}
     >
-      <h1
-        id="savedSearchTitle"
-        className="euiScreenReaderOnly"
-        data-test-subj="discoverSavedSearchTitle"
-      >
-        {discoverSession?.title
-          ? i18n.translate('discover.pageTitleWithSavedSearch', {
-              defaultMessage: 'Discover - {savedSearchTitle}',
-              values: {
-                savedSearchTitle: discoverSession.title,
-              },
-            })
-          : i18n.translate('discover.pageTitleWithoutSavedSearch', {
-              defaultMessage: 'Discover - Search not yet saved',
-            })}
-      </h1>
       <TopNavMemoized
         savedQuery={savedQuery}
         stateContainer={stateContainer}
@@ -435,7 +424,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
         isLoading={isLoading}
         onCancelClick={onCancelClick}
       />
-      <EuiPageBody aria-describedby="savedSearchTitle" css={styles.savedSearchTitle}>
+      <EuiPageBody css={styles.pageBody}>
         <div css={styles.sidebarContainer}>
           {dataViewLoading && (
             <EuiDelayRender delay={300}>
@@ -545,7 +534,7 @@ const componentStyles = {
       padding: 0,
       backgroundColor: euiTheme.colors.backgroundBasePlain,
     }),
-  savedSearchTitle: css({
+  pageBody: css({
     overflow: 'hidden',
   }),
   sidebarContainer: css({

@@ -262,32 +262,34 @@ describe('Minimap integrated with Graph', () => {
     });
   });
 
-  it('should render minimap nodes with the same dimensions as graph nodes', () => {
+  it('should render minimap nodes with the same dimensions as graph nodes', async () => {
     renderGraph({
       ...graphSample,
       interactive: true,
       showMinimap: true,
     });
 
-    const minimapEntityNodes = screen.getAllByTestId(GRAPH_MINIMAP_ENTITY_NODE_ID);
-    const minimapLabelNodes = screen.getAllByTestId(GRAPH_MINIMAP_LABEL_NODE_ID);
+    await waitFor(() => {
+      const minimapEntityNodes = screen.getAllByTestId(GRAPH_MINIMAP_ENTITY_NODE_ID);
+      const minimapLabelNodes = screen.getAllByTestId(GRAPH_MINIMAP_LABEL_NODE_ID);
 
-    // Verify Minimap entity nodes have the correct dimensions (but scaled down)
-    expect(
-      minimapEntityNodes.every(
-        (node) =>
-          node.getAttribute('width') === NODE_WIDTH.toString() &&
-          node.getAttribute('height') === NODE_HEIGHT.toString()
-      )
-    ).toBe(true);
+      // Verify Minimap entity nodes have the correct dimensions (but scaled down)
+      expect(
+        minimapEntityNodes.every(
+          (node) =>
+            node.getAttribute('width') === NODE_WIDTH.toString() &&
+            node.getAttribute('height') === NODE_HEIGHT.toString()
+        )
+      ).toBe(true);
 
-    // Verify Minimap label nodes have the correct dimensions (but scaled down)
-    expect(
-      minimapLabelNodes.every(
-        (node) =>
-          node.getAttribute('width') === NODE_LABEL_WIDTH.toString() &&
-          node.getAttribute('height') === NODE_LABEL_HEIGHT.toString()
-      )
-    ).toBe(true);
+      // Verify Minimap label nodes have the correct dimensions (but scaled down)
+      expect(
+        minimapLabelNodes.every(
+          (node) =>
+            node.getAttribute('width') === NODE_LABEL_WIDTH.toString() &&
+            node.getAttribute('height') === NODE_LABEL_HEIGHT.toString()
+        )
+      ).toBe(true);
+    });
   });
 });

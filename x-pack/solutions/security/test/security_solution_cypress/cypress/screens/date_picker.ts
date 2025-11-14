@@ -38,8 +38,6 @@ export const LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON =
 
 export const DATE_PICKER_START_DATE_POPOVER_BUTTON = `${GLOBAL_FILTERS_CONTAINER} ${LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON}`;
 
-export const SHOW_DATES_BUTTON = `${GLOBAL_FILTERS_CONTAINER} [data-test-subj="superDatePickerShowDatesButton"]`;
-
 export const GET_LOCAL_SHOW_DATES_BUTTON = (container: string) =>
   `${container} [data-test-subj="superDatePickerShowDatesButton"]`;
 

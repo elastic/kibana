@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -123,5 +123,8 @@
     "@kbn/core-chrome-layout-constants",
     "@kbn/core-di",
     "@kbn/licensing-types",
+    "@kbn/alerting-plugin",
+    "@kbn/spaces-utils",
+    "@kbn/react-query",
   ]
 }

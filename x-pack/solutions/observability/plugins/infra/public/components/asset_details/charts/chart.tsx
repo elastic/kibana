@@ -9,8 +9,6 @@ import type { LensConfig } from '@kbn/lens-embeddable-utils/config_builder';
 import type { TimeRange } from '@kbn/es-query';
 import useAsync from 'react-use/lib/useAsync';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { resolveDataView } from '../../../utils/data_view';
-import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { METRIC_CHART_HEIGHT } from '../../../common/visualizations/constants';
 import { buildCombinedAssetFilter } from '../../../utils/filters/build';
 import type { LensChartProps } from '../../lens';
@@ -39,28 +37,20 @@ export const Chart = ({
 }: ChartProps) => {
   const { setDateRange } = useDatePickerContext();
   const { reloadRequestTime } = useReloadRequestTimeContext();
-  const {
-    services: { dataViews },
-  } = useKibanaContextForPlugin();
 
   const { value: filters = [] } = useAsync(async () => {
-    if (!dataView?.id) {
+    if (!dataView) {
       return [];
     }
-
-    const resolvedDataView = await resolveDataView({
-      dataViewId: dataView.id,
-      dataViewsService: dataViews,
-    });
 
     return [
       buildCombinedAssetFilter({
         field: queryField,
         values: [entityId],
-        dataView: resolvedDataView.dataViewReference,
+        dataView,
       }),
     ];
-  }, [dataView?.id, dataViews, queryField, entityId]);
+  }, [dataView, queryField, entityId]);
 
   const handleBrushEnd = useCallback(
     ({ range, preventDefault }: BrushEndArgs) => {

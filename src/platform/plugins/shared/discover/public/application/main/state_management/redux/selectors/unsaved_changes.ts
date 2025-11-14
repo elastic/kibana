@@ -55,6 +55,10 @@ export const selectHasUnsavedChanges = (
 
   if (!isEqual(persistedTabIds, currentTabsIds)) {
     tabIdsChanged = true;
+    addLog('[DiscoverSession] difference between initial and changed version: tab ids', {
+      before: persistedTabIds,
+      after: currentTabsIds,
+    });
   }
 
   const unsavedTabIds: string[] = [];
@@ -208,5 +212,5 @@ const TAB_COMPARATORS: TabComparators = {
   breakdownField: fieldComparator('breakdownField', ''),
   density: fieldComparator('density', DataGridDensity.COMPACT),
   visContext: visContextComparator,
-  controlGroupJson: fieldComparator('controlGroupJson', ''),
+  controlGroupJson: fieldComparator('controlGroupJson', '{}'),
 };

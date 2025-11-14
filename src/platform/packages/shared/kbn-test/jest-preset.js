@@ -24,6 +24,8 @@ const scoutReporter = [
 
 /** @type {import("@jest/types").Config.InitialOptions} */
 module.exports = {
+  retryTimes: process.env.CI ? 3 : 0,
+
   // The directory where Jest should output its coverage files
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest',
 
@@ -48,6 +50,13 @@ module.exports = {
   // Use this configuration option to add custom reporters to Jest
   reporters: [
     'default',
+    [
+      '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/slow_test_reporter.js',
+      {
+        warnOnSlowerThan: 300,
+        color: true,
+      },
+    ],
     [
       '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/junit_reporter',
       {
@@ -136,12 +145,6 @@ module.exports = {
   watchPathIgnorePatterns: ['.*/__tmp__/.*'],
 
   resolver: '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/resolver.js',
-
-  // Workaround to "TypeError: Cannot assign to read only property 'structuredClone' of object '[object global]'"
-  // This happens when we run jest tests with --watch after node20+
-  globals: {
-    structuredClone: {},
-  },
 
   testResultsProcessor:
     '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/result_processors/logging_result_processor.js',

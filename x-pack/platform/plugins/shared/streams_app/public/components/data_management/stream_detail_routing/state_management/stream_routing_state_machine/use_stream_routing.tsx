@@ -9,6 +9,8 @@ import React, { useEffect, useMemo } from 'react';
 import { createActorContext, useSelector } from '@xstate5/react';
 import { createConsoleInspector } from '@kbn/xstate-utils';
 import { waitFor } from 'xstate5';
+import type { RoutingDefinition } from '@kbn/streams-schema';
+import type { Condition } from '@kbn/streamlang';
 import {
   streamRoutingMachine,
   createStreamRoutingMachineImplementations,
@@ -20,6 +22,7 @@ import type {
   RoutingSamplesActorRef,
   RoutingSamplesActorSnapshot,
 } from './routing_samples_state_machine';
+import type { PartitionSuggestion } from '../../review_suggestions_form/use_review_suggestions_form';
 
 const consoleInspector = createConsoleInspector();
 
@@ -54,14 +57,41 @@ export const useStreamRoutingEvents = () => {
       editRule: (id: string) => {
         service.send({ type: 'routingRule.edit', id });
       },
-      forkStream: () => {
-        service.send({ type: 'routingRule.fork' });
+      forkStream: async (routingRule?: RoutingDefinition) => {
+        service.send({ type: 'routingRule.fork', routingRule });
+
+        await waitFor(
+          service,
+          (snapshot) =>
+            snapshot.matches({ ready: 'idle' }) ||
+            snapshot.matches({ ready: { reviewSuggestedRule: 'reviewing' } })
+        );
+
+        const finalSnapshot = service.getSnapshot();
+        return {
+          success: finalSnapshot.matches({ ready: 'idle' }),
+        };
       },
       saveChanges: () => {
         service.send({ type: 'routingRule.save' });
       },
       setDocumentMatchFilter: (filter: DocumentMatchFilterOptions) => {
         service.send({ type: 'routingSamples.setDocumentMatchFilter', filter });
+      },
+      reviewSuggestedRule: (id: string) => {
+        service.send({ type: 'routingRule.reviewSuggested', id });
+      },
+      editSuggestion: (index: number, suggestion: PartitionSuggestion) => {
+        service.send({ type: 'suggestion.edit', index, suggestion });
+      },
+      changeSuggestionName: (name: string) => {
+        service.send({ type: 'suggestion.changeName', name });
+      },
+      changeSuggestionCondition: (condition: Condition) => {
+        service.send({ type: 'suggestion.changeCondition', condition });
+      },
+      saveEditedSuggestion: () => {
+        service.send({ type: 'suggestion.saveSuggestion' });
       },
     }),
     [service]

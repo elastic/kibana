@@ -22,10 +22,10 @@ export const runPanelPlacementStrategy = (
       const otherPanels = { ...currentPanels };
       for (const [id, panel] of Object.entries(currentPanels)) {
         // only consider collisions with panels in the same section
-        if (!sectionId || panel.gridData.sectionId === sectionId) {
-          const { gridData, ...currentPanel } = cloneDeep(panel);
-          const newGridData = { ...gridData, y: gridData.y + height };
-          otherPanels[id] = { ...currentPanel, gridData: newGridData };
+        if (!sectionId || panel.grid.sectionId === sectionId) {
+          const { grid, ...currentPanel } = cloneDeep(panel);
+          const newGridData = { ...grid, y: grid.y + height };
+          otherPanels[id] = { ...currentPanel, grid: newGridData };
         }
       }
       return {
@@ -39,8 +39,8 @@ export const runPanelPlacementStrategy = (
       const currentPanelsArray = Object.values(currentPanels);
       currentPanelsArray.forEach((panel) => {
         // only consider panels in the same section when calculating maxY
-        if (panel.gridData.sectionId === sectionId) {
-          maxY = Math.max(panel.gridData.y + panel.gridData.h, maxY);
+        if (panel.grid.sectionId === sectionId) {
+          maxY = Math.max(panel.grid.y + panel.grid.h, maxY);
         }
       });
 
@@ -58,9 +58,9 @@ export const runPanelPlacementStrategy = (
       }
 
       currentPanelsArray.forEach((panel) => {
-        if (panel.gridData.sectionId === sectionId) {
-          for (let x = panel.gridData.x; x < panel.gridData.x + panel.gridData.w; x++) {
-            for (let y = panel.gridData.y; y < panel.gridData.y + panel.gridData.h; y++) {
+        if (panel.grid.sectionId === sectionId) {
+          for (let x = panel.grid.x; x < panel.grid.x + panel.grid.w; x++) {
+            for (let y = panel.grid.y; y < panel.grid.y + panel.grid.h; y++) {
               const row = grid[y];
               if (row === undefined) {
                 throw new Error(

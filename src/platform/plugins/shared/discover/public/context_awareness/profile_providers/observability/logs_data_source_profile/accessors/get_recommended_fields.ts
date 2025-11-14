@@ -7,26 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataViewField } from '@kbn/data-views-plugin/common';
+import { DEFAULT_LOGS_PROFILE } from '@kbn/discover-utils';
 import type { DataSourceProfileProvider } from '../../../..';
-
-// Field names that should always be surfaced in the UI for logs data.
-export const DEFAULT_LOGS_RECOMMENDED_FIELD_NAMES: Array<DataViewField['name']> = [
-  'event.dataset',
-  'service.name',
-  'host.name',
-  'message',
-  'log.level',
-];
 
 export const createRecommendedFields = ({
   defaultFields,
 }: {
-  defaultFields?: Array<DataViewField['name']>;
+  defaultFields?: ReadonlyArray<string>;
 }): DataSourceProfileProvider['profile']['getRecommendedFields'] => {
   return (prev) => () => ({
     ...(prev ? prev() : {}),
 
-    recommendedFields: defaultFields ?? DEFAULT_LOGS_RECOMMENDED_FIELD_NAMES,
+    recommendedFields: [...(defaultFields ?? DEFAULT_LOGS_PROFILE.recommendedFields)],
   });
 };

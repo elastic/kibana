@@ -14,6 +14,7 @@ import {
   LENS_SAMPLING_DEFAULT_VALUE,
   LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE,
 } from './constants';
+import { filterSchema, unifiedSearchFilterSchema } from './filter';
 
 export const sharedPanelInfoSchema = {
   /**
@@ -45,6 +46,12 @@ export const sharedPanelInfoSchema = {
       },
     })
   ),
+  filters: schema.maybe(schema.arrayOf(unifiedSearchFilterSchema)),
+};
+
+export const dslOnlyPanelInfoSchema = {
+  // ES|QL chart should not have the ability to define a KQL/Lucene query
+  query: schema.maybe(filterSchema),
 };
 
 export const layerSettingsSchema = {

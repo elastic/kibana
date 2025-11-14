@@ -10,12 +10,13 @@
 import { buildMetricField } from './build_metric_field';
 import type { FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/types';
 import type { Dimension } from '../../../common/types';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 
 describe('buildMetricField', () => {
   it('should build a metric field with string meta properties for a gauge', () => {
     const name = 'test.metric';
     const index = 'test-index';
-    const dimensions: Dimension[] = [{ name: 'host.name', type: 'keyword' }];
+    const dimensions: Dimension[] = [{ name: 'host.name', type: ES_FIELD_TYPES.KEYWORD }];
     const type = 'double';
     const typeInfo: FieldCapsFieldCapability = {
       aggregatable: true,
@@ -24,7 +25,6 @@ describe('buildMetricField', () => {
       time_series_metric: 'gauge',
       meta: {
         unit: 'bytes',
-        description: 'Test metric description',
         display: 'Test Metric',
       },
     };
@@ -38,7 +38,6 @@ describe('buildMetricField', () => {
       type,
       instrument: 'gauge',
       unit: 'bytes',
-      description: 'Test metric description',
       display: 'Test Metric',
     });
   });
@@ -55,7 +54,6 @@ describe('buildMetricField', () => {
       time_series_metric: 'counter',
       meta: {
         unit: ['bytes', 'per_second'],
-        description: ['Another', 'description'],
         display: ['Another', 'Display'],
       },
     };
@@ -69,7 +67,6 @@ describe('buildMetricField', () => {
       type,
       instrument: 'counter',
       unit: 'bytes, per_second',
-      description: 'Another, description',
       display: 'Another, Display',
     });
   });
@@ -122,7 +119,6 @@ describe('buildMetricField', () => {
       type,
       instrument: 'gauge',
       unit: undefined,
-      description: undefined,
       display: undefined,
     });
   });

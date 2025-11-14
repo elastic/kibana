@@ -6,7 +6,7 @@
  */
 
 import { ToolType } from './definition';
-import { internalNamespaces } from './namespaces';
+import { internalNamespaces } from '../base/namespaces';
 
 const platformCoreTool = (toolName: string) => {
   return `${internalNamespaces.platformCore}.${toolName}`;
@@ -23,6 +23,7 @@ export const platformCoreTools = {
   getDocumentById: platformCoreTool('get_document_by_id'),
   generateEsql: platformCoreTool('generate_esql'),
   executeEsql: platformCoreTool('execute_esql'),
+  createVisualization: platformCoreTool('create_visualization'),
 } as const;
 
 /**

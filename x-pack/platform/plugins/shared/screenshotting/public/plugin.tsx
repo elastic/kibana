@@ -26,7 +26,6 @@ export class ScreenshottingPlugin implements Plugin<void, void, SetupDeps> {
         title: 'Screenshotting Expressions Renderer',
         visibleIn: [],
         chromeless: true,
-
         mount: async ({ element }: AppMountParameters) => {
           ReactDOM.render(
             <ScreenshotModeContext.Provider value={screenshotMode}>

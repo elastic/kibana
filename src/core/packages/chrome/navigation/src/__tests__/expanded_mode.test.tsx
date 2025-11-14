@@ -8,17 +8,18 @@
  */
 
 import React from 'react';
-import { I18nProvider } from '@kbn/i18n-react';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { render, screen, within, waitFor, act } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 
-import { EXPANDED_MENU_GAP, EXPANDED_MENU_ITEM_HEIGHT, MAX_MENU_ITEMS } from '../constants';
-import { Navigation } from '../components/navigation';
+import { TestComponent } from './test_component';
+import { flushPopoverTimers } from './flush_popover_timers';
 import { basicMock } from '../mocks/basic_navigation';
-import { createBoundingClientRectMock } from './create_bounding_client_rect_mock';
 import { observabilityMock } from '../mocks/observability';
-import { resizeWindow } from './resize_window';
 import { securityMock } from '../mocks/security';
+import { mockClientHeight } from './mock_client_height';
+
+const mockExpandedMenuGap = 16;
+const mockMenuItemHeight = 51;
 
 // Basic mock reusable IDs
 const appsItemId = basicMock.navItems.primaryItems[2].id;
@@ -27,39 +28,27 @@ const appsItemId = basicMock.navItems.primaryItems[2].id;
 const resultExplorerItemId = securityMock.navItems.primaryItems[11].sections?.[2].items[0].id;
 
 describe('Expanded mode', () => {
-  let restoreWindowSize: () => void;
-
-  const originalGetBoundingClientRect = Element.prototype.getBoundingClientRect;
-  const originalScrollIntoView = Element.prototype.scrollIntoView;
-  const scrollIntoViewMock = jest.fn();
+  let user: ReturnType<typeof userEvent.setup>;
 
   beforeAll(() => {
-    Element.prototype.getBoundingClientRect = createBoundingClientRectMock(
-      (EXPANDED_MENU_ITEM_HEIGHT + EXPANDED_MENU_GAP) * (MAX_MENU_ITEMS - 1) +
-        (EXPANDED_MENU_ITEM_HEIGHT + EXPANDED_MENU_GAP)
-    );
-    Element.prototype.scrollIntoView = scrollIntoViewMock;
+    // Mock the client height for the primary menu item
+    mockClientHeight(mockMenuItemHeight);
+    // Mock the gap between the primary menu items
+    jest.mock('../utils/get_style_property', () => ({
+      getStyleProperty: jest.fn(() => mockExpandedMenuGap),
+    }));
   });
 
   beforeEach(() => {
-    restoreWindowSize = resizeWindow(1024, 768);
-    scrollIntoViewMock.mockClear();
-  });
-
-  afterAll(() => {
-    if (restoreWindowSize) restoreWindowSize();
-    Element.prototype.getBoundingClientRect = originalGetBoundingClientRect;
-    Element.prototype.scrollIntoView = originalScrollIntoView;
+    user = userEvent.setup({
+      advanceTimers: jest.advanceTimersByTime,
+      pointerEventsCheck: 0,
+    });
   });
 
   it('should render the side navigation', () => {
     const { container } = render(
-      <Navigation
-        isCollapsed={false}
-        items={basicMock.navItems}
-        logo={basicMock.logo}
-        setWidth={() => {}}
-      />
+      <TestComponent isCollapsed={false} items={basicMock.navItems} logo={basicMock.logo} />
     );
 
     expect(container).toMatchSnapshot();
@@ -73,12 +62,7 @@ describe('Expanded mode', () => {
      */
     it('should display the solution label next to the logo', () => {
       render(
-        <Navigation
-          isCollapsed={false}
-          items={basicMock.navItems}
-          logo={basicMock.logo}
-          setWidth={() => {}}
-        />
+        <TestComponent isCollapsed={false} items={basicMock.navItems} logo={basicMock.logo} />
       );
 
       const solutionLogo = screen.getByRole('link', {
@@ -101,19 +85,15 @@ describe('Expanded mode', () => {
        */
       it('(with submenu) should show a popover with the submenu on hover (with submenu)', async () => {
         render(
-          <Navigation
-            isCollapsed={false}
-            items={basicMock.navItems}
-            logo={basicMock.logo}
-            setWidth={() => {}}
-          />
+          <TestComponent isCollapsed={false} items={basicMock.navItems} logo={basicMock.logo} />
         );
 
         const appsLink = screen.getByRole('link', {
           name: 'Apps',
         });
 
-        await userEvent.hover(appsLink);
+        await user.hover(appsLink);
+        flushPopoverTimers();
 
         const popover = await screen.findByRole('dialog', {
           name: 'Apps',
@@ -130,12 +110,11 @@ describe('Expanded mode', () => {
        */
       it('(with submenu) should NOT show a popover if the item with submenu is already active', async () => {
         render(
-          <Navigation
-            activeItemId={appsItemId}
-            isCollapsed={false}
-            items={basicMock.navItems}
+          <TestComponent
             logo={basicMock.logo}
-            setWidth={() => {}}
+            items={basicMock.navItems}
+            isCollapsed={false}
+            initialActiveItemId={appsItemId}
           />
         );
 
@@ -146,7 +125,8 @@ describe('Expanded mode', () => {
         expect(appsLink).toHaveAttribute('aria-current', 'page');
         expect(appsLink).toHaveAttribute('data-highlighted', 'true');
 
-        await userEvent.hover(appsLink);
+        await user.hover(appsLink);
+        flushPopoverTimers();
 
         const popover = screen.queryByRole('dialog', {
           name: 'Apps',
@@ -163,22 +143,14 @@ describe('Expanded mode', () => {
        * AND a side panel with the submenu should show
        */
       it('(with submenu) should redirect and open side panel when clicking item with submenu', async () => {
-        const TestComponent = () => {
-          const [activeItemId, setActiveItemId] = React.useState<string | undefined>();
-
-          return (
-            <Navigation
-              activeItemId={activeItemId}
-              isCollapsed={false}
-              items={basicMock.navItems}
-              logo={basicMock.logo}
-              onItemClick={(item) => setActiveItemId(item.id)}
-              setWidth={() => {}}
-            />
-          );
-        };
-
-        render(<TestComponent />);
+        render(
+          <TestComponent
+            initialActiveItemId={appsItemId}
+            isCollapsed={false}
+            items={basicMock.navItems}
+            logo={basicMock.logo}
+          />
+        );
 
         const appsLink = screen.getByRole('link', {
           name: 'Apps',
@@ -187,10 +159,10 @@ describe('Expanded mode', () => {
 
         expect(appsLink).toHaveAttribute('href', expectedHref);
 
-        await userEvent.click(appsLink);
+        await user.click(appsLink);
 
         const sidePanel = await screen.findByRole('region', {
-          name: 'Side panel',
+          name: 'Side panel for Apps',
         });
 
         expect(sidePanel).toBeInTheDocument();
@@ -204,25 +176,24 @@ describe('Expanded mode', () => {
        */
       it('(with submenu) should move focus to popover on Enter when focused item has submenu', async () => {
         render(
-          <Navigation
-            isCollapsed={false}
-            items={basicMock.navItems}
-            logo={basicMock.logo}
-            setWidth={() => {}}
-          />
+          <TestComponent isCollapsed={false} items={basicMock.navItems} logo={basicMock.logo} />
         );
 
         const appsLink = screen.getByRole('link', {
           name: 'Apps',
         });
 
-        appsLink.focus();
-
-        await userEvent.keyboard('{enter}');
+        act(() => {
+          appsLink.focus();
+        });
 
         const popover = await screen.findByRole('dialog', {
           name: 'Apps',
         });
+
+        expect(popover).toBeInTheDocument();
+
+        await user.keyboard('{Enter}');
 
         const overviewLink = within(popover).getByRole('link', {
           name: 'Overview',
@@ -239,19 +210,15 @@ describe('Expanded mode', () => {
        */
       it('(without submenu) should NOT show a popover on hover (without submenu)', async () => {
         render(
-          <Navigation
-            isCollapsed={false}
-            items={basicMock.navItems}
-            logo={basicMock.logo}
-            setWidth={() => {}}
-          />
+          <TestComponent isCollapsed={false} items={basicMock.navItems} logo={basicMock.logo} />
         );
 
         const dashboardsLink = screen.getByRole('link', {
           name: 'Dashboards',
         });
 
-        await userEvent.hover(dashboardsLink);
+        await user.hover(dashboardsLink);
+        flushPopoverTimers();
 
         const popover = screen.queryByRole('dialog');
 
@@ -267,12 +234,7 @@ describe('Expanded mode', () => {
        */
       it('(without submenu) should redirect and NOT open side panel when clicking item without submenu', async () => {
         render(
-          <Navigation
-            isCollapsed={false}
-            items={basicMock.navItems}
-            logo={basicMock.logo}
-            setWidth={() => {}}
-          />
+          <TestComponent isCollapsed={false} items={basicMock.navItems} logo={basicMock.logo} />
         );
 
         const dashboardsLink = screen.getByRole('link', {
@@ -282,10 +244,10 @@ describe('Expanded mode', () => {
 
         expect(dashboardsLink).toHaveAttribute('href', expectedHref);
 
-        await userEvent.click(dashboardsLink);
+        await user.click(dashboardsLink);
 
         const sidePanel = screen.queryByRole('region', {
-          name: 'Side panel',
+          name: /Side panel/,
         });
 
         expect(sidePanel).not.toBeInTheDocument();
@@ -299,12 +261,7 @@ describe('Expanded mode', () => {
        */
       it('(without submenu) should redirect on Enter when focused item has no submenu', async () => {
         render(
-          <Navigation
-            isCollapsed={false}
-            items={basicMock.navItems}
-            logo={basicMock.logo}
-            setWidth={() => {}}
-          />
+          <TestComponent isCollapsed={false} items={basicMock.navItems} logo={basicMock.logo} />
         );
 
         const dashboardsLink = screen.getByRole('link', {
@@ -314,12 +271,14 @@ describe('Expanded mode', () => {
 
         expect(dashboardsLink).toHaveAttribute('href', expectedHref);
 
-        dashboardsLink.focus();
+        act(() => {
+          dashboardsLink.focus();
+        });
 
-        await userEvent.keyboard('{enter}');
+        await user.keyboard('{enter}');
 
         const sidePanel = screen.queryByRole('region', {
-          name: 'Side panel',
+          name: /Side panel/,
         });
 
         expect(sidePanel).not.toBeInTheDocument();
@@ -334,11 +293,10 @@ describe('Expanded mode', () => {
        */
       it('should show tooltip with "Beta" and beta badge on hover', async () => {
         render(
-          <Navigation
+          <TestComponent
             isCollapsed={false}
             items={observabilityMock.navItems}
             logo={observabilityMock.logo}
-            setWidth={() => {}}
           />
         );
 
@@ -346,7 +304,8 @@ describe('Expanded mode', () => {
           name: 'Dashboards',
         });
 
-        await userEvent.hover(dashboardsLink);
+        await user.hover(dashboardsLink);
+        flushPopoverTimers();
 
         const tooltip = await screen.findByRole('tooltip');
         const betaIcon = tooltip.querySelector('[data-euiicon-type="beta"]');
@@ -365,11 +324,10 @@ describe('Expanded mode', () => {
        */
       it('should show tooltip with "Tech preview" and flask badge on hover', async () => {
         render(
-          <Navigation
+          <TestComponent
             isCollapsed={false}
             items={observabilityMock.navItems}
             logo={observabilityMock.logo}
-            setWidth={() => {}}
           />
         );
 
@@ -377,7 +335,8 @@ describe('Expanded mode', () => {
           name: 'Cases',
         });
 
-        await userEvent.hover(casesLink);
+        await user.hover(casesLink);
+        flushPopoverTimers();
 
         const tooltip = await screen.findByRole('tooltip');
         const flaskIcon = tooltip.querySelector('[data-euiicon-type="flask"]');
@@ -397,14 +356,11 @@ describe('Expanded mode', () => {
        */
       it('should render the "More" primary menu item when items overflow', async () => {
         render(
-          <I18nProvider>
-            <Navigation
-              isCollapsed={false}
-              items={securityMock.navItems}
-              logo={securityMock.logo}
-              setWidth={() => {}}
-            />
-          </I18nProvider>
+          <TestComponent
+            isCollapsed={false}
+            items={securityMock.navItems}
+            logo={securityMock.logo}
+          />
         );
 
         const moreButton = await screen.findByRole('button', {
@@ -422,21 +378,19 @@ describe('Expanded mode', () => {
        */
       it('should show popover with secondary menu on hover over "More"', async () => {
         render(
-          <I18nProvider>
-            <Navigation
-              isCollapsed={false}
-              items={securityMock.navItems}
-              logo={securityMock.logo}
-              setWidth={() => {}}
-            />
-          </I18nProvider>
+          <TestComponent
+            isCollapsed={false}
+            items={securityMock.navItems}
+            logo={securityMock.logo}
+          />
         );
 
-        const moreButton = screen.getByRole('button', {
+        const moreButton = await screen.findByRole('button', {
           name: 'More',
         });
 
-        await userEvent.hover(moreButton);
+        await user.hover(moreButton);
+        flushPopoverTimers();
 
         const popover = await screen.findByRole('dialog', {
           name: 'More',
@@ -450,51 +404,73 @@ describe('Expanded mode', () => {
       /**
        * GIVEN not all primary menu items fit the menu height
        * AND the navigation renders in expanded mode
-       * WHEN I hover over the "More" primary menu item
+       * WHEN I hover over the “More” primary menu item
        * AND I click on the menu item that has a submenu
-       * THEN I should see a side panel with that submenu
+       * THEN the nested panel shows with the submenu
+       * AND when I click on a submenu item
+       * THEN the popover should close
+       * - AND I should be redirected to that item’s href
+       * AND I should see a side panel with that submenu
        */
       it('should open side panel when clicking submenu item inside "More" popover', async () => {
-        const TestComponent = () => {
-          const [activeItemId, setActiveItemId] = React.useState<string | undefined>();
+        render(
+          <TestComponent
+            isCollapsed={false}
+            items={securityMock.navItems}
+            logo={securityMock.logo}
+          />
+        );
 
-          return (
-            <I18nProvider>
-              <Navigation
-                activeItemId={activeItemId}
-                isCollapsed={false}
-                items={securityMock.navItems}
-                logo={securityMock.logo}
-                onItemClick={(item) => setActiveItemId(item.id)}
-                setWidth={() => {}}
-              />
-            </I18nProvider>
-          );
-        };
-
-        render(<TestComponent />);
-
-        const moreButton = screen.getByRole('button', {
+        const moreButton = await screen.findByRole('button', {
           name: 'More',
         });
 
-        await userEvent.hover(moreButton);
+        await user.hover(moreButton);
+        flushPopoverTimers();
 
         const popover = await screen.findByRole('dialog', {
           name: 'More',
         });
 
-        const mlLink = within(popover).getByRole('link', {
+        const mlButton = within(popover).getByRole('button', {
           name: 'Machine learning',
         });
 
-        await userEvent.click(mlLink);
+        await user.click(mlButton);
 
-        const sidePanel = screen.getByRole('region', {
-          name: 'Side panel',
+        expect(popover).toBeInTheDocument();
+
+        const mlHeading = await within(popover).findByRole('heading', {
+          name: 'Machine learning',
+        });
+
+        expect(mlHeading).toBeInTheDocument();
+
+        let anomalyExplorerLink = await within(popover).findByRole('link', {
+          name: 'Anomaly explorer',
+        });
+
+        await user.click(anomalyExplorerLink);
+
+        const sidePanel = await screen.findByRole('region', {
+          name: 'Side panel for Machine learning',
         });
 
         expect(sidePanel).toBeInTheDocument();
+
+        await waitFor(() => {
+          expect(popover).not.toBeInTheDocument();
+        });
+
+        expect(sidePanel).toBeInTheDocument();
+
+        anomalyExplorerLink = await within(sidePanel).findByRole('link', {
+          name: 'Anomaly explorer',
+        });
+
+        expect(anomalyExplorerLink).toBeInTheDocument();
+        expect(anomalyExplorerLink).toHaveAttribute('data-highlighted', 'true');
+        expect(anomalyExplorerLink).toHaveAttribute('aria-current', 'page');
       });
 
       /**
@@ -503,24 +479,23 @@ describe('Expanded mode', () => {
        * WHEN I hover over the "More" primary menu item
        * AND I click on the menu item that doesn’t have a submenu
        * THEN I shouldn’t see a side panel
+       * AND I should be redirected to that item’s href
        */
       it('should NOT open side panel when clicking item without submenu in "More" popover', async () => {
         render(
-          <I18nProvider>
-            <Navigation
-              isCollapsed={false}
-              items={securityMock.navItems}
-              logo={securityMock.logo}
-              setWidth={() => {}}
-            />
-          </I18nProvider>
+          <TestComponent
+            isCollapsed={false}
+            items={securityMock.navItems}
+            logo={securityMock.logo}
+          />
         );
 
-        const moreButton = screen.getByRole('button', {
+        const moreButton = await screen.findByRole('button', {
           name: 'More',
         });
 
-        await userEvent.hover(moreButton);
+        await user.hover(moreButton);
+        flushPopoverTimers();
 
         const popover = await screen.findByRole('dialog', {
           name: 'More',
@@ -530,120 +505,14 @@ describe('Expanded mode', () => {
           name: 'Coverage',
         });
 
-        await userEvent.click(coverageLink);
-
-        const sidePanel = screen.queryByRole('region', {
-          name: 'Side panel',
-        });
-
-        expect(sidePanel).not.toBeInTheDocument();
-      });
-
-      /**
-       * GIVEN not all primary menu items fit the menu height
-       * AND the navigation renders in expanded mode
-       * WHEN I hover over the "More" primary menu item
-       * AND I click on the menu item that has a submenu
-       * THEN the popover should close
-       * AND I should be redirected to that item’s href
-       * AND I should a side panel should show with that submenu
-       */
-      it('should close popover, redirect, and open side panel after clicking on an item with submenu from "More"', async () => {
-        const TestComponent = () => {
-          const [activeItemId, setActiveItemId] = React.useState<string | undefined>();
-
-          return (
-            <I18nProvider>
-              <Navigation
-                activeItemId={activeItemId}
-                isCollapsed={false}
-                items={securityMock.navItems}
-                logo={securityMock.logo}
-                onItemClick={(item) => setActiveItemId(item.id)}
-                setWidth={() => {}}
-              />
-            </I18nProvider>
-          );
-        };
-
-        render(<TestComponent />);
-
-        const moreButton = screen.getByRole('button', {
-          name: 'More',
-        });
-
-        await userEvent.hover(moreButton);
-
-        const popover = await screen.findByRole('dialog', {
-          name: 'More',
-        });
-
-        const mlLink = within(popover).getByRole('link', {
-          name: /Machine learning/,
-        });
-        const expectedHref = securityMock.navItems.primaryItems[11].href;
-
-        expect(mlLink).toHaveAttribute('href', expectedHref);
-
-        await userEvent.click(mlLink);
-
-        await waitFor(() => {
-          expect(popover).not.toBeInTheDocument();
-        });
-
-        const sidePanel = await screen.findByRole('region', {
-          name: 'Side panel',
-        });
-
-        expect(sidePanel).toBeInTheDocument();
-      });
-
-      /**
-       * GIVEN not all primary menu items fit the menu height
-       * AND the navigation renders in expanded mode
-       * WHEN I hover over the "More" primary menu item
-       * AND I click on the menu item that doesn’t have a submenu
-       * THEN the popover should close
-       * AND I should be redirected to that item’s href
-       * AND I shouldn’t see a side panel
-       */
-      it('should close popover, redirect, and NOT open side panel after clicking on an item without submenu from "More"', async () => {
-        render(
-          <I18nProvider>
-            <Navigation
-              isCollapsed={false}
-              items={securityMock.navItems}
-              logo={securityMock.logo}
-              setWidth={() => {}}
-            />
-          </I18nProvider>
-        );
-
-        const moreButton = screen.getByRole('button', {
-          name: 'More',
-        });
-
-        await userEvent.hover(moreButton);
-
-        const popover = await screen.findByRole('dialog', {
-          name: 'More',
-        });
-
-        const coverageLink = within(popover).getByRole('link', {
-          name: 'Coverage',
-        });
-        const expectedHref = securityMock.navItems.primaryItems[12].href;
-
-        expect(coverageLink).toHaveAttribute('href', expectedHref);
-
-        await userEvent.click(coverageLink);
+        await user.click(coverageLink);
 
         await waitFor(() => {
           expect(popover).not.toBeInTheDocument();
         });
 
         const sidePanel = screen.queryByRole('region', {
-          name: 'Side panel',
+          name: /Side panel/,
         });
 
         expect(sidePanel).not.toBeInTheDocument();
@@ -661,25 +530,21 @@ describe('Expanded mode', () => {
        */
       it('should have active state and open side panel when initial active submenu item is under "More"', async () => {
         render(
-          <I18nProvider>
-            <Navigation
-              activeItemId={resultExplorerItemId}
-              isCollapsed={false}
-              items={securityMock.navItems}
-              logo={securityMock.logo}
-              setWidth={() => {}}
-            />
-          </I18nProvider>
+          <TestComponent
+            initialActiveItemId={resultExplorerItemId}
+            isCollapsed={false}
+            items={securityMock.navItems}
+            logo={securityMock.logo}
+          />
         );
 
-        const moreButton = screen.getByRole('button', {
+        const moreButton = await screen.findByRole('button', {
           name: 'More',
         });
 
-        // More button should be highlighted when containing active item
         expect(moreButton).toHaveAttribute('data-highlighted', 'true');
 
-        await userEvent.hover(moreButton);
+        await user.hover(moreButton);
 
         const popover = await screen.findByRole('dialog', {
           name: 'More',
@@ -687,29 +552,26 @@ describe('Expanded mode', () => {
 
         expect(popover).toBeInTheDocument();
 
-        const mlPopoverLink = await within(popover).findByRole('link', {
-          name: /Machine learning/,
-        });
-        const expectedHref = securityMock.navItems.primaryItems[11].href;
-
-        expect(mlPopoverLink).toHaveAttribute('href', expectedHref);
-        // Parent should be highlighted when child is active, but not marked as current
-        expect(mlPopoverLink).toHaveAttribute('data-highlighted', 'true');
-
-        const sidePanel = await screen.findByRole('region', {
-          name: 'Side panel',
+        const mlButton = await within(popover).findByRole('button', {
+          name: 'Machine learning',
         });
 
-        expect(sidePanel).toBeInTheDocument();
+        expect(mlButton).toHaveAttribute('data-highlighted', 'true');
 
-        const resultExplorerLink = within(sidePanel).getByRole('link', {
-          name: /Result explorer/,
+        await user.click(mlButton);
+
+        const mlHeader = await within(popover).findByText('Machine learning');
+
+        expect(mlHeader).toBeInTheDocument();
+
+        const resultExplorerLink = await within(popover).findByRole('link', {
+          name: 'Result explorer',
         });
+
         const expectedSubItemHref =
           securityMock.navItems.primaryItems[11].sections?.[2].items[0].href;
 
         expect(resultExplorerLink).toHaveAttribute('href', expectedSubItemHref);
-        // Actual active submenu item should be both current and highlighted
         expect(resultExplorerLink).toHaveAttribute('aria-current', 'page');
         expect(resultExplorerLink).toHaveAttribute('data-highlighted', 'true');
       });

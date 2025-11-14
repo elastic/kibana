@@ -7,9 +7,10 @@
 
 import { z } from '@kbn/zod';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
+import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
+import { ToolType } from '@kbn/onechat-common';
 import type { BuiltinToolRegistry } from './builtin_registry';
 import { createBuiltinToolRegistry } from './builtin_registry';
-import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 
 describe('BuiltinToolRegistry', () => {
   let registry: BuiltinToolRegistry;
@@ -20,6 +21,7 @@ describe('BuiltinToolRegistry', () => {
 
   const mockTool: BuiltinToolDefinition = {
     id: 'test-tool',
+    type: ToolType.builtin,
     description: 'A test tool',
     schema: z.object({}),
     tags: [],
@@ -77,6 +79,7 @@ describe('BuiltinToolRegistry', () => {
     it('should return all registered tools', async () => {
       const mockTool1: BuiltinToolDefinition = {
         id: 'test-tool-1',
+        type: ToolType.builtin,
         description: 'A test tool',
         tags: [],
         schema: z.object({}),
@@ -87,6 +90,7 @@ describe('BuiltinToolRegistry', () => {
 
       const mockTool2: BuiltinToolDefinition = {
         id: 'test-tool-2',
+        type: ToolType.builtin,
         description: 'Another test tool',
         tags: [],
         schema: z.object({}),

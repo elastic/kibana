@@ -6,19 +6,17 @@
  */
 
 import React from 'react';
+import { IconDashboards } from '../../../../../../../common/icons/dashboards';
 import { START_DASHBOARD_MIGRATION_CARD_TITLE } from '../../../../../../../siem_migrations/dashboards/components/status_panels/translations';
 import { OnboardingCardId } from '../../../../../../constants';
 import type { OnboardingCardConfig } from '../../../../../../types';
 import { checkStartMigrationCardComplete } from './start_migration_check_complete';
-import startDashboardMigrationIcon from '../images/start_dashboard_migration.png';
-import startDashboardMigrationDarkIcon from '../images/start_dashboard_migration_dark.png';
 import type { StartMigrationCardMetadata } from '../common/types';
 
 export const startDashboardMigrationCardConfig: OnboardingCardConfig<StartMigrationCardMetadata> = {
   id: OnboardingCardId.siemMigrationsDashboards,
   title: START_DASHBOARD_MIGRATION_CARD_TITLE,
-  icon: startDashboardMigrationIcon,
-  iconDark: startDashboardMigrationDarkIcon,
+  icon: IconDashboards,
   experimentalFlagRequired: 'automaticDashboardsMigration',
   Component: React.lazy(
     () =>

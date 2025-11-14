@@ -36,14 +36,7 @@ export * from './src/ast/location';
 
 export { Builder, type AstNodeParserFields, type AstNodeTemplate } from './src/builder';
 
-export {
-  parse,
-  Parser,
-  type ParseOptions,
-  type ParseResult,
-  ESQLErrorListener,
-  TIME_SPAN_UNITS,
-} from './src/parser';
+export * from './src/parser';
 
 export { Walker, type WalkerOptions, walk, type WalkerAstNode } from './src/walker';
 
@@ -76,5 +69,6 @@ export * from './src/definitions/constants';
 export * from './src/definitions/types';
 export { METADATA_FIELDS } from './src/commands_registry/options/metadata';
 export { TIME_SYSTEM_PARAMS } from './src/definitions/utils/literals';
+export { withAutoSuggest } from './src/definitions/utils/autocomplete/helpers';
 
 export { getNoValidCallSignatureError } from './src/definitions/utils/validation/utils';

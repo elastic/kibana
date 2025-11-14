@@ -9,12 +9,12 @@ import { render, screen, waitFor } from '@testing-library/react';
 import type { TextBasedDimensionEditorProps } from './dimension_editor';
 import { TextBasedDimensionEditor } from './dimension_editor';
 
-// Mock fetchFieldsFromESQL
-jest.mock('@kbn/esql-editor', () => ({
-  fetchFieldsFromESQL: jest.fn(),
+// Mock fetchFieldsFromESQLExpression
+jest.mock('./fetch_fields_from_esql_expression', () => ({
+  fetchFieldsFromESQLExpression: jest.fn(),
 }));
 
-const { fetchFieldsFromESQL } = jest.requireMock('@kbn/esql-editor');
+const { fetchFieldsFromESQLExpression } = jest.requireMock('./fetch_fields_from_esql_expression');
 
 describe('TextBasedDimensionEditor', () => {
   const defaultProps = {
@@ -51,7 +51,7 @@ describe('TextBasedDimensionEditor', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    fetchFieldsFromESQL.mockResolvedValue({
+    fetchFieldsFromESQLExpression.mockResolvedValue({
       columns: [
         { id: 'field1', name: 'Field One', meta: { type: 'string' } },
         { id: 'field2', name: 'Field Two', meta: { type: 'number' } },
@@ -64,8 +64,8 @@ describe('TextBasedDimensionEditor', () => {
 
     // Check if fetchFieldsFromESQL was called
     await waitFor(() => {
-      expect(fetchFieldsFromESQL).toHaveBeenCalledTimes(1);
-      expect(fetchFieldsFromESQL).toHaveBeenCalledWith(
+      expect(fetchFieldsFromESQLExpression).toHaveBeenCalledTimes(1);
+      expect(fetchFieldsFromESQLExpression).toHaveBeenCalledWith(
         { esql: 'FROM my_data | limit 0' },
         {},
         { from: defaultProps.dateRange.fromDate, to: defaultProps.dateRange.toDate },

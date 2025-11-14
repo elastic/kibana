@@ -98,7 +98,7 @@ export function createQuantitativeGroundednessEvaluator(): Evaluator {
           score: null,
           label: 'unavailable',
           explanation: 'No groundedness analysis available',
-          metadata,
+          metadata: metadata ?? undefined,
         };
       }
 
@@ -109,7 +109,7 @@ export function createQuantitativeGroundednessEvaluator(): Evaluator {
         score,
         label: summaryText,
         explanation: summaryText,
-        metadata,
+        metadata: metadata ?? undefined,
       };
     },
     kind: 'LLM',

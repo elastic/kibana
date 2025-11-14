@@ -194,7 +194,7 @@ export function extractDefaultDynamicKafkaTopics(
   ];
 }
 
-export function useOutputForm(onSucess: () => void, output?: Output, defaultOuput?: Output) {
+export function useOutputForm(onSucess: () => void, output?: Output, defaultOutput?: Output) {
   const fleetStatus = useFleetStatus();
   const authz = useAuthz();
 
@@ -255,7 +255,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
   const isServerless = cloud?.isServerlessEnabled;
   // Set the hosts to default for new ES output in serverless.
   const elasticsearchUrlDefaultValue =
-    isServerless && !output?.hosts ? defaultOuput?.hosts || [] : output?.hosts || [];
+    isServerless && !output?.hosts ? defaultOutput?.hosts || [] : output?.hosts || [];
   const elasticsearchUrlDisabled = isServerless || isDisabled('hosts');
   const elasticsearchUrlInput = useComboInput(
     'esHostsComboxBox',

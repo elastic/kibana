@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import util from 'util';
-import { isEqual, isEqualWith } from 'lodash';
 import { diff } from 'jest-diff';
+import { isEqual, isEqualWith } from 'lodash';
+import util from 'util';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  // Failing: See https://github.com/elastic/kibana/issues/235843
-  describe.skip('Privileges', () => {
+  describe('Privileges', () => {
     describe('GET /api/security/privileges', () => {
       it('should return a privilege map with all known privileges, without actions', async () => {
         // If you're adding a privilege to the following, that's great!
@@ -59,6 +58,7 @@ export default function ({ getService }: FtrProviderContext) {
             siem: ['all', 'read', 'minimal_all', 'minimal_read'],
             siemV2: ['all', 'read', 'minimal_all', 'minimal_read'],
             siemV3: ['all', 'read', 'minimal_all', 'minimal_read'],
+            siemV4: ['all', 'read', 'minimal_all', 'minimal_read'],
             securitySolutionAssistant: ['all', 'read', 'minimal_all', 'minimal_read'],
             securitySolutionAttackDiscovery: ['all', 'read', 'minimal_all', 'minimal_read'],
             securitySolutionCases: ['all', 'read', 'minimal_all', 'minimal_read'],
@@ -70,6 +70,7 @@ export default function ({ getService }: FtrProviderContext) {
             searchPlayground: ['all', 'read', 'minimal_all', 'minimal_read'],
             searchSynonyms: ['all', 'read', 'minimal_all', 'minimal_read'],
             searchQueryRules: ['all', 'read', 'minimal_all', 'minimal_read'],
+            workflowsManagement: ['all', 'read', 'minimal_all', 'minimal_read'],
             searchInferenceEndpoints: ['all', 'read', 'minimal_all', 'minimal_read'],
             fleetv2: ['all', 'read', 'minimal_all', 'minimal_read'],
             fleet: ['all', 'read', 'minimal_all', 'minimal_read'],
@@ -80,7 +81,6 @@ export default function ({ getService }: FtrProviderContext) {
             rulesSettings: ['all', 'read', 'minimal_all', 'minimal_read'],
             maintenanceWindow: ['all', 'read', 'minimal_all', 'minimal_read'],
             streams: ['all', 'read', 'minimal_all', 'minimal_read'],
-            aiAssistantManagementSelection: ['all', 'read', 'minimal_all', 'minimal_read'],
             dataQuality: ['all', 'read', 'minimal_all', 'minimal_read'],
             manageReporting: ['all', 'read', 'minimal_all', 'minimal_read'],
           },
@@ -199,6 +199,19 @@ export default function ({ getService }: FtrProviderContext) {
             searchPlayground: ['all', 'read', 'minimal_all', 'minimal_read'],
             searchSynonyms: ['all', 'read', 'minimal_all', 'minimal_read'],
             searchQueryRules: ['all', 'read', 'minimal_all', 'minimal_read'],
+            workflowsManagement: [
+              'all',
+              'minimal_all',
+              'minimal_read',
+              'read',
+              'workflow_create',
+              'workflow_delete',
+              'workflow_execute',
+              'workflow_execution_cancel',
+              'workflow_execution_read',
+              'workflow_read',
+              'workflow_update',
+            ],
             searchInferenceEndpoints: ['all', 'read', 'minimal_all', 'minimal_read'],
             fleetv2: [
               'agent_policies_all',
@@ -222,6 +235,8 @@ export default function ({ getService }: FtrProviderContext) {
               'all',
               'blocklist_all',
               'blocklist_read',
+              'endpoint_exceptions_all',
+              'endpoint_exceptions_read',
               'endpoint_list_all',
               'endpoint_list_read',
               'event_filters_all',
@@ -240,6 +255,7 @@ export default function ({ getService }: FtrProviderContext) {
               'file_operations_all',
               'execute_operations_all',
               'scan_operations_all',
+              'soc_management_all',
             ],
             siemV2: [
               'actions_log_management_all',
@@ -248,6 +264,8 @@ export default function ({ getService }: FtrProviderContext) {
               'global_artifact_management_all',
               'blocklist_all',
               'blocklist_read',
+              'endpoint_exceptions_all',
+              'endpoint_exceptions_read',
               'endpoint_list_all',
               'endpoint_list_read',
               'event_filters_all',
@@ -266,6 +284,7 @@ export default function ({ getService }: FtrProviderContext) {
               'file_operations_all',
               'execute_operations_all',
               'scan_operations_all',
+              'soc_management_all',
               'workflow_insights_all',
               'workflow_insights_read',
             ],
@@ -276,6 +295,8 @@ export default function ({ getService }: FtrProviderContext) {
               'global_artifact_management_all',
               'blocklist_all',
               'blocklist_read',
+              'endpoint_exceptions_all',
+              'endpoint_exceptions_read',
               'endpoint_list_all',
               'endpoint_list_read',
               'event_filters_all',
@@ -294,6 +315,42 @@ export default function ({ getService }: FtrProviderContext) {
               'file_operations_all',
               'execute_operations_all',
               'scan_operations_all',
+              'soc_management_all',
+              'trusted_devices_all',
+              'trusted_devices_read',
+              'workflow_insights_all',
+              'workflow_insights_read',
+            ],
+            siemV4: [
+              'actions_log_management_all',
+              'actions_log_management_read',
+              'all',
+              'global_artifact_management_all',
+              'blocklist_all',
+              'blocklist_read',
+              'endpoint_exceptions_all',
+              'endpoint_exceptions_read',
+              'endpoint_list_all',
+              'endpoint_list_read',
+              'event_filters_all',
+              'event_filters_read',
+              'host_isolation_all',
+              'host_isolation_exceptions_all',
+              'host_isolation_exceptions_read',
+              'minimal_all',
+              'minimal_read',
+              'policy_management_all',
+              'policy_management_read',
+              'process_operations_all',
+              'read',
+              'trusted_applications_all',
+              'trusted_applications_read',
+              'trusted_devices_all',
+              'trusted_devices_read',
+              'file_operations_all',
+              'execute_operations_all',
+              'scan_operations_all',
+              'soc_management_all',
               'workflow_insights_all',
               'workflow_insights_read',
             ],
@@ -313,7 +370,13 @@ export default function ({ getService }: FtrProviderContext) {
               'update_anonymization',
               'manage_global_knowledge_base',
             ],
-            securitySolutionAttackDiscovery: ['all', 'read', 'minimal_all', 'minimal_read'],
+            securitySolutionAttackDiscovery: [
+              'all',
+              'read',
+              'minimal_all',
+              'minimal_read',
+              'update_schedule',
+            ],
             securitySolutionCases: [
               'all',
               'read',
@@ -431,7 +494,6 @@ export default function ({ getService }: FtrProviderContext) {
             ],
             maintenanceWindow: ['all', 'read', 'minimal_all', 'minimal_read'],
             streams: ['all', 'read', 'minimal_all', 'minimal_read'],
-            aiAssistantManagementSelection: ['all', 'read', 'minimal_all', 'minimal_read'],
           },
           reserved: [
             'fleet-setup',

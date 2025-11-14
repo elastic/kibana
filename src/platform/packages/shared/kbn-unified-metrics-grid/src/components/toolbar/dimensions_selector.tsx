@@ -9,11 +9,14 @@
 
 import React, { useMemo, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlexGroup, EuiFlexItem, EuiNotificationBadge } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ToolbarSelector, type SelectableEntry } from '@kbn/shared-ux-toolbar-selector';
-import { ClearAllSection } from './clear_all_section';
-import { MAX_DIMENSIONS_SELECTIONS } from '../../common/constants';
+import { comboBoxFieldOptionMatcher } from '@kbn/field-utils';
+import { css } from '@emotion/react';
+import {
+  MAX_DIMENSIONS_SELECTIONS,
+  METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ,
+} from '../../common/constants';
 
 interface DimensionsFilterProps {
   fields: Array<{
@@ -21,15 +24,17 @@ interface DimensionsFilterProps {
     dimensions: Array<{ name: string; type: string; description?: string }>;
   }>;
   selectedDimensions: string[];
+  fullWidth?: boolean;
   onChange: (dimensions: string[]) => void;
-  onClear: () => void;
+  singleSelection?: boolean;
 }
 
 export const DimensionsSelector = ({
   fields,
   selectedDimensions,
   onChange,
-  onClear,
+  fullWidth = false,
+  singleSelection = false,
 }: DimensionsFilterProps) => {
   // Extract all unique dimensions from fields that match the search term
   const allDimensions = useMemo(() => {
@@ -84,21 +89,24 @@ export const DimensionsSelector = ({
     return allDimensions.map<SelectableEntry>((dimension) => {
       const isSelected = selectedDimensions.includes(dimension.name);
       const isIntersecting = intersectingDimensions.has(dimension.name);
-      const isDisabledByLimit = !isSelected && isAtMaxLimit;
+      const isDisabledByLimit = singleSelection ? false : !isSelected && isAtMaxLimit;
 
       return {
         value: dimension.name,
         label: dimension.name,
         checked: isSelected ? 'on' : undefined,
-        disabled: !isIntersecting || isDisabledByLimit,
+        // In single-selection mode, don't check intersections since we're replacing, not adding
+        disabled: singleSelection ? false : !isIntersecting || isDisabledByLimit,
         key: dimension.name,
       };
     });
-  }, [allDimensions, selectedDimensions, intersectingDimensions]);
+  }, [allDimensions, selectedDimensions, intersectingDimensions, singleSelection]);
 
   const handleChange = useCallback(
-    (chosenOption?: SelectableEntry[]) => {
-      const newSelection = chosenOption?.map((p) => p.value) ?? [];
+    (chosenOption?: SelectableEntry | SelectableEntry[]) => {
+      const opts =
+        chosenOption == null ? [] : Array.isArray(chosenOption) ? chosenOption : [chosenOption];
+      const newSelection = opts.map((p) => p.value);
       // Enforce the maximum limit
       const limitedSelection = newSelection.slice(0, MAX_DIMENSIONS_SELECTIONS);
       onChange(limitedSelection);
@@ -107,67 +115,46 @@ export const DimensionsSelector = ({
   );
 
   const buttonLabel = useMemo(() => {
-    if (selectedDimensions.length === 0) {
+    const count = selectedDimensions.length;
+    const dimensionLabel = selectedDimensions[0];
+    if (count === 0) {
       return (
         <FormattedMessage
           id="metricsExperience.dimensionsSelector.breakdownFieldButtonLabel"
-          defaultMessage="No dimensions selected"
+          defaultMessage="No {maxDimensions, plural, one {dimension} other {dimensions}} selected"
+          values={{ maxDimensions: MAX_DIMENSIONS_SELECTIONS }}
         />
       );
     }
     return (
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-        <EuiFlexItem grow={false}>
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem
+          grow={false}
+          css={css`
+            align-items: flex-start;
+          `}
+        >
           <FormattedMessage
             id="metricsExperience.dimensionsSelector.breakdownFieldButtonLabelWithSelection"
-            defaultMessage="Dimensions"
+            defaultMessage="Breakdown by {dimensionLabel}"
+            values={{ dimensionLabel }}
           />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiNotificationBadge>{selectedDimensions.length}</EuiNotificationBadge>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
   }, [selectedDimensions]);
 
-  const popoverContentBelowSearch = useMemo(() => {
-    const isAtMaxLimit = selectedDimensions.length >= MAX_DIMENSIONS_SELECTIONS;
-    const statusMessage = isAtMaxLimit
-      ? i18n.translate('metricsExperience.dimensionsSelector.maxLimitStatusMessage', {
-          defaultMessage:
-            'Maximum of {maxDimensions} dimensions selected ({count}/{maxDimensions})',
-          values: { count: selectedDimensions.length, maxDimensions: MAX_DIMENSIONS_SELECTIONS },
-        })
-      : i18n.translate('metricsExperience.dimensionsSelector.selectedStatusMessage', {
-          defaultMessage:
-            '{count, plural, one {# dimension selected} other {# dimensions selected}}',
-          values: { count: selectedDimensions.length },
-        });
-
-    return (
-      <ClearAllSection
-        selectedOptionsLength={selectedDimensions.length}
-        onClearAllAction={onClear}
-        selectedOptionsMessage={statusMessage}
-      />
-    );
-  }, [onClear, selectedDimensions.length]);
-
   return (
     <ToolbarSelector
-      data-test-subj="metricsExperienceBreakdownSelector"
+      data-test-subj={METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}
       data-selected-value={selectedDimensions}
       searchable
       buttonLabel={buttonLabel}
-      optionMatcher={({ option, normalizedSearchValue }) => {
-        return 'name' in option
-          ? String(option.name ?? '').includes(normalizedSearchValue)
-          : option.label.includes(normalizedSearchValue);
-      }}
+      optionMatcher={comboBoxFieldOptionMatcher}
       options={options}
-      singleSelection={false}
+      singleSelection={singleSelection}
       onChange={handleChange}
-      popoverContentBelowSearch={popoverContentBelowSearch}
+      fullWidth={fullWidth}
     />
   );
 };

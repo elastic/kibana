@@ -17,9 +17,11 @@ import type { GlobalRunContext } from './types';
 export async function collectAndRun({
   context,
   configGlob,
+  configFromCwd,
 }: {
   context: GlobalRunContext;
   configGlob?: string | string[];
+  configFromCwd?: boolean;
 }): Promise<ConfigResult[]> {
   const { log, globalConfig, runtimeOverrides, workspace } = context;
 
@@ -29,7 +31,10 @@ export async function collectAndRun({
 
   const patterns = castArray(configGlob ?? []);
 
-  const configPaths = await collectConfigPaths({ patterns, cwd: workspace.getDir() });
+  const configPaths = await collectConfigPaths({
+    patterns,
+    cwd: configFromCwd ? process.cwd() : workspace.getDir(),
+  });
 
   log.debug(`Discovered ${configPaths.length} config path(s)`);
 

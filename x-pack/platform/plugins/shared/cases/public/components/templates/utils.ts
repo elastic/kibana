@@ -93,6 +93,7 @@ export const templateSerializer = (
   const {
     connectorId,
     syncAlerts = false,
+    extractObservables = false,
     templateTags,
     templateDescription,
     ...otherCaseFields
@@ -117,7 +118,7 @@ export const templateSerializer = (
       ...otherCaseFields,
       connector: transformedConnector,
       customFields: transformedCustomFields,
-      settings: { syncAlerts },
+      settings: { syncAlerts, extractObservables },
     },
   };
 

@@ -32,6 +32,11 @@ export interface ActionTypeRegistryOpts {
   inMemoryConnectors: InMemoryConnector[];
 }
 
+interface ListOpts {
+  featureId?: string;
+  exposeValidation?: boolean;
+}
+
 export class ActionTypeRegistry {
   private readonly taskManager: TaskManagerSetupContract;
   private readonly actionTypes: Map<string, ActionType> = new Map();
@@ -244,7 +249,9 @@ export class ActionTypeRegistry {
   /**
    * Returns a list of registered action types [{ id, name, enabled }], filtered by featureId if provided.
    */
-  public list(featureId?: string): CommonActionType[] {
+  public list(
+    { featureId, exposeValidation }: ListOpts = { exposeValidation: false }
+  ): CommonActionType[] {
     return Array.from(this.actionTypes)
       .filter(([_, actionType]) => {
         return featureId ? actionType.supportedFeatureIds.includes(featureId) : true;
@@ -259,6 +266,14 @@ export class ActionTypeRegistry {
         supportedFeatureIds: actionType.supportedFeatureIds,
         isSystemActionType: !!actionType.isSystemActionType,
         subFeature: actionType.subFeature,
+        ...(exposeValidation === true
+          ? {
+              validate: {
+                params: actionType.validate.params,
+              },
+            }
+          : {}),
+        isDeprecated: !!actionType.isDeprecated,
       }));
   }
 
@@ -271,5 +286,9 @@ export class ActionTypeRegistry {
 
   public getAllTypes(): string[] {
     return [...this.list().map(({ id }) => id)];
+  }
+
+  isDeprecated(actionTypeId: string): boolean {
+    return Boolean(this.actionTypes.get(actionTypeId)?.isDeprecated);
   }
 }

@@ -12,14 +12,15 @@ import * as i18n from '../create/translations';
 
 interface Props {
   isLoading: boolean;
+  defaultValue?: boolean;
 }
 
-const SyncAlertsToggleComponent: React.FC<Props> = ({ isLoading }) => {
+const SyncAlertsToggleComponent: React.FC<Props> = ({ isLoading, defaultValue = true }) => {
   return (
     <UseField
       path="syncAlerts"
       component={ToggleField}
-      config={{ defaultValue: true }}
+      config={{ defaultValue }}
       componentProps={{
         idAria: 'caseSyncAlerts',
         'data-test-subj': 'caseSyncAlerts',

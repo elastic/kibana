@@ -71,7 +71,7 @@ export const Source: React.FC<SourceProps> = ({ node, index }) => {
           label={
             comment ? (
               <EuiToolTip content={comment}>
-                <span>
+                <span tabIndex={0}>
                   Source {index} <EuiIcon type="editorComment" color="subdued" />
                 </span>
               </EuiToolTip>

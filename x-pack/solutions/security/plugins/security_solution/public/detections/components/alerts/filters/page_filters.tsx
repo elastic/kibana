@@ -16,7 +16,10 @@ import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
 import type { DataView, DataViewSpec } from '@kbn/data-plugin/common';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useKibana } from '../../../../common/lib/kibana';
-import { DEFAULT_DETECTION_PAGE_FILTERS } from '../../../../../common/constants';
+import {
+  DEFAULT_ALERTS_INDEX,
+  DEFAULT_DETECTION_PAGE_FILTERS,
+} from '../../../../../common/constants';
 import { URL_PARAM_KEY } from '../../../../common/hooks/use_url_state';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { SECURITY_ALERT_DATA_VIEW } from '../../../constants';
@@ -64,15 +67,25 @@ export const PageFilters = memo(({ dataView, ...props }: PageFiltersProps) => {
     [urlStorage]
   );
 
+  // TODO change to .getIndexPattern() once we remove the newDataViewPickerEnabled feature flag and we have a DataView object
+  const alertsIndicesTitle = useMemo(
+    () =>
+      dataView.title
+        ?.split(',')
+        .filter((index) => index.includes(DEFAULT_ALERTS_INDEX))
+        .join(','),
+    [dataView]
+  );
+
   const customDataViewSpec = useMemo(
     () => ({
       id: SECURITY_ALERT_DATA_VIEW.id,
       name: SECURITY_ALERT_DATA_VIEW.name,
       allowNoIndex: true,
-      title: dataView.title, // TODO change to .getIndexPattern() once we remove the newDataViewPickerEnabled feature flag and we have a DataView object
+      title: alertsIndicesTitle,
       timeFieldName: '@timestamp',
     }),
-    [dataView]
+    [alertsIndicesTitle]
   );
 
   const spaceId = useSpaceId();

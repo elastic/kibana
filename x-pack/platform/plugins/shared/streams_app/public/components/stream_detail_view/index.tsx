@@ -16,10 +16,11 @@ import type { StreamsFeatures } from '../../hooks/use_streams_privileges';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 import { RedirectTo } from '../redirect_to';
 import { ClassicStreamBadge, LifecycleBadge, WiredStreamBadge } from '../stream_badges';
-import { StreamDetailDashboardsView } from '../stream_detail_dashboards_view';
+import { StreamDetailAttachments } from '../stream_detail_attachments';
 import { StreamDetailOverview } from '../stream_detail_overview';
 import { StreamsAppPageTemplate } from '../streams_app_page_template';
 import { StreamDescription } from './description';
+import { FeedbackButton } from '../feedback_button';
 
 const getStreamDetailTabs = ({
   definition,
@@ -46,7 +47,7 @@ const getStreamDetailTabs = ({
         path: { key: definition.stream.name, tab: 'dashboards' },
       }),
       background: true,
-      content: <StreamDetailDashboardsView definition={definition} />,
+      content: <StreamDetailAttachments definition={definition} />,
       label: i18n.translate('xpack.streams.streamDetailView.dashboardsTab', {
         defaultMessage: 'Dashboards',
       }),
@@ -90,13 +91,21 @@ export function StreamDetailView() {
         bottomBorder="extended"
         description={<StreamDescription definition={definition} />}
         pageTitle={
-          <EuiFlexGroup gutterSize="s" alignItems="center">
-            {key}
-            <EuiBadgeGroup gutterSize="s">
-              {Streams.ClassicStream.GetResponse.is(definition) && <ClassicStreamBadge />}
-              {Streams.WiredStream.GetResponse.is(definition) && <WiredStreamBadge />}
-              <LifecycleBadge lifecycle={definition.effective_lifecycle} />
-            </EuiBadgeGroup>
+          <EuiFlexGroup
+            direction="row"
+            gutterSize="s"
+            alignItems="center"
+            justifyContent="spaceBetween"
+          >
+            <EuiFlexGroup gutterSize="s" alignItems="center">
+              {key}
+              <EuiBadgeGroup gutterSize="s">
+                {Streams.ClassicStream.GetResponse.is(definition) && <ClassicStreamBadge />}
+                {Streams.WiredStream.GetResponse.is(definition) && <WiredStreamBadge />}
+                <LifecycleBadge lifecycle={definition.effective_lifecycle} />
+              </EuiBadgeGroup>
+            </EuiFlexGroup>
+            <FeedbackButton />
           </EuiFlexGroup>
         }
         tabs={Object.entries(tabs ?? {}).map(([tabName, { label, href }]) => {

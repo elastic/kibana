@@ -7,29 +7,35 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { EuiCallOut } from '@elastic/eui';
 import type { AppMenuActionPrimary } from '@kbn/discover-utils';
 import { AppMenuActionId, AppMenuActionType } from '@kbn/discover-utils';
 import { omit } from 'lodash';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { i18n } from '@kbn/i18n';
+import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import type { DiscoverStateContainer } from '../../../state_management/discover_state';
 import { getSharingData, showPublicUrlSwitch } from '../../../../../utils/get_sharing_data';
 import type { DiscoverAppLocatorParams } from '../../../../../../common/app_locator';
 import type { AppMenuDiscoverParams } from './types';
 import type { DiscoverServices } from '../../../../../build_services';
+import type { TabState } from '../../../state_management/redux/types';
 
 export const getShareAppMenuItem = ({
   discoverParams,
   services,
   stateContainer,
   hasIntegrations,
+  hasUnsavedChanges,
+  currentTab,
+  persistedDiscoverSession,
 }: {
   discoverParams: AppMenuDiscoverParams;
   services: DiscoverServices;
   stateContainer: DiscoverStateContainer;
   hasIntegrations: boolean;
+  hasUnsavedChanges: boolean;
+  currentTab: TabState | undefined;
+  persistedDiscoverSession: DiscoverSession | undefined;
 }): AppMenuActionPrimary[] => {
   if (!services.share) {
     return [];
@@ -44,16 +50,15 @@ export const getShareAppMenuItem = ({
   }) => {
     const { dataView, isEsqlMode } = discoverParams;
 
-    const savedSearch = stateContainer.savedSearchState.getState();
     const searchSourceSharingData = await getSharingData(
-      savedSearch.searchSource,
-      stateContainer.appState.getState(),
+      stateContainer.savedSearchState.getState().searchSource,
+      stateContainer.appState.get(),
       services,
       isEsqlMode
     );
 
-    const { locator } = services;
-    const appState = stateContainer.appState.getState();
+    const { locator, discoverFeatureFlags } = services;
+    const appState = stateContainer.appState.get();
     const { timefilter } = services.data.query.timefilter;
     const timeRange = timefilter.getTime();
     const refreshInterval = timefilter.getRefreshInterval();
@@ -62,7 +67,7 @@ export const getShareAppMenuItem = ({
     // Share -> Get links -> Snapshot
     const params: DiscoverAppLocatorParams = {
       ...omit(appState, 'dataSource'),
-      ...(savedSearch.id ? { savedSearchId: savedSearch.id } : {}),
+      ...(persistedDiscoverSession?.id ? { savedSearchId: persistedDiscoverSession.id } : {}),
       ...(dataView?.isPersisted()
         ? { dataViewId: dataView?.id }
         : { dataViewSpec: dataView?.toMinimalSpec() }),
@@ -71,7 +76,15 @@ export const getShareAppMenuItem = ({
       refreshInterval,
     };
 
-    // TODO: for a persisted saved search, add the current tab ID to the params
+    const tabsEnabled = discoverFeatureFlags.getTabsEnabled();
+
+    if (tabsEnabled && currentTab) {
+      params.tab = {
+        id: currentTab.id,
+        label: currentTab.label,
+      };
+    }
+
     const relativeUrl = locator.getRedirectUrl(params);
 
     // This logic is duplicated from `relativeToAbsolute` (for bundle size reasons). Ultimately, this should be
@@ -82,7 +95,7 @@ export const getShareAppMenuItem = ({
 
     // Share -> Get links -> Saved object
     let shareableUrlForSavedObject = await locator.getUrl(
-      { savedSearchId: savedSearch.id },
+      { savedSearchId: persistedDiscoverSession?.id },
       { absolute: true }
     );
 
@@ -100,7 +113,7 @@ export const getShareAppMenuItem = ({
       shareableUrl,
       shareableUrlForSavedObject,
       shareableUrlLocatorParams: { locator, params },
-      objectId: savedSearch.id,
+      objectId: persistedDiscoverSession?.id,
       objectType: 'search',
       objectTypeAlias: i18n.translate('discover.share.objectTypeAlias', {
         defaultMessage: 'Discover session',
@@ -117,24 +130,12 @@ export const getShareAppMenuItem = ({
           integration: {
             export: {
               csvReports: {
-                draftModeCallOut: (
-                  <EuiCallOut
-                    color="warning"
-                    iconType="warning"
-                    title={i18n.translate('discover.exports.csvReports.warning.title', {
-                      defaultMessage: 'Unsaved changes',
-                    })}
-                  >
-                    {i18n.translate(
-                      'discover.exports.csvReports.postURLWatcherMessage.unsavedChanges',
-                      {
-                        defaultMessage: 'URL may change if you upgrade Kibana.',
-                      }
-                    )}
-                  </EuiCallOut>
-                ),
+                draftModeCallOut: true,
               },
             },
+          },
+          link: {
+            draftModeCallOut: tabsEnabled,
           },
         },
       },
@@ -144,12 +145,12 @@ export const getShareAppMenuItem = ({
         ...searchSourceSharingData,
         // CSV reports can be generated without a saved search so we provide a fallback title
         title:
-          savedSearch.title ||
+          persistedDiscoverSession?.title ||
           i18n.translate('discover.localMenu.fallbackReportTitle', {
             defaultMessage: 'Untitled Discover session',
           }),
       },
-      isDirty: !savedSearch.id || stateContainer.appState.hasChanged(),
+      isDirty: !persistedDiscoverSession?.id || hasUnsavedChanges,
       onClose: () => {
         anchorElement?.focus();
       },

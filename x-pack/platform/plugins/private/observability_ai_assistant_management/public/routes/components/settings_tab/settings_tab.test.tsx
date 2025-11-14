@@ -35,7 +35,7 @@ describe('SettingsTab', () => {
 
   beforeEach(() => {
     useAppContextMock.mockReturnValue({
-      config: { spacesEnabled: true, visibilityEnabled: true },
+      config: { spacesEnabled: true },
     });
     useKibanaMock.mockReturnValue({
       services: {

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// TODO: Remove the eslint-disable comments to use the proper types.
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-non-null-assertion */
+
 import type { StackFrame, WorkflowStepExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 
@@ -42,6 +45,10 @@ function getStepTreeType(
   }
 
   return 'unknown';
+}
+
+function isVisibleStepType(stepType: string): boolean {
+  return !['workflow_level_timeout'].includes(stepType);
 }
 
 /**
@@ -82,17 +89,19 @@ export function buildStepExecutionsTree(
   const stepExecutionsMap: Map<string, WorkflowStepExecutionDto> = new Map();
   const computedPathsMap: Map<string, string[]> = new Map();
 
-  stepExecutions.forEach((stepExecution) => {
-    const computedPath = [
-      ...(stepExecution.scopeStack ? flattenStackFrames(stepExecution.scopeStack) : []),
-      stepExecution.stepId,
-    ];
-    const key = computedPath.join('>');
-    computedPathsMap.set(stepExecution.id!, computedPath);
-    stepExecutionsMap.set(key, {
-      ...stepExecution,
+  stepExecutions
+    .filter((stepExecution) => isVisibleStepType(stepExecution.stepType!))
+    .forEach((stepExecution) => {
+      const computedPath = [
+        ...(stepExecution.scopeStack ? flattenStackFrames(stepExecution.scopeStack) : []),
+        stepExecution.stepId,
+      ];
+      const key = computedPath.join('>');
+      computedPathsMap.set(stepExecution.id, computedPath);
+      stepExecutionsMap.set(key, {
+        ...stepExecution,
+      });
     });
-  });
 
   for (const { id } of stepExecutionsMap.values()) {
     const computedPath = computedPathsMap.get(id!)!;

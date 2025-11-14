@@ -151,7 +151,6 @@
     "xpack.securitySolutionServerless": "solutions/security/plugins/security_solution_serverless",
     "xpack.sessionView": "solutions/security/plugins/session_view",
     "xpack.streams": [
-      "solutions/observability/plugins/observability_streams_wrapper",
       "platform/plugins/shared/streams_app"
     ],
     "xpack.slo": "solutions/observability/plugins/slo",

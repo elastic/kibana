@@ -19,15 +19,13 @@ import type { IClickActionDescriptor } from './types';
 import type { OnActionDismiss } from './types';
 import extendSessionIcon from './icons/extend_session.svg';
 import type { UISession } from '../../../types';
-import { BACKGROUND_SEARCH_FEATURE_FLAG_KEY } from '../../../../constants';
 interface ExtendButtonProps {
   searchSession: UISession;
   api: SearchSessionsMgmtAPI;
-  hasBackgroundSearchEnabled: boolean;
 }
 
 const ExtendConfirm = ({ ...props }: ExtendButtonProps & { onActionDismiss: OnActionDismiss }) => {
-  const { searchSession, api, onActionDismiss, hasBackgroundSearchEnabled } = props;
+  const { searchSession, api, onActionDismiss } = props;
   const { id, name, expires } = searchSession;
   const [isLoading, setIsLoading] = useState(false);
   const extendByDuration = moment.duration(api.getExtendByDuration());
@@ -35,11 +33,7 @@ const ExtendConfirm = ({ ...props }: ExtendButtonProps & { onActionDismiss: OnAc
   const newExpiration = moment(expires).add(extendByDuration);
 
   const confirmModalTitleId = useGeneratedHtmlId();
-
-  const title = i18n.translate('data.mgmt.searchSessions.extendModal.title', {
-    defaultMessage: 'Extend search session expiration',
-  });
-  const bgsTitle = i18n.translate('data.mgmt.searchSessions.extendModal.backgroundSearchTitle', {
+  const title = i18n.translate('data.mgmt.searchSessions.extendModal.backgroundSearchTitle', {
     defaultMessage: 'Extend background search expiration',
   });
 
@@ -49,30 +43,19 @@ const ExtendConfirm = ({ ...props }: ExtendButtonProps & { onActionDismiss: OnAc
   const extend = i18n.translate('data.mgmt.searchSessions.extendModal.dontExtendButton', {
     defaultMessage: 'Cancel',
   });
-  const message = i18n.translate('data.mgmt.searchSessions.extendModal.extendMessage', {
+  const message = i18n.translate('data.mgmt.searchSessions.extendModal.backgroundSearchMessage', {
     defaultMessage:
-      "The search session ''{name}'' expiration would be extended until {newExpires}.",
+      "The background search ''{name}'' expiration would be extended until {newExpires}.",
     values: {
       name,
       newExpires: newExpiration.toLocaleString(),
     },
   });
-  const bgsMessage = i18n.translate(
-    'data.mgmt.searchSessions.extendModal.backgroundSearchMessage',
-    {
-      defaultMessage:
-        "The background search ''{name}'' expiration would be extended until {newExpires}.",
-      values: {
-        name,
-        newExpires: newExpiration.toLocaleString(),
-      },
-    }
-  );
 
   return (
     <EuiConfirmModal
       aria-labelledby={confirmModalTitleId}
-      title={hasBackgroundSearchEnabled ? bgsTitle : title}
+      title={title}
       titleProps={{ id: confirmModalTitleId }}
       onCancel={onActionDismiss}
       onConfirm={async () => {
@@ -87,7 +70,7 @@ const ExtendConfirm = ({ ...props }: ExtendButtonProps & { onActionDismiss: OnAc
       defaultFocusedButton="confirm"
       buttonColor="primary"
     >
-      {hasBackgroundSearchEnabled ? bgsMessage : message}
+      {message}
     </EuiConfirmModal>
   );
 };
@@ -102,15 +85,7 @@ export const createExtendActionDescriptor = (
   onClick: async () => {
     const ref = core.overlays.openModal(
       toMountPoint(
-        <ExtendConfirm
-          hasBackgroundSearchEnabled={core.featureFlags.getBooleanValue(
-            BACKGROUND_SEARCH_FEATURE_FLAG_KEY,
-            false
-          )}
-          onActionDismiss={() => ref?.close()}
-          searchSession={uiSession}
-          api={api}
-        />,
+        <ExtendConfirm onActionDismiss={() => ref?.close()} searchSession={uiSession} api={api} />,
         core
       )
     );

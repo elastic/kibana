@@ -28,6 +28,7 @@ import { retryUntil } from './create_resource_installation_helper.test';
 import { mlPluginMock } from '@kbn/ml-plugin/public/mocks';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { getDefaultAnonymizationFields } from '../../common/anonymization';
 
 jest.mock('../ai_assistant_data_clients/conversations', () => ({
   AIAssistantConversationsDataClient: jest.fn(),
@@ -138,6 +139,7 @@ describe('AI Assistant Service', () => {
       taskManager: taskManagerMock.createSetup(),
       productDocManager: Promise.resolve({
         getStatus: jest.fn(),
+        getStatuses: jest.fn(),
         install: jest.fn(),
         update: jest.fn(),
         updateAll: jest.fn(),
@@ -810,6 +812,70 @@ describe('AI Assistant Service', () => {
       );
 
       expect(clusterClient.indices.createDataStream).toHaveBeenCalledTimes(7);
+    });
+  });
+
+  describe('createDefaultAnonymizationFields', () => {
+    test('should create default anonymization fields', async () => {
+      (clusterClient.search as unknown as jest.Mock).mockResolvedValue({
+        hits: { hits: [], total: { value: 0 } },
+      });
+
+      const assistantService = new AIAssistantService(assistantServiceOpts);
+      await assistantService.createDefaultAnonymizationFields('test');
+
+      expect(clusterClient.bulk).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.arrayContaining([
+            { create: { _index: '.kibana-elastic-ai-assistant-anonymization-fields-test' } },
+          ]),
+        }),
+        expect.any(Object)
+      );
+    });
+
+    test('should not create default anonymization fields if they already exist', async () => {
+      const defaultAnonymizationFields = getDefaultAnonymizationFields('default');
+      (clusterClient.search as unknown as jest.Mock).mockResolvedValue({
+        hits: {
+          hits: [],
+          total: { value: defaultAnonymizationFields.length },
+        },
+      });
+
+      const assistantService = new AIAssistantService(assistantServiceOpts);
+      await assistantService.createDefaultAnonymizationFields('default');
+
+      expect(clusterClient.bulk).not.toHaveBeenCalled();
+    });
+
+    test('should create one default anonymization field when the last default anonymization field does not exist in the index', async () => {
+      const defaultAnonymizationFields = getDefaultAnonymizationFields('default');
+      // Mock the search response to return the default anonymization fields except the last one
+      const storedFieldsLength = defaultAnonymizationFields.length - 1;
+      const defaultFieldsExpectLast = defaultAnonymizationFields.slice(0, -1);
+      const lastField = defaultAnonymizationFields[storedFieldsLength];
+      (clusterClient.search as unknown as jest.Mock).mockResolvedValue({
+        hits: {
+          hits: [...defaultFieldsExpectLast.map((field) => ({ _source: field }))],
+          total: { value: storedFieldsLength },
+        },
+      });
+
+      const assistantService = new AIAssistantService(assistantServiceOpts);
+      await assistantService.createDefaultAnonymizationFields('test');
+
+      // it should create the last default anonymization field
+      expect(clusterClient.bulk).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.arrayContaining([
+            expect.objectContaining({
+              field: lastField.field,
+            }),
+          ]),
+        }),
+        expect.any(Object)
+      );
     });
   });
 });

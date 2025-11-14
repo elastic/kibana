@@ -37,6 +37,27 @@ export class UnifiedTabsPageObject extends FtrService {
     }
   }
 
+  public async hasUnsavedIndicator(index?: number) {
+    if (index === undefined) return false;
+
+    const tabElements = await this.getTabElements();
+    if (index < 0 || index >= tabElements.length) {
+      throw new Error(`Tab index ${index} is out of bounds`);
+    }
+
+    const tabElement = tabElements[index];
+    const tab = (await tabElement?.getAttribute('data-test-subj')) || '';
+    const tabId = tab.replace(/^unifiedTabs_tab_/, '');
+    const tabChangesIndicator = `unifiedTabs__tabChangesIndicator-${tabId}`;
+
+    return await this.testSubjects.exists(tabChangesIndicator);
+  }
+
+  public async getSelectedTabLabel() {
+    const selectedTab = await this.getSelectedTab();
+    return selectedTab?.label;
+  }
+
   public async getTabWidths() {
     const tabElements = await this.getTabElements();
     return await Promise.all(
@@ -145,7 +166,11 @@ export class UnifiedTabsPageObject extends FtrService {
     const labelElement = await this.find.byCssSelector(
       '[data-test-subj^="unifiedTabs_editTabLabelInput_"]'
     );
-    await labelElement.clearValue();
+    await labelElement.clearValueWithKeyboard();
+    await this.retry.waitFor('the tab label input to be empty', async () => {
+      const value = await labelElement.getAttribute('value');
+      return value === '';
+    });
     await labelElement.type(newLabel, { charByChar: true });
     await this.browser.pressKeys(this.browser.keys.ENTER);
     await this.retry.waitFor('the tab label to change', async () => {
@@ -212,5 +237,116 @@ export class UnifiedTabsPageObject extends FtrService {
 
   public async isTabsBarVisible() {
     return await this.testSubjects.exists('unifiedTabs_tabsBar');
+  }
+
+  public async isTabPreviewVisible() {
+    return await this.testSubjects.exists('unifiedTabs_tabPreview_contentPanel');
+  }
+
+  public async closeTabPreviewWithEsc() {
+    if (await this.isTabPreviewVisible()) {
+      await this.browser.pressKeys(this.browser.keys.ESCAPE);
+      await this.retry.waitFor('tab preview to close', async () => {
+        return !(await this.isTabPreviewVisible());
+      });
+    }
+  }
+
+  public async openTabPreview(index: number) {
+    const tabElements = await this.getTabElements();
+    if (index < 0 || index >= tabElements.length) {
+      throw new Error(`Tab index ${index} is out of bounds`);
+    }
+    await this.testSubjects.moveMouseTo('breadcrumbs');
+    const tabElement = tabElements[index];
+    const controlElement = await tabElement.findByCssSelector(
+      '[data-test-subj^="unifiedTabs_selectTabBtn_"]'
+    );
+    await controlElement.moveMouseTo();
+    await this.retry.waitFor('tab preview to appear', async () => {
+      return await this.isTabPreviewVisible();
+    });
+  }
+
+  public async getTabPreviewContent(index: number) {
+    await this.openTabPreview(index);
+
+    const getVisibleText = async (selector: string): Promise<string> => {
+      const elements = await this.find.allByCssSelector(`[data-test-subj^="${selector}"]`, 0);
+      if (elements?.length > 1) {
+        throw new Error(
+          `Expected exactly one element for selector ${selector}, but found ${elements.length}`
+        );
+      }
+      if (elements?.length === 0) {
+        return '';
+      }
+      return await elements[0].getVisibleText();
+    };
+
+    const content = {
+      title: await getVisibleText('unifiedTabs_tabPreview_title_'),
+      query: await getVisibleText('unifiedTabs_tabPreviewCodeBlock_'),
+      label: await getVisibleText('unifiedTabs_tabPreview_label_'),
+    };
+
+    return content;
+  }
+
+  public async openTabsBarMenu() {
+    await this.testSubjects.click('unifiedTabs_tabsBarMenuButton');
+    await this.retry.waitFor('the tabs bar menu to open', async () => {
+      return await this.testSubjects.exists('unifiedTabs_tabsBarMenuPanel');
+    });
+  }
+
+  public async closeTabsBarMenu() {
+    await this.testSubjects.click('unifiedTabs_tabsBarMenuButton');
+    await this.retry.waitFor('the tabs bar menu to close', async () => {
+      return !(await this.testSubjects.exists('unifiedTabs_tabsBarMenuPanel'));
+    });
+    await this.browser.pressKeys(this.browser.keys.ESCAPE); // cancel the tooltip if it is open
+  }
+
+  public async getRecentlyClosedTabLabels() {
+    await this.openTabsBarMenu();
+    const recentlyClosedItems = await this.find.allByCssSelector(
+      '[data-test-subj^="unifiedTabs_tabsMenu_recentlyClosedTab_"]'
+    );
+    const labels = [];
+    for (const item of recentlyClosedItems) {
+      labels.push(await item.getVisibleText());
+    }
+    await this.closeTabsBarMenu();
+    return labels;
+  }
+
+  public async restoreRecentlyClosedTab(index: number) {
+    const currentNumberOfTabs = await this.getNumberOfTabs();
+    await this.openTabsBarMenu();
+    const recentlyClosedItems = await this.find.allByCssSelector(
+      '[data-test-subj^="unifiedTabs_tabsMenu_recentlyClosedTab_"]'
+    );
+    if (index < 0 || index >= recentlyClosedItems.length) {
+      throw new Error(`Recently closed tab index ${index} is out of bounds`);
+    }
+    await recentlyClosedItems[index].click();
+    await this.retry.waitFor('the tab to be restored', async () => {
+      const newNumberOfTabs = await this.getNumberOfTabs();
+      return newNumberOfTabs === currentNumberOfTabs + 1;
+    });
+  }
+
+  public async clearRecentlyClosedTabs() {
+    await this.openTabsBarMenu();
+    const buttonTestId = 'unifiedTabs_tabsMenu_clearRecentlyClosed';
+    const clearButtonExists = await this.testSubjects.exists(buttonTestId);
+    if (clearButtonExists) {
+      await this.testSubjects.click(buttonTestId);
+      await this.retry.waitFor('recently closed tabs to be cleared', async () => {
+        return !(await this.testSubjects.exists(buttonTestId));
+      });
+    }
+    await this.closeTabsBarMenu();
   }
 }

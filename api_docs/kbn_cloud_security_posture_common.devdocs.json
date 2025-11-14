@@ -2007,7 +2007,37 @@
         "label": "CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX",
         "description": [],
         "signature": [
-          "\"security_solution_cdr_latest_misconfigurations\""
+          "\"security_solution_cdr_latest_misconfigurations_v2\""
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_LEGACY_VERSIONS",
+        "type": "Array",
+        "tags": [],
+        "label": "CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_LEGACY_VERSIONS",
+        "description": [],
+        "signature": [
+          "string[]"
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_OLD_VERSIONS",
+        "type": "Array",
+        "tags": [],
+        "label": "CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_OLD_VERSIONS",
+        "description": [],
+        "signature": [
+          "string[]"
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
         "deprecated": false,
@@ -2046,11 +2076,86 @@
       },
       {
         "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX",
+        "type": "string",
+        "tags": [],
+        "label": "CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX",
+        "description": [],
+        "signature": [
+          "\"security_solution_cdr_latest_vulnerabilities_v2\""
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX_LEGACY_VERSIONS",
+        "type": "Array",
+        "tags": [],
+        "label": "CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX_LEGACY_VERSIONS",
+        "description": [],
+        "signature": [
+          "string[]"
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX_OLD_VERSIONS",
+        "type": "Array",
+        "tags": [],
+        "label": "CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX_OLD_VERSIONS",
+        "description": [],
+        "signature": [
+          "string[]"
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.CDR_VULNERABILITIES_DATA_VIEW_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "CDR_VULNERABILITIES_DATA_VIEW_NAME",
+        "description": [],
+        "signature": [
+          "\"Latest Cloud Security Vulnerabilities\""
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
         "id": "def-common.CDR_VULNERABILITIES_INDEX_PATTERN",
         "type": "string",
         "tags": [],
         "label": "CDR_VULNERABILITIES_INDEX_PATTERN",
         "description": [],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.CLOUD_SECURITY_PLUGIN_VERSION",
+        "type": "string",
+        "tags": [],
+        "label": "CLOUD_SECURITY_PLUGIN_VERSION",
+        "description": [],
+        "signature": [
+          "\"1.9.0\""
+        ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,

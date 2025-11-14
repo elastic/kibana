@@ -6,17 +6,17 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
 import { findFinalWord, findPreviousWord } from '../../../definitions/utils/autocomplete/helpers';
 import { buildFieldsDefinitions } from '../../../definitions/utils/functions';
 import { getOperatorSuggestions } from '../../../definitions/utils/operators';
 import { unescapeColumnName } from '../../../definitions/utils/shared';
-import type { ESQLCommand, ESQLSource } from '../../../types';
+import type { ESQLAstAllCommands, ESQLSource } from '../../../types';
 import {
   commaCompleteItem,
   getNewUserDefinedColumnSuggestion,
   pipeCompleteItem,
 } from '../../complete_items';
-import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
 import type { ESQLColumnData, ESQLPolicy, ICommandCallbacks } from '../../types';
 import { Location, type ICommandContext, type ISuggestionItem } from '../../types';
 import {
@@ -33,7 +33,7 @@ import {
 
 export async function autocomplete(
   query: string,
-  command: ESQLCommand,
+  command: ESQLAstAllCommands,
   callbacks?: ICommandCallbacks,
   context?: ICommandContext,
   cursorPosition?: number
@@ -152,7 +152,7 @@ export async function autocomplete(
       const word = findPreviousWord(innerText);
       if (policyMetadata.enrichFields.includes(unescapeColumnName(word))) {
         // complete field name
-        return [pipeCompleteItem, { ...commaCompleteItem, command: TRIGGER_SUGGESTION_COMMAND }];
+        return [pipeCompleteItem, withAutoSuggest(commaCompleteItem)];
       } else {
         // not recognized as a field name, assume new user-defined column name
         return getOperatorSuggestions(
@@ -170,7 +170,7 @@ export async function autocomplete(
     }
 
     case Position.WITH_AFTER_COMPLETE_CLAUSE: {
-      return [pipeCompleteItem, { ...commaCompleteItem, command: TRIGGER_SUGGESTION_COMMAND }];
+      return [pipeCompleteItem, withAutoSuggest(commaCompleteItem)];
     }
 
     default:

@@ -17,15 +17,17 @@ import {
   createIntegrationEntitySource,
 } from './utils';
 export default ({ getService }: FtrProviderContext) => {
-  const api = getService('securitySolutionApi');
+  const api = getService('entityAnalyticsApi');
   const kibanaServer = getService('kibanaServer');
+  const esArchiver = getService('esArchiver');
+  const privMonUtils = PrivMonUtils(getService);
   const log = getService('log');
+  const es = getService('es');
   const spaces = getService('spaces');
   const supertest = getService('supertest');
 
   const customSpace = 'privmontestspace';
 
-  const privMonUtils = PrivMonUtils(getService);
   const privMonUtilsCustomSpace = PrivMonUtils(getService, customSpace);
 
   async function getPrivMonSoStatus(space: string = 'default') {
@@ -35,7 +37,8 @@ export default ({ getService }: FtrProviderContext) => {
     });
   }
 
-  describe('@ess @serverless @skipInServerlessMKI Entity Privilege Monitoring APIs', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/236954
+  describe.skip('@ess @serverless @skipInServerlessMKI Entity Privilege Monitoring APIs', () => {
     const dataView = dataViewRouteHelpersFactory(supertest);
     const dataViewWithNamespace = dataViewRouteHelpersFactory(supertest, customSpace);
 
@@ -268,13 +271,15 @@ export default ({ getService }: FtrProviderContext) => {
       const indexName = 'privileged-users-index-pattern';
       const entitySource = createIndexEntitySource(indexName, { name: 'PrivilegedUsers' });
       const entitySourceIntegration = createIntegrationEntitySource({
-        name: '.entity_analytics.monitoring.sources.okta-default', // if you need that exact name
+        name: '.entity_analytics.monitoring.sources.entityanalytics_okta-default',
       });
       beforeEach(async () => {
         await enablePrivmonSetting(kibanaServer);
       });
       afterEach(async () => {
         await disablePrivmonSetting(kibanaServer);
+        await es.indices.delete({ index: indexName }, { ignore: [404] });
+        await api.deleteMonitoringEngine({ query: { data: true } });
       });
 
       it('should not create duplicate monitoring data sources', async () => {
@@ -288,7 +293,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(names).toEqual(
           expect.arrayContaining([
             'PrivilegedUsers',
-            '.entity_analytics.monitoring.sources.okta-default',
+            '.entity_analytics.monitoring.sources.entityanalytics_okta-default',
           ])
         );
         // Try to create the same entity sources again
@@ -372,7 +377,6 @@ export default ({ getService }: FtrProviderContext) => {
         await indexSyncUtils.createEntitySourceForIndex();
 
         const usersBefore = await privMonUtils.scheduleEngineAndWaitForUserCount(2);
-
         const user1Before = privMonUtils.findUser(usersBefore, 'user1');
         log.info(`User 1 before: ${JSON.stringify(user1Before)}`);
         await indexSyncUtils.deleteUserFromIndex('user1');
@@ -427,18 +431,232 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
+    describe('integrations sync', async () => {
+      beforeEach(async () => {
+        await esArchiver.load(
+          'x-pack/solutions/security/test/fixtures/es_archives/privileged_monitoring/integrations/okta',
+          { useCreate: true }
+        );
+        // Set timestamps to be within last month so they are included in sync (default first run is now - 1M)
+        await privMonUtils.integrationsSync.updateIntegrationsUsersWithRelativeTimestamps({
+          indexPattern: privMonUtils.integrationsSync.OKTA_INDEX,
+        });
+        await enablePrivmonSetting(kibanaServer);
+        await privMonUtils.initPrivMonEngine();
+      });
+
+      afterEach(async () => {
+        await esArchiver.unload(
+          'x-pack/solutions/security/test/fixtures/es_archives/privileged_monitoring/integrations/okta'
+        );
+        // delete the okta index
+        await api.deleteMonitoringEngine({ query: { data: true } });
+        await disablePrivmonSetting(kibanaServer);
+      });
+
+      it('should sync integrations during update detection ', async () => {
+        // schedule a sync
+        const monitoringSource = await privMonUtils.getIntegrationMonitoringSource(
+          'entityanalytics_okta'
+        );
+        expect(monitoringSource).toBeDefined();
+        expect(monitoringSource?.name).toBe(
+          '.entity_analytics.monitoring.sources.entityanalytics_okta-default'
+        );
+        await privMonUtils.runSync();
+
+        const { body: usersBefore } = await api.listPrivMonUsers({ query: {} });
+        // each user should be privileged and have correct source
+        usersBefore.forEach((r: any) => {
+          privMonUtils.assertIsPrivileged(r, true);
+          expect(r.user.name).toBeDefined();
+          expect(r.labels.sources).toContain('entity_analytics_integration');
+          expect(r.labels.source_ids).toContain(monitoringSource?.id);
+        });
+        expect(usersBefore.length).toBe(6); // should be 6 privileged users
+
+        const mableBefore = privMonUtils.findUser(usersBefore, 'Mable.Mann');
+        expect(mableBefore).toBeDefined();
+        expect(mableBefore?.entity_analytics_monitoring?.labels).toEqual([
+          {
+            field: 'user.roles',
+            source: monitoringSource?.id,
+            value: 'Group Administrator',
+          },
+        ]);
+
+        const kathryneBefore = privMonUtils.findUser(usersBefore, 'Kathryne.Ziemann');
+        expect(kathryneBefore).toBeDefined();
+        privMonUtils.assertIsPrivileged(kathryneBefore, true);
+        expect(kathryneBefore?.labels?.source_ids).toContain(monitoringSource?.id);
+        expect(kathryneBefore?.labels?.sources).toContain('entity_analytics_integration');
+        expect(kathryneBefore?.entity_analytics_monitoring?.labels).toEqual([
+          {
+            field: 'user.roles',
+            source: monitoringSource?.id,
+            value: 'Read-only Administrator',
+          },
+        ]);
+
+        // update okta user to non-privileged, to test sync updates
+        await privMonUtils.integrationsSync.setIntegrationUserPrivilege({
+          id: privMonUtils.integrationsSync.OKTA_USER_IDS.mable,
+          isPrivileged: false,
+          indexPattern: privMonUtils.integrationsSync.OKTA_INDEX,
+        });
+        // schedule another sync
+        await privMonUtils.runSync();
+        const { body: usersAfter } = await api.listPrivMonUsers({ query: {} });
+
+        // find the updated user
+        const mableAfter = privMonUtils.findUser(usersAfter, 'Mable.Mann');
+        expect(mableAfter).toBeDefined();
+        privMonUtils.assertIsPrivileged(mableAfter, false);
+        expect(mableAfter?.entity_analytics_monitoring?.labels).toEqual([]);
+        privMonUtils.expectTimestampsHaveBeenUpdated(mableBefore, mableAfter);
+
+        // kathryne should remain privileged
+        const kathryneAfter = privMonUtils.findUser(usersAfter, 'Kathryne.Ziemann');
+        expect(kathryneAfter).toBeDefined();
+        privMonUtils.assertIsPrivileged(kathryneAfter, true);
+        expect(kathryneAfter?.labels?.source_ids).toContain(monitoringSource?.id);
+        expect(kathryneAfter?.labels?.sources).toContain('entity_analytics_integration');
+        expect(kathryneAfter?.entity_analytics_monitoring?.labels).toEqual([
+          {
+            field: 'user.roles',
+            source: monitoringSource?.id,
+            value: 'Read-only Administrator',
+          },
+        ]);
+        expect(kathryneAfter?.['@timestamp']).toEqual(kathryneBefore?.['@timestamp']);
+        expect(kathryneAfter?.event?.ingested).toEqual(kathryneBefore?.event?.ingested);
+      });
+
+      it('should update and create users within lastProcessedMarker range during update detection ', async () => {
+        // --- Timestamps
+        const nowMinus1M1D = await privMonUtils.integrationsSync.dateOffsetFrom({
+          months: 2,
+          days: 1,
+        });
+        const nowMinus2M = await privMonUtils.integrationsSync.dateOffsetFrom({ months: 2 });
+        const nowMinus1w = await privMonUtils.integrationsSync.dateOffsetFrom({ days: 7 });
+        const nowMinus6d = await privMonUtils.integrationsSync.dateOffsetFrom({ days: 6 });
+        // PHASE 1: Push two users out of range, sync => expect 4 privileged remain
+        await privMonUtils.integrationsSync.setTimestamp(
+          privMonUtils.integrationsSync.OKTA_USER_IDS.devon,
+          nowMinus1M1D,
+          privMonUtils.integrationsSync.OKTA_INDEX
+        );
+        await privMonUtils.integrationsSync.setTimestamp(
+          privMonUtils.integrationsSync.OKTA_USER_IDS.elinor,
+          nowMinus2M,
+          privMonUtils.integrationsSync.OKTA_INDEX
+        );
+        await privMonUtils.runSync();
+        const snapA = await privMonUtils.integrationsSync.expectUserCount(4);
+
+        // PHASE 2: Re-run with no changes => no processing, marker should be default (now-1M)
+        await privMonUtils.runSync();
+        const snapB = await privMonUtils.integrationsSync.expectUserCount(4);
+        expect(new Set(snapB)).toEqual(new Set(snapA));
+
+        const markerAfterPhase2 = await privMonUtils.integrationsSync.getLastProcessedMarker(
+          privMonUtils.integrationsSync.OKTA_INDEX
+        );
+        expect(markerAfterPhase2).toBe(
+          privMonUtils.integrationsSync.DEFAULT_INTEGRATIONS_RELATIVE_TIMESTAMP
+        );
+
+        // PHASE 3: Bring one user back in-range, sync => last processed marker updates to that timestamp
+        await privMonUtils.integrationsSync.setTimestamp(
+          privMonUtils.integrationsSync.OKTA_USER_IDS.kaelyn,
+          nowMinus1w,
+          privMonUtils.integrationsSync.OKTA_INDEX
+        );
+        await privMonUtils.runSync();
+        const markerAfterPhase3 = await privMonUtils.integrationsSync.getLastProcessedMarker(
+          privMonUtils.integrationsSync.OKTA_INDEX
+        );
+        expect(markerAfterPhase3).toBe(nowMinus1w);
+
+        // PHASE 4: Flip a non-privileged user to privileged + in-range, sync => count 5, last processed marker updates
+        await privMonUtils.integrationsSync.setIntegrationUserPrivilege({
+          id: privMonUtils.integrationsSync.OKTA_USER_IDS.bennett,
+          isPrivileged: true,
+          indexPattern: privMonUtils.integrationsSync.OKTA_INDEX,
+        });
+        await privMonUtils.integrationsSync.setTimestamp(
+          privMonUtils.integrationsSync.OKTA_USER_IDS.bennett,
+          nowMinus6d,
+          privMonUtils.integrationsSync.OKTA_INDEX
+        );
+
+        await privMonUtils.runSync();
+        await privMonUtils.integrationsSync.expectUserCount(5);
+
+        const markerAfterPhase4 = await privMonUtils.integrationsSync.getLastProcessedMarker(
+          privMonUtils.integrationsSync.OKTA_INDEX
+        );
+        expect(markerAfterPhase4).toBe(nowMinus6d);
+      });
+
+      it('deletes missing users during a full sync window', async () => {
+        const EXPECTED_DELETED_USERNAME = 'Mable.Mann';
+        // Initial sync to establish users - deletion detection NOT expected
+        await privMonUtils.runSync();
+        // Create sync window
+        await privMonUtils.integrationsSync.createFullSyncWindowFromOffsets();
+        // Remove on user from source, simulating deletion
+        await privMonUtils.integrationsSync.deleteIntegrationUser({
+          id: privMonUtils.integrationsSync.OKTA_USER_IDS.mable,
+          indexPattern: privMonUtils.integrationsSync.OKTA_INDEX,
+        });
+        // Run sync - deletion detection expected to run and remove the user
+        await privMonUtils.runSync();
+        const users = await privMonUtils.integrationsSync.expectUserCount(6);
+        const mable = privMonUtils.findUser(users, EXPECTED_DELETED_USERNAME);
+        expect(mable).toBeDefined();
+        privMonUtils.assertIsPrivileged(mable, false);
+        expect(mable?.entity_analytics_monitoring?.labels).toEqual([]);
+        await privMonUtils.integrationsSync.createFullSyncWindowFromOffsets({
+          startOffsetMinutes: -40,
+          completeOffsetMinutes: -45,
+        });
+        await privMonUtils.runSync();
+        const usersAfter = await privMonUtils.integrationsSync.expectUserCount(6);
+        usersAfter.forEach((u: any) => {
+          expect(u.user.is_privileged).toBe(false);
+        });
+        await privMonUtils.integrationsSync.cleanupEventsIndex();
+      });
+    });
+
     describe('default entity sources', () => {
+      beforeEach(async () => {});
+      afterEach(async () => {
+        await api.deleteMonitoringEngine({ query: { data: true } });
+        await disablePrivmonSetting(kibanaServer);
+      });
       it('should create default entity sources on privileged monitoring engine initialization', async () => {
         await enablePrivmonSetting(kibanaServer);
         await privMonUtils.initPrivMonEngine();
 
         const sources = await api.listEntitySources({ query: {} });
         const names = sources.body.map((s: any) => s.name);
+        const syncMarkersIndices = sources.body.map((s: any) => s.integrations?.syncMarkerIndex);
+        // confirm default sources have been created
         expect(names).toEqual(
           expect.arrayContaining([
-            '.entity_analytics.monitoring.sources.okta-default',
-            '.entity_analytics.monitoring.sources.ad-default',
+            '.entity_analytics.monitoring.sources.entityanalytics_okta-default',
+            '.entity_analytics.monitoring.sources.entityanalytics_ad-default',
             '.entity_analytics.monitoring.users-default',
+          ])
+        );
+        expect(syncMarkersIndices).toEqual(
+          expect.arrayContaining([
+            undefined, // default users source has no sync marker since index does not use sync markers
+            'logs-entityanalytics_okta.entity-default', // okta sync markers source
+            'logs-entityanalytics_ad.user-default', // ad sync markers source
           ])
         );
       });

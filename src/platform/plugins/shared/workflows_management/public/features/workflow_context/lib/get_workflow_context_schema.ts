@@ -35,13 +35,35 @@ export function getWorkflowContextSchema(definition: WorkflowYaml) {
               valueSchema = z.any();
               if (opts.length > 0) {
                 const literals = opts.map((o) => z.literal(o)) as [
-                  z.ZodLiteral<any>,
-                  z.ZodLiteral<any>,
-                  ...z.ZodLiteral<any>[]
+                  z.ZodLiteral<unknown>,
+                  z.ZodLiteral<unknown>,
+                  ...z.ZodLiteral<unknown>[]
                 ];
                 valueSchema = z.union(literals);
               }
               break;
+            case 'array': {
+              // Create a union of all possible array types to show comprehensive type information
+              // This allows the type description to show "string[] | number[] | boolean[]"
+              const arraySchemas = [z.array(z.string()), z.array(z.number()), z.array(z.boolean())];
+              const { minItems, maxItems } = input;
+              const applyConstraints = (
+                schema: z.ZodArray<z.ZodString | z.ZodNumber | z.ZodBoolean>
+              ) => {
+                let s = schema;
+                if (minItems != null) s = s.min(minItems);
+                if (maxItems != null) s = s.max(maxItems);
+                return s;
+              };
+              valueSchema = z.union(
+                arraySchemas.map(applyConstraints) as [
+                  z.ZodArray<z.ZodString>,
+                  z.ZodArray<z.ZodNumber>,
+                  z.ZodArray<z.ZodBoolean>
+                ]
+              );
+              break;
+            }
             default:
               valueSchema = z.any();
               break;
@@ -57,7 +79,10 @@ export function getWorkflowContextSchema(definition: WorkflowYaml) {
     // with the const name as the key and inferred type as the value
     consts: z.object({
       ...Object.fromEntries(
-        Object.entries(definition.consts ?? {}).map(([key, value]) => [key, inferZodType(value)])
+        Object.entries(definition.consts ?? {}).map(([key, value]) => [
+          key,
+          inferZodType(value, { isConst: true }),
+        ])
       ),
     }),
   });

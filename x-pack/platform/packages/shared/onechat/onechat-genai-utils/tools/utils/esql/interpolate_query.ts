@@ -5,31 +5,30 @@
  * 2.0.
  */
 
+import { esql, WrappingPrettyPrinter, type WrappingPrettyPrinterOptions } from '@kbn/esql-ast';
+
+const defaultPrintOpts: WrappingPrettyPrinterOptions = {
+  wrap: 80,
+  pipeTab: '',
+};
+
 /**
  * Interpolates parameters into a templated ESQL query string.
  *
  * @param template The ESQL query template with '?' placeholders (e.g., "?user_id").
  * @param params An object where keys match the placeholder names and values are the data to insert.
+ * @param printOpts (optional) Options for the pretty printer.
  * @returns The interpolated ESQL query string.
  *
  * **Important** This is meant as a workaround until a proper util gets exposed from `@kbn/esql-ast`,
  *               and likely doesn't cover all edge cases.
  */
-export const interpolateEsqlQuery = (template: string, params: Record<string, unknown>): string => {
-  let interpolatedQuery = template;
-
-  for (const key in params) {
-    if (Object.prototype.hasOwnProperty.call(params, key)) {
-      const value = params[key];
-      const placeholder = new RegExp(`\\?${key}\\b`, 'g');
-
-      // Format the value based on its type
-      const formattedValue = typeof value === 'string' ? `"${value}"` : String(value);
-
-      // Replace all occurrences of the placeholder
-      interpolatedQuery = interpolatedQuery.replace(placeholder, formattedValue);
-    }
-  }
-
-  return interpolatedQuery;
+export const interpolateEsqlQuery = (
+  template: string,
+  params: Record<string, unknown>,
+  printOpts: WrappingPrettyPrinterOptions = defaultPrintOpts
+): string => {
+  const query = esql(template, params);
+  query.inlineParams();
+  return WrappingPrettyPrinter.print(query.ast, printOpts);
 };

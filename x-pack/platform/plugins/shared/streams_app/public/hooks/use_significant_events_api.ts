@@ -6,10 +6,10 @@
  */
 
 import { useAbortController } from '@kbn/react-hooks';
-import type { StreamQueryKql, System } from '@kbn/streams-schema';
+import type { StreamQueryKql, Feature } from '@kbn/streams-schema';
 import { type SignificantEventsGenerateResponse } from '@kbn/streams-schema';
 import { useKibana } from './use_kibana';
-import { NO_SYSTEM } from '../components/stream_detail_significant_events_view/add_significant_event_flyout/utils/default_query';
+import { NO_FEATURE } from '../components/stream_detail_significant_events_view/add_significant_event_flyout/utils/default_query';
 
 interface SignificantEventsApiBulkOperationCreate {
   index: StreamQueryKql;
@@ -26,7 +26,8 @@ interface SignificantEventsApi {
   upsertQuery: (query: StreamQueryKql) => Promise<void>;
   removeQuery: (id: string) => Promise<void>;
   bulk: (operations: SignificantEventsApiBulkOperation[]) => Promise<void>;
-  generate: (connectorId: string, system?: System) => SignificantEventsGenerateResponse;
+  generate: (connectorId: string, feature?: Feature) => SignificantEventsGenerateResponse;
+  abort: () => void;
 }
 
 export function useSignificantEventsApi({
@@ -46,11 +47,11 @@ export function useSignificantEventsApi({
     },
   } = useKibana();
 
-  const { signal } = useAbortController();
+  const { signal, abort, refresh } = useAbortController();
 
   return {
-    upsertQuery: async ({ system, kql, title, id }) => {
-      const effectiveSystem = system && system.name === NO_SYSTEM.name ? undefined : system;
+    upsertQuery: async ({ feature, kql, title, id }) => {
+      const effectiveFeature = feature && feature.name === NO_FEATURE.name ? undefined : feature;
       await streamsRepositoryClient.fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
         signal,
         params: {
@@ -61,7 +62,7 @@ export function useSignificantEventsApi({
           body: {
             kql,
             title,
-            system: effectiveSystem,
+            feature: effectiveFeature,
           },
         },
       });
@@ -93,7 +94,7 @@ export function useSignificantEventsApi({
         },
       });
     },
-    generate: (connectorId: string, system?: System) => {
+    generate: (connectorId: string, feature?: Feature) => {
       return streamsRepositoryClient.stream(
         `POST /api/streams/{name}/significant_events/_generate 2023-10-31`,
         {
@@ -108,11 +109,15 @@ export function useSignificantEventsApi({
               to: new Date(end).toString(),
             },
             body: {
-              system,
+              feature,
             },
           },
         }
       );
+    },
+    abort: () => {
+      abort();
+      refresh();
     },
   };
 }

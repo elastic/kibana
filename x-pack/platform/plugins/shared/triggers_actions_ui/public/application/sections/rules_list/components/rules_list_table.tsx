@@ -169,6 +169,7 @@ export function convertRulesToTableItems(opts: ConvertRulesToTableItemsOpts): Ru
         (canExecuteActions || (!canExecuteActions && !rule.actions.length)),
       enabledInLicense: !!ruleTypeIndex.get(rule.ruleTypeId)?.enabledInLicense,
       showIntervalWarning: parseDuration(rule.schedule.interval) < minimumDuration,
+      isInternallyManaged: ruleTypeIndex.get(rule.ruleTypeId)!.isInternallyManaged,
     };
   });
 }
@@ -373,7 +374,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
           <EuiCheckbox
             id={`ruleListTable_select_${rule.id}}`}
             onChange={() => onSelectRow(rule)}
-            disabled={!rule.isEditable}
+            disabled={!rule.isEditable || rule.isInternallyManaged}
             checked={isRowSelected(rule)}
             data-test-subj={`checkboxSelectRow-${rule.id}`}
           />
@@ -560,7 +561,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
                   await onSnoozeRule(rule, snoozeSchedule);
                 }}
                 unsnoozeRule={async (scheduleIds) => await onUnsnoozeRule(rule, scheduleIds)}
-                isRuleEditable={rule.isEditable}
+                isRuleEditable={rule.isEditable && !rule.isInternallyManaged}
               />
             </div>
           );
@@ -794,7 +795,9 @@ export const RulesListTable = (props: RulesListTableProps) => {
             >
               <EuiFlexItem grow={false} className="ruleSidebarItem">
                 <EuiFlexGroup justifyContent="flexEnd" gutterSize="xs">
-                  {rule.isEditable && isRuleTypeEditableInContext(rule.ruleTypeId) ? (
+                  {rule.isEditable &&
+                  isRuleTypeEditableInContext(rule.ruleTypeId) &&
+                  !rule.isInternallyManaged ? (
                     <EuiFlexItem grow={false} data-test-subj="ruleSidebarEditAction">
                       <EuiButtonIcon
                         color={'primary'}
@@ -815,7 +818,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
                       />
                     </EuiFlexItem>
                   ) : null}
-                  {rule.isEditable ? (
+                  {rule.isEditable && !rule.isInternallyManaged ? (
                     <EuiFlexItem grow={false} data-test-subj="ruleSidebarDeleteAction">
                       <EuiButtonIcon
                         color={'danger'}

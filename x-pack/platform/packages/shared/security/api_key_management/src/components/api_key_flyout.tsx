@@ -21,6 +21,7 @@ import {
   EuiFormRow,
   EuiHorizontalRule,
   EuiIcon,
+  EuiLink,
   EuiPanel,
   EuiSkeletonText,
   EuiSpacer,
@@ -57,7 +58,7 @@ import type {
   UpdateAPIKeyParams,
   UpdateAPIKeyResult,
 } from './api_keys_api_client';
-import { DocLink } from './doc_link';
+import { useDocLinks } from './doc_link';
 
 const TypeLabel = () => (
   <FormattedMessage
@@ -188,6 +189,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
   const {
     services: { http },
   } = useKibana();
+  const [docLinks] = useDocLinks();
   const [responseError, setResponseError] = useState<KibanaServerError | undefined>(undefined);
   const [{ value: roles, loading: isLoadingRoles }, getRoles] = useAsyncFn(() => {
     if (http) {
@@ -339,6 +341,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
               {responseError && (
                 <>
                   <EuiCallOut
+                    announceOnMount
                     data-test-subj="apiKeyFlyoutResponseError"
                     color="danger"
                     title={
@@ -357,6 +360,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                 !isOwner ? (
                   <>
                     <EuiCallOut
+                      announceOnMount
                       iconType="lock"
                       title={
                         <FormattedMessage
@@ -370,6 +374,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                 ) : hasExpired ? (
                   <>
                     <EuiCallOut
+                      announceOnMount
                       iconType="lock"
                       title={
                         <FormattedMessage
@@ -700,15 +705,16 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                       />
                     }
                     helpText={
-                      <DocLink
-                        app="elasticsearch"
-                        doc="security-api-create-cross-cluster-api-key.html#security-api-create-cross-cluster-api-key-request-body"
+                      <EuiLink
+                        href={docLinks.apis.createCrossClusterApiKey}
+                        target="_blank"
+                        external
                       >
                         <FormattedMessage
                           id="xpack.security.accountManagement.apiKeyFlyout.accessHelpText"
                           defaultMessage="Learn how to structure access permissions."
                         />
-                      </DocLink>
+                      </EuiLink>
                     }
                     fullWidth
                   >
@@ -835,15 +841,16 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                       </EuiPanel>
                       <FormRow
                         helpText={
-                          <DocLink
-                            app="elasticsearch"
-                            doc="security-api-create-api-key.html#security-api-create-api-key-request-body"
+                          <EuiLink
+                            href={docLinks.apis.createApiKeyRoleDescriptors}
+                            target="_blank"
+                            external
                           >
                             <FormattedMessage
                               id="xpack.security.accountManagement.apiKeyFlyout.roleDescriptorsHelpText"
                               defaultMessage="Learn how to structure role descriptors."
                             />
-                          </DocLink>
+                          </EuiLink>
                         }
                         fullWidth
                         data-test-subj="apiKeysRoleDescriptorsCodeEditor"
@@ -921,15 +928,12 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                     <FormRow
                       data-test-subj="apiKeysMetadataCodeEditor"
                       helpText={
-                        <DocLink
-                          app="elasticsearch"
-                          doc="security-api-create-api-key.html#security-api-create-api-key-request-body"
-                        >
+                        <EuiLink href={docLinks.apis.createApiKeyMetadata} target="_blank" external>
                           <FormattedMessage
                             id="xpack.security.accountManagement.apiKeyFlyout.metadataHelpText"
                             defaultMessage="Learn how to structure metadata."
                           />
-                        </DocLink>
+                        </EuiLink>
                       }
                       fullWidth
                     >

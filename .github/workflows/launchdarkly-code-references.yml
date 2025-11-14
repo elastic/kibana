@@ -14,6 +14,7 @@ jobs:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           fetch-depth: 11 # This value must be set if the lookback configuration option is not disabled for find-code-references. Read more: https://github.com/launchdarkly/ld-find-code-refs#searching-for-unused-flags-extinctions
+          persist-credentials: false
       - name: LaunchDarkly Code References
         uses: launchdarkly/find-code-references@89a7d362d1d4b3725fe0fe0ccd0dc69e3bdcba58 # v2.14.0
         with:

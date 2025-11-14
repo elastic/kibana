@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { VisParams } from '@kbn/visualizations-plugin/common';
+import type { VisParams } from '@kbn/visualizations-common';
 
 export const getVisTypeFromParams = (params?: VisParams) => {
   let type = params?.seriesParams?.[0]?.type;

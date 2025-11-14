@@ -32,7 +32,6 @@ import type {
 import { ENHANCED_ES_SEARCH_STRATEGY, SEARCH_SESSION_TYPE } from '../../../common';
 import type { ISearchSessionService } from '../..';
 import { NoSearchIdInSessionError } from '../..';
-import { createRequestHash } from './utils';
 import type { ConfigSchema, SearchSessionsConfigSchema } from '../../config';
 import { getSessionStatus } from './get_session_status';
 
@@ -284,15 +283,17 @@ export class SearchSessionService implements ISearchSessionService {
   public trackId = async (
     deps: SearchSessionDependencies,
     user: AuthenticatedUser | null,
-    searchRequest: IKibanaSearchRequest,
     searchId: string,
     options: ISearchOptions
   ) => {
-    const { sessionId, strategy = ENHANCED_ES_SEARCH_STRATEGY } = options;
+    const { sessionId, strategy = ENHANCED_ES_SEARCH_STRATEGY, requestHash } = options;
     if (!this.sessionConfig.enabled || !sessionId || !searchId) return;
-    if (!searchRequest.params) return;
-
-    const requestHash = createRequestHash(searchRequest.params);
+    if (!requestHash) {
+      this.logger.error(
+        `SearchSessionService: trackId | Missing requestHash | sessionId: "${sessionId}" | searchId:"${searchId}"`
+      );
+      return;
+    }
 
     this.logger.debug(
       `SearchSessionService: trackId | sessionId: "${sessionId}" | searchId:"${searchId}" | requestHash: "${requestHash}"`
@@ -391,20 +392,21 @@ export class SearchSessionService implements ISearchSessionService {
     deps: SearchSessionDependencies,
     user: AuthenticatedUser | null,
     searchRequest: IKibanaSearchRequest,
-    { sessionId, isStored, isRestore }: ISearchOptions
+    { sessionId, isStored, isRestore, requestHash }: ISearchOptions
   ) => {
     if (!this.sessionConfig.enabled) {
-      throw new Error('Search sessions are disabled');
+      throw new Error('Background search is disabled');
     } else if (!sessionId) {
       throw new Error('Session ID is required');
     } else if (!isStored) {
-      throw new Error('Cannot get search ID from a session that is not stored');
+      throw new Error('Cannot get search ID from a search that is not stored');
     } else if (!isRestore) {
-      throw new Error('Get search ID is only supported when restoring a session');
+      throw new Error('Get search ID is only supported when restoring a background search');
+    } else if (!requestHash) {
+      throw new Error('Request hash is required to get search ID from session');
     }
 
     const session = await this.get(deps, user, sessionId);
-    const requestHash = createRequestHash(searchRequest.params);
     if (!Object.hasOwn(session.attributes.idMapping, requestHash)) {
       this.logger.debug(`SearchSessionService: getId | ${sessionId} | ${requestHash} not found`);
       this.logger.error(

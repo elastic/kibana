@@ -16,14 +16,21 @@ import type { ObservabilityAIAssistantAppPluginStartDependencies } from '../type
 interface UseIsNavControlVisibleProps {
   coreStart: CoreStart;
   pluginsStart: ObservabilityAIAssistantAppPluginStartDependencies;
+  isServerless?: boolean;
 }
 
 function getVisibility(
   appId: string | undefined,
   applications: ReadonlyMap<string, PublicAppInfo>,
   preferredAssistantType: AIAssistantType,
-  space: Space
+  space: Space,
+  isServerless?: boolean
 ) {
+  // If the app itself is enabled, always show the control in the solution view or serverless.
+  if (space.solution === 'es' || space.solution === 'oblt' || isServerless) {
+    return true;
+  }
+
   if (preferredAssistantType === AIAssistantType.Never) {
     return false;
   }
@@ -31,11 +38,7 @@ function getVisibility(
   const categoryId =
     (appId && applications.get(appId)?.category?.id) || DEFAULT_APP_CATEGORIES.kibana.id;
 
-  if (
-    preferredAssistantType === AIAssistantType.Observability ||
-    space.solution === 'es' ||
-    space.solution === 'oblt'
-  ) {
+  if (preferredAssistantType === AIAssistantType.Observability) {
     return categoryId !== DEFAULT_APP_CATEGORIES.security.id;
   }
 
@@ -45,7 +48,11 @@ function getVisibility(
   ].includes(categoryId);
 }
 
-export function useIsNavControlVisible({ coreStart, pluginsStart }: UseIsNavControlVisibleProps) {
+export function useIsNavControlVisible({
+  coreStart,
+  pluginsStart,
+  isServerless,
+}: UseIsNavControlVisibleProps) {
   const [isVisible, setIsVisible] = useState(false);
 
   const { currentAppId$, applications$ } = coreStart.application;
@@ -61,12 +68,20 @@ export function useIsNavControlVisible({ coreStart, pluginsStart }: UseIsNavCont
       space$,
     ]).subscribe({
       next: ([appId, applications, preferredAssistantType, space]) => {
-        setIsVisible(getVisibility(appId, applications, preferredAssistantType, space));
+        setIsVisible(
+          getVisibility(appId, applications, preferredAssistantType, space, isServerless)
+        );
       },
     });
 
     return () => appSubscription.unsubscribe();
-  }, [currentAppId$, applications$, aiAssistantManagementSelection.aiAssistantType$, space$]);
+  }, [
+    currentAppId$,
+    applications$,
+    aiAssistantManagementSelection.aiAssistantType$,
+    space$,
+    isServerless,
+  ]);
 
   return {
     isVisible,

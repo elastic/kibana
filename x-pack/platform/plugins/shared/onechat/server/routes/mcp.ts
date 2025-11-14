@@ -14,10 +14,7 @@ import { apiPrivileges } from '../../common/features';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { KibanaMcpHttpTransport } from '../utils/mcp/kibana_mcp_http_transport';
-import { getTechnicalPreviewWarning } from './utils';
 import { MCP_SERVER_PATH } from '../../common/mcp';
-
-const TECHNICAL_PREVIEW_WARNING = getTechnicalPreviewWarning('Elastic MCP Server');
 
 const MCP_SERVER_NAME = 'elastic-mcp-server';
 const MCP_SERVER_VERSION = '0.0.1';
@@ -33,9 +30,10 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
       },
       access: 'public',
       summary: 'MCP server',
-      description: TECHNICAL_PREVIEW_WARNING,
+      description:
+        'WARNING: This endpoint is designed for MCP clients (Claude Desktop, Cursor, VS Code, etc.) and should not be used directly via REST APIs. Use MCP Inspector or native MCP clients instead.',
       options: {
-        tags: ['mcp', 'oas-tag:elastic agent builder'],
+        tags: ['mcp', 'oas-tag:agent builder'],
         xsrfRequired: false,
         availability: {
           stability: 'experimental',
@@ -83,8 +81,7 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
 
           // Expose tools scoped to the request
           for (const tool of tools) {
-            const toolSchema =
-              typeof tool.schema === 'function' ? await tool.schema() : tool.schema;
+            const toolSchema = await tool.getSchema();
             server.tool(
               idMapping.get(tool.id) ?? tool.id,
               tool.description,
@@ -140,83 +137,6 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
             },
           });
         }
-      })
-    );
-
-  router.versioned
-    .get({
-      path: MCP_SERVER_PATH,
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
-      },
-      access: 'public',
-      summary: 'MCP server',
-      description: TECHNICAL_PREVIEW_WARNING,
-      options: {
-        tags: ['mcp', 'oas-tag:elastic agent builder'],
-        availability: {
-          stability: 'experimental',
-          since: '9.2.0',
-        },
-      },
-    })
-    .addVersion(
-      {
-        version: '2023-10-31',
-        validate: false,
-        options: {
-          oasOperationObject: () => path.join(__dirname, 'examples/mcp_tools_list.yaml'),
-        },
-      },
-      wrapHandler(async (ctx, _, response) => {
-        return response.customError({
-          statusCode: 405,
-          body: {
-            message: 'Method not allowed',
-            attributes: {
-              code: ErrorCode.ConnectionClosed,
-            },
-          },
-        });
-      })
-    );
-
-  router.versioned
-    .delete({
-      path: MCP_SERVER_PATH,
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
-      },
-      access: 'public',
-      summary: 'MCP server',
-      description: TECHNICAL_PREVIEW_WARNING,
-      options: {
-        tags: ['mcp', 'oas-tag:elastic agent builder'],
-        xsrfRequired: false,
-        availability: {
-          stability: 'experimental',
-          since: '9.2.0',
-        },
-      },
-    })
-    .addVersion(
-      {
-        version: '2023-10-31',
-        validate: false,
-        options: {
-          oasOperationObject: () => path.join(__dirname, 'examples/mcp_tools_list.yaml'),
-        },
-      },
-      wrapHandler(async (ctx, _, response) => {
-        return response.customError({
-          statusCode: 405,
-          body: {
-            message: 'Method not allowed',
-            attributes: {
-              code: ErrorCode.ConnectionClosed,
-            },
-          },
-        });
       })
     );
 }

@@ -91,6 +91,17 @@
           },
           {
             "parentPluginId": "@kbn/search-code-examples",
+            "id": "def-common.consoleTutorials.timeSeriesDataStreams",
+            "type": "string",
+            "tags": [],
+            "label": "timeSeriesDataStreams",
+            "description": [],
+            "path": "x-pack/solutions/search/packages/kbn-search-code-examples/src/api-tutorials/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-code-examples",
             "id": "def-common.consoleTutorials.hybridSearch",
             "type": "string",
             "tags": [],

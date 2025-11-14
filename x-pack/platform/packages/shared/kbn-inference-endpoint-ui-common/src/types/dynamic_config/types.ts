@@ -23,6 +23,7 @@ export enum FieldType {
   STRING = 'str',
   INTEGER = 'int',
   BOOLEAN = 'bool',
+  MAP = 'map',
 }
 
 export interface ConfigCategoryProperties {
@@ -61,7 +62,7 @@ type ServiceProviderKeysType = keyof typeof ServiceProviderKeys;
 export interface OverrideFieldsContentType {
   serverlessOnly?: boolean;
   hidden?: string[];
-  additional: FieldsConfiguration[];
+  additional?: FieldsConfiguration[];
 }
 export type InternalOverrideFieldsType = {
   [Key in ServiceProviderKeysType | string]?: OverrideFieldsContentType;

@@ -14,23 +14,24 @@ export const StatefulHeaderPromo = () => {
   return (
     <HeaderPromo
       title={i18n.translate('xpack.searchHomepage.header.statefulPromo.title', {
-        defaultMessage: 'Build your first search solution',
+        defaultMessage: 'GPUs go brrr! GPU-accelerated inference for ELSER',
       })}
       description={i18n.translate('xpack.searchHomepage.header.statefulPromo.description', {
         defaultMessage:
-          'Learn the fundamentals of creating a complete search experience with this hands-on tutorial.',
+          'We are thrilled to launch ELSER on ElS -- get state-of-the-art semantic search relevance without having to manage your own machine learning nodes.',
       })}
-      cta={
+      actions={[
         <HeaderCTALink
-          data-test-subj="searchHomepageSearchHomepageHeaderCTA"
-          data-telemetry-id="8-search-tutorial"
-          href="https://www.elastic.co/search-labs/tutorials/search-tutorial/welcome"
+          key="10-elser-on-eis"
+          // "search-promo-homepage-" is prepended to the telemetry id in HeaderCTALink
+          data-telemetry-id="10-elser-on-eis"
+          href="https://www.elastic.co/docs/explore-analyze/elastic-inference/eis#elser-on-eis"
         >
           {i18n.translate('xpack.searchHomepage.statefulPromo.content', {
-            defaultMessage: 'Start the tutorial',
+            defaultMessage: 'View docs',
           })}
-        </HeaderCTALink>
-      }
+        </HeaderCTALink>,
+      ]}
     />
   );
 };

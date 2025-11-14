@@ -15,16 +15,18 @@ import type {
 } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type {
+  AttackDiscoveryApiAlert,
   AttackDiscoveryGenerationConfig,
   CreateAttackDiscoveryAlertsParams,
   Replacements,
 } from '@kbn/elastic-assistant-common';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { Document } from '@langchain/core/documents';
 
 import { deduplicateAttackDiscoveries } from '../../../lib/attack_discovery/persistence/deduplication';
-import { reportAttackDiscoverySuccessTelemetry } from './helpers';
-import { handleGraphError } from '../post/helpers/handle_graph_error';
+import { reportAttackDiscoverySuccessTelemetry } from './report_attack_discovery_success_telemetry';
+import { handleGraphError } from '../public/post/helpers/handle_graph_error';
 import type { AttackDiscoveryDataClient } from '../../../lib/attack_discovery/persistence';
 import { generateAttackDiscoveries } from './generate_discoveries';
 
@@ -33,11 +35,13 @@ export interface GenerateAndUpdateAttackDiscoveriesParams {
   authenticatedUser: AuthenticatedUser;
   config: AttackDiscoveryGenerationConfig;
   dataClient: AttackDiscoveryDataClient;
+  enableFieldRendering: boolean;
   esClient: ElasticsearchClient;
   executionUuid: string;
   logger: Logger;
   savedObjectsClient: SavedObjectsClientContract;
   telemetry: AnalyticsServiceSetup;
+  withReplacements: boolean;
 }
 
 export const generateAndUpdateAttackDiscoveries = async ({
@@ -45,12 +49,19 @@ export const generateAndUpdateAttackDiscoveries = async ({
   authenticatedUser,
   config,
   dataClient,
+  enableFieldRendering,
   esClient,
   executionUuid,
   logger,
   savedObjectsClient,
   telemetry,
-}: GenerateAndUpdateAttackDiscoveriesParams) => {
+  withReplacements,
+}: GenerateAndUpdateAttackDiscoveriesParams): Promise<{
+  anonymizedAlerts?: Document[];
+  attackDiscoveries?: AttackDiscoveryApiAlert[];
+  error?: { message?: string }; // for compatibility with legacy internal API error handling
+  replacements?: Replacements;
+}> => {
   const startTime = moment(); // start timing the generation
 
   // get parameters from the request body
@@ -86,7 +97,6 @@ export const generateAndUpdateAttackDiscoveries = async ({
       telemetry,
     });
 
-    let storedAttackDiscoveries = attackDiscoveries;
     const alertsContextCount = anonymizedAlerts.length;
 
     /**
@@ -112,7 +122,6 @@ export const generateAndUpdateAttackDiscoveries = async ({
       replacements: latestReplacements,
       spaceId: dataClient.spaceId,
     });
-    storedAttackDiscoveries = dedupedDiscoveries;
 
     const createAttackDiscoveryAlertsParams: CreateAttackDiscoveryAlertsParams = {
       alertsContextCount,
@@ -120,10 +129,12 @@ export const generateAndUpdateAttackDiscoveries = async ({
       apiConfig,
       attackDiscoveries: dedupedDiscoveries,
       connectorName: connectorName ?? apiConfig.connectorId,
+      enableFieldRendering,
       generationUuid: executionUuid,
       replacements: latestReplacements,
+      withReplacements,
     };
-    await dataClient.createAttackDiscoveryAlerts({
+    const storedAttackDiscoveries = await dataClient.createAttackDiscoveryAlerts({
       authenticatedUser,
       createAttackDiscoveryAlertsParams,
     });

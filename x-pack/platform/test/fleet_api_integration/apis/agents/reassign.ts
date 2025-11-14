@@ -196,7 +196,7 @@ export default function (providerContext: FtrProviderContext) {
             expect(agent.policy_id).to.eql('policy2');
           });
         };
-
+        // TODO: use helper function `checkBulkAgentAction`
         await new Promise((resolve, reject) => {
           let attempts = 0;
           const intervalId = setInterval(async () => {

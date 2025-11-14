@@ -117,7 +117,7 @@
         "label": "LazyPackageCard",
         "description": [],
         "signature": [
-          "React.LazyExoticComponent<({ description, name, title, version, type, icons, integration, url, release, id, fromIntegrations, isReauthorizationRequired, isUnverified, isUpdateAvailable, showLabels, showInstallationStatus, showCompressedInstallationStatus, extraLabelsBadges, isQuickstart, installStatus, onCardClick: onClickProp, isCollectionCard, titleLineClamp, titleBadge, descriptionLineClamp, maxCardHeight, minCardHeight, showDescription, showReleaseBadge, hasDataStreams, }: ",
+          "React.LazyExoticComponent<({ description, name, title, version, type, icons, integration, url, release, id, fromIntegrations, isReauthorizationRequired, isUnverified, isUpdateAvailable, showLabels, showInstallationStatus, showCompressedInstallationStatus, extraLabelsBadges, isQuickstart, installStatus, onCardClick: onClickProp, isCollectionCard, titleLineClamp, titleBadge, titleSize, descriptionLineClamp, maxCardHeight, minCardHeight, showDescription, showReleaseBadge, hasDataStreams, }: ",
           {
             "pluginId": "fleet",
             "scope": "public",
@@ -416,7 +416,7 @@
         "label": "SetupTechnologySelector",
         "description": [],
         "signature": [
-          "({ disabled, allowedSetupTechnologies, setupTechnology, onSetupTechnologyChange, isAgentlessDefault, showBetaBadge, showLimitationsMessage, useDescribedFormGroup, }: SetupTechnologySelectorProps) => React.JSX.Element"
+          "({ disabled, allowedSetupTechnologies, setupTechnology, onSetupTechnologyChange, isAgentlessDefault, showBetaBadge, useDescribedFormGroup, }: SetupTechnologySelectorProps) => React.JSX.Element"
         ],
         "path": "x-pack/platform/plugins/shared/fleet/public/services/setup_technology_selector.tsx",
         "deprecated": false,
@@ -427,7 +427,7 @@
             "id": "def-public.SetupTechnologySelector.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  disabled,\n  allowedSetupTechnologies = [SetupTechnology.AGENT_BASED, SetupTechnology.AGENTLESS],\n  setupTechnology,\n  onSetupTechnologyChange,\n  isAgentlessDefault = false,\n  showBetaBadge = true,\n  showLimitationsMessage = false,\n  useDescribedFormGroup = true,\n}",
+            "label": "{\n  disabled,\n  allowedSetupTechnologies = [SetupTechnology.AGENT_BASED, SetupTechnology.AGENTLESS],\n  setupTechnology,\n  onSetupTechnologyChange,\n  isAgentlessDefault = false,\n  showBetaBadge = true,\n  useDescribedFormGroup = true,\n}",
             "description": [],
             "signature": [
               "SetupTechnologySelectorProps"
@@ -971,7 +971,7 @@
             "label": "role_arn",
             "description": [],
             "signature": [
-              "CloudConnectorRoleArn"
+              "CloudConnectorVar"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
             "deprecated": false,
@@ -1071,6 +1071,119 @@
       },
       {
         "parentPluginId": "fleet",
+        "id": "def-public.CloudConnector",
+        "type": "Interface",
+        "tags": [],
+        "label": "CloudConnector",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.CloudConnector.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.CloudConnector.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.CloudConnector.cloudProvider",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "cloudProvider",
+            "description": [],
+            "signature": [
+              "\"aws\" | \"azure\" | \"gcp\""
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.CloudConnector.vars",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "vars",
+            "description": [],
+            "signature": [
+              "AwsCloudConnectorVars",
+              " | ",
+              "AzureCloudConnectorVars"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.CloudConnector.packagePolicyCount",
+            "type": "number",
+            "tags": [],
+            "label": "packagePolicyCount",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.CloudConnector.created_at",
+            "type": "string",
+            "tags": [],
+            "label": "created_at",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.CloudConnector.updated_at",
+            "type": "string",
+            "tags": [],
+            "label": "updated_at",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.CloudConnector.namespace",
+            "type": "string",
+            "tags": [],
+            "label": "namespace",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-public.CloudConnectorListOptions",
         "type": "Interface",
         "tags": [],
@@ -1107,110 +1220,13 @@
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
             "deprecated": false,
             "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "fleet",
-        "id": "def-public.CloudConnectorResponse",
-        "type": "Interface",
-        "tags": [],
-        "label": "CloudConnectorResponse",
-        "description": [],
-        "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
+          },
           {
             "parentPluginId": "fleet",
-            "id": "def-public.CloudConnectorResponse.id",
+            "id": "def-public.CloudConnectorListOptions.kuery",
             "type": "string",
             "tags": [],
-            "label": "id",
-            "description": [],
-            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-public.CloudConnectorResponse.name",
-            "type": "string",
-            "tags": [],
-            "label": "name",
-            "description": [],
-            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-public.CloudConnectorResponse.cloudProvider",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "cloudProvider",
-            "description": [],
-            "signature": [
-              "\"aws\" | \"azure\" | \"gcp\""
-            ],
-            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-public.CloudConnectorResponse.vars",
-            "type": "Object",
-            "tags": [],
-            "label": "vars",
-            "description": [],
-            "signature": [
-              "CloudConnectorVars"
-            ],
-            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-public.CloudConnectorResponse.packagePolicyCount",
-            "type": "number",
-            "tags": [],
-            "label": "packagePolicyCount",
-            "description": [],
-            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-public.CloudConnectorResponse.created_at",
-            "type": "string",
-            "tags": [],
-            "label": "created_at",
-            "description": [],
-            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-public.CloudConnectorResponse.updated_at",
-            "type": "string",
-            "tags": [],
-            "label": "updated_at",
-            "description": [],
-            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-public.CloudConnectorResponse.namespace",
-            "type": "string",
-            "tags": [],
-            "label": "namespace",
+            "label": "kuery",
             "description": [],
             "signature": [
               "string | undefined"
@@ -1280,56 +1296,12 @@
       },
       {
         "parentPluginId": "fleet",
-        "id": "def-public.CloudConnectorVars",
-        "type": "Interface",
-        "tags": [],
-        "label": "CloudConnectorVars",
-        "description": [],
-        "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "fleet",
-            "id": "def-public.CloudConnectorVars.role_arn",
-            "type": "Object",
-            "tags": [],
-            "label": "role_arn",
-            "description": [],
-            "signature": [
-              "CloudConnectorRoleArn",
-              " | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-public.CloudConnectorVars.external_id",
-            "type": "Object",
-            "tags": [],
-            "label": "external_id",
-            "description": [],
-            "signature": [
-              "CloudConnectorSecretVar",
-              " | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "fleet",
         "id": "def-public.CreateCloudConnectorRequest",
         "type": "Interface",
         "tags": [],
         "label": "CreateCloudConnectorRequest",
         "description": [],
-        "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
+        "path": "x-pack/platform/plugins/shared/fleet/common/types/rest_spec/cloud_connector.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1340,21 +1312,23 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/rest_spec/cloud_connector.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "fleet",
             "id": "def-public.CreateCloudConnectorRequest.vars",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "vars",
             "description": [],
             "signature": [
-              "CloudConnectorVars"
+              "AwsCloudConnectorVars",
+              " | ",
+              "AzureCloudConnectorVars"
             ],
-            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/rest_spec/cloud_connector.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1368,7 +1342,7 @@
             "signature": [
               "\"aws\" | \"azure\" | \"gcp\""
             ],
-            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/rest_spec/cloud_connector.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2411,6 +2385,20 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-public.IntegrationCardItem.titleSize",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "titleSize",
+            "description": [],
+            "signature": [
+              "\"s\" | \"xs\" | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/public/applications/integrations/sections/epm/screens/home/card_utils.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-public.IntegrationCardItem.url",
             "type": "string",
             "tags": [],
@@ -2609,6 +2597,10 @@
                 "path": "x-pack/solutions/security/plugins/security_solution/scripts/endpoint/common/fleet_services.ts"
               },
               {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/scripts/endpoint/common/fleet_services.ts"
+              },
+              {
                 "plugin": "synthetics",
                 "path": "x-pack/solutions/observability/plugins/synthetics/server/synthetics_service/private_location/synthetics_private_location.ts"
               },
@@ -2642,11 +2634,31 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/scripts/endpoint/osquery_host/services/add_osquery_integration.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/metadata/endpoint_metadata_service.test.ts"
+              },
+              {
+                "plugin": "@kbn/cloud-security-posture",
+                "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/cloud_connector/utils.test.ts"
+              },
+              {
+                "plugin": "@kbn/cloud-security-posture",
+                "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/cloud_connector/utils.test.ts"
               },
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/metadata/support/endpoint_package_policies.test.ts"
+              },
+              {
+                "plugin": "@kbn/cloud-security-posture",
+                "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/cloud_connector/hooks/use_cloud_connector_setup.test.ts"
+              },
+              {
+                "plugin": "@kbn/cloud-security-posture",
+                "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/cloud_connector/test/mock.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -4720,6 +4732,23 @@
       },
       {
         "parentPluginId": "fleet",
+        "id": "def-public.CloudConnectorVars",
+        "type": "Type",
+        "tags": [],
+        "label": "CloudConnectorVars",
+        "description": [],
+        "signature": [
+          "AwsCloudConnectorVars",
+          " | ",
+          "AzureCloudConnectorVars"
+        ],
+        "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-public.CloudProvider",
         "type": "Type",
         "tags": [],
@@ -5206,10 +5235,43 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-public.CLOUD_CONNECTOR_API_ROUTES.INFO_PATTERN",
+            "type": "string",
+            "tags": [],
+            "label": "INFO_PATTERN",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-public.CLOUD_CONNECTOR_API_ROUTES.CREATE_PATTERN",
             "type": "string",
             "tags": [],
             "label": "CREATE_PATTERN",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.CLOUD_CONNECTOR_API_ROUTES.UPDATE_PATTERN",
+            "type": "string",
+            "tags": [],
+            "label": "UPDATE_PATTERN",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.CLOUD_CONNECTOR_API_ROUTES.DELETE_PATTERN",
+            "type": "string",
+            "tags": [],
+            "label": "DELETE_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
             "deprecated": false,
@@ -5444,6 +5506,17 @@
             "type": "string",
             "tags": [],
             "label": "DELETE_KIBANA_ASSETS_PATTERN",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.EPM_API_ROUTES.INSTALL_RULE_ASSETS_PATTERN",
+            "type": "string",
+            "tags": [],
+            "label": "INSTALL_RULE_ASSETS_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
             "deprecated": false,
@@ -6404,7 +6477,7 @@
             "label": "add_integration_to_policy",
             "description": [],
             "signature": [
-              "({ pkgkey, integration, agentPolicyId, useMultiPageLayout }: ",
+              "({ pkgkey, integration, agentPolicyId, useMultiPageLayout, prerelease, }: ",
               {
                 "pluginId": "fleet",
                 "scope": "public",
@@ -6423,7 +6496,7 @@
                 "id": "def-public.pagePathGetters.add_integration_to_policy.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{ pkgkey, integration, agentPolicyId, useMultiPageLayout }",
+                "label": "{\n    pkgkey,\n    integration,\n    agentPolicyId,\n    useMultiPageLayout,\n    prerelease,\n  }",
                 "description": [],
                 "signature": [
                   {
@@ -10657,7 +10730,7 @@
                 "section": "def-common.AgentPolicy",
                 "text": "AgentPolicy"
               },
-              " | null | undefined) => Promise<void>"
+              " | null | undefined, options?: { throwOnAgentlessError?: boolean | undefined; } | undefined) => Promise<void>"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/server/services/index.ts",
             "deprecated": false,
@@ -10705,6 +10778,20 @@
                     "text": "AgentPolicy"
                   },
                   " | null | undefined"
+                ],
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/agent_policy.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "fleet",
+                "id": "def-server.AgentPolicyServiceInterface.deployPolicy.$4",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "{ throwOnAgentlessError?: boolean | undefined; } | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/agent_policy.ts",
                 "deprecated": false,
@@ -13111,6 +13198,49 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-server.PackageClient.rollbackPackage",
+            "type": "Function",
+            "tags": [],
+            "label": "rollbackPackage",
+            "description": [],
+            "signature": [
+              "(options: { pkgName: string; }) => Promise<",
+              "RollbackPackageResponse",
+              ">"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/package_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-server.PackageClient.rollbackPackage.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/package_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "fleet",
+                    "id": "def-server.PackageClient.rollbackPackage.$1.pkgName",
+                    "type": "string",
+                    "tags": [],
+                    "label": "pkgName",
+                    "description": [],
+                    "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/package_service.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -14481,9 +14611,9 @@
               "SavedObjectsClientContract",
               ", esClient: ",
               "ElasticsearchClient",
-              ", ids: string[], options?: { user?: ",
-              "AuthenticatedUser",
-              " | undefined; skipUnassignFromAgentPolicies?: boolean | undefined; force?: boolean | undefined; asyncDeploy?: boolean | undefined; } | undefined, context?: ",
+              ", ids: string[], options?: ",
+              "PackagePolicyClientDeleteOptions",
+              " | undefined, context?: ",
               "RequestHandlerContext",
               " | undefined, request?: ",
               "KibanaRequest",
@@ -14553,68 +14683,14 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
+                "signature": [
+                  "PackagePolicyClientDeleteOptions",
+                  " | undefined"
+                ],
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "fleet",
-                    "id": "def-server.PackagePolicyClient.delete.$4.user",
-                    "type": "Object",
-                    "tags": [],
-                    "label": "user",
-                    "description": [],
-                    "signature": [
-                      "AuthenticatedUser",
-                      " | undefined"
-                    ],
-                    "path": "x-pack/platform/plugins/shared/fleet/server/services/package_policy_service.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  },
-                  {
-                    "parentPluginId": "fleet",
-                    "id": "def-server.PackagePolicyClient.delete.$4.skipUnassignFromAgentPolicies",
-                    "type": "CompoundType",
-                    "tags": [],
-                    "label": "skipUnassignFromAgentPolicies",
-                    "description": [],
-                    "signature": [
-                      "boolean | undefined"
-                    ],
-                    "path": "x-pack/platform/plugins/shared/fleet/server/services/package_policy_service.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  },
-                  {
-                    "parentPluginId": "fleet",
-                    "id": "def-server.PackagePolicyClient.delete.$4.force",
-                    "type": "CompoundType",
-                    "tags": [],
-                    "label": "force",
-                    "description": [],
-                    "signature": [
-                      "boolean | undefined"
-                    ],
-                    "path": "x-pack/platform/plugins/shared/fleet/server/services/package_policy_service.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  },
-                  {
-                    "parentPluginId": "fleet",
-                    "id": "def-server.PackagePolicyClient.delete.$4.asyncDeploy",
-                    "type": "CompoundType",
-                    "tags": [],
-                    "label": "asyncDeploy",
-                    "description": [],
-                    "signature": [
-                      "boolean | undefined"
-                    ],
-                    "path": "x-pack/platform/plugins/shared/fleet/server/services/package_policy_service.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
+                "isRequired": false
               },
               {
                 "parentPluginId": "fleet",
@@ -21712,6 +21788,39 @@
         },
         {
           "parentPluginId": "fleet",
+          "id": "def-server.FleetStartContract.runWithCache",
+          "type": "Function",
+          "tags": [],
+          "label": "runWithCache",
+          "description": [],
+          "signature": [
+            "<T = any>(cb: () => Promise<T>) => Promise<T>"
+          ],
+          "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "fleet",
+              "id": "def-server.FleetStartContract.runWithCache.$1",
+              "type": "Function",
+              "tags": [],
+              "label": "cb",
+              "description": [],
+              "signature": [
+                "() => Promise<T>"
+              ],
+              "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/packages/cache.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "returnComment": [],
+              "children": []
+            }
+          ]
+        },
+        {
+          "parentPluginId": "fleet",
           "id": "def-server.FleetStartContract.agentPolicyService",
           "type": "Object",
           "tags": [],
@@ -23190,6 +23299,48 @@
       },
       {
         "parentPluginId": "fleet",
+        "id": "def-common.CreateAgentlessPolicyRequest",
+        "type": "Interface",
+        "tags": [],
+        "label": "CreateAgentlessPolicyRequest",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/fleet/common/types/rest_spec/agentless_policy.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.CreateAgentlessPolicyRequest.body",
+            "type": "Object",
+            "tags": [],
+            "label": "body",
+            "description": [],
+            "signature": [
+              "{ readonly id?: string | undefined; readonly namespace?: string | undefined; readonly description?: string | undefined; readonly inputs?: Record<string, Readonly<{ enabled?: boolean | undefined; streams?: Record<string, Readonly<{ enabled?: boolean | undefined; vars?: Record<string, string | number | boolean | string[] | number[] | Readonly<{} & { id: string; isSecretRef: boolean; }> | null> | undefined; } & {}>> | undefined; vars?: Record<string, string | number | boolean | string[] | number[] | Readonly<{} & { id: string; isSecretRef: boolean; }> | null> | undefined; } & {}>> | undefined; readonly vars?: Record<string, string | number | boolean | string[] | number[] | Readonly<{} & { id: string; isSecretRef: boolean; }> | null> | undefined; readonly additional_datastreams_permissions?: string[] | null | undefined; readonly force?: boolean | undefined; readonly name: string; readonly package: Readonly<{ title?: string | undefined; experimental_data_stream_features?: Readonly<{} & { features: Readonly<{ synthetic_source?: boolean | undefined; tsdb?: boolean | undefined; doc_value_only_numeric?: boolean | undefined; doc_value_only_other?: boolean | undefined; } & {}>; data_stream: string; }>[] | undefined; requires_root?: boolean | undefined; fips_compatible?: boolean | undefined; } & { version: string; name: string; }>; }"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/rest_spec/agentless_policy.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.CreateAgentlessPolicyRequest.query",
+            "type": "Object",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              "{ readonly format: \"simplified\" | \"legacy\"; }"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/rest_spec/agentless_policy.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-common.CreateAgentPolicyRequest",
         "type": "Interface",
         "tags": [],
@@ -23533,6 +23684,48 @@
               "Error"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.DeleteAgentlessPolicyRequest",
+        "type": "Interface",
+        "tags": [],
+        "label": "DeleteAgentlessPolicyRequest",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/fleet/common/types/rest_spec/agentless_policy.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.DeleteAgentlessPolicyRequest.params",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "{ readonly policyId: string; }"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/rest_spec/agentless_policy.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.DeleteAgentlessPolicyRequest.query",
+            "type": "Object",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              "{ readonly force?: boolean | undefined; }"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/rest_spec/agentless_policy.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -24851,15 +25044,9 @@
             "label": "meta",
             "description": [],
             "signature": [
-              "{ [key: string]: unknown; package?: Pick<",
-              {
-                "pluginId": "fleet",
-                "scope": "common",
-                "docId": "kibFleetPluginApi",
-                "section": "def-common.PackagePolicyPackage",
-                "text": "PackagePolicyPackage"
-              },
-              ", \"version\" | \"name\"> | undefined; } | undefined"
+              "{ [key: string]: unknown; package?: ",
+              "FullAgentPolicyMetaPackage",
+              " | undefined; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
             "deprecated": false,
@@ -25890,6 +26077,34 @@
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.Installation.rolled_back",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "rolled_back",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.Installation.is_rollback_ttl_expired",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "is_rollback_ttl_expired",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -26049,6 +26264,20 @@
                 "section": "def-common.KibanaSavedObjectType",
                 "text": "KibanaSavedObjectType"
               }
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.KibanaAssetReference.deferred",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "deferred",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
             "deprecated": false,
@@ -26786,6 +27015,10 @@
                 "path": "x-pack/solutions/security/plugins/security_solution/scripts/endpoint/common/fleet_services.ts"
               },
               {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/scripts/endpoint/common/fleet_services.ts"
+              },
+              {
                 "plugin": "synthetics",
                 "path": "x-pack/solutions/observability/plugins/synthetics/server/synthetics_service/private_location/synthetics_private_location.ts"
               },
@@ -26819,11 +27052,31 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/scripts/endpoint/osquery_host/services/add_osquery_integration.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/metadata/endpoint_metadata_service.test.ts"
+              },
+              {
+                "plugin": "@kbn/cloud-security-posture",
+                "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/cloud_connector/utils.test.ts"
+              },
+              {
+                "plugin": "@kbn/cloud-security-posture",
+                "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/cloud_connector/utils.test.ts"
               },
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/metadata/support/endpoint_package_policies.test.ts"
+              },
+              {
+                "plugin": "@kbn/cloud-security-posture",
+                "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/cloud_connector/hooks/use_cloud_connector_setup.test.ts"
+              },
+              {
+                "plugin": "@kbn/cloud-security-posture",
+                "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/cloud_connector/test/mock.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -30019,13 +30272,58 @@
       },
       {
         "parentPluginId": "fleet",
+        "id": "def-common.CLOUD_CONNECTOR_SAVED_OBJECT_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "CLOUD_CONNECTOR_SAVED_OBJECT_TYPE",
+        "description": [],
+        "signature": [
+          "\"fleet-cloud-connector\""
+        ],
+        "path": "x-pack/platform/plugins/shared/fleet/common/constants/saved_objects.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.CreateAgentlessPolicyResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "CreateAgentlessPolicyResponse",
+        "description": [],
+        "signature": [
+          "{ readonly item: Readonly<{ namespace?: string | undefined; version?: string | undefined; description?: string | undefined; inputs?: Record<string, Readonly<{ enabled?: boolean | undefined; streams?: Record<string, Readonly<{ enabled?: boolean | undefined; vars?: Record<string, string | number | boolean | string[] | number[] | Readonly<{} & { id: string; isSecretRef: boolean; }> | null> | undefined; } & {}>> | undefined; vars?: Record<string, string | number | boolean | string[] | number[] | Readonly<{} & { id: string; isSecretRef: boolean; }> | null> | undefined; } & {}>> | Readonly<{ id?: string | undefined; config?: Record<string, Readonly<{ value?: any; type?: string | undefined; frozen?: boolean | undefined; } & {}>> | undefined; vars?: Record<string, Readonly<{ value?: any; type?: string | undefined; frozen?: boolean | undefined; } & {}>> | undefined; keep_enabled?: boolean | undefined; policy_template?: string | undefined; compiled_input?: any; } & { type: string; enabled: boolean; streams: Readonly<{ id?: string | undefined; config?: Record<string, Readonly<{ value?: any; type?: string | undefined; frozen?: boolean | undefined; } & {}>> | undefined; vars?: Record<string, Readonly<{ value?: any; type?: string | undefined; frozen?: boolean | undefined; } & {}>> | undefined; release?: \"experimental\" | \"beta\" | \"ga\" | undefined; keep_enabled?: boolean | undefined; compiled_stream?: any; } & { enabled: boolean; data_stream: Readonly<{ elasticsearch?: Readonly<{ privileges?: Readonly<{ indices?: string[] | undefined; } & {}> | undefined; dynamic_dataset?: boolean | undefined; dynamic_namespace?: boolean | undefined; } & {}> | undefined; } & { type: string; dataset: string; }>; }>[]; }>[] | undefined; is_managed?: boolean | undefined; policy_id?: string | null | undefined; policy_ids?: string[] | undefined; output_id?: string | null | undefined; cloud_connector_id?: string | null | undefined; package?: Readonly<{ title?: string | undefined; experimental_data_stream_features?: Readonly<{} & { features: Readonly<{ synthetic_source?: boolean | undefined; tsdb?: boolean | undefined; doc_value_only_numeric?: boolean | undefined; doc_value_only_other?: boolean | undefined; } & {}>; data_stream: string; }>[] | undefined; requires_root?: boolean | undefined; fips_compatible?: boolean | undefined; } & { version: string; name: string; }> | undefined; vars?: Record<string, string | number | boolean | string[] | number[] | Readonly<{} & { id: string; isSecretRef: boolean; }> | null> | Record<string, Readonly<{ value?: any; type?: string | undefined; frozen?: boolean | undefined; } & {}>> | undefined; elasticsearch?: Readonly<{ privileges?: Readonly<{ cluster?: string[] | undefined; } & {}> | undefined; } & {}> | undefined; overrides?: Readonly<{ inputs?: Record<string, any> | undefined; } & {}> | null | undefined; supports_agentless?: boolean | null | undefined; supports_cloud_connector?: boolean | null | undefined; additional_datastreams_permissions?: string[] | null | undefined; agents?: number | undefined; secret_references?: Readonly<{} & { id: string; }>[] | undefined; spaceIds?: string[] | undefined; } & { id: string; name: string; enabled: boolean; revision: number; created_at: string; created_by: string; updated_at: string; updated_by: string; }>; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/fleet/common/types/rest_spec/agentless_policy.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.DeleteAgentlessPolicyResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "DeleteAgentlessPolicyResponse",
+        "description": [],
+        "signature": [
+          "{ readonly id: string; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/fleet/common/types/rest_spec/agentless_policy.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-common.DisplayedAssetTypes",
         "type": "Type",
         "tags": [],
         "label": "DisplayedAssetTypes",
         "description": [],
         "signature": [
-          "(\"search\" | \"map\" | \"index\" | \"transform\" | \"tag\" | \"dashboard\" | \"lens\" | \"index-pattern\" | \"visualization\" | \"ingest_pipeline\" | \"ilm_policy\" | \"ml-module\" | \"security-ai-prompt\" | \"security-rule\" | \"csp-rule-template\" | \"alerting_rule_template\" | \"osquery-pack-asset\" | \"osquery-saved-query\" | \"index_template\" | \"component_template\" | \"data_stream_ilm_policy\" | \"ml_model\" | \"knowledge_base\")[]"
+          "(\"search\" | \"map\" | \"index\" | \"transform\" | \"alert\" | \"tag\" | \"dashboard\" | \"lens\" | \"index-pattern\" | \"visualization\" | \"ingest_pipeline\" | \"ilm_policy\" | \"ml-module\" | \"security-ai-prompt\" | \"security-rule\" | \"csp-rule-template\" | \"alerting_rule_template\" | \"osquery-pack-asset\" | \"osquery-saved-query\" | \"index_template\" | \"component_template\" | \"data_stream_ilm_policy\" | \"ml_model\" | \"knowledge_base\")[]"
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
         "deprecated": false,
@@ -31297,7 +31595,7 @@
         "signature": [
           "{ type?: ",
           "PackageSpecPackageType",
-          " | undefined; version: string; name: string; title: string; description?: string | undefined; path?: string | undefined; download?: string | undefined; internal?: boolean | undefined; icons?: (",
+          " | undefined; path?: string | undefined; version: string; name: string; title: string; description?: string | undefined; download?: string | undefined; internal?: boolean | undefined; icons?: (",
           {
             "pluginId": "fleet",
             "scope": "common",
@@ -31804,6 +32102,17 @@
             "type": "string",
             "tags": [],
             "label": "PRIVILEGE_LEVEL_CHANGE_PATTERN",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.AGENT_API_ROUTES.BULK_PRIVILEGE_LEVEL_CHANGE_PATTERN",
+            "type": "string",
+            "tags": [],
+            "label": "BULK_PRIVILEGE_LEVEL_CHANGE_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
             "deprecated": false,
@@ -32999,6 +33308,54 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.agentRouteService.postChangeAgentPrivilegeLevel",
+            "type": "Function",
+            "tags": [],
+            "label": "postChangeAgentPrivilegeLevel",
+            "description": [],
+            "signature": [
+              "(agentId: string) => string"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-common.agentRouteService.postChangeAgentPrivilegeLevel.$1",
+                "type": "string",
+                "tags": [],
+                "label": "agentId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.agentRouteService.postBulkChangeAgentPrivilegeLevel",
+            "type": "Function",
+            "tags": [],
+            "label": "postBulkChangeAgentPrivilegeLevel",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -33515,6 +33872,17 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-common.EPM_API_ROUTES.INSTALL_RULE_ASSETS_PATTERN",
+            "type": "string",
+            "tags": [],
+            "label": "INSTALL_RULE_ASSETS_PATTERN",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-common.EPM_API_ROUTES.FILEPATH_PATTERN",
             "type": "string",
             "tags": [],
@@ -33989,6 +34357,54 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-common.epmRouteService.getBulkRollbackPath",
+            "type": "Function",
+            "tags": [],
+            "label": "getBulkRollbackPath",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.epmRouteService.getBulkRollbackInfoPath",
+            "type": "Function",
+            "tags": [],
+            "label": "getBulkRollbackInfoPath",
+            "description": [],
+            "signature": [
+              "(taskId: string) => string"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-common.epmRouteService.getBulkRollbackInfoPath.$1",
+                "type": "string",
+                "tags": [],
+                "label": "taskId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-common.epmRouteService.getRemovePath",
             "type": "Function",
             "tags": [],
@@ -34066,6 +34482,53 @@
               {
                 "parentPluginId": "fleet",
                 "id": "def-common.epmRouteService.getInstallKibanaAssetsPath.$2",
+                "type": "string",
+                "tags": [],
+                "label": "pkgVersion",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.epmRouteService.getInstallRuleAssetsPath",
+            "type": "Function",
+            "tags": [],
+            "label": "getInstallRuleAssetsPath",
+            "description": [],
+            "signature": [
+              "(pkgName: string, pkgVersion: string) => string"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-common.epmRouteService.getInstallRuleAssetsPath.$1",
+                "type": "string",
+                "tags": [],
+                "label": "pkgName",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "fleet",
+                "id": "def-common.epmRouteService.getInstallRuleAssetsPath.$2",
                 "type": "string",
                 "tags": [],
                 "label": "pkgVersion",

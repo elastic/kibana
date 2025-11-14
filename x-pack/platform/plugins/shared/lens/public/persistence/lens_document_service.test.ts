@@ -10,7 +10,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { LENS_ITEM_LATEST_VERSION } from '../../common/constants';
 import { LensClient } from './lens_client';
 import { LensDocumentService } from './lens_document_service';
-import type { LensDocument } from './types';
+import type { LensDocument } from '@kbn/lens-common';
 
 jest.mock('./lens_client', () => {
   const mockClient = {
@@ -55,7 +55,13 @@ describe('LensStore', () => {
       };
 
       jest.mocked(client.create).mockImplementation(async (item, references) => ({
-        item: { id: 'new-id', ...item, references, extraProp: 'test' },
+        item: {
+          id: 'new-id',
+          ...item,
+          references,
+          extraProp: 'test',
+          visualizationType: item.visualizationType ?? 'lnsXY',
+        },
         meta: { type: 'lens' },
       }));
       const doc = await service.save(docToSave);
@@ -84,7 +90,13 @@ describe('LensStore', () => {
       };
 
       jest.mocked(client.update).mockImplementation(async (id, item, references) => ({
-        item: { id, ...item, references, extraProp: 'test' },
+        item: {
+          id,
+          ...item,
+          references,
+          extraProp: 'test',
+          visualizationType: item.visualizationType ?? 'lnsXY',
+        },
         meta: { type: 'lens' },
       }));
 

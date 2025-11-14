@@ -36,6 +36,7 @@ export const ToolEditContextMenu = () => {
       zIndex={Number(euiTheme.levels.header) - 1}
       button={
         <EuiButtonIcon
+          data-test-subj="agentBuilderToolContextMenuButton"
           size="m"
           iconType="boxesVertical"
           onClick={() => setIsOpen((openState) => !openState)}
@@ -47,6 +48,7 @@ export const ToolEditContextMenu = () => {
         size="s"
         items={[
           <EuiContextMenuItem
+            data-test-subj="agentBuilderToolCloneButton"
             key="clone"
             icon="copy"
             size="s"
@@ -57,6 +59,7 @@ export const ToolEditContextMenu = () => {
             {labels.tools.cloneToolButtonLabel}
           </EuiContextMenuItem>,
           <EuiContextMenuItem
+            data-test-subj="agentBuilderToolDeleteButton"
             key="delete"
             icon="trash"
             size="s"

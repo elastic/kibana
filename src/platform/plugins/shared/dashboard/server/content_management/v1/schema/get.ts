@@ -8,50 +8,48 @@
  */
 import { schema } from '@kbn/config-schema';
 import {
-  dashboardItemSchema,
+  getDashboardItemSchema,
   dashboardMetaSchema,
   dashboardResolveMetaSchema,
-  dashboardDataAttributesSchema,
-  dashboardAPIItemSchema,
+  getDashboardDataSchema,
 } from './common';
 
-export const dashboardGetResultSchema = schema.object(
-  {
-    item: dashboardItemSchema,
-    meta: schema.object(
-      {
-        outcome: schema.oneOf([
-          schema.literal('exactMatch'),
-          schema.literal('aliasMatch'),
-          schema.literal('conflict'),
-        ]),
-        aliasTargetId: schema.maybe(schema.string()),
-        aliasPurpose: schema.maybe(
-          schema.oneOf([
-            schema.literal('savedObjectConversion'),
-            schema.literal('savedObjectImport'),
-          ])
-        ),
-      },
-      { unknowns: 'forbid' }
-    ),
-  },
-  { unknowns: 'forbid' }
-);
+export function getDashboardGetResultSchema() {
+  return schema.object(
+    {
+      item: getDashboardItemSchema(),
+      meta: schema.object(
+        {
+          outcome: schema.oneOf([
+            schema.literal('exactMatch'),
+            schema.literal('aliasMatch'),
+            schema.literal('conflict'),
+          ]),
+          aliasTargetId: schema.maybe(schema.string()),
+          aliasPurpose: schema.maybe(
+            schema.oneOf([
+              schema.literal('savedObjectConversion'),
+              schema.literal('savedObjectImport'),
+            ])
+          ),
+        },
+        { unknowns: 'forbid' }
+      ),
+    },
+    { unknowns: 'forbid' }
+  );
+}
 
-export const dashboardAPIGetResultSchema = schema.object(
-  {
-    id: schema.string(),
-    type: schema.string(),
-    data: dashboardDataAttributesSchema,
-    meta: dashboardMetaSchema.extends(dashboardResolveMetaSchema),
-  },
-  { unknowns: 'forbid' }
-);
+export function getDashboardAPIGetResultSchema() {
+  return schema.object(
+    {
+      id: schema.string(),
+      type: schema.string(),
+      data: getDashboardDataSchema(),
+      meta: dashboardMetaSchema.extends(dashboardResolveMetaSchema),
+    },
+    { unknowns: 'forbid' }
+  );
+}
 
 export const dashboardGetResultMetaSchema = dashboardMetaSchema.extends(dashboardResolveMetaSchema);
-
-export const dashboardListResultAPISchema = schema.object({
-  items: schema.arrayOf(dashboardAPIItemSchema),
-  total: schema.number(),
-});

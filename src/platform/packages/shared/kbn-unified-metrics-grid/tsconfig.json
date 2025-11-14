@@ -1,25 +1,19 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx",
-  ],
-  "exclude": [
-    "target/**/*"
-  ],
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": ["target/**/*"],
   "kbn_references": [
+    "@kbn/field-types",
     "@kbn/unified-histogram",
     "@kbn/metrics-experience-plugin",
     "@kbn/shared-ux-utility",
     "@kbn/esql-ast",
-    "@kbn/shared-ux-button-toolbar",
     "@kbn/i18n",
     "@kbn/i18n-react",
     "@kbn/chart-icons",
-    "@kbn/esql-utils",
     "@kbn/data-plugin",
     "@kbn/lens-embeddable-utils",
     "@kbn/data-views-plugin",
@@ -31,5 +25,12 @@
     "@kbn/data-grid-in-table-search",
     "@kbn/es-query",
     "@kbn/discover-utils",
+    "@kbn/fields-metadata-plugin",
+    "@kbn/shared-ux-button-toolbar",
+    "@kbn/apm-types",
+    "@kbn/esql-utils",
+    "@kbn/field-utils",
+    "@kbn/react-query",
+    "@kbn/restorable-state"
   ]
 }

@@ -10,13 +10,13 @@ import type { PackageListItem } from '@kbn/fleet-plugin/common';
 
 export interface TableSectionContext {
   /**
-   * List of installed AI for SOC integrations
+   * List of installed EASE integrations
    */
   packages: PackageListItem[];
 }
 
 /**
- * A context provider for the AI for SOC alert summary table grouping component.
+ * A context provider for EASE alert summary table grouping component.
  * This allows group stats and renderers to not have to fetch packages.
  */
 export const TableSectionContext = createContext<TableSectionContext | undefined>(undefined);

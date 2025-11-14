@@ -41,6 +41,7 @@ export const PageTitle: React.FC<PageTitleProps> = React.memo(({ title, isBeta }
           grow={false}
         >
           <EuiBetaBadge
+            data-test-subj="migrationsBetaBadge"
             iconType={'beaker'}
             label={i18n.BETA_LABEL}
             tooltipContent={i18n.BETA_TOOLTIP}

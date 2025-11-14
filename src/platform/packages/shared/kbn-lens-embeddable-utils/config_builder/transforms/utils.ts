@@ -13,14 +13,13 @@ import type {
   FormBasedPersistedState,
   GenericIndexPatternColumn,
   PersistedIndexPatternLayer,
-} from '@kbn/lens-plugin/public';
-import type {
   TextBasedLayer,
   TextBasedLayerColumn,
   TextBasedPersistedState,
-} from '@kbn/lens-plugin/public/datasources/form_based/esql_layer/types';
+} from '@kbn/lens-common';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import { isOfAggregateQueryType, type Filter, type Query } from '@kbn/es-query';
 import type { LensAttributes, LensDatatableDataset } from '../types';
 import type { LensApiState, NarrowByType } from '../schema';
 import { fromBucketLensStateToAPI } from './columns/buckets';
@@ -32,6 +31,7 @@ import {
   LENS_SAMPLING_DEFAULT_VALUE,
   LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE,
 } from '../schema/constants';
+import type { LensApiFilterType, UnifiedSearchFilterType } from '../schema/filter';
 
 type DataSourceStateLayer =
   | FormBasedPersistedState['layers'] // metric chart can return 2 layers (one for the metric and one for the trendline)
@@ -441,6 +441,66 @@ export const generateApiLayer = (options: PersistedIndexPatternLayer | TextBased
   };
 };
 
+export const filtersToApiFormat = (
+  filters: Filter[]
+): (LensApiFilterType | UnifiedSearchFilterType)[] => {
+  return filters.map((filter) => ({
+    language: filter.query?.language,
+    query: filter.query?.query ?? filter.query,
+    meta: {},
+  }));
+};
+
+export const queryToApiFormat = (query: Query): LensApiFilterType | undefined => {
+  if (typeof query.query !== 'string') {
+    return;
+  }
+  return {
+    query: query.query,
+    language: query.language as 'kuery' | 'lucene',
+  };
+};
+
+export const filtersToLensState = (
+  filters: (LensApiFilterType | UnifiedSearchFilterType)[]
+): Filter[] => {
+  return filters.map((filter) => ({
+    query: { query: filter.query, language: filter?.language },
+    meta: {},
+  }));
+};
+
+export const queryToLensState = (query: LensApiFilterType): Query => {
+  return query;
+};
+
+export const filtersAndQueryToApiFormat = (
+  state: LensAttributes
+): {
+  filters?: (LensApiFilterType | UnifiedSearchFilterType)[];
+  query?: LensApiFilterType;
+} => {
+  return {
+    ...(state.state.filters?.length ? { filters: filtersToApiFormat(state.state.filters) } : {}),
+    ...(state.state.query && !isOfAggregateQueryType(state.state.query)
+      ? { query: queryToApiFormat(state.state.query) }
+      : {}),
+  };
+};
+
+export const filtersAndQueryToLensState = (state: LensApiState) => {
+  const query =
+    state.dataset.type === 'esql'
+      ? { esql: state.dataset.query }
+      : 'query' in state && state.query
+      ? queryToLensState(state.query satisfies LensApiFilterType)
+      : undefined;
+  return {
+    ...(state.filters ? { filters: filtersToLensState(state.filters) } : {}),
+    ...(query ? { query } : {}),
+  };
+};
+
 export type DeepMutable<T> = T extends (...args: never[]) => unknown
   ? T // don't mutate functions
   : T extends ReadonlyArray<infer U>
@@ -460,3 +520,7 @@ export type DeepPartial<T> = T extends (...args: never[]) => unknown
       [P in keyof T]?: DeepPartial<T[P]>;
     }
   : T;
+
+export function nonNullable<T>(v: T): v is NonNullable<T> {
+  return v != null;
+}

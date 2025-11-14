@@ -21,7 +21,7 @@ export async function addFromLibrary(dashboardApi: DashboardApi) {
     },
     flyoutProps: {
       'data-test-subj': 'dashboardAddPanel',
-      triggerId: 'addFromLibraryButton',
+      triggerId: 'dashboardAddTopNavButton',
     },
   });
 }

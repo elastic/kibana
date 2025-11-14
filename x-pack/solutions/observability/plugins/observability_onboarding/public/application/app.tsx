@@ -7,7 +7,6 @@
 
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
 import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
@@ -22,18 +21,6 @@ import type {
   ObservabilityOnboardingPluginStartDeps,
 } from '../plugin';
 import { ObservabilityOnboardingFlow } from './observability_onboarding_flow';
-
-export const onBoardingTitle = i18n.translate(
-  'xpack.observability_onboarding.breadcrumbs.onboarding',
-  {
-    defaultMessage: 'Onboarding',
-  }
-);
-
-export const breadcrumbsApp = {
-  id: 'observabilityOnboarding',
-  label: onBoardingTitle,
-};
 
 export function ObservabilityOnboardingAppRoot({
   appMountParameters,

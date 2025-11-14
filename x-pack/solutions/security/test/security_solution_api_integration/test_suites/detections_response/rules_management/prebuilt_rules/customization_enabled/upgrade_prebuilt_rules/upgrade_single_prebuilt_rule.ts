@@ -24,7 +24,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const supertest = getService('supertest');
   const log = getService('log');
-  const securitySolutionApi = getService('securitySolutionApi');
+  const detectionsApi = getService('detectionsApi');
   const deps = {
     es,
     supertest,
@@ -83,7 +83,7 @@ export default ({ getService }: FtrProviderContext): void => {
                   },
                 ],
               });
-              const upgradedRule = await securitySolutionApi.readRule({
+              const upgradedRule = await detectionsApi.readRule({
                 query: { rule_id: DEFAULT_TEST_RULE_ID },
               });
 
@@ -129,7 +129,7 @@ export default ({ getService }: FtrProviderContext): void => {
                   },
                 ],
               });
-              const upgradedRule = await securitySolutionApi.readRule({
+              const upgradedRule = await detectionsApi.readRule({
                 query: { rule_id: DEFAULT_TEST_RULE_ID },
               });
 
@@ -179,7 +179,7 @@ export default ({ getService }: FtrProviderContext): void => {
                   },
                 ],
               });
-              const upgradedRule = await securitySolutionApi.readRule({
+              const upgradedRule = await detectionsApi.readRule({
                 query: { rule_id: DEFAULT_TEST_RULE_ID },
               });
 
@@ -226,7 +226,7 @@ export default ({ getService }: FtrProviderContext): void => {
                   },
                 ],
               });
-              const upgradedRule = await securitySolutionApi.readRule({
+              const upgradedRule = await detectionsApi.readRule({
                 query: { rule_id: DEFAULT_TEST_RULE_ID },
               });
 
@@ -343,7 +343,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 mode: ModeEnum.ALL_RULES,
                 pick_version: 'TARGET',
               });
-              const upgradedRule = await securitySolutionApi.readRule({
+              const upgradedRule = await detectionsApi.readRule({
                 query: { rule_id: DEFAULT_TEST_RULE_ID },
               });
 

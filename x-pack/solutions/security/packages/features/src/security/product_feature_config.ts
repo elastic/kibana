@@ -76,6 +76,9 @@ export const securityDefaultProductFeaturesConfig: SecurityProductFeaturesConfig
       },
     },
   },
+  [ProductFeatureSecurityKey.aiValueReport]: {
+    subFeatureIds: [SecuritySubFeatureId.socManagement],
+  },
   [ProductFeatureSecurityKey.investigationGuideInteractions]: {
     privileges: {
       all: {
@@ -166,5 +169,9 @@ export const securityDefaultProductFeaturesConfig: SecurityProductFeaturesConfig
       SecuritySubFeatureId.eventFilters,
       SecuritySubFeatureId.globalArtifactManagement,
     ],
+  },
+
+  [ProductFeatureSecurityKey.endpointExceptions]: {
+    subFeatureIds: [SecuritySubFeatureId.endpointExceptions],
   },
 };

@@ -12,12 +12,12 @@ import {
   EuiSkeletonRectangle,
   useEuiTheme,
 } from '@elastic/eui';
-import { useQueryClient } from '@tanstack/react-query';
 import React, { lazy, Suspense, useCallback, useEffect, useState } from 'react';
 import type { Observable } from 'rxjs';
 
 import type { ApplicationStart, Capabilities } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { useQueryClient } from '@kbn/react-query';
 
 import { SpacesMenu } from './components/spaces_menu';
 import { SPACES_QUERY_KEY, useSpaces } from './hooks/use_spaces';

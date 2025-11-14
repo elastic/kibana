@@ -12,6 +12,7 @@ import { useFindPrompts } from '@kbn/elastic-assistant';
 import { DATA_QUALITY_SUGGESTED_USER_PROMPT } from '@kbn/ecs-data-quality-dashboard';
 import { EXPLAIN_THEN_SUMMARIZE_RULE_DETAILS } from '../../../detection_engine/common/translations';
 import { EXPLAIN_THEN_SUMMARIZE_SUGGEST_INVESTIGATION_GUIDE } from '../prompts/user/translations';
+import { ASSET_INVENTORY_ENTITY_PROMPT } from '../../../flyout/entity_details/shared/translations';
 
 const mockPrompts = [
   {
@@ -25,6 +26,10 @@ const mockPrompts = [
   {
     promptId: 'ruleAnalysis',
     prompt: 'RULE ANALYSIS',
+  },
+  {
+    promptId: 'assetAnalysis',
+    prompt: 'ASSET ANALYSIS',
   },
 ];
 jest.mock('@kbn/elastic-assistant');
@@ -46,6 +51,12 @@ describe('useFindPromptContexts', () => {
         description: 'Alert (from view)',
         suggestedUserPrompt: 'ALERT EVALUATION',
         tooltip: 'Add this alert as context',
+      },
+      asset: {
+        category: 'asset',
+        description: 'Entity details',
+        suggestedUserPrompt: 'ASSET ANALYSIS',
+        tooltip: 'Asset details from inventory',
       },
       'data-quality-dashboard': {
         category: 'data-quality-dashboard',
@@ -82,6 +93,12 @@ describe('useFindPromptContexts', () => {
         description: 'Alert (from view)',
         suggestedUserPrompt: EXPLAIN_THEN_SUMMARIZE_SUGGEST_INVESTIGATION_GUIDE,
         tooltip: 'Add this alert as context',
+      },
+      asset: {
+        category: 'asset',
+        description: 'Entity details',
+        suggestedUserPrompt: ASSET_INVENTORY_ENTITY_PROMPT,
+        tooltip: 'Asset details from inventory',
       },
       'data-quality-dashboard': {
         category: 'data-quality-dashboard',

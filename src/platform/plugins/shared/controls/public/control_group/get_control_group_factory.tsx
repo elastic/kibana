@@ -104,7 +104,7 @@ export const getControlGroupEmbeddableFactory = () => {
         isEditingEnabled: () => true,
         openAddDataControlFlyout: (settings) => {
           const parentDataViewId = apiPublishesDataViews(parentApi)
-            ? parentApi.dataViews$.value?.[0]?.id
+            ? parentApi.dataViews$.value?.find((dataView) => dataView.isPersisted())?.id
             : undefined;
           const newControlState = controlsManager.getNewControlState();
 

@@ -7,9 +7,26 @@
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
 import type { AddSolutionNavigationArg } from '@kbn/navigation-plugin/public';
-import { STACK_MANAGEMENT_NAV_ID, INGEST_AND_MANAGE_DATA_NAV_ID } from '@kbn/deeplinks-management';
+import { STACK_MANAGEMENT_NAV_ID, DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
+import { lazy } from 'react';
 import { map, of } from 'rxjs';
 import type { ObservabilityPublicPluginsStart } from './plugin';
+const LazyIconBriefcase = lazy(() =>
+  import('@kbn/observability-nav-icons').then(({ iconBriefcase }) => ({ default: iconBriefcase }))
+);
+const LazyIconMl = lazy(() =>
+  import('@kbn/observability-nav-icons').then(({ iconProductMl }) => ({ default: iconProductMl }))
+);
+const LazyIconProductStreamsWired = lazy(() =>
+  import('@kbn/observability-nav-icons').then(({ iconProductStreamsWired }) => ({
+    default: iconProductStreamsWired,
+  }))
+);
+const LazyIconProductCloudInfra = lazy(() =>
+  import('@kbn/observability-nav-icons').then(({ iconProductCloudInfra }) => ({
+    default: iconProductCloudInfra,
+  }))
+);
 
 const title = i18n.translate(
   'xpack.observability.obltNav.headerSolutionSwitcher.obltSolutionTitle',
@@ -81,7 +98,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                 link: 'observability-overview:cases_create',
               },
             ],
-            iconV2: 'casesApp',
+            iconV2: LazyIconBriefcase,
           },
           {
             link: 'slo',
@@ -91,7 +108,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
             ? [
                 {
                   link: 'streams' as const,
-                  iconV2: 'beaker',
+                  iconV2: LazyIconProductStreamsWired,
                 },
               ]
             : []),
@@ -102,6 +119,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
             }),
             renderAs: 'panelOpener',
             spaceBefore: null,
+            iconV2: 'spaces',
             children: [
               {
                 id: 'apm',
@@ -194,7 +212,6 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                 ],
               },
             ],
-            iconV2: 'spaces',
           },
           {
             id: 'metrics',
@@ -204,7 +221,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
             }),
             renderAs: 'panelOpener',
             spaceBefore: null,
-            iconV2: 'storage',
+            iconV2: LazyIconProductCloudInfra,
             children: [
               {
                 children: [
@@ -261,6 +278,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
             title: i18n.translate('xpack.observability.obltNav.aiAssistant', {
               defaultMessage: 'AI Assistant',
             }),
+            iconV2: 'sparkles',
             link: 'observabilityAIAssistant',
           },
           {
@@ -269,8 +287,8 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
               defaultMessage: 'Machine Learning',
             }),
             spaceBefore: null,
-            iconV2: 'info',
             renderAs: 'panelOpener',
+            iconV2: LazyIconMl,
             children: [
               {
                 title: '',
@@ -340,6 +358,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
             }),
             spaceBefore: null,
             renderAs: 'panelOpener',
+            iconV2: 'wrench',
             children: [
               {
                 link: 'logs:anomalies',
@@ -376,7 +395,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
               defaultMessage: 'Add data',
             }),
             link: 'observabilityOnboarding',
-            icon: 'launch',
+            iconV2: 'plusInCircle',
           },
           {
             id: 'devTools',
@@ -384,17 +403,19 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
               defaultMessage: 'Developer tools',
             }),
             link: 'dev_tools',
+            iconV2: 'code',
             icon: 'editorCodeBlock',
           },
           {
-            id: INGEST_AND_MANAGE_DATA_NAV_ID,
-            title: i18n.translate('xpack.observability.obltNav.ingestAndManageData', {
-              defaultMessage: 'Ingest and manage data',
+            id: DATA_MANAGEMENT_NAV_ID,
+            title: i18n.translate('xpack.observability.obltNav.dataManagement', {
+              defaultMessage: 'Data management',
               description:
                 'The heading of a section in a navigation tree dedicated to data collection',
             }),
             renderAs: 'panelOpener',
             spaceBefore: null,
+            iconV2: 'database',
             children: [
               {
                 id: 'ingest_and_integrations',
@@ -424,9 +445,9 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                 ],
               },
               {
-                id: 'indicesDataStreamsAndRollups',
-                title: i18n.translate('xpack.observability.obltNav.indicesDataStreamsAndRollups', {
-                  defaultMessage: 'Indices, data streams and roll ups',
+                id: 'indicesAndDataStreams',
+                title: i18n.translate('xpack.observability.obltNav.indicesAndDataStreams', {
+                  defaultMessage: 'Indices and data streams',
                   description:
                     'Heading in a nav tree dedicated to UIs for leveraging various Elasticsearch features for data management',
                 }),
@@ -465,10 +486,23 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
             spaceBefore: null,
             children: [
               {
-                id: 'stack_monitoring_title',
+                id: 'stack_management_home',
                 title: '',
                 renderAs: 'panelOpener',
-                children: [{ link: 'monitoring' }],
+                children: [
+                  {
+                    // We include this link here to ensure that the settings icon does not land on Stack Monitoring by default
+                    // https://github.com/elastic/kibana/issues/241518
+                    // And that the sidenav panel opens when user lands to legacy management landing page
+                    // https://github.com/elastic/kibana/issues/240275
+                    link: 'management',
+                    title: i18n.translate('xpack.observability.obltNav.management_home', {
+                      defaultMessage: 'Home',
+                    }),
+                    breadcrumbStatus: 'hidden',
+                  },
+                  { link: 'monitoring' },
+                ],
               },
               {
                 id: 'alerts_and_insights',
@@ -479,7 +513,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                 spaceBefore: null,
                 children: [
                   {
-                    link: 'observability-overview:rules',
+                    link: 'management:triggersActions',
                   },
                   {
                     link: 'management:triggersActionsConnectors',
@@ -578,6 +612,9 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                   },
                   {
                     link: 'management:dataViews',
+                  },
+                  {
+                    link: 'management:search_sessions',
                   },
                 ],
               },

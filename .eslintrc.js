@@ -1147,17 +1147,6 @@ module.exports = {
       },
     },
     {
-      files: [
-        'x-pack/solutions/observability/plugins/apm/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'x-pack/solutions/observability/plugins/infra/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'x-pack/solutions/observability/plugins/profiling/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'x-pack/solutions/observability/plugins/observability_shared/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-      ],
-      rules: {
-        '@kbn/eui-a11y/eui_elements_should_have_aria_label_or_aria_labelledby_props': 'warn',
-      },
-    },
-    {
       // require explicit return types in route handlers for performance reasons
       files: ['x-pack/solutions/observability/plugins/apm/server/**/route.ts'],
       rules: {
@@ -1284,6 +1273,13 @@ module.exports = {
             paths: RESTRICTED_IMPORTS,
           },
         ],
+      },
+    },
+    // Allow node.js imports for security solution test packages
+    {
+      files: ['x-pack/solutions/security/packages/test-api-clients/**/*.{js,mjs,ts,tsx}'],
+      rules: {
+        'import/no-nodejs-modules': 'off',
       },
     },
     {
@@ -1574,6 +1570,7 @@ module.exports = {
         'src/platform/test/*api_integration*/**/*.{js,ts}',
         'x-pack/platform/test/{accessibility,*functional*}/apps/**/*.{js,ts}',
         'x-pack/platform/test/*api_integration*/**/*.{js,ts}',
+        'x-pack/platform/test/*functional/tests/**/*.{js,ts}',
       ],
       extends: ['plugin:mocha/recommended'],
       plugins: ['mocha'],
@@ -1640,6 +1637,17 @@ module.exports = {
         'playwright/valid-title': 'error',
         // Scout has a its own runtime validator for test tags
         'playwright/valid-test-tags': 'off',
+        // Check all function arguments to catch unused destructured params
+        '@typescript-eslint/no-unused-vars': [
+          'error',
+          {
+            vars: 'all',
+            args: 'all',
+            ignoreRestSiblings: true, // Ignore unused vars when destructuring with rest operator
+            varsIgnorePattern: '^_', // Allow _ prefix for intentionally unused variables
+            argsIgnorePattern: '^_', // Allow _ prefix for intentionally unused args
+          },
+        ],
       },
     },
     {
@@ -1816,6 +1824,36 @@ module.exports = {
         'x-pack/solutions/**/test/api_integration/apis/cases/**/*.{ts, tsx}',
       ],
     },
+    /**
+     * Stack Connectors Specs package
+     * This package contains common code for public and server side
+     */
+    {
+      files: ['src/platform/packages/shared/kbn-connector-specs/**/*.{js,mjs,ts,tsx}'],
+      rules: {
+        'import/no-nodejs-modules': 'error',
+        'no-duplicate-imports': 'off',
+        'import/no-duplicates': 'error',
+        'no-restricted-imports': [
+          'error',
+          {
+            // prevents UI code from importing server side code and then webpack including it when doing builds
+            patterns: ['**/*server*'],
+            paths: RESTRICTED_IMPORTS,
+          },
+        ],
+        '@typescript-eslint/no-explicit-any': 'error',
+        '@typescript-eslint/no-non-null-assertion': 'error',
+        '@typescript-eslint/no-this-alias': 'error',
+        '@typescript-eslint/no-unused-vars': 'error',
+      },
+    },
+    {
+      files: ['src/platform/packages/shared/kbn-connector-specs/src/icons/**/*.{ts,tsx}'],
+      rules: {
+        'import/no-default-export': 'off',
+      },
+    },
 
     /**
      * Lens overrides
@@ -1850,6 +1888,19 @@ module.exports = {
         'src/platform/plugins/shared/discover/**/*.{ts,tsx}',
         'src/platform/plugins/shared/saved_search/**/*.{ts,tsx}',
       ],
+    },
+
+    /**
+     * Search overrides
+     */
+
+    {
+      files: ['x-pack/solutions/search/**/*.{ts,tsx}'],
+      excludedFiles: ['x-pack/solutions/search/**/*.test.tsx'],
+      rules: {
+        '@kbn/i18n/strings_should_be_translated_with_i18n': 'warn',
+        '@kbn/i18n/strings_should_be_translated_with_formatted_message': 'warn',
+      },
     },
 
     /**
@@ -1902,8 +1953,6 @@ module.exports = {
           'error',
           { vars: 'all', args: 'after-used', ignoreRestSiblings: true, varsIgnorePattern: '^_' },
         ],
-        '@kbn/i18n/strings_should_be_translated_with_i18n': 'warn',
-        '@kbn/i18n/strings_should_be_translated_with_formatted_message': 'warn',
         '@kbn/telemetry/event_generating_elements_should_be_instrumented': 'warn',
       },
     },
@@ -2235,6 +2284,198 @@ module.exports = {
     },
 
     /**
+     * Workflows Team: generic rules
+     */
+    {
+      files: [
+        'src/platform/plugins/shared/workflows_management/**/*.{js,mjs,ts,tsx}',
+        'src/platform/plugins/shared/workflows_execution_engine/**/*.{js,mjs,ts,tsx}',
+        'src/platform/packages/shared/kbn-workflows/**/*.{js,mjs,ts,tsx}',
+        'src/platform/packages/shared/kbn-workflows-ui/**/*.{js,mjs,ts,tsx}',
+      ],
+      plugins: ['eslint-plugin-node', 'react'],
+      env: {
+        jest: true,
+      },
+      rules: {
+        'accessor-pairs': 'error',
+        'array-callback-return': 'error',
+        'no-array-constructor': 'error',
+        complexity: 'warn',
+        'node/no-deprecated-api': 'error',
+        'no-bitwise': 'error',
+        'no-continue': 'error',
+        'no-dupe-keys': 'error',
+        'no-duplicate-case': 'error',
+        'no-duplicate-imports': 'off',
+        'no-empty-character-class': 'error',
+        'no-empty-pattern': 'error',
+        'no-ex-assign': 'error',
+        'no-extend-native': 'error',
+        'no-extra-bind': 'error',
+        'no-extra-boolean-cast': 'error',
+        'no-extra-label': 'error',
+        'no-func-assign': 'error',
+        'no-implicit-globals': 'error',
+        'no-implied-eval': 'error',
+        'no-invalid-regexp': 'error',
+        'no-inner-declarations': 'error',
+        'no-lone-blocks': 'error',
+        'no-multi-assign': 'error',
+        'no-misleading-character-class': 'error',
+        'no-new-symbol': 'error',
+        'no-obj-calls': 'error',
+        'no-param-reassign': 'error',
+        'no-process-exit': 'error',
+        'no-prototype-builtins': 'error',
+        'no-return-await': 'error',
+        'no-self-compare': 'error',
+        'no-shadow-restricted-names': 'error',
+        'no-sparse-arrays': 'error',
+        'no-this-before-super': 'error',
+        // rely on typescript
+        'no-undef': 'off',
+        'no-unreachable': 'error',
+        'no-unsafe-finally': 'error',
+        'no-useless-call': 'error',
+        'no-useless-catch': 'error',
+        'no-useless-concat': 'error',
+        'no-useless-computed-key': 'error',
+        'no-useless-rename': 'error',
+        'no-useless-return': 'error',
+        'one-var-declaration-per-line': 'error',
+        'prefer-object-spread': 'error',
+        'prefer-promise-reject-errors': 'error',
+        'prefer-rest-params': 'error',
+        'prefer-spread': 'error',
+        'prefer-template': 'error',
+        'react/boolean-prop-naming': 'error',
+        'react/button-has-type': 'error',
+        'react/display-name': 'error',
+        'react/forbid-dom-props': 'error',
+        'react/no-access-state-in-setstate': 'error',
+        'react/no-children-prop': 'error',
+        'react/no-danger-with-children': 'error',
+        'react/no-deprecated': 'error',
+        'react/no-did-mount-set-state': 'error',
+        'react/no-direct-mutation-state': 'error',
+        'react/no-find-dom-node': 'error',
+        'react/no-redundant-should-component-update': 'error',
+        'react/no-render-return-value': 'error',
+        'react/no-typos': 'error',
+        'react/no-string-refs': 'error',
+        'react/no-this-in-sfc': 'error',
+        'react/no-unescaped-entities': 'error',
+        'react/no-unsafe': 'error',
+        'react/no-unused-prop-types': 'error',
+        'react/no-unused-state': 'error',
+        'react/sort-default-props': 'error',
+        'react/void-dom-elements-no-children': 'error',
+        'react/jsx-no-comment-textnodes': 'error',
+        'react/jsx-no-literals': 'error',
+        'react/jsx-no-target-blank': 'error',
+        'react/jsx-fragments': 'error',
+        'require-atomic-updates': 'error',
+        'symbol-description': 'error',
+        'vars-on-top': 'error',
+        'import/no-duplicates': ['error'],
+        '@typescript-eslint/no-non-null-assertion': 'error',
+        '@typescript-eslint/no-this-alias': 'error',
+        '@typescript-eslint/no-explicit-any': 'error',
+        '@typescript-eslint/no-useless-constructor': 'error',
+        '@typescript-eslint/unified-signatures': 'error',
+        'no-restricted-imports': [
+          'error',
+          {
+            // prevents code from importing files that contain the name "legacy" within their name. This is a mechanism
+            // to help deprecation and prevent accidental re-use/continued use of code we plan on removing. If you are
+            // finding yourself turning this off a lot for "new code" consider renaming the file and functions if it is has valid uses.
+            patterns: ['*legacy*'],
+            paths: RESTRICTED_IMPORTS,
+          },
+        ],
+        'import/order': [
+          // This rule sorts import declarations
+          'error',
+          {
+            groups: [
+              'unknown',
+              ['builtin', 'external'],
+              'internal',
+              ['parent', 'sibling', 'index'],
+            ],
+            pathGroups: [
+              {
+                pattern: '{**,.}/*.test.mocks',
+                group: 'unknown',
+              },
+              {
+                pattern: '{@kbn/**,src/**,kibana{,/**}}',
+                group: 'internal',
+              },
+            ],
+            pathGroupsExcludedImportTypes: [],
+            alphabetize: {
+              order: 'asc',
+              caseInsensitive: true,
+            },
+          },
+        ],
+        'import/no-duplicates': ['error'],
+        'sort-imports': [
+          // This rule sorts imports of multiple members (destructured imports)
+          'error',
+          {
+            ignoreCase: true,
+            ignoreDeclarationSort: true,
+          },
+        ],
+      },
+    },
+    /**
+     * Workflows Team: public and common rules
+     */
+    {
+      files: [
+        'src/platform/plugins/shared/workflows_management/public/**/*.{js,mjs,ts,tsx}',
+        'src/platform/plugins/shared/workflows_management/common/**/*.{js,mjs,ts,tsx}',
+        'src/platform/packages/shared/kbn-workflows/**/*.{js,mjs,ts,tsx}',
+        'src/platform/packages/shared/kbn-workflows-ui/**/*.{js,mjs,ts,tsx}',
+      ],
+      rules: {
+        'import/no-nodejs-modules': 'error',
+        'no-duplicate-imports': 'off',
+        'import/no-duplicates': ['error'],
+      },
+    },
+    /**
+     * Workflows Team: test files
+     */
+    {
+      files: [
+        'src/platform/plugins/shared/workflows_management/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'src/platform/plugins/shared/workflows_execution_engine/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'src/platform/packages/shared/kbn-workflows/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'src/platform/packages/shared/kbn-workflows-ui/**/*.{test,mock,test_helper}.{ts,tsx}',
+      ],
+      rules: {
+        '@typescript-eslint/no-non-null-assertion': 'off',
+        '@typescript-eslint/no-explicit-any': 'off',
+      },
+    },
+    /**
+     * Workflows Team: scripts files
+     */
+    {
+      files: ['src/platform/packages/shared/kbn-workflows/scripts/**/*.{js,ts}'],
+      rules: {
+        'import/no-nodejs-modules': 'off',
+        'no-console': 'off',
+        'no-process-exit': 'off',
+      },
+    },
+
+    /**
      * Disallow `export *` syntax in plugin/core public/server/common index files and instead
      * require that plugins/core explicitly export the APIs that should be accessible outside the plugin.
      *
@@ -2396,6 +2637,13 @@ module.exports = {
                   "Observability solution tests should import from '@kbn/scout-oblt' instead.",
               },
             ],
+            patterns: [
+              {
+                group: ['@kbn/scout/**', '@playwright/test/**', 'playwright/**'],
+                message:
+                  "Observability solution tests should import from '@kbn/scout-oblt' instead.",
+              },
+            ],
           },
         ],
       },
@@ -2419,6 +2667,13 @@ module.exports = {
               },
               {
                 name: 'playwright',
+                message:
+                  "Security solution tests should import from '@kbn/scout-security' instead.",
+              },
+            ],
+            patterns: [
+              {
+                group: ['@kbn/scout/**', '@playwright/test/**', 'playwright/**'],
                 message:
                   "Security solution tests should import from '@kbn/scout-security' instead.",
               },

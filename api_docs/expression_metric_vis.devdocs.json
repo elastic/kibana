@@ -213,9 +213,9 @@
             "signature": [
               "string | ",
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
               }
@@ -234,9 +234,9 @@
             "signature": [
               "string | ",
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
               },
@@ -256,9 +256,9 @@
             "signature": [
               "string | ",
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
               },
@@ -278,9 +278,9 @@
             "signature": [
               "string | ",
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
               },
@@ -314,9 +314,9 @@
             "signature": [
               "string | ",
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
               }
@@ -335,9 +335,9 @@
             "signature": [
               "string | ",
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
               },
@@ -357,9 +357,9 @@
             "signature": [
               "string | ",
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
               },
@@ -379,9 +379,9 @@
             "signature": [
               "string | ",
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
               },
@@ -1252,7 +1252,7 @@
               "MakeOverridesSerializable",
               "<",
               "CustomXDomain",
-              " | undefined>; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: React.ComponentType<{}> | React.ReactChild | undefined; ariaLabel?: string | undefined; ariaLabelledBy?: string | undefined; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendStrategy?: ",
+              " | undefined>; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | React.ComponentType<{}> | undefined; ariaLabel?: string | undefined; ariaLabelledBy?: string | undefined; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendStrategy?: ",
               "LegendStrategy",
               " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> & Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>>) | undefined"
             ],

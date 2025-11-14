@@ -73,11 +73,56 @@ const getSingleEventUserAction = ({
   ];
 };
 
+const getMultipleEventsUserAction = ({
+  userAction,
+  userProfiles,
+  attachment,
+  loadingCommentIds,
+  handleDeleteComment,
+}: BuilderArgs): EuiCommentProps[] => {
+  if (!Array.isArray(attachment.eventId)) {
+    return [];
+  }
+
+  const totalEvents = attachment.eventId.length;
+
+  return [
+    {
+      username: (
+        <HoverableUserWithAvatarResolver user={userAction.createdBy} userProfiles={userProfiles} />
+      ),
+      eventColor: 'subdued',
+      event: <MultipleEventsCommentEvent actionId={userAction.id} totalEvents={totalEvents} />,
+      'data-test-subj': `user-action-event-${userAction.type}-${userAction.action}-action-${userAction.id}`,
+      timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
+      timelineAvatar: 'bell',
+      actions: (
+        <UserActionContentToolbar id={attachment.id}>
+          <EventPropertyActions
+            onDelete={() =>
+              handleDeleteComment(attachment.id, DELETE_EVENTS_SUCCESS_TITLE(totalEvents))
+            }
+            isLoading={loadingCommentIds.includes(attachment.id)}
+            totalEvents={totalEvents}
+          />
+        </UserActionContentToolbar>
+      ),
+    },
+  ];
+};
+
 export const createEventAttachmentUserActionBuilder = (
   params: BuilderArgs
 ): ReturnType<UserActionBuilder> => ({
   build: () => {
-    return getSingleEventUserAction(params);
+    const { attachment } = params;
+    const eventId = Array.isArray(attachment.eventId) ? attachment.eventId : [attachment.eventId];
+
+    if (eventId.length === 1) {
+      return getSingleEventUserAction(params);
+    }
+
+    return getMultipleEventsUserAction(params);
   },
 });
 

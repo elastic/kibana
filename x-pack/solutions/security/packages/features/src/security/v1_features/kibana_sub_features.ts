@@ -6,7 +6,7 @@
  */
 
 import type { SubFeatureConfig } from '@kbn/features-plugin/common';
-import { SECURITY_FEATURE_ID_V3 } from '../../../constants';
+import { SECURITY_FEATURE_ID_V4 } from '../../../constants';
 import { SecuritySubFeatureId } from '../../product_features_keys';
 import type { SecurityFeatureParams } from '../types';
 import type { SubFeatureReplacements } from '../../types';
@@ -25,47 +25,49 @@ import {
   fileOperationsSubFeature,
   executeActionSubFeature,
   scanActionSubFeature,
+  socManagementSubFeature,
 } from '../kibana_sub_features';
 
 const replacements: Partial<Record<SecuritySubFeatureId, SubFeatureReplacements>> = {
-  [SecuritySubFeatureId.endpointList]: [{ feature: SECURITY_FEATURE_ID_V3 }],
-  [SecuritySubFeatureId.endpointExceptions]: [
-    {
-      feature: SECURITY_FEATURE_ID_V3,
-      additionalPrivileges: { endpoint_exceptions_all: ['global_artifact_management_all'] },
-    },
-  ],
+  [SecuritySubFeatureId.endpointList]: [{ feature: SECURITY_FEATURE_ID_V4 }],
   [SecuritySubFeatureId.trustedApplications]: [
     {
-      feature: SECURITY_FEATURE_ID_V3,
+      feature: SECURITY_FEATURE_ID_V4,
       additionalPrivileges: { trusted_applications_all: ['global_artifact_management_all'] },
     },
   ],
   [SecuritySubFeatureId.hostIsolationExceptionsBasic]: [
     {
-      feature: SECURITY_FEATURE_ID_V3,
+      feature: SECURITY_FEATURE_ID_V4,
       additionalPrivileges: { host_isolation_exceptions_all: ['global_artifact_management_all'] },
     },
   ],
   [SecuritySubFeatureId.blocklist]: [
     {
-      feature: SECURITY_FEATURE_ID_V3,
+      feature: SECURITY_FEATURE_ID_V4,
       additionalPrivileges: { blocklist_all: ['global_artifact_management_all'] },
     },
   ],
   [SecuritySubFeatureId.eventFilters]: [
     {
-      feature: SECURITY_FEATURE_ID_V3,
+      feature: SECURITY_FEATURE_ID_V4,
       additionalPrivileges: { event_filters_all: ['global_artifact_management_all'] },
     },
   ],
-  [SecuritySubFeatureId.policyManagement]: [{ feature: SECURITY_FEATURE_ID_V3 }],
-  [SecuritySubFeatureId.responseActionsHistory]: [{ feature: SECURITY_FEATURE_ID_V3 }],
-  [SecuritySubFeatureId.hostIsolation]: [{ feature: SECURITY_FEATURE_ID_V3 }],
-  [SecuritySubFeatureId.processOperations]: [{ feature: SECURITY_FEATURE_ID_V3 }],
-  [SecuritySubFeatureId.fileOperations]: [{ feature: SECURITY_FEATURE_ID_V3 }],
-  [SecuritySubFeatureId.executeAction]: [{ feature: SECURITY_FEATURE_ID_V3 }],
-  [SecuritySubFeatureId.scanAction]: [{ feature: SECURITY_FEATURE_ID_V3 }],
+  [SecuritySubFeatureId.endpointExceptions]: [
+    {
+      feature: SECURITY_FEATURE_ID_V4,
+      additionalPrivileges: { endpoint_exceptions_all: ['global_artifact_management_all'] },
+    },
+  ],
+  [SecuritySubFeatureId.policyManagement]: [{ feature: SECURITY_FEATURE_ID_V4 }],
+  [SecuritySubFeatureId.responseActionsHistory]: [{ feature: SECURITY_FEATURE_ID_V4 }],
+  [SecuritySubFeatureId.hostIsolation]: [{ feature: SECURITY_FEATURE_ID_V4 }],
+  [SecuritySubFeatureId.processOperations]: [{ feature: SECURITY_FEATURE_ID_V4 }],
+  [SecuritySubFeatureId.fileOperations]: [{ feature: SECURITY_FEATURE_ID_V4 }],
+  [SecuritySubFeatureId.executeAction]: [{ feature: SECURITY_FEATURE_ID_V4 }],
+  [SecuritySubFeatureId.scanAction]: [{ feature: SECURITY_FEATURE_ID_V4 }],
+  [SecuritySubFeatureId.socManagement]: [{ feature: SECURITY_FEATURE_ID_V4 }],
 };
 
 /**
@@ -85,13 +87,14 @@ export const getSecuritySubFeaturesMap = ({
 }: SecurityFeatureParams): Map<SecuritySubFeatureId, SubFeatureConfig> => {
   const securitySubFeaturesList: Array<[SecuritySubFeatureId, SubFeatureConfig]> = [
     [SecuritySubFeatureId.endpointList, endpointListSubFeature()],
-    [SecuritySubFeatureId.endpointExceptions, endpointExceptionsSubFeature()],
     [SecuritySubFeatureId.trustedApplications, trustedApplicationsSubFeature()],
     [SecuritySubFeatureId.hostIsolationExceptionsBasic, hostIsolationExceptionsBasicSubFeature()],
     [SecuritySubFeatureId.blocklist, blocklistSubFeature()],
     [SecuritySubFeatureId.eventFilters, eventFiltersSubFeature()],
+    [SecuritySubFeatureId.endpointExceptions, endpointExceptionsSubFeature()],
     [SecuritySubFeatureId.policyManagement, policyManagementSubFeature()],
     [SecuritySubFeatureId.responseActionsHistory, responseActionsHistorySubFeature()],
+    [SecuritySubFeatureId.socManagement, socManagementSubFeature()],
     [SecuritySubFeatureId.hostIsolation, hostIsolationSubFeature()],
     [SecuritySubFeatureId.processOperations, processOperationsSubFeature()],
     [SecuritySubFeatureId.fileOperations, fileOperationsSubFeature()],
@@ -108,10 +111,8 @@ export const getSecuritySubFeaturesMap = ({
         subFeature = addSubFeatureReplacements(subFeature, featureReplacements);
       }
 
-      // If the feature is space-aware, we need to set false to the requireAllSpaces flag and remove the privilegesTooltip
-      if (experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
-        subFeature = { ...subFeature, requireAllSpaces: false, privilegesTooltip: undefined };
-      }
+      // Space awareness is now always enabled - set requireAllSpaces to false and remove privilegesTooltip
+      subFeature = { ...subFeature, requireAllSpaces: false, privilegesTooltip: undefined };
 
       return [id, subFeature];
     })

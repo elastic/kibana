@@ -11,6 +11,7 @@ import { outputService } from '../../services';
 import { createOrUpdateFailedInstallStatus } from '../../services/epm/packages/install_errors_helpers';
 
 import { installCustomAsset } from './custom_assets';
+import type { SyncIntegrationsData } from './model';
 
 import { syncIntegrationsOnRemote } from './sync_integrations_on_remote';
 
@@ -52,6 +53,7 @@ describe('syncIntegrationsOnRemote', () => {
     packageClientMock = {
       getInstallation: jest.fn(),
       installPackage: jest.fn(),
+      rollbackPackage: jest.fn(),
     };
     loggerMock = {
       debug: jest.fn(),
@@ -78,7 +80,9 @@ describe('syncIntegrationsOnRemote', () => {
     );
   });
 
-  function getSyncedIntegrationsCCRDoc(syncEnabled: boolean) {
+  function getSyncedIntegrationsCCRDoc(syncEnabled: boolean): {
+    hits: { hits: Array<{ _source: SyncIntegrationsData }> };
+  } {
     return {
       hits: {
         hits: [
@@ -86,6 +90,7 @@ describe('syncIntegrationsOnRemote', () => {
             _source: {
               remote_es_hosts: [
                 {
+                  name: 'remote1',
                   hosts: ['http://localhost:9200'],
                   sync_integrations: syncEnabled,
                 },
@@ -96,18 +101,21 @@ describe('syncIntegrationsOnRemote', () => {
                   package_version: '2.2.0',
                   updated_at: '2021-01-01T00:00:00.000Z',
                   install_source: 'registry',
+                  install_status: 'installed',
                 },
                 {
                   package_name: 'system',
                   package_version: '2.2.0',
                   updated_at: '2021-01-01T00:00:00.000Z',
                   install_source: 'registry',
+                  install_status: 'installed',
                 },
                 {
                   package_name: 'custom-pkg',
                   package_version: '1.0.0',
                   updated_at: '2021-01-01T00:00:00.000Z',
                   install_source: 'custom',
+                  install_status: 'installed',
                 },
               ],
               custom_assets: {
@@ -213,6 +221,45 @@ describe('syncIntegrationsOnRemote', () => {
       pkgVersion: '2.2.0',
       keepFailedInstallation: true,
       force: true,
+    });
+  });
+
+  it('should install package if higher version is installed and rolled back', async () => {
+    getIndicesMock.mockResolvedValue({
+      'fleet-synced-integrations-ccr-remote1': {},
+    });
+    const mockedSyncDoc = getSyncedIntegrationsCCRDoc(true);
+    mockedSyncDoc.hits.hits[0]._source.integrations.push({
+      package_name: 'endpoint',
+      package_version: '1.0.0',
+      updated_at: '2021-01-01T00:00:00.000Z',
+      install_source: 'registry',
+      install_status: 'installed',
+      rolled_back: true,
+    });
+    searchMock.mockResolvedValue(mockedSyncDoc);
+    packageClientMock.getInstallation.mockImplementation((packageName: string) =>
+      packageName === 'endpoint'
+        ? {
+            install_status: 'installed',
+            version: '1.3.0',
+          }
+        : {
+            install_status: 'installed',
+            version: '2.2.0',
+          }
+    );
+
+    await syncIntegrationsOnRemote(
+      esClientMock,
+      soClientMock,
+      packageClientMock,
+      abortController,
+      loggerMock
+    );
+
+    expect(packageClientMock.rollbackPackage).toHaveBeenCalledWith({
+      pkgName: 'endpoint',
     });
   });
 

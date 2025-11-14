@@ -45,6 +45,7 @@ export type {
   LabelsParams,
   Dimension,
   Dimensions,
+  PartitionLegendValue,
 } from './types/expression_renderers';
 
 export {

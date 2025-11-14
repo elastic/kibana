@@ -8,21 +8,21 @@
  */
 
 import type { EnterForeachNode } from '@kbn/workflows/graph';
-import type { NodeImplementation } from '../node_implementation';
+import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
-import type { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
+import type { NodeImplementation } from '../node_implementation';
 
 export class EnterForeachNodeImpl implements NodeImplementation {
   constructor(
     private node: EnterForeachNode,
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager,
-    private contextManager: WorkflowContextManager,
+    private stepExecutionRuntime: StepExecutionRuntime,
     private workflowLogger: IWorkflowEventLogger
   ) {}
 
   public async run(): Promise<void> {
-    if (!this.wfExecutionRuntimeManager.getCurrentStepState()) {
+    if (!this.stepExecutionRuntime.getCurrentStepState()) {
       await this.enterForeach();
     } else {
       await this.advanceIteration();
@@ -30,8 +30,11 @@ export class EnterForeachNodeImpl implements NodeImplementation {
   }
 
   private async enterForeach(): Promise<void> {
-    let foreachState = this.wfExecutionRuntimeManager.getCurrentStepState();
-    await this.wfExecutionRuntimeManager.startStep();
+    await this.stepExecutionRuntime.startStep();
+    let foreachState = this.stepExecutionRuntime.getCurrentStepState();
+    await this.stepExecutionRuntime.setInput({
+      foreach: this.node.configuration.foreach,
+    });
     const evaluatedItems = this.getItems();
 
     if (evaluatedItems.length === 0) {
@@ -41,11 +44,11 @@ export class EnterForeachNodeImpl implements NodeImplementation {
           workflow: { step_id: this.node.stepId },
         }
       );
-      await this.wfExecutionRuntimeManager.setCurrentStepState({
+      await this.stepExecutionRuntime.setCurrentStepState({
         items: [],
         total: 0,
       });
-      await this.wfExecutionRuntimeManager.finishStep();
+      await this.stepExecutionRuntime.finishStep();
       this.wfExecutionRuntimeManager.navigateToNode(this.node.exitNodeId);
       return;
     }
@@ -65,14 +68,16 @@ export class EnterForeachNodeImpl implements NodeImplementation {
       total: evaluatedItems.length,
     };
 
-    await this.wfExecutionRuntimeManager.setCurrentStepState(foreachState);
+    await this.stepExecutionRuntime.setCurrentStepState(foreachState);
     // Enter a new scope for the first iteration
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.wfExecutionRuntimeManager.enterScope(foreachState.index!.toString());
     this.wfExecutionRuntimeManager.navigateToNextNode();
   }
 
   private async advanceIteration(): Promise<void> {
-    let foreachState = this.wfExecutionRuntimeManager.getCurrentStepState()!;
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    let foreachState = this.stepExecutionRuntime.getCurrentStepState()!;
     // Update items and index if they have changed
     const items = foreachState.items;
     const index = foreachState.index + 1;
@@ -85,42 +90,55 @@ export class EnterForeachNodeImpl implements NodeImplementation {
       total,
     };
     // Enter a new scope for the new iteration
-    await this.wfExecutionRuntimeManager.setCurrentStepState(foreachState);
+    await this.stepExecutionRuntime.setCurrentStepState(foreachState);
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.wfExecutionRuntimeManager.enterScope(foreachState.index!.toString());
     this.wfExecutionRuntimeManager.navigateToNextNode();
   }
 
-  private getItems(): any[] {
-    let items: any[] = [];
+  private getItems(): unknown[] {
+    const expression = this.node.configuration.foreach;
+    let resolvedValue = this.processForeachConfiguration();
 
-    if (!this.node.configuration.foreach) {
-      throw new Error('Foreach configuration is required');
+    if (typeof resolvedValue === 'string') {
+      try {
+        resolvedValue = JSON.parse(resolvedValue);
+      } catch {
+        throw new Error(`Unable to parse rendered value: ${resolvedValue}`);
+      }
     }
 
-    try {
-      items = JSON.parse(this.node.configuration.foreach);
-    } catch (error) {
-      const { value, pathExists } = this.contextManager.readContextPath(
-        this.node.configuration.foreach
+    if (!Array.isArray(resolvedValue)) {
+      throw new Error(
+        `Foreach expression must evaluate to an array. ` +
+          `Expression "${expression}" resolved to ${typeof resolvedValue}${
+            resolvedValue === null
+              ? ' (null)'
+              : resolvedValue === undefined
+              ? ' (undefined)'
+              : `: ${JSON.stringify(resolvedValue).substring(0, 100)}${
+                  JSON.stringify(resolvedValue).length > 100 ? '...' : ''
+                }`
+          }. `
       );
-
-      if (!pathExists) {
-        throw new Error(
-          `Foreach configuration path "${this.node.configuration.foreach}" does not exist in the workflow context.`
-        );
-      }
-
-      if (Array.isArray(value)) {
-        items = value;
-      } else if (typeof value === 'string') {
-        items = JSON.parse(value);
-      }
     }
 
-    if (!Array.isArray(items)) {
-      throw new Error('Foreach configuration must be an array');
+    return resolvedValue;
+  }
+
+  private processForeachConfiguration(): unknown {
+    const expression = this.node.configuration.foreach;
+
+    if (!expression) {
+      throw new Error(
+        'Foreach configuration is required. Please specify an array or expression that evaluates to an array.'
+      );
     }
 
-    return items;
+    if (expression.startsWith('{{') && expression.endsWith('}}')) {
+      return this.stepExecutionRuntime.contextManager.evaluateExpressionInContext(expression);
+    }
+
+    return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(expression);
   }
 }

@@ -32,7 +32,6 @@ import { isRefreshIntervalValid, isTimeRangeValid } from '../../../../../utils/v
 import { getValidFilters } from '../../../../../utils/get_valid_filters';
 import { updateSavedSearch } from '../../utils/update_saved_search';
 import { APP_STATE_URL_KEY } from '../../../../../../common';
-import { TABS_ENABLED_FEATURE_FLAG_KEY } from '../../../../../constants';
 import { selectTabRuntimeState } from '../runtime_state';
 import type { ConnectedCustomizationService } from '../../../../../customizations';
 import { disconnectTab } from './tabs';
@@ -61,7 +60,11 @@ export const initializeSingleTab: InternalStateThunkActionCreator<
       defaultUrlState,
     },
   }) =>
-  async (dispatch, getState, { services, runtimeStateManager, urlStateStorage }) => {
+  async (
+    dispatch,
+    getState,
+    { services, runtimeStateManager, urlStateStorage, searchSessionManager }
+  ) => {
     dispatch(disconnectTab({ tabId }));
     dispatch(internalStateSlice.actions.resetOnSavedSearchChange({ tabId }));
 
@@ -72,27 +75,22 @@ export const initializeSingleTab: InternalStateThunkActionCreator<
      * New tab initialization with the restored data if available
      */
 
-    const tabsEnabled = services.core.featureFlags.getBooleanValue(
-      TABS_ENABLED_FEATURE_FLAG_KEY,
-      false
-    );
-
     let tabInitialGlobalState: TabStateGlobalState | undefined;
     let tabInitialAppState: DiscoverAppState | undefined;
     let tabInitialInternalState: TabState['initialInternalState'] | undefined;
 
-    if (tabsEnabled) {
-      const tabState = selectTab(getState(), tabId);
+    const tabState = selectTab(getState(), tabId);
 
+    if (tabState.globalState) {
       tabInitialGlobalState = cloneDeep(tabState.globalState);
+    }
 
-      if (tabState.initialAppState) {
-        tabInitialAppState = cloneDeep(tabState.initialAppState);
-      }
+    if (tabState.appState) {
+      tabInitialAppState = cloneDeep(tabState.appState);
+    }
 
-      if (tabState.initialInternalState) {
-        tabInitialInternalState = cloneDeep(tabState.initialInternalState);
-      }
+    if (tabState.initialInternalState) {
+      tabInitialInternalState = cloneDeep(tabState.initialInternalState);
     }
 
     const discoverTabLoadTracker = scopedEbtManager$
@@ -228,6 +226,17 @@ export const initializeSingleTab: InternalStateThunkActionCreator<
       services,
     });
 
+    // Push the tab's initial search session ID to the URL if one exists,
+    // unless it should be overridden by a search session ID already in the URL
+    if (
+      tabInitialInternalState?.searchSessionId &&
+      !searchSessionManager.hasSearchSessionIdInURL()
+    ) {
+      searchSessionManager.pushSearchSessionIdToURL(tabInitialInternalState.searchSessionId, {
+        replace: true,
+      });
+    }
+
     /**
      * Sync global services
      */
@@ -280,9 +289,8 @@ export const initializeSingleTab: InternalStateThunkActionCreator<
       stateContainer.savedSearchState.set(savedSearch);
     }
 
-    // Make sure app state container is completely reset
-    stateContainer.appState.resetToState(initialAppState);
-    stateContainer.appState.resetInitialState();
+    // Make sure app state is completely reset
+    dispatch(internalStateSlice.actions.resetAppState({ tabId, appState: initialAppState }));
 
     // Set runtime state
     stateContainer$.next(stateContainer);

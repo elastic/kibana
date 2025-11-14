@@ -119,6 +119,7 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
       () => ({
         id: 'translation',
         name: i18n.TRANSLATION_TAB_LABEL,
+        'data-test-subj': 'tabTranslation',
         content: (
           <TabContentPadding>
             <TranslationTab
@@ -136,6 +137,7 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
       () => ({
         id: 'overview',
         name: i18n.OVERVIEW_TAB_LABEL,
+        'data-test-subj': 'tabOverview',
         content: (
           <TabContentPadding>
             {ruleDetailsToOverview && (
@@ -167,6 +169,7 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
       () => ({
         id: 'summary',
         name: SUMMARY_TAB_LABEL,
+        'data-test-subj': 'tabSummary',
         content: (
           <TabContentPadding>
             <SummaryTab migrationRule={migrationRule} />
@@ -219,7 +222,7 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
         ownFocus
       >
         <EuiFlyoutHeader>
-          <EuiTitle size="m">
+          <EuiTitle size="m" data-test-subj="detailsFlyoutTitle">
             <h2 id={migrationsRulesFlyoutTitleId}>
               {ruleDetailsToOverview?.name ??
                 migrationRule.original_rule.title ??
@@ -254,7 +257,12 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={closeFlyout} flush="left">
+              <EuiButtonEmpty
+                onClick={closeFlyout}
+                flush="left"
+                data-test-subj="detailsFlyoutCloseButton"
+                aria-label={CLOSE_BUTTON_LABEL}
+              >
                 {CLOSE_BUTTON_LABEL}
               </EuiButtonEmpty>
             </EuiFlexItem>

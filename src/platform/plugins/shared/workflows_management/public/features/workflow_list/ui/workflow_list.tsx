@@ -10,32 +10,33 @@
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBasicTable,
-  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
   EuiLoadingSpinner,
-  EuiSpacer,
   EuiSwitch,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 import type { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
-import { i18n } from '@kbn/i18n';
-import { FormattedRelative } from '@kbn/i18n-react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { WorkflowListItemDto } from '@kbn/workflows';
+import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { WorkflowListItemDto, WorkflowsSearchParams } from '@kbn/workflows';
+import { useWorkflows } from '@kbn/workflows-ui';
+import { WorkflowsUtilityBar } from './workflows_utility_bar';
 import { WorkflowsEmptyState } from '../../../components';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
-import { useWorkflows } from '../../../entities/workflows/model/use_workflows';
+import { useKibana } from '../../../hooks/use_kibana';
+import { getRunTooltipContent, StatusBadge, WorkflowStatus } from '../../../shared/ui';
+import { NextExecutionTime } from '../../../shared/ui/next_execution_time';
 import { shouldShowWorkflowsEmptyState } from '../../../shared/utils/workflow_utils';
-import type { WorkflowsSearchParams } from '../../../types';
-import { WORKFLOWS_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
-import { StatusBadge, WorkflowStatus, getRunWorkflowTooltipContent } from '../../../shared/ui';
-import { WorkflowExecuteModal } from '../../run_workflow/ui/workflow_execute_modal';
 import { WorkflowsTriggersList } from '../../../widgets/worflows_triggers_list/worflows_triggers_list';
+import { WorkflowTags } from '../../../widgets/workflow_tags/workflow_tags';
+import { WorkflowExecuteModal } from '../../run_workflow/ui/workflow_execute_modal';
+import { WORKFLOWS_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
 
 interface WorkflowListProps {
   search: WorkflowsSearchParams;
@@ -45,33 +46,35 @@ interface WorkflowListProps {
 
 export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowListProps) {
   const { application, notifications } = useKibana().services;
-  const { data: workflows, isLoading: isLoadingWorkflows, error } = useWorkflows(search);
+  const { data: workflows, isLoading: isLoadingWorkflows, error, refetch } = useWorkflows(search);
   const { deleteWorkflows, runWorkflow, cloneWorkflow, updateWorkflow } = useWorkflowActions();
 
   const [selectedItems, setSelectedItems] = useState<WorkflowListItemDto[]>([]);
   const [executeWorkflow, setExecuteWorkflow] = useState<WorkflowListItemDto | null>(null);
 
-  const canCreateWorkflow = application?.capabilities.workflowsManagement.createWorkflow;
-  const canExecuteWorkflow = application?.capabilities.workflowsManagement.executeWorkflow;
-  const canUpdateWorkflow = application?.capabilities.workflowsManagement.updateWorkflow;
-  const canDeleteWorkflow = application?.capabilities.workflowsManagement.deleteWorkflow;
+  const canCreateWorkflow = application.capabilities.workflowsManagement.createWorkflow;
+  const canExecuteWorkflow = application.capabilities.workflowsManagement.executeWorkflow;
+  const canUpdateWorkflow = application.capabilities.workflowsManagement.updateWorkflow;
+  const canDeleteWorkflow = application.capabilities.workflowsManagement.deleteWorkflow;
 
-  const deleteSelectedWorkflows = () => {
-    if (selectedItems.length === 0) {
-      return;
-    }
-    const confirmed = window.confirm(
-      `Are you sure you want to delete ${selectedItems.length} workflows?`
-    );
-    if (!confirmed) {
-      return;
-    }
-    deleteWorkflows.mutate({ ids: selectedItems.map((item) => item.id) });
+  const deselectWorkflows = useCallback(() => {
     setSelectedItems([]);
-  };
+  }, []);
+
+  const onRefresh = useCallback(async () => {
+    const result = await refetch();
+    // Update selected items with fresh data after refetch
+    if (result.data?.results && selectedItems.length > 0) {
+      const selectedIds = selectedItems.map((item) => item.id);
+      const updatedSelectedItems = result.data.results.filter((workflow) =>
+        selectedIds.includes(workflow.id)
+      );
+      setSelectedItems(updatedSelectedItems);
+    }
+  }, [refetch, selectedItems]);
 
   const handleRunWorkflow = useCallback(
-    (id: string, event: Record<string, any>) => {
+    (id: string, event: Record<string, unknown>) => {
       runWorkflow.mutate(
         { id, inputs: event },
         {
@@ -79,8 +82,8 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
             notifications?.toasts.addSuccess('Workflow run started', {
               toastLifeTimeMs: 3000,
             });
-            application!.navigateToUrl(
-              application!.getUrlForApp('workflows', {
+            application.navigateToUrl(
+              application.getUrlForApp('workflows', {
                 path: `/${id}?tab=executions&executionId=${workflowExecutionId}`,
               })
             );
@@ -154,130 +157,160 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
         name: 'Name',
         dataType: 'string',
         render: (name: string, item) => (
-          <EuiFlexGroup direction="column" gutterSize="xs">
-            <EuiFlexItem>
-              <EuiLink>
-                <Link to={`/${item.id}`}>{name}</Link>
-              </EuiLink>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText size="s" color="subdued">
-                {item.description}
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <div
+            css={css`
+              max-width: 100%;
+              overflow: hidden;
+            `}
+          >
+            <EuiFlexGroup direction="column" gutterSize="xs">
+              <EuiFlexItem>
+                <EuiLink>
+                  <Link
+                    to={`/${item.id}`}
+                    css={css`
+                      white-space: nowrap;
+                      overflow: hidden;
+                      text-overflow: ellipsis;
+                      display: block;
+                      max-width: 100%;
+                    `}
+                  >
+                    {name}
+                  </Link>
+                </EuiLink>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiText
+                  size="xs"
+                  color="subdued"
+                  title={item.description}
+                  css={css`
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    max-width: 100%;
+                    display: block;
+                    width: 100%;
+                  `}
+                >
+                  {item.description || (
+                    <FormattedMessage
+                      id="workflows.workflowList.noDescription"
+                      defaultMessage="No description"
+                    />
+                  )}
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </div>
         ),
       },
       {
+        field: 'tags',
+        name: 'Tags',
+        width: '15%',
+        render: (value: unknown, workflow: WorkflowListItemDto) => {
+          return <WorkflowTags tags={workflow.definition?.tags} />;
+        },
+      },
+      {
         field: 'triggers',
-        name: 'Triggers',
-        render: (value: any, item: WorkflowListItemDto) =>
-          item.definition?.triggers ? (
-            <WorkflowsTriggersList triggers={item.definition.triggers} />
-          ) : (
-            <EuiText size="s">No triggers</EuiText>
-          ),
+        name: 'Trigger',
+        width: '12%',
+        render: (value: unknown, item: WorkflowListItemDto) => (
+          <NextExecutionTime triggers={item.definition?.triggers ?? []} history={item.history}>
+            <WorkflowsTriggersList triggers={item.definition?.triggers ?? []} />
+          </NextExecutionTime>
+        ),
       },
       {
         name: 'Last run',
         field: 'runHistory',
+        width: '10%',
         render: (value, item) => {
-          if (item.history.length === 0) return;
+          if (!item.history || item.history.length === 0) return;
           const lastRun = item.history[0];
           return (
-            <EuiText size="s">
-              <FormattedRelative value={lastRun.finishedAt} />
-            </EuiText>
+            <StatusBadge status={lastRun.status} date={lastRun.finishedAt || lastRun.startedAt} />
           );
-        },
-      },
-      {
-        name: 'Last run status',
-        field: 'runHistory',
-        render: (value, item) => {
-          if (item.history.length === 0) {
-            return;
-          }
-          return <StatusBadge status={item.history[0].status} />;
-        },
-      },
-      {
-        name: 'Valid',
-        field: 'valid',
-        render: (value: boolean) => {
-          return <WorkflowStatus valid={value} />;
         },
       },
       {
         name: 'Enabled',
         field: 'enabled',
+        width: '70px',
         render: (value, item) => {
           return (
-            <EuiToolTip
-              content={
-                !item.valid
-                  ? i18n.translate('workflows.workflowList.invalid', {
-                      defaultMessage: 'Fix errors to enable workflow',
-                    })
-                  : undefined
-              }
-            >
-              <EuiSwitch
-                disabled={!canUpdateWorkflow || !item.valid}
-                checked={item.enabled}
-                onChange={() => handleToggleWorkflow(item)}
-                label={
-                  item.enabled
-                    ? i18n.translate('workflows.workflowList.enabled', {
-                        defaultMessage: 'Enabled',
-                      })
-                    : i18n.translate('workflows.workflowList.disabled', {
-                        defaultMessage: 'Disabled',
-                      })
-                }
-                showLabel={false}
-              />
-            </EuiToolTip>
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  content={
+                    !item.valid
+                      ? i18n.translate('workflows.workflowList.invalid', {
+                          defaultMessage: 'Fix errors to enable workflow',
+                        })
+                      : undefined
+                  }
+                >
+                  <EuiSwitch
+                    disabled={!canUpdateWorkflow || !item.valid}
+                    checked={item.enabled}
+                    onChange={() => handleToggleWorkflow(item)}
+                    label={
+                      item.enabled
+                        ? i18n.translate('workflows.workflowList.enabled', {
+                            defaultMessage: 'Enabled',
+                          })
+                        : i18n.translate('workflows.workflowList.disabled', {
+                            defaultMessage: 'Disabled',
+                          })
+                    }
+                    showLabel={false}
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+              {/* TODO: right now it's only invalid but in the future we might need to add other statuses */}
+              {!item.valid && (
+                <EuiFlexItem grow={false}>
+                  <WorkflowStatus valid={item.valid} />
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
           );
         },
       },
       {
-        name: 'Actions',
+        name: '',
+        width: '120px',
         actions: [
           {
             isPrimary: true,
             enabled: (item) => !!canExecuteWorkflow && item.enabled && item.valid,
             type: 'icon',
-            color: 'primary',
+            color: 'text',
             name: i18n.translate('workflows.workflowList.run', {
               defaultMessage: 'Run',
             }),
             icon: 'play',
             description: (item: WorkflowListItemDto) =>
-              getRunWorkflowTooltipContent(item.valid, !!canExecuteWorkflow, item.enabled) ??
+              getRunTooltipContent({
+                isValid: item.valid,
+                canRunWorkflow: !!canExecuteWorkflow,
+                isEnabled: item.enabled,
+              }) ??
               i18n.translate('workflows.workflowList.run', {
                 defaultMessage: 'Run',
               }),
             onClick: (item: WorkflowListItemDto) => {
-              let needInput: boolean | undefined = false;
-              if (item.definition?.triggers) {
-                needInput =
-                  item.definition.triggers.some((trigger) => trigger.type === 'alert') ||
-                  (item.definition.triggers.some((trigger) => trigger.type === 'manual') &&
-                    item.definition.inputs &&
-                    Object.keys(item.definition.inputs).length > 0);
-              }
-              if (needInput) {
-                setExecuteWorkflow(item);
-              } else {
-                handleRunWorkflow(item.id, {});
-              }
+              setExecuteWorkflow(item);
             },
           },
           {
             enabled: () => !!canUpdateWorkflow,
             type: 'icon',
-            color: 'primary',
+            color: 'text',
+            isPrimary: true,
             name: i18n.translate('workflows.workflowList.edit', {
               defaultMessage: 'Edit',
             }),
@@ -285,7 +318,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
             description: i18n.translate('workflows.workflowList.edit', {
               defaultMessage: 'Edit workflow',
             }),
-            href: (item) => application!.getUrlForApp('workflows', { path: `/${item.id}` }),
+            href: (item) => application.getUrlForApp('workflows', { path: `/${item.id}` }),
           },
           {
             enabled: () => !!canCreateWorkflow,
@@ -331,16 +364,15 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
       },
     ],
     [
+      canUpdateWorkflow,
+      handleToggleWorkflow,
+      canExecuteWorkflow,
       application,
       canCreateWorkflow,
-      canDeleteWorkflow,
-      canExecuteWorkflow,
-      canUpdateWorkflow,
       handleCloneWorkflow,
+      canDeleteWorkflow,
       handleDeleteWorkflow,
-      handleRunWorkflow,
       setExecuteWorkflow,
-      handleToggleWorkflow,
     ]
   );
 
@@ -351,14 +383,26 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
           <EuiLoadingSpinner />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiText>Loading workflows...</EuiText>
+          <EuiText>
+            <FormattedMessage
+              id="workflows.workflowList.loading"
+              defaultMessage="Loading workflows..."
+            />
+          </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
   }
 
   if (error) {
-    return <EuiText>Error loading workflows</EuiText>;
+    return (
+      <EuiText>
+        <FormattedMessage
+          id="workflows.workflowList.error"
+          defaultMessage="Error loading workflows"
+        />
+      </EuiText>
+    );
   }
 
   // Show empty state if no workflows exist and no filters are applied
@@ -377,61 +421,55 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
 
   const showStart = (search.page - 1) * search.limit + 1;
   let showEnd = search.page * search.limit;
-  if (showEnd > (workflows!._pagination.total || 0)) {
-    showEnd = workflows!._pagination.total;
+  if (workflows && showEnd > (workflows._pagination.total || 0)) {
+    showEnd = workflows._pagination.total;
   }
 
   return (
     <>
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-        <EuiFlexItem grow={5}>
-          <EuiText size="s">
-            Showing
-            <b>
-              {' '}
-              {showStart}-{showEnd}{' '}
-            </b>
-            of {workflows?._pagination.total} workflows
-          </EuiText>
-        </EuiFlexItem>
-        {canDeleteWorkflow && (
-          <EuiFlexItem>
-            <EuiButton
-              color="danger"
-              iconType="trash"
-              onClick={deleteSelectedWorkflows}
-              isDisabled={selectedItems.length === 0}
-            >
-              Delete {selectedItems.length || 'selected'} workflows
-            </EuiButton>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-      <EuiSpacer />
+      <WorkflowsUtilityBar
+        totalWorkflows={workflows?._pagination.total || 0}
+        selectedWorkflows={selectedItems}
+        deselectWorkflows={deselectWorkflows}
+        onRefresh={onRefresh}
+        showStart={showStart}
+        showEnd={showEnd}
+      />
       <EuiBasicTable
+        css={css`
+          .euiBasicTableAction-showOnHover {
+            opacity: 1 !important;
+          }
+        `}
+        rowProps={() => ({
+          style: { height: '68px' },
+        })}
         columns={columns}
         items={workflows?.results ?? []}
         itemId="id"
-        responsiveBreakpoint={false}
-        tableLayout={'auto'}
-        onChange={({ page: { index: pageIndex, size } }: CriteriaWithPagination<any>) =>
+        responsiveBreakpoint="xs"
+        tableLayout={'fixed'}
+        onChange={({
+          page: { index: pageIndex, size },
+        }: CriteriaWithPagination<WorkflowListItemDto>) =>
           setSearch({ ...search, page: pageIndex + 1, limit: size })
         }
         selection={{
           onSelectionChange: setSelectedItems,
           selectable: () => true,
-          initialSelected: selectedItems,
+          selected: selectedItems,
         }}
         pagination={{
           pageSize: search.limit,
           pageSizeOptions: WORKFLOWS_TABLE_PAGE_SIZE_OPTIONS,
-          totalItemCount: workflows!._pagination.total,
+          totalItemCount: workflows?._pagination?.total ?? 0,
           pageIndex: search.page - 1,
         }}
       />
-      {executeWorkflow && (
+      {executeWorkflow?.definition && (
         <WorkflowExecuteModal
-          workflow={executeWorkflow}
+          definition={executeWorkflow.definition}
+          workflowId={executeWorkflow.id}
           onClose={() => setExecuteWorkflow(null)}
           onSubmit={(event) => handleRunWorkflow(executeWorkflow.id, event)}
         />

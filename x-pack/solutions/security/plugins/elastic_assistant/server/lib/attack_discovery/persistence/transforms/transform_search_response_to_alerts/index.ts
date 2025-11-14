@@ -7,36 +7,11 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/core/server';
-import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
-import { transformInternalReplacements } from '@kbn/elastic-assistant-common';
-import {
-  ALERT_RULE_EXECUTION_UUID,
-  ALERT_RULE_UUID,
-  ALERT_START,
-  ALERT_UPDATED_AT,
-  ALERT_UPDATED_BY_USER_ID,
-  ALERT_UPDATED_BY_USER_NAME,
-  ALERT_WORKFLOW_STATUS,
-  ALERT_WORKFLOW_STATUS_UPDATED_AT,
-} from '@kbn/rule-data-utils';
-import moment from 'moment';
+import type { AttackDiscoveryApiAlert } from '@kbn/elastic-assistant-common';
 
 import { isMissingRequiredFields } from './is_missing_required_fields';
-import {
-  ALERT_ATTACK_DISCOVERY_ALERT_IDS,
-  ALERT_ATTACK_DISCOVERY_API_CONFIG,
-  ALERT_ATTACK_DISCOVERY_DETAILS_MARKDOWN,
-  ALERT_ATTACK_DISCOVERY_ENTITY_SUMMARY_MARKDOWN,
-  ALERT_ATTACK_DISCOVERY_MITRE_ATTACK_TACTICS,
-  ALERT_ATTACK_DISCOVERY_REPLACEMENTS,
-  ALERT_ATTACK_DISCOVERY_SUMMARY_MARKDOWN,
-  ALERT_ATTACK_DISCOVERY_TITLE,
-  ALERT_ATTACK_DISCOVERY_USER_ID,
-  ALERT_ATTACK_DISCOVERY_USER_NAME,
-  ALERT_ATTACK_DISCOVERY_USERS,
-  ALERT_RISK_SCORE,
-} from '../../../schedules/fields/field_names';
 import type { AttackDiscoveryAlertDocument } from '../../../schedules/types';
+import { transformAttackDiscoveryAlertDocumentToApi } from './transform_attack_discovery_alert_document_to_api';
 
 interface HasNumericValue {
   value: number;
@@ -57,19 +32,23 @@ const aggregationHasValue = (aggregation: unknown): aggregation is HasNumericVal
 
 interface TransformSearchResponseToAlerts {
   connectorNames: string[];
-  data: AttackDiscoveryAlert[];
+  data: AttackDiscoveryApiAlert[];
   uniqueAlertIdsCount: number;
   uniqueAlertIds: string[];
 }
 
 export const transformSearchResponseToAlerts = ({
+  enableFieldRendering,
+  includeUniqueAlertIds = false,
   logger,
   response,
-  includeUniqueAlertIds = false,
+  withReplacements,
 }: {
+  enableFieldRendering: boolean;
+  includeUniqueAlertIds?: boolean;
   logger: Logger;
   response: estypes.SearchResponse<AttackDiscoveryAlertDocument>;
-  includeUniqueAlertIds?: boolean;
+  withReplacements: boolean;
 }): TransformSearchResponseToAlerts => {
   const data = response.hits.hits.flatMap((hit) => {
     if (hit._source == null || isMissingRequiredFields(hit)) {
@@ -83,46 +62,12 @@ export const transformSearchResponseToAlerts = ({
 
     const source = hit._source;
 
-    // NOTE: we won't return this hit if `isMissingRequiredFields` above returns  `false`
-    return {
-      alertIds: source[ALERT_ATTACK_DISCOVERY_ALERT_IDS] ?? [], // required field
-      alertRuleUuid: source[ALERT_RULE_UUID],
-      alertStart: moment(source[ALERT_START]).isValid()
-        ? moment(source[ALERT_START]).toISOString()
-        : undefined, // optional field
-      alertUpdatedAt: moment(source[ALERT_UPDATED_AT]).isValid()
-        ? moment(source[ALERT_UPDATED_AT]).toISOString()
-        : undefined, // optional field
-      alertUpdatedByUserId: source[ALERT_UPDATED_BY_USER_ID],
-      alertUpdatedByUserName: source[ALERT_UPDATED_BY_USER_NAME],
-      alertWorkflowStatus: source[ALERT_WORKFLOW_STATUS],
-      alertWorkflowStatusUpdatedAt: moment(source[ALERT_WORKFLOW_STATUS_UPDATED_AT]).isValid()
-        ? moment(source[ALERT_WORKFLOW_STATUS_UPDATED_AT]).toISOString()
-        : undefined, // optional field
-      connectorId: source[ALERT_ATTACK_DISCOVERY_API_CONFIG].connector_id, // required field
-      connectorName: source[ALERT_ATTACK_DISCOVERY_API_CONFIG].name,
-      detailsMarkdown: source[ALERT_ATTACK_DISCOVERY_DETAILS_MARKDOWN] ?? '', // required field
-      entitySummaryMarkdown: source[ALERT_ATTACK_DISCOVERY_ENTITY_SUMMARY_MARKDOWN],
-      generationUuid: source[ALERT_RULE_EXECUTION_UUID] ?? '', // required field
-      id: hit._id ?? source[ALERT_RULE_EXECUTION_UUID] ?? '', // required field
-      mitreAttackTactics: Array.isArray(source[ALERT_ATTACK_DISCOVERY_MITRE_ATTACK_TACTICS])
-        ? source[ALERT_ATTACK_DISCOVERY_MITRE_ATTACK_TACTICS]
-        : undefined,
-      replacements: Array.isArray(source[ALERT_ATTACK_DISCOVERY_REPLACEMENTS])
-        ? transformInternalReplacements(source[ALERT_ATTACK_DISCOVERY_REPLACEMENTS])
-        : undefined,
-      riskScore: source[ALERT_RISK_SCORE],
-      summaryMarkdown: source[ALERT_ATTACK_DISCOVERY_SUMMARY_MARKDOWN] ?? '', // required field
-      timestamp: moment(source['@timestamp']).isValid()
-        ? moment(source['@timestamp']).toISOString()
-        : new Date().toISOString(), // required field
-      title: source[ALERT_ATTACK_DISCOVERY_TITLE] ?? '', // required field
-      userId: source[ALERT_ATTACK_DISCOVERY_USER_ID],
-      userName: source[ALERT_ATTACK_DISCOVERY_USER_NAME],
-      users: Array.isArray(source[ALERT_ATTACK_DISCOVERY_USERS])
-        ? source[ALERT_ATTACK_DISCOVERY_USERS]
-        : undefined,
-    };
+    return transformAttackDiscoveryAlertDocumentToApi({
+      attackDiscoveryAlertDocument: source,
+      enableFieldRendering,
+      id: hit._id ?? '',
+      withReplacements,
+    });
   });
 
   const uniqueAlertIdsCountAggregation = response.aggregations?.unique_alert_ids_count;

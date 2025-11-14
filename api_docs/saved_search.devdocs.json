@@ -235,9 +235,8 @@
             "label": "attributes",
             "description": [],
             "signature": [
-              "Omit<",
               "SavedSearchAttributes",
-              ", \"description\"> & { description?: string | undefined; references: ",
+              " & { references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -376,31 +375,6 @@
           ", \"id\">>"
         ],
         "path": "src/platform/plugins/shared/saved_search/public/service/save_discover_session.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "savedSearch",
-        "id": "def-public.SavedSearchByValueAttributes",
-        "type": "Type",
-        "tags": [],
-        "label": "SavedSearchByValueAttributes",
-        "description": [],
-        "signature": [
-          "Omit<",
-          "SavedSearchAttributes",
-          ", \"description\"> & { description?: string | undefined; references: ",
-          {
-            "pluginId": "@kbn/content-management-utils",
-            "scope": "server",
-            "docId": "kibKbnContentManagementUtilsPluginApi",
-            "section": "def-server.Reference",
-            "text": "Reference"
-          },
-          "[]; }"
-        ],
-        "path": "src/platform/plugins/shared/saved_search/public/service/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -990,7 +964,7 @@
           "\nExtract tab attributes into a separate array since multiple tabs are supported"
         ],
         "signature": [
-          "(attributes: T) => T & { tabs: { id: string; label: string; attributes: Pick<Omit<T, \"title\" | \"description\">, Exclude<Exclude<keyof T, \"title\" | \"description\">, \"tabs\">>; }[]; }"
+          "(attributes: T, discoverSessionId: string | undefined) => T & { tabs: { id: string; label: string; attributes: Pick<Omit<T, \"title\" | \"description\">, Exclude<Exclude<keyof T, \"title\" | \"description\">, \"tabs\">>; }[]; }"
         ],
         "path": "src/platform/plugins/shared/saved_search/common/service/extract_tabs.ts",
         "deprecated": false,
@@ -1012,6 +986,23 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          },
+          {
+            "parentPluginId": "savedSearch",
+            "id": "def-common.extractTabs.$2",
+            "type": "string",
+            "tags": [],
+            "label": "discoverSessionId",
+            "description": [
+              "Optional Discover session ID used to generate a deterministic UUID for the default tab"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/plugins/shared/saved_search/common/service/extract_tabs.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -1641,6 +1632,14 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
+              "[] | undefined; nonHighlightingFilters?: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
               "[] | undefined; sort?: ",
               {
                 "pluginId": "data",
@@ -1991,6 +1990,30 @@
           "; id?: string | undefined; tags?: string[] | undefined; managed: boolean; references?: ",
           "SavedObjectReference",
           "[] | undefined; sharingSavedObjectProps?: { outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; aliasTargetId?: string | undefined; aliasPurpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; errorJSON?: string | undefined; } | undefined; }"
+        ],
+        "path": "src/platform/plugins/shared/saved_search/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "savedSearch",
+        "id": "def-common.SavedSearchByValueAttributes",
+        "type": "Type",
+        "tags": [],
+        "label": "SavedSearchByValueAttributes",
+        "description": [],
+        "signature": [
+          "SavedSearchAttributes",
+          " & { references: ",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "server",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-server.Reference",
+            "text": "Reference"
+          },
+          "[]; }"
         ],
         "path": "src/platform/plugins/shared/saved_search/common/types.ts",
         "deprecated": false,

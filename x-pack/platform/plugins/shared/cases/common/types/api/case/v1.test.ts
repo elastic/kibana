@@ -136,6 +136,7 @@ const basicCase: Case = {
       description: null,
     },
   ],
+  total_observables: 1,
   incremental_id: 123,
 };
 
@@ -414,7 +415,7 @@ describe('CasesFindRequestRt', () => {
     page: '1',
     perPage: '10',
     search: 'search text',
-    searchFields: ['title', 'description'],
+    searchFields: ['title', 'description', 'incremental_id.text'],
     to: '1w',
     sortOrder: 'desc',
     sortField: 'createdAt',
@@ -536,7 +537,7 @@ describe('CasesSearchRequestRt', () => {
     page: '1',
     perPage: '10',
     search: 'search text',
-    searchFields: ['title', 'description'],
+    searchFields: ['title', 'description', 'incremental_id.text'],
     to: '1w',
     sortOrder: 'desc',
     sortField: 'createdAt',

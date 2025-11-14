@@ -13,6 +13,7 @@ import { AppStatus } from '@kbn/core/public';
 import type { AppUpdater } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { sortBy } from 'lodash';
+import { css as cssClassName } from '@emotion/css';
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import type { UrlForwardingSetup } from '@kbn/url-forwarding-plugin/public';
@@ -20,8 +21,6 @@ import { deepLinkIds as devtoolsDeeplinkIds } from '@kbn/deeplinks-devtools';
 import type { CreateDevToolArgs, DevToolApp } from './dev_tool';
 import { createDevToolApp } from './dev_tool';
 import { DocTitleService, BreadcrumbService } from './services';
-
-import './index.scss';
 
 export interface DevToolsSetup {
   /**
@@ -36,6 +35,12 @@ export interface DevToolsSetup {
    */
   register: (devTool: CreateDevToolArgs) => DevToolApp;
 }
+
+const devAppWrapperClassName = cssClassName`
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+`;
 
 export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
   private readonly devTools = new Map<string, DevToolApp>();
@@ -64,7 +69,7 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
       category: DEFAULT_APP_CATEGORIES.management,
       mount: async (params: AppMountParameters) => {
         const { element, history } = params;
-        element.classList.add('devAppWrapper');
+        element.className = devAppWrapperClassName;
 
         const [core] = await getStartServices();
         const { application, chrome, executionContext } = core;

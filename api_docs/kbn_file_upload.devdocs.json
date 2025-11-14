@@ -185,10 +185,10 @@
                 "id": "def-common.FileUploadManager.Unnamed.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "http",
+                "label": "coreStart",
                 "description": [],
                 "signature": [
-                  "HttpSetup"
+                  "CoreStart"
                 ],
                 "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
                 "deprecated": false,
@@ -219,21 +219,6 @@
               {
                 "parentPluginId": "@kbn/file-upload",
                 "id": "def-common.FileUploadManager.Unnamed.$4",
-                "type": "Object",
-                "tags": [],
-                "label": "notifications",
-                "description": [],
-                "signature": [
-                  "NotificationsStart"
-                ],
-                "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/file-upload",
-                "id": "def-common.FileUploadManager.Unnamed.$5",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "autoAddInferenceEndpointName",
@@ -248,7 +233,7 @@
               },
               {
                 "parentPluginId": "@kbn/file-upload",
-                "id": "def-common.FileUploadManager.Unnamed.$6",
+                "id": "def-common.FileUploadManager.Unnamed.$5",
                 "type": "boolean",
                 "tags": [],
                 "label": "autoCreateDataView",
@@ -263,7 +248,7 @@
               },
               {
                 "parentPluginId": "@kbn/file-upload",
-                "id": "def-common.FileUploadManager.Unnamed.$7",
+                "id": "def-common.FileUploadManager.Unnamed.$6",
                 "type": "boolean",
                 "tags": [],
                 "label": "removePipelinesAfterImport",
@@ -278,7 +263,7 @@
               },
               {
                 "parentPluginId": "@kbn/file-upload",
-                "id": "def-common.FileUploadManager.Unnamed.$8",
+                "id": "def-common.FileUploadManager.Unnamed.$7",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "existingIndexName",
@@ -293,7 +278,7 @@
               },
               {
                 "parentPluginId": "@kbn/file-upload",
-                "id": "def-common.FileUploadManager.Unnamed.$9",
+                "id": "def-common.FileUploadManager.Unnamed.$8",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "indexSettingsOverride",
@@ -301,6 +286,21 @@
                 "signature": [
                   "IndicesIndexSettings",
                   " | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/file-upload",
+                "id": "def-common.FileUploadManager.Unnamed.$9",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "location",
+                "description": [],
+                "signature": [
+                  "string | null"
                 ],
                 "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
                 "deprecated": false,
@@ -454,6 +454,38 @@
           },
           {
             "parentPluginId": "@kbn/file-upload",
+            "id": "def-common.FileUploadManager.abortAnalysis",
+            "type": "Function",
+            "tags": [],
+            "label": "abortAnalysis",
+            "description": [],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-common.FileUploadManager.abortImport",
+            "type": "Function",
+            "tags": [],
+            "label": "abortImport",
+            "description": [],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
             "id": "def-common.FileUploadManager.removeClashingFiles",
             "type": "Function",
             "tags": [],
@@ -524,6 +556,22 @@
                 "section": "def-common.UploadStatus",
                 "text": "UploadStatus"
               }
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-common.FileUploadManager.getInitializedWithExistingIndex",
+            "type": "Function",
+            "tags": [],
+            "label": "getInitializedWithExistingIndex",
+            "description": [],
+            "signature": [
+              "() => boolean"
             ],
             "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
             "deprecated": false,
@@ -1005,7 +1053,7 @@
             "section": "def-common.Index",
             "text": "Index"
           },
-          "[]; existingIndexName: string | null; setExistingIndexName: (idxName: string | null) => void; }"
+          "[]; existingIndexName: string | null; setExistingIndexName: (idxName: string | null) => void; abortAllAnalysis: () => void; abortImport: () => void; }"
         ],
         "path": "x-pack/platform/packages/shared/file-upload/src/use_file_upload.ts",
         "deprecated": false,
@@ -1221,7 +1269,7 @@
             "section": "def-common.Index",
             "text": "Index"
           },
-          "[]; existingIndexName: string | null; setExistingIndexName: (idxName: string | null) => void; }"
+          "[]; existingIndexName: string | null; setExistingIndexName: (idxName: string | null) => void; abortAllAnalysis: () => void; abortImport: () => void; }"
         ],
         "path": "x-pack/platform/packages/shared/file-upload/src/use_file_upload.ts",
         "deprecated": false,
@@ -1722,7 +1770,7 @@
             "section": "def-common.Index",
             "text": "Index"
           },
-          "[]; existingIndexName: string | null; setExistingIndexName: (idxName: string | null) => void; } | undefined>"
+          "[]; existingIndexName: string | null; setExistingIndexName: (idxName: string | null) => void; abortAllAnalysis: () => void; abortImport: () => void; } | undefined>"
         ],
         "path": "x-pack/platform/packages/shared/file-upload/src/use_file_upload.ts",
         "deprecated": false,

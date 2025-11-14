@@ -601,6 +601,7 @@ export class CasesService {
 
       transformedAttributes.attributes.total_alerts = 0;
       transformedAttributes.attributes.total_comments = 0;
+      transformedAttributes.attributes.total_events = 0;
 
       const createdCase = await this.unsecuredSavedObjectsClient.create<CasePersistedAttributes>(
         CASE_SAVED_OBJECT,
@@ -633,6 +634,7 @@ export class CasesService {
 
         transformedAttributes.total_alerts = 0;
         transformedAttributes.total_comments = 0;
+        transformedAttributes.total_events = 0;
 
         return {
           type: CASE_SAVED_OBJECT,

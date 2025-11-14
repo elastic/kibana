@@ -9,6 +9,7 @@ import type { DiagnosticResult } from '@elastic/elasticsearch';
 import { errors } from '@elastic/elasticsearch';
 import type {
   IndicesDataStream,
+  IndicesGetDataStreamResponse,
   QueryDslQueryContainer,
   Result,
 } from '@elastic/elasticsearch/lib/api/types';
@@ -19,7 +20,6 @@ import { Streams, getAncestors, getParentId } from '@kbn/streams-schema';
 import type { LockManagerService } from '@kbn/lock-manager';
 import type { Condition } from '@kbn/streamlang';
 import type { AssetClient } from './assets/asset_client';
-import { ASSET_ID, ASSET_TYPE } from './assets/fields';
 import type { QueryClient } from './assets/query/query_client';
 import {
   DefinitionNotFoundError,
@@ -28,11 +28,12 @@ import {
 import { SecurityError } from './errors/security_error';
 import { StatusError } from './errors/status_error';
 import { LOGS_ROOT_STREAM_NAME, rootStreamDefinition } from './root_stream_definition';
-import type { StreamsStorageClient } from './service';
+import type { StreamsStorageClient } from './storage/streams_storage_client';
 import { State } from './state_management/state';
 import { checkAccess, checkAccessBulk } from './stream_crud';
 import { StreamsStatusConflictError } from './errors/streams_status_conflict_error';
-import type { SystemClient } from './system/system_client';
+import type { FeatureClient } from './feature/feature_client';
+import type { AttachmentClient } from './attachments/attachment_client';
 
 interface AcknowledgeResponse<TResult extends Result> {
   acknowledged: true;
@@ -67,9 +68,10 @@ export class StreamsClient {
       lockManager: LockManagerService;
       scopedClusterClient: IScopedClusterClient;
       assetClient: AssetClient;
+      attachmentClient: AttachmentClient;
       queryClient: QueryClient;
       storageClient: StreamsStorageClient;
-      systemClient: SystemClient;
+      featureClient: FeatureClient;
       logger: Logger;
       request: KibanaRequest;
       isServerless: boolean;
@@ -213,8 +215,8 @@ export class StreamsClient {
         }
       );
 
-      const { assetClient, storageClient } = this.dependencies;
-      await Promise.all([assetClient.clean(), storageClient.clean()]);
+      const { assetClient, attachmentClient, storageClient } = this.dependencies;
+      await Promise.all([assetClient.clean(), attachmentClient.clean(), storageClient.clean()]);
     }
 
     if (elasticsearchStreamsEnabled) {
@@ -470,23 +472,27 @@ export class StreamsClient {
     return wrapEsCall(
       this.dependencies.scopedClusterClient.asCurrentUser.indices.getDataStream({ name })
     ).then((response) => {
+      const notFoundErrorBody = {
+        meta: {
+          aborted: false,
+          attempts: 1,
+          connection: null,
+          context: null,
+          name: 'resource_not_found_exception',
+          request: {} as unknown as DiagnosticResult['meta']['request'],
+        },
+        warnings: [],
+        body: 'resource_not_found_exception',
+        statusCode: 404,
+      };
       if (response.data_streams.length === 0) {
-        throw new errors.ResponseError({
-          meta: {
-            aborted: false,
-            attempts: 1,
-            connection: null,
-            context: null,
-            name: 'resource_not_found_exception',
-            request: {} as unknown as DiagnosticResult['meta']['request'],
-          },
-          warnings: [],
-          body: 'resource_not_found_exception',
-          statusCode: 404,
-        });
+        throw new errors.ResponseError(notFoundErrorBody);
       }
 
       const dataStream = response.data_streams[0];
+      if (!dataStream) {
+        throw new errors.ResponseError(notFoundErrorBody);
+      }
       return dataStream;
     });
   }
@@ -520,6 +526,7 @@ export class StreamsClient {
       'create',
       'manage',
       'monitor',
+      'view_index_metadata',
       'manage_data_stream_lifecycle',
       'read_failure_store',
       'manage_failure_store',
@@ -546,6 +553,7 @@ export class StreamsClient {
           Object.values(privileges.index[name]).every((privilege) => privilege === true)
         ),
       monitor: names.every((name) => privileges.index[name].monitor),
+      view_index_metadata: names.every((name) => privileges.index[name].view_index_metadata),
       // on serverless, there is no ILM, so we map lifecycle to true if the user has manage_data_stream_lifecycle
       lifecycle: isServerless
         ? names.every((name) => privileges.index[name].manage_data_stream_lifecycle)
@@ -642,9 +650,18 @@ export class StreamsClient {
    * stored definition).
    */
   private async getUnmanagedDataStreams(): Promise<Streams.ClassicStream.Definition[]> {
-    const response = await wrapEsCall(
-      this.dependencies.scopedClusterClient.asCurrentUser.indices.getDataStream()
-    );
+    let response: IndicesGetDataStreamResponse;
+    try {
+      response = await wrapEsCall(
+        this.dependencies.scopedClusterClient.asCurrentUser.indices.getDataStream()
+      );
+    } catch (e) {
+      // if permissions are insufficient, we just return an empty list
+      if (e.statusCode === 403) {
+        return [];
+      }
+      throw e;
+    }
 
     return response.data_streams.map((dataStream) => ({
       name: dataStream.name,
@@ -774,19 +791,19 @@ export class StreamsClient {
     const { dashboards, queries, rules } = request;
 
     await Promise.all([
-      this.dependencies.assetClient.syncAssetList(
+      this.dependencies.attachmentClient.syncAttachmentList(
         name,
         dashboards.map((dashboard) => ({
-          [ASSET_ID]: dashboard,
-          [ASSET_TYPE]: 'dashboard' as const,
+          id: dashboard,
+          type: 'dashboard' as const,
         })),
         'dashboard'
       ),
-      this.dependencies.assetClient.syncAssetList(
+      this.dependencies.attachmentClient.syncAttachmentList(
         name,
         rules.map((rule) => ({
-          [ASSET_ID]: rule,
-          [ASSET_TYPE]: 'rule' as const,
+          id: rule,
+          type: 'rule' as const,
         })),
         'rule'
       ),

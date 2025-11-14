@@ -449,7 +449,7 @@ const getBaseDiscoverFeature = ({
       },
       {
         name: i18n.translate('xpack.features.ossFeatures.discoverSearchSessionsFeatureName', {
-          defaultMessage: 'Store Search Sessions',
+          defaultMessage: 'Store Background search',
         }),
         privilegeGroups: [
           {
@@ -460,7 +460,7 @@ const getBaseDiscoverFeature = ({
                 name: i18n.translate(
                   'xpack.features.ossFeatures.discoverStoreSearchSessionsPrivilegeName',
                   {
-                    defaultMessage: 'Store Search Sessions',
+                    defaultMessage: 'Store Background search',
                   }
                 ),
                 includeIn: 'all',
@@ -731,7 +731,7 @@ const getBaseDashboardFeature = ({
       },
       {
         name: i18n.translate('xpack.features.ossFeatures.dashboardSearchSessionsFeatureName', {
-          defaultMessage: 'Store Search Sessions',
+          defaultMessage: 'Store Background search',
         }),
         privilegeGroups: [
           {
@@ -742,7 +742,7 @@ const getBaseDashboardFeature = ({
                 name: i18n.translate(
                   'xpack.features.ossFeatures.dashboardStoreSearchSessionsPrivilegeName',
                   {
-                    defaultMessage: 'Store Search Sessions',
+                    defaultMessage: 'Store Background search',
                   }
                 ),
                 includeIn: 'all',

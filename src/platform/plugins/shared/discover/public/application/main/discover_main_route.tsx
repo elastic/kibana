@@ -16,6 +16,7 @@ import useUnmount from 'react-use/lib/useUnmount';
 import type { AppMountParameters } from '@kbn/core/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import useLatest from 'react-use/lib/useLatest';
+import { i18n } from '@kbn/i18n';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import type { CustomizationCallback, DiscoverCustomizationContext } from '../../customizations';
 import {
@@ -37,13 +38,13 @@ import {
 } from './components/single_tab_view';
 import { useAsyncFunction } from './hooks/use_async_function';
 import { TabsView } from './components/tabs_view';
-import { TABS_ENABLED_FEATURE_FLAG_KEY } from '../../constants';
 import { ChartPortalsRenderer } from './components/chart';
 import { useStateManagers } from './state_management/hooks/use_state_managers';
 import { useUrl } from './hooks/use_url';
 import { useAlertResultsToast } from './hooks/use_alert_results_toast';
 import { setBreadcrumbs } from '../../utils/breadcrumbs';
 import { useUnsavedChanges } from './state_management/hooks/use_unsaved_changes';
+import { DiscoverTopNavMenuProvider } from './components/top_nav/discover_topnav_menu';
 
 export interface MainRouteProps {
   customizationContext: DiscoverCustomizationContext;
@@ -76,7 +77,7 @@ export const DiscoverMainRoute = ({
         ...withNotifyOnErrors(services.core.notifications.toasts),
       })
   );
-  const { internalState, runtimeStateManager } = useStateManagers({
+  const { internalState, runtimeStateManager, searchSessionManager } = useStateManagers({
     services,
     urlStateStorage,
     customizationContext,
@@ -92,6 +93,7 @@ export const DiscoverMainRoute = ({
         urlStateStorage={urlStateStorage}
         internalState={internalState}
         runtimeStateManager={runtimeStateManager}
+        searchSessionManager={searchSessionManager}
       />
     </InternalStateProvider>
   );
@@ -100,11 +102,11 @@ export const DiscoverMainRoute = ({
 const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
   const { customizationContext, runtimeStateManager } = props;
   const services = useDiscoverServices();
-  const { core, dataViews, chrome } = services;
+  const { core, dataViews, chrome, data, discoverFeatureFlags } = services;
   const history = useHistory();
   const dispatch = useInternalStateDispatch();
   const rootProfileState = useRootProfile();
-  const tabsEnabled = core.featureFlags.getBooleanValue(TABS_ENABLED_FEATURE_FLAG_KEY, false);
+  const tabsEnabled = discoverFeatureFlags.getTabsEnabled();
 
   const { initializeProfileDataViews } = useDefaultAdHocDataViews();
   const [mainRouteInitializationState, initializeMainRoute] = useAsyncFunction<InitializeMainRoute>(
@@ -178,6 +180,8 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
   }, [currentDiscoverSessionId, initializeDiscoverSession]);
 
   useUnmount(() => {
+    data.search.session.clear();
+
     for (const tabId of Object.keys(runtimeStateManager.tabs.byId)) {
       dispatch(internalStateActions.disconnectTab({ tabId }));
     }
@@ -248,7 +252,27 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
   return (
     <rootProfileState.AppWrapper>
       <ChartPortalsRenderer runtimeStateManager={runtimeStateManager}>
-        {tabsEnabled ? <TabsView {...props} /> : <SingleTabView {...props} />}
+        <DiscoverTopNavMenuProvider>
+          <>
+            <h1 className="euiScreenReaderOnly" data-test-subj="discoverSavedSearchTitle">
+              {persistedDiscoverSession?.title
+                ? i18n.translate('discover.pageTitleWithSavedSearch', {
+                    defaultMessage: 'Discover - {savedSearchTitle}',
+                    values: {
+                      savedSearchTitle: persistedDiscoverSession.title,
+                    },
+                  })
+                : i18n.translate('discover.pageTitleWithoutSavedSearch', {
+                    defaultMessage: 'Discover - Session not yet saved',
+                  })}
+            </h1>
+            {tabsEnabled && customizationContext.displayMode !== 'embedded' ? (
+              <TabsView {...props} />
+            ) : (
+              <SingleTabView {...props} />
+            )}
+          </>
+        </DiscoverTopNavMenuProvider>
       </ChartPortalsRenderer>
     </rootProfileState.AppWrapper>
   );

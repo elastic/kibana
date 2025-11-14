@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import type { Indicator } from '../../../../../../common/threat_intelligence/types/indicator';
 import { BUTTON_TEST_ID } from './test_ids';
@@ -21,10 +21,6 @@ export interface OpenIndicatorFlyoutButtonProps {
    * Method called by the onClick event to open/close the flyout.
    */
   onOpen: (indicator: Indicator) => void;
-  /**
-   * Boolean used to change the color and type of icon depending on the state of the flyout.
-   */
-  isOpen: boolean;
 }
 
 /**
@@ -33,18 +29,18 @@ export interface OpenIndicatorFlyoutButtonProps {
 export const OpenIndicatorFlyoutButton: FC<OpenIndicatorFlyoutButtonProps> = ({
   indicator,
   onOpen,
-  isOpen,
 }) => {
+  const open = useCallback(() => onOpen(indicator), [indicator, onOpen]);
+
   return (
     <EuiToolTip content={VIEW_DETAILS_BUTTON_LABEL} disableScreenReaderOutput>
       <EuiButtonIcon
-        data-test-subj={BUTTON_TEST_ID}
-        color={isOpen ? 'text' : 'primary'}
-        iconType={isOpen ? 'minimize' : 'expand'}
-        isSelected={isOpen}
-        iconSize="s"
         aria-label={VIEW_DETAILS_BUTTON_LABEL}
-        onClick={() => onOpen(indicator)}
+        color="text"
+        data-test-subj={BUTTON_TEST_ID}
+        iconType="expand"
+        onClick={open}
+        size="s"
       />
     </EuiToolTip>
   );

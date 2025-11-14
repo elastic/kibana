@@ -146,6 +146,7 @@ const VulnerabilitiesCountComponent = ({
   return (
     <EuiToolTip content={bucket.doc_count}>
       <EuiBadge
+        tabIndex={0}
         css={css`
           margin-left: ${euiTheme.size.s};
         `}

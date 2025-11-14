@@ -7,35 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EnterNormalPathNode } from '@kbn/workflows/graph';
-import type { StepErrorCatcher, NodeImplementation } from '../../node_implementation';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
-import type { IWorkflowEventLogger } from '../../../workflow_event_logger/workflow_event_logger';
+import type { NodeImplementation } from '../../node_implementation';
 
-export class EnterNormalPathNodeImpl implements NodeImplementation, StepErrorCatcher {
-  constructor(
-    private node: EnterNormalPathNode,
-    private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager,
-    private workflowLogger: IWorkflowEventLogger
-  ) {}
+export class EnterNormalPathNodeImpl implements NodeImplementation {
+  constructor(private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager) {}
 
   public async run(): Promise<void> {
-    this.wfExecutionRuntimeManager.enterScope();
     this.wfExecutionRuntimeManager.navigateToNextNode();
-  }
-
-  public async catchError(): Promise<void> {
-    this.workflowLogger.logError(
-      'Error caught by the OnFailure zone. Redirecting to the fallback path'
-    );
-    const stepState = this.wfExecutionRuntimeManager.getCurrentStepState() || {};
-
-    await this.wfExecutionRuntimeManager.setCurrentStepState({
-      ...stepState,
-      error: this.wfExecutionRuntimeManager.getWorkflowExecution().error, // save error to the state of the enter node
-    });
-    this.wfExecutionRuntimeManager.setWorkflowError(undefined); // clear workflow error to let run go
-    this.wfExecutionRuntimeManager.navigateToNode(this.node.enterFailurePathNodeId);
-    return Promise.resolve();
   }
 }

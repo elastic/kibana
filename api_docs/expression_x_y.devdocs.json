@@ -586,9 +586,9 @@
             "signature": [
               "(string | ",
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
               },
@@ -622,9 +622,9 @@
             "signature": [
               "string | ",
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
               },
@@ -658,9 +658,9 @@
             "signature": [
               "(string | ",
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
               },
@@ -680,9 +680,9 @@
             "signature": [
               "string | ",
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
               },
@@ -770,7 +770,7 @@
             "label": "xScaleType",
             "description": [],
             "signature": [
-              "\"time\" | \"linear\" | \"ordinal\""
+              "\"time\" | \"ordinal\" | \"linear\""
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
@@ -1063,9 +1063,9 @@
             ],
             "signature": [
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
                 "section": "def-common.LegendSize",
                 "text": "LegendSize"
               },
@@ -1086,9 +1086,9 @@
             ],
             "signature": [
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
                 "section": "def-common.XYLegendValue",
                 "text": "XYLegendValue"
               },
@@ -1107,9 +1107,9 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
                 "section": "def-common.LegendLayout",
                 "text": "LegendLayout"
               },
@@ -1544,9 +1544,9 @@
             "signature": [
               "string | ",
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
               }
@@ -1842,9 +1842,9 @@
             "signature": [
               "string | ",
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
               },
@@ -1864,9 +1864,9 @@
             "signature": [
               "string | ",
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
               },
@@ -2012,7 +2012,7 @@
               "AxisStyle",
               ", \"gridLine\">> | undefined>; title?: string | undefined; position?: ",
               "Position",
-              " | undefined; hide?: boolean | undefined; ticks?: number | undefined; domain?: ",
+              " | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; domain?: ",
               {
                 "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
@@ -2022,7 +2022,7 @@
               },
               "<",
               "YDomainRange",
-              " | undefined>; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; gridLine?: ",
+              " | undefined>; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; ticks?: number | undefined; gridLine?: ",
               {
                 "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
@@ -2068,7 +2068,7 @@
               "MakeOverridesSerializable",
               "<",
               "CustomXDomain",
-              " | undefined>; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: React.ComponentType<{}> | React.ReactChild | undefined; ariaLabel?: string | undefined; ariaLabelledBy?: string | undefined; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendStrategy?: ",
+              " | undefined>; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | React.ComponentType<{}> | undefined; ariaLabel?: string | undefined; ariaLabelledBy?: string | undefined; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendStrategy?: ",
               "LegendStrategy",
               " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> & Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>>) | undefined"
             ],
@@ -2253,7 +2253,7 @@
           "AxisStyle",
           ", \"gridLine\">> | undefined>; title?: string | undefined; position?: ",
           "Position",
-          " | undefined; hide?: boolean | undefined; ticks?: number | undefined; domain?: ",
+          " | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; domain?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -2263,7 +2263,7 @@
           },
           "<",
           "YDomainRange",
-          " | undefined>; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; gridLine?: ",
+          " | undefined>; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; ticks?: number | undefined; gridLine?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -2287,7 +2287,7 @@
           "AxisStyle",
           ", \"gridLine\">> | undefined>; title?: string | undefined; position?: ",
           "Position",
-          " | undefined; hide?: boolean | undefined; ticks?: number | undefined; domain?: ",
+          " | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; domain?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -2297,7 +2297,7 @@
           },
           "<",
           "YDomainRange",
-          " | undefined>; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; gridLine?: ",
+          " | undefined>; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; ticks?: number | undefined; gridLine?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -2321,7 +2321,7 @@
           "AxisStyle",
           ", \"gridLine\">> | undefined>; title?: string | undefined; position?: ",
           "Position",
-          " | undefined; hide?: boolean | undefined; ticks?: number | undefined; domain?: ",
+          " | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; domain?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -2331,7 +2331,7 @@
           },
           "<",
           "YDomainRange",
-          " | undefined>; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; gridLine?: ",
+          " | undefined>; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; ticks?: number | undefined; gridLine?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -3503,7 +3503,7 @@
         "label": "XScaleType",
         "description": [],
         "signature": [
-          "\"time\" | \"linear\" | \"ordinal\""
+          "\"time\" | \"ordinal\" | \"linear\""
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
@@ -3680,6 +3680,21 @@
       }
     ],
     "objects": [
+      {
+        "parentPluginId": "expressionXY",
+        "id": "def-common.FillStyles",
+        "type": "Object",
+        "tags": [],
+        "label": "FillStyles",
+        "description": [],
+        "signature": [
+          "{ readonly NONE: \"none\"; readonly ABOVE: \"above\"; readonly BELOW: \"below\"; }"
+        ],
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "expressionXY",
         "id": "def-common.FittingFunctions",

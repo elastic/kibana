@@ -18,6 +18,7 @@ import type { ToolDefinition } from '@kbn/onechat-common';
 import React, { useCallback } from 'react';
 import { useToolsActions } from '../../../context/tools_provider';
 import { labels } from '../../../utils/i18n';
+import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
 
 export interface ToolsTableHeaderProps {
   isLoading: boolean;
@@ -38,6 +39,7 @@ export const ToolsTableHeader = ({
 }: ToolsTableHeaderProps) => {
   const { euiTheme } = useEuiTheme();
   const { bulkDeleteTools } = useToolsActions();
+  const { manageTools } = useUiPrivileges();
 
   const selectAll = useCallback(() => {
     setSelectedTools(tools.filter((tool) => !tool.readonly));
@@ -86,23 +88,34 @@ export const ToolsTableHeader = ({
           </EuiText>
           {selectedTools.length > 0 && (
             <EuiFlexGroup gutterSize="none">
+              {manageTools && (
+                <EuiButtonEmpty
+                  aria-label={labels.tools.deleteSelectedToolsButtonLabel(selectedTools.length)}
+                  data-test-subj="agentBuilderToolsBulkDeleteButton"
+                  iconType="trash"
+                  iconSize="m"
+                  size="xs"
+                  color="danger"
+                  onClick={deleteSelection}
+                >
+                  <EuiText
+                    size="xs"
+                    css={css`
+                      font-weight: ${euiTheme.font.weight.semiBold};
+                    `}
+                  >
+                    {labels.tools.deleteSelectedToolsButtonLabel(selectedTools.length)}
+                  </EuiText>
+                </EuiButtonEmpty>
+              )}
               <EuiButtonEmpty
-                iconType="trash"
+                aria-label={labels.tools.selectAllToolsButtonLabel}
+                data-test-subj="agentBuilderToolsSelectAllButton"
+                iconType="pagesSelect"
                 iconSize="m"
                 size="xs"
-                color="danger"
-                onClick={deleteSelection}
+                onClick={selectAll}
               >
-                <EuiText
-                  size="xs"
-                  css={css`
-                    font-weight: ${euiTheme.font.weight.semiBold};
-                  `}
-                >
-                  {labels.tools.deleteSelectedToolsButtonLabel(selectedTools.length)}
-                </EuiText>
-              </EuiButtonEmpty>
-              <EuiButtonEmpty iconType="pagesSelect" iconSize="m" size="xs" onClick={selectAll}>
                 <EuiText
                   size="xs"
                   css={css`
@@ -112,7 +125,14 @@ export const ToolsTableHeader = ({
                   {labels.tools.selectAllToolsButtonLabel}
                 </EuiText>
               </EuiButtonEmpty>
-              <EuiButtonEmpty iconType="cross" iconSize="m" size="xs" onClick={clearSelection}>
+              <EuiButtonEmpty
+                aria-label={labels.tools.clearSelectionButtonLabel}
+                data-test-subj="agentBuilderToolsClearSelectionButton"
+                iconType="cross"
+                iconSize="m"
+                size="xs"
+                onClick={clearSelection}
+              >
                 <EuiText
                   size="xs"
                   css={css`

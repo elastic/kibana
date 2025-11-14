@@ -13,8 +13,11 @@ export type WorkflowToolConfig = {
   workflow_id: string;
 };
 
-export type WorkflowToolDefinition = ToolDefinition<WorkflowToolConfig>;
-export type WorkflowToolDefinitionWithSchema = ToolDefinitionWithSchema<WorkflowToolConfig>;
+export type WorkflowToolDefinition = ToolDefinition<ToolType.workflow, WorkflowToolConfig>;
+export type WorkflowToolDefinitionWithSchema = ToolDefinitionWithSchema<
+  ToolType.workflow,
+  WorkflowToolConfig
+>;
 
 export function isWorkflowTool(
   tool: ToolDefinitionWithSchema

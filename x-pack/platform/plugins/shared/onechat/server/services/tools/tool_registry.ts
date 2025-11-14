@@ -9,18 +9,25 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import {
   createToolNotFoundError,
   createBadRequestError,
-  createInternalError,
   validateToolId,
 } from '@kbn/onechat-common';
-import type { Runner, RunToolReturn, ScopedRunnerRunToolsParams } from '@kbn/onechat-server';
+import type {
+  Runner,
+  RunToolReturn,
+  ScopedRunnerRunToolsParams,
+  ToolAvailabilityContext,
+} from '@kbn/onechat-server';
+import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
+import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type {
   InternalToolDefinition,
   ToolCreateParams,
   ToolUpdateParams,
-  ToolSource,
-  ReadonlyToolTypeClient,
-  ToolTypeClient,
+  ToolProvider,
+  WritableToolProvider,
+  ReadonlyToolProvider,
 } from './tool_provider';
+import { isReadonlyToolProvider } from './tool_provider';
 import { toExecutableTool } from './utils';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -29,10 +36,6 @@ export interface ToolListParams {
   // type?: ToolType[];
   // tags?: string[];
 }
-
-const isToolTypeClient = (client: ReadonlyToolTypeClient): client is ToolTypeClient => {
-  return 'create' in client;
-};
 
 export interface ToolRegistry {
   has(toolId: string): Promise<boolean>;
@@ -46,28 +49,49 @@ export interface ToolRegistry {
   ): Promise<RunToolReturn>;
 }
 
-interface CreateToolClientParams {
+interface CreateToolRegistryParams {
   getRunner: () => Runner;
-  toolSources: ToolSource[];
+  persistedProvider: WritableToolProvider;
+  builtinProvider: ReadonlyToolProvider;
   request: KibanaRequest;
   space: string;
+  uiSettings: UiSettingsServiceStart;
+  savedObjects: SavedObjectsServiceStart;
 }
 
-export const createToolRegistry = (params: CreateToolClientParams): ToolRegistry => {
+export const createToolRegistry = (params: CreateToolRegistryParams): ToolRegistry => {
   return new ToolRegistryImpl(params);
 };
 
 class ToolRegistryImpl implements ToolRegistry {
-  private readonly toolSources: ToolSource[];
+  private readonly persistedProvider: WritableToolProvider;
+  private readonly builtinProvider: ReadonlyToolProvider;
+  private readonly spaceId: string;
   private readonly request: KibanaRequest;
-  private readonly space: string;
+  private readonly uiSettings: UiSettingsServiceStart;
+  private readonly savedObjects: SavedObjectsServiceStart;
   private readonly getRunner: () => Runner;
 
-  constructor({ toolSources, request, space, getRunner }: CreateToolClientParams) {
-    this.toolSources = toolSources;
+  constructor({
+    persistedProvider,
+    builtinProvider,
+    request,
+    getRunner,
+    space,
+    uiSettings,
+    savedObjects,
+  }: CreateToolRegistryParams) {
+    this.persistedProvider = persistedProvider;
+    this.builtinProvider = builtinProvider;
     this.request = request;
-    this.space = space;
+    this.spaceId = space;
+    this.uiSettings = uiSettings;
+    this.savedObjects = savedObjects;
     this.getRunner = getRunner;
+  }
+
+  private get orderedProviders(): ToolProvider[] {
+    return [this.builtinProvider, this.persistedProvider];
   }
 
   async execute<TParams extends object = Record<string, unknown>, TResult = unknown>(
@@ -75,14 +99,16 @@ class ToolRegistryImpl implements ToolRegistry {
   ): Promise<RunToolReturn> {
     const { toolId, ...otherParams } = params;
     const tool = await this.get(toolId);
+    if (!(await this.isAvailable(tool))) {
+      throw createBadRequestError(`Tool ${toolId} is not available`);
+    }
     const executable = toExecutableTool({ tool, runner: this.getRunner(), request: this.request });
     return (await executable.execute(otherParams)) as RunToolReturn;
   }
 
   async has(toolId: string) {
-    for (const source of this.toolSources) {
-      const client = await source.getClient({ request: this.request, space: this.space });
-      if (await client.has(toolId)) {
+    for (const provider of this.orderedProviders) {
+      if (await provider.has(toolId)) {
         return true;
       }
     }
@@ -90,10 +116,13 @@ class ToolRegistryImpl implements ToolRegistry {
   }
 
   async get(toolId: string) {
-    for (const source of this.toolSources) {
-      const client = await source.getClient({ request: this.request, space: this.space });
-      if (await client.has(toolId)) {
-        return client.get(toolId);
+    for (const provider of this.orderedProviders) {
+      if (await provider.has(toolId)) {
+        const tool = await provider.get(toolId);
+        if (!(await this.isAvailable(tool))) {
+          throw createBadRequestError(`Tool ${toolId} is not available`);
+        }
+        return tool;
       }
     }
     throw createToolNotFoundError({ toolId });
@@ -101,16 +130,19 @@ class ToolRegistryImpl implements ToolRegistry {
 
   async list(opts?: ToolListParams | undefined) {
     const allTools: InternalToolDefinition[] = [];
-    for (const type of this.toolSources) {
-      const client = await type.getClient({ request: this.request, space: this.space });
-      const toolsFromType = await client.list();
-      allTools.push(...toolsFromType);
+    for (const provider of this.orderedProviders) {
+      const toolsFromType = await provider.list();
+      for (const tool of toolsFromType) {
+        if (await this.isAvailable(tool)) {
+          allTools.push(tool);
+        }
+      }
     }
     return allTools;
   }
 
   async create(createRequest: ToolCreateParams) {
-    const { type, id: toolId } = createRequest;
+    const { id: toolId } = createRequest;
 
     const validationError = validateToolId({ toolId, builtIn: false });
     if (validationError) {
@@ -121,49 +153,43 @@ class ToolRegistryImpl implements ToolRegistry {
       throw createBadRequestError(`Tool with id ${toolId} already exists`);
     }
 
-    const source = this.toolSources.find((t) => t.toolTypes.includes(type));
-    if (!source) {
-      throw createBadRequestError(`Unknown tool type ${type}`);
-    }
-    const client = await source.getClient({ request: this.request, space: this.space });
-    if (isToolTypeClient(client)) {
-      return client.create(createRequest);
-    } else {
-      throw createInternalError(`Non-readonly source ${source.id} exposes a read-only client`);
-    }
+    return this.persistedProvider.create(createRequest);
   }
 
   async update(toolId: string, update: ToolUpdateParams) {
-    for (const source of this.toolSources) {
-      const client = await source.getClient({ request: this.request, space: this.space });
-      if (await client.has(toolId)) {
-        if (source.readonly) {
+    for (const provider of this.orderedProviders) {
+      if (await provider.has(toolId)) {
+        if (isReadonlyToolProvider(provider)) {
           throw createBadRequestError(`Tool ${toolId} is read-only and can't be updated`);
         }
-        if (isToolTypeClient(client)) {
-          return client.update(toolId, update);
-        } else {
-          throw createInternalError(`Non-readonly source ${source.id} exposes a read-only client`);
-        }
+        return provider.update(toolId, update);
       }
     }
     throw createToolNotFoundError({ toolId });
   }
 
   async delete(toolId: string): Promise<boolean> {
-    for (const source of this.toolSources) {
-      const client = await source.getClient({ request: this.request, space: this.space });
-      if (await client.has(toolId)) {
-        if (source.readonly) {
+    for (const provider of this.orderedProviders) {
+      if (await provider.has(toolId)) {
+        if (isReadonlyToolProvider(provider)) {
           throw createBadRequestError(`Tool ${toolId} is read-only and can't be deleted`);
         }
-        if (isToolTypeClient(client)) {
-          return client.delete(toolId);
-        } else {
-          throw createInternalError(`Non-readonly source ${source.id} exposes a read-only client`);
-        }
+        return provider.delete(toolId);
       }
     }
     throw createToolNotFoundError({ toolId });
+  }
+
+  private async isAvailable(tool: InternalToolDefinition): Promise<boolean> {
+    const soClient = this.savedObjects.getScopedClient(this.request);
+    const uiSettingsClient = this.uiSettings.asScopedToClient(soClient);
+
+    const context: ToolAvailabilityContext = {
+      spaceId: this.spaceId,
+      request: this.request,
+      uiSettings: uiSettingsClient,
+    };
+    const toolStatus = await tool.isAvailable(context);
+    return toolStatus.status === 'available';
   }
 }

@@ -13,5 +13,3 @@ export const NEXT_STEP_BUTTON = '[data-test-subj="onboarding--securityTourNextSt
 export const COMPLETION_POPOVER = '[data-test-subj="manualCompletionPopover"]';
 
 export const GLOBAL_TOUR_BUTTON = `[data-test-subj="guideButton"]`;
-
-export const CLOSE_CREATE_CASE_FLYOUT = `[data-test-subj="create-case-flyout"] [data-test-subj="euiFlyoutCloseButton"]`;

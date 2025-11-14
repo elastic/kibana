@@ -6,19 +6,19 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { TruncatedDocumentAnalysis } from '@kbn/ai-tools';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { Condition } from '@kbn/streamlang';
 import { conditionToQueryDsl } from '@kbn/streamlang';
 import { format } from 'util';
 import pLimit from 'p-limit';
 import { compact, isEqual } from 'lodash';
+import type { FormattedDocumentAnalysis } from '@kbn/ai-tools';
 import { clusterSampleDocs } from './cluster_sample_docs';
 
 export interface ClusterLogsResponse {
   sampled: number;
   noise: number[];
-  clusters: Array<{ count: number; analysis: TruncatedDocumentAnalysis }>;
+  clusters: Array<{ count: number; analysis: FormattedDocumentAnalysis }>;
 }
 
 function getFields(condition: Condition): string[] {
@@ -51,6 +51,7 @@ export async function clusterLogs({
   end,
   size = 1000,
   logger,
+  dropUnmapped = false,
 }: {
   index: string;
   partitions: Array<{ name: string; condition: Condition }>;
@@ -59,6 +60,7 @@ export async function clusterLogs({
   end: number;
   size?: number;
   logger: Logger;
+  dropUnmapped?: boolean;
 }): Promise<Array<{ name: string; condition: Condition; clustering: ClusterLogsResponse }>> {
   // time filter
   const rangeQuery = {
@@ -120,21 +122,22 @@ export async function clusterLogs({
       return limiter(() => {
         const requestBody = {
           index,
-          _source: false,
-          fields: [{ field: '*', include_unmapped: true }],
+          _source: true,
           size,
           timeout: '5s',
           // add runtime mappings so fields are queryable
-          runtime_mappings: Object.fromEntries(
-            Array.from(unmappedFields).map((field) => {
-              return [
-                field,
-                {
-                  type: 'keyword' as const,
-                },
-              ];
-            })
-          ),
+          runtime_mappings: dropUnmapped
+            ? {}
+            : Object.fromEntries(
+                Array.from(unmappedFields).map((field) => {
+                  return [
+                    field,
+                    {
+                      type: 'keyword' as const,
+                    },
+                  ];
+                })
+              ),
           query: {
             bool: {
               must: [request.query],
@@ -165,6 +168,8 @@ export async function clusterLogs({
       const clustering = clusterSampleDocs({
         hits: response.hits.hits,
         fieldCaps,
+        dropUnmapped,
+        valueCardinalityLimit: 100,
       });
 
       return {

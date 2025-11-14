@@ -7,50 +7,43 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React, { useState } from 'react';
 import type { ComponentProps } from 'react';
-import React, { useEffect, useState } from 'react';
-import type { Meta, StoryFn, StoryObj } from '@storybook/react';
-import { css, Global } from '@emotion/react';
-import type { UseEuiTheme } from '@elastic/eui';
 import { EuiSkipLink, useEuiTheme } from '@elastic/eui';
-import { ChromeLayout, ChromeLayoutConfigProvider } from '@kbn/core-chrome-layout-components';
-import { Box } from '@kbn/core-chrome-layout-components/__stories__/box';
+import type { UseEuiTheme } from '@elastic/eui';
+import type { Meta, StoryFn, StoryObj } from '@storybook/react';
 import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
+import { Box } from '@kbn/core-chrome-layout-components/__stories__/box';
+import { ChromeLayout, ChromeLayoutConfigProvider } from '@kbn/core-chrome-layout-components';
+import { css, Global } from '@emotion/react';
 
-import { Navigation } from '../components/navigation';
 import { LOGO, PRIMARY_MENU_FOOTER_ITEMS, PRIMARY_MENU_ITEMS } from '../mocks/observability';
+import { Navigation } from '../components/navigation';
+import { usePreventLinkNavigation } from '../hooks/use_prevent_link_navigation';
+import { NAVIGATION_ROOT_SELECTOR, NAVIGATION_SELECTOR_PREFIX } from '../constants';
 
-const styles = ({ euiTheme }: UseEuiTheme) => css`
-  body {
-    background-color: ${euiTheme.colors.backgroundBasePlain};
-  }
+const styles = ({ euiTheme }: UseEuiTheme) => {
+  const sidePanelClassName = `${NAVIGATION_SELECTOR_PREFIX}-sidePanel`;
 
-  #storybook-root {
-    display: flex;
-  }
+  return css`
+    body {
+      background-color: ${euiTheme.colors.backgroundBasePlain};
+    }
 
-  div.side-nav,
-  div.side_panel {
-    height: 100vh;
-  }
-`;
+    #storybook-root {
+      display: flex;
+    }
+
+    div.${NAVIGATION_ROOT_SELECTOR}, div.${sidePanelClassName} {
+      height: 100vh;
+    }
+  `;
+};
 
 type PropsAndArgs = ComponentProps<typeof Navigation>;
 
 const PreventLinkNavigation = (Story: StoryFn) => {
-  useEffect(() => {
-    const handleClick = (e: Event) => {
-      const target = e.target as HTMLElement;
-      const anchor = target.closest('a');
-
-      if (anchor && anchor.getAttribute('href')) {
-        e.preventDefault();
-      }
-    };
-
-    document.addEventListener('click', handleClick, true);
-    return () => document.removeEventListener('click', handleClick, true);
-  }, []);
+  usePreventLinkNavigation();
 
   return <Story />;
 };

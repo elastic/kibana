@@ -9,6 +9,16 @@ import React from 'react';
 import { EuiCallOut, EuiText, EuiLink, EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
+
+const styles = {
+  container: css`
+    max-width: 1000px;
+  `,
+  callOut: css`
+    padding: 16px;
+  `,
+};
 
 export const LicenseWarningNotice = () => {
   const registerLicenseLinkLabel = i18n.translate('xpack.searchProfiler.registerLicenseLinkLabel', {
@@ -32,14 +42,14 @@ export const LicenseWarningNotice = () => {
   });
 
   return (
-    <div className="prfDevTool__licenseWarning__container">
+    <div css={styles.container}>
       <EuiCallOut
         title={i18n.translate('xpack.searchProfiler.licenseErrorMessageTitle', {
           defaultMessage: 'License error',
         })}
         color="danger"
         iconType="warning"
-        style={{ padding: '16px' }}
+        css={styles.callOut}
       >
         <EuiText size="s">
           <p>

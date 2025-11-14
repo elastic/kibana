@@ -137,7 +137,9 @@
               "section": "def-common.WorkflowExecutionEngineModel",
               "text": "WorkflowExecutionEngineModel"
             },
-            ", stepId: string, contextOverride: Record<string, any>) => Promise<",
+            ", stepId: string, contextOverride: Record<string, any>, request?: ",
+            "KibanaRequest",
+            "<unknown, unknown, unknown, any> | undefined) => Promise<",
             "ExecuteWorkflowStepResponse",
             ">"
           ],
@@ -195,6 +197,22 @@
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
+            },
+            {
+              "parentPluginId": "workflowsExecutionEngine",
+              "id": "def-server.WorkflowsExecutionEnginePluginStart.executeWorkflowStep.$4",
+              "type": "Object",
+              "tags": [],
+              "label": "request",
+              "description": [],
+              "signature": [
+                "KibanaRequest",
+                "<unknown, unknown, unknown, any> | undefined"
+              ],
+              "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": false
             }
           ],
           "returnComment": []
@@ -253,40 +271,44 @@
   },
   "common": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "workflowsExecutionEngine",
+        "id": "def-common.createIndexes",
+        "type": "Function",
+        "tags": [],
+        "label": "createIndexes",
+        "description": [],
+        "signature": [
+          "(options: CreateIndexesOptions) => Promise<void>"
+        ],
+        "path": "src/platform/plugins/shared/workflows_execution_engine/common/create_indexes.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "workflowsExecutionEngine",
+            "id": "def-common.createIndexes.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "CreateIndexesOptions"
+            ],
+            "path": "src/platform/plugins/shared/workflows_execution_engine/common/create_indexes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [],
     "enums": [],
     "misc": [
-      {
-        "parentPluginId": "workflowsExecutionEngine",
-        "id": "def-common.PLUGIN_ID",
-        "type": "string",
-        "tags": [],
-        "label": "PLUGIN_ID",
-        "description": [],
-        "signature": [
-          "\"workflowsExecutionEngine\""
-        ],
-        "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "workflowsExecutionEngine",
-        "id": "def-common.PLUGIN_NAME",
-        "type": "string",
-        "tags": [],
-        "label": "PLUGIN_NAME",
-        "description": [],
-        "signature": [
-          "\"Workflows Execution Engine\""
-        ],
-        "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "workflowsExecutionEngine",
         "id": "def-common.WORKFLOWS_EXECUTION_LOGS_INDEX",
@@ -297,7 +319,7 @@
         "signature": [
           "\".workflows-execution-logs\""
         ],
-        "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
+        "path": "src/platform/plugins/shared/workflows_execution_engine/common/mappings.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -312,7 +334,7 @@
         "signature": [
           "\".workflows-executions\""
         ],
-        "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
+        "path": "src/platform/plugins/shared/workflows_execution_engine/common/mappings.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -327,7 +349,7 @@
         "signature": [
           "\".workflows-step-executions\""
         ],
-        "path": "src/platform/plugins/shared/workflows_execution_engine/common/index.ts",
+        "path": "src/platform/plugins/shared/workflows_execution_engine/common/mappings.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

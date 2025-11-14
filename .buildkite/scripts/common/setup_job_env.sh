@@ -122,14 +122,14 @@ EOF
   DEPLOY_TAGGER_SLACK_WEBHOOK_URL=${DEPLOY_TAGGER_SLACK_WEBHOOK_URL:-"$(vault_get kibana-serverless-release-tools DEPLOY_TAGGER_SLACK_WEBHOOK_URL)"}
   export DEPLOY_TAGGER_SLACK_WEBHOOK_URL
 
-  SONAR_LOGIN=$(vault_get sonarqube token)
-  export SONAR_LOGIN
+  # unset APM creds to ensure APM data gets sent to preconfigured APM cluster (kibana-cloud-apm)
+  if ! is_pr_with_label "ci:collect-apm"; then
+    ELASTIC_APM_SERVER_URL=$(vault_get project-kibana-ci-apm apm_server_url)
+    export ELASTIC_APM_SERVER_URL
 
-  ELASTIC_APM_SERVER_URL=$(vault_get project-kibana-ci-apm apm_server_url)
-  export ELASTIC_APM_SERVER_URL
-
-  ELASTIC_APM_API_KEY=$(vault_get project-kibana-ci-apm apm_server_api_key)
-  export ELASTIC_APM_API_KEY
+    ELASTIC_APM_API_KEY=$(vault_get project-kibana-ci-apm apm_server_api_key)
+    export ELASTIC_APM_API_KEY
+  fi
 }
 
 # Set up GenAI keys

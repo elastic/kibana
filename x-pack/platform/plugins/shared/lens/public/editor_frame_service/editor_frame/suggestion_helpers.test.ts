@@ -13,8 +13,13 @@ import {
   createMockDatasource,
   createMockFramePublicAPI,
 } from '../../mocks';
-import type { TableSuggestion, DatasourceSuggestion, Visualization } from '../../types';
-import type { DatasourceStates, DataViewsState } from '../../state_management';
+import type {
+  TableSuggestion,
+  DatasourceSuggestion,
+  Visualization,
+  DatasourceStates,
+  DataViewsState,
+} from '@kbn/lens-common';
 
 const generateSuggestion = (state = {}, layerId: string = 'first'): DatasourceSuggestion => ({
   state,

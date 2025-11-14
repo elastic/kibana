@@ -57,7 +57,12 @@ export const getTranslationResultNode = (params: GetTranslationResultNodeParams)
       };
     }
 
-    const panelJSON = processPanel(panel, query, state.parsed_panel);
+    const panelJSON = processPanel(
+      panel,
+      query,
+      state.esql_query_columns ?? [],
+      state.parsed_panel
+    );
 
     return {
       elastic_panel: panelJSON,

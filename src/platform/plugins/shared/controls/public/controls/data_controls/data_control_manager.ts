@@ -8,7 +8,7 @@
  */
 
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, combineLatest, debounceTime, first, skip, switchMap, tap } from 'rxjs';
+import { BehaviorSubject, combineLatest, first, skip, switchMap, tap } from 'rxjs';
 
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
@@ -175,7 +175,7 @@ export const initializeDataControlManager = <EditorState extends object = {}>(
     });
   };
 
-  const filtersReadySubscription = filters$.pipe(skip(1), debounceTime(0)).subscribe(() => {
+  const filtersReadySubscription = filters$.pipe(skip(1)).subscribe(() => {
     // Set filtersReady$.next(true); in filters$ subscription instead of setOutputFilter
     // to avoid signaling filters ready until after filters have been emitted
     // to avoid timing issues

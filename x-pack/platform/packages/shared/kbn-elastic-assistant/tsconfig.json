@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -47,7 +47,10 @@
     "@kbn/inference-common",
     "@kbn/core-doc-links-browser-mocks",
     "@kbn/core-user-profile-common",
+    "@kbn/ai-assistant-management-plugin",
     "@kbn/management-settings-ids",
     "@kbn/core-ui-settings-browser",
+    "@kbn/ai-assistant-connector-selector-action",
+    "@kbn/react-query",
   ]
 }

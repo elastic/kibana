@@ -85,6 +85,29 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await testSubjects.missingOrFail('sampleDataSection');
         });
       });
+      describe('Get started with API', function () {
+        it('clicking on search basics tutorial open console', async () => {
+          await testSubjects.existOrFail('console_tutorials_search_basics');
+          await testSubjects.click('console_tutorials_search_basics');
+          await testSubjects.existOrFail('consoleEditorContainer');
+        });
+        it('clicking on semantic search tutorial open console', async () => {
+          await testSubjects.existOrFail('console_tutorials_semantic_search');
+          await testSubjects.click('console_tutorials_semantic_search');
+          await testSubjects.existOrFail('consoleEditorContainer');
+        });
+        it('clicking on esql tutorial open console', async () => {
+          await testSubjects.existOrFail('console_tutorials_esql');
+          await testSubjects.click('console_tutorials_esql');
+          await testSubjects.existOrFail('consoleEditorContainer');
+        });
+        // TODO:  uncomment below lines when we are ready to show TSDS tutorial. review https://github.com/elastic/kibana/pull/237384#issuecomment-3411670210
+        // it('clicking on tsds tutorial open console', async () => {
+        //   await testSubjects.existOrFail('console_tutorials_tsds');
+        //   await testSubjects.click('console_tutorials_tsds');
+        //   await testSubjects.existOrFail('consoleEditorContainer');
+        // });
+      });
 
       describe('Alternate Solutions', function () {
         it('renders Observability content', async () => {
@@ -161,12 +184,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await deleteAllTestIndices();
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/225446
-      it.skip('goes to the start page if there exists no index', async () => {
-        await pageObjects.common.navigateToApp('searchHomepage');
-        await pageObjects.searchHomePage.expectToBeOnStartpage();
-      });
-
       it('goes to the home page if there exists at least one index', async () => {
         await pageObjects.common.navigateToApp('searchHomepage');
         await pageObjects.searchHomePage.expectToBeOnHomepage();
@@ -221,12 +238,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       after(async () => {
         await deleteAllTestIndices();
-      });
-
-      // FLAKY: https://github.com/elastic/kibana/issues/225446
-      it.skip('goes to the start page if there exists no index', async () => {
-        await pageObjects.common.navigateToApp('searchHomepage');
-        await pageObjects.searchHomePage.expectToBeOnStartpage();
       });
 
       it('goes to the home page if there exists at least one index', async () => {

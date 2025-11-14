@@ -1137,43 +1137,6 @@
       },
       {
         "parentPluginId": "@kbn/core-elasticsearch-server-internal",
-        "id": "def-server.isRetryableEsClientError",
-        "type": "Function",
-        "tags": [],
-        "label": "isRetryableEsClientError",
-        "description": [
-          "\nReturns true if the given elasticsearch error should be retried\nby retry-based resiliency systems such as the SO migration, false otherwise."
-        ],
-        "signature": [
-          "(e: ",
-          "ElasticsearchClientError",
-          ") => boolean"
-        ],
-        "path": "src/core/packages/elasticsearch/server-internal/src/retryable_es_client_errors.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/core-elasticsearch-server-internal",
-            "id": "def-server.isRetryableEsClientError.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "e",
-            "description": [],
-            "signature": [
-              "ElasticsearchClientError"
-            ],
-            "path": "src/core/packages/elasticsearch/server-internal/src/retryable_es_client_errors.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/core-elasticsearch-server-internal",
         "id": "def-server.isSupportedEsServer",
         "type": "Function",
         "tags": [],
@@ -1219,7 +1182,7 @@
         "label": "pollEsNodesVersion",
         "description": [],
         "signature": [
-          "({ internalClient, log, kibanaVersion, ignoreVersionMismatch, healthCheckInterval, healthCheckStartupInterval, }: ",
+          "({ internalClient, log, kibanaVersion, ignoreVersionMismatch, healthCheckInterval, healthCheckStartupInterval, healthCheckRetry, }: ",
           "PollEsNodesVersionOptions",
           ") => ",
           "Observable",
@@ -1236,7 +1199,7 @@
             "id": "def-server.pollEsNodesVersion.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  internalClient,\n  log,\n  kibanaVersion,\n  ignoreVersionMismatch,\n  healthCheckInterval,\n  healthCheckStartupInterval,\n}",
+            "label": "{\n  internalClient,\n  log,\n  kibanaVersion,\n  ignoreVersionMismatch,\n  healthCheckInterval,\n  healthCheckStartupInterval,\n  healthCheckRetry,\n}",
             "description": [],
             "signature": [
               "PollEsNodesVersionOptions"
@@ -2483,7 +2446,9 @@
             "parentPluginId": "@kbn/core-elasticsearch-server-internal",
             "id": "def-server.PollEsNodesVersionOptions.ignoreVersionMismatch",
             "type": "boolean",
-            "tags": [],
+            "tags": [
+              "default"
+            ],
             "label": "ignoreVersionMismatch",
             "description": [],
             "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
@@ -2494,7 +2459,9 @@
             "parentPluginId": "@kbn/core-elasticsearch-server-internal",
             "id": "def-server.PollEsNodesVersionOptions.healthCheckInterval",
             "type": "number",
-            "tags": [],
+            "tags": [
+              "default"
+            ],
             "label": "healthCheckInterval",
             "description": [],
             "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
@@ -2514,6 +2481,19 @@
             "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-elasticsearch-server-internal",
+            "id": "def-server.PollEsNodesVersionOptions.healthCheckRetry",
+            "type": "number",
+            "tags": [
+              "default"
+            ],
+            "label": "healthCheckRetry",
+            "description": [],
+            "path": "src/core/packages/elasticsearch/server-internal/src/version_check/ensure_es_version.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2529,7 +2509,7 @@
         "label": "ElasticsearchConfigType",
         "description": [],
         "signature": [
-          "{ readonly username?: string | undefined; readonly password?: string | undefined; readonly serviceAccountToken?: string | undefined; readonly publicBaseUrl?: string | undefined; readonly ssl: Readonly<{ key?: string | undefined; certificate?: string | undefined; certificateAuthorities?: string | string[] | undefined; keyPassphrase?: string | undefined; } & { verificationMode: \"none\" | \"certificate\" | \"full\"; keystore: Readonly<{ password?: string | undefined; path?: string | undefined; } & {}>; truststore: Readonly<{ password?: string | undefined; path?: string | undefined; } & {}>; alwaysPresentCertificate: boolean; }>; readonly healthCheck: Readonly<{} & { delay: moment.Duration; startupDelay: moment.Duration; }>; readonly hosts: string | string[]; readonly apiVersion: string; readonly sniffOnStart: boolean; readonly sniffInterval: false | moment.Duration; readonly sniffOnConnectionFault: boolean; readonly maxSockets: number; readonly maxIdleSockets: number; readonly maxResponseSize: false | ",
+          "{ readonly username?: string | undefined; readonly password?: string | undefined; readonly serviceAccountToken?: string | undefined; readonly publicBaseUrl?: string | undefined; readonly ssl: Readonly<{ key?: string | undefined; certificate?: string | undefined; certificateAuthorities?: string | string[] | undefined; keyPassphrase?: string | undefined; } & { verificationMode: \"none\" | \"certificate\" | \"full\"; keystore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; truststore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; alwaysPresentCertificate: boolean; }>; readonly healthCheck: Readonly<{} & { retry: number; delay: moment.Duration; startupDelay: moment.Duration; }>; readonly hosts: string | string[]; readonly apiVersion: string; readonly sniffOnStart: boolean; readonly sniffInterval: false | moment.Duration; readonly sniffOnConnectionFault: boolean; readonly maxSockets: number; readonly maxIdleSockets: number; readonly maxResponseSize: false | ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -2672,10 +2652,10 @@
             "pluginId": "@kbn/config-schema",
             "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-common.Type",
-            "text": "Type"
+            "section": "def-common.ConditionalType",
+            "text": "ConditionalType"
           },
-          "<string | string[]>; customHeaders: ",
+          "<true, string | string[], string | string[]>; customHeaders: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -2851,7 +2831,15 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<moment.Duration>; }>; ignoreVersionMismatch: ",
+          "<moment.Duration>; retry: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<number>; }>; ignoreVersionMismatch: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",

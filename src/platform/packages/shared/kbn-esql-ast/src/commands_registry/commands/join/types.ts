@@ -12,13 +12,12 @@ import type { ESQLAstExpression } from '../../../types';
 /**
  * Position of the caret in the JOIN command, which can be easily matched with
  * with basic parsing. Can be matched with a regular expression. Does not
- * include the `condition` and `after_condition` positions.
+ * include the `expression` position.
  *
  * ```
- * <type> JOIN <index> [ AS <alias> ] ON <conditions>
- * |     ||   ||      |  | ||      |  | |
- * |     ||   ||      |  | ||      |  | |
- * |     ||   ||      |  | ||      |  | after_on
+ * <type> JOIN <index> [ AS <alias> ] ON <expressions>
+ * |     ||   ||      |  | ||      |  |
+ * |     ||   ||      |  | ||      |  |
  * |     ||   ||      |  | ||      |  on
  * |     ||   ||      |  | ||      after_alias
  * |     ||   ||      |  | |alias
@@ -44,23 +43,18 @@ export type JoinStaticPosition =
   | 'after_as'
   | 'alias'
   | 'after_alias'
-  | 'on'
-  | 'after_on';
+  | 'on';
 
 /**
- * Position of the caret in the JOIN command. Includes the `condition` and
- * `after_condition` positions, which need to involve the main parser to be
- * determined correctly.
+ * Position of the caret in the JOIN command. Includes the `on_expression` position,
+ * which needs to involve the main parser to be determined correctly.
  *
  * ```
- * <type> JOIN <index> [ AS <alias> ] ON <condition> [, <condition> [, ...]]
- * |     ||   ||      |  | ||      |  | ||          |   |          |
- * |     ||   ||      |  | ||      |  | ||          |   |          |
- * |     ||   ||      |  | ||      |  | ||          |   |          after_condition
- * |     ||   ||      |  | ||      |  | ||          |   condition
- * |     ||   ||      |  | ||      |  | ||          after_condition
- * |     ||   ||      |  | ||      |  | |condition
- * |     ||   ||      |  | ||      |  | after_on
+ * <type> JOIN <index> [ AS <alias> ] ON <expression> [, <expression> [, ...]]
+ * |     ||   ||      |  | ||      |  | ||           |   |           |
+ * |     ||   ||      |  | ||      |  | ||           |   |           |
+ * |     ||   ||      |  | ||      |  | ||           |   on_expression
+ * |     ||   ||      |  | ||      |  | |on_expression
  * |     ||   ||      |  | ||      |  on
  * |     ||   ||      |  | ||      after_alias
  * |     ||   ||      |  | |alias
@@ -74,7 +68,7 @@ export type JoinStaticPosition =
  * type
  * ```
  */
-export type JoinPosition = JoinStaticPosition | 'condition' | 'after_condition';
+export type JoinPosition = JoinStaticPosition | 'on_expression';
 
 /**
  * Details about the position of the caret in the JOIN command.
@@ -82,13 +76,15 @@ export type JoinPosition = JoinStaticPosition | 'condition' | 'after_condition';
 export interface JoinCommandPosition {
   pos: JoinPosition;
 
-  /** The `<type>` of the JOIN command. */
-  type: string;
+  /**
+   * If position is `expression`, this property holds the
+   * expression AST node inside of which the caret is located.
+   */
+  expression?: ESQLAstExpression;
 
   /**
-   * If position is `condition` or `after_condition`, this property holds the
-   * condition expression AST node after which or inside of which the caret is
-   * located.
+   * Whether the expression is complete (not incomplete).
+   * Used to determine if we should suggest comma/pipe.
    */
-  condition?: ESQLAstExpression;
+  isExpressionComplete?: boolean;
 }

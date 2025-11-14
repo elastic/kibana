@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import moment from 'moment-timezone';
 import { Frequency } from '@kbn/rrule';
 import type { RRuleRequestV1 } from '../../../r_rule';
 import type { ScheduleRequest } from '../../types/v1';
-import { DEFAULT_TIMEZONE, DURATION_REGEX, INTERVAL_FREQUENCY_REGEXP } from '../../constants';
+import { DEFAULT_TIMEZONE, INTERVAL_FREQUENCY_REGEXP } from '../../constants';
+import { getDurationInMilliseconds } from './util';
 
 const transformEveryToFrequency = (frequency?: string) => {
   switch (frequency) {
@@ -24,14 +24,6 @@ const transformEveryToFrequency = (frequency?: string) => {
     default:
       return;
   }
-};
-
-const getDurationInMilliseconds = (duration: string): number => {
-  const [, durationNumber, durationUnit] = duration.match(DURATION_REGEX) ?? [];
-
-  return moment
-    .duration(durationNumber, durationUnit as moment.unitOfTime.DurationConstructor)
-    .asMilliseconds();
 };
 
 export const transformCustomScheduleToRRule = (

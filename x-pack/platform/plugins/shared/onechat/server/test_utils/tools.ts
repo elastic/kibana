@@ -8,10 +8,11 @@
 import { z } from '@kbn/zod';
 import { ToolType } from '@kbn/onechat-common';
 import type {
+  BuiltinToolDefinition,
   ExecutableTool,
   ExecutableToolHandlerFn,
-  ToolProvider,
   ToolHandlerFn,
+  ToolProvider,
 } from '@kbn/onechat-server';
 import type { ToolsServiceStart } from '../services/tools/types';
 import type { ToolRegistry } from '../services/tools/tool_registry';
@@ -49,12 +50,31 @@ export const createToolsServiceStartMock = (): ToolsServiceStartMock => {
   };
 };
 
-export type MockedTool = Omit<InternalToolDefinition, 'handler'> & {
-  handler: jest.MockedFunction<ToolHandlerFn>;
+export type MockedTool = Omit<InternalToolDefinition, 'getHandler' | 'getSchema'> & {
+  getHandler: jest.MockedFunction<() => ToolHandlerFn>;
+  getSchema: jest.MockedFunction<() => any>;
 };
 
 export type MockedExecutableTool = Omit<ExecutableTool, 'execute'> & {
   execute: jest.MockedFunction<ExecutableToolHandlerFn>;
+};
+
+export type MockedBuiltinTool = Omit<BuiltinToolDefinition, 'handler'> & {
+  handler: jest.MockedFunction<ToolHandlerFn>;
+};
+
+export const createMockedBuiltinTool = (
+  parts: Partial<MockedBuiltinTool> = {}
+): MockedBuiltinTool => {
+  return {
+    id: 'test-tool',
+    type: ToolType.builtin,
+    description: 'test description',
+    schema: z.object({}),
+    tags: ['tag-1', 'tag-2'],
+    handler: jest.fn(parts.handler),
+    ...parts,
+  };
 };
 
 export const createMockedTool = (parts: Partial<MockedTool> = {}): MockedTool => {
@@ -64,9 +84,10 @@ export const createMockedTool = (parts: Partial<MockedTool> = {}): MockedTool =>
     description: 'test description',
     configuration: {},
     readonly: false,
-    schema: z.object({}),
     tags: ['tag-1', 'tag-2'],
-    handler: jest.fn(parts.handler),
+    getSchema: jest.fn(async () => z.object({})),
+    getHandler: jest.fn(parts.getHandler),
+    isAvailable: jest.fn(),
     ...parts,
   };
 };
@@ -79,7 +100,7 @@ export const createMockedExecutableTool = (
     type: ToolType.builtin,
     description: 'test description',
     readonly: false,
-    schema: () => z.object({}),
+    getSchema: () => z.object({}),
     configuration: {},
     tags: ['tag-1', 'tag-2'],
     ...parts,

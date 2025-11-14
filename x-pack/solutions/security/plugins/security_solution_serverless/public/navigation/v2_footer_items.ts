@@ -8,6 +8,7 @@
 import type { NodeDefinition } from '@kbn/core-chrome-browser';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
+import { STACK_MANAGEMENT_NAV_ID, DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 
 export const createV2footerItemsTree = (): NodeDefinition => ({
   id: 'category-management',
@@ -19,7 +20,7 @@ export const createV2footerItemsTree = (): NodeDefinition => ({
   sideNavVersion: 'v2',
   children: [
     {
-      id: 'ingest_and_manage_data',
+      id: DATA_MANAGEMENT_NAV_ID,
       iconV2: 'database',
       title: i18nStrings.ingestAndManageData.title,
       renderAs: 'panelOpener',
@@ -49,29 +50,14 @@ export const createV2footerItemsTree = (): NodeDefinition => ({
           ],
         },
         {
-          title: i18nStrings.ingestAndManageData.indicesDsAndRollups.title,
+          title: i18nStrings.ingestAndManageData.indicesAndDataStreams.title,
           breadcrumbStatus: 'hidden',
           children: [
-            {
-              // TODO : update Steams link
-              breadcrumbStatus: 'hidden',
-              link: 'streams:overview',
-            },
+            { link: 'streams' },
             {
               breadcrumbStatus: 'hidden',
               link: 'management:index_management',
             },
-            // TODO: verify if we need to add these links
-            // as they are not visible in the footer items in v1 serverless
-
-            // {
-            //   breadcrumbStatus: 'hidden',
-            //   link: 'management:index_lifecycle_management',
-            // },
-            // {
-            //   breadcrumbStatus: 'hidden',
-            //   link: 'management:snapshot_restore',
-            // },
             {
               breadcrumbStatus: 'hidden',
               link: 'management:transform',
@@ -80,10 +66,6 @@ export const createV2footerItemsTree = (): NodeDefinition => ({
               breadcrumbStatus: 'hidden',
               link: 'management:jobsListLink',
             },
-            // {
-            //   breadcrumbStatus: 'hidden',
-            //   link: 'management:rollup_jobs',
-            // },
             {
               breadcrumbStatus: 'hidden',
               link: 'management:data_quality',
@@ -94,6 +76,7 @@ export const createV2footerItemsTree = (): NodeDefinition => ({
     },
     {
       title: i18nStrings.stackManagementV2.serverlessTitle,
+      id: STACK_MANAGEMENT_NAV_ID,
       iconV2: 'gear',
       breadcrumbStatus: 'hidden',
       renderAs: 'panelOpener',
@@ -118,14 +101,11 @@ export const createV2footerItemsTree = (): NodeDefinition => ({
           title: i18nStrings.stackManagementV2.organization.title,
           breadcrumbStatus: 'hidden',
           children: [
-            // TODO: verify visibility of Users and Roles link
             {
               cloudLink: 'billingAndSub',
             },
-            // TODO: verify visibility of Users and Roles link
             {
               cloudLink: 'userAndRoles',
-              title: i18nStrings.stackManagement.access.usersAndRoles,
             },
           ],
         },
@@ -230,6 +210,12 @@ export const createV2footerItemsTree = (): NodeDefinition => ({
               link: 'management:settings',
             },
           ],
+        },
+        {
+          // We include this link here to ensure that sidenav panel opens when user lands to legacy management landing page
+          // https://github.com/elastic/kibana/issues/240275
+          link: 'management',
+          sideNavStatus: 'hidden',
         },
       ],
     },

@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import { evaluate as base } from '@kbn/evals';
+import { evaluate as base, createDefaultTerminalReporter } from '@kbn/evals';
 import { KnowledgeBaseClient } from './clients/knowledge_base_client';
 import { ConversationsClient } from './clients/conversations_client';
 import { ObservabilityAIAssistantEvaluationChatClient } from './chat_client';
+import type { EvaluateObservabilityAIAssistantDataset } from './evaluate_dataset';
+import { createEvaluateObservabilityAIAssistantDataset } from './evaluate_dataset';
+import { createScenarioSummaryReporter } from './scenario_summary_reporter';
 
 export const evaluate = base.extend<
   {},
@@ -16,6 +19,7 @@ export const evaluate = base.extend<
     knowledgeBaseClient: KnowledgeBaseClient;
     conversationsClient: ConversationsClient;
     chatClient: ObservabilityAIAssistantEvaluationChatClient;
+    evaluateDataset: EvaluateObservabilityAIAssistantDataset;
   }
 >({
   knowledgeBaseClient: [
@@ -49,5 +53,29 @@ export const evaluate = base.extend<
     {
       scope: 'worker',
     },
+  ],
+  evaluateDataset: [
+    ({ chatClient, evaluators, phoenixClient }, use) => {
+      use(
+        createEvaluateObservabilityAIAssistantDataset({
+          chatClient,
+          evaluators,
+          phoenixClient,
+        })
+      );
+    },
+    { scope: 'worker' },
+  ],
+  reportModelScore: [
+    async ({}, use) => {
+      const useScenarioReporting = process.env.SCENARIO_REPORTING === 'true';
+
+      if (useScenarioReporting) {
+        await use(createScenarioSummaryReporter());
+      } else {
+        await use(createDefaultTerminalReporter());
+      }
+    },
+    { scope: 'worker' },
   ],
 });

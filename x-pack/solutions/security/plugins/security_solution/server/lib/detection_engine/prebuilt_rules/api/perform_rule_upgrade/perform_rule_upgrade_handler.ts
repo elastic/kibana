@@ -7,6 +7,7 @@
 
 import type { Logger, KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { isRuleCustomized } from '../../../../../../common/detection_engine/rule_management/utils';
 import type {
   FullThreeWayRuleDiff,
   PerformRuleUpgradeRequestBody,
@@ -43,7 +44,10 @@ import { calculateRuleDiff } from '../../logic/diff/calculate_rule_diff';
 import type { RuleTriad } from '../../model/rule_groups/get_rule_groups';
 import { getPossibleUpgrades } from '../../logic/utils';
 import type { RuleUpgradeContext } from './update_rule_telemetry';
-import { sendRuleUpdateTelemetryEvents } from './update_rule_telemetry';
+import {
+  sendRuleBulkUpgradeTelemetryEvent,
+  sendRuleUpdateTelemetryEvents,
+} from './update_rule_telemetry';
 
 export const performRuleUpgradeHandler = async (
   context: SecuritySolutionRequestHandlerContext,
@@ -61,7 +65,7 @@ export const performRuleUpgradeHandler = async (
     const ruleAssetsClient = createPrebuiltRuleAssetsClient(soClient);
     const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
     const mlAuthz = ctx.securitySolution.getMlAuthz();
-    const analytics = ctx.securitySolution.getAnalytics();
+    const analyticsService = ctx.securitySolution.getAnalytics();
 
     const { isRulesCustomizationEnabled } = detectionRulesClient.getRuleCustomizationStatus();
     const defaultPickVersion = isRulesCustomizationEnabled
@@ -183,6 +187,7 @@ export const performRuleUpgradeHandler = async (
               ruleId: targetRule.rule_id,
               ruleName: currentVersion.name,
               hasBaseVersion: !!baseVersion,
+              isCustomized: isRuleCustomized(currentVersion),
               fieldsDiff: ruleDiff.fields,
             });
             return;
@@ -239,12 +244,24 @@ export const performRuleUpgradeHandler = async (
       }
 
       sendRuleUpdateTelemetryEvents(
-        analytics,
+        analyticsService,
         ruleUpgradeContextsMap,
         updatedRules,
         ruleErrors,
-        skippedRules
+        skippedRules,
+        logger
       );
+
+      if (mode === ModeEnum.ALL_RULES) {
+        sendRuleBulkUpgradeTelemetryEvent(
+          analyticsService,
+          ruleUpgradeContextsMap,
+          updatedRules,
+          ruleErrors,
+          skippedRules,
+          logger
+        );
+      }
     }
 
     const body: PerformRuleUpgradeResponseBody = {

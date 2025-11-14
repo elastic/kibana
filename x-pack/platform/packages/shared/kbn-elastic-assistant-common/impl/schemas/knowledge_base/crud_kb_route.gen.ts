@@ -83,6 +83,10 @@ export const ReadKnowledgeBaseResponse = z.object({
    */
   security_labs_exists: z.boolean().optional(),
   /**
+   * Indicates if Defend Insights documentation exists in the KnowledgeBase.
+   */
+  defend_insights_exists: z.boolean().optional(),
+  /**
    * Indicates if user data exists in the KnowledgeBase.
    */
   user_data_exists: z.boolean().optional(),

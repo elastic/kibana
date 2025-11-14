@@ -204,8 +204,9 @@ export const mockRenderContext = createPartialObjectMock<RenderContext<Additiona
   isLoadingMutedAlerts: false,
   mutedAlerts: {},
   pageIndex: 0,
+  onPageIndexChange: jest.fn(),
   pageSize: 1,
-  openAlertInFlyout: jest.fn(),
+  onPageSizeChange: jest.fn(),
   bulkActionsStore: [
     createMockBulkActionsState(),
     jest.fn(),
@@ -213,9 +214,6 @@ export const mockRenderContext = createPartialObjectMock<RenderContext<Additiona
   renderCellValue: jest.fn().mockImplementation((props) => {
     return `${props.colIndex}:${props.rowIndex}`;
   }),
-  renderFlyoutHeader: jest.fn(),
-  renderFlyoutBody: jest.fn(),
-  renderFlyoutFooter: jest.fn(),
   renderActionsCell: () => (
     <EuiFlexItem grow={false}>
       <EuiButtonIcon

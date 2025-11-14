@@ -11,7 +11,12 @@ import kbnRison from '@kbn/rison';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { common, discover, header } = getPageObjects(['common', 'discover', 'header']);
+  const { common, discover, header, unifiedTabs } = getPageObjects([
+    'common',
+    'discover',
+    'header',
+    'unifiedTabs',
+  ]);
   const testSubjects = getService('testSubjects');
   const dataViews = getService('dataViews');
   const dataGrid = getService('dataGrid');
@@ -49,6 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('data view mode', () => {
       it('should render logs controls for logs data source', async () => {
         await common.navigateToApp('discover');
+        await unifiedTabs.closeTabPreviewWithEsc();
         await dataViews.switchTo('my-example-logs');
         await discover.waitUntilSearchingHasFinished();
         await testSubjects.existOrFail('exampleLogsControl_visBarVerticalStacked');
@@ -68,6 +74,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should not render logs controls for non-logs data source', async () => {
         await common.navigateToApp('discover');
+        await unifiedTabs.closeTabPreviewWithEsc();
         await dataViews.switchTo('my-example-metrics');
         await discover.waitUntilSearchingHasFinished();
         await testSubjects.missingOrFail('exampleLogsControl_visBarVerticalStacked');

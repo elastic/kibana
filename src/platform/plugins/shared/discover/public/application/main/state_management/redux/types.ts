@@ -14,6 +14,7 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import type { Filter, TimeRange } from '@kbn/es-query';
 import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
 import type { UnifiedDataTableRestorableState } from '@kbn/unified-data-table';
+import type { UnifiedMetricsGridRestorableState } from '@kbn/unified-metrics-grid';
 import type { UnifiedFieldListRestorableState } from '@kbn/unified-field-list';
 import type { UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
 import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram';
@@ -27,6 +28,8 @@ export interface InternalStateDataRequestParams {
   timeRangeAbsolute: TimeRange | undefined;
   timeRangeRelative: TimeRange | undefined;
   searchSessionId: string | undefined;
+  isSearchSessionRestored: boolean;
+  lastReloadRequestTime?: number;
 }
 
 export interface TabStateGlobalState {
@@ -41,11 +44,13 @@ export interface TabState extends TabItem {
     serializedSearchSource?: SerializedSearchSourceFields;
     visContext?: UnifiedHistogramVisContext | {};
     controlGroupJson?: string;
+    searchSessionId?: string;
   };
-  initialAppState?: DiscoverAppState;
 
   // The following properties are used to manage the tab's state after it has been initialized.
   globalState: TabStateGlobalState;
+  appState: DiscoverAppState;
+  previousAppState: DiscoverAppState;
   controlGroupState: ControlPanelsState<ESQLControlState> | undefined;
   /**
    * ESQL query variables
@@ -68,6 +73,7 @@ export interface TabState extends TabItem {
     fieldList?: Partial<UnifiedFieldListRestorableState>;
     layout?: Partial<DiscoverLayoutRestorableState>;
     searchDraft?: Partial<UnifiedSearchDraft>;
+    metricsGrid?: Partial<UnifiedMetricsGridRestorableState>;
   };
 }
 
@@ -94,9 +100,10 @@ export interface DiscoverInternalState {
   tabsBarVisibility: TabsBarVisibility;
   tabs: {
     areInitializing: boolean;
-    byId: Record<string, TabState | RecentlyClosedTabState>;
+    byId: Record<string, TabState>;
     allIds: string[];
     unsavedIds: string[];
+    recentlyClosedTabsById: Record<string, RecentlyClosedTabState>;
     recentlyClosedTabIds: string[];
     /**
      * WARNING: You probably don't want to use this property.

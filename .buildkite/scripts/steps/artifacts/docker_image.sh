@@ -17,8 +17,8 @@ fi
 KIBANA_BASE_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless"
 export KIBANA_IMAGE="$KIBANA_BASE_IMAGE:$KIBANA_IMAGE_TAG"
 
-KIBANA_CHAT_BASE_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless-chat"
-export KIBANA_CHAT_IMAGE="$KIBANA_CHAT_BASE_IMAGE:$KIBANA_IMAGE_TAG"
+KIBANA_WORKPLACE_AI_BASE_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless-workplaceai"
+export KIBANA_WORKPLACE_AI_IMAGE="$KIBANA_WORKPLACE_AI_BASE_IMAGE:$KIBANA_IMAGE_TAG"
 
 KIBANA_OBSERVABILITY_BASE_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless-observability"
 export KIBANA_OBSERVABILITY_IMAGE="$KIBANA_OBSERVABILITY_BASE_IMAGE:$KIBANA_IMAGE_TAG"
@@ -77,7 +77,7 @@ if [[ "$SKIP_BUILD" == "false" ]]; then
 
   echo "--- Tag images"
   retag_image_with_architecture "$KIBANA_IMAGE" "kibana-serverless-$BASE_VERSION-docker-image"
-  retag_image_with_architecture "$KIBANA_CHAT_IMAGE" "kibana-serverless-chat-$BASE_VERSION-docker-image"
+  retag_image_with_architecture "$KIBANA_WORKPLACE_AI_IMAGE" "kibana-serverless-workplaceai-$BASE_VERSION-docker-image"
   retag_image_with_architecture "$KIBANA_OBSERVABILITY_IMAGE" "kibana-serverless-observability-$BASE_VERSION-docker-image"
   retag_image_with_architecture "$KIBANA_SEARCH_IMAGE" "kibana-serverless-search-$BASE_VERSION-docker-image"
   retag_image_with_architecture "$KIBANA_SECURITY_IMAGE" "kibana-serverless-security-$BASE_VERSION-docker-image"
@@ -85,8 +85,8 @@ if [[ "$SKIP_BUILD" == "false" ]]; then
   echo "--- Push images"
   docker_with_retry push "$KIBANA_IMAGE-arm64"
   docker_with_retry push "$KIBANA_IMAGE-amd64"
-  docker_with_retry push "$KIBANA_CHAT_IMAGE-arm64"
-  docker_with_retry push "$KIBANA_CHAT_IMAGE-amd64"
+  docker_with_retry push "$KIBANA_WORKPLACE_AI_IMAGE-arm64"
+  docker_with_retry push "$KIBANA_WORKPLACE_AI_IMAGE-amd64"
   docker_with_retry push "$KIBANA_OBSERVABILITY_IMAGE-arm64"
   docker_with_retry push "$KIBANA_OBSERVABILITY_IMAGE-amd64"
   docker_with_retry push "$KIBANA_SEARCH_IMAGE-arm64"
@@ -96,7 +96,7 @@ if [[ "$SKIP_BUILD" == "false" ]]; then
 
   echo "--- Create and push manifests"
   create_and_push_manifest "$KIBANA_IMAGE"
-  create_and_push_manifest "$KIBANA_CHAT_IMAGE"
+  create_and_push_manifest "$KIBANA_WORKPLACE_AI_IMAGE"
   create_and_push_manifest "$KIBANA_OBSERVABILITY_IMAGE"
   create_and_push_manifest "$KIBANA_SEARCH_IMAGE"
   create_and_push_manifest "$KIBANA_SECURITY_IMAGE"
@@ -104,7 +104,7 @@ if [[ "$SKIP_BUILD" == "false" ]]; then
   # Update latest tags when building off main
   if [[ "$BUILDKITE_BRANCH" == "$KIBANA_BASE_BRANCH" ]] && [[ "${BUILDKITE_PULL_REQUEST:-false}" == "false" ]]; then
     docker buildx imagetools create -t "$KIBANA_BASE_IMAGE:latest" "$KIBANA_IMAGE"
-    docker buildx imagetools create -t "$KIBANA_CHAT_BASE_IMAGE:latest" "$KIBANA_CHAT_IMAGE"
+    docker buildx imagetools create -t "$KIBANA_WORKPLACE_AI_BASE_IMAGE:latest" "$KIBANA_WORKPLACE_AI_IMAGE"
     docker buildx imagetools create -t "$KIBANA_OBSERVABILITY_BASE_IMAGE:latest" "$KIBANA_OBSERVABILITY_IMAGE"
     docker buildx imagetools create -t "$KIBANA_SEARCH_BASE_IMAGE:latest" "$KIBANA_SEARCH_IMAGE"
     docker buildx imagetools create -t "$KIBANA_SECURITY_BASE_IMAGE:latest" "$KIBANA_SECURITY_IMAGE"

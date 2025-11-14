@@ -11,15 +11,19 @@ disabled:
   # Observability AI Assistant local-only tests
   - x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.ai_assistant_local.serverless.config.ts
 
+  # Empty configs
+  - x-pack/solutions/observability/test/serverless/api_integration/configs/config.feature_flags.ts
+
 defaultQueue: 'n2-4-spot'
 enabled:
   - x-pack/solutions/observability/test/serverless/api_integration/configs/config.ts
   - x-pack/solutions/observability/test/serverless/api_integration/configs/config.logs_essentials.ts
-  - x-pack/solutions/observability/test/serverless/api_integration/configs/config.feature_flags.ts
   - x-pack/platform/test/serverless/api_integration/configs/observability/config.group1.ts
   - x-pack/platform/test/serverless/api_integration/configs/observability/config.logs_essentials.group1.ts
   - x-pack/solutions/observability/test/serverless/api_integration/test_suites/fleet/config.ts
   - x-pack/solutions/observability/test/serverless/functional/configs/config.ts
+  - x-pack/solutions/observability/test/serverless/functional/configs/config.cases_and_rules.ts
+  - x-pack/solutions/observability/test/serverless/functional/configs/config.ml_and_discover.ts
   - x-pack/solutions/observability/test/serverless/functional/configs/config.logs_essentials.ts
   - x-pack/platform/test/serverless/functional/configs/observability/config.examples.ts
   - x-pack/solutions/observability/test/serverless/functional/configs/config.feature_flags.ts

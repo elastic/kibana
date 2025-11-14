@@ -65,7 +65,6 @@ export const casesSchema = schema.object({
   tags: schema.arrayOf(schema.string()),
   title: schema.string(),
   total_alerts: schema.number(),
-  total_events: schema.number(),
   total_comments: schema.number(),
   updated_at: schema.nullable(schema.string()),
   updated_by: schema.nullable(UserSchema),

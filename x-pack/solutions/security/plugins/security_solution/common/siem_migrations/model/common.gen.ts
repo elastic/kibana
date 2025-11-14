@@ -17,6 +17,8 @@
 import { z } from '@kbn/zod';
 
 import { NonEmptyString } from '../../api/model/primitives.gen';
+import { SplunkResourceType } from './vendor/common/splunk.gen';
+import { QradarResourceType } from './vendor/common/qradar.gen';
 
 /**
  * The GenAI connector id to use.
@@ -56,7 +58,9 @@ export const LangSmithEvaluationOptions = LangSmithOptions.merge(
  * The vendor identifier.
  */
 export type SiemMigrationVendor = z.infer<typeof SiemMigrationVendor>;
-export const SiemMigrationVendor = z.literal('splunk');
+export const SiemMigrationVendor = z.enum(['splunk', 'qradar']);
+export type SiemMigrationVendorEnum = typeof SiemMigrationVendor.enum;
+export const SiemMigrationVendorEnum = SiemMigrationVendor.enum;
 
 /**
  * A comment for the migration process
@@ -110,6 +114,10 @@ export const MigrationTaskStatusEnum = MigrationTaskStatus.enum;
  */
 export type MigrationLastExecution = z.infer<typeof MigrationLastExecution>;
 export const MigrationLastExecution = z.object({
+  /**
+   * The total execution time in milliseconds for the migration. This includes duration of last_execution and any previous executions.
+   */
+  total_execution_time_ms: z.number().int().optional(),
   /**
    * The moment the last execution started.
    */
@@ -256,13 +264,8 @@ export const MigrationTaskStats = z.object({
   last_execution: MigrationLastExecution.optional(),
 });
 
-/**
- * The type of the resource
- */
 export type SiemMigrationResourceType = z.infer<typeof SiemMigrationResourceType>;
-export const SiemMigrationResourceType = z.enum(['macro', 'lookup']);
-export type SiemMigrationResourceTypeEnum = typeof SiemMigrationResourceType.enum;
-export const SiemMigrationResourceTypeEnum = SiemMigrationResourceType.enum;
+export const SiemMigrationResourceType = z.union([SplunkResourceType, QradarResourceType]);
 
 /**
  * A resource of a migration

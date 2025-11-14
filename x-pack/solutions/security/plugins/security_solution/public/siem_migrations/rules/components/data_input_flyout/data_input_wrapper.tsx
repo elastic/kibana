@@ -7,9 +7,9 @@
 
 import type { PropsWithChildren } from 'react';
 import React, { useCallback, useState } from 'react';
-import type { RuleMigrationTaskStats } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { MigrationDataInputContextProvider } from '../../../common/components';
 import { MigrationDataInputFlyout } from './data_input_flyout';
+import type { RuleMigrationStats } from '../../types';
 
 interface RuleMigrationDataInputWrapperProps {
   onFlyoutClosed: () => void;
@@ -19,7 +19,7 @@ export const RuleMigrationDataInputWrapper = React.memo<
 >(({ children, onFlyoutClosed }) => {
   const [isFlyoutOpen, setIsFlyoutOpen] = useState<boolean>();
   const [flyoutMigrationStats, setFlyoutMigrationStats] = useState<
-    RuleMigrationTaskStats | undefined
+    RuleMigrationStats | undefined
   >();
 
   const closeFlyout = useCallback(() => {
@@ -28,7 +28,7 @@ export const RuleMigrationDataInputWrapper = React.memo<
     onFlyoutClosed?.();
   }, [onFlyoutClosed]);
 
-  const openFlyout = useCallback((migrationStats?: RuleMigrationTaskStats) => {
+  const openFlyout = useCallback((migrationStats?: RuleMigrationStats) => {
     setFlyoutMigrationStats(migrationStats);
     setIsFlyoutOpen(true);
   }, []);

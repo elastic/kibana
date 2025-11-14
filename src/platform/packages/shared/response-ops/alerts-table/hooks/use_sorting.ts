@@ -7,50 +7,44 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SortCombinations } from '@elastic/elasticsearch/lib/api/types';
 import type { EuiDataGridSorting } from '@elastic/eui';
 import type { EuiDataGridColumnSortingConfig } from '@elastic/eui/src/components/datagrid/data_grid_types';
 import { useCallback, useMemo, useState } from 'react';
-import { defaultSort } from '../constants';
+import type { AlertsTableSortCombinations } from '../types';
+import { defaultSortCombinations } from '../constants';
 
-const formatGridColumns = (cols: SortCombinations[]): EuiDataGridSorting['columns'] => {
-  const colsSorting: EuiDataGridSorting['columns'] = [];
-  cols.forEach((col) => {
-    Object.entries(col).forEach(([field, oSort]) => {
-      colsSorting.push({ id: field, direction: oSort.order });
-    });
-  });
-  return colsSorting;
-};
-
-export type UseSorting = (
-  onSortChange: (sort: EuiDataGridSorting['columns']) => void,
-  initialSort: SortCombinations[]
-) => {
-  sortingColumns: EuiDataGridSorting['columns'];
-  onSort: (newSort: EuiDataGridSorting['columns']) => void;
-};
+const sortCombinationsToDataGridSort = (
+  sortCombinations: AlertsTableSortCombinations[]
+): EuiDataGridSorting['columns'] =>
+  sortCombinations.flatMap((combination) =>
+    Object.entries(combination).map(([id, options]) => ({
+      id,
+      direction: options.order,
+    }))
+  );
 
 export function useSorting(
   onSortChange: (sort: EuiDataGridSorting['columns']) => void,
   visibleColumns: string[],
-  initialSort: SortCombinations[] = defaultSort
+  sortCombinations: AlertsTableSortCombinations[] = defaultSortCombinations
 ) {
   const [visibleColumnsSort, invisibleColumnsSort] = useMemo(() => {
-    const visibleSort: SortCombinations[] = [];
+    const visibleSort: AlertsTableSortCombinations[] = [];
     const invisibleSort: EuiDataGridColumnSortingConfig[] = [];
-    initialSort.forEach((sortCombinations) => {
-      if (visibleColumns.includes(Object.keys(sortCombinations)[0])) {
-        visibleSort.push(sortCombinations);
+    sortCombinations.forEach((combination) => {
+      if (visibleColumns.includes(Object.keys(combination)[0])) {
+        visibleSort.push(combination);
       } else {
-        invisibleSort.push(...formatGridColumns([sortCombinations]));
+        invisibleSort.push(...sortCombinationsToDataGridSort([combination]));
       }
     });
     return [visibleSort, invisibleSort];
-  }, [initialSort, visibleColumns]);
+  }, [sortCombinations, visibleColumns]);
+
   const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>(
-    formatGridColumns(visibleColumnsSort)
+    sortCombinationsToDataGridSort(visibleColumnsSort)
   );
+
   const onSort = useCallback<EuiDataGridSorting['onSort']>(
     (sortingConfig) => {
       onSortChange([...sortingConfig, ...invisibleColumnsSort]);
@@ -58,5 +52,6 @@ export function useSorting(
     },
     [onSortChange, invisibleColumnsSort]
   );
+
   return { sortingColumns, onSort };
 }

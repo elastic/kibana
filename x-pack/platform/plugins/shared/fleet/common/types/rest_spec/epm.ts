@@ -172,6 +172,10 @@ export interface BulkUninstallPackagesRequest {
   force?: boolean;
 }
 
+export interface BulkRollbackPackagesRequest {
+  packages: Array<{ name: string }>;
+}
+
 export interface BulkOperationPackagesResponse {
   taskId: string;
 }

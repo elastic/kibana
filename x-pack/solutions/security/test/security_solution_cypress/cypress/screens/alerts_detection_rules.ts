@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export const CREATE_NEW_RULE_BTN = '[data-test-subj="create-new-rule"]';
-
 export const COLLAPSED_ACTION_BTN = '[data-test-subj="euiCollapsedItemActionsButton"]';
 
 export const ELASTIC_RULES_BTN = '[data-test-subj="showElasticRulesFilterButton"]';
@@ -113,19 +111,13 @@ export const ADD_ELASTIC_RULES_TABLE = '[data-test-subj="add-prebuilt-rules-tabl
 
 export const RULES_ROW = '.euiTableRow';
 
-export const RULE_ROW_MODIFIED_BADGE = '[data-test-subj="rulesTableModifiedColumnBadge"]';
-
 export const SEVERITY = '[data-test-subj="severity"]';
 
 export const SELECT_ALL_RULES_BTN = '[data-test-subj="selectAllRules"]';
 
 export const RULES_EMPTY_PROMPT = '[data-test-subj="rulesEmptyPrompt"]';
 
-export const RULES_DELETE_CONFIRMATION_MODAL = '[data-test-subj="deleteRulesConfirmationModal"]';
-
 export const MODAL_CONFIRMATION_BTN = '[data-test-subj="confirmModalConfirmButton"]';
-
-export const MODAL_CONFIRMATION_TITLE = '[data-test-subj="confirmModalTitleText"]';
 
 export const MODAL_CONFIRMATION_BODY = '[data-test-subj="confirmModalBodyText"]';
 
@@ -142,8 +134,6 @@ export const RULE_DETAILS_REVERT_RULE_BTN = '[data-test-subj="rules-details-reve
 export const RULE_DETAILS_REVERT_RULE_TOOLTIP =
   '[data-test-subj="rules-details-revert-rule-tooltip"]';
 
-export const SERVER_SIDE_EVENT_COUNT = '[data-test-subj="server-side-event-count"]';
-
 export const SELECT_ALL_RULES_ON_PAGE_CHECKBOX = '[data-test-subj="checkboxSelectAll"]';
 
 export const RULE_IMPORT_MODAL = '[data-test-subj="rules-import-modal-button"]';
@@ -158,8 +148,6 @@ export const TOASTER_MESSAGE = '[data-test-subj="errorToastMessage"]';
 
 export const SUCCESS_TOASTER_HEADER =
   '[class*="euiToast-success"] [data-test-subj="euiToastHeader"]';
-
-export const WARN_TOASTER_HEADER = '[class*="euiToast-warn"] [data-test-subj="euiToastHeader"]';
 
 export const TOASTER_BODY = '[data-test-subj="globalToastList"] [data-test-subj="euiToastBody"]';
 
@@ -190,13 +178,13 @@ export const RULES_SELECTED_TAG = '.euiSelectableListItem[aria-checked="true"]';
 
 export const SELECTED_RULES_NUMBER_LABEL = '[data-test-subj="selectedRules"]';
 
+export const TIMELINE_BOTTOM_BAR = '[data-test-subj="timeline-bottom-bar-container"]';
+
 export const AUTO_REFRESH_POPOVER_TRIGGER_BUTTON = '[data-test-subj="autoRefreshButton"]';
 
 export const REFRESH_RULES_TABLE_BUTTON = '[data-test-subj="refreshRulesAction-linkIcon"]';
 
 export const REFRESH_SETTINGS_SWITCH = '[data-test-subj="refreshSettingsSwitch"]';
-
-export const REFRESH_SETTINGS_SELECTION_NOTE = '[data-test-subj="refreshSettingsSelectionNote"]';
 
 export const REFRESH_RULES_STATUS = '[data-test-subj="refreshRulesStatus"]';
 
@@ -387,8 +375,6 @@ export const PER_FIELD_ACCEPT_BUTTON =
 export const PER_FIELD_SAVE_BUTTON = '[data-test-subj="prebuilt-rule-upgrade-flyout-field-save"]';
 
 export const MODIFIED_RULE_BADGE = '[data-test-subj="upgradeRulesTableModifiedColumnBadge"]';
-
-export const RULES_TABLE_MODIFIED_RULE_BADGE = '[data-test-subj="rulesTableModifiedColumnBadge"]';
 
 export const CONFLICTS_MODAL_UPGRADE_CONFLICT_FREE_RULES =
   '[data-test-subj="conflicts-modal-upgrade-conflict-free-rules"]';

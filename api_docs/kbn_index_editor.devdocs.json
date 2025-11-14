@@ -170,7 +170,7 @@
             "label": "onClose",
             "description": [],
             "signature": [
-              "((result: { indexName: string | null; indexCreatedDuringFlyout: boolean; }) => void) | undefined"
+              "((result: { indexName: string | null; indexCreatedDuringFlyout: boolean; indexHasNewFields: boolean; }) => void) | undefined"
             ],
             "path": "src/platform/packages/private/kbn-index-editor/src/types.ts",
             "deprecated": false,
@@ -213,8 +213,68 @@
                     "path": "src/platform/packages/private/kbn-index-editor/src/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/index-editor",
+                    "id": "def-public.EditLookupIndexContentContext.onClose.$1.indexHasNewFields",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "indexHasNewFields",
+                    "description": [
+                      "Indicates if new fields have been added to the index"
+                    ],
+                    "path": "src/platform/packages/private/kbn-index-editor/src/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/index-editor",
+            "id": "def-public.EditLookupIndexContentContext.onOpenIndexInDiscover",
+            "type": "Function",
+            "tags": [],
+            "label": "onOpenIndexInDiscover",
+            "description": [],
+            "signature": [
+              "((indexName: string, esqlQuery: string) => Promise<void>) | undefined"
+            ],
+            "path": "src/platform/packages/private/kbn-index-editor/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/index-editor",
+                "id": "def-public.EditLookupIndexContentContext.onOpenIndexInDiscover.$1",
+                "type": "string",
+                "tags": [],
+                "label": "indexName",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/private/kbn-index-editor/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/index-editor",
+                "id": "def-public.EditLookupIndexContentContext.onOpenIndexInDiscover.$2",
+                "type": "string",
+                "tags": [],
+                "label": "esqlQuery",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/private/kbn-index-editor/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": []

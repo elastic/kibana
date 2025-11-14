@@ -21,12 +21,12 @@ describe('utils', () => {
     test('it returns expected link', () => {
       const resultLink = getNotificationResultsLink({
         kibanaSiemAppUrl: 'http://localhost:5601/app/security',
-        id: 'notification-id',
+        id: '721df360-e7f8-402c-9bdb-1bc724667d51', // some rule.id
         from: '00000',
         to: '1111',
       });
       expect(resultLink).toEqual(
-        `http://localhost:5601/app/security/detections/rules/id/notification-id?timerange=(global:(linkTo:!(timeline),timerange:(from:00000,kind:absolute,to:1111)),timeline:(linkTo:!(global),timerange:(from:00000,kind:absolute,to:1111)))`
+        `http://localhost:5601/app/security/rules/id/721df360-e7f8-402c-9bdb-1bc724667d51?timerange=(global:(linkTo:!(timeline),timerange:(from:00000,kind:absolute,to:1111)),timeline:(linkTo:!(global),timerange:(from:00000,kind:absolute,to:1111)))`
       );
     });
   });

@@ -6,9 +6,13 @@
  */
 
 import expect from 'expect';
-import type { ListPrivMonUsersResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics';
+import type {
+  ListEntitySourcesResponse,
+  ListPrivMonUsersResponse,
+} from '@kbn/security-solution-plugin/common/api/entity_analytics';
 import { getPrivilegedMonitorUsersIndex } from '@kbn/security-solution-plugin/common/entity_analytics/privileged_user_monitoring/utils';
 import { asyncForEach } from '@kbn/std';
+import { monitoringEntitySourceTypeName } from '@kbn/security-solution-plugin/server/lib/entity_analytics/privilege_monitoring/saved_objects';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { entityAnalyticsRouteHelpersFactory } from '../../../utils/entity_analytics';
 import { PrivMonUtils } from '../utils';
@@ -20,8 +24,26 @@ export default ({ getService }: FtrProviderContext) => {
   const kibanaServer = getService('kibanaServer');
   const log = getService('log');
   const entityAnalyticsRoutes = entityAnalyticsRouteHelpersFactory(supertest, log);
-  const api = getService('securitySolutionApi');
+  const entityAnalyticsApi = getService('entityAnalyticsApi');
   const spacesService = getService('spaces');
+
+  const deleteEntitySources = async (namespace: string, names?: string[]) => {
+    const entitySources = (await entityAnalyticsApi.listEntitySources({ query: {} }, namespace))
+      .body as ListEntitySourcesResponse;
+
+    const entitySourcesToDelete = names
+      ? entitySources.filter((s) => !names?.includes(s.name!))
+      : entitySources;
+
+    await asyncForEach(entitySourcesToDelete, async ({ id }) =>
+      kibanaServer.savedObjects.delete({
+        // Hack because deleteEntitySource API doesn't exist
+        type: monitoringEntitySourceTypeName,
+        space: namespace,
+        id,
+      })
+    );
+  };
 
   const createDeprecatedPrivMonUser = (
     namespace: string,
@@ -43,6 +65,19 @@ export default ({ getService }: FtrProviderContext) => {
       refresh: 'wait_for',
     });
 
+  const expectAllDefaultSourcesToExist = async (namespace: string) => {
+    const sources = await entityAnalyticsApi.listEntitySources({ query: {} }, namespace);
+    const names = (sources.body as ListEntitySourcesResponse).map((s) => s.name);
+
+    expect(names.sort()).toEqual(
+      [
+        `.entity_analytics.monitoring.users-${namespace}`,
+        `.entity_analytics.monitoring.sources.entityanalytics_okta-${namespace}`,
+        `.entity_analytics.monitoring.sources.entityanalytics_ad-${namespace}`,
+      ].sort()
+    );
+  };
+
   const SPACES = ['default', 'space1'];
 
   describe('@ess @serverless @skipInServerlessMKI Entity Analytics Privileged user monitoring Migrations', () => {
@@ -61,7 +96,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     afterEach(async () => {
       await asyncForEach(SPACES, async (space) => {
-        await api.deleteMonitoringEngine({ query: { data: true } }, space);
+        await entityAnalyticsApi.deleteMonitoringEngine({ query: { data: true } }, space);
         await disablePrivmonSetting(kibanaServer, space);
         if (space !== 'default') {
           await spacesService.delete(space);
@@ -70,74 +105,99 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     SPACES.forEach((namespace) => {
-      it(`should run the migration when users have source_index field for space ${namespace}`, async () => {
-        const indexPattern = 'INDEX1';
+      describe(`source_index migration for space ${namespace}`, () => {
+        it(`should run the migration when users have source_index field`, async () => {
+          const indexPattern = 'INDEX1';
 
-        await api.createEntitySource(
-          {
-            body: {
-              type: 'index',
-              name: 'User Monitored Indices',
-              indexPattern,
+          await entityAnalyticsApi.createEntitySource(
+            {
+              body: {
+                type: 'index',
+                name: 'User Monitored Indices',
+                indexPattern,
+              },
             },
-          },
-          namespace
-        );
-        await createDeprecatedPrivMonUser(namespace, indexPattern);
-        await entityAnalyticsRoutes.runMigrations();
+            namespace
+          );
+          await createDeprecatedPrivMonUser(namespace, indexPattern);
+          await entityAnalyticsRoutes.runMigrations();
 
-        const res = await api.listPrivMonUsers({ query: {} }, namespace);
-        const listed = res.body as ListPrivMonUsersResponse;
+          const res = await entityAnalyticsApi.listPrivMonUsers({ query: {} }, namespace);
+          const listed = res.body as ListPrivMonUsersResponse;
 
-        expect(listed.length).toEqual(1);
+          expect(listed.length).toEqual(1);
+          expect(listed[0]?.labels?.source_ids).toBeDefined();
+          expect((listed[0]?.labels as any).source_indices).not.toBeDefined(); // Type Assertion required because source_indices is not defined in the schema anymore
+        });
 
-        expect(listed[0]?.labels?.source_ids).toBeDefined();
-        expect((listed[0]?.labels as any).source_indices).not.toBeDefined(); // Type Assertion required because source_indices is not defined in the schema anymore
+        it(`should run the migration and delete stale users when the index was updated`, async () => {
+          const indexPattern = 'INDEX2';
+
+          await entityAnalyticsApi.createEntitySource(
+            {
+              body: {
+                type: 'index',
+                name: 'User Monitored Indices',
+                indexPattern,
+              },
+            },
+            namespace
+          );
+          await createDeprecatedPrivMonUser(namespace, indexPattern);
+          await createDeprecatedPrivMonUser(namespace, 'DIFFERENT INDEX PATTERNS', 'user_2'); // stale user
+
+          await entityAnalyticsRoutes.runMigrations();
+
+          const res = await entityAnalyticsApi.listPrivMonUsers({ query: {} }, namespace);
+          const listed = res.body as ListPrivMonUsersResponse;
+
+          expect(listed.length).toEqual(1);
+          expect(listed[0].user?.name).toEqual('user_1');
+          expect(listed[0]?.labels?.source_ids).toBeDefined();
+        });
+
+        it(`should not run the migration if engine is disable`, async () => {
+          const indexPattern = 'INDEX4';
+
+          await entityAnalyticsApi.createEntitySource(
+            {
+              body: {
+                type: 'index',
+                name: 'User Monitored Indices',
+                indexPattern,
+              },
+            },
+            namespace
+          );
+          await createDeprecatedPrivMonUser(namespace, indexPattern);
+
+          await entityAnalyticsApi.deleteMonitoringEngine({ query: { data: true } }, namespace);
+          await entityAnalyticsRoutes.runMigrations(); // should return 200
+        });
       });
 
-      it(`should run the migration and delete stale users when the index was updated for space ${namespace}`, async () => {
-        const indexPattern = 'INDEX2';
+      describe(`upsert entity source migration for space ${namespace}`, () => {
+        it(`should create the entity source when migration runs and no entity source exists`, async () => {
+          await deleteEntitySources(namespace);
 
-        await api.createEntitySource(
-          {
-            body: {
-              type: 'index',
-              name: 'User Monitored Indices',
-              indexPattern,
-            },
-          },
-          namespace
-        );
-        await createDeprecatedPrivMonUser(namespace, indexPattern);
-        await createDeprecatedPrivMonUser(namespace, 'DIFFERENT INDEX PATTERNS', 'user_2'); // stale user
+          await entityAnalyticsRoutes.runMigrations();
 
-        await entityAnalyticsRoutes.runMigrations();
+          await expectAllDefaultSourcesToExist(namespace);
+        });
 
-        const res = await api.listPrivMonUsers({ query: {} }, namespace);
-        const listed = res.body as ListPrivMonUsersResponse;
+        it(`should create missing entity source when migration runs one entity source doesn't exist`, async () => {
+          await deleteEntitySources(namespace, [`.entity_analytics.monitoring.users-${namespace}`]);
 
-        expect(listed.length).toEqual(1);
-        expect(listed[0].user?.name).toEqual('user_1');
-        expect(listed[0]?.labels?.source_ids).toBeDefined();
-      });
+          await entityAnalyticsRoutes.runMigrations();
 
-      it(`should not run the migration if engine is disable for space ${namespace}`, async () => {
-        const indexPattern = 'INDEX4';
+          await expectAllDefaultSourcesToExist(namespace);
+        });
 
-        await api.createEntitySource(
-          {
-            body: {
-              type: 'index',
-              name: 'User Monitored Indices',
-              indexPattern,
-            },
-          },
-          namespace
-        );
-        await createDeprecatedPrivMonUser(namespace, indexPattern);
+        it(`should work as expected when migration runs and all entity sources exist`, async () => {
+          await entityAnalyticsRoutes.runMigrations();
 
-        await api.deleteMonitoringEngine({ query: { data: true } }, namespace);
-        await entityAnalyticsRoutes.runMigrations(); // should return 200
+          await expectAllDefaultSourcesToExist(namespace);
+        });
       });
     });
   });

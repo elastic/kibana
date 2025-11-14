@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { i18n } from '@kbn/i18n';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox } from '@elastic/eui';
@@ -145,6 +146,12 @@ export function DashboardsSelector({
       options={dashboardList}
       selectedOptions={selectedDashboards}
       placeholder={placeholder}
+      aria-label={
+        placeholder ??
+        i18n.translate('dashboardsSelector.comboBox.ariaLabel', {
+          defaultMessage: 'Dashboards',
+        })
+      }
       onChange={internalOnChange}
       onFocus={handleComboBoxFocus}
       onSearchChange={onSearchChange}

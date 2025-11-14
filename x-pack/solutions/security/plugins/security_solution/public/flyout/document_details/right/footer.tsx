@@ -17,7 +17,7 @@ import { FLYOUT_FOOTER_TEST_ID } from './test_ids';
 import { TakeActionButton } from '../shared/components/take_action_button';
 
 export const ASK_AI_ASSISTANT = i18n.translate(
-  'xpack.securitySolution.ai4soc.flyout.right.footer.askAIAssistant',
+  'xpack.securitySolution.ease.flyout.right.footer.askAIAssistant',
   {
     defaultMessage: 'Ask AI Assistant',
   }

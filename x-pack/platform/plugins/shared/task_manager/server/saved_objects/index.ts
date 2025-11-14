@@ -14,7 +14,11 @@ import { getOldestIdleActionTask } from '../queries/oldest_idle_action_task';
 import { TASK_MANAGER_INDEX } from '../constants';
 import { backgroundTaskNodeModelVersions, taskModelVersions } from './model_versions';
 
-export { scheduleRruleSchemaV1, scheduleRruleSchemaV2 } from './schemas/rrule';
+export {
+  scheduleRruleSchemaV1,
+  scheduleRruleSchemaV2,
+  scheduleRruleSchemaV3,
+} from './schemas/rrule';
 
 export const TASK_SO_NAME = 'task';
 export const BACKGROUND_TASK_NODE_SO_NAME = 'background-task-node';

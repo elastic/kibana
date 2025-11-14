@@ -84,7 +84,7 @@ const assertAllNodesAreVisited = (query: string) => {
     visitObject: (node) => {
       if (isProperNode(node)) {
         allNodes.add(node);
-        if (node.type !== 'command') {
+        if (node.type !== 'command' && node.type !== 'header-command') {
           allExpressionNodes.add(node);
         }
       }

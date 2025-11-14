@@ -8,6 +8,7 @@
 import { deepFreeze } from '@kbn/std';
 import { get } from 'lodash';
 import type { KibanaRequest } from '@kbn/core/server';
+import type { MemoryDumpActionRequestBody } from '../../../../common/api/endpoint/actions/response_actions/memory_dump';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 import { isActionSupportedByAgentType } from '../../../../common/endpoint/service/response_actions/is_response_action_supported';
 import { EndpointAuthorizationError } from '../../errors';
@@ -107,7 +108,26 @@ const COMMANDS_WITH_ACCESS_TO_FILES: CommandsWithFileAccess = deepFreeze<Command
     crowdstrike: false,
     microsoft_defender_endpoint: false,
   },
+  'memory-dump': {
+    endpoint: false,
+    sentinel_one: false,
+    crowdstrike: false,
+    microsoft_defender_endpoint: false,
+  },
 });
+
+/**
+ * Returns boolean indicating if the response action has access to files.
+ * NOTE that this utility DOES NOT check privileges.
+ * @param agentType
+ * @param action
+ */
+export const doesActionHaveFileAccess = (
+  agentType: ResponseActionAgentType,
+  action: ResponseActionsApiCommandNames
+): boolean => {
+  return get(COMMANDS_WITH_ACCESS_TO_FILES, `${action}.${agentType}`, false);
+};
 
 /**
  * Checks to ensure that the user has the correct authz for the response action associated with the action id.
@@ -216,6 +236,8 @@ export const executeResponseAction = async (
       return responseActionsClient.runscript(requestBody as RunScriptActionRequestBody);
     case 'cancel':
       return responseActionsClient.cancel(requestBody as CancelActionRequestBody);
+    case 'memory-dump':
+      return responseActionsClient.memoryDump(requestBody as MemoryDumpActionRequestBody);
     default:
       throw new CustomHttpRequestError(
         `No handler found for response action command: [${command}]`,

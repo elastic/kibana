@@ -27,7 +27,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const browser = getService('browser');
   const toasts = getService('toasts');
 
-  describe('cases list', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/238752
+  describe.skip('cases list', () => {
     before(async () => {
       await cases.api.deleteAllCases();
       await cases.navigation.navigateToApp();
@@ -538,7 +539,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         const lsState = {
           filterOptions: {
             search: '',
-            searchFields: ['title', 'description'],
+            searchFields: ['title', 'description', 'incremental_id.text'],
             severity: [],
             assignees: [],
             reporters: [],
@@ -692,7 +693,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           queryParams: { page: 1, perPage: 10, sortField: 'createdAt', sortOrder: 'desc' },
           filterOptions: {
             search: theCase.title,
-            searchFields: ['title', 'description'],
+            searchFields: ['title', 'description', 'incremental_id.text'],
             severity: [theCase.severity],
             assignees: [profiles[0].uid],
             reporters: [],

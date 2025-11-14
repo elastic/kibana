@@ -6,7 +6,7 @@
  */
 
 import expect from 'expect';
-import { ATTACK_DISCOVERY_SCHEDULES_FIND } from '@kbn/elastic-assistant-common';
+import { ATTACK_DISCOVERY_INTERNAL_SCHEDULES_FIND } from '@kbn/elastic-assistant-common';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   createAttackDiscoverySchedules,
@@ -73,7 +73,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(result).toEqual(
           getMissingAssistantKibanaPrivilegesError({
-            routeDetails: `GET ${ATTACK_DISCOVERY_SCHEDULES_FIND}`,
+            routeDetails: `GET ${ATTACK_DISCOVERY_INTERNAL_SCHEDULES_FIND}`,
           })
         );
       });
@@ -92,7 +92,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(result).toEqual(
           getMissingAssistantKibanaPrivilegesError({
-            routeDetails: `GET ${ATTACK_DISCOVERY_SCHEDULES_FIND}`,
+            routeDetails: `GET ${ATTACK_DISCOVERY_INTERNAL_SCHEDULES_FIND}`,
           })
         );
       });

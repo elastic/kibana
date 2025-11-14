@@ -8,22 +8,14 @@
  */
 
 export type {
-  FindDashboardsByIdResponseAttributes,
   GridData,
   DashboardPanel,
   DashboardSection,
-  DashboardAttributes,
+  DashboardState,
   DashboardItem,
   DashboardGetIn,
   DashboardAPIGetOut,
   DashboardGetOut,
-  DashboardCreateIn,
-  DashboardCreateOut,
-  DashboardCreateOptions,
-  DashboardSearchIn,
-  DashboardSearchOut,
-  DashboardSearchAPIResult,
-  DashboardSearchOptions,
   DashboardUpdateIn,
   DashboardUpdateOut,
   DashboardUpdateOptions,

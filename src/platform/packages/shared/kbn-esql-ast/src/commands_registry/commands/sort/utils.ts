@@ -7,15 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
 import { getFragmentData } from '../../../definitions/utils/autocomplete/helpers';
 import {
   pipeCompleteItem,
-  type ESQLCommand,
   type ESQLSingleAstItem,
   commaCompleteItem,
   isColumn,
+  isFunctionExpression,
 } from '../../../..';
-import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
+import type { ESQLAstAllCommands } from '../../../types';
+import { within } from '../../../ast/location';
 import type { ISuggestionItem } from '../../types';
 
 export type SortPosition =
@@ -26,66 +28,77 @@ export type SortPosition =
   | 'nulls_complete'
   | 'after_nulls';
 
-export const getSortPos = (query: string, command: ESQLCommand): SortPosition | undefined => {
+export interface SortPositionContext {
+  insideFunction?: boolean;
+}
+
+export const getSortPos = (
+  query: string,
+  command: ESQLAstAllCommands,
+  cursorPosition: number
+): { position: SortPosition | undefined; context?: SortPositionContext } => {
   const lastArg = command.args[command.args.length - 1];
   if (!lastArg || /,\s+$/.test(query)) {
-    return 'empty_expression';
+    return { position: 'empty_expression' };
   }
 
   if (!Array.isArray(lastArg) && lastArg.type !== 'order') {
-    return 'expression';
+    const insideFunction = isFunctionExpression(lastArg) && within(cursorPosition, lastArg);
+
+    return {
+      position: 'expression',
+      context: { insideFunction },
+    };
   }
 
   if (/(?:asc|desc)$/i.test(query)) {
-    return 'order_complete';
+    return { position: 'order_complete' };
   }
 
   if (/(?:asc|desc)\s+(?:N?U?L?L?S? ?(F?I?R?S?|LA?S?)?)$/i.test(query)) {
-    return 'after_order';
+    return { position: 'after_order' };
   }
 
   if (/(?:nulls\s+first|nulls\s+last)$/i.test(query)) {
-    return 'nulls_complete';
+    return { position: 'nulls_complete' };
   }
 
   if (/(?:nulls\s+first|nulls\s+last)\s+$/i.test(query)) {
-    return 'after_nulls';
+    return { position: 'after_nulls' };
   }
+
+  return { position: undefined };
 };
 
 export const sortModifierSuggestions = {
-  ASC: {
+  ASC: withAutoSuggest({
     label: 'ASC',
     text: 'ASC',
     detail: '',
     kind: 'Keyword',
     sortText: '1-ASC',
-    command: TRIGGER_SUGGESTION_COMMAND,
-  } as ISuggestionItem,
-  DESC: {
+  }),
+  DESC: withAutoSuggest({
     label: 'DESC',
     text: 'DESC',
     detail: '',
     kind: 'Keyword',
     sortText: '1-DESC',
-    command: TRIGGER_SUGGESTION_COMMAND,
-  } as ISuggestionItem,
-  NULLS_FIRST: {
+  }),
+  NULLS_FIRST: withAutoSuggest({
     label: 'NULLS FIRST',
     text: 'NULLS FIRST',
     detail: '',
     kind: 'Keyword',
     sortText: '2-NULLS FIRST',
-    command: TRIGGER_SUGGESTION_COMMAND,
-  } as ISuggestionItem,
-  NULLS_LAST: {
+  }),
+  NULLS_LAST: withAutoSuggest({
     label: 'NULLS LAST',
     text: 'NULLS LAST',
     detail: '',
     kind: 'Keyword',
     sortText: '2-NULLS LAST',
-    command: TRIGGER_SUGGESTION_COMMAND,
-  } as ISuggestionItem,
+  }),
 };
 
 export const rightAfterColumn = (
@@ -115,11 +128,10 @@ export const getSuggestionsAfterCompleteExpression = (
   ];
 
   const pipeSuggestion = { ...pipeCompleteItem };
-  const commaSuggestion = {
+  const commaSuggestion = withAutoSuggest({
     ...commaCompleteItem,
     text: ', ',
-    command: TRIGGER_SUGGESTION_COMMAND,
-  };
+  });
 
   // does the query end with whitespace?
   if (/\s$/.test(innerText)) {

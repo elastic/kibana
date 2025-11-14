@@ -9,11 +9,13 @@ import type {
   ApplicationStart,
   ChromeStart,
   DocLinksStart,
+  FeatureFlagsStart,
   HttpStart,
   PluginInitializer,
   PluginInitializerContext,
 } from '@kbn/core/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { ObservabilityPublicStart } from '@kbn/observability-plugin/public';
 import type {
   ObservabilityOnboardingPluginSetup,
   ObservabilityOnboardingPluginStart,
@@ -45,6 +47,8 @@ export interface ObservabilityOnboardingAppServices {
   config: ConfigSchema;
   docLinks: DocLinksStart;
   chrome: ChromeStart;
+  featureFlags: FeatureFlagsStart;
+  observability: ObservabilityPublicStart;
 }
 
 export const plugin: PluginInitializer<

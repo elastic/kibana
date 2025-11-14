@@ -139,7 +139,12 @@ export const PeopleinSpaceExpression: React.FunctionComponent<PeopleinSpaceParam
   return (
     <Fragment>
       {errorsCallout.length ? (
-        <EuiCallOut title="Sorry, there was an error" color="danger" iconType="warning">
+        <EuiCallOut
+          announceOnMount
+          title="Sorry, there was an error"
+          color="danger"
+          iconType="warning"
+        >
           {errorsCallout}
         </EuiCallOut>
       ) : (
@@ -177,6 +182,12 @@ export const PeopleinSpaceExpression: React.FunctionComponent<PeopleinSpaceParam
               <EuiPopoverTitle>When the People in</EuiPopoverTitle>
               <EuiSelect
                 compressed
+                aria-label={i18n.translate(
+                  'AlertingExample.peopleInSpaceExpression.craftSelectAriaLabel',
+                  {
+                    defaultMessage: 'Spacecraft',
+                  }
+                )}
                 value={craftTrigger.craft}
                 onChange={(event) => {
                   setRuleParams('craft', event.target.value);
@@ -226,6 +237,12 @@ export const PeopleinSpaceExpression: React.FunctionComponent<PeopleinSpaceParam
                 <EuiFlexItem grow={false} style={{ width: 150 }}>
                   <EuiSelect
                     compressed
+                    aria-label={i18n.translate(
+                      'AlertingExample.peopleInSpaceExpression.operatorSelectAriaLabel',
+                      {
+                        defaultMessage: 'People in space comparison',
+                      }
+                    )}
                     value={outerSpaceCapacityTrigger.op}
                     onChange={(event) => {
                       setRuleParams('op', event.target.value);

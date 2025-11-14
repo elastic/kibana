@@ -181,7 +181,7 @@ export const MonitorListStatusColumn = ({
             </EuiText>
           }
         >
-          <PaddedText size="xs" color="subdued" className="eui-textNoWrap">
+          <PaddedText tabIndex={0} size="xs" color="subdued" className="eui-textNoWrap">
             {statusMessage},
           </PaddedText>
         </EuiToolTip>
@@ -198,7 +198,7 @@ export const MonitorListStatusColumn = ({
             </>
           }
         >
-          <EuiText size="xs" color="subdued" className="eui-textNoWrap">
+          <EuiText tabIndex={0} size="xs" color="subdued" className="eui-textNoWrap">
             {getCheckedLabel(timestamp)}
           </EuiText>
         </EuiToolTip>

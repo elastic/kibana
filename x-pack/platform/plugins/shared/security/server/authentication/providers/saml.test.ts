@@ -17,6 +17,7 @@ import { SAMLAuthenticationProvider, SAMLLogin } from './saml';
 import {
   AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
   AUTH_URL_HASH_QUERY_STRING_PARAMETER,
+  ES_CLIENT_AUTHENTICATION_HEADER,
 } from '../../../common/constants';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { InvalidGrantError } from '../../errors';
@@ -1671,7 +1672,298 @@ describe('SAMLAuthenticationProvider', () => {
     });
   });
 
+  describe('`doesSessionNeedToBeCheckedForRequestIds` method', () => {
+    it('returns true when state is undefined', () => {
+      expect(provider.shouldInvalidateIntermediateSessionAfterLogin(undefined)).toBe(true);
+    });
+
+    it('returns true when state is null', () => {
+      expect(provider.shouldInvalidateIntermediateSessionAfterLogin(null)).toBe(true);
+    });
+
+    it('returns true when state has no requestIdMap', () => {
+      const state = {
+        accessToken: 'some-token',
+        refreshToken: 'some-refresh-token',
+        realm: 'test-realm',
+      };
+      expect(provider.shouldInvalidateIntermediateSessionAfterLogin(state)).toBe(true);
+    });
+
+    it('returns true when requestIdMap is empty', () => {
+      const state = {
+        accessToken: 'some-token',
+        refreshToken: 'some-refresh-token',
+        realm: 'test-realm',
+        requestIdMap: {},
+      };
+      expect(provider.shouldInvalidateIntermediateSessionAfterLogin(state)).toBe(true);
+    });
+
+    it('returns false when requestIdMap has one entry', () => {
+      const state = {
+        accessToken: 'some-token',
+        refreshToken: 'some-refresh-token',
+        realm: 'test-realm',
+        requestIdMap: {
+          'request-id-1': { redirectURL: '/some-path' },
+        },
+      };
+      expect(provider.shouldInvalidateIntermediateSessionAfterLogin(state)).toBe(false);
+    });
+
+    it('returns false when requestIdMap has multiple entries', () => {
+      const state = {
+        accessToken: 'some-token',
+        refreshToken: 'some-refresh-token',
+        realm: 'test-realm',
+        requestIdMap: {
+          'request-id-1': { redirectURL: '/some-path' },
+          'request-id-2': { redirectURL: '/another-path' },
+          'request-id-3': { redirectURL: '/third-path' },
+        },
+      };
+      expect(provider.shouldInvalidateIntermediateSessionAfterLogin(state)).toBe(false);
+    });
+  });
+
   it('`getHTTPAuthenticationScheme` method', () => {
     expect(provider.getHTTPAuthenticationScheme()).toBe('bearer');
+  });
+
+  describe('UIAM mode', () => {
+    beforeEach(() => {
+      mockUser = mockAuthenticatedUser({
+        authentication_provider: { type: 'saml', name: ELASTIC_CLOUD_SSO_REALM_NAME },
+      });
+      mockOptions = mockAuthenticationProviderOptions({
+        name: ELASTIC_CLOUD_SSO_REALM_NAME,
+        uiam: true,
+      });
+
+      mockOptions.client.asInternalUser.transport.request.mockResolvedValue({
+        access_token: 'some-token',
+        refresh_token: 'some-refresh-token',
+        realm: ELASTIC_CLOUD_SSO_REALM_NAME,
+        authentication: mockUser,
+      });
+      mockOptions.uiam?.getUserProfileGrant.mockReturnValue({
+        type: 'uiamAccessToken',
+        accessToken: 'some-token',
+        sharedSecret: 'some-secret',
+      });
+      mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
+
+      provider = new SAMLAuthenticationProvider(mockOptions, {
+        realm: ELASTIC_CLOUD_SSO_REALM_NAME,
+      });
+    });
+
+    describe('`login` method', () => {
+      it('properly constructs user profile activate grant when UIAM is enabled.', async () => {
+        const request = httpServerMock.createKibanaRequest();
+        await expect(
+          provider.login(
+            request,
+            { type: SAMLLogin.LoginWithSAMLResponse, samlResponse: mockSAMLSet1.samlResponse },
+            {
+              requestIdMap: {
+                [mockSAMLSet1.requestId]: { redirectURL: '/test-base-path/some-path#some-app' },
+              },
+              realm: ELASTIC_CLOUD_SSO_REALM_NAME,
+            }
+          )
+        ).resolves.toEqual(
+          AuthenticationResult.redirectTo('/test-base-path/some-path#some-app', {
+            userProfileGrant: {
+              type: 'uiamAccessToken',
+              accessToken: 'some-token',
+              sharedSecret: 'some-secret',
+            },
+            state: {
+              accessToken: 'some-token',
+              refreshToken: 'some-refresh-token',
+              realm: ELASTIC_CLOUD_SSO_REALM_NAME,
+            },
+            user: mockUser,
+          })
+        );
+
+        expect(mockOptions.uiam?.getUserProfileGrant).toHaveBeenCalledTimes(1);
+        expect(mockOptions.uiam?.getUserProfileGrant).toHaveBeenCalledWith('some-token');
+        expect(mockOptions.client.asInternalUser.transport.request).toHaveBeenCalledWith({
+          method: 'POST',
+          path: '/_security/saml/authenticate',
+          body: {
+            ids: [mockSAMLSet1.requestId],
+            content: mockSAMLSet1.samlResponse,
+            realm: ELASTIC_CLOUD_SSO_REALM_NAME,
+          },
+        });
+      });
+    });
+
+    describe('`authenticate` method', () => {
+      it('properly constructs authentication headers when UIAM is enabled.', async () => {
+        const request = httpServerMock.createKibanaRequest({ headers: {} });
+        const state = {
+          accessToken: 'some-valid-token',
+          refreshToken: 'some-valid-refresh-token',
+          realm: ELASTIC_CLOUD_SSO_REALM_NAME,
+        };
+        const authorization = `Bearer ${state.accessToken}`;
+
+        await expect(provider.authenticate(request, state)).resolves.toEqual(
+          AuthenticationResult.succeeded(mockUser, {
+            authHeaders: { authorization, [ES_CLIENT_AUTHENTICATION_HEADER]: 'some-shared-secret' },
+          })
+        );
+
+        expect(mockOptions.client.asScoped).toHaveBeenCalledWith({
+          headers: { authorization, [ES_CLIENT_AUTHENTICATION_HEADER]: 'some-shared-secret' },
+        });
+
+        expect(request.headers).not.toHaveProperty('authorization');
+        expect(request.headers).not.toHaveProperty(ES_CLIENT_AUTHENTICATION_HEADER);
+      });
+    });
+
+    describe('`logout` method', () => {
+      it('returns `notHandled` if state is not presented or does not include access token.', async () => {
+        const request = httpServerMock.createKibanaRequest();
+
+        await expect(provider.logout(request)).resolves.toEqual(
+          DeauthenticationResult.notHandled()
+        );
+
+        expect(mockOptions.client.asInternalUser.transport.request).not.toHaveBeenCalled();
+      });
+
+      it('fails if token invalidation fails.', async () => {
+        const request = httpServerMock.createKibanaRequest();
+        const accessToken = 'x-saml-token';
+        const refreshToken = 'x-saml-refresh-token';
+
+        const failureReason = new errors.ResponseError(
+          securityMock.createApiResponse({ statusCode: 500, body: {} })
+        );
+        mockOptions.uiam?.invalidateSessionTokens.mockRejectedValue(failureReason);
+
+        await expect(
+          provider.logout(request, {
+            accessToken,
+            refreshToken,
+            realm: ELASTIC_CLOUD_SSO_REALM_NAME,
+          })
+        ).resolves.toEqual(DeauthenticationResult.failed(failureReason));
+
+        expect(mockOptions.uiam?.invalidateSessionTokens).toHaveBeenCalledTimes(1);
+        expect(mockOptions.uiam?.invalidateSessionTokens).toHaveBeenCalledWith(
+          'x-saml-token',
+          'x-saml-refresh-token'
+        );
+
+        expect(mockOptions.client.asInternalUser.transport.request).not.toHaveBeenCalled();
+      });
+
+      it('redirects to `loggedOut` URL.', async () => {
+        const request = httpServerMock.createKibanaRequest();
+        const accessToken = 'x-saml-token';
+        const refreshToken = 'x-saml-refresh-token';
+
+        await expect(
+          provider.logout(request, {
+            accessToken,
+            refreshToken,
+            realm: 'test-realm',
+          })
+        ).resolves.toEqual(DeauthenticationResult.redirectTo(mockOptions.urls.loggedOut(request)));
+
+        expect(mockOptions.uiam?.invalidateSessionTokens).toHaveBeenCalledTimes(1);
+        expect(mockOptions.uiam?.invalidateSessionTokens).toHaveBeenCalledWith(
+          'x-saml-token',
+          'x-saml-refresh-token'
+        );
+
+        expect(mockOptions.client.asInternalUser.transport.request).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('refresh token handling', () => {
+      it('succeeds if token from the state is expired, but has been successfully refreshed.', async () => {
+        const request = httpServerMock.createKibanaRequest();
+        const state = {
+          accessToken: 'expired-token',
+          refreshToken: 'valid-refresh-token',
+          realm: 'cloud-saml-kibana',
+        };
+
+        mockScopedClusterClient.asCurrentUser.security.authenticate.mockRejectedValueOnce(
+          new errors.ResponseError(securityMock.createApiResponse({ statusCode: 401, body: {} }))
+        );
+
+        mockOptions.uiam?.refreshSessionTokens.mockResolvedValue({
+          accessToken: 'new-access-token',
+          refreshToken: 'new-refresh-token',
+        });
+
+        mockOptions.uiam?.getUserProfileGrant.mockReturnValue({
+          accessToken: 'new-access-token',
+          sharedSecret: 'some-secret',
+          type: 'uiamAccessToken',
+        });
+
+        await expect(provider.authenticate(request, state)).resolves.toEqual(
+          AuthenticationResult.succeeded(mockUser, {
+            authHeaders: { authorization: 'Bearer new-access-token' },
+            userProfileGrant: {
+              accessToken: 'new-access-token',
+              sharedSecret: 'some-secret',
+              type: 'uiamAccessToken',
+            },
+            state: {
+              accessToken: 'new-access-token',
+              refreshToken: 'new-refresh-token',
+              realm: 'cloud-saml-kibana',
+            },
+          })
+        );
+
+        expect(mockOptions.uiam?.refreshSessionTokens).toHaveBeenCalledTimes(1);
+        expect(mockOptions.uiam?.refreshSessionTokens).toHaveBeenCalledWith(state.refreshToken);
+
+        expect(request.headers).not.toHaveProperty('authorization');
+      });
+
+      it('fails if token from the state is expired, refresh attempt failed, and displays error from UIAM', async () => {
+        const request = httpServerMock.createKibanaRequest({ headers: {} });
+        const state = {
+          accessToken: 'expired-token',
+          refreshToken: 'invalid-refresh-token',
+          realm: 'cloud-saml-kibana',
+        };
+        const authorization = `Bearer ${state.accessToken}`;
+
+        mockScopedClusterClient.asCurrentUser.security.authenticate.mockRejectedValue(
+          new errors.ResponseError(securityMock.createApiResponse({ statusCode: 401, body: {} }))
+        );
+
+        const refreshFailureReason = new Boom.Boom('Authentication failed');
+        mockOptions.uiam?.refreshSessionTokens.mockRejectedValue(refreshFailureReason);
+
+        await expect(provider.authenticate(request, state)).resolves.toEqual(
+          AuthenticationResult.failed(refreshFailureReason as any)
+        );
+
+        expect(mockOptions.uiam?.refreshSessionTokens).toHaveBeenCalledTimes(1);
+        expect(mockOptions.uiam?.refreshSessionTokens).toHaveBeenCalledWith(state.refreshToken);
+
+        expect(mockOptions.client.asScoped).toHaveBeenCalledWith({
+          headers: { authorization, [ES_CLIENT_AUTHENTICATION_HEADER]: 'some-shared-secret' },
+        });
+
+        expect(request.headers).not.toHaveProperty('authorization');
+      });
+    });
   });
 });

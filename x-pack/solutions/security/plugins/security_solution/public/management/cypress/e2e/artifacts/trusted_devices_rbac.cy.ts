@@ -12,14 +12,7 @@ describe(
   'Trusted devices RBAC',
   {
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
-    env: {
-      ftrConfig: {
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify(['trustedDevices'])}`,
-        ],
-      },
-    },
   },
 
-  getArtifactMockedDataTests(getArtifactsListTestDataForArtifact('trustedDevices'), ['siemV3'])
+  getArtifactMockedDataTests(getArtifactsListTestDataForArtifact('trustedDevices'))
 );

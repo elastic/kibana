@@ -199,9 +199,10 @@ export class RuleTypeRunner<
       async () => {
         const checkHasReachedAlertLimit = () => {
           const reachedLimit = alertsClient.hasReachedAlertLimit() || false;
+          const maxAlerts = alertsClient.getMaxAlertLimit();
           if (reachedLimit) {
             context.logger.warn(
-              `rule execution generated greater than ${this.options.context.maxAlerts} alerts: ${context.ruleLogPrefix}`
+              `rule execution generated greater than ${maxAlerts} alerts: ${context.ruleLogPrefix}`
             );
             context.ruleRunMetricsStore.setHasReachedAlertLimit(true);
           }
@@ -380,28 +381,6 @@ export class RuleTypeRunner<
         }
       })
     );
-
-    await withAlertingSpan('alerting:updating-maintenance-windows', async () => {
-      if (this.shouldLogAndScheduleActionsForAlerts(ruleType.cancelAlertsOnRuleTimeout)) {
-        const updateAlertsMaintenanceWindowResult =
-          await alertsClient.updatePersistedAlertsWithMaintenanceWindowIds();
-
-        // Set the event log MW ids again, this time including the ids that matched alerts with
-        // scoped query
-        if (
-          updateAlertsMaintenanceWindowResult?.maintenanceWindowIds &&
-          updateAlertsMaintenanceWindowResult?.maintenanceWindowIds.length > 0
-        ) {
-          context.alertingEventLogger.setMaintenanceWindowIds(
-            updateAlertsMaintenanceWindowResult.maintenanceWindowIds
-          );
-        }
-      } else {
-        context.logger.debug(
-          `skipping updating alerts with maintenance windows for rule ${context.ruleLogPrefix}: rule execution has been cancelled.`
-        );
-      }
-    });
 
     alertsClient.logAlerts({
       ruleRunMetricsStore: context.ruleRunMetricsStore,

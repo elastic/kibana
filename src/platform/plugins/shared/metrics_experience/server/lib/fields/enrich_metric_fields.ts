@@ -13,7 +13,8 @@ import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import type { estypes } from '@elastic/elasticsearch';
 import type { InferSearchResponseOf } from '@kbn/es-types';
 import { semconvFlat } from '@kbn/otel-semantic-conventions';
-import type { DataStreamFieldCapsMap } from '../../types';
+import { dateRangeQuery, kqlQuery } from '@kbn/es-query';
+import type { IndexFieldCapsMap, EpochTimeRange } from '../../types';
 import type { Dimension, MetricField } from '../../../common/types';
 import { extractDimensions } from '../dimensions/extract_dimensions';
 import { normalizeUnit } from './normalize_unit';
@@ -21,6 +22,7 @@ import { normalizeUnit } from './normalize_unit';
 export interface MetricMetadata {
   dimensions: string[];
   unitFromSample?: string;
+  totalHits: number;
 }
 export type MetricMetadataMap = Map<string, MetricMetadata>;
 
@@ -28,8 +30,8 @@ function isErrorResponseBase(subject: unknown): subject is ErrorResponseBase {
   return typeof subject === 'object' && subject !== null && 'error' in subject;
 }
 
-function generateMapKey(indexName: string, fieldName: string) {
-  return `${indexName}>${fieldName}`;
+export function generateMapKey(indexName: string, fieldName: string) {
+  return `${fieldName}>${indexName}`;
 }
 
 function buildMetricMetadataMap(
@@ -52,15 +54,17 @@ function buildMetricMetadataMap(
 
       if (isErrorResponseBase(searchResult)) {
         logger.error(`Error sampling document for metric ${name}: ${searchResult.error}`);
-        return [mapKey, { dimensions: [] }];
+        return [mapKey, { dimensions: [], totalHits: 0 }];
       }
 
       if (!searchResult?.hits.hits?.length) {
-        return [mapKey, { dimensions: [] }];
+        return [mapKey, { dimensions: [], totalHits: 0 }];
       }
 
       const fields = searchResult.hits.hits[0].fields ?? {};
-      const { dimensions, unitFromSample } = Object.entries(fields).reduce<MetricMetadata>(
+      const { dimensions, unitFromSample } = Object.entries(fields).reduce<
+        Omit<MetricMetadata, 'totalHits'>
+      >(
         (acc, [fieldName, fieldValue]) => {
           if (fieldName === semconvFlat.unit.name) {
             const value = Array.isArray(fieldValue) ? fieldValue[0] : fieldValue;
@@ -68,6 +72,7 @@ function buildMetricMetadataMap(
             if (typeof value === 'string') {
               acc.unitFromSample = value;
             }
+            return acc;
           } else {
             acc.dimensions.push(fieldName);
           }
@@ -82,6 +87,7 @@ function buildMetricMetadataMap(
         {
           dimensions,
           unitFromSample,
+          totalHits: searchResult?.hits.hits?.length ?? 0,
         },
       ];
     })
@@ -94,10 +100,14 @@ export async function sampleMetricMetadata({
   esClient,
   metricFields,
   logger,
+  timerange: { from, to },
+  kuery,
 }: {
   esClient: TracedElasticsearchClient;
   metricFields: MetricField[];
   logger: Logger;
+  timerange: EpochTimeRange;
+  kuery?: string;
 }): Promise<MetricMetadataMap> {
   if (metricFields.length === 0) {
     return new Map();
@@ -112,8 +122,16 @@ export async function sampleMetricMetadata({
         size: 1,
         terminate_after: 1,
         query: {
-          exists: {
-            field,
+          bool: {
+            filter: [
+              {
+                exists: {
+                  field,
+                },
+              },
+              ...dateRangeQuery(from, to),
+              ...kqlQuery(kuery),
+            ],
           },
         },
         _source: false,
@@ -130,7 +148,7 @@ export async function sampleMetricMetadata({
     const metricMetadataMap: MetricMetadataMap = new Map();
 
     for (const { name } of metricFields) {
-      metricMetadataMap.set(name, { dimensions: [] });
+      metricMetadataMap.set(name, { dimensions: [], totalHits: 0 });
     }
     return metricMetadataMap;
   }
@@ -139,14 +157,18 @@ export async function sampleMetricMetadata({
 export async function enrichMetricFields({
   esClient,
   metricFields,
-  dataStreamFieldCapsMap,
+  indexFieldCapsMap,
   logger,
+  timerange,
+  kuery,
 }: {
   esClient: TracedElasticsearchClient;
   metricFields: MetricField[];
-  dataStreamFieldCapsMap: DataStreamFieldCapsMap;
+  indexFieldCapsMap: IndexFieldCapsMap;
   logger: Logger;
-}) {
+  timerange: EpochTimeRange;
+  kuery?: string;
+}): Promise<MetricField[]> {
   if (metricFields.length === 0) {
     return metricFields;
   }
@@ -155,27 +177,29 @@ export async function enrichMetricFields({
     esClient,
     metricFields,
     logger,
+    timerange,
+    kuery,
   });
 
   const uniqueDimensionSets = new Map<string, Array<Dimension>>();
 
   return metricFields.map((field) => {
-    const { dimensions, unitFromSample } =
+    const { dimensions, unitFromSample, totalHits } =
       metricMetadataMap.get(generateMapKey(field.index, field.name)) || {};
-    const fieldCaps = dataStreamFieldCapsMap.get(field.index);
+    const fieldCaps = indexFieldCapsMap.get(field.index);
 
-    if (!dimensions || dimensions.length === 0) {
+    if ((!dimensions || dimensions.length === 0) && totalHits === 0) {
       return { ...field, dimensions: [], noData: true };
     }
 
-    const cacheKey = [...dimensions].sort().join(',');
-    if (!uniqueDimensionSets.has(cacheKey) && fieldCaps) {
+    const cacheKey = dimensions ? [...(dimensions || [])].sort().join(',') : undefined;
+    if (cacheKey && !uniqueDimensionSets.has(cacheKey) && fieldCaps) {
       uniqueDimensionSets.set(cacheKey, extractDimensions(fieldCaps, dimensions));
     }
 
     return {
       ...field,
-      dimensions: uniqueDimensionSets.get(cacheKey)!,
+      dimensions: cacheKey ? uniqueDimensionSets.get(cacheKey) ?? [] : [],
       noData: false,
       unit: normalizeUnit({ fieldName: field.name, unit: field.unit ?? unitFromSample }),
     };

@@ -6,10 +6,6 @@
  */
 
 export type {
-  BuiltinToolDefinition,
-  ToolHandlerFn,
-  ToolHandlerReturn,
-  ToolHandlerContext,
   ToolProvider,
   ToolProviderHasOptions,
   ToolProviderGetOptions,
@@ -19,9 +15,8 @@ export type {
   ExecutableToolHandlerFn,
   LLmDescriptionHandlerParams,
   LlmDescriptionHandler,
-} from './src/tools';
-export type { ModelProvider, ScopedModel } from './src/model_provider';
-export type {
+  ModelProvider,
+  ScopedModel,
   ScopedRunner,
   ScopedRunToolFn,
   ScopedRunnerRunToolsParams,
@@ -31,13 +26,29 @@ export type {
   RunToolFn,
   Runner,
   RunToolReturn,
-} from './src/runner';
-export {
-  type OnechatToolEvent,
-  type ToolEventHandlerFn,
-  type ToolEventEmitter,
-  type ToolProgressEmitterFn,
-} from './src/events';
+  OnechatToolEvent,
+  ToolEventHandlerFn,
+  ToolEventEmitter,
+  ToolProgressEmitterFn,
+  ToolResultStore,
+  WritableToolResultStore,
+} from './runner';
+export type {
+  ToolHandlerFn,
+  ToolHandlerReturn,
+  ToolHandlerContext,
+  ToolHandlerResult,
+  BuiltinToolDefinition,
+  StaticToolRegistration,
+  StaticEsqlTool,
+  StaticWorkflowTool,
+  StaticIndexSearchTool,
+  ToolAvailabilityContext,
+  ToolAvailabilityHandler,
+  ToolAvailabilityResult,
+  ToolAvailabilityConfig,
+} from './tools';
+export { getToolResultId, createErrorResult, isToolResultId } from './tools';
 export type {
   AgentHandlerParams,
   AgentHandlerContext,
@@ -52,4 +63,4 @@ export type {
   AgentEventEmitterFn,
   RunAgentOnEventFn,
 } from './agents';
-export { chatSystemIndex, chatSystemIndexPrefix } from './src/indices';
+export { chatSystemIndex, chatSystemIndexPrefix } from './indices';

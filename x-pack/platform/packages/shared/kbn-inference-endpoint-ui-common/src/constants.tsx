@@ -31,6 +31,7 @@ export enum ServiceProviderKeys {
   watsonxai = 'watsonxai',
   ai21 = 'ai21',
   llama = 'llama',
+  contextualai = 'contextualai',
 }
 
 export const GEMINI_REGION_DOC_LINK = (
@@ -88,9 +89,10 @@ export const INTERNAL_OVERRIDE_FIELDS: InternalOverrideFieldsType = {
           sensitive: false,
           supported_task_types: ['text_embedding', 'sparse_embedding', 'rerank'],
           type: FieldType.INTEGER,
-          updatable: false,
+          updatable: true,
         },
       },
     ],
+    serverlessOnly: true,
   },
 };

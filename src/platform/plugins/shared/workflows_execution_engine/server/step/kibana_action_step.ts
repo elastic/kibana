@@ -7,12 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// TODO: Remove eslint exceptions comments and fix the issues
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+import type { FetcherConfigSchema } from '@kbn/workflows';
 import { buildKibanaRequestFromAction } from '@kbn/workflows';
-import type { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
+import type { z } from '@kbn/zod';
+import type { BaseStep, RunStepResult } from './node_implementation';
+import { BaseAtomicNodeImplementation } from './node_implementation';
+import { getKibanaUrl } from '../utils';
+import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
-import type { RunStepResult, BaseStep } from './node_implementation';
-import { BaseAtomicNodeImplementation } from './node_implementation';
 
 // Extend BaseStep for kibana-specific properties
 export interface KibanaActionStep extends BaseStep {
@@ -20,44 +26,29 @@ export interface KibanaActionStep extends BaseStep {
   with?: Record<string, any>;
 }
 
+/**
+ * Fetcher configuration options for customizing HTTP requests
+ * Derived from the Zod schema to ensure type safety and avoid duplication
+ */
+type FetcherOptions = NonNullable<z.infer<typeof FetcherConfigSchema>> & {
+  // Allow additional undici Agent options to be passed through
+  [key: string]: any;
+};
+
 export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaActionStep> {
   constructor(
     step: KibanaActionStep,
-    contextManager: WorkflowContextManager,
+    stepExecutionRuntime: StepExecutionRuntime,
     workflowRuntime: WorkflowExecutionRuntimeManager,
     private workflowLogger: IWorkflowEventLogger
   ) {
-    super(step, contextManager, undefined, workflowRuntime);
+    super(step, stepExecutionRuntime, undefined, workflowRuntime);
   }
 
   public getInput() {
-    // Get current context for templating
-    const context = this.contextManager.getContext();
     // Render inputs from 'with' - support both direct step.with and step.configuration.with
     const stepWith = this.step.with || (this.step as any).configuration?.with || {};
-    return this.renderObjectTemplate(stepWith, context);
-  }
-
-  /**
-   * Recursively render the object template.
-   * @param obj - The object to render.
-   * @param context - The context to use for rendering.
-   * @returns The rendered object.
-   */
-  private renderObjectTemplate(obj: any, context: any): any {
-    if (Array.isArray(obj)) {
-      return obj.map((item) => this.renderObjectTemplate(item, context));
-    }
-    if (obj && typeof obj === 'object') {
-      return Object.entries(obj).reduce((acc, [key, value]) => {
-        acc[key] = this.renderObjectTemplate(value, context);
-        return acc;
-      }, {} as any);
-    }
-    if (typeof obj === 'string') {
-      return this.templatingEngine.render(obj, context);
-    }
-    return obj;
+    return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(stepWith);
   }
 
   public async _run(withInputs?: any): Promise<RunStepResult> {
@@ -108,19 +99,14 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
           action_type: 'kibana',
         },
       });
-      return await this.handleFailure(stepWith, error);
+      return this.handleFailure(stepWith, error);
     }
   }
 
   private getKibanaUrl(): string {
-    // Get Kibana URL from CoreStart if available
-    const coreStart = this.contextManager.getCoreStart();
-    if (coreStart?.http?.basePath?.publicBaseUrl) {
-      return coreStart.http.basePath.publicBaseUrl;
-    }
-
-    // Fallback to localhost for development
-    return 'http://localhost:5601';
+    const coreStart = this.stepExecutionRuntime.contextManager.getCoreStart();
+    const { cloudSetup } = this.stepExecutionRuntime.contextManager.getDependencies();
+    return getKibanaUrl(coreStart, cloudSetup);
   }
 
   private getAuthHeaders(): Record<string, string> {
@@ -130,19 +116,14 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
     };
 
     // Get fakeRequest for authentication (created by Task Manager from taskInstance.apiKey)
-    const fakeRequest = this.contextManager.getFakeRequest();
+    const fakeRequest = this.stepExecutionRuntime.contextManager.getFakeRequest();
     if (fakeRequest?.headers?.authorization) {
       // Use API key from fakeRequest if available
       headers.Authorization = fakeRequest.headers.authorization.toString();
     } else {
-      // Fallback to basic auth for development
-      const basicAuth = Buffer.from('elastic:changeme').toString('base64');
-      headers.Authorization = `Basic ${basicAuth}`;
+      // error
+      throw new Error('No authentication headers found');
     }
-
-    // Note: User context is not available in KibanaRequestAuth interface
-    // Could be added in the future if needed for user attribution
-
     return headers;
   }
 
@@ -152,17 +133,27 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
     stepType: string,
     params: any
   ): Promise<any> {
+    // Get current space ID from workflow context
+    const spaceId = this.stepExecutionRuntime.contextManager.getContext().workflow.spaceId;
+
+    // Extract and remove fetcher configuration from params (it's only for our internal use)
+    const { fetcher: fetcherOptions, ...cleanParams } = params;
+
     // Support both raw API format and connector-driven syntax
-    if (params.request) {
+    if (cleanParams.request) {
       // Raw API format: { request: { method, path, body, query, headers } } - like Dev Console
-      const { method = 'GET', path, body, query, headers: customHeaders } = params.request;
-      return await this.makeHttpRequest(kibanaUrl, {
-        method,
-        path,
-        body,
-        query,
-        headers: { ...authHeaders, ...customHeaders },
-      });
+      const { method = 'GET', path, body, query, headers: customHeaders } = cleanParams.request;
+      return this.makeHttpRequest(
+        kibanaUrl,
+        {
+          method,
+          path,
+          body,
+          query,
+          headers: { ...authHeaders, ...customHeaders },
+        },
+        fetcherOptions
+      );
     } else {
       // Use generated connector definitions to determine method and path (covers all 454+ Kibana APIs)
       const {
@@ -171,15 +162,19 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
         body,
         query,
         headers: connectorHeaders,
-      } = buildKibanaRequestFromAction(stepType, params);
+      } = buildKibanaRequestFromAction(stepType, cleanParams, spaceId);
 
-      return await this.makeHttpRequest(kibanaUrl, {
-        method,
-        path,
-        body,
-        query,
-        headers: { ...authHeaders, ...connectorHeaders },
-      });
+      return this.makeHttpRequest(
+        kibanaUrl,
+        {
+          method,
+          path,
+          body,
+          query,
+          headers: { ...authHeaders, ...connectorHeaders },
+        },
+        fetcherOptions
+      );
     }
   }
 
@@ -191,7 +186,8 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
       body?: any;
       query?: any;
       headers?: Record<string, string>;
-    }
+    },
+    fetcherOptions?: FetcherOptions
   ): Promise<any> {
     const { method, path, body, query, headers = {} } = requestConfig;
 
@@ -202,18 +198,55 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
       fullUrl = `${fullUrl}?${queryString}`;
     }
 
-    const response = await fetch(fullUrl, {
+    // Build fetch options
+    const fetchOptions: RequestInit = {
       method,
       headers,
       body: body ? JSON.stringify(body) : undefined,
-    });
+    };
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`HTTP ${response.status}: ${errorText}`);
+    // Apply undici Agent with fetcher options
+    if (fetcherOptions && Object.keys(fetcherOptions).length > 0) {
+      const { Agent } = await import('undici');
+
+      const {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        skip_ssl_verification, // eslint-disable-next-line @typescript-eslint/naming-convention
+        follow_redirects, // eslint-disable-next-line @typescript-eslint/naming-convention
+        max_redirects, // eslint-disable-next-line @typescript-eslint/naming-convention
+        keep_alive,
+        ...otherOptions
+      } = fetcherOptions;
+
+      const agentOptions: any = { ...otherOptions };
+
+      // Map our options to undici Agent options
+      if (skip_ssl_verification) {
+        agentOptions.connect = { ...(agentOptions.connect || {}), rejectUnauthorized: false };
+      }
+      if (max_redirects !== undefined) {
+        agentOptions.maxRedirections = max_redirects;
+      }
+      if (keep_alive !== undefined) {
+        agentOptions.keepAliveTimeout = keep_alive ? 60000 : 0;
+        agentOptions.keepAliveMaxTimeout = keep_alive ? 600000 : 0;
+      }
+
+      (fetchOptions as any).dispatcher = new Agent(agentOptions);
+
+      // Handle redirect at fetch level
+      if (follow_redirects === false) {
+        fetchOptions.redirect = 'manual';
+      }
     }
 
-    const responseData = await response.json();
-    return responseData;
+    // Make the HTTP request
+    const response = await fetch(fullUrl, fetchOptions);
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${await response.text()}`);
+    }
+
+    return response.json();
   }
 }

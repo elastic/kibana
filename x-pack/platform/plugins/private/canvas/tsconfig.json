@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
 
@@ -20,7 +20,6 @@
     "i18n/**/*",
     "public/**/*",
     "server/**/*",
-    "shareable_runtime/**/*",
     "storybook/**/*",
     "tasks/mocks/*",
     "types/**/*"
@@ -61,13 +60,8 @@
     "@kbn/analytics",
     "@kbn/safer-lodash-set",
     "@kbn/config-schema",
-    "@kbn/tooling-log",
-    "@kbn/ci-stats-reporter",
-    "@kbn/optimizer-webpack-helpers",
-    "@kbn/core-apps-server-internal",
     "@kbn/flot-charts",
     "@kbn/shared-ux-router",
-    "@kbn/babel-register",
     "@kbn/shared-ux-button-toolbar",
     "@kbn/saved-objects-finder-plugin",
     "@kbn/core-saved-objects-server",
@@ -87,7 +81,8 @@
     "@kbn/shared-ux-markdown",
     "@kbn/content-management-utils",
     "@kbn/deeplinks-analytics",
-    "@kbn/core-saved-objects-api-server"
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/visualizations-common"
   ],
   "exclude": ["target/**/*"]
 }

@@ -18,10 +18,6 @@ import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugi
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import memoizeOne from 'memoize-one';
 import { isEqual } from 'lodash';
-import { TextBasedDataPanel } from './components/datapanel';
-import { TextBasedDimensionEditor } from './components/dimension_editor';
-import { TextBasedDimensionTrigger } from './components/dimension_trigger';
-import { toExpression } from './to_expression';
 import type {
   DatasourceDimensionEditorProps,
   DatasourceDataPanelProps,
@@ -33,15 +29,18 @@ import type {
   DataSourceInfo,
   UserMessage,
   OperationMetadata,
-} from '../../../types';
-import { generateId } from '../../../id_generator';
-import type {
   TextBasedPrivateState,
   TextBasedPersistedState,
   TextBasedLayerColumn,
   TextBasedField,
-} from './types';
-import type { Datasource, DatasourceSuggestion } from '../../../types';
+  Datasource,
+  DatasourceSuggestion,
+} from '@kbn/lens-common';
+import { TextBasedDataPanel } from './components/datapanel';
+import { TextBasedDimensionEditor } from './components/dimension_editor';
+import { TextBasedDimensionTrigger } from './components/dimension_trigger';
+import { toExpression } from './to_expression';
+import { generateId } from '../../../id_generator';
 import { getUniqueLabelGenerator, nonNullable } from '../../../utils';
 import { onDrop, getDropProps } from './dnd';
 import { removeColumn } from './remove_column';
@@ -681,7 +680,9 @@ export function getTextBasedDatasource({
 
       for (const { query } of Object.values(state.layers)) {
         if (query) {
-          const esqlAdhocDataview = await getESQLAdHocDataview(query.esql, dataViewsService);
+          const esqlAdhocDataview = await getESQLAdHocDataview(query.esql, dataViewsService, {
+            skipFetchFields: true,
+          });
           indexPatterns.push(esqlAdhocDataview);
         }
       }

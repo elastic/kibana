@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import type { Indicator } from '../../../../../common/threat_intelligence/types/indicator';
 import { useKibana } from '../../../../common/lib/kibana';
 import type { FetchParams } from '../services/fetch_indicator_by_id';

@@ -13,55 +13,55 @@ import { isNumber } from 'lodash';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import type { MetricField, MetricFieldsResponse } from '../../../common/types';
 import { deduplicateFields } from '../../lib/fields/deduplicate_fields';
-import { getEcsFieldDescriptions } from '../../lib/fields/get_ecs_field_descriptions';
 import { extractMetricFields } from '../../lib/fields/extract_metric_fields';
-import { enrichMetricFields } from '../../lib/fields/enrich_metric_fields';
+import { enrichMetricFields, generateMapKey } from '../../lib/fields/enrich_metric_fields';
 import { extractDimensions } from '../../lib/dimensions/extract_dimensions';
 import { buildMetricField } from '../../lib/fields/build_metric_field';
 import { retrieveFieldCaps } from '../../lib/fields/retrieve_fieldcaps';
 import { applyPagination } from '../../lib/pagination/apply_pagination';
+import type { EpochTimeRange } from '../../types';
 
 export async function getMetricFields({
   indexPattern,
   fields = '*',
-  from,
-  to,
   esClient,
   page,
   size,
   logger,
+  timerange,
+  kuery,
 }: {
   esClient: TracedElasticsearchClient;
   indexPattern: string;
   fields?: Fields;
-  from: number;
-  to: number;
+  timerange: EpochTimeRange;
   page: number;
   size: number;
   logger: Logger;
+  kuery?: string;
 }): Promise<MetricFieldsResponse> {
   if (!indexPattern) return { fields: [], total: 0 };
 
-  const dataStreamFieldCapsMap = await retrieveFieldCaps({
+  const indexFieldCapsMap = await retrieveFieldCaps({
     esClient: esClient.client,
     indexPattern,
-    to,
-    from,
     fields,
+    timerange,
   });
 
   const allMetricFields: MetricField[] = [];
-  for (const [dataStreamName, fieldCaps] of dataStreamFieldCapsMap.entries()) {
-    if (isNumber(dataStreamName) || fieldCaps == null) continue;
+  for (const [indexName, fieldCaps] of indexFieldCapsMap.entries()) {
+    if (isNumber(indexName) || fieldCaps == null) continue;
     if (Object.keys(fieldCaps).length === 0) continue;
 
     const metricFields = extractMetricFields(fieldCaps);
+
     const allDimensions = extractDimensions(fieldCaps);
 
     const initialFields = metricFields.map(({ fieldName, type, typeInfo }) =>
       buildMetricField({
         name: fieldName,
-        index: dataStreamName,
+        index: indexName,
         dimensions: allDimensions,
         type,
         typeInfo,
@@ -72,35 +72,25 @@ export async function getMetricFields({
     allMetricFields.push(...deduped);
   }
 
-  allMetricFields.sort((a, b) => a.name.localeCompare(b.name));
+  allMetricFields.sort((a, b) =>
+    generateMapKey(a.index, a.name).localeCompare(generateMapKey(b.index, b.name))
+  );
 
   const enrichedMetricFields = await enrichMetricFields({
     esClient,
     metricFields: applyPagination({ metricFields: allMetricFields, page, size }),
-    dataStreamFieldCapsMap,
+    indexFieldCapsMap,
     logger,
+    timerange,
+    kuery,
   });
 
-  // Get ECS descriptions for all field names
-  const ecsDescriptions = getEcsFieldDescriptions(enrichedMetricFields.map((field) => field.name));
-
   const finalFields = enrichedMetricFields.map((field) => {
-    const ecsDescription = ecsDescriptions.get(field.name);
-
-    const description = field.description || ecsDescription;
-    const source: MetricField['source'] = field.description
-      ? 'custom'
-      : ecsDescription
-      ? 'ecs'
-      : 'custom';
-
     return {
       ...field,
-      description,
-      source,
       dimensions: field.dimensions.sort((a, b) => a.name.localeCompare(b.name)),
     };
   });
 
-  return { fields: finalFields, total: allMetricFields.length };
+  return { fields: finalFields, total: kuery ? finalFields.length : allMetricFields.length };
 }

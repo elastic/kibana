@@ -8,8 +8,8 @@
  */
 
 import { z } from '@kbn/zod';
-import { WorkflowRetrySchema } from '../../../spec/schema';
 import { GraphNodeSchema } from './base';
+import { WorkflowRetrySchema } from '../../../spec/schema';
 
 export const EnterContinueNodeSchema = GraphNodeSchema.extend({
   id: z.string(),
@@ -44,6 +44,7 @@ export const EnterTryBlockNodeSchema = GraphNodeSchema.extend({
   id: z.string(),
   type: z.literal('enter-try-block'),
   enterNormalPathNodeId: z.string(),
+  enterFallbackPathNodeId: z.string(),
   exitNodeId: z.string(),
 });
 export type EnterTryBlockNode = z.infer<typeof EnterTryBlockNodeSchema>;
@@ -100,3 +101,19 @@ export const WorkflowLevelOnFailureNodeSchema = GraphNodeSchema.extend({
   type: z.literal('workflow-level-on-failure'),
 });
 export type WorkflowLevelOnFailureNode = z.infer<typeof WorkflowLevelOnFailureNodeSchema>;
+
+// Timeout handling nodes - stack-based timeout management
+export const EnterTimeoutZoneNodeSchema = GraphNodeSchema.extend({
+  id: z.string(),
+  type: z.literal('enter-timeout-zone'),
+  timeout: z.string(),
+  stepType: z.union([z.literal('workflow_level_timeout'), z.literal('step_level_timeout')]),
+});
+export type EnterTimeoutZoneNode = z.infer<typeof EnterTimeoutZoneNodeSchema>;
+
+export const ExitTimeoutZoneNodeSchema = GraphNodeSchema.extend({
+  id: z.string(),
+  type: z.literal('exit-timeout-zone'),
+  stepType: z.union([z.literal('workflow_level_timeout'), z.literal('step_level_timeout')]),
+});
+export type ExitTimeoutZoneNode = z.infer<typeof ExitTimeoutZoneNodeSchema>;

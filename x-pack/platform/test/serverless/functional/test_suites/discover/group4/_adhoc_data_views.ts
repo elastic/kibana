@@ -60,6 +60,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should navigate back correctly from to surrounding and single views', async () => {
+      await PageObjects.discover.waitUntilTabIsLoaded();
+
       await dataViews.createFromSearchBar({
         name: 'logstash',
         adHoc: true,
@@ -157,11 +159,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('search results should be different after data view update', async () => {
+      await PageObjects.discover.waitUntilTabIsLoaded();
+
       await dataViews.createFromSearchBar({
         name: 'logst',
         adHoc: true,
         hasTimeField: true,
       });
+      await PageObjects.discover.waitUntilSearchingHasFinished();
       const prevDataViewId = await PageObjects.discover.getCurrentDataViewId();
 
       // trigger data view id update
@@ -169,29 +174,34 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         '_bytes-runtimefield',
         `emit(doc["bytes"].value.toString())`
       );
+      await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
       await PageObjects.unifiedFieldList.clickFieldListItemToggle('_bytes-runtimefield');
       const newDataViewId = await PageObjects.discover.getCurrentDataViewId();
       expect(newDataViewId).not.to.equal(prevDataViewId);
 
       // save first search
       await PageObjects.discover.saveSearch('logst*-ss-_bytes-runtimefield');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilTabIsLoaded();
 
       // remove field and create with the same name, but different value
       await PageObjects.unifiedFieldList.clickFieldListItemRemove('_bytes-runtimefield');
       await PageObjects.discover.removeField('_bytes-runtimefield');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilTabIsLoaded();
+      await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
       // trigger data view id update
       await PageObjects.discover.addRuntimeField(
         '_bytes-runtimefield',
         `emit((doc["bytes"].value * 2).toString())`
       );
+      await PageObjects.discover.waitUntilTabIsLoaded();
+      await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
       await PageObjects.unifiedFieldList.clickFieldListItemToggle('_bytes-runtimefield');
 
       // save second search
       await PageObjects.discover.saveSearch('logst*-ss-_bytes-runtimefield-updated', true);
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilTabIsLoaded();
+      await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
       // open searches on dashboard
       await PageObjects.dashboard.navigateToApp();
@@ -264,6 +274,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should notify about invalid filter reffs', async () => {
+      await PageObjects.discover.waitUntilTabIsLoaded();
+
       await dataViews.createFromSearchBar({
         name: 'logstas',
         adHoc: true,

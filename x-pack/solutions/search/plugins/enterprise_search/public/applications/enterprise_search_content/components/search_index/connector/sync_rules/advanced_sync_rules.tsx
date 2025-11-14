@@ -70,6 +70,7 @@ export const AdvancedSyncRules: React.FC = () => {
 
       {(!isAdvancedSnippetEmpty || !isLocalSnippetEmpty) && (
         <EuiCallOut
+          announceOnMount
           title={i18n.translate(
             'xpack.enterpriseSearch.content.index.connector.syncRules.advancedTabCallout.title',
             { defaultMessage: 'Configuration warning' }

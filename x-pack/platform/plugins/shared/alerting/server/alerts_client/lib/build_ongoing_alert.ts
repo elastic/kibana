@@ -25,6 +25,7 @@ import {
   TAGS,
   TIMESTAMP,
   VERSION,
+  ALERT_STATE_NAMESPACE,
 } from '@kbn/rule-data-utils';
 import type { DeepPartial } from '@kbn/utility-types';
 import { get, omit } from 'lodash';
@@ -33,7 +34,12 @@ import type { AlertInstanceContext, AlertInstanceState, RuleAlertData } from '..
 import type { AlertRule } from '../types';
 import { stripFrameworkFields } from './strip_framework_fields';
 import { nanosToMicros } from './nanos_to_micros';
-import { removeUnflattenedFieldsFromAlert, replaceRefreshableAlertFields } from './format_alert';
+import {
+  removeUnflattenedFieldsFromAlert,
+  replaceRefreshableAlertFields,
+  replaceEmptyAlertFields,
+} from './format_alert';
+import { filterAlertState } from './filter_alert_state';
 
 interface BuildOngoingAlertOpts<
   AlertData extends RuleAlertData,
@@ -81,6 +87,9 @@ export const buildOngoingAlert = <
   ActionGroupIds,
   RecoveryActionGroupId
 >): Alert & AlertData => {
+  // Sets array fields to empty arrays if previously reported in the existing alert
+  // but not present in the payload
+  replaceEmptyAlertFields(alert, payload);
   const cleanedPayload = stripFrameworkFields(payload);
 
   // Make sure that any alert fields that are updateable are flattened.
@@ -88,6 +97,9 @@ export const buildOngoingAlert = <
 
   // Omit fields that are overwrite-able with undefined value
   const cleanedAlert = omit(alert, ALERT_SEVERITY_IMPROVING);
+  const alertState = legacyAlert.getState();
+  const filteredAlertState = filterAlertState(alertState);
+  const hasAlertState = Object.keys(filteredAlertState).length > 0;
 
   const alertUpdates = {
     // Set latest rule configuration
@@ -113,15 +125,13 @@ export const buildOngoingAlert = <
     [ALERT_CONSECUTIVE_MATCHES]: legacyAlert.getActiveCount(),
     [ALERT_PENDING_RECOVERED_COUNT]: legacyAlert.getPendingRecoveredCount(),
     // Set the time range
-    ...(legacyAlert.getState().start
+    ...(alertState.start
       ? {
-          [ALERT_TIME_RANGE]: { gte: legacyAlert.getState().start },
+          [ALERT_TIME_RANGE]: { gte: alertState.start },
         }
       : {}),
     // Set latest duration as ongoing alerts should have updated duration
-    ...(legacyAlert.getState().duration
-      ? { [ALERT_DURATION]: nanosToMicros(legacyAlert.getState().duration) }
-      : {}),
+    ...(alertState.duration ? { [ALERT_DURATION]: nanosToMicros(alertState.duration) } : {}),
     ...(isImproving != null ? { [ALERT_SEVERITY_IMPROVING]: isImproving } : {}),
     [ALERT_PREVIOUS_ACTION_GROUP]: get(alert, ALERT_ACTION_GROUP),
     [SPACE_IDS]: dangerouslyCreateAlertsInAllSpaces === true ? ['*'] : rule[SPACE_IDS],
@@ -133,6 +143,7 @@ export const buildOngoingAlert = <
         ...(rule[ALERT_RULE_TAGS] ?? []),
       ])
     ),
+    ...(hasAlertState ? { [ALERT_STATE_NAMESPACE]: filteredAlertState } : {}),
   };
 
   // Clean the existing alert document so any nested fields that will be updated

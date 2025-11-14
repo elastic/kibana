@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -7,7 +7,7 @@
     "../../../../../typings/**/*",
     "common/**/*",
     "public/**/*",
-    "server/**/*",
+    "server/**/*"
   ],
   "exclude": [
     "target/**/*",
@@ -67,6 +67,7 @@
     "@kbn/data-views-plugin",
     "@kbn/expressions-plugin",
     "@kbn/lens-plugin",
+    "@kbn/license-management-plugin",
     "@kbn/scout",
     "@kbn/management-settings-field-definition",
     "@kbn/management-settings-types",
@@ -78,8 +79,20 @@
     "@kbn/workflows-management-plugin",
     "@kbn/spaces-plugin",
     "@kbn/doc-links",
+    "@kbn/ui-actions-plugin",
     "@kbn/workflows",
     "@kbn/spaces-utils",
     "@kbn/spaces-plugin",
+    "@kbn/licensing-types",
+    "@kbn/licensing-plugin",
+    "@kbn/lens-embeddable-utils",
+    "@kbn/ai-assistant-connector-selector-action",
+    "@kbn/elastic-assistant",
+    "@kbn/react-kibana-mount",
+    "@kbn/react-query",
+    "@kbn/maps-plugin",
+    "@kbn/shared-ux-utility",
+    "@kbn/usage-collection-plugin",
+    "@kbn/core-notifications-browser"
   ]
 }

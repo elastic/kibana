@@ -75,7 +75,7 @@ interface Props {
     }>
   ) => void;
   clearFilters: () => void;
-  isCurrentRequestIncremented: boolean;
+  queryHasChanged: boolean;
 }
 
 export const AgentListTable: React.FC<Props> = (props: Props) => {
@@ -96,7 +96,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
     isUsingFilter,
     setEnrollmentFlyoutState,
     clearFilters,
-    isCurrentRequestIncremented,
+    queryHasChanged,
   } = props;
 
   const authz = useAuthz();
@@ -125,7 +125,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
   }, [agents, isAgentSelectable, showUpgradeable, totalAgents]);
 
   const noItemsMessage =
-    isLoading && isCurrentRequestIncremented ? (
+    isLoading && queryHasChanged ? (
       <FormattedMessage
         id="xpack.fleet.agentList.loadingAgentsMessage"
         defaultMessage="Loading agents…"
@@ -139,7 +139,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
             <EuiLink onClick={() => clearFilters()}>
               <FormattedMessage
                 id="xpack.fleet.agentList.clearFiltersLinkText"
-                defaultMessage="Clear filters"
+                defaultMessage="Reset filters"
               />
             </EuiLink>
           ),
@@ -220,7 +220,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
             />
           }
         >
-          <span>
+          <span tabIndex={0}>
             <FormattedMessage id="xpack.fleet.agentList.cpuTitle" defaultMessage="CPU" />
             &nbsp;
             <EuiIcon type="info" />
@@ -246,7 +246,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
             />
           }
         >
-          <span>
+          <span tabIndex={0}>
             <FormattedMessage id="xpack.fleet.agentList.memoryTitle" defaultMessage="Memory" />
             &nbsp;
             <EuiIcon type="info" />
@@ -290,7 +290,9 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
               />
             }
           >
-            <FormattedRelative value={lastCheckin} />
+            <span tabIndex={0}>
+              <FormattedRelative value={lastCheckin} />
+            </span>
           </EuiToolTip>
         ) : undefined,
     },

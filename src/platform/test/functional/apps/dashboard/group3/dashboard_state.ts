@@ -105,7 +105,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await dashboard.saveDashboard(dashboardName, { saveAsNew: false });
 
-      await dashboard.gotoDashboardLandingPage();
       await dashboard.loadSavedDashboard(dashboardName);
 
       await enableNewChartLibraryDebug(true);
@@ -237,11 +236,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 return {
                   ...panel,
                   gridData: {
-                    ...panel.gridData,
+                    ...panel.grid,
                     w:
-                      panel.gridData.w === DEFAULT_PANEL_WIDTH
-                        ? DEFAULT_PANEL_WIDTH * 2
-                        : panel.gridData.w,
+                      panel.grid.w === DEFAULT_PANEL_WIDTH ? DEFAULT_PANEL_WIDTH * 2 : panel.grid.w,
                   },
                 };
               }),
@@ -309,15 +306,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             (appState: Partial<DashboardLocatorParams>) => {
               return {
                 panels: (appState.panels ?? []).map((widget) => {
-                  const panel = widget as DashboardPanel;
+                  const panel = widget as DashboardPanel & { config: Record<string, unknown> };
                   return {
                     ...panel,
-                    panelConfig: {
-                      ...(panel.panelConfig ?? {}),
+                    config: {
+                      ...(panel.config ?? {}),
                       vis: {
-                        ...((panel.panelConfig?.vis as object) ?? {}),
+                        ...((panel.config?.vis as object) ?? {}),
                         colors: {
-                          ...((panel.panelConfig?.vis as { colors: object })?.colors ?? {}),
+                          ...((panel.config?.vis as { colors: object })?.colors ?? {}),
                           ['80000']: 'FFFFFF',
                         },
                       },
@@ -354,13 +351,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             (appState: Partial<DashboardLocatorParams>) => {
               return {
                 panels: (appState.panels ?? []).map((widget) => {
-                  const panel = widget as DashboardPanel;
+                  const panel = widget as DashboardPanel & { config: Record<string, unknown> };
                   return {
                     ...panel,
-                    panelConfig: {
-                      ...(panel.panelConfig ?? {}),
+                    config: {
+                      ...(panel.config ?? {}),
                       vis: {
-                        ...((panel.panelConfig?.vis as object) ?? {}),
+                        ...((panel.config?.vis as object) ?? {}),
                         colors: {},
                       },
                     },

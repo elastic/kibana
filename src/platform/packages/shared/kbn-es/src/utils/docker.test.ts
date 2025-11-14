@@ -355,17 +355,24 @@ describe('resolveEsArgs()', () => {
     ['foo', 'bar'],
     ['qux', 'zip'],
   ];
+  const refreshOverrideFlag = '-Des.stateless.allow.index.refresh_interval.override=true';
+  const findEnvValue = (args: string[], key: string) => {
+    const entry = args.find((value) => value.startsWith(`${key}=`));
+    return entry ? entry.slice(key.length + 1) : undefined;
+  };
 
   test('should return default args when no options', () => {
     const esArgs = resolveEsArgs(defaultEsArgs, {});
 
-    expect(esArgs).toHaveLength(4);
+    expect(esArgs).toHaveLength(6);
     expect(esArgs).toMatchInlineSnapshot(`
       Array [
         "--env",
         "foo=bar",
         "--env",
         "qux=zip",
+        "--env",
+        "ES_JAVA_OPTS=-Des.stateless.allow.index.refresh_interval.override=true",
       ]
     `);
   });
@@ -373,13 +380,15 @@ describe('resolveEsArgs()', () => {
   test('should override default args when options is a string', () => {
     const esArgs = resolveEsArgs(defaultEsArgs, { esArgs: 'foo=true' });
 
-    expect(esArgs).toHaveLength(4);
+    expect(esArgs).toHaveLength(6);
     expect(esArgs).toMatchInlineSnapshot(`
       Array [
         "--env",
         "foo=true",
         "--env",
         "qux=zip",
+        "--env",
+        "ES_JAVA_OPTS=-Des.stateless.allow.index.refresh_interval.override=true",
       ]
     `);
   });
@@ -387,13 +396,15 @@ describe('resolveEsArgs()', () => {
   test('should override default args when options is an array', () => {
     const esArgs = resolveEsArgs(defaultEsArgs, { esArgs: ['foo=false', 'qux=true'] });
 
-    expect(esArgs).toHaveLength(4);
+    expect(esArgs).toHaveLength(6);
     expect(esArgs).toMatchInlineSnapshot(`
       Array [
         "--env",
         "foo=false",
         "--env",
         "qux=true",
+        "--env",
+        "ES_JAVA_OPTS=-Des.stateless.allow.index.refresh_interval.override=true",
       ]
     `);
   });
@@ -401,7 +412,7 @@ describe('resolveEsArgs()', () => {
   test('should override defaults args and handle password option', () => {
     const esArgs = resolveEsArgs(defaultEsArgs, { esArgs: 'foo=false', password: 'hello' });
 
-    expect(esArgs).toHaveLength(6);
+    expect(esArgs).toHaveLength(8);
     expect(esArgs).toMatchInlineSnapshot(`
       Array [
         "--env",
@@ -410,6 +421,8 @@ describe('resolveEsArgs()', () => {
         "qux=zip",
         "--env",
         "ELASTIC_PASSWORD=hello",
+        "--env",
+        "ES_JAVA_OPTS=-Des.stateless.allow.index.refresh_interval.override=true",
       ]
     `);
   });
@@ -417,7 +430,7 @@ describe('resolveEsArgs()', () => {
   test('should add SSL args when SSL is passed', () => {
     const esArgs = resolveEsArgs(defaultEsArgs, { ssl: true });
 
-    expect(esArgs).toHaveLength(10);
+    expect(esArgs).toHaveLength(12);
     expect(esArgs).toMatchInlineSnapshot(`
       Array [
         "--env",
@@ -430,6 +443,8 @@ describe('resolveEsArgs()', () => {
         "xpack.security.http.ssl.keystore.path=/usr/share/elasticsearch/config/certs/elasticsearch.p12",
         "--env",
         "xpack.security.http.ssl.verification_mode=certificate",
+        "--env",
+        "ES_JAVA_OPTS=-Des.stateless.allow.index.refresh_interval.override=true",
       ]
     `);
   });
@@ -470,6 +485,8 @@ describe('resolveEsArgs()', () => {
         "xpack.security.authc.realms.saml.cloud-saml-kibana.attributes.name=http://saml.elastic-cloud.com/attributes/name",
         "--env",
         "xpack.security.authc.realms.saml.cloud-saml-kibana.attributes.mail=http://saml.elastic-cloud.com/attributes/email",
+        "--env",
+        "ES_JAVA_OPTS=-Des.stateless.allow.index.refresh_interval.override=true",
       ]
     `);
   });
@@ -490,8 +507,129 @@ describe('resolveEsArgs()', () => {
         "xpack.security.http.ssl.keystore.path=/usr/share/elasticsearch/config/certs/elasticsearch.p12",
         "--env",
         "xpack.security.http.ssl.verification_mode=certificate",
+        "--env",
+        "ES_JAVA_OPTS=-Des.stateless.allow.index.refresh_interval.override=true",
       ]
     `);
+  });
+
+  test('should not add UIAM-related args when run in Serverless mode without `--uiam` option', () => {
+    const esArgs = resolveEsArgs([], {
+      ssl: true,
+      kibanaUrl: 'http://localhost:5601/',
+      projectType,
+      basePath: baseEsPath,
+      uiam: false,
+    });
+
+    expect(esArgs).toMatchInlineSnapshot(`
+      Array [
+        "--env",
+        "xpack.security.http.ssl.enabled=true",
+        "--env",
+        "xpack.security.http.ssl.keystore.path=/usr/share/elasticsearch/config/certs/elasticsearch.p12",
+        "--env",
+        "xpack.security.http.ssl.verification_mode=certificate",
+        "--env",
+        "xpack.security.authc.native_role_mappings.enabled=true",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.order=0",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.idp.metadata.path=/usr/share/elasticsearch/config/secrets/idp_metadata.xml",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.idp.entity_id=urn:mock-idp",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.sp.entity_id=http://localhost:5601",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.sp.acs=http://localhost:5601/api/security/saml/callback",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.sp.logout=http://localhost:5601/logout",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.attributes.principal=http://saml.elastic-cloud.com/attributes/principal",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.attributes.groups=http://saml.elastic-cloud.com/attributes/roles",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.attributes.name=http://saml.elastic-cloud.com/attributes/name",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.attributes.mail=http://saml.elastic-cloud.com/attributes/email",
+        "--env",
+        "ES_JAVA_OPTS=-Des.stateless.allow.index.refresh_interval.override=true",
+      ]
+    `);
+  });
+
+  test('should add UIAM-related args when run in Serverless mode with `--uiam` option', () => {
+    const esArgs = resolveEsArgs([], {
+      ssl: true,
+      kibanaUrl: 'http://localhost:5601/',
+      projectType,
+      basePath: baseEsPath,
+      uiam: true,
+    });
+
+    expect(esArgs).toMatchInlineSnapshot(`
+      Array [
+        "--env",
+        "xpack.security.http.ssl.enabled=true",
+        "--env",
+        "xpack.security.http.ssl.keystore.path=/usr/share/elasticsearch/config/certs/elasticsearch.p12",
+        "--env",
+        "xpack.security.http.ssl.verification_mode=certificate",
+        "--env",
+        "xpack.security.authc.native_role_mappings.enabled=true",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.order=0",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.idp.metadata.path=/usr/share/elasticsearch/config/secrets/idp_metadata.xml",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.idp.entity_id=urn:mock-idp",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.sp.entity_id=http://localhost:5601",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.sp.acs=http://localhost:5601/api/security/saml/callback",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.sp.logout=http://localhost:5601/logout",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.attributes.principal=http://saml.elastic-cloud.com/attributes/principal",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.attributes.groups=http://saml.elastic-cloud.com/attributes/roles",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.attributes.name=http://saml.elastic-cloud.com/attributes/name",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.attributes.mail=http://saml.elastic-cloud.com/attributes/email",
+        "--env",
+        "metering.url=http://localhost:5601/",
+        "--env",
+        "metering.report_period=60m",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.private_attributes=http://saml.elastic-cloud.com/attributes/uiam/authentication/access_token,http://saml.elastic-cloud.com/attributes/uiam/authentication/access_token_expires_at,http://saml.elastic-cloud.com/attributes/uiam/authentication/refresh_token,http://saml.elastic-cloud.com/attributes/uiam/authentication/refresh_token_expires_at",
+        "--env",
+        "serverless.organization_id=1234567890",
+        "--env",
+        "serverless.project_type=elasticsearch",
+        "--env",
+        "serverless.project_id=abcde1234567890",
+        "--env",
+        "serverless.universal_iam_service.enabled=true",
+        "--env",
+        "serverless.universal_iam_service.url=http://uiam-cosmosdb-gateway:8080",
+        "--env",
+        "ES_JAVA_OPTS=-Des.stateless.allow.index.refresh_interval.override=true",
+      ]
+    `);
+  });
+
+  test('should append refresh interval override when ES_JAVA_OPTS is provided', () => {
+    const esArgs = resolveEsArgs([], { esArgs: 'ES_JAVA_OPTS=-Xms1g -Xmx1g' });
+
+    expect(findEnvValue(esArgs, 'ES_JAVA_OPTS')).toBe(`-Xms1g -Xmx1g ${refreshOverrideFlag}`);
+  });
+
+  test('should not duplicate refresh interval override when already present', () => {
+    const existingOptions = `-Xms1g -Xmx1g ${refreshOverrideFlag}`;
+    const esArgs = resolveEsArgs([], { esArgs: `ES_JAVA_OPTS=${existingOptions}` });
+
+    expect(findEnvValue(esArgs, 'ES_JAVA_OPTS')).toBe(existingOptions);
   });
 });
 

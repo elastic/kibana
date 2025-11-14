@@ -7,13 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import dateMath from '@kbn/datemath';
-import classNames from 'classnames';
-import { css } from '@emotion/react';
 import type { ReactNode } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import deepEqual from 'fast-deep-equal';
 import useObservable from 'react-use/lib/useObservable';
+import classNames from 'classnames';
+import deepEqual from 'fast-deep-equal';
+import { EMPTY, delay, mergeMap, of } from 'rxjs';
+import { map } from 'rxjs';
+import { throttle } from 'lodash';
+
+import dateMath from '@kbn/datemath';
+import { css } from '@emotion/react';
 import type { Filter, TimeRange, Query, AggregateQuery } from '@kbn/es-query';
 import {
   getAggregateQueryMode,
@@ -22,9 +26,6 @@ import {
   getLanguageDisplayName,
 } from '@kbn/es-query';
 import { ESQLLangEditor, type ESQLEditorProps } from '@kbn/esql/public';
-import { EMPTY } from 'rxjs';
-import { map } from 'rxjs';
-import { throttle } from 'lodash';
 import type { EuiFieldText, EuiIconProps, OnRefreshProps, UseEuiTheme } from '@elastic/eui';
 import {
   EuiFlexGroup,
@@ -40,26 +41,27 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SearchSessionState, getQueryLog } from '@kbn/data-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import type { PersistedLog, TimeHistoryContract } from '@kbn/data-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { ESQLControlVariable } from '@kbn/esql-types';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { ESQLControlVariable } from '@kbn/esql-types';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { SplitButton } from '@kbn/split-button';
-import type { IUnifiedSearchPluginServices, UnifiedSearchDraft } from '../types';
-import { QueryStringInput } from './query_string_input';
-import { NoDataPopover } from './no_data_popover';
-import { shallowEqual } from '../utils/shallow_equal';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { AddFilterPopover } from './add_filter_popover';
 import type { DataViewPickerProps } from '../dataview_picker';
 import { DataViewPicker } from '../dataview_picker';
-import { ESQLMenuPopover, type ESQLMenuPopoverProps } from './esql_menu_popover';
-
 import { FilterButtonGroup } from '../filter_bar/filter_button_group/filter_button_group';
+import { NoDataPopover } from './no_data_popover';
 import type {
   SuggestionsAbstraction,
   SuggestionsListSize,
 } from '../typeahead/suggestions_component';
+import type { IUnifiedSearchPluginServices, UnifiedSearchDraft } from '../types';
+import { shallowEqual } from '../utils/shallow_equal';
+
+import { QueryStringInput } from './query_string_input';
+import { ESQLMenuPopover, type ESQLMenuPopoverProps } from './esql_menu_popover';
 
 export const strings = {
   getNeedsUpdatingLabel: () =>
@@ -150,7 +152,7 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   onRefresh?: (payload: { dateRange: TimeRange }) => void;
   onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
   onSubmit: (payload: { dateRange: TimeRange; query?: Query | QT }) => void;
-  onSendToBackground: (payload: { dateRange: TimeRange; query?: Query | QT }) => void;
+  onSendToBackground: (payload: { dateRange: TimeRange; query?: Query | QT }) => Promise<void>;
   onCancel?: () => void;
   onDraftChange?: (draft: UnifiedSearchDraft | undefined) => void;
   placeholder?: string;
@@ -227,6 +229,10 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
      */
     controlsWrapper: React.ReactNode;
   };
+  /**
+   * Optional ES|QL prop - Callback function invoked to open the given ES|QL query in a new Discover tab
+   */
+  onOpenQueryInNewTab?: ESQLEditorProps['onOpenQueryInNewTab'];
   useBackgroundSearchButton?: boolean;
 }
 
@@ -275,6 +281,7 @@ export const QueryBarTopRow = React.memo(
   ) {
     const isMobile = useIsWithinBreakpoints(['xs', 's']);
     const [isXXLarge, setIsXXLarge] = useState<boolean>(false);
+    const [isSendingToBackground, setIsSendingToBackground] = useState(false);
     const submitButtonStyle: QueryBarTopRowProps['submitButtonStyle'] =
       props.submitButtonStyle ?? 'auto';
     const submitButtonIconOnly =
@@ -320,11 +327,17 @@ export const QueryBarTopRow = React.memo(
 
     const isQueryLangSelected = props.query && !isOfQueryType(props.query);
 
-    const backgroundSearchState = useObservable(data.search.session.state$);
+    const backgroundSearchState = useObservable(
+      data.search.session.state$.pipe(
+        mergeMap((state) => {
+          // We want to delay enabling the button to avoid flickering when searches are quick
+          if (state === SearchSessionState.Loading) return of(state).pipe(delay(500));
+          return of(state);
+        })
+      )
+    );
     const canSendToBackground =
-      props.isDirty ||
-      backgroundSearchState === SearchSessionState.Loading ||
-      backgroundSearchState === SearchSessionState.Completed;
+      backgroundSearchState === SearchSessionState.Loading && !isSendingToBackground;
 
     const queryLanguage = props.query && isOfQueryType(props.query) && props.query.language;
     const queryRef = useRef<Query | QT | undefined>(props.query);
@@ -410,12 +423,14 @@ export const QueryBarTopRow = React.memo(
     );
 
     const onClickSendToBackground = useCallback(
-      (event: React.MouseEvent<HTMLButtonElement>) => {
+      async (event: React.MouseEvent<HTMLButtonElement>) => {
         event.preventDefault();
-        props.onSendToBackground({
+        setIsSendingToBackground(true);
+        await props.onSendToBackground({
           query: queryRef.current,
           dateRange: dateRangeRef.current,
         });
+        setIsSendingToBackground(false);
       },
       [props]
     );
@@ -613,7 +628,7 @@ export const QueryBarTopRow = React.memo(
       const component = getWrapperWithTooltip(datePicker, enableTooltip, props.query);
 
       return (
-        <EuiFlexItem className={wrapperClasses} css={inputStringStyles.datePickerWrapper}>
+        <EuiFlexItem className={wrapperClasses} css={styles.datePickerWrapper}>
           {component}
         </EuiFlexItem>
       );
@@ -627,13 +642,14 @@ export const QueryBarTopRow = React.memo(
           <SplitButton
             aria-label={buttonLabelCancel}
             color="text"
-            data-test-subj="queryCancelSplitButton"
+            data-test-subj="queryCancelButton"
             iconType="cross"
             isSecondaryButtonDisabled={!canSendToBackground}
+            isSecondaryButtonLoading={isSendingToBackground}
             onClick={onClickCancelButton}
             onSecondaryButtonClick={onClickSendToBackground}
             secondaryButtonAriaLabel={strings.getSendToBackgroundLabel()}
-            secondaryButtonIcon="clock"
+            secondaryButtonIcon="backgroundTask"
             secondaryButtonTitle={strings.getSendToBackgroundLabel()}
             size="s"
           >
@@ -688,15 +704,16 @@ export const QueryBarTopRow = React.memo(
         <SplitButton
           aria-label={props.isDirty ? labelDirty : strings.getRefreshQueryLabel()}
           color={props.isDirty ? 'success' : 'primary'}
-          data-test-subj="querySubmitSplitButton"
+          data-test-subj="querySubmitButton"
           iconType={props.isDirty ? iconDirty : 'refresh'}
           isDisabled={isDateRangeInvalid || props.isDisabled}
           isLoading={props.isLoading}
           isSecondaryButtonDisabled={!canSendToBackground}
+          isSecondaryButtonLoading={isSendingToBackground}
           onClick={onClickSubmitButton}
           onSecondaryButtonClick={onClickSendToBackground}
           secondaryButtonAriaLabel={strings.getSendToBackgroundLabel()}
-          secondaryButtonIcon="clock"
+          secondaryButtonIcon="backgroundTask"
           secondaryButtonTitle={strings.getSendToBackgroundLabel()}
           size="s"
         >
@@ -898,12 +915,14 @@ export const QueryBarTopRow = React.memo(
                 : undefined
             }
             esqlVariables={props.esqlVariablesConfig?.esqlVariables ?? []}
+            onOpenQueryInNewTab={props.onOpenQueryInNewTab}
           />
         )
       );
     }
     const { euiTheme } = useEuiTheme();
     const isScreenshotMode = props.isScreenshotMode === true;
+    const styles = useMemoCss(inputStringStyles);
 
     return (
       <>
@@ -916,6 +935,7 @@ export const QueryBarTopRow = React.memo(
           <>
             <EuiFlexGroup
               className="kbnQueryBar"
+              data-test-subj="kbnQueryBar"
               direction={isMobile && !shouldShowDatePickerAsBadge() ? 'column' : 'row'}
               responsive={false}
               gutterSize="s"

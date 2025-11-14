@@ -40,6 +40,7 @@ describe('CreateESQLControlAction', () => {
     esqlVariables: [],
     onSaveControl: jest.fn(),
     onCancelControl: jest.fn(),
+    parentApi: {},
   };
 
   beforeEach(() => {
@@ -90,13 +91,14 @@ describe('CreateESQLControlAction', () => {
 
       expect(mockOpenLazyFlyout).toHaveBeenCalledWith({
         core: mockCore,
-        parentApi: searchMock,
+        parentApi: {},
         loadContent: expect.any(Function),
         flyoutProps: {
           'data-test-subj': 'create_esql_control_flyout',
           isResizable: true,
           maxWidth: 800,
           triggerId: 'dashboard-controls-menu-button',
+          onClose: expect.any(Function),
         },
       });
     });

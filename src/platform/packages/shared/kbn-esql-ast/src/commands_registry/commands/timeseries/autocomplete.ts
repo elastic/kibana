@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLCommand } from '../../../types';
+import type { ESQLAstAllCommands } from '../../../types';
 import { pipeCompleteItem, commaCompleteItem } from '../../complete_items';
 import { specialIndicesToSuggestions } from '../../../definitions/utils/sources';
 import {
@@ -14,6 +14,7 @@ import {
   additionalSourcesSuggestions,
 } from '../../../definitions/utils/sources';
 import { metadataSuggestion, getMetadataSuggestions } from '../../options/metadata';
+import { getRecommendedQueriesSuggestions } from '../../options/recommended_queries';
 import { withinQuotes } from '../../../definitions/utils/autocomplete/helpers';
 import type { ICommandCallbacks } from '../../types';
 import { type ISuggestionItem, type ICommandContext } from '../../types';
@@ -21,7 +22,7 @@ import { getOverlapRange, isRestartingExpression } from '../../../definitions/ut
 
 export async function autocomplete(
   query: string,
-  command: ESQLCommand,
+  command: ESQLAstAllCommands,
   callbacks?: ICommandCallbacks,
   context?: ICommandContext,
   cursorPosition?: number
@@ -59,6 +60,11 @@ export async function autocomplete(
     suggestions.push(metadataSuggestion);
     suggestions.push(commaCompleteItem);
     suggestions.push(pipeCompleteItem);
+    suggestions.push(
+      ...(await getRecommendedQueriesSuggestions(
+        context?.editorExtensions ?? { recommendedFields: [], recommendedQueries: [] }
+      ))
+    );
   }
   // TS something MET/
   else if (indexes.length > 0 && /^TS\s+\S+\s+/i.test(innerText) && metadataOverlap) {
@@ -68,12 +74,16 @@ export async function autocomplete(
   // TS something/
   // TS something, /
   else if (indexes.length) {
-    const sources = context?.sources ?? [];
+    const timeSeriesSources =
+      context?.timeSeriesSources?.map(({ name }) => ({ name, hidden: false })) ?? [];
+    const recommendedQuerySuggestions = await getRecommendedQueriesSuggestions(
+      context?.editorExtensions ?? { recommendedFields: [], recommendedQueries: [] }
+    );
     const additionalSuggestions = await additionalSourcesSuggestions(
       innerText,
-      sources,
+      timeSeriesSources,
       indexes.map(({ name }) => name),
-      []
+      recommendedQuerySuggestions
     );
     addSuggestionsBasedOnQuote(additionalSuggestions);
   }

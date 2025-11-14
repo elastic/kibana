@@ -19,6 +19,7 @@ import {
   getPreviousDailyTaskTimestamp,
   safeValue,
   unflatten,
+  processDetectionRuleCustomizations,
 } from '../helpers';
 import { copyAllowlistedFields, filterList } from '../filterlists';
 import type { AllowlistFields } from '../filterlists/types';
@@ -98,6 +99,7 @@ export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: n
               cluster_name: clusterInfo?.cluster_name,
               package_version: packageInfo?.version,
               task_version: taskVersion,
+              customizations: processDetectionRuleCustomizations(event),
             })
           );
 

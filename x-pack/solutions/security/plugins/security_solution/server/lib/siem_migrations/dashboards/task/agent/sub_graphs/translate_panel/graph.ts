@@ -17,6 +17,8 @@ import { translateDashboardPanelState } from './state';
 import type { TranslatePanelGraphParams, TranslateDashboardPanelState } from './types';
 import { migrateDashboardConfigSchema } from '../../state';
 import { getSelectIndexPatternNode } from './nodes/select_index_pattern';
+import { RETRY_POLICY } from '../../constants';
+import { getExtractColumnsFromEsqlQueryNode } from './nodes/extract_columns';
 
 export function getTranslatePanelGraph(params: TranslatePanelGraphParams) {
   const translateQueryNode = getTranslateQueryNode(params);
@@ -24,6 +26,7 @@ export function getTranslatePanelGraph(params: TranslatePanelGraphParams) {
   const validationNode = getValidationNode(params);
   const fixQueryErrorsNode = getFixQueryErrorsNode(params);
   const ecsMappingNode = getEcsMappingNode(params);
+  const extractColumnsFromEsqlNode = getExtractColumnsFromEsqlQueryNode(params);
   const selectIndexPatternNode = getSelectIndexPatternNode(params);
   const translationResultNode = getTranslationResultNode(params);
 
@@ -32,11 +35,22 @@ export function getTranslatePanelGraph(params: TranslatePanelGraphParams) {
     migrateDashboardConfigSchema
   )
     // Nodes
-    .addNode('inlineQuery', inlineQueryNode)
-    .addNode('translateQuery', translateQueryNode)
+    .addNode('inlineQuery', inlineQueryNode, {
+      retryPolicy: RETRY_POLICY,
+    })
+    .addNode('translateQuery', translateQueryNode, {
+      retryPolicy: RETRY_POLICY,
+    })
     .addNode('validation', validationNode)
-    .addNode('fixQueryErrors', fixQueryErrorsNode)
-    .addNode('ecsMapping', ecsMappingNode)
+    .addNode('fixQueryErrors', fixQueryErrorsNode, {
+      retryPolicy: RETRY_POLICY,
+    })
+    .addNode('ecsMapping', ecsMappingNode, {
+      retryPolicy: RETRY_POLICY,
+    })
+    .addNode('extractColumnsFromEsql', extractColumnsFromEsqlNode, {
+      retryPolicy: RETRY_POLICY,
+    })
     .addNode('selectIndexPattern', selectIndexPatternNode)
     .addNode('translationResult', translationResultNode)
 
@@ -49,8 +63,9 @@ export function getTranslatePanelGraph(params: TranslatePanelGraphParams) {
     .addConditionalEdges('validation', validationRouter, [
       'fixQueryErrors',
       'ecsMapping',
-      'selectIndexPattern',
+      'extractColumnsFromEsql',
     ])
+    .addEdge('extractColumnsFromEsql', 'selectIndexPattern')
     .addEdge('selectIndexPattern', 'translationResult')
     .addEdge('translationResult', END);
 
@@ -73,5 +88,5 @@ const validationRouter = (state: TranslateDashboardPanelState) => {
   if (!state.includes_ecs_mapping) {
     return 'ecsMapping';
   }
-  return 'selectIndexPattern';
+  return 'extractColumnsFromEsql';
 };

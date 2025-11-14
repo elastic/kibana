@@ -12,7 +12,9 @@ import type { GetExecutionLogsParams, GetStepLogsParams } from '../workflows_man
 
 // Simple interfaces for workflow logging
 export interface IWorkflowEventLogger {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   logInfo(message: string, meta?: any): void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   logError(message: string, error?: Error, meta?: any): void;
 }
 
@@ -29,6 +31,7 @@ export interface LogSearchResult {
       step_id?: string;
       step_name?: string;
     };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [key: string]: any;
   }>;
 }
@@ -42,12 +45,14 @@ export class SimpleWorkflowLogger implements IWorkflowEventLogger {
     private enableConsoleLogging: boolean = false
   ) {}
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   logInfo(message: string, meta?: any): void {
     if (this.enableConsoleLogging) {
       this.logger.info(`🔄 WORKFLOW: ${message}`, meta);
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   logError(message: string, error?: Error, meta?: any): void {
     if (this.enableConsoleLogging) {
       this.logger.error(`🔄 WORKFLOW: ${message}`, { error, ...meta });
@@ -68,6 +73,7 @@ export class SimpleWorkflowLogger implements IWorkflowEventLogger {
       };
       const mappedSortField = fieldMapping[sortField] || sortField;
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const mustQueries: any[] = [];
 
       if ('executionId' in params) {
@@ -106,6 +112,7 @@ export class SimpleWorkflowLogger implements IWorkflowEventLogger {
         sort: [{ [mappedSortField]: { order: sortOrder } }],
       });
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const logs = response.hits.hits.map((hit: any) => hit._source);
       const total =
         typeof response.hits.total === 'number'

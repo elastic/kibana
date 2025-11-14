@@ -10,7 +10,7 @@ import {
   esqlCommandRegistry,
   TIME_SYSTEM_PARAMS,
   timeUnitsToSuggest,
-  TRIGGER_SUGGESTION_COMMAND,
+  withAutoSuggest,
   METADATA_FIELDS,
   ESQL_STRING_TYPES,
 } from '@kbn/esql-ast';
@@ -18,6 +18,7 @@ import { getSafeInsertText } from '@kbn/esql-ast/src/definitions/utils';
 import { scalarFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/scalar_functions';
 import { getDateHistogramCompletionItem } from '@kbn/esql-ast/src/commands_registry/complete_items';
 import { getRecommendedQueriesTemplates } from '@kbn/esql-ast/src/commands_registry/options/recommended_queries';
+import type { ISuggestionItem } from '@kbn/esql-ast/src/commands_registry/types';
 import { Location } from '@kbn/esql-ast/src/commands_registry/types';
 import type { PartialSuggestionWithText, SuggestOptions } from './__tests__/helpers';
 import {
@@ -88,21 +89,22 @@ describe('autocomplete', () => {
   });
 
   const sourceCommands = ['row', 'from', 'show', 'ts'];
+  const headerCommands = ['set'];
 
-  describe('New command', () => {
-    const recommendedQuerySuggestions = getRecommendedQueriesSuggestionsFromTemplates(
-      'FROM logs*',
-      'dateField',
-      'textField'
-    );
-    testSuggestions('/', [
+  const getSourceAndHeaderCommands = () => {
+    return [
+      ...headerCommands.map((name) => name.toUpperCase() + ' '),
       ...sourceCommands.map((name) => name.toUpperCase() + ' '),
-      ...mapRecommendedQueriesFromExtensions(editorExtensions.recommendedQueries),
-      ...recommendedQuerySuggestions.map((q) => q.queryString),
-    ]);
-    const commands = esqlCommandRegistry
+    ];
+  };
+
+  const getNonSourceHeaderCommands = () => {
+    return esqlCommandRegistry
       ?.getAllCommands()
-      .filter(({ name, metadata }) => !sourceCommands.includes(name) && !metadata.hidden)
+      .filter(
+        ({ name, metadata }) =>
+          !sourceCommands.includes(name) && !headerCommands.includes(name) && !metadata.hidden
+      )
       .map(({ name, metadata }) => {
         if (metadata.types && metadata.types.length) {
           const cmds: string[] = [];
@@ -116,6 +118,21 @@ describe('autocomplete', () => {
         }
       })
       .flat();
+  };
+
+  describe('New command', () => {
+    const recommendedQuerySuggestions = getRecommendedQueriesSuggestionsFromTemplates(
+      'FROM logs*',
+      'dateField',
+      'textField'
+    );
+
+    testSuggestions('/', [
+      ...getSourceAndHeaderCommands(),
+      ...mapRecommendedQueriesFromExtensions(editorExtensions.recommendedQueries),
+      ...recommendedQuerySuggestions.map((q) => q.queryString),
+    ]);
+    const commands = getNonSourceHeaderCommands();
 
     testSuggestions('from a | /', commands);
     testSuggestions('from a metadata _id | /', commands);
@@ -231,27 +248,12 @@ describe('autocomplete', () => {
       'textField'
     );
     testSuggestions('f/', [
-      ...sourceCommands.map((cmd) => `${cmd.toUpperCase()} `),
+      ...getSourceAndHeaderCommands().map(attachTriggerCommand),
       ...mapRecommendedQueriesFromExtensions(editorExtensions.recommendedQueries),
       ...recommendedQuerySuggestions.map((q) => q.queryString),
     ]);
 
-    const commands = esqlCommandRegistry
-      ?.getAllCommands()
-      .filter(({ name, metadata }) => !sourceCommands.includes(name) && !metadata.hidden)
-      .map(({ name, metadata }) => {
-        if (metadata.types && metadata.types.length) {
-          const cmds: string[] = [];
-          for (const type of metadata.types) {
-            const cmd = type.name.toUpperCase() + ' ' + name.toUpperCase() + ' ';
-            cmds.push(cmd);
-          }
-          return cmds;
-        } else {
-          return name.toUpperCase() + ' ';
-        }
-      })
-      .flat();
+    const commands = getNonSourceHeaderCommands();
 
     // pipe command
     testSuggestions('FROM k | E/', commands);
@@ -434,8 +436,9 @@ describe('autocomplete', () => {
         'boolean',
         {
           operators: true,
+          skipAssign: true,
         },
-        undefined,
+        ['keyword'],
         ['and', 'or', 'not']
       )
     );
@@ -472,27 +475,12 @@ describe('autocomplete', () => {
     );
     // Source command
     testSuggestions('F/', [
-      ...['FROM ', 'ROW ', 'SHOW ', 'TS '].map(attachTriggerCommand),
+      ...getSourceAndHeaderCommands().map(attachTriggerCommand),
       ...mapRecommendedQueriesFromExtensions(editorExtensions.recommendedQueries),
       ...recommendedQuerySuggestions.map((q) => q.queryString),
     ]);
 
-    const commands = esqlCommandRegistry
-      ?.getAllCommands()
-      .filter(({ name, metadata }) => !sourceCommands.includes(name) && !metadata.hidden)
-      .map(({ name, metadata }) => {
-        if (metadata.types && metadata.types.length) {
-          const cmds: string[] = [];
-          for (const type of metadata.types) {
-            const cmd = type.name.toUpperCase() + ' ' + name.toUpperCase() + ' ';
-            cmds.push(cmd);
-          }
-          return cmds;
-        } else {
-          return name.toUpperCase() + ' ';
-        }
-      })
-      .flat();
+    const commands = getNonSourceHeaderCommands();
 
     // Pipe command
     testSuggestions(
@@ -540,7 +528,6 @@ describe('autocomplete', () => {
       testSuggestions('FROM a | EVAL REPLACE(keywordField, keywordField, /)', [
         ...getFieldNamesByType(ESQL_STRING_TYPES).map((field) => ({
           text: field,
-          command: undefined,
         })),
         ...getFunctionSignaturesByReturnType(
           Location.EVAL,
@@ -586,8 +573,9 @@ describe('autocomplete', () => {
       testSuggestions(
         'FROM /',
         [
-          { text: 'index1', command: TRIGGER_SUGGESTION_COMMAND },
-          { text: 'index2', command: TRIGGER_SUGGESTION_COMMAND },
+          withAutoSuggest({ text: '(FROM $0)' } as ISuggestionItem),
+          withAutoSuggest({ text: 'index1' } as ISuggestionItem),
+          withAutoSuggest({ text: 'index2' } as ISuggestionItem),
         ],
         undefined,
         [
@@ -602,8 +590,8 @@ describe('autocomplete', () => {
       testSuggestions(
         'FROM index/',
         [
-          { text: 'index1', command: TRIGGER_SUGGESTION_COMMAND },
-          { text: 'index2', command: TRIGGER_SUGGESTION_COMMAND },
+          withAutoSuggest({ text: 'index1' } as ISuggestionItem),
+          withAutoSuggest({ text: 'index2' } as ISuggestionItem),
         ],
         undefined,
         [
@@ -623,9 +611,18 @@ describe('autocomplete', () => {
       testSuggestions(
         'FROM index1/',
         [
-          { text: 'index1 | ', filterText: 'index1', command: TRIGGER_SUGGESTION_COMMAND },
-          { text: 'index1, ', filterText: 'index1', command: TRIGGER_SUGGESTION_COMMAND },
-          { text: 'index1 METADATA ', filterText: 'index1', command: TRIGGER_SUGGESTION_COMMAND },
+          withAutoSuggest({
+            text: 'index1 | ',
+            filterText: 'index1',
+          } as ISuggestionItem),
+          withAutoSuggest({
+            text: 'index1, ',
+            filterText: 'index1',
+          } as ISuggestionItem),
+          withAutoSuggest({
+            text: 'index1 METADATA ',
+            filterText: 'index1',
+          } as ISuggestionItem),
           ...recommendedQuerySuggestions.map((q) => `index1${q.queryString}`),
         ],
         undefined,
@@ -646,9 +643,19 @@ describe('autocomplete', () => {
       testSuggestions(
         'FROM index1, index2/',
         [
-          { text: 'index2 | ', filterText: 'index2', command: TRIGGER_SUGGESTION_COMMAND },
-          { text: 'index2, ', filterText: 'index2', command: TRIGGER_SUGGESTION_COMMAND },
-          { text: 'index2 METADATA ', filterText: 'index2', command: TRIGGER_SUGGESTION_COMMAND },
+          withAutoSuggest({ text: '(FROM $0)' } as ISuggestionItem),
+          withAutoSuggest({
+            text: 'index2 | ',
+            filterText: 'index2',
+          } as ISuggestionItem),
+          withAutoSuggest({
+            text: 'index2, ',
+            filterText: 'index2',
+          } as ISuggestionItem),
+          withAutoSuggest({
+            text: 'index2 METADATA ',
+            filterText: 'index2',
+          } as ISuggestionItem),
           ...recommendedQuerySuggestions.map((q) => `index2${q.queryString}`),
         ],
         undefined,
@@ -673,24 +680,21 @@ describe('autocomplete', () => {
       testSuggestions(
         'FROM foo$bar/',
         [
-          {
+          withAutoSuggest({
             text: 'foo$bar | ',
             filterText: 'foo$bar',
-            command: TRIGGER_SUGGESTION_COMMAND,
             rangeToReplace: { start: 5, end: 12 },
-          },
-          {
+          } as ISuggestionItem),
+          withAutoSuggest({
             text: 'foo$bar, ',
             filterText: 'foo$bar',
-            command: TRIGGER_SUGGESTION_COMMAND,
             rangeToReplace: { start: 5, end: 12 },
-          },
-          {
+          } as ISuggestionItem),
+          withAutoSuggest({
             text: 'foo$bar METADATA ',
             filterText: 'foo$bar',
-            command: TRIGGER_SUGGESTION_COMMAND,
             rangeToReplace: { start: 5, end: 12 },
-          },
+          } as ISuggestionItem),
           ...recommendedQuerySuggestions.map((q) => `foo$bar${q.queryString}`),
         ],
         undefined,
@@ -706,9 +710,12 @@ describe('autocomplete', () => {
       testSuggestions(
         'FROM i*/',
         [
-          { text: 'i* | ', filterText: 'i*', command: TRIGGER_SUGGESTION_COMMAND },
-          { text: 'i*, ', filterText: 'i*', command: TRIGGER_SUGGESTION_COMMAND },
-          { text: 'i* METADATA ', filterText: 'i*', command: TRIGGER_SUGGESTION_COMMAND },
+          withAutoSuggest({ text: 'i* | ', filterText: 'i*' } as ISuggestionItem),
+          withAutoSuggest({ text: 'i*, ', filterText: 'i*' } as ISuggestionItem),
+          withAutoSuggest({
+            text: 'i* METADATA ',
+            filterText: 'i*',
+          } as ISuggestionItem),
           ...recommendedQuerySuggestions.map((q) => `i*${q.queryString}`),
         ],
         undefined,
@@ -764,7 +771,6 @@ describe('autocomplete', () => {
           'col0 = ',
           ...getPolicyFields('policy').map((name) => ({
             text: name,
-            command: undefined,
             rangeToReplace: { start: 43, end: 47 },
           })),
         ]);
@@ -772,7 +778,6 @@ describe('autocomplete', () => {
           'FROM a | ENRICH policy ON @timestamp WITH col0 = othe/',
           getPolicyFields('policy').map((name) => ({
             text: name,
-            command: undefined,
             rangeToReplace: { start: 50, end: 54 },
           }))
         );
@@ -849,7 +854,7 @@ describe('autocomplete', () => {
       ),
     ]);
 
-    // WHERE argument comparison
+    // WHERE argument comparison (keyword fields get only string operators)
     testSuggestions(
       'FROM a | WHERE keywordField /',
       getFunctionSignaturesByReturnType(
@@ -857,6 +862,7 @@ describe('autocomplete', () => {
         'boolean',
         {
           operators: true,
+          skipAssign: true,
         },
         ['keyword']
       ).map((s) => (s.text.toLowerCase().includes('null') ? s : attachTriggerCommand(s)))
@@ -887,13 +893,24 @@ describe('autocomplete', () => {
         );
         // comma if there's even one more field
         testSuggestions('FROM a METADATA _id, _ignored, _index, _source/', [
-          { filterText: '_source', text: '_source | ', command: TRIGGER_SUGGESTION_COMMAND },
-          { filterText: '_source', text: '_source, ', command: TRIGGER_SUGGESTION_COMMAND },
+          withAutoSuggest({
+            filterText: '_source',
+            text: '_source | ',
+          } as ISuggestionItem),
+          withAutoSuggest({
+            filterText: '_source',
+            text: '_source, ',
+          } as ISuggestionItem),
         ]);
         // no comma if there are no more fields
         testSuggestions(
           'FROM a METADATA _id, _ignored, _index, _source, _index_mode, _score, _version/',
-          [{ filterText: '_version', text: '_version | ', command: TRIGGER_SUGGESTION_COMMAND }]
+          [
+            withAutoSuggest({
+              filterText: '_version',
+              text: '_version | ',
+            } as ISuggestionItem),
+          ]
         );
       });
 
@@ -1027,39 +1044,20 @@ describe('autocomplete', () => {
     });
   });
 
+  describe('IN operator with lists', () => {
+    testSuggestions('FROM a | WHERE integerField IN (doubleField /', [{ text: ', ' }]);
+  });
+
   describe('Replacement ranges are attached when needed', () => {
     testSuggestions('FROM a | WHERE doubleField IS NOT N/', [
       { text: 'IS NOT NULL', rangeToReplace: { start: 27, end: 35 } },
-      { text: 'IS NULL', rangeToReplace: undefined },
-      '!= $0',
-      '== $0',
-      'IN $0',
-      'AND $0',
-      'NOT',
-      'NOT IN $0',
-      'OR $0',
     ]);
     testSuggestions('FROM a | WHERE doubleField IS N/', [
       { text: 'IS NOT NULL', rangeToReplace: { start: 27, end: 31 } },
       { text: 'IS NULL', rangeToReplace: { start: 27, end: 31 } },
-      { text: '!= $0', rangeToReplace: { start: 30, end: 31 } },
-      '== $0',
-      'IN $0',
-      'AND $0',
-      'NOT',
-      'NOT IN $0',
-      'OR $0',
     ]);
     testSuggestions('FROM a | EVAL doubleField IS NOT N/', [
       { text: 'IS NOT NULL', rangeToReplace: { start: 26, end: 34 } },
-      'IS NULL',
-      '!= $0',
-      '== $0',
-      'IN $0',
-      'AND $0',
-      'NOT',
-      'NOT IN $0',
-      'OR $0',
     ]);
 
     describe('dot-separated field names', () => {

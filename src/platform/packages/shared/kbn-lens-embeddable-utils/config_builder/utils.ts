@@ -14,14 +14,13 @@ import type {
   FormBasedPersistedState,
   GenericIndexPatternColumn,
   PersistedIndexPatternLayer,
-} from '@kbn/lens-plugin/public';
-import type {
   TextBasedLayerColumn,
   TextBasedPersistedState,
-} from '@kbn/lens-plugin/public/datasources/form_based/esql_layer/types';
+} from '@kbn/lens-common';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
-import type { DataViewsCommon } from './config_builder';
+import type { Reference } from '@kbn/content-management-utils';
+import type { DataViewsCommon } from './types';
 import type {
   FormulaValueConfig,
   LensAnnotationLayer,
@@ -32,6 +31,7 @@ import type {
   LensConfig,
   LensDataset,
   LensDatatableDataset,
+  LensDataviewDataset,
   LensESQLDataset,
 } from './types';
 import type { LensApiState } from './schema';
@@ -75,14 +75,43 @@ export function mapToFormula(layer: LensBaseLayer): FormulaValueConfig {
   };
 }
 
-export function buildReferences(dataviews: Record<string, DataView>) {
+export function extractReferences(dataviews: Record<string, DataView>): {
+  references: Reference[];
+  internalReferences: Reference[];
+  adHocDataViews: Record<string, DataViewSpec>;
+} {
+  const adHocDataViews = getAdhocDataviews(dataviews);
+  return {
+    ...buildReferences(dataviews, adHocDataViews),
+    adHocDataViews,
+  };
+}
+
+export function buildReferences(
+  dataviews: Record<string, DataView>,
+  adHocDataViews: Record<string, DataViewSpec>
+): {
+  references: Reference[];
+  internalReferences: Reference[];
+} {
   const references = [];
-  for (const layerid in dataviews) {
-    if (dataviews[layerid]) {
-      references.push(...getDefaultReferences(dataviews[layerid].id!, layerid));
+  const internalReferences = [];
+
+  for (const [layerId, dataview] of Object.entries(dataviews)) {
+    if (dataview.id) {
+      const defaultRefs = getDefaultReferences(dataview.id, layerId);
+      if (adHocDataViews[dataview.id]) {
+        internalReferences.push(...defaultRefs);
+      } else {
+        references.push(...defaultRefs);
+      }
     }
   }
-  return references.flat();
+
+  return {
+    references: references.flat(),
+    internalReferences: internalReferences.flat(),
+  };
 }
 
 const getAdhocDataView = (dataView: DataView): Record<string, DataViewSpec> => {
@@ -93,6 +122,7 @@ const getAdhocDataView = (dataView: DataView): Record<string, DataViewSpec> => {
   };
 };
 
+// Getting the spec from a data view is a heavy operation, that's why the result is cached.
 export const getAdhocDataviews = (dataviews: Record<string, DataView>) => {
   let adHocDataViews = {};
   [...new Set(Object.values(dataviews))].forEach((d) => {
@@ -111,54 +141,43 @@ export function isSingleLayer(
   return layer && typeof layer === 'object' && ('columnOrder' in layer || 'columns' in layer);
 }
 
-export function isFormulaDataset(dataset?: LensDataset) {
-  if (dataset && 'index' in dataset) {
-    return true;
-  }
-  return false;
-}
-
 /**
- * it loads dataview by id or creates an ad-hoc dataview if index pattern is provided
- * @param index
- * @param dataViewsAPI
- * @param timeField
+ * Retrieves an existing data view by its title (index) or creates an Ad-Hoc Dataview if it does not exist.
+ *
+ * Behavior:
+ * - If an explicit `id` is provided, a new ad-hoc data view is picked from the cache or created with that `id`.
+ * - If no `id` is provided, the function first attempts to retrieve an existing data view whose id matches `index`.
+ *   - If retrieval succeeds, the existing data view is returned.
+ *   - If retrieval fails (e.g. it does not exist), a new data view is created using `index` as the title.
+ *
+ * @param params.index The index pattern or title to use for lookup or creation.
+ * @param params.timeFieldName The name of the time field to associate with the data view.
+ * @param dataViewsAPI The DataViews service API used to get or create data views.
+ * @param id Optional explicit id to assign to the data view; if provided, creation is forced.
+ * @returns A promise resolving to the retrieved or newly created data view.
+ * @throws Re-throws any error coming from the underlying DataViews API when creation fails.
  */
 export async function getDataView(
-  index: string,
+  { index, timeFieldName }: { index: string; timeFieldName: string },
   dataViewsAPI: DataViewsCommon,
-  timeField?: string
+  id?: string
 ) {
-  let dataView: DataView;
-
-  try {
-    dataView = await dataViewsAPI.get(index, false);
-  } catch {
-    dataView = await dataViewsAPI.create({
-      title: index,
-      timeFieldName: timeField || '@timestamp',
-    });
+  if (id) {
+    return dataViewsAPI.create({ id, title: index, timeFieldName });
   }
-
-  return dataView;
+  try {
+    return await dataViewsAPI.get(index, false);
+  } catch {
+    return dataViewsAPI.create({ title: index, timeFieldName });
+  }
 }
 
-export function getDatasetIndex(dataset?: LensDataset) {
-  if (!dataset) return undefined;
-
-  let index: string;
-  let timeFieldName: string = '@timestamp';
-
-  if ('index' in dataset) {
-    index = dataset.index;
-    timeFieldName = dataset.timeFieldName || '@timestamp';
-  } else if ('esql' in dataset) {
-    index = getIndexPatternFromESQLQuery(dataset.esql); // parseIndexFromQuery(config.dataset.query);
-  } else {
-    return undefined;
+export function getDatasetIndex(dataset: LensDataset) {
+  if (isDataViewDataset(dataset)) {
+    return { index: dataset.index, timeFieldName: dataset.timeFieldName ?? '@timestamp' };
+  } else if (isESQLDataset(dataset)) {
+    return { index: getIndexPatternFromESQLQuery(dataset.esql), timeFieldName: '@timestamp' };
   }
-
-  return { index, timeFieldName };
 }
 
 function buildDatasourceStatesLayer(
@@ -211,7 +230,7 @@ function buildDatasourceStatesLayer(
     return newLayer;
   }
 
-  if ('esql' in dataset) {
+  if (isESQLDataset(dataset)) {
     return ['textBased', buildESQLLayer(layer)];
   } else if ('type' in dataset) {
     return ['textBased', buildValueLayer(layer)];
@@ -236,18 +255,22 @@ export const buildDatasourceStates = async (
   for (let i = 0; i < configLayers.length; i++) {
     const layer = configLayers[i];
     const layerId = `layer_${i}`;
-    const dataset = layer.dataset || mainDataset;
+    const dataset = layer.dataset ?? mainDataset;
 
     if (!dataset && 'type' in layer && (layer as LensAnnotationLayer).type !== 'annotation') {
       throw Error('dataset must be defined');
     }
-
-    const index = getDatasetIndex(dataset);
-    const dataView = index
-      ? await getDataView(index.index, dataViewsAPI, index.timeFieldName)
-      : undefined;
-
     if (dataset) {
+      const index = getDatasetIndex(dataset);
+
+      const dataView = index
+        ? await getDataView(
+            index,
+            dataViewsAPI,
+            isESQLDataset(dataset) ? JSON.stringify(index) : undefined
+          )
+        : undefined;
+
       const [type, layerConfig] = buildDatasourceStatesLayer(
         layer,
         i,
@@ -315,6 +338,13 @@ export const addLayerFormulaColumns = (
   layer.columnOrder.push(...columns.columnOrder.map((c) => `${c}${postfix}`));
 };
 
+function isESQLDataset(dataset: LensDataset): dataset is LensESQLDataset {
+  return 'esql' in dataset;
+}
+export function isDataViewDataset(dataset: LensDataset): dataset is LensDataviewDataset {
+  return 'index' in dataset;
+}
+
 export function isLensAPIFormat(config: unknown): config is LensApiState {
   return typeof config === 'object' && config !== null && 'type' in config;
 }
@@ -327,4 +357,8 @@ export function isLensLegacyAttributes(config: unknown): config is LensAttribute
   return (
     typeof config === 'object' && config !== null && 'state' in config && 'references' in config
   );
+}
+
+export function isEsqlTableTypeDataset(dataset: LensApiState['dataset']) {
+  return dataset.type === 'esql' || dataset.type === 'table';
 }

@@ -21,6 +21,7 @@ import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { FilterStateStore } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import type { AssetInventoryChartData } from '../hooks/use_fetch_chart_data/types';
 import { ASSET_FIELDS } from '../constants';
 import type { AssetsURLQuery } from '../hooks/use_asset_inventory_url_state/use_asset_inventory_url_state';
@@ -68,7 +69,7 @@ export interface AssetInventoryBarChartProps {
   setQuery(v: Partial<AssetsURLQuery>): void;
 }
 
-const createAssetFilter = (key: string, value: string, index: string) => {
+const createAssetFilter = (key: string, value: string, index: string): Filter => {
   return {
     $state: { store: FilterStateStore.APP_STATE },
     meta: {
@@ -88,6 +89,24 @@ const createAssetFilter = (key: string, value: string, index: string) => {
   };
 };
 
+export const createNotExistsAssetFilter = (key: string, index: string): Filter => {
+  return {
+    $state: { store: FilterStateStore.APP_STATE },
+    meta: {
+      alias: null,
+      disabled: false,
+      index,
+      key,
+      negate: true,
+      type: 'exists',
+      params: { query: 'exists' },
+    },
+    query: {
+      exists: { field: key },
+    },
+  };
+};
+
 export const handleElementClick = (
   elements: Array<[GeometryValue, SeriesIdentifier]>,
   setQuery: (v: Partial<AssetsURLQuery>) => void,
@@ -101,10 +120,17 @@ export const handleElementClick = (
   const subtype = datum[ASSET_FIELDS.ENTITY_SUB_TYPE];
   const type = datum[ASSET_FIELDS.ENTITY_TYPE];
 
-  const filters = [
-    createAssetFilter(ASSET_FIELDS.ENTITY_TYPE, type, index),
-    createAssetFilter(ASSET_FIELDS.ENTITY_SUB_TYPE, subtype, index),
-  ];
+  const filters: Filter[] = [createAssetFilter(ASSET_FIELDS.ENTITY_TYPE, type, index)];
+
+  // Check if this is an "Uncategorized" entry (now formatted as "[EntityType] (uncategorized)")
+  const isUncategorized = subtype && subtype.endsWith('(uncategorized)');
+
+  // Only add sub_type filter if it's not an "Uncategorized" entry (indicating missing field)
+  if (subtype && !isUncategorized) {
+    filters.push(createAssetFilter(ASSET_FIELDS.ENTITY_SUB_TYPE, subtype, index));
+  } else {
+    filters.push(createNotExistsAssetFilter(ASSET_FIELDS.ENTITY_SUB_TYPE, index));
+  }
 
   setQuery({ filters });
 };

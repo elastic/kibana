@@ -6,31 +6,60 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { ToolType, createToolNotFoundError } from '@kbn/onechat-common';
-import type { BuiltinToolDefinition } from '@kbn/onechat-server';
-import type { InternalToolDefinition, ToolSource, ReadonlyToolTypeClient } from '../tool_provider';
+import type { ToolType } from '@kbn/onechat-common';
+import { createToolNotFoundError, createBadRequestError } from '@kbn/onechat-common';
+import type { ToolProviderFn, ReadonlyToolProvider } from '../tool_provider';
 import type { BuiltinToolRegistry } from './builtin_registry';
+import type {
+  AnyToolTypeDefinition,
+  ToolTypeDefinition,
+  BuiltinToolTypeDefinition,
+} from '../tool_types/definitions';
+import { isDisabledDefinition } from '../tool_types/definitions';
+import { convertTool } from './converter';
+import { ToolAvailabilityCache } from './availability_cache';
 
-export const createBuiltInToolSource = ({
+export const createBuiltinProviderFn =
+  ({
+    registry,
+    toolTypes,
+  }: {
+    registry: BuiltinToolRegistry;
+    toolTypes: AnyToolTypeDefinition[];
+  }): ToolProviderFn<true> =>
+  async ({ request, space }) => {
+    return createBuiltinToolProvider({
+      registry,
+      toolTypes,
+      request,
+      space,
+    });
+  };
+
+export const createBuiltinToolProvider = ({
   registry,
+  toolTypes,
+  request,
+  space,
 }: {
   registry: BuiltinToolRegistry;
-}): ToolSource<ToolType.builtin> => {
+  toolTypes: AnyToolTypeDefinition[];
+  request: KibanaRequest;
+  space: string;
+}): ReadonlyToolProvider => {
+  const definitionMap = toolTypes
+    .filter((def) => !isDisabledDefinition(def))
+    .reduce((map, def) => {
+      map[def.toolType] = def as ToolTypeDefinition | BuiltinToolTypeDefinition;
+      return map;
+    }, {} as Record<ToolType, ToolTypeDefinition | BuiltinToolTypeDefinition>);
+
+  const context = { spaceId: space, request };
+  const availabilityCache = new ToolAvailabilityCache();
+
   return {
     id: 'builtin',
-    toolTypes: [ToolType.builtin],
     readonly: true,
-    getClient: ({ request }) => createBuiltinToolClient({ registry, request }),
-  };
-};
-
-export const createBuiltinToolClient = ({
-  registry,
-}: {
-  registry: BuiltinToolRegistry;
-  request: KibanaRequest;
-}): ReadonlyToolTypeClient<{}> => {
-  return {
     has(toolId: string) {
       return registry.has(toolId);
     },
@@ -39,24 +68,23 @@ export const createBuiltinToolClient = ({
       if (!tool) {
         throw createToolNotFoundError({ toolId });
       }
-      return convertTool(tool);
+      const definition = definitionMap[tool.type];
+      if (!definition) {
+        throw createBadRequestError(`Unknown type for tool '${toolId}': '${tool.type}'`);
+      }
+      return convertTool({ tool, definition, context, cache: availabilityCache });
     },
     list() {
       const tools = registry.list();
-      return tools.map(convertTool);
+      return tools
+        .filter((tool) => {
+          // evict unknown tools - atm it's used for workflow tools if the plugin is disabled.
+          return definitionMap[tool.type];
+        })
+        .map((tool) => {
+          const definition = definitionMap[tool.type]!;
+          return convertTool({ tool, definition, context, cache: availabilityCache });
+        });
     },
-  };
-};
-
-export const convertTool = (tool: BuiltinToolDefinition): InternalToolDefinition => {
-  return {
-    id: tool.id,
-    type: ToolType.builtin,
-    description: tool.description,
-    tags: tool.tags,
-    configuration: {},
-    readonly: true,
-    schema: tool.schema,
-    handler: tool.handler,
   };
 };

@@ -6,7 +6,10 @@
  */
 
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
-import { SecurityPageName } from '@kbn/security-solution-navigation';
+import {
+  ATTACKS_ALERTS_ALIGNMENT_ENABLED,
+  SecurityPageName,
+} from '@kbn/security-solution-navigation';
 import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
 import { defaultNavigationTree } from '@kbn/security-solution-navigation/navigation_tree';
 import { type Services } from '../common/services';
@@ -34,17 +37,20 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
         {
           link: 'discover',
           iconV2: 'discoverApp',
+          sideNavVersion: 'v1',
         },
         defaultNavigationTree.dashboards({ sideNavVersion: 'v1' }),
         {
           breadcrumbStatus: 'hidden',
           children: [
             defaultNavigationTree.rules({ sideNavVersion: 'v1' }),
-            {
-              id: SecurityPageName.alerts,
-              link: securityLink(SecurityPageName.alerts),
-              sideNavVersion: 'v1',
-            },
+            services.featureFlags.getBooleanValue(ATTACKS_ALERTS_ALIGNMENT_ENABLED, false)
+              ? defaultNavigationTree.alertDetections({ sideNavVersion: 'v1' })
+              : {
+                  id: SecurityPageName.alerts,
+                  link: securityLink(SecurityPageName.alerts),
+                  sideNavVersion: 'v1',
+                },
             {
               link: 'workflows',
               withBadge: true,

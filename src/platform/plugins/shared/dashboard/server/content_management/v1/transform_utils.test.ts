@@ -13,7 +13,6 @@ import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_objec
 import type { DashboardItem } from './types';
 
 import { savedObjectToItem } from './transform_utils';
-import { DEFAULT_DASHBOARD_OPTIONS } from '../../../common/content_management';
 
 describe('savedObjectToItem', () => {
   const commonSavedObject: SavedObject = {
@@ -23,46 +22,40 @@ describe('savedObjectToItem', () => {
     attributes: {},
   };
 
-  const getSavedObjectForAttributes = (
-    attributes: DashboardSavedObjectAttributes
-  ): SavedObject<DashboardSavedObjectAttributes> => {
-    return {
-      ...commonSavedObject,
-      attributes,
-    };
-  };
-
   beforeEach(() => {
     jest.resetAllMocks();
   });
 
   it('should convert saved object to item with all attributes', () => {
-    const input = getSavedObjectForAttributes({
-      title: 'title',
-      description: 'description',
-      timeRestore: true,
-      panelsJSON: JSON.stringify([
-        {
-          embeddableConfig: { enhancements: {} },
-          gridData: { x: 0, y: 0, w: 10, h: 10, i: '1' },
-          id: '1',
-          panelIndex: '1',
-          title: 'title1',
-          type: 'type1',
-          version: '2',
+    const input: SavedObject<DashboardSavedObjectAttributes> = {
+      ...commonSavedObject,
+      attributes: {
+        title: 'title',
+        description: 'description',
+        timeRestore: true,
+        panelsJSON: JSON.stringify([
+          {
+            embeddableConfig: { enhancements: {} },
+            gridData: { x: 0, y: 0, w: 10, h: 10, i: '1' },
+            id: '1',
+            panelIndex: '1',
+            title: 'title1',
+            type: 'type1',
+            version: '2',
+          },
+        ]),
+        optionsJSON: JSON.stringify({
+          hidePanelTitles: true,
+          useMargins: false,
+          syncColors: false,
+          syncTooltips: false,
+          syncCursor: false,
+        }),
+        kibanaSavedObjectMeta: {
+          searchSourceJSON: '{"query":{"query":"test","language":"KQL"}}',
         },
-      ]),
-      optionsJSON: JSON.stringify({
-        hidePanelTitles: true,
-        useMargins: false,
-        syncColors: false,
-        syncTooltips: false,
-        syncCursor: false,
-      }),
-      kibanaSavedObjectMeta: {
-        searchSourceJSON: '{"query":{"query":"test","language":"KQL"}}',
       },
-    });
+    };
 
     const { item, error } = savedObjectToItem(input, false);
     expect(error).toBeNull();
@@ -71,16 +64,15 @@ describe('savedObjectToItem', () => {
       attributes: {
         title: 'title',
         description: 'description',
-        timeRestore: true,
         panels: [
           {
-            panelConfig: {
+            config: {
               enhancements: {},
               savedObjectId: '1',
               title: 'title1',
             },
-            gridData: { x: 0, y: 0, w: 10, h: 10, i: '1' },
-            panelIndex: '1',
+            grid: { x: 0, y: 0, w: 10, h: 10 },
+            uid: '1',
             type: 'type1',
             version: '2',
           },
@@ -92,22 +84,22 @@ describe('savedObjectToItem', () => {
           syncTooltips: false,
           syncCursor: false,
         },
-        kibanaSavedObjectMeta: {
-          searchSource: { query: { query: 'test', language: 'KQL' } },
-        },
+        query: { query: 'test', language: 'KQL' },
       },
     });
   });
 
-  it('should handle missing optional attributes', () => {
-    const input = getSavedObjectForAttributes({
-      title: 'title',
-      description: 'description',
-      timeRestore: false,
-      panelsJSON: '[]',
-      optionsJSON: '{}',
-      kibanaSavedObjectMeta: {},
-    });
+  it('should not supply defaults for missing properties', () => {
+    const input: SavedObject<DashboardSavedObjectAttributes> = {
+      ...commonSavedObject,
+      attributes: {
+        title: 'title',
+        description: 'description',
+        timeRestore: false,
+        panelsJSON: '[]',
+        kibanaSavedObjectMeta: {},
+      },
+    };
 
     const { item, error } = savedObjectToItem(input, false);
     expect(error).toBeNull();
@@ -116,35 +108,7 @@ describe('savedObjectToItem', () => {
       attributes: {
         title: 'title',
         description: 'description',
-        timeRestore: false,
         panels: [],
-        options: DEFAULT_DASHBOARD_OPTIONS,
-        kibanaSavedObjectMeta: {},
-      },
-    });
-  });
-
-  it('should handle partial saved object', () => {
-    const input = {
-      ...commonSavedObject,
-      references: undefined,
-      attributes: {
-        title: 'title',
-        description: 'my description',
-        timeRestore: false,
-      },
-    };
-
-    const { item, error } = savedObjectToItem(input, true, {
-      allowedAttributes: ['title', 'description'],
-    });
-    expect(error).toBeNull();
-    expect(item).toEqual({
-      ...commonSavedObject,
-      references: [],
-      attributes: {
-        title: 'title',
-        description: 'my description',
       },
     });
   });
@@ -161,59 +125,5 @@ describe('savedObjectToItem', () => {
     const { item, error } = savedObjectToItem(input, true);
     expect(item).toBeNull();
     expect(error).not.toBe(null);
-  });
-
-  it('should include only requested references', () => {
-    const input = {
-      ...commonSavedObject,
-      references: [
-        {
-          type: 'tag',
-          id: 'tag1',
-          name: 'tag-ref-tag1',
-        },
-        {
-          type: 'index-pattern',
-          id: 'index-pattern1',
-          name: 'index-pattern-ref-index-pattern1',
-        },
-      ],
-      attributes: {
-        title: 'title',
-        description: 'my description',
-        timeRestore: false,
-      },
-    };
-
-    {
-      const { item } = savedObjectToItem(input, true, {
-        allowedAttributes: ['title', 'description'],
-      });
-      expect(item?.references).toEqual(input.references);
-    }
-
-    {
-      const { item } = savedObjectToItem(input, true, {
-        allowedAttributes: ['title', 'description'],
-        allowedReferences: ['tag'],
-      });
-      expect(item?.references).toEqual([input.references[0]]);
-    }
-
-    {
-      const { item } = savedObjectToItem(input, true, {
-        allowedAttributes: ['title', 'description'],
-        allowedReferences: [],
-      });
-      expect(item?.references).toEqual([]);
-    }
-
-    {
-      const { item } = savedObjectToItem({ ...input, references: undefined }, true, {
-        allowedAttributes: ['title', 'description'],
-        allowedReferences: [],
-      });
-      expect(item?.references).toEqual([]);
-    }
   });
 });

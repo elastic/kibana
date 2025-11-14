@@ -15,121 +15,219 @@ import {
   EuiText,
   EuiIcon,
   EuiLoadingSpinner,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import useToggle from 'react-use/lib/useToggle';
-import type { Streams } from '@kbn/streams-schema';
-import { type ReviewSuggestionsInputs } from './use_review_suggestions_form';
-import { CreateStreamConfirmationModal } from './create_stream_confirmation_modal';
-import { getPercentageFormatter } from '../../../../util/formatters';
-import { useTimefilter } from '../../../../hooks/use_timefilter';
+import { type Streams } from '@kbn/streams-schema';
+import { isCondition } from '@kbn/streamlang';
+import type { PartitionSuggestion } from './use_review_suggestions_form';
 import { useMatchRate } from './use_match_rate';
-import { useStreamSamplesSelector } from '../state_management/stream_routing_state_machine/use_stream_routing';
+import {
+  useStreamRoutingEvents,
+  useStreamsRoutingSelector,
+  useStreamSamplesSelector,
+} from '../state_management/stream_routing_state_machine/use_stream_routing';
 import { SelectablePanel } from './selectable_panel';
-import { ConditionPanel } from '../../shared';
-
-const percentageFormatter = getPercentageFormatter({ precision: 2 });
+import { ConditionPanel, VerticalRule } from '../../shared';
+import { StreamNameFormRow } from '../stream_name_form_row';
+import { RoutingConditionEditor } from '../routing_condition_editor';
+import { processCondition } from '../utils';
+import { EditSuggestedRuleControls } from '../control_bars';
 
 export function SuggestedStreamPanel({
   definition,
   partition,
   onDismiss,
   onPreview,
-  onSuccess,
+  index,
+  onEdit,
+  onSave,
 }: {
   definition: Streams.WiredStream.GetResponse;
-  partition: ReviewSuggestionsInputs['suggestions'][number];
+  partition: PartitionSuggestion;
   onDismiss(): void;
   onPreview(toggle: boolean): void;
-  onSuccess(): void;
+  index: number;
+  onEdit(index: number, suggestion: PartitionSuggestion): void;
+  onSave?: () => void;
 }) {
-  const [isModalOpen, toggleModal] = useToggle(false);
-  const { timeState } = useTimefilter();
-  const matchRate = useMatchRate(definition, partition, timeState.start, timeState.end);
+  const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
+  const { changeSuggestionName, changeSuggestionCondition, reviewSuggestedRule } =
+    useStreamRoutingEvents();
+
+  const editedSuggestion = routingSnapshot.context.editedSuggestion;
+  const isEditing =
+    routingSnapshot.matches({ ready: 'editingSuggestedRule' }) &&
+    routingSnapshot.context.editingSuggestionIndex === index;
+
+  const currentSuggestion = isEditing && editedSuggestion ? editedSuggestion : partition;
+  const matchRate = useMatchRate(definition, currentSuggestion);
+
   const selectedPreview = useStreamSamplesSelector((snapshot) => snapshot.context.selectedPreview);
   const isSelected = Boolean(
     selectedPreview &&
       selectedPreview.type === 'suggestion' &&
-      selectedPreview.name === partition.name
+      selectedPreview.name === currentSuggestion.name
   );
 
-  return (
-    <>
-      {isModalOpen && (
-        <CreateStreamConfirmationModal
-          definition={definition}
-          partition={partition}
-          onSuccess={() => {
-            toggleModal(false);
-            onSuccess();
-          }}
-          onClose={() => toggleModal(false)}
-        />
-      )}
+  const nameError = React.useMemo(() => {
+    if (!isEditing) return undefined;
+
+    const isDuplicateName = routingSnapshot.context.routing.some(
+      (r) => r.destination === currentSuggestion.name
+    );
+
+    if (isDuplicateName) {
+      return i18n.translate('xpack.streams.streamDetailRouting.nameConflictError', {
+        defaultMessage: 'A stream with this name already exists',
+      });
+    }
+
+    return undefined;
+  }, [isEditing, currentSuggestion.name, routingSnapshot.context.routing]);
+
+  const conditionError = React.useMemo(() => {
+    if (!isEditing) return undefined;
+
+    const processedCondition = processCondition(currentSuggestion.condition);
+    const isProcessedCondition = processedCondition ? isCondition(processedCondition) : true;
+
+    if (!isProcessedCondition) {
+      return i18n.translate('xpack.streams.streamDetailRouting.conditionRequiredError', {
+        defaultMessage: 'Condition is required',
+      });
+    }
+
+    return undefined;
+  }, [isEditing, currentSuggestion.condition]);
+
+  const handleNameChange = (name: string) => {
+    if (!isEditing) return;
+    changeSuggestionName(name);
+  };
+
+  const handleConditionChange = (condition: any) => {
+    if (!isEditing) return;
+    changeSuggestionCondition(condition);
+  };
+
+  if (isEditing) {
+    return (
       <SelectablePanel paddingSize="m" isSelected={isSelected}>
-        <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiFlexItem>
-            <EuiTitle size="s">
-              <h4>{partition.name}</h4>
-            </EuiTitle>
-          </EuiFlexItem>
-          {matchRate.loading ? (
-            <EuiFlexItem grow={false}>
-              <EuiLoadingSpinner size="s" />
-            </EuiFlexItem>
-          ) : matchRate.value !== undefined ? (
-            <>
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="check" color="success" size="s" />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText size="s" color="success">
-                  {percentageFormatter.format(matchRate.value)}
-                </EuiText>
-              </EuiFlexItem>
-            </>
-          ) : null}
-        </EuiFlexGroup>
-        <EuiSpacer size="s" />
-        <ConditionPanel condition={partition.condition} />
-        <EuiSpacer size="m" />
-        <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              iconType={isSelected ? 'eyeClosed' : 'eye'}
-              isSelected={isSelected}
-              size="s"
-              onClick={() => onPreview(!isSelected)}
-            >
-              {i18n.translate('xpack.streams.streamDetailRouting.suggestedStreamPanel.preview', {
-                defaultMessage: 'Preview',
-              })}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="m" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty size="s" onClick={onDismiss}>
-                  {i18n.translate(
-                    'xpack.streams.streamDetailRouting.suggestedStreamPanel.dismiss',
-                    {
-                      defaultMessage: 'Reject',
-                    }
-                  )}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton iconType="check" size="s" onClick={() => toggleModal(true)} fill>
-                  {i18n.translate('xpack.streams.streamDetailRouting.suggestedStreamPanel.accept', {
-                    defaultMessage: 'Accept',
-                  })}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
+        <EuiFlexGroup direction="column" gutterSize="m">
+          <StreamNameFormRow
+            value={currentSuggestion.name}
+            onChange={handleNameChange}
+            autoFocus
+            error={nameError}
+            isInvalid={!!nameError}
+          />
+          <RoutingConditionEditor
+            status="enabled"
+            condition={currentSuggestion.condition}
+            onConditionChange={handleConditionChange}
+            onStatusChange={() => {}}
+            isSuggestionRouting={true}
+          />
+          <EditSuggestedRuleControls
+            onSave={onSave}
+            onAccept={() => reviewSuggestedRule(currentSuggestion.name || partition.name)}
+            nameError={nameError}
+            conditionError={conditionError}
+          />
         </EuiFlexGroup>
       </SelectablePanel>
-    </>
+    );
+  }
+
+  return (
+    <SelectablePanel paddingSize="m" isSelected={isSelected}>
+      <EuiFlexGroup gutterSize="xs" alignItems="center">
+        <EuiFlexItem>
+          <EuiTitle size="s">
+            <h4>{currentSuggestion.name}</h4>
+          </EuiTitle>
+        </EuiFlexItem>
+        {matchRate.loading ? (
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="s" />
+          </EuiFlexItem>
+        ) : matchRate.value !== undefined ? (
+          <>
+            <EuiIcon type="check" color="success" size="s" />
+            <EuiText size="s" color="success">
+              {matchRate.value}
+            </EuiText>
+          </>
+        ) : null}
+        <EuiFlexItem grow={false}>
+          <VerticalRule />
+        </EuiFlexItem>
+        <EuiButtonIcon
+          iconType="pencil"
+          onClick={() => onEdit(index, currentSuggestion)}
+          aria-label={i18n.translate('xpack.streams.streamDetailRouting.edit', {
+            defaultMessage: 'Edit',
+          })}
+          data-test-subj={`suggestionEditButton-${currentSuggestion.name}`}
+        />
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
+      <ConditionPanel condition={currentSuggestion.condition} />
+      <EuiSpacer size="m" />
+      <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween" wrap>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            iconType={isSelected ? 'eyeClosed' : 'eye'}
+            isSelected={isSelected}
+            size="s"
+            onClick={() => onPreview(!isSelected)}
+            aria-label={i18n.translate(
+              'xpack.streams.streamDetailRouting.suggestedStreamPanel.preview',
+              {
+                defaultMessage: 'Preview',
+              }
+            )}
+          >
+            {i18n.translate('xpack.streams.streamDetailRouting.suggestedStreamPanel.preview', {
+              defaultMessage: 'Preview',
+            })}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="m" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="s"
+                onClick={onDismiss}
+                aria-label={i18n.translate(
+                  'xpack.streams.streamDetailRouting.suggestedStreamPanel.dismiss',
+                  {
+                    defaultMessage: 'Reject',
+                  }
+                )}
+              >
+                {i18n.translate('xpack.streams.streamDetailRouting.suggestedStreamPanel.dismiss', {
+                  defaultMessage: 'Reject',
+                })}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                iconType="check"
+                size="s"
+                onClick={() => reviewSuggestedRule(currentSuggestion.name || partition.name)}
+                fill
+              >
+                {i18n.translate('xpack.streams.streamDetailRouting.suggestedStreamPanel.accept', {
+                  defaultMessage: 'Accept',
+                })}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </SelectablePanel>
   );
 }

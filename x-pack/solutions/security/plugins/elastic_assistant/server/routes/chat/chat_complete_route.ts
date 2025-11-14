@@ -7,7 +7,7 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
-import type { Message, Replacements, ConversationResponse } from '@kbn/elastic-assistant-common';
+import type { Replacements, ConversationResponse } from '@kbn/elastic-assistant-common';
 import {
   ELASTIC_AI_ASSISTANT_CHAT_COMPLETE_URL,
   ChatCompleteProps,
@@ -36,6 +36,7 @@ import { transformESSearchToAnonymizationFields } from '../../ai_assistant_data_
 import type { EsAnonymizationFieldsSchema } from '../../ai_assistant_data_clients/anonymization_fields/types';
 import { isOpenSourceModel } from '../utils';
 import type { ConfigSchema } from '../../config_schema';
+import type { OnLlmResponse } from '../../lib/langchain/executors/types';
 
 export const SYSTEM_PROMPT_CONTEXT_NON_I18N = (context: string) => {
   return `CONTEXT:\n"""\n${context}\n"""`;
@@ -209,11 +210,11 @@ export const chatCompleteRoute = (
             disabled: contentReferencesDisabled ?? false,
           });
 
-          const onLlmResponse = async (
-            content: string,
-            traceData: Message['traceData'] = {},
-            isError = false
-          ): Promise<void> => {
+          const onLlmResponse: OnLlmResponse = async ({
+            content,
+            traceData = {},
+            isError = false,
+          }): Promise<void> => {
             if (conversationId && conversationsDataClient) {
               const { prunedContent, prunedContentReferencesStore } = pruneContentReferences(
                 content,
@@ -250,16 +251,7 @@ export const chatCompleteRoute = (
               onNewReplacements,
               replacements: latestReplacements,
               contentReferencesStore,
-              request: {
-                ...request,
-                // TODO: clean up after empty tools will be available to use
-                body: {
-                  ...request.body,
-                  replacements: {},
-                  size: 10,
-                  alertsIndexPattern: '.alerts-security.alerts-default',
-                },
-              },
+              request,
               response,
               telemetry,
               responseLanguage: request.body.responseLanguage,

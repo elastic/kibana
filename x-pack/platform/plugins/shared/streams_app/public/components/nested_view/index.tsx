@@ -28,7 +28,7 @@ export function NestedView({
     <div
       className={css`
         padding-left: ${euiTheme.size.base};
-        margin-left: ${euiTheme.size.xxs};
+        margin-left: 16px;
         border-left: ${last ? 'none' : euiTheme.border.thin};
         margin-top: -${euiTheme.size.xs}; //-4px
         padding-top: ${first ? '16px' : euiTheme.size.s}; //8px

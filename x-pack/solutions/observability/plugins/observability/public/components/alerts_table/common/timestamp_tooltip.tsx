@@ -23,7 +23,7 @@ export function TimestampTooltip({ time, timeUnit = 'milliseconds' }: Props) {
 
   return (
     <EuiToolTip content={absoluteTimeLabel}>
-      <>{absoluteTimeLabel}</>
+      <span tabIndex={0}>{absoluteTimeLabel}</span>
     </EuiToolTip>
   );
 }

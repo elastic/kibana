@@ -37,5 +37,6 @@ export const connectorTypes: string[] = [
   '.inference',
   '.microsoft_defender_endpoint',
   '.cases',
+  '.workflows',
   '.observability-ai-assistant',
 ];

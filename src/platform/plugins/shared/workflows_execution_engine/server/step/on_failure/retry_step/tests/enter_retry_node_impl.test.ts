@@ -7,14 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { EnterRetryNode } from '@kbn/workflows/graph';
+import type { StepExecutionRuntime } from '../../../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../../../workflow_context_manager/workflow_execution_runtime_manager';
-import { EnterRetryNodeImpl } from '../enter_retry_node_impl';
 import type { IWorkflowEventLogger } from '../../../../workflow_event_logger/workflow_event_logger';
 import type { WorkflowTaskManager } from '../../../../workflow_task_manager/workflow_task_manager';
+import { EnterRetryNodeImpl } from '../enter_retry_node_impl';
 
 describe('EnterRetryNodeImpl', () => {
   let underTest: EnterRetryNodeImpl;
   let node: EnterRetryNode;
+  let stepExecutionRuntime: StepExecutionRuntime;
   let workflowRuntime: WorkflowExecutionRuntimeManager;
   let workflowLogger: IWorkflowEventLogger;
   let workflowTaskManager: WorkflowTaskManager;
@@ -28,12 +30,31 @@ describe('EnterRetryNodeImpl', () => {
       configuration: { 'max-attempts': 3 },
       exitNodeId: 'afterRetry',
     };
-    workflowRuntime = {} as unknown as WorkflowExecutionRuntimeManager;
-    workflowLogger = {} as unknown as IWorkflowEventLogger;
+    stepExecutionRuntime = {
+      getCurrentStepState: jest.fn(),
+      startStep: jest.fn(),
+      setCurrentStepState: jest.fn(),
+      failStep: jest.fn(),
+      setWaitStep: jest.fn(),
+    } as unknown as StepExecutionRuntime;
+    workflowRuntime = {
+      enterScope: jest.fn(),
+      navigateToNextNode: jest.fn(),
+      navigateToNode: jest.fn(),
+      setWorkflowError: jest.fn(),
+    } as unknown as WorkflowExecutionRuntimeManager;
+    workflowLogger = {
+      logDebug: jest.fn(),
+      logError: jest.fn(),
+    } as unknown as IWorkflowEventLogger;
     workflowTaskManager = {} as unknown as WorkflowTaskManager;
-    workflowLogger.logDebug = jest.fn();
-    workflowLogger.logError = jest.fn();
-    underTest = new EnterRetryNodeImpl(node, workflowRuntime, workflowTaskManager, workflowLogger);
+    underTest = new EnterRetryNodeImpl(
+      node,
+      stepExecutionRuntime,
+      workflowRuntime,
+      workflowTaskManager,
+      workflowLogger
+    );
   });
 
   beforeAll(() => {
@@ -47,11 +68,7 @@ describe('EnterRetryNodeImpl', () => {
   describe('run', () => {
     describe('when first time entering retry step', () => {
       beforeEach(() => {
-        workflowRuntime.getCurrentStepState = jest.fn().mockReturnValue(undefined);
-        workflowRuntime.enterScope = jest.fn();
-        workflowRuntime.startStep = jest.fn();
-        workflowRuntime.setCurrentStepState = jest.fn();
-        workflowRuntime.navigateToNextNode = jest.fn();
+        (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue(undefined);
       });
 
       it('should enter first attempt scope', async () => {
@@ -62,12 +79,12 @@ describe('EnterRetryNodeImpl', () => {
 
       it('should start step', async () => {
         await underTest.run();
-        expect(workflowRuntime.startStep).toHaveBeenCalledWith();
+        expect(stepExecutionRuntime.startStep).toHaveBeenCalledWith();
       });
 
       it('should set attempt to 0 in step state', async () => {
         await underTest.run();
-        expect(workflowRuntime.setCurrentStepState).toHaveBeenCalledWith({ attempt: 0 });
+        expect(stepExecutionRuntime.setCurrentStepState).toHaveBeenCalledWith({ attempt: 0 });
       });
 
       it('should go to next step', async () => {
@@ -78,10 +95,7 @@ describe('EnterRetryNodeImpl', () => {
 
     describe('when re-entering retry step after a failure', () => {
       beforeEach(() => {
-        workflowRuntime.getCurrentStepState = jest.fn().mockReturnValue({ attempt: 1 });
-        workflowRuntime.enterScope = jest.fn();
-        workflowRuntime.setCurrentStepState = jest.fn();
-        workflowRuntime.navigateToNextNode = jest.fn();
+        (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({ attempt: 1 });
       });
 
       it('should enter next attempt scope', async () => {
@@ -92,7 +106,7 @@ describe('EnterRetryNodeImpl', () => {
 
       it('should increment attempt in step state', async () => {
         await underTest.run();
-        expect(workflowRuntime.setCurrentStepState).toHaveBeenCalledWith({ attempt: 2 });
+        expect(stepExecutionRuntime.setCurrentStepState).toHaveBeenCalledWith({ attempt: 2 });
       });
 
       it('should log debug message about retrying', async () => {
@@ -111,20 +125,17 @@ describe('EnterRetryNodeImpl', () => {
 
   describe('catchError', () => {
     beforeEach(() => {
-      workflowRuntime.getCurrentStepState = jest.fn().mockReturnValue({ attempt: 2 });
-      workflowRuntime.navigateToNode = jest.fn();
+      (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({ attempt: 2 });
     });
 
     describe('when attempts exceed max limit', () => {
       beforeEach(() => {
-        workflowRuntime.getCurrentStepState = jest.fn().mockReturnValue({ attempt: 3 });
-        workflowRuntime.failStep = jest.fn();
-        workflowRuntime.setWorkflowError = jest.fn();
+        (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({ attempt: 3 });
       });
 
       it('should fail the step with appropriate error', async () => {
         await underTest.catchError();
-        expect(workflowRuntime.failStep).toHaveBeenCalledWith(
+        expect(stepExecutionRuntime.failStep).toHaveBeenCalledWith(
           new Error('Retry step "retryStep1" has exceeded the maximum number of attempts.')
         );
       });
@@ -133,9 +144,7 @@ describe('EnterRetryNodeImpl', () => {
     describe('no delay configured', () => {
       describe('when attempts are within max limit', () => {
         beforeEach(() => {
-          workflowRuntime.getCurrentStepState = jest.fn().mockReturnValue({ attempt: 2 });
-          workflowRuntime.navigateToNode = jest.fn();
-          workflowRuntime.setWorkflowError = jest.fn();
+          (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({ attempt: 2 });
         });
 
         it('should clear workflow error', async () => {
@@ -158,13 +167,11 @@ describe('EnterRetryNodeImpl', () => {
           workflowTaskManager.scheduleResumeTask = jest.fn().mockResolvedValue({
             taskId: 'fake-task-id',
           });
-          workflowRuntime.setWaitStep = jest.fn();
           workflowRuntime.setWorkflowError = jest.fn();
           workflowRuntime.getWorkflowExecution = jest.fn().mockReturnValue({
             id: 'fake-execution-1',
             spaceId: 'fake-space-1',
           });
-          workflowRuntime.setCurrentStepState = jest.fn();
         });
 
         it('should clear workflow error', async () => {
@@ -175,7 +182,7 @@ describe('EnterRetryNodeImpl', () => {
 
         it('should set step to wait status', async () => {
           await underTest.catchError();
-          expect(workflowRuntime.setWaitStep).toHaveBeenCalledWith();
+          expect(stepExecutionRuntime.setWaitStep).toHaveBeenCalledWith();
         });
 
         it('should schedule resume task of current execution', async () => {
@@ -198,11 +205,11 @@ describe('EnterRetryNodeImpl', () => {
         });
 
         it('should update state with task id with preserving previous state', async () => {
-          workflowRuntime.getCurrentStepState = jest.fn().mockReturnValue({
+          (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({
             attempt: 1,
           });
           await underTest.catchError();
-          expect(workflowRuntime.setCurrentStepState).toHaveBeenCalledWith({
+          expect(stepExecutionRuntime.setCurrentStepState).toHaveBeenCalledWith({
             attempt: 1,
             resumeExecutionTaskId: 'fake-task-id',
           });
@@ -212,8 +219,6 @@ describe('EnterRetryNodeImpl', () => {
       describe('short delay configured', () => {
         beforeEach(() => {
           node.configuration.delay = '5s';
-          workflowRuntime.navigateToNode = jest.fn();
-          workflowRuntime.setWorkflowError = jest.fn();
         });
 
         it('should clear workflow error', async () => {

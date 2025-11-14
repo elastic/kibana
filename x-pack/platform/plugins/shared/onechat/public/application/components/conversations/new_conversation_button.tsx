@@ -10,12 +10,14 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useNavigation } from '../../hooks/use_navigation';
 import { appPaths } from '../../utils/app_paths';
-import { useConversationId } from '../../hooks/use_conversation_id';
+import { useConversationId } from '../../context/conversation/use_conversation_id';
 import { useIsSendingMessage } from '../../hooks/use_is_sending_message';
 import { useSendMessage } from '../../context/send_message/send_message_context';
+import { useConversationContext } from '../../context/conversation/conversation_context';
 
 export const NewConversationButton: React.FC<{}> = () => {
   const { createOnechatUrl } = useNavigation();
+  const { isEmbeddedContext, setConversationId } = useConversationContext();
   const conversationId = useConversationId();
   const isNewConversation = !conversationId;
   const isSendingMessage = useIsSendingMessage();
@@ -27,12 +29,17 @@ export const NewConversationButton: React.FC<{}> = () => {
     if (isNewConversation) {
       cleanConversation();
     }
+    if (isEmbeddedContext) {
+      setConversationId?.(undefined);
+    }
   };
 
   const buttonProps = isDisabled
     ? {
         disabled: true,
       }
+    : isEmbeddedContext
+    ? {}
     : {
         href: createOnechatUrl(appPaths.chat.new),
       };
@@ -52,6 +59,7 @@ export const NewConversationButton: React.FC<{}> = () => {
       iconSide="left"
       aria-label={labels.ariaLabel}
       onClick={handleClick}
+      data-test-subj="agentBuilderNewConversationButton"
       {...buttonProps}
     >
       {labels.display}

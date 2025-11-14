@@ -36,6 +36,12 @@ If you are migrating from a version prior to version 9.0, you must first upgrade
 % 4. You can then call the link from any Kibana code. For example: `href: docLinks.links.upgradeAssistant.id`
 % Check https://docs.elastic.dev/docs/kibana-doc-links (internal) for more details about the Doc links service.
 
+## 9.2.0 [kibana-9.2.0-breaking-changes]
+$$$kibana-230067$$$
+::::{dropdown} Improved advanced settings management APIs privilege checks 
+% **Details**<br> Roles with explicit `read` access to advanced settings but `all` access to `SavedObjectManagement` can no longer update settings using the internal advanced settings API. This update enforces explicit privileges instead of relying on saved object security checks.
+View [#230067]({{kib-pull}}230067).
+::::
 
 ## 9.1.0 [kibana-9.1.0-breaking-changes]
 $$$kibana-213916$$$

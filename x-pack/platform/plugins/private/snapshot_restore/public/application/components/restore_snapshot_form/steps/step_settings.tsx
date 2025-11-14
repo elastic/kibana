@@ -72,7 +72,7 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
   );
 
   return (
-    <div className="snapshotRestore__restoreForm__stepSettings">
+    <div>
       {/* Step title and doc link */}
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
@@ -105,6 +105,7 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
         <>
           <EuiSpacer size="m" />
           <EuiCallOut
+            announceOnMount
             iconType="question"
             title={i18n.translate(
               'xpack.snapshotRestore.restoreForm.stepSettings.dataStreamsCallout.title',

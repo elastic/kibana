@@ -79,6 +79,7 @@ export const EsQueryRuleTypeExpression: React.FunctionComponent<
   const expressionError = !!errorParam && (
     <>
       <EuiCallOut
+        announceOnMount
         color="danger"
         size="s"
         data-test-subj="esQueryAlertExpressionError"

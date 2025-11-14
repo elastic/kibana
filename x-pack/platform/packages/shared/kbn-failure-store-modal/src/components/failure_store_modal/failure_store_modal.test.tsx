@@ -20,10 +20,21 @@ const defaultProps = {
   } as FailureStoreFormProps,
 };
 
-const renderModal = (failureStoreProps = defaultProps.failureStoreProps) => {
+const renderModal = (
+  failureStoreProps = defaultProps.failureStoreProps,
+  inheritOptions?: {
+    canShowInherit: boolean;
+    isWired: boolean;
+    isCurrentlyInherited: boolean;
+  }
+) => {
   return render(
     <IntlProvider>
-      <FailureStoreModal {...defaultProps} failureStoreProps={failureStoreProps} />
+      <FailureStoreModal
+        {...defaultProps}
+        failureStoreProps={failureStoreProps}
+        inheritOptions={inheritOptions}
+      />
     </IntlProvider>
   );
 };
@@ -110,7 +121,7 @@ describe('FailureStoreModal', () => {
       expect(getByTestId('selectFailureStoreRetentionPeriodUnit')).toBeInTheDocument();
 
       expect(getByTestId('selectFailureStorePeriodValue')).toHaveValue(15);
-      expect(getByTestId('selectFailureStoreRetentionPeriodUnit')).toHaveValue('d');
+      expect(getByTestId('selectFailureStoreRetentionPeriodUnit')).toHaveTextContent('Days');
 
       fireEvent.click(getByTestId('enableFailureStoreToggle'));
 
@@ -159,9 +170,9 @@ describe('FailureStoreModal', () => {
       expect(valueSelector).toBeDisabled();
       expect(unitSelector).toBeDisabled();
 
-      // The default retention period in the props is 40m, so the value should be 40 and unit 'm'
+      // The default retention period in the props is 40m, so the value should be 40 and unit 'Minutes'
       expect(valueSelector).toHaveValue(40);
-      expect(unitSelector).toHaveValue('m');
+      expect(unitSelector).toHaveTextContent('Minutes');
 
       fireEvent.click(customButton);
 
@@ -171,16 +182,15 @@ describe('FailureStoreModal', () => {
       expect(valueSelector).not.toBeDisabled();
       expect(unitSelector).not.toBeDisabled();
 
-      // The custom retention period by default is the default period, so the value should be 40 and unit 'm'
+      // The custom retention period by default is the default period, so the value should be 40 and unit 'Minutes'
       expect(valueSelector).toHaveValue(40);
-      expect(unitSelector).toHaveValue('m');
+      expect(unitSelector).toHaveTextContent('Minutes');
 
-      fireEvent.change(unitSelector, {
-        target: { value: 's' },
-      });
+      fireEvent.click(unitSelector);
+      fireEvent.click(getByTestId('retentionPeriodUnit-s'));
       fireEvent.change(valueSelector, { target: { value: '15' } });
 
-      expect(unitSelector).toHaveValue('s');
+      expect(unitSelector).toHaveTextContent('Seconds');
       expect(valueSelector).toHaveValue(15);
 
       fireEvent.click(getByTestId('failureStoreModalSaveButton'));
@@ -191,6 +201,244 @@ describe('FailureStoreModal', () => {
           customRetentionPeriod: '15s',
         });
       });
+    });
+  });
+
+  describe('inherit functionality', () => {
+    it('renders inherit toggle when inheritOptions are provided', () => {
+      const { getByTestId } = renderModal(
+        {
+          failureStoreEnabled: true,
+          defaultRetentionPeriod: '30d',
+        },
+        {
+          canShowInherit: true,
+          isWired: true,
+          isCurrentlyInherited: false,
+        }
+      );
+
+      expect(getByTestId('inheritFailureStoreSwitch')).toBeInTheDocument();
+    });
+
+    it('does not render inherit toggle when inheritOptions are not provided', () => {
+      const { queryByTestId } = renderModal({
+        failureStoreEnabled: true,
+        defaultRetentionPeriod: '30d',
+      });
+
+      expect(queryByTestId('inheritFailureStoreSwitch')).not.toBeInTheDocument();
+    });
+
+    it('does not render inherit toggle when canShowInherit is false', () => {
+      const { queryByTestId } = renderModal(
+        {
+          failureStoreEnabled: true,
+          defaultRetentionPeriod: '30d',
+        },
+        {
+          canShowInherit: false,
+          isWired: true,
+          isCurrentlyInherited: false,
+        }
+      );
+
+      expect(queryByTestId('inheritFailureStoreSwitch')).not.toBeInTheDocument();
+    });
+
+    it('disables all fields when inherit toggle is enabled', async () => {
+      const { getByTestId } = renderModal(
+        {
+          failureStoreEnabled: true,
+          defaultRetentionPeriod: '30d',
+          customRetentionPeriod: '40d',
+        },
+        {
+          canShowInherit: true,
+          isWired: true,
+          isCurrentlyInherited: false,
+        }
+      );
+
+      const inheritToggle = getByTestId('inheritFailureStoreSwitch');
+      const failureStoreToggle = getByTestId('enableFailureStoreToggle');
+      const periodTypeButtons = getByTestId('selectFailureStorePeriodType');
+
+      // Initially, inherit is off and fields should be enabled
+      expect(inheritToggle).not.toBeChecked();
+      expect(failureStoreToggle).not.toBeDisabled();
+
+      // Enable inherit toggle
+      fireEvent.click(inheritToggle);
+
+      await waitFor(() => {
+        expect(inheritToggle).toBeChecked();
+        expect(failureStoreToggle).toBeDisabled();
+        // Check that period type button group is disabled
+        const buttons = within(periodTypeButtons).getAllByRole('button');
+        buttons.forEach((button) => {
+          expect(button).toBeDisabled();
+        });
+      });
+    });
+
+    it('do not reset fields to initial values when inherit is enabled', async () => {
+      const { getByTestId } = renderModal(
+        {
+          failureStoreEnabled: true,
+          defaultRetentionPeriod: '30d',
+          customRetentionPeriod: '40d',
+        },
+        {
+          canShowInherit: true,
+          isWired: true,
+          isCurrentlyInherited: false,
+        }
+      );
+
+      const inheritToggle = getByTestId('inheritFailureStoreSwitch');
+      const failureStoreToggle = getByTestId('enableFailureStoreToggle');
+      const valueSelector = getByTestId('selectFailureStorePeriodValue');
+
+      // Initially, failure store is enabled with custom period of 40d
+      expect(failureStoreToggle).toBeChecked();
+      expect(valueSelector).toHaveValue(40);
+
+      // Modify the failure store toggle
+      fireEvent.click(failureStoreToggle);
+      expect(failureStoreToggle).not.toBeChecked();
+
+      // Enable inherit toggle
+      fireEvent.click(inheritToggle);
+
+      await waitFor(() => {
+        // Fields should maintain the modified values
+        expect(failureStoreToggle).not.toBeChecked();
+      });
+    });
+
+    it('saves inherit configuration when inherit is enabled', async () => {
+      const { getByTestId } = renderModal(
+        {
+          failureStoreEnabled: false,
+          defaultRetentionPeriod: '30d',
+        },
+        {
+          canShowInherit: true,
+          isWired: true,
+          isCurrentlyInherited: false,
+        }
+      );
+
+      const inheritToggle = getByTestId('inheritFailureStoreSwitch');
+      const saveButton = getByTestId('failureStoreModalSaveButton');
+
+      // Enable inherit toggle
+      fireEvent.click(inheritToggle);
+
+      await waitFor(() => {
+        expect(inheritToggle).toBeChecked();
+        expect(saveButton).not.toBeDisabled();
+      });
+
+      fireEvent.click(saveButton);
+
+      await waitFor(() => {
+        expect(defaultProps.onSaveModal).toHaveBeenCalledWith({
+          inherit: true,
+          failureStoreEnabled: false,
+        });
+      });
+    });
+
+    it('initializes with inherit enabled when isCurrentlyInherited is true', () => {
+      const { getByTestId } = renderModal(
+        {
+          failureStoreEnabled: false,
+          defaultRetentionPeriod: '30d',
+        },
+        {
+          canShowInherit: true,
+          isWired: true,
+          isCurrentlyInherited: true,
+        }
+      );
+
+      const inheritToggle = getByTestId('inheritFailureStoreSwitch');
+      const failureStoreToggle = getByTestId('enableFailureStoreToggle');
+
+      expect(inheritToggle).toBeChecked();
+      expect(failureStoreToggle).toBeDisabled();
+    });
+
+    it('enables fields when inherit is disabled after being enabled', async () => {
+      const { getByTestId } = renderModal(
+        {
+          failureStoreEnabled: true,
+          defaultRetentionPeriod: '30d',
+        },
+        {
+          canShowInherit: true,
+          isWired: true,
+          isCurrentlyInherited: false,
+        }
+      );
+
+      const inheritToggle = getByTestId('inheritFailureStoreSwitch');
+      const failureStoreToggle = getByTestId('enableFailureStoreToggle');
+
+      // Enable inherit
+      fireEvent.click(inheritToggle);
+
+      await waitFor(() => {
+        expect(failureStoreToggle).toBeDisabled();
+      });
+
+      // Disable inherit
+      fireEvent.click(inheritToggle);
+
+      await waitFor(() => {
+        expect(inheritToggle).not.toBeChecked();
+        expect(failureStoreToggle).not.toBeDisabled();
+      });
+    });
+
+    it('displays wired inheritance labels when isWired is true', () => {
+      const { getByText } = renderModal(
+        {
+          failureStoreEnabled: true,
+          defaultRetentionPeriod: '30d',
+        },
+        {
+          canShowInherit: true,
+          isWired: true,
+          isCurrentlyInherited: false,
+        }
+      );
+
+      expect(getByText('Inherit from parent stream')).toBeInTheDocument();
+      expect(
+        getByText("Use the failure retention configuration from this stream's parent")
+      ).toBeInTheDocument();
+    });
+
+    it('displays classic inheritance labels when isWired is false', () => {
+      const { getByText } = renderModal(
+        {
+          failureStoreEnabled: true,
+          defaultRetentionPeriod: '30d',
+        },
+        {
+          canShowInherit: true,
+          isWired: false,
+          isCurrentlyInherited: false,
+        }
+      );
+
+      expect(getByText('Inherit from index template')).toBeInTheDocument();
+      expect(
+        getByText("Use failure retention configuration from this stream's index template")
+      ).toBeInTheDocument();
     });
   });
 });

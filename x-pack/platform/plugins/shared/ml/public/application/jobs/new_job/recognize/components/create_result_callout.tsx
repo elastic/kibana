@@ -27,6 +27,7 @@ export const CreateResultCallout: FC<CreateResultCalloutProps> = memo(
       <>
         {saveState === SAVE_STATE.SAVED && (
           <EuiCallOut
+            announceOnMount
             title={
               <FormattedMessage
                 id="xpack.ml.newJob.recognize.jobsCreatedTitle"
@@ -39,6 +40,7 @@ export const CreateResultCallout: FC<CreateResultCalloutProps> = memo(
         )}
         {saveState === SAVE_STATE.FAILED && (
           <EuiCallOut
+            announceOnMount
             title={
               <FormattedMessage
                 id="xpack.ml.newJob.simple.recognize.jobsCreationFailedTitle"
@@ -51,6 +53,7 @@ export const CreateResultCallout: FC<CreateResultCalloutProps> = memo(
         )}
         {saveState === SAVE_STATE.PARTIAL_FAILURE && (
           <EuiCallOut
+            announceOnMount
             title={
               <FormattedMessage
                 id="xpack.ml.newJob.recognize.someJobsCreationFailedTitle"

@@ -34,14 +34,6 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
   opacity: 1;
 }
 
-.c1 > span.euiToolTipAnchor {
-  display: block;
-}
-
-.c1 > span.euiToolTipAnchor.eui-textTruncate {
-  display: inline-block;
-}
-
 <div
   class="c0"
   data-test-subj="hoverVisibilityContainer"
@@ -80,33 +72,53 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
         <dd
           class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
         >
-          <div
-            data-test-subj="cellActions-renderContent-host.id"
+          <span
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-DefaultFieldRendererComponent"
+            data-test-subj="DefaultFieldRendererComponent"
           >
-            <div>
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
               <div
-                class="euiPopover emotion-euiPopover-inline-block"
+                class="euiFlexItem emotion-euiFlexItem-growZero"
               >
-                <div>
-                  <div
-                    data-provider-id="draggableId.content.host-id-renderer-default-draggable-ip-overview-host-id"
-                    tabindex="-1"
-                  >
-                    <span
-                      class="c1"
-                      data-test-subj="render-content-host.id"
+                <div
+                  data-test-subj="cellActions-renderContent-host.id"
+                >
+                  <div>
+                    <div
+                      class="euiPopover emotion-euiPopover-inline-block"
                     >
-                      <span
-                        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-                      >
-                        aa7ca589f1b8220002f2fc61c64cfbf1
-                      </span>
-                    </span>
+                      <div>
+                        <div
+                          tabindex="-1"
+                        >
+                          <span
+                            class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
+                            data-test-subj="render-content-host.id"
+                          >
+                            <span
+                              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                            >
+                              aa7ca589f1b8220002f2fc61c64cfbf1
+                            </span>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
+               
             </div>
-          </div>
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiFlexItem emotion-euiFlexItem-growZero"
+              />
+            </div>
+          </span>
         </dd>
         <dt
           class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
@@ -166,11 +178,10 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <div
-                  data-provider-id="draggableId.content.default-field-renderer-default-draggable-host-overview-host_ip-10_142_0_7"
                   tabindex="-1"
                 >
                   <span
-                    class="c1"
+                    class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                     data-test-subj="render-content-host.ip"
                   >
                     <span
@@ -240,11 +251,10 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <div
-                  data-provider-id="draggableId.content.default-field-renderer-default-draggable-host-overview-host_mac-42:01:0a:8e:00:07"
                   tabindex="-1"
                 >
                   <span
-                    class="c1"
+                    class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                     data-test-subj="render-content-host.mac"
                   >
                     <span
@@ -285,11 +295,10 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <div
-                  data-provider-id="draggableId.content.default-field-renderer-default-draggable-host-overview-host_os_platform-debian"
                   tabindex="-1"
                 >
                   <span
-                    class="c1"
+                    class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                     data-test-subj="render-content-host.os.platform"
                   >
                     <span
@@ -339,11 +348,10 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <div
-                  data-provider-id="draggableId.content.default-field-renderer-default-draggable-host-overview-host_os_name-Debian GNU/Linux"
                   tabindex="-1"
                 >
                   <span
-                    class="c1"
+                    class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                     data-test-subj="render-content-host.os.name"
                   >
                     <span
@@ -384,11 +392,10 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <div
-                  data-provider-id="draggableId.content.default-field-renderer-default-draggable-host-overview-host_os_family-debian"
                   tabindex="-1"
                 >
                   <span
-                    class="c1"
+                    class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                     data-test-subj="render-content-host.os.family"
                   >
                     <span
@@ -429,11 +436,10 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <div
-                  data-provider-id="draggableId.content.default-field-renderer-default-draggable-host-overview-host_os_version-9 (stretch)"
                   tabindex="-1"
                 >
                   <span
-                    class="c1"
+                    class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                     data-test-subj="render-content-host.os.version"
                   >
                     <span
@@ -474,11 +480,10 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <div
-                  data-provider-id="draggableId.content.default-field-renderer-default-draggable-host-overview-host_architecture-x86_64"
                   tabindex="-1"
                 >
                   <span
-                    class="c1"
+                    class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                     data-test-subj="render-content-host.architecture"
                   >
                     <span
@@ -528,11 +533,10 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <div
-                  data-provider-id="draggableId.content.default-field-renderer-default-draggable-host-overview-cloud_provider-gce"
                   tabindex="-1"
                 >
                   <span
-                    class="c1"
+                    class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                     data-test-subj="render-content-cloud.provider"
                   >
                     <span
@@ -573,11 +577,10 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <div
-                  data-provider-id="draggableId.content.default-field-renderer-default-draggable-host-overview-cloud_region-us-east-1"
                   tabindex="-1"
                 >
                   <span
-                    class="c1"
+                    class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                     data-test-subj="render-content-cloud.region"
                   >
                     <span
@@ -618,11 +621,10 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <div
-                  data-provider-id="draggableId.content.default-field-renderer-default-draggable-host-overview-cloud_instance_id-423232333829362673777"
                   tabindex="-1"
                 >
                   <span
-                    class="c1"
+                    class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                     data-test-subj="render-content-cloud.instance.id"
                   >
                     <span
@@ -663,11 +665,10 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <div
-                  data-provider-id="draggableId.content.default-field-renderer-default-draggable-host-overview-cloud_machine_type-custom-4-16384"
                   tabindex="-1"
                 >
                   <span
-                    class="c1"
+                    class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                     data-test-subj="render-content-cloud.machine.type"
                   >
                     <span
@@ -729,14 +730,6 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
   opacity: 1;
 }
 
-.c1 > span.euiToolTipAnchor {
-  display: block;
-}
-
-.c1 > span.euiToolTipAnchor.eui-textTruncate {
-  display: inline-block;
-}
-
 <div
   class="c0"
   data-test-subj="hoverVisibilityContainer"
@@ -760,33 +753,53 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
         <dd
           class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
         >
-          <div
-            data-test-subj="cellActions-renderContent-host.id"
+          <span
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-DefaultFieldRendererComponent"
+            data-test-subj="DefaultFieldRendererComponent"
           >
-            <div>
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
               <div
-                class="euiPopover emotion-euiPopover-inline-block"
+                class="euiFlexItem emotion-euiFlexItem-growZero"
               >
-                <div>
-                  <div
-                    data-provider-id="draggableId.content.host-id-renderer-default-draggable-ip-overview-host-id"
-                    tabindex="-1"
-                  >
-                    <span
-                      class="c1"
-                      data-test-subj="render-content-host.id"
+                <div
+                  data-test-subj="cellActions-renderContent-host.id"
+                >
+                  <div>
+                    <div
+                      class="euiPopover emotion-euiPopover-inline-block"
                     >
-                      <span
-                        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-                      >
-                        aa7ca589f1b8220002f2fc61c64cfbf1
-                      </span>
-                    </span>
+                      <div>
+                        <div
+                          tabindex="-1"
+                        >
+                          <span
+                            class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
+                            data-test-subj="render-content-host.id"
+                          >
+                            <span
+                              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                            >
+                              aa7ca589f1b8220002f2fc61c64cfbf1
+                            </span>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
+               
             </div>
-          </div>
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiFlexItem emotion-euiFlexItem-growZero"
+              />
+            </div>
+          </span>
         </dd>
         <dt
           class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
@@ -846,11 +859,10 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <div
-                  data-provider-id="draggableId.content.default-field-renderer-default-draggable-host-overview-host_ip-10_142_0_7"
                   tabindex="-1"
                 >
                   <span
-                    class="c1"
+                    class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                     data-test-subj="render-content-host.ip"
                   >
                     <span
@@ -920,11 +932,10 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <div
-                  data-provider-id="draggableId.content.default-field-renderer-default-draggable-host-overview-host_mac-42:01:0a:8e:00:07"
                   tabindex="-1"
                 >
                   <span
-                    class="c1"
+                    class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                     data-test-subj="render-content-host.mac"
                   >
                     <span
@@ -965,11 +976,10 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <div
-                  data-provider-id="draggableId.content.default-field-renderer-default-draggable-host-overview-host_os_platform-debian"
                   tabindex="-1"
                 >
                   <span
-                    class="c1"
+                    class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                     data-test-subj="render-content-host.os.platform"
                   >
                     <span
@@ -1019,11 +1029,10 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <div
-                  data-provider-id="draggableId.content.default-field-renderer-default-draggable-host-overview-host_os_name-Debian GNU/Linux"
                   tabindex="-1"
                 >
                   <span
-                    class="c1"
+                    class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                     data-test-subj="render-content-host.os.name"
                   >
                     <span
@@ -1064,11 +1073,10 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <div
-                  data-provider-id="draggableId.content.default-field-renderer-default-draggable-host-overview-host_os_family-debian"
                   tabindex="-1"
                 >
                   <span
-                    class="c1"
+                    class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                     data-test-subj="render-content-host.os.family"
                   >
                     <span
@@ -1109,11 +1117,10 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <div
-                  data-provider-id="draggableId.content.default-field-renderer-default-draggable-host-overview-host_os_version-9 (stretch)"
                   tabindex="-1"
                 >
                   <span
-                    class="c1"
+                    class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                     data-test-subj="render-content-host.os.version"
                   >
                     <span
@@ -1154,11 +1161,10 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <div
-                  data-provider-id="draggableId.content.default-field-renderer-default-draggable-host-overview-host_architecture-x86_64"
                   tabindex="-1"
                 >
                   <span
-                    class="c1"
+                    class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                     data-test-subj="render-content-host.architecture"
                   >
                     <span
@@ -1208,11 +1214,10 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <div
-                  data-provider-id="draggableId.content.default-field-renderer-default-draggable-host-overview-cloud_provider-gce"
                   tabindex="-1"
                 >
                   <span
-                    class="c1"
+                    class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                     data-test-subj="render-content-cloud.provider"
                   >
                     <span
@@ -1253,11 +1258,10 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <div
-                  data-provider-id="draggableId.content.default-field-renderer-default-draggable-host-overview-cloud_region-us-east-1"
                   tabindex="-1"
                 >
                   <span
-                    class="c1"
+                    class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                     data-test-subj="render-content-cloud.region"
                   >
                     <span
@@ -1298,11 +1302,10 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <div
-                  data-provider-id="draggableId.content.default-field-renderer-default-draggable-host-overview-cloud_instance_id-423232333829362673777"
                   tabindex="-1"
                 >
                   <span
-                    class="c1"
+                    class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                     data-test-subj="render-content-cloud.instance.id"
                   >
                     <span
@@ -1343,11 +1346,10 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <div
-                  data-provider-id="draggableId.content.default-field-renderer-default-draggable-host-overview-cloud_machine_type-custom-4-16384"
                   tabindex="-1"
                 >
                   <span
-                    class="c1"
+                    class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
                     data-test-subj="render-content-cloud.machine.type"
                   >
                     <span

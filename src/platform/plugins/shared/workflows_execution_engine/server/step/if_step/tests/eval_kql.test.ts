@@ -44,6 +44,18 @@ describe('evaluateKql', () => {
       expect(evaluateKql(kql, { matchesCount: 0 })).toBe(false);
     });
 
+    it('should support array index access in property path', () => {
+      const kql = 'users[0].name: "Alice"';
+      expect(evaluateKql(kql, { users: [{ name: 'Alice' }, { name: 'Bob' }] })).toBe(true);
+      expect(evaluateKql(kql, { users: [{ name: 'Charlie' }, { name: 'Bob' }] })).toBe(false);
+    });
+
+    it('should support array index access through dot', () => {
+      const kql = 'users.0.name: "Alice"';
+      expect(evaluateKql(kql, { users: [{ name: 'Alice' }, { name: 'Bob' }] })).toBe(true);
+      expect(evaluateKql(kql, { users: [{ name: 'Charlie' }, { name: 'Bob' }] })).toBe(false);
+    });
+
     describe('range expressions', () => {
       it('should correctly evaluate a simple "range" KQL expression with number', () => {
         const kql = 'matchesCount >= 1000 and matchesCount <= 5000';
@@ -83,41 +95,61 @@ describe('evaluateKql', () => {
       it('should correctly evaluate when checking if field exists using wildcard', () => {
         const kql = 'matchesCount:*'; // TODO: Figure out how to do "exist" operation in KQL
         expect(evaluateKql(kql, { matchesCount: 2339 })).toBe(true);
+        expect(evaluateKql(kql, { matchesCount: { someObject: 'foo' } })).toBe(true);
+        expect(evaluateKql(kql, { matchesCount: undefined })).toBe(false);
         expect(evaluateKql(kql, { nothing: 0 })).toBe(false);
       });
 
       it('should evaluate term* wildcard correctly', () => {
-        const kql = 'user.name: "John*"';
+        const kql = 'user.name: John*';
         expect(evaluateKql(kql, { user: { name: 'John Doe' } })).toBe(true);
         expect(evaluateKql(kql, { user: { name: 'Jane Doe' } })).toBe(false);
       });
 
-      it('should match escaped asterisk', () => {
-        const kql = 'user.name:"John\\*"';
+      it('should do anything', () => {
+        const kql = 'user.info: *John*';
+        expect(
+          evaluateKql(kql, {
+            user: {
+              info: 'Lorem ipsum John Doe',
+            },
+          })
+        ).toBe(true);
+        expect(
+          evaluateKql(kql, {
+            user: {
+              info: 'Lorem ipsum Jane Doe',
+            },
+          })
+        ).toBe(false);
+      });
+
+      it('should match asterisk if quoted', () => {
+        const kql = 'user.name:"John*"';
         expect(evaluateKql(kql, { user: { name: 'John*' } })).toBe(true);
         expect(evaluateKql(kql, { user: { name: 'John Doe' } })).toBe(false);
       });
 
       it('should evaluate *term wildcard correctly', () => {
-        const kql = 'user.name: "*Doe"';
+        const kql = 'user.name: *Doe';
         expect(evaluateKql(kql, { user: { name: 'John Doe' } })).toBe(true);
         expect(evaluateKql(kql, { user: { name: 'John Smith' } })).toBe(false);
       });
 
       it('should evaluate *term* wildcard correctly', () => {
-        const kql = 'txt: "*psu*"';
+        const kql = 'txt: *psu*';
         expect(evaluateKql(kql, { txt: 'Lorem ipsum dolor' })).toBe(true);
         expect(evaluateKql(kql, { txt: 'Lorem ipsm dolor' })).toBe(false);
       });
 
-      it('should evaluate a?c wildcard correctly', () => {
-        const kql = 'user.name: "J??n Doe"';
+      it('should evaluate a*c wildcard correctly', () => {
+        const kql = 'user.name: J*n Doe';
         expect(evaluateKql(kql, { user: { name: 'John Doe' } })).toBe(true);
         expect(evaluateKql(kql, { user: { name: 'Jane Doe' } })).toBe(false);
       });
 
       it('should evaluate complex wildcard correctly', () => {
-        const kql = 'user.name: "J??n D*"';
+        const kql = 'user.name: J*n D*';
         expect(evaluateKql(kql, { user: { name: 'John Doe' } })).toBe(true);
         expect(evaluateKql(kql, { user: { name: 'Jane Doe' } })).toBe(false);
       });
