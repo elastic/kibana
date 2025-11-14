@@ -18,7 +18,7 @@ import type { ScoutWorkerFixtures } from '@kbn/scout';
 import type { KibanaPhoenixClient } from './kibana_phoenix_client/client';
 import type { EvaluationCriterion } from './evaluators/criteria';
 import type { EvaluationAnalysisService } from './utils/analysis';
-import { type EvaluationReporter } from './utils/report_model_score';
+import { type EvaluationReporter } from './utils/evaluation_reporter';
 
 export interface EvaluationDataset {
   name: string;

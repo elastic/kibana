@@ -8,8 +8,7 @@
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import { hostname } from 'os';
-import type { DatasetScoreWithStats } from './evaluation_stats';
-import type { EvaluationReport } from './report_model_score';
+import type { DatasetScoreWithStats, EvaluationReport } from './evaluation_stats';
 
 export interface EvaluationScoreDocument {
   '@timestamp': string;
@@ -320,7 +319,7 @@ export class EvaluationScoreRepository {
         },
       };
 
-      const response = await this.esClient.search({
+      const response = await this.esClient.search<EvaluationScoreDocument>({
         index: EVALUATIONS_DATA_STREAM_WILDCARD,
         query,
         sort: [
@@ -331,7 +330,9 @@ export class EvaluationScoreRepository {
       });
 
       const hits = response.hits?.hits || [];
-      const scores = hits.map((hit: any) => hit._source);
+      const scores = hits
+        .map((hit) => hit._source)
+        .filter((source): source is EvaluationScoreDocument => source !== undefined);
 
       this.log.info(`Retrieved ${scores.length} scores for run ID: ${runId}`);
       return scores;

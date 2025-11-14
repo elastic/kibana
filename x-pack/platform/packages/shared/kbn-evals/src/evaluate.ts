@@ -16,11 +16,8 @@ import type { EvaluationTestOptions } from './config/create_playwright_eval_conf
 import { httpHandlerFromKbnClient } from './utils/http_handler_from_kbn_client';
 import { createCriteriaEvaluator } from './evaluators/criteria';
 import type { DefaultEvaluators, EvaluationSpecificWorkerFixtures } from './types';
-import {
-  buildEvaluationReport,
-  exportEvaluations,
-  createDefaultTerminalReporter,
-} from './utils/report_model_score';
+import { buildEvaluationReport, exportEvaluations } from './utils/report_model_score';
+import { createDefaultTerminalReporter } from './utils/evaluation_reporter';
 import { createConnectorFixture } from './utils/create_connector_fixture';
 import { createCorrectnessAnalysisEvaluator } from './evaluators/correctness';
 import { EvaluationAnalysisService } from './utils/analysis';
