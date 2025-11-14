@@ -88,7 +88,7 @@ export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect })
             <EuiFlexItem grow={false}>
               <EuiButton
                 fill
-                href="https://cloud.elastic.co/registration?onboarding_service_type=ccm&redirectTo=%2Faccount%2Fkeys"
+                href="https://cloud.elastic.co/registration?onboarding_service_type=ccm"
                 target="_blank"
                 iconType="popout"
                 iconSide="right"
@@ -98,7 +98,7 @@ export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect })
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton
-                href="https://cloud.elastic.co/login?onboarding_service_type=ccm&redirectTo=%2Faccount%2Fkeys"
+                href="https://cloud.elastic.co/login?redirectTo=%2Fconnect-cluster-services"
                 target="_blank"
                 iconType="popout"
                 iconSide="right"
