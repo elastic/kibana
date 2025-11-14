@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ALERTS_TABLE_EXPAND_BUTTON } from '../../screens/alerts';
 import { initializeDataViews } from '../../tasks/login';
 import { cleanupRule, loadRule } from '../../tasks/api_fixtures';
 import {
@@ -41,7 +42,7 @@ describe(
     });
 
     it('should substitute parameters in investigation guide', () => {
-      cy.getBySel('expand-event').first().click();
+      cy.getBySel(ALERTS_TABLE_EXPAND_BUTTON).first().click();
       cy.getBySel('securitySolutionFlyoutInvestigationGuideButton').click();
       // Flakes at times if the button is only clicked once
       cy.contains('Get processes').should('be.visible').dblclick({ force: true });
@@ -57,7 +58,7 @@ describe(
     it.skip('should substitute parameters in live query and increase number of ran queries', () => {
       let initialNotificationCount: number;
       let updatedNotificationCount: number;
-      cy.getBySel('expand-event').first().click();
+      cy.getBySel(ALERTS_TABLE_EXPAND_BUTTON).first().click();
       cy.getBySel('response-actions-notification')
         .should('not.have.text', '0')
         .then((element) => {
@@ -81,7 +82,7 @@ describe(
         });
 
       it('should be able to run take action query against all enrolled agents', () => {
-        cy.getBySel('expand-event').first().click();
+        cy.getBySel(ALERTS_TABLE_EXPAND_BUTTON).first().click();
         cy.getBySel('securitySolutionFlyoutFooterDropdownButton').click();
         cy.getBySel('osquery-action-item').click();
         cy.getBySel('agentSelection').within(() => {
@@ -103,7 +104,7 @@ describe(
       it('should substitute params in osquery ran from timelines alerts', () => {
         cy.getBySel('send-alert-to-timeline-button').first().click();
         cy.getBySel('query-events-table').within(() => {
-          cy.getBySel('expand-event').first().click();
+          cy.getBySel(ALERTS_TABLE_EXPAND_BUTTON).first().click();
         });
         takeOsqueryActionWithParams();
       });

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ALERTS_TABLE_EXPAND_BUTTON } from '../../screens/alerts';
 import { initializeDataViews } from '../../tasks/login';
 import { cleanupRule, loadRule } from '../../tasks/api_fixtures';
 import { checkActionItemsInResults, loadRuleAlerts, navigateToRule } from '../../tasks/live_query';
@@ -37,7 +38,7 @@ describe(
 
     it('can visit discover from response action results', { tags: ['@ess'] }, () => {
       const discoverRegex = new RegExp(`action_id: ${UUID_REGEX}`);
-      cy.getBySel('expand-event').first().click();
+      cy.getBySel(ALERTS_TABLE_EXPAND_BUTTON).first().click();
       cy.getBySel('securitySolutionFlyoutResponseSectionHeader').click();
       cy.getBySel('securitySolutionFlyoutResponseButton').click();
       cy.getBySel('responseActionsViewWrapper').should('exist');
@@ -62,7 +63,7 @@ describe(
 
     it('can visit lens from response action results', { tags: ['@ess'] }, () => {
       const lensRegex = new RegExp(`Action ${UUID_REGEX} results`);
-      cy.getBySel('expand-event').first().click();
+      cy.getBySel(ALERTS_TABLE_EXPAND_BUTTON).first().click();
       cy.getBySel('securitySolutionFlyoutResponseSectionHeader').click();
       cy.getBySel('securitySolutionFlyoutResponseButton').click();
       cy.getBySel('responseActionsViewWrapper').should('exist');
@@ -100,7 +101,7 @@ describe(
       () => {
         const timelineRegex = new RegExp(`Added ${UUID_REGEX} to Timeline`);
         const filterRegex = new RegExp(`action_id: "${UUID_REGEX}"`);
-        cy.getBySel('expand-event').first().click();
+        cy.getBySel(ALERTS_TABLE_EXPAND_BUTTON).first().click();
         cy.getBySel('securitySolutionFlyoutResponseSectionHeader').click();
         cy.getBySel('securitySolutionFlyoutResponseButton').click();
         cy.getBySel('responseActionsViewWrapper').should('exist');

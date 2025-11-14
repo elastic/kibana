@@ -6,10 +6,11 @@
  */
 
 import { waitForAlertsToPopulate } from '@kbn/cypress-test-helper/src/services/alerting_services';
+import { ALERTS_TABLE_EXPAND_BUTTON } from '../../screens/alerts';
 import { disableNewFeaturesTours } from '../../tasks/navigation';
 import { initializeDataViews } from '../../tasks/login';
 import { checkResults, clickRuleName, submitQuery } from '../../tasks/live_query';
-import { loadRule, cleanupRule } from '../../tasks/api_fixtures';
+import { cleanupRule, loadRule } from '../../tasks/api_fixtures';
 import { ServerlessRoleName } from '../../support/roles';
 
 describe('Alert Test', { tags: ['@ess'] }, () => {
@@ -33,7 +34,7 @@ describe('Alert Test', { tags: ['@ess'] }, () => {
       });
       clickRuleName(ruleName);
       waitForAlertsToPopulate();
-      cy.getBySel('expand-event').first().click();
+      cy.getBySel(ALERTS_TABLE_EXPAND_BUTTON).first().click();
       cy.getBySel('securitySolutionFlyoutInvestigationGuideButton').click();
       cy.contains('Get processes').click();
     });

@@ -21,6 +21,7 @@ import { useExpandableFlyoutApi, useExpandableFlyoutState } from '@kbn/expandabl
 import { createExpandableFlyoutApiMock } from '../../../mock/expandable_flyout';
 import { useUserPrivileges } from '../../user_privileges';
 import { initialUserPrivilegesState } from '../../user_privileges/user_privileges_context';
+import { EXPAND_BUTTON_TEST_ID } from '../../header_actions';
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
@@ -118,7 +119,7 @@ describe('RowAction', () => {
         <RowAction {...defaultProps} />
       </TestProviders>
     );
-    expect(wrapper.getAllByTestId('expand-event')).not.toBeNull();
+    expect(wrapper.getAllByTestId(EXPAND_BUTTON_TEST_ID)).not.toBeNull();
   });
 
   test('should always show expandable flyout if the page is attackDiscovery', () => {
@@ -130,7 +131,7 @@ describe('RowAction', () => {
         <RowAction {...defaultProps} />
       </TestProviders>
     );
-    fireEvent.click(wrapper.getByTestId('expand-event'));
+    fireEvent.click(wrapper.getByTestId(EXPAND_BUTTON_TEST_ID));
     expect(mockDispatch).not.toHaveBeenCalled();
     expect(mockOpenFlyout).toHaveBeenCalledWith({
       right: {

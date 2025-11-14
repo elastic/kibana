@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ALERTS_TABLE_EXPAND_BUTTON } from '../../screens/alerts';
 import { initializeDataViews } from '../../tasks/login';
 import { OSQUERY_FLYOUT_BODY_EDITOR } from '../../screens/live_query';
 import {
@@ -67,7 +68,7 @@ describe.skip(
 
       it('runs osquery against alert and creates a new case', () => {
         const [caseName, caseDescription] = generateRandomStringName(2);
-        cy.getBySel('expand-event').first().click();
+        cy.getBySel(ALERTS_TABLE_EXPAND_BUTTON).first().click();
         cy.getBySel('securitySolutionFlyoutFooterDropdownButton').click();
         cy.getBySel('osquery-action-item').click();
         cy.contains(/^\d+ agen(t|ts) selected/);
@@ -102,7 +103,7 @@ describe.skip(
       });
 
       it('sees osquery results from last action and add to a case', () => {
-        cy.getBySel('expand-event').first().click();
+        cy.getBySel(ALERTS_TABLE_EXPAND_BUTTON).first().click();
         cy.getBySel('securitySolutionFlyoutResponseSectionHeader').click();
         cy.getBySel('securitySolutionFlyoutResponseButton').click();
         cy.getBySel('responseActionsViewWrapper').should('exist');

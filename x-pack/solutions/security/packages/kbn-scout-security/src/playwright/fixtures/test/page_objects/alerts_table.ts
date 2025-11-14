@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ScoutPage, Locator } from '@kbn/scout';
+import type { Locator, ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout';
 
 const PAGE_URL = 'security/alerts';
@@ -34,7 +34,7 @@ export class AlertsTablePage {
       `Alert with rule '${ruleName}' is not displayed in the alerts table`
     ).toBeVisible();
 
-    return row.locator(`[data-test-subj='expand-event']`).click();
+    return row.locator(`[data-test-subj='expand-event-button']`).click();
   }
 
   async waitForDetectionsAlertsWrapper() {
