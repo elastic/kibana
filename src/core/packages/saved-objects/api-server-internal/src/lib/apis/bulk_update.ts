@@ -161,6 +161,9 @@ export const performBulkUpdate = async <T>(
       ? SavedObjectsUtils.namespaceStringToId(objectNamespace)
       : namespace;
 
+  // Note here we are doing a bulk (client.mget) before updating
+  // Interesting thing is --> `_source: true`
+  // Op is a bit heavy but it might be useful.
   const bulkGetDocs = validObjects.map(({ value: { type, id, objectNamespace } }) => ({
     _id: serializer.generateRawId(getNamespaceId(objectNamespace), type, id),
     _index: commonHelper.getIndexForType(type),
@@ -336,16 +339,36 @@ export const performBulkUpdate = async <T>(
         migrationVersionCompatibility,
       };
 
+      const _id = serializer.generateRawId(getNamespaceId(objectNamespace), type, id);
       bulkUpdateParams.push(
         {
           index: {
-            _id: serializer.generateRawId(getNamespaceId(objectNamespace), type, id),
+            _id,
             _index: commonHelper.getIndexForType(type),
             ...versionProperties,
           },
         },
         updatedMigratedDocumentToSave._source
       );
+
+      if (options.snapshot) {
+        const _source = updatedMigratedDocumentToSave._source;
+        bulkUpdateParams.push(
+          {
+            create: {
+              _id,
+              _index: commonHelper.getSnapshotIndexForType(type),
+            },
+          },
+          {
+            '@timestamp': new Date().toISOString(),
+            'user.id': updatedBy || 'unknown',
+            message: options.reason || 'update',
+            id: _id,
+            source: _source,
+          }
+        );
+      }
 
       return right(expectedResult);
     })

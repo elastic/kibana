@@ -42,6 +42,10 @@ export interface SavedObjectsUpdateOptions<Attributes = unknown> extends SavedOb
    * Defaults to `true`.
    */
   mergeAttributes?: boolean;
+  /** Snapshot the object after update */
+  snapshot?: boolean;
+  /** Why change was made */
+  reason?: string;
 }
 
 /**

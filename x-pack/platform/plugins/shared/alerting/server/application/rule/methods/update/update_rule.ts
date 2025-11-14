@@ -377,6 +377,8 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
         id,
         version,
         overwrite: true,
+        snapshot: true,
+        reason: 'rule updated by user',
         references: extractedReferences,
       },
     });

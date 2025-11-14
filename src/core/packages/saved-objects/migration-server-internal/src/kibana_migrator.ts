@@ -23,6 +23,7 @@ import type {
 } from '@kbn/core-elasticsearch-server';
 import type {
   ISavedObjectTypeRegistry,
+  SavedObjectsType,
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core-saved-objects-server';
 import {
@@ -144,7 +145,7 @@ export class KibanaMigrator implements IKibanaMigrator {
     return this.documentMigrator;
   }
 
-  public runMigrations({
+  public async runMigrations({
     rerun = false,
     skipVersionCheck = false,
   }: { rerun?: boolean; skipVersionCheck?: boolean } = {}): Promise<MigrationResult[]> {
@@ -163,6 +164,18 @@ export class KibanaMigrator implements IKibanaMigrator {
 
         return result;
       });
+    }
+
+    try {
+      // Migration finished.
+      // Add indices for tracking SO version histories.
+      for (const type of this.typeRegistry.getAllTypes()) {
+        if (type.snapshots) {
+          await this.createSnapshotIndex(type);
+        }
+      }
+    } catch (error) {
+      this.log.error(error);
     }
 
     return this.migrationResult;
@@ -232,6 +245,40 @@ export class KibanaMigrator implements IKibanaMigrator {
       process.removeListener('uncaughtExceptionMonitor', dumpLogs);
       logger.clear?.();
     }
+  }
+
+  async createSnapshotIndex(type: SavedObjectsType) {
+    if (!type.indexPattern) {
+      throw new Error(
+        `Unable to create snapshot index for [${type.name}]. Missing [indexPattern] in type definition.`
+      );
+    }
+    const alias = `${type.indexPattern}_snapshots`;
+    const index = `${alias}_001`;
+    const exists = await this.client.indices.exists({ index });
+    if (exists) {
+      this.log.debug(`Snapshot index [${index}] exists. Skipping creation..`);
+      // return;
+      // Recreate the snapshot index for POC while testing/debugging.
+      await this.client.indices.delete({ index });
+    }
+    // TODO: This should really be a data stream
+    this.log.info(`Snapshot index [${index}] missing. Creating..`);
+    await this.client.indices.create({
+      index,
+      aliases: { [alias]: { is_write_index: true } },
+      mappings: {
+        properties: {
+          '@timestamp': { type: 'date' },
+          'user.id': { type: 'keyword' },
+          message: { type: 'text' },
+          id: { type: 'keyword' },
+          source: { type: 'flattened' },
+          diff: { type: 'object' },
+          meta: { type: 'object' },
+        },
+      },
+    });
   }
 
   public getActiveMappings(): IndexMapping {

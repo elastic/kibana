@@ -50,6 +50,11 @@ export interface SavedObjectsType<Attributes = any> {
    */
   hidden: boolean;
   /**
+   * Is the type snapshottable.
+   * If true, a snapshot index will be created alongside the main index.
+   */
+  snapshots?: boolean;
+  /**
    * Is the type hidden from the http APIs. If `hiddenFromHttpApis:true`, repositories will have access to the type but the type is not exposed via the HTTP APIs.
    * It is recommended to hide types registered with 'hidden=false' from the httpApis for backward compatibility in the HTTP layer.
    *
