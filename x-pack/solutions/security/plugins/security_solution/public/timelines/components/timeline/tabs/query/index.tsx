@@ -10,7 +10,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
-import type { EuiDataGridControlColumn } from '@elastic/eui';
+import { type EuiDataGridControlColumn } from '@elastic/eui';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { DataLoadingState } from '@kbn/unified-data-table';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
@@ -354,6 +354,8 @@ export const QueryTabContentComponent: React.FC<Props> = ({
         header={
           <QueryTabHeader
             activeTab={activeTab}
+            dataViewId={dataViewId}
+            currentIndices={currentTimeline.indexNames}
             filterManager={timelineFilterManager}
             show={show && activeTab === TimelineTabs.query}
             showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
