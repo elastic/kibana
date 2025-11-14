@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/logs-data-access-plugin",
   "owner": [
-    "@elastic/obs-onboarding-team"
+    "@elastic/obs-exploration-team"
   ],
   "group": "platform",
   "visibility": "shared",
