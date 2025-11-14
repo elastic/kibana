@@ -11,6 +11,10 @@ export type {
   StaticEsqlTool,
   StaticWorkflowTool,
   StaticIndexSearchTool,
+  ToolAvailabilityContext,
+  ToolAvailabilityHandler,
+  ToolAvailabilityResult,
+  ToolAvailabilityConfig,
 } from './builtin';
 export type {
   ToolHandlerFn,
