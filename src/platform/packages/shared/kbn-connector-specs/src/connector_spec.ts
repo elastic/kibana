@@ -83,6 +83,8 @@ export interface AuthTypeSpec<T extends Record<string, unknown>> {
   configure: (axiosInstance: AxiosInstance, secret: T) => AxiosInstance;
 }
 
+export type NormalizedAuthType = AuthTypeSpec<Record<string, unknown>>;
+
 // ============================================================================
 // PHASE 2 AUTH TYPES (Not supported yet - see connector_rfc.ts)
 // ============================================================================

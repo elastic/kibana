@@ -6,10 +6,10 @@
  */
 
 import { z } from '@kbn/zod';
-import type { NormalizedAuthType } from './auth_type_registry';
 import { AuthTypeRegistry } from './auth_type_registry';
 import { registerAuthTypes } from './register_auth_types';
 import zodToJsonSchema from 'zod-to-json-schema';
+import type { NormalizedAuthType } from '@kbn/connector-specs';
 
 const getAuthType = (overrides = {}): NormalizedAuthType => {
   return {

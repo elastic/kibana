@@ -7,13 +7,12 @@
 
 import { z } from '@kbn/zod';
 import Boom from '@hapi/boom';
-import type { AuthTypeSpec as AuthType, AuthTypeDef } from '@kbn/connector-specs';
+import type { AuthTypeDef, NormalizedAuthType } from '@kbn/connector-specs';
+import type { AUTH_TYPE_DISCRIMINATOR } from '@kbn/connector-specs/src/lib';
+import { getSchemaForAuthType } from '@kbn/connector-specs/src/lib';
 import { i18n } from '@kbn/i18n';
 import { isString } from 'lodash';
 
-const AUTH_TYPE_DISCRIMINATOR = 'authType';
-
-export type NormalizedAuthType = AuthType<Record<string, unknown>>;
 export class AuthTypeRegistry {
   private readonly authTypes: Map<string, NormalizedAuthType> = new Map();
 
@@ -101,20 +100,6 @@ export class AuthTypeRegistry {
 
     const authType = this.get(authTypeId);
 
-    let schemaToUse = authType.schema;
-    if (customSchema && customSchema instanceof z.ZodObject) {
-      if (mergeStrategy === 'override') {
-        // use the custom schema
-        schemaToUse = customSchema;
-      } else {
-        // merge the schemas, with the custom schema overriding any shared props
-        schemaToUse = schemaToUse.merge(customSchema);
-      }
-    }
-
-    // add the authType discriminator key
-    return schemaToUse.extend({
-      [AUTH_TYPE_DISCRIMINATOR]: z.literal(authTypeId),
-    });
+    return getSchemaForAuthType(authTypeId, authType, { customSchema, mergeStrategy });
   }
 }

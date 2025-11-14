@@ -8,13 +8,16 @@
  */
 
 import { z } from '@kbn/zod';
-import 'zod-metadata/register';
 import type { AxiosInstance } from 'axios';
 import type { AuthTypeSpec } from '../connector_spec';
 
 const authSchema = z.object({
   // these should default to being registered as a secret field so we don't explicitly define it here
-  headers: z.record(z.string(), z.string()).meta({}).describe('Custom Headers'),
+  tokenUrl: z.string().url(),
+  clientId: z.string(),
+  clientSecret: z.string(),
+  scope: z.string().optional(),
+  additionalFields: z.string().optional(),
 });
 
 type AuthSchemaType = z.infer<typeof authSchema>;
@@ -23,15 +26,15 @@ type AuthSchemaType = z.infer<typeof authSchema>;
  * Header-based authentication (generic)
  * Use for: API keys, custom headers (X-API-Key, etc.)
  */
-export const HeaderAuth: AuthTypeSpec<AuthSchemaType> = {
-  id: 'header',
-  name: 'Header Based Authentication',
+export const OAuth: AuthTypeSpec<AuthSchemaType> = {
+  id: 'oauth2',
+  name: 'OAuth',
   schema: authSchema,
   configure: (axiosInstance: AxiosInstance, secret: AuthSchemaType): AxiosInstance => {
-    // set global defaults
-    for (const [key, value] of Object.entries(secret.headers)) {
-      axiosInstance.defaults.headers.common[key] = value;
-    }
+    // need a token management system here to handle token retrieval/refreshing
+    // get token using client credentials flow
+
+    // set Authorization header with token once retrieved
 
     return axiosInstance;
   },
