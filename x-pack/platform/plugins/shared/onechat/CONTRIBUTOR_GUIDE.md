@@ -304,3 +304,62 @@ onechat.agents.register({
 
 Refer to [`AgentConfiguration`](https://github.com/elastic/kibana/blob/main/x-pack/platform/packages/shared/onechat/onechat-common/agents/definition.ts)
 for the full list of available configuration options.
+
+## Registering attachment types
+
+Attachments are used to provide additional context when conversing with an agent.
+
+It is possible to register custom attachment types, to have control over how the data is exposed to the agent,
+and how it is rendered in the UI.
+
+### Server-side registration
+
+You can register an attachment type by using the `attachments.registerType` API of the `onechat` plugin's setup contract.
+
+```ts
+class MyPlugin {
+  setup(core: CoreSetup, { onechat }: { onechat: OnechatPluginSetup }) {
+    onechat.attachments.registerType(myAttachmentDefinition);
+  }
+}
+```
+
+There are two main categories of attachment types:
+- `inline`: attachment is self-contained, with the data attached to it.
+  `reference`: reference a persisted resource (for example, a dashboard, an alert, etc) by its id, and resolve it dynamically when needed.
+  - (Not implemented yet)
+
+**Example of inline attachment type definition:**
+
+```ts
+const textDataSchema = z.object({
+  content: z.string(),
+});
+
+const textArrachmentType: InlineAttachmentTypeDefinition = {
+  // unique id of the attachment type
+  id: AttachmentType.text,
+  // type: inline or reference
+  type: 'inline',
+  // validate and parse the input when received from the client
+  validate: (input) => {
+    const parseResult = textDataSchema.safeParse(input);
+    if (parseResult.success) {
+      return { valid: true, data: parseResult.data };
+    } else {
+      return { valid: false, error: parseResult.error.message };
+    }
+  },
+  // format the data to be exposed to the LLM
+  format: (input) => {
+    return { type: 'text', value: input.content };
+  },
+}
+```
+
+Refer to [`AttachmentTypeDefinition`](https://github.com/elastic/kibana/blob/main/x-pack/platform/packages/shared/onechat/onechat-server/attachments/type_definition.ts)
+for the full list of available configuration options.
+
+### Browser-side registration
+
+Not implemented yet 

@@ -40,7 +40,7 @@ export class WorkflowTemplatingEngine {
     const openExpressionIndex = resolvedExpression.indexOf('{{');
     const closeExpressionIndex = resolvedExpression.lastIndexOf('}}');
 
-    if (!openExpressionIndex && !closeExpressionIndex) {
+    if (openExpressionIndex === -1 || closeExpressionIndex === -1) {
       throw new Error(`The provided expression is invalid. Got: ${template}.`);
     }
 
@@ -59,6 +59,11 @@ export class WorkflowTemplatingEngine {
     // Handle null and undefined
     if (value === null || value === undefined) {
       return value;
+    }
+
+    if (typeof value === 'string' && value.startsWith('${{') && value.endsWith('}}')) {
+      // remove the first $ only as the evaluateExpression removes the {{ and }} later
+      return this.evaluateExpression(value.substring(1), context);
     }
 
     // Handle string values - render them using the template engine

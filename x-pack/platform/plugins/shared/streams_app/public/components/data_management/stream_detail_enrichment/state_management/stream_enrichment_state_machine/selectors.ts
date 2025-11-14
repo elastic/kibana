@@ -25,8 +25,8 @@ export const selectDraftProcessor = (context: StreamEnrichmentContextType) => {
 
   return draft && isActionBlock(snapshot?.context.step)
     ? {
-        processor: snapshot?.context.step,
-        resources: snapshot?.context.resources,
+        processor: snapshot.context.step,
+        resources: snapshot.context.resources,
       }
     : {
         processor: undefined,

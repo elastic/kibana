@@ -19,12 +19,12 @@ interface ServiceProviderProps extends EndpointModelInfoProps {
 export const ServiceProvider: React.FC<ServiceProviderProps> = ({ service, endpointInfo }) => {
   const provider = SERVICE_PROVIDERS[service];
 
-  return provider ? (
+  return (
     <EuiFlexGroup gutterSize="xs" direction="row" alignItems="center">
       <EuiFlexItem grow={0}>
         <EuiIcon
           data-test-subj={`table-column-service-provider-${service}`}
-          type={provider.icon}
+          type={provider ? provider.icon : 'empty'}
           style={{ marginRight: '8px' }}
         />
       </EuiFlexItem>
@@ -32,7 +32,7 @@ export const ServiceProvider: React.FC<ServiceProviderProps> = ({ service, endpo
         <EuiFlexGroup gutterSize="xs" direction="column">
           <EuiFlexItem>
             <EuiText size="s" color="subdued">
-              {provider.name}
+              {provider ? provider.name : service}
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem>
@@ -41,7 +41,5 @@ export const ServiceProvider: React.FC<ServiceProviderProps> = ({ service, endpo
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
-  ) : (
-    <span>{service}</span>
   );
 };

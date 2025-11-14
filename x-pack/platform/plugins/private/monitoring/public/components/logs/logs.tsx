@@ -227,6 +227,7 @@ export class LogsContent extends PureComponent<LogsContentProps> {
 
     return discoverLink ? (
       <EuiCallOut
+        announceOnMount
         size="m"
         title={i18n.translate('xpack.monitoring.logs.listing.calloutTitle', {
           defaultMessage: 'Want to see more log entries?',

@@ -39,6 +39,29 @@ import {
   SiemMigrationResourceBase,
 } from '../../common.gen';
 
+export type CreateQRadarRuleMigrationRulesRequestParams = z.infer<
+  typeof CreateQRadarRuleMigrationRulesRequestParams
+>;
+export const CreateQRadarRuleMigrationRulesRequestParams = z.object({
+  migration_id: NonEmptyString,
+});
+export type CreateQRadarRuleMigrationRulesRequestParamsInput = z.input<
+  typeof CreateQRadarRuleMigrationRulesRequestParams
+>;
+
+export type CreateQRadarRuleMigrationRulesRequestBody = z.infer<
+  typeof CreateQRadarRuleMigrationRulesRequestBody
+>;
+export const CreateQRadarRuleMigrationRulesRequestBody = z.object({
+  /**
+   * The QRadar rules XML export content
+   */
+  xml: z.string().min(1),
+});
+export type CreateQRadarRuleMigrationRulesRequestBodyInput = z.input<
+  typeof CreateQRadarRuleMigrationRulesRequestBody
+>;
+
 export type CreateRuleMigrationRequestBody = z.infer<typeof CreateRuleMigrationRequestBody>;
 export const CreateRuleMigrationRequestBody = z.object({
   /**
@@ -292,6 +315,14 @@ export const StartRuleMigrationRequestBody = z.object({
    * The optional indicator to retry the rule translation based on this filter criteria.
    */
   retry: RuleMigrationRetryFilter.optional(),
+  /**
+   * Selected rules to retry migration on.
+   */
+  selection: z
+    .object({
+      ids: z.array(NonEmptyString),
+    })
+    .optional(),
 });
 export type StartRuleMigrationRequestBodyInput = z.input<typeof StartRuleMigrationRequestBody>;
 

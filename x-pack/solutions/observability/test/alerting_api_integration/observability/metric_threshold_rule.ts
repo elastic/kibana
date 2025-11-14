@@ -37,7 +37,8 @@ export default function ({ getService }: FtrProviderContext) {
     const METRICS_ALERTS_INDEX = '.alerts-observability.metrics.alerts-default';
     const ALERT_ACTION_INDEX = 'alert-action-metric-threshold';
 
-    describe('alert and action creation', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/241490
+    describe.skip('alert and action creation', () => {
       before(async () => {
         await supertest.patch(`/api/metrics/source/default`).set('kbn-xsrf', 'foo').send({
           anomalyThreshold: 50,

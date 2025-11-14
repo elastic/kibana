@@ -9,10 +9,15 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { CostSavingsMetric } from './cost_savings_metric';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
+import { useSignalIndexWithDefault } from '../../hooks/use_signal_index_with_default';
 
 // Mock VisualizationEmbeddable
 jest.mock('../../../common/components/visualization_actions/visualization_embeddable', () => ({
   VisualizationEmbeddable: jest.fn(() => <div data-test-subj="mock-visualization-embeddable" />),
+}));
+
+jest.mock('../../hooks/use_signal_index_with_default', () => ({
+  useSignalIndexWithDefault: jest.fn(),
 }));
 
 const defaultProps = {
@@ -22,7 +27,16 @@ const defaultProps = {
   analystHourlyRate: 100,
 };
 
+const mockUseSignalIndexWithDefault = useSignalIndexWithDefault as jest.MockedFunction<
+  typeof useSignalIndexWithDefault
+>;
+
 describe('CostSavingsMetric', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseSignalIndexWithDefault.mockReturnValue('.alerts-security.alerts-default');
+  });
+
   it('passes correct props to VisualizationEmbeddable', () => {
     render(<CostSavingsMetric {...defaultProps} />);
     expect(VisualizationEmbeddable).toHaveBeenCalledWith(
@@ -36,5 +50,10 @@ describe('CostSavingsMetric', () => {
       }),
       {}
     );
+  });
+
+  it('calls useSignalIndexWithDefault hook', () => {
+    render(<CostSavingsMetric {...defaultProps} />);
+    expect(mockUseSignalIndexWithDefault).toHaveBeenCalled();
   });
 });

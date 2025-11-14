@@ -119,6 +119,7 @@ describe('LogsOverview', () => {
         },
         "filters": Array [],
         "index": "logs",
+        "nonHighlightingFilters": Array [],
         "timeRange": Object {
           "from": "2023-01-01T00:00:00Z",
           "to": "2023-01-02T00:00:00Z",
@@ -160,6 +161,7 @@ describe('LogsOverview', () => {
         },
         "filters": Array [],
         "index": "logs-custom.indexname-*",
+        "nonHighlightingFilters": Array [],
         "timeRange": Object {
           "from": "2023-01-01T00:00:00Z",
           "to": "2023-01-02T00:00:00Z",
@@ -205,6 +207,7 @@ describe('LogsOverview', () => {
         },
         "filters": Array [],
         "index": "logs-custom.dataview-*",
+        "nonHighlightingFilters": Array [],
         "timeRange": Object {
           "from": "2023-01-01T00:00:00Z",
           "to": "2023-01-02T00:00:00Z",

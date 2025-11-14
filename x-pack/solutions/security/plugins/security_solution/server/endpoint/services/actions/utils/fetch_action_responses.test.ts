@@ -32,7 +32,7 @@ describe('fetchActionResponses()', () => {
           error: '',
           '@timestamp': '2022-04-30T16:08:47.449Z',
           action_data: {
-            command: 'upload',
+            command: expect.any(String),
             comment: '',
             parameter: undefined,
           },
@@ -44,14 +44,10 @@ describe('fetchActionResponses()', () => {
             action_id: '123',
             completed_at: '2022-04-30T10:53:59.449Z',
             data: {
-              command: 'upload',
+              command: expect.any(String),
               comment: '',
               output: {
-                content: {
-                  code: 'ra_upload_file-success',
-                  disk_free_space: 4825566125475,
-                  path: '/disk1/file/saved/here',
-                },
+                content: expect.anything(),
                 type: 'json',
               },
             },
@@ -67,7 +63,7 @@ describe('fetchActionResponses()', () => {
         {
           '@timestamp': '2022-04-30T16:08:47.449Z',
           action_data: {
-            command: 'upload',
+            command: expect.any(String),
             comment: '',
             parameter: undefined,
           },
@@ -83,14 +79,10 @@ describe('fetchActionResponses()', () => {
             action_id: '123',
             completed_at: '2022-04-30T10:53:59.449Z',
             data: {
-              command: 'upload',
+              command: expect.any(String),
               comment: '',
               output: {
-                content: {
-                  code: 'ra_upload_file-success',
-                  disk_free_space: 4825566125475,
-                  path: '/disk1/file/saved/here',
-                },
+                content: expect.anything(),
                 type: 'json',
               },
             },

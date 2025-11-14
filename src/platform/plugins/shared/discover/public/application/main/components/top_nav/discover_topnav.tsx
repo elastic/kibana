@@ -99,6 +99,18 @@ export const DiscoverTopNav = ({
     onUpdateESQLQuery: stateContainer.actions.updateESQLQuery,
   });
 
+  const onOpenQueryInNewTab = useCallback(
+    async (tabName: string, esqlQuery: string) => {
+      dispatch(
+        internalStateActions.openInNewTab({
+          tabLabel: tabName,
+          appState: { query: { esql: esqlQuery } },
+        })
+      );
+    },
+    [dispatch]
+  );
+
   useEffect(() => {
     return () => {
       // Make sure to close the editors when unmounting
@@ -149,7 +161,7 @@ export const DiscoverTopNav = ({
     } else {
       // remove savedQueryId from state
       const newState = {
-        ...appState.getState(),
+        ...appState.get(),
       };
       delete newState.savedQuery;
       appState.set(newState);
@@ -316,6 +328,7 @@ export const DiscoverTopNav = ({
               }
             : undefined
         }
+        onOpenQueryInNewTab={tabsEnabled ? onOpenQueryInNewTab : undefined}
       />
       {isESQLToDataViewTransitionModalVisible && (
         <ESQLToDataViewTransitionModal onClose={onESQLToDataViewTransitionModalClose} />

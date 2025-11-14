@@ -51,6 +51,7 @@ export const AgentPolicyYamlFlyout = memo<{ policyId: string; onClose: () => voi
       <Loading />
     ) : error ? (
       <EuiCallOut
+        announceOnMount
         title={
           <FormattedMessage
             id="xpack.fleet.policyDetails.ErrorGettingFullAgentPolicy"
@@ -97,6 +98,7 @@ export const AgentPolicyYamlFlyout = memo<{ policyId: string; onClose: () => voi
             <>
               <EuiSpacer size="m" />
               <EuiCallOut
+                announceOnMount
                 title={
                   <FormattedMessage
                     id="xpack.fleet.policyDetails.secretsTitle"

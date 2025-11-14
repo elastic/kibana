@@ -767,7 +767,7 @@
           "\nCreates a `Transform` that will calculate a Hash based on the data provided by a Readable"
         ],
         "signature": [
-          "(algorithm?: \"sha256\" | \"md5\" | \"sha1\" | \"sha512\") => FileHashTransform"
+          "(algorithm?: \"md5\" | \"sha1\" | \"sha256\" | \"sha512\") => FileHashTransform"
         ],
         "path": "src/platform/plugins/shared/files/server/file_client/stream_transforms/file_hash_transform/file_hash_transform.ts",
         "deprecated": false,
@@ -781,7 +781,7 @@
             "label": "algorithm",
             "description": [],
             "signature": [
-              "\"sha256\" | \"md5\" | \"sha1\" | \"sha512\""
+              "\"md5\" | \"sha1\" | \"sha256\" | \"sha512\""
             ],
             "path": "src/platform/plugins/shared/files/server/file_client/stream_transforms/file_hash_transform/file_hash_transform.ts",
             "deprecated": false,
@@ -6026,7 +6026,7 @@
               "\nA list of hashes to compute for this file kind. The hashes will be computed\nduring the file upload process and stored in the file metadata."
             ],
             "signature": [
-              "(\"sha256\" | \"md5\" | \"sha1\" | \"sha512\")[] | undefined"
+              "(\"md5\" | \"sha1\" | \"sha256\" | \"sha512\")[] | undefined"
             ],
             "path": "src/platform/plugins/shared/files/common/types.ts",
             "deprecated": false,

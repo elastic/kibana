@@ -163,7 +163,7 @@ export const SavedObjectDebugger: React.FunctionComponent = () => {
       {savedObjectResult && (status === 'error' || namesStatus === 'error') && (
         <>
           <EuiSpacer size="m" />
-          <EuiCallOut title="Error" color="danger">
+          <EuiCallOut announceOnMount title="Error" color="danger">
             <FormattedMessage
               id="xpack.fleet.debug.savedObjectDebugger.fetchError"
               defaultMessage="Error fetching Saved Objects"

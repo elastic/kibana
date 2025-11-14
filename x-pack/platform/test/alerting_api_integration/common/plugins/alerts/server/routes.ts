@@ -721,6 +721,55 @@ export function defineRoutes(
 
   router.post(
     {
+      path: '/api/alerts_fixture/{id}/_execute_connector_as_notification',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+        body: schema.object({
+          params: schema.recordOf(schema.string(), schema.any()),
+        }),
+      },
+    },
+    async (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> => {
+      const [_, { actions }] = await core.getStartServices();
+
+      const actionsClient = await actions.getActionsClientWithRequest(req);
+
+      try {
+        return res.ok({
+          body: await actionsClient.execute({
+            actionId: req.params.id,
+            params: req.body.params,
+            source: {
+              type: ActionExecutionSourceType.NOTIFICATION,
+              source: null,
+            },
+            relatedSavedObjects: [],
+          }),
+        });
+      } catch (err) {
+        if (err.isBoom && err.output.statusCode === 403) {
+          return res.forbidden({ body: err });
+        }
+
+        throw err;
+      }
+    }
+  );
+
+  router.post(
+    {
       path: '/_test/report_gap',
       security: {
         authz: {

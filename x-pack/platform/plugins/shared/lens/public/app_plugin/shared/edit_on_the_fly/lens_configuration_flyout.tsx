@@ -294,7 +294,9 @@ export function LensEditConfigurationFlyout({
           isSaveable={isSaveable}
           isReadOnly={isReadOnly}
           applyButtonLabel={applyButtonLabel}
-          toolbar={<VisualizationToolbarWrapper framePublicAPI={framePublicAPI} />}
+          toolbar={
+            <VisualizationToolbarWrapper framePublicAPI={framePublicAPI} isInlineEditing={true} />
+          }
         >
           <LayerConfiguration
             // TODO: remove this once we support switching to any chart in Discover
@@ -334,7 +336,9 @@ export function LensEditConfigurationFlyout({
         isNewPanel={isNewPanel}
         isReadOnly={isReadOnly}
         applyButtonLabel={applyButtonLabel}
-        toolbar={<VisualizationToolbarWrapper framePublicAPI={framePublicAPI} />}
+        toolbar={
+          <VisualizationToolbarWrapper framePublicAPI={framePublicAPI} isInlineEditing={true} />
+        }
       >
         <EuiFlexGroup
           css={css`

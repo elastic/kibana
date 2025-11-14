@@ -10,6 +10,7 @@ import { ExecutionStatus as WorkflowExecutionStatus } from '@kbn/workflows/types
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { ToolHandlerResult } from '@kbn/onechat-server/tools';
 import { ToolResultType } from '@kbn/onechat-common/tools';
+import { getWorkflowOutput } from './get_workflow_output';
 
 type WorkflowApi = WorkflowsServerPluginSetup['management'];
 
@@ -67,24 +68,21 @@ export const executeWorkflow = async ({
 
       if (execution) {
         if (execution.status === WorkflowExecutionStatus.COMPLETED) {
-          const lastStep = execution.stepExecutions[execution.stepExecutions.length - 1];
+          const output = getWorkflowOutput(execution.stepExecutions);
+
+          const data: Record<string, any> = {
+            execution_id: executionId,
+            workflow_id: workflowId,
+            status: execution.status,
+            started_at: execution.startedAt,
+            finished_at: execution.finishedAt,
+            output,
+          };
+
           return [
             {
               type: ToolResultType.other,
-              data: {
-                execution_id: executionId,
-                workflow_id: workflowId,
-                status: execution.status,
-                started_at: execution.startedAt,
-                finished_at: execution.finishedAt,
-                output: lastStep.output,
-                details: execution.stepExecutions.map((step) => ({
-                  step_id: step.stepId,
-                  execution_index: step.globalExecutionIndex,
-                  input: step.input,
-                  output: step.output,
-                })),
-              },
+              data,
             },
           ];
         }

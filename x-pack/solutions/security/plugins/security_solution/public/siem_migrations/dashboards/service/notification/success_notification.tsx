@@ -13,36 +13,41 @@ import {
   useNavigation,
   NavigationProvider,
 } from '@kbn/security-solution-navigation';
-import type { ToastInput } from '@kbn/core-notifications-browser';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { DashboardMigrationTaskStats } from '../../../../../common/siem_migrations/model/dashboard_migration.gen';
 
-export const getSuccessToast = (
+export const raiseSuccessToast = (
   migrationStats: DashboardMigrationTaskStats,
   core: CoreStart
-): ToastInput => ({
-  color: 'success',
-  iconType: 'check',
-  toastLifeTimeMs: 1000 * 60 * 30, // 30 minutes
-  title: i18n.translate(
-    'xpack.securitySolution.siemMigrations.dashboardsService.polling.successTitle',
-    {
-      defaultMessage: 'Dashboards translation complete.',
-    }
-  ),
-  text: toMountPoint(
-    <NavigationProvider core={core}>
-      <SuccessToastContent migrationStats={migrationStats} />
-    </NavigationProvider>,
-    core
-  ),
-});
+): void => {
+  const toast = core.notifications.toasts.addSuccess({
+    color: 'success',
+    iconType: 'check',
+    toastLifeTimeMs: 1000 * 60 * 30, // 30 minutes
+    title: i18n.translate(
+      'xpack.securitySolution.siemMigrations.dashboardsService.polling.successTitle',
+      {
+        defaultMessage: 'Dashboards translation complete.',
+      }
+    ),
+    text: toMountPoint(
+      <NavigationProvider core={core}>
+        <SuccessToastContent
+          migrationStats={migrationStats}
+          dismissHandler={() => core.notifications.toasts.remove(toast)}
+        />
+      </NavigationProvider>,
+      core
+    ),
+  });
+};
 
-const SuccessToastContent: React.FC<{ migrationStats: DashboardMigrationTaskStats }> = ({
-  migrationStats,
-}) => {
+const SuccessToastContent: React.FC<{
+  migrationStats: DashboardMigrationTaskStats;
+  dismissHandler: () => void;
+}> = ({ migrationStats, dismissHandler }) => {
   const { navigateTo, getAppUrl } = useNavigation();
 
   const navParams = useMemo(() => {
@@ -56,8 +61,9 @@ const SuccessToastContent: React.FC<{ migrationStats: DashboardMigrationTaskStat
         deepLinkId: SecurityPageName.siemMigrationsDashboards,
         path: migrationStats.id,
       });
+      dismissHandler();
     },
-    [navigateTo, migrationStats.id]
+    [navigateTo, migrationStats.id, dismissHandler]
   );
   const url = useMemo(() => getAppUrl(navParams), [getAppUrl, navParams]);
 

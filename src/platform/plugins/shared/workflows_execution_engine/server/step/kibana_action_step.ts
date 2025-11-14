@@ -15,6 +15,7 @@ import { buildKibanaRequestFromAction } from '@kbn/workflows';
 import type { z } from '@kbn/zod';
 import type { BaseStep, RunStepResult } from './node_implementation';
 import { BaseAtomicNodeImplementation } from './node_implementation';
+import { getKibanaUrl } from '../utils';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
@@ -103,29 +104,9 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
   }
 
   private getKibanaUrl(): string {
-    // Get Kibana URL from server.publicBaseUrl config if available
     const coreStart = this.stepExecutionRuntime.contextManager.getCoreStart();
-    if (coreStart?.http?.basePath?.publicBaseUrl) {
-      return coreStart.http.basePath.publicBaseUrl;
-    }
-    // Get Kibana URL from cloud.kibanaUrl config if available
     const { cloudSetup } = this.stepExecutionRuntime.contextManager.getDependencies();
-    if (cloudSetup?.kibanaUrl) {
-      return cloudSetup.kibanaUrl;
-    }
-
-    // Fallback to local network binding
-    const http = coreStart?.http;
-    if (http) {
-      const { protocol, hostname, port } = http.getServerInfo();
-      return `${protocol}://${hostname}:${port}${http.basePath
-        // Prepending on '' removes the serverBasePath
-        .prepend('/')
-        .slice(0, -1)}`;
-    }
-
-    // Fallback to localhost for development
-    return 'http://localhost:5601';
+    return getKibanaUrl(coreStart, cloudSetup);
   }
 
   private getAuthHeaders(): Record<string, string> {

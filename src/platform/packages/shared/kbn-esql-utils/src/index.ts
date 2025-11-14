@@ -17,7 +17,6 @@ export {
   hasTransformationalCommand,
   getTimeFieldFromESQLQuery,
   prettifyQuery,
-  isQueryWrappedByPipes,
   retrieveMetadataColumns,
   getQueryColumnsFromESQLQuery,
   mapVariableToColumn,
@@ -59,4 +58,5 @@ export {
   getESQLStatsQueryMeta,
   constructCascadeQuery,
   mutateQueryStatsGrouping,
+  appendFilteringWhereClauseForCascadeLayout,
 } from './utils/cascaded_documents_helpers';

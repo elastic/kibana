@@ -18,6 +18,7 @@ import type { ToolDefinition } from '@kbn/onechat-common';
 import React, { useCallback } from 'react';
 import { useToolsActions } from '../../../context/tools_provider';
 import { labels } from '../../../utils/i18n';
+import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
 
 export interface ToolsTableHeaderProps {
   isLoading: boolean;
@@ -38,6 +39,7 @@ export const ToolsTableHeader = ({
 }: ToolsTableHeaderProps) => {
   const { euiTheme } = useEuiTheme();
   const { bulkDeleteTools } = useToolsActions();
+  const { manageTools } = useUiPrivileges();
 
   const selectAll = useCallback(() => {
     setSelectedTools(tools.filter((tool) => !tool.readonly));
@@ -86,24 +88,26 @@ export const ToolsTableHeader = ({
           </EuiText>
           {selectedTools.length > 0 && (
             <EuiFlexGroup gutterSize="none">
-              <EuiButtonEmpty
-                aria-label={labels.tools.deleteSelectedToolsButtonLabel(selectedTools.length)}
-                data-test-subj="agentBuilderToolsBulkDeleteButton"
-                iconType="trash"
-                iconSize="m"
-                size="xs"
-                color="danger"
-                onClick={deleteSelection}
-              >
-                <EuiText
+              {manageTools && (
+                <EuiButtonEmpty
+                  aria-label={labels.tools.deleteSelectedToolsButtonLabel(selectedTools.length)}
+                  data-test-subj="agentBuilderToolsBulkDeleteButton"
+                  iconType="trash"
+                  iconSize="m"
                   size="xs"
-                  css={css`
-                    font-weight: ${euiTheme.font.weight.semiBold};
-                  `}
+                  color="danger"
+                  onClick={deleteSelection}
                 >
-                  {labels.tools.deleteSelectedToolsButtonLabel(selectedTools.length)}
-                </EuiText>
-              </EuiButtonEmpty>
+                  <EuiText
+                    size="xs"
+                    css={css`
+                      font-weight: ${euiTheme.font.weight.semiBold};
+                    `}
+                  >
+                    {labels.tools.deleteSelectedToolsButtonLabel(selectedTools.length)}
+                  </EuiText>
+                </EuiButtonEmpty>
+              )}
               <EuiButtonEmpty
                 aria-label={labels.tools.selectAllToolsButtonLabel}
                 data-test-subj="agentBuilderToolsSelectAllButton"

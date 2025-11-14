@@ -3,7 +3,7 @@ requestBody:
     application/json:
       examples:
         mcpInitializeRequestExample:
-          description: "Example request to initalise communication over MCP protocol"
+          description: "WARNING: DO NOT USE THIS ENDPOINT VIA REST API. These examples are auto-generated and should not be run. Integrate with MCP using MCP Inspector or native MCP clients (Claude Desktop, Cursor, VS Code) instead."
           value:
             jsonrpc: "2.0"
             method: "initialize"

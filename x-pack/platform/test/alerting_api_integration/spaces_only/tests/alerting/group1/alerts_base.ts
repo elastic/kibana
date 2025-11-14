@@ -527,7 +527,7 @@ instanceStateValue: true
       } = await supertestWithoutAuth.get(`${getUrlPrefix(space.id)}/api/licensing/feature_usage`);
       expect(features).to.be.an(Array);
       const indexRecordFeature = features.find(
-        (feature: { name: string }) => feature.name === 'Connector: Test: Index Record'
+        (feature: { id: string }) => feature.id === 'Connector: Test: Index Record'
       );
       expect(indexRecordFeature).to.be.ok();
       expect(indexRecordFeature.last_used).to.be.a('string');

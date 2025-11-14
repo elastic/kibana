@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EuiFlyoutResizableProps } from '@elastic/eui';
 import { EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { QueryClientProvider, QueryClient } from '@kbn/react-query';
@@ -43,6 +44,7 @@ export interface RuleFormProps<MetaData extends RuleTypeMetaData = RuleTypeMetaD
   initialValues?: Partial<Omit<RuleFormData, 'ruleTypeId'>>;
   initialMetadata?: MetaData;
   initialEditStep?: RuleFormStepId;
+  focusTrapProps?: EuiFlyoutResizableProps['focusTrapProps'];
 }
 
 export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
@@ -68,6 +70,7 @@ export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
     initialValues,
     initialMetadata,
     initialEditStep,
+    focusTrapProps,
   } = props;
 
   const {
@@ -126,6 +129,7 @@ export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
           connectorFeatureId={connectorFeatureId}
           initialMetadata={initialMetadata}
           initialEditStep={initialEditStep}
+          focusTrapProps={focusTrapProps}
         />
       );
     }
@@ -149,6 +153,7 @@ export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
           showMustacheAutocompleteSwitch={showMustacheAutocompleteSwitch}
           initialValues={initialValues}
           initialMetadata={initialMetadata}
+          focusTrapProps={focusTrapProps}
         />
       );
     }
@@ -199,6 +204,7 @@ export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
     shouldUseRuleProducer,
     canShowConsumerSelection,
     initialValues,
+    focusTrapProps,
   ]);
 
   return (

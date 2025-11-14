@@ -44,9 +44,6 @@ export interface IsPinnedParams {
   pinnedEventIds: Readonly<Record<string, boolean>>;
 }
 
-export const eventIsPinned = ({ eventId, pinnedEventIds }: IsPinnedParams): boolean =>
-  pinnedEventIds[eventId] === true;
-
 export interface GetPinOnClickParams {
   allowUnpinning: boolean;
   eventId: string;

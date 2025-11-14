@@ -423,7 +423,7 @@
             "label": "serverless",
             "description": [],
             "signature": [
-              "{ project_id: string; project_name?: string | undefined; project_type?: \"search\" | \"security\" | \"observability\" | \"workplace_ai\" | undefined; product_tier?: \"complete\" | \"logs_essentials\" | \"essentials\" | \"search_ai_lake\" | undefined; orchestrator_target?: string | undefined; in_trial?: boolean | undefined; } | undefined"
+              "{ project_id: string; project_name?: string | undefined; project_type?: \"search\" | \"security\" | \"observability\" | \"workplaceai\" | undefined; product_tier?: \"complete\" | \"logs_essentials\" | \"essentials\" | \"search_ai_lake\" | undefined; orchestrator_target?: string | undefined; in_trial?: boolean | undefined; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/cloud/public/plugin.tsx",
             "deprecated": false,
@@ -802,7 +802,7 @@
             "\nOnboarding configuration"
           ],
           "signature": [
-            "{ defaultSolution?: \"security\" | \"workplace_ai\" | \"oblt\" | \"es\" | undefined; }"
+            "{ defaultSolution?: \"security\" | \"workplaceai\" | \"oblt\" | \"es\" | undefined; }"
           ],
           "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
           "deprecated": false,
@@ -831,7 +831,7 @@
             "\nServerless configuration"
           ],
           "signature": [
-            "{ projectId?: string | undefined; projectName?: string | undefined; projectType?: \"search\" | \"security\" | \"observability\" | \"workplace_ai\" | undefined; productTier?: \"complete\" | \"logs_essentials\" | \"essentials\" | \"search_ai_lake\" | undefined; orchestratorTarget?: string | undefined; organizationInTrial?: boolean | undefined; }"
+            "{ projectId?: string | undefined; projectName?: string | undefined; projectType?: \"search\" | \"security\" | \"observability\" | \"workplaceai\" | undefined; productTier?: \"complete\" | \"logs_essentials\" | \"essentials\" | \"search_ai_lake\" | undefined; orchestratorTarget?: string | undefined; organizationInTrial?: boolean | undefined; }"
           ],
           "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
           "deprecated": false,
@@ -1075,7 +1075,7 @@
             "\nServerless configuration"
           ],
           "signature": [
-            "{ projectId?: string | undefined; projectName?: string | undefined; projectType?: \"search\" | \"security\" | \"observability\" | \"workplace_ai\" | undefined; organizationInTrial?: boolean | undefined; }"
+            "{ projectId?: string | undefined; projectName?: string | undefined; projectType?: \"search\" | \"security\" | \"observability\" | \"workplaceai\" | undefined; organizationInTrial?: boolean | undefined; }"
           ],
           "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
           "deprecated": false,
@@ -1393,7 +1393,7 @@
             "\nOnboarding configuration."
           ],
           "signature": [
-            "{ defaultSolution?: \"security\" | \"workplace_ai\" | \"oblt\" | \"es\" | undefined; }"
+            "{ defaultSolution?: \"security\" | \"workplaceai\" | \"oblt\" | \"es\" | undefined; }"
           ],
           "path": "x-pack/platform/plugins/shared/cloud/server/plugin.ts",
           "deprecated": false,
@@ -1424,7 +1424,7 @@
             "\nServerless configuration.\n"
           ],
           "signature": [
-            "{ projectId?: string | undefined; projectName?: string | undefined; projectType?: \"search\" | \"security\" | \"observability\" | \"workplace_ai\" | undefined; productTier?: \"complete\" | \"logs_essentials\" | \"essentials\" | \"search_ai_lake\" | undefined; orchestratorTarget?: string | undefined; organizationInTrial?: boolean | undefined; }"
+            "{ projectId?: string | undefined; projectName?: string | undefined; projectType?: \"search\" | \"security\" | \"observability\" | \"workplaceai\" | undefined; productTier?: \"complete\" | \"logs_essentials\" | \"essentials\" | \"search_ai_lake\" | undefined; orchestratorTarget?: string | undefined; organizationInTrial?: boolean | undefined; }"
           ],
           "path": "x-pack/platform/plugins/shared/cloud/server/plugin.ts",
           "deprecated": false,

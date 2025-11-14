@@ -7,4 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export type { SplitButtonProps } from './src/split_button';
 export { SplitButton } from './src/split_button';

@@ -37,7 +37,6 @@ export interface FlyoutContent {
   title?: string | ReactNode;
   description?: string | ReactNode;
   showFileContentPreview?: boolean;
-  showFileSummary?: boolean;
 }
 
 export interface InputOverrides {

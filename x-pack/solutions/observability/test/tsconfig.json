@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -95,5 +95,8 @@
     "@kbn/cypress-test-helper",
     "@kbn/streams-schema",
     "@kbn/data-quality",
+    "@kbn/onechat-common",
+    "@kbn/observability-agent-plugin",
+    "@kbn/onechat-plugin",
   ]
 }

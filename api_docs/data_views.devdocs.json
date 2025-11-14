@@ -13708,6 +13708,10 @@
                 "path": "src/platform/plugins/shared/controls/public/controls/data_controls/options_list_control/options_list_fetch_cache.ts"
               },
               {
+                "plugin": "@kbn/lens-embeddable-utils",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/columns/breakdown.ts"
+              },
+              {
                 "plugin": "lens",
                 "path": "x-pack/platform/plugins/shared/lens/public/data_views_service/loader.ts"
               },
@@ -13722,10 +13726,6 @@
               {
                 "plugin": "dataVisualizer",
                 "path": "x-pack/platform/plugins/private/data_visualizer/public/application/index_data_visualizer/hooks/use_data_visualizer_grid_data.ts"
-              },
-              {
-                "plugin": "@kbn/lens-embeddable-utils",
-                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/columns/breakdown.ts"
               },
               {
                 "plugin": "ml",
@@ -13945,15 +13945,15 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/detections/components/alerts_table/alerts_grouping.tsx"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/detections/components/alerts_table/alerts_grouping.tsx"
-              },
-              {
-                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/threat_intelligence/modules/indicators/hooks/use_ti_data_view.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/detections/components/alerts_table/alerts_grouping.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/detections/components/alerts_table/alerts_grouping.tsx"
               },
               {
                 "plugin": "@kbn/test-suites-xpack-observability",
@@ -14149,15 +14149,15 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/query_bar/eql/index.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/query_bar/eql/index.tsx"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/explore/network/pages/details/index.tsx"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/query_bar/eql/index.tsx"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/query_bar/eql/index.tsx"
               }
             ]
           },

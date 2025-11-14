@@ -4,7 +4,7 @@ info:
   title: Overlays that are applicable to both serverless and non-serverless documents
   version: 0.0.1
 actions:
-  # Add some tag descriptions and displayNames
+# Add some tag descriptions and displayNames
   - target: '$.tags[?(@.name=="maintenance-window")]'
     description: Change tag description and displayName
     update:
@@ -186,7 +186,7 @@ actions:
       description: >
         Elastic Package Manager (EPM) APIs enable you to manage packages and integrations, including installing, updating, and uninstalling packages, managing custom integrations, and handling package assets.
       x-displayName: 'Elastic Package Manager (EPM)'
-  # Add some spaces API examples
+# Add some spaces API examples
   - target: "$.paths['/api/spaces/space']['post']"
     description: 'Add example to create space API'
     update:
@@ -227,3 +227,24 @@ actions:
                   $ref: '../examples/get_spaces_response1.yaml'
                 getSpacesResponseExample2:
                   $ref: '../examples/get_spaces_response2.yaml'
+# Add an introduction to spaces
+  - target: '$'
+    description: Add an extra page about spaces
+    update:
+      x-topics:
+        - title: Kibana spaces
+          content: |
+            Spaces enable you to organize your dashboards and other saved objects into meaningful categories.
+            You can use the default space or create your own spaces.
+
+            To run APIs in non-default spaces, you must add `s/{space_id}/` to the path.
+            For example:
+
+            ```bash
+            curl -X GET "http://${KIBANA_URL}/s/marketing/api/data_views" \
+              -H "Authorization: ApiKey ${API_KEY}"
+            ```
+
+            If you use the Kibana console to send API requests, it automatically adds the appropriate space identifier.
+
+            To learn more, check out [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces).

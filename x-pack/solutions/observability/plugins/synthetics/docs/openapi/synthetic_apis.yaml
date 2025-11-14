@@ -798,7 +798,7 @@ paths:
           application/json:
             schema:
               type: object
-              property:
+              properties:
                 ids:
                   description: An array of parameter IDs to delete.
                   type: array
@@ -1508,7 +1508,6 @@ components:
     getParameterResponse:
       title: Get parameter response
       type: object
-      required:
       properties:
         description:
           type: string

@@ -24,6 +24,7 @@ import type { ConverseCompletionChunk } from './process_completion_chunks';
 import { processConverseCompletionChunks } from './process_completion_chunks';
 import { addNoToolUsageDirective } from './prompts';
 import { toolChoiceToConverse, toolsToConverseBedrock } from './convert_tools';
+import { getTemperatureIfValid } from '../../utils/get_temperature';
 
 export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
   chatComplete: ({
@@ -47,13 +48,14 @@ export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
       ? [{ text: addNoToolUsageDirective(system) }]
       : [{ text: system }];
     const bedRockTools = noToolUsage ? [] : toolsToConverseBedrock(tools, messages);
+    const connector = executor.getConnector();
 
     const subActionParams = {
       system: systemMessage,
       messages: converseMessages,
       tools: bedRockTools?.length ? bedRockTools : undefined,
       toolChoice: toolChoiceToConverse(toolChoice),
-      temperature,
+      ...getTemperatureIfValid(temperature, { connector, modelName }),
       model: modelName,
       stopSequences: ['\n\nHuman:'],
       signal: abortSignal,
@@ -96,7 +98,7 @@ export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
 };
 
 const messagesToBedrock = (messages: Message[]): BedRockMessage[] => {
-  return messages.map((message): BedRockMessage => {
+  const converseMessages: BedRockMessage[] = messages.map((message): BedRockMessage => {
     switch (message.role) {
       case MessageRole.User: {
         const rawContent: BedRockMessage['rawContent'] = [];
@@ -180,4 +182,25 @@ const messagesToBedrock = (messages: Message[]): BedRockMessage[] => {
       }
     }
   });
+
+  // Combine consecutive user tool result messages into a single message. This format is required by Bedrock.
+  const combinedConverseMessages = converseMessages.reduce<BedRockMessage[]>((acc, curr) => {
+    const lastMessage = acc[acc.length - 1];
+
+    if (
+      lastMessage &&
+      lastMessage.role === 'user' &&
+      lastMessage.rawContent?.some((c) => 'toolResult' in c) &&
+      curr.role === 'user' &&
+      curr.rawContent?.some((c) => 'toolResult' in c)
+    ) {
+      lastMessage.rawContent = lastMessage.rawContent.concat(curr.rawContent);
+    } else {
+      acc.push(curr);
+    }
+
+    return acc;
+  }, []);
+
+  return combinedConverseMessages;
 };

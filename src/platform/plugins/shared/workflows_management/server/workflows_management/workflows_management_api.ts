@@ -34,7 +34,7 @@ import type {
 } from './workflows_management_service';
 import { WorkflowValidationError } from '../../common/lib/errors';
 import { validateStepNameUniqueness } from '../../common/lib/validate_step_names';
-import { parseWorkflowYamlToJSON } from '../../common/lib/yaml_utils';
+import { parseWorkflowYamlToJSON, stringifyWorkflowDefinition } from '../../common/lib/yaml';
 
 export interface GetWorkflowsParams {
   triggerType?: 'schedule' | 'event' | 'manual';
@@ -134,7 +134,7 @@ export class WorkflowsManagementApi {
   ): Promise<WorkflowDetailDto> {
     // Parse and update the YAML to change the name
     const zodSchema = await this.workflowsService.getWorkflowZodSchema(
-      { loose: true },
+      { loose: false },
       spaceId,
       request
     );
@@ -150,11 +150,8 @@ export class WorkflowsManagementApi {
       })}`,
     };
 
-    // Convert back to YAML string
-    const clonedYaml = `name: ${updatedYaml.name}\n${workflow.yaml
-      .split('\n')
-      .slice(1)
-      .join('\n')}`;
+    // Convert back to YAML string using proper YAML stringification
+    const clonedYaml = stringifyWorkflowDefinition(updatedYaml as WorkflowYaml);
     return this.workflowsService.createWorkflow({ yaml: clonedYaml }, spaceId, request);
   }
 
@@ -207,7 +204,7 @@ export class WorkflowsManagementApi {
     request: KibanaRequest
   ): Promise<string> {
     const zodSchema = await this.workflowsService.getWorkflowZodSchema(
-      { loose: true },
+      { loose: false },
       spaceId,
       request
     );
@@ -261,7 +258,7 @@ export class WorkflowsManagementApi {
   ): Promise<string> {
     const parsedYaml = parseWorkflowYamlToJSON(
       workflowYaml,
-      await this.workflowsService.getWorkflowZodSchema({ loose: true }, spaceId, request)
+      await this.workflowsService.getWorkflowZodSchema({ loose: false }, spaceId, request)
     );
 
     if (parsedYaml.error) {
@@ -281,7 +278,8 @@ export class WorkflowsManagementApi {
         spaceId,
       },
       stepId,
-      contextOverride
+      contextOverride,
+      request
     );
     return executeResponse.workflowExecutionId;
   }
@@ -388,7 +386,11 @@ export class WorkflowsManagementApi {
     spaceId: string,
     request: KibanaRequest
   ): Promise<JsonSchema7Type> {
-    const zodSchema = await this.workflowsService.getWorkflowZodSchema({ loose }, spaceId, request);
+    const zodSchema = await this.workflowsService.getWorkflowZodSchema(
+      { loose: false },
+      spaceId,
+      request
+    );
     return getJsonSchemaFromYamlSchema(zodSchema);
   }
 }

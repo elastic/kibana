@@ -8,6 +8,8 @@
  */
 
 import { parse } from '..';
+import type { ESQLAstQueryExpression, ESQLParens } from '../../types';
+import { isParens, isSubQuery } from '../../ast/is';
 
 describe('FROM', () => {
   describe('correctly formatted', () => {
@@ -375,6 +377,127 @@ describe('FROM', () => {
       const { errors } = parse(text);
 
       expect(errors.length > 0).toBe(true);
+    });
+  });
+
+  describe('subqueries', () => {
+    it('can parse simple subquery', () => {
+      const text = 'FROM index1, (FROM index2 | WHERE a > 10)';
+      const { ast, errors } = parse(text);
+
+      expect(errors.length).toBe(0);
+      expect(ast).toMatchObject([
+        {
+          type: 'command',
+          name: 'from',
+          args: [
+            {
+              type: 'source',
+              name: 'index1',
+            },
+            {
+              type: 'parens',
+              child: {
+                type: 'query',
+                commands: [
+                  { type: 'command', name: 'from' },
+                  { type: 'command', name: 'where' },
+                ],
+              },
+            },
+          ],
+        },
+      ]);
+    });
+
+    it('can parse subquery as only source', () => {
+      const text = 'FROM (FROM index1 | WHERE x > 0)';
+      const { ast, errors } = parse(text);
+
+      expect(errors.length).toBe(0);
+      expect(ast[0].args).toHaveLength(1);
+      expect(ast[0].args[0]).toMatchObject({
+        type: 'parens',
+        child: {
+          type: 'query',
+          commands: [{ name: 'from' }, { name: 'where' }],
+        },
+      });
+    });
+
+    it('can parse subquery followed by main query pipes', () => {
+      const text = 'FROM (FROM index1 | WHERE a > 0) | WHERE b < 10 | LIMIT 5';
+      const { ast, errors } = parse(text);
+
+      expect(errors.length).toBe(0);
+      expect(ast).toHaveLength(3);
+      expect(ast[0].name).toBe('from');
+      expect(ast[1].name).toBe('where');
+      expect(ast[2].name).toBe('limit');
+    });
+
+    it('correctly captures location for deeply nested subqueries (3 levels)', () => {
+      const text = 'FROM (FROM (FROM (FROM index | WHERE a > 0) | WHERE b < 10) | LIMIT 5)';
+      const { ast } = parse(text);
+
+      // Level 1 - outermost
+      const level1Parens = ast[0].args[0] as ESQLParens;
+      expect(text.slice(level1Parens.location.min, level1Parens.location.max + 1)).toBe(
+        '(FROM (FROM (FROM index | WHERE a > 0) | WHERE b < 10) | LIMIT 5)'
+      );
+
+      // Level 2 - middle
+      const level1Query = level1Parens.child as ESQLAstQueryExpression;
+      const level2Parens = level1Query.commands[0].args[0] as ESQLParens;
+      expect(text.slice(level2Parens.location.min, level2Parens.location.max + 1)).toBe(
+        '(FROM (FROM index | WHERE a > 0) | WHERE b < 10)'
+      );
+
+      // Level 3 - innermost
+      const level2Query = level2Parens.child as ESQLAstQueryExpression;
+      const level3Parens = level2Query.commands[0].args[0] as ESQLParens;
+      expect(text.slice(level3Parens.location.min, level3Parens.location.max + 1)).toBe(
+        '(FROM index | WHERE a > 0)'
+      );
+    });
+
+    describe('error cases', () => {
+      it('errors on unclosed subquery and captures location up to end of content', () => {
+        const text = 'FROM (FROM index | WHERE a > 10';
+        const { ast, errors } = parse(text);
+
+        expect(errors.length).toBeGreaterThan(0);
+
+        const parens = ast[0].args[0] as ESQLParens;
+
+        expect(isParens(parens)).toBe(true);
+        expect(isSubQuery(parens)).toBe(true);
+        expect(parens.incomplete).toBe(true);
+
+        const query = parens.child as ESQLAstQueryExpression;
+
+        expect(query.incomplete).toBe(true);
+        expect(query.commands).toHaveLength(2);
+
+        // Verify location captures everything including missing closing paren
+        expect(text.slice(parens.location.min, parens.location.max + 1)).toBe(
+          '(FROM index | WHERE a > 10'
+        );
+      });
+
+      it('errors on empty subquery', () => {
+        const text = 'FROM index, ()';
+        const { errors } = parse(text);
+
+        expect(errors.length).toBeGreaterThan(0);
+      });
+
+      it('errors on subquery without FROM', () => {
+        const text = 'FROM (WHERE a > 10)';
+        const { errors } = parse(text);
+
+        expect(errors.length).toBeGreaterThan(0);
+      });
     });
   });
 });

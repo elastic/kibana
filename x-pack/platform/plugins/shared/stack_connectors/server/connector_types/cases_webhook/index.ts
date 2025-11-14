@@ -18,20 +18,19 @@ import type {
   CasesWebhookSecretConfigurationType,
   ExecutorParams,
   ExecutorSubActionPushParams,
-} from './types';
-import { createExternalService } from './service';
+} from '@kbn/connector-schemas/cases_webhook';
 import {
+  CONNECTOR_ID,
+  CONNECTOR_NAME,
   ExecutorParamsSchema,
   ExternalIncidentServiceConfigurationSchema,
   ExternalIncidentServiceSecretConfigurationSchema,
-} from './schema';
+} from '@kbn/connector-schemas/cases_webhook';
+import { createExternalService } from './service';
 import { api } from './api';
 import { validateCasesWebhookConfig, validateConnector } from './validators';
-import * as i18n from './translations';
 
 const supportedSubActions: string[] = ['pushToService'];
-export type ActionParamsType = CasesWebhookActionParamsType;
-export const ConnectorTypeId = '.cases-webhook';
 
 // connector type definition
 export function getConnectorType(): ConnectorType<
@@ -41,9 +40,9 @@ export function getConnectorType(): ConnectorType<
   CasesWebhookExecutorResultData
 > {
   return {
-    id: ConnectorTypeId,
+    id: CONNECTOR_ID,
     minimumLicenseRequired: 'gold',
-    name: i18n.NAME,
+    name: CONNECTOR_NAME,
     validate: {
       config: {
         schema: ExternalIncidentServiceConfigurationSchema,

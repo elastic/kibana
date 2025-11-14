@@ -62,6 +62,7 @@ const meta = {
         {...(props.supportNodePreviewPopover
           ? {
               onOpenEventPreview: action('onOpenEventPreview'),
+              onOpenNetworkPreview: action('onOpenNetworkPreview'),
             }
           : {})}
       />

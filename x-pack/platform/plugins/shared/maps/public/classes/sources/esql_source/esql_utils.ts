@@ -61,28 +61,6 @@ export async function getESQLMeta(esql: string) {
   };
 }
 
-/*
- * Map column.type to field type
- * Supported column types https://www.elastic.co/guide/en/elasticsearch/reference/master/esql-limitations.html#_supported_types
- */
-export function getFieldType(column: ESQLColumn) {
-  switch (column.type) {
-    case 'boolean':
-    case 'date':
-    case 'ip':
-    case 'keyword':
-    case 'text':
-      return 'string';
-    case 'double':
-    case 'int':
-    case 'long':
-    case 'unsigned_long':
-      return 'number';
-    default:
-      return undefined;
-  }
-}
-
 export function getFields(dataView: DataView) {
   const dateFields: string[] = [];
   const geoFields: string[] = [];

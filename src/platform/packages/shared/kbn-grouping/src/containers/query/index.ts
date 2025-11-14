@@ -25,8 +25,6 @@ export const MAX_RUNTIME_FIELD_SIZE = 100;
  * Composes grouping query and aggregations
  * @param additionalFilters Global filtering applicable to the grouping component.
  * Array of {@link BoolAgg} to be added to the query
- * @param from starting timestamp
- * @param groupByFields array of field names to group by
  * @param pageNumber starting grouping results page number
  * @param rootAggregations Top level aggregations to get the groups number or overall groups metrics.
  * Array of {@link NamedAggregation}
@@ -34,8 +32,10 @@ export const MAX_RUNTIME_FIELD_SIZE = 100;
  * @param size number of grouping results per page
  * @param sort add one or more sorts on specific fields
  * @param statsAggregations group level aggregations which correspond to {@link GroupStatsRenderer} configuration
- * @param to ending timestamp
  * @param uniqueValue unique value to use for crazy query magic
+ * @param timeRange timerange object for the query (from - to)
+ * @param multiValueFieldsToFlatten list of multi-value field to be flattened when grouping
+ * @param countByKeyForMultiValueFields field ES should use to count the documents (defaults to 'groupByField')
  *
  * @returns query dsl {@link GroupingQuery}
  */
@@ -84,7 +84,7 @@ export const getGroupingQuery = ({
               def groupValues = [];
               if (doc.containsKey(params['selectedGroup']) && !doc[params['selectedGroup']].empty) {
                 groupValues = doc[params['selectedGroup']];
-              }  
+              }
               int count = groupValues.size();
               if (count == 0 || count > ${MAX_RUNTIME_FIELD_SIZE} ) { emit(params['uniqueValue']); }
               else {
@@ -123,7 +123,7 @@ export const getGroupingQuery = ({
       // if shouldFlattenMultiValueField = true its preferable to pass countByKeyForMultiValueFields
       // this field will be used to count the number of documents
       // if not passed the counting will have duplicates since we are counting the number of values
-      // of the groupByField stores instead of the actuall documents count
+      // of the groupByField stores instead of the actual documents count
       // else , shouldFlattenMultiValueField = false - count documents by groupByField
       unitsCount: {
         value_count: {

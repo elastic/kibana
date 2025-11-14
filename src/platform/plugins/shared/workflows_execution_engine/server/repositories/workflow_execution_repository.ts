@@ -9,25 +9,13 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EsWorkflowExecution } from '@kbn/workflows';
-import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS } from '../../common';
-import { createIndexWithMappings } from '../../common/create_index';
+import { ExecutionStatus } from '@kbn/workflows';
+import { WORKFLOWS_EXECUTIONS_INDEX } from '../../common';
 
 export class WorkflowExecutionRepository {
   private indexName = WORKFLOWS_EXECUTIONS_INDEX;
-  private indexInitialized = false;
 
   constructor(private esClient: ElasticsearchClient) {}
-
-  private async ensureIndexExists() {
-    if (this.indexInitialized) return; // Only 1 boolean check after first time
-
-    await createIndexWithMappings({
-      esClient: this.esClient,
-      indexName: this.indexName,
-      mappings: WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
-    });
-    this.indexInitialized = true;
-  }
 
   /**
    * Retrieves a workflow execution by its ID from Elasticsearch.
@@ -40,8 +28,6 @@ export class WorkflowExecutionRepository {
     workflowExecutionId: string,
     spaceId: string
   ): Promise<EsWorkflowExecution | null> {
-    await this.ensureIndexExists();
-
     const response = await this.esClient.search<EsWorkflowExecution>({
       index: this.indexName,
       query: {
@@ -66,8 +52,6 @@ export class WorkflowExecutionRepository {
   public async createWorkflowExecution(
     workflowExecution: Partial<EsWorkflowExecution>
   ): Promise<void> {
-    await this.ensureIndexExists();
-
     if (!workflowExecution.id) {
       throw new Error('Workflow execution ID is required for creation');
     }
@@ -104,5 +88,67 @@ export class WorkflowExecutionRepository {
       refresh: true,
       doc: workflowExecution,
     });
+  }
+
+  /**
+   * Generic method to search workflow executions with a custom query.
+   *
+   * @param query - The Elasticsearch query object.
+   * @param size - Optional maximum number of results to return (default: 10).
+   * @returns A promise that resolves to the list of search hits.
+   */
+  public async searchWorkflowExecutions(query: Record<string, unknown>, size: number = 10) {
+    const response = await this.esClient.search<EsWorkflowExecution>({
+      index: this.indexName,
+      query,
+      size,
+    });
+
+    return response.hits.hits;
+  }
+
+  /**
+   * Retrieves running (non-terminal) workflow executions by workflow ID.
+   *
+   * @param workflowId - The ID of the workflow.
+   * @param spaceId - The ID of the space associated with the workflow execution.
+   * @param triggeredBy - Optional filter for the trigger type (e.g., 'scheduled').
+   * @returns A promise that resolves to the list of search hits for running executions.
+   */
+  public async getRunningExecutionsByWorkflowId(
+    workflowId: string,
+    spaceId: string,
+    triggeredBy?: string
+  ) {
+    const mustClauses: Array<Record<string, unknown>> = [
+      { term: { workflowId } },
+      { term: { spaceId } },
+    ];
+
+    if (triggeredBy) {
+      mustClauses.push({ term: { triggeredBy } });
+    }
+
+    return this.searchWorkflowExecutions(
+      {
+        bool: {
+          must: mustClauses,
+          must_not: [
+            {
+              terms: {
+                status: [
+                  ExecutionStatus.COMPLETED,
+                  ExecutionStatus.FAILED,
+                  ExecutionStatus.CANCELLED,
+                  ExecutionStatus.SKIPPED,
+                  ExecutionStatus.TIMED_OUT,
+                ],
+              },
+            },
+          ],
+        },
+      },
+      1
+    );
   }
 }

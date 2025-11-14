@@ -69,6 +69,21 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.AGENT_BUILDER_NAV_ENABLED_SETTING_ID",
+        "type": "string",
+        "tags": [],
+        "label": "AGENT_BUILDER_NAV_ENABLED_SETTING_ID",
+        "description": [],
+        "signature": [
+          "\"agentBuilder:navEnabled\""
+        ],
+        "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
         "id": "def-common.AI_ANONYMIZATION_SETTINGS",
         "type": "string",
         "tags": [],
@@ -331,6 +346,21 @@
         "description": [],
         "signature": [
           "\"csv:separator\""
+        ],
+        "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.DATA_CONNECTORS_ENABLED_SETTING_ID",
+        "type": "string",
+        "tags": [],
+        "label": "DATA_CONNECTORS_ENABLED_SETTING_ID",
+        "description": [],
+        "signature": [
+          "\"dataConnectors:enabled\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
         "deprecated": false,
@@ -1344,6 +1374,21 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_REGISTER_OBSERVABILITY_AGENT_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_REGISTER_OBSERVABILITY_AGENT_ID",
+        "description": [],
+        "signature": [
+          "\"observability:registerObservabilityAgent\""
+        ],
+        "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
         "id": "def-common.OBSERVABILITY_SEARCH_EXCLUDED_DATA_TIERS",
         "type": "string",
         "tags": [],
@@ -1351,6 +1396,21 @@
         "description": [],
         "signature": [
           "\"observability:searchExcludedDataTiers\""
+        ],
+        "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS",
+        "description": [],
+        "signature": [
+          "\"observability:streamsEnableAttachments\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
         "deprecated": false,

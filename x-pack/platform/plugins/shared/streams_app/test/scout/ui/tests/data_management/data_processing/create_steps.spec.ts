@@ -38,7 +38,7 @@ test.describe('Stream data processing - creating steps', { tag: ['@ess', '@svlOb
     expect(await pageObjects.streams.getProcessorsListItems()).toHaveLength(1);
   });
 
-  test('should create a new condition successfully', async ({ page, pageObjects }) => {
+  test('should create a new condition successfully', async ({ pageObjects }) => {
     await pageObjects.streams.clickAddCondition();
     await pageObjects.streams.fillCondition('test_field', 'contains', 'logs');
     await pageObjects.streams.clickSaveCondition();
@@ -46,7 +46,7 @@ test.describe('Stream data processing - creating steps', { tag: ['@ess', '@svlOb
     expect(await pageObjects.streams.getConditionsListItems()).toHaveLength(1);
   });
 
-  test('should be able to nest steps under conditions', async ({ page, pageObjects }) => {
+  test('should be able to nest steps under conditions', async ({ pageObjects }) => {
     // Create a condition first
     await pageObjects.streams.clickAddCondition();
     await pageObjects.streams.fillCondition('test_field', 'contains', 'logs');

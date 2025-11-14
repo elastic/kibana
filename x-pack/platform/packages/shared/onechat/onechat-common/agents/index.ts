@@ -19,3 +19,4 @@ export {
   type ResolvedAgentCapabilities,
   getKibanaDefaultAgentCapabilities,
 } from './capabilities';
+export { AgentExecutionErrorCode } from './execution_errors';

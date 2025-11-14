@@ -6,14 +6,15 @@
  */
 import { Chart, Metric, MetricTrendShape, Settings } from '@elastic/charts';
 import type { EuiThemeComputed } from '@elastic/eui';
-import { EuiPanel, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { EuiPanel, EuiSkeletonText, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import moment from 'moment';
 import React, { useState, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { OverviewTrend } from '../../../../../../../../common/types';
 import { MetricItemExtra } from './metric_item_extra';
 import type { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
 import type { ClientPluginsStart } from '../../../../../../../plugin';
@@ -40,25 +41,18 @@ export const getColor = (euiTheme: EuiThemeComputed, isEnabled: boolean, status?
   if (!isEnabled) {
     return euiTheme.colors.backgroundBaseDisabled;
   }
-  const isAmsterdam = euiTheme.flags.hasVisColorAdjustment;
 
   // make sure these are synced with slo card colors while making changes
 
   switch (status) {
     case 'down':
-      return isAmsterdam
-        ? euiTheme.colors.vis.euiColorVisBehindText9
-        : euiTheme.colors.backgroundBaseDanger;
+      return euiTheme.colors.backgroundBaseDanger;
     case 'up':
-      return isAmsterdam
-        ? euiTheme.colors.vis.euiColorVisBehindText0
-        : euiTheme.colors.backgroundBaseSuccess;
+      return euiTheme.colors.backgroundBaseSuccess;
     case 'unknown':
       return euiTheme.colors.backgroundBasePlain;
     default:
-      return isAmsterdam
-        ? euiTheme.colors.vis.euiColorVisBehindText0
-        : euiTheme.colors.backgroundBaseSuccess;
+      return euiTheme.colors.backgroundBaseSuccess;
   }
 };
 
@@ -70,6 +64,56 @@ const truncateText = (text: string) => {
   }
   const halfLength = Math.floor(maxLength / 2);
   return `${text.slice(0, halfLength)}…${text.slice(-halfLength)}`;
+};
+
+/**
+ * Get metric value props for Metric component. The goal of this function is
+ * to be able to handle the loading state of the trend data without disrupting
+ * the type expectations of the Metric component.
+ */
+export const getMetricValueProps = (trendData: OverviewTrend | 'loading' | null | undefined) => {
+  if (trendData === 'loading')
+    return {
+      value: '',
+      extra: (
+        <EuiSkeletonText
+          lines={1}
+          ariaWrapperProps={{
+            style: {
+              height: '16px',
+              width: '50px',
+            },
+          }}
+        />
+      ),
+    };
+
+  if (!trendData || trendData.median === null) {
+    return {
+      value: '',
+      extra: (
+        <FormattedMessage
+          id="xpack.synthetics.overview.metricItem.noDataAvailableMessage"
+          defaultMessage="--"
+        />
+      ),
+    };
+  }
+
+  return {
+    value: trendData.median,
+    valueFormatter: (d: number) => formatDuration(d),
+    extra: (
+      <MetricItemExtra
+        stats={{
+          medianDuration: trendData.median,
+          minDuration: trendData.min,
+          maxDuration: trendData.max,
+          avgDuration: trendData.avg,
+        }}
+      />
+    ),
+  };
 };
 
 export const MetricItem = ({
@@ -199,30 +243,11 @@ export const MetricItem = ({
                 {
                   title: truncateText(monitor.name),
                   subtitle: locationName,
-                  value: trendData !== 'loading' ? trendData?.median ?? 0 : 0,
+                  body: <MetricItemBody monitor={monitor} />,
+                  color: getColor(euiTheme, monitor.isEnabled, status),
                   trendShape: MetricTrendShape.Area,
                   trend: trendData !== 'loading' && !!trendData?.data ? trendData.data : [],
-                  extra:
-                    trendData !== 'loading' && !!trendData ? (
-                      <MetricItemExtra
-                        stats={{
-                          medianDuration: trendData.median,
-                          minDuration: trendData.min,
-                          maxDuration: trendData.max,
-                          avgDuration: trendData.avg,
-                        }}
-                      />
-                    ) : trendData === 'loading' ? (
-                      <span>
-                        <FormattedMessage
-                          defaultMessage="..."
-                          id="xpack.synthetics.overview.metricItem.loadingMessage"
-                        />
-                      </span>
-                    ) : undefined,
-                  valueFormatter: (d: number) => formatDuration(d),
-                  color: getColor(euiTheme, monitor.isEnabled, status),
-                  body: <MetricItemBody monitor={monitor} />,
+                  ...getMetricValueProps(trendData),
                 },
               ],
             ]}

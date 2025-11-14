@@ -92,7 +92,22 @@ export const addOsqueryIntegrationToAgentPolicy = async ({
         type: 'osquery',
         policy_template: 'osquery_manager',
         enabled: true,
-        streams: [],
+        streams: [
+          {
+            enabled: true,
+            data_stream: {
+              type: 'logs',
+              dataset: 'osquery_manager.result',
+            },
+          },
+          {
+            enabled: true,
+            data_stream: {
+              type: 'logs',
+              dataset: 'osquery_manager.action.responses',
+            },
+          },
+        ],
       },
     ],
   });

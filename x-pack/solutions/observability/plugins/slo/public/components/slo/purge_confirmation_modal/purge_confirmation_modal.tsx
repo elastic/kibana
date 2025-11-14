@@ -152,6 +152,7 @@ export function SloPurgeConfirmationModal({
         <>
           <EuiSpacer size="s" />
           <EuiCallOut
+            announceOnMount
             color="warning"
             size="s"
             title={i18n.translate('xpack.slo.purgeConfirmationModal.forceWarning', {

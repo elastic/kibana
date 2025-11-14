@@ -98,7 +98,8 @@ describe('getColumns', () => {
       expect(mockGenerateDiscoverLink).toHaveBeenCalledWith({
         'trace.id': traceId,
         'span.id': docId,
-        'event.name': 'exception',
+        'event.name': undefined,
+        'exception.message': 'Test error message',
       });
     });
 

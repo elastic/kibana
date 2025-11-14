@@ -94,7 +94,12 @@ export const RuleCustomizationsFlyout = memo(function RuleCustomizationsFlyout({
   const extraTabs = useMemo(() => {
     const headerCallout = isReverting ? (
       <>
-        <EuiCallOut title={i18n.REVERTING_RULE_CALLOUT_TITLE} color="warning" iconType="warning">
+        <EuiCallOut
+          announceOnMount={false}
+          title={i18n.REVERTING_RULE_CALLOUT_TITLE}
+          color="warning"
+          iconType="warning"
+        >
           <p>{i18n.REVERTING_RULE_CALLOUT_MESSAGE}</p>
         </EuiCallOut>
         <EuiSpacer size="l" />

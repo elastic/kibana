@@ -5,19 +5,18 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
 import type { IScopedClusterClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { isCCSRemoteIndexName } from '@kbn/es-query';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import { partition } from 'lodash';
 import { SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/constants';
-import type { StoredSLOSettings } from '../../domain/models';
 import { toHighPrecision } from '../../utils/number';
 import { createEsParams, typedSearch } from '../../utils/queries';
 import { getSummaryIndices, getSloSettings } from '../slo_settings';
 import type { EsSummaryDocument } from '../summary_transform_generator/helpers/create_temp_summary';
 import { getElasticsearchQueryOrThrow, parseStringFilters } from '../transform_generators';
+import { excludeStaleSummaryFilter } from '../summary_utils';
 import { fromRemoteSummaryDocumentToSloDefinition } from '../unsafe_federated/remote_summary_doc_to_slo';
 import { getFlattenedGroupings } from '../utils';
 import type {
@@ -187,31 +186,7 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
   }
 }
 
-function excludeStaleSummaryFilter(
-  settings: StoredSLOSettings,
-  kqlFilter: string,
-  hideStale?: boolean
-): estypes.QueryDslQueryContainer[] {
-  if (kqlFilter.includes('summaryUpdatedAt') || !settings.staleThresholdInHours || !hideStale) {
-    return [];
-  }
-  return [
-    {
-      bool: {
-        should: [
-          { term: { isTempDoc: true } },
-          {
-            range: {
-              summaryUpdatedAt: {
-                gte: `now-${settings.staleThresholdInHours}h`,
-              },
-            },
-          },
-        ],
-      },
-    },
-  ];
-}
+// excludeStaleSummaryFilter moved to ../summary_utils.ts
 
 function getRemoteClusterName(index: string) {
   if (isCCSRemoteIndexName(index)) {

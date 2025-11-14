@@ -13,6 +13,7 @@ import { schema } from '@kbn/config-schema';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
 import type { HttpService } from '@kbn/core-http-server-internal';
 import { Env } from '@kbn/config';
@@ -36,7 +37,10 @@ const kibanaVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.
 beforeEach(async () => {
   logger = loggingSystemMock.create();
   server = createInternalHttpService({ logger });
-  await server.preboot({ context: contextServiceMock.createPrebootContract() });
+  await server.preboot({
+    context: contextServiceMock.createPrebootContract(),
+    docLinks: docLinksServiceMock.createSetupContract(),
+  });
 });
 
 afterEach(async () => {
@@ -1659,10 +1663,10 @@ describe('runs with default preResponse handlers', () => {
     expect(response.header.foo).toBe('bar');
     expect(response.header['kbn-name']).toBe('kibana');
     expect(response.header['content-security-policy']).toBe(
-      `script-src 'report-sample' 'self' 'unsafe-eval'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'`
+      `script-src 'report-sample' 'self' 'unsafe-eval'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; object-src 'report-sample' 'none'`
     );
     expect(response.header['content-security-policy-report-only']).toBe(
-      `form-action 'report-sample' 'self'; object-src 'report-sample' 'none'`
+      `form-action 'report-sample' 'self'`
     );
   });
 });

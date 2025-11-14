@@ -49,7 +49,6 @@ export type {
 
 export {
   AlertHistoryDefaultIndexName,
-  ALERT_HISTORY_PREFIX,
   AlertHistoryDocumentTemplate,
   AlertHistoryEsIndexConnectorId,
   ActionConnectorMode,

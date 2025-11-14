@@ -182,7 +182,6 @@ export const calculateScoresWithESQL = async (
         );
 
         const entityFilter = getFilters(params, entityType as EntityType);
-
         return esClient.esql
           .query({
             query,
@@ -270,7 +269,7 @@ const getFilters = (options: CalculateScoresParams, entityType?: EntityType) => 
           const esQuery = toElasticsearchQuery(kqlQuery);
           if (esQuery) {
             filters.push({
-              bool: { must_not: esQuery },
+              bool: { must: esQuery },
             });
           }
         } catch (error) {
@@ -359,7 +358,7 @@ export const getESQL = (
         scores = MV_PSERIES_WEIGHTED_SUM(TOP(risk_score, ${sampleSize}, "desc"), ${RIEMANN_ZETA_S_VALUE}),
         risk_inputs = TOP(input, 10, "desc")
     BY ${identifierField}
-    | SORT scores DESC, ${identifierField} ASC
+    | SORT scores DESC
     | LIMIT ${pageSize}
   `;
 

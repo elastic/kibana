@@ -35,11 +35,45 @@ import {
   SERVER_ADDRESS,
   SERVER_PORT,
   USER_AGENT_VERSION,
+  KUBERNETES_POD_UID,
+  CONTAINER_ID,
+  HOST_HOSTNAME,
 } from '../../../../common/es_fields/apm';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { RollupInterval } from '../../../../common/rollup';
+const requiredFields = asMutableArray([
+  TRACE_ID,
+  AGENT_NAME,
+  PROCESSOR_EVENT,
+  AT_TIMESTAMP,
+  TIMESTAMP_US,
+  SERVICE_NAME,
+  TRANSACTION_ID,
+  TRANSACTION_DURATION,
+  TRANSACTION_NAME,
+  TRANSACTION_SAMPLED,
+  TRANSACTION_TYPE,
+] as const);
+
+const optionalFields = asMutableArray([
+  PROCESSOR_NAME,
+  SERVICE_LANGUAGE_NAME,
+  URL_FULL,
+  TRANSACTION_PAGE_URL,
+  HTTP_RESPONSE_STATUS_CODE,
+  HTTP_REQUEST_METHOD,
+  USER_AGENT_NAME,
+  URL_PATH,
+  URL_SCHEME,
+  SERVER_ADDRESS,
+  SERVER_PORT,
+  USER_AGENT_VERSION,
+  KUBERNETES_POD_UID,
+  HOST_HOSTNAME,
+  CONTAINER_ID,
+] as const);
 
 export async function getTransaction({
   transactionId,
@@ -54,35 +88,6 @@ export async function getTransaction({
   start: number;
   end: number;
 }): Promise<Transaction | undefined> {
-  const requiredFields = asMutableArray([
-    TRACE_ID,
-    AGENT_NAME,
-    PROCESSOR_EVENT,
-    AT_TIMESTAMP,
-    TIMESTAMP_US,
-    SERVICE_NAME,
-    TRANSACTION_ID,
-    TRANSACTION_DURATION,
-    TRANSACTION_NAME,
-    TRANSACTION_SAMPLED,
-    TRANSACTION_TYPE,
-  ] as const);
-
-  const optionalFields = asMutableArray([
-    PROCESSOR_NAME,
-    SERVICE_LANGUAGE_NAME,
-    URL_FULL,
-    TRANSACTION_PAGE_URL,
-    HTTP_RESPONSE_STATUS_CODE,
-    HTTP_REQUEST_METHOD,
-    USER_AGENT_NAME,
-    URL_PATH,
-    URL_SCHEME,
-    SERVER_ADDRESS,
-    SERVER_PORT,
-    USER_AGENT_VERSION,
-  ] as const);
-
   const resp = await apmEventClient.search('get_transaction', {
     apm: {
       sources: [

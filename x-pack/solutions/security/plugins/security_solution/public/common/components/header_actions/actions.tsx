@@ -45,23 +45,43 @@ const ActionsContainer = styled.div`
   display: flex;
 `;
 
-const ActionsComponent: React.FC<ActionProps> = ({
+type ActionsComponentProps = Pick<
+  ActionProps,
+  | 'ariaRowindex'
+  | 'columnValues'
+  | 'disableExpandAction'
+  | 'disablePinAction'
+  | 'disableTimelineAction'
+  | 'ecsData'
+  | 'eventId'
+  | 'eventIdToNoteIds'
+  | 'isEventViewer'
+  | 'isEventPinned'
+  | 'onEventDetailsPanelOpened'
+  | 'onRuleChange'
+  | 'refetch'
+  | 'showNotes'
+  | 'timelineId'
+  | 'toggleShowNotes'
+>;
+
+const ActionsComponent: React.FC<ActionsComponentProps> = ({
   ariaRowindex,
   columnValues,
   disableExpandAction = false,
+  disablePinAction = true,
+  disableTimelineAction = false,
   ecsData,
   eventId,
   eventIdToNoteIds,
-  isEventPinned = false,
   isEventViewer = false,
+  isEventPinned = false,
   onEventDetailsPanelOpened,
   onRuleChange,
+  refetch,
   showNotes,
   timelineId,
-  refetch,
   toggleShowNotes,
-  disablePinAction = true,
-  disableTimelineAction = false,
 }) => {
   const dispatch = useDispatch();
 
@@ -167,11 +187,11 @@ const ActionsComponent: React.FC<ActionProps> = ({
   );
 
   // we hide the analyzer icon if the data is not available for the resolver
-  // or if we are on the cases alerts table and the the visualization in flyout advanced setting is disabled
+  // or if we are on the cases alerts table and the visualization in flyout advanced setting is disabled
   const showAnalyzerIcon = useIsInvestigateInResolverActionEnabled(ecsData);
 
   // we hide the session view icon if the session view is not available
-  // or if we are on the cases alerts table and the the visualization in flyout advanced setting is disabled
+  // or if we are on the cases alerts table and the visualization in flyout advanced setting is disabled
   // or if the user is not on an enterprise license or on the kubernetes page
   const isEnterprisePlus = useLicense().isEnterprise();
   const showSessionViewIcon = useMemo(

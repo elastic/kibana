@@ -122,62 +122,32 @@ exports[`ManageData render 1`] = `
         <EuiFlexItem
           grow={false}
         >
-          <RedirectAppLinks
-            coreStart={
-              Object {
-                "application": Object {
-                  "capabilities": Object {
-                    "navLinks": Object {
-                      "dev_tools": true,
-                      "management": true,
-                    },
-                  },
-                },
-              }
-            }
+          <EuiButtonEmpty
+            data-test-subj="homeDevTools"
+            flush="both"
+            href=""
+            iconType="wrench"
           >
-            <EuiButtonEmpty
-              data-test-subj="homeDevTools"
-              flush="both"
-              href=""
-              iconType="wrench"
-            >
-              <MemoizedFormattedMessage
-                defaultMessage="Dev Tools"
-                id="home.manageData.devToolsButtonLabel"
-              />
-            </EuiButtonEmpty>
-          </RedirectAppLinks>
+            <MemoizedFormattedMessage
+              defaultMessage="Dev Tools"
+              id="home.manageData.devToolsButtonLabel"
+            />
+          </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem
           grow={false}
         >
-          <RedirectAppLinks
-            coreStart={
-              Object {
-                "application": Object {
-                  "capabilities": Object {
-                    "navLinks": Object {
-                      "dev_tools": true,
-                      "management": true,
-                    },
-                  },
-                },
-              }
-            }
+          <EuiButtonEmpty
+            data-test-subj="homeManage"
+            flush="both"
+            href=""
+            iconType="gear"
           >
-            <EuiButtonEmpty
-              data-test-subj="homeManage"
-              flush="both"
-              href=""
-              iconType="gear"
-            >
-              <MemoizedFormattedMessage
-                defaultMessage="Stack Management"
-                id="home.manageData.stackManagementButtonLabel"
-              />
-            </EuiButtonEmpty>
-          </RedirectAppLinks>
+            <MemoizedFormattedMessage
+              defaultMessage="Stack Management"
+              id="home.manageData.stackManagementButtonLabel"
+            />
+          </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlexItem>

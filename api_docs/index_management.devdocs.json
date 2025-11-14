@@ -1383,7 +1383,7 @@
         "label": "IndexManagementConfig",
         "description": [],
         "signature": [
-          "{ readonly ui: Readonly<{} & { enabled: boolean; }>; readonly enableIndexActions: boolean; readonly enableLegacyTemplates: boolean; readonly dev: Readonly<{} & { enableIndexDetailsPage: boolean; enableSemanticText: boolean; }>; readonly enableSizeAndDocCount: boolean; readonly enableIndexStats: boolean; readonly enableDataStreamStats: boolean; readonly editableIndexSettings: \"all\" | \"limited\"; readonly enableMappingsSourceFieldSection: boolean; readonly enableTogglingDataRetention: boolean; readonly enableProjectLevelRetentionChecks: boolean; }"
+          "{ readonly ui: Readonly<{} & { enabled: boolean; }>; readonly dev: Readonly<{} & { enableIndexDetailsPage: boolean; enableSemanticText: boolean; }>; readonly enableIndexActions: boolean; readonly enableLegacyTemplates: boolean; readonly enableSizeAndDocCount: boolean; readonly enableIndexStats: boolean; readonly enableDataStreamStats: boolean; readonly editableIndexSettings: \"all\" | \"limited\"; readonly enableMappingsSourceFieldSection: boolean; readonly enableTogglingDataRetention: boolean; readonly enableProjectLevelRetentionChecks: boolean; }"
         ],
         "path": "x-pack/platform/plugins/shared/index_management/server/config.ts",
         "deprecated": false,

@@ -18,6 +18,7 @@ export function runFeatureIdentification({
   logger,
   stream,
   features,
+  signal,
 }: {
   start: number;
   end: number;
@@ -26,6 +27,7 @@ export function runFeatureIdentification({
   logger: Logger;
   stream: Streams.all.Definition;
   features: Feature[];
+  signal: AbortSignal;
 }) {
   return identifyFeatures({
     start,
@@ -35,6 +37,7 @@ export function runFeatureIdentification({
     logger,
     stream,
     features,
+    signal,
     dropUnmapped: true,
   });
 }

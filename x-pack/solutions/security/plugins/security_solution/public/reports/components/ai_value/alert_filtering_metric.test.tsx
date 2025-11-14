@@ -13,6 +13,7 @@ import { getExcludeAlertsFilters } from './utils';
 import { getAlertFilteringMetricLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/ai/alert_filtering_metric';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { VisualizationContextMenuActions } from '../../../common/components/visualization_actions/types';
+import { useSignalIndexWithDefault } from '../../hooks/use_signal_index_with_default';
 
 jest.mock('../../../common/components/visualization_actions/visualization_embeddable', () => ({
   VisualizationEmbeddable: jest.fn(() => <div data-test-subj="mock-visualization-embeddable" />),
@@ -29,6 +30,10 @@ jest.mock(
   })
 );
 
+jest.mock('../../hooks/use_signal_index_with_default', () => ({
+  useSignalIndexWithDefault: jest.fn(),
+}));
+
 const mockGetExcludeAlertsFilters = getExcludeAlertsFilters as jest.MockedFunction<
   typeof getExcludeAlertsFilters
 >;
@@ -36,6 +41,9 @@ const mockGetAlertFilteringMetricLensAttributes =
   getAlertFilteringMetricLensAttributes as jest.MockedFunction<
     typeof getAlertFilteringMetricLensAttributes
   >;
+const mockUseSignalIndexWithDefault = useSignalIndexWithDefault as jest.MockedFunction<
+  typeof useSignalIndexWithDefault
+>;
 
 const defaultProps = {
   attackAlertIds: ['alert-1', 'alert-2', 'alert-3'],
@@ -65,6 +73,7 @@ describe('AlertFilteringMetric', () => {
     jest.clearAllMocks();
 
     mockGetExcludeAlertsFilters.mockReturnValue([excludeAlertsFilters]);
+    mockUseSignalIndexWithDefault.mockReturnValue('.alerts-security.alerts-default');
   });
 
   it('passes correct props to VisualizationEmbeddable and calls getExcludeAlertsFilters', () => {
@@ -117,6 +126,7 @@ describe('AlertFilteringMetric', () => {
     expect(mockGetAlertFilteringMetricLensAttributes).toHaveBeenCalledWith({
       ...mockArgs,
       totalAlerts: defaultProps.totalAlerts,
+      signalIndexName: '.alerts-security.alerts-default',
     });
   });
 
@@ -146,6 +156,32 @@ describe('AlertFilteringMetric', () => {
     expect(mockGetAlertFilteringMetricLensAttributes).toHaveBeenCalledWith(
       expect.objectContaining({
         totalAlerts: 1000000,
+        signalIndexName: '.alerts-security.alerts-default',
+      })
+    );
+  });
+
+  it('calls useSignalIndexWithDefault hook', () => {
+    render(<AlertFilteringMetric {...defaultProps} />);
+    expect(mockUseSignalIndexWithDefault).toHaveBeenCalled();
+  });
+
+  it('passes signalIndexName from useSignalIndexWithDefault to getLensAttributes', () => {
+    const customSignalIndexName = '.alerts-security.alerts-custom-space';
+    mockUseSignalIndexWithDefault.mockReturnValue(customSignalIndexName);
+
+    render(<AlertFilteringMetric {...defaultProps} />);
+
+    const callArgs = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0];
+    const mockArgs = {
+      euiTheme: { colors: {} },
+      extraOptions: { filters: [] },
+    };
+    callArgs.getLensAttributes(mockArgs);
+
+    expect(mockGetAlertFilteringMetricLensAttributes).toHaveBeenCalledWith(
+      expect.objectContaining({
+        signalIndexName: customSignalIndexName,
       })
     );
   });

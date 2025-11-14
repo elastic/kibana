@@ -6,7 +6,7 @@ mapped_pages:
 
 # Cases connector and action [cases-action-type]
 
-The Cases connector creates cases in {{kib}} when alerts occur.
+The Cases connector creates [Cases](docs-content://explore-analyze/alerts-cases/cases.md) in {{kib}} when alerts occur.
 
 ## Create connectors in {{kib}} [define-cases-ui]
 

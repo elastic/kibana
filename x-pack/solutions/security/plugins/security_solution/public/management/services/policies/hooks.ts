@@ -7,7 +7,7 @@
 import type { QueryObserverResult, UseQueryOptions } from '@kbn/react-query';
 import { useQuery } from '@kbn/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import { type GetInfoResponse, type BulkGetAgentPoliciesResponse } from '@kbn/fleet-plugin/common';
+import { type BulkGetAgentPoliciesResponse, type GetInfoResponse } from '@kbn/fleet-plugin/common';
 import { firstValueFrom } from 'rxjs';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import { ENDPOINT_PACKAGE_POLICIES_STATS_STRATEGY } from '../../../../common/endpoint/constants';
@@ -52,7 +52,7 @@ export function useGetEndpointSpecificPolicies(
   );
 }
 
-export function useEndpointPackagePoliciesStats(enabled: boolean) {
+export function useEndpointPackagePoliciesStats() {
   const { data } = useKibana().services;
   return useQuery(
     ['endpointPackagePoliciesStatsStrategy'],
@@ -64,7 +64,7 @@ export function useEndpointPackagePoliciesStats(enabled: boolean) {
         )
       );
     },
-    { select: (response) => response.rawResponse, enabled }
+    { select: (response) => response.rawResponse, enabled: true }
   );
 }
 

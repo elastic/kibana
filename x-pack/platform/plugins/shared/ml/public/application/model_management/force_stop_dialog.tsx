@@ -168,6 +168,7 @@ export const StopModelDeploymentsConfirmDialog: FC<ForceStopModelConfirmDialogPr
       {pipelineWarning.length > 0 ? (
         <>
           <EuiCallOut
+            announceOnMount
             title={
               <FormattedMessage
                 id="xpack.ml.trainedModels.modelsList.forceStopDialog.pipelinesWarning"
@@ -190,6 +191,7 @@ export const StopModelDeploymentsConfirmDialog: FC<ForceStopModelConfirmDialogPr
 
       {model.hasInferenceServices && inferenceServiceIDs.length === 0 ? (
         <EuiCallOut
+          announceOnMount
           title={
             <FormattedMessage
               id="xpack.ml.trainedModels.modelsList.forceStopDialog.hasInferenceServicesWarning"
@@ -204,6 +206,7 @@ export const StopModelDeploymentsConfirmDialog: FC<ForceStopModelConfirmDialogPr
       {inferenceServiceIDs.length > 0 ? (
         <>
           <EuiCallOut
+            announceOnMount
             title={
               <FormattedMessage
                 id="xpack.ml.trainedModels.modelsList.forceStopDialog.inferenceServicesWarning"

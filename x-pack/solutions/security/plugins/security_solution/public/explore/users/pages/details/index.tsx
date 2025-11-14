@@ -113,7 +113,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
   const {
     indicesExist: oldIndicesExist,
     selectedPatterns: oldSelectedPatterns,
-    sourcererDataView: oldSourcererDataView,
+    sourcererDataView: oldSourcererDataViewSpec,
   } = useSourcererDataView();
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
@@ -134,7 +134,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
         buildEsQuery(
           newDataViewPickerEnabled
             ? experimentalDataView
-            : dataViewSpecToViewBase(oldSourcererDataView),
+            : dataViewSpecToViewBase(oldSourcererDataViewSpec),
           [query],
           [...usersDetailsPageFilters, ...globalFilters],
           getEsQueryConfig(uiSettings)
@@ -147,7 +147,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     experimentalDataView,
     globalFilters,
     newDataViewPickerEnabled,
-    oldSourcererDataView,
+    oldSourcererDataViewSpec,
     query,
     uiSettings,
     usersDetailsPageFilters,
@@ -233,10 +233,9 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
           <EuiWindowEvent event="resize" handler={noop} />
           <FiltersGlobal>
             <SiemSearchBar
-              sourcererDataView={
-                newDataViewPickerEnabled ? experimentalDataView : oldSourcererDataView
-              } // TODO: newDataViewPicker - Can be removed after migration to new dataview picker
+              dataView={experimentalDataView}
               id={InputsModelId.global}
+              sourcererDataViewSpec={oldSourcererDataViewSpec} // TODO remove when we remove the newDataViewPickerEnabled feature flag
             />
           </FiltersGlobal>
 

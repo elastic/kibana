@@ -12,6 +12,7 @@ import {
   getESQLStatsQueryMeta,
   constructCascadeQuery,
   mutateQueryStatsGrouping,
+  appendFilteringWhereClauseForCascadeLayout,
 } from './cascaded_documents_helpers';
 
 describe('cascaded documents helpers utils', () => {
@@ -347,6 +348,114 @@ describe('cascaded documents helpers utils', () => {
 
       expect(result.esql).toMatchInlineSnapshot(
         `"FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY CATEGORIZE(message), agent.keyword, url.keyword"`
+      );
+    });
+  });
+
+  describe('appendFilteringWhereClauseForCascadeLayout', () => {
+    it('appends a filter in where clause in an existing query containing a stats command without a where command', () => {
+      expect(
+        appendFilteringWhereClauseForCascadeLayout(
+          'from logstash-* | stats var = avg(woof)',
+          'dest',
+          'tada!',
+          '+',
+          'string'
+        )
+      ).toBe('FROM logstash-* | WHERE dest == "tada!" | STATS var = AVG(woof)');
+    });
+
+    it('appends a filter in where clause in an existing query containing a stats command with a where command', () => {
+      expect(
+        appendFilteringWhereClauseForCascadeLayout(
+          'from logstash-* | where country == "GR" | stats var = avg(woof) ',
+          'dest',
+          'tada!',
+          '+',
+          'string'
+        )
+      ).toBe('FROM logstash-* | WHERE dest == "tada!" AND country == "GR" | STATS var = AVG(woof)');
+    });
+
+    it('negates a filter in where clause in an existing query containing a stats command without a where command', () => {
+      expect(
+        appendFilteringWhereClauseForCascadeLayout(
+          `FROM logstash-* | WHERE \`geo.dest\` == "BT" | SORT @timestamp DESC | LIMIT 10000 | STATS countB = COUNT(bytes) BY geo.dest | SORT countB`,
+          'geo.dest',
+          'BT',
+          '-',
+          'string'
+        )
+      ).toBe(
+        'FROM logstash-* | WHERE `geo.dest` != "BT" | SORT @timestamp DESC | LIMIT 10000 | STATS countB = COUNT(bytes) BY geo.dest | SORT countB'
+      );
+    });
+
+    it("accounts for case where there's a pre-existing where command that references a runtime field created in a previous stats command ", () => {
+      expect(
+        appendFilteringWhereClauseForCascadeLayout(
+          'from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB | where countB > 0',
+          'dest',
+          'tada!',
+          '+',
+          'string'
+        )
+      ).toBe(
+        'FROM logstash-* | WHERE dest == "tada!" | SORT @timestamp DESC | LIMIT 10000 | STATS countB = COUNT(bytes) BY geo.dest | SORT countB | WHERE countB > 0'
+      );
+    });
+
+    it('handles the case where the field being filtered on is a runtime field created by a stats command', () => {
+      expect(
+        appendFilteringWhereClauseForCascadeLayout(
+          'FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY Pattern = CATEGORIZE(message), agent.keyword, clientip',
+          'Pattern',
+          'tada!',
+          '+',
+          'string'
+        )
+      ).toBe(
+        'FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY Pattern = CATEGORIZE(message), agent.keyword, clientip | WHERE Pattern == "tada!"'
+      );
+    });
+
+    it('handles the case where the field being filtered on is a runtime field created by a stats command, followed by other commands', () => {
+      expect(
+        appendFilteringWhereClauseForCascadeLayout(
+          'FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY Pattern = CATEGORIZE(message), agent.keyword, clientip | SORT count DESC',
+          'Pattern',
+          'tada!',
+          '+',
+          'string'
+        )
+      ).toBe(
+        'FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY Pattern = CATEGORIZE(message), agent.keyword, clientip | WHERE Pattern == "tada!" | SORT count DESC'
+      );
+    });
+
+    it('handles the case where the field being filtered on is a runtime field created by a stats command, and with another filter applied there after', () => {
+      const initialFilterResult = appendFilteringWhereClauseForCascadeLayout(
+        'FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY Pattern = CATEGORIZE(message), agent.keyword, clientip | SORT count DESC',
+        'Pattern',
+        'tada!',
+        '+',
+        'string'
+      );
+
+      expect(initialFilterResult).toBe(
+        'FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY Pattern = CATEGORIZE(message), agent.keyword, clientip | WHERE Pattern == "tada!" | SORT count DESC'
+      );
+
+      expect(
+        appendFilteringWhereClauseForCascadeLayout(
+          initialFilterResult,
+          'clientip',
+          '192.168.1.1',
+          '+',
+          'string'
+        )
+      ).toBe(
+        'FROM kibana_sample_data_logs | WHERE clientip == "192.168.1.1" | STATS count = COUNT(bytes), average = AVG(memory) BY Pattern = CATEGORIZE(message), agent.keyword, clientip | WHERE Pattern == "tada!" | SORT count DESC'
       );
     });
   });

@@ -7,35 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { HTMLAttributes } from 'react';
 import React from 'react';
-import { css } from '@emotion/react';
+import type { HTMLAttributes } from 'react';
 import { EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 
-import { MenuItem } from '../menu_item';
 import type { SideNavLogo } from '../../../types';
+import { MenuItem } from '../menu_item';
+import { NAVIGATION_SELECTOR_PREFIX } from '../../constants';
 import { useTooltip } from '../../hooks/use_tooltip';
 
-export interface SideNavLogoProps
-  extends Omit<HTMLAttributes<HTMLAnchorElement>, 'onClick'>,
-    SideNavLogo {
+export interface LogoProps extends Omit<HTMLAttributes<HTMLAnchorElement>, 'onClick'>, SideNavLogo {
   id: string;
-  isHighlighted: boolean;
-  isCurrent?: boolean;
   isCollapsed: boolean;
+  isCurrent?: boolean;
+  isHighlighted: boolean;
   onClick?: () => void;
 }
 
-/**
- * It's used to communicate what solution the user is currently in.
- */
-export const SideNavLogoComponent = ({
-  isHighlighted,
-  isCurrent,
+export const Logo = ({
   isCollapsed,
+  isCurrent,
+  isHighlighted,
   label,
   ...props
-}: SideNavLogoProps): JSX.Element => {
+}: LogoProps): JSX.Element => {
   const { euiTheme } = useEuiTheme();
   const { tooltipRef, handleMouseOut } = useTooltip();
 
@@ -65,12 +62,17 @@ export const SideNavLogoComponent = ({
     }
   `;
 
+  const logoWrapperTestSubj = `${NAVIGATION_SELECTOR_PREFIX}-logoWrapper`;
+  const logoTestSubj = `${NAVIGATION_SELECTOR_PREFIX}-logo`;
+
   const menuItem = (
-    <div data-test-subj="side-nav-logo-wrapper" css={wrapperStyles}>
+    <div data-test-subj={logoWrapperTestSubj} css={wrapperStyles}>
       <MenuItem
-        aria-label={`${label} homepage`}
-        // TODO: Change to `side-nav-logo`, might affect tests
-        data-test-subj="sideNavLogo"
+        aria-label={i18n.translate('core.ui.chrome.sideNavigation.logoAriaLabel', {
+          defaultMessage: '{label} homepage',
+          values: { label },
+        })}
+        data-test-subj={logoTestSubj}
         isHighlighted={isHighlighted}
         isCurrent={isCurrent}
         isLabelVisible={!isCollapsed}

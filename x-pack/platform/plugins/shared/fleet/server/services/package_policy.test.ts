@@ -1941,6 +1941,9 @@ describe('Package policy service', () => {
   });
 
   describe('update', () => {
+    beforeEach(() => {
+      mockAgentPolicyGet();
+    });
     it('should fail to update on version conflict', async () => {
       const savedObjectsClient = createSavedObjectClientMock();
 
@@ -7749,6 +7752,8 @@ describe('Package policy service', () => {
       const soClient = createSavedObjectClientMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       const updateSpy = jest.spyOn(packagePolicyService, 'update');
+
+      mockAgentPolicyGet();
       soClient.find.mockResolvedValue({
         saved_objects: [
           {

@@ -79,6 +79,7 @@ export function BurnRateRuleEditor(props: Props) {
         <>
           <EuiSpacer size="l" />
           <EuiCallOut
+            announceOnMount
             color="warning"
             size="s"
             title={i18n.translate('xpack.slo.rules.groupByMessage', {

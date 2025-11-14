@@ -35,6 +35,7 @@ export const getSocManager: () => Omit<Role, 'name'> = () => {
             'actions_log_management_all',
 
             'workflow_insights_all',
+            'soc_management_all',
           ],
           securitySolutionTimeline: ['all'],
           securitySolutionNotes: ['all'],

@@ -61,8 +61,8 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | WHERE host.name IS NOT NULL
-  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), host.name
+  | WHERE \`host.name\` IS NOT NULL
+  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`host.name\`
 `.trim()
     );
   });
@@ -75,10 +75,10 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | WHERE host.name IS NOT NULL AND container.id IS NOT NULL
-  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), host.name, container.id
-  | EVAL ${DIMENSIONS_COLUMN} = CONCAT(host.name, " › ", container.id)
-  | DROP host.name, container.id
+  | WHERE \`host.name\` IS NOT NULL AND \`container.id\` IS NOT NULL
+  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`host.name\`, \`container.id\`
+  | EVAL ${DIMENSIONS_COLUMN} = CONCAT(\`host.name\`, " › ", \`container.id\`)
+  | DROP \`host.name\`, \`container.id\`
 `.trim()
     );
   });
@@ -91,10 +91,10 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | WHERE host.ip IS NOT NULL AND host.name IS NOT NULL
-  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), host.ip, host.name
-  | EVAL ${DIMENSIONS_COLUMN} = CONCAT(host.ip::STRING, " › ", host.name)
-  | DROP host.ip, host.name
+  | WHERE \`host.ip\`::STRING IS NOT NULL AND \`host.name\` IS NOT NULL
+  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`host.ip\`, \`host.name\`
+  | EVAL ${DIMENSIONS_COLUMN} = CONCAT(\`host.ip\`::STRING, " › ", \`host.name\`)
+  | DROP \`host.ip\`, \`host.name\`
 `.trim()
     );
   });
@@ -107,10 +107,10 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | WHERE cpu.cores IS NOT NULL AND host.name IS NOT NULL
-  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), cpu.cores, host.name
-  | EVAL ${DIMENSIONS_COLUMN} = CONCAT(cpu.cores::STRING, " › ", host.name)
-  | DROP cpu.cores, host.name
+  | WHERE \`cpu.cores\`::STRING IS NOT NULL AND \`host.name\` IS NOT NULL
+  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`cpu.cores\`, \`host.name\`
+  | EVAL ${DIMENSIONS_COLUMN} = CONCAT(\`cpu.cores\`::STRING, " › ", \`host.name\`)
+  | DROP \`cpu.cores\`, \`host.name\`
 `.trim()
     );
   });
@@ -123,10 +123,10 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | WHERE host.ip IS NOT NULL AND host.name IS NOT NULL AND cpu.cores IS NOT NULL
-  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), host.ip, host.name, cpu.cores
-  | EVAL ${DIMENSIONS_COLUMN} = CONCAT(host.ip::STRING, " › ", host.name, " › ", cpu.cores::STRING)
-  | DROP host.ip, host.name, cpu.cores
+  | WHERE \`host.ip\`::STRING IS NOT NULL AND \`host.name\` IS NOT NULL AND \`cpu.cores\`::STRING IS NOT NULL
+  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`host.ip\`, \`host.name\`, \`cpu.cores\`
+  | EVAL ${DIMENSIONS_COLUMN} = CONCAT(\`host.ip\`::STRING, " › ", \`host.name\`, " › ", \`cpu.cores\`::STRING)
+  | DROP \`host.ip\`, \`host.name\`, \`cpu.cores\`
 `.trim()
     );
   });
@@ -144,7 +144,7 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | WHERE host.name IN ("host-1", "host-2")
+  | WHERE \`host.name\` IN ("host-1", "host-2")
   | WHERE region IN ("us-east")
   | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
 `.trim()
@@ -200,7 +200,7 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | WHERE host.name IN ("host-1")
+  | WHERE \`host.name\` IN ("host-1")
   | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
 `.trim()
     );
@@ -215,9 +215,107 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | WHERE host.name IN ("host-1")
-  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), host.name
+  | WHERE \`host.name\` IN ("host-1")
+  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`host.name\`
 `.trim()
     );
+  });
+
+  describe('special character escaping', () => {
+    const mockMetricWithSpecialChars: MetricField = {
+      name: 'cpu.usage',
+      type: 'gauge',
+      index: 'metrics-*',
+      dimensions: [
+        { name: 'service-name', type: ES_FIELD_TYPES.KEYWORD },
+        { name: 'container-id', type: ES_FIELD_TYPES.KEYWORD },
+        { name: 'host-ip', type: ES_FIELD_TYPES.IP },
+      ],
+    };
+
+    it('should escape field names with hyphens in single dimension', () => {
+      const query = createESQLQuery({
+        metric: mockMetricWithSpecialChars,
+        dimensions: ['service-name'],
+      });
+      expect(query).toBe(
+        `
+TS metrics-*
+  | WHERE \`service-name\` IS NOT NULL
+  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`service-name\`
+`.trim()
+      );
+    });
+
+    it('should escape field names with hyphens in multiple dimensions', () => {
+      const query = createESQLQuery({
+        metric: mockMetricWithSpecialChars,
+        dimensions: ['service-name', 'container-id'],
+      });
+      expect(query).toBe(
+        `
+TS metrics-*
+  | WHERE \`service-name\` IS NOT NULL AND \`container-id\` IS NOT NULL
+  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`service-name\`, \`container-id\`
+  | EVAL ${DIMENSIONS_COLUMN} = CONCAT(\`service-name\`, " › ", \`container-id\`)
+  | DROP \`service-name\`, \`container-id\`
+`.trim()
+      );
+    });
+
+    it('should escape field names with hyphens and cast non-keyword fields', () => {
+      const query = createESQLQuery({
+        metric: mockMetricWithSpecialChars,
+        dimensions: ['host-ip', 'service-name'],
+      });
+      expect(query).toBe(
+        `
+TS metrics-*
+  | WHERE \`host-ip\`::STRING IS NOT NULL AND \`service-name\` IS NOT NULL
+  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`host-ip\`, \`service-name\`
+  | EVAL ${DIMENSIONS_COLUMN} = CONCAT(\`host-ip\`::STRING, " › ", \`service-name\`)
+  | DROP \`host-ip\`, \`service-name\`
+`.trim()
+      );
+    });
+
+    it('should escape filter field names with hyphens', () => {
+      const query = createESQLQuery({
+        metric: mockMetricWithSpecialChars,
+        filters: [
+          { field: 'service-name', value: 'web-server' },
+          { field: 'container-id', value: 'cont-123' },
+        ],
+      });
+      expect(query).toBe(
+        `
+TS metrics-*
+  | WHERE \`service-name\` IN ("web-server")
+  | WHERE \`container-id\` IN ("cont-123")
+  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+`.trim()
+      );
+    });
+
+    it('should escape field names with backticks by doubling them', () => {
+      const mockMetricWithBackticks: MetricField = {
+        name: 'cpu.usage',
+        type: 'gauge',
+        index: 'metrics-*',
+        dimensions: [{ name: 'field`with`ticks', type: ES_FIELD_TYPES.KEYWORD }],
+      };
+
+      const query = createESQLQuery({
+        metric: mockMetricWithBackticks,
+        dimensions: ['field`with`ticks'],
+      });
+      expect(query).toBe(
+        `
+TS metrics-*
+  | WHERE \`field\`\`with\`\`ticks\` IS NOT NULL
+  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`field\`\`with\`\`ticks\`
+`.trim()
+      );
+    });
   });
 });

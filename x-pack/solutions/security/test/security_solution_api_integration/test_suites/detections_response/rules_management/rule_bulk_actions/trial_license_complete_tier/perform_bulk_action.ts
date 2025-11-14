@@ -19,7 +19,7 @@ import {
 import { getCreateExceptionListDetectionSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 import { getCreateExceptionListItemMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_item_schema.mock';
-import { AuthType } from '@kbn/stack-connectors-plugin/common/auth/constants';
+import { AuthType } from '@kbn/connector-schemas/common/auth/constants';
 import type { BaseDefaultableFields } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import moment from 'moment';
 import {

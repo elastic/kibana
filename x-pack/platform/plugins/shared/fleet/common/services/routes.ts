@@ -26,6 +26,7 @@ import {
   UNINSTALL_TOKEN_ROUTES,
   FLEET_DEBUG_ROUTES,
   REMOTE_SYNCED_INTEGRATIONS_API_ROUTES,
+  AGENTLESS_POLICIES_ROUTES,
 } from '../constants';
 
 export const epmRouteService = {
@@ -202,6 +203,15 @@ export const packagePolicyRouteService = {
 
   getBulkGetPath: (): string => {
     return PACKAGE_POLICY_API_ROUTES.BULK_GET_PATTERN;
+  },
+};
+
+export const agentlessPolicyRouteService = {
+  getCreatePath: () => {
+    return AGENTLESS_POLICIES_ROUTES.CREATE_PATTERN;
+  },
+  getDeletePath: (policyId: string) => {
+    return AGENTLESS_POLICIES_ROUTES.DELETE_PATTERN.replace('{policyId}', policyId);
   },
 };
 

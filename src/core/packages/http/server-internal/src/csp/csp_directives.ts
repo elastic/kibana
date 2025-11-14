@@ -30,7 +30,6 @@ export type CspDirectiveName =
  */
 export const defaultReportOnlyRules: Partial<Record<CspDirectiveName, string[]>> = {
   'form-action': [`'report-sample'`, `'self'`],
-  'object-src': [`'report-sample'`, `'none'`],
 };
 
 /**
@@ -40,6 +39,7 @@ export const defaultRules: Partial<Record<CspDirectiveName, string[]>> = {
   'script-src': [`'report-sample'`, `'self'`],
   'worker-src': [`'report-sample'`, `'self'`, `blob:`],
   'style-src': [`'report-sample'`, `'self'`, `'unsafe-inline'`],
+  'object-src': [`'report-sample'`, `'none'`],
 };
 
 /**
@@ -67,10 +67,19 @@ export class CspDirectives {
   addDirectiveValue(directiveName: CspDirectiveName, directiveValue: string, enforce = true) {
     const directivesMap = enforce ? this.directives : this.reportOnlyDirectives;
 
-    if (!directivesMap.has(directiveName)) {
-      directivesMap.set(directiveName, new Set());
+    let directive = directivesMap.get(directiveName);
+    if (!directive) {
+      directivesMap.set(directiveName, (directive = new Set()));
     }
-    directivesMap.get(directiveName)!.add(normalizeDirectiveValue(directiveValue));
+
+    const normalizedDirectiveValue = normalizeDirectiveValue(directiveValue);
+    // 'none' can not coexist with other values, and will be ignored by browsers.
+    // In practice, this should only happen when a default rule defined above is set to 'none',
+    // AND the administrator chose to specify a value via kibana.yml configuration. (e.g. see `object-src` above)
+    if (directive.has(`'none'`) && normalizedDirectiveValue !== `'report-sample'`) {
+      directive.delete(`'none'`);
+    }
+    directive.add(normalizedDirectiveValue);
   }
 
   clearDirectiveValues(directiveName: CspDirectiveName) {
@@ -174,6 +183,9 @@ const parseConfigDirectives = (cspConfig: CspConfigType): CspConfigDirectives =>
   }
   if (cspConfig.img_src?.length) {
     enforceDirectives.set('img-src', cspConfig.img_src);
+  }
+  if (cspConfig.object_src?.length) {
+    enforceDirectives.set('object-src', cspConfig.object_src);
   }
   if (cspConfig.frame_ancestors?.length) {
     enforceDirectives.set('frame-ancestors', cspConfig.frame_ancestors);

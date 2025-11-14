@@ -2,7 +2,7 @@
 
 exports[`NetworkTopNFlow Table Component rendering it renders the default NetworkTopNFlow table 1`] = `
 .c1 .siemSubtitle__item {
-  color: #7a7f89;
+  color: #98A8C3;
   font-size: 12px;
   line-height: 1.5;
 }
@@ -46,7 +46,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
 
   .c4 .euiPagination::before {
     bottom: 0;
-    color: #515761;
+    color: #1D2A3E;
     content: '\\2026';
     font-size: 14px;
     padding: 5px 8px;

@@ -539,6 +539,10 @@ export class SecurityPageObject extends FtrService {
     await this.find.clickByButtonText('Update user');
   }
 
+  async backToUsersList() {
+    await this.find.clickByButtonText('Back to users');
+  }
+
   async createUser(user: UserFormValues) {
     await this.clickElasticsearchUsers();
     await this.clickCreateNewUser();
@@ -585,7 +589,7 @@ export class SecurityPageObject extends FtrService {
         return userResponse[user.username!].enabled === false;
       });
     }
-    await this.submitUpdateUserForm();
+    await this.backToUsersList();
   }
 
   async activatesUser(user: UserFormValues) {
@@ -599,7 +603,7 @@ export class SecurityPageObject extends FtrService {
         return userResponse[user.username!].enabled === true;
       });
     }
-    await this.submitUpdateUserForm();
+    await this.backToUsersList();
   }
 
   async deleteUser(username: string) {

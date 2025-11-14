@@ -8,11 +8,12 @@
 import React, { Suspense, lazy } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { EuiLoadingSpinner } from '@elastic/eui';
-import { ConversationFlyout } from './conversation_flyout';
+import { EuiLoadingSpinner, htmlIdGenerator } from '@elastic/eui';
 import type { OpenConversationFlyoutOptions } from './types';
 import type { OnechatInternalService } from '../services';
 import type { ConversationFlyoutRef } from '../types';
+
+const htmlId = htmlIdGenerator('onechat-conversation-flyout');
 
 interface OpenConversationFlyoutParams {
   coreStart: CoreStart;
@@ -32,7 +33,7 @@ export function openConversationFlyout(
 ): { flyoutRef: ConversationFlyoutRef } {
   const { overlays, application, ...startServices } = coreStart;
 
-  const LazyConversationComponent = lazy(async () => {
+  const LazyEmbeddableConversationComponent = lazy(async () => {
     const { createEmbeddableConversation } = await import(
       '../embeddable/create_embeddable_conversation'
     );
@@ -45,13 +46,20 @@ export function openConversationFlyout(
     };
   });
 
+  const handleOnClose = () => {
+    flyoutRef.close();
+    options.onClose?.();
+  };
+
+  const ariaLabelledBy = htmlId();
+
   const flyoutRef = overlays.openFlyout(
     toMountPoint(
       <Suspense fallback={<EuiLoadingSpinner size="l" />}>
-        <ConversationFlyout
+        <LazyEmbeddableConversationComponent
+          onClose={handleOnClose}
+          ariaLabelledBy={ariaLabelledBy}
           {...options}
-          onClose={() => flyoutRef.close()}
-          ConversationComponent={LazyConversationComponent}
         />
       </Suspense>,
       startServices
@@ -59,13 +67,10 @@ export function openConversationFlyout(
     {
       'data-test-subj': 'onechat-conversation-flyout-wrapper',
       ownFocus: true,
-      onClose: () => {
-        flyoutRef.close();
-        options.onClose?.();
-      },
       isResizable: true,
-      size: '1000px',
       type: 'push',
+      hideCloseButton: true,
+      'aria-labelledby': ariaLabelledBy,
     }
   );
 

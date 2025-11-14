@@ -6,12 +6,13 @@
  */
 import { toBooleanRt } from '@kbn/io-ts-utils/src/to_boolean_rt';
 import * as t from 'io-ts';
-import { sloDefinitionSchema } from '../../schema';
+import { sloDefinitionAndHealthSchema, sloDefinitionSchema } from '../../schema';
 
 const findSloDefinitionsParamsSchema = t.partial({
   query: t.partial({
     search: t.string,
     includeOutdatedOnly: toBooleanRt,
+    includeHealth: toBooleanRt,
     tags: t.string,
     page: t.string,
     perPage: t.string,
@@ -25,8 +26,26 @@ const findSloDefinitionsResponseSchema = t.type({
   results: t.array(sloDefinitionSchema),
 });
 
+const findSloDefinitionsWithHealthResponseSchema = t.type({
+  page: t.number,
+  perPage: t.number,
+  total: t.number,
+  results: t.array(sloDefinitionAndHealthSchema),
+});
+
 type FindSLODefinitionsParams = t.TypeOf<typeof findSloDefinitionsParamsSchema.props.query>;
 type FindSLODefinitionsResponse = t.OutputOf<typeof findSloDefinitionsResponseSchema>;
+type FindSLODefinitionsWithHealthResponse = t.OutputOf<
+  typeof findSloDefinitionsWithHealthResponseSchema
+>;
 
-export { findSloDefinitionsParamsSchema, findSloDefinitionsResponseSchema };
-export type { FindSLODefinitionsParams, FindSLODefinitionsResponse };
+export {
+  findSloDefinitionsParamsSchema,
+  findSloDefinitionsResponseSchema,
+  findSloDefinitionsWithHealthResponseSchema,
+};
+export type {
+  FindSLODefinitionsParams,
+  FindSLODefinitionsResponse,
+  FindSLODefinitionsWithHealthResponse,
+};

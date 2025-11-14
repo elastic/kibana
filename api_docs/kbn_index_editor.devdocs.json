@@ -231,6 +231,53 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/index-editor",
+            "id": "def-public.EditLookupIndexContentContext.onOpenIndexInDiscover",
+            "type": "Function",
+            "tags": [],
+            "label": "onOpenIndexInDiscover",
+            "description": [],
+            "signature": [
+              "((indexName: string, esqlQuery: string) => Promise<void>) | undefined"
+            ],
+            "path": "src/platform/packages/private/kbn-index-editor/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/index-editor",
+                "id": "def-public.EditLookupIndexContentContext.onOpenIndexInDiscover.$1",
+                "type": "string",
+                "tags": [],
+                "label": "indexName",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/private/kbn-index-editor/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/index-editor",
+                "id": "def-public.EditLookupIndexContentContext.onOpenIndexInDiscover.$2",
+                "type": "string",
+                "tags": [],
+                "label": "esqlQuery",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/private/kbn-index-editor/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

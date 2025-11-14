@@ -12,7 +12,7 @@ import { monaco } from '@kbn/monaco';
 import { isBuiltInStepType } from '@kbn/workflows';
 import { generateBuiltInStepSnippet } from './generate_builtin_step_snippet';
 import { generateConnectorSnippet } from './generate_connector_snippet';
-import { getStepNodeAtPosition, getStepNodesWithType } from '../../../../../common/lib/yaml_utils';
+import { getStepNodeAtPosition, getStepNodesWithType } from '../../../../../common/lib/yaml';
 import { getIndentLevelFromLineNumber } from '../get_indent_level';
 import { prependIndentToLines } from '../prepend_indent_to_lines';
 import { getMonacoRangeFromYamlNode } from '../utils';

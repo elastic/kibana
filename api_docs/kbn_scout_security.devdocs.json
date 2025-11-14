@@ -8147,6 +8147,20 @@
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/page_objects/index.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-security",
+            "id": "def-common.PageObjects.inspector",
+            "type": "Object",
+            "tags": [],
+            "label": "inspector",
+            "description": [],
+            "signature": [
+              "Inspector"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/page_objects/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

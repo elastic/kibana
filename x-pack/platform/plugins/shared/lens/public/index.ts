@@ -11,17 +11,16 @@ import { LensPlugin } from './plugin';
 export { isLensApi } from './react_embeddable/type_guards';
 export { type EmbeddableComponent } from './react_embeddable/renderer/lens_custom_renderer_component';
 export type {
-  LensApi,
   LensSerializedState,
   LensRuntimeState,
   LensByValueInput,
   LensByReferenceInput,
   TypedLensByValueInput,
   LensEmbeddableInput,
-  LensEmbeddableOutput,
   LensSavedObjectAttributes,
   LensRendererProps as EmbeddableComponentProps,
 } from '@kbn/lens-common';
+export type { LensApi, LensEmbeddableOutput } from '@kbn/lens-common-2';
 
 // Datasource and User message types
 export type {

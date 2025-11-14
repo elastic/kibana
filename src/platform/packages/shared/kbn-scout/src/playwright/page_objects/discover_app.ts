@@ -8,6 +8,7 @@
  */
 
 import type { ScoutPage } from '..';
+import { expect } from '..';
 
 export class DiscoverApp {
   constructor(private readonly page: ScoutPage) {}
@@ -46,5 +47,112 @@ export class DiscoverApp {
 
   async waitForHistogramRendered() {
     await this.page.testSubj.waitForSelector('unifiedHistogramRendered');
+  }
+
+  async getCurrentQueryName(): Promise<string> {
+    const breadcrumb = this.page.testSubj.locator('breadcrumb last');
+    return await breadcrumb.innerText();
+  }
+
+  async loadSavedSearch(searchName: string) {
+    await this.page.testSubj.click('discoverOpenButton');
+    await this.page.testSubj.waitForSelector('loadSearchForm', { state: 'visible' });
+
+    // Filter for the search
+    const searchInput = this.page.testSubj.locator('savedObjectFinderSearchInput');
+    await searchInput.fill(`"${searchName.replace('-', ' ')}"`);
+
+    // Click the saved search
+    const savedSearchId = searchName.split(' ').join('-');
+    await this.page.testSubj.click(`savedObjectTitle${savedSearchId}`);
+    await this.waitUntilSearchingHasFinished();
+  }
+
+  async getHitCountInt(): Promise<number> {
+    await this.page.waitForLoadingIndicatorHidden();
+    const hitCount = await this.page.testSubj.innerText('discoverQueryHits');
+    return parseInt(hitCount.replace(/,/g, ''), 10);
+  }
+
+  async getChartTimespan(): Promise<string> {
+    // Wait until the attribute no longer contains "Loading"
+    const element = this.page.testSubj.locator('unifiedHistogramChart');
+    await expect(element).not.toHaveAttribute('data-time-range', /Loading/);
+
+    return (await element.getAttribute('data-time-range')) ?? '';
+  }
+
+  async clickHistogramBar() {
+    const canvas = this.page.locator('[data-test-subj="unifiedHistogramChart"] canvas');
+    // Click at the center of the canvas
+    await canvas.click();
+  }
+
+  async waitUntilSearchingHasFinished() {
+    await this.page.testSubj.waitForSelector('discoverDataGridUpdating', {
+      state: 'hidden',
+      timeout: 30000,
+    });
+  }
+
+  async getDocTableIndex(index: number): Promise<string> {
+    const rowIndex = index - 1; // Convert to 0-based index
+    const row = this.page.locator(`[data-grid-row-index="${rowIndex}"]`);
+    return await row.innerText();
+  }
+
+  async getDocTableField(index: number): Promise<string> {
+    const rowIndex = index - 1;
+    await this.page.testSubj.click('dataGridFullScreenButton');
+    const row = this.page.locator(`[data-grid-row-index="${rowIndex}"]`);
+    const text = await row.innerText();
+    await this.page.testSubj.click('dataGridFullScreenButton');
+    return text.trim();
+  }
+
+  async getChartInterval(): Promise<string> {
+    const button = this.page.testSubj.locator('unifiedHistogramTimeIntervalSelectorButton');
+    return (await button.getAttribute('data-selected-value')) || '';
+  }
+
+  async expandTimeRangeAsSuggestedInNoResultsMessage() {
+    const button = this.page.testSubj.locator('discoverNoResultsViewAllMatches');
+    await button.click();
+    await this.waitUntilSearchingHasFinished();
+  }
+
+  async revertUnsavedChanges() {
+    await this.page.testSubj.hover('unsavedChangesBadge');
+    await this.page.testSubj.click('unsavedChangesBadge');
+    await this.page.testSubj.waitForSelector('unsavedChangesBadgeMenuPanel', { state: 'visible' });
+    await this.page.testSubj.click('revertUnsavedChangesButton');
+    await this.waitUntilSearchingHasFinished();
+  }
+
+  async clickFieldSort(field: string, sortOption: string) {
+    const header = this.page.testSubj.locator(`dataGridHeaderCell-${field}`);
+    await header.click();
+    await this.page.testSubj.waitForSelector(`dataGridHeaderCellActionGroup-${field}`, {
+      state: 'visible',
+    });
+    await this.page.locator(`button:has-text("${sortOption}")`).click();
+  }
+
+  async getDocHeader(): Promise<string> {
+    const headers = await this.page
+      .locator('[data-test-subj^="dataGridHeaderCell-"]')
+      .allInnerTexts();
+    return headers.join(',');
+  }
+
+  async getSharedItemTitleAndDescription(): Promise<{ title: string; description: string }> {
+    const cssSelector = '[data-shared-item][data-title][data-description]';
+    const element = this.page.locator(cssSelector);
+    await element.waitFor({ state: 'visible' });
+
+    const title = (await element.getAttribute('data-title')) || '';
+    const description = (await element.getAttribute('data-description')) || '';
+
+    return { title, description };
   }
 }

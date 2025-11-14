@@ -106,7 +106,7 @@ const HostsComponent = () => {
   const {
     indicesExist: oldIndicesExist,
     selectedPatterns: oldSelectedPatterns,
-    sourcererDataView: oldSourcererDataView,
+    sourcererDataView: oldSourcererDataViewSpec,
   } = useSourcererDataView();
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
@@ -125,23 +125,23 @@ const HostsComponent = () => {
     () =>
       convertToBuildEsQuery({
         config: getEsQueryConfig(uiSettings),
-        dataViewSpec: oldSourcererDataView,
+        dataViewSpec: oldSourcererDataViewSpec,
         dataView: experimentalDataView,
         queries: [query],
         filters: globalFilters,
       }),
-    [uiSettings, oldSourcererDataView, experimentalDataView, query, globalFilters]
+    [uiSettings, oldSourcererDataViewSpec, experimentalDataView, query, globalFilters]
   );
   const [tabsFilterQuery] = useMemo(
     () =>
       convertToBuildEsQuery({
         config: getEsQueryConfig(uiSettings),
-        dataViewSpec: oldSourcererDataView,
+        dataViewSpec: oldSourcererDataViewSpec,
         dataView: experimentalDataView,
         queries: [query],
         filters: tabsFilters,
       }),
-    [uiSettings, oldSourcererDataView, experimentalDataView, query, tabsFilters]
+    [uiSettings, oldSourcererDataViewSpec, experimentalDataView, query, tabsFilters]
   );
 
   useInvalidFilterQuery({
@@ -189,12 +189,10 @@ const HostsComponent = () => {
         <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
           <EuiWindowEvent event="resize" handler={noop} />
           <FiltersGlobal>
-            {/* TODO: newDataViewPicker - Can be removed after migration to new dataview picker */}
             <SiemSearchBar
+              dataView={experimentalDataView}
               id={InputsModelId.global}
-              sourcererDataView={
-                newDataViewPickerEnabled ? experimentalDataView : oldSourcererDataView
-              }
+              sourcererDataViewSpec={oldSourcererDataViewSpec} // TODO remove when we remove the newDataViewPickerEnabled feature flag
             />
           </FiltersGlobal>
 

@@ -14,6 +14,10 @@ const placeholder = i18n.translate('xpack.datasetQuality.filterBar.placeholder',
   defaultMessage: 'Filter data sets',
 });
 
+const ariaLabel = i18n.translate('xpack.datasetQuality.filterBar.ariaLabel', {
+  defaultMessage: 'Type a data set name',
+});
+
 export interface FilterBarComponentProps {
   query?: string;
   onQueryChange: (query: string) => void;
@@ -35,7 +39,7 @@ export const FilterBar = ({ query, onQueryChange }: FilterBarComponentProps) => 
       value={query ?? ''}
       onChange={onChange}
       isClearable={true}
-      aria-label={placeholder}
+      aria-label={ariaLabel}
     />
   );
 };

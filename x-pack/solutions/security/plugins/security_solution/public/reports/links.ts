@@ -6,8 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { CoreStart } from '@kbn/core/public';
-import type { StartPlugins } from '../types';
 import {
   SecurityPageName,
   SECURITY_FEATURE_ID,
@@ -25,7 +23,11 @@ export const aiValueLinks: LinkItem = {
   }),
   path: AI_VALUE_PATH,
   capabilities: [
-    [`${SECURITY_FEATURE_ID}.show`, `${ATTACK_DISCOVERY_FEATURE_ID}.attack-discovery`],
+    [
+      `${SECURITY_FEATURE_ID}.show`,
+      `${ATTACK_DISCOVERY_FEATURE_ID}.attack-discovery`,
+      `${SECURITY_FEATURE_ID}.socManagement`,
+    ],
   ],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.aiValue', {
@@ -33,26 +35,4 @@ export const aiValueLinks: LinkItem = {
     }),
   ],
   globalNavPosition: 8,
-};
-
-/**
- * Filters the Value report link based on user roles.
- * Only admin and soc_manager roles are allowed to see this link in the complete tier.
- */
-export const getAiValueFilteredLinks = async (
-  _core: CoreStart,
-  plugins: StartPlugins
-): Promise<LinkItem | null> => {
-  const currentUser = await plugins.security.authc.getCurrentUser();
-
-  if (!currentUser) {
-    return null;
-  }
-
-  const userRoles = currentUser.roles || [];
-  const allowedRoles = ['admin', 'soc_manager', '_search_ai_lake_soc_manager'];
-
-  const hasRequiredRole = allowedRoles.some((role) => userRoles.includes(role));
-
-  return hasRequiredRole ? aiValueLinks : null;
 };

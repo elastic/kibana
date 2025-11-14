@@ -106,7 +106,7 @@ const ExecutionStatusIconTypeMap: Record<ExecutionStatus, EuiIconType> = {
   [ExecutionStatus.TIMED_OUT]: 'errorFilled',
   [ExecutionStatus.PENDING]: 'clock',
   [ExecutionStatus.RUNNING]: 'play',
-  [ExecutionStatus.WAITING]: 'clock',
+  [ExecutionStatus.WAITING]: 'pause',
   [ExecutionStatus.WAITING_FOR_INPUT]: 'dot',
   [ExecutionStatus.CANCELLED]: 'crossInCircle',
   [ExecutionStatus.SKIPPED]: 'minusInCircleFilled',

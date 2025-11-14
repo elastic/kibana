@@ -124,10 +124,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
         <EmbeddableRenderer
           type={type}
           maybeId={id}
-          getParentApi={() => ({
-            ...dashboardApi,
-            reload$: dashboardInternalApi.panelsReload$,
-          })}
+          getParentApi={() => dashboardApi}
           key={`${type}_${id}`}
           panelProps={panelProps}
           onApiAvailable={(api) => dashboardInternalApi.registerChildApi(api)}

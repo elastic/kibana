@@ -18,6 +18,8 @@ import {
   RULES_PATH,
   DATA_QUALITY_PATH,
   ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
+  ENTITY_ANALYTICS_MANAGEMENT_PATH,
+  ATTACKS_PATH,
 } from '../../../common/constants';
 import { SourcererScopeName } from '../store/model';
 
@@ -39,17 +41,24 @@ const detectionsPaths = [
   ATTACK_DISCOVERY_PATH,
 ];
 
+const attacksPaths = [ATTACKS_PATH];
+
 const explorePaths = [
   HOSTS_PATH,
   USERS_PATH,
   NETWORK_PATH,
   ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
+  ENTITY_ANALYTICS_MANAGEMENT_PATH,
 ];
 
 export const getScopeFromPath = (
   pathname: string,
   newDataViewPickerEnabled?: boolean
-): SourcererScopeName.default | SourcererScopeName.detections | SourcererScopeName.explore => {
+):
+  | SourcererScopeName.default
+  | SourcererScopeName.detections
+  | SourcererScopeName.attacks
+  | SourcererScopeName.explore => {
   if (
     matchPath(pathname, {
       path: detectionsPaths,
@@ -57,6 +66,16 @@ export const getScopeFromPath = (
     })
   ) {
     return SourcererScopeName.detections;
+  }
+
+  if (
+    newDataViewPickerEnabled &&
+    matchPath(pathname, {
+      path: attacksPaths,
+      strict: false,
+    })
+  ) {
+    return SourcererScopeName.attacks;
   }
 
   if (

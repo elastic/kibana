@@ -92,8 +92,8 @@ export function AiAssistantSelectionPage() {
                   <>
                     <EuiSpacer size="s" />
                     <EuiCallOut
-                      iconType="warning"
                       announceOnMount
+                      iconType="warning"
                       data-test-subj="pluginsAiAssistantSelectionPageObservabilityDocumentationCallout"
                       title={i18n.translate(
                         'aiAssistantManagementSelection.aiAssistantSelectionPage.observabilityAi.thisFeatureIsDisabledCallOutLabel',
@@ -180,8 +180,8 @@ export function AiAssistantSelectionPage() {
                   <>
                     <EuiSpacer size="s" />
                     <EuiCallOut
-                      iconType="warning"
                       announceOnMount
+                      iconType="warning"
                       data-test-subj="pluginsAiAssistantSelectionPageSecurityDocumentationCallout"
                       title={i18n.translate(
                         'aiAssistantManagementSelection.aiAssistantSelectionPage.securityAi.thisFeatureIsDisabledCallOutLabel',

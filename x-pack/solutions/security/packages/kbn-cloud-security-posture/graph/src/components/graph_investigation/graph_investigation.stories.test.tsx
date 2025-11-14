@@ -11,8 +11,6 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { action } from '@storybook/addon-actions';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import * as stories from './graph_investigation.stories';
 import { type GraphInvestigationProps } from './graph_investigation';
@@ -52,15 +50,11 @@ jest.mock('@storybook/addon-actions', () => ({
   }),
 }));
 
-jest.mock('@kbn/expandable-flyout');
-
 const renderStory = (args: Partial<GraphInvestigationProps> = {}) => {
   return render(
-    <TestProvider>
-      <IntlProvider locale="en">
-        <Investigation {...args} />
-      </IntlProvider>
-    </TestProvider>,
+    <IntlProvider locale="en">
+      <Investigation {...args} />
+    </IntlProvider>,
     {
       // TODO: Fails in concurrent mode
       legacyRoot: true,
@@ -158,9 +152,6 @@ describe('GraphInvestigation Component', () => {
         actionMocks[key].mockClear();
       }
     }
-    (useExpandableFlyoutApi as jest.Mock).mockReturnValue({
-      openPreviewPanel: jest.fn(),
-    });
   });
 
   it('renders without crashing', () => {
@@ -229,7 +220,7 @@ describe('GraphInvestigation Component', () => {
       expect(showDetailsItem).toHaveTextContent('Show alert details');
     });
 
-    xit('should not show `Show event details` list item when label node misses documentsData', async () => {
+    it('should not show `Show event details` list item when label node misses documentsData', async () => {
       const { container, queryByTestId } = renderStory();
 
       await expandNode(
@@ -251,7 +242,7 @@ describe('GraphInvestigation Component', () => {
       expect(showDetailsItem).not.toHaveAttribute('disabled');
     });
 
-    xit('show the option `Show entity details` as disabled when entity node has no documentsData', async () => {
+    it('show the option `Show entity details` as disabled when entity node has no documentsData', async () => {
       const { container, getByTestId, queryByTestId } = renderStory();
 
       await expandNode(container, 'admin@example.com');

@@ -10,8 +10,8 @@ import { registerConnectorTypes } from '..';
 import type { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { experimentalFeaturesMock, registrationServicesMock } from '../../mocks';
 import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
+import { CONNECTOR_ID } from '@kbn/connector-schemas/servicenow_itom/constants';
 
-const SERVICENOW_ITOM_CONNECTOR_TYPE_ID = '.servicenow-itom';
 let connectorTypeRegistry: TypeRegistry<ConnectorTypeModel>;
 
 beforeAll(() => {
@@ -21,15 +21,15 @@ beforeAll(() => {
 });
 
 describe('connectorTypeRegistry.get() works', () => {
-  test(`${SERVICENOW_ITOM_CONNECTOR_TYPE_ID}: connector type static data is as expected`, () => {
-    const connectorTypeModel = connectorTypeRegistry.get(SERVICENOW_ITOM_CONNECTOR_TYPE_ID);
-    expect(connectorTypeModel.id).toEqual(SERVICENOW_ITOM_CONNECTOR_TYPE_ID);
+  test(`${CONNECTOR_ID}: connector type static data is as expected`, () => {
+    const connectorTypeModel = connectorTypeRegistry.get(CONNECTOR_ID);
+    expect(connectorTypeModel.id).toEqual(CONNECTOR_ID);
   });
 });
 
 describe('servicenow action params validation', () => {
-  test(`${SERVICENOW_ITOM_CONNECTOR_TYPE_ID}: action params validation succeeds when action params is valid`, async () => {
-    const connectorTypeModel = connectorTypeRegistry.get(SERVICENOW_ITOM_CONNECTOR_TYPE_ID);
+  test(`${CONNECTOR_ID}: action params validation succeeds when action params is valid`, async () => {
+    const connectorTypeModel = connectorTypeRegistry.get(CONNECTOR_ID);
     const actionParams = { subActionParams: { severity: 'Critical' } };
 
     expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
@@ -40,8 +40,8 @@ describe('servicenow action params validation', () => {
     });
   });
 
-  test(`${SERVICENOW_ITOM_CONNECTOR_TYPE_ID}: params validation succeeds when additional_info is an empty string`, async () => {
-    const connectorTypeModel = connectorTypeRegistry.get(SERVICENOW_ITOM_CONNECTOR_TYPE_ID);
+  test(`${CONNECTOR_ID}: params validation succeeds when additional_info is an empty string`, async () => {
+    const connectorTypeModel = connectorTypeRegistry.get(CONNECTOR_ID);
     const actionParams = { subActionParams: { severity: 'Critical', additional_info: '' } };
 
     expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
@@ -52,8 +52,8 @@ describe('servicenow action params validation', () => {
     });
   });
 
-  test(`${SERVICENOW_ITOM_CONNECTOR_TYPE_ID}: params validation fails when severity is not valid`, async () => {
-    const connectorTypeModel = connectorTypeRegistry.get(SERVICENOW_ITOM_CONNECTOR_TYPE_ID);
+  test(`${CONNECTOR_ID}: params validation fails when severity is not valid`, async () => {
+    const connectorTypeModel = connectorTypeRegistry.get(CONNECTOR_ID);
     const actionParams = { subActionParams: { severity: null } };
 
     expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
@@ -64,8 +64,8 @@ describe('servicenow action params validation', () => {
     });
   });
 
-  test(`${SERVICENOW_ITOM_CONNECTOR_TYPE_ID}: params validation fails when additional_info is not valid JSON`, async () => {
-    const connectorTypeModel = connectorTypeRegistry.get(SERVICENOW_ITOM_CONNECTOR_TYPE_ID);
+  test(`${CONNECTOR_ID}: params validation fails when additional_info is not valid JSON`, async () => {
+    const connectorTypeModel = connectorTypeRegistry.get(CONNECTOR_ID);
     const actionParams = { subActionParams: { severity: 'Critical', additional_info: 'foobar' } };
 
     expect(await connectorTypeModel.validateParams(actionParams)).toEqual({

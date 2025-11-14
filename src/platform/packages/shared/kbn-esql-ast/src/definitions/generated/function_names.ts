@@ -43,6 +43,7 @@ export const esqlFunctionNames = [
   'CATEGORIZE',
   'CBRT',
   'CEIL',
+  'CHUNK',
   'CIDR_MATCH',
   'CLAMP',
   'CLAMP_MAX',

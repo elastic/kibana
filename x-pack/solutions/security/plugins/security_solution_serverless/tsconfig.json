@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -38,7 +38,6 @@
     "@kbn/serverless-security-settings",
     "@kbn/core-elasticsearch-server",
     "@kbn/core-logging-server-mocks",
-    "@kbn/stack-connectors-plugin",
     "@kbn/actions-plugin",
     "@kbn/discover-plugin",
     "@kbn/logging",
@@ -49,5 +48,6 @@
     "@kbn/core-application-browser",
     "@kbn/inference-common",
     "@kbn/deeplinks-management",
+    "@kbn/connector-schemas",
   ]
 }

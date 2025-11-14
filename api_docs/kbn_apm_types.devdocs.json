@@ -424,6 +424,20 @@
         "children": [
           {
             "parentPluginId": "@kbn/apm-types",
+            "id": "def-common.Error.eventName",
+            "type": "string",
+            "tags": [],
+            "label": "eventName",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-types",
             "id": "def-common.Error.error",
             "type": "Object",
             "tags": [],

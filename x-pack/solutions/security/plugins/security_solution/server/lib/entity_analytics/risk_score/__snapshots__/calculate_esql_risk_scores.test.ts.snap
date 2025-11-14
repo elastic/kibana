@@ -16,7 +16,7 @@ exports[`Calculate risk scores with ESQL ESQL query matches snapshot 1`] = `
         scores = MV_PSERIES_WEIGHTED_SUM(TOP(risk_score, 10000, \\"desc\\"), 1.5),
         risk_inputs = TOP(input, 10, \\"desc\\")
     BY host.name
-    | SORT scores DESC, host.name ASC
+    | SORT scores DESC
     | LIMIT 3500
   "
 `;

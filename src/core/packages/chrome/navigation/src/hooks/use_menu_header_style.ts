@@ -15,8 +15,7 @@ import { css } from '@emotion/react';
  * `z-index: 1` causes the `1px` border in dark mode to be underneath the header.
  * We cannot apply border to the header because we need to account for the scrollbar.
  *
- * TODO: Likely, this needs to be revisited in the future within EUI components to avoid
- * the hack and assure consistency.
+ * TODO: this needs to be revisited in the future within EUI components to ensure consistency.
  */
 export function useMenuHeaderStyle() {
   const { euiTheme, colorMode } = useEuiTheme();

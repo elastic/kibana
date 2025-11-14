@@ -24,30 +24,10 @@ import { i18n } from '@kbn/i18n';
 import { isDescendantOf, isRoutingEnabled } from '@kbn/streams-schema';
 import { css } from '@emotion/css';
 import { css as cssReact } from '@emotion/react';
-import styled from '@emotion/styled';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
-import { ConditionPanel } from '../shared';
+import { ConditionPanel, VerticalRule } from '../shared';
 import type { RoutingDefinitionWithUIAttributes } from './types';
-
-function VerticalRule() {
-  const { euiTheme } = useEuiTheme();
-  const CentralizedContainer = styled.div`
-    display: flex;
-    align-items: center;
-    padding: 0 ${euiTheme.size.xs};
-  `;
-
-  const Border = styled.div`
-    height: 20px;
-    border-right: ${euiTheme.border.thin};
-  `;
-
-  return (
-    <CentralizedContainer>
-      <Border />
-    </CentralizedContainer>
-  );
-}
+import { DisabledBadge } from '../shared';
 
 export function IdleRoutingStreamEntry({
   availableStreams,
@@ -143,11 +123,7 @@ export function IdleRoutingStreamEntry({
           >
             {!isRoutingEnabled(routingRule.status) && (
               <>
-                <EuiBadge color="subdued">
-                  {i18n.translate('xpack.streams.streamDetailRouting.disabled', {
-                    defaultMessage: 'Disabled',
-                  })}
-                </EuiBadge>
+                <DisabledBadge />
                 <VerticalRule />
               </>
             )}

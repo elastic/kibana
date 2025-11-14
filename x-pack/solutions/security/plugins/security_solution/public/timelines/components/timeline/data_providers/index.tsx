@@ -56,7 +56,7 @@ const DropTargetDataProviders = styled.div`
   flex-direction: column;
   justify-content: flex-start;
   position: relative;
-  border: 0.2rem dashed ${({ theme }) => theme.euiTheme.colors.borderBaseFormsControl};
+  border: 0.2rem dashed ${({ theme }) => theme.euiTheme.colors.borderBaseProminent};
   border-radius: 5px;
   padding: ${({ theme }) => theme.euiTheme.size.s} 0;
   margin: 0px 0 0px 0;

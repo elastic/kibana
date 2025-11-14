@@ -21,6 +21,7 @@ interface FileAnalysisEvent {
   delimiter: string;
   preview_success: boolean;
   analysis_success: boolean;
+  analysis_cancelled: boolean;
   overrides_used: boolean;
   analysis_time_ms: number;
   location?: string;
@@ -35,6 +36,7 @@ interface FileUploadEvent {
   documents_success: number;
   documents_failed: number;
   upload_success: boolean;
+  upload_cancelled: boolean;
   upload_time_ms: number;
   location?: string;
 }
@@ -44,6 +46,7 @@ interface UploadSessionEvent {
   total_files: number;
   total_size_bytes: number;
   session_success: boolean;
+  session_cancelled: boolean;
   session_time_ms: number;
   new_index_created: boolean;
   data_view_created: boolean;

@@ -15,10 +15,13 @@ import {
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import type { Logger } from '@kbn/logging/src/logger';
 import type { SSLSettings, Services } from '@kbn/actions-plugin/server/types';
+import type {
+  ConnectorTypeConfigType,
+  ConnectorTypeSecretsType,
+} from '@kbn/connector-schemas/webhook';
+import { AuthType } from '@kbn/connector-schemas/common/auth';
 import { getOauth2DeleteTokenAxiosInterceptor } from '../../../common/auth/oauth2_delete_token_axios_interceptor';
 import { buildConnectorAuth } from '../../../common/auth/utils';
-import { AuthType } from '../../../common/auth/constants';
-import type { ConnectorTypeConfigType, ConnectorTypeSecretsType } from './types';
 
 interface GetOAuth2AxiosConfigParams {
   connectorId: string;

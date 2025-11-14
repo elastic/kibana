@@ -22,7 +22,6 @@ import type {
 } from '@kbn/usage-collection-plugin/public';
 import type { SharePluginSetup, SharePluginStart, LocatorPublic } from '@kbn/share-plugin/public';
 
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { EmbeddedConsoleView } from './embeddable_console';
@@ -43,7 +42,6 @@ export interface AppSetupUIPluginDependencies {
 }
 
 export interface AppPluginSetupDependencies {
-  dataViews: DataViewsPublicPluginStart;
   data: DataPublicPluginStart;
   licensing: LicensingPluginStart;
 }
@@ -52,7 +50,6 @@ export interface AppStartUIPluginDependencies {
   home?: HomePublicPluginStart;
   share: SharePluginStart;
   usageCollection?: UsageCollectionStart;
-  dataViews: DataViewsPublicPluginStart;
   data: DataPublicPluginStart;
   licensing: LicensingPluginStart;
 }

@@ -9,6 +9,7 @@ import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { InstallTranslatedButton } from './install_translated';
 import { getDashboardMigrationDashboardMock } from '../../../../../common/siem_migrations/model/__mocks__';
+import type { BulkActionsItem } from './types';
 
 describe('InstallTranslatedButton', () => {
   const mockInstallTranslatedItems = jest.fn();
@@ -29,6 +30,20 @@ describe('InstallTranslatedButton', () => {
   });
 
   it('renders the button with correct text when items are selected', () => {
+    const additionalItem = {
+      ...getDashboardMigrationDashboardMock(),
+      id: 'EfDKfJkBBI4hy8QbQ_BC',
+      migration_id: '9bcd7ea8-f617-4dc4-ab4a-da323c0a18b3',
+      translation_result: 'full',
+    } as BulkActionsItem;
+    const selectedItems: BulkActionsItem[] = [getDashboardMigrationDashboardMock(), additionalItem];
+    const { getByText } = render(
+      <InstallTranslatedButton {...defaultProps} selectedItems={selectedItems} />
+    );
+    expect(getByText('Install selected (2)')).toBeInTheDocument();
+  });
+
+  it('renders the button with correct text when partially translated items are selected', () => {
     const selectedItems = [getDashboardMigrationDashboardMock()];
     const { getByText } = render(
       <InstallTranslatedButton {...defaultProps} selectedItems={selectedItems} />

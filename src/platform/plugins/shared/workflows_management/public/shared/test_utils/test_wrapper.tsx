@@ -12,7 +12,7 @@ import { Provider as ReduxProvider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
 import type { Store } from 'redux';
 import { I18nProvider } from '@kbn/i18n-react';
-import { createMockStore } from '../../widgets/workflow_yaml_editor/lib/store/__mocks__/store.mock';
+import { createMockStore } from '../../entities/workflows/store/__mocks__/store.mock';
 
 interface TestWrapperProps {
   children: React.ReactNode;

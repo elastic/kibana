@@ -11,13 +11,14 @@ import { z } from '@kbn/zod';
 import { createTracedEsClient } from '@kbn/traced-es-client';
 import { isoToEpoch } from '@kbn/zod-helpers';
 import { parse as dateMathParse } from '@kbn/datemath';
+import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { createRoute } from '../create_route';
-import { getDimensions } from './get_dimentions';
+import { getDimensions } from './get_dimensions';
 import { throwNotFoundIfMetricsExperienceDisabled } from '../../lib/utils';
 
 export const getDimensionsRoute = createRoute({
   endpoint: 'GET /internal/metrics_experience/dimensions',
-  security: { authz: { requiredPrivileges: ['read'] } },
+  security: { authz: { enabled: false, reason: 'Authorization provided by Elasticsearch' } },
   params: z.object({
     query: z.object({
       dimensions: z
@@ -32,9 +33,18 @@ export const getDimensionsRoute = createRoute({
         })
         .pipe(z.array(z.string()).min(1).max(10)),
       indices: z
-        .union([z.string(), z.array(z.string())])
-        .transform((val) => (Array.isArray(val) ? val : [val]))
-        .default(['metrics-*']),
+        .string()
+        .optional()
+        .transform((str) => {
+          if (!str) return ['metrics-*'];
+          try {
+            const parsed = JSON.parse(str);
+            return parsed;
+          } catch {
+            throw new Error('Invalid JSON');
+          }
+        })
+        .pipe(z.array(z.string())),
       to: z.string().datetime().default(dateMathParse('now')!.toISOString()).transform(isoToEpoch),
       from: z
         .string()
@@ -43,18 +53,18 @@ export const getDimensionsRoute = createRoute({
         .transform(isoToEpoch),
     }),
   }),
-  handler: async ({ context, params, logger }) => {
+  handler: async ({ context, params, logger, request }) => {
     const { elasticsearch, featureFlags } = await context.core;
     await throwNotFoundIfMetricsExperienceDisabled(featureFlags);
 
     const { dimensions, indices, from, to } = params.query;
     const esClient = elasticsearch.client.asCurrentUser;
-
     const values = await getDimensions({
       esClient: createTracedEsClient({
-        logger,
         client: esClient,
+        logger,
         plugin: 'metrics_experience',
+        abortSignal: getRequestAbortedSignal(request.events.aborted$),
       }),
       dimensions,
       indices,

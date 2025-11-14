@@ -161,6 +161,7 @@ const MigrateSystemIndicesStep: FunctionComponent<Props> = ({ setIsComplete }) =
   if (migrationStatus.error) {
     return (
       <EuiCallOut
+        announceOnMount={false}
         title={i18nTexts.loadingError}
         color="danger"
         iconType="warning"
@@ -204,6 +205,7 @@ const MigrateSystemIndicesStep: FunctionComponent<Props> = ({ setIsComplete }) =
       {startMigrationStatus.statusType === 'error' && (
         <>
           <EuiCallOut
+            announceOnMount
             size="s"
             color="danger"
             iconType="warning"
@@ -219,6 +221,7 @@ const MigrateSystemIndicesStep: FunctionComponent<Props> = ({ setIsComplete }) =
       {migrationStatus.data?.migration_status === 'ERROR' && (
         <>
           <EuiCallOut
+            announceOnMount={false}
             size="s"
             color="danger"
             iconType="warning"

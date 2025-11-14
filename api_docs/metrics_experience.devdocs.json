@@ -16,7 +16,7 @@
         "signature": [
           "{ getDimensions: (params: { dimensions: string; indices?: string | string[] | undefined; from?: string | undefined; to?: string | undefined; }, signal?: AbortSignal | null | undefined) => Promise<{ values: { value: string; field: string; }[]; }>; getFields: (params: { page?: number | undefined; index?: string | undefined; size?: number | undefined; fields?: string | string[] | undefined; from?: string | undefined; to?: string | undefined; }, signal?: AbortSignal | null | undefined) => Promise<{ fields: ",
           "MetricField",
-          "[]; total: number; page: number; }>; getIndexPatternMetadata({ indexPattern, from, to, }: { indexPattern: string; } & { from: string; to: string; }, signal?: AbortSignal | null | undefined): Promise<{ indexPatternMetadata: { [k: string]: { hasTimeSeriesFields: boolean; }; }; }>; }"
+          "[]; total: number; page: number; }>; }"
         ],
         "path": "src/platform/plugins/shared/metrics_experience/public/api/index.ts",
         "deprecated": false,
@@ -46,7 +46,7 @@
           "signature": [
             "{ getDimensions: (params: { dimensions: string; indices?: string | string[] | undefined; from?: string | undefined; to?: string | undefined; }, signal?: AbortSignal | null | undefined) => Promise<{ values: { value: string; field: string; }[]; }>; getFields: (params: { page?: number | undefined; index?: string | undefined; size?: number | undefined; fields?: string | string[] | undefined; from?: string | undefined; to?: string | undefined; }, signal?: AbortSignal | null | undefined) => Promise<{ fields: ",
             "MetricField",
-            "[]; total: number; page: number; }>; getIndexPatternMetadata({ indexPattern, from, to, }: { indexPattern: string; } & { from: string; to: string; }, signal?: AbortSignal | null | undefined): Promise<{ indexPatternMetadata: { [k: string]: { hasTimeSeriesFields: boolean; }; }; }>; } | undefined"
+            "[]; total: number; page: number; }>; } | undefined"
           ],
           "path": "src/platform/plugins/shared/metrics_experience/public/types.ts",
           "deprecated": false,
@@ -71,45 +71,7 @@
         "label": "MetricsExperienceRouteRepository",
         "description": [],
         "signature": [
-          "{ \"GET /internal/metrics_experience/index_pattern_metadata/{indexPattern}\": ",
-          {
-            "pluginId": "@kbn/server-route-repository-utils",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-            "section": "def-common.ServerRoute",
-            "text": "ServerRoute"
-          },
-          "<\"GET /internal/metrics_experience/index_pattern_metadata/{indexPattern}\", ",
-          "ZodObject",
-          "<{ path: ",
-          "ZodObject",
-          "<{ indexPattern: ",
-          "ZodString",
-          "; }, \"strip\", ",
-          "ZodTypeAny",
-          ", { indexPattern: string; }, { indexPattern: string; }>; query: ",
-          "ZodObject",
-          "<{ to: ",
-          "ZodEffects",
-          "<",
-          "ZodString",
-          ", number, string>; from: ",
-          "ZodEffects",
-          "<",
-          "ZodString",
-          ", number, string>; }, \"strip\", ",
-          "ZodTypeAny",
-          ", { from: number; to: number; }, { from: string; to: string; }>; }, \"strip\", ",
-          "ZodTypeAny",
-          ", { path: { indexPattern: string; }; query: { from: number; to: number; }; }, { path: { indexPattern: string; }; query: { from: string; to: string; }; }>, ",
-          {
-            "pluginId": "@kbn/server-route-repository-utils",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-            "section": "def-common.DefaultRouteHandlerResources",
-            "text": "DefaultRouteHandlerResources"
-          },
-          ", { indexPatternMetadata: { [k: string]: { hasTimeSeriesFields: boolean; }; }; }, undefined>; \"GET /internal/metrics_experience/fields\": ",
+          "{ \"GET /internal/metrics_experience/fields\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",

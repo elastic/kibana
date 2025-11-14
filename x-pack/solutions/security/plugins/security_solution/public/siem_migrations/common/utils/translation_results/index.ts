@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { useEuiTheme } from '@elastic/eui';
 import { MigrationTranslationResult } from '../../../../../common/siem_migrations/constants';
 import type { MigrationTranslationResult as MigrationTranslationResultType } from '../../../../../common/siem_migrations/model/common.gen';
 import * as i18n from './translations';
@@ -17,19 +16,7 @@ const COLORS = {
   error: '#E7664C',
 } as const;
 
-export const useResultVisColors = () => {
-  const { euiTheme } = useEuiTheme();
-  if (euiTheme.themeName === 'EUI_THEME_AMSTERDAM') {
-    return {
-      [MigrationTranslationResult.FULL]: euiTheme.colors.vis.euiColorVis0,
-      [MigrationTranslationResult.PARTIAL]: euiTheme.colors.vis.euiColorVis5,
-      [MigrationTranslationResult.UNTRANSLATABLE]: euiTheme.colors.vis.euiColorVis7,
-      error: euiTheme.colors.vis.euiColorVis9,
-    };
-  }
-  // Borealis
-  return COLORS;
-};
+export const useResultVisColors = () => COLORS;
 
 export const convertTranslationResultIntoColor = (status?: MigrationTranslationResultType) => {
   switch (status) {

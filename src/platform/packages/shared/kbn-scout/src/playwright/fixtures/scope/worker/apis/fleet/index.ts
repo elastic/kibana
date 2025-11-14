@@ -18,6 +18,9 @@ import type {
 } from './types';
 
 export interface FleetApiService {
+  internal: {
+    setup: () => Promise<any>;
+  };
   integration: {
     install: (name: string) => Promise<any>;
     delete: (name: string) => Promise<any>;
@@ -73,6 +76,16 @@ export interface FleetApiService {
 
 export const getFleetApiHelper = (log: ScoutLogger, kbnClient: KbnClient): FleetApiService => {
   return {
+    internal: {
+      setup: async () => {
+        return await measurePerformanceAsync(log, `fleetApi.internal.setup`, async () => {
+          return await kbnClient.request({
+            method: 'POST',
+            path: '/api/fleet/setup',
+          });
+        });
+      },
+    },
     integration: {
       install: async (name: string) => {
         return await measurePerformanceAsync(

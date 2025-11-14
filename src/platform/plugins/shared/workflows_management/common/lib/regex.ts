@@ -53,3 +53,31 @@ export const LIQUID_EXPRESSION_REGEX_GLOBAL = /(\{\{[^}]*\}\}|\{\%[^%]*\%\})/g;
 // More specific patterns for different Liquid constructs
 export const LIQUID_OUTPUT_REGEX_GLOBAL = /\{\{\s*([^}]*?)\s*\}\}/g;
 export const LIQUID_TAG_REGEX_GLOBAL = /\{\%\s*([^%]*?)\s*\%\}/g;
+
+export const DYNAMIC_VALUE_REGEX = /^\$\{\{\s*\S[\s\S]*\}\}$/;
+
+/**
+ * Checks if a value matches the dynamic/templated value pattern ($<something>)
+ * Examples: ${{env.USER}}, ${{ref:myVar}}, ${{someVariable}}
+ * Pattern: starts with ${{ and ends with }}, and any non-empty string in between
+ */
+export function isDynamicValue(value: unknown): boolean {
+  if (typeof value !== 'string') {
+    return false;
+  }
+  return DYNAMIC_VALUE_REGEX.test(value);
+}
+
+export const VARIABLE_VALUE_REGEX = /^\{\{\s*\S[\s\S]*\}\}$/;
+
+/**
+ * Checks if a value matches the variable pattern ({{ variable }})
+ * Examples: {{ variable }}, {{ variable | filter }}
+ * Pattern: starts with {{ and ends with }}, and any non-empty string in between
+ */
+export function isVariableValue(value: unknown): boolean {
+  if (typeof value !== 'string') {
+    return false;
+  }
+  return VARIABLE_VALUE_REGEX.test(value);
+}

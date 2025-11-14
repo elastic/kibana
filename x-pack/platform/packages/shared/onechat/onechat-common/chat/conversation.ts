@@ -7,6 +7,7 @@
 
 import type { UserIdAndName } from '../base/users';
 import type { ToolResult } from '../tools/tool_result';
+import type { Attachment, AttachmentInput } from '../attachments';
 
 /**
  * Represents a user input that initiated a conversation round.
@@ -16,6 +17,24 @@ export interface RoundInput {
    * A text message from the user.
    */
   message: string;
+  /**
+   * Optional attachments to provide to the agent.
+   */
+  attachments?: Attachment[];
+}
+
+/**
+ * Raw version of RoundInput, as accepted as input by the converse and agent APIs.
+ */
+export interface RawRoundInput {
+  /**
+   * A text message from the user.
+   */
+  message: string;
+  /**
+   * Optional attachments to provide to the agent.
+   */
+  attachments?: AttachmentInput[];
 }
 
 /**
@@ -132,17 +151,33 @@ export interface ConversationRound {
   steps: ConversationRoundStep[];
   /** The final response from the assistant */
   response: AssistantResponse;
+  /** when the round was started */
+  started_at: string;
+  /** time it took to first token, in ms */
+  time_to_first_token: number;
+  /** time it took to last token, in ms */
+  time_to_last_token: number;
   /** when tracing is enabled, contains the traceId associated with this round */
   trace_id?: string;
 }
 
+/**
+ * Main structure representing a conversation with an agent.
+ */
 export interface Conversation {
+  /** unique id for this conversation */
   id: string;
+  /** id of the agent this conversation is bound to */
   agent_id: string;
+  /** info of the owner of the discussion */
   user: UserIdAndName;
+  /** title of the conversation */
   title: string;
+  /** creation date */
   created_at: string;
+  /** update date */
   updated_at: string;
+  /** list of round for this conversation */
   rounds: ConversationRound[];
 }
 

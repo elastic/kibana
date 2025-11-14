@@ -80,8 +80,12 @@ const useResettableState: <T>(
   };
   const updateValue = (next: typeof value, shouldUpdateInitialValue = false) => {
     setValue(next);
-    setHasChanged(true);
-    if (shouldUpdateInitialValue) initialValueRef.current = next;
+    if (shouldUpdateInitialValue) {
+      initialValueRef.current = next;
+      setHasChanged(false);
+    } else {
+      setHasChanged(true);
+    }
   };
   return [value, hasChanged, updateValue, reset];
 };
@@ -171,6 +175,10 @@ export const RulesSettingsFlyout = memo((props: RulesSettingsFlyoutProps) => {
   const canWriteQueryDelaySettings = writeQueryDelaySettingsUI && !hasQueryDelayError;
   const canShowQueryDelaySettings = readQueryDelaySettingsUI;
   const canShowAlertDeleteSettings = readAlertDeleteSettingsUI;
+
+  const isChanged = hasFlappingChanged || hasQueryDelayChanged;
+  const hasMinimumWritePermissions = canWriteFlappingSettings || canWriteQueryDelaySettings;
+  const shouldDisableSaveButton = !isChanged || !hasMinimumWritePermissions;
 
   const handleSettingsChange = (
     setting: keyof RulesSettingsProperties,
@@ -324,7 +332,7 @@ export const RulesSettingsFlyout = memo((props: RulesSettingsFlyoutProps) => {
               fill
               data-test-subj="rulesSettingsFlyoutSaveButton"
               onClick={handleSave}
-              disabled={!canWriteFlappingSettings && !canWriteQueryDelaySettings}
+              disabled={shouldDisableSaveButton}
             >
               <FormattedMessage
                 id="xpack.triggersActionsUI.rulesSettings.flyout.saveButton"

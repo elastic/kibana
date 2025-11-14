@@ -1,0 +1,19 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": ["jest", "node", "react", "@kbn/ambient-ui-types"]
+  },
+  "include": ["**/*.ts", "**/*.tsx", "index.ts"],
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/react-query",
+    "@kbn/kibana-react-plugin",
+    "@kbn/workflows",
+    "@kbn/react-kibana-context-theme",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/core"
+  ]
+}
+

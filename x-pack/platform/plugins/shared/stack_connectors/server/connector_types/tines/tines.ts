@@ -11,10 +11,12 @@ import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import type { AxiosError } from 'axios';
 import type { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import {
+  API_MAX_RESULTS,
+  SUB_ACTION,
   TinesStoriesActionParamsSchema,
   TinesWebhooksActionParamsSchema,
   TinesRunActionParamsSchema,
-} from '../../../common/tines/schema';
+} from '@kbn/connector-schemas/tines';
 import type {
   TinesConfig,
   TinesSecrets,
@@ -26,7 +28,7 @@ import type {
   TinesWebhookObject,
   TinesStoryObject,
   TinesWebhookActionConfig,
-} from '../../../common/tines/types';
+} from '@kbn/connector-schemas/tines';
 import {
   TinesStoriesApiResponseSchema,
   TinesWebhooksApiResponseSchema,
@@ -39,7 +41,6 @@ import type {
   TinesWebhookApiResponse,
   TinesWebhooksApiResponse,
 } from './api_schema';
-import { API_MAX_RESULTS, SUB_ACTION } from '../../../common/tines/constants';
 
 export const API_PATH = '/api/v1';
 export const WEBHOOK_PATH = '/webhook';

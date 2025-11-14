@@ -6,6 +6,7 @@
  */
 
 import { useAbortController } from '@kbn/react-hooks';
+import { firstValueFrom } from 'rxjs';
 import type { Streams, Feature } from '@kbn/streams-schema';
 import type { IdentifiedFeaturesEvent } from '@kbn/streams-plugin/server/routes/internal/streams/features/types';
 import type { StorageClientBulkResponse } from '@kbn/storage-adapter';
@@ -39,7 +40,7 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
 
   return {
     identifyFeatures: async (connectorId: string, to: string, from: string) => {
-      return await streamsRepositoryClient.fetch(
+      const events$ = streamsRepositoryClient.stream(
         'POST /internal/streams/{name}/features/_identify',
         {
           signal,
@@ -53,6 +54,8 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
           },
         }
       );
+
+      return firstValueFrom(events$);
     },
     addFeaturesToStream: async (features: Feature[]) => {
       return await streamsRepositoryClient.fetch('POST /internal/streams/{name}/features/_bulk', {

@@ -2022,6 +2022,22 @@
             "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-rule-form",
+            "id": "def-public.RuleFormProps.focusTrapProps",
+            "type": "Object",
+            "tags": [],
+            "label": "focusTrapProps",
+            "description": [],
+            "signature": [
+              "Pick<",
+              "EuiFocusTrapProps",
+              ", \"shards\" | \"returnFocus\" | \"closeOnMouseup\"> | undefined"
+            ],
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

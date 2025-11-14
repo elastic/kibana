@@ -8,6 +8,7 @@
  */
 
 export const LATEST_VERSION = 1;
+export const DASHBOARD_API_VERSION = String(LATEST_VERSION);
 
 export const CONTENT_ID = 'dashboard';
 
@@ -18,7 +19,7 @@ export const DEFAULT_PANEL_HEIGHT = 15;
 export const DEFAULT_DASHBOARD_OPTIONS = {
   hidePanelTitles: false,
   useMargins: true,
-  syncColors: true,
+  syncColors: false,
   syncCursor: true,
-  syncTooltips: true,
+  syncTooltips: false,
 } as const;

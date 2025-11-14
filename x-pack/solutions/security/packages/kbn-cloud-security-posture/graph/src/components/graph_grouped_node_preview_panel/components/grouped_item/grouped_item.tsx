@@ -7,6 +7,10 @@
 
 import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  DOCUMENT_TYPE_ENTITY,
+  DOCUMENT_TYPE_ALERT,
+} from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import { Skeleton } from './parts/skeleton';
 import { Panel } from './parts/panel';
 import { HeaderRow } from './parts/header_row';
@@ -28,14 +32,14 @@ export type GroupedItemProps =
 export const GroupedItem = memo(({ item, isLoading }: GroupedItemProps) => {
   if (isLoading) {
     return (
-      <Panel>
+      <Panel grow={false}>
         <Skeleton />
       </Panel>
     );
   }
 
   return (
-    <Panel isAlert={item.itemType === 'alert'}>
+    <Panel isAlert={item.itemType === DOCUMENT_TYPE_ALERT}>
       <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
         <EuiFlexItem>
           <HeaderRow item={item} />
@@ -47,7 +51,7 @@ export const GroupedItem = memo(({ item, isLoading }: GroupedItemProps) => {
           </EuiFlexItem>
         )}
 
-        {item.itemType !== 'entity' && item.actor && item.target && (
+        {item.itemType !== DOCUMENT_TYPE_ENTITY && item.actor && item.target && (
           <EuiFlexItem>
             <ActorsRow actor={item.actor} target={item.target} />
           </EuiFlexItem>

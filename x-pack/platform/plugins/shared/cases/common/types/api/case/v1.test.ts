@@ -136,6 +136,7 @@ const basicCase: Case = {
       description: null,
     },
   ],
+  total_observables: 1,
   incremental_id: 123,
 };
 

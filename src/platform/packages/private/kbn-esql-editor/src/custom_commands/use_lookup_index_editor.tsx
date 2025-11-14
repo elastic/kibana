@@ -140,7 +140,8 @@ export const useLookupIndexCommand = (
   getLookupIndices: (() => Promise<{ indices: IndexAutocompleteItem[] }>) | undefined,
   query: AggregateQuery,
   onIndexCreated: (resultQuery: string) => Promise<void>,
-  onNewFieldsAddedToIndex?: (indexName: string) => void
+  onNewFieldsAddedToIndex?: (indexName: string) => void,
+  onOpenIndexInDiscover?: EditLookupIndexContentContext['onOpenIndexInDiscover']
 ) => {
   const { euiTheme } = useEuiTheme();
   const {
@@ -296,9 +297,10 @@ export const useLookupIndexCommand = (
             indexHasNewFields
           );
         },
+        onOpenIndexInDiscover,
       } as EditLookupIndexContentContext);
     },
-    [onFlyoutClose, uiActions]
+    [onFlyoutClose, onOpenIndexInDiscover, uiActions]
   );
 
   const openFlyoutRef = useRef(openFlyout);

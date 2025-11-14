@@ -653,6 +653,7 @@ export const ModelsList: FC<Props> = ({
               isElserCalloutVisible ? (
                 <>
                   <EuiCallOut
+                    announceOnMount={false}
                     size="s"
                     title={
                       <FormattedMessage

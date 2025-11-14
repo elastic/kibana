@@ -94,7 +94,9 @@ export const suggest = (
     throw new Error(`${commandName.toUpperCase()} command not found in the parsed query`);
   }
 
-  return autocomplete(query, command, mockCallbacks, context, cursorPosition);
+  const contextWithRoot = { ...context, rootAst: root };
+
+  return autocomplete(query, command, mockCallbacks, contextWithRoot, cursorPosition);
 };
 
 export const expectSuggestions = async (
@@ -333,6 +335,11 @@ export function getFunctionSignaturesByReturnType(
         return signatures.some(({ params }) => params.length > 1)
           ? `${name.toUpperCase()} $0`
           : name.toUpperCase();
+      }
+
+      const hasNoArguments = signatures.every((sig) => sig.params.length === 0);
+      if (hasNoArguments) {
+        return `${name.toUpperCase()}()`;
       }
       return customParametersSnippet
         ? `${name.toUpperCase()}(${customParametersSnippet})`

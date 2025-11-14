@@ -11,7 +11,9 @@ import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { CONNECTOR_ID } from '@kbn/connector-schemas/cases_webhook/constants';
 import type { CasesWebhookActionParams, CasesWebhookConfig, CasesWebhookSecrets } from './types';
+import { formDeserializer, formSerializer } from '../lib/webhook/form_serialization';
 
 export function getConnectorType(): ConnectorTypeModel<
   CasesWebhookConfig,
@@ -19,7 +21,7 @@ export function getConnectorType(): ConnectorTypeModel<
   CasesWebhookActionParams
 > {
   return {
-    id: '.cases-webhook',
+    id: CONNECTOR_ID,
     iconClass: 'logoWebhook',
     selectMessage: i18n.translate(
       'xpack.stackConnectors.components.casesWebhook.selectMessageText',
@@ -52,5 +54,9 @@ export function getConnectorType(): ConnectorTypeModel<
     },
     actionConnectorFields: lazy(() => import('./webhook_connectors')),
     actionParamsFields: lazy(() => import('./webhook_params')),
+    connectorForm: {
+      serializer: formSerializer,
+      deserializer: formDeserializer,
+    },
   };
 }

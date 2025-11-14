@@ -71,6 +71,18 @@ interface OwnProps {
   signalIndexName: string | undefined;
   tableId: TableIdLiteral;
   to: string;
+
+  /**
+   * If you're not using this property, multi-value fields will be transformed into a string
+   * and grouped by that value. For instance, if an object has a property
+   * called "mac" with value ['mac1', 'mac2'], the query will stringify that value
+   * to "mac1, mac2" and then group by it.
+   *
+   * Using this property will create a bucket for each value of the multi-value fields in question.
+   * Following the example above, a field with the ['mac1', 'mac2'] value will be grouped
+   * in 2 groups: one for mac1 and a second formac2.
+   */
+  multiValueFieldsToFlatten?: string[];
 }
 
 export type AlertsTableComponentProps = OwnProps;
@@ -97,6 +109,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   signalIndexName,
   tableId,
   to,
+  multiValueFieldsToFlatten,
 }) => {
   const {
     services: { uiSettings },
@@ -176,6 +189,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
       to,
       pageSize,
       pageIndex,
+      multiValueFieldsToFlatten,
     });
   }, [
     additionalFilters,
@@ -187,6 +201,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     selectedGroup,
     to,
     uniqueValue,
+    multiValueFieldsToFlatten,
   ]);
 
   const emptyGlobalQuery = useMemo(() => getGlobalQuery([]), [getGlobalQuery]);

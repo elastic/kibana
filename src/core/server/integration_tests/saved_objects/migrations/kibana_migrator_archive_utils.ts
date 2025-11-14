@@ -13,6 +13,7 @@ import { join } from 'path';
 import fs from 'fs/promises';
 import { exec } from 'child_process';
 import { promisify } from 'util';
+import { setTimeout as timer } from 'timers/promises';
 const execPromise = promisify(exec);
 
 import type { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
@@ -21,9 +22,8 @@ import {
   defaultKibanaIndex,
   getKibanaMigratorTestKit,
   startElasticsearch,
-} from './kibana_migrator_test_kit';
-import { delay } from './test_utils';
-import { baselineTypes, getBaselineDocuments } from './kibana_migrator_test_kit.fixtures';
+} from '@kbn/migrator-test-kit';
+import { baselineTypes, getBaselineDocuments } from '@kbn/migrator-test-kit/fixtures';
 
 export const BASELINE_ELASTICSEARCH_VERSION = '9.3.0';
 export const BASELINE_DOCUMENTS_PER_TYPE_SMALL = 200;
@@ -90,16 +90,16 @@ export const createBaselineArchive = async ({
   }
 
   // wait a bit more to make sure everything's persisted to disk
-  await delay(30);
+  await timer(30_000);
 
   await compressBaselineArchive(basePath, dataArchive);
   console.log(`Archive created in: ${(Date.now() - startTime) / 1000} seconds`, dataArchive);
 
   // leave command line enough time to finish creating + closing ZIP file
-  await delay(30);
+  await timer(30_000);
 
   await esServer.stop();
-  await delay(10);
+  await timer(10_000);
   await fs.rm(basePath, { recursive: true, force: true });
 };
 

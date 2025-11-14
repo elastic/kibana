@@ -25,7 +25,7 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { IngestPipeline as IngestPipelineType } from '@kbn/file-upload-common';
-import { STATUS, useFileUploadContext } from '@kbn/file-upload';
+import { useFileUploadContext } from '@kbn/file-upload';
 import { FileClashIcon, FileClashResult } from './file_clash';
 import { Mappings } from './mappings';
 import { IngestPipeline } from './pipeline';
@@ -51,7 +51,6 @@ enum TAB {
 interface Props {
   index: number;
   showFileContentPreview?: boolean;
-  showFileSummary?: boolean;
   lite: boolean;
   showOverrideButton?: boolean;
 }
@@ -60,10 +59,9 @@ export const FileStatus: FC<Props> = ({
   lite,
   index,
   showFileContentPreview,
-  showFileSummary,
   showOverrideButton = false,
 }) => {
-  const { deleteFile, uploadStatus, filesStatus, fileUploadManager, pipelines } =
+  const { deleteFile, uploadStatus, filesStatus, fileUploadManager, pipelines, uploadStarted } =
     useFileUploadContext();
 
   const fileStatus = filesStatus[index];
@@ -73,11 +71,6 @@ export const FileStatus: FC<Props> = ({
 
   const [selectedTab, setSelectedTab] = useState<TAB>(TAB.PREVIEW);
   const [expanded, setExpanded] = useState<boolean>(false);
-
-  const importStarted =
-    uploadStatus.overallImportStatus === STATUS.STARTED ||
-    uploadStatus.overallImportStatus === STATUS.COMPLETED ||
-    uploadStatus.overallImportStatus === STATUS.FAILED;
 
   const buttonCss = css`
     &:hover {
@@ -103,7 +96,7 @@ export const FileStatus: FC<Props> = ({
   return (
     <>
       <EuiPanel hasShadow={false} hasBorder paddingSize="s">
-        {importStarted ? (
+        {uploadStarted ? (
           <>
             <UploadProgress fileStatus={fileStatus} />
             {fileStatus.failures.length > 0 ? (
@@ -178,36 +171,31 @@ export const FileStatus: FC<Props> = ({
                       </>
                     ) : null}
 
-                    {fileStatus.results !== null || fileStatus.analysisError !== undefined ? (
-                      <>
-                        {/* TODO, remove button should be stop if analysis is in progress */}
-                        <EuiFlexItem grow={false}>
-                          <EuiToolTip
-                            position="top"
-                            content={
-                              <FormattedMessage
-                                id="xpack.dataVisualizer.file.fileStatus.deleteFile"
-                                defaultMessage="Remove file"
-                              />
+                    <EuiFlexItem grow={false}>
+                      <EuiToolTip
+                        position="top"
+                        content={
+                          <FormattedMessage
+                            id="xpack.dataVisualizer.file.fileStatus.deleteFile"
+                            defaultMessage="Remove file"
+                          />
+                        }
+                      >
+                        <EuiButtonIcon
+                          onClick={() => deleteFile(index)}
+                          iconType="trash"
+                          size="xs"
+                          color="danger"
+                          data-test-subj={`mlFileUploadDeleteFileButton-${index}`}
+                          aria-label={i18n.translate(
+                            'xpack.dataVisualizer.file.fileStatus.deleteFile',
+                            {
+                              defaultMessage: 'Remove file',
                             }
-                          >
-                            <EuiButtonIcon
-                              onClick={() => deleteFile(index)}
-                              iconType="trash"
-                              size="xs"
-                              color="danger"
-                              data-test-subj={`mlFileUploadDeleteFileButton-${index}`}
-                              aria-label={i18n.translate(
-                                'xpack.dataVisualizer.file.fileStatus.deleteFile',
-                                {
-                                  defaultMessage: 'Remove file',
-                                }
-                              )}
-                            />
-                          </EuiToolTip>
-                        </EuiFlexItem>
-                      </>
-                    ) : null}
+                          )}
+                        />
+                      </EuiToolTip>
+                    </EuiFlexItem>
                   </EuiFlexGroup>
                 </>
               }

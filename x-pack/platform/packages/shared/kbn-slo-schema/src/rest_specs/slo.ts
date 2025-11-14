@@ -12,6 +12,7 @@ import {
   metaSchema,
   remoteSchema,
   sloDefinitionSchema,
+  type sloDefinitionAndHealthSchema,
   summarySchema,
 } from '../schema';
 
@@ -25,7 +26,8 @@ const sloWithDataResponseSchema = t.intersection([
 ]);
 
 type SLODefinitionResponse = t.OutputOf<typeof sloDefinitionSchema>;
+type SLODefinitionWithHealthResponse = t.OutputOf<typeof sloDefinitionAndHealthSchema>;
 type SLOWithSummaryResponse = t.OutputOf<typeof sloWithDataResponseSchema>;
 
 export { sloWithDataResponseSchema };
-export type { SLODefinitionResponse, SLOWithSummaryResponse };
+export type { SLODefinitionResponse, SLODefinitionWithHealthResponse, SLOWithSummaryResponse };
