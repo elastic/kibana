@@ -30,9 +30,9 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
     log.debug(
       'SolutionNavigation.sidenav.expandMoreIfNeeded - checking if "More" menu needs to be expanded'
     );
-    if (await testSubjects.exists('sideNavMoreMenuItem', { timeout: TIMEOUT_CHECK })) {
+    if (await testSubjects.exists('kbnChromeNav-moreMenuTrigger', { timeout: TIMEOUT_CHECK })) {
       await retry.try(async () => {
-        const moreMenuItem = await testSubjects.find('sideNavMoreMenuItem', TIMEOUT_CHECK);
+        const moreMenuItem = await testSubjects.find('kbnChromeNav-moreMenuTrigger', TIMEOUT_CHECK);
         let isExpanded = await moreMenuItem.getAttribute('aria-expanded');
         log.debug(
           'SolutionNavigation.sidenav.expandMoreIfNeeded - More Popover Visible',
@@ -53,11 +53,11 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
     log.debug(
       'SolutionNavigation.sidenav.collapseMoreIfNeeded - checking if "More" menu needs to be collapsed'
     );
-    if (await testSubjects.exists('sideNavMoreMenuItem', { timeout: TIMEOUT_CHECK })) {
+    if (await testSubjects.exists('kbnChromeNav-moreMenuTrigger', { timeout: TIMEOUT_CHECK })) {
       // TODO: find a better way to collapse
       // https://github.com/elastic/kibana/issues/236242
       await retry.try(async () => {
-        const moreMenuItem = await testSubjects.find('sideNavMoreMenuItem', TIMEOUT_CHECK);
+        const moreMenuItem = await testSubjects.find('kbnChromeNav-moreMenuTrigger', TIMEOUT_CHECK);
         let isExpanded = await moreMenuItem.getAttribute('aria-expanded');
         log.debug(
           'SolutionNavigation.sidenav.collapseMoreIfNeeded - More Popover Visible',
@@ -235,14 +235,14 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
 
       async expectPanelExists(sectionId: NavigationId) {
         log.debug('SolutionNavigation.sidenav.expectPanelExists', sectionId);
-        await testSubjects.existOrFail(`~side-navigation-panel_${sectionId}`, {
+        await testSubjects.existOrFail(`~kbnChromeNav-sidePanel_${sectionId}`, {
           timeout: TIMEOUT_CHECK,
         });
       },
       async isPanelOpen(sectionId: NavigationId) {
         try {
           const panel = await testSubjects.find(
-            `~side-navigation-panel_${sectionId}`,
+            `~kbnChromeNav-sidePanel_${sectionId}`,
             TIMEOUT_CHECK
           );
           return !!panel;
