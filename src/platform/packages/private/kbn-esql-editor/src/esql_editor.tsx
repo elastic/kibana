@@ -248,15 +248,17 @@ const ESQLEditorInternal = function ESQLEditor({
     ]
   );
 
-  // combine with the starred queries one
   const onUpdateAndSubmitQuery = useCallback(
-    (newQuery: string) => {
+    (newQuery: string, querySource: QuerySource) => {
+      // notify telemetry that a query has been submitted from the history panel
+      telemetryService.trackQueryHistoryClicked(querySource === QuerySource.STARRED);
+      // update the query first
       onQueryUpdate(newQuery);
       setTimeout(() => {
-        onQuerySubmit(QuerySource.VISOR);
+        onQuerySubmit(querySource);
       }, 0);
     },
-    [onQuerySubmit, onQueryUpdate]
+    [onQuerySubmit, onQueryUpdate, telemetryService]
   );
 
   const onCommentLine = useCallback(() => {
@@ -1204,7 +1206,7 @@ const ESQLEditorInternal = function ESQLEditor({
         isSpaceReduced={measuredEditorWidth < BREAKPOINT_WIDTH}
         isVisible={isVisorOpen}
         onClose={() => setIsVisorOpen(false)}
-        onUpdateAndSubmitQuery={onUpdateAndSubmitQuery}
+        onUpdateAndSubmitQuery={(newQuery) => onUpdateAndSubmitQuery(newQuery, QuerySource.VISOR)}
       />
       <EditorFooter
         lines={editorModel.current?.getLineCount() || 1}
@@ -1214,7 +1216,7 @@ const ESQLEditorInternal = function ESQLEditor({
         }}
         code={code}
         onErrorClick={onErrorClick}
-        runQuery={onQuerySubmit}
+        onUpdateAndSubmitQuery={onUpdateAndSubmitQuery}
         updateQuery={onQueryUpdate}
         detectedTimestamp={detectedTimestamp}
         hideRunQueryText={hideRunQueryText}

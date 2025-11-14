@@ -27,8 +27,7 @@ import {
 } from '@kbn/language-documentation';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
-import type { TelemetryQuerySubmittedProps } from '@kbn/esql-types/src/esql_telemetry_types';
-import { QuerySource } from '@kbn/esql-types/src/esql_telemetry_types';
+import type { QuerySource } from '@kbn/esql-types/src/esql_telemetry_types';
 import type { DataErrorsControl, ESQLEditorDeps } from '../types';
 import { ErrorsWarningsFooterPopover } from './errors_warnings_popover';
 import { SubmitFeedbackComponent } from './feedback_component';
@@ -52,7 +51,7 @@ interface EditorFooterProps {
   warnings?: MonacoMessage[];
   detectedTimestamp?: string;
   onErrorClick: (error: MonacoMessage) => void;
-  runQuery: (source: TelemetryQuerySubmittedProps['source']) => void;
+  onUpdateAndSubmitQuery: (newQuery: string, querySource: QuerySource) => void;
   updateQuery: (qs: string) => void;
   isHistoryOpen: boolean;
   setIsHistoryOpen: (status: boolean) => void;
@@ -80,7 +79,7 @@ export const EditorFooter = memo(function EditorFooter({
   warnings,
   detectedTimestamp,
   onErrorClick,
-  runQuery,
+  onUpdateAndSubmitQuery,
   updateQuery,
   hideRunQueryText,
   editorIsInline,
@@ -105,23 +104,6 @@ export const EditorFooter = memo(function EditorFooter({
   const { docLinks } = kibana.services;
   const [isErrorPopoverOpen, setIsErrorPopoverOpen] = useState(false);
   const [isWarningPopoverOpen, setIsWarningPopoverOpen] = useState(false);
-
-  const onUpdateAndSubmit = useCallback(
-    (qs: string, isStarred: boolean) => {
-      // notify telemetry that a query has been submitted from the history panel
-      telemetryService.trackQueryHistoryClicked(isStarred);
-      // update the query first
-      updateQuery(qs);
-      // submit the query with some latency
-      // if I do it immediately there is some race condition until
-      // the state is updated and it won't be sumbitted correctly
-      const source = isStarred ? QuerySource.STARRED : QuerySource.HISTORY;
-      setTimeout(() => {
-        runQuery(source);
-      }, 300);
-    },
-    [runQuery, updateQuery, telemetryService]
-  );
 
   const toggleHistoryComponent = useCallback(() => {
     setIsHistoryOpen(!isHistoryOpen);
@@ -349,7 +331,7 @@ export const EditorFooter = memo(function EditorFooter({
         <EuiFlexItem grow={false}>
           <HistoryAndStarredQueriesTabs
             containerCSS={styles.historyContainer}
-            onUpdateAndSubmit={onUpdateAndSubmit}
+            onUpdateAndSubmit={onUpdateAndSubmitQuery}
             containerWidth={measuredContainerWidth}
             height={resizableContainerHeight}
             isSpaceReduced={isSpaceReduced}
