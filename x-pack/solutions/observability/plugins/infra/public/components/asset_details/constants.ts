@@ -26,3 +26,13 @@ export const DOCKER_METRIC_TYPES: DockerContainerMetrics[] = ['cpu', 'memory', '
 export const KUBERNETES_METRIC_TYPES: KubernetesContainerMetrics[] = ['cpu', 'memory'];
 
 export const APM_HOST_TROUBLESHOOTING_LINK = 'https://ela.st/host-troubleshooting';
+
+// Regex pattern to match formulas where 'avg' is the first function
+// Matches: "avg(...)", "1 - avg(...)", "100 * avg(...)", "(avg(...))", etc.
+// Allows optional whitespace, numbers, and arithmetic operators before 'avg'
+export const AVG_AS_FIRST_FUNCTION_PATTERN = /^\s*[\d\s\-+*/()]*\bavg\b/i;
+
+// Regex pattern to match formulas where 'max' is the first function
+// Matches: "max(...)", "1 - max(...)", "100 * max(...)", "(max(...))", etc.
+// Allows optional whitespace, numbers, and arithmetic operators before 'max'
+export const MAX_AS_FIRST_FUNCTION_PATTERN = /^\s*[\d\s\-+*/()]*\bmax\b/i;

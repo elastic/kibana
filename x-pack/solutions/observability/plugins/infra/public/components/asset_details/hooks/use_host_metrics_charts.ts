@@ -10,6 +10,7 @@ import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import useAsync from 'react-use/lib/useAsync';
 import type { HostMetricTypes } from '../charts/types';
+import { AVG_AS_FIRST_FUNCTION_PATTERN, MAX_AS_FIRST_FUNCTION_PATTERN } from '../constants';
 import { useChartSeriesColor } from './use_chart_series_color';
 
 export const useHostCharts = ({
@@ -83,12 +84,26 @@ export const useKubernetesCharts = ({
   return { charts, error };
 };
 
-const getSubtitleFromFormula = (value: string) =>
-  value.startsWith('max')
-    ? i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.max', { defaultMessage: 'Max' })
-    : i18n.translate('xpack.infra.assetDetails.kpi.subtitle.average', {
-        defaultMessage: 'Average',
-      });
+export const getSubtitleFromFormula = (value: string) => {
+  // Check if 'avg' is the first word/function in the formula
+  if (AVG_AS_FIRST_FUNCTION_PATTERN.test(value)) {
+    return i18n.translate('xpack.infra.assetDetails.kpi.subtitle.average', {
+      defaultMessage: 'Average',
+    });
+  }
+
+  // Check if 'max' is the first word/function in the formula
+  if (MAX_AS_FIRST_FUNCTION_PATTERN.test(value)) {
+    return i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.max', {
+      defaultMessage: 'Max',
+    });
+  }
+
+  // keep the fallback subtitle for now
+  return i18n.translate('xpack.infra.assetDetails.kpi.subtitle.average', {
+    defaultMessage: 'Average',
+  });
+};
 
 export const useHostKpiCharts = ({
   indexPattern,
