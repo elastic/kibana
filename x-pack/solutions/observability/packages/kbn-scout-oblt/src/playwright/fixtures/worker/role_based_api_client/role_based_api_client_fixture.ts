@@ -46,7 +46,7 @@ export const roleBasedApiClientFixture = coreWorkerFixtures.extend<
         }),
       ]);
 
-      function getRoleBasedApiClient({ username }: { username: Users | 'elastic' }) {
+      function getRoleBasedApiClient({ username }: { username: RoleBasedUsername | 'elastic' }) {
         const url = new URL(config.hosts.kibana);
         url.username = username;
         url.password = username === 'elastic' ? config.auth.password : USER_TEST_PASSWORD;

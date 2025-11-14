@@ -18,7 +18,7 @@ import {
 const profilingRoutePaths = getRoutePaths();
 
 apiTest.describe('Profiling is not setup and no data is loaded', { tag: ['@ess'] }, () => {
-  apiTest.beforeAll(async ({ esClient, apiServices, log, config }) => {
+  apiTest.beforeAll(async ({ esClient, log, config }) => {
     await cleanUpProfilingData({
       es: esClient,
       config,
@@ -36,7 +36,7 @@ apiTest.describe('Profiling is not setup and no data is loaded', { tag: ['@ess']
     expect(adminStatus.pre_8_9_1_data).toBe(false);
   });
 
-  apiTest('Viewer users', async ({ roleBasedApiClient, apiServices }) => {
+  apiTest('Viewer users', async ({ roleBasedApiClient }) => {
     const readRes = await roleBasedApiClient.viewerUser({
       endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
     });
@@ -86,7 +86,7 @@ apiTest.describe('Profiling is setup', { tag: ['@ess'] }, () => {
     });
     await setupProfiling(config, apiServices, log);
   });
-  apiTest.afterAll(async ({ esClient, config, apiServices, log }) => {
+  apiTest.afterAll(async ({ esClient, config, log }) => {
     await cleanUpProfilingData({
       es: esClient,
       config,
