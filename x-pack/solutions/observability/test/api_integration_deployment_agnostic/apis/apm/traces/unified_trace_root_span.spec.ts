@@ -17,19 +17,22 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const start = new Date('2022-01-01T00:00:00.000Z').getTime();
   const end = new Date('2022-01-01T00:15:00.000Z').getTime() - 1;
 
+  const fetchRootSpan = (traceId: string) =>
+    apmApiClient.readUser({
+      endpoint: `GET /internal/apm/unified_traces/{traceId}/root_span`,
+      params: {
+        path: { traceId },
+        query: {
+          start: new Date(start).toISOString(),
+          end: new Date(end).toISOString(),
+        },
+      },
+    });
+
   describe('Unified trace root span', () => {
     describe('Root span does not exist', () => {
       it('handles empty state', async () => {
-        const response = await apmApiClient.readUser({
-          endpoint: `GET /internal/apm/unified_traces/{traceId}/root_span`,
-          params: {
-            path: { traceId: 'foo' },
-            query: {
-              start: new Date(start).toISOString(),
-              end: new Date(end).toISOString(),
-            },
-          },
-        });
+        const response = await fetchRootSpan('foo');
 
         expect(response.status).to.be(200);
         expect(response.body).to.eql({});
@@ -80,16 +83,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       after(() => apmSynthtraceEsClient.clean());
 
       it('returns APM root transaction duration', async () => {
-        const response = await apmApiClient.readUser({
-          endpoint: `GET /internal/apm/unified_traces/{traceId}/root_span`,
-          params: {
-            path: { traceId },
-            query: {
-              start: new Date(start).toISOString(),
-              end: new Date(end).toISOString(),
-            },
-          },
-        });
+        const response = await fetchRootSpan(traceId);
 
         expect(response.status).to.eql(200);
         expect(response.body?.duration).to.equal(1000000);
@@ -153,16 +147,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       after(() => apmSynthtraceEsClient.clean());
 
       it('returns OTel processed root span duration', async () => {
-        const response = await apmApiClient.readUser({
-          endpoint: `GET /internal/apm/unified_traces/{traceId}/root_span`,
-          params: {
-            path: { traceId },
-            query: {
-              start: new Date(start).toISOString(),
-              end: new Date(end).toISOString(),
-            },
-          },
-        });
+        const response = await fetchRootSpan(traceId);
 
         expect(response.status).to.eql(200);
         expect(response.body?.duration).to.equal(2000000);
@@ -231,16 +216,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       it('returns OTel non-processed root span duration', async () => {
-        const response = await apmApiClient.readUser({
-          endpoint: `GET /internal/apm/unified_traces/{traceId}/root_span`,
-          params: {
-            path: { traceId },
-            query: {
-              start: new Date(start).toISOString(),
-              end: new Date(end).toISOString(),
-            },
-          },
-        });
+        const response = await fetchRootSpan(traceId);
 
         expect(response.status).to.eql(200);
         expect(response.body?.duration).to.equal(500);

@@ -18,15 +18,18 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const start = new Date('2022-01-01T00:00:00.000Z').getTime();
   const end = new Date('2022-01-01T00:15:00.000Z').getTime() - 1;
 
+  const fetchSpan = (traceId: string, spanId: string) =>
+    apmApiClient.readUser({
+      endpoint: `GET /internal/apm/unified_traces/{traceId}/spans/{spanId}`,
+      params: {
+        path: { traceId, spanId },
+      },
+    });
+
   describe('Unified trace span', () => {
     describe('Span does not exist', () => {
       it('handles empty state', async () => {
-        const response = await apmApiClient.readUser({
-          endpoint: `GET /internal/apm/unified_traces/{traceId}/spans/{spanId}`,
-          params: {
-            path: { traceId: 'foo', spanId: 'bar' },
-          },
-        });
+        const response = await fetchSpan('foo', 'bar');
 
         expect(response.status).to.be(200);
         expect(response.body).to.eql({});
@@ -87,12 +90,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       describe('return span', () => {
         let span: APIReturnType<'GET /internal/apm/unified_traces/{traceId}/spans/{spanId}'>;
         before(async () => {
-          const response = await apmApiClient.readUser({
-            endpoint: `GET /internal/apm/unified_traces/{traceId}/spans/{spanId}`,
-            params: {
-              path: { traceId, spanId },
-            },
-          });
+          const response = await fetchSpan(traceId, spanId);
 
           expect(response.status).to.eql(200);
           span = response.body;
@@ -183,12 +181,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       after(() => apmSynthtraceEsClient.clean());
 
       it('returns OTel processed span', async () => {
-        const response = await apmApiClient.readUser({
-          endpoint: `GET /internal/apm/unified_traces/{traceId}/spans/{spanId}`,
-          params: {
-            path: { traceId, spanId },
-          },
-        });
+        const response = await fetchSpan(traceId, spanId);
 
         expect(response.status).to.eql(200);
         expect(response.body?.span?.id).to.equal(spanId);
@@ -263,12 +256,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       it('returns OTel non-processed span', async () => {
-        const response = await apmApiClient.readUser({
-          endpoint: `GET /internal/apm/unified_traces/{traceId}/spans/{spanId}`,
-          params: {
-            path: { traceId, spanId },
-          },
-        });
+        const response = await fetchSpan(traceId, spanId);
 
         expect(response.status).to.eql(200);
         expect(response.body?.span?.id).to.equal(spanId);
