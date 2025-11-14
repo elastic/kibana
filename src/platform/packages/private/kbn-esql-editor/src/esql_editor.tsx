@@ -1206,7 +1206,9 @@ const ESQLEditorInternal = function ESQLEditor({
         isSpaceReduced={measuredEditorWidth < BREAKPOINT_WIDTH}
         isVisible={isVisorOpen}
         onClose={() => setIsVisorOpen(false)}
-        onUpdateAndSubmitQuery={(newQuery) => onUpdateAndSubmitQuery(newQuery, QuerySource.VISOR)}
+        onUpdateAndSubmitQuery={(newQuery) =>
+          onUpdateAndSubmitQuery(newQuery, QuerySource.QUICK_SEARCH)
+        }
       />
       <EditorFooter
         lines={editorModel.current?.getLineCount() || 1}
