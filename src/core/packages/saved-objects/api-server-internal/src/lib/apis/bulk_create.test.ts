@@ -1156,14 +1156,6 @@ describe('#bulkCreate', () => {
             expect.objectContaining({
               objects: expect.arrayContaining([
                 {
-                  type: 'config',
-                  id: '6.0.0-alpha1',
-                  name: 'Test One',
-                  existingNamespaces: [],
-                  initialNamespace: undefined,
-                  // explicitly confirm there is no accessControl for non-supporting type
-                },
-                {
                   type: ACCESS_CONTROL_TYPE,
                   id: 'has-read-only-metadata',
                   name: 'Test Two',
@@ -1217,14 +1209,6 @@ describe('#bulkCreate', () => {
             expect.objectContaining({
               objects: expect.arrayContaining([
                 {
-                  type: 'config',
-                  id: '6.0.0-alpha1',
-                  name: 'Test One',
-                  existingNamespaces: [],
-                  initialNamespace: undefined,
-                  // explicitly confirm there is no accessControl for non-supporting type
-                },
-                {
                   type: ACCESS_CONTROL_TYPE,
                   id: 'has-read-only-metadata',
                   name: 'Test Two',
@@ -1270,20 +1254,7 @@ describe('#bulkCreate', () => {
             accessControl: { accessMode: 'write_restricted' },
           });
 
-          expect(securityExtension.authorizeBulkCreate).toHaveBeenCalledWith(
-            expect.objectContaining({
-              objects: expect.arrayContaining([
-                {
-                  type: 'config',
-                  id: '6.0.0-alpha1',
-                  name: 'Test One',
-                  existingNamespaces: [],
-                  initialNamespace: undefined,
-                  // explicitly confirm there is no accessControl for non-supporting type
-                },
-              ]),
-            })
-          );
+          expect(securityExtension.authorizeBulkCreate).not.toHaveBeenCalled();
         });
 
         // regression test
