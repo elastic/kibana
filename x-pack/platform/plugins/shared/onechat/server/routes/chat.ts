@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import path from 'node:path';
 import type { Observable } from 'rxjs';
@@ -252,9 +253,7 @@ export function registerChatRoutes({
         return response.ok<ChatResponse>({
           body: {
             conversation_id: convId,
-            trace_id: round.trace_id,
-            steps: round.steps,
-            response: round.response,
+            ...omit(round, ['id', 'input']),
           },
         });
       })
