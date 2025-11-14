@@ -11,7 +11,7 @@ export const CUSTOM_ROLES: Record<string, KibanaRole> = {
   indexManagement: {
     elasticsearch: {
       // would be nice if this wasn't needed
-      cluster: ['monitor'],
+      cluster: ['manage'],
       indices: [
         {
           names: ['*'],

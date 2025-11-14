@@ -152,11 +152,19 @@ test.describe('Index template wizard - Preview template', { tag: ['@ess'] }, () 
     await pageObjects.indexManagement.navigateToIndexManagementTab('templates');
   });
 
+  test.afterEach(async ({ esClient, log }) => {
+    try {
+      await esClient.indices.deleteIndexTemplate({ name: 'a-star' });
+    } catch (e) {
+      log.debug(
+        `Template cleanup failed for a-star: ${e instanceof Error ? e.message : String(e)}`
+      );
+    }
+  });
+
   test('can preview index template that matches a_fake_index_pattern_that_wont_match_any_indices', async ({
     page,
     pageObjects,
-    esClient,
-    log,
   }) => {
     // Click Create Template button
     await page.testSubj.locator('createTemplateButton').click();
@@ -209,21 +217,12 @@ test.describe('Index template wizard - Preview template', { tag: ['@ess'] }, () 
     await pageObjects.indexManagement.clickNextButton();
 
     // Click preview tab
-    await page.testSubj.locator('previewTab').click();
+    await page.testSubj.locator('previewTabBtn').click();
 
     const templatePreview = await page.testSubj.locator('simulateTemplatePreview').textContent();
     expect(templatePreview).not.toContain('error');
 
     await page.testSubj.locator('closeDetailsButton').click();
-
-    // Cleanup
-    try {
-      await esClient.indices.deleteIndexTemplate({ name: 'a-star' });
-    } catch (e) {
-      log.debug(
-        `Template cleanup failed for a-star: ${e instanceof Error ? e.message : String(e)}`
-      );
-    }
   });
 });
 

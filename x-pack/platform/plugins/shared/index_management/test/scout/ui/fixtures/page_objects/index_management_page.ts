@@ -5,11 +5,15 @@
  * 2.0.
  */
 
+/* eslint-disable max-classes-per-file */
+
 import type { ScoutPage } from '@kbn/scout';
 
-export class IndexManagement {
+export class AbstractPageObject {
   constructor(public readonly page: ScoutPage) {}
+}
 
+export class IndexManagement extends AbstractPageObject {
   async goto() {
     await this.page.gotoApp('management/data/index_management');
   }
