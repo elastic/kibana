@@ -1392,6 +1392,121 @@ describe('config schema', () => {
       });
     });
 
+    describe('`origin`', () => {
+      it('should be a valid URI or an array of URIs', () => {
+        const uriErrorMessage =
+          '[authc.providers]: types that failed validation:\n' +
+          '- [authc.providers.0]: expected value of type [array] but got [Object]\n' +
+          '- [authc.providers.1.basic.provider1.origin]: types that failed validation:\n' +
+          ' - [origin.0]: value must be a valid URI (see RFC 3986).\n' +
+          ' - [origin.1]: could not parse array value from json input';
+
+        const authConfig = {
+          authc: {
+            providers: {
+              basic: { provider1: { order: 0, origin: 'not-a-valid-uri' as any } },
+            },
+          },
+        };
+
+        expect(() => ConfigSchema.validate(authConfig)).toThrow(uriErrorMessage);
+
+        authConfig.authc.providers.basic.provider1.origin = 'test.com';
+        expect(() => ConfigSchema.validate(authConfig)).toThrow(uriErrorMessage);
+
+        authConfig.authc.providers.basic.provider1.origin = 'http:/test.com:5601';
+        expect(() => ConfigSchema.validate(authConfig)).toThrow(uriErrorMessage);
+
+        authConfig.authc.providers.basic.provider1.origin = 12345;
+        expect(() => ConfigSchema.validate(authConfig)).toThrow(
+          '[authc.providers]: types that failed validation:\n' +
+            '- [authc.providers.0]: expected value of type [array] but got [Object]\n' +
+            '- [authc.providers.1.basic.provider1.origin]: types that failed validation:\n' +
+            ' - [origin.0]: expected value of type [string] but got [number].\n' +
+            ' - [origin.1]: expected value of type [array] but got [number]'
+        );
+
+        authConfig.authc.providers.basic.provider1.origin = { prop: 'should not be an object' };
+        expect(() => ConfigSchema.validate(authConfig)).toThrow(
+          '[authc.providers]: types that failed validation:\n' +
+            '- [authc.providers.0]: expected value of type [array] but got [Object]\n' +
+            '- [authc.providers.1.basic.provider1.origin]: types that failed validation:\n' +
+            ' - [origin.0]: expected value of type [string] but got [Object].\n' +
+            ' - [origin.1]: expected value of type [array] but got [Object]'
+        );
+
+        authConfig.authc.providers.basic.provider1.origin = 'http://test.com:5601';
+        expect(
+          (ConfigSchema.validate(authConfig).authc.providers as any).basic.provider1.origin
+        ).toEqual('http://test.com:5601');
+
+        authConfig.authc.providers.basic.provider1.origin = 'http://127.0.0.1:5601';
+        expect(
+          (ConfigSchema.validate(authConfig).authc.providers as any).basic.provider1.origin
+        ).toEqual('http://127.0.0.1:5601');
+
+        authConfig.authc.providers.basic.provider1.origin = [
+          'https://elastic.co',
+          'https://localhost:5601',
+        ];
+        expect(
+          (ConfigSchema.validate(authConfig).authc.providers as any).basic.provider1.origin
+        ).toEqual(['https://elastic.co', 'https://localhost:5601']);
+      });
+
+      it('should only allow the origin component of the URI', () => {
+        const uriErrorMessage =
+          '[authc.providers]: types that failed validation:\n' +
+          '- [authc.providers.0]: expected value of type [array] but got [Object]\n' +
+          '- [authc.providers.1.basic.provider1.origin]: types that failed validation:\n' +
+          ' - [origin.0]: expected a lower-case origin (scheme, host, and optional port) but got: http://test.com/too-long\n' +
+          ' - [origin.1]: could not parse array value from json input';
+
+        const authConfig = {
+          authc: {
+            providers: {
+              basic: { provider1: { order: 0, origin: 'http://test.com/too-long' as any } },
+            },
+          },
+        };
+
+        expect(() => ConfigSchema.validate(authConfig)).toThrow(uriErrorMessage);
+      });
+
+      it('should be allowed for all provider types', () => {
+        const origin = 'https://elastic.co';
+
+        const authConfig = ConfigSchema.validate({
+          authc: {
+            providers: {
+              basic: { basic1: { order: 0, origin } },
+              token: { token1: { order: 1, origin } },
+              pki: { pki1: { order: 2, origin } },
+              kerberos: { kerberos1: { order: 3, origin } },
+              oidc: { oidc1: { order: 4, realm: 'oidc-realm', origin } },
+              saml: { saml1: { order: 5, realm: 'saml-realm', origin } },
+              anonymous: {
+                anonymous1: {
+                  order: 6,
+                  credentials: 'elasticsearch_anonymous_user',
+                  origin,
+                },
+              },
+            },
+          },
+        });
+
+        const providers = authConfig.authc.providers as any;
+        expect(providers.basic.basic1.origin).toEqual(origin);
+        expect(providers.token.token1.origin).toEqual(origin);
+        expect(providers.pki.pki1.origin).toEqual(origin);
+        expect(providers.kerberos.kerberos1.origin).toEqual(origin);
+        expect(providers.oidc.oidc1.origin).toEqual(origin);
+        expect(providers.saml.saml1.origin).toEqual(origin);
+        expect(providers.anonymous.anonymous1.origin).toEqual(origin);
+      });
+    });
+
     it('`name` should be unique across all provider types', () => {
       expect(() =>
         ConfigSchema.validate({

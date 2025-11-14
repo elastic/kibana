@@ -128,6 +128,7 @@ export const GrokPatternAISuggestions = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       {aiFeatures &&
+        aiFeatures.enabled &&
         aiFeatures.isManagedAIConnector &&
         !aiFeatures.hasAcknowledgedAdditionalCharges && (
           <>

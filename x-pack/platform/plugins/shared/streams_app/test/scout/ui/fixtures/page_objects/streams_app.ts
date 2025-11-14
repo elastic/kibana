@@ -77,10 +77,13 @@ export class StreamsApp {
   async gotoAdvancedTab(streamName: string) {
     await this.gotoStreamManagementTab(streamName, 'advanced');
   }
+<<<<<<< HEAD
 
   async clickGoBackToStreams() {    
     await this.page.getByTestId('backToStreamsButton').click();
   }
+=======
+>>>>>>> 7754321431eaa5fc136a8010ea02e62a14b42bc0
 
   async clickStreamNameLink(streamName: string) {
     await this.page.getByTestId(`streamsNameLink-${streamName}`).click();
@@ -222,7 +225,7 @@ export class StreamsApp {
   }
 
   async updateRoutingRule() {
-    await this.page.getByRole('button', { name: 'Change routing' }).click();
+    await this.page.getByRole('button', { name: 'Update' }).click();
   }
 
   async cancelRoutingRule() {
@@ -622,6 +625,12 @@ export class StreamsApp {
 
   getDataSourcesList() {
     return this.page.getByTestId('streamsAppProcessingDataSourcesList');
+  }
+
+  async getDataSourcesSelector() {
+    const dataSourcesSelector = this.page.getByTestId('streamsAppProcessingDataSourceSelector');
+    await expect(dataSourcesSelector).toBeVisible();
+    return dataSourcesSelector;
   }
 
   getDataSourcesListItems() {

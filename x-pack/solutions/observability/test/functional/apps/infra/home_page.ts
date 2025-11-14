@@ -401,6 +401,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.goToTime(DATE_WITH_HOSTS_DATA);
         await pageObjects.infraHome.getWaffleMap();
         await retry.tryForTime(5000, async () => {
+          await pageObjects.infraHome.clearSearchTerm();
           await pageObjects.infraHome.enterSearchTerm('host.name: "host-1"');
           const nodesWithValue = await pageObjects.infraHome.getNodesWithValues();
           expect(nodesWithValue).to.eql([{ name: 'host-1', value: 50, color: '#61a2ff' }]);
@@ -410,6 +411,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('change color palette', async () => {
         await pageObjects.infraHome.goToTime(DATE_WITH_HOSTS_DATA);
+        await pageObjects.infraHome.clearSearchTerm();
         await pageObjects.infraHome.openLegendControls();
         await pageObjects.infraHome.changePalette('temperature');
         await pageObjects.infraHome.applyLegendControls();

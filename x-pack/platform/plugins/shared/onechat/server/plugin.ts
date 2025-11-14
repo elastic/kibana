@@ -7,6 +7,7 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { OnechatConfig } from './config';
 import { ServiceManager } from './services';
 import type {
@@ -20,6 +21,9 @@ import { registerRoutes } from './routes';
 import { registerUISettings } from './ui_settings';
 import type { OnechatHandlerContext } from './request_handler_context';
 import { registerOnechatHandlerContext } from './request_handler_context';
+import { createOnechatUsageCounter } from './telemetry/usage_counters';
+import { TrackingService } from './telemetry/tracking_service';
+import { registerTelemetryCollector } from './telemetry/telemetry_collector';
 
 export class OnechatPlugin
   implements
@@ -34,6 +38,8 @@ export class OnechatPlugin
   // @ts-expect-error unused for now
   private config: OnechatConfig;
   private serviceManager = new ServiceManager();
+  private usageCounter?: UsageCounter;
+  private trackingService?: TrackingService;
 
   constructor(context: PluginInitializerContext<OnechatConfig>) {
     this.logger = context.logger.get();
@@ -44,9 +50,23 @@ export class OnechatPlugin
     coreSetup: CoreSetup<OnechatStartDependencies, OnechatPluginStart>,
     setupDeps: OnechatSetupDependencies
   ): OnechatPluginSetup {
+    // Create usage counter for telemetry (if usageCollection is available)
+    if (setupDeps.usageCollection) {
+      this.usageCounter = createOnechatUsageCounter(setupDeps.usageCollection);
+      if (this.usageCounter) {
+        this.trackingService = new TrackingService(this.usageCounter, this.logger.get('telemetry'));
+        registerTelemetryCollector(setupDeps.usageCollection, this.logger.get('telemetry'));
+      }
+
+      this.logger.info('Onechat telemetry initialized');
+    } else {
+      this.logger.warn('Usage collection plugin not available, telemetry disabled');
+    }
+
     const serviceSetups = this.serviceManager.setupServices({
       logger: this.logger.get('services'),
       workflowsManagement: setupDeps.workflowsManagement,
+      trackingService: this.trackingService,
     });
 
     registerFeatures({ features: setupDeps.features });
@@ -68,6 +88,7 @@ export class OnechatPlugin
         }
         return services;
       },
+      trackingService: this.trackingService,
     });
 
     return {
@@ -95,6 +116,7 @@ export class OnechatPlugin
       spaces,
       uiSettings,
       savedObjects,
+      trackingService: this.trackingService,
     });
 
     const { tools, runnerFactory } = startServices;
