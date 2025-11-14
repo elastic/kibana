@@ -21,8 +21,38 @@ import { createErrorResult } from '@kbn/onechat-server';
 /**
  * Workflow-specific simplified tools that wrap the original tools
  * and simplify their responses to avoid Elasticsearch mapping issues.
- * These tools are optimized for workflow execution where responses
- * need to be stored in Elasticsearch with text field mappings.
+ *
+ * The workflow execution engine stores tool outputs in the step execution
+ * index with `dynamic: false` and the `output` field mapped as `type: 'object', enabled: false`.
+ *
+ * Without simplification, we encountered several Elasticsearch mapping issues:
+ *
+ * 1. **Nested array conflicts**: Complex nested structures with arrays of arrays
+ *    (e.g., `cases[].comments_summary[]`) caused mapping conflicts when different
+ *    tool responses had varying nested structures. Elasticsearch would reject documents
+ *    or fail to store them properly.
+ *
+ * 2. **Field explosion**: Deeply nested objects with many optional fields created
+ *    mapping conflicts as Elasticsearch tried to infer field types from the first
+ *    document, then rejected subsequent documents with different structures.
+ *
+ * 3. **Dynamic mapping limitations**: With `dynamic: false`, Elasticsearch won't
+ *    auto-create mappings for new nested fields, causing documents with unexpected
+ *    structures to be rejected or stored incorrectly.
+ *
+ * 4. **Type conflicts**: When the same field path appeared with different types
+ *    across different tool responses (e.g., a field that was sometimes a string,
+ *    sometimes an object), Elasticsearch would throw mapping exceptions.
+ *
+ * The solution is to:
+ * - Flatten nested structures and remove deeply nested arrays
+ * - Limit array sizes to prevent excessive nesting
+ * - Extract only essential fields to avoid field explosion
+ * - Stringify the simplified result as JSON, which is stored safely in the
+ *   `output` object field without triggering dynamic mapping issues
+ *
+ * These tools are optimized for workflow execution where responses need to be
+ * stored reliably in Elasticsearch without mapping conflicts.
  */
 
 const MAX_ARRAY_SIZE = 5;
