@@ -8,6 +8,7 @@
  */
 
 import Fs from 'fs';
+<<<<<<< HEAD
 import { expandAgentQueue } from '../agent_images';
 import { BuildkiteClient, type BuildkiteStep } from '../buildkite';
 import { collectEnvFromLabels } from '../pr_labels';
@@ -25,6 +26,19 @@ export interface ModuleDiscoveryInfo {
     serverRunFlags: string[];
     usesParallelWorkers: boolean;
   }[];
+=======
+import { BuildkiteClient, type BuildkiteStep } from '../buildkite';
+import { collectEnvFromLabels } from '../pr_labels';
+import { expandAgentQueue } from '../agent_images';
+import { getRequiredEnv } from '#pipeline-utils';
+
+interface ScoutTestDiscoveryConfig {
+  group: string;
+  path: string;
+  usesParallelWorkers: boolean;
+  configs: string[];
+  type: 'plugin' | 'package';
+>>>>>>> 48890453f76f ([CI] Filter empty jest tests before grouping (#242440))
 }
 
 // Collect environment variables to pass through to test execution steps
@@ -41,15 +55,26 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
     throw new Error(`Scout configs file not found at ${scoutConfigsPath}`);
   }
 
+<<<<<<< HEAD
   const modulesWithTests = JSON.parse(
     Fs.readFileSync(scoutConfigsPath, 'utf-8')
   ) as ModuleDiscoveryInfo[];
 
   if (modulesWithTests.length === 0) {
+=======
+  const rawScoutConfigs = JSON.parse(Fs.readFileSync(scoutConfigsPath, 'utf-8')) as Record<
+    string,
+    ScoutTestDiscoveryConfig
+  >;
+  const pluginsOrPackagesWithScoutTests: string[] = Object.keys(rawScoutConfigs);
+
+  if (pluginsOrPackagesWithScoutTests.length === 0) {
+>>>>>>> 48890453f76f ([CI] Filter empty jest tests before grouping (#242440))
     // no scout configs found, nothing to need to upload steps
     return;
   }
 
+<<<<<<< HEAD
   const SCOUT_CONFIGS_DEPS =
     process.env.SCOUT_CONFIGS_DEPS !== undefined
       ? process.env.SCOUT_CONFIGS_DEPS.split(',')
@@ -109,4 +134,43 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
 
   // upload the step definitions to Buildkite
   bk.uploadSteps(steps);
+=======
+  const scoutCiRunGroups = pluginsOrPackagesWithScoutTests.map((name) => ({
+    label: `Scout: [ ${rawScoutConfigs[name].group} / ${name} ] ${rawScoutConfigs[name].type}`,
+    key: name,
+    agents: expandAgentQueue(rawScoutConfigs[name].usesParallelWorkers ? 'n2-8-spot' : 'n2-4-spot'),
+    group: rawScoutConfigs[name].group,
+  }));
+
+  // upload the step definitions to Buildkite
+  bk.uploadSteps(
+    [
+      {
+        group: 'Scout Configs',
+        key: 'scout-configs',
+        depends_on: ['build_scout_tests'],
+        steps: scoutCiRunGroups.map(
+          ({ label, key, group, agents }): BuildkiteStep => ({
+            label,
+            command: getRequiredEnv('SCOUT_CONFIGS_SCRIPT'),
+            timeout_in_minutes: 60,
+            agents,
+            env: {
+              SCOUT_CONFIG_GROUP_KEY: key,
+              SCOUT_CONFIG_GROUP_TYPE: group,
+              ...envFromlabels,
+              ...scoutExtraEnv,
+            },
+            retry: {
+              automatic: [
+                { exit_status: '10', limit: 1 },
+                { exit_status: '*', limit: 3 },
+              ],
+            },
+          })
+        ),
+      },
+    ].flat()
+  );
+>>>>>>> 48890453f76f ([CI] Filter empty jest tests before grouping (#242440))
 }
