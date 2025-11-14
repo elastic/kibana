@@ -431,6 +431,7 @@ export async function persistedStateToExpression(
     visualizationState: {
       state: persistedVisualizationState,
       activeId: visualizationType,
+      selectedLayerId: null,
     },
     datasourceStates,
     annotationGroups,

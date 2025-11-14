@@ -7,13 +7,13 @@
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
-  EuiPanel,
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiText,
   EuiIconTip,
+  EuiButtonIcon,
   useEuiTheme,
 } from '@elastic/eui';
 import { BehaviorSubject } from 'rxjs';
@@ -24,8 +24,8 @@ import { ReorderProvider } from '@kbn/dom-drag-drop';
 import { DimensionButton } from '@kbn/visualization-ui-components';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import type { LayerAction, VisualizationDimensionGroupConfig } from '@kbn/lens-common';
-import { LayerActions } from './layer_actions';
+import type { VisualizationDimensionGroupConfig } from '@kbn/lens-common';
+import { getTabIdAttribute } from '@kbn/unified-tabs';
 import { isOperation } from '../../../types_guards';
 import { LayerHeader } from './layer_header';
 import type { LayerPanelProps } from './types';
@@ -39,13 +39,15 @@ import {
   selectResolvedDateRange,
   selectDatasourceStates,
 } from '../../../state_management';
-import { getSharedActions } from './layer_actions/layer_actions';
 import { FlyoutContainer } from '../../../shared_components/flyout_container';
+import { LENS_LAYER_TABS_CONTENT_ID } from '../../../app_plugin/shared/edit_on_the_fly/layer_tabs';
 import { FakeDimensionButton } from './buttons/fake_dimension_button';
 import { getLongMessage } from '../../../user_messages_utils';
 import { isApiESQLVariablesCompatible } from '../../../react_embeddable/type_guards';
 import { ESQLEditor } from './esql_editor';
 import { useEditorFrameService } from '../../editor_frame_service_context';
+import { getOpenLayerSettingsAction } from './layer_actions/open_layer_settings';
+import { getRemoveLayerAction } from './layer_actions/remove_layer_action';
 
 export function LayerPanel(props: LayerPanelProps) {
   const { datasourceMap } = useEditorFrameService();
@@ -66,7 +68,6 @@ export function LayerPanel(props: LayerPanelProps) {
     dimensionGroups,
     onRemoveLayer,
     onCloneLayer,
-    registerNewLayerRef,
     layerIndex,
     activeVisualization,
     updateVisualization,
@@ -92,8 +93,6 @@ export function LayerPanel(props: LayerPanelProps) {
 
   const isInlineEditing = Boolean(props?.setIsInlineFlyoutVisible);
 
-  const isSaveable = useLensSelector((state) => state.lens.isSaveable);
-
   const datasourceStates = useLensSelector(selectDatasourceStates);
   const isFullscreen = useLensSelector(selectIsFullscreenDatasource);
   const dateRange = useLensSelector(selectResolvedDateRange);
@@ -105,11 +104,6 @@ export function LayerPanel(props: LayerPanelProps) {
 
   const panelRef = useRef<HTMLDivElement | null>(null);
   const settingsPanelRef = useRef<HTMLDivElement | null>(null);
-
-  const registerLayerRef = useCallback(
-    (el: HTMLDivElement | null) => registerNewLayerRef(layerId, el),
-    [layerId, registerNewLayerRef]
-  );
 
   const closeDimensionEditor = () => {
     if (layerDatasource) {
@@ -314,70 +308,54 @@ export function LayerPanel(props: LayerPanelProps) {
     [activeVisualization, layerId, props.framePublicAPI, visualizationState]
   );
 
-  const compatibleActions = useMemo<LayerAction[]>(
-    () =>
-      [
-        ...(activeVisualization
-          .getSupportedActionsForLayer?.(
-            layerId,
-            visualizationState,
-            updateVisualization,
-            props.registerLibraryAnnotationGroup,
-            isSaveable
-          )
-          .map((action) => ({
-            ...action,
-            execute: () => {
-              action.execute(layerActionsFlyoutRef.current);
-            },
-          })) || []),
-
-        ...getSharedActions({
-          layerId,
-          activeVisualization,
-          core,
-          layerIndex,
-          layerType: activeVisualization.getLayerType(layerId, visualizationState),
-          isOnlyLayer,
-          isTextBasedLanguage,
-          hasLayerSettings: Boolean(
-            (Object.values(visualizationLayerSettings).some(Boolean) &&
-              activeVisualization.LayerSettingsComponent) ||
-              layerDatasource?.LayerSettingsComponent
-          ),
-          openLayerSettings: () => setPanelSettingsOpen(true),
-          onCloneLayer,
-          onRemoveLayer: () => onRemoveLayer(layerId),
-          customRemoveModalText: activeVisualization.getCustomRemoveLayerText?.(
-            layerId,
-            visualizationState
-          ),
-        }),
-      ].filter((i) => i.isCompatible),
-    [
-      activeVisualization,
-      layerId,
-      visualizationState,
-      updateVisualization,
-      props.registerLibraryAnnotationGroup,
-      isSaveable,
-      core,
-      layerIndex,
-      isOnlyLayer,
-      isTextBasedLanguage,
-      visualizationLayerSettings,
-      layerDatasource?.LayerSettingsComponent,
-      onCloneLayer,
-      onRemoveLayer,
-    ]
+  const hasLayerSettings = Boolean(
+    (Object.values(visualizationLayerSettings).some(Boolean) &&
+      activeVisualization.LayerSettingsComponent) ||
+      layerDatasource?.LayerSettingsComponent
   );
-  const layerActionsFlyoutRef = useRef<HTMLDivElement | null>(null);
+
+  const layerSettingsAction = useMemo(
+    () =>
+      getOpenLayerSettingsAction({
+        openLayerSettings: () => setPanelSettingsOpen(true),
+        hasLayerSettings,
+      }),
+    [hasLayerSettings]
+  );
+
+  const clearLayerAction = useMemo(() => {
+    // Only show clear layer button for single layer visualizations
+    // Multi-layer visualizations have this action in the tabs
+    // isOnlyLayer already accounts for hidden layers via getRemoveOperation
+    const supportsMultipleLayers = Boolean(activeVisualization.getAddLayerButtonComponent);
+
+    if (supportsMultipleLayers || !isOnlyLayer) {
+      return null;
+    }
+
+    const layerType = activeVisualization.getLayerType(layerId, visualizationState);
+    return getRemoveLayerAction({
+      execute: () => onRemoveLayer(layerId),
+      layerIndex,
+      layerType,
+      isOnlyLayer: true,
+      core,
+      customModalText: activeVisualization.getCustomRemoveLayerText?.(layerId, visualizationState),
+    });
+  }, [
+    activeVisualization,
+    isOnlyLayer,
+    layerId,
+    visualizationState,
+    layerIndex,
+    core,
+    onRemoveLayer,
+  ]);
 
   return (
     <>
       <section
         tabIndex={-1}
-        ref={registerLayerRef}
         css={css`
           margin-bottom: ${euiTheme.size.base};
           // disable focus ring for mouse clicks, leave it for keyboard users
@@ -386,12 +364,18 @@ export function LayerPanel(props: LayerPanelProps) {
           }
         `}
         data-test-subj={`lns-layerPanel-${layerIndex}`}
+        id={LENS_LAYER_TABS_CONTENT_ID}
+        role="tabpanel"
+        aria-labelledby={getTabIdAttribute({
+          id: layerId,
+          label: 'tab item',
+        })}
       >
-        <EuiPanel paddingSize="none" hasShadow={false} hasBorder>
+        <div>
           <header
             className="lnsLayerPanel__layerHeader"
             css={css`
-              padding: ${euiTheme.size.base};
+              padding: 0 0 ${euiTheme.size.base} 0;
               border-bottom: ${euiTheme.border.thin};
             `}
           >
@@ -417,14 +401,25 @@ export function LayerPanel(props: LayerPanelProps) {
                   onlyAllowSwitchToSubtypes={onlyAllowSwitchToSubtypes}
                 />
               </EuiFlexItem>
-              {props.displayLayerSettings && (
+              {props.displayLayerSettings && layerSettingsAction.isCompatible && (
                 <EuiFlexItem grow={false}>
-                  <LayerActions
-                    actions={compatibleActions}
-                    layerIndex={layerIndex}
-                    mountingPoint={layerActionsFlyoutRef.current}
+                  <EuiButtonIcon
+                    iconType={layerSettingsAction.icon}
+                    aria-label={layerSettingsAction.displayName}
+                    onClick={() => layerSettingsAction.execute(null)}
+                    data-test-subj={layerSettingsAction['data-test-subj']}
                   />
-                  <div ref={layerActionsFlyoutRef} />
+                </EuiFlexItem>
+              )}
+              {clearLayerAction && (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonIcon
+                    iconType={clearLayerAction.icon}
+                    color={clearLayerAction.color}
+                    aria-label={clearLayerAction.displayName}
+                    onClick={() => clearLayerAction.execute(null)}
+                    data-test-subj={clearLayerAction['data-test-subj']}
+                  />
                 </EuiFlexItem>
               )}
             </EuiFlexGroup>
@@ -512,7 +507,7 @@ export function LayerPanel(props: LayerPanelProps) {
               return (
                 <EuiFormRow
                   css={css`
-                    padding: ${euiTheme.size.base};
+                    padding: ${euiTheme.size.base} 0;
                     &:last-child {
                       border-radius: 0 0 ${euiTheme.border.radius.medium}
                         ${euiTheme.border.radius.medium};
@@ -576,8 +571,8 @@ export function LayerPanel(props: LayerPanelProps) {
                       <ReorderProvider
                         dataTestSubj="lnsDragDrop"
                         css={css`
-                          margin: -${euiTheme.size.xs} -${euiTheme.size.base};
-                          padding: ${euiTheme.size.xs} ${euiTheme.size.base};
+                          margin: -${euiTheme.size.xs} 0;
+                          padding: ${euiTheme.size.xs} 0;
                         `}
                       >
                         {group.accessors.map((accessorConfig, accessorIndex) => {
@@ -719,7 +714,7 @@ export function LayerPanel(props: LayerPanelProps) {
                 </EuiFormRow>
               );
             })}
-        </EuiPanel>
+        </div>
       </section>
       {(layerDatasource?.LayerSettingsComponent || activeVisualization?.LayerSettingsComponent) && (
         <FlyoutContainer
@@ -848,7 +843,7 @@ export function LayerPanel(props: LayerPanelProps) {
                 <>
                   <div
                     css={css`
-                      padding: ${euiTheme.size.base};
+                      padding: ${euiTheme.size.base} 0;
                     `}
                   >
                     <activeVisualization.DimensionEditorComponent

@@ -192,6 +192,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should focus the added layer', async () => {
         await visualize.navigateToNewVisualization();
         await visualize.clickVisType('lens');
+        await timePicker.ensureHiddenNoDataPopover();
         await lens.createLayer();
         expect(await hasFocus('lns-layerPanel-1')).to.be(true);
       });

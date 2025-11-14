@@ -591,7 +591,7 @@ describe('suggestion helpers', () => {
             hasDefaultTimeField: jest.fn(() => true),
           },
         },
-        { activeId: 'testVis', state: {} },
+        { activeId: 'testVis', state: {}, selectedLayerId: null },
         { testDatasource: { state: mockDatasourceState, isLoading: false } },
         { testVis: mockVisualization1 },
         datasourceMap.mock,

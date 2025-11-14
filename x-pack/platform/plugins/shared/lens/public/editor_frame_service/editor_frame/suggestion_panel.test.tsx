@@ -100,6 +100,7 @@ describe('suggestion_panel', () => {
       visualization: {
         activeId: 'testVis',
         state: {},
+        selectedLayerId: null,
       },
       activeDatasourceId: 'testDatasource',
     };
@@ -217,6 +218,7 @@ describe('suggestion_panel', () => {
         visualization: {
           activeId: 'vis2',
           state: {},
+          selectedLayerId: null,
         },
       };
 

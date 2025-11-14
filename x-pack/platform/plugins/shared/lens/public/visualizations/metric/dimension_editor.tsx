@@ -108,7 +108,7 @@ function BreakdownByEditor({ setState, state }: SubProps) {
     });
 
   return (
-    <>
+    <div className="lnsIndexPatternDimensionEditor--padded">
       <EuiFormRow
         label={i18n.translate('xpack.lens.metric.maxColumns', {
           defaultMessage: 'Layout columns',
@@ -124,7 +124,7 @@ function BreakdownByEditor({ setState, state }: SubProps) {
           onChange={({ target: { value } }) => handleMaxColsChange(value)}
         />
       </EuiFormRow>
-    </>
+    </div>
   );
 }
 
@@ -461,7 +461,7 @@ function SecondaryMetricEditor({
   });
 
   return (
-    <>
+    <div className="lnsIndexPatternDimensionEditor--padded">
       <EuiFormRow
         display="columnCompressed"
         fullWidth
@@ -653,7 +653,7 @@ function SecondaryMetricEditor({
           datasource={datasource}
         />
       ) : null}
-    </>
+    </div>
   );
 }
 
@@ -719,7 +719,7 @@ function PrimaryMetricEditor(props: SubProps) {
   const colorByValue = state.palette ? 'dynamic' : 'static';
 
   return (
-    <>
+    <div className="lnsIndexPatternDimensionEditor--padded">
       {isMetricNumeric && (
         <EuiFormRow
           display="columnCompressed"
@@ -862,7 +862,7 @@ function PrimaryMetricEditor(props: SubProps) {
           }}
         />
       </EuiFormRow>
-    </>
+    </div>
   );
 }
 

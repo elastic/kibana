@@ -48,6 +48,7 @@ export const {
   editVisualizationAction,
   removeLayers,
   removeOrClearLayer,
+  setSelectedLayerId,
   cloneLayer,
   addLayer,
   onDropToDimension,

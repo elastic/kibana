@@ -67,6 +67,7 @@ export const initialState: LensAppState = {
   visualization: {
     state: null,
     activeId: null,
+    selectedLayerId: null,
   },
   dataViews: {
     indexPatternRefs: [],
@@ -142,6 +143,7 @@ export const getPreloadedState = ({
     visualization: {
       state: null,
       activeId: visualizationType ?? Object.keys(visualizationMap)[0] ?? null,
+      selectedLayerId: null,
     },
   };
   return state;
@@ -239,6 +241,9 @@ export const removeOrClearLayer = createAction<{
   layerId: string;
   layerIds: string[];
 }>('lens/removeOrClearLayer');
+export const setSelectedLayerId = createAction<{
+  layerId: string | null;
+}>('lens/setSelectedLayerId');
 
 export const cloneLayer = createAction(
   'cloneLayer',
@@ -315,6 +320,7 @@ export const lensActions = {
   editVisualizationAction,
   removeLayers,
   removeOrClearLayer,
+  setSelectedLayerId,
   addLayer,
   onDropToDimension,
   cloneLayer,
@@ -469,6 +475,9 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
               removedId
             ))
         );
+      })
+      .addCase(setSelectedLayerId, (state, { payload }) => {
+        state.visualization.selectedLayerId = payload.layerId;
       })
       .addCase(changeIndexPattern, (state, { payload }) => {
         const { visualizationIds, datasourceIds, layerId, indexPatternId, dataViews } = payload;

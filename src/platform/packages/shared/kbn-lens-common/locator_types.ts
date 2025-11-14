@@ -41,7 +41,11 @@ export interface LensShareableState {
   /**
    * Set the visualization configuration
    */
-  visualization: { activeId: string | null; state: unknown } & SerializableRecord;
+  visualization: {
+    activeId: string | null;
+    state: unknown;
+    selectedLayerId: string | null;
+  } & SerializableRecord;
 
   /**
    * Set the active datasource used
@@ -112,7 +116,11 @@ export interface LensAppLocatorParams extends SerializableRecord {
   /**
    * Set the visualization configuration
    */
-  visualization?: { activeId: string | null; state: unknown } & SerializableRecord;
+  visualization?: {
+    activeId: string | null;
+    state: unknown;
+    selectedLayerId: string | null;
+  } & SerializableRecord;
 
   /**
    * Set the datasources configurations

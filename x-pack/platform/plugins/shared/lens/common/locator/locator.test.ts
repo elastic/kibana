@@ -20,7 +20,7 @@ const setup = async () => {
 };
 
 const lensShareableState: LensAppLocatorParams = {
-  visualization: { activeId: 'bar_chart', state: {} },
+  visualization: { activeId: 'bar_chart', state: {}, selectedLayerId: null },
   activeDatasourceId: 'xxxxx',
   datasourceStates: { formBased: { state: {} } },
   references: [],
