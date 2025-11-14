@@ -10,8 +10,8 @@
 import React from 'react';
 import { EuiBetaBadge, EuiThemeProvider } from '@elastic/eui';
 import { css } from '@emotion/react';
-
 import { i18n } from '@kbn/i18n';
+
 import type { BadgeType } from '../../../types';
 
 interface BetaBadgeProps {
@@ -23,8 +23,6 @@ interface BetaBadgeProps {
 /**
  * A badge to indicate that a feature is in beta.
  * It can be aligned to the middle or bottom of the text.
- *
- * TODO: support `bottom` and `text-bottom` alignment in EUI
  */
 export const BetaBadge = ({ type, isInverted, alignment = 'bottom' }: BetaBadgeProps) => {
   const betaBadgeStyles = css`

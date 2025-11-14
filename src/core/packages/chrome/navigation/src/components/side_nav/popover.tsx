@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiPopover } from '@elastic/eui';
-import { css } from '@emotion/react';
+import React, { useRef, useMemo, useCallback, cloneElement, useEffect, useState } from 'react';
 import type {
   ReactNode,
   ReactElement,
@@ -18,9 +17,16 @@ import type {
   KeyboardEvent,
   Ref,
 } from 'react';
-import React, { useRef, useMemo, useCallback, cloneElement, useEffect, useState } from 'react';
-import { useEuiTheme } from '@elastic/eui';
+import { EuiPopover, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 
+import {
+  BOTTOM_POPOVER_GAP,
+  POPOVER_HOVER_DELAY,
+  POPOVER_OFFSET,
+  TOP_BAR_HEIGHT,
+  TOP_BAR_POPOVER_GAP,
+} from '../../constants';
 import { SIDE_PANEL_WIDTH } from '../../hooks/use_layout_width';
 import { focusAdjacentTrigger } from '../../utils/focus_adjacent_trigger';
 import { focusFirstElement } from '../../utils/focus_first_element';
@@ -29,32 +35,16 @@ import { handleRovingIndex } from '../../utils/handle_roving_index';
 import { updateTabIndices } from '../../utils/update_tab_indices';
 import { useHoverTimeout } from '../../hooks/use_hover_timeout';
 import { useScroll } from '../../hooks/use_scroll';
-import {
-  BOTTOM_POPOVER_GAP,
-  POPOVER_HOVER_DELAY,
-  POPOVER_OFFSET,
-  TOP_BAR_HEIGHT,
-  TOP_BAR_POPOVER_GAP,
-} from '../../constants';
 
-/**
- * Flag for tracking if any popover is open.
- */
-let anyPopoverOpen: boolean = false;
-
-/**
- * Utility function to check if any popover is open.
- *
- * @returns true if any popover is open
- */
-export const getIsAnyPopoverOpenNow = () => anyPopoverOpen;
-
-export interface SideNavPopoverProps {
-  container?: HTMLElement;
+export interface PopoverProps {
   children?: ReactNode | ((closePopover: () => void) => ReactNode);
+  container?: HTMLElement;
   hasContent: boolean;
+  isAnyPopoverOpen: boolean;
   isSidePanelOpen: boolean;
   label: string;
+  persistent?: boolean;
+  setAnyPopoverOpen: (isOpen: boolean) => void;
   trigger: ReactElement<{
     ref?: Ref<HTMLElement>;
     onClick?: (e: MouseEvent) => void;
@@ -63,20 +53,29 @@ export interface SideNavPopoverProps {
     'aria-haspopup'?: boolean | 'menu' | 'listbox' | 'tree' | 'grid' | 'dialog';
     'aria-expanded'?: boolean;
   }>;
-  persistent?: boolean;
 }
 
-export const SideNavPopover = ({
+/**
+ * The side nav popover differs from the regular `EuiPopover`:
+ * - it opens on focus and hover, instead of just click,
+ * - it handles keyboard navigation
+ *   - Enter to move focus into the popover
+ *   - Arrow keys to move focus between elements,
+ *   - Escape to move focus back to the trigger.
+ */
+export const Popover = ({
   children,
   container,
   hasContent,
+  isAnyPopoverOpen,
   isSidePanelOpen,
   label,
   persistent = false,
+  setAnyPopoverOpen,
   trigger,
-}: SideNavPopoverProps): JSX.Element => {
+}: PopoverProps): JSX.Element => {
   const { euiTheme } = useEuiTheme();
-  const { setTimeout, clearTimeout } = useHoverTimeout();
+  const { setHoverTimeout, clearHoverTimeout } = useHoverTimeout();
 
   const popoverRef = useRef<HTMLDivElement | null>(null);
   const triggerRef = useRef<HTMLElement>(null);
@@ -91,44 +90,53 @@ export const SideNavPopover = ({
 
   const open = useCallback(() => {
     setIsOpen(true);
-    anyPopoverOpen = true;
-  }, []);
+    setAnyPopoverOpen(true);
+  }, [setAnyPopoverOpen]);
 
   const close = useCallback(() => {
     setIsOpen(false);
     clearOpenedByClick();
-    clearTimeout();
+    clearHoverTimeout();
     setShouldFocusOnOpen(false);
-    anyPopoverOpen = false;
-  }, [clearOpenedByClick, clearTimeout]);
+    setAnyPopoverOpen(false);
+  }, [clearOpenedByClick, clearHoverTimeout, setAnyPopoverOpen]);
 
   const handleClose = useCallback(() => {
-    clearTimeout();
+    clearHoverTimeout();
     close();
-  }, [clearTimeout, close]);
+  }, [clearHoverTimeout, close]);
 
   const tryOpen = useCallback(() => {
-    if (!isSidePanelOpen && !getIsAnyPopoverOpenNow()) {
+    if (!isSidePanelOpen && !isAnyPopoverOpen) {
       open();
     }
-  }, [isSidePanelOpen, open]);
+  }, [isAnyPopoverOpen, isSidePanelOpen, open]);
 
   const handleMouseEnter = useCallback(() => {
     if (!persistent || !isOpenedByClick) {
-      clearTimeout();
-      if (getIsAnyPopoverOpenNow()) {
-        setTimeout(tryOpen, POPOVER_HOVER_DELAY);
+      clearHoverTimeout();
+      if (isAnyPopoverOpen) {
+        setHoverTimeout(tryOpen, POPOVER_HOVER_DELAY);
       } else if (!isSidePanelOpen) {
-        setTimeout(open, POPOVER_HOVER_DELAY);
+        setHoverTimeout(open, POPOVER_HOVER_DELAY);
       }
     }
-  }, [persistent, isOpenedByClick, isSidePanelOpen, clearTimeout, open, setTimeout, tryOpen]);
+  }, [
+    persistent,
+    isOpenedByClick,
+    isAnyPopoverOpen,
+    isSidePanelOpen,
+    clearHoverTimeout,
+    open,
+    setHoverTimeout,
+    tryOpen,
+  ]);
 
   const handleMouseLeave = useCallback(() => {
     if (!persistent || !isOpenedByClick) {
-      setTimeout(handleClose, POPOVER_HOVER_DELAY);
+      setHoverTimeout(handleClose, POPOVER_HOVER_DELAY);
     }
-  }, [persistent, isOpenedByClick, setTimeout, handleClose]);
+  }, [persistent, isOpenedByClick, setHoverTimeout, handleClose]);
 
   const scrollStyles = useScroll(true);
 
@@ -137,12 +145,12 @@ export const SideNavPopover = ({
       if (isOpen && isOpenedByClick) {
         handleClose();
       } else {
-        clearTimeout();
+        clearHoverTimeout();
         open();
         setOpenedByClick();
       }
     }
-  }, [persistent, isOpen, isOpenedByClick, handleClose, clearTimeout, open, setOpenedByClick]);
+  }, [persistent, isOpen, isOpenedByClick, handleClose, clearHoverTimeout, open, setOpenedByClick]);
 
   const handleTriggerKeyDown: KeyboardEventHandler = useCallback(
     (e) => {
@@ -185,7 +193,7 @@ export const SideNavPopover = ({
 
   const handleBlur: FocusEventHandler = useCallback(
     (e) => {
-      clearTimeout();
+      clearHoverTimeout();
 
       const nextFocused = e.relatedTarget;
       const isStayingInComponent =
@@ -199,16 +207,16 @@ export const SideNavPopover = ({
         handleClose();
       }
     },
-    [clearTimeout, handleClose]
+    [clearHoverTimeout, handleClose]
   );
 
   // Clean up on unmount
   useEffect(() => {
     return () => {
-      clearTimeout();
+      clearHoverTimeout();
       handleClose();
     };
-  }, [clearTimeout, handleClose]);
+  }, [clearHoverTimeout, handleClose]);
 
   const enhancedTrigger = useMemo(
     () =>
