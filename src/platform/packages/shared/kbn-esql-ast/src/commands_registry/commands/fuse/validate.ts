@@ -17,6 +17,11 @@ export const validate = (
 ): ESQLMessage[] => {
   const messages: ESQLMessage[] = [];
 
+  // If no columns are provided don't perform the client side validation, to avoid false positives.
+  if (context?.columns?.size === 0) {
+    return messages;
+  }
+
   if (!context?.columns.get('_id')) {
     messages.push(buildMissingMetadataMessage(command, '_id'));
   }

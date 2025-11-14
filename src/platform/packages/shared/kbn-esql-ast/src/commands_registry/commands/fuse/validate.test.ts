@@ -55,5 +55,18 @@ describe('FUSE Validation', () => {
         ]
       );
     });
+
+    test('do not return validation errors if columns context is not provided', () => {
+      const context = { columns: new Map() };
+      fuseExpectErrors(
+        `FROM index
+                    | FORK
+                      (WHERE keywordField != "" | LIMIT 100)
+                      (SORT doubleField ASC NULLS LAST)
+                    | FUSE`,
+        [],
+        context
+      );
+    });
   });
 });
