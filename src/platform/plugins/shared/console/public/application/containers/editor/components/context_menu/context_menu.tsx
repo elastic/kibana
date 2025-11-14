@@ -18,6 +18,7 @@ import {
   EuiBadge,
   EuiLoadingSpinner,
   EuiIcon,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import type { NotificationsStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -137,17 +138,26 @@ export const ContextMenu = ({
     />
   );
 
-  // Create the language clients menu items
-  const languageClientsItems = AVAILABLE_LANGUAGES.map((lang) => (
-    <EuiContextMenuItem
-      key={lang.value}
-      data-test-subj={`languageClientMenuItem-${lang.value}`}
-      icon={currentLanguage === lang.value ? 'check' : 'empty'}
-      onClick={() => handleLanguageSelect(lang.value)}
-    >
-      {lang.label}
-    </EuiContextMenuItem>
-  ));
+  // Create the language clients menu items with separators
+  const languageClientsItems = AVAILABLE_LANGUAGES.flatMap((lang, index) => {
+    const menuItem = (
+      <EuiContextMenuItem
+        key={lang.value}
+        data-test-subj={`languageClientMenuItem-${lang.value}`}
+        icon={currentLanguage === lang.value ? 'check' : 'empty'}
+        onClick={() => handleLanguageSelect(lang.value)}
+      >
+        {lang.label}
+      </EuiContextMenuItem>
+    );
+
+    // Add separator after each item except the last one
+    if (index < AVAILABLE_LANGUAGES.length - 1) {
+      return [menuItem, <EuiHorizontalRule key={`separator-${lang.value}`} margin="none" />];
+    }
+
+    return [menuItem];
+  });
 
   // Main menu items
   const mainMenuItems = [
