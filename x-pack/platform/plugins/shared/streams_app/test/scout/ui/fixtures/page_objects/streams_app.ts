@@ -8,8 +8,7 @@
 /* eslint-disable playwright/no-nth-methods */
 
 import type { ScoutPage } from '@kbn/scout';
-import { expect } from '@kbn/scout';
-import { EuiComboBoxWrapper } from '@kbn/scout';
+import { EuiComboBoxWrapper, expect } from '@kbn/scout';
 import type { FieldTypeOption } from '../../../../../public/components/data_management/schema_editor/constants';
 
 export class StreamsApp {
@@ -84,6 +83,10 @@ export class StreamsApp {
 
   async clickDataQualityTab() {
     await this.page.getByTestId('dataQualityTab').click();
+  }
+
+  async clickRootBreadcrumb() {
+    await this.page.getByTestId('breadcrumb first').click();
   }
 
   // Streams table utility methods
