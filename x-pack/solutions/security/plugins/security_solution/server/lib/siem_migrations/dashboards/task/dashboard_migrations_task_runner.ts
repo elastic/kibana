@@ -56,7 +56,7 @@ export class DashboardMigrationTaskRunner extends SiemMigrationTaskRunner<
 
   /** Retrieves the connector and creates the migration agent */
   public async setup(connectorId: string): Promise<void> {
-    const { inferenceService } = this.dependencies;
+    const { inferenceService, toolsService } = this.dependencies;
 
     const model = await this.actionsClientChat.createModel({
       connectorId,
@@ -76,7 +76,9 @@ export class DashboardMigrationTaskRunner extends SiemMigrationTaskRunner<
       connectorId,
       this.migrationId,
       inferenceService.getClient({ request: this.request }),
-      this.logger
+      this.logger,
+      toolsService,
+      this.request
     );
 
     const agent = getDashboardMigrationAgent({

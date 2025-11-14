@@ -256,6 +256,7 @@ export class RequestContextFactory implements IRequestContextFactory {
           savedObjectsClient: coreContext.savedObjects.client,
           packageService: startPlugins.fleet?.packageService,
           telemetry: core.analytics,
+          toolsService: startPlugins.onechat?.tools,
         },
       }),
 
