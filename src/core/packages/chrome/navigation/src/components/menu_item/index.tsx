@@ -140,6 +140,10 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
       overflow: hidden;
       max-width: 100%;
       padding: 0 ${euiTheme.size.s};
+
+      &::first-letter {
+        text-transform: uppercase;
+      }
     `;
 
     const content = (
