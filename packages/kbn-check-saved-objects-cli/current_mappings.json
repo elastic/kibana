@@ -2637,20 +2637,8 @@
         "type": "boolean"
       },
       "ilm_migration_status": {
-        "properties": {
-          "logs": {
-            "index": false,
-            "type": "keyword"
-          },
-          "metrics": {
-            "index": false,
-            "type": "keyword"
-          },
-          "synthetics": {
-            "index": false,
-            "type": "keyword"
-          }
-        }
+        "dynamic": false,
+        "properties": {}
       },
       "output_secret_storage_requirements_met": {
         "type": "boolean"
