@@ -28,7 +28,9 @@ export const validate = (
     walk(fromCommand, {
       visitCommandOption: (node) => {
         if (node.name.toLocaleLowerCase() === 'metadata') {
-          const metadataFields = node.args.map((arg) => (arg as ESQLSingleAstItem).name);
+          const metadataFields = node.args.map((arg) =>
+            (arg as ESQLSingleAstItem)?.name?.toLocaleLowerCase()
+          );
           if (metadataFields.includes('_id')) {
             hasIdMetadata = true;
           }
