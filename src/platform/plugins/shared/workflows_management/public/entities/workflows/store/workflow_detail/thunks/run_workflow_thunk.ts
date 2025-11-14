@@ -21,6 +21,7 @@ export interface RunWorkflowResponse {
   workflowExecutionId: string;
 }
 
+// This is unused thunk, but I think it worth keeping it. Maybe will be used in the future.
 export const runWorkflowThunk = createAsyncThunk<
   RunWorkflowResponse,
   RunWorkflowParams,
