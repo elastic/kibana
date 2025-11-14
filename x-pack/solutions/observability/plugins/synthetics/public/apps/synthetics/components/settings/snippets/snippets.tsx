@@ -26,7 +26,6 @@ import { euiStyled } from '@kbn/react-kibana-context-styled';
 import { MonacoEditorLangId } from '../../../../../../common/runtime_types';
 import { useFormWrapped } from '../../../../../hooks/use_form_wrapped';
 import { CodeEditor } from '../../monitor_add_edit/fields/code_editor';
-// import { syntheticsSuggestionProvider } from '../../../lib/editor/snippets';
 import { useGetSnippets, usePostSnippet } from './hooks';
 import { useSnippetsSuggestions } from './use_snippets_suggestions';
 
@@ -104,7 +103,9 @@ export const Snippets = () => {
       }),
     },
     {
-      name: 'Actions',
+      name: i18n.translate('xpack.synthetics.snippets.table.actionsColumn', {
+        defaultMessage: 'Actions',
+      }),
       actions: [
         {
           icon: 'pencil',
@@ -122,12 +123,6 @@ export const Snippets = () => {
         },
       ],
     },
-    // {
-    //     name: i18n.translate('xpack.synthetics.snippets.table.actionsColumn', { defaultMessage: 'Actions' }),
-    //     render: (snippet: SnippetData) => (
-    //         <SnippetForm initialData={snippet} />
-    //     ),
-    // },
   ];
 
   return (
@@ -185,7 +180,6 @@ export const Snippets = () => {
 interface SnippetFormProps {
   initialData?: SnippetData;
   onSubmit?: (data: SnippetData) => void;
-  // suggestionProvider: monaco.languages.CompletionItemProvider;
   isLoading?: boolean;
 }
 const SnippetForm = (props: SnippetFormProps) => {
@@ -248,7 +242,6 @@ const SnippetForm = (props: SnippetFormProps) => {
             onClick={handleSubmit(props.onSubmit ?? (() => {}))}
             isLoading={props.isLoading}
             fill
-            // isLoading={isSaving}
           >
             {i18n.translate('xpack.synthetics.snippetForm.saveButtonLabel', {
               defaultMessage: 'Save',
@@ -275,7 +268,6 @@ const SnippetEditor = () => {
       )}
       id="javascript"
       languageId={MonacoEditorLangId.JAVASCRIPT}
-      // suggestionProvider={props.suggestionProvider}
       onChange={onChange}
       value={value}
       placeholder={i18n.translate('xpack.synthetics.addEditMonitor.scriptEditor.placeholder', {
@@ -285,6 +277,9 @@ const SnippetEditor = () => {
   );
 };
 
+// This is a workaround to fix the issue with EuiFlyoutBody overflow styles interfering with Monaco editor
+// suggestion dropdown positioning.
+// See https://elastic.slack.com/archives/C7QC1JV6F/p1752857243376749?thread_ts=1752777398.249589&cid=C7QC1JV6F
 const FlyoutBodyContainer = euiStyled.div`
   & .euiFlyoutBody__overflow {
   position: relative;
