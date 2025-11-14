@@ -60,4 +60,34 @@ export const getScheduledReportFormSchema = (
       },
     ],
   },
+  emailCcRecipients: {
+    type: FIELD_TYPES.COMBO_BOX,
+    label: i18n.SCHEDULED_REPORT_FORM_EMAIL_CC_RECIPIENTS_LABEL,
+    defaultValue: [],
+    validations: [
+      {
+        isBlocking: false,
+        validator: getEmailsValidator(validateEmailAddresses),
+      },
+    ],
+  },
+  emailBccRecipients: {
+    type: FIELD_TYPES.COMBO_BOX,
+    label: i18n.SCHEDULED_REPORT_FORM_EMAIL_BCC_RECIPIENTS_LABEL,
+    defaultValue: [],
+    validations: [
+      {
+        isBlocking: false,
+        validator: getEmailsValidator(validateEmailAddresses),
+      },
+    ],
+  },
+  emailSubject: {
+    type: FIELD_TYPES.TEXT,
+    label: i18n.SCHEDULED_REPORT_FORM_EMAIL_SUBJECT_LABEL,
+  },
+  emailMessage: {
+    type: FIELD_TYPES.TEXTAREA,
+    label: i18n.SCHEDULED_REPORT_FORM_EMAIL_MESSAGE_LABEL,
+  },
 });

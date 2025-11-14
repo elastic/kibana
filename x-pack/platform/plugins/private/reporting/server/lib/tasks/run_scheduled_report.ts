@@ -11,6 +11,7 @@ import type { ConcreteTaskInstance, TaskInstance } from '@kbn/task-manager-plugi
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
 import { ScheduleType } from '@kbn/reporting-server';
+import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import type { ScheduledReportTaskParams, ScheduledReportTaskParamsWithoutSpaceId } from '.';
 import { SCHEDULED_REPORTING_EXECUTE_TYPE } from '.';
 import type { SavedReport } from '../store';
@@ -19,7 +20,7 @@ import { SCHEDULED_REPORT_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import type { PrepareJobResults } from './run_report';
 import { RunReportTask } from './run_report';
 import { ScheduledReport } from '../store/scheduled_report';
-import type { ScheduledReportType } from '../../types';
+import type { ScheduledReportTemplateVariables, ScheduledReportType } from '../../types';
 
 const MAX_ATTACHMENT_SIZE = 10 * 1024 * 1024; // 10mb
 
@@ -139,12 +140,33 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
         const email = notification.email;
         const title = scheduledReport.attributes.title;
         const extension = this.getJobContentExtension(report.jobtype);
+        const filename = `${title}-${runAt.toISOString()}.${extension}`;
+        const templateVariables = {
+          title,
+          filename,
+          objectType: scheduledReport.attributes.meta.objectType,
+          date: scheduledReport.attributes.schedule?.rrule?.dtstart,
+          output: {
+            contentType: output.content_type,
+            csvContainsFormulas: output.csv_contains_formulas,
+            errorCode: output.error_code,
+            maxSizeReached: output.max_size_reached,
+            hasUserError: output.user_error,
+            warnings: output.warnings,
+          },
+        } satisfies ScheduledReportTemplateVariables;
+        const subject = email.subject
+          ? renderMustacheString(this.logger, email.subject, templateVariables, 'none')
+          : `${title}-${runAt.toISOString()} scheduled report`;
+        const message = email.message
+          ? renderMustacheString(this.logger, email.message, templateVariables, 'markdown')
+          : 'Your scheduled report is attached for you to download or share.';
 
         await this.emailNotificationService.notify({
           reporting: this.opts.reporting,
           index: report._index,
           id: report._id,
-          filename: `${title}-${runAt.toISOString()}.${extension}`,
+          filename,
           contentType: output.content_type,
           relatedObject: {
             id: scheduledReport.id,
@@ -155,7 +177,8 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
             to: email.to,
             cc: email.cc,
             bcc: email.bcc,
-            subject: `${title}-${runAt.toISOString()} scheduled report`,
+            subject,
+            message,
             spaceId,
           },
         });

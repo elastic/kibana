@@ -21,6 +21,8 @@ export const rawNotificationSchema = schema.object({
         to: schema.maybe(schema.arrayOf(schema.string())),
         bcc: schema.maybe(schema.arrayOf(schema.string())),
         cc: schema.maybe(schema.arrayOf(schema.string())),
+        subject: schema.maybe(schema.string({ maxLength: 1000 })),
+        message: schema.maybe(schema.string({ maxLength: 10000 })),
       },
       {
         validate: (value) => {
