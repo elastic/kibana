@@ -32,6 +32,7 @@ const createConnectorTypeFromSpec = (
     secretSchemas.push(actions.getSchemaForAuthType(authType));
   }
 
+  const config = spec.schema ? spec.schema : z.object({});
   const secrets =
     secretSchemas.length > 0
       ? // to make zod types happy
@@ -47,9 +48,6 @@ const createConnectorTypeFromSpec = (
     getService: (params) => {
       throw new Error('Not implemented');
     },
-    schema: {
-      config: spec.schema,
-      secrets,
-    },
+    schema: { config, secrets },
   };
 };
