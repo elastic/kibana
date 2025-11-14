@@ -93,18 +93,18 @@ export function initializeESQLControlSelections(
     }
   }
 
-  function haveDependenciesChanged(
+  function haveVariablesValuesChanged(
     currentVariables: ESQLControlVariable[],
     previousVariables: ESQLControlVariable[],
-    queryDependencies: string[]
+    variablesInQuery: string[]
   ): boolean {
-    if (queryDependencies.length === 0) return false;
+    if (variablesInQuery.length === 0) return false;
 
-    for (const depName of queryDependencies) {
-      const currentVar = currentVariables.find((v) => v.key === depName);
-      const previousVar = previousVariables.find((v) => v.key === depName);
+    for (const variableName of variablesInQuery) {
+      const currentVariable = currentVariables.find((v) => v.key === variableName);
+      const previousVariable = previousVariables.find((v) => v.key === variableName);
 
-      if (!deepEqual(currentVar?.value, previousVar?.value)) {
+      if (!deepEqual(currentVariable?.value, previousVariable?.value)) {
         return true;
       }
     }
@@ -118,7 +118,7 @@ export function initializeESQLControlSelections(
     .pipe(
       filter(() => controlType$.getValue() === EsqlControlType.VALUES_FROM_QUERY),
       filter(({ esqlVariables }) => {
-        const queryDependencies = getESQLQueryVariables(esqlQuery$.getValue());
+        const variablesInQuery = getESQLQueryVariables(esqlQuery$.getValue());
         const variablesInParent = esqlVariables || [];
 
         // Filter out this control's own variable
@@ -129,7 +129,7 @@ export function initializeESQLControlSelections(
 
         const shouldFetch =
           previousESQLVariables.length === 0 ||
-          haveDependenciesChanged(externalVariables, previousESQLVariables, queryDependencies);
+          haveVariablesValuesChanged(externalVariables, previousESQLVariables, variablesInQuery);
 
         if (shouldFetch) {
           previousESQLVariables = [...externalVariables];
