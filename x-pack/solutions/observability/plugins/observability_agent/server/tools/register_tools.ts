@@ -16,6 +16,12 @@ import {
   OBSERVABILITY_SEARCH_KNOWLEDGE_BASE_TOOL_ID,
   createSearchKnowledgeBaseTool,
 } from './search_knowledge_base/search_knowledge_base';
+import {
+  OBSERVABILITY_GET_LOG_CHANGE_POINT_TOOL_ID,
+  createObservabilityGetLogChangePointTool,
+  OBSERVABILITY_GET_METRIC_CHANGE_POINT_TOOL_ID,
+  createObservabilityGetMetricChangePointTool,
+} from './get_change_point';
 import type {
   ObservabilityAgentPluginSetupDependencies,
   ObservabilityAgentPluginStart,
@@ -32,6 +38,8 @@ const PLATFORM_TOOL_IDS = [
 const OBSERVABILITY_TOOL_IDS = [
   OBSERVABILITY_GET_DATA_SOURCES_TOOL_ID,
   OBSERVABILITY_SEARCH_KNOWLEDGE_BASE_TOOL_ID,
+  OBSERVABILITY_GET_LOG_CHANGE_POINT_TOOL_ID,
+  OBSERVABILITY_GET_METRIC_CHANGE_POINT_TOOL_ID,
 ];
 
 export const OBSERVABILITY_AGENT_TOOL_IDS = [...PLATFORM_TOOL_IDS, ...OBSERVABILITY_TOOL_IDS];
@@ -48,6 +56,8 @@ export async function registerTools({
   const observabilityTools: StaticToolRegistration<any>[] = [
     createGetDataSourcesTool({ core, plugins, logger }),
     createSearchKnowledgeBaseTool({ core, logger }),
+    createObservabilityGetLogChangePointTool({ core, plugins, logger }),
+    createObservabilityGetMetricChangePointTool({ core, plugins, logger }),
   ];
 
   for (const tool of observabilityTools) {
