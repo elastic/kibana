@@ -165,9 +165,7 @@ export async function getTraceDocsPerPage({
 
         const spanWaterfallEvent: WaterfallSpan = {
           ...spanEvent,
-          processor: {
-            event: 'span',
-          },
+          processor: processor as { event: 'span' },
           span: {
             ...span,
             composite: span.composite
@@ -185,8 +183,8 @@ export async function getTraceDocsPerPage({
 
       const txWaterfallEvent: WaterfallTransaction = {
         ...txEvent,
-        processor: {
-          event: 'transaction',
+        processor: processor as {
+          event: 'transaction';
         },
         span: {
           ...span,
