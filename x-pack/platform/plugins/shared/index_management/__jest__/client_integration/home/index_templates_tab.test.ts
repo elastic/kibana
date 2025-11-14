@@ -563,7 +563,6 @@ describe('Index Templates tab', () => {
           expect(find('templateDetails.title').text().trim()).toEqual(name);
         });
 
-        // todo
         it('should have a close button and be able to close flyout', async () => {
           const { actions, component, exists } = testBed;
 
@@ -624,17 +623,6 @@ describe('Index Templates tab', () => {
           });
 
           await actions.clickTemplateAt(0);
-
-          /*
-          expect(find('templateDetails.tab').length).toBe(5);
-          expect(find('templateDetails.tab').map((t) => t.text())).toEqual([
-            'Summary',
-            'Settings',
-            'Mappings',
-            'Aliases',
-            'Preview',
-          ]);
-          */
 
           expect(exists('summaryTabBtn')).toBe(true);
           expect(exists('settingsTabBtn')).toBe(true);
