@@ -50,8 +50,6 @@ import {
 } from './redux';
 import type { DiscoverSavedSearchContainer } from './discover_saved_search_container';
 import { getSavedSearchContainer } from './discover_saved_search_container';
-import { sendLoadingMsg } from '../hooks/use_saved_search_messages';
-
 export interface DiscoverStateContainerParams {
   /**
    * The ID of the tab associated with this state container
@@ -572,14 +570,6 @@ export function getDiscoverStateContainer({
    * Triggered when user changes grouping in the cascade experience
    */
   const onCascadeGroupingChange = (({ query, cascadeGrouping }) => {
-    // Set documents loading to true immediately on state changes since there's a delay
-    // on the fetch and we don't want to see state changes reflected in the data cascade
-    // until the fetch is complete
-    sendLoadingMsg(
-      dataStateContainer.data$.documents$,
-      dataStateContainer.data$.documents$.getValue()
-    );
-
     trackQueryFields(query);
 
     const currentTabState = getCurrentTab();
@@ -593,10 +583,6 @@ export function getDiscoverStateContainer({
         },
       })
     );
-
-    addLog('[getDiscoverStateContainer] onCascadeGroupingChange triggers data fetching');
-
-    dataStateContainer.fetch();
   }) satisfies DiscoverStateContainer['actions']['onCascadeGroupingChange'];
 
   /**

@@ -22,20 +22,18 @@ import {
   CascadedDocumentsLayout,
   useGroupBySelectorRenderer,
 } from '../../application/main/components/layout/cascaded_documents';
-import type { CascadedDocumentsRestorableState } from '../../application/main/components/layout/cascaded_documents/cascaded_documents_restorable_state';
+import { useCurrentTabSelector } from '../../application/main/state_management/redux';
 
 export type DiscoverGridProps = UnifiedDataTableProps & {
   query?: DiscoverAppState['query'];
   onUpdateESQLQuery?: DiscoverStateContainer['actions']['updateESQLQuery'];
 } & (
     | {
-        cascadeConfig?: undefined;
-        onCascadeGroupingChange?: never;
+        onCascadeGroupingChange?: undefined;
         viewModeToggle?: never;
       }
     | {
-        // when cascade config is passed to the discover grid component, we expect that all it's supporting props are passed along
-        cascadeConfig?: CascadedDocumentsRestorableState;
+        // when cascade on grouping change handler config is passed to the discover grid component, we expect that all it's supporting props are passed along
         onCascadeGroupingChange: DiscoverStateContainer['actions']['onCascadeGroupingChange'];
         viewModeToggle: React.ReactElement | undefined;
       }
@@ -47,7 +45,6 @@ export type DiscoverGridProps = UnifiedDataTableProps & {
  */
 export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
   onUpdateESQLQuery,
-  cascadeConfig,
   onCascadeGroupingChange,
   query,
   viewModeToggle,
@@ -111,6 +108,8 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
   const groupBySelectorRenderer = useGroupBySelectorRenderer({
     cascadeGroupingChangeHandler,
   });
+
+  const cascadeConfig = useCurrentTabSelector((state) => state.uiState.cascadedDocuments);
 
   const externalAdditionalControls = useMemo(() => {
     return (

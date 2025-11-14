@@ -226,34 +226,37 @@ export const getDiscoverAppStateContainer = ({
         if (services.discoverFeatureFlags.getCascadeLayoutEnabled()) {
           const currentTabState = selectTab(internalState.getState(), tabId);
 
+          const availableCascadeGroups = getESQLStatsQueryMeta(
+            (value!.query as AggregateQuery).esql
+          ).groupByFields.map((group) => group.field);
+
+          const computeSelectedCascadeGroups = (cascadeGroups: string[]) => {
+            if (
+              !currentTabState.uiState.cascadedDocuments ||
+              (currentTabState.uiState.cascadedDocuments &&
+                // if the proposed available groups is different in length or contains a value the existing one doesn't have, we want to reset by defaulting to the first group
+                (cascadeGroups.length !==
+                  currentTabState.uiState.cascadedDocuments.availableCascadeGroups.length ||
+                  cascadeGroups.some(
+                    (group) =>
+                      (
+                        currentTabState.uiState.cascadedDocuments?.availableCascadeGroups ?? []
+                      ).indexOf(group) < 0
+                  )))
+            ) {
+              return [cascadeGroups[0]].filter(Boolean);
+            }
+
+            // return existing selection since we've asserted that there's been no change to the available groups default
+            return currentTabState.uiState.cascadedDocuments!.selectedCascadeGroups;
+          };
+
           // compute and set cascade groupings when state updates happen
           internalState.dispatch(
             injectCurrentTab(internalStateActions.setCascadeUiState)({
               cascadeUiState: {
-                availableCascadeGroups: getESQLStatsQueryMeta(
-                  (value!.query as AggregateQuery).esql
-                ).groupByFields.map((group) => group.field),
-                get selectedCascadeGroups() {
-                  if (
-                    !currentTabState.uiState.cascadedDocuments ||
-                    (currentTabState.uiState.cascadedDocuments &&
-                      // if the proposed available groups is different in length or contains a value the existing one doesn't have, we want to reset by defaulting to the first group
-                      (this.availableCascadeGroups.length !==
-                        currentTabState.uiState.cascadedDocuments.availableCascadeGroups.length ||
-                        this.availableCascadeGroups.some(
-                          (group) =>
-                            (
-                              currentTabState.uiState.cascadedDocuments?.availableCascadeGroups ??
-                              []
-                            ).indexOf(group) < 0
-                        )))
-                  ) {
-                    return [this.availableCascadeGroups[0]].filter(Boolean);
-                  }
-
-                  // return existing selection since we've asserted that there's been no change to the available groups default
-                  return currentTabState.uiState.cascadedDocuments!.selectedCascadeGroups;
-                },
+                availableCascadeGroups,
+                selectedCascadeGroups: computeSelectedCascadeGroups(availableCascadeGroups),
               },
             })
           );
