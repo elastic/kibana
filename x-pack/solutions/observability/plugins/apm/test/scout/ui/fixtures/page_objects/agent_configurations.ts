@@ -13,7 +13,7 @@
  */
 
 import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
-import { EuiComboBoxWrapper } from '@kbn/scout-oblt';
+import { EuiComboBoxWrapper, EuiFieldTextWrapper } from '@kbn/scout-oblt';
 
 export class AgentConfigurationsPage {
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
@@ -86,7 +86,10 @@ export class AgentConfigurationsPage {
   }
 
   async selectSettingValue(settingKey: string, value: string) {
-    await this.page.testSubj.locator(`row_${settingKey}`).locator('input').fill(value);
+    const inputField = new EuiFieldTextWrapper(this.page, {
+      dataTestSubj: `row_${settingKey}`,
+    });
+    await inputField.fill(value);
   }
 
   async clickSaveConfiguration() {
