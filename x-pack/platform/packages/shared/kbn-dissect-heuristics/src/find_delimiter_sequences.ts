@@ -11,7 +11,6 @@ import {
   isLikelyDelimiter,
   scoreDelimiterQuality,
   countOccurrences,
-  findPosition,
   calculatePositionScore,
   containsIPAddress,
 } from './utils';
@@ -30,8 +29,10 @@ interface DelimiterCandidate {
  * 1. Extract all substrings from all messages (length 1-10 chars)
  * 2. Filter to substrings that appear in ALL messages
  * 3. Filter out purely alphanumeric substrings (likely data, not delimiters)
- * 4. Score by consistency of position across messages
- * 5. Return top-scored candidates
+ * 4. For each delimiter, find ALL occurrences in each message
+ * 5. Score EACH occurrence separately by position consistency
+ * 6. Keep delimiters where ANY occurrence meets the minimum score threshold
+ * 7. Return unique delimiter literals (buildDelimiterTree will handle multiple occurrences)
  */
 export function findDelimiterSequences(
   messages: string[],
@@ -87,64 +88,84 @@ export function findDelimiterSequences(
   // Step 3: Filter to likely delimiters
   const likelyDelimiters = commonSubstrings.filter(isLikelyDelimiter);
 
-  console.log('Likely delimiters found:', likelyDelimiters);
+  // Step 4: Score each delimiter by ALL occurrences, not just the first
+  // This ensures delimiters with consistent 2nd/3rd occurrences aren't filtered out
+  const scoredDelimiters: DelimiterCandidate[] = [];
 
-  // Step 4: Score each delimiter by position consistency
-  const scoredDelimiters: DelimiterCandidate[] = likelyDelimiters.map((delimiter) => {
-    const positions = messages.map((msg) => findPosition(msg, delimiter));
-    const score = calculatePositionScore(positions);
-    const frequency = countOccurrences(messages, delimiter);
-
-    // Apply penalty for delimiters that appear multiple times in the same message
-    // BUT only if the messages contain IP addresses (to avoid penalizing CSV/pipe delimiters)
-    let multipleOccurrencePenalty = 1.0;
-
-    const hasMultipleOccurrences = messages.some((msg) => {
-      const occurrences = msg.split(delimiter).length - 1;
-      return occurrences > 1;
+  for (const delimiter of likelyDelimiters) {
+    // Find ALL positions of this delimiter in each message (like buildDelimiterTree does)
+    const allPositionsPerMessage = messages.map((msg) => {
+      const positions: number[] = [];
+      let index = msg.indexOf(delimiter);
+      while (index !== -1) {
+        positions.push(index);
+        index = msg.indexOf(delimiter, index + delimiter.length);
+      }
+      return positions;
     });
 
-    if (hasMultipleOccurrences) {
-      // Only penalize if messages contain IP addresses (likely the delimiter is '.' or ':')
-      const messagesHaveIPs = messages.some((msg) => containsIPAddress(msg));
-      if (messagesHaveIPs && (delimiter === '.' || delimiter === ':')) {
-        multipleOccurrencePenalty = 0.3;
+    // Find the maximum number of occurrences across all messages
+    const maxOccurrences = Math.max(...allPositionsPerMessage.map((p) => p.length));
+
+    // Score each occurrence separately
+    for (let occIndex = 0; occIndex < maxOccurrences; occIndex++) {
+      const positions = allPositionsPerMessage.map((posArray) =>
+        posArray[occIndex] !== undefined ? posArray[occIndex] : -1
+      );
+
+      // Only consider this occurrence if it exists in all messages
+      if (!positions.some((pos) => pos === -1)) {
+        const score = calculatePositionScore(positions);
+
+        // Apply penalty for delimiters that appear multiple times in the same message
+        // BUT only if the messages contain IP addresses (to avoid penalizing CSV/pipe delimiters)
+        let multipleOccurrencePenalty = 1.0;
+
+        if (maxOccurrences > 1) {
+          // Only penalize if messages contain IP addresses (likely the delimiter is '.' or ':')
+          const messagesHaveIPs = messages.some((msg) => containsIPAddress(msg));
+          if (messagesHaveIPs && (delimiter === '.' || delimiter === ':')) {
+            multipleOccurrencePenalty = 0.3;
+          }
+        }
+
+        const finalScore = score * multipleOccurrencePenalty;
+
+        // Only add this occurrence if it meets the minimum score
+        if (finalScore >= minScore) {
+          scoredDelimiters.push({
+            literal: delimiter,
+            frequency: countOccurrences(messages, delimiter),
+            positions,
+            score: finalScore,
+          });
+        }
       }
     }
+  }
 
-    return {
-      literal: delimiter,
-      frequency,
-      positions,
-      score: score * multipleOccurrencePenalty,
-    };
+  // Step 5: Sort by score, then length, then frequency
+  const validDelimiters = scoredDelimiters.sort((a, b) => {
+    // Sort by score first (higher is better)
+    if (b.score !== a.score) {
+      return b.score - a.score;
+    }
+    // Then by length (longer delimiters are more specific)
+    if (b.literal.length !== a.literal.length) {
+      return b.literal.length - a.literal.length;
+    }
+    // Then by frequency
+    return b.frequency - a.frequency;
   });
-
-  // Step 5: Filter by score and variance, then sort by score
-  const validDelimiters = scoredDelimiters
-    .filter((d) => d.score >= minScore)
-    .sort((a, b) => {
-      // Sort by score first (higher is better)
-      if (b.score !== a.score) {
-        return b.score - a.score;
-      }
-      // Then by length (longer delimiters are more specific)
-      if (b.literal.length !== a.literal.length) {
-        return b.literal.length - a.literal.length;
-      }
-      // Then by frequency
-      return b.frequency - a.frequency;
-    });
 
   // Remove delimiters that are substrings of other delimiters with same positions
   // Process longer delimiters first to ensure they are kept over their substrings
   const sortedByLength = [...validDelimiters].sort((a, b) => b.literal.length - a.literal.length);
-  console.log('Sorted delimiters by length for substring removal:', sortedByLength);
   const filteredDelimiters = removeDuplicateSubstrings(sortedByLength);
 
-  console.log('Filtered delimiters after removing duplicates:', filteredDelimiters);
-
-  return filteredDelimiters.map((d) => d.literal);
+  // Return unique delimiter literals (may have multiple occurrences, but buildDelimiterTree handles that)
+  const uniqueDelimiters = Array.from(new Set(filteredDelimiters.map((d) => d.literal)));
+  return uniqueDelimiters;
 }
 
 /**
