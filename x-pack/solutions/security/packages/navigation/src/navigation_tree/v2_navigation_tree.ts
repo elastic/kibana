@@ -10,7 +10,7 @@ import type { NodeDefinition } from '@kbn/core-chrome-browser';
 import { defaultNavigationTree } from '../../navigation_tree';
 
 import { SecurityPageName } from '../..';
-import { i18nStrings, securityLink } from '../../links';
+import { securityLink } from '../../links';
 import { ATTACKS_ALERTS_ALIGNMENT_ENABLED } from '../constants';
 
 const LazyIconWorkflow = lazy(() =>
@@ -30,61 +30,49 @@ const LazyIconIntelligence = lazy(() =>
 export const createV2NavigationTree = (core: CoreStart): NodeDefinition[] => [
   {
     link: 'discover',
-    iconV2: 'discoverApp',
-    sideNavVersion: 'v2',
+    icon: 'discoverApp',
   },
-  defaultNavigationTree.dashboards({ sideNavVersion: 'v2' }),
-  defaultNavigationTree.rules({ sideNavVersion: 'v2' }),
+  defaultNavigationTree.dashboards(),
+  defaultNavigationTree.rules(),
   core.featureFlags.getBooleanValue(ATTACKS_ALERTS_ALIGNMENT_ENABLED, false)
-    ? defaultNavigationTree.alertDetections({ sideNavVersion: 'v2' })
+    ? defaultNavigationTree.alertDetections()
     : {
         id: SecurityPageName.alerts,
-        iconV2: 'warning',
+        icon: 'warning',
         link: securityLink(SecurityPageName.alerts),
-        sideNavVersion: 'v2',
       },
   {
     // TODO: update icon from EUI
-    iconV2: LazyIconWorkflow,
+    icon: LazyIconWorkflow,
     link: 'workflows',
-    withBadge: true,
-    badgeTypeV2: 'techPreview' as const,
-    badgeOptions: {
-      icon: 'beaker',
-      tooltip: i18nStrings.workflows.badgeTooltip,
-    },
-    sideNavVersion: 'v2',
+    badgeType: 'techPreview' as const,
   },
   {
     id: SecurityPageName.attackDiscovery,
-    iconV2: 'bolt',
+    icon: 'bolt',
     link: securityLink(SecurityPageName.attackDiscovery),
-    sideNavVersion: 'v2',
   },
   {
     id: SecurityPageName.cloudSecurityPostureFindings,
     // TODO change this to the `bullseye` EUI icon when available
-    iconV2: LazyIconFindings,
+    icon: LazyIconFindings,
     link: securityLink(SecurityPageName.cloudSecurityPostureFindings),
-    sideNavVersion: 'v2',
   },
-  defaultNavigationTree.cases({ sideNavVersion: 'v2' }),
-  defaultNavigationTree.entityAnalytics({ sideNavVersion: 'v2' }),
-  defaultNavigationTree.explore({ sideNavVersion: 'v2' }),
-  defaultNavigationTree.investigations({ sideNavVersion: 'v2' }),
+  defaultNavigationTree.cases(),
+  defaultNavigationTree.entityAnalytics(),
+  defaultNavigationTree.explore(),
+  defaultNavigationTree.investigations(),
   {
     id: SecurityPageName.threatIntelligence,
     // TODO change this to the `compute` EUI icon when available
-    iconV2: LazyIconIntelligence,
+    icon: LazyIconIntelligence,
     link: securityLink(SecurityPageName.threatIntelligence),
-    sideNavVersion: 'v2',
   },
   {
     id: SecurityPageName.assetInventory,
-    iconV2: 'editorChecklist',
+    icon: 'editorChecklist',
     link: securityLink(SecurityPageName.assetInventory),
-    sideNavVersion: 'v2',
   },
-  defaultNavigationTree.assets(core, { sideNavVersion: 'v2' }),
-  defaultNavigationTree.ml({ sideNavVersion: 'v2' }),
+  defaultNavigationTree.assets(core),
+  defaultNavigationTree.ml(),
 ];

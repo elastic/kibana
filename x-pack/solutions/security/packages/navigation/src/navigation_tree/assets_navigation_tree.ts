@@ -12,23 +12,16 @@ import { SecurityGroupName, SecurityPageName } from '../constants';
 import { SecurityLinkGroup } from '../link_groups';
 import { securityLink } from '../links';
 import { i18nStrings } from '../i18n_strings';
-import { renderIntegrationsLinkCallout } from './integrations_link_callout';
 
 const LazyIconAssets = lazy(() =>
   import('./v2_icons/assets').then(({ iconAssets }) => ({ default: iconAssets }))
 );
 
-export const createAssetsNavigationTree = (
-  core: CoreStart,
-  { sideNavVersion }: { sideNavVersion?: NodeDefinition['sideNavVersion'] } = {
-    sideNavVersion: 'v1',
-  }
-): NodeDefinition => ({
+export const createAssetsNavigationTree = (core: CoreStart): NodeDefinition => ({
   id: SecurityGroupName.assets,
-  iconV2: LazyIconAssets,
+  icon: LazyIconAssets,
   title: SecurityLinkGroup[SecurityGroupName.assets].title,
   renderAs: 'panelOpener',
-  sideNavVersion,
   children: [
     {
       link: 'fleet',
@@ -95,13 +88,6 @@ export const createAssetsNavigationTree = (
         {
           id: SecurityPageName.responseActionsHistory,
           link: securityLink(SecurityPageName.responseActionsHistory),
-        },
-      ],
-    },
-    {
-      children: [
-        {
-          renderItem: () => renderIntegrationsLinkCallout(core),
         },
       ],
     },

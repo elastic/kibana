@@ -12,137 +12,106 @@ import {
 } from '@kbn/security-solution-navigation';
 import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
 import { defaultNavigationTree } from '@kbn/security-solution-navigation/navigation_tree';
+import { STACK_MANAGEMENT_NAV_ID, DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
+import { lazy } from 'react';
 import { type Services } from '../common/services';
 import { SOLUTION_NAME } from './translations';
-import { v2FooterItems } from './v2_footer_items';
+
+const LazyIconWorkflow = lazy(() =>
+  import('./custom_icons/workflow').then(({ iconWorkflow }) => ({ default: iconWorkflow }))
+);
+
+// TODO delete when the `bullseye` EUI icon has been updated
+const LazyIconFindings = lazy(() =>
+  import('./custom_icons/findings').then(({ iconFindings }) => ({ default: iconFindings }))
+);
+
+// TODO delete when the EUI icon has been updated
+const LazyIconIntelligence = lazy(() =>
+  import('./custom_icons/intelligence').then(({ iconIntelligence }) => ({
+    default: iconIntelligence,
+  }))
+);
 
 export const createNavigationTree = (services: Services): NavigationTreeDefinition => ({
   body: [
     {
-      type: 'navGroup',
       id: 'security_solution_nav',
-      title: SOLUTION_NAME,
       icon: 'logoSecurity',
-      breadcrumbStatus: 'hidden',
-      defaultIsCollapsed: false,
-      isCollapsible: false,
-      children: [
-        {
-          link: securityLink(SecurityPageName.landing),
-          title: SOLUTION_NAME,
-          icon: 'logoSecurity',
-          renderAs: 'home',
-          sideNavVersion: 'v2',
-        },
-        {
-          link: 'discover',
-          iconV2: 'discoverApp',
-          sideNavVersion: 'v1',
-        },
-        defaultNavigationTree.dashboards({ sideNavVersion: 'v1' }),
-        {
-          breadcrumbStatus: 'hidden',
-          children: [
-            defaultNavigationTree.rules({ sideNavVersion: 'v1' }),
-            services.featureFlags.getBooleanValue(ATTACKS_ALERTS_ALIGNMENT_ENABLED, false)
-              ? defaultNavigationTree.alertDetections({ sideNavVersion: 'v1' })
-              : {
-                  id: SecurityPageName.alerts,
-                  link: securityLink(SecurityPageName.alerts),
-                  sideNavVersion: 'v1',
-                },
-            {
-              link: 'workflows',
-              withBadge: true,
-              badgeTypeV2: 'techPreview' as const,
-              badgeOptions: {
-                icon: 'beaker',
-                tooltip: i18nStrings.workflows.badgeTooltip,
-              },
-              sideNavVersion: 'v1',
-            },
-            {
-              id: SecurityPageName.attackDiscovery,
-              link: securityLink(SecurityPageName.attackDiscovery),
-              sideNavVersion: 'v1',
-            },
-            {
-              id: SecurityPageName.cloudSecurityPostureFindings,
-              link: securityLink(SecurityPageName.cloudSecurityPostureFindings),
-              sideNavVersion: 'v1',
-            },
-            defaultNavigationTree.cases({ sideNavVersion: 'v1' }),
-          ],
-        },
-        {
-          breadcrumbStatus: 'hidden',
-          children: [
-            defaultNavigationTree.entityAnalytics({ sideNavVersion: 'v1' }),
-            defaultNavigationTree.explore({ sideNavVersion: 'v1' }),
-            defaultNavigationTree.investigations({ sideNavVersion: 'v1' }),
-            {
-              id: SecurityPageName.threatIntelligence,
-              link: securityLink(SecurityPageName.threatIntelligence),
-              sideNavVersion: 'v1',
-            },
-          ],
-        },
-        {
-          breadcrumbStatus: 'hidden',
-          children: [
-            {
-              id: SecurityPageName.assetInventory,
-              link: securityLink(SecurityPageName.assetInventory),
-              sideNavVersion: 'v1',
-            },
-            {
-              id: SecurityPageName.siemReadiness,
-              link: securityLink(SecurityPageName.siemReadiness),
-              sideNavVersion: 'v1',
-            },
-            defaultNavigationTree.assets(services, { sideNavVersion: 'v1' }),
-          ],
-        },
-        defaultNavigationTree.ml({ sideNavVersion: 'v1' }),
-        // version 2 sidenav
-        ...defaultNavigationTree.v2(services),
-      ],
+      link: securityLink(SecurityPageName.landing),
+      title: SOLUTION_NAME,
+      renderAs: 'home',
     },
+    {
+      link: 'discover',
+      icon: 'discoverApp',
+    },
+    defaultNavigationTree.dashboards(),
+    defaultNavigationTree.rules(),
+    services.featureFlags.getBooleanValue(ATTACKS_ALERTS_ALIGNMENT_ENABLED, false)
+      ? defaultNavigationTree.alertDetections()
+      : {
+          id: SecurityPageName.alerts,
+          icon: 'warning',
+          link: securityLink(SecurityPageName.alerts),
+        },
+    {
+      // TODO: update icon from EUI
+      icon: LazyIconWorkflow,
+      link: 'workflows',
+      badgeType: 'techPreview' as const,
+    },
+    {
+      id: SecurityPageName.attackDiscovery,
+      icon: 'bolt',
+      link: securityLink(SecurityPageName.attackDiscovery),
+    },
+    {
+      id: SecurityPageName.cloudSecurityPostureFindings,
+      // TODO change this to the `bullseye` EUI icon when available
+      icon: LazyIconFindings,
+      link: securityLink(SecurityPageName.cloudSecurityPostureFindings),
+    },
+    defaultNavigationTree.cases(),
+    defaultNavigationTree.entityAnalytics(),
+    defaultNavigationTree.explore(),
+    defaultNavigationTree.investigations(),
+    {
+      id: SecurityPageName.threatIntelligence,
+      // TODO change this to the `compute` EUI icon when available
+      icon: LazyIconIntelligence,
+      link: securityLink(SecurityPageName.threatIntelligence),
+    },
+    {
+      id: SecurityPageName.assetInventory,
+      icon: 'editorChecklist',
+      link: securityLink(SecurityPageName.assetInventory),
+    },
+    defaultNavigationTree.assets(services),
+    defaultNavigationTree.ml(),
   ],
   footer: [
     {
       id: 'security_solution_nav_footer',
-      type: 'navGroup',
       children: [
-        {
-          id: SecurityPageName.landing,
-          link: securityLink(SecurityPageName.landing),
-          sideNavVersion: 'v1',
-          icon: 'launch',
-        },
-        // version 2 sidenav launchpad
         {
           id: 'launchpad',
           title: i18nStrings.launchPad.title,
           renderAs: 'panelOpener',
-          sideNavVersion: 'v2',
-          iconV2: 'launch',
+          icon: 'launch',
           children: [
             {
               children: [
                 {
                   id: 'launchpad_get_started',
                   link: securityLink(SecurityPageName.landing),
-                  sideNavVersion: 'v2',
                 },
                 {
                   link: securityLink(SecurityPageName.siemReadiness),
-                  sideNavVersion: 'v2',
                 },
                 {
                   // value report
                   link: securityLink(SecurityPageName.aiValue),
-                  sideNavVersion: 'v2',
                 },
               ],
             },
@@ -152,12 +121,10 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
                 {
                   id: SecurityPageName.siemMigrationsRules,
                   link: securityLink(SecurityPageName.siemMigrationsRules),
-                  sideNavVersion: 'v2',
                 },
                 {
                   id: SecurityPageName.siemMigrationsDashboards,
                   link: securityLink(SecurityPageName.siemMigrationsDashboards),
-                  sideNavVersion: 'v2',
                 },
               ],
             },
@@ -168,121 +135,138 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
           title: i18nStrings.devTools,
           icon: 'editorCodeBlock',
         },
-        // version 2 sidenav footer items
-        ...v2FooterItems,
         {
-          title: i18nStrings.management.title,
-          icon: 'gear',
+          id: DATA_MANAGEMENT_NAV_ID,
+          title: i18nStrings.ingestAndManageData.title,
+          icon: 'database',
           breadcrumbStatus: 'hidden',
-          renderAs: 'accordion',
-          spaceBefore: null,
-          sideNavVersion: 'v1',
+          renderAs: 'panelOpener',
           children: [
             {
-              id: 'stack_management',
-              title: i18nStrings.stackManagement.title,
-              renderAs: 'panelOpener',
-              spaceBefore: null,
+              title: i18nStrings.ingestAndManageData.ingestAndIntegrations.title,
+              children: [
+                { link: 'integrations' },
+                // TODO: Add fleet back when it is possible to not jump to  fleet sub menu under assets
+                // { link: 'fleet' },
+                { link: 'management:ingest_pipelines' },
+                // logstash pipeline
+                { link: 'management:pipelines' },
+                { link: 'management:content_connectors' },
+              ],
+            },
+            {
+              title: i18nStrings.ingestAndManageData.indicesAndDataStreams.title,
+              children: [
+                { link: 'streams' },
+                { link: 'management:index_management' },
+                { link: 'management:index_lifecycle_management' },
+                { link: 'management:snapshot_restore' },
+                { link: 'management:transform' },
+                { link: 'management:rollup_jobs' },
+                { link: 'management:data_quality' },
+              ],
+            },
+          ],
+        },
+        {
+          id: STACK_MANAGEMENT_NAV_ID,
+          title: i18nStrings.stackManagementV2.title,
+          icon: 'gear',
+          breadcrumbStatus: 'hidden',
+          renderAs: 'panelOpener',
+          children: [
+            {
+              id: 'stack_management_home',
+              breadcrumbStatus: 'hidden',
               children: [
                 {
-                  title: i18nStrings.stackManagement.ingest.title,
-                  children: [
-                    { link: 'management:ingest_pipelines' },
-                    { link: 'management:pipelines' },
-                  ],
+                  // We include this link here to ensure that the settings icon does not land on Stack Monitoring by default
+                  // https://github.com/elastic/kibana/issues/241518
+                  // And that the sidenav panel opens when user lands to legacy management landing page
+                  // https://github.com/elastic/kibana/issues/240275
+                  link: 'management',
+                  title: i18nStrings.stackManagementV2.home.title,
+                  breadcrumbStatus: 'hidden',
+                },
+                { link: 'monitoring' },
+              ],
+            },
+            {
+              title: i18nStrings.stackManagementV2.alertsAndInsights.title,
+              children: [
+                { link: 'management:triggersActions' },
+                { link: 'management:cases' },
+                { link: 'management:triggersActionsConnectors' },
+                { link: 'management:reporting' },
+                { link: 'management:jobsListLink' },
+                { link: 'management:watcher' },
+                { link: 'management:maintenanceWindows' },
+                {
+                  id: SecurityPageName.entityAnalyticsManagement,
+                  link: securityLink(SecurityPageName.entityAnalyticsManagement),
                 },
                 {
-                  title: i18nStrings.stackManagement.data.title,
-                  children: [
-                    { link: 'management:index_management' },
-                    { link: 'management:index_lifecycle_management' },
-                    { link: 'management:snapshot_restore' },
-                    { link: 'management:rollup_jobs' },
-                    { link: 'management:transform' },
-                    { link: 'management:cross_cluster_replication' },
-                    { link: 'management:remote_clusters' },
-                    { link: 'management:migrate_data' },
-                    { link: 'management:content_connectors' },
-                  ],
-                },
-                {
-                  title: i18nStrings.stackManagement.alertsAndInsights.title,
-                  children: [
-                    { link: 'management:triggersActions' },
-                    { link: 'management:cases' },
-                    { link: 'management:triggersActionsConnectors' },
-                    { link: 'management:reporting' },
-                    { link: 'management:jobsListLink' },
-                    { link: 'management:watcher' },
-                    { link: 'management:maintenanceWindows' },
-                    {
-                      id: SecurityPageName.entityAnalyticsManagement,
-                      link: securityLink(SecurityPageName.entityAnalyticsManagement),
-                    },
-                    {
-                      id: SecurityPageName.entityAnalyticsEntityStoreManagement,
-                      link: securityLink(SecurityPageName.entityAnalyticsEntityStoreManagement),
-                    },
-                  ],
-                },
-                {
-                  title: i18nStrings.ml.title,
-                  children: [
-                    { link: 'management:overview' },
-                    { link: 'management:anomaly_detection' },
-                    { link: 'management:analytics' },
-                    { link: 'management:trained_models' },
-                    { link: 'management:supplied_configurations' },
-                  ],
-                },
-                {
-                  title: i18nStrings.stackManagement.security.title,
-                  children: [
-                    { link: 'management:users' },
-                    { link: 'management:roles' },
-                    { link: 'management:api_keys' },
-                    { link: 'management:role_mappings' },
-                  ],
-                },
-                {
-                  title: i18nStrings.stackManagement.kibana.title,
-                  children: [
-                    { link: 'management:dataViews' },
-                    { link: 'management:filesManagement' },
-                    { link: 'management:objects' },
-                    { link: 'management:tags' },
-                    { link: 'management:search_sessions' },
-                    { link: 'management:spaces' },
-                    { link: 'maps' },
-                    { link: 'visualize' },
-                    { link: 'graph' },
-                    { link: 'canvas' },
-                    { link: 'management:settings' },
-                  ],
-                },
-                {
-                  title: 'AI',
-                  children: [
-                    { link: 'management:genAiSettings' },
-                    { link: 'management:aiAssistantManagementSelection' },
-                  ],
-                },
-                {
-                  title: i18nStrings.stackManagement.stack.title,
-                  children: [
-                    { link: 'management:license_management' },
-                    { link: 'management:upgrade_assistant' },
-                  ],
+                  id: SecurityPageName.entityAnalyticsEntityStoreManagement,
+                  link: securityLink(SecurityPageName.entityAnalyticsEntityStoreManagement),
                 },
               ],
             },
             {
-              link: 'monitoring',
-              sideNavVersion: 'v1',
+              title: i18nStrings.ml.title,
+              children: [
+                { link: 'management:overview' },
+                { link: 'management:anomaly_detection' },
+                { link: 'management:analytics' },
+                { link: 'management:trained_models' },
+                { link: 'management:supplied_configurations' },
+              ],
             },
             {
-              link: 'integrations',
-              sideNavVersion: 'v1',
+              title: i18nStrings.stackManagement.ai.title,
+              children: [
+                { link: 'management:genAiSettings' },
+                { link: 'management:aiAssistantManagementSelection' },
+              ],
+            },
+            {
+              title: i18nStrings.stackManagementV2.security.title,
+              children: [
+                { link: 'management:users' },
+                { link: 'management:roles' },
+                { link: 'management:api_keys' },
+                { link: 'management:role_mappings' },
+              ],
+            },
+            {
+              title: i18nStrings.stackManagementV2.data.title,
+              children: [
+                { link: 'management:cross_cluster_replication' },
+                { link: 'management:remote_clusters' },
+                { link: 'management:migrate_data' },
+              ],
+            },
+            {
+              title: i18nStrings.stackManagementV2.kibana.title,
+              children: [
+                { link: 'management:dataViews' },
+                { link: 'management:filesManagement' },
+                { link: 'management:objects' },
+                { link: 'management:tags' },
+                { link: 'management:search_sessions' },
+                { link: 'management:spaces' },
+                { link: 'maps' },
+                { link: 'visualize' },
+                { link: 'graph' },
+                { link: 'canvas' },
+                { link: 'management:settings' },
+              ],
+            },
+            {
+              title: i18nStrings.stackManagement.stack.title,
+              children: [
+                { link: 'management:license_management' },
+                { link: 'management:upgrade_assistant' },
+              ],
             },
           ],
         },

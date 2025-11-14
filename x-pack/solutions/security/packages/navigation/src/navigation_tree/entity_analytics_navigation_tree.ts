@@ -17,16 +17,11 @@ const LazyIconEntityAnalytics = lazy(() =>
   }))
 );
 
-export const createEntityAnalyticsNavigationTree = (
-  { sideNavVersion }: { sideNavVersion?: NodeDefinition['sideNavVersion'] } = {
-    sideNavVersion: 'v1',
-  }
-): NodeDefinition => ({
+export const createEntityAnalyticsNavigationTree = (): NodeDefinition => ({
   id: SecurityGroupName.entityAnalytics,
-  iconV2: LazyIconEntityAnalytics,
+  icon: LazyIconEntityAnalytics,
   title: SecurityLinkGroup[SecurityGroupName.entityAnalytics].title,
   renderAs: 'panelOpener',
-  sideNavVersion,
   children: [
     {
       id: SecurityPageName.entityAnalyticsOverview,
