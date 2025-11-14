@@ -172,9 +172,11 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
   }, [actionType, connectors]);
 
   const hasConnectorConfig = (
-    connector: ActionConnector
-  ): connector is UserConfiguredActionConnector<Record<string, unknown>, Record<string, unknown>> =>
-    connector && 'config' in connector;
+    currentConnector: ActionConnector
+  ): currentConnector is UserConfiguredActionConnector<
+    Record<string, unknown>,
+    Record<string, unknown>
+  > => 'config' in currentConnector;
 
   const connectorConfig = connector && hasConnectorConfig(connector) ? connector.config : undefined;
 
