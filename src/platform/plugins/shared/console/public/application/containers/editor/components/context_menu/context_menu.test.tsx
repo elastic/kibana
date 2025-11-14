@@ -28,7 +28,9 @@ const createMockContextValue = (isPackagedEnvironment?: boolean): ContextValue =
   return {
     services: {
       storage: {} as any,
-      esHostService: {} as any,
+      esHostService: {
+        init: jest.fn(),
+      } as any,
       history: {} as any,
       settings: {} as any,
       notifications: mockNotifications as any,
