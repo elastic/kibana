@@ -21,7 +21,6 @@ import type {
   WritableToolResultStore,
   ModelProvider,
 } from '@kbn/onechat-server';
-import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 import type { ToolsServiceStart } from '../tools';
 import type { AgentsServiceStart } from '../agents';
 import type { AttachmentServiceStart } from '../attachments';
@@ -42,8 +41,6 @@ export interface CreateScopedRunnerDeps {
   agentsService: AgentsServiceStart;
   attachmentsService: AttachmentServiceStart;
   trackingService?: TrackingService;
-  // plugin deps
-  llmTasks?: LlmTasksPluginStart;
   // other deps
   logger: Logger;
   request: KibanaRequest;

@@ -9,7 +9,6 @@ import type { Logger } from '@kbn/logging';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 import type { Runner } from '@kbn/onechat-server';
 import type { ToolsServiceStart } from '../tools';
 import type { AgentsServiceStart } from '../agents';
@@ -23,7 +22,6 @@ export interface RunnerFactoryDeps {
   security: SecurityServiceStart;
   // plugin deps
   inference: InferenceServerStart;
-  llmTasks?: LlmTasksPluginStart;
   // internal service deps
   toolsService: ToolsServiceStart;
   agentsService: AgentsServiceStart;

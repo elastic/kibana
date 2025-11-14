@@ -58,7 +58,6 @@ export class ServiceManager {
     inference,
     uiSettings,
     savedObjects,
-    llmTasks,
     trackingService,
   }: ServicesStartDeps): Promise<InternalStartServices> {
     if (!this.services) {
@@ -82,7 +81,6 @@ export class ServiceManager {
       elasticsearch,
       uiSettings,
       savedObjects,
-      llmTasks,
     });
 
     const agents = this.services.agents.start({
@@ -98,7 +96,6 @@ export class ServiceManager {
       security,
       elasticsearch,
       inference,
-      llmTasks,
       toolsService: tools,
       agentsService: agents,
       attachmentsService: attachments,

@@ -10,7 +10,6 @@ import type { Logger } from '@kbn/logging';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
-import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 import type {
   ToolEventEmitter,
   ModelProvider,
@@ -79,8 +78,4 @@ export interface ToolHandlerContext {
    * Logger scoped to this execution
    */
   logger: Logger;
-  /**
-   * LLM Tasks plugin start contract for accessing documentation retrieval and other LLM tasks.
-   */
-  llmTasks?: LlmTasksPluginStart;
 }

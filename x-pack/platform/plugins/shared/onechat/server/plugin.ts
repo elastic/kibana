@@ -140,7 +140,7 @@ export class OnechatPlugin
 
   start(
     { elasticsearch, security, uiSettings, savedObjects }: CoreStart,
-    { inference, spaces, llmTasks }: OnechatStartDependencies
+    { inference, spaces }: OnechatStartDependencies
   ): OnechatPluginStart {
     // Start async initialization. The Plugin interface requires start() to be synchronous,
     // so we initialize services asynchronously and await them when methods are called.
@@ -155,7 +155,6 @@ export class OnechatPlugin
         spaces,
         uiSettings,
         savedObjects,
-        llmTasks,
         trackingService: this.trackingService,
       })
       .then(

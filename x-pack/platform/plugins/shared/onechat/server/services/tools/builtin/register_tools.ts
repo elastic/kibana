@@ -43,17 +43,10 @@ export const registerBuiltinTools = ({
     listIndicesTool(),
     indexExplorerTool(),
     createVisualizationTool(),
+    productDocumentationTool(coreSetup),
   ];
 
   tools.forEach((tool) => {
     registry.register(tool);
   });
-};
-
-export const registerProductDocumentationTool = ({
-  registry,
-}: {
-  registry: BuiltinToolRegistry;
-}) => {
-  registry.register(productDocumentationTool());
 };

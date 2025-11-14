@@ -11,6 +11,9 @@ import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { createErrorResult } from '@kbn/onechat-server';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
+import type { CoreSetup } from '@kbn/core/server';
+import type { RetrieveDocumentationResultDoc } from '@kbn/llm-tasks-plugin/server';
+import type { OnechatStartDependencies, OnechatPluginStart } from '../../../../types';
 
 const productDocumentationSchema = z.object({
   query: z.string().describe('Search query to retrieve documentation about Elastic products'),
@@ -25,15 +28,22 @@ const productDocumentationSchema = z.object({
     .describe('Maximum number of documents to return. Defaults to 3.'),
 });
 
-export const productDocumentationTool = (): BuiltinToolDefinition<
-  typeof productDocumentationSchema
-> => {
-  return {
+export const productDocumentationTool = (
+  coreSetup: CoreSetup<OnechatStartDependencies, OnechatPluginStart>
+): BuiltinToolDefinition<typeof productDocumentationSchema> => {
+  // Create a closure that will resolve llmTasks when the handler is called
+  const getLlmTasks = async () => {
+    const [, plugins] = await coreSetup.getStartServices();
+    return plugins.llmTasks;
+  };
+
+  const baseTool: BuiltinToolDefinition<typeof productDocumentationSchema> = {
     id: platformCoreTools.productDocumentation,
     type: ToolType.builtin,
     description: `Search and retrieve documentation about Elastic products (Kibana, Elasticsearch, Elastic Security, Elastic Observability).`,
     schema: productDocumentationSchema,
-    handler: async ({ query, product, max = 3 }, { modelProvider, llmTasks, logger, request }) => {
+    handler: async ({ query, product, max = 3 }, { modelProvider, logger, request }) => {
+      const llmTasks = await getLlmTasks();
       if (!llmTasks) {
         return {
           results: [
@@ -79,7 +89,7 @@ export const productDocumentationTool = (): BuiltinToolDefinition<
 
         // Return documentation results
         return {
-          results: result.documents.map((doc) => ({
+          results: result.documents.map((doc: RetrieveDocumentationResultDoc) => ({
             type: ToolResultType.resource,
             data: {
               reference: {
@@ -108,5 +118,31 @@ export const productDocumentationTool = (): BuiltinToolDefinition<
       }
     },
     tags: [],
+    availability: {
+      cacheMode: 'space',
+      handler: async ({ request }) => {
+        try {
+          const [, plugins] = await coreSetup.getStartServices();
+          const llmTasks = plugins.llmTasks;
+
+          if (!llmTasks) {
+            return { status: 'unavailable' };
+          }
+
+          const isAvailable =
+            (await llmTasks.retrieveDocumentationAvailable({
+              inferenceId: defaultInferenceEndpoints.ELSER,
+            })) ?? false;
+
+          return {
+            status: isAvailable ? 'available' : 'unavailable',
+          };
+        } catch (error) {
+          return { status: 'unavailable' };
+        }
+      },
+    },
   };
+
+  return baseTool;
 };
