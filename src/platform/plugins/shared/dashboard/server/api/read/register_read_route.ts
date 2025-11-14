@@ -15,7 +15,7 @@ import { getReadResponseBodySchema } from './schemas';
 import { read } from './read';
 
 export function registerReadRoute(router: VersionedRouter<RequestHandlerContext>) {
-  const readRoute = router.post({
+  const readRoute = router.get({
     path: `${PUBLIC_API_PATH}/{id}`,
     summary: `Get a dashboard`,
     ...commonRouteConfig,
