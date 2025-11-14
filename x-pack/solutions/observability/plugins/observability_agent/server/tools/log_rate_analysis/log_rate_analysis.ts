@@ -23,7 +23,9 @@ export const OBSERVABILITY_RUN_LOG_RATE_ANALYSIS_TOOL_ID = 'observability.run_lo
 const dateRangeSchema = z.object({
   from: z
     .string()
-    .describe('Start of the time window expressed with Elasticsearch date math. Example: `now-15m`'),
+    .describe(
+      'Start of the time window expressed with Elasticsearch date math. Example: `now-15m`'
+    ),
   to: z
     .string()
     .describe('End of the time window expressed with Elasticsearch date math. Example: `now`.'),
