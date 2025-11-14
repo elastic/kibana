@@ -71,7 +71,7 @@ describe('SiemRulesMigrationsTelemetry', () => {
       {
         eventName: siemMigrationEventNames[SiemMigrationsRuleEventTypes.SetupMigrationCreated],
         migrationId: 'def',
-        rulesCount: 10,
+        count: 10,
         result: 'success',
       }
     );
