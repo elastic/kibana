@@ -39,7 +39,7 @@ const machineLearningItemId = observabilityMock.navItems.primaryItems[10].id;
 describe('Both modes', () => {
   let user: ReturnType<typeof userEvent.setup>;
 
-  let restoreWindowSize: () => void;
+  let restoreWindowSize: (() => void) | undefined;
 
   beforeAll(() => {
     mockClientHeight(mockMenuItemHeight);
