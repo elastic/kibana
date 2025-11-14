@@ -4146,14 +4146,10 @@ components:
             - delete
           type: string
         gap_status:
+          $ref: '#/components/schemas/AggregatedGapStatus'
           description: >-
             Gap status to filter rules with gaps by status (used together with
             gaps_range_*).
-          enum:
-            - unfilled
-            - in_progress
-            - filled
-          type: string
         gaps_range_end:
           description: Gaps range end, valid only when query is provided
           type: string
@@ -4183,14 +4179,10 @@ components:
             - disable
           type: string
         gap_status:
+          $ref: '#/components/schemas/AggregatedGapStatus'
           description: >-
             Gap status to filter rules with gaps by status (used together with
             gaps_range_*).
-          enum:
-            - unfilled
-            - in_progress
-            - filled
-          type: string
         gaps_range_end:
           description: Gaps range end, valid only when query is provided
           type: string
@@ -4233,14 +4225,10 @@ components:
             - include_exceptions
             - include_expired_exceptions
         gap_status:
+          $ref: '#/components/schemas/AggregatedGapStatus'
           description: >-
             Gap status to filter rules with gaps by status (used together with
             gaps_range_*).
-          enum:
-            - unfilled
-            - in_progress
-            - filled
-          type: string
         gaps_range_end:
           description: Gaps range end, valid only when query is provided
           type: string
@@ -4350,14 +4338,10 @@ components:
           minItems: 1
           type: array
         gap_status:
+          $ref: '#/components/schemas/AggregatedGapStatus'
           description: >-
             Gap status to filter rules with gaps by status (used together with
             gaps_range_*).
-          enum:
-            - unfilled
-            - in_progress
-            - filled
-          type: string
         gaps_range_end:
           description: Gaps range end, valid only when query is provided
           type: string
@@ -4392,14 +4376,10 @@ components:
             - enable
           type: string
         gap_status:
+          $ref: '#/components/schemas/AggregatedGapStatus'
           description: >-
             Gap status to filter rules with gaps by status (used together with
             gaps_range_*).
-          enum:
-            - unfilled
-            - in_progress
-            - filled
-          type: string
         gaps_range_end:
           description: Gaps range end, valid only when query is provided
           type: string
@@ -4431,14 +4411,10 @@ components:
             - export
           type: string
         gap_status:
+          $ref: '#/components/schemas/AggregatedGapStatus'
           description: >-
             Gap status to filter rules with gaps by status (used together with
             gaps_range_*).
-          enum:
-            - unfilled
-            - in_progress
-            - filled
-          type: string
         gaps_range_end:
           description: Gaps range end, valid only when query is provided
           type: string
@@ -4487,14 +4463,10 @@ components:
             - start_date
             - end_date
         gap_status:
+          $ref: '#/components/schemas/AggregatedGapStatus'
           description: >-
             Gap status to filter rules with gaps by status (used together with
             gaps_range_*).
-          enum:
-            - unfilled
-            - in_progress
-            - filled
-          type: string
         gaps_range_end:
           description: Gaps range end, valid only when query is provided
           type: string
@@ -4525,14 +4497,10 @@ components:
             - run
           type: string
         gap_status:
+          $ref: '#/components/schemas/AggregatedGapStatus'
           description: >-
             Gap status to filter rules with gaps by status (used together with
             gaps_range_*).
-          enum:
-            - unfilled
-            - in_progress
-            - filled
-          type: string
         gaps_range_end:
           description: Gaps range end, valid only when query is provided
           type: string
