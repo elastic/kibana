@@ -18,3 +18,4 @@ export { mergeChunks } from './merge_chunks';
 export { isNativeFunctionCallingSupported } from './function_calling_support';
 export { convertUpstreamError } from './convert_upstream_error';
 export { handleConnectorResponse } from './handle_connector_response';
+export { handleLifecycleCallbacks } from './handle_lifecycle_callbacks';

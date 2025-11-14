@@ -20,3 +20,10 @@ export const OPTIONAL_LABEL = i18n.translate(
     defaultMessage: 'Optional',
   }
 );
+
+export const TEMPERATURE_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.genAi.temperatureTextFieldLabel',
+  {
+    defaultMessage: 'Temperature',
+  }
+);

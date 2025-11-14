@@ -79,7 +79,12 @@ export function initializeSettingsManager(initialState: DashboardState) {
         syncTooltips$: stateManager.api.syncTooltips$,
         useMargins$: stateManager.api.useMargins$,
       },
-      setSettings: stateManager.reinitializeState,
+      setSettings: (settings: Partial<DashboardSettings>) => {
+        stateManager.reinitializeState({
+          ...stateManager.getLatestState(),
+          ...settings,
+        });
+      },
       setTags: stateManager.api.setTags,
       timeRestore$: stateManager.api.timeRestore$,
       title$: stateManager.api.title$,

@@ -158,6 +158,7 @@ export interface ICommandContext {
   supportsControls?: boolean;
   histogramBarTarget?: number;
   activeProduct?: PricingProduct | undefined;
+  isCursorInSubquery?: boolean;
 }
 /**
  * This is a list of locations within an ES|QL query.

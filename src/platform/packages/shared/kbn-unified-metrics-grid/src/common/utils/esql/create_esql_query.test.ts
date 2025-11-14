@@ -91,7 +91,7 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | WHERE \`host.ip\` IS NOT NULL AND \`host.name\` IS NOT NULL
+  | WHERE \`host.ip\`::STRING IS NOT NULL AND \`host.name\` IS NOT NULL
   | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`host.ip\`, \`host.name\`
   | EVAL ${DIMENSIONS_COLUMN} = CONCAT(\`host.ip\`::STRING, " › ", \`host.name\`)
   | DROP \`host.ip\`, \`host.name\`
@@ -107,7 +107,7 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | WHERE \`cpu.cores\` IS NOT NULL AND \`host.name\` IS NOT NULL
+  | WHERE \`cpu.cores\`::STRING IS NOT NULL AND \`host.name\` IS NOT NULL
   | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`cpu.cores\`, \`host.name\`
   | EVAL ${DIMENSIONS_COLUMN} = CONCAT(\`cpu.cores\`::STRING, " › ", \`host.name\`)
   | DROP \`cpu.cores\`, \`host.name\`
@@ -123,7 +123,7 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | WHERE \`host.ip\` IS NOT NULL AND \`host.name\` IS NOT NULL AND \`cpu.cores\` IS NOT NULL
+  | WHERE \`host.ip\`::STRING IS NOT NULL AND \`host.name\` IS NOT NULL AND \`cpu.cores\`::STRING IS NOT NULL
   | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`host.ip\`, \`host.name\`, \`cpu.cores\`
   | EVAL ${DIMENSIONS_COLUMN} = CONCAT(\`host.ip\`::STRING, " › ", \`host.name\`, " › ", \`cpu.cores\`::STRING)
   | DROP \`host.ip\`, \`host.name\`, \`cpu.cores\`
@@ -144,8 +144,8 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | WHERE \`host.name\` IN ("host-1", "host-2")
-  | WHERE region IN ("us-east")
+  | WHERE \`host.name\`::STRING IN ("host-1", "host-2")
+  | WHERE region::STRING IN ("us-east")
   | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
 `.trim()
     );
@@ -200,7 +200,7 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | WHERE \`host.name\` IN ("host-1")
+  | WHERE \`host.name\`::STRING IN ("host-1")
   | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
 `.trim()
     );
@@ -215,7 +215,7 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | WHERE \`host.name\` IN ("host-1")
+  | WHERE \`host.name\`::STRING IN ("host-1")
   | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`host.name\`
 `.trim()
     );
@@ -271,7 +271,7 @@ TS metrics-*
       expect(query).toBe(
         `
 TS metrics-*
-  | WHERE \`host-ip\` IS NOT NULL AND \`service-name\` IS NOT NULL
+  | WHERE \`host-ip\`::STRING IS NOT NULL AND \`service-name\` IS NOT NULL
   | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`host-ip\`, \`service-name\`
   | EVAL ${DIMENSIONS_COLUMN} = CONCAT(\`host-ip\`::STRING, " › ", \`service-name\`)
   | DROP \`host-ip\`, \`service-name\`
@@ -290,8 +290,8 @@ TS metrics-*
       expect(query).toBe(
         `
 TS metrics-*
-  | WHERE \`service-name\` IN ("web-server")
-  | WHERE \`container-id\` IN ("cont-123")
+  | WHERE \`service-name\`::STRING IN ("web-server")
+  | WHERE \`container-id\`::STRING IN ("cont-123")
   | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
 `.trim()
       );

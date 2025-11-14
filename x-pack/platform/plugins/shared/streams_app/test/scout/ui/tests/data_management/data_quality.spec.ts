@@ -30,7 +30,7 @@ test.describe('Stream data quality', { tag: ['@ess', '@svlOblt'] }, () => {
     await apiServices.streams.disable();
   });
 
-  test('should show data quality metrics', async ({ page, pageObjects }) => {
+  test('should show data quality metrics', async ({ page }) => {
     // Degraded and failed documents metrics should be visible
     await expect(
       page.getByTestId('datasetQualityDetailsSummaryKpiCard-Degraded documents')
@@ -41,16 +41,13 @@ test.describe('Stream data quality', { tag: ['@ess', '@svlOblt'] }, () => {
 
     // Edit failure store button should not be visible for wired streams
     await page.getByTestId('datasetQualityDetailsSummaryKpiCard-Failed documents').click();
-    await expect(page.getByTestId('datasetQualityDetailsEditFailureStore')).not.toBeVisible();
+    await expect(page.getByTestId('datasetQualityDetailsEditFailureStore')).toBeHidden();
 
     // Quality issues table should be visible
     await expect(page.getByTestId('datasetQualityDetailsDegradedFieldTable')).toBeVisible();
   });
 
-  test('date picker should show same time range as Streams Main page', async ({
-    page,
-    pageObjects,
-  }) => {
+  test('date picker should show same time range as Streams Main page', async ({ pageObjects }) => {
     // Go to Main page
     await pageObjects.streams.gotoStreamMainPage();
     const mainTimeRange = {
@@ -67,7 +64,6 @@ test.describe('Stream data quality', { tag: ['@ess', '@svlOblt'] }, () => {
   });
 
   test('changing time range should also update date picker on Streams Main page', async ({
-    page,
     pageObjects,
   }) => {
     const dataQualityTimeRange = {

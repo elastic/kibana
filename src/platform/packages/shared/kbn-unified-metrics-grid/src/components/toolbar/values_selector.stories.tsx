@@ -48,10 +48,11 @@ const mockClient: MetricsExperienceClient = {
     ],
   }),
   getFields: async () => ({ fields: [], total: 0, page: 1 }),
-} as MetricsExperienceClient;
+  searchFields: async () => ({ fields: [], total: 0, page: 1 }),
+};
 
 // Wrapper component with all required providers
-const StoryWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+const StoryWrapper = ({ children }: React.PropsWithChildren<{}>) => (
   <IntlProvider locale="en">
     <QueryClientProvider client={queryClient}>
       <MetricsExperienceClientProvider value={{ client: mockClient }}>

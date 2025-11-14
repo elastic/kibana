@@ -658,6 +658,20 @@
         "children": [
           {
             "parentPluginId": "@kbn/unified-tabs",
+            "id": "def-public.TabPreviewData.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-tabs/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-tabs",
             "id": "def-public.TabPreviewData.query",
             "type": "CompoundType",
             "tags": [],

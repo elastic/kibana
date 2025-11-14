@@ -1586,6 +1586,41 @@
       },
       {
         "parentPluginId": "@kbn/inference-common",
+        "id": "def-common.isOutputTokenLimitReachedError",
+        "type": "Function",
+        "tags": [],
+        "label": "isOutputTokenLimitReachedError",
+        "description": [
+          "\nCheck if an error is a {@link ChatCompletionTokenLimitReachedError}"
+        ],
+        "signature": [
+          "(error: Error) => boolean"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.isOutputTokenLimitReachedError.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "Error"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-common",
         "id": "def-common.isOutputUpdateEvent",
         "type": "Function",
         "tags": [],
@@ -1698,41 +1733,6 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/connectors/is_supported_connector.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/inference-common",
-        "id": "def-common.isTokenLimitReachedError",
-        "type": "Function",
-        "tags": [],
-        "label": "isTokenLimitReachedError",
-        "description": [
-          "\nCheck if an error is a {@link ChatCompletionTokenLimitReachedError}"
-        ],
-        "signature": [
-          "(error: Error) => boolean"
-        ],
-        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/errors.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/inference-common",
-            "id": "def-common.isTokenLimitReachedError.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "error",
-            "description": [],
-            "signature": [
-              "Error"
-            ],
-            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/errors.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -5925,7 +5925,7 @@
         "tags": [],
         "label": "ChatCompletionTokenLimitReachedError",
         "description": [
-          "\nError thrown if the completion call fails because of a token limit\nerror, e.g. when the context window is higher than the limit"
+          "\nError thrown if the completion call fails because of an output token limit error"
         ],
         "signature": [
           {
@@ -5943,7 +5943,7 @@
             "section": "def-common.ChatCompletionErrorCode",
             "text": "ChatCompletionErrorCode"
           },
-          ".TokenLimitReachedError, { tokenLimit?: number | undefined; tokenCount?: number | undefined; }>"
+          ".OutputTokenLimitReachedError, { tokenLimit?: number | undefined; tokenCount?: number | undefined; }>"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/errors.ts",
         "deprecated": false,
@@ -5975,7 +5975,7 @@
             "section": "def-common.ChatCompletionErrorCode",
             "text": "ChatCompletionErrorCode"
           },
-          ".ToolNotFoundError, { name: string; }>"
+          ".ToolNotFoundError, { name: string; arguments: string; }>"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/errors.ts",
         "deprecated": false,

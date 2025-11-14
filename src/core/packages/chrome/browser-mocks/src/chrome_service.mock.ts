@@ -95,6 +95,8 @@ const createStartContractMock = () => {
       updateSolutionNavigations: jest.fn(),
       navigationTourManager: {} as any,
     }),
+    setGlobalFooter: jest.fn(),
+    getGlobalFooter$: jest.fn(),
   });
 
   return startContract;

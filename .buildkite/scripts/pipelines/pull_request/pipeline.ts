@@ -17,6 +17,7 @@
 
 import fs from 'fs';
 import prConfigs from '../../../pull_requests.json';
+import { runPreBuild } from './pre_build';
 import {
   areChangesSkippable,
   doAnyChangesMatch,
@@ -62,8 +63,14 @@ const getPipeline = (filename: string, removeSteps = true) => {
       return;
     }
 
-    pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base.yml', false));
-    pipeline.push(getPipeline('.buildkite/pipelines/pull_request/pick_test_groups.yml'));
+    if (GITHUB_PR_LABELS.includes('ci:beta-faster-pr-build')) {
+      await runPreBuild();
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base_merged_phases.yml', false));
+    } else {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base.yml', false));
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/pick_test_groups.yml'));
+    }
+
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/scout_tests.yml'));
 
     if (await doAnyChangesMatch([/^src\/platform\/packages\/private\/kbn-handlebars/])) {
@@ -99,13 +106,6 @@ const getPipeline = (filename: string, removeSteps = true) => {
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/apm_cypress.yml'));
-    }
-
-    if (
-      (await doAnyChangesMatch([/^x-pack\/solutions\/observability\/plugins\/profiling/])) ||
-      GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
-    ) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/profiling_cypress.yml'));
     }
 
     if (
@@ -487,6 +487,25 @@ const getPipeline = (filename: string, removeSteps = true) => {
       ])
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/check_saved_objects.yml'));
+    }
+
+    if (
+      (await doAnyChangesMatch([
+        /^packages\/kbn-babel-preset/,
+        /^packages\/kbn-repo-file-maps/,
+        /^src\/platform\/packages\/private\/kbn-babel-transform/,
+        /^src\/platform\/packages\/private\/kbn-import-resolver/,
+        /^src\/platform\/packages\/private\/kbn-jest-serializers/,
+        /^src\/platform\/packages\/private\/kbn-repo-packages/,
+        /^src\/platform\/packages\/shared\/kbn-babel-register/,
+        /^src\/platform\/packages\/shared\/kbn-jest-benchmarks/,
+        /^src\/platform\/packages\/shared\/kbn-repo-info/,
+        /^src\/platform\/packages\/shared\/kbn-test/,
+        /^src\/setup_node_env/,
+      ])) ||
+      GITHUB_PR_LABELS.includes('ci:bench-jest')
+    ) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/jest_bench.yml'));
     }
 
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));

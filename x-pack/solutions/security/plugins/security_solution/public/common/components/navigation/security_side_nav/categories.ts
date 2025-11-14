@@ -8,40 +8,44 @@
 import { LinkCategoryType, type SeparatorLinkCategory } from '@kbn/security-solution-navigation';
 import { SecurityPageName } from '../../../../../common';
 
-export const CATEGORIES: SeparatorLinkCategory[] = [
-  {
-    type: LinkCategoryType.separator,
-    linkIds: [SecurityPageName.dashboards],
-  },
-  {
-    type: LinkCategoryType.separator,
-    linkIds: [
-      SecurityPageName.rulesLanding,
-      SecurityPageName.alerts,
-      SecurityPageName.attackDiscovery,
-      SecurityPageName.cloudSecurityPostureFindings,
-      SecurityPageName.case,
-    ],
-  },
-  {
-    type: LinkCategoryType.separator,
-    linkIds: [SecurityPageName.siemMigrationsLanding],
-  },
-  {
-    type: LinkCategoryType.separator,
-    linkIds: [
-      SecurityPageName.entityAnalyticsLanding,
-      SecurityPageName.exploreLanding,
-      SecurityPageName.timelines,
-      SecurityPageName.threatIntelligence,
-    ],
-  },
-  {
-    type: LinkCategoryType.separator,
-    linkIds: [SecurityPageName.assetInventory],
-  },
-  {
-    type: LinkCategoryType.separator,
-    linkIds: [SecurityPageName.siemReadiness],
-  },
-];
+export const getNavCategories = (
+  attacksAlertsAlignmentEnabled?: boolean
+): SeparatorLinkCategory[] => {
+  return [
+    {
+      type: LinkCategoryType.separator,
+      linkIds: [SecurityPageName.dashboards],
+    },
+    {
+      type: LinkCategoryType.separator,
+      linkIds: [
+        SecurityPageName.rulesLanding,
+        attacksAlertsAlignmentEnabled ? SecurityPageName.alertDetections : SecurityPageName.alerts,
+        SecurityPageName.attackDiscovery,
+        SecurityPageName.cloudSecurityPostureFindings,
+        SecurityPageName.case,
+      ],
+    },
+    {
+      type: LinkCategoryType.separator,
+      linkIds: [SecurityPageName.siemMigrationsLanding],
+    },
+    {
+      type: LinkCategoryType.separator,
+      linkIds: [
+        SecurityPageName.entityAnalyticsLanding,
+        SecurityPageName.exploreLanding,
+        SecurityPageName.timelines,
+        SecurityPageName.threatIntelligence,
+      ],
+    },
+    {
+      type: LinkCategoryType.separator,
+      linkIds: [SecurityPageName.assetInventory],
+    },
+    {
+      type: LinkCategoryType.separator,
+      linkIds: [SecurityPageName.siemReadiness],
+    },
+  ];
+};

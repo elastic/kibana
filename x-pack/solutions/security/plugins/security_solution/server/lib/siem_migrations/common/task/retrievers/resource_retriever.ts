@@ -5,21 +5,35 @@
  * 2.0.
  */
 
-import type { ResourceIdentifierConstructor } from '../../../../../../common/siem_migrations/resources';
-import type { OriginalItem } from '../../../../../../common/siem_migrations/types';
+import type { Simplify } from 'type-fest';
+import {
+  isResourceSupportedVendor,
+  type ResourceSupportedVendor,
+} from '../../../../../../common/siem_migrations/rules/resources/types';
 import type {
-  SiemMigrationResource,
-  SiemMigrationResourceType,
-} from '../../../../../../common/siem_migrations/model/common.gen';
+  ResourceIdentifierConstructor,
+  SiemMigrationResourceTypeByVendor,
+} from '../../../../../../common/siem_migrations/resources';
+import type { OriginalItem } from '../../../../../../common/siem_migrations/types';
+import type { SiemMigrationResource } from '../../../../../../common/siem_migrations/model/common.gen';
 import type { SiemMigrationsDataResourcesClient } from '../../data/siem_migrations_data_resources_client';
 import type { ItemDocument } from '../../types';
 
-export interface MigrationDefinedResource extends SiemMigrationResource {
+type SupportedSiemMigrationResourceType =
+  SiemMigrationResourceTypeByVendor[ResourceSupportedVendor];
+
+type SupportedVendorSiemMigrationResource = Simplify<
+  SiemMigrationResource & {
+    type: SupportedSiemMigrationResourceType;
+  }
+>;
+
+export interface MigrationDefinedResource extends SupportedVendorSiemMigrationResource {
   content: string; // ensures content exists
 }
 export type MigrationResourcesData = Pick<MigrationDefinedResource, 'name' | 'content' | 'type'>;
 export type MigrationResources = Partial<
-  Record<SiemMigrationResourceType, MigrationResourcesData[]>
+  Record<SupportedSiemMigrationResourceType, MigrationResourcesData[]>
 >;
 interface ExistingResources {
   macro: Record<string, MigrationDefinedResource>;
@@ -46,7 +60,10 @@ export abstract class ResourceRetriever<I extends ItemDocument = ItemDocument> {
     do {
       resources = await batches.next();
       resources.forEach((resource) => {
-        existingResources[resource.type][resource.name] = resource;
+        // currenctly only supported for splunk
+        if (resource.type === 'macro' || resource.type === 'lookup') {
+          existingResources[resource.type][resource.name] = resource;
+        }
       });
     } while (resources.length > 0);
 
@@ -54,6 +71,9 @@ export abstract class ResourceRetriever<I extends ItemDocument = ItemDocument> {
   }
 
   public async getResources(originalItem: OriginalItem<I>): Promise<MigrationResources> {
+    if (!isResourceSupportedVendor(originalItem.vendor)) {
+      throw new Error(`Resource retrievel is not supported for vendor: ${originalItem.vendor}`);
+    }
     const existingResources = this.existingResources;
     if (!existingResources) {
       throw new Error('initialize must be called before calling getResources');
@@ -65,6 +85,9 @@ export abstract class ResourceRetriever<I extends ItemDocument = ItemDocument> {
     const macrosFound = new Map<string, MigrationDefinedResource>();
     const lookupsFound = new Map<string, MigrationDefinedResource>();
     resourcesIdentifiedFromRule.forEach((resource) => {
+      if (resource.type !== 'macro' && resource.type !== 'lookup') {
+        return;
+      }
       const existingResource = existingResources[resource.type][resource.name];
       if (existingResource) {
         if (resource.type === 'macro') {
@@ -86,6 +109,9 @@ export abstract class ResourceRetriever<I extends ItemDocument = ItemDocument> {
 
       nestedResourcesFound = [];
       nestedResourcesIdentified.forEach((resource) => {
+        if (resource.type !== 'macro' && resource.type !== 'lookup') {
+          return;
+        }
         const existingResource = existingResources[resource.type][resource.name];
         if (existingResource) {
           nestedResourcesFound.push(existingResource);

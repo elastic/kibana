@@ -76,7 +76,7 @@ export function FlyoutToolbar<S>({
     [contentMap]
   );
 
-  const flyoutContentStyles = useMemoCss(styles).flyoutContent;
+  const flyoutToolbarStyles = useMemoCss(styles);
 
   const flyoutTitle = idSelected
     ? toolbarOptions.find((toolbarOption) => toolbarOption.id === idSelected)?.label || ''
@@ -117,9 +117,10 @@ export function FlyoutToolbar<S>({
           setIdSelected('');
           setFlyoutVisible(false);
         }}
+        overrideContainerCss={flyoutToolbarStyles.dialog}
       >
         {FlyoutContent ? (
-          <div id={idSelected} css={flyoutContentStyles}>
+          <div id={idSelected} css={flyoutToolbarStyles.flyoutContent}>
             <FlyoutContent {...flyoutContentProps} />
           </div>
         ) : null}
@@ -129,6 +130,10 @@ export function FlyoutToolbar<S>({
 }
 
 const styles = {
+  dialog: ({ euiTheme }: UseEuiTheme) =>
+    css`
+      z-index: ${euiTheme.levels.menu};
+    `,
   flyoutContent: ({ euiTheme }: UseEuiTheme) =>
     css({
       padding: euiTheme.size.base,

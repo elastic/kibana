@@ -49,4 +49,81 @@ export const assetInventoryUsageSchema: MakeSchemaFrom<AssetInventoryUsage> = {
       last_doc_timestamp: { type: 'date' },
     },
   },
+  asset_inventory_cloud_connector_usage_stats: {
+    type: 'array',
+    items: {
+      id: {
+        type: 'keyword',
+        _meta: { description: 'Cloud connector ID' },
+      },
+      created_at: {
+        type: 'date',
+        _meta: { description: 'Cloud connector created at timestamp' },
+      },
+      updated_at: {
+        type: 'date',
+        _meta: { description: 'Cloud connector updated at timestamp' },
+      },
+      hasCredentials: {
+        type: 'boolean',
+        _meta: { description: 'Whether the cloud connector has valid credentials' },
+      },
+      cloud_provider: {
+        type: 'keyword',
+        _meta: { description: 'Cloud provider (aws, azure, gcp)' },
+      },
+      packagePolicyIds: {
+        type: 'array',
+        items: {
+          type: 'keyword',
+          _meta: { description: 'Package policy ID using this cloud connector' },
+        },
+      },
+      packagePolicyCount: {
+        type: 'long',
+        _meta: { description: 'Number of package policies using this cloud connector' },
+      },
+    },
+  },
+  asset_inventory_installation_stats: {
+    type: 'array',
+    items: {
+      package_policy_id: {
+        type: 'keyword',
+        _meta: { description: 'Package policy ID' },
+      },
+      package_name: {
+        type: 'keyword',
+        _meta: { description: 'Package name' },
+      },
+      package_version: {
+        type: 'keyword',
+        _meta: { description: 'Package version' },
+      },
+      created_at: {
+        type: 'date',
+        _meta: { description: 'Package policy created at timestamp' },
+      },
+      agent_policy_id: {
+        type: 'keyword',
+        _meta: { description: 'Agent policy ID' },
+      },
+      agent_count: {
+        type: 'long',
+        _meta: { description: 'Number of agents associated with the agent policy' },
+      },
+      is_agentless: {
+        type: 'boolean',
+        _meta: { description: 'Whether the deployment is agentless' },
+      },
+      supports_cloud_connector: {
+        type: 'boolean',
+        _meta: { description: 'Whether the package policy supports cloud connector' },
+      },
+      cloud_connector_id: {
+        type: 'keyword',
+        _meta: { description: 'Cloud connector ID associated with the package policy' },
+      },
+    },
+  },
 };

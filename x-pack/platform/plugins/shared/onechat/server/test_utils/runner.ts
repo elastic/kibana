@@ -15,9 +15,9 @@ import {
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { WritableToolResultStore } from '@kbn/onechat-server';
 import type { AttachmentServiceStart } from '../services/attachments';
-import type { CreateScopedRunnerDeps } from '../services/runner/runner';
-import type { ModelProviderFactoryMock } from './model_provider';
-import { createModelProviderFactoryMock } from './model_provider';
+import type { CreateScopedRunnerDeps, CreateRunnerDeps } from '../services/runner/runner';
+import type { ModelProviderMock, ModelProviderFactoryMock } from './model_provider';
+import { createModelProviderMock, createModelProviderFactoryMock } from './model_provider';
 import type { ToolsServiceStartMock } from './tools';
 import { createToolsServiceStartMock } from './tools';
 import type { AgentsServiceStartMock } from './agents';
@@ -39,21 +39,44 @@ export const createToolResultStoreMock = (): ToolResultStoreMock => {
 export const createAttachmentsServiceMock = (): AttachmentsServiceMock => {
   return {
     validate: jest.fn(),
-    format: jest.fn(),
+    getTypeDefinition: jest.fn(),
   };
 };
 
 export interface CreateScopedRunnerDepsMock extends CreateScopedRunnerDeps {
   elasticsearch: ReturnType<typeof elasticsearchServiceMock.createStart>;
   security: ReturnType<typeof securityServiceMock.createStart>;
-  modelProviderFactory: ModelProviderFactoryMock;
+  modelProvider: ModelProviderMock;
   toolsService: ToolsServiceStartMock;
   agentsService: AgentsServiceStartMock;
   logger: MockedLogger;
   request: KibanaRequest;
 }
 
+export interface CreateRunnerDepsMock extends CreateRunnerDeps {
+  elasticsearch: ReturnType<typeof elasticsearchServiceMock.createStart>;
+  security: ReturnType<typeof securityServiceMock.createStart>;
+  modelProviderFactory: ModelProviderFactoryMock;
+  toolsService: ToolsServiceStartMock;
+  agentsService: AgentsServiceStartMock;
+  logger: MockedLogger;
+}
+
 export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
+  return {
+    elasticsearch: elasticsearchServiceMock.createStart(),
+    security: securityServiceMock.createStart(),
+    modelProvider: createModelProviderMock(),
+    toolsService: createToolsServiceStartMock(),
+    agentsService: createAgentsServiceStartMock(),
+    logger: loggerMock.create(),
+    request: httpServerMock.createKibanaRequest(),
+    resultStore: createToolResultStoreMock(),
+    attachmentsService: createAttachmentsServiceMock(),
+  };
+};
+
+export const createRunnerDepsMock = (): CreateRunnerDepsMock => {
   return {
     elasticsearch: elasticsearchServiceMock.createStart(),
     security: securityServiceMock.createStart(),
@@ -61,8 +84,6 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
     toolsService: createToolsServiceStartMock(),
     agentsService: createAgentsServiceStartMock(),
     logger: loggerMock.create(),
-    request: httpServerMock.createKibanaRequest(),
-    resultStore: createToolResultStoreMock(),
     attachmentsService: createAttachmentsServiceMock(),
   };
 };

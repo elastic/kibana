@@ -14,6 +14,8 @@
  * This file causes all of them to be served in a single request.
  */
 
+export { getLensTransforms } from '../common/transforms';
+
 export * from './visualizations/datatable/datatable_visualization';
 export * from './visualizations/datatable';
 export * from './visualizations/legacy_metric/metric_visualization';

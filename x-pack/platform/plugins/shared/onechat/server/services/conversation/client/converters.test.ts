@@ -48,6 +48,12 @@ describe('conversation model converters', () => {
               started_at: roundCreationDate,
               time_to_first_token: 42,
               time_to_last_token: 100,
+              model_usage: {
+                connector_id: 'unknown',
+                llm_calls: 1,
+                input_tokens: 12,
+                output_tokens: 42,
+              },
             },
           ],
           created_at: creationDate,
@@ -84,6 +90,12 @@ describe('conversation model converters', () => {
             started_at: roundCreationDate,
             time_to_first_token: 42,
             time_to_last_token: 100,
+            model_usage: {
+              connector_id: 'unknown',
+              llm_calls: 1,
+              input_tokens: 12,
+              output_tokens: 42,
+            },
           },
         ],
       });
@@ -106,6 +118,12 @@ describe('conversation model converters', () => {
           started_at: roundCreationDate,
           time_to_first_token: 0,
           time_to_last_token: 0,
+          model_usage: {
+            connector_id: 'unknown',
+            llm_calls: 1,
+            input_tokens: 12,
+            output_tokens: 42,
+          },
         },
       ];
 
@@ -134,6 +152,12 @@ describe('conversation model converters', () => {
             started_at: roundCreationDate,
             time_to_first_token: 0,
             time_to_last_token: 0,
+            model_usage: {
+              connector_id: 'unknown',
+              llm_calls: 1,
+              input_tokens: 12,
+              output_tokens: 42,
+            },
           },
         ],
       });
@@ -234,6 +258,12 @@ describe('conversation model converters', () => {
             started_at: roundCreationDate,
             time_to_first_token: 42,
             time_to_last_token: 100,
+            model_usage: {
+              connector_id: 'unknown',
+              llm_calls: 1,
+              input_tokens: 12,
+              output_tokens: 42,
+            },
           },
         ],
       };
@@ -262,6 +292,12 @@ describe('conversation model converters', () => {
             started_at: roundCreationDate,
             time_to_first_token: 42,
             time_to_last_token: 100,
+            model_usage: {
+              connector_id: 'unknown',
+              llm_calls: 1,
+              input_tokens: 12,
+              output_tokens: 42,
+            },
           },
         ],
         created_at: creationDate,

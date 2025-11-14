@@ -17,6 +17,14 @@ export {
   MAX_STREAM_NAME_LENGTH,
 } from '../common/constants';
 
+export {
+  excludeFrozenQuery,
+  kqlQuery,
+  rangeQuery,
+  isKqlQueryValid,
+  buildEsqlFilter,
+} from '../common/query_helpers';
+
 export const plugin: PluginInitializer<StreamsPluginSetup, StreamsPluginStart> = (
   context: PluginInitializerContext
 ) => {

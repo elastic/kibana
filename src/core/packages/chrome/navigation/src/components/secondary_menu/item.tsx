@@ -8,15 +8,16 @@
  */
 
 import React from 'react';
-import type { IconType } from '@elastic/eui';
-import { EuiButton, EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
 import type { ReactNode } from 'react';
+import { EuiButton, EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
+import type { IconType } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { useScrollToActive } from '../../hooks/use_scroll_to_active';
 
 import type { SecondaryMenuItem } from '../../../types';
 import { BetaBadge } from '../beta_badge';
 import { useHighContrastModeStyles } from '../../hooks/use_high_contrast_mode_styles';
+import { useScrollToActive } from '../../hooks/use_scroll_to_active';
+import { NAVIGATION_SELECTOR_PREFIX } from '../../constants';
 
 export interface SecondaryMenuItemProps extends Omit<SecondaryMenuItem, 'href'> {
   children: ReactNode;
@@ -25,7 +26,6 @@ export interface SecondaryMenuItemProps extends Omit<SecondaryMenuItem, 'href'> 
   iconType?: IconType;
   isCurrent?: boolean;
   isHighlighted: boolean;
-  key: string;
   onClick?: () => void;
   testSubjPrefix?: string;
 }
@@ -44,20 +44,18 @@ export const SecondaryMenuItemComponent = ({
   isCurrent,
   isExternal,
   isHighlighted,
-  testSubjPrefix = 'secondaryMenuItem',
+  testSubjPrefix,
   ...props
 }: SecondaryMenuItemProps): JSX.Element => {
   const { euiTheme } = useEuiTheme();
-
-  // TODO: remove once the fix is available on EUI side
   const highContrastModeStyles = useHighContrastModeStyles();
   const activeItemRef = useScrollToActive<HTMLLIElement>(isCurrent);
+  const resolvedTestSubjPrefix = testSubjPrefix ?? `${NAVIGATION_SELECTOR_PREFIX}-secondaryItem`;
 
   const iconSide = iconType ? 'left' : 'right';
   const iconProps = {
     iconSide: iconSide as 'left' | 'right',
     iconType: isExternal ? 'popout' : iconType,
-    // Ensure external links open in a new tab
     ...(isExternal && { target: '_blank' }),
   };
 
@@ -98,11 +96,11 @@ export const SecondaryMenuItemComponent = ({
     <li ref={activeItemRef}>
       {isHighlighted ? (
         <EuiButton
-          aria-current={isCurrent ? 'page' : undefined}
           id={id}
+          aria-current={isCurrent ? 'page' : undefined}
           css={buttonStyles}
           data-highlighted="true"
-          data-test-subj={`${testSubjPrefix}-${id}`}
+          data-test-subj={`${resolvedTestSubjPrefix}-${id}`}
           fullWidth
           href={hasSubmenu ? undefined : href}
           size="s"
@@ -114,12 +112,12 @@ export const SecondaryMenuItemComponent = ({
         </EuiButton>
       ) : (
         <EuiButtonEmpty
-          aria-current={isCurrent ? 'page' : undefined}
           id={id}
+          aria-current={isCurrent ? 'page' : undefined}
           color="text"
           css={buttonStyles}
           data-highlighted="false"
-          data-test-subj={`${testSubjPrefix}-${id}`}
+          data-test-subj={`${resolvedTestSubjPrefix}-${id}`}
           href={hasSubmenu ? undefined : href}
           size="s"
           textProps={false}

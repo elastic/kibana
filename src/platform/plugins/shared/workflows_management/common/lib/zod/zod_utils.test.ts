@@ -91,42 +91,52 @@ describe('isValidSchemaPath', () => {
 describe('getSchemaAtPath', () => {
   it('should return the correct type for simple paths', () => {
     expectZodSchemaEqual(
-      getSchemaAtPath(z.object({ a: z.string() }), 'a') as z.ZodType,
+      getSchemaAtPath(z.object({ a: z.string() }), 'a').schema as z.ZodType,
       z.string()
     );
   });
 
   it('should return the correct type for nested paths', () => {
     expectZodSchemaEqual(
-      getSchemaAtPath(z.object({ a: z.object({ b: z.array(z.string()) }) }), 'a.b[0]') as z.ZodType,
+      getSchemaAtPath(z.object({ a: z.object({ b: z.array(z.string()) }) }), 'a.b[0]')
+        .schema as z.ZodType,
       z.string()
     );
   });
 
   it('should return null for array paths with invalid index', () => {
-    expect(getSchemaAtPath(z.object({ a: z.array(z.string()).length(5) }), 'a[10]')).toBeNull();
+    expect(
+      getSchemaAtPath(z.object({ a: z.array(z.string()).length(5) }), 'a[10]').schema
+    ).toBeNull();
   });
 
   it('should return element schema for unconstrained arrays', () => {
     expectZodSchemaEqual(
-      getSchemaAtPath(z.object({ a: z.array(z.string()) }), 'a[0]') as z.ZodType,
+      getSchemaAtPath(z.object({ a: z.array(z.string()) }), 'a[0]').schema as z.ZodType,
       z.string()
     );
     expectZodSchemaEqual(
-      getSchemaAtPath(z.object({ a: z.array(z.string()) }), 'a[999]') as z.ZodType,
+      getSchemaAtPath(z.object({ a: z.array(z.string()) }), 'a[999]').schema as z.ZodType,
       z.string()
     );
   });
 
   it('should return null for negative indices', () => {
-    expect(getSchemaAtPath(z.object({ a: z.array(z.string()) }), 'a[-1]')).toBeNull();
+    expect(getSchemaAtPath(z.object({ a: z.array(z.string()) }), 'a[-1]').schema).toBeNull();
   });
 
   it('should return null for invalid paths', () => {
-    expect(getSchemaAtPath(z.object({ a: z.string() }), 'b')).toBeNull();
-    expect(getSchemaAtPath(z.object({ a: z.string() }), 'a.b')).toBeNull();
-    expect(getSchemaAtPath(z.object({ a: z.string() }), 'a[1]')).toBeNull();
-    expect(getSchemaAtPath(z.object({ a: z.string() }), 'a[0].b')).toBeNull();
+    expect(getSchemaAtPath(z.object({ a: z.string() }), 'b').schema).toBeNull();
+    expect(getSchemaAtPath(z.object({ a: z.string() }), 'a.b').schema).toBeNull();
+    expect(getSchemaAtPath(z.object({ a: z.string() }), 'a[1]').schema).toBeNull();
+    expect(getSchemaAtPath(z.object({ a: z.string() }), 'a[0].b').schema).toBeNull();
+  });
+
+  it('should return any for optional any in nested object', () => {
+    const schema = z.object({ a: z.object({ b: z.any().optional() }) });
+    const result = getSchemaAtPath(schema, 'a.b');
+    expectZodSchemaEqual(result.schema as z.ZodType, z.any());
+    expect(result.scopedToPath).toBe('a.b');
   });
 });
 

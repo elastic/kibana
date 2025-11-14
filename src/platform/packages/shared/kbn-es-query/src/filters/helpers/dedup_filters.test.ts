@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { FilterStateStore } from '@kbn/es-query-constants';
 import type { DataViewBase, DataViewFieldBase } from '../../es_query';
 import type { Filter } from '../build_filters';
-import { buildQueryFilter, buildRangeFilter, FilterStateStore } from '../build_filters';
+import { buildQueryFilter, buildRangeFilter } from '../build_filters';
 import { dedupFilters } from './dedup_filters';
 
 describe('filter manager utilities', () => {

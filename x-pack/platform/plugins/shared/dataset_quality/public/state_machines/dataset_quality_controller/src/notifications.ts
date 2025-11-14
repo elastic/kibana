@@ -65,3 +65,20 @@ export const fetchFailedStatsFailedNotifier = (toasts: IToasts, error: Error) =>
     text: error.message,
   });
 };
+
+export const updateFailureStoreFailedNotifier = (toasts: IToasts, error: Error) => {
+  toasts.addDanger({
+    title: i18n.translate('xpack.datasetQuality.updateFailureStoreFailed', {
+      defaultMessage: "We couldn't update the failure store settings.",
+    }),
+    text: error.message,
+  });
+};
+
+export const updateFailureStoreSuccessNotifier = (toasts: IToasts) => {
+  toasts.addSuccess({
+    title: i18n.translate('xpack.datasetQuality.updateFailureStoreSuccess', {
+      defaultMessage: 'Failure store settings saved',
+    }),
+  });
+};

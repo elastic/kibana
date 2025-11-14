@@ -13,7 +13,6 @@ import { css } from '@emotion/react';
 import { css as cssString } from '@emotion/css';
 import { useEuiTheme } from '@elastic/eui';
 import { getTabsShadowGradient } from './get_tabs_shadow_gradient';
-import { useChromeStyle } from './use_chrome_style';
 import type { TabsServices } from '../../types';
 
 const globalCss = cssString`
@@ -40,7 +39,6 @@ export const TabsBarWithBackground: React.FC<TabsBarWithBackgroundProps> = ({
   children,
   ...otherProps
 }) => {
-  const { isProjectChromeStyle } = useChromeStyle(services);
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
 
@@ -58,9 +56,6 @@ export const TabsBarWithBackground: React.FC<TabsBarWithBackgroundProps> = ({
       css={css`
         // tabs bar background
         background: ${euiTheme.colors.lightestShade};
-
-        // for some reason the header slightly overlaps the tabs bar in a solution view
-        margin-top: ${isProjectChromeStyle ? '1px' : '0'};
       `}
     >
       <div

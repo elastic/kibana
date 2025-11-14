@@ -117,7 +117,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
         expect(res.body).to.eql({
           statusCode: 400,
           error: 'Bad Request',
-          message: `error validating action type config: [\n  {\n    \"code\": \"unrecognized_keys\",\n    \"keys\": [\n      \"foo\"\n    ],\n    \"path\": [],\n    \"message\": \"Unrecognized key(s) in object: 'foo'\"\n  }\n]`,
+          message: `error validating connector type config: Unrecognized key(s) in object: 'foo'`,
         });
       });
 
@@ -131,7 +131,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
         expect(res.body).to.eql({
           statusCode: 400,
           error: 'Bad Request',
-          message: `error validating action type secrets: [\n  {\n    \"code\": \"unrecognized_keys\",\n    \"keys\": [\n      \"foo\"\n    ],\n    \"path\": [],\n    \"message\": \"Unrecognized key(s) in object: 'foo'\"\n  }\n]`,
+          message: `error validating connector type secrets: Unrecognized key(s) in object: 'foo'`,
         });
       });
     });
@@ -194,7 +194,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           retry: true,
           connector_id: res.body.id,
           errorSource: TaskErrorSource.USER,
-          service_message: `Request validation failed ([\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"id\"\n    ],\n    \"message\": \"Required\"\n  },\n  {\n    \"code\": \"unrecognized_keys\",\n    \"keys\": [\n      \"foo\"\n    ],\n    \"path\": [],\n    \"message\": \"Unrecognized key(s) in object: 'foo'\"\n  }\n])`,
+          service_message: `Request validation failed (2 errors:\n [1]: Unrecognized key(s) in object: 'foo';\n [2]: Field \"id\": Required)`,
         });
       });
 

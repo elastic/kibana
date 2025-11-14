@@ -38,3 +38,6 @@ export type {
   LensXYConfigBase,
   LensBreakdownConfig,
 } from './config_builder';
+
+export { lensApiStateSchema } from './config_builder';
+export type { LensApiSchemaType } from './config_builder';

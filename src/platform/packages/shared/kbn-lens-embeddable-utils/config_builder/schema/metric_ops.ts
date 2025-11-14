@@ -58,6 +58,14 @@ export const formulaOperationDefinitionSchema = schema.object({
       description: 'Formula',
     },
   }),
+  /**
+   * Filter
+   */
+  filter: schema.maybe(filterSchema),
+  /**
+   * Reduced time range
+   */
+  reduced_time_range: schema.maybe(schema.string({ meta: { description: 'Reduced time range' } })),
 });
 
 export const esqlColumnSchema = schema.object({

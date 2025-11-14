@@ -21,8 +21,8 @@ import {
   setWorkflow,
   setYamlString,
   WorkflowDetailStoreProvider,
-} from '../../../widgets/workflow_yaml_editor/lib/store';
-import type { AppDispatch } from '../../../widgets/workflow_yaml_editor/lib/store/store';
+} from '../../../entities/workflows/store';
+import type { AppDispatch } from '../../../entities/workflows/store/store';
 
 const defaultWorkflow: WorkflowDetailDto = {
   id: 'test-workflow-123',

@@ -39,7 +39,8 @@ export interface WorkflowsExecutionEnginePluginStart {
   executeWorkflowStep(
     workflow: WorkflowExecutionEngineModel,
     stepId: string,
-    contextOverride: Record<string, any>
+    contextOverride: Record<string, any>,
+    request?: KibanaRequest
   ): Promise<ExecuteWorkflowStepResponse>;
 
   cancelWorkflowExecution(workflowExecutionId: string, spaceId: string): Promise<void>;

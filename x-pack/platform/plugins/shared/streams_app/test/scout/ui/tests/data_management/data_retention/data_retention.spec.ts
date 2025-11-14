@@ -33,10 +33,7 @@ test.describe(
       await apiServices.streams.disable();
     });
 
-    test('should update a stream data retention policy successfully', async ({
-      page,
-      pageObjects,
-    }) => {
+    test('should update a stream data retention policy successfully', async ({ page }) => {
       // Update to a specific retention policy first
       await page.getByTestId('streamsAppRetentionMetadataEditDataRetentionButton').click();
 

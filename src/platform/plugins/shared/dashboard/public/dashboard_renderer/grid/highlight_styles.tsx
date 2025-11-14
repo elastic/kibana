@@ -31,7 +31,7 @@ const getOutlineFadeKeyframes = ({ euiTheme }: UseEuiTheme) =>
       outline: `${euiTheme.border.width.thin} dashed transparent`,
     },
     '100%': {
-      outline: `${euiTheme.border.width.thin} dashed ${euiTheme.colors.borderBaseFormsControl}`,
+      outline: `${euiTheme.border.width.thin} dashed ${euiTheme.colors.borderBaseProminent}`,
     },
   });
 

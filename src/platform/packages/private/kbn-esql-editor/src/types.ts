@@ -90,6 +90,8 @@ export interface ESQLEditorProps {
   disableAutoFocus?: boolean;
   /** Enables the creation of controls from the editor **/
   controlsContext?: ControlsContext;
+  /** Opens the given query in a new Discover tab **/
+  onOpenQueryInNewTab?: (tabName: string, esqlQuery: string) => Promise<void>;
   /** The available ESQL variables from the page context this editor was opened in */
   esqlVariables?: ESQLControlVariable[];
   /** Resize the editor to fit the initially passed query on mount */

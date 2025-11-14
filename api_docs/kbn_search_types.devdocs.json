@@ -835,6 +835,22 @@
             "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-types",
+            "id": "def-common.ISearchOptions.requestHash",
+            "type": "string",
+            "tags": [],
+            "label": "requestHash",
+            "description": [
+              "\nA hash of the request params. This is attached automatically by the search interceptor. It is used to link this request with a search session."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

@@ -8,26 +8,12 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import type { SavedObjectsFindOptionsReference } from '@kbn/core/public';
 
 import type {
-  DashboardSearchOptions,
-  DashboardSearchAPIResult,
+  DashboardSearchRequestBody,
+  DashboardSearchResponseBody,
   DashboardState,
-} from '../../server/content_management';
-
-export interface SearchDashboardsArgs {
-  options?: DashboardSearchOptions;
-  hasNoReference?: SavedObjectsFindOptionsReference[];
-  hasReference?: SavedObjectsFindOptionsReference[];
-  search: string;
-  size: number;
-}
-
-export interface SearchDashboardsResponse {
-  total: number;
-  hits: DashboardSearchAPIResult['hits'];
-}
+} from '../../server';
 
 /**
  * Types for Finding Dashboards
@@ -39,12 +25,7 @@ export type FindDashboardsByIdResponse = { id: string } & (
 );
 
 export interface FindDashboardsService {
-  search: (
-    props: Pick<
-      SearchDashboardsArgs,
-      'hasReference' | 'hasNoReference' | 'search' | 'size' | 'options'
-    >
-  ) => Promise<SearchDashboardsResponse>;
+  search: (search: DashboardSearchRequestBody) => Promise<DashboardSearchResponseBody>;
   findById: (id: string) => Promise<FindDashboardsByIdResponse>;
   findByIds: (ids: string[]) => Promise<FindDashboardsByIdResponse[]>;
   findByTitle: (title: string) => Promise<{ id: string } | undefined>;

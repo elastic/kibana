@@ -90,6 +90,7 @@ export const ProcessorFieldSelector = ({
       isInvalid={fieldState.invalid}
       error={fieldState.error?.message}
       labelAppend={labelAppend}
+      showIcon={true}
     />
   );
 };

@@ -12,6 +12,8 @@ import { type TabState } from './types';
 
 export const DEFAULT_TAB_STATE: Omit<TabState, keyof TabItem> = {
   globalState: {},
+  appState: {},
+  previousAppState: {},
   forceFetchOnSelect: false,
   isDataViewLoading: false,
   dataRequestParams: {

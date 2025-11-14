@@ -7,6 +7,7 @@
 
 import { TableId } from '@kbn/securitysolution-data-table';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
+import { PageScope } from '../../data_view_manager/constants';
 import { AssociatedFilter } from '../../../common/notes/constants';
 import { ReqStatus } from '../../notes/store/notes.slice';
 import { HostsFields } from '../../../common/api/search_strategy/hosts/model/sort';
@@ -38,7 +39,7 @@ import { TimelineId, TimelineTabs } from '../../../common/types/timeline';
 import { TimelineStatusEnum, TimelineTypeEnum } from '../../../common/api/timeline';
 import { mockManagementState } from '../../management/store/reducer';
 import type { ManagementState } from '../../management/types';
-import { initialSourcererState, SourcererScopeName } from '../../sourcerer/store/model';
+import { initialSourcererState } from '../../sourcerer/store/model';
 import { allowedExperimentalValues } from '../../../common/experimental_features';
 import { getScopePatternListSelection } from '../../sourcerer/store/helpers';
 import { mockBrowserFields, mockIndexFields } from '../containers/source/mock';
@@ -469,52 +470,62 @@ export const mockGlobalState: State = {
     ],
     sourcererScopes: {
       ...mockSourcererState.sourcererScopes,
-      [SourcererScopeName.default]: {
-        ...mockSourcererState.sourcererScopes[SourcererScopeName.default],
+      [PageScope.default]: {
+        ...mockSourcererState.sourcererScopes[PageScope.default],
         selectedDataViewId: mockSourcererState.defaultDataView.id,
         selectedPatterns: getScopePatternListSelection(
           mockSourcererState.defaultDataView,
-          SourcererScopeName.default,
+          PageScope.default,
           mockSourcererState.signalIndexName,
           true
         ),
       },
-      [SourcererScopeName.detections]: {
-        ...mockSourcererState.sourcererScopes[SourcererScopeName.detections],
+      [PageScope.alerts]: {
+        ...mockSourcererState.sourcererScopes[PageScope.alerts],
         selectedDataViewId: mockSourcererState.defaultDataView.id,
         selectedPatterns: getScopePatternListSelection(
           mockSourcererState.defaultDataView,
-          SourcererScopeName.detections,
+          PageScope.alerts,
           mockSourcererState.signalIndexName,
           true
         ),
       },
-      [SourcererScopeName.timeline]: {
-        ...mockSourcererState.sourcererScopes[SourcererScopeName.timeline],
+      [PageScope.attacks]: {
+        ...mockSourcererState.sourcererScopes[PageScope.attacks],
         selectedDataViewId: mockSourcererState.defaultDataView.id,
         selectedPatterns: getScopePatternListSelection(
           mockSourcererState.defaultDataView,
-          SourcererScopeName.timeline,
+          PageScope.attacks,
           mockSourcererState.signalIndexName,
           true
         ),
       },
-      [SourcererScopeName.analyzer]: {
-        ...mockSourcererState.sourcererScopes[SourcererScopeName.default],
+      [PageScope.timeline]: {
+        ...mockSourcererState.sourcererScopes[PageScope.timeline],
         selectedDataViewId: mockSourcererState.defaultDataView.id,
         selectedPatterns: getScopePatternListSelection(
           mockSourcererState.defaultDataView,
-          SourcererScopeName.default,
+          PageScope.timeline,
           mockSourcererState.signalIndexName,
           true
         ),
       },
-      [SourcererScopeName.explore]: {
-        ...mockSourcererState.sourcererScopes[SourcererScopeName.default],
+      [PageScope.analyzer]: {
+        ...mockSourcererState.sourcererScopes[PageScope.default],
         selectedDataViewId: mockSourcererState.defaultDataView.id,
         selectedPatterns: getScopePatternListSelection(
           mockSourcererState.defaultDataView,
-          SourcererScopeName.default,
+          PageScope.default,
+          mockSourcererState.signalIndexName,
+          true
+        ),
+      },
+      [PageScope.explore]: {
+        ...mockSourcererState.sourcererScopes[PageScope.default],
+        selectedDataViewId: mockSourcererState.defaultDataView.id,
+        selectedPatterns: getScopePatternListSelection(
+          mockSourcererState.defaultDataView,
+          PageScope.default,
           mockSourcererState.signalIndexName,
           true
         ),

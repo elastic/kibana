@@ -43,7 +43,7 @@ describe('thehive pushToService action params validation', () => {
       comments: [],
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         'pushToServiceParam.incident.title': [],
         'pushToServiceParam.incident.description': [],
@@ -68,7 +68,7 @@ describe('thehive pushToService action params validation', () => {
       comments: [],
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         'pushToServiceParam.incident.title': ['Title is required.'],
         'pushToServiceParam.incident.description': ['Description is required.'],
@@ -109,7 +109,7 @@ describe('thehive createAlert action params validation', () => {
       comments: [],
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         'pushToServiceParam.incident.title': [],
         'pushToServiceParam.incident.description': [],
@@ -135,7 +135,7 @@ describe('thehive createAlert action params validation', () => {
       comments: [],
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         'pushToServiceParam.incident.title': [],
         'pushToServiceParam.incident.description': [],

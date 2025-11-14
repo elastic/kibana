@@ -15,7 +15,7 @@ import { IndicatorFieldsTable } from './fields_table';
 /**
  * Pick indicator fields starting with the indicator type
  */
-const byIndicatorType = (indicatorType: string) => (field: string) =>
+const byIndicatorType = (indicatorType: string, field: string) =>
   field.startsWith(`threat.indicator.${indicatorType}`) ||
   [
     'threat.indicator.reference',
@@ -38,12 +38,13 @@ export const HighlightedValuesTable: FC<HighlightedValuesTableProps> = ({
   indicator,
   'data-test-subj': dataTestSubj,
 }) => {
-  const indicatorType = unwrapValue(indicator, RawIndicatorFieldId.Type);
-
-  const highlightedFields: string[] = useMemo(
-    () => Object.keys(indicator.fields).filter(byIndicatorType(indicatorType || '')),
-    [indicator.fields, indicatorType]
-  );
+  const highlightedFields = useMemo(() => {
+    const indicatorType = unwrapValue(indicator, RawIndicatorFieldId.Type);
+    const sanitisedIndicatorType = (!Array.isArray(indicatorType) && indicatorType) || '';
+    return Object.keys(indicator.fields).filter((field) =>
+      byIndicatorType(sanitisedIndicatorType, field)
+    );
+  }, [indicator]);
 
   return (
     <EuiPanel hasBorder hasShadow={false}>

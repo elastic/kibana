@@ -11,7 +11,7 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import { useSelector } from 'react-redux';
 import { type FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import { useKibana } from '../../common/lib/kibana';
-import { DataViewManagerScopeName } from '../constants';
+import { PageScope } from '../constants';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { sourcererAdapterSelector } from '../redux/selectors';
 import type { SharedDataViewSelectionState } from '../redux/types';
@@ -30,7 +30,7 @@ export interface UseDataViewReturnValue {
  * selected data view.
  */
 export const useDataView = (
-  dataViewManagerScope: DataViewManagerScopeName = DataViewManagerScopeName.default
+  dataViewManagerScope: PageScope = PageScope.default
 ): UseDataViewReturnValue => {
   const {
     services: { dataViews, notifications },

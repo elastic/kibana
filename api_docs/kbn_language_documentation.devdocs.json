@@ -168,7 +168,8 @@
             "label": "groups",
             "description": [],
             "signature": [
-              "{ label: string; description?: string | undefined; items: { label: string; description?: JSX.Element | undefined; }[]; }[]"
+              "DocumentationGroup",
+              "[]"
             ],
             "path": "src/platform/packages/private/kbn-language-documentation/src/types.ts",
             "deprecated": false,

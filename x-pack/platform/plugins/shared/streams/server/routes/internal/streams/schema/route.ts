@@ -14,6 +14,7 @@ import type { StreamsMappingProperties } from '@kbn/streams-schema/src/fields';
 import type { DocumentWithIgnoredFields } from '@kbn/streams-schema/src/shared/record_types';
 import { LOGS_ROOT_STREAM_NAME } from '../../../../lib/streams/root_stream_definition';
 import { MAX_PRIORITY } from '../../../../lib/streams/index_templates/generate_index_template';
+import { getProcessingPipelineName } from '../../../../lib/streams/ingest_pipelines/name';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { SecurityError } from '../../../../lib/streams/errors/security_error';
 import { checkAccess } from '../../../../lib/streams/stream_crud';
@@ -120,13 +121,15 @@ export const schemaFieldsSimulationRoute = createServerRoute({
     simulationError: string | null;
     documentsWithRuntimeFieldsApplied: DocumentWithIgnoredFields[] | null;
   }> => {
-    const { scopedClusterClient } = await getScopedClients({ request });
+    const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
 
     const { read } = await checkAccess({ name: params.path.name, scopedClusterClient });
 
     if (!read) {
       throw new SecurityError(`Cannot read stream ${params.path.name}, insufficient privileges`);
     }
+
+    const streamDefinition = await streamsClient.getStream(params.path.name);
 
     const userFieldDefinitions = params.body.field_definitions.flatMap((field) => {
       // filter out potential system fields since we can't simulate them anyway
@@ -192,7 +195,8 @@ export const schemaFieldsSimulationRoute = createServerRoute({
       sampleResultsAsSimulationDocs,
       params.path.name,
       propertiesForSimulation,
-      scopedClusterClient
+      scopedClusterClient,
+      streamDefinition
     );
 
     const hasErrors = simulation.docs.some((doc: any) => doc.doc.error !== undefined);
@@ -274,7 +278,8 @@ async function simulateIngest(
   sampleResultsAsSimulationDocs: Array<SearchHit<unknown>>,
   dataStreamName: string,
   propertiesForSimulation: StreamsMappingProperties,
-  scopedClusterClient: IScopedClusterClient
+  scopedClusterClient: IScopedClusterClient,
+  streamDefinition: Streams.all.Definition
 ) {
   // fetch the index template to get the base mappings
   const dataStream = await scopedClusterClient.asCurrentUser.indices.getDataStream({
@@ -307,6 +312,38 @@ async function simulateIngest(
       },
     },
   };
+  const isWiredStream = Streams.WiredStream.Definition.is(streamDefinition);
+
+  let pipelineSubstitutions: Record<string, { processors: any[] }>;
+  let simulatePath: string;
+
+  if (isWiredStream) {
+    // For wired streams: override root logs processing pipeline to reroute, then noop child stream processing
+    pipelineSubstitutions = {
+      [getProcessingPipelineName(LOGS_ROOT_STREAM_NAME)]: {
+        processors: [
+          {
+            reroute: {
+              destination: dataStreamName,
+            },
+          },
+        ],
+      },
+      [getProcessingPipelineName(dataStreamName)]: {
+        processors: [],
+      },
+    };
+    simulatePath = '_ingest/_simulate';
+  } else {
+    // For classic streams: keep existing dummy pipeline approach
+    pipelineSubstitutions = {
+      [DUMMY_PIPELINE_NAME]: {
+        processors: [],
+      },
+    };
+    simulatePath = `_ingest/_simulate?pipeline=${DUMMY_PIPELINE_NAME}`;
+  }
+
   const simulationBody = {
     docs: sampleResultsAsSimulationDocs,
     index_template_substitutions: {
@@ -321,38 +358,13 @@ async function simulateIngest(
         },
       },
     },
-    pipeline_substitutions: {
-      [DUMMY_PIPELINE_NAME]: {
-        // The sampleResults are already gathered directly from the child stream index. But, we can't
-        // simulate an _index other than logs for wired streams, this reroutes the documents back to the child stream.
-        // After the reroute the override below ensures no double processing happens.
-        processors: [
-          ...(dataStreamName.startsWith(`${LOGS_ROOT_STREAM_NAME}.`)
-            ? [
-                {
-                  reroute: {
-                    destination: dataStreamName,
-                  },
-                },
-              ]
-            : []),
-        ],
-      },
-      // prevent double-processing
-      ...(dataStreamName.startsWith(`${LOGS_ROOT_STREAM_NAME}.`)
-        ? {
-            [`${dataStreamName}@stream.processing`]: {
-              processors: [],
-            },
-          }
-        : {}),
-    },
+    pipeline_substitutions: pipelineSubstitutions,
   };
 
   // TODO: We should be using scopedClusterClient.asCurrentUser.simulate.ingest() but the ES JS lib currently has a bug. The types also aren't available yet, so we use any.
   const simulation = (await scopedClusterClient.asCurrentUser.transport.request({
     method: 'POST',
-    path: `_ingest/_simulate?pipeline=${DUMMY_PIPELINE_NAME}`,
+    path: simulatePath,
     body: simulationBody,
   })) as any;
 

@@ -130,20 +130,17 @@ apiTest.describe('Streamlang to ES|QL - Remove Processor', { tag: ['@ess', '@svl
     expect(doc2?.['event.kind']).toBe('production');
   });
 
-  apiTest(
-    'should reject Mustache template syntax {{ and {{{ in field names',
-    async ({ testBed, esql }) => {
-      const streamlangDSL: StreamlangDSL = {
-        steps: [
-          {
-            action: 'remove',
-            from: '{{field.name}}',
-          } as RemoveProcessor,
-        ],
-      };
-      expect(() => transpile(streamlangDSL)).toThrow(
-        'Mustache template syntax {{ }} or {{{ }}} is not allowed in field names'
-      );
-    }
-  );
+  apiTest('should reject Mustache template syntax {{ and {{{ in field names', async ({}) => {
+    const streamlangDSL: StreamlangDSL = {
+      steps: [
+        {
+          action: 'remove',
+          from: '{{field.name}}',
+        } as RemoveProcessor,
+      ],
+    };
+    expect(() => transpile(streamlangDSL)).toThrow(
+      'Mustache template syntax {{ }} or {{{ }}} is not allowed in field names'
+    );
+  });
 });

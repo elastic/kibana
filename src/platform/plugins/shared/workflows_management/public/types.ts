@@ -45,11 +45,3 @@ export interface WorkflowsPublicPluginStartAdditionalServices {
 export type WorkflowsServices = CoreStart &
   WorkflowsPublicPluginStartDependencies &
   WorkflowsPublicPluginStartAdditionalServices;
-
-export interface WorkflowsSearchParams {
-  limit: number;
-  page: number;
-  query?: string;
-  createdBy?: string[];
-  enabled?: boolean[];
-}

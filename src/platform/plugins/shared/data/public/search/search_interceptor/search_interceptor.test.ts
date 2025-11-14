@@ -35,7 +35,8 @@ jest.mock('./create_request_hash', () => {
   return {
     ...originalModule,
     createRequestHash: jest.fn().mockImplementation((input) => {
-      return Promise.resolve(JSON.stringify(input));
+      const { preference, ...params } = input;
+      return JSON.stringify(params);
     }),
   };
 });
@@ -319,7 +320,14 @@ describe('SearchInterceptor', () => {
 
       mockCoreSetup.http.post.mockImplementation(getHttpMock(responses));
 
-      const response = searchInterceptor.search({}, { pollInterval: 0 });
+      const response = searchInterceptor.search(
+        {
+          params: {
+            body: { query: { match_all: {} } },
+          },
+        },
+        { pollInterval: 0 }
+      );
       response.subscribe({ next, error, complete });
 
       await timeTravel(10);
@@ -387,6 +395,18 @@ describe('SearchInterceptor', () => {
       `);
       expect(complete).toHaveBeenCalled();
       expect(error).not.toHaveBeenCalled();
+
+      // check that the request body wasn't included on the 2nd request
+      expect(mockCoreSetup.http.post).toHaveBeenCalledTimes(2);
+      const firstRequest = (
+        mockCoreSetup.http.post.mock.calls[0] as unknown as [string, HttpFetchOptions]
+      )[1];
+      expect(JSON.parse(firstRequest?.body as string).params.body).toBeDefined();
+
+      const secondRequest = (
+        mockCoreSetup.http.post.mock.calls[1] as unknown as [string, HttpFetchOptions]
+      )[1];
+      expect(JSON.parse(secondRequest?.body as string).params.body).not.toBeDefined();
     });
 
     test('should abort on user abort', async () => {
@@ -733,6 +753,71 @@ describe('SearchInterceptor', () => {
 
       expect(mockCoreSetup.http.post).toHaveBeenCalledTimes(2);
       expect(mockCoreSetup.http.delete).not.toHaveBeenCalled();
+    });
+
+    describe('when the search is already backgrounded', () => {
+      test('should NOT DELETE a running SAVED async search on async timeout', async () => {
+        sessionService.isCurrentSession.mockReturnValue(true);
+        sessionService.isSaving.mockReturnValue(true);
+
+        mockCoreSetup.http.post.mockResolvedValue(
+          getMockSearchResponse({
+            isPartial: true,
+            isRunning: true,
+            rawResponse: {},
+            id: '1',
+          })
+        );
+
+        const response = searchInterceptor.search({}, { pollInterval: 0 });
+        response.subscribe({ next, error });
+
+        await timeTravel(10);
+
+        expect(next).toHaveBeenCalled();
+        expect(error).not.toHaveBeenCalled();
+        expect(mockCoreSetup.http.post).toHaveBeenCalled();
+        expect(mockCoreSetup.http.delete).not.toHaveBeenCalled();
+
+        // Long enough to reach the timeout
+        await timeTravel(2000);
+
+        expect(mockCoreSetup.http.delete).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('when the search gets backgrounded during execution', () => {
+      test('should NOT DELETE a running SAVED async search on async timeout', async () => {
+        sessionService.isCurrentSession.mockReturnValue(true);
+        sessionService.isSaving.mockReturnValue(false);
+
+        mockCoreSetup.http.post.mockResolvedValue(
+          getMockSearchResponse({
+            isPartial: true,
+            isRunning: true,
+            rawResponse: {},
+            id: '1',
+          })
+        );
+
+        const response = searchInterceptor.search({}, { pollInterval: 0 });
+        response.subscribe({ next, error });
+
+        // We emit a new state to clear the timeout
+        sessionState$.next(SearchSessionState.BackgroundLoading);
+
+        await timeTravel(10);
+
+        expect(next).toHaveBeenCalled();
+        expect(error).not.toHaveBeenCalled();
+        expect(mockCoreSetup.http.post).toHaveBeenCalled();
+        expect(mockCoreSetup.http.delete).not.toHaveBeenCalled();
+
+        // Long enough to reach the timeout
+        await timeTravel(2000);
+
+        expect(mockCoreSetup.http.delete).not.toHaveBeenCalled();
+      });
     });
 
     describe('Search session', () => {

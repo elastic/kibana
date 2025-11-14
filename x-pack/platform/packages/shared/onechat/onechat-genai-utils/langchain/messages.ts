@@ -111,15 +111,17 @@ export const createToolResultMessage = ({
   });
 };
 
-export const createToolCallMessage = (toolCall: ToolCall, message?: string): AIMessage => {
+export const createToolCallMessage = (
+  toolCallOrCalls: ToolCall | ToolCall[],
+  message?: string
+): AIMessage => {
+  const toolCalls = isArray(toolCallOrCalls) ? toolCallOrCalls : [toolCallOrCalls];
   return new AIMessage({
     content: message ?? '',
-    tool_calls: [
-      {
-        id: toolCall.toolCallId,
-        name: toolCall.toolName,
-        args: toolCall.args,
-      },
-    ],
+    tool_calls: toolCalls.map((toolCall) => ({
+      id: toolCall.toolCallId,
+      name: toolCall.toolName,
+      args: toolCall.args,
+    })),
   });
 };

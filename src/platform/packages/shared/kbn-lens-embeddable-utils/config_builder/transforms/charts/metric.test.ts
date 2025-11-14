@@ -40,16 +40,6 @@ const defaultValues = [
     path: 'breakdown_by',
     value: {
       breakdown_by: {
-        // defaults for terms breakdown by
-        excludes: {
-          as_regex: false,
-          values: [],
-        },
-        includes: {
-          as_regex: false,
-          values: [],
-        },
-        increase_accuracy: false,
         other_bucket: { include_documents_without_field: false },
         rank_by: { direction: 'asc', type: 'alphabetical' },
       },
@@ -197,6 +187,8 @@ describe('metric chart transformations', () => {
           columns: 3,
           size: 5,
           collapse_by: 'sum',
+          // encode the rank as it would be detected by the transforms
+          rank_by: { type: 'column', metric: 0, direction: 'desc' },
         },
       };
 
@@ -300,6 +292,8 @@ describe('metric chart transformations', () => {
           fields: ['service_name'],
           columns: 5,
           size: 10,
+          // encode the rank as it would be detected by the transforms
+          rank_by: { type: 'column', metric: 0, direction: 'desc' },
         },
       };
 
@@ -359,6 +353,8 @@ describe('metric chart transformations', () => {
           fields: ['service_name'],
           columns: 5,
           size: 10,
+          // encode the rank as it would be detected by the transforms
+          rank_by: { type: 'column', metric: 0, direction: 'desc' },
         },
       };
       const finalAPIState = validateAndApiToApiTransforms(comprehensiveMetricConfig);
