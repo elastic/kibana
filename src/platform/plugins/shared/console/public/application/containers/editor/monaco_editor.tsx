@@ -59,8 +59,8 @@ const useStyles = () => {
     `,
     playButton: css`
       margin-left: ${euiTheme.size.xs} !important;
-      height: ${euiTheme.size.l} !important;
-      width: ${euiTheme.size.l} !important;
+      height: ${euiTheme.size.xl} !important;
+      width: ${euiTheme.size.xl} !important;
     `,
   };
 };
