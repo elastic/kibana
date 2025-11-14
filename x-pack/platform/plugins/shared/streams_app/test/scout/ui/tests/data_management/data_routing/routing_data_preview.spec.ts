@@ -213,7 +213,10 @@ test.describe('Stream data routing - previewing data', { tag: ['@ess', '@svlOblt
 
   // This test is failing in Cloud run even with improved cleanup b/w test spec files
   // See https://github.com/elastic/kibana/issues/242931
-  test.skip('should switch between matched and unmatched documents', async ({ page, pageObjects }) => {
+  test.skip('should switch between matched and unmatched documents', async ({
+    page,
+    pageObjects,
+  }) => {
     await pageObjects.streams.clickCreateRoutingRule();
     await pageObjects.streams.fillRoutingRuleName('filter-switch-test');
 
