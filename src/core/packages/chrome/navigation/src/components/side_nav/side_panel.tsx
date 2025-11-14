@@ -79,9 +79,10 @@ export const SidePanel = ({ children, footer, openerNode }: SidePanelProps): JSX
       data-test-subj={`${sidePanelClassName} ${sidePanelClassName}_${openerNode.id}`}
       hasShadow={false}
       role="region"
+      color="transparent"
     >
       <EuiSplitPanel.Inner
-        color="subdued"
+        color="transparent"
         css={navigationPanelStyles}
         data-test-subj={`${NAVIGATION_SELECTOR_PREFIX}-panelContent`}
         onKeyDown={handleRovingIndex}
@@ -91,7 +92,7 @@ export const SidePanel = ({ children, footer, openerNode }: SidePanelProps): JSX
         {children}
       </EuiSplitPanel.Inner>
       <EuiSplitPanel.Inner
-        color="subdued"
+        color="transparent"
         data-test-subj={`${NAVIGATION_SELECTOR_PREFIX}-panelFooter`}
         paddingSize="none"
         grow={false}
