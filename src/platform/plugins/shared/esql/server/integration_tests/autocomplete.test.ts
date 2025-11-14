@@ -9,7 +9,7 @@
 
 import { EsqlServiceTestbed } from './testbed';
 
-describe('EsqlService', () => {
+describe('Autocomplete endpoints', () => {
   const testbed = new EsqlServiceTestbed();
 
   beforeAll(async () => {
