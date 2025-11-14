@@ -21,7 +21,7 @@ export class WaitStepImpl implements NodeImplementation {
   ) {}
 
   async run(): Promise<void> {
-    if (this.stepExecutionRuntime.tryEnterWait(this.node.configuration.with.duration)) {
+    if (this.stepExecutionRuntime.tryEnterDelay(this.node.configuration.with.duration)) {
       this.logStartWait();
       return;
     }

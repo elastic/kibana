@@ -61,7 +61,7 @@ export class EnterRetryNodeImpl implements NodeImplementation, NodeWithErrorCatc
   private async advanceRetryAttempt(): Promise<void> {
     if (
       this.node.configuration.delay &&
-      this.stepExecutionRuntime.tryEnterWait(this.node.configuration.delay)
+      this.stepExecutionRuntime.tryEnterDelay(this.node.configuration.delay)
     ) {
       this.workflowLogger.logDebug(`Delaying retry for ${this.node.configuration.delay}.`);
       // Enter a new scope for the new attempt. Since attempt is 0 based, we add 1 to it.
