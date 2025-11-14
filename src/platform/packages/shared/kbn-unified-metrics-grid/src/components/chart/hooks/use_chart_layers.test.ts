@@ -48,7 +48,7 @@ describe('useChartLayers', () => {
     const { result } = renderHook(() =>
       useChartLayers({
         metric: mockMetric,
-        dimensions: ['service.name'],
+        dimensions: [{ name: 'service.name', type: 'keyword' }],
         color: '#FFF',
       })
     );
@@ -64,7 +64,10 @@ describe('useChartLayers', () => {
     const { result } = renderHook(() =>
       useChartLayers({
         metric: mockMetric,
-        dimensions: ['service.name', 'host.name'],
+        dimensions: [
+          { name: 'service.name', type: 'keyword' },
+          { name: 'host.name', type: 'keyword' },
+        ],
         color: '#FFF',
       })
     );
