@@ -1293,11 +1293,9 @@ module.exports = {
         ],
       },
     },
-    // Allow node.js imports only for the prebuilt rules package generation scripts
+    // Allow node.js imports for security solution test packages
     {
-      files: [
-        'x-pack/solutions/security/packages/test-api-clients/prebuilt_rules_package_generation/*.{js,mjs,ts,tsx}',
-      ],
+      files: ['x-pack/solutions/security/packages/test-api-clients/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'import/no-nodejs-modules': 'off',
       },
