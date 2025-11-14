@@ -22,7 +22,6 @@ import { MAX_DIMENSIONS_SELECTIONS } from '../../../common/constants';
 interface UseToolbarActionsProps
   extends Pick<ChartSectionProps, 'fetchParams' | 'renderToggleActions'> {
   fields: MetricField[];
-  indexPattern: string;
   hideDimensionsSelector?: boolean;
   hideRightSideActions?: boolean;
 }
@@ -30,7 +29,6 @@ export const useToolbarActions = ({
   fields,
   fetchParams,
   renderToggleActions,
-  indexPattern,
   hideDimensionsSelector = false,
   hideRightSideActions = false,
 }: UseToolbarActionsProps) => {
@@ -55,6 +53,9 @@ export const useToolbarActions = ({
     () => (isFullscreen ? undefined : renderToggleActions()),
     [isFullscreen, renderToggleActions]
   );
+  const indices = useMemo(() => {
+    return [...new Set(fields.map((field) => field.index))];
+  }, [fields]);
 
   const leftSideActions = useMemo(
     () => [
@@ -73,7 +74,7 @@ export const useToolbarActions = ({
           selectedValues={valueFilters}
           onChange={onValuesChange}
           disabled={dimensions.length === 0}
-          indices={[indexPattern]}
+          indices={indices}
           timeRange={fetchParams.timeRange}
           onClear={onClearValues}
           fullWidth={isSmallScreen}
@@ -84,7 +85,7 @@ export const useToolbarActions = ({
       isSmallScreen,
       dimensions,
       fields,
-      indexPattern,
+      indices,
       onClearValues,
       onDimensionsChange,
       onValuesChange,

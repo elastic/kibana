@@ -26,6 +26,7 @@ import type {
   Suggestion,
   TermsIndexPatternColumn,
   TypedLensByValueInput,
+  XYState,
 } from '@kbn/lens-plugin/public';
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
 import { getAggregateQueryMode, isOfAggregateQueryType } from '@kbn/es-query';
@@ -482,7 +483,7 @@ export class LensVisService {
   private getHistogramSuggestionForESQL = ({
     queryParams,
     breakdownField,
-    preferredVisAttributes,
+    preferredVisAttributes: originalPreferredVisAttributes,
   }: {
     queryParams: QueryParams;
     breakdownField?: DataViewField;
@@ -492,6 +493,20 @@ export class LensVisService {
     const breakdownColumn = breakdownField?.name
       ? columns?.find((column) => column.name === breakdownField.name)
       : undefined;
+    let preferredVisAttributes = originalPreferredVisAttributes;
+
+    if (preferredVisAttributes && breakdownColumn) {
+      const visualization = preferredVisAttributes?.state?.visualization as XYState | undefined;
+      const layers = Array.isArray(visualization?.layers) ? visualization.layers : [];
+      if (
+        !layers.some(
+          (layer) => 'splitAccessor' in layer && layer.splitAccessor === breakdownColumn.name
+        )
+      ) {
+        // the preferred vis attributes don't contain the breakdown column, so we discard it to avoid issues
+        preferredVisAttributes = undefined;
+      }
+    }
 
     if (
       dataView.isTimeBased() &&

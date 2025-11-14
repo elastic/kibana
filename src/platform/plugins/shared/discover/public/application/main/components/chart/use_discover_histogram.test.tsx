@@ -230,7 +230,7 @@ describe('useDiscoverHistogram', () => {
     it('should not sync Unified Histogram state with the state container if there are no changes', async () => {
       const stateContainer = getStateContainer();
       const { hook } = await renderUseDiscoverHistogram({ stateContainer });
-      const containerState = stateContainer.appState.getState();
+      const containerState = stateContainer.appState.get();
       const state = {
         chartHidden: containerState.hideChart,
         totalHitsStatus: UnifiedHistogramFetchStatus.loading,
@@ -267,7 +267,7 @@ describe('useDiscoverHistogram', () => {
     it('should exclude totalHitsStatus and totalHitsResult from Unified Histogram state updates', async () => {
       const stateContainer = getStateContainer();
       const { hook } = await renderUseDiscoverHistogram({ stateContainer });
-      const containerState = stateContainer.appState.getState();
+      const containerState = stateContainer.appState.get();
       const state = {
         chartHidden: containerState.hideChart,
         totalHitsStatus: UnifiedHistogramFetchStatus.loading,
@@ -300,7 +300,7 @@ describe('useDiscoverHistogram', () => {
     it('should update total hits when the total hits state changes', async () => {
       const stateContainer = getStateContainer();
       const { hook } = await renderUseDiscoverHistogram({ stateContainer });
-      const containerState = stateContainer.appState.getState();
+      const containerState = stateContainer.appState.get();
       const state = {
         chartHidden: containerState.hideChart,
         totalHitsStatus: UnifiedHistogramFetchStatus.loading,
@@ -342,7 +342,7 @@ describe('useDiscoverHistogram', () => {
       mockData.query.getState = () => mockQueryState;
       const stateContainer = getStateContainer();
       const { hook } = await renderUseDiscoverHistogram({ stateContainer });
-      const containerState = stateContainer.appState.getState();
+      const containerState = stateContainer.appState.get();
       const error = new Error('test');
       const state = {
         chartHidden: containerState.hideChart,

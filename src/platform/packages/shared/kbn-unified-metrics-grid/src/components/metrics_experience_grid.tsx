@@ -9,32 +9,18 @@
 
 import React, { useCallback, useMemo } from 'react';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
-import { i18n } from '@kbn/i18n';
 import { keys } from '@elastic/eui';
-import { css } from '@emotion/react';
-import {
-  EuiBetaBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiText,
-  euiScrollBarStyles,
-  useEuiTheme,
-  type EuiFlexGridProps,
-} from '@elastic/eui';
 import {
   METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ,
   METRICS_VALUES_SELECTOR_DATA_TEST_SUBJ,
-  PAGE_SIZE,
 } from '../common/constants';
-import { MetricsGrid } from './metrics_grid';
-import { Pagination } from './pagination';
-import { usePaginatedFields, useMetricFieldsQuery, useValueFilters } from '../hooks';
 import { useMetricsExperienceState } from '../context/metrics_experience_state_provider';
 import { MetricsGridWrapper } from './metrics_grid_wrapper';
-import { MetricsGridLoadingProgress, EmptyState } from './empty_state/empty_state';
+import { EmptyState } from './empty_state/empty_state';
 import { useToolbarActions } from './toolbar/hooks/use_toolbar_actions';
 import { SearchButton } from './toolbar/right_side_actions/search_button';
+import { useMetricFieldsQuery } from '../hooks';
+import { MetricsExperienceGridContent } from './metrics_experience_grid_content';
 
 export const MetricsExperienceGrid = ({
   renderToggleActions,
@@ -48,24 +34,12 @@ export const MetricsExperienceGrid = ({
   isChartLoading: isDiscoverLoading,
   isComponentVisible,
 }: ChartSectionProps) => {
-  const euiThemeContext = useEuiTheme();
-  const { euiTheme } = euiThemeContext;
-
-  const {
-    searchTerm,
-    currentPage,
-    dimensions,
-    isFullscreen,
-    valueFilters,
-    onPageChange,
-    onSearchTermChange,
-    onToggleFullscreen,
-  } = useMetricsExperienceState();
-
   const { dataView, timeRange } = fetchParams;
+  const { searchTerm, isFullscreen, valueFilters, onSearchTermChange, onToggleFullscreen } =
+    useMetricsExperienceState();
 
   const indexPattern = useMemo(() => dataView?.getIndexPattern() ?? 'metrics-*', [dataView]);
-  const { data: fields = [], isFetching: isFieldsLoading } = useMetricFieldsQuery({
+  const { data: fields = [], isFetching: isFetchingAllFields } = useMetricFieldsQuery({
     index: indexPattern,
     timeRange,
   });
@@ -73,7 +47,6 @@ export const MetricsExperienceGrid = ({
   const { toggleActions, leftSideActions, rightSideActions } = useToolbarActions({
     fields,
     renderToggleActions,
-    indexPattern,
     fetchParams,
   });
 
@@ -87,27 +60,8 @@ export const MetricsExperienceGrid = ({
     [isFullscreen, onToggleFullscreen]
   );
 
-  const {
-    currentPageFields = [],
-    totalPages = 0,
-    filteredFieldsCount = 0,
-  } = usePaginatedFields({
-    fields,
-    dimensions,
-    pageSize: PAGE_SIZE,
-    currentPage,
-    searchTerm,
-  }) ?? {};
-
-  const columns = useMemo<NonNullable<EuiFlexGridProps['columns']>>(
-    () => Math.min(filteredFieldsCount, 4) as NonNullable<EuiFlexGridProps['columns']>,
-    [filteredFieldsCount]
-  );
-
-  const filters = useValueFilters(valueFilters);
-
-  if (fields.length === 0) {
-    return <EmptyState isLoading={isFieldsLoading} />;
+  if (fields.length === 0 && valueFilters.length === 0) {
+    return <EmptyState isLoading={isFetchingAllFields} />;
   }
 
   return (
@@ -135,94 +89,17 @@ export const MetricsExperienceGrid = ({
       isFullscreen={isFullscreen}
       onKeyDown={onKeyDown}
     >
-      <EuiFlexGroup
-        direction="column"
-        gutterSize="s"
-        tabIndex={-1}
-        data-test-subj="metricsExperienceRendered"
-        css={css`
-          ${histogramCss || ''}
-          height: 100%;
-          overflow: auto;
-          padding: ${euiTheme.size.s} ${euiTheme.size.s} 0;
-          margin-block: ${euiTheme.size.xs};
-          ${euiScrollBarStyles(euiThemeContext)}
-        `}
-      >
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup
-            justifyContent="spaceBetween"
-            alignItems="center"
-            gutterSize="s"
-            responsive={false}
-            direction="row"
-          >
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup
-                justifyContent="spaceBetween"
-                alignItems="center"
-                responsive={false}
-                gutterSize="s"
-              >
-                <EuiFlexItem grow={false}>
-                  <EuiText size="s">
-                    <strong>
-                      {i18n.translate('metricsExperience.grid.metricsCount.label', {
-                        defaultMessage: '{count} {count, plural, one {metric} other {metrics}}',
-                        values: { count: filteredFieldsCount },
-                      })}
-                    </strong>
-                  </EuiText>
-                </EuiFlexItem>
-                {isFieldsLoading && (
-                  <EuiFlexItem grow={false}>
-                    <EuiLoadingSpinner size="s" />
-                  </EuiFlexItem>
-                )}
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBetaBadge
-                label={i18n.translate('metricsExperience.grid.technicalPreview.label', {
-                  defaultMessage: 'Technical preview',
-                })}
-                tooltipContent={i18n.translate('metricsExperience.grid.technicalPreview.tooltip', {
-                  defaultMessage:
-                    'This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
-                })}
-                tooltipPosition="left"
-                title={i18n.translate('metricsExperience.grid.technicalPreview.title', {
-                  defaultMessage: 'Technical preview',
-                })}
-                size="s"
-                data-test-subj="metricsExperienceTechnicalPreviewBadge"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem grow>
-          {isDiscoverLoading && <MetricsGridLoadingProgress />}
-          <MetricsGrid
-            columns={columns}
-            dimensions={dimensions}
-            filters={filters}
-            services={services}
-            fields={currentPageFields}
-            onBrushEnd={onBrushEnd}
-            onFilter={onFilter}
-            discoverFetch$={discoverFetch$}
-            fetchParams={fetchParams}
-            searchTerm={searchTerm}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <Pagination
-            totalPages={totalPages}
-            currentPage={currentPage}
-            onPageChange={onPageChange}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <MetricsExperienceGridContent
+        fields={fields}
+        services={services}
+        discoverFetch$={discoverFetch$}
+        fetchParams={fetchParams}
+        onBrushEnd={onBrushEnd}
+        onFilter={onFilter}
+        histogramCss={histogramCss}
+        isFieldsLoading={isFetchingAllFields}
+        isDiscoverLoading={isDiscoverLoading}
+      />
     </MetricsGridWrapper>
   );
 };
