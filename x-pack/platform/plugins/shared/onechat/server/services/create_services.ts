@@ -50,7 +50,7 @@ export class ServiceManager {
     return this.internalSetup;
   }
 
-  async startServices({
+  startServices({
     logger,
     security,
     spaces,
@@ -59,7 +59,7 @@ export class ServiceManager {
     uiSettings,
     savedObjects,
     trackingService,
-  }: ServicesStartDeps): Promise<InternalStartServices> {
+  }: ServicesStartDeps): InternalStartServices {
     if (!this.services) {
       throw new Error('#startServices called before #setupServices');
     }
