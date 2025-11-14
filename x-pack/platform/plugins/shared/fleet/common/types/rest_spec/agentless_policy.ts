@@ -27,9 +27,6 @@ export const CreateAgentlessPolicyRequestSchema = {
     policy_ids: undefined,
     supports_agentless: undefined,
     output_id: undefined,
-    cloud_connector_id: undefined,
-    cloud_connector_name: undefined,
-    supports_cloud_connector: undefined,
     // Add explicit cloud_connector configuration object
     cloud_connector: schema.maybe(
       schema.object({
@@ -39,7 +36,6 @@ export const CreateAgentlessPolicyRequestSchema = {
           schema.literal('gcp'),
         ]),
         cloud_connector_id: schema.maybe(schema.string()),
-        cloud_connector_name: schema.maybe(schema.string()),
       })
     ),
   }),

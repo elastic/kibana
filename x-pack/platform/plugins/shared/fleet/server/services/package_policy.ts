@@ -599,7 +599,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       .create<PackagePolicySOAttributes>(
         savedObjectType,
         {
-          ...omit(enrichedPackagePolicy, 'cloud_connector_name'),
+          ...enrichedPackagePolicy,
           ...(enrichedPackagePolicy.package
             ? { package: omit(enrichedPackagePolicy.package, 'experimental_data_stream_features') }
             : {}),
@@ -799,7 +799,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           type: savedObjectType,
           id: packagePolicyId,
           attributes: {
-            ...omit(pkgPolicyWithoutId, 'cloud_connector_name'),
+            ...pkgPolicyWithoutId,
             ...(packagePolicy.package
               ? { package: omit(packagePolicy.package, 'experimental_data_stream_features') }
               : {}),
@@ -1435,7 +1435,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         ...currentPackagePolicySO,
         id: `${id}:prev`,
         attributes: {
-          ...omit(currentPackagePolicySO.attributes, 'cloud_connector_name'),
+          ...currentPackagePolicySO.attributes,
           latest_revision: false,
         },
       };
@@ -1466,7 +1466,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         savedObjectType,
         id,
         {
-          ...omit(restOfPackagePolicy, 'cloud_connector_name'),
+          ...restOfPackagePolicy,
           ...(restOfPackagePolicy.package
             ? { package: omit(restOfPackagePolicy.package, 'experimental_data_stream_features') }
             : {}),
@@ -1718,7 +1718,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
               ...currentPackagePolicySO,
               id: `${id}:prev`,
               attributes: {
-                ...omit(currentPackagePolicySO.attributes, 'cloud_connector_name'),
+                ...currentPackagePolicySO.attributes,
                 latest_revision: false,
               },
             };
@@ -1830,7 +1830,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           type: savedObjectType,
           id,
           attributes: {
-            ...omit(restOfPackagePolicy, 'cloud_connector_name'),
+            ...restOfPackagePolicy,
             ...(restOfPackagePolicy.package
               ? { package: omit(restOfPackagePolicy.package, 'experimental_data_stream_features') }
               : {}),
@@ -2333,7 +2333,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           supports_agentless: newPolicy.supports_agentless,
           supports_cloud_connector: newPolicy.supports_cloud_connector,
           cloud_connector_id: newPolicy.cloud_connector_id,
-          cloud_connector_name: newPolicy.cloud_connector_name,
           additional_datastreams_permissions: newPolicy.additional_datastreams_permissions,
         };
       }

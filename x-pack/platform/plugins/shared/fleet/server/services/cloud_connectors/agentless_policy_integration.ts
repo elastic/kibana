@@ -7,7 +7,8 @@
 
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 
-import type { AgentPolicy, CloudProvider, NewPackagePolicy } from '../../types';
+import type { CloudProvider } from '../../../common/types';
+import type { AgentPolicy, NewPackagePolicy } from '../../types';
 import { CloudConnectorCreateError } from '../../errors';
 import { cloudConnectorService } from '../cloud_connector';
 import { extractAndCreateCloudConnectorSecrets } from '../secrets/cloud_connector';
@@ -129,6 +130,7 @@ export async function createAndIntegrateCloudConnector(params: {
   // Extract cloud connector name from package policy if provided
   const cloudConnectorName = getCloudConnectorNameFromPackagePolicy(
     updatedPackagePolicy,
+    cloudProvider,
     `${cloudProvider}-cloud-connector: ${policyName}`
   );
 
