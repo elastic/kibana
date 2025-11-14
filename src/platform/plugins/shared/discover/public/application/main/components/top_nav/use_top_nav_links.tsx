@@ -49,6 +49,7 @@ import {
 import type { DiscoverAppLocatorParams } from '../../../../../common';
 import type { DiscoverAppState } from '../../state_management/discover_app_state_container';
 import { onSaveDiscoverSession } from './save_discover_session';
+import { useDataState } from '../../hooks/use_data_state';
 
 /**
  * Helper function to build the top nav links
@@ -87,6 +88,8 @@ export const useTopNavLinks = ({
       http: services.http,
       toasts: services.notifications.toasts,
     });
+  const totalHits$ = state.dataState.data$.totalHits$;
+  const totalHitsState = useDataState(totalHits$);
 
   const getAuthorizedWriteConsumerIds = (ruleTypes: RuleTypeWithDescription[]): string[] =>
     ruleTypes
@@ -197,6 +200,7 @@ export const useTopNavLinks = ({
           hasUnsavedChanges,
           currentTab,
           persistedDiscoverSession,
+          totalHitsState,
         });
         items.push(...shareAppMenuItem);
       }
@@ -216,6 +220,7 @@ export const useTopNavLinks = ({
       persistedDiscoverSession,
       hasShareIntegration,
       hasUnsavedChanges,
+      totalHitsState,
     ]);
 
   const getAppMenuAccessor = useProfileAccessor('getAppMenu');

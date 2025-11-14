@@ -82,6 +82,7 @@ export class ShareMenuManager {
       asExport,
       publicAPIEnabled,
       onSave,
+      totalHits,
     }: ShowShareMenuOptions & {
       menuItems: ShareConfigs[];
       onClose: () => void;
@@ -118,6 +119,7 @@ export class ShareMenuManager {
             unmount();
           },
           onSave,
+          totalHits,
         },
       }),
       rendering

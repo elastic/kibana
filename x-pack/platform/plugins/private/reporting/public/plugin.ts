@@ -218,7 +218,7 @@ export class ReportingPublicPlugin
     shareSetup.registerShareIntegration<ExportShare>(
       'search',
       // TODO: export the reporting pdf export provider for registration in the actual plugins that depend on it
-      reportingCsvExportShareIntegration({ apiClient, startServices$ })
+      reportingCsvExportShareIntegration({ apiClient, startServices$, csvConfig: this.config.csv })
     );
 
     if (this.config.export_types.pdf.enabled || this.config.export_types.png.enabled) {

@@ -16,6 +16,7 @@ import type { InjectedIntl } from '@kbn/i18n-react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ShareContext, ExportShare } from '@kbn/share-plugin/public';
 import type { LocatorParams } from '@kbn/reporting-common/types';
+import { EuiCallOut, EuiText } from '@elastic/eui';
 import type { ReportParamsGetter, ReportParamsGetterOptions } from '../../../types';
 import type { CsvSearchModeParams } from '../../shared/get_search_csv_job_params';
 import { getSearchCsvJobParams } from '../../shared/get_search_csv_job_params';
@@ -56,7 +57,7 @@ export const getCsvReportParams: ReportParamsGetter<
  * @description Returns config for the CSV export integration
  */
 export const getShareMenuItems =
-  ({ apiClient, startServices$ }: ExportModalShareOpts) =>
+  ({ apiClient, startServices$, csvConfig }: ExportModalShareOpts) =>
   ({
     objectType,
     sharingData,
@@ -168,5 +169,23 @@ export const getShareMenuItems =
         contentType: 'text',
         generateAssetURIValue: () => absoluteUrl,
       },
+      renderTotalHitsSizeWarning: (totalHits: number = 0) => totalHits >= (csvConfig?.maxRows || 0),
+      totalHitsSizeWarning: (
+        <EuiCallOut
+          size="s"
+          color="warning"
+          title={i18n.translate('reporting.share.csv.reporting.totalHitsSizeWarning.title', {
+            defaultMessage: 'You have exceeded the recommended row limit.',
+          })}
+          iconType="warning"
+        >
+          <EuiText component="p" size="s">
+            {i18n.translate('reporting.share.csv.reporting.totalHitsSizeWarning.message', {
+              defaultMessage:
+                'This limit can be configured in kibana.yml, but increasing it may impact performance.',
+            })}
+          </EuiText>
+        </EuiCallOut>
+      ),
     };
   };
