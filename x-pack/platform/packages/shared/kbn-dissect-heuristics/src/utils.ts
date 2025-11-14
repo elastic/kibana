@@ -313,18 +313,18 @@ export function calculatePositionScore(positions: number[]): number {
     return 1.0;
   }
 
-  // Use exponential decay with a moderate threshold
-  // This provides reasonable leniency for natural variance in field lengths
+  // Use exponential decay with a lenient threshold
+  // This provides significant leniency for natural variance in field lengths
   // (PIDs, process names, log levels, etc.) while still penalizing excessive
   // positional inconsistency
   //
-  // threshold=20 means:
-  //   - variance=5 → score≈0.78
-  //   - variance=10 → score≈0.61
-  //   - variance=15 → score≈0.47
-  //   - variance=20 → score≈0.37
-  //   - variance=25 → score≈0.29
-  const threshold = 20;
+  // threshold=25 means:
+  //   - variance=5 → score≈0.82
+  //   - variance=10 → score≈0.67
+  //   - variance=15 → score≈0.55
+  //   - variance=20 → score≈0.45
+  //   - variance=25 → score≈0.37
+  const threshold = 25;
   return Math.exp(-posVariance / threshold);
 }
 

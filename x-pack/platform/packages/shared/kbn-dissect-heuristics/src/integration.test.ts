@@ -924,12 +924,12 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
         'Nov 13 20:10:18 combo ftpd[23152]: connection from 211.167.68.59 () at Sat Jul  9 12:16:51 2005',
       ];
       const result = extractDissectPatternDangerouslySlow(logs);
-      // After normalization: correctly detects ':' as delimiter, more granular fields
-      // due to varying content after colon (authentication vs session vs ALERT messages)
+      // After normalization: correctly detects ':' as delimiter
+      // With lenient position scoring, the colon is detected despite varying process name lengths
       expect(result.pattern).toBe(
-        '%{field_1} %{field_2} %{field_3} %{field_4} %{field_5}: %{field_6} %{field_7} %{field_8} %{field_9}'
+        '%{field_1} %{field_2} %{field_3} %{field_4} %{field_5}: %{field_6} %{field_7} %{field_8}'
       );
-      expect(result.fields.length).toBe(9);
+      expect(result.fields.length).toBe(8);
     });
   });
 });
