@@ -9,10 +9,19 @@ import { getArtifactsListTestDataForArtifact } from '../../fixtures/artifacts_pa
 import { getArtifactMockedDataTests } from '../../support/artifacts_rbac_runner';
 
 describe(
-  'Trusted devices RBAC',
+  'Endpoint Exceptions RBAC',
   {
+    env: {
+      ftrConfig: {
+        kbnServerArgs: [
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+            'endpointExceptionsMovedUnderManagement',
+          ])}`,
+        ],
+      },
+    },
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
   },
 
-  getArtifactMockedDataTests(getArtifactsListTestDataForArtifact('trustedDevices'))
+  getArtifactMockedDataTests(getArtifactsListTestDataForArtifact('endpointExceptions'))
 );
