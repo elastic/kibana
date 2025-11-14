@@ -19,6 +19,7 @@ import {
 } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts/constants';
 import { ExceptionsListItemGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/exceptions_list_item_generator';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { SECURITY_FEATURE_ID } from '@kbn/security-solution-plugin/common';
 import type { ArtifactTestData } from '../../../../../security_solution_endpoint/services/endpoint_artifacts';
 import type { PolicyTestResourceInfo } from '../../../../../security_solution_endpoint/services/endpoint_policy';
 import { ROLE } from '../../../../config/services/security_solution_edr_workflows_roles_users';
@@ -26,6 +27,7 @@ import { createSupertestErrorLogger } from '../../utils';
 import type { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 
 export default function ({ getService }: FtrProviderContext) {
+  const rolesUsersProvider = getService('rolesUsersProvider');
   const endpointPolicyTestResources = getService('endpointPolicyTestResources');
   const endpointArtifactTestResources = getService('endpointArtifactTestResources');
   const utils = getService('securitySolutionUtils');
@@ -54,6 +56,9 @@ export default function ({ getService }: FtrProviderContext) {
         await fleetEndpointPolicy.cleanup();
       }
     });
+
+    const anErrorMessageWith = (value: string) => (res: { body: { message: string } }) =>
+      expect(res.body.message).to.be(value);
 
     const exceptionsGenerator = new ExceptionsListItemGenerator();
     let endpointExceptionData: ArtifactTestData;
@@ -296,6 +301,22 @@ ${JSON.stringify(createItem())}
           const deleteUrl = `${EXCEPTION_LIST_ITEM_URL}?item_id=${body.item_id}&namespace_type=${body.namespace_type}`;
           await endpointPolicyManagerSupertest.delete(deleteUrl).set('kbn-xsrf', 'true');
         });
+
+        it(`should add global artifact tag on [${endpointExceptionApiCall.method}] if no assignment tag is present`, async () => {
+          const requestBody = endpointExceptionApiCall.getBody();
+          requestBody.tags = [];
+
+          await endpointPolicyManagerSupertest[endpointExceptionApiCall.method](
+            endpointExceptionApiCall.path
+          )
+            .set('kbn-xsrf', 'true')
+            .send(requestBody)
+            .expect(200)
+            .expect(({ body }) => expect(body.tags).to.contain(GLOBAL_ARTIFACT_TAG));
+
+          const deleteUrl = `${EXCEPTION_LIST_ITEM_URL}?item_id=${requestBody.item_id}&namespace_type=${requestBody.namespace_type}`;
+          await endpointPolicyManagerSupertest.delete(deleteUrl).set('kbn-xsrf', 'true');
+        });
       }
       for (const endpointExceptionApiCall of [...needsWritePrivilege, ...needsReadPrivilege]) {
         it(`should not error on [${endpointExceptionApiCall.method}] - [${endpointExceptionApiCall.info}]`, async () => {
@@ -305,6 +326,48 @@ ${JSON.stringify(createItem())}
             .set('kbn-xsrf', 'true')
             .send(endpointExceptionApiCall.getBody() as object)
             .expect(200);
+        });
+      }
+    });
+
+    describe('has endpoint exception access but no global artifact access', () => {
+      let noGlobalArtifactSupertest: TestAgent;
+
+      before(async () => {
+        const loadedRole = await rolesUsersProvider.loader.create({
+          name: 'no_global_artifact_role',
+          kibana: [
+            {
+              base: [],
+              feature: {
+                [SECURITY_FEATURE_ID]: ['all', 'endpointExceptionsAll'],
+              },
+              spaces: ['*'],
+            },
+          ],
+          elasticsearch: { cluster: [], indices: [], run_as: [] },
+        });
+
+        noGlobalArtifactSupertest = await utils.createSuperTest(loadedRole.username);
+      });
+
+      after(async () => {
+        await rolesUsersProvider.loader.delete('no_global_artifact_role');
+      });
+
+      for (const endpointExceptionApiCall of [...endpointExceptionCalls, ...needsWritePrivilege]) {
+        it(`should error on [${endpointExceptionApiCall.method}] - [${endpointExceptionApiCall.info}]`, async () => {
+          await noGlobalArtifactSupertest[endpointExceptionApiCall.method](
+            endpointExceptionApiCall.path
+          )
+            .set('kbn-xsrf', 'true')
+            .send(endpointExceptionApiCall.getBody() as object)
+            .expect(403)
+            .expect(
+              anErrorMessageWith(
+                'EndpointExceptionsError: Endpoint exceptions authorization failure'
+              )
+            );
         });
       }
     });
