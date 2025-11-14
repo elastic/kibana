@@ -18,13 +18,13 @@ import {
   EuiContextMenuPanel,
   EuiContextMenuItem,
   EuiPopover,
-  EuiConfirmModal,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useCloudConnectedAppContext } from '../../app_context';
 import { OverviewSection } from './overview_section';
 import { ServicesSection } from './services_section';
 import { MigrationSection } from './migration_section';
+import { DisconnectClusterModal } from './disconnect_cluster_modal';
 
 interface ClusterDetails {
   id: string;
@@ -129,39 +129,12 @@ export const ConnectedServicesPage: React.FC<ConnectedServicesPageProps> = ({ cl
   ];
 
   const disconnectModal = isDisconnectModalVisible ? (
-    <EuiConfirmModal
-      title={
-        <FormattedMessage
-          id="xpack.cloudConnect.connectedServices.disconnect.modalTitle"
-          defaultMessage="Disconnect cluster?"
-        />
-      }
-      onCancel={closeDisconnectModal}
+    <DisconnectClusterModal
+      clusterName={clusterDetails.name}
+      onClose={closeDisconnectModal}
       onConfirm={handleDisconnectCluster}
-      cancelButtonText={
-        <FormattedMessage
-          id="xpack.cloudConnect.connectedServices.disconnect.cancelButton"
-          defaultMessage="Cancel"
-        />
-      }
-      confirmButtonText={
-        <FormattedMessage
-          id="xpack.cloudConnect.connectedServices.disconnect.confirmButton"
-          defaultMessage="Disconnect"
-        />
-      }
-      buttonColor="danger"
-      defaultFocusedButton="cancel"
-      confirmButtonDisabled={isDisconnecting}
       isLoading={isDisconnecting}
-    >
-      <p>
-        <FormattedMessage
-          id="xpack.cloudConnect.connectedServices.disconnect.modalDescription"
-          defaultMessage="This will remove the connection to Cloud Connect. You can reconnect at any time by providing an API key."
-        />
-      </p>
-    </EuiConfirmModal>
+    />
   ) : null;
 
   const actionsButton = (
