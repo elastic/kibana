@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { CloudProvider, CloudConnectorVars, NewPackagePolicy } from '../../types';
+import {
+  isAwsCloudConnectorVars,
+  isAzureCloudConnectorVars,
+} from '../../../common/services/cloud_connector_helpers';
+
+import type { CloudProvider, CloudConnectorVars } from '../../../common/types';
+import type { NewPackagePolicy } from '../../types';
 
 /**
  * Updates package policy inputs with cloud connector secret references
@@ -77,16 +83,29 @@ export function updatePackagePolicyWithCloudConnectorSecrets(
 }
 
 /**
- * Extracts cloud connector name from package policy
+ * Extracts cloud connector name from package policy variables
  * Used to name cloud connectors based on user input or generate a default name
  *
- * @param packagePolicy - The package policy containing the cloud_connector_name
- * @param defaultName - Default name to use if cloud_connector_name is not found
+ * @param packagePolicy - The package policy containing the cloud connector variables
+ * @param targetCsp - The target cloud service provider
+ * @param defaultName - Default name to use if name cannot be extracted from variables
  * @returns The cloud connector name
  */
 export function getCloudConnectorNameFromPackagePolicy(
   packagePolicy: NewPackagePolicy,
+  targetCsp: CloudProvider,
   defaultName: string
 ): string {
-  return packagePolicy.cloud_connector_name || defaultName;
+  const vars = packagePolicy.inputs.find((input) => input.enabled)?.streams[0]?.vars;
+
+  if (!vars) {
+    return defaultName;
+  }
+
+  if (targetCsp === 'aws' && isAwsCloudConnectorVars(vars)) {
+    return vars.role_arn.value;
+  } else if (targetCsp === 'azure' && isAzureCloudConnectorVars(vars)) {
+    return vars.azure_credentials_cloud_connector_id.value;
+  }
+  return defaultName;
 }

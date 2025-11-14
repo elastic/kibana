@@ -7,7 +7,8 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
-import type { CloudProvider, CloudConnectorVars, NewPackagePolicy } from '../../types';
+import type { CloudProvider, CloudConnectorVars } from '../../../common/types';
+import type { NewPackagePolicy } from '../../types';
 import { CloudConnectorInvalidVarsError } from '../../errors';
 
 import { createSecrets } from './common';

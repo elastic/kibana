@@ -14,7 +14,7 @@ import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
 
 import { createAppContextStartContractMock, createPackagePolicyServiceMock } from '../../mocks';
 import { getPackageInfo } from '../epm/packages';
-import { appContextService, cloudConnectorService } from '../app_context';
+import { appContextService, cloudConnectorService } from '..';
 import { agentPolicyService } from '../agent_policy';
 
 import { AgentlessPoliciesServiceImpl } from './agentless_policies';
@@ -379,7 +379,13 @@ describe('AgentlessPoliciesService', () => {
           id: opts?.id || 'new-agentless-package-policy-id',
           name: policy.name,
           package: policy.package,
-          inputs: policy.inputs || [],
+          inputs: (policy.inputs || []).map((input) => ({
+            ...input,
+            streams: input.streams.map((stream) => ({
+              ...stream,
+              id: stream.id || 'stream-id',
+            })),
+          })),
           namespace: policy.namespace,
           revision: 1,
           created_at: new Date().toISOString(),

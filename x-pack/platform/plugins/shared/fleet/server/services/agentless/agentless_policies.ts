@@ -28,7 +28,7 @@ import type { PackagePolicyClient } from '../package_policy_service';
 
 import { agentPolicyService } from '../agent_policy';
 import { getPackageInfo } from '../epm/packages';
-import { appContextService, cloudConnectorService } from '../app_context';
+import { appContextService, cloudConnectorService } from '..';
 
 import type { PackageInfo } from '../../types';
 import {
@@ -177,9 +177,6 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
           ...(data.cloud_connector.cloud_connector_id && {
             cloud_connector_id: data.cloud_connector.cloud_connector_id,
           }),
-          ...(data.cloud_connector.cloud_connector_name && {
-            cloud_connector_name: data.cloud_connector.cloud_connector_name,
-          }),
         }),
       };
 
@@ -237,7 +234,7 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
           );
           await cloudConnectorService
             .delete(this.soClient, createdCloudConnectorId, true)
-            .catch((e) => {
+            .catch((e: Error) => {
               this.logger.error(
                 `Failed to delete cloud connector ${createdCloudConnectorId}: ${e.message}`,
                 { error: e }
