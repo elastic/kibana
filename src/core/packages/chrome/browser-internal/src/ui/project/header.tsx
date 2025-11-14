@@ -52,18 +52,14 @@ const getHeaderCss = ({ size, colors }: EuiThemeComputed) => ({
       display: flex;
       align-items: center;
       justify-content: center;
-      min-width: 56px; /* 56 = 40 + 8 + 8 */
+      min-width: 40px;
       cursor: pointer;
     `,
     logo: css`
       min-width: 0; /* overrides min-width: 40px */
       padding: 0;
     `,
-    spinner: css`
-      position: relative;
-      left: 4px;
-      top: 2px;
-    `,
+    spinner: css``,
   },
   leftHeaderSection: css`
     // needed to enable breadcrumbs truncation

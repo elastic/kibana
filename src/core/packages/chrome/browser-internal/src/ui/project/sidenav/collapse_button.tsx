@@ -8,13 +8,7 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
-import {
-  EuiButtonIcon,
-  logicalCSS,
-  logicalSizeCSS,
-  useEuiTheme,
-  useIsWithinBreakpoints,
-} from '@elastic/eui';
+import { EuiButtonIcon, useEuiTheme, useIsWithinBreakpoints } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
@@ -30,19 +24,12 @@ interface Props {
 }
 
 const sideNavCollapseButtonStyles = (euiTheme: UseEuiTheme['euiTheme']) => {
-  // packages/eui/src/components/header/header.styles.ts
-  const height = euiTheme.size.xxxl; // TODO: hardcoded height of the euiHeader header
-  const padding = euiTheme.size.s; // TODO: hardcoded padding of the euiHeader header
-
   return {
     sideNavCollapseButtonWrapper: css`
       display: flex;
       align-items: center;
       justify-content: center;
-      ${logicalSizeCSS(height)}
-      ${logicalCSS('border-right', euiTheme.border.thin)}
-      ${logicalCSS('margin-left', `-${padding}`)}
-      ${logicalCSS('margin-right', padding)}
+      min-width: 40px;
     `,
     sideNavCollapseButton: css`
       &.euiButtonIcon:hover {
@@ -78,7 +65,7 @@ export const SideNavCollapseButton: FC<Props> = ({ isCollapsed, toggle, ...rest 
       <EuiButtonIcon
         data-test-subj="sideNavCollapseButton"
         css={styles.sideNavCollapseButton}
-        size="s"
+        size="m"
         color="text"
         iconType={iconType}
         aria-label={
