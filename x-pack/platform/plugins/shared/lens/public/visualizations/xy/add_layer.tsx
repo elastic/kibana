@@ -14,6 +14,7 @@ import {
   EuiContextMenu,
   EuiFlexItem,
   EuiFlexGroup,
+  EuiToolTip,
   type UseEuiTheme,
   useEuiTheme,
 } from '@elastic/eui';
@@ -108,6 +109,10 @@ export function AddLayerButton({
 
   const firstLayerSubtype = getDataLayers(state.layers)?.[0]?.seriesType;
 
+  const buttonLabel = i18n.translate('xpack.lens.configPanel.addLayerButton', {
+    defaultMessage: 'Add layer',
+  });
+
   return (
     <div
       css={css`
@@ -119,17 +124,17 @@ export function AddLayerButton({
       <EuiPopover
         data-test-subj="lnsConfigPanel__addLayerPopover"
         button={
-          <EuiButtonIcon
-            data-test-subj="lnsLayerAddButton"
-            aria-label={i18n.translate('xpack.lens.configPanel.addLayerButton', {
-              defaultMessage: 'Add layer',
-            })}
-            size="s"
-            onClick={() => toggleLayersChoice(!showLayersChoice)}
-            iconType="plus"
-            color="text"
-            display="base"
-          />
+          <EuiToolTip content={buttonLabel}>
+            <EuiButtonIcon
+              data-test-subj="lnsLayerAddButton"
+              aria-label={buttonLabel}
+              size="s"
+              onClick={() => toggleLayersChoice(!showLayersChoice)}
+              iconType="plus"
+              color="text"
+              display="base"
+            />
+          </EuiToolTip>
         }
         isOpen={showLayersChoice}
         closePopover={() => toggleLayersChoice(false)}
