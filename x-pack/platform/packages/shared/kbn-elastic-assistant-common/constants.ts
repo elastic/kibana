@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ALERT_NAMESPACE } from "@kbn/rule-data-utils"
-
+import { ALERT_NAMESPACE } from '@kbn/rule-data-utils';
 
 export const ELASTIC_AI_ASSISTANT_URL = '/api/security_ai_assistant';
 export const ELASTIC_AI_ASSISTANT_INTERNAL_URL = '/internal/elastic_assistant';
