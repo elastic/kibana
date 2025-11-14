@@ -13,6 +13,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ToolbarSelector, type SelectableEntry } from '@kbn/shared-ux-toolbar-selector';
 import { comboBoxFieldOptionMatcher } from '@kbn/field-utils';
 import { css } from '@emotion/react';
+import type { Dimension } from '@kbn/metrics-experience-plugin/common/types';
 import {
   MAX_DIMENSIONS_SELECTIONS,
   METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ,
@@ -21,11 +22,11 @@ import {
 interface DimensionsFilterProps {
   fields: Array<{
     name: string;
-    dimensions: Array<{ name: string; type: string; description?: string }>;
+    dimensions: Dimension[];
   }>;
-  selectedDimensions: Array<{ name: string; type: string }>;
+  selectedDimensions: Dimension[];
   fullWidth?: boolean;
-  onChange: (dimensions: Array<{ name: string; type: string }>) => void;
+  onChange: (dimensions: Dimension[]) => void;
   singleSelection?: boolean;
 }
 
@@ -46,7 +47,7 @@ export const DimensionsSelector = ({
 
   // Extract all unique dimensions from fields that match the search term
   const allDimensions = useMemo(() => {
-    const dimensionMap = new Map<string, { name: string; type: string; description?: string }>();
+    const dimensionMap = new Map<string, Dimension>();
 
     fields
       .flatMap((field) => field.dimensions)

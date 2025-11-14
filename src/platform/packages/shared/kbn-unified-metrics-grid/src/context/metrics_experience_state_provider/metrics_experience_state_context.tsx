@@ -9,12 +9,13 @@
 
 import React, { useCallback } from 'react';
 import { createContext } from 'react';
+import type { Dimension } from '@kbn/metrics-experience-plugin/common/types';
 import { type MetricsExperienceRestorableState, useRestorableState } from '../../restorable_state';
 import { FIELD_VALUE_SEPARATOR } from '../../common/constants';
 
 export interface MetricsExperienceStateContextValue extends MetricsExperienceRestorableState {
   onPageChange: (value: number) => void;
-  onDimensionsChange: (value: Array<{ name: string; type: string }>) => void;
+  onDimensionsChange: (value: Dimension[]) => void;
   onValuesChange: (value: string[]) => void;
   onSearchTermChange: (value: string) => void;
   onToggleFullscreen: () => void;
@@ -31,7 +32,7 @@ export function MetricsExperienceStateProvider({ children }: { children: React.R
   const [isFullscreen, setIsFullscreen] = useRestorableState('isFullscreen', false);
 
   const onDimensionsChange = useCallback(
-    (nextDimensions: Array<{ name: string; type: string }>) => {
+    (nextDimensions: Dimension[]) => {
       setCurrentPage(0);
       setDimensions(nextDimensions);
       setValueFilters((prevValueFilters) => {

@@ -9,7 +9,7 @@
 
 import { useMemo, useRef, useEffect } from 'react';
 import type { TimeRange } from '@kbn/es-query';
-import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
+import type { Dimension, MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import { useValueFilters } from './use_value_filters';
 import { useMetricFieldsSearchQuery } from './use_metric_fields_search_query';
 
@@ -22,7 +22,7 @@ export const useFilteredMetricFields = ({
   onFilterComplete,
 }: {
   allFields: MetricField[];
-  dimensions: Array<{ name: string; type: string }>;
+  dimensions: Dimension[];
   searchTerm: string;
   valueFilters: string[];
   timeRange: TimeRange | undefined;
