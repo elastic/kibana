@@ -38,7 +38,7 @@ jest.mock('../apis/update_schedule_report');
 
 const mockValidateEmailAddresses = jest.fn().mockResolvedValue([]);
 const mockReportingHealth = jest.mocked(getReportingHealth);
-const mockGetUserPRofileQuery = jest.mocked(useGetUserProfileQuery);
+const mockGetUserProfileQuery = jest.mocked(useGetUserProfileQuery);
 const mockedUseUiSetting = jest.mocked(useUiSetting);
 const mockUpdateScheduleReport = jest.mocked(updateScheduleReport);
 
@@ -81,7 +81,7 @@ describe('EditScheduledReportFlyout', () => {
       areNotificationsEnabled: true,
     });
 
-    mockGetUserPRofileQuery.mockReturnValue({
+    mockGetUserProfileQuery.mockReturnValue({
       data: {
         user: {
           email: 'test@example.com',
@@ -125,7 +125,7 @@ describe('EditScheduledReportFlyout', () => {
   });
 
   it('submits the form correctly', async () => {
-    user = userEvent.setup();
+    user = userEvent.setup({ delay: null });
     render(
       <IntlProvider locale="en">
         <QueryClientProvider client={queryClient}>
@@ -165,6 +165,27 @@ describe('EditScheduledReportFlyout', () => {
           },
         })
       );
+    });
+  });
+
+  it('cancels the form correctly', async () => {
+    user = userEvent.setup({ delay: null });
+    render(
+      <IntlProvider locale="en">
+        <QueryClientProvider client={queryClient}>
+          <EditScheduledReportFlyout
+            {...defaultProps}
+            availableReportTypes={[{ label: 'PDF', id: 'printablePdfV2' }]}
+          />
+        </QueryClientProvider>
+      </IntlProvider>
+    );
+
+    const cancelButton = await screen.findByTestId('scheduleExportCancelButton');
+
+    await user.click(cancelButton);
+    await waitFor(() => {
+      expect(onClose).toHaveBeenCalled();
     });
   });
 });

@@ -28,8 +28,8 @@ export const ViewScheduledReportFlyout = ({
       paddingSize="l"
       ownFocus={true}
       onClose={onClose}
-      data-test-subj="scheduledReportFlyout"
-      aria-label="scheduledReportFlyout"
+      data-test-subj="viewScheduledReportFlyout"
+      aria-label="viewScheduledReportFlyout"
     >
       <ScheduledReportForm
         scheduledReport={scheduledReport}

@@ -50,7 +50,7 @@ jest.mock('../hooks/use_get_user_profile_query');
 const mockGetScheduledReports = jest.mocked(getScheduledReportsList);
 const mockDisableScheduledReports = jest.mocked(bulkDisableScheduledReports);
 const mockDeleteScheduledReports = jest.mocked(bulkDeleteScheduledReports);
-const mockGetUserPRofileQuery = jest.mocked(useGetUserProfileQuery);
+const mockGetUserProfileQuery = jest.mocked(useGetUserProfileQuery);
 
 const coreStart = coreMock.createStart();
 const http = httpServiceMock.createSetupContract();
@@ -107,7 +107,7 @@ describe('ReportSchedulesTable', () => {
         },
       },
     });
-    mockGetUserPRofileQuery.mockReturnValue({
+    mockGetUserProfileQuery.mockReturnValue({
       data: {
         user: {
           email: 'test@example.com',

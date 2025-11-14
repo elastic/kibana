@@ -59,8 +59,6 @@ export const EditScheduledReportFlyout = ({
         text: mountReactNode(<>{i18n.SCHEDULED_REPORT_UPDATE_SUCCESS_TOAST_MESSAGE}</>),
       });
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error(error);
       toasts.addError(error, {
         title: i18n.SCHEDULED_REPORT_FORM_FAILURE_TOAST_TITLE,
         toastMessage: i18n.SCHEDULED_REPORT_FORM_FAILURE_TOAST_MESSAGE,

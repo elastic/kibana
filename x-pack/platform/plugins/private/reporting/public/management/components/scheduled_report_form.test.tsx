@@ -32,7 +32,7 @@ jest.mock('../apis/get_reporting_health');
 
 const mockValidateEmailAddresses = jest.fn().mockResolvedValue([]);
 const mockReportingHealth = jest.mocked(getReportingHealth);
-const mockGetUserPRofileQuery = jest.mocked(useGetUserProfileQuery);
+const mockGetUserProfileQuery = jest.mocked(useGetUserProfileQuery);
 const mockedUseUiSetting = jest.mocked(useUiSetting);
 
 describe('ScheduledReportForm', () => {
@@ -77,7 +77,6 @@ describe('ScheduledReportForm', () => {
   });
 
   beforeEach(() => {
-    user = userEvent.setup();
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         application: {
@@ -95,7 +94,7 @@ describe('ScheduledReportForm', () => {
       hasPermanentEncryptionKey: true,
       areNotificationsEnabled: true,
     });
-    mockGetUserPRofileQuery.mockReturnValue({
+    mockGetUserProfileQuery.mockReturnValue({
       data: {
         user: {
           email: 'test@example.com',
@@ -127,6 +126,7 @@ describe('ScheduledReportForm', () => {
   });
 
   it('calls onSubmit correctly', async () => {
+    user = userEvent.setup({ delay: null });
     renderWithProviders(
       <ScheduledReportForm
         {...defaultProps}
@@ -180,6 +180,7 @@ describe('ScheduledReportForm', () => {
     });
 
     it('calls onSubmit correctly in edit mode', async () => {
+      user = userEvent.setup({ delay: null });
       const props = {
         ...defaultProps,
         editMode: true,
@@ -268,6 +269,7 @@ describe('ScheduledReportForm', () => {
 
   describe('Validation', () => {
     it('shows validation error when title is empty', async () => {
+      user = userEvent.setup({ delay: null });
       renderWithProviders(<ScheduledReportForm {...defaultProps} />);
 
       const titleInput = await screen.findByTestId('reportTitleInput');
@@ -276,10 +278,13 @@ describe('ScheduledReportForm', () => {
       const submitButton = await screen.findByTestId('scheduleExportSubmitButton');
       await user.click(submitButton);
 
+      expect(onSubmitForm).not.toHaveBeenCalled();
+
       expect(await screen.findByText('Report file name is required')).toBeInTheDocument();
     });
 
     it('does not throw error for previous start date when it is not updated in edit mode', async () => {
+      user = userEvent.setup();
       const props = {
         ...defaultProps,
         availableReportTypes: [{ id: 'printablePdfV2', label: 'PDF' }],

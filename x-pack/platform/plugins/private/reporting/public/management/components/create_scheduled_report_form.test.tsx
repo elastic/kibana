@@ -46,7 +46,7 @@ jest.mock('../apis/schedule_report');
 
 const mockValidateEmailAddresses = jest.fn().mockResolvedValue([]);
 const mockReportingHealth = jest.mocked(getReportingHealth);
-const mockGetUserPRofileQuery = jest.mocked(useGetUserProfileQuery);
+const mockGetUserProfileQuery = jest.mocked(useGetUserProfileQuery);
 const mockedUseUiSetting = jest.mocked(useUiSetting);
 const mockScheduleReport = jest.mocked(scheduleReport);
 
@@ -102,7 +102,7 @@ describe('createScheduledReportForm', () => {
       hasPermanentEncryptionKey: true,
       areNotificationsEnabled: true,
     });
-    mockGetUserPRofileQuery.mockReturnValue({
+    mockGetUserProfileQuery.mockReturnValue({
       data: {
         user: {
           email: 'test@example.com',
@@ -145,7 +145,7 @@ describe('createScheduledReportForm', () => {
   });
 
   it('submits the form correctly', async () => {
-    user = userEvent.setup();
+    user = userEvent.setup({ delay: null });
     render(
       <IntlProvider locale="en">
         <QueryClientProvider client={queryClient}>
@@ -182,6 +182,24 @@ describe('createScheduledReportForm', () => {
           },
         })
       );
+    });
+  });
+
+  it('cancels the form correctly', async () => {
+    user = userEvent.setup({ delay: null });
+    render(
+      <IntlProvider locale="en">
+        <QueryClientProvider client={queryClient}>
+          <CreateScheduledReportForm {...defaultProps} />
+        </QueryClientProvider>
+      </IntlProvider>
+    );
+
+    const cancelButton = await screen.findByTestId('scheduleExportCancelButton');
+
+    await user.click(cancelButton);
+    await waitFor(() => {
+      expect(onClose).toHaveBeenCalled();
     });
   });
 });
