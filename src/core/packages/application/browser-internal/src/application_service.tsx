@@ -10,7 +10,6 @@
 import React from 'react';
 import { BehaviorSubject, firstValueFrom, type Observable, Subject, type Subscription } from 'rxjs';
 import { map, shareReplay, takeUntil, distinctUntilChanged, filter, take } from 'rxjs';
-import { KBN_LOAD_MARKS, LOAD_FIRST_NAV } from '@kbn/core-root-browser-internal/src/events';
 import type { History } from 'history';
 import { createBrowserHistory } from 'history';
 
@@ -178,8 +177,8 @@ export class ApplicationService {
         if (currentAppId && currentAppId !== app.id) {
           this.appInternalStates.delete(currentAppId);
         }
-        performance.mark(KBN_LOAD_MARKS, {
-          detail: LOAD_FIRST_NAV,
+        performance.mark('kbnLoad', {
+          detail: 'first_app_nav',
         });
         this.currentAppId$.next(app.id);
         return app.mount(params);
