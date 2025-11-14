@@ -13,7 +13,7 @@ import {
 } from './v3';
 export * from './v3';
 
-export const rawNotificationSchemav2 = rawNotificationSchemaV1.extends({
+export const rawNotificationSchema = rawNotificationSchemaV1.extends({
   email: schema.maybe(
     rawEmailNotificationSchemaV1.extends({
       subject: schema.maybe(schema.string({ maxLength: 1000 })),
@@ -23,5 +23,5 @@ export const rawNotificationSchemav2 = rawNotificationSchemaV1.extends({
 });
 
 export const rawScheduledReportSchema = rawScheduledReportSchemaV3.extends({
-  notification: schema.maybe(rawNotificationSchemav2),
+  notification: schema.maybe(rawNotificationSchema),
 });
