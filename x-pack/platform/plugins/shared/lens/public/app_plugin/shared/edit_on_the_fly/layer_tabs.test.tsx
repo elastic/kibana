@@ -323,7 +323,7 @@ describe('LayerTabs', () => {
   });
 
   describe('layer reset and remove', () => {
-    it('should show layer actions menu when single layer', async () => {
+    it('should hide layer tabs when single layer', async () => {
       const datasourceMap = mockDatasourceMap();
       const visualizationMap = mockVisualizationMap();
 
@@ -347,20 +347,11 @@ describe('LayerTabs', () => {
 
       const { instance } = await prepareAndMountComponent(props);
 
-      // The tab action button should exist
-      expect(instance.find('[data-test-subj="lnsLayerActions"]').exists()).toBe(true);
+      // Layer tabs should not be rendered when there's only one layer
+      expect(instance.find('[data-test-subj="lnsLayerActions"]').exists()).toBe(false);
 
-      // Click the tab action button to open the menu
-      act(() => {
-        instance.find('button[aria-label="Layer actions"]').simulate('click');
-      });
-      instance.update();
-
-      // The layer actions menu should exist (contains reset/remove buttons)
-      expect(instance.find('[data-test-subj="lnsLayerActionsMenu"]').exists()).toBe(true);
-
-      // The reset action should exist
-      expect(instance.find('button[title="Clear layer"]').exists()).toBe(true);
+      // UnifiedTabs component should not be rendered
+      expect(instance.find('UnifiedTabs').exists()).toBe(false);
     });
 
     it('should show layer actions menu when multiple layers', async () => {
