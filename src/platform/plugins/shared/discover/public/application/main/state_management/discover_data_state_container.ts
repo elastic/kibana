@@ -340,7 +340,7 @@ export function getDataStateContainer({
 
           abortController = new AbortController();
 
-          const isEsqlQuery = isOfAggregateQueryType(appStateContainer.getState().query);
+          const isEsqlQuery = isOfAggregateQueryType(appStateContainer.get().query);
           const latestFetchDetails: DiscoverLatestFetchDetails = {
             abortController,
           };
