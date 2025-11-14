@@ -15,7 +15,6 @@ import {
   SYMBOLIZER_PACKAGE_POLICY_NAME,
 } from '@kbn/profiling-data-access-plugin/common';
 import supertest from 'supertest';
-import { getRoutePaths } from '../../../../common';
 
 const esArchiversPath = Path.posix.join(
   __dirname,
@@ -26,8 +25,6 @@ const esArchiversPath = Path.posix.join(
   'es_archiver',
   'profiling'
 );
-
-const profilingRoutePaths = getRoutePaths();
 
 function logWithTimer(logger: ToolingLog) {
   const start = process.hrtime();
@@ -72,14 +69,14 @@ export async function setupProfiling(
   await apiServices.fleet.agent.setup();
 
   const res = await st
-    .get(profilingRoutePaths.HasSetupESResources)
+    .get('/api/profiling/setup/es_resources')
     .set({ 'kbn-xsrf': 'foo' })
     .set('x-elastic-internal-origin', 'Kibana');
 
   if (!res.body.has_setup) {
     log(`Setting up Universal Profiling`);
     await st
-      .post(profilingRoutePaths.HasSetupESResources)
+      .post('/api/profiling/setup/es_resources')
       .set({ 'kbn-xsrf': 'foo' })
       .set('x-elastic-internal-origin', 'Kibana');
   } else {
