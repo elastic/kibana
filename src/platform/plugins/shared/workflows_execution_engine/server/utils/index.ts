@@ -12,3 +12,4 @@ export { buildStepExecutionId } from './build_step_execution_id/build_step_execu
 export { stringifyStackFrames } from './stringify_stack_frames';
 export { getKibanaUrl, buildWorkflowExecutionUrl } from './get_kibana_url';
 export { generateExecutionTaskScope } from './generate_execution_task_scope';
+export { TimeoutAbortedError, abortableTimeout } from './abortable_timeout/abortable_timeout';
