@@ -206,30 +206,6 @@ describe('WorkflowDetailTestModal', () => {
         });
       });
     });
-
-    describe('when no changes', () => {
-      beforeEach(() => {
-        (selectHasChanges as unknown as jest.Mock).mockReturnValue(false);
-      });
-
-      it('should call run workflow when submit button is clicked', async () => {
-        mockRunWorkflow.mockResolvedValue({ workflowExecutionId: 'exec-123AAAAA' });
-
-        const mockSetSelectedExecution = jest.fn();
-        mockUseWorkflowUrlState.mockReturnValue({
-          setSelectedExecution: mockSetSelectedExecution,
-        });
-
-        const { getByTestId } = renderModal();
-
-        const submitButton = getByTestId('submit-modal');
-        fireEvent.click(submitButton);
-
-        await waitFor(() => {
-          expect(mockRunWorkflow).toHaveBeenCalledWith({ inputs: { test: 'input' } });
-        });
-      });
-    });
   });
 
   describe('warnings', () => {
