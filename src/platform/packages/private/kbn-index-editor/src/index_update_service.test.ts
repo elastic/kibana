@@ -254,4 +254,33 @@ describe('IndexUpdateService', () => {
       });
     });
   });
+
+  describe('resetIndexMapping', () => {
+    it('should recreate index, refresh dataview, discard changes and refetch when index is created', async () => {
+      service.setIndexName('my-index');
+      service.setIndexCreated(true);
+
+      await service.resetIndexMapping();
+
+      // Verify the recreate endpoint was called
+      expect(http.post).toHaveBeenCalledWith('/internal/esql/lookup_index/my-index/recreate');
+
+      // Verify unsaved changes were discarded
+      const hasChangesAfterReset = await firstValueFrom(service.hasUnsavedChanges$);
+      expect(hasChangesAfterReset).toBe(false);
+    });
+
+    it('should not call recreate endpoint if index is not created', async () => {
+      service.setIndexName('my-index');
+
+      await service.resetIndexMapping();
+
+      // Verify the recreate endpoint was not called
+      expect(http.post).not.toHaveBeenCalled();
+
+      // Verify unsaved changes were discarded
+      const hasChangesAfterReset = await firstValueFrom(service.hasUnsavedChanges$);
+      expect(hasChangesAfterReset).toBe(false);
+    });
+  });
 });
