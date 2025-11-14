@@ -7,13 +7,14 @@
 
 import { z } from '@kbn/zod';
 import { platformCoreTools, ToolType } from '@kbn/onechat-common';
-import { defaultInferenceEndpoints } from '@kbn/inference-common';
+import { defaultInferenceEndpoints, InferenceConnectorType } from '@kbn/inference-common';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { createErrorResult } from '@kbn/onechat-server';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { CoreSetup } from '@kbn/core/server';
 import type { RetrieveDocumentationResultDoc } from '@kbn/llm-tasks-plugin/server';
 import type { OnechatStartDependencies, OnechatPluginStart } from '../../../../types';
+import { createModelProvider } from '../../../runner/model_provider';
 
 const productDocumentationSchema = z.object({
   query: z.string().describe('Search query to retrieve documentation about Elastic products'),
@@ -60,8 +61,11 @@ export const productDocumentationTool = (
         const model = await modelProvider.getDefaultModel();
         const connector = model.connector;
 
-        // Use static inferenceId (default ELSER endpoint)
-        const inferenceId = defaultInferenceEndpoints.ELSER;
+        // Try to get inferenceId from the connector, fall back to default ELSER endpoint
+        let inferenceId = defaultInferenceEndpoints.ELSER;
+        if (connector.type === InferenceConnectorType.Inference && connector.config?.inferenceId) {
+          inferenceId = connector.config.inferenceId;
+        }
 
         // Retrieve documentation
         const result = await llmTasks.retrieveDocumentation({
@@ -129,9 +133,29 @@ export const productDocumentationTool = (
             return { status: 'unavailable' };
           }
 
+          // Try to get inferenceId from the default connector using modelProvider
+          let inferenceId = defaultInferenceEndpoints.ELSER;
+          try {
+            const modelProvider = createModelProvider({
+              inference: plugins.inference,
+              request,
+            });
+            const model = await modelProvider.getDefaultModel();
+            const connector = model.connector;
+            // For inference connectors, inferenceId is stored in config.inferenceId
+            if (
+              connector.type === InferenceConnectorType.Inference &&
+              connector.config?.inferenceId
+            ) {
+              inferenceId = connector.config.inferenceId;
+            }
+          } catch {
+            // If we can't get the connector, fall back to default ELSER endpoint
+          }
+
           const isAvailable =
             (await llmTasks.retrieveDocumentationAvailable({
-              inferenceId: defaultInferenceEndpoints.ELSER,
+              inferenceId,
             })) ?? false;
 
           return {
