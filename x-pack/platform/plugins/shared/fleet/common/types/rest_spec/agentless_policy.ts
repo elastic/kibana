@@ -23,12 +23,25 @@ export const CreateAgentlessPolicyRequestSchema = {
   }),
   body: SimplifiedCreatePackagePolicyRequestBodySchema.extends({
     // Remove all properties that are not relevant for agentless policies
-    cloud_connector_id: undefined,
-    supports_cloud_connector: undefined,
     policy_id: undefined,
     policy_ids: undefined,
     supports_agentless: undefined,
     output_id: undefined,
+    cloud_connector_id: undefined,
+    cloud_connector_name: undefined,
+    supports_cloud_connector: undefined,
+    // Add explicit cloud_connector configuration object
+    cloud_connector: schema.maybe(
+      schema.object({
+        target_csp: schema.oneOf([
+          schema.literal('aws'),
+          schema.literal('azure'),
+          schema.literal('gcp'),
+        ]),
+        cloud_connector_id: schema.maybe(schema.string()),
+        cloud_connector_name: schema.maybe(schema.string()),
+      })
+    ),
   }),
 };
 

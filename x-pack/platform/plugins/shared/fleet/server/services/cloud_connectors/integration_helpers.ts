@@ -77,10 +77,10 @@ export function updatePackagePolicyWithCloudConnectorSecrets(
 }
 
 /**
- * Extracts cloud connector name from package policy vars
+ * Extracts cloud connector name from package policy
  * Used to name cloud connectors based on user input or generate a default name
  *
- * @param packagePolicy - The package policy containing vars
+ * @param packagePolicy - The package policy containing the cloud_connector_name
  * @param defaultName - Default name to use if cloud_connector_name is not found
  * @returns The cloud connector name
  */
@@ -88,6 +88,5 @@ export function getCloudConnectorNameFromPackagePolicy(
   packagePolicy: NewPackagePolicy,
   defaultName: string
 ): string {
-  const vars = packagePolicy.inputs?.find((input) => input.enabled)?.streams[0]?.vars;
-  return vars?.cloud_connector_name?.value || defaultName;
+  return packagePolicy.cloud_connector_name || defaultName;
 }
