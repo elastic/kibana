@@ -1128,6 +1128,8 @@
       "@kbn/flot-charts/*": ["src/platform/packages/shared/kbn-flot-charts/*"],
       "@kbn/foo-plugin": ["x-pack/platform/test/ui_capabilities/common/plugins/foo_plugin"],
       "@kbn/foo-plugin/*": ["x-pack/platform/test/ui_capabilities/common/plugins/foo_plugin/*"],
+      "@kbn/fs": ["x-pack/platform/packages/shared/kbn-fs"],
+      "@kbn/fs/*": ["x-pack/platform/packages/shared/kbn-fs/*"],
       "@kbn/ftr-apis-plugin": ["src/platform/plugins/private/ftr_apis"],
       "@kbn/ftr-apis-plugin/*": ["src/platform/plugins/private/ftr_apis/*"],
       "@kbn/ftr-common-functional-services": ["src/platform/packages/shared/kbn-ftr-common-functional-services"],

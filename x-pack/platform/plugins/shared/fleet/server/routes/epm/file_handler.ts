@@ -8,6 +8,7 @@
 import path from 'path';
 
 import type { TypeOf } from '@kbn/config-schema';
+import { sanitizeSvg } from '@kbn/fs';
 import mime from 'mime-types';
 import type { ResponseHeaders, KnownHeaders, HttpResponseOptions } from '@kbn/core/server';
 
@@ -63,9 +64,13 @@ export const getFileHandler: FleetRequestHandler<
 
     const contentType = storedAsset.media_type;
     validateContentTypeIsAllowed(contentType);
-    const buffer = storedAsset.data_utf8
+    let buffer = storedAsset.data_utf8
       ? Buffer.from(storedAsset.data_utf8, 'utf8')
       : Buffer.from(storedAsset.data_base64, 'base64');
+
+    if (contentType === 'image/svg+xml') {
+      buffer = sanitizeSvg(buffer);
+    }
 
     if (!contentType) {
       return response.custom({
@@ -104,10 +109,8 @@ export const getFileHandler: FleetRequestHandler<
 
     // if storedAsset is not available, fileBuffer *must* be
     // b/c we error if we don't have at least one, and storedAsset is the least likely
-    const { buffer, contentType } = {
-      contentType: mime.contentType(path.extname(assetPath)),
-      buffer: fileBuffer,
-    };
+    let buffer = fileBuffer;
+    const contentType = mime.contentType(path.extname(assetPath));
 
     if (!contentType) {
       return response.custom({
@@ -116,6 +119,10 @@ export const getFileHandler: FleetRequestHandler<
       });
     }
     validateContentTypeIsAllowed(contentType);
+
+    if (contentType === 'image/svg+xml') {
+      buffer = sanitizeSvg(buffer);
+    }
 
     return response.custom({
       body: buffer,
