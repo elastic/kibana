@@ -38,6 +38,8 @@ requestBody:
             name: cspm-aws-policy
             description: CSPM integration for AWS with cloud connector
             namespace: default
+            cloud_connector:
+              target_csp: aws
             inputs:
               cspm-cloudbeat/cis_aws:
                 enabled: true
@@ -70,6 +72,8 @@ requestBody:
             name: cspm-azure-policy
             description: CSPM integration for Azure with cloud connector
             namespace: default
+            cloud_connector:
+              target_csp: azure
             inputs:
               cspm-cloudbeat/cis_azure:
                 enabled: true
