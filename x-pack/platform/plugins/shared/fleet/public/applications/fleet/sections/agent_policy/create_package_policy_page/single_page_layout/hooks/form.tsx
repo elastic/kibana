@@ -204,7 +204,6 @@ async function savePackagePolicy(pkgPolicy: CreatePackagePolicyRequest['body']) 
     function formatPackage(pkg: NewPackagePolicy['package']) {
       return omit(pkg, 'title');
     }
-
     const result = await sendCreateAgentlessPolicy(
       {
         package: formatPackage(pkgPolicy.package),
@@ -218,7 +217,8 @@ async function savePackagePolicy(pkgPolicy: CreatePackagePolicyRequest['body']) 
           'id',
           'supports_agentless',
           'supports_cloud_connector',
-          'cloud_connector_id'
+          'cloud_connector_id',
+          'cloud_connector_name'
         ),
         id: pkgPolicy.id ? String(pkgPolicy.id) : undefined,
         inputs: formatInputs(pkgPolicy.inputs),
