@@ -73,6 +73,7 @@ export function QuickSearchVisor({
       if (e.key === 'Enter' && selectedSources.length > 0 && searchValue.trim()) {
         const selectedSourceNames = selectedSources.map((source) => source.label).join(', ');
         if (selectedSourceNames && searchValue.trim()) {
+          // Support of time_series
           const sourceCommand = query.trim().toUpperCase().startsWith('TS ') ? 'TS' : 'FROM';
           const newQuery = `${sourceCommand} ${selectedSourceNames} | WHERE KQL("${searchValue.trim()}")`;
           onUpdateAndSubmitQuery(newQuery);

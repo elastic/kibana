@@ -8,7 +8,14 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { EuiSelectable, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiButtonIcon } from '@elastic/eui';
+import {
+  EuiSelectable,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiButtonIcon,
+  type EuiSelectableListProps,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 
@@ -19,6 +26,13 @@ interface DataSourcesListProps {
   onChangeDatasources: (newId: string[]) => void;
   // Currently selected data sources
   currentSources: string[];
+}
+
+interface DataSourceOption {
+  key?: string;
+  label: string;
+  value?: string;
+  checked?: 'on' | 'off' | undefined;
 }
 
 export function DataSourcesList({
@@ -38,51 +52,55 @@ export function DataSourcesList({
         });
   }, [showOnlySelected]);
 
+  const onChoicesChange = useCallback(
+    (choices: EuiSelectableListProps<DataSourceOption>['options']) => {
+      const selectedChoices = choices.filter(({ checked }) => checked) as unknown as {
+        value: string;
+      }[];
+      const newSelectedValues = selectedChoices.map((choice) => choice.value);
+
+      // Prevent deselecting the last remaining source
+      if (newSelectedValues.length === 0 && currentSources.length === 1) {
+        return;
+      }
+
+      // I am doing this to preserve the order of existing selections and append new ones at the end
+      const orderedSelections = [
+        ...currentSources.filter((source) => newSelectedValues.includes(source)),
+        ...newSelectedValues.filter((value) => !currentSources.includes(value)),
+      ];
+
+      onChangeDatasources(orderedSelections);
+    },
+    [currentSources, onChangeDatasources]
+  );
+
+  const options: DataSourceOption[] = useMemo(() => {
+    return sourcesList
+      ?.filter((source) => (showOnlySelected ? currentSources?.includes(source) : true))
+      ?.map((source) => ({
+        key: source,
+        label: source,
+        value: source,
+        checked: currentSources?.includes(source) ? ('on' as const) : undefined,
+      }));
+  }, [sourcesList, showOnlySelected, currentSources]);
+
   const onFilterToggleClick = useCallback(() => {
     setShowOnlySelected((prev) => !prev);
   }, []);
 
   return (
-    <EuiSelectable<{
-      key?: string;
-      label: string;
-      value?: string;
-      checked?: 'on' | 'off' | undefined;
-    }>
+    <EuiSelectable<DataSourceOption>
       listProps={{
         truncationProps: {
           truncation: 'middle',
         },
       }}
-      data-test-subj="indexPattern-switcher"
+      data-test-subj="esqlEditor-datasourcesList-switcher"
       searchable
-      options={sourcesList
-        ?.filter((source) => (showOnlySelected ? currentSources?.includes(source) : true))
-        ?.map((source) => ({
-          key: source,
-          label: source,
-          value: source,
-          checked: currentSources?.includes(source) ? 'on' : undefined,
-        }))}
-      onChange={(choices) => {
-        const selectedChoices = choices.filter(({ checked }) => checked) as unknown as {
-          value: string;
-        }[];
-        const newSelectedValues = selectedChoices.map((choice) => choice.value);
-
-        // Prevent deselecting the last remaining source
-        if (newSelectedValues.length === 0 && currentSources.length === 1) {
-          return;
-        }
-
-        // I am doing this to preserve the order of existing selections and append new ones at the end
-        const orderedSelections = [
-          ...currentSources.filter((source) => newSelectedValues.includes(source)),
-          ...newSelectedValues.filter((value) => !currentSources.includes(value)),
-        ];
-
-        onChangeDatasources(orderedSelections);
-      }}
+      options={options}
+      onChange={onChoicesChange}
       searchProps={{
         id: 'visorSearchListId',
         compressed: true,

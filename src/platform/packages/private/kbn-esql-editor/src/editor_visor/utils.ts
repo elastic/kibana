@@ -7,7 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const generateDashPatterns = (sourceNames: string[]) => {
+/**
+ * We get the list of all indices (source names) from ES.
+ * This function generates index patterns for indices that share the same prefix.
+ * For example, if we have indices like:
+ * - logs-2023.01.01
+ * - logs-2023.01.02
+ * This function will generate the index pattern:
+ * - logs-*
+ * @param sourceNames all the available indices
+ * @returns an array of index patterns
+ */
+
+export const generateIndexPatterns = (sourceNames: string[]): string[] => {
   const prefixCounts = new Map<string, number>();
 
   sourceNames.forEach((name) => {
@@ -20,7 +32,7 @@ export const generateDashPatterns = (sourceNames: string[]) => {
     }
   });
 
-  // Only create patterns for prefixes that appear in multiple indices
+  // Only for indices that have more than one occurrence of the same prefix
   const patterns = new Set<string>();
   prefixCounts.forEach((count, prefix) => {
     if (count > 1) {
