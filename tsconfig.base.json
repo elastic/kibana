@@ -2242,6 +2242,8 @@
       "@kbn/timerange/*": ["src/platform/packages/shared/kbn-timerange/*"],
       "@kbn/tinymath": ["src/platform/packages/private/kbn-tinymath"],
       "@kbn/tinymath/*": ["src/platform/packages/private/kbn-tinymath/*"],
+      "@kbn/todo-plugin": ["examples/todo_example"],
+      "@kbn/todo-plugin/*": ["examples/todo_example/*"],
       "@kbn/tooling-log": ["src/platform/packages/shared/kbn-tooling-log"],
       "@kbn/tooling-log/*": ["src/platform/packages/shared/kbn-tooling-log/*"],
       "@kbn/traced-es-client": ["src/platform/packages/shared/kbn-traced-es-client"],

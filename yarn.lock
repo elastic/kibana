@@ -8983,6 +8983,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/todo-plugin@link:examples/todo_example":
+  version "0.0.0"
+  uid ""
+
 "@kbn/tooling-log@link:src/platform/packages/shared/kbn-tooling-log":
   version "0.0.0"
   uid ""

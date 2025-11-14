@@ -1079,6 +1079,7 @@
     "@kbn/timelion-grammar": "link:src/platform/packages/private/kbn-timelion-grammar",
     "@kbn/timerange": "link:src/platform/packages/shared/kbn-timerange",
     "@kbn/tinymath": "link:src/platform/packages/private/kbn-tinymath",
+    "@kbn/todo-plugin": "link:examples/todo_example",
     "@kbn/traced-es-client": "link:src/platform/packages/shared/kbn-traced-es-client",
     "@kbn/tracing": "link:src/platform/packages/shared/kbn-tracing",
     "@kbn/tracing-config": "link:src/platform/packages/shared/kbn-tracing-config",
