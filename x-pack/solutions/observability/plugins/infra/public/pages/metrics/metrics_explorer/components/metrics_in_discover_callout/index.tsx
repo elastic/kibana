@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
@@ -42,18 +42,15 @@ export function MetricsInDiscoverCallout({ timeRange }: MetricsInDiscoverCallout
     false
   );
 
-  const discoverHref = useMemo(() => {
-    if (!services.share) return undefined;
-    return services.share.url.locators.get(DISCOVER_APP_LOCATOR)?.getRedirectUrl({
-      timeRange: {
-        from: timeRange.from,
-        to: timeRange.to,
-      },
-      query: {
-        esql: getEsqlQuery('metrics-*'),
-      },
-    });
-  }, [services.share, timeRange]);
+  const discoverHref = services.share?.url.locators.get(DISCOVER_APP_LOCATOR)?.useUrl({
+    timeRange: {
+      from: timeRange.from,
+      to: timeRange.to,
+    },
+    query: {
+      esql: getEsqlQuery('metrics-*'),
+    },
+  });
 
   if (dismissedCallout || !discoverHref) {
     return null;
@@ -81,12 +78,11 @@ export function MetricsInDiscoverCallout({ timeRange }: MetricsInDiscoverCallout
       >
         <EuiText size="s">{calloutContent}</EuiText>
         <EuiSpacer size="m" />
-        {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
         <EuiButton
           data-test-subj="infraMetricsExplorerMetricsInDiscoverCalloutButton"
           fill
           href={discoverHref}
-          onClick={handleViewInDiscoverClick}
+          onClickCapture={handleViewInDiscoverClick}
           aria-label={buttonLabel}
         >
           {buttonLabel}
