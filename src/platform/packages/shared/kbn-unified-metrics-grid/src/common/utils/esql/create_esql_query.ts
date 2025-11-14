@@ -12,7 +12,7 @@ import { drop, evaluate, stats, timeseries, where } from '@kbn/esql-composer';
 import { type MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { sanitazeESQLInput } from '@kbn/esql-utils';
-import { DIMENSION_TYPES } from '../../constants';
+import { NUMERIC_TYPES } from '@kbn/metrics-experience-plugin/common/fields/constants';
 import { DIMENSIONS_COLUMN } from './constants';
 import { createMetricAggregation, createTimeBucketAggregation } from './create_aggregation';
 
@@ -33,7 +33,7 @@ const separator = '\u203A'.normalize('NFC');
  * @returns `true` if the field type needs to be cast to a string, otherwise `false`.
  */
 function needsStringCasting(fieldType: ES_FIELD_TYPES): boolean {
-  return DIMENSION_TYPES.includes(fieldType) && fieldType !== ES_FIELD_TYPES.KEYWORD;
+  return NUMERIC_TYPES.includes(fieldType) && fieldType !== ES_FIELD_TYPES.KEYWORD;
 }
 
 /**
