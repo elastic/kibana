@@ -406,7 +406,7 @@ export const convertFormStateToProcessor = (
       return {
         processorDefinition: {
           action: 'replace',
-          from: isEmpty(from) ? '' : from,
+          from,
           pattern: isEmpty(pattern) ? '' : pattern,
           replacement: isEmpty(replacement) ? '' : replacement,
           to: isEmpty(to) ? undefined : to,
