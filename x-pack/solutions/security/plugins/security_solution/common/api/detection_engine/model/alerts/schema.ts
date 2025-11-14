@@ -9,8 +9,8 @@ import type {
   ConvertSchemaType,
   ConvertSchemaTypeToReadSchema,
 } from '@kbn/rule-registry-plugin/common/schemas/schema';
+import type { ALERT_ATTACK_IDS } from '@kbn/elastic-assistant-common';
 import type {
-  ALERT_ATTACK_IDS,
   ALERT_BUILDING_BLOCK_TYPE,
   ALERT_INTENDED_TIMESTAMP,
   ALERT_REASON,
