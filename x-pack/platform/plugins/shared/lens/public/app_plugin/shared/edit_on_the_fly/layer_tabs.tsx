@@ -19,7 +19,7 @@ import {
 } from '@kbn/unified-search-plugin/public';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
-import { UnifiedTabs, useNewTabProps } from '@kbn/unified-tabs';
+import { UnifiedTabs } from '@kbn/unified-tabs';
 
 import {
   cloneLayer,
@@ -39,7 +39,6 @@ import { getSharedActions } from '../../../editor_frame_service/editor_frame/con
 import { getRemoveOperation } from '../../../utils';
 
 import type { LayerTabsProps } from './types';
-import { useAddLayerButton } from './use_add_layer_button';
 
 export const LENS_LAYER_TABS_CONTENT_ID = 'lnsLayerTabsContent';
 
@@ -75,8 +74,6 @@ export function LayerTabs({
   const [datasource] = Object.values(framePublicAPI.datasourceLayers);
   const isTextBasedLanguage =
     datasource?.isTextBasedLanguage() || isOfAggregateQueryType(attributes?.state.query) || false;
-
-  const { getNewTabDefaultProps } = useNewTabProps({ numberOfInitialItems: 0 });
 
   const dispatchLens = useLensDispatch();
 
@@ -265,14 +262,6 @@ export function LayerTabs({
     visualization,
   ]);
 
-  const addLayerButton = useAddLayerButton(
-    framePublicAPI,
-    coreStart,
-    dataViews,
-    uiActions,
-    setIsInlineFlyoutVisible
-  );
-
   return (
     <div
       css={css`
@@ -281,7 +270,7 @@ export function LayerTabs({
         border-bottom: ${euiTheme.border.thin};
       `}
     >
-      {!!addLayerButton && managedItems.length > 1 ? (
+      {managedItems.length > 1 ? (
         <UnifiedTabs
           items={managedItems}
           selectedItemId={selectedLayerId ?? undefined}
@@ -305,9 +294,10 @@ export function LayerTabs({
             // Update selected layer
             dispatchLens(setSelectedLayerId({ layerId: updatedState.selectedItem?.id ?? null }));
           }}
-          createItem={getNewTabDefaultProps}
           onEBTEvent={() => {}}
-          customNewTabButton={addLayerButton || undefined}
+          // we render the custom "Add layer" button in the flyout header toolbar
+          customNewTabButton={<></>}
+          createItem={() => ({ id: '', label: '' })}
           tabContentIdOverride={LENS_LAYER_TABS_CONTENT_ID}
           disableInlineLabelEditing
           disableDragAndDrop

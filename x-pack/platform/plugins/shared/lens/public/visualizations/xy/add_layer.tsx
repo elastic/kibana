@@ -128,6 +128,7 @@ export function AddLayerButton({
             onClick={() => toggleLayersChoice(!showLayersChoice)}
             iconType="plus"
             color="text"
+            display="base"
           />
         }
         isOpen={showLayersChoice}

@@ -35,6 +35,7 @@ import { trackSaveUiCounterEvents } from '../../../lens_ui_telemetry';
 import { useCurrentAttributes } from './use_current_attributes';
 import { deleteUserChartTypeFromSessionStorage } from '../../../chart_type_session_storage';
 import { LayerTabsWrapper } from './layer_tabs';
+import { useAddLayerButton } from './use_add_layer_button';
 
 export function LensEditConfigurationFlyout({
   attributes,
@@ -268,6 +269,14 @@ export function LensEditConfigurationFlyout({
     getUserMessages,
   ]);
 
+  const addLayerButton = useAddLayerButton(
+    framePublicAPI,
+    coreStart,
+    startDependencies.dataViews,
+    startDependencies.uiActions,
+    setIsInlineFlyoutVisible
+  );
+
   const onKeyDown = (e: KeyboardEvent) => {
     if (e.key === keys.ESCAPE) {
       closeFlyout?.();
@@ -295,7 +304,10 @@ export function LensEditConfigurationFlyout({
           isReadOnly={isReadOnly}
           applyButtonLabel={applyButtonLabel}
           toolbar={
-            <VisualizationToolbarWrapper framePublicAPI={framePublicAPI} isInlineEditing={true} />
+            <>
+              <VisualizationToolbarWrapper framePublicAPI={framePublicAPI} isInlineEditing={true} />
+              {addLayerButton}
+            </>
           }
         >
           <LayerConfiguration
@@ -337,7 +349,10 @@ export function LensEditConfigurationFlyout({
         isReadOnly={isReadOnly}
         applyButtonLabel={applyButtonLabel}
         toolbar={
-          <VisualizationToolbarWrapper framePublicAPI={framePublicAPI} isInlineEditing={true} />
+          <>
+            <VisualizationToolbarWrapper framePublicAPI={framePublicAPI} isInlineEditing={true} />
+            {addLayerButton}
+          </>
         }
         layerTabs={
           <LayerTabsWrapper

@@ -14,7 +14,7 @@ import type { LensLayerType } from './types';
 // Mapping of lens layer types to tab display names
 export const lensLayerTypeTabDisplayNames = {
   data: i18n.translate('xpack.lens.layerTypes.tabDisplayName.data', {
-    defaultMessage: 'Data',
+    defaultMessage: 'Data layer',
   }),
   referenceLine: i18n.translate('xpack.lens.layerTypes.tabDisplayName.referenceLine', {
     defaultMessage: 'Reference line',

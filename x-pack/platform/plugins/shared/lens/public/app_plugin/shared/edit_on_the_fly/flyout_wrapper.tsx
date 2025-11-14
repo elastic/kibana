@@ -39,7 +39,6 @@ export const FlyoutWrapper = ({
   isInlineFlyoutVisible,
   isScrollable,
   displayFlyoutHeader,
-  language,
   isNewPanel,
   isSaveable,
   onCancel,
@@ -102,33 +101,46 @@ export const FlyoutWrapper = ({
           </EuiFlexGroup>
           <EuiSpacer size="s" />
           {/* Header row 2: Edit in Lens and button groups */}
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
-            {navigateToLensEditor && !isReadOnly && (
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs">
-                  <EuiLink onClick={navigateToLensEditor} data-test-subj="navigateToLensEditorLink">
-                    {i18n.translate('xpack.lens.config.editLinkLabel', {
-                      defaultMessage: 'Edit in Lens',
-                    })}
-                  </EuiLink>
-                </EuiText>
-              </EuiFlexItem>
-            )}
-            <EuiFlexItem grow={true} />
-            {toolbar && (
-              <EuiFlexItem grow={false} data-test-subj="lnsVisualizationToolbar">
-                {toolbar}
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-          <EuiSpacer size="s" />
+          {(navigateToLensEditor || toolbar) && (
+            <>
+              <EuiFlexGroup
+                gutterSize="s"
+                justifyContent="spaceBetween"
+                alignItems="center"
+                responsive={false}
+              >
+                {navigateToLensEditor && !isReadOnly && (
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="xs">
+                      <EuiLink
+                        onClick={navigateToLensEditor}
+                        data-test-subj="navigateToLensEditorLink"
+                      >
+                        {i18n.translate('xpack.lens.config.editLinkLabel', {
+                          defaultMessage: 'Edit in Lens',
+                        })}
+                      </EuiLink>
+                    </EuiText>
+                  </EuiFlexItem>
+                )}
+                {/* Empty growing flex item to push toolbar to the right */}
+                <EuiFlexItem grow={true} />
+                {toolbar ? (
+                  <EuiFlexItem grow={false} data-test-subj="lnsVisualizationToolbar">
+                    {toolbar}
+                  </EuiFlexItem>
+                ) : null}
+              </EuiFlexGroup>
+              <EuiSpacer size="s" />
+            </>
+          )}
           {/* Header row 3: Layer tabs */}
           {layerTabs ? (
             <div
               // Adding negative margin to compensate for EuiFlyout header padding
-              css={css`
-                margin-inline: -${euiTheme.size.base};
-              `}
+              css={css({
+                marginInline: `-${euiTheme.size.base}`,
+              })}
             >
               {layerTabs}
             </div>
