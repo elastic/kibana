@@ -167,6 +167,7 @@ const CreateRulePageComponent: React.FC = () => {
     scheduleStepData,
     actionsStepForm,
     actionsStepData,
+    handleNewConnectorCreated,
   } = useRuleForms({
     defineStepDefault,
     aboutStepDefault: stepAboutDefaultValue,
@@ -718,6 +719,7 @@ const CreateRulePageComponent: React.FC = () => {
             summaryActionMessageParams={actionMessageParams}
             form={actionsStepForm}
             ruleInterval={scheduleStepData.interval}
+            onNewConnectorCreated={handleNewConnectorCreated}
           />
 
           <EuiHorizontalRule margin="m" />
@@ -772,6 +774,7 @@ const CreateRulePageComponent: React.FC = () => {
       submitRuleDisabled,
       submitRuleEnabled,
       scheduleStepData.interval,
+      handleNewConnectorCreated,
     ]
   );
   const memoActionsStepExtraAction = useMemo(

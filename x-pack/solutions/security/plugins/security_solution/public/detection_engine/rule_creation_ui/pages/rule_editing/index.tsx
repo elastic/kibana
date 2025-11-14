@@ -128,6 +128,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     scheduleStepData,
     actionsStepForm,
     actionsStepData,
+    handleNewConnectorCreated,
   } = useRuleForms({
     defineStepDefault: defineRuleData,
     aboutStepDefault: aboutRuleData,
@@ -322,6 +323,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
                   form={actionsStepForm}
                   key="actionsStep"
                   ruleInterval={scheduleStepData.interval}
+                  onNewConnectorCreated={handleNewConnectorCreated}
                 />
               )}
               <EuiSpacer />
@@ -356,6 +358,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
       actionsStepData,
       actionMessageParams,
       actionsStepForm,
+      handleNewConnectorCreated,
     ]
   );
 

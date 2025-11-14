@@ -14,9 +14,5 @@ describe(
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
   },
 
-  getArtifactMockedDataTests(getArtifactsListTestDataForArtifact('trustedDevices'), [
-    'siemV3',
-    'siemV4',
-    'siemV5',
-  ])
+  getArtifactMockedDataTests(getArtifactsListTestDataForArtifact('trustedDevices'))
 );
