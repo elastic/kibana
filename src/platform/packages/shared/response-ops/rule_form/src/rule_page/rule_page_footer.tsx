@@ -115,12 +115,11 @@ export const RulePageFooter = (props: RulePageFooterProps) => {
                 requestParams: operation.params,
               });
             }
-          } catch (queryError: any) {
+          } catch (error: any) {
             // TODO: how to handle error
             console.log('error:', error);
             requestResponder.error({
-              body: Joperation.response.body,
-              requestParams: operation.params,
+              json: { message: error.message },
             });
           }
         });
@@ -129,9 +128,8 @@ export const RulePageFooter = (props: RulePageFooterProps) => {
     } catch (error: any) {
       // TODO: how to handle error
       console.log('error:', error);
-      requestsAdapter.reset();
-      requestsAdapter.start('Rule execution query', {
-        id: uuidv4(),
+      requestResponder.error({
+        json: { message: error.message },
       });
       inspector.open({ requests: requestsAdapter });
     }

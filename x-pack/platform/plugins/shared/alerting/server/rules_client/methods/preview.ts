@@ -6,6 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { searchSourceInspector } from '../../routes/rule/apis/execute/search_source_interceptor';
 import { createEsClientWithMeta } from '../../routes/rule/apis/execute/es_client_meta_wrapper';
 import type {
   AsyncSearchParams,
@@ -35,6 +36,7 @@ export async function preview(
     // const [, { data, dataViews, share }] = await core.getStartServices();
     const esQueries: any[] = [];
     const asCurrentUserWithMeta = createEsClientWithMeta(esClient, esQueries);
+    const inspectedSearchSourceClient = searchSourceInspector(searchSourceClient, esQueries);
 
     const services: RuleExecutorServices = {
       alertsClient: {
@@ -51,7 +53,7 @@ export async function preview(
       },
       getDataViews: async () => dataViewsService,
       getMaintenanceWindowIds: async () => [],
-      getSearchSourceClient: async () => searchSourceClient,
+      getSearchSourceClient: async () => inspectedSearchSourceClient,
       savedObjectsClient,
       scopedClusterClient: {
         asCurrentUser: asCurrentUserWithMeta,
