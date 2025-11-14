@@ -149,7 +149,12 @@ export const Snippets = () => {
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiBasicTable tableCaption="List of code snippets" columns={columns} items={snippets} />
+      <EuiBasicTable
+        tableCaption="List of code snippets"
+        columns={columns}
+        items={snippets}
+        loading={isLoading}
+      />
       {isFlyoutVisible && (
         <EuiFlyout
           onClose={() => setIsFlyoutVisible(false)}
