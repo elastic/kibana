@@ -234,7 +234,8 @@ function waitForKibanaLogin(kbUrl: string, credentials: Credentials): Promise<vo
 const getProductTypes = (
   tier: string,
   endpointAddon: boolean,
-  cloudAddon: boolean
+  cloudAddon: boolean,
+  aisocAddon: boolean
 ): ProductType[] => {
   let productTypes: ProductType[] = [...DEFAULT_CONFIGURATION];
 
@@ -249,6 +250,9 @@ const getProductTypes = (
   }
   if (!endpointAddon) {
     productTypes = productTypes.filter((product) => product.product_line !== 'endpoint');
+  }
+  if (!aisocAddon) {
+    productTypes = productTypes.filter((product) => product.product_line !== 'search_ai_lake');
   }
 
   return productTypes;
@@ -335,6 +339,11 @@ export const cli = () => {
           type: 'boolean',
           default: true,
         })
+        .option('aisocAddon', {
+          alias: 'aa',
+          type: 'boolean',
+          default: true,
+        })
         .option('commit', {
           alias: 'c',
           type: 'string',
@@ -377,6 +386,7 @@ ${JSON.stringify(argv, null, 2)}
       const tier: string = argv.tier;
       const endpointAddon: boolean = argv.endpointAddon;
       const cloudAddon: boolean = argv.cloudAddon;
+      const aisocAddon: boolean = argv.aisocAddon;
       const commit: string = argv.commit;
 
       log.info(`
@@ -452,7 +462,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
               const PROJECT_NAME = `${PROJECT_NAME_PREFIX}-${id}`;
 
               const productTypes = isOpen
-                ? getProductTypes(tier, endpointAddon, cloudAddon)
+                ? getProductTypes(tier, endpointAddon, cloudAddon, aisocAddon)
                 : (parseTestFileConfig(filePath).productTypes as ProductType[]);
 
               log.info(`Running spec file: ${filePath}`);
