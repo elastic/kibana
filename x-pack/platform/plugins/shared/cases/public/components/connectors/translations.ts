@@ -33,3 +33,10 @@ export const CARD_TABLE_VALUE_COLUMN_NAME = i18n.translate(
     defaultMessage: 'Value',
   }
 );
+
+export const CARD_TABLE_CAPTION = i18n.translate(
+  'xpack.cases.connectors.connectorCard.table.caption',
+  {
+    defaultMessage: 'Connector fields table',
+  }
+);

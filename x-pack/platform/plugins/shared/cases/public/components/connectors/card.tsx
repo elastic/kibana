@@ -21,7 +21,11 @@ import {
 import type { ConnectorTypes } from '../../../common/types/domain';
 import { useKibana } from '../../common/lib/kibana';
 import { getConnectorIcon } from '../utils';
-import { CARD_TABLE_FIELD_COLUMN_NAME, CARD_TABLE_VALUE_COLUMN_NAME } from './translations';
+import {
+  CARD_TABLE_CAPTION,
+  CARD_TABLE_FIELD_COLUMN_NAME,
+  CARD_TABLE_VALUE_COLUMN_NAME,
+} from './translations';
 
 interface Item {
   title: string;
@@ -96,7 +100,7 @@ const ConnectorCardDisplay: React.FC<ConnectorCardProps> = ({
           {listItems.length > 0 && (
             <EuiBasicTable
               rowProps={rowProps}
-              tableCaption="Demo for EuiBasicTable with sorting"
+              tableCaption={CARD_TABLE_CAPTION}
               responsiveBreakpoint={false}
               items={listItems}
               columns={columns}
