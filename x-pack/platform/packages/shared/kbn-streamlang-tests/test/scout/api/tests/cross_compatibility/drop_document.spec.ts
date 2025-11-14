@@ -69,7 +69,7 @@ apiTest.describe(
       }
     );
 
-    apiTest('should raise a runtime error when where is omitted', async ({ testBed, esql }) => {
+    apiTest('should raise a runtime error when where is omitted', async () => {
       const streamlangDSL: StreamlangDSL = {
         steps: [
           {
