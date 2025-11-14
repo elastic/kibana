@@ -48,10 +48,9 @@ export function MetricsExperienceStateProvider({ children }: { children: React.R
 
   const onValuesChange = useCallback(
     (values: string[]) => {
-      setCurrentPage(0);
       setValueFilters(values);
     },
-    [setValueFilters, setCurrentPage]
+    [setValueFilters]
   );
 
   const onPageChange = useCallback((page: number) => setCurrentPage(page), [setCurrentPage]);
