@@ -7,10 +7,11 @@
 
 import { expect } from '@kbn/scout';
 import { test } from '../fixtures';
+// import { CUSTOM_ROLES } from './custom_roles';
 
 test.describe('Index template wizard - Create', { tag: ['@ess'] }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects, page }) => {
-    // TODO: Create loginAsIndexManagementUser role
+    // await browserAuth.loginWithCustomRole(CUSTOM_ROLES.indexManagement);
     await browserAuth.loginAsAdmin();
     await pageObjects.indexManagement.navigateToIndexManagementTab('templates');
     // Click Create Template button

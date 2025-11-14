@@ -7,10 +7,11 @@
 
 import { expect } from '@kbn/scout';
 import { test } from '../fixtures';
+// import { CUSTOM_ROLES } from './custom_roles';
 
 test.describe('Index details page', { tag: ['@ess'] }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
-    // TODO: Create loginAsIndexManagementUser role
+    // await browserAuth.loginWithCustomRole(CUSTOM_ROLES.indexManagement);
     await browserAuth.loginAsAdmin();
     await pageObjects.indexManagement.goto();
   });
