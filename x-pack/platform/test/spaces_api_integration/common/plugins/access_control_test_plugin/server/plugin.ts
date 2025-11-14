@@ -19,6 +19,9 @@ export class AccessControlTestPlugin implements Plugin {
       hidden: false,
       namespaceType: 'multiple-isolated',
       supportsAccessControl: true,
+      management: {
+        importableAndExportable: true,
+      },
       mappings: {
         dynamic: false,
         properties: {
@@ -31,6 +34,9 @@ export class AccessControlTestPlugin implements Plugin {
       name: NON_ACCESS_CONTROL_TYPE,
       hidden: false,
       namespaceType: 'multiple-isolated',
+      management: {
+        importableAndExportable: true,
+      },
       mappings: {
         dynamic: false,
         properties: {
@@ -502,6 +508,7 @@ export class AccessControlTestPlugin implements Plugin {
         }
       }
     );
+
     // Get NON_ACCESS_CONTROL_TYPE
     router.get(
       {

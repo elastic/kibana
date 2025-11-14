@@ -158,6 +158,6 @@ export interface SavedObjectsRawDocSource {
   references?: SavedObjectReference[];
   originId?: string;
   managed?: boolean;
-
+  accessControl?: SavedObjectAccessControl;
   [typeMapping: string]: any;
 }
