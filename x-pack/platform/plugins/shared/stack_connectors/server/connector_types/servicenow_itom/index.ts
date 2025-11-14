@@ -13,32 +13,37 @@ import type {
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
 } from '@kbn/actions-plugin/server/types';
 import { AlertingConnectorFeatureId, SecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
-import { validate } from '../lib/servicenow/validators';
-import {
-  ExecutorParamsSchemaITOM,
-  ExternalIncidentServiceSecretConfigurationSchema,
-  ExternalIncidentServiceConfigurationBaseSchema,
-} from '../lib/servicenow/schema';
-import * as i18n from '../lib/servicenow/translations';
 import type {
-  ExecutorSubActionGetChoicesParams,
-  PushToServiceResponse,
-  ServiceNowExecutorResultData,
+  ServiceNowPublicConfigurationBaseType,
   ServiceNowSecretConfigurationType,
-  ServiceFactory,
+  ExecutorSubActionGetChoicesParams,
+} from '@kbn/connector-schemas/servicenow';
+import type {
   ExecutorParamsITOM,
   ExecutorSubActionAddEventParams,
+} from '@kbn/connector-schemas/servicenow_itom';
+import {
+  ExternalIncidentServiceConfigurationBaseSchema,
+  ExternalIncidentServiceSecretConfigurationSchema,
+} from '@kbn/connector-schemas/servicenow';
+import {
+  CONNECTOR_ID,
+  CONNECTOR_NAME,
+  ExecutorParamsSchemaITOM,
+} from '@kbn/connector-schemas/servicenow_itom';
+import { validate } from '../lib/servicenow/validators';
+import type {
+  PushToServiceResponse,
+  ServiceNowExecutorResultData,
+  ServiceFactory,
   ExternalServiceApiITOM,
   ExternalServiceITOM,
-  ServiceNowPublicConfigurationBaseType,
 } from '../lib/servicenow/types';
-import { ServiceNowITOMConnectorTypeId, snExternalServiceConfig } from '../lib/servicenow/config';
+import { snExternalServiceConfig } from '../lib/servicenow/config';
 import { throwIfSubActionIsNotSupported } from '../lib/servicenow/utils';
 import { createExternalService } from './service';
 import { api as apiITOM } from './api';
 import { createServiceWrapper } from '../lib/servicenow/create_service_wrapper';
-
-export { ServiceNowITOMConnectorTypeId };
 
 export type ServiceNowConnectorType<
   C extends Record<string, unknown> = ServiceNowPublicConfigurationBaseType,
@@ -56,9 +61,9 @@ export function getServiceNowITOMConnectorType(): ServiceNowConnectorType<
   ExecutorParamsITOM
 > {
   return {
-    id: ServiceNowITOMConnectorTypeId,
+    id: CONNECTOR_ID,
     minimumLicenseRequired: 'platinum',
-    name: i18n.SERVICENOW_ITOM,
+    name: CONNECTOR_NAME,
     supportedFeatureIds: [AlertingConnectorFeatureId, SecurityConnectorFeatureId],
     validate: {
       config: {
@@ -75,7 +80,7 @@ export function getServiceNowITOMConnectorType(): ServiceNowConnectorType<
       },
     },
     executor: curry(executorITOM)({
-      actionTypeId: ServiceNowITOMConnectorTypeId,
+      actionTypeId: CONNECTOR_ID,
       createService: createExternalService,
       api: apiITOM,
     }),
