@@ -85,7 +85,7 @@ export function fetchAll(
   try {
     const searchSource = savedSearch.searchSource.createChild();
     const dataView = searchSource.getField('index')!;
-    const { query, sort } = appStateContainer.getState();
+    const { query, sort } = appStateContainer.get();
     const isEsqlQuery = isOfAggregateQueryType(query);
     const currentTab = getCurrentTab();
 
@@ -236,7 +236,7 @@ export async function fetchMoreDocuments(params: CommonFetchParams): Promise<voi
   try {
     const searchSource = savedSearch.searchSource.createChild();
     const dataView = searchSource.getField('index')!;
-    const { query, sort } = appStateContainer.getState();
+    const { query, sort } = appStateContainer.get();
     const isEsqlQuery = isOfAggregateQueryType(query);
 
     if (isEsqlQuery) {
