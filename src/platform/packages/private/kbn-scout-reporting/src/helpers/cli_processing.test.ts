@@ -127,6 +127,35 @@ describe('cli_processing', () => {
       expect(getRunTarget(argv)).toBe('serverless-search');
     });
 
+    it(`should return the correct mode for '--grep=@svlSecurity' when env var is not set`, () => {
+      delete process.env.SCOUT_TARGET_MODE;
+      const argv = [
+        'node_modules/.bin/playwright',
+        'test',
+        '--project',
+        'local',
+        '--grep=@svlSecurity',
+        '--config',
+        'path/to/config',
+      ];
+      expect(getRunTarget(argv)).toBe('serverless-security');
+    });
+
+    it(`should return the correct mode for '--grep @svlSecurity' when env var is not set`, () => {
+      delete process.env.SCOUT_TARGET_MODE;
+      const argv = [
+        'node_modules/.bin/playwright',
+        'test',
+        '--project',
+        'local',
+        '--grep',
+        '@svlSecurity',
+        '--config',
+        'path/to/config',
+      ];
+      expect(getRunTarget(argv)).toBe('serverless-security');
+    });
+
     it(`should return 'undefined' for an invalid --grep tag when env var is not set`, () => {
       delete process.env.SCOUT_TARGET_MODE;
       const argv = [

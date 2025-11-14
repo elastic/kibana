@@ -49,13 +49,25 @@ export function getRunTarget(argv: string[] = process.argv): string {
     '@svlSecurity': 'serverless-security',
   };
 
-  const grepIndex = argv.findIndex((arg) => arg === '--grep' || arg.startsWith('--grep='));
-  if (grepIndex !== -1) {
-    const tag = argv[grepIndex].startsWith('--grep=')
-      ? argv[grepIndex].split('=')[1]
-      : argv[grepIndex + 1] || ''; // Look at the next argument if '--grep' is used without `=`
+  // Try to find --grep argument in different formats
+  for (let i = 0; i < argv.length; i++) {
+    const arg = argv[i];
 
-    return tagsToMode[tag] || 'undefined';
+    // Handle --grep=@tag format
+    if (arg.startsWith('--grep=')) {
+      const tag = arg.split('=')[1];
+      if (tag && tagsToMode[tag]) {
+        return tagsToMode[tag];
+      }
+    }
+
+    // Handle --grep @tag format
+    if (arg === '--grep' && i + 1 < argv.length) {
+      const tag = argv[i + 1];
+      if (tag && tagsToMode[tag]) {
+        return tagsToMode[tag];
+      }
+    }
   }
 
   return 'undefined';
