@@ -157,8 +157,8 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | WHERE \`host.name\` IN ("host-1", "host-2")
-  | WHERE region IN ("us-east")
+  | WHERE \`host.name\`::STRING IN ("host-1", "host-2")
+  | WHERE region::STRING IN ("us-east")
   | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
 `.trim()
     );
@@ -213,7 +213,7 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | WHERE \`host.name\` IN ("host-1")
+  | WHERE \`host.name\`::STRING IN ("host-1")
   | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
 `.trim()
     );
@@ -228,7 +228,7 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | WHERE \`host.name\` IN ("host-1")
+  | WHERE \`host.name\`::STRING IN ("host-1")
   | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`host.name\`
 `.trim()
     );
@@ -309,8 +309,8 @@ TS metrics-*
       expect(query).toBe(
         `
 TS metrics-*
-  | WHERE \`service-name\` IN ("web-server")
-  | WHERE \`container-id\` IN ("cont-123")
+  | WHERE \`service-name\`::STRING IN ("web-server")
+  | WHERE \`container-id\`::STRING IN ("cont-123")
   | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
 `.trim()
       );

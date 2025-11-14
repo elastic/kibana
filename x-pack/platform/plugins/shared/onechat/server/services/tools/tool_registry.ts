@@ -11,7 +11,14 @@ import {
   createBadRequestError,
   validateToolId,
 } from '@kbn/onechat-common';
-import type { Runner, RunToolReturn, ScopedRunnerRunToolsParams } from '@kbn/onechat-server';
+import type {
+  Runner,
+  RunToolReturn,
+  ScopedRunnerRunToolsParams,
+  ToolAvailabilityContext,
+} from '@kbn/onechat-server';
+import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
+import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type {
   InternalToolDefinition,
   ToolCreateParams,
@@ -42,28 +49,44 @@ export interface ToolRegistry {
   ): Promise<RunToolReturn>;
 }
 
-interface CreateToolClientParams {
+interface CreateToolRegistryParams {
   getRunner: () => Runner;
   persistedProvider: WritableToolProvider;
   builtinProvider: ReadonlyToolProvider;
   request: KibanaRequest;
   space: string;
+  uiSettings: UiSettingsServiceStart;
+  savedObjects: SavedObjectsServiceStart;
 }
 
-export const createToolRegistry = (params: CreateToolClientParams): ToolRegistry => {
+export const createToolRegistry = (params: CreateToolRegistryParams): ToolRegistry => {
   return new ToolRegistryImpl(params);
 };
 
 class ToolRegistryImpl implements ToolRegistry {
   private readonly persistedProvider: WritableToolProvider;
   private readonly builtinProvider: ReadonlyToolProvider;
+  private readonly spaceId: string;
   private readonly request: KibanaRequest;
+  private readonly uiSettings: UiSettingsServiceStart;
+  private readonly savedObjects: SavedObjectsServiceStart;
   private readonly getRunner: () => Runner;
 
-  constructor({ persistedProvider, builtinProvider, request, getRunner }: CreateToolClientParams) {
+  constructor({
+    persistedProvider,
+    builtinProvider,
+    request,
+    getRunner,
+    space,
+    uiSettings,
+    savedObjects,
+  }: CreateToolRegistryParams) {
     this.persistedProvider = persistedProvider;
     this.builtinProvider = builtinProvider;
     this.request = request;
+    this.spaceId = space;
+    this.uiSettings = uiSettings;
+    this.savedObjects = savedObjects;
     this.getRunner = getRunner;
   }
 
@@ -76,6 +99,9 @@ class ToolRegistryImpl implements ToolRegistry {
   ): Promise<RunToolReturn> {
     const { toolId, ...otherParams } = params;
     const tool = await this.get(toolId);
+    if (!(await this.isAvailable(tool))) {
+      throw createBadRequestError(`Tool ${toolId} is not available`);
+    }
     const executable = toExecutableTool({ tool, runner: this.getRunner(), request: this.request });
     return (await executable.execute(otherParams)) as RunToolReturn;
   }
@@ -92,7 +118,11 @@ class ToolRegistryImpl implements ToolRegistry {
   async get(toolId: string) {
     for (const provider of this.orderedProviders) {
       if (await provider.has(toolId)) {
-        return provider.get(toolId);
+        const tool = await provider.get(toolId);
+        if (!(await this.isAvailable(tool))) {
+          throw createBadRequestError(`Tool ${toolId} is not available`);
+        }
+        return tool;
       }
     }
     throw createToolNotFoundError({ toolId });
@@ -102,7 +132,11 @@ class ToolRegistryImpl implements ToolRegistry {
     const allTools: InternalToolDefinition[] = [];
     for (const provider of this.orderedProviders) {
       const toolsFromType = await provider.list();
-      allTools.push(...toolsFromType);
+      for (const tool of toolsFromType) {
+        if (await this.isAvailable(tool)) {
+          allTools.push(tool);
+        }
+      }
     }
     return allTools;
   }
@@ -144,5 +178,18 @@ class ToolRegistryImpl implements ToolRegistry {
       }
     }
     throw createToolNotFoundError({ toolId });
+  }
+
+  private async isAvailable(tool: InternalToolDefinition): Promise<boolean> {
+    const soClient = this.savedObjects.getScopedClient(this.request);
+    const uiSettingsClient = this.uiSettings.asScopedToClient(soClient);
+
+    const context: ToolAvailabilityContext = {
+      spaceId: this.spaceId,
+      request: this.request,
+      uiSettings: uiSettingsClient,
+    };
+    const toolStatus = await tool.isAvailable(context);
+    return toolStatus.status === 'available';
   }
 }

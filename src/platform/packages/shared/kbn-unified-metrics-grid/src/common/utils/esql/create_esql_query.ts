@@ -68,7 +68,6 @@ export function createESQLQuery({ metric, dimensions = [], filters }: CreateESQL
 
   const whereConditions: QueryOperator[] = [];
   const valuesByField = new Map<string, Set<string>>();
-  const dimensionTypeMap = new Map(dimensions?.map((dim) => [dim.name, dim.type]));
 
   if (filters && filters.length) {
     for (const filter of filters) {
@@ -81,12 +80,15 @@ export function createESQLQuery({ metric, dimensions = [], filters }: CreateESQL
     }
 
     valuesByField.forEach((value, key) => {
-      const dimType = dimensionTypeMap.get(key);
-      const sanitizedKey = sanitazeESQLInput(key) ?? key;
-      const castedKey = castFieldIfNeeded(sanitizedKey, dimType);
+      const valuesArray = Array.from(value);
+      const escapedKey = sanitazeESQLInput(key);
+
+      // Always cast to STRING for filtering to handle potential mapping conflicts
+      // where the same field name exists with different types (e.g., both long and keyword)
+      const castedKey = `${escapedKey}::STRING`;
 
       whereConditions.push(
-        where(`${castedKey} IN (${new Array(value.size).fill('?').join(', ')})`, Array.from(value))
+        where(`${castedKey} IN (${new Array(value.size).fill('?').join(', ')})`, valuesArray)
       );
     });
   }
