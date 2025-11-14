@@ -27,7 +27,7 @@ export const CreateAgentlessPolicyRequestSchema = {
     policy_ids: undefined,
     supports_agentless: undefined,
     output_id: undefined,
-    // Add explicit cloud_connector configuration object
+    // Cloud connector configuration - all connector settings go here
     cloud_connector: schema.maybe(
       schema.object({
         target_csp: schema.oneOf([
@@ -35,7 +35,14 @@ export const CreateAgentlessPolicyRequestSchema = {
           schema.literal('azure'),
           schema.literal('gcp'),
         ]),
-        cloud_connector_id: schema.maybe(schema.string()),
+        cloud_connector_id: schema.maybe(
+          schema.string({
+            meta: {
+              description:
+                'ID of an existing cloud connector to reuse. If not provided, a new connector will be created.',
+            },
+          })
+        ),
       })
     ),
   }),

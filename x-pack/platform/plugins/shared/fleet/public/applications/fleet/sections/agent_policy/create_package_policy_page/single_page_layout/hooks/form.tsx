@@ -171,7 +171,8 @@ async function savePackagePolicy(pkgPolicy: CreatePackagePolicyRequest['body']) 
           'vars',
           'id',
           'supports_agentless',
-          'supports_cloud_connector'
+          'supports_cloud_connector',
+          'cloud_connector_id'
         ),
         id: pkgPolicy.id ? String(pkgPolicy.id) : undefined,
         inputs: formatInputs(pkgPolicy.inputs),
