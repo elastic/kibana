@@ -22,6 +22,8 @@ import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 import { migrateEndpointDataToSupportSpaces } from './endpoint/migrations/space_awareness_migration';
 import { SavedObjectsClientFactory } from './endpoint/services/saved_objects';
 import { registerEntityStoreDataViewRefreshTask } from './lib/entity_analytics/entity_store/tasks/data_view_refresh/data_view_refresh_task';
+import { entityStoreKnowledgeTool } from './lib/entity_analytics/entity_store/entity_store_knowledge_tool';
+import { entityStoreAgent } from './lib/entity_analytics/entity_store/entity_store_agent';
 import { ensureIndicesExistsForPolicies } from './endpoint/migrations/ensure_indices_exists_for_policies';
 import { CompleteExternalResponseActionsTask } from './endpoint/lib/response_actions';
 import { registerAgentRoutes } from './endpoint/routes/agent';
@@ -602,6 +604,12 @@ export class Plugin implements ISecuritySolutionPlugin {
     } else {
       this.logger.warn('Task Manager not available, health diagnostic task not registered.');
     }
+
+    // Register Entity Store knowledge tool with OneChat
+    plugins.onechat.tools.register(entityStoreKnowledgeTool());
+
+    // Register Entity Store agent with OneChat
+    plugins.onechat.agents.register(entityStoreAgent);
 
     return {
       setProductFeaturesConfigurator:
