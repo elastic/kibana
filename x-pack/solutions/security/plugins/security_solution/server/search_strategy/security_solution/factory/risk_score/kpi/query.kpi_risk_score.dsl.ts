@@ -64,6 +64,7 @@ export const buildKpiRiskScoreQuery = ({
   const buildAggregationForEntity = (entityType: EntityType): AggregationsAggregationContainer => ({
     terms: {
       field: EntityTypeToLevelField[entityType],
+      size: 10,
     },
     aggs: {
       unique_entries: {
