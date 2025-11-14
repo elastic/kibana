@@ -251,7 +251,6 @@ const ThreatHuntingEntitiesTableInner: React.FC = () => {
       initialColumns: INITIAL_COLUMNS,
       columnHeadersOverride: COLUMN_HEADERS_OVERRIDE,
       customCellRendererOverrides: customCellRenderers,
-      columnsOverride: INITIAL_COLUMNS.map((column): string => column.id),
     }),
     [customCellRenderers]
   );
