@@ -35,7 +35,7 @@ import type {
   RuleActionParam,
   RuleActionParams,
 } from '@kbn/alerting-types';
-import type { ActionConnector } from '@kbn/alerts-ui-shared';
+import type { ActionConnector, UserConfiguredActionConnector } from '@kbn/alerts-ui-shared';
 import {
   checkActionFormActionTypeEnabled,
   getAvailableActionVariables,
@@ -171,7 +171,12 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
     );
   }, [actionType, connectors]);
 
-  const connectorConfig = connector && 'config' in connector ? connector.config : undefined;
+  const hasConnectorConfig = (
+    connector: ActionConnector
+  ): connector is UserConfiguredActionConnector<Record<string, unknown>, Record<string, unknown>> =>
+    connector && 'config' in connector;
+
+  const connectorConfig = connector && hasConnectorConfig(connector) ? connector.config : undefined;
 
   const onDelete = (id: string) => {
     dispatch({ type: 'removeAction', payload: { uuid: id } });

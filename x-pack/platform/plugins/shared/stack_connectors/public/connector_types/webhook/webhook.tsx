@@ -32,11 +32,11 @@ export function getConnectorType(): ConnectorTypeModel<
     }),
     validateParams: async (
       actionParams: WebhookActionParams,
-      connectorConfig?: WebhookConfig
+      connectorConfig: WebhookConfig | null
     ): Promise<GenericValidationResult<WebhookActionParams>> => {
-      const webhookMethod: WebhookMethods = connectorConfig?.method
+      const webhookMethod: WebhookMethods | null = connectorConfig?.method
         ? connectorConfig.method
-        : WebhookMethods.POST;
+        : null;
       const translations = await import('./translations');
       const errors = {
         body: new Array<string>(),
@@ -45,6 +45,7 @@ export function getConnectorType(): ConnectorTypeModel<
       validationResult.errors = errors;
 
       if (
+        webhookMethod !== null &&
         ![WebhookMethods.GET, WebhookMethods.DELETE].includes(webhookMethod) &&
         !actionParams.body?.length
       ) {

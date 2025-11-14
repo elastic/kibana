@@ -38,7 +38,7 @@ describe('webhook action params validation', () => {
       body: 'message {test}',
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: { body: [] },
     });
   });

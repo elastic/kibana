@@ -70,6 +70,34 @@ describe('WebhookParamsFields renders', () => {
     expect(await screen.findByTestId('bodyAddVariableButton')).toBeInTheDocument();
   });
 
+  it('all params fields are rendered when method is DELETE', async () => {
+    const actionConnector = {
+      config: { method: 'delete' },
+    } as unknown as ActionConnector;
+
+    renderWithKibanaRenderContext(
+      <WebhookParamsFields
+        actionParams={actionParams}
+        actionConnector={actionConnector}
+        errors={{ body: [] }}
+        editAction={() => {}}
+        index={0}
+        messageVariables={[
+          {
+            name: 'myVar',
+            description: 'My variable description',
+            useWithTripleBracesInTemplates: true,
+          },
+        ]}
+      />
+    );
+
+    const jsonEditor = await screen.findByTestId('bodyJsonEditor');
+
+    expect(jsonEditor).toBeInTheDocument();
+    expect(await screen.findByText('Optional')).toBeInTheDocument();
+  });
+
   it('banner displays HTTP method configured', async () => {
     const actionConnector = {
       config: { method: 'get' },

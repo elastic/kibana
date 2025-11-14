@@ -39,7 +39,7 @@ const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<WebhookActi
             title={i18n.translate(
               'xpack.stackConnectors.components.webhook.noSetupRequiredCalloutTitle',
               {
-                values: { method: webhookMethod!.toUpperCase() },
+                values: { method: webhookMethod.toUpperCase() },
                 defaultMessage: 'This connector is configured to use HTTP {method} requests.',
               }
             )}
