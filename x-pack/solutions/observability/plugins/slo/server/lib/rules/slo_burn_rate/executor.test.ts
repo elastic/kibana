@@ -804,6 +804,70 @@ describe('BurnRateRuleExecutor', () => {
         }),
       });
     });
+
+    it('includes APM service fields in alert payload when available in summary', async () => {
+      const slo = createSLO({
+        objective: { target: 0.9 },
+      });
+      const ruleParams = someRuleParamsWithWindows({ sloId: slo.id });
+      soClientMock.find.mockResolvedValueOnce(createFindResponse([slo]));
+      const buckets = [
+        {
+          instanceId: '*',
+          windows: [
+            { shortWindowBurnRate: 2.1, longWindowBurnRate: 2.3 },
+            { shortWindowBurnRate: 1.2, longWindowBurnRate: 1.5 },
+          ],
+        },
+      ];
+      esClientMock.search.mockResolvedValueOnce(
+        generateEsResponse(ruleParams, buckets, { instanceId: '*' })
+      );
+      esClientMock.search.mockResolvedValueOnce(
+        generateEsResponse(ruleParams, [], { instanceId: '*' })
+      );
+      esClientMock.search.mockResolvedValueOnce(generateEsSummaryResponseWithApmFields());
+
+      // @ts-ignore
+      servicesMock.alertsClient!.report.mockImplementation(({ id }: { id: string }) => ({
+        uuid: `uuid-${id}`,
+        start: new Date().toISOString(),
+      }));
+
+      const executor = getRuleExecutor(basePathMock);
+      await executor({
+        params: ruleParams,
+        startedAt: new Date(),
+        startedAtOverridden: false,
+        services: servicesMock,
+        executionId: 'irrelevant',
+        logger: loggerMock,
+        previousStartedAt: null,
+        rule: {} as SanitizedRuleConfig,
+        spaceId: 'irrelevant',
+        state: {},
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        getTimeRange,
+        isServerless: false,
+      });
+
+      expect(servicesMock.alertsClient!.report).toBeCalledWith({
+        id: '*',
+        actionGroup: ALERT_ACTION.id,
+        state: {
+          alertState: AlertStates.ALERT,
+        },
+        payload: expect.objectContaining({
+          [SLO_ID_FIELD]: slo.id,
+          [SLO_REVISION_FIELD]: slo.revision,
+          [SLO_INSTANCE_ID_FIELD]: '*',
+          'service.name': 'my-service',
+          'service.environment': 'production',
+          'transaction.name': 'GET /api/endpoint',
+          'transaction.type': 'request',
+        }),
+      });
+    });
   });
 });
 
@@ -936,6 +1000,34 @@ function generateEsSummaryResponse() {
             status: 'HEALTHY',
             errorBudgetConsumed: 0.6,
             errorBudgetRemaining: 0.4,
+          },
+        },
+      ],
+    },
+  };
+}
+
+function generateEsSummaryResponseWithApmFields() {
+  return {
+    ...commonEsResponse,
+    hits: {
+      hits: [
+        {
+          _index: '.slo-observability.summary-v3.2',
+          _id: 'X19fX19fJWJbqiqq1WN9x1e_kHkXpwAA',
+          _source: {
+            sliValue: 0.9,
+            status: 'HEALTHY',
+            errorBudgetConsumed: 0.6,
+            errorBudgetRemaining: 0.4,
+            service: {
+              environment: 'production',
+              name: 'my-service',
+            },
+            transaction: {
+              name: 'GET /api/endpoint',
+              type: 'request',
+            },
           },
         },
       ],
