@@ -1125,7 +1125,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       });
     });
 
-    it('should render setup technology selector for AWS and hide cloud connectors in cloud GCP environment', async () => {
+    it('should render setup technology selector for AWS and show cloud connectors in cloud GCP environment', async () => {
       const newPackagePolicy = getMockPolicyAWS();
       (useKibana as jest.Mock).mockReturnValue({
         services: {
@@ -1175,11 +1175,10 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       const optionValues = options.map((option) => option.value);
 
       await waitFor(() => {
-        expect(options).toHaveLength(2);
+        expect(options).toHaveLength(3);
         expect(optionValues).toEqual(
-          expect.arrayContaining(['direct_access_keys', 'temporary_keys'])
+          expect.arrayContaining(['cloud_connectors', 'direct_access_keys', 'temporary_keys'])
         );
-        expect(optionValues).not.toContain('cloud_connectors');
       });
     });
     it('should render setup technology selector for AWS and allow to select cloud connectors in serverless aws environment', async () => {
@@ -1243,7 +1242,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       });
     });
 
-    it('should render setup technology selector for AWS and hide cloud connectors in serverless gcp environment', async () => {
+    it('should render setup technology selector for AWS and show cloud connectors in serverless gcp environment', async () => {
       const newPackagePolicy = getMockPolicyAWS();
       (useKibana as jest.Mock).mockReturnValue({
         services: {
@@ -1297,15 +1296,14 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       const optionValues = options.map((option) => option.value);
 
       await waitFor(() => {
-        expect(options).toHaveLength(2);
+        expect(options).toHaveLength(3);
         expect(optionValues).toEqual(
-          expect.arrayContaining(['direct_access_keys', 'temporary_keys'])
+          expect.arrayContaining(['cloud_connectors', 'direct_access_keys', 'temporary_keys'])
         );
-        expect(optionValues).not.toContain('cloud_connectors');
       });
     });
 
-    it('should render setup technology selector for AWS and hide cloud connectors in serverless azure environment', async () => {
+    it('should render setup technology selector for AWS and show cloud connectors in serverless azure environment', async () => {
       const newPackagePolicy = getMockPolicyAWS();
       (useKibana as jest.Mock).mockReturnValue({
         services: {
@@ -1359,11 +1357,10 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       const optionValues = options.map((option) => option.value);
 
       await waitFor(() => {
-        expect(options).toHaveLength(2);
+        expect(options).toHaveLength(3);
         expect(optionValues).toEqual(
-          expect.arrayContaining(['direct_access_keys', 'temporary_keys'])
+          expect.arrayContaining(['cloud_connectors', 'direct_access_keys', 'temporary_keys'])
         );
-        expect(optionValues).not.toContain('cloud_connectors');
       });
     });
   });
