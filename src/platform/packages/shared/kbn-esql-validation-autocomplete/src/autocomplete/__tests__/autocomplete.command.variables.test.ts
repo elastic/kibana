@@ -34,7 +34,11 @@ describe('autocomplete.suggest', () => {
         text: '',
         kind: 'Issue',
         detail: 'Click to create',
-        command: { id: 'esql.control.values.create', title: 'Click to create' },
+        command: {
+          arguments: [{ source: 'question_mark' }],
+          id: 'esql.control.values.create',
+          title: 'Click to create',
+        },
         sortText: '1',
       });
 
@@ -65,7 +69,11 @@ describe('autocomplete.suggest', () => {
         text: '',
         kind: 'Issue',
         detail: 'Click to create',
-        command: { id: 'esql.control.functions.create', title: 'Click to create' },
+        command: {
+          arguments: [{ source: 'smart_suggestion' }],
+          id: 'esql.control.functions.create',
+          title: 'Click to create',
+        },
         sortText: '1',
       });
     });
@@ -115,7 +123,11 @@ describe('autocomplete.suggest', () => {
         text: '',
         kind: 'Issue',
         detail: 'Click to create',
-        command: { id: 'esql.control.fields.create', title: 'Click to create' },
+        command: {
+          arguments: [{ source: 'smart_suggestion' }],
+          id: 'esql.control.fields.create',
+          title: 'Click to create',
+        },
         sortText: '11',
       });
     });
@@ -226,7 +238,11 @@ describe('autocomplete.suggest', () => {
         text: '',
         kind: 'Issue',
         detail: 'Click to create',
-        command: { id: 'esql.control.values.create', title: 'Click to create' },
+        command: {
+          arguments: [{ source: 'question_mark' }],
+          id: 'esql.control.values.create',
+          title: 'Click to create',
+        },
         sortText: '1',
       });
     });
@@ -248,7 +264,11 @@ describe('autocomplete.suggest', () => {
         text: '',
         kind: 'Issue',
         detail: 'Click to create',
-        command: { id: 'esql.control.values.create', title: 'Click to create' },
+        command: {
+          arguments: [{ source: 'smart_suggestion' }],
+          id: 'esql.control.values.create',
+          title: 'Click to create',
+        },
         sortText: '11',
       });
     });
@@ -298,7 +318,11 @@ describe('autocomplete.suggest', () => {
         text: '',
         kind: 'Issue',
         detail: 'Click to create',
-        command: { id: 'esql.control.values.create', title: 'Click to create' },
+        command: {
+          arguments: [{ source: 'question_mark' }],
+          id: 'esql.control.values.create',
+          title: 'Click to create',
+        },
         sortText: '1',
       });
     });
