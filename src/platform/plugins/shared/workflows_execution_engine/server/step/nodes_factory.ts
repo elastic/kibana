@@ -66,14 +66,12 @@ import type { StepExecutionRuntime } from '../workflow_context_manager/step_exec
 import type { StepExecutionRuntimeFactory } from '../workflow_context_manager/step_execution_runtime_factory';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
-import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 
 export class NodesFactory {
   constructor(
     private connectorExecutor: ConnectorExecutor, // this is temporary, we will remove it when we have a proper connector executor
     private workflowRuntime: WorkflowExecutionRuntimeManager,
     private workflowLogger: IWorkflowEventLogger, // Assuming you have a logger interface
-    private workflowTaskManager: WorkflowTaskManager,
     private urlValidator: UrlValidator,
     private workflowGraph: WorkflowGraph,
     private stepExecutionRuntimeFactory: StepExecutionRuntimeFactory
@@ -133,7 +131,6 @@ export class NodesFactory {
           node as EnterRetryNode,
           stepExecutionRuntime,
           this.workflowRuntime,
-          this.workflowTaskManager,
           stepLogger
         );
       case 'exit-retry':

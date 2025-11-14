@@ -8,21 +8,16 @@
  */
 
 import type { EnterRetryNode } from '@kbn/workflows/graph';
-// import { parseDuration } from '../../../utils';
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger/workflow_event_logger';
-import type { WorkflowTaskManager } from '../../../workflow_task_manager/workflow_task_manager';
 import type { NodeImplementation, NodeWithErrorCatching } from '../../node_implementation';
 
 export class EnterRetryNodeImpl implements NodeImplementation, NodeWithErrorCatching {
-  // private static readonly SHORT_DELAY_THRESHOLD = 1000 * 5; // 5 seconds
-
   constructor(
     private node: EnterRetryNode,
     private stepExecutionRuntime: StepExecutionRuntime,
     private workflowRuntime: WorkflowExecutionRuntimeManager,
-    private workflowTaskManager: WorkflowTaskManager,
     private workflowLogger: IWorkflowEventLogger
   ) {}
 
@@ -36,10 +31,9 @@ export class EnterRetryNodeImpl implements NodeImplementation, NodeWithErrorCatc
   }
 
   public async catchError(): Promise<void> {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const retryState = this.stepExecutionRuntime.getCurrentStepState()!;
+    const attempt = this.stepExecutionRuntime.getCurrentStepState()?.attempt;
 
-    if (retryState.attempt < this.node.configuration['max-attempts']) {
+    if (attempt < this.node.configuration['max-attempts']) {
       // If the retry attempt is within the allowed limit, re-enter the retry step
       // Call setWorkflowError with undefined to exit catchError loop and continue execution
       this.workflowRuntime.navigateToNode(this.node.id);
@@ -53,9 +47,6 @@ export class EnterRetryNodeImpl implements NodeImplementation, NodeWithErrorCatc
   }
 
   private async initializeRetry(): Promise<void> {
-    const xxx = this.stepExecutionRuntime.stepExecution;
-    const wfexec = this.workflowRuntime.getWorkflowExecution();
-
     // Enter whole retry step scope
     await this.stepExecutionRuntime.startStep();
     // Enter first attempt scope. Since attempt is 0 based, we add 1 to it.
@@ -72,20 +63,17 @@ export class EnterRetryNodeImpl implements NodeImplementation, NodeWithErrorCatc
       this.node.configuration.delay &&
       this.stepExecutionRuntime.tryEnterWait(this.node.configuration.delay)
     ) {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const retryState = this.stepExecutionRuntime.getCurrentStepState()!;
-      const attempt = retryState.attempt + 1;
-      this.workflowLogger.logDebug(`Retrying "${this.node.stepId}" step. (attempt ${attempt}).`);
-      await this.stepExecutionRuntime.setCurrentStepState({ ...retryState, attempt });
       this.workflowLogger.logDebug(`Delaying retry for ${this.node.configuration.delay}.`);
       // Enter a new scope for the new attempt. Since attempt is 0 based, we add 1 to it.
       return;
     }
 
-    this.workflowRuntime.enterScope(
-      `${this.stepExecutionRuntime.getCurrentStepState()!.attempt + 1}-attempt`
-    );
-
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const retryState = this.stepExecutionRuntime.getCurrentStepState()!;
+    const attempt = retryState.attempt + 1;
+    this.workflowLogger.logDebug(`Retrying "${this.node.stepId}" step. (attempt ${attempt}).`);
+    await this.stepExecutionRuntime.setCurrentStepState({ ...retryState, attempt });
+    this.workflowRuntime.enterScope(`${attempt + 1}-attempt`);
     this.workflowRuntime.navigateToNextNode();
   }
 }
