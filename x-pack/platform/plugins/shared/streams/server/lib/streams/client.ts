@@ -329,7 +329,7 @@ export class StreamsClient {
       throw new StatusError('Stream name must not be empty.', 400);
     }
 
-    if (name.length >= MAX_STREAM_NAME_LENGTH) {
+    if (name.length > MAX_STREAM_NAME_LENGTH) {
       throw new StatusError(
         `Stream name cannot be longer than ${MAX_STREAM_NAME_LENGTH} characters.`,
         400
