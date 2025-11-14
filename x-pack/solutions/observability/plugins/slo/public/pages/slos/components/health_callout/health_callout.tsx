@@ -7,7 +7,7 @@
 
 import { EuiButtonEmpty, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useState } from 'react';
 import { useFetchSloHealth } from '../../../../hooks/use_fetch_slo_health';
 import { ContentWithInspectCta } from '../../../slo_details/components/health_callout/content_with_inspect_cta';
