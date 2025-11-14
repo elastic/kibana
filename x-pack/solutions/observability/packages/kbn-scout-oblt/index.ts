@@ -6,10 +6,10 @@
  */
 
 // Observability-specific test framework
-export { test, spaceTest } from './src/playwright';
+export { test, apiTest, spaceTest } from './src/playwright';
 
 // re-exported test framework from @kbn/scout
-export { expect, lighthouseTest, apiTest, tags } from '@kbn/scout';
+export { expect, lighthouseTest, tags } from '@kbn/scout';
 
 // Custom global setup hook with profiling support
 export { globalSetupHook } from './src/playwright/global_hooks/profiling_setup';

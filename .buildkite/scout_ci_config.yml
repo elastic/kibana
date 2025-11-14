@@ -2,6 +2,7 @@
 plugins:
   enabled:
     - apm
+    - profiling
     - console
     - discover_enhanced
     - maps
