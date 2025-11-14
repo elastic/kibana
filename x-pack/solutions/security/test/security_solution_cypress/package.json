@@ -20,7 +20,7 @@
     "cypress:rule_management:prebuilt_rules:installation:run:ess": "yarn cypress:ess --spec './cypress/e2e/detection_response/rule_management/prebuilt_rules/installation/**/*.cy.ts'",
     "cypress:rule_management:prebuilt_rules:upgrade:run:ess": "yarn cypress:ess --spec './cypress/e2e/detection_response/rule_management/prebuilt_rules/upgrade/**/*.cy.ts'",
     "cypress:rule_management:prebuilt_rules:customization:run:ess": "yarn cypress:ess --spec './cypress/e2e/detection_response/rule_management/prebuilt_rules/customization/**/*.cy.ts'",
-    "cypress:detection_engine:run:ess": "yarn cypress:ess --spec './cypress/e2e/detection_response/detection_engine/rule_edit/machine_learning_rule.cy.ts'",
+    "cypress:detection_engine:run:ess": "yarn cypress:ess --spec './cypress/e2e/detection_response/detection_engine/!(exceptions)/**/*.cy.ts'",
     "cypress:detection_engine:exceptions:run:ess": "yarn cypress:ess --spec './cypress/e2e/detection_response/detection_engine/exceptions/**/*.cy.ts'",
     "cypress:ai_assistant:run:ess": "yarn cypress:ess --spec './cypress/e2e/ai_assistant/**/*.cy.ts'",
     "cypress:run:respops:ess": "yarn cypress:ess --spec './cypress/e2e/detection_response/**/*.cy.ts'",
