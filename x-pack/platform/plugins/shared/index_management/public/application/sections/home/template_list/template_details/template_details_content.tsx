@@ -55,35 +55,35 @@ const TABS = [
     name: i18n.translate('xpack.idxMgmt.templateDetails.summaryTabTitle', {
       defaultMessage: 'Summary',
     }),
-    dataTestSubj: 'summaryTab',
+    dataTestSubj: 'summaryTabBtn',
   },
   {
     id: SETTINGS_TAB_ID,
     name: i18n.translate('xpack.idxMgmt.templateDetails.settingsTabTitle', {
       defaultMessage: 'Settings',
     }),
-    dataTestSubj: 'settingsTab',
+    dataTestSubj: 'settingsTabBtn',
   },
   {
     id: MAPPINGS_TAB_ID,
     name: i18n.translate('xpack.idxMgmt.templateDetails.mappingsTabTitle', {
       defaultMessage: 'Mappings',
     }),
-    dataTestSubj: 'mappingsTab',
+    dataTestSubj: 'mappingsTabBtn',
   },
   {
     id: ALIASES_TAB_ID,
     name: i18n.translate('xpack.idxMgmt.templateDetails.aliasesTabTitle', {
       defaultMessage: 'Aliases',
     }),
-    dataTestSubj: 'aliasesTab',
+    dataTestSubj: 'aliasesTabBtn',
   },
   {
     id: PREVIEW_TAB_ID,
     name: i18n.translate('xpack.idxMgmt.templateDetails.previewTabTitle', {
       defaultMessage: 'Preview',
     }),
-    dataTestSubj: 'previewTab',
+    dataTestSubj: 'previewTabBtn',
   },
 ];
 
