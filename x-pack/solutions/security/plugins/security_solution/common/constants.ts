@@ -30,7 +30,7 @@ export const TIMELINE_FEATURE_ID = 'securitySolutionTimeline' as const;
 export const NOTES_FEATURE_ID = 'securitySolutionNotes' as const;
 export const SERVER_APP_ID = 'siem' as const;
 export const SECURITY_FEATURE_ID = SECURITY_FEATURE_ID_V5;
-export { RULES_FEATURE_ID } from '@kbn/security-solution-features/constants';
+export { RULES_FEATURE_ID_V2 as RULES_FEAUTRE_ID } from '@kbn/security-solution-features/constants';
 export const APP_NAME = 'Security' as const;
 export const APP_ICON_SOLUTION = 'logoSecurity' as const;
 export const APP_PATH = `/app/security` as const;

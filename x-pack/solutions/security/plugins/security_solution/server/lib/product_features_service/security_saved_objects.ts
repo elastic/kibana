@@ -11,6 +11,7 @@ import {
   timelineSavedObjectTypes,
   notesSavedObjectTypes,
   savedObjectTypes,
+  exceptionsSavedObjectTypes,
 } from '../../saved_objects';
 import { noteType, pinnedEventType, timelineType } from '../timeline/saved_object_mappings';
 import { prebuiltRuleAssetType } from '../detection_engine/prebuilt_rules';
@@ -75,3 +76,5 @@ export const rulesSavedObjects = [
   EXCEPTION_LIST_NAMESPACE_AGNOSTIC,
   prebuiltRuleAssetType.name,
 ];
+
+export const securityExceptionsSavedObjects = exceptionsSavedObjectTypes;

@@ -163,6 +163,18 @@ export enum ProductFeatureRulesKey {
    * Enables customization of prebuilt Elastic rules
    */
   prebuiltRuleCustomization = 'prebuilt_rule_customization',
+
+  /**
+   * Enables Exceptions
+   */
+  exceptions = 'exceptions',
+}
+
+export enum ProductFeatureExceptionsFeatureKey {
+  /**
+   * Enables Exceptions
+   */
+  exceptions = 'exceptions',
 }
 
 // Merges the two enums.
@@ -175,6 +187,7 @@ export const ProductFeatureKey = {
   ...ProductFeatureTimelineKey,
   ...ProductFeatureNotesKey,
   ...ProductFeatureRulesKey,
+  ...ProductFeatureExceptionsFeatureKey,
 };
 // We need to merge the value and the type and export both to replicate how enum works.
 export type ProductFeatureKeyType =
@@ -185,7 +198,8 @@ export type ProductFeatureKeyType =
   | ProductFeatureSiemMigrationsKey
   | ProductFeatureTimelineKey
   | ProductFeatureNotesKey
-  | ProductFeatureRulesKey;
+  | ProductFeatureRulesKey
+  | ProductFeatureExceptionsFeatureKey;
 
 export const ALL_PRODUCT_FEATURE_KEYS = Object.freeze(Object.values(ProductFeatureKey));
 

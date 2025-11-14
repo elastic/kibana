@@ -24,7 +24,7 @@ import {
   getTimelineFeature,
   getNotesFeature,
   getSiemMigrationsFeature,
-  getRulesFeature,
+  getRulesV2Feature,
 } from '@kbn/security-solution-features/product_features';
 import { API_ACTION_PREFIX } from '@kbn/security-solution-features/actions';
 import type { ExperimentalFeatures } from '../../../common';
@@ -81,7 +81,7 @@ export class ProductFeaturesService {
       getNotesFeature({ ...securityFeatureParams, savedObjects: securityNotesSavedObjects }),
     ]);
     this.productFeaturesRegistry.create('rules', [
-      getRulesFeature({ ...securityFeatureParams, savedObjects: rulesSavedObjects }),
+      getRulesV2Feature({ ...securityFeatureParams, savedObjects: rulesSavedObjects }),
     ]);
     if (!experimentalFeatures.siemMigrationsDisabled) {
       this.productFeaturesRegistry.create('siemMigrations', [getSiemMigrationsFeature()]);

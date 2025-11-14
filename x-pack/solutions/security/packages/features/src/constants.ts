@@ -36,6 +36,9 @@ export const CASES_FEATURE_ID_V2 = 'securitySolutionCasesV2' as const;
 export const CASES_FEATURE_ID_V3 = 'securitySolutionCasesV3' as const;
 
 export const SECURITY_SOLUTION_CASES_APP_ID = 'securitySolutionCases' as const;
+export const EXCEPTIONS_SUBFEATURE_ID = 'securitySolutionExceptions' as const;
+export const EXCEPTIONS_SUBFEATURE_ID_ALL = 'securitySolutionExceptionsAll' as const;
+export const EXCEPTIONS_SUBFEATURE_ID_READ = 'securitySolutionExceptionsRead' as const;
 
 export const ASSISTANT_FEATURE_ID = 'securitySolutionAssistant' as const;
 export const ATTACK_DISCOVERY_FEATURE_ID = 'securitySolutionAttackDiscovery' as const;
@@ -44,6 +47,7 @@ export const NOTES_FEATURE_ID = 'securitySolutionNotes' as const;
 export const SIEM_MIGRATIONS_FEATURE_ID = 'securitySolutionSiemMigrations' as const;
 
 export const RULES_FEATURE_ID = 'securitySolutionRulesV1' as const;
+export const RULES_FEATURE_ID_V2 = 'securitySolutionRulesV2' as const;
 
 // Rules API privileges
 export const RULES_API_READ = 'rules-read' as const;
@@ -62,12 +66,13 @@ export const USERS_API_READ = 'users-read' as const;
 export const RULES_UI_READ = 'read_rules' as const;
 export const RULES_UI_DETECTIONS = 'detections' as const;
 export const RULES_UI_EXTERNAL_DETECTIONS = 'external_detections' as const;
-export const RULES_UI_READ_PRIVILEGE = `${RULES_FEATURE_ID}.${RULES_UI_READ}` as const;
+export const RULES_UI_READ_PRIVILEGE = `${RULES_FEATURE_ID_V2}.${RULES_UI_READ}` as const;
 export const RULES_UI_EDIT = 'edit_rules' as const;
-export const RULES_UI_EDIT_PRIVILEGE = `${RULES_FEATURE_ID}.${RULES_UI_EDIT}` as const;
-export const RULES_UI_DETECTIONS_PRIVILEGE = `${RULES_FEATURE_ID}.${RULES_UI_DETECTIONS}` as const;
+export const RULES_UI_EDIT_PRIVILEGE = `${RULES_FEATURE_ID_V2}.${RULES_UI_EDIT}` as const;
+export const RULES_UI_DETECTIONS_PRIVILEGE =
+  `${RULES_FEATURE_ID_V2}.${RULES_UI_DETECTIONS}` as const;
 export const RULES_UI_EXTERNAL_DETECTIONS_PRIVILEGE =
-  `${RULES_FEATURE_ID}.${RULES_UI_EXTERNAL_DETECTIONS}` as const;
+  `${RULES_FEATURE_ID_V2}.${RULES_UI_EXTERNAL_DETECTIONS}` as const;
 
 // Same as the plugin id defined by Cloud Security Posture
 export const CLOUD_POSTURE_APP_ID = 'csp' as const;

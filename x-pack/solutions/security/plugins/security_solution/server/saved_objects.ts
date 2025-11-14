@@ -9,6 +9,7 @@ import type { CoreSetup, Logger } from '@kbn/core/server';
 
 import { promptType } from '@kbn/security-ai-prompts';
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import { exceptionListType } from '@kbn/lists-plugin/server/saved_objects';
 import { referenceDataSavedObjectType } from './endpoint/lib/reference_data';
 import { protectionUpdatesNoteType } from './endpoint/lib/protection_updates_note/saved_object_mappings';
 import { noteType, pinnedEventType, timelineType } from './lib/timeline/saved_object_mappings';
@@ -52,6 +53,7 @@ export const savedObjectTypes = types.map((type) => type.name);
 export const timelineSavedObjectTypes = [timelineType.name, pinnedEventType.name];
 
 export const notesSavedObjectTypes = [noteType.name];
+export const exceptionsSavedObjectTypes = [exceptionListType.name];
 
 export const initSavedObjects = (savedObjects: CoreSetup['savedObjects']) => {
   types.forEach((type) => savedObjects.registerType(type));

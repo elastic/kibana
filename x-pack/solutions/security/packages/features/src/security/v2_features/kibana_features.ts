@@ -28,7 +28,7 @@ import {
   LISTS_API_ALL,
   LISTS_API_READ,
   LISTS_API_SUMMARY,
-  RULES_FEATURE_ID,
+  RULES_FEATURE_ID_V2,
   SECURITY_UI_SHOW,
   SECURITY_UI_CRUD,
   INITIALIZE_SECURITY_SOLUTION,
@@ -104,12 +104,12 @@ export const getSecurityV2BaseKibanaFeature = ({
         default: [
           // note: overriden by product feature endpointArtifactManagement when enabled
           { feature: SECURITY_FEATURE_ID_V5, privileges: ['all'] },
-          { feature: RULES_FEATURE_ID, privileges: ['all'] },
+          { feature: RULES_FEATURE_ID_V2, privileges: ['all'] },
         ],
         minimal: [
           // note: overriden by product feature endpointArtifactManagement when enabled
           { feature: SECURITY_FEATURE_ID_V5, privileges: ['minimal_all'] },
-          { feature: RULES_FEATURE_ID, privileges: ['minimal_all'] },
+          { feature: RULES_FEATURE_ID_V2, privileges: ['minimal_all'] },
         ],
       },
       app: [APP_ID, CLOUD_POSTURE_APP_ID, 'kibana'],
@@ -146,11 +146,11 @@ export const getSecurityV2BaseKibanaFeature = ({
       replacedBy: {
         default: [
           { feature: SECURITY_FEATURE_ID_V5, privileges: ['read'] },
-          { feature: RULES_FEATURE_ID, privileges: ['read'] },
+          { feature: RULES_FEATURE_ID_V2, privileges: ['read'] },
         ],
         minimal: [
           { feature: SECURITY_FEATURE_ID_V5, privileges: ['minimal_read'] },
-          { feature: RULES_FEATURE_ID, privileges: ['minimal_read'] },
+          { feature: RULES_FEATURE_ID_V2, privileges: ['minimal_read'] },
         ],
       },
       app: [APP_ID, CLOUD_POSTURE_APP_ID, 'kibana'],

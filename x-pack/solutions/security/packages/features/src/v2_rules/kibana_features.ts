@@ -31,14 +31,11 @@ import {
   LISTS_API_SUMMARY,
   RULES_API_ALL,
   RULES_API_READ,
-  RULES_FEATURE_ID,
   RULES_FEATURE_ID_V2,
   RULES_UI_EDIT,
   RULES_UI_READ,
   SERVER_APP_ID,
   USERS_API_READ,
-  EXCEPTIONS_SUBFEATURE_ID_ALL,
-  EXCEPTIONS_SUBFEATURE_ID_READ,
 } from '../constants';
 import { type BaseKibanaFeatureConfig } from '../types';
 import type { SecurityFeatureParams } from '../security/types';
@@ -60,22 +57,10 @@ const alertingFeatures = SECURITY_RULE_TYPES.map((ruleTypeId) => ({
   consumers: [SERVER_APP_ID],
 }));
 
-export const getRulesBaseKibanaFeature = (
+export const getRulesV2BaseKibanaFeature = (
   params: SecurityFeatureParams
 ): BaseKibanaFeatureConfig => ({
-  deprecated: {
-    notice: i18n.translate(
-      'securitySolutionPackages.features.featureRegistry.linkSecuritySolutionSecurity.deprecationMessage',
-      {
-        defaultMessage: 'The {currentId} permissions are deprecated, please see {latestId}.',
-        values: {
-          currentId: RULES_FEATURE_ID,
-          latestId: RULES_FEATURE_ID_V2,
-        },
-      }
-    ),
-  },
-  id: RULES_FEATURE_ID,
+  id: RULES_FEATURE_ID_V2,
   name: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.linkSecuritySolutionRolesTitle',
     {
@@ -85,7 +70,7 @@ export const getRulesBaseKibanaFeature = (
   order: 1100,
   category: DEFAULT_APP_CATEGORIES.security,
   // scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
-  app: [RULES_FEATURE_ID, 'kibana'],
+  app: [RULES_FEATURE_ID_V2, 'kibana'],
   catalogue: [APP_ID],
   alerting: alertingFeatures,
   management: {
@@ -93,16 +78,7 @@ export const getRulesBaseKibanaFeature = (
   },
   privileges: {
     all: {
-      replacedBy: {
-        default: [{ feature: RULES_FEATURE_ID_V2, privileges: ['all'] }],
-        minimal: [
-          {
-            feature: RULES_FEATURE_ID_V2,
-            privileges: ['minimal_all', EXCEPTIONS_SUBFEATURE_ID_ALL],
-          },
-        ],
-      },
-      app: [RULES_FEATURE_ID, 'kibana'],
+      app: [RULES_FEATURE_ID_V2, 'kibana'],
       catalogue: [APP_ID],
       savedObject: {
         all: params.savedObjects,
@@ -132,16 +108,7 @@ export const getRulesBaseKibanaFeature = (
       ],
     },
     read: {
-      replacedBy: {
-        default: [{ feature: RULES_FEATURE_ID_V2, privileges: ['read'] }],
-        minimal: [
-          {
-            feature: RULES_FEATURE_ID_V2,
-            privileges: ['minimal_read', EXCEPTIONS_SUBFEATURE_ID_READ],
-          },
-        ],
-      },
-      app: [RULES_FEATURE_ID, 'kibana'],
+      app: [RULES_FEATURE_ID_V2, 'kibana'],
       catalogue: [APP_ID],
       savedObject: {
         all: [],
