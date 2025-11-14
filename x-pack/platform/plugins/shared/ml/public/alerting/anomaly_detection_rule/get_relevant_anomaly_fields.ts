@@ -38,7 +38,7 @@ export function getRelevantAnomalyFields(
   const isPurePopulationJob =
     jobConfigs.length > 0 &&
     jobConfigs.every((job) => {
-      const detectors = job.analysis_config?.detectors || [];
+      const detectors = job.analysis_config?.detectors ?? [];
       return detectors.length === 1 && detectors[0].over_field_name;
     });
 
@@ -46,7 +46,7 @@ export function getRelevantAnomalyFields(
   const hasInfluencers =
     jobConfigs.length > 0 &&
     jobConfigs.some((job) => {
-      const influencers = job.analysis_config?.influencers || [];
+      const influencers = job.analysis_config?.influencers ?? [];
       return influencers.length > 0;
     });
 
@@ -61,7 +61,7 @@ export function getRelevantAnomalyFields(
 
   if (jobConfigs.length > 0) {
     jobConfigs.forEach((job) => {
-      const detectors = job.analysis_config?.detectors || [];
+      const detectors = job.analysis_config?.detectors ?? [];
 
       detectors.forEach((detector) => {
         if (detector.partition_field_name) {

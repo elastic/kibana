@@ -123,7 +123,7 @@ export const AnomalyKqlFilter: FC<AnomalyKqlFilterProps> = React.memo(
      */
     const handleKqlChange = useCallback(
       (payload: { query?: Query }) => {
-        const kqlText = (payload.query?.query as string) || '';
+        const kqlText = (payload.query?.query as string) ?? '';
         onChange(kqlText.trim() || null);
       },
       [onChange]
@@ -174,7 +174,7 @@ export const AnomalyKqlFilter: FC<AnomalyKqlFilterProps> = React.memo(
               onQueryChange={handleKqlChange}
               onQuerySubmit={handleKqlChange}
               query={{
-                query: value || '',
+                query: value ?? '',
                 language: 'kuery',
               }}
               dataTestSubj="mlAnomalyAlertKqlSearchBar"
