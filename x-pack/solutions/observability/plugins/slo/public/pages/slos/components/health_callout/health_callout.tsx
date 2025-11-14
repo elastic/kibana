@@ -5,24 +5,18 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiButtonEmpty, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
+import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useState } from 'react';
 import { useFetchSloHealth } from '../../../../hooks/use_fetch_slo_health';
 import { ContentWithInspectCta } from '../../../slo_details/components/health_callout/content_with_inspect_cta';
 import { paths } from '../../../../../common/locators/paths';
 
 const CALLOUT_SESSION_STORAGE_KEY = 'slo_health_callout_hidden';
-const MAX_SLOS_IN_CALLOUT = 10;
 
-export function HealthCallout() {
-  const {
-    isLoading,
-    isError,
-    data: resultData,
-  } = useFetchSloHealth({ page: 0, perPage: MAX_SLOS_IN_CALLOUT });
-  const { data: results, total } = resultData ?? {};
+export function HealthCallout({ sloList = [] }: { sloList: SLOWithSummaryResponse[] }) {
+  const { isLoading, isError, data: results } = useFetchSloHealth({ list: sloList });
   const [showCallOut, setShowCallOut] = useState(
     !sessionStorage.getItem(CALLOUT_SESSION_STORAGE_KEY)
   );
@@ -73,50 +67,38 @@ export function HealthCallout() {
             e.stopPropagation();
           }}
         >
-          <span data-test-subj="sloHealthCalloutDescription">
-            <FormattedMessage
-              id="xpack.slo.sloList.healthCallout.description"
-              defaultMessage="The following {count, plural, one {SLO is} other {SLOs are}} in an unhealthy state. Data may be missing or incomplete. You can inspect {count, plural, one {it} other {each one}} here:"
-              values={{
-                count: unhealthyAndMissingSloList.length,
-              }}
-            />
-          </span>
-          <ul>
-            {unhealthyAndMissingSloList.map((result) => (
-              <li key={result.sloId}>
-                <ContentWithInspectCta
-                  textSize="xs"
-                  content={result.sloName}
-                  url={paths.sloDetails(result.sloId, '*', undefined, 'overview')}
-                />
-              </li>
-            ))}
-          </ul>
-          {typeof total === 'number' && total > results.length && (
-            <>
+          <EuiFlexItem>
+            <span data-test-subj="sloHealthCalloutDescription">
               <FormattedMessage
-                id="xpack.slo.sloList.healthCallout.moreUnhealthySloLinkText"
-                defaultMessage="+ {count} more"
-                values={{ count: total - results.length }}
+                id="xpack.slo.sloList.healthCallout.description"
+                defaultMessage="The following {count, plural, one {SLO is} other {SLOs are}} in an unhealthy state. Data may be missing or incomplete. You can inspect {count, plural, one {it} other {each one}} here:"
+                values={{
+                  count: unhealthyAndMissingSloList.length,
+                }}
               />
-              <EuiSpacer size="s" />
-            </>
-          )}
+            </span>
+            <ul>
+              {unhealthyAndMissingSloList.map((result) => (
+                <li key={result.sloId}>
+                  <ContentWithInspectCta
+                    textSize="xs"
+                    content={result.sloName}
+                    url={paths.sloDetails(result.sloId, '*', undefined, 'overview')}
+                  />
+                </li>
+              ))}
+            </ul>
+          </EuiFlexItem>
           <EuiFlexGroup direction="row" gutterSize="xs">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                aria-label={i18n.translate(
-                  'xpack.slo.sloList.healthCallout.buttonDimissAriaLabel',
-                  { defaultMessage: 'Dismiss SLO health callout' }
-                )}
                 data-test-subj="sloHealthCalloutDimissButton"
                 color="text"
                 size="s"
                 onClick={dismiss}
               >
                 <FormattedMessage
-                  id="xpack.slo.sloList.healthCallout.buttonDismissLabel"
+                  id="xpack.slo.sloList.healthCallout.buttonDimissLabel"
                   defaultMessage="Dismiss"
                 />
               </EuiButtonEmpty>
