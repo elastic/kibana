@@ -165,7 +165,6 @@ import {
   handleExperimentalDatastreamFeatureOptIn,
   mapPackagePolicySavedObjectToPackagePolicy,
   preflightCheckPackagePolicy,
-  removeCloudConnectorTransientVars,
 } from './package_policies';
 import type {
   PackagePolicyClient,
@@ -556,9 +555,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         if (cloudConnector) {
           enrichedPackagePolicy.cloud_connector_id = cloudConnector.id;
         }
-
-        // TODO: Remove after https://github.com/elastic/security-team/issues/14608
-        enrichedPackagePolicy = removeCloudConnectorTransientVars(enrichedPackagePolicy);
       }
 
       inputs = enrichedPackagePolicy.inputs as PackagePolicyInput[];

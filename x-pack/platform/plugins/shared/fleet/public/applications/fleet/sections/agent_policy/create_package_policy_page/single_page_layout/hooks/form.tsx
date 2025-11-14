@@ -159,7 +159,6 @@ async function savePackagePolicy(pkgPolicy: CreatePackagePolicyRequest['body']) 
     function formatPackage(pkg: NewPackagePolicy['package']) {
       return omit(pkg, 'title');
     }
-
     const result = await sendCreateAgentlessPolicy(
       {
         package: formatPackage(pkgPolicy.package),
@@ -172,11 +171,26 @@ async function savePackagePolicy(pkgPolicy: CreatePackagePolicyRequest['body']) 
           'vars',
           'id',
           'supports_agentless',
-          'supports_cloud_connector'
+          'supports_cloud_connector',
+          'cloud_connector_id',
+          'cloud_connector_name'
         ),
         id: pkgPolicy.id ? String(pkgPolicy.id) : undefined,
         inputs: formatInputs(pkgPolicy.inputs),
         vars: formatVars(pkgPolicy.vars),
+        // Build cloud_connector object if cloud connectors are supported
+        ...(pkgPolicy.supports_cloud_connector &&
+          pkgPolicy.vars?.deployment?.value && {
+            cloud_connector: {
+              target_csp: pkgPolicy.vars.deployment.value as string,
+              ...(pkgPolicy.cloud_connector_id && {
+                cloud_connector_id: pkgPolicy.cloud_connector_id,
+              }),
+              ...(pkgPolicy.cloud_connector_name && {
+                cloud_connector_name: pkgPolicy.cloud_connector_name,
+              }),
+            },
+          }),
       },
       {
         format: inputsFormat.Legacy,

@@ -125,6 +125,25 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
       const { outputId, fleetServerId } = agentlessAgentService.getDefaultSettings();
 
       const agentPolicyName = getAgentlessAgentPolicyNameFromPackagePolicyName(data.name);
+
+      // Get base agentless config from package info
+      const baseAgentlessConfig = getAgentlessPolicy(pkgInfo);
+
+      // Build agentless config with cloud connectors if provided
+      let agentlessConfig = baseAgentlessConfig;
+      if (data.cloud_connector?.target_csp) {
+        this.logger.debug(
+          `Configuring cloud connectors for cloud provider: ${data.cloud_connector.target_csp} from cloud_connector object`
+        );
+        agentlessConfig = {
+          ...baseAgentlessConfig,
+          cloud_connectors: {
+            target_csp: data.cloud_connector.target_csp,
+            enabled: true,
+          },
+        };
+      }
+
       const agentPolicy = await agentPolicyService.create(
         this.soClient,
         this.esClient,
@@ -136,7 +155,7 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
           namespace: data.namespace || 'default',
           monitoring_enabled: [],
           keep_monitoring_alive: true,
-          agentless: getAgentlessPolicy(pkgInfo),
+          agentless: agentlessConfig,
           global_data_tags: getAgentlessGlobalDataTags(pkgInfo),
           fleet_server_host_id: fleetServerId,
           data_output_id: outputId,
@@ -148,10 +167,20 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
       createdAgentPolicyId = agentPolicy.id;
 
       const newPolicy = {
-        ...omit(data, 'id', 'package'),
+        ...omit(data, 'id', 'package', 'cloud_connector'),
         namespace: data.namespace || 'default',
         policy_ids: [agentPolicy.id],
         supports_agentless: true,
+        // Extract cloud connector fields from cloud_connector object
+        ...(data.cloud_connector && {
+          supports_cloud_connector: true,
+          ...(data.cloud_connector.cloud_connector_id && {
+            cloud_connector_id: data.cloud_connector.cloud_connector_id,
+          }),
+          ...(data.cloud_connector.cloud_connector_name && {
+            cloud_connector_name: data.cloud_connector.cloud_connector_name,
+          }),
+        }),
       };
 
       let newPackagePolicy = simplifiedPackagePolicytoNewPackagePolicy(newPolicy, pkgInfo);

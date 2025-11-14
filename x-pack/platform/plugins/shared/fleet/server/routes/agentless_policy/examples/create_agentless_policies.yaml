@@ -38,6 +38,7 @@ requestBody:
             name: cspm-aws-policy
             description: CSPM integration for AWS with cloud connector
             namespace: default
+            cloud_connector_name: 'My AWS Cloud Connector'
             inputs:
               cspm-cloudbeat/cis_aws:
                 enabled: true
@@ -54,7 +55,6 @@ requestBody:
                       aws.credentials.type: 'cloud_connector'
                       aws.account_type: 'organization-account'
                       aws.supports_cloud_connectors: true
-                      cloud_connector_name: 'My AWS Cloud Connector'
               cspm-cloudbeat/cis_gcp:
                 enabled: false
               cspm-cloudbeat/cis_azure:
@@ -73,6 +73,7 @@ requestBody:
             name: cspm-azure-policy
             description: CSPM integration for Azure with cloud connector
             namespace: default
+            cloud_connector_name: 'My Azure Cloud Connector'
             inputs:
               cspm-cloudbeat/cis_azure:
                 enabled: true
@@ -90,7 +91,6 @@ requestBody:
                         value: 'existing-azure-credentials-connector-id'
                         type: 'text'
                       azure.account_type: 'organization-account'
-                      cloud_connector_name: 'My Azure Cloud Connector'
               cspm-cloudbeat/cis_aws:
                 enabled: false
               cspm-cloudbeat/cis_gcp:
