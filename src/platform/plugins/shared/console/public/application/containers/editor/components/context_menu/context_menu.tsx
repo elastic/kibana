@@ -8,6 +8,7 @@
  */
 
 import React, { useState } from 'react';
+import type { SerializedStyles } from '@emotion/react';
 import {
   EuiButtonIcon,
   EuiContextMenuPanel,
@@ -36,6 +37,7 @@ interface Props {
   isKbnRequestSelected: boolean;
   onMenuOpen: () => void;
   onCopyAs: (language?: string) => Promise<void>;
+  buttonCss?: SerializedStyles;
 }
 
 const DELAY_FOR_HIDING_SPINNER = 500;
@@ -53,6 +55,7 @@ export const ContextMenu = ({
   isKbnRequestSelected,
   onMenuOpen,
   onCopyAs,
+  buttonCss,
 }: Props) => {
   const {
     config: { isPackagedEnvironment },
@@ -127,6 +130,7 @@ export const ContextMenu = ({
       })}
       iconType="boxesVertical"
       iconSize="s"
+      css={buttonCss}
     />
   );
 

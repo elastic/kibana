@@ -57,10 +57,14 @@ const useStyles = () => {
       // For IE11
       min-width: calc(${euiTheme.size.l} * 2);
     `,
+    actionButton: css`
+      height: ${euiTheme.size.l} !important;
+      width: ${euiTheme.size.l} !important;
+    `,
     playButton: css`
       margin-left: ${euiTheme.size.xs} !important;
-      height: ${euiTheme.size.xl} !important;
-      width: ${euiTheme.size.xl} !important;
+      height: ${euiTheme.size.l} !important;
+      width: ${euiTheme.size.l} !important;
     `,
   };
 };
@@ -118,7 +122,6 @@ export const MonacoEditor = ({
   const setInputEditor = useSetInputEditor();
   const styles = useStyles();
   const highlightedLinesClassName = useHighlightedLinesClassName();
-  const [isPlayButtonHovered, setIsPlayButtonHovered] = useState(false);
   const [defaultLanguage, setDefaultLanguage] = useState(
     storage.get(StorageKeys.DEFAULT_LANGUAGE, DEFAULT_LANGUAGE)
   );
@@ -386,14 +389,12 @@ export const MonacoEditor = ({
             })}
           >
             <EuiButtonIcon
-              display={isPlayButtonHovered ? 'fill' : 'base'}
+              display="fill"
               size="m"
               color="primary"
               iconType="play"
               iconSize="m"
               onClick={sendRequestsCallback}
-              onMouseEnter={() => setIsPlayButtonHovered(true)}
-              onMouseLeave={() => setIsPlayButtonHovered(false)}
               data-test-subj="sendRequestButton"
               aria-label={i18n.translate('console.monaco.sendRequestButtonTooltipAriaLabel', {
                 defaultMessage: 'Click to send request',
@@ -419,6 +420,7 @@ export const MonacoEditor = ({
                 defaultMessage: 'Copy to language',
               })}
               disabled={!window.navigator?.clipboard}
+              css={styles.actionButton}
             />
           </EuiToolTip>
         </EuiFlexItem>
@@ -432,6 +434,7 @@ export const MonacoEditor = ({
             isKbnRequestSelected={isKbnRequestSelected}
             onMenuOpen={checkIsKbnRequestSelected}
             onCopyAs={copyAs}
+            buttonCss={styles.actionButton}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
