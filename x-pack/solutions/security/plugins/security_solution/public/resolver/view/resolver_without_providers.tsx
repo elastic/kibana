@@ -44,6 +44,7 @@ export const ResolverWithoutProviders = React.memo(
       filters,
       isSplitPanel = false,
       showPanelOnClick,
+      entityIndex,
     }: ResolverProps,
     refToForward
   ) {
@@ -58,6 +59,7 @@ export const ResolverWithoutProviders = React.memo(
       indices,
       shouldUpdate,
       filters,
+      entityIndex,
     });
     useAutotuneTimerange({ id: resolverComponentInstanceID });
     /**

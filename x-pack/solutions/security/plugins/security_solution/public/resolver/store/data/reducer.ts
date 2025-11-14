@@ -39,7 +39,15 @@ export const dataReducer = reducerWithInitialState(initialAnalyzerState)
       appReceivedNewExternalProperties,
       (
         draft,
-        { id, resolverComponentInstanceID, locationSearch, databaseDocumentID, indices, filters }
+        {
+          id,
+          resolverComponentInstanceID,
+          locationSearch,
+          databaseDocumentID,
+          indices,
+          filters,
+          entityIndex,
+        }
       ) => {
         const state: Draft<DataState> = draft[id]?.data;
         state.tree = {
@@ -49,6 +57,7 @@ export const dataReducer = reducerWithInitialState(initialAnalyzerState)
             indices,
             filters,
             agentId: state.tree?.lastResponse?.parameters?.agentId || '',
+            entityIndex,
           },
         };
         state.resolverComponentInstanceID = resolverComponentInstanceID;
@@ -80,6 +89,7 @@ export const dataReducer = reducerWithInitialState(initialAnalyzerState)
           indices: parameters.indices,
           filters: parameters.filters,
           agentId: parameters.agentId,
+          entityIndex: parameters.entityIndex,
         },
       };
       return draft;

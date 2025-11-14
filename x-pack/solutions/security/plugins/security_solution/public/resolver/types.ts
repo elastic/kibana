@@ -200,6 +200,11 @@ export interface TreeFetcherParameters {
    */
   indices: string[];
 
+  /**
+   * The index that the backend should use to find the originating document.
+   */
+  entityIndex: string;
+
   filters: TimeFilters;
 
   agentId: string;
@@ -804,7 +809,7 @@ export interface DataAccessLayer {
     /** _id of the document to find an entity in. */
     _id: string;
     /** indices to search in */
-    indices: string[];
+    index: string;
     /** signal to abort the request */
     signal: AbortSignal;
   }) => Promise<ResolverEntityIndex>;
@@ -836,9 +841,14 @@ export interface ResolverProps {
   resolverComponentInstanceID: string;
 
   /**
-   * Indices that the backend should use to find the originating document.
+   * Indices that the backend should use to build the graph.
    */
   indices: string[];
+
+  /**
+   * The index that the backend should use to find the originating document.
+   */
+  entityIndex: string;
 
   filters: TimeFilters;
 
