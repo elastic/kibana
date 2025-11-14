@@ -22,7 +22,7 @@ pageLoadAssetSize:
   contentManagement: 8350
   controls: 12234
   core: 572422
-  cps: 1580
+  cps: 6000
   crossClusterReplication: 12662
   customIntegrations: 11715
   dashboard: 19000
@@ -93,7 +93,7 @@ pageLoadAssetSize:
   kibanaReact: 22503
   kibanaUsageCollection: 1736
   kibanaUtils: 54848
-  lens: 65189
+  lens: 71747
   licenseManagement: 8265
   licensing: 10078
   links: 8620
@@ -167,8 +167,8 @@ pageLoadAssetSize:
   spaces: 30783
   stackAlerts: 31499
   stackConnectors: 83751
-  streams: 9000
-  streamsApp: 17000
+  streams: 10000
+  streamsApp: 19225
   synthetics: 31571
   telemetry: 25755
   telemetryManagementSection: 5522
