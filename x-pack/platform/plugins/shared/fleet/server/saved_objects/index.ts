@@ -376,6 +376,9 @@ export const getSavedObjectTypes = (
               },
               { unknowns: 'ignore' }
             ),
+            create: schema.object({
+              min_agent_version: schema.maybe(schema.string()),
+            }),
           },
         },
       },
@@ -465,6 +468,9 @@ export const getSavedObjectTypes = (
               },
               { unknowns: 'ignore' }
             ),
+            create: schema.object({
+              min_agent_version: schema.maybe(schema.string()),
+            }),
           },
         },
       },
@@ -980,6 +986,9 @@ export const getSavedObjectTypes = (
               },
               { unknowns: 'ignore' }
             ),
+            create: schema.object({
+              min_agent_version: schema.maybe(schema.string()),
+            }),
           },
         },
       },
@@ -1135,6 +1144,9 @@ export const getSavedObjectTypes = (
               },
               { unknowns: 'ignore' }
             ),
+            create: schema.object({
+              min_agent_version: schema.maybe(schema.string()),
+            }),
           },
         },
       },
