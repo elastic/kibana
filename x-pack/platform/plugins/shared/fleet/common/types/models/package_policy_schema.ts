@@ -147,13 +147,6 @@ export const PackagePolicyBaseSchema = {
       })
     )
   ),
-  cloud_connector_name: schema.maybe(
-    schema.string({
-      meta: {
-        description: 'Name for the cloud connector to be created with this package policy.',
-      },
-    })
-  ),
   enabled: schema.boolean(),
   is_managed: schema.maybe(schema.boolean()),
   package: schema.maybe(PackagePolicyPackageSchema),
@@ -380,32 +373,6 @@ export const SimplifiedPackagePolicyBaseSchema = schema.object({
     })
   ),
   output_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
-  cloud_connector_id: schema.maybe(
-    schema.nullable(
-      schema.string({
-        meta: {
-          description: 'ID of the cloud connector associated with this package policy.',
-        },
-      })
-    )
-  ),
-  cloud_connector_name: schema.maybe(
-    schema.string({
-      meta: {
-        description: 'Name for the cloud connector to be created with this package policy.',
-      },
-    })
-  ),
-  supports_cloud_connector: schema.maybe(
-    schema.nullable(
-      schema.boolean({
-        defaultValue: false,
-        meta: {
-          description: 'Indicates whether the package policy supports cloud connectors.',
-        },
-      })
-    )
-  ),
   vars: schema.maybe(SimplifiedVarsSchema),
   inputs: SimplifiedPackagePolicyInputsSchema,
   supports_agentless: schema.maybe(

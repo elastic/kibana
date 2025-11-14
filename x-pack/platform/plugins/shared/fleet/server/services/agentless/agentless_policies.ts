@@ -185,9 +185,6 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
           ...(data.cloud_connector.cloud_connector_id && {
             cloud_connector_id: data.cloud_connector.cloud_connector_id,
           }),
-          ...(data.cloud_connector.cloud_connector_name && {
-            cloud_connector_name: data.cloud_connector.cloud_connector_name,
-          }),
         }),
       };
 
