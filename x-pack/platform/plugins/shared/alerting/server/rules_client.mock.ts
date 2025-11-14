@@ -67,6 +67,7 @@ const createRulesClientMock = () => {
     getRuleTypesByQuery: jest.fn(),
     getTemplate: jest.fn(),
     createGapAutoFillScheduler: jest.fn(),
+    getGapAutoFillScheduler: jest.fn(),
     getContext: jest.fn(),
   };
   return mocked;

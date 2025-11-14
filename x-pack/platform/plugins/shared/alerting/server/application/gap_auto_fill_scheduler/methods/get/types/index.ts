@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { transformResponse as transformResponseV1 } from './v1';
+export type { GetGapAutoFillSchedulerParams } from './get_gap_auto_fill_scheduler_types';

@@ -5,8 +5,11 @@
  * 2.0.
  */
 import type { IRouter } from '@kbn/core/server';
-import type { GapAutoFillSchedulerResponseV1 } from '../../../../../../common/routes/gaps/apis/gap_auto_fill_scheduler';
-import { gapAutoFillSchedulerBodySchemaV1 } from '../../../../../../common/routes/gaps/apis/gap_auto_fill_scheduler';
+import type {
+  GapAutoFillSchedulerResponseV1,
+  GetGapAutoFillSchedulerParamsV1,
+} from '../../../../../../common/routes/gaps/apis/gap_auto_fill_scheduler';
+import { getGapAutoFillSchedulerParamsSchemaV1 } from '../../../../../../common/routes/gaps/apis/gap_auto_fill_scheduler';
 import type { ILicenseState } from '../../../../../lib';
 import { verifyAccessAndContext } from '../../../../lib';
 import type { AlertingRequestHandlerContext } from '../../../../../types';
@@ -15,24 +18,26 @@ import { transformRequestV1 } from './transforms';
 import { transformToGapAutoFillSchedulerResponseBodyV1 } from '../transforms/transform_response';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../../constants';
 
-export const createAutoFillSchedulerRoute = (
+export const getAutoFillSchedulerRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
   licenseState: ILicenseState
 ) => {
-  router.post(
+  router.get(
     {
-      path: `${INTERNAL_ALERTING_GAPS_API_PATH}/auto_fill_scheduler`,
+      path: `${INTERNAL_ALERTING_GAPS_API_PATH}/auto_fill_scheduler/{id}`,
       security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: { access: 'internal' },
       validate: {
-        body: gapAutoFillSchedulerBodySchemaV1,
+        params: getGapAutoFillSchedulerParamsSchemaV1,
       },
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
+        const params: GetGapAutoFillSchedulerParamsV1 = req.params;
+
         const alertingContext = await context.alerting;
         const rulesClient = await alertingContext.getRulesClient();
-        const result = await rulesClient.createGapAutoFillScheduler(transformRequestV1(req));
+        const result = await rulesClient.getGapAutoFillScheduler(transformRequestV1(params));
         const response: GapAutoFillSchedulerResponseV1 = {
           body: transformToGapAutoFillSchedulerResponseBodyV1(result),
         };

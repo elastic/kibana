@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { GapAutoFillSchedulerResponseBodyV1 } from '../../../../../../../common/routes/gaps/apis/gap_auto_fill_scheduler';
+import type { GapAutoFillSchedulerResponse } from '../../../../../../application/gap_auto_fill_scheduler/result/types';
 
-import type { GapAutoFillSchedulerResponseBodyV1 } from '../../../../../../../../common/routes/gaps/apis/gap_auto_fill_scheduler';
-import type { GapAutoFillSchedulerResponse } from '../../../../../../../application/gap_auto_fill_scheduler/result/types';
-
-export const transformResponse = (
+export const transformToGapAutoFillSchedulerResponseBody = (
   result: GapAutoFillSchedulerResponse
 ): GapAutoFillSchedulerResponseBodyV1 => ({
   id: result.id,

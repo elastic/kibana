@@ -102,6 +102,8 @@ import type { GetRuleTemplateParams } from '../application/rule_template/methods
 import { getRuleTemplate } from '../application/rule_template/methods/get/get_rule_template';
 import { createGapAutoFillScheduler } from '../application/gap_auto_fill_scheduler/methods/create/create_gap_auto_fill_scheduler';
 import type { CreateGapAutoFillSchedulerParams } from '../application/gap_auto_fill_scheduler/methods/create/types';
+import { getGapAutoFillScheduler } from '../application/gap_auto_fill_scheduler/methods/get/get_gap_auto_fill_scheduler';
+import type { GetGapAutoFillSchedulerParams } from '../application/gap_auto_fill_scheduler/methods/get/types';
 
 export type ConstructorOptions = Omit<
   RulesClientContext,
@@ -263,6 +265,9 @@ export class RulesClient {
 
   public createGapAutoFillScheduler = (params: CreateGapAutoFillSchedulerParams) =>
     createGapAutoFillScheduler(this.context, params);
+
+  public getGapAutoFillScheduler = (params: GetGapAutoFillSchedulerParams) =>
+    getGapAutoFillScheduler(this.context, params);
 
   public getContext() {
     return this.context;

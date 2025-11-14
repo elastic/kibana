@@ -5,4 +5,7 @@
  * 2.0.
  */
 
-export { transformRequest as transformRequestV1 } from './transform_request/v1';
+import type { TypeOf } from '@kbn/config-schema';
+import type { getGapAutoFillSchedulerSchema } from '../schemas';
+
+export type GetGapAutoFillSchedulerParams = TypeOf<typeof getGapAutoFillSchedulerSchema>;

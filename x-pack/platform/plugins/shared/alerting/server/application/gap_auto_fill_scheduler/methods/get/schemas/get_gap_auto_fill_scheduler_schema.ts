@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { transformRequest as transformRequestV1 } from './transform_request/v1';
+import { schema } from '@kbn/config-schema';
+
+export const getGapAutoFillSchedulerSchema = schema.object({
+  id: schema.string(),
+});

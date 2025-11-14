@@ -7,6 +7,10 @@
 import { schema } from '@kbn/config-schema';
 import dateMath from '@kbn/datemath';
 
+export const getGapAutoFillSchedulerParamsSchema = schema.object({
+  id: schema.string(),
+});
+
 export const gapAutoFillSchedulerBodySchema = schema.object(
   {
     id: schema.maybe(schema.string()),
