@@ -50,7 +50,7 @@ export const Snippets = () => {
   useSnippetsSuggestions({ snippets });
 
   const isLoading = isFetchingSnippets || postSnippetMutation.isLoading;
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [deletingSnippetId, setDeletingSnippetId] = useState<string | null>(null);
 
   const handleEditSnippet = (snippet: SyntheticsServiceSnippetWithIdType) => {
     // Logic to open the snippet in an editor or modal for editing
@@ -76,11 +76,11 @@ export const Snippets = () => {
 
   const submitDeleteSnippet = async (snippet: SyntheticsServiceSnippetWithIdType) => {
     try {
-      setIsDeleting(true);
+      setDeletingSnippetId(snippet.id);
       await deleteSnippetMutation.mutateAsync({ snippet });
       await refetchSnippets();
     } finally {
-      setIsDeleting(false);
+      setDeletingSnippetId(null);
     }
   };
 
@@ -133,7 +133,7 @@ export const Snippets = () => {
               onClick={() => submitDeleteSnippet(snippet)}
               size="s"
               data-test-subj="syntheticsDeleteSnippetButton"
-              isLoading={isDeleting}
+              isLoading={deletingSnippetId === snippet.id}
             />
           ),
         },
