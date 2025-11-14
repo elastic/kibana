@@ -93,6 +93,8 @@ const contextRowActions: Array<
     onClick(this: RowClickActionContext) {
       const updatedQuery = appendFilteringWhereClauseForCascadeLayout(
         this.editorQuery.esql,
+        this.esqlVariables,
+        this.dataView,
         this.rowContext.groupId,
         this.rowContext.groupValue as string,
         '+'
@@ -116,6 +118,8 @@ const contextRowActions: Array<
     onClick(this: RowClickActionContext) {
       const updatedQuery = appendFilteringWhereClauseForCascadeLayout(
         this.editorQuery.esql,
+        this.esqlVariables,
+        this.dataView,
         this.rowContext.groupId,
         this.rowContext.groupValue as string,
         '-'
@@ -178,6 +182,8 @@ const ContextMenu = React.memo(
     services,
     editorQuery,
     editorQueryMeta,
+    esqlVariables,
+    dataView,
     close,
     globalState,
     openInNewTab,
@@ -201,6 +207,8 @@ const ContextMenu = React.memo(
                 rowContext: row,
                 services,
                 editorQuery,
+                esqlVariables,
+                dataView,
                 closeActionMenu: close,
                 globalState,
                 openInNewTab,
@@ -209,7 +217,17 @@ const ContextMenu = React.memo(
           }, [] as Array<EuiContextMenuPanelItemDescriptor>),
         },
       ];
-    }, [close, editorQuery, globalState, groupType, openInNewTab, row, services]);
+    }, [
+      close,
+      dataView,
+      editorQuery,
+      esqlVariables,
+      globalState,
+      groupType,
+      openInNewTab,
+      row,
+      services,
+    ]);
 
     return (
       <EuiContextMenu
