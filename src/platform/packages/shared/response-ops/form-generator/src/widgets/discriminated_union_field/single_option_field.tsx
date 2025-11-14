@@ -12,10 +12,14 @@ import { z } from '@kbn/zod/v4';
 import { EuiFormFieldset, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { getMeta } from '../../schema_metadata';
 import type { DiscriminatedUnionWidgetProps } from './discriminated_union_field';
+import { getDiscriminatorKey } from './discriminated_union_field';
 import { getWidget } from '..';
 
-const getDiscriminatorFieldValue = (optionSchema: z.ZodObject<z.ZodRawShape>) => {
-  return (optionSchema.shape.type as z.ZodLiteral<string>).value;
+const getDiscriminatorFieldValue = (
+  optionSchema: z.ZodObject<z.ZodRawShape>,
+  discriminatorKey: string
+) => {
+  return (optionSchema.shape[discriminatorKey] as z.ZodLiteral<string>).value;
 };
 
 export const SingleOptionUnionField: React.FC<DiscriminatedUnionWidgetProps> = ({
@@ -34,7 +38,8 @@ export const SingleOptionUnionField: React.FC<DiscriminatedUnionWidgetProps> = (
 }) => {
   const discriminatedSchema = schema as z.ZodDiscriminatedUnion<z.ZodObject<z.ZodRawShape>[]>;
   const singleOptionSchema = discriminatedSchema.options[0];
-  const discriminatorValue = getDiscriminatorFieldValue(singleOptionSchema);
+  const discriminatorKey = getDiscriminatorKey(discriminatedSchema);
+  const discriminatorValue = getDiscriminatorFieldValue(singleOptionSchema, discriminatorKey);
 
   const [internalTouched, setInternalTouched] = React.useState<boolean>(false);
   const [fieldErrors, setFieldErrors] = React.useState<Record<string, string[] | undefined>>({});
@@ -55,12 +60,14 @@ export const SingleOptionUnionField: React.FC<DiscriminatedUnionWidgetProps> = (
   );
 
   const valueObj = useMemo(() => {
-    return typeof value === 'object' && value !== null ? value : { type: discriminatorValue };
-  }, [value, discriminatorValue]);
+    return typeof value === 'object' && value !== null
+      ? value
+      : { [discriminatorKey]: discriminatorValue };
+  }, [value, discriminatorValue, discriminatorKey]);
 
   const fields = useMemo(() => {
     return Object.entries(singleOptionSchema.shape).map(([fieldKey, subSchema], index: number) => {
-      if (fieldKey === 'type') return null; // Skip discriminator field
+      if (fieldKey === discriminatorKey) return null; // Skip discriminator field
 
       const fieldSchema = subSchema as z.ZodTypeAny;
       const metaInfo = getMeta(fieldSchema);
@@ -149,6 +156,7 @@ export const SingleOptionUnionField: React.FC<DiscriminatedUnionWidgetProps> = (
     setFieldError,
     setFieldTouched,
     onBlur,
+    discriminatorKey,
   ]);
 
   return (

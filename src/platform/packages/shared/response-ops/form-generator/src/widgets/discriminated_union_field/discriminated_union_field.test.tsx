@@ -496,6 +496,45 @@ describe('DiscriminatedUnionField', () => {
     expect(screen.queryByText('Username')).toBeNull();
     expect(screen.queryByText('API Key')).toBeNull();
   });
+
+  it('works with custom discriminator field (not "type")', () => {
+    const option1 = z.object({
+      kind: z.literal('email'),
+      address: z.string().meta({ widget: 'text', label: 'Email Address' }),
+    });
+
+    const option2 = z.object({
+      kind: z.literal('sms'),
+      phone: z.string().meta({ widget: 'text', label: 'Phone Number' }),
+    });
+
+    const schema = z.discriminatedUnion('kind', [
+      option1.meta({ label: 'Email Notification' }),
+      option2.meta({ label: 'SMS Notification' }),
+    ]);
+
+    render(
+      <DiscriminatedUnionField
+        fieldId="notification"
+        value={{ kind: 'email', address: '' }}
+        label="Notification Method"
+        schema={schema}
+        onChange={mockOnChange}
+        onBlur={mockOnBlur}
+      />,
+      { wrapper }
+    );
+
+    expect(screen.getByText('Notification Method')).toBeDefined();
+    expect(screen.getByText('Email Notification')).toBeDefined();
+    expect(screen.getByText('SMS Notification')).toBeDefined();
+
+    const emailCard = screen.getByLabelText('Email Notification') as HTMLInputElement;
+    expect(emailCard.checked).toBe(true);
+
+    expect(screen.getByText('Email Address')).toBeDefined();
+    expect(screen.queryByText('Phone Number')).toBeNull();
+  });
 });
 
 describe('getDiscriminatedUnionInitialValue', () => {

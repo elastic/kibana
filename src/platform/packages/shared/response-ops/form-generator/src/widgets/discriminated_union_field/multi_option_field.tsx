@@ -12,11 +12,15 @@ import { z } from '@kbn/zod/v4';
 import { EuiCheckableCard, EuiFormFieldset, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { getMeta } from '../../schema_metadata';
 import type { DiscriminatedUnionWidgetProps } from './discriminated_union_field';
+import { getDiscriminatorKey } from './discriminated_union_field';
 import { getDefaultValuesForOption } from './get_default_values';
 import { getWidget } from '..';
 
-const getDiscriminatorFieldValue = (optionSchema: z.ZodObject<z.ZodRawShape>) => {
-  return (optionSchema.shape.type as z.ZodLiteral<string>).value;
+const getDiscriminatorFieldValue = (
+  optionSchema: z.ZodObject<z.ZodRawShape>,
+  discriminatorKey: string
+) => {
+  return (optionSchema.shape[discriminatorKey] as z.ZodLiteral<string>).value;
 };
 
 export const MultiOptionUnionField: React.FC<DiscriminatedUnionWidgetProps> = ({
@@ -36,6 +40,7 @@ export const MultiOptionUnionField: React.FC<DiscriminatedUnionWidgetProps> = ({
   const discriminatedSchema = schema as z.ZodDiscriminatedUnion<z.ZodObject<z.ZodRawShape>[]>;
   const schemaOptions = discriminatedSchema.options;
   const totalOptions = schemaOptions.length;
+  const discriminatorKey = getDiscriminatorKey(discriminatedSchema);
 
   const [internalTouchedFields, setInternalTouchedFields] = React.useState<Set<string>>(new Set());
   const [internalFieldErrors, setInternalFieldErrors] = React.useState<
@@ -59,8 +64,9 @@ export const MultiOptionUnionField: React.FC<DiscriminatedUnionWidgetProps> = ({
 
   const options = useMemo(() => {
     return schemaOptions.map((optionSchema: z.ZodObject<z.ZodRawShape>, index: number) => {
-      const discriminatorValue = getDiscriminatorFieldValue(optionSchema);
-      const currentType = typeof value === 'object' && value !== null ? value.type : value;
+      const discriminatorValue = getDiscriminatorFieldValue(optionSchema, discriminatorKey);
+      const currentType =
+        typeof value === 'object' && value !== null ? value[discriminatorKey] : value;
       const isChecked = currentType === discriminatorValue;
       const checkableCardId = `${fieldId}-option-${discriminatorValue}`;
 
@@ -68,7 +74,7 @@ export const MultiOptionUnionField: React.FC<DiscriminatedUnionWidgetProps> = ({
       const cardLabel: string = (optionMeta?.label as string | undefined) || discriminatorValue;
 
       const handleCardChange = () => {
-        const newValue = getDefaultValuesForOption(optionSchema);
+        const newValue = getDefaultValuesForOption(optionSchema, discriminatorKey);
         setInternalTouchedFields(new Set());
         setInternalFieldErrors({});
         onChange(fieldId, newValue);
@@ -87,7 +93,9 @@ export const MultiOptionUnionField: React.FC<DiscriminatedUnionWidgetProps> = ({
                 const optionFieldMeta = getMeta(fieldSchema);
                 const optionWidget = optionFieldMeta?.widget || 'text';
                 const valueObj =
-                  typeof value === 'object' && value !== null ? value : { type: value };
+                  typeof value === 'object' && value !== null
+                    ? value
+                    : { [discriminatorKey]: value };
                 const optionValue = valueObj[fieldKey] ?? '';
 
                 const OptionWidgetComponent = getWidget(optionWidget);
@@ -108,7 +116,7 @@ export const MultiOptionUnionField: React.FC<DiscriminatedUnionWidgetProps> = ({
                   const currentValueObj =
                     typeof value === 'object' && value !== null
                       ? value
-                      : { type: discriminatorValue };
+                      : { [discriminatorKey]: discriminatorValue };
 
                   const updatedValue = {
                     ...currentValueObj,
@@ -198,6 +206,7 @@ export const MultiOptionUnionField: React.FC<DiscriminatedUnionWidgetProps> = ({
     errors,
     setFieldError,
     setFieldTouched,
+    discriminatorKey,
     touched,
     internalTouchedFields,
     internalFieldErrors,

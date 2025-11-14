@@ -29,8 +29,18 @@ export type DiscriminatedUnionWidgetProps = Omit<
   schema?: z.ZodDiscriminatedUnion<any>;
 };
 
-export const getDiscriminatorFieldValue = (optionSchema: z.ZodObject<z.ZodRawShape>) => {
-  return (optionSchema.shape.type as z.ZodLiteral<string>).value;
+export const getDiscriminatorKey = (
+  schema: z.ZodDiscriminatedUnion<z.ZodObject<z.ZodRawShape>[]>
+): string => {
+  // Couldn't find a better way to get access the discriminator from the schema's internal definition
+  return (schema as unknown as { _def: { discriminator: string } })._def.discriminator;
+};
+
+export const getDiscriminatorFieldValue = (
+  optionSchema: z.ZodObject<z.ZodRawShape>,
+  discriminatorKey: string
+) => {
+  return (optionSchema.shape[discriminatorKey] as z.ZodLiteral<string>).value;
 };
 
 export const getDiscriminatedUnionInitialValue = (schema: z.ZodTypeAny, defaultValue?: unknown) => {
@@ -44,19 +54,21 @@ export const getDiscriminatedUnionInitialValue = (schema: z.ZodTypeAny, defaultV
   const valueToUse = metadataDefault ?? defaultValue;
 
   if (valueToUse) {
+    const discriminatorKey = getDiscriminatorKey(discriminatedSchema);
     const matchingOption = discriminatedSchema.options.find(
       (option: z.ZodObject<z.ZodRawShape>) => {
-        const discriminatorValue = getDiscriminatorFieldValue(option);
+        const discriminatorValue = getDiscriminatorFieldValue(option, discriminatorKey);
         return discriminatorValue === valueToUse;
       }
     );
 
     if (matchingOption) {
-      return getDefaultValuesForOption(matchingOption);
+      return getDefaultValuesForOption(matchingOption, discriminatorKey);
     }
   }
 
-  return getDefaultValuesForOption(discriminatedSchema.options[0]);
+  const discriminatorKey = getDiscriminatorKey(discriminatedSchema);
+  return getDefaultValuesForOption(discriminatedSchema.options[0], discriminatorKey);
 };
 
 export const DiscriminatedUnionField: React.FC<DiscriminatedUnionWidgetProps> = (props) => {

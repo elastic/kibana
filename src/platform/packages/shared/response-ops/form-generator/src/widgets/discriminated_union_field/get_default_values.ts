@@ -9,16 +9,20 @@
 
 import { z } from '@kbn/zod/v4';
 
-export const getDefaultValuesForOption = (optionSchema: z.ZodObject<z.ZodRawShape>) => {
-  const defaultValues: Record<string, unknown> = {};
+export const getDefaultValuesForOption = (
+  optionSchema: z.ZodObject<z.ZodRawShape>,
+  discriminatorKey?: string
+) => {
+  const defaultValues: Record<string, any> = {};
 
-  if ('type' in optionSchema.shape) {
-    const typeField = optionSchema.shape.type as z.ZodLiteral<string>;
-    defaultValues.type = typeField.value;
+  const discriminator = discriminatorKey || 'type';
+  if (discriminator in optionSchema.shape) {
+    const discriminatorField = optionSchema.shape[discriminator] as z.ZodLiteral<string>;
+    defaultValues[discriminator] = discriminatorField.value;
   }
 
   Object.entries(optionSchema.shape).forEach(([fieldKey, fieldSchema]) => {
-    if (fieldKey === 'type') return; // Skip discriminator
+    if (fieldKey === discriminator) return;
 
     const zodFieldSchema = fieldSchema as z.ZodTypeAny;
 
