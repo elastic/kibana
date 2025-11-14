@@ -137,7 +137,12 @@ export async function evaluateDissectSuggestions() {
   const output = await Promise.all(
     suggestions.map(async (suggestion) => {
       if (!suggestion.processor) {
-        return { ...suggestion, parsing_score_samples: 0, parsing_score_all_docs: 0, field_analysis: {} };
+        return {
+          ...suggestion,
+          parsing_score_samples: 0,
+          parsing_score_all_docs: 0,
+          field_analysis: {},
+        };
       }
       const sampleDocs = await fetchDocs(suggestion.stream, 100);
       const allDocs = await fetchDocs(suggestion.stream, 10_000);

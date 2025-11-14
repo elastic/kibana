@@ -71,9 +71,6 @@ export const handleProcessingDissectSuggestions = async ({
   const stream = await streamsClient.getStream(params.path.name);
   const isWiredStream = Streams.WiredStream.Definition.is(stream);
 
-  console.log(JSON.stringify(params.body.sample_messages, null, 2));
-  console.log(JSON.stringify(params.body.review_fields, null, 2));
-
   const response = await inferenceClient.prompt({
     connectorId: params.body.connector_id,
     prompt: ReviewDissectFieldsPrompt,
@@ -84,8 +81,6 @@ export const handleProcessingDissectSuggestions = async ({
     abortSignal: signal,
   });
   const reviewResult = response.toolCalls[0].function.arguments;
-
-  console.log(JSON.stringify(reviewResult, null, 2));
 
   // if the stream is wired, or if it matches the logs-*.otel-* pattern, use the OTEL field names
   const useOtelFieldNames = isWiredStream || params.path.name.match(/^logs-.*\.otel-/);
