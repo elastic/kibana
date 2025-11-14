@@ -450,8 +450,8 @@ describe('regular expressions', () => {
       const expression = root.commands[0].args[0];
 
       expect(errors.length).toBe(0);
-      expect(expression.args[1].values).toHaveLength(5);
-      expect(expression.args[1].values.map((v) => v.valueUnquoted)).toEqual([
+      expect((expression as any).args[1].values).toHaveLength(5);
+      expect((expression as any).args[1].values.map((v: any) => v.valueUnquoted)).toEqual([
         'a',
         'b',
         'c',
@@ -468,7 +468,7 @@ describe('regular expressions', () => {
       const expression = root.commands[0].args[0];
 
       expect(errors.length).toBe(0);
-      expect(expression.args[0]).toMatchObject({
+      expect((expression as any).args[0]).toMatchObject({
         type: 'column',
         name: 'my field',
         quoted: true,
@@ -481,7 +481,7 @@ describe('regular expressions', () => {
       const expression = root.commands[0].args[0];
 
       expect(errors.length).toBe(0);
-      expect(expression.args[1]).toMatchObject({
+      expect((expression as any).args[1]).toMatchObject({
         type: 'literal',
         literalType: 'keyword',
         valueUnquoted: 'pattern',
@@ -494,7 +494,7 @@ describe('regular expressions', () => {
       const expression = root.commands[0].args[0];
 
       expect(errors.length).toBe(0);
-      expect(expression.args[1].values).toHaveLength(3);
+      expect((expression as any).args[1].values).toHaveLength(3);
     });
 
     it('LIKE with escaped characters in pattern', () => {
@@ -503,7 +503,7 @@ describe('regular expressions', () => {
       const expression = root.commands[0].args[0];
 
       expect(errors.length).toBe(0);
-      expect(expression.args[1]).toMatchObject({
+      expect((expression as any).args[1]).toMatchObject({
         type: 'literal',
         literalType: 'keyword',
         valueUnquoted: 'test"quote',
