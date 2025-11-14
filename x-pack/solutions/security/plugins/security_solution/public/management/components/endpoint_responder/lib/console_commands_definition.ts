@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { MemoryDumpActionResult } from '../command_render_components/memory_dump_action';
 import { CancelActionResult } from '../command_render_components/cancel_action';
 import { isActionSupportedByAgentType } from '../../../../../common/endpoint/service/response_actions/is_response_action_supported';
 import { isCancelFeatureAvailable } from '../../../../../common/endpoint/service/authz/cancel_authz_utils';
@@ -20,7 +21,11 @@ import type { CommandArgDefinition } from '../../console/types';
 import { isAgentTypeAndActionSupported } from '../../../../common/lib/endpoint';
 import { getRbacControl } from '../../../../../common/endpoint/service/response_actions/utils';
 import { UploadActionResult } from '../command_render_components/upload_action';
-import { ArgumentFileSelector } from '../../console_argument_selectors';
+import {
+  ArgumentFileSelector,
+  CrowdstrikeScriptInputParams,
+  MicrosoftScriptInputParams,
+} from '../../console_argument_selectors';
 import type { ParsedArgData } from '../../console/service/types';
 import { ExperimentalFeaturesService } from '../../../../common/experimental_features_service';
 import type {
@@ -62,6 +67,7 @@ import {
   MS_DEFENDER_ENDPOINT_CONSOLE_COMMANDS,
 } from '../../../common/translations';
 import { ScanActionResult } from '../command_render_components/scan_action';
+import { SentinelOneScriptInputParams } from '../../console_argument_selectors/script_input_params_selector';
 
 const emptyArgumentValidator = (argData: ParsedArgData): true | string => {
   if (argData?.length > 0 && typeof argData[0] === 'string' && argData[0]?.trim().length > 0) {
@@ -104,17 +110,17 @@ const capabilitiesAndPrivilegesValidator = (
     const privileges = command.commandDefinition.meta.privileges;
     const agentCapabilities: EndpointCapabilities[] = command.commandDefinition.meta.capabilities;
     const commandName = command.commandDefinition.name as ConsoleResponseActionCommands;
-    const responderCapability =
-      RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY[commandName];
+    const responderCapabilities =
+      RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY[commandName] ?? [];
     let errorMessage = '';
 
     // We only validate Agent capabilities for the command for Endpoint agents
     if (agentType === 'endpoint') {
-      if (!responderCapability) {
+      if (!responderCapabilities.length) {
         errorMessage = errorMessage.concat(UPGRADE_AGENT_FOR_RESPONDER(agentType, commandName));
-      }
-
-      if (responderCapability && !agentCapabilities.includes(responderCapability)) {
+      } else if (
+        !responderCapabilities.some((capability) => agentCapabilities.includes(capability))
+      ) {
         errorMessage = errorMessage.concat(UPGRADE_AGENT_FOR_RESPONDER(agentType, commandName));
       }
     }
@@ -187,6 +193,7 @@ export const getEndpointConsoleCommands = ({
     crowdstrikeRunScriptEnabled,
     microsoftDefenderEndpointRunScriptEnabled,
     microsoftDefenderEndpointCancelEnabled,
+    responseActionsEndpointMemoryDump,
   } = featureFlags;
   const commandMeta: EndpointCommandDefinitionMeta = {
     agentType,
@@ -202,11 +209,12 @@ export const getEndpointConsoleCommands = ({
       return true;
     }
 
-    const responderCapability =
-      RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY[commandName];
+    const responderCapability: EndpointCapabilities[] = [
+      ...(RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY[commandName] ?? []),
+    ];
 
-    if (responderCapability) {
-      return endpointCapabilities.includes(responderCapability);
+    if (responderCapability.length) {
+      return responderCapability.some((capability) => endpointCapabilities.includes(capability));
     }
 
     return false;
@@ -272,19 +280,19 @@ export const getEndpointConsoleCommands = ({
       mustHaveArgs: true,
       args: {
         ...commandCommentArgument(),
-        pid: {
-          required: false,
-          allowMultiples: false,
-          exclusiveOr: true,
-          about: CONSOLE_COMMANDS.killProcess.args.pid.about,
-          validate: pidValidator,
-        },
         entityId: {
           required: false,
           allowMultiples: false,
           exclusiveOr: true,
           about: CONSOLE_COMMANDS.killProcess.args.entityId.about,
           validate: emptyArgumentValidator,
+        },
+        pid: {
+          required: false,
+          allowMultiples: false,
+          exclusiveOr: true,
+          about: CONSOLE_COMMANDS.killProcess.args.pid.about,
+          validate: pidValidator,
         },
       },
       helpGroupLabel: HELP_GROUPS.responseActions.label,
@@ -307,19 +315,19 @@ export const getEndpointConsoleCommands = ({
       mustHaveArgs: true,
       args: {
         ...commandCommentArgument(),
-        pid: {
-          required: false,
-          allowMultiples: false,
-          exclusiveOr: true,
-          about: CONSOLE_COMMANDS.suspendProcess.args.pid.about,
-          validate: pidValidator,
-        },
         entityId: {
           required: false,
           allowMultiples: false,
           exclusiveOr: true,
           about: CONSOLE_COMMANDS.suspendProcess.args.entityId.about,
           validate: emptyArgumentValidator,
+        },
+        pid: {
+          required: false,
+          allowMultiples: false,
+          exclusiveOr: true,
+          about: CONSOLE_COMMANDS.suspendProcess.args.pid.about,
+          validate: pidValidator,
         },
       },
       helpGroupLabel: HELP_GROUPS.responseActions.label,
@@ -576,6 +584,131 @@ export const getEndpointConsoleCommands = ({
     });
   }
 
+  if (responseActionsEndpointMemoryDump) {
+    const endpointSupportsKernelDump = (endpointCapabilities as EndpointCapabilities[]).includes(
+      'memdump_kernel'
+    );
+    const endpointSupportsProcessDump = (endpointCapabilities as EndpointCapabilities[]).includes(
+      'memdump_process'
+    );
+    const getMemoryDumpTypeNotSupportedMessage = (type: 'process' | 'kernel') =>
+      i18n.translate(
+        'xpack.securitySolution.consoleCommandsDefinition.memoryDump.kernelTypeNotSupported',
+        {
+          defaultMessage:
+            '"{type}" memory dump type is not currently supported for this host OS type ({osType})',
+          values: { osType: platform, type },
+        }
+      );
+
+    consoleCommands.push({
+      name: 'memory-dump',
+      about: getCommandAboutInfo({
+        aboutInfo: CONSOLE_COMMANDS.memoryDump.about,
+        isSupported: doesEndpointSupportCommand('memory-dump'),
+      }),
+      RenderComponent: MemoryDumpActionResult,
+      meta: commandMeta,
+      exampleUsage: 'memory-dump --process --pid=123 --comment="dump process 123"',
+      exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
+      validate: (enteredCommand) => {
+        const standardValidation = capabilitiesAndPrivilegesValidator(agentType)(enteredCommand);
+
+        if (standardValidation !== true) {
+          return standardValidation;
+        }
+
+        const argsInterface = enteredCommand.args;
+
+        // Nothing to do if all the user did was `--help`
+        if (argsInterface.hasArg('help')) {
+          return true;
+        }
+
+        const memoryDumpType = argsInterface.hasArg('kernel') ? 'kernel' : 'process';
+
+        // PID and Entity ID are only supported for process memory dumps
+        if (
+          memoryDumpType === 'kernel' &&
+          (argsInterface.hasArg('pid') || argsInterface.hasArg('entityId'))
+        ) {
+          return i18n.translate(
+            'xpack.securitySolution.consoleCommandsDefinition.memoryDump.pidAndEntityIdNotSupportedForKernel',
+            {
+              defaultMessage:
+                '"pid" and "entityId" arguments are not supported for "kernel" memory dumps',
+            }
+          );
+        }
+
+        // Process memory dump requires either pid or entityId
+        if (
+          memoryDumpType === 'process' &&
+          !argsInterface.hasArg('pid') &&
+          !argsInterface.hasArg('entityId')
+        ) {
+          return i18n.translate(
+            'xpack.securitySolution.consoleCommandsDefinition.memoryDump.pidAndEntityIdRequiredForProcess',
+            {
+              defaultMessage: '"pid" or "entityId argument is required for "process" memory dumps',
+            }
+          );
+        }
+
+        return true;
+      },
+      mustHaveArgs: true,
+      args: {
+        kernel: {
+          about: CONSOLE_COMMANDS.memoryDump.kernelArgAbout,
+          required: false,
+          allowMultiples: false,
+          mustHaveValue: false,
+          exclusiveOr: true,
+          validate: () => {
+            if (!endpointSupportsKernelDump) {
+              return getMemoryDumpTypeNotSupportedMessage('kernel');
+            }
+
+            return true;
+          },
+        },
+        process: {
+          about: CONSOLE_COMMANDS.memoryDump.processArgAbout,
+          required: false,
+          allowMultiples: false,
+          mustHaveValue: false,
+          exclusiveOr: true,
+          validate: () => {
+            if (!endpointSupportsProcessDump) {
+              return getMemoryDumpTypeNotSupportedMessage('process');
+            }
+
+            return true;
+          },
+        },
+        entityId: {
+          required: false,
+          allowMultiples: false,
+          mustHaveValue: 'non-empty-string',
+          about: CONSOLE_COMMANDS.memoryDump.entityIdArgAbout,
+        },
+        pid: {
+          required: false,
+          allowMultiples: false,
+          mustHaveValue: 'number-greater-than-zero',
+          about: CONSOLE_COMMANDS.memoryDump.pidArgAbout,
+        },
+        ...commandCommentArgument(),
+      },
+      helpGroupLabel: HELP_GROUPS.responseActions.label,
+      helpGroupPosition: HELP_GROUPS.responseActions.position,
+      helpCommandPosition: 6,
+      helpDisabled: !doesEndpointSupportCommand('memory-dump'),
+      helpHidden: !getRbacControl({ commandName: 'execute', privileges: endpointPrivileges }),
+    });
+  }
+
   switch (agentType) {
     case 'sentinel_one':
       return adjustCommandsForSentinelOne({ commandList: consoleCommands, platform });
@@ -715,6 +848,8 @@ const adjustCommandsForSentinelOne = ({
               { defaultMessage: 'Input arguments for the selected script' }
             ),
             mustHaveValue: 'non-empty-string',
+            SelectorComponent: SentinelOneScriptInputParams,
+            selectorShowTextValue: true,
           },
           ...commandCommentArgument(),
         };
@@ -830,6 +965,8 @@ const adjustCommandsForCrowdstrike = ({
               allowMultiples: false,
               about: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.args.commandLine.about,
               mustHaveValue: 'non-empty-string',
+              selectorShowTextValue: true,
+              SelectorComponent: CrowdstrikeScriptInputParams,
             },
             HostPath: {
               required: false,
@@ -902,6 +1039,8 @@ const adjustCommandsForMicrosoftDefenderEndpoint = ({
               allowMultiples: false,
               about: MS_DEFENDER_ENDPOINT_CONSOLE_COMMANDS.runscript.args.args.about,
               mustHaveValue: 'non-empty-string',
+              selectorShowTextValue: true,
+              SelectorComponent: MicrosoftScriptInputParams,
             },
             ...commandCommentArgument(),
           },

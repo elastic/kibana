@@ -50,6 +50,7 @@ jest.mock('../api/hooks/use_schedule_now_risk_engine_mutation', () => ({
 }));
 
 const mockToggleSelectedClosedAlertsSetting = jest.fn();
+const mockToggleScoreRetainment = jest.fn();
 
 const mockUseConfigurableRiskEngineSettings = jest.fn();
 
@@ -71,34 +72,58 @@ jest.mock('../components/risk_score_management/risk_score_preview_section', () =
   RiskScorePreviewSection: (props: never) => mockRiskScorePreviewSection(props),
 }));
 
+jest.mock('../components/risk_score_management/alert_filters_kql_bar', () => ({
+  AlertFiltersKqlBar: () => 'Alert filters',
+}));
+
+const defaultRiskEngineSettings = {
+  includeClosedAlerts: false,
+  range: {
+    start: 'now-30d',
+    end: 'now',
+  },
+  enableResetToZero: true,
+  filters: [],
+};
+
+const buildConfig = (overrides: Record<string, unknown> = {}) => {
+  const {
+    selectedRiskEngineSettings: selectedOverrides,
+    savedRiskEngineSettings: savedOverrides,
+    selectedSettingsMatchSavedSettings,
+    ...rest
+  } = overrides;
+
+  return {
+    selectedRiskEngineSettings: {
+      ...defaultRiskEngineSettings,
+      ...(selectedOverrides as Record<string, unknown> | undefined),
+    },
+    savedRiskEngineSettings: {
+      ...defaultRiskEngineSettings,
+      ...(savedOverrides as Record<string, unknown> | undefined),
+    },
+    selectedSettingsMatchSavedSettings:
+      (selectedSettingsMatchSavedSettings as boolean | undefined) ?? true,
+    resetSelectedSettings: () => {},
+    saveSelectedSettingsMutation: {
+      mutateAsync: () => {},
+      isLoading: false,
+    },
+    isLoadingRiskEngineSettings: false,
+    setSelectedDateSetting: () => {},
+    toggleSelectedClosedAlertsSetting: mockToggleSelectedClosedAlertsSetting,
+    toggleScoreRetainment: mockToggleScoreRetainment,
+    setAlertFilters: () => {},
+    getUIAlertFilters: () => [],
+    ...rest,
+  };
+};
+
 describe('EntityAnalyticsManagementPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseConfigurableRiskEngineSettings.mockReturnValue({
-      selectedRiskEngineSettings: {
-        includeClosedAlerts: false,
-        range: {
-          start: 'now-30d',
-          end: 'now',
-        },
-      },
-      savedRiskEngineSettings: {
-        includeClosedAlerts: false,
-        range: {
-          start: 'now-30d',
-          end: 'now',
-        },
-      },
-      selectedSettingsMatchSavedSettings: true,
-      resetSelectedSettings: () => {},
-      saveSelectedSettingsMutation: {
-        mutateAsync: () => {},
-      },
-      setSelectedDateSetting: () => {},
-      toggleSelectedClosedAlertsSetting: mockToggleSelectedClosedAlertsSetting,
-      isLoadingRiskEngineSettings: false,
-      isLoadingSaveSelectedSettings: false,
-    });
+    mockUseConfigurableRiskEngineSettings.mockReturnValue(buildConfig());
   });
 
   const pageComponent = () => (
@@ -117,30 +142,28 @@ describe('EntityAnalyticsManagementPage', () => {
   it('toggles the save bar when making changes to the closed alerts toggle', () => {
     const { rerender } = render(pageComponent());
 
-    expect(screen.queryByText('Save')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('riskScoreSaveButton')).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId('includeClosedAlertsSwitch'));
     expect(mockToggleSelectedClosedAlertsSetting).toHaveBeenCalled();
 
-    mockUseConfigurableRiskEngineSettings.mockReturnValue({
-      ...mockUseConfigurableRiskEngineSettings(),
-      selectedSettingsMatchSavedSettings: false,
-      selectedRiskEngineSettings: {
-        includeClosedAlerts: true,
-        range: {
-          start: 'now-30d',
-          end: 'now',
+    mockUseConfigurableRiskEngineSettings.mockReturnValue(
+      buildConfig({
+        selectedSettingsMatchSavedSettings: false,
+        selectedRiskEngineSettings: {
+          includeClosedAlerts: true,
         },
-      },
-    });
+      })
+    );
     rerender(pageComponent());
-    expect(screen.getByText('Save')).toBeInTheDocument();
+    expect(screen.getByTestId('riskScoreSaveButton')).toBeInTheDocument();
   });
 
   it('calls the preview section with the toggle button selection as it changes', () => {
     const { rerender } = render(pageComponent());
 
     expect(mockRiskScorePreviewSection).toHaveBeenCalledWith({
+      alertFilters: [],
       from: 'now-30d',
       to: 'now',
       includeClosedAlerts: false,
@@ -153,19 +176,17 @@ describe('EntityAnalyticsManagementPage', () => {
     fireEvent.click(screen.getByTestId('includeClosedAlertsSwitch'));
     expect(mockToggleSelectedClosedAlertsSetting).toHaveBeenCalled();
 
-    mockUseConfigurableRiskEngineSettings.mockReturnValue({
-      ...mockUseConfigurableRiskEngineSettings(),
-      selectedSettingsMatchSavedSettings: false,
-      selectedRiskEngineSettings: {
-        includeClosedAlerts: true,
-        range: {
-          start: 'now-30d',
-          end: 'now',
+    mockUseConfigurableRiskEngineSettings.mockReturnValue(
+      buildConfig({
+        selectedSettingsMatchSavedSettings: false,
+        selectedRiskEngineSettings: {
+          includeClosedAlerts: true,
         },
-      },
-    });
+      })
+    );
     rerender(pageComponent());
     expect(mockRiskScorePreviewSection).toHaveBeenCalledWith({
+      alertFilters: [],
       from: 'now-30d',
       to: 'now',
       includeClosedAlerts: true,

@@ -356,7 +356,7 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
       },
       async expectPanelExists(sectionId: NavigationId) {
         log.debug('SolutionNavigation.sidenav.expectPanelExists', sectionId);
-        await testSubjects.existOrFail(`~sideNavPanel-id-${sectionId}`, {
+        await testSubjects.existOrFail(`~side-navigation-panel_${sectionId}`, {
           timeout: TIMEOUT_CHECK,
         });
       },
@@ -487,7 +487,7 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
         },
         async getFeedbackDismissTestSubjectId() {
           return (await isV2())
-            ? 'feedbackSnippetPanel > feedbackSnippetPanelDismiss'
+            ? 'feedbackSnippetPanel > sideNavigationFeedbackPanelDismiss'
             : 'sideNavfeedbackCallout > euiDismissCalloutButton';
         },
         async expectExists() {
@@ -497,7 +497,7 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
         },
         async expectMissing() {
           return (await isV2())
-            ? await testSubjects.existOrFail('feedbackSnippetButton', {
+            ? await testSubjects.existOrFail('sideNavigationFeedbackButtonSurveyLink', {
                 timeout: TIMEOUT_CHECK,
               })
             : await testSubjects.missingOrFail(await this.getFeedbackTestSubjectId(), {

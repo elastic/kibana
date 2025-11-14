@@ -424,7 +424,7 @@
                 "section": "def-common.IngestPipeline",
                 "text": "IngestPipeline"
               },
-              " | undefined)[], existingIndex?: boolean | undefined) => Promise<",
+              " | undefined)[], existingIndex?: boolean | undefined, signal?: AbortSignal | undefined) => Promise<",
               {
                 "pluginId": "@kbn/file-upload-common",
                 "scope": "common",
@@ -520,6 +520,21 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
+              },
+              {
+                "parentPluginId": "fileUpload",
+                "id": "def-public.IImporter.initializeImport.$6",
+                "type": "Object",
+                "tags": [],
+                "label": "signal",
+                "description": [],
+                "signature": [
+                  "AbortSignal | undefined"
+                ],
+                "path": "x-pack/platform/plugins/private/file_upload/public/importer/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -542,7 +557,7 @@
                 "section": "def-common.IngestPipeline",
                 "text": "IngestPipeline"
               },
-              "[]) => void"
+              "[], signal?: AbortSignal | undefined) => void"
             ],
             "path": "x-pack/platform/plugins/private/file_upload/public/importer/types.ts",
             "deprecated": false,
@@ -599,6 +614,21 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "fileUpload",
+                "id": "def-public.IImporter.initializeWithoutCreate.$4",
+                "type": "Object",
+                "tags": [],
+                "label": "signal",
+                "description": [],
+                "signature": [
+                  "AbortSignal | undefined"
+                ],
+                "path": "x-pack/platform/plugins/private/file_upload/public/importer/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -611,7 +641,7 @@
             "label": "import",
             "description": [],
             "signature": [
-              "(index: string, ingestPipelineId: string | undefined, setImportProgress: (progress: number) => void) => Promise<",
+              "(index: string, ingestPipelineId: string | undefined, setImportProgress: (progress: number) => void, signal?: AbortSignal | undefined) => Promise<",
               {
                 "pluginId": "@kbn/file-upload-common",
                 "scope": "common",
@@ -669,6 +699,21 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "fileUpload",
+                "id": "def-public.IImporter.import.$4",
+                "type": "Object",
+                "tags": [],
+                "label": "signal",
+                "description": [],
+                "signature": [
+                  "AbortSignal | undefined"
+                ],
+                "path": "x-pack/platform/plugins/private/file_upload/public/importer/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -745,14 +790,30 @@
             "label": "deletePipelines",
             "description": [],
             "signature": [
-              "() => Promise<",
+              "(signal?: AbortSignal | undefined) => Promise<",
               "AcknowledgedResponseBase",
               "[]>"
             ],
             "path": "x-pack/platform/plugins/private/file_upload/public/importer/types.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "fileUpload",
+                "id": "def-public.IImporter.deletePipelines.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "signal",
+                "description": [],
+                "signature": [
+                  "AbortSignal | undefined"
+                ],
+                "path": "x-pack/platform/plugins/private/file_upload/public/importer/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
             "returnComment": []
           }
         ],

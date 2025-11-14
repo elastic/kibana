@@ -14,7 +14,7 @@ import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import type { MetricField, MetricFieldsResponse } from '../../../common/types';
 import { deduplicateFields } from '../../lib/fields/deduplicate_fields';
 import { extractMetricFields } from '../../lib/fields/extract_metric_fields';
-import { enrichMetricFields } from '../../lib/fields/enrich_metric_fields';
+import { enrichMetricFields, generateMapKey } from '../../lib/fields/enrich_metric_fields';
 import { extractDimensions } from '../../lib/dimensions/extract_dimensions';
 import { buildMetricField } from '../../lib/fields/build_metric_field';
 import { retrieveFieldCaps } from '../../lib/fields/retrieve_fieldcaps';
@@ -29,6 +29,7 @@ export async function getMetricFields({
   size,
   logger,
   timerange,
+  kuery,
 }: {
   esClient: TracedElasticsearchClient;
   indexPattern: string;
@@ -37,10 +38,11 @@ export async function getMetricFields({
   page: number;
   size: number;
   logger: Logger;
+  kuery?: string;
 }): Promise<MetricFieldsResponse> {
   if (!indexPattern) return { fields: [], total: 0 };
 
-  const dataStreamFieldCapsMap = await retrieveFieldCaps({
+  const indexFieldCapsMap = await retrieveFieldCaps({
     esClient: esClient.client,
     indexPattern,
     fields,
@@ -48,17 +50,18 @@ export async function getMetricFields({
   });
 
   const allMetricFields: MetricField[] = [];
-  for (const [dataStreamName, fieldCaps] of dataStreamFieldCapsMap.entries()) {
-    if (isNumber(dataStreamName) || fieldCaps == null) continue;
+  for (const [indexName, fieldCaps] of indexFieldCapsMap.entries()) {
+    if (isNumber(indexName) || fieldCaps == null) continue;
     if (Object.keys(fieldCaps).length === 0) continue;
 
     const metricFields = extractMetricFields(fieldCaps);
+
     const allDimensions = extractDimensions(fieldCaps);
 
     const initialFields = metricFields.map(({ fieldName, type, typeInfo }) =>
       buildMetricField({
         name: fieldName,
-        index: dataStreamName,
+        index: indexName,
         dimensions: allDimensions,
         type,
         typeInfo,
@@ -69,14 +72,17 @@ export async function getMetricFields({
     allMetricFields.push(...deduped);
   }
 
-  allMetricFields.sort((a, b) => a.name.localeCompare(b.name));
+  allMetricFields.sort((a, b) =>
+    generateMapKey(a.index, a.name).localeCompare(generateMapKey(b.index, b.name))
+  );
 
   const enrichedMetricFields = await enrichMetricFields({
     esClient,
     metricFields: applyPagination({ metricFields: allMetricFields, page, size }),
-    dataStreamFieldCapsMap,
+    indexFieldCapsMap,
     logger,
     timerange,
+    kuery,
   });
 
   const finalFields = enrichedMetricFields.map((field) => {
@@ -86,5 +92,5 @@ export async function getMetricFields({
     };
   });
 
-  return { fields: finalFields, total: allMetricFields.length };
+  return { fields: finalFields, total: kuery ? finalFields.length : allMetricFields.length };
 }

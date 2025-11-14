@@ -68,6 +68,7 @@ export const ScheduledReportFlyoutShareWrapper = ({
     return (
       <EuiFlyoutBody>
         <EuiCallOut
+          announceOnMount={false}
           title={i18n.SCHEDULED_REPORT_NO_REPORT_TYPES_TITLE}
           color="warning"
           iconType="warning"

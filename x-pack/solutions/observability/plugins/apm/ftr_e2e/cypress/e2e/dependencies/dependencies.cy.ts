@@ -17,7 +17,8 @@ const timeRange = {
   rangeTo: end,
 };
 
-describe('Dependencies', () => {
+// Failing: See https://github.com/elastic/kibana/issues/240813
+describe.skip('Dependencies', () => {
   before(() => {
     synthtrace.index(
       opbeans({

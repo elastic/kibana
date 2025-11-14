@@ -12,6 +12,7 @@ import { VisualizationEmbeddable } from '../../../common/components/visualizatio
 import { getTimeSavedMetricLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/ai/time_saved_metric';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { VisualizationContextMenuActions } from '../../../common/components/visualization_actions/types';
+import { useSignalIndexWithDefault } from '../../hooks/use_signal_index_with_default';
 jest.mock('../../../common/components/visualization_actions/visualization_embeddable', () => ({
   VisualizationEmbeddable: jest.fn(() => <div data-test-subj="mock-visualization-embeddable" />),
 }));
@@ -23,8 +24,15 @@ jest.mock(
   })
 );
 
+jest.mock('../../hooks/use_signal_index_with_default', () => ({
+  useSignalIndexWithDefault: jest.fn(),
+}));
+
 const mockGetTimeSavedMetricLensAttributes =
   getTimeSavedMetricLensAttributes as jest.MockedFunction<typeof getTimeSavedMetricLensAttributes>;
+const mockUseSignalIndexWithDefault = useSignalIndexWithDefault as jest.MockedFunction<
+  typeof useSignalIndexWithDefault
+>;
 
 const defaultProps = {
   from: '2023-01-01T00:00:00.000Z',
@@ -35,6 +43,7 @@ const defaultProps = {
 describe('TimeSavedMetric', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseSignalIndexWithDefault.mockReturnValue('.alerts-security.alerts-default');
     mockGetTimeSavedMetricLensAttributes.mockReturnValue({
       description: '',
       state: {
@@ -126,6 +135,7 @@ describe('TimeSavedMetric', () => {
     expect(mockGetTimeSavedMetricLensAttributes).toHaveBeenCalledWith({
       ...mockArgs,
       minutesPerAlert: defaultProps.minutesPerAlert,
+      signalIndexName: '.alerts-security.alerts-default',
     });
   });
 
@@ -153,9 +163,35 @@ describe('TimeSavedMetric', () => {
       expect(mockGetTimeSavedMetricLensAttributes).toHaveBeenCalledWith(
         expect.objectContaining({
           minutesPerAlert,
+          signalIndexName: '.alerts-security.alerts-default',
         })
       );
     });
+  });
+
+  it('calls useSignalIndexWithDefault hook', () => {
+    render(<TimeSavedMetric {...defaultProps} />);
+    expect(mockUseSignalIndexWithDefault).toHaveBeenCalled();
+  });
+
+  it('passes signalIndexName from useSignalIndexWithDefault to getLensAttributes', () => {
+    const customSignalIndexName = '.alerts-security.alerts-custom-space';
+    mockUseSignalIndexWithDefault.mockReturnValue(customSignalIndexName);
+
+    render(<TimeSavedMetric {...defaultProps} />);
+
+    const callArgs = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0];
+    const mockArgs = {
+      euiTheme: { colors: {} },
+      extraOptions: { filters: [] },
+    };
+    callArgs.getLensAttributes(mockArgs);
+
+    expect(mockGetTimeSavedMetricLensAttributes).toHaveBeenCalledWith(
+      expect.objectContaining({
+        signalIndexName: customSignalIndexName,
+      })
+    );
   });
 
   it('memoizes timerange based on from and to props', () => {

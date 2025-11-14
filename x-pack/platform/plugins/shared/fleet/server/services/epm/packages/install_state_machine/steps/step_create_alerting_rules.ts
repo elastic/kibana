@@ -9,6 +9,8 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
+import pMap from 'p-map';
+
 import { FLEET_ELASTIC_AGENT_PACKAGE, FleetError } from '../../../../../../common';
 import { type KibanaAssetReference, KibanaSavedObjectType } from '../../../../../../common/types';
 import { createKibanaRequestFromAuth } from '../../../../request_utils';
@@ -17,6 +19,7 @@ import { withPackageSpan } from '../../utils';
 import type { InstallContext } from '../_state_machine_package_install';
 import type { ArchiveAsset } from '../../../kibana/assets/install';
 import { saveKibanaAssetsRefs } from '../../install';
+import { MAX_CONCURRENT_RULE_CREATION_OPERATIONS } from '../../../../../constants';
 
 function getRuleId({
   pkgName,
@@ -124,7 +127,7 @@ export async function stepCreateAlertingRules(
           ?.getRulesClientWithRequest(createKibanaRequestFromAuth(context.authorizationHeader))
       : undefined;
 
-    const assetRefs: KibanaAssetReference[] = [];
+    const alertTemplateAssets: ArchiveAsset[] = [];
     await packageInstallContext.archiveIterator.traverseEntries(
       async (entry) => {
         if (!entry.buffer) {
@@ -132,15 +135,25 @@ export async function stepCreateAlertingRules(
         }
 
         const alertTemplate = JSON.parse(entry.buffer.toString('utf8')) as ArchiveAsset;
+        alertTemplateAssets.push(alertTemplate);
+      },
+      (path) => path.match(/\/alerting_rule_template\//) !== null
+    );
 
+    const assetRefs: KibanaAssetReference[] = [];
+    await pMap(
+      alertTemplateAssets,
+      async (alertTemplate) => {
         const ref = await createAlertingRuleFromTemplate(
           { rulesClient, logger },
           { alertTemplateArchiveAsset: alertTemplate, spaceId, pkgName }
         );
+
         assetRefs.push(ref);
       },
-      (path) => path.match(/\/alerting_rule_template\//) !== null
+      { concurrency: MAX_CONCURRENT_RULE_CREATION_OPERATIONS }
     );
+
     await saveKibanaAssetsRefs(savedObjectsClient, pkgName, assetRefs, false, true);
   });
 }

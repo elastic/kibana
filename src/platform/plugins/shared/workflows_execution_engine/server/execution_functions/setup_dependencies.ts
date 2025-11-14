@@ -10,14 +10,13 @@
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type { CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import type { EsWorkflowExecution } from '@kbn/workflows';
-
+import type { EsWorkflowExecution, WorkflowSettings } from '@kbn/workflows';
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 
 import { ConnectorExecutor } from '../connector_executor';
 import { UrlValidator } from '../lib/url_validator';
-import type { LogsRepository } from '../repositories/logs_repository/logs_repository';
+import type { LogsRepository } from '../repositories/logs_repository';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import { NodesFactory } from '../step/nodes_factory';
@@ -27,6 +26,10 @@ import { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/wor
 import { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
 import { WorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
 import { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
+
+const defaultWorkflowSettings: WorkflowSettings = {
+  timeout: '6h',
+};
 
 export async function setupDependencies(
   workflowRunId: string,
@@ -54,7 +57,8 @@ export async function setupDependencies(
   }
 
   let workflowExecutionGraph = WorkflowGraph.fromWorkflowDefinition(
-    workflowExecution.workflowDefinition
+    workflowExecution.workflowDefinition,
+    defaultWorkflowSettings
   );
 
   // If the execution is for a specific step, narrow the graph to that step

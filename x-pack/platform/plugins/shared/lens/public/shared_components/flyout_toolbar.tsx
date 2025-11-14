@@ -61,9 +61,11 @@ export interface ToolbarContentMap<S> {
 
 export function FlyoutToolbar<S>({
   contentMap,
+  isInlineEditing = false,
   ...flyoutContentProps
 }: VisualizationToolbarProps<S> & {
   contentMap: ToolbarContentMap<S>;
+  isInlineEditing: boolean;
 }) {
   const [isFlyoutVisible, setFlyoutVisible] = useState(false);
   const [idSelected, setIdSelected] = useState<Options | ''>('');
@@ -74,7 +76,7 @@ export function FlyoutToolbar<S>({
     [contentMap]
   );
 
-  const flyoutContentStyles = useMemoCss(styles).flyoutContent;
+  const flyoutToolbarStyles = useMemoCss(styles);
 
   const flyoutTitle = idSelected
     ? toolbarOptions.find((toolbarOption) => toolbarOption.id === idSelected)?.label || ''
@@ -109,15 +111,16 @@ export function FlyoutToolbar<S>({
       <FlyoutContainer
         isFullscreen={false}
         label={flyoutTitle}
-        isInlineEditing={true}
+        isInlineEditing={isInlineEditing}
         isOpen={isFlyoutVisible}
         handleClose={() => {
           setIdSelected('');
           setFlyoutVisible(false);
         }}
+        overrideContainerCss={flyoutToolbarStyles.dialog}
       >
         {FlyoutContent ? (
-          <div id={idSelected} css={flyoutContentStyles}>
+          <div id={idSelected} css={flyoutToolbarStyles.flyoutContent}>
             <FlyoutContent {...flyoutContentProps} />
           </div>
         ) : null}
@@ -127,6 +130,10 @@ export function FlyoutToolbar<S>({
 }
 
 const styles = {
+  dialog: ({ euiTheme }: UseEuiTheme) =>
+    css`
+      z-index: ${euiTheme.levels.menu};
+    `,
   flyoutContent: ({ euiTheme }: UseEuiTheme) =>
     css({
       padding: euiTheme.size.base,

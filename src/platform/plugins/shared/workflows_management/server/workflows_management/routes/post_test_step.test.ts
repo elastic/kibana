@@ -29,37 +29,6 @@ describe('POST /api/workflows/testStep', () => {
     jest.clearAllMocks();
   });
 
-  describe('route definition', () => {
-    it('should define the test step route with correct configuration', () => {
-      registerPostTestStepRoute({
-        router: mockRouter,
-        api: workflowsApi,
-        logger: mockLogger,
-        spaces: mockSpaces,
-      });
-
-      const postTestStepCall = (mockRouter.post as jest.Mock).mock.calls.find(
-        (call) => call[0].path === '/api/workflows/testStep'
-      );
-
-      expect(postTestStepCall).toBeDefined();
-      expect(postTestStepCall[0]).toMatchObject({
-        path: '/api/workflows/testStep',
-        options: {
-          tags: ['api', 'workflows'],
-        },
-        security: {
-          authz: {
-            requiredPrivileges: ['all'],
-          },
-        },
-      });
-      expect(postTestStepCall[0].validate).toBeDefined();
-      expect(postTestStepCall[0].validate.body).toBeDefined();
-      expect(postTestStepCall[1]).toEqual(expect.any(Function));
-    });
-  });
-
   describe('handler logic', () => {
     let routeHandler: any;
 

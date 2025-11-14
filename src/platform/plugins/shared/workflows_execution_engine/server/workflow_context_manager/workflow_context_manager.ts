@@ -17,7 +17,7 @@ import type { WorkflowExecutionState } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import type { RunStepResult } from '../step/node_implementation';
 import type { WorkflowTemplatingEngine } from '../templating_engine';
-import { buildStepExecutionId } from '../utils';
+import { buildStepExecutionId, buildWorkflowExecutionUrl, getKibanaUrl } from '../utils';
 
 export interface ContextManagerInit {
   // New properties for logging
@@ -134,6 +134,11 @@ export class WorkflowContextManager {
     return this.templateEngine.render(obj, context);
   }
 
+  public evaluateExpressionInContext(template: string): unknown {
+    const context = this.getContext();
+    return this.templateEngine.evaluateExpression(template, context);
+  }
+
   public readContextPath(propertyPath: string): { pathExists: boolean; value: unknown } {
     const propertyPathSegments = parseJsPropertyAccess(propertyPath);
     let result: unknown = this.getContext();
@@ -185,12 +190,20 @@ export class WorkflowContextManager {
 
   private buildWorkflowContext(): WorkflowContext {
     const workflowExecution = this.workflowExecutionState.getWorkflowExecution();
+    const kibanaUrl = getKibanaUrl(this.coreStart, this.dependencies.cloudSetup);
+    const executionUrl = buildWorkflowExecutionUrl(
+      kibanaUrl,
+      workflowExecution.spaceId,
+      workflowExecution.workflowId,
+      workflowExecution.id
+    );
 
     return {
       execution: {
         id: workflowExecution.id,
         isTestRun: !!workflowExecution.isTestRun,
         startedAt: new Date(workflowExecution.startedAt),
+        url: executionUrl,
       },
       workflow: {
         id: workflowExecution.workflowId,
@@ -198,6 +211,7 @@ export class WorkflowContextManager {
         enabled: workflowExecution.workflowDefinition.enabled,
         spaceId: workflowExecution.spaceId,
       },
+      kibanaUrl,
       consts: workflowExecution.workflowDefinition.consts || {},
       event: workflowExecution.context?.event,
       inputs: workflowExecution.context?.inputs,

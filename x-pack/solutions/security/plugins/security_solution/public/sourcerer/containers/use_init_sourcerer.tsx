@@ -30,6 +30,7 @@ export const useInitSourcerer = (
   scopeId:
     | SourcererScopeName.default
     | SourcererScopeName.detections
+    | SourcererScopeName.attacks
     | SourcererScopeName.explore = SourcererScopeName.default
 ) => {
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
@@ -237,10 +238,12 @@ export const useInitSourcerer = (
 
         try {
           const response = await createSourcererDataView({
-            body: { patternList: newPatternList },
-            signal: abortCtrl.current.signal,
             dataViewService: dataViews,
-            dataViewId,
+            defaultDetails: {
+              dataViewId,
+              patternList: newPatternList,
+            },
+            alertDetails: {},
           });
 
           if (response?.defaultDataView.patternList.includes(newSignalsIndex)) {

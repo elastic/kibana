@@ -157,7 +157,7 @@ export const SourceConfigurationSettings = ({
       )}
       {errors.length > 0 ? (
         <>
-          <EuiCallOut color="danger">
+          <EuiCallOut announceOnMount color="danger">
             <ul>
               {errors.map((error, errorIndex) => (
                 <li key={errorIndex}>{error}</li>

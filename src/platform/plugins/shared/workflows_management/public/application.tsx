@@ -12,11 +12,10 @@ import ReactDOM from 'react-dom';
 import type { AppMountParameters } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { QueryClientProvider } from '@kbn/react-query';
 import { WorkflowsRoutes } from './routes';
+import { queryClient } from './shared/lib/query_client';
 import type { WorkflowsServices } from './types';
-
-const queryClient = new QueryClient();
 
 export const renderApp = (
   services: WorkflowsServices,

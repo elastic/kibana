@@ -42,7 +42,7 @@ const projectToAlias = new Map<string, string>([
   ['observability', 'oblt'],
   ['security', 'security'],
   ['search', 'es'],
-  ['workplace_ai', 'workplace_ai'],
+  ['workplaceai', 'workplaceai'],
 ]);
 
 const tierSpecificRolesFileExists = (filePath: string): boolean => {

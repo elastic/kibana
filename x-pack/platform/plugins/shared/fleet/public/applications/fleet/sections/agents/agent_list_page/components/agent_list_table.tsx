@@ -139,7 +139,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
             <EuiLink onClick={() => clearFilters()}>
               <FormattedMessage
                 id="xpack.fleet.agentList.clearFiltersLinkText"
-                defaultMessage="Clear filters"
+                defaultMessage="Reset filters"
               />
             </EuiLink>
           ),

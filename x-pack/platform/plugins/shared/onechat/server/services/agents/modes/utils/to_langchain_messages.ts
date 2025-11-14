@@ -5,43 +5,52 @@
  * 2.0.
  */
 
-import type { BaseMessage } from '@langchain/core/messages';
-import { AIMessage, HumanMessage, ToolMessage } from '@langchain/core/messages';
-import type { ConversationRound, RoundInput, ToolCallWithResult } from '@kbn/onechat-common';
+import type { BaseMessage, HumanMessage } from '@langchain/core/messages';
+import { AIMessage, ToolMessage } from '@langchain/core/messages';
+import type { AssistantResponse, ToolCallWithResult } from '@kbn/onechat-common';
 import { isToolCallStep } from '@kbn/onechat-common';
-import { sanitizeToolId } from '@kbn/onechat-genai-utils/langchain';
+import {
+  sanitizeToolId,
+  createUserMessage,
+  createAIMessage,
+} from '@kbn/onechat-genai-utils/langchain';
+import { generateXmlTree } from '@kbn/onechat-genai-utils/tools/utils';
+import type {
+  ProcessedConversation,
+  ProcessedRoundInput,
+  ProcessedConversationRound,
+  ProcessedAttachment,
+} from './prepare_conversation';
 
 /**
  * Converts a conversation to langchain format
  */
 export const conversationToLangchainMessages = ({
-  previousRounds,
-  nextInput,
+  conversation,
   ignoreSteps = false,
 }: {
-  previousRounds: ConversationRound[];
-  nextInput: RoundInput;
+  conversation: ProcessedConversation;
   ignoreSteps?: boolean;
 }): BaseMessage[] => {
   const messages: BaseMessage[] = [];
 
-  for (const round of previousRounds) {
+  for (const round of conversation.previousRounds) {
     messages.push(...roundToLangchain(round, { ignoreSteps }));
   }
 
-  messages.push(createUserMessage({ content: nextInput.message }));
+  messages.push(formatRoundInput({ input: conversation.nextInput }));
 
   return messages;
 };
 
 export const roundToLangchain = (
-  round: ConversationRound,
+  round: ProcessedConversationRound,
   { ignoreSteps = false }: { ignoreSteps?: boolean } = {}
 ): BaseMessage[] => {
   const messages: BaseMessage[] = [];
 
   // user message
-  messages.push(createUserMessage({ content: round.input.message }));
+  messages.push(formatRoundInput({ input: round.input }));
 
   // steps
   if (!ignoreSteps) {
@@ -53,17 +62,49 @@ export const roundToLangchain = (
   }
 
   // assistant response
-  messages.push(createAssistantMessage({ content: round.response.message }));
+  messages.push(formatAssistantResponse({ response: round.response }));
 
   return messages;
 };
 
-const createUserMessage = ({ content }: { content: string }): HumanMessage => {
-  return new HumanMessage({ content });
+const formatRoundInput = ({ input }: { input: ProcessedRoundInput }): HumanMessage => {
+  const { message, attachments } = input;
+
+  let content = message;
+
+  if (attachments.length > 0) {
+    content += `\n\n
+<attachments>
+${attachments.map((attachment) => formatAttachment({ attachment, indent: 2 })).join('\n')}
+</attachments>
+`;
+  }
+
+  return createUserMessage(content);
 };
 
-const createAssistantMessage = ({ content }: { content: string }): AIMessage => {
-  return new AIMessage({ content });
+const formatAttachment = ({
+  attachment,
+  indent = 0,
+}: {
+  attachment: ProcessedAttachment;
+  indent?: number;
+}): string => {
+  return generateXmlTree(
+    {
+      tagName: 'attachment',
+      attributes: {
+        type: attachment.attachment.type,
+        id: attachment.attachment.id,
+      },
+      children: [attachment.representation.value],
+    },
+    { initialIndentLevel: indent }
+  );
+};
+
+const formatAssistantResponse = ({ response }: { response: AssistantResponse }): AIMessage => {
+  return createAIMessage(response.message);
 };
 
 export const createToolCallMessages = (toolCall: ToolCallWithResult): [AIMessage, ToolMessage] => {

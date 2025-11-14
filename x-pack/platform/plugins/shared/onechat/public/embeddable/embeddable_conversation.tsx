@@ -5,50 +5,62 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { createMemoryHistory } from 'history';
-import { Router } from '@kbn/shared-ux-router';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { I18nProvider } from '@kbn/i18n-react';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { SendMessageProvider } from '../application/context/send_message/send_message_context';
-import { OnechatServicesContext } from '../application/context/onechat_services_context';
-import type { EmbeddableConversationDependencies, EmbeddableConversationProps } from './types';
+import React from 'react';
+import { EuiFlyoutBody, EuiFlyoutHeader, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+import type { EmbeddableConversationInternalProps } from './types';
+import { EmbeddableConversationsProvider } from '../application/context/conversation/embeddable_conversations_provider';
+import { Conversation } from '../application/components/conversations/conversation';
+import { EmbeddableConversationHeader } from './embeddable_conversation_header';
 
-const queryClient = new QueryClient();
-const history = createMemoryHistory();
+export const EmbeddableConversationInternal: React.FC<EmbeddableConversationInternalProps> = (
+  props
+) => {
+  const { euiTheme } = useEuiTheme();
+  const { onClose, ariaLabelledBy } = props;
 
-type EmbeddableConversationInternalProps = EmbeddableConversationDependencies &
-  EmbeddableConversationProps;
+  const backgroundStyles = css`
+    background-color: ${euiTheme.colors.backgroundBasePlain};
+  `;
 
-export const EmbeddableConversationInternal: React.FC<EmbeddableConversationInternalProps> = ({
-  coreStart,
-  services,
-  ...contextProps
-}) => {
-  const kibanaServices = useMemo(
-    () => ({
-      ...coreStart,
-      plugins: services.startDependencies,
-    }),
-    [coreStart, services.startDependencies]
-  );
+  const headerStyles = css`
+    ${backgroundStyles}
+    display: flex;
+    align-items: center;
+    &.euiFlyoutHeader {
+      padding-inline: 0;
+      padding-block-start: 0;
+      padding: ${euiTheme.size.base};
+    }
+  `;
+  const bodyStyles = css`
+    ${backgroundStyles}
+    flex: 1;
+
+    .euiFlyoutBody__overflow {
+      overflow: hidden;
+      height: 100%;
+    }
+
+    .euiFlyoutBody__overflowContent {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      overflow: hidden;
+      padding: 0;
+    }
+  `;
 
   return (
-    <div style={{ height: '100%', width: '100%' }}>
-      <KibanaContextProvider services={kibanaServices}>
-        <I18nProvider>
-          <QueryClientProvider client={queryClient}>
-            <OnechatServicesContext.Provider value={services}>
-              <Router history={history}>
-                <SendMessageProvider>
-                  <div>{JSON.stringify(contextProps)}</div>
-                </SendMessageProvider>
-              </Router>
-            </OnechatServicesContext.Provider>
-          </QueryClientProvider>
-        </I18nProvider>
-      </KibanaContextProvider>
-    </div>
+    <EmbeddableConversationsProvider {...props}>
+      <EuiFlyoutHeader css={headerStyles}>
+        <EmbeddableConversationHeader onClose={onClose} ariaLabelledBy={ariaLabelledBy} />
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody css={bodyStyles}>
+        <Conversation />
+      </EuiFlyoutBody>
+    </EmbeddableConversationsProvider>
   );
 };

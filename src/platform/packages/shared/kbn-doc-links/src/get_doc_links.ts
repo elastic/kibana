@@ -443,6 +443,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     server: {
       protocol: `${ELASTIC_DOCS}reference/kibana/configuration-reference/general-settings#server-protocol`,
       publicBaseUrl: `${ELASTIC_DOCS}reference/kibana/configuration-reference/general-settings#server-publicBaseUrl`,
+      troubleshootServerNotReady: `${ELASTIC_DOCS}troubleshoot/kibana/error-server-not-ready`,
     },
     logging: {
       enableDeprecationHttpDebugLogs: `${ELASTIC_DOCS}reference/kibana/configuration-reference/logging-settings#enable-http-debug-logs`,
@@ -511,6 +512,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       queryDsl: `${ELASTIC_DOCS}explore-analyze/query-filter/languages/querydsl`,
       queryESQL: `${ELASTIC_DOCS}explore-analyze/query-filter/languages/esql`,
       queryESQLExamples: `${ELASTIC_DOCS}explore-analyze/query-filter/languages/esql`,
+      queryESQLMultiValueControls: `${ELASTIC_DOCS}explore-analyze/query-filter/languages/esql-kibana#esql-multi-values-controls`,
     },
     search: {
       sessions: `${ELASTIC_DOCS}explore-analyze/discover/search-sessions`,

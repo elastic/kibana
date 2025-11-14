@@ -28,6 +28,7 @@ export function getSourceField(
       case 'append':
       case 'set':
         return processor.to;
+      case 'convert':
       case 'rename':
       case 'grok':
       case 'dissect':
@@ -236,8 +237,8 @@ export function getSchemaFieldsFromSimulation(context: SimulationContext): {
             }
             // All other metadata fields are ignored for classic streams
           } else if (streamType === 'wired') {
-            // Wired streams: Only handle OTEL fields, ignore everything else
-            if (isOtelField) {
+            // Wired streams: Handle OTEL and ECS fields (ECS fields might be detected in their namespaced form)
+            if (isOtelField || isEcsField) {
               fieldSchema = {
                 ...fieldSchema,
                 status: 'mapped',

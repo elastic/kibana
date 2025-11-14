@@ -11,10 +11,13 @@ import { isEqual } from 'lodash';
 import type {
   AppendProcessor,
   Condition,
+  ConvertProcessor,
   DateProcessor,
   DissectProcessor,
   GrokProcessor,
   ProcessorType,
+  RemoveByPrefixProcessor,
+  RemoveProcessor,
   RenameProcessor,
   SetProcessor,
   StreamlangProcessorDefinition,
@@ -99,6 +102,12 @@ const actionStepValidators: {
   [K in ProcessorType]: (step: Extract<StreamlangProcessorDefinition, { action: K }>) => void;
 } = {
   append: (step: AppendProcessor) => checkFieldName(step.to),
+  convert: (step: ConvertProcessor) => {
+    checkFieldName(step.from);
+    if ('to' in step && step.to) {
+      checkFieldName(step.to);
+    }
+  },
   date: (step: DateProcessor) => {
     checkFieldName(step.from);
     if ('to' in step && step.to) {
@@ -117,18 +126,28 @@ const actionStepValidators: {
       checkFieldName(step.copy_from);
     }
   },
+  remove_by_prefix: (step: RemoveByPrefixProcessor) => checkFieldName(step.from),
+  remove: (step: RemoveProcessor) => checkFieldName(step.from),
   // fields referenced in manual ingest pipelines are not validated here because
   // the interface is Elasticsearch directly here, which has its own validation
   manual_ingest_pipeline: () => {},
 };
 
-function validateSteps(steps: StreamlangStep[]) {
+function validateSteps(steps: StreamlangStep[], isWithinWhereBlock = false) {
   for (const step of steps) {
     if ('where' in step && step.where && 'steps' in step.where) {
       validateCondition(step.where as Condition);
-      validateSteps(step.where.steps);
+      // Nested steps are within a where block
+      validateSteps(step.where.steps, true);
     } else if (isActionBlock(step)) {
-      if (step.where) {
+      // Check if remove_by_prefix is being used within a where block
+      if (step.action === 'remove_by_prefix' && isWithinWhereBlock) {
+        throw new MalformedStreamError(
+          'remove_by_prefix processor cannot be used within a where block. Use it at the root level or use the remove processor with a condition instead.'
+        );
+      }
+
+      if ('where' in step && step.where) {
         validateCondition(step.where);
       }
       const validateStep = actionStepValidators[step.action] as (

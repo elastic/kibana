@@ -6,6 +6,12 @@
  */
 
 import expect from '@kbn/expect';
+import { ALERT_FLAPPING, ALERT_FLAPPING_HISTORY, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
+import { RuleNotifyWhen } from '@kbn/alerting-types';
+import type { SearchHit } from '@kbn/es-types';
+import type { Alert } from '@kbn/alerts-as-data-utils';
+import type { String } from 'lodash';
 import {
   UserAtSpaceScenarios,
   SuperuserAtSpace1,
@@ -17,6 +23,7 @@ import {
   getTestRuleData,
   ObjectRemover,
   getUnauthorizedErrorMessage,
+  resetRulesSettings,
 } from '../../../../common/lib';
 
 const defaultSuccessfulResponse = {
@@ -29,6 +36,7 @@ const defaultSuccessfulResponse = {
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const es = getService('es');
+  const retry = getService('retry');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('bulkEnableRules', () => {
@@ -758,6 +766,142 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
     }
+
+    describe('Clearing flapping tests', () => {
+      const { user, space } = SuperuserAtSpace1;
+      const alertsAsDataIndex = '.alerts-test.patternfiring.alerts-default';
+      const TEST_CACHE_EXPIRATION_TIME = 12000;
+
+      const queryForAlertDocs = async <T>(ruleId: string): Promise<Array<SearchHit<T>>> => {
+        const searchResult = await es.search({
+          index: alertsAsDataIndex,
+          sort: [{ '@timestamp': 'desc' }],
+          query: {
+            bool: {
+              must: {
+                term: { [ALERT_RULE_UUID]: { value: ruleId } },
+              },
+            },
+          },
+          size: 25,
+        });
+        return searchResult.hits.hits as Array<SearchHit<T>>;
+      };
+
+      const runSoon = async (id: String) => {
+        return supertest
+          .post(`${getUrlPrefix(space.id)}/internal/alerting/rule/${id}/_run_soon`)
+          .set('kbn-xsrf', 'foo')
+          .expect(204);
+      };
+
+      afterEach(async () => {
+        await es.deleteByQuery({
+          index: alertsAsDataIndex,
+          query: {
+            match_all: {},
+          },
+          conflicts: 'proceed',
+          ignore_unavailable: true,
+        });
+        await objectRemover.removeAll();
+        await resetRulesSettings(supertest, space.id);
+      });
+
+      it('should clear flapping history when enabling rules', async () => {
+        const params = { pattern: { alertA: [true, false, true, false, true, false, true] } };
+        await supertest
+          .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/settings/_flapping`)
+          .set('kbn-xsrf', 'foo')
+          .auth('superuser', 'superuser')
+          .send({
+            enabled: true,
+            look_back_window: 5,
+            status_change_threshold: 2,
+          })
+          .expect(200);
+        await setTimeoutAsync(TEST_CACHE_EXPIRATION_TIME);
+
+        const rule1 = await supertest
+          .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              rule_type_id: 'test.patternFiringAad',
+              schedule: { interval: '1d' },
+              throttle: null,
+              params,
+              actions: [],
+              notify_when: RuleNotifyWhen.CHANGE,
+            })
+          )
+          .expect(200);
+
+        objectRemover.add(space.id, rule1.body.id, 'rule', 'alerting');
+
+        const rule2 = await supertest
+          .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              rule_type_id: 'test.patternFiringAad',
+              schedule: { interval: '1d' },
+              throttle: null,
+              params,
+              actions: [],
+              notify_when: RuleNotifyWhen.CHANGE,
+            })
+          )
+          .expect(200);
+
+        objectRemover.add(space.id, rule2.body.id, 'rule', 'alerting');
+
+        for (let i = 0; i < 4; i++) {
+          await retry.try(async () => {
+            const alert1Docs = await queryForAlertDocs<Alert>(rule1.body.id);
+            const alert2Docs = await queryForAlertDocs<Alert>(rule2.body.id);
+
+            expect(alert1Docs[0]?._source[ALERT_FLAPPING_HISTORY]?.length).eql(i + 1);
+            expect(alert2Docs[0]?._source[ALERT_FLAPPING_HISTORY]?.length).eql(i + 1);
+            if (i === 3) {
+              return;
+            }
+            await Promise.all([runSoon(rule1.body.id), runSoon(rule2.body.id)]);
+          });
+        }
+
+        let alert1Docs = await queryForAlertDocs<Alert>(rule1.body.id);
+        let alert2Docs = await queryForAlertDocs<Alert>(rule1.body.id);
+
+        expect(alert1Docs[0]?._source[ALERT_FLAPPING_HISTORY]).eql([true, true, true, true]);
+        expect(alert1Docs[0]?._source[ALERT_FLAPPING]).eql(true);
+
+        expect(alert2Docs[0]?._source[ALERT_FLAPPING_HISTORY]).eql([true, true, true, true]);
+        expect(alert2Docs[0]?._source[ALERT_FLAPPING]).eql(true);
+
+        await supertestWithoutAuth
+          .patch(`${getUrlPrefix(space.id)}/internal/alerting/rules/_bulk_disable`)
+          .set('kbn-xsrf', 'foo')
+          .auth(user.username, user.password)
+          .send({ ids: [rule1.body.id, rule2.body.id] })
+          .expect(200);
+
+        await supertestWithoutAuth
+          .patch(`${getUrlPrefix(space.id)}/internal/alerting/rules/_bulk_enable`)
+          .set('kbn-xsrf', 'foo')
+          .auth(user.username, user.password)
+          .send({ ids: [rule1.body.id, rule2.body.id] })
+          .expect(200);
+
+        alert1Docs = await queryForAlertDocs<Alert>(rule1.body.id);
+        alert2Docs = await queryForAlertDocs<Alert>(rule1.body.id);
+
+        expect(alert1Docs[0]?._source[ALERT_FLAPPING_HISTORY]).eql([]);
+        expect(alert1Docs[0]?._source[ALERT_FLAPPING]).eql(false);
+        expect(alert2Docs[0]?._source[ALERT_FLAPPING_HISTORY]).eql([]);
+        expect(alert2Docs[0]?._source[ALERT_FLAPPING]).eql(false);
+      });
+    });
 
     describe('Validation tests', () => {
       const { user, space } = SuperuserAtSpace1;

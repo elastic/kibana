@@ -9,11 +9,11 @@ import React, { useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
   EuiIcon,
-  useEuiTheme,
-  useEuiFontSize,
   EuiSkeletonText,
+  EuiText,
+  useEuiFontSize,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { getOr } from 'lodash/fp';
@@ -47,18 +47,18 @@ import { getField } from '../../shared/utils';
 import { CellActions } from '../../shared/components/cell_actions';
 import {
   FAMILY,
-  LAST_SEEN,
   HOST_RISK_LEVEL,
+  LAST_SEEN,
 } from '../../../../overview/components/host_overview/translations';
 import {
-  ENTITIES_HOST_OVERVIEW_TEST_ID,
-  ENTITIES_HOST_OVERVIEW_OS_FAMILY_TEST_ID,
+  ENTITIES_HOST_OVERVIEW_ALERT_COUNT_TEST_ID,
   ENTITIES_HOST_OVERVIEW_LAST_SEEN_TEST_ID,
-  ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID,
   ENTITIES_HOST_OVERVIEW_LINK_TEST_ID,
   ENTITIES_HOST_OVERVIEW_LOADING_TEST_ID,
-  ENTITIES_HOST_OVERVIEW_ALERT_COUNT_TEST_ID,
   ENTITIES_HOST_OVERVIEW_MISCONFIGURATIONS_TEST_ID,
+  ENTITIES_HOST_OVERVIEW_OS_FAMILY_TEST_ID,
+  ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID,
+  ENTITIES_HOST_OVERVIEW_TEST_ID,
   ENTITIES_HOST_OVERVIEW_VULNERABILITIES_TEST_ID,
 } from './test_ids';
 import { RiskScoreDocTooltip } from '../../../../overview/components/common';
@@ -210,7 +210,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
   const { hasMisconfigurationFindings } = useHasMisconfigurations('host.name', hostName);
   const { hasVulnerabilitiesFindings } = useHasVulnerabilities('host.name', hostName);
 
-  const { openDetailsPanel } = useNavigateToHostDetails({
+  const openDetailsPanel = useNavigateToHostDetails({
     hostName,
     scopeId,
     isRiskScoreExist,

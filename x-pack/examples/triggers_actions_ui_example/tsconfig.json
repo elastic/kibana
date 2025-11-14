@@ -1,5 +1,5 @@
 {
-  "extends": "../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -36,5 +36,6 @@
     "@kbn/task-manager-plugin",
     "@kbn/fields-metadata-plugin",
     "@kbn/react-query",
+    "@kbn/zod"
   ]
 }

@@ -297,6 +297,11 @@ export class UiamService implements UiamServicePublic {
     return new Agent({
       connect: {
         ca,
+        // The applications, including Kibana, running inside the MKI cluster should not need access to things like the
+        // root CA and should be able to work with the CAs related to that particular cluster. The trust bundle we
+        // currently deploy in the Kibana pods includes only the intermediate CA that is scoped to the application
+        // cluster. Therefore, we need to allow partial trust chain validation.
+        allowPartialTrustChain: true,
         rejectUnauthorized: verificationMode !== 'none',
         // By default, Node.js is checking the server identity to match SAN/CN in certificate.
         ...(verificationMode === 'certificate' ? { checkServerIdentity: () => undefined } : {}),

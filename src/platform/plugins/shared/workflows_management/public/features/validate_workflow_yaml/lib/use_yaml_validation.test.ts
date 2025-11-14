@@ -12,8 +12,13 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import { monaco } from '@kbn/monaco';
 import { useYamlValidation } from './use_yaml_validation';
-import { setYamlString } from '../../../widgets/workflow_yaml_editor/lib/store/slice';
-import { createWorkflowEditorStore } from '../../../widgets/workflow_yaml_editor/lib/store/store';
+import { selectDetail } from '../../../entities/workflows/store';
+import { createWorkflowsStore } from '../../../entities/workflows/store/store';
+import {
+  setActiveTab,
+  setYamlString,
+} from '../../../entities/workflows/store/workflow_detail/slice';
+import { createStartServicesMock } from '../../../mocks';
 
 // Mock Monaco editor
 const createMockEditor = (value: string) => {
@@ -72,10 +77,11 @@ const renderHookWithProviders = (
   editor: monaco.editor.IStandaloneCodeEditor | null,
   yamlContent: string
 ) => {
-  const store = createWorkflowEditorStore();
+  const store = createWorkflowsStore(createStartServicesMock());
 
   // Set the YAML content which will trigger computation via middleware
   store.dispatch(setYamlString(yamlContent));
+  store.dispatch(setActiveTab('workflow'));
 
   const wrapper = ({ children }: { children: React.ReactNode }) => {
     return React.createElement(Provider, { store }, children);
@@ -124,12 +130,12 @@ steps:
     // Wait for the Redux state to have computed data
     await waitFor(
       () => {
-        const state = store.getState();
+        const state = selectDetail(store.getState());
         // Debug: log the state to understand what's happening
         // console.log('Redux state:', JSON.stringify(state, null, 2));
-        expect(state.workflow.computed).toBeDefined();
-        expect(state.workflow.computed?.yamlDocument).toBeDefined();
-        expect(state.workflow.computed?.workflowDefinition).toBeDefined();
+        expect(state.computed).toBeDefined();
+        expect(state.computed?.yamlDocument).toBeDefined();
+        expect(state.computed?.workflowDefinition).toBeDefined();
       },
       { timeout: 2000 }
     );

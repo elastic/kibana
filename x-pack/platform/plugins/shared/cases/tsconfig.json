@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -98,7 +98,8 @@
     "@kbn/licensing-types",
     "@kbn/lazy-object",
     "@kbn/core-notifications-browser-mocks",
-    "@kbn/react-query"
+    "@kbn/react-query",
+    "@kbn/zod"
   ],
   "exclude": [
     "target/**/*"

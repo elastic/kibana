@@ -1,0 +1,58 @@
+{
+  "id": "@kbn/deeplinks-workplace-ai",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/deeplinks-workplace-ai",
+        "id": "def-common.DeepLinkId",
+        "type": "Type",
+        "tags": [],
+        "label": "DeepLinkId",
+        "description": [],
+        "signature": [
+          "\"workplace_ai\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/workplace_ai/deep_links.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-workplace-ai",
+        "id": "def-common.WorkplaceAIApp",
+        "type": "Type",
+        "tags": [],
+        "label": "WorkplaceAIApp",
+        "description": [],
+        "signature": [
+          "\"workplace_ai\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/workplace_ai/deep_links.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

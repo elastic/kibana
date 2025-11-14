@@ -20,16 +20,6 @@ interface Props extends Omit<EuiIconProps, 'type'> {
 
 export function SpanIcon({ type, subtype, size = 'l', ...props }: Props) {
   const icon = getSpanIcon(type, subtype);
-  const isPresentationRole =
-    ['none', 'presentation'].includes(props.role ?? '') ||
-    ['true', true].includes(props['aria-hidden'] ?? '');
 
-  return (
-    <EuiIcon
-      type={icon}
-      size={size}
-      title={!isPresentationRole ? type || subtype : undefined}
-      {...props}
-    />
-  );
+  return <EuiIcon type={icon} size={size} title={type || subtype} {...props} />;
 }

@@ -3914,7 +3914,7 @@ const matchOperatorDefinition: FunctionDefinition = {
       returnType: 'boolean',
     },
   ],
-  locationsAvailable: [Location.WHERE, Location.STATS_WHERE, Location.JOIN],
+  locationsAvailable: [Location.WHERE, Location.STATS_WHERE, Location.JOIN, Location.EVAL],
   examples: ['FROM books\n| WHERE author:"Faulkner"'],
 };
 

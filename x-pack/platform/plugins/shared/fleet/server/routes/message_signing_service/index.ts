@@ -42,15 +42,18 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: RotateKeyPairSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () =>
                 schema.object({
                   message: schema.string(),
                 }),
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
             500: {
+              description: 'An internal server error.',
               body: genericErrorResponse,
             },
           },

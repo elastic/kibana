@@ -71,6 +71,12 @@ const CODES = Object.freeze({
     { defaultMessage: 'Endpoint timed out while attempting to connect to upload API' }
   ),
 
+  /** not enough free disk space to complete the action as per endpoint advanced policy */
+  'ra_get-file_error_not-enough-free-space': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.getFile.notEnoughFreeSpace',
+    { defaultMessage: 'Not enough free disk space to process the action' }
+  ),
+
   // -----------------------------------------------------------------
   // SUSPEND-PROCESS CODES
   // -----------------------------------------------------------------
@@ -277,6 +283,11 @@ const CODES = Object.freeze({
     { defaultMessage: 'Failed to retrieve the file. File upload api (fleet-server) is unreachable' }
   ),
 
+  /** not enough free disk space to complete the action as per endpoint advanced policy */
+  'ra_upload_error_not-enough-free-space': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.upload.notEnoughFreeSpace',
+    { defaultMessage: 'Not enough free disk space to process the action' }
+  ),
   // -----------------------------------------------------------------
   // SCAN CODES
   // -----------------------------------------------------------------

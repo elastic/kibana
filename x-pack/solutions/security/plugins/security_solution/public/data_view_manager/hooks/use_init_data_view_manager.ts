@@ -12,6 +12,7 @@ import {
   addListener as originalAddListener,
   removeListener as originalRemoveListener,
 } from '@reduxjs/toolkit';
+import { ATTACKS_ALERTS_ALIGNMENT_ENABLED } from '../../../common/constants';
 import type { RootState } from '../redux/reducer';
 import { useKibana } from '../../common/lib/kibana';
 import { createDataViewSelectedListener } from '../redux/listeners/data_view_selected';
@@ -42,6 +43,10 @@ export const useInitDataViewManager = () => {
   const dispatch = useDispatch();
   const services = useKibana().services;
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const attacksAlertsAlignmentEnabled = services.featureFlags.getBooleanValue(
+    ATTACKS_ALERTS_ALIGNMENT_ENABLED,
+    false
+  );
 
   const {
     loading: loadingSignalIndex,
@@ -80,13 +85,16 @@ export const useInitDataViewManager = () => {
     }
 
     // NOTE: init listener contains logic that preloads default security solution data view
-    const dataViewsLoadingListener = createInitListener({
-      dataViews: services.dataViews,
-      http: services.http,
-      uiSettings: services.uiSettings,
-      application: services.application,
-      spaces: services.spaces,
-    });
+    const dataViewsLoadingListener = createInitListener(
+      {
+        dataViews: services.dataViews,
+        http: services.http,
+        uiSettings: services.uiSettings,
+        application: services.application,
+        spaces: services.spaces,
+      },
+      attacksAlertsAlignmentEnabled
+    );
 
     dispatch(addListener(dataViewsLoadingListener));
 
@@ -95,6 +103,7 @@ export const useInitDataViewManager = () => {
       DataViewManagerScopeName.default,
       DataViewManagerScopeName.timeline,
       DataViewManagerScopeName.detections,
+      DataViewManagerScopeName.attacks,
       DataViewManagerScopeName.analyzer,
       DataViewManagerScopeName.explore,
     ].map((scope) =>
@@ -117,6 +126,7 @@ export const useInitDataViewManager = () => {
       });
     };
   }, [
+    attacksAlertsAlignmentEnabled,
     dispatch,
     newDataViewPickerEnabled,
     services.application,

@@ -14,6 +14,7 @@ import type { RuntimeFieldSpec, RuntimePrimitiveTypes } from '@kbn/data-views-pl
 export enum SourcererScopeName {
   default = 'default',
   detections = 'detections',
+  attacks = 'attacks',
   timeline = 'timeline',
   analyzer = 'analyzer',
   explore = 'explore',
@@ -109,6 +110,8 @@ export interface SourcererModel {
   defaultDataView: SourcererDataView & { id: string; error?: unknown };
   /** default security-solution alert data view */
   alertDataView: SourcererDataView & { id: string; error?: unknown };
+  /** default security-solution attack data view */
+  attackDataView: SourcererDataView & { id: string; error?: unknown };
   /** all Kibana data views, including security-solution */
   kibanaDataViews: SourcererDataView[];
   /** security solution signals index name */
@@ -146,6 +149,7 @@ export const initDataView: SourcererDataView & { id: string; error?: unknown } =
 export const initialSourcererState: SourcererModel = {
   defaultDataView: initDataView,
   alertDataView: initDataView,
+  attackDataView: initDataView,
   kibanaDataViews: [],
   signalIndexName: null,
   signalIndexMappingOutdated: null,
@@ -157,6 +161,10 @@ export const initialSourcererState: SourcererModel = {
     [SourcererScopeName.detections]: {
       ...initSourcererScope,
       id: SourcererScopeName.detections,
+    },
+    [SourcererScopeName.attacks]: {
+      ...initSourcererScope,
+      id: SourcererScopeName.attacks,
     },
     [SourcererScopeName.timeline]: {
       ...initSourcererScope,

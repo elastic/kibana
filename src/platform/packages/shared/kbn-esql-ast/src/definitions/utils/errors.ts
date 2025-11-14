@@ -255,6 +255,14 @@ Expected one of:
           values: { identifier: out.identifier },
         }),
       };
+    case 'joinOnSingleExpression':
+      return {
+        message: i18n.translate('kbn-esql-ast.esql.validation.joinOnSingleExpression', {
+          defaultMessage:
+            'JOIN ON clause must be a comma separated list of fields or a single expression',
+        }),
+        type: 'error',
+      };
     case 'tooManyForks':
       return {
         message: i18n.translate('kbn-esql-ast.esql.validation.tooManyForks', {
@@ -331,6 +339,21 @@ Expected one of:
       return {
         message: i18n.translate('kbn-esql-ast.esql.validation.forkTooFewBranches', {
           defaultMessage: '[FORK] Must include at least two branches.',
+        }),
+        type: 'error',
+      };
+    case 'forkNotAllowedWithSubqueries':
+      return {
+        message: i18n.translate('kbn-esql-ast.esql.validation.forkNotAllowedWithSubqueries', {
+          defaultMessage: '[FORK] Command is not allowed inside a subquery.',
+        }),
+        type: 'error',
+      };
+    case 'inlineStatsNotAllowedAfterLimit':
+      return {
+        message: i18n.translate('kbn-esql-ast.esql.validation.inlineStatsNotAllowedAfterLimit', {
+          defaultMessage:
+            '[INLINE STATS] Command is not allowed at the root level when the query contains subqueries.',
         }),
         type: 'error',
       };
@@ -459,6 +482,9 @@ export const errors = {
       'getJoinIndices'
     ),
 
+  joinOnSingleExpression: (location: ESQLLocation): ESQLMessage =>
+    errors.byId('joinOnSingleExpression', location, {}),
+
   noMatchingCallSignature: (
     fn: ESQLFunction,
     definition: FunctionDefinition,
@@ -558,6 +584,12 @@ export const errors = {
 
   forkTooFewBranches: (command: ESQLAstAllCommands): ESQLMessage =>
     errors.byId('forkTooFewBranches', command.location, {}),
+
+  forkNotAllowedWithSubqueries: (command: ESQLAstAllCommands): ESQLMessage =>
+    errors.byId('forkNotAllowedWithSubqueries', command.location, {}),
+
+  inlineStatsNotAllowedAfterLimit: (command: ESQLAstAllCommands): ESQLMessage =>
+    errors.byId('inlineStatsNotAllowedAfterLimit', command.location, {}),
 };
 
 export const buildSignatureTypes = (sig: Signature) =>
