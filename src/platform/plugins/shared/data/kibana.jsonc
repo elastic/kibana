@@ -25,7 +25,8 @@
       "fieldFormats",
       "dataViews",
       "screenshotMode",
-      "management"
+      "management",
+      "taskManager"
     ],
     "optionalPlugins": [
       "usageCollection"

@@ -18,6 +18,10 @@ import type { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
 import type { PluginStart as DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/server';
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
 import type { ConfigSchema } from './config';
 import type { ISearchSetup, ISearchStart } from './search';
 import { DatatableUtilitiesService } from './datatable_utilities';
@@ -55,12 +59,14 @@ export interface DataPluginSetupDependencies {
   expressions: ExpressionsServerSetup;
   usageCollection?: UsageCollectionSetup;
   fieldFormats: FieldFormatsSetup;
+  taskManager: TaskManagerSetupContract;
 }
 
 export interface DataPluginStartDependencies {
   fieldFormats: FieldFormatsStart;
   logger: Logger;
   dataViews: DataViewsServerPluginStart;
+  taskManager: TaskManagerStartContract;
 }
 
 export class DataServerPlugin
@@ -89,7 +95,7 @@ export class DataServerPlugin
 
   public setup(
     core: CoreSetup<DataPluginStartDependencies, DataPluginStart>,
-    { expressions, usageCollection, fieldFormats }: DataPluginSetupDependencies
+    { expressions, usageCollection, fieldFormats, taskManager }: DataPluginSetupDependencies
   ) {
     this.scriptsService.setup(core);
     const querySetup = this.queryService.setup(core);
@@ -100,6 +106,7 @@ export class DataServerPlugin
     const searchSetup = this.searchService.setup(core, {
       expressions,
       usageCollection,
+      taskManager,
     });
 
     return {
@@ -109,10 +116,14 @@ export class DataServerPlugin
     };
   }
 
-  public start(core: CoreStart, { fieldFormats, dataViews }: DataPluginStartDependencies) {
+  public start(
+    core: CoreStart,
+    { fieldFormats, dataViews, taskManager }: DataPluginStartDependencies
+  ) {
     const search = this.searchService.start(core, {
       fieldFormats,
       indexPatterns: dataViews,
+      taskManager,
     });
     const datatableUtilities = new DatatableUtilitiesService(
       search.aggs,

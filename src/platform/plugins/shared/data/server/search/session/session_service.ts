@@ -21,9 +21,17 @@ import type {
 } from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/core/server';
 import { defer } from '@kbn/kibana-utils-plugin/common';
-import type { IKibanaSearchRequest, ISearchOptions } from '@kbn/search-types';
+import type {
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
+  ISearchOptions,
+} from '@kbn/search-types';
 import { debounce } from 'lodash';
 import moment from 'moment';
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
 import type {
   SearchSessionRequestInfo,
   SearchSessionSavedObjectAttributes,
@@ -41,7 +49,7 @@ import { NoSearchIdInSessionError } from '../..';
 import { createRequestHash } from './utils';
 import type { ConfigSchema, SearchSessionsConfigSchema } from '../../config';
 import type { SearchStatusWithInfo } from './get_session_status';
-import { getSessionStatus as getSessionStatusInternal } from './get_session_status';
+import { getSessionStatus } from './get_session_status';
 
 export interface SearchSessionDependencies {
   savedObjectsClient: SavedObjectsClientContract;
@@ -51,10 +59,12 @@ export interface SearchSessionStatusDependencies extends SearchSessionDependenci
   asCurrentUserElasticsearchClient: ElasticsearchClient;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface SetupDependencies {}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface StartDependencies {}
+interface SetupDependencies {
+  taskManager: TaskManagerSetupContract;
+}
+interface StartDependencies {
+  taskManager: TaskManagerStartContract;
+}
 
 /**
  * Used to batch requests that add searches into the session saved object
@@ -76,6 +86,10 @@ export class SearchSessionService implements ISearchSessionService {
   private sessionConfig: SearchSessionsConfigSchema;
   private setupCompleted = false;
 
+  private taskManager!: TaskManagerStartContract;
+  private internalEsClient!: ElasticsearchClient;
+  private internalSavedObjectsClient!: SavedObjectsClientContract;
+
   constructor(
     private readonly logger: Logger,
     private readonly config: ConfigSchema,
@@ -85,12 +99,29 @@ export class SearchSessionService implements ISearchSessionService {
   }
 
   public setup(core: CoreSetup, deps: SetupDependencies) {
+    deps.taskManager.registerTaskDefinitions({
+      'backgroundSearch:updateStatus': {
+        title: 'Poll background search status and update if needed',
+        createTaskRunner: ({ taskInstance }) => ({
+          run: async () => {
+            await this.runTask(taskInstance.params.sessionId);
+            return { state: taskInstance.state };
+          },
+        }),
+      },
+    });
     this.setupCompleted = true;
   }
 
   public start(core: CoreStart, deps: StartDependencies) {
     if (!this.setupCompleted)
       throw new Error('SearchSessionService setup() must be called before start()');
+
+    this.taskManager = deps.taskManager;
+    this.internalSavedObjectsClient = core.savedObjects.createInternalRepository([
+      SEARCH_SESSION_TYPE,
+    ]);
+    this.internalEsClient = core.elasticsearch.client.asInternalUser;
   }
 
   public stop() {}
@@ -197,8 +228,15 @@ export class SearchSessionService implements ISearchSessionService {
     });
 
     const sessionStatuses = await Promise.all(
-      findResponse.saved_objects.map((so) => {
-        const sessionStatus = this.getSessionStatus(deps, user, so);
+      findResponse.saved_objects.map(async (so) => {
+        const sessionStatus = await getSessionStatus(
+          {
+            esClient: deps.asCurrentUserElasticsearchClient,
+          },
+          so.attributes,
+          this.sessionConfig
+        );
+
         return sessionStatus;
       })
     );
@@ -286,12 +324,16 @@ export class SearchSessionService implements ISearchSessionService {
     deps: SearchSessionDependencies,
     user: AuthenticatedUser | null,
     searchRequest: IKibanaSearchRequest,
-    searchId: string,
+    searchResponse: IKibanaSearchResponse,
     options: ISearchOptions
   ) => {
+    const searchId = searchResponse.id;
+
     const { sessionId, strategy = ENHANCED_ES_SEARCH_STRATEGY, startTime } = options;
     if (!this.sessionConfig.enabled || !sessionId || !searchId) return;
     if (!searchRequest.params) return;
+
+    this.registerTask(sessionId);
 
     const requestHash = createRequestHash(searchRequest.params);
 
@@ -302,7 +344,7 @@ export class SearchSessionService implements ISearchSessionService {
     const searchInfo: SearchSessionRequestInfo = {
       id: searchId,
       strategy,
-      status: SearchStatus.IN_PROGRESS,
+      status: searchResponse.isRunning ? SearchStatus.IN_PROGRESS : SearchStatus.COMPLETE,
       startTime: startTime ? moment.unix(startTime).toISOString() : undefined,
     };
 
@@ -378,7 +420,13 @@ export class SearchSessionService implements ISearchSessionService {
     this.logger.debug(`SearchSessionService: status | ${sessionId}`);
     const session = await this.get(deps, user, sessionId);
 
-    const sessionStatus = await this.getSessionStatus(deps, user, session);
+    const sessionStatus = await getSessionStatus(
+      {
+        esClient: deps.asCurrentUserElasticsearchClient,
+      },
+      session.attributes,
+      this.sessionConfig
+    );
 
     return { status: sessionStatus.status, errors: sessionStatus.errors };
   }
@@ -467,14 +515,61 @@ export class SearchSessionService implements ISearchSessionService {
     }
   };
 
-  private getSessionStatus = async (
-    searchSessionDeps: SearchSessionStatusDependencies,
-    user: AuthenticatedUser | null,
-    savedObject: SavedObject<SearchSessionSavedObjectAttributes>
-  ) => {
-    const sessionStatus = await getSessionStatusInternal(
+  private getTaskId = (sessionId: string) => {
+    return `backgroundSearch:updateStatus:${sessionId}`;
+  };
+
+  private registerTask = async (sessionId: string) => {
+    const taskId = this.getTaskId(sessionId);
+
+    if (await this.taskExists(taskId)) {
+      // If the sessionId is already queued for updates we don't need to queue it again
+      return;
+    }
+
+    this.logger.debug(`Registering background search status update task for session ${sessionId}`);
+    await this.taskManager.schedule({
+      taskType: 'backgroundSearch:updateStatus',
+      state: {},
+      params: { sessionId },
+      id: taskId,
+      schedule: { interval: '10s' },
+    });
+  };
+
+  private taskExists = async (taskId: string) => {
+    try {
+      await this.taskManager.get(taskId);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  };
+
+  private async getSavedObject(deps: SearchSessionDependencies, sessionId: string) {
+    try {
+      return await this.get(deps, null, sessionId);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  private runTask = async (sessionId: string) => {
+    const deps = {
+      asCurrentUserElasticsearchClient: this.internalEsClient,
+      savedObjectsClient: this.internalSavedObjectsClient,
+    };
+
+    const savedObject = await this.getSavedObject(deps, sessionId);
+    if (!savedObject) {
+      this.logger.debug(`Search session ${sessionId} not found, removing background update task`);
+      await this.taskManager.remove(this.getTaskId(sessionId));
+      return;
+    }
+
+    const sessionStatus = await getSessionStatus(
       {
-        esClient: searchSessionDeps.asCurrentUserElasticsearchClient,
+        esClient: deps.asCurrentUserElasticsearchClient,
       },
       savedObject.attributes,
       this.sessionConfig
@@ -484,10 +579,17 @@ export class SearchSessionService implements ISearchSessionService {
       sessionStatus.searchStatuses || []
     );
 
-    if (!!updatedIdMapping) {
+    if (!!updatedIdMapping || sessionStatus.status !== savedObject.attributes.status) {
       const hasUpdatedToComplete =
         sessionStatus.status === SearchSessionStatus.COMPLETE && !savedObject.attributes.completed;
-      const latestCompletion = Object.values(updatedIdMapping).reduce<string | undefined>(
+      if (hasUpdatedToComplete) {
+        this.logger.debug(
+          `Search session ${sessionId} is completed, removing background update task`
+        );
+        await this.taskManager.remove(this.getTaskId(sessionId));
+      }
+
+      const latestCompletion = Object.values(updatedIdMapping || {}).reduce<string | undefined>(
         (res, curr) => {
           if (!curr.completionTime) return res;
           if (!res) return curr.completionTime;
@@ -496,8 +598,8 @@ export class SearchSessionService implements ISearchSessionService {
         undefined
       );
 
-      await this.update(searchSessionDeps, user, savedObject.id, {
-        idMapping: updatedIdMapping,
+      await this.update(deps, null, savedObject.id, {
+        idMapping: updatedIdMapping ?? undefined,
         completed: hasUpdatedToComplete ? latestCompletion : undefined,
         status: sessionStatus.status,
       });

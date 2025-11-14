@@ -34,6 +34,10 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { KbnServerError } from '@kbn/kibana-utils-plugin/server';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
+import type {
   DataRequestHandlerContext,
   IScopedSearchClient,
   ISearchSetup,
@@ -107,12 +111,14 @@ type StrategyMap = Record<string, ISearchStrategy<any, any>>;
 export interface SearchServiceSetupDependencies {
   expressions: ExpressionsServerSetup;
   usageCollection?: UsageCollectionSetup;
+  taskManager: TaskManagerSetupContract;
 }
 
 /** @internal */
 export interface SearchServiceStartDependencies {
   fieldFormats: FieldFormatsStart;
   indexPatterns: DataViewsServerPluginStart;
+  taskManager: TaskManagerStartContract;
 }
 
 /** @internal */
@@ -145,7 +151,7 @@ export class SearchService {
 
   public setup(
     core: CoreSetup<DataPluginStartDependencies, DataPluginStart>,
-    { expressions, usageCollection }: SearchServiceSetupDependencies
+    { expressions, usageCollection, taskManager }: SearchServiceSetupDependencies
   ): ISearchSetup {
     core.savedObjects.registerType(searchSessionSavedObjectType);
     const usage = usageCollection ? usageProvider(core) : undefined;
@@ -154,7 +160,7 @@ export class SearchService {
     registerSearchRoute(router, this.logger, core.executionContext);
     registerSessionRoutes(router, this.logger);
 
-    this.sessionService.setup(core, {});
+    this.sessionService.setup(core, { taskManager });
 
     core.http.registerRouteHandlerContext<DataRequestHandlerContext, 'search'>(
       'search',
@@ -270,11 +276,11 @@ export class SearchService {
 
   public start(
     core: CoreStart,
-    { fieldFormats, indexPatterns }: SearchServiceStartDependencies
+    { fieldFormats, indexPatterns, taskManager }: SearchServiceStartDependencies
   ): ISearchStart {
     const { elasticsearch, savedObjects, uiSettings } = core;
 
-    this.sessionService.start(core, {});
+    this.sessionService.start(core, { taskManager });
 
     const aggs = this.aggsService.start({
       fieldFormats,
@@ -410,9 +416,7 @@ export class SearchService {
                     isStored: true,
                   });
                 } else {
-                  return from(
-                    deps.searchSessionsClient.trackId(request, response.id, options)
-                  ).pipe(
+                  return from(deps.searchSessionsClient.trackId(request, response, options)).pipe(
                     tap(() => {
                       isInternalSearchStored = true;
                     }),

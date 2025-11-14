@@ -14,7 +14,11 @@ import type {
   SavedObjectsFindOptions,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
-import type { IKibanaSearchRequest, ISearchOptions } from '@kbn/search-types';
+import type {
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
+  ISearchOptions,
+} from '@kbn/search-types';
 import type {
   SearchSessionsFindResponse,
   SearchSessionSavedObjectAttributes,
@@ -28,7 +32,7 @@ export interface IScopedSearchSessionsClient {
   getId: (request: IKibanaSearchRequest, options: ISearchOptions) => Promise<string>;
   trackId: (
     request: IKibanaSearchRequest,
-    searchId: string,
+    response: IKibanaSearchResponse,
     options: ISearchOptions
   ) => Promise<void>;
   getSearchIdMapping: (sessionId: string) => Promise<Map<string, string>>;
