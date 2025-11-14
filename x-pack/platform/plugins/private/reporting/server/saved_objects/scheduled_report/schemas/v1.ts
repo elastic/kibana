@@ -14,31 +14,25 @@ const rawLayoutIdSchema = schema.oneOf([
   schema.literal('canvas'),
 ]);
 
-export const rawNotificationSchema = schema.object({
-  email: schema.maybe(
-    schema.object(
-      {
-        to: schema.maybe(schema.arrayOf(schema.string())),
-        bcc: schema.maybe(schema.arrayOf(schema.string())),
-        cc: schema.maybe(schema.arrayOf(schema.string())),
-        subject: schema.maybe(schema.string({ maxLength: 1000 })),
-        message: schema.maybe(schema.string({ maxLength: 10000 })),
-      },
-      {
-        validate: (value) => {
-          const allEmails = new Set([
-            ...(value.to || []),
-            ...(value.bcc || []),
-            ...(value.cc || []),
-          ]);
+export const rawEmailNotificationSchema = schema.object(
+  {
+    to: schema.maybe(schema.arrayOf(schema.string())),
+    bcc: schema.maybe(schema.arrayOf(schema.string())),
+    cc: schema.maybe(schema.arrayOf(schema.string())),
+  },
+  {
+    validate: (value) => {
+      const allEmails = new Set([...(value.to || []), ...(value.bcc || []), ...(value.cc || [])]);
 
-          if (allEmails.size === 0) {
-            return 'At least one email address is required';
-          }
-        },
+      if (allEmails.size === 0) {
+        return 'At least one email address is required';
       }
-    )
-  ),
+    },
+  }
+);
+
+export const rawNotificationSchema = schema.object({
+  email: schema.maybe(rawEmailNotificationSchema),
 });
 
 export const rawScheduledReportSchema = schema.object({
