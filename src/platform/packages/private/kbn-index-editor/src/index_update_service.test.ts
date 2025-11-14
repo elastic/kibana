@@ -205,7 +205,7 @@ describe('IndexUpdateService', () => {
     service.deleteDoc([rowsAfterEdition[0].id]);
     const rowsAfterDeletion = await firstValueFrom(service.rows$);
     expect(rowsAfterDeletion.length).toBe(1); // An empty placeholder row should always be visible
-    expect(rowsAfterDeletion[0].raw).toMatchObject({ _id: expect.anything() });
+    expect(rowsAfterDeletion[0].id).toEqual(expect.stringContaining(ROW_PLACEHOLDER_PREFIX));
   });
 
   describe('flush operations', () => {

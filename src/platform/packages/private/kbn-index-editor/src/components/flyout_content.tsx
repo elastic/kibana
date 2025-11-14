@@ -36,7 +36,6 @@ import { QueryBar } from './query_bar';
 import { FileDropzone } from './file_drop_zone';
 import { FlyoutFooter } from './flyout_footer';
 import { IndexName } from './index_name';
-import { ROW_PLACEHOLDER_PREFIX } from '../constants';
 
 export interface FlyoutContentProps {
   deps: FlyoutDeps;
@@ -73,7 +72,7 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
     }
   );
 
-  const rowsWithValues = rows?.some((row) => !row.id.startsWith(ROW_PLACEHOLDER_PREFIX));
+  const rowsWithValues = rows?.some((row) => Object.keys(row.flattened).length > 0);
 
   const noResults = !isLoading && !rowsWithValues;
 

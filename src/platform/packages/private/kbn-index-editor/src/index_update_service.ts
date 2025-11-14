@@ -824,12 +824,8 @@ export class IndexUpdateService {
     const docId = `${ROW_PLACEHOLDER_PREFIX}${uuidv4()}`;
     return {
       id: docId,
-      raw: {
-        _id: docId,
-      },
-      flattened: {
-        _id: docId,
-      },
+      raw: {},
+      flattened: {},
     };
   }
 
