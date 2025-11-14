@@ -312,7 +312,9 @@ export const EditorFooter = memo(function EditorFooter({
             <>
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
-                  {!hideQuickSearch && <QuickSearchAction toggleVisor={toggleVisor} />}
+                  {!hideQuickSearch && (
+                    <QuickSearchAction toggleVisor={toggleVisor} hideKeyboardShortcut={true} />
+                  )}
                   {!hideQueryHistory && (
                     <QueryHistoryAction
                       toggleHistory={toggleHistoryComponent}

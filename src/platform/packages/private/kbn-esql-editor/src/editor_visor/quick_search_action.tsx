@@ -10,7 +10,13 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { EuiButtonEmpty, EuiFlexItem, EuiToolTip, useEuiTheme } from '@elastic/eui';
-export function QuickSearchAction({ toggleVisor }: { toggleVisor: () => void }) {
+export function QuickSearchAction({
+  toggleVisor,
+  hideKeyboardShortcut,
+}: {
+  toggleVisor: () => void;
+  hideKeyboardShortcut?: boolean;
+}) {
   const quickSearchLabel = i18n.translate('esqlEditor.visor.quickSearchLabel', {
     defaultMessage: 'Quick search',
   });
@@ -35,7 +41,7 @@ export function QuickSearchAction({ toggleVisor }: { toggleVisor: () => void }) 
               margin-right: ${euiTheme.size.m};
             `}
           >
-            {`${quickSearchLabel} (${shortCut})`}
+            {hideKeyboardShortcut ? quickSearchLabel : `${quickSearchLabel} (${shortCut})`}
           </EuiButtonEmpty>
         </EuiToolTip>
       </EuiFlexItem>
