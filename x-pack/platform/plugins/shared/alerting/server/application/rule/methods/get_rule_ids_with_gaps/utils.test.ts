@@ -38,13 +38,13 @@ describe('utils', () => {
       });
     });
 
-    it('defaults missing fields to 0 and omits sumTotalMs when absent', () => {
+    it('defaults missing fields to 0', () => {
       const bucket: GapDurationBucket = {};
       expect(extractGapDurationSums(bucket)).toEqual({
         totalUnfilledDurationMs: 0,
         totalInProgressDurationMs: 0,
         totalFilledDurationMs: 0,
-        totalDurationMs: undefined,
+        totalDurationMs: 0,
       });
     });
 
