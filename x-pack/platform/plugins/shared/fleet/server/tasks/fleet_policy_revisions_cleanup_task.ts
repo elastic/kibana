@@ -223,10 +223,16 @@ export class FleetPolicyRevisionsCleanupTask {
     );
 
     this.logger.debug(
-      `[FleetPolicyRevisionsCleanupTask] Attempting to delete a maximum of ${MAX_DOCS} out of ${docCount} policy revision documents.`
+      `[FleetPolicyRevisionsCleanupTask] Attempting to delete potentially ${
+        docCount >= MAX_DOCS ? MAX_DOCS : docCount
+      } policy revision documents.`
     );
 
-    await this.deletePolicyRevisions(esClient, policiesRevisionSummaries, context);
+    const result = await this.deletePolicyRevisions(esClient, policiesRevisionSummaries, context);
+
+    this.logger.debug(
+      `[FleetPolicyRevisionsCleanupTask] Deleted ${result.deleted} policy revision documents.`
+    );
 
     this.logger.debug('[FleetPolicyRevisionsCleanupTask] Cleanup completed');
   };
@@ -374,7 +380,7 @@ export class FleetPolicyRevisionsCleanupTask {
 
       // Favor a cutoff offset based on the min revision used by agents, otherwise use the max idx
       const revisionIdxCutoff = minUsedRevisionIdxCutoff ?? summary.maxRevision - this.maxRevisions;
-      return [...acc, { policyId, revisionIdxCutoff }];
+      return [...acc, { policyId, revisionIdxCutoff, docCount: summary.count }];
     }, []);
 
     return await this.queryDeletePolicyRevisions(esClient, policiesToDelete, context);
@@ -389,7 +395,7 @@ export class FleetPolicyRevisionsCleanupTask {
       bool: {
         must: [
           { term: { policy_id: policyId } },
-          { range: { revision_idx: { lt: revisionIdxCutoff } } },
+          { range: { revision_idx: { lte: revisionIdxCutoff } } },
         ],
       },
     }));

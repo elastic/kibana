@@ -49,11 +49,6 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
     max_policies_per_run: 100,
   };
 
-  const mockOpenPointInTimeResponse = (id: string) => ({
-    id,
-    _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
-  });
-
   beforeEach(() => {
     jest.clearAllMocks();
 
@@ -284,7 +279,7 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
                   bool: {
                     must: [
                       { term: { policy_id: 'policy-1' } },
-                      { range: { revision_idx: { lt: 5 } } }, // 15 - 10 = 5
+                      { range: { revision_idx: { lte: 5 } } }, // 15 - 10 = 5
                     ],
                   },
                 },
@@ -353,7 +348,7 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
                   bool: {
                     must: [
                       { term: { policy_id: 'policy-1' } },
-                      { range: { revision_idx: { lt: 2 } } }, // 12 - 10 = 2
+                      { range: { revision_idx: { lte: 2 } } }, // 12 - 10 = 2
                     ],
                   },
                 },
@@ -427,7 +422,7 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
                   bool: {
                     must: [
                       { term: { policy_id: 'policy-1' } },
-                      { range: { revision_idx: { lt: 5 } } }, // 15 - 10 = 5
+                      { range: { revision_idx: { lte: 5 } } }, // 15 - 10 = 5
                     ],
                   },
                 },
@@ -485,7 +480,7 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
                   bool: {
                     must: [
                       { term: { policy_id: 'policy-1' } },
-                      { range: { revision_idx: { lt: 10 } } }, // 20 - 10 = 10
+                      { range: { revision_idx: { lte: 10 } } }, // 20 - 10 = 10
                     ],
                   },
                 },
