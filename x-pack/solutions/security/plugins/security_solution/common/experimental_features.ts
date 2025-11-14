@@ -183,6 +183,12 @@ export const allowedExperimentalValues = Object.freeze({
    *  Enables the QRadar rules import feature
    */
   qradarRulesMigration: false,
+  /**
+   * Enables Security Agent Builder integration. When enabled, registers Security Agent Builder
+   * tools (alerts, security labs, product documentation) and the Security Agent.
+   * Enable via: xpack.securitySolution.enableExperimental: ['agentBuilderEnabled']
+   */
+  agentBuilderEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

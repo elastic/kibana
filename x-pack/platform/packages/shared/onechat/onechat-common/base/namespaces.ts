@@ -11,12 +11,17 @@
  */
 export const internalNamespaces = {
   platformCore: 'platform.core',
+  coreSecurity: 'core.security',
 } as const;
 
 /**
  * List of protected namespaces which can only be used by internal tools.
  */
-export const protectedNamespaces: string[] = [internalNamespaces.platformCore, 'observability'];
+export const protectedNamespaces: string[] = [
+  internalNamespaces.platformCore,
+  internalNamespaces.coreSecurity,
+  'observability',
+];
 
 /**
  * Checks if the provided tool name belongs to a protected namespace.
