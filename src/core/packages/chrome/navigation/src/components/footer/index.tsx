@@ -11,7 +11,12 @@ import React, { forwardRef, useMemo } from 'react';
 import type { ForwardRefExoticComponent, ReactNode, RefAttributes } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { useEuiTheme, type UseEuiTheme } from '@elastic/eui';
+import {
+  EuiScreenReaderOnly,
+  useEuiTheme,
+  useGeneratedHtmlId,
+  type UseEuiTheme,
+} from '@elastic/eui';
 
 import { FooterItem } from './item';
 import { getFocusableElements } from '../../utils/get_focusable_elements';
@@ -41,6 +46,9 @@ interface FooterComponent
 
 const FooterBase = forwardRef<HTMLElement, FooterProps>(({ children, isCollapsed }, ref) => {
   const { euiTheme } = useEuiTheme();
+  const footerNavigationInstructionsId = useGeneratedHtmlId({
+    prefix: 'footer-navigation-instructions',
+  });
 
   const handleRef = (node: HTMLElement | null) => {
     if (typeof ref === 'function') {
@@ -52,6 +60,18 @@ const FooterBase = forwardRef<HTMLElement, FooterProps>(({ children, isCollapsed
     if (node) {
       const elements = getFocusableElements(node);
       updateTabIndices(elements);
+
+      // Add aria-describedby with keyboard navigation instructions to the first focusable element only
+      if (elements.length > 0) {
+        const firstElement = elements[0];
+        const existingDescribedBy = firstElement.getAttribute('aria-describedby');
+        if (!existingDescribedBy?.includes(footerNavigationInstructionsId)) {
+          const enhancedDescribedBy = existingDescribedBy
+            ? `${footerNavigationInstructionsId} ${existingDescribedBy}`
+            : footerNavigationInstructionsId;
+          firstElement.setAttribute('aria-describedby', enhancedDescribedBy);
+        }
+      }
     }
   };
 
@@ -61,19 +81,29 @@ const FooterBase = forwardRef<HTMLElement, FooterProps>(({ children, isCollapsed
   );
 
   return (
-    // The footer itself is not interactive but the children are
-    // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
-    <footer
-      aria-label={i18n.translate('core.ui.chrome.sideNavigation.footerAriaLabel', {
-        defaultMessage: 'Side navigation',
-      })}
-      css={wrapperStyles}
-      onKeyDown={handleRovingIndex}
-      ref={handleRef}
-      data-test-subj={`${NAVIGATION_SELECTOR_PREFIX}-footer`}
-    >
-      {children}
-    </footer>
+    <>
+      <EuiScreenReaderOnly>
+        <p id={footerNavigationInstructionsId}>
+          {i18n.translate('core.ui.chrome.sideNavigation.footerInstructions', {
+            defaultMessage:
+              'You are focused on a footer menu. Use up and down arrow keys to navigate between items and press Enter to activate',
+          })}
+        </p>
+      </EuiScreenReaderOnly>
+      {/* The footer itself is not interactive but the children are */}
+      {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
+      <footer
+        aria-label={i18n.translate('core.ui.chrome.sideNavigation.footerAriaLabel', {
+          defaultMessage: 'Side navigation',
+        })}
+        css={wrapperStyles}
+        onKeyDown={handleRovingIndex}
+        ref={handleRef}
+        data-test-subj={`${NAVIGATION_SELECTOR_PREFIX}-footer`}
+      >
+        {children}
+      </footer>
+    </>
   );
 });
 

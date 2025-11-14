@@ -11,7 +11,12 @@ import React, { forwardRef, useMemo } from 'react';
 import type { ForwardedRef, ForwardRefExoticComponent, ReactNode, RefAttributes } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { useEuiTheme, type UseEuiTheme } from '@elastic/eui';
+import {
+  EuiScreenReaderOnly,
+  useEuiTheme,
+  useGeneratedHtmlId,
+  type UseEuiTheme,
+} from '@elastic/eui';
 
 import { PrimaryMenuItem } from './item';
 import { getFocusableElements } from '../../utils/get_focusable_elements';
@@ -41,6 +46,11 @@ interface PrimaryMenuComponent
 export const PrimaryMenuBase = forwardRef<HTMLElement, PrimaryMenuProps>(
   ({ children, isCollapsed }, ref: ForwardedRef<HTMLElement>): JSX.Element => {
     const { euiTheme } = useEuiTheme();
+    const mainNavigationInstructionsId = useGeneratedHtmlId({
+      prefix: 'main-navigation-instructions',
+    });
+    const popoverEnterAndExitInstructionsId = 'popover-enter-exit-instructions';
+    const popoverNavigationInstructionsId = 'popover-navigation-instructions';
 
     const styles = useMemo(
       () => getPrimaryMenuStyles(euiTheme, isCollapsed),
@@ -51,6 +61,18 @@ export const PrimaryMenuBase = forwardRef<HTMLElement, PrimaryMenuProps>(
       if (node) {
         const elements = getFocusableElements(node);
         updateTabIndices(elements);
+
+        // Add aria-describedby with keyboard navigation instructions to the first focusable element only
+        if (elements.length > 0) {
+          const firstElement = elements[0];
+          const existingDescribedBy = firstElement.getAttribute('aria-describedby');
+          if (!existingDescribedBy?.includes(mainNavigationInstructionsId)) {
+            const enhancedDescribedBy = existingDescribedBy
+              ? `${mainNavigationInstructionsId} ${existingDescribedBy}`
+              : mainNavigationInstructionsId;
+            firstElement.setAttribute('aria-describedby', enhancedDescribedBy);
+          }
+        }
       }
 
       if (typeof ref === 'function') ref(node);
@@ -58,20 +80,45 @@ export const PrimaryMenuBase = forwardRef<HTMLElement, PrimaryMenuProps>(
     };
 
     return (
-      // The nav itself is not interactive but the children are
-      // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
-      <nav
-        aria-label={i18n.translate('core.ui.chrome.sideNavigation.primaryMenuAriaLabel', {
-          defaultMessage: 'Main',
-        })}
-        css={styles}
-        id={PRIMARY_NAVIGATION_ID}
-        data-test-subj={PRIMARY_NAVIGATION_ID}
-        onKeyDown={handleRovingIndex}
-        ref={handleRef}
-      >
-        {children}
-      </nav>
+      <>
+        <EuiScreenReaderOnly>
+          <p id={mainNavigationInstructionsId}>
+            {i18n.translate('core.ui.chrome.sideNavigation.primaryMenuInstructions', {
+              defaultMessage:
+                'You are focused on a primary menu. Use up and down arrow keys to navigate between items and press Enter to activate',
+            })}
+          </p>
+        </EuiScreenReaderOnly>
+        {/* Rendered once for all popovers */}
+        <EuiScreenReaderOnly>
+          <span id={popoverEnterAndExitInstructionsId}>
+            {i18n.translate('core.ui.chrome.sideNavigation.popoverInstruction', {
+              defaultMessage: 'Press Enter to go to the submenu and Escape to exit',
+            })}
+          </span>
+        </EuiScreenReaderOnly>
+        <EuiScreenReaderOnly>
+          <p id={popoverNavigationInstructionsId}>
+            {i18n.translate('core.ui.chrome.sideNavigation.popoverNavigationInstructions', {
+              defaultMessage: 'Use up and down arrow keys to navigate and press Enter to activate',
+            })}
+          </p>
+        </EuiScreenReaderOnly>
+        {/* The nav itself is not interactive but the children are */}
+        {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
+        <nav
+          aria-label={i18n.translate('core.ui.chrome.sideNavigation.primaryMenuAriaLabel', {
+            defaultMessage: 'Main',
+          })}
+          css={styles}
+          id={PRIMARY_NAVIGATION_ID}
+          data-test-subj={PRIMARY_NAVIGATION_ID}
+          onKeyDown={handleRovingIndex}
+          ref={handleRef}
+        >
+          {children}
+        </nav>
+      </>
     );
   }
 );

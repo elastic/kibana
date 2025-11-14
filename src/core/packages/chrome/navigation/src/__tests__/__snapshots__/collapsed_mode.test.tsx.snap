@@ -43,6 +43,24 @@ exports[`Collapsed mode should render the side navigation 1`] = `
           </a>
         </div>
       </span>
+      <p
+        class="emotion-euiScreenReaderOnly"
+        id="main-navigation-instructions_generated-id"
+      >
+        You are focused on a primary menu. Use up and down arrow keys to navigate between items and press Enter to activate
+      </p>
+      <span
+        class="emotion-euiScreenReaderOnly"
+        id="popover-enter-exit-instructions"
+      >
+        Press Enter to go to the submenu and Escape to exit
+      </span>
+      <p
+        class="emotion-euiScreenReaderOnly"
+        id="popover-navigation-instructions"
+      >
+        Use up and down arrow keys to navigate and press Enter to activate
+      </p>
       <nav
         aria-label="Main"
         class="css-1d7jr1a-getPrimaryMenuStyles"
@@ -59,6 +77,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
               class="euiToolTipAnchor  emotion-euiToolTipAnchor-inlineBlock-wrapperStyles"
             >
               <a
+                aria-describedby="main-navigation-instructions_generated-id"
                 aria-haspopup="false"
                 class="css-12vu9wt-buttonStyles"
                 data-highlighted="false"
@@ -132,6 +151,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
             class="euiPopover emotion-euiPopover-block"
           >
             <a
+              aria-describedby="popover-enter-exit-instructions"
               aria-expanded="false"
               aria-haspopup="true"
               class="css-12vu9wt-buttonStyles"
@@ -161,6 +181,12 @@ exports[`Collapsed mode should render the side navigation 1`] = `
           </div>
         </div>
       </nav>
+      <p
+        class="emotion-euiScreenReaderOnly"
+        id="footer-navigation-instructions_generated-id"
+      >
+        You are focused on a footer menu. Use up and down arrow keys to navigate between items and press Enter to activate
+      </p>
       <footer
         aria-label="Side navigation"
         class="css-1q4tj4c-getWrapperStyles"
@@ -176,6 +202,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
               class="euiToolTipAnchor  emotion-euiToolTipAnchor-inlineBlock-wrapperStyles"
             >
               <a
+                aria-describedby="footer-navigation-instructions_generated-id"
                 aria-haspopup="false"
                 aria-label="Getting started"
                 class="euiButtonIcon emotion-euiButtonIcon-s-empty-text-buttonStyles"
@@ -236,6 +263,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
               class="css-1g7fa48-wrapperStyles"
             >
               <a
+                aria-describedby="popover-enter-exit-instructions"
                 aria-expanded="false"
                 aria-haspopup="true"
                 aria-label="Settings"

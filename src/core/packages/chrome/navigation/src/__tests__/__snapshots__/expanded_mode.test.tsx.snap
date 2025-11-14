@@ -39,6 +39,24 @@ exports[`Expanded mode should render the side navigation 1`] = `
           </div>
         </a>
       </div>
+      <p
+        class="emotion-euiScreenReaderOnly"
+        id="main-navigation-instructions_generated-id"
+      >
+        You are focused on a primary menu. Use up and down arrow keys to navigate between items and press Enter to activate
+      </p>
+      <span
+        class="emotion-euiScreenReaderOnly"
+        id="popover-enter-exit-instructions"
+      >
+        Press Enter to go to the submenu and Escape to exit
+      </span>
+      <p
+        class="emotion-euiScreenReaderOnly"
+        id="popover-navigation-instructions"
+      >
+        Use up and down arrow keys to navigate and press Enter to activate
+      </p>
       <nav
         aria-label="Main"
         class="css-175v8l8-getPrimaryMenuStyles"
@@ -52,6 +70,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
             class="euiPopover emotion-euiPopover-block"
           >
             <a
+              aria-describedby="main-navigation-instructions_generated-id"
               aria-haspopup="false"
               class="css-12vu9wt-buttonStyles"
               data-highlighted="false"
@@ -120,6 +139,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
             class="euiPopover emotion-euiPopover-block"
           >
             <a
+              aria-describedby="popover-enter-exit-instructions"
               aria-expanded="false"
               aria-haspopup="true"
               class="css-12vu9wt-buttonStyles"
@@ -149,6 +169,12 @@ exports[`Expanded mode should render the side navigation 1`] = `
           </div>
         </div>
       </nav>
+      <p
+        class="emotion-euiScreenReaderOnly"
+        id="footer-navigation-instructions_generated-id"
+      >
+        You are focused on a footer menu. Use up and down arrow keys to navigate between items and press Enter to activate
+      </p>
       <footer
         aria-label="Side navigation"
         class="css-1cpms11-getWrapperStyles"
@@ -164,6 +190,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
               class="euiToolTipAnchor  emotion-euiToolTipAnchor-inlineBlock-wrapperStyles"
             >
               <a
+                aria-describedby="footer-navigation-instructions_generated-id"
                 aria-haspopup="false"
                 aria-label="Getting started"
                 class="euiButtonIcon emotion-euiButtonIcon-s-empty-text-buttonStyles"
@@ -224,6 +251,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
               class="css-1g7fa48-wrapperStyles"
             >
               <a
+                aria-describedby="popover-enter-exit-instructions"
                 aria-expanded="false"
                 aria-haspopup="true"
                 aria-label="Settings"

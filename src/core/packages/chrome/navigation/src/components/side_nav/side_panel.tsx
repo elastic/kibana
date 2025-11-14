@@ -8,7 +8,13 @@
  */
 
 import React, { type ReactNode, useMemo } from 'react';
-import { EuiSplitPanel, useEuiTheme, type UseEuiTheme } from '@elastic/eui';
+import {
+  EuiScreenReaderOnly,
+  EuiSplitPanel,
+  useEuiTheme,
+  useGeneratedHtmlId,
+  type UseEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
@@ -48,11 +54,26 @@ export const SidePanel = ({ children, footer, openerNode }: SidePanelProps): JSX
   const { euiTheme } = useEuiTheme();
   const scrollStyles = useScroll();
   const wrapperStyles = useMemo(() => getWrapperStyles(euiTheme), [euiTheme]);
+  const secondaryNavigationInstructionsId = useGeneratedHtmlId({
+    prefix: 'secondary-navigation-instructions',
+  });
 
   const panelRef = (ref: HTMLDivElement) => {
     if (ref) {
       const elements = getFocusableElements(ref);
       updateTabIndices(elements);
+
+      // Add aria-describedby with keyboard navigation instructions to the first focusable element only
+      if (elements.length > 0) {
+        const firstElement = elements[0];
+        const existingDescribedBy = firstElement.getAttribute('aria-describedby');
+        if (!existingDescribedBy?.includes(secondaryNavigationInstructionsId)) {
+          const enhancedDescribedBy = existingDescribedBy
+            ? `${secondaryNavigationInstructionsId} ${existingDescribedBy}`
+            : secondaryNavigationInstructionsId;
+          firstElement.setAttribute('aria-describedby', enhancedDescribedBy);
+        }
+      }
     }
   };
 
@@ -66,38 +87,48 @@ export const SidePanel = ({ children, footer, openerNode }: SidePanelProps): JSX
   const sidePanelClassName = `${NAVIGATION_SELECTOR_PREFIX}-sidePanel`;
 
   return (
-    <EuiSplitPanel.Outer
-      aria-label={i18n.translate('core.ui.chrome.sideNavigation.sidePanelAriaLabel', {
-        defaultMessage: `Side panel for {label}`,
-        values: {
-          label: openerNode.label,
-        },
-      })}
-      borderRadius="none"
-      className={sidePanelClassName} // Used in Storybook to limit the height of the panel
-      css={wrapperStyles}
-      data-test-subj={`${sidePanelClassName} ${sidePanelClassName}_${openerNode.id}`}
-      hasShadow={false}
-      role="region"
-    >
-      <EuiSplitPanel.Inner
-        color="subdued"
-        css={navigationPanelStyles}
-        data-test-subj={`${NAVIGATION_SELECTOR_PREFIX}-panelContent`}
-        onKeyDown={handleRovingIndex}
-        panelRef={panelRef}
-        paddingSize="none"
+    <>
+      <EuiScreenReaderOnly>
+        <p id={secondaryNavigationInstructionsId}>
+          {i18n.translate('core.ui.chrome.sideNavigation.sidePanelInstructions', {
+            defaultMessage: 'Use up and down arrow keys to navigate and press Enter to activate',
+          })}
+        </p>
+      </EuiScreenReaderOnly>
+      <EuiSplitPanel.Outer
+        aria-label={i18n.translate('core.ui.chrome.sideNavigation.sidePanelAriaLabel', {
+          defaultMessage: `Side panel for {label}`,
+          values: {
+            label: openerNode.label,
+          },
+        })}
+        aria-describedby={secondaryNavigationInstructionsId}
+        borderRadius="none"
+        className={sidePanelClassName} // Used in Storybook to limit the height of the panel
+        css={wrapperStyles}
+        data-test-subj={`${sidePanelClassName} ${sidePanelClassName}_${openerNode.id}`}
+        hasShadow={false}
+        role="region"
       >
-        {children}
-      </EuiSplitPanel.Inner>
-      <EuiSplitPanel.Inner
-        color="subdued"
-        data-test-subj={`${NAVIGATION_SELECTOR_PREFIX}-panelFooter`}
-        paddingSize="none"
-        grow={false}
-      >
-        {footer}
-      </EuiSplitPanel.Inner>
-    </EuiSplitPanel.Outer>
+        <EuiSplitPanel.Inner
+          color="subdued"
+          css={navigationPanelStyles}
+          data-test-subj={`${NAVIGATION_SELECTOR_PREFIX}-panelContent`}
+          onKeyDown={handleRovingIndex}
+          panelRef={panelRef}
+          paddingSize="none"
+        >
+          {children}
+        </EuiSplitPanel.Inner>
+        <EuiSplitPanel.Inner
+          color="subdued"
+          data-test-subj={`${NAVIGATION_SELECTOR_PREFIX}-panelFooter`}
+          paddingSize="none"
+          grow={false}
+        >
+          {footer}
+        </EuiSplitPanel.Inner>
+      </EuiSplitPanel.Outer>
+    </>
   );
 };
