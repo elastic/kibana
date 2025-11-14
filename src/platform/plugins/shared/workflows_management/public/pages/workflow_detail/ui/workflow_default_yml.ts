@@ -9,6 +9,10 @@
 
 export const workflowDefaultYaml = `name: New workflow
 enabled: false
+description: This is a new workflow
+tags:
+  - workflow
+  - example
 triggers:
   - type: manual
 
