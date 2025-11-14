@@ -165,6 +165,10 @@ export interface ConversationRound {
 
 export interface RoundModelUsageStats {
   /**
+   * Id of the connector used for this round
+   */
+  connector_id: string;
+  /**
    * Number of LLM calls which were done during this round.
    */
   llm_calls: number;

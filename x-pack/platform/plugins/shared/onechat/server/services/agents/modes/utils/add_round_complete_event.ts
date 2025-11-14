@@ -167,6 +167,8 @@ const getModelUsage = (stats: ModelProviderStats): RoundModelUsageStats => {
   }
 
   return {
+    // we don't support multi-models yet, so we can just pick from the first call
+    connector_id: stats.calls.length ? stats.calls[0].connectorId : 'unknown',
     llm_calls: stats.calls.length,
     input_tokens: inputTokens,
     output_tokens: outputTokens,
