@@ -424,11 +424,9 @@ export const MonacoEditor = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <ContextMenu
-            getRequests={getRequestsCallback}
             getDocumentation={getDocumenationLink}
             autoIndent={autoIndentCallback}
             notifications={notifications}
-            getIsKbnRequestSelected={isKbnRequestSelectedCallback}
             currentLanguage={currentLanguage}
             onLanguageChange={handleLanguageChange}
             isKbnRequestSelected={isKbnRequestSelected}

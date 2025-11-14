@@ -23,20 +23,14 @@ import {
 import type { NotificationsStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import type { EditorRequest } from '../../types';
 
 import { useServicesContext } from '../../../../contexts';
 import { DEFAULT_LANGUAGE, AVAILABLE_LANGUAGES } from '../../../../../../common/constants';
 
 interface Props {
-  getRequests: () => Promise<EditorRequest[]>;
   getDocumentation: () => Promise<string | null>;
   autoIndent: (ev: React.MouseEvent) => void;
   notifications: Pick<NotificationsStart, 'toasts'>;
-  /* A function that returns true if any of the selected requests is an internal Kibana request
-   * (starting with the kbn: prefix). This is needed here as we display only the curl language
-   * for internal Kibana requests since the other languages are not supported yet. */
-  getIsKbnRequestSelected: () => Promise<boolean | null>;
   currentLanguage: string;
   onLanguageChange: (language: string) => void;
   isKbnRequestSelected: boolean;
@@ -51,11 +45,9 @@ const getLanguageLabelByValue = (value: string) => {
 };
 
 export const ContextMenu = ({
-  getRequests,
   getDocumentation,
   autoIndent,
   notifications,
-  getIsKbnRequestSelected,
   currentLanguage,
   onLanguageChange,
   isKbnRequestSelected,
