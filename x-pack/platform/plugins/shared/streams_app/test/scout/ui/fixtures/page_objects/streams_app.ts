@@ -77,7 +77,10 @@ export class StreamsApp {
   async gotoAdvancedTab(streamName: string) {
     await this.gotoStreamManagementTab(streamName, 'advanced');
   }
- 
+
+  async clickGoBackToStreams() {    
+    await this.page.getByTestId('backToStreamsButton').click();
+  }
 
   async clickStreamNameLink(streamName: string) {
     await this.page.getByTestId(`streamsNameLink-${streamName}`).click();
