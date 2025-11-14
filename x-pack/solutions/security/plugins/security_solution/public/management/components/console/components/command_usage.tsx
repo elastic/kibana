@@ -22,22 +22,16 @@ const additionalProps = {
   className: 'euiTruncateText',
 };
 
-export const CommandInputUsage = memo<Pick<CommandUsageProps, 'commandDef'>>(({ commandDef }) => {
+export interface CommandInputUsageExampleProps {
+  commandDef: CommandDefinition;
+}
+
+export const CommandInputUsageExample = memo<CommandInputUsageExampleProps>(({ commandDef }) => {
   const inputCommand = useInputCommand();
-  const usageHelp = useMemo(() => {
-    return getArgumentsForCommand(commandDef).map((usage, index) => {
-      return (
-        <React.Fragment key={`helpUsage-${index}`}>
-          {index > 0 && <EuiSpacer size="xs" />}
-          <ConsoleCodeBlock>{`${commandDef.name} ${usage}`}</ConsoleCodeBlock>
-        </React.Fragment>
-      );
-    });
-  }, [commandDef]);
 
   const helpExample = useMemo(() => {
-    if (commandDef.helpUsage) {
-      return commandDef.helpUsage;
+    if (commandDef.helpExample) {
+      return commandDef.helpExample;
     }
 
     return typeof commandDef.exampleUsage === 'function'
@@ -46,7 +40,7 @@ export const CommandInputUsage = memo<Pick<CommandUsageProps, 'commandDef'>>(({ 
   }, [commandDef, inputCommand]);
 
   return (
-    <>
+    helpExample && (
       <EuiDescriptionList
         compressed
         type="column"
@@ -55,19 +49,56 @@ export const CommandInputUsage = memo<Pick<CommandUsageProps, 'commandDef'>>(({ 
           {
             title: (
               <ConsoleCodeBlock>
-                {i18n.translate('xpack.securitySolution.console.commandUsage.inputUsage', {
-                  defaultMessage: 'Usage',
+                {i18n.translate('xpack.securitySolution.console.commandUsage.exampleUsage', {
+                  defaultMessage: 'Example',
                 })}
               </ConsoleCodeBlock>
             ),
-            description: usageHelp && usageHelp.length > 0 ? usageHelp : commandDef.name,
+            description: <ConsoleCodeBlock>{helpExample}</ConsoleCodeBlock>,
           },
         ]}
         descriptionProps={additionalProps}
         titleProps={additionalProps}
       />
-      <EuiSpacer size="s" />
-      {helpExample && (
+    )
+  );
+});
+CommandInputUsageExample.displayName = 'CommandInputUsageExample';
+
+interface CommandInputUsageProps extends Pick<CommandUsageProps, 'commandDef'> {
+  /** If the command help example should be displayed. Default is `true`. */
+  withHelpExample?: boolean;
+}
+
+export const CommandInputUsage = memo<CommandInputUsageProps>(
+  ({ commandDef, withHelpExample = true }) => {
+    const usageHelp = useMemo(() => {
+      if (commandDef.helpUsage) {
+        return <ConsoleCodeBlock>{commandDef.helpUsage}</ConsoleCodeBlock>;
+      }
+
+      const commandArgs = getArgumentsForCommand(commandDef);
+
+      if (commandArgs.length === 0) {
+        return <ConsoleCodeBlock>{commandDef.name}</ConsoleCodeBlock>;
+      }
+
+      return (
+        <>
+          {commandArgs.map((usage, index) => {
+            return (
+              <React.Fragment key={`helpUsage-${index}`}>
+                {index > 0 && <EuiSpacer size="xs" />}
+                <ConsoleCodeBlock>{`${commandDef.name} ${usage}`}</ConsoleCodeBlock>
+              </React.Fragment>
+            );
+          })}
+        </>
+      );
+    }, [commandDef]);
+
+    return (
+      <>
         <EuiDescriptionList
           compressed
           type="column"
@@ -76,21 +107,23 @@ export const CommandInputUsage = memo<Pick<CommandUsageProps, 'commandDef'>>(({ 
             {
               title: (
                 <ConsoleCodeBlock>
-                  {i18n.translate('xpack.securitySolution.console.commandUsage.exampleUsage', {
-                    defaultMessage: 'Example',
+                  {i18n.translate('xpack.securitySolution.console.commandUsage.inputUsage', {
+                    defaultMessage: 'Usage',
                   })}
                 </ConsoleCodeBlock>
               ),
-              description: <ConsoleCodeBlock>{helpExample}</ConsoleCodeBlock>,
+              description: usageHelp,
             },
           ]}
           descriptionProps={additionalProps}
           titleProps={additionalProps}
         />
-      )}
-    </>
-  );
-});
+        <EuiSpacer size="s" />
+        {withHelpExample && <CommandInputUsageExample commandDef={commandDef} />}
+      </>
+    );
+  }
+);
 CommandInputUsage.displayName = 'CommandInputUsage';
 
 export interface CommandUsageProps {
@@ -147,7 +180,7 @@ export const CommandUsage = memo<CommandUsageProps>(({ commandDef, errorMessage 
 
   const parametersDescriptionList = (title: string, parameters: CommandDetails) => {
     const description = parameters.map((item) => (
-      <div>
+      <div key={item.title}>
         <ConsoleCodeBlock bold inline>
           {item.title}
         </ConsoleCodeBlock>
@@ -200,6 +233,7 @@ export const CommandUsage = memo<CommandUsageProps>(({ commandDef, errorMessage 
   return (
     <EuiPanel paddingSize="none" color="transparent" data-test-subj={getTestId('commandUsage')}>
       {renderErrorMessage()}
+
       <EuiDescriptionList
         compressed
         type="column"
@@ -221,7 +255,9 @@ export const CommandUsage = memo<CommandUsageProps>(({ commandDef, errorMessage 
         data-test-subj={getTestId('commandUsage-options')}
       />
       <EuiSpacer size="s" />
-      <CommandInputUsage commandDef={commandDef} />
+
+      <CommandInputUsage commandDef={commandDef} withHelpExample={false} />
+
       {commandOptions.required &&
         commandOptions.required.length > 0 &&
         parametersDescriptionList(
@@ -230,6 +266,7 @@ export const CommandUsage = memo<CommandUsageProps>(({ commandDef, errorMessage 
           }),
           commandOptions.required
         )}
+
       {commandOptions.exclusiveOr &&
         commandOptions.exclusiveOr.length > 0 &&
         parametersDescriptionList(
@@ -238,6 +275,7 @@ export const CommandUsage = memo<CommandUsageProps>(({ commandDef, errorMessage 
           }),
           commandOptions.exclusiveOr
         )}
+
       {commandOptions.optional &&
         commandOptions.optional.length > 0 &&
         parametersDescriptionList(
@@ -246,6 +284,9 @@ export const CommandUsage = memo<CommandUsageProps>(({ commandDef, errorMessage 
           }),
           commandOptions.optional
         )}
+
+      <EuiSpacer size="s" />
+      <CommandInputUsageExample commandDef={commandDef} />
     </EuiPanel>
   );
 });
