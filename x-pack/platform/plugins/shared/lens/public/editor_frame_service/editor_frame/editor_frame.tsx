@@ -25,6 +25,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { getAbsoluteDateRange } from '../../utils';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
+import { useAddLayerButton } from '../../app_plugin/shared/edit_on_the_fly/use_add_layer_button';
 import { DataPanelWrapper } from './data_panel_wrapper';
 import { BannerWrapper } from './banner_wrapper';
 import { ConfigPanelWrapper } from './config_panel';
@@ -129,6 +130,14 @@ export function EditorFrame(props: EditorFrameProps) {
     }
   }, []);
 
+  const addLayerButton = useAddLayerButton(
+    framePublicAPI,
+    props.core,
+    props.plugins.dataViews,
+    props.plugins.uiActions,
+    () => {}
+  );
+
   return (
     <RootDragDropProvider
       initialState={{ dataTestSubjPrefix: 'lnsDragDrop' }}
@@ -160,16 +169,21 @@ export function EditorFrame(props: EditorFrameProps) {
             <ErrorBoundary onError={onError}>
               <>
                 <EuiFlexGroup
+                  gutterSize="s"
                   css={styles.visualizationToolbar}
                   justifyContent="flexEnd"
                   responsive={false}
                   wrap={true}
                 >
                   <EuiFlexItem grow={false} data-test-subj="lnsVisualizationToolbar">
-                    <VisualizationToolbarWrapper framePublicAPI={framePublicAPI} />
-                    <EuiSpacer size="m" />
+                    <VisualizationToolbarWrapper
+                      framePublicAPI={framePublicAPI}
+                      isInlineEditing={true}
+                    />
                   </EuiFlexItem>
+                  <EuiFlexItem grow={false}>{addLayerButton}</EuiFlexItem>
                 </EuiFlexGroup>
+                <EuiSpacer size="s" />
                 <LayerTabsWrapper
                   coreStart={props.core}
                   framePublicAPI={framePublicAPI}

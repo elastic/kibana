@@ -125,11 +125,7 @@ export const FlyoutWrapper = ({
                 )}
                 {/* Empty growing flex item to push toolbar to the right */}
                 <EuiFlexItem grow={true} />
-                {toolbar ? (
-                  <EuiFlexItem grow={false} data-test-subj="lnsVisualizationToolbar">
-                    {toolbar}
-                  </EuiFlexItem>
-                ) : null}
+                {toolbar ?? null}
               </EuiFlexGroup>
               <EuiSpacer size="s" />
             </>
