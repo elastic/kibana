@@ -7,8 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import type { searchRequestBodySchema, searchResponseBodySchema } from './schemas';
-
-export type DashboardSearchRequestBody = TypeOf<typeof searchRequestBodySchema>;
-export type DashboardSearchResponseBody = TypeOf<typeof searchResponseBodySchema>;
+export type { DashboardUpdateRequestBody } from './types';
+export { registerUpdateRoute } from './register_update_route';
