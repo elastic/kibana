@@ -82,11 +82,15 @@ describe('Cases connector incident fields', { tags: ['@ess', '@serverless'] }, (
     createCase();
 
     cy.get(CONNECTOR_TITLE).should('have.text', getIbmResilientConnectorOptions().title);
+    cy.get(CONNECTOR_CARD_DETAILS).should('contain.text', `Incident types`);
     cy.get(CONNECTOR_CARD_DETAILS).should(
-      'have.text',
-      `Incident types: ${getIbmResilientConnectorOptions().incidentTypes.join(', ')}Severity: ${
-        getIbmResilientConnectorOptions().severity
-      }`
+      'contain.text',
+      getIbmResilientConnectorOptions().incidentTypes.join(', ')
+    );
+    cy.get(CONNECTOR_CARD_DETAILS).should('contain.text', `Severity`);
+    cy.get(CONNECTOR_CARD_DETAILS).should(
+      'contain.text',
+      getIbmResilientConnectorOptions().severity
     );
   });
 });
