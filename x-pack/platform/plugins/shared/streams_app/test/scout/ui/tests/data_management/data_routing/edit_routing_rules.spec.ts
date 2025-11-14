@@ -61,7 +61,7 @@ test.describe('Stream data routing - editing routing rules', { tag: ['@ess', '@s
     await expect(page.getByText('test-service')).toBeVisible();
   });
 
-  test('should switch between editing different rules', async ({ pageObjects }) => {
+  test('should switch between editing different rules', async ({ pageObjects, page }) => {
     // Create another test rule
     await pageObjects.streams.clickCreateRoutingRule();
     await pageObjects.streams.fillRoutingRuleName('edit-test-2');
