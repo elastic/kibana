@@ -15,6 +15,7 @@ import type {
 import type {
   RuleAction,
   ActionTypeRegistryContract,
+  ActionConnector,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { validateActionFilterQuery } from '@kbn/triggers-actions-ui-plugin/public';
 
@@ -25,9 +26,10 @@ export const DEFAULT_VALIDATION_TIMEOUT = 100;
 
 export const validateSingleAction = async (
   actionItem: RuleAction,
-  actionTypeRegistry: ActionTypeRegistryContract
+  actionTypeRegistry: ActionTypeRegistryContract,
+  connector?: ActionConnector
 ): Promise<string[]> => {
-  const actionParamsErrors = await validateActionParams(actionItem, actionTypeRegistry);
+  const actionParamsErrors = await validateActionParams(actionItem, actionTypeRegistry, connector);
   const mustacheErrors = validateMustache(actionItem.params);
   const queryErrors = validateActionFilterQuery(actionItem);
 
@@ -35,7 +37,7 @@ export const validateSingleAction = async (
 };
 
 export const validateRuleActionsField =
-  (actionTypeRegistry: ActionTypeRegistryContract) =>
+  (actionTypeRegistry: ActionTypeRegistryContract, connectors?: ActionConnector[]) =>
   async (
     ...data: Parameters<ValidationFunc<FormData, string, RuleAction[]>>
   ): ValidationResponsePromise<ERROR_CODE> => {
@@ -43,7 +45,12 @@ export const validateRuleActionsField =
 
     const errors = [];
     for (const actionItem of value) {
-      const errorsArray = await validateSingleAction(actionItem, actionTypeRegistry);
+      const currentConnector = connectors?.find((connector) => connector.id === actionItem.id);
+      const errorsArray = await validateSingleAction(
+        actionItem,
+        actionTypeRegistry,
+        currentConnector
+      );
 
       if (errorsArray.length) {
         const actionTypeName = getActionTypeName(actionItem.actionTypeId);
@@ -78,6 +85,7 @@ export const validateRuleActionsField =
 export const debouncedValidateRuleActionsField =
   <I extends FormData>(
     actionTypeRegistry: ActionTypeRegistryContract,
+    connectors?: ActionConnector[],
     defaultValidationTimeout = DEFAULT_VALIDATION_TIMEOUT
   ) =>
   (data: ValidationFuncArg<I, RuleAction[]>): ValidationResponsePromise => {
@@ -87,7 +95,7 @@ export const debouncedValidateRuleActionsField =
         if (isCanceled) {
           resolve();
         } else {
-          resolve(validateRuleActionsField(actionTypeRegistry)(data));
+          resolve(validateRuleActionsField(actionTypeRegistry, connectors)(data));
         }
       }, defaultValidationTimeout);
     });
