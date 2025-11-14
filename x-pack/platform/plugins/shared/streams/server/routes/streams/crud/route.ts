@@ -38,13 +38,15 @@ export const readStreamRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<Streams.all.GetResponse> => {
-    const { assetClient, streamsClient, scopedClusterClient } = await getScopedClients({
+    const { assetClient, attachmentClient, streamsClient, scopedClusterClient } = await getScopedClients({
       request,
     });
+
 
     const body = await readStream({
       name: params.path.name,
       assetClient,
+      attachmentClient,
       scopedClusterClient,
       streamsClient,
       isServerless: server.isServerless,
