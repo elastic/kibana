@@ -879,6 +879,27 @@ export class IndexUpdateService {
     this.telemetry.trackEditInteraction({ actionType: 'delete_row' });
   }
 
+  /** Reset index to original state */
+  public async resetIndexMapping() {
+    if (this.isIndexCreated()) {
+      await this.http.post<BulkResponse>(
+        `/internal/esql/lookup_index/${this.getIndexName()}/recreate`
+      );
+
+      // Refresh dataview fields
+      const dataView = await firstValueFrom(this.dataView$);
+      await this.data.dataViews.refreshFields(dataView, false, true);
+
+      // Clean all unsaved changes that might be in memory
+      this.discardUnsavedChanges();
+
+      // Refetch the new index and update rows data
+      this.refresh();
+    } else {
+      this.discardUnsavedChanges();
+    }
+  }
+
   /**
    * Sends a bulk update request to an index.
    * @param updates

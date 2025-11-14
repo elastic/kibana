@@ -30,13 +30,13 @@ import { css } from '@emotion/react';
 import type { FileUploadResults } from '@kbn/file-upload-common';
 import { i18n } from '@kbn/i18n';
 import { ErrorCallout } from './error_callout';
-import { isPlaceholderColumn } from '../utils';
 import { UnsavedChangesModal } from './modals/unsaved_changes_modal';
 import type { EditLookupIndexContentContext, FlyoutDeps } from '../types';
 import { QueryBar } from './query_bar';
 import { FileDropzone } from './file_drop_zone';
 import { FlyoutFooter } from './flyout_footer';
 import { IndexName } from './index_name';
+import { ROW_PLACEHOLDER_PREFIX } from '../constants';
 
 export interface FlyoutContentProps {
   deps: FlyoutDeps;
@@ -73,11 +73,9 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
     }
   );
 
-  const columnsWithoutPlaceholders = dataViewColumns?.filter(
-    (column) => !isPlaceholderColumn(column.name)
-  );
+  const rowsWithValues = rows?.some((row) => !row.id.startsWith(ROW_PLACEHOLDER_PREFIX));
 
-  const noResults = !isLoading && columnsWithoutPlaceholders?.length === 0;
+  const noResults = !isLoading && !rowsWithValues;
 
   return (
     <KibanaContextProvider

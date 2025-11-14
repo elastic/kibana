@@ -99,6 +99,53 @@ export const registerLookupIndexRoutes = (
     }
   );
 
+  router.post(
+    {
+      path: '/internal/esql/lookup_index/{indexName}/recreate',
+      validate: {
+        params: schema.object({
+          indexName: schema.string(),
+        }),
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
+      options: {
+        description: 'Recreates an index with lookup mode, used to reset the mapping of the index.',
+      },
+    },
+    async (requestHandlerContext, request, response) => {
+      try {
+        const core = await requestHandlerContext.core;
+        const client = core.elasticsearch.client.asCurrentUser;
+
+        const indexName = request.params.indexName;
+
+        await client.indices.delete({
+          index: indexName,
+          ignore_unavailable: true,
+        });
+
+        const result = await client.indices.create({
+          index: indexName,
+          settings: {
+            mode: 'lookup',
+          },
+        });
+
+        return response.ok({
+          body: result,
+        });
+      } catch (error) {
+        logger.get().debug(error);
+        throw error;
+      }
+    }
+  );
+
   router.get(
     {
       path: '/internal/esql/lookup_index/privileges',
