@@ -74,17 +74,43 @@ export const openLazyFlyout = (params: OpenLazyFlyoutParams) => {
     onClose();
   });
 
-  const flyoutRef = core.overlays.openFlyout(
-    toMountPoint(
-      <LazyFlyout
-        closeFlyout={onClose}
-        loadContent={loadContent}
-        core={core}
-        ariaLabelledBy={ariaLabelledBy}
-      />,
-      core
-    ),
+  //   const flyoutRef = core.overlays.openFlyout(
+  //     toMountPoint(
+  //       <LazyFlyout
+  //         closeFlyout={onClose}
+  //         loadContent={loadContent}
+  //         core={core}
+  //         ariaLabelledBy={ariaLabelledBy}
+  //       />,
+  //       core
+  //     ),
+  //     {
+  //       size: 500,
+  //       type: 'push',
+  //       paddingSize: 'm',
+  //       maxWidth: 800,
+  //       ownFocus: true,
+  //       isResizable: true,
+  //       outsideClickCloses: true,
+  //       className: 'kbnPresentationLazyFlyout',
+  //       'aria-labelledby': ariaLabelledBy,
+  //       onClose,
+  //       ...flyoutProps,
+  //     }
+  //   );
+  //   overlayTracker?.openOverlay(flyoutRef, { focusedPanelId });
+  //   return flyoutRef;
+  // };
+
+  const flyoutRef = core.overlays.openSystemFlyout(
+    <LazyFlyout
+      closeFlyout={onClose}
+      loadContent={loadContent}
+      core={core}
+      ariaLabelledBy={ariaLabelledBy}
+    />,
     {
+      session: 'start',
       size: 500,
       type: 'push',
       paddingSize: 'm',
@@ -94,6 +120,7 @@ export const openLazyFlyout = (params: OpenLazyFlyoutParams) => {
       outsideClickCloses: true,
       className: 'kbnPresentationLazyFlyout',
       'aria-labelledby': ariaLabelledBy,
+      'aria-label': 'Test title',
       onClose,
       ...flyoutProps,
     }
