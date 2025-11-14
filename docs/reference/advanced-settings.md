@@ -161,7 +161,7 @@ $$$shortdots-enable$$$`shortDots:enable`
 $$$sort-options$$$`sort:options`
 :   Options for the Elasticsearch [sort](elasticsearch://reference/elasticsearch/rest-apis/sort-search-results.md) parameter.
 
-$$$state-storeinsessionstorage$$$`state:storeInSessionStorage` {applies_to}`stack: preview`
+$$$state-storeinsessionstorage$$$`state:storeInSessionStorage` {applies_to}`stack: preview` {applies_to}`stack: deprecated 9.3` {applies_to}`serverless: deprecated`
 :   Kibana tracks UI state in the URL, which can lead to problems when there is a lot of state information, and the URL gets very long. Enabling this setting stores part of the URL in your browser session to keep the URL short.
 
 $$$theme-darkmode$$$`theme:darkMode` {applies_to}`stack: deprecated 9.0`
