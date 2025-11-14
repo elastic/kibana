@@ -10,7 +10,7 @@
 import type { Logger } from '@kbn/core/server';
 import { dateRangeQuery } from '@kbn/es-query';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
-import type { estypes } from '@elastic/elasticsearch';
+import { from as fromCommand, evaluate, where, stats, sort, limit } from '@kbn/esql-composer';
 
 interface CreateDimensionsParams {
   esClient: TracedElasticsearchClient;
@@ -33,43 +33,38 @@ export const getDimensions = async ({
     return [];
   }
 
+  const source = fromCommand(indices);
+  const query = source
+    .pipe(
+      evaluate('??dim = ??dim::string', { dim: dimensions[0] }),
+      where('??dim IS NOT NULL', { dim: dimensions[0] }),
+      stats('BY ??dim', {
+        dim: dimensions[0],
+      }),
+      sort('??dim', { dim: dimensions[0] }),
+      limit(20)
+    )
+    .toString();
+
   try {
-    const response = await esClient.search('get_dimensions', {
-      index: indices.join(','),
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [...dateRangeQuery(from, to)],
+    const response = await esClient.esql(
+      'get_dimensions',
+      {
+        query,
+        filter: {
+          bool: {
+            filter: [...dateRangeQuery(from, to)],
+          },
         },
       },
-      // Create aggregations for each dimension
-      aggs: dimensions.reduce((acc, currDimension) => {
-        acc[currDimension] = {
-          terms: {
-            field: currDimension,
-            size: 20,
-            order: { _key: 'asc' },
-          },
-        };
-
-        return acc;
-      }, {} as Record<string, Pick<estypes.AggregationsAggregationContainer, 'terms'>>),
-    });
-
-    const aggregations = response.aggregations;
-
-    const values = dimensions.flatMap((dimension) => {
-      const agg = aggregations?.[dimension];
-      return (
-        agg?.buckets?.map((bucket) => ({
-          value: String(bucket.key ?? ''),
-          field: dimension,
-        })) ?? []
-      );
-    });
-
-    return values;
+      {
+        transform: 'plain',
+      }
+    );
+    return response.hits.map((hit) => ({
+      value: String(hit[dimensions[0]]),
+      field: dimensions[0],
+    }));
   } catch (error) {
     logger.error('Error fetching dimension values:', error);
     return [];

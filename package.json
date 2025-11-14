@@ -254,6 +254,7 @@
     "@kbn/config-mocks": "link:src/platform/packages/private/kbn-config-mocks",
     "@kbn/config-schema": "link:src/platform/packages/shared/kbn-config-schema",
     "@kbn/connector-schemas": "link:src/platform/packages/shared/kbn-connector-schemas",
+    "@kbn/connector-specs": "link:src/platform/packages/shared/kbn-connector-specs",
     "@kbn/console-plugin": "link:src/platform/plugins/shared/console",
     "@kbn/content-connectors-plugin": "link:x-pack/platform/plugins/shared/content_connectors",
     "@kbn/content-management-content-editor": "link:src/platform/packages/shared/content-management/content_editor",

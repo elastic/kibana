@@ -232,6 +232,8 @@
       "@kbn/config-schema/*": ["src/platform/packages/shared/kbn-config-schema/*"],
       "@kbn/connector-schemas": ["src/platform/packages/shared/kbn-connector-schemas"],
       "@kbn/connector-schemas/*": ["src/platform/packages/shared/kbn-connector-schemas/*"],
+      "@kbn/connector-specs": ["src/platform/packages/shared/kbn-connector-specs"],
+      "@kbn/connector-specs/*": ["src/platform/packages/shared/kbn-connector-specs/*"],
       "@kbn/console-plugin": ["src/platform/plugins/shared/console"],
       "@kbn/console-plugin/*": ["src/platform/plugins/shared/console/*"],
       "@kbn/content-connectors-plugin": ["x-pack/platform/plugins/shared/content_connectors"],

@@ -4963,6 +4963,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/connector-specs@link:src/platform/packages/shared/kbn-connector-specs":
+  version "0.0.0"
+  uid ""
+
 "@kbn/console-plugin@link:src/platform/plugins/shared/console":
   version "0.0.0"
   uid ""
