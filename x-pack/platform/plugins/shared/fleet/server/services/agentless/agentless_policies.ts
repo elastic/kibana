@@ -17,7 +17,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { omit } from 'lodash';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
 
-import type { CreateAgentlessPolicyRequestSchema } from '../../../common/types';
+import type { AgentlessPolicy, CreateAgentlessPolicyRequestSchema } from '../../../common/types';
 
 import { AGENTLESS_AGENT_POLICY_INACTIVITY_TIMEOUT } from '../../../common/constants';
 
@@ -57,7 +57,7 @@ export interface AgentlessPoliciesService {
   ) => Promise<void>;
 }
 
-const getAgentlessPolicy = (packageInfo?: PackageInfo) => {
+const getAgentlessPolicy = (packageInfo?: PackageInfo): AgentlessPolicy | undefined => {
   if (
     !packageInfo?.policy_templates &&
     !packageInfo?.policy_templates?.some((policy) => policy.deployment_modes)
