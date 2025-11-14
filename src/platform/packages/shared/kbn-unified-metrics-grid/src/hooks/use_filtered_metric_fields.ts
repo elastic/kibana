@@ -22,7 +22,7 @@ export const useFilteredMetricFields = ({
   onFilterComplete,
 }: {
   allFields: MetricField[];
-  dimensions: string[];
+  dimensions: Array<{ name: string; type: string }>;
   searchTerm: string;
   valueFilters: string[];
   timeRange: TimeRange | undefined;
@@ -32,7 +32,7 @@ export const useFilteredMetricFields = ({
 
   // Client-side filtering by dimensions and search term
   const dimensionsSet = useMemo(
-    () => (dimensions.length > 0 ? new Set(dimensions) : null),
+    () => (dimensions.length > 0 ? new Set(dimensions.map((d) => d.name)) : null),
     [dimensions]
   );
   const searchTermLower = useMemo(() => searchTerm?.toLowerCase(), [searchTerm]);

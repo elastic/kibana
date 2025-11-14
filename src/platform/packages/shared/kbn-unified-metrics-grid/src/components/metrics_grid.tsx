@@ -29,7 +29,7 @@ export type MetricsGridProps = Pick<
   'searchSessionId' | 'services' | 'onBrushEnd' | 'onFilter' | 'abortController' | 'requestParams'
 > & {
   filters?: Array<{ field: string; value: string }>;
-  dimensions: string[];
+  dimensions: Array<{ name: string; type: string }>;
   searchTerm?: string;
   columns: NonNullable<EuiFlexGridProps['columns']>;
   discoverFetch$: Observable<UnifiedHistogramInputMessage>;
@@ -200,7 +200,7 @@ interface ChartItemProps
   metric: MetricField;
   index: number;
   size: ChartSize;
-  dimensions: string[];
+  dimensions: Array<{ name: string; type: string }>;
   filters: Array<{ field: string; value: string }>;
   discoverFetch$: Observable<UnifiedHistogramInputMessage>;
   rowIndex: number;

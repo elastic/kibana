@@ -31,7 +31,7 @@ import {
 } from '../../common/constants';
 
 export interface ValuesFilterProps {
-  selectedDimensions: string[];
+  selectedDimensions: Array<{ name: string; type: string }>;
   selectedValues: string[];
   indices?: string[];
   disabled?: boolean;
@@ -50,12 +50,17 @@ export const ValuesSelector = ({
   indices = [],
   onClear,
 }: ValuesFilterProps) => {
+  const selectedDimensionNames = useMemo(
+    () => selectedDimensions.map((d) => d.name),
+    [selectedDimensions]
+  );
+
   const {
     data: values = [],
     isLoading,
     error,
   } = useDimensionsQuery({
-    dimensions: selectedDimensions,
+    dimensions: selectedDimensionNames,
     indices,
     from: timeRange.from,
     to: timeRange.to,
@@ -189,7 +194,7 @@ export const ValuesSelector = ({
   return (
     <ToolbarSelector
       data-test-subj={METRICS_VALUES_SELECTOR_DATA_TEST_SUBJ}
-      data-selected-value={selectedDimensions}
+      data-selected-value={selectedDimensionNames}
       searchable
       buttonLabel={buttonLabel}
       optionMatcher={comboBoxFieldOptionMatcher}

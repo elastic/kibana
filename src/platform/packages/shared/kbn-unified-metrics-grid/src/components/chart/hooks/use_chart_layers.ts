@@ -18,7 +18,7 @@ import {
 } from '../../../common/utils';
 
 interface UseChartLayersParams {
-  dimensions?: string[];
+  dimensions?: Array<{ name: string; type: string }>;
   metric: MetricField;
   color?: string;
   seriesType?: LensSeriesLayer['seriesType'];
@@ -67,7 +67,7 @@ export const useChartLayers = ({
         ],
         breakdown: hasDimensions
           ? dimensions.length === 1
-            ? dimensions[0]
+            ? dimensions[0].name
             : DIMENSIONS_COLUMN
           : undefined,
       },

@@ -18,7 +18,7 @@ import { createMetricAggregation, createTimeBucketAggregation } from './create_a
 
 interface CreateESQLQueryParams {
   metric: MetricField;
-  dimensions?: string[];
+  dimensions?: Array<{ name: string; type: string }>;
   filters?: Array<{ field: string; value: string }>;
 }
 
@@ -43,17 +43,17 @@ function needsStringCasting(fieldType: ES_FIELD_TYPES): boolean {
  * non-keyword types.
  *
  * @param metric - The full metric field object, including dimension type information.
- * @param dimensions - An array of selected dimension names.
+ * @param dimensions - An array of selected dimension objects with name and type.
  * @param filters - An array of filters to apply to the query.
  * @returns A complete ESQL query string.
  */
 export function createESQLQuery({ metric, dimensions = [], filters }: CreateESQLQueryParams) {
-  const { name: metricField, instrument, index, dimensions: metricDimensions } = metric;
+  const { name: metricField, instrument, index } = metric;
   const source = timeseries(index);
 
   const whereConditions: QueryOperator[] = [];
   const valuesByField = new Map<string, Set<string>>();
-  const dimensionTypeMap = new Map(metricDimensions?.map((dim) => [dim.name, dim.type]));
+  const dimensionTypeMap = new Map(dimensions?.map((dim) => [dim.name, dim.type]));
 
   if (filters && filters.length) {
     for (const filter of filters) {
@@ -69,7 +69,9 @@ export function createESQLQuery({ metric, dimensions = [], filters }: CreateESQL
       const dimType = dimensionTypeMap.get(key);
       const escapedKey = sanitazeESQLInput(key);
       const castedKey =
-        dimType && needsStringCasting(dimType) ? `${escapedKey}::STRING` : escapedKey;
+        dimType && needsStringCasting(dimType as ES_FIELD_TYPES)
+          ? `${escapedKey}::STRING`
+          : escapedKey;
 
       whereConditions.push(
         where(`${castedKey} IN (${new Array(value.size).fill('?').join(', ')})`, Array.from(value))
@@ -77,17 +79,18 @@ export function createESQLQuery({ metric, dimensions = [], filters }: CreateESQL
     });
   }
 
-  const unfilteredDimensions = (dimensions ?? []).filter((dim) => !valuesByField.has(dim));
+  const unfilteredDimensions = (dimensions ?? []).filter((dim) => !valuesByField.has(dim.name));
   const queryPipeline = source.pipe(
     ...whereConditions,
     unfilteredDimensions.length > 0
       ? where(
           unfilteredDimensions
             .map((dim) => {
-              const dimType = dimensionTypeMap.get(dim);
-              const escapedDim = sanitazeESQLInput(dim);
+              const escapedDim = sanitazeESQLInput(dim.name);
               const castedDim =
-                dimType && needsStringCasting(dimType) ? `${escapedDim}::STRING` : escapedDim;
+                dim.type && needsStringCasting(dim.type as ES_FIELD_TYPES)
+                  ? `${escapedDim}::STRING`
+                  : escapedDim;
               return `${castedDim} IS NOT NULL`;
             })
             .join(' AND ')
@@ -99,7 +102,7 @@ export function createESQLQuery({ metric, dimensions = [], filters }: CreateESQL
         placeholderName: 'metricField',
       })} BY ${createTimeBucketAggregation({})}${
         (dimensions ?? []).length > 0
-          ? `, ${dimensions.map((dim) => sanitazeESQLInput(dim)).join(',')}`
+          ? `, ${dimensions.map((dim) => sanitazeESQLInput(dim.name)).join(',')}`
           : ''
       }`,
       {
@@ -113,15 +116,14 @@ export function createESQLQuery({ metric, dimensions = [], filters }: CreateESQL
             evaluate(
               `${DIMENSIONS_COLUMN} = CONCAT(${dimensions
                 .map((dim) => {
-                  const dimType = dimensionTypeMap.get(dim);
-                  const escapedDim = sanitazeESQLInput(dim);
-                  return dimType && needsStringCasting(dimType)
+                  const escapedDim = sanitazeESQLInput(dim.name);
+                  return dim.type && needsStringCasting(dim.type as ES_FIELD_TYPES)
                     ? `${escapedDim}::STRING`
                     : escapedDim;
                 })
                 .join(`, " ${separator} ", `)})`
             ),
-            drop(`${dimensions.map((dim) => sanitazeESQLInput(dim)).join(',')}`),
+            drop(`${dimensions.map((dim) => sanitazeESQLInput(dim.name)).join(',')}`),
           ]
       : [])
   );

@@ -14,7 +14,7 @@ import { FIELD_VALUE_SEPARATOR } from '../../common/constants';
 
 export interface MetricsExperienceStateContextValue extends MetricsExperienceRestorableState {
   onPageChange: (value: number) => void;
-  onDimensionsChange: (value: string[]) => void;
+  onDimensionsChange: (value: Array<{ name: string; type: string }>) => void;
   onValuesChange: (value: string[]) => void;
   onSearchTermChange: (value: string) => void;
   onToggleFullscreen: () => void;
@@ -31,15 +31,16 @@ export function MetricsExperienceStateProvider({ children }: { children: React.R
   const [isFullscreen, setIsFullscreen] = useRestorableState('isFullscreen', false);
 
   const onDimensionsChange = useCallback(
-    (nextDimensions: string[]) => {
+    (nextDimensions: Array<{ name: string; type: string }>) => {
       setCurrentPage(0);
       setDimensions(nextDimensions);
       setValueFilters((prevValueFilters) => {
         if (nextDimensions.length === 0) {
           return [];
         }
+        const dimensionNames = new Set(nextDimensions.map((d) => d.name));
         return prevValueFilters.filter((v) =>
-          nextDimensions.includes(v.split(FIELD_VALUE_SEPARATOR)[0])
+          dimensionNames.has(v.split(FIELD_VALUE_SEPARATOR)[0])
         );
       });
     },

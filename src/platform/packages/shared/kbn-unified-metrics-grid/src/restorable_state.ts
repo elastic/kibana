@@ -20,7 +20,7 @@ export interface MetricsExperienceRestorableState {
   isFullscreen: boolean;
 
   // Metric grouping dimensions
-  dimensions: string[];
+  dimensions: Array<{ name: string; type: string }>;
 
   // Metric value filters
   valueFilters: string[];

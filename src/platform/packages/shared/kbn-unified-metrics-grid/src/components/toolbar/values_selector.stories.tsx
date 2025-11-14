@@ -68,7 +68,10 @@ export const Default = () => {
   return (
     <StoryWrapper>
       <ValuesSelector
-        selectedDimensions={['host.name', 'service.name']}
+        selectedDimensions={[
+          { name: 'host.name', type: 'keyword' },
+          { name: 'service.name', type: 'keyword' },
+        ]}
         selectedValues={selectedValues}
         indices={['metrics-*']}
         timeRange={defaultTimeRange}
@@ -88,7 +91,10 @@ export const WithSelectedValues = () => {
   return (
     <StoryWrapper>
       <ValuesSelector
-        selectedDimensions={['host.name', 'service.name']}
+        selectedDimensions={[
+          { name: 'host.name', type: 'keyword' },
+          { name: 'service.name', type: 'keyword' },
+        ]}
         selectedValues={selectedValues}
         indices={['metrics-*']}
         timeRange={defaultTimeRange}
@@ -105,7 +111,7 @@ export const Disabled = () => {
   return (
     <StoryWrapper>
       <ValuesSelector
-        selectedDimensions={['host.name']}
+        selectedDimensions={[{ name: 'host.name', type: 'keyword' }]}
         selectedValues={selectedValues}
         indices={['metrics-*']}
         disabled={true}
