@@ -683,6 +683,11 @@ Object {
       "required": true,
       "type": "keyword",
     },
+    "kibana.alert.attack_ids": Object {
+      "array": true,
+      "required": false,
+      "type": "keyword",
+    },
     "kibana.alert.case_ids": Object {
       "array": true,
       "required": false,
@@ -10872,11 +10877,6 @@ Object {
     },
     "kibana.alert.action_group": Object {
       "array": false,
-      "required": false,
-      "type": "keyword",
-    },
-    "kibana.alert.attack_ids": Object {
-      "array": true,
       "required": false,
       "type": "keyword",
     },
