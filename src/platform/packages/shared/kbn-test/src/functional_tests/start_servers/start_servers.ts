@@ -30,7 +30,7 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
 
   await withProcRunner(log, async (procs) => {
     let config: Config;
-    if (process.env.FTR_ENABLE_FIPS_AGENT?.toLowerCase() !== 'true') {
+    if (process.env.TEST_ENABLE_FIPS_AGENT?.toLowerCase() !== 'true') {
       config = await readConfigFile(log, options.esVersion, options.config);
     } else {
       config = await readConfigFile(log, options.esVersion, options.config, {}, applyFipsOverrides);

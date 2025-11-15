@@ -6,7 +6,7 @@ export DISABLE_BOOTSTRAP_VALIDATION=false
 .buildkite/scripts/bootstrap.sh
 .buildkite/scripts/setup_es_snapshot_cache.sh
 
-if [[ "${FTR_ENABLE_FIPS_AGENT:-}" == "true" ]]; then
+if [[ "${TEST_ENABLE_FIPS_AGENT:-}" == "true" ]]; then
   .buildkite/scripts/steps/checks/verify_fips_enabled.sh
 fi
 .buildkite/scripts/steps/checks/saved_objects_compat_changes.sh

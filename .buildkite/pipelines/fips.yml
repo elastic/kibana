@@ -1,6 +1,6 @@
 env:
   DISABLE_CI_STATS_SHIPPING: 'true'
-  KBN_ENABLE_FIPS: 'true'
+  TEST_ENABLE_FIPS_AGENT: 'true'
   TEST_BROWSER_HEADLESS: 1
 agents:
   provider: 'gcp'

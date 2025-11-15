@@ -28,7 +28,7 @@ const FIPS_AGENT_IMAGE_CONFIG: BuildkiteAgentTargetingRule = {
 };
 
 const GITHUB_PR_LABELS = process.env.GITHUB_PR_LABELS ?? '';
-const FTR_ENABLE_FIPS_AGENT = process.env.FTR_ENABLE_FIPS_AGENT?.toLowerCase() === 'true';
+const TEST_ENABLE_FIPS_AGENT = process.env.TEST_ENABLE_FIPS_AGENT?.toLowerCase() === 'true';
 const USE_QA_IMAGE_FOR_PR = process.env.USE_QA_IMAGE_FOR_PR?.match(/(1|true)/i);
 
 // Narrow the return type with overloads
@@ -38,13 +38,13 @@ function getAgentImageConfig({ returnYaml = false } = {}): string | BuildkiteAge
   const bk = new BuildkiteClient();
   let config: BuildkiteAgentTargetingRule;
 
-  if (FTR_ENABLE_FIPS_AGENT || GITHUB_PR_LABELS.includes('ci:enable-fips-agent')) {
+  if (TEST_ENABLE_FIPS_AGENT || GITHUB_PR_LABELS.includes('ci:enable-fips-agent')) {
     config = FIPS_AGENT_IMAGE_CONFIG;
 
     bk.setAnnotation(
       'agent image config',
       'info',
-      '#### FIPS Agents Enabled<br />\nFIPS mode can produce new test failures. If you did not intend this remove ```KBN_ENABLE_FIPS``` environment variable and/or the ```ci:enable-fips-agent``` Github label.'
+      `#### FIPS Agents Enabled<br />\nFIPS mode can produce new test failures. If you did not intend this remove \`\`\`TEST_ENABLE_FIPS_AGENT\`\`\` environment variable and/or the \`\`\`ci:enable-fips-agent\`\`\` Github label.`
     );
   } else {
     config = DEFAULT_AGENT_IMAGE_CONFIG;
