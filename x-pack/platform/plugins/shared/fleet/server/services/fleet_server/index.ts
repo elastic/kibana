@@ -149,7 +149,7 @@ export async function checkFleetServerVersionsForSecretsStorage(
   });
 
   if (fleetServerAgents.agents.length === 0) {
-    return false;
+    return true;
   }
 
   let result = true;
