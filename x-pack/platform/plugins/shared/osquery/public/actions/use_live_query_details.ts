@@ -13,6 +13,7 @@ import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { API_VERSIONS } from '../../common/constants';
 import { useKibana } from '../common/lib/kibana';
 import { useErrorToast } from '../common/hooks/use_error_toast';
+import type { User } from '../../common/types/user';
 
 interface UseLiveQueryDetails {
   actionId?: string;
@@ -43,7 +44,8 @@ export interface LiveQueryDetailsItem {
   agent_platforms: string[];
   agent_policy_ids: string[];
   agents: string[];
-  user_id?: string;
+  created_by?: User; // New format (User object)
+  user_id?: string; // Legacy format (string) - kept for backward compatibility
   pack_id?: string;
   pack_name?: string;
   pack_prebuilt?: boolean;

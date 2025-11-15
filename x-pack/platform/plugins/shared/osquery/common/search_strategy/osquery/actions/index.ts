@@ -10,6 +10,7 @@ import type { IEsSearchResponse } from '@kbn/search-types';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { Inspect, Maybe } from '../../common';
 import type { RequestOptions, RequestOptionsPaginated } from '../..';
+import type { User } from '../../../types/user';
 
 export type ActionEdges = estypes.SearchResponse<object>['hits']['hits'];
 
@@ -28,7 +29,8 @@ export interface ActionDetails {
   agent_platforoms: string[];
   agent_policy_ids: string[];
   agents: string[];
-  user_id?: string;
+  created_by?: User; // New format (User object)
+  user_id?: string; // Legacy format (string) - kept for backward compatibility
   pack_id?: string;
   pack_name?: string;
   space_id?: string;

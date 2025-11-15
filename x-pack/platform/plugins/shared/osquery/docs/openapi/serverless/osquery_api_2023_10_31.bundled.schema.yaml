@@ -481,6 +481,11 @@ components:
           agent_policy_ids: []
           agents:
             - 16d7caf5-efd2-4212-9b62-73dafc91fa13
+          created_by:
+            email: elastic@example.com
+            full_name: Elastic User
+            profile_uid: u_abcdefg
+            username: elastic
           expiration: '2022-07-26T10:04:32.220Z'
           input_type: osquery
           metadata:
@@ -498,7 +503,6 @@ components:
               query: select * from uptime;
               timeout: 120
           type: INPUT_ACTION
-          user_id: elastic
       type: object
       properties: {}
     CreatePacksRequestBody:
@@ -648,6 +652,11 @@ components:
           action_id: 3c42c847-eb30-4452-80e0-728584042334
           agents:
             - 16d7caf5-efd2-4212-9b62-73dafc91fa13
+          created_by:
+            email: elastic@example.com
+            full_name: Elastic User
+            profile_uid: u_abcdefg
+            username: elastic
           expiration: '2022-07-26T10:04:32.220Z'
           queries:
             - action_id: 609c4c66-ba3d-43fa-afdd-53e244577aa0
@@ -666,7 +675,6 @@ components:
               status: completed
               successful: 0
           status: completed
-          user_id: elastic
       type: object
       properties: {}
     FindLiveQueryResponse:
@@ -678,6 +686,11 @@ components:
                 action_id: 3c42c847-eb30-4452-80e0-728584042334
                 agents:
                   - 16d7caf5-efd2-4212-9b62-73dafc91fa13
+                created_by:
+                  email: elastic@example.com
+                  full_name: Elastic User
+                  profile_uid: u_abcdefg
+                  username: elastic
                 expiration: '2023-10-31T00:00:00Z'
                 queries:
                   - action_id: 609c4c66-ba3d-43fa-afdd-53e244577aa0
@@ -689,7 +702,6 @@ components:
                     id: 6724a474-cbba-41ef-a1aa-66aebf0879e2
                     query: select * from uptime;
                     saved_query_id: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
-                user_id: elastic
       type: object
       properties: {}
     FindPackResponse:

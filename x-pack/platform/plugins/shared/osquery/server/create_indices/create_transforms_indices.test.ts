@@ -122,6 +122,14 @@ function makeEsIndexMappings(
         ...((overrides.event as any) || {}),
       },
       agent_ids: { ignore_above: 1024, type: 'keyword' },
+      created_by: {
+        properties: {
+          email: { ignore_above: 1024, type: 'keyword' },
+          full_name: { ignore_above: 1024, type: 'keyword' },
+          username: { ignore_above: 1024, type: 'keyword' },
+          profile_uid: { ignore_above: 1024, type: 'keyword' },
+        },
+      },
       ...overrides,
     },
   };

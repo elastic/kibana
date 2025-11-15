@@ -107,7 +107,8 @@ export const getLiveQueryDetailsRoute = (
                   '@timestamp',
                   'agent_selection',
                   'agents',
-                  'user_id',
+                  'created_by', // New field (User object)
+                  'user_id', // Legacy field (string) - kept for backward compatibility
                   'pack_id',
                   'pack_name',
                   'prebuilt_pack'

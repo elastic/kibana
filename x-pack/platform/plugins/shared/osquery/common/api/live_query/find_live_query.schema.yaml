@@ -6,6 +6,8 @@ paths: { }
 components:
   schemas:
     FindLiveQueryResponse:
+      # Note: Documents may contain either 'created_by' (new format) or 'user_id' (legacy format)
+      # for backward compatibility with existing data
       example:
         data:
           items:
@@ -14,7 +16,11 @@ components:
                 expiration: '2023-10-31T00:00:00Z'
                 "@timestamp": '2023-10-31T00:00:00Z'
                 agents: [ '16d7caf5-efd2-4212-9b62-73dafc91fa13' ]
-                user_id: 'elastic'
+                created_by:
+                  username: 'elastic'
+                  full_name: 'Elastic User'
+                  email: 'elastic@example.com'
+                  profile_uid: 'u_abcdefg'
                 queries:
                   - action_id: "609c4c66-ba3d-43fa-afdd-53e244577aa0"
                     id: "6724a474-cbba-41ef-a1aa-66aebf0879e2"
@@ -27,13 +33,19 @@ components:
       type: object
       properties: { }
     FindLiveQueryDetailsResponse:
+      # Note: Documents may contain either 'created_by' (new format) or 'user_id' (legacy format)
+      # for backward compatibility with existing data
       example:
         data:
           action_id: "3c42c847-eb30-4452-80e0-728584042334"
           expiration: "2022-07-26T10:04:32.220Z"
           "@timestamp": "2022-07-26T09:59:32.220Z"
           agents: [ "16d7caf5-efd2-4212-9b62-73dafc91fa13" ]
-          user_id: "elastic"
+          created_by:
+            username: "elastic"
+            full_name: "Elastic User"
+            email: "elastic@example.com"
+            profile_uid: "u_abcdefg"
           queries:
             - action_id: "609c4c66-ba3d-43fa-afdd-53e244577aa0"
               id: "6724a474-cbba-41ef-a1aa-66aebf0879e2"

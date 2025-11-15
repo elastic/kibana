@@ -63,6 +63,7 @@ components:
           nullable: true
 
     CreateLiveQueryResponse:
+      # Note: New documents will use 'created_by' (User object) instead of 'user_id' (string)
       type: object
       properties: { }
       example:
@@ -78,7 +79,11 @@ components:
            agent_policy_ids: [ ]
            agents:
              - '16d7caf5-efd2-4212-9b62-73dafc91fa13'
-           user_id: 'elastic'
+           created_by:
+             username: 'elastic'
+             full_name: 'Elastic User'
+             email: 'elastic@example.com'
+             profile_uid: 'u_abcdefg'
            metadata:
              execution_context:
                name: 'osquery'
