@@ -1261,6 +1261,30 @@
     "userScope.apiKeyId"
   ],
   "telemetry": [],
+  "threat-hunting-hypothesis": [
+    "managed",
+    "model",
+    "model.name",
+    "sourceType",
+    "summary",
+    "tags",
+    "threat",
+    "threat.framework",
+    "threat.tactic",
+    "threat.tactic.id",
+    "threat.tactic.name",
+    "threat.tactic.reference",
+    "threat.technique",
+    "threat.technique.id",
+    "threat.technique.name",
+    "threat.technique.reference",
+    "threat.technique.subtechnique",
+    "threat.technique.subtechnique.id",
+    "threat.technique.subtechnique.name",
+    "threat.technique.subtechnique.reference",
+    "title",
+    "version"
+  ],
   "threshold-explorer-view": [],
   "ui-metric": [
     "count"

@@ -651,9 +651,6 @@
         },
         "type": "nested"
       },
-      "total_observables": {
-        "type": "integer"
-      },
       "owner": {
         "type": "keyword"
       },
@@ -691,6 +688,9 @@
         "type": "integer"
       },
       "total_events": {
+        "type": "integer"
+      },
+      "total_observables": {
         "type": "integer"
       },
       "updated_at": {
@@ -4175,6 +4175,82 @@
   "telemetry": {
     "dynamic": false,
     "properties": {}
+  },
+  "threat-hunting-hypothesis": {
+    "dynamic": false,
+    "properties": {
+      "managed": {
+        "type": "boolean"
+      },
+      "model": {
+        "properties": {
+          "name": {
+            "type": "keyword"
+          }
+        }
+      },
+      "sourceType": {
+        "type": "keyword"
+      },
+      "summary": {
+        "type": "text"
+      },
+      "tags": {
+        "type": "keyword"
+      },
+      "threat": {
+        "properties": {
+          "framework": {
+            "type": "keyword"
+          },
+          "tactic": {
+            "properties": {
+              "id": {
+                "type": "keyword"
+              },
+              "name": {
+                "type": "keyword"
+              },
+              "reference": {
+                "type": "keyword"
+              }
+            }
+          },
+          "technique": {
+            "properties": {
+              "id": {
+                "type": "keyword"
+              },
+              "name": {
+                "type": "keyword"
+              },
+              "reference": {
+                "type": "keyword"
+              },
+              "subtechnique": {
+                "properties": {
+                  "id": {
+                    "type": "keyword"
+                  },
+                  "name": {
+                    "type": "keyword"
+                  },
+                  "reference": {
+                    "type": "keyword"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "title": {
+        "type": "text"
+      },
+      "version": {
+        "type": "keyword"
+      }
+    }
   },
   "threshold-explorer-view": {
     "dynamic": false,

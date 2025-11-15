@@ -1,0 +1,218 @@
+openapi: 3.0.0
+info:
+  title: Threat Hunting Hypotheses Schema
+  description: Schema for managing threat hunting hypotheses in the security solution.
+  version: "2023-10-31"
+
+paths:
+  /api/entity_analytics/threat_hunting_hypotheses:
+    post:
+      operationId: CreateThreatHuntingHypothesis
+      x-codegen-enabled: true
+      summary: Create a new threat hunting hypothesis
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateThreatHuntingHypothesis"
+      responses:
+        "200":
+          description: Threat hunting hypothesis created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ThreatHuntingHypothesis"
+
+  /api/entity_analytics/threat_hunting_hypotheses/{id}:
+    get:
+      operationId: GetThreatHuntingHypothesis
+      x-codegen-enabled: true
+      summary: Get a threat hunting hypothesis by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Threat Hunting hypothesis details retrieved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ThreatHuntingHypothesis"
+    put:
+      operationId: UpdateThreatHuntingHypothesis
+      x-codegen-enabled: true
+      summary: Update a threat hunting hypothesis by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateThreatHuntingHypothesis"
+      responses:
+        "200":
+          description: Threat hunting hypothesis updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ThreatHuntingHypothesis"  
+
+    delete:
+      operationId: DeleteThreatHuntingHypothesis
+      x-codegen-enabled: true
+      summary: Delete a threat hunting hypothesis
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Threat hunting hypothesis deleted successfully
+
+  /api/entity_analytics/threat_hunting_hypotheses/list:
+    get:
+      operationId: ListThreatHuntingHypotheses
+      x-codegen-enabled: true
+      summary: List all threat hunting hypotheses
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+        - name: managed
+          in: query
+          schema:
+            type: boolean
+        - name: name
+          in: query
+          schema:
+            type: string
+
+      responses:
+        "200":
+          description: List of threat hunting hypotheses retrieved
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ThreatHuntingHypothesis"
+components:
+  schemas:
+    CreateThreatHuntingHypothesis:
+      allOf:
+      - $ref: '#/components/schemas/ThreatHuntingHypothesisProperties'
+      - type: object
+        required: [title, summary, managed, source_type, version]
+        properties: {}
+
+    UpdateThreatHuntingHypothesis:
+      allOf:
+      - $ref: '#/components/schemas/ThreatHuntingHypothesisProperties'
+      - type: object        
+        properties: {}
+
+    ThreatHuntingHypothesisProperties:
+      type: object
+      description: Core properties of a threat hunting hypothesis saved object
+      properties:
+        title:
+          type: string
+          description: Bold text shown at the top of the card
+        summary:
+          type: string
+          description: Supporting text shown below the title
+        managed:
+          type: boolean
+          description: Indicates if the hypothesis is system-managed (immutable)
+        source_type:
+          type: string
+          description: Origin of the hypothesis
+          enum: [pre_built, ai_generated]
+        version:
+          type: string
+          description: Content version used for reconciliation
+        threat:
+          type: object
+          description: ECS threat context for this hypothesis
+          properties:
+            framework:
+              type: string
+              description: e.g. "MITRE ATT&CK"
+            tactic:
+              type: object
+              properties:
+                id:
+                  type: string
+                name:
+                  type: string
+                reference:
+                  type: string
+            technique:
+              type: object
+              properties:
+                id:
+                  type: string
+                name:
+                  type: string
+                reference:
+                  type: string
+                subtechnique:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    reference:
+                      type: string
+        tags:
+          type: array
+          description: Labels associated with the hypothesis
+          items:
+            type: string
+        model:
+          type: object
+          description: LLM model metadata if AI-generated
+          properties:
+            name:
+              type: string
+              description: Model name (e.g. "gpt-4o", "claude-opus")
+
+    ThreatHuntingHypothesis:
+      allOf:
+      - $ref: '#/components/schemas/ThreatHuntingHypothesisProperties'
+      - type: object
+        required: [title, source_type, summary]
+        properties:
+          id:
+            type: string
+
+      type: object
+      properties:
+        syncMarkerIndex: 
+          type: string
+          description: Index to read latest sync markers from
+        syncData: 
+          type: object
+          description: integrations latest full sync and update syncData
+          properties:
+            lastFullSync: 
+              type: string
+              format: date-time
+              description: Timestamp of the last full sync from integrations
+            lastUpdateProcessed: 
+              type: string
+              format: date-time
+              description: Timestamp of the last update processed from integrations

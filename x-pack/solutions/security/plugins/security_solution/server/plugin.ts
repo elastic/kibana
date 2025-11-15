@@ -7,7 +7,7 @@
 
 import type { Observable } from 'rxjs';
 import { QUERY_RULE_TYPE_ID, SAVED_QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
-import type { Logger, LogMeta } from '@kbn/core/server';
+import type { Logger, LogMeta, CoreAuditService } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/alerting-plugin/server';
@@ -153,6 +153,7 @@ export class Plugin implements ISecuritySolutionPlugin {
   private readonly pluginContext: PluginInitializerContext;
   private readonly config: ConfigType;
   private readonly logger: Logger;
+  private auditService: CoreAuditService | null = null;
   private readonly appClientFactory: AppClientFactory;
   private readonly productFeaturesService: ProductFeaturesService;
 
@@ -185,6 +186,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.pluginContext = context;
     this.config = serverConfig;
     this.logger = context.logger.get();
+
     this.appClientFactory = new AppClientFactory();
     this.productFeaturesService = new ProductFeaturesService(
       this.logger,
@@ -239,7 +241,6 @@ export class Plugin implements ISecuritySolutionPlugin {
       encryptedSavedObjects: plugins.encryptedSavedObjects,
       logger: this.logger,
     });
-
     initUiSettings(core.uiSettings, experimentalFeatures, config.enableUiSettingsValidations);
     productFeaturesService.setup(core, plugins);
 
@@ -268,6 +269,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       logger: this.logger,
       auditLogger: plugins.security?.audit.withoutRequest,
       kibanaVersion: pluginContext.env.packageInfo.version,
+      experimentalFeatures,
     }).catch((err) => {
       logger.error(`Error scheduling entity analytics migration: ${err}`);
     });
@@ -615,9 +617,8 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins: SecuritySolutionPluginStartDependencies
   ): SecuritySolutionPluginStart {
     const { config, logger, productFeaturesService } = this;
-
     this.ruleMonitoringService.start(core, plugins);
-
+    this.auditService = core.security.audit;
     const savedObjectsClient = new SavedObjectsClient(
       core.savedObjects.createInternalRepository([
         ManifestConstants.SAVED_OBJECT_TYPE,
@@ -637,7 +638,6 @@ export class Plugin implements ISecuritySolutionPlugin {
     );
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const fleetStartServices = plugins.fleet!;
-
     const { packageService } = fleetStartServices;
 
     this.licensing$ = plugins.licensing.license$;
