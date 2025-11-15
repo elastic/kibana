@@ -97,11 +97,10 @@ describe('parseNavigationTree', () => {
     cloudLinks: {},
   };
 
-  it('should parse a navigation tree with body, footer, and callout sections', () => {
+  it('should parse a navigation tree with body, footer', () => {
     const navigationTreeDef: NavigationTreeDefinition = {
       body: [
         {
-          type: 'navGroup',
           id: 'test_group',
           title: 'Test Group',
           children: [
@@ -114,22 +113,8 @@ describe('parseNavigationTree', () => {
       ],
       footer: [
         {
-          type: 'navItem',
           id: 'footer_item',
           title: 'Footer Item',
-        },
-      ],
-      callout: [
-        {
-          type: 'navGroup',
-          id: 'callout_group',
-          title: 'Callout Group',
-          children: [
-            {
-              id: 'callout_item',
-              title: 'Callout Item',
-            },
-          ],
         },
       ],
     };
@@ -139,98 +124,23 @@ describe('parseNavigationTree', () => {
     // Verify the result contains all sections
     expect(result.navigationTreeUI.body).toHaveLength(1);
     expect(result.navigationTreeUI.footer).toHaveLength(1);
-    expect(result.navigationTreeUI.callout).toHaveLength(1);
-
-    // Verify the callout section was parsed correctly
-    const calloutGroup = result.navigationTreeUI.callout?.[0] as any;
-    expect(calloutGroup).toBeDefined();
-    expect(calloutGroup.id).toBe('callout_group');
-    expect(calloutGroup.children).toHaveLength(1);
-    expect(calloutGroup.children[0].id).toBe('callout_item');
   });
 
-  it('should handle a navigation tree with only body and callout sections', () => {
+  it('should handle a navigation tree with only body', () => {
     const navigationTreeDef: NavigationTreeDefinition = {
       body: [
         {
-          type: 'navItem',
           id: 'body_item',
           title: 'Body Item',
         },
       ],
-      callout: [
-        {
-          type: 'navGroup',
-          id: 'callout_group',
-          title: 'Callout Group',
-          children: [
-            {
-              id: 'callout_item',
-              title: 'Callout Item',
-            },
-          ],
-        },
-      ],
     };
 
     const result = parseNavigationTree('es', navigationTreeDef, mockDeps);
 
-    // Verify the result contains body and callout sections but not footer
+    // Verify the result contains body section but not footer
     expect(result.navigationTreeUI.body).toHaveLength(1);
     expect(result.navigationTreeUI.footer).toBeUndefined();
-    expect(result.navigationTreeUI.callout).toHaveLength(1);
-  });
-
-  it('should handle a navigation tree with only body and footer sections (no callout)', () => {
-    const navigationTreeDef: NavigationTreeDefinition = {
-      body: [
-        {
-          type: 'navItem',
-          id: 'body_item',
-          title: 'Body Item',
-        },
-      ],
-      footer: [
-        {
-          type: 'navItem',
-          id: 'footer_item',
-          title: 'Footer Item',
-        },
-      ],
-    };
-
-    const result = parseNavigationTree('es', navigationTreeDef, mockDeps);
-
-    // Verify the result contains body and footer sections but not callout
-    expect(result.navigationTreeUI.body).toHaveLength(1);
-    expect(result.navigationTreeUI.footer).toHaveLength(1);
-    expect(result.navigationTreeUI.callout).toBeUndefined();
-  });
-
-  it('should handle a navigation tree with only a callout section', () => {
-    const navigationTreeDef: NavigationTreeDefinition = {
-      body: [],
-      callout: [
-        {
-          type: 'navGroup',
-          id: 'callout_group',
-          title: 'Callout Group',
-          children: [
-            {
-              id: 'callout_item',
-              title: 'Callout Item',
-            },
-          ],
-        },
-      ],
-    };
-
-    const result = parseNavigationTree('es', navigationTreeDef, mockDeps);
-
-    // Verify the result contains only the callout section
-    expect(result.navigationTreeUI.body).toHaveLength(0);
-    expect(result.navigationTreeUI.footer).toBeUndefined();
-    expect(result.navigationTreeUI.callout).toHaveLength(1);
   });
 });
 

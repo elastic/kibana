@@ -273,7 +273,6 @@ describe('panel opener href', () => {
 describe('empty panel opener', () => {
   it('should not return panel opener if it has no children', () => {
     const tree = structuredClone(navigationTree);
-    // @ts-expect-error to avoid excess type checking for test
     tree.body[0]!.children![2].children = []; // 'securityGroup:rules' panel opener has no children now
     const {
       navItems: { primaryItems },
@@ -289,9 +288,18 @@ describe('hidden panel link', () => {
     const tree = structuredClone(navigationTree);
     // @ts-expect-error to avoid excess type checking for test
     const stackManagementNode = tree.footer[0].children[2].children[0];
-    stackManagementNode.children.push({
-      link: 'management',
+    stackManagementNode.children!.push({
+      deepLink: {
+        id: 'stack_management',
+        title: 'Stack Management',
+        baseUrl: '/',
+        href: '/app/management',
+        url: '/app/management',
+        visibleIn: ['sideNav'],
+      },
       sideNavStatus: 'hidden',
+      id: 'stack_management',
+      path: 'footer.stack_management.stack_management',
     });
 
     // Add management link under stack management section
@@ -300,12 +308,10 @@ describe('hidden panel link', () => {
       activeItemId,
     } = createNavigationItems(tree, [
       [
-        // @ts-expect-error to avoid excess type checking for test
-        tree.footer[0],
-        // @ts-expect-error to avoid excess type checking for test
-        tree.footer[0].children[2],
+        tree.footer![0],
+        tree.footer![0]!.children![2],
         stackManagementNode,
-        stackManagementNode.children[stackManagementNode.children.length - 1],
+        stackManagementNode.children![stackManagementNode.children!.length - 1],
       ],
     ]);
 
