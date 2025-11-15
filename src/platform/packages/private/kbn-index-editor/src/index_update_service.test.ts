@@ -205,7 +205,7 @@ describe('IndexUpdateService', () => {
     service.deleteDoc([rowsAfterEdition[0].id]);
     const rowsAfterDeletion = await firstValueFrom(service.rows$);
     expect(rowsAfterDeletion.length).toBe(1); // An empty placeholder row should always be visible
-    expect(rowsAfterDeletion[0].raw).toMatchObject({ _id: expect.anything() });
+    expect(rowsAfterDeletion[0].id).toEqual(expect.stringContaining(ROW_PLACEHOLDER_PREFIX));
   });
 
   describe('flush operations', () => {
@@ -252,6 +252,35 @@ describe('IndexUpdateService', () => {
         outcome: 'success',
         latency: expect.any(Number),
       });
+    });
+  });
+
+  describe('resetIndexMapping', () => {
+    it('should recreate index, refresh dataview, discard changes and refetch when index is created', async () => {
+      service.setIndexName('my-index');
+      service.setIndexCreated(true);
+
+      await service.resetIndexMapping();
+
+      // Verify the recreate endpoint was called
+      expect(http.post).toHaveBeenCalledWith('/internal/esql/lookup_index/my-index/recreate');
+
+      // Verify unsaved changes were discarded
+      const hasChangesAfterReset = await firstValueFrom(service.hasUnsavedChanges$);
+      expect(hasChangesAfterReset).toBe(false);
+    });
+
+    it('should not call recreate endpoint if index is not created', async () => {
+      service.setIndexName('my-index');
+
+      await service.resetIndexMapping();
+
+      // Verify the recreate endpoint was not called
+      expect(http.post).not.toHaveBeenCalled();
+
+      // Verify unsaved changes were discarded
+      const hasChangesAfterReset = await firstValueFrom(service.hasUnsavedChanges$);
+      expect(hasChangesAfterReset).toBe(false);
     });
   });
 });

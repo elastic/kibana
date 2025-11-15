@@ -824,12 +824,8 @@ export class IndexUpdateService {
     const docId = `${ROW_PLACEHOLDER_PREFIX}${uuidv4()}`;
     return {
       id: docId,
-      raw: {
-        _id: docId,
-      },
-      flattened: {
-        _id: docId,
-      },
+      raw: {},
+      flattened: {},
     };
   }
 
@@ -877,6 +873,26 @@ export class IndexUpdateService {
     this.addAction('delete-doc', { ids });
 
     this.telemetry.trackEditInteraction({ actionType: 'delete_row' });
+  }
+
+  /** Reset index to original state */
+  public async resetIndexMapping() {
+    if (this.isIndexCreated()) {
+      await this.http.post<BulkResponse>(
+        `/internal/esql/lookup_index/${this.getIndexName()}/recreate`
+      );
+
+      // Refresh dataview fields
+      const dataView = await firstValueFrom(this.dataView$);
+      await this.data.dataViews.refreshFields(dataView, false, true);
+
+      // Clean all unsaved changes that might be in memory
+      this.discardUnsavedChanges();
+      this._docs$.next([]);
+      this._totalHits$.next(0);
+    } else {
+      this.discardUnsavedChanges();
+    }
   }
 
   /**

@@ -8,18 +8,45 @@
  */
 
 import type { FC } from 'react';
-import React from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiEmptyPrompt, EuiLink, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiLink, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import useObservable from 'react-use/lib/useObservable';
+import { i18n } from '@kbn/i18n';
 import type { KibanaContextExtra } from '../types';
 import { useFileSelectorContext } from './file_drop_zone';
+import { isPlaceholderColumn } from '../utils';
 
 export const EmptyPrompt: FC = () => {
   const { onFileSelectorClick } = useFileSelectorContext();
   const {
-    services: { fileUpload },
+    services: { fileUpload, indexUpdateService, notifications },
   } = useKibana<KibanaContextExtra>();
+
+  const columns = useObservable(indexUpdateService.dataTableColumns$);
+
+  const allowMappingsReset = useMemo(
+    () => columns?.some((col) => !isPlaceholderColumn(col.name)),
+    [columns]
+  );
+
+  const [isResettingMappings, setIsResettingMappings] = useState(false);
+
+  const resetIndexMappings = useCallback(async () => {
+    setIsResettingMappings(true);
+    try {
+      await indexUpdateService.resetIndexMapping();
+    } catch (error) {
+      notifications.toasts.addError(error, {
+        title: i18n.translate('indexEditor.emptyPrompt.resetMappingsErrorToastTitle', {
+          defaultMessage: 'Error resetting index mappings',
+        }),
+      });
+    } finally {
+      setIsResettingMappings(false);
+    }
+  }, [indexUpdateService, notifications.toasts]);
 
   const maxFileSize = fileUpload.getMaxBytesFormatted();
 
@@ -69,6 +96,19 @@ export const EmptyPrompt: FC = () => {
               }}
             />
           </EuiText>
+          {allowMappingsReset && (
+            <>
+              <EuiSpacer size="l" />
+              <EuiButton onClick={resetIndexMappings} isLoading={isResettingMappings}>
+                <EuiText size="xs">
+                  <FormattedMessage
+                    id="indexEditor.emptyPrompt.dropAllColumns"
+                    defaultMessage="Drop all columns"
+                  />
+                </EuiText>
+              </EuiButton>
+            </>
+          )}
         </>
       }
     />
