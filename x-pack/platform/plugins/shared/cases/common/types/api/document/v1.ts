@@ -7,11 +7,11 @@
 
 import * as rt from 'io-ts';
 
-const AlertRt = rt.strict({
+const DocumentRt = rt.strict({
   id: rt.string,
   index: rt.string,
   attached_at: rt.string,
 });
 
-export const AlertResponseRt = rt.array(AlertRt);
-export type AlertResponse = rt.TypeOf<typeof AlertResponseRt>;
+export const DocumentResponseRt = rt.array(DocumentRt);
+export type DocumentResponse = rt.TypeOf<typeof DocumentResponseRt>;
