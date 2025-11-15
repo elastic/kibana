@@ -92,8 +92,6 @@ export interface InputsModel {
   global: InputsRange;
   timeline: InputsRange;
   valueReport: InputsRangeTimeOnly;
-  // TODO: remove ? when isSocTrendsEnabled feature flag is removed
-  socTrends?: InputsRangeTimeOnly;
 }
 export interface UrlInputsModelInputs {
   linkTo: InputsModelId[];
@@ -104,6 +102,4 @@ export interface UrlInputsModel {
   timeline: UrlInputsModelInputs;
   // serverless only
   valueReport?: UrlInputsModelInputs;
-  // TODO: remove ? when isSocTrendsEnabled feature flag is removed
-  socTrends?: UrlInputsModelInputs;
 }
