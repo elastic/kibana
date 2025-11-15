@@ -66,16 +66,9 @@ const SkippedJobList: FC<{ jobs: SkippedJobs[] }> = ({ jobs }) => (
   <>
     {jobs.length > 0 && (
       <>
-        {jobs.map(({ jobId, missingIndices, missingFilters }) => (
+        {jobs.map(({ jobId, missingFilters }) => (
           <EuiText size="s">
             <h5>{jobId}</h5>
-            {missingIndices.length > 0 && (
-              <FormattedMessage
-                id="xpack.ml.importExport.importFlyout.cannotImportJobCallout.missingIndex"
-                defaultMessage="Missing index {num, plural, one {pattern} other {patterns}}: {indices}"
-                values={{ num: missingIndices.length, indices: missingIndices.join(',') }}
-              />
-            )}
             {missingFilters.length > 0 && (
               <FormattedMessage
                 id="xpack.ml.importExport.importFlyout.cannotImportJobCallout.missingFilters"

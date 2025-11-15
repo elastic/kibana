@@ -26,6 +26,7 @@ import {
   EuiPanel,
   EuiFormRow,
   EuiFieldText,
+  EuiCallOut,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -43,6 +44,11 @@ import { useValidateIds } from './validate';
 import type { ImportedAdJob, JobIdObject, SkippedJobs } from './jobs_import_service';
 import { useEnabledFeatures } from '../../../contexts/ml';
 
+interface DatafeedValidationInfo {
+  hasWarning: boolean;
+  warningMessage?: string;
+}
+
 export interface Props {
   isDisabled: boolean;
   onImportComplete: (() => void) | null;
@@ -51,13 +57,11 @@ export interface Props {
 export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete }) => {
   const {
     services: {
-      data: {
-        dataViews: { getTitles: getDataViewTitles },
-      },
       notifications: { toasts },
       mlServices: {
         mlUsageCollection,
         mlApi: {
+          validateDatafeedPreview,
           jobs: { bulkCreateJobs },
           dataFrameAnalytics: { createDataFrameAnalytics },
           filters: { filters: getFilters },
@@ -144,15 +148,30 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete }) =>
       const validatedJobs = await jobImportService.validateJobs(
         loadedFile.jobs,
         loadedFile.jobType,
-        getDataViewTitles,
         getFilters
       );
+
+      // Create datafeed validation map based on job type
+      const datafeedValidationMap = new Map<string, DatafeedValidationInfo>();
 
       if (loadedFile.jobType === 'anomaly-detector') {
         const tempJobs = (loadedFile.jobs as ImportedAdJob[]).filter((j) =>
           validatedJobs.jobs.map(({ jobId }) => jobId).includes(j.job.job_id)
         );
         setAdJobs(tempJobs);
+
+        const validations = await jobImportService.validateJobsDatafeeds(
+          tempJobs,
+          validateDatafeedPreview
+        );
+
+        // Populate the map with validation results
+        validations.forEach((validation) => {
+          datafeedValidationMap.set(validation.jobId, {
+            hasWarning: validation.hasWarning,
+            warningMessage: validation.warningMessage,
+          });
+        });
       } else if (loadedFile.jobType === 'data-frame-analytics') {
         const tempJobs = (loadedFile.jobs as DataFrameAnalyticsConfig[]).filter((j) =>
           validatedJobs.jobs.map(({ jobId }) => jobId).includes(j.id)
@@ -160,21 +179,27 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete }) =>
         setDfaJobs(tempJobs);
       }
 
-      setJobType(loadedFile.jobType);
       setJobIdObjects(
-        validatedJobs.jobs.map(({ jobId, destIndex }) => ({
-          jobId,
-          originalId: jobId,
-          jobIdValid: true,
-          jobIdInvalidMessage: '',
-          jobIdValidated: false,
-          destIndex,
-          originalDestIndex: destIndex,
-          destIndexValid: true,
-          destIndexInvalidMessage: '',
-          destIndexValidated: false,
-        }))
+        validatedJobs.jobs.map(({ jobId, destIndex }) => {
+          const datafeedValidation = datafeedValidationMap.get(jobId);
+          return {
+            jobId,
+            originalId: jobId,
+            jobIdValid: true,
+            jobIdInvalidMessage: '',
+            jobIdValidated: false,
+            destIndex,
+            originalDestIndex: destIndex,
+            destIndexValid: true,
+            destIndexInvalidMessage: '',
+            destIndexValidated: false,
+            datafeedInvalid: datafeedValidation?.hasWarning,
+            datafeedWarningMessage: datafeedValidation?.warningMessage,
+          };
+        })
       );
+
+      setJobType(loadedFile.jobType);
 
       const ids = createIdsMash(validatedJobs.jobs as JobIdObject[], loadedFile.jobType);
       setIdsMash(ids);
@@ -375,6 +400,9 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete }) =>
           hideCloseButton
           size="m"
           data-test-subj="mlJobMgmtImportJobsFlyout"
+          aria-label={i18n.translate('xpack.ml.importExportJobs.importFlyout.flyoutAriaLabel', {
+            defaultMessage: 'Import jobs flyout',
+          })}
         >
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">
@@ -495,6 +523,26 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete }) =>
                                 />
                               </EuiFormRow>
                             )}
+
+                            {jobType === 'anomaly-detector' &&
+                              jobId.datafeedInvalid === true &&
+                              jobId.datafeedWarningMessage && (
+                                <EuiFormRow>
+                                  <EuiCallOut
+                                    title={i18n.translate(
+                                      'xpack.ml.importExportJobs.importFlyout.datafeedWarning.title',
+                                      {
+                                        defaultMessage: 'Datafeed Warning',
+                                      }
+                                    )}
+                                    color="warning"
+                                    size="s"
+                                    announceOnMount
+                                  >
+                                    <p>{jobId.datafeedWarningMessage}</p>
+                                  </EuiCallOut>
+                                </EuiFormRow>
+                              )}
                           </EuiFlexItem>
                           <EuiFlexItem grow={false}>
                             <DeleteJobButton index={i} />
