@@ -51,6 +51,18 @@ export const applyCriticalityToScore = ({
   return bayesianUpdate({ max: RISK_SCORING_NORMALIZATION_MAX, modifier, score });
 };
 
+export const applyPrivilegeduserModifiers = (
+  score: number,
+  privmon: { sources: string[]; labels: []; monitored: boolean }
+) => {
+  // TODO: Must take into account the different combos of `privmon`. Hardcoded for now.
+  const modifier = 1.5;
+  if (!privmon.monitored) {
+    return score;
+  }
+  return bayesianUpdate({ max: RISK_SCORING_NORMALIZATION_MAX, modifier, score });
+};
+
 /**
  * Updates a score with the given modifier using bayesian inference.
  * @param modifier - The modifier to be applied to the score.
@@ -60,11 +72,11 @@ export const applyCriticalityToScore = ({
  * @returns The updated score with modifiers applied
  */
 export const bayesianUpdate = ({
-  max,
+  max = RISK_SCORING_NORMALIZATION_MAX,
   modifier,
   score,
 }: {
-  max: number;
+  max?: number;
   modifier: number;
   score: number;
 }) => {
