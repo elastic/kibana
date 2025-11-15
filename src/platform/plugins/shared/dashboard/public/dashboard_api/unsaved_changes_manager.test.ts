@@ -19,6 +19,7 @@ import { isDashboardSection } from '../../common';
 import type { DashboardSettings } from './settings_manager';
 import { initializeSettingsManager } from './settings_manager';
 import type { initializeUnifiedSearchManager } from './unified_search_manager';
+import type { initializeProjectRoutingManager } from './project_routing_manager';
 import type { DashboardPanel } from '../../server';
 import { getSampleDashboardState } from '../mocks';
 
@@ -74,6 +75,11 @@ const unifiedSearchManagerMock = {
       >({}),
   },
 } as unknown as ReturnType<typeof initializeUnifiedSearchManager>;
+const projectRoutingManagerMock = {
+  internalApi: {
+    startComparing$: () => new BehaviorSubject<Partial<Pick<DashboardState, 'projectRouting'>>>({}),
+  },
+} as unknown as ReturnType<typeof initializeProjectRoutingManager>;
 const getReferences = () => [];
 const savedObjectId$ = new BehaviorSubject<string | undefined>('dashboard1234');
 const viewMode$ = new BehaviorSubject<ViewMode>('edit');
@@ -105,6 +111,7 @@ describe('unsavedChangesManager', () => {
           savedObjectId$,
           settingsManager,
           unifiedSearchManager: unifiedSearchManagerMock,
+          projectRoutingManager: projectRoutingManagerMock,
           getReferences,
         });
 
@@ -130,6 +137,7 @@ describe('unsavedChangesManager', () => {
           savedObjectId$,
           settingsManager: settingsManagerMock,
           unifiedSearchManager: unifiedSearchManagerMock,
+          projectRoutingManager: projectRoutingManagerMock,
           getReferences,
         });
 

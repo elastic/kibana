@@ -103,4 +103,39 @@ describe('initializeSettingsManager', () => {
       });
     });
   });
+
+  describe('projectRoutingRestore deserialization', () => {
+    test('Should set projectRoutingRestore to false when projectRouting is undefined', () => {
+      const state: DashboardState = {
+        ...getSampleDashboardState(),
+        // projectRouting is undefined
+      };
+      const settingsManager = initializeSettingsManager(state);
+      const settings = settingsManager.api.getSettings();
+
+      expect(settings.projectRoutingRestore).toBe(false);
+    });
+
+    test('Should set projectRoutingRestore to true when projectRouting is null', () => {
+      const state: DashboardState = {
+        ...getSampleDashboardState(),
+        projectRouting: null,
+      };
+      const settingsManager = initializeSettingsManager(state);
+      const settings = settingsManager.api.getSettings();
+
+      expect(settings.projectRoutingRestore).toBe(true);
+    });
+
+    test('Should set projectRoutingRestore to true when projectRouting is a string', () => {
+      const state: DashboardState = {
+        ...getSampleDashboardState(),
+        projectRouting: '_alias:_origin',
+      };
+      const settingsManager = initializeSettingsManager(state);
+      const settings = settingsManager.api.getSettings();
+
+      expect(settings.projectRoutingRestore).toBe(true);
+    });
+  });
 });

@@ -470,6 +470,19 @@ export function getDiscoverStateContainer({
       })
     );
 
+    // Subscribe to globalState.projectRouting changes and trigger data fetch
+    let previousProjectRouting = selectTab(internalState.getState(), tabId).globalState
+      .projectRouting;
+    const projectRoutingUnsubscribe = internalState.subscribe(() => {
+      const currentProjectRouting = selectTab(internalState.getState(), tabId).globalState
+        .projectRouting;
+      if (currentProjectRouting !== previousProjectRouting) {
+        previousProjectRouting = currentProjectRouting;
+        addLog('[getDiscoverStateContainer] projectRouting changes triggers data fetching');
+        fetchData();
+      }
+    });
+
     const savedSearchChangesSubscription = savedSearchContainer
       .getCurrent$()
       .subscribe(syncLocallyPersistedTabState);
@@ -511,6 +524,7 @@ export function getDiscoverStateContainer({
       unsubscribeData();
       appStateSubscription.unsubscribe();
       appStateInitAndSyncUnsubscribe();
+      projectRoutingUnsubscribe();
       unsubscribeSavedSearchUrlTracking();
       filterUnsubscribe.unsubscribe();
       timefilerUnsubscribe.unsubscribe();

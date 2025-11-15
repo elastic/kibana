@@ -8,7 +8,7 @@
  */
 
 import type { IconType } from '@elastic/eui/src/components/icon/icon';
-import type { Query, AggregateQuery } from '@kbn/es-query';
+import type { Query, AggregateQuery, ProjectRouting } from '@kbn/es-query';
 import { type DataView } from '@kbn/data-plugin/common';
 import type {
   DataPublicPluginStart,
@@ -434,6 +434,7 @@ export interface LensDocument {
       state?: unknown;
     };
     filters: Filter[];
+    projectRouting?: ProjectRouting;
     needsRefresh?: boolean;
     adHocDataViews?: Record<string, DataViewSpec>;
     internalReferences?: Reference[];
@@ -1245,6 +1246,7 @@ export interface FramePublicAPI {
   activeData?: Record<string, Datatable>;
   dataViews: DataViewsState;
   forceDSL?: boolean;
+  projectRouting?: ProjectRouting;
 }
 
 /**
@@ -1389,6 +1391,7 @@ export interface LensAppState extends EditorFrameState {
 
   // Whether the current visualization is managed by the system
   managed: boolean;
+  projectRouting?: ProjectRouting;
 }
 
 export interface LensState {

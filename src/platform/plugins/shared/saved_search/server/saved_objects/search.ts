@@ -23,7 +23,8 @@ import {
   SCHEMA_SEARCH_MODEL_VERSION_6,
   SCHEMA_SEARCH_MODEL_VERSION_7,
   SCHEMA_SEARCH_MODEL_VERSION_8,
-  SCHEMA_SEARCH_MODEL_VERSION_9_SO_API_WORKAROUND,
+  SCHEMA_SEARCH_MODEL_VERSION_10_SO_API_WORKAROUND,
+  PROJECT_ROUTING_SCHEMA,
 } from './schema';
 
 export function getSavedSearchObjectType(
@@ -115,11 +116,21 @@ export function getSavedSearchObjectType(
       9: {
         changes: [],
         schemas: {
-          forwardCompatibility: SCHEMA_SEARCH_MODEL_VERSION_9_SO_API_WORKAROUND.extends(
+          forwardCompatibility: SCHEMA_SEARCH_MODEL_VERSION_8.extends(
+            PROJECT_ROUTING_SCHEMA,
+            { unknowns: 'ignore' }
+          ),
+          create: SCHEMA_SEARCH_MODEL_VERSION_8.extends(PROJECT_ROUTING_SCHEMA),
+        },
+      },
+      10: {
+        changes: [],
+        schemas: {
+          forwardCompatibility: SCHEMA_SEARCH_MODEL_VERSION_10_SO_API_WORKAROUND.extends(
             {},
             { unknowns: 'ignore' }
           ),
-          create: SCHEMA_SEARCH_MODEL_VERSION_9_SO_API_WORKAROUND,
+          create: SCHEMA_SEARCH_MODEL_VERSION_10_SO_API_WORKAROUND,
         },
       },
     },

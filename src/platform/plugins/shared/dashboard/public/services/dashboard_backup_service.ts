@@ -102,10 +102,14 @@ class DashboardBackupService implements DashboardBackupServiceType {
     }
   }
 
-  public getState(id = DASHBOARD_PANELS_UNSAVED_ID) {
+  public getState(id = DASHBOARD_PANELS_UNSAVED_ID): Partial<DashboardState> | undefined {
     try {
       const dashboards = this.getDashboards();
-      return dashboards[id];
+      const backupState = dashboards[id];
+      if (!backupState) {
+        return;
+      }
+      return backupState
     } catch (e) {
       coreServices.notifications.toasts.addDanger({
         title: getPanelsGetError(e.message),
@@ -118,6 +122,7 @@ class DashboardBackupService implements DashboardBackupServiceType {
     try {
       const allSpaces = this.sessionStorage.get(DASHBOARD_STATE_SESSION_KEY) ?? {};
       set(allSpaces, [this.activeSpaceId, id], backupState);
+      console.log('allSpaces', allSpaces);
       this.sessionStorage.set(DASHBOARD_STATE_SESSION_KEY, allSpaces);
     } catch (e) {
       coreServices.notifications.toasts.addDanger({
@@ -159,6 +164,7 @@ class DashboardBackupService implements DashboardBackupServiceType {
 
   public dashboardHasUnsavedEdits(id = DASHBOARD_PANELS_UNSAVED_ID) {
     const dashboards = this.getDashboards();
+    console.log('dashboards', dashboards);
     return hasUnsavedEdits(dashboards[id]);
   }
 

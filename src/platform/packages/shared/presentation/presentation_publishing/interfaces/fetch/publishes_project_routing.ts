@@ -7,16 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/**
- * Project routing configuration for cross-project search (CPS).
- *
- * Used in serverless environments to control whether searches are scoped to a single project or span multiple projects.
- *
- * Examples:
- * - undefined - take the default behavior as per parent/space configuration
- * - null - Search across all projects 
- * - '_alias:_origin' - Search only in the current project
- *
- * @public
- */
-export type ProjectRouting = string | null | undefined;
+import type { ProjectRouting } from '@kbn/es-query';
+import type { PublishingSubject } from '../../publishing_subject';
+
+export interface PublishesProjectRouting {
+  projectRouting$: PublishingSubject<ProjectRouting | undefined>;
+}
+
+export const apiPublishesProjectRouting = (
+  unknownApi: unknown
+): unknownApi is PublishesProjectRouting => {
+  return Boolean(
+    unknownApi && (unknownApi as PublishesProjectRouting)?.projectRouting$ !== undefined
+  );
+};

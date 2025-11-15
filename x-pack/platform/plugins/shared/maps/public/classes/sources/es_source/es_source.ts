@@ -220,6 +220,9 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     if (requestMeta.applyGlobalQuery && !isFeatureEditorOpenForLayer) {
       searchSource.setField('query', requestMeta.query);
     }
+    if (requestMeta.projectRouting) {
+      searchSource.setField('projectRouting', requestMeta.projectRouting);
+    }
 
     const parents = [];
     if (requestMeta.sourceQuery && !isFeatureEditorOpenForLayer) {
@@ -490,12 +493,6 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
         query,
       });
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.warn(
-        `Unable to fetch suggestions for field: ${field.getRootName()}, query: ${query}, error: ${
-          error.message
-        }`
-      );
       return [];
     }
   };

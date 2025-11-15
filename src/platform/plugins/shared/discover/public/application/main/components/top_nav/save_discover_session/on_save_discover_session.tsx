@@ -42,6 +42,8 @@ export const onSaveDiscoverSession = async ({
   const allTabs = selectAllTabs(internalState);
 
   const timeRestore = persistedDiscoverSession?.tabs.some((tab) => tab.timeRestore) ?? false;
+  const projectRoutingRestore =
+    persistedDiscoverSession?.tabs.some((tab) => tab.projectRoutingRestore) ?? false;
   const isTimeBased = allTabs.some((tab) => {
     const tabRuntimeState = selectTabRuntimeState(state.runtimeStateManager, tab.id);
     const tabDataView = tabRuntimeState.currentDataView$.getValue();
@@ -66,11 +68,13 @@ export const onSaveDiscoverSession = async ({
 
     return Boolean(dataViewListItem?.timeFieldName);
   });
+  const hasProjectRouting = allTabs.some((tab) => Boolean(tab.globalState.projectRouting));
 
   const onSave: DiscoverSessionSaveModalOnSaveCallback = async ({
     newTitle,
     newCopyOnSave,
     newTimeRestore,
+    newProjectRoutingRestore,
     newDescription,
     newTags,
     isTitleDuplicateConfirmed,
@@ -86,6 +90,7 @@ export const onSaveDiscoverSession = async ({
           internalStateActions.saveDiscoverSession({
             newTitle,
             newTimeRestore,
+            newProjectRoutingRestore,
             newCopyOnSave,
             newDescription,
             newTags,
@@ -133,12 +138,14 @@ export const onSaveDiscoverSession = async ({
   const saveModal = (
     <DiscoverSessionSaveModal
       isTimeBased={isTimeBased}
+      hasProjectRouting={hasProjectRouting}
       services={services}
       title={persistedDiscoverSession?.title ?? ''}
       showCopyOnSave={!!persistedDiscoverSession?.id}
       initialCopyOnSave={initialCopyOnSave}
       description={persistedDiscoverSession?.description}
       timeRestore={timeRestore}
+      projectRoutingRestore={projectRoutingRestore}
       tags={persistedDiscoverSession?.tags ?? []}
       managed={persistedDiscoverSession?.managed ?? false}
       onSave={onSave}
