@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, of, ReplaySubject } from 'rxjs';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { esHitsMock } from '@kbn/discover-utils/src/__mocks__';
@@ -19,7 +19,7 @@ import type {
   DataTotalHits$,
 } from '../../state_management/discover_data_state_container';
 import { discoverServiceMock } from '../../../../__mocks__/services';
-import type { SidebarToggleState } from '../../../types';
+import type { DiscoverLatestFetchDetails, SidebarToggleState } from '../../../types';
 import { FetchStatus } from '../../../types';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { DiscoverHistogramLayout } from './discover_histogram_layout';
@@ -132,6 +132,10 @@ const mountComponent = async ({
     searchSessionId: noSearchSessionId ? undefined : mockSearchSessionId,
   });
   stateContainer.dataState.data$ = savedSearchData$;
+
+  const fetchChart$ = new ReplaySubject<DiscoverLatestFetchDetails>(1);
+  fetchChart$.next({});
+  stateContainer.dataState.fetchChart$ = fetchChart$;
 
   const props: DiscoverMainContentProps = {
     dataView,

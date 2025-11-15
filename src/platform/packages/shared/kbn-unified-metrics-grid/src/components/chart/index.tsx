@@ -11,9 +11,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, useEuiTheme } from '@elasti
 import { css } from '@emotion/react';
 import type { LensSeriesLayer } from '@kbn/lens-embeddable-utils/config_builder';
 import { useBoolean } from '@kbn/react-hooks';
-import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
+import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import React, { useRef } from 'react';
-import type { Observable } from 'rxjs';
 import type { LensYBoundsConfig } from '@kbn/lens-embeddable-utils/config_builder/types';
 import { useLensProps } from './hooks/use_lens_props';
 import type { LensWrapperProps } from './lens_wrapper';
@@ -25,10 +24,13 @@ export const ChartSizes = {
 };
 
 export type ChartSize = keyof typeof ChartSizes;
-export type ChartProps = Pick<ChartSectionProps, 'searchSessionId' | 'requestParams'> &
-  Omit<LensWrapperProps, 'lensProps' | 'onViewDetails' | 'onCopyToDashboard' | 'description'> & {
+export type ChartProps = Pick<ChartSectionProps, 'fetchParams'> &
+  Omit<
+    LensWrapperProps,
+    'lensProps' | 'onViewDetails' | 'onCopyToDashboard' | 'description' | 'abortController'
+  > & {
     size?: ChartSize;
-    discoverFetch$: Observable<UnifiedHistogramInputMessage>;
+    discoverFetch$: ChartSectionProps['fetch$'];
     onViewDetails?: () => void;
     esqlQuery: string;
     title: string;
@@ -38,15 +40,13 @@ export type ChartProps = Pick<ChartSectionProps, 'searchSessionId' | 'requestPar
 
 const LensWrapperMemo = React.memo(LensWrapper);
 export const Chart = ({
-  abortController,
   services,
-  searchSessionId,
   onBrushEnd,
   onFilter,
   onViewDetails,
-  requestParams,
-  titleHighlight,
+  fetchParams,
   discoverFetch$,
+  titleHighlight,
   size = 'm',
   esqlQuery,
   title,
@@ -60,15 +60,13 @@ export const Chart = ({
 
   const [isSaveModalVisible, { toggle: toggleSaveModalVisible }] = useBoolean(false);
   const { SaveModalComponent } = services.lens;
-  const { getTimeRange } = requestParams;
 
   const lensProps = useLensProps({
     title,
     query: esqlQuery,
     services,
-    searchSessionId,
+    fetchParams,
     discoverFetch$,
-    getTimeRange,
     chartRef,
     chartLayers,
     yBounds,
@@ -97,7 +95,7 @@ export const Chart = ({
             services={services}
             onBrushEnd={onBrushEnd}
             onFilter={onFilter}
-            abortController={abortController}
+            abortController={fetchParams.abortController}
             onViewDetails={onViewDetails}
             onCopyToDashboard={toggleSaveModalVisible}
             syncCursor={syncCursor}

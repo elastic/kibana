@@ -34,7 +34,7 @@ import { getEsqlDataView } from './utils/get_esql_data_view';
 import type { DiscoverAppStateContainer } from './discover_app_state_container';
 import type { DiscoverServices } from '../../../build_services';
 import type { DiscoverSearchSessionManager } from './discover_search_session';
-import { FetchStatus } from '../../types';
+import { type DiscoverLatestFetchDetails, FetchStatus } from '../../types';
 import { validateTimeRange } from './utils/validate_time_range';
 import { fetchAll, type CommonFetchParams, fetchMoreDocuments } from '../data_fetching/fetch_all';
 import { sendResetMsg } from '../hooks/use_saved_search_messages';
@@ -100,7 +100,7 @@ export interface DiscoverDataStateContainer {
   /**
    * Emits when the chart should be fetched
    */
-  fetchChart$: Observable<void>;
+  fetchChart$: Observable<DiscoverLatestFetchDetails>;
   /**
    * Used to disable the next fetch that would otherwise be triggered by a URL state change
    */
@@ -165,7 +165,7 @@ export function getDataStateContainer({
   const { data, uiSettings, toastNotifications } = services;
   const { timefilter } = data.query.timefilter;
   const inspectorAdapters = { requests: new RequestAdapter() };
-  const fetchChart$ = new ReplaySubject<void>(1);
+  const fetchChart$ = new ReplaySubject<DiscoverLatestFetchDetails>(1);
   const disableNextFetchOnStateChange$ = new BehaviorSubject(false);
 
   /**
@@ -340,9 +340,17 @@ export function getDataStateContainer({
 
           abortController = new AbortController();
 
+          const isEsqlQuery = isOfAggregateQueryType(appStateContainer.get().query);
+          const latestFetchDetails: DiscoverLatestFetchDetails = {
+            abortController,
+          };
+
           // Trigger chart fetching after the pre fetch state has been updated
           // to ensure state values that would affect data fetching are set
-          fetchChart$.next();
+          if (!isEsqlQuery) {
+            // trigger in parallel with the main request for Classic mode
+            fetchChart$.next(latestFetchDetails);
+          }
 
           const prevAutoRefreshDone = autoRefreshDone;
           const fetchAllTracker = scopedEbtManager.trackPerformanceEvent('discoverFetchAll');
@@ -357,6 +365,11 @@ export function getDataStateContainer({
             abortController,
             getCurrentTab,
             onFetchRecordsComplete: async () => {
+              if (isEsqlQuery) {
+                // defer triggering chart fetching until after main request completes for ES|QL mode
+                fetchChart$.next(latestFetchDetails);
+              }
+
               const { resetDefaultProfileState: currentResetDefaultProfileState } = getCurrentTab();
 
               if (currentResetDefaultProfileState.resetId !== resetDefaultProfileState.resetId) {

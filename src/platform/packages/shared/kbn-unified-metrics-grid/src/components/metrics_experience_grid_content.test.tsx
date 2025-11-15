@@ -12,12 +12,15 @@ import { render } from '@testing-library/react';
 import type { MetricsExperienceGridContentProps } from './metrics_experience_grid_content';
 import { MetricsExperienceGridContent } from './metrics_experience_grid_content';
 import * as hooks from '../hooks';
-import type { UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
+import type {
+  UnifiedHistogramFetch$,
+  UnifiedHistogramFetchParams,
+} from '@kbn/unified-histogram/types';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { Subject } from 'rxjs';
 import type { MetricField, Dimension } from '@kbn/metrics-experience-plugin/common/types';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import * as metricsExperienceStateProvider from '../context/metrics_experience_state_provider';
+import { getFetch$Mock, getFetchParamsMock } from '@kbn/unified-histogram/__mocks__/fetch_params';
 
 jest.mock('../context/metrics_experience_state_provider');
 jest.mock('../hooks');
@@ -68,32 +71,31 @@ const allFields: MetricField[] = [
 ];
 
 describe('MetricsExperienceGridContent', () => {
-  let input$: Subject<UnifiedHistogramInputMessage>;
+  let fetch$: UnifiedHistogramFetch$;
+  let fetchParams: UnifiedHistogramFetchParams;
   let defaultProps: MetricsExperienceGridContentProps;
 
   beforeEach(() => {
     jest.clearAllMocks();
 
+    fetchParams = getFetchParamsMock({
+      dataView: { getIndexPattern: () => 'metrics-*', isTimeBased: () => true } as any,
+      filters: [],
+      query: { esql: 'FROM metrics-*' },
+      esqlVariables: [],
+      relativeTimeRange: { from: 'now-15m', to: 'now' },
+    });
+
     // Create new Subject for each test to prevent memory leaks
-    input$ = new Subject<UnifiedHistogramInputMessage>();
+    fetch$ = getFetch$Mock(fetchParams);
 
     defaultProps = {
       fields: allFields,
-      timeRange: { from: 'now-15m', to: 'now' },
       services: {} as any,
-      input$,
-      requestParams: {
-        getTimeRange: () => ({ from: 'now-15m', to: 'now' }),
-        filters: [],
-        query: { esql: 'FROM metrics-*' },
-        esqlVariables: [],
-        relativeTimeRange: { from: 'now-15m', to: 'now' },
-        updateTimeRange: () => {},
-      },
+      discoverFetch$: fetch$,
+      fetchParams,
       onBrushEnd: jest.fn(),
       onFilter: jest.fn(),
-      searchSessionId: 'test-session-id',
-      abortController: new AbortController(),
       histogramCss: { name: '', styles: '' },
     };
 
@@ -125,7 +127,7 @@ describe('MetricsExperienceGridContent', () => {
 
   afterEach(() => {
     // Complete the Subject to prevent memory leaks and hanging tests
-    input$.complete();
+    fetch$.complete();
   });
 
   it('renders the grid with paginated fields', () => {

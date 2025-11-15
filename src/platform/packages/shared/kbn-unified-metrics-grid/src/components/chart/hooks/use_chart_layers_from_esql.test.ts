@@ -40,7 +40,7 @@ describe('useChartLayers', () => {
     services: servicesMock as UnifiedHistogramServices,
   };
 
-  const getTimeRange = (): TimeRange => ({ from: 'now-1h', to: 'now' });
+  const timeRange: TimeRange = { from: 'now-1h', to: 'now' };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -59,7 +59,7 @@ describe('useChartLayers', () => {
     const { result } = renderHook(() =>
       useChartLayersFromEsql({
         query: 'FROM metrics-*',
-        getTimeRange,
+        timeRange,
         seriesType: 'line',
         color: 'red',
         services: mockServices.services,
@@ -88,7 +88,7 @@ describe('useChartLayers', () => {
     const { result } = renderHook(() =>
       useChartLayersFromEsql({
         query: 'FROM metrics-*',
-        getTimeRange,
+        timeRange,
         seriesType: 'area',
         color: 'blue',
         services: mockServices.services,
@@ -125,7 +125,7 @@ describe('useChartLayers', () => {
     const { result } = renderHook(() =>
       useChartLayersFromEsql({
         query: 'FROM metrics-*',
-        getTimeRange,
+        timeRange,
         seriesType: 'area',
         color: 'blue',
         services: mockServices.services,
@@ -162,7 +162,7 @@ describe('useChartLayers', () => {
     const { result } = renderHook(() =>
       useChartLayersFromEsql({
         query: 'FROM metrics-*',
-        getTimeRange,
+        timeRange,
         seriesType: 'bar',
         services: mockServices.services,
       })
