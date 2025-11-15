@@ -2432,7 +2432,7 @@
         "@a2a-js/sdk",
         "@modelcontextprotocol/sdk",
         "@n8n/json-schema-to-zod",
-        "expr-eval"
+        "expr-eval-fork"
       ],
       "reviewers": [
         "team:search-kibana"
