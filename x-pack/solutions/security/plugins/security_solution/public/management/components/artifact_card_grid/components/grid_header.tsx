@@ -36,6 +36,7 @@ export const GridHeader = memo<GridHeaderProps>(
             {
               defaultMessage: '{action} all cards',
               values: {
+                // @ts-expect-error upgrade typescript v5.9.3
                 action: 'unfold' ? 'Expand' : 'Collapse',
               },
             }

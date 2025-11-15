@@ -43,10 +43,15 @@ function hasChanged(existingProxy: FleetProxy, preconfiguredFleetProxy: FleetPro
         preconfiguredFleetProxy.proxy_headers ?? null
       ) ||
       existingProxy.certificate_authorities) ??
+    // @ts-expect-error upgrade typescript v5.9.3
     null !== preconfiguredFleetProxy.certificate_authorities ??
+    // @ts-expect-error upgrade typescript v5.9.3
     (null || existingProxy.certificate) ??
+    // @ts-expect-error upgrade typescript v5.9.3
     null !== preconfiguredFleetProxy.certificate ??
+    // @ts-expect-error upgrade typescript v5.9.3
     (null || existingProxy.certificate_key) ??
+    // @ts-expect-error upgrade typescript v5.9.3
     null !== preconfiguredFleetProxy.certificate_key ??
     null
   );

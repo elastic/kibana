@@ -503,6 +503,7 @@ export const termsOperation: OperationDefinition<
                 layer,
                 columnId,
                 indexPattern,
+                // @ts-expect-error upgrade typescript v5.9.3
                 op: newFieldOp,
                 field: mainField,
                 visualizationGroups: dimensionGroups,

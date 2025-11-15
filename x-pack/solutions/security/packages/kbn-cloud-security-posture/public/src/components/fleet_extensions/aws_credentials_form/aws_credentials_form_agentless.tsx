@@ -124,7 +124,7 @@ const getCloudFormationConfig = (
 
   return {
     isSupported,
-    accordionTitleLink: <EuiLink>{'Steps to Generate AWS Account Credentials'}</EuiLink> || '',
+    accordionTitleLink: <EuiLink>{'Steps to Generate AWS Account Credentials'}</EuiLink>,
     templateUrl: automationCredentialTemplate || '',
   };
 };

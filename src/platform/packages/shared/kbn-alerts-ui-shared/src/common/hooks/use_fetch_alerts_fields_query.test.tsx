@@ -71,7 +71,7 @@ describe('useFetchAlertsFieldsQuery', () => {
         initialProps: {
           ruleTypeIds: ['apm'],
           enabled: false,
-        },
+        } as { ruleTypeIds: string[]; enabled?: boolean },
       }
     );
 

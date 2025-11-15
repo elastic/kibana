@@ -77,6 +77,7 @@ export function createVegaRequestHandler(
     let dataView: DataView;
     const firstFilterIndex = filters[0]?.meta.index;
     if (firstFilterIndex) {
+      // @ts-expect-error upgrade typescript v5.9.3
       dataView = await dataViews.get(firstFilterIndex).catch(() => undefined);
     }
 

@@ -418,6 +418,7 @@ class SavedObjectFinderUiClass extends React.Component<
   }
 }
 
+// @ts-expect-error upgrade typescript v5.9.3
 export const SavedObjectFinderUi = withEuiTablePersist(SavedObjectFinderUiClass, {
   get: (props) => ({
     tableId: `soFinder-${props.id}`,
