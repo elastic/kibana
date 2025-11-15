@@ -8139,6 +8139,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/scratchpad-app-plugin@link:x-pack/platform/plugins/shared/scratchpad_app":
+  version "0.0.0"
+  uid ""
+
 "@kbn/screenshot-mode-example-plugin@link:examples/screenshot_mode_example":
   version "0.0.0"
   uid ""
