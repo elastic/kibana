@@ -470,11 +470,10 @@ export default ({ getService }: FtrProviderContext): void => {
             supertest,
             req: {
               // @ts-expect-error: types are not correct
-              initials: 4,
+              initials: null,
               // @ts-expect-error: types are not correct
-              color: true,
-              // @ts-expect-error: types are not correct
-              imageUrl: [],
+              color: null,
+              imageUrl: null,
             },
             headers: superUserHeaders,
           });
