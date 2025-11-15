@@ -123,7 +123,9 @@ function FlyoutActions({
       </EuiFlexItem>
       {visibleFlyoutActions.map((action) => (
         <EuiFlexItem key={action.id} grow={false}>
-          {showFlyoutIconsOnly ? (
+          {'Component' in action && action.Component ? (
+            <action.Component showIconOnly={showFlyoutIconsOnly} />
+          ) : showFlyoutIconsOnly ? (
             <EuiToolTip
               content={action.helpText ? `${action.label} - ${action.helpText}` : action.label}
             >
