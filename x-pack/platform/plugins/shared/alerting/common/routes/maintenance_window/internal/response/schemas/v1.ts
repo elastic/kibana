@@ -35,6 +35,7 @@ export const maintenanceWindowResponseSchema = schema.object({
     schema.literal(maintenanceWindowStatusV1.UPCOMING),
     schema.literal(maintenanceWindowStatusV1.FINISHED),
     schema.literal(maintenanceWindowStatusV1.ARCHIVED),
+    schema.literal(maintenanceWindowStatusV1.DISABLED),
   ]),
   category_ids: maintenanceWindowCategoryIdsSchemaV1,
   scoped_query: schema.maybe(schema.nullable(alertsFilterQuerySchemaV1)),

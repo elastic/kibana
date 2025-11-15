@@ -22,6 +22,7 @@ export const transformMaintenanceWindowAttributesToMaintenanceWindow = (
     events,
     expirationDate: new Date(expirationDate),
     dateToCompare: new Date(),
+    enabled: attributes.enabled,
   });
 
   return {
