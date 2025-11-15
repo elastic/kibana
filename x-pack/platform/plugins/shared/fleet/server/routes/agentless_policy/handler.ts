@@ -14,6 +14,31 @@ import type { FleetRequestHandler } from '../../types';
 import { appContextService } from '../../services';
 import { AgentlessPoliciesServiceImpl } from '../../services/agentless/agentless_policies';
 import type { DeleteAgentlessPolicyRequestSchema } from '../../../common/types/rest_spec/agentless_policy';
+import { syncAgentlessDeployments } from '../../services/agentless/deployment_sync';
+import { agentlessAgentService } from '../../services/agents/agentless_agent';
+
+export const syncAgentlessPoliciesHandler: FleetRequestHandler = async (
+  context,
+  request,
+  response
+) => {
+  const logger = appContextService.getLogger().get('agentless');
+
+  await syncAgentlessDeployments({
+    logger,
+    agentlessAgentService,
+  });
+
+  // const agentlessPoliciesService = new AgentlessPoliciesServiceImpl();
+
+  // await syncAgentlessPolicies({ logger, agent });
+
+  return response.ok({
+    body: {
+      success: true,
+    },
+  });
+};
 
 export const createAgentlessPolicyHandler: FleetRequestHandler<
   undefined,

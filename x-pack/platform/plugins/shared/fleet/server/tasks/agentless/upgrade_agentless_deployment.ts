@@ -15,13 +15,13 @@ import {
 } from '@kbn/task-manager-plugin/server';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 
-import { agentPolicyService, appContextService } from '../services';
+import { agentPolicyService, appContextService } from '../../services';
 
-import type { Agent, AgentPolicy } from '../types';
+import type { Agent, AgentPolicy } from '../../types';
 
-import { AGENTS_PREFIX } from '../constants';
-import { getAgentsByKuery } from '../services/agents';
-import { agentlessAgentService } from '../services/agents/agentless_agent';
+import { AGENTS_PREFIX } from '../../constants';
+import { getAgentsByKuery } from '../../services/agents';
+import { agentlessAgentService } from '../../services/agents/agentless_agent';
 
 export const UPGRADE_AGENTLESS_DEPLOYMENTS_TASK_TYPE = 'fleet:upgrade-agentless-deployments-task';
 export const UPGRADE_AGENT_DEPLOYMENTS_TASK_VERSION = '1.0.0';

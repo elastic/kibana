@@ -10,15 +10,15 @@ import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 
-import { agentPolicyService, appContextService } from '../services';
-import { createAppContextStartContractMock } from '../mocks';
-import { createAgentPolicyMock } from '../../common/mocks';
+import { agentPolicyService, appContextService } from '../../services';
+import { createAppContextStartContractMock } from '../../mocks';
+import { createAgentPolicyMock } from '../../../common/mocks';
 
-import type { AgentPolicy } from '../types';
+import type { AgentPolicy } from '../../types';
 
-import { agentlessAgentService } from '../services/agents/agentless_agent';
+import { agentlessAgentService } from '../../services/agents/agentless_agent';
 
-import { getAgentsByKuery } from '../services/agents';
+import { getAgentsByKuery } from '../../services/agents';
 
 import {
   UPGRADE_AGENT_DEPLOYMENTS_TASK_VERSION,
@@ -73,11 +73,11 @@ const mockAgentPolicy: AgentPolicy = createAgentPolicyMock({
   package_policies: [systemMock],
 });
 
-jest.mock('../services/agent_policy_update', () => ({
+jest.mock('../../services/agent_policy_update', () => ({
   agentPolicyUpdateEventHandler: jest.fn(),
 }));
 
-jest.mock('../services/agents', () => ({
+jest.mock('../../services/agents', () => ({
   getAgentsByKuery: jest.fn(),
   getLatestAvailableAgentVersion: jest.fn(),
 }));
