@@ -2302,10 +2302,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
               i.type === input.type &&
               (!input.policy_template || input.policy_template === i.policy_template)
           );
-
+          const inputHasToMigrate = disableInputToMigrate(inputs, input?.id);
           return {
             ...defaultInput,
-            enabled: input.enabled,
+            enabled: inputHasToMigrate ? false : input.enabled, // disable if there is another input with migrate_from linking to this input
             type: input.type,
             // to propagate "enabled: false" to streams
             streams: defaultInput?.streams?.map((stream) => ({
@@ -3243,34 +3243,41 @@ function _compilePackagePolicyInput(
       )
     : pkgInfo.policy_templates?.[0];
 
-  if (!input.enabled || !packagePolicyTemplate) {
+  if (!input.enabled || !input.migrate_from || !packagePolicyTemplate) {
     return undefined;
   }
-
   const packageInputs = getNormalizedInputs(packagePolicyTemplate);
 
   if (!packageInputs.length) {
     return undefined;
   }
+  let templatePath: string;
 
-  const packageInput = packageInputs.find((pkgInput) => pkgInput.type === input.type);
-  if (!packageInput) {
-    throw new InputNotFoundError(
-      `Input template not found, unable to find input type ${input.type}`
+  if (input.migrate_from) {
+    const packageInputToMigrate = packageInputs.find(
+      (pkgInput) => pkgInput.title === input.migrate_from
     );
-  }
-  if (!packageInput.template_path) {
-    return undefined;
+    if (!packageInputToMigrate?.template_path) return undefined;
+    templatePath = packageInputToMigrate.template_path;
+  } else {
+    const packageInput = packageInputs.find((pkgInput) => pkgInput.type === input.type);
+    if (!packageInput) {
+      throw new InputNotFoundError(
+        `Input template not found, unable to find input type ${input.type}`
+      );
+    }
+    if (!packageInput.template_path) {
+      return undefined;
+    }
+    templatePath = packageInput.template_path;
   }
 
   const [pkgInputTemplate] = getAssetsDataFromAssetsMap(pkgInfo, assetsMap, (path: string) =>
-    path.endsWith(`/agent/input/${packageInput.template_path!}`)
+    path.endsWith(`/agent/input/${templatePath!}`)
   );
 
   if (!pkgInputTemplate || !pkgInputTemplate.buffer) {
-    throw new InputNotFoundError(
-      `Unable to load input template at /agent/input/${packageInput.template_path!}`
-    );
+    throw new InputNotFoundError(`Unable to load input template at /agent/input/${templatePath!}`);
   }
 
   return compileTemplate(
@@ -4077,4 +4084,15 @@ async function requireUniqueName(
       `An integration policy with the name ${packagePolicy.name} already exists. Please rename it or choose a different name.`
     );
   }
+}
+
+function disableInputToMigrate(inputs: NewPackagePolicyInput[], inputId?: string) {
+  if (!inputId) {
+    return false;
+  }
+  const inputToMigrate = inputs.find((i) => i.migrate_from === inputId);
+  if (inputToMigrate) {
+    return true;
+  }
+  return false;
 }
