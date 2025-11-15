@@ -13,6 +13,7 @@ import {
   OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS,
   OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS,
   OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS,
+  OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS,
 } from '@kbn/management-settings-ids';
 import type { StreamsPluginStartDependencies } from './types';
 import { STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE } from '../common';
@@ -65,6 +66,24 @@ export function registerFeatureFlags(
       technicalPreview: true,
       readonly: true,
       readonlyMode: 'ui',
+    },
+  });
+
+  core.uiSettings.register({
+    [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: {
+      category: ['observability'],
+      name: i18n.translate('xpack.streams.queryStreamsSettingsName', {
+        defaultMessage: 'Query streams',
+      }) as string,
+      value: false,
+      description: i18n.translate('xpack.streams.queryStreamsSettingsDescription', {
+        defaultMessage: 'Enable Query streams.',
+      }),
+      type: 'boolean',
+      schema: schema.boolean(),
+      requiresPageReload: true,
+      solutionViews: ['classic', 'oblt'],
+      technicalPreview: true,
     },
   });
 

@@ -17,6 +17,7 @@ import {
   EuiHighlight,
   EuiIconTip,
   EuiButtonIcon,
+  EuiBadge,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
@@ -86,7 +87,7 @@ export function StreamsTreeTable({
   const filteredStreams = React.useMemo(
     () =>
       filterStreamsByQuery(
-        streams.filter((stream) => Streams.ingest.all.Definition.is(stream.stream)),
+        streams.filter((stream) => Streams.all.Definition.is(stream.stream)),
         searchQuery
       ),
     [streams, searchQuery]
@@ -255,17 +256,20 @@ export function StreamsTreeTable({
                       data-test-subj={`${isCollapsed ? 'expand' : 'collapse'}Button-${
                         item.stream.name
                       }`}
-                      aria-label={i18n.translate(
+                      aria-label={
                         isCollapsed
-                          ? 'xpack.streams.streamsTreeTable.collapsedNodeAriaLabel'
-                          : 'xpack.streams.streamsTreeTable.expandedNodeAriaLabel',
-                        {
-                          defaultMessage: isCollapsed
-                            ? 'Collapsed node with {childCount} children'
-                            : 'Expanded node with {childCount} children',
-                          values: { childCount: item.children.length },
-                        }
-                      )}
+                          ? i18n.translate(
+                              'xpack.streams.streamsTreeTable.collapsedNodeAriaLabel',
+                              {
+                                defaultMessage: 'Collapsed node with {childCount} children',
+                                values: { childCount: item.children.length },
+                              }
+                            )
+                          : i18n.translate('xpack.streams.streamsTreeTable.expandedNodeAriaLabel', {
+                              defaultMessage: 'Expanded node with {childCount} children',
+                              values: { childCount: item.children.length },
+                            })
+                      }
                       onClick={(e: React.MouseEvent) => {
                         handleToggleCollapse(item.stream.name);
                       }}
@@ -294,6 +298,15 @@ export function StreamsTreeTable({
                     <EuiHighlight search={searchQuery}>{item.stream.name}</EuiHighlight>
                   </EuiLink>
                 </EuiFlexItem>
+                {Streams.QueryStream.Definition.is(item.stream) && (
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color={euiTheme.colors.backgroundLightAccent}>
+                      {i18n.translate('xpack.streams.streamsTreeTable.queryStreamBadge', {
+                        defaultMessage: 'Query stream',
+                      })}
+                    </EuiBadge>
+                  </EuiFlexItem>
+                )}
               </EuiFlexGroup>
             );
           },
