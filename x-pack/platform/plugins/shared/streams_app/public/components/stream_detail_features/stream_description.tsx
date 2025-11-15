@@ -19,6 +19,7 @@ import type { Streams } from '@kbn/streams-schema';
 import React from 'react';
 import { ConnectorListButton } from '../connector_list_button/connector_list_button';
 import { useStreamDescriptionApi } from './stream_description/use_stream_description_api';
+import { Row } from '../data_management/stream_detail_management/advanced_view/row';
 
 export interface AISummaryProps {
   definition: Streams.all.GetResponse;
@@ -173,37 +174,41 @@ export const StreamDescription: React.FC<AISummaryProps> = ({ definition, refres
             />
           </EuiFlexGroup>
         ) : (
-          <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiText size="s" color="subdued">
-                {STREAM_DESCRIPTION_HELP}
-              </EuiText>
-            </EuiFlexItem>
-
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                size="s"
-                isLoading={isUpdating}
-                isDisabled={areButtonsDisabled}
-                onClick={onStartEditing}
-              >
-                {MANUAL_ENTRY_BUTTON_LABEL}
-              </EuiButton>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <ConnectorListButton
-                buttonProps={{
-                  fill: true,
-                  size: 's',
-                  iconType: 'sparkles',
-                  children: GENERATE_DESCRIPTION_BUTTON_LABEL,
-                  onClick: onGenerateDescription,
-                  isDisabled: areButtonsDisabled,
-                  isLoading: isGenerating,
-                }}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <Row
+            left={
+              <EuiFlexItem grow={false}>
+                <EuiText size="s" color="subdued">
+                  {STREAM_DESCRIPTION_HELP}
+                </EuiText>
+              </EuiFlexItem>
+            }
+            right={
+              <EuiFlexGroup direction="row" gutterSize="m" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    isLoading={isUpdating}
+                    isDisabled={areButtonsDisabled}
+                    onClick={onStartEditing}
+                  >
+                    {MANUAL_ENTRY_BUTTON_LABEL}
+                  </EuiButton>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <ConnectorListButton
+                    buttonProps={{
+                      fill: true,
+                      size: 'm',
+                      iconType: 'sparkles',
+                      children: GENERATE_DESCRIPTION_BUTTON_LABEL,
+                      onClick: onGenerateDescription,
+                      isDisabled: areButtonsDisabled,
+                      isLoading: isGenerating,
+                    }}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
+          />
         )}
       </EuiPanel>
     </EuiPanel>
