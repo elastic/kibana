@@ -215,9 +215,8 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
       if (!stateContainer.stateStorage.get(APP_STATE_URL_KEY) || !hasESQLUrlState) {
         if (savedSearchAppState?.savedSearch.timeRange) {
           stateContainer.internalState.dispatch(
-            stateContainer.injectCurrentTab(stateContainer.internalStateActions.setGlobalState)({
+            stateContainer.injectCurrentTab(stateContainer.internalStateActions.updateGlobalState)({
               globalState: {
-                ...stateContainer.getCurrentTab().globalState,
                 timeRange: savedSearchAppState.savedSearch.timeRange,
               },
             })
