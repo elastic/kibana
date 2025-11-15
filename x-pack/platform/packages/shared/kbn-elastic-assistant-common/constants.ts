@@ -47,8 +47,6 @@ export const ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_FIND =
 
 // TODO: Update existing 'status' endpoint to take resource as query param as to not conflict with 'entries'
 export const ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL =
-  `${ELASTIC_AI_ASSISTANT_URL}/knowledge_base` as const;
-export const ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_RESOURCE_URL =
   `${ELASTIC_AI_ASSISTANT_URL}/knowledge_base/{resource?}` as const;
 export const ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL =
   `${ELASTIC_AI_ASSISTANT_URL}/knowledge_base/entries` as const;
