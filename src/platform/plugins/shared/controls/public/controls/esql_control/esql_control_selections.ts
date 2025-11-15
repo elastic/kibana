@@ -8,11 +8,11 @@
  */
 import deepEqual from 'react-fast-compare';
 import { BehaviorSubject, combineLatest, debounceTime, filter, map, merge, switchMap } from 'rxjs';
-import { ESQLVariableType } from '@kbn/esql-types';
+import { ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
 import type { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { ESQLControlVariable, ESQLControlState } from '@kbn/esql-types';
-import { EsqlControlType } from '@kbn/esql-types';
+import { getESQLQueryVariables } from '@kbn/esql-utils';
 import type {
   OptionsListSearchTechnique,
   OptionsListSelection,
@@ -93,16 +93,61 @@ export function initializeESQLControlSelections(
     }
   }
 
+  function haveVariablesValuesChanged(
+    currentVariables: ESQLControlVariable[],
+    previousVariables: ESQLControlVariable[],
+    variablesInQuery: string[]
+  ): boolean {
+    if (variablesInQuery.length === 0) return false;
+
+    for (const variableName of variablesInQuery) {
+      const currentVariable = currentVariables.find((v) => v.key === variableName);
+      const previousVariable = previousVariables.find((v) => v.key === variableName);
+
+      if (!deepEqual(currentVariable?.value, previousVariable?.value)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   // For Values From Query controls, update values on dashboard load/reload
+  // or when dependencies change in case of chaining controls
+  let previousESQLVariables: ESQLControlVariable[] = [];
+  let hasInitialFetch = false;
   const fetchSubscription = controlFetch$
     .pipe(
       filter(() => controlType$.getValue() === EsqlControlType.VALUES_FROM_QUERY),
-      switchMap(async ({ timeRange }) => {
+      filter(({ esqlVariables }) => {
+        const variablesInQuery = getESQLQueryVariables(esqlQuery$.getValue());
+        const variablesInParent = esqlVariables || [];
+
+        // Filter out this control's own variable
+        const currentVariableName = variableName$.getValue();
+        const externalVariables = variablesInParent.filter(
+          (variable) => variable.key !== currentVariableName
+        );
+
+        const shouldFetch =
+          !hasInitialFetch ||
+          haveVariablesValuesChanged(externalVariables, previousESQLVariables, variablesInQuery);
+
+        if (shouldFetch) {
+          previousESQLVariables = [...externalVariables];
+          hasInitialFetch = true;
+        }
+
+        return shouldFetch;
+      }),
+      switchMap(async ({ timeRange, esqlVariables }) => {
         setDataLoading(true);
+        const variablesInParent = esqlVariables || [];
+
         return await getESQLSingleColumnValues({
           query: esqlQuery$.getValue(),
           search: dataService.search.search,
           timeRange,
+          esqlVariables: variablesInParent,
         });
       })
     )
@@ -191,6 +236,8 @@ export function initializeESQLControlSelections(
       if (lastSaved?.controlType) controlType$.next(lastSaved?.controlType);
       esqlQuery$.next(lastSaved?.esqlQuery ?? '');
       title$.next(lastSaved?.title);
+      previousESQLVariables = [];
+      hasInitialFetch = false;
     },
     getLatestState: () => {
       return {

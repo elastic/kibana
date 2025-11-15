@@ -425,19 +425,17 @@ export const buildColumnSuggestions = (
   });
 
   const suggestions = [...fieldsSuggestions];
-  if (options?.supportsControls) {
-    const variableType = options?.variableType ?? ESQLVariableType.FIELDS;
-    const userDefinedColumns =
-      variables?.filter((variable) => variable.type === variableType) ?? [];
+  const variableType = options?.variableType ?? ESQLVariableType.FIELDS;
+  const userDefinedColumns = variables?.filter((variable) => variable.type === variableType) ?? [];
 
-    const controlSuggestions = columns.length
-      ? getControlSuggestion(
-          variableType,
-          userDefinedColumns?.map((v) => `${getVariablePrefix(variableType)}${v.key}`)
-        )
-      : [];
-    suggestions.push(...controlSuggestions);
-  }
+  const controlSuggestions = columns.length
+    ? getControlSuggestion(
+        variableType,
+        userDefinedColumns?.map((v) => `${getVariablePrefix(variableType)}${v.key}`),
+        Boolean(options?.supportsControls)
+      )
+    : [];
+  suggestions.push(...controlSuggestions);
 
   return [...suggestions];
 };

@@ -28,7 +28,7 @@ import type { CodeEditorProps } from '@kbn/code-editor';
 import { CodeEditor } from '@kbn/code-editor';
 import type { CoreStart } from '@kbn/core/public';
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
-import type { FieldType } from '@kbn/esql-ast';
+import { type FieldType } from '@kbn/esql-ast';
 import type { ESQLFieldWithMetadata } from '@kbn/esql-ast/src/commands_registry/types';
 import type { ESQLTelemetryCallbacks } from '@kbn/esql-types';
 import {
@@ -284,16 +284,15 @@ const ESQLEditorInternal = function ESQLEditor({
 
   // Enable the variables service if the feature is supported in the consumer app
   useEffect(() => {
+    const variables = variablesService?.esqlVariables;
+    if (!isEqual(variables, esqlVariables)) {
+      variablesService?.clearVariables();
+      esqlVariables?.forEach((variable) => {
+        variablesService?.addVariable(variable);
+      });
+    }
     if (controlsContext?.supportsControls) {
       variablesService?.enableSuggestions();
-
-      const variables = variablesService?.esqlVariables;
-      if (!isEqual(variables, esqlVariables)) {
-        variablesService?.clearVariables();
-        esqlVariables?.forEach((variable) => {
-          variablesService?.addVariable(variable);
-        });
-      }
     } else {
       variablesService?.disableSuggestions();
     }
