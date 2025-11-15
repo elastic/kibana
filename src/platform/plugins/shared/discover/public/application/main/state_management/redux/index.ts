@@ -32,6 +32,7 @@ import {
   replaceAppState,
   updateGlobalState,
   replaceGlobalState,
+  pushCurrentTabStateToUrl,
 } from './actions';
 
 export {
@@ -46,12 +47,7 @@ export { DEFAULT_TAB_STATE } from './constants';
 export { type InternalStateStore, createInternalStateStore } from './internal_state';
 
 export const internalStateActions = {
-  ...omit(
-    internalStateSlice.actions,
-    'setTabs',
-    'setDataViewId',
-    'setDefaultProfileAdHocDataViewIds'
-  ),
+  ...omit(internalStateSlice.actions, 'setTabs', 'setDefaultProfileAdHocDataViewIds'),
   loadDataViewList,
   setTabs,
   updateTabs,
@@ -75,6 +71,7 @@ export const internalStateActions = {
   replaceAppState,
   updateGlobalState,
   replaceGlobalState,
+  pushCurrentTabStateToUrl,
 };
 
 export {

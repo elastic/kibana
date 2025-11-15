@@ -29,8 +29,8 @@ const mergeAppState = (
   return { mergedAppState, hasStateChanges: !isEqualState(currentAppState, mergedAppState) };
 };
 
-export const updateAppState: InternalStateThunkActionCreator<[AppStatePayload]> =
-  (payload) => async (dispatch, getState) => {
+export const updateAppState: InternalStateThunkActionCreator<[AppStatePayload]> = (payload) =>
+  async function updateAppStateThunkFn(dispatch, getState) {
     const { mergedAppState, hasStateChanges } = mergeAppState(getState(), payload);
 
     if (hasStateChanges) {
@@ -40,9 +40,10 @@ export const updateAppState: InternalStateThunkActionCreator<[AppStatePayload]> 
     }
   };
 
-export const replaceAppState: InternalStateThunkActionCreator<[AppStatePayload], Promise<void>> =
-  (payload) =>
-  async (dispatch, getState, { urlStateStorage }) => {
+export const replaceAppState: InternalStateThunkActionCreator<[AppStatePayload], Promise<void>> = (
+  payload
+) =>
+  async function replaceAppStateThunkFn(dispatch, getState, { urlStateStorage }) {
     const currentState = getState();
 
     if (currentState.tabs.unsafeCurrentId !== payload.tabId) {
@@ -68,8 +69,8 @@ const mergeGlobalState = (
   };
 };
 
-export const updateGlobalState: InternalStateThunkActionCreator<[GlobalStatePayload]> =
-  (payload) => async (dispatch, getState) => {
+export const updateGlobalState: InternalStateThunkActionCreator<[GlobalStatePayload]> = (payload) =>
+  async function updateGlobalStateThunkFn(dispatch, getState) {
     const { mergedGlobalState, hasStateChanges } = mergeGlobalState(getState(), payload);
 
     if (hasStateChanges) {
@@ -85,9 +86,8 @@ export const updateGlobalState: InternalStateThunkActionCreator<[GlobalStatePayl
 export const replaceGlobalState: InternalStateThunkActionCreator<
   [GlobalStatePayload],
   Promise<void>
-> =
-  (payload) =>
-  async (dispatch, getState, { urlStateStorage }) => {
+> = (payload) =>
+  async function replaceGlobalStateThunkFn(dispatch, getState, { urlStateStorage }) {
     const currentState = getState();
 
     if (currentState.tabs.unsafeCurrentId !== payload.tabId) {
@@ -97,4 +97,15 @@ export const replaceGlobalState: InternalStateThunkActionCreator<
     const { mergedGlobalState } = mergeGlobalState(currentState, payload);
 
     await urlStateStorage.set(GLOBAL_STATE_URL_KEY, mergedGlobalState, { replace: true });
+  };
+
+export const pushCurrentTabStateToUrl: InternalStateThunkActionCreator<
+  [TabActionPayload],
+  Promise<void>
+> = ({ tabId }) =>
+  async function pushCurrentTabStateToUrlThunkFn(dispatch) {
+    await Promise.all([
+      dispatch(replaceGlobalState({ tabId, globalState: {} })),
+      dispatch(replaceAppState({ tabId, appState: {} })),
+    ]);
   };
