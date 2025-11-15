@@ -82,6 +82,7 @@ async function getState(url: string = '/', { savedSearch }: { savedSearch?: Save
     customizationService: await getConnectedCustomizationService({
       customizationCallbacks: [],
       stateContainer: nextState,
+      services: mockServices,
     }),
     runtimeStateManager,
     getCurrentUrl,

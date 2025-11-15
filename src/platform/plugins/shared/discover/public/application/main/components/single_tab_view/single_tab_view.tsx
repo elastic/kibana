@@ -112,6 +112,7 @@ export const SingleTabView = ({
       const customizationService = await getConnectedCustomizationService({
         stateContainer,
         customizationCallbacks,
+        services,
       });
 
       return dispatch(
