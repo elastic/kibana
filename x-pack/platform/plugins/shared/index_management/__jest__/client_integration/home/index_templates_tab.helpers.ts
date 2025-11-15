@@ -40,7 +40,6 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
   const selectDetailsTab = async (
     tab: 'summary' | 'settings' | 'mappings' | 'aliases' | 'preview'
   ) => {
-    // const tabs = ['summary', 'settings', 'mappings', 'aliases', 'preview'];
     const tabTestDataSubj = `${tab}TabBtn` as TestSubjects;
 
     await act(async () => {

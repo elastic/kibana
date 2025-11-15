@@ -12,46 +12,6 @@ import { createLazyPageObject } from '@kbn/scout';
 import type { AbstractPageObject } from './page_objects/index_management_page';
 import { IndexManagement } from './page_objects/index_management_page';
 
-// import type { IndexManagementPageObjects } from './page_objects';
-// import { extendPageObjects } from './page_objects';
-
-/*
-interface IndexManagementPO {
-  indexManagement: IndexManagement;
-}
-
-export type IndexManagementPageObjects = IndexManagementPO & PageObjects;
-
-export function extendPageObjects(
-  pageObjects: PageObjects,
-  page: ScoutPage
-): IndexManagementPageObjects {
-  return {
-    ...pageObjects,
-    indexManagement: createLazyPageObject(IndexManagement, page),
-  };
-}
-export interface ConsoleTestFixtures extends ScoutTestFixtures {
-  pageObjects: IndexManagementPageObjects;
-}
-
-export const test = base.extend<ConsoleTestFixtures, ScoutWorkerFixtures>({
-  pageObjects: async (
-    {
-      pageObjects,
-      page,
-    }: {
-      pageObjects: IndexManagementPageObjects;
-      page: ScoutPage;
-    },
-    use: (pageObjects: IndexManagementPageObjects) => Promise<void>
-  ) => {
-    const extendedPageObjects = extendPageObjects(pageObjects, page);
-    await use(extendedPageObjects);
-  },
-});
-*/
-
 type PageObjectClass = new (page: ScoutPage) => AbstractPageObject;
 
 export const createTest = function <PageObjectsExtensions = Record<string, AbstractPageObject>>(
