@@ -8,11 +8,11 @@
 import React, { useEffect, useMemo } from 'react';
 import { EuiHorizontalRule, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { ValueReportSettings } from './value_report_settings';
 import {
-  DEFAULT_VALUE_REPORT_MINUTES,
-  DEFAULT_VALUE_REPORT_RATE,
-} from '../../../../common/constants';
+  SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_MINUTES,
+  SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_RATE,
+} from '@kbn/management-settings-ids';
+import { ValueReportSettings } from './value_report_settings';
 import { CostSavingsTrend } from './cost_savings_trend';
 import { ExecutiveSummary } from './executive_summary';
 import { AlertProcessing } from './alert_processing';
@@ -30,8 +30,8 @@ export const AIValueMetrics: React.FC<Props> = ({ setHasAttackDiscoveries, from,
 
   const { analystHourlyRate, minutesPerAlert } = useMemo(
     () => ({
-      minutesPerAlert: uiSettings.get<number>(DEFAULT_VALUE_REPORT_MINUTES),
-      analystHourlyRate: uiSettings.get<number>(DEFAULT_VALUE_REPORT_RATE),
+      minutesPerAlert: uiSettings.get<number>(SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_MINUTES),
+      analystHourlyRate: uiSettings.get<number>(SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_RATE),
     }),
     [uiSettings]
   );

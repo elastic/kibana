@@ -19,7 +19,7 @@ import {
   EuiSkeletonText,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { DEFAULT_VALUE_REPORT_TITLE } from '../../../../common/constants';
+import { SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_TITLE } from '@kbn/management-settings-ids';
 import { useKibana } from '../../../common/lib/kibana';
 import { CostSavings } from './cost_savings';
 import { getTimeRangeAsDays, formatDollars, formatThousands } from './metrics';
@@ -53,10 +53,12 @@ export const ExecutiveSummary: React.FC<Props> = ({
   valueMetricsCompare,
 }) => {
   const { uiSettings } = useKibana().services;
-  const [title, setTitle] = useState<string>(uiSettings.get(DEFAULT_VALUE_REPORT_TITLE));
+  const [title, setTitle] = useState<string>(
+    uiSettings.get(SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_TITLE)
+  );
   const updateTitle = useCallback(
     (newTitle: string) => {
-      uiSettings.set(DEFAULT_VALUE_REPORT_TITLE, newTitle);
+      uiSettings.set(SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_TITLE, newTitle);
       setTitle(newTitle);
     },
     [uiSettings]

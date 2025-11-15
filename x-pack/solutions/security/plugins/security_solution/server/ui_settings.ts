@@ -9,11 +9,13 @@ import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
 import type { CoreSetup, UiSettingsParams } from '@kbn/core/server';
-import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
-import type { ReadonlyModeType } from '@kbn/core-ui-settings-common';
+import {
+  SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_MINUTES,
+  SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_RATE,
+  SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_TITLE,
+} from '@kbn/management-settings-ids';
 import {
   APP_ID,
-  DEFAULT_AI_CONNECTOR,
   DEFAULT_ALERT_TAGS_KEY,
   DEFAULT_ALERT_TAGS_VALUE,
   DEFAULT_ANOMALY_SCORE,
@@ -30,9 +32,6 @@ import {
   DEFAULT_THREAT_INDEX_KEY,
   DEFAULT_THREAT_INDEX_VALUE,
   DEFAULT_TO,
-  DEFAULT_VALUE_REPORT_MINUTES,
-  DEFAULT_VALUE_REPORT_RATE,
-  DEFAULT_VALUE_REPORT_TITLE,
   ENABLE_ASSET_INVENTORY_SETTING,
   ENABLE_CCS_READ_WARNING_SETTING,
   ENABLE_CLOUD_CONNECTOR_SETTING,
@@ -622,33 +621,8 @@ export const initUiSettings = (
   uiSettings.register(orderSettings(securityUiSettings));
 };
 
-export const getDefaultAIConnectorSetting = (
-  connectors: Connector[],
-  readonlyMode?: ReadonlyModeType
-): SettingsConfig => ({
-  [DEFAULT_AI_CONNECTOR]: {
-    name: i18n.translate('xpack.securitySolution.uiSettings.defaultAIConnectorLabel', {
-      defaultMessage: 'Default AI Connector',
-    }),
-    // TODO, make Elastic LLM the default value once fully available in serverless
-    value: connectors.at(0)?.id,
-    description: i18n.translate('xpack.securitySolution.uiSettings.defaultAIConnectorDescription', {
-      defaultMessage: 'Default AI connector for serverless AI features (Elastic AI SOC Engine)',
-    }),
-    type: 'select',
-    options: connectors.map(({ id }) => id),
-    optionLabels: Object.fromEntries(connectors.map(({ id, name }) => [id, name])),
-    category: [APP_ID],
-    requiresPageReload: true,
-    schema: schema.string(),
-    solutionViews: ['classic', 'security'],
-    readonlyMode,
-    readonly: readonlyMode !== undefined,
-  },
-});
-
 export const getDefaultValueReportSettings = (): SettingsConfig => ({
-  [DEFAULT_VALUE_REPORT_MINUTES]: {
+  [SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_MINUTES]: {
     name: i18n.translate('xpack.securitySolution.uiSettings.defaultValueMinutesLabel', {
       defaultMessage: 'Value report minutes per alert',
     }),
@@ -666,7 +640,7 @@ export const getDefaultValueReportSettings = (): SettingsConfig => ({
     schema: schema.number(),
     solutionViews: ['classic', 'security'],
   },
-  [DEFAULT_VALUE_REPORT_RATE]: {
+  [SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_RATE]: {
     name: i18n.translate('xpack.securitySolution.uiSettings.defaultValueRateLabel', {
       defaultMessage: 'Value report analyst hourly rate',
     }),
@@ -681,7 +655,7 @@ export const getDefaultValueReportSettings = (): SettingsConfig => ({
     schema: schema.number(),
     solutionViews: ['classic', 'security'],
   },
-  [DEFAULT_VALUE_REPORT_TITLE]: {
+  [SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_TITLE]: {
     name: i18n.translate('xpack.securitySolution.uiSettings.defaultValueTitleLabel', {
       defaultMessage: 'Value report title',
     }),
