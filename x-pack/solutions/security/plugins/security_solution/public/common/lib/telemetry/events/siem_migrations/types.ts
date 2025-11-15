@@ -111,7 +111,7 @@ export interface ReportSetupQueryCopiedActionParams {
 export interface ReportSetupMigrationCreatedActionParams extends BaseResultActionParams {
   eventName: string;
   migrationId?: string;
-  rulesCount: number;
+  count: number;
 }
 export interface ReportSetupMigrationDeletedActionParams extends BaseResultActionParams {
   eventName: string;
