@@ -60,13 +60,21 @@ export const DissectPatternAISuggestions = ({
   if (suggestionsState.value) {
     return (
       <DissectPatternSuggestion
-        dissectProcessor={suggestionsState.value.processor}
+        dissectProcessor={suggestionsState.value.dissectProcessor}
         simulationResult={suggestionsState.value.simulationResult}
         onAccept={() => {
           if (suggestionsState.value) {
-            setValue('pattern', suggestionsState.value.processor.pattern, {
+            setValue('pattern', suggestionsState.value.dissectProcessor.pattern, {
               shouldValidate: true,
             });
+            // Set append_separator if the processor uses it
+            if (suggestionsState.value.dissectProcessor.processor.dissect.append_separator) {
+              setValue(
+                'append_separator',
+                suggestionsState.value.dissectProcessor.processor.dissect.append_separator,
+                { shouldValidate: true }
+              );
+            }
           }
           refreshSuggestions(null);
         }}

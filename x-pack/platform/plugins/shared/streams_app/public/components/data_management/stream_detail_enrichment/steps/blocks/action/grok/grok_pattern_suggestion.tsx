@@ -67,14 +67,14 @@ export const GrokPatternAISuggestions = ({
   if (suggestionsState.value) {
     return (
       <GrokPatternSuggestion
-        grokProcessor={suggestionsState.value.processor}
+        grokProcessor={suggestionsState.value.grokProcessor}
         simulationResult={suggestionsState.value.simulationResult}
         onAccept={() => {
           if (suggestionsState.value) {
             setValue(
               'patterns',
-              suggestionsState.value.processor.patterns.map(
-                (value: string) => new DraftGrokExpression(grokCollection, value)
+              suggestionsState.value.grokProcessor.patterns.map(
+                (value) => new DraftGrokExpression(grokCollection, value)
               ),
               { shouldValidate: true }
             );
