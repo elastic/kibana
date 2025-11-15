@@ -128,6 +128,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       connectorsDropbox: `${ELASTIC_DOCS}reference/search-connectors/es-connectors-dropbox`,
       connectorsContentExtraction: `${ELASTIC_DOCS}reference/search-connectors/es-connectors-content-extraction`,
       connectorsGithub: `${ELASTIC_DOCS}reference/search-connectors/es-connectors-github`,
+      connectorsGitlab: `${ELASTIC_DOCS}reference/search-connectors/es-connectors-gitlab`,
       connectorsGmail: `${ELASTIC_DOCS}reference/search-connectors/es-connectors-gmail`,
       connectorsGoogleCloudStorage: `${ELASTIC_DOCS}reference/search-connectors/es-connectors-google-cloud`,
       connectorsGoogleDrive: `${ELASTIC_DOCS}reference/search-connectors/es-connectors-google-drive`,
