@@ -267,10 +267,7 @@ export const TransformList: FC<TransformListProps> = ({
       >
         <DeleteActionName
           canDeleteTransform={capabilities.canDeleteTransform}
-          disabled={isDeleteActionDisabled(transformSelection, false)}
-          isBulkAction={true}
           items={transformSelection}
-          forceDisable={false}
         />
       </EuiButtonEmpty>
     </div>,
