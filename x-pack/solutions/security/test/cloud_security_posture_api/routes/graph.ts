@@ -22,6 +22,7 @@ import type {
 } from '@kbn/cloud-security-posture-common/types/graph/latest';
 import { CLOUD_ASSET_DISCOVERY_PACKAGE_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
 import { isLabelNode } from '@kbn/cloud-security-posture-graph/src/components/utils';
+import { getEnrichPolicyId } from '@kbn/cloud-security-posture-common/utils/helpers';
 import type { FtrProviderContext } from '../ftr_provider_context';
 import { result } from '../utils';
 import { CspSecurityCommonProvider } from './helper/user_roles_utilites';
@@ -805,6 +806,161 @@ export default function (providerContext: FtrProviderContext) {
           expect(response.body).to.have.property('nodes').length(3);
           expect(response.body).to.have.property('edges').length(2);
         });
+
+        describe('ECS schema changes with standardized entity representation', () => {
+          it('should return a graph with nodes and edges by origin event - new ECS schema fields user.entity.id and entity.target.id', async () => {
+            const response = await postGraph(supertest, {
+              query: {
+                indexPatterns: ['.alerts-security.alerts-*', 'logs-*'],
+                originEventIds: [{ id: 'new-schema-event-id', isAlert: false }],
+                start: '2024-09-01T00:00:00Z',
+                end: '2024-09-02T00:00:00Z',
+              },
+            }).expect(result(200));
+
+            expect(response.body).to.have.property('nodes').length(3);
+            expect(response.body).to.have.property('edges').length(2);
+            expect(response.body).not.to.have.property('messages');
+
+            const actorNode = response.body.nodes.find(
+              (node: NodeDataModel) => node.id === 'new-schema-user@example.com'
+            ) as EntityNodeDataModel;
+            expect(actorNode).not.to.be(undefined);
+            expect(actorNode.shape).to.equal('rectangle');
+
+            const targetNode = response.body.nodes.find(
+              (node: NodeDataModel) =>
+                node.id === 'projects/new-schema-project-id/serviceAccounts/test-sa'
+            ) as EntityNodeDataModel;
+            expect(targetNode).not.to.be(undefined);
+            expect(targetNode.shape).to.equal('rectangle');
+
+            response.body.nodes.forEach((node: EntityNodeDataModel | LabelNodeDataModel) => {
+              expect(node).to.have.property('color');
+              expect(node.color).equal(
+                'primary',
+                `node color mismatched [node: ${node.id}] [actual: ${node.color}]`
+              );
+              if (isLabelNode(node)) {
+                expect(node.documentsData).to.have.length(1);
+                expect(node.documentsData?.[0]).to.have.property('type', 'event');
+              }
+            });
+
+            response.body.edges.forEach((edge: EdgeDataModel) => {
+              expect(edge).to.have.property('color');
+              expect(edge.color).equal(
+                'subdued',
+                `edge color mismatched [edge: ${edge.id}] [actual: ${edge.color}]`
+              );
+              expect(edge.type).equal('solid');
+            });
+          });
+
+          it('should return a graph with nodes and edges by origin event - only new ECS schema fields (no legacy fields)', async () => {
+            const response = await postGraph(supertest, {
+              query: {
+                indexPatterns: ['.alerts-security.alerts-*', 'logs-*'],
+                originEventIds: [{ id: 'only-new-schema-event-id', isAlert: false }],
+                start: '2024-09-05T00:00:00Z',
+                end: '2024-09-06T00:00:00Z',
+              },
+            }).expect(result(200));
+
+            expect(response.body).to.have.property('nodes').length(3);
+            expect(response.body).to.have.property('edges').length(2);
+            expect(response.body).not.to.have.property('messages');
+
+            const actorNode = response.body.nodes.find(
+              (node: NodeDataModel) => node.id === 'only-new-schema-user@example.com'
+            ) as EntityNodeDataModel;
+            expect(actorNode).not.to.be(undefined);
+            expect(actorNode.shape).to.equal('rectangle');
+
+            const targetNode = response.body.nodes.find(
+              (node: NodeDataModel) =>
+                node.id === 'projects/only-new-schema-project-id/serviceAccounts/deleted-sa'
+            ) as EntityNodeDataModel;
+            expect(targetNode).not.to.be(undefined);
+            expect(targetNode.shape).to.equal('rectangle');
+
+            response.body.nodes.forEach((node: EntityNodeDataModel | LabelNodeDataModel) => {
+              expect(node).to.have.property('color');
+              expect(node.color).equal(
+                'primary',
+                `node color mismatched [node: ${node.id}] [actual: ${node.color}]`
+              );
+              if (isLabelNode(node)) {
+                expect(node.documentsData).to.have.length(2);
+                const hasAlert = node.documentsData!.some((doc) => doc.type === 'alert');
+                const hasEvent = node.documentsData!.some((doc) => doc.type === 'event');
+                expect(hasAlert).to.be(true);
+                expect(hasEvent).to.be(true);
+              }
+            });
+
+            response.body.edges.forEach((edge: EdgeDataModel) => {
+              expect(edge).to.have.property('color');
+              expect(edge.color).equal(
+                'subdued',
+                `edge color mismatched [edge: ${edge.id}] [actual: ${edge.color}]`
+              );
+              expect(edge.type).equal('solid');
+            });
+          });
+
+          it('should return a graph with both alert and event for only new ECS schema fields', async () => {
+            const response = await postGraph(supertest, {
+              query: {
+                indexPatterns: ['.alerts-security.alerts-*', 'logs-*'],
+                originEventIds: [{ id: 'only-new-schema-event-id', isAlert: true }],
+                start: '2024-09-05T00:00:00Z',
+                end: '2024-09-06T00:00:00Z',
+              },
+            }).expect(result(200));
+
+            expect(response.body).to.have.property('nodes').length(3);
+            expect(response.body).to.have.property('edges').length(2);
+            expect(response.body).not.to.have.property('messages');
+
+            const actorNode = response.body.nodes.find(
+              (node: NodeDataModel) => node.id === 'only-new-schema-user@example.com'
+            ) as EntityNodeDataModel;
+            expect(actorNode).not.to.be(undefined);
+            expect(actorNode.shape).to.equal('rectangle');
+
+            const targetNode = response.body.nodes.find(
+              (node: NodeDataModel) =>
+                node.id === 'projects/only-new-schema-project-id/serviceAccounts/deleted-sa'
+            ) as EntityNodeDataModel;
+            expect(targetNode).not.to.be(undefined);
+            expect(targetNode.shape).to.equal('rectangle');
+
+            response.body.nodes.forEach((node: EntityNodeDataModel | LabelNodeDataModel) => {
+              expect(node).to.have.property('color');
+              expect(node.color).equal(
+                'primary',
+                `node color mismatched [node: ${node.id}] [actual: ${node.color}]`
+              );
+              if (isLabelNode(node)) {
+                expect(node.documentsData).to.have.length(2);
+                const hasAlert = node.documentsData!.some((doc) => doc.type === 'alert');
+                const hasEvent = node.documentsData!.some((doc) => doc.type === 'event');
+                expect(hasAlert).to.be(true);
+                expect(hasEvent).to.be(true);
+              }
+            });
+
+            response.body.edges.forEach((edge: EdgeDataModel) => {
+              expect(edge).to.have.property('color');
+              expect(edge.color).equal(
+                'subdued',
+                `edge color mismatched [edge: ${edge.id}] [actual: ${edge.color}]`
+              );
+              expect(edge.type).equal('solid');
+            });
+          });
+        });
       });
 
       describe('Enrich graph with entity metadata', () => {
@@ -827,9 +983,14 @@ export default function (providerContext: FtrProviderContext) {
             `enrich index to be created and populated for ${spaceIdentifier} space`,
             async () => {
               try {
-                // Check if the index has data (policy has been executed)
+                await es.enrich.executePolicy({
+                  name: getEnrichPolicyId(spaceId),
+                  wait_for_completion: true,
+                });
+                // Check if the enrich index has data (policy has been executed)
+                const enrichIndexName = `.enrich-${getEnrichPolicyId(spaceId)}`;
                 const count = await es.count({
-                  index: `.enrich-entity_store_field_retention_generic_${spaceIdentifier}_v1.0.0`,
+                  index: enrichIndexName,
                 });
                 return count.count > 0;
               } catch (e) {
@@ -899,8 +1060,8 @@ export default function (providerContext: FtrProviderContext) {
             const response = await es.count({
               index: entitiesIndex,
             });
-            // We expect 2 documents (one for default space, one for test space)
-            return response.count === 2;
+            // We expect 4 documents (three for default space, one for test space)
+            return response.count === 4;
           });
 
           // initialize security-solution-default data-view
@@ -910,6 +1071,34 @@ export default function (providerContext: FtrProviderContext) {
           // initialize security-solution-test data-view
           customSpaceDataView = dataViewRouteHelpersFactory(supertest, customNamespaceId);
           await customSpaceDataView.create('security-solution');
+
+          // NOW enable asset inventory - this creates and executes the enrich policy with all entities
+          await supertest
+            .post(`/api/asset_inventory/enable`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({})
+            .expect(200);
+
+          // Enable asset inventory in the test space
+          await supertest
+            .post(`/s/${customNamespaceId}/api/asset_inventory/enable`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({})
+            .expect(200);
+
+          // Wait for enrich policy to be created (async operation after enable returns)
+          await retry.waitFor('enrich policy to be created', async () => {
+            try {
+              await es.enrich.getPolicy({ name: getEnrichPolicyId() });
+              return true;
+            } catch (e) {
+              return false;
+            }
+          });
+
+          // Wait for enrich indexes to be created AND populated with data
+          await waitForEnrichIndexPopulated();
+          await waitForEnrichIndexPopulated(customNamespaceId);
         });
 
         after(async () => {
@@ -935,16 +1124,6 @@ export default function (providerContext: FtrProviderContext) {
         });
 
         it('should contain entity data when asset inventory is enabled', async () => {
-          // enable asset inventory - install underlying indexes and enrich policies
-          await supertest
-            .post(`/api/asset_inventory/enable`)
-            .set('kbn-xsrf', 'xxxx')
-            .send({})
-            .expect(200);
-
-          // Wait for enrich index to be created AND populated with data
-          await waitForEnrichIndexPopulated();
-
           // although enrich policy is already create via 'api/asset_inventory/enable'
           // we still would like to replicate as if cloud asset discovery integration was fully installed
           await supertest
@@ -1044,16 +1223,6 @@ export default function (providerContext: FtrProviderContext) {
         });
 
         it('should return enriched data when asset inventory is enabled in a different space', async () => {
-          // Enable asset inventory in the test space
-          await supertest
-            .post(`/s/${customNamespaceId}/api/asset_inventory/enable`)
-            .set('kbn-xsrf', 'xxxx')
-            .send({})
-            .expect(200);
-
-          // Wait for enrich index to be created AND populated with data
-          await waitForEnrichIndexPopulated(customNamespaceId);
-
           await supertest
             .post(`/s/${customNamespaceId}/api/fleet/epm/packages/_bulk`)
             .set('kbn-xsrf', 'xxxx')
@@ -1103,6 +1272,83 @@ export default function (providerContext: FtrProviderContext) {
             expect(actorNode.icon).to.equal('user');
             expect(actorNode.shape).to.equal('ellipse');
             expect(actorNode.tag).to.equal('Identity');
+          });
+        });
+
+        it('should enrich graph with entity metadata for actor acting on single target', async () => {
+          await supertest
+            .post(`/api/fleet/epm/packages/_bulk`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              packages: [
+                {
+                  name: 'cloud_asset_inventory',
+                  version: CLOUD_ASSET_DISCOVERY_PACKAGE_VERSION,
+                },
+              ],
+            })
+            .expect(200);
+
+          await retry.tryForTime(enrichPolicyCreationTimeout, async () => {
+            const response = await postGraph(supertest, {
+              query: {
+                indexPatterns: ['.alerts-security.alerts-*', 'logs-*'],
+                originEventIds: [{ id: 'entity-enrichment-event-id', isAlert: true }],
+                start: '2024-09-10T14:00:00Z',
+                end: '2024-09-10T15:00:00Z',
+              },
+            }).expect(result(200));
+
+            expect(response.body).to.have.property('nodes').length(3);
+            expect(response.body).to.have.property('edges').length(2);
+            expect(response.body).not.to.have.property('messages');
+
+            // Find the actor node and verify entity enrichment
+            const actorNode = response.body.nodes.find(
+              (node: NodeDataModel) => node.id === 'entity-user@example.com'
+            ) as EntityNodeDataModel;
+            expect(actorNode).not.to.be(undefined);
+            expect(actorNode.label).to.equal('GCP IAM User');
+            expect(actorNode.icon).to.equal('user');
+            expect(actorNode.shape).to.equal('ellipse');
+            expect(actorNode.tag).to.equal('Identity');
+
+            // Find the target node (service.target.entity.id) and verify entity enrichment
+            const serviceTargetNode = response.body.nodes.find(
+              (node: NodeDataModel) => node.id === 'entity-service-target-1'
+            ) as EntityNodeDataModel;
+            expect(serviceTargetNode).not.to.be(undefined);
+            expect(serviceTargetNode.label).to.equal('GCP Compute Instance');
+            expect(serviceTargetNode.shape).to.equal('rectangle');
+            expect(serviceTargetNode.tag).to.equal('Compute');
+
+            // Verify label node has both event and alert
+            const labelNode = response.body.nodes.find(
+              (node: NodeDataModel) => node.shape === 'label'
+            ) as LabelNodeDataModel;
+            expect(labelNode).not.to.be(undefined);
+            expect(labelNode.color).equal('primary');
+            expect(labelNode.documentsData).to.have.length(2);
+            expectExpect(labelNode.documentsData).toContainEqual(
+              expectExpect.objectContaining({
+                type: 'event',
+              })
+            );
+            expectExpect(labelNode.documentsData).toContainEqual(
+              expectExpect.objectContaining({
+                type: 'alert',
+              })
+            );
+
+            // Verify edges
+            response.body.edges.forEach((edge: EdgeDataModel) => {
+              expect(edge).to.have.property('color');
+              expect(edge.color).equal(
+                'subdued',
+                `edge color mismatched [edge: ${edge.id}] [actual: ${edge.color}]`
+              );
+              expect(edge.type).equal('solid');
+            });
           });
         });
       });

@@ -81,8 +81,34 @@ export const useGraphPreview = ({
   const eventId = getFieldsData('event.id');
   const eventIds = originalEventId ? getFieldArray(originalEventId) : getFieldArray(eventId);
 
-  const actorIds = getFieldArray(getFieldsData('actor.entity.id'));
-  const targetIds = getFieldArray(getFieldsData('target.entity.id'));
+  // Get actor IDs from both legacy and new ECS schema fields
+  const legacyActorIds = getFieldArray(getFieldsData('actor.entity.id'));
+  const userActorIds = getFieldArray(getFieldsData('user.entity.id'));
+  const hostActorIds = getFieldArray(getFieldsData('host.entity.id'));
+  const serviceActorIds = getFieldArray(getFieldsData('service.entity.id'));
+  const entityIds = getFieldArray(getFieldsData('entity.id'));
+  const actorIds = [
+    ...legacyActorIds,
+    ...userActorIds,
+    ...hostActorIds,
+    ...serviceActorIds,
+    ...entityIds,
+  ];
+
+  // Get target IDs from both legacy and new ECS schema fields
+  const legacyTargetIds = getFieldArray(getFieldsData('target.entity.id'));
+  const userTargetIds = getFieldArray(getFieldsData('user.target.entity.id'));
+  const hostTargetIds = getFieldArray(getFieldsData('host.target.entity.id'));
+  const serviceTargetIds = getFieldArray(getFieldsData('service.target.entity.id'));
+  const entityTargetIds = getFieldArray(getFieldsData('entity.target.id'));
+  const targetIds = [
+    ...legacyTargetIds,
+    ...userTargetIds,
+    ...hostTargetIds,
+    ...serviceTargetIds,
+    ...entityTargetIds,
+  ];
+
   const action: string[] | undefined = get(['event', 'action'], ecsData);
   const hasGraphRepresentation =
     Boolean(timestamp) &&
