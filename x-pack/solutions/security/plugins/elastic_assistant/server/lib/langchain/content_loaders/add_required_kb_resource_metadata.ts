@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Document } from 'langchain/document';
+import type { Document } from '@langchain/core/documents';
 
 /**
  * Transforms a set of documents by adding metadata that indicates those documents are required
