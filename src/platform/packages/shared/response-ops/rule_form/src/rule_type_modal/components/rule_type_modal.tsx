@@ -105,6 +105,8 @@ export const RuleTypeModal: React.FC<RuleTypeModalProps & RuleTypeModalState> = 
                 <EuiSpacer size="m" />
                 <EuiPageHeaderSection style={{ width: isFullscreenPortrait ? '100%' : '50%' }}>
                   <EuiFieldSearch
+                    id="ruleTypeModalSearch"
+                    data-test-subj="ruleTypeModalSearch"
                     placeholder={i18n.translate(
                       'responseOpsRuleForm.components.ruleTypeModal.searchPlaceholder',
                       {
