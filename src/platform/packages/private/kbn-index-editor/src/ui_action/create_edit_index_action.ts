@@ -67,9 +67,13 @@ export function createEditLookupIndexContentAction(
       const existingIndexName = doesIndexExist ? indexName : null;
 
       const fileManager = new FileUploadManager(
-        fileUpload,
-        coreStart,
-        data,
+        {
+          analytics: coreStart.analytics,
+          data,
+          fileUpload,
+          http: coreStart.http,
+          notifications: coreStart.notifications,
+        },
         null,
         false,
         true,

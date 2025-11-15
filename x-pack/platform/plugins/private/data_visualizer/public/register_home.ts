@@ -7,22 +7,51 @@
 
 import { i18n } from '@kbn/i18n';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import { getFileDataVisualizerWrapper } from './lazy_load_bundle/component_wrapper';
+import type { ResultLinks } from '@kbn/file-upload-common';
+import type { CoreSetup } from '@kbn/core/public';
+
+import type { FileUploadStartDependencies } from '@kbn/file-upload';
+import { getFileDataVisualizerWrapper } from '@kbn/file-upload';
 import {
   featureTitle,
   FILE_DATA_VIS_TAB_ID,
   applicationPath,
   featureId,
 } from '../common/constants';
-import type { ResultLinks } from '../common/app';
+import { getFieldsStatsGrid } from './application/common/components/fields_stats_grid';
 
-export function registerHomeAddData(home: HomePublicPluginSetup, resultsLinks: ResultLinks) {
+export function registerHomeAddData(
+  getStartServices: CoreSetup<FileUploadStartDependencies>['getStartServices'],
+  home: HomePublicPluginSetup,
+  resultsLinks: ResultLinks
+) {
   home.addData.registerAddDataTab({
     id: FILE_DATA_VIS_TAB_ID,
     name: i18n.translate('xpack.dataVisualizer.file.embeddedTabTitle', {
       defaultMessage: 'Upload file',
     }),
-    getComponent: () => getFileDataVisualizerWrapper('home-add-data', resultsLinks),
+    getComponent: () =>
+      getFileDataVisualizerWrapper(
+        async () => {
+          const [coreStart, deps] = await getStartServices();
+          return {
+            analytics: coreStart.analytics,
+            application: coreStart.application,
+            data: deps.data,
+            fieldFormats: deps.fieldFormats,
+            fileUpload: deps.fileUpload,
+            http: coreStart.http,
+            notifications: coreStart.notifications,
+            share: deps.share,
+            uiActions: deps.uiActions,
+            uiSettings: coreStart.uiSettings,
+            coreStart,
+          };
+        },
+        'home-add-data',
+        resultsLinks,
+        getFieldsStatsGrid
+      ),
   });
 }
 

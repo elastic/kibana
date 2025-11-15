@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export type { FileDataVisualizerSpec, IndexDataVisualizerSpec } from '../../application';
-export { FileDataVisualizer, IndexDataVisualizer } from '../../application';
+// export type { FileDataVisualizerSpec, IndexDataVisualizerSpec } from '../../application';
+export { IndexDataVisualizer } from '../../application';
 export { DataDrift } from '../component_wrapper';

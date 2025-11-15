@@ -21,7 +21,7 @@ import { createFields } from './create_fields';
 import { filterFields } from './filter_fields';
 import { MetricFieldsCount, TotalFieldsCount } from '../stats_table/components/field_count_stats';
 
-interface Props {
+export interface Props {
   results: FindFileStructureResponse;
 }
 

@@ -15,13 +15,15 @@ export function plugin(initializerContext: PluginInitializerContext) {
 export type { DataVisualizerPluginStart } from './plugin';
 
 export type {
-  FileDataVisualizerSpec,
+  // FileDataVisualizerSpec,
   IndexDataVisualizerSpec,
   IndexDataVisualizerViewProps,
   DataDriftSpec,
 } from './application';
-export type {
-  GetAdditionalLinksParams,
-  ResultLink,
-  GetAdditionalLinks,
-} from './application/common/components/results_links';
+// export type {
+//   GetAdditionalLinksParams,
+//   ResultLink,
+//   GetAdditionalLinks,
+// } from './application/file_data_visualizer/new/results_links';
+
+export { getFieldsStatsGrid } from './application/common/components/fields_stats_grid';

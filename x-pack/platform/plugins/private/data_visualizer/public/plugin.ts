@@ -10,12 +10,12 @@ import type { Plugin } from '@kbn/core/public';
 
 import type { CoreSetup } from '@kbn/core/public';
 import { dynamic } from '@kbn/shared-ux-utility';
+import type { ConfigSchema } from '@kbn/file-upload-common';
 import { getComponents } from './api';
 import { getMaxBytesFormatted } from './application/common/util/get_max_bytes';
 import { registerHomeAddData, registerHomeFeatureCatalogue } from './register_home';
 import { setStartServices } from './kibana_services';
 import { IndexDataVisualizerLocatorDefinition } from './application/index_data_visualizer/locator';
-import type { ConfigSchema } from '../common/app';
 import type {
   DataVisualizerSetupDependencies,
   DataVisualizerStartDependencies,
@@ -59,7 +59,7 @@ export class DataVisualizerPlugin
     }
 
     if (plugins.home) {
-      registerHomeAddData(plugins.home, this.resultsLinks);
+      registerHomeAddData(core.getStartServices as any, plugins.home, this.resultsLinks); // fix any !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       registerHomeFeatureCatalogue(plugins.home);
     }
 
@@ -70,17 +70,23 @@ export class DataVisualizerPlugin
     setStartServices(core, plugins);
 
     if (plugins.uiActions) {
-      registerUiActions(core, plugins);
+      const deps = {
+        ...plugins,
+        http: core.http,
+        application: core.application,
+        uiActions: plugins.uiActions,
+      };
+      registerUiActions(core, deps as any); // fix any !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     }
 
     const {
-      getFileDataVisualizerComponent,
+      // getFileDataVisualizerComponent,
       getIndexDataVisualizerComponent,
       getDataDriftComponent,
     } = getComponents(this.resultsLinks);
 
     return {
-      getFileDataVisualizerComponent,
+      // getFileDataVisualizerComponent,
       getIndexDataVisualizerComponent,
       getDataDriftComponent,
       getMaxBytesFormatted,
