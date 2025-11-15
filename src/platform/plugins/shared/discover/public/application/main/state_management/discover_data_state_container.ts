@@ -334,7 +334,11 @@ export function getDataStateContainer({
 
           if (preFetchStateUpdate) {
             disableNextFetchOnStateChange$.next(true);
-            await appStateContainer.replaceUrlState(preFetchStateUpdate);
+            await internalState.dispatch(
+              injectCurrentTab(internalStateActions.replaceAppState)({
+                appState: preFetchStateUpdate,
+              })
+            );
             disableNextFetchOnStateChange$.next(false);
           }
 
@@ -371,7 +375,11 @@ export function getDataStateContainer({
               });
 
               if (postFetchStateUpdate) {
-                await appStateContainer.replaceUrlState(postFetchStateUpdate);
+                await internalState.dispatch(
+                  injectCurrentTab(internalStateActions.replaceAppState)({
+                    appState: postFetchStateUpdate,
+                  })
+                );
               }
 
               // Clear the default profile state flags after the data fetching

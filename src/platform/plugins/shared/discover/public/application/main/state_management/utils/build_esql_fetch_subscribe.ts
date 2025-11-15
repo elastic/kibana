@@ -178,7 +178,9 @@ export const buildEsqlFetchSubscribe = ({
           ...(changeViewMode && { viewMode: undefined }),
         };
 
-        await appStateContainer.replaceUrlState(nextState);
+        await internalState.dispatch(
+          injectCurrentTab(internalStateActions.replaceAppState)({ appState: nextState })
+        );
       }
     }
 

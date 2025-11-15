@@ -224,7 +224,11 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
           );
         }
         stateContainer.appState.set(finalAppState);
-        await stateContainer.appState.replaceUrlState(finalAppState);
+        await stateContainer.internalState.dispatch(
+          stateContainer.injectCurrentTab(stateContainer.internalStateActions.replaceAppState)({
+            appState: finalAppState,
+          })
+        );
       }
 
       const unsubscribeState = stateContainer.appState.state$.subscribe({

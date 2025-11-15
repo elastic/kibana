@@ -320,11 +320,15 @@ export function getDiscoverStateContainer({
     }
 
     if (isDataSourceType(appStateContainer.get().dataSource, DataSourceType.DataView)) {
-      await appStateContainer.replaceUrlState({
-        dataSource: nextDataView.id
-          ? createDataViewDataSource({ dataViewId: nextDataView.id })
-          : undefined,
-      });
+      await internalState.dispatch(
+        injectCurrentTab(internalStateActions.replaceAppState)({
+          appState: {
+            dataSource: nextDataView.id
+              ? createDataViewDataSource({ dataViewId: nextDataView.id })
+              : undefined,
+          },
+        })
+      );
     }
 
     const trackingEnabled = Boolean(nextDataView.isPersisted() || savedSearchContainer.getId());
