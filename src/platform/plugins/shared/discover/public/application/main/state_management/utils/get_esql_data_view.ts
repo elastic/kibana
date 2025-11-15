@@ -33,11 +33,16 @@ export async function getEsqlDataView(
     // here the pattern hasn't changed but the time field has
     onlyTimeFieldChanged
   ) {
-    return await getESQLAdHocDataview(query.esql, services.dataViews, {
-      // make sure that data view service cache is not used when creating the ES|QL data view,
-      // otherwise a single mutated data view instance would be used across tabs (inside currentDataView$) which would be incorrect
-      // https://github.com/elastic/kibana/issues/234719
-      createNewInstanceEvenIfCachedOneAvailable: !currentDataView || onlyTimeFieldChanged,
+    return await getESQLAdHocDataview({
+      dataViewsService: services.dataViews,
+      query: query.esql,
+      options: {
+        // make sure that data view service cache is not used when creating the ES|QL data view,
+        // otherwise a single mutated data view instance would be used across tabs (inside currentDataView$) which would be incorrect
+        // https://github.com/elastic/kibana/issues/234719
+        createNewInstanceEvenIfCachedOneAvailable: !currentDataView || onlyTimeFieldChanged,
+      },
+      http: services.http,
     });
   }
   return currentDataView;
