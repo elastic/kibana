@@ -30,6 +30,8 @@ import {
   resetDiscoverSession,
   updateAppState,
   replaceAppState,
+  updateGlobalState,
+  replaceGlobalState,
 } from './actions';
 
 export {
@@ -71,6 +73,8 @@ export const internalStateActions = {
   resetDiscoverSession,
   updateAppState,
   replaceAppState,
+  updateGlobalState,
+  replaceGlobalState,
 };
 
 export {
