@@ -33,9 +33,12 @@ import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
 import {
   type ESQLStatsQueryMeta,
   type SupportedStatsFunction,
+  getStatsGroupFieldType,
+  getFieldParamDefinition,
 } from '@kbn/esql-utils/src/utils/cascaded_documents_helpers';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { ESQLControlVariable } from '@kbn/esql-types';
+import type { StatsCommandSummary } from '@kbn/esql-ast/src/mutate/commands/stats';
 import { getPatternCellRenderer } from '../../../../../../context_awareness/profile_providers/common/patterns_data_source_profile/pattern_cell_renderer';
 
 import type { ESQLDataGroupNode, DataTableRecord } from './types';
@@ -53,7 +56,7 @@ interface RowContext {
 interface RowClickActionContext {
   dataView: DataView;
   editorQuery: AggregateQuery;
-  editorQueryMeta: ESQLStatsQueryMeta;
+  statsFieldSummary: StatsCommandSummary['grouping'] | undefined;
   esqlVariables: ESQLControlVariable[] | undefined;
   rowContext: RowContext;
   services: UnifiedDataTableProps['services'];
@@ -71,6 +74,10 @@ const contextRowActions: Array<
      * The stats function type to render the action for. If not provided, the action will be rendered for all stats function types.
      */
     renderFor?: SupportedStatsFunction;
+    /**
+     * Allows an action to be enabled when the field is filterable.
+     */
+    enabledWhenFilterable?: boolean;
   }
 > = [
   {
@@ -85,6 +92,7 @@ const contextRowActions: Array<
     },
   },
   {
+    enabledWhenFilterable: true,
     name: i18n.translate('discover.esql_data_cascade.row.action.filter_in', {
       defaultMessage: 'Filter in',
     }),
@@ -110,6 +118,7 @@ const contextRowActions: Array<
     },
   },
   {
+    enabledWhenFilterable: true,
     name: i18n.translate('discover.esql_data_cascade.row.action.filter_out', {
       defaultMessage: 'Filter out',
     }),
@@ -165,11 +174,11 @@ interface ContextMenuProps
   extends Pick<
     RowClickActionContext,
     | 'editorQuery'
-    | 'editorQueryMeta'
     | 'globalState'
     | 'openInNewTab'
     | 'dataView'
     | 'esqlVariables'
+    | 'statsFieldSummary'
   > {
   row: RowContext;
   services: UnifiedDataTableProps['services'];
@@ -181,16 +190,29 @@ const ContextMenu = React.memo(
     row,
     services,
     editorQuery,
-    editorQueryMeta,
+    statsFieldSummary,
     esqlVariables,
     dataView,
     close,
     globalState,
     openInNewTab,
   }: ContextMenuProps) => {
-    const groupType = editorQueryMeta.groupByFields.find(
-      (field) => field.field === row.groupId
-    )?.type;
+    const rowStatsFieldSummary = useMemo(() => {
+      return statsFieldSummary?.[row.groupId];
+    }, [statsFieldSummary, row.groupId]);
+
+    const groupType = rowStatsFieldSummary
+      ? getStatsGroupFieldType(rowStatsFieldSummary)
+      : undefined;
+
+    const rowDataViewField = useMemo(() => {
+      const fieldParamDef = getFieldParamDefinition(
+        row.groupId,
+        rowStatsFieldSummary?.terminals ?? [],
+        esqlVariables
+      );
+      return dataView.fields.getByName(fieldParamDef ?? row.groupId);
+    }, [dataView.fields, esqlVariables, row.groupId, rowStatsFieldSummary?.terminals]);
 
     const panels = useMemo<EuiContextMenuPanelDescriptor[]>(() => {
       return [
@@ -203,6 +225,9 @@ const ContextMenu = React.memo(
 
             return acc.concat({
               ...action,
+              disabled:
+                (action.enabledWhenFilterable === true && !rowDataViewField?.filterable) ||
+                !row.groupValue,
               onClick: (action.onClick as MouseEventHandler<Element>)?.bind({
                 rowContext: row,
                 services,
@@ -226,6 +251,7 @@ const ContextMenu = React.memo(
       groupType,
       openInNewTab,
       row,
+      rowDataViewField?.filterable,
       services,
     ]);
 
@@ -243,7 +269,7 @@ export const useEsqlDataCascadeRowActionHelpers = (
   dataView: DataView,
   esqlVariables: ESQLControlVariable[] | undefined,
   editorQuery: AggregateQuery,
-  editorQueryMeta: ESQLStatsQueryMeta,
+  statsFieldSummary: StatsCommandSummary['grouping'] | undefined,
   globalState: TabStateGlobalState,
   services: UnifiedDataTableProps['services']
 ) => {
@@ -300,12 +326,12 @@ export const useEsqlDataCascadeRowActionHelpers = (
           <ContextMenu
             close={closePopover}
             editorQuery={editorQuery}
-            editorQueryMeta={editorQueryMeta}
             esqlVariables={esqlVariables}
             globalState={globalState}
             row={popoverRowData!}
             services={services}
             dataView={dataView}
+            statsFieldSummary={statsFieldSummary}
             openInNewTab={openInNewTab}
           />
         </EuiWrappingPopover>
@@ -315,11 +341,11 @@ export const useEsqlDataCascadeRowActionHelpers = (
       popoverRowData,
       closePopover,
       editorQuery,
-      editorQueryMeta,
       esqlVariables,
       globalState,
       services,
       dataView,
+      statsFieldSummary,
       openInNewTab,
     ]
   );

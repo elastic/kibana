@@ -87,13 +87,12 @@ const requiresMatchPhrase = (fieldName: string, dataViewFields: DataView['fields
   const dataViewField = dataViewFields.getByName(fieldName);
 
   return (
-    (dataViewField?.spec.esTypes?.includes('text') ||
-      dataViewField?.spec.esTypes?.includes('keyword')) &&
-    !dataViewField?.spec.aggregatable
+    (dataViewField?.esTypes?.includes('text') || dataViewField?.esTypes?.includes('keyword')) &&
+    !dataViewField?.aggregatable
   );
 };
 
-function getStatsCommandToOperateOn(esqlQuery: EsqlQuery): StatsCommandSummary | null {
+export function getStatsCommandToOperateOn(esqlQuery: EsqlQuery): StatsCommandSummary | null {
   if (esqlQuery.errors.length) {
     return null;
   }
@@ -143,7 +142,7 @@ function getStatsCommandAtIndexSummary(esqlQuery: EsqlQuery, commandIndex: numbe
   return mutate.commands.stats.summarizeCommand(esqlQuery, declarationCommand);
 }
 
-function getFieldParamDefinition(
+export function getFieldParamDefinition(
   fieldName: string,
   fieldTerminals: StatsFieldSummary['terminals'],
   esqlVariables: ESQLControlVariable[] | undefined
@@ -161,6 +160,19 @@ function getFieldParamDefinition(
 
     return controlVariable.value as string;
   }
+}
+
+export function getStatsGroupFieldType(groupByFields: StatsFieldSummary): string;
+export function getStatsGroupFieldType(
+  groupByFields: StatsFieldSummary | undefined
+): string | undefined {
+  if (!groupByFields) {
+    return undefined;
+  }
+
+  return groupByFields.definition.type === 'function'
+    ? groupByFields.definition.name
+    : groupByFields.definition.type;
 }
 
 export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta => {
@@ -247,10 +259,7 @@ export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta =
       // as they are not valid in this context
       groupByFields.push({
         field: groupFieldName,
-        type:
-          groupFieldNode.definition.type === 'function'
-            ? groupFieldNode.definition.name
-            : groupFieldNode.definition.type,
+        type: getStatsGroupFieldType(groupFieldNode)!,
       });
 
       break;
@@ -265,10 +274,7 @@ export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta =
 
     groupByFields.push({
       field: groupFieldName,
-      type:
-        groupFieldNode.definition.type === 'function'
-          ? groupFieldNode.definition.name
-          : groupFieldNode.definition.type,
+      type: getStatsGroupFieldType(groupFieldNode)!,
     });
   }
 

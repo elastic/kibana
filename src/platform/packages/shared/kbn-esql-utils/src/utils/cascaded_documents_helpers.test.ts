@@ -151,15 +151,16 @@ describe('cascaded documents helpers utils', () => {
       ]);
     });
 
-    it('should return a single group by field if there is a where command preceding a STATS by command targeting a column specified as a grouping option in the operatingstats command', () => {
+    it('should return a single group by field if there is a where command following a STATS by command targeting a column specified as a grouping option in the operating stats command', () => {
       const queryString = `
-        FROM kibana_sample_data_logs
-          | WHERE clientip == "177.120.218.48"
-          | STATS count = COUNT(bytes), average = AVG(memory)
-                BY Pattern = CATEGORIZE(message), agent.keyword, clientip
-          | WHERE Pattern ==
-                ".*?177\\.120\\.218\\.48.+?2018.+?07.+?GET.+?HTTP.+?1\\.1.+?200.+?Mozilla.+?4\\.0.+?compatible.+?MSIE.+?6\\.0.+?Windows.+?NT.+?5\\.1.+?SV1.+?NET.+?CLR.+?1\\.1\\.4322.*?"
-          | SORT count DESC 
+     FROM kibana_sample_data_logs
+      | WHERE clientip == "177.120.218.48"
+      | STATS count = COUNT(bytes), average = AVG(memory)
+            BY Pattern = CATEGORIZE(message)
+      | WHERE
+          Pattern ==
+            "some random pattern"
+      | SORT average ASC
       `;
 
       const result = getESQLStatsQueryMeta(queryString);

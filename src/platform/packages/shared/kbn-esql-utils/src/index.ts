@@ -56,6 +56,8 @@ export { extractCategorizeTokens } from './utils/extract_categorize_tokens';
 export { getLookupIndicesFromQuery } from './utils/get_lookup_indices';
 export {
   getESQLStatsQueryMeta,
+  getStatsGroupFieldType,
+  getFieldParamDefinition,
   constructCascadeQuery,
   mutateQueryStatsGrouping,
   appendFilteringWhereClauseForCascadeLayout,

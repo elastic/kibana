@@ -52,6 +52,8 @@ export {
   constructCascadeQuery,
   mutateQueryStatsGrouping,
   appendFilteringWhereClauseForCascadeLayout,
+  getStatsGroupFieldType,
+  getFieldParamDefinition,
 } from './src';
 
 export { ENABLE_ESQL, FEEDBACK_LINK } from './constants';
