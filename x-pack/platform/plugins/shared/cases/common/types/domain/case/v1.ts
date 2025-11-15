@@ -187,7 +187,12 @@ export const SimilarityRt = rt.strict({
 
 export const SimilarCaseRt = rt.intersection([
   CaseRt,
-  rt.strict({ similarities: rt.strict({ observables: rt.array(SimilarityRt) }) }),
+  rt.strict({
+    similarities: rt.strict({
+      observables: rt.array(SimilarityRt),
+      alertIds: rt.array(rt.string),
+    }),
+  }),
 ]);
 
 export type Case = rt.TypeOf<typeof CaseRt>;

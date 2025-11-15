@@ -16,11 +16,13 @@ import type {
   SavedObjectsFindOptions,
   SavedObjectsBulkDeleteObject,
   SavedObjectsBulkDeleteOptions,
+  SavedObjectsRawDocSource,
 } from '@kbn/core/server';
 
 import type { estypes } from '@elastic/elasticsearch';
 import { nodeBuilder } from '@kbn/es-query';
 
+import type { SavedObjectsSearchResponse } from '@kbn/core-saved-objects-api-server';
 import type { Case, CaseStatuses, User } from '../../../common/types/domain';
 import { caseStatuses } from '../../../common/types/domain';
 import {
@@ -384,6 +386,28 @@ export class CasesService {
       };
     } catch (error) {
       this.log.error(`Error on find cases: ${error}`);
+      throw error;
+    }
+  }
+
+  public async searchCases(
+    options: SavedObjectFindOptionsKueryNode,
+    type: string = CASE_SAVED_OBJECT
+  ): Promise<SavedObjectsSearchResponse<SavedObjectsRawDocSource, unknown>> {
+    try {
+      this.log.debug(`Attempting to search cases`);
+      const cases = await this.unsecuredSavedObjectsClient.search<
+        SavedObjectsRawDocSource,
+        unknown
+      >({
+        namespaces: ['*'],
+        type,
+        ...options,
+      });
+
+      return cases;
+    } catch (error) {
+      this.log.error(`Error on search cases: ${error}`);
       throw error;
     }
   }

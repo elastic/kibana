@@ -46,6 +46,7 @@ import type { CasesSearchParams } from './types';
 import { decodeWithExcessOrThrow } from '../common/runtime_types';
 import {
   CASE_SAVED_OBJECT,
+  CASE_COMMENT_SAVED_OBJECT,
   FILE_ATTACHMENT_TYPE,
   NO_ASSIGNEES_FILTERING_KEYWORD,
   OWNER_FIELD,
@@ -686,6 +687,22 @@ export const buildObservablesFieldsFilter = (observables: Record<string, string[
         )}" AND typeKey: "${typeKey}"}`
       );
     });
+  });
+
+  return nodeBuilder.or(filterExpressions);
+};
+
+export const buildAlertsFieldsFilter = (alertIds: string[]) => {
+  // NOTE: empty alertIds mean that we should not construct the filter and it should lead
+  // to early return in the calling context (it is required).
+  if (!alertIds.length) {
+    return;
+  }
+
+  const filterExpressions = alertIds.map((alertId) => {
+    return fromKueryExpression(
+      `${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId: "${escapeQuotes(alertId)}"`
+    );
   });
 
   return nodeBuilder.or(filterExpressions);
