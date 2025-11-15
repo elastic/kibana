@@ -21,28 +21,6 @@ export interface ExtScoutTestFixtures extends ScoutTestFixtures {
   };
 }
 
-/*
-export const test = baseTest.extend<ExtScoutTestFixtures, ScoutWorkerFixtures>({
-  pageObjects: async (
-    {
-      pageObjects,
-      page,
-    }: {
-      pageObjects: ExtScoutTestFixtures['pageObjects'];
-      page: ExtScoutTestFixtures['page'];
-    },
-    use: (pageObjects: ExtScoutTestFixtures['pageObjects']) => Promise<void>
-  ) => {
-    const extendedPageObjects = {
-      ...pageObjects,
-      demo: createLazyPageObject(DemoPage, page),
-    };
-
-    await use(extendedPageObjects);
-  },
-});
-*/
-
 export const test = createTest<{
   demo: DemoPage;
 }>({
