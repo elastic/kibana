@@ -65,12 +65,13 @@ evaluate('the model should answer truthfully', async ({ inferenceClient, phoenix
 
 ### Available fixtures
 
-| Fixture                     | Description                                                                                 |
-| --------------------------- | ------------------------------------------------------------------------------------------- |
-| `inferenceClient`           | Bound to the connector declared by the active Playwright project.                           |
-| `phoenixClient`             | Client for the Phoenix API (to run experiments)                                             |
-| `evaluationAnalysisService` | Service for analyzing and comparing evaluation results across different models and datasets |
-| `reportModelScore`          | Function that displays evaluation results (can be overridden for custom reporting)          |
+| Fixture                     | Description                                                                                                                                   |
+| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `inferenceClient`           | Bound to the connector declared by the active Playwright project.                                                                             |
+| `phoenixClient`             | Client for the Phoenix API (to run experiments)                                                                                               |
+| `evaluationAnalysisService` | Service for analyzing and comparing evaluation results across different models and datasets                                                   |
+| `reportModelScore`          | Function that displays evaluation results (can be overridden for custom reporting)                                                            |
+| `traceEsClient`             | Dedicated ES client for querying traces. Defaults to `esClient` Scout fixture. See [Trace-Based Evaluators](#trace-based-evaluators-optional) |
 
 ## Running the suite
 
@@ -78,11 +79,11 @@ Make sure that you've configured a Phoenix exporter in `kibana.dev.yml`:
 
 ```yaml
 telemetry.tracing.exporters:
-  phoenix:
-    base_url: 'https://<my-phoenix-host>'
-    public_url: 'https://<my-phoenix-host>'
-    project_name: '<my-name>'
-    api_key: '<my-api-key>'
+  - phoenix:
+      base_url: 'https://<my-phoenix-host>'
+      public_url: 'https://<my-phoenix-host>'
+      project_name: '<my-name>'
+      api_key: '<my-api-key>'
 ```
 
 Create a Playwright config that delegates to the helper:
@@ -105,6 +106,54 @@ Now run the tests exactly like a normal Scout/Playwright suite in another termin
 ```bash
 node scripts/playwright test --config x-pack/platform/packages/shared/<my-dir-name>/playwright.config.ts
 ```
+
+### Trace-Based Evaluators (Optional)
+
+Trace-based evaluators automatically collect non-functional metrics from OpenTelemetry traces stored in Elasticsearch:
+
+- **Token usage** (input, output, cached tokens)
+- **Latency** (request duration)
+- **Tool calls** (number of tool invocations)
+- You can build your own using `createTraceBasedEvaluator` factory.
+
+By default, these evaluators query traces from the same Elasticsearch cluster as your test environment using the `esClient` fixture.
+
+#### Prerequisites
+
+To enable trace-based evaluators, configure the HTTP exporter in `kibana.dev.yml` to export traces via OpenTelemetry:
+
+```yaml
+telemetry.tracing.exporters:
+  - phoenix:
+      base_url: 'https://<my-phoenix-host>'
+      public_url: 'https://<my-phoenix-host>'
+      project_name: '<my-name>'
+      api_key: '<my-api-key>'
+  - http:
+      url: 'http://localhost:4318/v1/traces'
+```
+
+#### Start EDOT Collector
+
+Start the EDOT (Elastic Distribution of OpenTelemetry) Gateway Collector to receive and store traces. Ensure Docker is running, then execute:
+
+```bash
+# Optionally use non-default ports using --http-port <http-port> or --grpc-port <grpc-port>
+# You must update the tracing exporters with the right port in kibana.dev.yml
+ELASTICSEARCH_HOST=http://localhost:9220 node scripts/edot_collector.js
+```
+
+The EDOT Collector receives traces from Kibana via the HTTP exporter and stores them in your local Elasticsearch cluster. Alternatively, you can use a managed OTLP endpoint instead of running EDOT Collector locally (this hasn't been tested yet though).
+
+#### Using a Separate Monitoring Cluster
+
+If your EDOT Collector stores traces in a different Elasticsearch cluster than your test environment (e.g., a common monitoring cluster for your team), specify the trace cluster URL with the `TRACING_ES_URL` environment variable:
+
+```bash
+TRACING_ES_URL=http://elastic:changeme@localhost:9200 node scripts/playwright test --config x-pack/platform/packages/shared/<my-dir-name>/playwright.config.ts
+```
+
+This creates a dedicated `traceEsClient` that connects to your monitoring cluster while `esClient` continues to use your test environment cluster.
 
 ## Customizing Report Display
 
@@ -192,8 +241,7 @@ The evaluation data is stored with the following structure:
     "experiments": [{ "id": "experiment_id_1" }],
     "environment": {
       "hostname": "your-hostname"
-    },
-    "tags": ["tag1", "tag2"]
+    }
   }
   ```
 

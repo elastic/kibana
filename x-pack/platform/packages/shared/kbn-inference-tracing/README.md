@@ -1,6 +1,6 @@
 # @kbn/inference-tracing
 
-Utilities for capturing GenAI / LLM traces in Kibana and exporting them to observability back-ends. Currently supported are Phoenix and Langfuse.
+Utilities for capturing GenAI / LLM traces in Kibana and exporting them to observability back-ends. Currently supported are Phoenix, Langfuse, and standard OTLP (OpenTelemetry Protocol).
 
 ## 1. Configure an exporter
 
@@ -42,7 +42,48 @@ provider.addSpanProcessor(
 provider.register();
 ```
 
-Both processors transform spans into the format understood by the back-end and log a handy “View trace at ...” link when a root span finishes.
+### OTLP (Standard OpenTelemetry Protocol)
+
+```ts
+import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
+import { OTLPSpanProcessor } from '@kbn/inference-tracing';
+
+const provider = new NodeTracerProvider();
+
+// HTTP protocol
+provider.addSpanProcessor(
+  new OTLPSpanProcessor(
+    {
+      url: 'http://localhost:4318/v1/traces',
+      headers: {
+        Authorization: 'Bearer YOUR_TOKEN',
+      },
+      scheduled_delay: 2_000,
+    },
+    'http'
+  )
+);
+
+// gRPC protocol
+provider.addSpanProcessor(
+  new OTLPSpanProcessor(
+    {
+      url: 'http://localhost:4317',
+      headers: {
+        Authorization: 'Bearer YOUR_TOKEN',
+      },
+      scheduled_delay: 2_000,
+    },
+    'grpc'
+  )
+);
+
+provider.register();
+```
+
+You can configure multiple exporters to send traces to different backends simultaneously.
+
+All processors transform spans into the format understood by the back-end and log a handy "View trace at ..." link when a root span finishes.
 
 ## 2. Instrument your code with helper functions
 

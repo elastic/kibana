@@ -12,6 +12,8 @@ import {
   type KibanaPhoenixClient,
   type EvaluationDataset,
   createQuantitativeGroundednessEvaluator,
+  withEvaluateExampleSpan,
+  withEvaluatorSpan,
 } from '@kbn/evals';
 import type { ExperimentTask } from '@kbn/evals/src/types';
 import type { TaskOutput } from '@arizeai/phoenix-client/dist/esm/types/experiments';
@@ -65,24 +67,31 @@ export function createEvaluateDataset({
       output,
       metadata,
     }) => {
-      const response = await chatClient.converse({
-        messages: [{ message: input.question }],
+      const response = await withEvaluateExampleSpan('EvaluateExample', {}, async () => {
+        return await chatClient.converse({
+          messages: [{ message: input.question }],
+        });
       });
 
       // Running correctness and groundedness evaluators as part of the task since their respective quantitative evaluators need their output
+      // Wrap LLM judge calls @kbn/evals spans and assign root context to prevent them from contributing to latency, token use and other metrics of the EvaluateExample span
       const [correctnessResult, groundednessResult] = await Promise.all([
-        evaluators.correctnessAnalysis().evaluate({
-          input,
-          expected: output,
-          output: response,
-          metadata,
-        }),
-        evaluators.groundednessAnalysis().evaluate({
-          input,
-          expected: output,
-          output: response,
-          metadata,
-        }),
+        withEvaluatorSpan('CorrectnessAnalysis', {}, () =>
+          evaluators.correctnessAnalysis().evaluate({
+            input,
+            expected: output,
+            output: response,
+            metadata,
+          })
+        ),
+        withEvaluatorSpan('GroundednessAnalysis', {}, () =>
+          evaluators.groundednessAnalysis().evaluate({
+            input,
+            expected: output,
+            output: response,
+            metadata,
+          })
+        ),
       ]);
       const correctnessAnalysis = correctnessResult.metadata;
       const groundednessAnalysis = groundednessResult.metadata;
@@ -92,6 +101,7 @@ export function createEvaluateDataset({
         messages: response.messages,
         correctnessAnalysis,
         groundednessAnalysis,
+        traceId: response.traceId,
       };
     };
 
@@ -100,7 +110,11 @@ export function createEvaluateDataset({
         dataset,
         task: callConverseAndEvaluate,
       },
-      [...createQuantitativeCorrectnessEvaluators(), createQuantitativeGroundednessEvaluator()]
+      [
+        ...createQuantitativeCorrectnessEvaluators(),
+        createQuantitativeGroundednessEvaluator(),
+        ...evaluators.traceBasedEvaluators(),
+      ]
     );
   };
 }
