@@ -41,6 +41,7 @@ import {
 
 import type { FinderAttributes, SavedObjectCommon } from '../../common';
 import { LISTING_LIMIT_SETTING } from '../../common';
+import { foo } from './new_stuff';
 
 const PAGE_SIZE_OPTIONS = [5, 10, 15, 25];
 
@@ -205,6 +206,8 @@ class SavedObjectFinderUiClass extends React.Component<
   }
 
   private getSavedObjectMetaDataMap(): Record<string, SavedObjectMetaData> {
+    import('./new_stuff_async');
+
     return this.props.savedObjectMetaData.reduce(
       (map, metaData) => ({ ...map, [metaData.type]: metaData }),
       {}
@@ -218,6 +221,8 @@ class SavedObjectFinderUiClass extends React.Component<
       },
       this.debouncedFetch.bind(null, this.state.query)
     );
+
+    return foo;
   };
 
   public render() {
