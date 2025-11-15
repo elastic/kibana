@@ -15,6 +15,7 @@ import { I18nProviderMock } from '@kbn/core-i18n-browser-mocks/src/i18n_context_
 import { monaco, YAML_LANG_ID } from '@kbn/monaco';
 import type { WorkflowYAMLEditorProps } from './workflow_yaml_editor';
 import { WorkflowYAMLEditor } from './workflow_yaml_editor';
+import { useSaveYaml } from '../../../entities/workflows/model/use_save_yaml';
 import { setActiveTab, setExecution, setYamlString } from '../../../entities/workflows/store';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
 import type { YamlEditorProps } from '../../../shared/ui';
@@ -70,9 +71,12 @@ jest.mock('../../../entities/connectors/model/use_available_connectors', () => (
   }),
 }));
 
+const mockSaveYaml = jest.fn();
+const mockUseSaveYaml = useSaveYaml as jest.MockedFunction<typeof useSaveYaml>;
+
 // Mock the useSaveYaml hook
 jest.mock('../../../entities/workflows/model/use_save_yaml', () => ({
-  useSaveYaml: jest.fn(() => jest.fn()),
+  useSaveYaml: jest.fn(),
 }));
 
 // Mock the useKibana hook
@@ -102,10 +106,25 @@ jest.mock('../lib/monaco_providers', () => ({
   registerUnifiedHoverProvider: jest.fn(() => jest.fn()),
 }));
 
+const mockRegisterKeyboardCommands = jest.fn();
+const mockUnregisterKeyboardCommands = jest.fn();
+let capturedKeyboardHandlers: {
+  save?: () => void;
+  run?: () => void;
+  saveAndRun?: () => void;
+} = {};
+
 jest.mock('../lib/use_register_keyboard_commands', () => ({
   useRegisterKeyboardCommands: jest.fn(() => ({
-    registerKeyboardCommands: jest.fn(),
-    unregisterKeyboardCommands: jest.fn(),
+    registerKeyboardCommands: (params: any) => {
+      capturedKeyboardHandlers = {
+        save: params.save,
+        run: params.run,
+        saveAndRun: params.saveAndRun,
+      };
+      mockRegisterKeyboardCommands(params);
+    },
+    unregisterKeyboardCommands: mockUnregisterKeyboardCommands,
   })),
 }));
 
@@ -212,6 +231,12 @@ describe('WorkflowYAMLEditor', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    capturedKeyboardHandlers = {};
+    mockSaveYaml.mockResolvedValue(undefined);
+    mockUseSaveYaml.mockReturnValue([
+      mockSaveYaml,
+      { isLoading: false, error: null, result: undefined },
+    ]);
   });
 
   it('renders without crashing', () => {
@@ -373,6 +398,131 @@ steps:
 
       // Verify that dispose was called on the completion provider
       expect(registeredProvider.dispose).toHaveBeenCalled();
+    });
+  });
+
+  describe('keyboard commands', () => {
+    it('should register keyboard commands when editor mounts', () => {
+      const store = createMockStore();
+      store.dispatch(setYamlString('version: "1"\nname: "test"'));
+      store.dispatch(setActiveTab('workflow'));
+
+      renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store);
+
+      expect(mockRegisterKeyboardCommands).toHaveBeenCalled();
+      const callArgs = mockRegisterKeyboardCommands.mock.calls[0][0];
+      expect(callArgs).toHaveProperty('save');
+      expect(callArgs).toHaveProperty('run');
+      expect(callArgs).toHaveProperty('saveAndRun');
+    });
+
+    it('should call save handler when save keyboard shortcut is triggered', () => {
+      const store = createMockStore();
+      store.dispatch(setYamlString('version: "1"\nname: "test"'));
+      store.dispatch(setActiveTab('workflow'));
+
+      renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store);
+
+      expect(capturedKeyboardHandlers.save).toBeDefined();
+      capturedKeyboardHandlers.save!();
+
+      expect(mockSaveYaml).toHaveBeenCalledTimes(1);
+    });
+
+    it('should prevent multiple saves when one is already in progress', async () => {
+      const store = createMockStore();
+      store.dispatch(setYamlString('version: "1"\nname: "test"'));
+      store.dispatch(setActiveTab('workflow'));
+
+      // Set isLoading to true to simulate a save in progress
+      mockUseSaveYaml.mockReturnValue([
+        mockSaveYaml,
+        { isLoading: true, error: null, result: undefined },
+      ]);
+
+      renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store);
+
+      // Wait for handlers to be registered
+      await waitFor(() => {
+        expect(capturedKeyboardHandlers.save).toBeDefined();
+      });
+
+      // Try to save multiple times
+      capturedKeyboardHandlers.save!();
+      capturedKeyboardHandlers.save!();
+      capturedKeyboardHandlers.save!();
+
+      // Should not call saveYaml because isSaving is true
+      expect(mockSaveYaml).not.toHaveBeenCalled();
+    });
+
+    it('should call saveAndRun handler when saveAndRun keyboard shortcut is triggered', () => {
+      const store = createMockStore();
+      store.dispatch(setYamlString('version: "1"\nname: "test"'));
+      store.dispatch(setActiveTab('workflow'));
+
+      renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store);
+
+      expect(capturedKeyboardHandlers.saveAndRun).toBeDefined();
+      capturedKeyboardHandlers.saveAndRun!();
+
+      expect(mockSaveYaml).toHaveBeenCalledTimes(1);
+    });
+
+    it('should prevent multiple saveAndRun when one is already in progress', async () => {
+      const store = createMockStore();
+      store.dispatch(setYamlString('version: "1"\nname: "test"'));
+      store.dispatch(setActiveTab('workflow'));
+
+      // Set isLoading to true to simulate a save in progress
+      mockUseSaveYaml.mockReturnValue([
+        mockSaveYaml,
+        { isLoading: true, error: null, result: undefined },
+      ]);
+
+      renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store);
+
+      // Wait for handlers to be registered
+      await waitFor(() => {
+        expect(capturedKeyboardHandlers.saveAndRun).toBeDefined();
+      });
+
+      // Try to saveAndRun multiple times
+      capturedKeyboardHandlers.saveAndRun!();
+      capturedKeyboardHandlers.saveAndRun!();
+
+      // Should not call saveYaml because isSaving is true
+      expect(mockSaveYaml).not.toHaveBeenCalled();
+    });
+
+    it('should allow save after previous save completes', async () => {
+      const store = createMockStore();
+      store.dispatch(setYamlString('version: "1"\nname: "test"'));
+      store.dispatch(setActiveTab('workflow'));
+
+      // Start with not saving
+      mockUseSaveYaml.mockReturnValue([
+        mockSaveYaml,
+        { isLoading: false, error: null, result: undefined },
+      ]);
+
+      renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store);
+
+      // Wait for handlers to be registered
+      await waitFor(() => {
+        expect(capturedKeyboardHandlers.save).toBeDefined();
+      });
+
+      // First save should work
+      capturedKeyboardHandlers.save!();
+      expect(mockSaveYaml).toHaveBeenCalledTimes(1);
+
+      // Clear the mock call count and simulate save completing (still not loading)
+      mockSaveYaml.mockClear();
+
+      // Second save should also work since isSaving is false
+      capturedKeyboardHandlers.save!();
+      expect(mockSaveYaml).toHaveBeenCalledTimes(1);
     });
   });
 });
