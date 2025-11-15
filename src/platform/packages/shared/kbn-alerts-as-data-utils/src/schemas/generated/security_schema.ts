@@ -228,6 +228,7 @@ const SecurityAlertOptional = rt.partial({
   'service.risk.calculated_score_norm': schemaNumber,
   tags: schemaStringArray,
   'user.asset.criticality': schemaString,
+  'attack_ids': schemaStringArray,
 });
 
 // prettier-ignore

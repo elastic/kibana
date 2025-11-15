@@ -48,6 +48,7 @@ import type {
   ALERT_WORKFLOW_ASSIGNEE_IDS,
   ALERT_WORKFLOW_STATUS,
   ALERT_WORKFLOW_TAGS,
+  ALERT_ATTACK_IDS,
   EVENT_KIND,
   SPACE_IDS,
   TIMESTAMP,
@@ -528,6 +529,10 @@ type DetectionAlertSchema = {
   [ALERT_WORKFLOW_ASSIGNEE_IDS]: {
     type: string[] | undefined;
     version: Version8120;
+  };
+  [ALERT_ATTACK_IDS]: {
+    type: string[] | undefined;
+    version: Version930;
   };
   [LEGACY_ALERT_HOST_CRITICALITY]: {
     type: string | undefined;

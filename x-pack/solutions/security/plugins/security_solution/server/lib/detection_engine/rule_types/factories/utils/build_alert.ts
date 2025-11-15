@@ -44,6 +44,7 @@ import {
   TIMESTAMP,
   ALERT_INTENDED_TIMESTAMP,
   ALERT_RULE_EXECUTION_TYPE,
+  ALERT_ATTACK_IDS,
 } from '@kbn/rule-data-utils';
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 import { requiredOptional } from '@kbn/zod-helpers';
@@ -281,6 +282,7 @@ export const buildAlertFields = ({
     [ALERT_UUID]: alertUuid,
     [ALERT_WORKFLOW_TAGS]: [],
     [ALERT_WORKFLOW_ASSIGNEE_IDS]: [],
+    [ALERT_ATTACK_IDS]: [],
     ...flattenWithPrefix(ALERT_RULE_META, params.meta),
     // These fields don't exist in the mappings, but leaving here for now to limit changes to the alert building logic
     'kibana.alert.rule.risk_score': params.riskScore,

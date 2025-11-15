@@ -14,6 +14,7 @@ import type {
   ElasticsearchClient,
   KibanaRequest,
   SavedObjectsClientContract,
+  IScopedClusterClient,
 } from '@kbn/core/server';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
@@ -65,6 +66,7 @@ import {
   ensureDedicatedInferenceEndpoint,
 } from '../ai_assistant_data_clients/knowledge_base';
 import { AttackDiscoveryDataClient } from '../lib/attack_discovery/persistence';
+import { AttackDiscoveryLookupDataClient } from '../lib/attack_discovery/persistence/lookup_data_client';
 import { DefendInsightsDataClient } from '../lib/defend_insights/persistence';
 import { createGetElserId, ensureProductDocumentationInstalled } from './helpers';
 import { hasAIAssistantLicense } from '../routes/helpers';
@@ -763,6 +765,24 @@ export class AIAssistantService {
       logger: opts.logger,
       rulesClient: opts.rulesClient,
     });
+  }
+
+  public async createAttackDiscoveryLookupDataClient(
+    opts: CreateAIAssistantClientParams & {
+      esScopedClient: IScopedClusterClient;
+    }
+  ): Promise<AttackDiscoveryLookupDataClient | null> {
+    const res = await this.checkResourcesInstallation(opts);
+
+    if (res === null) {
+      return null;
+    }
+
+    return new AttackDiscoveryLookupDataClient(
+      opts.esScopedClient,
+      this.options.logger.get('attackDiscoveryLookup'),
+      opts.spaceId
+    );
   }
 
   public async createDefendInsightsDataClient(

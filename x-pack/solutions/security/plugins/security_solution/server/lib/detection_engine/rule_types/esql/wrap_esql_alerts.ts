@@ -51,7 +51,10 @@ export const wrapEsqlAlerts = ({
     return {
       _id: id,
       _index: event._index ?? '',
-      _source: baseAlert,
+      _source: {
+        ...baseAlert,
+        ...(event.fields?.attack_ids ? { attack_ids: event.fields.attack_ids } : {}),
+      },
     };
   });
 

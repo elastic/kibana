@@ -14,6 +14,7 @@ import {
   ALERT_RULE_PARAMETERS,
   ALERT_WORKFLOW_ASSIGNEE_IDS,
   ALERT_WORKFLOW_TAGS,
+  ALERT_ATTACK_IDS,
 } from '@kbn/rule-data-utils';
 
 const ENRICHMENT_DESTINATION_PATH = 'threat.enrichments';
@@ -49,6 +50,7 @@ export const ALERT_EVENTS_FIELDS = [
   '@timestamp',
   'kibana.alert.ancestors.index',
   ALERT_WORKFLOW_ASSIGNEE_IDS,
+  ALERT_ATTACK_IDS,
   'kibana.alert.workflow_status',
   ALERT_WORKFLOW_TAGS,
   'kibana.alert.group.id',

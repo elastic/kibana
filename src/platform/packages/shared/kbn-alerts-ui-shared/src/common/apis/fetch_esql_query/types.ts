@@ -7,12 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './use_alerts_data_view';
-export * from './use_fetch_alerts_index_names_query';
-export * from './use_get_alerts_group_aggregations_query';
-export * from './use_health_check';
-export * from './use_load_alerting_framework_health';
-export * from './use_get_rule_types_permissions';
-export * from './use_load_ui_health';
-export * from './use_fetch_unified_alerts_fields';
-export * from './use_esql_query';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { ESQLSearchResponse } from '@kbn/es-types';
+
+export interface FetchEsqlQueryParams {
+  // Dependencies
+  data: DataPublicPluginStart;
+
+  // Params
+  /**
+   * ES|QL query string
+   */
+  query: string;
+
+  /**
+   * Filter for the ES|QL query
+   */
+  filter?: unknown;
+}
+
+export type EsqlQueryResponse = ESQLSearchResponse;

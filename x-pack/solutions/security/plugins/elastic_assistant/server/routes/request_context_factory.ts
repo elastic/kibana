@@ -172,6 +172,15 @@ export class RequestContextFactory implements IRequestContextFactory {
         });
       }),
 
+      getAttackDiscoveryLookupDataClient: memoize(async () => {
+        return this.assistantService.createAttackDiscoveryLookupDataClient({
+          spaceId: getSpaceId(),
+          licensing: context.licensing,
+          logger: this.logger,
+          esScopedClient: coreContext.elasticsearch.client,
+        });
+      }),
+
       getDefendInsightsDataClient: memoize(async () => {
         const currentUser = await getCurrentUser();
         return this.assistantService.createDefendInsightsDataClient({

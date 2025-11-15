@@ -60,6 +60,7 @@ import type {
   AIAssistantKnowledgeBaseDataClient,
 } from './ai_assistant_data_clients/knowledge_base';
 import type { AttackDiscoveryDataClient } from './lib/attack_discovery/persistence';
+import type { AttackDiscoveryLookupDataClient } from './lib/attack_discovery/persistence/lookup_data_client';
 import type {
   AIAssistantConversationsDataClient,
   GetAIAssistantConversationsDataClientParams,
@@ -166,6 +167,7 @@ export interface ElasticAssistantApiRequestHandlerContext {
   ) => Promise<AIAssistantKnowledgeBaseDataClient | null>;
   getAttackDiscoveryDataClient: () => Promise<AttackDiscoveryDataClient | null>;
   getAttackDiscoverySchedulingDataClient: () => Promise<AttackDiscoveryScheduleDataClient | null>;
+  getAttackDiscoveryLookupDataClient: () => Promise<AttackDiscoveryLookupDataClient | null>;
   getDefendInsightsDataClient: () => Promise<DefendInsightsDataClient | null>;
   getAIAssistantPromptsDataClient: () => Promise<AIAssistantDataClient | null>;
   getAlertSummaryDataClient: () => Promise<AIAssistantDataClient | null>;

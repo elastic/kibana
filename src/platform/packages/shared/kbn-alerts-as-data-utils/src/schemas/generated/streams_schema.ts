@@ -119,6 +119,7 @@ const StreamsAlertOptional = rt.partial({
   'kibana.alert.workflow_tags': schemaStringArray,
   'kibana.version': schemaString,
   tags: schemaStringArray,
+  'attack_ids': schemaStringArray,
 });
 
 // prettier-ignore
