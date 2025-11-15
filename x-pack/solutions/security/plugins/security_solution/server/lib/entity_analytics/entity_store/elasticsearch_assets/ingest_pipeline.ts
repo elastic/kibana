@@ -43,12 +43,14 @@ const buildIngestPipeline = ({
   debugMode,
   namespace,
   description,
+  displayNameTemplate,
 }: {
   allEntityFields: string[];
   debugMode?: boolean;
   namespace: string;
   version: string;
   description: EntityEngineInstallationDescriptor;
+  displayNameTemplate: string;
 }): IngestProcessorContainer[] => {
   const enrichPolicyName = getFieldRetentionEnrichPolicyName({
     namespace,
@@ -64,10 +66,39 @@ const buildIngestPipeline = ({
       },
     },
     {
-      set: {
-        field: 'entity.name',
-        override: false,
-        value: `{{${description.identityField}}}`,
+      script: {
+        lang: 'painless',
+        source: `
+          // Extract the display name field from the template
+          String template = params.template;
+          // Remove {{ and }} to get the field path
+          String fieldPath = template.substring(2, template.length() - 2);
+          
+          // Navigate to the field value
+          def value = ctx;
+          for (String part : fieldPath.splitOnToken('.')) {
+            if (value == null) break;
+            value = value[part];
+          }
+          
+          // Handle collected values (arrays/maps) by taking the first element
+          if (value instanceof List && !value.isEmpty()) {
+            value = value[0];
+          } else if (value instanceof Map && !value.isEmpty()) {
+            // Get first value from map (collected values might be in map format)
+            value = value.values().toArray()[0];
+          }
+          
+          // Set entity.name to the extracted value, or use the identity field as fallback
+          if (value != null && value != '') {
+            ctx.entity.name = value;
+          } else {
+            ctx.entity.name = ctx['${description.identityField}'];
+          }
+        `,
+        params: {
+          template: displayNameTemplate,
+        },
       },
     },
     ...(debugMode
@@ -129,12 +160,14 @@ export const createPlatformPipeline = async ({
   debugMode,
   description,
   options,
+  displayNameTemplate,
 }: {
   description: EntityEngineInstallationDescriptor;
   options: { namespace: string };
   logger: Logger;
   esClient: ElasticsearchClient;
   debugMode?: boolean;
+  displayNameTemplate: string;
 }) => {
   const allEntityFields = description.fields.map(({ destination }) => destination);
 
@@ -151,6 +184,7 @@ export const createPlatformPipeline = async ({
       version: description.version,
       allEntityFields,
       debugMode,
+      displayNameTemplate,
     }),
   };
 

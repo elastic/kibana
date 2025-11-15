@@ -13,4 +13,36 @@ describe('generateLatestTransform(definition)', () => {
     const transform = generateLatestTransform(entityDefinition);
     expect(transform).toMatchSnapshot();
   });
+
+  it('should include runtime_mappings in source when provided in definition', () => {
+    const definitionWithRuntimeMappings = {
+      ...entityDefinition,
+      runtimeMappings: {
+        _computed_field: {
+          type: 'keyword',
+          script: {
+            source: 'emit(doc["some.field"].value)',
+          },
+        },
+      },
+    };
+
+    const transform = generateLatestTransform(definitionWithRuntimeMappings);
+
+    expect(transform.source.runtime_mappings).toBeDefined();
+    expect(transform.source.runtime_mappings).toEqual({
+      _computed_field: {
+        type: 'keyword',
+        script: {
+          source: 'emit(doc["some.field"].value)',
+        },
+      },
+    });
+  });
+
+  it('should not include runtime_mappings in source when not provided in definition', () => {
+    const transform = generateLatestTransform(entityDefinition);
+
+    expect(transform.source.runtime_mappings).toBeUndefined();
+  });
 });
