@@ -1059,6 +1059,7 @@
     "@kbn/streams-app-plugin": "link:x-pack/platform/plugins/shared/streams_app",
     "@kbn/streams-plugin": "link:x-pack/platform/plugins/shared/streams",
     "@kbn/streams-schema": "link:x-pack/platform/packages/shared/kbn-streams-schema",
+    "@kbn/superdatepicker": "link:src/platform/packages/shared/kbn-superdatepicker",
     "@kbn/synthetics-plugin": "link:x-pack/solutions/observability/plugins/synthetics",
     "@kbn/task-manager-dependencies-plugin": "link:x-pack/platform/plugins/private/task_manager_dependencies",
     "@kbn/task-manager-fixture-plugin": "link:x-pack/platform/test/alerting_api_integration/common/plugins/task_manager_fixture",
