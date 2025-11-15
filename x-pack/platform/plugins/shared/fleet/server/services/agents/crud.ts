@@ -33,6 +33,7 @@ import { isSpaceAwarenessEnabled } from '../spaces/helpers';
 import { DEFAULT_NAMESPACES_FILTER, isAgentInNamespace } from '../spaces/agent_namespaces';
 import { addNamespaceFilteringToQuery } from '../spaces/query_namespaces_filtering';
 import { createEsSearchIterable } from '../utils/create_es_search_iterable';
+import { retryTransientEsErrors } from '../epm/elasticsearch/retry';
 
 import { searchHitToAgent, agentSOAttributesToFleetServerAgentDoc } from './helpers';
 import { buildAgentStatusRuntimeField } from './build_status_runtime_field';
@@ -346,8 +347,10 @@ export async function getAgentsByKuery(
   let res;
 
   try {
-    res = await queryAgents(
-      searchAfter ? { searchAfter, size: perPage } : { from: (page - 1) * perPage, size: perPage }
+    res = await retryTransientEsErrors(() =>
+      queryAgents(
+        searchAfter ? { searchAfter, size: perPage } : { from: (page - 1) * perPage, size: perPage }
+      )
     );
   } catch (err) {
     appContextService.getLogger().error(`Error getting agents by kuery: ${JSON.stringify(err)}`);
