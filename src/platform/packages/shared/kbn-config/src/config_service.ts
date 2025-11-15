@@ -230,10 +230,22 @@ export class ConfigService {
       typeof config.get(path)?.enabled !== 'undefined' &&
       typeof validatedConfig?.enabled === 'undefined'
     ) {
-      validatedConfig = await firstValueFrom(
-        this.getValidatedConfigAtPath$(path) as Observable<{ enabled?: boolean }>,
-        { defaultValue: undefined }
-      );
+      try {
+        validatedConfig = await firstValueFrom(
+          this.getValidatedConfigAtPath$(path) as Observable<{ enabled?: boolean }>,
+          { defaultValue: undefined }
+        );
+      } catch (error) {
+        if (error instanceof ValidationError) {
+          throw new ValidationError(
+            new SchemaTypeError(
+              `enabled status cannot be changed. Please, remove [${namespace}.enabled] from the configuration file.`,
+              [namespace]
+            )
+          );
+        }
+        throw error;
+      }
     }
 
     const isDisabled = validatedConfig?.enabled === false;
