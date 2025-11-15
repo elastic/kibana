@@ -319,7 +319,7 @@ export class EntityStoreDataClient {
     return { engines, succeeded: true };
   }
 
-  private async getEnabledEntityTypes(): Promise<EntityType[]> {
+  public async getEnabledEntityTypes(): Promise<EntityType[]> {
     const genericEntityStoreEnabled = await this.uiSettingsClient.get<boolean>(
       SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING
     );
