@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import {
-  ruleParamsSchemaWithDefaultValueV1,
+  ruleParamsSchemaWithRuleTypeIdAndDefaultValueV1,
   createRuleParamsExamplesV1,
 } from '@kbn/response-ops-rule-params';
 import { validateDurationV1, validateHoursV1, validateTimezoneV1 } from '../../../validation';
@@ -133,15 +133,12 @@ export const actionSchema = schema.object(
   }
 );
 
-export const createBodySchema = schema.object({
+export const createBodySchemaCommon = schema.object({
   name: schema.string({
     meta: {
       description:
         'The name of the rule. While this name does not have to be unique, a distinctive name can help you identify a rule.',
     },
-  }),
-  rule_type_id: schema.string({
-    meta: { description: 'The rule type identifier.' },
   }),
   enabled: schema.boolean({
     defaultValue: true,
@@ -171,7 +168,6 @@ export const createBodySchema = schema.object({
       })
     )
   ),
-  params: ruleParamsSchemaWithDefaultValueV1,
   schedule: schema.object(
     {
       interval: schema.string({
@@ -192,6 +188,11 @@ export const createBodySchema = schema.object({
   flapping: schema.maybe(schema.nullable(flappingSchemaV1)),
   artifacts: schema.maybe(artifactsSchemaV1),
 });
+
+export const createBodySchema = schema.intersection([
+  createBodySchemaCommon,
+  ruleParamsSchemaWithRuleTypeIdAndDefaultValueV1(),
+]);
 
 export { createRuleParamsExamplesV1 };
 

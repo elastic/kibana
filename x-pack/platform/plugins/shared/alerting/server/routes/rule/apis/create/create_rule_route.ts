@@ -75,7 +75,8 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
           const ruleTypes = alertingContext.listTypes();
 
           // Assert versioned inputs
-          const createRuleData: CreateRuleRequestBodyV1<RuleParamsV1> = req.body;
+          const createRuleData: CreateRuleRequestBodyV1<RuleParamsV1> =
+            req.body as unknown as CreateRuleRequestBodyV1<RuleParamsV1>;
           const params: CreateRuleRequestParamsV1 = req.params;
 
           countUsageOfPredefinedIds({
@@ -100,9 +101,13 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
               isSystemAction: (connectorId: string) => actionsClient.isSystemAction(connectorId),
             });
 
-            const actions = allActions.filter((action) => !actionsClient.isSystemAction(action.id));
-            const systemActions = allActions.filter((action) =>
-              actionsClient.isSystemAction(action.id)
+            const actions = allActions.filter(
+              (action: CreateRuleRequestBodyV1['actions'][number]) =>
+                !actionsClient.isSystemAction(action.id)
+            );
+            const systemActions = allActions.filter(
+              (action: CreateRuleRequestBodyV1['actions'][number]) =>
+                actionsClient.isSystemAction(action.id)
             );
 
             const flappingSettings = await rulesSettingsClient.flapping().get();
