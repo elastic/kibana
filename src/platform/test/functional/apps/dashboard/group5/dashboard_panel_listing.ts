@@ -61,7 +61,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         panelGroupByOrder.set(order, panelGroupTitle);
       }
 
-      expect(panelGroupByOrder.size).to.eql(3);
+      expect(panelGroupByOrder.size).to.eql(4);
 
       expect([...panelGroupByOrder.values()]).to.eql([
         'visualizationsGroup',
