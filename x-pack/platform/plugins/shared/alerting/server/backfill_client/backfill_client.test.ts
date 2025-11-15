@@ -2646,8 +2646,7 @@ describe('BackfillClient', () => {
 
       const result = await backfillClient.findOverlappingBackfills({
         ruleId: '1',
-        start: mockStart,
-        end: mockEnd,
+        ranges: [{ start: mockStart, end: mockEnd }],
         savedObjectsRepository: mockSavedObjectsRepository,
         actionsClient,
       });
@@ -2657,8 +2656,8 @@ describe('BackfillClient', () => {
         perPage: 100,
         hasReference: [{ id: '1', type: RULE_SAVED_OBJECT_TYPE }],
         filter: `
-        ad_hoc_run_params.attributes.start <= "${mockEnd.toISOString()}" and
-        ad_hoc_run_params.attributes.end >= "${mockStart.toISOString()}"
+        (ad_hoc_run_params.attributes.start <= "${mockEnd.toISOString()}" and
+        ad_hoc_run_params.attributes.end >= "${mockStart.toISOString()}")
       `,
       });
 
@@ -2682,8 +2681,7 @@ describe('BackfillClient', () => {
       await expect(
         backfillClient.findOverlappingBackfills({
           ruleId: '1',
-          start: mockStart,
-          end: mockEnd,
+          ranges: [{ start: mockStart, end: mockEnd }],
           savedObjectsRepository: mockSavedObjectsRepository,
           actionsClient,
         })
@@ -2702,8 +2700,7 @@ describe('BackfillClient', () => {
 
       const result = await backfillClient.findOverlappingBackfills({
         ruleId: '1',
-        start: mockStart,
-        end: mockEnd,
+        ranges: [{ start: mockStart, end: mockEnd }],
         savedObjectsRepository: mockSavedObjectsRepository,
         actionsClient,
       });

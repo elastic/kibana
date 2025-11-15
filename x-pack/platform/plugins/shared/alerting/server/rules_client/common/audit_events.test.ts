@@ -5,12 +5,18 @@
  * 2.0.
  */
 
-import { AD_HOC_RUN_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import {
+  AD_HOC_RUN_SAVED_OBJECT_TYPE,
+  RULE_SAVED_OBJECT_TYPE,
+  GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
+} from '../../saved_objects';
 import {
   RuleAuditAction,
   ruleAuditEvent,
   AdHocRunAuditAction,
   adHocRunAuditEvent,
+  GapAutoFillSchedulerAuditAction,
+  gapAutoFillSchedulerAuditEvent,
 } from './audit_events';
 
 describe('#ruleAuditEvent', () => {
@@ -142,6 +148,148 @@ describe('#ruleAuditEvent', () => {
           },
         },
         "message": "Failed attempt to create rule [id=ALERT_ID]",
+      }
+    `);
+  });
+});
+
+describe('#gapAutoFillSchedulerAuditEvent', () => {
+  test('creates event with `unknown` outcome', () => {
+    expect(
+      gapAutoFillSchedulerAuditEvent({
+        action: GapAutoFillSchedulerAuditAction.CREATE,
+        outcome: 'unknown',
+        savedObject: {
+          type: GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
+          id: 'SCHEDULER_ID',
+          name: 'fake_name',
+        },
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "error": undefined,
+        "event": Object {
+          "action": "gap_auto_fill_scheduler_create",
+          "category": Array [
+            "database",
+          ],
+          "outcome": "unknown",
+          "type": Array [
+            "creation",
+          ],
+        },
+        "kibana": Object {
+          "saved_object": Object {
+            "id": "SCHEDULER_ID",
+            "name": "fake_name",
+            "type": "gap_auto_fill_scheduler",
+          },
+        },
+        "message": "User is creating gap auto fill scheduler gap_auto_fill_scheduler [id=SCHEDULER_ID] [name=fake_name]",
+      }
+    `);
+  });
+
+  test('creates event with `success` outcome', () => {
+    expect(
+      gapAutoFillSchedulerAuditEvent({
+        action: GapAutoFillSchedulerAuditAction.GET,
+        savedObject: {
+          type: GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
+          id: 'SCHEDULER_ID',
+          name: 'fake_name',
+        },
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "error": undefined,
+        "event": Object {
+          "action": "gap_auto_fill_scheduler_get",
+          "category": Array [
+            "database",
+          ],
+          "outcome": "success",
+          "type": Array [
+            "access",
+          ],
+        },
+        "kibana": Object {
+          "saved_object": Object {
+            "id": "SCHEDULER_ID",
+            "name": "fake_name",
+            "type": "gap_auto_fill_scheduler",
+          },
+        },
+        "message": "User has got gap auto fill scheduler gap_auto_fill_scheduler [id=SCHEDULER_ID] [name=fake_name]",
+      }
+    `);
+  });
+
+  test('creates event with `failure` outcome', () => {
+    expect(
+      gapAutoFillSchedulerAuditEvent({
+        action: GapAutoFillSchedulerAuditAction.DELETE,
+        savedObject: {
+          type: GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
+          id: 'SCHEDULER_ID',
+          name: 'fake_name',
+        },
+        error: new Error('ERROR_MESSAGE'),
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "error": Object {
+          "code": "Error",
+          "message": "ERROR_MESSAGE",
+        },
+        "event": Object {
+          "action": "gap_auto_fill_scheduler_delete",
+          "category": Array [
+            "database",
+          ],
+          "outcome": "failure",
+          "type": Array [
+            "deletion",
+          ],
+        },
+        "kibana": Object {
+          "saved_object": Object {
+            "id": "SCHEDULER_ID",
+            "name": "fake_name",
+            "type": "gap_auto_fill_scheduler",
+          },
+        },
+        "message": "Failed attempt to delete gap auto fill scheduler gap_auto_fill_scheduler [id=SCHEDULER_ID] [name=fake_name]",
+      }
+    `);
+  });
+
+  test('creates event without known name', () => {
+    expect(
+      gapAutoFillSchedulerAuditEvent({
+        action: GapAutoFillSchedulerAuditAction.UPDATE,
+        savedObject: { type: GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE, id: 'SCHEDULER_ID' },
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "error": undefined,
+        "event": Object {
+          "action": "gap_auto_fill_scheduler_update",
+          "category": Array [
+            "database",
+          ],
+          "outcome": "success",
+          "type": Array [
+            "change",
+          ],
+        },
+        "kibana": Object {
+          "saved_object": Object {
+            "id": "SCHEDULER_ID",
+            "type": "gap_auto_fill_scheduler",
+          },
+        },
+        "message": "User has updated gap auto fill scheduler gap_auto_fill_scheduler [id=SCHEDULER_ID]",
       }
     `);
   });

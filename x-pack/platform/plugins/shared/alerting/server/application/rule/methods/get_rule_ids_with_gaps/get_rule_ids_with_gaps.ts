@@ -7,6 +7,7 @@
 
 import Boom from '@hapi/boom';
 import type { KueryNode } from '@kbn/es-query';
+import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
 import {
   AlertingAuthorizationEntity,
   AlertingAuthorizationFilterType,
@@ -44,10 +45,10 @@ export async function getRuleIdsWithGaps(
       throw error;
     }
 
-    const { start, end, statuses } = params;
+    const { start, end, statuses, sortOrder, ruleTypes } = params;
     const eventLogClient = await context.getEventLogClient();
 
-    const filter = buildGapsFilter({
+    let filter = buildGapsFilter({
       start,
       end,
       statuses,
@@ -55,6 +56,21 @@ export async function getRuleIdsWithGaps(
       hasInProgressIntervals: params.hasInProgressIntervals,
       hasFilledIntervals: params.hasFilledIntervals,
     });
+
+    if (ruleTypes?.length) {
+      const ruleTypesFilter = ruleTypes
+        .map(
+          (rt) =>
+            `(kibana.alert.rule.rule_type_id: "${rt.type}" AND kibana.alert.rule.consumer: "${rt.consumer}")`
+        )
+        .join(' OR ');
+      filter = `${filter} AND (${ruleTypesFilter})`;
+    }
+
+    const perBucketAgg: Record<string, AggregationsAggregationContainer> =
+      sortOrder === 'desc'
+        ? { newest_gap_timestamp: { max: { field: '@timestamp' } } }
+        : { oldest_gap_timestamp: { min: { field: '@timestamp' } } };
 
     const aggs = await eventLogClient.aggregateEventsWithAuthFilter(
       RULE_SAVED_OBJECT_TYPE,
@@ -71,7 +87,12 @@ export async function getRuleIdsWithGaps(
             terms: {
               field: 'rule.id',
               size: 10000,
+              order:
+                sortOrder === 'desc'
+                  ? { newest_gap_timestamp: 'desc' }
+                  : { oldest_gap_timestamp: 'asc' },
             },
+            aggs: perBucketAgg,
           },
         },
       }

@@ -11,6 +11,7 @@ import { Gap } from '../gap';
 
 describe('transformToGap', () => {
   const timestamp = '2023-01-01T00:00:00.000Z';
+  const mockNow = '2025-01-01T02:03:04.000Z';
   const validInterval = {
     gte: '2023-01-01T00:00:00.000Z',
     lte: '2023-01-01T01:00:00.000Z',
@@ -61,26 +62,37 @@ describe('transformToGap', () => {
   });
 
   it('transforms valid event to Gap object', () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date(mockNow));
+
     const events = createMockEvent();
     const result = transformToGap(events);
 
     expect(result).toHaveLength(1);
     expect(result[0]).toBeInstanceOf(Gap);
-    expect(result[0]).toEqual(
-      new Gap({
-        ruleId,
-        timestamp,
+    expect(result[0].toObject()).toEqual(
+      expect.objectContaining({
         range: validInterval,
-        filledIntervals: [validInterval],
-        inProgressIntervals: [validInterval],
-        internalFields: {
-          _id: 'test-id',
-          _index: 'test-index',
-          _seq_no: 1,
-          _primary_term: 1,
-        },
+        filled_intervals: [validInterval],
+        in_progress_intervals: [validInterval],
+        unfilled_intervals: [],
+        status: 'partially_filled',
+        total_gap_duration_ms: 3600000,
+        filled_duration_ms: 3600000,
+        unfilled_duration_ms: 0,
+        in_progress_duration_ms: 3600000,
+        updated_at: mockNow,
       })
     );
+
+    expect(result[0].internalFields).toEqual({
+      _id: 'test-id',
+      _index: 'test-index',
+      _seq_no: 1,
+      _primary_term: 1,
+    });
+
+    jest.useRealTimers();
   });
 
   it('filters out invalid gaps (missing range)', () => {

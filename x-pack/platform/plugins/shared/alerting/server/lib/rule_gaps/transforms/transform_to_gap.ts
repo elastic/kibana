@@ -55,6 +55,7 @@ export const transformToGap = (events: Pick<QueryEventsBySavedObjectResult, 'dat
         range,
         filledIntervals,
         inProgressIntervals,
+        updatedAt: gap?.updated_at,
         internalFields: {
           _id: doc._id,
           _index: doc._index,

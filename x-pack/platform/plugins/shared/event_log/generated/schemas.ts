@@ -164,6 +164,7 @@ export const EventSchema = schema.maybe(
                     unfilled_duration_ms: ecsStringOrNumber(),
                     in_progress_duration_ms: ecsStringOrNumber(),
                     deleted: ecsBoolean(),
+                    updated_at: ecsDate(),
                   })
                 ),
                 execution: schema.maybe(
@@ -264,6 +265,38 @@ export const EventSchema = schema.maybe(
           schema.object({
             id: ecsString(),
             name: ecsString(),
+          })
+        ),
+        gap_auto_fill: schema.maybe(
+          schema.object({
+            execution: schema.maybe(
+              schema.object({
+                status: ecsString(),
+                start: ecsDate(),
+                end: ecsDate(),
+                duration_ms: ecsStringOrNumber(),
+                rule_ids: ecsStringMulti(),
+                task_params: schema.maybe(
+                  schema.object({
+                    name: ecsString(),
+                    num_retries: ecsStringOrNumber(),
+                    gap_fill_range: ecsString(),
+                    interval: ecsString(),
+                    max_backfills: ecsStringOrNumber(),
+                  })
+                ),
+                results: schema.maybe(
+                  schema.arrayOf(
+                    schema.object({
+                      rule_id: ecsString(),
+                      processed_gaps: ecsStringOrNumber(),
+                      status: ecsString(),
+                      error: ecsString(),
+                    })
+                  )
+                ),
+              })
+            ),
           })
         ),
       })
