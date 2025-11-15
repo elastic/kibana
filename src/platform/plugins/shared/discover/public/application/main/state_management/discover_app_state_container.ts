@@ -53,10 +53,6 @@ export interface DiscoverAppStateContainer extends BaseStateContainer<DiscoverAp
    */
   initAndSync: () => () => void;
   /**
-   * Updates the URL with the current app and global state without pushing to history (e.g. on initialization)
-   */
-  updateUrlWithCurrentState: () => Promise<void>;
-  /**
    * Updates the state, if replace is true, a history.replace is performed instead of history.push
    * @param newPartial
    * @param replace
@@ -216,17 +212,6 @@ export const getDiscoverAppStateContainer = ({
     state$: from(internalState).pipe(map(getGlobalState), distinctUntilChanged(isEqual)),
   };
 
-  const updateUrlWithCurrentState = async () => {
-    await Promise.all([
-      internalState.dispatch(
-        injectCurrentTab(internalStateActions.replaceGlobalState)({ globalState: {} })
-      ),
-      internalState.dispatch(
-        injectCurrentTab(internalStateActions.replaceAppState)({ appState: {} })
-      ),
-    ]);
-  };
-
   const initAndSync = () => {
     const currentSavedSearch = savedSearchContainer.getState();
 
@@ -305,10 +290,12 @@ export const getDiscoverAppStateContainer = ({
       });
 
     // current state needs to be pushed to url
-    updateUrlWithCurrentState().then(() => {
-      startSyncingAppStateWithUrl();
-      startSyncingGlobalStateWithUrl();
-    });
+    internalState
+      .dispatch(injectCurrentTab(internalStateActions.pushCurrentTabStateToUrl)())
+      .then(() => {
+        startSyncingAppStateWithUrl();
+        startSyncingGlobalStateWithUrl();
+      });
 
     return () => {
       stopSyncingQueryAppStateWithStateContainer();
@@ -338,7 +325,6 @@ export const getDiscoverAppStateContainer = ({
   return {
     ...appStateContainer,
     initAndSync,
-    updateUrlWithCurrentState,
     update,
   };
 };

@@ -25,7 +25,6 @@ import {
   internalStateActions,
   useInternalStateDispatch,
   useInternalStateSelector,
-  selectTabRuntimeState,
 } from './state_management/redux';
 import type { RootProfileState } from '../../context_awareness';
 import { useRootProfile, useDefaultAdHocDataViews } from '../../context_awareness';
@@ -161,10 +160,7 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
           shouldClearAllTabs: isSwitchingSession,
         });
       } else {
-        const currentTabRuntimeState = selectTabRuntimeState(runtimeStateManager, currentTabId);
-        const currentTabStateContainer = currentTabRuntimeState.stateContainer$.getValue();
-
-        currentTabStateContainer?.appState.updateUrlWithCurrentState();
+        dispatch(internalStateActions.pushCurrentTabStateToUrl({ tabId: currentTabId }));
       }
     }
   );
