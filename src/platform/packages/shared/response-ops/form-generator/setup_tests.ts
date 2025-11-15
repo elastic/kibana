@@ -6,7 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-export * from 'zod/v3';
-export { isZod } from './util';
-export type { ZodEsque } from './types';
+/* eslint-disable import/no-extraneous-dependencies */
+import '@testing-library/jest-dom';
+import '@emotion/jest';
