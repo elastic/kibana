@@ -13,6 +13,7 @@ import type {
   DropDocumentProcessor,
   GrokProcessor,
   ManualIngestPipelineProcessor,
+  ReplaceProcessor,
   SetProcessor,
   StreamlangWhereBlockWithUIAttributes,
 } from '@kbn/streamlang';
@@ -32,6 +33,7 @@ export type DateFormState = DateProcessor;
 export type DropFormState = DropDocumentProcessor;
 export type ManualIngestPipelineFormState = ManualIngestPipelineProcessor;
 export type ConvertFormState = ConvertProcessor;
+export type ReplaceFormState = ReplaceProcessor;
 
 export type SetFormState = SetProcessor;
 
@@ -42,6 +44,7 @@ export type SpecialisedFormState =
   | DropFormState
   | ManualIngestPipelineFormState
   | ConvertFormState
+  | ReplaceFormState
   | SetFormState;
 
 export type ProcessorFormState = SpecialisedFormState | ConfigDrivenProcessorFormState;

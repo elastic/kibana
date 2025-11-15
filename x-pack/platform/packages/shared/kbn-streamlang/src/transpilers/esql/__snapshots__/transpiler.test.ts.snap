@@ -24,6 +24,8 @@ exports[`transpile - Streamlang DSL to ES|QL) should transpile a variety of proc
 "  | WHERE NOT \`https.status_code\` == 200
   | WHERE NOT(\`http.status_code\` IS NULL)
   | EVAL \`http.status_code_str\` = CASE(\`http.error\` == 404, TO_STRING(\`http.status_code\`), NULL)
+  | WHERE NOT(message IS NULL)
+  | EVAL clean_message = CASE(log_level == \\"ERROR\\", REPLACE(message, \\"error\\", \\"warning\\"), clean_message)
   | WHERE NOT(\`attributes.old_name\` IS NULL)
   | WHERE \`attributes.new_name\` IS NULL
   | EVAL \`attributes.new_name\` = \`attributes.old_name\`

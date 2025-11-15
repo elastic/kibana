@@ -28,6 +28,7 @@ export const ConvertProcessorForm = () => {
       <ConvertTypeSelector />
       <EuiSpacer size="m" />
       <TargetFieldSelector />
+      <EuiSpacer size="m" />
       <FieldsAccordion>
         <ProcessorConditionEditor />
       </FieldsAccordion>

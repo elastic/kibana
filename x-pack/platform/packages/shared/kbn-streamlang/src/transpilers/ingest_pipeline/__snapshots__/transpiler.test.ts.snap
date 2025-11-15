@@ -212,6 +212,24 @@ Object {
       },
     },
     Object {
+      "gsub": Object {
+        "field": "message",
+        "if": "
+  try {
+  if (($('log_level', null) !== null && (($('log_level', null) instanceof Number && $('log_level', null).toString() == \\"ERROR\\") || $('log_level', null) == \\"ERROR\\"))) {
+    return true;
+  }
+  return false;
+} catch (Exception e) {
+  return false;
+}
+",
+        "pattern": "error",
+        "replacement": "warning",
+        "target_field": "clean_message",
+      },
+    },
+    Object {
       "rename": Object {
         "field": "attributes.old_name",
         "target_field": "attributes.new_name",

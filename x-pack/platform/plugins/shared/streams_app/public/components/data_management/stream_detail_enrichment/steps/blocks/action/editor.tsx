@@ -48,6 +48,7 @@ import { SetProcessorForm } from './set';
 import { useKibana } from '../../../../../../hooks/use_kibana';
 import { deleteProcessorPromptOptions, discardChangesPromptOptions } from './prompt_options';
 import { ConvertProcessorForm } from './convert';
+import { ReplaceProcessorForm } from './replace';
 
 export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((props, ref) => {
   const { processorMetrics, stepRef } = props;
@@ -178,6 +179,7 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
               <ProcessorTypeSelector disabled={isConfigured} />
               <EuiSpacer size="m" />
               {type === 'convert' && <ConvertProcessorForm />}
+              {type === 'replace' && <ReplaceProcessorForm />}
               {type === 'date' && <DateProcessorForm />}
               {type === 'grok' && <GrokProcessorForm />}
               {type === 'dissect' && <DissectProcessorForm />}
