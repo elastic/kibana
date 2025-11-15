@@ -31,9 +31,13 @@ import { useGetSettings } from '../slo_settings/hooks/use_get_settings';
 import { SlosPage } from './slos';
 import { transformSloToCloneState } from '../slo_edit/helpers/transform_slo_to_clone_state';
 
+const mockHistoryReplace = jest.fn();
+const mockUseHistory = jest.fn();
+
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useParams: jest.fn(),
+  useHistory: () => mockUseHistory(),
 }));
 
 jest.mock('@kbn/observability-shared-plugin/public');
@@ -159,6 +163,15 @@ const mockKibana = () => {
 describe('SLOs Page', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockHistoryReplace.mockClear();
+    mockUseHistory.mockReturnValue({
+      replace: mockHistoryReplace,
+      createHref: (location: any) => {
+        if (typeof location === 'string') return location;
+        return location.pathname || '/';
+      },
+      location: { pathname: '/slos', search: '', hash: '', state: undefined },
+    });
     mockKibana();
     useGetSettingsMock.mockReturnValue({
       isLoading: false,
@@ -181,7 +194,7 @@ describe('SLOs Page', () => {
 
   describe('when the incorrect license is found', () => {
     beforeEach(() => {
-      useFetchSloListMock.mockReturnValue({ isLoading: false, sloList: emptySloList });
+      useFetchSloListMock.mockReturnValue({ isLoading: false, data: emptySloList });
       useLicenseMock.mockReturnValue({ hasAtLeast: () => false });
       useFetchHistoricalSummaryMock.mockReturnValue({
         isLoading: false,
@@ -189,14 +202,20 @@ describe('SLOs Page', () => {
       });
     });
 
-    it('navigates to the SLOs Welcome Page', async () => {
+    it('redirects to the SLOs Welcome Page', async () => {
+      let container: HTMLElement;
+
       await act(async () => {
-        render(<SlosPage />);
+        const result = render(<SlosPage />);
+        container = result.container;
       });
 
       await waitFor(() => {
-        expect(mockNavigate).toBeCalledWith(paths.slosWelcome);
+        expect(mockHistoryReplace).toHaveBeenCalledWith('/welcome');
       });
+
+      // Should not render page content when redirecting
+      expect(container!.firstChild).toBeNull();
     });
   });
 
@@ -205,23 +224,29 @@ describe('SLOs Page', () => {
       useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
     });
 
-    it('navigates to the SLOs Welcome Page when the API has finished loading and there are no results', async () => {
+    it('redirects to the SLOs Welcome Page when the API has finished loading and there are no results', async () => {
       useFetchSloListMock.mockReturnValue({ isLoading: false, data: emptySloList });
       useFetchHistoricalSummaryMock.mockReturnValue({
         isLoading: false,
         data: {},
       });
 
+      let container: HTMLElement;
+
       await act(async () => {
-        render(<SlosPage />);
+        const result = render(<SlosPage />);
+        container = result.container;
       });
 
       await waitFor(() => {
-        expect(mockNavigate).toBeCalledWith(paths.slosWelcome);
+        expect(mockHistoryReplace).toHaveBeenCalledWith('/welcome');
       });
+
+      // Should not render page content when redirecting
+      expect(container!.firstChild).toBeNull();
     });
 
-    it('navigates to the SLOs Welcome Page when the user has not the request read permissions', async () => {
+    it('redirects to the SLOs Welcome Page when the user does not have the required read permissions', async () => {
       useFetchSloListMock.mockReturnValue({ isLoading: false, data: sloList });
       useFetchHistoricalSummaryMock.mockReturnValue({
         isLoading: false,
@@ -232,13 +257,61 @@ describe('SLOs Page', () => {
         data: { hasAllReadRequested: false, hasAllWriteRequested: false },
       });
 
+      let container: HTMLElement;
+
       await act(async () => {
-        render(<SlosPage />);
+        const result = render(<SlosPage />);
+        container = result.container;
       });
 
       await waitFor(() => {
-        expect(mockNavigate).toBeCalledWith(paths.slosWelcome);
+        expect(mockHistoryReplace).toHaveBeenCalledWith('/welcome');
       });
+
+      // Should not render page content when redirecting
+      expect(container!.firstChild).toBeNull();
+    });
+
+    it('returns null while loading SLO data', async () => {
+      useFetchSloListMock.mockReturnValue({ isLoading: true, data: undefined });
+      useFetchHistoricalSummaryMock.mockReturnValue({
+        isLoading: false,
+        data: {},
+      });
+
+      let container: HTMLElement;
+      await act(async () => {
+        const result = render(<SlosPage />);
+        container = result.container;
+      });
+
+      // Should not render page content while loading
+      expect(container!.firstChild).toBeNull();
+      // Should not redirect while loading
+      expect(mockHistoryReplace).not.toHaveBeenCalled();
+    });
+
+    it('returns null while loading permissions', async () => {
+      useFetchSloListMock.mockReturnValue({ isLoading: false, data: sloList });
+      useFetchHistoricalSummaryMock.mockReturnValue({
+        isLoading: false,
+        data: historicalSummaryData,
+      });
+      usePermissionsMock.mockReturnValue({
+        isLoading: true,
+        data: undefined,
+      });
+
+      let container: HTMLElement;
+      await act(async () => {
+        const result = render(<SlosPage />);
+        container = result.container;
+      });
+
+      // Should not render page content while loading permissions
+      expect(container!.firstChild).toBeNull();
+      // Should not redirect while loading
+      expect(mockHistoryReplace).not.toHaveBeenCalled();
     });
 
     it('should have a create new SLO button', async () => {
@@ -269,7 +342,9 @@ describe('SLOs Page', () => {
         });
         expect(await screen.findByTestId('sloListViewButton')).toBeTruthy();
 
-        fireEvent.click(screen.getByTestId('sloListViewButton'));
+        await act(async () => {
+          fireEvent.click(screen.getByTestId('sloListViewButton'));
+        });
 
         expect(screen.queryByTestId('slosPage')).toBeTruthy();
         expect(screen.queryByTestId('sloList')).toBeTruthy();
@@ -289,9 +364,14 @@ describe('SLOs Page', () => {
           render(<SlosPage />);
         });
         expect(await screen.findByTestId('compactView')).toBeTruthy();
-        fireEvent.click(screen.getByTestId('compactView'));
 
-        (await screen.findByLabelText('All actions, row 1')).click();
+        await act(async () => {
+          fireEvent.click(screen.getByTestId('compactView'));
+        });
+
+        await act(async () => {
+          (await screen.findByLabelText('All actions, row 1')).click();
+        });
 
         await waitForEuiPopoverOpen();
 
@@ -299,7 +379,9 @@ describe('SLOs Page', () => {
 
         expect(button).toBeTruthy();
 
-        button.click();
+        await act(async () => {
+          button.click();
+        });
 
         expect(mockNavigate).toBeCalledWith(`${paths.sloEdit(sloList.results.at(0)?.id || '')}`);
       });
@@ -316,8 +398,14 @@ describe('SLOs Page', () => {
           render(<SlosPage />);
         });
         expect(await screen.findByTestId('compactView')).toBeTruthy();
-        fireEvent.click(screen.getByTestId('compactView'));
-        screen.getByLabelText('All actions, row 1').click();
+
+        await act(async () => {
+          fireEvent.click(screen.getByTestId('compactView'));
+        });
+
+        await act(async () => {
+          screen.getByLabelText('All actions, row 1').click();
+        });
 
         await waitForEuiPopoverOpen();
 
@@ -325,7 +413,7 @@ describe('SLOs Page', () => {
 
         expect(button).toBeTruthy();
 
-        act(() => {
+        await act(async () => {
           button.click();
         });
 
@@ -344,8 +432,14 @@ describe('SLOs Page', () => {
           render(<SlosPage />);
         });
         expect(await screen.findByTestId('compactView')).toBeTruthy();
-        fireEvent.click(screen.getByTestId('compactView'));
-        screen.getByLabelText('All actions, row 1').click();
+
+        await act(async () => {
+          fireEvent.click(screen.getByTestId('compactView'));
+        });
+
+        await act(async () => {
+          screen.getByLabelText('All actions, row 1').click();
+        });
 
         await waitForEuiPopoverOpen();
 
@@ -353,7 +447,9 @@ describe('SLOs Page', () => {
 
         expect(button).toBeTruthy();
 
-        button.click();
+        await act(async () => {
+          button.click();
+        });
 
         expect(mockLocator).toBeCalled();
       });
@@ -371,8 +467,14 @@ describe('SLOs Page', () => {
         });
 
         expect(await screen.findByTestId('compactView')).toBeTruthy();
-        fireEvent.click(screen.getByTestId('compactView'));
-        screen.getByLabelText('All actions, row 1').click();
+
+        await act(async () => {
+          fireEvent.click(screen.getByTestId('compactView'));
+        });
+
+        await act(async () => {
+          screen.getByLabelText('All actions, row 1').click();
+        });
 
         await waitForEuiPopoverOpen();
 
@@ -380,11 +482,13 @@ describe('SLOs Page', () => {
 
         expect(button).toBeTruthy();
 
-        act(() => {
+        await act(async () => {
           button.click();
         });
 
-        screen.getByTestId('observabilitySolutionSloDeleteModalConfirmButton').click();
+        await act(async () => {
+          screen.getByTestId('observabilitySolutionSloDeleteModalConfirmButton').click();
+        });
 
         expect(mockDeleteSlo).toBeCalledWith({
           id: sloList.results.at(0)?.id,
@@ -405,8 +509,14 @@ describe('SLOs Page', () => {
         });
 
         expect(await screen.findByTestId('compactView')).toBeTruthy();
-        fireEvent.click(screen.getByTestId('compactView'));
-        screen.getByLabelText('All actions, row 1').click();
+
+        await act(async () => {
+          fireEvent.click(screen.getByTestId('compactView'));
+        });
+
+        await act(async () => {
+          screen.getByLabelText('All actions, row 1').click();
+        });
 
         await waitForEuiPopoverOpen();
 
@@ -414,7 +524,9 @@ describe('SLOs Page', () => {
 
         expect(button).toBeTruthy();
 
-        button.click();
+        await act(async () => {
+          button.click();
+        });
 
         await waitFor(() => {
           const slo = sloList.results.at(0);

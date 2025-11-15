@@ -9,8 +9,9 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
+import { useHistory } from 'react-router-dom';
 import { SLOsOverview } from './components/slos_overview/slos_overview';
-import { paths } from '../../../common/locators/paths';
+import { paths, SLOS_WELCOME_PATH } from '../../../common/locators/paths';
 import { HeaderMenu } from '../../components/header_menu/header_menu';
 import { SloOutdatedCallout } from '../../components/slo/slo_outdated_callout';
 import { useFetchSloList } from '../../hooks/use_fetch_slo_list';
@@ -26,15 +27,15 @@ export const SLO_PAGE_ID = 'slo-page-container';
 
 export function SlosPage() {
   const {
-    application: { navigateToUrl },
     http: { basePath },
     serverless,
   } = useKibana().services;
   const { ObservabilityPageTemplate } = usePluginContext();
   const { hasAtLeast } = useLicense();
-  const { data: permissions } = usePermissions();
+  const { data: permissions, ...permissionsContext } = usePermissions();
+  const history = useHistory();
 
-  const { isLoading, isError, data: sloList } = useFetchSloList({ perPage: 0 });
+  const { isError, data: sloList, ...sloListContext } = useFetchSloList({ perPage: 0 });
   const { total } = sloList ?? { total: 0 };
 
   useBreadcrumbs(
@@ -50,15 +51,23 @@ export function SlosPage() {
     { serverless }
   );
 
-  useEffect(() => {
-    if ((!isLoading && total === 0) || hasAtLeast('platinum') === false || isError) {
-      navigateToUrl(basePath.prepend(paths.slosWelcome));
-    }
+  const shouldRedirect =
+    (!sloListContext.isLoading && total === 0) ||
+    hasAtLeast('platinum') === false ||
+    isError ||
+    permissions?.hasAllReadRequested === false;
 
-    if (permissions?.hasAllReadRequested === false) {
-      navigateToUrl(basePath.prepend(paths.slosWelcome));
+  useEffect(() => {
+    if (shouldRedirect) {
+      // Use history.replace for in-app navigation to avoid adding a new entry in the browser history
+      history.replace(SLOS_WELCOME_PATH);
     }
-  }, [basePath, hasAtLeast, isError, isLoading, navigateToUrl, total, permissions]);
+  }, [shouldRedirect, history]);
+
+  // Prevent flash of content while loading or during redirect
+  if (sloListContext.isLoading || permissionsContext.isLoading || shouldRedirect) {
+    return null;
+  }
 
   return (
     <ObservabilityPageTemplate
