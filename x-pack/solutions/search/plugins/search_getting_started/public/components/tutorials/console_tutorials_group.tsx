@@ -4,7 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { consoleTutorials } from '@kbn/search-code-examples';
+import {
+  consoleTutorials,
+  replaceConsoleTutorialStrings,
+  type ConsoleTutorialVariables,
+} from '@kbn/search-code-examples';
+import {
+  SERVERLESS_ES_SEARCH_INFERENCE_ENDPOINTS_ID,
+  ES_SEARCH_PLAYGROUND_ID,
+  ENTERPRISE_SEARCH_APPLICATIONS_APP_ID,
+} from '@kbn/deeplinks-search';
 import { TryInConsoleButton } from '@kbn/try-in-console';
 import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiText, EuiImage } from '@elastic/eui';
 import React, { useMemo } from 'react';
@@ -25,6 +34,26 @@ interface TutorialMetadata {
 export const ConsoleTutorialsGroup = () => {
   const { application, console: consolePlugin, share } = useKibana().services;
   const assetBasePath = useAssetBasePath();
+
+  // Generate URLs using deeplinks - same way navigation bar does it
+  const tutorialVariables = useMemo<ConsoleTutorialVariables>(() => {
+    return {
+      inference_endpoints_url: application.getUrlForApp(
+        SERVERLESS_ES_SEARCH_INFERENCE_ENDPOINTS_ID,
+        {
+          deepLinkId: 'inferenceEndpoints',
+          absolute: true,
+        }
+      ),
+      search_playground_url: application.getUrlForApp(ES_SEARCH_PLAYGROUND_ID, {
+        absolute: true,
+      }),
+      search_applications_url: application.getUrlForApp(ENTERPRISE_SEARCH_APPLICATIONS_APP_ID, {
+        deepLinkId: 'searchApplications',
+        absolute: true,
+      }),
+    };
+  }, [application]);
   const tutorials: TutorialMetadata[] = useMemo(
     () => [
       {
@@ -39,7 +68,7 @@ export const ConsoleTutorialsGroup = () => {
               'Learn how to create an index, add documents, and basic search techniques.',
           }
         ),
-        request: consoleTutorials.basics,
+        request: replaceConsoleTutorialStrings(consoleTutorials.basics, tutorialVariables),
         image: `${assetBasePath}/search_window_illustration.svg`,
         buttonRef: React.createRef<HTMLButtonElement>(),
       },
@@ -87,7 +116,7 @@ export const ConsoleTutorialsGroup = () => {
       //   buttonRef: useRef<HTMLButtonElement>(null),
       // },
     ],
-    [assetBasePath]
+    [assetBasePath, tutorialVariables]
   );
 
   return (

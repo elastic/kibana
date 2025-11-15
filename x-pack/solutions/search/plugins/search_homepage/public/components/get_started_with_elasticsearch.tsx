@@ -4,9 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { consoleTutorials } from '@kbn/search-code-examples';
+import {
+  consoleTutorials,
+  replaceConsoleTutorialStrings,
+  type ConsoleTutorialVariables,
+} from '@kbn/search-code-examples';
 import { TryInConsoleButton } from '@kbn/try-in-console';
-import { SEARCH_INDICES, SEARCH_INDICES_CREATE_INDEX } from '@kbn/deeplinks-search/constants';
+import {
+  SEARCH_INDICES,
+  SEARCH_INDICES_CREATE_INDEX,
+  SERVERLESS_ES_SEARCH_INFERENCE_ENDPOINTS_ID,
+  ES_SEARCH_PLAYGROUND_ID,
+  ENTERPRISE_SEARCH_APPLICATIONS_APP_ID,
+} from '@kbn/deeplinks-search/constants';
 import {
   EuiBadge,
   EuiCard,
@@ -127,6 +137,26 @@ export const GetStartedWithElasticsearch = () => {
   } = useIsSampleDataAvailable();
   const isSmallScreen = useIsWithinBreakpoints(['xs', 's', 'm']);
 
+  // Generate URLs using deeplinks - same way navigation bar does it
+  const tutorialVariables = React.useMemo<ConsoleTutorialVariables>(() => {
+    return {
+      inference_endpoints_url: application.getUrlForApp(
+        SERVERLESS_ES_SEARCH_INFERENCE_ENDPOINTS_ID,
+        {
+          deepLinkId: 'inferenceEndpoints',
+          absolute: true,
+        }
+      ),
+      search_playground_url: application.getUrlForApp(ES_SEARCH_PLAYGROUND_ID, {
+        absolute: true,
+      }),
+      search_applications_url: application.getUrlForApp(ENTERPRISE_SEARCH_APPLICATIONS_APP_ID, {
+        deepLinkId: 'searchApplications',
+        absolute: true,
+      }),
+    };
+  }, [application]);
+
   const gettingStartedCards: GettingStartedCardMetadata[] = [
     // Upload file card
     {
@@ -216,7 +246,7 @@ export const GetStartedWithElasticsearch = () => {
       }),
       buttonComponent: (
         <TryInConsoleButton
-          request={consoleTutorials.basics}
+          request={replaceConsoleTutorialStrings(consoleTutorials.basics, tutorialVariables)}
           color="text"
           type="button"
           application={application}
