@@ -16,6 +16,7 @@ import type { Condition } from '@kbn/streamlang';
 import type { StreamsTelemetryClient } from '../../../../../telemetry/client';
 import { getFormattedError } from '../../../../../util/errors';
 import type { StreamRoutingServiceDependencies } from './types';
+import type { HttpRequestPreview } from '../../../request_preview_flyout';
 
 /**
  * Upsert stream actor factory
@@ -27,25 +28,47 @@ export interface UpsertStreamInput {
   routing: RoutingDefinition[];
 }
 
+export interface RoutingSaveRequest extends HttpRequestPreview {
+  method: 'PUT';
+  body: {
+    ingest: Streams.WiredStream.GetResponse['stream']['ingest'];
+  };
+}
+
+export const buildRoutingSaveRequest = (
+  definition: Streams.WiredStream.GetResponse,
+  routing: RoutingDefinition[]
+): RoutingSaveRequest => {
+  const streamName = encodeURIComponent(definition.stream.name);
+
+  return {
+    method: 'PUT',
+    url: `/api/streams/${streamName}/_ingest`,
+    body: {
+      ingest: {
+        ...definition.stream.ingest,
+        wired: {
+          ...definition.stream.ingest.wired,
+          routing,
+        },
+      },
+    },
+  };
+};
+
 export function createUpsertStreamActor({
   streamsRepositoryClient,
 }: Pick<StreamRoutingServiceDependencies, 'streamsRepositoryClient'>) {
   return fromPromise<UpsertStreamResponse, UpsertStreamInput>(({ input, signal }) => {
+    const request = buildRoutingSaveRequest(input.definition, input.routing);
+
     return streamsRepositoryClient.fetch(`PUT /api/streams/{name}/_ingest 2023-10-31`, {
       signal,
       params: {
         path: {
           name: input.definition.stream.name,
         },
-        body: {
-          ingest: {
-            ...input.definition.stream.ingest,
-            wired: {
-              ...input.definition.stream.ingest.wired,
-              routing: input.routing,
-            },
-          },
-        },
+        body: request.body,
       },
     });
   });

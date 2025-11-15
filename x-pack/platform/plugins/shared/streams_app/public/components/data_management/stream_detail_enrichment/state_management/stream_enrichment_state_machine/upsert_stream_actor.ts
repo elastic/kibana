@@ -18,8 +18,16 @@ import { convertUIStepsToDSL, isActionBlock } from '@kbn/streamlang';
 import { getStreamTypeFromDefinition } from '../../../../../util/get_stream_type_from_definition';
 import { getFormattedError } from '../../../../../util/errors';
 import type { StreamEnrichmentServiceDependencies } from './types';
+import type { HttpRequestPreview } from '../../../request_preview_flyout';
 
 export type UpsertStreamResponse = APIReturnType<'PUT /api/streams/{name}/_ingest 2023-10-31'>;
+
+export interface StreamSaveRequest extends HttpRequestPreview {
+  method: 'PUT';
+  body: {
+    ingest: Streams.ingest.all.GetResponse['stream']['ingest'];
+  };
+}
 
 export interface UpsertStreamInput {
   definition: Streams.ingest.all.GetResponse;
@@ -27,11 +35,52 @@ export interface UpsertStreamInput {
   fields?: FieldDefinition;
 }
 
+export const buildStreamSaveRequest = (
+  definition: Streams.ingest.all.GetResponse,
+  steps: StreamlangStepWithUIAttributes[],
+  fields?: FieldDefinition
+): StreamSaveRequest => {
+  const streamName = encodeURIComponent(definition.stream.name);
+  const processing = convertUIStepsToDSL(steps);
+
+  const ingest = Streams.WiredStream.GetResponse.is(definition)
+    ? {
+        ...definition.stream.ingest,
+        processing,
+        ...(fields && {
+          wired: {
+            ...definition.stream.ingest.wired,
+            fields,
+          },
+        }),
+      }
+    : {
+        ...definition.stream.ingest,
+        processing,
+        ...(fields && {
+          classic: {
+            ...definition.stream.ingest.classic,
+            field_overrides: fields,
+          },
+        }),
+      };
+
+  return {
+    method: 'PUT',
+    url: `/api/streams/${streamName}/_ingest`,
+    body: {
+      ingest,
+    },
+  };
+};
+
 export function createUpsertStreamActor({
   streamsRepositoryClient,
   telemetryClient,
 }: Pick<StreamEnrichmentServiceDependencies, 'streamsRepositoryClient' | 'telemetryClient'>) {
   return fromPromise<UpsertStreamResponse, UpsertStreamInput>(async ({ input, signal }) => {
+    const saveRequest = buildStreamSaveRequest(input.definition, input.steps, input.fields);
+
     const response = await streamsRepositoryClient.fetch(
       `PUT /api/streams/{name}/_ingest 2023-10-31`,
       {
@@ -40,28 +89,7 @@ export function createUpsertStreamActor({
           path: {
             name: input.definition.stream.name,
           },
-          body: Streams.WiredStream.GetResponse.is(input.definition)
-            ? {
-                ingest: {
-                  ...input.definition.stream.ingest,
-                  processing: convertUIStepsToDSL(input.steps),
-                  ...(input.fields && {
-                    wired: { ...input.definition.stream.ingest.wired, fields: input.fields },
-                  }),
-                },
-              }
-            : {
-                ingest: {
-                  ...input.definition.stream.ingest,
-                  processing: convertUIStepsToDSL(input.steps),
-                  ...(input.fields && {
-                    classic: {
-                      ...input.definition.stream.ingest.classic,
-                      field_overrides: input.fields,
-                    },
-                  }),
-                },
-              },
+          body: saveRequest.body,
         },
       }
     );

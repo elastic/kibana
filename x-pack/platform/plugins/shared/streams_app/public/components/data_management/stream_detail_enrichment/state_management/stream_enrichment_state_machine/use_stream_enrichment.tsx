@@ -27,6 +27,8 @@ import type {
 } from '../simulation_state_machine';
 import type { MappedSchemaField, SchemaField } from '../../../schema_editor/types';
 import { isGrokProcessor } from '../../utils';
+import { buildStreamSaveRequest } from './upsert_stream_actor';
+import { getConfiguredSteps, getUpsertFields } from './utils';
 
 const consoleInspector = createConsoleInspector();
 
@@ -124,6 +126,21 @@ export const useStreamEnrichmentEvents = () => {
     }),
     [service]
   );
+};
+
+export const useStreamSaveRequestPreview = () => {
+  const service = StreamEnrichmentContext.useActorRef();
+
+  return useCallback(() => {
+    const snapshot = service.getSnapshot();
+    const context = snapshot.context;
+
+    return buildStreamSaveRequest(
+      context.definition,
+      getConfiguredSteps(context),
+      getUpsertFields(context)
+    );
+  }, [service]);
 };
 
 export const StreamEnrichmentContextProvider = ({

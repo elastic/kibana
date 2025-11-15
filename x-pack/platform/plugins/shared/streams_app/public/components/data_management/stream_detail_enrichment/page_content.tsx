@@ -5,38 +5,41 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
 import {
   EuiAccordion,
   EuiCode,
   EuiPanel,
   EuiResizableContainer,
+  EuiSpacer,
   EuiSplitPanel,
   EuiText,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import type { Streams } from '@kbn/streams-schema';
-import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { css } from '@emotion/react';
-import { isEmpty } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { useKbnUrlStateStorageFromRouterContext } from '../../../util/kbn_url_state_context';
+import type { Streams } from '@kbn/streams-schema';
+import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
+import { isEmpty } from 'lodash';
+import React, { useMemo } from 'react';
 import { useKibana } from '../../../hooks/use_kibana';
+import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_definition';
+import { useKbnUrlStateStorageFromRouterContext } from '../../../util/kbn_url_state_context';
+import { StreamsAppContextProvider } from '../../streams_app_context_provider';
+import { RequestPreviewFlyout, type HttpRequestPreview } from '../request_preview_flyout';
 import { ManagementBottomBar } from '../management_bottom_bar';
+import { getDefinitionFields } from '../schema_editor/hooks/use_schema_fields';
+import { SchemaChangesReviewModal, getChanges } from '../schema_editor/schema_changes_review_modal';
+import { NoStepsEmptyPrompt } from './empty_prompts';
 import { SimulationPlayground } from './simulation_playground';
 import {
   StreamEnrichmentContextProvider,
   useSimulatorSelector,
   useStreamEnrichmentEvents,
   useStreamEnrichmentSelector,
+  useStreamSaveRequestPreview,
 } from './state_management/stream_enrichment_state_machine';
-import { NoStepsEmptyPrompt } from './empty_prompts';
 import { RootSteps } from './steps/root_steps';
-import { StreamsAppContextProvider } from '../../streams_app_context_provider';
-import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_definition';
-import { SchemaChangesReviewModal, getChanges } from '../schema_editor/schema_changes_review_modal';
-import { getDefinitionFields } from '../schema_editor/hooks/use_schema_fields';
 
 const MemoSimulationPlayground = React.memo(SimulationPlayground);
 
@@ -78,6 +81,7 @@ export function StreamDetailEnrichmentContentImpl() {
   const { appParams, core } = context;
 
   const { resetChanges, saveChanges } = useStreamEnrichmentEvents();
+  const getRequestPreview = useStreamSaveRequestPreview();
 
   const isReady = useStreamEnrichmentSelector((state) => state.matches('ready'));
   const definition = useStreamEnrichmentSelector((state) => state.context.definition);
@@ -97,6 +101,19 @@ export function StreamDetailEnrichmentContentImpl() {
   );
 
   const hasChanges = canUpdate && !isSimulating;
+  const [isRequestFlyoutOpen, setIsRequestFlyoutOpen] = React.useState(false);
+  const [requestPreview, setRequestPreview] = React.useState<HttpRequestPreview | null>(null);
+
+  const openRequestPreviewFlyout = React.useCallback(() => {
+    const preview = getRequestPreview();
+    setRequestPreview(preview);
+    setIsRequestFlyoutOpen(true);
+  }, [getRequestPreview]);
+
+  const closeRequestPreviewFlyout = React.useCallback(() => {
+    setIsRequestFlyoutOpen(false);
+    setRequestPreview(null);
+  }, []);
 
   useUnsavedChangesPrompt({
     hasUnsavedChanges: hasChanges,
@@ -179,6 +196,14 @@ export function StreamDetailEnrichmentContentImpl() {
           disabled={!hasChanges}
           insufficientPrivileges={!canManage}
           isInvalid={hasDefinitionError}
+          onViewRequest={openRequestPreviewFlyout}
+        />
+      )}
+      {isRequestFlyoutOpen && requestPreview && (
+        <RequestPreviewFlyout
+          request={requestPreview}
+          onClose={closeRequestPreviewFlyout}
+          prependBasePath={core.http.basePath.prepend}
         />
       )}
     </EuiSplitPanel.Outer>

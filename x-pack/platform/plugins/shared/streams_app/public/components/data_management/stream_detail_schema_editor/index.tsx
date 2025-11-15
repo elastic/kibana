@@ -26,10 +26,15 @@ import { useDiscardConfirm } from '../../../hooks/use_discard_confirm';
 import { useStreamDetail } from '../../../hooks/use_stream_detail';
 import { SchemaEditor } from '../schema_editor';
 import { DEFAULT_TABLE_COLUMN_NAMES } from '../schema_editor/constants';
-import { getDefinitionFields, useSchemaFields } from '../schema_editor/hooks/use_schema_fields';
+import {
+  buildSchemaSaveRequest,
+  getDefinitionFields,
+  useSchemaFields,
+} from '../schema_editor/hooks/use_schema_fields';
 import { SchemaChangesReviewModal } from '../schema_editor/schema_changes_review_modal';
 import { StreamsAppContextProvider } from '../../streams_app_context_provider';
 import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_definition';
+import { RequestPreviewFlyout, type HttpRequestPreview } from '../request_preview_flyout';
 
 interface SchemaEditorProps {
   definition: Streams.ingest.all.GetResponse;
@@ -43,6 +48,8 @@ export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: Sche
   const context = useKibana();
   const { loading } = useStreamDetail();
   const [selectedFields, setSelectedFields] = React.useState<string[]>([]);
+  const [isRequestFlyoutOpen, setIsRequestFlyoutOpen] = React.useState(false);
+  const [requestPreview, setRequestPreview] = React.useState<HttpRequestPreview | null>(null);
 
   const {
     fields,
@@ -76,6 +83,16 @@ export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: Sche
   const handleCancelClick = useDiscardConfirm(discardChanges, {
     defaultFocusedButton: 'cancel',
   });
+
+  const openRequestPreviewFlyout = React.useCallback(() => {
+    setRequestPreview(buildSchemaSaveRequest(definition, fields));
+    setIsRequestFlyoutOpen(true);
+  }, [definition, fields]);
+
+  const closeRequestPreviewFlyout = React.useCallback(() => {
+    setIsRequestFlyoutOpen(false);
+    setRequestPreview(null);
+  }, []);
 
   const openConfirmationModal = () => {
     const overlay = context.core.overlays.openModal(
@@ -173,6 +190,17 @@ export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: Sche
                     </EuiButtonEmpty>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      color="text"
+                      iconType="popout"
+                      onClick={openRequestPreviewFlyout}
+                      data-test-subj="streamsAppSchemaEditorViewRequestButton"
+                      disabled={!definition.privileges.manage}
+                    >
+                      {viewRequestButtonLabel}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
                     <EuiButton
                       fill
                       onClick={openConfirmationModal}
@@ -190,6 +218,18 @@ export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: Sche
           </EuiBottomBar>
         </EuiFlexItem>
       )}
+      {isRequestFlyoutOpen && requestPreview && (
+        <RequestPreviewFlyout
+          request={requestPreview}
+          onClose={closeRequestPreviewFlyout}
+          prependBasePath={context.core.http.basePath.prepend}
+        />
+      )}
     </EuiFlexGroup>
   );
 };
+
+const viewRequestButtonLabel = i18n.translate(
+  'xpack.streams.schemaEditor.viewRequestButtonLabel',
+  { defaultMessage: 'View request' }
+);

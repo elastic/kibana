@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiToolTip, EuiBottomBar } from '@elastic/eui';
+import { EuiBottomBar, EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { useDiscardConfirm } from '../../../hooks/use_discard_confirm';
 
 interface ManagementBottomBarProps {
@@ -18,6 +18,8 @@ interface ManagementBottomBarProps {
   isInvalid?: boolean;
   onCancel: () => void;
   onConfirm: () => void;
+  onViewRequest?: () => void;
+  isViewRequestDisabled?: boolean;
 }
 
 export function ManagementBottomBar({
@@ -28,6 +30,8 @@ export function ManagementBottomBar({
   isInvalid = false,
   onCancel,
   onConfirm,
+  onViewRequest,
+  isViewRequestDisabled,
 }: ManagementBottomBarProps) {
   const handleCancel = useDiscardConfirm(onCancel, {
     title: discardUnsavedChangesTitle,
@@ -35,6 +39,9 @@ export function ManagementBottomBar({
     confirmButtonText: discardUnsavedChangesLabel,
     cancelButtonText: keepEditingLabel,
   });
+
+  const disableViewRequestButton =
+    isViewRequestDisabled ?? (disabled || insufficientPrivileges || isInvalid);
 
   return (
     <EuiBottomBar position="sticky">
@@ -51,6 +58,18 @@ export function ManagementBottomBar({
             defaultMessage: 'Cancel changes',
           })}
         </EuiButtonEmpty>
+        {onViewRequest && (
+          <EuiButtonEmpty
+            data-test-subj="streamsAppManagementBottomBarViewRequestButton"
+            color="text"
+            size="s"
+            iconType="popout"
+            onClick={onViewRequest}
+            disabled={disableViewRequestButton}
+          >
+            {viewRequestButtonText}
+          </EuiButtonEmpty>
+        )}
         <EuiToolTip
           content={
             isInvalid
@@ -88,6 +107,11 @@ export function ManagementBottomBar({
 const defaultConfirmButtonText = i18n.translate(
   'xpack.streams.streamDetailView.managementTab.bottomBar.confirm',
   { defaultMessage: 'Save changes' }
+);
+
+const viewRequestButtonText = i18n.translate(
+  'xpack.streams.streamDetailView.managementTab.bottomBar.viewRequest',
+  { defaultMessage: 'View request' }
 );
 
 const discardUnsavedChangesLabel = i18n.translate(
