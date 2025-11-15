@@ -32,10 +32,9 @@ export const getKnowledgeBaseStatus = async ({
   http,
   resource,
   signal,
-}: ReadKnowledgeBaseRequestParams & {
-  http: HttpSetup;
-  signal?: AbortSignal | undefined;
-}): Promise<ReadKnowledgeBaseResponse | IHttpFetchError> => {
+}: ReadKnowledgeBaseRequestParams & { http: HttpSetup; signal?: AbortSignal | undefined }): Promise<
+  ReadKnowledgeBaseResponse | IHttpFetchError
+> => {
   try {
     const path = ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL.replace('{resource?}', resource || '');
     const response = await http.fetch(path, {
