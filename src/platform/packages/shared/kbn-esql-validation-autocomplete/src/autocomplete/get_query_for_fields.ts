@@ -9,6 +9,7 @@
 
 import type { ESQLAstQueryExpression } from '@kbn/esql-ast';
 import { EDITOR_MARKER } from '@kbn/esql-ast';
+import type { ESQLAstForkCommand } from '@kbn/esql-ast/src/types';
 import { expandEvals } from '../shared/expand_evals';
 
 /**
@@ -42,7 +43,9 @@ export function getQueryForFields(
      * Original query: FROM lolz | EVAL foo = 1 | FORK (EVAL bar = 2) (EVAL baz = 3 | WHERE /)
      * Simplified:     FROM lolz | EVAL foo = 1 | EVAL baz = 3
      */
-    const currentBranch = lastCommand.args[lastCommand.args.length - 1] as ESQLAstQueryExpression;
+    const forkCommand = lastCommand as ESQLAstForkCommand;
+    const currentBranch = forkCommand.args[forkCommand.args.length - 1].child;
+
     const newCommands = commands.slice(0, -1).concat(currentBranch.commands.slice(0, -1));
     return { ...root, commands: newCommands };
   }

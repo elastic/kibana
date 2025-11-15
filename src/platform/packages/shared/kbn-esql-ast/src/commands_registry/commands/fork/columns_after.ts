@@ -8,18 +8,18 @@
  */
 import { uniqBy } from 'lodash';
 import { esqlCommandRegistry } from '../../../..';
-import type { ESQLAstQueryExpression } from '../../../types';
-import { type ESQLCommand } from '../../../types';
+import type { ESQLAstAllCommands, ESQLAstForkCommand } from '../../../types';
 import type { ESQLColumnData, ESQLFieldWithMetadata } from '../../types';
 import type { IAdditionalFields } from '../../registry';
 
 export const columnsAfter = async (
-  command: ESQLCommand,
+  command: ESQLAstAllCommands,
   previousColumns: ESQLColumnData[],
   query: string,
   additionalFields: IAdditionalFields
 ) => {
-  const branches = command.args as ESQLAstQueryExpression[];
+  const forkCommand = command as ESQLAstForkCommand;
+  const branches = forkCommand.args.map((parens) => parens.child);
 
   const columnsFromBranches = [];
 
