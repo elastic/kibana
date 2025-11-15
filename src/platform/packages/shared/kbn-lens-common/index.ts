@@ -238,7 +238,6 @@ export type {
   ValidXYDataLayerConfig,
   ValidLayer,
   XYState,
-  State,
 } from './visualizations/xy/types';
 export type {
   LensEmbeddableInput,

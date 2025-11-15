@@ -40,8 +40,8 @@ import { TextBasedDataPanel } from './components/datapanel';
 import { TextBasedDimensionEditor } from './components/dimension_editor';
 import { TextBasedDimensionTrigger } from './components/dimension_trigger';
 import { toExpression } from './to_expression';
-import { generateId } from '../../../id_generator';
-import { getUniqueLabelGenerator, nonNullable } from '../../../utils';
+import { generateId } from '../../id_generator';
+import { getUniqueLabelGenerator, nonNullable } from '../../utils';
 import { onDrop, getDropProps } from './dnd';
 import { removeColumn } from './remove_column';
 import {
@@ -55,7 +55,7 @@ import {
   addColumnsToCache,
   retrieveLayerColumnsFromCache,
 } from './fieldlist_cache';
-import { TEXT_BASED_LANGUAGE_ERROR } from '../../../user_messages_ids';
+import { TEXT_BASED_LANGUAGE_ERROR } from '../../user_messages_ids';
 
 function getLayerReferenceName(layerId: string) {
   return `textBasedLanguages-datasource-layer-${layerId}`;

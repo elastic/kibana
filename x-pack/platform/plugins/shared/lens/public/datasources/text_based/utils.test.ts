@@ -9,7 +9,7 @@ import type { DatatableColumn } from '@kbn/expressions-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { mockDataViewsService } from '../../../data_views_service/mocks';
+import { mockDataViewsService } from '../../data_views_service/mocks';
 import {
   getIndexPatternFromTextBasedQuery,
   loadIndexPatternRefs,

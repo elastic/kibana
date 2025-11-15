@@ -23,8 +23,8 @@ import { render } from '@elastic/eui/lib/test/rtl';
 import { type TextBasedDataPanelProps, TextBasedDataPanel } from './datapanel';
 import type { TextBasedPrivateState, DataViewsState } from '@kbn/lens-common';
 
-import { createIndexPatternServiceMock } from '../../../../mocks/data_views_service_mock';
-import { createMockFramePublicAPI } from '../../../../mocks';
+import { createIndexPatternServiceMock } from '../../../mocks/data_views_service_mock';
+import { createMockFramePublicAPI } from '../../../mocks';
 import { addColumnsToCache } from '../fieldlist_cache';
 
 const fieldsFromQuery = [

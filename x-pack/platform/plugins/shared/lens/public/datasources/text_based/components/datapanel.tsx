@@ -27,9 +27,9 @@ import type { OverrideFieldGroupDetails } from '@kbn/unified-field-list/src/type
 import { useEuiTheme } from '@elastic/eui';
 import type { DatasourceDataPanelProps, TextBasedPrivateState } from '@kbn/lens-common';
 import { getStateFromAggregateQuery } from '../utils';
-import { FieldItem } from '../../../common/field_item';
+import { FieldItem } from '../../common/field_item';
 import { getColumnsFromCache } from '../fieldlist_cache';
-import { dataPanelStyles } from '../../../common/datapanel.styles';
+import { dataPanelStyles } from '../../common/datapanel.styles';
 
 const getCustomFieldType: GetCustomFieldType<DatatableColumn> = (field) => field?.meta.type;
 
