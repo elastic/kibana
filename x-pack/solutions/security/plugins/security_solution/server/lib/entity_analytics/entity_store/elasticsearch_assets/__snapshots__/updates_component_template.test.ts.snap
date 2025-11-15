@@ -9,6 +9,9 @@ Object {
         "@timestamp": Object {
           "type": "date",
         },
+        "Calculated_entity_id": Object {
+          "type": "keyword",
+        },
         "asset.business_unit": Object {
           "type": "keyword",
         },
@@ -118,9 +121,6 @@ Object {
           "type": "ip",
         },
         "host.mac": Object {
-          "type": "keyword",
-        },
-        "host.name": Object {
           "type": "keyword",
         },
         "host.os.name": Object {

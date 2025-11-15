@@ -10,6 +10,7 @@ import type { EntityType } from '../../../../../common/api/entity_analytics';
 import { EngineComponentResourceEnum } from '../../../../../common/api/entity_analytics';
 import { getEntitiesIndexName } from '../utils';
 import type { EntityEngineInstallationDescriptor } from '../installation/types';
+import { ENTITY_ID_FIELD } from '../constants';
 
 type DefinitionMetadata = Pick<EntityEngineInstallationDescriptor, 'entityType' | 'version'> & {
   namespace: string;
@@ -44,7 +45,7 @@ export const createFieldRetentionEnrichPolicy = async ({
     }),
     match: {
       indices: getEntitiesIndexName(description.entityType, options.namespace),
-      match_field: description.identityField,
+      match_field: ENTITY_ID_FIELD,
       enrich_fields: enrichFields,
     },
   });

@@ -143,8 +143,10 @@ Object {
             },
           },
         ],
+        "should": Array [],
       },
     },
+    "runtime_mappings": undefined,
   },
   "sync": Object {
     "time": Object {

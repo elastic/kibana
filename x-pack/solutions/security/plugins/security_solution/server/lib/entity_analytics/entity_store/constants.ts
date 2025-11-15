@@ -12,6 +12,8 @@ import type {
 } from '../../../../common/api/entity_analytics';
 import { DEFAULT_INTERVAL } from './tasks/field_retention_enrichment/constants';
 
+export const ENTITY_ID_FIELD = 'entity.id';
+
 export const DEFAULT_LOOKBACK_PERIOD = '3h';
 export const DEFAULT_FIELD_HISTORY_LENGTH = 10;
 export const DEFAULT_SYNC_DELAY = '1m';
