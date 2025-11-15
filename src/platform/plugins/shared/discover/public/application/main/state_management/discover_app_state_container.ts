@@ -218,7 +218,9 @@ export const getDiscoverAppStateContainer = ({
 
   const updateUrlWithCurrentState = async () => {
     await Promise.all([
-      stateStorage.set(GLOBAL_STATE_URL_KEY, globalStateContainer.get(), { replace: true }),
+      internalState.dispatch(
+        injectCurrentTab(internalStateActions.replaceGlobalState)({ globalState: {} })
+      ),
       internalState.dispatch(
         injectCurrentTab(internalStateActions.replaceAppState)({ appState: {} })
       ),
