@@ -271,7 +271,9 @@ export function PackageCard({
             & > .euiFlexItem {
               min-width: 0;
             }
-
+            .euiIcon {
+              object-fit: contain !important;
+            }
             ${isCollectionCard
               ? `& > .euiFlexItem:last-child {
               min-width: auto;
