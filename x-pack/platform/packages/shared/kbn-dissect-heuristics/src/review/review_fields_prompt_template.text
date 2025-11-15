@@ -35,7 +35,7 @@ For every field in the log:
      * Use for: redundant data, unwanted delimiters, formatting characters  
 
 3. **Identify static fields that should NOT be extracted**:
-   * **IMPORTANT**: If a field always has the **same literal value** across all messages, it should be **part of the pattern itself**, not extracted as a field  
+   * **IMPORTANT**: If a field always has the **same literal value** across all messages, it should be **part of the pattern itself**, not extracted as a field. Use your judgement whether it's always the same value by chance in the current sample or whether it's actually part of the pattern. 
    * **CRITICAL**: Static fields must NEVER be grouped with other fields - each static field should be its own separate entry
    * Mark such fields as static with `is_static: true` and provide the `static_value`  
    * Common examples:
@@ -48,7 +48,7 @@ For every field in the log:
      * `field_2="john"` → `{"ecs_field": "user.name", "columns": ["field_2"], ...}` (extracted as field)
      * `field_3="status"` → `{"is_static": true, "static_value": "status", "columns": ["field_3"]}` (becomes literal `status` in pattern)
      * `field_4="active"` → `{"ecs_field": "custom.status", "columns": ["field_4"], ...}` (extracted as field)
-   * Use static values for string literals only, not for control characters like = or |, these are extracted already.
+   * Use static values for string literals only, not for control characters like [ or ] or = or |, these are extracted already. Static fields are always alphanumeric.
 
 4. For **each final field** (combined or uncombined):
 
@@ -58,6 +58,7 @@ For every field in the log:
 5. **Infer the log source**  
    * Set `log_source` to the most likely origin system (e.g., `System log`, `Nginx access log`).  
 
+Your job is not to detect the pattern of the log messages, this is already done - it's only about grouping and naming the fields. Use every field only once
 ---
 
 ### Output Format
