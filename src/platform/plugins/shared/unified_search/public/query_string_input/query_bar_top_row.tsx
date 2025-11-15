@@ -7,13 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import dateMath from '@kbn/datemath';
-import classNames from 'classnames';
-import { css } from '@emotion/react';
 import type { ReactNode } from 'react';
+import classNames from 'classnames';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 import useObservable from 'react-use/lib/useObservable';
+import { EMPTY, delay, mergeMap, of } from 'rxjs';
+import { map } from 'rxjs';
+import { throttle } from 'lodash';
+
+import dateMath from '@kbn/datemath';
+import { css } from '@emotion/react';
 import type { Filter, TimeRange, Query, AggregateQuery } from '@kbn/es-query';
 import {
   getAggregateQueryMode,
@@ -22,9 +26,6 @@ import {
   getLanguageDisplayName,
 } from '@kbn/es-query';
 import { ESQLLangEditor, type ESQLEditorProps } from '@kbn/esql/public';
-import { EMPTY } from 'rxjs';
-import { map } from 'rxjs';
-import { throttle } from 'lodash';
 import type { EuiFieldText, EuiIconProps, OnRefreshProps, UseEuiTheme } from '@elastic/eui';
 import {
   EuiFlexGroup,
@@ -322,7 +323,15 @@ export const QueryBarTopRow = React.memo(
 
     const isQueryLangSelected = props.query && !isOfQueryType(props.query);
 
-    const backgroundSearchState = useObservable(data.search.session.state$);
+    const backgroundSearchState = useObservable(
+      data.search.session.state$.pipe(
+        mergeMap((state) => {
+          // We want to delay enabling the button to avoid flickering when searches are quick
+          if (state === SearchSessionState.Loading) return of(state).pipe(delay(500));
+          return of(state);
+        })
+      )
+    );
     const canSendToBackground =
       backgroundSearchState === SearchSessionState.Loading && !isSendingToBackground;
 
