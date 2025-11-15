@@ -7,19 +7,16 @@
 
 import React from 'react';
 import { EuiFlyout } from '@elastic/eui';
-import type { ReportingAPIClient } from '@kbn/reporting-public';
 import type { ReportTypeData, ScheduledReport } from '../../types';
-import { ScheduledReportFlyoutContent } from './scheduled_report_flyout_content';
+import { ScheduledReportForm } from './scheduled_report_form';
 
 export interface ScheduledReportFlyoutProps {
-  apiClient: ReportingAPIClient;
   scheduledReport: Partial<ScheduledReport>;
-  availableReportTypes: ReportTypeData[];
+  availableReportTypes?: ReportTypeData[];
   onClose: () => void;
 }
 
-export const ScheduledReportFlyout = ({
-  apiClient,
+export const ViewScheduledReportFlyout = ({
   scheduledReport,
   availableReportTypes,
   onClose,
@@ -31,13 +28,13 @@ export const ScheduledReportFlyout = ({
       paddingSize="l"
       ownFocus={true}
       onClose={onClose}
-      data-test-subj="scheduledReportFlyout"
+      data-test-subj="viewScheduledReportFlyout"
+      aria-label="viewScheduledReportFlyout"
     >
-      <ScheduledReportFlyoutContent
-        apiClient={apiClient}
+      <ScheduledReportForm
         scheduledReport={scheduledReport}
-        availableReportTypes={availableReportTypes}
         onClose={onClose}
+        availableReportTypes={availableReportTypes}
         readOnly
       />
     </EuiFlyout>

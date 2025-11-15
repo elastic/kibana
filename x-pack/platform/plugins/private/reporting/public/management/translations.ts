@@ -240,6 +240,13 @@ export const SCHEDULED_REPORT_FORM_SUCCESS_TOAST_TITLE = i18n.translate(
   }
 );
 
+export const SCHEDULED_REPORT_UPDATE_SUCCESS_TOAST_TITLE = i18n.translate(
+  'xpack.reporting.scheduledReportingForm.updateSuccessToastTitle',
+  {
+    defaultMessage: 'Scheduled report updated',
+  }
+);
+
 export const SCHEDULED_REPORT_FORM_CREATE_EMAIL_CONNECTOR_LABEL = i18n.translate(
   'xpack.reporting.scheduledReportingForm.createEmailConnectorLabel',
   {
@@ -251,6 +258,13 @@ export const SCHEDULED_REPORT_FORM_SUCCESS_TOAST_MESSAGE = i18n.translate(
   'xpack.reporting.scheduledReportingForm.successToastMessage',
   {
     defaultMessage: 'Find your schedule information and your exports in the ',
+  }
+);
+
+export const SCHEDULED_REPORT_UPDATE_SUCCESS_TOAST_MESSAGE = i18n.translate(
+  'xpack.reporting.scheduledReportingForm.updateSuccessToastMessage',
+  {
+    defaultMessage: 'Your scheduled report was updated successfully.',
   }
 );
 
