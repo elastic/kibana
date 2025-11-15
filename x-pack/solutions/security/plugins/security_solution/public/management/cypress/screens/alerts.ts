@@ -43,7 +43,7 @@ export const getAlertsTableRows = (timeout?: number): Cypress.Chainable<JQuery<H
 };
 
 export const openAlertDetailsView = (rowIndex: number = 0): void => {
-  cy.getByTestSubj('expand-event').eq(rowIndex).click();
+  cy.getByTestSubj('expand-event-button').eq(rowIndex).click();
   cy.getByTestSubj('securitySolutionFlyoutFooterDropdownButton').click();
 };
 

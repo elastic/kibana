@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ALERTS_TABLE_EXPAND_BUTTON } from '../../screens/alerts';
 import { initializeDataViews } from '../../tasks/login';
 import { cleanupRule, loadRule } from '../../tasks/api_fixtures';
 import { RESPONSE_ACTIONS_ITEM_0, RESPONSE_ACTIONS_ITEM_1 } from '../../tasks/response_actions';
@@ -66,7 +67,7 @@ describe.skip(
 
     it('should be able to run live query and add to timeline', () => {
       const TIMELINE_NAME = 'Untitled timeline';
-      cy.getBySel('expand-event').first().click();
+      cy.getBySel(ALERTS_TABLE_EXPAND_BUTTON).first().click();
       cy.getBySel('securitySolutionFlyoutFooterDropdownButton').click();
       cy.getBySel('osquery-action-item').click();
       cy.contains('1 agent selected.');

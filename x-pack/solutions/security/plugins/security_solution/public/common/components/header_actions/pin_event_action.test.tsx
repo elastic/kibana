@@ -5,64 +5,166 @@
  * 2.0.
  */
 
-import { render, screen } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 
-import { PinEventAction } from './pin_event_action';
+import { BUTTON_TEST_ID, PinEventAction } from './pin_event_action';
 import { useUserPrivileges } from '../user_privileges';
-import { getEndpointPrivilegesInitialStateMock } from '../user_privileges/endpoint/mocks';
-import { TestProviders } from '../../mock';
+import { createMockStore, mockGlobalState, TestProviders } from '../../mock';
 import { TimelineTypeEnum } from '../../../../common/api/timeline';
+import { timelineActions } from '../../../timelines/store';
+import { TimelineId } from '../../../../common/types';
 
 jest.mock('../user_privileges');
-const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
 
 describe('PinEventAction', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  describe('isDisabled', () => {
-    test('it disables the pin event button when the user does NOT have crud privileges', () => {
-      useUserPrivilegesMock.mockReturnValue({
-        timelinePrivileges: { crud: false, read: true },
-        endpointPrivileges: getEndpointPrivilegesInitialStateMock(),
-      });
-
-      render(
-        <TestProviders>
-          <PinEventAction
-            isAlert={false}
-            noteIds={[]}
-            onPinClicked={jest.fn}
-            eventIsPinned={false}
-            timelineType={TimelineTypeEnum.default}
-          />
-        </TestProviders>
-      );
-
-      expect(screen.getByTestId('pin')).toHaveProperty('disabled', true);
+  it('should disable button if user does NOT have Timeline crud privileges', () => {
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      timelinePrivileges: { crud: false, read: true },
     });
 
-    test('it enables the pin event button when the user has crud privileges', () => {
-      useUserPrivilegesMock.mockReturnValue({
-        timelinePrivileges: { crud: true, read: true },
-        endpointPrivileges: getEndpointPrivilegesInitialStateMock(),
+    const { getByTestId } = render(
+      <TestProviders>
+        <PinEventAction
+          ariaRowindex={1}
+          columnValues={''}
+          eventId={'eventId'}
+          eventIdToNoteIds={{}}
+          isAlert={false}
+          noteIds={[]}
+          timelineId={TimelineId.test}
+          timelineType={TimelineTypeEnum.default}
+        />
+      </TestProviders>
+    );
+
+    expect(getByTestId(BUTTON_TEST_ID)).toHaveProperty('disabled', true);
+  });
+
+  it('should disable button if timeline type is template', () => {
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      timelinePrivileges: { crud: true, read: true },
+    });
+
+    const { getByTestId } = render(
+      <TestProviders>
+        <PinEventAction
+          ariaRowindex={1}
+          columnValues={''}
+          eventId={'eventId'}
+          eventIdToNoteIds={{}}
+          isAlert={false}
+          noteIds={[]}
+          timelineId={TimelineId.test}
+          timelineType={TimelineTypeEnum.template}
+        />
+      </TestProviders>
+    );
+
+    expect(getByTestId(BUTTON_TEST_ID)).toHaveProperty('disabled', true);
+  });
+
+  it('should disable button if there are some notes on that event', () => {
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      timelinePrivileges: { crud: true, read: true },
+    });
+
+    const { getByTestId } = render(
+      <TestProviders>
+        <PinEventAction
+          ariaRowindex={1}
+          columnValues={''}
+          eventId={'eventId'}
+          eventIdToNoteIds={{}}
+          isAlert={false}
+          noteIds={['note1']}
+          timelineId={TimelineId.test}
+          timelineType={TimelineTypeEnum.default}
+        />
+      </TestProviders>
+    );
+
+    expect(getByTestId(BUTTON_TEST_ID)).toHaveProperty('disabled', true);
+  });
+
+  it('should pin event', async () => {
+    const spy = jest.spyOn(timelineActions, 'pinEvent');
+
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      timelinePrivileges: { crud: true, read: true },
+    });
+
+    const { getByTestId } = render(
+      <TestProviders>
+        <PinEventAction
+          ariaRowindex={1}
+          columnValues={''}
+          eventId={'eventId'}
+          eventIdToNoteIds={{}}
+          isAlert={false}
+          noteIds={[]}
+          timelineId={TimelineId.test}
+          timelineType={TimelineTypeEnum.default}
+        />
+      </TestProviders>
+    );
+
+    getByTestId(BUTTON_TEST_ID).click();
+
+    await waitFor(() => {
+      expect(spy).toHaveBeenCalledWith({
+        id: TimelineId.test,
+        eventId: 'eventId',
       });
+    });
+  });
 
-      render(
-        <TestProviders>
-          <PinEventAction
-            isAlert={false}
-            noteIds={[]}
-            onPinClicked={jest.fn}
-            eventIsPinned={false}
-            timelineType={TimelineTypeEnum.default}
-          />
-        </TestProviders>
-      );
+  it('should unpin event', async () => {
+    const spy = jest.spyOn(timelineActions, 'unPinEvent');
 
-      expect(screen.getByTestId('pin')).not.toHaveClass('euiButtonIcon-isDisabled');
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      timelinePrivileges: { crud: true, read: true },
+    });
+
+    const mockStore = createMockStore({
+      ...mockGlobalState,
+      timeline: {
+        ...mockGlobalState.timeline,
+        timelineById: {
+          [TimelineId.test]: {
+            ...mockGlobalState.timeline.timelineById[TimelineId.test],
+            pinnedEventIds: { eventId: true },
+          },
+        },
+      },
+    });
+
+    const { getByTestId } = render(
+      <TestProviders store={mockStore}>
+        <PinEventAction
+          ariaRowindex={1}
+          columnValues={''}
+          eventId={'eventId'}
+          eventIdToNoteIds={{}}
+          isAlert={false}
+          noteIds={[]}
+          timelineId={TimelineId.test}
+          timelineType={TimelineTypeEnum.default}
+        />
+      </TestProviders>
+    );
+
+    getByTestId(BUTTON_TEST_ID).click();
+
+    await waitFor(() => {
+      expect(spy).toHaveBeenCalledWith({
+        id: TimelineId.test,
+        eventId: 'eventId',
+      });
     });
   });
 });
