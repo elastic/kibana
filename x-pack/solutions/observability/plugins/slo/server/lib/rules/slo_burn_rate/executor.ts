@@ -172,6 +172,23 @@ export const getRuleExecutor = (basePath: IBasePath) =>
             ? SUPPRESSED_PRIORITY_ACTION.id
             : windowDef.actionGroup;
 
+          // Extract APM service and transaction fields from SLO summary if available
+          const apmFields: Record<string, string> = {};
+          if (sloSummary) {
+            if (sloSummary.service?.name) {
+              apmFields['service.name'] = sloSummary.service.name;
+            }
+            if (sloSummary.service?.environment) {
+              apmFields['service.environment'] = sloSummary.service.environment;
+            }
+            if (sloSummary.transaction?.name) {
+              apmFields['transaction.name'] = sloSummary.transaction.name;
+            }
+            if (sloSummary.transaction?.type) {
+              apmFields['transaction.type'] = sloSummary.transaction.type;
+            }
+          }
+
           const { uuid } = alertsClient.report({
             id: alertId,
             actionGroup,
@@ -189,6 +206,7 @@ export const getRuleExecutor = (basePath: IBasePath) =>
               [SLO_INSTANCE_ID_FIELD]: instanceId,
               [SLO_DATA_VIEW_ID_FIELD]: slo.indicator.params.dataViewId,
               ...getEcsGroupsFromFlattenGrouping(groupingsFlattened),
+              ...apmFields,
             },
           });
 
