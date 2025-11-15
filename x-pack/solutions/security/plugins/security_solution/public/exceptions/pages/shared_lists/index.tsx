@@ -47,13 +47,13 @@ import { ReferenceErrorModal } from '../../../common/components/reference_error_
 import { patchRule } from '../../../detection_engine/rule_management/api/api';
 
 import { getSearchFilters } from '../../../detection_engine/rule_management_ui/components/rules_table/helpers';
-import { useUserData } from '../../../detections/components/user_info';
 import { useListsConfig } from '../../../detections/containers/detection_engine/lists/use_lists_config';
 import { MissingPrivilegesCallOut } from '../../../common/components/missing_privileges';
 import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../../../common/endpoint/service/artifacts/constants';
 
 import { AddExceptionFlyout } from '../../../detection_engine/rule_exceptions/components/add_exception_flyout';
 import { useEndpointExceptionsCapability } from '../../hooks/use_endpoint_exceptions_capability';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 
 export type Func = () => Promise<void>;
 
@@ -86,10 +86,10 @@ const ExceptionsTable = styled(EuiFlexGroup)`
 `;
 
 export const SharedLists = React.memo(() => {
-  const [{ loading: userInfoLoading, canUserCRUD, canUserREAD }] = useUserData();
+  const { edit: canEditRules, read: canReadRules } = useUserPrivileges().rulesPrivileges;
 
   const { loading: listsConfigLoading } = useListsConfig();
-  const loading = userInfoLoading || listsConfigLoading;
+  const loading = listsConfigLoading;
 
   const canAccessEndpointExceptions = useEndpointExceptionsCapability('showEndpointExceptions');
   const canWriteEndpointExceptions = useEndpointExceptionsCapability('crudEndpointExceptions');
@@ -445,9 +445,7 @@ export const SharedLists = React.memo(() => {
   };
   const onCreateExceptionListOpenClick = () => setDisplayCreateSharedListFlyout(true);
 
-  const isReadOnly = useMemo(() => {
-    return (canUserREAD && !canUserCRUD) ?? true;
-  }, [canUserREAD, canUserCRUD]);
+  const isReadOnly = canReadRules && !canEditRules;
 
   useEffect(() => {
     if (isSearchingExceptions && hasNoExceptions) {
