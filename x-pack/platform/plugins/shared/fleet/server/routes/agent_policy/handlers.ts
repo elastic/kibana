@@ -7,6 +7,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import type { KibanaRequest, RequestHandler, ResponseHeaders } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import pMap from 'p-map';
 import { dump } from 'js-yaml';
 
@@ -64,13 +65,17 @@ import type {
   GetAgentPolicyOutputsResponse,
   GetListAgentPolicyOutputsResponse,
   CreatePackagePolicyRequest,
+  PackagePolicy,
 } from '../../../common/types';
 import { AgentPolicyNotFoundError, FleetUnauthorizedError, FleetError } from '../../errors';
 import { createAgentPolicyWithPackages } from '../../services/agent_policy_create';
 import { updateAgentPolicySpaces } from '../../services/spaces/agent_policy';
 import { packagePolicyToSimplifiedPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
 import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
+
 import { getAutoUpgradeAgentsStatus } from '../../services/agents';
+import { extractMinVersionFromRanges } from '../../services/agents/version_compatibility';
+import { getPackageInfo } from '../../services/epm/packages';
 
 import { createPackagePolicyHandler } from '../package_policy/handlers';
 import { getLatestAgentAvailableDockerImageVersion } from '../../services/agents';
@@ -128,6 +133,44 @@ function sanitizeItemForReadAgentOnly(item: AgentPolicy): AgentPolicy {
     monitoring_enabled: item.monitoring_enabled,
     package_policies: [],
   };
+}
+
+async function calculateMinAgentVersionForPolicy(
+  packagePolicies: PackagePolicy[],
+  soClient: SavedObjectsClientContract
+): Promise<string | undefined> {
+  const logger = appContextService.getLogger().get('calculateMinAgentVersionForPolicy');
+
+  if (!packagePolicies || packagePolicies.length === 0) {
+    return undefined;
+  }
+
+  // Collect all agent version requirements from package policies
+  const versionRequirements: string[] = [];
+  for (const packagePolicy of packagePolicies) {
+    if (packagePolicy.package?.name && packagePolicy.package?.version) {
+      try {
+        const pkgInfo = await getPackageInfo({
+          savedObjectsClient: soClient,
+          pkgName: packagePolicy.package.name,
+          pkgVersion: packagePolicy.package.version,
+          ignoreUnverified: true,
+          prerelease: true,
+        });
+        if (pkgInfo?.conditions?.agent?.version) {
+          versionRequirements.push(pkgInfo.conditions.agent.version);
+        }
+      } catch (error) {
+        // If we can't get package info, skip this package policy
+        logger.debug(
+          `Could not get package info for ${packagePolicy.package.name}@${packagePolicy.package.version}, skipping agent version requirement`
+        );
+      }
+    }
+  }
+
+  // Extract minimum version from all ranges (handles OR clauses and takes maximum across packages)
+  return extractMinVersionFromRanges(versionRequirements);
 }
 
 export async function getAuthorizedSpacesWithAgentPoliciesAllPrivileges(
@@ -190,10 +233,36 @@ export const getAgentPoliciesHandler: FleetRequestHandler<
     await populateAssignedAgentsCount(fleetContext.agentClient.asCurrentUser, items);
   }
 
+  // Calculate min_agent_version for all items with package policies
+  if (withPackagePolicies && authzFleetReadAgentPolicies) {
+    const logger = appContextService.getLogger().get('getAgentPoliciesHandler');
+    await pMap(
+      items,
+      async (item) => {
+        if (item.package_policies && item.package_policies.length > 0) {
+          try {
+            item.min_agent_version = await calculateMinAgentVersionForPolicy(
+              item.package_policies,
+              soClient
+            );
+          } catch (error) {
+            // If calculation fails, log and continue without min_agent_version
+            logger.warn(
+              `Failed to calculate min_agent_version for agent policy ${item.id}: ${
+                error instanceof Error ? error.message : String(error)
+              }`
+            );
+          }
+        }
+      },
+      { concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_10 }
+    );
+  }
+
   if (!authzFleetReadAgentPolicies) {
     items = items.map(sanitizeItemForReadAgentOnly);
   } else if (withPackagePolicies && format === inputsFormat.Simplified) {
-    items.map((item) => {
+    items = items.map((item) => {
       if (isEmpty(item.package_policies)) {
         return item;
       }
@@ -203,7 +272,7 @@ export const getAgentPoliciesHandler: FleetRequestHandler<
           packagePolicyToSimplifiedPackagePolicy(packagePolicy)
         ),
       };
-    });
+    }) as typeof items;
   }
 
   const body: GetAgentPoliciesResponse = {
@@ -241,10 +310,37 @@ export const bulkGetAgentPoliciesHandler: FleetRequestHandler<
       withPackagePolicies,
       ignoreMissing,
     });
+
+    // Calculate min_agent_version for all items with package policies (before format transformation)
+    if (withPackagePolicies && authzFleetReadAgentPolicies) {
+      const logger = appContextService.getLogger().get('bulkGetAgentPoliciesHandler');
+      await pMap(
+        items,
+        async (item) => {
+          if (item.package_policies && item.package_policies.length > 0) {
+            try {
+              item.min_agent_version = await calculateMinAgentVersionForPolicy(
+                item.package_policies,
+                soClient
+              );
+            } catch (error) {
+              // If calculation fails, log and continue without min_agent_version
+              logger.warn(
+                `Failed to calculate min_agent_version for agent policy ${item.id}: ${
+                  error instanceof Error ? error.message : String(error)
+                }`
+              );
+            }
+          }
+        },
+        { concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_10 }
+      );
+    }
+
     if (!authzFleetReadAgentPolicies) {
       items = items.map(sanitizeItemForReadAgentOnly);
     } else if (withPackagePolicies && request.query.format === inputsFormat.Simplified) {
-      items.map((item) => {
+      items = items.map((item) => {
         if (isEmpty(item.package_policies)) {
           return item;
         }
@@ -254,7 +350,7 @@ export const bulkGetAgentPoliciesHandler: FleetRequestHandler<
             packagePolicyToSimplifiedPackagePolicy(packagePolicy)
           ),
         };
-      });
+      }) as typeof items;
     }
 
     const body: BulkGetAgentPoliciesResponse = {
@@ -282,39 +378,72 @@ export const getOneAgentPolicyHandler: FleetRequestHandler<
   TypeOf<typeof GetOneAgentPolicyRequestSchema.params>,
   TypeOf<typeof GetOneAgentPolicyRequestSchema.query>
 > = async (context, request, response) => {
-  const [coreContext, fleetContext] = await Promise.all([context.core, context.fleet]);
-  const soClient = coreContext.savedObjects.client;
+  try {
+    const [coreContext, fleetContext] = await Promise.all([context.core, context.fleet]);
+    const soClient = coreContext.savedObjects.client;
 
-  const agentPolicy = await agentPolicyService.get(soClient, request.params.agentPolicyId);
-  if (agentPolicy) {
-    if (fleetContext.authz.fleet.readAgents) {
-      await populateAssignedAgentsCount(fleetContext.agentClient.asCurrentUser, [agentPolicy]);
-    }
-    let item: any = agentPolicy;
-    if (!fleetContext.authz.fleet.readAgentPolicies) {
-      item = sanitizeItemForReadAgentOnly(agentPolicy);
-    } else if (
-      request.query.format === inputsFormat.Simplified &&
-      !isEmpty(agentPolicy.package_policies)
-    ) {
-      item = {
-        ...agentPolicy,
-        package_policies: agentPolicy.package_policies!.map((packagePolicy) =>
-          packagePolicyToSimplifiedPackagePolicy(packagePolicy)
-        ),
+    const agentPolicy = await agentPolicyService.get(soClient, request.params.agentPolicyId, true);
+    if (agentPolicy) {
+      if (fleetContext.authz.fleet.readAgents) {
+        await populateAssignedAgentsCount(fleetContext.agentClient.asCurrentUser, [agentPolicy]);
+      }
+      let item: any = agentPolicy;
+      if (!fleetContext.authz.fleet.readAgentPolicies) {
+        item = sanitizeItemForReadAgentOnly(agentPolicy);
+      } else if (
+        request.query.format === inputsFormat.Simplified &&
+        !isEmpty(agentPolicy.package_policies)
+      ) {
+        item = {
+          ...agentPolicy,
+          package_policies: agentPolicy.package_policies!.map((packagePolicy) =>
+            packagePolicyToSimplifiedPackagePolicy(packagePolicy)
+          ),
+        };
+      }
+
+      // Calculate min_agent_version if package policies are available and user has read permissions
+      if (
+        fleetContext.authz.fleet.readAgentPolicies &&
+        agentPolicy.package_policies &&
+        agentPolicy.package_policies.length > 0
+      ) {
+        try {
+          item.min_agent_version = await calculateMinAgentVersionForPolicy(
+            agentPolicy.package_policies,
+            soClient
+          );
+        } catch (error) {
+          // If calculation fails, log and continue without min_agent_version
+          const logger = appContextService.getLogger().get('getOneAgentPolicyHandler');
+          logger.warn(
+            `Failed to calculate min_agent_version for agent policy ${
+              request.params.agentPolicyId
+            }: ${error instanceof Error ? error.message : String(error)}`
+          );
+        }
+      }
+
+      const body: GetOneAgentPolicyResponse = {
+        item,
       };
+      return response.ok({
+        body,
+      });
+    } else {
+      return response.customError({
+        statusCode: 404,
+        body: { message: 'Agent policy not found' },
+      });
     }
-    const body: GetOneAgentPolicyResponse = {
-      item,
-    };
-    return response.ok({
-      body,
-    });
-  } else {
-    return response.customError({
-      statusCode: 404,
-      body: { message: 'Agent policy not found' },
-    });
+  } catch (error) {
+    const logger = appContextService.getLogger().get('getOneAgentPolicyHandler');
+    logger.error(
+      `Error in getOneAgentPolicyHandler for agent policy ${request.params.agentPolicyId}: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+    throw error;
   }
 };
 

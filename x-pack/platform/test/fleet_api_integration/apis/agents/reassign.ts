@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import { skipIfNoDockerRegistry } from '../../helpers';
 import { testUsers } from '../test_users';
 
 export default function (providerContext: FtrProviderContext) {
@@ -15,6 +16,14 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const fleetAndAgents = getService('fleetAndAgents');
+
+  const epmInstall = async (pkgName: string, pkgVersion: string) => {
+    await supertest
+      .post(`/api/fleet/epm/packages/${pkgName}/${pkgVersion}`)
+      .set('kbn-xsrf', 'xxxx')
+      .send({ force: true })
+      .expect(200);
+  };
 
   describe('fleet_reassign_agent', () => {
     before(async () => {
@@ -85,6 +94,105 @@ export default function (providerContext: FtrProviderContext) {
             policy_id: 'policy2',
           })
           .expect(400);
+      });
+
+      describe('version compatibility', () => {
+        skipIfNoDockerRegistry(providerContext);
+
+        // Use existing policy1 from esArchiver fixture instead of creating a new one
+        const sourcePolicyId = 'policy1';
+        let targetPolicyWithVersionId: string;
+
+        beforeEach(async () => {
+          await epmInstall('agent_version_test', '1.0.0');
+
+          const { body: targetPolicyWithVersion } = await supertest
+            .post(`/api/fleet/agent_policies`)
+            .set('kbn-xsrf', 'xxx')
+            .send({
+              name: 'Target policy with version requirement',
+              namespace: 'default',
+            })
+            .expect(200);
+          targetPolicyWithVersionId = targetPolicyWithVersion.item.id;
+
+          await supertest
+            .post(`/api/fleet/package_policies`)
+            .set('kbn-xsrf', 'xxx')
+            .send({
+              name: 'agent-version-test-reassign',
+              description: '',
+              namespace: 'default',
+              policy_id: targetPolicyWithVersionId,
+              enabled: true,
+              inputs: [
+                {
+                  enabled: true,
+                  streams: [],
+                  type: 'single_input',
+                },
+              ],
+              package: {
+                name: 'agent_version_test',
+                version: '1.0.0',
+              },
+            })
+            .expect(200);
+        });
+
+        it('should allow reassigning when agent version is compatible', async () => {
+          // Create agent with compatible version
+          await fleetAndAgents.generateAgent('online', 'agent-compat-1', sourcePolicyId, '8.12.0');
+
+          await supertest
+            .post(`/api/fleet/agents/agent-compat-1/reassign`)
+            .set('kbn-xsrf', 'xxx')
+            .send({
+              policy_id: targetPolicyWithVersionId,
+            })
+            .expect(200);
+
+          const { body } = await supertest.get(`/api/fleet/agents/agent-compat-1`).expect(200);
+          expect(body.item.policy_id).to.eql(targetPolicyWithVersionId);
+        });
+
+        it('should throw an error when agent version is incompatible', async () => {
+          // Create agent with incompatible version
+          await fleetAndAgents.generateAgent(
+            'online',
+            'agent-incompat-1',
+            sourcePolicyId,
+            '8.11.0'
+          );
+
+          const { body } = await supertest
+            .post(`/api/fleet/agents/agent-incompat-1/reassign`)
+            .set('kbn-xsrf', 'xxx')
+            .send({
+              policy_id: targetPolicyWithVersionId,
+            })
+            .expect(400);
+
+          expect(body.message).to.contain('does not satisfy required version range');
+          expect(body.message).to.contain('Use force:true to override');
+        });
+
+        it('should allow reassigning with force=true when agent version is incompatible', async () => {
+          // Create agent with incompatible version
+          await fleetAndAgents.generateAgent('online', 'agent-force-1', sourcePolicyId, '8.11.0');
+
+          await supertest
+            .post(`/api/fleet/agents/agent-force-1/reassign`)
+            .set('kbn-xsrf', 'xxx')
+            .send({
+              policy_id: targetPolicyWithVersionId,
+              force: true,
+            })
+            .expect(200);
+
+          const { body } = await supertest.get(`/api/fleet/agents/agent-force-1`).expect(200);
+          expect(body.item.policy_id).to.eql(targetPolicyWithVersionId);
+        });
       });
     });
 
@@ -242,6 +350,341 @@ export default function (providerContext: FtrProviderContext) {
             policy_id: 'policy2',
           })
           .expect(403);
+      });
+
+      describe('version compatibility', () => {
+        skipIfNoDockerRegistry(providerContext);
+
+        // Use existing policy1 from esArchiver fixture instead of creating a new one
+        const bulkSourcePolicyId = 'policy1';
+        let bulkTargetPolicyWithVersionId: string;
+
+        beforeEach(async () => {
+          await epmInstall('agent_version_test', '1.0.0');
+
+          const { body: bulkTargetPolicyWithVersion } = await supertest
+            .post(`/api/fleet/agent_policies`)
+            .set('kbn-xsrf', 'xxx')
+            .send({
+              name: 'Bulk target policy with version requirement',
+              namespace: 'default',
+            })
+            .expect(200);
+          bulkTargetPolicyWithVersionId = bulkTargetPolicyWithVersion.item.id;
+
+          await supertest
+            .post(`/api/fleet/package_policies`)
+            .set('kbn-xsrf', 'xxx')
+            .send({
+              name: 'agent-version-test-bulk-reassign',
+              description: '',
+              namespace: 'default',
+              policy_id: bulkTargetPolicyWithVersionId,
+              enabled: true,
+              inputs: [
+                {
+                  enabled: true,
+                  streams: [],
+                  type: 'single_input',
+                },
+              ],
+              package: {
+                name: 'agent_version_test',
+                version: '1.0.0',
+              },
+            })
+            .expect(200);
+        });
+
+        it('should allow bulk reassigning when all agent versions are compatible', async () => {
+          // Create multiple agents with compatible versions
+          await fleetAndAgents.generateAgent(
+            'online',
+            'bulk-compat-1',
+            bulkSourcePolicyId,
+            '8.12.0'
+          );
+          await fleetAndAgents.generateAgent(
+            'online',
+            'bulk-compat-2',
+            bulkSourcePolicyId,
+            '8.13.0'
+          );
+          await fleetAndAgents.generateAgent(
+            'online',
+            'bulk-compat-3',
+            bulkSourcePolicyId,
+            '8.13.0'
+          );
+
+          const { body } = await supertest
+            .post(`/api/fleet/agents/bulk_reassign`)
+            .set('kbn-xsrf', 'xxx')
+            .send({
+              agents: ['bulk-compat-1', 'bulk-compat-2', 'bulk-compat-3'],
+              policy_id: bulkTargetPolicyWithVersionId,
+            })
+            .expect(200);
+
+          const actionId = body.actionId;
+
+          // Wait for action to complete
+          await new Promise((resolve, reject) => {
+            let attempts = 0;
+            const intervalId = setInterval(async () => {
+              if (attempts > 10) {
+                clearInterval(intervalId);
+                reject(new Error('action timed out'));
+                return;
+              }
+              ++attempts;
+              const {
+                body: { items: actionStatuses },
+              } = await supertest.get(`/api/fleet/agents/action_status`).set('kbn-xsrf', 'xxx');
+
+              const action = actionStatuses.find((a: any) => a.actionId === actionId);
+              if (action && action.nbAgentsActioned === action.nbAgentsActionCreated) {
+                clearInterval(intervalId);
+                resolve({});
+              }
+            }, 1000);
+          });
+
+          // Verify all agents were reassigned
+          const [agent1data, agent2data, agent3data] = await Promise.all([
+            supertest.get(`/api/fleet/agents/bulk-compat-1`).set('kbn-xsrf', 'xxx'),
+            supertest.get(`/api/fleet/agents/bulk-compat-2`).set('kbn-xsrf', 'xxx'),
+            supertest.get(`/api/fleet/agents/bulk-compat-3`).set('kbn-xsrf', 'xxx'),
+          ]);
+          expect(agent1data.body.item.policy_id).to.eql(bulkTargetPolicyWithVersionId);
+          expect(agent2data.body.item.policy_id).to.eql(bulkTargetPolicyWithVersionId);
+          expect(agent3data.body.item.policy_id).to.eql(bulkTargetPolicyWithVersionId);
+        });
+
+        it('should partially succeed when some agent versions are incompatible', async () => {
+          // Create mix of compatible and incompatible agents
+          await fleetAndAgents.generateAgent(
+            'online',
+            'bulk-mixed-1',
+            bulkSourcePolicyId,
+            '8.12.0'
+          );
+          await fleetAndAgents.generateAgent(
+            'online',
+            'bulk-mixed-2',
+            bulkSourcePolicyId,
+            '8.11.0'
+          );
+          await fleetAndAgents.generateAgent(
+            'online',
+            'bulk-mixed-3',
+            bulkSourcePolicyId,
+            '8.12.0'
+          );
+          await fleetAndAgents.generateAgent(
+            'online',
+            'bulk-mixed-4',
+            bulkSourcePolicyId,
+            '8.11.0'
+          );
+
+          const { body } = await supertest
+            .post(`/api/fleet/agents/bulk_reassign`)
+            .set('kbn-xsrf', 'xxx')
+            .send({
+              agents: ['bulk-mixed-1', 'bulk-mixed-2', 'bulk-mixed-3', 'bulk-mixed-4'],
+              policy_id: bulkTargetPolicyWithVersionId,
+            })
+            .expect(200);
+
+          const actionId = body.actionId;
+
+          // Wait for action to complete
+          await new Promise((resolve, reject) => {
+            let attempts = 0;
+            const intervalId = setInterval(async () => {
+              if (attempts > 10) {
+                clearInterval(intervalId);
+                reject(new Error('action timed out'));
+                return;
+              }
+              ++attempts;
+              const {
+                body: { items: actionStatuses },
+              } = await supertest.get(`/api/fleet/agents/action_status`).set('kbn-xsrf', 'xxx');
+
+              const action = actionStatuses.find((a: any) => a.actionId === actionId);
+              if (action && action.nbAgentsActioned === action.nbAgentsActionCreated) {
+                clearInterval(intervalId);
+                resolve({});
+              }
+            }, 1000);
+          });
+
+          // Check action status
+          const { body: statusBody } = await supertest
+            .get(`/api/fleet/agents/action_status`)
+            .set('kbn-xsrf', 'xxx');
+          const actionStatus = statusBody.items.find((a: any) => a.actionId === actionId);
+
+          expect(actionStatus).to.be.ok();
+          expect(actionStatus.nbAgentsActionCreated).to.eql(2); // Only compatible agents
+          expect(actionStatus.nbAgentsFailed).to.eql(2); // Incompatible agents
+
+          // Verify compatible agents were reassigned
+          const [agent1data, agent3data] = await Promise.all([
+            supertest.get(`/api/fleet/agents/bulk-mixed-1`).set('kbn-xsrf', 'xxx'),
+            supertest.get(`/api/fleet/agents/bulk-mixed-3`).set('kbn-xsrf', 'xxx'),
+          ]);
+          expect(agent1data.body.item.policy_id).to.eql(bulkTargetPolicyWithVersionId);
+          expect(agent3data.body.item.policy_id).to.eql(bulkTargetPolicyWithVersionId);
+
+          // Verify incompatible agents were not reassigned
+          const [agent2data, agent4data] = await Promise.all([
+            supertest.get(`/api/fleet/agents/bulk-mixed-2`).set('kbn-xsrf', 'xxx'),
+            supertest.get(`/api/fleet/agents/bulk-mixed-4`).set('kbn-xsrf', 'xxx'),
+          ]);
+          expect(agent2data.body.item.policy_id).to.eql(bulkSourcePolicyId);
+          expect(agent4data.body.item.policy_id).to.eql(bulkSourcePolicyId);
+        });
+
+        it('should allow bulk reassigning when all agent versions are incompatible but force=true', async () => {
+          // Create multiple agents with incompatible versions
+          await fleetAndAgents.generateAgent(
+            'online',
+            'bulk-force-1',
+            bulkSourcePolicyId,
+            '8.11.0'
+          );
+          await fleetAndAgents.generateAgent(
+            'online',
+            'bulk-force-2',
+            bulkSourcePolicyId,
+            '8.11.0'
+          );
+
+          const { body } = await supertest
+            .post(`/api/fleet/agents/bulk_reassign`)
+            .set('kbn-xsrf', 'xxx')
+            .send({
+              agents: ['bulk-force-1', 'bulk-force-2'],
+              policy_id: bulkTargetPolicyWithVersionId,
+              force: true,
+            })
+            .expect(200);
+
+          const actionId = body.actionId;
+
+          // Wait for action to complete
+          await new Promise((resolve, reject) => {
+            let attempts = 0;
+            const intervalId = setInterval(async () => {
+              if (attempts > 10) {
+                clearInterval(intervalId);
+                reject(new Error('action timed out'));
+                return;
+              }
+              ++attempts;
+              const {
+                body: { items: actionStatuses },
+              } = await supertest.get(`/api/fleet/agents/action_status`).set('kbn-xsrf', 'xxx');
+
+              const action = actionStatuses.find((a: any) => a.actionId === actionId);
+              if (action && action.nbAgentsActioned === action.nbAgentsActionCreated) {
+                clearInterval(intervalId);
+                resolve({});
+              }
+            }, 1000);
+          });
+
+          // Verify all agents were reassigned despite incompatible versions
+          const [agent1data, agent2data] = await Promise.all([
+            supertest.get(`/api/fleet/agents/bulk-force-1`).set('kbn-xsrf', 'xxx'),
+            supertest.get(`/api/fleet/agents/bulk-force-2`).set('kbn-xsrf', 'xxx'),
+          ]);
+          expect(agent1data.body.item.policy_id).to.eql(bulkTargetPolicyWithVersionId);
+          expect(agent2data.body.item.policy_id).to.eql(bulkTargetPolicyWithVersionId);
+        });
+
+        it('should handle bulk reassigning with kuery when some agents are incompatible', async () => {
+          // Create mix of compatible and incompatible agents
+          await fleetAndAgents.generateAgent(
+            'online',
+            'bulk-kuery-1',
+            bulkSourcePolicyId,
+            '8.12.0'
+          );
+          await fleetAndAgents.generateAgent(
+            'online',
+            'bulk-kuery-2',
+            bulkSourcePolicyId,
+            '8.11.0'
+          );
+          await fleetAndAgents.generateAgent(
+            'online',
+            'bulk-kuery-3',
+            bulkSourcePolicyId,
+            '8.12.0'
+          );
+
+          const { body } = await supertest
+            .post(`/api/fleet/agents/bulk_reassign`)
+            .set('kbn-xsrf', 'xxx')
+            .send({
+              agents: `policy_id:${bulkSourcePolicyId}`,
+              policy_id: bulkTargetPolicyWithVersionId,
+            })
+            .expect(200);
+
+          const actionId = body.actionId;
+
+          // Wait for action to complete
+          await new Promise((resolve, reject) => {
+            let attempts = 0;
+            const intervalId = setInterval(async () => {
+              if (attempts > 10) {
+                clearInterval(intervalId);
+                reject(new Error('action timed out'));
+                return;
+              }
+              ++attempts;
+              const {
+                body: { items: actionStatuses },
+              } = await supertest.get(`/api/fleet/agents/action_status`).set('kbn-xsrf', 'xxx');
+
+              const action = actionStatuses.find((a: any) => a.actionId === actionId);
+              if (action && action.nbAgentsActioned === action.nbAgentsActionCreated) {
+                clearInterval(intervalId);
+                resolve({});
+              }
+            }, 1000);
+          });
+
+          // Check action status for correct counts
+          const { body: statusBody } = await supertest
+            .get(`/api/fleet/agents/action_status`)
+            .set('kbn-xsrf', 'xxx');
+          const actionStatus = statusBody.items.find((a: any) => a.actionId === actionId);
+
+          expect(actionStatus).to.be.ok();
+          // Should have reassigned compatible agents, failed on incompatible ones
+          expect(actionStatus.nbAgentsActionCreated).to.be.greaterThan(0);
+          expect(actionStatus.nbAgentsFailed).to.be.greaterThan(0);
+
+          // Verify compatible agents were reassigned
+          const [agent1data, agent3data] = await Promise.all([
+            supertest.get(`/api/fleet/agents/bulk-kuery-1`).set('kbn-xsrf', 'xxx'),
+            supertest.get(`/api/fleet/agents/bulk-kuery-3`).set('kbn-xsrf', 'xxx'),
+          ]);
+          expect(agent1data.body.item.policy_id).to.eql(bulkTargetPolicyWithVersionId);
+          expect(agent3data.body.item.policy_id).to.eql(bulkTargetPolicyWithVersionId);
+
+          // Verify incompatible agent was not reassigned
+          const agent2data = await supertest
+            .get(`/api/fleet/agents/bulk-kuery-2`)
+            .set('kbn-xsrf', 'xxx');
+          expect(agent2data.body.item.policy_id).to.eql(bulkSourcePolicyId);
+        });
       });
     });
   });

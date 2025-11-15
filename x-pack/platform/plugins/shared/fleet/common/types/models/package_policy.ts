@@ -112,6 +112,7 @@ export interface PackagePolicy extends Omit<NewPackagePolicy, 'inputs'> {
   inputs: PackagePolicyInput[];
   version?: string;
   agents?: number;
+  min_agent_version?: string;
   revision: number;
   secret_references?: SecretReference[];
   updated_at: string;

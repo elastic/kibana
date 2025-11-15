@@ -194,7 +194,7 @@ describe('Add Integration - Real API', () => {
     clickIfVisible(FLYOUT_CLOSE_BTN_SEL);
 
     cy.getBySel(SETTINGS_TAB).click();
-    cy.getBySel(UPDATE_PACKAGE_BTN).click();
+    cy.wait(500).getBySel(UPDATE_PACKAGE_BTN).click();
     cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();
 
     cy.getBySel(LATEST_VERSION).then(($title) => {

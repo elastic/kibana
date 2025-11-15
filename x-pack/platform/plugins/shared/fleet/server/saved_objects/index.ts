@@ -9,6 +9,8 @@ import type { SavedObjectsServiceSetup, SavedObjectsType } from '@kbn/core/serve
 
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 
+import { schema } from '@kbn/config-schema';
+
 import {
   LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
@@ -270,6 +272,7 @@ export const getSavedObjectTypes = (
           monitoring_http: { type: 'flattened', index: false },
           monitoring_diagnostics: { type: 'flattened', index: false },
           required_versions: { type: 'flattened', index: false },
+          min_agent_version: { type: 'keyword' },
         },
       },
       migrations: {
@@ -357,6 +360,27 @@ export const getSavedObjectTypes = (
             },
           ],
         },
+        '8': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                min_agent_version: { type: 'keyword' },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: schema.object(
+              {
+                min_agent_version: schema.maybe(schema.string()),
+              },
+              { unknowns: 'ignore' }
+            ),
+            create: schema.object({
+              min_agent_version: schema.maybe(schema.string()),
+            }),
+          },
+        },
       },
     },
     [AGENT_POLICY_SAVED_OBJECT_TYPE]: {
@@ -406,6 +430,7 @@ export const getSavedObjectTypes = (
             properties: {},
           },
           required_versions: { type: 'flattened', index: false },
+          min_agent_version: { type: 'keyword' },
         },
       },
       modelVersions: {
@@ -426,6 +451,27 @@ export const getSavedObjectTypes = (
               },
             },
           ],
+        },
+        '3': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                min_agent_version: { type: 'keyword' },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: schema.object(
+              {
+                min_agent_version: schema.maybe(schema.string()),
+              },
+              { unknowns: 'ignore' }
+            ),
+            create: schema.object({
+              min_agent_version: schema.maybe(schema.string()),
+            }),
+          },
         },
       },
     },
@@ -712,6 +758,7 @@ export const getSavedObjectTypes = (
           created_by: { type: 'keyword' },
           bump_agent_policy_revision: { type: 'boolean' },
           latest_revision: { type: 'boolean' },
+          min_agent_version: { type: 'keyword' },
         },
       },
       modelVersions: {
@@ -925,6 +972,25 @@ export const getSavedObjectTypes = (
             },
           ],
         },
+        '22': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: { min_agent_version: { type: 'keyword' } },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: schema.object(
+              {
+                min_agent_version: schema.maybe(schema.string()),
+              },
+              { unknowns: 'ignore' }
+            ),
+            create: schema.object({
+              min_agent_version: schema.maybe(schema.string()),
+            }),
+          },
+        },
       },
       migrations: {
         '7.10.0': migratePackagePolicyToV7100,
@@ -991,6 +1057,7 @@ export const getSavedObjectTypes = (
           created_by: { type: 'keyword' },
           bump_agent_policy_revision: { type: 'boolean' },
           latest_revision: { type: 'boolean' },
+          min_agent_version: { type: 'keyword' },
         },
       },
       modelVersions: {
@@ -1062,6 +1129,25 @@ export const getSavedObjectTypes = (
               transformFn: (typeSafeGuard) => typeSafeGuard(disableBrowserInputWhenBothEnabled),
             },
           ],
+        },
+        '8': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: { min_agent_version: { type: 'keyword' } },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: schema.object(
+              {
+                min_agent_version: schema.maybe(schema.string()),
+              },
+              { unknowns: 'ignore' }
+            ),
+            create: schema.object({
+              min_agent_version: schema.maybe(schema.string()),
+            }),
+          },
         },
       },
     },

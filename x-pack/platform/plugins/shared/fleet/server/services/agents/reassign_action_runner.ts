@@ -21,10 +21,22 @@ import { bulkUpdateAgents } from './crud';
 import { createErrorActionResults, createAgentAction } from './actions';
 import { getHostedPolicies, isHostedAgent } from './hosted_agent';
 import { BulkActionTaskType } from './bulk_action_types';
+import { checkAgentVersionCompatibilityForReassign } from './reassign';
 
 export class ReassignActionRunner extends ActionRunner {
   protected async processAgents(agents: Agent[]): Promise<{ actionId: string }> {
-    return await reassignBatch(this.esClient, this.actionParams! as any, agents, {});
+    return await reassignBatch(
+      this.esClient,
+      {
+        newAgentPolicyId: this.actionParams!.newAgentPolicyId,
+        actionId: this.actionParams!.actionId,
+        total: this.actionParams!.total,
+        spaceId: this.actionParams!.spaceId,
+        force: this.actionParams!.force,
+      },
+      agents,
+      {}
+    );
   }
 
   protected getTaskType() {
@@ -43,6 +55,7 @@ export async function reassignBatch(
     actionId?: string;
     total?: number;
     spaceId?: string;
+    force?: boolean;
   },
   givenAgents: Agent[],
   outgoingErrors: Record<Agent['id'], Error>
@@ -51,9 +64,28 @@ export async function reassignBatch(
   const soClient = appContextService.getInternalUserSOClientForSpaceId(spaceId);
   const errors: Record<Agent['id'], Error> = { ...outgoingErrors };
 
-  const hostedPolicies = await getHostedPolicies(soClient, givenAgents);
+  // Check version compatibility for all agents when force is not true
+  let agentsToCheck = givenAgents;
+  if (!options.force) {
+    const compatibleAgents: Agent[] = [];
+    for (const agent of givenAgents) {
+      const versionError = await checkAgentVersionCompatibilityForReassign(
+        soClient,
+        agent,
+        options.newAgentPolicyId
+      );
+      if (versionError) {
+        errors[agent.id] = versionError;
+      } else {
+        compatibleAgents.push(agent);
+      }
+    }
+    agentsToCheck = compatibleAgents;
+  }
 
-  const agentsToUpdate = givenAgents.reduce<Agent[]>((agents, agent) => {
+  const hostedPolicies = await getHostedPolicies(soClient, agentsToCheck);
+
+  const agentsToUpdate = agentsToCheck.reduce<Agent[]>((agents, agent) => {
     if (agent.policy_id === options.newAgentPolicyId) {
       errors[agent.id] = new AgentReassignmentError(
         `Agent ${agent.id} is already assigned to agent policy ${options.newAgentPolicyId}`
@@ -73,7 +105,9 @@ export async function reassignBatch(
     appContextService
       .getLogger()
       .debug('No agents to update, skipping agent update and action creation');
-    throw new AgentReassignmentError('No agents to reassign, already assigned or hosted agents');
+    throw new AgentReassignmentError(
+      'No agents to reassign: agents may be already assigned, assigned to a hosted policy, on an incompatible version, or not found'
+    );
   }
 
   const newAgentPolicy = await agentPolicyService.get(soClient, options.newAgentPolicyId);
@@ -112,7 +146,7 @@ export async function reassignBatch(
     esClient,
     actionId,
     errors,
-    'already assigned or assigned to hosted policy'
+    'already assigned, assigned to a hosted policy, on an incompatible version, or not found'
   );
 
   return { actionId };

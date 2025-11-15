@@ -519,6 +519,7 @@ export const PackagePolicyResponseSchema = PackagePolicySchema.extends({
   ),
   spaceIds: schema.maybe(schema.arrayOf(schema.string())),
   agents: schema.maybe(schema.number()),
+  min_agent_version: schema.maybe(schema.string()),
 });
 
 export const OrphanedPackagePoliciesResponseSchema = schema.object({

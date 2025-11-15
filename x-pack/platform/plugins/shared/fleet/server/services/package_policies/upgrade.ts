@@ -32,6 +32,10 @@ import type {
 } from '../../../common';
 
 import { runWithCache } from '../epm/packages/cache';
+import {
+  isAnyAgentBelowRequiredVersion,
+  extractMinVersionFromRanges,
+} from '../agents/version_compatibility';
 
 import {
   MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS,
@@ -135,6 +139,31 @@ async function doUpgrade(
     throw new PackagePolicyRestrictionRelatedError(
       `Cannot upgrade package policy ${packagePolicy.id}`
     );
+  }
+
+  // Enforce agent version condition if specified and not forced
+  const requiredAgentVersion = packageInfo?.conditions?.agent?.version;
+  if (requiredAgentVersion && !options?.force) {
+    const policyIds = Array.isArray(packagePolicy.policy_ids)
+      ? packagePolicy.policy_ids
+      : packagePolicy.policy_id
+      ? [packagePolicy.policy_id]
+      : [];
+
+    const hasIncompatibleAgent = await isAnyAgentBelowRequiredVersion({
+      esClient,
+      soClient,
+      policyIds,
+      requiredVersion: requiredAgentVersion,
+    });
+    if (hasIncompatibleAgent) {
+      // Extract minimum version for clearer error message
+      const minVersion = extractMinVersionFromRanges([requiredAgentVersion]);
+      const minVersionDisplay = minVersion || requiredAgentVersion;
+      throw new PackagePolicyRestrictionRelatedError(
+        `Cannot upgrade package policy ${packagePolicy.id}: at least one agent on its agent policies does not satisfy required version range ${requiredAgentVersion} (minimum: ${minVersionDisplay}). Use force:true to override.`
+      );
+    }
   }
 
   const updatePackagePolicy = updatePackageInputs(

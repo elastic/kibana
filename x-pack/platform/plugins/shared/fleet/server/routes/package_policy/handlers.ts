@@ -9,6 +9,8 @@ import type { TypeOf } from '@kbn/config-schema';
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { RequestHandler } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import pMap from 'p-map';
 
 import { groupBy, isEmpty, isEqual, keyBy } from 'lodash';
 
@@ -35,6 +37,7 @@ import type {
   DeleteOnePackagePolicyRequestSchema,
   BulkGetPackagePoliciesRequestSchema,
   UpdatePackagePolicyRequestBodySchema,
+  PackageInfo,
 } from '../../types';
 import type {
   PostDeletePackagePoliciesResponse,
@@ -54,7 +57,11 @@ import {
   getPackageInfo,
   removeInstallation,
 } from '../../services/epm/packages';
-import { PACKAGES_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../constants';
+import {
+  PACKAGES_SAVED_OBJECT_TYPE,
+  SO_SEARCH_LIMIT,
+  MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_10,
+} from '../../constants';
 import {
   simplifiedPackagePolicytoNewPackagePolicy,
   packagePolicyToSimplifiedPackagePolicy,
@@ -64,6 +71,11 @@ import type { SimplifiedPackagePolicy } from '../../../common/services/simplifie
 import { runWithCache } from '../../services/epm/packages/cache';
 
 import {
+  isAnyAgentBelowRequiredVersion,
+  extractMinVersionFromRanges,
+} from '../../services/agents/version_compatibility';
+
+import {
   isSimplifiedCreatePackagePolicyRequest,
   removeFieldsFromInputSchema,
   renameAgentlessAgentPolicy,
@@ -71,6 +83,42 @@ import {
 } from './utils';
 
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
+
+async function calculateMinAgentVersionForPackagePolicy(
+  packagePolicy: PackagePolicy,
+  soClient: SavedObjectsClientContract
+): Promise<string | undefined> {
+  const logger = appContextService.getLogger().get('calculateMinAgentVersionForPackagePolicy');
+
+  if (!packagePolicy.package?.name || !packagePolicy.package?.version) {
+    return undefined;
+  }
+
+  try {
+    const pkgInfo = await getPackageInfo({
+      savedObjectsClient: soClient,
+      pkgName: packagePolicy.package.name,
+      pkgVersion: packagePolicy.package.version,
+      ignoreUnverified: true,
+      prerelease: true,
+    });
+
+    if (pkgInfo?.conditions?.agent?.version) {
+      return extractMinVersionFromRanges([pkgInfo.conditions.agent.version]);
+    }
+  } catch (error) {
+    // If we can't get package info, log and return undefined
+    logger.debug(
+      `Could not get package info for ${packagePolicy.package.name}@${
+        packagePolicy.package.version
+      }, skipping agent version requirement: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+  }
+
+  return undefined;
+}
 
 export const getPackagePoliciesHandler: FleetRequestHandler<
   undefined,
@@ -84,6 +132,25 @@ export const getPackagePoliciesHandler: FleetRequestHandler<
   const { items, total, page, perPage } = await packagePolicyService.list(soClient, request.query);
 
   checkAllowedPackages(items, limitedToPackages, 'package.name');
+
+  // Calculate min_agent_version for all items
+  const logger = appContextService.getLogger().get('getPackagePoliciesHandler');
+  await pMap(
+    items,
+    async (item) => {
+      try {
+        item.min_agent_version = await calculateMinAgentVersionForPackagePolicy(item, soClient);
+      } catch (error) {
+        // If calculation fails, log and continue without min_agent_version
+        logger.warn(
+          `Failed to calculate min_agent_version for package policy ${item.id}: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+      }
+    },
+    { concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_10 }
+  );
 
   if (request.query.withAgentCount) {
     await populatePackagePolicyAssignedAgentsCount(esClient, items);
@@ -121,6 +188,25 @@ export const bulkGetPackagePoliciesHandler: FleetRequestHandler<
 
     checkAllowedPackages(responseItems, limitedToPackages, 'package.name');
 
+    // Calculate min_agent_version for all items
+    const logger = appContextService.getLogger().get('bulkGetPackagePoliciesHandler');
+    await pMap(
+      responseItems,
+      async (item) => {
+        try {
+          item.min_agent_version = await calculateMinAgentVersionForPackagePolicy(item, soClient);
+        } catch (error) {
+          // If calculation fails, log and continue without min_agent_version
+          logger.warn(
+            `Failed to calculate min_agent_version for package policy ${item.id}: ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
+        }
+      },
+      { concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_10 }
+    );
+
     return response.ok({
       body: {
         items:
@@ -156,6 +242,22 @@ export const getOnePackagePolicyHandler: FleetRequestHandler<
 
     if (packagePolicy) {
       checkAllowedPackages([packagePolicy], limitedToPackages, 'package.name');
+
+      // Calculate min_agent_version
+      try {
+        packagePolicy.min_agent_version = await calculateMinAgentVersionForPackagePolicy(
+          packagePolicy,
+          soClient
+        );
+      } catch (error) {
+        // If calculation fails, log and continue without min_agent_version
+        const logger = appContextService.getLogger().get('getOnePackagePolicyHandler');
+        logger.warn(
+          `Failed to calculate min_agent_version for package policy ${packagePolicyId}: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+      }
 
       return response.ok({
         body: {
@@ -237,11 +339,12 @@ export const createPackagePolicyHandler: FleetRequestHandler<
   const spaceId = fleetContext.spaceId;
   try {
     let newPackagePolicy: NewPackagePolicy;
+    let pkgInfo: PackageInfo | undefined;
     if (isSimplifiedCreatePackagePolicyRequest(newPolicy)) {
       if (!pkg) {
         throw new PackagePolicyRequestError('Package is required');
       }
-      const pkgInfo = await getPackageInfo({
+      pkgInfo = await getPackageInfo({
         savedObjectsClient: soClient,
         pkgName: pkg.name,
         pkgVersion: pkg.version,
@@ -256,6 +359,15 @@ export const createPackagePolicyHandler: FleetRequestHandler<
         ...newPolicy,
         package: pkg,
       } as NewPackagePolicy);
+      if (pkg?.name && pkg?.version) {
+        pkgInfo = await getPackageInfo({
+          savedObjectsClient: soClient,
+          pkgName: pkg.name,
+          pkgVersion: pkg.version,
+          ignoreUnverified: force,
+          prerelease: true,
+        });
+      }
     }
     newPackagePolicy.inputs = alignInputsAndStreams(newPackagePolicy.inputs);
 
@@ -265,6 +377,32 @@ export const createPackagePolicyHandler: FleetRequestHandler<
     });
 
     wasPackageAlreadyInstalled = installation?.install_status === 'installed';
+
+    // Enforce agent version condition if specified and not forced
+    const requiredAgentVersion = pkgInfo?.conditions?.agent?.version;
+    if (requiredAgentVersion && !force) {
+      const policyIds = Array.isArray((newPackagePolicy as { policy_ids?: string[] }).policy_ids)
+        ? newPackagePolicy.policy_ids!
+        : newPackagePolicy.policy_id
+        ? [newPackagePolicy.policy_id]
+        : [];
+
+      const hasIncompatibleAgent = await isAnyAgentBelowRequiredVersion({
+        esClient,
+        soClient,
+        policyIds,
+        requiredVersion: requiredAgentVersion,
+        spaceId: fleetContext.spaceId,
+      });
+      if (hasIncompatibleAgent) {
+        // Extract minimum version for clearer error message
+        const minVersion = extractMinVersionFromRanges([requiredAgentVersion]);
+        const minVersionDisplay = minVersion || requiredAgentVersion;
+        throw new PackagePolicyRequestError(
+          `Cannot create integration policy: at least one agent on targeted agent policies does not satisfy required version range ${requiredAgentVersion} (minimum: ${minVersionDisplay}). Use force:true to override.`
+        );
+      }
+    }
 
     // Create package policy
     const packagePolicy = await fleetContext.packagePolicyService.asCurrentUser.create(
@@ -374,6 +512,7 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
     // simplified request
     const { force, package: pkg, ...body } = request.body;
     let newData: NewPackagePolicy;
+    let pkgInfo: PackageInfo | undefined;
 
     if (
       body.inputs &&
@@ -382,10 +521,12 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
       if (!pkg) {
         throw new PackagePolicyRequestError('Package is required');
       }
-      const pkgInfo = await getPackageInfo({
+      pkgInfo = await getPackageInfo({
         savedObjectsClient: soClient,
         pkgName: pkg.name,
         pkgVersion: pkg.version,
+        ignoreUnverified: force,
+        prerelease: true,
       });
 
       newData = simplifiedPackagePolicytoNewPackagePolicy(
@@ -424,9 +565,64 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
       if (overrides) {
         newData.overrides = overrides;
       }
+
+      // Load package info if package is being updated OR if policy_ids are being changed
+      if (pkg?.name && pkg?.version) {
+        // Package version is being updated - load new package info
+        pkgInfo = await getPackageInfo({
+          savedObjectsClient: soClient,
+          pkgName: pkg.name,
+          pkgVersion: pkg.version,
+          ignoreUnverified: force,
+          prerelease: true,
+        });
+      } else {
+        // Check if policy_ids are being changed
+        const currentPolicyIds =
+          packagePolicy.policy_ids || (packagePolicy.policy_id ? [packagePolicy.policy_id] : []);
+        const newPolicyIds = newData.policy_ids || (newData.policy_id ? [newData.policy_id] : []);
+        const policyIdsChanged = !isEqual(currentPolicyIds.sort(), newPolicyIds.sort());
+
+        // If policy_ids changed and package has version requirements, load existing package info
+        if (policyIdsChanged && packagePolicy.package?.name && packagePolicy.package?.version) {
+          pkgInfo = await getPackageInfo({
+            savedObjectsClient: soClient,
+            pkgName: packagePolicy.package.name,
+            pkgVersion: packagePolicy.package.version,
+            ignoreUnverified: true,
+            prerelease: true,
+          });
+        }
+      }
     }
 
     newData.inputs = alignInputsAndStreams(newData.inputs);
+
+    // Enforce agent version condition if specified and not forced
+    const requiredAgentVersion = pkgInfo?.conditions?.agent?.version;
+    if (requiredAgentVersion && !force) {
+      // Get the destination policy IDs (where the package policy will be after update)
+      const newPolicyIds = newData.policy_ids || (newData.policy_id ? [newData.policy_id] : []);
+
+      // Only check if there are destination policies (allow removing all policy assignments)
+      if (newPolicyIds.length > 0) {
+        const hasIncompatibleAgent = await isAnyAgentBelowRequiredVersion({
+          esClient,
+          soClient,
+          policyIds: newPolicyIds,
+          requiredVersion: requiredAgentVersion,
+          spaceId: fleetContext.spaceId,
+        });
+        if (hasIncompatibleAgent) {
+          // Extract minimum version for clearer error message
+          const minVersion = extractMinVersionFromRanges([requiredAgentVersion]);
+          const minVersionDisplay = minVersion || requiredAgentVersion;
+          throw new PackagePolicyRequestError(
+            `Cannot update integration policy: at least one agent on affected agent policies does not satisfy required version range ${requiredAgentVersion} (minimum: ${minVersionDisplay}). Use force:true to override.`
+          );
+        }
+      }
+    }
 
     if (
       newData.policy_ids &&
@@ -542,7 +738,7 @@ export const upgradePackagePolicyHandler: RequestHandler<
     soClient,
     esClient,
     request.body.packagePolicyIds,
-    { user }
+    { user, force: request.body.force }
   );
 
   const firstFatalError = body.find((item) => item.statusCode && item.statusCode !== 200);
@@ -558,18 +754,78 @@ export const upgradePackagePolicyHandler: RequestHandler<
   });
 };
 
-export const dryRunUpgradePackagePolicyHandler: RequestHandler<
-  unknown,
-  unknown,
+export const dryRunUpgradePackagePolicyHandler: FleetRequestHandler<
+  undefined,
+  undefined,
   TypeOf<typeof DryRunPackagePoliciesRequestSchema.body>
 > = async (context, request, response) => {
-  const soClient = (await context.core).savedObjects.client;
+  const coreContext = await context.core;
+  const fleetContext = await context.fleet;
+  const soClient = fleetContext.internalSoClient;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const logger = appContextService.getLogger().get('dryRunUpgradePackagePolicyHandler');
 
   const body: UpgradePackagePolicyDryRunResponse = [];
   const { packagePolicyIds } = request.body;
   await runWithCache(async () => {
     for (const id of packagePolicyIds) {
       const result = await packagePolicyService.getUpgradeDryRunDiff(soClient, id);
+
+      // Check for agent version incompatibility if the dry run was successful
+      if ((!result.statusCode || result.statusCode === 200) && result.diff) {
+        const currentPackagePolicy = result.diff[0];
+        const proposedPackagePolicy = result.diff[1];
+
+        if (proposedPackagePolicy?.package?.name && proposedPackagePolicy?.package?.version) {
+          try {
+            const pkgInfo = await getPackageInfo({
+              savedObjectsClient: soClient,
+              pkgName: proposedPackagePolicy.package.name,
+              pkgVersion: proposedPackagePolicy.package.version,
+              ignoreUnverified: true,
+              prerelease: true,
+            });
+
+            const requiredAgentVersion = pkgInfo?.conditions?.agent?.version;
+            if (requiredAgentVersion) {
+              const policyIds =
+                currentPackagePolicy.policy_ids ||
+                (currentPackagePolicy.policy_id ? [currentPackagePolicy.policy_id] : []);
+
+              if (policyIds.length > 0) {
+                const hasIncompatibleAgent = await isAnyAgentBelowRequiredVersion({
+                  esClient,
+                  soClient,
+                  policyIds,
+                  requiredVersion: requiredAgentVersion,
+                  spaceId: fleetContext.spaceId,
+                });
+
+                if (hasIncompatibleAgent) {
+                  // Extract minimum version for clearer error message
+                  const minVersion = extractMinVersionFromRanges([requiredAgentVersion]);
+                  const minVersionDisplay = minVersion || requiredAgentVersion;
+                  if (!proposedPackagePolicy.errors) {
+                    proposedPackagePolicy.errors = [];
+                  }
+                  proposedPackagePolicy.errors.push({
+                    key: undefined,
+                    message: `Cannot upgrade integration policy: at least one agent on affected agent policies does not satisfy required version range ${requiredAgentVersion} (minimum: ${minVersionDisplay}). Use force:true to override.`,
+                  });
+                  result.hasErrors = true;
+                }
+              }
+            }
+          } catch (error) {
+            logger.debug(
+              `Failed to check agent version compatibility for package policy ${id} during dry run: ${
+                error instanceof Error ? error.message : String(error)
+              }`
+            );
+          }
+        }
+      }
+
       body.push(result);
     }
   });

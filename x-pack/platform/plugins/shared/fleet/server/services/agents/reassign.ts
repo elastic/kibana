@@ -7,6 +7,7 @@
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
+import semverSatisfies from 'semver/functions/satisfies';
 
 import type { Agent } from '../../types';
 import { agentPolicyService } from '../agent_policy';
@@ -20,7 +21,9 @@ import { SO_SEARCH_LIMIT } from '../../constants';
 
 import { agentsKueryNamespaceFilter } from '../spaces/agent_namespaces';
 import { getCurrentNamespace } from '../spaces/get_current_namespace';
+import { getPackageInfo } from '../epm/packages';
 
+import { extractMinVersionFromRanges } from './version_compatibility';
 import {
   getAgentsById,
   getAgentPolicyForAgent,
@@ -54,6 +57,63 @@ async function verifyNewAgentPolicy(
       `Cannot reassign agents to hosted agent policy ${newAgentPolicy.id}`
     );
   }
+}
+
+/**
+ * Checks if an agent's version is compatible with the target agent policy's package requirements.
+ * Returns an AgentReassignmentError if incompatible, null if compatible or no requirements.
+ */
+export async function checkAgentVersionCompatibilityForReassign(
+  soClient: SavedObjectsClientContract,
+  agent: Agent,
+  targetPolicyId: string
+): Promise<AgentReassignmentError | null> {
+  const targetAgentPolicy = await agentPolicyService.get(soClient, targetPolicyId, true);
+  if (!targetAgentPolicy?.package_policies || targetAgentPolicy.package_policies.length === 0) {
+    return null;
+  }
+
+  // Collect all agent version requirements from package policies
+  const versionRequirements: string[] = [];
+  for (const packagePolicy of targetAgentPolicy.package_policies) {
+    if (packagePolicy.package?.name && packagePolicy.package?.version) {
+      try {
+        const pkgInfo = await getPackageInfo({
+          savedObjectsClient: soClient,
+          pkgName: packagePolicy.package.name,
+          pkgVersion: packagePolicy.package.version,
+          ignoreUnverified: true,
+          prerelease: true,
+        });
+        if (pkgInfo?.conditions?.agent?.version) {
+          versionRequirements.push(pkgInfo.conditions.agent.version);
+        }
+      } catch (error) {
+        // If we can't get package info, skip this package policy
+        continue;
+      }
+    }
+  }
+
+  // Check if agent version satisfies all version requirements
+  if (versionRequirements.length > 0) {
+    const agentVersion = agent.agent?.version || agent.local_metadata?.elastic?.agent?.version;
+    if (!agentVersion) {
+      return null;
+    }
+    for (const requiredVersionRange of versionRequirements) {
+      if (!semverSatisfies(agentVersion, requiredVersionRange)) {
+        // Extract min version for error message
+        const minVersion = extractMinVersionFromRanges([requiredVersionRange]);
+        const minVersionDisplay = minVersion || requiredVersionRange;
+        return new AgentReassignmentError(
+          `Agent ${agent.id} version ${agentVersion} does not satisfy required version range ${requiredVersionRange} (minimum: ${minVersionDisplay}) for target agent policy. Use force:true to override.`
+        );
+      }
+    }
+  }
+
+  return null;
 }
 
 export async function reassignAgent(
@@ -153,7 +213,7 @@ export async function reassignAgents(
 
   return await reassignBatch(
     esClient,
-    { newAgentPolicyId, spaceId: currentSpaceId },
+    { newAgentPolicyId, spaceId: currentSpaceId, force: options.force },
     givenAgents,
     outgoingErrors
   );
