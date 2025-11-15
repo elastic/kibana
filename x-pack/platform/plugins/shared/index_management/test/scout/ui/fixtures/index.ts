@@ -58,9 +58,6 @@ export const createTest = function <PageObjectsExtensions = Record<string, Abstr
   pageObjectClassMap: Record<string, PageObjectClass>
 ) {
   type PageObjectsExtended = PageObjectsExtensions & PageObjects;
-  interface TestFixtures extends ScoutTestFixtures {
-    pageObjects: PageObjectsExtended;
-  }
 
   function extendPOs(pageObjects: PageObjects, page: ScoutPage): PageObjectsExtended {
     const initedLazyPageObjects = Object.keys(pageObjectClassMap).reduce<
@@ -76,7 +73,12 @@ export const createTest = function <PageObjectsExtensions = Record<string, Abstr
     } as PageObjectsExtended;
   }
 
-  return base.extend<TestFixtures, ScoutWorkerFixtures>({
+  return base.extend<
+    ScoutTestFixtures & {
+      pageObjects: PageObjectsExtended;
+    },
+    ScoutWorkerFixtures
+  >({
     pageObjects: async (
       {
         pageObjects,
