@@ -140,4 +140,21 @@ describe('Options list popover', () => {
 
     expect(getSelectAllCheckbox()).toBeDisabled();
   });
+
+  test('bulk selections are disabled when multi-value empty selection is disabled and all options are selected', async () => {
+    const contextMock = getOptionsListContextMock();
+    contextMock.componentApi.setTotalCardinality(3);
+    contextMock.componentApi.setAvailableOptions([
+      { value: 'moo', docCount: 1 },
+      { value: 'miau', docCount: 2 },
+      { value: 'oink', docCount: 3 },
+    ]);
+    contextMock.componentApi.setSelectedOptions(['moo', 'miau', 'oink']);
+    renderComponent({
+      ...contextMock,
+      displaySettings: { disableMultiValueEmptySelection: true },
+    });
+
+    expect(getSelectAllCheckbox()).toBeDisabled();
+  });
 });

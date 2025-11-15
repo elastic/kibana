@@ -123,7 +123,15 @@ export const OptionsListPopoverActionBar = ({
     ? selectedOptions.length > MAX_OPTIONS_LIST_BULK_SELECT_SIZE
     : totalCardinality > MAX_OPTIONS_LIST_BULK_SELECT_SIZE;
 
-  const isBulkSelectDisabled = dataLoading || hasNoOptions || hasTooManyOptions || showOnlySelected;
+  const isEmptySelectionDisabled =
+    displaySettings.disableMultiValueEmptySelection && areAllSelected;
+
+  const isBulkSelectDisabled =
+    dataLoading ||
+    hasNoOptions ||
+    hasTooManyOptions ||
+    showOnlySelected ||
+    isEmptySelectionDisabled;
 
   const handleBulkAction = useCallback(
     async (bulkAction: (keys: string[]) => void) => {
