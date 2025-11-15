@@ -27,13 +27,16 @@ export const buildSecurityApi = ({
       apiKeys: {
         areAPIKeysEnabled: () => getAuthc().apiKeys.areAPIKeysEnabled(),
         areCrossClusterAPIKeysEnabled: () => getAuthc().apiKeys.areAPIKeysEnabled(),
-        grantAsInternalUser: (request, createParams) =>
-          getAuthc().apiKeys.grantAsInternalUser(request, createParams),
+        grantAsInternalUser: (request, createParams, isForUiam) =>
+          getAuthc().apiKeys.grantAsInternalUser(request, createParams, isForUiam),
         create: (request, createParams) => getAuthc().apiKeys.create(request, createParams),
         update: (request, updateParams) => getAuthc().apiKeys.update(request, updateParams),
         validate: (apiKeyParams) => getAuthc().apiKeys.validate(apiKeyParams),
         invalidate: (request, params) => getAuthc().apiKeys.invalidate(request, params),
         invalidateAsInternalUser: (params) => getAuthc().apiKeys.invalidateAsInternalUser(params),
+        invalidateViaUiam: (request, apiKeyId) =>
+          getAuthc().apiKeys.invalidateViaUiam(request, apiKeyId),
+        getScopedClusterClient: (request) => getAuthc().apiKeys.getScopedClusterClient(request),
       },
     },
     audit: {
