@@ -8,6 +8,7 @@
 import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type {
+  ReviewRuleInstallationRequestBody,
   ReviewRuleInstallationResponseBody,
   RuleInstallationStatsForReview,
 } from '../../../../../../common/api/detection_engine/prebuilt_rules';
@@ -19,12 +20,19 @@ import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebui
 import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
 import { excludeLicenseRestrictedRules } from '../../logic/utils';
 
+// TODO: Add proper sort type
+const DEFAULT_SORT = {
+  field: 'name',
+  order: 'asc',
+};
+
 export const reviewRuleInstallationHandler = async (
   context: SecuritySolutionRequestHandlerContext,
-  request: KibanaRequest,
+  request: KibanaRequest<undefined, undefined, ReviewRuleInstallationRequestBody>,
   response: KibanaResponseFactory
 ) => {
   const siemResponse = buildSiemResponse(response);
+  const { page = 1, per_page: perPage = 20, sort = DEFAULT_SORT, filter } = request.body ?? {};
 
   try {
     const ctx = await context.resolve(['core', 'alerting', 'securitySolution']);
@@ -34,25 +42,34 @@ export const reviewRuleInstallationHandler = async (
     const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
     const mlAuthz = ctx.securitySolution.getMlAuthz();
 
-    const allLatestVersions = await ruleAssetsClient.fetchLatestVersions();
+    const allLatestVersions = await ruleAssetsClient.fetchLatestVersions(); // Filter here, sort here
     const currentRuleVersions = await ruleObjectsClient.fetchInstalledRuleVersions();
     const currentRuleVersionsMap = new Map(
       currentRuleVersions.map((version) => [version.rule_id, version])
     );
 
-    const allInstallableRules = allLatestVersions.filter(
+    const nonInstalledLatestVersions = allLatestVersions.filter(
       (latestVersion) => !currentRuleVersionsMap.has(latestVersion.rule_id)
     );
 
-    const nonInstalledRuleAssets = await ruleAssetsClient.fetchAssetsByVersion(allInstallableRules);
-    const installableRuleAssets = await excludeLicenseRestrictedRules(
-      nonInstalledRuleAssets,
+    const installableVersions = await excludeLicenseRestrictedRules(
+      nonInstalledLatestVersions,
       mlAuthz
     );
 
+    const installableVersionsPage = installableVersions.slice((page - 1) * perPage, page * perPage);
+
+    const installableRuleAssetsPage = await ruleAssetsClient.fetchAssetsByVersion(
+      installableVersionsPage
+    );
+
     const body: ReviewRuleInstallationResponseBody = {
-      stats: calculateRuleStats(installableRuleAssets),
-      rules: installableRuleAssets.map((prebuiltRuleAsset) =>
+      total: installableVersions.length,
+      stats: {
+        tags: [], // TODO: Implement
+        num_rules_to_install: installableVersions.length,
+      },
+      rules: installableRuleAssetsPage.map((prebuiltRuleAsset) =>
         convertPrebuiltRuleAssetToRuleResponse(prebuiltRuleAsset)
       ),
     };
@@ -66,10 +83,13 @@ export const reviewRuleInstallationHandler = async (
     });
   }
 };
+
 const getAggregatedTags = (rules: PrebuiltRuleAsset[]): string[] => {
   const set = new Set<string>(rules.flatMap((rule) => rule.tags || []));
   return Array.from(set.values()).sort((a, b) => a.localeCompare(b));
 };
+
+// TODO: Potentially remove
 const calculateRuleStats = (
   rulesToInstall: PrebuiltRuleAsset[]
 ): RuleInstallationStatsForReview => {

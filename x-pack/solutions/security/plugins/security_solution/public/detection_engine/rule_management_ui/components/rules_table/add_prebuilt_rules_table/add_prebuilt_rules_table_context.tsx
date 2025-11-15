@@ -26,6 +26,8 @@ import { isUpgradeReviewRequestEnabled } from './add_prebuilt_rules_utils';
 import * as i18n from './translations';
 import type { AddPrebuiltRulesTableFilterOptions } from './use_filter_prebuilt_rules_to_install';
 import { useFilterPrebuiltRulesToInstall } from './use_filter_prebuilt_rules_to_install';
+import { RULES_TABLE_INITIAL_PAGE_SIZE } from '../constants';
+import type { PaginationOptions } from '../../../../rule_management/logic';
 
 export interface AddPrebuiltRulesTableState {
   /**
@@ -48,6 +50,10 @@ export interface AddPrebuiltRulesTableState {
    * Is true then there is no cached data and the query is currently fetching.
    */
   isLoading: boolean;
+  /**
+   * Is true whenever a request is in-flight, which includes initial loading as well as background refetches.
+   */
+  isFetching: boolean;
   /**
    * Will be true if the query has been fetched.
    */
@@ -81,6 +87,10 @@ export interface AddPrebuiltRulesTableState {
    * Rule rows selected in EUI InMemory Table
    */
   selectedRules: RuleResponse[];
+  /**
+   * Current pagination state
+   */
+  pagination: PaginationOptions;
 }
 
 export interface AddPrebuiltRulesTableActions {
@@ -90,6 +100,7 @@ export interface AddPrebuiltRulesTableActions {
   installSelectedRules: (enable?: boolean) => void;
   setFilterOptions: Dispatch<SetStateAction<AddPrebuiltRulesTableFilterOptions>>;
   selectRules: (rules: RuleResponse[]) => void;
+  setPagination: Dispatch<SetStateAction<{ page: number; perPage: number }>>;
   openRulePreview: (ruleId: RuleSignatureId) => void;
 }
 
@@ -119,6 +130,11 @@ export const AddPrebuiltRulesTableContextProvider = ({
     tags: [],
   });
 
+  const [pagination, setPagination] = useState({
+    page: 1,
+    perPage: RULES_TABLE_INITIAL_PAGE_SIZE,
+  });
+
   const { data: prebuiltRulesStatus } = useFetchPrebuiltRulesStatusQuery();
 
   const isUpgradingSecurityPackages = useIsUpgradingSecurityPackages();
@@ -128,31 +144,47 @@ export const AddPrebuiltRulesTableContextProvider = ({
     }) > 0;
 
   const {
-    data: { rules, stats: { tags } } = {
-      rules: [],
-      stats: { tags: [] },
-    },
+    data: reviewResponse,
     refetch,
     dataUpdatedAt,
     isFetched,
+    isFetching,
     isLoading,
     isRefetching,
-  } = usePrebuiltRulesInstallReview({
-    refetchInterval: 60000, // Refetch available rules for installation every minute
-    keepPreviousData: true, // Use this option so that the state doesn't jump between "success" and "loading" on page change
-    // Fetch rules to install only after background installation of security_detection_rules package is complete
-    enabled: isUpgradeReviewRequestEnabled({
-      canUserCRUD,
-      isUpgradingSecurityPackages,
-      prebuiltRulesStatus: prebuiltRulesStatus?.stats,
-    }),
-  });
+  } = usePrebuiltRulesInstallReview(
+    {
+      page: pagination.page,
+      per_page: pagination.perPage,
+      filter: {},
+      sort: {
+        field: 'name',
+        order: 'asc',
+      },
+    },
+    {
+      refetchInterval: 60000, // Refetch available rules for installation every minute
+      keepPreviousData: true, // Use this option so that the state doesn't jump between "success" and "loading" on page change
+      // Fetch rules to install only after background installation of security_detection_rules package is complete
+      enabled: isUpgradeReviewRequestEnabled({
+        canUserCRUD,
+        isUpgradingSecurityPackages,
+        prebuiltRulesStatus: prebuiltRulesStatus?.stats,
+      }),
+    }
+  );
+
+  const rules = useMemo(() => reviewResponse?.rules ?? [], [reviewResponse]);
+
+  const total = reviewResponse?.total ?? 0;
+
+  const tags = useMemo(() => reviewResponse?.stats?.tags ?? [], [reviewResponse]);
 
   const isAnyRuleInstalling = loadingRules.length > 0 || isInstallingAllRules;
 
   const { mutateAsync: installAllRulesRequest } = usePerformInstallAllRules();
   const { mutateAsync: installSpecificRulesRequest } = usePerformInstallSpecificRules();
 
+  // TODO: Remove when replacing with BE implementation
   const filteredRules = useFilterPrebuiltRulesToInstall({ filterOptions, rules });
 
   const installOneRule = useCallback(
@@ -268,6 +300,7 @@ export const AddPrebuiltRulesTableContextProvider = ({
 
   const actions = useMemo(
     () => ({
+      setPagination,
       setFilterOptions,
       installAllRules,
       installOneRule,
@@ -276,7 +309,7 @@ export const AddPrebuiltRulesTableContextProvider = ({
       selectRules: setSelectedRules,
       openRulePreview,
     }),
-    [installAllRules, installOneRule, installSelectedRules, refetch, openRulePreview]
+    [setPagination, installAllRules, installOneRule, installSelectedRules, refetch, openRulePreview]
   );
 
   const providerValue = useMemo<AddPrebuiltRulesContextType>(() => {
@@ -285,9 +318,10 @@ export const AddPrebuiltRulesTableContextProvider = ({
         rules: filteredRules,
         filterOptions,
         tags,
-        hasRulesToInstall: isFetched && rules.length > 0,
+        hasRulesToInstall: total > 0,
         isFetched,
         isLoading,
+        isFetching,
         loadingRules,
         isRefetching,
         isUpgradingSecurityPackages,
@@ -295,15 +329,19 @@ export const AddPrebuiltRulesTableContextProvider = ({
         isAnyRuleInstalling,
         selectedRules,
         lastUpdated: dataUpdatedAt,
+        pagination: {
+          ...pagination,
+          total: total ?? 0,
+        },
       },
       actions,
     };
   }, [
-    rules,
     filteredRules,
     filterOptions,
     tags,
     isFetched,
+    isFetching,
     isLoading,
     loadingRules,
     isRefetching,
@@ -312,6 +350,8 @@ export const AddPrebuiltRulesTableContextProvider = ({
     isAnyRuleInstalling,
     selectedRules,
     dataUpdatedAt,
+    pagination,
+    total,
     actions,
   ]);
 
