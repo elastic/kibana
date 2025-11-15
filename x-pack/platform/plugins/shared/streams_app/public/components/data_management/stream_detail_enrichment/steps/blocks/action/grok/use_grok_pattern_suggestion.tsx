@@ -5,29 +5,16 @@
  * 2.0.
  */
 
-import type { FlattenRecord } from '@kbn/streams-schema';
-import { useAbortController } from '@kbn/react-hooks';
-import useAsyncFn from 'react-use/lib/useAsyncFn';
-import { flattenObjectNestedLast } from '@kbn/object-utils';
 import {
-  getReviewFields,
-  getGrokProcessor,
-  mergeGrokProcessors,
-  groupMessagesByPattern,
   extractGrokPatternDangerouslySlow,
+  getGrokProcessor,
+  getReviewFields,
+  mergeGrokProcessors,
   unwrapPatternDefinitions,
-  type GrokProcessorResult,
 } from '@kbn/grok-heuristics';
-import { get } from 'lodash';
 import { lastValueFrom } from 'rxjs';
+import { usePatternSuggestionBase } from '../common/use_pattern_suggestion_base';
 import { useKibana } from '../../../../../../../hooks/use_kibana';
-import { showErrorToast } from '../../../../../../../hooks/use_streams_app_fetch';
-import {
-  selectOriginalPreviewRecords,
-  selectPreviewRecords,
-} from '../../../../state_management/simulation_state_machine/selectors';
-import { useSimulatorSelector } from '../../../../state_management/stream_enrichment_state_machine';
-import { simulateProcessing } from '../../../../state_management/simulation_state_machine/simulation_runner_actor';
 
 export const SUGGESTED_GROK_PROCESSOR_ID = 'grok-processor';
 
@@ -39,7 +26,6 @@ export interface GrokPatternSuggestionParams {
 
 export function useGrokPatternSuggestion() {
   const {
-    core: { notifications },
     services: { telemetryClient },
     dependencies: {
       start: {
@@ -48,159 +34,64 @@ export function useGrokPatternSuggestion() {
     },
   } = useKibana();
 
-  const abortController = useAbortController();
-  const stepsWithoutCurrent = useSimulatorSelector((snapshot) =>
-    snapshot.context.steps.slice(0, -1)
-  );
-  const previewDocsFilter = useSimulatorSelector((snapshot) => snapshot.context.previewDocsFilter);
-  const originalSamples = useSimulatorSelector((snapshot) =>
-    selectOriginalPreviewRecords(snapshot.context)
-  );
-
-  return useAsyncFn(
-    async (params: GrokPatternSuggestionParams | null) => {
-      if (params === null) {
-        return Promise.resolve(undefined); // Reset to initial value
-      }
-
-      let samples = originalSamples
-        .map((doc) => doc.document)
-        .map(flattenObjectNestedLast) as FlattenRecord[];
-
-      /**
-       * If there are processors, we run a partial simulation to get the samples.
-       * If there are no processors, we use the original samples previously assigned.
-       */
-      if (stepsWithoutCurrent.length > 0) {
-        const simulation = await simulateProcessing({
-          streamsRepositoryClient,
-          input: {
-            streamName: params.streamName,
-            steps: stepsWithoutCurrent,
-            documents: samples,
-          },
-        });
-
-        samples = selectPreviewRecords({
-          samples: originalSamples,
-          previewDocsFilter,
-          simulation,
-        });
-      }
-
-      const messages = samples.reduce<string[]>((acc, sample) => {
-        const value = get(sample, params.fieldName);
-        if (typeof value === 'string') {
-          acc.push(value);
-        }
-        return acc;
-      }, []);
-
-      const groupedMessages = groupMessagesByPattern(messages);
-
-      const finishTrackingAndReport = telemetryClient.startTrackingAIGrokSuggestionLatency({
-        name: params.streamName,
-        field: params.fieldName,
-        connector_id: params.connectorId,
-      });
-
-      const result = await Promise.allSettled(
-        groupedMessages.map((group) => {
-          const grokPatternNodes = extractGrokPatternDangerouslySlow(group.messages);
-
-          // The only reason we're streaming the response here is to avoid timeout issues prevalent with long-running requests to LLMs.
-          // There is only ever going to be a single event emitted so we can safely use `lastValueFrom`.
-          return lastValueFrom(
-            streamsRepositoryClient.stream(
-              'POST /internal/streams/{name}/processing/_suggestions/grok',
-              {
-                signal: abortController.signal,
-                params: {
-                  path: { name: params.streamName },
-                  body: {
-                    connector_id: params.connectorId,
-                    sample_messages: group.messages.slice(0, 10),
-                    review_fields: getReviewFields(grokPatternNodes, 10),
-                  },
+  return usePatternSuggestionBase(
+    {
+      processorId: SUGGESTED_GROK_PROCESSOR_ID,
+      extractPattern: (messages: string[]) => extractGrokPatternDangerouslySlow(messages),
+      getReviewFields: (pattern, numExamples) => getReviewFields(pattern, numExamples),
+      callReviewApiAndCreateProcessor: async (pattern, reviewFields, params) => {
+        const reviewResult = await lastValueFrom(
+          streamsRepositoryClient.stream(
+            'POST /internal/streams/{name}/processing/_suggestions/grok',
+            {
+              signal: params.signal,
+              params: {
+                path: { name: params.streamName },
+                body: {
+                  connector_id: params.connectorId,
+                  sample_messages: params.messages,
+                  pattern_object: reviewFields,
                 },
-              }
-            )
-          ).then((reviewResult) => {
-            const grokProcessor = getGrokProcessor(grokPatternNodes, reviewResult.grokProcessor);
-
-            return {
-              ...grokProcessor,
-              patterns: unwrapPatternDefinitions(grokProcessor), // NOTE: Inline patterns until we support custom pattern definitions in Streamlang
-              pattern_definitions: {},
-            };
-          });
-        })
-      );
-
-      const aggregateError = new AggregateError(
-        result.reduce<Error[]>((acc, settledState) => {
-          if (settledState.status === 'rejected') {
-            acc.push(settledState.reason);
-          }
-          return acc;
-        }, [])
-      );
-
-      const grokProcessors = result.reduce<GrokProcessorResult[]>((acc, settledState) => {
-        if (settledState.status === 'fulfilled') {
-          acc.push(settledState.value);
-        }
-        return acc;
-      }, []);
-
-      // If all promises failed, throw an aggregate error, otherwise ignore errors and continue with fulfilled results
-      if (grokProcessors.length === 0) {
-        finishTrackingAndReport(0, [0]);
-        showErrorToast(notifications, aggregateError);
-        throw aggregateError;
-      }
-
-      // Combine all grok processors into a single one with fallback patterns
-      const combinedGrokProcessor = mergeGrokProcessors(grokProcessors);
-
-      // Run simulation to get fields and metrics
-      const simulationResult = await streamsRepositoryClient.fetch(
-        'POST /internal/streams/{name}/processing/_simulate',
-        {
-          signal: abortController.signal,
-          params: {
-            path: { name: params.streamName },
-            body: {
-              documents: samples,
-              processing: {
-                steps: [
-                  {
-                    action: 'grok',
-                    customIdentifier: SUGGESTED_GROK_PROCESSOR_ID,
-                    from: params.fieldName,
-                    patterns: combinedGrokProcessor.patterns,
-                  },
-                ],
               },
-            },
-          },
+            }
+          )
+        );
+        if (reviewResult.type !== 'result' || typeof reviewResult.grokProcessor !== 'object') {
+          throw new Error('Invalid grok review response');
         }
-      );
-
-      finishTrackingAndReport(1, [
-        simulationResult.processors_metrics[SUGGESTED_GROK_PROCESSOR_ID].parsed_rate,
-      ]);
-
-      return { grokProcessor: combinedGrokProcessor, simulationResult };
+        const grokProcessor = getGrokProcessor(pattern, {
+          ...reviewResult.grokProcessor,
+          fields: reviewResult.grokProcessor.fields.map((field) => ({
+            name: field.ecs_field,
+            columns: field.columns,
+            grok_components: field.grok_components,
+          })),
+        });
+        return {
+          ...grokProcessor,
+          patterns: unwrapPatternDefinitions(grokProcessor),
+          pattern_definitions: {},
+        };
+      },
+      createStreamlangStep: (fieldName, processor) => ({
+        action: 'grok',
+        customIdentifier: SUGGESTED_GROK_PROCESSOR_ID,
+        from: fieldName,
+        patterns: processor.patterns,
+      }),
+      telemetryMethod: 'startTrackingAIGrokSuggestionLatency',
+      groupStrategy: 'all',
+      mergeProcessors: (processors) => {
+        const merged = mergeGrokProcessors(processors);
+        return {
+          ...merged,
+          pattern_definitions: merged.pattern_definitions || {},
+        };
+      },
     },
-    [
-      abortController,
-      stepsWithoutCurrent,
-      previewDocsFilter,
-      originalSamples,
-      notifications,
+    {
       streamsRepositoryClient,
       telemetryClient,
-    ]
+    }
   );
 }

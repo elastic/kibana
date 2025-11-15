@@ -6,15 +6,15 @@
  */
 
 import { z } from '@kbn/zod';
-import type { IScopedClusterClient } from '@kbn/core/server';
 import { ReviewDissectFieldsPrompt } from '@kbn/dissect-heuristics';
-import type { InferenceClient, ToolOptionsOfPrompt } from '@kbn/inference-common';
-import { Streams } from '@kbn/streams-schema';
-import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
-import { prefixOTelField } from '@kbn/otel-semantic-conventions';
 import type { ToolCallsOfToolOptions } from '@kbn/inference-common/src/chat_complete/tools_of';
+import type { ToolOptionsOfPrompt } from '@kbn/inference-common';
 import type { FieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
-import type { StreamsClient } from '../../../../lib/streams/client';
+import {
+  handleProcessingSuggestions,
+  resolveFieldName,
+  type CommonSuggestionHandlerDeps,
+} from './common_suggestions_handler';
 
 export interface ProcessingDissectSuggestionsParams {
   path: {
@@ -33,14 +33,7 @@ export interface ProcessingDissectSuggestionsParams {
   };
 }
 
-export interface ProcessingDissectSuggestionsHandlerDeps {
-  params: ProcessingDissectSuggestionsParams;
-  inferenceClient: InferenceClient;
-  scopedClusterClient: IScopedClusterClient;
-  streamsClient: StreamsClient;
-  fieldsMetadataClient: IFieldsMetadataClient;
-  signal: AbortSignal;
-}
+export type ProcessingDissectSuggestionsHandlerDeps = CommonSuggestionHandlerDeps;
 
 export const processingDissectSuggestionsSchema = z.object({
   path: z.object({ name: z.string() }),
@@ -61,40 +54,28 @@ type FieldReviewResults = ToolCallsOfToolOptions<
   ToolOptionsOfPrompt<typeof ReviewDissectFieldsPrompt>
 >[number]['function']['arguments']['fields'];
 
-export const handleProcessingDissectSuggestions = async ({
-  params,
-  inferenceClient,
-  streamsClient,
-  fieldsMetadataClient,
-  signal,
-}: ProcessingDissectSuggestionsHandlerDeps) => {
-  const stream = await streamsClient.getStream(params.path.name);
-  const isWiredStream = Streams.WiredStream.Definition.is(stream);
-
-  const response = await inferenceClient.prompt({
-    connectorId: params.body.connector_id,
-    prompt: ReviewDissectFieldsPrompt,
-    input: {
-      sample_messages: params.body.sample_messages,
-      review_fields: JSON.stringify(params.body.review_fields),
+export const handleProcessingDissectSuggestions = async (
+  deps: ProcessingDissectSuggestionsHandlerDeps
+) => {
+  return handleProcessingSuggestions(
+    {
+      prompt: ReviewDissectFieldsPrompt,
+      extractReviewFields: (reviewFields) => JSON.stringify(reviewFields),
+      mapFieldResult: (
+        field: FieldReviewResults[number],
+        name,
+        useOtelFieldNames,
+        fieldMetadata
+      ) => ({
+        ecs_field: resolveFieldName(name, useOtelFieldNames, fieldMetadata),
+        columns: field.columns,
+        join_strategy: field.join_strategy,
+        is_static: field.is_static,
+        static_value: field.static_value,
+      }),
     },
-    abortSignal: signal,
-  });
-  const reviewResult = response.toolCalls[0].function.arguments;
-
-  // if the stream is wired, or if it matches the logs-*.otel-* pattern, use the OTEL field names
-  const useOtelFieldNames = isWiredStream || params.path.name.match(/^logs-.*\.otel-/);
-
-  const fieldMetadata = await fieldsMetadataClient
-    .find({
-      fieldNames: reviewResult.fields.map((field) => field.ecs_field),
-    })
-    .then((fieldsDictionary) => fieldsDictionary.toPlain());
-
-  return {
-    log_source: reviewResult.log_source,
-    fields: mapFields(reviewResult.fields, fieldMetadata, !!useOtelFieldNames),
-  };
+    deps
+  );
 };
 
 export function mapFields(
@@ -111,9 +92,7 @@ export function mapFields(
       : field.ecs_field;
     return {
       // make sure otel field names are translated/prefixed correctly
-      ecs_field: useOtelFieldNames
-        ? fieldMetadata[name]?.otel_equivalent ?? prefixOTelField(name)
-        : name,
+      ecs_field: resolveFieldName(name, useOtelFieldNames, fieldMetadata),
       columns: field.columns,
       join_strategy: field.join_strategy,
       is_static: field.is_static,
