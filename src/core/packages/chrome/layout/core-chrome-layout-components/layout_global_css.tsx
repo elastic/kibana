@@ -26,6 +26,8 @@ export const LayoutGlobalCSS = () => {
     sidebarWidth,
     applicationTopBarHeight,
     applicationBottomBarHeight,
+    applicationMarginBottom,
+    applicationMarginRight,
   } = useLayoutState();
 
   const banner = css`
@@ -82,12 +84,19 @@ export const LayoutGlobalCSS = () => {
   `;
 
   const application = css`
+    ${layoutVarName('application.marginBottom')}: ${applicationMarginBottom}px;
+    ${layoutVarName('application.marginRight')}: ${applicationMarginRight}px;
+
     ${layoutVarName('application.top')}: calc(
       ${layoutVar('banner.height')} + ${layoutVar('header.height')}
     );
-    ${layoutVarName('application.bottom')}: ${layoutVar('footer.height')};
+    ${layoutVarName('application.bottom')}: calc(${layoutVar('footer.height')} + ${layoutVar(
+      'application.marginBottom'
+    )});
     ${layoutVarName('application.left')}: ${navigationWidth}px;
-    ${layoutVarName('application.right')}: ${sidebarWidth}px;
+    ${layoutVarName('application.right')}: calc(${layoutVar(
+      'application.marginRight'
+    )} + ${sidebarWidth}px);
     ${layoutVarName('application.height')}: calc(
       100vh - ${layoutVar('application.top')} - ${layoutVar('application.bottom')}
     );

@@ -24,7 +24,7 @@ import { NAVIGATION_ROOT_SELECTOR } from '../../constants';
 
 const getWrapperStyles = (theme: UseEuiTheme['euiTheme'], isCollapsed: boolean) => css`
   box-sizing: border-box;
-  background-color: ${theme.colors.backgroundBasePlain};
+  background-color: ${theme.colors.backgroundTransparent};
   border-right: ${theme.border.width.thin} solid ${theme.colors.borderBaseSubdued};
   display: flex;
   flex-direction: column;
