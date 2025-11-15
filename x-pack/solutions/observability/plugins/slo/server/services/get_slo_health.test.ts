@@ -337,9 +337,7 @@ describe('GetSLOHealth', () => {
         ],
       });
 
-      const missingSummaryTotal = result.filter(
-        (res) => res.health.summary === 'missing'
-      ).length;
+      const missingSummaryTotal = result.filter((res) => res.health.summary === 'missing').length;
       expect(missingSummaryTotal).toBe(1);
       expect(result).toHaveLength(2);
       expect(result[0].health.summary).toBe('missing');
