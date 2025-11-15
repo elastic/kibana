@@ -10,13 +10,16 @@
 import { createContext, useContext } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { isFunction } from 'lodash';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { DiscoverStateContainer } from '../application/main/state_management/discover_state';
-import type { CustomizationCallback } from './types';
+import type { CustomizationCallback, ExtendedDiscoverStateContainer } from './types';
 import type {
   DiscoverCustomizationId,
   DiscoverCustomizationService,
 } from './customization_service';
 import { createCustomizationService } from './customization_service';
+import { getInitialState } from '../application/main/state_management/discover_app_state_container';
+import type { DiscoverServices } from '../build_services';
 
 const customizationContext = createContext(createCustomizationService());
 
@@ -37,14 +40,31 @@ export interface ConnectedCustomizationService extends DiscoverCustomizationServ
   cleanup: () => Promise<void>;
 }
 
+export const getExtendedDiscoverStateContainer = (
+  stateContainer: DiscoverStateContainer,
+  services: DiscoverServices
+): ExtendedDiscoverStateContainer => ({
+  ...stateContainer,
+  getAppStateFromSavedSearch: (newSavedSearch: SavedSearch) => {
+    return getInitialState({
+      initialUrlState: undefined,
+      savedSearch: newSavedSearch,
+      services,
+    });
+  },
+});
+
 export const getConnectedCustomizationService = async ({
   customizationCallbacks,
-  stateContainer,
+  stateContainer: originalStateContainer,
+  services,
 }: {
   customizationCallbacks: CustomizationCallback[];
   stateContainer: DiscoverStateContainer;
+  services: DiscoverServices;
 }): Promise<ConnectedCustomizationService> => {
   const customizations = createCustomizationService();
+  const stateContainer = getExtendedDiscoverStateContainer(originalStateContainer, services);
   const callbacks = customizationCallbacks.map((callback) =>
     Promise.resolve(callback({ customizations, stateContainer }))
   );

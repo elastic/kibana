@@ -13,7 +13,7 @@ import type {
 } from '@kbn/charts-plugin/public';
 import { renderHook } from '@testing-library/react';
 import type {
-  DiscoverStateContainer,
+  ExtendedDiscoverStateContainer,
   UnifiedHistogramCustomization,
   DiscoverCustomization,
 } from '@kbn/discover-plugin/public';
@@ -81,7 +81,7 @@ const mockSetFunctionOnBrushEndCallback = (histogramCustomization: DiscoverCusto
   );
 };
 
-const mockStateContainer = {} as DiscoverStateContainer;
+const mockStateContainer = {} as ExtendedDiscoverStateContainer;
 
 describe('useHistogramCustomization', () => {
   const startServices = createStartServicesMock();

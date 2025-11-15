@@ -191,6 +191,7 @@ export function getDiscoverInternalStateMock({
       const customizationService = await getConnectedCustomizationService({
         stateContainer,
         customizationCallbacks: [],
+        services,
       });
 
       await internalState.dispatch(

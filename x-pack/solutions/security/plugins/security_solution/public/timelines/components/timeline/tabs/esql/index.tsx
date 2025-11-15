@@ -215,16 +215,19 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
       if (!stateContainer.stateStorage.get(APP_STATE_URL_KEY) || !hasESQLUrlState) {
         if (savedSearchAppState?.savedSearch.timeRange) {
           stateContainer.internalState.dispatch(
-            stateContainer.injectCurrentTab(stateContainer.internalStateActions.setGlobalState)({
+            stateContainer.injectCurrentTab(stateContainer.internalStateActions.updateGlobalState)({
               globalState: {
-                ...stateContainer.getCurrentTab().globalState,
                 timeRange: savedSearchAppState.savedSearch.timeRange,
               },
             })
           );
         }
         stateContainer.appState.set(finalAppState);
-        await stateContainer.appState.replaceUrlState(finalAppState);
+        await stateContainer.internalState.dispatch(
+          stateContainer.injectCurrentTab(stateContainer.internalStateActions.replaceAppState)({
+            appState: finalAppState,
+          })
+        );
       }
 
       const unsubscribeState = stateContainer.appState.state$.subscribe({

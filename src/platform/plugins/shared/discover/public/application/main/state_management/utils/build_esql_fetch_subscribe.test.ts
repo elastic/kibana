@@ -31,9 +31,8 @@ async function getTestProps(
   appState?: Partial<DiscoverAppState>,
   defaultFetchStatus: FetchStatus = FetchStatus.PARTIAL
 ) {
-  const replaceUrlState = jest.fn();
+  const replaceUrlState = jest.spyOn(internalStateActions, 'replaceAppState').mockClear();
   const stateContainer = getDiscoverStateMock({ isTimeBased: true });
-  stateContainer.appState.replaceUrlState = replaceUrlState;
   stateContainer.appState.update({ columns: [], ...appState });
   const dataViewList = [dataViewMock as DataViewListItem];
   jest.spyOn(dataViewsService, 'getIdsWithTitle').mockResolvedValue(dataViewList);
@@ -98,7 +97,7 @@ describe('buildEsqlFetchSubscribe', () => {
   test('an ES|QL query should change state when loading and finished', async () => {
     const { replaceUrlState, stateContainer } = await setupTest(true);
 
-    replaceUrlState.mockReset();
+    replaceUrlState.mockClear();
 
     stateContainer.dataState.data$.documents$.next(msgComplete);
     expect(replaceUrlState).toHaveBeenCalledTimes(0);
@@ -119,7 +118,8 @@ describe('buildEsqlFetchSubscribe', () => {
 
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
     expect(replaceUrlState).toHaveBeenCalledWith({
-      viewMode: undefined,
+      tabId: 'the-saved-search-id-with-timefield',
+      appState: { viewMode: undefined },
     });
   });
 
@@ -127,7 +127,7 @@ describe('buildEsqlFetchSubscribe', () => {
     const { replaceUrlState, stateContainer } = await setupTest(false);
     const documents$ = stateContainer.dataState.data$.documents$;
     documents$.next(msgComplete);
-    replaceUrlState.mockReset();
+    replaceUrlState.mockClear();
 
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
@@ -145,7 +145,8 @@ describe('buildEsqlFetchSubscribe', () => {
 
     await waitFor(() => {
       expect(replaceUrlState).toHaveBeenCalledWith({
-        columns: ['field1'],
+        tabId: 'the-saved-search-id-with-timefield',
+        appState: { columns: ['field1'] },
       });
     });
   });
@@ -154,7 +155,7 @@ describe('buildEsqlFetchSubscribe', () => {
     const { replaceUrlState, stateContainer } = await setupTest(false);
     const documents$ = stateContainer.dataState.data$.documents$;
     documents$.next(msgComplete);
-    replaceUrlState.mockReset();
+    replaceUrlState.mockClear();
 
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
@@ -171,7 +172,8 @@ describe('buildEsqlFetchSubscribe', () => {
 
     await waitFor(() => {
       expect(replaceUrlState).toHaveBeenCalledWith({
-        columns: [],
+        tabId: 'the-saved-search-id-with-timefield',
+        appState: { columns: [] },
       });
     });
   });
@@ -181,7 +183,7 @@ describe('buildEsqlFetchSubscribe', () => {
     const documents$ = stateContainer.dataState.data$.documents$;
     documents$.next(msgComplete);
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(0));
-    replaceUrlState.mockReset();
+    replaceUrlState.mockClear();
 
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
@@ -196,7 +198,7 @@ describe('buildEsqlFetchSubscribe', () => {
       query: { esql: 'from the-data-view-title | where field1 > 0' },
     });
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(0));
-    replaceUrlState.mockReset();
+    replaceUrlState.mockClear();
 
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
@@ -212,7 +214,8 @@ describe('buildEsqlFetchSubscribe', () => {
     });
     await waitFor(() => {
       expect(replaceUrlState).toHaveBeenCalledWith({
-        columns: [],
+        tabId: 'the-saved-search-id-with-timefield',
+        appState: { columns: [] },
       });
     });
   });
@@ -223,7 +226,7 @@ describe('buildEsqlFetchSubscribe', () => {
 
     documents$.next(msgComplete);
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(0));
-    replaceUrlState.mockReset();
+    replaceUrlState.mockClear();
 
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
@@ -239,10 +242,11 @@ describe('buildEsqlFetchSubscribe', () => {
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
     await waitFor(() => {
       expect(replaceUrlState).toHaveBeenCalledWith({
-        columns: ['field1'],
+        tabId: 'the-saved-search-id-with-timefield',
+        appState: { columns: ['field1'] },
       });
     });
-    replaceUrlState.mockReset();
+    replaceUrlState.mockClear();
 
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
@@ -265,7 +269,7 @@ describe('buildEsqlFetchSubscribe', () => {
 
     documents$.next(msgComplete);
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(0));
-    replaceUrlState.mockReset();
+    replaceUrlState.mockClear();
 
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
@@ -292,7 +296,8 @@ describe('buildEsqlFetchSubscribe', () => {
 
     await waitFor(() => {
       expect(replaceUrlState).toHaveBeenCalledWith({
-        columns: ['field1'],
+        tabId: 'the-saved-search-id-with-timefield',
+        appState: { columns: ['field1'] },
       });
     });
   });
@@ -319,10 +324,11 @@ describe('buildEsqlFetchSubscribe', () => {
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
     await waitFor(() => {
       expect(replaceUrlState).toHaveBeenCalledWith({
-        columns: ['field1', 'field2'],
+        tabId: 'the-saved-search-id-with-timefield',
+        appState: { columns: ['field1', 'field2'] },
       });
     });
-    replaceUrlState.mockReset();
+    replaceUrlState.mockClear();
 
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
@@ -337,7 +343,8 @@ describe('buildEsqlFetchSubscribe', () => {
     });
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
     expect(replaceUrlState).toHaveBeenCalledWith({
-      columns: ['field1'],
+      tabId: 'the-saved-search-id-with-timefield',
+      appState: { columns: ['field1'] },
     });
   });
 
@@ -390,7 +397,8 @@ describe('buildEsqlFetchSubscribe', () => {
     });
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
     expect(replaceUrlState).toHaveBeenCalledWith({
-      columns: ['field1'],
+      tabId: 'the-saved-search-id-with-timefield',
+      appState: { columns: ['field1'] },
     });
   });
 
@@ -420,7 +428,7 @@ describe('buildEsqlFetchSubscribe', () => {
     stateContainer.appState.get = jest.fn(() => {
       return { columns: ['field1', 'field2'], index: 'the-data-view-id' };
     });
-    replaceUrlState.mockReset();
+    replaceUrlState.mockClear();
 
     documents$.next({
       fetchStatus: FetchStatus.LOADING,
@@ -450,7 +458,8 @@ describe('buildEsqlFetchSubscribe', () => {
 
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
     expect(replaceUrlState).toHaveBeenCalledWith({
-      columns: ['field1'],
+      tabId: 'the-saved-search-id-with-timefield',
+      appState: { columns: ['field1'] },
     });
   });
 
@@ -460,7 +469,7 @@ describe('buildEsqlFetchSubscribe', () => {
 
     documents$.next(msgComplete);
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(0));
-    replaceUrlState.mockReset();
+    replaceUrlState.mockClear();
 
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
@@ -478,7 +487,8 @@ describe('buildEsqlFetchSubscribe', () => {
 
     await waitFor(() => {
       expect(replaceUrlState).toHaveBeenCalledWith({
-        columns: ['field1'],
+        tabId: 'the-saved-search-id-with-timefield',
+        appState: { columns: ['field1'] },
       });
     });
   });

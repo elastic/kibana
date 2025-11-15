@@ -253,9 +253,8 @@ export function getDiscoverStateContainer({
       const state = selectTab(internalState.getState(), tabId).globalState;
       if (state?.refreshInterval && !state.refreshInterval.pause) {
         internalState.dispatch(
-          injectCurrentTab(internalStateActions.setGlobalState)({
+          injectCurrentTab(internalStateActions.updateGlobalState)({
             globalState: {
-              ...state,
               refreshInterval: { ...state.refreshInterval, pause: true },
             },
           })
@@ -320,11 +319,15 @@ export function getDiscoverStateContainer({
     }
 
     if (isDataSourceType(appStateContainer.get().dataSource, DataSourceType.DataView)) {
-      await appStateContainer.replaceUrlState({
-        dataSource: nextDataView.id
-          ? createDataViewDataSource({ dataViewId: nextDataView.id })
-          : undefined,
-      });
+      await internalState.dispatch(
+        injectCurrentTab(internalStateActions.replaceAppState)({
+          appState: {
+            dataSource: nextDataView.id
+              ? createDataViewDataSource({ dataViewId: nextDataView.id })
+              : undefined,
+          },
+        })
+      );
     }
 
     const trackingEnabled = Boolean(nextDataView.isPersisted() || savedSearchContainer.getId());
@@ -390,14 +393,8 @@ export function getDiscoverStateContainer({
     });
 
     // clears pinned filters
-    const globalState = selectTab(internalState.getState(), tabId).globalState;
     internalState.dispatch(
-      injectCurrentTab(internalStateActions.setGlobalState)({
-        globalState: {
-          ...globalState,
-          filters: [],
-        },
-      })
+      injectCurrentTab(internalStateActions.updateGlobalState)({ globalState: { filters: [] } })
     );
   };
 

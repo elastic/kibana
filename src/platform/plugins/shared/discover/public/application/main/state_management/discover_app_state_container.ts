@@ -53,25 +53,11 @@ export interface DiscoverAppStateContainer extends BaseStateContainer<DiscoverAp
    */
   initAndSync: () => () => void;
   /**
-   * Updates the URL with the current app and global state without pushing to history (e.g. on initialization)
-   */
-  updateUrlWithCurrentState: () => Promise<void>;
-  /**
-   * Replaces the current state in URL with the given state
-   * @param newState
-   * @param merge if true, the given state is merged with the current state
-   */
-  replaceUrlState: (newPartial: DiscoverAppState, merge?: boolean) => Promise<void>;
-  /**
    * Updates the state, if replace is true, a history.replace is performed instead of history.push
    * @param newPartial
    * @param replace
    */
   update: (newPartial: DiscoverAppState, replace?: boolean) => void;
-  /*
-   * Get updated AppState when given a saved search
-   */
-  getAppStateFromSavedSearch: (newSavedSearch: SavedSearch) => DiscoverAppState;
 }
 
 export interface DiscoverAppState {
@@ -197,24 +183,6 @@ export const getDiscoverAppStateContainer = ({
     state$: from(internalState).pipe(map(getAppState), distinctUntilChanged(isEqual)),
   };
 
-  const getAppStateFromSavedSearch = (newSavedSearch: SavedSearch) => {
-    return getInitialState({
-      initialUrlState: undefined,
-      savedSearch: newSavedSearch,
-      services,
-    });
-  };
-
-  const replaceUrlState = async (newPartial: DiscoverAppState = {}, merge = true) => {
-    addLog('[appState] replaceUrlState', { newPartial, merge });
-    const state = merge ? { ...appStateContainer.get(), ...newPartial } : newPartial;
-    if (internalState.getState().tabs.unsafeCurrentId === tabId) {
-      await stateStorage.set(APP_STATE_URL_KEY, state, { replace: true });
-    } else {
-      appStateContainer.set(state);
-    }
-  };
-
   const getGlobalState = (state: DiscoverInternalState): GlobalQueryStateFromUrl => {
     const tabState = selectTab(state, tabId);
     const { timeRange: time, refreshInterval, filters } = tabState.globalState;
@@ -242,13 +210,6 @@ export const getDiscoverAppStateContainer = ({
       );
     },
     state$: from(internalState).pipe(map(getGlobalState), distinctUntilChanged(isEqual)),
-  };
-
-  const updateUrlWithCurrentState = async () => {
-    await Promise.all([
-      stateStorage.set(GLOBAL_STATE_URL_KEY, globalStateContainer.get(), { replace: true }),
-      replaceUrlState({}),
-    ]);
   };
 
   const initAndSync = () => {
@@ -287,7 +248,7 @@ export const getDiscoverAppStateContainer = ({
 
     if (setDataViewFromSavedSearch) {
       // used data view is different from the given by url/state which is invalid
-      setState(appStateContainer, {
+      update({
         dataSource: savedSearchDataView?.id
           ? createDataViewDataSource({ dataViewId: savedSearchDataView.id })
           : undefined,
@@ -329,10 +290,12 @@ export const getDiscoverAppStateContainer = ({
       });
 
     // current state needs to be pushed to url
-    updateUrlWithCurrentState().then(() => {
-      startSyncingAppStateWithUrl();
-      startSyncingGlobalStateWithUrl();
-    });
+    internalState
+      .dispatch(injectCurrentTab(internalStateActions.pushCurrentTabStateToUrl)())
+      .then(() => {
+        startSyncingAppStateWithUrl();
+        startSyncingGlobalStateWithUrl();
+      });
 
     return () => {
       stopSyncingQueryAppStateWithStateContainer();
@@ -345,19 +308,24 @@ export const getDiscoverAppStateContainer = ({
   const update = (newPartial: DiscoverAppState, replace = false) => {
     addLog('[appState] update', { newPartial, replace });
     if (replace) {
-      return replaceUrlState(newPartial);
+      return internalState.dispatch(
+        injectCurrentTab(internalStateActions.replaceAppState)({
+          appState: newPartial,
+        })
+      );
     } else {
-      setState(appStateContainer, newPartial);
+      internalState.dispatch(
+        injectCurrentTab(internalStateActions.updateAppState)({
+          appState: newPartial,
+        })
+      );
     }
   };
 
   return {
     ...appStateContainer,
     initAndSync,
-    updateUrlWithCurrentState,
-    replaceUrlState,
     update,
-    getAppStateFromSavedSearch,
   };
 };
 
@@ -397,22 +365,6 @@ export function getInitialState({
   }
 
   return handleSourceColumnState(mergedState, services.uiSettings);
-}
-
-/**
- * Helper function to merge a given new state with the existing state and to set the given state
- * container
- */
-export function setState(
-  stateContainer: BaseStateContainer<DiscoverAppState>,
-  newState: DiscoverAppState
-) {
-  addLog('[appstate] setState', { newState });
-  const oldState = stateContainer.get();
-  const mergedState = { ...oldState, ...newState };
-  if (!isEqualState(oldState, mergedState)) {
-    stateContainer.set(mergedState);
-  }
 }
 
 /**
