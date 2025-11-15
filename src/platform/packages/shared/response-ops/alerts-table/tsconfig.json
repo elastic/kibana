@@ -48,5 +48,6 @@
     "@kbn/zod",
     "@kbn/field-types",
     "@kbn/react-query",
+    "@kbn/unified-search-plugin",
   ]
 }

@@ -34,9 +34,14 @@ export class EmbeddableAlertsTablePlugin
 
   public start(
     coreServices: CoreStart,
-    { uiActions }: EmbeddableAlertsTablePublicStartDependencies
+    { uiActions, unifiedSearch, data }: EmbeddableAlertsTablePublicStartDependencies
   ) {
-    registerAddAlertsTableAction({ coreServices, uiActions });
+    registerAddAlertsTableAction({
+      coreServices,
+      uiActions,
+      data,
+      unifiedSearch,
+    });
     return {};
   }
 

@@ -33,8 +33,17 @@ export const CaseViewAlerts = ({
   onAlertsTableLoaded,
 }: CaseViewAlertsProps) => {
   const { services } = useKibana();
-  const { data, http, notifications, fieldFormats, application, licensing, settings } =
-    services as SetRequired<typeof services, 'licensing'>;
+  const {
+    data,
+    http,
+    notifications,
+    fieldFormats,
+    application,
+    licensing,
+    settings,
+    unifiedSearch,
+  } = services as SetRequired<typeof services, 'licensing'>;
+
   const alertIds = getManualAlertIds(caseData.comments);
   const alertIdsQuery = useMemo(
     () => ({
@@ -106,6 +115,7 @@ export const CaseViewAlerts = ({
                 // In the Cases UI the licensing service is defined
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                 licensing: licensing!,
+                unifiedSearch,
               },
             })}
       />

@@ -186,6 +186,7 @@ const TriggersActionsUiExampleApp = ({
                     application,
                     licensing,
                     settings,
+                    unifiedSearch,
                   }}
                 />
               </Page>

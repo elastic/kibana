@@ -22,7 +22,8 @@
       "data",
       "fieldFormats",
       "licensing",
-      "security"
+      "security",
+      "unifiedSearch"
     ],
     "requiredBundles": [
       "kibanaReact"

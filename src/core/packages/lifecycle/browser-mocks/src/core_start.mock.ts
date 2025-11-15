@@ -28,6 +28,8 @@ import { renderingServiceMock } from '@kbn/core-rendering-browser-mocks';
 import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-browser-mocks';
 import { pricingServiceMock } from '@kbn/core-pricing-browser-mocks';
 import { lazyObject } from '@kbn/lazy-object';
+// import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+// import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
 export function createCoreStartMock({ basePath = '' } = {}) {
   const mock = lazyObject({
@@ -55,6 +57,8 @@ export function createCoreStartMock({ basePath = '' } = {}) {
     plugins: lazyObject({
       onStart: jest.fn(),
     }),
+    unifiedSearch: jest.fn(),
+    data: jest.fn(),
   });
 
   return mock;
