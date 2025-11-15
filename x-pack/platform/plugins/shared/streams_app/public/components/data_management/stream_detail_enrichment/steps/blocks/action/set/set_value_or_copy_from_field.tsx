@@ -49,7 +49,7 @@ export const ValueField = ({ toggleCustom }: { toggleCustom: () => void }) => {
       }
       fullWidth
     >
-      <EuiFieldText {...inputProps} inputRef={ref} />
+      <EuiFieldText {...inputProps} inputRef={ref} compressed={true} />
     </EuiFormRow>
   );
 };
