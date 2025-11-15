@@ -50,6 +50,72 @@ export const useFetchGraphData = (params: UseFetchGraphDataParams) => {
             ],
           },
           {
+            id: 'grouped-entity-uuid-123',
+            color: 'primary',
+            shape: 'ellipse',
+            icon: 'user',
+            label: 'AWS IAM',
+            tag: 'Identity',
+            count: 3,
+            documentsData: [
+              {
+                id: 'entity-1',
+                type: DOCUMENT_TYPE_ENTITY,
+                entity: {
+                  name: 'user-1@example.com',
+                  type: 'Identity',
+                  sub_type: 'AWS IAM',
+                },
+              },
+              {
+                id: 'entity-2',
+                type: DOCUMENT_TYPE_ENTITY,
+                entity: {
+                  name: 'user-2@example.com',
+                  type: 'Identity',
+                  sub_type: 'AWS IAM',
+                },
+              },
+              {
+                id: 'entity-3',
+                type: DOCUMENT_TYPE_ENTITY,
+                entity: {
+                  name: 'user-3@example.com',
+                  type: 'Identity',
+                  sub_type: 'AWS IAM',
+                },
+              },
+            ],
+          },
+          {
+            id: 'grp(a(grouped-entity-uuid-123)-b(projects/your-project-id/roles/customRole))',
+            shape: 'group',
+          },
+          {
+            id: 'a(grouped-entity-uuid-123)-b(projects/your-project-id/roles/customRole)label(grouped-events)',
+            label: 'grouped-events',
+            color: 'primary',
+            shape: 'label',
+            parentId:
+              'grp(a(grouped-entity-uuid-123)-b(projects/your-project-id/roles/customRole))',
+            uniqueEventsCount: 2,
+            uniqueAlertsCount: 1,
+            documentsData: [
+              {
+                id: 'grouped-event-1',
+                type: DOCUMENT_TYPE_EVENT,
+              },
+              {
+                id: 'grouped-event-2',
+                type: DOCUMENT_TYPE_EVENT,
+              },
+              {
+                id: 'grouped-alert-1',
+                type: DOCUMENT_TYPE_ALERT,
+              },
+            ],
+          },
+          {
             id: 'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)',
             label: 'google.iam.admin.v1.CreateRole',
             color: 'danger',
@@ -143,6 +209,36 @@ export const useFetchGraphData = (params: UseFetchGraphDataParams) => {
             source:
               'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.DeleteRole)',
             target: 'grp(a(admin@example.com)-b(projects/your-project-id/roles/customRole))',
+            color: 'subdued',
+            type: 'solid',
+          },
+          {
+            id: 'a(grouped-entity-uuid-123)-b(grp(a(grouped-entity-uuid-123)-b(projects/your-project-id/roles/customRole)))',
+            source: 'grouped-entity-uuid-123',
+            target: 'grp(a(grouped-entity-uuid-123)-b(projects/your-project-id/roles/customRole))',
+            color: 'subdued',
+            type: 'solid',
+          },
+          {
+            id: 'a(grp(a(grouped-entity-uuid-123)-b(projects/your-project-id/roles/customRole)))-b(projects/your-project-id/roles/customRole)',
+            source: 'grp(a(grouped-entity-uuid-123)-b(projects/your-project-id/roles/customRole))',
+            target: 'projects/your-project-id/roles/customRole',
+            color: 'subdued',
+            type: 'solid',
+          },
+          {
+            id: 'a(grp(a(grouped-entity-uuid-123)-b(projects/your-project-id/roles/customRole)))-b(a(grouped-entity-uuid-123)-b(projects/your-project-id/roles/customRole)label(grouped-events))',
+            source: 'grp(a(grouped-entity-uuid-123)-b(projects/your-project-id/roles/customRole))',
+            target:
+              'a(grouped-entity-uuid-123)-b(projects/your-project-id/roles/customRole)label(grouped-events)',
+            color: 'subdued',
+            type: 'solid',
+          },
+          {
+            id: 'a(a(grouped-entity-uuid-123)-b(projects/your-project-id/roles/customRole)label(grouped-events))-b(grp(a(grouped-entity-uuid-123)-b(projects/your-project-id/roles/customRole)))',
+            source:
+              'a(grouped-entity-uuid-123)-b(projects/your-project-id/roles/customRole)label(grouped-events)',
+            target: 'grp(a(grouped-entity-uuid-123)-b(projects/your-project-id/roles/customRole))',
             color: 'subdued',
             type: 'solid',
           },

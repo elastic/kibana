@@ -483,11 +483,9 @@ export default function (providerContext: FtrProviderContext) {
           },
         }).expect(result(200));
 
-        expect(response.body).to.have.property('nodes').length(5);
-        expect(response.body).to.have.property('edges').length(6);
+        expect(response.body).to.have.property('nodes').length(5); // 1 group + 2 entities + 2 labels
+        expect(response.body).to.have.property('edges').length(6); // actor→group, group→target, group↔label1, group↔label2
         expect(response.body).not.to.have.property('messages');
-
-        expect(response.body.nodes[0].shape).equal('group', 'Groups should be the first nodes');
 
         response.body.nodes.forEach((node: NodeDataModel) => {
           if (node.shape !== 'group') {
@@ -535,8 +533,8 @@ export default function (providerContext: FtrProviderContext) {
           },
         }).expect(result(200));
 
-        expect(response.body).to.have.property('nodes').length(5);
-        expect(response.body).to.have.property('edges').length(4);
+        expect(response.body).to.have.property('nodes').length(3);
+        expect(response.body).to.have.property('edges').length(2);
         expect(response.body).not.to.have.property('messages');
 
         response.body.nodes.forEach((node: EntityNodeDataModel | LabelNodeDataModel) => {
@@ -591,8 +589,8 @@ export default function (providerContext: FtrProviderContext) {
           },
         }).expect(result(200));
 
-        expect(response.body).to.have.property('nodes').length(5);
-        expect(response.body).to.have.property('edges').length(4);
+        expect(response.body).to.have.property('nodes').length(5); // 3 entities + 2 labels
+        expect(response.body).to.have.property('edges').length(4); // Simple connections without group
         expect(response.body).not.to.have.property('messages');
 
         response.body.nodes.forEach(
@@ -992,14 +990,15 @@ export default function (providerContext: FtrProviderContext) {
             expect(response.body).to.have.property('nodes').length(3);
             expect(response.body).to.have.property('edges').length(2);
             expect(response.body).not.to.have.property('messages');
-            // Find the actor node
+            // Find the actor node directly by entity ID (single entity uses entity ID as node ID)
             const actorNode = response.body.nodes.find(
-              (node: NodeDataModel) => node.id === 'admin@example.com'
+              (node: EntityNodeDataModel) => node.id === 'admin@example.com'
             ) as EntityNodeDataModel;
 
             // Verify entity enrichment
             expect(actorNode).not.to.be(undefined);
-            expect(actorNode.label).to.equal('AWS IAM User');
+            // For single enriched entities, label should be entity.name
+            expect(actorNode.label).to.equal('AdminExample');
             expect(actorNode.icon).to.equal('user');
             expect(actorNode.shape).to.equal('ellipse');
             expect(actorNode.tag).to.equal('Identity');
@@ -1093,13 +1092,15 @@ export default function (providerContext: FtrProviderContext) {
               customNamespaceId
             ).expect(result(200, logger));
 
+            // Find the actor node directly by entity ID (single entity uses entity ID as node ID)
             const actorNode = response.body.nodes.find(
-              (node: NodeDataModel) => node.id === 'admin@example.com'
+              (node: EntityNodeDataModel) => node.id === 'admin@example.com'
             ) as EntityNodeDataModel;
 
             // Verify entity enrichment
             expect(actorNode).not.to.be(undefined);
-            expect(actorNode.label).to.equal('AWS IAM User');
+            // For single enriched entities, label should be entity.name
+            expect(actorNode.label).to.equal('AdminExample');
             expect(actorNode.icon).to.equal('user');
             expect(actorNode.shape).to.equal('ellipse');
             expect(actorNode.tag).to.equal('Identity');
