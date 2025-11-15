@@ -21,7 +21,7 @@
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/group/endpoint-graph",
     "availability": {
       "stack": true,
-      "serverless": true
+      "serverless": false
     }
   }
 }

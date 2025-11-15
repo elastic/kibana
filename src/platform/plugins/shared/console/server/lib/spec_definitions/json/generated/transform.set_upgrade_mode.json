@@ -1,26 +1,27 @@
 {
-  "get_script": {
+  "transform.set_upgrade_mode": {
     "url_params": {
       "error_trace": "__flag__",
       "filter_path": [],
       "human": "__flag__",
       "pretty": "__flag__",
-      "master_timeout": [
+      "enabled": "__flag__",
+      "timeout": [
         "30s",
         "-1",
         "0"
       ]
     },
     "methods": [
-      "GET"
+      "POST"
     ],
     "patterns": [
-      "_scripts/{id}"
+      "_transform/set_upgrade_mode"
     ],
-    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-get-script",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-transform-set-upgrade-mode",
     "availability": {
       "stack": true,
-      "serverless": true
+      "serverless": false
     }
   }
 }
