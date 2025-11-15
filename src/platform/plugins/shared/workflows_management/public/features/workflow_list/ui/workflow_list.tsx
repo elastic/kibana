@@ -468,6 +468,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
       />
       {executeWorkflow?.definition && (
         <WorkflowExecuteModal
+          isTestRun={false}
           definition={executeWorkflow.definition}
           workflowId={executeWorkflow.id}
           onClose={() => setExecuteWorkflow(null)}

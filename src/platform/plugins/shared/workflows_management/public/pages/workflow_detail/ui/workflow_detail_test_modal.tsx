@@ -77,6 +77,7 @@ export const WorkflowDetailTestModal = () => {
 
   return (
     <WorkflowExecuteModal
+      isTestRun={true}
       definition={definition}
       workflowId={workflowId}
       onClose={closeModal}

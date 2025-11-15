@@ -9,7 +9,7 @@
 
 import type { IRouter, Logger } from '@kbn/core/server';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
-import type { ExecutionStatus } from '@kbn/workflows';
+import type { ExecutionStatus, ExecutionType } from '@kbn/workflows';
 import type { WorkflowsManagementApi } from '../workflows_management_api';
 
 // Pagination constants
@@ -24,6 +24,19 @@ export function parseExecutionStatuses(
 ): ExecutionStatus[] | undefined {
   if (!statuses) return undefined;
   return typeof statuses === 'string' ? ([statuses] as ExecutionStatus[]) : statuses;
+}
+
+/**
+ * Helper function to parse execution types from query parameters
+ * Handles both single string and array of strings
+ */
+export function parseExecutionTypes(
+  executionTypes?: ExecutionType | ExecutionType[] | undefined
+): ExecutionType[] | undefined {
+  if (!executionTypes) return undefined;
+  return typeof executionTypes === 'string'
+    ? ([executionTypes] as ExecutionType[])
+    : executionTypes;
 }
 
 export interface RouteDependencies {
