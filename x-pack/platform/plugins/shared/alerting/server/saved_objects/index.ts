@@ -111,6 +111,8 @@ export function setupSavedObjects(
   savedObjects.registerType({
     name: RULE_SAVED_OBJECT_TYPE,
     indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
+    // Create the snapshot index for this type.
+    snapshots: true,
     hidden: true,
     namespaceType: 'multiple-isolated',
     convertToMultiNamespaceTypeVersion: '8.0.0',

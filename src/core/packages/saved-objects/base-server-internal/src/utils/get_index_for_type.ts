@@ -14,6 +14,7 @@ interface GetIndexForTypeOptions {
   typeRegistry: ISavedObjectTypeRegistry;
   kibanaVersion: string;
   defaultIndex: string;
+  snapshot?: boolean;
 }
 
 export const getIndexForType = ({
@@ -21,6 +22,7 @@ export const getIndexForType = ({
   typeRegistry,
   defaultIndex,
   kibanaVersion,
+  snapshot = false,
 }: GetIndexForTypeOptions): string => {
-  return `${typeRegistry.getIndex(type) || defaultIndex}_${kibanaVersion}`;
+  return `${typeRegistry.getIndex(type) || defaultIndex}${snapshot ? '_snapshot' : kibanaVersion}`;
 };

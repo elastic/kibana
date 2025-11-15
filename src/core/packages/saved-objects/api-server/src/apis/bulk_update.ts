@@ -49,6 +49,10 @@ export interface SavedObjectsBulkUpdateOptions extends SavedObjectsBaseOptions {
   refresh?: MutatingOperationRefreshSetting;
   /** {@link SavedObjectsRawDocParseOptions.migrationVersionCompatibility} */
   migrationVersionCompatibility?: 'compatible' | 'raw';
+  /** Snapshot the object after bulk update */
+  snapshot?: boolean;
+  /** Why change was made */
+  reason: string;
 }
 
 /**
