@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { memo, useCallback, useMemo } from 'react';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -15,20 +16,19 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useMemo, type FC } from 'react';
-import { useIndicatorsFlyoutContext } from '../../hooks/use_flyout_context';
-import { EMPTY_VALUE } from '../../../../constants/common';
-import type { Indicator } from '../../../../../../common/threat_intelligence/types/indicator';
-import { RawIndicatorFieldId } from '../../../../../../common/threat_intelligence/types/indicator';
-import { unwrapValue } from '../../utils/unwrap_value';
-import { IndicatorEmptyPrompt } from './empty_prompt';
-import { IndicatorBlock } from './block';
-import { HighlightedValuesTable } from './highlighted_values_table';
-import {
-  INDICATORS_FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCKS,
-  INDICATORS_FLYOUT_OVERVIEW_TABLE,
-  INDICATORS_FLYOUT_OVERVIEW_TITLE,
-} from './test_ids';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { IOCRightPanelKey } from '../constants/panel_keys';
+import { getIndicatorFieldAndValue } from '../../../threat_intelligence/modules/indicators/utils/field_value';
+import { IndicatorEmptyPrompt } from '../components/empty_prompt';
+import { unwrapValue } from '../../../threat_intelligence/modules/indicators/utils/unwrap_value';
+import { RawIndicatorFieldId } from '../../../../common/threat_intelligence/types/indicator';
+import { IndicatorBlock } from '../components/block';
+import { HighlightedValuesTable } from '../components/highlighted_values_table';
+import { useIOCDetailsContext } from '../context';
+
+export const INDICATORS_FLYOUT_OVERVIEW_TITLE = 'tiFlyoutOverviewTitle';
+export const INDICATORS_FLYOUT_OVERVIEW_TABLE = 'tiFlyoutOverviewTableRow';
+export const INDICATORS_FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCKS = 'tiFlyoutOverviewHighLevelBlocks';
 
 const highLevelFields = [
   RawIndicatorFieldId.Feed,
@@ -37,16 +37,12 @@ const highLevelFields = [
   RawIndicatorFieldId.Confidence,
 ];
 
-export interface IndicatorsFlyoutOverviewProps {
-  indicator: Indicator;
-  onViewAllFieldsInTable: VoidFunction;
-}
-
-export const IndicatorsFlyoutOverview: FC<IndicatorsFlyoutOverviewProps> = ({
-  indicator,
-  onViewAllFieldsInTable,
-}) => {
-  const { indicatorName } = useIndicatorsFlyoutContext();
+/**
+ * Overview view displayed in the document details expandable flyout right section
+ */
+export const OverviewTab = memo(() => {
+  const { indicator } = useIOCDetailsContext();
+  const { openRightPanel } = useExpandableFlyoutApi();
 
   const indicatorType = unwrapValue(indicator, RawIndicatorFieldId.Type);
 
@@ -73,10 +69,19 @@ export const IndicatorsFlyoutOverview: FC<IndicatorsFlyoutOverviewProps> = ({
     return unwrappedDescription ? <EuiText>{unwrappedDescription}</EuiText> : null;
   }, [indicator]);
 
-  const title =
-    indicatorName != null
-      ? indicatorName
-      : unwrapValue(indicator, RawIndicatorFieldId.Name) || EMPTY_VALUE;
+  const title: string | null = getIndicatorFieldAndValue(indicator, RawIndicatorFieldId.Name).value;
+
+  const onViewAllFieldsInTable = useCallback(
+    () =>
+      openRightPanel({
+        id: IOCRightPanelKey,
+        path: { tab: 'table' },
+        params: {
+          id: indicator._id,
+        },
+      }),
+    [indicator._id, openRightPanel]
+  );
 
   if (!indicatorType) {
     return <IndicatorEmptyPrompt />;
@@ -123,4 +128,6 @@ export const IndicatorsFlyoutOverview: FC<IndicatorsFlyoutOverviewProps> = ({
       />
     </>
   );
-};
+});
+
+OverviewTab.displayName = 'OverviewTab';
