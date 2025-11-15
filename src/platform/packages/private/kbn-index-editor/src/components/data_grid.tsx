@@ -31,7 +31,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { memoize } from 'lodash';
 import { RowColumnCreator } from './row_column_creator';
-import { getColumnInputRenderer } from './grid_custom_renderers/column_input_renderer';
+import { getColumnHeaderRenderer } from './grid_custom_renderers/column_header_renderer';
 import { type KibanaContextExtra } from '../types';
 import { getCellValueRenderer } from './grid_custom_renderers/cell_value_renderer';
 import { getValueInputPopover } from './grid_custom_renderers/value_input_popover';
@@ -171,9 +171,11 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       (acc, columnName, columnIndex) => {
         if (!props.dataView.fields.getByName(columnName)) {
           const editMode = editingColumnIndex === columnIndex;
+          const columnType = columnsMeta[columnName]?.type;
           acc[columnName] = memoize(
-            getColumnInputRenderer(
+            getColumnHeaderRenderer(
               columnName,
+              columnType,
               columnIndex,
               editMode,
               setEditingColumnIndex,
@@ -195,6 +197,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     renderedColumns,
     props.dataView.fields,
     editingColumnIndex,
+    columnsMeta,
     indexUpdateService,
     indexEditorTelemetryService,
   ]);
