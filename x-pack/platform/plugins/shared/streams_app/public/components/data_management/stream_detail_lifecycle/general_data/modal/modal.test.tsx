@@ -38,6 +38,7 @@ describe('EditLifecycleModal', () => {
           processing: { steps: [] },
           settings: {},
           wired: { fields: {}, routing: [] },
+          failure_store: { inherit: {} },
         },
       },
       effective_lifecycle: effectiveLifecycle,

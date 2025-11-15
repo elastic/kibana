@@ -57,6 +57,7 @@ And it can render !{tooltip[tooltips like this](Look! I'm a very helpful tooltip
           lifecycle: { inherit: {} },
           processing: { steps: [] },
           classic: {},
+          failure_store: { inherit: {} },
         },
       }}
     />

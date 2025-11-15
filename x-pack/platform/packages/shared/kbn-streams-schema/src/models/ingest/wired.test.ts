@@ -22,6 +22,7 @@ describe('WiredStream', () => {
             fields: {},
             routing: [],
           },
+          failure_store: { inherit: {} },
         },
       },
     ] satisfies WiredStream.Definition[])('is valid %s', (val) => {
@@ -87,6 +88,7 @@ describe('WiredStream', () => {
               fields: {},
               routing: [],
             },
+            failure_store: { inherit: {} },
           },
         },
         privileges: {
@@ -162,6 +164,7 @@ describe('WiredStream', () => {
               fields: {},
               routing: [],
             },
+            failure_store: { inherit: {} },
           },
         },
         ...emptyAssets,

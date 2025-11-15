@@ -13,11 +13,13 @@ import {
 } from '@kbn/streams-schema';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
+import { findInheritedFailureStore } from '@kbn/streams-schema/src/helpers/lifecycle';
 import type { AttachmentClient } from '../../../lib/streams/attachments/attachment_client';
 import type { AssetClient } from '../../../lib/streams/assets/asset_client';
 import type { StreamsClient } from '../../../lib/streams/client';
 import {
   getDataStreamLifecycle,
+  getFailureStore,
   getDataStreamSettings,
   getUnmanagedElasticsearchAssets,
 } from '../../../lib/streams/stream_crud';
@@ -31,12 +33,14 @@ export async function readStream({
   attachmentClient,
   streamsClient,
   scopedClusterClient,
+  isServerless,
 }: {
   name: string;
   assetClient: AssetClient;
   attachmentClient: AttachmentClient;
   streamsClient: StreamsClient;
   scopedClusterClient: IScopedClusterClient;
+  isServerless: boolean;
 }): Promise<Streams.all.GetResponse> {
   const [streamDefinition, { [name]: assets }, attachments] = await Promise.all([
     streamsClient.getStream(name),
@@ -105,6 +109,10 @@ export async function readStream({
       : Promise.resolve(null),
   ]);
 
+  const failureStore = dataStream
+    ? await getFailureStore({ name, scopedClusterClient, isServerless })
+    : undefined;
+
   if (Streams.ClassicStream.Definition.is(streamDefinition)) {
     return {
       stream: streamDefinition,
@@ -122,6 +130,7 @@ export async function readStream({
       dashboards,
       rules,
       queries,
+      effective_failure_store: failureStore,
     } satisfies Streams.ClassicStream.GetResponse;
   }
 
@@ -129,6 +138,8 @@ export async function readStream({
     streamDefinition,
     getInheritedFieldsFromAncestors(ancestors)
   );
+
+  const inheritedFailureStore = findInheritedFailureStore(streamDefinition, ancestors);
 
   const body: Streams.WiredStream.GetResponse = {
     stream: streamDefinition,
@@ -139,7 +150,12 @@ export async function readStream({
     effective_lifecycle: findInheritedLifecycle(streamDefinition, ancestors),
     effective_settings: getInheritedSettings([...ancestors, streamDefinition]),
     inherited_fields: inheritedFields,
+    effective_failure_store: failureStore
+      ? {
+          ...failureStore,
+          from: inheritedFailureStore.from,
+        }
+      : undefined,
   };
-
   return body;
 }

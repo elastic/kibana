@@ -80,6 +80,7 @@ describe('RetentionCard', () => {
             processing: { steps: [] },
             settings: {},
             wired: { fields: {}, routing: [] },
+            failure_store: { inherit: {} },
           },
         },
         // Effective lifecycle for wired streams must include a `from` field
@@ -118,6 +119,7 @@ describe('RetentionCard', () => {
             processing: { steps: [] },
             settings: {},
             wired: { fields: {}, routing: [] },
+            failure_store: { inherit: {} },
           },
         },
         effective_lifecycle: { ilm: { policy: 'test-policy' }, from: 'logs-test' },

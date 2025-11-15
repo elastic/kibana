@@ -5,10 +5,11 @@
  * 2.0.
  */
 import React, { useState } from 'react';
-import type { Streams } from '@kbn/streams-schema';
+import { Streams, isRoot } from '@kbn/streams-schema';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { withSuspense } from '@kbn/shared-ux-utility';
+import { isInheritFailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
 import { NoFailureStorePanel } from './no_failure_store_panel';
 import { FailureStoreInfo } from './failure_store_info';
 import { useUpdateFailureStore } from '../../../../hooks/use_update_failure_store';
@@ -16,6 +17,7 @@ import { useKibana } from '../../../../hooks/use_kibana';
 import { NoPermissionBanner } from './no_permission_banner';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
 import type { useDataStreamStats } from '../hooks/use_data_stream_stats';
+import { getFormattedError } from '../../../../util/errors';
 
 // Lazy load the FailureStoreModal to reduce bundle size
 const LazyFailureStoreModal = React.lazy(async () => ({
@@ -27,17 +29,20 @@ const FailureStoreModal = withSuspense(LazyFailureStoreModal);
 export const StreamDetailFailureStore = ({
   definition,
   data,
+  refreshDefinition,
 }: {
   definition: Streams.ingest.all.GetResponse;
   data: ReturnType<typeof useDataStreamStats>;
+  refreshDefinition: () => void;
 }) => {
   const [isFailureStoreModalOpen, setIsFailureStoreModalOpen] = useState(false);
-  const { updateFailureStore } = useUpdateFailureStore();
+  const { updateFailureStore } = useUpdateFailureStore(definition.stream);
   const {
     core: { notifications },
   } = useKibana();
 
   const { timeState } = useTimefilter();
+  const { isServerless } = useKibana();
 
   const {
     privileges: {
@@ -51,14 +56,31 @@ export const StreamDetailFailureStore = ({
   };
 
   const handleSaveModal = async (update: {
-    failureStoreEnabled: boolean;
+    failureStoreEnabled?: boolean;
     customRetentionPeriod?: string;
+    inherit?: boolean;
   }) => {
     try {
-      await updateFailureStore(definition.stream.name, {
-        failureStoreEnabled: update.failureStoreEnabled,
-        customRetentionPeriod: update.customRetentionPeriod,
-      });
+      if (update.inherit) {
+        await updateFailureStore(definition.stream.name, {
+          inherit: {},
+        });
+      } else {
+        const failureStoreEnabled = update.failureStoreEnabled ?? false;
+        await updateFailureStore(definition.stream.name, {
+          enabled: failureStoreEnabled,
+          ...(failureStoreEnabled && update.customRetentionPeriod
+            ? {
+                lifecycle: {
+                  enabled: true,
+                  data_retention: update.customRetentionPeriod,
+                },
+              }
+            : {}),
+        });
+      }
+
+      refreshDefinition();
 
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.streams.streamDetailFailureStore.updateFailureStoreSuccess', {
@@ -66,15 +88,32 @@ export const StreamDetailFailureStore = ({
         }),
       });
     } catch (error) {
-      notifications.toasts.addDanger({
+      notifications.toasts.addError(error, {
         title: i18n.translate('xpack.streams.streamDetailFailureStore.updateFailureStoreFailed', {
           defaultMessage: "We couldn't update the failure store settings.",
         }),
-        text: error.message,
+        toastMessage: getFormattedError(error).message,
       });
+    } finally {
+      closeModal();
+      data.refresh();
     }
-    closeModal();
-    data.refresh();
+  };
+
+  // Determine stream type and inheritance options
+  const isWired = Streams.WiredStream.GetResponse.is(definition);
+  const isClassicStream = Streams.ClassicStream.GetResponse.is(definition);
+  const isRootStream = isRoot(definition.stream.name);
+
+  // Check if current failure store is inherited
+  const isCurrentlyInherited = isInheritFailureStore(definition.stream.ingest.failure_store);
+
+  const canShowInherit = (isWired && !isRootStream) || isClassicStream;
+
+  const inheritOptions = {
+    canShowInherit,
+    isWired,
+    isCurrentlyInherited,
   };
 
   return (
@@ -91,9 +130,11 @@ export const StreamDetailFailureStore = ({
                   defaultRetentionPeriod: data?.stats?.fs.config.retentionPeriod.default,
                   customRetentionPeriod: data?.stats?.fs.config.retentionPeriod.custom,
                 }}
+                inheritOptions={inheritOptions}
+                showIlmDescription={isServerless}
               />
             )}
-            {data.isLoading || data?.stats?.fs.config.enabled ? (
+            {data.isLoading || data?.stats?.fs.config?.enabled ? (
               <FailureStoreInfo
                 openModal={setIsFailureStoreModalOpen}
                 definition={definition}

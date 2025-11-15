@@ -27,6 +27,7 @@ describe('generateLayer', () => {
         dsl: { data_retention: '30d' },
       },
       settings: {},
+      failure_store: { inherit: {} },
     },
   };
 

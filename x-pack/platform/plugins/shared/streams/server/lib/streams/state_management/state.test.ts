@@ -48,6 +48,7 @@ describe('State', () => {
           fields: {},
           routing: [],
         },
+        failure_store: { inherit: {} },
       },
     };
     const classicStream: Streams.ClassicStream.Definition = {
@@ -58,6 +59,7 @@ describe('State', () => {
         processing: { steps: [] },
         settings: {},
         classic: {},
+        failure_store: { inherit: {} },
       },
     };
     const groupStream: Streams.GroupStream.Definition = {

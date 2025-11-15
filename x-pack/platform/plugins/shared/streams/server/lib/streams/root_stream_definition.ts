@@ -16,6 +16,10 @@ export const rootStreamDefinition: Streams.WiredStream.Definition = {
   description: 'Root stream',
   ingest: {
     lifecycle: { dsl: {} },
+    failure_store: {
+      enabled: true,
+      lifecycle: { enabled: true, data_retention: '30d' }, // default 30d retention for failure store
+    },
     settings: {},
     processing: { steps: [] },
     wired: {
