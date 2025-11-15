@@ -18,6 +18,9 @@ import {
 import { ControlYamlView } from '.';
 import * as i18n from './translations';
 import { MAX_SELECTORS_AND_RESPONSES_PER_TYPE } from '../../common/constants';
+import { useConfigModel } from './hooks/use_config_model';
+
+jest.mock('./hooks/use_config_model');
 
 describe('<ControlYamlView />', () => {
   const onChange = jest.fn();
@@ -32,6 +35,8 @@ describe('<ControlYamlView />', () => {
 
   beforeEach(() => {
     onChange.mockClear();
+    // Set default mock for useConfigModel to return non null value
+    (useConfigModel as jest.Mock).mockReturnValue({});
   });
 
   it('handles invalid yaml', async () => {
@@ -73,5 +78,16 @@ describe('<ControlYamlView />', () => {
 
     expect(getByTestId('cloudDefendAdditionalErrors')).toBeTruthy();
     expect(getByText('"targetFilePath" values cannot exceed 255 bytes')).toBeTruthy();
+  });
+
+  it('handles loading state', async () => {
+    // Force the hook to return null
+    (useConfigModel as jest.Mock).mockReturnValue(null);
+
+    const { getByText, queryByText } = render(<WrappedComponent />);
+
+    expect(getByText(i18n.controlYamlLoading)).toBeInTheDocument();
+
+    expect(queryByText(i18n.controlYamlHelp)).not.toBeInTheDocument();
   });
 });

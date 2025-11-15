@@ -142,6 +142,19 @@ export const ControlYamlView = ({ policy, onChange, show }: ViewDeps) => {
     [editorErrors.length, input?.vars, onChange, policy, show, validateAdditional]
   );
 
+  // render loading state if currentModel is not ready, to prevent monaco from calling setLanguage on null object
+  if (!currentModel) {
+    return (
+      <EuiFlexGroup direction="column" css={!show && styles.hide}>
+        <EuiFlexItem>
+          <EuiText color="subdued" size="s">
+            {i18n.controlYamlLoading}
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
   return (
     <EuiFlexGroup direction="column" css={!show && styles.hide}>
       <EuiFlexItem>
