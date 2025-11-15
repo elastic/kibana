@@ -57,12 +57,6 @@ export interface DiscoverAppStateContainer extends BaseStateContainer<DiscoverAp
    */
   updateUrlWithCurrentState: () => Promise<void>;
   /**
-   * Replaces the current state in URL with the given state
-   * @param newState
-   * @param merge if true, the given state is merged with the current state
-   */
-  replaceUrlState: (newPartial: DiscoverAppState) => Promise<void>;
-  /**
    * Updates the state, if replace is true, a history.replace is performed instead of history.push
    * @param newPartial
    * @param replace
@@ -205,14 +199,6 @@ export const getDiscoverAppStateContainer = ({
     });
   };
 
-  const replaceUrlState = (newPartial: DiscoverAppState = {}) => {
-    return internalState.dispatch(
-      injectCurrentTab(internalStateActions.replaceAppState)({
-        appState: newPartial,
-      })
-    );
-  };
-
   const getGlobalState = (state: DiscoverInternalState): GlobalQueryStateFromUrl => {
     const tabState = selectTab(state, tabId);
     const { timeRange: time, refreshInterval, filters } = tabState.globalState;
@@ -245,7 +231,9 @@ export const getDiscoverAppStateContainer = ({
   const updateUrlWithCurrentState = async () => {
     await Promise.all([
       stateStorage.set(GLOBAL_STATE_URL_KEY, globalStateContainer.get(), { replace: true }),
-      replaceUrlState({}),
+      internalState.dispatch(
+        injectCurrentTab(internalStateActions.replaceAppState)({ appState: {} })
+      ),
     ]);
   };
 
@@ -343,7 +331,11 @@ export const getDiscoverAppStateContainer = ({
   const update = (newPartial: DiscoverAppState, replace = false) => {
     addLog('[appState] update', { newPartial, replace });
     if (replace) {
-      return replaceUrlState(newPartial);
+      return internalState.dispatch(
+        injectCurrentTab(internalStateActions.replaceAppState)({
+          appState: newPartial,
+        })
+      );
     } else {
       internalState.dispatch(
         injectCurrentTab(internalStateActions.updateAppState)({
@@ -357,7 +349,6 @@ export const getDiscoverAppStateContainer = ({
     ...appStateContainer,
     initAndSync,
     updateUrlWithCurrentState,
-    replaceUrlState,
     update,
     getAppStateFromSavedSearch,
   };

@@ -124,8 +124,12 @@ export const useDiscoverInTimelineActions = (
           savedSearch = await savedSearchService.get(newSavedSearchId);
           const savedSearchState = savedSearch ? getAppStateFromSavedSearch(savedSearch) : null;
           discoverStateContainer.current?.appState.initAndSync();
-          await discoverStateContainer.current?.appState.replaceUrlState(
-            savedSearchState?.appState ?? {}
+          await discoverStateContainer.current?.internalState.dispatch(
+            discoverStateContainer.current?.injectCurrentTab(
+              discoverStateContainer.current?.internalStateActions.replaceAppState
+            )({
+              appState: savedSearchState?.appState ?? {},
+            })
           );
           setDiscoverAppState(savedSearchState?.appState ?? defaultDiscoverAppState());
           const discoverState = discoverStateContainer.current;
@@ -149,7 +153,13 @@ export const useDiscoverInTimelineActions = (
             appState: defaultState,
           })
         );
-        await discoverStateContainer.current?.appState.replaceUrlState({});
+        await discoverStateContainer.current?.internalState.dispatch(
+          discoverStateContainer.current?.injectCurrentTab(
+            discoverStateContainer.current?.internalStateActions.replaceAppState
+          )({
+            appState: {},
+          })
+        );
         setDiscoverAppState(defaultState);
         const discoverState = discoverStateContainer.current;
         discoverState?.internalState.dispatch(
