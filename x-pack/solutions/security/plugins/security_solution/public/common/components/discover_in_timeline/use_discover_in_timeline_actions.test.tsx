@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
-import { discoverPluginMock } from '@kbn/discover-plugin/public/mocks';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import { waitFor, act, renderHook } from '@testing-library/react';
@@ -20,9 +19,17 @@ import * as timelineActions from '../../../timelines/store/actions';
 import type { ComponentType, FC, PropsWithChildren } from 'react';
 import React from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { createDiscoverServicesMock } from '@kbn/discover-plugin/public/__mocks__/services';
+import { getExtendedDiscoverStateContainer } from '@kbn/discover-plugin/public/customizations';
+import { getDiscoverStateMock } from '@kbn/discover-plugin/public/__mocks__/discover_state.mock';
+
+const discoverServices = createDiscoverServicesMock();
 
 let mockDiscoverStateContainerRef = {
-  current: discoverPluginMock.getDiscoverStateMock({}),
+  current: getExtendedDiscoverStateContainer(
+    getDiscoverStateMock({ services: discoverServices }),
+    discoverServices
+  ),
 };
 
 jest.mock('../../lib/kibana');
@@ -69,7 +76,10 @@ const getTestProviderWithCustomState = (state: State = mockState) => {
 
 const renderTestHook = (customWrapper: ComponentType = getTestProviderWithCustomState()) => {
   mockDiscoverStateContainerRef = {
-    current: discoverPluginMock.getDiscoverStateMock({}),
+    current: getExtendedDiscoverStateContainer(
+      getDiscoverStateMock({ services: discoverServices }),
+      discoverServices
+    ),
   };
   return renderHook(() => useDiscoverInTimelineActions(mockDiscoverStateContainerRef), {
     wrapper: customWrapper,

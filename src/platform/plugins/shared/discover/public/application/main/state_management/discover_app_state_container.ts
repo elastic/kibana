@@ -62,10 +62,6 @@ export interface DiscoverAppStateContainer extends BaseStateContainer<DiscoverAp
    * @param replace
    */
   update: (newPartial: DiscoverAppState, replace?: boolean) => void;
-  /*
-   * Get updated AppState when given a saved search
-   */
-  getAppStateFromSavedSearch: (newSavedSearch: SavedSearch) => DiscoverAppState;
 }
 
 export interface DiscoverAppState {
@@ -189,14 +185,6 @@ export const getDiscoverAppStateContainer = ({
       internalState.dispatch(injectCurrentTab(internalStateActions.setAppState)({ appState }));
     },
     state$: from(internalState).pipe(map(getAppState), distinctUntilChanged(isEqual)),
-  };
-
-  const getAppStateFromSavedSearch = (newSavedSearch: SavedSearch) => {
-    return getInitialState({
-      initialUrlState: undefined,
-      savedSearch: newSavedSearch,
-      services,
-    });
   };
 
   const getGlobalState = (state: DiscoverInternalState): GlobalQueryStateFromUrl => {
@@ -350,7 +338,6 @@ export const getDiscoverAppStateContainer = ({
     initAndSync,
     updateUrlWithCurrentState,
     update,
-    getAppStateFromSavedSearch,
   };
 };
 

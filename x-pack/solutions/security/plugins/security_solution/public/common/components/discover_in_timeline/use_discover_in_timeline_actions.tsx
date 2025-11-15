@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DiscoverStateContainer } from '@kbn/discover-plugin/public';
+import type { ExtendedDiscoverStateContainer } from '@kbn/discover-plugin/public';
 import type { SaveSavedSearchOptions } from '@kbn/saved-search-plugin/public';
 import { isEqualWith } from 'lodash';
 import { useMemo, useCallback, useRef } from 'react';
@@ -49,7 +49,7 @@ export const defaultDiscoverTimeRange: TimeRange = {
 };
 
 export const useDiscoverInTimelineActions = (
-  discoverStateContainer: RefObject<DiscoverStateContainer | undefined>
+  discoverStateContainer: RefObject<ExtendedDiscoverStateContainer | undefined>
 ) => {
   const { setDiscoverAppState } = useDiscoverState();
   const { addError } = useAppToasts();
@@ -102,8 +102,7 @@ export const useDiscoverInTimelineActions = (
    * */
   const getAppStateFromSavedSearch = useCallback(
     (savedSearch: SavedSearch) => {
-      const appState =
-        discoverStateContainer.current?.appState.getAppStateFromSavedSearch(savedSearch);
+      const appState = discoverStateContainer.current?.getAppStateFromSavedSearch(savedSearch);
       return {
         savedSearch,
         appState,
