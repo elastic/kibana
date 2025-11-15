@@ -103,7 +103,7 @@ const availableFormats: ReportTypeData[] = [
     label: 'PNG',
   },
   {
-    id: 'csv_searchsource',
+    id: 'csv_v2',
     label: 'CSV',
   },
 ];

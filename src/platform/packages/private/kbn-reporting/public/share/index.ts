@@ -13,3 +13,9 @@ export { reportingPNGExportShareIntegration } from './integrations/png';
 export type { JobParamsProviderOptions, StartServices } from './share_context_menu';
 export { getSharedComponents } from './shared';
 export type { ReportingPublicComponents } from './shared';
+
+export { getCsvReportParams } from './share_context_menu/register_csv_modal_reporting';
+export {
+  getPdfReportParams,
+  getPngReportParams,
+} from './share_context_menu/register_pdf_png_modal_reporting';

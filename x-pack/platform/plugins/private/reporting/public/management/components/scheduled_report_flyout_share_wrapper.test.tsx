@@ -20,7 +20,7 @@ const mockUseShareTypeContext = jest.mocked(useShareTypeContext).mockReturnValue
   objectType: 'dashboard',
   shareMenuItems: [
     { config: { exportType: 'printablePdfV2', label: 'PDF' } },
-    { config: { exportType: 'csv_searchsource', label: 'CSV' } },
+    { config: { exportType: 'csv_v2', label: 'CSV' } },
   ],
 });
 

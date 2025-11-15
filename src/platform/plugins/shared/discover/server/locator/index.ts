@@ -9,6 +9,7 @@
 
 import type { CoreStart, IUiSettingsClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type { ISearchStartSearchSource } from '@kbn/data-plugin/common';
+import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { DiscoverServerPluginLocatorService, DiscoverServerPluginStartDeps } from '..';
 import { getScopedClient } from './service';
 
@@ -25,6 +26,7 @@ export interface LocatorServicesDeps {
   searchSourceStart: ISearchStartSearchSource;
   savedObjects: SavedObjectsClientContract;
   uiSettings: IUiSettingsClient;
+  dataViewsService: DataViewsService;
 }
 
 /**
