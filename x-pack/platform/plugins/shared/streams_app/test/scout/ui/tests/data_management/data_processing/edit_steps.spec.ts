@@ -10,8 +10,7 @@ import { test } from '../../../fixtures';
 import { generateLogsData } from '../../../fixtures/generators';
 
 test.describe('Stream data processing - editing steps', { tag: ['@ess', '@svlOblt'] }, () => {
-  test.beforeAll(async ({ apiServices, logsSynthtraceEsClient }) => {
-    await apiServices.streams.enable();
+  test.beforeAll(async ({ logsSynthtraceEsClient }) => {
     await generateLogsData(logsSynthtraceEsClient)({ index: 'logs-generic-default' });
   });
 
@@ -33,9 +32,8 @@ test.describe('Stream data processing - editing steps', { tag: ['@ess', '@svlObl
     await pageObjects.streams.gotoProcessingTab('logs-generic-default');
   });
 
-  test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
+  test.afterAll(async ({ logsSynthtraceEsClient }) => {
     await logsSynthtraceEsClient.clean();
-    await apiServices.streams.disable();
   });
 
   test('should edit an existing processor', async ({ page, pageObjects }) => {

@@ -218,15 +218,15 @@ export class StreamsApp {
   }
 
   async saveRoutingRule() {
-    await this.page.getByRole('button', { name: 'Save' }).click();
+    await this.page.testSubj.locator('streamsAppStreamDetailRoutingSaveButton').click();
   }
 
   async updateRoutingRule() {
-    await this.page.getByRole('button', { name: 'Update' }).click();
+    await this.page.testSubj.locator('streamsAppStreamDetailRoutingUpdateButton').click();
   }
 
   async cancelRoutingRule() {
-    await this.page.getByRole('button', { name: 'Cancel' }).click();
+    await this.page.testSubj.locator('streamsAppRoutingStreamEntryCancelButton').click();
   }
 
   async removeRoutingRule() {

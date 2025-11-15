@@ -16,7 +16,6 @@ const POOR_QUALITY_STREAM = 'logs-poor-quality';
 
 test.describe('Stream list view - table values', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeAll(async ({ apiServices, logsSynthtraceEsClient }) => {
-    await apiServices.streams.enable();
     const currentTime = Date.now();
     // Stream 1: Good quality stream - no failed or degraded docs, 50 docs total
     await generateLogsData(logsSynthtraceEsClient)({
@@ -108,7 +107,6 @@ test.describe('Stream list view - table values', { tag: ['@ess', '@svlOblt'] }, 
     await apiServices.streams.deleteStream(GOOD_QUALITY_STREAM);
     await apiServices.streams.deleteStream(DEGRADED_QUALITY_STREAM);
     await apiServices.streams.deleteStream(POOR_QUALITY_STREAM);
-    await apiServices.streams.disable();
   });
 
   test('should display correct doc count in the table', async ({ pageObjects, page }) => {
