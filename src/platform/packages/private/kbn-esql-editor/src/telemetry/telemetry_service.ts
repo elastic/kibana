@@ -15,6 +15,9 @@ import {
   missingSortBeforeLimit,
 } from '@kbn/esql-utils/src/utils/query_parsing_helpers';
 import {
+  ESQL_CONTROL_CONFIG_CANCELLED,
+  ESQL_CONTROL_CONFIG_OPENED,
+  ESQL_CONTROL_CONFIG_SAVED,
   ESQL_LOOKUP_JOIN_ACTION_SHOWN,
   ESQL_QUERY_HISTORY_CLICKED,
   ESQL_QUERY_HISTORY_OPENED,
@@ -136,6 +139,40 @@ export class ESQLEditorTelemetryService {
     this._reportEvent(ESQL_RECOMMENDED_QUERY_CLICKED, {
       trigger_source: source,
       recommended_query: label,
+    });
+  }
+
+  public trackEsqlControlFlyoutOpened(
+    prefilled: boolean,
+    controlType: string,
+    source: string,
+    query: string
+  ) {
+    // parsing and prettifying the raw query
+    // to remove comments for accurately measuring its length
+    const { root } = Parser.parse(query);
+    const prettyQuery = BasicPrettyPrinter.print(root);
+
+    this._reportEvent(ESQL_CONTROL_CONFIG_OPENED, {
+      prefilled,
+      control_kind: controlType,
+      trigger_source: source,
+      query_length: prettyQuery.length.toString(),
+      query_lines: query.split('\n').length.toString(),
+    });
+  }
+
+  public trackEsqlControlConfigSaved(controlType: string, source: string) {
+    this._reportEvent(ESQL_CONTROL_CONFIG_SAVED, {
+      control_kind: controlType,
+      trigger_source: source,
+    });
+  }
+
+  public trackEsqlControlConfigCancelled(controlType: string, reason: string) {
+    this._reportEvent(ESQL_CONTROL_CONFIG_CANCELLED, {
+      control_kind: controlType,
+      reason,
     });
   }
 }

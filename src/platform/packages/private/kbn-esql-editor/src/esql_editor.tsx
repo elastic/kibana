@@ -91,6 +91,7 @@ const triggerControl = async (
   variableType: ESQLVariableType,
   position: monaco.Position | null | undefined,
   uiActions: ESQLEditorDeps['uiActions'],
+  source: string,
   esqlVariables?: ESQLControlVariable[],
   onSaveControl?: ControlsContext['onSaveControl'],
   onCancelControl?: ControlsContext['onCancelControl']
@@ -99,6 +100,7 @@ const triggerControl = async (
     queryString,
     variableType,
     cursorPosition: position,
+    source,
     esqlVariables,
     onSaveControl,
     onCancelControl,
@@ -357,12 +359,16 @@ const ESQLEditorInternal = function ESQLEditor({
 
   controlCommands.forEach(({ command, variableType }) => {
     monaco.editor.registerCommand(command, async (...args) => {
+      const [, { source }] = args;
+      const prefilled = source !== 'question_mark';
+      telemetryService.trackEsqlControlFlyoutOpened(prefilled, variableType, source, fixedQuery);
       const position = editor1.current?.getPosition();
       await triggerControl(
         fixedQuery,
         variableType,
         position,
         uiActions,
+        source,
         esqlVariables,
         controlsContext?.onSaveControl,
         controlsContext?.onCancelControl
@@ -530,8 +536,8 @@ const ESQLEditorInternal = function ESQLEditor({
     () => ({
       onDecorationHoverShown: (hoverMessage: string) =>
         telemetryService.trackLookupJoinHoverActionShown(hoverMessage),
-      onSuggestionsWithCustomCommandShown: (commandIds: string[]) =>
-        telemetryService.trackSuggestionsWithCustomCommandShown(commandIds),
+      onSuggestionsWithCustomCommandShown: (commands) =>
+        telemetryService.trackSuggestionsWithCustomCommandShown(commands),
     }),
     [telemetryService]
   );

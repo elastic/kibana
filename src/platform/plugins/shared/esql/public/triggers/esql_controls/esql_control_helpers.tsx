@@ -32,6 +32,7 @@ interface Context {
   closeFlyout?: () => void;
   ariaLabelledBy: string;
   currentApp?: string;
+  source: string;
 }
 
 export async function loadESQLControlFlyout({
@@ -48,6 +49,7 @@ export async function loadESQLControlFlyout({
   closeFlyout = () => {},
   ariaLabelledBy,
   currentApp,
+  source,
 }: Context) {
   const timeRange = timefilter.getTime();
   const deps = await untilPluginStartServicesReady();
@@ -72,6 +74,7 @@ export async function loadESQLControlFlyout({
           esqlVariables={esqlVariables}
           timeRange={timeRange}
           currentApp={currentApp}
+          telemetryTriggerSource={source}
         />
       </KibanaContextProvider>
     </KibanaRenderContextProvider>
