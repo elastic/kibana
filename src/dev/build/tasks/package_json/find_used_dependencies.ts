@@ -53,6 +53,7 @@ export async function findUsedDependencies(
         ...(await globby(
           [
             // main code entries
+            'src/cli/*/dist.js',
             'src/cli*/dist.js',
             // core entry
             'src/core/server/index.js',

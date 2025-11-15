@@ -9,18 +9,18 @@ import expect from 'expect';
 import { BASE_ALERTING_API_PATH } from '@kbn/alerting-plugin/common';
 import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
+  createRule,
+  createAlertsIndex,
+  deleteAllRules,
+  deleteAllAlerts,
+} from '@kbn/detections-response-ftr-services';
+import {
   createLegacyRuleAction,
   getSimpleRule,
   getSlackAction,
   getWebHookAction,
   getLegacyActionSO,
 } from '../../../utils';
-import {
-  createRule,
-  createAlertsIndex,
-  deleteAllRules,
-  deleteAllAlerts,
-} from '../../../../../config/services/detections_response';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {

@@ -14,13 +14,13 @@ import type {
 } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
-import { fetchRule, getSimpleRule, createExceptionList } from '../../../../utils';
 import {
   createRule,
   createAlertsIndex,
   deleteAllRules,
   deleteAllAlerts,
-} from '../../../../../../config/services/detections_response';
+} from '@kbn/detections-response-ftr-services';
+import { fetchRule, getSimpleRule, createExceptionList } from '../../../../utils';
 import {
   deleteAllExceptions,
   removeExceptionListItemServerGeneratedProperties,
