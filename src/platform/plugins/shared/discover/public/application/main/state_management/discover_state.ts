@@ -253,9 +253,8 @@ export function getDiscoverStateContainer({
       const state = selectTab(internalState.getState(), tabId).globalState;
       if (state?.refreshInterval && !state.refreshInterval.pause) {
         internalState.dispatch(
-          injectCurrentTab(internalStateActions.setGlobalState)({
+          injectCurrentTab(internalStateActions.updateGlobalState)({
             globalState: {
-              ...state,
               refreshInterval: { ...state.refreshInterval, pause: true },
             },
           })
@@ -394,14 +393,8 @@ export function getDiscoverStateContainer({
     });
 
     // clears pinned filters
-    const globalState = selectTab(internalState.getState(), tabId).globalState;
     internalState.dispatch(
-      injectCurrentTab(internalStateActions.setGlobalState)({
-        globalState: {
-          ...globalState,
-          filters: [],
-        },
-      })
+      injectCurrentTab(internalStateActions.updateGlobalState)({ globalState: { filters: [] } })
     );
   };
 
