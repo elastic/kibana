@@ -368,6 +368,13 @@ export const RULE_PAGE_FOOTER_SAVE_TEXT = i18n.translate(
   }
 );
 
+export const RULE_PAGE_FOOTER_PREVIEW_TEXT = i18n.translate(
+  'responseOpsRuleForm.ruleForm.rulePageFooter.previewText',
+  {
+    defaultMessage: 'preview',
+  }
+);
+
 export const RULE_FLYOUT_HEADER_CREATE_TITLE = i18n.translate(
   'responseOpsRuleForm.ruleForm.ruleFlyoutHeader.createTitle',
   {

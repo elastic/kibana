@@ -68,6 +68,7 @@ import { unmuteAll } from '../application/rule/methods/unmute_all';
 import { muteAll } from '../application/rule/methods/mute_all';
 import { unmuteInstance } from '../application/rule/methods/unmute_alert/unmute_instance';
 import { runSoon } from './methods/run_soon';
+import { preview } from './methods/preview';
 import { listRuleTypes } from '../application/rule/methods/rule_types/rule_types';
 import { getScheduleFrequency } from '../application/rule/methods/get_schedule_frequency/get_schedule_frequency';
 import type { BulkUntrackBody } from '../application/rule/methods/bulk_untrack/bulk_untrack_alerts';
@@ -211,6 +212,8 @@ export class RulesClient {
   public bulkUntrackAlerts = (options: BulkUntrackBody) => bulkUntrackAlerts(this.context, options);
 
   public runSoon = (options: { id: string }) => runSoon(this.context, options);
+
+  public preview = (options: any) => preview(this.context, options);
 
   public listRuleTypes = () => listRuleTypes(this.context);
 
