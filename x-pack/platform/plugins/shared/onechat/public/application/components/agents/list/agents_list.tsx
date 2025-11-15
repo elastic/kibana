@@ -10,6 +10,7 @@ import type {
   EuiTableActionsColumnType,
   EuiTableComputedColumnType,
   EuiTableFieldDataColumnType,
+  CriteriaWithPagination,
 } from '@elastic/eui';
 import {
   EuiFlexGroup,
@@ -63,6 +64,8 @@ export const AgentsList: React.FC = () => {
   const { manageAgents } = useUiPrivileges();
   const { createOnechatUrl } = useNavigation();
   const { deleteAgent } = useDeleteAgent();
+  const [pageIndex, setPageIndex] = React.useState(0);
+  const [pageSize, setPageSize] = React.useState(10);
 
   const columns: Array<EuiBasicTableColumn<AgentDefinition>> = useMemo(() => {
     const agentAvatar: EuiTableComputedColumnType<AgentDefinition> = {
@@ -222,6 +225,21 @@ export const AgentsList: React.FC = () => {
             autoSortOptions: false,
           },
         ],
+      }}
+      pagination={{
+        pageIndex,
+        pageSize,
+        pageSizeOptions: [10, 25, 50, 100],
+        showPerPageOptions: true,
+      }}
+      onTableChange={({ page }: CriteriaWithPagination<AgentDefinition>) => {
+        if (page) {
+          setPageIndex(page.index);
+          if (page.size !== pageSize) {
+            setPageSize(page.size);
+            setPageIndex(0);
+          }
+        }
       }}
       loading={isLoading}
       error={errorMessage}
