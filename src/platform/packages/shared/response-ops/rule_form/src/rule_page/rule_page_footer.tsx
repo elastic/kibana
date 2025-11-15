@@ -9,33 +9,50 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiButtonEmpty } from '@elastic/eui';
+import { v4 as uuidv4 } from 'uuid';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   RULE_PAGE_FOOTER_CANCEL_TEXT,
   RULE_PAGE_FOOTER_SHOW_REQUEST_TEXT,
   RULE_PAGE_FOOTER_CREATE_TEXT,
   RULE_PAGE_FOOTER_SAVE_TEXT,
+  RULE_PAGE_FOOTER_PREVIEW_TEXT,
 } from '../translations';
 import { useRuleFormScreenContext, useRuleFormState } from '../hooks';
 import { hasRuleErrors } from '../validation';
 import { ConfirmCreateRule } from '../components';
+import { useRuleFormInspector } from './inspector_context';
 
 export interface RulePageFooterProps {
   isEdit?: boolean;
   isSaving?: boolean;
+  isLoadingPreview?: boolean;
   onCancel: () => void;
   onSave: () => void;
+  onPreview: (formData: any) => Promise<any>;
 }
 
 export const RulePageFooter = (props: RulePageFooterProps) => {
   const [showCreateConfirmation, setShowCreateConfirmation] = useState<boolean>(false);
+  const {
+    services: { inspector },
+  } = useKibana();
+  const { requestsAdapter } = useRuleFormInspector();
 
   const { setIsShowRequestScreenVisible } = useRuleFormScreenContext();
 
-  const { isEdit = false, isSaving = false, onCancel, onSave } = props;
+  const {
+    isEdit = false,
+    isSaving = false,
+    isLoadingPreview = false,
+    onCancel,
+    onSave,
+    onPreview,
+  } = props;
 
   const {
     plugins: { application },
-    formData: { actions },
+    formData,
     connectors,
     baseErrors = {},
     paramsErrors = {},
@@ -44,7 +61,7 @@ export const RulePageFooter = (props: RulePageFooterProps) => {
   } = useRuleFormState();
 
   const hasErrors = useMemo(() => {
-    const hasBrokenConnectors = actions.some((action) => {
+    const hasBrokenConnectors = formData.actions.some((action) => {
       return !connectors.find((connector) => connector.id === action.id);
     });
 
@@ -58,7 +75,7 @@ export const RulePageFooter = (props: RulePageFooterProps) => {
       actionsErrors,
       actionsParamsErrors,
     });
-  }, [actions, connectors, baseErrors, paramsErrors, actionsErrors, actionsParamsErrors]);
+  }, [formData.actions, connectors, baseErrors, paramsErrors, actionsErrors, actionsParamsErrors]);
 
   const saveButtonText = useMemo(() => {
     if (isEdit) {
@@ -71,16 +88,65 @@ export const RulePageFooter = (props: RulePageFooterProps) => {
     setIsShowRequestScreenVisible(true);
   }, [setIsShowRequestScreenVisible]);
 
+  const onPreviewClick = useCallback(async () => {
+    requestsAdapter.reset();
+
+    try {
+      const response = await onPreview(formData);
+      if (response._inspect && response._inspect.esQueries) {
+        response._inspect.esQueries.forEach((operation: any, index) => {
+          const requestResponder = requestsAdapter.start(`Rule execution Query ${index}`, {
+            id: uuidv4(),
+          });
+
+          try {
+            requestResponder.json(JSON.parse(operation.params.body));
+            if (operation.response.statusCode < 400) {
+              // Mark this specific operation as successful.
+              requestResponder.ok({
+                json: {
+                  rawResponse: operation.response.body,
+                  requestParams: operation.params,
+                },
+              });
+            } else {
+              requestResponder.error({
+                body: operation.response.body,
+                requestParams: operation.params,
+              });
+            }
+          } catch (error: any) {
+            // TODO: how to handle error
+            console.log('error:', error);
+            // requestResponder.error({
+            //   body: operation.response.body,
+            //   requestParams: operation.params,
+            // });
+          }
+        });
+      }
+      inspector.open({ requests: requestsAdapter });
+    } catch (error: any) {
+      // TODO: how to handle error
+      console.log('error:', error);
+      // requestsAdapter.reset();
+      // requestsAdapter.start('Rule execution query', {
+      //   id: uuidv4(),
+      // });
+      inspector.open({ requests: requestsAdapter });
+    }
+  }, [formData, onPreview, inspector, requestsAdapter]);
+
   const onSaveClick = useCallback(() => {
     if (isEdit) {
       return onSave();
     }
     const canReadConnectors = !!application.capabilities.actions?.show;
-    if (actions.length === 0 && canReadConnectors) {
+    if (formData.actions.length === 0 && canReadConnectors) {
       return setShowCreateConfirmation(true);
     }
     onSave();
-  }, [actions, isEdit, application, onSave]);
+  }, [formData.actions, isEdit, application, onSave]);
 
   const onCreateConfirmClick = useCallback(() => {
     setShowCreateConfirmation(false);
@@ -115,6 +181,16 @@ export const RulePageFooter = (props: RulePageFooterProps) => {
               >
                 {RULE_PAGE_FOOTER_SHOW_REQUEST_TEXT}
               </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                data-test-subj="rulePageFooterPreviewButton"
+                onClick={onPreviewClick}
+                disabled={isSaving || hasErrors || isLoadingPreview}
+                isLoading={isLoadingPreview}
+              >
+                {RULE_PAGE_FOOTER_PREVIEW_TEXT}
+              </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton

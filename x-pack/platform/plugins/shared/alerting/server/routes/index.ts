@@ -14,6 +14,8 @@ import type { AlertingConfig } from '../config';
 import type { GetAlertIndicesAlias, ILicenseState } from '../lib';
 import type { AlertingRequestHandlerContext } from '../types';
 import { createRuleRoute } from './rule/apis/create';
+import { executeRuleRoute } from './rule/apis/execute/execute_rule_route';
+
 import { getRuleRoute, getInternalRuleRoute } from './rule/apis/get/get_rule_route';
 import { updateRuleRoute } from './rule/apis/update/update_rule_route';
 import { deleteRuleRoute } from './rule/apis/delete/delete_rule_route';
@@ -121,6 +123,8 @@ export function defineRoutes(opts: RouteOptions) {
   } = opts;
 
   createRuleRoute(opts);
+  executeRuleRoute(opts);
+
   getRuleRoute(router, licenseState);
   getInternalRuleTemplateRoute(router, licenseState);
   getInternalRuleRoute(router, licenseState);

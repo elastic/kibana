@@ -21,6 +21,7 @@ import type { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import type { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
@@ -161,6 +162,7 @@ interface PluginsStart {
   dataViewEditor: DataViewEditorStart;
   charts: ChartsPluginStart;
   alerting?: AlertingStart;
+  inspector: InspectorPluginStart;
   spaces?: SpacesPluginStart;
   navigateToApp: CoreStart['application']['navigateToApp'];
   features: FeaturesPluginStart;
@@ -311,6 +313,7 @@ export class Plugin
             actionTypeRegistry,
             ruleTypeRegistry,
             kibanaFeatures,
+            inspector: pluginsStart.inspector,
             licensing: pluginsStart.licensing,
             expressions: pluginsStart.expressions,
             isServerless: !!pluginsStart.serverless,
