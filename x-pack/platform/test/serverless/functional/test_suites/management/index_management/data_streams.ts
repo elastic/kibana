@@ -25,8 +25,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     TIME_SERIES = 'Time series',
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/205316
-  describe.skip('Data Streams', () => {
+  describe('Data Streams', () => {
     before(async () => {
       log.debug('Creating required data stream');
       try {
@@ -130,7 +129,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         this.tags(['skipSvlOblt', 'skipSvlSearch']);
 
         it('shows project data retention in the datastreams list', async () => {
-          expect(await testSubjects.exists('projectLevelRetentionCallout')).to.be(true);
+          expect(await testSubjects.exists('projectLevelRetentionLink')).to.be(true);
           expect(await testSubjects.exists('cloudLinkButton')).to.be(true);
         });
       });
