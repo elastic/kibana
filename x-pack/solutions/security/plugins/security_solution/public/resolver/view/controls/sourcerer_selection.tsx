@@ -10,8 +10,6 @@ import { EuiPopover } from '@elastic/eui';
 import { PageScope } from '../../../data_view_manager/constants';
 import { StyledEuiButtonIcon } from './styles';
 import { useColors } from '../use_colors';
-import { Sourcerer } from '../../../sourcerer/components';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { DataViewPicker } from '../../../data_view_manager/components/data_view_picker';
 
 const nodeLegendButtonTitle = i18n.translate(
@@ -33,8 +31,6 @@ export const SourcererButton = memo(
     setActivePopover: (value: 'sourcererSelection') => void;
     isOpen: boolean;
   }) => {
-    const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-
     const setAsActivePopover = useCallback(() => {
       setActivePopover('sourcererSelection');
     }, [setActivePopover]);
@@ -59,11 +55,7 @@ export const SourcererButton = memo(
         closePopover={closePopover}
         anchorPosition="leftCenter"
       >
-        {newDataViewPickerEnabled ? (
-          <DataViewPicker scope={PageScope.analyzer} onClosePopover={closePopover} />
-        ) : (
-          <Sourcerer scope={PageScope.analyzer} />
-        )}
+        <DataViewPicker scope={PageScope.analyzer} onClosePopover={closePopover} />
       </EuiPopover>
     );
   }

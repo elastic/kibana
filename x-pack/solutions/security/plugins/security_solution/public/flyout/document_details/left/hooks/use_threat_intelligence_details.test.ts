@@ -9,19 +9,17 @@ import { useThreatIntelligenceDetails } from './use_threat_intelligence_details'
 import { renderHook } from '@testing-library/react';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import { useTimelineEventsDetails } from '../../../../timelines/containers/details';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { useInvestigationTimeEnrichment } from '../../shared/hooks/use_investigation_enrichment';
 import type { RouteSpyState } from '../../../../common/utils/route/types';
 import {
-  type UseBasicDataFromDetailsDataResult,
   useBasicDataFromDetailsData,
+  type UseBasicDataFromDetailsDataResult,
 } from '../../shared/hooks/use_basic_data_from_details_data';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 
 jest.mock('../../../../timelines/containers/details');
-jest.mock('../../../../sourcerer/containers');
 jest.mock('../../../../common/utils/route/use_route_spy');
 jest.mock('../../shared/context');
 jest.mock('../../shared/hooks/use_investigation_enrichment');
@@ -43,15 +41,6 @@ describe('useThreatIntelligenceDetails', () => {
     jest
       .mocked(useBasicDataFromDetailsData)
       .mockReturnValue({ isAlert: true } as unknown as UseBasicDataFromDetailsDataResult);
-
-    jest.mocked(useSourcererDataView).mockReturnValue({
-      browserFields: {},
-      dataViewId: '',
-      loading: false,
-      indicesExist: true,
-      selectedPatterns: [],
-      sourcererDataView: {},
-    });
 
     jest
       .mocked(useRouteSpy)

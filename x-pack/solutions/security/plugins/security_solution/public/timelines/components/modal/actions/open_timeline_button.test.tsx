@@ -12,11 +12,9 @@ import { TestProviders } from '../../../../common/mock/test_providers';
 import { useParams } from 'react-router-dom';
 import { TimelineTypeEnum } from '../../../../../common/api/timeline';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useTimelineStatus } from '../../open_timeline/use_timeline_status';
 
 jest.mock('../../../../common/lib/apm/use_start_transaction');
-jest.mock('../../../../sourcerer/containers');
 jest.mock('../../open_timeline/use_timeline_status');
 jest.mock('react-redux', () => {
   const origin = jest.requireActual('react-redux');
@@ -63,11 +61,6 @@ describe('OpenTimelineButton', () => {
   it('should open the modal after clicking on the button', async () => {
     (useParams as jest.Mock).mockReturnValue({ tabName: TimelineTypeEnum.template });
     (useStartTransaction as jest.Mock).mockReturnValue({ startTransaction: jest.fn() });
-    (useSourcererDataView as jest.Mock).mockReturnValue({
-      dataViewId: '',
-      selectedPatterns: [],
-      sourcererDataView: {},
-    });
     (useTimelineStatus as jest.Mock).mockReturnValue({
       timelineStatus: 'active',
       templateTimelineFilter: null,

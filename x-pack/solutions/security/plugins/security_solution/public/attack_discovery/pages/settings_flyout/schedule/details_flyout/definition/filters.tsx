@@ -13,30 +13,13 @@ import { FilterItems } from '@kbn/unified-search-plugin/public';
 
 import { PageScope } from '../../../../../../data_view_manager/constants';
 import { useDataView } from '../../../../../../data_view_manager/hooks/use_data_view';
-import { useSourcererDataView } from '../../../../../../sourcerer/containers';
-import { useCreateDataView } from '../../../../../../common/hooks/use_create_data_view';
-import { useIsExperimentalFeatureEnabled } from '../../../../../../common/hooks/use_experimental_features';
 
 interface FiltersProps {
   filters: Filter[];
 }
 
 export const Filters: React.FC<FiltersProps> = React.memo(({ filters }) => {
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataView: experimentalDataView } = useDataView(PageScope.alerts);
-
-  // get the sourcerer `DataViewSpec` for alerts:
-  const { sourcererDataView: oldSourcererDataView, loading: oldIsLoadingIndexPattern } =
-    useSourcererDataView(PageScope.alerts);
-
-  // create a `DataView` from the `DataViewSpec`:
-  const { dataView: oldDataView } = useCreateDataView({
-    dataViewSpec: oldSourcererDataView,
-    loading: oldIsLoadingIndexPattern,
-    skip: newDataViewPickerEnabled,
-  });
-
-  const alertsDataView = newDataViewPickerEnabled ? experimentalDataView : oldDataView;
+  const { dataView: alertsDataView } = useDataView(PageScope.alerts);
 
   const isEsql = filters.some((filter) => filter?.query?.language === 'esql');
   const searchBarFilters = useMemo(() => {

@@ -11,17 +11,12 @@ import { act, render, screen } from '@testing-library/react';
 import { Filters } from './filters';
 import { useCreateDataView } from '../../../../../../common/hooks/use_create_data_view';
 import { TestProviders } from '../../../../../../common/mock';
-import { useSourcererDataView } from '../../../../../../sourcerer/containers';
 import { useIsExperimentalFeatureEnabled } from '../../../../../../common/hooks/use_experimental_features';
 
 jest.mock('../../../../../../common/hooks/use_create_data_view');
-jest.mock('../../../../../../sourcerer/containers');
 jest.mock('../../../../../../common/hooks/use_experimental_features');
 
 const mockUseCreateDataView = useCreateDataView as jest.MockedFunction<typeof useCreateDataView>;
-const mockUseSourcererDataView = useSourcererDataView as jest.MockedFunction<
-  typeof useSourcererDataView
->;
 
 const renderComponent = async () => {
   await act(() => {
@@ -49,10 +44,6 @@ describe('Filters', () => {
       },
       loading: false,
     } as unknown as jest.Mocked<ReturnType<typeof useCreateDataView>>);
-    mockUseSourcererDataView.mockReturnValue({
-      sourcererDataView: {},
-      loading: false,
-    } as unknown as jest.Mocked<ReturnType<typeof useSourcererDataView>>);
   });
 
   it('should render filters component', async () => {

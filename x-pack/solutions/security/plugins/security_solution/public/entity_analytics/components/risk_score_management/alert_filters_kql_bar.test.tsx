@@ -5,24 +5,17 @@
  * 2.0.
  */
 
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
-import type { BrowserFields } from '@kbn/timelines-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { AlertFiltersKqlBar } from './alert_filters_kql_bar';
 import type { UIAlertFilter } from './common';
-import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useKibana } from '../../../common/lib/kibana';
 import { TestProviders } from '../../../common/mock';
-import type { SelectedDataView } from '../../../sourcerer/store/model';
 
-jest.mock('../../../sourcerer/containers');
 jest.mock('../../../common/lib/kibana');
 
-const mockUseSourcererDataView = useSourcererDataView as jest.MockedFunction<
-  typeof useSourcererDataView
->;
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 
 const mockDataView: Partial<DataView> = {
@@ -30,21 +23,6 @@ const mockDataView: Partial<DataView> = {
   title: 'test-index',
   fields: [] as unknown as DataView['fields'],
 };
-
-const mockSourcererDataViewSpec: DataViewSpec = {
-  id: 'test-data-view-id',
-  title: 'test-index',
-  fields: {} as DataViewSpec['fields'],
-};
-
-const createMockSelectedDataView = (): SelectedDataView => ({
-  browserFields: {} as BrowserFields,
-  dataViewId: mockSourcererDataViewSpec.id ?? null,
-  indicesExist: true,
-  loading: false,
-  selectedPatterns: [mockSourcererDataViewSpec.title ?? 'test-index'],
-  sourcererDataView: mockSourcererDataViewSpec,
-});
 
 const mockCreateDataView = jest.fn().mockResolvedValue(mockDataView);
 const mockClearInstanceCache = jest.fn();
@@ -63,8 +41,6 @@ describe('AlertFiltersKqlBar', () => {
         },
       },
     });
-
-    mockUseSourcererDataView.mockReturnValue(createMockSelectedDataView());
 
     const submitButtonText = 'Submit';
     mockUseKibana.mockReturnValue({
