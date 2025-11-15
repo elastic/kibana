@@ -175,7 +175,7 @@ export async function getUnifiedTraceItems({
   return {
     traceItems: unifiedTraceItems.hits.hits
       .map((hit) => {
-        const event = accessKnownApmEventFields(hit.fields, fields);
+        const event = accessKnownApmEventFields(hit.fields).requireFields(fields);
         const apmDuration = event[SPAN_DURATION] ?? event[TRANSACTION_DURATION];
         const id = event[SPAN_ID] ?? event[TRANSACTION_ID];
         const name = event[SPAN_NAME] ?? event[TRANSACTION_NAME];
