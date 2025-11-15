@@ -8,7 +8,37 @@
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 
 export const CAI_CASES_INDEX_MAPPINGS: MappingTypeMapping = {
-  dynamic: false,
+  dynamic: true,
+  dynamic_templates: [
+    {
+      as_keyword: {
+        match_pattern: 'regex',
+        match: '.*_as_keyword',
+        mapping: {
+          type: 'keyword',
+          ignore_above: 256,
+        },
+      },
+    },
+    {
+      as_integer: {
+        match_pattern: 'regex',
+        match: '.*_as_integer',
+        mapping: {
+          type: 'integer',
+        },
+      },
+    },
+    {
+      as_date: {
+        match_pattern: 'regex',
+        match: '.*_as_date',
+        mapping: {
+          type: 'date',
+        },
+      },
+    },
+  ],
   properties: {
     '@timestamp': {
       type: 'date',
@@ -132,6 +162,10 @@ export const CAI_CASES_INDEX_MAPPINGS: MappingTypeMapping = {
           type: 'keyword',
         },
       },
+    },
+    fields: {
+      type: 'object',
+      dynamic: true,
     },
     observables: {
       properties: {
