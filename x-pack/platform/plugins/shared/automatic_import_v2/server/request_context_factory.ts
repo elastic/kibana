@@ -13,7 +13,7 @@ import type {
   AutomaticImportV2PluginRequestHandlerContext,
   AutomaticImportV2PluginSetupDependencies,
 } from './types';
-import type { AutomaticImportService } from './services';
+import type { AutomaticImportService, TaskManagerService } from './services';
 
 export interface IRequestContextFactory {
   create(
@@ -28,6 +28,7 @@ interface ConstructorOptions {
   plugins: AutomaticImportV2PluginSetupDependencies;
   kibanaVersion: string;
   automaticImportService: AutomaticImportService;
+  taskManagerService: TaskManagerService;
 }
 
 export class RequestContextFactory implements IRequestContextFactory {
@@ -59,6 +60,7 @@ export class RequestContextFactory implements IRequestContextFactory {
       getSpaceId,
       getCurrentUser: async () => coreContext.security.authc.getCurrentUser(),
       automaticImportService: this.options.automaticImportService,
+      taskManagerService: this.options.taskManagerService,
       inference: startPlugins.inference,
       savedObjectsClient,
     };
