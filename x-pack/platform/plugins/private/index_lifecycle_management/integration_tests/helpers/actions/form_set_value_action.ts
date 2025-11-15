@@ -6,18 +6,61 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import type { TestBed } from '@kbn/test-jest-helpers';
+import { screen, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
-export function createFormSetValueAction<V extends string = string>(
-  testBed: TestBed,
-  dataTestSubject: string
-) {
-  const { form, component } = testBed;
-
+export function createFormSetValueAction<V extends string = string>(dataTestSubject: string) {
   return async (value: V) => {
-    await act(async () => {
-      form.setInputValue(dataTestSubject, value);
+    // Create userEvent instance with timer advancement (main-2co Pattern 2)
+    const user = userEvent.setup({
+      advanceTimers: jest.advanceTimersByTime,
+      pointerEventsCheck: 0,
     });
-    component.update();
+    // Use getAllByTestId()[0] to handle duplicate test IDs (main-2co Pattern 6)
+    const element = screen.getAllByTestId<HTMLInputElement | HTMLSelectElement>(dataTestSubject)[0];
+
+    if (element.tagName === 'SELECT') {
+      // For select elements, use userEvent.selectOptions (main-2co Pattern 2)
+      // This properly triggers React form state updates
+      await user.selectOptions(element, value);
+
+      // Advance timers to ensure form state updates propagate
+      await act(async () => {
+        await jest.runOnlyPendingTimersAsync();
+      });
+    } else {
+      // Check if this is a number input with invalid characters that browser would filter
+      // (e.g., comma in "5,5"). For these validation test cases, we need fireEvent
+      // to bypass browser validation and test our own validation logic.
+      const isNumberInput = element.getAttribute('type') === 'number';
+      const hasInvalidChars = isNumberInput && /[,]/.test(value);
+
+      if (hasInvalidChars) {
+        // Use fireEvent to force invalid value that browser would normally reject
+        // This allows us to test our validation logic for edge cases
+        fireEvent.change(element, { target: { value } });
+
+        // Direct DOM method needs act() wrapper (main-2co Pattern 16)
+        await act(async () => {
+          element.blur();
+          await jest.runOnlyPendingTimersAsync();
+        });
+      } else {
+        // For normal input, use userEvent for realistic interaction (main-2co Pattern 3)
+        await user.clear(element);
+
+        // userEvent.type() doesn't accept empty strings (main-2co Pattern 3b)
+        // For empty string validation tests, only clear the field
+        if (value !== '') {
+          await user.type(element, value);
+        }
+
+        // Direct DOM method needs act() wrapper (main-2co Pattern 16)
+        await act(async () => {
+          element.blur();
+          await jest.runOnlyPendingTimersAsync();
+        });
+      }
+    }
   };
 }

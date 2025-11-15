@@ -5,36 +5,65 @@
  * 2.0.
  */
 
+import { screen, within } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
-import type { TestBed } from '@kbn/test-jest-helpers';
 import type { Phase } from '../../../common/types';
 
-const createWaitForValidationAction = (testBed: TestBed) => () => {
-  const { component } = testBed;
-  act(() => {
-    jest.runAllTimers();
+const waitForValidation = async () => {
+  await act(async () => {
+    await jest.runOnlyPendingTimersAsync();
   });
-  component.update();
+  // Give React another tick to update the DOM
+  await act(async () => {
+    await jest.runOnlyPendingTimersAsync();
+  });
 };
 
-const createExpectMessagesAction =
-  (testBed: TestBed) => (expectedMessages: string[], phase?: Phase) => {
-    const { form } = testBed;
-    if (phase) {
-      expect(form.getErrorsMessages(`${phase}-phase`)).toEqual(expectedMessages);
-    } else {
-      expect(form.getErrorsMessages()).toEqual(expectedMessages);
-    }
-  };
+const getErrorMessages = (phase?: Phase): string[] => {
+  // Try multiple selectors to find error messages
+  const container = phase ? screen.getByTestId(`${phase}-phase`) : document.body;
 
-export const createErrorsActions = (testBed: TestBed) => {
-  const { exists } = testBed;
+  // Look for error messages in multiple ways
+  const errorTexts: string[] = [];
+
+  // Method 1: Look for elements with role="alert"
+  const alertElements = phase
+    ? within(container).queryAllByRole('alert')
+    : screen.queryAllByRole('alert');
+
+  alertElements.forEach((el) => {
+    const texts = el.querySelectorAll('.euiFormErrorText');
+    texts.forEach((text) => {
+      const content = text.textContent?.trim();
+      if (content) errorTexts.push(content);
+    });
+  });
+
+  // Method 2: Look for .euiFormErrorText directly
+  if (errorTexts.length === 0) {
+    const errorElements = container.querySelectorAll('.euiFormErrorText');
+    errorElements.forEach((el) => {
+      const content = el.textContent?.trim();
+      if (content) errorTexts.push(content);
+    });
+  }
+
+  return errorTexts;
+};
+
+const expectMessages = (expectedMessages: string[], phase?: Phase) => {
+  const actualMessages = getErrorMessages(phase);
+  expect(actualMessages).toEqual(expectedMessages);
+};
+
+export const createErrorsActions = () => {
   return {
     errors: {
-      waitForValidation: createWaitForValidationAction(testBed),
-      haveGlobalCallout: () => exists('policyFormErrorsCallout'),
-      havePhaseCallout: (phase: Phase) => exists(`phaseErrorIndicator-${phase}`),
-      expectMessages: createExpectMessagesAction(testBed),
+      waitForValidation,
+      haveGlobalCallout: () => Boolean(screen.queryByTestId('policyFormErrorsCallout')),
+      havePhaseCallout: (phase: Phase) =>
+        Boolean(screen.queryByTestId(`phaseErrorIndicator-${phase}`)),
+      expectMessages,
     },
   };
 };

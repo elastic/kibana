@@ -7,87 +7,99 @@
 
 import { act } from 'react-dom/test-utils';
 import { i18nTexts } from '../../../public/application/sections/edit_policy/i18n_texts';
-import { setupEnvironment } from '../../helpers';
-import { getGeneratedPolicies } from '../constants';
-import type { ValidationTestBed } from './validation.helpers';
-import { setupValidationTestBed } from './validation.helpers';
+import {
+  setupEnvironment,
+  renderEditPolicy,
+  setPolicyName,
+  savePolicy,
+  toggleSwitch,
+  expectErrorMessages,
+} from '../../helpers';
+import { getGeneratedPolicies, getDefaultHotPhasePolicy, POLICY_NAME } from '../constants';
 
 describe('<EditPolicy /> policy name validation', () => {
-  let testBed: ValidationTestBed;
-  let actions: ValidationTestBed['actions'];
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    jest.useFakeTimers();
   });
 
   afterAll(() => {
     jest.useRealTimers();
   });
 
-  beforeEach(async () => {
-    httpRequestsMockHelpers.setLoadPolicies(getGeneratedPolicies());
+  describe('new policy', () => {
+    beforeEach(async () => {
+      // HTTP Mock Hygiene (main-2co Pattern 8): Mock all endpoints before rendering
+      httpRequestsMockHelpers.setDefaultResponses();
+      // Include the policy being edited (my_policy) along with other policies for validation
+      httpRequestsMockHelpers.setLoadPolicies([
+        getDefaultHotPhasePolicy(),
+        ...getGeneratedPolicies(),
+      ]);
 
-    await act(async () => {
-      testBed = await setupValidationTestBed(httpSetup);
-    });
+      // Pattern 1c: Component Rendering with Timers
+      renderEditPolicy(httpSetup, { isNewPolicy: true });
 
-    const { component } = testBed;
-    component.update();
-    ({ actions } = testBed);
-  });
-
-  test(`doesn't allow empty policy name`, async () => {
-    await actions.savePolicy();
-    actions.errors.expectMessages([i18nTexts.editPolicy.errors.policyNameRequiredMessage]);
-  });
-
-  test(`doesn't allow policy name with space`, async () => {
-    await actions.setPolicyName('my policy');
-    actions.errors.waitForValidation();
-    actions.errors.expectMessages([i18nTexts.editPolicy.errors.policyNameContainsInvalidChars]);
-  });
-
-  test(`doesn't allow policy name that is already used`, async () => {
-    await actions.setPolicyName('testy0');
-    actions.errors.waitForValidation();
-    actions.errors.expectMessages([i18nTexts.editPolicy.errors.policyNameAlreadyUsedErrorMessage]);
-  });
-
-  test(`doesn't allow to save as new policy but using the same name`, async () => {
-    await act(async () => {
-      testBed = await setupValidationTestBed(httpSetup, {
-        testBedConfig: {
-          memoryRouter: {
-            initialEntries: [`/policies/edit/testy0`],
-            componentRoutePath: `/policies/edit/:policyName`,
-          },
-        },
+      await act(async () => {
+        await jest.runOnlyPendingTimersAsync();
       });
     });
-    const { component } = testBed;
-    component.update();
-    ({ actions } = testBed);
 
-    await actions.toggleSaveAsNewPolicy();
-    actions.errors.waitForValidation();
-    await actions.savePolicy();
-    actions.errors.expectMessages([
-      i18nTexts.editPolicy.errors.policyNameMustBeDifferentErrorMessage,
-    ]);
+    test(`doesn't allow empty policy name`, async () => {
+      await savePolicy(httpSetup);
+      expectErrorMessages([i18nTexts.editPolicy.errors.policyNameRequiredMessage]);
+    });
+
+    test(`doesn't allow policy name with space`, async () => {
+      await setPolicyName('my policy');
+      expectErrorMessages([i18nTexts.editPolicy.errors.policyNameContainsInvalidChars]);
+    });
+
+    test(`doesn't allow policy name that is already used`, async () => {
+      await setPolicyName('testy0');
+      expectErrorMessages([i18nTexts.editPolicy.errors.policyNameAlreadyUsedErrorMessage]);
+    });
+
+    test(`doesn't allow policy name with comma`, async () => {
+      await setPolicyName('my,policy');
+      expectErrorMessages([i18nTexts.editPolicy.errors.policyNameContainsInvalidChars]);
+    });
+
+    test(`doesn't allow policy name starting with underscore`, async () => {
+      await setPolicyName('_mypolicy');
+      expectErrorMessages([i18nTexts.editPolicy.errors.policyNameStartsWithUnderscoreErrorMessage]);
+    });
   });
 
-  test(`doesn't allow policy name with comma`, async () => {
-    await actions.setPolicyName('my,policy');
-    actions.errors.waitForValidation();
-    actions.errors.expectMessages([i18nTexts.editPolicy.errors.policyNameContainsInvalidChars]);
-  });
+  describe('existing policy', () => {
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setDefaultResponses();
+      httpRequestsMockHelpers.setLoadPolicies([
+        getDefaultHotPhasePolicy(),
+        ...getGeneratedPolicies(),
+      ]);
 
-  test(`doesn't allow policy name starting with underscore`, async () => {
-    await actions.setPolicyName('_mypolicy');
-    actions.errors.waitForValidation();
-    actions.errors.expectMessages([
-      i18nTexts.editPolicy.errors.policyNameStartsWithUnderscoreErrorMessage,
-    ]);
+      // Render existing policy (not new)
+      renderEditPolicy(httpSetup);
+
+      await act(async () => {
+        await jest.runOnlyPendingTimersAsync();
+      });
+    });
+
+    test(`doesn't allow to save as new policy but using the same name`, async () => {
+      // Toggle "save as new" to show the policy name field
+      // The field will be pre-populated with the existing policy name (my_policy)
+      await toggleSwitch('saveAsNewSwitch');
+
+      // Trigger validation by changing the value and changing it back
+      // This ensures validation runs on the pre-populated value
+      await setPolicyName('temp');
+      await setPolicyName(POLICY_NAME);
+
+      // When saving as new, the policy name must be different from the original
+      expectErrorMessages([i18nTexts.editPolicy.errors.policyNameMustBeDifferentErrorMessage]);
+    });
   });
 });

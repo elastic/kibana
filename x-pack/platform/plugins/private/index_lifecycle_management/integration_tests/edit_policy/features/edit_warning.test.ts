@@ -6,148 +6,185 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import type { TestBed } from '@kbn/test-jest-helpers';
+import { screen, fireEvent } from '@testing-library/react';
 import { setupEnvironment } from '../../helpers';
 import { initTestBed } from '../init_test_bed';
 import { getDefaultHotPhasePolicy, POLICY_NAME, POLICY_MANAGED_BY_ES } from '../constants';
 
 describe('<EditPolicy /> edit warning', () => {
-  let testBed: TestBed;
-  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
+  let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
 
   beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    jest.useFakeTimers();
   });
 
   afterAll(() => {
     jest.useRealTimers();
   });
 
-  beforeEach(async () => {
-    httpRequestsMockHelpers.setDefaultResponses();
-
-    await act(async () => {
-      testBed = await initTestBed(httpSetup);
-    });
-
-    const { component } = testBed;
-    component.update();
+  beforeEach(() => {
+    jest.clearAllMocks();
+    ({ httpRequestsMockHelpers, httpSetup } = setupEnvironment());
   });
 
-  test('no edit warning for a new policy', async () => {
-    httpRequestsMockHelpers.setLoadPolicies([]);
-    await act(async () => {
-      testBed = await initTestBed(httpSetup);
+  describe('when loading a new policy', () => {
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setDefaultResponses();
+      httpRequestsMockHelpers.setLoadPolicies([]);
+      initTestBed(httpSetup);
+
+      await act(async () => {
+        await jest.runOnlyPendingTimersAsync();
+      });
     });
-    const { exists, component } = testBed;
-    component.update();
-    expect(exists('editWarning')).toBe(false);
+
+    test('no edit warning for a new policy', () => {
+      expect(screen.queryByTestId('editWarning')).not.toBeInTheDocument();
+    });
   });
 
-  test('an edit warning is shown for an existing policy', async () => {
-    httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy(POLICY_NAME)]);
-    await act(async () => {
-      testBed = await initTestBed(httpSetup);
+  describe('when loading an existing policy', () => {
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setDefaultResponses();
+      httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy(POLICY_NAME)]);
+      initTestBed(httpSetup);
+
+      await act(async () => {
+        await jest.runOnlyPendingTimersAsync();
+      });
     });
-    const { exists, component } = testBed;
-    component.update();
-    expect(exists('editWarning')).toBe(true);
+
+    test('an edit warning is shown for an existing policy', () => {
+      expect(screen.getAllByTestId('editWarning').length).toBeGreaterThan(0);
+    });
   });
 
-  test('an edit warning callout is shown for an existing, managed policy', async () => {
-    httpRequestsMockHelpers.setLoadPolicies([POLICY_MANAGED_BY_ES]);
+  describe('when loading a managed policy', () => {
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setDefaultResponses();
+      httpRequestsMockHelpers.setLoadPolicies([POLICY_MANAGED_BY_ES]);
+      initTestBed(httpSetup);
 
-    await act(async () => {
-      testBed = await initTestBed(httpSetup);
+      await act(async () => {
+        await jest.runOnlyPendingTimersAsync();
+      });
     });
-    const { exists, component } = testBed;
-    component.update();
 
-    expect(exists('editWarning')).toBe(true);
-    expect(exists('editManagedPolicyCallOut')).toBe(true);
+    test('an edit warning callout is shown for an existing, managed policy', () => {
+      expect(screen.getAllByTestId('editWarning').length).toBeGreaterThan(0);
+      expect(screen.getByTestId('editManagedPolicyCallOut')).toBeInTheDocument();
+    });
+
+    test('an edit warning callout is shown for a deprecated policy', () => {
+      expect(screen.getAllByTestId('editWarning').length).toBeGreaterThan(0);
+      expect(screen.getByTestId('editPolicyWithDeprecation')).toBeInTheDocument();
+    });
   });
 
-  test('an edit warning callout is shown for a deprecated policy', async () => {
-    httpRequestsMockHelpers.setLoadPolicies([POLICY_MANAGED_BY_ES]);
+  describe('when policy has no indices', () => {
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setDefaultResponses();
+      httpRequestsMockHelpers.setLoadPolicies([
+        { ...getDefaultHotPhasePolicy(POLICY_NAME), indices: [] },
+      ]);
+      initTestBed(httpSetup);
 
-    await act(async () => {
-      testBed = await initTestBed(httpSetup);
+      await act(async () => {
+        await jest.runOnlyPendingTimersAsync();
+      });
     });
-    const { exists, component } = testBed;
-    component.update();
 
-    expect(exists('editWarning')).toBe(true);
-    expect(exists('editPolicyWithDeprecation')).toBe(true);
+    test('no indices link if no indices', () => {
+      expect(screen.queryByTestId('linkedIndicesLink')).not.toBeInTheDocument();
+    });
   });
 
-  test('no indices link if no indices', async () => {
-    httpRequestsMockHelpers.setLoadPolicies([
-      { ...getDefaultHotPhasePolicy(POLICY_NAME), indices: [] },
-    ]);
-    await act(async () => {
-      testBed = await initTestBed(httpSetup);
+  describe('when policy has no index templates', () => {
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setDefaultResponses();
+      httpRequestsMockHelpers.setLoadPolicies([
+        { ...getDefaultHotPhasePolicy(POLICY_NAME), indexTemplates: [] },
+      ]);
+      initTestBed(httpSetup);
+
+      await act(async () => {
+        await jest.runOnlyPendingTimersAsync();
+      });
     });
-    const { exists, component } = testBed;
-    component.update();
-    expect(exists('linkedIndicesLink')).toBe(false);
+
+    test('no index templates link if no index templates', () => {
+      expect(screen.queryByTestId('linkedIndexTemplatesLink')).not.toBeInTheDocument();
+    });
   });
 
-  test('no index templates link if no index templates', async () => {
-    httpRequestsMockHelpers.setLoadPolicies([
-      { ...getDefaultHotPhasePolicy(POLICY_NAME), indexTemplates: [] },
-    ]);
-    await act(async () => {
-      testBed = await initTestBed(httpSetup);
+  describe('when policy has indices', () => {
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setDefaultResponses();
+      httpRequestsMockHelpers.setLoadPolicies([
+        {
+          ...getDefaultHotPhasePolicy(POLICY_NAME),
+          indices: ['index1', 'index2', 'index3'],
+        },
+      ]);
+      initTestBed(httpSetup);
+
+      await act(async () => {
+        await jest.runOnlyPendingTimersAsync();
+      });
     });
-    const { exists, component } = testBed;
-    component.update();
-    expect(exists('linkedIndexTemplatesLink')).toBe(false);
+
+    test('index templates link has number of indices', () => {
+      expect(screen.getByTestId('linkedIndicesLink')).toHaveTextContent('3 linked indices');
+    });
   });
 
-  test('index templates link has number of indices', async () => {
-    httpRequestsMockHelpers.setLoadPolicies([
-      {
-        ...getDefaultHotPhasePolicy(POLICY_NAME),
-        indices: ['index1', 'index2', 'index3'],
-      },
-    ]);
-    await act(async () => {
-      testBed = await initTestBed(httpSetup);
+  describe('when policy has index templates', () => {
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setDefaultResponses();
+      httpRequestsMockHelpers.setLoadPolicies([
+        {
+          ...getDefaultHotPhasePolicy(POLICY_NAME),
+          indexTemplates: ['template1', 'template2', 'template3'],
+        },
+      ]);
+      initTestBed(httpSetup);
+
+      await act(async () => {
+        await jest.runOnlyPendingTimersAsync();
+      });
     });
-    const { component, find } = testBed;
-    component.update();
-    expect(find('linkedIndicesLink').text()).toBe('3 linked indices');
+
+    test('index templates link has number of index templates', () => {
+      expect(screen.getByTestId('linkedIndexTemplatesLink')).toHaveTextContent(
+        '3 linked index templates'
+      );
+    });
   });
 
-  test('index templates link has number of index templates', async () => {
-    httpRequestsMockHelpers.setLoadPolicies([
-      {
-        ...getDefaultHotPhasePolicy(POLICY_NAME),
-        indexTemplates: ['template1', 'template2', 'template3'],
-      },
-    ]);
-    await act(async () => {
-      testBed = await initTestBed(httpSetup);
-    });
-    const { component, find } = testBed;
-    component.update();
-    expect(find('linkedIndexTemplatesLink').text()).toBe('3 linked index templates');
-  });
+  describe('index templates flyout', () => {
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setDefaultResponses();
+      httpRequestsMockHelpers.setLoadPolicies([
+        {
+          ...getDefaultHotPhasePolicy(POLICY_NAME),
+          indexTemplates: ['template1'],
+        },
+      ]);
+      initTestBed(httpSetup);
 
-  test('index templates link opens the flyout', async () => {
-    httpRequestsMockHelpers.setLoadPolicies([
-      {
-        ...getDefaultHotPhasePolicy(POLICY_NAME),
-        indexTemplates: ['template1'],
-      },
-    ]);
-    await act(async () => {
-      testBed = await initTestBed(httpSetup);
+      await act(async () => {
+        await jest.runOnlyPendingTimersAsync();
+      });
     });
-    const { component, find, exists } = testBed;
-    component.update();
-    expect(exists('indexTemplatesFlyoutHeader')).toBe(false);
-    find('linkedIndexTemplatesLink').simulate('click');
-    expect(exists('indexTemplatesFlyoutHeader')).toBe(true);
+
+    test('index templates link opens the flyout', () => {
+      expect(screen.queryByTestId('indexTemplatesFlyoutHeader')).not.toBeInTheDocument();
+
+      const link = screen.getByTestId('linkedIndexTemplatesLink');
+      fireEvent.click(link);
+
+      expect(screen.getByTestId('indexTemplatesFlyoutHeader')).toBeInTheDocument();
+    });
   });
 });

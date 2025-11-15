@@ -5,30 +5,28 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
-import type { TestBed } from '@kbn/test-jest-helpers';
+import { screen, fireEvent, waitFor } from '@testing-library/react';
 
 const jsonSelector = 'policyRequestJson';
 
-export const createRequestFlyoutActions = (testBed: TestBed) => {
-  const { find, component, exists } = testBed;
+export const createRequestFlyoutActions = () => {
   const openRequestFlyout = async () => {
-    await act(async () => {
-      find('requestButton').simulate('click');
+    fireEvent.click(screen.getByTestId('requestButton'));
+    // Wait for flyout to appear
+    await waitFor(() => {
+      expect(
+        screen.queryByTestId(jsonSelector) || screen.queryByTestId('policyRequestInvalidAlert')
+      ).toBeInTheDocument();
     });
-    component.update();
   };
-  const closeRequestFlyout = async () => {
-    await act(async () => {
-      find('policyRequestClose').simulate('click');
-    });
-    component.update();
+  const closeRequestFlyout = () => {
+    fireEvent.click(screen.getByTestId('policyRequestClose'));
   };
   return {
     openRequestFlyout,
     closeRequestFlyout,
-    hasRequestJson: () => exists(jsonSelector),
-    getRequestJson: () => find(jsonSelector).text(),
-    hasInvalidPolicyAlert: () => exists('policyRequestInvalidAlert'),
+    hasRequestJson: () => Boolean(screen.queryByTestId(jsonSelector)),
+    getRequestJson: () => screen.getByTestId(jsonSelector).textContent || '',
+    hasInvalidPolicyAlert: () => Boolean(screen.queryByTestId('policyRequestInvalidAlert')),
   };
 };

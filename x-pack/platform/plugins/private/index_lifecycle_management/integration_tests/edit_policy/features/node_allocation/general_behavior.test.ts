@@ -6,6 +6,7 @@
  */
 
 import { act } from 'react-dom/test-utils';
+import { screen, within } from '@testing-library/react';
 import type { HttpFetchOptionsWithPath } from '@kbn/core/public';
 import { setupEnvironment } from '../../../helpers';
 import type { GeneralNodeAllocationTestBed } from './general_behavior.helpers';
@@ -22,7 +23,7 @@ describe('<EditPolicy /> node allocation general behavior', () => {
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    jest.useFakeTimers();
   });
 
   afterAll(() => {
@@ -47,8 +48,7 @@ describe('<EditPolicy /> node allocation general behavior', () => {
 
       await setup();
 
-      const { component, actions } = testBed;
-      component.update();
+      const { actions } = testBed;
 
       await actions.setDataAllocation('node_attrs');
       await actions.savePolicy();
@@ -71,16 +71,16 @@ describe('<EditPolicy /> node allocation general behavior', () => {
         });
 
         await setup();
-
-        const { component } = testBed;
-        component.update();
       });
 
       test('detecting use of the recommended allocation type', () => {
-        const { find } = testBed;
-        const selectedDataAllocation = find(
-          'warm-dataTierAllocationControls.dataTierSelect'
-        ).text();
+        // Find container first, then query within it (dot notation doesn't work in test IDs)
+        const containers = screen.getAllByTestId('warm-dataTierAllocationControls');
+        const container = containers[0];
+        const selectedDataAllocation = within(container)
+          .getByTestId('dataTierSelect')
+          .textContent?.replace(/,/g, '')
+          .trim();
         expect(selectedDataAllocation).toBe('Use warm nodes (recommended)');
       });
 
@@ -115,19 +115,24 @@ describe('<EditPolicy /> node allocation general behavior', () => {
         });
 
         await setup();
-
-        const { component } = testBed;
-        component.update();
       });
 
       test('detecting use of the custom allocation type', () => {
-        const { find } = testBed;
-        expect(find('warm-dataTierAllocationControls.dataTierSelect').text()).toBe('Custom');
+        // Find container first, then query within it (dot notation doesn't work in test IDs)
+        const containers = screen.getAllByTestId('warm-dataTierAllocationControls');
+        const container = containers[0];
+        const textContent = within(container)
+          .getByTestId('dataTierSelect')
+          .textContent?.replace(/,/g, '')
+          .trim();
+        expect(textContent).toBe('Custom');
       });
 
       test('detecting use of the "off" allocation type', () => {
-        const { find } = testBed;
-        expect(find('cold-dataTierAllocationControls.dataTierSelect').text()).toContain('Off');
+        // Find container first, then query within it (dot notation doesn't work in test IDs)
+        const containers = screen.getAllByTestId('cold-dataTierAllocationControls');
+        const container = containers[0];
+        expect(within(container).getByTestId('dataTierSelect').textContent).toContain('Off');
       });
     });
   });

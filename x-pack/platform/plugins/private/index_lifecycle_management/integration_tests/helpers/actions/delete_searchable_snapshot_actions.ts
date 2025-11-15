@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import type { TestBed } from '@kbn/test-jest-helpers';
 import { createFormToggleAction } from './form_toggle_action';
 
-export const createDeleteSearchableSnapshotActions = (testBed: TestBed) => {
+export const createDeleteSearchableSnapshotActions = () => {
   const toggleSelector = `deleteSearchableSnapshotSwitch`;
   return {
-    toggleDeleteSearchableSnapshot: createFormToggleAction(testBed, toggleSelector),
+    toggleDeleteSearchableSnapshot: createFormToggleAction(toggleSelector),
   };
 };

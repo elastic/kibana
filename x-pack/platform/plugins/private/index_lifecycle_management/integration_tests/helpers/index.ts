@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+// Legacy testbed pattern exports (to be removed)
 export * from './actions';
 
 export { setupEnvironment, WithAppDependencies } from './setup_environment';
+export { renderWithDependencies as renderWithDependenciesLegacy } from './render';
+
+// Pure RTL pattern exports (new)
+export * from './rtl_helpers';
+export { renderEditPolicy, renderWithDependencies } from './rtl_render';

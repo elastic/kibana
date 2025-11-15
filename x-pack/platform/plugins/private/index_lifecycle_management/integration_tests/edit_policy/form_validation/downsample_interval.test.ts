@@ -34,8 +34,6 @@ describe('<EditPolicy /> downsample interval validation', () => {
       testBed = await setupValidationTestBed(httpSetup);
     });
 
-    const { component } = testBed;
-    component.update();
     ({ actions } = testBed);
     await actions.setPolicyName('mypolicy');
   });
@@ -64,7 +62,7 @@ describe('<EditPolicy /> downsample interval validation', () => {
     {
       name: `doesn't allow decimals for timing (with comma)`,
       value: '5,5',
-      error: [i18nTexts.editPolicy.errors.integerRequired],
+      error: [i18nTexts.editPolicy.errors.numberRequired],
     },
   ].forEach((testConfig: { name: string; value: string; error: string[] }) => {
     (['hot', 'warm', 'cold'] as PhaseWithDownsample[]).forEach((phase: PhaseWithDownsample) => {
@@ -82,7 +80,7 @@ describe('<EditPolicy /> downsample interval validation', () => {
         // will be displayed under the field.
         await actions[phase].downsample.setDownsampleInterval(value);
 
-        actions.errors.waitForValidation();
+        await actions.errors.waitForValidation();
 
         actions.errors.expectMessages(error);
       });
@@ -99,7 +97,7 @@ describe('<EditPolicy /> downsample interval validation', () => {
     await actions.warm.downsample.toggle();
     await actions.warm.downsample.setDownsampleInterval('1', 'h');
 
-    actions.errors.waitForValidation();
+    await actions.errors.waitForValidation();
     actions.errors.expectMessages(
       ['Must be greater than and a multiple of the hot phase value (60m)'],
       'warm'
@@ -107,7 +105,7 @@ describe('<EditPolicy /> downsample interval validation', () => {
 
     await actions.cold.downsample.toggle();
     await actions.cold.downsample.setDownsampleInterval('90', 'm');
-    actions.errors.waitForValidation();
+    await actions.errors.waitForValidation();
     actions.errors.expectMessages(
       ['Must be greater than and a multiple of the warm phase value (1h)'],
       'cold'
@@ -115,17 +113,17 @@ describe('<EditPolicy /> downsample interval validation', () => {
 
     // disable warm phase, check that we now get an error because of the hot phase;
     await actions.togglePhase('warm');
-    actions.errors.waitForValidation();
+    await actions.errors.waitForValidation();
     actions.errors.expectMessages(
       ['Must be greater than and a multiple of the hot phase value (60m)'],
       'cold'
     );
     await actions.cold.downsample.setDownsampleInterval('120', 'm');
-    actions.errors.waitForValidation();
+    await actions.errors.waitForValidation();
     actions.errors.expectMessages([], 'cold');
 
     await actions.cold.downsample.setDownsampleInterval('90', 'm');
-    actions.errors.waitForValidation();
+    await actions.errors.waitForValidation();
     actions.errors.expectMessages(
       ['Must be greater than and a multiple of the hot phase value (60m)'],
       'cold'

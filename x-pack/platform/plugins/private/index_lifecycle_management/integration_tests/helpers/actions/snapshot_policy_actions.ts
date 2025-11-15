@@ -5,23 +5,25 @@
  * 2.0.
  */
 
-import type { TestBed } from '@kbn/test-jest-helpers';
-import { act } from 'react-dom/test-utils';
+import { screen, fireEvent } from '@testing-library/react';
 
-const createSetWaitForSnapshotAction = (testBed: TestBed) => async (snapshotPolicyName: string) => {
-  const { find, component } = testBed;
-  act(() => {
-    find('snapshotPolicyCombobox').simulate('change', [{ label: snapshotPolicyName }]);
-  });
-  component.update();
+const createSetWaitForSnapshotAction = () => (snapshotPolicyName: string) => {
+  // The data-test-subj is on the input element itself for ComboBoxField
+  const input = screen.getByTestId('snapshotPolicyCombobox') as HTMLInputElement;
+
+  // Type the value
+  fireEvent.change(input, { target: { value: snapshotPolicyName } });
+
+  // Simulate creating a custom option by pressing Enter
+  // This triggers onCreateOption in the EUI ComboBox
+  fireEvent.keyDown(input, { key: 'Enter', code: 'Enter', keyCode: 13 });
 };
 
-export const createSnapshotPolicyActions = (testBed: TestBed) => {
-  const { exists } = testBed;
+export const createSnapshotPolicyActions = () => {
   return {
-    setSnapshotPolicy: createSetWaitForSnapshotAction(testBed),
-    hasCustomPolicyCallout: () => exists('customPolicyCallout'),
-    hasPolicyErrorCallout: () => exists('policiesErrorCallout'),
-    hasNoPoliciesCallout: () => exists('noPoliciesCallout'),
+    setSnapshotPolicy: createSetWaitForSnapshotAction(),
+    hasCustomPolicyCallout: () => Boolean(screen.queryByTestId('customPolicyCallout')),
+    hasPolicyErrorCallout: () => Boolean(screen.queryByTestId('policiesErrorCallout')),
+    hasNoPoliciesCallout: () => Boolean(screen.queryByTestId('noPoliciesCallout')),
   };
 };
