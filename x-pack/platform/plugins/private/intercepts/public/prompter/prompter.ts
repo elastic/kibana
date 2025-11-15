@@ -88,24 +88,27 @@ export class InterceptPrompter {
       .pipe(Rx.filter((response) => !!response))
       .pipe(
         Rx.mergeMap((response) => {
-          // anchor for all calculations, this is the time when the trigger was registered
-          const timePoint = Date.now();
-
-          let diff = 0;
-
-          // Calculate the number of runs since the trigger was registered
-          const runs = Math.floor(
-            (diff = timePoint - Date.parse(response.registeredAt)) / response.triggerIntervalInMs
-          );
-
-          nextRunId = runs + 1;
-
           return this.pageHidden$!.pipe(
             Rx.switchMap((isHidden) => {
+              // if the page is hidden, there's no need to run computations on wether to display the intercept or not
               if (isHidden) return Rx.EMPTY;
 
+              // anchor for all calculations, this is the current time at which we are considering displaying the intercept
+              const timePoint = Date.now();
+
+              // difference between the current time and the time when the trigger was registered
+              let diff = 0;
+
+              // Calculate the number of runs since the trigger was registered
+              const runs = Math.floor(
+                (diff = timePoint - Date.parse(response.registeredAt)) /
+                  response.triggerIntervalInMs
+              );
+
+              nextRunId = runs + 1;
+
               return Rx.timer(
-                // create a timer that will not exceed the max timer interval
+                // create a timer that will not exceed browser's max timer interval
                 Math.min(nextRunId * response.triggerIntervalInMs - diff, this.MAX_TIMER_INTERVAL),
                 Math.min(response.triggerIntervalInMs, this.MAX_TIMER_INTERVAL)
               ).pipe(

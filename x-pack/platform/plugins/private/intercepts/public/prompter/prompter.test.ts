@@ -6,6 +6,7 @@
  */
 import * as Rx from 'rxjs';
 import React from 'react';
+import { fireEvent, createEvent } from '@testing-library/react';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
@@ -445,6 +446,152 @@ describe('ProductInterceptPrompter', () => {
 
           // advance time to point in time when next run should happen
           await jest.advanceTimersByTimeAsync(timeInMsTillNextRun);
+
+          expect(mockQueueInterceptFn).toHaveBeenCalledWith(
+            expect.objectContaining({
+              id: intercept.id,
+              runId: triggerRuns + 1,
+            })
+          );
+
+          subscription.unsubscribe();
+        });
+      });
+
+      describe('document visibility impact on intercept queueing', () => {
+        const triggerIntervalInMs = 10 * 24 * 60 * 60 * 1000; // 10 days
+
+        const documentHiddenStateSpy = jest.spyOn(document, 'hidden', 'get');
+
+        afterEach(() => {
+          documentHiddenStateSpy.mockReturnValue(false);
+        });
+
+        afterAll(() => {
+          documentHiddenStateSpy.mockRestore();
+        });
+
+        it('does not queue the intercept even if the time for the next run has elapsed when the document has transitioned to "hidden" state ', async () => {
+          const triggerInfo: TriggerInfo = {
+            registeredAt: new Date(
+              '08 November 2025 15:55:00 GMT+0100 (Central European Standard Time)'
+            ).toISOString(),
+            triggerIntervalInMs,
+            recurrent: true,
+          };
+
+          const triggerRuns = 30;
+          const timeInMsTillNextRun = triggerInfo.triggerIntervalInMs / 3;
+
+          // return the configured trigger info
+          jest.spyOn(http, 'post').mockResolvedValue(triggerInfo);
+          jest.spyOn(http, 'get').mockResolvedValue({ lastInteractedInterceptId: triggerRuns });
+
+          // set system time to time in the future, where there would have been 30 runs of the received trigger,
+          // with just about 1/3 of the time before the next trigger
+          jest.setSystemTime(
+            new Date(
+              Date.parse(triggerInfo.registeredAt) +
+                triggerInfo.triggerIntervalInMs * triggerRuns +
+                triggerInfo.triggerIntervalInMs -
+                timeInMsTillNextRun
+            )
+          );
+
+          const subscriptionHandler = jest.fn();
+
+          const intercept$ = registerIntercept({
+            id: intercept.id,
+            config: () => Promise.resolve(intercept),
+          });
+
+          const subscription = intercept$.subscribe(subscriptionHandler);
+
+          // advance timers to halfway through the time until the next run should happen
+          await jest.advanceTimersByTimeAsync(timeInMsTillNextRun / 2);
+
+          expect(http.post).toHaveBeenCalledWith(TRIGGER_INFO_API_ROUTE, {
+            body: JSON.stringify({ triggerId: intercept.id }),
+          });
+
+          // set document hidden state to true
+          documentHiddenStateSpy.mockReturnValue(true);
+          // trigger visibility change event, simulating the page transitioning from being visible to hidden
+          fireEvent(document, createEvent('visibilitychange', document));
+
+          // allow entire time for which the intercept ought to have displayed to elapse
+          await jest.advanceTimersByTimeAsync(timeInMsTillNextRun / 2);
+
+          expect(mockQueueInterceptFn).not.toHaveBeenCalledWith(
+            expect.objectContaining({
+              id: intercept.id,
+              runId: triggerRuns + 1,
+            })
+          );
+
+          subscription.unsubscribe();
+        });
+
+        it('shows the intercept if the user transitions the document from "hidden" state to "visible" state during qualifying time window', async () => {
+          const triggerInfo: TriggerInfo = {
+            registeredAt: new Date(
+              '08 November 2025 15:55:00 GMT+0100 (Central European Standard Time)'
+            ).toISOString(),
+            triggerIntervalInMs,
+            recurrent: true,
+          };
+
+          const triggerRuns = 30;
+          const timeInMsTillNextRun = triggerInfo.triggerIntervalInMs / 3;
+
+          // return the configured trigger info
+          jest.spyOn(http, 'post').mockResolvedValue(triggerInfo);
+          jest.spyOn(http, 'get').mockResolvedValue({ lastInteractedInterceptId: triggerRuns });
+
+          // set system time to time in the future, where there would have been 30 runs of the received trigger,
+          // with just about 1/3 of the time before the next trigger
+          jest.setSystemTime(
+            new Date(
+              Date.parse(triggerInfo.registeredAt) +
+                triggerInfo.triggerIntervalInMs * triggerRuns +
+                triggerInfo.triggerIntervalInMs -
+                timeInMsTillNextRun
+            )
+          );
+
+          const subscriptionHandler = jest.fn();
+
+          const intercept$ = registerIntercept({
+            id: intercept.id,
+            config: () => Promise.resolve(intercept),
+          });
+
+          const subscription = intercept$.subscribe(subscriptionHandler);
+
+          // advance timers to halfway through the time until the next run should happen
+          await jest.advanceTimersByTimeAsync(timeInMsTillNextRun / 2);
+
+          expect(http.post).toHaveBeenCalledWith(TRIGGER_INFO_API_ROUTE, {
+            body: JSON.stringify({ triggerId: intercept.id }),
+          });
+
+          // set document hidden state to true
+          documentHiddenStateSpy.mockReturnValue(true);
+          // trigger visibility change event, simulating the page transitioning from being visible to being hidden
+          fireEvent(document, createEvent('visibilitychange', document));
+
+          // allow 3/4 of the entire time for which the intercept ought to have displayed to elapse
+          await jest.advanceTimersByTimeAsync(timeInMsTillNextRun / 4);
+
+          expect(mockQueueInterceptFn).not.toHaveBeenCalled();
+
+          // set document hidden state to false
+          documentHiddenStateSpy.mockReturnValue(false);
+          // trigger visibility change event, simulating the page transitioning from being hidden to being visible
+          fireEvent(document, createEvent('visibilitychange', document));
+
+          // allow 4/4 of the entire time for which the intercept ought to have displayed to elapse
+          await jest.advanceTimersByTimeAsync(timeInMsTillNextRun / 4);
 
           expect(mockQueueInterceptFn).toHaveBeenCalledWith(
             expect.objectContaining({
