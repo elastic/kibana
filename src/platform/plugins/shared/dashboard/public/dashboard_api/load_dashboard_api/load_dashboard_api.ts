@@ -25,7 +25,8 @@ export async function loadDashboardApi({
   getCreationOptions?: () => Promise<DashboardCreationOptions>;
   savedObjectId?: string;
 }) {
-  const creationStartTime = performance.now();
+  const creationStartTime = performance.getEntriesByName('dashboard_app_mount', 'mark')[0]
+    .startTime;
   const creationOptions = await getCreationOptions?.();
   const incomingEmbeddables = creationOptions?.getIncomingEmbeddables?.();
   const savedObjectResult = savedObjectId ? await dashboardClient.get(savedObjectId) : undefined;

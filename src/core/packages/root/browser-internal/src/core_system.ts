@@ -451,9 +451,6 @@ export class CoreSystem {
 
       // Wait for the first app navigation to report Kibana Loaded
       firstValueFrom(application.currentAppId$.pipe(filter(Boolean))).then(() => {
-        performance.mark(KBN_LOAD_MARKS, {
-          detail: LOAD_FIRST_NAV,
-        });
         this.reportKibanaLoadedEvent(analytics);
       });
 
