@@ -43,6 +43,12 @@ export const ControlYamlView = ({ policy, onChange, show }: ViewDeps) => {
   const configuration = input?.vars?.configuration?.value || '';
   const currentModel = useConfigModel(configuration);
 
+  useEffect(() => {
+    if (currentModel && currentModel.getValue() !== configuration) {
+      currentModel.setValue(configuration);
+    }
+  }, [currentModel, configuration]);
+
   // not all validations can be done via json-schema
   const validateAdditional = useCallback((value: any) => {
     const errors: string[] = [];

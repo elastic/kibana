@@ -36,7 +36,10 @@ describe('<ControlYamlView />', () => {
   beforeEach(() => {
     onChange.mockClear();
     // Set default mock for useConfigModel to return non null value
-    (useConfigModel as jest.Mock).mockReturnValue({});
+    (useConfigModel as jest.Mock).mockReturnValue({
+      getValue: jest.fn(() => ''),
+      setValue: jest.fn(),
+    });
   });
 
   it('handles invalid yaml', async () => {
