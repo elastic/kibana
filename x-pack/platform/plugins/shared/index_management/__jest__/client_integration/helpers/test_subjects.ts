@@ -118,4 +118,9 @@ export type TestSubjects =
   | 'noIndicesMessage'
   | 'clearIndicesSearch'
   | 'usingMaxRetention'
-  | 'componentTemplatesLink';
+  | 'componentTemplatesLink'
+  | 'summaryTabBtn'
+  | 'settingsTabBtn'
+  | 'mappingsTabBtn'
+  | 'aliasesTabBtn'
+  | 'previewTabBtn';
