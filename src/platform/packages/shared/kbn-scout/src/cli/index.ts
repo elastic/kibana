@@ -8,11 +8,12 @@
  */
 import { RunWithCommands } from '@kbn/dev-cli-runner';
 import { cli as reportingCLI } from '@kbn/scout-reporting';
-import { startServerCmd } from './start_server';
-import { runTestsCmd } from './run_tests';
-import { runPlaywrightTestCheckCmd } from './run_playwright_test_check';
 import { discoverPlaywrightConfigsCmd } from './config_discovery';
 import { createTestTrack } from './create_test_track';
+import { filterCloudPlaywrightConfigsCmd } from './filter_cloud_configs';
+import { runPlaywrightTestCheckCmd } from './run_playwright_test_check';
+import { runTestsCmd } from './run_tests';
+import { startServerCmd } from './start_server';
 
 export async function run() {
   await new RunWithCommands(
@@ -24,6 +25,7 @@ export async function run() {
       runTestsCmd,
       runPlaywrightTestCheckCmd,
       discoverPlaywrightConfigsCmd,
+      filterCloudPlaywrightConfigsCmd,
       reportingCLI.initializeReportDatastream,
       reportingCLI.uploadEvents,
       reportingCLI.updateTestConfigStats,

@@ -7,20 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import fs from 'fs';
 import type { Command, FlagsReader } from '@kbn/dev-cli-runner';
 import { SCOUT_PLAYWRIGHT_CONFIGS_PATH } from '@kbn/scout-info';
-import path from 'path';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { getScoutPlaywrightConfigs, DEFAULT_TEST_PATH_PATTERNS } from '../config';
+import fs from 'fs';
+import path from 'path';
 import { measurePerformance } from '../common';
+import { DEFAULT_TEST_PATH_PATTERNS, getScoutPlaywrightConfigs } from '../config';
 import { validateWithScoutCiConfig } from '../config/discovery';
 
 const getCountByType = (configs: Map<string, any>, type: 'plugin' | 'package'): number => {
   return Array.from(configs.values()).filter((config) => config.type === type).length;
 };
 
-export const runDiscoverPlaywrightConfigs = (flagsReader: FlagsReader, log: ToolingLog) => {
+export const runDiscoverPlaywrightConfigs = async (flagsReader: FlagsReader, log: ToolingLog) => {
   const searchPaths = flagsReader.arrayOfStrings('searchPaths')!;
 
   const scoutConfigs = measurePerformance(log, 'Discovering Playwright config files', () =>
