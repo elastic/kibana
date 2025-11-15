@@ -9,7 +9,6 @@ import type { Client as ElasticsearchClient8 } from 'elasticsearch-8.x';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { ProductName } from '@kbn/product-doc-common';
-import { getSourceNamesFromProductName, getProductNameFromSource } from '../artifact/product_name';
 
 /** the list of fields to import from the source cluster */
 const fields = [
@@ -40,12 +39,12 @@ export interface ExtractedDocument {
   ai_tags: string[];
 }
 
-const convertHit = (hit: SearchHit<any>): ExtractedDocument => {
+const convertHit = (hit: SearchHit<any>, productName: ProductName): ExtractedDocument => {
   const source = hit._source;
   return {
     content_title: source.content_title,
     content_body: source.content_body,
-    product_name: getProductNameFromSource(source.product_name),
+    product_name: productName,
     root_type: 'documentation',
     slug: source.slug,
     url: source.url,
@@ -57,11 +56,43 @@ const convertHit = (hit: SearchHit<any>): ExtractedDocument => {
   };
 };
 
+const generateSearchCriteriaForProduct = (productName: ProductName) => {
+  if (productName.toLowerCase() === 'elasticsearch') {
+    return {
+      bool: {
+        minimum_should_match: 1,
+        should: [
+          {
+            match_phrase: {
+              filename: '*solutions/search*',
+            },
+          },
+          {
+            wildcard: {
+              product_name: {
+                case_insensitive: true,
+                value: 'elasticsearch',
+              },
+            },
+          },
+        ],
+      },
+    };
+  }
+  return {
+    wildcard: {
+      filename: {
+        value: `*${productName}*`,
+        case_insensitive: false,
+      },
+    },
+  };
+};
 export const extractDocumentation = async ({
   client,
   index,
   stackVersion,
-  productName,
+  productName: productNameParam,
   log,
 }: {
   client: ElasticsearchClient8;
@@ -72,20 +103,30 @@ export const extractDocumentation = async ({
 }) => {
   log.info(`Starting to extract documents from source cluster`);
 
-  const response = await client.search({
+  const productName = productNameParam.toLowerCase();
+  const query = {
     index,
     size: 10000,
     query: {
       bool: {
         must: [
-          { terms: { product_name: getSourceNamesFromProductName(productName) } },
-          { term: { version: stackVersion } },
-          { exists: { field: 'ai_fields.ai_summary' } },
+          {
+            bool: {
+              should: [generateSearchCriteriaForProduct(productName)],
+            },
+          },
+          {
+            exists: {
+              field: 'ai_fields.ai_summary',
+            },
+          },
         ],
       },
     },
     fields,
-  });
+  };
+
+  const response = await client.search(query);
 
   const totalHits =
     typeof response.hits.total === 'number'
@@ -100,5 +141,5 @@ export const extractDocumentation = async ({
     `Finished extracting documents from source. ${response.hits.hits.length} documents were extracted`
   );
 
-  return response.hits.hits.map(convertHit);
+  return response.hits.hits.map((hit) => convertHit(hit, productName));
 };
