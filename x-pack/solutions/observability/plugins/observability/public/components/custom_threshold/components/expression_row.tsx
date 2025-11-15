@@ -252,6 +252,17 @@ export const aggregationType: { [key: string]: AggregationType } = {
     validNormalizedTypes: ['number', 'date', 'histogram'],
     value: Aggregators.MIN,
   },
+  median: {
+    text: i18n.translate(
+      'xpack.observability.customThreshold.rule.alertFlyout.aggregationText.median',
+      {
+        defaultMessage: 'Median',
+      }
+    ),
+    fieldRequired: true,
+    validNormalizedTypes: ['number', 'histogram'],
+    value: Aggregators.MED,
+  },
   cardinality: {
     text: i18n.translate(
       'xpack.observability.customThreshold.rule.alertFlyout.aggregationText.cardinality',

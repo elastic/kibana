@@ -18,6 +18,7 @@ const allowedAggregators = [
   'min',
   'max',
   'cardinality',
+  'median',
   'rate',
   'p95',
   'p99',
