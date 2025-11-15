@@ -32,6 +32,7 @@ const wiredStreamManagementSubTabs = [
   'dataQuality',
   'attachments',
   'references',
+  'dashboardGeneration',
 ] as const;
 
 type WiredStreamManagementSubTab = (typeof wiredStreamManagementSubTabs)[number];

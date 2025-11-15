@@ -1,0 +1,8 @@
+Stream name:
+{{stream.name}}
+
+Stream description:
+- {{{stream.description}}}
+
+Fields:
+{{{fields}}}

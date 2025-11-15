@@ -7,8 +7,10 @@
 
 import { suggestPartitionsRoute } from './suggest_partitions_route';
 import { unmanagedAssetsRoute } from './unmanaged_assets_route';
+import { suggestDashboardRoute } from './suggest_dashboard_route';
 
 export const internalManagementRoutes = {
   ...unmanagedAssetsRoute,
   ...suggestPartitionsRoute,
+  ...suggestDashboardRoute,
 };
