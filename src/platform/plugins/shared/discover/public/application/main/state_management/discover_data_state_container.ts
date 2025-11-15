@@ -30,6 +30,7 @@ import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { DEFAULT_COLUMNS_SETTING, SEARCH_ON_PAGE_LOAD_SETTING } from '@kbn/discover-utils';
 import { getTimeDifferenceInSeconds } from '@kbn/timerange';
+import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import { getEsqlDataView } from './utils/get_esql_data_view';
 import type { DiscoverAppStateContainer } from './discover_app_state_container';
 import type { DiscoverServices } from '../../../build_services';
@@ -284,8 +285,8 @@ export function getDataStateContainer({
             scopedEbtManager,
           };
 
-          abortController?.abort();
-          abortControllerFetchMore?.abort();
+          abortController?.abort(AbortReason.REPLACED);
+          abortControllerFetchMore?.abort(AbortReason.REPLACED);
 
           if (options.fetchMore) {
             abortControllerFetchMore = new AbortController();
@@ -437,8 +438,8 @@ export function getDataStateContainer({
   };
 
   const cancel = () => {
-    abortController?.abort();
-    abortControllerFetchMore?.abort();
+    abortController?.abort(AbortReason.CANCELED);
+    abortControllerFetchMore?.abort(AbortReason.CANCELED);
   };
 
   const getAbortController = () => {

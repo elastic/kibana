@@ -9,19 +9,26 @@
 
 import type { PublicContract, SerializableRecord } from '@kbn/utility-types';
 import {
+  BehaviorSubject,
+  combineLatest,
   distinctUntilChanged,
+  EMPTY,
   filter,
+  from,
   map,
   mapTo,
+  merge,
   mergeMap,
+  type Observable,
+  of,
   repeat,
   startWith,
+  Subscription,
   switchMap,
   takeUntil,
   tap,
+  timer,
 } from 'rxjs';
-import type { Observable } from 'rxjs';
-import { BehaviorSubject, combineLatest, EMPTY, from, merge, of, Subscription, timer } from 'rxjs';
 import type {
   PluginInitializerContext,
   StartServicesAccessor,
@@ -32,6 +39,7 @@ import moment from 'moment';
 import type { IKibanaSearchResponse, ISearchOptions } from '@kbn/search-types';
 import { LRUCache } from 'lru-cache';
 import type { Logger } from '@kbn/logging';
+import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import type { SearchUsageCollector } from '../..';
 import type { ConfigSchema } from '../../../server/config';
 import type { SessionMeta, SessionStateContainer } from './search_session_state';
@@ -68,7 +76,7 @@ interface TrackSearchDescriptor {
   /**
    * Cancel the search
    */
-  abort: () => void;
+  abort: (reason: AbortReason) => void;
 
   /**
    * Used for polling after running in background (to ensure the search makes it into the background search saved
@@ -585,7 +593,7 @@ export class SessionService {
     state.trackedSearches
       .filter((s) => s.state === TrackedSearchState.InProgress)
       .forEach((s) => {
-        s.searchDescriptor.abort();
+        s.searchDescriptor.abort(AbortReason.CANCELED);
       });
     this.state.transitions.cancel();
     if (isStoredSession) {

@@ -84,7 +84,7 @@ export function useExpressionRenderer(
   useEffect(() => {
     if (abortController?.signal)
       abortController.signal.onabort = () => {
-        expressionLoaderRef.current?.cancel();
+        expressionLoaderRef.current?.cancel(abortController.signal.reason);
       };
   }, [abortController]);
 
