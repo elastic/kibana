@@ -8,11 +8,11 @@
 import type {
   PageObjects,
   ScoutTestFixtures,
-  ScoutWorkerFixtures,
   ScoutParallelTestFixtures,
   ScoutParallelWorkerFixtures,
 } from '@kbn/scout';
-import { test as baseTest, spaceTest as spaceBaseTest, createLazyPageObject } from '@kbn/scout';
+import { spaceTest as spaceBaseTest, createLazyPageObject } from '@kbn/scout';
+import { createTest } from '@kbn/scout';
 import { DemoPage } from './page_objects';
 
 export interface ExtScoutTestFixtures extends ScoutTestFixtures {
@@ -21,6 +21,7 @@ export interface ExtScoutTestFixtures extends ScoutTestFixtures {
   };
 }
 
+/*
 export const test = baseTest.extend<ExtScoutTestFixtures, ScoutWorkerFixtures>({
   pageObjects: async (
     {
@@ -39,6 +40,13 @@ export const test = baseTest.extend<ExtScoutTestFixtures, ScoutWorkerFixtures>({
 
     await use(extendedPageObjects);
   },
+});
+*/
+
+export const test = createTest<{
+  demo: DemoPage;
+}>({
+  demo: DemoPage,
 });
 
 export interface ExtParallelRunTestFixtures extends ScoutParallelTestFixtures {
