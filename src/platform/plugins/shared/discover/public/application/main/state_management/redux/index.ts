@@ -28,6 +28,8 @@ import {
   initializeTabs,
   saveDiscoverSession,
   resetDiscoverSession,
+  updateAppState,
+  replaceAppState,
 } from './actions';
 
 export {
@@ -67,6 +69,8 @@ export const internalStateActions = {
   initializeTabs,
   saveDiscoverSession,
   resetDiscoverSession,
+  updateAppState,
+  replaceAppState,
 };
 
 export {

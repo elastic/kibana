@@ -61,7 +61,7 @@ export interface DiscoverAppStateContainer extends BaseStateContainer<DiscoverAp
    * @param newState
    * @param merge if true, the given state is merged with the current state
    */
-  replaceUrlState: (newPartial: DiscoverAppState, merge?: boolean) => Promise<void>;
+  replaceUrlState: (newPartial: DiscoverAppState) => Promise<void>;
   /**
    * Updates the state, if replace is true, a history.replace is performed instead of history.push
    * @param newPartial
@@ -205,14 +205,12 @@ export const getDiscoverAppStateContainer = ({
     });
   };
 
-  const replaceUrlState = async (newPartial: DiscoverAppState = {}, merge = true) => {
-    addLog('[appState] replaceUrlState', { newPartial, merge });
-    const state = merge ? { ...appStateContainer.get(), ...newPartial } : newPartial;
-    if (internalState.getState().tabs.unsafeCurrentId === tabId) {
-      await stateStorage.set(APP_STATE_URL_KEY, state, { replace: true });
-    } else {
-      appStateContainer.set(state);
-    }
+  const replaceUrlState = (newPartial: DiscoverAppState = {}) => {
+    return internalState.dispatch(
+      injectCurrentTab(internalStateActions.replaceAppState)({
+        appState: newPartial,
+      })
+    );
   };
 
   const getGlobalState = (state: DiscoverInternalState): GlobalQueryStateFromUrl => {
@@ -287,7 +285,7 @@ export const getDiscoverAppStateContainer = ({
 
     if (setDataViewFromSavedSearch) {
       // used data view is different from the given by url/state which is invalid
-      setState(appStateContainer, {
+      update({
         dataSource: savedSearchDataView?.id
           ? createDataViewDataSource({ dataViewId: savedSearchDataView.id })
           : undefined,
@@ -347,7 +345,11 @@ export const getDiscoverAppStateContainer = ({
     if (replace) {
       return replaceUrlState(newPartial);
     } else {
-      setState(appStateContainer, newPartial);
+      internalState.dispatch(
+        injectCurrentTab(internalStateActions.updateAppState)({
+          appState: newPartial,
+        })
+      );
     }
   };
 
@@ -397,22 +399,6 @@ export function getInitialState({
   }
 
   return handleSourceColumnState(mergedState, services.uiSettings);
-}
-
-/**
- * Helper function to merge a given new state with the existing state and to set the given state
- * container
- */
-export function setState(
-  stateContainer: BaseStateContainer<DiscoverAppState>,
-  newState: DiscoverAppState
-) {
-  addLog('[appstate] setState', { newState });
-  const oldState = stateContainer.get();
-  const mergedState = { ...oldState, ...newState };
-  if (!isEqualState(oldState, mergedState)) {
-    stateContainer.set(mergedState);
-  }
 }
 
 /**
