@@ -9,6 +9,7 @@ import {
   BrowserCouldNotLaunchError,
   BrowserScreenshotError,
   BrowserUnexpectedlyClosedError,
+  IndexPrivilegeError,
   InvalidLayoutParametersError,
   UnknownError,
   VisualReportingSoftDisabledError,
@@ -63,6 +64,18 @@ describe('mapToReportingError', () => {
     expect(
       mapToReportingError(createCustomError('InsufficientMemoryAvailableOnCloudError'))
     ).toBeInstanceOf(VisualReportingSoftDisabledError);
+  });
+
+  test('IndexPrivilegeError', () => {
+    const createCustomError = (name: string) => {
+      const e = new Error('Test index privilege error');
+      e.name = name;
+      return e;
+    };
+
+    expect(mapToReportingError(createCustomError('IndexPrivilegeError'))).toBeInstanceOf(
+      IndexPrivilegeError
+    );
   });
 
   test('unknown error', () => {
