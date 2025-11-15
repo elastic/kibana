@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
-  EuiFormRow,
   EuiFieldText,
-  EuiIcon,
   EuiFormLabel,
+  EuiFormRow,
+  EuiIcon,
   EuiScreenReaderOnly,
   EuiTextTruncate,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
+import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-plugin/public';
 import { useStreamsRoutingSelector } from './state_management/stream_routing_state_machine';
 
 interface StreamNameFormRowProps {
@@ -28,8 +29,29 @@ interface StreamNameFormRowProps {
   isInvalid?: boolean;
 }
 
-const MAX_NAME_LENGTH = 200;
+const MIN_NAME_LENGTH = 1;
 const PREFIX_MAX_VISIBLE_CHARACTERS = 25;
+
+export const getHelpText = (
+  isStreamNameEmpty: boolean,
+  isStreamNameTooLong: boolean,
+  readOnly: boolean
+): string | undefined => {
+  if (isStreamNameEmpty && !readOnly) {
+    return i18n.translate('xpack.streams.streamDetailRouting.minimumNameHelpText', {
+      defaultMessage: `Stream name is required.`,
+    });
+  } else if (isStreamNameTooLong && !readOnly) {
+    return i18n.translate('xpack.streams.streamDetailRouting.maximumNameHelpText', {
+      defaultMessage: `Stream name cannot be longer than {maxLength} characters.`,
+      values: {
+        maxLength: MAX_STREAM_NAME_LENGTH,
+      },
+    });
+  } else {
+    return undefined;
+  }
+};
 
 export function StreamNameFormRow({
   value,
@@ -47,21 +69,11 @@ export function StreamNameFormRow({
   const prefix = parentStreamName + '.';
   const partitionName = value.replace(prefix, '');
 
-  const isLengthValid = value.length > prefix.length && value.length <= MAX_NAME_LENGTH;
+  const isStreamNameEmpty = value.length <= prefix.length;
+  const isStreamNameTooLong = value.length > MAX_STREAM_NAME_LENGTH;
+  const isLengthValid = !isStreamNameEmpty && !isStreamNameTooLong;
 
-  const helpText =
-    value.length >= MAX_NAME_LENGTH && !readOnly
-      ? i18n.translate('xpack.streams.streamDetailRouting.maximumNameHelpText', {
-          defaultMessage: `Stream name cannot be longer than {maxLength} characters.`,
-          values: {
-            maxLength: MAX_NAME_LENGTH,
-          },
-        })
-      : value.length <= prefix.length && !readOnly
-      ? i18n.translate('xpack.streams.streamDetailRouting.minimumNameHelpText', {
-          defaultMessage: `Stream name is required.`,
-        })
-      : undefined;
+  const helpText = getHelpText(isStreamNameEmpty, isStreamNameTooLong, readOnly);
 
   const isDotPresent = !readOnly && partitionName.includes('.');
   const dotErrorMessage = isDotPresent
@@ -96,7 +108,8 @@ export function StreamNameFormRow({
         readOnly={readOnly}
         autoFocus={autoFocus}
         onChange={handleChange}
-        maxLength={MAX_NAME_LENGTH - prefix.length}
+        minLength={MIN_NAME_LENGTH}
+        maxLength={MAX_STREAM_NAME_LENGTH - prefix.length}
         prepend={[
           <EuiIcon type="streamsWired" />,
           <EuiFormLabel

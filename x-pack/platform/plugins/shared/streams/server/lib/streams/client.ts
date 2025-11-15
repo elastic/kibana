@@ -19,6 +19,7 @@ import type { RoutingStatus } from '@kbn/streams-schema';
 import { Streams, getAncestors, getParentId } from '@kbn/streams-schema';
 import type { LockManagerService } from '@kbn/lock-manager';
 import type { Condition } from '@kbn/streamlang';
+import { MAX_STREAM_NAME_LENGTH } from '../../../common/constants';
 import type { AssetClient } from './assets/asset_client';
 import type { QueryClient } from './assets/query/query_client';
 import {
@@ -323,6 +324,18 @@ export class StreamsClient {
 
     if (childExistsAlready) {
       throw new StatusError(`Child stream ${name} already exists`, 409);
+    }
+
+    const prefix = parent + '.';
+    if (name.length <= prefix.length) {
+      throw new StatusError('Stream name must not be empty.', 400);
+    }
+
+    if (name.length > MAX_STREAM_NAME_LENGTH) {
+      throw new StatusError(
+        `Stream name cannot be longer than ${MAX_STREAM_NAME_LENGTH} characters.`,
+        400
+      );
     }
 
     await State.attemptChanges(

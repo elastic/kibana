@@ -53,3 +53,5 @@ export const STREAMS_TIERED_FEATURES = [
 ];
 
 export const FAILURE_STORE_SELECTOR = '::failures';
+
+export const MAX_STREAM_NAME_LENGTH = 200;
