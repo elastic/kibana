@@ -13,7 +13,6 @@ import { Streams, emptyAssets, getInheritedFieldsFromAncestors } from '@kbn/stre
 import { omit } from 'lodash';
 import { OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS } from '@kbn/management-settings-ids';
 import type { RequestHandlerContext } from '@kbn/core/server';
-import type { QueryLink } from '../../../common/assets';
 import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
 import { createServerRoute } from '../create_server_route';
 import { StatusError } from '../../lib/streams/errors/status_error';
@@ -26,6 +25,7 @@ import {
   withoutBaseFields,
 } from '../../lib/content/stream';
 import { asTree } from '../../lib/content/stream/tree';
+import type { SignificantEventLink } from '../../../common/significant_events';
 
 const MAX_CONTENT_PACK_SIZE_BYTES = 1024 * 1024 * 5; // 5MB
 
@@ -55,7 +55,7 @@ const exportContentRoute = createServerRoute({
   async handler({ params, request, response, context, getScopedClients }) {
     await checkEnabled(context);
 
-    const { assetClient, streamsClient } = await getScopedClients({ request });
+    const { significantEventsClient, streamsClient } = await getScopedClients({ request });
 
     const root = await streamsClient.getStream(params.path.name);
     if (!Streams.WiredStream.Definition.is(root)) {
@@ -67,10 +67,10 @@ const exportContentRoute = createServerRoute({
       streamsClient.getDescendants(params.path.name),
     ]);
 
-    const queryLinks = await assetClient.getAssetLinks(
-      [params.path.name, ...descendants.map((stream) => stream.name)],
-      ['query']
-    );
+    const queryLinks = await significantEventsClient.getSignificantEventLinks([
+      params.path.name,
+      ...descendants.map((stream) => stream.name),
+    ]);
     const inheritedFields = getInheritedFieldsFromAncestors(ancestors);
 
     const exportedTree = asTree({
@@ -112,7 +112,7 @@ function asContentPackEntry({
   queryLinks,
 }: {
   stream: Streams.WiredStream.Definition;
-  queryLinks: QueryLink[];
+  queryLinks: SignificantEventLink[];
 }): ContentPackStream {
   return {
     type: 'stream' as const,
@@ -156,7 +156,7 @@ const importContentRoute = createServerRoute({
   async handler({ params, request, context, getScopedClients }) {
     await checkEnabled(context);
 
-    const { assetClient, streamsClient } = await getScopedClients({ request });
+    const { significantEventsClient, streamsClient } = await getScopedClients({ request });
 
     const root = await streamsClient.getStream(params.path.name);
     if (!Streams.WiredStream.Definition.is(root)) {
@@ -166,10 +166,10 @@ const importContentRoute = createServerRoute({
     const contentPack = await parseArchive(params.body.content);
 
     const descendants = await streamsClient.getDescendants(params.path.name);
-    const queryLinks = await assetClient.getAssetLinks(
-      [params.path.name, ...descendants.map(({ name }) => name)],
-      ['query']
-    );
+    const queryLinks = await significantEventsClient.getSignificantEventLinks([
+      params.path.name,
+      ...descendants.map(({ name }) => name),
+    ]);
 
     const existingTree = asTree({
       root: params.path.name,
