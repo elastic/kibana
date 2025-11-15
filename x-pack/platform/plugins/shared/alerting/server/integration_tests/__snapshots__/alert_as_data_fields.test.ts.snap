@@ -743,6 +743,11 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "kibana.alert.maintenance_window_names": Object {
+      "array": true,
+      "required": false,
+      "type": "keyword",
+    },
     "kibana.alert.pending_recovered_count": Object {
       "array": false,
       "required": false,
@@ -1458,6 +1463,11 @@ Object {
       "type": "date",
     },
     "kibana.alert.maintenance_window_ids": Object {
+      "array": true,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.maintenance_window_names": Object {
       "array": true,
       "required": false,
       "type": "keyword",
@@ -2644,6 +2654,11 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "kibana.alert.maintenance_window_names": Object {
+      "array": true,
+      "required": false,
+      "type": "keyword",
+    },
     "kibana.alert.new_terms": Object {
       "array": true,
       "required": false,
@@ -3822,6 +3837,11 @@ Object {
       "type": "date",
     },
     "kibana.alert.maintenance_window_ids": Object {
+      "array": true,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.maintenance_window_names": Object {
       "array": true,
       "required": false,
       "type": "keyword",
@@ -5008,6 +5028,11 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "kibana.alert.maintenance_window_names": Object {
+      "array": true,
+      "required": false,
+      "type": "keyword",
+    },
     "kibana.alert.new_terms": Object {
       "array": true,
       "required": false,
@@ -6186,6 +6211,11 @@ Object {
       "type": "date",
     },
     "kibana.alert.maintenance_window_ids": Object {
+      "array": true,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.maintenance_window_names": Object {
       "array": true,
       "required": false,
       "type": "keyword",
@@ -7378,6 +7408,11 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "kibana.alert.maintenance_window_names": Object {
+      "array": true,
+      "required": false,
+      "type": "keyword",
+    },
     "kibana.alert.new_terms": Object {
       "array": true,
       "required": false,
@@ -8560,6 +8595,11 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "kibana.alert.maintenance_window_names": Object {
+      "array": true,
+      "required": false,
+      "type": "keyword",
+    },
     "kibana.alert.new_terms": Object {
       "array": true,
       "required": false,
@@ -9738,6 +9778,11 @@ Object {
       "type": "date",
     },
     "kibana.alert.maintenance_window_ids": Object {
+      "array": true,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.maintenance_window_names": Object {
       "array": true,
       "required": false,
       "type": "keyword",
@@ -10931,6 +10976,11 @@ Object {
       "type": "date",
     },
     "kibana.alert.maintenance_window_ids": Object {
+      "array": true,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.maintenance_window_names": Object {
       "array": true,
       "required": false,
       "type": "keyword",

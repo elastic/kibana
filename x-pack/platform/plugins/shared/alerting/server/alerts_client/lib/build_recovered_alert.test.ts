@@ -16,6 +16,7 @@ import {
   ALERT_FLAPPING_HISTORY,
   ALERT_INSTANCE_ID,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_MAINTENANCE_WINDOW_NAMES,
   ALERT_START,
   ALERT_STATUS,
   ALERT_UUID,
@@ -79,6 +80,7 @@ for (const flattened of [true, false]) {
         [ALERT_SEVERITY_IMPROVING]: true,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
         [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+        [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_STATUS]: 'recovered',
         [ALERT_WORKFLOW_STATUS]: 'open',
@@ -122,6 +124,7 @@ for (const flattened of [true, false]) {
         duration: '36000000',
       });
       legacyAlert.setMaintenanceWindowIds(['maint-1', 'maint-321']);
+      legacyAlert.setMaintenanceWindowNames(['Maintenance Window 1', 'Maintenance Window 321']);
 
       const updatedRule = {
         ...alertRule,
@@ -152,6 +155,7 @@ for (const flattened of [true, false]) {
         [ALERT_SEVERITY_IMPROVING]: true,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
         [ALERT_MAINTENANCE_WINDOW_IDS]: ['maint-1', 'maint-321'],
+        [ALERT_MAINTENANCE_WINDOW_NAMES]: ['Maintenance Window 1', 'Maintenance Window 321'],
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_STATUS]: 'recovered',
         [ALERT_WORKFLOW_STATUS]: 'open',
@@ -219,6 +223,7 @@ for (const flattened of [true, false]) {
         [ALERT_SEVERITY_IMPROVING]: true,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
         [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+        [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_STATUS]: 'recovered',
         [ALERT_WORKFLOW_STATUS]: 'open',
@@ -263,6 +268,7 @@ for (const flattened of [true, false]) {
         duration: '36000000',
       });
       legacyAlert.setMaintenanceWindowIds(['maint-1', 'maint-321']);
+      legacyAlert.setMaintenanceWindowNames(['Maintenance Window 1', 'Maintenance Window 321']);
 
       const alert = flattened
         ? {
@@ -323,6 +329,7 @@ for (const flattened of [true, false]) {
         [ALERT_SEVERITY_IMPROVING]: true,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
         [ALERT_MAINTENANCE_WINDOW_IDS]: ['maint-1', 'maint-321'],
+        [ALERT_MAINTENANCE_WINDOW_NAMES]: ['Maintenance Window 1', 'Maintenance Window 321'],
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_STATUS]: 'recovered',
         [ALERT_WORKFLOW_STATUS]: 'open',
@@ -390,6 +397,7 @@ for (const flattened of [true, false]) {
         [ALERT_SEVERITY_IMPROVING]: true,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
         [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+        [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_STATUS]: 'recovered',
         [ALERT_WORKFLOW_STATUS]: 'open',
@@ -433,6 +441,7 @@ for (const flattened of [true, false]) {
         duration: '36000000',
       });
       legacyAlert.setMaintenanceWindowIds(['maint-1', 'maint-321']);
+      legacyAlert.setMaintenanceWindowNames(['Maintenance Window 1', 'Maintenance Window 321']);
 
       const alert = flattened
         ? {
@@ -501,6 +510,7 @@ for (const flattened of [true, false]) {
         [ALERT_SEVERITY_IMPROVING]: true,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
         [ALERT_MAINTENANCE_WINDOW_IDS]: ['maint-1', 'maint-321'],
+        [ALERT_MAINTENANCE_WINDOW_NAMES]: ['Maintenance Window 1', 'Maintenance Window 321'],
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_STATUS]: 'recovered',
         [ALERT_WORKFLOW_STATUS]: 'open',
@@ -544,6 +554,7 @@ for (const flattened of [true, false]) {
         duration: '36000000',
       });
       legacyAlert.setMaintenanceWindowIds(['maint-1', 'maint-321']);
+      legacyAlert.setMaintenanceWindowNames(['Maintenance Window 1', 'Maintenance Window 321']);
 
       const alert = flattened
         ? {
@@ -610,6 +621,7 @@ for (const flattened of [true, false]) {
         [ALERT_SEVERITY_IMPROVING]: true,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
         [ALERT_MAINTENANCE_WINDOW_IDS]: ['maint-1', 'maint-321'],
+        [ALERT_MAINTENANCE_WINDOW_NAMES]: ['Maintenance Window 1', 'Maintenance Window 321'],
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_STATUS]: 'recovered',
         [ALERT_WORKFLOW_STATUS]: 'open',
@@ -718,6 +730,7 @@ for (const flattened of [true, false]) {
         [ALERT_SEVERITY_IMPROVING]: true,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
         [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+        [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_STATUS]: 'recovered',
         [ALERT_WORKFLOW_STATUS]: 'custom_status',
