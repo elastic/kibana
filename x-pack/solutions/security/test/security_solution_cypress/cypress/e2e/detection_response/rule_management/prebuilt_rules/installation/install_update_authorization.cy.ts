@@ -39,6 +39,7 @@ import {
   UPGRADE_ALL_RULES_BUTTON,
 } from '../../../../../screens/alerts_detection_rules';
 import { login } from '../../../../../tasks/login';
+import { NOT_FOUND } from '../../../../../screens/common/page';
 
 // Rule to test update
 const RULE_1_ID = 'rule_1';
@@ -101,11 +102,7 @@ describe(
         // and assert that rules cannot be selected and all
         // installation buttons are disabled
         cy.visit(`${APP_PATH}${RULES_ADD_PATH}`);
-        cy.get(INSTALL_ALL_RULES_BUTTON).should('be.disabled');
-        cy.get(getInstallSingleRuleButtonByRuleId(UPDATED_RULE_1['security-rule'].rule_id)).should(
-          'not.exist'
-        );
-        cy.get(RULE_CHECKBOX).should('not.exist');
+        cy.get(NOT_FOUND).should('exist');
       });
 
       it('should not be able to upgrade prebuilt rules', () => {

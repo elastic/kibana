@@ -97,6 +97,8 @@ export default function ({ getService }: FtrProviderContext) {
         siemV2: 0,
         siemV3: 0,
         siemV4: 0,
+        siemV5: 0,
+        securitySolutionRulesV1: 0,
         securitySolutionCases: 0,
         securitySolutionCasesV2: 0,
         securitySolutionCasesV3: 0,
