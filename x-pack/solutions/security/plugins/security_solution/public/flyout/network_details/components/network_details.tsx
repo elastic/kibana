@@ -8,6 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { PageScope } from '../../../data_view_manager/constants';
 import { PageLoader } from '../../../common/components/page_loader';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { InputsModelId } from '../../../common/store/inputs/constants';
@@ -29,7 +30,6 @@ import { useAnomaliesTableData } from '../../../common/components/ml/anomaly/use
 import { useInstalledSecurityJobNameById } from '../../../common/components/ml/hooks/use_installed_security_jobs';
 import { EmptyPrompt } from '../../../common/components/empty_prompt';
 import type { NarrowDateRange } from '../../../common/components/ml/types';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
 
@@ -147,7 +147,7 @@ export const NetworkDetails = ({ ip, flowTarget }: NetworkDetailsProps) => {
       narrowDateRange={narrowDateRange}
       indexPatterns={selectedPatterns}
       jobNameById={jobNameById}
-      scopeId={SourcererScopeName.default}
+      scopeId={PageScope.default}
       isFlyoutOpen={true}
     />
   ) : (

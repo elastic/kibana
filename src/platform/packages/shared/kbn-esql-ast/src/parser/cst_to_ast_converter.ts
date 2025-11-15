@@ -1975,36 +1975,6 @@ export class CstToAstConverter {
     );
   }
 
-  private collectRegexExpression(ctx: cst.BooleanExpressionContext): ast.ESQLFunction[] {
-    const regexes = ctx.getTypedRuleContexts(cst.RegexBooleanExpressionContext);
-    const ret: ast.ESQLFunction[] = [];
-    return ret.concat(
-      regexes
-        .map((regex) => {
-          if (
-            regex instanceof cst.RlikeExpressionContext ||
-            regex instanceof cst.LikeExpressionContext
-          ) {
-            const negate = regex.NOT();
-            const likeType = regex instanceof cst.RlikeExpressionContext ? 'rlike' : 'like';
-            const fnName = `${negate ? 'not ' : ''}${likeType}`;
-            const fn = this.toFunction(fnName, regex, undefined, 'binary-expression');
-            const arg = this.visitValueExpression(regex.valueExpression());
-            if (arg) {
-              fn.args.push(arg);
-
-              const literal = this.toStringLiteral(regex.string_());
-
-              fn.args.push(literal);
-            }
-            return fn;
-          }
-          return undefined;
-        })
-        .filter(nonNullable)
-    );
-  }
-
   private collectIsNullExpression(ctx: cst.BooleanExpressionContext) {
     if (!(ctx instanceof cst.IsNullContext)) {
       return [];
@@ -2071,13 +2041,13 @@ export class CstToAstConverter {
       return this.visitLogicalIns(ctx);
     }
 
+    if (ctx instanceof cst.RegexExpressionContext) {
+      return this.fromRegexExpression(ctx);
+    }
+
     // TODO: Remove these list traversals and concatenations.
     list = list
-      .concat(
-        this.collectRegexExpression(ctx),
-        this.collectIsNullExpression(ctx),
-        this.collectDefaultExpression(ctx)
-      )
+      .concat(this.collectIsNullExpression(ctx), this.collectDefaultExpression(ctx))
       .flat();
 
     return firstItem(list);
@@ -2130,6 +2100,103 @@ export class CstToAstConverter {
     );
 
     return expression;
+  }
+
+  private fromRegexExpression(ctx: cst.RegexExpressionContext): ast.ESQLFunction | undefined {
+    return this.fromRegexBooleanExpression(ctx.regexBooleanExpression());
+  }
+
+  private fromRegexBooleanExpression(
+    ctx: cst.RegexBooleanExpressionContext
+  ): ast.ESQLFunction | undefined {
+    if (ctx instanceof cst.LikeExpressionContext || ctx instanceof cst.RlikeExpressionContext) {
+      return this.toRegexBinaryExpression(ctx);
+    }
+
+    if (
+      ctx instanceof cst.LikeListExpressionContext ||
+      ctx instanceof cst.RlikeListExpressionContext
+    ) {
+      return this.toRegexListExpression(ctx);
+    }
+
+    return undefined;
+  }
+
+  private toRegexBinaryExpression(
+    ctx: cst.LikeExpressionContext | cst.RlikeExpressionContext
+  ): ast.ESQLBinaryExpression | undefined {
+    const left = this.visitValueExpression(ctx.valueExpression());
+
+    if (!left) {
+      return undefined;
+    }
+
+    const right = this.toStringLiteral(ctx.string_());
+    const notCtx = ctx.NOT();
+    const likeType = ctx instanceof cst.RlikeExpressionContext ? 'rlike' : 'like';
+    const operator = `${notCtx ? 'not ' : ''}${likeType}` as ast.BinaryExpressionOperator;
+    const operatorNode = this.toIdentifierFromTerminalNode(
+      ctx instanceof cst.LikeExpressionContext ? ctx.LIKE() : ctx.RLIKE()
+    );
+
+    if (notCtx) {
+      operatorNode.name = `NOT ${operatorNode.name}`;
+      operatorNode.location.min = notCtx.symbol.start;
+      operatorNode.text = `not${operatorNode.text}`;
+    }
+
+    const args: [ast.ESQLAstExpression, ast.ESQLStringLiteral] = [
+      left as ast.ESQLAstExpression,
+      right,
+    ];
+
+    return this.toBinaryExpression(operator, ctx, args, {
+      operator: operatorNode,
+    });
+  }
+
+  private toRegexListExpression(
+    ctx: cst.LikeListExpressionContext | cst.RlikeListExpressionContext
+  ): ast.ESQLBinaryExpression | undefined {
+    const left = this.visitValueExpression(ctx.valueExpression());
+
+    if (!left) {
+      return undefined;
+    }
+
+    const notCtx = ctx.NOT();
+    const likeType = ctx instanceof cst.RlikeListExpressionContext ? 'rlike' : 'like';
+    const operator = `${notCtx ? 'not ' : ''}${likeType}` as ast.BinaryExpressionOperator;
+    const operatorNode = this.toIdentifierFromTerminalNode(
+      ctx instanceof cst.LikeListExpressionContext ? ctx.LIKE() : ctx.RLIKE()
+    );
+
+    if (notCtx) {
+      operatorNode.name = `NOT ${operatorNode.name}`;
+      operatorNode.location.min = notCtx.symbol.start;
+      operatorNode.text = `not${operatorNode.text}`;
+    }
+
+    // Convert the list of string patterns into a tuple list AST node
+    const stringCtxs = ctx.string__list();
+    const values: ast.ESQLStringLiteral[] = stringCtxs.map((stringCtx) =>
+      this.toStringLiteral(stringCtx)
+    );
+
+    const list = Builder.expression.list.tuple(
+      { values },
+      {
+        incomplete: values.some((v) => v.incomplete),
+        location: getPosition(ctx.LP().symbol, ctx.RP().symbol),
+      }
+    );
+
+    const args: [ast.ESQLAstExpression, ast.ESQLList] = [left as ast.ESQLAstExpression, list];
+
+    return this.toBinaryExpression(operator, ctx, args, {
+      operator: operatorNode,
+    });
   }
 
   private visitMatchExpression(ctx: cst.MatchExpressionContext): ESQLAstMatchBooleanExpression {
