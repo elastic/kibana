@@ -79,6 +79,24 @@ async function muteInstanceWithOCC(
   const mutedInstanceIds = attributes.mutedInstanceIds || [];
   if (!attributes.muteAll && !mutedInstanceIds.includes(alertInstanceId)) {
     mutedInstanceIds.push(alertInstanceId);
+
+    const indices = context.getAlertIndicesAlias([attributes.alertTypeId], context.spaceId);
+
+    if (indices && indices.length > 0) {
+      try {
+        await context.alertsService?.muteAlertInstance({
+          ruleId,
+          alertInstanceId,
+          indices,
+          logger: context.logger,
+        });
+      } catch (error) {
+        context.logger.error(
+          `Failed to mute alert instance ${alertInstanceId} in Elasticsearch: ${error.message}`
+        );
+      }
+    }
+
     await updateRuleSo({
       savedObjectsClient: context.unsecuredSavedObjectsClient,
       savedObjectsUpdateOptions: { version },
