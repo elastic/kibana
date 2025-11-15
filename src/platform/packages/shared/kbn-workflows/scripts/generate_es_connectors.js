@@ -613,7 +613,7 @@ function generateConnectorDefinition(endpointName, definition) {
     paramsSchema: z.object({
 ${schemaFields.join('\n')}
     }),
-    outputSchema: z.any().describe('Response from ${endpointName} API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ${endpointName} API'),
   }`;
 }
 
@@ -672,6 +672,7 @@ function generateElasticsearchConnectors() {
 
 import { z } from '@kbn/zod';
 import type { InternalConnectorContract } from '../../types/v1';
+import { EsGenericResponseSchema } from '../elasticsearch_generic_response_schema';
 
 export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
 ${connectorDefinitions.join(',\n')}

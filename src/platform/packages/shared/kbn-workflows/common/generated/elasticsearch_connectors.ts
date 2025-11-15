@@ -11,7 +11,7 @@
  * AUTO-GENERATED FILE - DO NOT EDIT
  * 
  * This file contains Elasticsearch connector definitions generated from Console's API specifications.
- * Generated at: 2025-11-13T08:04:43.119Z
+ * Generated at: 2025-11-13T13:29:10.627Z
  * Source: Console definitions (569 APIs)
  * 
  * To regenerate: npm run generate:es-connectors
@@ -19,6 +19,7 @@
 
 import { z } from '@kbn/zod';
 import type { InternalConnectorContract } from '../../types/v1';
+import { EsGenericResponseSchema } from '../elasticsearch_generic_response_schema';
 
 export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
   {
@@ -37,7 +38,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from _internal.delete_desired_balance API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from _internal.delete_desired_balance API'),
   },
   {
     type: 'elasticsearch._internal.delete_desired_nodes',
@@ -55,7 +56,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from _internal.delete_desired_nodes API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from _internal.delete_desired_nodes API'),
   },
   {
     type: 'elasticsearch._internal.get_desired_balance',
@@ -73,7 +74,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from _internal.get_desired_balance API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from _internal.get_desired_balance API'),
   },
   {
     type: 'elasticsearch._internal.get_desired_nodes',
@@ -91,7 +92,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from _internal.get_desired_nodes API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from _internal.get_desired_nodes API'),
   },
   {
     type: 'elasticsearch._internal.prevalidate_node_removal',
@@ -109,7 +110,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from _internal.prevalidate_node_removal API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from _internal.prevalidate_node_removal API'),
   },
   {
     type: 'elasticsearch._internal.update_desired_nodes',
@@ -132,7 +133,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     upsert: z.object({}).passthrough().optional().describe('Upsert document'),
     doc_as_upsert: z.boolean().optional().describe('Use doc as upsert'),
     }),
-    outputSchema: z.any().describe('Response from _internal.update_desired_nodes API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from _internal.update_desired_nodes API'),
   },
   {
     type: 'elasticsearch.async_search.delete',
@@ -155,7 +156,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from async_search.delete API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from async_search.delete API'),
   },
   {
     type: 'elasticsearch.async_search.get',
@@ -181,7 +182,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     wait_for_completion_timeout: z.union([z.number(), z.array(z.number()), z.enum(['-1', '0'])]).optional().describe('Numeric parameter: wait_for_completion_timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from async_search.get API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from async_search.get API'),
   },
   {
     type: 'elasticsearch.async_search.status',
@@ -205,7 +206,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     keep_alive: z.enum(['5d', '-1', '0']).optional().describe('Enum parameter: keep_alive'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from async_search.status API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from async_search.status API'),
   },
   {
     type: 'elasticsearch.async_search.submit',
@@ -271,7 +272,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     sort: z.unknown().optional().describe('Parameter: sort'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from async_search.submit API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from async_search.submit API'),
   },
   {
     type: 'elasticsearch.autoscaling.delete_autoscaling_policy',
@@ -296,7 +297,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from autoscaling.delete_autoscaling_policy API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from autoscaling.delete_autoscaling_policy API'),
   },
   {
     type: 'elasticsearch.autoscaling.get_autoscaling_capacity',
@@ -319,7 +320,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from autoscaling.get_autoscaling_capacity API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from autoscaling.get_autoscaling_capacity API'),
   },
   {
     type: 'elasticsearch.autoscaling.get_autoscaling_policy',
@@ -343,7 +344,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from autoscaling.get_autoscaling_policy API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from autoscaling.get_autoscaling_policy API'),
   },
   {
     type: 'elasticsearch.autoscaling.put_autoscaling_policy',
@@ -368,7 +369,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from autoscaling.put_autoscaling_policy API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from autoscaling.put_autoscaling_policy API'),
   },
   {
     type: 'elasticsearch.bulk',
@@ -403,7 +404,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     require_data_stream: z.boolean().optional().describe('Boolean flag: require_data_stream'),
     operations: z.array(z.object({}).passthrough()).optional().describe('Bulk operations'),
     }),
-    outputSchema: z.any().describe('Response from bulk API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from bulk API'),
   },
   {
     type: 'elasticsearch.capabilities',
@@ -421,7 +422,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from capabilities API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from capabilities API'),
   },
   {
     type: 'elasticsearch.cat.aliases',
@@ -451,7 +452,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from cat.aliases API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from cat.aliases API'),
   },
   {
     type: 'elasticsearch.cat.allocation',
@@ -482,7 +483,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from cat.allocation API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from cat.allocation API'),
   },
   {
     type: 'elasticsearch.cat.component_templates',
@@ -512,7 +513,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from cat.component_templates API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from cat.component_templates API'),
   },
   {
     type: 'elasticsearch.cat.count',
@@ -540,7 +541,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     s: z.unknown().optional().describe('Parameter: s'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from cat.count API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from cat.count API'),
   },
   {
     type: 'elasticsearch.cat.fielddata',
@@ -569,7 +570,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     s: z.unknown().optional().describe('Parameter: s'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from cat.fielddata API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from cat.fielddata API'),
   },
   {
     type: 'elasticsearch.cat.health',
@@ -598,7 +599,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     s: z.unknown().optional().describe('Parameter: s'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from cat.health API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from cat.health API'),
   },
   {
     type: 'elasticsearch.cat.help',
@@ -616,7 +617,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from cat.help API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from cat.help API'),
   },
   {
     type: 'elasticsearch.cat.indices',
@@ -651,7 +652,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     s: z.unknown().optional().describe('Parameter: s'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from cat.indices API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from cat.indices API'),
   },
   {
     type: 'elasticsearch.cat.master',
@@ -680,7 +681,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from cat.master API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from cat.master API'),
   },
   {
     type: 'elasticsearch.cat.ml_data_frame_analytics',
@@ -711,7 +712,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     time: z.enum(['nanos', 'micros', 'ms', 's', 'm', 'h', 'd']).optional().describe('Enum parameter: time'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from cat.ml_data_frame_analytics API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from cat.ml_data_frame_analytics API'),
   },
   {
     type: 'elasticsearch.cat.ml_datafeeds',
@@ -741,7 +742,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     time: z.enum(['nanos', 'micros', 'ms', 's', 'm', 'h', 'd']).optional().describe('Enum parameter: time'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from cat.ml_datafeeds API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from cat.ml_datafeeds API'),
   },
   {
     type: 'elasticsearch.cat.ml_jobs',
@@ -772,7 +773,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     time: z.enum(['nanos', 'micros', 'ms', 's', 'm', 'h', 'd']).optional().describe('Enum parameter: time'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from cat.ml_jobs API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from cat.ml_jobs API'),
   },
   {
     type: 'elasticsearch.cat.ml_trained_models',
@@ -805,7 +806,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     time: z.enum(['nanos', 'micros', 'ms', 's', 'm', 'h', 'd']).optional().describe('Enum parameter: time'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from cat.ml_trained_models API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from cat.ml_trained_models API'),
   },
   {
     type: 'elasticsearch.cat.nodeattrs',
@@ -834,7 +835,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from cat.nodeattrs API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from cat.nodeattrs API'),
   },
   {
     type: 'elasticsearch.cat.nodes',
@@ -866,7 +867,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     time: z.enum(['nanos', 'micros', 'ms', 's', 'm', 'h', 'd']).optional().describe('Enum parameter: time'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from cat.nodes API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from cat.nodes API'),
   },
   {
     type: 'elasticsearch.cat.pending_tasks',
@@ -896,7 +897,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     time: z.enum(['nanos', 'micros', 'ms', 's', 'm', 'h', 'd']).optional().describe('Enum parameter: time'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from cat.pending_tasks API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from cat.pending_tasks API'),
   },
   {
     type: 'elasticsearch.cat.plugins',
@@ -926,7 +927,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from cat.plugins API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from cat.plugins API'),
   },
   {
     type: 'elasticsearch.cat.recovery',
@@ -958,7 +959,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     time: z.enum(['nanos', 'micros', 'ms', 's', 'm', 'h', 'd']).optional().describe('Enum parameter: time'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from cat.recovery API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from cat.recovery API'),
   },
   {
     type: 'elasticsearch.cat.repositories',
@@ -987,7 +988,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from cat.repositories API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from cat.repositories API'),
   },
   {
     type: 'elasticsearch.cat.segments',
@@ -1018,7 +1019,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from cat.segments API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from cat.segments API'),
   },
   {
     type: 'elasticsearch.cat.shards',
@@ -1049,7 +1050,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     time: z.enum(['nanos', 'micros', 'ms', 's', 'm', 'h', 'd']).optional().describe('Enum parameter: time'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from cat.shards API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from cat.shards API'),
   },
   {
     type: 'elasticsearch.cat.snapshots',
@@ -1080,7 +1081,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     time: z.enum(['nanos', 'micros', 'ms', 's', 'm', 'h', 'd']).optional().describe('Enum parameter: time'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from cat.snapshots API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from cat.snapshots API'),
   },
   {
     type: 'elasticsearch.cat.tasks',
@@ -1114,7 +1115,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     wait_for_completion: z.boolean().optional().describe('Boolean flag: wait_for_completion'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from cat.tasks API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from cat.tasks API'),
   },
   {
     type: 'elasticsearch.cat.templates',
@@ -1144,7 +1145,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from cat.templates API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from cat.templates API'),
   },
   {
     type: 'elasticsearch.cat.thread_pool',
@@ -1175,7 +1176,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from cat.thread_pool API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from cat.thread_pool API'),
   },
   {
     type: 'elasticsearch.cat.transforms',
@@ -1207,7 +1208,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     size: z.union([z.number(), z.array(z.number()), z.enum(['100'])]).optional().describe('Numeric parameter: size'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from cat.transforms API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from cat.transforms API'),
   },
   {
     type: 'elasticsearch.ccr.delete_auto_follow_pattern',
@@ -1231,7 +1232,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ccr.delete_auto_follow_pattern API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ccr.delete_auto_follow_pattern API'),
   },
   {
     type: 'elasticsearch.ccr.follow',
@@ -1256,7 +1257,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     wait_for_active_shards: z.enum(['all', 'index-setting']).optional().describe('Enum parameter: wait_for_active_shards'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ccr.follow API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ccr.follow API'),
   },
   {
     type: 'elasticsearch.ccr.follow_info',
@@ -1280,7 +1281,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ccr.follow_info API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ccr.follow_info API'),
   },
   {
     type: 'elasticsearch.ccr.follow_stats',
@@ -1304,7 +1305,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ccr.follow_stats API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ccr.follow_stats API'),
   },
   {
     type: 'elasticsearch.ccr.forget_follower',
@@ -1328,7 +1329,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ccr.forget_follower API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ccr.forget_follower API'),
   },
   {
     type: 'elasticsearch.ccr.get_auto_follow_pattern',
@@ -1352,7 +1353,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ccr.get_auto_follow_pattern API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ccr.get_auto_follow_pattern API'),
   },
   {
     type: 'elasticsearch.ccr.pause_auto_follow_pattern',
@@ -1376,7 +1377,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ccr.pause_auto_follow_pattern API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ccr.pause_auto_follow_pattern API'),
   },
   {
     type: 'elasticsearch.ccr.pause_follow',
@@ -1400,7 +1401,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ccr.pause_follow API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ccr.pause_follow API'),
   },
   {
     type: 'elasticsearch.ccr.put_auto_follow_pattern',
@@ -1424,7 +1425,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ccr.put_auto_follow_pattern API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ccr.put_auto_follow_pattern API'),
   },
   {
     type: 'elasticsearch.ccr.resume_auto_follow_pattern',
@@ -1448,7 +1449,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ccr.resume_auto_follow_pattern API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ccr.resume_auto_follow_pattern API'),
   },
   {
     type: 'elasticsearch.ccr.resume_follow',
@@ -1472,7 +1473,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ccr.resume_follow API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ccr.resume_follow API'),
   },
   {
     type: 'elasticsearch.ccr.stats',
@@ -1496,7 +1497,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ccr.stats API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ccr.stats API'),
   },
   {
     type: 'elasticsearch.ccr.unfollow',
@@ -1520,7 +1521,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ccr.unfollow API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ccr.unfollow API'),
   },
   {
     type: 'elasticsearch.clear_scroll',
@@ -1543,7 +1544,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from clear_scroll API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from clear_scroll API'),
   },
   {
     type: 'elasticsearch.close_point_in_time',
@@ -1565,7 +1566,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from close_point_in_time API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from close_point_in_time API'),
   },
   {
     type: 'elasticsearch.cluster.allocation_explain',
@@ -1594,7 +1595,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from cluster.allocation_explain API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from cluster.allocation_explain API'),
   },
   {
     type: 'elasticsearch.cluster.delete_component_template',
@@ -1619,7 +1620,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from cluster.delete_component_template API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from cluster.delete_component_template API'),
   },
   {
     type: 'elasticsearch.cluster.delete_voting_config_exclusions',
@@ -1643,7 +1644,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     wait_for_removal: z.boolean().optional().describe('Boolean flag: wait_for_removal'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from cluster.delete_voting_config_exclusions API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from cluster.delete_voting_config_exclusions API'),
   },
   {
     type: 'elasticsearch.cluster.exists_component_template',
@@ -1668,7 +1669,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     local: z.boolean().optional().describe('Boolean flag: local'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from cluster.exists_component_template API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from cluster.exists_component_template API'),
   },
   {
     type: 'elasticsearch.cluster.get_component_template',
@@ -1696,7 +1697,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from cluster.get_component_template API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from cluster.get_component_template API'),
   },
   {
     type: 'elasticsearch.cluster.get_settings',
@@ -1722,7 +1723,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from cluster.get_settings API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from cluster.get_settings API'),
   },
   {
     type: 'elasticsearch.cluster.health',
@@ -1756,7 +1757,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     wait_for_status: z.enum(['green', 'yellow', 'red', 'unknown', 'unavailable']).optional().describe('Enum parameter: wait_for_status'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from cluster.health API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from cluster.health API'),
   },
   {
     type: 'elasticsearch.cluster.info',
@@ -1779,7 +1780,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from cluster.info API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from cluster.info API'),
   },
   {
     type: 'elasticsearch.cluster.pending_tasks',
@@ -1803,7 +1804,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from cluster.pending_tasks API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from cluster.pending_tasks API'),
   },
   {
     type: 'elasticsearch.cluster.post_voting_config_exclusions',
@@ -1829,7 +1830,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from cluster.post_voting_config_exclusions API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from cluster.post_voting_config_exclusions API'),
   },
   {
     type: 'elasticsearch.cluster.put_component_template',
@@ -1857,7 +1858,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     version: z.number().optional().describe('Template version'),
     meta: z.object({}).passthrough().optional().describe('Mapping metadata'),
     }),
-    outputSchema: z.any().describe('Response from cluster.put_component_template API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from cluster.put_component_template API'),
   },
   {
     type: 'elasticsearch.cluster.put_settings',
@@ -1883,7 +1884,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     persistent: z.object({}).passthrough().optional().describe('Persistent cluster settings'),
     transient: z.object({}).passthrough().optional().describe('Transient cluster settings'),
     }),
-    outputSchema: z.any().describe('Response from cluster.put_settings API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from cluster.put_settings API'),
   },
   {
     type: 'elasticsearch.cluster.remote_info',
@@ -1905,7 +1906,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from cluster.remote_info API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from cluster.remote_info API'),
   },
   {
     type: 'elasticsearch.cluster.reroute',
@@ -1933,7 +1934,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from cluster.reroute API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from cluster.reroute API'),
   },
   {
     type: 'elasticsearch.cluster.state',
@@ -1965,7 +1966,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     wait_for_timeout: z.union([z.number(), z.array(z.number()), z.enum(['-1', '0'])]).optional().describe('Numeric parameter: wait_for_timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from cluster.state API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from cluster.state API'),
   },
   {
     type: 'elasticsearch.cluster.stats',
@@ -1990,7 +1991,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.union([z.number(), z.array(z.number()), z.enum(['-1', '0'])]).optional().describe('Numeric parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from cluster.stats API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from cluster.stats API'),
   },
   {
     type: 'elasticsearch.connector.check_in',
@@ -2013,7 +2014,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from connector.check_in API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from connector.check_in API'),
   },
   {
     type: 'elasticsearch.connector.delete',
@@ -2038,7 +2039,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     hard: z.boolean().optional().describe('Boolean flag: hard'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from connector.delete API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from connector.delete API'),
   },
   {
     type: 'elasticsearch.connector.get',
@@ -2062,7 +2063,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     include_deleted: z.boolean().optional().describe('Boolean flag: include_deleted'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from connector.get API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from connector.get API'),
   },
   {
     type: 'elasticsearch.connector.last_sync',
@@ -2085,7 +2086,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from connector.last_sync API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from connector.last_sync API'),
   },
   {
     type: 'elasticsearch.connector.list',
@@ -2114,7 +2115,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     query: z.union([z.string(), z.number()]).optional().describe('Parameter: query'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from connector.list API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from connector.list API'),
   },
   {
     type: 'elasticsearch.connector.post',
@@ -2136,7 +2137,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from connector.post API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from connector.post API'),
   },
   {
     type: 'elasticsearch.connector.put',
@@ -2159,7 +2160,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from connector.put API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from connector.put API'),
   },
   {
     type: 'elasticsearch.connector.secret_delete',
@@ -2178,7 +2179,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     id: z.string().describe('Path parameter: id (required)'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from connector.secret_delete API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from connector.secret_delete API'),
   },
   {
     type: 'elasticsearch.connector.secret_get',
@@ -2197,7 +2198,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     id: z.string().describe('Path parameter: id (required)'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from connector.secret_get API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from connector.secret_get API'),
   },
   {
     type: 'elasticsearch.connector.secret_post',
@@ -2215,7 +2216,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from connector.secret_post API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from connector.secret_post API'),
   },
   {
     type: 'elasticsearch.connector.secret_put',
@@ -2234,7 +2235,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     id: z.string().describe('Path parameter: id (required)'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from connector.secret_put API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from connector.secret_put API'),
   },
   {
     type: 'elasticsearch.connector.sync_job_cancel',
@@ -2257,7 +2258,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from connector.sync_job_cancel API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from connector.sync_job_cancel API'),
   },
   {
     type: 'elasticsearch.connector.sync_job_check_in',
@@ -2280,7 +2281,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from connector.sync_job_check_in API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from connector.sync_job_check_in API'),
   },
   {
     type: 'elasticsearch.connector.sync_job_claim',
@@ -2303,7 +2304,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from connector.sync_job_claim API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from connector.sync_job_claim API'),
   },
   {
     type: 'elasticsearch.connector.sync_job_delete',
@@ -2326,7 +2327,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from connector.sync_job_delete API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from connector.sync_job_delete API'),
   },
   {
     type: 'elasticsearch.connector.sync_job_error',
@@ -2349,7 +2350,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from connector.sync_job_error API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from connector.sync_job_error API'),
   },
   {
     type: 'elasticsearch.connector.sync_job_get',
@@ -2372,7 +2373,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from connector.sync_job_get API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from connector.sync_job_get API'),
   },
   {
     type: 'elasticsearch.connector.sync_job_list',
@@ -2399,7 +2400,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     job_type: z.enum(['full', 'incremental', 'access_control']).optional().describe('Enum parameter: job_type'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from connector.sync_job_list API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from connector.sync_job_list API'),
   },
   {
     type: 'elasticsearch.connector.sync_job_post',
@@ -2421,7 +2422,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from connector.sync_job_post API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from connector.sync_job_post API'),
   },
   {
     type: 'elasticsearch.connector.sync_job_update_stats',
@@ -2444,7 +2445,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from connector.sync_job_update_stats API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from connector.sync_job_update_stats API'),
   },
   {
     type: 'elasticsearch.connector.update_active_filtering',
@@ -2470,7 +2471,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     upsert: z.object({}).passthrough().optional().describe('Upsert document'),
     doc_as_upsert: z.boolean().optional().describe('Use doc as upsert'),
     }),
-    outputSchema: z.any().describe('Response from connector.update_active_filtering API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from connector.update_active_filtering API'),
   },
   {
     type: 'elasticsearch.connector.update_api_key_id',
@@ -2496,7 +2497,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     upsert: z.object({}).passthrough().optional().describe('Upsert document'),
     doc_as_upsert: z.boolean().optional().describe('Use doc as upsert'),
     }),
-    outputSchema: z.any().describe('Response from connector.update_api_key_id API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from connector.update_api_key_id API'),
   },
   {
     type: 'elasticsearch.connector.update_configuration',
@@ -2522,7 +2523,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     upsert: z.object({}).passthrough().optional().describe('Upsert document'),
     doc_as_upsert: z.boolean().optional().describe('Use doc as upsert'),
     }),
-    outputSchema: z.any().describe('Response from connector.update_configuration API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from connector.update_configuration API'),
   },
   {
     type: 'elasticsearch.connector.update_error',
@@ -2548,7 +2549,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     upsert: z.object({}).passthrough().optional().describe('Upsert document'),
     doc_as_upsert: z.boolean().optional().describe('Use doc as upsert'),
     }),
-    outputSchema: z.any().describe('Response from connector.update_error API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from connector.update_error API'),
   },
   {
     type: 'elasticsearch.connector.update_features',
@@ -2574,7 +2575,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     upsert: z.object({}).passthrough().optional().describe('Upsert document'),
     doc_as_upsert: z.boolean().optional().describe('Use doc as upsert'),
     }),
-    outputSchema: z.any().describe('Response from connector.update_features API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from connector.update_features API'),
   },
   {
     type: 'elasticsearch.connector.update_filtering',
@@ -2600,7 +2601,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     upsert: z.object({}).passthrough().optional().describe('Upsert document'),
     doc_as_upsert: z.boolean().optional().describe('Use doc as upsert'),
     }),
-    outputSchema: z.any().describe('Response from connector.update_filtering API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from connector.update_filtering API'),
   },
   {
     type: 'elasticsearch.connector.update_filtering_validation',
@@ -2626,7 +2627,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     upsert: z.object({}).passthrough().optional().describe('Upsert document'),
     doc_as_upsert: z.boolean().optional().describe('Use doc as upsert'),
     }),
-    outputSchema: z.any().describe('Response from connector.update_filtering_validation API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from connector.update_filtering_validation API'),
   },
   {
     type: 'elasticsearch.connector.update_index_name',
@@ -2652,7 +2653,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     upsert: z.object({}).passthrough().optional().describe('Upsert document'),
     doc_as_upsert: z.boolean().optional().describe('Use doc as upsert'),
     }),
-    outputSchema: z.any().describe('Response from connector.update_index_name API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from connector.update_index_name API'),
   },
   {
     type: 'elasticsearch.connector.update_name',
@@ -2678,7 +2679,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     upsert: z.object({}).passthrough().optional().describe('Upsert document'),
     doc_as_upsert: z.boolean().optional().describe('Use doc as upsert'),
     }),
-    outputSchema: z.any().describe('Response from connector.update_name API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from connector.update_name API'),
   },
   {
     type: 'elasticsearch.connector.update_native',
@@ -2704,7 +2705,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     upsert: z.object({}).passthrough().optional().describe('Upsert document'),
     doc_as_upsert: z.boolean().optional().describe('Use doc as upsert'),
     }),
-    outputSchema: z.any().describe('Response from connector.update_native API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from connector.update_native API'),
   },
   {
     type: 'elasticsearch.connector.update_pipeline',
@@ -2730,7 +2731,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     upsert: z.object({}).passthrough().optional().describe('Upsert document'),
     doc_as_upsert: z.boolean().optional().describe('Use doc as upsert'),
     }),
-    outputSchema: z.any().describe('Response from connector.update_pipeline API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from connector.update_pipeline API'),
   },
   {
     type: 'elasticsearch.connector.update_scheduling',
@@ -2756,7 +2757,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     upsert: z.object({}).passthrough().optional().describe('Upsert document'),
     doc_as_upsert: z.boolean().optional().describe('Use doc as upsert'),
     }),
-    outputSchema: z.any().describe('Response from connector.update_scheduling API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from connector.update_scheduling API'),
   },
   {
     type: 'elasticsearch.connector.update_service_type',
@@ -2782,7 +2783,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     upsert: z.object({}).passthrough().optional().describe('Upsert document'),
     doc_as_upsert: z.boolean().optional().describe('Use doc as upsert'),
     }),
-    outputSchema: z.any().describe('Response from connector.update_service_type API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from connector.update_service_type API'),
   },
   {
     type: 'elasticsearch.connector.update_status',
@@ -2808,7 +2809,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     upsert: z.object({}).passthrough().optional().describe('Upsert document'),
     doc_as_upsert: z.boolean().optional().describe('Use doc as upsert'),
     }),
-    outputSchema: z.any().describe('Response from connector.update_status API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from connector.update_status API'),
   },
   {
     type: 'elasticsearch.count',
@@ -2845,7 +2846,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     q: z.union([z.string(), z.number()]).optional().describe('Parameter: q'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from count API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from count API'),
   },
   {
     type: 'elasticsearch.create',
@@ -2879,7 +2880,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     wait_for_active_shards: z.enum(['1', 'all', 'index-setting']).optional().describe('Enum parameter: wait_for_active_shards'),
     document: z.object({}).passthrough().optional().describe('Document content'),
     }),
-    outputSchema: z.any().describe('Response from create API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from create API'),
   },
   {
     type: 'elasticsearch.dangling_indices.delete_dangling_index',
@@ -2905,7 +2906,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.union([z.number(), z.array(z.number()), z.enum(['-1', '0'])]).optional().describe('Numeric parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from dangling_indices.delete_dangling_index API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from dangling_indices.delete_dangling_index API'),
   },
   {
     type: 'elasticsearch.dangling_indices.import_dangling_index',
@@ -2931,7 +2932,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.union([z.number(), z.array(z.number()), z.enum(['-1', '0'])]).optional().describe('Numeric parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from dangling_indices.import_dangling_index API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from dangling_indices.import_dangling_index API'),
   },
   {
     type: 'elasticsearch.dangling_indices.list_dangling_indices',
@@ -2953,7 +2954,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from dangling_indices.list_dangling_indices API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from dangling_indices.list_dangling_indices API'),
   },
   {
     type: 'elasticsearch.delete',
@@ -2985,7 +2986,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     wait_for_active_shards: z.enum(['1', 'all', 'index-setting']).optional().describe('Enum parameter: wait_for_active_shards'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from delete API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from delete API'),
   },
   {
     type: 'elasticsearch.delete_by_query',
@@ -3037,7 +3038,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     wait_for_completion: z.boolean().optional().describe('Boolean flag: wait_for_completion'),
     query: z.union([z.string(), z.object({}).passthrough()]).optional().describe('Query (ES-QL string or Elasticsearch Query DSL)'),
     }),
-    outputSchema: z.any().describe('Response from delete_by_query API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from delete_by_query API'),
   },
   {
     type: 'elasticsearch.delete_by_query_rethrottle',
@@ -3062,7 +3063,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     query: z.union([z.string(), z.object({}).passthrough()]).optional().describe('Query (ES-QL string or Elasticsearch Query DSL)'),
     conflicts: z.enum(['abort', 'proceed']).optional().describe('Conflict resolution'),
     }),
-    outputSchema: z.any().describe('Response from delete_by_query_rethrottle API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from delete_by_query_rethrottle API'),
   },
   {
     type: 'elasticsearch.delete_script',
@@ -3087,7 +3088,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from delete_script API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from delete_script API'),
   },
   {
     type: 'elasticsearch.enrich.delete_policy',
@@ -3111,7 +3112,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from enrich.delete_policy API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from enrich.delete_policy API'),
   },
   {
     type: 'elasticsearch.enrich.execute_policy',
@@ -3136,7 +3137,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     wait_for_completion: z.boolean().optional().describe('Boolean flag: wait_for_completion'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from enrich.execute_policy API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from enrich.execute_policy API'),
   },
   {
     type: 'elasticsearch.enrich.get_policy',
@@ -3160,7 +3161,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from enrich.get_policy API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from enrich.get_policy API'),
   },
   {
     type: 'elasticsearch.enrich.put_policy',
@@ -3184,7 +3185,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from enrich.put_policy API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from enrich.put_policy API'),
   },
   {
     type: 'elasticsearch.enrich.stats',
@@ -3207,7 +3208,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from enrich.stats API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from enrich.stats API'),
   },
   {
     type: 'elasticsearch.eql.delete',
@@ -3230,7 +3231,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from eql.delete API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from eql.delete API'),
   },
   {
     type: 'elasticsearch.eql.get',
@@ -3255,7 +3256,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     wait_for_completion_timeout: z.union([z.number(), z.array(z.number()), z.enum(['-1', '0'])]).optional().describe('Numeric parameter: wait_for_completion_timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from eql.get API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from eql.get API'),
   },
   {
     type: 'elasticsearch.eql.get_status',
@@ -3278,7 +3279,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from eql.get_status API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from eql.get_status API'),
   },
   {
     type: 'elasticsearch.eql.search',
@@ -3320,7 +3321,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     fields: z.array(z.string()).optional().describe('Fields to return'),
     track_total_hits: z.union([z.boolean(), z.number()]).optional().describe('Track total hits'),
     }),
-    outputSchema: z.any().describe('Response from eql.search API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from eql.search API'),
   },
   {
     type: 'elasticsearch.esql.async_query',
@@ -3346,7 +3347,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     format: z.enum(['csv', 'json', 'tsv', 'txt', 'yaml', 'cbor', 'smile', 'arrow']).optional().describe('Enum parameter: format'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from esql.async_query API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from esql.async_query API'),
   },
   {
     type: 'elasticsearch.esql.async_query_delete',
@@ -3369,7 +3370,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from esql.async_query_delete API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from esql.async_query_delete API'),
   },
   {
     type: 'elasticsearch.esql.async_query_get',
@@ -3396,7 +3397,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     wait_for_completion_timeout: z.union([z.number(), z.array(z.number()), z.enum(['-1', '0'])]).optional().describe('Numeric parameter: wait_for_completion_timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from esql.async_query_get API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from esql.async_query_get API'),
   },
   {
     type: 'elasticsearch.esql.async_query_stop',
@@ -3420,7 +3421,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     drop_null_columns: z.boolean().optional().describe('Boolean flag: drop_null_columns'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from esql.async_query_stop API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from esql.async_query_stop API'),
   },
   {
     type: 'elasticsearch.esql.get_query',
@@ -3443,7 +3444,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from esql.get_query API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from esql.get_query API'),
   },
   {
     type: 'elasticsearch.esql.list_queries',
@@ -3465,7 +3466,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from esql.list_queries API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from esql.list_queries API'),
   },
   {
     type: 'elasticsearch.esql.query',
@@ -3496,7 +3497,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     profile: z.boolean().optional().describe('Enable profiling'),
     filter: z.object({}).passthrough().optional().describe('Query filter'),
     }),
-    outputSchema: z.any().describe('Response from esql.query API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from esql.query API'),
   },
   {
     type: 'elasticsearch.exists',
@@ -3530,7 +3531,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     version_type: z.enum(['internal', 'external', 'external_gte', 'force']).optional().describe('Enum parameter: version_type'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from exists API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from exists API'),
   },
   {
     type: 'elasticsearch.exists_source',
@@ -3563,7 +3564,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     version_type: z.enum(['internal', 'external', 'external_gte', 'force']).optional().describe('Enum parameter: version_type'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from exists_source API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from exists_source API'),
   },
   {
     type: 'elasticsearch.explain',
@@ -3599,7 +3600,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     q: z.union([z.string(), z.number()]).optional().describe('Parameter: q'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from explain API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from explain API'),
   },
   {
     type: 'elasticsearch.features.get_features',
@@ -3622,7 +3623,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from features.get_features API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from features.get_features API'),
   },
   {
     type: 'elasticsearch.features.reset_features',
@@ -3645,7 +3646,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from features.reset_features API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from features.reset_features API'),
   },
   {
     type: 'elasticsearch.field_caps',
@@ -3676,7 +3677,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     include_empty_fields: z.boolean().optional().describe('Boolean flag: include_empty_fields'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from field_caps API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from field_caps API'),
   },
   {
     type: 'elasticsearch.fleet.delete_secret',
@@ -3695,7 +3696,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     id: z.string().describe('Path parameter: id (required)'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from fleet.delete_secret API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from fleet.delete_secret API'),
   },
   {
     type: 'elasticsearch.fleet.get_secret',
@@ -3714,7 +3715,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     id: z.string().describe('Path parameter: id (required)'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from fleet.get_secret API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from fleet.get_secret API'),
   },
   {
     type: 'elasticsearch.fleet.global_checkpoints',
@@ -3741,7 +3742,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from fleet.global_checkpoints API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from fleet.global_checkpoints API'),
   },
   {
     type: 'elasticsearch.fleet.msearch',
@@ -3785,7 +3786,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     highlight: z.object({}).passthrough().optional().describe('Highlighting configuration'),
     _source: z.union([z.boolean(), z.array(z.string()), z.object({}).passthrough()]).optional().describe('Source field filtering'),
     }),
-    outputSchema: z.any().describe('Response from fleet.msearch API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from fleet.msearch API'),
   },
   {
     type: 'elasticsearch.fleet.post_secret',
@@ -3803,7 +3804,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from fleet.post_secret API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from fleet.post_secret API'),
   },
   {
     type: 'elasticsearch.fleet.search',
@@ -3874,7 +3875,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     highlight: z.object({}).passthrough().optional().describe('Highlighting configuration'),
     fields: z.array(z.string()).optional().describe('Fields to return'),
     }),
-    outputSchema: z.any().describe('Response from fleet.search API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from fleet.search API'),
   },
   {
     type: 'elasticsearch.get',
@@ -3910,7 +3911,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     version_type: z.enum(['internal', 'external', 'external_gte', 'force']).optional().describe('Enum parameter: version_type'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from get API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from get API'),
   },
   {
     type: 'elasticsearch.get_script',
@@ -3934,7 +3935,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     master_timeout: z.union([z.number(), z.array(z.number()), z.enum(['-1', '0'])]).optional().describe('Numeric parameter: master_timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from get_script API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from get_script API'),
   },
   {
     type: 'elasticsearch.get_script_context',
@@ -3956,7 +3957,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from get_script_context API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from get_script_context API'),
   },
   {
     type: 'elasticsearch.get_script_languages',
@@ -3978,7 +3979,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from get_script_languages API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from get_script_languages API'),
   },
   {
     type: 'elasticsearch.get_source',
@@ -4011,7 +4012,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     version_type: z.enum(['internal', 'external', 'external_gte', 'force']).optional().describe('Enum parameter: version_type'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from get_source API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from get_source API'),
   },
   {
     type: 'elasticsearch.graph.explore',
@@ -4036,7 +4037,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.union([z.number(), z.array(z.number()), z.enum(['-1', '0'])]).optional().describe('Numeric parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from graph.explore API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from graph.explore API'),
   },
   {
     type: 'elasticsearch.health_report',
@@ -4062,7 +4063,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     size: z.union([z.number(), z.array(z.number()), z.enum(['1000'])]).optional().describe('Numeric parameter: size'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from health_report API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from health_report API'),
   },
   {
     type: 'elasticsearch.ilm.delete_lifecycle',
@@ -4087,7 +4088,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ilm.delete_lifecycle API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ilm.delete_lifecycle API'),
   },
   {
     type: 'elasticsearch.ilm.explain_lifecycle',
@@ -4113,7 +4114,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ilm.explain_lifecycle API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ilm.explain_lifecycle API'),
   },
   {
     type: 'elasticsearch.ilm.get_lifecycle',
@@ -4138,7 +4139,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ilm.get_lifecycle API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ilm.get_lifecycle API'),
   },
   {
     type: 'elasticsearch.ilm.get_status',
@@ -4160,7 +4161,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ilm.get_status API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ilm.get_status API'),
   },
   {
     type: 'elasticsearch.ilm.migrate_to_data_tiers',
@@ -4184,7 +4185,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ilm.migrate_to_data_tiers API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ilm.migrate_to_data_tiers API'),
   },
   {
     type: 'elasticsearch.ilm.move_to_step',
@@ -4207,7 +4208,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ilm.move_to_step API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ilm.move_to_step API'),
   },
   {
     type: 'elasticsearch.ilm.put_lifecycle',
@@ -4232,7 +4233,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ilm.put_lifecycle API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ilm.put_lifecycle API'),
   },
   {
     type: 'elasticsearch.ilm.remove_policy',
@@ -4255,7 +4256,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ilm.remove_policy API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ilm.remove_policy API'),
   },
   {
     type: 'elasticsearch.ilm.retry',
@@ -4278,7 +4279,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ilm.retry API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ilm.retry API'),
   },
   {
     type: 'elasticsearch.ilm.start',
@@ -4302,7 +4303,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ilm.start API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ilm.start API'),
   },
   {
     type: 'elasticsearch.ilm.stop',
@@ -4326,7 +4327,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ilm.stop API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ilm.stop API'),
   },
   {
     type: 'elasticsearch.index',
@@ -4363,7 +4364,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     require_data_stream: z.boolean().optional().describe('Boolean flag: require_data_stream'),
     document: z.object({}).passthrough().optional().describe('Document content'),
     }),
-    outputSchema: z.any().describe('Response from index API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from index API'),
   },
   {
     type: 'elasticsearch.indices.add_block',
@@ -4392,7 +4393,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from indices.add_block API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.add_block API'),
   },
   {
     type: 'elasticsearch.indices.analyze',
@@ -4415,7 +4416,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from indices.analyze API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.analyze API'),
   },
   {
     type: 'elasticsearch.indices.cancel_migrate_reindex',
@@ -4441,7 +4442,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     script: z.object({}).passthrough().optional().describe('Script configuration'),
     conflicts: z.enum(['abort', 'proceed']).optional().describe('Conflict resolution'),
     }),
-    outputSchema: z.any().describe('Response from indices.cancel_migrate_reindex API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.cancel_migrate_reindex API'),
   },
   {
     type: 'elasticsearch.indices.clear_cache',
@@ -4471,7 +4472,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     request: z.boolean().optional().describe('Boolean flag: request'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from indices.clear_cache API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.clear_cache API'),
   },
   {
     type: 'elasticsearch.indices.clone',
@@ -4498,7 +4499,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     wait_for_active_shards: z.enum(['1', 'all', 'index-setting']).optional().describe('Enum parameter: wait_for_active_shards'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from indices.clone API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.clone API'),
   },
   {
     type: 'elasticsearch.indices.close',
@@ -4527,7 +4528,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     wait_for_active_shards: z.enum(['1', 'all', 'index-setting']).optional().describe('Enum parameter: wait_for_active_shards'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from indices.close API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.close API'),
   },
   {
     type: 'elasticsearch.indices.create',
@@ -4555,7 +4556,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     settings: z.object({}).passthrough().optional().describe('Index settings'),
     aliases: z.object({}).passthrough().optional().describe('Index aliases'),
     }),
-    outputSchema: z.any().describe('Response from indices.create API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.create API'),
   },
   {
     type: 'elasticsearch.indices.create_data_stream',
@@ -4580,7 +4581,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from indices.create_data_stream API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.create_data_stream API'),
   },
   {
     type: 'elasticsearch.indices.create_from',
@@ -4606,7 +4607,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     settings: z.object({}).passthrough().optional().describe('Index settings'),
     aliases: z.object({}).passthrough().optional().describe('Index aliases'),
     }),
-    outputSchema: z.any().describe('Response from indices.create_from API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.create_from API'),
   },
   {
     type: 'elasticsearch.indices.data_streams_stats',
@@ -4630,7 +4631,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     expand_wildcards: z.enum(['all', 'open', 'closed', 'hidden', 'none']).optional().describe('Enum parameter: expand_wildcards'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from indices.data_streams_stats API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.data_streams_stats API'),
   },
   {
     type: 'elasticsearch.indices.delete',
@@ -4658,7 +4659,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from indices.delete API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.delete API'),
   },
   {
     type: 'elasticsearch.indices.delete_alias',
@@ -4684,7 +4685,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from indices.delete_alias API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.delete_alias API'),
   },
   {
     type: 'elasticsearch.indices.delete_data_lifecycle',
@@ -4710,7 +4711,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.union([z.number(), z.array(z.number()), z.enum(['-1', '0'])]).optional().describe('Numeric parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from indices.delete_data_lifecycle API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.delete_data_lifecycle API'),
   },
   {
     type: 'elasticsearch.indices.delete_data_stream',
@@ -4735,7 +4736,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     expand_wildcards: z.enum(['all', 'open', 'closed', 'hidden', 'none']).optional().describe('Enum parameter: expand_wildcards'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from indices.delete_data_stream API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.delete_data_stream API'),
   },
   {
     type: 'elasticsearch.indices.delete_data_stream_options',
@@ -4761,7 +4762,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.union([z.number(), z.array(z.number()), z.enum(['-1', '0'])]).optional().describe('Numeric parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from indices.delete_data_stream_options API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.delete_data_stream_options API'),
   },
   {
     type: 'elasticsearch.indices.delete_index_template',
@@ -4786,7 +4787,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from indices.delete_index_template API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.delete_index_template API'),
   },
   {
     type: 'elasticsearch.indices.delete_template',
@@ -4811,7 +4812,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from indices.delete_template API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.delete_template API'),
   },
   {
     type: 'elasticsearch.indices.disk_usage',
@@ -4839,7 +4840,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     run_expensive_tasks: z.boolean().optional().describe('Boolean flag: run_expensive_tasks'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from indices.disk_usage API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.disk_usage API'),
   },
   {
     type: 'elasticsearch.indices.downsample',
@@ -4863,7 +4864,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from indices.downsample API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.downsample API'),
   },
   {
     type: 'elasticsearch.indices.exists',
@@ -4892,7 +4893,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     local: z.boolean().optional().describe('Boolean flag: local'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from indices.exists API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.exists API'),
   },
   {
     type: 'elasticsearch.indices.exists_alias',
@@ -4920,7 +4921,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from indices.exists_alias API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.exists_alias API'),
   },
   {
     type: 'elasticsearch.indices.exists_index_template',
@@ -4946,7 +4947,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from indices.exists_index_template API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.exists_index_template API'),
   },
   {
     type: 'elasticsearch.indices.exists_template',
@@ -4972,7 +4973,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from indices.exists_template API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.exists_template API'),
   },
   {
     type: 'elasticsearch.indices.explain_data_lifecycle',
@@ -4997,7 +4998,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     master_timeout: z.union([z.number(), z.array(z.number()), z.enum(['-1', '0'])]).optional().describe('Numeric parameter: master_timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from indices.explain_data_lifecycle API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.explain_data_lifecycle API'),
   },
   {
     type: 'elasticsearch.indices.field_usage_stats',
@@ -5024,7 +5025,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     fields: z.unknown().optional().describe('Parameter: fields'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from indices.field_usage_stats API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.field_usage_stats API'),
   },
   {
     type: 'elasticsearch.indices.flush',
@@ -5052,7 +5053,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     wait_if_ongoing: z.boolean().optional().describe('Boolean flag: wait_if_ongoing'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from indices.flush API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.flush API'),
   },
   {
     type: 'elasticsearch.indices.forcemerge',
@@ -5082,7 +5083,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     wait_for_completion: z.boolean().optional().describe('Boolean flag: wait_for_completion'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from indices.forcemerge API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.forcemerge API'),
   },
   {
     type: 'elasticsearch.indices.get',
@@ -5113,7 +5114,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     features: z.enum(['aliases', 'mappings', 'settings']).optional().describe('Enum parameter: features'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from indices.get API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.get API'),
   },
   {
     type: 'elasticsearch.indices.get_alias',
@@ -5141,7 +5142,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from indices.get_alias API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.get_alias API'),
   },
   {
     type: 'elasticsearch.indices.get_data_lifecycle',
@@ -5167,7 +5168,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from indices.get_data_lifecycle API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.get_data_lifecycle API'),
   },
   {
     type: 'elasticsearch.indices.get_data_lifecycle_stats',
@@ -5189,7 +5190,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from indices.get_data_lifecycle_stats API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.get_data_lifecycle_stats API'),
   },
   {
     type: 'elasticsearch.indices.get_data_stream',
@@ -5216,7 +5217,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     verbose: z.boolean().optional().describe('Boolean flag: verbose'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from indices.get_data_stream API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.get_data_stream API'),
   },
   {
     type: 'elasticsearch.indices.get_data_stream_mappings',
@@ -5240,7 +5241,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from indices.get_data_stream_mappings API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.get_data_stream_mappings API'),
   },
   {
     type: 'elasticsearch.indices.get_data_stream_options',
@@ -5265,7 +5266,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from indices.get_data_stream_options API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.get_data_stream_options API'),
   },
   {
     type: 'elasticsearch.indices.get_data_stream_settings',
@@ -5289,7 +5290,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from indices.get_data_stream_settings API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.get_data_stream_settings API'),
   },
   {
     type: 'elasticsearch.indices.get_field_mapping',
@@ -5317,7 +5318,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     include_defaults: z.boolean().optional().describe('Boolean flag: include_defaults'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from indices.get_field_mapping API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.get_field_mapping API'),
   },
   {
     type: 'elasticsearch.indices.get_index_template',
@@ -5344,7 +5345,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     include_defaults: z.boolean().optional().describe('Boolean flag: include_defaults'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from indices.get_index_template API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.get_index_template API'),
   },
   {
     type: 'elasticsearch.indices.get_mapping',
@@ -5372,7 +5373,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from indices.get_mapping API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.get_mapping API'),
   },
   {
     type: 'elasticsearch.indices.get_migrate_reindex_status',
@@ -5398,7 +5399,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     script: z.object({}).passthrough().optional().describe('Script configuration'),
     conflicts: z.enum(['abort', 'proceed']).optional().describe('Conflict resolution'),
     }),
-    outputSchema: z.any().describe('Response from indices.get_migrate_reindex_status API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.get_migrate_reindex_status API'),
   },
   {
     type: 'elasticsearch.indices.get_settings',
@@ -5429,7 +5430,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from indices.get_settings API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.get_settings API'),
   },
   {
     type: 'elasticsearch.indices.get_template',
@@ -5455,7 +5456,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from indices.get_template API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.get_template API'),
   },
   {
     type: 'elasticsearch.indices.migrate_reindex',
@@ -5480,7 +5481,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     script: z.object({}).passthrough().optional().describe('Script configuration'),
     conflicts: z.enum(['abort', 'proceed']).optional().describe('Conflict resolution'),
     }),
-    outputSchema: z.any().describe('Response from indices.migrate_reindex API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.migrate_reindex API'),
   },
   {
     type: 'elasticsearch.indices.migrate_to_data_stream',
@@ -5505,7 +5506,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from indices.migrate_to_data_stream API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.migrate_to_data_stream API'),
   },
   {
     type: 'elasticsearch.indices.modify_data_stream',
@@ -5527,7 +5528,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from indices.modify_data_stream API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.modify_data_stream API'),
   },
   {
     type: 'elasticsearch.indices.open',
@@ -5556,7 +5557,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     wait_for_active_shards: z.enum(['1', 'all', 'index-setting']).optional().describe('Enum parameter: wait_for_active_shards'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from indices.open API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.open API'),
   },
   {
     type: 'elasticsearch.indices.promote_data_stream',
@@ -5580,7 +5581,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from indices.promote_data_stream API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.promote_data_stream API'),
   },
   {
     type: 'elasticsearch.indices.put_alias',
@@ -5606,7 +5607,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from indices.put_alias API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.put_alias API'),
   },
   {
     type: 'elasticsearch.indices.put_data_lifecycle',
@@ -5632,7 +5633,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from indices.put_data_lifecycle API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.put_data_lifecycle API'),
   },
   {
     type: 'elasticsearch.indices.put_data_stream_mappings',
@@ -5658,7 +5659,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from indices.put_data_stream_mappings API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.put_data_stream_mappings API'),
   },
   {
     type: 'elasticsearch.indices.put_data_stream_options',
@@ -5684,7 +5685,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from indices.put_data_stream_options API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.put_data_stream_options API'),
   },
   {
     type: 'elasticsearch.indices.put_data_stream_settings',
@@ -5710,7 +5711,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from indices.put_data_stream_settings API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.put_data_stream_settings API'),
   },
   {
     type: 'elasticsearch.indices.put_index_template',
@@ -5739,7 +5740,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     priority: z.number().optional().describe('Template priority'),
     version: z.number().optional().describe('Template version'),
     }),
-    outputSchema: z.any().describe('Response from indices.put_index_template API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.put_index_template API'),
   },
   {
     type: 'elasticsearch.indices.put_mapping',
@@ -5770,7 +5771,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     dynamic: z.union([z.boolean(), z.enum(['strict'])]).optional().describe('Dynamic mapping'),
     meta: z.object({}).passthrough().optional().describe('Mapping metadata'),
     }),
-    outputSchema: z.any().describe('Response from indices.put_mapping API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.put_mapping API'),
   },
   {
     type: 'elasticsearch.indices.put_settings',
@@ -5801,7 +5802,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     settings: z.object({}).passthrough().optional().describe('Index settings'),
     }),
-    outputSchema: z.any().describe('Response from indices.put_settings API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.put_settings API'),
   },
   {
     type: 'elasticsearch.indices.put_template',
@@ -5831,7 +5832,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     settings: z.object({}).passthrough().optional().describe('Index settings'),
     aliases: z.object({}).passthrough().optional().describe('Index aliases'),
     }),
-    outputSchema: z.any().describe('Response from indices.put_template API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.put_template API'),
   },
   {
     type: 'elasticsearch.indices.recovery',
@@ -5859,7 +5860,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     ignore_unavailable: z.boolean().optional().describe('Boolean flag: ignore_unavailable'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from indices.recovery API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.recovery API'),
   },
   {
     type: 'elasticsearch.indices.refresh',
@@ -5885,7 +5886,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     ignore_unavailable: z.boolean().optional().describe('Boolean flag: ignore_unavailable'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from indices.refresh API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.refresh API'),
   },
   {
     type: 'elasticsearch.indices.reload_search_analyzers',
@@ -5912,7 +5913,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     resource: z.union([z.string(), z.number()]).optional().describe('Parameter: resource'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from indices.reload_search_analyzers API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.reload_search_analyzers API'),
   },
   {
     type: 'elasticsearch.indices.remove_block',
@@ -5941,7 +5942,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from indices.remove_block API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.remove_block API'),
   },
   {
     type: 'elasticsearch.indices.resolve_cluster',
@@ -5969,7 +5970,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.union([z.number(), z.array(z.number()), z.enum(['-1', '0'])]).optional().describe('Numeric parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from indices.resolve_cluster API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.resolve_cluster API'),
   },
   {
     type: 'elasticsearch.indices.resolve_index',
@@ -5995,7 +5996,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     allow_no_indices: z.boolean().optional().describe('Boolean flag: allow_no_indices'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from indices.resolve_index API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.resolve_index API'),
   },
   {
     type: 'elasticsearch.indices.rollover',
@@ -6024,7 +6025,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     lazy: z.boolean().optional().describe('Boolean flag: lazy'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from indices.rollover API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.rollover API'),
   },
   {
     type: 'elasticsearch.indices.segments',
@@ -6050,7 +6051,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     ignore_unavailable: z.boolean().optional().describe('Boolean flag: ignore_unavailable'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from indices.segments API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.segments API'),
   },
   {
     type: 'elasticsearch.indices.shard_stores',
@@ -6077,7 +6078,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     status: z.enum(['green', 'yellow', 'red', 'all']).optional().describe('Enum parameter: status'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from indices.shard_stores API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.shard_stores API'),
   },
   {
     type: 'elasticsearch.indices.shrink',
@@ -6104,7 +6105,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     wait_for_active_shards: z.enum(['1', 'all', 'index-setting']).optional().describe('Enum parameter: wait_for_active_shards'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from indices.shrink API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.shrink API'),
   },
   {
     type: 'elasticsearch.indices.simulate_index_template',
@@ -6131,7 +6132,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     include_defaults: z.boolean().optional().describe('Boolean flag: include_defaults'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from indices.simulate_index_template API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.simulate_index_template API'),
   },
   {
     type: 'elasticsearch.indices.simulate_template',
@@ -6158,7 +6159,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     include_defaults: z.boolean().optional().describe('Boolean flag: include_defaults'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from indices.simulate_template API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.simulate_template API'),
   },
   {
     type: 'elasticsearch.indices.split',
@@ -6185,7 +6186,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     wait_for_active_shards: z.enum(['1', 'all', 'index-setting']).optional().describe('Enum parameter: wait_for_active_shards'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from indices.split API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.split API'),
   },
   {
     type: 'elasticsearch.indices.stats',
@@ -6218,7 +6219,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     level: z.enum(['cluster', 'indices', 'shards']).optional().describe('Enum parameter: level'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from indices.stats API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.stats API'),
   },
   {
     type: 'elasticsearch.indices.update_aliases',
@@ -6245,7 +6246,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     upsert: z.object({}).passthrough().optional().describe('Upsert document'),
     doc_as_upsert: z.boolean().optional().describe('Use doc as upsert'),
     }),
-    outputSchema: z.any().describe('Response from indices.update_aliases API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.update_aliases API'),
   },
   {
     type: 'elasticsearch.indices.validate_query',
@@ -6280,7 +6281,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     q: z.union([z.string(), z.number()]).optional().describe('Parameter: q'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from indices.validate_query API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from indices.validate_query API'),
   },
   {
     type: 'elasticsearch.inference.chat_completion_unified',
@@ -6304,7 +6305,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from inference.chat_completion_unified API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from inference.chat_completion_unified API'),
   },
   {
     type: 'elasticsearch.inference.completion',
@@ -6328,7 +6329,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from inference.completion API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from inference.completion API'),
   },
   {
     type: 'elasticsearch.inference.delete',
@@ -6354,7 +6355,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     force: z.boolean().optional().describe('Boolean flag: force'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from inference.delete API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from inference.delete API'),
   },
   {
     type: 'elasticsearch.inference.get',
@@ -6378,7 +6379,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from inference.get API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from inference.get API'),
   },
   {
     type: 'elasticsearch.inference.inference',
@@ -6403,7 +6404,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from inference.inference API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from inference.inference API'),
   },
   {
     type: 'elasticsearch.inference.put',
@@ -6428,7 +6429,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from inference.put API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from inference.put API'),
   },
   {
     type: 'elasticsearch.inference.put_alibabacloud',
@@ -6453,7 +6454,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from inference.put_alibabacloud API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from inference.put_alibabacloud API'),
   },
   {
     type: 'elasticsearch.inference.put_amazonbedrock',
@@ -6478,7 +6479,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from inference.put_amazonbedrock API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from inference.put_amazonbedrock API'),
   },
   {
     type: 'elasticsearch.inference.put_amazonsagemaker',
@@ -6498,7 +6499,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     amazonsagemaker_inference_id: z.string().describe('Path parameter: amazonsagemaker_inference_id (required)'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from inference.put_amazonsagemaker API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from inference.put_amazonsagemaker API'),
   },
   {
     type: 'elasticsearch.inference.put_anthropic',
@@ -6523,7 +6524,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from inference.put_anthropic API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from inference.put_anthropic API'),
   },
   {
     type: 'elasticsearch.inference.put_azureaistudio',
@@ -6548,7 +6549,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from inference.put_azureaistudio API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from inference.put_azureaistudio API'),
   },
   {
     type: 'elasticsearch.inference.put_azureopenai',
@@ -6573,7 +6574,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from inference.put_azureopenai API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from inference.put_azureopenai API'),
   },
   {
     type: 'elasticsearch.inference.put_cohere',
@@ -6598,7 +6599,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from inference.put_cohere API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from inference.put_cohere API'),
   },
   {
     type: 'elasticsearch.inference.put_custom',
@@ -6622,7 +6623,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from inference.put_custom API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from inference.put_custom API'),
   },
   {
     type: 'elasticsearch.inference.put_deepseek',
@@ -6647,7 +6648,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from inference.put_deepseek API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from inference.put_deepseek API'),
   },
   {
     type: 'elasticsearch.inference.put_elasticsearch',
@@ -6672,7 +6673,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from inference.put_elasticsearch API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from inference.put_elasticsearch API'),
   },
   {
     type: 'elasticsearch.inference.put_elser',
@@ -6697,7 +6698,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from inference.put_elser API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from inference.put_elser API'),
   },
   {
     type: 'elasticsearch.inference.put_googleaistudio',
@@ -6722,7 +6723,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from inference.put_googleaistudio API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from inference.put_googleaistudio API'),
   },
   {
     type: 'elasticsearch.inference.put_googlevertexai',
@@ -6747,7 +6748,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from inference.put_googlevertexai API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from inference.put_googlevertexai API'),
   },
   {
     type: 'elasticsearch.inference.put_hugging_face',
@@ -6772,7 +6773,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from inference.put_hugging_face API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from inference.put_hugging_face API'),
   },
   {
     type: 'elasticsearch.inference.put_jinaai',
@@ -6797,7 +6798,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from inference.put_jinaai API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from inference.put_jinaai API'),
   },
   {
     type: 'elasticsearch.inference.put_mistral',
@@ -6822,7 +6823,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from inference.put_mistral API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from inference.put_mistral API'),
   },
   {
     type: 'elasticsearch.inference.put_openai',
@@ -6847,7 +6848,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from inference.put_openai API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from inference.put_openai API'),
   },
   {
     type: 'elasticsearch.inference.put_voyageai',
@@ -6872,7 +6873,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from inference.put_voyageai API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from inference.put_voyageai API'),
   },
   {
     type: 'elasticsearch.inference.put_watsonx',
@@ -6897,7 +6898,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from inference.put_watsonx API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from inference.put_watsonx API'),
   },
   {
     type: 'elasticsearch.inference.rerank',
@@ -6921,7 +6922,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from inference.rerank API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from inference.rerank API'),
   },
   {
     type: 'elasticsearch.inference.sparse_embedding',
@@ -6945,7 +6946,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from inference.sparse_embedding API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from inference.sparse_embedding API'),
   },
   {
     type: 'elasticsearch.inference.stream_completion',
@@ -6969,7 +6970,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from inference.stream_completion API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from inference.stream_completion API'),
   },
   {
     type: 'elasticsearch.inference.text_embedding',
@@ -6993,7 +6994,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from inference.text_embedding API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from inference.text_embedding API'),
   },
   {
     type: 'elasticsearch.inference.update',
@@ -7020,7 +7021,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     upsert: z.object({}).passthrough().optional().describe('Upsert document'),
     doc_as_upsert: z.boolean().optional().describe('Use doc as upsert'),
     }),
-    outputSchema: z.any().describe('Response from inference.update API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from inference.update API'),
   },
   {
     type: 'elasticsearch.info',
@@ -7042,7 +7043,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from info API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from info API'),
   },
   {
     type: 'elasticsearch.ingest.delete_geoip_database',
@@ -7067,7 +7068,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ingest.delete_geoip_database API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ingest.delete_geoip_database API'),
   },
   {
     type: 'elasticsearch.ingest.delete_ip_location_database',
@@ -7092,7 +7093,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ingest.delete_ip_location_database API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ingest.delete_ip_location_database API'),
   },
   {
     type: 'elasticsearch.ingest.delete_pipeline',
@@ -7117,7 +7118,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ingest.delete_pipeline API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ingest.delete_pipeline API'),
   },
   {
     type: 'elasticsearch.ingest.geo_ip_stats',
@@ -7139,7 +7140,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ingest.geo_ip_stats API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ingest.geo_ip_stats API'),
   },
   {
     type: 'elasticsearch.ingest.get_geoip_database',
@@ -7162,7 +7163,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ingest.get_geoip_database API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ingest.get_geoip_database API'),
   },
   {
     type: 'elasticsearch.ingest.get_ip_location_database',
@@ -7185,7 +7186,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ingest.get_ip_location_database API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ingest.get_ip_location_database API'),
   },
   {
     type: 'elasticsearch.ingest.get_pipeline',
@@ -7210,7 +7211,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     summary: z.boolean().optional().describe('Boolean flag: summary'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ingest.get_pipeline API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ingest.get_pipeline API'),
   },
   {
     type: 'elasticsearch.ingest.processor_grok',
@@ -7232,7 +7233,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ingest.processor_grok API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ingest.processor_grok API'),
   },
   {
     type: 'elasticsearch.ingest.put_geoip_database',
@@ -7257,7 +7258,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ingest.put_geoip_database API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ingest.put_geoip_database API'),
   },
   {
     type: 'elasticsearch.ingest.put_ip_location_database',
@@ -7282,7 +7283,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ingest.put_ip_location_database API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ingest.put_ip_location_database API'),
   },
   {
     type: 'elasticsearch.ingest.put_pipeline',
@@ -7311,7 +7312,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     on_failure: z.array(z.object({}).passthrough()).optional().describe('Failure processors'),
     version: z.number().optional().describe('Template version'),
     }),
-    outputSchema: z.any().describe('Response from ingest.put_pipeline API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ingest.put_pipeline API'),
   },
   {
     type: 'elasticsearch.ingest.simulate',
@@ -7335,7 +7336,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     verbose: z.boolean().optional().describe('Boolean flag: verbose'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ingest.simulate API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ingest.simulate API'),
   },
   {
     type: 'elasticsearch.knn_search',
@@ -7354,7 +7355,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     index: z.string().describe('Path parameter: index (required)'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from knn_search API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from knn_search API'),
   },
   {
     type: 'elasticsearch.license.delete',
@@ -7378,7 +7379,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from license.delete API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from license.delete API'),
   },
   {
     type: 'elasticsearch.license.get',
@@ -7402,7 +7403,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     local: z.boolean().optional().describe('Boolean flag: local'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from license.get API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from license.get API'),
   },
   {
     type: 'elasticsearch.license.get_basic_status',
@@ -7424,7 +7425,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from license.get_basic_status API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from license.get_basic_status API'),
   },
   {
     type: 'elasticsearch.license.get_trial_status',
@@ -7446,7 +7447,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from license.get_trial_status API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from license.get_trial_status API'),
   },
   {
     type: 'elasticsearch.license.post',
@@ -7471,7 +7472,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from license.post API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from license.post API'),
   },
   {
     type: 'elasticsearch.license.post_start_basic',
@@ -7496,7 +7497,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from license.post_start_basic API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from license.post_start_basic API'),
   },
   {
     type: 'elasticsearch.license.post_start_trial',
@@ -7521,7 +7522,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from license.post_start_trial API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from license.post_start_trial API'),
   },
   {
     type: 'elasticsearch.logstash.delete_pipeline',
@@ -7544,7 +7545,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from logstash.delete_pipeline API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from logstash.delete_pipeline API'),
   },
   {
     type: 'elasticsearch.logstash.get_pipeline',
@@ -7567,7 +7568,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from logstash.get_pipeline API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from logstash.get_pipeline API'),
   },
   {
     type: 'elasticsearch.logstash.put_pipeline',
@@ -7590,7 +7591,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from logstash.put_pipeline API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from logstash.put_pipeline API'),
   },
   {
     type: 'elasticsearch.mget',
@@ -7622,7 +7623,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     stored_fields: z.enum(['false']).optional().describe('Enum parameter: stored_fields'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from mget API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from mget API'),
   },
   {
     type: 'elasticsearch.migration.deprecations',
@@ -7645,7 +7646,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from migration.deprecations API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from migration.deprecations API'),
   },
   {
     type: 'elasticsearch.migration.get_feature_upgrade_status',
@@ -7667,7 +7668,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from migration.get_feature_upgrade_status API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from migration.get_feature_upgrade_status API'),
   },
   {
     type: 'elasticsearch.migration.post_feature_upgrade',
@@ -7689,7 +7690,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from migration.post_feature_upgrade API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from migration.post_feature_upgrade API'),
   },
   {
     type: 'elasticsearch.ml.clear_trained_model_deployment_cache',
@@ -7712,7 +7713,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.clear_trained_model_deployment_cache API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.clear_trained_model_deployment_cache API'),
   },
   {
     type: 'elasticsearch.ml.close_job',
@@ -7738,7 +7739,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30m', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.close_job API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.close_job API'),
   },
   {
     type: 'elasticsearch.ml.delete_calendar',
@@ -7761,7 +7762,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.delete_calendar API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.delete_calendar API'),
   },
   {
     type: 'elasticsearch.ml.delete_calendar_event',
@@ -7785,7 +7786,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.delete_calendar_event API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.delete_calendar_event API'),
   },
   {
     type: 'elasticsearch.ml.delete_calendar_job',
@@ -7809,7 +7810,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.delete_calendar_job API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.delete_calendar_job API'),
   },
   {
     type: 'elasticsearch.ml.delete_data_frame_analytics',
@@ -7834,7 +7835,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['1m', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.delete_data_frame_analytics API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.delete_data_frame_analytics API'),
   },
   {
     type: 'elasticsearch.ml.delete_datafeed',
@@ -7858,7 +7859,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     force: z.boolean().optional().describe('Boolean flag: force'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.delete_datafeed API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.delete_datafeed API'),
   },
   {
     type: 'elasticsearch.ml.delete_expired_data',
@@ -7883,7 +7884,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['8h', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.delete_expired_data API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.delete_expired_data API'),
   },
   {
     type: 'elasticsearch.ml.delete_filter',
@@ -7906,7 +7907,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.delete_filter API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.delete_filter API'),
   },
   {
     type: 'elasticsearch.ml.delete_forecast',
@@ -7932,7 +7933,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.delete_forecast API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.delete_forecast API'),
   },
   {
     type: 'elasticsearch.ml.delete_job',
@@ -7958,7 +7959,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     wait_for_completion: z.boolean().optional().describe('Boolean flag: wait_for_completion'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.delete_job API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.delete_job API'),
   },
   {
     type: 'elasticsearch.ml.delete_model_snapshot',
@@ -7982,7 +7983,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.delete_model_snapshot API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.delete_model_snapshot API'),
   },
   {
     type: 'elasticsearch.ml.delete_trained_model',
@@ -8007,7 +8008,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.delete_trained_model API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.delete_trained_model API'),
   },
   {
     type: 'elasticsearch.ml.delete_trained_model_alias',
@@ -8031,7 +8032,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.delete_trained_model_alias API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.delete_trained_model_alias API'),
   },
   {
     type: 'elasticsearch.ml.estimate_model_memory',
@@ -8053,7 +8054,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.estimate_model_memory API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.estimate_model_memory API'),
   },
   {
     type: 'elasticsearch.ml.evaluate_data_frame',
@@ -8075,7 +8076,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.evaluate_data_frame API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.evaluate_data_frame API'),
   },
   {
     type: 'elasticsearch.ml.explain_data_frame_analytics',
@@ -8098,7 +8099,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.explain_data_frame_analytics API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.explain_data_frame_analytics API'),
   },
   {
     type: 'elasticsearch.ml.flush_job',
@@ -8126,7 +8127,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     start: z.unknown().optional().describe('Parameter: start'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.flush_job API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.flush_job API'),
   },
   {
     type: 'elasticsearch.ml.forecast',
@@ -8152,7 +8153,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     max_model_memory: z.enum(['20mb']).optional().describe('Enum parameter: max_model_memory'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.forecast API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.forecast API'),
   },
   {
     type: 'elasticsearch.ml.get_buckets',
@@ -8185,7 +8186,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     start: z.union([z.number(), z.array(z.number()), z.enum(['-1'])]).optional().describe('Numeric parameter: start'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.get_buckets API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.get_buckets API'),
   },
   {
     type: 'elasticsearch.ml.get_calendar_events',
@@ -8213,7 +8214,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     start: z.unknown().optional().describe('Parameter: start'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.get_calendar_events API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.get_calendar_events API'),
   },
   {
     type: 'elasticsearch.ml.get_calendars',
@@ -8238,7 +8239,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     size: z.union([z.number(), z.array(z.number()), z.enum(['10000'])]).optional().describe('Numeric parameter: size'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.get_calendars API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.get_calendars API'),
   },
   {
     type: 'elasticsearch.ml.get_categories',
@@ -8265,7 +8266,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     size: z.union([z.number(), z.array(z.number()), z.enum(['100'])]).optional().describe('Numeric parameter: size'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.get_categories API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.get_categories API'),
   },
   {
     type: 'elasticsearch.ml.get_data_frame_analytics',
@@ -8292,7 +8293,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     exclude_generated: z.boolean().optional().describe('Boolean flag: exclude_generated'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.get_data_frame_analytics API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.get_data_frame_analytics API'),
   },
   {
     type: 'elasticsearch.ml.get_data_frame_analytics_stats',
@@ -8319,7 +8320,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     verbose: z.boolean().optional().describe('Boolean flag: verbose'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.get_data_frame_analytics_stats API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.get_data_frame_analytics_stats API'),
   },
   {
     type: 'elasticsearch.ml.get_datafeed_stats',
@@ -8343,7 +8344,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     allow_no_match: z.boolean().optional().describe('Boolean flag: allow_no_match'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.get_datafeed_stats API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.get_datafeed_stats API'),
   },
   {
     type: 'elasticsearch.ml.get_datafeeds',
@@ -8368,7 +8369,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     exclude_generated: z.boolean().optional().describe('Boolean flag: exclude_generated'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.get_datafeeds API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.get_datafeeds API'),
   },
   {
     type: 'elasticsearch.ml.get_filters',
@@ -8393,7 +8394,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     size: z.union([z.number(), z.array(z.number()), z.enum(['100'])]).optional().describe('Numeric parameter: size'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.get_filters API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.get_filters API'),
   },
   {
     type: 'elasticsearch.ml.get_influencers',
@@ -8424,7 +8425,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     start: z.union([z.number(), z.array(z.number()), z.enum(['-1'])]).optional().describe('Numeric parameter: start'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.get_influencers API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.get_influencers API'),
   },
   {
     type: 'elasticsearch.ml.get_job_stats',
@@ -8448,7 +8449,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     allow_no_match: z.boolean().optional().describe('Boolean flag: allow_no_match'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.get_job_stats API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.get_job_stats API'),
   },
   {
     type: 'elasticsearch.ml.get_jobs',
@@ -8473,7 +8474,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     exclude_generated: z.boolean().optional().describe('Boolean flag: exclude_generated'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.get_jobs API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.get_jobs API'),
   },
   {
     type: 'elasticsearch.ml.get_memory_stats',
@@ -8498,7 +8499,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.get_memory_stats API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.get_memory_stats API'),
   },
   {
     type: 'elasticsearch.ml.get_model_snapshot_upgrade_stats',
@@ -8523,7 +8524,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     allow_no_match: z.boolean().optional().describe('Boolean flag: allow_no_match'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.get_model_snapshot_upgrade_stats API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.get_model_snapshot_upgrade_stats API'),
   },
   {
     type: 'elasticsearch.ml.get_model_snapshots',
@@ -8553,7 +8554,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     start: z.unknown().optional().describe('Parameter: start'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.get_model_snapshots API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.get_model_snapshots API'),
   },
   {
     type: 'elasticsearch.ml.get_overall_buckets',
@@ -8583,7 +8584,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     top_n: z.union([z.number(), z.array(z.number()), z.enum(['1'])]).optional().describe('Numeric parameter: top_n'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.get_overall_buckets API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.get_overall_buckets API'),
   },
   {
     type: 'elasticsearch.ml.get_records',
@@ -8614,7 +8615,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     start: z.union([z.number(), z.array(z.number()), z.enum(['-1'])]).optional().describe('Numeric parameter: start'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.get_records API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.get_records API'),
   },
   {
     type: 'elasticsearch.ml.get_trained_models',
@@ -8644,7 +8645,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     tags: z.unknown().optional().describe('Parameter: tags'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.get_trained_models API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.get_trained_models API'),
   },
   {
     type: 'elasticsearch.ml.get_trained_models_stats',
@@ -8670,7 +8671,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     size: z.union([z.number(), z.array(z.number()), z.enum(['100'])]).optional().describe('Numeric parameter: size'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.get_trained_models_stats API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.get_trained_models_stats API'),
   },
   {
     type: 'elasticsearch.ml.infer_trained_model',
@@ -8694,7 +8695,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['10s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.infer_trained_model API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.infer_trained_model API'),
   },
   {
     type: 'elasticsearch.ml.info',
@@ -8716,7 +8717,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.info API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.info API'),
   },
   {
     type: 'elasticsearch.ml.open_job',
@@ -8740,7 +8741,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30m', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.open_job API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.open_job API'),
   },
   {
     type: 'elasticsearch.ml.post_calendar_events',
@@ -8763,7 +8764,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.post_calendar_events API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.post_calendar_events API'),
   },
   {
     type: 'elasticsearch.ml.post_data',
@@ -8788,7 +8789,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     reset_start: z.unknown().optional().describe('Parameter: reset_start'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.post_data API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.post_data API'),
   },
   {
     type: 'elasticsearch.ml.preview_data_frame_analytics',
@@ -8811,7 +8812,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.preview_data_frame_analytics API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.preview_data_frame_analytics API'),
   },
   {
     type: 'elasticsearch.ml.preview_datafeed',
@@ -8836,7 +8837,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     end: z.unknown().optional().describe('Parameter: end'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.preview_datafeed API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.preview_datafeed API'),
   },
   {
     type: 'elasticsearch.ml.put_calendar',
@@ -8859,7 +8860,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.put_calendar API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.put_calendar API'),
   },
   {
     type: 'elasticsearch.ml.put_calendar_job',
@@ -8883,7 +8884,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.put_calendar_job API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.put_calendar_job API'),
   },
   {
     type: 'elasticsearch.ml.put_data_frame_analytics',
@@ -8906,7 +8907,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.put_data_frame_analytics API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.put_data_frame_analytics API'),
   },
   {
     type: 'elasticsearch.ml.put_datafeed',
@@ -8937,7 +8938,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     frequency: z.string().optional().describe('Frequency'),
     scroll_size: z.number().optional().describe('Scroll size'),
     }),
-    outputSchema: z.any().describe('Response from ml.put_datafeed API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.put_datafeed API'),
   },
   {
     type: 'elasticsearch.ml.put_filter',
@@ -8960,7 +8961,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.put_filter API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.put_filter API'),
   },
   {
     type: 'elasticsearch.ml.put_job',
@@ -8989,7 +8990,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     analysis_config: z.object({}).passthrough().optional().describe('Analysis configuration'),
     data_description: z.object({}).passthrough().optional().describe('Data description'),
     }),
-    outputSchema: z.any().describe('Response from ml.put_job API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.put_job API'),
   },
   {
     type: 'elasticsearch.ml.put_trained_model',
@@ -9014,7 +9015,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     wait_for_completion: z.boolean().optional().describe('Boolean flag: wait_for_completion'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.put_trained_model API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.put_trained_model API'),
   },
   {
     type: 'elasticsearch.ml.put_trained_model_alias',
@@ -9039,7 +9040,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     reassign: z.boolean().optional().describe('Boolean flag: reassign'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.put_trained_model_alias API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.put_trained_model_alias API'),
   },
   {
     type: 'elasticsearch.ml.put_trained_model_definition_part',
@@ -9063,7 +9064,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.put_trained_model_definition_part API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.put_trained_model_definition_part API'),
   },
   {
     type: 'elasticsearch.ml.put_trained_model_vocabulary',
@@ -9086,7 +9087,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.put_trained_model_vocabulary API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.put_trained_model_vocabulary API'),
   },
   {
     type: 'elasticsearch.ml.reset_job',
@@ -9111,7 +9112,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     delete_user_annotations: z.boolean().optional().describe('Boolean flag: delete_user_annotations'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.reset_job API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.reset_job API'),
   },
   {
     type: 'elasticsearch.ml.revert_model_snapshot',
@@ -9136,7 +9137,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     delete_intervening_results: z.boolean().optional().describe('Boolean flag: delete_intervening_results'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.revert_model_snapshot API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.revert_model_snapshot API'),
   },
   {
     type: 'elasticsearch.ml.set_upgrade_mode',
@@ -9160,7 +9161,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.set_upgrade_mode API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.set_upgrade_mode API'),
   },
   {
     type: 'elasticsearch.ml.start_data_frame_analytics',
@@ -9184,7 +9185,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['20s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.start_data_frame_analytics API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.start_data_frame_analytics API'),
   },
   {
     type: 'elasticsearch.ml.start_datafeed',
@@ -9210,7 +9211,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['20s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.start_datafeed API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.start_datafeed API'),
   },
   {
     type: 'elasticsearch.ml.start_trained_model_deployment',
@@ -9241,7 +9242,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     wait_for: z.enum(['started', 'starting', 'fully_allocated']).optional().describe('Enum parameter: wait_for'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.start_trained_model_deployment API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.start_trained_model_deployment API'),
   },
   {
     type: 'elasticsearch.ml.stop_data_frame_analytics',
@@ -9267,7 +9268,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['20s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.stop_data_frame_analytics API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.stop_data_frame_analytics API'),
   },
   {
     type: 'elasticsearch.ml.stop_datafeed',
@@ -9293,7 +9294,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['20s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.stop_datafeed API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.stop_datafeed API'),
   },
   {
     type: 'elasticsearch.ml.stop_trained_model_deployment',
@@ -9318,7 +9319,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     force: z.boolean().optional().describe('Boolean flag: force'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.stop_trained_model_deployment API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.stop_trained_model_deployment API'),
   },
   {
     type: 'elasticsearch.ml.update_data_frame_analytics',
@@ -9344,7 +9345,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     upsert: z.object({}).passthrough().optional().describe('Upsert document'),
     doc_as_upsert: z.boolean().optional().describe('Use doc as upsert'),
     }),
-    outputSchema: z.any().describe('Response from ml.update_data_frame_analytics API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.update_data_frame_analytics API'),
   },
   {
     type: 'elasticsearch.ml.update_datafeed',
@@ -9374,7 +9375,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     upsert: z.object({}).passthrough().optional().describe('Upsert document'),
     doc_as_upsert: z.boolean().optional().describe('Use doc as upsert'),
     }),
-    outputSchema: z.any().describe('Response from ml.update_datafeed API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.update_datafeed API'),
   },
   {
     type: 'elasticsearch.ml.update_filter',
@@ -9400,7 +9401,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     upsert: z.object({}).passthrough().optional().describe('Upsert document'),
     doc_as_upsert: z.boolean().optional().describe('Use doc as upsert'),
     }),
-    outputSchema: z.any().describe('Response from ml.update_filter API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.update_filter API'),
   },
   {
     type: 'elasticsearch.ml.update_job',
@@ -9426,7 +9427,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     upsert: z.object({}).passthrough().optional().describe('Upsert document'),
     doc_as_upsert: z.boolean().optional().describe('Use doc as upsert'),
     }),
-    outputSchema: z.any().describe('Response from ml.update_job API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.update_job API'),
   },
   {
     type: 'elasticsearch.ml.update_model_snapshot',
@@ -9453,7 +9454,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     upsert: z.object({}).passthrough().optional().describe('Upsert document'),
     doc_as_upsert: z.boolean().optional().describe('Use doc as upsert'),
     }),
-    outputSchema: z.any().describe('Response from ml.update_model_snapshot API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.update_model_snapshot API'),
   },
   {
     type: 'elasticsearch.ml.update_trained_model_deployment',
@@ -9480,7 +9481,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     upsert: z.object({}).passthrough().optional().describe('Upsert document'),
     doc_as_upsert: z.boolean().optional().describe('Use doc as upsert'),
     }),
-    outputSchema: z.any().describe('Response from ml.update_trained_model_deployment API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.update_trained_model_deployment API'),
   },
   {
     type: 'elasticsearch.ml.upgrade_job_snapshot',
@@ -9506,7 +9507,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30m', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.upgrade_job_snapshot API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.upgrade_job_snapshot API'),
   },
   {
     type: 'elasticsearch.ml.validate',
@@ -9528,7 +9529,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.validate API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.validate API'),
   },
   {
     type: 'elasticsearch.ml.validate_detector',
@@ -9550,7 +9551,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ml.validate_detector API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ml.validate_detector API'),
   },
   {
     type: 'elasticsearch.monitoring.bulk',
@@ -9576,7 +9577,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     interval: z.union([z.number(), z.array(z.number()), z.enum(['-1', '0'])]).optional().describe('Numeric parameter: interval'),
     operations: z.array(z.object({}).passthrough()).optional().describe('Bulk operations'),
     }),
-    outputSchema: z.any().describe('Response from monitoring.bulk API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from monitoring.bulk API'),
   },
   {
     type: 'elasticsearch.msearch',
@@ -9620,7 +9621,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     highlight: z.object({}).passthrough().optional().describe('Highlighting configuration'),
     _source: z.union([z.boolean(), z.array(z.string()), z.object({}).passthrough()]).optional().describe('Source field filtering'),
     }),
-    outputSchema: z.any().describe('Response from msearch API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from msearch API'),
   },
   {
     type: 'elasticsearch.msearch_template',
@@ -9656,7 +9657,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     highlight: z.object({}).passthrough().optional().describe('Highlighting configuration'),
     _source: z.union([z.boolean(), z.array(z.string()), z.object({}).passthrough()]).optional().describe('Source field filtering'),
     }),
-    outputSchema: z.any().describe('Response from msearch_template API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from msearch_template API'),
   },
   {
     type: 'elasticsearch.mtermvectors',
@@ -9691,7 +9692,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     version_type: z.enum(['internal', 'external', 'external_gte', 'force']).optional().describe('Enum parameter: version_type'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from mtermvectors API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from mtermvectors API'),
   },
   {
     type: 'elasticsearch.nodes.clear_repositories_metering_archive',
@@ -9715,7 +9716,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from nodes.clear_repositories_metering_archive API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from nodes.clear_repositories_metering_archive API'),
   },
   {
     type: 'elasticsearch.nodes.get_repositories_metering_info',
@@ -9738,7 +9739,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from nodes.get_repositories_metering_info API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from nodes.get_repositories_metering_info API'),
   },
   {
     type: 'elasticsearch.nodes.hot_threads',
@@ -9768,7 +9769,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     sort: z.enum(['cpu', 'wait', 'block', 'gpu', 'mem']).optional().describe('Enum parameter: sort'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from nodes.hot_threads API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from nodes.hot_threads API'),
   },
   {
     type: 'elasticsearch.nodes.info',
@@ -9794,7 +9795,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from nodes.info API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from nodes.info API'),
   },
   {
     type: 'elasticsearch.nodes.reload_secure_settings',
@@ -9818,7 +9819,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from nodes.reload_secure_settings API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from nodes.reload_secure_settings API'),
   },
   {
     type: 'elasticsearch.nodes.stats',
@@ -9852,7 +9853,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     include_unloaded_segments: z.boolean().optional().describe('Boolean flag: include_unloaded_segments'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from nodes.stats API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from nodes.stats API'),
   },
   {
     type: 'elasticsearch.nodes.usage',
@@ -9877,7 +9878,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from nodes.usage API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from nodes.usage API'),
   },
   {
     type: 'elasticsearch.open_point_in_time',
@@ -9907,7 +9908,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     max_concurrent_shard_requests: z.union([z.number(), z.array(z.number()), z.enum(['5'])]).optional().describe('Numeric parameter: max_concurrent_shard_requests'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from open_point_in_time API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from open_point_in_time API'),
   },
   {
     type: 'elasticsearch.ping',
@@ -9929,7 +9930,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ping API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ping API'),
   },
   {
     type: 'elasticsearch.profiling.flamegraph',
@@ -9947,7 +9948,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from profiling.flamegraph API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from profiling.flamegraph API'),
   },
   {
     type: 'elasticsearch.profiling.stacktraces',
@@ -9965,7 +9966,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from profiling.stacktraces API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from profiling.stacktraces API'),
   },
   {
     type: 'elasticsearch.profiling.status',
@@ -9983,7 +9984,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from profiling.status API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from profiling.status API'),
   },
   {
     type: 'elasticsearch.profiling.topn_functions',
@@ -10001,7 +10002,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from profiling.topn_functions API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from profiling.topn_functions API'),
   },
   {
     type: 'elasticsearch.put_script',
@@ -10027,7 +10028,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from put_script API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from put_script API'),
   },
   {
     type: 'elasticsearch.query_rules.delete_rule',
@@ -10051,7 +10052,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from query_rules.delete_rule API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from query_rules.delete_rule API'),
   },
   {
     type: 'elasticsearch.query_rules.delete_ruleset',
@@ -10074,7 +10075,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from query_rules.delete_ruleset API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from query_rules.delete_ruleset API'),
   },
   {
     type: 'elasticsearch.query_rules.get_rule',
@@ -10098,7 +10099,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from query_rules.get_rule API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from query_rules.get_rule API'),
   },
   {
     type: 'elasticsearch.query_rules.get_ruleset',
@@ -10121,7 +10122,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from query_rules.get_ruleset API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from query_rules.get_ruleset API'),
   },
   {
     type: 'elasticsearch.query_rules.list_rulesets',
@@ -10145,7 +10146,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     size: z.union([z.string(), z.number()]).optional().describe('Parameter: size'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from query_rules.list_rulesets API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from query_rules.list_rulesets API'),
   },
   {
     type: 'elasticsearch.query_rules.put_rule',
@@ -10169,7 +10170,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from query_rules.put_rule API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from query_rules.put_rule API'),
   },
   {
     type: 'elasticsearch.query_rules.put_ruleset',
@@ -10192,7 +10193,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from query_rules.put_ruleset API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from query_rules.put_ruleset API'),
   },
   {
     type: 'elasticsearch.query_rules.test',
@@ -10215,7 +10216,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from query_rules.test API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from query_rules.test API'),
   },
   {
     type: 'elasticsearch.rank_eval',
@@ -10242,7 +10243,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     search_type: z.union([z.string(), z.number()]).optional().describe('Parameter: search_type'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from rank_eval API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from rank_eval API'),
   },
   {
     type: 'elasticsearch.reindex',
@@ -10276,7 +10277,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     script: z.object({}).passthrough().optional().describe('Script configuration'),
     conflicts: z.enum(['abort', 'proceed']).optional().describe('Conflict resolution'),
     }),
-    outputSchema: z.any().describe('Response from reindex API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from reindex API'),
   },
   {
     type: 'elasticsearch.reindex_rethrottle',
@@ -10303,7 +10304,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     script: z.object({}).passthrough().optional().describe('Script configuration'),
     conflicts: z.enum(['abort', 'proceed']).optional().describe('Conflict resolution'),
     }),
-    outputSchema: z.any().describe('Response from reindex_rethrottle API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from reindex_rethrottle API'),
   },
   {
     type: 'elasticsearch.render_search_template',
@@ -10329,7 +10330,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     explain: z.boolean().optional().describe('Explain query'),
     profile: z.boolean().optional().describe('Enable profiling'),
     }),
-    outputSchema: z.any().describe('Response from render_search_template API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from render_search_template API'),
   },
   {
     type: 'elasticsearch.rollup.delete_job',
@@ -10352,7 +10353,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from rollup.delete_job API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from rollup.delete_job API'),
   },
   {
     type: 'elasticsearch.rollup.get_jobs',
@@ -10375,7 +10376,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from rollup.get_jobs API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from rollup.get_jobs API'),
   },
   {
     type: 'elasticsearch.rollup.get_rollup_caps',
@@ -10398,7 +10399,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from rollup.get_rollup_caps API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from rollup.get_rollup_caps API'),
   },
   {
     type: 'elasticsearch.rollup.get_rollup_index_caps',
@@ -10421,7 +10422,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from rollup.get_rollup_index_caps API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from rollup.get_rollup_index_caps API'),
   },
   {
     type: 'elasticsearch.rollup.put_job',
@@ -10444,7 +10445,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from rollup.put_job API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from rollup.put_job API'),
   },
   {
     type: 'elasticsearch.rollup.rollup_search',
@@ -10469,7 +10470,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     typed_keys: z.boolean().optional().describe('Boolean flag: typed_keys'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from rollup.rollup_search API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from rollup.rollup_search API'),
   },
   {
     type: 'elasticsearch.rollup.start_job',
@@ -10492,7 +10493,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from rollup.start_job API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from rollup.start_job API'),
   },
   {
     type: 'elasticsearch.rollup.stop_job',
@@ -10517,7 +10518,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     wait_for_completion: z.boolean().optional().describe('Boolean flag: wait_for_completion'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from rollup.stop_job API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from rollup.stop_job API'),
   },
   {
     type: 'elasticsearch.scripts_painless_execute',
@@ -10539,7 +10540,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from scripts_painless_execute API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from scripts_painless_execute API'),
   },
   {
     type: 'elasticsearch.scroll',
@@ -10564,7 +10565,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     rest_total_hits_as_int: z.boolean().optional().describe('Boolean flag: rest_total_hits_as_int'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from scroll API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from scroll API'),
   },
   {
     type: 'elasticsearch.search',
@@ -10637,7 +10638,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     highlight: z.object({}).passthrough().optional().describe('Highlighting configuration'),
     fields: z.array(z.string()).optional().describe('Fields to return'),
     }),
-    outputSchema: z.any().describe('Response from search API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from search API'),
   },
   {
     type: 'elasticsearch.search_application.delete',
@@ -10660,7 +10661,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from search_application.delete API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from search_application.delete API'),
   },
   {
     type: 'elasticsearch.search_application.delete_behavioral_analytics',
@@ -10683,7 +10684,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from search_application.delete_behavioral_analytics API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from search_application.delete_behavioral_analytics API'),
   },
   {
     type: 'elasticsearch.search_application.get',
@@ -10706,7 +10707,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from search_application.get API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from search_application.get API'),
   },
   {
     type: 'elasticsearch.search_application.get_behavioral_analytics',
@@ -10729,7 +10730,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from search_application.get_behavioral_analytics API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from search_application.get_behavioral_analytics API'),
   },
   {
     type: 'elasticsearch.search_application.list',
@@ -10754,7 +10755,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     size: z.union([z.string(), z.number()]).optional().describe('Parameter: size'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from search_application.list API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from search_application.list API'),
   },
   {
     type: 'elasticsearch.search_application.post_behavioral_analytics_event',
@@ -10779,7 +10780,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     debug: z.boolean().optional().describe('Boolean flag: debug'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from search_application.post_behavioral_analytics_event API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from search_application.post_behavioral_analytics_event API'),
   },
   {
     type: 'elasticsearch.search_application.put',
@@ -10803,7 +10804,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     create: z.boolean().optional().describe('Boolean flag: create'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from search_application.put API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from search_application.put API'),
   },
   {
     type: 'elasticsearch.search_application.put_behavioral_analytics',
@@ -10826,7 +10827,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from search_application.put_behavioral_analytics API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from search_application.put_behavioral_analytics API'),
   },
   {
     type: 'elasticsearch.search_application.render_query',
@@ -10849,7 +10850,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from search_application.render_query API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from search_application.render_query API'),
   },
   {
     type: 'elasticsearch.search_application.search',
@@ -10883,7 +10884,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     fields: z.array(z.string()).optional().describe('Fields to return'),
     track_total_hits: z.union([z.boolean(), z.number()]).optional().describe('Track total hits'),
     }),
-    outputSchema: z.any().describe('Response from search_application.search API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from search_application.search API'),
   },
   {
     type: 'elasticsearch.search_mvt',
@@ -10918,7 +10919,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     with_labels: z.boolean().optional().describe('Boolean flag: with_labels'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from search_mvt API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from search_mvt API'),
   },
   {
     type: 'elasticsearch.search_shards',
@@ -10948,7 +10949,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     routing: z.union([z.string(), z.number()]).optional().describe('Parameter: routing'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from search_shards API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from search_shards API'),
   },
   {
     type: 'elasticsearch.search_template',
@@ -10985,7 +10986,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     template: z.object({}).passthrough().optional().describe('Template configuration'),
     params: z.array(z.any()).optional().describe('Query parameters'),
     }),
-    outputSchema: z.any().describe('Response from search_template API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from search_template API'),
   },
   {
     type: 'elasticsearch.searchable_snapshots.cache_stats',
@@ -11009,7 +11010,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     master_timeout: z.union([z.number(), z.array(z.number()), z.enum(['-1', '0'])]).optional().describe('Numeric parameter: master_timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from searchable_snapshots.cache_stats API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from searchable_snapshots.cache_stats API'),
   },
   {
     type: 'elasticsearch.searchable_snapshots.clear_cache',
@@ -11035,7 +11036,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     ignore_unavailable: z.boolean().optional().describe('Boolean flag: ignore_unavailable'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from searchable_snapshots.clear_cache API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from searchable_snapshots.clear_cache API'),
   },
   {
     type: 'elasticsearch.searchable_snapshots.mount',
@@ -11062,7 +11063,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     storage: z.enum(['full_copy']).optional().describe('Enum parameter: storage'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from searchable_snapshots.mount API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from searchable_snapshots.mount API'),
   },
   {
     type: 'elasticsearch.searchable_snapshots.stats',
@@ -11086,7 +11087,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     level: z.enum(['cluster', 'indices', 'shards']).optional().describe('Enum parameter: level'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from searchable_snapshots.stats API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from searchable_snapshots.stats API'),
   },
   {
     type: 'elasticsearch.security.activate_user_profile',
@@ -11108,7 +11109,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from security.activate_user_profile API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.activate_user_profile API'),
   },
   {
     type: 'elasticsearch.security.authenticate',
@@ -11130,7 +11131,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from security.authenticate API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.authenticate API'),
   },
   {
     type: 'elasticsearch.security.bulk_delete_role',
@@ -11153,7 +11154,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     refresh: z.enum(['true', 'false', 'wait_for']).optional().describe('Enum parameter: refresh'),
     operations: z.array(z.object({}).passthrough()).optional().describe('Bulk operations'),
     }),
-    outputSchema: z.any().describe('Response from security.bulk_delete_role API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.bulk_delete_role API'),
   },
   {
     type: 'elasticsearch.security.bulk_put_role',
@@ -11176,7 +11177,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     refresh: z.enum(['true', 'false', 'wait_for']).optional().describe('Enum parameter: refresh'),
     operations: z.array(z.object({}).passthrough()).optional().describe('Bulk operations'),
     }),
-    outputSchema: z.any().describe('Response from security.bulk_put_role API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.bulk_put_role API'),
   },
   {
     type: 'elasticsearch.security.bulk_update_api_keys',
@@ -11198,7 +11199,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     operations: z.array(z.object({}).passthrough()).optional().describe('Bulk operations'),
     }),
-    outputSchema: z.any().describe('Response from security.bulk_update_api_keys API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.bulk_update_api_keys API'),
   },
   {
     type: 'elasticsearch.security.change_password',
@@ -11222,7 +11223,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     refresh: z.enum(['true', 'false', 'wait_for']).optional().describe('Enum parameter: refresh'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from security.change_password API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.change_password API'),
   },
   {
     type: 'elasticsearch.security.clear_api_key_cache',
@@ -11245,7 +11246,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from security.clear_api_key_cache API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.clear_api_key_cache API'),
   },
   {
     type: 'elasticsearch.security.clear_cached_privileges',
@@ -11268,7 +11269,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from security.clear_cached_privileges API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.clear_cached_privileges API'),
   },
   {
     type: 'elasticsearch.security.clear_cached_realms',
@@ -11292,7 +11293,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     usernames: z.union([z.string(), z.number()]).optional().describe('Parameter: usernames'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from security.clear_cached_realms API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.clear_cached_realms API'),
   },
   {
     type: 'elasticsearch.security.clear_cached_roles',
@@ -11315,7 +11316,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from security.clear_cached_roles API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.clear_cached_roles API'),
   },
   {
     type: 'elasticsearch.security.clear_cached_service_tokens',
@@ -11340,7 +11341,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from security.clear_cached_service_tokens API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.clear_cached_service_tokens API'),
   },
   {
     type: 'elasticsearch.security.create_api_key',
@@ -11363,7 +11364,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     refresh: z.enum(['true', 'false', 'wait_for']).optional().describe('Enum parameter: refresh'),
     document: z.object({}).passthrough().optional().describe('Document content'),
     }),
-    outputSchema: z.any().describe('Response from security.create_api_key API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.create_api_key API'),
   },
   {
     type: 'elasticsearch.security.create_cross_cluster_api_key',
@@ -11385,7 +11386,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     document: z.object({}).passthrough().optional().describe('Document content'),
     }),
-    outputSchema: z.any().describe('Response from security.create_cross_cluster_api_key API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.create_cross_cluster_api_key API'),
   },
   {
     type: 'elasticsearch.security.create_service_token',
@@ -11411,7 +11412,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     refresh: z.enum(['true', 'false', 'wait_for']).optional().describe('Enum parameter: refresh'),
     document: z.object({}).passthrough().optional().describe('Document content'),
     }),
-    outputSchema: z.any().describe('Response from security.create_service_token API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.create_service_token API'),
   },
   {
     type: 'elasticsearch.security.delegate_pki',
@@ -11433,7 +11434,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from security.delegate_pki API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.delegate_pki API'),
   },
   {
     type: 'elasticsearch.security.delete_privileges',
@@ -11458,7 +11459,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     refresh: z.enum(['true', 'false', 'wait_for']).optional().describe('Enum parameter: refresh'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from security.delete_privileges API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.delete_privileges API'),
   },
   {
     type: 'elasticsearch.security.delete_role',
@@ -11482,7 +11483,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     refresh: z.enum(['true', 'false', 'wait_for']).optional().describe('Enum parameter: refresh'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from security.delete_role API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.delete_role API'),
   },
   {
     type: 'elasticsearch.security.delete_role_mapping',
@@ -11506,7 +11507,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     refresh: z.enum(['true', 'false', 'wait_for']).optional().describe('Enum parameter: refresh'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from security.delete_role_mapping API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.delete_role_mapping API'),
   },
   {
     type: 'elasticsearch.security.delete_service_token',
@@ -11532,7 +11533,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     refresh: z.enum(['true', 'false', 'wait_for']).optional().describe('Enum parameter: refresh'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from security.delete_service_token API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.delete_service_token API'),
   },
   {
     type: 'elasticsearch.security.delete_user',
@@ -11556,7 +11557,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     refresh: z.enum(['true', 'false', 'wait_for']).optional().describe('Enum parameter: refresh'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from security.delete_user API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.delete_user API'),
   },
   {
     type: 'elasticsearch.security.disable_user',
@@ -11580,7 +11581,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     refresh: z.enum(['true', 'false', 'wait_for']).optional().describe('Enum parameter: refresh'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from security.disable_user API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.disable_user API'),
   },
   {
     type: 'elasticsearch.security.disable_user_profile',
@@ -11604,7 +11605,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     refresh: z.enum(['true', 'false', 'wait_for']).optional().describe('Enum parameter: refresh'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from security.disable_user_profile API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.disable_user_profile API'),
   },
   {
     type: 'elasticsearch.security.enable_user',
@@ -11628,7 +11629,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     refresh: z.enum(['true', 'false', 'wait_for']).optional().describe('Enum parameter: refresh'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from security.enable_user API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.enable_user API'),
   },
   {
     type: 'elasticsearch.security.enable_user_profile',
@@ -11652,7 +11653,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     refresh: z.enum(['true', 'false', 'wait_for']).optional().describe('Enum parameter: refresh'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from security.enable_user_profile API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.enable_user_profile API'),
   },
   {
     type: 'elasticsearch.security.enroll_kibana',
@@ -11674,7 +11675,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from security.enroll_kibana API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.enroll_kibana API'),
   },
   {
     type: 'elasticsearch.security.enroll_node',
@@ -11696,7 +11697,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from security.enroll_node API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.enroll_node API'),
   },
   {
     type: 'elasticsearch.security.get_api_key',
@@ -11726,7 +11727,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     with_profile_uid: z.boolean().optional().describe('Boolean flag: with_profile_uid'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from security.get_api_key API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.get_api_key API'),
   },
   {
     type: 'elasticsearch.security.get_builtin_privileges',
@@ -11748,7 +11749,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from security.get_builtin_privileges API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.get_builtin_privileges API'),
   },
   {
     type: 'elasticsearch.security.get_privileges',
@@ -11772,7 +11773,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from security.get_privileges API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.get_privileges API'),
   },
   {
     type: 'elasticsearch.security.get_role',
@@ -11795,7 +11796,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from security.get_role API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.get_role API'),
   },
   {
     type: 'elasticsearch.security.get_role_mapping',
@@ -11818,7 +11819,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from security.get_role_mapping API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.get_role_mapping API'),
   },
   {
     type: 'elasticsearch.security.get_service_accounts',
@@ -11842,7 +11843,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from security.get_service_accounts API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.get_service_accounts API'),
   },
   {
     type: 'elasticsearch.security.get_service_credentials',
@@ -11866,7 +11867,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from security.get_service_credentials API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.get_service_credentials API'),
   },
   {
     type: 'elasticsearch.security.get_settings',
@@ -11889,7 +11890,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     master_timeout: z.union([z.number(), z.array(z.number()), z.enum(['-1', '0'])]).optional().describe('Numeric parameter: master_timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from security.get_settings API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.get_settings API'),
   },
   {
     type: 'elasticsearch.security.get_token',
@@ -11911,7 +11912,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from security.get_token API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.get_token API'),
   },
   {
     type: 'elasticsearch.security.get_user',
@@ -11935,7 +11936,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     with_profile_uid: z.boolean().optional().describe('Boolean flag: with_profile_uid'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from security.get_user API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.get_user API'),
   },
   {
     type: 'elasticsearch.security.get_user_privileges',
@@ -11957,7 +11958,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from security.get_user_privileges API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.get_user_privileges API'),
   },
   {
     type: 'elasticsearch.security.get_user_profile',
@@ -11981,7 +11982,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     data: z.unknown().optional().describe('Parameter: data'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from security.get_user_profile API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.get_user_profile API'),
   },
   {
     type: 'elasticsearch.security.grant_api_key',
@@ -12004,7 +12005,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     refresh: z.enum(['true', 'false', 'wait_for']).optional().describe('Enum parameter: refresh'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from security.grant_api_key API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.grant_api_key API'),
   },
   {
     type: 'elasticsearch.security.has_privileges',
@@ -12027,7 +12028,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from security.has_privileges API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.has_privileges API'),
   },
   {
     type: 'elasticsearch.security.has_privileges_user_profile',
@@ -12049,7 +12050,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from security.has_privileges_user_profile API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.has_privileges_user_profile API'),
   },
   {
     type: 'elasticsearch.security.invalidate_api_key',
@@ -12071,7 +12072,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from security.invalidate_api_key API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.invalidate_api_key API'),
   },
   {
     type: 'elasticsearch.security.invalidate_token',
@@ -12093,7 +12094,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from security.invalidate_token API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.invalidate_token API'),
   },
   {
     type: 'elasticsearch.security.oidc_authenticate',
@@ -12115,7 +12116,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from security.oidc_authenticate API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.oidc_authenticate API'),
   },
   {
     type: 'elasticsearch.security.oidc_logout',
@@ -12137,7 +12138,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from security.oidc_logout API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.oidc_logout API'),
   },
   {
     type: 'elasticsearch.security.oidc_prepare_authentication',
@@ -12159,7 +12160,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from security.oidc_prepare_authentication API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.oidc_prepare_authentication API'),
   },
   {
     type: 'elasticsearch.security.put_privileges',
@@ -12182,7 +12183,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     refresh: z.enum(['true', 'false', 'wait_for']).optional().describe('Enum parameter: refresh'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from security.put_privileges API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.put_privileges API'),
   },
   {
     type: 'elasticsearch.security.put_role',
@@ -12210,7 +12211,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     run_as: z.array(z.string()).optional().describe('Run as users'),
     metadata: z.object({}).passthrough().optional().describe('Metadata'),
     }),
-    outputSchema: z.any().describe('Response from security.put_role API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.put_role API'),
   },
   {
     type: 'elasticsearch.security.put_role_mapping',
@@ -12238,7 +12239,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     run_as: z.array(z.string()).optional().describe('Run as users'),
     metadata: z.object({}).passthrough().optional().describe('Metadata'),
     }),
-    outputSchema: z.any().describe('Response from security.put_role_mapping API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.put_role_mapping API'),
   },
   {
     type: 'elasticsearch.security.put_user',
@@ -12266,7 +12267,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     email: z.string().optional().describe('Email address'),
     metadata: z.object({}).passthrough().optional().describe('Metadata'),
     }),
-    outputSchema: z.any().describe('Response from security.put_user API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.put_user API'),
   },
   {
     type: 'elasticsearch.security.query_api_keys',
@@ -12291,7 +12292,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     typed_keys: z.boolean().optional().describe('Boolean flag: typed_keys'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from security.query_api_keys API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.query_api_keys API'),
   },
   {
     type: 'elasticsearch.security.query_role',
@@ -12313,7 +12314,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from security.query_role API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.query_role API'),
   },
   {
     type: 'elasticsearch.security.query_user',
@@ -12336,7 +12337,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     with_profile_uid: z.boolean().optional().describe('Boolean flag: with_profile_uid'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from security.query_user API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.query_user API'),
   },
   {
     type: 'elasticsearch.security.saml_authenticate',
@@ -12358,7 +12359,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from security.saml_authenticate API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.saml_authenticate API'),
   },
   {
     type: 'elasticsearch.security.saml_complete_logout',
@@ -12380,7 +12381,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from security.saml_complete_logout API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.saml_complete_logout API'),
   },
   {
     type: 'elasticsearch.security.saml_invalidate',
@@ -12402,7 +12403,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from security.saml_invalidate API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.saml_invalidate API'),
   },
   {
     type: 'elasticsearch.security.saml_logout',
@@ -12424,7 +12425,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from security.saml_logout API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.saml_logout API'),
   },
   {
     type: 'elasticsearch.security.saml_prepare_authentication',
@@ -12446,7 +12447,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from security.saml_prepare_authentication API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.saml_prepare_authentication API'),
   },
   {
     type: 'elasticsearch.security.saml_service_provider_metadata',
@@ -12469,7 +12470,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from security.saml_service_provider_metadata API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.saml_service_provider_metadata API'),
   },
   {
     type: 'elasticsearch.security.suggest_user_profiles',
@@ -12492,7 +12493,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     data: z.unknown().optional().describe('Parameter: data'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from security.suggest_user_profiles API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.suggest_user_profiles API'),
   },
   {
     type: 'elasticsearch.security.update_api_key',
@@ -12518,7 +12519,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     upsert: z.object({}).passthrough().optional().describe('Upsert document'),
     doc_as_upsert: z.boolean().optional().describe('Use doc as upsert'),
     }),
-    outputSchema: z.any().describe('Response from security.update_api_key API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.update_api_key API'),
   },
   {
     type: 'elasticsearch.security.update_cross_cluster_api_key',
@@ -12544,7 +12545,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     upsert: z.object({}).passthrough().optional().describe('Upsert document'),
     doc_as_upsert: z.boolean().optional().describe('Use doc as upsert'),
     }),
-    outputSchema: z.any().describe('Response from security.update_cross_cluster_api_key API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.update_cross_cluster_api_key API'),
   },
   {
     type: 'elasticsearch.security.update_settings',
@@ -12571,7 +12572,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     upsert: z.object({}).passthrough().optional().describe('Upsert document'),
     doc_as_upsert: z.boolean().optional().describe('Use doc as upsert'),
     }),
-    outputSchema: z.any().describe('Response from security.update_settings API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.update_settings API'),
   },
   {
     type: 'elasticsearch.security.update_user_profile_data',
@@ -12600,7 +12601,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     upsert: z.object({}).passthrough().optional().describe('Upsert document'),
     doc_as_upsert: z.boolean().optional().describe('Use doc as upsert'),
     }),
-    outputSchema: z.any().describe('Response from security.update_user_profile_data API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from security.update_user_profile_data API'),
   },
   {
     type: 'elasticsearch.shutdown.delete_node',
@@ -12625,7 +12626,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['nanos', 'micros', 'ms', 's', 'm', 'h', 'd']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from shutdown.delete_node API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from shutdown.delete_node API'),
   },
   {
     type: 'elasticsearch.shutdown.get_node',
@@ -12649,7 +12650,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     master_timeout: z.enum(['nanos', 'micros', 'ms', 's', 'm', 'h', 'd']).optional().describe('Enum parameter: master_timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from shutdown.get_node API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from shutdown.get_node API'),
   },
   {
     type: 'elasticsearch.shutdown.put_node',
@@ -12674,7 +12675,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['nanos', 'micros', 'ms', 's', 'm', 'h', 'd']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from shutdown.put_node API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from shutdown.put_node API'),
   },
   {
     type: 'elasticsearch.simulate.ingest',
@@ -12698,7 +12699,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pipeline: z.union([z.string(), z.number()]).optional().describe('Parameter: pipeline'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from simulate.ingest API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from simulate.ingest API'),
   },
   {
     type: 'elasticsearch.slm.delete_lifecycle',
@@ -12723,7 +12724,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from slm.delete_lifecycle API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from slm.delete_lifecycle API'),
   },
   {
     type: 'elasticsearch.slm.execute_lifecycle',
@@ -12748,7 +12749,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from slm.execute_lifecycle API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from slm.execute_lifecycle API'),
   },
   {
     type: 'elasticsearch.slm.execute_retention',
@@ -12772,7 +12773,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from slm.execute_retention API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from slm.execute_retention API'),
   },
   {
     type: 'elasticsearch.slm.get_lifecycle',
@@ -12797,7 +12798,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from slm.get_lifecycle API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from slm.get_lifecycle API'),
   },
   {
     type: 'elasticsearch.slm.get_stats',
@@ -12821,7 +12822,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from slm.get_stats API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from slm.get_stats API'),
   },
   {
     type: 'elasticsearch.slm.get_status',
@@ -12845,7 +12846,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from slm.get_status API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from slm.get_status API'),
   },
   {
     type: 'elasticsearch.slm.put_lifecycle',
@@ -12870,7 +12871,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from slm.put_lifecycle API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from slm.put_lifecycle API'),
   },
   {
     type: 'elasticsearch.slm.start',
@@ -12894,7 +12895,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from slm.start API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from slm.start API'),
   },
   {
     type: 'elasticsearch.slm.stop',
@@ -12918,7 +12919,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from slm.stop API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from slm.stop API'),
   },
   {
     type: 'elasticsearch.snapshot.cleanup_repository',
@@ -12943,7 +12944,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from snapshot.cleanup_repository API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from snapshot.cleanup_repository API'),
   },
   {
     type: 'elasticsearch.snapshot.clone',
@@ -12969,7 +12970,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from snapshot.clone API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from snapshot.clone API'),
   },
   {
     type: 'elasticsearch.snapshot.create',
@@ -12995,7 +12996,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     wait_for_completion: z.boolean().optional().describe('Boolean flag: wait_for_completion'),
     document: z.object({}).passthrough().optional().describe('Document content'),
     }),
-    outputSchema: z.any().describe('Response from snapshot.create API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from snapshot.create API'),
   },
   {
     type: 'elasticsearch.snapshot.create_repository',
@@ -13021,7 +13022,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     verify: z.boolean().optional().describe('Boolean flag: verify'),
     document: z.object({}).passthrough().optional().describe('Document content'),
     }),
-    outputSchema: z.any().describe('Response from snapshot.create_repository API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from snapshot.create_repository API'),
   },
   {
     type: 'elasticsearch.snapshot.delete',
@@ -13047,7 +13048,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     wait_for_completion: z.boolean().optional().describe('Boolean flag: wait_for_completion'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from snapshot.delete API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from snapshot.delete API'),
   },
   {
     type: 'elasticsearch.snapshot.delete_repository',
@@ -13072,7 +13073,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from snapshot.delete_repository API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from snapshot.delete_repository API'),
   },
   {
     type: 'elasticsearch.snapshot.get',
@@ -13110,7 +13111,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     verbose: z.boolean().optional().describe('Boolean flag: verbose'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from snapshot.get API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from snapshot.get API'),
   },
   {
     type: 'elasticsearch.snapshot.get_repository',
@@ -13135,7 +13136,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     master_timeout: z.enum(['to 30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from snapshot.get_repository API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from snapshot.get_repository API'),
   },
   {
     type: 'elasticsearch.snapshot.repository_analyze',
@@ -13170,7 +13171,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from snapshot.repository_analyze API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from snapshot.repository_analyze API'),
   },
   {
     type: 'elasticsearch.snapshot.repository_verify_integrity',
@@ -13201,7 +13202,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     verify_blob_contents: z.boolean().optional().describe('Boolean flag: verify_blob_contents'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from snapshot.repository_verify_integrity API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from snapshot.repository_verify_integrity API'),
   },
   {
     type: 'elasticsearch.snapshot.restore',
@@ -13227,7 +13228,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     wait_for_completion: z.boolean().optional().describe('Boolean flag: wait_for_completion'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from snapshot.restore API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from snapshot.restore API'),
   },
   {
     type: 'elasticsearch.snapshot.status',
@@ -13253,7 +13254,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from snapshot.status API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from snapshot.status API'),
   },
   {
     type: 'elasticsearch.snapshot.verify_repository',
@@ -13278,7 +13279,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from snapshot.verify_repository API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from snapshot.verify_repository API'),
   },
   {
     type: 'elasticsearch.sql.clear_cursor',
@@ -13300,7 +13301,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from sql.clear_cursor API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from sql.clear_cursor API'),
   },
   {
     type: 'elasticsearch.sql.delete_async',
@@ -13323,7 +13324,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from sql.delete_async API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from sql.delete_async API'),
   },
   {
     type: 'elasticsearch.sql.get_async',
@@ -13350,7 +13351,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     wait_for_completion_timeout: z.union([z.number(), z.array(z.number()), z.enum(['-1', '0'])]).optional().describe('Numeric parameter: wait_for_completion_timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from sql.get_async API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from sql.get_async API'),
   },
   {
     type: 'elasticsearch.sql.get_async_status',
@@ -13373,7 +13374,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from sql.get_async_status API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from sql.get_async_status API'),
   },
   {
     type: 'elasticsearch.sql.query',
@@ -13396,7 +13397,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     format: z.enum(['csv', 'json', 'tsv', 'txt', 'yaml', 'cbor', 'smile']).optional().describe('Enum parameter: format'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from sql.query API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from sql.query API'),
   },
   {
     type: 'elasticsearch.sql.translate',
@@ -13418,7 +13419,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from sql.translate API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from sql.translate API'),
   },
   {
     type: 'elasticsearch.ssl.certificates',
@@ -13440,7 +13441,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from ssl.certificates API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ssl.certificates API'),
   },
   {
     type: 'elasticsearch.streams.logs_disable',
@@ -13458,7 +13459,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from streams.logs_disable API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from streams.logs_disable API'),
   },
   {
     type: 'elasticsearch.streams.logs_enable',
@@ -13476,7 +13477,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from streams.logs_enable API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from streams.logs_enable API'),
   },
   {
     type: 'elasticsearch.streams.status',
@@ -13494,7 +13495,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from streams.status API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from streams.status API'),
   },
   {
     type: 'elasticsearch.synonyms.delete_synonym',
@@ -13517,7 +13518,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from synonyms.delete_synonym API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from synonyms.delete_synonym API'),
   },
   {
     type: 'elasticsearch.synonyms.delete_synonym_rule',
@@ -13542,7 +13543,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     refresh: z.boolean().optional().describe('Boolean flag: refresh'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from synonyms.delete_synonym_rule API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from synonyms.delete_synonym_rule API'),
   },
   {
     type: 'elasticsearch.synonyms.get_synonym',
@@ -13567,7 +13568,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     size: z.union([z.number(), z.array(z.number()), z.enum(['10'])]).optional().describe('Numeric parameter: size'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from synonyms.get_synonym API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from synonyms.get_synonym API'),
   },
   {
     type: 'elasticsearch.synonyms.get_synonym_rule',
@@ -13591,7 +13592,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from synonyms.get_synonym_rule API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from synonyms.get_synonym_rule API'),
   },
   {
     type: 'elasticsearch.synonyms.get_synonyms_sets',
@@ -13615,7 +13616,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     size: z.union([z.number(), z.array(z.number()), z.enum(['10'])]).optional().describe('Numeric parameter: size'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from synonyms.get_synonyms_sets API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from synonyms.get_synonyms_sets API'),
   },
   {
     type: 'elasticsearch.synonyms.put_synonym',
@@ -13639,7 +13640,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     refresh: z.boolean().optional().describe('Boolean flag: refresh'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from synonyms.put_synonym API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from synonyms.put_synonym API'),
   },
   {
     type: 'elasticsearch.synonyms.put_synonym_rule',
@@ -13664,7 +13665,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     refresh: z.boolean().optional().describe('Boolean flag: refresh'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from synonyms.put_synonym_rule API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from synonyms.put_synonym_rule API'),
   },
   {
     type: 'elasticsearch.tasks.cancel',
@@ -13691,7 +13692,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     wait_for_completion: z.boolean().optional().describe('Boolean flag: wait_for_completion'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from tasks.cancel API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from tasks.cancel API'),
   },
   {
     type: 'elasticsearch.tasks.get',
@@ -13716,7 +13717,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     wait_for_completion: z.boolean().optional().describe('Boolean flag: wait_for_completion'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from tasks.get API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from tasks.get API'),
   },
   {
     type: 'elasticsearch.tasks.list',
@@ -13745,7 +13746,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     wait_for_completion: z.boolean().optional().describe('Boolean flag: wait_for_completion'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from tasks.list API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from tasks.list API'),
   },
   {
     type: 'elasticsearch.terms_enum',
@@ -13768,7 +13769,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from terms_enum API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from terms_enum API'),
   },
   {
     type: 'elasticsearch.termvectors',
@@ -13803,7 +13804,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     version_type: z.enum(['internal', 'external', 'external_gte', 'force']).optional().describe('Enum parameter: version_type'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from termvectors API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from termvectors API'),
   },
   {
     type: 'elasticsearch.text_structure.find_field_structure',
@@ -13839,7 +13840,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timestamp_format: z.union([z.string(), z.number()]).optional().describe('Parameter: timestamp_format'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from text_structure.find_field_structure API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from text_structure.find_field_structure API'),
   },
   {
     type: 'elasticsearch.text_structure.find_message_structure',
@@ -13872,7 +13873,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timestamp_format: z.union([z.string(), z.number()]).optional().describe('Parameter: timestamp_format'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from text_structure.find_message_structure API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from text_structure.find_message_structure API'),
   },
   {
     type: 'elasticsearch.text_structure.find_structure',
@@ -13905,7 +13906,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timestamp_format: z.union([z.string(), z.number()]).optional().describe('Parameter: timestamp_format'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from text_structure.find_structure API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from text_structure.find_structure API'),
   },
   {
     type: 'elasticsearch.text_structure.test_grok_pattern',
@@ -13928,7 +13929,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     ecs_compatibility: z.enum(['disabled']).optional().describe('Enum parameter: ecs_compatibility'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from text_structure.test_grok_pattern API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from text_structure.test_grok_pattern API'),
   },
   {
     type: 'elasticsearch.transform.delete_transform',
@@ -13954,7 +13955,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from transform.delete_transform API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from transform.delete_transform API'),
   },
   {
     type: 'elasticsearch.transform.get_node_stats',
@@ -13972,7 +13973,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     paramsSchema: z.object({
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from transform.get_node_stats API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from transform.get_node_stats API'),
   },
   {
     type: 'elasticsearch.transform.get_transform',
@@ -13999,7 +14000,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     exclude_generated: z.boolean().optional().describe('Boolean flag: exclude_generated'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from transform.get_transform API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from transform.get_transform API'),
   },
   {
     type: 'elasticsearch.transform.get_transform_stats',
@@ -14026,7 +14027,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.union([z.number(), z.array(z.number()), z.enum(['-1', '0'])]).optional().describe('Numeric parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from transform.get_transform_stats API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from transform.get_transform_stats API'),
   },
   {
     type: 'elasticsearch.transform.preview_transform',
@@ -14050,7 +14051,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from transform.preview_transform API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from transform.preview_transform API'),
   },
   {
     type: 'elasticsearch.transform.put_transform',
@@ -14079,7 +14080,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     description: z.string().optional().describe('Description'),
     frequency: z.string().optional().describe('Frequency'),
     }),
-    outputSchema: z.any().describe('Response from transform.put_transform API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from transform.put_transform API'),
   },
   {
     type: 'elasticsearch.transform.reset_transform',
@@ -14104,7 +14105,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from transform.reset_transform API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from transform.reset_transform API'),
   },
   {
     type: 'elasticsearch.transform.schedule_now_transform',
@@ -14128,7 +14129,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from transform.schedule_now_transform API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from transform.schedule_now_transform API'),
   },
   {
     type: 'elasticsearch.transform.start_transform',
@@ -14153,7 +14154,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     from: z.union([z.string(), z.number()]).optional().describe('Parameter: from'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from transform.start_transform API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from transform.start_transform API'),
   },
   {
     type: 'elasticsearch.transform.stop_transform',
@@ -14181,7 +14182,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     wait_for_completion: z.boolean().optional().describe('Boolean flag: wait_for_completion'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from transform.stop_transform API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from transform.stop_transform API'),
   },
   {
     type: 'elasticsearch.transform.update_transform',
@@ -14209,7 +14210,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     upsert: z.object({}).passthrough().optional().describe('Upsert document'),
     doc_as_upsert: z.boolean().optional().describe('Use doc as upsert'),
     }),
-    outputSchema: z.any().describe('Response from transform.update_transform API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from transform.update_transform API'),
   },
   {
     type: 'elasticsearch.transform.upgrade_transforms',
@@ -14233,7 +14234,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from transform.upgrade_transforms API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from transform.upgrade_transforms API'),
   },
   {
     type: 'elasticsearch.update',
@@ -14273,7 +14274,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     upsert: z.object({}).passthrough().optional().describe('Upsert document'),
     doc_as_upsert: z.boolean().optional().describe('Use doc as upsert'),
     }),
-    outputSchema: z.any().describe('Response from update API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from update API'),
   },
   {
     type: 'elasticsearch.update_by_query',
@@ -14328,7 +14329,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     query: z.union([z.string(), z.object({}).passthrough()]).optional().describe('Query (ES-QL string or Elasticsearch Query DSL)'),
     script: z.object({}).passthrough().optional().describe('Script configuration'),
     }),
-    outputSchema: z.any().describe('Response from update_by_query API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from update_by_query API'),
   },
   {
     type: 'elasticsearch.update_by_query_rethrottle',
@@ -14354,7 +14355,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     script: z.object({}).passthrough().optional().describe('Script configuration'),
     conflicts: z.enum(['abort', 'proceed']).optional().describe('Conflict resolution'),
     }),
-    outputSchema: z.any().describe('Response from update_by_query_rethrottle API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from update_by_query_rethrottle API'),
   },
   {
     type: 'elasticsearch.watcher.ack_watch',
@@ -14378,7 +14379,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from watcher.ack_watch API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from watcher.ack_watch API'),
   },
   {
     type: 'elasticsearch.watcher.activate_watch',
@@ -14401,7 +14402,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from watcher.activate_watch API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from watcher.activate_watch API'),
   },
   {
     type: 'elasticsearch.watcher.deactivate_watch',
@@ -14424,7 +14425,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from watcher.deactivate_watch API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from watcher.deactivate_watch API'),
   },
   {
     type: 'elasticsearch.watcher.delete_watch',
@@ -14447,7 +14448,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from watcher.delete_watch API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from watcher.delete_watch API'),
   },
   {
     type: 'elasticsearch.watcher.execute_watch',
@@ -14471,7 +14472,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     debug: z.boolean().optional().describe('Boolean flag: debug'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from watcher.execute_watch API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from watcher.execute_watch API'),
   },
   {
     type: 'elasticsearch.watcher.get_settings',
@@ -14494,7 +14495,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     master_timeout: z.union([z.number(), z.array(z.number()), z.enum(['-1', '0'])]).optional().describe('Numeric parameter: master_timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from watcher.get_settings API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from watcher.get_settings API'),
   },
   {
     type: 'elasticsearch.watcher.get_watch',
@@ -14517,7 +14518,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from watcher.get_watch API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from watcher.get_watch API'),
   },
   {
     type: 'elasticsearch.watcher.put_watch',
@@ -14548,7 +14549,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     actions: z.object({}).passthrough().optional().describe('Watch actions'),
     metadata: z.object({}).passthrough().optional().describe('Metadata'),
     }),
-    outputSchema: z.any().describe('Response from watcher.put_watch API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from watcher.put_watch API'),
   },
   {
     type: 'elasticsearch.watcher.query_watches',
@@ -14570,7 +14571,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     pretty: z.boolean().optional().describe('Boolean flag: pretty'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from watcher.query_watches API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from watcher.query_watches API'),
   },
   {
     type: 'elasticsearch.watcher.start',
@@ -14593,7 +14594,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from watcher.start API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from watcher.start API'),
   },
   {
     type: 'elasticsearch.watcher.stats',
@@ -14617,7 +14618,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     emit_stacktraces: z.boolean().optional().describe('Boolean flag: emit_stacktraces'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from watcher.stats API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from watcher.stats API'),
   },
   {
     type: 'elasticsearch.watcher.stop',
@@ -14640,7 +14641,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from watcher.stop API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from watcher.stop API'),
   },
   {
     type: 'elasticsearch.watcher.update_settings',
@@ -14667,7 +14668,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     upsert: z.object({}).passthrough().optional().describe('Upsert document'),
     doc_as_upsert: z.boolean().optional().describe('Use doc as upsert'),
     }),
-    outputSchema: z.any().describe('Response from watcher.update_settings API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from watcher.update_settings API'),
   },
   {
     type: 'elasticsearch.xpack.info',
@@ -14691,7 +14692,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     accept_enterprise: z.boolean().optional().describe('Boolean flag: accept_enterprise'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from xpack.info API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from xpack.info API'),
   },
   {
     type: 'elasticsearch.xpack.usage',
@@ -14714,7 +14715,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
     master_timeout: z.enum(['30s', '-1', '0']).optional().describe('Enum parameter: master_timeout'),
     body: z.any().optional().describe('Request body'),
     }),
-    outputSchema: z.any().describe('Response from xpack.usage API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from xpack.usage API'),
   }
 ];
 
