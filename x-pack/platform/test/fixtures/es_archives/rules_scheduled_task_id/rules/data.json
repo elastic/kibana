@@ -83,3 +83,46 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "id": "alert:d7f3cca6-e2aa-4921-aee8-12d2ad3873ca",
+    "index": ".kibana_1",
+    "source": {
+      "alert": {
+        "actions": [
+        ],
+        "alertTypeId": "example.always-firing",
+        "apiKey": "QIUT8u0/kbOakEHSj50jDpVR90MrqOxanEscboYOoa8PxQvcA5jfHash+fqH3b+KNjJ1LpnBcisGuPkufY9j1e32gKzwGZV5Bfys87imHvygJvIM8uKiFF8bQ8Y4NTaxOJO9fAmZPrFy07ZcQMCAQz+DUTgBFqs=",
+        "apiKeyOwner": "elastic",
+        "consumer": "alerts",
+        "createdAt": "2020-06-17T15:35:38.497Z",
+        "createdBy": "elastic",
+        "enabled": true,
+        "muteAll": false,
+        "mutedInstanceIds": [
+        ],
+        "name": "always-firing-alert-stuck-running",
+        "params": {
+        },
+        "schedule": {
+          "interval": "1d"
+        },
+        "scheduledTaskId": "d7f3cca6-e2aa-4921-aee8-12d2ad3873ca",
+        "tags": [
+        ],
+        "throttle": null,
+        "updatedAt": "2020-06-17T15:35:38.497Z",
+        "updatedBy": "elastic"
+      },
+      "migrationVersion": {
+        "alert": "7.16.0"
+      },
+      "references": [
+      ],
+      "type": "alert",
+      "updated_at": "2020-06-17T15:35:39.839Z"
+    }
+  }
+}
