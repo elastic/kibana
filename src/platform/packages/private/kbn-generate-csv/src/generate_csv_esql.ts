@@ -70,7 +70,7 @@ export class CsvESQLGenerator {
     let reportingError: undefined | ReportingError;
     const warnings: string[] = [];
 
-    const { maxSizeBytes, bom, escapeFormulaValues } = settings;
+    const { maxSizeBytes, maxRows, bom, escapeFormulaValues } = settings;
     const builder = new MaxSizeStringBuilder(this.stream, byteSizeValueToNumber(maxSizeBytes), bom);
 
     // it will return undefined if there are no _tstart, _tend named params in the query
@@ -93,9 +93,16 @@ export class CsvESQLGenerator {
         getEsQueryConfig(this.clients.uiSettings as Parameters<typeof getEsQueryConfig>[0])
       );
 
+    let query = this.job.query.esql;
+    if (query && maxRows) {
+      this.logger.info(
+        `This search has been limited by the recommended row limit (${maxRows}). This limit can be configured in kibana.yml, but increasing it may impact performance.`
+      );
+      query = `${this.job.query.esql} | limit ${maxRows}`;
+    }
     const searchParams: IKibanaSearchRequest<ESQLSearchParams> = {
       params: {
-        query: this.job.query.esql,
+        query,
         filter,
         // locale can be used for number/date formatting
         locale: i18n.getLocale(),

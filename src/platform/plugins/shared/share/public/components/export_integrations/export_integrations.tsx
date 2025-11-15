@@ -72,6 +72,7 @@ interface ManagedFlyoutProps {
   >['objectTypeMeta'];
   onSave?: () => Promise<void>;
   isSaving?: boolean;
+  totalHits?: number;
 }
 
 function LayoutOptionsSwitch({ usePrintLayout, printLayoutChange }: LayoutOptionsProps) {
@@ -136,9 +137,17 @@ function ManagedFlyout({
   shareObjectTypeAlias,
   onSave,
   isSaving,
+  totalHits,
 }: ManagedFlyoutProps) {
   const [usePrintLayout, setPrintLayout] = useState(false);
   const [isCreatingExport, setIsCreatingExport] = useState<boolean>(false);
+  const renderTotalHitsSizeWarning = useMemo<boolean | undefined>(
+    () =>
+      exportIntegration.config.renderTotalHitsSizeWarning &&
+      exportIntegration.config.renderTotalHitsSizeWarning(totalHits),
+    [exportIntegration.config, totalHits]
+  );
+
   const getReport = useCallback(async () => {
     try {
       setIsCreatingExport(true);
@@ -238,6 +247,11 @@ function ManagedFlyout({
               </EuiFlexItem>
             )}
           </Fragment>
+          <Fragment>
+            {publicAPIEnabled && renderTotalHitsSizeWarning && (
+              <EuiFlexItem>{exportIntegration.config.totalHitsSizeWarning}</EuiFlexItem>
+            )}
+          </Fragment>
         </EuiFlexGroup>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
@@ -280,6 +294,7 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
     objectType,
     objectTypeAlias,
     objectTypeMeta,
+    totalHits,
   } = useShareTypeContext('integration', 'export');
   const { shareMenuItems: exportDerivatives } = useShareTypeContext(
     'integration',
@@ -454,6 +469,7 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
               onCloseFlyout={flyoutOnCloseHandler}
               onSave={onSave}
               isSaving={isSaving}
+              totalHits={totalHits}
             />
           ) : (
             (selectedMenuItem as ExportShareDerivativesConfig)?.config.flyoutContent({

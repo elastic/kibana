@@ -157,6 +157,8 @@ export interface ExportShare
       requiresSavedState?: boolean;
       supportedLayoutOptions?: Array<'print'>;
       renderLayoutOptionSwitch?: boolean;
+      renderTotalHitsSizeWarning?: (totalHits?: number) => boolean;
+      totalHitsSizeWarning?: ReactNode;
     } & (
       | {
           generateAssetComponent?: never;
@@ -397,6 +399,7 @@ export interface ShowShareMenuOptions extends Omit<ShareContext, 'onClose'> {
   onClose?: () => void;
   publicAPIEnabled?: boolean;
   onSave?: () => Promise<void>;
+  totalHits?: number;
 }
 
 export interface ClientConfigType {

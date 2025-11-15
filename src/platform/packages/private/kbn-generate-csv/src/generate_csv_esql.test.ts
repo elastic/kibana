@@ -97,6 +97,7 @@ describe('CsvESQLGenerator', () => {
       useByteOrderMarkEncoding: false,
       scroll: { size: 500, duration: '30s', strategy: 'pit' },
       maxConcurrentShardRequests: 5,
+      maxRows: 500,
     };
 
     mockLogger = loggingSystemMock.createLogger();
@@ -482,7 +483,7 @@ describe('CsvESQLGenerator', () => {
               },
             },
             locale: 'en',
-            query: query.esql,
+            query: `${query.esql} | limit 500`,
           },
         },
         {
@@ -555,7 +556,7 @@ describe('CsvESQLGenerator', () => {
               }),
             ]),
             locale: 'en',
-            query: query.esql,
+            query: `${query.esql} | limit 500`,
           },
         },
         {
@@ -565,6 +566,83 @@ describe('CsvESQLGenerator', () => {
           },
           abortSignal: expect.any(AbortSignal),
         }
+      );
+    });
+
+    it('adds maxRows limit to the query', async () => {
+      const query = {
+        esql: 'FROM custom-metrics | WHERE event.ingested >= ?_tstart AND event.ingested <= ?_tend',
+      };
+      const filters = [
+        {
+          meta: {},
+          query: {
+            range: {
+              'event.ingested': { format: 'strict_date_optional_time', gte: 'now-15m', lte: 'now' },
+            },
+          },
+        },
+      ];
+
+      const generateCsv = new CsvESQLGenerator(
+        createMockJob({ query, filters }),
+        mockConfig,
+        mockTaskInstanceFields,
+        {
+          es: mockEsClient,
+          data: mockDataClient,
+          uiSettings: uiSettingsClient,
+        },
+        new CancellationToken(),
+        mockLogger,
+        stream
+      );
+      await generateCsv.generateData();
+
+      expect(mockDataClient.search).toHaveBeenCalledWith(
+        {
+          params: {
+            filter: {
+              bool: {
+                filter: [
+                  {
+                    range: {
+                      'event.ingested': {
+                        format: 'strict_date_optional_time',
+                        gte: 'now-15m',
+                        lte: 'now',
+                      },
+                    },
+                  },
+                ],
+                must: [],
+                must_not: [],
+                should: [],
+              },
+            },
+            params: expect.arrayContaining([
+              expect.objectContaining({
+                _tstart: expect.any(String),
+              }),
+              expect.objectContaining({
+                _tend: expect.any(String),
+              }),
+            ]),
+            locale: 'en',
+            query: `${query.esql} | limit 500`,
+          },
+        },
+        {
+          strategy: 'esql',
+          transport: {
+            requestTimeout: '30s',
+          },
+          abortSignal: expect.any(AbortSignal),
+        }
+      );
+
+      expect(mockLogger.info.mock.calls[0][0]).toMatchInlineSnapshot(
+        `"This search has been limited by the recommended row limit (500). This limit can be configured in kibana.yml, but increasing it may impact performance."`
       );
     });
   });
@@ -640,6 +718,7 @@ describe('CsvESQLGenerator', () => {
         useByteOrderMarkEncoding: false,
         scroll: { size: 500, duration: '30s', strategy: 'pit' },
         maxConcurrentShardRequests: 5,
+        maxRows: 500,
       };
       mockSearchResponse({
         columns: [{ name: 'message', type: 'string' }],
