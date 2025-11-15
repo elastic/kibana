@@ -7,7 +7,7 @@
 
 import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import {
-  CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
+  CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_LATEST,
   LATEST_VULNERABILITIES_RETENTION_POLICY,
 } from '@kbn/cloud-security-posture-common';
 import {
@@ -16,10 +16,11 @@ import {
 } from '../../common/constants';
 
 const CURRENT_VULN_TRANSFORM_VERSION =
-  'cloud_security_posture.vulnerabilities_latest-default-8.15.0';
+  'cloud_security_posture.vulnerabilities_latest-default-8.16.0';
 
 export const DEPRECATED_VULN_TRANSFORM_VERSIONS = [
   'cloud_security_posture.vulnerabilities_latest-default-8.8.0',
+  'cloud_security_posture.vulnerabilities_latest-default-8.15.0',
 ];
 
 export const latestVulnerabilitiesTransform: TransformPutTransformRequest = {
@@ -30,7 +31,7 @@ export const latestVulnerabilitiesTransform: TransformPutTransformRequest = {
     index: VULNERABILITIES_INDEX_PATTERN,
   },
   dest: {
-    index: CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
+    index: CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_LATEST,
   },
   frequency: '5m',
   sync: {
