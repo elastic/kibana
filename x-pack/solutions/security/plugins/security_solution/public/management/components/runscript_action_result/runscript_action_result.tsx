@@ -7,6 +7,7 @@
 
 import React, { memo } from 'react';
 import { EuiText, type EuiTextProps } from '@elastic/eui';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { ResponseActionFileDownloadLink } from '../response_action_file_download_link';
 import type {
   ActionDetails,
@@ -41,11 +42,14 @@ export interface RunscriptActionResultProps {
 export const RunscriptActionResult = memo<RunscriptActionResultProps>(
   ({ action, agentId, textSize = 's', 'data-test-subj': dataTestSubj }) => {
     // TODO:PT refactor other EDR responses to use this component (centralize all response UI for runscript)
+
+    const { canWriteExecuteOperations } = useUserPrivileges().endpointPrivileges;
+
     return (
       <EuiText size={textSize}>
         <ResponseActionFileDownloadLink
           action={action}
-          canAccessFileDownloadLink={true}
+          canAccessFileDownloadLink={canWriteExecuteOperations}
           data-test-subj={dataTestSubj}
           agentId={agentId}
           textSize={textSize}
