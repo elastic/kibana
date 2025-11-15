@@ -16,19 +16,6 @@ import { ContextMenu } from './context_menu';
 import { ServicesContextProvider } from '../../../../contexts';
 import type { ContextValue } from '../../../../contexts/services_context';
 
-jest.mock('./language_selector_modal', () => ({
-  LanguageSelectorModal: () => <div>Language Selector Modal</div>,
-}));
-
-jest.mock('../../../../../services', () => ({
-  convertRequestToLanguage: jest.fn(() =>
-    Promise.resolve({ data: 'mocked request code', error: null })
-  ),
-  StorageKeys: {
-    DEFAULT_LANGUAGE: 'default_language',
-  },
-}));
-
 const mockNotifications: Pick<NotificationsStart, 'toasts'> = {
   toasts: {
     addSuccess: jest.fn(),
@@ -40,12 +27,8 @@ const mockNotifications: Pick<NotificationsStart, 'toasts'> = {
 const createMockContextValue = (isPackagedEnvironment?: boolean): ContextValue => {
   return {
     services: {
-      storage: {
-        get: jest.fn(() => 'curl'),
-        set: jest.fn(),
-      } as any,
+      storage: {} as any,
       esHostService: {
-        getHost: jest.fn(() => 'http://localhost:9200'),
         init: jest.fn(),
       } as any,
       history: {} as any,
@@ -78,11 +61,14 @@ const createMockContextValue = (isPackagedEnvironment?: boolean): ContextValue =
 };
 
 const defaultProps = {
-  getRequests: jest.fn(() => Promise.resolve([{ method: 'GET', url: '/', data: [] }])),
   getDocumentation: jest.fn(() => Promise.resolve('https://elastic.co/docs')),
   autoIndent: jest.fn(),
   notifications: mockNotifications,
-  getIsKbnRequestSelected: jest.fn(() => Promise.resolve(false)),
+  currentLanguage: 'curl',
+  onLanguageChange: jest.fn(),
+  isKbnRequestSelected: false,
+  onMenuOpen: jest.fn(),
+  onCopyAs: jest.fn(() => Promise.resolve()),
 };
 
 describe('ContextMenu', () => {
@@ -90,8 +76,8 @@ describe('ContextMenu', () => {
     jest.clearAllMocks();
   });
 
-  describe('Copy as menu item visibility', () => {
-    it('should show "Copy as" menu item when not in isPackagedEnvironment', async () => {
+  describe('Copy to language menu item visibility', () => {
+    it('should show "Copy to language" menu item when not in isPackagedEnvironment', async () => {
       const contextValue = createMockContextValue(undefined);
 
       render(
@@ -106,11 +92,11 @@ describe('ContextMenu', () => {
       await userEvent.click(menuButton);
 
       await waitFor(() => {
-        expect(screen.getByTestId('consoleMenuCopyAsButton')).toBeInTheDocument();
+        expect(screen.getByTestId('consoleMenuCopyToLanguage')).toBeInTheDocument();
       });
     });
 
-    it('should hide "Copy as" menu item when isPackagedEnvironment is true', async () => {
+    it('should hide "Copy to language" menu item when isPackagedEnvironment is true', async () => {
       const contextValue = createMockContextValue(true);
 
       render(
@@ -130,8 +116,8 @@ describe('ContextMenu', () => {
         expect(screen.getByTestId('consoleMenu')).toBeInTheDocument();
       });
 
-      // Verify "Copy as" button is NOT in the document
-      expect(screen.queryByTestId('consoleMenuCopyAsButton')).not.toBeInTheDocument();
+      // Verify "Copy to language" button is NOT in the document
+      expect(screen.queryByTestId('consoleMenuCopyToLanguage')).not.toBeInTheDocument();
     });
   });
 });

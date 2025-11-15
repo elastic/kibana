@@ -23,6 +23,12 @@ import type { FieldType } from '@kbn/esql-ast/src/definitions/types';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { MonacoEditorActionsProvider } from './monaco_editor_actions_provider';
 import type { EditorRequest } from './types';
+import { convertRequestToLanguage, StorageKeys } from '../../../services';
+import {
+  DEFAULT_LANGUAGE,
+  AVAILABLE_LANGUAGES,
+  KIBANA_API_PREFIX,
+} from '../../../../common/constants';
 import {
   useSetInitialValue,
   useSetupAutocompletePolling,
@@ -51,6 +57,15 @@ const useStyles = () => {
       // For IE11
       min-width: calc(${euiTheme.size.l} * 2);
     `,
+    actionButton: css`
+      height: ${euiTheme.size.l} !important;
+      width: ${euiTheme.size.l} !important;
+    `,
+    playButton: css`
+      margin-left: ${euiTheme.size.xs} !important;
+      height: ${euiTheme.size.l} !important;
+      width: ${euiTheme.size.l} !important;
+    `,
   };
 };
 
@@ -60,6 +75,10 @@ export interface EditorProps {
   setValue: (value: string) => void;
   customParsedRequestsProvider?: (model: any) => any;
 }
+
+const getLanguageLabelByValue = (value: string) => {
+  return AVAILABLE_LANGUAGES.find((lang) => lang.value === value)?.label || DEFAULT_LANGUAGE;
+};
 
 export const MonacoEditor = ({
   localStorageValue,
@@ -77,6 +96,8 @@ export const MonacoEditor = ({
       data,
       licensing,
       application,
+      storage,
+      esHostService,
     },
     docLinkVersion,
   } = context;
@@ -101,6 +122,20 @@ export const MonacoEditor = ({
   const setInputEditor = useSetInputEditor();
   const styles = useStyles();
   const highlightedLinesClassName = useHighlightedLinesClassName();
+  const [defaultLanguage, setDefaultLanguage] = useState(
+    storage.get(StorageKeys.DEFAULT_LANGUAGE, DEFAULT_LANGUAGE)
+  );
+  const [currentLanguage, setCurrentLanguage] = useState(defaultLanguage);
+  const [isKbnRequestSelected, setIsKbnRequestSelected] = useState<boolean>(false);
+
+  // When a Kibana request is selected, force language to curl
+  useEffect(() => {
+    if (isKbnRequestSelected) {
+      setCurrentLanguage(DEFAULT_LANGUAGE);
+    } else {
+      setCurrentLanguage(defaultLanguage);
+    }
+  }, [defaultLanguage, isKbnRequestSelected]);
 
   const getRequestsCallback = useCallback(async (): Promise<EditorRequest[]> => {
     const requests = await actionsProvider.current?.getRequests();
@@ -122,6 +157,89 @@ export const MonacoEditor = ({
   const isKbnRequestSelectedCallback = useCallback(async () => {
     return actionsProvider.current!.isKbnRequestSelected();
   }, []);
+
+  const copyText = async (text: string) => {
+    if (window.navigator?.clipboard) {
+      await window.navigator.clipboard.writeText(text);
+      return;
+    }
+    throw new Error('Could not copy to clipboard!');
+  };
+
+  // This function will convert all the selected requests to the language by
+  // calling convertRequestToLanguage and then copy the data to clipboard.
+  const copyAs = async (language?: string) => {
+    // Get the language we want to convert the requests to
+    const withLanguage = language || currentLanguage;
+    // Get all the selected requests
+    const requests = await getRequestsCallback();
+
+    // If we have any kbn requests, we should not allow the user to copy as
+    // anything other than curl
+    const hasKbnRequests = requests.some((req) => req.url.startsWith(KIBANA_API_PREFIX));
+
+    if (hasKbnRequests && withLanguage !== 'curl') {
+      toasts.addDanger({
+        title: i18n.translate('console.consoleMenu.copyAsMixedRequestsMessage', {
+          defaultMessage: 'Kibana requests can only be copied as curl',
+        }),
+      });
+      return;
+    }
+
+    const { data: requestsAsCode, error: requestError } = await convertRequestToLanguage({
+      language: withLanguage,
+      esHost: esHostService.getHost(),
+      kibanaHost: window.location.origin,
+      requests,
+    });
+
+    if (requestError) {
+      toasts.addDanger({
+        title: i18n.translate('console.consoleMenu.copyAsFailedMessage', {
+          defaultMessage:
+            '{requestsCount, plural, one {Request} other {Requests}} could not be copied to clipboard',
+          values: { requestsCount: requests.length },
+        }),
+      });
+      return;
+    }
+
+    toasts.addSuccess({
+      title: i18n.translate('console.consoleMenu.copyAsSuccessMessage', {
+        defaultMessage:
+          '{requestsCount, plural, one {Request} other {Requests}} copied to clipboard as {language}',
+        values: { language: getLanguageLabelByValue(withLanguage), requestsCount: requests.length },
+      }),
+    });
+
+    await copyText(requestsAsCode);
+  };
+
+  const checkIsKbnRequestSelected = async () => {
+    const isKbn = await isKbnRequestSelectedCallback();
+    setIsKbnRequestSelected(isKbn || false);
+    return isKbn;
+  };
+
+  const onCopyAsSubmit = async () => {
+    // Check if current request is a Kibana request
+    const isKbn = await checkIsKbnRequestSelected();
+    // If it's a Kibana request, use curl; otherwise use the current language
+    const languageToUse = isKbn ? DEFAULT_LANGUAGE : currentLanguage;
+    await copyAs(languageToUse);
+  };
+
+  const handleLanguageChange = useCallback(
+    (language: string) => {
+      storage.set(StorageKeys.DEFAULT_LANGUAGE, language);
+      setDefaultLanguage(language);
+      if (!isKbnRequestSelected) {
+        setCurrentLanguage(language);
+      }
+    },
+    [storage, isKbnRequestSelected]
+  );
 
   const editorDidMountCallback = useCallback(
     (editor: monaco.editor.IStandaloneCodeEditor) => {
@@ -271,23 +389,52 @@ export const MonacoEditor = ({
             })}
           >
             <EuiButtonIcon
-              iconType="playFilled"
+              display="fill"
+              size="m"
+              color="primary"
+              iconType="play"
+              iconSize="m"
               onClick={sendRequestsCallback}
               data-test-subj="sendRequestButton"
               aria-label={i18n.translate('console.monaco.sendRequestButtonTooltipAriaLabel', {
                 defaultMessage: 'Click to send request',
               })}
-              iconSize={'s'}
+              css={styles.playButton}
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiToolTip
+            content={i18n.translate('console.monaco.copyToLanguageButtonTooltipContent', {
+              defaultMessage: 'Copy to language',
+            })}
+          >
+            <EuiButtonIcon
+              display="empty"
+              size="m"
+              color="text"
+              iconType="copyClipboard"
+              onClick={onCopyAsSubmit}
+              data-test-subj="copyToLanguageActionButton"
+              aria-label={i18n.translate('console.monaco.copyToLanguageButtonAriaLabel', {
+                defaultMessage: 'Copy to language',
+              })}
+              disabled={!window.navigator?.clipboard}
+              css={styles.actionButton}
             />
           </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <ContextMenu
-            getRequests={getRequestsCallback}
             getDocumentation={getDocumenationLink}
             autoIndent={autoIndentCallback}
             notifications={notifications}
-            getIsKbnRequestSelected={isKbnRequestSelectedCallback}
+            currentLanguage={currentLanguage}
+            onLanguageChange={handleLanguageChange}
+            isKbnRequestSelected={isKbnRequestSelected}
+            onMenuOpen={checkIsKbnRequestSelected}
+            onCopyAs={copyAs}
+            buttonCss={styles.actionButton}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

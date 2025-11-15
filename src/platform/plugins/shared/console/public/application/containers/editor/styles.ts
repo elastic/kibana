@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { transparentize, useEuiTheme } from '@elastic/eui';
+import { useEuiTheme, transparentize } from '@elastic/eui';
 import { css as cssClassName } from '@emotion/css';
 import { css } from '@emotion/react';
 
@@ -20,8 +20,8 @@ export const useActionStyles = () => {
       top: 0;
       // Adjust for possible scrollbars
       right: ${euiTheme.size.base};
-      height: ${euiTheme.size.l};
-      background-color: ${euiTheme.colors.backgroundBaseSubdued};
+      height: calc(${euiTheme.size.l} + ${euiTheme.size.s});
+      background-color: ${euiTheme.colors.emptyShade};
       border-radius: ${euiTheme.size.xs};
       box-shadow: 0 0 calc(${euiTheme.size.xs} * 0.5) calc(${euiTheme.size.xs} * 0.5)
         ${euiTheme.colors.lightShade};
