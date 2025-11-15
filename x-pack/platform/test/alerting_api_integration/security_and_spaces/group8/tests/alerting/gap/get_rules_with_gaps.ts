@@ -207,6 +207,78 @@ export default function getRuleIdsWithGapsTests({ getService }: FtrProviderConte
             }
           });
 
+          it('should filter rules by aggregated status', async () => {
+            // Create a rule
+            const ruleResponse = await supertest
+              .post(`${getUrlPrefix(apiOptions.spaceId)}/api/alerting/rule`)
+              .set('kbn-xsrf', 'foo')
+              .send(getRule())
+              .expect(200);
+            const ruleId = ruleResponse.body.id;
+            objectRemover.add(apiOptions.spaceId, ruleId, 'rule', 'alerting');
+
+            // Create an unfilled gap
+            await supertest
+              .post(`${getUrlPrefix(apiOptions.spaceId)}/_test/report_gap`)
+              .set('kbn-xsrf', 'foo')
+              .send({
+                ruleId,
+                start: gap1Start,
+                end: gap1End,
+                spaceId: apiOptions.spaceId,
+              });
+
+            // Test filtering by aggregated status 'unfilled'
+            const aggUnfilledResponse = await supertestWithoutAuth
+              .post(`${getUrlPrefix(apiOptions.spaceId)}/internal/alerting/rules/gaps/_get_rules`)
+              .set('kbn-xsrf', 'foo')
+              .auth(apiOptions.username, apiOptions.password)
+              .send({
+                start: searchStart,
+                end: searchEnd,
+                aggregated_statuses: ['unfilled'],
+              });
+
+            switch (scenario.id) {
+              case 'no_kibana_privileges at space1':
+              case 'space_1_all at space2':
+                expect(aggUnfilledResponse.statusCode).to.eql(403);
+                break;
+
+              case 'global_read at space1':
+              case 'space_1_all_alerts_none_actions at space1':
+              case 'superuser at space1':
+              case 'space_1_all at space1':
+              case 'space_1_all_with_restricted_fixture at space1':
+                expect(aggUnfilledResponse.statusCode).to.eql(200);
+                expect(aggUnfilledResponse.body.total).to.eql(1);
+                expect(aggUnfilledResponse.body.rule_ids).to.eql([ruleId]);
+                break;
+
+              default:
+                throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+            }
+
+            // Test filtering by aggregated status 'filled' (should return empty)
+            const aggFilledResponse = await supertestWithoutAuth
+              .post(`${getUrlPrefix(apiOptions.spaceId)}/internal/alerting/rules/gaps/_get_rules`)
+              .set('kbn-xsrf', 'foo')
+              .auth(apiOptions.username, apiOptions.password)
+              .send({
+                start: searchStart,
+                end: searchEnd,
+                aggregated_statuses: ['filled'],
+              });
+
+            if (
+              !['no_kibana_privileges at space1', 'space_1_all at space2'].includes(scenario.id)
+            ) {
+              expect(aggFilledResponse.statusCode).to.eql(200);
+              expect(aggFilledResponse.body.total).to.eql(0);
+              expect(aggFilledResponse.body.rule_ids).to.eql([]);
+            }
+          });
+
           it('should not return the rule id of a deleted rule', async () => {
             // Create 2 rules
             const rresponse1 = await supertest

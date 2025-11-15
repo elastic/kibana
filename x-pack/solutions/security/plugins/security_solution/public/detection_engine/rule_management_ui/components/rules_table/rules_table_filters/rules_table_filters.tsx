@@ -8,6 +8,7 @@
 import { EuiFilterButton, EuiFilterGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEqual } from 'lodash/fp';
 import React, { useCallback } from 'react';
+import type { AggregatedGapStatus } from '@kbn/alerting-plugin/common';
 import styled from 'styled-components';
 import { useRuleManagementFilters } from '../../../../rule_management/logic/use_rule_management_filters';
 import { RULES_TABLE_ACTIONS } from '../../../../../common/lib/apm/user_actions';
@@ -18,6 +19,7 @@ import { TagsFilterPopover } from './tags_filter_popover';
 import { RuleExecutionStatusSelector } from './rule_execution_status_selector';
 import { RuleSearchField } from './rule_search_field';
 import type { RuleExecutionStatus } from '../../../../../../common/api/detection_engine';
+import { GapStatusSelector } from './gap_status_selector';
 
 const FilterWrapper = styled(EuiFlexGroup)`
   margin-bottom: ${({ theme }) => theme.eui.euiSizeXS};
@@ -44,6 +46,7 @@ const RulesTableFiltersComponent = () => {
     tags: selectedTags,
     enabled,
     ruleExecutionStatus: selectedRuleExecutionStatus,
+    gapStatus,
   } = filterOptions;
 
   const handleOnSearch = useCallback(
@@ -94,6 +97,16 @@ const RulesTableFiltersComponent = () => {
     [selectedRuleExecutionStatus, setFilterOptions, startTransaction]
   );
 
+  const handleSelectedGapStatus = useCallback(
+    (newStatus?: AggregatedGapStatus) => {
+      if (newStatus !== gapStatus) {
+        startTransaction({ name: RULES_TABLE_ACTIONS.FILTER });
+        setFilterOptions({ gapStatus: newStatus });
+      }
+    },
+    [gapStatus, setFilterOptions, startTransaction]
+  );
+
   return (
     <FilterWrapper gutterSize="m" justifyContent="flexEnd" wrap>
       <RuleSearchField initialValue={filterOptions.filter} onSearch={handleOnSearch} />
@@ -104,6 +117,15 @@ const RulesTableFiltersComponent = () => {
             selectedTags={selectedTags}
             tags={allTags}
             data-test-subj="allRulesTagPopover"
+          />
+        </EuiFilterGroup>
+      </EuiFlexItem>
+
+      <EuiFlexItem grow={false}>
+        <EuiFilterGroup>
+          <GapStatusSelector
+            selectedStatus={gapStatus}
+            onSelectedStatusChanged={handleSelectedGapStatus}
           />
         </EuiFilterGroup>
       </EuiFlexItem>

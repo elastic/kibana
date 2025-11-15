@@ -14,9 +14,30 @@ import {
 import type { RulesClientContext } from '../../../../rules_client';
 import type { GetRuleIdsWithGapsParams, GetRuleIdsWithGapsResponse } from './types';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
-import { buildGapsFilter } from '../../../../lib/rule_gaps/build_gaps_filter';
+import {
+  extractGapDurationSums,
+  calculateAggregatedGapStatus,
+  COMMON_GAP_AGGREGATIONS,
+  type GapDurationBucket,
+} from './utils';
 export const RULE_SAVED_OBJECT_TYPE = 'alert';
+import { buildGapsFilter } from '../../../../lib/rule_gaps/build_gaps_filter';
 
+/**
+ * Returns rule ids that have gaps within the requested time range.
+ *
+ * Parameters:
+ * - statuses: Direct per-gap status filter applied to event log gap documents
+ *   before aggregation. This corresponds to gap-level statuses
+ *   (e.g. 'unfilled' | 'partially_filled' | 'filled') and controls which
+ *   gaps are considered in the aggregations and latest timestamp query.
+ *
+ * - aggregatedStatuses: Computed, per-rule status filter applied after
+ *   aggregation. For each rule we compute an aggregated status from the
+ *   summed gap durations with precedence: unfilled > in_progress > filled.
+ *   Only rules whose computed aggregated status matches one of the provided
+ *   values ('unfilled' | 'in_progress' | 'filled') are returned.
+ */
 export async function getRuleIdsWithGaps(
   context: RulesClientContext,
   params: GetRuleIdsWithGapsParams
@@ -44,7 +65,7 @@ export async function getRuleIdsWithGaps(
       throw error;
     }
 
-    const { start, end, statuses } = params;
+    const { start, end, statuses, aggregatedStatuses } = params;
     const eventLogClient = await context.getEventLogClient();
 
     const filter = buildGapsFilter({
@@ -62,38 +83,41 @@ export async function getRuleIdsWithGaps(
       {
         filter,
         aggs: {
-          latest_gap_timestamp: {
-            max: {
-              field: '@timestamp',
-            },
-          },
-          unique_rule_ids: {
-            terms: {
-              field: 'rule.id',
-              size: 10000,
-            },
+          latest_gap_timestamp: { max: { field: '@timestamp' } },
+          by_rule: {
+            terms: { field: 'rule.id', size: 10000, order: { _key: 'asc' } },
+            aggs: COMMON_GAP_AGGREGATIONS,
           },
         },
       }
     );
 
-    interface UniqueRuleIdsAgg {
-      buckets: Array<{ key: string }>;
+    interface ByRuleBucket extends GapDurationBucket {
+      key: string;
     }
 
-    const uniqueRuleIdsAgg = aggs.aggregations?.unique_rule_ids as UniqueRuleIdsAgg;
+    const byRuleAgg = aggs.aggregations?.by_rule as { buckets: ByRuleBucket[] };
+    const buckets = byRuleAgg?.buckets ?? [];
+
+    const ruleIds: string[] = [];
+    if (aggregatedStatuses?.length ?? 0 > 0) {
+      for (const b of buckets) {
+        const sums = extractGapDurationSums(b);
+        const aggregatedStatus = calculateAggregatedGapStatus(sums);
+        if (aggregatedStatus && aggregatedStatuses?.includes(aggregatedStatus)) ruleIds.push(b.key);
+      }
+    } else {
+      for (const b of buckets) {
+        ruleIds.push(b.key);
+      }
+    }
+
     const latestGapTimestampAgg = aggs.aggregations?.latest_gap_timestamp as { value: number };
-
-    const resultBuckets = uniqueRuleIdsAgg?.buckets ?? [];
-
-    const ruleIds = resultBuckets.map((bucket) => bucket.key) ?? [];
-
     const result: GetRuleIdsWithGapsResponse = {
-      total: ruleIds?.length,
+      total: ruleIds.length,
       ruleIds,
       latestGapTimestamp: latestGapTimestampAgg?.value,
     };
-
     return result;
   } catch (err) {
     const errorMessage = `Failed to find rules with gaps`;

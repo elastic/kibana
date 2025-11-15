@@ -114,12 +114,14 @@ describe('getGapsSummaryByRuleIds', () => {
               totalUnfilledDurationMs: { value: 1000 },
               totalInProgressDurationMs: { value: 2000 },
               totalFilledDurationMs: { value: 3000 },
+              totalDurationMs: { value: 6000 },
             },
             {
               key: '2',
               totalUnfilledDurationMs: { value: 4000 },
               totalInProgressDurationMs: { value: 5000 },
               totalFilledDurationMs: { value: 6000 },
+              totalDurationMs: { value: 15000 },
             },
           ],
         },
@@ -183,6 +185,11 @@ describe('getGapsSummaryByRuleIds', () => {
                 field: 'kibana.alert.rule.gap.filled_duration_ms',
               },
             },
+            totalDurationMs: {
+              sum: {
+                field: 'kibana.alert.rule.gap.total_gap_duration_ms',
+              },
+            },
           },
         },
       },
@@ -195,12 +202,14 @@ describe('getGapsSummaryByRuleIds', () => {
           totalUnfilledDurationMs: 1000,
           totalInProgressDurationMs: 2000,
           totalFilledDurationMs: 3000,
+          status: 'unfilled',
         },
         {
           ruleId: '2',
           totalUnfilledDurationMs: 4000,
           totalInProgressDurationMs: 5000,
           totalFilledDurationMs: 6000,
+          status: 'unfilled',
         },
       ],
     });

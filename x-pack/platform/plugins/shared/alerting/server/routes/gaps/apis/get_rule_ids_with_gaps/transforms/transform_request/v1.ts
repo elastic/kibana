@@ -12,6 +12,7 @@ export const transformRequest = (request: GetRuleIdsWithGapBodyV1): GetRuleIdsWi
   start: request.start,
   end: request.end,
   statuses: request.statuses,
+  aggregatedStatuses: request.aggregated_statuses,
   hasUnfilledIntervals: request.has_unfilled_intervals,
   hasInProgressIntervals: request.has_in_progress_intervals,
   hasFilledIntervals: request.has_filled_intervals,
