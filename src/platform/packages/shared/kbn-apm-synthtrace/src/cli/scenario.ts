@@ -12,9 +12,9 @@ import type { Logger } from '../lib/utils/create_logger';
 import type { ScenarioReturnType } from '../lib/utils/with_client';
 import type { SynthtraceClients } from './utils/clients_manager';
 import type { RunOptions } from './utils/parse_run_cli_flags';
+import type { KibanaClient } from '../lib/shared/base_kibana_client';
 
 export type ScenarioInitOptions = RunOptions & { logger: Logger; from: number; to: number };
-export type ScenarioPhaseOptions = SynthtraceClients;
 
 type Generate<TFields extends Fields> = (options: {
   range: Timerange;
@@ -22,8 +22,8 @@ type Generate<TFields extends Fields> = (options: {
 }) => ScenarioReturnType<TFields> | Array<ScenarioReturnType<TFields>>;
 
 export type Scenario<TFields extends Fields = Fields> = (options: ScenarioInitOptions) => Promise<{
-  bootstrap?: (options: ScenarioPhaseOptions) => Promise<void>;
+  bootstrap?: (synthtraceClients: SynthtraceClients, kibanaClient: KibanaClient) => Promise<void>;
   generate: Generate<TFields>;
-  teardown?: (options: ScenarioPhaseOptions) => Promise<void>;
-  setupPipeline?: (options: ScenarioPhaseOptions) => void;
+  teardown?: (synthtraceClients: SynthtraceClients, kibanaClient: KibanaClient) => Promise<void>;
+  setupPipeline?: (synthtraceClients: SynthtraceClients) => void;
 }>;
