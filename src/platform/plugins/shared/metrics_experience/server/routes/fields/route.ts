@@ -79,7 +79,7 @@ export const searchFieldsRoute = createRoute({
       fields: z.union([z.string(), z.array(z.string())]).default('*'),
       page: z.coerce.number().int().positive().default(1),
       size: z.coerce.number().int().positive().default(100),
-      kuery: z.string().optional(),
+      filters: z.record(z.string(), z.array(z.string()).max(100)).optional().default({}),
     }),
   }),
   handler: async ({ context, params, logger }) => {
@@ -87,7 +87,7 @@ export const searchFieldsRoute = createRoute({
     await throwNotFoundIfMetricsExperienceDisabled(featureFlags);
 
     const esClient = elasticsearch.client.asCurrentUser;
-    const { index, from, to, fields, page, size, kuery } = params.body;
+    const { index, from, to, fields, page, size, filters } = params.body;
 
     const { fields: resultFields, total } = await getMetricFields({
       esClient: createTracedEsClient({
@@ -97,10 +97,13 @@ export const searchFieldsRoute = createRoute({
       }),
       indexPattern: index,
       timerange: { from, to },
-      fields,
+      fields:
+        fields === '*'
+          ? fields
+          : (Array.isArray(fields) ? fields : [fields]).concat(Object.keys(filters)),
       page,
       size,
-      kuery,
+      filters,
       logger,
     });
 

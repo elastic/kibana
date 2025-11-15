@@ -134,11 +134,10 @@ TS metrics-*
   it('should handle filters', () => {
     const query = createESQLQuery({
       metric: mockMetric,
-      filters: [
-        { field: 'host.name', value: 'host-1' },
-        { field: 'host.name', value: 'host-2' },
-        { field: 'region', value: 'us-east' },
-      ],
+      filters: {
+        'host.name': ['host-1', 'host-2'],
+        region: ['us-east'],
+      },
     });
 
     expect(query).toBe(
@@ -194,7 +193,7 @@ TS metrics-*
     const query = createESQLQuery({
       metric: mockMetric,
       dimensions: undefined,
-      filters: [{ field: 'host.name', value: 'host-1' }],
+      filters: { 'host.name': ['host-1'] },
     });
 
     expect(query).toBe(
@@ -209,7 +208,7 @@ TS metrics-*
     const query = createESQLQuery({
       metric: { ...mockMetric, dimensions: undefined as unknown as Dimension[] },
       dimensions: ['host.name'],
-      filters: [{ field: 'host.name', value: 'host-1' }],
+      filters: { 'host.name': ['host-1'] },
     });
 
     expect(query).toBe(
@@ -282,10 +281,10 @@ TS metrics-*
     it('should escape filter field names with hyphens', () => {
       const query = createESQLQuery({
         metric: mockMetricWithSpecialChars,
-        filters: [
-          { field: 'service-name', value: 'web-server' },
-          { field: 'container-id', value: 'cont-123' },
-        ],
+        filters: {
+          'service-name': ['web-server'],
+          'container-id': ['cont-123'],
+        },
       });
       expect(query).toBe(
         `

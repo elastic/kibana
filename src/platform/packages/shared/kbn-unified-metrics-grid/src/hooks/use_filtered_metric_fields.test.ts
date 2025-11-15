@@ -77,7 +77,7 @@ describe('useFilteredMetricFields', () => {
       'field3',
       'field4',
     ]);
-    expect(result.current.filters).toEqual([]);
+    expect(result.current.filters).toBeUndefined();
     expect(result.current.isLoading).toBe(false);
   });
 
@@ -135,7 +135,7 @@ describe('useFilteredMetricFields', () => {
         fields: [],
         index: '',
         timeRange: DEFAULT_TIME_RANGE,
-        kuery: undefined,
+        filters: undefined,
         enabled: false,
       });
     });
@@ -151,7 +151,9 @@ describe('useFilteredMetricFields', () => {
         fields: ['field1', 'field2'],
         index: 'metrics-*',
         timeRange: DEFAULT_TIME_RANGE,
-        kuery: 'host.name:"server1"',
+        filters: {
+          'host.name': ['server1'],
+        },
         enabled: true,
       });
     });
@@ -175,7 +177,9 @@ describe('useFilteredMetricFields', () => {
         fields: ['metric1', 'metric2'],
         index: 'metrics-*',
         timeRange: DEFAULT_TIME_RANGE,
-        kuery: 'host.name:"server1"',
+        filters: {
+          'host.name': ['server1'],
+        },
         enabled: true,
       });
     });
@@ -192,7 +196,9 @@ describe('useFilteredMetricFields', () => {
         fields: [],
         index: '',
         timeRange: DEFAULT_TIME_RANGE,
-        kuery: 'host.name:"server1"',
+        filters: {
+          'host.name': ['server1'],
+        },
         enabled: false,
       });
     });
