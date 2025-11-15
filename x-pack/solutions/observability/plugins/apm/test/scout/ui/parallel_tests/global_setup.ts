@@ -14,7 +14,7 @@ import { testData } from '../fixtures';
 globalSetupHook(
   'Ingest data to Elasticsearch',
   { tag: ['@ess', '@svlOblt'] },
-  async ({ apmSynthtraceEsClient, apiServices, log, config }) => {
+  async ({ apmSynthtraceEsClient, apiServices, log, config, esClient }, use) => {
     if (!config.isCloud) {
       await apiServices.fleet.internal.setup();
       log.info('Fleet infrastructure setup completed');
@@ -28,5 +28,20 @@ globalSetupHook(
 
     await apmSynthtraceEsClient.index(opbeansDataGenerator);
     await apmSynthtraceEsClient.index(servicesDataFromTheLast24Hours());
+
+    log.info('Cleaning up APM ML indices before running the APM tests');
+    const jobs = await esClient.ml.getJobs();
+    const apmJobs = jobs.jobs.filter((job) => job.job_id.startsWith('apm-'));
+    for (const job of apmJobs) {
+      try {
+        await esClient.ml.stopDatafeed({ datafeed_id: `datafeed-${job.job_id}`, force: true });
+        await esClient.ml.deleteDatafeed({ datafeed_id: `datafeed-${job.job_id}`, force: true });
+      } catch (e) {
+        // Datafeed might not exist
+        log.warning(`Datafeed not found for job: ${job.job_id}`);
+      }
+      await esClient.ml.deleteJob({ job_id: job.job_id, force: true });
+      log.info(`Deleted job: ${job.job_id}`);
+    }
   }
 );

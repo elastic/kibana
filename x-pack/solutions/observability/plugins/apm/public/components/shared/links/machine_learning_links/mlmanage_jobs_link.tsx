@@ -13,16 +13,17 @@ interface Props {
   children?: React.ReactNode;
   external?: boolean;
   jobId?: string;
+  dataTestSubj?: string;
 }
 
-export function MLManageJobsLink({ children, external, jobId }: Props) {
+export function MLManageJobsLink({ children, external, jobId, dataTestSubj }: Props) {
   const mlADLink = useMlManageJobsHref({
     jobId,
   });
 
   return (
     <EuiLink
-      data-test-subj="apmMLManageJobsLinkLink"
+      data-test-subj={dataTestSubj ?? 'apmMLManageJobsLink'}
       children={children}
       href={mlADLink}
       external={external}

@@ -55,4 +55,14 @@ export class AnomalyDetectionPage {
 
     this.page.getByText('Anomaly detection jobs created');
   }
+
+  async deleteMlJob() {
+    const manageJobsButton = this.page.testSubj.locator('apmMLManageJobsTextLink');
+    await manageJobsButton.click();
+    const allActionsButton = this.page.getByLabel('All actions, row 1');
+    await allActionsButton.click();
+    await this.page.testSubj.locator('mlActionButtonDeleteJob').click();
+    await this.page.testSubj.locator('mlDeleteJobConfirmModalButton').click();
+    this.page.getByText('deleted successfully');
+  }
 }
