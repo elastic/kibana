@@ -15,7 +15,7 @@ import {
   EuiBadge,
   EuiToolTip,
 } from '@elastic/eui';
-import type { Condition, FilterCondition } from '@kbn/streamlang';
+import type { Condition, FilterCondition, RangeCondition } from '@kbn/streamlang';
 import {
   getFilterOperator,
   getFilterValue,
@@ -100,11 +100,34 @@ const FilterBadges = ({ condition }: { condition: FilterCondition }) => {
   const operatorText =
     operatorToHumanReadableNameMap[operator as keyof typeof operatorToHumanReadableNameMap];
 
+  let displayText = value?.toString() ?? '';
+
+  if (operator === 'range' && typeof value === 'object' && value !== null) {
+    const rangeValue = value as RangeCondition;
+    const { gte, gt, lte, lt } = rangeValue;
+
+    const parts: string[] = [];
+
+    if (gte !== undefined) {
+      parts.push(`≥ ${gte}`);
+    } else if (gt !== undefined) {
+      parts.push(`> ${gt}`);
+    }
+
+    if (lte !== undefined) {
+      parts.push(`≤ ${lte}`);
+    } else if (lt !== undefined) {
+      parts.push(`< ${lt}`);
+    }
+
+    displayText = parts.length > 0 ? parts.join(' to ') : '-';
+  }
+
   return (
     <>
       <BadgeItem text={field} />
       <OperatorText operator={operatorText} subdued />
-      <BadgeItem text={value?.toString() ?? ''} />
+      <BadgeItem text={displayText} />
     </>
   );
 };

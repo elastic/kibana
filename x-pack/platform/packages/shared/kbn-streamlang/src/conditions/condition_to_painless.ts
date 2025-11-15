@@ -38,10 +38,114 @@ function encodeValue(value: StringOrNumberOrBoolean | null | undefined) {
   return value;
 }
 
+// Helper function to evaluate date math expressions in Painless
+function evaluateDateMath(expression: string): string {
+  const expr = String(expression).trim();
+
+  // Check if it's a date math expression (contains 'now' or '||')
+  if (expr.includes('now') || expr.includes('||')) {
+    let code: string;
+    let remainingExpr: string;
+
+    // Parse the anchor date and any subsequent operations
+    if (expr.startsWith('now')) {
+      // Anchor is 'now'
+      code = 'System.currentTimeMillis()';
+      remainingExpr = expr.substring(3); // Remove 'now'
+    } else if (expr.includes('||')) {
+      // Anchor is a date string with ||
+      const [dateStr, mathExpr] = expr.split('||');
+
+      // Normalize various date formats to ISO format for Painless
+      const normalizedDate = normalizeDateString(dateStr.trim());
+
+      // Parse the date string to get milliseconds
+      code = `Instant.parse(${encodeValue(normalizedDate)}).toEpochMilli()`;
+      remainingExpr = mathExpr || '';
+    } else {
+      // Not a valid date math expression
+      const encoded = encodeValue(String(expression));
+      return typeof encoded === 'string' ? encoded : String(encoded);
+    }
+
+    // Milliseconds per unit for offset calculations
+    const msPerUnit: Record<string, number> = {
+      y: 365.25 * 24 * 60 * 60 * 1000, // approximate year
+      M: 30 * 24 * 60 * 60 * 1000, // approximate month
+      w: 7 * 24 * 60 * 60 * 1000,
+      d: 24 * 60 * 60 * 1000,
+      h: 60 * 60 * 1000,
+      H: 60 * 60 * 1000,
+      m: 60 * 1000,
+      s: 1000,
+    };
+
+    // Parse and apply all offset operations (e.g., +1M, -1d)
+    const offsetRegex = /([+-])(\d+)([yMwdhHms])/g;
+    let match;
+    while ((match = offsetRegex.exec(remainingExpr)) !== null) {
+      const sign = match[1];
+      const amount = parseInt(match[2], 10);
+      const unit = match[3];
+
+      const ms = msPerUnit[unit];
+      if (ms) {
+        const offsetMs = amount * ms;
+        code = sign === '+' ? `(${code} + ${offsetMs}L)` : `(${code} - ${offsetMs}L)`;
+      }
+    }
+
+    // Parse and apply rounding operation (e.g., /d)
+    const roundMatch = remainingExpr.match(/\/([yMwdhHms])/);
+    if (roundMatch) {
+      const roundUnit = roundMatch[1];
+      const roundMs = msPerUnit[roundUnit];
+      if (roundMs) {
+        // Round down to the nearest unit
+        code = `((long)(${code} / ${roundMs}L) * ${roundMs}L)`;
+      }
+    }
+
+    // Convert milliseconds to ISO date string for comparison
+    return `(Instant.ofEpochMilli(${code}).toString())`;
+  }
+
+  // Not a date math expression, return as-is (already quoted by encodeValue)
+  const encoded = encodeValue(String(expression));
+  return typeof encoded === 'string' ? encoded : String(encoded);
+}
+
+// Helper to normalize various date formats to ISO format
+function normalizeDateString(dateStr: string): string {
+  // Try to parse and convert common date formats to ISO
+  // Support formats like: 2001.02.01, 2001-02-01, 2001/02/01
+
+  // Replace dots or slashes with dashes
+  let normalized = dateStr.replace(/\./g, '-').replace(/\//g, '-');
+
+  // If it's just a date (no time), add time component for ISO format
+  if (!normalized.includes('T') && !normalized.includes(' ')) {
+    normalized += 'T00:00:00Z';
+  } else if (normalized.includes(' ')) {
+    // Replace space with T for ISO format
+    normalized = normalized.replace(' ', 'T');
+    if (!normalized.endsWith('Z') && !normalized.includes('+') && !normalized.includes('-', 10)) {
+      normalized += 'Z';
+    }
+  }
+
+  // Ensure it ends with Z if no timezone specified
+  if (!normalized.endsWith('Z') && !normalized.includes('+') && !normalized.includes('-', 10)) {
+    normalized += 'Z';
+  }
+
+  return normalized;
+}
+
 function generateRangeComparisonClauses(
   field: string,
   operator: 'gt' | 'gte' | 'lt' | 'lte',
-  value: number
+  value: StringOrNumberOrBoolean
 ): { numberClause: string; stringClause: string } {
   const opMap: Record<typeof operator, string> = {
     gt: '>',
@@ -50,10 +154,28 @@ function generateRangeComparisonClauses(
     lte: '<=',
   };
   const opSymbol = opMap[operator];
-  return {
-    numberClause: `${field} ${opSymbol} ${encodeValue(value)}`,
-    stringClause: `Float.parseFloat(${field}) ${opSymbol} ${encodeValue(value)}`,
-  };
+
+  // Check if the value is numeric
+  const numericValue = typeof value === 'number' ? value : Number(value);
+  const isNumeric = !isNaN(numericValue);
+
+  if (isNumeric) {
+    // Handle numeric comparisons (integers, floats)
+    return {
+      numberClause: `${field} ${opSymbol} ${encodeValue(numericValue)}`,
+      stringClause: `Float.parseFloat(${field}) ${opSymbol} ${encodeValue(numericValue)}`,
+    };
+  } else {
+    // Check if it's a date math expression
+    const stringValue = String(value);
+    const comparisonValue = evaluateDateMath(stringValue);
+
+    // Handle string comparisons (dates, etc.) - use compareTo for strings
+    return {
+      numberClause: `String.valueOf(${field}).compareTo(${comparisonValue}) ${opSymbol} 0`,
+      stringClause: `${field}.compareTo(${comparisonValue}) ${opSymbol} 0`,
+    };
+  }
 }
 
 // Convert a shorthand binary filter condition to painless
@@ -106,7 +228,7 @@ function shorthandBinaryToPainless(condition: ShorthandBinaryFilterCondition) {
         const { numberClause, stringClause } = generateRangeComparisonClauses(
           safeFieldAccessor,
           'gte',
-          Number(range.gte)
+          range.gte
         );
         numberClauses.push(numberClause);
         stringClauses.push(stringClause);
@@ -115,7 +237,7 @@ function shorthandBinaryToPainless(condition: ShorthandBinaryFilterCondition) {
         const { numberClause, stringClause } = generateRangeComparisonClauses(
           safeFieldAccessor,
           'lte',
-          Number(range.lte)
+          range.lte
         );
         numberClauses.push(numberClause);
         stringClauses.push(stringClause);
@@ -124,7 +246,7 @@ function shorthandBinaryToPainless(condition: ShorthandBinaryFilterCondition) {
         const { numberClause, stringClause } = generateRangeComparisonClauses(
           safeFieldAccessor,
           'gt',
-          Number(range.gt)
+          range.gt
         );
         numberClauses.push(numberClause);
         stringClauses.push(stringClause);
@@ -133,7 +255,7 @@ function shorthandBinaryToPainless(condition: ShorthandBinaryFilterCondition) {
         const { numberClause, stringClause } = generateRangeComparisonClauses(
           safeFieldAccessor,
           'lt',
-          Number(range.lt)
+          range.lt
         );
         numberClauses.push(numberClause);
         stringClauses.push(stringClause);
