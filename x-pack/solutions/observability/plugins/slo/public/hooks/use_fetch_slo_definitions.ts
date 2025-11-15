@@ -18,6 +18,8 @@ export interface UseFetchSloDefinitionsResponse {
   refetch: () => void;
 }
 
+export type SLODefinitionSortableFields = 'version' | 'enabled';
+
 interface SLODefinitionParams {
   name?: string;
   includeOutdatedOnly?: boolean;
@@ -25,6 +27,9 @@ interface SLODefinitionParams {
   page?: number;
   perPage?: number;
   includeHealth?: boolean;
+  enabledFilter?: string;
+  sortField?: SLODefinitionSortableFields;
+  sortOrder?: 'asc' | 'desc';
 }
 
 export function useFetchSloDefinitions({
@@ -34,25 +39,40 @@ export function useFetchSloDefinitions({
   page = 1,
   perPage = 100,
   includeHealth = false,
+  enabledFilter = undefined,
+  sortField = undefined,
+  sortOrder = undefined,
 }: SLODefinitionParams): UseFetchSloDefinitionsResponse {
   const { sloClient } = usePluginContext();
   const search = name.endsWith('*') ? name : `${name}*`;
   const validTags = tags.filter((tag) => !!tag).join();
 
   const { isLoading, isError, isSuccess, data, refetch } = useQuery({
-    queryKey: sloKeys.definitions({ search, page, perPage, includeOutdatedOnly, validTags }),
+    queryKey: sloKeys.definitions({
+      search,
+      page,
+      perPage,
+      includeOutdatedOnly,
+      validTags,
+      enabledFilter,
+      sortField,
+      sortOrder,
+    }),
     queryFn: async ({ signal }) => {
       try {
+        const query = {
+          ...(search !== undefined && { search }),
+          ...(!!includeOutdatedOnly && { includeOutdatedOnly }),
+          ...(!!includeHealth && { includeHealth }),
+          ...(validTags?.length && { tags: validTags }),
+          ...(page !== undefined && { page: String(page) }),
+          ...(perPage !== undefined && { perPage: String(perPage) }),
+          ...((enabledFilter === 'true' || enabledFilter === 'false') && { enabledFilter }),
+          ...(!!sortField && !!sortOrder && { sortField, sortOrder }),
+        };
         return await sloClient.fetch('GET /api/observability/slos/_definitions 2023-10-31', {
           params: {
-            query: {
-              ...(search !== undefined && { search }),
-              ...(!!includeOutdatedOnly && { includeOutdatedOnly }),
-              ...(!!includeHealth && { includeHealth }),
-              ...(validTags?.length && { tags: validTags }),
-              ...(page !== undefined && { page: String(page) }),
-              ...(perPage !== undefined && { perPage: String(perPage) }),
-            },
+            query,
           },
           signal,
         });
