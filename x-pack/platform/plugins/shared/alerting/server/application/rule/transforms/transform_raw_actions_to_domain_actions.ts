@@ -75,6 +75,7 @@ export const transformRawActionsToDomainSystemActions = ({
         params: action.params,
         actionTypeId: action.actionTypeId,
         uuid: action.uuid,
+        ...(action.frequency ? { frequency: action.frequency } : {}),
         ...(action.useAlertDataForTemplate
           ? { useAlertDataForTemplate: action.useAlertDataForTemplate }
           : {}),

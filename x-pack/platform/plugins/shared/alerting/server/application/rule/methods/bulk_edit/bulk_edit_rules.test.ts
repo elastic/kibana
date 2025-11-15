@@ -1534,7 +1534,7 @@ describe('bulkEdit()', () => {
       });
     });
 
-    it('should throw an error if the system action contains the frequency', async () => {
+    it('should accept frequency in system actions', async () => {
       const action = {
         id: 'system_action-id',
         uuid: '123',
@@ -1567,21 +1567,21 @@ describe('bulkEdit()', () => {
         ],
       });
 
-      expect(res).toEqual({
-        errors: [
-          {
-            message:
-              'Error validating bulk edit rules operations - [frequency]: definition for this key is missing',
-            rule: {
-              id: '1',
-              name: 'my rule name',
-            },
+      expect(res.errors).toEqual([]);
+      expect(res.rules).toHaveLength(1);
+      expect(res.rules[0].systemActions).toEqual([
+        {
+          id: 'system_action-id',
+          actionTypeId: 'test-2',
+          params: {},
+          uuid: expect.any(String),
+          frequency: {
+            notifyWhen: 'onActiveAlert',
+            summary: false,
+            throttle: null,
           },
-        ],
-        rules: [],
-        skipped: [],
-        total: 1,
-      });
+        },
+      ]);
     });
 
     it('should throw an error if the system action contains the alertsFilter', async () => {

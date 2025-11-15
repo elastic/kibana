@@ -5,16 +5,23 @@
  * 2.0.
  */
 
+import { ALERT_UUID } from '@kbn/rule-data-utils';
+import { get } from 'lodash';
 import type { AlertInstanceState, AlertInstanceContext } from '@kbn/alerting-state-types';
 import type { RuleSystemAction, RuleTypeParams } from '@kbn/alerting-types';
 import type { CombinedSummarizedAlerts } from '../../../types';
 import type { RuleTypeState, RuleAlertData } from '../../../../common';
+import { parseDuration } from '../../../../common';
 import type { GetSummarizedAlertsParams } from '../../../alerts_client/types';
 import {
   buildRuleUrl,
   formatActionToEnqueue,
   getSummarizedAlerts,
   shouldScheduleAction,
+  isActionOnInterval,
+  isSummaryActionThrottled,
+  isSummaryAction,
+  logNumberOfFilteredAlerts,
 } from '../lib';
 import type {
   ActionSchedulerOptions,
@@ -59,9 +66,11 @@ export class SystemActionScheduler<
     return 1;
   }
 
-  public async getActionsToSchedule(
-    _: GetActionsToScheduleOpts<State, Context, ActionGroupIds, RecoveryActionGroupId>
-  ): Promise<ActionsToSchedule[]> {
+  public async getActionsToSchedule({
+    throttledSummaryActions,
+  }: GetActionsToScheduleOpts<State, Context, ActionGroupIds, RecoveryActionGroupId>): Promise<
+    ActionsToSchedule[]
+  > {
     const executables: Array<{
       action: RuleSystemAction;
       summarizedAlerts: CombinedSummarizedAlerts;
@@ -69,20 +78,87 @@ export class SystemActionScheduler<
     const results: ActionsToSchedule[] = [];
 
     for (const action of this.actions) {
-      const options: GetSummarizedAlertsParams = {
+      const isSummary = isSummaryAction(action);
+
+      // Check if summary action is throttled (only for summary actions)
+      if (
+        isSummary &&
+        isSummaryActionThrottled({
+          action,
+          throttledSummaryActions,
+          logger: this.context.logger,
+        })
+      ) {
+        continue;
+      }
+
+      const actionHasThrottleInterval = isActionOnInterval(action);
+      const optionsBase = {
         spaceId: this.context.taskInstance.params.spaceId,
         ruleId: this.context.rule.id,
         excludedAlertInstanceIds: this.context.rule.mutedInstanceIds,
-        executionUuid: this.context.executionId,
       };
+
+      let options: GetSummarizedAlertsParams;
+      if (actionHasThrottleInterval) {
+        const throttleMills = parseDuration(action.frequency!.throttle!);
+        const start = new Date(Date.now() - throttleMills);
+        options = { ...optionsBase, start, end: new Date() };
+      } else {
+        options = { ...optionsBase, executionUuid: this.context.executionId };
+      }
 
       const summarizedAlerts = await getSummarizedAlerts({
         queryOptions: options,
         alertsClient: this.context.alertsClient,
       });
 
+      if (!actionHasThrottleInterval) {
+        logNumberOfFilteredAlerts({
+          logger: this.context.logger,
+          numberOfAlerts: isSummary ? 0 : summarizedAlerts.all.count, // For per-alert, count individual alerts
+          numberOfSummarizedAlerts: summarizedAlerts.all.count,
+          action,
+        });
+      }
+
       if (summarizedAlerts && summarizedAlerts.all.count !== 0) {
-        executables.push({ action, summarizedAlerts });
+        if (isSummary) {
+          // Summary action: one workflow with all alerts
+          executables.push({ action, summarizedAlerts });
+        } else {
+          // Per-alert action: separate workflow for each alert
+          for (const alert of summarizedAlerts.all.data) {
+            const alertUuid = get(alert, ALERT_UUID);
+            const isInNew = summarizedAlerts.new.data.some((a) => get(a, ALERT_UUID) === alertUuid);
+            const isInOngoing = summarizedAlerts.ongoing.data.some(
+              (a) => get(a, ALERT_UUID) === alertUuid
+            );
+            const isInRecovered = summarizedAlerts.recovered.data.some(
+              (a) => get(a, ALERT_UUID) === alertUuid
+            );
+
+            const singleAlertSummary: CombinedSummarizedAlerts = {
+              new: {
+                count: isInNew ? 1 : 0,
+                data: isInNew ? [alert] : [],
+              },
+              ongoing: {
+                count: isInOngoing ? 1 : 0,
+                data: isInOngoing ? [alert] : [],
+              },
+              recovered: {
+                count: isInRecovered ? 1 : 0,
+                data: isInRecovered ? [alert] : [],
+              },
+              all: {
+                count: 1,
+                data: [alert],
+              },
+            };
+            executables.push({ action, summarizedAlerts: singleAlertSummary });
+          }
+        }
       }
     }
 
@@ -131,6 +207,11 @@ export class SystemActionScheduler<
       this.context.ruleRunMetricsStore.incrementNumberOfTriggeredActionsByConnectorType(
         actionTypeId
       );
+
+      // Update throttled state for summary actions with throttle interval
+      if (isSummaryAction(action) && isActionOnInterval(action) && throttledSummaryActions) {
+        throttledSummaryActions[action.uuid!] = { date: new Date().toISOString() };
+      }
 
       const connectorAdapter = this.context.taskRunnerContext.connectorAdapterRegistry.get(
         action.actionTypeId

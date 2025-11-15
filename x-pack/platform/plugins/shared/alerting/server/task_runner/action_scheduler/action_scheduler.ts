@@ -73,6 +73,7 @@ export class ActionScheduler<
   }): Promise<RunResult> {
     const throttledSummaryActions: ThrottledActions = getSummaryActionsFromTaskState({
       actions: this.context.rule.actions,
+      systemActions: this.context.rule.systemActions,
       summaryActions: this.context.taskInstance.state?.summaryActions,
     });
 

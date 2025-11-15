@@ -67,6 +67,7 @@ export interface RuleSystemAction {
   id: string;
   actionTypeId: string;
   params: RuleActionParams;
+  frequency?: RuleActionFrequency;
 }
 
 export interface MappedParamsProperties {

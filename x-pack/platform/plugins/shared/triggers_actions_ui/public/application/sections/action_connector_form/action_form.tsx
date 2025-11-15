@@ -252,21 +252,14 @@ export const ActionForm = ({
       (field) => field.actionTypeId === actionTypeModel.id
     );
 
-    const actionToPush = isSystemActionType
-      ? {
-          id: '',
-          actionTypeId: actionTypeModel.id,
-          params: {},
-          uuid: uuidv4(),
-        }
-      : {
-          id: '',
-          actionTypeId: actionTypeModel.id,
-          group: defaultActionGroupId,
-          params: {},
-          frequency: defaultRuleFrequency,
-          uuid: uuidv4(),
-        };
+    const actionToPush = {
+      id: '',
+      actionTypeId: actionTypeModel.id,
+      params: {},
+      frequency: defaultRuleFrequency,
+      uuid: uuidv4(),
+      ...(isSystemActionType ? {} : { group: defaultActionGroupId }),
+    };
 
     if (actionTypeConnectors.length === 0) {
       actionTypeConnectors = connectors.filter((field) =>
@@ -470,6 +463,7 @@ export const ActionForm = ({
                 index={index}
                 key={`system-action-form-action-at-${actionItem.uuid}`}
                 setActionParamsProperty={setActionParamsProperty}
+                setActionFrequencyProperty={setActionFrequencyProperty}
                 actionTypesIndex={actionTypesIndex}
                 connectors={connectors}
                 messageVariables={messageVariables}
@@ -482,6 +476,11 @@ export const ActionForm = ({
                 producerId={producerId}
                 ruleTypeId={ruleTypeId}
                 disableErrorMessages={disableErrorMessages}
+                hasAlertsMappings={hasAlertsMappings}
+                minimumThrottleInterval={minimumThrottleInterval}
+                notifyWhenSelectOptions={notifyWhenSelectOptions}
+                hideNotifyWhen={hideNotifyWhen}
+                defaultRuleFrequency={defaultRuleFrequency}
               />
             );
           }

@@ -4494,7 +4494,7 @@ describe('create()', () => {
       );
     });
 
-    test('should throw an error if the system action contains the frequency', async () => {
+    test('should accept frequency in system actions', async () => {
       const systemAction = {
         id: 'system_action-id',
         uuid: '123',
@@ -4508,9 +4508,21 @@ describe('create()', () => {
       };
 
       const data = getMockData({ actions: [], systemActions: [systemAction] });
-      await expect(() => rulesClient.create({ data })).rejects.toMatchInlineSnapshot(
-        `[Error: Error validating create data - [systemActions.0.frequency]: definition for this key is missing]`
-      );
+      const result = await rulesClient.create({ data });
+
+      expect(result.systemActions).toEqual([
+        {
+          id: 'system_action-id',
+          actionTypeId: '.test',
+          params: {},
+          uuid: expect.any(String),
+          frequency: {
+            summary: false,
+            notifyWhen: 'onActionGroupChange',
+            throttle: null,
+          },
+        },
+      ]);
     });
 
     test('should throw an error if the system action contains the alertsFilter', async () => {

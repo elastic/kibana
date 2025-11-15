@@ -64,11 +64,13 @@ export const transformAlertToRuleSystemAction = ({
   actionTypeId,
   params,
   uuid,
+  frequency,
 }: AlertingRuleSystemAction): RuleAction => ({
   id,
   params,
   action_type_id: actionTypeId,
   ...(uuid && { uuid }),
+  ...(frequency && { frequency }),
 });
 
 export const transformNormalizedRuleToAlertAction = ({

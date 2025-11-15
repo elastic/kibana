@@ -6,14 +6,19 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import type { IntervalSchedule, RuleAction, ThrottledActions } from '../../../../common';
+import type {
+  IntervalSchedule,
+  RuleAction,
+  RuleSystemAction,
+  ThrottledActions,
+} from '../../../../common';
 import { parseDuration, RuleNotifyWhenTypeValues } from '../../../../common';
 
-export const isSummaryAction = (action?: RuleAction) => {
+export const isSummaryAction = (action?: RuleAction | RuleSystemAction) => {
   return action?.frequency?.summary ?? false;
 };
 
-export const isActionOnInterval = (action?: RuleAction) => {
+export const isActionOnInterval = (action?: RuleAction | RuleSystemAction) => {
   if (action?.frequency == null) {
     return false;
   }
@@ -28,7 +33,7 @@ export const isSummaryActionThrottled = ({
   throttledSummaryActions,
   logger,
 }: {
-  action?: RuleAction;
+  action?: RuleAction | RuleSystemAction;
   throttledSummaryActions?: ThrottledActions;
   logger: Logger;
 }) => {
@@ -64,21 +69,26 @@ export const isSummaryActionThrottled = ({
   return throttled;
 };
 
-export const generateActionHash = (action?: RuleAction) => {
+export const generateActionHash = (action?: RuleAction | RuleSystemAction) => {
   return `${action?.actionTypeId || 'no-action-type-id'}:${
-    action?.frequency?.summary ? 'summary' : action?.group || 'no-action-group'
+    action?.frequency?.summary
+      ? 'summary'
+      : (action && 'group' in action ? action.group : 'no-action-group') || 'no-action-group'
   }:${action?.frequency?.throttle || 'no-throttling'}`;
 };
 
 export const getSummaryActionsFromTaskState = ({
   actions,
+  systemActions,
   summaryActions = {},
 }: {
   actions: RuleAction[];
+  systemActions?: RuleSystemAction[];
   summaryActions?: ThrottledActions;
 }) => {
+  const allActions = [...actions, ...(systemActions || [])];
   return Object.entries(summaryActions).reduce((newObj, [key, val]) => {
-    const actionExists = actions.find(
+    const actionExists = allActions.find(
       (action) =>
         action.frequency?.summary && (action.uuid === key || generateActionHash(action) === key)
     );
@@ -92,7 +102,7 @@ export const getSummaryActionsFromTaskState = ({
 };
 
 export const getSummaryActionTimeBounds = (
-  action: RuleAction,
+  action: RuleAction | RuleSystemAction,
   ruleSchedule: IntervalSchedule,
   previousStartedAt: Date | null
 ): { start?: number; end?: number } => {
@@ -125,7 +135,7 @@ interface LogNumberOfFilteredAlertsOpts {
   logger: Logger;
   numberOfAlerts: number;
   numberOfSummarizedAlerts: number;
-  action: RuleAction;
+  action: RuleAction | RuleSystemAction;
 }
 export const logNumberOfFilteredAlerts = ({
   logger,
