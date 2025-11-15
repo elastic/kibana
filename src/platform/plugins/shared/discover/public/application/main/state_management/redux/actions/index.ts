@@ -12,4 +12,4 @@ export * from './initialize_single_tab';
 export * from './tabs';
 export * from './save_discover_session';
 export * from './reset_discover_session';
-export * from './app_state';
+export * from './tab_state';
