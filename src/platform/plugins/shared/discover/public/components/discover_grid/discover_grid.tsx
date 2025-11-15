@@ -31,6 +31,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
   onUpdateESQLQuery,
   query,
   rowAdditionalLeadingControls: customRowAdditionalLeadingControls,
+  onFullScreenChange,
   ...props
 }) => {
   const { dataView, setExpandedDoc, renderDocumentView } = props;
@@ -86,6 +87,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
       paginationMode={paginationModeConfig.paginationMode}
       customGridColumnsConfiguration={customGridColumnsConfiguration}
       shouldKeepAdHocDataViewImmutable
+      onFullScreenChange={onFullScreenChange}
       {...props}
     />
   );
