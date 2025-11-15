@@ -11,7 +11,7 @@
         "label": "FailureStoreModal",
         "description": [],
         "signature": [
-          "({ onCloseModal, onSaveModal, failureStoreProps, }: Props) => React.JSX.Element"
+          "({ onCloseModal, onSaveModal, failureStoreProps, showIlmDescription, inheritOptions, }: Props) => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/shared/kbn-failure-store-modal/src/components/failure_store_modal/failure_store_modal.tsx",
         "deprecated": false,
@@ -22,7 +22,7 @@
             "id": "def-public.FailureStoreModal.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  onCloseModal,\n  onSaveModal,\n  failureStoreProps,\n}",
+            "label": "{\n  onCloseModal,\n  onSaveModal,\n  failureStoreProps,\n  showIlmDescription = false,\n  inheritOptions,\n}",
             "description": [],
             "signature": [
               "Props"
