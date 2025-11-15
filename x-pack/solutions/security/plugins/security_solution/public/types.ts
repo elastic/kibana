@@ -38,6 +38,7 @@ import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
+import type { CloudDefendPluginStart } from '@kbn/cloud-defend-plugin/public';
 import type { CspClientPluginStart } from '@kbn/cloud-security-posture-plugin/public';
 import type { ApmBase } from '@elastic/apm-rum';
 import type {
@@ -75,6 +76,7 @@ import type { Rules } from './rules';
 import type { Timelines } from './timelines';
 import type { Management } from './management';
 import type { CloudSecurityPosture } from './cloud_security_posture';
+import type { CloudDefend } from './cloud_defend';
 import type { ThreatIntelligence } from './threat_intelligence';
 import type { SecuritySolutionTemplateWrapper } from './app/home/template_wrapper';
 import type { AssetInventory } from './asset_inventory';
@@ -142,6 +144,7 @@ export interface StartPlugins {
   osquery: OsqueryPluginStart;
   security: SecurityPluginStart;
   cloud?: CloudStart;
+  cloudDefend: CloudDefendPluginStart;
   cloudSecurityPosture: CspClientPluginStart;
   dataViews: DataViewsServicePublic;
   fieldFormats: FieldFormatsStartCommon;
@@ -232,6 +235,7 @@ export interface SubPlugins {
   alerts: Detections;
   assetInventory: AssetInventory;
   attackDiscovery: AttackDiscovery;
+  cloudDefend: CloudDefend;
   cloudSecurityPosture: CloudSecurityPosture;
   dashboards: Dashboards;
   exceptions: Exceptions;
@@ -255,6 +259,7 @@ export interface StartedSubPlugins {
   alerts: Awaited<ReturnType<Detections['start']>>;
   assetInventory: Awaited<ReturnType<AssetInventory['start']>>;
   attackDiscovery: ReturnType<AttackDiscovery['start']>;
+  cloudDefend: ReturnType<CloudDefend['start']>;
   cloudSecurityPosture: ReturnType<CloudSecurityPosture['start']>;
   dashboards: ReturnType<Dashboards['start']>;
   exceptions: ReturnType<Exceptions['start']>;
