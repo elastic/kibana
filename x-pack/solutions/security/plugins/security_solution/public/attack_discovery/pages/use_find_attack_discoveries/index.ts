@@ -43,6 +43,7 @@ interface Props {
   status?: string[];
   sortField?: string;
   sortOrder?: string;
+  globalQuery?: string;
 }
 
 interface UseFindAttackDiscoveries {
@@ -81,6 +82,7 @@ export const useFindAttackDiscoveries = ({
   status,
   sortField = '@timestamp',
   sortOrder = 'desc',
+  globalQuery,
 }: Props): UseFindAttackDiscoveries => {
   const { addError } = useAppToasts();
   const { attackDiscoveryPublicApiEnabled } = useKibanaFeatureFlags();
@@ -116,6 +118,7 @@ export const useFindAttackDiscoveries = ({
         sort_order: sortOrder,
         start,
         status,
+        global_query: globalQuery,
       };
 
       if (attackDiscoveryPublicApiEnabled) {
@@ -143,6 +146,7 @@ export const useFindAttackDiscoveries = ({
       attackDiscoveryPublicApiEnabled,
       connectorNames,
       end,
+      globalQuery,
       http,
       ids,
       includeUniqueAlertIds,

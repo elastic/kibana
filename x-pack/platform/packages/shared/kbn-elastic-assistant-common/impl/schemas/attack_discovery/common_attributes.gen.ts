@@ -286,6 +286,10 @@ export const FindAttackDiscoveryAlertsParams = z.object({
    * When true, return the created Attack discoveries with text replacements applied to the detailsMarkdown, entitySummaryMarkdown, summaryMarkdown, and title fields.
    */
   withReplacements: z.boolean(),
+  /**
+   * global search bar query filter
+   */
+  globalQuery: z.string().optional(),
 });
 
 export type AttackDiscoveryGenerationConfig = z.infer<typeof AttackDiscoveryGenerationConfig>;

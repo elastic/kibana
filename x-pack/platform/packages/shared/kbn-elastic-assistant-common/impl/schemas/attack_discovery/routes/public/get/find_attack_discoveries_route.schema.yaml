@@ -50,7 +50,7 @@ paths:
           required: false
           schema:
             type: string
-          example: "now"
+          example: 'now'
         - name: 'ids'
           description: Filter results to the Attack discoveries with the specified IDs
           in: query
@@ -90,13 +90,20 @@ paths:
           required: false
           schema:
             type: string
-          example: ""
+          example: ''
         - name: 'shared'
           description: Whether to filter by shared visibility. If omitted, both shared and privately visible Attack discoveries are returned. Use `true` to return only shared discoveries, `false` to return only those visible to the current user.
           in: query
           required: false
           schema:
             type: boolean
+        - name: 'global_query'
+          description: Elastic global query
+          in: query
+          required: false
+          schema:
+            type: string
+          example: ''
         - name: 'sort_field'
           description: Field used to sort results. See `AttackDiscoveryFindSortField` for allowed values.
           in: query
@@ -104,7 +111,7 @@ paths:
           schema:
             default: '@timestamp'
             $ref: '#/components/schemas/AttackDiscoveryFindSortField'
-          example: "@timestamp"
+          example: '@timestamp'
         - name: 'sort_order'
           description: Sort order direction `asc` for ascending or `desc` for descending. Defaults to `desc`.
           in: query
@@ -112,14 +119,14 @@ paths:
           schema:
             default: 'desc'
             $ref: '../../../../common_attributes.schema.yaml#/components/schemas/SortOrder'
-          example: "desc"
+          example: 'desc'
         - name: 'start'
           description: Start of the time range for the search. Accepts absolute timestamps (ISO 8601) or relative date math (e.g. "now-7d").
           in: query
           required: false
           schema:
             type: string
-          example: "now-24h"
+          example: 'now-24h'
         - name: 'status'
           description: Filter by alert workflow status. Provide one or more of the allowed workflow states.
           in: query
@@ -132,7 +139,7 @@ paths:
                 - 'acknowledged'
                 - 'closed'
                 - 'open'
-          example: ['open','acknowledged']
+          example: ['open', 'acknowledged']
         - name: 'with_replacements'
           description: When true, return the created Attack discoveries with text replacements applied to the detailsMarkdown, entitySummaryMarkdown, summaryMarkdown, and title fields. Defaults to `true`.
           in: query
@@ -197,11 +204,11 @@ paths:
                   error:
                     type: string
                     description: Error type
-                    example: "Bad Request"
+                    example: 'Bad Request'
                   message:
                     type: string
                     description: Human-readable error message
-                    example: "Invalid request payload."
+                    example: 'Invalid request payload.'
 components:
   schemas:
     AttackDiscoveryFindSortField:

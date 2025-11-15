@@ -225,7 +225,7 @@ const SearchAndFilterComponent: React.FC<Props> = ({
           />
         </EuiFlexItem>
 
-        <EuiFlexItem
+        {/* <EuiFlexItem
           css={css`
             width: ${DATE_PICKER_WIDTH};
           `}
@@ -242,7 +242,7 @@ const SearchAndFilterComponent: React.FC<Props> = ({
             start={start}
             updateButtonProps={updateButtonProps}
           />
-        </EuiFlexItem>
+        </EuiFlexItem> */}
       </EuiFlexGroup>
 
       {filterByAlertIds.length > 0 && (

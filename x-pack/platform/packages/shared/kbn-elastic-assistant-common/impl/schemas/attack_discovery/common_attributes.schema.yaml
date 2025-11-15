@@ -179,7 +179,6 @@ components:
           type: string
           description: The reason for a status of failed.
 
-
     CreateAttackDiscoveryAlertsParams:
       type: object
       required:
@@ -295,6 +294,9 @@ components:
         withReplacements:
           description: When true, return the created Attack discoveries with text replacements applied to the detailsMarkdown, entitySummaryMarkdown, summaryMarkdown, and title fields.
           type: boolean
+        globalQuery:
+          description: global search bar query filter
+          type: string
 
     AttackDiscoveryGenerationConfig:
       type: object
