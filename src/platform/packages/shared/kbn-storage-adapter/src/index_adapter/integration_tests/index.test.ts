@@ -14,7 +14,7 @@ import type {
   StorageClientIndexResponse,
   StorageDocumentOf,
 } from '../../..';
-import { StorageIndexAdapter, type StorageSettings } from '../../..';
+import { BulkOperationError, StorageIndexAdapter, type StorageSettings } from '../../..';
 import type { Logger } from '@kbn/core/server';
 import * as getSchemaVersionModule from '../../get_schema_version';
 import { isResponseError } from '@kbn/es-errors';
@@ -345,6 +345,97 @@ describe('StorageIndexAdapter', () => {
 
     it('deletes the documents', async () => {
       await verifyClean();
+    });
+  });
+
+  describe('when bulk operation encounters errors', () => {
+    afterAll(async () => {
+      await client?.clean();
+    });
+
+    it('throws BulkOperationError when bulk operation contains document-level errors', async () => {
+      // Create an adapter with strict mapping to trigger mapping errors
+      const strictAdapter = createStorageIndexAdapter({
+        name: 'test_strict_index',
+        schema: {
+          properties: {
+            foo: {
+              type: 'keyword',
+            },
+          },
+        },
+      });
+      const strictClient = strictAdapter.getClient();
+
+      // First create the index with strict mapping
+      await strictClient.index({
+        id: 'doc1',
+        document: { foo: 'bar' },
+      });
+
+      // Try to bulk index with an invalid field (should fail due to dynamic: strict)
+      await expect(
+        strictClient.bulk({
+          operations: [
+            {
+              index: {
+                _id: 'doc2',
+                document: { foo: 'baz', invalid_field: 'value' } as any,
+              },
+            },
+          ],
+          refresh: 'wait_for',
+        })
+      ).rejects.toThrow(BulkOperationError);
+
+      await strictClient.clean();
+    });
+
+    it('includes error details in the thrown BulkOperationError', async () => {
+      const strictAdapter = createStorageIndexAdapter({
+        name: 'test_strict_index_2',
+        schema: {
+          properties: {
+            foo: {
+              type: 'keyword',
+            },
+          },
+        },
+      });
+      const strictClient = strictAdapter.getClient();
+
+      // Create the index
+      await strictClient.index({
+        id: 'doc1',
+        document: { foo: 'bar' },
+      });
+
+      try {
+        await strictClient.bulk({
+          operations: [
+            {
+              index: {
+                _id: 'doc2',
+                document: { foo: 'baz', invalid_field: 'value' } as any,
+              },
+            },
+          ],
+          refresh: 'wait_for',
+        });
+        fail('Expected BulkOperationError to be thrown');
+      } catch (err) {
+        const error = err as BulkOperationError;
+        expect(error).toBeInstanceOf(BulkOperationError);
+        expect(error.message).toContain('Bulk operation failed');
+        expect(error.message).toContain('1 out of 1 items');
+        expect(error.response).toBeDefined();
+        expect(error.response.errors).toBe(true);
+        expect(error.response.items).toHaveLength(1);
+        expect(error.response.items[0].index?.error).toBeDefined();
+        expect(error.response.items[0].index?.error?.type).toBe('strict_dynamic_mapping_exception');
+      }
+
+      await strictClient.clean();
     });
   });
 
