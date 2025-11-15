@@ -5,3 +5,4 @@
  * 2.0.
  */
 export { muteAlertParamsSchema } from './mute_alert_params_schema';
+export { muteAlertBodySchema } from './mute_alert_body_schema';

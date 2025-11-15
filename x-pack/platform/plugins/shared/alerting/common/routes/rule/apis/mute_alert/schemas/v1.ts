@@ -19,3 +19,14 @@ export const muteAlertParamsSchema = schema.object({
     },
   }),
 });
+
+export const muteAlertBodySchema = schema.object({
+  validate_alerts_existence: schema.maybe(
+    schema.boolean({
+      defaultValue: true,
+      meta: {
+        description: 'Whether to validate the existence of the alert.',
+      },
+    })
+  ),
+});

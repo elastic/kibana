@@ -5,14 +5,20 @@
  * 2.0.
  */
 import type { IRouter } from '@kbn/core/server';
-import { transformRequestParamsToApplicationV1 } from './transforms';
+import { transformRequestParamsToApplicationV2 } from './transforms';
 import type { ILicenseState } from '../../../../lib';
 import { RuleTypeDisabledError } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
 import type { AlertingRequestHandlerContext } from '../../../../types';
 import { BASE_ALERTING_API_PATH } from '../../../../types';
-import type { MuteAlertRequestParamsV1 } from '../../../../../common/routes/rule/apis/mute_alert';
-import { muteAlertParamsSchemaV1 } from '../../../../../common/routes/rule/apis/mute_alert';
+import type {
+  MuteAlertRequestBodyV1,
+  MuteAlertRequestParamsV1,
+} from '../../../../../common/routes/rule/apis/mute_alert';
+import {
+  muteAlertParamsSchemaV1,
+  muteAlertBodySchemaV1,
+} from '../../../../../common/routes/rule/apis/mute_alert';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 
 export const muteAlertRoute = (
@@ -31,6 +37,7 @@ export const muteAlertRoute = (
       validate: {
         request: {
           params: muteAlertParamsSchemaV1,
+          body: muteAlertBodySchemaV1,
         },
         response: {
           204: {
@@ -53,8 +60,12 @@ export const muteAlertRoute = (
         const alertingContext = await context.alerting;
         const rulesClient = await alertingContext.getRulesClient();
         const params: MuteAlertRequestParamsV1 = req.params;
+        const body: MuteAlertRequestBodyV1 = req.body;
+
         try {
-          await rulesClient.muteInstance(transformRequestParamsToApplicationV1(params));
+          await rulesClient.muteInstance(
+            transformRequestParamsToApplicationV2({ ...params, ...body })
+          );
           return res.noContent();
         } catch (e) {
           if (e instanceof RuleTypeDisabledError) {
