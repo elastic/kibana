@@ -24,9 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataGrid = getService('dataGrid');
   const monacoEditor = getService('monacoEditor');
 
-  // Failing: See https://github.com/elastic/kibana/issues/241720
-  // This is currently stalling several CI runs
-  describe.skip('has ES data but no custom data view', function () {
+  describe('has ES data but no custom data view', function () {
     beforeEach(async () => {
       await common.navigateToApp('home');
       await kibanaServer.savedObjects.cleanStandardList();
