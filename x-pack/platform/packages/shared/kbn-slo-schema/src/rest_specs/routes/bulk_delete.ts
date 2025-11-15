@@ -7,41 +7,41 @@
 import * as t from 'io-ts';
 import { sloIdSchema } from '../../schema/slo';
 
-const bulkDeleteParamsSchema = t.type({
+const bulkOperationParamsSchema = t.type({
   body: t.type({
     list: t.array(sloIdSchema),
   }),
 });
 
-const bulkDeleteStatusParamsSchema = t.type({
+const bulkOperationStatusParamsSchema = t.type({
   path: t.type({
     taskId: t.string,
   }),
 });
 
-type BulkDeleteInput = t.OutputOf<typeof bulkDeleteParamsSchema.props.body>;
-type BulkDeleteParams = t.TypeOf<typeof bulkDeleteParamsSchema.props.body>;
-interface BulkDeleteResponse {
+type BulkOperationInput = t.OutputOf<typeof bulkOperationParamsSchema.props.body>;
+type BulkOperationParams = t.TypeOf<typeof bulkOperationParamsSchema.props.body>;
+interface BulkOperationResponse {
   taskId: string;
 }
 
-interface BulkDeleteResult {
+interface BulkOperationResult {
   id: string;
   success: boolean;
   error?: string;
 }
 
-interface BulkDeleteStatusResponse {
+interface BulkOperationStatusResponse {
   isDone: boolean;
-  results?: BulkDeleteResult[];
+  results?: BulkOperationResult[];
   error?: string;
 }
 
 export type {
-  BulkDeleteInput,
-  BulkDeleteParams,
-  BulkDeleteResponse,
-  BulkDeleteResult,
-  BulkDeleteStatusResponse,
+  BulkOperationInput,
+  BulkOperationParams,
+  BulkOperationResponse,
+  BulkOperationResult,
+  BulkOperationStatusResponse,
 };
-export { bulkDeleteParamsSchema, bulkDeleteStatusParamsSchema };
+export { bulkOperationParamsSchema, bulkOperationStatusParamsSchema };
