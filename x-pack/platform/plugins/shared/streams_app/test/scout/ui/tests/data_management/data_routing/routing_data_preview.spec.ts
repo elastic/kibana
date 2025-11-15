@@ -169,7 +169,7 @@ test.describe('Stream data routing - previewing data', { tag: ['@ess', '@svlOblt
     });
 
     // Should show no matching documents
-    await expect(page.getByText('No documents to preview')).toBeVisible();
+    await expect(page.getByTestId('streamsAppRoutingPreviewEmptyPromptTitle')).toBeVisible();
   });
 
   test('should show document filter controls when there is data by default', async ({
@@ -354,5 +354,161 @@ test.describe('Stream data routing - previewing data', { tag: ['@ess', '@svlOblt
     // Verify filter controls are present and disabled
     await expect(page.getByTestId('routingPreviewMatchedFilterButton')).toBeDisabled();
     await expect(page.getByTestId('routingPreviewUnmatchedFilterButton')).toBeDisabled();
+  });
+
+  test('should handle "no data" when date range has no documents', async ({
+    page,
+    pageObjects,
+  }) => {
+    await pageObjects.streams.clickCreateRoutingRule();
+    await pageObjects.streams.fillRoutingRuleName('no-data-test');
+
+    await pageObjects.streams.fillConditionEditor({
+      field: 'severity_text',
+      operator: 'equals',
+      value: 'info',
+    });
+
+    // Set date range to far future where no data exists
+    await pageObjects.datePicker.setAbsoluteRange({
+      from: 'Jan 1, 2099 @ 00:00:00.000',
+      to: 'Jan 2, 2099 @ 00:00:00.000',
+    });
+
+    // Should show no documents message
+    await expect(page.getByTestId('streamsAppRoutingPreviewEmptyPromptTitle')).toBeVisible();
+  });
+
+  test('should show empty state during rule editing', async ({
+    page,
+    apiServices,
+    pageObjects,
+  }) => {
+    // Create a rule first
+    await apiServices.streams.forkStream('logs', 'logs.edit-preview-test', {
+      field: 'service.name',
+      eq: 'test',
+    });
+
+    await pageObjects.streams.gotoPartitioningTab('logs');
+    await pageObjects.streams.clickEditRoutingRule('logs.edit-preview-test');
+
+    // Preview should show empty state during editing
+    await expect(page.getByTestId('streamsAppRoutingPreviewEditingPanelTitle')).toBeVisible();
+  });
+
+  test('should show correct message when editing existing rule in preview panel', async ({
+    page,
+    apiServices,
+    pageObjects,
+  }) => {
+    await apiServices.streams.forkStream('logs', 'logs.edit-message-test', {
+      field: 'service.name',
+      eq: 'test',
+    });
+
+    await pageObjects.streams.gotoPartitioningTab('logs');
+    await pageObjects.streams.clickEditRoutingRule('logs.edit-message-test');
+
+    // Should show message about saving changes
+    await expect(page.getByTestId('streamsAppRoutingPreviewEditingPanelBodyMessage')).toBeVisible();
+
+    // Should also show warning about reordering
+    await expect(
+      page.getByTestId('streamsAppRoutingPreviewEditingPanelReorderingWarning')
+    ).toBeVisible();
+  });
+
+  test('should recover from error state when condition is fixed', async ({ page, pageObjects }) => {
+    await pageObjects.streams.clickCreateRoutingRule();
+    await pageObjects.streams.fillRoutingRuleName('error-recovery-test');
+
+    // Set invalid condition (only operator, no field or value)
+    await pageObjects.streams.fillConditionEditor({
+      operator: 'equals',
+    });
+
+    // Should show disabled state or error
+    await expect(page.getByTestId('routingPreviewMatchedFilterButton')).toBeDisabled();
+
+    // Fix the condition
+    await pageObjects.streams.fillConditionEditor({
+      field: 'severity_text',
+      value: 'info',
+    });
+
+    // Should recover and show preview
+    await pageObjects.streams.expectPreviewPanelVisible();
+    await expect(page.getByTestId('routingPreviewMatchedFilterButton')).toBeEnabled();
+  });
+
+  test('should display child stream count badge for nested routing rules', async ({
+    page,
+    apiServices,
+    pageObjects,
+  }) => {
+    // Create a parent stream with a child
+    await apiServices.streams.forkStream('logs', 'logs.parent', {
+      field: 'service.name',
+      eq: 'parent',
+    });
+
+    // Create a child under the parent
+    await apiServices.streams.forkStream('logs.parent', 'logs.parent.child1', {
+      field: 'severity_text',
+      eq: 'info',
+    });
+
+    await apiServices.streams.forkStream('logs.parent', 'logs.parent.child2', {
+      field: 'severity_text',
+      eq: 'warn',
+    });
+
+    await pageObjects.streams.gotoPartitioningTab('logs');
+
+    // Should see +2 badge on logs.parent indicating it has 2 children
+    const childCountBadge = page
+      .locator('[data-test-subj="routingRule-logs.parent"]')
+      .getByTestId('streamsAppRoutingRuleChildCountBadge');
+    await expect(childCountBadge).toBeVisible();
+    await expect(childCountBadge).toHaveText('+2');
+  });
+
+  test('should not show child count badge when stream has no children', async ({
+    page,
+    apiServices,
+    pageObjects,
+  }) => {
+    try {
+      await apiServices.streams.clearStreamChildren('logs');
+    } catch (error) {
+      // Ignore 409 errors if streams can't be cleared
+    }
+    await apiServices.streams.forkStream('logs', 'logs.no-children', {
+      field: 'service.name',
+      eq: 'test',
+    });
+
+    await pageObjects.streams.gotoPartitioningTab('logs');
+
+    // Should not see any +N badge
+    const routingRule = page.getByTestId('routingRule-logs.no-children');
+    await expect(routingRule).toBeVisible();
+
+    // Badge should not exist
+    const badge = routingRule.getByTestId('streamsAppRoutingRuleChildCountBadge');
+    await expect(badge).toBeHidden();
+  });
+
+  test('should show preview panel in idle state with data', async ({ page, pageObjects }) => {
+    // In idle state (no rule being created/edited), preview should show sample data
+    await pageObjects.streams.expectPreviewPanelVisible();
+
+    // Should see the data preview header
+    await expect(page.getByTestId('streamsAppRoutingPreviewPanelHeader')).toBeVisible();
+
+    // Should see some data rows
+    const rows = await pageObjects.streams.getPreviewTableRows();
+    expect(rows.length).toBeGreaterThan(0);
   });
 });

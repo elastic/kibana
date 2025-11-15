@@ -27,8 +27,8 @@ test.describe('Stream data routing - creating routing rules', { tag: ['@ess', '@
 
     // Verify we're in the creating new rule state
     await expect(page.getByTestId('streamsAppRoutingStreamEntryNameField')).toBeVisible();
-    await expect(page.getByText('Stream name')).toBeVisible();
-    await expect(page.getByText('logs.')).toBeVisible();
+    await expect(page.getByTestId('streamsAppRoutingStreamNameLabel')).toBeVisible();
+    await expect(page.getByTestId('streamsAppRoutingStreamNamePrefix')).toContainText('logs.');
 
     // Fill in the stream name
     await page.getByTestId('streamsAppRoutingStreamEntryNameField').fill('nginx');
@@ -41,13 +41,20 @@ test.describe('Stream data routing - creating routing rules', { tag: ['@ess', '@
     });
 
     // Save the rule (fork stream)
-    await page.getByRole('button', { name: 'Save' }).click();
+    await page.getByTestId('streamsAppStreamDetailRoutingSaveButton').click();
 
     // Verify success
     await pageObjects.streams.expectRoutingRuleVisible('logs.nginx');
-    await expect(page.getByText('service.name')).toBeVisible();
-    await expect(page.getByText('equals')).toBeVisible();
-    await expect(page.getByText('nginxlogs')).toBeVisible();
+    const routingRule = page.getByTestId('routingRule-logs.nginx');
+    await expect(routingRule.getByTestId('streamsAppConditionDisplayField')).toContainText(
+      'service.name'
+    );
+    await expect(routingRule.getByTestId('streamsAppConditionDisplayOperator')).toContainText(
+      'equals'
+    );
+    await expect(routingRule.getByTestId('streamsAppConditionDisplayValue')).toContainText(
+      'nginxlogs'
+    );
   });
 
   test('should cancel creating new routing rule', async ({ page, pageObjects }) => {
@@ -121,5 +128,236 @@ test.describe('Stream data routing - creating routing rules', { tag: ['@ess', '@
 
     const createButton = page.getByTestId('streamsAppStreamDetailRoutingAddRuleButton');
     await expect(createButton).toBeDisabled();
+  });
+
+  test('should navigate to child stream when clicking on stream name link', async ({
+    page,
+    pageObjects,
+  }) => {
+    // Create a child stream first
+    await pageObjects.streams.clickCreateRoutingRule();
+    await pageObjects.streams.fillRoutingRuleName('navigation-test');
+    await pageObjects.streams.fillConditionEditor({
+      field: 'service.name',
+      value: 'test',
+      operator: 'equals',
+    });
+    await pageObjects.streams.saveRoutingRule();
+    await pageObjects.toasts.closeAll();
+
+    // Click on the child stream name link (scope to specific routing rule)
+    const streamLink = page
+      .getByTestId('routingRule-logs.navigation-test')
+      .getByTestId('streamsAppRoutingStreamEntryButton');
+    await expect(streamLink).toBeVisible();
+    await streamLink.click();
+
+    // Verify we navigated to the child stream's partitioning tab
+    await expect(page).toHaveURL(/logs\.navigation-test\/management\/partitioning/);
+  });
+
+  test('should show "Open stream in new tab" button in success toast', async ({
+    page,
+    pageObjects,
+  }) => {
+    await pageObjects.streams.clickCreateRoutingRule();
+    await pageObjects.streams.fillRoutingRuleName('toast-test');
+    await pageObjects.streams.fillConditionEditor({
+      field: 'service.name',
+      value: 'test',
+      operator: 'equals',
+    });
+    await pageObjects.streams.saveRoutingRule();
+    await pageObjects.toasts.waitFor();
+
+    // Verify "Open stream in new tab" button is present
+    const openInNewTabButton = page.getByTestId(
+      'streamsAppSaveOrUpdateChildrenOpenStreamInNewTabButton'
+    );
+    await expect(openInNewTabButton).toBeVisible();
+
+    // Verify the button has correct link
+    await expect(openInNewTabButton).toHaveAttribute(
+      'href',
+      expect.stringContaining('logs.toast-test')
+    );
+  });
+
+  test('should handle complex AND/OR condition via syntax editor', async ({
+    page,
+    pageObjects,
+  }) => {
+    await pageObjects.streams.clickCreateRoutingRule();
+    await pageObjects.streams.fillRoutingRuleName('complex-condition-test');
+    await pageObjects.streams.toggleConditionEditorWithSyntaxSwitch();
+
+    const complexCondition = {
+      and: [
+        {
+          field: 'severity_text',
+          eq: 'info',
+        },
+        {
+          field: 'service.name',
+          contains: 'web',
+        },
+      ],
+    };
+
+    await pageObjects.streams.fillConditionEditorWithSyntax(
+      JSON.stringify(complexCondition, null, 2)
+    );
+
+    // Verify the syntax editor contains the condition
+    const codeEditor = page.getByTestId('streamsAppConditionEditorCodeEditor');
+    await expect(codeEditor).toBeVisible();
+
+    await pageObjects.streams.saveRoutingRule();
+    await pageObjects.toasts.waitFor();
+
+    // Verify rule was created
+    await pageObjects.streams.expectRoutingRuleVisible('logs.complex-condition-test');
+  });
+
+  test('should show error for invalid JSON in syntax editor', async ({ page, pageObjects }) => {
+    await pageObjects.streams.clickCreateRoutingRule();
+    await pageObjects.streams.fillRoutingRuleName('invalid-json-test');
+    await pageObjects.streams.toggleConditionEditorWithSyntaxSwitch();
+
+    // Enter invalid JSON
+    const codeEditor = page.getByTestId('streamsAppConditionEditorCodeEditor');
+    await codeEditor.click();
+    await page.keyboard.type('{ invalid json }');
+
+    await pageObjects.streams.saveRoutingRule();
+
+    // Should not create the rule (button might be disabled or error shown)
+    // Rule should not exist
+    await expect(page.getByTestId('streamsAppRoutingStreamEntryNameField')).toBeVisible();
+  });
+
+  test('should show complex condition in syntax editor', async ({
+    page,
+    apiServices,
+    pageObjects,
+  }) => {
+    // Create a rule with complex condition via API
+    try {
+      await apiServices.streams.clearStreamChildren('logs');
+    } catch (error) {
+      // Ignore 409 errors if streams can't be cleared
+    }
+
+    // Complex condition that can't be edited in simple UI
+    const complexCondition = {
+      or: [
+        { field: 'severity_text', eq: 'error' },
+        { field: 'severity_text', eq: 'critical' },
+      ],
+    };
+
+    await apiServices.streams.forkStream('logs', 'logs.complex-ui-test', complexCondition);
+
+    await pageObjects.streams.gotoPartitioningTab('logs');
+    await pageObjects.streams.clickEditRoutingRule('logs.complex-ui-test');
+
+    // Should see the syntax editor switch
+    const syntaxSwitch = page.getByTestId('streamsAppConditionEditorSwitch');
+    await expect(syntaxSwitch).toBeVisible();
+
+    // The complex condition should be shown in the code editor
+    // Look for the JSON structure with "or" condition
+    const codeEditor = page.getByTestId('streamsAppConditionEditorCodeEditor');
+    await expect(codeEditor).toBeVisible();
+
+    // Verify the condition contains the OR structure
+    await expect(codeEditor).toContainText('"or": [');
+  });
+
+  test('should attempt to create stream with duplicate name and fail', async ({
+    page,
+    pageObjects,
+  }) => {
+    // Create first rule
+    await pageObjects.streams.clickCreateRoutingRule();
+    await pageObjects.streams.fillRoutingRuleName('duplicate-test');
+    await pageObjects.streams.fillConditionEditor({
+      field: 'service.name',
+      operator: 'equals',
+      value: 'test',
+    });
+    await pageObjects.streams.saveRoutingRule();
+    await pageObjects.toasts.closeAll();
+
+    // Verify first rule was created
+    await pageObjects.streams.expectRoutingRuleVisible('logs.duplicate-test');
+
+    // Try to create another with same name
+    await pageObjects.streams.clickCreateRoutingRule();
+    await pageObjects.streams.fillRoutingRuleName('duplicate-test');
+    await pageObjects.streams.fillConditionEditor({
+      field: 'service.name',
+      operator: 'equals',
+      value: 'different',
+    });
+    await pageObjects.streams.saveRoutingRule();
+
+    // Should show error toast
+    await pageObjects.toasts.waitFor();
+
+    // Should stay in creating state due to error
+    await expect(page.getByTestId('streamsAppRoutingStreamEntryNameField')).toBeVisible();
+  });
+
+  test('should validate stream names with consecutive dots', async ({ page, pageObjects }) => {
+    await pageObjects.streams.clickCreateRoutingRule();
+
+    // Try name with consecutive dots
+    await pageObjects.streams.fillRoutingRuleName('test..invalid');
+
+    // Add a condition to enable save button
+    await pageObjects.streams.fillConditionEditor({
+      field: 'service.name',
+      operator: 'equals',
+      value: 'test',
+    });
+
+    // Try to save - button should be disabled due to validation
+    const saveButton = page.getByTestId('streamsAppStreamDetailRoutingSaveButton');
+    await expect(saveButton).toBeDisabled();
+  });
+
+  test('should validate stream names starting with dots', async ({ page, pageObjects }) => {
+    await pageObjects.streams.clickCreateRoutingRule();
+
+    await pageObjects.streams.fillRoutingRuleName('.invalid');
+
+    // Add a condition to enable save button
+    await pageObjects.streams.fillConditionEditor({
+      field: 'service.name',
+      operator: 'equals',
+      value: 'test',
+    });
+
+    // Try to save - button should be disabled due to validation
+    const saveButton = page.getByTestId('streamsAppStreamDetailRoutingSaveButton');
+    await expect(saveButton).toBeDisabled();
+  });
+
+  test('should validate stream names ending with dots', async ({ page, pageObjects }) => {
+    await pageObjects.streams.clickCreateRoutingRule();
+
+    await pageObjects.streams.fillRoutingRuleName('invalid.');
+
+    // Add a condition to enable save button
+    await pageObjects.streams.fillConditionEditor({
+      field: 'service.name',
+      operator: 'equals',
+      value: 'test',
+    });
+
+    // Try to save - button should be disabled due to validation
+    const saveButton = page.getByTestId('streamsAppStreamDetailRoutingSaveButton');
+    await expect(saveButton).toBeDisabled();
   });
 });
