@@ -232,16 +232,20 @@ export const updateTabs: InternalStateThunkActionCreator<
         const appState = nextTabStateContainer.appState.get();
         const { filters: appFilters, query } = appState;
 
-        await urlStateStorage.set<QueryState>(
-          GLOBAL_STATE_URL_KEY,
-          {
-            time: timeRange,
-            refreshInterval,
-            filters: globalFilters,
-          },
-          { replace: true }
-        );
-        await urlStateStorage.set<DiscoverAppState>(APP_STATE_URL_KEY, appState, { replace: true });
+        await Promise.all([
+          urlStateStorage.set<QueryState>(
+            GLOBAL_STATE_URL_KEY,
+            {
+              time: timeRange,
+              refreshInterval,
+              filters: globalFilters,
+            },
+            { replace: true }
+          ),
+          urlStateStorage.set<DiscoverAppState>(APP_STATE_URL_KEY, appState, {
+            replace: true,
+          }),
+        ]);
 
         services.timefilter.setTime(timeRange ?? services.timefilter.getTimeDefaults());
         services.timefilter.setRefreshInterval(
@@ -275,8 +279,10 @@ export const updateTabs: InternalStateThunkActionCreator<
           nextTabStateContainer.actions.fetchData();
         }
       } else {
-        await urlStateStorage.set(GLOBAL_STATE_URL_KEY, null, { replace: true });
-        await urlStateStorage.set(APP_STATE_URL_KEY, null, { replace: true });
+        await Promise.all([
+          urlStateStorage.set(GLOBAL_STATE_URL_KEY, null, { replace: true }),
+          urlStateStorage.set(APP_STATE_URL_KEY, null, { replace: true }),
+        ]);
         searchSessionManager.removeSearchSessionIdFromURL({ replace: true });
         services.data.search.session.reset();
       }
