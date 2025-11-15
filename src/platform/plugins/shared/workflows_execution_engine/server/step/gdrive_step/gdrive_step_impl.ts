@@ -7,19 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type { GDriveGraphNode } from '@kbn/workflows/graph';
+import { type FileMetadata, GoogleDriveClient, type ListFilesOptions } from './google_drive_client';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
 import type { BaseStep, RunStepResult } from '../node_implementation';
 import { BaseAtomicNodeImplementation } from '../node_implementation';
-import { GoogleDriveClient, type ListFilesOptions } from './google_drive_client';
 
 export interface GDriveStep extends BaseStep {
   with: {
-    service_credential?: Record<string, any>;
+    service_credential?: Record<string, unknown>;
     operation?: 'list' | 'get' | 'ping' | 'download';
     fileId?: string;
     fileName?: string;
@@ -29,6 +27,42 @@ export interface GDriveStep extends BaseStep {
     subject?: string;
   };
 }
+
+interface GDriveOperationInput {
+  service_credential?: Record<string, unknown>;
+  operation?: 'list' | 'get' | 'ping' | 'download';
+  fileId?: string;
+  folderId?: string;
+  subject?: string;
+}
+
+interface ListFilesOutput {
+  files: FileMetadata[];
+  count: number;
+  pages: number;
+  incompleteSearch: boolean;
+}
+
+interface DownloadFileOutput {
+  fileId: string;
+  fileName: string;
+  mimeType: string;
+  size: number;
+  content: string;
+  contentEncoding: 'base64' | 'utf8';
+  metadata: {
+    createdTime?: string;
+    modifiedTime?: string;
+    parents?: string[];
+    webViewLink?: string;
+  };
+}
+
+type GDriveOperationOutput =
+  | { kind: string; connected: boolean } // ping
+  | ListFilesOutput // list
+  | FileMetadata // get
+  | DownloadFileOutput; // download
 
 export class GDriveStepImpl extends BaseAtomicNodeImplementation<GDriveStep> {
   private driveClient: GoogleDriveClient | null = null;
@@ -54,10 +88,11 @@ export class GDriveStepImpl extends BaseAtomicNodeImplementation<GDriveStep> {
   }
 
   public getInput() {
-    const { service_credential, operation, fileId, folderId, subject } = this.step.with;
+    const { operation, fileId, folderId, subject } = this.step.with;
+    const serviceCredential = this.step.with.service_credential;
 
     return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext({
-      service_credential,
+      serviceCredential,
       operation: operation || 'list',
       fileId,
       folderId,
@@ -65,7 +100,7 @@ export class GDriveStepImpl extends BaseAtomicNodeImplementation<GDriveStep> {
     });
   }
 
-  protected async _run(input: any): Promise<RunStepResult> {
+  protected async _run(input: GDriveOperationInput): Promise<RunStepResult> {
     try {
       return await this.executeGDriveOperation(input);
     } catch (error) {
@@ -73,17 +108,23 @@ export class GDriveStepImpl extends BaseAtomicNodeImplementation<GDriveStep> {
     }
   }
 
-  private async executeGDriveOperation(input: any): Promise<RunStepResult> {
-    const { service_credential, operation = 'list', fileId, folderId, subject } = input;
+  private async executeGDriveOperation(input: GDriveOperationInput): Promise<RunStepResult> {
+    // Resolve secrets in input (e.g., ${workplace_connector:id:secret_key})
+    const resolvedInput =
+      await this.stepExecutionRuntime.contextManager.resolveSecretsInValue<GDriveOperationInput>(
+        input
+    );
+    const { operation = 'list', fileId, folderId, subject } = resolvedInput;
+    const serviceCredential = resolvedInput.service_credential;
 
-    if (!service_credential) {
+    if (!serviceCredential) {
       throw new Error('service_credential is required for Google Drive operations');
     }
 
     // Initialize client if not already done
     if (!this.driveClient) {
       this.driveClient = new GoogleDriveClient({
-        service_credential,
+        service_credential: serviceCredential,
         subject,
       });
     }
@@ -94,7 +135,7 @@ export class GDriveStepImpl extends BaseAtomicNodeImplementation<GDriveStep> {
       tags: ['gdrive', operation],
     });
 
-    let output: any;
+    let output: GDriveOperationOutput;
 
     switch (operation) {
       case 'ping':
@@ -130,7 +171,7 @@ export class GDriveStepImpl extends BaseAtomicNodeImplementation<GDriveStep> {
     });
 
     return {
-      input,
+      input: resolvedInput,
       output,
       error: undefined,
     };
@@ -148,12 +189,12 @@ export class GDriveStepImpl extends BaseAtomicNodeImplementation<GDriveStep> {
     };
   }
 
-  private async handleList(folderId?: string): Promise<any> {
+  private async handleList(folderId?: string): Promise<ListFilesOutput> {
     if (!this.driveClient) {
       throw new Error('Google Drive client not initialized');
     }
 
-    const allFiles: any[] = [];
+    const allFiles: FileMetadata[] = [];
     let pageToken: string | undefined;
     let pageCount = 0;
     let incompleteSearch = false;
@@ -166,7 +207,9 @@ export class GDriveStepImpl extends BaseAtomicNodeImplementation<GDriveStep> {
       };
 
       this.workflowLogger.logInfo(
-        `Fetching Google Drive files page ${pageCount + 1}${pageToken ? ` (continuing from previous page)` : ''}`,
+        `Fetching Google Drive files page ${pageCount + 1}${
+          pageToken ? ` (continuing from previous page)` : ''
+        }`,
         {
           workflow: { step_id: this.step.name },
           event: { action: 'gdrive_list_pagination', outcome: 'unknown' },
@@ -214,7 +257,7 @@ export class GDriveStepImpl extends BaseAtomicNodeImplementation<GDriveStep> {
     };
   }
 
-  private async handleGet(fileId: string): Promise<any> {
+  private async handleGet(fileId: string): Promise<FileMetadata> {
     if (!this.driveClient) {
       throw new Error('Google Drive client not initialized');
     }
@@ -223,7 +266,7 @@ export class GDriveStepImpl extends BaseAtomicNodeImplementation<GDriveStep> {
     return file;
   }
 
-  private async handleDownload(fileId: string): Promise<any> {
+  private async handleDownload(fileId: string): Promise<DownloadFileOutput> {
     if (!this.driveClient) {
       throw new Error('Google Drive client not initialized');
     }
@@ -265,7 +308,10 @@ export class GDriveStepImpl extends BaseAtomicNodeImplementation<GDriveStep> {
     };
   }
 
-  protected async handleFailure(input: any, error: any): Promise<RunStepResult> {
+  protected async handleFailure(
+    input: GDriveOperationInput,
+    error: unknown
+  ): Promise<RunStepResult> {
     let errorMessage: string;
 
     if (error instanceof Error) {
@@ -291,4 +337,3 @@ export class GDriveStepImpl extends BaseAtomicNodeImplementation<GDriveStep> {
     };
   }
 }
-
