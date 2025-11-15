@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod';
 import {
   elasticsearchServiceMock,
   loggingSystemMock,
@@ -32,6 +33,11 @@ const createSetupMock = () => {
   const mock: jest.Mocked<PluginSetupContract> = lazyObject({
     registerType: jest.fn(),
     registerSubActionConnectorType: jest.fn(),
+    getSchemaForAuthType: jest.fn().mockReturnValue(
+      z.object({
+        authType: z.literal('none'),
+      })
+    ),
     isPreconfiguredConnector: jest.fn(),
     getSubActionConnectorClass: jest.fn(),
     getCaseConnectorClass: jest.fn(),

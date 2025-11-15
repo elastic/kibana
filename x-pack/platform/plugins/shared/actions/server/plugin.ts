@@ -49,6 +49,7 @@ import { resolveCustomHosts } from './lib/custom_host_settings';
 import { events } from './lib/event_based_telemetry';
 import { ActionsClient } from './actions_client/actions_client';
 import { ActionTypeRegistry } from './action_type_registry';
+import { AuthTypeRegistry, registerAuthTypes } from './auth_types';
 import { createBulkExecutionEnqueuerFunction } from './create_execute_function';
 import { registerActionsUsageCollector } from './usage';
 import type { ILicenseState } from './lib';
@@ -120,6 +121,8 @@ export interface PluginSetupContract {
   >(
     connector: SubActionConnectorType<Config, Secrets>
   ): void;
+
+  getSchemaForAuthType: AuthTypeRegistry['getSchemaForAuthType'];
 
   isPreconfiguredConnector(connectorId: string): boolean;
 
@@ -207,6 +210,7 @@ export class ActionsPlugin
   private readonly actionsConfig: ActionsConfig;
   private taskRunnerFactory?: TaskRunnerFactory;
   private actionTypeRegistry?: ActionTypeRegistry;
+  private authTypeRegistry?: AuthTypeRegistry;
   private actionExecutor?: ActionExecutor;
   private licenseState: ILicenseState | null = null;
   private security?: SecurityPluginSetup;
@@ -299,6 +303,9 @@ export class ActionsPlugin
     this.actionExecutor = actionExecutor;
     this.security = plugins.security;
 
+    this.authTypeRegistry = new AuthTypeRegistry();
+    registerAuthTypes(this.authTypeRegistry);
+
     setupSavedObjects(
       core.savedObjects,
       plugins.encryptedSavedObjects,
@@ -389,6 +396,7 @@ export class ActionsPlugin
       ) => {
         subActionFramework.registerConnector(connector);
       },
+      getSchemaForAuthType: (...args) => this.authTypeRegistry!.getSchemaForAuthType(...args),
       isPreconfiguredConnector: (connectorId: string): boolean => {
         return !!this.inMemoryConnectors.find(
           (inMemoryConnector) =>

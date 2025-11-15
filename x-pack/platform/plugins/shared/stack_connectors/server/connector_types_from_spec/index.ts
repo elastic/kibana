@@ -19,13 +19,26 @@ export function registerConnectorTypesFromSpecs({
 }) {
   // Register connector specs
   for (const spec of Object.values(connectorsSpecs)) {
-    actions.registerSubActionConnectorType(createConnectorTypeFromSpec(spec));
+    actions.registerSubActionConnectorType(createConnectorTypeFromSpec(spec, actions));
   }
 }
 
 const createConnectorTypeFromSpec = (
-  spec: ConnectorSpec
+  spec: ConnectorSpec,
+  actions: ActionsPluginSetupContract
 ): SubActionConnectorType<ActionTypeConfig, ActionTypeSecrets> => {
+  const secretSchemas: z.ZodDiscriminatedUnionOption<'authType'>[] = [];
+  for (const authType of spec.authTypes || []) {
+    secretSchemas.push(actions.getSchemaForAuthType(authType));
+  }
+
+  const config = spec.schema ? spec.schema : z.object({});
+  const secrets =
+    secretSchemas.length > 0
+      ? // to make zod types happy
+        z.discriminatedUnion('authType', [secretSchemas[0], ...secretSchemas.slice(1)])
+      : z.object({}).default({});
+
   return {
     id: spec.metadata.id,
     minimumLicenseRequired: spec.metadata.minimumLicense,
@@ -35,9 +48,6 @@ const createConnectorTypeFromSpec = (
     getService: (params) => {
       throw new Error('Not implemented');
     },
-    schema: {
-      config: z.object({}),
-      secrets: z.object({}),
-    },
+    schema: { config, secrets },
   };
 };

@@ -55,6 +55,7 @@
     "@kbn/lazy-object",
     "@kbn/zod",
     "@kbn/connector-schemas",
+    "@kbn/connector-specs",
   ],
   "exclude": [
     "target/**/*",
