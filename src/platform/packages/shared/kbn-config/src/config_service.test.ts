@@ -776,3 +776,48 @@ describe('Dynamic Overrides', () => {
     ).toStrictEqual({ namespace1: {} });
   });
 });
+
+describe('ConfigService transformers', () => {
+  let configService: ConfigService;
+  let rawConfigProvider: any;
+
+  beforeEach(async () => {
+    const rawConfig = { testNamespace: { value: 'original' } };
+    rawConfigProvider = getRawConfigProvider(rawConfig);
+    configService = new ConfigService(rawConfigProvider, defaultEnv, logger);
+    await configService.setSchema('testNamespace', schema.object({ value: schema.string() }));
+  });
+
+  test('registerConfigTransformer adds transformer to the array', () => {
+    const transformer = jest.fn((_path, config) => config);
+    expect(() => configService.registerConfigTransformer(transformer)).not.toThrow();
+  });
+
+  test('applyConfigTransformers applies single transformer correctly', async () => {
+    const transformer = jest.fn((_path, config) => ({ ...config, transformed: true }));
+    configService.registerConfigTransformer(transformer);
+
+    const config = await firstValueFrom(configService.atPath('testNamespace'));
+    expect(transformer).toHaveBeenCalledWith('testNamespace', expect.any(Object));
+    expect(config).toHaveProperty('transformed', true);
+  });
+
+  test('transformers are applied in atPath before returning config', async () => {
+    const transformer = jest.fn((_path, config) => ({ ...config, fromTransformer: true }));
+    configService.registerConfigTransformer(transformer);
+
+    const config = await firstValueFrom(configService.atPath('testNamespace'));
+    expect(config).toHaveProperty('fromTransformer', true);
+    expect(transformer).toHaveBeenCalledWith('testNamespace', expect.any(Object));
+  });
+
+  test('transformers are applied in atPathSync before returning config', async () => {
+    const transformer = jest.fn((_path, config) => ({ ...config, fromSyncTransformer: true }));
+    configService.registerConfigTransformer(transformer);
+
+    await configService.validate();
+    const config = configService.atPathSync('testNamespace');
+    expect(config).toHaveProperty('fromSyncTransformer', true);
+    expect(transformer).toHaveBeenCalledWith('testNamespace', expect.any(Object));
+  });
+});

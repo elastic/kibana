@@ -36,6 +36,7 @@ const createServiceMock = (): PluginsServiceMock =>
     setup: jest.fn().mockResolvedValue(createInternalSetupContractMock()),
     start: jest.fn().mockResolvedValue(createInternalStartContractMock()),
     stop: jest.fn(),
+    registerFeatureFlagsTransformer: jest.fn(),
   });
 
 const createSetupContractMock = () => {
