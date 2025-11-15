@@ -52,6 +52,7 @@ export interface PopoverProps {
     tabIndex?: number;
     'aria-haspopup'?: boolean | 'menu' | 'listbox' | 'tree' | 'grid' | 'dialog';
     'aria-expanded'?: boolean;
+    'aria-describedby'?: string;
   }>;
 }
 
@@ -76,6 +77,8 @@ export const Popover = ({
 }: PopoverProps): JSX.Element => {
   const { euiTheme } = useEuiTheme();
   const { setHoverTimeout, clearHoverTimeout } = useHoverTimeout();
+  const popoverEnterAndExitInstructionsId = 'popover-enter-exit-instructions';
+  const popoverNavigationInstructionsId = 'popover-navigation-instructions';
 
   const popoverRef = useRef<HTMLDivElement | null>(null);
   const triggerRef = useRef<HTMLElement>(null);
@@ -222,15 +225,17 @@ export const Popover = ({
     () =>
       cloneElement(trigger, {
         ref: triggerRef,
-        'aria-haspopup': hasContent,
+        'aria-haspopup': hasContent ? 'menu' : undefined,
         'aria-expanded': hasContent ? isOpen : undefined,
+        'aria-describedby': hasContent ? popoverEnterAndExitInstructionsId : undefined,
         onClick: (e: MouseEvent) => {
           trigger.props.onClick?.(e);
           handleTriggerClick();
         },
         onKeyDown: handleTriggerKeyDown,
       }),
-    [trigger, hasContent, isOpen, handleTriggerKeyDown, handleTriggerClick]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [trigger, hasContent, isOpen, popoverEnterAndExitInstructionsId, handleTriggerKeyDown]
   );
 
   const wrapperStyles = css`
@@ -280,6 +285,18 @@ export const Popover = ({
             if (ref) {
               const elements = getFocusableElements(ref);
               updateTabIndices(elements);
+
+              // Add aria-describedby to the first focusable element only
+              if (elements.length > 0) {
+                const firstElement = elements[0];
+                const existingDescribedBy = firstElement.getAttribute('aria-describedby');
+                if (!existingDescribedBy?.includes(popoverNavigationInstructionsId)) {
+                  const enhancedDescribedBy = existingDescribedBy
+                    ? `${popoverNavigationInstructionsId} ${existingDescribedBy}`
+                    : popoverNavigationInstructionsId;
+                  firstElement.setAttribute('aria-describedby', enhancedDescribedBy);
+                }
+              }
 
               if (shouldFocusOnOpen) {
                 focusFirstElement(popoverRef);
