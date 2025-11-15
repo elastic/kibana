@@ -34,5 +34,7 @@
     "@kbn/config-schema",
     "@kbn/core-http-server-utils",
     "@kbn/licensing-types",
+    "@kbn/licensing-plugin",
+    "@kbn/logging-mocks",
   ]
 }

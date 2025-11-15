@@ -28,6 +28,12 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import {
+  EXPORT_TYPE_SCHEDULED,
+  LICENSE_TYPE_BASIC,
+  REPORTING_FEATURE_ID,
+} from '@kbn/reporting-common';
 import type { CreateJobFn, RunTaskFn } from './types';
 import type { ReportingConfigType } from '.';
 
@@ -37,6 +43,7 @@ export interface BaseExportTypeSetupDeps {
 }
 
 export interface BaseExportTypeStartDeps {
+  licensing: LicensingPluginStart;
   savedObjects: SavedObjectsServiceStart;
   uiSettings: UiSettingsServiceStart;
   esClient: IClusterClient;
@@ -79,6 +86,23 @@ export abstract class ExportType<
   }
   start(startDeps: StartDepsType) {
     this.startDeps = startDeps;
+  }
+
+  getFeatureUsageName(type: string): string {
+    return `${REPORTING_FEATURE_ID}: ${this.id} ${type} export`;
+  }
+  shouldNotifyUsage(type: string): boolean {
+    if (type === EXPORT_TYPE_SCHEDULED) {
+      return true;
+    }
+
+    return !this.validLicenses.includes(LICENSE_TYPE_BASIC);
+  }
+
+  notifyUsage(type: string) {
+    if (this.shouldNotifyUsage(type)) {
+      this.startDeps.licensing.featureUsage.notifyUsage(this.getFeatureUsageName(type));
+    }
   }
 
   private async getSavedObjectsClient(request: KibanaRequest) {

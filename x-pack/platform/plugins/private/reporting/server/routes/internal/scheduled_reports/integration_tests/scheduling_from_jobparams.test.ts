@@ -108,7 +108,7 @@ describe(`POST ${INTERNAL_ROUTES.SCHEDULE_PREFIX}`, () => {
     eventTracker = new EventTracker(mockCoreSetup.analytics, 'jobId', 'exportTypeId', 'appId');
     jest.spyOn(reportingCore, 'getEventTracker').mockReturnValue(eventTracker);
 
-    mockExportTypesRegistry = new ExportTypesRegistry();
+    mockExportTypesRegistry = new ExportTypesRegistry(licensingMock.createSetup());
     mockExportTypesRegistry.register(mockPdfExportType);
 
     soClient = await reportingCore.getScopedSoClient(fakeRawRequest as unknown as KibanaRequest);
