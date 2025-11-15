@@ -22,6 +22,7 @@ import type { TimeRange } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { comboBoxFieldOptionMatcher } from '@kbn/field-utils';
 import { css } from '@emotion/react';
+import type { Dimension } from '@kbn/metrics-experience-plugin/common/types';
 import { FIELD_VALUE_SEPARATOR } from '../../common/constants';
 import { useDimensionsQuery } from '../../hooks';
 import { ClearAllSection } from './clear_all_section';
@@ -31,7 +32,7 @@ import {
 } from '../../common/constants';
 
 export interface ValuesFilterProps {
-  selectedDimensions: string[];
+  selectedDimensions: Dimension[];
   selectedValues: string[];
   indices?: string[];
   disabled?: boolean;
@@ -50,12 +51,17 @@ export const ValuesSelector = ({
   indices = [],
   onClear,
 }: ValuesFilterProps) => {
+  const selectedDimensionNames = useMemo(
+    () => selectedDimensions.map((d) => d.name),
+    [selectedDimensions]
+  );
+
   const {
     data: values = [],
     isLoading,
     error,
   } = useDimensionsQuery({
-    dimensions: selectedDimensions,
+    dimensions: selectedDimensionNames,
     indices,
     from: timeRange.from,
     to: timeRange.to,
@@ -189,7 +195,7 @@ export const ValuesSelector = ({
   return (
     <ToolbarSelector
       data-test-subj={METRICS_VALUES_SELECTOR_DATA_TEST_SUBJ}
-      data-selected-value={selectedDimensions}
+      data-selected-value={selectedDimensionNames}
       searchable
       buttonLabel={buttonLabel}
       optionMatcher={comboBoxFieldOptionMatcher}

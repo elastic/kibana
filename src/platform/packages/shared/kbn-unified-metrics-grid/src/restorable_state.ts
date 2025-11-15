@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Dimension } from '@kbn/metrics-experience-plugin/common/types';
 import { createRestorableStateProvider } from '@kbn/restorable-state';
 
 export interface MetricsExperienceRestorableState {
@@ -20,7 +21,7 @@ export interface MetricsExperienceRestorableState {
   isFullscreen: boolean;
 
   // Metric grouping dimensions
-  dimensions: string[];
+  dimensions: Dimension[];
 
   // Metric value filters
   valueFilters: string[];

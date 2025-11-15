@@ -86,7 +86,7 @@ describe('MetricsGrid', () => {
     const { rerender } = render(
       <MetricsGrid
         columns={3}
-        dimensions={['host.name']}
+        dimensions={[{ name: 'host.name', type: ES_FIELD_TYPES.KEYWORD }]}
         discoverFetch$={discoverFetch$}
         fields={fields}
         requestParams={requestParams}
@@ -100,7 +100,7 @@ describe('MetricsGrid', () => {
     rerender(
       <MetricsGrid
         columns={4}
-        dimensions={['host.name']}
+        dimensions={[{ name: 'host.name', type: ES_FIELD_TYPES.KEYWORD }]}
         discoverFetch$={discoverFetch$}
         fields={fields}
         requestParams={requestParams}
