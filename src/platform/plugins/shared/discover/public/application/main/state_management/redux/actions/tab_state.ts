@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import { GLOBAL_STATE_URL_KEY } from '../../../../../../common/constants';
 import { APP_STATE_URL_KEY } from '../../../../../../common';
 import { isEqualState } from '../../discover_app_state_container';
@@ -95,8 +96,13 @@ export const replaceGlobalState: InternalStateThunkActionCreator<
     }
 
     const { mergedGlobalState } = mergeGlobalState(currentState, payload);
+    const globalUrlState: GlobalQueryStateFromUrl = {
+      time: mergedGlobalState.timeRange,
+      refreshInterval: mergedGlobalState.refreshInterval,
+      filters: mergedGlobalState.filters,
+    };
 
-    await urlStateStorage.set(GLOBAL_STATE_URL_KEY, mergedGlobalState, { replace: true });
+    await urlStateStorage.set(GLOBAL_STATE_URL_KEY, globalUrlState, { replace: true });
   };
 
 export const pushCurrentTabStateToUrl: InternalStateThunkActionCreator<
