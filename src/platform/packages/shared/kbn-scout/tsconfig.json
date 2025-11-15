@@ -4,7 +4,8 @@
     "outDir": "target/types",
     "types": [
       "jest",
-      "node"
+      "node",
+      "@playwright/test"
     ]
   },
   "include": [

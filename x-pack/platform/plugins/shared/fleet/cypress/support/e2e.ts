@@ -22,9 +22,13 @@
 // https://on.cypress.io/configuration
 // ***********************************************************
 
+import { setupEuiCypressMatchers } from '@elastic/eui/lib/test/cypress/matchers';
+
 // Import commands.js using ES2015 syntax:
 import { request } from '../tasks/common';
 import './commands';
+
+setupEuiCypressMatchers();
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace

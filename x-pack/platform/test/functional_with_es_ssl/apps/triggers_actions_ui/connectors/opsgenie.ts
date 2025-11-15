@@ -356,9 +356,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('should show the message is required error when clicking the save button', async () => {
-        expect(
-          await (await testSubjects.find('rulePageFooterSaveButton')).getAttribute('disabled')
-        ).to.be('true');
+        expect(await (await testSubjects.find('rulePageFooterSaveButton')).isEuiEnabled()).to.be(
+          false
+        );
       });
     });
 

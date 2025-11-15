@@ -11,6 +11,7 @@ import { omit, mapValues, range, flatten } from 'lodash';
 import moment from 'moment';
 import { asyncForEach } from '@kbn/std';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
+import { euiDisabledSelector } from '@elastic/eui';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import { ObjectRemover } from '../../lib/object_remover';
 import { getTestAlertData, getTestConnectorData } from '../../lib/get_test_data';
@@ -378,7 +379,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           clearWithKeyboard: true,
         });
 
-        await find.clickByCssSelector('[data-test-subj="rulePageFooterSaveButton"]:not(disabled)');
+        await find.clickByCssSelector(
+          `[data-test-subj="rulePageFooterSaveButton"]:not(${euiDisabledSelector})`
+        );
 
         const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql(`Updated "${updatedRuleName}"`);
@@ -552,7 +555,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           clearWithKeyboard: true,
         });
 
-        await find.clickByCssSelector('[data-test-subj="rulePageFooterSaveButton"]:not(disabled)');
+        await find.clickByCssSelector(
+          `[data-test-subj="rulePageFooterSaveButton"]:not(${euiDisabledSelector})`
+        );
 
         const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql(`Updated "${updatedRuleName}"`);

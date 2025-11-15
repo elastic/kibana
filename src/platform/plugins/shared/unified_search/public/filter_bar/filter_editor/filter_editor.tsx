@@ -295,6 +295,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
                     fill
                     onClick={this.onSubmit}
                     isDisabled={!this.isFilterValid()}
+                    hasAriaDisabled
                     data-test-subj="saveFilter"
                     size="s"
                   >

@@ -122,6 +122,7 @@ export const RulePageFooter = (props: RulePageFooterProps) => {
                 data-test-subj="rulePageFooterSaveButton"
                 onClick={onSaveClick}
                 disabled={isSaving || hasErrors}
+                hasAriaDisabled
                 isLoading={isSaving}
               >
                 {saveButtonText}

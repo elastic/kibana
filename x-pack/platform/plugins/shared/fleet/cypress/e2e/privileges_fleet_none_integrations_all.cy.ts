@@ -39,6 +39,6 @@ describe('When the user has All privileges for Integrations but None for for Fle
     const integrationCardSelector = getIntegrationCard('apache');
     scrollToIntegration(integrationCardSelector);
     cy.getBySel(integrationCardSelector).click();
-    cy.getBySel(ADD_INTEGRATION_POLICY_BTN).should('be.disabled');
+    cy.getBySel(ADD_INTEGRATION_POLICY_BTN).should('be.euiDisabled');
   });
 });

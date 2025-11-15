@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
 import { omit } from 'lodash';
+import { euiDisabledSelector } from '@elastic/eui';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import type { FtrProviderContext } from '../../ftr_provider_context';
@@ -547,7 +548,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.existOrFail('confirmCreateRuleModal');
       await testSubjects.click('confirmCreateRuleModal > confirmModalCancelButton');
       await testSubjects.missingOrFail('confirmRuleSaveModal');
-      await find.existsByCssSelector('[data-test-subj="rulePageFooterSaveButton"]:not(disabled)');
+      await find.existsByCssSelector(
+        `[data-test-subj="rulePageFooterSaveButton"]:not(${euiDisabledSelector})`
+      );
 
       await testSubjects.click('rulePageFooterSaveButton');
       await testSubjects.existOrFail('confirmCreateRuleModal');
