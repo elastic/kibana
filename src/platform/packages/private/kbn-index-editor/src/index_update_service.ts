@@ -51,6 +51,7 @@ import { IndexEditorErrors } from './types';
 import { parsePrimitive } from './utils';
 import { ROW_PLACEHOLDER_PREFIX, COLUMN_PLACEHOLDER_PREFIX } from './constants';
 import type { IndexEditorTelemetryService } from './telemetry/telemetry_service';
+import { RowsVirtualIndexes } from './utils/rows_virtual_indexes';
 
 const DOCS_PER_FETCH = 1000;
 
@@ -59,6 +60,7 @@ const MAX_COLUMN_PLACEHOLDERS = 4;
 interface DocUpdate {
   id: string;
   value: Record<string, any>;
+  atIndex?: number;
 }
 
 type BulkUpdateOperations = Array<{ type: 'add-doc'; payload: DocUpdate } | DeleteDocAction>;
@@ -126,6 +128,12 @@ export class IndexUpdateService {
   }
 
   private indexHasNewFields: boolean = false;
+
+  /**
+   * Keeps track of the placement position of newly added rows inside the table
+   * This is updated when rows are added/deleted
+   */
+  private newRowsVirtualIndexes = new RowsVirtualIndexes();
 
   /** Indicates the service has been completed */
   private readonly _completed$ = new Subject<{
@@ -283,6 +291,12 @@ export class IndexUpdateService {
     scan((acc: BulkUpdateOperations, action: Action) => {
       switch (action.type) {
         case 'add-doc':
+          if (action.payload.atIndex !== undefined) {
+            this.newRowsVirtualIndexes.addRowVirtualIndex(
+              action.payload.id,
+              action.payload.atIndex
+            );
+          }
           return [...acc, action];
         case 'delete-doc':
           // if a doc is deleted we need to remove any pending updates to it
@@ -297,11 +311,19 @@ export class IndexUpdateService {
           if (isDeletingAnySavedColumn) {
             updatedAcc.push(action);
           }
+          // Remove virtual indexes for deleted rows
+          action.payload.ids.forEach((id) => {
+            const index = this._rows$.getValue().findIndex((row) => row.id === id);
+            this.newRowsVirtualIndexes.deleteVirtualIndexByRowId(id);
+            this.newRowsVirtualIndexes.updateVirtualIndexesAfterDeletion(index);
+          });
+
           const newTotalHits = this._totalHits$.getValue() - idsToDelete.size;
           this._totalHits$.next(newTotalHits > 1 ? newTotalHits : 1);
           return updatedAcc;
         case 'saved':
-          // Clear the buffer after save
+          // Clear the buffer and new rows virtual indexes after save
+          this.newRowsVirtualIndexes.clear();
           return [];
         case 'discard-unsaved-changes':
           return [];
@@ -492,19 +514,29 @@ export class IndexUpdateService {
             return v;
           });
 
-        // created docs that are not saved yet should be rendered first
+        // created docs that are not saved yet should be inserted at their virtual indexes
         Array.from(savingDocs.entries())
           .filter((arg): arg is [id: string, v: PendingDocUpdate] => {
             const [id, v] = arg;
             return v.type === 'add-doc' && id.startsWith(ROW_PLACEHOLDER_PREFIX);
           })
+          .sort(([idA], [idB]) => {
+            const indexA = this.newRowsVirtualIndexes.getRowVirtualIndex(idA);
+            const indexB = this.newRowsVirtualIndexes.getRowVirtualIndex(idB);
+            return (indexA ?? 0) - (indexB ?? 0);
+          })
           .forEach(([id, v]) => {
-            resultRows.unshift({ id, flattened: v.update, raw: v.update });
+            const atIndex = this.newRowsVirtualIndexes.getRowVirtualIndex(id);
+            if (atIndex !== undefined) {
+              resultRows.splice(atIndex, 0, { id, flattened: v.update, raw: v.update });
+            }
           });
 
         // If no rows left, add a placeholder row
         if (resultRows.length === 0) {
-          resultRows.push(this.buildPlaceholderRow());
+          const newRow = this.buildPlaceholderRow();
+          resultRows.push(newRow);
+          this.newRowsVirtualIndexes.addRowVirtualIndex(newRow.id, 0);
         }
         this._rows$.next(resultRows);
       })
@@ -851,9 +883,9 @@ export class IndexUpdateService {
   }
 
   /** Adds an empty document */
-  public addEmptyRow() {
+  public addEmptyRow(atIndex: number) {
     const newDocId = `${ROW_PLACEHOLDER_PREFIX}${uuidv4()}`;
-    this.addAction('add-doc', { id: newDocId, value: {} });
+    this.addAction('add-doc', { id: newDocId, value: {}, atIndex });
 
     this.telemetry.trackEditInteraction({ actionType: 'add_row' });
   }
@@ -1012,6 +1044,7 @@ export class IndexUpdateService {
     this._indexName$.complete();
 
     this.data.dataViews.clearInstanceCache();
+    this.newRowsVirtualIndexes.clear();
   }
 
   public async createIndex({ exitAfterFlush = false }) {
