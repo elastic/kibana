@@ -99,11 +99,16 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     [setConversationId]
   );
 
+  const onDeleteConversation = useCallback(() => {
+    setConversationId(undefined);
+  }, [setConversationId]);
+
   const conversationActions = useConversationActions({
     conversationId: persistedConversationId,
     queryClient,
     conversationsService: services.conversationsService,
     onConversationCreated,
+    onDeleteConversation,
   });
 
   const attachmentMapRef = useRef<Map<string, Record<string, unknown>>>(new Map());
