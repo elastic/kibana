@@ -30,6 +30,7 @@ export interface SamlSessionManagerOptions {
   cloudHostName?: string;
   cloudUsersFilePath: string;
   log: ToolingLog;
+  basePath?: string;
 }
 
 export interface SupportedRoles {
@@ -63,7 +64,21 @@ export class SamlSessionManager {
       hostname: options.hostOptions.hostname,
       port: options.hostOptions.port,
     };
-    this.kbnHost = Url.format(hostOptionsWithoutAuth);
+    // Include base path in kbnHost if provided
+    let kbnHostBase = Url.format(hostOptionsWithoutAuth);
+    if (options.basePath) {
+      // Normalize base path: remove trailing slash, treat empty or "/" as no base path
+      const normalizedBasePath = options.basePath.replace(/\/$/, '').trim();
+      // Only add base path if it's not empty and not just "/"
+      if (normalizedBasePath && normalizedBasePath !== '/') {
+        // Ensure base path starts with "/"
+        const basePathWithSlash = normalizedBasePath.startsWith('/')
+          ? normalizedBasePath
+          : `/${normalizedBasePath}`;
+        kbnHostBase = `${kbnHostBase}${basePathWithSlash}`;
+      }
+    }
+    this.kbnHost = kbnHostBase;
     this.isCloud = options.isCloud;
     this.cloudHostName = options.cloudHostName || process.env.TEST_CLOUD_HOST_NAME;
     if (this.isCloud) {
