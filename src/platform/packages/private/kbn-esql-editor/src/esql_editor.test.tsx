@@ -56,6 +56,17 @@ describe('ESQLEditor', () => {
 
   const corePluginMock = coreMock.createStart();
   corePluginMock.chrome.getActiveSolutionNavId$.mockReturnValue(new BehaviorSubject('oblt'));
+
+  corePluginMock.http.get = jest.fn().mockImplementation((url: string) => {
+    if (url.includes('/internal/esql/autocomplete/sources/')) {
+      return Promise.resolve([
+        { name: 'test_index', hidden: false, type: 'index' },
+        { name: 'logs', hidden: false, type: 'index' },
+      ]);
+    }
+    return Promise.resolve([]);
+  });
+
   const services = {
     uiSettings,
     settings: {
@@ -81,6 +92,7 @@ describe('ESQLEditor', () => {
       onTextLangQuerySubmit: jest.fn(),
     };
     mockValidate.mockResolvedValue({ errors: [], warnings: [] });
+
     jest.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(
       (contextId, options) =>
         ({
