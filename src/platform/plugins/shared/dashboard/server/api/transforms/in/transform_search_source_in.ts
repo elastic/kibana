@@ -9,7 +9,7 @@
 
 import { extractReferences } from '@kbn/data-plugin/common';
 import type { DashboardState } from '../../types';
-import { logger } from '../../../../kibana_services';
+import { logger } from '../../../kibana_services';
 
 export function transformSearchSourceIn(
   filters?: DashboardState['filters'],

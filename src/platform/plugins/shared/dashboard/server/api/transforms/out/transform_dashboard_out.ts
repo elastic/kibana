@@ -9,7 +9,7 @@
 
 import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import { tagSavedObjectTypeName } from '@kbn/saved-objects-tagging-plugin/common';
-import type { DashboardSavedObjectAttributes } from '../../../../dashboard_saved_object';
+import type { DashboardSavedObjectAttributes } from '../../../dashboard_saved_object';
 import type { DashboardState } from '../../types';
 import { transformControlGroupOut } from './transform_control_group_out';
 import { transformSearchSourceOut } from './transform_search_source_out';

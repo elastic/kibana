@@ -19,7 +19,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { DashboardState } from '../../common/types';
 import type { DashboardApi, DashboardCreationOptions } from '..';
-import { DASHBOARD_APP_ID } from '../../common/constants';
+import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
 import { DashboardRenderer } from '../dashboard_renderer/dashboard_renderer';
 import { DashboardTopNav } from '../dashboard_top_nav';
 import {

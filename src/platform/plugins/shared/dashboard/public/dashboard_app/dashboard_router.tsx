@@ -18,7 +18,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import type { RouteComponentProps } from 'react-router-dom';
 import { HashRouter, Redirect } from 'react-router-dom';
 
-import { DASHBOARD_APP_ID, LANDING_PAGE_PATH } from '../../common/constants';
+import { DASHBOARD_APP_ID, LANDING_PAGE_PATH } from '../../common/page_bundle_constants';
 import type { RedirectToProps } from './types';
 import { coreServices, dataService, embeddableService } from '../services/kibana_services';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';

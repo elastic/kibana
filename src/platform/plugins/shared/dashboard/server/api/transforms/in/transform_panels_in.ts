@@ -11,14 +11,14 @@ import Boom from '@hapi/boom';
 import { v4 as uuidv4 } from 'uuid';
 
 import type { SavedObjectReference } from '@kbn/core/server';
-import { isDashboardSection, prefixReferencesFromPanel } from '../../../../../common';
+import { isDashboardSection, prefixReferencesFromPanel } from '../../../../common';
 import type {
   DashboardSavedObjectAttributes,
   SavedDashboardPanel,
   SavedDashboardSection,
-} from '../../../../dashboard_saved_object';
+} from '../../../dashboard_saved_object';
 import type { DashboardState, DashboardPanel, DashboardSection } from '../../types';
-import { embeddableService, logger } from '../../../../kibana_services';
+import { embeddableService, logger } from '../../../kibana_services';
 
 export function transformPanelsIn(widgets: DashboardState['panels'] | undefined): {
   panelsJSON: DashboardSavedObjectAttributes['panelsJSON'];

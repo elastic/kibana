@@ -20,7 +20,7 @@ import type {
   ControlsLabelPosition,
   ControlsIgnoreParentSettings,
 } from '@kbn/controls-schemas';
-import type { DashboardSavedObjectAttributes } from '../../../../dashboard_saved_object';
+import type { DashboardSavedObjectAttributes } from '../../../dashboard_saved_object';
 import { transformControlsState } from './transform_controls_state';
 
 export const transformControlGroupOut: (

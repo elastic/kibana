@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DashboardState, DashboardSection } from '../server/content_management';
+import type { DashboardState, DashboardSection } from '../server';
 
 export const isDashboardSection = (
   widget: DashboardState['panels'][number]

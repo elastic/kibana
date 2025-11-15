@@ -8,12 +8,7 @@
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import type { LoginAsInteractiveUserResponse } from './helpers';
-import {
-  loginAsInteractiveUser,
-  setupInteractiveUser,
-  sampleDashboard,
-  cleanupInteractiveUser,
-} from './helpers';
+import { loginAsInteractiveUser, setupInteractiveUser, cleanupInteractiveUser } from './helpers';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('updated_by', function () {
@@ -99,19 +94,16 @@ export default function ({ getService }: FtrProviderContext) {
         expect(updateResponse.status).to.be(200);
 
         const getResponse = await supertestWithAuth
-          .post('/api/content_management/rpc/get')
+          .get(`/api/dashboards/dashboard/${createResponse.body.id}`)
           .set('kbn-xsrf', 'true')
-          .send({
-            id: createResponse.body.id,
-            contentTypeId: sampleDashboard.contentTypeId,
-            version: sampleDashboard.version,
-          });
+          .set('elastic-api-version', '1')
+          .send();
 
         expect(getResponse.status).to.be(200);
-        expect(getResponse.body.result.result.item).to.be.ok();
+        expect(getResponse.body.data).to.be.ok();
 
         const createdMeta = createResponse.body.meta;
-        const getMeta = getResponse.body.result.result.item;
+        const getMeta = getResponse.body.meta;
 
         expect(getMeta).to.not.have.key('updatedBy');
         expect(getMeta.createdBy).to.eql(createdMeta.createdBy);
@@ -139,19 +131,16 @@ export default function ({ getService }: FtrProviderContext) {
         expect(updateResponse.status).to.be(200);
 
         const getResponse = await supertestWithAuth
-          .post('/api/content_management/rpc/get')
+          .get(`/api/dashboards/dashboard/${createResponse.body.id}`)
           .set('kbn-xsrf', 'true')
-          .send({
-            id: createResponse.body.id,
-            contentTypeId: sampleDashboard.contentTypeId,
-            version: sampleDashboard.version,
-          });
+          .set('elastic-api-version', '1')
+          .send();
 
         expect(getResponse.status).to.be(200);
-        expect(getResponse.body.result.result.item).to.be.ok();
+        expect(getResponse.body.data).to.be.ok();
 
         const createdMeta = createResponse.body.meta;
-        const getMeta = getResponse.body.result.result.item;
+        const getMeta = getResponse.body.meta;
 
         expect(getMeta).to.have.key('updatedBy');
         expect(getMeta.updatedBy).to.not.eql(createdMeta.updatedBy);

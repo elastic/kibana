@@ -9,7 +9,7 @@
 
 import { transformSearchSourceOut } from './transform_search_source_out';
 
-jest.mock('../../../../kibana_services', () => ({
+jest.mock('../../../kibana_services', () => ({
   logger: { warn: jest.fn() },
 }));
 

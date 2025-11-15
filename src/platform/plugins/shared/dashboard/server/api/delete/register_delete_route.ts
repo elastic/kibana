@@ -11,7 +11,7 @@ import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { INTERNAL_API_VERSION, PUBLIC_API_PATH, commonRouteConfig } from '../constants';
-import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../dashboard_saved_object';
+import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
 
 export function registerDeleteRoute(router: VersionedRouter<RequestHandlerContext>) {
   const deleteRoute = router.delete({

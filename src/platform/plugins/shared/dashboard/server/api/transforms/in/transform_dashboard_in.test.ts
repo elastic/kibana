@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DEFAULT_DASHBOARD_OPTIONS } from '../../../../../common/content_management';
+import { DEFAULT_DASHBOARD_OPTIONS } from '../../../../common/constants';
 import type { DashboardState } from '../../types';
 import { transformDashboardIn } from './transform_dashboard_in';
 

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getDashboardStateSchema } from '../../schema';
+import { getDashboardStateSchema } from '../../dashboard_state_schemas';
 import { transformPanelsOut } from './transform_panels_out';
 
 describe('transformPanelsOut', () => {
@@ -25,7 +25,7 @@ describe('transformPanelsOut', () => {
       },
     ];
     const panels = transformPanelsOut(panelsJSON, sections);
-    getDashboardStateSchema().panels.validate(panels);
+    getDashboardStateSchema().validate({ title: '', panels });
     expect(panels).toMatchInlineSnapshot(`
       Array [
         Object {
