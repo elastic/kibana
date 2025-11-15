@@ -14,6 +14,7 @@ describe('WiredStream', () => {
       {
         name: 'wired-stream',
         description: '',
+        updated_at: new Date().toISOString(),
         ingest: {
           lifecycle: { inherit: {} },
           processing: { steps: [] },
@@ -33,6 +34,7 @@ describe('WiredStream', () => {
       {
         name: 'wired-stream',
         description: null,
+        updated_at: new Date().toISOString(),
         ingest: {
           lifecycle: { inherit: {} },
           processing: { steps: [] },
@@ -47,6 +49,8 @@ describe('WiredStream', () => {
         name: 'wired-stream',
         description: '',
         ingest: {
+          lifecycle: { inherit: {} },
+          processing: { steps: [] },
           settings: {},
           wired: {
             fields: {},
@@ -57,6 +61,19 @@ describe('WiredStream', () => {
       {
         name: 'wired-stream',
         description: '',
+        updated_at: new Date().toISOString(),
+        ingest: {
+          settings: {},
+          wired: {
+            fields: {},
+            routing: [],
+          },
+        },
+      },
+      {
+        name: 'wired-stream',
+        description: '',
+        updated_at: new Date().toISOString(),
         ingest: {
           lifecycle: { inherit: {} },
           settings: {},
@@ -79,6 +96,7 @@ describe('WiredStream', () => {
         stream: {
           name: 'wired-stream',
           description: '',
+          updated_at: new Date().toISOString(),
           ingest: {
             lifecycle: { inherit: {} },
             processing: { steps: [] },
@@ -188,6 +206,22 @@ describe('WiredStream', () => {
             },
           },
         },
+      },
+      {
+        stream: {
+          description: 'updated_at should not be present',
+          updated_at: new Date().toISOString(),
+          ingest: {
+            lifecycle: { inherit: {} },
+            processing: { steps: [] },
+            settings: {},
+            wired: {
+              fields: {},
+              routing: [],
+            },
+          },
+        },
+        ...emptyAssets,
       },
     ])('is not valid', (val) => {
       expect(WiredStream.UpsertRequest.is(val as any)).toBe(false);

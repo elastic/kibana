@@ -35,6 +35,7 @@ const xFormatter = niceTimeFormatter([start, end]);
 const logsStreamDefinition: Streams.WiredStream.Definition = {
   name: 'logs',
   description: '',
+  updated_at: new Date().toISOString(),
   ingest: {
     wired: {
       fields: {},
