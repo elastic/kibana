@@ -1731,4 +1731,333 @@ steps:
       );
     });
   });
+
+  describe('getAvailableConnectors', () => {
+    let mockActionsClient: jest.Mocked<IUnsecuredActionsClient>;
+    let mockActionsClientWithRequest: jest.Mocked<PublicMethodsOf<ActionsClient>>;
+    let mockRequest: any;
+
+    beforeEach(async () => {
+      mockRequest = {
+        auth: {
+          credentials: {
+            username: 'test-user',
+          },
+        },
+      };
+
+      mockActionsClient = {
+        getAll: jest.fn(),
+        execute: jest.fn(),
+        bulkEnqueueExecution: jest.fn(),
+      } as any;
+
+      mockActionsClientWithRequest = {
+        listTypes: jest.fn(),
+        getAll: jest.fn(),
+      } as any;
+
+      // Update the mocks to return our specific instances
+      const mockGetActionsClient = jest.fn().mockResolvedValue(mockActionsClient);
+      const mockGetActionsClientWithRequest = jest
+        .fn()
+        .mockResolvedValue(mockActionsClientWithRequest);
+
+      const mockGetActionsStart = jest.fn().mockResolvedValue({
+        getUnsecuredActionsClient: mockGetActionsClient,
+        getActionsClientWithRequest: mockGetActionsClientWithRequest,
+      });
+
+      // Re-initialize service with new mocks
+      const mockEsClientPromise = Promise.resolve(mockEsClient);
+      service = new WorkflowsService(mockEsClientPromise, mockLogger, false, mockGetActionsStart);
+      service.setSecurityService(mockSecurity);
+
+      // Wait for initialization to complete
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    it('should return connectors grouped by type with instances', async () => {
+      const mockActionTypes = [
+        {
+          id: '.slack',
+          name: 'Slack',
+          enabled: true,
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic',
+        },
+        {
+          id: '.email',
+          name: 'Email',
+          enabled: true,
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic',
+        },
+      ];
+
+      const mockConnectors = [
+        {
+          id: 'connector-1',
+          name: 'My Slack Connector',
+          actionTypeId: '.slack',
+          isPreconfigured: false,
+          isDeprecated: false,
+        },
+        {
+          id: 'connector-2',
+          name: 'My Email Connector',
+          actionTypeId: '.email',
+          isPreconfigured: false,
+          isDeprecated: false,
+        },
+      ];
+
+      mockActionsClient.getAll.mockResolvedValue(mockConnectors as any);
+      mockActionsClientWithRequest.listTypes.mockResolvedValue(mockActionTypes as any);
+
+      const result = await service.getAvailableConnectors('default', mockRequest);
+
+      expect(result.totalConnectors).toBe(2);
+      expect(result.connectorsByType['.slack']).toBeDefined();
+      expect(result.connectorsByType['.email']).toBeDefined();
+
+      expect(result.connectorsByType['.slack']).toEqual({
+        actionTypeId: '.slack',
+        displayName: 'Slack',
+        instances: [
+          {
+            id: 'connector-1',
+            name: 'My Slack Connector',
+            isPreconfigured: false,
+            isDeprecated: false,
+          },
+        ],
+        enabled: true,
+        enabledInConfig: true,
+        enabledInLicense: true,
+        minimumLicenseRequired: 'basic',
+      });
+
+      expect(result.connectorsByType['.email']).toEqual({
+        actionTypeId: '.email',
+        displayName: 'Email',
+        instances: [
+          {
+            id: 'connector-2',
+            name: 'My Email Connector',
+            isPreconfigured: false,
+            isDeprecated: false,
+          },
+        ],
+        enabled: true,
+        enabledInConfig: true,
+        enabledInLicense: true,
+        minimumLicenseRequired: 'basic',
+      });
+
+      expect(mockActionsClient.getAll).toHaveBeenCalledWith('default');
+      expect(mockActionsClientWithRequest.listTypes).toHaveBeenCalledWith({
+        featureId: expect.any(String),
+        includeSystemActionTypes: false,
+      });
+    });
+
+    it('should include action types without connectors', async () => {
+      const mockActionTypes = [
+        {
+          id: '.slack',
+          name: 'Slack',
+          enabled: true,
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic',
+        },
+        {
+          id: '.email',
+          name: 'Email',
+          enabled: true,
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic',
+        },
+      ];
+
+      const mockConnectors = [
+        {
+          id: 'connector-1',
+          name: 'My Slack Connector',
+          actionTypeId: '.slack',
+          isPreconfigured: false,
+          isDeprecated: false,
+        },
+      ];
+
+      mockActionsClient.getAll.mockResolvedValue(mockConnectors as any);
+      mockActionsClientWithRequest.listTypes.mockResolvedValue(mockActionTypes as any);
+
+      const result = await service.getAvailableConnectors('default', mockRequest);
+
+      expect(result.totalConnectors).toBe(1);
+      expect(result.connectorsByType['.slack']).toBeDefined();
+      expect(result.connectorsByType['.email']).toBeDefined();
+
+      // Slack has an instance
+      expect(result.connectorsByType['.slack'].instances).toHaveLength(1);
+
+      // Email has no instances but still appears
+      expect(result.connectorsByType['.email'].instances).toHaveLength(0);
+      expect(result.connectorsByType['.email'].actionTypeId).toBe('.email');
+      expect(result.connectorsByType['.email'].displayName).toBe('Email');
+    });
+
+    it('should handle multiple connectors of the same type', async () => {
+      const mockActionTypes = [
+        {
+          id: '.slack',
+          name: 'Slack',
+          enabled: true,
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic',
+        },
+      ];
+
+      const mockConnectors = [
+        {
+          id: 'connector-1',
+          name: 'Slack Connector 1',
+          actionTypeId: '.slack',
+          isPreconfigured: false,
+          isDeprecated: false,
+        },
+        {
+          id: 'connector-2',
+          name: 'Slack Connector 2',
+          actionTypeId: '.slack',
+          isPreconfigured: true,
+          isDeprecated: false,
+        },
+        {
+          id: 'connector-3',
+          name: 'Slack Connector 3',
+          actionTypeId: '.slack',
+          isPreconfigured: false,
+          isDeprecated: true,
+        },
+      ];
+
+      mockActionsClient.getAll.mockResolvedValue(mockConnectors as any);
+      mockActionsClientWithRequest.listTypes.mockResolvedValue(mockActionTypes as any);
+
+      const result = await service.getAvailableConnectors('default', mockRequest);
+
+      expect(result.totalConnectors).toBe(3);
+      expect(result.connectorsByType['.slack'].instances).toHaveLength(3);
+      expect(result.connectorsByType['.slack'].instances).toEqual([
+        {
+          id: 'connector-1',
+          name: 'Slack Connector 1',
+          isPreconfigured: false,
+          isDeprecated: false,
+        },
+        {
+          id: 'connector-2',
+          name: 'Slack Connector 2',
+          isPreconfigured: true,
+          isDeprecated: false,
+        },
+        {
+          id: 'connector-3',
+          name: 'Slack Connector 3',
+          isPreconfigured: false,
+          isDeprecated: true,
+        },
+      ]);
+    });
+
+    it('should handle empty connectors and action types', async () => {
+      mockActionsClient.getAll.mockResolvedValue([]);
+      mockActionsClientWithRequest.listTypes.mockResolvedValue([]);
+
+      const result = await service.getAvailableConnectors('default', mockRequest);
+
+      expect(result.totalConnectors).toBe(0);
+      expect(result.connectorsByType).toEqual({});
+    });
+
+    it('should handle connectors with action types not in the list', async () => {
+      const mockActionTypes = [
+        {
+          id: '.slack',
+          name: 'Slack',
+          enabled: true,
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic',
+        },
+      ];
+
+      const mockConnectors = [
+        {
+          id: 'connector-1',
+          name: 'My Slack Connector',
+          actionTypeId: '.slack',
+          isPreconfigured: false,
+          isDeprecated: false,
+        },
+        {
+          id: 'connector-2',
+          name: 'Unknown Connector',
+          actionTypeId: '.unknown',
+          isPreconfigured: false,
+          isDeprecated: false,
+        },
+      ];
+
+      mockActionsClient.getAll.mockResolvedValue(mockConnectors as any);
+      mockActionsClientWithRequest.listTypes.mockResolvedValue(mockActionTypes as any);
+
+      const result = await service.getAvailableConnectors('default', mockRequest);
+
+      expect(result.totalConnectors).toBe(2);
+      // Only .slack should be in connectorsByType since .unknown is not in actionTypes
+      expect(result.connectorsByType['.slack']).toBeDefined();
+      expect(result.connectorsByType['.unknown']).toBeUndefined();
+      // The .slack connector should still be included
+      expect(result.connectorsByType['.slack'].instances).toHaveLength(1);
+    });
+
+    it('should call both getAll and listTypes in parallel', async () => {
+      const mockActionTypes = [
+        {
+          id: '.slack',
+          name: 'Slack',
+          enabled: true,
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic',
+        },
+      ];
+
+      const mockConnectors: any[] = [];
+
+      mockActionsClient.getAll.mockResolvedValue(mockConnectors);
+      mockActionsClientWithRequest.listTypes.mockResolvedValue(mockActionTypes as any);
+
+      await service.getAvailableConnectors('default', mockRequest);
+
+      // Verify both methods were called
+      expect(mockActionsClient.getAll).toHaveBeenCalled();
+      expect(mockActionsClientWithRequest.listTypes).toHaveBeenCalled();
+
+      // Verify they were called with correct parameters
+      expect(mockActionsClient.getAll).toHaveBeenCalledWith('default');
+      expect(mockActionsClientWithRequest.listTypes).toHaveBeenCalledWith({
+        featureId: expect.any(String),
+        includeSystemActionTypes: false,
+      });
+    });
+  });
 });

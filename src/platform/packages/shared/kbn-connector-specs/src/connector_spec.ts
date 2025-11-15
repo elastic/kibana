@@ -59,12 +59,12 @@ export interface ConnectorMetadata {
     | 'alerting'
     | 'cases'
     | 'uptime'
-    | 'security'
     | 'siem'
     | 'generativeAIForSecurity'
     | 'generativeAIForObservability'
     | 'generativeAIForSearchPlayground'
     | 'endpointSecurity'
+    | 'workflows'
   >;
 }
 

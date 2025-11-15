@@ -9,6 +9,7 @@ import {
   AlertingConnectorFeatureId,
   SecurityConnectorFeatureId,
   UptimeConnectorFeatureId,
+  WorkflowsConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import { urlAllowListValidator } from '@kbn/actions-plugin/server';
 import { ValidatorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
@@ -38,6 +39,7 @@ export const getJiraServiceManagementConnectorType = (): SubActionConnectorType<
       AlertingConnectorFeatureId,
       UptimeConnectorFeatureId,
       SecurityConnectorFeatureId,
+      WorkflowsConnectorFeatureId,
     ],
     renderParameterTemplates,
   };

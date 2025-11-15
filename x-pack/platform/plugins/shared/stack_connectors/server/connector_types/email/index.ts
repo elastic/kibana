@@ -33,6 +33,7 @@ import {
   AlertingConnectorFeatureId,
   UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
+  WorkflowsConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import { withoutMustacheTemplate } from '@kbn/actions-plugin/common';
 import {
@@ -219,6 +220,7 @@ export function getConnectorType(params: GetConnectorTypeParams): EmailConnector
       AlertingConnectorFeatureId,
       UptimeConnectorFeatureId,
       SecurityConnectorFeatureId,
+      WorkflowsConnectorFeatureId,
     ],
     validate: {
       config: {

@@ -29,7 +29,7 @@ export const AbuseIPDBConnector: ConnectorSpec = {
     displayName: 'AbuseIPDB',
     description: 'IP reputation checking and abuse reporting',
     minimumLicense: 'gold',
-    supportedFeatureIds: ['alerting', 'siem'],
+    supportedFeatureIds: ['workflows'],
   },
 
   schema: z.discriminatedUnion('method', [

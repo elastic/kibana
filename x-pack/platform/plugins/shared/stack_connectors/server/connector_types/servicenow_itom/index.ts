@@ -12,7 +12,11 @@ import type {
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
 } from '@kbn/actions-plugin/server/types';
-import { AlertingConnectorFeatureId, SecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
+import {
+  AlertingConnectorFeatureId,
+  SecurityConnectorFeatureId,
+  WorkflowsConnectorFeatureId,
+} from '@kbn/actions-plugin/common';
 import type {
   ServiceNowPublicConfigurationBaseType,
   ServiceNowSecretConfigurationType,
@@ -64,7 +68,11 @@ export function getServiceNowITOMConnectorType(): ServiceNowConnectorType<
     id: CONNECTOR_ID,
     minimumLicenseRequired: 'platinum',
     name: CONNECTOR_NAME,
-    supportedFeatureIds: [AlertingConnectorFeatureId, SecurityConnectorFeatureId],
+    supportedFeatureIds: [
+      AlertingConnectorFeatureId,
+      SecurityConnectorFeatureId,
+      WorkflowsConnectorFeatureId,
+    ],
     validate: {
       config: {
         schema: ExternalIncidentServiceConfigurationBaseSchema,
