@@ -49,6 +49,32 @@ const privMonLinks: LinkItem = {
   licenseType: 'platinum',
 };
 
+const threatHuntingLinks: LinkItem = {
+  id: SecurityPageName.entityAnalyticsOverview,
+  title: i18n.translate('xpack.securitySolution.appLinks.entityAnalytics.threatHunting', {
+    defaultMessage: 'Threat hunting',
+  }),
+  description: i18n.translate(
+    'xpack.securitySolution.navigation.entityAnalytics.threatHunting.description',
+    {
+      defaultMessage:
+        'Run natural-language hunts, review workspace activity, and dig into prioritized entities.',
+    }
+  ),
+  landingImage: eaOverviewPageImg,
+  path: ENTITY_ANALYTICS_OVERVIEW_PATH,
+  globalSearchKeywords: [
+    i18n.translate('xpack.securitySolution.appLinks.entityAnalytics.threatHunting', {
+      defaultMessage: 'Threat hunting',
+    }),
+  ],
+  hideTimeline: false,
+  skipUrlState: false,
+  capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
+  licenseType: 'platinum',
+  experimentalKey: 'entityThreatHuntingEnabled',
+};
+
 const eaOverviewLinks: LinkItem = {
   id: SecurityPageName.entityAnalyticsOverview,
   title: i18n.translate('xpack.securitySolution.appLinks.entityAnalytics.overview', {
@@ -72,6 +98,7 @@ const eaOverviewLinks: LinkItem = {
   skipUrlState: false,
   capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
   licenseType: 'platinum',
+  hideWhenExperimentalKey: 'entityThreatHuntingEnabled',
 };
 
 export const entityAnalyticsLinks: LinkItem = {
@@ -83,8 +110,11 @@ export const entityAnalyticsLinks: LinkItem = {
     i18n.translate('xpack.securitySolution.appLinks.entityAnalytics.landing', {
       defaultMessage: 'Entity analytics',
     }),
+    i18n.translate('xpack.securitySolution.appLinks.entityAnalytics.threatHunting.keyword', {
+      defaultMessage: 'Threat hunting',
+    }),
   ],
-  links: [eaOverviewLinks, privMonLinks],
+  links: [threatHuntingLinks, eaOverviewLinks, privMonLinks],
   hideTimeline: true,
   skipUrlState: true,
   uiSettingRequired: ENABLE_PRIVILEGED_USER_MONITORING_SETTING,

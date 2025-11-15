@@ -15,6 +15,7 @@ import {
   EntityTypeToLevelField,
   EntityTypeToScoreField,
 } from '../../../../../common/search_strategy';
+import { EntityTypeToIdentifierField } from '../../../../../common/entity_analytics/types';
 import {
   EntityPanelKeyByType,
   EntityPanelParamByType,
@@ -29,6 +30,16 @@ import { ENTITIES_LIST_TABLE_ID } from '../constants';
 import { EntityIconByType, getEntityType, sourceFieldToText } from '../helpers';
 import { CRITICALITY_LEVEL_TITLE } from '../../asset_criticality/translations';
 import { formatRiskScore } from '../../../common';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useNavigateToTimeline } from '../../../../overview/components/detection_response/hooks/use_navigate_to_timeline';
+
+const toArray = <T,>(value: T | T[] | null | undefined): T[] => {
+  if (value == null) {
+    return [];
+  }
+
+  return Array.isArray(value) ? value : [value];
+};
 
 export type EntitiesListColumns = [
   Columns<Entity>,
@@ -43,6 +54,8 @@ export type EntitiesListColumns = [
 export const useEntitiesListColumns = (): EntitiesListColumns => {
   const { openRightPanel } = useExpandableFlyoutApi();
   const { euiTheme } = useEuiTheme();
+  const entityThreatHuntingEnabled = useIsExperimentalFeatureEnabled('entityThreatHuntingEnabled');
+  const { openTimelineWithFilters } = useNavigateToTimeline();
 
   return [
     {
@@ -56,41 +69,88 @@ export const useEntitiesListColumns = (): EntitiesListColumns => {
       render: (record: Entity) => {
         const entityType = getEntityType(record);
 
-        const value = record.entity.name;
-        const onClick = () => {
-          const id = EntityPanelKeyByType[entityType];
+        const identifierField = EntityTypeToIdentifierField[entityType];
+        const rawIdentifier = get(identifierField, record);
+        const identifierCandidates = toArray(rawIdentifier);
 
-          if (id) {
-            openRightPanel({
-              id,
-              params: {
-                [EntityPanelParamByType[entityType] ?? '']: value,
-                contextID: ENTITIES_LIST_TABLE_ID,
-                scopeId: ENTITIES_LIST_TABLE_ID,
-              },
-            });
+        // Use entity.name as primary display name (same as used in the name column)
+        // Fall back to identifier or entity.id if name is not available
+        const displayName =
+          record.entity?.name ||
+          identifierCandidates.find(
+            (value): value is string => typeof value === 'string' && value.length > 0
+          ) ||
+          record.entity?.id;
+
+        const flyoutKey = EntityPanelKeyByType[entityType];
+
+        const onClick = () => {
+          if (!flyoutKey || !displayName) {
+            return;
           }
+
+          openRightPanel({
+            id: flyoutKey,
+            params: {
+              [EntityPanelParamByType[entityType] ?? '']: displayName,
+              contextID: ENTITIES_LIST_TABLE_ID,
+              scopeId: ENTITIES_LIST_TABLE_ID,
+            },
+          });
         };
 
-        if (!value || !EntityPanelKeyByType[entityType]) {
+        const timelineIdentifier = identifierCandidates.find(
+          (value): value is string => typeof value === 'string' && value.length > 0
+        );
+        const canRenderTimelineActions = entityThreatHuntingEnabled && timelineIdentifier != null;
+
+        if (!flyoutKey && !canRenderTimelineActions) {
           return null;
         }
 
         return (
-          <EuiButtonIcon
-            iconType="expand"
-            onClick={onClick}
-            aria-label={i18n.translate(
-              'xpack.securitySolution.entityAnalytics.entityStore.entitiesList.entityPreview.ariaLabel',
-              {
-                defaultMessage: 'Preview entity with name {name}',
-                values: { name: value },
-              }
+          <span>
+            {flyoutKey && displayName && (
+              <EuiButtonIcon
+                iconType="expand"
+                onClick={onClick}
+                aria-label={i18n.translate(
+                  'xpack.securitySolution.entityAnalytics.entityStore.entitiesList.entityPreview.ariaLabel',
+                  {
+                    defaultMessage: 'Preview entity with name {name}',
+                    values: { name: displayName },
+                  }
+                )}
+                style={{ color: euiTheme.colors.primary }}
+              />
             )}
-          />
+            {canRenderTimelineActions && (
+              <EuiButtonIcon
+                iconType="timeline"
+                onClick={() =>
+                  openTimelineWithFilters([
+                    [
+                      {
+                        field: identifierField,
+                        value: timelineIdentifier,
+                      },
+                    ],
+                  ])
+                }
+                aria-label={i18n.translate(
+                  'xpack.securitySolution.entityAnalytics.entityStore.entitiesList.openTimeline.ariaLabel',
+                  {
+                    defaultMessage: 'Open timeline for {name}',
+                    values: { name: displayName ?? timelineIdentifier },
+                  }
+                )}
+                style={{ color: euiTheme.colors.primary }}
+              />
+            )}
+          </span>
         );
       },
-      width: '5%',
+      grow: false,
     },
     {
       field: 'entity.name',

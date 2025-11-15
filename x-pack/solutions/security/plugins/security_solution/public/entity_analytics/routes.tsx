@@ -24,6 +24,8 @@ import { EntityStoreManagementPage } from './pages/entity_store_management_page'
 import { EntityAnalyticsLandingPage } from './pages/entity_analytics_landing';
 import { EntityAnalyticsPrivilegedUserMonitoringPage } from './pages/entity_analytics_privileged_user_monitoring_page';
 import { OverviewDashboard } from './pages/entity_analytics_overview_page';
+import { ThreatHuntingHomePage } from './pages/threat_hunting_home_page';
+import { useIsExperimentalFeatureEnabled } from '../common/hooks/use_experimental_features';
 
 const EntityAnalyticsManagementWrapper = () => (
   <PluginTemplateWrapper>
@@ -129,9 +131,16 @@ const EntityAnalyticsPrivilegedUserMonitoringContainer: React.FC = React.memo(()
 EntityAnalyticsPrivilegedUserMonitoringContainer.displayName =
   'EntityAnalyticsPrivilegedUserMonitoringContainer';
 
+export const EntityAnalyticsOverviewContent: React.FC = React.memo(() => {
+  const isThreatHuntingEnabled = useIsExperimentalFeatureEnabled('entityThreatHuntingEnabled');
+
+  return isThreatHuntingEnabled ? <ThreatHuntingHomePage /> : <OverviewDashboard />;
+});
+EntityAnalyticsOverviewContent.displayName = 'EntityAnalyticsOverviewContent';
+
 const EntityAnalyticsOverviewWrapper = () => (
   <PluginTemplateWrapper>
-    <OverviewDashboard />
+    <EntityAnalyticsOverviewContent />
   </PluginTemplateWrapper>
 );
 
