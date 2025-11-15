@@ -14,7 +14,6 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { waitFor } from '@testing-library/dom';
-import { act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
@@ -184,6 +183,7 @@ describe('ESQLEditor', () => {
   });
 
   it('should render correctly if editorIsInline prop is set to true', async () => {
+    const user = userEvent.setup();
     const onTextLangQuerySubmit = jest.fn();
     const newProps = {
       ...props,
@@ -198,7 +198,7 @@ describe('ESQLEditor', () => {
     expect(runQueryButton).toBeInTheDocument(); // Assert it exists
 
     if (runQueryButton) {
-      await userEvent.click(runQueryButton);
+      await user.click(runQueryButton);
       expect(onTextLangQuerySubmit).toHaveBeenCalledTimes(1);
     }
   });
@@ -215,6 +215,8 @@ describe('ESQLEditor', () => {
 
   describe('data errors switch', () => {
     test('shown with errors enabled', async () => {
+      const user = userEvent.setup();
+
       const newProps = {
         ...props,
         dataErrorsControl: { enabled: true, onChange: jest.fn() },
@@ -230,15 +232,17 @@ describe('ESQLEditor', () => {
       await waitFor(() => {
         expect(queryByTestId('ESQLEditor-footerPopoverButton-error')).toBeInTheDocument();
       });
-      act(() => {
-        queryByTestId('ESQLEditor-footerPopoverButton-error')?.click();
-      });
+
+      await user.click(queryByTestId('ESQLEditor-footerPopoverButton-error')!);
+
       expect(queryByTestId('ESQLEditor-footerPopover-dataErrorsSwitch')).toBeInTheDocument();
 
       expect(queryAllByText('Data error example')).toHaveLength(2);
     });
 
     test('shown with errors disabled', async () => {
+      const user = userEvent.setup();
+
       const newProps = {
         ...props,
         dataErrorsControl: { enabled: false, onChange: jest.fn() },
@@ -254,15 +258,17 @@ describe('ESQLEditor', () => {
       await waitFor(() => {
         expect(queryByTestId('ESQLEditor-footerPopoverButton-error')).toBeInTheDocument();
       });
-      act(() => {
-        queryByTestId('ESQLEditor-footerPopoverButton-error')?.click();
-      });
+
+      await user.click(queryByTestId('ESQLEditor-footerPopoverButton-error')!);
+
       expect(queryByTestId('ESQLEditor-footerPopover-dataErrorsSwitch')).toBeInTheDocument();
 
       expect(queryAllByText('Data error example')).toHaveLength(0);
     });
 
     test('not shown when prop not set', async () => {
+      const user = userEvent.setup();
+
       mockValidate.mockResolvedValue({
         errors: [{ message: 'Data error example', severity: 'error' }],
         warnings: [],
@@ -271,9 +277,9 @@ describe('ESQLEditor', () => {
       await waitFor(() => {
         expect(queryByTestId('ESQLEditor-footerPopoverButton-error')).toBeInTheDocument();
       });
-      act(() => {
-        queryByTestId('ESQLEditor-footerPopoverButton-error')?.click();
-      });
+
+      await user.click(queryByTestId('ESQLEditor-footerPopoverButton-error')!);
+
       expect(queryByTestId('ESQLEditor-footerPopover-dataErrorsSwitch')).not.toBeInTheDocument();
     });
   });
