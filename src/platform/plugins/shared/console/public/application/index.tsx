@@ -23,6 +23,7 @@ import { Redirect, useLocation } from 'react-router-dom';
 import { Router, Route, Routes } from '@kbn/shared-ux-router';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { CONFIG_TAB_ID, HISTORY_TAB_ID, SHELL_TAB_ID } from './containers/main';
 import type { AutocompleteInfo } from '../services';
 import { createStorage, createHistory, createSettings, setStorage } from '../services';
@@ -47,6 +48,7 @@ export interface BootDependencies extends ConsoleStartServices {
   application: ApplicationStart;
   data: DataPublicPluginStart;
   licensing: LicensingPluginStart;
+  share: SharePluginStart;
   element: HTMLElement;
   history: RouteComponentProps['history'];
   docLinks: DocLinksStart['links'];
@@ -61,6 +63,7 @@ export async function renderApp({
   application,
   data,
   licensing,
+  share,
   element,
   history,
   http,
@@ -107,6 +110,7 @@ export async function renderApp({
             application,
             data,
             licensing,
+            share,
           },
           config: {
             isDevMode,
