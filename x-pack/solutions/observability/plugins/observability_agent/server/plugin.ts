@@ -55,7 +55,7 @@ export class ObservabilityAgentPlugin
           this.logger.error(`Error registering observability agent tools: ${error}`);
         });
 
-        registerObservabilityAgent({ core, plugins, logger: this.logger }).catch((error) => {
+        registerObservabilityAgent({ plugins, logger: this.logger }).catch((error) => {
           this.logger.error(`Error registering observability agent: ${error}`);
         });
       })
