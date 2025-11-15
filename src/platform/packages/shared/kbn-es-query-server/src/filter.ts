@@ -15,6 +15,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { ASCODE_FILTER_OPERATOR } from '@kbn/es-query-constants';
 
 // ====================================================================
 // CORE FILTER OPERATOR AND VALUE SCHEMAS
@@ -130,9 +131,12 @@ const conditionFieldSchema = schema.object({
  * Schema for 'is' and 'is_not' operators with single value
  */
 const singleConditionSchema = conditionFieldSchema.extends({
-  operator: schema.oneOf([schema.literal('is'), schema.literal('is_not')], {
-    meta: { description: 'Single value comparison operators' },
-  }),
+  operator: schema.oneOf(
+    [schema.literal(ASCODE_FILTER_OPERATOR.IS), schema.literal(ASCODE_FILTER_OPERATOR.IS_NOT)],
+    {
+      meta: { description: 'Single value comparison operators' },
+    }
+  ),
   value: schema.oneOf([schema.string(), schema.number(), schema.boolean()], {
     meta: { description: 'Single value for comparison' },
   }),
@@ -142,9 +146,15 @@ const singleConditionSchema = conditionFieldSchema.extends({
  * Schema for 'is_one_of' and 'is_not_one_of' operators with array values
  */
 const oneOfConditionSchema = conditionFieldSchema.extends({
-  operator: schema.oneOf([schema.literal('is_one_of'), schema.literal('is_not_one_of')], {
-    meta: { description: 'Array value comparison operators' },
-  }),
+  operator: schema.oneOf(
+    [
+      schema.literal(ASCODE_FILTER_OPERATOR.IS_ONE_OF),
+      schema.literal(ASCODE_FILTER_OPERATOR.IS_NOT_ONE_OF),
+    ],
+    {
+      meta: { description: 'Array value comparison operators' },
+    }
+  ),
   value: schema.oneOf(
     [
       schema.arrayOf(schema.string()),
@@ -159,7 +169,7 @@ const oneOfConditionSchema = conditionFieldSchema.extends({
  * Schema for 'range' operator with range value
  */
 const rangeConditionSchema = conditionFieldSchema.extends({
-  operator: schema.literal('range'),
+  operator: schema.literal(ASCODE_FILTER_OPERATOR.RANGE),
   value: rangeSchema,
 });
 
@@ -167,9 +177,15 @@ const rangeConditionSchema = conditionFieldSchema.extends({
  * Schema for 'exists' and 'not_exists' operators without value
  */
 const existsConditionSchema = conditionFieldSchema.extends({
-  operator: schema.oneOf([schema.literal('exists'), schema.literal('not_exists')], {
-    meta: { description: 'Field existence check operators' },
-  }),
+  operator: schema.oneOf(
+    [
+      schema.literal(ASCODE_FILTER_OPERATOR.EXISTS),
+      schema.literal(ASCODE_FILTER_OPERATOR.NOT_EXISTS),
+    ],
+    {
+      meta: { description: 'Field existence check operators' },
+    }
+  ),
   // value is intentionally omitted for exists/not_exists operators
 });
 
@@ -184,6 +200,11 @@ const conditionSchema = schema.oneOf(
 // ====================================================================
 // FILTER DISCRIMINATED UNION SCHEMA
 // ====================================================================
+
+interface RecursiveType {
+  name: string;
+  self: undefined | RecursiveType;
+}
 
 /**
  * Schema for condition filters
@@ -208,7 +229,7 @@ export const asCodeGroupFilterSchema = basePropertiesSchema.extends(
         conditions: schema.arrayOf(
           schema.oneOf([
             conditionSchema,
-            schema.lazy(GROUP_FILTER_ID), // Recursive reference for nested groups
+            schema.lazy<RecursiveType>(GROUP_FILTER_ID), // Recursive reference for nested groups
           ])
         ),
       },
@@ -220,11 +241,28 @@ export const asCodeGroupFilterSchema = basePropertiesSchema.extends(
 
 /**
  * Schema for DSL filters
+ * Includes field and params properties specific to DSL filters for preserving metadata
  */
 export const asCodeDSLFilterSchema = basePropertiesSchema.extends({
   dsl: schema.recordOf(schema.string(), schema.any(), {
     meta: { description: 'Elasticsearch Query DSL object' },
   }),
+  field: schema.maybe(
+    schema.string({
+      meta: {
+        description:
+          'Field name from filter metadata (meta.field). Critical for scripted filters where field cannot be extracted from query.',
+      },
+    })
+  ),
+  params: schema.maybe(
+    schema.any({
+      meta: {
+        description:
+          'Filter parameters from metadata (meta.params). Preserves display values, formats, and script parameters.',
+      },
+    })
+  ),
 });
 
 /**
