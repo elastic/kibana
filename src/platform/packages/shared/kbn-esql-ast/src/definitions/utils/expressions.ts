@@ -26,7 +26,7 @@ import { getFunctionDefinition } from './functions';
 import { isArrayType } from '../types';
 import { getColumnForASTNode } from './shared';
 import type { ESQLColumnData } from '../../commands_registry/types';
-import { TIME_SYSTEM_PARAMS } from './literals';
+import { TIME_SYSTEM_PARAMS, AUTO_INTERVAL_PARAM } from './literals';
 import { Walker } from '../../walker';
 import { isMarkerNode } from './ast';
 
@@ -51,7 +51,10 @@ export function getExpressionType(
   }
 
   if (isLiteral(root)) {
-    if (root.literalType === 'param' && TIME_SYSTEM_PARAMS.includes(root.text)) {
+    if (
+      root.literalType === 'param' &&
+      (TIME_SYSTEM_PARAMS.includes(root.text) || root.text === AUTO_INTERVAL_PARAM)
+    ) {
       return 'keyword';
     }
     return root.literalType;

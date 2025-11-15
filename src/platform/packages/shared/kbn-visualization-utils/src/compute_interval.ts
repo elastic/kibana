@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
+import dateMath from '@kbn/datemath';
 
 // follows the same logic with vega auto_date function
-const barTarget = 50; // same as vega
+const DEFAULT_HISTOGRAM_BAR_TARGET = 50; // same as vega
 const roundInterval = (interval: number) => {
   {
     switch (true) {
@@ -51,10 +51,15 @@ const roundInterval = (interval: number) => {
   }
 };
 
-export const computeInterval = (timeRange: TimeRange, data: DataPublicPluginStart): string => {
-  const bounds = data.query.timefilter.timefilter.calculateBounds(timeRange!);
-  const min = bounds.min!.valueOf();
-  const max = bounds.max!.valueOf();
-  const interval = (max - min) / barTarget;
+export const computeInterval = (
+  timeRange: TimeRange,
+  histogramBarTarget = DEFAULT_HISTOGRAM_BAR_TARGET
+): string => {
+  const now = new Date();
+  const lowerBound = dateMath.parse(timeRange.from, { forceNow: now });
+  const upperBound = dateMath.parse(timeRange.to, { roundUp: true, forceNow: now });
+  const min = lowerBound ? lowerBound.valueOf() : 0;
+  const max = upperBound ? upperBound.valueOf() : 0;
+  const interval = (max - min) / histogramBarTarget;
   return roundInterval(interval);
 };

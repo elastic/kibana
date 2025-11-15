@@ -9,7 +9,7 @@ import { ESQL_ASYNC_SEARCH_STRATEGY, KBN_FIELD_TYPES } from '@kbn/data-plugin/co
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { getStartEndParams } from '@kbn/esql-utils';
+import { getNamedParams } from '@kbn/esql-utils';
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { type UseCancellableSearch, useCancellableSearch } from '@kbn/ml-cancellable-search';
 import type { estypes } from '@elastic/elasticsearch';
@@ -83,7 +83,7 @@ const getESQLDocumentCountStats = async (
   const esqlBaseQuery = query.esql;
   let earliestMs = Infinity;
   let latestMs = -Infinity;
-  const namedParams = getStartEndParams(esqlBaseQuery, timeRange);
+  const namedParams = getNamedParams(esqlBaseQuery, timeRange);
 
   if (timeFieldName) {
     const aggQuery = appendToESQLQuery(
@@ -299,7 +299,7 @@ export const useESQLOverallStatsData = (
         // And use this one query to
         // 1) identify populated/empty fields
         // 2) gather examples for populated text fields
-        const namedParams = getStartEndParams(esqlBaseQuery, timeRange);
+        const namedParams = getNamedParams(esqlBaseQuery, timeRange);
         const columnsResp = (await runRequest(
           {
             params: {

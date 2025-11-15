@@ -13,7 +13,7 @@ import type { ESQLColumnData } from '../../commands_registry/types';
 import { Location } from '../../commands_registry/types';
 import { buildPartialMatcher, getExpressionType } from './expressions';
 import { setTestFunctions } from './test_functions';
-import { TIME_SYSTEM_PARAMS } from './literals';
+import { TIME_SYSTEM_PARAMS, AUTO_INTERVAL_PARAM } from './literals';
 
 describe('buildPartialMatcher', () => {
   it('should build a partial matcher', () => {
@@ -78,7 +78,7 @@ describe('getExpressionType', () => {
         expectedType: 'param',
       },
       // time system params are interpreted as keywords... this is not a mistake
-      ...TIME_SYSTEM_PARAMS.map((p) => ({
+      ...[AUTO_INTERVAL_PARAM, ...TIME_SYSTEM_PARAMS].map((p) => ({
         expression: p,
         expectedType: 'keyword' as SupportedDataType,
       })),

@@ -33,7 +33,8 @@ interface StreamChartPanelProps {
 export function StreamChartPanel({ definition }: StreamChartPanelProps) {
   const {
     dependencies: {
-      start: { data, dataViews, share, streams },
+      start: { dataViews, share, streams },
+
     },
   } = useKibana();
   const { streamsRepositoryClient } = streams;
@@ -50,8 +51,8 @@ export function StreamChartPanel({ definition }: StreamChartPanelProps) {
   );
 
   const bucketSize = useMemo(
-    () => computeInterval(timeState.asAbsoluteTimeRange, data),
-    [data, timeState.asAbsoluteTimeRange]
+    () => computeInterval(timeState.asAbsoluteTimeRange),
+    [timeState.asAbsoluteTimeRange]
   );
 
   const queries = useMemo(() => {

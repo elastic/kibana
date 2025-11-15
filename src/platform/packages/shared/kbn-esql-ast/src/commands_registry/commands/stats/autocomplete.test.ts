@@ -28,6 +28,7 @@ import {
 } from '../../../definitions/all_operators';
 import type { ICommandCallbacks } from '../../types';
 import type { FunctionReturnType, FieldType } from '../../../definitions/types';
+import { AUTO_INTERVAL_PARAM } from '../../../definitions/utils/literals';
 import {
   ESQL_NUMBER_TYPES,
   FunctionDefinitionTypes,
@@ -826,6 +827,14 @@ describe('STATS Autocomplete', () => {
             // BUCKET second parameter (buckets) has constantOnly: true
             // Types: date_period, integer, time_duration (NOT date, so no ?_tstart/?_tend)
             ...getLiteralsByType('time_duration'),
+            AUTO_INTERVAL_PARAM,
+            ...getFunctionSignaturesByReturnType(
+              Location.EVAL,
+              ['integer', 'date_period', 'time_duration'],
+              {
+                scalar: true,
+              }
+            ),
           ],
           mockCallbacks,
           mockContext,

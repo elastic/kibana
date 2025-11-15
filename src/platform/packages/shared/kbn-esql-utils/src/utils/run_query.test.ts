@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
-import { getStartEndParams, getNamedParams } from './run_query';
+import { getStartEndParams } from './named_params/_tstart_end';
+import { getNamedParams } from './named_params';
 
 describe('run query helpers', () => {
   describe('getStartEndParams', () => {
@@ -61,6 +62,25 @@ describe('run query helpers', () => {
       expect(params).toHaveLength(2);
       expect(params[0]).toHaveProperty('_tstart');
       expect(params[1]).toHaveProperty('_tend');
+    });
+
+    it('should return the interval param if given', () => {
+      const time = { from: 'Jul 5, 2024 @ 08:03:56.849', to: 'Jul 5, 2024 @ 10:03:56.849' };
+      const query = 'FROM foo | EVAL DATE_TRUNC(?_tautointerval, timestamp)';
+      const variables: ESQLControlVariable[] = [];
+      const params = getNamedParams(query, time, variables);
+      expect(params).toHaveLength(1);
+      expect(params[0]).toHaveProperty('_tautointerval');
+    });
+
+    it('should return the interval param and time params if given', () => {
+      const time = { from: 'Jul 5, 2024 @ 08:03:56.849', to: 'Jul 5, 2024 @ 10:03:56.849' };
+      const query = 'FROM foo | EVAL DATE_TRUNC(?_tautointerval, ?_tstart)';
+      const variables: ESQLControlVariable[] = [];
+      const params = getNamedParams(query, time, variables);
+      expect(params).toHaveLength(2);
+      expect(params[0]).toHaveProperty('_tstart');
+      expect(params[1]).toHaveProperty('_tautointerval');
     });
 
     it('should return the variables if given', () => {

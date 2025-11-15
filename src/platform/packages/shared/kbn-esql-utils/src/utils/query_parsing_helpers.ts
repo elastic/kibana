@@ -213,7 +213,8 @@ export const getTimeFieldFromESQLQuery = (esql: string) => {
 
   const params = Walker.params(root);
   const timeNamedParam = params.find(
-    (param) => param.value === '_tstart' || param.value === '_tend'
+    (param) =>
+      param.value === '_tstart' || param.value === '_tend' || param.value === '_tautointerval'
   );
   if (!timeNamedParam || !functions.length) {
     return undefined;

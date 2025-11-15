@@ -13,6 +13,6 @@
     "@kbn/interpreter",
     "@kbn/data-views-plugin",
     "@kbn/es-query",
-    "@kbn/data-plugin",
+    "@kbn/datemath",
   ]
 }
