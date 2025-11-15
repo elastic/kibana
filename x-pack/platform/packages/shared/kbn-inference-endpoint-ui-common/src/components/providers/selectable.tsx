@@ -61,7 +61,7 @@ export const SelectableProvider: React.FC<SelectableProviderProps> = ({
           </EuiFlexItem>
           <EuiFlexItem grow={true}>
             <EuiFlexGroup gutterSize="none" direction="column" responsive={false}>
-              <EuiFlexItem data-test-subj="provider">
+              <EuiFlexItem data-test-subj={`${provider?.name}-provider`}>
                 <ServiceProviderName
                   providerKey={option.label as ServiceProviderKeys}
                   searchValue={searchValue}

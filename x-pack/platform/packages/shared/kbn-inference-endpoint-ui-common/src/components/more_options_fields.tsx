@@ -38,7 +38,10 @@ export const MoreOptionsFields: React.FC<AdditionalOptionsFieldsProps> = ({
       buttonElement="button"
       borders="none"
       buttonContent={
-        <EuiTextColor color={euiTheme.colors.primary}>
+        <EuiTextColor
+          color={euiTheme.colors.primary}
+          data-test-subj="inference-endpoint-more-options-accordion-button"
+        >
           <FormattedMessage
             id="xpack.inferenceEndpointUICommon.components.additionalInfo.moreOptionLabel"
             defaultMessage="More options"
