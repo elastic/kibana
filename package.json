@@ -529,6 +529,7 @@
     "@kbn/discover-plugin": "link:src/platform/plugins/shared/discover",
     "@kbn/discover-shared-plugin": "link:src/platform/plugins/shared/discover_shared",
     "@kbn/discover-utils": "link:src/platform/packages/shared/kbn-discover-utils",
+    "@kbn/dissect-heuristics": "link:x-pack/platform/packages/shared/kbn-dissect-heuristics",
     "@kbn/doc-links": "link:src/platform/packages/shared/kbn-doc-links",
     "@kbn/dom-drag-drop": "link:src/platform/packages/shared/kbn-dom-drag-drop",
     "@kbn/ebt-tools": "link:src/platform/packages/shared/kbn-ebt-tools",

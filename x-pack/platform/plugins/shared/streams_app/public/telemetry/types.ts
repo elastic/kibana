@@ -37,6 +37,23 @@ interface StreamsAIGrokSuggestionAcceptedProps {
   detected_fields: number;
 }
 
+interface StreamsAIDissectSuggestionLatencyProps {
+  name: string;
+  field: string;
+  connector_id: string;
+  suggestion_count: number;
+  duration_ms: number;
+  match_rate: number[];
+}
+
+interface StreamsAIDissectSuggestionAcceptedProps {
+  name: string;
+  field: string;
+  connector_id: string;
+  match_rate: number;
+  detected_fields: number;
+}
+
 interface WiredStreamsStatusChangedProps {
   is_enabled: boolean;
 }
@@ -75,6 +92,8 @@ export {
   type StreamsAttachmentClickEventProps,
   type StreamsAIGrokSuggestionLatencyProps,
   type StreamsAIGrokSuggestionAcceptedProps,
+  type StreamsAIDissectSuggestionLatencyProps,
+  type StreamsAIDissectSuggestionAcceptedProps,
   type StreamsRetentionChangedProps,
   type StreamsProcessingSavedProps,
   type StreamsChildStreamCreatedProps,
