@@ -199,4 +199,5 @@ interface InvestigationGuide {
 export interface DenormalizedArtifacts {
   dashboards?: DashboardItem[];
   investigation_guide?: InvestigationGuide;
+  entities?: string[];
 }

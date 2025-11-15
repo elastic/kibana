@@ -85,7 +85,7 @@ export function injectReferencesIntoArtifacts(
   references?: SavedObjectReference[]
 ): Required<RuleDomain['artifacts']> {
   if (!artifacts) {
-    return { dashboards: [], investigation_guide: { blob: '' } };
+    return { dashboards: [], investigation_guide: { blob: '' }, entities: [] };
   }
   return {
     ...artifacts,
@@ -107,5 +107,6 @@ export function injectReferencesIntoArtifacts(
           id: reference.id,
         };
       }) ?? [],
+    entities: artifacts.entities ?? [],
   };
 }

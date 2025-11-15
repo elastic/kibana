@@ -110,6 +110,28 @@ export const ALERT_LINK_DASHBOARDS_TITLE = i18n.translate(
   }
 );
 
+export const ALERT_LINK_ENTITIES_TITLE = i18n.translate(
+  'responseOpsRuleForm.ruleForm.ruleDefinition.alertLinkEntitiesTitle',
+  {
+    defaultMessage: 'Related entities',
+  }
+);
+
+export const ALERT_LINK_ENTITIES_LABEL_TOOLTIP_CONTENT = i18n.translate(
+  'responseOpsRuleForm.ruleForm.ruleDefinition.alertLinkEntities.label.tooltipContent',
+  {
+    defaultMessage:
+      'Correlate this rule with specific entities (e.g., service names) to help organize and filter alerts.',
+  }
+);
+
+export const ALERT_LINK_ENTITIES_PLACEHOLDER = i18n.translate(
+  'responseOpsRuleForm.ruleForm.ruleDefinition.alertLinkEntitiesPlaceholder',
+  {
+    defaultMessage: 'Select entities to correlate with this rule',
+  }
+);
+
 export const ALERT_LINK_DASHBOARDS_LABEL_TOOLTIP_CONTENT = i18n.translate(
   'responseOpsRuleForm.ruleForm.ruleDefinition.alertLinkDashboards.label.tooltipContent',
   {

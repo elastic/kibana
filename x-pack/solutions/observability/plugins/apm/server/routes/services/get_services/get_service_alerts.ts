@@ -5,20 +5,8 @@
  * 2.0.
  */
 
-import {
-  kqlQuery,
-  termQuery,
-  rangeQuery,
-  wildcardQuery,
-  termsQuery,
-} from '@kbn/observability-plugin/server';
-import {
-  ALERT_RULE_PRODUCER,
-  ALERT_STATUS,
-  ALERT_STATUS_ACTIVE,
-  ALERT_UUID,
-} from '@kbn/rule-data-utils';
-import { APM_ALERTING_CONSUMERS } from '../../../../common/alerting/config/apm_alerting_feature_ids';
+import { kqlQuery, termQuery, rangeQuery, wildcardQuery } from '@kbn/observability-plugin/server';
+import { ALERT_STATUS, ALERT_STATUS_ACTIVE, ALERT_UUID } from '@kbn/rule-data-utils';
 import { SERVICE_NAME } from '../../../../common/es_fields/apm';
 import type { ServiceGroup } from '../../../../common/service_groups';
 import type { ApmAlertsClient } from '../../../lib/helpers/get_apm_alerts_client';
@@ -58,21 +46,28 @@ export async function getServicesAlerts({
     query: {
       bool: {
         filter: [
-          ...termsQuery(ALERT_RULE_PRODUCER, ...APM_ALERTING_CONSUMERS),
           ...termQuery(ALERT_STATUS, ALERT_STATUS_ACTIVE),
           ...rangeQuery(start, end),
           ...kqlQuery(kuery),
           ...serviceGroupWithOverflowQuery(serviceGroup),
-          ...termQuery(SERVICE_NAME, serviceName),
-          ...wildcardQuery(SERVICE_NAME, searchQuery),
+          // ...wildcardQuery(SERVICE_NAME, searchQuery),
           ...environmentQuery(environment),
         ],
+        ...(serviceName
+          ? {
+              should: [
+                ...termQuery(SERVICE_NAME, serviceName),
+                ...termQuery('kibana.alert.rule.entities', serviceName),
+              ],
+              minimum_should_match: 1,
+            }
+          : {}),
       },
     },
     aggs: {
       services: {
         terms: {
-          field: SERVICE_NAME,
+          field: 'kibana.alert.rule.entities',
           size: maxNumServices,
         },
         aggs: {
@@ -87,6 +82,8 @@ export async function getServicesAlerts({
   };
 
   const result = await apmAlertsClient.search(params);
+
+  console.log('params', JSON.stringify(params, null, 2));
 
   const filterAggBuckets = result.aggregations?.services.buckets ?? [];
 

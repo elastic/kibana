@@ -23,7 +23,7 @@ import type { RuleTaskInstance, RuleTypeRunnerContext } from '../../task_runner/
 
 export type RuleData<Params extends RuleTypeParams> = Pick<
   SanitizedRule<Params>,
-  'id' | 'name' | 'tags' | 'consumer' | 'revision' | 'alertDelay' | 'params'
+  'id' | 'name' | 'tags' | 'consumer' | 'revision' | 'alertDelay' | 'params' | 'artifacts'
 >;
 
 interface InitializeAlertsClientOpts<Params extends RuleTypeParams> {
@@ -102,6 +102,7 @@ export const initializeAlertsClient = async <
           spaceId: context.spaceId,
           tags: rule.tags,
           alertDelay: rule.alertDelay?.active ?? 0,
+          entities: rule.artifacts?.entities,
         },
       })) ?? null;
 

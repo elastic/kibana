@@ -13,6 +13,7 @@ describe('injectReferencesIntoArtifacts', () => {
     expect(injectReferencesIntoArtifacts('test-id', undefined, [])).toEqual({
       dashboards: [],
       investigation_guide: { blob: '' },
+      entities: [],
     });
   });
 
@@ -22,6 +23,7 @@ describe('injectReferencesIntoArtifacts', () => {
     ).toEqual({
       dashboards: [],
       investigation_guide: { blob: '# Summary' },
+      entities: [],
     });
   });
 
@@ -94,6 +96,25 @@ describe('injectReferencesIntoArtifacts', () => {
       investigation_guide: {
         blob: 'test',
       },
+      entities: [],
+    });
+  });
+
+  it('includes entities in artifacts', () => {
+    const artifacts = {
+      dashboards: [],
+      investigation_guide: {
+        blob: 'test',
+      },
+      entities: ['frontend', 'backend'],
+    };
+    const result = injectReferencesIntoArtifacts('test-id', artifacts, []);
+    expect(result).toEqual({
+      dashboards: [],
+      investigation_guide: {
+        blob: 'test',
+      },
+      entities: ['frontend', 'backend'],
     });
   });
 });

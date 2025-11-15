@@ -13,6 +13,7 @@ describe('denormalizeArtifacts', () => {
     expect(artifacts).toEqual({
       dashboards: [],
       investigation_guide: { blob: '' },
+      entities: [],
     });
     expect(references).toEqual([]);
   });
@@ -52,6 +53,37 @@ describe('denormalizeArtifacts', () => {
       {
         id: '456',
         name: 'dashboard_1',
+        type: 'dashboard',
+      },
+    ]);
+  });
+
+  it('returns denormalized artifacts with entities', () => {
+    const ruleArtifacts = {
+      dashboards: [
+        {
+          id: '123',
+        },
+      ],
+      investigation_guide: {
+        blob: '## Summary',
+      },
+      entities: ['frontend', 'backend'],
+    };
+    const { artifacts, references } = denormalizeArtifacts(ruleArtifacts);
+    expect(artifacts).toEqual({
+      dashboards: [
+        {
+          refId: 'dashboard_0',
+        },
+      ],
+      investigation_guide: ruleArtifacts.investigation_guide,
+      entities: ruleArtifacts.entities,
+    });
+    expect(references).toEqual([
+      {
+        id: '123',
+        name: 'dashboard_0',
         type: 'dashboard',
       },
     ]);

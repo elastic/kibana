@@ -342,6 +342,7 @@ export class TaskRunner<
           revision: rule.revision,
           alertDelay: rule.alertDelay,
           params: rule.params,
+          artifacts: rule.artifacts,
         },
         ruleType: this.ruleType as UntypedNormalizedRuleType,
         startedAt: this.taskInstance.startedAt,

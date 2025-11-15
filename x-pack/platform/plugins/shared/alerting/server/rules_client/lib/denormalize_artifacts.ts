@@ -16,6 +16,7 @@ export function denormalizeArtifacts(ruleArtifacts: Artifacts | undefined): {
   const artifacts: Required<DenormalizedArtifacts> = {
     dashboards: [],
     investigation_guide: { blob: '' },
+    entities: [],
   };
 
   if (ruleArtifacts && ruleArtifacts.investigation_guide) {
@@ -37,6 +38,9 @@ export function denormalizeArtifacts(ruleArtifacts: Artifacts | undefined): {
         refId: refName,
       });
     });
+  }
+  if (ruleArtifacts && ruleArtifacts.entities) {
+    artifacts.entities = ruleArtifacts.entities;
   }
 
   return {

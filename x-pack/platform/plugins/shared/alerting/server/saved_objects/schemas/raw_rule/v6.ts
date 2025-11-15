@@ -12,8 +12,11 @@ export const rawRuleInvestigationGuideSchema = schema.object({
   blob: schema.string(),
 });
 
+export const rawRuleEntitiesSchema = schema.arrayOf(schema.string());
+
 export const artifactsSchema = artifactsSchemaV5.extends({
   investigation_guide: schema.maybe(rawRuleInvestigationGuideSchema),
+  entities: schema.maybe(rawRuleEntitiesSchema),
 });
 
 export const rawRuleSchema = rawRuleSchemaV5.extends({
