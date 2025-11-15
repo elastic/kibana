@@ -14,6 +14,8 @@ import { testDocs } from '../../src/sample_data/knowledge_base';
  * Any changes should be made in both places until the legacy evaluation framework is removed.
  */
 
+const RETRIEVE_ELASTIC_DOC_FUNCTION_NAME = 'retrieve_elastic_doc';
+
 evaluate.describe('Knowledge base', { tag: '@svlOblt' }, () => {
   evaluate.beforeAll(async ({ knowledgeBaseClient }) => {
     await knowledgeBaseClient.ensureInstalled().catch((e) => {
@@ -156,6 +158,110 @@ evaluate.describe('Knowledge base', { tag: '@svlOblt' }, () => {
                     'Mentions the specific alert thresholds for API response time, error rate, CPU usage, and memory usage',
                     'Identifies the primary database technologies: PostgreSQL, MongoDB, and Redis and mentions that database metrics are collected via Metricbeat',
                     'Does not combine information incorrectly or hallucinate details not present in the KB',
+                  ],
+                },
+                metadata: {},
+              },
+            ],
+          },
+        });
+      }
+    );
+  });
+
+  evaluate.describe('kb source isolation (Lens)', () => {
+    evaluate.beforeAll(async ({ knowledgeBaseClient, documentationClient }) => {
+      await knowledgeBaseClient.importEntries({
+        entries: [
+          {
+            id: 'lens_internal_policy',
+            title: 'Lens: Internal Usage & Best Practices (ACME)',
+            text:
+              'Internal-only: Lens is ACME’s standard tool for observability dashboards.\n' +
+              'Access: Only Observability Admins edit shared templates; team Editors manage dashboards in team spaces.\n' +
+              'Naming: <team>::<service>::<purpose>.\n' +
+              'Required tags: owner, env, data_domain, pii_level, retention_days.\n' +
+              'Data views: "acme-*", "metrics-acme-*", "logs-acme-*".\n' +
+              'Prod dashboards require env:prod filter; default time 24h; refresh ≥ 30s.\n' +
+              'PII fields (*_email, *_user_id) must be masked. Include Data Health embeddable.\n' +
+              'Use company palette; red reserved for SLA/SLO breach; max 10 visualizations.\n',
+          },
+        ],
+      });
+
+      await documentationClient.ensureInstalled();
+    });
+
+    evaluate.afterAll(async ({ knowledgeBaseClient, conversationsClient, documentationClient }) => {
+      await knowledgeBaseClient.clear();
+      await conversationsClient.clear();
+      await documentationClient.uninstall();
+    });
+
+    evaluate(
+      'returns information ONLY from the internal knowledge base for internal Lens usage questions',
+      async ({ evaluateDataset }) => {
+        await evaluateDataset({
+          dataset: {
+            name: 'kb: source isolation',
+            description:
+              'Queries about internal Lens governance should retrieve only internal entries, excluding product docs (and vice versa).',
+            examples: [
+              {
+                input: {
+                  question:
+                    'What are our internal Lens rules for production dashboards (naming, required tags, allowed data views, and minimum refresh)?',
+                },
+                output: {
+                  criteria: [
+                    'Retrieves the internal policy entry (id "lens_internal_policy").',
+                    'Mentions naming format <team>::<service>::<purpose>, required tags (owner, env, data_domain, pii_level, retention_days).',
+                    'Mentions allowed data views ("acme-*", "metrics-acme-*", "logs-acme-*"), default time 24h, and refresh ≥ 30s.',
+                    `Does not use function ${RETRIEVE_ELASTIC_DOC_FUNCTION_NAME}  before answering the question about internal Lens policies.`,
+                    'Does not hallucinate details that are not present in the internal policy.',
+                  ],
+                },
+                metadata: {},
+              },
+              {
+                input: {
+                  question:
+                    'Summarize our security/PII rules for Lens dashboards and the visualization standards used in prod.',
+                },
+                output: {
+                  criteria: [
+                    'Uses context function response to retrieve information ONLY from the internal policy',
+                    `Does not use function ${RETRIEVE_ELASTIC_DOC_FUNCTION_NAME}  before answering the question about internal Lens policies.`,
+                    'Mentions masking PII fields (e.g., *_email, *_user_id), use of company color palette, red for SLA/SLO breaches, and Data Health embeddable.',
+                  ],
+                },
+                metadata: {},
+              },
+            ],
+          },
+        });
+      }
+    );
+
+    evaluate(
+      'LLM response is formulated using product docs instead of internal knowledge base when the user asks about the Elastic Stack',
+      async ({ evaluateDataset }) => {
+        await evaluateDataset({
+          dataset: {
+            name: 'kb: Elastic stack questions',
+            description: `Validates ${RETRIEVE_ELASTIC_DOC_FUNCTION_NAME} usage for Kibana Lens guidance.`,
+            examples: [
+              {
+                input: {
+                  question:
+                    'What is Kibana Lens and how do I create a bar chart visualization with it?',
+                },
+                output: {
+                  criteria: [
+                    'Does not use context function response to retrieve information about Kibana Lens',
+                    `Uses the ${RETRIEVE_ELASTIC_DOC_FUNCTION_NAME} function before answering the question about Kibana`,
+                    'Accurately explains what Kibana Lens is and provides steps for creating a visualization',
+                    `Any additional information beyond the retrieved documentation must be factually accurate and relevant to the user's question`,
                   ],
                 },
                 metadata: {},
