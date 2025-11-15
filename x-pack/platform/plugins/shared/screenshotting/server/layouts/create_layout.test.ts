@@ -21,6 +21,10 @@ describe('Create Layout', () => {
         "hasHeader": true,
         "height": 16,
         "id": "preserve_layout",
+        "imageSize": Object {
+          "height": 0,
+          "width": 0,
+        },
         "scaledHeight": 32,
         "scaledWidth": 32,
         "selectors": Object {
@@ -78,6 +82,10 @@ describe('Create Layout', () => {
         "hasHeader": false,
         "height": 18,
         "id": "canvas",
+        "imageSize": Object {
+          "height": 0,
+          "width": 0,
+        },
         "scaledHeight": 36,
         "scaledWidth": 36,
         "selectors": Object {
