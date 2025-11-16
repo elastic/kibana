@@ -2572,7 +2572,19 @@
               "TabActionPayload",
               "<Pick<",
               "TabState",
-              ", \"globalState\">>, \"internalState/setGlobalState\">; setOverriddenVisContextAfterInvalidation: ",
+              ", \"globalState\">>, \"internalState/setGlobalState\">; setAppState: ",
+              "ActionCreatorWithPayload",
+              "<",
+              "TabActionPayload",
+              "<Pick<",
+              "TabState",
+              ", \"appState\">>, \"internalState/setAppState\">; resetAppState: ",
+              "ActionCreatorWithPayload",
+              "<",
+              "TabActionPayload",
+              "<Pick<",
+              "TabState",
+              ", \"appState\">>, \"internalState/resetAppState\">; setOverriddenVisContextAfterInvalidation: ",
               "ActionCreatorWithPayload",
               "<",
               "TabActionPayload",
@@ -2690,6 +2702,10 @@
             "deprecated": true,
             "trackAdoption": false,
             "references": [
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/discover_in_timeline/use_discover_in_timeline_actions.tsx"
+              },
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/discover_in_timeline/use_discover_in_timeline_actions.tsx"
@@ -2951,15 +2967,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ") => void; undoSavedSearchChanges: () => Promise<",
-              {
-                "pluginId": "savedSearch",
-                "scope": "public",
-                "docId": "kibSavedSearchPluginApi",
-                "section": "def-public.SavedSearch",
-                "text": "SavedSearch"
-              },
-              ">; updateAdHocDataViewId: (editedDataView: ",
+              ") => void; updateAdHocDataViewId: (editedDataView: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
