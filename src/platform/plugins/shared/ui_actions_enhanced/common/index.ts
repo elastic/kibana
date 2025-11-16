@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export { DEFAULT_URL_DRILLDOWN_OPTIONS } from './constants';
+
 export type {
   BaseActionConfig,
   SerializedAction,

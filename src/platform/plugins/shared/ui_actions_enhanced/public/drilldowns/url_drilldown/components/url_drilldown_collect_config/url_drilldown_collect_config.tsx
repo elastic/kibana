@@ -24,7 +24,7 @@ import {
 } from './i18n';
 import { VariablePopover } from '../variable_popover';
 import { UrlDrilldownOptionsComponent } from './lazy';
-import { DEFAULT_URL_DRILLDOWN_OPTIONS } from '../../constants';
+import { DEFAULT_URL_DRILLDOWN_OPTIONS } from '../../../../../common/constants';
 import { validateUrl } from '../../url_validation';
 
 export interface UrlDrilldownCollectConfigProps {

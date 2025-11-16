@@ -16,6 +16,12 @@ export const PLUGIN_NAME = 'presentationUtil';
  */
 export const EXPRESSIONS_LANGUAGE_ID = 'kibana-expressions';
 
+export const DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS = {
+  openInNewTab: false,
+  useCurrentDateRange: true,
+  useCurrentFilters: true,
+};
+
 export type {
   EnvironmentName,
   EnvironmentStatus,

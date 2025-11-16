@@ -7,9 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { UrlDrilldownOptions } from './types';
-
-export const DEFAULT_URL_DRILLDOWN_OPTIONS: UrlDrilldownOptions = {
+export const DEFAULT_URL_DRILLDOWN_OPTIONS = {
   encodeUrl: true,
   openInNewTab: true,
 };
