@@ -358,7 +358,7 @@ export default function (providerContext: FtrProviderContext) {
                 filter: [
                   {
                     match_phrase: {
-                      'actor.entity.id': 'admin@example.com',
+                      'user.entity.id': 'admin@example.com',
                     },
                   },
                 ],
@@ -539,7 +539,7 @@ export default function (providerContext: FtrProviderContext) {
                 filter: [
                   {
                     match_phrase: {
-                      'actor.entity.id': 'admin2@example.com',
+                      'user.entity.id': 'admin2@example.com',
                     },
                   },
                 ],
@@ -589,7 +589,7 @@ export default function (providerContext: FtrProviderContext) {
                 filter: [
                   {
                     match_phrase: {
-                      'actor.entity.id': 'admin@example.com',
+                      'user.entity.id': 'admin@example.com',
                     },
                   },
                 ],
@@ -697,7 +697,7 @@ export default function (providerContext: FtrProviderContext) {
                 filter: [
                   {
                     match_phrase: {
-                      'actor.entity.id': 'admin2@example.com',
+                      'user.entity.id': 'admin2@example.com',
                     },
                   },
                 ],
@@ -753,7 +753,7 @@ export default function (providerContext: FtrProviderContext) {
                 filter: [
                   {
                     match_phrase: {
-                      'actor.entity.id': 'admin5@example.com',
+                      'user.entity.id': 'admin5@example.com',
                     },
                   },
                 ],
@@ -780,7 +780,7 @@ export default function (providerContext: FtrProviderContext) {
                 filter: [
                   {
                     match_phrase: {
-                      'actor.entity.id': 'admin5@example.com',
+                      'user.entity.id': 'admin5@example.com',
                     },
                   },
                 ],
@@ -807,7 +807,7 @@ export default function (providerContext: FtrProviderContext) {
                 filter: [
                   {
                     exists: {
-                      field: 'actor.entity.id',
+                      field: 'user.entity.id',
                     },
                   },
                 ],
@@ -901,7 +901,7 @@ export default function (providerContext: FtrProviderContext) {
                   filter: [
                     {
                       match_phrase: {
-                        'actor.entity.id': 'admin@example.com',
+                        'user.entity.id': 'admin@example.com',
                       },
                     },
                   ],
@@ -960,7 +960,7 @@ export default function (providerContext: FtrProviderContext) {
               const response = await es.count({
                 index: entitiesIndex,
               });
-              return response.count === 4;
+              return response.count === 5;
             });
 
             // initialize security-solution-default data-view
@@ -1026,7 +1026,7 @@ export default function (providerContext: FtrProviderContext) {
                       filter: [
                         {
                           match_phrase: {
-                            'actor.entity.id': 'admin@example.com',
+                            'user.entity.id': 'admin@example.com',
                           },
                         },
                       ],
@@ -1096,7 +1096,7 @@ export default function (providerContext: FtrProviderContext) {
             });
           });
 
-          it('should return enriched data when asset inventory is enabled in a different space', async () => {
+          it('should return enriched data when asset inventory is enabled in a different space - multi target', async () => {
             await entityStoreHelpers.installCloudAssetInventoryPackage(customNamespaceId);
 
             await retry.tryForTime(enrichPolicyCreationTimeout, async () => {
@@ -1105,20 +1105,9 @@ export default function (providerContext: FtrProviderContext) {
                 {
                   query: {
                     indexPatterns: ['.alerts-security.alerts-*', 'logs-*'],
-                    originEventIds: [],
+                    originEventIds: [{ id: 'service-host-event-id', isAlert: false }],
                     start: '2024-09-01T00:00:00Z',
                     end: '2024-09-02T00:00:00Z',
-                    esQuery: {
-                      bool: {
-                        filter: [
-                          {
-                            match_phrase: {
-                              'actor.entity.id': 'admin@example.com',
-                            },
-                          },
-                        ],
-                      },
-                    },
                   },
                 },
                 undefined,
@@ -1126,15 +1115,22 @@ export default function (providerContext: FtrProviderContext) {
               ).expect(result(200, logger));
 
               const actorNode = response.body.nodes.find(
-                (node: NodeDataModel) => node.id === 'admin@example.com'
+                (node: NodeDataModel) =>
+                  node.id === 'service-account-123@project.iam.gserviceaccount.com'
               ) as EntityNodeDataModel;
 
-              // Verify entity enrichment
+              // Verify entity enrichment for service actor
               expect(actorNode).not.to.be(undefined);
-              expect(actorNode.label).to.equal('AWS IAM User');
-              expect(actorNode.icon).to.equal('user');
-              expect(actorNode.shape).to.equal('ellipse');
-              expect(actorNode.tag).to.equal('Identity');
+              expect(actorNode.label).to.equal('GCP Service Account');
+              expect(actorNode.icon).to.equal('cloudStormy');
+              expect(actorNode.shape).to.equal('rectangle');
+              expect(actorNode.tag).to.equal('Service');
+
+              // Verify we have the target node (host-instance-1)
+              const targetNode = response.body.nodes.find(
+                (node: NodeDataModel) => node.id === 'host-instance-1'
+              );
+              expect(targetNode).not.to.be(undefined);
             });
           });
         });

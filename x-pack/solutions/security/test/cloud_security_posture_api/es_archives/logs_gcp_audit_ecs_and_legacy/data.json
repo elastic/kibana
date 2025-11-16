@@ -797,3 +797,96 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-gcp.audit-default",
+    "id": "7",
+    "index": ".ds-logs-gcp.audit-default-2024.10.07-000001",
+    "source": {
+      "@timestamp": "2024-09-01T12:34:56.789Z",
+      "actor": {
+        "entity": {
+          "id": "service-account-123@project.iam.gserviceaccount.com"
+        }
+      },
+      "service": {
+        "entity": {
+          "id": "service-account-123@project.iam.gserviceaccount.com"
+        },
+        "name": "compute.googleapis.com"
+      },
+      "cloud": {
+        "project": {
+          "id": "your-project-id"
+        },
+        "provider": "gcp"
+      },
+      "ecs": {
+        "version": "8.11.0"
+      },
+      "event": {
+        "action": "google.compute.v1.Instances.start",
+        "agent_id_status": "missing",
+        "category": [
+          "process"
+        ],
+        "id": "service-host-event-id",
+        "ingested": "2024-10-07T17:47:35Z",
+        "kind": "event",
+        "outcome": "success",
+        "provider": "activity",
+        "type": [
+          "start"
+        ]
+      },
+      "gcp": {
+        "audit": {
+          "authorization_info": [
+            {
+              "granted": true,
+              "permission": "compute.instances.start",
+              "resource": "projects/your-project-id/zones/us-central1-a/instances/instance-1"
+            }
+          ],
+          "logentry_operation": {
+            "id": "operation-9876543210"
+          },
+          "resource_name": "projects/your-project-id/zones/us-central1-a/instances/instance-1",
+          "type": "type.googleapis.com/google.cloud.audit.AuditLog"
+        }
+      },
+      "log": {
+        "level": "NOTICE",
+        "logger": "projects/your-project-id/logs/cloudaudit.googleapis.com%2Factivity"
+      },
+      "source": {
+        "ip": "10.0.0.5"
+      },
+      "tags": [
+        "_geoip_database_unavailable_GeoLite2-City.mmdb",
+        "_geoip_database_unavailable_GeoLite2-ASN.mmdb"
+      ],
+      "target": {
+        "entity": {
+          "id": "host-instance-1"
+        }
+      },
+      "host": {
+        "target": {
+          "entity": {
+            "id": "host-instance-1"
+          }
+        }
+      },
+      "user_agent": {
+        "device": {
+          "name": "Other"
+        },
+        "name": "Other",
+        "original": "google-cloud-sdk/400.0.0"
+      }
+    }
+  }
+}
