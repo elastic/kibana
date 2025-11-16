@@ -17,10 +17,10 @@ import {
   ResizableLayoutMode,
   ResizableLayoutOrder,
 } from '@kbn/resizable-layout';
-import type { JsonValue } from '@kbn/utility-types';
 import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowExecutionPanel } from './workflow_execution_panel';
 import { WorkflowStepExecutionDetails } from './workflow_step_execution_details';
+import { buildTriggerContextFromExecution } from './workflow_trigger_context';
 import { useWorkflowExecutionPolling } from '../../../entities/workflows/model/use_workflow_execution_polling';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 
@@ -76,30 +76,18 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
       }
 
       if (selectedStepExecutionId === 'trigger' && workflowExecution?.context) {
-        let triggerType = 'alert';
-
-        const isScheduled =
-          (workflowExecution.context.event as { type?: string })?.type === 'scheduled';
-        if (
-          workflowExecution.context.inputs &&
-          Object.keys(workflowExecution.context.inputs).length > 0
-        ) {
-          triggerType = 'manual';
-        } else if (isScheduled) {
-          triggerType = 'scheduled';
+        const triggerContext = buildTriggerContextFromExecution(workflowExecution.context);
+        if (!triggerContext) {
+          return undefined;
         }
-
-        const inputData = workflowExecution.context.event || workflowExecution.context.inputs;
-
-        const { inputs, event, ...contextData } = workflowExecution.context;
 
         return {
           id: 'trigger',
-          stepId: triggerType,
-          stepType: `trigger_${triggerType}`,
+          stepId: triggerContext.triggerType,
+          stepType: `trigger_${triggerContext.triggerType}`,
           status: ExecutionStatus.COMPLETED,
-          input: inputData as JsonValue,
-          output: contextData as JsonValue,
+          input: triggerContext.input,
+          output: triggerContext.output,
           scopeStack: [],
           workflowRunId: workflowExecution.id,
           workflowId: workflowExecution.workflowId || '',

@@ -35,11 +35,11 @@ export function buildWorkflowContext(
     workflow: {
       id: workflowExecution.workflowId,
       name: workflowExecution.workflowDefinition?.name ?? '',
-      enabled: workflowExecution.workflowDefinition?.enabled ?? true,
+      enabled: workflowExecution.workflowDefinition?.enabled ?? false,
       spaceId: workflowExecution.spaceId,
     },
     kibanaUrl,
-    consts: workflowExecution.workflowDefinition?.consts || {},
+    consts: workflowExecution.workflowDefinition?.consts ?? {},
     event: workflowExecution.context?.event,
     inputs: workflowExecution.context?.inputs,
     now: new Date(),

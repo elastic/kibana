@@ -29,7 +29,6 @@ import React from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { JsonValue } from '@kbn/utility-types';
 import type { WorkflowExecutionDto, WorkflowStepExecutionDto, WorkflowYaml } from '@kbn/workflows';
 import {
   ExecutionStatus,
@@ -40,6 +39,7 @@ import {
 import type { StepExecutionTreeItem } from './build_step_executions_tree';
 import { buildStepExecutionsTree } from './build_step_executions_tree';
 import { StepExecutionTreeItemLabel } from './step_execution_tree_item_label';
+import { buildTriggerContextFromExecution } from './workflow_trigger_context';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
 
 function convertTreeToEuiTreeViewItems(
@@ -219,42 +219,28 @@ export const WorkflowStepExecutionTree = ({
     const triggerStep = triggerPseudoStep ?? inputsPseudoStep;
 
     if (triggerStep && execution.context) {
-      let triggerType: 'alert' | 'scheduled' | 'manual' = 'alert';
-
-      const isScheduled = (execution.context.event as { type?: string })?.type === 'scheduled';
-      const hasInputs =
-        execution.context.inputs && Object.keys(execution.context.inputs).length > 0;
-
-      if (!triggerPseudoStep && hasInputs) {
-        triggerType = 'manual';
-      } else if (isScheduled) {
-        triggerType = 'scheduled';
+      const triggerContext = buildTriggerContextFromExecution(execution.context);
+      if (triggerContext) {
+        const triggerExecution: WorkflowStepExecutionDto = {
+          id: 'trigger',
+          stepId: triggerContext.triggerType,
+          stepType: `trigger_${triggerContext.triggerType}`,
+          status: ExecutionStatus.COMPLETED,
+          input: triggerContext.input,
+          output: triggerContext.output,
+          scopeStack: [],
+          workflowRunId: execution.id,
+          workflowId: execution.workflowId || '',
+          startedAt: '',
+          globalExecutionIndex: -1,
+          stepExecutionIndex: 0,
+          topologicalIndex: -1,
+        };
+        stepExecutionMap.set(triggerExecution.id, triggerExecution);
+        triggerStep.stepExecutionId = triggerExecution.id;
+        triggerStep.stepId = triggerExecution.stepId;
+        triggerStep.stepType = triggerExecution.stepType;
       }
-
-      const capitalizedTriggerType = triggerType.charAt(0).toUpperCase() + triggerType.slice(1);
-      const inputData = execution.context.event || execution.context.inputs;
-
-      const { inputs, event, ...contextData } = execution.context;
-
-      const triggerExecution: WorkflowStepExecutionDto = {
-        id: 'trigger',
-        stepId: capitalizedTriggerType,
-        stepType: `trigger_${triggerType}`,
-        status: ExecutionStatus.COMPLETED,
-        input: inputData as JsonValue,
-        output: contextData as JsonValue,
-        scopeStack: [],
-        workflowRunId: execution.id,
-        workflowId: execution.workflowId || '',
-        startedAt: '',
-        globalExecutionIndex: -1,
-        stepExecutionIndex: 0,
-        topologicalIndex: -1,
-      };
-      stepExecutionMap.set(triggerExecution.id, triggerExecution);
-      triggerStep.stepExecutionId = triggerExecution.id;
-      triggerStep.stepId = triggerExecution.stepId;
-      triggerStep.stepType = `trigger_${triggerType}`;
     }
     const items: EuiTreeViewProps['items'] = convertTreeToEuiTreeViewItems(
       stepExecutionsTree,
