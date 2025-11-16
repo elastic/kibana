@@ -429,9 +429,11 @@ describe('buildEsqlFetchSubscribe', () => {
       query: { esql: 'from the-data-view-title | WHERE field1=2' },
     });
     expect(replaceUrlState).toHaveBeenCalledTimes(0);
-    stateContainer.appState.get = jest.fn(() => {
-      return { columns: ['field1', 'field2'], index: 'the-data-view-id' };
-    });
+    stateContainer.internalState.dispatch(
+      stateContainer.injectCurrentTab(internalStateActions.updateAppState)({
+        appState: { columns: ['field1', 'field2'] },
+      })
+    );
     replaceUrlState.mockClear();
 
     documents$.next({

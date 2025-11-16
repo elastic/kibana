@@ -249,7 +249,7 @@ describe('useDiscoverHistogram', () => {
       const stateContainer = getStateContainer();
       const updateAppStateSpy = jest.spyOn(internalStateActions, 'updateAppState').mockClear();
       const { hook } = await renderUseDiscoverHistogram({ stateContainer });
-      const containerState = stateContainer.appState.get();
+      const containerState = stateContainer.getCurrentTab().appState;
       const state = {
         timeInterval: containerState.interval,
         chartHidden: containerState.hideChart,
@@ -295,7 +295,7 @@ describe('useDiscoverHistogram', () => {
     it('should exclude totalHitsStatus and totalHitsResult from Unified Histogram state updates', async () => {
       const stateContainer = getStateContainer();
       const { hook } = await renderUseDiscoverHistogram({ stateContainer });
-      const containerState = stateContainer.appState.get();
+      const containerState = stateContainer.getCurrentTab().appState;
       const state = {
         timeInterval: containerState.interval,
         chartHidden: containerState.hideChart,
@@ -337,7 +337,7 @@ describe('useDiscoverHistogram', () => {
     it('should update total hits when the total hits state changes', async () => {
       const stateContainer = getStateContainer();
       const { hook } = await renderUseDiscoverHistogram({ stateContainer });
-      const containerState = stateContainer.appState.get();
+      const containerState = stateContainer.getCurrentTab().appState;
       const state = {
         timeInterval: containerState.interval,
         chartHidden: containerState.hideChart,
@@ -380,7 +380,7 @@ describe('useDiscoverHistogram', () => {
       mockData.query.getState = () => mockQueryState;
       const stateContainer = getStateContainer();
       const { hook } = await renderUseDiscoverHistogram({ stateContainer });
-      const containerState = stateContainer.appState.get();
+      const containerState = stateContainer.getCurrentTab().appState;
       const error = new Error('test');
       const state = {
         timeInterval: containerState.interval,

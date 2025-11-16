@@ -206,8 +206,8 @@ export function getDataStateContainer({
    */
   const { esqlFetchSubscribe, cleanupEsql } = buildEsqlFetchSubscribe({
     internalState,
-    appStateContainer,
     dataSubjects,
+    getCurrentTab,
     injectCurrentTab,
   });
 
@@ -277,11 +277,11 @@ export function getDataStateContainer({
             inspectorAdapters,
             searchSessionId,
             services,
-            appStateContainer,
             internalState,
             savedSearch: savedSearchContainer.getState(),
             scopedProfilesManager,
             scopedEbtManager,
+            getCurrentTab,
           };
 
           abortController?.abort();
@@ -321,9 +321,9 @@ export function getDataStateContainer({
           );
 
           await scopedProfilesManager.resolveDataSourceProfile({
-            dataSource: appStateContainer.get().dataSource,
+            dataSource: getCurrentTab().appState.dataSource,
             dataView: savedSearchContainer.getState().searchSource.getField('index'),
-            query: appStateContainer.get().query,
+            query: getCurrentTab().appState.query,
           });
 
           const dataView = currentDataView$.getValue();
@@ -359,7 +359,6 @@ export function getDataStateContainer({
             ...commonFetchParams,
             reset: options.reset,
             abortController,
-            getCurrentTab,
             onFetchRecordsComplete: async () => {
               const { resetDefaultProfileState: currentResetDefaultProfileState } = getCurrentTab();
 
@@ -420,7 +419,7 @@ export function getDataStateContainer({
   }
 
   const fetchQuery = async () => {
-    const query = appStateContainer.get().query;
+    const query = getCurrentTab().appState.query;
     const currentDataView = savedSearchContainer.getState().searchSource.getField('index');
 
     if (isOfAggregateQueryType(query)) {

@@ -77,9 +77,9 @@ describe('test getDataStateContainer', () => {
 
     expect(resolveDataSourceProfileSpy).toHaveBeenCalledTimes(1);
     expect(resolveDataSourceProfileSpy).toHaveBeenCalledWith({
-      dataSource: stateContainer.appState.get().dataSource,
+      dataSource: stateContainer.getCurrentTab().appState.dataSource,
       dataView: stateContainer.savedSearchState.getState().searchSource.getField('index'),
-      query: stateContainer.appState.get().query,
+      query: stateContainer.getCurrentTab().appState.query,
     });
     expect(dataState.data$.totalHits$.value.result).toBe(0);
     expect(dataState.data$.documents$.value.result).toEqual([]);
@@ -203,8 +203,8 @@ describe('test getDataStateContainer', () => {
       breakdownField: false,
       hideChart: false,
     });
-    expect(stateContainer.appState.get().columns).toEqual(['message', 'extension']);
-    expect(stateContainer.appState.get().rowHeight).toEqual(3);
+    expect(stateContainer.getCurrentTab().appState.columns).toEqual(['message', 'extension']);
+    expect(stateContainer.getCurrentTab().appState.rowHeight).toEqual(3);
     dataUnsub();
     appUnsub();
   });
@@ -245,8 +245,8 @@ describe('test getDataStateContainer', () => {
       breakdownField: false,
       hideChart: false,
     });
-    expect(stateContainer.appState.get().columns).toEqual(['default_column']);
-    expect(stateContainer.appState.get().rowHeight).toBeUndefined();
+    expect(stateContainer.getCurrentTab().appState.columns).toEqual(['default_column']);
+    expect(stateContainer.getCurrentTab().appState.rowHeight).toBeUndefined();
     dataUnsub();
     appUnsub();
   });

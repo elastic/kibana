@@ -122,8 +122,8 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
       ...(discoverStateContainer.current?.savedSearchState.getState() ?? discoverSavedSearchState),
       timeRange: discoverDataService.query.timefilter.timefilter.getTime(),
       refreshInterval: discoverStateContainer.current?.getCurrentTab().globalState.refreshInterval,
-      breakdownField: discoverStateContainer.current?.appState.get().breakdownField,
-      rowsPerPage: discoverStateContainer.current?.appState.get().rowsPerPage,
+      breakdownField: discoverStateContainer.current?.getCurrentTab().appState.breakdownField,
+      rowsPerPage: discoverStateContainer.current?.getCurrentTab().appState.rowsPerPage,
       title: GET_TIMELINE_DISCOVER_SAVED_SEARCH_TITLE(title),
       description,
     };
@@ -210,7 +210,8 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
           discoverAppState) ??
         defaultDiscoverAppState;
 
-      const hasESQLUrlState = (stateContainer.appState.get()?.query as { esql: string })?.esql;
+      const hasESQLUrlState = (stateContainer.getCurrentTab().appState.query as { esql: string })
+        ?.esql;
 
       if (!stateContainer.stateStorage.get(APP_STATE_URL_KEY) || !hasESQLUrlState) {
         if (savedSearchAppState?.savedSearch.timeRange) {

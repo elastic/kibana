@@ -23,6 +23,7 @@ import { isValidRuleFormPlugins } from '@kbn/response-ops-rule-form/lib';
 import type { DiscoverStateContainer } from '../../../state_management/discover_state';
 import type { AppMenuDiscoverParams } from './types';
 import type { DiscoverServices } from '../../../../../build_services';
+import { useAppStateSelector } from '../../../state_management/discover_app_state_container';
 
 const EsQueryValidConsumer: RuleCreationValidConsumer[] = [
   AlertConsumers.INFRASTRUCTURE,
@@ -44,8 +45,6 @@ const CreateAlertFlyout: React.FC<{
   onFinishAction: () => void;
   stateContainer: DiscoverStateContainer;
 }> = ({ stateContainer, discoverParams, services, onFinishAction }) => {
-  const query = stateContainer.appState.get().query;
-
   const {
     dataView,
     isEsqlMode,
@@ -60,6 +59,10 @@ const CreateAlertFlyout: React.FC<{
   /**
    * Provides the default parameters used to initialize the new rule
    */
+
+  const query = useAppStateSelector((state) => state.query);
+  const savedQueryId = useAppStateSelector((state) => state.savedQuery);
+
   const getParams = useCallback(() => {
     if (isEsqlMode) {
       return {
@@ -68,7 +71,6 @@ const CreateAlertFlyout: React.FC<{
         timeField,
       };
     }
-    const savedQueryId = stateContainer.appState.get().savedQuery;
     return {
       searchType: 'searchSource',
       searchConfiguration: stateContainer.savedSearchState
@@ -76,7 +78,7 @@ const CreateAlertFlyout: React.FC<{
         .searchSource.getSerializedFields(),
       savedQueryId,
     };
-  }, [isEsqlMode, stateContainer.appState, stateContainer.savedSearchState, query, timeField]);
+  }, [isEsqlMode, stateContainer.savedSearchState, savedQueryId, query, timeField]);
 
   const discoverMetadata: EsQueryAlertMetaData = useMemo(
     () => ({

@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { BaseStateContainer } from '@kbn/kibana-utils-plugin/common';
 import type { AggregateQuery, Filter, FilterCompareOptions, Query } from '@kbn/es-query';
 import {
   COMPARE_ALL_OPTIONS,
@@ -26,6 +25,7 @@ import { type GlobalQueryStateFromUrl, connectToQueryState } from '@kbn/data-plu
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import type { DataGridDensity } from '@kbn/unified-data-table';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import type { Observable } from 'rxjs';
 import { distinctUntilChanged, from, map } from 'rxjs';
 import defaultComparator from 'fast-deep-equal';
 import type { DiscoverServices } from '../../../build_services';
@@ -47,11 +47,20 @@ import { internalStateActions, selectTab, useCurrentTabSelector } from './redux'
 import { APP_STATE_URL_KEY } from '../../../../common';
 import { GLOBAL_STATE_URL_KEY } from '../../../../common/constants';
 
-export interface DiscoverAppStateContainer extends BaseStateContainer<DiscoverAppState> {
+export interface DiscoverAppStateContainer {
   /**
    * Initializes the app state and starts syncing it with the URL
    */
   initAndSync: () => () => void;
+  /**
+   * Sets state into container
+   * @param state - new state to set
+   */
+  set: (state: DiscoverAppState) => void;
+  /**
+   * {@link Observable} of state
+   */
+  state$: Observable<DiscoverAppState>;
 }
 
 export interface DiscoverAppState {

@@ -229,8 +229,7 @@ export const updateTabs: InternalStateThunkActionCreator<
 
       if (nextTab && nextTabStateContainer) {
         const { timeRange, refreshInterval, filters: globalFilters } = nextTab.globalState;
-        const appState = nextTabStateContainer.appState.get();
-        const { filters: appFilters, query } = appState;
+        const { filters: appFilters, query } = nextTab.appState;
 
         await Promise.all([
           urlStateStorage.set<QueryState>(
@@ -242,7 +241,7 @@ export const updateTabs: InternalStateThunkActionCreator<
             },
             { replace: true }
           ),
-          urlStateStorage.set<DiscoverAppState>(APP_STATE_URL_KEY, appState, {
+          urlStateStorage.set<DiscoverAppState>(APP_STATE_URL_KEY, nextTab.appState, {
             replace: true,
           }),
         ]);

@@ -318,7 +318,7 @@ export function getDiscoverStateContainer({
       );
     }
 
-    if (isDataSourceType(appStateContainer.get().dataSource, DataSourceType.DataView)) {
+    if (isDataSourceType(getCurrentTab().appState.dataSource, DataSourceType.DataView)) {
       await internalState.dispatch(
         injectCurrentTab(internalStateActions.replaceAppState)({
           appState: {
@@ -380,7 +380,7 @@ export function getDiscoverStateContainer({
   };
 
   const transitionFromDataViewToESQL = (dataView: DataView) => {
-    const appState = appStateContainer.get();
+    const appState = getCurrentTab().appState;
     const { query, sort } = appState;
     const filterQuery = query && isOfQueryType(query) ? query : undefined;
     const queryString = getInitialESQLQuery(dataView, true, filterQuery);
@@ -487,7 +487,7 @@ export function getDiscoverStateContainer({
       const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, tabId);
       savedSearchContainer.update({
         nextDataView: currentDataView$.getValue(),
-        nextState: appStateContainer.get(),
+        nextState: getCurrentTab().appState,
         useFilterAndQueryServices: true,
       });
       addLog('[getDiscoverStateContainer] filter changes triggers data fetching');
@@ -496,8 +496,8 @@ export function getDiscoverStateContainer({
 
     services.data.search.session.enableStorage(
       createSearchSessionRestorationDataProvider({
-        appStateContainer,
         data: services.data,
+        getCurrentTab,
         getSavedSearch: () => savedSearchContainer.getState(),
       }),
       {
@@ -569,7 +569,6 @@ export function getDiscoverStateContainer({
       services,
       internalState,
       runtimeStateManager,
-      appState: appStateContainer,
       injectCurrentTab,
       getCurrentTab,
     });
@@ -584,7 +583,7 @@ export function getDiscoverStateContainer({
 
   const updateESQLQuery = (queryOrUpdater: string | ((prevQuery: string) => string)) => {
     addLog('updateESQLQuery');
-    const { query: currentQuery } = appStateContainer.get();
+    const { query: currentQuery } = getCurrentTab().appState;
 
     if (!isOfAggregateQueryType(currentQuery)) {
       throw new Error(
@@ -632,8 +631,8 @@ export function getDiscoverStateContainer({
 }
 
 export function createSearchSessionRestorationDataProvider(deps: {
-  appStateContainer: DiscoverAppStateContainer;
   data: DataPublicPluginStart;
+  getCurrentTab: () => TabState;
   getSavedSearch: () => SavedSearch;
 }): SearchSessionInfoProvider {
   const getSavedSearch = () => deps.getSavedSearch();
@@ -666,17 +665,17 @@ export function createSearchSessionRestorationDataProvider(deps: {
 }
 
 function createUrlGeneratorState({
-  appStateContainer,
   data,
+  getCurrentTab,
   getSavedSearch,
   shouldRestoreSearchSession,
 }: {
-  appStateContainer: DiscoverAppStateContainer;
   data: DataPublicPluginStart;
+  getCurrentTab: () => TabState;
   getSavedSearch: () => SavedSearch;
   shouldRestoreSearchSession: boolean;
 }): DiscoverAppLocatorParams {
-  const appState = appStateContainer.get();
+  const appState = getCurrentTab().appState;
   const dataView = getSavedSearch().searchSource.getField('index');
   return {
     filters: data.query.filterManager.getFilters(),

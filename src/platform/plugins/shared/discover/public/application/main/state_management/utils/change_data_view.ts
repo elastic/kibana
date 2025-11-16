@@ -14,7 +14,6 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
   DEFAULT_COLUMNS_SETTING,
 } from '@kbn/discover-utils';
-import type { DiscoverAppStateContainer } from '../discover_app_state_container';
 import { addLog } from '../../../../utils/add_log';
 import type { DiscoverServices } from '../../../../build_services';
 import { getDataViewAppState } from './get_switch_data_view_app_state';
@@ -35,7 +34,6 @@ export async function changeDataView({
   services,
   internalState,
   runtimeStateManager,
-  appState,
   injectCurrentTab,
   getCurrentTab,
 }: {
@@ -43,17 +41,15 @@ export async function changeDataView({
   services: DiscoverServices;
   internalState: InternalStateStore;
   runtimeStateManager: RuntimeStateManager;
-  appState: DiscoverAppStateContainer;
   injectCurrentTab: TabActionInjector;
   getCurrentTab: () => TabState;
 }) {
   addLog('[ui] changeDataView', { id: dataViewId });
 
   const { dataViews, uiSettings } = services;
-  const { id: currentTabId } = getCurrentTab();
-  const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, currentTabId);
+  const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, getCurrentTab().id);
   const currentDataView = currentDataView$.getValue();
-  const state = appState.get();
+
   let nextDataView: DataView | null = null;
 
   internalState.dispatch(
@@ -87,15 +83,16 @@ export async function changeDataView({
       })
     );
 
+    const currentAppState = getCurrentTab().appState;
     const nextAppState = getDataViewAppState(
       currentDataView,
       nextDataView,
       uiSettings.get(DEFAULT_COLUMNS_SETTING, []),
-      state.columns || [],
-      (state.sort || []) as SortOrder[],
+      currentAppState.columns || [],
+      (currentAppState.sort || []) as SortOrder[],
       uiSettings.get(MODIFY_COLUMNS_ON_SWITCH),
       uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
-      state.query
+      currentAppState.query
     );
 
     internalState.dispatch(

@@ -23,14 +23,8 @@ import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
 import { internalStateActions, selectTabRuntimeState } from '../state_management/redux';
 
 const getDeps = (): CommonFetchParams => {
-  const {
-    appState,
-    internalState,
-    dataState,
-    runtimeStateManager,
-    getCurrentTab,
-    injectCurrentTab,
-  } = getDiscoverStateMock({});
+  const { internalState, dataState, runtimeStateManager, getCurrentTab, injectCurrentTab } =
+    getDiscoverStateMock({});
   const { scopedProfilesManager$, scopedEbtManager$ } = selectTabRuntimeState(
     runtimeStateManager,
     getCurrentTab().id
@@ -47,9 +41,9 @@ const getDeps = (): CommonFetchParams => {
     services: discoverServiceMock,
     savedSearch: savedSearchMock,
     internalState,
-    appStateContainer: appState,
     scopedProfilesManager: scopedProfilesManager$.getValue(),
     scopedEbtManager: scopedEbtManager$.getValue(),
+    getCurrentTab,
   };
 };
 

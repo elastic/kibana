@@ -53,14 +53,14 @@ describe('buildStateSubscribe', () => {
   });
 
   it('should not call refetch$ if nothing changes', async () => {
-    await getSubscribeFn()(stateContainer.appState.get());
+    await getSubscribeFn()(stateContainer.getCurrentTab().appState);
 
     expect(stateContainer.dataState.refetch$.next).not.toHaveBeenCalled();
   });
 
   it('should not call refetch$ if viewMode changes', async () => {
     await getSubscribeFn()({
-      ...stateContainer.appState.get(),
+      ...stateContainer.getCurrentTab().appState,
       dataSource: {
         type: DataSourceType.Esql,
       },

@@ -88,7 +88,7 @@ describe('Test discover app state container', () => {
     state.set({
       dataSource: createDataViewDataSource({ dataViewId: 'first' }),
     });
-    const stateA = state.get();
+    const stateA = getCurrentTab().appState;
     state.set({
       dataSource: createDataViewDataSource({ dataViewId: 'second' }),
     });
@@ -159,21 +159,21 @@ describe('Test discover app state container', () => {
   });
 
   test('should automatically set ES|QL data source when query is ES|QL', () => {
-    const state = getStateContainer();
+    getStateContainer();
     internalState.dispatch(
       internalStateActions.updateAppState({
         tabId: getCurrentTab().id,
         appState: { dataSource: createDataViewDataSource({ dataViewId: 'test' }) },
       })
     );
-    expect(state.get().dataSource?.type).toBe('dataView');
+    expect(getCurrentTab().appState.dataSource?.type).toBe('dataView');
     internalState.dispatch(
       internalStateActions.updateAppState({
         tabId: getCurrentTab().id,
         appState: { query: { esql: 'from test' } },
       })
     );
-    expect(state.get().dataSource?.type).toBe('esql');
+    expect(getCurrentTab().appState.dataSource?.type).toBe('esql');
   });
 
   describe('initAndSync', () => {

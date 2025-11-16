@@ -241,7 +241,7 @@ async function mountComponent<WithReactTestingLibrary extends boolean = false>(
   });
   mockedServices.data.query.getState = jest
     .fn()
-    .mockImplementation(() => stateContainer.appState.get());
+    .mockImplementation(() => stateContainer.getCurrentTab().appState);
 
   const component = (
     <DiscoverTestProvider

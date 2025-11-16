@@ -188,7 +188,7 @@ describe('useDiscoverInTimelineActions', () => {
       const { result } = renderTestHook();
       await result.current.resetDiscoverAppState();
       await waitFor(() => {
-        const appState = mockDiscoverStateContainerRef.current.appState.get();
+        const appState = mockDiscoverStateContainerRef.current.getCurrentTab().appState;
         expect(appState).toMatchObject(result.current.defaultDiscoverAppState);
       });
     });

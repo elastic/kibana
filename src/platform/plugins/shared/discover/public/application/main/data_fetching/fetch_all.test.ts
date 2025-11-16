@@ -66,9 +66,7 @@ describe('test fetchAll', () => {
       totalHits$: new BehaviorSubject<DataTotalHitsMsg>({ fetchStatus: FetchStatus.UNINITIALIZED }),
     };
     searchSource = savedSearchMock.searchSource.createChild();
-    const { appState, internalState, runtimeStateManager, getCurrentTab } = getDiscoverStateMock(
-      {}
-    );
+    const { internalState, runtimeStateManager, getCurrentTab } = getDiscoverStateMock({});
     const { scopedProfilesManager$, scopedEbtManager$ } = selectTabRuntimeState(
       runtimeStateManager,
       getCurrentTab().id
@@ -78,7 +76,6 @@ describe('test fetchAll', () => {
       reset: false,
       abortController: new AbortController(),
       inspectorAdapters: { requests: new RequestAdapter() },
-      appStateContainer: appState,
       internalState,
       scopedProfilesManager: scopedProfilesManager$.getValue(),
       scopedEbtManager: scopedEbtManager$.getValue(),
