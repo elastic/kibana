@@ -254,7 +254,7 @@ export const WorkflowStepExecutionTree = ({
       stepExecutionMap.set(triggerExecution.id, triggerExecution);
       triggerStep.stepExecutionId = triggerExecution.id;
       triggerStep.stepId = triggerExecution.stepId;
-      triggerStep.stepType = triggerExecution.stepType;
+      triggerStep.stepType = `trigger_${triggerType}`;
     }
     const items: EuiTreeViewProps['items'] = convertTreeToEuiTreeViewItems(
       stepExecutionsTree,
