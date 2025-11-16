@@ -89,11 +89,17 @@ export const SendToTimelineButton: FC<PropsWithChildren<SendToTimelineButtonProp
       // If esql, don't reset filters or mess with dataview & time range
       if (dataProviders?.[0]?.queryType === 'esql' || dataProviders?.[0]?.queryType === 'sql') {
         if (discoverStateContainer.current) {
-          discoverStateContainer.current?.appState.set({
-            query: {
-              esql: dataProviders[0].kqlQuery,
-            },
-          });
+          discoverStateContainer.current?.internalState.dispatch(
+            discoverStateContainer.current?.injectCurrentTab(
+              discoverStateContainer.current?.internalStateActions.setAppState
+            )({
+              appState: {
+                query: {
+                  esql: dataProviders[0].kqlQuery,
+                },
+              },
+            })
+          );
 
           await discoverStateContainer.current?.internalState.dispatch(
             discoverStateContainer.current?.injectCurrentTab(

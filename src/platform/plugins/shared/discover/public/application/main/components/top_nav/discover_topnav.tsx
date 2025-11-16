@@ -156,6 +156,7 @@ export const DiscoverTopNav = ({
 
   const appState = useAppStateSelector((state) => state);
   const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
+  const setAppState = useCurrentTabAction(internalStateActions.setAppState);
 
   const updateSavedQueryId = useCallback(
     (newSavedQueryId: string | undefined) => {
@@ -165,10 +166,10 @@ export const DiscoverTopNav = ({
         // remove savedQueryId from state
         const newState = { ...appState };
         delete newState.savedQuery;
-        stateContainer.appState.set(newState);
+        dispatch(setAppState({ appState: newState }));
       }
     },
-    [appState, dispatch, stateContainer.appState, updateAppState]
+    [appState, dispatch, setAppState, updateAppState]
   );
 
   const onESQLToDataViewTransitionModalClose = useCallback(

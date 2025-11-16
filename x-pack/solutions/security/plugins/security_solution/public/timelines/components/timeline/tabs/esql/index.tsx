@@ -223,7 +223,11 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
             })
           );
         }
-        stateContainer.appState.set(finalAppState);
+        stateContainer.internalState.dispatch(
+          stateContainer.injectCurrentTab(stateContainer.internalStateActions.setAppState)({
+            appState: finalAppState,
+          })
+        );
         await stateContainer.internalState.dispatch(
           stateContainer.injectCurrentTab(stateContainer.internalStateActions.replaceAppState)({
             appState: finalAppState,

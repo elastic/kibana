@@ -51,11 +51,6 @@ export interface DiscoverAppStateContainer {
    * Initializes the app state and starts syncing it with the URL
    */
   initAndSync: () => () => void;
-  /**
-   * Sets state into container
-   * @param state - new state to set
-   */
-  set: (state: DiscoverAppState) => void;
 }
 
 export interface DiscoverAppState {

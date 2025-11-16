@@ -84,14 +84,20 @@ describe('Test discover app state container', () => {
     });
 
   test('getPrevious returns the state before the current', async () => {
-    const state = getStateContainer();
-    state.set({
-      dataSource: createDataViewDataSource({ dataViewId: 'first' }),
-    });
+    getStateContainer();
+    internalState.dispatch(
+      internalStateActions.setAppState({
+        tabId: getCurrentTab().id,
+        appState: { dataSource: createDataViewDataSource({ dataViewId: 'first' }) },
+      })
+    );
     const stateA = getCurrentTab().appState;
-    state.set({
-      dataSource: createDataViewDataSource({ dataViewId: 'second' }),
-    });
+    internalState.dispatch(
+      internalStateActions.setAppState({
+        tabId: getCurrentTab().id,
+        appState: { dataSource: createDataViewDataSource({ dataViewId: 'second' }) },
+      })
+    );
     expect(getCurrentTab().previousAppState).toEqual(stateA);
   });
 

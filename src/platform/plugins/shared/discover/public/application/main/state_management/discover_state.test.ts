@@ -1126,13 +1126,17 @@ describe('Discover state', () => {
           globalState: { filters },
         })
       );
-      state.appState.set({
-        query,
-        sort: [
-          ['@timestamp', 'asc'],
-          ['bytes', 'desc'],
-        ],
-      });
+      state.internalState.dispatch(
+        state.injectCurrentTab(internalStateActions.setAppState)({
+          appState: {
+            query,
+            sort: [
+              ['@timestamp', 'asc'],
+              ['bytes', 'desc'],
+            ],
+          },
+        })
+      );
       await state.actions.transitionFromDataViewToESQL(dataViewMockWithTimeField);
       expect(state.getCurrentTab().appState.query).toStrictEqual({
         esql: 'FROM the-data-view-title | WHERE KQL("""foo: \'bar\'""")',

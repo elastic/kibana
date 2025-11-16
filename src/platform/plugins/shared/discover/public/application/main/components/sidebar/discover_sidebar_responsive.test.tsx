@@ -202,10 +202,14 @@ function getStateContainer({
   fieldListUiState?: Partial<UnifiedFieldListRestorableState>;
 }) {
   const stateContainer = getDiscoverStateMock({ isTimeBased: true });
-  stateContainer.appState.set({
-    query: query ?? { query: '', language: 'lucene' },
-    filters: [],
-  });
+  stateContainer.internalState.dispatch(
+    stateContainer.injectCurrentTab(internalStateActions.setAppState)({
+      appState: {
+        query: query ?? { query: '', language: 'lucene' },
+        filters: [],
+      },
+    })
+  );
   if (fieldListUiState) {
     stateContainer.internalState.dispatch(
       stateContainer.injectCurrentTab(internalStateActions.setFieldListUiState)({
@@ -325,11 +329,15 @@ describe('discover responsive sidebar', function () {
     expect(compLoadingExistence.find(EuiProgress).exists()).toBe(true);
 
     await act(async () => {
-      const appStateContainer = getDiscoverStateMock({ isTimeBased: true }).appState;
-      appStateContainer.set({
-        query: { query: '', language: 'lucene' },
-        filters: [],
-      });
+      const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+      stateContainer.internalState.dispatch(
+        stateContainer.injectCurrentTab(internalStateActions.setAppState)({
+          appState: {
+            query: { query: '', language: 'lucene' },
+            filters: [],
+          },
+        })
+      );
       resolveFunction!({
         indexPatternTitle: 'test-loaded',
         existingFieldNames: Object.keys(mockfieldCounts),
