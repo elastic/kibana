@@ -18,7 +18,6 @@ import {
 import { useGetGroupSelectorStateless } from '@kbn/grouping/src/hooks/use_get_group_selector';
 import { getTelemetryEvent } from '@kbn/grouping/src/telemetry/const';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { PageScope } from '../../../data_view_manager/constants';
 import type { GetSecurityAlertsTableProp } from './types';
 import { groupIdSelector } from '../../../common/store/grouping/selectors';
 import { useSourcererDataView } from '../../../sourcerer/containers';

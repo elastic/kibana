@@ -452,7 +452,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
     disableAdditionalToolbarControls || tableType === TableId.alertsOnCasePage;
 
   const ruleTypeIds = useMemo(() => {
-    if (sourcererScope === SourcererScopeName.attacks) {
+    if (sourcererScope === PageScope.attacks) {
       return [...SECURITY_SOLUTION_RULE_TYPE_IDS, ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID];
     }
     return SECURITY_SOLUTION_RULE_TYPE_IDS;

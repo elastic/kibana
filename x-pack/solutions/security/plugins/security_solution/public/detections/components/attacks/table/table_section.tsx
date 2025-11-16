@@ -9,7 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { TableId } from '@kbn/securitysolution-data-table';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { PageScope } from '../../../../data_view_manager/constants';
 import { useGroupTakeActionsItems } from '../../../hooks/alerts_table/use_group_take_action_items';
 import {
   defaultGroupingOptions,
@@ -83,7 +83,7 @@ export const TableSection = React.memo(({ dataView }: TableSectionProps) => {
           tableType={TableId.alertsOnAlertsPage}
           inputFilters={[...defaultFilters, ...groupingFilters]}
           isLoading={isLoading}
-          sourcererScope={SourcererScopeName.attacks}
+          sourcererScope={PageScope.attacks}
         />
       );
     },
@@ -123,7 +123,7 @@ export const TableSection = React.memo(({ dataView }: TableSectionProps) => {
         renderChildComponent={renderAlertTable}
         tableId={TableId.alertsOnAlertsPage}
         to={to}
-        sourcererScope={SourcererScopeName.attacks}
+        sourcererScope={PageScope.attacks}
       />
     </div>
   );

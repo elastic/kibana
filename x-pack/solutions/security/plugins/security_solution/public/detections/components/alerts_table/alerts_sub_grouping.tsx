@@ -87,7 +87,7 @@ interface OwnProps {
   /**
    * Data view scope
    */
-  sourcererScope?: SourcererScopeName;
+  sourcererScope?: PageScope;
 }
 
 export type AlertsTableComponentProps = OwnProps;
@@ -115,7 +115,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   tableId,
   to,
   multiValueFieldsToFlatten,
-  sourcererScope = SourcererScopeName.detections,
+  sourcererScope = PageScope.alerts,
 }) => {
   const {
     services: { uiSettings },
@@ -199,7 +199,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     });
     return {
       ...query,
-      include_attacks: sourcererScope === SourcererScopeName.attacks,
+      include_attacks: sourcererScope === PageScope.attacks,
     };
   }, [
     additionalFilters,
