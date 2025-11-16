@@ -16,6 +16,10 @@ import {
   INDEX_PATTERN_REGEX,
 } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import { getEnrichPolicyId } from '@kbn/cloud-security-posture-common/utils/helpers';
+import {
+  GRAPH_ACTOR_ENTITY_FIELDS,
+  GRAPH_TARGET_ENTITY_FIELDS,
+} from '@kbn/cloud-security-posture-common/constants';
 import type { EsQuery, GraphEdge, OriginEventId } from './types';
 
 interface BuildEsqlQueryParams {
@@ -117,13 +121,7 @@ const buildDslFilter = (
         : [
             {
               bool: {
-                should: [
-                  { exists: { field: 'user.target.entity.id' } },
-                  { exists: { field: 'host.target.entity.id' } },
-                  { exists: { field: 'service.target.entity.id' } },
-                  { exists: { field: 'entity.target.id' } },
-                  { exists: { field: 'target.entity.id' } },
-                ],
+                should: [...GRAPH_TARGET_ENTITY_FIELDS.map((field) => ({ exists: { field } }))],
                 minimum_should_match: 1,
               },
             },
@@ -179,29 +177,26 @@ const buildEsqlQuery = ({
   const SECURITY_ALERTS_PARTIAL_IDENTIFIER = '.alerts-security.alerts-';
   const enrichPolicyName = getEnrichPolicyId(spaceId);
 
+  // Build WHERE clause for actor entity fields
+  const actorFieldsWhereClause = [
+    ...GRAPH_ACTOR_ENTITY_FIELDS.map((field) => `${field} IS NOT NULL`),
+  ].join(' OR ');
+
+  // Build COALESCE for actor entity ID
+  const actorFieldsCoalesce = [...GRAPH_ACTOR_ENTITY_FIELDS].join(',\n    ');
+
+  // Build COALESCE for target entity ID
+  const targetFieldsCoalesce = [...GRAPH_TARGET_ENTITY_FIELDS].join(',\n    ');
+
   const query = `FROM ${indexPatterns
     .filter((indexPattern) => indexPattern.length > 0)
     .join(',')} METADATA _id, _index
-| WHERE event.action IS NOT NULL AND (
-    user.entity.id IS NOT NULL OR
-    host.entity.id IS NOT NULL OR
-    service.entity.id IS NOT NULL OR
-    entity.id IS NOT NULL OR
-    actor.entity.id IS NOT NULL
-  )
+| WHERE event.action IS NOT NULL AND (${actorFieldsWhereClause})
 | EVAL actorEntityId = COALESCE(
-    user.entity.id,
-    host.entity.id,
-    service.entity.id,
-    entity.id,
-    actor.entity.id
+    ${actorFieldsCoalesce}
   )
 | EVAL targetEntityId = COALESCE(
-    user.target.entity.id,
-    host.target.entity.id,
-    service.target.entity.id,
-    entity.target.id,
-    target.entity.id
+    ${targetFieldsCoalesce}
   )
 ${
   isEnrichPolicyExists
