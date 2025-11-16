@@ -8,7 +8,12 @@
  */
 
 import { isEqual } from 'lodash';
-import type { InternalStateStore, RuntimeStateManager, TabState } from '../redux';
+import {
+  internalStateActions,
+  type InternalStateStore,
+  type RuntimeStateManager,
+  type TabState,
+} from '../redux';
 import type { DiscoverServices } from '../../../../build_services';
 import type { DiscoverSavedSearchContainer } from '../discover_saved_search_container';
 import type { DiscoverDataStateContainer } from '../discover_data_state_container';
@@ -115,13 +120,15 @@ export const buildStateSubscribe =
       // If the requested data view is not found, don't try to load it,
       // and instead reset the app state to the fallback data view
       if (fallback) {
-        appState.update(
-          {
-            dataSource: nextDataView.id
-              ? createDataViewDataSource({ dataViewId: nextDataView.id })
-              : undefined,
-          },
-          true
+        await internalState.dispatch(
+          internalStateActions.replaceAppState({
+            tabId: getCurrentTab().id,
+            appState: {
+              dataSource: nextDataView.id
+                ? createDataViewDataSource({ dataViewId: nextDataView.id })
+                : undefined,
+            },
+          })
         );
 
         return;

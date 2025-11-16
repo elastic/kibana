@@ -57,7 +57,7 @@ export interface DiscoverAppStateContainer extends BaseStateContainer<DiscoverAp
    * @param newPartial
    * @param replace
    */
-  update: (newPartial: DiscoverAppState, replace?: boolean) => void;
+  update: (newPartial: DiscoverAppState) => void;
 }
 
 export interface DiscoverAppState {
@@ -305,21 +305,13 @@ export const getDiscoverAppStateContainer = ({
     };
   };
 
-  const update = (newPartial: DiscoverAppState, replace = false) => {
-    addLog('[appState] update', { newPartial, replace });
-    if (replace) {
-      return internalState.dispatch(
-        injectCurrentTab(internalStateActions.replaceAppState)({
-          appState: newPartial,
-        })
-      );
-    } else {
-      internalState.dispatch(
-        injectCurrentTab(internalStateActions.updateAppState)({
-          appState: newPartial,
-        })
-      );
-    }
+  const update = (newPartial: DiscoverAppState) => {
+    addLog('[appState] update', { newPartial });
+    internalState.dispatch(
+      injectCurrentTab(internalStateActions.updateAppState)({
+        appState: newPartial,
+      })
+    );
   };
 
   return {

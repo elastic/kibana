@@ -27,6 +27,11 @@ import type { PanelsToggleProps } from '../../../../components/panels_toggle';
 import { PatternAnalysisTab } from '../pattern_analysis/pattern_analysis_tab';
 import { PATTERN_ANALYSIS_VIEW_CLICK } from '../pattern_analysis/constants';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
+import {
+  internalStateActions,
+  useCurrentTabAction,
+  useInternalStateDispatch,
+} from '../../state_management/redux';
 
 const DROP_PROPS = {
   value: {
@@ -70,9 +75,11 @@ export const DiscoverMainContent = ({
   const { trackUiMetric } = useDiscoverServices();
   const isEsqlMode = useIsEsqlMode();
 
+  const dispatch = useInternalStateDispatch();
+  const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
   const setDiscoverViewMode = useCallback(
     (mode: VIEW_MODE) => {
-      stateContainer.appState.update({ viewMode: mode }, true);
+      dispatch(updateAppState({ appState: { viewMode: mode } }));
 
       if (trackUiMetric) {
         if (mode === VIEW_MODE.AGGREGATED_LEVEL) {
@@ -97,7 +104,7 @@ export const DiscoverMainContent = ({
         });
       });
     },
-    [trackUiMetric, stateContainer]
+    [dispatch, stateContainer.appState.state$, trackUiMetric, updateAppState]
   );
 
   const isDropAllowed = Boolean(onDropFieldToTable);
