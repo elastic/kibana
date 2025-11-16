@@ -75,7 +75,7 @@ test.describe('Stream data routing - editing routing rules', { tag: ['@ess', '@s
     );
   });
 
-  test('should switch between editing different rules', async ({ page, pageObjects }) => {
+  test('should switch between editing different rules', async ({ pageObjects }) => {
     // Create another test rule
     await pageObjects.streams.clickCreateRoutingRule();
     await pageObjects.streams.fillRoutingRuleName('edit-test-2');
@@ -96,7 +96,7 @@ test.describe('Stream data routing - editing routing rules', { tag: ['@ess', '@s
     expect(await pageObjects.streams.conditionEditorValueComboBox.getSelectedValue()).toBe('info');
   });
 
-  test('should remove routing rule with confirmation', async ({ page, pageObjects }) => {
+  test('should remove routing rule with confirmation', async ({ pageObjects }) => {
     await pageObjects.streams.clickEditRoutingRule('logs.edit-test');
 
     await pageObjects.streams.removeRoutingRule();
@@ -108,7 +108,7 @@ test.describe('Stream data routing - editing routing rules', { tag: ['@ess', '@s
     await pageObjects.toasts.waitFor();
   });
 
-  test('should cancel rule removal', async ({ page, pageObjects }) => {
+  test('should cancel rule removal', async ({ pageObjects }) => {
     await pageObjects.streams.clickEditRoutingRule('logs.edit-test');
     await pageObjects.streams.removeRoutingRule();
 
