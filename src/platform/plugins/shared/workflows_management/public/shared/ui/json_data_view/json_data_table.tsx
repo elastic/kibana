@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { JsonArray, JsonObject } from '@kbn/utility-types';
 import { FieldName } from './field_name';
-import { formatValue } from './format_value';
+import { formatValue, formatValueAsElement } from './format_value';
 import { inferFieldType } from './infer_field_type';
 import { TableFieldValue } from './table_field_value';
 import { appendKeyPath, flattenKeyPaths } from '../../lib/flatten_key_paths';
@@ -34,6 +34,7 @@ const MAX_NAME_COLUMN_WIDTH = 300;
 interface JSONDataTableRecord {
   field: string;
   value: string | number | boolean | null;
+  displayValue: string | React.ReactElement;
   fieldType: string;
   searchableValue: string;
 }
@@ -64,16 +65,18 @@ export const JSONDataTable = React.memo<JSONDataTableProps>(
       return Object.keys(flattened).map((fieldPath) => {
         const value = flattened[fieldPath];
         const fieldType = inferFieldType(value);
-        const displayValue =
+        const textValue =
           fieldType === 'date'
             ? getFormattedDateTime(new Date(value as string)) ?? ''
             : formatValue(value);
+        const displayValue = fieldType === 'date' ? textValue : formatValueAsElement(value);
 
         return {
           field: fieldPath, // Each field path is unique
-          value: displayValue,
+          value: flattened[fieldPath],
+          displayValue,
           fieldType, // Store the field type for the cell renderer
-          searchableValue: `${fieldPath.toLowerCase()} ${displayValue.toLowerCase()}`,
+          searchableValue: `${fieldPath.toLowerCase()} ${textValue.toLowerCase()}`,
         };
       });
     }, [jsonObject, getFormattedDateTime]);
@@ -131,7 +134,7 @@ export const JSONDataTable = React.memo<JSONDataTableProps>(
       return function RenderCellValue({ rowIndex, columnId }) {
         const record = filteredRecords[rowIndex];
         if (!record) return null;
-        const { value, field, fieldType } = record;
+        const { displayValue, field, fieldType, value } = record;
 
         if (columnId === 'name') {
           return <FieldName fieldName={field} fieldType={fieldType} highlight={searchTerm} />;
@@ -140,7 +143,7 @@ export const JSONDataTable = React.memo<JSONDataTableProps>(
         if (columnId === 'value') {
           return (
             <TableFieldValue
-              formattedValue={value?.toString() ?? ''}
+              formattedValue={displayValue}
               field={field}
               rawValue={value}
               isHighlighted={Boolean(

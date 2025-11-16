@@ -7,16 +7,46 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
+
+/**
+ * Formats a value as plain text without HTML tags.
+ * Arrays are formatted as [item1, item2, item3]
+ */
 export function formatValue(value: unknown): string {
   if (value === null || value === undefined) {
     return '-';
   }
   if (Array.isArray(value)) {
-    return `<span class="ffArray__highlight">[</span>${value
-      .map(formatValue)
-      .join(
-        `<span class="ffArray__highlight">, </span>`
-      )}<span class="ffArray__highlight">]</span>`;
+    return `[${value.map(formatValue).join(', ')}]`;
+  }
+  if (typeof value === 'object') {
+    return JSON.stringify(value);
+  }
+  return String(value);
+}
+
+/**
+ * Formats a value as a React element with proper highlighting for arrays.
+ * This safely renders arrays with highlighted brackets and commas.
+ */
+export function formatValueAsElement(value: unknown): React.ReactElement | string {
+  if (value === null || value === undefined) {
+    return '-';
+  }
+  if (Array.isArray(value)) {
+    return (
+      <>
+        <span className="ffArray__highlight">{'['}</span>
+        {value.map((item, index) => (
+          <React.Fragment key={index}>
+            {index > 0 && <span className="ffArray__highlight">{', '}</span>}
+            {formatValueAsElement(item)}
+          </React.Fragment>
+        ))}
+        <span className="ffArray__highlight">{']'}</span>
+      </>
+    );
   }
   if (typeof value === 'object') {
     return JSON.stringify(value);
