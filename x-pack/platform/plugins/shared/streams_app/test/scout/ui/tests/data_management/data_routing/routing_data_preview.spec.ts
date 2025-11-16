@@ -481,7 +481,7 @@ test.describe('Stream data routing - previewing data', { tag: ['@ess', '@svlOblt
   }) => {
     try {
       await apiServices.streams.clearStreamChildren('logs');
-    } catch (error) {
+    } catch {
       // Ignore 409 errors if streams can't be cleared
     }
     await apiServices.streams.forkStream('logs', 'logs.no-children', {

@@ -145,7 +145,6 @@ test.describe('Stream data routing - creating routing rules', { tag: ['@ess', '@
     await pageObjects.streams.saveRoutingRule();
     await pageObjects.toasts.closeAll();
 
-    // Click on the child stream name link (scope to specific routing rule)
     const streamLink = page
       .getByTestId('routingRule-logs.navigation-test')
       .getByTestId('streamsAppRoutingStreamEntryButton');
@@ -170,13 +169,11 @@ test.describe('Stream data routing - creating routing rules', { tag: ['@ess', '@
     await pageObjects.streams.saveRoutingRule();
     await pageObjects.toasts.waitFor();
 
-    // Verify "Open stream in new tab" button is present
     const openInNewTabButton = page.getByTestId(
       'streamsAppSaveOrUpdateChildrenOpenStreamInNewTabButton'
     );
     await expect(openInNewTabButton).toBeVisible();
 
-    // Verify the button has correct link
     await expect(openInNewTabButton).toHaveAttribute(
       'href',
       expect.stringContaining('logs.toast-test')
@@ -208,14 +205,12 @@ test.describe('Stream data routing - creating routing rules', { tag: ['@ess', '@
       JSON.stringify(complexCondition, null, 2)
     );
 
-    // Verify the syntax editor contains the condition
     const codeEditor = page.getByTestId('streamsAppConditionEditorCodeEditor');
     await expect(codeEditor).toBeVisible();
 
     await pageObjects.streams.saveRoutingRule();
     await pageObjects.toasts.waitFor();
 
-    // Verify rule was created
     await pageObjects.streams.expectRoutingRuleVisible('logs.complex-condition-test');
   });
 
@@ -231,8 +226,6 @@ test.describe('Stream data routing - creating routing rules', { tag: ['@ess', '@
 
     await pageObjects.streams.saveRoutingRule();
 
-    // Should not create the rule (button might be disabled or error shown)
-    // Rule should not exist
     await expect(page.getByTestId('streamsAppRoutingStreamEntryNameField')).toBeVisible();
   });
 
@@ -241,14 +234,12 @@ test.describe('Stream data routing - creating routing rules', { tag: ['@ess', '@
     apiServices,
     pageObjects,
   }) => {
-    // Create a rule with complex condition via API
     try {
       await apiServices.streams.clearStreamChildren('logs');
-    } catch (error) {
+    } catch {
       // Ignore 409 errors if streams can't be cleared
     }
 
-    // Complex condition that can't be edited in simple UI
     const complexCondition = {
       or: [
         { field: 'severity_text', eq: 'error' },
@@ -261,16 +252,12 @@ test.describe('Stream data routing - creating routing rules', { tag: ['@ess', '@
     await pageObjects.streams.gotoPartitioningTab('logs');
     await pageObjects.streams.clickEditRoutingRule('logs.complex-ui-test');
 
-    // Should see the syntax editor switch
     const syntaxSwitch = page.getByTestId('streamsAppConditionEditorSwitch');
     await expect(syntaxSwitch).toBeVisible();
 
-    // The complex condition should be shown in the code editor
-    // Look for the JSON structure with "or" condition
     const codeEditor = page.getByTestId('streamsAppConditionEditorCodeEditor');
     await expect(codeEditor).toBeVisible();
 
-    // Verify the condition contains the OR structure
     await expect(codeEditor).toContainText('"or": [');
   });
 
