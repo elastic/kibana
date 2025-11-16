@@ -132,14 +132,14 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
                             defaultMessage: 'Access this data in your workflow',
                           }
                         )}
-                        iconType="iInCircle"
+                        iconType="info"
                         announceOnMount={false}
                       >
                         <FormattedMessage
                           id="workflowsManagement.stepExecutionDetails.contextAccessDescription"
                           defaultMessage="You can reference these values using {code}"
                           values={{
-                            code: <strong>{`{{ variable }}`}</strong>,
+                            code: <strong>{`{{ field }}`}</strong>,
                           }}
                         />
                       </EuiCallOut>
@@ -161,7 +161,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
                             defaultMessage: 'Access this data in your workflow',
                           }
                         )}
-                        iconType="iInCircle"
+                        iconType="info"
                         announceOnMount={false}
                       >
                         <FormattedMessage
@@ -171,8 +171,8 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
                             code: (
                               <strong>
                                 {triggerType === 'manual'
-                                  ? `{{ inputs.variable }}`
-                                  : `{{ event.variable }}`}
+                                  ? `{{ inputs.field }}`
+                                  : `{{ event.field }}`}
                               </strong>
                             ),
                           }}
