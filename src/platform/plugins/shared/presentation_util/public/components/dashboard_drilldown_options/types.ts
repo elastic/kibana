@@ -13,9 +13,3 @@ export type DashboardDrilldownOptions = {
   useCurrentDateRange: boolean;
   openInNewTab: boolean;
 };
-
-export const DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS: DashboardDrilldownOptions = {
-  openInNewTab: false,
-  useCurrentDateRange: true,
-  useCurrentFilters: true,
-};
