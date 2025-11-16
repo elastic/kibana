@@ -30,7 +30,7 @@ describe('Save dashboard state', () => {
   });
 
   it('should save the dashboard using the same ID', async () => {
-    mockUpdate.mockResolvedValue({ item: { id: 'Boogaloo' } });
+    mockUpdate.mockResolvedValue({ id: 'Boogaloo' });
     const dashboardState = {
       ...getSampleDashboardState(),
       title: 'BOO',
