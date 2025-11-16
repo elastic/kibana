@@ -54,7 +54,15 @@ import type { ProcessorResources } from './state_management/steps_state_machine'
 /**
  * These are processor types with specialised UI. Other processor types are handled by a generic config-driven UI.
  */
-export const SPECIALISED_TYPES = ['convert', 'date', 'dissect', 'grok', 'set', 'replace'];
+export const SPECIALISED_TYPES = [
+  'convert',
+  'date',
+  'dissect',
+  'grok',
+  'set',
+  'replace',
+  'drop_document',
+];
 
 interface FormStateDependencies {
   grokCollection: StreamEnrichmentContextType['grokCollection'];
@@ -138,6 +146,8 @@ const defaultDissectProcessorFormState = (sampleDocs: FlattenRecord[]): DissectF
 const defaultDropProcessorFormState = (): DropFormState => ({
   action: 'drop_document',
   where: ALWAYS_CONDITION,
+  ignore_failure: true,
+  ignore_missing: true,
 });
 
 const defaultGrokProcessorFormState: (
@@ -351,10 +361,13 @@ export const convertFormStateToProcessor = (
     }
 
     if (formState.action === 'drop_document') {
+      const { where, ignore_failure, ignore_missing } = formState;
       return {
         processorDefinition: {
           action: 'drop_document',
-          where: formState.where,
+          where,
+          ignore_failure,
+          ignore_missing,
         },
       };
     }
