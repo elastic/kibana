@@ -1,0 +1,763 @@
+
+{
+  "type": "doc",
+  "value": {
+    "id": "only-new-schema-alert-id",
+    "index": ".internal.alerts-security.alerts-default-000001",
+    "source": {
+      "@timestamp": "2024-09-05T10:21:00.000Z",
+      "user": {
+        "entity": {
+          "id": "only-new-schema-user@example.com"
+        }
+      },
+      "client": {
+        "user": {
+          "email": "only-new-schema-user@example.com"
+        }
+      },
+      "cloud": {
+        "project": {
+          "id": "only-new-schema-project-id"
+        },
+        "provider": "gcp"
+      },
+      "ecs": {
+        "version": "8.11.0"
+      },
+      "event": {
+        "action": "google.iam.admin.v1.DeleteServiceAccount",
+        "agent_id_status": "missing",
+        "category": [
+          "iam"
+        ],
+        "dataset": "gcp.audit",
+        "id": "only-new-schema-event-id",
+        "ingested": "2024-09-05T10:21:00.000Z",
+        "module": "gcp",
+        "outcome": "success",
+        "provider": "activity",
+        "type": [
+          "deletion"
+        ]
+      },
+      "event.kind": "signal",
+      "gcp": {
+        "audit": {
+          "authorization_info": [
+            {
+              "granted": true,
+              "permission": "iam.serviceAccounts.delete",
+              "resource": "projects/only-new-schema-project-id"
+            }
+          ],
+          "logentry_operation": {
+            "id": "only-new-schema-operation-id"
+          },
+          "request": {
+            "@type": "type.googleapis.com/google.iam.admin.v1.DeleteServiceAccountRequest",
+            "name": "projects/only-new-schema-project-id/serviceAccounts/deleted-sa"
+          },
+          "resource_name": "projects/only-new-schema-project-id/serviceAccounts/deleted-sa",
+          "type": "type.googleapis.com/google.cloud.audit.AuditLog"
+        }
+      },
+      "kibana.alert.ancestors": [
+        {
+          "depth": 0,
+          "id": "OnlyNewSchemaDoc",
+          "index": ".ds-logs-gcp.audit-default-2024.09.05-000001",
+          "type": "event"
+        }
+      ],
+      "kibana.alert.depth": 1,
+      "kibana.alert.intended_timestamp": "2024-09-05T10:21:00.000Z",
+      "kibana.alert.last_detected": "2024-09-05T10:21:00.000Z",
+      "kibana.alert.original_event.action": "google.iam.admin.v1.DeleteServiceAccount",
+      "kibana.alert.original_event.agent_id_status": "missing",
+      "kibana.alert.original_event.category": [
+        "iam"
+      ],
+      "kibana.alert.original_event.dataset": "gcp.audit",
+      "kibana.alert.original_event.id": "only-new-schema-event-id",
+      "kibana.alert.original_event.ingested": "2024-09-05T10:20:30.000Z",
+      "kibana.alert.original_event.kind": "event",
+      "kibana.alert.original_event.module": "gcp",
+      "kibana.alert.original_event.outcome": "success",
+      "kibana.alert.original_event.provider": "activity",
+      "kibana.alert.original_event.type": [
+        "deletion"
+      ],
+      "kibana.alert.original_time": "2024-09-05T10:20:30.000Z",
+      "kibana.alert.reason": "iam event with source 10.0.0.5 created medium alert GCP IAM Service Account Deletion.",
+      "kibana.alert.risk_score": 47,
+      "kibana.alert.rule.actions": [],
+      "kibana.alert.rule.author": [
+        "Elastic"
+      ],
+      "kibana.alert.rule.category": "Custom Query Rule",
+      "kibana.alert.rule.consumer": "siem",
+      "kibana.alert.rule.created_at": "2024-09-05T10:00:00.000Z",
+      "kibana.alert.rule.created_by": "elastic",
+      "kibana.alert.rule.description": "Identifies service account deletion in Google Cloud Platform (GCP).",
+      "kibana.alert.rule.enabled": true,
+      "kibana.alert.rule.exceptions_list": [],
+      "kibana.alert.rule.execution.timestamp": "2024-09-05T10:21:00.000Z",
+      "kibana.alert.rule.execution.uuid": "only-new-schema-execution-uuid",
+      "kibana.alert.rule.false_positives": [],
+      "kibana.alert.rule.from": "now-6m",
+      "kibana.alert.rule.immutable": true,
+      "kibana.alert.rule.indices": [
+        "filebeat-*",
+        "logs-gcp*"
+      ],
+      "kibana.alert.rule.interval": "5m",
+      "kibana.alert.rule.license": "Elastic License v2",
+      "kibana.alert.rule.max_signals": 100,
+      "kibana.alert.rule.name": "GCP IAM Service Account Deletion",
+      "kibana.alert.rule.note": "",
+      "kibana.alert.rule.parameters": {
+        "author": [
+          "Elastic"
+        ],
+        "description": "Identifies service account deletion in Google Cloud Platform (GCP).",
+        "exceptions_list": [],
+        "false_positives": [],
+        "from": "now-6m",
+        "immutable": true,
+        "index": [
+          "filebeat-*",
+          "logs-gcp*"
+        ],
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "max_signals": 100,
+        "note": "",
+        "query": "event.dataset:gcp.audit and event.action:google.iam.admin.v*.DeleteServiceAccount and event.outcome:success\n",
+        "references": [],
+        "related_integrations": [
+          {
+            "integration": "audit",
+            "package": "gcp",
+            "version": "^2.0.0"
+          }
+        ],
+        "required_fields": [
+          {
+            "ecs": true,
+            "name": "event.action",
+            "type": "keyword"
+          },
+          {
+            "ecs": true,
+            "name": "event.dataset",
+            "type": "keyword"
+          },
+          {
+            "ecs": true,
+            "name": "event.outcome",
+            "type": "keyword"
+          }
+        ],
+        "risk_score": 47,
+        "risk_score_mapping": [],
+        "rule_id": "only-new-schema-rule-id",
+        "rule_source": {
+          "is_customized": false,
+          "type": "external"
+        },
+        "setup": "The GCP Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+        "severity": "medium",
+        "severity_mapping": [],
+        "threat": [],
+        "timestamp_override": "event.ingested",
+        "to": "now",
+        "type": "query",
+        "version": 1
+      },
+      "kibana.alert.rule.producer": "siem",
+      "kibana.alert.rule.references": [],
+      "kibana.alert.rule.revision": 0,
+      "kibana.alert.rule.risk_score": 47,
+      "kibana.alert.rule.risk_score_mapping": [],
+      "kibana.alert.rule.rule_id": "only-new-schema-rule-id",
+      "kibana.alert.rule.rule_type_id": "siem.queryRule",
+      "kibana.alert.rule.severity": "medium",
+      "kibana.alert.rule.severity_mapping": [],
+      "kibana.alert.rule.tags": [
+        "Domain: Cloud",
+        "Data Source: GCP",
+        "Data Source: Google Cloud Platform",
+        "Use Case: Identity and Access Audit"
+      ],
+      "kibana.alert.rule.threat": [],
+      "kibana.alert.rule.timestamp_override": "event.ingested",
+      "kibana.alert.rule.to": "now",
+      "kibana.alert.rule.type": "query",
+      "kibana.alert.rule.updated_at": "2024-09-05T10:00:00.000Z",
+      "kibana.alert.rule.updated_by": "elastic",
+      "kibana.alert.rule.uuid": "only-new-schema-rule-uuid",
+      "kibana.alert.rule.version": 1,
+      "kibana.alert.severity": "medium",
+      "kibana.alert.start": "2024-09-05T10:21:00.000Z",
+      "kibana.alert.status": "active",
+      "kibana.alert.uuid": "only-new-schema-alert-uuid",
+      "kibana.alert.workflow_assignee_ids": [],
+      "kibana.alert.workflow_status": "open",
+      "kibana.alert.workflow_tags": [],
+      "kibana.space_ids": [
+        "default"
+      ],
+      "kibana.version": "9.0.0",
+      "log": {
+        "level": "NOTICE",
+        "logger": "projects/only-new-schema-project-id/logs/cloudaudit.googleapis.com%2Factivity"
+      },
+      "related": {
+        "ip": [
+          "10.0.0.5"
+        ],
+        "user": [
+          "only-new-schema-user@example.com"
+        ]
+      },
+      "service": {
+        "name": "iam.googleapis.com"
+      },
+      "source": {
+        "ip": "10.0.0.5"
+      },
+      "tags": [],
+      "entity": {
+        "target": {
+          "id": "projects/only-new-schema-project-id/serviceAccounts/deleted-sa"
+        }
+      },
+      "user_agent": {
+        "device": {
+          "name": "Other"
+        },
+        "name": "Other",
+        "original": "google-cloud-sdk/360.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "new-schema-alert-id",
+    "index": ".internal.alerts-security.alerts-default-000001",
+    "source": {
+      "@timestamp": "2024-09-01T12:35:00.000Z",
+      "user": {
+        "entity": {
+          "id": "new-schema-user@example.com"
+        }
+      },
+      "actor": {
+        "entity": {
+          "id": "new-schema-user@example.com"
+        }
+      },
+      "client": {
+        "user": {
+          "email": "new-schema-user@example.com"
+        }
+      },
+      "cloud": {
+        "project": {
+          "id": "new-schema-project-id"
+        },
+        "provider": "gcp"
+      },
+      "ecs": {
+        "version": "8.11.0"
+      },
+      "event": {
+        "action": "google.iam.admin.v1.CreateServiceAccount",
+        "agent_id_status": "missing",
+        "category": [
+          "iam"
+        ],
+        "dataset": "gcp.audit",
+        "id": "new-schema-event-id",
+        "ingested": "2024-09-01T12:34:56.789Z",
+        "module": "gcp",
+        "outcome": "success",
+        "provider": "activity",
+        "type": [
+          "creation"
+        ]
+      },
+      "event.kind": "signal",
+      "gcp": {
+        "audit": {
+          "authorization_info": [
+            {
+              "granted": true,
+              "permission": "iam.serviceAccounts.create",
+              "resource": "projects/new-schema-project-id"
+            }
+          ],
+          "logentry_operation": {
+            "id": "operation-new-schema"
+          },
+          "request": {
+            "@type": "type.googleapis.com/google.iam.admin.v1.CreateServiceAccountRequest",
+            "name": "projects/new-schema-project-id/serviceAccounts/test-sa@new-schema-project-id.iam.gserviceaccount.com",
+            "accountId": "test-sa"
+          },
+          "resource_name": "projects/new-schema-project-id/serviceAccounts/test-sa@new-schema-project-id.iam.gserviceaccount.com",
+          "response": {
+            "@type": "type.googleapis.com/google.iam.admin.v1.ServiceAccount",
+            "name": "projects/new-schema-project-id/serviceAccounts/test-sa@new-schema-project-id.iam.gserviceaccount.com",
+            "projectId": "new-schema-project-id",
+            "uniqueId": "123456789",
+            "email": "test-sa@new-schema-project-id.iam.gserviceaccount.com"
+          },
+          "type": "type.googleapis.com/google.cloud.audit.AuditLog"
+        }
+      },
+      "kibana.alert.ancestors": [
+        {
+          "depth": 0,
+          "id": "NewSchemaDoc",
+          "index": ".ds-logs-gcp.audit-default-2024.10.07-000001",
+          "type": "event"
+        }
+      ],
+      "kibana.alert.depth": 1,
+      "kibana.alert.intended_timestamp": "2024-09-01T12:35:00.000Z",
+      "kibana.alert.last_detected": "2024-09-01T12:35:00.000Z",
+      "kibana.alert.original_event.action": "google.iam.admin.v1.CreateServiceAccount",
+      "kibana.alert.original_event.agent_id_status": "missing",
+      "kibana.alert.original_event.category": [
+        "iam"
+      ],
+      "kibana.alert.original_event.dataset": "gcp.audit",
+      "kibana.alert.original_event.id": "new-schema-event-id",
+      "kibana.alert.original_event.ingested": "2024-09-01T12:34:56.789Z",
+      "kibana.alert.original_event.kind": "event",
+      "kibana.alert.original_event.module": "gcp",
+      "kibana.alert.original_event.outcome": "success",
+      "kibana.alert.original_event.provider": "activity",
+      "kibana.alert.original_event.type": [
+        "creation"
+      ],
+      "kibana.alert.original_time": "2024-09-01T12:34:56.789Z",
+      "kibana.alert.reason": "iam event with source 10.0.0.2 created medium alert GCP IAM Service Account Creation.",
+      "kibana.alert.risk_score": 47,
+      "kibana.alert.rule.actions": [],
+      "kibana.alert.rule.author": [
+        "Elastic"
+      ],
+      "kibana.alert.rule.category": "Custom Query Rule",
+      "kibana.alert.rule.consumer": "siem",
+      "kibana.alert.rule.created_at": "2024-09-01T12:00:00.000Z",
+      "kibana.alert.rule.created_by": "elastic",
+      "kibana.alert.rule.description": "Identifies service account creation in Google Cloud Platform (GCP).",
+      "kibana.alert.rule.enabled": true,
+      "kibana.alert.rule.exceptions_list": [],
+      "kibana.alert.rule.execution.timestamp": "2024-09-01T12:35:00.000Z",
+      "kibana.alert.rule.execution.uuid": "new-schema-execution-uuid",
+      "kibana.alert.rule.false_positives": [],
+      "kibana.alert.rule.from": "now-6m",
+      "kibana.alert.rule.immutable": true,
+      "kibana.alert.rule.indices": [
+        "filebeat-*",
+        "logs-gcp*"
+      ],
+      "kibana.alert.rule.interval": "5m",
+      "kibana.alert.rule.license": "Elastic License v2",
+      "kibana.alert.rule.max_signals": 100,
+      "kibana.alert.rule.name": "GCP IAM Service Account Creation",
+      "kibana.alert.rule.note": "",
+      "kibana.alert.rule.parameters": {
+        "author": [
+          "Elastic"
+        ],
+        "description": "Identifies service account creation in Google Cloud Platform (GCP).",
+        "exceptions_list": [],
+        "false_positives": [],
+        "from": "now-6m",
+        "immutable": true,
+        "index": [
+          "filebeat-*",
+          "logs-gcp*"
+        ],
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "max_signals": 100,
+        "note": "",
+        "query": "event.dataset:gcp.audit and event.action:google.iam.admin.v*.CreateServiceAccount and event.outcome:success\n",
+        "references": [],
+        "related_integrations": [
+          {
+            "integration": "audit",
+            "package": "gcp",
+            "version": "^2.0.0"
+          }
+        ],
+        "required_fields": [
+          {
+            "ecs": true,
+            "name": "event.action",
+            "type": "keyword"
+          },
+          {
+            "ecs": true,
+            "name": "event.dataset",
+            "type": "keyword"
+          },
+          {
+            "ecs": true,
+            "name": "event.outcome",
+            "type": "keyword"
+          }
+        ],
+        "risk_score": 47,
+        "risk_score_mapping": [],
+        "rule_id": "new-schema-rule-id",
+        "rule_source": {
+          "is_customized": false,
+          "type": "external"
+        },
+        "setup": "The GCP Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+        "severity": "medium",
+        "severity_mapping": [],
+        "threat": [],
+        "timestamp_override": "event.ingested",
+        "to": "now",
+        "type": "query",
+        "version": 1
+      },
+      "kibana.alert.rule.producer": "siem",
+      "kibana.alert.rule.references": [],
+      "kibana.alert.rule.revision": 0,
+      "kibana.alert.rule.risk_score": 47,
+      "kibana.alert.rule.risk_score_mapping": [],
+      "kibana.alert.rule.rule_id": "new-schema-rule-id",
+      "kibana.alert.rule.rule_type_id": "siem.queryRule",
+      "kibana.alert.rule.severity": "medium",
+      "kibana.alert.rule.severity_mapping": [],
+      "kibana.alert.rule.tags": [
+        "Domain: Cloud",
+        "Data Source: GCP",
+        "Data Source: Google Cloud Platform",
+        "Use Case: Identity and Access Audit"
+      ],
+      "kibana.alert.rule.threat": [],
+      "kibana.alert.rule.timestamp_override": "event.ingested",
+      "kibana.alert.rule.to": "now",
+      "kibana.alert.rule.type": "query",
+      "kibana.alert.rule.updated_at": "2024-09-01T12:00:00.000Z",
+      "kibana.alert.rule.updated_by": "elastic",
+      "kibana.alert.rule.uuid": "new-schema-rule-uuid",
+      "kibana.alert.rule.version": 1,
+      "kibana.alert.severity": "medium",
+      "kibana.alert.start": "2024-09-01T12:35:00.000Z",
+      "kibana.alert.status": "active",
+      "kibana.alert.uuid": "new-schema-alert-uuid",
+      "kibana.alert.workflow_assignee_ids": [],
+      "kibana.alert.workflow_status": "open",
+      "kibana.alert.workflow_tags": [],
+      "kibana.space_ids": [
+        "default"
+      ],
+      "kibana.version": "9.0.0",
+      "log": {
+        "level": "NOTICE",
+        "logger": "projects/new-schema-project-id/logs/cloudaudit.googleapis.com%2Factivity"
+      },
+      "related": {
+        "ip": [
+          "10.0.0.2"
+        ],
+        "user": [
+          "new-schema-user@example.com"
+        ]
+      },
+      "service": {
+        "name": "iam.googleapis.com"
+      },
+      "source": {
+        "ip": "10.0.0.2"
+      },
+      "tags": [],
+      "target": {
+        "entity": {
+          "id": "projects/new-schema-project-id/serviceAccounts/test-sa"
+        }
+      },
+      "entity": {
+        "target": {
+          "id": "projects/new-schema-project-id/serviceAccounts/test-sa"
+        }
+      },
+      "user_agent": {
+        "device": {
+          "name": "Other"
+        },
+        "name": "Other",
+        "original": "google-cloud-sdk/350.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "entity-enrichment-alert-id",
+    "index": ".internal.alerts-security.alerts-default-000001",
+    "source": {
+      "@timestamp": "2024-09-10T14:30:30.000Z",
+      "user": {
+        "entity": {
+          "id": "entity-user@example.com"
+        }
+      },
+      "actor": {
+        "entity": {
+          "id": "entity-user@example.com"
+        }
+      },
+      "client": {
+        "user": {
+          "email": "entity-user@example.com"
+        }
+      },
+      "cloud": {
+        "project": {
+          "id": "entity-test-project-id"
+        },
+        "provider": "gcp"
+      },
+      "ecs": {
+        "version": "8.11.0"
+      },
+      "event": {
+        "action": "google.compute.v1.Instances.setMetadata",
+        "agent_id_status": "missing",
+        "category": [
+          "configuration"
+        ],
+        "dataset": "gcp.audit",
+        "id": "entity-enrichment-event-id",
+        "ingested": "2024-09-10T14:30:00.000Z",
+        "module": "gcp",
+        "outcome": "success",
+        "provider": "activity",
+        "type": [
+          "change"
+        ]
+      },
+      "event.kind": "signal",
+      "gcp": {
+        "audit": {
+          "authorization_info": [
+            {
+              "granted": true,
+              "permission": "compute.instances.setMetadata",
+              "resource": "projects/entity-test-project-id"
+            }
+          ],
+          "logentry_operation": {
+            "id": "entity-enrichment-operation-id"
+          },
+          "request": {
+            "@type": "type.googleapis.com/google.compute.v1.SetMetadataInstanceRequest",
+            "instance": "entity-instance-1"
+          },
+          "resource_name": "projects/entity-test-project-id/zones/us-central1-a/instances/entity-instance-1",
+          "type": "type.googleapis.com/google.cloud.audit.AuditLog"
+        }
+      },
+      "kibana.alert.ancestors": [
+        {
+          "depth": 0,
+          "id": "EntityEnrichmentDoc",
+          "index": ".ds-logs-gcp.audit-default-2024.09.10-000001",
+          "type": "event"
+        }
+      ],
+      "kibana.alert.depth": 1,
+      "kibana.alert.intended_timestamp": "2024-09-10T14:30:30.000Z",
+      "kibana.alert.last_detected": "2024-09-10T14:30:30.000Z",
+      "kibana.alert.original_event.action": "google.compute.v1.Instances.setMetadata",
+      "kibana.alert.original_event.agent_id_status": "missing",
+      "kibana.alert.original_event.category": [
+        "configuration"
+      ],
+      "kibana.alert.original_event.dataset": "gcp.audit",
+      "kibana.alert.original_event.id": "entity-enrichment-event-id",
+      "kibana.alert.original_event.ingested": "2024-09-10T14:30:00.000Z",
+      "kibana.alert.original_event.kind": "event",
+      "kibana.alert.original_event.module": "gcp",
+      "kibana.alert.original_event.outcome": "success",
+      "kibana.alert.original_event.provider": "activity",
+      "kibana.alert.original_event.type": [
+        "change"
+      ],
+      "kibana.alert.original_time": "2024-09-10T14:30:00.000Z",
+      "kibana.alert.reason": "configuration event with source 10.0.0.10 created medium alert GCP Compute Instance Metadata Change.",
+      "kibana.alert.risk_score": 47,
+      "kibana.alert.rule.actions": [],
+      "kibana.alert.rule.author": [
+        "Elastic"
+      ],
+      "kibana.alert.rule.category": "Custom Query Rule",
+      "kibana.alert.rule.consumer": "siem",
+      "kibana.alert.rule.created_at": "2024-09-10T14:00:00.000Z",
+      "kibana.alert.rule.created_by": "elastic",
+      "kibana.alert.rule.description": "Identifies compute instance metadata changes in Google Cloud Platform (GCP).",
+      "kibana.alert.rule.enabled": true,
+      "kibana.alert.rule.exceptions_list": [],
+      "kibana.alert.rule.execution.timestamp": "2024-09-10T14:30:30.000Z",
+      "kibana.alert.rule.execution.uuid": "entity-enrichment-execution-uuid",
+      "kibana.alert.rule.false_positives": [],
+      "kibana.alert.rule.from": "now-6m",
+      "kibana.alert.rule.immutable": true,
+      "kibana.alert.rule.indices": [
+        "filebeat-*",
+        "logs-gcp*"
+      ],
+      "kibana.alert.rule.interval": "5m",
+      "kibana.alert.rule.license": "Elastic License v2",
+      "kibana.alert.rule.max_signals": 100,
+      "kibana.alert.rule.name": "GCP Compute Instance Metadata Change",
+      "kibana.alert.rule.note": "",
+      "kibana.alert.rule.parameters": {
+        "author": [
+          "Elastic"
+        ],
+        "description": "Identifies compute instance metadata changes in Google Cloud Platform (GCP).",
+        "exceptions_list": [],
+        "false_positives": [],
+        "from": "now-6m",
+        "immutable": true,
+        "index": [
+          "filebeat-*",
+          "logs-gcp*"
+        ],
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "max_signals": 100,
+        "note": "",
+        "query": "event.dataset:gcp.audit and event.action:google.compute.v*.Instances.setMetadata and event.outcome:success\n",
+        "references": [],
+        "related_integrations": [
+          {
+            "integration": "audit",
+            "package": "gcp",
+            "version": "^2.0.0"
+          }
+        ],
+        "required_fields": [
+          {
+            "ecs": true,
+            "name": "event.action",
+            "type": "keyword"
+          },
+          {
+            "ecs": true,
+            "name": "event.dataset",
+            "type": "keyword"
+          },
+          {
+            "ecs": true,
+            "name": "event.outcome",
+            "type": "keyword"
+          }
+        ],
+        "risk_score": 47,
+        "risk_score_mapping": [],
+        "rule_id": "entity-enrichment-rule-id",
+        "rule_source": {
+          "is_customized": false,
+          "type": "external"
+        },
+        "setup": "The GCP Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+        "severity": "medium",
+        "severity_mapping": [],
+        "threat": [],
+        "timestamp_override": "event.ingested",
+        "to": "now",
+        "type": "query",
+        "version": 1
+      },
+      "kibana.alert.rule.producer": "siem",
+      "kibana.alert.rule.references": [],
+      "kibana.alert.rule.revision": 0,
+      "kibana.alert.rule.risk_score": 47,
+      "kibana.alert.rule.risk_score_mapping": [],
+      "kibana.alert.rule.rule_id": "entity-enrichment-rule-id",
+      "kibana.alert.rule.rule_type_id": "siem.queryRule",
+      "kibana.alert.rule.severity": "medium",
+      "kibana.alert.rule.severity_mapping": [],
+      "kibana.alert.rule.tags": [
+        "Domain: Cloud",
+        "Data Source: GCP",
+        "Data Source: Google Cloud Platform",
+        "Use Case: Configuration Audit"
+      ],
+      "kibana.alert.rule.threat": [],
+      "kibana.alert.rule.timestamp_override": "event.ingested",
+      "kibana.alert.rule.to": "now",
+      "kibana.alert.rule.type": "query",
+      "kibana.alert.rule.updated_at": "2024-09-10T14:00:00.000Z",
+      "kibana.alert.rule.updated_by": "elastic",
+      "kibana.alert.rule.uuid": "entity-enrichment-rule-uuid",
+      "kibana.alert.rule.version": 1,
+      "kibana.alert.severity": "medium",
+      "kibana.alert.start": "2024-09-10T14:30:30.000Z",
+      "kibana.alert.status": "active",
+      "kibana.alert.uuid": "entity-enrichment-alert-uuid",
+      "kibana.alert.workflow_assignee_ids": [],
+      "kibana.alert.workflow_status": "open",
+      "kibana.alert.workflow_tags": [],
+      "kibana.space_ids": [
+        "default"
+      ],
+      "kibana.version": "9.0.0",
+      "log": {
+        "level": "NOTICE",
+        "logger": "projects/entity-test-project-id/logs/cloudaudit.googleapis.com%2Factivity"
+      },
+      "related": {
+        "ip": [
+          "10.0.0.10"
+        ],
+        "user": [
+          "entity-user@example.com"
+        ]
+      },
+      "service": {
+        "name": "compute.googleapis.com",
+        "target": {
+          "entity": {
+            "id": "entity-service-target-1"
+          }
+        }
+      },
+      "source": {
+        "ip": "10.0.0.10"
+      },
+      "tags": [],
+      "target": {
+        "entity": {
+          "id": "entity-service-target-1"
+        }
+      },
+      "user_agent": {
+        "device": {
+          "name": "Other"
+        },
+        "name": "Other",
+        "original": "google-cloud-sdk/370.0.0"
+      }
+    }
+  }
+}
