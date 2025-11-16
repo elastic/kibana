@@ -12,18 +12,16 @@ import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 // eslint-disable-next-line complexity
 export const getStepIconType = (nodeType: string): EuiIconType => {
   let iconType: EuiIconType = 'info';
-  switch (nodeType) {
-    // pseudo-steps
-    case '__trigger':
-      iconType = 'bolt';
-      break;
-    case '__inputs':
-      iconType = 'inputOutput';
-      break;
 
+  let typeToMatch = nodeType;
+  if (nodeType.startsWith('trigger_')) {
+    typeToMatch = nodeType.replace('trigger_', '');
+  }
+
+  switch (typeToMatch) {
     // triggers
     case 'manual':
-      iconType = 'user';
+      iconType = 'play';
       break;
     case 'alert':
       iconType = 'warning';

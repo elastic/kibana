@@ -101,14 +101,11 @@ export class WorkflowsExecutionEnginePlugin
               const esClient = coreStart.elasticsearch.client.asInternalUser as Client;
               const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
               const stepExecutionRepository = new StepExecutionRepository(esClient);
-              const logsRepository = new LogsRepository(esClient);
-
               await runWorkflow({
                 workflowRunId,
                 spaceId,
                 workflowExecutionRepository, // TODO: remove from params, can be created inside
                 stepExecutionRepository, // TODO: remove from params, can be created inside
-                logsRepository, // TODO: remove from params, can be created inside
                 taskAbortController,
                 taskManager, // TODO: move to dependencies
                 esClient, // TODO: remove from params, can be created inside

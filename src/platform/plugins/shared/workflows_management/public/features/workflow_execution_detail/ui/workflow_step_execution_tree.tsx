@@ -25,12 +25,19 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
+
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { JsonValue } from '@kbn/utility-types';
 import type { WorkflowExecutionDto, WorkflowStepExecutionDto, WorkflowYaml } from '@kbn/workflows';
-import { ExecutionStatus, isDangerousStatus, isInProgressStatus } from '@kbn/workflows';
+import {
+  ExecutionStatus,
+  isDangerousStatus,
+  isInProgressStatus,
+  isTerminalStatus,
+} from '@kbn/workflows';
+
 import type { StepExecutionTreeItem } from './build_step_executions_tree';
 import { buildStepExecutionsTree } from './build_step_executions_tree';
 import { StepExecutionTreeItemLabel } from './step_execution_tree_item_label';
@@ -59,11 +66,11 @@ function convertTreeToEuiTreeViewItems(
 
     return {
       id: item.stepExecutionId ?? `${item.stepId}-${item.executionIndex}-no-step-execution`,
-      css: getStatusCss({ status, selected, isPseudoStep: item.isPseudoStep }, euiTheme),
+      css: getStatusCss({ status, selected }, euiTheme),
       icon: (
         <StepIcon
           stepType={item.stepType}
-          executionStatus={item.isPseudoStep ? null : status ?? null}
+          executionStatus={status ?? null}
           onClick={selectStepExecution}
         />
       ),
@@ -107,7 +114,6 @@ function convertTreeToEuiTreeViewItems(
 export interface WorkflowStepExecutionTreeProps {
   execution: WorkflowExecutionDto | null;
   definition: WorkflowYaml | null;
-  isLoading: boolean;
   error: Error | null;
   onStepExecutionClick: (stepExecutionId: string) => void;
   selectedId: string | null;
@@ -116,7 +122,6 @@ export interface WorkflowStepExecutionTreeProps {
 const emptyPromptCommonProps: EuiEmptyPromptProps = { titleSize: 'xs', paddingSize: 's' };
 
 export const WorkflowStepExecutionTree = ({
-  isLoading,
   error,
   execution,
   definition,
@@ -126,7 +131,7 @@ export const WorkflowStepExecutionTree = ({
   const styles = useMemoCss(componentStyles);
   const { euiTheme } = useEuiTheme();
 
-  if (isLoading || !execution) {
+  if (!execution) {
     return (
       <EuiEmptyPrompt
         {...emptyPromptCommonProps}
@@ -173,47 +178,66 @@ export const WorkflowStepExecutionTree = ({
       />
     );
   } else if (definition) {
-    const skeletonStepExecutions: WorkflowStepExecutionDto[] = definition.steps.map(
-      (step, index) => ({
-        stepId: step.name,
-        stepType: step.type,
-        status: ExecutionStatus.PENDING,
-        id: `${step.name}-${step.type}-${index}`,
-        scopeStack: [],
-        workflowRunId: '',
-        workflowId: '',
-        startedAt: '',
-        finishedAt: '',
-        children: [],
-        globalExecutionIndex: 0,
-        stepExecutionIndex: 0,
-        topologicalIndex: 0,
-      })
-    );
-    const stepExecutionMap = new Map<string, WorkflowStepExecutionDto>();
     const stepExecutionNameMap = new Map<string, WorkflowStepExecutionDto>();
+    const stepExecutionMap = new Map<string, WorkflowStepExecutionDto>();
+
     for (const stepExecution of execution.stepExecutions) {
       stepExecutionNameMap.set(stepExecution.stepId, stepExecution);
       stepExecutionMap.set(stepExecution.id, stepExecution);
     }
-    for (const skeletonStepExecution of skeletonStepExecutions) {
-      if (!stepExecutionNameMap.has(skeletonStepExecution.stepId)) {
-        stepExecutionMap.set(skeletonStepExecution.id, skeletonStepExecution);
-      }
+
+    if (!isTerminalStatus(execution.status)) {
+      definition.steps
+        .filter((step) => !stepExecutionNameMap.has(step.name)) // we put skeletons only for steps without execution
+        .filter((step) => !execution.stepId || step.name === execution.stepId) // we create skeletons only for the executed step and its children
+        .map((step, index) => ({
+          stepId: step.name,
+          stepType: step.type,
+          status: ExecutionStatus.PENDING,
+          id: `${step.name}-${step.type}-${index}`,
+          scopeStack: [],
+          workflowRunId: '',
+          workflowId: '',
+          startedAt: '',
+          finishedAt: '',
+          children: [],
+          globalExecutionIndex: 0,
+          stepExecutionIndex: 0,
+          topologicalIndex: 0,
+        }))
+        .forEach((skeletonStepExecution) =>
+          stepExecutionMap.set(skeletonStepExecution.id, skeletonStepExecution)
+        );
     }
+
     const stepExecutionsTree = buildStepExecutionsTree(
       Array.from(stepExecutionMap.values()),
       execution.context
     );
 
-    const triggerStep = stepExecutionsTree.find((item) => item.stepType === '__trigger');
-    if (triggerStep?.stepExecutionId && execution.context?.event) {
+    const triggerStep = stepExecutionsTree.find((item) => item.stepType?.startsWith('trigger_'));
+    if (triggerStep?.stepExecutionId && execution.context) {
+      let triggerType = 'alert';
+
+      const isScheduled = (execution.context.event as { type?: string })?.type === 'scheduled';
+      if (execution.context.inputs && Object.keys(execution.context.inputs).length > 0) {
+        triggerType = 'manual';
+      } else if (isScheduled) {
+        triggerType = 'scheduled';
+      }
+
+      const capitalizedTriggerType = triggerType.charAt(0).toUpperCase() + triggerType.slice(1);
+      const inputData = execution.context.event || execution.context.inputs;
+
+      const { inputs, event, ...contextData } = execution.context;
+
       const triggerExecution: WorkflowStepExecutionDto = {
-        id: triggerStep.stepExecutionId,
-        stepId: triggerStep.stepId,
-        stepType: triggerStep.stepType,
-        status: triggerStep.status ?? ExecutionStatus.COMPLETED,
-        input: execution.context.event as JsonValue,
+        id: 'trigger',
+        stepId: capitalizedTriggerType,
+        stepType: `trigger_${triggerType}`,
+        status: ExecutionStatus.COMPLETED,
+        input: inputData as JsonValue,
+        output: contextData as JsonValue,
         scopeStack: [],
         workflowRunId: execution.id,
         workflowId: execution.workflowId || '',
@@ -223,25 +247,6 @@ export const WorkflowStepExecutionTree = ({
         topologicalIndex: -1,
       };
       stepExecutionMap.set(triggerStep.stepExecutionId, triggerExecution);
-    }
-
-    const inputsStep = stepExecutionsTree.find((item) => item.stepType === '__inputs');
-    if (inputsStep?.stepExecutionId && execution.context?.inputs) {
-      const inputsExecution: WorkflowStepExecutionDto = {
-        id: inputsStep.stepExecutionId,
-        stepId: inputsStep.stepId,
-        stepType: inputsStep.stepType,
-        status: inputsStep.status ?? ExecutionStatus.COMPLETED,
-        input: execution.context.inputs as JsonValue,
-        scopeStack: [],
-        workflowRunId: execution.id,
-        workflowId: execution.workflowId || '',
-        startedAt: '',
-        globalExecutionIndex: -1,
-        stepExecutionIndex: 0,
-        topologicalIndex: -1,
-      };
-      stepExecutionMap.set(inputsStep.stepExecutionId, inputsExecution);
     }
 
     const items: EuiTreeViewProps['items'] = convertTreeToEuiTreeViewItems(
@@ -339,32 +344,9 @@ const componentStyles = {
 };
 
 const getStatusCss = (
-  {
-    status,
-    selected,
-    isPseudoStep,
-  }: { status?: ExecutionStatus; selected?: boolean; isPseudoStep?: boolean },
+  { status, selected }: { status?: ExecutionStatus; selected?: boolean },
   euiTheme: EuiThemeComputed
 ) => {
-  if (isPseudoStep) {
-    const pseudoBackground = euiTheme.colors.backgroundBasePlain;
-    if (selected) {
-      return css`
-        &,
-        &:active,
-        &:focus,
-        &:hover {
-          background-color: ${transparentize(pseudoBackground, 0.5)};
-        }
-      `;
-    }
-    return css`
-      &:hover {
-        background-color: ${transparentize(pseudoBackground, 0.7)};
-      }
-    `;
-  }
-
   if (!status) {
     return;
   }

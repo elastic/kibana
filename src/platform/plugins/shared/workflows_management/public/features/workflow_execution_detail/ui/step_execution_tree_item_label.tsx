@@ -36,7 +36,7 @@ export function StepExecutionTreeItemLabel({
   onClick,
 }: StepExecutionTreeItemLabelProps) {
   const styles = useMemoCss(componentStyles);
-  const isPseudoStep = stepType.startsWith('__');
+  const isPseudoStep = stepType.startsWith('trigger_');
   const isDangerous = status && isDangerousStatus(status);
   const isInactiveStatus = status === ExecutionStatus.SKIPPED || status === ExecutionStatus.PENDING;
 
@@ -55,7 +55,6 @@ export function StepExecutionTreeItemLabel({
           selected && styles.selectedStepName,
           isDangerous && styles.dangerousStepName,
           isInactiveStatus && styles.inactiveStepName,
-          isPseudoStep && styles.pseudoStepName,
         ]}
       >
         {stepId}
@@ -101,11 +100,6 @@ const componentStyles = {
   inactiveStepName: ({ euiTheme }: UseEuiTheme) =>
     css({
       color: euiTheme.colors.textDisabled,
-    }),
-  pseudoStepName: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      color: euiTheme.colors.textSubdued,
-      fontStyle: 'italic',
     }),
   duration: ({ euiTheme }: UseEuiTheme) =>
     css({

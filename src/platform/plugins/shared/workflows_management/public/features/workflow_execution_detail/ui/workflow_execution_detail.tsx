@@ -10,14 +10,17 @@
 import { EuiPanel } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+
 import {
   ResizableLayout,
   ResizableLayoutDirection,
   ResizableLayoutMode,
   ResizableLayoutOrder,
 } from '@kbn/resizable-layout';
+import type { JsonValue } from '@kbn/utility-types';
 import { ExecutionStatus } from '@kbn/workflows';
 import { useWorkflowExecutionPolling } from '@kbn/workflows-ui';
+
 import { WorkflowExecutionPanel } from './workflow_execution_panel';
 import { WorkflowStepExecutionDetails } from './workflow_step_execution_details';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
@@ -69,45 +72,40 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
         return undefined;
       }
 
-      if (selectedStepExecutionId.startsWith('__pseudo_')) {
-        const isPseudoTrigger = selectedStepExecutionId === '__pseudo_trigger__';
-        const isPseudoInputs = selectedStepExecutionId === '__pseudo_inputs__';
+      if (selectedStepExecutionId === 'trigger' && workflowExecution?.context) {
+        let triggerType = 'alert';
 
-        if (isPseudoTrigger && workflowExecution?.context?.event) {
-          return {
-            id: '__pseudo_trigger__',
-            stepId: 'Event',
-            stepType: '__trigger',
-            status: ExecutionStatus.COMPLETED,
-            input: workflowExecution.context.event,
-            scopeStack: [],
-            workflowRunId: workflowExecution.id,
-            workflowId: workflowExecution.workflowId || '',
-            startedAt: '',
-            globalExecutionIndex: -1,
-            stepExecutionIndex: 0,
-            topologicalIndex: -1,
-          };
+        const isScheduled =
+          (workflowExecution.context.event as { type?: string })?.type === 'scheduled';
+        if (
+          workflowExecution.context.inputs &&
+          Object.keys(workflowExecution.context.inputs).length > 0
+        ) {
+          triggerType = 'manual';
+        } else if (isScheduled) {
+          triggerType = 'scheduled';
         }
 
-        if (isPseudoInputs && workflowExecution?.context?.inputs) {
-          return {
-            id: '__pseudo_inputs__',
-            stepId: 'Inputs',
-            stepType: '__inputs',
-            status: ExecutionStatus.COMPLETED,
-            input: workflowExecution.context.inputs,
-            scopeStack: [],
-            workflowRunId: workflowExecution.id,
-            workflowId: workflowExecution.workflowId || '',
-            startedAt: '',
-            globalExecutionIndex: -1,
-            stepExecutionIndex: 0,
-            topologicalIndex: -1,
-          };
-        }
+        const capitalizedTriggerType = triggerType.charAt(0).toUpperCase() + triggerType.slice(1);
+        const inputData = workflowExecution.context.event || workflowExecution.context.inputs;
 
-        return undefined;
+        const { inputs, event, ...contextData } = workflowExecution.context;
+
+        return {
+          id: 'trigger',
+          stepId: capitalizedTriggerType,
+          stepType: `trigger_${triggerType}`,
+          status: ExecutionStatus.COMPLETED,
+          input: inputData as JsonValue,
+          output: contextData as JsonValue,
+          scopeStack: [],
+          workflowRunId: workflowExecution.id,
+          workflowId: workflowExecution.workflowId || '',
+          startedAt: '',
+          globalExecutionIndex: -1,
+          stepExecutionIndex: 0,
+          topologicalIndex: -1,
+        };
       }
 
       if (!workflowExecution?.stepExecutions?.length) {

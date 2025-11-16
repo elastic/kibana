@@ -83,20 +83,17 @@ export function flattenStackFrames(stackFrames: StackFrame[]): string[] {
   });
 }
 
-function createPseudoStepExecution(
-  type: 'trigger' | 'inputs',
-  data: any,
+function createPseudoTriggerStepExecution(
+  triggerType: string,
   executionId: string
 ): WorkflowStepExecutionDto {
-  const stepId = type === 'trigger' ? 'Event' : 'Inputs';
-  const stepType = type === 'trigger' ? '__trigger' : '__inputs';
+  const capitalizedTriggerType = triggerType.charAt(0).toUpperCase() + triggerType.slice(1);
 
   return {
-    id: `__pseudo_${type}__`,
-    stepId,
-    stepType,
+    id: 'trigger',
+    stepId: capitalizedTriggerType,
+    stepType: `trigger_${triggerType}`,
     status: ExecutionStatus.COMPLETED,
-    input: data,
     scopeStack: [],
     workflowRunId: executionId,
     workflowId: '',
@@ -184,39 +181,25 @@ export function buildStepExecutionsTree(
   if (executionContext) {
     const executionId = stepExecutions[0]?.workflowRunId || '';
 
-    if (executionContext.event) {
-      const triggerExecution = createPseudoStepExecution(
-        'trigger',
-        executionContext.event,
-        executionId
-      );
-      pseudoSteps.push({
-        stepId: triggerExecution.stepId,
-        stepType: triggerExecution.stepType!,
-        executionIndex: 0,
-        stepExecutionId: triggerExecution.id,
-        status: triggerExecution.status,
-        isPseudoStep: true,
-        children: [],
-      });
+    let triggerType = 'alert';
+
+    const isScheduled = (executionContext.event as { type?: string })?.type === 'scheduled';
+    if (executionContext.inputs && Object.keys(executionContext.inputs).length > 0) {
+      triggerType = 'manual';
+    } else if (isScheduled) {
+      triggerType = 'scheduled';
     }
 
-    if (executionContext.inputs && Object.keys(executionContext.inputs).length > 0) {
-      const inputsExecution = createPseudoStepExecution(
-        'inputs',
-        executionContext.inputs,
-        executionId
-      );
-      pseudoSteps.push({
-        stepId: inputsExecution.stepId,
-        stepType: inputsExecution.stepType!,
-        executionIndex: 0,
-        stepExecutionId: inputsExecution.id,
-        status: inputsExecution.status,
-        isPseudoStep: true,
-        children: [],
-      });
-    }
+    const triggerExecution = createPseudoTriggerStepExecution(triggerType, executionId);
+    pseudoSteps.push({
+      stepId: triggerExecution.stepId,
+      stepType: triggerExecution.stepType!,
+      executionIndex: 0,
+      stepExecutionId: triggerExecution.id,
+      status: triggerExecution.status,
+      isPseudoStep: true,
+      children: [],
+    });
   }
 
   return [...pseudoSteps, ...regularSteps];
