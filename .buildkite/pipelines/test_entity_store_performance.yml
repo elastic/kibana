@@ -76,6 +76,8 @@ steps:
         label: 'Run Entity Store Performance Tests'
         env:
           SECURITY_DOCS_GEN_BRANCH: dg-update-entity-store-perf #TODO: Remove this after debugging
+          PERF_INTERVAL: 150
+          PERF_COUNT: 1
         agents:
           provider: gcp
           image: family/kibana-ubuntu-2404

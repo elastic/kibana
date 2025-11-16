@@ -10,7 +10,6 @@ set -euo pipefail
 #   CLOUD_DEPLOYMENT_USERNAME - deployment username
 #   CLOUD_DEPLOYMENT_PASSWORD - deployment password
 # Optional environment variables:
-#   PERF_DATA_FILE - data file to use (default: "small")
 #   PERF_INTERVAL - interval in seconds (default: 30)
 #   PERF_COUNT - number of uploads (default: 10)
 #
@@ -35,17 +34,22 @@ run_performance_tests() {
   fi
 
   # Performance test parameters (configurable via env vars)
-  PERF_DATA_FILE="${PERF_DATA_FILE:-small}"
   PERF_INTERVAL="${PERF_INTERVAL:-30}"
   PERF_COUNT="${PERF_COUNT:-10}"
+  PERF_DATA_FILE="big"
 
   echo "--- Run Entity Store Performance Tests"
-  echo "Data file: $PERF_DATA_FILE"
+  echo "Data file: $PERF_DATA_FILE (will be generated)"
   echo "Interval: ${PERF_INTERVAL}s"
   echo "Count: $PERF_COUNT"
 
   # Change to repository directory
   cd "$SECURITY_DOCS_GEN_DIR"
+
+  # Generate performance data file
+  echo "--- Generate Performance Data File"
+  echo "Creating performance data file: $PERF_DATA_FILE with 1000000 entities, 1 log per entity"
+  yarn start create-perf-data "$PERF_DATA_FILE" 1000000 1
 
   # Create config.json
   echo "--- Create config.json"
@@ -85,6 +89,7 @@ run_performance_tests() {
   export TEST_EXIT_CODE
   export TEST_DURATION
   export TEST_LOG_DIR="${SECURITY_DOCS_GEN_DIR}/logs"
+  export PERF_DATA_FILE
 
   echo "Test completed with exit code: $TEST_EXIT_CODE"
   echo "Test duration: ${TEST_DURATION}s"

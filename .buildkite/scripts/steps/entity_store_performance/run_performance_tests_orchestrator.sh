@@ -146,7 +146,7 @@ run_performance_tests
 export TEST_EXIT_CODE
 export TEST_DURATION
 export TEST_LOG_DIR
-export PERF_DATA_FILE="${PERF_DATA_FILE:-small}"
+export PERF_DATA_FILE="${PERF_DATA_FILE:-big}"
 export PERF_INTERVAL="${PERF_INTERVAL:-30}"
 export PERF_COUNT="${PERF_COUNT:-10}"
 export CLOUD_DEPLOYMENT_ID
