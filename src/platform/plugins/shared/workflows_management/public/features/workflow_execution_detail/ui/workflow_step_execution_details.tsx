@@ -40,11 +40,13 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
       [stepExecution?.status]
     );
 
-    const isPseudoStep = stepExecution?.stepType?.startsWith('trigger_');
-    const triggerType = isPseudoStep ? stepExecution?.stepType?.replace('trigger_', '') : undefined;
+    const isTriggerPseudoStep = stepExecution?.stepType?.startsWith('trigger_');
+    const triggerType = isTriggerPseudoStep
+      ? stepExecution?.stepType?.replace('trigger_', '')
+      : undefined;
 
     const tabs = useMemo(() => {
-      if (isPseudoStep) {
+      if (isTriggerPseudoStep) {
         const pseudoTabs = [];
         if (stepExecution?.input) {
           const isManualTrigger = triggerType === 'manual';
@@ -73,7 +75,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
           name: 'Timeline',
         },
       ];
-    }, [stepExecution, isPseudoStep, triggerType]);
+    }, [stepExecution, isTriggerPseudoStep, triggerType]);
 
     const [selectedTabId, setSelectedTabId] = useState<string>(tabs[0].id);
 
@@ -122,7 +124,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
             <EuiFlexItem css={{ overflowY: 'auto' }}>
               {selectedTabId === 'output' && (
                 <>
-                  {isPseudoStep && (
+                  {isTriggerPseudoStep && (
                     <>
                       <EuiCallOut
                         size="s"
@@ -151,7 +153,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
               )}
               {selectedTabId === 'input' && (
                 <>
-                  {isPseudoStep && (
+                  {isTriggerPseudoStep && (
                     <>
                       <EuiCallOut
                         size="s"

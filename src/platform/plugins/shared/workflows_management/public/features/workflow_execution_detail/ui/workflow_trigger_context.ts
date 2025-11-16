@@ -8,6 +8,8 @@
  */
 
 import type { JsonValue } from '@kbn/utility-types';
+import type { WorkflowExecutionDto, WorkflowStepExecutionDto } from '@kbn/workflows';
+import { ExecutionStatus } from '@kbn/workflows';
 
 export type TriggerType = 'alert' | 'scheduled' | 'manual';
 
@@ -49,4 +51,32 @@ export function buildTriggerContextFromExecution(
     input: inputData as JsonValue,
     output: contextData as JsonValue,
   };
+}
+
+export function buildTriggerStepExecutionFromContext(
+  workflowExecution: WorkflowExecutionDto
+): WorkflowStepExecutionDto | null {
+  const triggerContext = buildTriggerContextFromExecution(
+    workflowExecution.context as Record<string, unknown> | undefined | null
+  );
+
+  if (!triggerContext) {
+    return null;
+  }
+
+  return {
+    id: 'trigger',
+    stepId: triggerContext.triggerType,
+    stepType: `trigger_${triggerContext.triggerType}`,
+    status: ExecutionStatus.COMPLETED,
+    input: triggerContext.input,
+    output: triggerContext.output,
+    scopeStack: [],
+    workflowRunId: workflowExecution.id,
+    workflowId: workflowExecution.workflowId || '',
+    startedAt: '',
+    globalExecutionIndex: -1,
+    stepExecutionIndex: 0,
+    topologicalIndex: -1,
+  } as WorkflowStepExecutionDto;
 }

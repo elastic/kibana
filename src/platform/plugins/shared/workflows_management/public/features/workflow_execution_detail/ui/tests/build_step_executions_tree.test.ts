@@ -753,12 +753,12 @@ describe('buildStepExecutionsTree', () => {
       expect(result[0].stepId).toBe('Event');
       expect(result[0].stepType).toBe('__trigger');
       expect(result[0].stepExecutionId).toBe('__pseudo_trigger__');
-      expect(result[0].isPseudoStep).toBe(true);
+      expect(result[0].isTriggerPseudoStep).toBe(true);
       expect(result[0].status).toBe(ExecutionStatus.COMPLETED);
       expect(result[0].children).toEqual([]);
 
       expect(result[1].stepId).toBe('step-1');
-      expect(result[1].isPseudoStep).toBeUndefined();
+      expect(result[1].isTriggerPseudoStep).toBeUndefined();
     });
 
     it('should prepend inputs pseudo-step when inputs data exists', () => {
@@ -785,7 +785,7 @@ describe('buildStepExecutionsTree', () => {
       expect(result[0].stepId).toBe('Inputs');
       expect(result[0].stepType).toBe('__inputs');
       expect(result[0].stepExecutionId).toBe('__pseudo_inputs__');
-      expect(result[0].isPseudoStep).toBe(true);
+      expect(result[0].isTriggerPseudoStep).toBe(true);
       expect(result[0].status).toBe(ExecutionStatus.COMPLETED);
       expect(result[0].children).toEqual([]);
 
@@ -817,14 +817,14 @@ describe('buildStepExecutionsTree', () => {
       expect(result).toHaveLength(3);
       expect(result[0].stepId).toBe('Event');
       expect(result[0].stepType).toBe('__trigger');
-      expect(result[0].isPseudoStep).toBe(true);
+      expect(result[0].isTriggerPseudoStep).toBe(true);
 
       expect(result[1].stepId).toBe('Inputs');
       expect(result[1].stepType).toBe('__inputs');
-      expect(result[1].isPseudoStep).toBe(true);
+      expect(result[1].isTriggerPseudoStep).toBe(true);
 
       expect(result[2].stepId).toBe('step-1');
-      expect(result[2].isPseudoStep).toBeUndefined();
+      expect(result[2].isTriggerPseudoStep).toBeUndefined();
     });
 
     it('should not add pseudo-steps when context is missing', () => {
@@ -841,7 +841,7 @@ describe('buildStepExecutionsTree', () => {
 
       expect(result).toHaveLength(1);
       expect(result[0].stepId).toBe('step-1');
-      expect(result[0].isPseudoStep).toBeUndefined();
+      expect(result[0].isTriggerPseudoStep).toBeUndefined();
     });
 
     it('should not add pseudo-steps when context is empty', () => {
@@ -911,7 +911,7 @@ describe('buildStepExecutionsTree', () => {
 
       expect(result).toHaveLength(2);
       expect(result[0].stepId).toBe('Event');
-      expect(result[0].isPseudoStep).toBe(true);
+      expect(result[0].isTriggerPseudoStep).toBe(true);
       expect(result[1].stepId).toBe('foreach');
       expect(result[1].children).toHaveLength(1);
     });

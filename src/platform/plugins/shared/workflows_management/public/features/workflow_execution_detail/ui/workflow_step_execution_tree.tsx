@@ -29,17 +29,17 @@ import React from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { WorkflowExecutionDto, WorkflowStepExecutionDto, WorkflowYaml } from '@kbn/workflows';
-import {
+import type {
   ExecutionStatus,
-  isDangerousStatus,
-  isInProgressStatus,
-  isTerminalStatus,
+  WorkflowExecutionDto,
+  WorkflowStepExecutionDto,
+  WorkflowYaml,
 } from '@kbn/workflows';
+import { isDangerousStatus, isInProgressStatus, isTerminalStatus } from '@kbn/workflows';
 import type { StepExecutionTreeItem } from './build_step_executions_tree';
 import { buildStepExecutionsTree } from './build_step_executions_tree';
 import { StepExecutionTreeItemLabel } from './step_execution_tree_item_label';
-import { buildTriggerContextFromExecution } from './workflow_trigger_context';
+import { buildTriggerStepExecutionFromContext } from './workflow_trigger_context';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
 
 function convertTreeToEuiTreeViewItems(
@@ -53,6 +53,9 @@ function convertTreeToEuiTreeViewItems(
     const stepExecution = stepExecutionMap.get(item.stepExecutionId ?? '');
     const status = stepExecution?.status;
     const selected = selectedId === stepExecution?.id;
+
+    const stepId = stepExecution?.stepId ?? item.stepId;
+    const stepType = stepExecution?.stepType ?? item.stepType;
 
     const selectStepExecution: React.MouseEventHandler = (e) => {
       // Prevent the click event from bubbling up to the tree view item so that the tree view item is not expanded/collapsed when selected
@@ -68,18 +71,16 @@ function convertTreeToEuiTreeViewItems(
       css: getStatusCss({ status, selected }, euiTheme),
       icon: (
         <StepIcon
-          stepType={item.stepType}
+          stepType={stepType}
           executionStatus={status ?? null}
           onClick={selectStepExecution}
         />
       ),
       label: (
         <StepExecutionTreeItemLabel
-          stepId={item.stepId}
-          stepType={item.stepType}
+          stepId={stepId}
           selected={selected}
           status={status}
-          executionIndex={item.executionIndex}
           executionTimeMs={stepExecution?.executionTimeMs ?? null}
           onClick={selectStepExecution}
         />
@@ -192,7 +193,7 @@ export const WorkflowStepExecutionTree = ({
         .map((step, index) => ({
           stepId: step.name,
           stepType: step.type,
-          status: ExecutionStatus.PENDING,
+          status: 'pending' as WorkflowStepExecutionDto['status'],
           id: `${step.name}-${step.type}-${index}`,
           scopeStack: [],
           workflowRunId: '',
@@ -219,27 +220,11 @@ export const WorkflowStepExecutionTree = ({
     const triggerStep = triggerPseudoStep ?? inputsPseudoStep;
 
     if (triggerStep && execution.context) {
-      const triggerContext = buildTriggerContextFromExecution(execution.context);
-      if (triggerContext) {
-        const triggerExecution: WorkflowStepExecutionDto = {
-          id: 'trigger',
-          stepId: triggerContext.triggerType,
-          stepType: `trigger_${triggerContext.triggerType}`,
-          status: ExecutionStatus.COMPLETED,
-          input: triggerContext.input,
-          output: triggerContext.output,
-          scopeStack: [],
-          workflowRunId: execution.id,
-          workflowId: execution.workflowId || '',
-          startedAt: '',
-          globalExecutionIndex: -1,
-          stepExecutionIndex: 0,
-          topologicalIndex: -1,
-        };
+      const triggerExecution = buildTriggerStepExecutionFromContext(execution);
+      if (triggerExecution) {
         stepExecutionMap.set(triggerExecution.id, triggerExecution);
         triggerStep.stepExecutionId = triggerExecution.id;
-        triggerStep.stepId = triggerExecution.stepId;
-        triggerStep.stepType = triggerExecution.stepType;
+        triggerStep.stepType = triggerExecution.stepType ?? '';
       }
     }
     const items: EuiTreeViewProps['items'] = convertTreeToEuiTreeViewItems(

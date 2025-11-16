@@ -23,7 +23,7 @@ export interface StepListTreeItem {
 export interface StepExecutionTreeItem extends StepListTreeItem {
   status: ExecutionStatus | null;
   stepExecutionId: string | null;
-  isPseudoStep?: boolean;
+  isTriggerPseudoStep?: boolean;
   children: StepExecutionTreeItem[];
 }
 
@@ -155,6 +155,7 @@ export function buildStepExecutionsTree(
   }
 
   const regularSteps = toArray(root);
+  // Pseudo-steps are not real steps, an example is the trigger pseudo-step that is used to display the trigger context (the only pseudo step for now)
   const pseudoSteps: StepExecutionTreeItem[] = [];
 
   if (executionContext) {
@@ -168,7 +169,7 @@ export function buildStepExecutionsTree(
         executionIndex: 0,
         stepExecutionId: '__pseudo_trigger__',
         status: ExecutionStatus.COMPLETED,
-        isPseudoStep: true,
+        isTriggerPseudoStep: true,
         children: [],
       });
     }
@@ -180,7 +181,7 @@ export function buildStepExecutionsTree(
         executionIndex: 0,
         stepExecutionId: '__pseudo_inputs__',
         status: ExecutionStatus.COMPLETED,
-        isPseudoStep: true,
+        isTriggerPseudoStep: true,
         children: [],
       });
     }

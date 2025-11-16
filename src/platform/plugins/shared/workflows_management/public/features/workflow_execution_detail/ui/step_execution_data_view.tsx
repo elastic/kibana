@@ -46,12 +46,12 @@ export const StepExecutionDataView = React.memo<StepExecutionDataViewProps>(
     }, [mode, stepExecution]);
 
     const fieldPathActionsPrefix: string | undefined = useMemo(() => {
-      const isTriggerStep = stepExecution.stepType?.startsWith('trigger_');
-      const triggerType = isTriggerStep
+      const isTriggerPseudoStep = stepExecution.stepId === 'trigger';
+      const triggerType = isTriggerPseudoStep
         ? stepExecution.stepType?.replace('trigger_', '')
         : undefined;
 
-      if (!isTriggerStep) {
+      if (!isTriggerPseudoStep) {
         if (mode !== 'output' || stepExecution.error) {
           return undefined; // field path actions only for non-error output data.
         }

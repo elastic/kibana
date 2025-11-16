@@ -17,10 +17,9 @@ import {
   ResizableLayoutMode,
   ResizableLayoutOrder,
 } from '@kbn/resizable-layout';
-import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowExecutionPanel } from './workflow_execution_panel';
 import { WorkflowStepExecutionDetails } from './workflow_step_execution_details';
-import { buildTriggerContextFromExecution } from './workflow_trigger_context';
+import { buildTriggerStepExecutionFromContext } from './workflow_trigger_context';
 import { useWorkflowExecutionPolling } from '../../../entities/workflows/model/use_workflow_execution_polling';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 
@@ -76,26 +75,7 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
       }
 
       if (selectedStepExecutionId === 'trigger' && workflowExecution?.context) {
-        const triggerContext = buildTriggerContextFromExecution(workflowExecution.context);
-        if (!triggerContext) {
-          return undefined;
-        }
-
-        return {
-          id: 'trigger',
-          stepId: triggerContext.triggerType,
-          stepType: `trigger_${triggerContext.triggerType}`,
-          status: ExecutionStatus.COMPLETED,
-          input: triggerContext.input,
-          output: triggerContext.output,
-          scopeStack: [],
-          workflowRunId: workflowExecution.id,
-          workflowId: workflowExecution.workflowId || '',
-          startedAt: '',
-          globalExecutionIndex: -1,
-          stepExecutionIndex: 0,
-          topologicalIndex: -1,
-        };
+        return buildTriggerStepExecutionFromContext(workflowExecution) ?? undefined;
       }
 
       if (!workflowExecution?.stepExecutions?.length) {
