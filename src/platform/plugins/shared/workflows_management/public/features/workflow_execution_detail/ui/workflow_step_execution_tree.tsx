@@ -214,12 +214,18 @@ export const WorkflowStepExecutionTree = ({
       execution.context
     );
 
-    const triggerStep = stepExecutionsTree.find((item) => item.stepType?.startsWith('trigger_'));
-    if (triggerStep?.stepExecutionId && execution.context) {
-      let triggerType = 'alert';
+    const triggerPseudoStep = stepExecutionsTree.find((item) => item.stepType === '__trigger');
+    const inputsPseudoStep = stepExecutionsTree.find((item) => item.stepType === '__inputs');
+    const triggerStep = triggerPseudoStep ?? inputsPseudoStep;
+
+    if (triggerStep && execution.context) {
+      let triggerType: 'alert' | 'scheduled' | 'manual' = 'alert';
 
       const isScheduled = (execution.context.event as { type?: string })?.type === 'scheduled';
-      if (execution.context.inputs && Object.keys(execution.context.inputs).length > 0) {
+      const hasInputs =
+        execution.context.inputs && Object.keys(execution.context.inputs).length > 0;
+
+      if (!triggerPseudoStep && hasInputs) {
         triggerType = 'manual';
       } else if (isScheduled) {
         triggerType = 'scheduled';
@@ -245,7 +251,10 @@ export const WorkflowStepExecutionTree = ({
         stepExecutionIndex: 0,
         topologicalIndex: -1,
       };
-      stepExecutionMap.set(triggerStep.stepExecutionId, triggerExecution);
+      stepExecutionMap.set(triggerExecution.id, triggerExecution);
+      triggerStep.stepExecutionId = triggerExecution.id;
+      triggerStep.stepId = triggerExecution.stepId;
+      triggerStep.stepType = triggerExecution.stepType;
     }
     const items: EuiTreeViewProps['items'] = convertTreeToEuiTreeViewItems(
       stepExecutionsTree,

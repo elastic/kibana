@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
+import { ExecutionStatus } from '@kbn/workflows';
 import { buildStepExecutionsTree } from '../build_step_executions_tree';
 
 // Helper function to create a valid WorkflowStepExecutionDto with all required properties
@@ -897,7 +897,7 @@ describe('buildStepExecutionsTree', () => {
           scopeStack: [
             {
               stepId: 'foreach',
-              nestedScopes: [{ scopeId: '0' }],
+              nestedScopes: [{ nodeId: 'foreach-1', nodeType: 'foreach', scopeId: '0' }],
             },
           ],
         }),
