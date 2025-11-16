@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable playwright/prefer-web-first-assertions */
-
 // TODO: 'toBeChecked' is not available in playwright version we are using. Remove after Playwright upgrade
 
 import { test, expect } from '../../../../../src/playwright';
