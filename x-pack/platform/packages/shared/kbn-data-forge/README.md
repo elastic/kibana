@@ -48,7 +48,7 @@ node x-pack/scripts/data_forge.js --help
 
 Generate host metrics for 10 hosts (minimal command):
 
-```sh
+```bash
 node x-pack/scripts/data_forge.js \
   --events-per-cycle 10 \
   --dataset fake_hosts
@@ -58,7 +58,7 @@ node x-pack/scripts/data_forge.js \
 
 Generate a complete observability stack with minimal configuration:
 
-```sh
+```bash
 node x-pack/scripts/data_forge.js \
   --events-per-cycle 10 \
   --dataset fake_stack
@@ -68,7 +68,7 @@ node x-pack/scripts/data_forge.js \
 
 Generate host metrics for 7 hosts with Kibana dashboards:
 
-```sh
+```bash
 node x-pack/scripts/data_forge.js \
   --events-per-cycle 7 \
   --lookback now-20m \
@@ -78,7 +78,7 @@ node x-pack/scripts/data_forge.js \
 
 ### Example 4: Generate Logs with Reduced Weekend Traffic
 
-```sh
+```bash
 node x-pack/scripts/data_forge.js \
   --dataset fake_logs \
   --lookback now-30d \
