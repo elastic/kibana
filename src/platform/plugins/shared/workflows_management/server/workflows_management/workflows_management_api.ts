@@ -38,7 +38,7 @@ import { parseWorkflowYamlToJSON, stringifyWorkflowDefinition } from '../../comm
 
 export interface GetWorkflowsParams {
   triggerType?: 'schedule' | 'event' | 'manual';
-  limit: number;
+  size: number;
   page: number;
   createdBy?: string[];
   enabled?: boolean[];
@@ -49,8 +49,8 @@ export interface GetWorkflowsParams {
 export interface GetWorkflowExecutionLogsParams {
   executionId: string;
   stepExecutionId?: string;
-  limit?: number;
-  offset?: number;
+  size?: number;
+  page?: number;
   sortField?: string;
   sortOrder?: 'asc' | 'desc';
 }
@@ -70,8 +70,8 @@ export interface WorkflowExecutionLogEntry {
 export interface WorkflowExecutionLogsDto {
   logs: WorkflowExecutionLogEntry[];
   total: number;
-  limit: number;
-  offset: number;
+  size: number;
+  page: number;
 }
 
 export interface GetStepExecutionParams {
@@ -81,16 +81,16 @@ export interface GetStepExecutionParams {
 
 export interface GetExecutionLogsParams {
   executionId: string;
-  limit?: number;
-  offset?: number;
+  size?: number;
+  page?: number;
   sortField?: string;
   sortOrder?: 'asc' | 'desc';
 }
 
 export interface GetStepLogsParams {
   executionId: string;
-  limit?: number;
-  offset?: number;
+  size?: number;
+  page?: number;
   sortField?: string;
   sortOrder?: 'asc' | 'desc';
   stepExecutionId: string;
@@ -308,8 +308,8 @@ export class WorkflowsManagementApi {
         {
           executionId: params.executionId,
           stepExecutionId: params.stepExecutionId,
-          limit: params.limit,
-          offset: params.offset,
+          size: params.size,
+          page: params.page,
           sortField: params.sortField,
           sortOrder: params.sortOrder,
         },
@@ -318,6 +318,9 @@ export class WorkflowsManagementApi {
     } else {
       result = await this.workflowsService.getExecutionLogs(params, spaceId);
     }
+
+    const size = params.size || 100;
+    const page = params.page || 1;
 
     // Transform the logs to match our API format
     return {
@@ -346,8 +349,8 @@ export class WorkflowsManagementApi {
           },
         })),
       total: result.total,
-      limit: params.limit || 100,
-      offset: params.offset || 0,
+      size,
+      page,
     };
   }
 

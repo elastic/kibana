@@ -19,7 +19,7 @@ interface UseWorkflowExecutionsParams {
   workflowId: string | null;
   statuses?: ExecutionStatus[];
   executionTypes?: ExecutionType[];
-  perPage?: number;
+  size?: number;
 }
 
 export function useWorkflowExecutions(
@@ -36,7 +36,7 @@ export function useWorkflowExecutions(
   > = {}
 ) {
   const { http } = useKibana().services;
-  const perPage = params.perPage ?? DEFAULT_PAGE_SIZE;
+  const size = params.size ?? DEFAULT_PAGE_SIZE;
 
   const queryFn = useCallback(
     async ({ pageParam = 1 }: { pageParam?: number }) => {
@@ -46,16 +46,16 @@ export function useWorkflowExecutions(
           statuses: params.statuses,
           executionTypes: params.executionTypes,
           page: pageParam,
-          perPage,
+          size,
         },
       });
     },
-    [http, params.workflowId, params.statuses, params.executionTypes, perPage]
+    [http, params.workflowId, params.statuses, params.executionTypes, size]
   );
 
   const getNextPageParam = useCallback((lastPage: WorkflowExecutionListDto) => {
-    const { page, limit, total } = lastPage._pagination;
-    const totalPages = Math.ceil(total / limit);
+    const { page, size, total } = lastPage;
+    const totalPages = Math.ceil(total / size);
 
     if (page >= totalPages) {
       return undefined;
@@ -81,7 +81,7 @@ export function useWorkflowExecutions(
       'executions',
       params.statuses,
       params.executionTypes,
-      perPage,
+      size,
     ],
     queryFn,
     getNextPageParam,
@@ -105,11 +105,9 @@ export function useWorkflowExecutions(
 
     return {
       results: allResults,
-      _pagination: {
-        page: data.pages.length, // Number of pages loaded
-        limit: firstPage._pagination.limit, // Keep original page size
-        total: firstPage._pagination.total, // Total available
-      },
+      page: data.pages.length, // Number of pages loaded
+      size: firstPage.size, // Keep original page size
+      total: firstPage.total, // Total available
     };
   }, [data]);
 

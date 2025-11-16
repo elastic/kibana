@@ -27,7 +27,6 @@ interface SearchWorkflowExecutionsParams {
   size?: number;
   from?: number;
   page?: number;
-  perPage?: number;
 }
 
 export const searchWorkflowExecutions = async ({
@@ -36,10 +35,9 @@ export const searchWorkflowExecutions = async ({
   workflowExecutionIndex,
   query,
   sort = [{ createdAt: 'desc' }],
-  size,
+  size = 20,
   from,
   page = 1,
-  perPage = 20,
 }: SearchWorkflowExecutionsParams): Promise<WorkflowExecutionListDto> => {
   try {
     logger.info(`Searching workflow executions in index ${workflowExecutionIndex}`);
@@ -52,17 +50,15 @@ export const searchWorkflowExecutions = async ({
       track_total_hits: true,
     });
 
-    return transformToWorkflowExecutionListModel(response, page, perPage);
+    return transformToWorkflowExecutionListModel(response, page, size);
   } catch (error) {
     // Index not found is expected when no workflows have been executed yet
     if (isResponseError(error) && error.body?.error?.type === 'index_not_found_exception') {
       return {
         results: [],
-        _pagination: {
-          limit: perPage,
-          page,
-          total: 0,
-        },
+        size,
+        page,
+        total: 0,
       };
     }
 
@@ -74,7 +70,7 @@ export const searchWorkflowExecutions = async ({
 function transformToWorkflowExecutionListModel(
   response: SearchResponse<EsWorkflowExecution>,
   page: number,
-  perPage: number
+  size: number
 ): WorkflowExecutionListDto {
   const total =
     typeof response.hits.total === 'number' ? response.hits.total : response.hits.total?.value ?? 0;
@@ -94,10 +90,8 @@ function transformToWorkflowExecutionListModel(
         triggeredBy: workflowExecution.triggeredBy,
       };
     }),
-    _pagination: {
-      limit: perPage,
-      page,
-      total,
-    },
+    size,
+    page,
+    total,
   };
 }

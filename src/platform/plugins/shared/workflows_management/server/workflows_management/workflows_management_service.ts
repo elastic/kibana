@@ -87,7 +87,7 @@ export interface SearchWorkflowExecutionsParams {
   statuses?: ExecutionStatus[];
   executionTypes?: ExecutionType[];
   page?: number;
-  perPage?: number;
+  size?: number;
 }
 
 export class WorkflowsService {
@@ -513,8 +513,8 @@ export class WorkflowsService {
       throw new Error('WorkflowsService not initialized');
     }
 
-    const { limit = 20, page = 1, enabled, createdBy, query } = params;
-    const from = (page - 1) * limit;
+    const { size = 20, page = 1, enabled, createdBy, query } = params;
+    const from = (page - 1) * size;
 
     const must: estypes.QueryDslQueryContainer[] = [];
 
@@ -610,7 +610,7 @@ export class WorkflowsService {
     }
 
     const searchResponse = await this.workflowStorage.getClient().search({
-      size: limit,
+      size,
       from,
       track_total_hits: true,
       query: {
@@ -646,14 +646,12 @@ export class WorkflowsService {
     }
 
     return {
-      _pagination: {
-        page,
-        limit,
-        total:
-          typeof searchResponse.hits.total === 'number'
-            ? searchResponse.hits.total
-            : searchResponse.hits.total?.value || 0,
-      },
+      page,
+      size,
+      total:
+        typeof searchResponse.hits.total === 'number'
+          ? searchResponse.hits.total
+          : searchResponse.hits.total?.value || 0,
       results: workflows,
     };
   }
@@ -857,8 +855,8 @@ export class WorkflowsService {
     }
 
     const page = params.page ?? 1;
-    const perPage = params.perPage ?? DEFAULT_PAGE_SIZE;
-    const from = (page - 1) * perPage;
+    const size = params.size ?? DEFAULT_PAGE_SIZE;
+    const from = (page - 1) * size;
 
     return searchWorkflowExecutions({
       esClient: this.esClient,
@@ -869,10 +867,9 @@ export class WorkflowsService {
           must,
         },
       },
-      size: perPage,
+      size,
       from,
       page,
-      perPage,
     });
   }
 
