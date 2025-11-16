@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { transformRequestParamsToApplication } from './v1';
+export { transformRequestBodyToApplication } from './v1';

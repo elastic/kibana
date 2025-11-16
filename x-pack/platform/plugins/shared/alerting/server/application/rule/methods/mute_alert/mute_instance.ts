@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { updateRuleSo } from '../../../../data/rule/methods/update_rule_so';
-import { muteAlertParamsSchema } from './schemas';
+import { muteAlertBodySchema, muteAlertParamsSchema } from './schemas';
 import type { MuteAlertBody, MuteAlertParams } from './types';
 import type { Rule } from '../../../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
@@ -19,7 +19,7 @@ import { updateMeta } from '../../../../rules_client/lib';
 
 export async function muteInstance(
   context: RulesClientContext,
-  params: MuteAlertParams & MuteAlertBody
+  { params, body }: { params: MuteAlertParams; body: MuteAlertBody }
 ): Promise<void> {
   const ruleId = params.alertId;
   try {
@@ -28,16 +28,23 @@ export async function muteInstance(
     throw Boom.badRequest(`Failed to validate params: ${error.message}`);
   }
 
+  try {
+    muteAlertBodySchema.validate(body);
+  } catch (error) {
+    throw Boom.badRequest(`Failed to validate body: ${error.message}`);
+  }
+
   return await retryIfConflicts(
     context.logger,
     `rulesClient.muteInstance('${ruleId}')`,
-    async () => await muteInstanceWithOCC(context, params)
+    async () => await muteInstanceWithOCC(context, params, body)
   );
 }
 
 async function muteInstanceWithOCC(
   context: RulesClientContext,
-  { alertId: ruleId, alertInstanceId, validateAlertsExistence }: MuteAlertParams & MuteAlertBody
+  { alertId: ruleId, alertInstanceId }: MuteAlertParams,
+  { validateAlertsExistence }: MuteAlertBody
 ) {
   const { attributes, version } = await context.unsecuredSavedObjectsClient.get<Rule>(
     RULE_SAVED_OBJECT_TYPE,

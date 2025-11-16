@@ -5,7 +5,10 @@
  * 2.0.
  */
 import type { IRouter } from '@kbn/core/server';
-import { transformRequestParamsToApplicationV2 } from './transforms';
+import {
+  transformRequestParamsToApplicationV1,
+  transformRequestBodyToApplicationV1,
+} from './transforms';
 import type { ILicenseState } from '../../../../lib';
 import { RuleTypeDisabledError } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
@@ -65,9 +68,10 @@ export const muteAlertRoute = (
         const body: MuteAlertRequestBodyV1 = req.body;
 
         try {
-          await rulesClient.muteInstance(
-            transformRequestParamsToApplicationV2({ ...params, ...body })
-          );
+          await rulesClient.muteInstance({
+            params: transformRequestParamsToApplicationV1(params),
+            body: transformRequestBodyToApplicationV1(body),
+          });
           return res.noContent();
         } catch (e) {
           if (e instanceof RuleTypeDisabledError) {

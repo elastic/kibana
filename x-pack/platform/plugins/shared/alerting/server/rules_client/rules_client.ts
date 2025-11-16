@@ -205,7 +205,7 @@ export class RulesClient {
 
   public muteAll = (options: { id: string }) => muteAll(this.context, options);
   public unmuteAll = (options: { id: string }) => unmuteAll(this.context, options);
-  public muteInstance = (options: MuteAlertParams & MuteAlertBody) =>
+  public muteInstance = (options: { params: MuteAlertParams; body: MuteAlertBody }) =>
     muteInstance(this.context, options);
   public unmuteInstance = (options: UnmuteAlertParams) => unmuteInstance(this.context, options);
 

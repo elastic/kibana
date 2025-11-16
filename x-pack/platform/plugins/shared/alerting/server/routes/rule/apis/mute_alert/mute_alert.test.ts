@@ -56,9 +56,13 @@ describe('muteAlertRoute', () => {
     expect(rulesClient.muteInstance.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
-          "alertId": "1",
-          "alertInstanceId": "2",
-          "validateAlertsExistence": true,
+          "body": Object {
+            "validateAlertsExistence": true,
+          },
+          "params": Object {
+            "alertId": "1",
+            "alertInstanceId": "2",
+          },
         },
       ]
     `);
