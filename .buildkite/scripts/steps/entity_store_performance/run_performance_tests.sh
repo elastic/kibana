@@ -46,11 +46,6 @@ run_performance_tests() {
   # Change to repository directory
   cd "$SECURITY_DOCS_GEN_DIR"
 
-  # Generate performance data file
-  echo "--- Generate Performance Data File"
-  echo "Creating performance data file: $PERF_DATA_FILE with 1000000 entities, 1 log per entity"
-  yarn start create-perf-data "$PERF_DATA_FILE" 1000000 1
-
   # Create config.json
   echo "--- Create config.json"
   jq -n \
@@ -72,6 +67,12 @@ run_performance_tests() {
         password: $kibana_password
       }
     }' > config.json
+
+
+  # Generate performance data file
+  echo "--- Generate Performance Data File"
+  echo "Creating performance data file: $PERF_DATA_FILE with 1000000 entities, 1 log per entity"
+  yarn start create-perf-data "$PERF_DATA_FILE" 1000000 1
 
   # Run the performance test
   TEST_START_TIME=$(date +%s)
