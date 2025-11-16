@@ -40,13 +40,14 @@ test.describe(
       const cell = dataGrid
         .locator('[role="gridcell"][data-gridcell-column-id="severity_text"]')
         .first();
+
       await dataGrid.scrollIntoViewIfNeeded();
       await cell.scrollIntoViewIfNeeded();
 
       const cellValue = await cell.textContent();
       await cell.hover();
 
-      await pageObjects.streams.clickFilterForButton();
+      await pageObjects.streams.clickFilterForButton(cell);
 
       const fieldInput = page.getByTestId('streamsAppConditionEditorFieldText').locator('input');
       const operatorSelect = page.getByTestId('streamsAppConditionEditorOperator');
@@ -66,13 +67,14 @@ test.describe(
       const cell = dataGrid
         .locator('[role="gridcell"][data-gridcell-column-id="severity_text"]')
         .first();
+
       await dataGrid.scrollIntoViewIfNeeded();
       await cell.scrollIntoViewIfNeeded();
 
       const cellValue = await cell.textContent();
       await cell.hover();
 
-      await pageObjects.streams.clickFilterOutButton();
+      await pageObjects.streams.clickFilterOutButton(cell);
 
       const fieldInput = page.getByTestId('streamsAppConditionEditorFieldText').locator('input');
       const operatorSelect = page.getByTestId('streamsAppConditionEditorOperator');
@@ -105,13 +107,14 @@ test.describe(
       const cell = dataGrid
         .locator('[role="gridcell"][data-gridcell-column-id="severity_text"]')
         .first();
+
       await dataGrid.scrollIntoViewIfNeeded();
       await cell.scrollIntoViewIfNeeded();
 
       const cellValue = await cell.textContent();
       await cell.hover();
 
-      await pageObjects.streams.clickFilterForButton();
+      await pageObjects.streams.clickFilterForButton(cell);
 
       const operatorSelect = page.getByTestId('streamsAppConditionEditorOperator');
       const valueInput = page.getByTestId('streamsAppConditionEditorValueText').locator('input');

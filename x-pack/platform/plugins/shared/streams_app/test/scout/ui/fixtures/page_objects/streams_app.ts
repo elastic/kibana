@@ -7,7 +7,7 @@
 
 /* eslint-disable playwright/no-nth-methods */
 
-import type { ScoutPage } from '@kbn/scout';
+import type { Locator, ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout';
 import { EuiComboBoxWrapper } from '@kbn/scout';
 import type { FieldTypeOption } from '../../../../../public/components/data_management/schema_editor/constants';
@@ -754,16 +754,22 @@ export class StreamsApp {
     await expect(this.page.getByTestId('droppable')).not.toHaveAttribute('class', /isDragging/);
   }
 
-  async clickFilterForButton() {
-    const filterForButton = this.page.getByTestId('streamsAppCellActionFilterFor');
-    await expect(filterForButton).toBeVisible();
-    await filterForButton.click();
+  private async clickCellActionButton(testId: string, cell: Locator) {
+    // Get the cell action button scoped to the specific cell
+    // EuiDataGrid renders cell actions for all cells in the DOM, but only the one
+    // for the hovered/clicked cell is visible. We find the button within the cell's actions wrapper.
+    const cellActionsWrapper = cell.locator('.euiDataGridRowCell__actionsWrapper');
+    const button = cellActionsWrapper.getByTestId(testId);
+    await button.scrollIntoViewIfNeeded();
+    await button.click();
   }
 
-  async clickFilterOutButton() {
-    const filterOutButton = this.page.getByTestId('streamsAppCellActionFilterOut');
-    await expect(filterOutButton).toBeVisible();
-    await filterOutButton.click();
+  async clickFilterForButton(cell: Locator) {
+    await this.clickCellActionButton('streamsAppCellActionFilterFor', cell);
+  }
+
+  async clickFilterOutButton(cell: Locator) {
+    await this.clickCellActionButton('streamsAppCellActionFilterOut', cell);
   }
 
   /**
