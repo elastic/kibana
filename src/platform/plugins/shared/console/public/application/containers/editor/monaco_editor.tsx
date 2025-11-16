@@ -230,13 +230,15 @@ export const MonacoEditor = ({
 
   const handleLanguageChange = useCallback(
     (language: string) => {
-      storage.set(StorageKeys.DEFAULT_LANGUAGE, language);
+      if (currentLanguage !== language) {
+        storage.set(StorageKeys.DEFAULT_LANGUAGE, language);
+      }
       setDefaultLanguage(language);
       if (!isKbnRequestSelected) {
         setCurrentLanguage(language);
       }
     },
-    [storage, isKbnRequestSelected]
+    [storage, currentLanguage, isKbnRequestSelected]
   );
 
   const editorDidMountCallback = useCallback(
