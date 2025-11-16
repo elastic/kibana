@@ -11,6 +11,11 @@
           "id": "admin@example.com"
         }
       },
+      "user": {
+        "entity": {
+          "id": "admin@example.com"
+        }
+      },
       "client": {
         "user": {
           "email": "admin@example.com"
@@ -117,6 +122,11 @@
           "id": "projects/your-project-id/roles/customRole"
         }
       },
+      "entity": {
+        "target": {
+          "id": "projects/your-project-id/roles/customRole"
+        }
+      },
       "user_agent": {
         "device": {
           "name": "Other"
@@ -137,6 +147,11 @@
     "source": {
       "@timestamp": "2024-09-01T12:34:56.789Z",
       "actor": {
+        "entity": {
+          "id": "admin2@example.com"
+        }
+      },
+      "user": {
         "entity": {
           "id": "admin2@example.com"
         }
@@ -247,6 +262,11 @@
           "id": "projects/your-project-id/roles/customRole"
         }
       },
+      "entity": {
+        "target": {
+          "id": "projects/your-project-id/roles/customRole"
+        }
+      },
       "user_agent": {
         "device": {
           "name": "Other"
@@ -267,6 +287,11 @@
     "source": {
       "@timestamp": "2024-09-01T12:34:56.789Z",
       "actor": {
+        "entity": {
+          "id": "admin3@example.com"
+        }
+      },
+      "user": {
         "entity": {
           "id": "admin3@example.com"
         }
@@ -377,6 +402,11 @@
           "id": "projects/your-project-id/roles/customRole"
         }
       },
+      "entity": {
+        "target": {
+          "id": "projects/your-project-id/roles/customRole"
+        }
+      },
       "user_agent": {
         "device": {
           "name": "Other"
@@ -397,6 +427,11 @@
     "source": {
       "@timestamp": "2024-09-01T12:34:56.789Z",
       "actor": {
+        "entity": {
+          "id": "admin3@example.com"
+        }
+      },
+      "user": {
         "entity": {
           "id": "admin3@example.com"
         }
@@ -507,6 +542,11 @@
           "id": "projects/your-project-id/roles/customRole"
         }
       },
+      "entity": {
+        "target": {
+          "id": "projects/your-project-id/roles/customRole"
+        }
+      },
       "user_agent": {
         "device": {
           "name": "Other"
@@ -527,6 +567,11 @@
     "source": {
       "@timestamp": "2024-09-01T12:34:56.789Z",
       "actor": {
+        "entity": {
+          "id": "admin4@example.com"
+        }
+      },
+      "user": {
         "entity": {
           "id": "admin4@example.com"
         }
@@ -646,6 +691,11 @@
           "id": "projects/your-project-id/roles/customRole"
         }
       },
+      "entity": {
+        "target": {
+          "id": "projects/your-project-id/roles/customRole"
+        }
+      },
       "user_agent": {
         "device": {
           "name": "Other"
@@ -666,6 +716,11 @@
     "source": {
       "@timestamp": "2024-09-01T12:34:56.789Z",
       "actor": {
+        "entity": {
+          "id": "admin6@example.com"
+        }
+      },
+      "user": {
         "entity": {
           "id": "admin6@example.com"
         }
@@ -782,6 +837,11 @@
       ],
       "target": {
         "entity": {
+          "id": "projects/your-project-id/roles/customRole"
+        }
+      },
+      "entity": {
+        "target": {
           "id": "projects/your-project-id/roles/customRole"
         }
       },
