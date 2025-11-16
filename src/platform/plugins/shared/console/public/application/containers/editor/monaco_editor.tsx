@@ -390,7 +390,6 @@ export const MonacoEditor = ({
           >
             <EuiButtonIcon
               display="fill"
-              size="m"
               color="primary"
               iconType="play"
               iconSize="m"
