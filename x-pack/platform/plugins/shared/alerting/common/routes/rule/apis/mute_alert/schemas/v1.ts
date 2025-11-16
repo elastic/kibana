@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import path from 'node:path';
 import { schema } from '@kbn/config-schema';
+
+export const muteAlertRequestBodyExamples = () => path.join(__dirname, 'examples_mute_alert.yaml');
 
 export const muteAlertParamsSchema = schema.object({
   rule_id: schema.string({
