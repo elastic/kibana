@@ -139,7 +139,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
                           id="workflowsManagement.stepExecutionDetails.contextAccessDescription"
                           defaultMessage="You can reference these values using {code}"
                           values={{
-                            code: <strong>{`{{ field }}`}</strong>,
+                            code: <strong>{`{{ <field> }}`}</strong>,
                           }}
                         />
                       </EuiCallOut>
@@ -171,8 +171,8 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
                             code: (
                               <strong>
                                 {triggerType === 'manual'
-                                  ? `{{ inputs.field }}`
-                                  : `{{ event.field }}`}
+                                  ? `{{ inputs.<field> }}`
+                                  : `{{ event.<field> }}`}
                               </strong>
                             ),
                           }}
