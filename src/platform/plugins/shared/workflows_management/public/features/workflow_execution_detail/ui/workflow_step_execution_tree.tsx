@@ -37,7 +37,6 @@ import {
   isInProgressStatus,
   isTerminalStatus,
 } from '@kbn/workflows';
-
 import type { StepExecutionTreeItem } from './build_step_executions_tree';
 import { buildStepExecutionsTree } from './build_step_executions_tree';
 import { StepExecutionTreeItemLabel } from './step_execution_tree_item_label';
@@ -248,7 +247,6 @@ export const WorkflowStepExecutionTree = ({
       };
       stepExecutionMap.set(triggerStep.stepExecutionId, triggerExecution);
     }
-
     const items: EuiTreeViewProps['items'] = convertTreeToEuiTreeViewItems(
       stepExecutionsTree,
       stepExecutionMap,
