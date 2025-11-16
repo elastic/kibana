@@ -89,14 +89,13 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
           triggerType = 'scheduled';
         }
 
-        const capitalizedTriggerType = triggerType.charAt(0).toUpperCase() + triggerType.slice(1);
         const inputData = workflowExecution.context.event || workflowExecution.context.inputs;
 
         const { inputs, event, ...contextData } = workflowExecution.context;
 
         return {
           id: 'trigger',
-          stepId: capitalizedTriggerType,
+          stepId: triggerType,
           stepType: `trigger_${triggerType}`,
           status: ExecutionStatus.COMPLETED,
           input: inputData as JsonValue,
