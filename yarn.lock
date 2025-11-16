@@ -2372,7 +2372,7 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui-amsterdam@npm:@elastic/eui@104.0.0-amsterdam.0":
+"@elastic/eui-amsterdam@npm:@elastic/eui@104.0.0-amsterdam.0", "@elastic/eui@104.0.0-amsterdam.0":
   version "104.0.0-amsterdam.0"
   resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-104.0.0-amsterdam.0.tgz#9eb69d025bf50367dbed544f21c6d2adedc2dd45"
   integrity sha512-mXZL4+TdFtfBYnB4GV3FMNgZTlywG4YFuqsUgE55ncdepsMRButzralO+i/8usdMIEFMmkEsUM8k/xgjxGQqWA==
@@ -2421,47 +2421,6 @@
     "@types/lodash" "^4.14.202"
     chroma-js "^2.4.2"
     lodash "^4.17.21"
-
-"@elastic/eui@104.0.0-amsterdam.0":
-  version "104.0.0-amsterdam.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-104.0.0-amsterdam.0.tgz#9eb69d025bf50367dbed544f21c6d2adedc2dd45"
-  integrity sha512-mXZL4+TdFtfBYnB4GV3FMNgZTlywG4YFuqsUgE55ncdepsMRButzralO+i/8usdMIEFMmkEsUM8k/xgjxGQqWA==
-  dependencies:
-    "@elastic/eui-theme-common" "2.0.0"
-    "@elastic/prismjs-esql" "^1.1.0"
-    "@hello-pangea/dnd" "^16.6.0"
-    "@types/lodash" "^4.14.202"
-    "@types/numeral" "^2.0.5"
-    "@types/react-window" "^1.8.8"
-    "@types/refractor" "^3.4.0"
-    chroma-js "^2.4.2"
-    classnames "^2.5.1"
-    lodash "^4.17.21"
-    mdast-util-to-hast "^10.2.0"
-    numeral "^2.0.6"
-    prop-types "^15.8.1"
-    react-dropzone "^11.7.1"
-    react-element-to-jsx-string "^15.0.0"
-    react-focus-on "^3.9.1"
-    react-is "^17.0.2"
-    react-remove-scroll-bar "^2.3.4"
-    react-virtualized-auto-sizer "^1.0.24"
-    react-window "^1.8.10"
-    refractor "^3.6.0"
-    rehype-raw "^5.1.0"
-    rehype-react "^6.2.1"
-    rehype-stringify "^8.0.0"
-    remark-breaks "^2.0.2"
-    remark-emoji "^2.1.0"
-    remark-parse-no-trim "^8.0.4"
-    remark-rehype "^8.1.0"
-    tabbable "^5.3.3"
-    text-diff "^1.0.1"
-    unified "^9.2.2"
-    unist-util-visit "^2.0.3"
-    url-parse "^1.5.10"
-    uuid "^8.3.0"
-    vfile "^4.2.1"
 
 "@elastic/filesaver@1.1.2":
   version "1.1.2"
@@ -9042,55 +9001,55 @@
     zod "^3.23.8"
     zod-to-json-schema "^3.24.1"
 
-"@moonrepo/cli@1.41.5":
-  version "1.41.5"
-  resolved "https://registry.yarnpkg.com/@moonrepo/cli/-/cli-1.41.5.tgz#6cc59b3ceff8af78f2d7ab3ce3f29b75ad4f5bd0"
-  integrity sha512-ZlT3qqoftCviFjMpiBviQUz/Tje4WsslmRRHC1yRcYjmJnuH2X8FnmdPn2wI4OLNRZ5suSTUEAyiOBDLc5qJLA==
+"@moonrepo/cli@1.41.6":
+  version "1.41.6"
+  resolved "https://registry.yarnpkg.com/@moonrepo/cli/-/cli-1.41.6.tgz#f5b018516f1aef491443a155e60d090417d8965e"
+  integrity sha512-SkwXawvrHOmWkO0XbxrwlqWwIveK5XOLkNQ2TW4/b7jAxIfiq9Al6ARw8tF1HMg5ir3uEGai9rmaEuSWtx1BZg==
   dependencies:
     detect-libc "^2.0.4"
   optionalDependencies:
-    "@moonrepo/core-linux-arm64-gnu" "1.41.5"
-    "@moonrepo/core-linux-arm64-musl" "1.41.5"
-    "@moonrepo/core-linux-x64-gnu" "1.41.5"
-    "@moonrepo/core-linux-x64-musl" "1.41.5"
-    "@moonrepo/core-macos-arm64" "1.41.5"
-    "@moonrepo/core-macos-x64" "1.41.5"
-    "@moonrepo/core-windows-x64-msvc" "1.41.5"
+    "@moonrepo/core-linux-arm64-gnu" "1.41.6"
+    "@moonrepo/core-linux-arm64-musl" "1.41.6"
+    "@moonrepo/core-linux-x64-gnu" "1.41.6"
+    "@moonrepo/core-linux-x64-musl" "1.41.6"
+    "@moonrepo/core-macos-arm64" "1.41.6"
+    "@moonrepo/core-macos-x64" "1.41.6"
+    "@moonrepo/core-windows-x64-msvc" "1.41.6"
 
-"@moonrepo/core-linux-arm64-gnu@1.41.5":
-  version "1.41.5"
-  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-arm64-gnu/-/core-linux-arm64-gnu-1.41.5.tgz#f7e57741227a886d1cff8d6a53ac819b83041125"
-  integrity sha512-dTf1F3ZucSBwYwtSl6VXRYUZfp7PD3BncU6xz38cq0p55yLpm0E+l8F1mJV6F0lyEj9DjidikfRhR8u9Gqz95w==
+"@moonrepo/core-linux-arm64-gnu@1.41.6":
+  version "1.41.6"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-arm64-gnu/-/core-linux-arm64-gnu-1.41.6.tgz#a9dd1a77c614d1e080b02dc571adddabcc7e2f72"
+  integrity sha512-3Ob5xqIUUKytQ3ZppTeOKXYUyG5WK9jSc5fgYoy9K9ezFEkkhLoGbQ8ysRbA210AQMWTfIpAcZWwKJ0dFJLDYw==
 
-"@moonrepo/core-linux-arm64-musl@1.41.5":
-  version "1.41.5"
-  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-arm64-musl/-/core-linux-arm64-musl-1.41.5.tgz#cf457b47cf830aafc7fe68e4e4faa6615e8107d4"
-  integrity sha512-yifj/1fRy+gKYwI5D/N0vZL8nuuUSZYqPsMMbwmCdwaBE+QwUvmanXYGCx5lxeVvPCkogCN5Y5X0uwXa0TYsHQ==
+"@moonrepo/core-linux-arm64-musl@1.41.6":
+  version "1.41.6"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-arm64-musl/-/core-linux-arm64-musl-1.41.6.tgz#70244776b9b59da62c8d5a430ac5540f9babcc72"
+  integrity sha512-vpH7Gf/0QNWqV78SfhRz4j4pI7TDUBDpWxmP2VlmBWrj3RJzZa31SyatFe1RLvHvN6cyj3w8S5ReaWKhAC399A==
 
-"@moonrepo/core-linux-x64-gnu@1.41.5":
-  version "1.41.5"
-  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-x64-gnu/-/core-linux-x64-gnu-1.41.5.tgz#b2e785de00d1ac912aa6f7459707dce14096c58a"
-  integrity sha512-ttEeTf2a1ImjzhQWQ8JG+lgg9iuIMu681RoYnoRF8TXKVpywvuaDEFM7beWQyvMEn1hNTbJ82yeJCmb2fsq2ig==
+"@moonrepo/core-linux-x64-gnu@1.41.6":
+  version "1.41.6"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-x64-gnu/-/core-linux-x64-gnu-1.41.6.tgz#28a439c736d7b1c5f788dfe5983b40af0935ecc8"
+  integrity sha512-wgRPmJZqSkjKL/uwoWb3r8In1YOCHw+hN/FBTpEioTeTmzt7EmTUzwpqMjEp1OAdxFs62DM+YgZ3/fMtYGCk9Q==
 
-"@moonrepo/core-linux-x64-musl@1.41.5":
-  version "1.41.5"
-  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-x64-musl/-/core-linux-x64-musl-1.41.5.tgz#7f3f3695782f697ce6e1b4823a60ab964c138ff7"
-  integrity sha512-qxiICL+UQim9+SIQh9jV/BX33HIT6ozxU97HhMxNtn3LbeUDNIHDAv3Wzzss7DSVCNdsFSO31OjgX8YY1Y//Bw==
+"@moonrepo/core-linux-x64-musl@1.41.6":
+  version "1.41.6"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-x64-musl/-/core-linux-x64-musl-1.41.6.tgz#863d6100177d7146a99d71918989e87141d62651"
+  integrity sha512-cAxY5GMdxbdkTTWS3KVrAaVJvMesSbiWCaMyV8Tr/rKC5Ud5MnT5bBGbPJOeDHd7qpu4e9jKIyMXSg2DA0zIYg==
 
-"@moonrepo/core-macos-arm64@1.41.5":
-  version "1.41.5"
-  resolved "https://registry.yarnpkg.com/@moonrepo/core-macos-arm64/-/core-macos-arm64-1.41.5.tgz#516d1725a6675fd217e2c0dcbd70424f2848bba4"
-  integrity sha512-q5qIVbO52cIZ0bak1xoop6dYj0xF7cgcvys/LrmbMLwyPwcucj09F1TmTAkpQtl/AXGjACIoVbWoDrFwxKHf7Q==
+"@moonrepo/core-macos-arm64@1.41.6":
+  version "1.41.6"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-macos-arm64/-/core-macos-arm64-1.41.6.tgz#32ee7813534b480e6ff90acb8b5dd83577ba2387"
+  integrity sha512-auPdZbEoP8NtDzj1fpVZG6EY2MrDyz1DBfki3I7WXkH8a6G8HjXn9JLViqs6EPljjrTbj2QBTYX/JCnjlsCcuw==
 
-"@moonrepo/core-macos-x64@1.41.5":
-  version "1.41.5"
-  resolved "https://registry.yarnpkg.com/@moonrepo/core-macos-x64/-/core-macos-x64-1.41.5.tgz#9cf7c671dd17c81b84e5fcb6a83ba1b0302a2d8f"
-  integrity sha512-0C+Pth0IbMwesDpn78O0Ur1VG+KESHuB2QHlSK4zNh3dfTN5fdPhgdLCk50ASCM1Wh4aA8gx5ayHKeilDWv9uQ==
+"@moonrepo/core-macos-x64@1.41.6":
+  version "1.41.6"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-macos-x64/-/core-macos-x64-1.41.6.tgz#8f6f81e9ce8b1c0fa54eae5dd2fd830e369cb0fb"
+  integrity sha512-76ya4w//hQbnT86tCk5vooQ0GTApxgnLuSA9fzqgN7ZEmTL6UWaP2ob1zfkNVFc6I7KxzgYYcP8wdc8q4F92ew==
 
-"@moonrepo/core-windows-x64-msvc@1.41.5":
-  version "1.41.5"
-  resolved "https://registry.yarnpkg.com/@moonrepo/core-windows-x64-msvc/-/core-windows-x64-msvc-1.41.5.tgz#c2e3c02f13df3a5dd4fc5a8e1a15a1871bd7a35c"
-  integrity sha512-QxKbCPv3Jx9u3n6M5OXdqP3HL3m8gU7HB5IejHTtbgJtanxuG180SmAy51peAx/tq/JsWn1kWm9UvsC68YQfYA==
+"@moonrepo/core-windows-x64-msvc@1.41.6":
+  version "1.41.6"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-windows-x64-msvc/-/core-windows-x64-msvc-1.41.6.tgz#62a4db1b3a888c70a2b56ad27c52bc46ad979322"
+  integrity sha512-agaMCGFeJF60Iggqwqx8M7RdFThIDDtWN/mPJz4vBzKWy3tSGTC99zNgkXjb4Jhny03ky5uFpORvX2Fj/ul9/Q==
 
 "@mrmlnc/readdir-enhanced@^2.2.1":
   version "2.2.1"
@@ -30710,7 +30669,7 @@ string-replace-loader@^3.1.0:
     loader-utils "^2.0.0"
     schema-utils "^3.0.0"
 
-"string-width-cjs@npm:string-width@^4.2.0":
+"string-width-cjs@npm:string-width@^4.2.0", string-width@^4.1.0, string-width@^4.2.0, string-width@^4.2.3:
   version "4.2.3"
   resolved "https://registry.yarnpkg.com/string-width/-/string-width-4.2.3.tgz#269c7117d27b05ad2e536830a8ec895ef9c6d010"
   integrity sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g==
@@ -30727,15 +30686,6 @@ string-width@^1.0.1:
     code-point-at "^1.0.0"
     is-fullwidth-code-point "^1.0.0"
     strip-ansi "^3.0.0"
-
-string-width@^4.1.0, string-width@^4.2.0, string-width@^4.2.3:
-  version "4.2.3"
-  resolved "https://registry.yarnpkg.com/string-width/-/string-width-4.2.3.tgz#269c7117d27b05ad2e536830a8ec895ef9c6d010"
-  integrity sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g==
-  dependencies:
-    emoji-regex "^8.0.0"
-    is-fullwidth-code-point "^3.0.0"
-    strip-ansi "^6.0.1"
 
 string-width@^5.0.1, string-width@^5.1.2:
   version "5.1.2"
@@ -30829,7 +30779,7 @@ stringify-object@^3.2.1:
     is-obj "^1.0.1"
     is-regexp "^1.0.0"
 
-"strip-ansi-cjs@npm:strip-ansi@^6.0.1":
+"strip-ansi-cjs@npm:strip-ansi@^6.0.1", strip-ansi@^6.0.0, strip-ansi@^6.0.1:
   version "6.0.1"
   resolved "https://registry.yarnpkg.com/strip-ansi/-/strip-ansi-6.0.1.tgz#9e26c63d30f53443e9489495b2105d37b67a85d9"
   integrity sha512-Y38VPSHcqkFrCpFnQ9vuSXmquuv5oXOKpGeT6aGrr3o3Gc9AlVa6JBfUSOCnbxGGZF+/0ooI7KrPuUSztUdU5A==
@@ -30842,13 +30792,6 @@ strip-ansi@^3.0.0, strip-ansi@^3.0.1:
   integrity sha1-ajhfuIU9lS1f8F0Oiq+UJ43GPc8=
   dependencies:
     ansi-regex "^2.0.0"
-
-strip-ansi@^6.0.0, strip-ansi@^6.0.1:
-  version "6.0.1"
-  resolved "https://registry.yarnpkg.com/strip-ansi/-/strip-ansi-6.0.1.tgz#9e26c63d30f53443e9489495b2105d37b67a85d9"
-  integrity sha512-Y38VPSHcqkFrCpFnQ9vuSXmquuv5oXOKpGeT6aGrr3o3Gc9AlVa6JBfUSOCnbxGGZF+/0ooI7KrPuUSztUdU5A==
-  dependencies:
-    ansi-regex "^5.0.1"
 
 strip-ansi@^7.0.1, strip-ansi@^7.1.0:
   version "7.1.0"
@@ -33596,7 +33539,7 @@ workerpool@^6.5.1:
   resolved "https://registry.yarnpkg.com/workerpool/-/workerpool-6.5.1.tgz#060f73b39d0caf97c6db64da004cd01b4c099544"
   integrity sha512-Fs4dNYcsdpYSAfVxhnl1L5zTksjvOJxtC5hzMNl+1t9B8hTJTdKDyZ5ju7ztgPy+ft9tBFXoOlDNiOT9WUXZlA==
 
-"wrap-ansi-cjs@npm:wrap-ansi@^7.0.0":
+"wrap-ansi-cjs@npm:wrap-ansi@^7.0.0", wrap-ansi@^7.0.0:
   version "7.0.0"
   resolved "https://registry.yarnpkg.com/wrap-ansi/-/wrap-ansi-7.0.0.tgz#67e145cff510a6a6984bdf1152911d69d2eb9e43"
   integrity sha512-YVGIj2kamLSTxw6NsZjoBxfSwsn0ycdesmc4p+Q21c5zPuZ1pl+NfxVdxPtdHvmNVOQ6XSYG4AUtyt/Fi7D16Q==
@@ -33617,15 +33560,6 @@ wrap-ansi@^6.0.1, wrap-ansi@^6.2.0:
   version "6.2.0"
   resolved "https://registry.yarnpkg.com/wrap-ansi/-/wrap-ansi-6.2.0.tgz#e9393ba07102e6c91a3b221478f0257cd2856e53"
   integrity sha512-r6lPcBGxZXlIcymEu7InxDMhdW0KDxpLgoFLcguasxCaJ/SOIZwINatK9KY/tf+ZrlywOKU0UDj3ATXUBfxJXA==
-  dependencies:
-    ansi-styles "^4.0.0"
-    string-width "^4.1.0"
-    strip-ansi "^6.0.0"
-
-wrap-ansi@^7.0.0:
-  version "7.0.0"
-  resolved "https://registry.yarnpkg.com/wrap-ansi/-/wrap-ansi-7.0.0.tgz#67e145cff510a6a6984bdf1152911d69d2eb9e43"
-  integrity sha512-YVGIj2kamLSTxw6NsZjoBxfSwsn0ycdesmc4p+Q21c5zPuZ1pl+NfxVdxPtdHvmNVOQ6XSYG4AUtyt/Fi7D16Q==
   dependencies:
     ansi-styles "^4.0.0"
     string-width "^4.1.0"
@@ -33741,7 +33675,7 @@ xpath@^0.0.33:
   resolved "https://registry.yarnpkg.com/xpath/-/xpath-0.0.33.tgz#5136b6094227c5df92002e7c3a13516a5074eb07"
   integrity sha512-NNXnzrkDrAzalLhIUc01jO2mOzXGXh1JwPgkihcLLzw98c0WgYDmmjSh1Kl3wzaxSVWMuA+fe0WTWOBDWCBmNA==
 
-"xstate5@npm:xstate@^5.19.2":
+"xstate5@npm:xstate@^5.19.2", xstate@^5.19.2:
   version "5.19.2"
   resolved "https://registry.yarnpkg.com/xstate/-/xstate-5.19.2.tgz#db3f1ee614bbb6a49ad3f0c96ddbf98562d456ba"
   integrity sha512-B8fL2aP0ogn5aviAXFzI5oZseAMqN00fg/TeDa3ZtatyDcViYLIfuQl4y8qmHCiKZgGEzmnTyNtNQL9oeJE2gw==
@@ -33750,11 +33684,6 @@ xstate@^4.38.3:
   version "4.38.3"
   resolved "https://registry.yarnpkg.com/xstate/-/xstate-4.38.3.tgz#4e15e7ad3aa0ca1eea2010548a5379966d8f1075"
   integrity sha512-SH7nAaaPQx57dx6qvfcIgqKRXIh4L0A1iYEqim4s1u7c9VoCgzZc+63FY90AKU4ZzOC2cfJzTnpO4zK7fCUzzw==
-
-xstate@^5.19.2:
-  version "5.19.2"
-  resolved "https://registry.yarnpkg.com/xstate/-/xstate-5.19.2.tgz#db3f1ee614bbb6a49ad3f0c96ddbf98562d456ba"
-  integrity sha512-B8fL2aP0ogn5aviAXFzI5oZseAMqN00fg/TeDa3ZtatyDcViYLIfuQl4y8qmHCiKZgGEzmnTyNtNQL9oeJE2gw==
 
 "xtend@>=4.0.0 <4.1.0-0", xtend@^4.0.0, xtend@^4.0.1, xtend@^4.0.2, xtend@~4.0.1:
   version "4.0.2"
