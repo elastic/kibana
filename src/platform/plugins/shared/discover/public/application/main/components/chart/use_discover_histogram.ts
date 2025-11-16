@@ -25,6 +25,7 @@ import {
   debounceTime,
   distinctUntilChanged,
   filter,
+  from,
   map,
   merge,
   pairwise,
@@ -132,22 +133,20 @@ export const useDiscoverHistogram = (
    */
 
   useEffect(() => {
-    const subscription = createAppStateObservable(stateContainer.appState.state$).subscribe(
-      (changes) => {
-        if ('timeInterval' in changes && changes.timeInterval) {
-          unifiedHistogramApi?.setTimeInterval(changes.timeInterval);
-        }
-
-        if ('chartHidden' in changes && typeof changes.chartHidden === 'boolean') {
-          unifiedHistogramApi?.setChartHidden(changes.chartHidden);
-        }
+    const subscription = createAppStateObservable(stateContainer).subscribe((changes) => {
+      if ('timeInterval' in changes && changes.timeInterval) {
+        unifiedHistogramApi?.setTimeInterval(changes.timeInterval);
       }
-    );
+
+      if ('chartHidden' in changes && typeof changes.chartHidden === 'boolean') {
+        unifiedHistogramApi?.setChartHidden(changes.chartHidden);
+      }
+    });
 
     return () => {
       subscription?.unsubscribe();
     };
-  }, [stateContainer.appState.state$, unifiedHistogramApi]);
+  }, [stateContainer, unifiedHistogramApi]);
 
   /**
    * Total hits
@@ -472,8 +471,10 @@ const createUnifiedHistogramStateObservable = (state$?: Observable<UnifiedHistog
   );
 };
 
-const createAppStateObservable = (state$: Observable<DiscoverAppState>) => {
-  return state$.pipe(
+const createAppStateObservable = (stateContainer: DiscoverStateContainer) => {
+  return from(stateContainer.internalState).pipe(
+    map(() => stateContainer.getCurrentTab().appState),
+    distinctUntilChanged((a, b) => isEqual(a, b)),
     startWith(undefined),
     pairwise(),
     map(([prev, curr]) => {

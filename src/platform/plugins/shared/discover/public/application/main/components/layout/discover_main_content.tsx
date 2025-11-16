@@ -15,6 +15,8 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import { distinctUntilChanged, from, map } from 'rxjs';
+import { isEqual } from 'lodash';
 import { VIEW_MODE } from '../../../../../common/constants';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DocumentViewModeToggle } from '../../../../components/view_mode_toggle';
@@ -93,18 +95,23 @@ export const DiscoverMainContent = ({
 
       return new Promise<VIEW_MODE>((resolve, reject) => {
         // return a promise to report when the view mode has been updated
-        const subscription = stateContainer.appState.state$.subscribe((state) => {
-          subscription.unsubscribe();
+        const subscription = from(stateContainer.internalState)
+          .pipe(
+            map(() => stateContainer.getCurrentTab().appState),
+            distinctUntilChanged((a, b) => isEqual(a, b))
+          )
+          .subscribe((state) => {
+            subscription.unsubscribe();
 
-          if (state.viewMode === mode) {
-            resolve(mode);
-          } else {
-            reject(mode);
-          }
-        });
+            if (state.viewMode === mode) {
+              resolve(mode);
+            } else {
+              reject(mode);
+            }
+          });
       });
     },
-    [dispatch, stateContainer.appState.state$, trackUiMetric, updateAppState]
+    [dispatch, stateContainer, trackUiMetric, updateAppState]
   );
 
   const isDropAllowed = Boolean(onDropFieldToTable);

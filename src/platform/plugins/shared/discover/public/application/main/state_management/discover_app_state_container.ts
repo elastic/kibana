@@ -25,7 +25,6 @@ import { type GlobalQueryStateFromUrl, connectToQueryState } from '@kbn/data-plu
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import type { DataGridDensity } from '@kbn/unified-data-table';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { Observable } from 'rxjs';
 import { distinctUntilChanged, from, map } from 'rxjs';
 import defaultComparator from 'fast-deep-equal';
 import type { DiscoverServices } from '../../../build_services';
@@ -57,10 +56,6 @@ export interface DiscoverAppStateContainer {
    * @param state - new state to set
    */
   set: (state: DiscoverAppState) => void;
-  /**
-   * {@link Observable} of state
-   */
-  state$: Observable<DiscoverAppState>;
 }
 
 export interface DiscoverAppState {

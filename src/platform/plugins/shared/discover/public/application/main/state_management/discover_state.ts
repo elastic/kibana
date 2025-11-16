@@ -15,11 +15,11 @@ import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import { DataViewType } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
-import { merge } from 'rxjs';
+import { distinctUntilChanged, from, map, merge } from 'rxjs';
 import { getInitialESQLQuery } from '@kbn/esql-utils';
 import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import { isOfAggregateQueryType, isOfQueryType } from '@kbn/es-query';
-import { isFunction } from 'lodash';
+import { isEqual, isFunction } from 'lodash';
 import type { DiscoverServices } from '../../..';
 import { FetchStatus } from '../../types';
 import { changeDataView } from './utils/change_data_view';
@@ -462,18 +462,23 @@ export function getDiscoverStateContainer({
     const appStateInitAndSyncUnsubscribe = appStateContainer.initAndSync();
 
     // subscribing to state changes of appStateContainer, triggering data fetching
-    const appStateSubscription = appStateContainer.state$.subscribe(
-      buildStateSubscribe({
-        appState: appStateContainer,
-        savedSearchState: savedSearchContainer,
-        dataState: dataStateContainer,
-        internalState,
-        runtimeStateManager,
-        services,
-        setDataView,
-        getCurrentTab,
-      })
-    );
+    const appStateSubscription = from(internalState)
+      .pipe(
+        map(() => getCurrentTab().appState),
+        distinctUntilChanged((a, b) => isEqual(a, b))
+      )
+      .subscribe(
+        buildStateSubscribe({
+          appState: appStateContainer,
+          savedSearchState: savedSearchContainer,
+          dataState: dataStateContainer,
+          internalState,
+          runtimeStateManager,
+          services,
+          setDataView,
+          getCurrentTab,
+        })
+      );
 
     const savedSearchChangesSubscription = savedSearchContainer
       .getCurrent$()
