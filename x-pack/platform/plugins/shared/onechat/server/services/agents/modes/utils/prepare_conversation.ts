@@ -6,6 +6,7 @@
  */
 
 import type { ConversationRound, RawRoundInput, RoundInput } from '@kbn/onechat-common';
+import { createInternalError } from '@kbn/onechat-common';
 import type { Attachment, AttachmentInput } from '@kbn/onechat-common/attachments';
 import type { AttachmentsService } from '@kbn/onechat-server/runner';
 import { getToolResultId } from '@kbn/onechat-server/tools';
@@ -85,16 +86,23 @@ const prepareRoundInput = async ({
 };
 
 const prepareAttachment = async ({
-  attachment,
+  attachment: input,
   attachmentsService,
 }: {
   attachment: AttachmentInput;
   attachmentsService: AttachmentsService;
 }): Promise<ProcessedAttachment> => {
-  const representation = await attachmentsService.format(attachment);
+  const definition = attachmentsService.getTypeDefinition(input.type);
+  if (!definition) {
+    throw createInternalError(`Found attachment with unknown type: "${input.type}"`);
+  }
+
+  const attachment = inputToFinal(input);
+  const formatted = await definition.format(attachment);
+
   return {
-    attachment: inputToFinal(attachment),
-    representation,
+    attachment,
+    representation: await formatted.getRepresentation(),
   };
 };
 

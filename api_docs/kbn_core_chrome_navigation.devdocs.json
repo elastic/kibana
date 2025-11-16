@@ -44,7 +44,9 @@
         "type": "Function",
         "tags": [],
         "label": "useNavigation",
-        "description": [],
+        "description": [
+          "\nHook for managing the main navigation state.\n"
+        ],
         "signature": [
           "(isCollapsed: boolean, items: ",
           "NavigationStructure",
@@ -60,7 +62,9 @@
             "type": "boolean",
             "tags": [],
             "label": "isCollapsed",
-            "description": [],
+            "description": [
+              "- whether the side nav is collapsed."
+            ],
             "signature": [
               "boolean"
             ],
@@ -75,7 +79,9 @@
             "type": "Object",
             "tags": [],
             "label": "items",
-            "description": [],
+            "description": [
+              "- the navigation structure including primary, secondary, and footer items."
+            ],
             "signature": [
               "NavigationStructure"
             ],
@@ -90,7 +96,9 @@
             "type": "string",
             "tags": [],
             "label": "logoId",
-            "description": [],
+            "description": [
+              "- the logo ID, used for highlighting the logo."
+            ],
             "signature": [
               "string"
             ],
@@ -105,7 +113,9 @@
             "type": "string",
             "tags": [],
             "label": "activeItemId",
-            "description": [],
+            "description": [
+              "- the active item ID, used for highlighting the active item."
+            ],
             "signature": [
               "string | undefined"
             ],
@@ -115,7 +125,9 @@
             "isRequired": false
           }
         ],
-        "returnComment": [],
+        "returnComment": [
+          "the navigation state including:\n- `actualActiveItemId` - the actual active item ID. There can only be one `aria-current=page` link on the page.\n- `visuallyActivePageId` - the visually active page ID. The link does not have to be `aria-current=page`, it can be a parent of an active page.\n- `visuallyActiveSubpageId` - the visually active subpage ID.\n- `openerNode` - the primary menu item whose submenu is shown in the side panel.\n- `isCollapsed` - whether the side nav is collapsed.\n- `isSidePanelOpen` - whether the side panel is open."
+        ],
         "initialIsOpen": false
       }
     ],
@@ -133,40 +145,13 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-chrome-navigation",
-            "id": "def-public.MenuItem.datatestsubj",
-            "type": "string",
-            "tags": [],
-            "label": "'data-test-subj'",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/core/packages/chrome/navigation/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-chrome-navigation",
-            "id": "def-public.MenuItem.badgeType",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "badgeType",
-            "description": [],
-            "signature": [
-              "BadgeType",
-              " | undefined"
-            ],
-            "path": "src/core/packages/chrome/navigation/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-chrome-navigation",
             "id": "def-public.MenuItem.href",
             "type": "string",
             "tags": [],
             "label": "href",
-            "description": [],
+            "description": [
+              "\nThe URL for the menu item link."
+            ],
             "path": "src/core/packages/chrome/navigation/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -177,7 +162,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "iconType",
-            "description": [],
+            "description": [
+              "\nThe icon to display for the menu item."
+            ],
             "signature": [
               "string | React.ComponentType<{}>"
             ],
@@ -191,7 +178,9 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [],
+            "description": [
+              "\nThe unique identifier of the menu item."
+            ],
             "path": "src/core/packages/chrome/navigation/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -202,7 +191,42 @@
             "type": "string",
             "tags": [],
             "label": "label",
-            "description": [],
+            "description": [
+              "\nThe label to display for the menu item."
+            ],
+            "path": "src/core/packages/chrome/navigation/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-navigation",
+            "id": "def-public.MenuItem.datatestsubj",
+            "type": "string",
+            "tags": [],
+            "label": "'data-test-subj'",
+            "description": [
+              "\n(optional) `data-test-subj` attribute for testing and tracking purposes."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/packages/chrome/navigation/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-navigation",
+            "id": "def-public.MenuItem.badgeType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "badgeType",
+            "description": [
+              "\n(optional) The type of badge shown next to the item (e.g. `beta`, `techPreview`)."
+            ],
+            "signature": [
+              "BadgeType",
+              " | undefined"
+            ],
             "path": "src/core/packages/chrome/navigation/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -213,7 +237,9 @@
             "type": "Array",
             "tags": [],
             "label": "sections",
-            "description": [],
+            "description": [
+              "\n(optional) The secondary menu sections belonging to the menu item."
+            ],
             "signature": [
               "SecondaryMenuSection",
               "[] | undefined"
@@ -247,22 +273,6 @@
             ],
             "signature": [
               "string | undefined"
-            ],
-            "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-chrome-navigation",
-            "id": "def-public.NavigationProps.sidePanelFooter",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "sidePanelFooter",
-            "description": [
-              "\nContent to display inside the side panel footer."
-            ],
-            "signature": [
-              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
             "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
             "deprecated": false,
@@ -315,12 +325,46 @@
           },
           {
             "parentPluginId": "@kbn/core-chrome-navigation",
+            "id": "def-public.NavigationProps.setWidth",
+            "type": "Function",
+            "tags": [],
+            "label": "setWidth",
+            "description": [
+              "\nRequired by the grid layout to set the width of the navigation slot."
+            ],
+            "signature": [
+              "(width: number) => void"
+            ],
+            "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-chrome-navigation",
+                "id": "def-public.NavigationProps.setWidth.$1",
+                "type": "number",
+                "tags": [],
+                "label": "width",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-navigation",
             "id": "def-public.NavigationProps.onItemClick",
             "type": "Function",
             "tags": [],
             "label": "onItemClick",
             "description": [
-              "\nCallback fired when a navigation item is clicked."
+              "\n(optional) Callback fired when a navigation item is clicked."
             ],
             "signature": [
               "((item: ",
@@ -359,37 +403,19 @@
           },
           {
             "parentPluginId": "@kbn/core-chrome-navigation",
-            "id": "def-public.NavigationProps.setWidth",
-            "type": "Function",
+            "id": "def-public.NavigationProps.sidePanelFooter",
+            "type": "CompoundType",
             "tags": [],
-            "label": "setWidth",
+            "label": "sidePanelFooter",
             "description": [
-              "\nRequired by the grid layout to set the width of the navigation slot."
+              "\n(optional) Content to display inside the side panel footer."
             ],
             "signature": [
-              "(width: number) => void"
+              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
             "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
             "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/core-chrome-navigation",
-                "id": "def-public.NavigationProps.setWidth.$1",
-                "type": "number",
-                "tags": [],
-                "label": "width",
-                "description": [],
-                "signature": [
-                  "number"
-                ],
-                "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-chrome-navigation",
@@ -398,7 +424,7 @@
             "tags": [],
             "label": "'data-test-subj'",
             "description": [
-              "\nOptional data-test-subj attribute for testing purposes."
+              "\n(optional) data-test-subj attribute for testing purposes."
             ],
             "signature": [
               "string | undefined"
@@ -427,7 +453,9 @@
             "type": "Array",
             "tags": [],
             "label": "footerItems",
-            "description": [],
+            "description": [
+              "\nThe items to be displayed in the navigation footer."
+            ],
             "signature": [
               "MenuItem",
               "[]"
@@ -442,7 +470,9 @@
             "type": "Array",
             "tags": [],
             "label": "primaryItems",
-            "description": [],
+            "description": [
+              "\nThe primary navigation items displayed in the navigation main menu."
+            ],
             "signature": [
               "MenuItem",
               "[]"
@@ -467,11 +497,52 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-chrome-navigation",
+            "id": "def-public.SecondaryMenuItem.href",
+            "type": "string",
+            "tags": [],
+            "label": "href",
+            "description": [
+              "\nThe URL for the menu item link."
+            ],
+            "path": "src/core/packages/chrome/navigation/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-navigation",
+            "id": "def-public.SecondaryMenuItem.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "\nThe unique identifier of the menu item."
+            ],
+            "path": "src/core/packages/chrome/navigation/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-navigation",
+            "id": "def-public.SecondaryMenuItem.label",
+            "type": "string",
+            "tags": [],
+            "label": "label",
+            "description": [
+              "\nThe label to display for the menu item."
+            ],
+            "path": "src/core/packages/chrome/navigation/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-navigation",
             "id": "def-public.SecondaryMenuItem.datatestsubj",
             "type": "string",
             "tags": [],
             "label": "'data-test-subj'",
-            "description": [],
+            "description": [
+              "\n(optional) `data-test-subj` attribute for testing and tracking purposes."
+            ],
             "signature": [
               "string | undefined"
             ],
@@ -485,7 +556,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "badgeType",
-            "description": [],
+            "description": [
+              "\n(optional) The type of badge shown next to the item (e.g. `beta`, `techPreview`)."
+            ],
             "signature": [
               "BadgeType",
               " | undefined"
@@ -496,47 +569,16 @@
           },
           {
             "parentPluginId": "@kbn/core-chrome-navigation",
-            "id": "def-public.SecondaryMenuItem.href",
-            "type": "string",
-            "tags": [],
-            "label": "href",
-            "description": [],
-            "path": "src/core/packages/chrome/navigation/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-chrome-navigation",
-            "id": "def-public.SecondaryMenuItem.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "path": "src/core/packages/chrome/navigation/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-chrome-navigation",
             "id": "def-public.SecondaryMenuItem.isExternal",
             "type": "CompoundType",
             "tags": [],
             "label": "isExternal",
-            "description": [],
+            "description": [
+              "\n(optional) Whether the link opens in a new tab."
+            ],
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/core/packages/chrome/navigation/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-chrome-navigation",
-            "id": "def-public.SecondaryMenuItem.label",
-            "type": "string",
-            "tags": [],
-            "label": "label",
-            "description": [],
             "path": "src/core/packages/chrome/navigation/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -561,7 +603,9 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [],
+            "description": [
+              "\nThe unique identifier of the secondary menu section."
+            ],
             "path": "src/core/packages/chrome/navigation/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -572,7 +616,9 @@
             "type": "Array",
             "tags": [],
             "label": "items",
-            "description": [],
+            "description": [
+              "\nThe items contained in the secondary menu section."
+            ],
             "signature": [
               "SecondaryMenuItem",
               "[]"
@@ -587,7 +633,9 @@
             "type": "string",
             "tags": [],
             "label": "label",
-            "description": [],
+            "description": [
+              "\n(optional) The label to display for the secondary menu section."
+            ],
             "signature": [
               "string | undefined"
             ],
@@ -616,7 +664,7 @@
             "tags": [],
             "label": "id",
             "description": [
-              "\nThe route ID for the logo, used for the active state."
+              "\nThe route ID of the logo, used for the active state."
             ],
             "path": "src/core/packages/chrome/navigation/types.ts",
             "deprecated": false,
@@ -629,7 +677,7 @@
             "tags": [],
             "label": "href",
             "description": [
-              "\nThe href for the logo link, typically the home page."
+              "\nThe href of the logo link, typically the home page."
             ],
             "path": "src/core/packages/chrome/navigation/types.ts",
             "deprecated": false,
@@ -668,7 +716,7 @@
             "tags": [],
             "label": "'data-test-subj'",
             "description": [
-              "\nOptional data-test-subj attribute"
+              "\n(optional) `data-test-subj` attribute for testing and tracking purposes."
             ],
             "signature": [
               "string | undefined"
