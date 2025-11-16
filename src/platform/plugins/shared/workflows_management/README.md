@@ -99,13 +99,58 @@ Workflow definitions stored as Kibana saved objects.
 
 The plugin exposes various API endpoints for workflow management:
 
-- `GET /api/workflows` - List workflows
+### Workflow Management
+- `POST /api/workflows/search` - Search and list workflows
 - `POST /api/workflows` - Create workflow
 - `GET /api/workflows/{id}` - Get workflow
 - `PUT /api/workflows/{id}` - Update workflow
 - `DELETE /api/workflows/{id}` - Delete workflow
 - `POST /api/workflows/{id}/execute` - Execute workflow
-- `GET /api/workflows/{id}/executions` - Get execution history
+
+### Execution Management
+- `GET /api/workflowExecutions` - List workflow executions
+- `GET /api/workflowExecutions/{id}` - Get execution details
+- `GET /api/workflowExecutions/{id}/logs` - Get execution logs
+
+### Pagination
+
+All paginated endpoints follow a consistent pagination strategy:
+
+**Request Parameters:**
+- `page` (number, default: 1) - Page number (1-indexed)
+- `size` (number, default: 20) - Number of items per page
+
+**Response Structure:**
+```json
+{
+  "results": [...],
+  "page": 1,
+  "size": 20,
+  "total": 100
+}
+```
+
+**Examples:**
+
+Search workflows:
+```bash
+POST /api/workflows/search
+{
+  "page": 1,
+  "size": 20,
+  "query": "sales"
+}
+```
+
+Get workflow executions:
+```bash
+GET /api/workflowExecutions?workflowId=xxx&page=1&size=20
+```
+
+Get execution logs:
+```bash
+GET /api/workflowExecutions/{id}/logs?page=1&size=100
+```
 
 ## UI Application
 
