@@ -12,7 +12,7 @@ import { useInfiniteQuery, type UseInfiniteQueryOptions } from '@kbn/react-query
 import type { ExecutionStatus, ExecutionType, WorkflowExecutionListDto } from '@kbn/workflows';
 import { useKibana } from '../../../hooks/use_kibana';
 
-const DEFAULT_PAGE_SIZE = 20;
+const DEFAULT_PAGE_SIZE = 100;
 const MAX_RETRIES = 3;
 
 interface UseWorkflowExecutionsParams {

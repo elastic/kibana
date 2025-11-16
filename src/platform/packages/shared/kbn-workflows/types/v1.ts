@@ -222,7 +222,7 @@ export const UpdateWorkflowCommandSchema = z.object({
 
 export const SearchWorkflowCommandSchema = z.object({
   triggerType: z.string().optional(),
-  size: z.number().default(20),
+  size: z.number().default(100),
   page: z.number().default(1),
   createdBy: z.array(z.string()).optional(),
   // bool or number transformed to boolean

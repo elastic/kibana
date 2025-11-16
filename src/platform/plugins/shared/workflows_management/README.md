@@ -118,14 +118,14 @@ All paginated endpoints follow a consistent pagination strategy:
 
 **Request Parameters:**
 - `page` (number, default: 1) - Page number (1-indexed)
-- `size` (number, default: 20) - Number of items per page
+- `size` (number, default: 100) - Number of items per page
 
 **Response Structure:**
 ```json
 {
   "results": [...],
   "page": 1,
-  "size": 20,
+  "size": 100,
   "total": 100
 }
 ```
@@ -137,14 +137,14 @@ Search workflows:
 POST /api/workflows/search
 {
   "page": 1,
-  "size": 20,
+  "size": 100,
   "query": "sales"
 }
 ```
 
 Get workflow executions:
 ```bash
-GET /api/workflowExecutions?workflowId=xxx&page=1&size=20
+GET /api/workflowExecutions?workflowId=xxx&page=1&size=100
 ```
 
 Get execution logs:

@@ -35,7 +35,7 @@ export const searchWorkflowExecutions = async ({
   workflowExecutionIndex,
   query,
   sort = [{ createdAt: 'desc' }],
-  size = 20,
+  size = 100,
   from,
   page = 1,
 }: SearchWorkflowExecutionsParams): Promise<WorkflowExecutionListDto> => {

@@ -81,7 +81,7 @@ import { createStorage } from '../storage/workflow_storage';
 import type { WorkflowProperties, WorkflowStorage } from '../storage/workflow_storage';
 import type { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
 
-const DEFAULT_PAGE_SIZE = 20;
+const DEFAULT_PAGE_SIZE = 100;
 export interface SearchWorkflowExecutionsParams {
   workflowId: string;
   statuses?: ExecutionStatus[];
@@ -513,7 +513,7 @@ export class WorkflowsService {
       throw new Error('WorkflowsService not initialized');
     }
 
-    const { size = 20, page = 1, enabled, createdBy, query } = params;
+    const { size = 100, page = 1, enabled, createdBy, query } = params;
     const from = (page - 1) * size;
 
     const must: estypes.QueryDslQueryContainer[] = [];
