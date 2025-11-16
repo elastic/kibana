@@ -100,14 +100,14 @@ export const useGraphPreview = ({
   });
 
   const action: string[] | undefined = get(['event', 'action'], ecsData);
-  
+
   const hasGraphRepresentation =
     Boolean(timestamp) &&
     Boolean(action?.length) &&
     eventIds.length > 0 &&
     actorIds.length > 0 &&
     targetIds.length > 0;
-    
+
   const { isAlert } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
 
   return {
