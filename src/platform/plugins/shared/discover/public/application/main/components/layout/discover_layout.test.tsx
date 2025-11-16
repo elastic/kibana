@@ -97,11 +97,15 @@ async function mountComponent(
 
   session.getSession$.mockReturnValue(new BehaviorSubject('123'));
 
-  stateContainer.appState.update({
-    dataSource: createDataViewDataSource({ dataViewId: dataView.id! }),
-    interval: 'auto',
-    query,
-  });
+  stateContainer.internalState.dispatch(
+    stateContainer.injectCurrentTab(internalStateActions.updateAppState)({
+      appState: {
+        dataSource: createDataViewDataSource({ dataViewId: dataView.id! }),
+        interval: 'auto',
+        query,
+      },
+    })
+  );
   stateContainer.internalState.dispatch(
     stateContainer.injectCurrentTab(internalStateActions.setDataView)({ dataView })
   );

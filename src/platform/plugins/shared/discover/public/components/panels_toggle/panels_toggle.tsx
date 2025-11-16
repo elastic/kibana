@@ -15,6 +15,11 @@ import { IconButtonGroup } from '@kbn/shared-ux-button-toolbar';
 import { useAppStateSelector } from '../../application/main/state_management/discover_app_state_container';
 import type { DiscoverStateContainer } from '../../application/main/state_management/discover_state';
 import type { SidebarToggleState } from '../../application/types';
+import {
+  internalStateActions,
+  useCurrentTabAction,
+  useInternalStateDispatch,
+} from '../../application/main/state_management/redux';
 
 export interface PanelsToggleProps {
   stateContainer: DiscoverStateContainer;
@@ -37,11 +42,13 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
   renderedFor,
   isChartAvailable,
 }) => {
+  const dispatch = useInternalStateDispatch();
+  const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
   const isChartHidden = useAppStateSelector((state) => Boolean(state.hideChart));
 
   const onToggleChart = useCallback(() => {
-    stateContainer.appState.update({ hideChart: !isChartHidden });
-  }, [stateContainer, isChartHidden]);
+    dispatch(updateAppState({ appState: { hideChart: !isChartHidden } }));
+  }, [dispatch, isChartHidden, updateAppState]);
 
   const sidebarToggleState = useObservable(sidebarToggleState$);
   const isSidebarCollapsed = sidebarToggleState?.isCollapsed ?? false;

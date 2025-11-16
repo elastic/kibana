@@ -154,19 +154,23 @@ export const DiscoverTopNav = ({
     [editField, canEditDataView]
   );
 
-  const updateSavedQueryId = (newSavedQueryId: string | undefined) => {
-    const { appState } = stateContainer;
-    if (newSavedQueryId) {
-      appState.update({ savedQuery: newSavedQueryId });
-    } else {
-      // remove savedQueryId from state
-      const newState = {
-        ...appState.get(),
-      };
-      delete newState.savedQuery;
-      appState.set(newState);
-    }
-  };
+  const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
+  const updateSavedQueryId = useCallback(
+    (newSavedQueryId: string | undefined) => {
+      const { appState } = stateContainer;
+      if (newSavedQueryId) {
+        dispatch(updateAppState({ appState: { savedQuery: newSavedQueryId } }));
+      } else {
+        // remove savedQueryId from state
+        const newState = {
+          ...appState.get(),
+        };
+        delete newState.savedQuery;
+        appState.set(newState);
+      }
+    },
+    [dispatch, stateContainer, updateAppState]
+  );
 
   const onESQLToDataViewTransitionModalClose = useCallback(
     (shouldDismissModal?: boolean, needsSave?: boolean) => {

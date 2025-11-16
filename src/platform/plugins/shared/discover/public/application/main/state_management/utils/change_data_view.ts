@@ -98,7 +98,9 @@ export async function changeDataView({
       state.query
     );
 
-    appState.update(nextAppState);
+    internalState.dispatch(
+      injectCurrentTab(internalStateActions.updateAppState)({ appState: nextAppState })
+    );
 
     if (internalState.getState().expandedDoc) {
       internalState.dispatch(internalStateActions.setExpandedDoc({ expandedDoc: undefined }));

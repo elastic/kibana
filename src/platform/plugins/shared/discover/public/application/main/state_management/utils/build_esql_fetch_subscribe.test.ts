@@ -33,7 +33,11 @@ async function getTestProps(
 ) {
   const replaceUrlState = jest.spyOn(internalStateActions, 'replaceAppState').mockClear();
   const stateContainer = getDiscoverStateMock({ isTimeBased: true });
-  stateContainer.appState.update({ columns: [], ...appState });
+  stateContainer.internalState.dispatch(
+    stateContainer.injectCurrentTab(internalStateActions.updateAppState)({
+      appState: { columns: [], ...appState },
+    })
+  );
   const dataViewList = [dataViewMock as DataViewListItem];
   jest.spyOn(dataViewsService, 'getIdsWithTitle').mockResolvedValue(dataViewList);
   await stateContainer.internalState.dispatch(internalStateActions.loadDataViewList());
@@ -510,7 +514,11 @@ describe('buildEsqlFetchSubscribe', () => {
       fetchStatus: FetchStatus.PARTIAL,
       query: { esql: 'from pattern' },
     });
-    stateContainer.appState.update({ query: { esql: 'from pattern1' } });
+    stateContainer.internalState.dispatch(
+      stateContainer.injectCurrentTab(internalStateActions.updateAppState)({
+        appState: { query: { esql: 'from pattern1' } },
+      })
+    );
     documents$.next({
       fetchStatus: FetchStatus.LOADING,
       query: { esql: 'from pattern1' },
@@ -537,7 +545,11 @@ describe('buildEsqlFetchSubscribe', () => {
         },
       })
     );
-    stateContainer.appState.update({ query: { esql: 'from pattern1' } });
+    stateContainer.internalState.dispatch(
+      stateContainer.injectCurrentTab(internalStateActions.updateAppState)({
+        appState: { query: { esql: 'from pattern1' } },
+      })
+    );
     documents$.next({
       fetchStatus: FetchStatus.LOADING,
       query: { esql: 'from pattern1' },
@@ -554,7 +566,11 @@ describe('buildEsqlFetchSubscribe', () => {
       fetchStatus: FetchStatus.PARTIAL,
       query: { esql: 'from pattern1' },
     });
-    stateContainer.appState.update({ query: { esql: 'from pattern2' } });
+    stateContainer.internalState.dispatch(
+      stateContainer.injectCurrentTab(internalStateActions.updateAppState)({
+        appState: { query: { esql: 'from pattern2' } },
+      })
+    );
     documents$.next({
       fetchStatus: FetchStatus.LOADING,
       query: { esql: 'from pattern2' },

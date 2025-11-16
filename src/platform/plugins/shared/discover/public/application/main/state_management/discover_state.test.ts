@@ -117,9 +117,13 @@ describe('Discover state', () => {
     });
 
     test('setting app state and syncing to URL', async () => {
-      state.appState.update({
-        dataSource: createDataViewDataSource({ dataViewId: 'modified' }),
-      });
+      state.internalState.dispatch(
+        state.injectCurrentTab(internalStateActions.updateAppState)({
+          appState: {
+            dataSource: createDataViewDataSource({ dataViewId: 'modified' }),
+          },
+        })
+      );
       await new Promise(process.nextTick);
       expect(getCurrentUrl()).toMatchInlineSnapshot(
         `"/#?_tab=(tabId:the-saved-search-id-with-timefield)&_a=(columns:!(default_column),dataSource:(dataViewId:modified,type:dataView),interval:auto,sort:!(!(timestamp,desc)))&_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15m,to:now))"`
@@ -147,13 +151,21 @@ describe('Discover state', () => {
     });
 
     test('getPreviousAppState returns the state before the current', async () => {
-      state.appState.update({
-        dataSource: createDataViewDataSource({ dataViewId: 'first' }),
-      });
+      state.internalState.dispatch(
+        state.injectCurrentTab(internalStateActions.updateAppState)({
+          appState: {
+            dataSource: createDataViewDataSource({ dataViewId: 'first' }),
+          },
+        })
+      );
       const stateA = state.appState.get();
-      state.appState.update({
-        dataSource: createDataViewDataSource({ dataViewId: 'second' }),
-      });
+      state.internalState.dispatch(
+        state.injectCurrentTab(internalStateActions.updateAppState)({
+          appState: {
+            dataSource: createDataViewDataSource({ dataViewId: 'second' }),
+          },
+        })
+      );
       expect(state.getCurrentTab().previousAppState).toEqual(stateA);
     });
 
@@ -204,9 +216,13 @@ describe('Discover state', () => {
     });
 
     test('setting app state and syncing to URL', async () => {
-      state.appState.update({
-        dataSource: createDataViewDataSource({ dataViewId: 'modified' }),
-      });
+      state.internalState.dispatch(
+        state.injectCurrentTab(internalStateActions.updateAppState)({
+          appState: {
+            dataSource: createDataViewDataSource({ dataViewId: 'modified' }),
+          },
+        })
+      );
 
       await jest.runAllTimersAsync();
 
@@ -289,15 +305,19 @@ describe('Discover state', () => {
     let mockSavedSearch: SavedSearch = {} as unknown as SavedSearch;
     const history = createBrowserHistory<HistoryLocationState>();
     const mockDataPlugin = dataPluginMock.createStartContract();
-    const discoverStateContainer = getDiscoverStateMock({ history });
-    discoverStateContainer.appState.update({
-      dataSource: createDataViewDataSource({
-        dataViewId: savedSearchMock.searchSource.getField('index')!.id!,
-      }),
-    });
+    const state = getDiscoverStateMock({ history });
+    state.internalState.dispatch(
+      state.injectCurrentTab(internalStateActions.updateAppState)({
+        appState: {
+          dataSource: createDataViewDataSource({
+            dataViewId: savedSearchMock.searchSource.getField('index')!.id!,
+          }),
+        },
+      })
+    );
     const searchSessionInfoProvider = createSearchSessionRestorationDataProvider({
       data: mockDataPlugin,
-      appStateContainer: discoverStateContainer.appState,
+      appStateContainer: state.appState,
       getSavedSearch: () => mockSavedSearch,
     });
 
@@ -1474,9 +1494,13 @@ describe('Discover state', () => {
     });
 
     test('setting app state and syncing to URL', async () => {
-      state.appState.update({
-        dataSource: createDataViewDataSource({ dataViewId: 'modified' }),
-      });
+      state.internalState.dispatch(
+        state.injectCurrentTab(internalStateActions.updateAppState)({
+          appState: {
+            dataSource: createDataViewDataSource({ dataViewId: 'modified' }),
+          },
+        })
+      );
       await new Promise(process.nextTick);
       expect(getCurrentUrl()).toMatchInlineSnapshot(
         `"/?_tab=(tabId:the-saved-search-id-with-timefield)&_a=(columns:!(default_column),dataSource:(dataViewId:modified,type:dataView),interval:auto,sort:!(!(timestamp,desc)))&_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15m,to:now))"`

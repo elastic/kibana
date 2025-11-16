@@ -52,12 +52,6 @@ export interface DiscoverAppStateContainer extends BaseStateContainer<DiscoverAp
    * Initializes the app state and starts syncing it with the URL
    */
   initAndSync: () => () => void;
-  /**
-   * Updates the state, if replace is true, a history.replace is performed instead of history.push
-   * @param newPartial
-   * @param replace
-   */
-  update: (newPartial: DiscoverAppState) => void;
 }
 
 export interface DiscoverAppState {
@@ -248,11 +242,15 @@ export const getDiscoverAppStateContainer = ({
 
     if (setDataViewFromSavedSearch) {
       // used data view is different from the given by url/state which is invalid
-      update({
-        dataSource: savedSearchDataView?.id
-          ? createDataViewDataSource({ dataViewId: savedSearchDataView.id })
-          : undefined,
-      });
+      internalState.dispatch(
+        injectCurrentTab(internalStateActions.updateAppState)({
+          appState: {
+            dataSource: savedSearchDataView?.id
+              ? createDataViewDataSource({ dataViewId: savedSearchDataView.id })
+              : undefined,
+          },
+        })
+      );
     }
 
     // syncs `_a` portion of url with query services
@@ -305,19 +303,9 @@ export const getDiscoverAppStateContainer = ({
     };
   };
 
-  const update = (newPartial: DiscoverAppState) => {
-    addLog('[appState] update', { newPartial });
-    internalState.dispatch(
-      injectCurrentTab(internalStateActions.updateAppState)({
-        appState: newPartial,
-      })
-    );
-  };
-
   return {
     ...appStateContainer,
     initAndSync,
-    update,
   };
 };
 

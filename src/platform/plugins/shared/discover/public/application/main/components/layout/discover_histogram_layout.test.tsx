@@ -59,8 +59,9 @@ function getStateContainer({
     query: { query: '', language: 'kuery' },
   };
 
-  stateContainer.appState.update(appState);
-
+  stateContainer.internalState.dispatch(
+    stateContainer.injectCurrentTab(internalStateActions.updateAppState)({ appState })
+  );
   stateContainer.internalState.dispatch(
     stateContainer.injectCurrentTab(internalStateActions.setDataView)({ dataView })
   );

@@ -80,6 +80,8 @@ export const useDiscoverHistogram = (
   } = stateContainer.dataState;
   const savedSearchState = useSavedSearch();
   const isEsqlMode = useIsEsqlMode();
+  const dispatch = useInternalStateDispatch();
+  const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
 
   /**
    * API initialization
@@ -109,14 +111,20 @@ export const useDiscoverHistogram = (
       }
 
       if (!isEqual(oldState, newState)) {
-        stateContainer.appState.update(newState);
+        dispatch(updateAppState({ appState: newState }));
       }
     });
 
     return () => {
       subscription?.unsubscribe();
     };
-  }, [inspectorAdapters, stateContainer.appState, unifiedHistogramApi?.state$]);
+  }, [
+    dispatch,
+    inspectorAdapters,
+    stateContainer.appState,
+    unifiedHistogramApi?.state$,
+    updateAppState,
+  ]);
 
   /**
    * Sync URL query params with Unified Histogram
@@ -314,7 +322,6 @@ export const useDiscoverHistogram = (
   const setOverriddenVisContextAfterInvalidation = useCurrentTabAction(
     internalStateActions.setOverriddenVisContextAfterInvalidation
   );
-  const dispatch = useInternalStateDispatch();
 
   const onVisContextChanged = useCallback(
     (
@@ -383,10 +390,10 @@ export const useDiscoverHistogram = (
   >(
     (nextBreakdownField) => {
       if (nextBreakdownField !== breakdownField) {
-        stateContainer.appState.update({ breakdownField: nextBreakdownField });
+        dispatch(updateAppState({ appState: { breakdownField: nextBreakdownField } }));
       }
     },
-    [breakdownField, stateContainer.appState]
+    [breakdownField, dispatch, updateAppState]
   );
 
   return {

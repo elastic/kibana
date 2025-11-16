@@ -351,17 +351,21 @@ export function getDiscoverStateContainer({
   };
 
   const transitionFromESQLToDataView = (dataViewId: string) => {
-    appStateContainer.update({
-      query: {
-        language: 'kuery',
-        query: '',
-      },
-      columns: [],
-      dataSource: {
-        type: DataSourceType.DataView,
-        dataViewId,
-      },
-    });
+    internalState.dispatch(
+      injectCurrentTab(internalStateActions.updateAppState)({
+        appState: {
+          query: {
+            language: 'kuery',
+            query: '',
+          },
+          columns: [],
+          dataSource: {
+            type: DataSourceType.DataView,
+            dataViewId,
+          },
+        },
+      })
+    );
   };
 
   const clearTimeFieldFromSort = (
@@ -382,15 +386,19 @@ export function getDiscoverStateContainer({
     const queryString = getInitialESQLQuery(dataView, true, filterQuery);
     const clearedSort = clearTimeFieldFromSort(sort, dataView?.timeFieldName);
 
-    appStateContainer.update({
-      query: { esql: queryString },
-      filters: [],
-      dataSource: {
-        type: DataSourceType.Esql,
-      },
-      columns: [],
-      sort: clearedSort,
-    });
+    internalState.dispatch(
+      injectCurrentTab(internalStateActions.updateAppState)({
+        appState: {
+          query: { esql: queryString },
+          filters: [],
+          dataSource: {
+            type: DataSourceType.Esql,
+          },
+          columns: [],
+          sort: clearedSort,
+        },
+      })
+    );
 
     // clears pinned filters
     internalState.dispatch(
@@ -587,7 +595,9 @@ export function getDiscoverStateContainer({
     const queryUpdater = isFunction(queryOrUpdater) ? queryOrUpdater : () => queryOrUpdater;
     const query = { esql: queryUpdater(currentQuery.esql) };
 
-    appStateContainer.update({ query });
+    internalState.dispatch(
+      injectCurrentTab(internalStateActions.updateAppState)({ appState: { query } })
+    );
   };
 
   return {

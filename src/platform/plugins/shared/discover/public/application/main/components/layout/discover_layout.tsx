@@ -100,8 +100,9 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     discoverFeatureFlags,
   } = useDiscoverServices();
   const { scopedEBTManager } = useScopedServices();
+  const dispatch = useInternalStateDispatch();
+  const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
   const styles = useMemoCss(componentStyles);
-
   const globalQueryState = data.query.getState();
   const { main$ } = stateContainer.dataState.data$;
   const [query, savedQuery, columns, sort, grid] = useAppStateSelector((state) => [
@@ -149,9 +150,9 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
 
   const setAppState = useCallback<UseColumnsProps['setAppState']>(
     ({ settings, ...rest }) => {
-      stateContainer.appState.update({ ...rest, grid: settings as DiscoverGridSettings });
+      dispatch(updateAppState({ appState: { ...rest, grid: settings as DiscoverGridSettings } }));
     },
-    [stateContainer]
+    [dispatch, updateAppState]
   );
 
   const {
@@ -272,9 +273,9 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
 
   const onAddBreakdownField = useCallback(
     (field: DataViewField | undefined) => {
-      stateContainer.appState.update({ breakdownField: field?.name });
+      dispatch(updateAppState({ appState: { breakdownField: field?.name } }));
     },
-    [stateContainer]
+    [dispatch, updateAppState]
   );
 
   const onFieldEdited: (options: {
@@ -387,7 +388,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     sendErrorMsg(stateContainer.dataState.data$.main$);
   }, [stateContainer.dataState]);
 
-  const dispatch = useInternalStateDispatch();
   const layoutUiState = useCurrentTabSelector((state) => state.uiState.layout);
   const setLayoutUiState = useCurrentTabAction(internalStateActions.setLayoutUiState);
   const onInitialStateChange = useCallback(

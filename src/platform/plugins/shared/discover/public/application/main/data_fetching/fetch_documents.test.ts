@@ -20,16 +20,24 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
-import { selectTabRuntimeState } from '../state_management/redux';
+import { internalStateActions, selectTabRuntimeState } from '../state_management/redux';
 
 const getDeps = (): CommonFetchParams => {
-  const { appState, internalState, dataState, runtimeStateManager, getCurrentTab } =
-    getDiscoverStateMock({});
+  const {
+    appState,
+    internalState,
+    dataState,
+    runtimeStateManager,
+    getCurrentTab,
+    injectCurrentTab,
+  } = getDiscoverStateMock({});
   const { scopedProfilesManager$, scopedEbtManager$ } = selectTabRuntimeState(
     runtimeStateManager,
     getCurrentTab().id
   );
-  appState.update({ sampleSize: 100 });
+  internalState.dispatch(
+    injectCurrentTab(internalStateActions.updateAppState)({ appState: { sampleSize: 100 } })
+  );
   return {
     dataSubjects: dataState.data$,
     initialFetchStatus: dataState.getInitialFetchStatus(),
