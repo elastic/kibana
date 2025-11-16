@@ -123,7 +123,6 @@ export const useDiscoverHistogram = (
     hideChart,
     inspectorAdapters,
     interval,
-    stateContainer.appState,
     unifiedHistogramApi?.state$,
     updateAppState,
   ]);
@@ -202,14 +201,7 @@ export const useDiscoverHistogram = (
     return () => {
       subscription?.unsubscribe();
     };
-  }, [
-    isEsqlMode,
-    main$,
-    totalHits$,
-    setTotalHitsError,
-    stateContainer.appState,
-    unifiedHistogramApi?.state$,
-  ]);
+  }, [isEsqlMode, main$, totalHits$, setTotalHitsError, unifiedHistogramApi?.state$]);
 
   /**
    * Request params

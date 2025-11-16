@@ -272,7 +272,6 @@ export function getDiscoverStateContainer({
   const dataStateContainer = getDataStateContainer({
     services,
     searchSessionManager,
-    appStateContainer,
     internalState,
     runtimeStateManager,
     savedSearchContainer,
@@ -469,7 +468,6 @@ export function getDiscoverStateContainer({
       )
       .subscribe(
         buildStateSubscribe({
-          appState: appStateContainer,
           savedSearchState: savedSearchContainer,
           dataState: dataStateContainer,
           internalState,

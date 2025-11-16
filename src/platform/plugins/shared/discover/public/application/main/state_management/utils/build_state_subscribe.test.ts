@@ -27,7 +27,6 @@ describe('buildStateSubscribe', () => {
 
   const getSubscribeFn = () => {
     return buildStateSubscribe({
-      appState: stateContainer.appState,
       savedSearchState: stateContainer.savedSearchState,
       dataState: stateContainer.dataState,
       internalState: stateContainer.internalState,

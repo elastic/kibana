@@ -32,7 +32,6 @@ const setupTestParams = (dataView: DataView | undefined) => {
   services.dataViews.get = jest.fn(() => Promise.resolve(dataView as DataView));
   return {
     services,
-    appState: discoverState.appState,
     internalState: discoverState.internalState,
     runtimeStateManager,
     injectCurrentTab: discoverState.injectCurrentTab,

@@ -18,7 +18,7 @@ import type { DiscoverServices } from '../../../../build_services';
 import type { DiscoverSavedSearchContainer } from '../discover_saved_search_container';
 import type { DiscoverDataStateContainer } from '../discover_data_state_container';
 import type { DiscoverStateContainer } from '../discover_state';
-import type { DiscoverAppState, DiscoverAppStateContainer } from '../discover_app_state_container';
+import type { DiscoverAppState } from '../discover_app_state_container';
 import { isEqualState } from '../discover_app_state_container';
 import { addLog } from '../../../../utils/add_log';
 import { FetchStatus } from '../../../types';
@@ -37,7 +37,6 @@ import { sendLoadingMsg } from '../../hooks/use_saved_search_messages';
  */
 export const buildStateSubscribe =
   ({
-    appState,
     dataState,
     internalState,
     runtimeStateManager,
@@ -46,7 +45,6 @@ export const buildStateSubscribe =
     setDataView,
     getCurrentTab,
   }: {
-    appState: DiscoverAppStateContainer;
     dataState: DiscoverDataStateContainer;
     internalState: InternalStateStore;
     runtimeStateManager: RuntimeStateManager;

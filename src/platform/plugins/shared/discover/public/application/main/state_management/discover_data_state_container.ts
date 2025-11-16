@@ -31,7 +31,6 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { DEFAULT_COLUMNS_SETTING, SEARCH_ON_PAGE_LOAD_SETTING } from '@kbn/discover-utils';
 import { getTimeDifferenceInSeconds } from '@kbn/timerange';
 import { getEsqlDataView } from './utils/get_esql_data_view';
-import type { DiscoverAppStateContainer } from './discover_app_state_container';
 import type { DiscoverServices } from '../../../build_services';
 import type { DiscoverSearchSessionManager } from './discover_search_session';
 import { FetchStatus } from '../../types';
@@ -144,7 +143,6 @@ export interface DiscoverDataStateContainer {
 export function getDataStateContainer({
   services,
   searchSessionManager,
-  appStateContainer,
   internalState,
   runtimeStateManager,
   savedSearchContainer,
@@ -154,7 +152,6 @@ export function getDataStateContainer({
 }: {
   services: DiscoverServices;
   searchSessionManager: DiscoverSearchSessionManager;
-  appStateContainer: DiscoverAppStateContainer;
   internalState: InternalStateStore;
   runtimeStateManager: RuntimeStateManager;
   savedSearchContainer: DiscoverSavedSearchContainer;
