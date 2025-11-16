@@ -217,14 +217,12 @@ export const MonacoEditor = ({
   };
 
   const checkIsKbnRequestSelected = async () => {
-    const isKbn = await isKbnRequestSelectedCallback();
-    setIsKbnRequestSelected(isKbn || false);
-    return isKbn;
+    setIsKbnRequestSelected(await isKbnRequestSelectedCallback());
   };
 
   const onCopyAsSubmit = async () => {
     // Check if current request is a Kibana request
-    const isKbn = await checkIsKbnRequestSelected();
+    const isKbn = await isKbnRequestSelectedCallback();
     // If it's a Kibana request, use curl; otherwise use the current language
     const languageToUse = isKbn ? DEFAULT_LANGUAGE : currentLanguage;
     await copyAs(languageToUse);
