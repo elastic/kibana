@@ -358,7 +358,7 @@ export default function (providerContext: FtrProviderContext) {
                 filter: [
                   {
                     match_phrase: {
-                      'actor.entity.id': 'admin@example.com',
+                      'user.entity.id': 'admin@example.com',
                     },
                   },
                 ],
@@ -539,7 +539,7 @@ export default function (providerContext: FtrProviderContext) {
                 filter: [
                   {
                     match_phrase: {
-                      'actor.entity.id': 'admin2@example.com',
+                      'user.entity.id': 'admin2@example.com',
                     },
                   },
                 ],
@@ -589,7 +589,7 @@ export default function (providerContext: FtrProviderContext) {
                 filter: [
                   {
                     match_phrase: {
-                      'actor.entity.id': 'admin@example.com',
+                      'user.entity.id': 'admin@example.com',
                     },
                   },
                 ],
@@ -775,7 +775,7 @@ export default function (providerContext: FtrProviderContext) {
                 filter: [
                   {
                     match_phrase: {
-                      'actor.entity.id': 'admin2@example.com',
+                      'user.entity.id': 'admin2@example.com',
                     },
                   },
                 ],
@@ -831,7 +831,7 @@ export default function (providerContext: FtrProviderContext) {
                 filter: [
                   {
                     match_phrase: {
-                      'actor.entity.id': 'admin5@example.com',
+                      'user.entity.id': 'admin5@example.com',
                     },
                   },
                 ],
@@ -858,7 +858,7 @@ export default function (providerContext: FtrProviderContext) {
                 filter: [
                   {
                     match_phrase: {
-                      'actor.entity.id': 'admin5@example.com',
+                      'user.entity.id': 'admin5@example.com',
                     },
                   },
                 ],
@@ -885,7 +885,7 @@ export default function (providerContext: FtrProviderContext) {
                 filter: [
                   {
                     exists: {
-                      field: 'actor.entity.id',
+                      field: 'user.entity.id',
                     },
                   },
                 ],
@@ -979,7 +979,7 @@ export default function (providerContext: FtrProviderContext) {
                   filter: [
                     {
                       match_phrase: {
-                        'actor.entity.id': 'admin@example.com',
+                        'user.entity.id': 'admin@example.com',
                       },
                     },
                   ],
@@ -1038,7 +1038,7 @@ export default function (providerContext: FtrProviderContext) {
               const response = await es.count({
                 index: entitiesIndex,
               });
-              return response.count === 4;
+              return response.count === 5;
             });
 
             // initialize security-solution-default data-view
@@ -1253,7 +1253,7 @@ export default function (providerContext: FtrProviderContext) {
                       filter: [
                         {
                           match_phrase: {
-                            'actor.entity.id': 'admin@example.com',
+                            'user.entity.id': 'admin@example.com',
                           },
                         },
                       ],
