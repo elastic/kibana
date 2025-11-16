@@ -7,6 +7,7 @@
 
 import type { monaco } from '@kbn/monaco';
 import { ACTION_METADATA_MAP, type ActionMetadata } from '@kbn/streamlang';
+import { i18n } from '@kbn/i18n';
 import type { ActionHoverContext } from './provider_interfaces';
 
 export class StreamlangActionHandler {
@@ -34,7 +35,12 @@ export class StreamlangActionHandler {
     const sections: string[] = [];
 
     // Header
-    sections.push(`**Streamlang Action**: \`${actionType}\``);
+    sections.push(
+      i18n.translate('xpack.streamlang.yamlEditor.hover.header', {
+        defaultMessage: '**Streamlang Action**: `{action}`',
+        values: { action: actionType },
+      })
+    );
     sections.push('');
 
     // Description
@@ -42,15 +48,29 @@ export class StreamlangActionHandler {
     sections.push('');
 
     // Usage guidance
-    sections.push(`**Usage**: ${metadata.usage}`);
+    sections.push(
+      i18n.translate('xpack.streamlang.yamlEditor.hover.usage', {
+        defaultMessage: '**Usage**: {usage}',
+        values: { usage: metadata.usage },
+      })
+    );
     sections.push('');
 
     // Examples
     if (metadata.examples.length > 0) {
-      sections.push('### Examples:');
+      sections.push(
+        i18n.translate('xpack.streamlang.yamlEditor.hover.examplesHeading', {
+          defaultMessage: '### Examples:',
+        })
+      );
       metadata.examples.forEach((example, index) => {
         if (example.description) {
-          sections.push(`**${example.description}**`);
+          sections.push(
+            i18n.translate('xpack.streamlang.yamlEditor.hover.exampleDescription', {
+              defaultMessage: '**{description}**',
+              values: { description: example.description },
+            })
+          );
         }
         sections.push('```yaml');
         sections.push(example.yaml);
@@ -64,9 +84,18 @@ export class StreamlangActionHandler {
 
     // Tips
     if (metadata.tips && metadata.tips.length > 0) {
-      sections.push('### 💡 Tips:');
+      sections.push(
+        i18n.translate('xpack.streamlang.yamlEditor.hover.tipsHeading', {
+          defaultMessage: '### 💡 Tips:',
+        })
+      );
       metadata.tips.forEach((tip) => {
-        sections.push(`- ${tip}`);
+        sections.push(
+          i18n.translate('xpack.streamlang.yamlEditor.hover.tipEntry', {
+            defaultMessage: '- {tip}',
+            values: { tip },
+          })
+        );
       });
     }
 

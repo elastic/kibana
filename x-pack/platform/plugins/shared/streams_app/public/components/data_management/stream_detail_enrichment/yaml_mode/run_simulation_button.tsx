@@ -39,21 +39,23 @@ export const RunSimulationButton = () => {
           : undefined
       }
     >
-      <EuiButtonIcon
-        iconType="playFilled"
-        aria-label={i18n.translate(
-          'xpack.streams.enrichment.yamlMode.runSimulationButton.ariaLabel',
-          {
-            defaultMessage: 'Run simulation',
-          }
-        )}
-        onClick={() => runSimulation()}
-        isDisabled={!canRunSimulation}
-        display="base"
-        size="s"
-        isLoading={isSimulationRunning}
-        data-test-subj="streamsAppEnrichmentRunSimulationButton"
-      />
+      <span style={{ display: 'inline-flex' }}>
+        <EuiButtonIcon
+          iconType="playFilled"
+          aria-label={i18n.translate(
+            'xpack.streams.enrichment.yamlMode.runSimulationButton.ariaLabel',
+            {
+              defaultMessage: 'Run simulation',
+            }
+          )}
+          onClick={() => runSimulation()}
+          isDisabled={!canRunSimulation}
+          display="base"
+          size="s"
+          isLoading={isSimulationRunning}
+          data-test-subj="streamsAppEnrichmentRunSimulationButton"
+        />
+      </span>
     </EuiToolTip>
   );
 };

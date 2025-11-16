@@ -181,11 +181,21 @@ function formatErrorMessages(
     const errorType = (error.type ?? 'unknown')
       .replace(/_/g, ' ')
       .replace(/\b\w/g, (letter) => letter.toUpperCase());
-    const message = error.message ?? 'An unknown error occurred.';
-    return `**${index + 1}. ${errorType}**\n\n${message}`;
+    const message =
+      error.message ??
+      i18n.translate('xpack.streams.streamlangYamlEditor.simulationStatus.unknownError', {
+        defaultMessage: 'An unknown error occurred.',
+      });
+    return i18n.translate('xpack.streams.streamlangYamlEditor.simulationStatus.errorEntry', {
+      defaultMessage: '**{entry}. {errorType}**\n\n{errorMessage}',
+      values: { entry: index + 1, errorType, errorMessage: message },
+    });
   });
 
-  return `**⚠️ Processor Errors (${errors.length})**\n\n${formattedErrors.join('\n\n---\n\n')}`;
+  return i18n.translate('xpack.streams.streamlangYamlEditor.simulationStatus.errorSummary', {
+    defaultMessage: '**⚠️ Processor Errors ({count})**\n\n{errors}',
+    values: { count: errors.length, errors: formattedErrors.join('\n\n---\n\n') },
+  });
 }
 
 function formatMetricsMessage(metrics?: ProcessorMetrics): string | undefined {
@@ -202,26 +212,58 @@ function formatMetricsMessage(metrics?: ProcessorMetrics): string | undefined {
 
   const parsedRateStr = formatRate(parsedRate);
   if (parsedRateStr) {
-    sections.push(`✅ **Parsed:** ${parsedRateStr} of documents`);
+    sections.push(
+      i18n.translate('xpack.streams.streamlangYamlEditor.simulationStatus.parsedRate', {
+        defaultMessage: '✅ **Parsed:** {rate} of documents',
+        values: { rate: parsedRateStr },
+      })
+    );
   }
 
   const failedRateStr = formatRate(failedRate);
   if (failedRateStr) {
-    sections.push(`❌ **Failed:** ${failedRateStr} of documents`);
+    sections.push(
+      i18n.translate('xpack.streams.streamlangYamlEditor.simulationStatus.failedRate', {
+        defaultMessage: '❌ **Failed:** {rate} of documents',
+        values: { rate: failedRateStr },
+      })
+    );
   }
 
   const skippedRateStr = formatRate(skippedRate);
   if (skippedRateStr) {
-    sections.push(`⏭️ **Skipped:** ${skippedRateStr} of documents`);
+    sections.push(
+      i18n.translate('xpack.streams.streamlangYamlEditor.simulationStatus.skippedRate', {
+        defaultMessage: '⏭️ **Skipped:** {rate} of documents',
+        values: { rate: skippedRateStr },
+      })
+    );
   }
 
   if (Array.isArray(detectedFields) && detectedFields.length > 0) {
     const fieldCount = detectedFields.length;
-    const fieldLabel = fieldCount === 1 ? 'field' : 'fields';
+    const fieldLabel = i18n.translate(
+      'xpack.streams.streamlangYamlEditor.simulationStatus.detectedFieldsLabel',
+      {
+        defaultMessage: '{count, plural, one {field} other {fields}}',
+        values: { count: fieldCount },
+      }
+    );
+
+    const fieldList = detectedFields
+      .map((field) =>
+        i18n.translate('xpack.streams.streamlangYamlEditor.simulationStatus.detectedFieldEntry', {
+          defaultMessage: '  - `{field}`',
+          values: { field },
+        })
+      )
+      .join('\n');
+
     sections.push(
-      `📋 **Detected ${fieldCount} ${fieldLabel}:**\n${detectedFields
-        .map((field) => `  - \`${field}\``)
-        .join('\n')}`
+      i18n.translate('xpack.streams.streamlangYamlEditor.simulationStatus.detectedFields', {
+        defaultMessage: '📋 **Detected {count} {label}:**\n{fields}',
+        values: { count: fieldCount, label: fieldLabel, fields: fieldList },
+      })
     );
   }
 
@@ -229,7 +271,10 @@ function formatMetricsMessage(metrics?: ProcessorMetrics): string | undefined {
     return undefined;
   }
 
-  return `**📊 Processor Metrics**\n\n${sections.join('\n\n')}`;
+  return i18n.translate('xpack.streams.streamlangYamlEditor.simulationStatus.metricsSummary', {
+    defaultMessage: '**📊 Processor Metrics**\n\n{sections}',
+    values: { sections: sections.join('\n\n') },
+  });
 }
 
 function formatRate(rate?: number): string | null {

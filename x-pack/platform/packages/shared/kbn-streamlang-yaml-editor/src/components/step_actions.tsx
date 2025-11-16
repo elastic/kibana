@@ -93,7 +93,7 @@ export const StepActions = memo<StepActionsProps>(
     } else if (!canRunSimulation) {
       tooltipContent = i18n.translate('xpack.streamlang.yamlEditor.stepActions.cannotRun', {
         defaultMessage:
-          'Simulation cannot be run. Ensure the YAML is valid and changes are purely additive.',
+          'Simulation cannot be run. Ensure the YAML is valid and changes are purely additive for partial data sources.',
       });
     } else {
       tooltipContent = i18n.translate('xpack.streamlang.yamlEditor.stepActions.runUpToStep', {

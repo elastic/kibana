@@ -127,6 +127,15 @@ export const StreamlangYamlEditor = ({
     }
   }, [schemas]);
 
+  useEffect(() => {
+    return () => {
+      if (monacoYamlRef.current) {
+        monacoYamlRef.current.dispose();
+        monacoYamlRef.current = null;
+      }
+    };
+  }, []);
+
   // Clear decorations immediately when user starts typing
   // Note: We keep yamlLineMap intact so that step actions and outlines continue to work
   useEffect(() => {

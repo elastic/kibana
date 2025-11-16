@@ -14,7 +14,7 @@ import type { APIReturnType } from '@kbn/streams-plugin/public/api';
 import type { IToasts } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { StreamlangDSL } from '@kbn/streamlang';
-import { getProcessorsCount } from '@kbn/streamlang';
+import { getProcessorsCount, stripCustomIdentifiers } from '@kbn/streamlang';
 import { getStreamTypeFromDefinition } from '../../../../../util/get_stream_type_from_definition';
 import { getFormattedError } from '../../../../../util/errors';
 import type { StreamEnrichmentServiceDependencies } from './types';
@@ -44,7 +44,7 @@ export function createUpsertStreamActor({
             ? {
                 ingest: {
                   ...input.definition.stream.ingest,
-                  processing: input.streamlangDSL,
+                  processing: stripCustomIdentifiers(input.streamlangDSL),
                   ...(input.fields && {
                     wired: { ...input.definition.stream.ingest.wired, fields: input.fields },
                   }),
@@ -53,7 +53,7 @@ export function createUpsertStreamActor({
             : {
                 ingest: {
                   ...input.definition.stream.ingest,
-                  processing: input.streamlangDSL,
+                  processing: stripCustomIdentifiers(input.streamlangDSL),
                   ...(input.fields && {
                     classic: {
                       ...input.definition.stream.ingest.classic,
