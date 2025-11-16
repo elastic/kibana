@@ -119,3 +119,18 @@ export const GENERIC_ENTITY_INDEX_ENRICH_POLICY =
   'entity_store_field_retention_generic_<space>_v1.0.0';
 
 export const CLOUD_SECURITY_PLUGIN_VERSION = '1.9.0';
+
+// New ECS entity fields for graph visualization
+export const GRAPH_ACTOR_ENTITY_FIELDS = [
+  'user.entity.id',
+  'host.entity.id',
+  'service.entity.id',
+  'entity.id',
+] as const;
+
+export const GRAPH_TARGET_ENTITY_FIELDS = [
+  'user.target.entity.id',
+  'host.target.entity.id',
+  'service.target.entity.id',
+  'entity.target.id',
+] as const;

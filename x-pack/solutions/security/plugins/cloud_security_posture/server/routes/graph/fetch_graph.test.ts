@@ -255,7 +255,7 @@ describe('fetchGraph', () => {
       expect(query).toMatch(/EVAL\s+actorEntityId\s*=\s*COALESCE\(/);
       expect(query).toMatch(/EVAL\s+targetEntityId\s*=\s*COALESCE\(/);
 
-      // Verify precedence order for actor (user -> host -> service -> entity -> actor)
+      // Verify precedence order for actor (user -> host -> service -> entity)
       const actorCoalesceRegex = /actorEntityId\s*=\s*COALESCE\(([\s\S]*?)\)/;
       const actorCoalesceMatch = actorCoalesceRegex.exec(query);
       expect(actorCoalesceMatch).toBeTruthy();
@@ -263,12 +263,13 @@ describe('fetchGraph', () => {
         const coalesceContent = actorCoalesceMatch[1];
         const fields = coalesceContent.split(',').map((f) => f.trim());
 
-        // Verify actor precedence order
+        // Verify actor precedence order (new ECS fields only)
         expect(fields[0]).toContain('user.entity.id');
         expect(fields[1]).toContain('host.entity.id');
         expect(fields[2]).toContain('service.entity.id');
         expect(fields[3]).toContain('entity.id');
-        expect(fields[4]).toContain('actor.entity.id');
+        // Should only have 4 fields (no legacy actor.entity.id)
+        expect(fields).toHaveLength(4);
       }
 
       // Verify precedence order for target
@@ -280,12 +281,13 @@ describe('fetchGraph', () => {
         const coalesceContent = targetCoalesceMatch[1];
         const fields = coalesceContent.split(',').map((f) => f.trim());
 
-        // Verify target precedence order
+        // Verify target precedence order (new ECS fields only)
         expect(fields[0]).toContain('user.target.entity.id');
         expect(fields[1]).toContain('host.target.entity.id');
         expect(fields[2]).toContain('service.target.entity.id');
         expect(fields[3]).toContain('entity.target.id');
-        expect(fields[4]).toContain('target.entity.id');
+        // Should only have 4 fields (no legacy target.entity.id)
+        expect(fields).toHaveLength(4);
       }
     });
   });
@@ -311,7 +313,7 @@ describe('fetchGraph', () => {
       const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
       const filterArg = esqlCallArgs[0].filter as any;
 
-      // Should have bool.filter with target entity exists checks
+      // Should have bool.filter with target entity exists checks (new ECS fields only)
       expect(filterArg.bool.filter).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
@@ -321,13 +323,17 @@ describe('fetchGraph', () => {
                 { exists: { field: 'host.target.entity.id' } },
                 { exists: { field: 'service.target.entity.id' } },
                 { exists: { field: 'entity.target.id' } },
-                { exists: { field: 'target.entity.id' } },
               ]),
               minimum_should_match: 1,
             }),
           }),
         ])
       );
+
+      const targetFilter = filterArg.bool.filter.find((f: any) =>
+        f.bool?.should?.some((s: any) => s.exists?.field?.includes('target'))
+      );
+      expect(targetFilter?.bool?.should).toHaveLength(4);
     });
 
     it('should not filter targets when showUnknownTarget is true', async () => {
@@ -355,106 +361,6 @@ describe('fetchGraph', () => {
         f.bool?.should?.some((s: any) => s.exists?.field?.includes('target'))
       );
       expect(hasTargetCheck).toBe(false);
-    });
-  });
-
-  describe('Backward compatibility', () => {
-    it('should include old schema fields in WHERE clause', async () => {
-      const validIndexPatterns = ['valid_index'];
-      const params = {
-        esClient,
-        logger,
-        start: 0,
-        end: 1000,
-        originEventIds: [] as OriginEventId[],
-        showUnknownTarget: false,
-        indexPatterns: validIndexPatterns,
-        spaceId: 'default',
-        esQuery: undefined as EsQuery | undefined,
-      };
-
-      await fetchGraph(params);
-
-      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
-      const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
-      const query = esqlCallArgs[0].query;
-
-      // Old fields should be included as fallback
-      expect(query).toContain('actor.entity.id IS NOT NULL');
-    });
-
-    it('should include old schema fields in COALESCE as last resort', async () => {
-      const validIndexPatterns = ['valid_index'];
-      const params = {
-        esClient,
-        logger,
-        start: 0,
-        end: 1000,
-        originEventIds: [] as OriginEventId[],
-        showUnknownTarget: false,
-        indexPatterns: validIndexPatterns,
-        spaceId: 'default',
-        esQuery: undefined as EsQuery | undefined,
-      };
-
-      await fetchGraph(params);
-
-      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
-      const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
-      const query = esqlCallArgs[0].query;
-
-      // Verify old actor.entity.id is last in COALESCE for actorEntityId
-      const actorCoalesceRegex = /actorEntityId\s*=\s*COALESCE\(([\s\S]*?)\)/;
-      const actorCoalesceMatch = actorCoalesceRegex.exec(query);
-      expect(actorCoalesceMatch).toBeTruthy();
-
-      if (actorCoalesceMatch) {
-        const coalesceContent = actorCoalesceMatch[1];
-        const parts = coalesceContent.split(',').map((p) => p.trim());
-
-        // Last part should contain old actor.entity.id
-        expect(parts[parts.length - 1]).toContain('actor.entity.id');
-      }
-
-      // Verify old target.entity.id is last in COALESCE for targetEntityId
-      const targetCoalesceRegex = /targetEntityId\s*=\s*COALESCE\(([\s\S]*?)\)/;
-      const targetCoalesceMatch = targetCoalesceRegex.exec(query);
-      expect(targetCoalesceMatch).toBeTruthy();
-
-      if (targetCoalesceMatch) {
-        const coalesceContent = targetCoalesceMatch[1];
-        const parts = coalesceContent.split(',').map((p) => p.trim());
-
-        // Last part should contain old target.entity.id
-        expect(parts[parts.length - 1]).toContain('target.entity.id');
-      }
-    });
-
-    it('should include old schema target fields in DSL filter', async () => {
-      const validIndexPatterns = ['valid_index'];
-      const params = {
-        esClient,
-        logger,
-        start: 0,
-        end: 1000,
-        originEventIds: [] as OriginEventId[],
-        showUnknownTarget: false,
-        indexPatterns: validIndexPatterns,
-        spaceId: 'default',
-        esQuery: undefined as EsQuery | undefined,
-      };
-
-      await fetchGraph(params);
-
-      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
-      const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
-      const filterArg = esqlCallArgs[0].filter as any;
-
-      // Old target.entity.id field should be included in target filter
-      const targetFilter = filterArg.bool.filter.find((f: any) =>
-        f.bool?.should?.some((s: any) => s.exists?.field === 'target.entity.id')
-      );
-      expect(targetFilter).toBeTruthy();
     });
   });
 });

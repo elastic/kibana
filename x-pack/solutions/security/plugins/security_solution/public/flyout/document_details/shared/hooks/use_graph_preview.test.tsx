@@ -18,10 +18,10 @@ const alertMockGetFieldsData: GetFieldsData = (field: string) => {
     return 'alertId';
   } else if (field === 'kibana.alert.original_event.id') {
     return 'eventId';
-  } else if (field === 'actor.entity.id') {
-    return 'actorId';
-  } else if (field === 'target.entity.id') {
-    return 'targetId';
+  } else if (field === 'user.entity.id') {
+    return 'userActorId';
+  } else if (field === 'entity.target.id') {
+    return 'entityTargetId';
   }
 
   return mockFieldData[field];
@@ -36,10 +36,10 @@ const eventMockGetFieldsData: GetFieldsData = (field: string) => {
     return;
   } else if (field === 'event.id') {
     return 'eventId';
-  } else if (field === 'actor.entity.id') {
-    return 'actorId';
-  } else if (field === 'target.entity.id') {
-    return 'targetId';
+  } else if (field === 'user.entity.id') {
+    return 'userActorId';
+  } else if (field === 'entity.target.id') {
+    return 'entityTargetId';
   }
 
   return mockFieldData[field];
@@ -48,9 +48,18 @@ const eventMockGetFieldsData: GetFieldsData = (field: string) => {
 const eventMockDataFormattedForFieldBrowser: TimelineEventsDetailsItem[] = [];
 
 describe('useGraphPreview', () => {
-  it(`should return false when missing actor`, () => {
+  it(`should return false when missing actor and target`, () => {
     const getFieldsData: GetFieldsData = (field: string) => {
-      if (field === 'actor.entity.id') {
+      if (
+        field === 'user.entity.id' ||
+        field === 'host.entity.id' ||
+        field === 'service.entity.id' ||
+        field === 'entity.id' ||
+        field === 'user.target.entity.id' ||
+        field === 'host.target.entity.id' ||
+        field === 'service.target.entity.id' ||
+        field === 'entity.target.id'
+      ) {
         return;
       }
       return alertMockGetFieldsData(field);
@@ -75,7 +84,7 @@ describe('useGraphPreview', () => {
       eventIds: ['eventId'],
       actorIds: [],
       action: ['action'],
-      targetIds: ['targetId'],
+      targetIds: [],
       isAlert: true,
     });
   });
@@ -95,16 +104,21 @@ describe('useGraphPreview', () => {
       hasGraphRepresentation: false,
       timestamp: mockFieldData['@timestamp'][0],
       eventIds: ['eventId'],
-      actorIds: ['actorId'],
+      actorIds: ['userActorId'],
       action: undefined,
-      targetIds: ['targetId'],
+      targetIds: ['entityTargetId'],
       isAlert: true,
     });
   });
 
-  it(`should return false when missing target`, () => {
+  it(`should return false when missing actor (target exists)`, () => {
     const getFieldsData: GetFieldsData = (field: string) => {
-      if (field === 'target.entity.id') {
+      if (
+        field === 'user.entity.id' ||
+        field === 'host.entity.id' ||
+        field === 'service.entity.id' ||
+        field === 'entity.id'
+      ) {
         return;
       }
       return alertMockGetFieldsData(field);
@@ -115,6 +129,9 @@ describe('useGraphPreview', () => {
         getFieldsData,
         ecsData: {
           _id: 'id',
+          event: {
+            action: ['action'],
+          },
         },
         dataFormattedForFieldBrowser: alertMockDataFormattedForFieldBrowser,
       },
@@ -124,8 +141,45 @@ describe('useGraphPreview', () => {
       hasGraphRepresentation: false,
       timestamp: mockFieldData['@timestamp'][0],
       eventIds: ['eventId'],
-      actorIds: ['actorId'],
-      action: undefined,
+      actorIds: [],
+      action: ['action'],
+      targetIds: ['entityTargetId'],
+      isAlert: true,
+    });
+  });
+
+  it(`should return false when missing target (actor exists)`, () => {
+    const getFieldsData: GetFieldsData = (field: string) => {
+      if (
+        field === 'user.target.entity.id' ||
+        field === 'host.target.entity.id' ||
+        field === 'service.target.entity.id' ||
+        field === 'entity.target.id'
+      ) {
+        return;
+      }
+      return alertMockGetFieldsData(field);
+    };
+
+    const hookResult = renderHook((props: UseGraphPreviewParams) => useGraphPreview(props), {
+      initialProps: {
+        getFieldsData,
+        ecsData: {
+          _id: 'id',
+          event: {
+            action: ['action'],
+          },
+        },
+        dataFormattedForFieldBrowser: alertMockDataFormattedForFieldBrowser,
+      },
+    });
+
+    expect(hookResult.result.current).toStrictEqual({
+      hasGraphRepresentation: false,
+      timestamp: mockFieldData['@timestamp'][0],
+      eventIds: ['eventId'],
+      actorIds: ['userActorId'],
+      action: ['action'],
       targetIds: [],
       isAlert: true,
     });
@@ -157,9 +211,9 @@ describe('useGraphPreview', () => {
       hasGraphRepresentation: false,
       timestamp: mockFieldData['@timestamp'][0],
       eventIds: [],
-      actorIds: ['actorId'],
+      actorIds: ['userActorId'],
       action: ['action'],
-      targetIds: ['targetId'],
+      targetIds: ['entityTargetId'],
       isAlert: true,
     });
   });
@@ -190,9 +244,9 @@ describe('useGraphPreview', () => {
       hasGraphRepresentation: false,
       timestamp: null,
       eventIds: ['eventId'],
-      actorIds: ['actorId'],
+      actorIds: ['userActorId'],
       action: ['action'],
-      targetIds: ['targetId'],
+      targetIds: ['entityTargetId'],
       isAlert: true,
     });
   });
@@ -215,9 +269,9 @@ describe('useGraphPreview', () => {
       hasGraphRepresentation: true,
       timestamp: mockFieldData['@timestamp'][0],
       eventIds: ['eventId'],
-      actorIds: ['actorId'],
+      actorIds: ['userActorId'],
       action: ['action'],
-      targetIds: ['targetId'],
+      targetIds: ['entityTargetId'],
       isAlert: false,
     });
   });
@@ -230,10 +284,10 @@ describe('useGraphPreview', () => {
         return;
       } else if (field === 'event.id') {
         return ['id1', 'id2'];
-      } else if (field === 'actor.entity.id') {
-        return ['actorId1', 'actorId2'];
-      } else if (field === 'target.entity.id') {
-        return ['targetId1', 'targetId2'];
+      } else if (field === 'user.entity.id') {
+        return ['userActorId1', 'userActorId2'];
+      } else if (field === 'entity.target.id') {
+        return ['entityTargetId1', 'entityTargetId2'];
       }
 
       return mockFieldData[field];
@@ -256,9 +310,9 @@ describe('useGraphPreview', () => {
       hasGraphRepresentation: true,
       timestamp: mockFieldData['@timestamp'][0],
       eventIds: ['id1', 'id2'],
-      actorIds: ['actorId1', 'actorId2'],
+      actorIds: ['userActorId1', 'userActorId2'],
       action: ['action1', 'action2'],
-      targetIds: ['targetId1', 'targetId2'],
+      targetIds: ['entityTargetId1', 'entityTargetId2'],
       isAlert: false,
     });
   });
@@ -281,9 +335,9 @@ describe('useGraphPreview', () => {
       hasGraphRepresentation: true,
       timestamp: mockFieldData['@timestamp'][0],
       eventIds: ['eventId'],
-      actorIds: ['actorId'],
+      actorIds: ['userActorId'],
       action: ['action'],
-      targetIds: ['targetId'],
+      targetIds: ['entityTargetId'],
       isAlert: true,
     });
   });
@@ -294,10 +348,10 @@ describe('useGraphPreview', () => {
         return 'alertId';
       } else if (field === 'kibana.alert.original_event.id') {
         return ['id1', 'id2'];
-      } else if (field === 'actor.entity.id') {
-        return ['actorId1', 'actorId2'];
-      } else if (field === 'target.entity.id') {
-        return ['targetId1', 'targetId2'];
+      } else if (field === 'user.entity.id') {
+        return ['userActorId1', 'userActorId2'];
+      } else if (field === 'entity.target.id') {
+        return ['entityTargetId1', 'entityTargetId2'];
       }
 
       return mockFieldData[field];
@@ -320,9 +374,208 @@ describe('useGraphPreview', () => {
       hasGraphRepresentation: true,
       timestamp: mockFieldData['@timestamp'][0],
       eventIds: ['id1', 'id2'],
-      actorIds: ['actorId1', 'actorId2'],
+      actorIds: ['userActorId1', 'userActorId2'],
       action: ['action1', 'action2'],
-      targetIds: ['targetId1', 'targetId2'],
+      targetIds: ['entityTargetId1', 'entityTargetId2'],
+      isAlert: true,
+    });
+  });
+
+  it(`should return true when alert has graph preview with new ECS schema user.entity.id`, () => {
+    const getFieldsData: GetFieldsData = (field: string) => {
+      if (field === 'kibana.alert.uuid') {
+        return 'alertId';
+      } else if (field === 'kibana.alert.original_event.id') {
+        return 'eventId';
+      } else if (field === 'user.entity.id') {
+        return 'userActorId';
+      } else if (field === 'service.target.entity.id') {
+        return 'serviceTargetId';
+      }
+
+      return mockFieldData[field];
+    };
+
+    const hookResult = renderHook((props: UseGraphPreviewParams) => useGraphPreview(props), {
+      initialProps: {
+        getFieldsData,
+        ecsData: {
+          _id: 'id',
+          event: {
+            action: ['action'],
+          },
+        },
+        dataFormattedForFieldBrowser: alertMockDataFormattedForFieldBrowser,
+      },
+    });
+
+    expect(hookResult.result.current).toStrictEqual({
+      hasGraphRepresentation: true,
+      timestamp: mockFieldData['@timestamp'][0],
+      eventIds: ['eventId'],
+      actorIds: ['userActorId'],
+      action: ['action'],
+      targetIds: ['serviceTargetId'],
+      isAlert: true,
+    });
+  });
+
+  it(`should return true when alert has graph preview with new ECS schema host.entity.id`, () => {
+    const getFieldsData: GetFieldsData = (field: string) => {
+      if (field === 'kibana.alert.uuid') {
+        return 'alertId';
+      } else if (field === 'kibana.alert.original_event.id') {
+        return 'eventId';
+      } else if (field === 'host.entity.id') {
+        return 'hostActorId';
+      } else if (field === 'entity.target.id') {
+        return 'entityTargetId';
+      }
+
+      return mockFieldData[field];
+    };
+
+    const hookResult = renderHook((props: UseGraphPreviewParams) => useGraphPreview(props), {
+      initialProps: {
+        getFieldsData,
+        ecsData: {
+          _id: 'id',
+          event: {
+            action: ['action'],
+          },
+        },
+        dataFormattedForFieldBrowser: alertMockDataFormattedForFieldBrowser,
+      },
+    });
+
+    expect(hookResult.result.current).toStrictEqual({
+      hasGraphRepresentation: true,
+      timestamp: mockFieldData['@timestamp'][0],
+      eventIds: ['eventId'],
+      actorIds: ['hostActorId'],
+      action: ['action'],
+      targetIds: ['entityTargetId'],
+      isAlert: true,
+    });
+  });
+
+  it(`should return true when alert has graph preview with new ECS schema service.entity.id`, () => {
+    const getFieldsData: GetFieldsData = (field: string) => {
+      if (field === 'kibana.alert.uuid') {
+        return 'alertId';
+      } else if (field === 'kibana.alert.original_event.id') {
+        return 'eventId';
+      } else if (field === 'service.entity.id') {
+        return 'serviceActorId';
+      } else if (field === 'user.target.entity.id') {
+        return 'userTargetId';
+      }
+
+      return mockFieldData[field];
+    };
+
+    const hookResult = renderHook((props: UseGraphPreviewParams) => useGraphPreview(props), {
+      initialProps: {
+        getFieldsData,
+        ecsData: {
+          _id: 'id',
+          event: {
+            action: ['action'],
+          },
+        },
+        dataFormattedForFieldBrowser: alertMockDataFormattedForFieldBrowser,
+      },
+    });
+
+    expect(hookResult.result.current).toStrictEqual({
+      hasGraphRepresentation: true,
+      timestamp: mockFieldData['@timestamp'][0],
+      eventIds: ['eventId'],
+      actorIds: ['serviceActorId'],
+      action: ['action'],
+      targetIds: ['userTargetId'],
+      isAlert: true,
+    });
+  });
+
+  it(`should return true when alert has graph preview with new ECS schema entity.id`, () => {
+    const getFieldsData: GetFieldsData = (field: string) => {
+      if (field === 'kibana.alert.uuid') {
+        return 'alertId';
+      } else if (field === 'kibana.alert.original_event.id') {
+        return 'eventId';
+      } else if (field === 'entity.id') {
+        return 'entityActorId';
+      } else if (field === 'host.target.entity.id') {
+        return 'hostTargetId';
+      }
+
+      return mockFieldData[field];
+    };
+
+    const hookResult = renderHook((props: UseGraphPreviewParams) => useGraphPreview(props), {
+      initialProps: {
+        getFieldsData,
+        ecsData: {
+          _id: 'id',
+          event: {
+            action: ['action'],
+          },
+        },
+        dataFormattedForFieldBrowser: alertMockDataFormattedForFieldBrowser,
+      },
+    });
+
+    expect(hookResult.result.current).toStrictEqual({
+      hasGraphRepresentation: true,
+      timestamp: mockFieldData['@timestamp'][0],
+      eventIds: ['eventId'],
+      actorIds: ['entityActorId'],
+      action: ['action'],
+      targetIds: ['hostTargetId'],
+      isAlert: true,
+    });
+  });
+
+  it(`should return true when alert has graph preview with multiple new ECS schema fields`, () => {
+    const getFieldsData: GetFieldsData = (field: string) => {
+      if (field === 'kibana.alert.uuid') {
+        return 'alertId';
+      } else if (field === 'kibana.alert.original_event.id') {
+        return 'eventId';
+      } else if (field === 'user.entity.id') {
+        return 'userActorId';
+      } else if (field === 'host.entity.id') {
+        return 'hostActorId';
+      } else if (field === 'service.target.entity.id') {
+        return 'serviceTargetId';
+      } else if (field === 'entity.target.id') {
+        return 'entityTargetId';
+      }
+
+      return mockFieldData[field];
+    };
+
+    const hookResult = renderHook((props: UseGraphPreviewParams) => useGraphPreview(props), {
+      initialProps: {
+        getFieldsData,
+        ecsData: {
+          _id: 'id',
+          event: {
+            action: ['action'],
+          },
+        },
+        dataFormattedForFieldBrowser: alertMockDataFormattedForFieldBrowser,
+      },
+    });
+
+    expect(hookResult.result.current).toStrictEqual({
+      hasGraphRepresentation: true,
+      timestamp: mockFieldData['@timestamp'][0],
+      eventIds: ['eventId'],
+      actorIds: ['userActorId', 'hostActorId'],
+      action: ['action'],
+      targetIds: ['serviceTargetId', 'entityTargetId'],
       isAlert: true,
     });
   });
