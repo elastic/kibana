@@ -142,19 +142,3 @@ evaluate.describe('My Test Suite', { tag: '@svlSecurity' }, () => {
   });
 });
 ```
-
-## Agent Configuration
-
-The SIEM Entity Analytics agent is configured with:
-
-- **Agent ID**: `siem-entity-analytics`
-- **Name**: Entity Analytics Agent
-- **Tools**: 
-  - `entity-analytics-tool`: Security-specific tool for entity analytics
-  - `platform.core.execute_esql`: Execute ES|QL queries
-  - `platform.core.generate_esql`: Generate ES|QL queries
-  - `platform.core.get_index_mapping`: Get index mappings
-  - `platform.core.list_indices`: List indices
-
-The agent is designed to assist with security analysis and entity analytics questions, and will politely decline questions unrelated to Elastic Security.
-
