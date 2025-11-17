@@ -15,6 +15,7 @@ import {
   ESQLVariableType,
   EsqlControlType,
   VariableNamePrefix,
+  TelemetryControlCancelledReason,
   type ESQLControlVariable,
   type ESQLControlState,
   type ControlTriggerSource,
@@ -201,7 +202,7 @@ export function ESQLControlsFlyout({
   const onCloseFlyout = useCallback(() => {
     telemetryServiceRef.current.trackEsqlControlConfigCancelled(
       initialVariableType,
-      'cancel_button'
+      TelemetryControlCancelledReason.CANCEL_BUTTON
     );
     closeFlyout();
   }, [closeFlyout, initialVariableType]);

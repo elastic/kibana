@@ -45,5 +45,6 @@ export {
   type ESQLTelemetryCallbacks,
   ControlTriggerSource,
   QuerySource,
+  TelemetryControlCancelledReason,
   type TelemetryQuerySubmittedProps,
 } from './src/esql_telemetry_types';
