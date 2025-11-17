@@ -31,6 +31,7 @@ import { WorkflowExecuteEventForm } from './workflow_execute_event_form';
 import { WorkflowExecuteIndexForm } from './workflow_execute_index_form';
 import { WorkflowExecuteManualForm } from './workflow_execute_manual_form';
 import { MANUAL_TRIGGERS_DESCRIPTIONS } from '../../../../common/translations';
+import { i18n } from '@kbn/i18n';
 
 type TriggerType = 'manual' | 'index' | 'alert';
 
@@ -56,7 +57,7 @@ interface WorkflowExecuteModalProps {
   onSubmit: (data: Record<string, unknown>) => void;
 }
 export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
-  ({ definition, workflowId, onClose, onSubmit, isTestRun = false }) => {
+  ({ definition, workflowId, onClose, onSubmit, isTestRun }) => {
     const modalTitleId = useGeneratedHtmlId();
     const enabledTriggers = ['alert', 'index', 'manual'];
     const defaultTrigger = useMemo(() => getDefaultTrigger(definition), [definition]);
@@ -147,8 +148,8 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
           style={{ width: '1200px', height: '100vh' }}
         >
           <EuiModalHeader>
-            <EuiModalHeaderTitle id={modalTitle.id}>
-              {modalTitle.defaultMessage}
+            <EuiModalHeaderTitle id={modalTitleId}>
+              {i18n.translate(modalTitle.id, { defaultMessage: modalTitle.defaultMessage })}
             </EuiModalHeaderTitle>
           </EuiModalHeader>
           <EuiModalBody>
