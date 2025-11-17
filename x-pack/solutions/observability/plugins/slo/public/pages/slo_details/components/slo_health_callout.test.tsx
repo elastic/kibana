@@ -313,7 +313,6 @@ describe('SloHealthCallout', () => {
             overall: 'unhealthy',
             rollup: 'unhealthy',
             summary: 'unhealthy',
-
           },
           state: 'running',
         },
