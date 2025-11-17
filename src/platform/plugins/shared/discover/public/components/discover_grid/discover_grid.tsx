@@ -51,6 +51,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
   viewModeToggle,
   externalAdditionalControls: customExternalAdditionalControls,
   rowAdditionalLeadingControls: customRowAdditionalLeadingControls,
+  onFullScreenChange,
   ...props
 }) => {
   const { dataView, setExpandedDoc, renderDocumentView } = props;
@@ -151,6 +152,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
       customGridColumnsConfiguration={customGridColumnsConfiguration}
       shouldKeepAdHocDataViewImmutable
       externalAdditionalControls={externalAdditionalControls}
+      onFullScreenChange={onFullScreenChange}
       {...props}
     />
   );

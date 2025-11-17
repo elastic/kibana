@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { memo, useCallback, useMemo, useRef } from 'react';
+import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
 import {
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -112,6 +112,7 @@ function DiscoverDocumentsComponent({
   stateContainer: DiscoverStateContainer;
   onFieldEdited?: (options: { editedDataView: DataView }) => void;
 }) {
+  const [isDataGridFullScreen, setIsDataGridFullScreen] = useState(false);
   const styles = useMemoCss(componentStyles);
   const services = useDiscoverServices();
   const { scopedEBTManager } = useScopedServices();
@@ -414,7 +415,7 @@ function DiscoverDocumentsComponent({
   const renderCustomToolbarWithElements = useMemo(
     () =>
       getRenderCustomToolbarWithElements({
-        leftSide: viewModeToggle,
+        leftSide: isDataGridFullScreen ? undefined : viewModeToggle,
         bottomSection: (
           <>
             {callouts}
@@ -422,7 +423,7 @@ function DiscoverDocumentsComponent({
           </>
         ),
       }),
-    [viewModeToggle, callouts, loadingIndicator]
+    [viewModeToggle, callouts, loadingIndicator, isDataGridFullScreen]
   );
 
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
@@ -507,6 +508,7 @@ function DiscoverDocumentsComponent({
             onInitialStateChange={onInitialStateChange}
             viewModeToggle={viewModeToggle}
             onCascadeGroupingChange={stateContainer.actions.onCascadeGroupingChange}
+            onFullScreenChange={setIsDataGridFullScreen}
           />
         </CellActionsProvider>
       </div>

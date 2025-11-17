@@ -478,6 +478,13 @@ interface InternalUnifiedDataTableProps {
    * When editing fields, it will create a new ad-hoc data view instead of modifying the existing one.
    */
   shouldKeepAdHocDataViewImmutable?: boolean;
+
+  /**
+   * Callback fired when full screen mode is toggled
+   * @param isFullScreen - boolean indicating if the grid is in full screen mode
+   */
+
+  onFullScreenChange?: (isFullScreen: boolean) => void;
 }
 
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
