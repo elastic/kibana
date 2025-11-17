@@ -64,7 +64,11 @@ export const transformDashboardIn = (
       ({ type }) => type !== tagSavedObjectTypeName
     );
 
-    const { panelsJSON, sections, references: panelReferences } = transformPanelsIn(panels);
+    const {
+      panelsJSON,
+      sections,
+      references: panelReferences,
+    } = transformPanelsIn(panels, allowUnmappedKeys);
 
     const { searchSourceJSON, references: searchSourceReferences } = transformSearchSourceIn(
       filters,

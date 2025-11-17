@@ -150,7 +150,7 @@ describe('transformDashboardIn', () => {
       const dashboardState: DashboardState = {
         title: 'title',
         panels: [],
-        references: []
+        references: [],
       };
       expect(transformDashboardIn(dashboardState, false)).toMatchInlineSnapshot(`
         Object {

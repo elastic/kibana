@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Boom from '@hapi/boom';
 import { v4 as uuidv4 } from 'uuid';
 
 import type { SavedObjectReference } from '@kbn/core/server';
@@ -20,7 +19,10 @@ import type {
 import type { DashboardState, DashboardPanel, DashboardSection } from '../../types';
 import { embeddableService, logger } from '../../../kibana_services';
 
-export function transformPanelsIn(widgets: DashboardState['panels'] | undefined): {
+export function transformPanelsIn(
+  widgets: DashboardState['panels'] | undefined,
+  allowUnmappedKeys: boolean
+): {
   panelsJSON: DashboardSavedObjectAttributes['panelsJSON'];
   sections: DashboardSavedObjectAttributes['sections'];
   references: SavedObjectReference[];
@@ -35,7 +37,7 @@ export function transformPanelsIn(widgets: DashboardState['panels'] | undefined)
       const idx = uid ?? uuidv4();
       sections.push({ ...restOfSection, gridData: { ...grid, i: idx } });
       sectionPanels.forEach((panel) => {
-        const { storedPanel, references } = transformPanelIn(panel);
+        const { storedPanel, references } = transformPanelIn(panel, allowUnmappedKeys);
         panels.push({
           ...storedPanel,
           gridData: { ...storedPanel.gridData, sectionId: idx },
@@ -44,7 +46,7 @@ export function transformPanelsIn(widgets: DashboardState['panels'] | undefined)
       });
     } else {
       // widget is a panel
-      const { storedPanel, references } = transformPanelIn(widget);
+      const { storedPanel, references } = transformPanelIn(widget, allowUnmappedKeys);
       panels.push(storedPanel);
       panelReferences.push(...references);
     }
@@ -52,7 +54,10 @@ export function transformPanelsIn(widgets: DashboardState['panels'] | undefined)
   return { panelsJSON: JSON.stringify(panels), sections, references: panelReferences };
 }
 
-function transformPanelIn(panel: DashboardPanel): {
+function transformPanelIn(
+  panel: DashboardPanel,
+  allowUnmappedKeys: boolean
+): {
   storedPanel: SavedDashboardPanel;
   references: SavedObjectReference[];
 } {
@@ -61,11 +66,15 @@ function transformPanelIn(panel: DashboardPanel): {
 
   const transforms = embeddableService?.getTransforms(panel.type);
 
+  if (!allowUnmappedKeys && !transforms?.schema) {
+    throw new Error(`No panel schema available for type: ${restPanel.type}.`);
+  }
+
   if (transforms?.schema) {
     try {
       transforms.schema.validate(config);
     } catch (error) {
-      throw Boom.badRequest(
+      throw new Error(
         `Panel config validation failed. Panel uid: ${uid}, type: ${restPanel.type}, validation error: ${error.message}`
       );
     }
