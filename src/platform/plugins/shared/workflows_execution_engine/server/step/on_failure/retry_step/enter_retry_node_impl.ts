@@ -31,7 +31,7 @@ export class EnterRetryNodeImpl implements NodeImplementation, NodeWithErrorCatc
   }
 
   public async catchError(): Promise<void> {
-    const attempt = this.stepExecutionRuntime.getCurrentStepState()?.attempt;
+    const attempt = this.stepExecutionRuntime.getCurrentStepState()?.attempt ?? 0;
 
     if (attempt < this.node.configuration['max-attempts']) {
       // If the retry attempt is within the allowed limit, re-enter the retry step

@@ -20,10 +20,13 @@ export async function handleExecutionDelay(
 ) {
   const workflowExecution = params.workflowRuntime.getWorkflowExecution();
 
-  if (stepExecutionRuntime.stepExecution?.status !== ExecutionStatus.WAITING) {
+  if (
+    !stepExecutionRuntime.stepExecution ||
+    stepExecutionRuntime.stepExecution.status !== ExecutionStatus.WAITING
+  ) {
     return;
   }
-  const resumeAtFromState = stepExecutionRuntime.stepExecution?.state?.resumeAt;
+  const resumeAtFromState = stepExecutionRuntime.stepExecution.state?.resumeAt;
 
   if (typeof resumeAtFromState !== 'string') {
     return;

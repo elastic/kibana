@@ -21,9 +21,7 @@ import type { WorkflowExecutionLoopParams } from '../types';
  * monitor() method if they implement the MonitorableNode interface.
  *
  * @param params - Workflow execution loop parameters containing factories and state
- * @param nodeStackFrames - The current node stack frames to process
  * @param monitoredStepExecutionRuntime - The runtime context for the step being monitored
- * @param monitorAbortController - AbortController to check for abort signals
  *
  * @returns Promise that resolves when all nodes in the stack have been processed
  */

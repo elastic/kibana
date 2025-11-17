@@ -224,7 +224,7 @@ export class StepExecutionRuntime {
         id: this.stepExecutionId,
         state: Object.keys(newState).length ? newState : undefined,
       });
-      return false; // did not enter wait, was already waiting and exiting
+      return false; // was already waiting, now exiting wait state
     }
 
     this.workflowExecutionState.upsertStep({

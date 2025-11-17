@@ -21,7 +21,7 @@ export class TimeoutAbortedError extends Error {
  * @param timeout - The timeout duration in milliseconds
  * @param abortSignal - An AbortSignal to cancel the timeout
  * @returns A Promise that resolves after the timeout or rejects if aborted
- * @throws {Error} Throws 'Timeout aborted' if the signal is aborted
+ * @throws {TimeoutAbortedError} Throws 'Timeout aborted' if the signal is aborted
  */
 export function abortableTimeout(timeout: number, abortSignal: AbortSignal): Promise<void> {
   return new Promise((resolve, reject) => {
