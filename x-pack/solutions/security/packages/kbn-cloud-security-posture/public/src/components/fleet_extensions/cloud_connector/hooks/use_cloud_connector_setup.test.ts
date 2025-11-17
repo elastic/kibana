@@ -624,3 +624,271 @@ describe('useCloudConnectorSetup', () => {
     });
   });
 });
+
+describe('extractVarValue helper - secret reference handling', () => {
+  const mockBasePolicy = {
+    id: 'test-policy-id',
+    enabled: true,
+    policy_id: 'test-policy',
+    policy_ids: ['test-policy'],
+    name: 'test-policy',
+    namespace: 'default',
+    package: {
+      name: 'cloud_security_posture',
+      title: 'Cloud Security Posture',
+      version: '1.0.0',
+    },
+    supports_cloud_connector: true,
+  };
+
+  const mockBaseInput = {
+    type: 'cloudbeat/cis_aws',
+    policy_template: 'cis_aws',
+    enabled: true,
+    streams: [
+      {
+        enabled: true,
+        data_stream: { type: 'logs', dataset: 'aws.cloudtrail' },
+        vars: {},
+      },
+    ],
+  } as NewPackagePolicyInput;
+
+  const mockUpdatePolicy: UpdatePolicy = jest.fn();
+
+  it('should extract string values directly', () => {
+    const stringInput = {
+      ...mockBaseInput,
+      streams: [
+        {
+          ...mockBaseInput.streams[0],
+          vars: {
+            tenant_id: { value: 'simple-string-value' },
+            client_id: { value: 'another-string' },
+          },
+        },
+      ],
+    } as NewPackagePolicyInput;
+
+    const stringPolicy = {
+      ...mockBasePolicy,
+      inputs: [stringInput],
+    } as NewPackagePolicy;
+
+    const { result } = renderHook(() =>
+      useCloudConnectorSetup(stringInput, stringPolicy, mockUpdatePolicy)
+    );
+
+    expect(result.current.newConnectionCredentials).toEqual({
+      tenantId: 'simple-string-value',
+      clientId: 'another-string',
+      azure_credentials_cloud_connector_id: undefined,
+    });
+  });
+
+  it('should extract id from secret reference objects', () => {
+    const secretInput = {
+      ...mockBaseInput,
+      streams: [
+        {
+          ...mockBaseInput.streams[0],
+          vars: {
+            tenant_id: { value: { id: 'secret-123', isSecretRef: true } },
+            client_id: { value: { id: 'secret-456', isSecretRef: true } },
+            azure_credentials_cloud_connector_id: {
+              value: 'secret-cc-789',
+            },
+          },
+        },
+      ],
+    } as NewPackagePolicyInput;
+
+    const secretPolicy = {
+      ...mockBasePolicy,
+      inputs: [secretInput],
+    } as NewPackagePolicy;
+
+    const { result } = renderHook(() =>
+      useCloudConnectorSetup(secretInput, secretPolicy, mockUpdatePolicy)
+    );
+
+    expect(result.current.newConnectionCredentials).toEqual({
+      tenantId: 'secret-123',
+      clientId: 'secret-456',
+      azure_credentials_cloud_connector_id: 'secret-cc-789',
+    });
+  });
+
+  it('should handle undefined values', () => {
+    const undefinedInput = {
+      ...mockBaseInput,
+      streams: [
+        {
+          ...mockBaseInput.streams[0],
+          vars: {
+            tenant_id: { value: undefined },
+            client_id: { value: undefined },
+            azure_credentials_cloud_connector_id: { value: undefined },
+          },
+        },
+      ],
+    } as NewPackagePolicyInput;
+
+    const undefinedPolicy = {
+      ...mockBasePolicy,
+      inputs: [undefinedInput],
+    } as NewPackagePolicy;
+
+    const { result } = renderHook(() =>
+      useCloudConnectorSetup(undefinedInput, undefinedPolicy, mockUpdatePolicy)
+    );
+
+    expect(result.current.newConnectionCredentials).toEqual({
+      tenantId: undefined,
+      clientId: undefined,
+      azure_credentials_cloud_connector_id: undefined,
+    });
+  });
+
+  it('should handle mixed string and secret reference values', () => {
+    const mixedInput = {
+      ...mockBaseInput,
+      streams: [
+        {
+          ...mockBaseInput.streams[0],
+          vars: {
+            tenant_id: { value: 'plain-string' },
+            client_id: { value: { id: 'secret-client', isSecretRef: true } },
+            azure_credentials_cloud_connector_id: { value: undefined },
+          },
+        },
+      ],
+    } as NewPackagePolicyInput;
+
+    const mixedPolicy = {
+      ...mockBasePolicy,
+      inputs: [mixedInput],
+    } as NewPackagePolicy;
+
+    const { result } = renderHook(() =>
+      useCloudConnectorSetup(mixedInput, mixedPolicy, mockUpdatePolicy)
+    );
+
+    expect(result.current.newConnectionCredentials).toEqual({
+      tenantId: 'plain-string',
+      clientId: 'secret-client',
+      azure_credentials_cloud_connector_id: undefined,
+    });
+  });
+});
+
+describe('Azure credentials with mixed secret and text vars', () => {
+  const mockBasePolicy = {
+    id: 'test-policy-id',
+    enabled: true,
+    policy_id: 'test-policy',
+    policy_ids: ['test-policy'],
+    name: 'test-policy',
+    namespace: 'default',
+    package: {
+      name: 'cloud_security_posture',
+      title: 'Cloud Security Posture',
+      version: '1.0.0',
+    },
+    supports_cloud_connector: true,
+  };
+
+  const mockAzureInput = {
+    type: 'cloudbeat/cis_azure',
+    policy_template: 'cis_azure',
+    enabled: true,
+    streams: [
+      {
+        enabled: true,
+        data_stream: { type: 'logs', dataset: 'azure.activitylogs' },
+        vars: {
+          tenant_id: { value: 'test-tenant-id', type: 'text' },
+          client_id: { value: 'test-client-id', type: 'text' },
+          azure_credentials_cloud_connector_id: { value: 'test-azure-connector', type: 'text' },
+        },
+      },
+    ],
+  } as NewPackagePolicyInput;
+
+  const mockAzurePolicy = {
+    ...mockBasePolicy,
+    inputs: [mockAzureInput],
+  } as NewPackagePolicy;
+
+  const mockUpdatePolicy: UpdatePolicy = jest.fn();
+
+  beforeEach(() => {
+    mockIsAzureCloudConnectorVars.mockReturnValue(true);
+  });
+
+  it('should handle azure_credentials_cloud_connector_id as string', () => {
+    const stringInput = {
+      ...mockAzureInput,
+      streams: [
+        {
+          ...mockAzureInput.streams[0],
+          vars: {
+            ...mockAzureInput.streams[0].vars,
+            azure_credentials_cloud_connector_id: { value: 'plain-connector-id', type: 'text' },
+          },
+        },
+      ],
+    } as NewPackagePolicyInput;
+
+    const stringPolicy = {
+      ...mockAzurePolicy,
+      inputs: [stringInput],
+    } as NewPackagePolicy;
+
+    const { result } = renderHook(() =>
+      useCloudConnectorSetup(stringInput, stringPolicy, mockUpdatePolicy)
+    );
+
+    expect(result.current.newConnectionCredentials).toEqual({
+      tenantId: 'test-tenant-id',
+      clientId: 'test-client-id',
+      azure_credentials_cloud_connector_id: 'plain-connector-id',
+    });
+  });
+
+  it('should handle azure.credentials.* format with secret references', () => {
+    const azureCredentialsInput = {
+      ...mockAzureInput,
+      streams: [
+        {
+          ...mockAzureInput.streams[0],
+          vars: {
+            'azure.credentials.tenant_id': {
+              value: { id: 'azure-secret-tenant', isSecretRef: true },
+              type: 'password',
+            },
+            'azure.credentials.client_id': {
+              value: { id: 'azure-secret-client', isSecretRef: true },
+              type: 'password',
+            },
+          },
+        },
+      ],
+    } as NewPackagePolicyInput;
+
+    const azureCredentialsPolicy = {
+      ...mockAzurePolicy,
+      inputs: [azureCredentialsInput],
+    } as NewPackagePolicy;
+
+    const { result } = renderHook(() =>
+      useCloudConnectorSetup(azureCredentialsInput, azureCredentialsPolicy, mockUpdatePolicy)
+    );
+
+    expect(result.current.newConnectionCredentials).toEqual({
+      tenantId: 'azure-secret-tenant',
+      clientId: 'azure-secret-client',
+      azure_credentials_cloud_connector_id: undefined,
+    });
+  });
+});

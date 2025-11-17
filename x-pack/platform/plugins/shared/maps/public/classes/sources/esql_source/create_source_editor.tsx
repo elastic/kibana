@@ -14,7 +14,7 @@ import { EuiFormRow, EuiPanel, EuiSkeletonText, EuiSpacer, EuiSwitch } from '@el
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { ES_GEO_FIELD_TYPE } from '../../../../common/constants';
 import type { ESQLSourceDescriptor } from '../../../../common/descriptor_types';
-import { getIndexPatternService } from '../../../kibana_services';
+import { getHttp, getIndexPatternService } from '../../../kibana_services';
 import { ESQLEditor } from './esql_editor';
 import { NarrowByMapBounds, NarrowByTime } from './narrow_by_field';
 
@@ -25,7 +25,6 @@ interface Props {
 
 export function CreateSourceEditor(props: Props) {
   const [isInitialized, setIsInitialized] = useState(false);
-  const [adhocDataViewId, setAdhocDataViewId] = useState<string | undefined>();
   const [esql, setEsql] = useState('');
   const [dateField, setDateField] = useState<string | undefined>();
   const [dateFields, setDateFields] = useState<string[]>([]);
@@ -47,10 +46,11 @@ export function CreateSourceEditor(props: Props) {
     getDataView()
       .then(async (dataView) => {
         const adhocDataView = dataView
-          ? await getESQLAdHocDataview(
-              `from ${dataView.getIndexPattern()}`,
-              getIndexPatternService()
-            )
+          ? await getESQLAdHocDataview({
+              dataViewsService: getIndexPatternService(),
+              query: `FROM ${dataView.getIndexPattern()}`,
+              http: getHttp(),
+            })
           : undefined;
         if (ignore) {
           return;
@@ -85,7 +85,6 @@ export function CreateSourceEditor(props: Props) {
             const initialEsql = `from ${adhocDataView.getIndexPattern()} | keep ${
               initialGeoField.name
             } | limit 10000`;
-            setAdhocDataViewId(adhocDataView.id);
             setDateField(initialDateField);
             setDateFields(initialDateFields);
             setGeoField(initialGeoField.name);
@@ -115,9 +114,8 @@ export function CreateSourceEditor(props: Props) {
   useDebounce(
     () => {
       const sourceConfig =
-        esql && esql.length && adhocDataViewId
+        esql && esql.length
           ? ({
-              dataViewId: adhocDataViewId,
               dateField,
               geoField,
               esql,
@@ -129,15 +127,7 @@ export function CreateSourceEditor(props: Props) {
       props.onSourceConfigChange(sourceConfig);
     },
     0,
-    [
-      adhocDataViewId,
-      dateField,
-      geoField,
-      esql,
-      narrowByGlobalSearch,
-      narrowByGlobalTime,
-      narrowByMapBounds,
-    ]
+    [dateField, geoField, esql, narrowByGlobalSearch, narrowByGlobalTime, narrowByMapBounds]
   );
 
   return (
@@ -146,7 +136,6 @@ export function CreateSourceEditor(props: Props) {
         <ESQLEditor
           esql={esql}
           onESQLChange={(change) => {
-            setAdhocDataViewId(change.adhocDataViewId);
             setEsql(change.esql);
             setDateFields(change.dateFields);
             setGeoFields(change.geoFields);

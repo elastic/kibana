@@ -107,3 +107,17 @@ export function scrollToIntegration(selector: string) {
     }
   });
 }
+
+export function calculateAssetCount(packageInfo: any): number {
+  const packageAssets = packageInfo?.assets || {};
+
+  // Calculate total asset count from all services and types
+  return Object.values(packageAssets).reduce((total: number, serviceAssets: any) => {
+    return (
+      total +
+      Object.values(serviceAssets || {}).reduce((serviceTotal: number, typeAssets: any) => {
+        return serviceTotal + (Array.isArray(typeAssets) ? typeAssets.length : 0);
+      }, 0)
+    );
+  }, 0);
+}

@@ -52,6 +52,7 @@ export const MoreOptionsFields: React.FC<AdditionalOptionsFieldsProps> = ({
         {optionalProviderFormFields.length > 0 ? (
           <>
             <ConfigurationFormItems
+              dataTestSubj="more-options-configuration-form"
               isLoading={false}
               direction="column"
               items={optionalProviderFormFields}
