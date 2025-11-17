@@ -51,21 +51,26 @@ export function joinValidation(left: ModelValidation, rights: ModelValidation[])
   };
 }
 
-type ModelOfSchema<TModelSchema extends ModelSchema> = {
+export type ModelOfSchema<TModelSchema extends ModelSchema> = {
   [key in keyof TModelSchema & ModelRepresentation]: z.input<TModelSchema[key]>;
 };
 
-type ModelSchema<TModel extends IModel = IModel> = {
+export type ModelSchema<TModel extends IModel = IModel> = {
   [key in keyof TModel & ModelRepresentation]: z.Schema<TModel[key]>;
 };
 
-export function modelValidation<TRightSchema extends ModelSchema>(
-  right: TRightSchema
-): ModelValidation<IModel, WithDefaults<TRightSchema>>;
-export function modelValidation<TLeft extends IModel, TRightSchema extends ModelSchema>(
+export function modelValidation<
+  TRightSchema extends ModelSchema,
+  TDefaults extends IModel = WithDefaults<TRightSchema>
+>(right: TRightSchema): ModelValidation<IModel, TDefaults>;
+export function modelValidation<
+  TLeft extends IModel,
+  TRightSchema extends ModelSchema,
+  TDefaults extends IModel = WithDefaults<TRightSchema>
+>(
   left: ModelValidation<any, TLeft>,
   right: TRightSchema
-): ModelValidation<TLeft, TLeft & WithDefaults<TRightSchema>>;
+): ModelValidation<TLeft, TLeft & TDefaults>;
 
 export function modelValidation(...args: [ModelValidation, ModelSchema] | [ModelSchema]) {
   if (args.length === 1) {
