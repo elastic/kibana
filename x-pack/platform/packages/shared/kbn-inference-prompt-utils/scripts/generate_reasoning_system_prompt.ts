@@ -5,16 +5,19 @@
  * 2.0.
  */
 
-import { run } from '@kbn/dev-cli-runner';
+import { runRecipe } from '@kbn/inference-cli';
 import { createFlagError } from '@kbn/dev-cli-errors';
-import reasoningMetaPrompt from '../prompts/reasoning/reasoning_meta_prompt.text';
-import reasoningSystemPrompt from '../prompts/reasoning/reasoning_system_prompt.text';
 
-run(
-  async ({ log, flagsReader, addCleanupTask }) => {
-    const controller = new AbortController();
-    addCleanupTask(() => controller.abort());
+import { generateReasoningPrompts } from '../src/flows/reasoning/generate_reasoning_prompts';
 
+runRecipe(
+  {
+    name: 'generate_reasoning_prompts',
+    flags: {
+      string: ['input'],
+    },
+  },
+  async ({ log, inferenceClient, flags }) => {
     let inputText = '';
 
     // Prefer piped stdin over the --input flag
@@ -30,35 +33,20 @@ run(
 
     // Fallback to --input flag if no stdin was provided
     if (!inputText) {
-      inputText = flagsReader.string('input') ?? '';
+      inputText = flags.input as string;
     }
 
     if (!inputText) {
       throw createFlagError('Provide input via piped stdin or --input flag');
     }
 
-    const divider = '=========================================';
+    log.info(`Generating prompts...`);
 
-    const output = [
-      reasoningMetaPrompt,
-      divider,
-      'System prompt',
-      divider,
-      reasoningSystemPrompt,
-      divider,
-      'Task description',
-      divider,
-      inputText,
-    ].join('\n\n');
+    const response = await generateReasoningPrompts({
+      inferenceClient,
+      taskDescriptionTemplate: inputText,
+    });
 
-    log.info(output);
-  },
-  {
-    flags: {
-      string: ['input'],
-      help: `
-        --input=<string>  Input text when not provided via stdin (stdin has precedence).
-      `,
-    },
+    process.stdout.write('\n' + response);
   }
 );
