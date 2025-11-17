@@ -13,7 +13,7 @@ import type { DashboardCreationOptions } from '../..';
 import { createDashboardEditUrl } from '../../utils/urls';
 import { screenshotModeService, spacesService } from '../../services/kibana_services';
 import { useDashboardMountContext } from './dashboard_mount_context';
-import type { DashboardAPIGetOut } from '../../../server/content_management';
+import type { DashboardReadResponseBody } from '../../../server';
 
 export const useDashboardOutcomeValidation = () => {
   const [aliasId, setAliasId] = useState<string>();
@@ -24,7 +24,7 @@ export const useDashboardOutcomeValidation = () => {
   const scopedHistory = getScopedHistory?.();
 
   const validateOutcome: DashboardCreationOptions['validateLoadedSavedObject'] = useCallback(
-    (result: DashboardAPIGetOut) => {
+    (result: DashboardReadResponseBody) => {
       if (result.meta.outcome === 'aliasMatch' && result.meta.aliasTargetId) {
         const path = scopedHistory.location.hash.replace(result.id, result.meta.aliasTargetId);
         if (screenshotModeService.isScreenshotMode()) {
