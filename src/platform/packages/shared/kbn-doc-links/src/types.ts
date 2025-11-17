@@ -707,6 +707,10 @@ export interface DocLinks {
     readonly a2aServer: string;
     readonly limitationsKnownIssues: string;
   };
+  readonly indexManagement: {
+    readonly componentTemplate: string;
+    readonly indexAlias: string;
+  };
 }
 
 export type BuildFlavor = 'serverless' | 'traditional';

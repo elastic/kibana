@@ -348,7 +348,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       ilmShrink: `${ELASTIC_DOCS}reference/elasticsearch/index-lifecycle-actions/ilm-shrink`,
       ilmWaitForSnapshot: `${ELASTIC_DOCS}reference/elasticsearch/index-lifecycle-actions/ilm-wait-for-snapshot`,
       indexModules: `${ELASTIC_DOCS}reference/elasticsearch/index-settings/index-modules`,
-      indexSettings: `${ELASTIC_DOCS}reference/elasticsearch/index-settings/index-modules`,
+      indexSettings: `${ELASTIC_DOCS}reference/elasticsearch/index-settings`,
       dynamicIndexSettings: `${ELASTIC_DOCS}reference/elasticsearch/index-settings/index-modules#dynamic-index-settings`,
       indexTemplates: `${ELASTIC_DOCS}manage-data/data-store/templates`,
       mapping: `${ELASTIC_DOCS}manage-data/data-store/mapping`,
@@ -716,9 +716,6 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       skippingDisconnectedClusters: `${ELASTIC_DOCS}solutions/search/cross-cluster-search#skip-unavailable-clusters`,
     },
     apis: {
-      bulkIndexAlias: isServerless
-        ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-indices-update-aliases`
-        : `${ELASTICSEARCH_APIS}operation/operation-indices-update-aliases`,
       indexStats: isServerless
         ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-indices-update-aliases`
         : `${ELASTICSEARCH_APIS}operation/operation-indices-stats`,
@@ -1070,6 +1067,14 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     },
     datasetQuality: {
       failureStore: `${ELASTIC_DOCS}solutions/observability/data-set-quality-monitoring#find-failed-documents-with-failure-store`,
+    },
+    indexManagement: {
+      componentTemplate: isServerless
+        ? `${ELASTIC_DOCS}manage-data/data-store/templates#component-templates`
+        : `${ELASTIC_DOCS}manage-data/data-store/templates#component-templates`,
+      indexAlias: isServerless
+        ? `${ELASTIC_DOCS}manage-data/data-store/aliases`
+        : `${ELASTIC_DOCS}manage-data/data-store/aliases`,
     },
   });
 };
