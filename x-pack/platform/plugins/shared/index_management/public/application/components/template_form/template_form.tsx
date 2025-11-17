@@ -160,12 +160,9 @@ export const TemplateForm = ({
   const apiError = saveError ? (
     <>
       <SectionError
-        title={
-          <FormattedMessage
-            id="xpack.idxMgmt.templateForm.saveTemplateError"
-            defaultMessage="Unable to create template"
-          />
-        }
+        title={i18n.translate('xpack.idxMgmt.templateForm.saveTemplateError', {
+          defaultMessage: 'Unable to create template',
+        })}
         error={saveError}
         data-test-subj="saveTemplateError"
       />
