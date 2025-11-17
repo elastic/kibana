@@ -120,7 +120,8 @@ export class IndexUpdateService {
     private readonly data: DataPublicPluginStart,
     private readonly notifications: NotificationsStart,
     private readonly telemetry: IndexEditorTelemetryService,
-    public readonly canEditIndex: boolean
+    public readonly canEditIndex: boolean,
+    public readonly canRecreateIndex: boolean
   ) {
     this.listenForUpdates();
   }

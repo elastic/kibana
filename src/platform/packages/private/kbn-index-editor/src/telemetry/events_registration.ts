@@ -18,6 +18,7 @@ export const INDEX_EDITOR_SAVE_SUBMITTED_EVENT_TYPE = 'index_editor.save_submitt
 export const INDEX_EDITOR_DATA_INTERACTION_EVENT_TYPE = 'index_editor.data_interaction';
 export const INDEX_EDITOR_CLICK_QUERY_THIS_INDEX_EVENT_TYPE =
   'index_editor.query_this_index_clicked';
+export const INDEX_EDITOR_DROP_ALL_COLUMNS_EVENT_TYPE = 'index_editor.drop_all_columns';
 
 /**
  * Registers the index editor analytics events.
@@ -150,6 +151,25 @@ export const registerIndexEditorAnalyticsEvents = once((analytics: AnalyticsServ
         _meta: {
           description:
             'The bucket in which the length of the query in the search bar falls into. Possible values are: 0|1-50|51-100|101-200|200+',
+        },
+      },
+    },
+  });
+
+  analytics.registerEventType({
+    eventType: INDEX_EDITOR_DROP_ALL_COLUMNS_EVENT_TYPE,
+    schema: {
+      flyout_mode: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'The mode in which the index editor flyout was opened. Possible values are: create|edit',
+        },
+      },
+      outcome: {
+        type: 'keyword',
+        _meta: {
+          description: 'The outcome of the action. Possible values are: success|error',
         },
       },
     },

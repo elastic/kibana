@@ -32,6 +32,7 @@ export interface LookupIndexPrivileges {
   canCreateIndex: boolean;
   canEditIndex: boolean;
   canReadIndex: boolean;
+  canRecreateIndex: boolean;
 }
 
 export const useLookupIndexPrivileges = () => {
@@ -76,6 +77,9 @@ export const useLookupIndexPrivileges = () => {
         canCreateIndex: hasPrivilege(privileges, indexName, 'create_index'),
         canEditIndex: hasPrivilege(privileges, indexName, 'write'),
         canReadIndex: hasPrivilege(privileges, indexName, 'read'),
+        canRecreateIndex:
+          hasPrivilege(privileges, indexName, 'delete_index') &&
+          hasPrivilege(privileges, indexName, 'create_index'),
       };
       return acc;
     }, {} as Record<string, LookupIndexPrivileges>);

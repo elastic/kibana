@@ -39,6 +39,7 @@ export interface IndexEditorCommandArgs {
   indexName: string;
   doesIndexExist?: boolean;
   canEditIndex?: boolean;
+  canRecreateIndex?: boolean;
   triggerSource?: string;
   highestPrivilege?: string; // The highest user privilege for the given index ( create, edit, read )
 }
@@ -90,6 +91,7 @@ export function getMonacoCommandString(
       indexName,
       doesIndexExist: isExistingIndex,
       canEditIndex,
+      canRecreateIndex: indexPrivileges.canRecreateIndex,
       triggerSource: 'esql_hover',
       highestPrivilege,
     })
@@ -278,12 +280,14 @@ export const useLookupIndexCommand = (
       indexName: string,
       doesIndexExist?: boolean,
       canEditIndex = true,
+      canRecreateIndex = false,
       triggerSource = 'esql_autocomplete'
     ) => {
       await uiActions.getTrigger('EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID').exec({
         indexName,
         doesIndexExist,
         canEditIndex,
+        canRecreateIndex,
         triggerSource,
         onClose: async ({
           indexName: resultIndexName,
@@ -312,8 +316,14 @@ export const useLookupIndexCommand = (
     const disposable = monaco.editor.registerCommand(
       COMMAND_ID,
       async (_, args: IndexEditorCommandArgs) => {
-        const { indexName, doesIndexExist, canEditIndex, triggerSource } = args;
-        await openFlyoutRef.current(indexName, doesIndexExist, canEditIndex, triggerSource);
+        const { indexName, doesIndexExist, canEditIndex, canRecreateIndex, triggerSource } = args;
+        await openFlyoutRef.current(
+          indexName,
+          doesIndexExist,
+          canEditIndex,
+          canRecreateIndex,
+          triggerSource
+        );
       }
     );
     return () => {

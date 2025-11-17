@@ -30,14 +30,15 @@ import { isPlaceholderColumn } from '../utils';
 export const EmptyPrompt: FC = () => {
   const { onFileSelectorClick } = useFileSelectorContext();
   const {
-    services: { fileUpload, indexUpdateService, notifications },
+    services: { fileUpload, indexUpdateService, notifications, indexEditorTelemetryService },
   } = useKibana<KibanaContextExtra>();
 
   const columns = useObservable(indexUpdateService.dataTableColumns$);
 
   const allowMappingsReset = useMemo(
-    () => columns?.some((col) => !isPlaceholderColumn(col.name)),
-    [columns]
+    () =>
+      indexUpdateService.canRecreateIndex && columns?.some((col) => !isPlaceholderColumn(col.name)),
+    [columns, indexUpdateService.canRecreateIndex]
   );
 
   const [isResettingMappings, setIsResettingMappings] = useState(false);
@@ -46,17 +47,19 @@ export const EmptyPrompt: FC = () => {
     setIsResettingMappings(true);
     try {
       await indexUpdateService.resetIndexMapping();
+      indexEditorTelemetryService.trackDropAllColumns('success');
     } catch (error) {
       notifications.toasts.addError(error, {
         title: i18n.translate('indexEditor.emptyPrompt.resetMappingsErrorToastTitle', {
           defaultMessage: 'Error resetting index mappings',
         }),
       });
+      indexEditorTelemetryService.trackDropAllColumns('error');
     } finally {
       setIsResettingMappings(false);
       setIsResetMappingsWarningModalOpen(false);
     }
-  }, [indexUpdateService, notifications.toasts]);
+  }, [indexEditorTelemetryService, indexUpdateService, notifications.toasts]);
 
   const maxFileSize = fileUpload.getMaxBytesFormatted();
 

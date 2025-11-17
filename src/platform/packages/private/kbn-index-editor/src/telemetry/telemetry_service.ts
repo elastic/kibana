@@ -12,6 +12,7 @@ import {
   INDEX_EDITOR_SAVE_SUBMITTED_EVENT_TYPE,
   INDEX_EDITOR_DATA_INTERACTION_EVENT_TYPE,
   INDEX_EDITOR_CLICK_QUERY_THIS_INDEX_EVENT_TYPE,
+  INDEX_EDITOR_DROP_ALL_COLUMNS_EVENT_TYPE,
 } from './events_registration';
 import { getBucket } from './utils';
 
@@ -104,6 +105,13 @@ export class IndexEditorTelemetryService {
         { label: '51-100', to: 100 },
         { label: '101-200', to: 200 },
       ]),
+    });
+  }
+
+  public trackDropAllColumns(outcome?: 'success' | 'error') {
+    this.reportEvent(INDEX_EDITOR_DROP_ALL_COLUMNS_EVENT_TYPE, {
+      flyout_mode: this._flyoutMode,
+      outcome,
     });
   }
 

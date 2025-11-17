@@ -45,7 +45,8 @@ export function createEditLookupIndexContentAction(
         data,
         coreStart.notifications,
         indexEditorTelemetryService,
-        context.canEditIndex
+        context.canEditIndex,
+        context.canRecreateIndex
       );
 
       const { indexName, doesIndexExist } = context;
