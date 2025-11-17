@@ -75,7 +75,7 @@ apiTest.describe('APM integration not installed but setup completed', { tag: ['@
 });
 
 apiTest.describe('Profiling is setup', { tag: ['@ess'] }, () => {
-  apiTest.beforeAll(async ({ esClient, apiServices, config, log }) => {
+  apiTest.beforeEach(async ({ esClient, apiServices, config, log }) => {
     await cleanUpProfilingData({
       es: esClient,
       config,
@@ -83,7 +83,7 @@ apiTest.describe('Profiling is setup', { tag: ['@ess'] }, () => {
     });
     await setupProfiling(config, apiServices, log);
   });
-  apiTest.afterAll(async ({ esClient, config, log }) => {
+  apiTest.afterEach(async ({ esClient, config, log }) => {
     await cleanUpProfilingData({
       es: esClient,
       config,
@@ -120,7 +120,8 @@ apiTest.describe('Profiling is setup', { tag: ['@ess'] }, () => {
     expect(adminStatus.pre_8_9_1_data).toBeFalsy();
   });
 
-  apiTest('Viewer user with data', async ({ roleBasedApiClient }) => {
+  apiTest('Viewer user with data', async ({ esClient, roleBasedApiClient, log }) => {
+    await loadProfilingData(esClient, log);
     const readRes = await roleBasedApiClient.viewerUser({
       endpoint: 'GET /api/profiling/setup/es_resources',
     });
