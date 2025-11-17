@@ -57,7 +57,7 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
     });
 
     /**
-     * Before running the step, we run monitoring once to handle cases where
+     * Before running the node, we run monitoring once to handle cases where
      * the step should not be executed at all, e.g., if the workflow has been
      * cancelled or a timeout has already occurred.
      */
