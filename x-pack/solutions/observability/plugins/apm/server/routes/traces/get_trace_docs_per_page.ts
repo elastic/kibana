@@ -9,14 +9,15 @@ import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { QueryDslQueryContainer, Sort } from '@elastic/elasticsearch/lib/api/types';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery } from '@kbn/observability-plugin/server';
-import { omit } from 'lodash';
-import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import {
   AGENT_NAME,
   CHILD_ID,
   EVENT_OUTCOME,
   FAAS_COLDSTART,
+  LINKS_SPAN_ID,
+  LINKS_TRACE_ID,
   OTEL_SPAN_LINKS_SPAN_ID,
   OTEL_SPAN_LINKS_TRACE_ID,
   PARENT_ID,
@@ -145,46 +146,46 @@ export async function getTraceDocsPerPage({
   return {
     hits: res.hits.hits.map((hit) => {
       const sort = hit.sort;
-      const fields = unflattenKnownApmEventFields(hit?.fields);
+      const fields = accessKnownApmEventFields(hit.fields).requireFields(requiredFields);
 
       const spanLinks =
-        'span' in hit._source ? hit._source.span?.links : mapOtelToSpanLink(fields.links);
+        'span' in hit._source
+          ? hit._source.span?.links
+          : mapOtelToSpanLink({
+              span_id: fields[LINKS_SPAN_ID],
+              trace_id: fields[LINKS_TRACE_ID],
+            });
 
-      if (hit.fields[PROCESSOR_EVENT]?.[0] === ProcessorEvent.span) {
-        const spanEvent = unflattenKnownApmEventFields(hit.fields, [
-          ...requiredFields,
-          ...requiredSpanFields,
-        ]);
+      if (fields[PROCESSOR_EVENT] === ProcessorEvent.span) {
+        const { child, span, processor, ...spanEvent } = fields
+          .requireFields(requiredSpanFields)
+          .unflatten();
 
         const spanWaterfallEvent: WaterfallSpan = {
-          ...omit(spanEvent, 'child'),
-          processor: {
-            event: 'span',
-          },
+          ...spanEvent,
+          processor: processor as { event: 'span' },
           span: {
-            ...spanEvent.span,
-            composite: spanEvent.span.composite
-              ? (spanEvent.span.composite as Required<WaterfallSpan['span']>['composite'])
+            ...span,
+            composite: span.composite
+              ? (span.composite as Required<WaterfallSpan['span']>['composite'])
               : undefined,
             links: spanLinks,
           },
-          ...(spanEvent.child ? { child: spanEvent.child as WaterfallSpan['child'] } : {}),
+          ...(child ? { child: child as WaterfallSpan['child'] } : undefined),
         };
 
         return { sort, hit: spanWaterfallEvent };
       }
 
-      const txEvent = unflattenKnownApmEventFields(hit.fields, [
-        ...requiredFields,
-        ...requiredTxFields,
-      ]);
+      const { span, processor, ...txEvent } = fields.requireFields(requiredTxFields).unflatten();
+
       const txWaterfallEvent: WaterfallTransaction = {
         ...txEvent,
-        processor: {
-          event: 'transaction',
+        processor: processor as {
+          event: 'transaction';
         },
         span: {
-          ...txEvent.span,
+          ...span,
           links: spanLinks,
         },
       };
