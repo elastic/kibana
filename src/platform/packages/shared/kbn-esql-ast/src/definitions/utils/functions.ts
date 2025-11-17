@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { ESQLControlVariable, RecommendedField } from '@kbn/esql-types';
-import { ESQLVariableType } from '@kbn/esql-types';
+import { ControlTriggerSource, ESQLVariableType } from '@kbn/esql-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import {
   type FunctionDefinition,
@@ -263,11 +263,18 @@ export function getFunctionSuggestion(fn: FunctionDefinition): ISuggestionItem {
     detail = `[${labels.join('] [')}] ${detail}`;
   }
   const fullSignatures = getFunctionSignatures(fn, { capitalize: true, withTypes: true });
+  const hasNoArguments = fn.signatures.every((sig) => sig.params.length === 0);
 
   let text = `${fn.name.toUpperCase()}($0)`;
+
+  if (hasNoArguments) {
+    text = `${fn.name.toUpperCase()}()`;
+  }
+
   if (fn.customParametersSnippet) {
     text = `${fn.name.toUpperCase()}(${fn.customParametersSnippet})`;
   }
+
   let functionsPriority = fn.type === FunctionDefinitionTypes.AGG ? 'A' : 'C';
   if (fn.type === FunctionDefinitionTypes.TIME_SERIES_AGG) {
     functionsPriority = '1A';
@@ -426,6 +433,7 @@ export const buildColumnSuggestions = (
     const controlSuggestions = columns.length
       ? getControlSuggestion(
           variableType,
+          ControlTriggerSource.SMART_SUGGESTION,
           userDefinedColumns?.map((v) => `${getVariablePrefix(variableType)}${v.key}`)
         )
       : [];

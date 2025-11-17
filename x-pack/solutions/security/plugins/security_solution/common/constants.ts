@@ -9,7 +9,10 @@ import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
 import * as i18n from './translations';
 
-export { SecurityPageName } from '@kbn/security-solution-navigation';
+export {
+  SecurityPageName,
+  ATTACKS_ALERTS_ALIGNMENT_ENABLED,
+} from '@kbn/security-solution-navigation';
 /**
  * as const
  *
@@ -97,7 +100,13 @@ export const REPORTS_PATH = '/reports' as const;
 export const AI_VALUE_PATH = `${REPORTS_PATH}/ai_value` as const;
 export const DETECTION_RESPONSE_PATH = '/detection_response' as const;
 export const DETECTIONS_PATH = '/detections' as const;
+
+// TODO: https://github.com/elastic/kibana/issues/242434
+// Investigate possibility of using `detections` instead
 export const ALERTS_PATH = '/alerts' as const;
+export const ATTACKS_PATH = '/attacks' as const;
+export const ALERT_DETECTIONS = '/alert_detections' as const;
+
 export const ALERT_DETAILS_REDIRECT_PATH = `${ALERTS_PATH}/redirect` as const;
 export const ALERT_SUMMARY_PATH = `/alert_summary` as const;
 export const RULES_PATH = '/rules' as const;
@@ -185,22 +194,6 @@ export const ENABLE_NEWS_FEED_SETTING = 'securitySolution:enableNewsFeed' as con
 
 /** This Kibana Advanced Setting sets a default AI connector for serverless AI features (EASE) */
 export const DEFAULT_AI_CONNECTOR = 'securitySolution:defaultAIConnector' as const;
-
-/** Feature flag for the default AI connector setting */
-export const AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED =
-  'aiAssistant.defaultLlmSettingEnabled' as const;
-
-/** The default value for the default AI connector setting */
-export const AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED_VALUE = true as const;
-
-/** This Kibana Advanced Setting sets a default AI value report minutes per alert */
-export const DEFAULT_VALUE_REPORT_MINUTES = 'securitySolution:defaultValueReportMinutes' as const;
-
-/** This Kibana Advanced Setting sets a default AI value report hourly analyst rate */
-export const DEFAULT_VALUE_REPORT_RATE = 'securitySolution:defaultValueReportRate' as const;
-
-/** This Kibana Advanced Setting sets a default title for the AI value report page */
-export const DEFAULT_VALUE_REPORT_TITLE = 'securitySolution:defaultValueReportTitle' as const;
 
 /** This Kibana Advanced Setting allows users to enable/disable querying cold and frozen data tiers in analyzer */
 export const EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER =

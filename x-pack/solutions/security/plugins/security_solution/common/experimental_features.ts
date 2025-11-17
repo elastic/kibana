@@ -184,6 +184,10 @@ export const allowedExperimentalValues = Object.freeze({
    * Protects all the work related to the attacks and alerts alignment effort
    */
   attacksAlertsAlignment: false,
+  /**
+   *  Enables the QRadar rules import feature
+   */
+  qradarRulesMigration: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

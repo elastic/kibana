@@ -10,11 +10,17 @@
 export enum SecurityPageName {
   administration = 'administration',
   alerts = 'alerts',
+  attacks = 'attacks',
   aiValue = 'ai_value',
   aiAssistedRuleCreate = 'ai_assisted_rule_create',
   assetInventory = 'asset_inventory',
   attackDiscovery = 'attack_discovery',
   blocklist = 'blocklist',
+
+  // TODO: https://github.com/elastic/kibana/issues/242434
+  // Investigate possibility of using `detections` instead
+  alertDetections = 'alert_detections',
+
   /*
    * Warning: Computed values are not permitted in an enum with string valued members
    * All Cases page names must match `CasesDeepLinkId` in x-pack/platform/plugins/shared/cases/public/common/navigation/deep_links.ts

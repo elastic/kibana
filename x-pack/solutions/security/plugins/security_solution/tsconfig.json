@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -259,8 +259,10 @@
     "@kbn/onechat-server",
     "@kbn/core-analytics-server-mocks",
     "@kbn/object-utils",
-    "@kbn/core-ui-settings-common",
+    "@kbn/ml-response-stream",
     "@kbn/react-query",
-    "@kbn/ml-response-stream"
+    "@kbn/core-chrome-layout-constants",
+    "@kbn/response-ops-rule-form",
+    "@kbn/core-lifecycle-browser-mocks"
   ]
 }

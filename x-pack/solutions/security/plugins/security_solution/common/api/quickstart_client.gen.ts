@@ -448,6 +448,8 @@ import type {
   UpsertDashboardMigrationResourcesResponse,
 } from '../siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import type {
+  CreateQRadarRuleMigrationRulesRequestParamsInput,
+  CreateQRadarRuleMigrationRulesRequestBodyInput,
   CreateRuleMigrationRequestBodyInput,
   CreateRuleMigrationResponse,
   CreateRuleMigrationRulesRequestParamsInput,
@@ -804,6 +806,25 @@ If a record already exists for the specified entity, that record is overwritten 
         path: '/api/entity_analytics/monitoring/users',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Parses QRadar XML export and adds rules to an existing migration
+   */
+  async createQRadarRuleMigrationRules(props: CreateQRadarRuleMigrationRulesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API CreateQRadarRuleMigrationRules`);
+    return this.kbnClient
+      .request({
+        path: replaceParams(
+          '/internal/siem_migrations/rules/{migration_id}/qradar/rules',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'POST',
         body: props.body,
@@ -3226,6 +3247,10 @@ export interface CreatePrivilegesImportIndexProps {
 }
 export interface CreatePrivMonUserProps {
   body: CreatePrivMonUserRequestBodyInput;
+}
+export interface CreateQRadarRuleMigrationRulesProps {
+  params: CreateQRadarRuleMigrationRulesRequestParamsInput;
+  body: CreateQRadarRuleMigrationRulesRequestBodyInput;
 }
 export interface CreateRuleProps {
   body: CreateRuleRequestBodyInput;
