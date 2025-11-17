@@ -33,6 +33,41 @@ CLOUD_DEPLOYMENT_ELASTICSEARCH_URL=$(ecctl deployment show "$CLOUD_DEPLOYMENT_ID
 echo "Kibana URL: $CLOUD_DEPLOYMENT_KIBANA_URL"
 echo "Elasticsearch URL: $CLOUD_DEPLOYMENT_ELASTICSEARCH_URL"
 
+# Get deployment resource specifications
+echo "--- Get Deployment Resource Specifications"
+DEPLOYMENT_JSON=$(ecctl deployment show "$CLOUD_DEPLOYMENT_ID" --output json)
+
+# Save deployment specification as artifact
+DEPLOYMENT_SPEC_FILE="${KIBANA_DIR}/deployment-spec-${CLOUD_DEPLOYMENT_ID}.json"
+echo "$DEPLOYMENT_JSON" | jq '.' > "$DEPLOYMENT_SPEC_FILE"
+echo "Saved deployment specification to: $DEPLOYMENT_SPEC_FILE"
+buildkite-agent artifact upload "$DEPLOYMENT_SPEC_FILE"
+
+# Extract hardware profile (deployment template)
+ES_HARDWARE_PROFILE=$(echo "$DEPLOYMENT_JSON" | jq -r '.resources.elasticsearch[0].plan.deployment_template.id // "unknown"')
+
+# Extract Kibana specifications
+KIBANA_MEMORY=$(echo "$DEPLOYMENT_JSON" | jq -r '.resources.kibana[0].plan.cluster_topology[0].size.value // "unknown"')
+KIBANA_ZONES=$(echo "$DEPLOYMENT_JSON" | jq -r '.resources.kibana[0].plan.cluster_topology[0].zone_count // "unknown"')
+KIBANA_INSTANCE_CONFIG=$(echo "$DEPLOYMENT_JSON" | jq -r '.resources.kibana[0].plan.cluster_topology[0].instance_configuration_id // "unknown"')
+
+# Extract Elasticsearch specifications
+# Get active nodes (size.value > 0) and aggregate their specs
+ES_TOTAL_MEMORY=$(echo "$DEPLOYMENT_JSON" | jq -r '[.resources.elasticsearch[0].plan.cluster_topology[] | select(.size.value != null and .size.value > 0) | (.size.value * (.zone_count // 1))] | add // 0')
+ES_ZONES=$(echo "$DEPLOYMENT_JSON" | jq -r '.resources.elasticsearch[0].plan.cluster_topology[] | select(.size.value != null and .size.value > 0) | (.zone_count // 1)' | head -1)
+ES_NODE_COUNT=$(echo "$DEPLOYMENT_JSON" | jq -r '[.resources.elasticsearch[0].plan.cluster_topology[] | select(.size.value != null and .size.value > 0) | (.zone_count // 1)] | add // 0')
+ES_NODE_DETAILS=$(echo "$DEPLOYMENT_JSON" | jq -r '.resources.elasticsearch[0].plan.cluster_topology[] | select(.size.value != null and .size.value > 0) | "\(.id): \(.size.value)MB x \((.zone_count // 1)) zones (\(.instance_configuration_id // "unknown"))"' | tr '\n' '; ')
+
+# Export for reporting script
+export ES_HARDWARE_PROFILE
+export KIBANA_MEMORY
+export KIBANA_ZONES
+export KIBANA_INSTANCE_CONFIG
+export ES_TOTAL_MEMORY
+export ES_ZONES
+export ES_NODE_COUNT
+export ES_NODE_DETAILS
+
 # Get credentials from legacy vault
 echo "--- Get Deployment Credentials"
 

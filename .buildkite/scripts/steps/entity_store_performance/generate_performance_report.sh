@@ -110,6 +110,38 @@ generate_performance_report() {
 - **Kibana URL**: $CLOUD_DEPLOYMENT_KIBANA_URL
 - **Elasticsearch URL**: $CLOUD_DEPLOYMENT_ELASTICSEARCH_URL
 
+EOF
+
+  # Add deployment resource specifications if available
+  if [ -n "${KIBANA_MEMORY:-}" ] && [ "${KIBANA_MEMORY}" != "unknown" ] && [ "${KIBANA_MEMORY}" != "null" ]; then
+    echo "### Deployment Resources" >> "$REPORT_FILE"
+    echo "" >> "$REPORT_FILE"
+    
+    if [ -n "${ES_HARDWARE_PROFILE:-}" ] && [ "${ES_HARDWARE_PROFILE}" != "unknown" ] && [ "${ES_HARDWARE_PROFILE}" != "null" ]; then
+      echo "#### Hardware Profile" >> "$REPORT_FILE"
+      echo "- **Elasticsearch**: ${ES_HARDWARE_PROFILE}" >> "$REPORT_FILE"
+      echo "" >> "$REPORT_FILE"
+    fi
+    
+    echo "#### Kibana" >> "$REPORT_FILE"
+    echo "- **Memory**: ${KIBANA_MEMORY}MB" >> "$REPORT_FILE"
+    echo "- **Zones**: ${KIBANA_ZONES:-unknown}" >> "$REPORT_FILE"
+    echo "- **Instance Config**: ${KIBANA_INSTANCE_CONFIG:-unknown}" >> "$REPORT_FILE"
+    echo "" >> "$REPORT_FILE"
+    
+    if [ -n "${ES_TOTAL_MEMORY:-}" ] && [ "${ES_TOTAL_MEMORY}" != "0" ] && [ "${ES_TOTAL_MEMORY}" != "null" ]; then
+      echo "#### Elasticsearch" >> "$REPORT_FILE"
+      echo "- **Total Memory**: ${ES_TOTAL_MEMORY}MB" >> "$REPORT_FILE"
+      echo "- **Node Count**: ${ES_NODE_COUNT:-unknown}" >> "$REPORT_FILE"
+      echo "- **Zones**: ${ES_ZONES:-unknown}" >> "$REPORT_FILE"
+      if [ -n "${ES_NODE_DETAILS:-}" ]; then
+        echo "- **Node Details**: ${ES_NODE_DETAILS}" >> "$REPORT_FILE"
+      fi
+      echo "" >> "$REPORT_FILE"
+    fi
+  fi
+
+  cat >> "$REPORT_FILE" <<EOF
 ## Test Results
 - **Status**: $([ $TEST_EXIT_CODE -eq 0 ] && echo "✅ PASSED" || echo "❌ FAILED")
 - **Exit Code**: $TEST_EXIT_CODE
@@ -177,8 +209,8 @@ EOF
           echo "$JSON_PART" | jq -r '.nodes[] | 
             "#### \(.node_name) (\(.node_id))",
             "- **CPU Usage**: \(.cpu.percent)%",
-            "- **JVM Heap Used**: \(.jvm.mem.heap_used_percent)% (\(.jvm.mem.heap_used_in_bytes / 1024 / 1024 | floor)MB / \(.jvm.mem.heap_max_in_bytes / 1024 / 1024 | floor)MB)",
-            "- **OS Memory Used**: \(.os.mem.used_percent)% (\(.os.mem.used_in_bytes / 1024 / 1024 | floor)MB / \(.os.mem.total_in_bytes / 1024 / 1024 | floor)MB)",
+            "- **JVM Heap Used**: \(.jvm.mem.heap_used_percent)% (\(.jvm.mem.heap_used_in_bytes // 0 / 1024 / 1024 | floor)MB / \(.jvm.mem.heap_max_in_bytes // 0 / 1024 / 1024 | floor)MB)",
+            "- **OS Memory Used**: \(.os.mem.used_percent)% (\(.os.mem.used_in_bytes // 0 / 1024 / 1024 | floor)MB / \(.os.mem.total_in_bytes // 0 / 1024 / 1024 | floor)MB)",
             "- **Load Average (1m/5m/15m)**: \(.os.cpu.load_average."1m" | tostring) / \(.os.cpu.load_average."5m" | tostring) / \(.os.cpu.load_average."15m" | tostring)",
             "- **GC Young Collections**: \(.jvm.gc.collectors.young.collection_count) (total time: \(.jvm.gc.collectors.young.collection_time_in_millis)ms)",
             "- **GC Old Collections**: \(.jvm.gc.collectors.old.collection_count) (total time: \(.jvm.gc.collectors.old.collection_time_in_millis)ms)",
