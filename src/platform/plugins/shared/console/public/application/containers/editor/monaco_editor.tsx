@@ -408,7 +408,11 @@ export const MonacoEditor = ({
           <EuiToolTip
             content={i18n.translate('console.monaco.copyToLanguageButtonTooltipContent', {
               defaultMessage: 'Copy to {language}',
-              values: { language: getLanguageLabelByValue(currentLanguage) },
+              values: {
+                language: getLanguageLabelByValue(
+                  isKbnRequestSelected ? DEFAULT_LANGUAGE : currentLanguage
+                ),
+              },
             })}
           >
             <EuiButtonIcon
@@ -417,10 +421,16 @@ export const MonacoEditor = ({
               color="text"
               iconType="copyClipboard"
               onClick={onCopyAsSubmit}
+              onMouseEnter={checkIsKbnRequestSelected}
+              onFocus={checkIsKbnRequestSelected}
               data-test-subj="copyToLanguageActionButton"
               aria-label={i18n.translate('console.monaco.copyToLanguageButtonAriaLabel', {
                 defaultMessage: 'Copy to {language}',
-                values: { language: getLanguageLabelByValue(currentLanguage) },
+                values: {
+                  language: getLanguageLabelByValue(
+                    isKbnRequestSelected ? DEFAULT_LANGUAGE : currentLanguage
+                  ),
+                },
               })}
               disabled={!window.navigator?.clipboard}
               css={styles.actionButton}
