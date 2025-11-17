@@ -152,6 +152,8 @@ export interface ObservabilityTracesFetchSpanFeature {
     params: {
       traceId: string;
       spanId: string;
+      start: string;
+      end: string;
     },
     signal: AbortSignal
   ) => Promise<SpanDocument | undefined>;

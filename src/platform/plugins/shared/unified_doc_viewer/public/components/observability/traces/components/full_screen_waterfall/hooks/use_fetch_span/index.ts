@@ -18,7 +18,8 @@ interface UseFetchSpanParams {
 }
 
 export const useFetchSpan = ({ spanId, traceId }: UseFetchSpanParams) => {
-  const { discoverShared, core } = getUnifiedDocViewerServices();
+  const { discoverShared, core, data } = getUnifiedDocViewerServices();
+  const timeFilter = data.query.timefilter.timefilter.getAbsoluteTime();
 
   const fetchSpanFeature = discoverShared.features.registry.getById(
     'observability-traces-fetch-span'
@@ -34,11 +35,13 @@ export const useFetchSpan = ({ spanId, traceId }: UseFetchSpanParams) => {
         {
           traceId,
           spanId,
+          start: timeFilter.from,
+          end: timeFilter.to,
         },
         signal
       );
     },
-    [fetchSpanFeature, traceId, spanId]
+    [fetchSpanFeature, traceId, spanId, timeFilter.from, timeFilter.to]
   );
 
   useEffect(() => {

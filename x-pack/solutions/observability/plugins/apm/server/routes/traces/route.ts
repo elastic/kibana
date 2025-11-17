@@ -485,18 +485,20 @@ const unifiedTraceSpanRoute = createApmServerRoute({
       traceId: t.string,
       spanId: t.string,
     }),
+    query: rangeRt,
   }),
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<SpanDocument | undefined> => {
     const {
       params: {
         path: { traceId, spanId },
+        query: { start, end },
       },
     } = resources;
 
     const apmEventClient = await getApmEventClient(resources);
 
-    return getUnifiedTraceSpan({ spanId, traceId, apmEventClient });
+    return getUnifiedTraceSpan({ spanId, traceId, apmEventClient, start, end });
   },
 });
 

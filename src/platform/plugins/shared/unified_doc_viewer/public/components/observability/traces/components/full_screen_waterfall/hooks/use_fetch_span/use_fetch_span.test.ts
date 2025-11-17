@@ -18,6 +18,10 @@ jest.mock('../../../../../../../plugin', () => ({
 
 const mockFetchSpan = jest.fn<Promise<SpanDocument | undefined>, any>();
 const mockAddDanger = jest.fn();
+const mockGetAbsoluteTime = jest.fn(() => ({
+  from: '2023-01-01T00:00:00.000Z',
+  to: '2023-01-01T01:00:00.000Z',
+}));
 
 const mockGetById: jest.Mock<
   | {
@@ -29,7 +33,15 @@ const mockGetById: jest.Mock<
 }));
 
 (getUnifiedDocViewerServices as jest.Mock).mockReturnValue({
-  data: {},
+  data: {
+    query: {
+      timefilter: {
+        timefilter: {
+          getAbsoluteTime: mockGetAbsoluteTime,
+        },
+      },
+    },
+  },
   discoverShared: {
     features: {
       registry: {
@@ -103,6 +115,8 @@ describe('useFetchSpan', () => {
       {
         traceId,
         spanId,
+        start: '2023-01-01T00:00:00.000Z',
+        end: '2023-01-01T01:00:00.000Z',
       },
       expect.any(AbortSignal)
     );
@@ -133,6 +147,8 @@ describe('useFetchSpan', () => {
       {
         traceId,
         spanId,
+        start: '2023-01-01T00:00:00.000Z',
+        end: '2023-01-01T01:00:00.000Z',
       },
       expect.any(AbortSignal)
     );
@@ -208,6 +224,8 @@ describe('useFetchSpan', () => {
       {
         traceId,
         spanId: 'span-1',
+        start: '2023-01-01T00:00:00.000Z',
+        end: '2023-01-01T01:00:00.000Z',
       },
       expect.any(AbortSignal)
     );
@@ -220,6 +238,8 @@ describe('useFetchSpan', () => {
       {
         traceId,
         spanId: 'span-2',
+        start: '2023-01-01T00:00:00.000Z',
+        end: '2023-01-01T01:00:00.000Z',
       },
       expect.any(AbortSignal)
     );
@@ -247,6 +267,8 @@ describe('useFetchSpan', () => {
       {
         traceId: 'trace-1',
         spanId,
+        start: '2023-01-01T00:00:00.000Z',
+        end: '2023-01-01T01:00:00.000Z',
       },
       expect.any(AbortSignal)
     );
@@ -258,6 +280,8 @@ describe('useFetchSpan', () => {
       {
         traceId: 'trace-2',
         spanId,
+        start: '2023-01-01T00:00:00.000Z',
+        end: '2023-01-01T01:00:00.000Z',
       },
       expect.any(AbortSignal)
     );
@@ -284,6 +308,8 @@ describe('useFetchSpan', () => {
       expect.objectContaining({
         traceId,
         spanId,
+        start: '2023-01-01T00:00:00.000Z',
+        end: '2023-01-01T01:00:00.000Z',
       }),
       expect.any(AbortSignal)
     );

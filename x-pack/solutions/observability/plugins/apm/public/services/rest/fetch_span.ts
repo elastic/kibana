@@ -11,13 +11,17 @@ export const fetchSpan = (
   {
     traceId,
     spanId,
+    start,
+    end,
   }: {
     traceId: string;
     spanId: string;
+    start: string;
+    end: string;
   },
   signal: AbortSignal
 ) =>
   callApmApi('GET /internal/apm/unified_traces/{traceId}/spans/{spanId}', {
-    params: { path: { traceId, spanId } },
+    params: { path: { traceId, spanId }, query: { start, end } },
     signal,
   });
