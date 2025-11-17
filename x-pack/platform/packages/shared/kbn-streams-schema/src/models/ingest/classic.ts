@@ -96,7 +96,7 @@ ClassicStream.Definition.is = (
 ): stream is ClassicStream.Definition =>
   Boolean(
     'ingest' in stream &&
-    typeof stream.ingest === 'object' &&
-    stream.ingest &&
-    'classic' in stream.ingest
+      typeof stream.ingest === 'object' &&
+      stream.ingest &&
+      'classic' in stream.ingest
   );

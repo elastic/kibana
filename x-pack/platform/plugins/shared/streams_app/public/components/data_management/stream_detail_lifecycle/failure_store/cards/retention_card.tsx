@@ -67,11 +67,11 @@ export const RetentionCard = ({
     if (isClassicStream) {
       return isInheritingFailureStore
         ? i18n.translate('xpack.streams.streamDetailFailureStore.inheritingFromIndexTemplate', {
-          defaultMessage: 'Inherit from index template',
-        })
+            defaultMessage: 'Inherit from index template',
+          })
         : i18n.translate('xpack.streams.streamDetailFailureStore.overrideIndexTemplate', {
-          defaultMessage: 'Override index template',
-        });
+            defaultMessage: 'Override index template',
+          });
     }
 
     return null;
@@ -81,17 +81,17 @@ export const RetentionCard = ({
 
   const retentionTypeApplied = customRetentionPeriod
     ? i18n.translate(
-      'xpack.streams.streamDetailView.failureStoreEnabled.failureRetentionCard.custom',
-      {
-        defaultMessage: 'Custom retention period',
-      }
-    )
+        'xpack.streams.streamDetailView.failureStoreEnabled.failureRetentionCard.custom',
+        {
+          defaultMessage: 'Custom retention period',
+        }
+      )
     : i18n.translate(
-      'xpack.streams.streamDetailView.failureStoreEnabled.failureRetentionCard.default',
-      {
-        defaultMessage: 'Default retention period',
-      }
-    );
+        'xpack.streams.streamDetailView.failureStoreEnabled.failureRetentionCard.default',
+        {
+          defaultMessage: 'Default retention period',
+        }
+      );
 
   const failureRetentionPeriod = customRetentionPeriod
     ? getTimeSizeAndUnitLabel(customRetentionPeriod)
