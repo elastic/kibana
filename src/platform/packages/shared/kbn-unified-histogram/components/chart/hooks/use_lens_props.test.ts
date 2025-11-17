@@ -32,6 +32,7 @@ describe('useLensProps', () => {
       breakdownField: dataViewWithTimefieldMock.getFieldByName('extension'),
     });
     fetchParams.externalVisContext = lensVisMock.visContext;
+    fetchParams.lastReloadRequestTime = new Date('2025-10-01T12:00:00Z').getTime();
 
     const lensProps = renderHook(() => {
       return useLensProps({

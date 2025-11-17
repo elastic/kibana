@@ -130,7 +130,7 @@ Object {
     "description": "fetch chart data and total hits",
   },
   "id": "unifiedHistogramLensComponent",
-  "lastReloadRequestTime": 1763386793197,
+  "lastReloadRequestTime": 1759320000000,
   "noPadding": true,
   "onLoad": [MockFunction],
   "searchSessionId": "id",
