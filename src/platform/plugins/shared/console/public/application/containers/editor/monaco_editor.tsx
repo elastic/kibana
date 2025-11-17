@@ -74,6 +74,7 @@ export interface EditorProps {
   value: string;
   setValue: (value: string) => void;
   customParsedRequestsProvider?: (model: any) => any;
+  enableSuggestWidgetRepositioning: boolean;
 }
 
 const getLanguageLabelByValue = (value: string) => {
@@ -85,6 +86,7 @@ export const MonacoEditor = ({
   value,
   setValue,
   customParsedRequestsProvider,
+  enableSuggestWidgetRepositioning,
 }: EditorProps) => {
   const context = useServicesContext();
   const {
@@ -462,6 +464,7 @@ export const MonacoEditor = ({
         suggestionProvider={suggestionProvider}
         enableFindAction={true}
         enableCustomContextMenu={true}
+        enableSuggestWidgetRepositioning={enableSuggestWidgetRepositioning}
       />
     </div>
   );
