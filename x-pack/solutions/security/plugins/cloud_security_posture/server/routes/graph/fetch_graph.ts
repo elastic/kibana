@@ -18,10 +18,6 @@ import {
 import { getEnrichPolicyId } from '@kbn/cloud-security-posture-common/utils/helpers';
 import type { EsQuery, GraphEdge, OriginEventId } from './types';
 
-const NON_ENRICHED_ENTITY_TYPE_PLURAL = 'Entities';
-const NON_ENRICHED_ENTITY_TYPE_SINGULAR = 'Entity';
-const NON_ENRICHED_PLACEHOLDER = 'NonEnriched';
-
 interface BuildEsqlQueryParams {
   indexPatterns: string[];
   originEventIds: OriginEventId[];
@@ -305,38 +301,6 @@ ${
       targetEntitySubType,
       isOrigin,
       isOriginAlert
-| EVAL actorEntityType = CASE(
-    actorEntityType IS NOT NULL,
-    actorEntityType,
-    actorIdsCount == 1,
-    "${NON_ENRICHED_ENTITY_TYPE_SINGULAR}",
-    "${NON_ENRICHED_ENTITY_TYPE_PLURAL}"
-  )
-| EVAL targetEntityType = CASE(
-    targetEntityType IS NOT NULL,
-    targetEntityType,
-    targetIdsCount == 1,
-    "${NON_ENRICHED_ENTITY_TYPE_SINGULAR}",
-    "${NON_ENRICHED_ENTITY_TYPE_PLURAL}"
-  )
-| EVAL actorLabel = CASE(
-    actorIdsCount == 1 AND actorEntityType == "${NON_ENRICHED_ENTITY_TYPE_SINGULAR}",
-    TO_STRING(actorIds),
-    actorIdsCount == 1 AND actorEntityType != "${NON_ENRICHED_ENTITY_TYPE_SINGULAR}",
-    actorEntityName,
-    actorIdsCount > 1 AND actorEntitySubType IS NOT NULL,
-    actorEntitySubType,
-    ""
-  )
-| EVAL targetLabel = CASE(
-    targetIdsCount == 1 AND targetEntityType == "${NON_ENRICHED_ENTITY_TYPE_SINGULAR}",
-    TO_STRING(targetIds),
-    targetIdsCount == 1 AND targetEntityType != "${NON_ENRICHED_ENTITY_TYPE_SINGULAR}",
-    targetEntityName,
-    targetIdsCount > 1 AND targetEntitySubType IS NOT NULL,
-    targetEntitySubType,
-    ""
-  )
 | LIMIT 1000
 | SORT action DESC, isOrigin`;
 

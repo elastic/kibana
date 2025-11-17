@@ -1145,8 +1145,8 @@ describe('parseRecords', () => {
           targetIds: ['host-1', 'host-2'],
           actorEntityType: 'user',
           targetEntityType: 'host',
-          actorLabel: 'service_account', // entity.sub_type from ESQL
-          targetLabel: 'server', // entity.sub_type from ESQL
+          actorEntitySubType: 'service_account',
+          targetEntitySubType: 'server',
           actorIdsCount: 3,
           targetIdsCount: 2,
           badge: 5,
@@ -1197,8 +1197,6 @@ describe('parseRecords', () => {
           targetIds: ['host-1', 'host-2'],
           actorEntityType: 'user',
           targetEntityType: 'host',
-          actorLabel: '', // No sub_type means no label
-          targetLabel: '', // No sub_type means no label
           actorIdsCount: 3,
           targetIdsCount: 2,
           badge: 5,
