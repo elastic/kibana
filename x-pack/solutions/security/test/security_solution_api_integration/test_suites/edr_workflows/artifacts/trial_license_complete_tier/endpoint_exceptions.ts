@@ -20,6 +20,7 @@ import {
 import { ExceptionsListItemGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/exceptions_list_item_generator';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { SECURITY_FEATURE_ID } from '@kbn/security-solution-plugin/common';
+import { buildPerPolicyTag } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts/utils';
 import type { ArtifactTestData } from '../../../../../security_solution_endpoint/services/endpoint_artifacts';
 import type { PolicyTestResourceInfo } from '../../../../../security_solution_endpoint/services/endpoint_policy';
 import { ROLE } from '../../../../config/services/security_solution_edr_workflows_roles_users';
@@ -32,6 +33,13 @@ export default function ({ getService }: FtrProviderContext) {
   const endpointArtifactTestResources = getService('endpointArtifactTestResources');
   const utils = getService('securitySolutionUtils');
   const log = getService('log');
+  const config = getService('config');
+
+  const IS_ENDPOINT_EXCEPTION_MOVE_FF_ENABLED = (
+    config.get('kbnTestServer.serverArgs', []) as string[]
+  )
+    .find((s) => s.startsWith('--xpack.securitySolution.enableExperimental'))
+    ?.includes('endpointExceptionsMovedUnderManagement');
 
   // @skipInServerlessMKI due to authentication issues - we should migrate from Basic to Bearer token when available
   // @skipInServerlessMKI - if you are removing this annotation, make sure to add the test suite to the MKI pipeline in .buildkite/pipelines/security_solution_quality_gate/mki_periodic/mki_periodic_defend_workflows.yml
@@ -146,7 +154,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     beforeEach(async () => {
       endpointExceptionData = await endpointArtifactTestResources.createEndpointException({
-        tags: [`${BY_POLICY_ARTIFACT_TAG_PREFIX}${fleetEndpointPolicy.packagePolicy.id}`],
+        tags: [buildPerPolicyTag(fleetEndpointPolicy.packagePolicy.id)],
       });
     });
 
