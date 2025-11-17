@@ -89,7 +89,10 @@ import { SearchResponseCache } from './search_response_cache';
 import { SearchAbortController } from './search_abort_controller';
 import type { SearchConfigSchema } from '../../../server/config';
 import type { SearchServiceStartDependencies } from '../search_service';
-import { createRequestHash } from './create_request_hash';
+import {
+  createRequestHashForBackgroundSearches,
+  createRequestHashForClientCache,
+} from './create_request_hash';
 
 export interface SearchInterceptorDeps {
   http: HttpSetup;
@@ -186,7 +189,7 @@ export class SearchInterceptor {
 
     if (!sessionId) return of(undefined); // don't use cache if doesn't belong to a session
 
-    return from(Promise.resolve(createRequestHash(hashOptions)));
+    return from(Promise.resolve(createRequestHashForClientCache(hashOptions)));
   }
 
   /*
@@ -462,7 +465,11 @@ export class SearchInterceptor {
     request: IKibanaSearchRequest,
     options?: ISearchOptions
   ): Promise<IKibanaSearchResponse> {
-    const { abortSignal, requestHash } = options || {};
+    const { abortSignal } = options || {};
+
+    const requestHash = request.params
+      ? createRequestHashForBackgroundSearches(request.params)
+      : undefined;
 
     if (request.id) {
       // just polling an existing search, no need to send the body, just the hash
