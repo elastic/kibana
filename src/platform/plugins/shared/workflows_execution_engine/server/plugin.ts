@@ -484,11 +484,12 @@ export class WorkflowsExecutionEnginePlugin
         cancelledAt: new Date().toISOString(),
         cancelledBy: 'system', // TODO: set user if available
       });
-
-      if (tasks.length) {
-        await taskManager.bulkRemove(tasks.map((task) => task.id));
-      }
       const idleTasks = tasks.filter((task) => task.status === TaskStatus.Idle);
+
+      if (idleTasks.length) {
+        await taskManager.bulkRemove(idleTasks.map((task) => task.id));
+      }
+
       // force delayed tasks to run so that internal cancellation logic can proceed
 
       if (idleTasks.length > 0) {
