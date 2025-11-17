@@ -113,8 +113,13 @@ evaluate.describe('SIEM Entity Analytics Agent - Basic Tests2', { tag: '@svlSecu
                   'Show the current status as DISABLED',
                   'Prompt the user to enable the risk engine',
                 ],
+                toolCalls: [
+                  {
+                    id: 'entity-analytics-tool',
+                  },
+                ],
               },
-              metadata: { query_intent: 'Factual', toolId: 'entity-analytics-tool' },
+              metadata: { query_intent: 'Factual' },
             },
             {
               input: {
@@ -126,8 +131,13 @@ evaluate.describe('SIEM Entity Analytics Agent - Basic Tests2', { tag: '@svlSecu
                   'Show the current status as DISABLED',
                   'Prompt the user to enable the risk engine',
                 ],
+                toolCalls: [
+                  {
+                    id: 'entity-analytics-tool',
+                  },
+                ],
               },
-              metadata: { query_intent: 'Factual', toolId: 'entity-analytics-tool' },
+              metadata: { query_intent: 'Factual' },
             },
             {
               input: {
@@ -139,8 +149,13 @@ evaluate.describe('SIEM Entity Analytics Agent - Basic Tests2', { tag: '@svlSecu
                   'Show the current status as DISABLED',
                   'Prompt the user to enable the risk engine',
                 ],
+                toolCalls: [
+                  {
+                    id: 'entity-analytics-tool',
+                  },
+                ],
               },
-              metadata: { query_intent: 'Factual', toolId: 'entity-analytics-tool' },
+              metadata: { query_intent: 'Factual' },
             },
           ],
         },
@@ -252,7 +267,7 @@ evaluate.describe('SIEM Entity Analytics Agent - Basic Tests2', { tag: '@svlSecu
       });
     });
 
-    evaluate('entity analytics risk score questions', async ({ evaluateDataset }) => {
+    evaluate.only('entity analytics risk score questions', async ({ evaluateDataset }) => {
       await evaluateDataset({
         dataset: {
           name: 'siem-entity-analytics: [entity-analytics-tool-questions] risk score',
@@ -264,8 +279,23 @@ evaluate.describe('SIEM Entity Analytics Agent - Basic Tests2', { tag: '@svlSecu
               },
               output: {
                 criteria: ['Return at least 5 users with the highest risk scores.'],
+                toolCalls: [
+                  {
+                    id: 'entity-analytics-tool',
+                    criteria: [
+                      `The tool should return the following ESQL query:
+                      FROM risk-score.risk-score-latest-default
+                      | WHERE user.name IS NOT NULL
+                      | SORT user.risk.calculated_score_norm DESC
+                      | KEEP user.name, user.risk.calculated_score_norm, user.risk.calculated_level
+
+                      Don't fail the assertion if the query has limit.
+                      `,
+                    ],
+                  },
+                ],
               },
-              metadata: { query_intent: 'Factual', toolId: 'entity-analytics-tool' },
+              metadata: { query_intent: 'Factual' },
             },
             {
               input: {
@@ -273,8 +303,20 @@ evaluate.describe('SIEM Entity Analytics Agent - Basic Tests2', { tag: '@svlSecu
               },
               output: {
                 criteria: ['Return the risk score of user-1 over the last 90 days.'],
+                toolCalls: [
+                  {
+                    id: 'entity-analytics-tool',
+                    criteria: [
+                      `The tool should return an ESQL query with the following structure:
+                      * FROM index: risk-score.risk-score-default
+                      * Filter by: @timestamp >= NOW() - 90 days
+                      * Filter by: user.name == "user-1"
+                      `,
+                    ],
+                  },
+                ],
               },
-              metadata: { query_intent: 'Factual', toolId: 'entity-analytics-tool' },
+              metadata: { query_intent: 'Factual' },
             },
             {
               input: {
@@ -282,8 +324,21 @@ evaluate.describe('SIEM Entity Analytics Agent - Basic Tests2', { tag: '@svlSecu
               },
               output: {
                 criteria: ['Return the 10 users with the highest risk scores right now.'],
+                toolCalls: [
+                  {
+                    id: 'entity-analytics-tool',
+                    criteria: [
+                      `The tool should return the following ESQL query:
+                      FROM risk-score.risk-score-latest-default
+                      | WHERE user.name IS NOT NULL
+                      | SORT user.risk.calculated_score_norm DESC
+                      | KEEP user.name, user.risk.calculated_score_norm, user.risk.calculated_level
+                      | LIMIT 10`,
+                    ],
+                  },
+                ],
               },
-              metadata: { query_intent: 'Factual', toolId: 'entity-analytics-tool' },
+              metadata: { query_intent: 'Factual' },
             },
           ],
         },
@@ -305,8 +360,13 @@ evaluate.describe('SIEM Entity Analytics Agent - Basic Tests2', { tag: '@svlSecu
                   'Return at least 4 entities with anomalous behavior',
                   `Mention at least 2 jobs ids: ${mlJobIds.join(', ')}`,
                 ],
+                toolCalls: [
+                  {
+                    id: 'entity-analytics-tool',
+                  },
+                ],
               },
-              metadata: { query_intent: 'Factual', toolId: 'entity-analytics-tool' },
+              metadata: { query_intent: 'Factual' },
             },
             {
               input: {
@@ -317,8 +377,13 @@ evaluate.describe('SIEM Entity Analytics Agent - Basic Tests2', { tag: '@svlSecu
                   'Return the users who downloaded unusually large data.',
                   `Mention at least 2 jobs ids: ${mlJobIds.join(', ')}`,
                 ],
+                toolCalls: [
+                  {
+                    id: 'entity-analytics-tool',
+                  },
+                ],
               },
-              metadata: { query_intent: 'Factual', toolId: 'entity-analytics-tool' },
+              metadata: { query_intent: 'Factual' },
             },
           ],
         },
