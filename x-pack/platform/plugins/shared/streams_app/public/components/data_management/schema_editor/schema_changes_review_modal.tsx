@@ -35,6 +35,7 @@ import { css } from '@emotion/css';
 import { useKibana } from '../../../hooks/use_kibana';
 import { getFormattedError } from '../../../util/errors';
 import type { MappedSchemaField, SchemaEditorField } from './types';
+import type { FieldStatus } from './constants';
 import { FIELD_TYPE_MAP } from './constants';
 import { convertToFieldDefinitionConfig } from './utils';
 import { FieldResultBadge } from './field_result';
@@ -131,8 +132,8 @@ export function SchemaChangesReviewModal({
   );
   const hasResult = React.useMemo(() => changes.some((field) => field.result), [changes]);
 
-  const fieldColumns = React.useMemo(() => {
-    const columns = [
+  const fieldColumns = React.useMemo(
+    () => [
       {
         field: 'name',
         name: i18n.translate('xpack.streams.schemaEditor.confirmChangesModal.tableColumnField', {
@@ -204,73 +205,81 @@ export function SchemaChangesReviewModal({
           defaultMessage: 'Status',
         }),
         width: '128px',
-        render: (status: string, field: SchemaEditorField) => {
+        render: (status: FieldStatus, field: SchemaEditorField) => {
           return (
             <FieldStatusBadge
-              status={status as any}
+              status={status}
               uncommitted={field.uncommitted}
               streamType={streamType}
             />
           );
         },
       },
-    ];
+      ...(hasResult
+        ? [
+            {
+              field: 'result',
+              name: i18n.translate(
+                'xpack.streams.schemaEditor.confirmChangesModal.tableColumnResult',
+                {
+                  defaultMessage: 'Result',
+                }
+              ),
+              width: '128px',
+              render: (result: SchemaEditorField['result'], field: SchemaEditorField) => {
+                if (!result) return null;
+                return <FieldResultBadge result={result} />;
+              },
+            },
+          ]
+        : []),
+      ...(hasSource
+        ? [
+            {
+              field: 'source',
+              name: i18n.translate(
+                'xpack.streams.schemaEditor.confirmChangesModal.tableColumnSource',
+                {
+                  defaultMessage: 'Source',
+                }
+              ),
+              width: '128px',
+              truncateText: true,
+              render: (source: string | undefined, field: SchemaEditorField) => {
+                // Don't show source for existing fields (those that have esType)
+                if (field.esType) {
+                  return null;
+                }
 
-    // Only add result column if any field has a result
-    if (hasResult) {
-      columns.push({
-        field: 'result',
-        name: i18n.translate('xpack.streams.schemaEditor.confirmChangesModal.tableColumnResult', {
-          defaultMessage: 'Result',
-        }),
-        width: '128px',
-        render: (result: SchemaEditorField['result'], field: SchemaEditorField) => {
-          if (!result) return null;
-          return <FieldResultBadge result={result} />;
-        },
-      } as any);
-    }
+                if (!source) return null;
 
-    // Only add source column if any field has a source
-    if (hasSource) {
-      columns.push({
-        field: 'source',
-        name: i18n.translate('xpack.streams.schemaEditor.confirmChangesModal.tableColumnSource', {
-          defaultMessage: 'Source',
-        }),
-        width: '128px',
-        truncateText: true,
-        render: (source: string | undefined, field: SchemaEditorField) => {
-          // Don't show source for existing fields (those that have esType)
-          if (field.esType) {
-            return null;
-          }
+                const sourceLabels = {
+                  ecs: i18n.translate(
+                    'xpack.streams.schemaEditor.confirmChangesModal.sourceLabel.ecs',
+                    {
+                      defaultMessage: 'ECS Standard',
+                    }
+                  ),
+                  otel: i18n.translate(
+                    'xpack.streams.schemaEditor.confirmChangesModal.sourceLabel.otel',
+                    {
+                      defaultMessage: 'OpenTelemetry',
+                    }
+                  ),
+                };
 
-          if (!source) return null;
-
-          const sourceLabels = {
-            ecs: i18n.translate('xpack.streams.schemaEditor.confirmChangesModal.sourceLabel.ecs', {
-              defaultMessage: 'ECS Standard',
-            }),
-            otel: i18n.translate(
-              'xpack.streams.schemaEditor.confirmChangesModal.sourceLabel.otel',
-              {
-                defaultMessage: 'OpenTelemetry',
-              }
-            ),
-          };
-
-          return (
-            <EuiBadge color="default">
-              {sourceLabels[source as keyof typeof sourceLabels] || source}
-            </EuiBadge>
-          );
-        },
-      } as any);
-    }
-
-    return columns;
-  }, [hasResult, hasSource, streamType]);
+                return (
+                  <EuiBadge color="default">
+                    {sourceLabels[source as keyof typeof sourceLabels] || source}
+                  </EuiBadge>
+                );
+              },
+            },
+          ]
+        : []),
+    ],
+    [hasResult, hasSource, streamType]
+  );
 
   return (
     <EuiModal onClose={onClose} maxWidth={800} aria-label={confirmChangesTitle}>
