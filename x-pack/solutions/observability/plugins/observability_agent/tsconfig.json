@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -17,7 +17,12 @@
     "@kbn/security-plugin",
     "@kbn/es-query",
     "@kbn/core-elasticsearch-server",
-    "@kbn/es-types"
+    "@kbn/es-types",
+    "@kbn/rule-registry-plugin",
+    "@kbn/observability-plugin",
+    "@kbn/core-http-server",
+    "@kbn/data-views-plugin",
+    "@kbn/metrics-data-access-plugin"
   ],
   "exclude": ["target/**/*"]
 }
