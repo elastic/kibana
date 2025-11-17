@@ -54,4 +54,4 @@ spec:
           branch: main
       tags:
         - kibana
-        - :kibana: Kibana release path
+        - ':kibana: Kibana release path'

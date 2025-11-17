@@ -31,4 +31,4 @@ spec:
           access_level: READ_ONLY
       tags:
         - kibana
-        - :kibana: Kibana release path
+        - ':kibana: Kibana release path'
