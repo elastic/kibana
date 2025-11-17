@@ -55,9 +55,11 @@
 
 
     "cypress:qa:serverless": "TZ=UTC node ../../plugins/security_solution/scripts/start_cypress_parallel_serverless --config-file ./test/security_solution_cypress/cypress/cypress_ci_serverless_qa.config.ts",
+    "cypress:qa:serverless:ai4dsoc": "TZ=UTC node ../../plugins/security_solution/scripts/start_cypress_parallel_serverless --config-file ./test/security_solution_cypress/cypress/cypress_ci_serverless_qa.config.ts --ai4dsoc",
     "cypress:open:qa:serverless": "yarn cypress:qa:serverless open",
+    "cypress:open:qa:serverless:ai4dsoc": "yarn cypress:qa:serverless:ai4dsoc open",
     "cypress:run:qa:serverless:ai_assistant": "yarn cypress:qa:serverless --spec './cypress/e2e/ai_assistant/**/*.cy.ts'",
-    "cypress:run:qa:serverless:ai4dsoc": "yarn cypress:qa:serverless --spec './cypress/e2e/ai4dsoc/**/*.cy.ts'",
+    "cypress:run:qa:serverless:ai4dsoc": "yarn cypress:qa:serverless:ai4dsoc --spec './cypress/e2e/ai4dsoc/**/*.cy.ts'",
     "cypress:run:qa:serverless:cloud_security_posture": "yarn cypress:qa:serverless --spec './cypress/e2e/cloud_security_posture/**/*.cy.ts'",
     "cypress:run:qa:serverless:detection_engine:all": "yarn cypress:qa:serverless --spec './cypress/e2e/detection_response/detection_engine/**/*.cy.ts'",
     "cypress:run:qa:serverless:detection_engine:alert_suppression": "yarn cypress:qa:serverless --spec './cypress/e2e/detection_response/detection_engine/alert_suppression/**/*.cy.ts'",

@@ -233,8 +233,13 @@ function waitForKibanaLogin(kbUrl: string, credentials: Credentials): Promise<vo
 const getProductTypes = (
   tier: string,
   endpointAddon: boolean,
-  cloudAddon: boolean
+  cloudAddon: boolean,
+  ai4dsoc: boolean
 ): ProductType[] => {
+  if (ai4dsoc) {
+    return [{ product_line: 'ai_soc', product_tier: 'search_ai_lake' }];
+  }
+
   let productTypes: ProductType[] = [...DEFAULT_CONFIGURATION];
 
   if (tier) {
@@ -334,6 +339,13 @@ export const cli = () => {
           type: 'boolean',
           default: true,
         })
+        .option('ai4dsoc', {
+          alias: 'ai4',
+          type: 'boolean',
+          default: false,
+          describe:
+            'Use only ai_soc product with search_ai_lake tier, ignoring other addons and tier options',
+        })
         .option('commit', {
           alias: 'c',
           type: 'string',
@@ -376,6 +388,7 @@ ${JSON.stringify(argv, null, 2)}
       const tier: string = argv.tier;
       const endpointAddon: boolean = argv.endpointAddon;
       const cloudAddon: boolean = argv.cloudAddon;
+      const ai4dsoc: boolean = argv.ai4dsoc;
       const commit: string = argv.commit;
 
       log.info(`
@@ -451,9 +464,10 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
               const PROJECT_NAME = `${PROJECT_NAME_PREFIX}-${id}`;
 
               const productTypes = isOpen
-                ? getProductTypes(tier, endpointAddon, cloudAddon)
+                ? getProductTypes(tier, endpointAddon, cloudAddon, ai4dsoc)
                 : (parseTestFileConfig(filePath).productTypes as ProductType[]);
 
+              log.info(`Product types for project: ${JSON.stringify(productTypes, null, 2)}`);
               log.info(`Running spec file: ${filePath}`);
               log.info(`Creating project ${PROJECT_NAME}...`);
               // Creating project for the test to run
