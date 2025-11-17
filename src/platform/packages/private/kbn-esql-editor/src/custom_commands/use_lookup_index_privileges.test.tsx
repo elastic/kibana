@@ -33,8 +33,8 @@ describe('useLookupIndexPrivileges', () => {
   it('should fetch permissions for a list of index names', async () => {
     const indexNames = ['index-1', 'index-2'];
     const mockPrivileges = {
-      'index-1': { create_index: true, write: true, read: true },
-      'index-2': { create_index: false, write: false, read: true },
+      'index-1': { create_index: true, write: true, read: true, delete_index: true },
+      'index-2': { create_index: false, write: false, read: true, delete_index: false },
     };
     services.http.get.mockResolvedValue(mockPrivileges);
 
@@ -51,8 +51,18 @@ describe('useLookupIndexPrivileges', () => {
       query: { indexName: 'index-1,index-2' },
     });
     expect(permissions).toEqual({
-      'index-1': { canCreateIndex: true, canEditIndex: true, canReadIndex: true },
-      'index-2': { canCreateIndex: false, canEditIndex: false, canReadIndex: true },
+      'index-1': {
+        canCreateIndex: true,
+        canEditIndex: true,
+        canReadIndex: true,
+        canRecreateIndex: true,
+      },
+      'index-2': {
+        canCreateIndex: false,
+        canEditIndex: false,
+        canReadIndex: true,
+        canRecreateIndex: false,
+      },
     });
   });
 
@@ -71,7 +81,12 @@ describe('useLookupIndexPrivileges', () => {
 
     expect(services.http.get).toHaveBeenCalledWith('/internal/esql/lookup_index/privileges', {});
     expect(permissions).toEqual({
-      '*': { canCreateIndex: false, canEditIndex: false, canReadIndex: false },
+      '*': {
+        canCreateIndex: false,
+        canEditIndex: false,
+        canReadIndex: false,
+        canRecreateIndex: false,
+      },
     });
   });
 
@@ -85,7 +100,12 @@ describe('useLookupIndexPrivileges', () => {
     });
 
     expect(permissions).toEqual({
-      '*': { canCreateIndex: false, canEditIndex: false, canReadIndex: false },
+      '*': {
+        canCreateIndex: false,
+        canEditIndex: false,
+        canReadIndex: false,
+        canRecreateIndex: false,
+      },
     });
   });
 
@@ -118,7 +138,12 @@ describe('useLookupIndexPrivileges', () => {
     });
 
     expect(permissions).toEqual({
-      'index-3': { canCreateIndex: false, canEditIndex: false, canReadIndex: false },
+      'index-3': {
+        canCreateIndex: false,
+        canEditIndex: false,
+        canReadIndex: false,
+        canRecreateIndex: false,
+      },
     });
   });
 });
