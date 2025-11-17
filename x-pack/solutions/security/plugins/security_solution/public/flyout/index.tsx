@@ -85,6 +85,10 @@ import {
   VulnerabilityFindingsPreviewPanelKey,
 } from './csp_details/vulnerabilities_flyout/constants';
 import { FindingsVulnerabilityPanel } from './csp_details/vulnerabilities_flyout/vulnerabilities_right';
+import { AttackDetailsRightPanelKey } from './attack_details/constants/panel_keys';
+import type { AttackDetailsProps } from './attack_details/types';
+import { AttackDetailsProvider } from './attack_details/context';
+import { AttackDetailsPanel } from './attack_details';
 
 const GraphGroupedNodePreviewPanel = React.lazy(() =>
   import('@kbn/cloud-security-posture-graph').then((module) => ({
@@ -248,6 +252,14 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
       <EaseDetailsProvider {...(props as EaseDetailsProps).params}>
         <EasePanel />
       </EaseDetailsProvider>
+    ),
+  },
+  {
+    key: AttackDetailsRightPanelKey,
+    component: (props) => (
+      <AttackDetailsProvider {...(props as AttackDetailsProps).params}>
+        <AttackDetailsPanel path={props.path as AttackDetailsProps['path']} />
+      </AttackDetailsProvider>
     ),
   },
   {

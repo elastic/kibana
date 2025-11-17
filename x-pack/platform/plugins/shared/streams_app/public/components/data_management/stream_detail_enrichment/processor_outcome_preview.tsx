@@ -23,6 +23,7 @@ import type { GrokProcessor } from '@kbn/streamlang';
 import { isActionBlock } from '@kbn/streamlang';
 import { useDocViewerSetup } from '../../../hooks/use_doc_viewer_setup';
 import { useDocumentExpansion } from '../../../hooks/use_document_expansion';
+import { useStreamDataViewFieldTypes } from '../../../hooks/use_stream_data_view_field_types';
 import { getPercentageFormatter } from '../../../util/formatters';
 import type { PreviewDocsFilterOption } from './state_management/simulation_state_machine';
 import {
@@ -51,6 +52,8 @@ import {
 import { PreviewFlyout, MemoPreviewTable } from '../shared';
 import { toDataTableRecordWithIndex } from '../stream_detail_routing/utils';
 import { RowSelectionContext } from '../shared/preview_table';
+import { getActiveDataSourceRef } from './state_management/stream_enrichment_state_machine/utils';
+import { useDataSourceSelector } from './state_management/data_source_state_machine';
 
 export const ProcessorOutcomePreview = () => {
   const samples = useSimulatorSelector((snapshot) => snapshot.context.samples);
@@ -58,17 +61,16 @@ export const ProcessorOutcomePreview = () => {
     selectPreviewRecords(snapshot.context)
   );
 
-  const areDataSourcesLoading = useStreamEnrichmentSelector((state) =>
-    state.context.dataSourcesRefs.some((ref) => {
-      const snap = ref.getSnapshot();
-      return (
-        snap.matches({ enabled: 'loadingData' }) || snap.matches({ enabled: 'debouncingChanges' })
-      );
-    })
+  const activeDataSourceRef = useStreamEnrichmentSelector((snapshot) =>
+    getActiveDataSourceRef(snapshot.context.dataSourcesRefs)
+  );
+
+  const isDataSourceLoading = useDataSourceSelector(activeDataSourceRef, (snapshot) =>
+    snapshot ? snapshot.matches({ enabled: 'loadingData' }) : false
   );
 
   if (isEmpty(samples)) {
-    if (areDataSourcesLoading) {
+    if (isDataSourceLoading) {
       return (
         <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 200 }}>
           <EuiFlexItem grow={false}>
@@ -129,6 +131,7 @@ const PreviewDocumentsGroupBy = () => {
   return (
     <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" wrap>
       <EuiFilterGroup
+        compressed={true}
         aria-label={i18n.translate(
           'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomeControlsAriaLabel',
           { defaultMessage: 'Filter for all, matching or unmatching previewed documents.' }
@@ -175,6 +178,9 @@ const PreviewDocumentsGroupBy = () => {
 const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRecord[] }) => {
   const detectedFields = useSimulatorSelector((state) => state.context.simulation?.detected_fields);
   const streamName = useSimulatorSelector((state) => state.context.streamName);
+
+  const { fieldTypes: dataViewFieldTypes, dataView: streamDataView } =
+    useStreamDataViewFieldTypes(streamName);
   const previewDocsFilter = useSimulatorSelector((state) => state.context.previewDocsFilter);
   const previewColumnsSorting = useSimulatorSelector(
     (state) => state.context.previewColumnsSorting
@@ -193,9 +199,6 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     selectHasSimulatedRecords(snapshot.context)
   );
 
-  const shouldShowRowSourceAvatars = useStreamEnrichmentSelector(
-    (state) => state.context.dataSourcesRefs.length >= 2
-  );
   const currentProcessorSourceField = useStreamEnrichmentSelector((state) => {
     const currentProcessorRef = state.context.stepRefs.find(
       (stepRef) =>
@@ -382,8 +385,6 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
       <RowSelectionContext.Provider value={rowSelectionContextValue}>
         <MemoPreviewTable
           documents={previewDocuments}
-          originalSamples={originalSamples}
-          showRowSourceAvatars={shouldShowRowSourceAvatars}
           displayColumns={previewColumns}
           rowHeightsOptions={validGrokField ? staticRowHeightsOptions : undefined}
           toolbarVisibility
@@ -392,6 +393,7 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
           setSorting={setPreviewColumnsSorting}
           columnOrderHint={previewColumnsOrder}
           renderCellValue={renderCellValue}
+          dataViewFieldTypes={dataViewFieldTypes}
         />
       </RowSelectionContext.Provider>
       <DocViewerContext.Provider value={docViewerContext}>
@@ -401,6 +403,7 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
           setExpandedDoc={setExpandedDoc}
           docViewsRegistry={docViewsRegistry}
           streamName={streamName}
+          streamDataView={streamDataView}
         />
       </DocViewerContext.Provider>
     </>

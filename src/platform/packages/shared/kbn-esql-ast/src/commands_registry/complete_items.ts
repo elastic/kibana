@@ -101,6 +101,26 @@ export const withCompleteItem: ISuggestionItem = withAutoSuggest({
   sortText: '1',
 });
 
+export const withMapCompleteItem: ISuggestionItem = withAutoSuggest({
+  label: 'inference_id',
+  text: '{ "inference_id": "$0" }',
+  asSnippet: true,
+  kind: 'Reference',
+  detail: 'Inference endpoint',
+  sortText: '1',
+});
+
+export const subqueryCompleteItem: ISuggestionItem = withAutoSuggest({
+  label: '(FROM ...)',
+  text: '(FROM $0)',
+  asSnippet: true,
+  kind: 'Method',
+  detail: i18n.translate('kbn-esql-ast.esql.autocomplete.subqueryFromDoc', {
+    defaultMessage: 'Adds a nested ES|QL query to your current query',
+  }),
+  sortText: '1',
+});
+
 export const minMaxValueCompleteItem: ISuggestionItem = {
   label: 'minmax',
   text: 'minmax',

@@ -39,6 +39,7 @@ export interface ProcessingGrokSuggestionsHandlerDeps {
   scopedClusterClient: IScopedClusterClient;
   streamsClient: StreamsClient;
   fieldsMetadataClient: IFieldsMetadataClient;
+  signal: AbortSignal;
 }
 
 export const processingGrokSuggestionsSchema = z.object({
@@ -65,6 +66,7 @@ export const handleProcessingGrokSuggestions = async ({
   inferenceClient,
   streamsClient,
   fieldsMetadataClient,
+  signal,
 }: ProcessingGrokSuggestionsHandlerDeps) => {
   const stream = await streamsClient.getStream(params.path.name);
   const isWiredStream = Streams.WiredStream.Definition.is(stream);
@@ -76,6 +78,7 @@ export const handleProcessingGrokSuggestions = async ({
       sample_messages: params.body.sample_messages,
       review_fields: JSON.stringify(params.body.review_fields),
     },
+    abortSignal: signal,
   });
   const reviewResult = response.toolCalls[0].function.arguments;
 

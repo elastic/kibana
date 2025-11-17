@@ -8,7 +8,7 @@
  */
 
 import type { Writable } from '@kbn/utility-types';
-import type { DashboardOptions } from '../../../../server/content_management';
+import type { DashboardOptions } from '../../../../server';
 
 export function extractOptions(state: { [key: string]: unknown }): Partial<DashboardOptions> {
   if (typeof state.options === 'object') {

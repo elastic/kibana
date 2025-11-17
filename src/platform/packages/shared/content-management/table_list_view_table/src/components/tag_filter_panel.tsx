@@ -36,6 +36,8 @@ import type { TagOptionItem } from './use_tag_filter_panel';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 const modifierKeyPrefix = isMac ? '⌘' : '^';
+const shortTagLength = 20;
+const mediumTagLength = 35;
 
 const clearSelectionBtnCSS = css`
   height: auto;
@@ -82,6 +84,10 @@ export const TagFilterPanel: FC<{}> = ({}) => {
     clearTagSelection,
   } = componentContext;
   const isSearchVisible = options.length > 10;
+  const longestTagLength = Math.max(0, ...options.map((option) => (option.label ?? '').length));
+  const panelWidthFromLongestTagLength =
+    (longestTagLength <= shortTagLength ? 18 : longestTagLength <= mediumTagLength ? 25 : 32) *
+    euiTheme.base;
 
   const searchBoxCSS = css`
     padding: ${euiTheme.size.s};
@@ -137,7 +143,7 @@ export const TagFilterPanel: FC<{}> = ({}) => {
         closePopover={closePopover}
         panelPaddingSize="none"
         anchorPosition="downCenter"
-        panelProps={{ css: { width: euiTheme.base * 18 } }}
+        panelProps={{ css: { width: panelWidthFromLongestTagLength } }}
       >
         <EuiPopoverTitle paddingSize="m" css={popoverTitleCSS}>
           <EuiFlexGroup>
