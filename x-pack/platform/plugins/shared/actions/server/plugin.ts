@@ -43,6 +43,7 @@ import type { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugi
 
 import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { AxiosInstance } from 'axios';
 import type { ActionsConfig, EnabledConnectorTypes } from './config';
 import { AllowedHosts, getValidatedConfig } from './config';
 import { resolveCustomHosts } from './lib/custom_host_settings';
@@ -104,6 +105,7 @@ import { createBulkUnsecuredExecutionEnqueuerFunction } from './create_unsecured
 import { createSystemConnectors } from './create_system_actions';
 import { ConnectorUsageReportingTask } from './usage/connector_usage_reporting_task';
 import { ConnectorRateLimiter } from './lib/connector_rate_limiter';
+import { getAxiosInstanceWithAuth } from './lib/get_axios_instance';
 
 export interface PluginSetupContract {
   registerType<
@@ -160,6 +162,8 @@ export interface PluginStartContract {
   inMemoryConnectors: InMemoryConnector[];
 
   getUnsecuredActionsClient(): IUnsecuredActionsClient;
+
+  getAxiosInstanceWithAuth(validatedSecrets: Record<string, unknown>): Promise<AxiosInstance>;
 
   renderActionParameterTemplates<Params extends ActionTypeParams = ActionTypeParams>(
     actionTypeId: string,
@@ -536,6 +540,15 @@ export class ActionsPlugin
     const secureGetActionsClientWithRequest = (request: KibanaRequest) =>
       getActionsClientWithRequest(request);
 
+    const getAxiosInstanceWithAuthHelper = async (validatedSecrets: Record<string, unknown>) => {
+      const getAxiosInstance = getAxiosInstanceWithAuth({
+        authTypeRegistry: this.authTypeRegistry!,
+        configurationUtilities: actionsConfigUtils,
+        logger,
+      });
+      return await getAxiosInstance(validatedSecrets);
+    };
+
     this.eventLogService!.registerSavedObjectProvider('action', (request) => {
       const client = secureGetActionsClientWithRequest(request);
       return (objects?: SavedObjectsBulkGetObject[]) =>
@@ -632,6 +645,7 @@ export class ActionsPlugin
       },
       getActionsClientWithRequest: secureGetActionsClientWithRequest,
       getUnsecuredActionsClient,
+      getAxiosInstanceWithAuth: getAxiosInstanceWithAuthHelper,
       inMemoryConnectors: this.inMemoryConnectors,
       renderActionParameterTemplates: (...args) =>
         renderActionParameterTemplates(this.logger, actionTypeRegistry, ...args),

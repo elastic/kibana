@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
 import { loggerMock } from '@kbn/logging-mocks';
-import { actionTypeRegistryMock } from '../action_type_registry.mock';
 import { AuthTypeRegistry, registerAuthTypes } from '../auth_types';
-import { getAxiosInstanceWithAuth, type ConnectorInfo } from './get_axios_instance';
+import { getAxiosInstanceWithAuth } from './get_axios_instance';
 import { actionsConfigMock } from '../actions_config.mock';
-import { getConnectorType } from '../fixtures';
 import { getCustomAgents } from './get_custom_agents';
 
 jest.mock('./get_custom_agents', () => ({
@@ -21,16 +18,6 @@ jest.mock('./get_custom_agents', () => ({
   }),
 }));
 
-const getConnectorInfo = (overrides = {}): ConnectorInfo => ({
-  actionTypeId: '.test',
-  name: 'Test connector',
-  config: {},
-  secrets: {},
-  actionId: '1',
-  ...overrides,
-});
-
-const connectorTypeRegistry = actionTypeRegistryMock.create();
 const logger = loggerMock.create();
 
 describe('getAxiosInstance', () => {
@@ -40,17 +27,15 @@ describe('getAxiosInstance', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    connectorTypeRegistry.getUtils.mockReturnValue(configurationUtilities);
   });
 
   test('returns axios instance with no auth when no authType is specified', async () => {
-    connectorTypeRegistry.get.mockReturnValue(getConnectorType());
-    const result = await getAxiosInstanceWithAuth({
+    const getAxios = getAxiosInstanceWithAuth({
       authTypeRegistry,
-      connector: getConnectorInfo(),
-      connectorTypeRegistry,
+      configurationUtilities,
       logger,
     });
+    const result = await getAxios({});
 
     expect(result).not.toBeUndefined();
     expect(result!.defaults.auth).toBeUndefined();
@@ -60,85 +45,23 @@ describe('getAxiosInstance', () => {
   });
 
   test('throws error when auth type is not supported', async () => {
-    connectorTypeRegistry.get.mockReturnValue(
-      getConnectorType({
-        validate: {
-          config: { schema: z.object({}) },
-          secrets: {
-            schema: z.object({
-              authType: z.literal('foo'),
-            }),
-          },
-          params: { schema: z.object({}) },
-        },
-      })
-    );
-    await expect(
-      getAxiosInstanceWithAuth({
-        authTypeRegistry,
-        connector: getConnectorInfo({
-          secrets: { authType: 'foo' },
-        }),
-        connectorTypeRegistry,
-        logger,
-      })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Auth type \\"foo\\" is not registered."`);
-  });
-
-  test('throws error when secrets do not match schema', async () => {
-    connectorTypeRegistry.get.mockReturnValue(
-      getConnectorType({
-        validate: {
-          config: { schema: z.object({}) },
-          secrets: {
-            schema: z.object({
-              authType: z.literal('basic'),
-              username: z.string(),
-              password: z.string(),
-            }),
-          },
-          params: { schema: z.object({}) },
-        },
-      })
-    );
-    await expect(
-      getAxiosInstanceWithAuth({
-        authTypeRegistry,
-        connector: getConnectorInfo({
-          secrets: { authType: 'basic', email: 'user', password: 'pass' },
-        }),
-        connectorTypeRegistry,
-        logger,
-      })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type secrets: Field \\"username\\": Required"`
+    const getAxios = getAxiosInstanceWithAuth({
+      authTypeRegistry,
+      configurationUtilities,
+      logger,
+    });
+    await expect(getAxios({ authType: 'foo' })).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Auth type \\"foo\\" is not registered."`
     );
   });
 
   test('returns axios instance configured for basic auth', async () => {
-    connectorTypeRegistry.get.mockReturnValue(
-      getConnectorType({
-        validate: {
-          config: { schema: z.object({}) },
-          secrets: {
-            schema: z.object({
-              authType: z.literal('basic'),
-              username: z.string(),
-              password: z.string(),
-            }),
-          },
-          params: { schema: z.object({}) },
-        },
-      })
-    );
-    const result = await getAxiosInstanceWithAuth({
+    const getAxios = getAxiosInstanceWithAuth({
       authTypeRegistry,
-      connector: getConnectorInfo({
-        secrets: { authType: 'basic', username: 'user', password: 'pass' },
-      }),
-      connectorTypeRegistry,
+      configurationUtilities,
       logger,
     });
+    const result = await getAxios({ authType: 'basic', username: 'user', password: 'pass' });
 
     expect(result).not.toBeUndefined();
     expect(result!.defaults.auth).toEqual({ username: 'user', password: 'pass' });
@@ -157,28 +80,12 @@ describe('getAxiosInstance', () => {
   });
 
   test('returns axios instance configured for bearer auth', async () => {
-    connectorTypeRegistry.get.mockReturnValue(
-      getConnectorType({
-        validate: {
-          config: { schema: z.object({}) },
-          secrets: {
-            schema: z.object({
-              authType: z.literal('bearer'),
-              token: z.string(),
-            }),
-          },
-          params: { schema: z.object({}) },
-        },
-      })
-    );
-    const result = await getAxiosInstanceWithAuth({
+    const getAxios = getAxiosInstanceWithAuth({
       authTypeRegistry,
-      connector: getConnectorInfo({
-        secrets: { authType: 'bearer', token: 'abcdxyz' },
-      }),
-      connectorTypeRegistry,
+      configurationUtilities,
       logger,
     });
+    const result = await getAxios({ authType: 'bearer', token: 'abcdxyz' });
 
     expect(result).not.toBeUndefined();
     expect(result!.defaults.auth).toBeUndefined();
@@ -202,36 +109,17 @@ describe('getAxiosInstance', () => {
   });
 
   test('returns axios instance configured for header auth', async () => {
-    connectorTypeRegistry.get.mockReturnValue(
-      getConnectorType({
-        validate: {
-          config: { schema: z.object({}) },
-          secrets: {
-            schema: z.object({
-              authType: z.literal('header'),
-              headers: z.object({
-                'X-Custom-Auth': z.string(),
-                'another-important-header': z.string(),
-              }),
-            }),
-          },
-          params: { schema: z.object({}) },
-        },
-      })
-    );
-    const result = await getAxiosInstanceWithAuth({
+    const getAxios = getAxiosInstanceWithAuth({
       authTypeRegistry,
-      connector: getConnectorInfo({
-        secrets: {
-          authType: 'header',
-          headers: {
-            'X-Custom-Auth': 'i-am-a-custom-auth-string',
-            'another-important-header': 'foo',
-          },
-        },
-      }),
-      connectorTypeRegistry,
+      configurationUtilities,
       logger,
+    });
+    const result = await getAxios({
+      authType: 'header',
+      headers: {
+        'X-Custom-Auth': 'i-am-a-custom-auth-string',
+        'another-important-header': 'foo',
+      },
     });
 
     expect(result).not.toBeUndefined();

@@ -62,6 +62,7 @@ const createStartMock = () => {
     getActionsAuthorizationWithRequest: jest
       .fn()
       .mockReturnValue(actionsAuthorizationMock.create()),
+    getAxiosInstanceWithAuth: jest.fn(),
     inMemoryConnectors: [],
     renderActionParameterTemplates: jest.fn(),
     isSystemActionConnector: jest.fn(),
