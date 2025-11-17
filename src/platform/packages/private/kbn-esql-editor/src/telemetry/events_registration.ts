@@ -184,7 +184,7 @@ export const registerESQLEditorAnalyticsEvents = once((analytics: AnalyticsServi
         type: 'keyword',
         _meta: {
           description:
-            'The reason why the control configuration was cancelled. Possible values are: cancel_button|close_button|escape_key',
+            'The reason why the control configuration was cancelled. Possible value is: cancel_button',
         },
       },
     },
