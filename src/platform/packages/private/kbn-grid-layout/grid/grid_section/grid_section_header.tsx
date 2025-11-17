@@ -9,7 +9,7 @@
 import classNames from 'classnames';
 import { cloneDeep } from 'lodash';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { distinctUntilChanged, map, pairwise, skip } from 'rxjs';
+import { distinctUntilChanged, map, pairwise } from 'rxjs';
 
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText, euiCanAnimate } from '@elastic/eui';
@@ -71,22 +71,6 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
       )
       .subscribe((count) => {
         setPanelCount(count);
-      });
-
-    /**
-     * This subscription adds/removes the targeted class when dragging into this section
-     */
-    const targetedSubscription = gridLayoutStateManager.activePanelEvent$
-      .pipe(skip(1))
-      .subscribe((activePanel) => {
-        const headerRef = gridLayoutStateManager.headerRefs.current[sectionId];
-        if (!headerRef) return;
-        const isTargeted = sectionId === activePanel?.targetSection;
-        if (isTargeted) {
-          headerRef.classList.add('kbnGridSectionHeader--targeted');
-        } else {
-          headerRef.classList.remove('kbnGridSectionHeader--targeted');
-        }
       });
 
     /**
@@ -153,7 +137,6 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
     return () => {
       accessModeSubscription.unsubscribe();
       panelCountSubscription.unsubscribe();
-      targetedSubscription.unsubscribe();
       dragRowStyleSubscription.unsubscribe();
       collapsedStateSubscription.unsubscribe();
     };
