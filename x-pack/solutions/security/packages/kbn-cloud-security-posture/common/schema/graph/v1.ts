@@ -138,7 +138,6 @@ export const entityNodeDataSchema = schema.allOf([
     ips: schema.maybe(schema.arrayOf(schema.string())),
     countryCodes: schema.maybe(schema.arrayOf(schema.string())),
     documentsData: schema.maybe(schema.arrayOf(nodeDocumentDataSchema)),
-    entityFieldHint: schema.maybe(schema.string()),
   }),
 ]);
 
