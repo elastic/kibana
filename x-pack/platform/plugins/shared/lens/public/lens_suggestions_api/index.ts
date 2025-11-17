@@ -130,7 +130,7 @@ export const suggestionsApi = ({
     suggestions: newSuggestions,
     targetTypeId: chartType,
     familyType: 'lnsXY',
-    shouldSwitch: ['area', 'line'].some((type) => chartType?.includes(type)),
+    forceSwitch: ['area', 'line'].some((type) => chartType?.includes(type)),
   });
   if (xyResult) return xyResult;
 
@@ -140,7 +140,7 @@ export const suggestionsApi = ({
     suggestions: newSuggestions,
     targetTypeId: chartType,
     familyType: 'lnsPie',
-    shouldSwitch: preferredChartType === ChartType.Donut,
+    forceSwitch: preferredChartType === ChartType.Donut,
   });
   if (pieResult) return pieResult;
 
