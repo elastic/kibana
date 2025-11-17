@@ -73,6 +73,7 @@ import {
 import { DiscoverHistogramLayout } from './discover_histogram_layout';
 import type { DiscoverLayoutRestorableState } from './discover_layout_restorable_state';
 import { useScopedServices } from '../../../../components/scoped_services_provider';
+import { useReadCascadeConfig } from './cascaded_documents/hooks/config';
 
 const queryClient = new QueryClient();
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
@@ -129,12 +130,11 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   const dataViewLoading = useCurrentTabSelector((state) => state.isDataViewLoading);
   const dataState: DataMainMsg = useDataState(main$);
   const discoverSession = useInternalStateSelector((state) => state.persistedDiscoverSession);
-  const [cascadeConfig, esqlVariables] = useCurrentTabSelector((state) => [
-    state.uiState.cascadedDocuments,
-    state.esqlVariables,
-  ]);
+  const esqlVariables = useCurrentTabSelector((state) => state.esqlVariables);
 
-  const cascadeLayoutSelected = useMemo(() => {
+  const cascadeConfig = useReadCascadeConfig();
+
+  const isCascadeLayoutSelected = useMemo(() => {
     return Boolean(cascadeConfig?.selectedCascadeGroups?.length);
   }, [cascadeConfig]);
 
@@ -247,7 +247,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
       // weird existence logic from Discover components
       // in the field it comes the operator _exists_ and in the value the field
       // I need to take care of it here but I think it should be handled on the fieldlist instead
-      const updatedQuery = cascadeLayoutSelected
+      const updatedQuery = isCascadeLayoutSelected
         ? appendFilteringWhereClauseForCascadeLayout(
             query.esql,
             esqlVariables,
@@ -282,7 +282,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     },
     [
       query,
-      cascadeLayoutSelected,
+      isCascadeLayoutSelected,
       esqlVariables,
       dataView,
       data.query.queryString,

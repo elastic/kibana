@@ -41,6 +41,7 @@ import {
   useGroupedCascadeData,
   useScopedESQLQueryFetchClient,
 } from './hooks';
+import type { DiscoverStateContainer } from '../../../state_management/discover_state';
 
 export { getESQLStatsQueryMeta };
 export { useGetGroupBySelectorRenderer as useGroupBySelectorRenderer } from './blocks/use_table_header_components';
@@ -156,14 +157,20 @@ const ESQLDataCascade = React.memo(
   }
 );
 
+interface CascadedDocumentsLayoutProps
+  extends Omit<ESQLDataCascadeProps, 'togglePopover' | 'queryMeta'> {
+  onUpdateESQLQuery: DiscoverStateContainer['actions']['updateESQLQuery'];
+}
+
 export const CascadedDocumentsLayout = React.memo(
   ({
     dataView,
     viewModeToggle,
     cascadeConfig,
     cascadeGroupingChangeHandler,
+    onUpdateESQLQuery,
     ...props
-  }: Omit<ESQLDataCascadeProps, 'togglePopover' | 'queryMeta'>) => {
+  }: CascadedDocumentsLayoutProps) => {
     const [query] = useAppStateSelector((state) => [state.query, state.filters]);
     const [globalState, esqlVariables] = useCurrentTabSelector((state) => [
       state.globalState,
@@ -183,14 +190,15 @@ export const CascadedDocumentsLayout = React.memo(
       return getStatsCommandToOperateOn(esqlQuery);
     }, [query]);
 
-    const { renderRowActionPopover, togglePopover } = useEsqlDataCascadeRowActionHelpers(
+    const { renderRowActionPopover, togglePopover } = useEsqlDataCascadeRowActionHelpers({
       dataView,
       esqlVariables,
-      query as AggregateQuery,
-      statsCommandBeingOperatedOn?.grouping,
+      editorQuery: query as AggregateQuery,
+      statsFieldSummary: statsCommandBeingOperatedOn?.grouping,
       globalState,
-      props.services
-    );
+      services: props.services,
+      updateESQLQuery: onUpdateESQLQuery,
+    });
 
     return (
       <div css={styles.wrapper} ref={cascadeWrapperRef}>

@@ -47,6 +47,7 @@ import {
   internalStateActions,
   useInternalStateDispatch,
 } from '../../../../state_management/redux';
+import type { DiscoverStateContainer } from '../../../../state_management/discover_state';
 
 interface RowContext {
   groupId: string;
@@ -63,6 +64,7 @@ interface RowClickActionContext {
   closeActionMenu: () => void;
   globalState: TabStateGlobalState;
   openInNewTab: (...args: Parameters<typeof internalStateActions.openInNewTab>) => void;
+  updateESQLQuery: DiscoverStateContainer['actions']['updateESQLQuery'];
 }
 
 /**
@@ -112,9 +114,7 @@ const contextRowActions: Array<
         return;
       }
 
-      this.services.data.query.queryString.setQuery({
-        esql: updatedQuery,
-      });
+      this.updateESQLQuery(updatedQuery);
     },
   },
   {
@@ -138,9 +138,7 @@ const contextRowActions: Array<
         return;
       }
 
-      this.services.data.query.queryString.setQuery({
-        esql: updatedQuery,
-      });
+      this.updateESQLQuery(updatedQuery);
     },
   },
   {
@@ -148,7 +146,6 @@ const contextRowActions: Array<
       defaultMessage: 'Open in new discover tab',
     }),
     icon: 'discoverApp',
-    renderFor: 'categorize',
     'data-test-subj': 'dscCascadeRowContextActionOpenInNewTab',
     onClick(this: RowClickActionContext, e) {
       e.preventDefault();
@@ -179,6 +176,7 @@ interface ContextMenuProps
     | 'dataView'
     | 'esqlVariables'
     | 'statsFieldSummary'
+    | 'updateESQLQuery'
   > {
   row: RowContext;
   services: UnifiedDataTableProps['services'];
@@ -196,6 +194,7 @@ const ContextMenu = React.memo(
     close,
     globalState,
     openInNewTab,
+    updateESQLQuery,
   }: ContextMenuProps) => {
     const rowStatsFieldSummary = useMemo(() => {
       return statsFieldSummary?.[row.groupId];
@@ -218,41 +217,48 @@ const ContextMenu = React.memo(
       return [
         {
           id: `${row.groupId}-${row.groupValue}-context-menu`,
-          items: contextRowActions.reduce((acc, { renderFor, ...action }) => {
-            if (renderFor && renderFor !== groupType) {
-              return acc;
-            }
+          items: contextRowActions.reduce(
+            (acc, { renderFor, enabledWhenFilterable, ...action }) => {
+              if (renderFor && renderFor !== groupType) {
+                return acc;
+              }
 
-            return acc.concat({
-              ...action,
-              disabled:
-                (action.enabledWhenFilterable === true && !rowDataViewField?.filterable) ||
-                !row.groupValue,
-              onClick: (action.onClick as MouseEventHandler<Element>)?.bind({
-                rowContext: row,
-                services,
-                editorQuery,
-                esqlVariables,
-                dataView,
-                closeActionMenu: close,
-                globalState,
-                openInNewTab,
-              }),
-            });
-          }, [] as Array<EuiContextMenuPanelItemDescriptor>),
+              return acc.concat({
+                ...action,
+                disabled:
+                  (enabledWhenFilterable === true &&
+                    rowDataViewField &&
+                    rowDataViewField?.filterable) ||
+                  !row.groupValue,
+                onClick: (action.onClick as MouseEventHandler<Element>)?.bind({
+                  rowContext: row,
+                  services,
+                  editorQuery,
+                  esqlVariables,
+                  dataView,
+                  closeActionMenu: close,
+                  globalState,
+                  openInNewTab,
+                  updateESQLQuery,
+                }),
+              });
+            },
+            [] as Array<EuiContextMenuPanelItemDescriptor>
+          ),
         },
       ];
     }, [
-      close,
-      dataView,
+      row,
+      groupType,
+      rowDataViewField,
+      services,
       editorQuery,
       esqlVariables,
+      dataView,
+      close,
       globalState,
-      groupType,
       openInNewTab,
-      row,
-      rowDataViewField?.filterable,
-      services,
+      updateESQLQuery,
     ]);
 
     return (
@@ -265,14 +271,24 @@ const ContextMenu = React.memo(
   }
 );
 
-export const useEsqlDataCascadeRowActionHelpers = (
-  dataView: DataView,
-  esqlVariables: ESQLControlVariable[] | undefined,
-  editorQuery: AggregateQuery,
-  statsFieldSummary: StatsCommandSummary['grouping'] | undefined,
-  globalState: TabStateGlobalState,
-  services: UnifiedDataTableProps['services']
-) => {
+export const useEsqlDataCascadeRowActionHelpers = ({
+  dataView,
+  esqlVariables,
+  editorQuery,
+  statsFieldSummary,
+  globalState,
+  services,
+  updateESQLQuery,
+}: Pick<
+  ContextMenuProps,
+  | 'dataView'
+  | 'esqlVariables'
+  | 'editorQuery'
+  | 'statsFieldSummary'
+  | 'globalState'
+  | 'services'
+  | 'updateESQLQuery'
+>) => {
   const popoverRef = useRef<HTMLButtonElement | null>(null);
   const [popoverRowData, setPopoverRowData] = useState<RowContext | null>(null);
   const dispatch = useInternalStateDispatch();
@@ -333,6 +349,7 @@ export const useEsqlDataCascadeRowActionHelpers = (
             dataView={dataView}
             statsFieldSummary={statsFieldSummary}
             openInNewTab={openInNewTab}
+            updateESQLQuery={updateESQLQuery}
           />
         </EuiWrappingPopover>
       ) : null;
@@ -347,6 +364,7 @@ export const useEsqlDataCascadeRowActionHelpers = (
       dataView,
       statsFieldSummary,
       openInNewTab,
+      updateESQLQuery,
     ]
   );
 

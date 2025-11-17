@@ -646,7 +646,7 @@ export function getDiscoverStateContainer({
     }
   };
 
-  const updateESQLQuery = (queryOrUpdater: string | ((prevQuery: string) => string)) => {
+  const updateESQLQuery = ((queryOrUpdater) => {
     addLog('updateESQLQuery');
     const { query: currentQuery } = appStateContainer.getState();
 
@@ -660,7 +660,7 @@ export function getDiscoverStateContainer({
     const query = { esql: queryUpdater(currentQuery.esql) };
 
     appStateContainer.update({ query });
-  };
+  }) satisfies DiscoverStateContainer['actions']['updateESQLQuery'];
 
   return {
     appState: appStateContainer,
