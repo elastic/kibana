@@ -260,9 +260,9 @@
     "@kbn/onechat-server",
     "@kbn/core-analytics-server-mocks",
     "@kbn/object-utils",
-    "@kbn/core-ui-settings-common",
     "@kbn/react-query",
     "@kbn/core-chrome-layout-constants",
+    "@kbn/response-ops-rule-form",
     "@kbn/core-lifecycle-browser-mocks"
   ]
 }
