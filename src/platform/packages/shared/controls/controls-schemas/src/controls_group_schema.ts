@@ -84,4 +84,8 @@ export const controlsGroupSchema = schema.object({
     meta: { description: 'Show apply selections button in controls.' },
     defaultValue: DEFAULT_AUTO_APPLY_SELECTIONS,
   }),
+}, {
+  meta: {
+    deprecated: true,
+  }
 });

@@ -18,19 +18,16 @@ import { getDashboardCRUResponseBody } from '../saved_object_utils';
 export async function update(
   requestCtx: RequestHandlerContext,
   id: string,
+  allowUnmappedKeys: boolean,
   searchBody: DashboardUpdateRequestBody
 ): Promise<DashboardUpdateResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
 
-  const { references: incomingReferences, ...incomingDashboardState } = searchBody.data;
   const {
     attributes: soAttributes,
     references: soReferences,
     error: transformInError,
-  } = transformDashboardIn({
-    dashboardState: incomingDashboardState,
-    incomingReferences,
-  });
+  } = transformDashboardIn(searchBody.data, allowUnmappedKeys);
   if (transformInError) {
     throw Boom.badRequest(`Invalid data. ${transformInError.message}`);
   }

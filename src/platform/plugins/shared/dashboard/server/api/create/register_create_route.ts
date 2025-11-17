@@ -9,9 +9,11 @@
 
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
+import { schema } from '@kbn/config-schema';
 import { commonRouteConfig, INTERNAL_API_VERSION, PUBLIC_API_PATH } from '../constants';
 import { getCreateRequestBodySchema, getCreateResponseBodySchema } from './schemas';
 import { create } from './create';
+import { allowUnmappedKeysSchema } from '../dashboard_state_schemas';
 
 export function registerCreateRoute(router: VersionedRouter<RequestHandlerContext>) {
   const createRoute = router.post({
@@ -25,6 +27,11 @@ export function registerCreateRoute(router: VersionedRouter<RequestHandlerContex
       version: INTERNAL_API_VERSION,
       validate: () => ({
         request: {
+          query: schema.maybe(
+            schema.object({
+              allowUnmappedKeys: schema.maybe(allowUnmappedKeysSchema),
+            })
+          ),
           body: getCreateRequestBodySchema(),
         },
         response: {
@@ -36,7 +43,7 @@ export function registerCreateRoute(router: VersionedRouter<RequestHandlerContex
     },
     async (ctx, req, res) => {
       try {
-        const result = await create(ctx, req.body);
+        const result = await create(ctx, req.query?.allowUnmappedKeys ?? false, req.body);
         return res.ok({ body: result });
       } catch (e) {
         if (e.isBoom && e.output.statusCode === 409) {

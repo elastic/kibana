@@ -66,7 +66,7 @@ describe('transformDashboardIn', () => {
       },
     };
 
-    const output = transformDashboardIn({ dashboardState });
+    const output = transformDashboardIn(dashboardState, true);
     expect(output).toMatchInlineSnapshot(`
       Object {
         "attributes": Object {
@@ -106,7 +106,7 @@ describe('transformDashboardIn', () => {
       options: DEFAULT_DASHBOARD_OPTIONS,
     };
 
-    const output = transformDashboardIn({ dashboardState });
+    const output = transformDashboardIn(dashboardState, true);
     expect(output).toMatchInlineSnapshot(`
       Object {
         "attributes": Object {
@@ -123,5 +123,41 @@ describe('transformDashboardIn', () => {
         "references": Array [],
       }
     `);
+  });
+
+  describe('allowUnmappedKeys === false', () => {
+    it('should return error when dashboard state contains controlGroupInput', () => {
+      const dashboardState: DashboardState = {
+        controlGroupInput: {
+          chainingSystem: 'NONE',
+          labelPosition: 'twoLine',
+          controls: [],
+          autoApplySelections: false,
+        },
+        title: 'title',
+        panels: [],
+      };
+      expect(transformDashboardIn(dashboardState, false)).toMatchInlineSnapshot(`
+        Object {
+          "attributes": null,
+          "error": [Error: controlGroupInput key is deprecated and not supported by dashboard CREATE and UPDATE endpoints.],
+          "references": null,
+        }
+      `);
+    });
+
+    it('should return error when there are references', () => {
+      const dashboardState: DashboardState = {
+        title: 'title',
+        panels: [],
+      };
+      expect(transformDashboardIn(dashboardState, false)).toMatchInlineSnapshot(`
+        Object {
+          "attributes": null,
+          "error": [Error: references key is deprecated and not supported by dashboard CREATE and UPDATE endpoints.],
+          "references": null,
+        }
+      `);
+    });
   });
 });

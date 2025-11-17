@@ -21,6 +21,15 @@ import {
   DEFAULT_DASHBOARD_OPTIONS,
 } from '../../common/constants';
 
+export const allowUnmappedKeysSchema = schema.boolean({
+  defaultValue: false,
+  meta: {
+    deprecated: true,
+    description:
+      'When enabled, dashboard REST endpoints support unmapped keys. Unmapped keys will unexpectedly change without notice and are not supported.',
+  },
+});
+
 export const panelGridSchema = schema.object({
   x: schema.number({ meta: { description: 'The x coordinate of the panel in grid units' } }),
   y: schema.number({ meta: { description: 'The y coordinate of the panel in grid units' } }),
@@ -137,7 +146,18 @@ export const optionsSchema = schema.object({
 
 export function getDashboardStateSchema() {
   return schema.object({
+    // unsuppoted "as code" keys
+    // TODO remove before GA
     controlGroupInput: schema.maybe(controlsGroupSchema),
+    references: schema.maybe(
+      schema.arrayOf(referenceSchema, {
+        meta: {
+          deprecated: true,
+        },
+      })
+    ),
+
+    // supported "as code" keys
     description: schema.maybe(schema.string({ meta: { description: 'A short description.' } })),
     filters: schema.maybe(schema.arrayOf(storedFilterSchema)),
     options: schema.maybe(optionsSchema),
@@ -145,7 +165,6 @@ export function getDashboardStateSchema() {
       defaultValue: [],
     }),
     query: schema.maybe(querySchema),
-    references: schema.maybe(schema.arrayOf(referenceSchema)),
     refreshInterval: schema.maybe(refreshIntervalSchema),
     tags: schema.maybe(
       schema.arrayOf(

@@ -16,13 +16,10 @@ import { transformControlGroupIn } from './transform_control_group_in';
 import { transformSearchSourceIn } from './transform_search_source_in';
 import { transformTagsIn } from './transform_tags_in';
 
-export const transformDashboardIn = ({
-  dashboardState,
-  incomingReferences = [],
-}: {
-  dashboardState: DashboardState;
-  incomingReferences?: SavedObjectReference[];
-}):
+export const transformDashboardIn = (
+  dashboardState: DashboardState,
+  allowUnmappedKeys: boolean
+):
   | {
       attributes: DashboardSavedObjectAttributes;
       references: SavedObjectReference[];
@@ -34,8 +31,28 @@ export const transformDashboardIn = ({
       error: Error;
     } => {
   try {
-    const { controlGroupInput, options, filters, panels, query, tags, timeRange, ...rest } =
-      dashboardState;
+    if (!allowUnmappedKeys && dashboardState.controlGroupInput) {
+      throw new Error(
+        'controlGroupInput key is deprecated and not supported by dashboard CREATE and UPDATE endpoints.'
+      );
+    }
+    if (!allowUnmappedKeys && dashboardState.references) {
+      throw new Error(
+        'references key is deprecated and not supported by dashboard CREATE and UPDATE endpoints.'
+      );
+    }
+
+    const {
+      controlGroupInput,
+      options,
+      filters,
+      panels,
+      query,
+      references: incomingReferences,
+      tags,
+      timeRange,
+      ...rest
+    } = dashboardState;
 
     const tagReferences = transformTagsIn({
       tags,
@@ -43,7 +60,7 @@ export const transformDashboardIn = ({
     });
 
     // TODO - remove once all references are provided server side
-    const nonTagIncomingReferences = incomingReferences.filter(
+    const nonTagIncomingReferences = (incomingReferences ?? []).filter(
       ({ type }) => type !== tagSavedObjectTypeName
     );
 
