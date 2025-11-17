@@ -23,7 +23,6 @@ const mockDataStreamsClient = {
 };
 
 const mockFailureStoreStats = {
-  config: { enabled: true, retentionPeriod: { custom: '30d' } },
   stats: { count: 100, size: 50000, creationDate: '2023-01-01T00:00:00Z' },
 };
 
@@ -38,6 +37,11 @@ const mockDataSearch = {
 const mockDefinition = {
   stream: {
     name: 'test-stream',
+  },
+  effective_failure_store: {
+    lifecycle: {
+      data_retention: '30d',
+    },
   },
 } as any;
 
@@ -149,7 +153,6 @@ describe('useDataStreamStats', () => {
         },
         fs: {
           aggregations: { buckets: [{ key: 1, doc_count: 100 }], interval: '30m' },
-          config: { enabled: true, retentionPeriod: { custom: '30d' } },
           stats: {
             bytesPerDay: 50000,
             bytesPerDoc: 500,
@@ -215,7 +218,6 @@ describe('useDataStreamStats', () => {
         },
         fs: {
           aggregations: { buckets: [], interval: '30m' },
-          config: { enabled: true, retentionPeriod: { custom: '30d' } },
           stats: {
             bytesPerDay: 0,
             bytesPerDoc: 0,
@@ -229,12 +231,21 @@ describe('useDataStreamStats', () => {
 
     it('should handles disabled failure store', async () => {
       mockStreamsRepositoryClient.fetch.mockResolvedValue({
-        config: { enabled: false, retentionPeriod: { custom: '30d' } },
+        stats: null,
       });
+
+      const definitionWithDisabledFS = {
+        stream: {
+          name: 'test-stream',
+        },
+        effective_failure_store: {
+          disabled: {},
+        },
+      } as any;
 
       const { result } = renderHook(() =>
         useDataStreamStats({
-          definition: mockDefinition,
+          definition: definitionWithDisabledFS,
           timeState: mockTimestate,
         })
       );
@@ -255,7 +266,6 @@ describe('useDataStreamStats', () => {
           },
         },
         fs: {
-          config: { enabled: false, retentionPeriod: { custom: '30d' } },
           aggregations: undefined,
           stats: undefined,
         },

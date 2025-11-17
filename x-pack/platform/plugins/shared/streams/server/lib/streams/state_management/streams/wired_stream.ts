@@ -596,7 +596,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
         },
       },
       {
-        type: 'set_failure_store',
+        type: 'update_failure_store',
         request: {
           name: this._definition.name,
           failure_store: failureStore,
@@ -709,10 +709,10 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
         hasAncestorWithChangedFailureStore = true;
       }
       const ancestorFailureStore = ancestorStream.getFailureStore();
-      if (!isInheritFailureStore(ancestorFailureStore)) {
+      if (ancestorFailureStore && !isInheritFailureStore(ancestorFailureStore)) {
         if (hasAncestorWithChangedFailureStore) {
           actions.push({
-            type: 'set_failure_store',
+            type: 'update_failure_store',
             request: {
               name: this._definition.name,
               failure_store: ancestorFailureStore,

@@ -146,6 +146,23 @@ export async function getIlmStats(
     .then((response) => response.body);
 }
 
+export async function getFailureStoreStats(
+  apiClient: StreamsSupertestRepositoryClient,
+  name: string,
+  expectStatusCode: number = 200
+) {
+  return await apiClient
+    .fetch('GET /internal/streams/{name}/failure_store/stats', {
+      params: {
+        path: {
+          name,
+        },
+      },
+    })
+    .expect(expectStatusCode)
+    .then((response) => response.body);
+}
+
 export async function getQueries(
   apiClient: StreamsSupertestRepositoryClient,
   name: string,

@@ -8,7 +8,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { EffectiveFailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
 import type { Streams } from '@kbn/streams-schema';
 import { RetentionCard } from './retention_card';
 
@@ -16,20 +15,6 @@ import { RetentionCard } from './retention_card';
 jest.mock('../../hooks/use_failure_store_redirect_link', () => ({
   useFailureStoreRedirectLink: () => ({ href: '/app/discover#/?_a=test' }),
 }));
-
-const customFailureStore: EffectiveFailureStore = {
-  retentionPeriod: {
-    custom: '7d',
-  },
-  enabled: true,
-};
-
-const defaultFailureStore: EffectiveFailureStore = {
-  retentionPeriod: {
-    default: '30d',
-  },
-  enabled: true,
-};
 
 const renderI18n = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 
@@ -60,9 +45,8 @@ const mockClassicDefinition: Streams.ClassicStream.GetResponse = {
   },
   effective_settings: {},
   effective_failure_store: {
-    enabled: true,
-    retentionPeriod: {
-      default: '30d',
+    lifecycle: {
+      data_retention: '30d',
     },
   },
   data_stream_exists: true,
@@ -101,9 +85,8 @@ const mockWiredDefinition: Streams.WiredStream.GetResponse = {
     from: 'logs',
   },
   effective_failure_store: {
-    enabled: true,
-    retentionPeriod: {
-      default: '30d',
+    lifecycle: {
+      data_retention: '30d',
     },
     from: 'logs',
   },
@@ -120,15 +103,25 @@ const mockWiredRootDefinition: Streams.WiredStream.GetResponse = {
     name: 'logs',
     description: '',
     ingest: {
-      lifecycle: { inherit: {} },
+      lifecycle: { dsl: { data_retention: '30d' } },
       processing: { steps: [] },
       settings: {},
-      failure_store: { enabled: true },
+      failure_store: { lifecycle: { data_retention: '30d' } },
       wired: {
         fields: {},
         routing: [],
       },
     },
+  },
+  effective_lifecycle: {
+    dsl: { data_retention: '30d' },
+    from: 'logs',
+  },
+  effective_failure_store: {
+    lifecycle: {
+      data_retention: '30d',
+    },
+    from: 'logs',
   },
 };
 
@@ -138,8 +131,14 @@ const mockWiredWithOverrideDefinition: Streams.WiredStream.GetResponse = {
     ...mockWiredDefinition.stream,
     ingest: {
       ...mockWiredDefinition.stream.ingest,
-      failure_store: { enabled: true },
+      failure_store: { lifecycle: { data_retention: '7d' } },
     },
+  },
+  effective_failure_store: {
+    lifecycle: {
+      data_retention: '7d',
+    },
+    from: 'logs.nginx-test',
   },
 };
 
@@ -149,7 +148,12 @@ const mockClassicWithOverrideDefinition: Streams.ClassicStream.GetResponse = {
     ...mockClassicDefinition.stream,
     ingest: {
       ...mockClassicDefinition.stream.ingest,
-      failure_store: { enabled: true },
+      failure_store: { lifecycle: { data_retention: '14d' } },
+    },
+  },
+  effective_failure_store: {
+    lifecycle: {
+      data_retention: '14d',
     },
   },
 };
@@ -162,41 +166,42 @@ describe('RetentionCard', () => {
   describe.each([
     { type: 'Classic', definition: mockClassicDefinition },
     { type: 'Wired', definition: mockWiredDefinition },
-  ])('$type Stream', ({ definition }) => {
-    it('returns null when failureStore missing', () => {
+  ])('when $type Stream', ({ type, definition }) => {
+    it('returns null when failureStore disabled', () => {
+      const isWired = type === 'Wired';
+      const disabledDefinition = {
+        ...definition,
+        effective_failure_store: isWired
+          ? { disabled: {}, from: definition.stream.name }
+          : { disabled: {} },
+      };
       const { container } = renderI18n(
         <RetentionCard
           openModal={jest.fn()}
           canManageFailureStore={true}
           streamName="logs-test"
-          failureStore={undefined}
-          definition={definition}
-        />
-      );
-      expect(container.firstChild).toBeNull();
-    });
-
-    it('returns null when retentionPeriod missing', () => {
-      const { container } = renderI18n(
-        <RetentionCard
-          openModal={jest.fn()}
-          canManageFailureStore={true}
-          streamName="logs-test"
-          failureStore={{ enabled: true, retentionPeriod: {} }}
-          definition={definition}
+          defaultRetentionPeriod="30d"
+          definition={disabledDefinition as any}
         />
       );
       expect(container.firstChild).toBeNull();
     });
 
     it('renders custom retention metric and subtitle', () => {
+      const customRetentionDefinition = {
+        ...definition,
+        effective_failure_store: {
+          lifecycle: { data_retention: '7d' },
+          from: definition.stream.name,
+        },
+      };
       renderI18n(
         <RetentionCard
           openModal={jest.fn()}
           canManageFailureStore={true}
           streamName="logs-test"
-          failureStore={customFailureStore}
-          definition={definition}
+          defaultRetentionPeriod="30d"
+          definition={customRetentionDefinition}
         />
       );
 
@@ -207,13 +212,20 @@ describe('RetentionCard', () => {
     });
 
     it('renders default retention metric and subtitle', () => {
+      const defaultRetentionDefinition = {
+        ...definition,
+        effective_failure_store: {
+          lifecycle: {},
+          from: definition.stream.name,
+        },
+      };
       renderI18n(
         <RetentionCard
           openModal={jest.fn()}
           canManageFailureStore={true}
           streamName="logs-test"
-          failureStore={defaultFailureStore}
-          definition={definition}
+          defaultRetentionPeriod="30d"
+          definition={defaultRetentionDefinition}
         />
       );
 
@@ -230,7 +242,7 @@ describe('RetentionCard', () => {
           openModal={openModal}
           canManageFailureStore={true}
           streamName="logs-test"
-          failureStore={defaultFailureStore}
+          defaultRetentionPeriod="30d"
           definition={definition}
         />
       );
@@ -245,7 +257,7 @@ describe('RetentionCard', () => {
           openModal={jest.fn()}
           canManageFailureStore={false}
           streamName="logs-test"
-          failureStore={defaultFailureStore}
+          defaultRetentionPeriod="30d"
           definition={definition}
         />
       );
@@ -262,7 +274,7 @@ describe('RetentionCard', () => {
             openModal={jest.fn()}
             canManageFailureStore={true}
             streamName="logs-test"
-            failureStore={defaultFailureStore}
+            defaultRetentionPeriod="30d"
             definition={mockClassicDefinition}
           />
         );
@@ -278,7 +290,7 @@ describe('RetentionCard', () => {
             openModal={jest.fn()}
             canManageFailureStore={true}
             streamName="logs-test"
-            failureStore={defaultFailureStore}
+            defaultRetentionPeriod="30d"
             definition={mockClassicWithOverrideDefinition}
           />
         );
@@ -296,7 +308,7 @@ describe('RetentionCard', () => {
             openModal={jest.fn()}
             canManageFailureStore={true}
             streamName="logs.nginx-test"
-            failureStore={defaultFailureStore}
+            defaultRetentionPeriod="30d"
             definition={mockWiredDefinition}
           />
         );
@@ -312,7 +324,7 @@ describe('RetentionCard', () => {
             openModal={jest.fn()}
             canManageFailureStore={true}
             streamName="logs.nginx-test"
-            failureStore={defaultFailureStore}
+            defaultRetentionPeriod="30d"
             definition={mockWiredWithOverrideDefinition}
           />
         );
@@ -328,7 +340,7 @@ describe('RetentionCard', () => {
             openModal={jest.fn()}
             canManageFailureStore={true}
             streamName="logs"
-            failureStore={defaultFailureStore}
+            defaultRetentionPeriod="30d"
             definition={mockWiredRootDefinition}
           />
         );

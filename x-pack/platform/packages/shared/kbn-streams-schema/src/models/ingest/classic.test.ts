@@ -107,6 +107,11 @@ describe('ClassicStream', () => {
           view_index_metadata: true,
         },
         data_stream_exists: true,
+        effective_failure_store: {
+          lifecycle: {
+            data_retention: undefined,
+          },
+        },
         ...emptyAssets,
       },
     ] satisfies ClassicStream.GetResponse[])('is valid', (val) => {

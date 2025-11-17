@@ -63,7 +63,7 @@ export namespace WiredStream {
     inherited_fields: InheritedFieldDefinition;
     effective_lifecycle: WiredIngestStreamEffectiveLifecycle;
     effective_settings: WiredIngestStreamEffectiveSettings;
-    effective_failure_store?: WiredIngestStreamEffectiveFailureStore;
+    effective_failure_store: WiredIngestStreamEffectiveFailureStore;
   }
 
   export type UpsertRequest = IngestBaseStream.UpsertRequest<Definition>;
@@ -85,7 +85,7 @@ export const WiredStream: ModelValidation<BaseStream.Model, WiredStream.Model> =
         inherited_fields: inheritedFieldDefinitionSchema,
         effective_lifecycle: wiredIngestStreamEffectiveLifecycleSchema,
         effective_settings: wiredIngestStreamEffectiveSettingsSchema,
-        effective_failure_store: z.optional(wiredIngestStreamEffectiveFailureStoreSchema),
+        effective_failure_store: wiredIngestStreamEffectiveFailureStoreSchema,
       })
     ),
     UpsertRequest: z.intersection(IngestBaseStream.UpsertRequest.right, z.object({})),

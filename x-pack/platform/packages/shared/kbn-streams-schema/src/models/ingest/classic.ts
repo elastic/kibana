@@ -54,7 +54,7 @@ export namespace ClassicStream {
     elasticsearch_assets?: ElasticsearchAssets;
     data_stream_exists: boolean;
     effective_lifecycle: ClassicIngestStreamEffectiveLifecycle;
-    effective_failure_store?: EffectiveFailureStore;
+    effective_failure_store: EffectiveFailureStore;
     effective_settings: IngestStreamSettings;
   }
 
@@ -84,7 +84,7 @@ export const ClassicStream: ModelValidation<BaseStream.Model, ClassicStream.Mode
         data_stream_exists: z.boolean(),
         effective_lifecycle: classicIngestStreamEffectiveLifecycleSchema,
         effective_settings: ingestStreamSettingsSchema,
-        effective_failure_store: z.optional(effectiveFailureStoreSchema),
+        effective_failure_store: effectiveFailureStoreSchema,
       })
     ),
     UpsertRequest: z.intersection(IngestBaseStream.UpsertRequest.right, z.object({})),
@@ -96,7 +96,7 @@ ClassicStream.Definition.is = (
 ): stream is ClassicStream.Definition =>
   Boolean(
     'ingest' in stream &&
-      typeof stream.ingest === 'object' &&
-      stream.ingest &&
-      'classic' in stream.ingest
+    typeof stream.ingest === 'object' &&
+    stream.ingest &&
+    'classic' in stream.ingest
   );

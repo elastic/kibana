@@ -307,7 +307,24 @@ export async function getDefaultRetentionValue({
   return defaultRetention;
 }
 
-export async function getFailureStore({
+export function getFailureStore({
+  dataStream,
+}: {
+  dataStream: DataStreamWithFailureStore;
+}): EffectiveFailureStore {
+  if (dataStream.failure_store?.enabled) {
+    const dataRetention = dataStream.failure_store?.lifecycle?.data_retention;
+
+    // data_retention is optional - failure store can be enabled without custom retention
+    return {
+      lifecycle: dataRetention ? { data_retention: dataRetention } : {},
+    };
+  }
+
+  return { disabled: {} };
+}
+
+export async function getFailureStoreDefaultRetention({
   name,
   scopedClusterClient,
   isServerless,
@@ -315,7 +332,7 @@ export async function getFailureStore({
   name: string;
   scopedClusterClient: IScopedClusterClient;
   isServerless: boolean;
-}): Promise<EffectiveFailureStore> {
+}): Promise<string | undefined> {
   // TODO: remove DataStreamWithFailureStore here and in streams-schema once failure store is added to the IndicesDataStream type
   const dataStream = (await getDataStream({
     name,
@@ -329,13 +346,7 @@ export async function getFailureStore({
       ? undefined
       : await getDefaultRetentionValue({ scopedClusterClient });
 
-  return {
-    enabled: !!dataStream.failure_store?.enabled,
-    retentionPeriod: {
-      custom: dataStream.failure_store?.lifecycle?.data_retention,
-      default: defaultRetentionPeriod,
-    },
-  };
+  return defaultRetentionPeriod;
 }
 
 export async function getFailureStoreStats({

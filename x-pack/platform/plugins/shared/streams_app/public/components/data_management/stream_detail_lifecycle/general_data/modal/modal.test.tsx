@@ -57,6 +57,10 @@ describe('EditLifecycleModal', () => {
         manage_failure_store: true,
         view_index_metadata: true,
       },
+      effective_failure_store: {
+        lifecycle: { data_retention: undefined },
+        from: streamName,
+      },
     };
 
     if (isWired) {

@@ -1048,6 +1048,6 @@ function emptyActionsByType(): ActionsByType {
     unlink_assets: [],
     unlink_features: [],
     update_ingest_settings: [],
-    set_failure_store: [],
+    update_failure_store: [],
   };
 }

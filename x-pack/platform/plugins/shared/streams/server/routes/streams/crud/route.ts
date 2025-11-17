@@ -49,7 +49,6 @@ export const readStreamRoute = createServerRoute({
       attachmentClient,
       scopedClusterClient,
       streamsClient,
-      isServerless: server.isServerless,
     });
 
     return body;

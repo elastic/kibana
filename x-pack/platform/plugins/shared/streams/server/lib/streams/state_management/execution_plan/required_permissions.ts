@@ -75,7 +75,7 @@ export function getRequiredPermissionsForActions({
     delete_queries,
     unlink_assets,
     unlink_features,
-    set_failure_store,
+    update_failure_store,
     ...rest
   } = actionsByType;
   assertEmptyObject(rest);

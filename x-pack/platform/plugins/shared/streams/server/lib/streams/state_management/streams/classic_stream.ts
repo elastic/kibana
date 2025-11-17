@@ -262,7 +262,7 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
       !('inherit' in this._definition.ingest.failure_store)
     ) {
       actions.push({
-        type: 'set_failure_store',
+        type: 'update_failure_store',
         request: {
           name: this._definition.name,
           failure_store: this._definition.ingest.failure_store,
@@ -343,7 +343,7 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
 
     if (this._changes.failure_store) {
       actions.push({
-        type: 'set_failure_store',
+        type: 'update_failure_store',
         request: {
           name: this._definition.name,
           failure_store:

@@ -7,13 +7,13 @@
 
 import type {
   ClusterPutComponentTemplateRequest,
-  IndicesDataStreamFailureStore,
   IndicesPutIndexTemplateRequest,
   IngestProcessorContainer,
   IngestPutPipelineRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { IngestStreamLifecycle, Streams } from '@kbn/streams-schema';
 import type { StreamsMappingProperties } from '@kbn/streams-schema/src/fields';
+import type { FailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
 
 export interface UpsertComponentTemplateAction {
   type: 'upsert_component_template';
@@ -126,11 +126,11 @@ export interface DeleteDotStreamsDocumentAction {
   };
 }
 
-export interface SetFailureStoreAction {
-  type: 'set_failure_store';
+export interface UpdateFailureStoreAction {
+  type: 'update_failure_store';
   request: {
     name: string;
-    failure_store?: IndicesDataStreamFailureStore;
+    failure_store?: FailureStore;
   };
 }
 
@@ -187,7 +187,7 @@ export type ElasticsearchAction =
   | DeleteQueriesAction
   | UnlinkAssetsAction
   | UnlinkFeaturesAction
-  | SetFailureStoreAction
+  | UpdateFailureStoreAction
   | UpdateIngestSettingsAction;
 
 export interface ActionsByType {
@@ -210,6 +210,6 @@ export interface ActionsByType {
   delete_queries: DeleteQueriesAction[];
   unlink_assets: UnlinkAssetsAction[];
   unlink_features: UnlinkFeaturesAction[];
-  set_failure_store: SetFailureStoreAction[];
+  update_failure_store: UpdateFailureStoreAction[];
   update_ingest_settings: UpdateIngestSettingsAction[];
 }

@@ -9,7 +9,14 @@ import { Streams, isRoot } from '@kbn/streams-schema';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { withSuspense } from '@kbn/shared-ux-utility';
-import { isInheritFailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
+import type {
+  FailureStore,
+  FailureStoreEnabled,
+} from '@kbn/streams-schema/src/models/ingest/failure_store';
+import {
+  isEnabledFailureStore,
+  isInheritFailureStore,
+} from '@kbn/streams-schema/src/models/ingest/failure_store';
 import { NoFailureStorePanel } from './no_failure_store_panel';
 import { FailureStoreInfo } from './failure_store_info';
 import { useUpdateFailureStore } from '../../../../hooks/use_update_failure_store';
@@ -17,6 +24,7 @@ import { useKibana } from '../../../../hooks/use_kibana';
 import { NoPermissionBanner } from './no_permission_banner';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
 import type { useDataStreamStats } from '../hooks/use_data_stream_stats';
+import { useFailureStoreDefaultRetention } from '../hooks/use_failure_store_default_retention';
 import { getFormattedError } from '../../../../util/errors';
 
 // Lazy load the FailureStoreModal to reduce bundle size
@@ -49,6 +57,7 @@ export const StreamDetailFailureStore = ({
       read_failure_store: readFailureStorePrivilege,
       manage_failure_store: manageFailureStorePrivilege,
     },
+    effective_failure_store: failureStore,
   } = definition;
 
   const closeModal = () => {
@@ -67,17 +76,21 @@ export const StreamDetailFailureStore = ({
         });
       } else {
         const failureStoreEnabled = update.failureStoreEnabled ?? false;
-        await updateFailureStore(definition.stream.name, {
-          enabled: failureStoreEnabled,
-          ...(failureStoreEnabled && update.customRetentionPeriod
-            ? {
-                lifecycle: {
-                  enabled: true,
-                  data_retention: update.customRetentionPeriod,
-                },
-              }
-            : {}),
-        });
+
+        // Determine the failure store configuration
+        let failureStoreConfig: FailureStore;
+
+        if (update.inherit) {
+          failureStoreConfig = { inherit: {} };
+        } else if (!failureStoreEnabled) {
+          failureStoreConfig = { disabled: {} };
+        } else {
+          failureStoreConfig = {
+            lifecycle: { data_retention: update.customRetentionPeriod ?? undefined },
+          };
+        }
+
+        await updateFailureStore(definition.stream.name, failureStoreConfig);
       }
 
       refreshDefinition();
@@ -116,34 +129,40 @@ export const StreamDetailFailureStore = ({
     isCurrentlyInherited,
   };
 
+  const failureStoreEnabled = isEnabledFailureStore(failureStore);
+
+  const defaultRetentionPeriod = useFailureStoreDefaultRetention(definition.stream.name);
+
   return (
     <EuiFlexItem grow={false}>
       <EuiFlexGroup direction="column" gutterSize="m">
         {readFailureStorePrivilege ? (
           <>
-            {isFailureStoreModalOpen && manageFailureStorePrivilege && data?.stats?.fs.config && (
+            {isFailureStoreModalOpen && manageFailureStorePrivilege && (
               <FailureStoreModal
                 onCloseModal={closeModal}
                 onSaveModal={handleSaveModal}
                 failureStoreProps={{
-                  failureStoreEnabled: data?.stats?.fs.config.enabled,
-                  defaultRetentionPeriod: data?.stats?.fs.config.retentionPeriod.default,
-                  customRetentionPeriod: data?.stats?.fs.config.retentionPeriod.custom,
+                  failureStoreEnabled,
+                  defaultRetentionPeriod,
+                  customRetentionPeriod: failureStoreEnabled
+                    ? (failureStore as FailureStoreEnabled).lifecycle.data_retention
+                    : undefined,
                 }}
                 inheritOptions={inheritOptions}
                 showIlmDescription={isServerless}
               />
             )}
-            {data.isLoading || data?.stats?.fs.config?.enabled ? (
+            {data.isLoading || failureStoreEnabled ? (
               <FailureStoreInfo
                 openModal={setIsFailureStoreModalOpen}
                 definition={definition}
                 statsError={data.error}
                 isLoadingStats={data.isLoading}
                 stats={data.stats?.fs.stats}
-                config={data?.stats?.fs.config}
                 timeState={timeState}
                 aggregations={data?.stats?.fs.aggregations}
+                defaultRetentionPeriod={defaultRetentionPeriod}
               />
             ) : (
               <NoFailureStorePanel openModal={setIsFailureStoreModalOpen} definition={definition} />

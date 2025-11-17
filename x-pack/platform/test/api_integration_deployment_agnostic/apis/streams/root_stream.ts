@@ -58,6 +58,7 @@ const rootStreamDefinition: Streams.WiredStream.Definition = {
         },
       },
     },
+    failure_store: { inherit: {} },
   },
 };
 

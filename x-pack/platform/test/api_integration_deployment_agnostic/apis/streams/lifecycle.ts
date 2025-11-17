@@ -116,6 +116,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           settings: {},
           processing: { steps: [] },
           wired: { fields: {}, routing: [] },
+          failure_store: { inherit: {} },
         },
       },
       ...emptyAssets,
@@ -446,6 +447,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             processing: { steps: [] },
             settings: {},
             classic: {},
+            failure_store: { inherit: {} },
           },
         },
         ...emptyAssets,
@@ -691,6 +693,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 routing: [],
               },
               lifecycle: { dsl: { data_retention: '1d' } },
+              failure_store: { inherit: {} },
             },
           },
         });
@@ -711,6 +714,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   routing: [],
                 },
                 lifecycle: { ilm: { policy: 'this-stream-policy-does-not-exist' } },
+                failure_store: { inherit: {} },
               },
             },
           });

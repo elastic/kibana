@@ -7,10 +7,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import { groupBy, orderBy } from 'lodash';
-import type {
-  IndicesDataStreamFailureStore,
-  SecurityHasPrivilegesRequest,
-} from '@elastic/elasticsearch/lib/api/types';
+import type { SecurityHasPrivilegesRequest } from '@elastic/elasticsearch/lib/api/types';
 import {
   deleteComponent,
   upsertComponent,
@@ -23,6 +20,7 @@ import {
   upsertDataStream,
   updateDefaultIngestPipeline,
   putDataStreamsSettings,
+  updateDataStreamsFailureStore,
 } from '../../data_streams/manage_data_streams';
 import { deleteTemplate, upsertTemplate } from '../../index_templates/manage_index_templates';
 import {
@@ -56,7 +54,7 @@ import type {
   UnlinkAssetsAction,
   UnlinkFeaturesAction,
   UpdateIngestSettingsAction,
-  SetFailureStoreAction,
+  UpdateFailureStoreAction,
 } from './types';
 
 /**
@@ -79,7 +77,7 @@ export class ExecutionPlan {
       delete_index_template: [],
       upsert_ingest_pipeline: [],
       delete_ingest_pipeline: [],
-      set_failure_store: [],
+      update_failure_store: [],
       append_processor_to_ingest_pipeline: [],
       delete_processor_from_ingest_pipeline: [],
       upsert_datastream: [],
@@ -180,7 +178,7 @@ export class ExecutionPlan {
         upsert_dot_streams_document,
         delete_dot_streams_document,
         update_data_stream_mappings,
-        set_failure_store,
+        update_failure_store,
         delete_queries,
         unlink_assets,
         unlink_features,
@@ -211,7 +209,7 @@ export class ExecutionPlan {
         this.updateLifecycle(update_lifecycle),
         this.updateDataStreamMappingsAndRollover(update_data_stream_mappings),
         this.updateDefaultIngestPipeline(update_default_ingest_pipeline),
-        this.setFailureStore(set_failure_store),
+        this.updateFailureStore(update_failure_store),
       ]);
 
       await this.upsertIngestPipelines(upsert_ingest_pipeline);
@@ -401,32 +399,16 @@ export class ExecutionPlan {
     );
   }
 
-  private async setFailureStore(actions: SetFailureStoreAction[]) {
+  private async updateFailureStore(actions: UpdateFailureStoreAction[]) {
     return Promise.all(
-      actions.map(async (action) => {
-        let failure_store: IndicesDataStreamFailureStore;
-        if (action.request.failure_store) {
-          failure_store = action.request.failure_store;
-        } else {
-          // figure out default settings for the failure store
-          const response =
-            await this.dependencies.scopedClusterClient.asCurrentUser.indices.simulateIndexTemplate(
-              {
-                name: action.request.name,
-              },
-              { meta: true }
-            );
-          // @ts-expect-error index simulate response is not well typed
-          failure_store = response.body.template.data_stream_options?.failure_store ?? {};
-        }
-        await this.dependencies.scopedClusterClient.asCurrentUser.indices.putDataStreamOptions(
-          {
-            name: action.request.name,
-            failure_store,
-          },
-          { meta: true }
-        );
-      })
+      actions.map((action) =>
+        updateDataStreamsFailureStore({
+          esClient: this.dependencies.scopedClusterClient.asCurrentUser,
+          logger: this.dependencies.logger,
+          name: action.request.name,
+          failureStore: action.request.failure_store,
+        })
+      )
     );
   }
 

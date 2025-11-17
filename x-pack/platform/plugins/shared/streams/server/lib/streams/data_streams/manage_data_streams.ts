@@ -12,9 +12,17 @@ import type {
   IngestStreamLifecycleDisabled,
   IngestStreamLifecycleILM,
 } from '@kbn/streams-schema';
-import type { IndicesSimulateTemplateTemplate } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  IndicesDataStreamFailureStore,
+  IndicesSimulateTemplateTemplate,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { StreamsMappingProperties } from '@kbn/streams-schema/src/fields';
 import { isDslLifecycle, isIlmLifecycle, isInheritLifecycle } from '@kbn/streams-schema';
+import type {
+  FailureStore,
+  FailureStoreEnabled,
+} from '@kbn/streams-schema/src/models/ingest/failure_store';
+import { isEnabledFailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
 import { retryTransientEsErrors } from '../helpers/retry';
 
 interface DataStreamManagementOptions {
@@ -270,6 +278,65 @@ export async function putDataStreamsSettings({
     .map(({ error }) => error);
   if (errors.length) {
     throw new Error(errors.join('\n'));
+  }
+}
+
+export async function updateDataStreamsFailureStore({
+  esClient,
+  logger,
+  name,
+  failureStore,
+}: {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  name: string;
+  failureStore: FailureStore | undefined;
+}) {
+  try {
+    let failureStoreConfig: IndicesDataStreamFailureStore;
+
+    if (failureStore) {
+      const enabled = isEnabledFailureStore(failureStore);
+
+      if (enabled) {
+        const dataRetention = (failureStore as FailureStoreEnabled).lifecycle.data_retention;
+        failureStoreConfig = {
+          enabled: true,
+          ...(dataRetention ? { lifecycle: { data_retention: dataRetention, enabled: true } } : {}),
+        };
+      } else {
+        failureStoreConfig = {
+          enabled: false,
+        };
+      }
+    } else {
+      // Figure out default settings for the failure store from the template
+      const response = await retryTransientEsErrors(
+        () => esClient.indices.simulateIndexTemplate({ name }),
+        { logger }
+      );
+
+      // If not template, disable the failure store. Empty object would cause Elasticsearch error.
+      // @ts-expect-error index simulate response is not well typed
+      failureStoreConfig = response.template?.data_stream_options?.failure_store ?? {
+        enabled: false,
+      };
+    }
+
+    await retryTransientEsErrors(
+      () =>
+        esClient.indices.putDataStreamOptions(
+          {
+            name,
+            failure_store: failureStoreConfig,
+          },
+          { meta: true }
+        ),
+      { logger }
+    );
+  } catch (err: any) {
+    logger.error(`Error updating data stream failure store: ${err.message}`);
+    throw err;
   }
 }
 

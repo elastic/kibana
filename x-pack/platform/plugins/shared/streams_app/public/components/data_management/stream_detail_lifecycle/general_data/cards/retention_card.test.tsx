@@ -100,6 +100,10 @@ describe('RetentionCard', () => {
           manage_failure_store: true,
           view_index_metadata: true,
         },
+        effective_failure_store: {
+          lifecycle: { data_retention: undefined },
+          from: 'logs-test',
+        },
       };
 
       render(<RetentionCard definition={definition} openEditModal={mockOpenEditModal} />);
@@ -137,6 +141,10 @@ describe('RetentionCard', () => {
           read_failure_store: true,
           manage_failure_store: true,
           view_index_metadata: true,
+        },
+        effective_failure_store: {
+          lifecycle: { data_retention: undefined },
+          from: 'logs-test',
         },
       };
 

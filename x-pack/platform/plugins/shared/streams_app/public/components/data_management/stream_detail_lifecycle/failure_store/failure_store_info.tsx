@@ -9,7 +9,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
 import type { TimeState } from '@kbn/es-query';
-import type { EffectiveFailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
 import { RetentionCard } from './cards/retention_card';
 import { StorageSizeCard } from './cards/storage_size_card';
 import { IngestionCard } from './cards/ingestion_card';
@@ -23,18 +22,18 @@ export const FailureStoreInfo = ({
   statsError,
   isLoadingStats,
   stats,
-  config,
   timeState,
   aggregations,
+  defaultRetentionPeriod,
 }: {
   openModal: (show: boolean) => void;
   definition: Streams.ingest.all.GetResponse;
   statsError: Error | undefined;
   isLoadingStats: boolean;
   stats?: EnhancedFailureStoreStats;
-  config?: EffectiveFailureStore;
   timeState: TimeState;
   aggregations?: StreamAggregations;
+  defaultRetentionPeriod?: string;
 }) => {
   return (
     <>
@@ -58,8 +57,8 @@ export const FailureStoreInfo = ({
             openModal={openModal}
             canManageFailureStore={definition.privileges?.manage_failure_store}
             streamName={definition.stream.name}
-            failureStore={config}
             definition={definition}
+            defaultRetentionPeriod={defaultRetentionPeriod}
           />
         </EuiFlexItem>
         <EuiFlexItem>

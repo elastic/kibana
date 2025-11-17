@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { IndicesFailureStoreLifecycle } from '@elastic/elasticsearch/lib/api/types';
 import type { Streams } from '../models/streams';
 import type {
   IngestStreamEffectiveLifecycle,
@@ -14,6 +13,7 @@ import type {
 } from '../models/ingest/lifecycle';
 import { isInheritLifecycle } from '../models/ingest/lifecycle';
 import { isDescendantOf, isChildOf, getSegments } from '../shared/hierarchy';
+import type { WiredIngestStreamEffectiveFailureStore } from '../models/ingest/failure_store';
 import { isInheritFailureStore } from '../models/ingest/failure_store';
 
 export function findInheritedLifecycle(
@@ -73,7 +73,7 @@ export function effectiveToIngestLifecycle(
 export function findInheritedFailureStore(
   definition: Streams.WiredStream.Definition,
   ancestors: Streams.WiredStream.Definition[]
-): IndicesFailureStoreLifecycle & { from: string } {
+): WiredIngestStreamEffectiveFailureStore {
   const originDefinition = [...ancestors, definition]
     .sort((a, b) => getSegments(a.name).length - getSegments(b.name).length)
     .findLast(({ ingest }) => !isInheritFailureStore(ingest.failure_store));
