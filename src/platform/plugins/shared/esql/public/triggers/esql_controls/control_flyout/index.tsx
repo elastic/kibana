@@ -11,9 +11,15 @@ import React, { useCallback, useMemo, useState, useEffect, useRef } from 'react'
 import { EuiFlyoutBody } from '@elastic/eui';
 import { ESQLEditorTelemetryService } from '@kbn/esql-editor';
 import type { TimeRange } from '@kbn/es-query';
-import { ESQLVariableType, type ESQLControlVariable, type ESQLControlState } from '@kbn/esql-types';
+import {
+  ESQLVariableType,
+  EsqlControlType,
+  VariableNamePrefix,
+  type ESQLControlVariable,
+  type ESQLControlState,
+  type ControlTriggerSource,
+} from '@kbn/esql-types';
 import { getValuesFromQueryField } from '@kbn/esql-utils';
-import { EsqlControlType, VariableNamePrefix } from '@kbn/esql-types';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { monaco } from '@kbn/monaco';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -46,7 +52,7 @@ interface ESQLControlsFlyoutProps {
   closeFlyout: () => void;
   ariaLabelledBy: string;
   currentApp?: string;
-  telemetryTriggerSource: string;
+  telemetryTriggerSource: ControlTriggerSource;
 }
 
 export function ESQLControlsFlyout({

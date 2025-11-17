@@ -21,9 +21,9 @@ export const ESQL_QUERY_HISTORY_CLICKED = 'esql.query_history_clicked';
 export const ESQL_STARRED_QUERY_CLICKED = 'esql.starred_query_clicked';
 export const ESQL_QUERY_SUBMITTED = 'esql.query_submitted';
 export const ESQL_RECOMMENDED_QUERY_CLICKED = 'esql.recommended_query_clicked';
-export const ESQL_CONTROL_CONFIG_OPENED = 'esql.control_config_opened';
-export const ESQL_CONTROL_CONFIG_CANCELLED = 'esql.control_config_cancelled';
-export const ESQL_CONTROL_CONFIG_SAVED = 'esql.control_config_saved';
+export const ESQL_CONTROL_FLYOUT_OPENED = 'esql.control_flyout_opened';
+export const ESQL_CONTROL_CANCELLED = 'esql.control_cancelled';
+export const ESQL_CONTROL_SAVED = 'esql.control_saved';
 
 /**
  * Registers the esql editor analytics events.
@@ -133,7 +133,7 @@ export const registerESQLEditorAnalyticsEvents = once((analytics: AnalyticsServi
     },
   });
   analytics.registerEventType({
-    eventType: ESQL_CONTROL_CONFIG_OPENED,
+    eventType: ESQL_CONTROL_FLYOUT_OPENED,
     schema: {
       prefilled: {
         type: 'boolean',
@@ -171,7 +171,7 @@ export const registerESQLEditorAnalyticsEvents = once((analytics: AnalyticsServi
     },
   });
   analytics.registerEventType({
-    eventType: ESQL_CONTROL_CONFIG_CANCELLED,
+    eventType: ESQL_CONTROL_CANCELLED,
     schema: {
       control_kind: {
         type: 'keyword',
@@ -190,7 +190,7 @@ export const registerESQLEditorAnalyticsEvents = once((analytics: AnalyticsServi
     },
   });
   analytics.registerEventType({
-    eventType: ESQL_CONTROL_CONFIG_SAVED,
+    eventType: ESQL_CONTROL_SAVED,
     schema: {
       control_kind: {
         type: 'keyword',

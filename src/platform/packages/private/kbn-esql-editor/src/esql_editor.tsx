@@ -48,8 +48,8 @@ import type { ComponentProps } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
-import type { TelemetryQuerySubmittedProps } from '@kbn/esql-types/src/esql_telemetry_types';
-import { QuerySource } from '@kbn/esql-types/src/esql_telemetry_types';
+import type { TelemetryQuerySubmittedProps } from '@kbn/esql-types';
+import { QuerySource, ControlTriggerSource } from '@kbn/esql-types';
 import { useCanCreateLookupIndex, useLookupIndexCommand } from './custom_commands';
 import { EditorFooter } from './editor_footer';
 import {
@@ -359,16 +359,21 @@ const ESQLEditorInternal = function ESQLEditor({
 
   controlCommands.forEach(({ command, variableType }) => {
     monaco.editor.registerCommand(command, async (...args) => {
-      const [, { source }] = args;
-      const prefilled = source !== 'question_mark';
-      telemetryService.trackEsqlControlFlyoutOpened(prefilled, variableType, source, fixedQuery);
+      const [, { triggerSource }] = args;
+      const prefilled = triggerSource !== ControlTriggerSource.QUESTION_MARK;
+      telemetryService.trackEsqlControlFlyoutOpened(
+        prefilled,
+        variableType,
+        triggerSource,
+        fixedQuery
+      );
       const position = editor1.current?.getPosition();
       await triggerControl(
         fixedQuery,
         variableType,
         position,
         uiActions,
-        source,
+        triggerSource,
         esqlVariables,
         controlsContext?.onSaveControl,
         controlsContext?.onCancelControl

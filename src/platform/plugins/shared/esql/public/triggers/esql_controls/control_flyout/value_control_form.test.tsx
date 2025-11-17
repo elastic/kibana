@@ -14,7 +14,7 @@ import type { IUiSettingsClient } from '@kbn/core/public';
 import type { monaco } from '@kbn/monaco';
 import { coreMock } from '@kbn/core/server/mocks';
 import type { ESQLControlState } from '@kbn/esql-types';
-import { ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
+import { ControlTriggerSource, ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
 import { getESQLResults } from '@kbn/esql-utils';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -70,7 +70,7 @@ describe('ValueControlForm', () => {
     search: searchMock,
     esqlVariables: [],
     ariaLabelledBy: 'esqlControlsFlyoutTitle',
-    telemetryTriggerSource: 'question_mark_test',
+    telemetryTriggerSource: ControlTriggerSource.QUESTION_MARK,
   };
 
   describe('Interval type', () => {

@@ -24,3 +24,8 @@ export interface TelemetryQuerySubmittedProps {
   source: QuerySource;
   query: string;
 }
+
+export enum ControlTriggerSource {
+  SMART_SUGGESTION = 'smart_suggestion',
+  QUESTION_MARK = 'question_mark',
+}

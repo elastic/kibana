@@ -41,4 +41,9 @@ export {
   SOURCES_TYPES,
 } from './src/constants';
 
-export { type ESQLTelemetryCallbacks } from './src/esql_telemetry_types';
+export {
+  type ESQLTelemetryCallbacks,
+  ControlTriggerSource,
+  QuerySource,
+  type TelemetryQuerySubmittedProps,
+} from './src/esql_telemetry_types';

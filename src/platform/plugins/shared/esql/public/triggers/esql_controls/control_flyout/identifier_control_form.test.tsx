@@ -15,7 +15,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { monaco } from '@kbn/monaco';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { ESQLControlState } from '@kbn/esql-types';
-import { ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
+import { ControlTriggerSource, ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
 import { ESQLControlsFlyout } from '.';
 
 jest.mock('@kbn/esql-utils', () => ({
@@ -33,7 +33,7 @@ const defaultProps = {
   cursorPosition: { column: 19, lineNumber: 1 } as monaco.Position,
   esqlVariables: [],
   ariaLabelledBy: 'esqlControlFlyoutTitle',
-  telemetryTriggerSource: 'question_mark_test',
+  telemetryTriggerSource: ControlTriggerSource.QUESTION_MARK,
 };
 
 const services = {

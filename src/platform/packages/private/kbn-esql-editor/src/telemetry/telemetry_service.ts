@@ -7,17 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { AnalyticsServiceStart } from '@kbn/core/server';
-import type { TelemetryQuerySubmittedProps } from '@kbn/esql-types/src/esql_telemetry_types';
-import { QuerySource } from '@kbn/esql-types/src/esql_telemetry_types';
+import { QuerySource } from '@kbn/esql-types';
+import type {
+  TelemetryQuerySubmittedProps,
+  ESQLVariableType,
+  ControlTriggerSource,
+} from '@kbn/esql-types';
 import { BasicPrettyPrinter, Parser } from '@kbn/esql-ast';
 import {
   hasLimitBeforeAggregate,
   missingSortBeforeLimit,
 } from '@kbn/esql-utils/src/utils/query_parsing_helpers';
 import {
-  ESQL_CONTROL_CONFIG_CANCELLED,
-  ESQL_CONTROL_CONFIG_OPENED,
-  ESQL_CONTROL_CONFIG_SAVED,
+  ESQL_CONTROL_CANCELLED,
+  ESQL_CONTROL_FLYOUT_OPENED,
+  ESQL_CONTROL_SAVED,
   ESQL_LOOKUP_JOIN_ACTION_SHOWN,
   ESQL_QUERY_HISTORY_CLICKED,
   ESQL_QUERY_HISTORY_OPENED,
@@ -144,8 +148,8 @@ export class ESQLEditorTelemetryService {
 
   public trackEsqlControlFlyoutOpened(
     prefilled: boolean,
-    controlType: string,
-    source: string,
+    controlType: ESQLVariableType,
+    triggerSource: ControlTriggerSource,
     query: string
   ) {
     // parsing and prettifying the raw query
@@ -153,24 +157,27 @@ export class ESQLEditorTelemetryService {
     const { root } = Parser.parse(query);
     const prettyQuery = BasicPrettyPrinter.print(root);
 
-    this._reportEvent(ESQL_CONTROL_CONFIG_OPENED, {
+    this._reportEvent(ESQL_CONTROL_FLYOUT_OPENED, {
       prefilled,
       control_kind: controlType,
-      trigger_source: source,
+      trigger_source: triggerSource,
       query_length: prettyQuery.length.toString(),
       query_lines: query.split('\n').length.toString(),
     });
   }
 
-  public trackEsqlControlConfigSaved(controlType: string, source: string) {
-    this._reportEvent(ESQL_CONTROL_CONFIG_SAVED, {
+  public trackEsqlControlConfigSaved(
+    controlType: ESQLVariableType,
+    triggerSource: ControlTriggerSource
+  ) {
+    this._reportEvent(ESQL_CONTROL_SAVED, {
       control_kind: controlType,
-      trigger_source: source,
+      trigger_source: triggerSource,
     });
   }
 
-  public trackEsqlControlConfigCancelled(controlType: string, reason: string) {
-    this._reportEvent(ESQL_CONTROL_CONFIG_CANCELLED, {
+  public trackEsqlControlConfigCancelled(controlType: ESQLVariableType, reason: string) {
+    this._reportEvent(ESQL_CONTROL_CANCELLED, {
       control_kind: controlType,
       reason,
     });
