@@ -35,7 +35,10 @@
     "@kbn/deeplinks-data-connectors",
     "@kbn/deeplinks-analytics",
     "@kbn/deeplinks-workflows",
-    "@kbn/onechat-common"
+    "@kbn/onechat-common",
+    "@kbn/cloud",
+    "@kbn/cloud-plugin",
+    "@kbn/share-plugin"
   ],
   "exclude": [
     "target/**/*",
