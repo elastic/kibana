@@ -6,11 +6,45 @@
  */
 
 /**
+ * A node in the Dissect pattern AST
+ */
+export type DissectASTNode = DissectFieldNode | DissectLiteralNode;
+
+/**
+ * Represents a field in the pattern AST
+ */
+export interface DissectFieldNode {
+  type: 'field';
+  name: string;
+  modifiers?: {
+    rightPadding?: boolean;
+    skip?: boolean;
+    namedSkip?: boolean;
+    append?: boolean;
+  };
+}
+
+/**
+ * Represents a literal delimiter in the pattern AST
+ */
+export interface DissectLiteralNode {
+  type: 'literal';
+  value: string;
+}
+
+/**
+ * The complete Dissect pattern AST
+ */
+export interface DissectAST {
+  nodes: DissectASTNode[];
+}
+
+/**
  * Represents a Dissect pattern with metadata
  */
 export interface DissectPattern {
-  /** The Dissect pattern string */
-  pattern: string;
+  /** The Dissect pattern AST */
+  ast: DissectAST;
   /** Extracted fields with metadata */
   fields: DissectField[];
 }

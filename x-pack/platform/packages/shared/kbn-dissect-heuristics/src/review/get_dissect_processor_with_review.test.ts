@@ -6,13 +6,61 @@
  */
 
 import { getDissectProcessorWithReview } from './get_dissect_processor_with_review';
-import type { DissectPattern } from '../types';
+import type { DissectPattern, DissectAST } from '../types';
 import type { NormalizedReviewResult } from './get_review_fields';
+
+// Helper to parse a pattern string into AST
+function parsePattern(patternString: string): DissectAST {
+  const nodes: DissectAST['nodes'] = [];
+  const regex = /%\{([^}]+)\}|([^%]+)/g;
+  let match;
+
+  while ((match = regex.exec(patternString)) !== null) {
+    if (match[1]) {
+      // Field node
+      const fieldContent = match[1];
+      const modifiers: any = {};
+      let fieldName = fieldContent;
+
+      // Parse modifiers
+      if (fieldContent.startsWith('+')) {
+        modifiers.append = true;
+        fieldName = fieldContent.slice(1);
+      }
+      if (fieldContent.startsWith('?')) {
+        modifiers.skip = true;
+        modifiers.namedSkip = true;
+        fieldName = fieldContent.slice(1);
+      }
+      if (fieldContent.endsWith('->')) {
+        modifiers.rightPadding = true;
+        fieldName = fieldName.slice(0, -2);
+      }
+      if (fieldName === '') {
+        modifiers.skip = true;
+      }
+
+      nodes.push({
+        type: 'field',
+        name: fieldName,
+        modifiers: Object.keys(modifiers).length > 0 ? modifiers : undefined,
+      });
+    } else if (match[2]) {
+      // Literal node
+      nodes.push({
+        type: 'literal',
+        value: match[2],
+      });
+    }
+  }
+
+  return { nodes };
+}
 
 describe('getDissectProcessorWithReview', () => {
   it('replaces field names with ECS names', () => {
     const pattern: DissectPattern = {
-      pattern: '%{field_1} %{field_2} %{field_3}',
+      ast: parsePattern('%{field_1} %{field_2} %{field_3}'),
       fields: [
         {
           name: 'field_1',
@@ -64,7 +112,7 @@ describe('getDissectProcessorWithReview', () => {
 
   it('groups adjacent fields into single field using skip strategy (default)', () => {
     const pattern: DissectPattern = {
-      pattern: '%{field_1}-%{field_2}-%{field_3} %{field_4}',
+      ast: parsePattern('%{field_1}-%{field_2}-%{field_3} %{field_4}'),
       fields: [
         {
           name: 'field_1',
@@ -107,14 +155,15 @@ describe('getDissectProcessorWithReview', () => {
 
     const result = getDissectProcessorWithReview(pattern, reviewResult);
 
-    expect(result.pattern).toBe('%{@timestamp}-%{}-%{} %{log.level}');
+    // The collapse logic removes consecutive skip fields AND their delimiters
+    expect(result.pattern).toBe('%{@timestamp} %{log.level}');
     expect(result.metadata.fieldCount).toBe(2);
     expect(result.processor.dissect.append_separator).toBeUndefined();
   });
 
   it('groups adjacent fields using append strategy', () => {
     const pattern: DissectPattern = {
-      pattern: '%{field_1} %{field_2} %{field_3}',
+      ast: parsePattern('%{field_1} %{field_2} %{field_3}'),
       fields: [
         {
           name: 'field_1',
@@ -159,7 +208,7 @@ describe('getDissectProcessorWithReview', () => {
 
   it('preserves modifiers when using append strategy', () => {
     const pattern: DissectPattern = {
-      pattern: '%{field_1->} %{field_2} %{field_3}',
+      ast: parsePattern('%{field_1->} %{field_2} %{field_3}'),
       fields: [
         {
           name: 'field_1',
@@ -204,7 +253,7 @@ describe('getDissectProcessorWithReview', () => {
 
   it('handles mixed append and skip strategies', () => {
     const pattern: DissectPattern = {
-      pattern: '%{field_1} %{field_2} [%{field_3}] %{field_4}',
+      ast: parsePattern('%{field_1} %{field_2} [%{field_3}] %{field_4}'),
       fields: [
         {
           name: 'field_1',
@@ -252,13 +301,14 @@ describe('getDissectProcessorWithReview', () => {
 
     const result = getDissectProcessorWithReview(pattern, reviewResult);
 
-    expect(result.pattern).toBe('%{+@timestamp} %{+@timestamp} [%{log.level}] %{message}');
+    // The collapse logic removes consecutive repeated append fields AND their delimiters
+    expect(result.pattern).toBe('%{+@timestamp} [%{log.level}] %{message}');
     expect(result.processor.dissect.append_separator).toBe(' ');
   });
 
   it('preserves modifiers when renaming fields', () => {
     const pattern: DissectPattern = {
-      pattern: '%{field_1->} %{field_2}',
+      ast: parsePattern('%{field_1->} %{field_2}'),
       fields: [
         {
           name: 'field_1',
@@ -297,7 +347,7 @@ describe('getDissectProcessorWithReview', () => {
 
   it('keeps unmapped fields as-is', () => {
     const pattern: DissectPattern = {
-      pattern: '%{field_1} %{field_2} %{field_3}',
+      ast: parsePattern('%{field_1} %{field_2} %{field_3}'),
       fields: [
         {
           name: 'field_1',
@@ -339,7 +389,7 @@ describe('getDissectProcessorWithReview', () => {
 
   it('replaces static fields with literal values', () => {
     const pattern: DissectPattern = {
-      pattern: '%{field_1}=%{field_2} %{field_3}=%{field_4}',
+      ast: parsePattern('%{field_1}=%{field_2} %{field_3}=%{field_4}'),
       fields: [
         {
           name: 'field_1',
@@ -402,7 +452,7 @@ describe('getDissectProcessorWithReview', () => {
 
   it('handles static fields with special characters', () => {
     const pattern: DissectPattern = {
-      pattern: '%{field_1}: %{field_2}',
+      ast: parsePattern('%{field_1}: %{field_2}'),
       fields: [
         {
           name: 'field_1',
@@ -442,7 +492,7 @@ describe('getDissectProcessorWithReview', () => {
 
   it('collapses trailing repeated append fields', () => {
     const pattern: DissectPattern = {
-      pattern: '%{field_1} %{field_2} %{field_3} %{field_4} %{field_5}',
+      ast: parsePattern('%{field_1} %{field_2} %{field_3} %{field_4} %{field_5}'),
       fields: [
         {
           name: 'field_1',

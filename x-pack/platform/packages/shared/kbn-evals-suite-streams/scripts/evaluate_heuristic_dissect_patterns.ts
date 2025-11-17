@@ -30,6 +30,7 @@ import {
   getReviewFields,
   getDissectProcessorWithReview,
   extractDissectPatternDangerouslySlow,
+  serializeAST,
 } from '@kbn/dissect-heuristics';
 import { groupMessagesByPattern } from '@kbn/grok-heuristics';
 import {
@@ -108,7 +109,7 @@ export async function evaluateDissectSuggestions() {
 
       const dissectPattern = extractDissectPatternDangerouslySlow(largestGroup.messages);
       const reviewFields = getReviewFields(dissectPattern, 10);
-      console.log(`- ${stream}: ${chalk.dim(dissectPattern.pattern)}`);
+      console.log(`- ${stream}: ${chalk.dim(serializeAST(dissectPattern.ast))}`);
 
       const suggestionData = await getSuggestions(
         stream,

@@ -5,9 +5,17 @@
  * 2.0.
  */
 
-import type { DissectPattern, DissectProcessorResult, DissectField } from '../types';
+import type {
+  DissectPattern,
+  DissectProcessorResult,
+  DissectField,
+  DissectAST,
+  DissectASTNode,
+  DissectFieldNode,
+} from '../types';
 import type { NormalizedReviewResult } from './get_review_fields';
-import { collapseTrailingRepeats } from './collapse_trailing_repeats';
+import { collapseRepeats } from './collapse_repeats';
+import { serializeAST } from '../serialize_ast';
 
 /**
  * Generates a Dissect processor by combining extracted pattern and
@@ -55,8 +63,22 @@ export function getDissectProcessorWithReview(
     }
   });
 
-  // Reconstruct the pattern with ECS field names
-  let newPattern = pattern.pattern;
+  // Transform the AST with ECS field names and handle grouping
+  const transformedAST = transformASTWithReview(
+    pattern.ast,
+    fieldNameMap,
+    staticFieldMap,
+    fieldGroupMap,
+    joinStrategyMap
+  );
+
+  // Collapse repeated field sequences
+  const collapsedAST = collapseRepeats(transformedAST);
+
+  // Serialize to pattern string
+  const finalPattern = serializeAST(collapsedAST);
+
+  // Build new fields list
   const newFields: DissectField[] = [];
   const processedGroups = new Set<string>();
 
@@ -64,12 +86,8 @@ export function getDissectProcessorWithReview(
     const ecsFieldName = fieldNameMap.get(field.name);
     const staticValue = staticFieldMap.get(field.name);
 
-    // If this is a static field, replace it with a literal value
+    // Skip static fields (they're now literals in the pattern)
     if (staticValue !== undefined) {
-      const escapedName = field.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const fieldPattern = new RegExp(`%\\{${escapedName}(->|\\?)?\\}`, 'g');
-      newPattern = newPattern.replace(fieldPattern, staticValue);
-      // Don't add to newFields since it's now a literal
       return;
     }
 
@@ -84,8 +102,6 @@ export function getDissectProcessorWithReview(
     if (fieldGroup && fieldGroup.length > 1) {
       // This field is part of a multi-column group
       if (!processedGroups.has(ecsFieldName)) {
-        const joinStrategy = joinStrategyMap.get(ecsFieldName)!;
-
         // First field in the group - create the combined field
         const groupFields = pattern.fields.filter((f) => fieldGroup.includes(f.name));
         const combinedValues = groupFields.map((f) => f.values);
@@ -111,42 +127,10 @@ export function getDissectProcessorWithReview(
           modifiers: field.modifiers,
         });
 
-        // Replace all field references in the pattern based on join strategy
-        fieldGroup.forEach((originalName, index) => {
-          const escapedName = originalName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-          const fieldPattern = new RegExp(`%\\{${escapedName}(->|\\?)?\\}`, 'g');
-
-          if (joinStrategy === 'append') {
-            // All fields use append modifier to join values
-            newPattern = newPattern.replace(fieldPattern, (match) => {
-              const modifier = match.includes('->') ? '->' : '';
-              return `%{+${ecsFieldName}${modifier}}`;
-            });
-          } else {
-            // skip strategy: first field gets the name, rest become empty skip fields
-            if (index === 0) {
-              newPattern = newPattern.replace(fieldPattern, (match) => {
-                const modifier = match.includes('->') ? '->' : match.includes('?') ? '?' : '';
-                return `%{${ecsFieldName}${modifier}}`;
-              });
-            } else {
-              newPattern = newPattern.replace(fieldPattern, '%{}');
-            }
-          }
-        });
-
         processedGroups.add(ecsFieldName);
       }
     } else {
       // Single-column field, just rename it
-      const escapedName = field.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const fieldPattern = new RegExp(`%\\{${escapedName}(->|\\?)?\\}`, 'g');
-
-      newPattern = newPattern.replace(fieldPattern, (match) => {
-        const modifier = match.includes('->') ? '->' : match.includes('?') ? '?' : '';
-        return `%{${ecsFieldName}${modifier}}`;
-      });
-
       newFields.push({
         ...field,
         name: ecsFieldName,
@@ -156,9 +140,6 @@ export function getDissectProcessorWithReview(
 
   // Check if any field uses append strategy
   const usesAppend = reviewResult.fields.some((field) => field.join_strategy === 'append');
-
-  // Collapse any repeated append fields at the end of the pattern
-  const finalPattern = collapseTrailingRepeats(newPattern);
 
   const dissectConfig: {
     field: string;
@@ -187,4 +168,97 @@ export function getDissectProcessorWithReview(
       fieldCount: newFields.length,
     },
   };
+}
+
+/**
+ * Transform AST nodes based on review result
+ * Replaces field names with ECS names, converts static fields to literals,
+ * and adds append modifiers for grouped fields
+ */
+function transformASTWithReview(
+  ast: DissectAST,
+  fieldNameMap: Map<string, string>,
+  staticFieldMap: Map<string, string>,
+  fieldGroupMap: Map<string, string[]>,
+  joinStrategyMap: Map<string, 'append' | 'skip'>
+): DissectAST {
+  const processedGroups = new Set<string>();
+  const transformedNodes: DissectASTNode[] = [];
+
+  for (let i = 0; i < ast.nodes.length; i++) {
+    const node = ast.nodes[i];
+
+    if (node.type === 'literal') {
+      transformedNodes.push(node);
+      continue;
+    }
+
+    // Field node
+    const fieldNode = node as DissectFieldNode;
+    const originalName = fieldNode.name;
+    const staticValue = staticFieldMap.get(originalName);
+
+    // Convert static fields to literals
+    if (staticValue !== undefined) {
+      transformedNodes.push({
+        type: 'literal',
+        value: staticValue,
+      });
+      continue;
+    }
+
+    const ecsFieldName = fieldNameMap.get(originalName);
+
+    if (!ecsFieldName) {
+      // Field not mapped, keep original
+      transformedNodes.push(fieldNode);
+      continue;
+    }
+
+    const fieldGroup = fieldGroupMap.get(ecsFieldName);
+
+    if (fieldGroup && fieldGroup.length > 1) {
+      // This is part of a multi-column group
+      const joinStrategy = joinStrategyMap.get(ecsFieldName)!;
+      const fieldIndex = fieldGroup.indexOf(originalName);
+
+      if (joinStrategy === 'append') {
+        // All fields in the group use append modifier
+        transformedNodes.push({
+          type: 'field',
+          name: ecsFieldName,
+          modifiers: {
+            ...fieldNode.modifiers,
+            append: true,
+          },
+        });
+      } else {
+        // skip strategy: first field gets the name, rest become empty skip fields
+        if (fieldIndex === 0) {
+          transformedNodes.push({
+            type: 'field',
+            name: ecsFieldName,
+            modifiers: fieldNode.modifiers,
+          });
+        } else {
+          transformedNodes.push({
+            type: 'field',
+            name: '',
+            modifiers: {
+              skip: true,
+            },
+          });
+        }
+      }
+    } else {
+      // Single-column field, just rename it
+      transformedNodes.push({
+        type: 'field',
+        name: ecsFieldName,
+        modifiers: fieldNode.modifiers,
+      });
+    }
+  }
+
+  return { nodes: transformedNodes };
 }

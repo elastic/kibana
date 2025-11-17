@@ -6,6 +6,7 @@
  */
 
 import { extractDissectPatternDangerouslySlow } from './extract_dissect_pattern';
+import { serializeAST } from './serialize_ast';
 import {
   APACHE_LOGS,
   SYSLOG,
@@ -23,19 +24,19 @@ import {
 describe('extractDissectPatternDangerouslySlow', () => {
   it('returns empty pattern for empty input', () => {
     const result = extractDissectPatternDangerouslySlow([]);
-    expect(result.pattern).toBe('');
+    expect(serializeAST(result.ast)).toBe('');
     expect(result.fields).toEqual([]);
   });
 
   it('handles empty messages', () => {
     const result = extractDissectPatternDangerouslySlow(EMPTY_MESSAGES);
-    expect(result.pattern).toBeTruthy();
+    expect(serializeAST(result.ast)).toBeTruthy();
     expect(result.fields).toHaveLength(1);
   });
 
   it('handles single message', () => {
     const result = extractDissectPatternDangerouslySlow(SINGLE_MESSAGE);
-    expect(result.pattern).toBeTruthy();
+    expect(serializeAST(result.ast)).toBeTruthy();
     expect(result.fields.length).toBeGreaterThan(0);
   });
 
@@ -44,7 +45,7 @@ describe('extractDissectPatternDangerouslySlow', () => {
       const messages = ['1.2.3.4 GET /index.html', '5.6.7.8 POST /api/data', '9.0.1.2 PUT /update'];
 
       const result = extractDissectPatternDangerouslySlow(messages);
-      expect(result.pattern).toContain(' ');
+      expect(serializeAST(result.ast)).toContain(' ');
       expect(result.fields.length).toBeGreaterThan(1);
     });
 
@@ -56,19 +57,19 @@ describe('extractDissectPatternDangerouslySlow', () => {
       ];
 
       const result = extractDissectPatternDangerouslySlow(messages);
-      expect(result.pattern).toContain('[');
-      expect(result.pattern).toContain(']');
+      expect(serializeAST(result.ast)).toContain('[');
+      expect(serializeAST(result.ast)).toContain(']');
     });
 
     it('detects pipe delimiter', () => {
       const result = extractDissectPatternDangerouslySlow(PIPE_DELIMITED);
-      expect(result.pattern).toContain('|');
+      expect(serializeAST(result.ast)).toContain('|');
       expect(result.fields.length).toBeGreaterThanOrEqual(3); // At least 3 fields
     });
 
     it('detects comma delimiter in CSV', () => {
       const result = extractDissectPatternDangerouslySlow(CSV_FORMAT);
-      expect(result.pattern).toContain(',');
+      expect(serializeAST(result.ast)).toContain(',');
       expect(result.fields.length).toBeGreaterThanOrEqual(4);
     });
   });
@@ -95,12 +96,12 @@ describe('extractDissectPatternDangerouslySlow', () => {
       const result = extractDissectPatternDangerouslySlow(SPACE_DELIMITED);
 
       // Debug: log actual result
-      // console.log('Pattern:', result.pattern);
+      // console.log('Pattern:', serializeAST(result.ast));
       // console.log('Fields:', result.fields.map(f => ({ name: f.name, values: f.values })));
 
       // Should extract 3 fields separated by space
       expect(result.fields.length).toBeGreaterThanOrEqual(2);
-      expect(result.pattern).toContain(' ');
+      expect(serializeAST(result.ast)).toContain(' ');
 
       // At least should have first field containing 'alpha'
       const hasAlpha = result.fields.some((f) => f.values.includes('alpha'));
@@ -113,7 +114,7 @@ describe('extractDissectPatternDangerouslySlow', () => {
 
       // With improved delimiter detection, should preserve IP addresses better
       // Just verify we got a reasonable pattern
-      expect(result.pattern).toBeTruthy();
+      expect(serializeAST(result.ast)).toBeTruthy();
       expect(result.fields.length).toBeGreaterThan(0);
     });
   });
@@ -123,51 +124,51 @@ describe('extractDissectPatternDangerouslySlow', () => {
       const result = extractDissectPatternDangerouslySlow(VARIABLE_WHITESPACE);
 
       // Multiple spaces are detected as delimiter
-      expect(result.pattern).toEqual('%{field_1->} %{field_2->} %{field_3->} %{field_4}');
+      expect(serializeAST(result.ast)).toEqual('%{field_1->} %{field_2->} %{field_3->} %{field_4}');
     });
 
     it('detects skip fields for constant values', () => {
       const result = extractDissectPatternDangerouslySlow(WITH_SKIP_FIELDS);
 
       // Just verify the pattern is valid
-      expect(result.pattern).toBeTruthy();
-      expect(result.pattern).toMatch(/%\{[^}]+\}/);
+      expect(serializeAST(result.ast)).toBeTruthy();
+      expect(serializeAST(result.ast)).toMatch(/%\{[^}]+\}/);
     });
   });
 
   describe('edge cases', () => {
     it('handles messages with no common delimiters', () => {
       const result = extractDissectPatternDangerouslySlow(NO_COMMON_DELIMITERS);
-      expect(result.pattern).toBeTruthy();
+      expect(serializeAST(result.ast)).toBeTruthy();
       // Should default to single field
       expect(result.fields.length).toBeGreaterThanOrEqual(1);
     });
 
     it('handles identical messages', () => {
       const result = extractDissectPatternDangerouslySlow(IDENTICAL_MESSAGES);
-      expect(result.pattern).toBeTruthy();
+      expect(serializeAST(result.ast)).toBeTruthy();
       expect(result.fields.length).toBeGreaterThan(0);
     });
 
     it('handles complex Apache logs', () => {
       const result = extractDissectPatternDangerouslySlow(APACHE_LOGS);
-      expect(result.pattern).toBeTruthy();
+      expect(serializeAST(result.ast)).toBeTruthy();
       expect(result.fields.length).toBeGreaterThan(5);
 
       // Should extract multiple delimiters
-      expect(result.pattern).toContain('[');
-      expect(result.pattern).toContain(']');
-      expect(result.pattern).toContain('"');
+      expect(serializeAST(result.ast)).toContain('[');
+      expect(serializeAST(result.ast)).toContain(']');
+      expect(serializeAST(result.ast)).toContain('"');
     });
 
     it('handles syslog format', () => {
       const result = extractDissectPatternDangerouslySlow(SYSLOG);
-      expect(result.pattern).toBeTruthy();
+      expect(serializeAST(result.ast)).toBeTruthy();
       expect(result.fields.length).toBeGreaterThan(4);
 
       // Should detect brackets for process ID
-      expect(result.pattern).toContain('[');
-      expect(result.pattern).toContain(']:');
+      expect(serializeAST(result.ast)).toContain('[');
+      expect(serializeAST(result.ast)).toContain(']:');
     });
   });
 
@@ -185,8 +186,8 @@ describe('extractDissectPatternDangerouslySlow', () => {
 
       testCases.forEach((messages) => {
         const result = extractDissectPatternDangerouslySlow(messages);
-        expect(result.pattern).not.toContain('%{*');
-        expect(result.pattern).not.toContain('%{&');
+        expect(serializeAST(result.ast)).not.toContain('%{*');
+        expect(serializeAST(result.ast)).not.toContain('%{&');
       });
     });
 
@@ -203,7 +204,7 @@ describe('extractDissectPatternDangerouslySlow', () => {
 
       testCases.forEach((messages) => {
         const result = extractDissectPatternDangerouslySlow(messages);
-        expect(result.pattern).not.toContain('%{+');
+        expect(serializeAST(result.ast)).not.toContain('%{+');
       });
     });
 
@@ -228,7 +229,7 @@ describe('extractDissectPatternDangerouslySlow', () => {
       testCases.forEach(({ name, messages }) => {
         const result = extractDissectPatternDangerouslySlow(messages);
         // Basic validation: pattern should have same number of delimiters for each message
-        expect(result.pattern).toBeTruthy();
+        expect(serializeAST(result.ast)).toBeTruthy();
         expect(result.fields.length).toBeGreaterThan(0);
       });
     });
@@ -246,7 +247,7 @@ describe('extractDissectPatternDangerouslySlow', () => {
       const result = extractDissectPatternDangerouslySlow(messages);
       const duration = performance.now() - start;
 
-      expect(result.pattern).toBeTruthy();
+      expect(serializeAST(result.ast)).toBeTruthy();
       expect(duration).toBeLessThan(5000); // Should complete in less than 5 seconds
     });
   });

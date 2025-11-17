@@ -6,11 +6,12 @@
  */
 
 import type { DissectPattern, DissectProcessorResult } from './types';
+import { serializeAST } from './serialize_ast';
 
 /**
  * Generates an Elasticsearch Dissect processor configuration from a Dissect pattern.
  *
- * @param pattern - The DissectPattern object containing pattern and field metadata
+ * @param pattern - The DissectPattern object containing AST and field metadata
  * @param sourceField - The source field to apply dissect to (default: 'message')
  * @returns DissectProcessorResult with processor config and metadata
  */
@@ -18,18 +19,20 @@ export function getDissectProcessor(
   pattern: DissectPattern,
   sourceField: string = 'message'
 ): DissectProcessorResult {
+  const patternString = serializeAST(pattern.ast);
+
   return {
-    pattern: pattern.pattern,
+    pattern: patternString,
     processor: {
       dissect: {
         field: sourceField,
-        pattern: pattern.pattern,
+        pattern: patternString,
         ignore_missing: true,
       },
     },
     metadata: {
       messageCount: pattern.fields[0]?.values.length ?? 0,
-      delimiterCount: countDelimiters(pattern.pattern),
+      delimiterCount: countDelimiters(patternString),
       fieldCount: pattern.fields.length,
     },
   };

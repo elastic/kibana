@@ -11,10 +11,15 @@ export { getReviewFields, type ReviewFields } from './src/review/get_review_fiel
 export { getDissectProcessorWithReview } from './src/review/get_dissect_processor_with_review';
 export { ReviewDissectFieldsPrompt } from './src/review/review_fields_prompt';
 export { groupMessagesByPattern } from './src/group_messages';
+export { serializeAST } from './src/serialize_ast';
 export type {
   DissectPattern,
   DissectField,
   DissectModifiers,
   DelimiterNode,
   DissectProcessorResult,
+  DissectAST,
+  DissectASTNode,
+  DissectFieldNode,
+  DissectLiteralNode,
 } from './src/types';

@@ -7,6 +7,11 @@
 
 import { extractDissectPatternDangerouslySlow } from './extract_dissect_pattern';
 import { getDissectProcessor } from './get_dissect_processor';
+import { serializeAST } from './serialize_ast';
+
+// Helper function to get pattern string from result
+const getPattern = (result: ReturnType<typeof extractDissectPatternDangerouslySlow>) =>
+  serializeAST(result.ast);
 
 describe('Dissect Pattern Extraction - Integration Tests', () => {
   describe('Common Log Formats', () => {
@@ -19,7 +24,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
 
       const result = extractDissectPatternDangerouslySlow(logs);
 
-      expect(result.pattern).toBe(
+      expect(getPattern(result)).toBe(
         '%{field_1} - %{field_2} [%{field_3}/%{field_4}/%{field_5->} %{field_6}] "%{field_7} /%{field_8->} %{field_9}/%{field_10->}" %{field_11} %{field_12}'
       );
       expect(result.fields).toHaveLength(12);
@@ -34,7 +39,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
 
       const result = extractDissectPatternDangerouslySlow(logs);
 
-      expect(result.pattern).toBe(
+      expect(getPattern(result)).toBe(
         '%{field_1} %{field_2} %{field_3} %{field_4} %{field_5}[%{field_6}]: %{field_7->} %{field_8}'
       );
       expect(result.fields).toHaveLength(8);
@@ -49,7 +54,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
 
       const result = extractDissectPatternDangerouslySlow(logs);
 
-      expect(result.pattern).toBe(
+      expect(getPattern(result)).toBe(
         '{"%{field_1}":"%{field_2}","%{field_3}":"%{field_4}","%{field_5}":"%{field_6->} %{field_7}"}'
       );
       expect(result.fields).toHaveLength(7);
@@ -64,7 +69,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
 
       const result = extractDissectPatternDangerouslySlow(logs);
 
-      expect(result.pattern).toBe('%{field_1},%{field_2},%{field_3},%{field_4},%{field_5}');
+      expect(getPattern(result)).toBe('%{field_1},%{field_2},%{field_3},%{field_4},%{field_5}');
       expect(result.fields).toHaveLength(5);
     });
 
@@ -77,7 +82,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
 
       const result = extractDissectPatternDangerouslySlow(logs);
 
-      expect(result.pattern).toBe('%{field_1}|%{field_2}|%{field_3}|%{field_4}');
+      expect(getPattern(result)).toBe('%{field_1}|%{field_2}|%{field_3}|%{field_4}');
       expect(result.fields).toHaveLength(4);
     });
 
@@ -86,7 +91,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
 
       const result = extractDissectPatternDangerouslySlow(logs);
 
-      expect(result.pattern).toBe('%{field_1}\t%{field_2->}\t%{field_3}');
+      expect(getPattern(result)).toBe('%{field_1}\t%{field_2->}\t%{field_3}');
       expect(result.fields).toHaveLength(3);
     });
   });
@@ -98,7 +103,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
       const result = extractDissectPatternDangerouslySlow(logs);
 
       // Whitespace varies, so field_1 needs right-padding
-      expect(result.pattern).toBe('%{field_1->} %{field_2}');
+      expect(getPattern(result)).toBe('%{field_1->} %{field_2}');
       expect(result.fields).toHaveLength(2);
     });
 
@@ -111,7 +116,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
 
       const result = extractDissectPatternDangerouslySlow(logs);
 
-      expect(result.pattern).toBe('%{field_1} - - [%{field_2}] %{field_3}');
+      expect(getPattern(result)).toBe('%{field_1} - - [%{field_2}] %{field_3}');
       expect(result.fields).toHaveLength(3);
     });
 
@@ -126,7 +131,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
 
       // After whitespace normalization: correctly detects varying log level lengths
       // and applies right-padding modifier. Date is kept as single field.
-      expect(result.pattern).toBe(
+      expect(getPattern(result)).toBe(
         '%{field_1->} - - [%{field_2}-%{field_3}-%{field_4}] %{field_5->} %{field_6}'
       );
       expect(result.fields).toHaveLength(6);
@@ -137,7 +142,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
     it('handles empty input array', () => {
       const result = extractDissectPatternDangerouslySlow([]);
 
-      expect(result.pattern).toBe('');
+      expect(getPattern(result)).toBe('');
       expect(result.fields).toEqual([]);
     });
 
@@ -146,7 +151,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
 
       const result = extractDissectPatternDangerouslySlow(logs);
 
-      expect(result.pattern).toBe(
+      expect(getPattern(result)).toBe(
         '%{field_1} %{field_2} %{field_3} %{field_4} %{field_5} %{field_6} %{field_7} %{field_8} %{field_9}'
       );
       expect(result.fields).toHaveLength(9);
@@ -157,7 +162,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
 
       const result = extractDissectPatternDangerouslySlow(logs);
 
-      expect(result.pattern).toBe('%{field_1} %{field_2}');
+      expect(getPattern(result)).toBe('%{field_1} %{field_2}');
       expect(result.fields).toHaveLength(2);
     });
 
@@ -166,7 +171,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
 
       const result = extractDissectPatternDangerouslySlow(logs);
 
-      expect(result.pattern).toBe('%{message}');
+      expect(getPattern(result)).toBe('%{message}');
       expect(result.fields).toHaveLength(1);
     });
 
@@ -176,7 +181,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
       const result = extractDissectPatternDangerouslySlow(logs);
 
       // Right-padding modifier correctly handles varying whitespace
-      expect(result.pattern).toBe('%{field_1->} %{field_2->} %{field_3}');
+      expect(getPattern(result)).toBe('%{field_1->} %{field_2->} %{field_3}');
       expect(result.fields).toHaveLength(3);
     });
 
@@ -190,7 +195,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
 
       const result = extractDissectPatternDangerouslySlow(logs);
 
-      expect(result.pattern).toBe('%{field_1} %{field_2} %{field_3} %{field_4} %{field_5}');
+      expect(getPattern(result)).toBe('%{field_1} %{field_2} %{field_3} %{field_4} %{field_5}');
       expect(result.fields).toHaveLength(5);
     });
 
@@ -203,7 +208,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
 
       const result = extractDissectPatternDangerouslySlow(logs);
 
-      expect(result.pattern).toBe('%{field_1}@%{field_2} -> /%{field_3}/%{field_4} (%{field_5})');
+      expect(getPattern(result)).toBe('%{field_1}@%{field_2} -> /%{field_3}/%{field_4} (%{field_5})');
       expect(result.fields).toHaveLength(5);
     });
 
@@ -216,7 +221,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
 
       const result = extractDissectPatternDangerouslySlow(logs);
 
-      expect(result.pattern).toBe(
+      expect(getPattern(result)).toBe(
         '%{field_1}-%{field_2}-%{field_3} [%{field_4}] (%{field_5}) - {%{field_6}: %{field_7}} %{field_8}'
       );
       expect(result.fields).toHaveLength(8);
@@ -231,7 +236,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
 
       const result = extractDissectPatternDangerouslySlow(logs);
 
-      expect(result.pattern).toBe(
+      expect(getPattern(result)).toBe(
         '%{field_1->} %{field_2}://%{field_3}/%{field_4}/%{field_5}/%{field_6->} %{field_7->} %{field_8}'
       );
       expect(result.fields).toHaveLength(8);
@@ -246,7 +251,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
 
       const result = extractDissectPatternDangerouslySlow(logs);
 
-      expect(result.pattern).toBe('%{field_1}-%{field_2}-%{field_3} %{field_4->} %{field_5}');
+      expect(getPattern(result)).toBe('%{field_1}-%{field_2}-%{field_3} %{field_4->} %{field_5}');
       expect(result.fields).toHaveLength(5);
     });
   });
@@ -261,8 +266,8 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
 
       testCases.forEach((logs) => {
         const result = extractDissectPatternDangerouslySlow(logs);
-        expect(result.pattern).not.toContain('%{*');
-        expect(result.pattern).not.toContain('%{&');
+        expect(getPattern(result)).not.toContain('%{*');
+        expect(getPattern(result)).not.toContain('%{&');
       });
     });
 
@@ -274,7 +279,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
 
       testCases.forEach((logs) => {
         const result = extractDissectPatternDangerouslySlow(logs);
-        expect(result.pattern).not.toContain('%{+');
+        expect(getPattern(result)).not.toContain('%{+');
       });
     });
 
@@ -300,8 +305,8 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
         const result = extractDissectPatternDangerouslySlow(logs);
 
         // Pattern should have matching %{ and }
-        const openCount = (result.pattern.match(/%\{/g) || []).length;
-        const closeCount = (result.pattern.match(/\}/g) || []).length;
+        const openCount = (getPattern(result).match(/%\{/g) || []).length;
+        const closeCount = (getPattern(result).match(/\}/g) || []).length;
         expect(openCount).toBe(closeCount);
         expect(openCount).toBeGreaterThan(0);
       });
@@ -320,7 +325,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
       const processor = getDissectProcessor(pattern, 'message');
 
       expect(processor.processor.dissect.field).toBe('message');
-      expect(processor.processor.dissect.pattern).toBe(pattern.pattern);
+      expect(processor.processor.dissect.pattern).toBe(getPattern(pattern));
       expect(processor.processor.dissect.ignore_missing).toBe(true);
       expect(processor.metadata.messageCount).toBe(3);
     });
@@ -347,7 +352,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
 
       const result = extractDissectPatternDangerouslySlow(logs);
 
-      expect(result.pattern).toBe(
+      expect(getPattern(result)).toBe(
         '%{field_1} - %{field_2} [%{field_3}/%{field_4}/%{field_5} +%{field_6}] "%{field_7} /%{field_8}/%{field_9} %{field_10}/%{field_11}" %{field_12} %{field_13} "%{field_14}://%{field_15}" "%{field_16}/%{field_17}"'
       );
       expect(result.fields).toHaveLength(17);
@@ -362,7 +367,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
 
       const result = extractDissectPatternDangerouslySlow(logs);
 
-      expect(result.pattern).toBe(
+      expect(getPattern(result)).toBe(
         '[%{field_1}-%{field_2}-%{field_3} %{field_4}] %{field_5}: %{field_6->} %{field_7} %{field_8}'
       );
       expect(result.fields).toHaveLength(8);
@@ -377,7 +382,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
 
       const result = extractDissectPatternDangerouslySlow(logs);
 
-      expect(result.pattern).toBe(
+      expect(getPattern(result)).toBe(
         '%{field_1}-%{field_2}-%{field_3} %{field_4} %{field_5} %{field_6->} %{field_7}'
       );
       expect(result.fields).toHaveLength(7);
@@ -392,7 +397,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
 
       const result = extractDissectPatternDangerouslySlow(logs);
 
-      expect(result.pattern).toBe(
+      expect(getPattern(result)).toBe(
         '%{field_1} %{field_2}: %{field_3} | %{field_4}: %{field_5} | %{field_6}: %{field_7} | %{field_8}: %{field_9}'
       );
       expect(result.fields).toHaveLength(9);
@@ -407,7 +412,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
 
       const result = extractDissectPatternDangerouslySlow(logs);
 
-      expect(result.pattern).toBe(
+      expect(getPattern(result)).toBe(
         '%{field_1}=%{field_2}-%{field_3}-%{field_4} %{field_5}=%{field_6->} %{field_7}=%{field_8->} %{field_9}=%{field_10->} %{field_11}_%{field_12}=%{field_13}'
       );
       expect(result.fields).toHaveLength(13);
@@ -425,7 +430,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
       const result = extractDissectPatternDangerouslySlow(logs);
       const duration = performance.now() - start;
 
-      expect(result.pattern).toBeTruthy();
+      expect(getPattern(result)).toBeTruthy();
       expect(result.fields.length).toBeGreaterThan(0);
       expect(duration).toBeLessThan(5000); // Should complete in less than 5 seconds
     });
@@ -439,7 +444,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
 
       const result = extractDissectPatternDangerouslySlow(logs);
 
-      expect(result.pattern).toBe(
+      expect(getPattern(result)).toBe(
         '%{field_1}|%{field_2}|%{field_3}|%{field_4}|%{field_5}|%{field_6}|%{field_7}|%{field_8}'
       );
       expect(result.fields).toHaveLength(8);
@@ -558,7 +563,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
       // extraction as a fallback to capture the structured fields.
       // After normalization: correctly detects '-' and ':' as delimiters
 
-      expect(result.pattern).toBe(
+      expect(getPattern(result)).toBe(
         '- %{field_1} %{field_2} %{field_3->} %{field_4->} %{field_5->} %{field_6} %{field_7->}: %{field_8->} %{field_9} %{field_10} %{field_11} %{field_12}'
       );
       expect(result.fields.length).toBe(12);
@@ -577,7 +582,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
       const result = extractDissectPatternDangerouslySlow(logs);
 
       // With uniform structure, heuristic should extract clear delimiters
-      expect(result.pattern).toBeTruthy();
+      expect(getPattern(result)).toBeTruthy();
       expect(result.fields.length).toBeGreaterThan(4);
       expect(result.fields.length).toBeLessThan(15);
 
@@ -691,7 +696,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
       ];
       const result = extractDissectPatternDangerouslySlow(logs);
       // After normalization: correctly detects '-' and ':' as delimiters
-      expect(result.pattern).toBe(
+      expect(getPattern(result)).toBe(
         '- %{field_1} %{field_2} %{field_3->} %{field_4->} %{field_5->} %{field_6->} %{field_7->}: %{field_8} %{field_9}'
       );
     });
@@ -800,7 +805,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
         '[11.13 18:56:50] chrome.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS',
       ];
       const result = extractDissectPatternDangerouslySlow(logs);
-      expect(result.pattern).toBe(
+      expect(getPattern(result)).toBe(
         '[%{field_1} %{field_2}] %{field_3} - %{field_4} %{field_5->} %{field_6->} %{field_7->} %{field_8} %{field_9}'
       );
     });
@@ -911,7 +916,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
       const result = extractDissectPatternDangerouslySlow(logs);
       // Note: field_3 does not use right-padding because ` - ` is a non-whitespace delimiter
       // The space is part of the delimiter, not padding. Fields naturally vary in length.
-      expect(result.pattern).toBe(
+      expect(getPattern(result)).toBe(
         '[%{field_1} %{field_2}] %{field_3} - %{field_4->} %{field_5->} %{field_6} %{field_7} %{field_8} %{field_9}'
       );
     });
@@ -1022,7 +1027,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
       const result = extractDissectPatternDangerouslySlow(logs);
       // After normalization: correctly detects ':' as delimiter
       // With lenient position scoring, the colon is detected despite varying process name lengths
-      expect(result.pattern).toBe(
+      expect(getPattern(result)).toBe(
         '%{field_1} %{field_2} %{field_3} %{field_4} %{field_5}: %{field_6->} %{field_7}'
       );
       expect(result.fields.length).toBe(7);

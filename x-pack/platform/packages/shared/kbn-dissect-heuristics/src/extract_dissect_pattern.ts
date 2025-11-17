@@ -12,7 +12,7 @@ import { extractFields } from './extract_fields';
 import { normalizeFieldBoundaries } from './normalize_field_boundaries';
 import { normalizeWhitespace, needsRightPadding } from './normalize_whitespace';
 import { detectModifiers } from './detect_modifiers';
-import { generatePattern } from './generate_pattern';
+import { generateAST } from './generate_ast';
 
 /**
  * WARNING: DO NOT RUN THIS FUNCTION ON THE MAIN THREAD
@@ -37,7 +37,7 @@ import { generatePattern } from './generate_pattern';
 export function extractDissectPatternDangerouslySlow(messages: string[]): DissectPattern {
   if (!messages.length) {
     return {
-      pattern: '',
+      ast: { nodes: [] },
       fields: [],
     };
   }
@@ -79,11 +79,11 @@ export function extractDissectPatternDangerouslySlow(messages: string[]): Dissec
     }
   });
 
-  // Step 5: Generate pattern string
-  const pattern = generatePattern(delimiterTree, fields);
+  // Step 5: Generate AST
+  const ast = generateAST(delimiterTree, fields);
 
   return {
-    pattern,
+    ast,
     fields,
   };
 }
