@@ -53,6 +53,8 @@ export function createESQLQuery({ metric, dimensions = [], filters }: CreateESQL
 
   const whereConditions: QueryOperator[] = [];
   const valuesByField = new Map<string, Set<string>>();
+  const dimensionTypeMap = new Map(metricDimensions?.map((dim) => [dim.name, dim.type]));
+
   if (filters && filters.length) {
     for (const filter of filters) {
       const currentValues = valuesByField.get(filter.field);
@@ -64,23 +66,33 @@ export function createESQLQuery({ metric, dimensions = [], filters }: CreateESQL
     }
 
     valuesByField.forEach((value, key) => {
+      const valuesArray = Array.from(value);
+      const escapedKey = sanitazeESQLInput(key);
+
+      // Always cast to STRING for filtering to handle potential mapping conflicts
+      // where the same field name exists with different types (e.g., both long and keyword)
+      const castedKey = `${escapedKey}::STRING`;
+
       whereConditions.push(
-        where(
-          `${sanitazeESQLInput(key)} IN (${new Array(value.size).fill('?').join(', ')})`,
-          Array.from(value)
-        )
+        where(`${castedKey} IN (${new Array(value.size).fill('?').join(', ')})`, valuesArray)
       );
     });
   }
-
-  const dimensionTypeMap = new Map(metricDimensions?.map((dim) => [dim.name, dim.type]));
 
   const unfilteredDimensions = (dimensions ?? []).filter((dim) => !valuesByField.has(dim));
   const queryPipeline = source.pipe(
     ...whereConditions,
     unfilteredDimensions.length > 0
       ? where(
-          unfilteredDimensions.map((dim) => `${sanitazeESQLInput(dim)} IS NOT NULL`).join(' AND ')
+          unfilteredDimensions
+            .map((dim) => {
+              const dimType = dimensionTypeMap.get(dim);
+              const escapedDim = sanitazeESQLInput(dim);
+              const castedDim =
+                dimType && needsStringCasting(dimType) ? `${escapedDim}::STRING` : escapedDim;
+              return `${castedDim} IS NOT NULL`;
+            })
+            .join(' AND ')
         )
       : (query) => query,
     stats(
