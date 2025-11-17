@@ -120,7 +120,7 @@ export const GENERIC_ENTITY_INDEX_ENRICH_POLICY =
 
 export const CLOUD_SECURITY_PLUGIN_VERSION = '1.9.0';
 
-// New ECS entity fields for graph visualization
+// ECS entity actor fields
 export const GRAPH_ACTOR_ENTITY_FIELDS = [
   'user.entity.id',
   'host.entity.id',
@@ -128,6 +128,7 @@ export const GRAPH_ACTOR_ENTITY_FIELDS = [
   'entity.id',
 ] as const;
 
+// ECS entity target fields
 export const GRAPH_TARGET_ENTITY_FIELDS = [
   'user.target.entity.id',
   'host.target.entity.id',
