@@ -28,7 +28,6 @@ import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
-import useObservable from 'react-use/lib/useObservable';
 import { useProfileAccessor } from '../../../../context_awareness';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -50,6 +49,7 @@ import {
   useCurrentTabSelector,
   useInternalStateDispatch,
 } from '../../state_management/redux';
+import { useDataState } from '../../hooks/use_data_state';
 
 const EMPTY_ESQL_COLUMNS: DatatableColumn[] = [];
 const EMPTY_FILTERS: Filter[] = [];
@@ -70,7 +70,7 @@ export const useDiscoverHistogram = (
   } = stateContainer.dataState;
   const savedSearchState = useSavedSearch();
   const isEsqlMode = useIsEsqlMode();
-  const documentsState = useObservable<DataDocumentsMsg>(documents$, documents$.getValue());
+  const documentsState = useDataState(documents$);
   const isChartLoading = useMemo(() => {
     return isEsqlMode && documentsState?.fetchStatus === FetchStatus.LOADING;
   }, [isEsqlMode, documentsState?.fetchStatus]);
@@ -216,9 +216,6 @@ export const useDiscoverHistogram = (
     return allFilters.length ? allFilters : EMPTY_FILTERS;
   }, [appFilters, globalFilters]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const timeRangeMemoized = useMemo(() => timeRange, [timeRange?.from, timeRange?.to]);
-
   const chartHidden = useAppStateSelector((state) => state.hideChart);
   const timeInterval = useAppStateSelector((state) => state.interval);
   const breakdownField = useAppStateSelector((state) => state.breakdownField);
@@ -239,7 +236,7 @@ export const useDiscoverHistogram = (
       dataView,
       query,
       filters: isEsqlMode ? EMPTY_FILTERS : filtersMemoized,
-      timeRange: timeRangeMemoized,
+      timeRange,
       relativeTimeRange,
       breakdownField,
       timeInterval,
@@ -262,9 +259,9 @@ export const useDiscoverHistogram = (
     filtersMemoized,
     inspectorAdapters.requests,
     isEsqlMode,
+    timeRange,
     relativeTimeRange,
     searchSessionId,
-    timeRangeMemoized,
     query,
     savedSearchState?.visContext,
     getModifiedVisAttributes,
