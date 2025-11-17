@@ -182,8 +182,8 @@ export const ContextMenu = ({
             </EuiFlexGroup>
           </EuiContextMenuItem>,
           // Hide Language clients option for Kibana requests
-          ...(!isKbnRequestSelected
-            ? [
+          {!isKbnRequestSelected
+            &&
                 <EuiContextMenuItem
                   key="Language clients"
                   data-test-subj="consoleMenuLanguageClients"
@@ -206,9 +206,8 @@ export const ContextMenu = ({
                       <EuiIcon type="arrowRight" size="m" />
                     </EuiFlexItem>
                   </EuiFlexGroup>
-                </EuiContextMenuItem>,
-              ]
-            : []),
+                </EuiContextMenuItem>
+              },
         ]
       : []),
     <EuiContextMenuItem
