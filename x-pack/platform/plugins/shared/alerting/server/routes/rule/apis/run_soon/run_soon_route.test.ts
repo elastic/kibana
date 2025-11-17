@@ -5,14 +5,14 @@
  * 2.0.
  */
 import { httpServiceMock } from '@kbn/core/server/mocks';
-import { licenseStateMock } from '../lib/license_state.mock';
-import { mockHandlerArguments } from './_mock_handler_arguments';
-import { rulesClientMock } from '../rules_client.mock';
-import { RuleTypeDisabledError } from '../lib/errors/rule_type_disabled';
-import { runSoonRoute } from './run_soon';
+import { licenseStateMock } from '../../../../lib/license_state.mock';
+import { mockHandlerArguments } from '../../../_mock_handler_arguments';
+import { rulesClientMock } from '../../../../rules_client.mock';
+import { RuleTypeDisabledError } from '../../../../lib/errors/rule_type_disabled';
+import { runSoonRoute } from './run_soon_route';
 
 const rulesClient = rulesClientMock.create();
-jest.mock('../lib/license_api_access', () => ({
+jest.mock('../../../../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
 
@@ -49,6 +49,47 @@ describe('runSoonRuleRoute', () => {
     expect(rulesClient.runSoon.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
+          "force": undefined,
+          "id": "1",
+        },
+      ]
+    `);
+
+    expect(res.noContent).toHaveBeenCalled();
+  });
+
+  it('run a rule ad hoc with force parameter if specified', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    runSoonRoute(router, licenseState);
+
+    const [config, handler] = router.post.mock.calls[0];
+
+    expect(config.path).toMatchInlineSnapshot(`"/internal/alerting/rule/{id}/_run_soon"`);
+
+    rulesClient.runSoon.mockResolvedValueOnce(undefined);
+
+    const [context, req, res] = mockHandlerArguments(
+      { rulesClient },
+      {
+        params: {
+          id: '1',
+        },
+        query: {
+          force: true,
+        },
+      },
+      ['noContent']
+    );
+
+    expect(await handler(context, req, res)).toEqual(undefined);
+
+    expect(rulesClient.runSoon).toHaveBeenCalledTimes(1);
+    expect(rulesClient.runSoon.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "force": true,
           "id": "1",
         },
       ]
@@ -85,6 +126,7 @@ describe('runSoonRuleRoute', () => {
     expect(rulesClient.runSoon.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
+          "force": undefined,
           "id": "1",
         },
       ]

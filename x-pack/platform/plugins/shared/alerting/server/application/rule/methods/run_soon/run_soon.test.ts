@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ConstructorOptions } from '../rules_client';
-import { RulesClient } from '../rules_client';
+import type { ConstructorOptions } from '../../../../rules_client';
+import { RulesClient } from '../../../../rules_client';
 import {
   savedObjectsClientMock,
   loggingSystemMock,
@@ -14,18 +14,19 @@ import {
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
-import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
+import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
+import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import type { AlertingAuthorization } from '../../authorization/alerting_authorization';
+import type { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
 import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
-import { getBeforeSetup, setGlobalDate } from './lib';
-import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
-import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
-import { backfillClientMock } from '../../backfill_client/backfill_client.mock';
+import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
+import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
+import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
+import { TaskAlreadyRunningError } from '@kbn/task-manager-plugin/server/lib/errors';
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -35,6 +36,7 @@ const authorization = alertingAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
 const auditLogger = auditLoggerMock.create();
 const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
+const logger = loggingSystemMock.create().get();
 
 const kibanaVersion = 'v7.10.0';
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
@@ -49,7 +51,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   minimumScheduleInterval: { value: '1m', enforce: false },
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
-  logger: loggingSystemMock.create().get(),
+  logger,
   internalSavedObjectsRepository,
   encryptedSavedObjectsClient: encryptedSavedObjects,
   getActionsClient: jest.fn(),
@@ -196,26 +198,14 @@ describe('runSoon()', () => {
 
   test('runs a rule ad hoc', async () => {
     await rulesClient.runSoon({ id: '1' });
-    expect(taskManager.runSoon).toHaveBeenCalled();
+    expect(logger.info).not.toHaveBeenCalled();
+    expect(taskManager.runSoon).toHaveBeenCalledWith('1', undefined);
   });
 
-  test('does not run a rule if that rule is already running', async () => {
-    taskManager.get.mockResolvedValueOnce({
-      id: '1',
-      scheduledAt: new Date(),
-      attempts: 0,
-      status: TaskStatus.Running,
-      runAt: new Date(),
-      state: {},
-      params: {},
-      taskType: '',
-      startedAt: null,
-      retryAt: null,
-      ownerId: null,
-    });
-    const message = await rulesClient.runSoon({ id: '1' });
-    expect(message).toBe('Rule is already running');
-    expect(taskManager.runSoon).not.toHaveBeenCalled();
+  test('runs a rule ad hoc with a force parameter', async () => {
+    await rulesClient.runSoon({ id: '1', force: true });
+    expect(logger.info).not.toHaveBeenCalled();
+    expect(taskManager.runSoon).toHaveBeenCalledWith('1', true);
   });
 
   test('does not run a rule if that rule is disabled', async () => {
@@ -228,21 +218,41 @@ describe('runSoon()', () => {
     });
     const message = await rulesClient.runSoon({ id: '1' });
     expect(message).toBe('Error running rule: rule is disabled');
-    expect(taskManager.get).not.toHaveBeenCalled();
+    expect(logger.info).not.toHaveBeenCalled();
     expect(taskManager.runSoon).not.toHaveBeenCalled();
   });
 
-  test('gracefully handles errors getting task document', async () => {
-    taskManager.get.mockRejectedValueOnce(new Error('oh no!'));
+  test('returns custom message if rule is already running', async () => {
+    taskManager.runSoon.mockRejectedValueOnce(new TaskAlreadyRunningError('1'));
     const message = await rulesClient.runSoon({ id: '1' });
-    expect(message).toBe('Error running rule: oh no!');
-    expect(taskManager.runSoon).not.toHaveBeenCalled();
+    expect(message).toBe('Rule is already running');
+    expect(logger.info).not.toHaveBeenCalled();
+    expect(taskManager.runSoon).toHaveBeenCalled();
+  });
+
+  test('returns custom message if rule is already running and force=true', async () => {
+    taskManager.runSoon.mockRejectedValueOnce(new TaskAlreadyRunningError('1'));
+    const message = await rulesClient.runSoon({ id: '1', force: true });
+    expect(message).toBe('Rule is already running and cannot be forced');
+    expect(logger.info).not.toHaveBeenCalled();
+    expect(taskManager.runSoon).toHaveBeenCalled();
+  });
+
+  test('logs message if taskManager.runSoon returns forced: true indicator', async () => {
+    taskManager.runSoon.mockResolvedValueOnce({ id: '1', forced: true });
+    const message = await rulesClient.runSoon({ id: '1' });
+    expect(message).toBeUndefined();
+    expect(logger.info).toHaveBeenCalledWith(
+      `Rule 1 was forced to run soon despite being in "running" status.`
+    );
+    expect(taskManager.runSoon).toHaveBeenCalled();
   });
 
   test('gracefully handles errors calling runSoon', async () => {
     taskManager.runSoon.mockRejectedValueOnce(new Error('fail!'));
     const message = await rulesClient.runSoon({ id: '1' });
     expect(message).toBe('Error running rule: fail!');
+    expect(logger.info).not.toHaveBeenCalled();
     expect(taskManager.runSoon).toHaveBeenCalled();
   });
 });

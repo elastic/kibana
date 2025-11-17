@@ -6,15 +6,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
-import { TaskStatus } from '@kbn/task-manager-plugin/server';
+import { TaskAlreadyRunningError } from '@kbn/task-manager-plugin/server/lib/errors';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import type { Rule } from '../../types';
-import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
-import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
-import type { RulesClientContext } from '../types';
-import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
+import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
+import type { RulesClientContext } from '../../../../rules_client/types';
+import type { RunSoonParams } from './types';
 
-export async function runSoon(context: RulesClientContext, { id }: { id: string }) {
+export async function runSoon(context: RulesClientContext, params: RunSoonParams) {
+  const { id, force } = params;
   const { attributes } = await context.unsecuredSavedObjectsClient.get<Rule>(
     RULE_SAVED_OBJECT_TYPE,
     id
@@ -58,32 +59,26 @@ export async function runSoon(context: RulesClientContext, { id }: { id: string 
     });
   }
 
-  let taskDoc: ConcreteTaskInstance | null = null;
   try {
-    taskDoc = attributes.scheduledTaskId
-      ? await context.taskManager.get(attributes.scheduledTaskId)
-      : null;
-  } catch (err) {
-    return i18n.translate('xpack.alerting.rulesClient.runSoon.getTaskError', {
-      defaultMessage: 'Error running rule: {errMessage}',
-      values: {
-        errMessage: err.message,
-      },
-    });
-  }
+    const { forced } = await context.taskManager.runSoon(
+      attributes.scheduledTaskId ? attributes.scheduledTaskId : id,
+      force
+    );
 
-  if (
-    taskDoc &&
-    (taskDoc.status === TaskStatus.Claiming || taskDoc.status === TaskStatus.Running)
-  ) {
-    return i18n.translate('xpack.alerting.rulesClient.runSoon.ruleIsRunning', {
-      defaultMessage: 'Rule is already running',
-    });
-  }
-
-  try {
-    await context.taskManager.runSoon(attributes.scheduledTaskId ? attributes.scheduledTaskId : id);
+    if (forced) {
+      context.logger.info(`Rule ${id} was forced to run soon despite being in "running" status.`);
+    }
   } catch (err) {
+    if (err instanceof TaskAlreadyRunningError) {
+      return force
+        ? i18n.translate('xpack.alerting.rulesClient.runSoon.ruleIsRunning', {
+            defaultMessage: 'Rule is already running and cannot be forced',
+          })
+        : i18n.translate('xpack.alerting.rulesClient.runSoon.ruleIsRunning', {
+            defaultMessage: 'Rule is already running',
+          });
+    }
+
     return i18n.translate('xpack.alerting.rulesClient.runSoon.runSoonError', {
       defaultMessage: 'Error running rule: {errMessage}',
       values: {
