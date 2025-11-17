@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { EuiFieldText, EuiFormRow } from '@elastic/eui';
+import { EuiFieldText, EuiFormRow, EuiTitle } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import useMountedState from 'react-use/lib/useMountedState';
 import { STATUS } from '@kbn/file-upload';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 
 const existsErrorText = i18n.translate(
@@ -99,9 +100,16 @@ export const IndexInput: FC<Props> = ({
 
   return (
     <EuiFormRow
-      label={i18n.translate('xpack.dataVisualizer.file.importView.indexNameLabel', {
-        defaultMessage: 'Index name',
-      })}
+      label={
+        <EuiTitle size="xxxs">
+          <h6>
+            <FormattedMessage
+              id="xpack.dataVisualizer.file.importView.indexNameLabel"
+              defaultMessage="Index name"
+            />
+          </h6>
+        </EuiTitle>
+      }
       isInvalid={indexNameError !== ''}
       error={indexNameError}
       fullWidth

@@ -37,17 +37,17 @@ export const FilePicker: FC<Props> = ({ fileUploadManager, fullWidth, large = fa
     <EuiFlexGroup direction="column" gutterSize="none">
       {fullWidth === false ? <EuiFlexItem grow={true} /> : null}
       <EuiFlexItem grow={false}>
-        <EuiTitle size="xxxs">
-          <h6>
-            <FormattedMessage
-              id="xpack.dataVisualizer.file.uploadView.uploadFilesTitle"
-              defaultMessage="Upload data"
-            />
-          </h6>
-        </EuiTitle>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
         <EuiFormRow
+          label={
+            <EuiTitle size="xxxs">
+              <h6>
+                <FormattedMessage
+                  id="xpack.dataVisualizer.file.uploadView.uploadFilesTitle"
+                  defaultMessage="Upload data"
+                />
+              </h6>
+            </EuiTitle>
+          }
           fullWidth
           helpText={i18n.translate(
             'xpack.dataVisualizer.file.aboutPanel.supportedFormatsDescription',
