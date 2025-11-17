@@ -25,7 +25,7 @@ import type { Filter, Query } from '@kbn/es-query';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
-import { SecurityPageName } from '../../../common/constants';
+import { ATTACKS_ALERTS_ALIGNMENT_ENABLED, SecurityPageName } from '../../../common/constants';
 import { HeaderPage } from '../../common/components/header_page';
 import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';
 import { useKibana } from '../../common/lib/kibana';
@@ -46,12 +46,13 @@ import { useSourcererDataView } from '../../sourcerer/containers';
 import { useAttackDiscovery } from './use_attack_discovery';
 import { useInvalidateGetAttackDiscoveryGenerations } from './use_get_attack_discovery_generations';
 import { getConnectorNameFromId } from './utils/get_connector_name_from_id';
+import { MovingAttacksCallout } from './moving_attacks_callout';
 
 export const ID = 'attackDiscoveryQuery';
 
 const AttackDiscoveryPageComponent: React.FC = () => {
   const {
-    services: { uiSettings, settings },
+    services: { featureFlags, uiSettings, settings },
   } = useKibana();
 
   const { http, inferenceEnabled } = useAssistantContext();
@@ -223,6 +224,11 @@ const AttackDiscoveryPageComponent: React.FC = () => {
 
   const onClose = useCallback(() => setShowFlyout(false), []);
 
+  const attacksAlertsAlignmentEnabled = featureFlags.getBooleanValue(
+    ATTACKS_ALERTS_ALIGNMENT_ENABLED,
+    false
+  );
+
   return (
     <div
       css={css`
@@ -242,6 +248,10 @@ const AttackDiscoveryPageComponent: React.FC = () => {
           />
           <EuiSpacer size={'s'} />
         </HeaderPage>
+
+        <EuiSpacer size="s" />
+
+        {attacksAlertsAlignmentEnabled && <MovingAttacksCallout />}
 
         <EuiSpacer size="s" />
 
