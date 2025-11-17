@@ -2157,7 +2157,7 @@ export default function (providerContext: FtrProviderContext) {
           target_version: '8.16.3',
           action_id: 'test-action-automatic',
         });
-        await generateAgent(providerContext, 'healhty', 'agent-3', policyWithAgents.id, '8.16.1', {
+        await generateAgent(providerContext, 'healthy', 'agent-3', policyWithAgents.id, '8.16.1', {
           state: 'UPG_DOWNLOADING',
           target_version: '8.16.3',
           action_id: 'test-action-automatic',
