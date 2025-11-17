@@ -14,16 +14,14 @@ apiTest.describe(
   { tag: ['@ess', '@svlSecurity', '@svlOblt'] },
   () => {
     let adminApiCredentials: RoleApiCredentials;
-    let clusterPainlessExecuteClusterPrivilegesCredentials: RoleApiCredentials;
+    let painlessExecuteClusterPrivilegesCredentials: RoleApiCredentials;
 
     apiTest.beforeAll(async ({ requestAuth }) => {
       adminApiCredentials = await requestAuth.getApiKey('admin');
 
-      clusterPainlessExecuteClusterPrivilegesCredentials = await requestAuth.getApiKeyForCustomRole(
-        {
-          cluster: ['cluster:admin/scripts/painless/execute'],
-        }
-      );
+      painlessExecuteClusterPrivilegesCredentials = await requestAuth.getApiKeyForCustomRole({
+        cluster: ['cluster:admin/scripts/painless/execute'],
+      });
     });
 
     apiTest(
