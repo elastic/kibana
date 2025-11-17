@@ -9,6 +9,8 @@ import type { FlattenRecord } from '@kbn/streams-schema';
 import { flattenObjectNestedLast } from '@kbn/object-utils';
 import { get } from 'lodash';
 import { useAbortController } from '@kbn/react-hooks';
+import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
+import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { useKibana } from '../../../../../../../hooks/use_kibana';
 import {
   selectOriginalPreviewRecords,
@@ -16,6 +18,10 @@ import {
 } from '../../../../state_management/simulation_state_machine/selectors';
 import { useSimulatorSelector } from '../../../../state_management/stream_enrichment_state_machine';
 import { simulateProcessing } from '../../../../state_management/simulation_state_machine/simulation_runner_actor';
+import type {
+  PreviewDocsFilterOption,
+  SampleDocumentWithUIAttributes,
+} from '../../../../state_management/simulation_state_machine';
 
 /**
  * Prepares samples for pattern extraction by:
@@ -24,10 +30,10 @@ import { simulateProcessing } from '../../../../state_management/simulation_stat
  * 3. Applying preview document filters
  */
 export async function prepareSamplesForPatternExtraction(
-  originalSamples: Array<{ document: unknown }>,
-  stepsWithoutCurrent: unknown[],
-  previewDocsFilter: unknown,
-  streamsRepositoryClient: any,
+  originalSamples: SampleDocumentWithUIAttributes[],
+  stepsWithoutCurrent: StreamlangStepWithUIAttributes[],
+  previewDocsFilter: PreviewDocsFilterOption,
+  streamsRepositoryClient: StreamsRepositoryClient,
   streamName: string
 ): Promise<FlattenRecord[]> {
   let samples = originalSamples
