@@ -308,7 +308,7 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
             // This prevents the timeslice from getting shifted forward immediately after applying the filters
             // when using a relative time range, thus triggering another dirty state that needs to be applied.
             // Doing a simple check of nextTimeRangeLength !== prevTimeRangeLength will give us a false positive
-            // if the relative timerange is set to "round to the nearest," which is why we compare the change to the
+            // if the relatifve timerange is set to "round to the nearest," which is why we compare the change to the
             // step size.
             const timeRangeHasChanged =
               nextStepSize !== prevStepSize ||
@@ -328,6 +328,12 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
             );
           }
         );
+
+      // Initialize the timeslice
+      syncTimesliceWithTimeRangePercentage(
+        state.timesliceStartAsPercentageOfTimeRange,
+        state.timesliceEndAsPercentageOfTimeRange
+      );
 
       return {
         api,
