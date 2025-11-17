@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { chatSystemIndex } from '@kbn/onechat-server';
+import { isIndexNotFoundError } from '@kbn/security-solution-plugin/public/common/utils/exceptions';
 
 /**
  * Usage counter data from saved objects
@@ -219,7 +220,9 @@ export class QueryUtils {
         rounds_distribution: roundsDistribution,
       };
     } catch (error) {
-      this.logger.warn(`Failed to fetch conversation metrics: ${error.message}`);
+      if (!isIndexNotFoundError(error)) {
+        this.logger.warn(`Failed to fetch conversation metrics: ${error.message}`);
+      }
       return {
         total: 0,
         total_rounds: 0,
