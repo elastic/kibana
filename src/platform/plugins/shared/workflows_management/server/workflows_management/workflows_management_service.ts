@@ -33,7 +33,6 @@ import type {
   EsWorkflowExecution,
   EsWorkflowStepExecution,
   ExecutionStatus,
-  ExecutionType,
   UpdatedWorkflowResponseDto,
   WorkflowAggsDto,
   WorkflowDetailDto,
@@ -44,7 +43,7 @@ import type {
   WorkflowStatsDto,
   WorkflowYaml,
 } from '@kbn/workflows';
-import { transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
+import { ExecutionType, transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
 import type { z } from '@kbn/zod';
 
 import { getWorkflowExecution } from './lib/get_workflow_execution';
@@ -846,12 +845,28 @@ export class WorkflowsService {
         },
       });
     }
-    if (params.executionTypes) {
-      must.push({
-        terms: {
-          executionType: params.executionTypes,
-        },
-      });
+    if (params.executionTypes && params.executionTypes?.length === 1) {
+      const isTestRun = params.executionTypes[0] === ExecutionType.TEST;
+
+      if (isTestRun) {
+        must.push({
+          term: {
+            isTestRun,
+          },
+        });
+      } else {
+        // the field isTestRun do not exist for regular runs
+        // so we need to check for both cases: field not existing or field being false
+        must.push({
+          bool: {
+            should: [
+              { term: { isTestRun: false } },
+              { bool: { must_not: { exists: { field: 'isTestRun' } } } },
+            ],
+            minimum_should_match: 1,
+          },
+        });
+      }
     }
 
     const page = params.page ?? 1;
