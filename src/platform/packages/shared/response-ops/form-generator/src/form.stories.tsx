@@ -145,21 +145,15 @@ const abuseIPDBConnectorSchema = z.object({
 });
 
 const alienVaultOTXConnectorSchema = z.object({
-  authType: z
-    .discriminatedUnion('type', [
-      z
-        .object({
-          type: z.literal('apiKey'), // this literal is irrelevant
-          'X-OTX-API-KEY': z.string().min(1, { message: 'API Key cannot be empty' }).meta({
-            widget: 'password',
-            label: 'API Key',
-          }),
-        })
-        .meta({
-          label: 'Headers',
-        }),
-    ])
-    .meta({ widget: 'formFieldset', label: 'Authentication' }),
+  authType: z.discriminatedUnion('authType', [
+    z.object({
+      authType: z.literal('header'),
+      'X-OTX-API-KEY': z.string().min(1, { message: 'API Key cannot be empty' }).meta({
+        widget: 'password',
+        label: 'API Key',
+      }),
+    }),
+  ]),
 });
 
 const GreyNoiseConnectorSchema = z.object({

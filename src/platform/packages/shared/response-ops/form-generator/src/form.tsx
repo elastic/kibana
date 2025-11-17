@@ -15,7 +15,7 @@ import type { BaseMetadata } from './schema_metadata';
 import { useFormState } from './use_form_state';
 import type { WidgetType } from './widgets';
 import { getWidget } from './widgets';
-import { INVALID_VALUE } from './translations';
+import { INVALID_VALUE_ERROR } from './translations';
 
 /**
  * Key used for root-level field validation errors.
@@ -42,8 +42,8 @@ const getFieldsFromSchema = <T extends z.ZodRawShape>(schema: z.ZodObject<T>) =>
     const schemaAny = subSchema as z.ZodTypeAny;
 
     const metaInfo = getMeta(schemaAny);
-    if (!metaInfo || !metaInfo.widget) {
-      throw new Error(`UI metadata is missing for field: ${key}`);
+    if (!metaInfo) {
+      throw new Error(`Metadata is missing for field: ${key}`);
     }
 
     fields.push({
@@ -75,7 +75,7 @@ const getFieldsFromSchema = <T extends z.ZodRawShape>(schema: z.ZodObject<T>) =>
 
             return Object.keys(errors).length > 0 ? errors : undefined;
           }
-          return { [ROOT_ERROR_KEY]: INVALID_VALUE };
+          return { [ROOT_ERROR_KEY]: INVALID_VALUE_ERROR };
         }
       },
     });
@@ -124,7 +124,7 @@ export const Form = <TSchema extends z.ZodObject<z.ZodRawShape>>({
             placeholder={meta?.placeholder}
             fullWidth={true}
             error={form.errors[id]}
-            isInvalid={!!form.errors[id]}
+            isInvalid={Boolean(form.errors[id])}
             onChange={form.handleChange}
             onBlur={form.handleBlur}
             schema={fieldSchema}

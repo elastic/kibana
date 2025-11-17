@@ -195,7 +195,7 @@ describe('Form', () => {
 
     expect(() => {
       render(<Form connectorSchema={schema} onSubmit={mockOnSubmit} />, { wrapper });
-    }).toThrow('UI metadata is missing for field: username');
+    }).toThrow('Metadata is missing for field: username');
 
     consoleError.mockRestore();
   });

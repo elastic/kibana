@@ -12,6 +12,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { KeyValueField } from './key_value_field';
 import { WidgetType } from '../types';
+import { DUPLICATED_KEY_ERROR } from '../../translations';
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <IntlProvider locale="en">{children}</IntlProvider>
@@ -246,7 +247,7 @@ describe('KeyValueField', () => {
     fireEvent.change(keyInput1, { target: { value: 'Content-Type' } });
 
     await waitFor(() => {
-      expect(screen.getByText('Duplicate key')).toBeDefined();
+      expect(screen.getByText(DUPLICATED_KEY_ERROR)).toBeDefined();
     });
   });
 

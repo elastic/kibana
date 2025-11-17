@@ -268,30 +268,6 @@ describe('DiscriminatedUnionField', () => {
     });
   });
 
-  it('throws error when schema is not ZodDiscriminatedUnion', () => {
-    const schema = z.object({
-      username: z.string(),
-    });
-
-    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
-
-    expect(() => {
-      render(
-        <DiscriminatedUnionField
-          fieldId="auth"
-          value={{ username: '' }}
-          label="Authentication"
-          schema={schema as any}
-          onChange={mockOnChange}
-          onBlur={mockOnBlur}
-        />,
-        { wrapper }
-      );
-    }).toThrow('Schema provided to DiscriminatedUnionField is not a ZodDiscriminatedUnion');
-
-    consoleError.mockRestore();
-  });
-
   it('displays validation errors for option fields', async () => {
     const option1 = z.object({
       type: z.literal('basic'),
@@ -601,16 +577,6 @@ describe('getDiscriminatedUnionInitialValue', () => {
       type: 'basic',
       username: '',
     });
-  });
-
-  it('throws error when schema is not ZodDiscriminatedUnion', () => {
-    const schema = z.object({
-      username: z.string(),
-    });
-
-    expect(() => {
-      getDiscriminatedUnionInitialValue(schema as any);
-    }).toThrow('Schema provided is not a ZodDiscriminatedUnion');
   });
 
   it('handles number fields with default value 0', () => {

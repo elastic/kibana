@@ -21,6 +21,7 @@ import {
 import { v4 as uuidv4 } from 'uuid';
 import type { BaseMetadata } from '../../schema_metadata';
 import type { BaseWidgetProps, WidgetType } from '../types';
+import { DUPLICATED_KEY_ERROR, EMPTY_KEY_ERROR } from '../../translations';
 
 export type KeyValueWidgetMeta = BaseMetadata & {
   widget: WidgetType.KeyValue;
@@ -100,12 +101,12 @@ export const KeyValueField: React.FC<KeyValueWidgetProps> = ({
         const trimmedKey = pair.key.trim();
 
         if (!trimmedKey && pair.value.trim()) {
-          errorMessages.push('Key cannot be empty');
-          pairErrorsMap[pair.id] = { key: 'Key cannot be empty' };
+          errorMessages.push(EMPTY_KEY_ERROR);
+          pairErrorsMap[pair.id] = { key: EMPTY_KEY_ERROR };
         } else if (trimmedKey) {
           if (keysSeen.has(trimmedKey)) {
-            errorMessages.push(`Duplicate key: ${trimmedKey}`);
-            pairErrorsMap[pair.id] = { key: 'Duplicate key' };
+            errorMessages.push(`${DUPLICATED_KEY_ERROR}: ${trimmedKey}`);
+            pairErrorsMap[pair.id] = { key: DUPLICATED_KEY_ERROR };
           } else {
             keysSeen.add(trimmedKey);
           }

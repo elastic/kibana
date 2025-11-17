@@ -41,10 +41,6 @@ export const getDiscriminatorFieldValue = (
 };
 
 export const getDiscriminatedUnionInitialValue = (schema: z.ZodTypeAny, defaultValue?: unknown) => {
-  if (!(schema instanceof z.ZodDiscriminatedUnion)) {
-    throw new Error('Schema provided is not a ZodDiscriminatedUnion');
-  }
-
   const discriminatedSchema = schema as z.ZodDiscriminatedUnion<z.ZodObject<z.ZodRawShape>[]>;
   const metaInfo = getMeta(discriminatedSchema);
   const metadataDefault = metaInfo?.default;
@@ -72,7 +68,7 @@ export const DiscriminatedUnionField: React.FC<DiscriminatedUnionWidgetProps> = 
   const { schema, value } = props;
 
   if (!(schema instanceof z.ZodDiscriminatedUnion)) {
-    throw new Error('Schema provided to DiscriminatedUnionField is not a ZodDiscriminatedUnion');
+    throw new Error('Unexpected schema provided to DiscriminatedUnionField');
   }
 
   const discriminatedSchema = schema as z.ZodDiscriminatedUnion<z.ZodObject<z.ZodRawShape>[]>;

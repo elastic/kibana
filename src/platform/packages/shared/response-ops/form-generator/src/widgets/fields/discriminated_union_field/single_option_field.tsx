@@ -10,6 +10,7 @@
 import React, { useMemo, useCallback } from 'react';
 import { z } from '@kbn/zod/v4';
 import { EuiFormFieldset, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import { INVALID_VALUE_ERROR } from '../../../translations';
 import { getMeta } from '../../../schema_metadata';
 import type { DiscriminatedUnionWidgetProps } from './discriminated_union_field';
 import { getDiscriminatorKey } from './discriminated_union_field';
@@ -53,7 +54,7 @@ export const SingleOptionUnionField: React.FC<DiscriminatedUnionWidgetProps> = (
         if (validationError instanceof z.ZodError) {
           return validationError.issues.map((issue) => issue.message);
         }
-        return ['Invalid value'];
+        return [INVALID_VALUE_ERROR];
       }
     },
     []
