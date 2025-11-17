@@ -127,4 +127,17 @@ export class IndexManagement extends AbstractPageObject {
       await expect(this.page.testSubj.locator('indexDetailsBackToIndicesButton')).toBeVisible();
     },
   };
+
+  indexTemplateWizard = {
+    completeStepOne: async () => {
+      await this.page.testSubj.locator('nameField').locator('input').fill('test-index-template');
+      await this.page.testSubj
+        .locator('indexPatternsField')
+        .locator('input')
+        .fill('test-index-pattern');
+
+      // Click Next button
+      await this.clickNextButton();
+    },
+  };
 }

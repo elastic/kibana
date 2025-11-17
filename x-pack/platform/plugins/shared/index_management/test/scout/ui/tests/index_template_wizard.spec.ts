@@ -38,20 +38,12 @@ test.describe('Index template wizard - Create', { tag: ['@ess'] }, () => {
   test('renders logistics (step 1)', async ({ page, pageObjects }) => {
     // Verify step title
     await expect(page.testSubj.locator('stepTitle')).toHaveText('Logistics');
-
-    // Fill out required fields
-    await page.testSubj.locator('nameField').locator('input').fill('test-index-template');
-    await page.testSubj.locator('indexPatternsField').locator('input').fill('test-index-pattern');
-
-    // Click Next button
-    await pageObjects.indexManagement.clickNextButton();
+    await pageObjects.indexManagement.indexTemplateWizard.completeStepOne();
   });
 
   test('renders component templates (step 2)', async ({ page, pageObjects }) => {
     // Fill logistics step
-    await page.testSubj.locator('nameField').locator('input').fill('test-index-template');
-    await page.testSubj.locator('indexPatternsField').locator('input').fill('test-index-pattern');
-    await pageObjects.indexManagement.clickNextButton();
+    await pageObjects.indexManagement.indexTemplateWizard.completeStepOne();
 
     // Verify empty prompt
     await expect(page.testSubj.locator('emptyPrompt')).toBeVisible();
@@ -62,9 +54,7 @@ test.describe('Index template wizard - Create', { tag: ['@ess'] }, () => {
 
   test('renders index settings (step 3)', async ({ page, pageObjects }) => {
     // Fill logistics step
-    await page.testSubj.locator('nameField').locator('input').fill('test-index-template');
-    await page.testSubj.locator('indexPatternsField').locator('input').fill('test-index-pattern');
-    await pageObjects.indexManagement.clickNextButton();
+    await pageObjects.indexManagement.indexTemplateWizard.completeStepOne();
 
     // Skip component templates step
     await pageObjects.indexManagement.clickNextButton();
@@ -83,9 +73,7 @@ test.describe('Index template wizard - Create', { tag: ['@ess'] }, () => {
 
   test('renders mappings (step 4)', async ({ page, pageObjects }) => {
     // Fill logistics step
-    await page.testSubj.locator('nameField').locator('input').fill('test-index-template');
-    await page.testSubj.locator('indexPatternsField').locator('input').fill('test-index-pattern');
-    await pageObjects.indexManagement.clickNextButton();
+    await pageObjects.indexManagement.indexTemplateWizard.completeStepOne();
 
     // Skip component templates and settings steps
     await pageObjects.indexManagement.clickNextButton();
@@ -100,9 +88,7 @@ test.describe('Index template wizard - Create', { tag: ['@ess'] }, () => {
 
   test('renders aliases (step 5)', async ({ page, pageObjects }) => {
     // Fill logistics step
-    await page.testSubj.locator('nameField').locator('input').fill('test-index-template');
-    await page.testSubj.locator('indexPatternsField').locator('input').fill('test-index-pattern');
-    await pageObjects.indexManagement.clickNextButton();
+    await pageObjects.indexManagement.indexTemplateWizard.completeStepOne();
 
     // Skip component templates, settings, and mappings steps
     await pageObjects.indexManagement.clickNextButton();
@@ -118,9 +104,7 @@ test.describe('Index template wizard - Create', { tag: ['@ess'] }, () => {
 
   test('renders review template (step 6)', async ({ page, pageObjects }) => {
     // Fill logistics step
-    await page.testSubj.locator('nameField').locator('input').fill('test-index-template');
-    await page.testSubj.locator('indexPatternsField').locator('input').fill('test-index-pattern');
-    await pageObjects.indexManagement.clickNextButton();
+    await pageObjects.indexManagement.indexTemplateWizard.completeStepOne();
 
     // Skip all intermediate steps
     await pageObjects.indexManagement.clickNextButton();
