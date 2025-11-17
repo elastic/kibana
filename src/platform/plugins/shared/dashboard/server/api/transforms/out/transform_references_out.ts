@@ -9,9 +9,9 @@
 
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { DashboardState, DashboardPanel } from '../../types';
-import { isDashboardSection } from '../../../../../common';
-import { embeddableService } from '../../../../kibana_services';
-import { getPanelIdFromReference } from '../../../../../common/reference_utils';
+import { isDashboardSection } from '../../../../common';
+import { embeddableService } from '../../../kibana_services';
+import { getPanelIdFromReference } from '../../../../common/reference_utils';
 
 export function transformReferencesOut(
   references: SavedObjectReference[],

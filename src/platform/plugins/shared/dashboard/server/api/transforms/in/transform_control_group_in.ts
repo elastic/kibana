@@ -11,7 +11,7 @@ import { flow } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 
 import type { ControlsGroupState } from '@kbn/controls-schemas';
-import type { DashboardSavedObjectAttributes } from '../../../../dashboard_saved_object';
+import type { DashboardSavedObjectAttributes } from '../../../dashboard_saved_object';
 
 export function transformControlGroupIn(
   controlGroupInput?: ControlsGroupState

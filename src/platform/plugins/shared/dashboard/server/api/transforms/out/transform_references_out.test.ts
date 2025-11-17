@@ -60,7 +60,7 @@ describe('transformReferencesOut', () => {
   describe('panel references', () => {
     test('should drop references for panels that handle references on server', () => {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      require('../../../../kibana_services').embeddableService = {
+      require('../../../kibana_services').embeddableService = {
         getTransforms: () => ({ transformOutInjectsReferences: true }),
       };
 
@@ -85,7 +85,7 @@ describe('transformReferencesOut', () => {
 
     test('should keep references for panels that do not handle references on server', () => {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      require('../../../../kibana_services').embeddableService = {
+      require('../../../kibana_services').embeddableService = {
         getTransforms: () => ({ transformOutInjectsReferences: false }),
       };
 

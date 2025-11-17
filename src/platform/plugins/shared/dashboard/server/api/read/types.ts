@@ -7,5 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Latest version is 3
-export * from './v1';
+import type { TypeOf } from '@kbn/config-schema';
+import type { getReadResponseBodySchema } from './schemas';
+
+export type DashboardReadResponseBody = TypeOf<ReturnType<typeof getReadResponseBodySchema>>;

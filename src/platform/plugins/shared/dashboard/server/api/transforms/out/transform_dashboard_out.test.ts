@@ -18,7 +18,7 @@ import {
 import type {
   DashboardSavedObjectAttributes,
   SavedDashboardPanel,
-} from '../../../../dashboard_saved_object';
+} from '../../../dashboard_saved_object';
 import type { DashboardState } from '../../types';
 import { transformDashboardOut } from './transform_dashboard_out';
 
