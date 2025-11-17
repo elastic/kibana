@@ -84,7 +84,6 @@ export const getRulesBaseKibanaFeature = (
   ),
   order: 1100,
   category: DEFAULT_APP_CATEGORIES.security,
-  // scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
   app: [RULES_FEATURE_ID, 'kibana'],
   catalogue: [APP_ID],
   alerting: alertingFeatures,
