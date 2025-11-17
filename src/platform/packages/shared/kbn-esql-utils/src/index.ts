@@ -11,7 +11,6 @@ export { getESQLAdHocDataview, getIndexForESQLQuery } from './utils/get_esql_adh
 export { getInitialESQLQuery } from './utils/get_initial_esql_query';
 export { getESQLWithSafeLimit } from './utils/get_esql_with_safe_limit';
 export {
-  getIndexPatternFromESQLQuery,
   getLimitFromESQLQuery,
   removeDropCommandsFromESQLQuery,
   hasTransformationalCommand,
@@ -30,6 +29,7 @@ export {
   getRemoteClustersFromESQLQuery,
   convertTimeseriesCommandToFrom,
 } from './utils/query_parsing_helpers';
+export { getIndexPatternFromESQLQuery } from './utils/get_index_pattern_from_query';
 export { queryCannotBeSampled } from './utils/query_cannot_be_sampled';
 export {
   appendToESQLQuery,

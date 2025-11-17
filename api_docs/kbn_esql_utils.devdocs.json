@@ -1824,7 +1824,7 @@
         "tags": [],
         "label": "getInitialESQLQuery",
         "description": [
-          "\nBuilds an ES|QL query for the provided dataView\nIf there is @timestamp field in the index, we don't add the WHERE clause\nIf there is no @timestamp and there is a dataView timeFieldName, we add the WHERE clause with the timeFieldName"
+          "\nBuilds an ES|QL query for the provided dataView\nIf there is @timestamp field in the index, we don't add the WHERE clause\nIf there is no @timestamp and there is a dataView timeFieldName, we add the WHERE clause with the timeFieldName\nIf the index pattern contains TSDB fields, we add the TS command, otherwise we add the FROM command"
         ],
         "signature": [
           "(dataView: ",

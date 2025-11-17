@@ -692,36 +692,41 @@
     "setup": {
       "parentPluginId": "metricsDataAccess",
       "id": "def-server.MetricsDataPluginSetup",
-      "type": "Interface",
+      "type": "Type",
       "tags": [],
       "label": "MetricsDataPluginSetup",
       "description": [],
-      "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/types.ts",
+      "signature": [
+        "{ client: ",
+        {
+          "pluginId": "metricsDataAccess",
+          "scope": "server",
+          "docId": "kibMetricsDataAccessPluginApi",
+          "section": "def-server.MetricsDataClient",
+          "text": "MetricsDataClient"
+        },
+        "; }"
+      ],
+      "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
-      "children": [
-        {
-          "parentPluginId": "metricsDataAccess",
-          "id": "def-server.MetricsDataPluginSetup.client",
-          "type": "Object",
-          "tags": [],
-          "label": "client",
-          "description": [],
-          "signature": [
-            {
-              "pluginId": "metricsDataAccess",
-              "scope": "server",
-              "docId": "kibMetricsDataAccessPluginApi",
-              "section": "def-server.MetricsDataClient",
-              "text": "MetricsDataClient"
-            }
-          ],
-          "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/types.ts",
-          "deprecated": false,
-          "trackAdoption": false
-        }
-      ],
       "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "metricsDataAccess",
+      "id": "def-server.MetricsDataPluginStart",
+      "type": "Type",
+      "tags": [],
+      "label": "MetricsDataPluginStart",
+      "description": [],
+      "signature": [
+        "{}"
+      ],
+      "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/plugin.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "lifecycle": "start",
       "initialIsOpen": true
     }
   },
