@@ -104,7 +104,9 @@ async function getUnifiedApmTraceError(params: {
 
   return compactMap(response.hits.hits, (hit) => {
     const errorSource = 'error' in hit._source ? hit._source : undefined;
-    const event = hit.fields ? accessKnownApmEventFields(hit.fields, requiredApmFields) : undefined;
+    const event = hit.fields
+      ? accessKnownApmEventFields(hit.fields).requireFields(requiredApmFields)
+      : undefined;
 
     const spanId = event?.[TRANSACTION_ID] ?? event?.[SPAN_ID];
 
@@ -167,7 +169,9 @@ async function getUnprocessedOtelErrors({
 
   return compactMap(response.hits.hits, (hit) => {
     const event = hit.fields
-      ? accessKnownApmEventFields(hit.fields as Partial<FlattenedApmEvent>, requiredOtelFields)
+      ? accessKnownApmEventFields(hit.fields as Partial<FlattenedApmEvent>).requireFields(
+          requiredOtelFields
+        )
       : undefined;
 
     if (!event) return null;

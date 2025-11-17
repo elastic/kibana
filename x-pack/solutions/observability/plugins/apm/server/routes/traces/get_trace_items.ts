@@ -101,7 +101,9 @@ export async function getApmTraceError(params: {
 
   return compactMap(response.hits.hits, (hit) => {
     const errorSource = 'error' in hit._source ? hit._source : undefined;
-    const event = hit.fields ? accessKnownApmEventFields(hit.fields, requiredFields) : undefined;
+    const event = hit.fields
+      ? accessKnownApmEventFields(hit.fields).requireFields(requiredFields)
+      : undefined;
 
     if (!event) {
       return undefined;
