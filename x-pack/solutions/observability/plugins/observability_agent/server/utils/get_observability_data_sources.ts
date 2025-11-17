@@ -8,6 +8,7 @@
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 import { getLogsIndices } from './get_logs_indices';
+import { getMetricsIndices } from './get_metrics_indices';
 import { getApmIndices } from './get_apm_indices';
 import type {
   ObservabilityAgentPluginSetupDependencies,
@@ -31,7 +32,7 @@ export async function getObservabilityDataSources({
 }> {
   const apmIndexPatterns = await getApmIndices({ core, plugins, logger });
   const logIndexPatterns = await getLogsIndices({ core, logger });
-  const metricIndexPatterns = ['metrics-*'];
+  const metricIndexPatterns = await getMetricsIndices({ core, plugins, logger });
   const alertsIndexPattern = ['alerts-observability-*'];
 
   return {
