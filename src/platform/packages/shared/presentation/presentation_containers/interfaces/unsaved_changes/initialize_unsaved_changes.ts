@@ -81,7 +81,6 @@ export const initializeUnsavedChanges = <StateType extends object = object>({
   );
 
   const resetUnsavedChanges = async () => {
-    console.log('RESET UNSAVED');
     const lastSavedState = parentApi.getLastSavedStateForChild(uuid);
     await onReset(lastSavedState);
   };
