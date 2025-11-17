@@ -11,62 +11,53 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowsServices } from '../../../../../types';
 import type { RootState } from '../../types';
-import { selectWorkflow, selectYamlString } from '../selectors';
+import { selectWorkflow } from '../selectors';
 
-export interface TestWorkflowParams {
+export interface RunWorkflowParams {
   inputs: Record<string, unknown>;
 }
 
-export interface TestWorkflowResponse {
+export interface RunWorkflowResponse {
   workflowExecutionId: string;
 }
 
-export const testWorkflowThunk = createAsyncThunk<
-  TestWorkflowResponse,
-  TestWorkflowParams,
+// This is unused thunk, but I think it worth keeping it. Maybe will be used in the future.
+export const runWorkflowThunk = createAsyncThunk<
+  RunWorkflowResponse,
+  RunWorkflowParams,
   { state: RootState; extra: { services: WorkflowsServices } }
 >(
-  'detail/testWorkflowThunk',
+  'detail/runWorkflowThunk',
   async ({ inputs }, { getState, rejectWithValue, extra: { services } }) => {
     const { http, notifications } = services;
     try {
-      const yamlString = selectYamlString(getState());
       const workflow = selectWorkflow(getState());
 
-      if (!yamlString) {
-        return rejectWithValue('No YAML content to test');
+      if (!workflow) {
+        return rejectWithValue('No workflow to run');
       }
 
-      const requestBody: Record<string, unknown> = {
-        workflowYaml: yamlString,
-        inputs,
-      };
-
-      if (workflow?.id) {
-        requestBody.workflowId = workflow.id;
-      }
-
-      // Make the API call to test the workflow
-      const response = await http.post<TestWorkflowResponse>(`/api/workflows/test`, {
-        body: JSON.stringify(requestBody),
+      // Make the API call to run the workflow
+      const response = await http.post<RunWorkflowResponse>(`/api/workflows/${workflow.id}/run`, {
+        body: JSON.stringify({
+          inputs,
+        }),
       });
-
       // Show success notification
       notifications.toasts.addSuccess(
-        i18n.translate('workflows.detail.testWorkflow.success', {
-          defaultMessage: 'Workflow test execution started',
+        i18n.translate('workflows.detail.runWorkflow.success', {
+          defaultMessage: 'Workflow execution started',
         }),
         { toastLifeTimeMs: 2000 }
       );
-
       return response;
     } catch (error) {
       // Extract error message from HTTP error body if available
-      const errorMessage = error.body?.message || error.message || 'Failed to test workflow';
+      const errorMessage = error.body?.message || error.message || 'Failed to run workflow';
 
       notifications.toasts.addError(new Error(errorMessage), {
-        title: i18n.translate('workflows.detail.testWorkflow.error', {
-          defaultMessage: 'Failed to test workflow',
+        title: i18n.translate('workflows.detail.runWorkflow.error', {
+          defaultMessage: 'Failed to run workflow',
         }),
       });
       return rejectWithValue(errorMessage);
