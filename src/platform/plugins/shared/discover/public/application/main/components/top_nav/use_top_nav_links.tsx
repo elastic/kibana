@@ -146,6 +146,7 @@ export const useTopNavLinks = ({
           onClick: () => {
             services.data.search.showSearchSessionsFlyout({
               appId,
+              trackingProps: { openedFrom: 'background search button' },
               onBackgroundSearchOpened: services.discoverFeatureFlags.getTabsEnabled()
                 ? ({ session, event }) => {
                     event?.preventDefault();
