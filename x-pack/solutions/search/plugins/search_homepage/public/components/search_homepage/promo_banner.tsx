@@ -6,18 +6,17 @@
  */
 
 import React, { useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiText,
-  EuiTextColor,
-  EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { promoBannerContainerStyle } from './styles';
 
 export const PromoBanner = () => {
@@ -32,28 +31,28 @@ export const PromoBanner = () => {
         css={promoBannerContainerStyle(euiTheme)}
       >
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup responsive={false} alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="s">
-                <h4>
-                  <EuiTextColor color={euiTheme.colors.textPrimary}>
-                    <FormattedMessage
-                      id="xpack.searchHomepage.searchHomepagePage.promoBanner.promoTitle"
-                      defaultMessage="Search Labs:"
-                    />
-                  </EuiTextColor>
-                </h4>
-              </EuiTitle>
-            </EuiFlexItem>
+          <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
               <EuiText size="m">
-                <p>
+                <b>
                   {i18n.translate('xpack.searchHomepage.promoBanner.promoText', {
                     defaultMessage:
                       "Transforming data interaction: Deploying Elastic's MCP server on Amazon Bedrock AgentCore Runtime for crafting agentic AI applications",
                   })}
-                </p>
+                </b>
               </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiLink
+                data-test-subj="searchHomepagePromoBannerReadTheArticleLink"
+                external
+                href="#"
+              >
+                <FormattedMessage
+                  id="xpack.searchHomepage.promoBanner.readTheArticleLinkLabel"
+                  defaultMessage="Read the article"
+                />
+              </EuiLink>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

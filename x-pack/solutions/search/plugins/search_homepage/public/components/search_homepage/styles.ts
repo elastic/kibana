@@ -23,4 +23,6 @@ export const homepageNavLinkHeaderIconStyle = (euiTheme: EuiThemeComputed<{}>) =
 export const promoBannerContainerStyle = (euiTheme: EuiThemeComputed<{}>) =>
   css({
     padding: euiTheme.size.base,
+    border: euiTheme.border.thin,
+    backgroundColor: euiTheme.colors.backgroundBasePlain,
   });

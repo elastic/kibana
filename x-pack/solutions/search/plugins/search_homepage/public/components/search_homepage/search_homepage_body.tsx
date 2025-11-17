@@ -8,10 +8,9 @@
 import React from 'react';
 
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, useEuiTheme } from '@elastic/eui';
 
 import { css } from '@emotion/react';
-import { ActionButtons } from './action_buttons';
 import { MetricPanels } from './metric_panels';
 import { PromoCard } from './promo_card';
 import { CloudServerlessPromo } from '../cloud_serverless_promo/cloud_serverless_promo';
@@ -30,8 +29,6 @@ export const SearchHomepageBody = () => {
 
   return (
     <KibanaPageTemplate.Section alignment="top" restrictWidth={true} grow>
-      <ActionButtons />
-      <EuiSpacer size="l" />
       <MetricPanels />
       <EuiFlexGroup gutterSize="l" direction="column">
         <EuiFlexItem>

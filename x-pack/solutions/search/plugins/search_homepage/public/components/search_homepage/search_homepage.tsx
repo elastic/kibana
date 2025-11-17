@@ -6,11 +6,14 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
+  EuiBetaBadge,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
@@ -19,6 +22,7 @@ import { openWiredConnectionDetails } from '@kbn/cloud/connection_details';
 import { useKibana } from '../../hooks/use_kibana';
 import { SearchHomepageBody } from './search_homepage_body';
 import { PromoBanner } from './promo_banner';
+import { useGetLicenseInfo } from '../../hooks/use_get_license_info';
 
 export const SearchHomepagePage = () => {
   const {
@@ -47,6 +51,7 @@ export const SearchHomepagePage = () => {
     () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
     [consolePlugin]
   );
+  const { isTrial, daysLeft } = useGetLicenseInfo();
 
   return (
     <KibanaPageTemplate
@@ -58,36 +63,77 @@ export const SearchHomepagePage = () => {
     >
       <PromoBanner />
       <KibanaPageTemplate.Section restrictWidth={true} grow={false}>
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="l">
-              <h1>
-                {username
-                  ? i18n.translate('xpack.searchHomepage.welcome.title', {
-                      defaultMessage: 'Welcome, {username}',
-                      values: { username },
-                    })
-                  : i18n.translate('xpack.searchHomepage.welcome.title.default', {
-                      defaultMessage: 'Welcome',
-                    })}
-              </h1>
-            </EuiTitle>
+        <EuiFlexGroup direction="column">
+          <EuiFlexItem>
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem>
+                <EuiFlexGroup responsive={false} alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiTitle size="l">
+                      <h1>
+                        {username
+                          ? i18n.translate('xpack.searchHomepage.welcome.title', {
+                              defaultMessage: 'Welcome, {username}',
+                              values: { username },
+                            })
+                          : i18n.translate('xpack.searchHomepage.welcome.title.default', {
+                              defaultMessage: 'Welcome',
+                            })}
+                      </h1>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                  {isTrial && (
+                    <EuiFlexItem grow={false}>
+                      <EuiBetaBadge
+                        title=""
+                        color="subdued"
+                        label={
+                          <FormattedMessage
+                            id="xpack.searchHomepage.searchHomepagePage.trialBadgeLabel"
+                            defaultMessage="Trial"
+                          />
+                        }
+                      />
+                    </EuiFlexItem>
+                  )}
+                </EuiFlexGroup>
+              </EuiFlexItem>
+
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  iconType="plugs"
+                  iconSide="left"
+                  onClick={() => openWiredConnectionDetails()}
+                  data-test-subj="search-homepage-context-menu-button"
+                  color="text"
+                >
+                  {i18n.translate('xpack.searchHomepage.connectionDetails.buttonLabel', {
+                    defaultMessage: 'Connection details',
+                  })}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              iconType="plugs"
-              iconSide="left"
-              onClick={() => openWiredConnectionDetails()}
-              data-test-subj="search-homepage-context-menu-button"
-              color="text"
-            >
-              {i18n.translate('xpack.searchHomepage.connectionDetails.buttonLabel', {
-                defaultMessage: 'Connection details',
-              })}
-            </EuiButtonEmpty>
+          <EuiFlexItem>
+            <EuiFlexGroup responsive={false}>
+              <EuiFlexItem>
+                <EuiText>
+                  <p>
+                    {i18n.translate('xpack.searchHomepage.searchHomepagePage.p.youHaveLabel', {
+                      defaultMessage: 'You have {daysLeft} days remaining your trial.',
+                      values: {
+                        daysLeft,
+                      },
+                    })}
+                  </p>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem />
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiHorizontalRule />
+
+        <EuiHorizontalRule margin="none" />
       </KibanaPageTemplate.Section>
       <SearchHomepageBody />
       {embeddableConsole}
