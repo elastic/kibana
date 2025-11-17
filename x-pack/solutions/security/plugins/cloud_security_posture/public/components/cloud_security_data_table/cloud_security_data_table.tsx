@@ -196,7 +196,6 @@ export const CloudSecurityDataTable = ({
   });
   const isGroupingEnabled = groupSelectorComponent === undefined;
 
-
   /**
    * This object is used to determine if the table rendering will be virtualized and the virtualization wrapper height.
    * mode should be passed as a key to the UnifiedDataTable component to force a re-render when the mode changes.
