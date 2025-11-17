@@ -122,6 +122,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
       workflowDefinition: definition,
       yaml,
       status: ExecutionStatus.COMPLETED,
+      isTestRun: false,
       triggeredBy: 'manual',
       startedAt: '2025-09-02T20:43:57.441Z',
       finishedAt: '2025-09-02T20:44:15.945Z',
@@ -474,7 +475,6 @@ export const Empty = {
 
 export const Loading: StoryObj<typeof WorkflowStepExecutionTree> = {
   args: {
-    isLoading: true,
     error: null,
     selectedId: null,
   },
@@ -482,7 +482,6 @@ export const Loading: StoryObj<typeof WorkflowStepExecutionTree> = {
 
 export const NoStepExecutionsExecuting: StoryObj<typeof WorkflowStepExecutionTree> = {
   args: {
-    isLoading: false,
     error: null,
     execution: {
       id: 'db38b255-ec34-4048-8b77-776081cb3a97',
@@ -491,6 +490,7 @@ export const NoStepExecutionsExecuting: StoryObj<typeof WorkflowStepExecutionTre
       workflowDefinition: definition,
       yaml,
       status: ExecutionStatus.RUNNING,
+      isTestRun: false,
       triggeredBy: 'manual',
       startedAt: '2025-09-02T20:43:57.441Z',
       finishedAt: '2025-09-02T20:44:15.945Z',
@@ -503,7 +503,6 @@ export const NoStepExecutionsExecuting: StoryObj<typeof WorkflowStepExecutionTre
 
 export const NoStepExecutions: StoryObj<typeof WorkflowStepExecutionTree> = {
   args: {
-    isLoading: false,
     error: null,
     execution: {
       id: 'db38b255-ec34-4048-8b77-776081cb3a97',
@@ -512,6 +511,7 @@ export const NoStepExecutions: StoryObj<typeof WorkflowStepExecutionTree> = {
       workflowDefinition: definition,
       yaml,
       status: ExecutionStatus.COMPLETED,
+      isTestRun: false,
       triggeredBy: 'manual',
       startedAt: '2025-09-02T20:43:57.441Z',
       finishedAt: '2025-09-02T20:44:15.945Z',
@@ -523,7 +523,6 @@ export const NoStepExecutions: StoryObj<typeof WorkflowStepExecutionTree> = {
 
 export const ErrorStory: StoryObj<typeof WorkflowStepExecutionTree> = {
   args: {
-    isLoading: false,
     error: new Error('Internal server error'),
     selectedId: null,
   },
