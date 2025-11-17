@@ -113,7 +113,7 @@ export function createEvaluateDataset({
       [
         ...createQuantitativeCorrectnessEvaluators(),
         createQuantitativeGroundednessEvaluator(),
-        ...evaluators.traceBasedEvaluators(),
+        ...Object.values(evaluators.traceBasedEvaluators),
       ]
     );
   };

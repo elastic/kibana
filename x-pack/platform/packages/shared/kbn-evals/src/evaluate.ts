@@ -94,13 +94,8 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
 
   reportDisplayOptions: [
     async ({ evaluators }, use) => {
-      const traceEvaluators = evaluators.traceBasedEvaluators();
-
-      const inputTokens = traceEvaluators.find((e) => e.name === 'Input Tokens')!;
-      const outputTokens = traceEvaluators.find((e) => e.name === 'Output Tokens')!;
-      const cachedTokens = traceEvaluators.find((e) => e.name === 'Cached Tokens')!;
-      const toolCalls = traceEvaluators.find((e) => e.name === 'Tool Calls')!;
-      const latency = traceEvaluators.find((e) => e.name === 'Latency')!;
+      const { inputTokens, outputTokens, cachedTokens, toolCalls, latency } =
+        evaluators.traceBasedEvaluators;
 
       await use({
         evaluatorDisplayOptions: new Map([
@@ -232,29 +227,27 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
             log,
           });
         },
-        traceBasedEvaluators: () => {
-          return [
-            createInputTokensEvaluator({
-              traceEsClient,
-              log,
-            }),
-            createOutputTokensEvaluator({
-              traceEsClient,
-              log,
-            }),
-            createLatencyEvaluator({
-              traceEsClient,
-              log,
-            }),
-            createToolCallsEvaluator({
-              traceEsClient,
-              log,
-            }),
-            createCachedTokensEvaluator({
-              traceEsClient,
-              log,
-            }),
-          ];
+        traceBasedEvaluators: {
+          inputTokens: createInputTokensEvaluator({
+            traceEsClient,
+            log,
+          }),
+          outputTokens: createOutputTokensEvaluator({
+            traceEsClient,
+            log,
+          }),
+          cachedTokens: createCachedTokensEvaluator({
+            traceEsClient,
+            log,
+          }),
+          toolCalls: createToolCallsEvaluator({
+            traceEsClient,
+            log,
+          }),
+          latency: createLatencyEvaluator({
+            traceEsClient,
+            log,
+          }),
         },
       };
       await use(evaluators);

@@ -59,7 +59,13 @@ export interface DefaultEvaluators {
   criteria: (criteria: EvaluationCriterion[]) => Evaluator;
   correctnessAnalysis: () => Evaluator;
   groundednessAnalysis: () => Evaluator;
-  traceBasedEvaluators: () => Evaluator[];
+  traceBasedEvaluators: {
+    inputTokens: Evaluator;
+    outputTokens: Evaluator;
+    latency: Evaluator;
+    toolCalls: Evaluator;
+    cachedTokens: Evaluator;
+  };
 }
 
 export type ExperimentTask<TExample extends Example, TTaskOutput extends TaskOutput> = (
