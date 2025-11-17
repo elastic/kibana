@@ -304,6 +304,37 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
 
   const previewColumns = grokColumns ?? availableColumns;
 
+  // Calculate columns specifically for summary mode
+  const displayColumnsForSummaryMode = useMemo(() => {
+    // Start with detected fields
+    const uniqueDetectedFields = detectedFields ? detectedFields.map((field) => field.name) : [];
+    const baseFields = Array.from(new Set(uniqueDetectedFields));
+
+    // Remove explicitly disabled columns
+    const filteredFields = baseFields.filter(
+      (field) => !explicitlyDisabledPreviewColumns.includes(field)
+    );
+
+    // Add explicitly enabled columns (if they exist in allColumns)
+    const fieldsToShow = [...filteredFields];
+    explicitlyEnabledPreviewColumns.forEach((col) => {
+      if (!fieldsToShow.includes(col) && allColumns.includes(col)) {
+        fieldsToShow.push(col);
+      }
+    });
+
+    return fieldsToShow;
+  }, [
+    detectedFields,
+    explicitlyDisabledPreviewColumns,
+    explicitlyEnabledPreviewColumns,
+    allColumns,
+  ]);
+
+  // Use appropriate columns based on view mode
+  const displayColumnsForTable =
+    effectiveViewMode === 'summary' ? displayColumnsForSummaryMode : previewColumns;
+
   const setVisibleColumns = useCallback(
     (visibleColumns: string[]) => {
       if (visibleColumns.length === 0) {
@@ -396,7 +427,7 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
       <RowSelectionContext.Provider value={rowSelectionContextValue}>
         <MemoPreviewTable
           documents={previewDocuments}
-          displayColumns={previewColumns}
+          displayColumns={displayColumnsForTable}
           rowHeightsOptions={validGrokField ? staticRowHeightsOptions : undefined}
           toolbarVisibility
           setVisibleColumns={setVisibleColumns}
