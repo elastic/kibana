@@ -6,7 +6,6 @@
  */
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
-import { castArray } from 'lodash';
 import type { ApmDataAccessServicesWrapper } from '../../../../lib/helpers/get_apm_data_access_client';
 import type { GetInfraEntityCountRequestBodyPayload } from '../../../../../common/http_api';
 import type { InfraMetricsClient } from '../../../../lib/helpers/get_infra_metrics_client';
@@ -47,7 +46,7 @@ export async function getHostsCount({
     query: {
       bool: {
         filter: [
-          ...castArray(query),
+          query,
           ...rangeQuery(from, to),
           {
             bool: {
