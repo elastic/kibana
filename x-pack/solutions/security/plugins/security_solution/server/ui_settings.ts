@@ -10,11 +10,6 @@ import { schema } from '@kbn/config-schema';
 
 import type { CoreSetup, UiSettingsParams } from '@kbn/core/server';
 import {
-  SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_MINUTES,
-  SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_RATE,
-  SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_TITLE,
-} from '@kbn/management-settings-ids';
-import {
   APP_ID,
   DEFAULT_ALERT_TAGS_KEY,
   DEFAULT_ALERT_TAGS_VALUE,
@@ -47,7 +42,6 @@ import {
   NEWS_FEED_URL_SETTING_DEFAULT,
   SHOW_RELATED_INTEGRATIONS_SETTING,
   ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
-  DEFAULT_AI_CONNECTOR,
 } from '../common/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { LogLevelSetting } from '../common/api/detection_engine/rule_monitoring';

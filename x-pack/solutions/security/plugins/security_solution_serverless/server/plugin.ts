@@ -14,10 +14,6 @@ import type {
 } from '@kbn/core/server';
 
 import { SECURITY_PROJECT_SETTINGS } from '@kbn/serverless-security-settings';
-import { isSupportedConnector } from '@kbn/inference-common';
-import { getDefaultAIConnectorSetting } from '@kbn/security-solution-plugin/server/ui_settings';
-import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
-import { AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED } from '@kbn/security-solution-plugin/common/constants';
 import { getEnabledProductFeatures } from '../common/pli/pli_features';
 
 import type { ServerlessSecurityConfig } from './config';
