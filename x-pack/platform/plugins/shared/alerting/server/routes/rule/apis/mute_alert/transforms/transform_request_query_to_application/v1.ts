@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { MuteAlertBody } from '../../../../../../application/rule/methods/mute_alert/types';
+import type { MuteAlertQuery } from '../../../../../../application/rule/methods/mute_alert/types';
 import type { RewriteRequestCase } from '../../../../../lib';
 
-export const transformRequestBodyToApplication: RewriteRequestCase<MuteAlertBody> = ({
+export const transformRequestQueryToApplication: RewriteRequestCase<MuteAlertQuery> = ({
   validate_alerts_existence: validateAlertsExistence,
 }) => ({
   validateAlertsExistence: validateAlertsExistence === undefined ? true : validateAlertsExistence,

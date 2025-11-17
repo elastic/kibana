@@ -7,7 +7,7 @@
 import type { IRouter } from '@kbn/core/server';
 import {
   transformRequestParamsToApplicationV1,
-  transformRequestBodyToApplicationV1,
+  transformRequestQueryToApplicationV1,
 } from './transforms';
 import type { ILicenseState } from '../../../../lib';
 import { RuleTypeDisabledError } from '../../../../lib';
@@ -15,13 +15,12 @@ import { verifyAccessAndContext } from '../../../lib';
 import type { AlertingRequestHandlerContext } from '../../../../types';
 import { BASE_ALERTING_API_PATH } from '../../../../types';
 import type {
-  MuteAlertRequestBodyV1,
+  MuteAlertRequestQueryV1,
   MuteAlertRequestParamsV1,
 } from '../../../../../common/routes/rule/apis/mute_alert';
 import {
   muteAlertParamsSchemaV1,
-  muteAlertBodySchemaV1,
-  muteAlertRequestBodyExamplesV1,
+  muteAlertQuerySchemaV1,
 } from '../../../../../common/routes/rule/apis/mute_alert';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 
@@ -37,12 +36,11 @@ export const muteAlertRoute = (
         access: 'public',
         summary: `Mute an alert`,
         tags: ['oas-tag:alerting'],
-        oasOperationObject: muteAlertRequestBodyExamplesV1,
       },
       validate: {
         request: {
           params: muteAlertParamsSchemaV1,
-          body: muteAlertBodySchemaV1,
+          query: muteAlertQuerySchemaV1,
         },
         response: {
           204: {
@@ -65,12 +63,12 @@ export const muteAlertRoute = (
         const alertingContext = await context.alerting;
         const rulesClient = await alertingContext.getRulesClient();
         const params: MuteAlertRequestParamsV1 = req.params;
-        const body: MuteAlertRequestBodyV1 = req.body;
+        const query: MuteAlertRequestQueryV1 = req.query || {};
 
         try {
           await rulesClient.muteInstance({
             params: transformRequestParamsToApplicationV1(params),
-            body: transformRequestBodyToApplicationV1(body),
+            query: transformRequestQueryToApplicationV1(query),
           });
           return res.noContent();
         } catch (e) {

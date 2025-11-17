@@ -8,7 +8,7 @@
 import type { UnmuteAlertParams } from '../application/rule/methods/unmute_alert/types';
 import type { RuleTagsParams } from '../application/rule/methods/tags';
 import { getRuleTags } from '../application/rule/methods/tags';
-import type { MuteAlertBody, MuteAlertParams } from '../application/rule/methods/mute_alert/types';
+import type { MuteAlertQuery, MuteAlertParams } from '../application/rule/methods/mute_alert/types';
 import type { SanitizedRule, RuleTypeParams } from '../types';
 import { parseDuration } from '../../common/parse_duration';
 import type { RulesClientContext } from './types';
@@ -205,7 +205,7 @@ export class RulesClient {
 
   public muteAll = (options: { id: string }) => muteAll(this.context, options);
   public unmuteAll = (options: { id: string }) => unmuteAll(this.context, options);
-  public muteInstance = (options: { params: MuteAlertParams; body: MuteAlertBody }) =>
+  public muteInstance = (options: { params: MuteAlertParams; query: MuteAlertQuery }) =>
     muteInstance(this.context, options);
   public unmuteInstance = (options: UnmuteAlertParams) => unmuteInstance(this.context, options);
 

@@ -1,8 +1,0 @@
-requestBody:
-  content:
-    application/json:
-      examples:
-        muteAlertExample:
-          description: 'validate_alerts_existence set to true to check if alerts exist before muting'
-          value:
-            validate_alerts_existence: true

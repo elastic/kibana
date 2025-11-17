@@ -91,7 +91,7 @@ describe('muteInstance()', () => {
 
     await rulesClient.muteInstance({
       params: { alertId: '1', alertInstanceId: '2' },
-      body: { validateAlertsExistence: false },
+      query: { validateAlertsExistence: false },
     });
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
       RULE_SAVED_OBJECT_TYPE,
@@ -125,7 +125,7 @@ describe('muteInstance()', () => {
 
     await rulesClient.muteInstance({
       params: { alertId: '1', alertInstanceId: '2' },
-      body: { validateAlertsExistence: false },
+      query: { validateAlertsExistence: false },
     });
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
   });
@@ -149,7 +149,7 @@ describe('muteInstance()', () => {
 
     await rulesClient.muteInstance({
       params: { alertId: '1', alertInstanceId: '2' },
-      body: { validateAlertsExistence: false },
+      query: { validateAlertsExistence: false },
     });
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
   });
@@ -187,7 +187,7 @@ describe('muteInstance()', () => {
       const rulesClient = new RulesClient(rulesClientParams);
       await rulesClient.muteInstance({
         params: { alertId: '1', alertInstanceId: '2' },
-        body: { validateAlertsExistence: false },
+        query: { validateAlertsExistence: false },
       });
 
       expect(actionsAuthorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'execute' });
@@ -208,7 +208,7 @@ describe('muteInstance()', () => {
       await expect(
         rulesClient.muteInstance({
           params: { alertId: '1', alertInstanceId: '2' },
-          body: { validateAlertsExistence: false },
+          query: { validateAlertsExistence: false },
         })
       ).rejects.toMatchInlineSnapshot(
         `[Error: Unauthorized to muteAlert a "myType" alert for "myApp"]`
@@ -242,7 +242,7 @@ describe('muteInstance()', () => {
       });
       await rulesClient.muteInstance({
         params: { alertId: '1', alertInstanceId: '2' },
-        body: { validateAlertsExistence: false },
+        query: { validateAlertsExistence: false },
       });
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -276,7 +276,7 @@ describe('muteInstance()', () => {
       await expect(
         rulesClient.muteInstance({
           params: { alertId: '1', alertInstanceId: '2' },
-          body: { validateAlertsExistence: false },
+          query: { validateAlertsExistence: false },
         })
       ).rejects.toThrow();
       expect(auditLogger.log).toHaveBeenCalledWith(

@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import path from 'node:path';
 import { schema } from '@kbn/config-schema';
-
-export const muteAlertRequestBodyExamples = () => path.join(__dirname, 'examples_mute_alert.yaml');
 
 export const muteAlertParamsSchema = schema.object({
   rule_id: schema.string({
@@ -23,13 +20,15 @@ export const muteAlertParamsSchema = schema.object({
   }),
 });
 
-export const muteAlertBodySchema = schema.object({
-  validate_alerts_existence: schema.maybe(
-    schema.boolean({
-      defaultValue: true,
-      meta: {
-        description: 'Whether to validate the existence of the alert.',
-      },
-    })
-  ),
-});
+export const muteAlertQuerySchema = schema.maybe(
+  schema.object({
+    validate_alerts_existence: schema.maybe(
+      schema.boolean({
+        defaultValue: true,
+        meta: {
+          description: 'Whether to validate the existence of the alert.',
+        },
+      })
+    ),
+  })
+);

@@ -6,4 +6,4 @@
  */
 
 export type { MuteAlertParams } from './mute_alert_params';
-export type { MuteAlertBody } from './mute_alert_body';
+export type { MuteAlertQuery } from './mute_alert_query';

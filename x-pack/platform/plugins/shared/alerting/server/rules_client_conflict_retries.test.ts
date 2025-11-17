@@ -206,7 +206,7 @@ async function muteInstance(success: boolean) {
   try {
     await rulesClient.muteInstance({
       params: { alertId: MockRuleId, alertInstanceId: 'instance-id' },
-      body: { validateAlertsExistence: false },
+      query: { validateAlertsExistence: false },
     });
   } catch (err) {
     return expectConflict(success, err);

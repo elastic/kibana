@@ -324,9 +324,10 @@ export const getAlertingApiHelper = (
           async () => {
             await kbnClient.request({
               method: 'POST',
-              path: `${buildSpacePath(spaceId)}/api/alerting/rule/${ruleId}/alert/${alertId}/_mute`,
+              path: `${buildSpacePath(
+                spaceId
+              )}/api/alerting/rule/${ruleId}/alert/${alertId}/_mute?validate_alerts_existence=false`,
               retries: 3,
-              body: { validate_alerts_existence: false },
             });
           }
         );

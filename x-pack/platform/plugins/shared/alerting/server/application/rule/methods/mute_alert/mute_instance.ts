@@ -8,8 +8,8 @@
 import Boom from '@hapi/boom';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { updateRuleSo } from '../../../../data/rule/methods/update_rule_so';
-import { muteAlertBodySchema, muteAlertParamsSchema } from './schemas';
-import type { MuteAlertBody, MuteAlertParams } from './types';
+import { muteAlertQuerySchema, muteAlertParamsSchema } from './schemas';
+import type { MuteAlertQuery, MuteAlertParams } from './types';
 import type { Rule } from '../../../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
@@ -19,7 +19,7 @@ import { updateMeta } from '../../../../rules_client/lib';
 
 export async function muteInstance(
   context: RulesClientContext,
-  { params, body }: { params: MuteAlertParams; body: MuteAlertBody }
+  { params, query }: { params: MuteAlertParams; query: MuteAlertQuery }
 ): Promise<void> {
   const ruleId = params.alertId;
   try {
@@ -29,7 +29,7 @@ export async function muteInstance(
   }
 
   try {
-    muteAlertBodySchema.validate(body);
+    muteAlertQuerySchema.validate(query);
   } catch (error) {
     throw Boom.badRequest(`Failed to validate body: ${error.message}`);
   }
@@ -37,14 +37,14 @@ export async function muteInstance(
   return await retryIfConflicts(
     context.logger,
     `rulesClient.muteInstance('${ruleId}')`,
-    async () => await muteInstanceWithOCC(context, params, body)
+    async () => await muteInstanceWithOCC(context, params, query)
   );
 }
 
 async function muteInstanceWithOCC(
   context: RulesClientContext,
   { alertId: ruleId, alertInstanceId }: MuteAlertParams,
-  { validateAlertsExistence }: MuteAlertBody
+  { validateAlertsExistence }: MuteAlertQuery
 ) {
   const { attributes, version } = await context.unsecuredSavedObjectsClient.get<Rule>(
     RULE_SAVED_OBJECT_TYPE,

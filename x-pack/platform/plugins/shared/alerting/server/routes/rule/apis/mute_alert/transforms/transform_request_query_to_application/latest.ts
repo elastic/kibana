@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import type { muteAlertBodySchema } from '../schemas';
-
-export type MuteAlertBody = TypeOf<typeof muteAlertBodySchema>;
+export { transformRequestQueryToApplication } from './v1';
