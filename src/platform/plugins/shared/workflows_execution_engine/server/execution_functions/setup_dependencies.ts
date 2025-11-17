@@ -11,7 +11,6 @@ import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/act
 import type { CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { EsWorkflowExecution, WorkflowSettings } from '@kbn/workflows';
-
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 
@@ -105,6 +104,8 @@ export async function setupDependencies(
     workflowExecutionGraph,
     workflowLogger,
     workflowExecutionState,
+    coreStart,
+    dependencies,
   });
 
   // Use user-scoped ES client if fakeRequest is available, otherwise fallback to regular client
