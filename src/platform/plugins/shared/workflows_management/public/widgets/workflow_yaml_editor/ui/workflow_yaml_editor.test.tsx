@@ -58,8 +58,8 @@ jest.mock('../../../shared/ui/unsaved_changes_prompt', () => ({
 }));
 
 // Mock the validation errors component
-jest.mock('./workflow_yaml_validation_errors', () => ({
-  WorkflowYAMLValidationErrors: () => null,
+jest.mock('./workflow_yaml_validation_accordion', () => ({
+  WorkflowYamlValidationAccordion: () => null,
 }));
 
 // Mock the useAvailableConnectors hook
@@ -113,8 +113,8 @@ jest.mock('./step_actions', () => ({
   StepActions: () => null,
 }));
 
-jest.mock('./workflow_yaml_editor_shortcuts', () => ({
-  WorkflowYAMLEditorShortcuts: () => null,
+jest.mock('./actions_menu_button', () => ({
+  ActionsMenuButton: () => null,
 }));
 
 jest.mock('./decorations', () => ({

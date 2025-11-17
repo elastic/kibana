@@ -1449,6 +1449,22 @@ describe('Agentless Agent service', () => {
 
       // Assert that the error is logged
       expect(mockedLogger.error).toHaveBeenCalledTimes(1);
+      expect(mockedLogger.error).toHaveBeenCalledWith(
+        expect.stringMatching(
+          /\[Agentless API\] Creating the agentless agent failed with a status 500/
+        ),
+        {
+          trace: expect.anything(),
+          http: {
+            request: {
+              id: undefined,
+            },
+            response: {
+              status_code: 500,
+            },
+          },
+        }
+      );
     });
 
     it('should throw an error and log and error when the Agentless API returns status 429', async () => {
