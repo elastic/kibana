@@ -39,16 +39,14 @@ export interface JobIdObject {
   destIndexInvalidMessage: string;
   destIndexValidated: boolean;
 
-  sourceIndexInvalid?: boolean;
-  sourceIndexWarningMessage?: string;
-
   datafeedInvalid?: boolean;
   datafeedWarningMessage?: string;
 }
 
 export interface SkippedJobs {
   jobId: string;
-  missingFilters: string[];
+  missingFilters?: string[];
+  missingSourceIndex?: boolean;
 }
 
 function isImportedAdJobs(obj: any): obj is ImportedAdJob[] {
@@ -141,7 +139,8 @@ export class JobImportService {
   public async validateJobs(
     jobs: ImportedAdJob[] | DataFrameAnalyticsConfig[],
     type: JobType,
-    getFilters: () => Promise<Filter[]>
+    getFilters: () => Promise<Filter[]>,
+    esSearch?: MlApi['esSearch']
   ) {
     const existingFilters = new Set((await getFilters()).map((f) => f.filter_id));
     const tempJobs: Array<{ jobId: string; destIndex?: string }> = [];
@@ -165,19 +164,58 @@ export class JobImportService {
             indices: Array.isArray(j.source.index) ? j.source.index : [j.source.index],
           }));
 
+    const missingSourceIndices = new Set<string>();
+    if (type === 'data-frame-analytics' && esSearch) {
+      await Promise.all(
+        commonJobs.map(async ({ jobId, indices }) => {
+          if (indices.length === 0) {
+            missingSourceIndices.add(jobId);
+            return;
+          }
+
+          try {
+            await esSearch({
+              index: indices,
+              size: 0,
+              body: {
+                query: { match_all: {} },
+              },
+            });
+          } catch (error) {
+            const errorMessage = extractErrorMessage(error);
+            if (
+              errorMessage.includes('index_not_found_exception') ||
+              errorMessage.includes('no such index')
+            ) {
+              missingSourceIndices.add(jobId);
+            }
+          }
+        })
+      );
+    }
+
     commonJobs.forEach(({ jobId, filters = [], destIndex }) => {
       const missingFilters = filters.filter((i) => existingFilters.has(i) === false);
+      const hasMissingSourceIndex = missingSourceIndices.has(jobId);
 
-      if (missingFilters.length === 0) {
+      if (missingFilters.length === 0 && !hasMissingSourceIndex) {
         tempJobs.push({
           jobId,
           ...(type === 'data-frame-analytics' ? { destIndex } : {}),
         });
       } else {
-        skippedJobs.push({
-          jobId,
-          missingFilters,
-        });
+        if (missingFilters.length > 0) {
+          skippedJobs.push({
+            jobId,
+            missingFilters,
+          });
+        }
+        if (hasMissingSourceIndex) {
+          skippedJobs.push({
+            jobId,
+            missingSourceIndex: true,
+          });
+        }
       }
     });
 
@@ -185,69 +223,6 @@ export class JobImportService {
       jobs: tempJobs,
       skippedJobs,
     };
-  }
-
-  public async validateSourceIndex(jobs: DataFrameAnalyticsConfig[], esSearch: MlApi['esSearch']) {
-    const results = await Promise.all(
-      jobs.map(async (job) => {
-        try {
-          const sourceIndex = Array.isArray(job.source.index)
-            ? job.source.index
-            : [job.source.index];
-
-          if (sourceIndex.length === 0) {
-            return {
-              jobId: job.id,
-              hasWarning: true,
-              warningMessage: i18n.translate('xpack.ml.jobsList.sourceIndexNotSpecified', {
-                defaultMessage: 'Source index not specified. This job will not run.',
-              }),
-            };
-          }
-
-          const resp = await esSearch({
-            index: sourceIndex,
-            size: 0,
-            body: {
-              track_total_hits: true,
-              query: { match_all: {} },
-            },
-          });
-
-          const docsCount =
-            resp.hits.total && typeof resp.hits.total === 'object'
-              ? resp.hits.total.value
-              : resp.hits.total;
-
-          if (docsCount === 0) {
-            return {
-              jobId: job.id,
-              hasWarning: true,
-              warningMessage: i18n.translate('xpack.ml.jobsList.sourceIndexNoData', {
-                defaultMessage: 'Source index returned no data. This job will not run.',
-              }),
-            };
-          }
-
-          return {
-            jobId: job.id,
-            hasWarning: false,
-          };
-        } catch (error) {
-          return {
-            jobId: job.id,
-            hasWarning: true,
-            warningMessage: i18n.translate('xpack.ml.jobsList.sourceIndexValidationFailed', {
-              defaultMessage: `Unable to validate source index. Reason: {reason}`,
-              values: {
-                reason: extractErrorMessage(error),
-              },
-            }),
-          };
-        }
-      })
-    );
-    return results;
   }
 
   public async validateDatafeeds(

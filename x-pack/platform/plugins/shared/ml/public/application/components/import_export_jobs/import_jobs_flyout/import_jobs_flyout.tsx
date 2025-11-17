@@ -149,11 +149,11 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete }) =>
       const validatedJobs = await jobImportService.validateJobs(
         loadedFile.jobs,
         loadedFile.jobType,
-        getFilters
+        getFilters,
+        esSearch
       );
 
       const datafeedValidationMap = new Map<string, DatafeedValidationInfo>();
-      const sourceIndexValidationMap = new Map<string, DatafeedValidationInfo>();
 
       if (loadedFile.jobType === 'anomaly-detector') {
         const tempJobs = (loadedFile.jobs as ImportedAdJob[]).filter((j) =>
@@ -177,21 +177,11 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete }) =>
           validatedJobs.jobs.map(({ jobId }) => jobId).includes(j.id)
         );
         setDfaJobs(tempJobs);
-
-        const validations = await jobImportService.validateSourceIndex(tempJobs, esSearch);
-
-        validations.forEach((validation) => {
-          sourceIndexValidationMap.set(validation.jobId, {
-            hasWarning: validation.hasWarning,
-            warningMessage: validation.warningMessage,
-          });
-        });
       }
 
       setJobIdObjects(
         validatedJobs.jobs.map(({ jobId, destIndex }) => {
           const datafeedValidation = datafeedValidationMap.get(jobId);
-          const sourceIndexValidation = sourceIndexValidationMap.get(jobId);
           return {
             jobId,
             originalId: jobId,
@@ -205,8 +195,6 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete }) =>
             destIndexValidated: false,
             datafeedInvalid: datafeedValidation?.hasWarning,
             datafeedWarningMessage: datafeedValidation?.warningMessage,
-            sourceIndexInvalid: sourceIndexValidation?.hasWarning,
-            sourceIndexWarningMessage: sourceIndexValidation?.warningMessage, // todo: you dont need it?
           };
         })
       );
@@ -537,24 +525,6 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete }) =>
                                     isInvalid={jobId.destIndexValid === false}
                                   />
                                 </EuiFormRow>
-                                {jobId.sourceIndexInvalid === true &&
-                                  jobId.sourceIndexWarningMessage && (
-                                    <EuiFormRow>
-                                      <EuiCallOut
-                                        title={i18n.translate(
-                                          'xpack.ml.importExport.importFlyout.sourceIndexWarning.title',
-                                          {
-                                            defaultMessage: 'Source Index Warning',
-                                          }
-                                        )}
-                                        color="warning"
-                                        size="s"
-                                        announceOnMount
-                                      >
-                                        <p>{jobId.sourceIndexWarningMessage}</p>
-                                      </EuiCallOut>
-                                    </EuiFormRow>
-                                  )}
                               </>
                             )}
 
