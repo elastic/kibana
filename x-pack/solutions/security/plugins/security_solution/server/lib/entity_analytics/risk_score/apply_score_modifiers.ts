@@ -88,7 +88,7 @@ interface RiskScoreDocFactoryParams {
 }
 
 export const riskScoreDocFactory =
-  ({ now, identifierField, globalWeight }: RiskScoreDocFactoryParams) =>
+  ({ now, identifierField, globalWeight = 1 }: RiskScoreDocFactoryParams) =>
   (
     bucket: RiskScoreBucket,
     criticalityFields: AssetCriticalityRiskFields,
@@ -102,7 +102,7 @@ export const riskScoreDocFactory =
     };
 
     const totalScoreWithModifiers =
-      risk.value.normalized_score +
+      risk.value.normalized_score * globalWeight +
       criticalityFields.category_2_score +
       privmonFields.category_3_score;
 
@@ -110,8 +110,8 @@ export const riskScoreDocFactory =
       globalWeight !== undefined ? risk.value.score * globalWeight : risk.value.score;
     const finalRiskScoreFields = {
       calculated_level: getRiskLevel(totalScoreWithModifiers),
-      calculated_score: weightedScore,
-      calculated_score_norm: totalScoreWithModifiers,
+      calculated_score: max10DecimalPlaces(weightedScore),
+      calculated_score_norm: max10DecimalPlaces(totalScoreWithModifiers),
     };
 
     return {

@@ -22,7 +22,7 @@ import type { PrivmonUserCrudService } from '../../privilege_monitoring/users/pr
 export interface PrivmonRiskFields {
   category_3_score: number;
   category_3_count: number;
-  is_privileged_user: boolean;
+  is_privileged_user?: boolean;
   privileged_user_modifier?: number;
 }
 
@@ -92,7 +92,6 @@ const calculateScoreAndContributions = (
     return {
       category_3_score: 0,
       category_3_count: 0,
-      is_privileged_user: false,
     };
   }
 
